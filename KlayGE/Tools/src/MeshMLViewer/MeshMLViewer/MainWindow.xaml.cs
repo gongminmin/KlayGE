@@ -102,6 +102,8 @@ namespace MeshMLViewer
 		public static extern IntPtr EmitTexture(IntPtr core, uint material_index);
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr OpacityTexture(IntPtr core, uint material_index);
+		[DllImport(CORE_NAME)]
+		public static extern uint SelectedObject(IntPtr core);
 	}
 
 	/// <summary>
@@ -113,6 +115,7 @@ namespace MeshMLViewer
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
+		private uint selected_mesh_index_;
 
 		public MainWindow()
 		{
@@ -138,6 +141,8 @@ namespace MeshMLViewer
 			properties.IsEnabled = false;
 
 			last_time_ = DateTime.Now;
+
+			selected_mesh_index_ = 0;
 		}
 
 		void MainWindowLoaded(object sender, RoutedEventArgs e)
@@ -389,6 +394,15 @@ namespace MeshMLViewer
 				buttons |= 4;
 			}
 			MeshMLViewerCore.MouseUp(core_, e.X, e.Y, buttons);
+
+			if (MouseButtons.Left == e.Button)
+			{
+				uint selected_mesh = MeshMLViewerCore.SelectedObject(core_);
+				if ((selected_mesh > 0) && (selected_mesh - 1 != selected_mesh_index_))
+				{
+					this.UpdateMeshProperties(selected_mesh - 1);
+				}
+			}
 		}
 		private void ViewerMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
@@ -414,7 +428,11 @@ namespace MeshMLViewer
 
 		private void UpdateMeshProperties(uint mesh_index)
 		{
+			selected_mesh_index_ = mesh_index;
+
 			properties.SelectedObject = null;
+
+			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_index].DisplayName;
 
 			properties_obj_.vertex_streams.Clear();
 

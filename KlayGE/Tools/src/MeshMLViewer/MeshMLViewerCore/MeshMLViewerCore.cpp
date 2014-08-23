@@ -220,7 +220,8 @@ namespace KlayGE
 	MeshMLViewerCore::MeshMLViewerCore(void* native_wnd)
 				: App3DFramework("MeshMLViewer", native_wnd),
 					fps_controller_(false), tb_controller_(false), is_fps_camera_(false),
-					skinning_(true), mouse_down_in_wnd_(false)
+					skinning_(true), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
+					update_selective_buffer_(false), selected_obj_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/MeshMLViewer");
 	}
@@ -239,11 +240,35 @@ namespace KlayGE
 	void MeshMLViewerCore::Resize(uint32_t width, uint32_t height)
 	{
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(width, height);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
+
+		ElementFormat fmt;
+		if (re.DeviceCaps().texture_format_support(EF_ABGR8))
+		{
+			fmt = EF_ABGR8;
+		}
+		else
+		{
+			BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ABGR8));
+
+			fmt = EF_ARGB8;
+		}
+
+		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write, NULL);
+		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read, NULL);
+		selective_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*selective_tex_, 0, 1, 0));
+		selective_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
+
+		update_selective_buffer_ = true;
 	}
 
 	void MeshMLViewerCore::InitObjects()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
 
 		font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -275,14 +300,14 @@ namespace KlayGE
 		}
 		uint32_t texel;
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+		if (re.DeviceCaps().texture_format_support(EF_ABGR8))
 		{
 			fmt = EF_ABGR8;
 			texel = clear_clr.ABGR();
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+			BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ARGB8));
 
 			fmt = EF_ARGB8;
 			texel = clear_clr.ARGB();
@@ -302,10 +327,17 @@ namespace KlayGE
 		this->Proj(0.1f, 100);
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
+
+		selective_fb_ = rf.MakeFrameBuffer();
+		selective_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 
 	void MeshMLViewerCore::DelObjects()
 	{
+		selective_fb_.reset();
+		selective_tex_.reset();
+		selective_cpu_tex_.reset();
+
 		tb_controller_.DetachCamera();
 		fps_controller_.DetachCamera();
 
@@ -344,6 +376,10 @@ namespace KlayGE
 		}
 		model_ = MakeSharedPtr<ModelObject>(name);
 		model_->AddToSceneManager();
+		for (size_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
+		{
+			model_->GetRenderable()->Subrenderable(i)->ObjectID(static_cast<uint32_t>(i + 1));
+		}
 
 		shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
 
@@ -365,6 +401,8 @@ namespace KlayGE
 		}
 		tb_controller_.Scalers(0.01f, MathLib::length(half_size) * 0.001f);
 		fps_controller_.Scalers(0.01f, 0.2f);
+
+		update_selective_buffer_ = true;
 	}
 
 	void MeshMLViewerCore::SaveAsModel(std::string const & name)
@@ -415,7 +453,64 @@ namespace KlayGE
 			axis_->ModelMatrix(scaling * trans);
 		}
 
-		return deferred_rendering_->Update(pass);
+		uint32_t deferrd_pass_start;
+		if (model_ && update_selective_buffer_)
+		{
+			deferrd_pass_start = 2;
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			if (0 == pass)
+			{
+				axis_->Visible(false);
+				grid_->Visible(false);
+				sky_box_->Visible(false);
+				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
+				{
+					model_->GetRenderable()->Subrenderable(i)->SelectMode(true);
+				}
+
+				re.BindFrameBuffer(selective_fb_);
+				re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
+					Color(0.0f, 0.0f, 0.0f, 1.0f), 1, 0);
+				return App3DFramework::URV_NeedFlush;
+			}
+			else if (1 == pass)
+			{
+				axis_->Visible(true);
+				grid_->Visible(true);
+				sky_box_->Visible(true);
+				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
+				{
+					model_->GetRenderable()->Subrenderable(i)->SelectMode(false);
+				}
+
+				re.BindFrameBuffer(FrameBufferPtr());
+				return 0;
+			}
+		}
+		else
+		{
+			deferrd_pass_start = 0;
+		}
+
+		if (pass >= deferrd_pass_start)
+		{
+			uint32_t deferred_pass = pass - deferrd_pass_start;
+			uint32_t urv = deferred_rendering_->Update(deferred_pass);
+			if (urv & App3DFramework::URV_Finished)
+			{
+				selective_tex_->CopyToTexture(*selective_cpu_tex_);
+				update_selective_buffer_ = false;
+			}
+
+			return urv;
+		}
+		else
+		{
+			BOOST_ASSERT(false);
+
+			return 0;
+		}
 	}
 
 	uint32_t MeshMLViewerCore::NumFrames() const
@@ -630,6 +725,11 @@ namespace KlayGE
 		return nullptr;
 	}
 
+	uint32_t MeshMLViewerCore::SelectedObject() const
+	{
+		return selected_obj_;
+	}
+
 	void MeshMLViewerCore::SkinningOn(bool on)
 	{
 		skinning_ = on;
@@ -708,6 +808,8 @@ namespace KlayGE
 	{
 		if (mouse_down_in_wnd_)
 		{
+			mouse_tracking_mode_ = true;
+
 			int2 pt(x, y);
 
 			if (button & (MB_Left | MB_Middle | MB_Right))
@@ -718,10 +820,12 @@ namespace KlayGE
 					if (is_fps_camera_)
 					{
 						fps_controller_.RotateRel(move_vec.x(), move_vec.y(), 0);
+						update_selective_buffer_ = true;
 					}
 					else
 					{
 						tb_controller_.Rotate(move_vec.x(), move_vec.y());
+						update_selective_buffer_ = true;
 					}
 				}
 				else if (button & MB_Middle)
@@ -729,6 +833,7 @@ namespace KlayGE
 					if (!is_fps_camera_)
 					{
 						tb_controller_.Move(move_vec.x(), move_vec.y());
+						update_selective_buffer_ = true;
 					}
 				}
 				else if (button & MB_Right)
@@ -736,6 +841,7 @@ namespace KlayGE
 					if (!is_fps_camera_)
 					{
 						tb_controller_.Zoom(move_vec.x(), move_vec.y());
+						update_selective_buffer_ = true;
 					}
 				}
 			}
@@ -746,13 +852,43 @@ namespace KlayGE
 
 	void MeshMLViewerCore::MouseUp(int x, int y, uint32_t button)
 	{
-		UNREF_PARAM(x);
-		UNREF_PARAM(y);
-		UNREF_PARAM(button);
-
 		if (mouse_down_in_wnd_)
 		{
 			mouse_down_in_wnd_ = false;
+
+			if (mouse_tracking_mode_)
+			{
+				mouse_tracking_mode_ = false;
+			}
+			else
+			{
+				if (button & MB_Left)
+				{
+					uint32_t entity_id;
+					Texture::Mapper mapper(*selective_cpu_tex_, 0, 0, TMA_Read_Only,
+						x, y, 1, 1);
+					uint8_t* p = mapper.Pointer<uint8_t>();
+					if (0 == p[3])
+					{
+						if (EF_ABGR8 == selective_cpu_tex_->Format())
+						{
+							entity_id = p[0] | (p[1] << 8) | (p[2] << 16);
+						}
+						else
+						{
+							BOOST_ASSERT(EF_ARGB8 == selective_cpu_tex_->Format());
+
+							entity_id = p[2] | (p[1] << 8) | (p[0] << 16);
+						}
+					}
+					else
+					{
+						entity_id = 0;
+					}
+
+					selected_obj_ = entity_id;
+				}
+			}
 		}
 	}
 
@@ -772,6 +908,7 @@ namespace KlayGE
 			if (is_fps_camera_)
 			{
 				fps_controller_.Move(0, 0, 1);
+				update_selective_buffer_ = true;
 			}
 			break;
 
@@ -779,6 +916,7 @@ namespace KlayGE
 			if (is_fps_camera_)
 			{
 				fps_controller_.Move(0, 0, -1);
+				update_selective_buffer_ = true;
 			}
 			break;
 
@@ -786,6 +924,7 @@ namespace KlayGE
 			if (is_fps_camera_)
 			{
 				fps_controller_.Move(-1, 0, 0);
+				update_selective_buffer_ = true;
 			}
 			break;
 
@@ -793,6 +932,7 @@ namespace KlayGE
 			if (is_fps_camera_)
 			{
 				fps_controller_.Move(1, 0, 0);
+				update_selective_buffer_ = true;
 			}
 			break;
 		}

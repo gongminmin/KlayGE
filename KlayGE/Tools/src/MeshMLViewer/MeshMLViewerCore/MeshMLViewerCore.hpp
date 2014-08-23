@@ -45,6 +45,7 @@ namespace KlayGE
 		char const * HeightTexture(uint32_t material_index) const;
 		char const * EmitTexture(uint32_t material_index) const;
 		char const * OpacityTexture(uint32_t material_index) const;
+		uint32_t SelectedObject() const;
 
 		void SkinningOn(bool on);
 		void SmoothMeshOn(bool on);
@@ -84,7 +85,14 @@ namespace KlayGE
 		std::string last_file_path_;
 
 		bool mouse_down_in_wnd_;
+		bool mouse_tracking_mode_;
 		int2 last_mouse_pt_;
+
+		FrameBufferPtr selective_fb_;
+		TexturePtr selective_tex_;
+		TexturePtr selective_cpu_tex_;
+		bool update_selective_buffer_;
+		uint32_t selected_obj_;
 	};
 }
 

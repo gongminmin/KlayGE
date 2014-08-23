@@ -178,24 +178,27 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
 	}
 
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.tess_method != TM_No)
+	if (!this->select_mode_on_)
 	{
-		*(deferred_effect_->ParameterByName("adaptive_tess")) = true;
-		*(deferred_effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
-		
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		FrameBufferPtr const & fb = re.CurFrameBuffer();
-		*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
-
-		*(technique_->Effect().ParameterByName("view_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
-
-		if (TM_Instanced == caps.tess_method)
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.tess_method != TM_No)
 		{
-			*(deferred_effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
-			*(deferred_effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
-			*(deferred_effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
-			*(deferred_effect_->ParameterByName("index_buf")) = bindable_ib_;
+			*(deferred_effect_->ParameterByName("adaptive_tess")) = true;
+			*(deferred_effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			FrameBufferPtr const & fb = re.CurFrameBuffer();
+			*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
+
+			*(technique_->Effect().ParameterByName("view_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
+
+			if (TM_Instanced == caps.tess_method)
+			{
+				*(deferred_effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
+				*(deferred_effect_->ParameterByName("skinned_tex_buf")) = skinned_tex_vb_;
+				*(deferred_effect_->ParameterByName("skinned_tangent_buf")) = skinned_tangent_vb_;
+				*(deferred_effect_->ParameterByName("index_buf")) = bindable_ib_;
+			}
 		}
 	}
 }
