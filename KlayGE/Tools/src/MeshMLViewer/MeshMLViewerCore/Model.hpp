@@ -19,6 +19,11 @@ public:
 
 	void BuildModelInfo();
 
+	virtual bool IsSkinned() const KLAYGE_OVERRIDE
+	{
+		return is_skinned_;
+	}
+
 	void SetTime(float time);
 
 	void VisualizeLighting();
@@ -55,6 +60,8 @@ private:
 	KlayGE::RenderTechniquePtr special_shading_techs_[3][2];
 	KlayGE::RenderTechniquePtr special_shading_alpha_blend_back_techs_[3][2];
 	KlayGE::RenderTechniquePtr special_shading_alpha_blend_front_techs_[3][2];
+
+	bool is_skinned_;
 };
 
 class DetailedSkinnedMesh : public KlayGE::SkinnedMesh

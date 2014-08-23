@@ -794,6 +794,8 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 	}
+
+	is_skinned_ = has_skinned;
 }
 
 void DetailedSkinnedModel::SetTime(float time)
