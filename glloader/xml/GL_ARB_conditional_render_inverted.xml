@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_conditional_render_inverted" reg_no="161">
+	<tokens>
+		<token name="GL_QUERY_WAIT_INVERTED" value="0x8E17"/>
+		<token name="GL_QUERY_NO_WAIT_INVERTED" value="0x8E18"/>
+		<token name="GL_QUERY_BY_REGION_WAIT_INVERTED" value="0x8E19"/>
+		<token name="GL_QUERY_BY_REGION_NO_WAIT_INVERTED" value="0x8E1A"/>
+	</tokens>
+</gl_extension>

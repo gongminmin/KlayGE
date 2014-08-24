@@ -1846,6 +1846,228 @@
 				<param type="GLboolean" name="transpose"/>
 				<param type="const GLdouble*" name="value"/>
 			</params>
+		</function>		
+		<function name="glEnableClientStateiEXT" return="void">
+			<params>
+				<param type="GLenum" name="array"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableClientStateiEXT" return="void">
+			<params>
+				<param type="GLenum" name="array"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glGetFloati_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetDoublei_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetPointeri_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLvoid**" name="params"/>
+			</params>
+		</function>
+		<function name="glEnableIndexedEXT" return="void">
+			<params>
+				<param type="GLenum" name="cap"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableIndexedEXT" return="void">
+			<params>
+				<param type="GLenum" name="cap"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glGetIntegerIndexedvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetBooleanIndexedvEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLboolean*" name="params"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayColorOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayEdgeFlagOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayIndexOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayNormalOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayTexCoordOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayMultiTexCoordOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="texunit"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayFogCoordOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArraySecondaryColorOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexAttribIOffsetEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLintptr" name="offset"/>
+			</params>
+		</function>
+		<function name="glEnableVertexArrayEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLenum" name="array"/>
+			</params>
+		</function>
+		<function name="glDisableVertexArrayEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLenum" name="array"/>
+			</params>
+		</function>
+		<function name="glEnableVertexArrayAttribEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableVertexArrayAttribEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayIntegervEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayPointervEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="param"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayIntegeri_vEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayPointeri_vEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="param"/>
+			</params>
 		</function>
 	</functions>
 </gl_extension>

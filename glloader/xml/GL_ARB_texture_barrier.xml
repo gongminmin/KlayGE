@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_barrier" reg_no="167">
+	<functions>
+		<function name="glTextureBarrier" return="void">
+			<mappings>
+				<mapping from="GL_NV_texture_barrier" name="glTextureBarrierNV"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

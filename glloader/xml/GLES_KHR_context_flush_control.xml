@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_KHR_context_flush_control" reg_no="191">
+	<tokens>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR" value="0x82FB"/>
+		<token name="GL_NONE" value="0x0000"/>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH" value="0x82FC"/>	
+	</tokens>
+</gl_extension>

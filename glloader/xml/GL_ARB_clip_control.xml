@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_clip_control" reg_no="160">
+	<tokens>
+		<token name="GL_LOWER_LEFT" value="0x8CA1"/>
+		<token name="GL_UPPER_LEFT" value="0x8CA2"/>
+		<token name="GL_NEGATIVE_ONE_TO_ONE" value="0x935E"/>
+		<token name="GL_ZERO_TO_ONE" value="0x935F"/>
+		<token name="GL_CLIP_ORIGIN" value="0x935C"/>
+		<token name="GL_CLIP_DEPTH_MODE" value="0x935D"/>
+	</tokens>
+
+	<functions>
+		<function name="glClipControl" return="void">
+			<params>
+				<param type="GLenum" name="origin"/>
+				<param type="GLenum" name="depth"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

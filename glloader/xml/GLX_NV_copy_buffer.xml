@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_NV_copy_buffer" reg_no="457">
+	<functions>
+		<function name="glXCopyBufferSubDataNV" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXContext" name="readCtx"/>
+				<param type="GLXContext" name="writeCtx"/>
+				<param type="GLenum" name="readTarget"/>
+				<param type="GLenum" name="writeTarget"/>
+				<param type="GLintptr" name="readOffset"/>
+				<param type="GLintptr" name="writeOffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glXNamedCopyBufferSubDataNV" return="void">
+			<params>
+				<param type="Display*" name="dpy"/>
+				<param type="GLXContext" name="readCtx"/>
+				<param type="GLXContext" name="writeCtx"/>
+				<param type="GLuint" name="readBuffer"/>
+				<param type="GLuint" name="writeBuffer"/>
+				<param type="GLintptr" name="readOffset"/>
+				<param type="GLintptr" name="writeOffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

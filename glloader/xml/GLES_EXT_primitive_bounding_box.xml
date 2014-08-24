@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_primitive_bounding_box" reg_no="186">
+	<tokens>
+		<token name="GL_PRIMITIVE_BOUNDING_BOX_EXT" value="0x92BE"/>
+	</tokens>
+
+	<functions>
+		<function name="glPrimitiveBoundingBoxEXT" return="void">
+			<params>
+				<param type="float" name="minX"/>
+				<param type="float" name="minY"/>
+				<param type="float" name="minZ"/>
+				<param type="float" name="minW"/>
+				<param type="float" name="maxX"/>
+				<param type="float" name="maxY"/>
+				<param type="float" name="maxZ"/>
+				<param type="float" name="maxW"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

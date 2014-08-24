@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ANDROID_extension_pack_es31a" reg_no="187">
+	<additionals>
+		<ext name="GLES_VERSION_3_1"/>
+		<ext name="GLES_KHR_debug"/>
+		<ext name="GLES_KHR_texture_compression_astc_ldr"/>
+		<ext name="GLES_KHR_blend_equation_advanced"/>
+		<ext name="GLES_OES_sample_shading"/>
+		<ext name="GLES_OES_sample_variables"/>
+		<ext name="GLES_OES_shader_image_atomic"/>
+		<ext name="GLES_OES_shader_multisample_interpolation"/>
+		<ext name="GLES_OES_texture_stencil8"/>
+		<ext name="GLES_OES_texture_storage_multisample_2d_array"/>
+		<ext name="GLES_EXT_copy_image"/>
+		<ext name="GLES_EXT_draw_buffers_indexed"/>
+		<ext name="GLES_EXT_geometry_shader"/>
+		<ext name="GLES_EXT_gpu_shader5"/>
+		<ext name="GLES_EXT_primitive_bounding_box"/>
+		<ext name="GLES_EXT_shader_io_blocks"/>
+		<ext name="GLES_EXT_tessellation_shader"/>
+		<ext name="GLES_EXT_texture_border_clamp"/>
+		<ext name="GLES_EXT_texture_buffer"/>
+		<ext name="GLES_EXT_texture_cube_map_array"/>
+		<ext name="GLES_EXT_texture_sRGB_decode"/>
+	</additionals>
+</gl_extension>

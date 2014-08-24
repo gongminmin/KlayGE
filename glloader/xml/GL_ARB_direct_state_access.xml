@@ -1,0 +1,771 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_direct_state_access" reg_no="164">
+	<tokens>
+		<token name="GL_TEXTURE_TARGET" value="0x1006"/>
+		<token name="GL_QUERY_TARGET" value="0x82EA"/>
+		<token name="GL_TEXTURE_BINDING" value="0x82EB"/>
+	</tokens>
+
+	<functions>
+		<function name="glCreateTransformFeedbacks" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+		</function>
+		<function name="glTransformFeedbackBufferBase" return="void">
+			<params>
+				<param type="GLuint" name="xfb"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glTransformFeedbackBufferRange" return="void">
+			<params>
+				<param type="GLuint" name="xfb"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glGetTransformFeedbackiv" return="void">
+			<params>
+				<param type="GLuint" name="xfb"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetTransformFeedbacki_v" return="void">
+			<params>
+				<param type="GLuint" name="xfb"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetTransformFeedbacki64_v" return="void">
+			<params>
+				<param type="GLuint" name="xfb"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLint64*" name="param"/>
+			</params>
+		</function>
+		<function name="glCreateBuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="buffers"/>
+			</params>
+		</function>
+		<function name="glNamedBufferStorage" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const GLvoid*" name="data"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+		<function name="glNamedBufferData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const GLvoid*" name="data"/>
+				<param type="GLenum" name="usage"/>
+			</params>
+		</function>
+		<function name="glNamedBufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCopyNamedBufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="readBuffer"/>
+				<param type="GLuint" name="writeBuffer"/>
+				<param type="GLintptr" name="readOffset"/>
+				<param type="GLintptr" name="writeOffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glClearNamedBufferData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glClearNamedBufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>    
+		<function name="glMapNamedBuffer" return="GLvoid*">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glMapNamedBufferRange" return="GLvoid*">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="length"/>
+				<param type="GLbitfield" name="access"/>
+			</params>
+		</function>
+		<function name="glUnmapNamedBuffer" return="GLboolean">
+			<params>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glFlushMappedNamedBufferRange" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="length"/>
+			</params>
+		</function>
+		<function name="glGetNamedBufferParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetNamedBufferParameteri64v" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetNamedBufferPointerv" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLvoid**" name="params"/>
+			</params>
+		</function>		
+		<function name="glGetNamedBufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCreateFramebuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="framebuffers"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferRenderbuffer" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="renderbuffertarget"/>
+				<param type="GLuint" name="renderbuffer"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferParameteri" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferTexture" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferTextureLayer" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="layer"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferDrawBuffer" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferDrawBuffers" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLenum*" name="bufs"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferReadBuffer" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glInvalidateNamedFramebufferData" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLsizei" name="numAttachments"/>
+				<param type="const GLenum*" name="attachments"/>
+			</params>
+		</function>
+		<function name="glInvalidateNamedFramebufferSubData" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLsizei" name="numAttachments"/>
+				<param type="const GLenum*" name="attachments"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glClearNamedFramebufferiv" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
+				<param type="const GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glClearNamedFramebufferuiv" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
+				<param type="const GLuint*" name="value"/>
+			</params>
+		</function>
+		<function name="glClearNamedFramebufferfv" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="buffer"/>
+				<param type="GLint" name="drawbuffer"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glClearNamedFramebufferfi" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="buffer"/>
+				<param type="GLfloat" name="depth"/>
+				<param type="GLint" name="stencil"/>
+			</params>
+		</function>
+		<function name="glBlitNamedFramebuffer" return="void">
+			<params>
+				<param type="GLuint" name="readFramebuffer"/>
+				<param type="GLuint" name="drawFramebuffer"/>
+				<param type="GLint" name="srcX0"/>
+				<param type="GLint" name="srcY0"/>
+				<param type="GLint" name="srcX1"/>
+				<param type="GLint" name="srcY1"/>
+				<param type="GLint" name="dstX0"/>
+				<param type="GLint" name="dstY0"/>
+				<param type="GLint" name="dstX1"/>
+				<param type="GLint" name="dstY1"/>
+				<param type="GLbitfield" name="mask"/>
+				<param type="GLenum" name="filter"/>
+			</params>
+		</function>
+		<function name="glCheckNamedFramebufferStatus" return="GLenum">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetNamedFramebufferParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetNamedFramebufferAttachmentParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glCreateRenderbuffers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="renderbuffers"/>
+			</params>
+		</function>
+		<function name="glNamedRenderbufferStorage" return="void">
+			<params>
+				<param type="GLuint" name="renderbuffer"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>		
+		<function name="glNamedRenderbufferStorageMultisample" return="void">
+			<params>
+				<param type="GLuint" name="renderbuffer"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glGetNamedRenderbufferParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="renderbuffer"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glCreateTextures" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="textures"/>
+			</params>
+		</function>
+		<function name="glTextureBuffer" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glTextureBufferRange" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glTextureStorage1D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glTextureStorage2D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glTextureStorage3D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+			</params>
+		</function>
+		<function name="glTextureStorage2DMultisample" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glTextureStorage3DMultisample" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glTextureSubImage1DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glTextureSubImage2DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>		
+		<function name="glTextureSubImage3D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="pixels"/>
+			</params>
+		</function>		
+		<function name="glCompressedTextureSubImage1D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>		
+		<function name="glCompressedTextureSubImage2D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>
+		<function name="glCompressedTextureSubImage3D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="imageSize"/>
+				<param type="const GLvoid*" name="data"/>
+			</params>
+		</function>		
+		<function name="glCopyTextureSubImage1D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+			</params>
+		</function>
+		<function name="glCopyTextureSubImage2D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glCopyTextureSubImage3D" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>		
+		<function name="glTextureParameterf" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="param"/>
+			</params>
+		</function>
+		<function name="glTextureParameterfv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glTextureParameteri" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+		<function name="glTextureParameterIivEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTextureParameterIuivEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTextureParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGenerateTextureMipmap" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glBindTextureUnit" return="void">
+			<params>
+				<param type="GLuint" name="unit"/>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glGetTextureImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetCompressedTextureImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="level"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetTextureLevelParameterfv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTextureLevelParameteriv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTextureParameterfv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTextureParameterIiv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTextureParameterIuiv" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetTextureParameterivEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glCreateVertexArrays" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="arrays"/>
+			</params>
+		</function>    
+		<function name="glDisableVertexArrayAttrib" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glEnableVertexArrayAttribEXT" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glVertexArrayElementBuffer" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexBuffer" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glVertexArrayVertexBuffers" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="buffers"/>
+				<param type="const GLintptr*" name="offsets"/>
+				<param type="const GLsizei*" name="strides"/>
+			</params>
+		</function>
+		<function name="glVertexArrayAttribFormat" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLboolean" name="normalized"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayAttribIFormat" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayAttribLFormat" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLint" name="size"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="relativeoffset"/>
+			</params>
+		</function>
+		<function name="glVertexArrayAttribBinding" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="attribindex"/>
+				<param type="GLuint" name="bindingindex"/>
+			</params>
+		</function>
+		<function name="glVertexArrayBindingDivisor" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="bindingindex"/>
+				<param type="GLuint" name="divisor"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayiv" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayIndexediv" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="param"/>
+			</params>
+		</function>
+		<function name="glGetVertexArrayIndexed64iv" return="void">
+			<params>
+				<param type="GLuint" name="vaobj"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="param"/>
+			</params>
+		</function>
+		<function name="glCreateSamplers" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="samplers"/>
+			</params>
+		</function>
+		<function name="glCreateProgramPipelines" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="pipelines"/>
+			</params>
+		</function>
+		<function name="glCreateQueries" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

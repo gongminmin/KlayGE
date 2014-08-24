@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_TIZEN_image_native_buffer" reg_no="76">
+	<tokens>
+		<token name="EGL_NATIVE_BUFFER_TIZEN" value="0x32A0"/>
+	</tokens>
+</gl_extension>

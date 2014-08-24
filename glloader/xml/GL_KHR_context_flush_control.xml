@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_KHR_context_flush_control" reg_no="168">
+	<tokens>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR" value="0x82FB"/>
+		<token name="GL_NONE" value="0x0000"/>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH" value="0x82FC"/>		
+		<token name="WGL_CONTEXT_RELEASE_BEHAVIOR_ARB" value="0x2097"/>
+		<token name="WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB" value="0x0000"/>
+		<token name="WGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB" value="0x2098"/>
+		<token name="GLX_CONTEXT_RELEASE_BEHAVIOR_ARB" value="0x2097"/>
+		<token name="GLX_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB" value="0x0000"/>
+		<token name="GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB" value="0x2098"/>
+	</tokens>
+</gl_extension>

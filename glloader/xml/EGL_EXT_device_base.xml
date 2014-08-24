@@ -1,0 +1,44 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_device_base" reg_no="72">
+	<typedefs>
+		<typedef type="void*" synonym="EGLDeviceEXT"/>
+		<typedef type="intptr_t" synonym="EGLAttrib"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_NO_DEVICE_EXT" value="((EGLDeviceEXT)0)"/>
+		<token name="EGL_BAD_DEVICE_EXT" value="0x322B"/>
+		<token name="EGL_DEVICE_EXT" value="0x322C"/>
+	</tokens>
+
+	<functions>
+		<function name="eglQueryDeviceAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDeviceEXT" name="device"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryDeviceStringEXT" return="const char*">
+			<params>
+				<param type="EGLDeviceEXT" name="device"/>
+				<param type="EGLint" name="name"/>
+			</params>
+		</function>
+		<function name="eglQueryDevicesEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="max_devices"/>
+				<param type="EGLDeviceEXT*" name="devices"/>
+				<param type="EGLint*" name="num_devices"/>
+			</params>
+		</function>
+		<function name="eglQueryDisplayAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

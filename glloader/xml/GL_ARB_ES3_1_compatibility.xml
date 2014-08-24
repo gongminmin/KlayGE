@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_ES3_1_compatibility" reg_no="159">
+	<functions>
+		<function name="glMemoryBarrierByRegion" return="void">
+			<params>
+				<param type="GLbitfield" name="barriers"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

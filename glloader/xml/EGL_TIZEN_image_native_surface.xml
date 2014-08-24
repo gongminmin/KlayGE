@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_TIZEN_image_native_surface" reg_no="77">
+	<tokens>
+		<token name="EGL_NATIVE_SURFACE_TIZEN" value="0x32A1"/>
+	</tokens>
+</gl_extension>

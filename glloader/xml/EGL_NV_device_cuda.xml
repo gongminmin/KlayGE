@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_device_cuda" reg_no="74">
+	<tokens>
+		<token name="EGL_CUDA_DEVICE_NV" value="0x323A"/>
+	</tokens>
+</gl_extension>

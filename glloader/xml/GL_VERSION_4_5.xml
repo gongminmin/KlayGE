@@ -1,0 +1,184 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_5">
+	<tokens>
+		<token name="GL_CONTEXT_LOST" value="0x0507"/>
+		<token name="GL_NEGATIVE_ONE_TO_ONE" value="0x935E"/>
+		<token name="GL_ZERO_TO_ONE" value="0x935F"/>
+		<token name="GL_CLIP_ORIGIN" value="0x935C"/>
+		<token name="GL_CLIP_DEPTH_MODE" value="0x935D"/>
+		<token name="GL_QUERY_WAIT_INVERTED" value="0x8E17"/>
+		<token name="GL_QUERY_NO_WAIT_INVERTED" value="0x8E18"/>
+		<token name="GL_QUERY_BY_REGION_WAIT_INVERTED" value="0x8E19"/>
+		<token name="GL_QUERY_BY_REGION_NO_WAIT_INVERTED" value="0x8E1A"/>
+		<token name="GL_MAX_CULL_DISTANCES" value="0x82F9"/>
+		<token name="GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES" value="0x82FA"/>
+		<token name="GL_TEXTURE_TARGET" value="0x1006"/>
+		<token name="GL_QUERY_TARGET" value="0x82EA"/>
+		<token name="GL_TEXTURE_BINDING" value="0x82EB"/>
+		<token name="GL_GUILTY_CONTEXT_RESET" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET" value="0x8255"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY" value="0x8256"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET" value="0x8252"/>
+		<token name="GL_NO_RESET_NOTIFICATION" value="0x8261"/>
+		<token name="GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT" value="0x00000004"/>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR" value="0x82FB"/>
+		<token name="GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH" value="0x82FC"/>
+	</tokens>
+	
+	<functions>		
+		<function name="glGetnTexImage" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="img"/>
+			</params>
+		</function>
+		<function name="glGetnUniformdv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLdouble*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformfv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformuiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnMapdv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLdouble*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnMapfv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnMapiv" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="query"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapfv" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapuiv" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPixelMapusv" return="void">
+			<params>
+				<param type="GLenum" name="map"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLushort*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnPolygonStipple" return="void">
+			<params>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLubyte*" name="pattern"/>
+			</params>
+		</function>
+		<function name="glGetnColorTable" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="table"/>
+			</params>
+		</function>
+		<function name="glGetnConvolutionFilter" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="image"/>
+			</params>
+		</function>
+		<function name="glGetnSeparableFilter" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="rowBufSize"/>
+				<param type="GLvoid*" name="row"/>
+				<param type="GLsizei" name="columnBufSize"/>
+				<param type="GLvoid*" name="column"/>
+				<param type="GLvoid*" name="span"/>
+			</params>
+		</function>
+		<function name="glGetnHistogram" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+		</function>
+		<function name="glGetnMinmax" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLboolean" name="reset"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="values"/>
+			</params>
+		</function>
+	</functions>
+
+	<additionals>
+		<ext name="GL_ARB_clip_control"/>
+		<ext name="GL_ARB_direct_state_access"/>
+		<ext name="GL_ARB_ES3_1_compatibility"/>
+		<ext name="GL_ARB_get_texture_sub_image"/>
+		<ext name="GL_KHR_robustness"/>
+		<ext name="GL_ARB_texture_barrier"/>
+	</additionals>
+</gl_extension>

@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_transform_feedback_overflow_query" reg_no="173">
+	<tokens>
+		<token name="GL_TRANSFORM_FEEDBACK_OVERFLOW_ARB" value="0x82EC"/>
+		<token name="GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB" value="0x82ED"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,71 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_KHR_robustness" reg_no="170">
+	<tokens>
+		<token name="GL_NO_ERROR" value="0x0000"/>
+		<token name="GL_GUILTY_CONTEXT_RESET" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET" value="0x8255"/>
+		<token name="GL_CONTEXT_ROBUST_ACCESS" value="0x90F3"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY" value="0x8256"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET" value="0x8252"/>
+		<token name="GL_NO_RESET_NOTIFICATION" value="0x8261"/>
+		<token name="GL_CONTEXT_LOST" value="0x0507"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetGraphicsResetStatus" return="GLenum">
+			<mappings>
+				<mapping from="GL_ARB_robustness" name="glGetGraphicsResetStatusARB"/>
+			</mappings>
+		</function>
+		<function name="glReadnPixels" return="void">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="data"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_robustness" name="glReadnPixelsARB"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformfv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_robustness" name="glGetnUniformfvARB"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_robustness" name="glGetnUniformivARB"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformuiv" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_robustness" name="glGetnUniformuivARB"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

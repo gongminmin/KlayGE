@@ -1,0 +1,36 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_get_texture_sub_image" reg_no="165">
+	<functions>
+		<function name="glGetTextureSubImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+		<function name="glGetCompressedTextureSubImage" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLvoid*" name="pixels"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

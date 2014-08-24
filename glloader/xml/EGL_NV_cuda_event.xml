@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_cuda_event" reg_no="75">
+	<tokens>
+		<token name="EGL_CUDA_EVENT_HANDLE_NV" value="0x323B"/>
+		<token name="EGL_SYNC_CUDA_EVENT_NV" value="0x323C"/>
+		<token name="EGL_SYNC_CUDA_EVENT_COMPLETE_NV" value="0x323D"/>
+	</tokens>
+</gl_extension>

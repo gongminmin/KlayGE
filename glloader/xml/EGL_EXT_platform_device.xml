@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_platform_device" reg_no="73">
+	<tokens>
+		<token name="EGL_PLATFORM_DEVICE_EXT" value="0x313F"/>
+	</tokens>
+</gl_extension>

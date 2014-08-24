@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_cull_distance" reg_no="162">
+	<tokens>
+		<token name="GL_MAX_CULL_DISTANCES" value="0x82F9"/>
+		<token name="GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES" value="0x82FA"/>
+	</tokens>
+</gl_extension>

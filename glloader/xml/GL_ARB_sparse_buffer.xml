@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_sparse_buffer" reg_no="172">
+	<tokens>
+		<token name="GL_SPARSE_STORAGE_BIT_ARB" value="0x0400"/>
+		<token name="GL_SPARSE_BUFFER_PAGE_SIZE_ARB" value="0x82F8"/>
+	</tokens>
+
+	<functions>
+		<function name="glBufferPageCommitmentARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLboolean" name="commit"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
