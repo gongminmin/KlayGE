@@ -961,10 +961,9 @@ namespace KlayGE
 	{
 		if (selected_obj_ > 0)
 		{
-			RenderablePtr const & model = model_->GetRenderable();
-			RenderablePtr const & mesh = model->Subrenderable(selected_obj_ - 1);
+			RenderablePtr const & mesh = model_->GetRenderable()->Subrenderable(selected_obj_ - 1);
 			OBBox obb;
-			if (checked_pointer_cast<RenderModel>(model)->IsSkinned() && skinning_)
+			if ((this->NumFrames() > 0) && skinning_)
 			{
 				obb = MathLib::convert_to_obbox(
 					checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(static_cast<uint32_t>(curr_frame_ + 0.5f)));
