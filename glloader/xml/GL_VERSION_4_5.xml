@@ -175,8 +175,11 @@
 
 	<additionals>
 		<ext name="GL_ARB_clip_control"/>
-		<ext name="GL_ARB_direct_state_access"/>
+		<ext name="GL_ARB_cull_distance"/>
 		<ext name="GL_ARB_ES3_1_compatibility"/>
+		<ext name="GL_ARB_conditional_render_inverted"/>
+		<ext name="GL_KHR_context_flush_control"/>
+		<ext name="GL_ARB_direct_state_access"/>
 		<ext name="GL_ARB_get_texture_sub_image"/>
 		<ext name="GL_KHR_robustness"/>
 		<ext name="GL_ARB_texture_barrier"/>

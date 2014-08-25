@@ -13,8 +13,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5']
 
 features_db = {
 	'1.1' : {
@@ -100,7 +100,7 @@ features_db = {
 		
 	'3.0' : {
 			'OpenGL Shading Language 1.30' : lambda : support_one(['GLSL_1_3', 'GL_EXT_gpu_shader4']),
-			'Conditional Rendering' : lambda : is_supported('GL_NV_conditional_render'),
+			'Conditional rendering' : lambda : is_supported('GL_NV_conditional_render'),
 			'Floating-point color buffer' : lambda : is_supported('GL_ARB_color_buffer_float'),
 			'Floating-point depth buffer' : lambda : support_one(['GL_ARB_depth_buffer_float', 'GL_NV_depth_buffer_float']),
 			'Floating-point texture' : lambda : support_one(['GL_ARB_texture_float', 'GL_ATI_texture_float', 'GL_NV_float_buffer']),
@@ -232,6 +232,20 @@ features_db = {
 			'Texture mirror clamp to edge' : lambda : support_one(['GL_ARB_texture_mirror_clamp_to_edge', 'GL_EXT_texture_mirror_clamp', 'GL_ATI_texture_mirror_once']),
 			'Stencil8 format texture' : lambda : is_supported('GL_ARB_texture_stencil8'),
 			'B10G11R11F format for vertex' : lambda : is_supported('GL_ARB_vertex_type_10f_11f_11f_rev'),
+		},
+
+	'4.5' : {
+			'Clip control' : lambda : is_supported('GL_ARB_clip_control'),
+			'Cull distance' : lambda : is_supported('GL_ARB_cull_distance'),
+			'OpenGL ES 3.1 compatibility' : lambda : is_supported('GL_ARB_ES3_1_compatibility'),
+			'Conditional Rendering inverted' : lambda : is_supported('GL_ARB_conditional_render_inverted'),
+			'Context flush control' : lambda : support_one(['GL_KHR_context_flush_control', 'GL_ARB_context_flush_control']),
+			'GLSL Derivative control' : lambda : is_supported('GL_ARB_derivative_control'),
+			'Direct state access' : lambda : support_one(['GL_ARB_direct_state_access', 'GL_EXT_direct_state_access']),
+			'Get texture sub image' : lambda : is_supported('GL_ARB_get_texture_sub_image'),
+			'Robustness' : lambda : support_one(['GL_KHR_robustness', 'GL_ARB_robustness']),
+			'GLSL texture image samples' : lambda : is_supported('GL_ARB_shader_texture_image_samples'),
+			'Texture barrier' : lambda : support_one(['GL_ARB_texture_barrier', 'GL_NV_texture_barrier']),
 		}
 }
 
@@ -359,6 +373,8 @@ class information:
 			is_supported.exts.append('GLSL_4_3')
 		if glsl_ver_index >= 11:
 			is_supported.exts.append('GLSL_4_4')
+		if glsl_ver_index >= 12:
+			is_supported.exts.append('GLSL_4_5')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
@@ -381,7 +397,7 @@ def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, gls
 	exts = ext_str.split(' ')
 
 	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2013 Minmin Gong\n')
+	print('Copyright(C) 2004-2014 Minmin Gong\n')
 
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)

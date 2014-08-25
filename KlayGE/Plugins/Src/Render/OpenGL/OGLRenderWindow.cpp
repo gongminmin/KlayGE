@@ -185,6 +185,7 @@ namespace KlayGE
 		}
 
 		std::vector<std::pair<std::string, std::pair<int, int> > > available_versions;
+		available_versions.push_back(std::make_pair("4.5", std::make_pair(4, 5)));
 		available_versions.push_back(std::make_pair("4.4", std::make_pair(4, 4)));
 		available_versions.push_back(std::make_pair("4.3", std::make_pair(4, 3)));
 		available_versions.push_back(std::make_pair("4.2", std::make_pair(4, 2)));
