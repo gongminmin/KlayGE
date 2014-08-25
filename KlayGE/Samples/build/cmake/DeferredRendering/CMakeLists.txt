@@ -45,7 +45,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.kfx

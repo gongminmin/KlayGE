@@ -24,7 +24,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/SelectMode.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
