@@ -154,7 +154,7 @@ def build_external_libs(build_info):
 			print("\nSeting up Cg...\n")
 			setup_Cg(build_info, compiler_info)
 
-		if compiler_info.is_windows:
+		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
 			print("\nSeting up wpftoolkit...\n")
 			setup_wpftoolkit(build_info, compiler_info)
 
