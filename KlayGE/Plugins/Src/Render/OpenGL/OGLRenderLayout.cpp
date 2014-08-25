@@ -67,7 +67,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLRenderLayout::BindVertexStreams(ShaderObjectPtr const & so) const
+	void OGLRenderLayout::BindVertexStreams(ShaderObjectPtr const & so, GLuint vao) const
 	{
 		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
 
@@ -80,6 +80,11 @@ namespace KlayGE
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
 			uint32_t const size = this->VertexSize(i);
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
+
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glVertexArrayVertexBuffer(vao, i, stream.GLvbo(), this->StartVertexLocation() * size, size);
+			}
 
 			uint8_t* elem_offset = nullptr;
 			typedef KLAYGE_DECLTYPE(vertex_stream_fmt) VertexStreamFmtType;
@@ -97,8 +102,24 @@ namespace KlayGE
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(use_vao_);
-					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
-					glEnableVertexAttribArray(attr);
+					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					{
+						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized,
+							reinterpret_cast<GLuint>(elem_offset));
+						glVertexArrayAttribBinding(vao, attr, i);
+						glEnableVertexArrayAttrib(vao, attr);
+					}
+					else if (glloader_GL_EXT_direct_state_access())
+					{
+						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
+							normalized, size, reinterpret_cast<GLintptr>(offset));
+						glEnableVertexArrayAttribEXT(vao, attr);
+					}
+					else
+					{
+						glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
+						glEnableVertexAttribArray(attr);
+					}
 
 					used_streams[attr] = 1;
 				}
@@ -111,20 +132,23 @@ namespace KlayGE
 		{
 			if (!used_streams[i])
 			{
-				glDisableVertexAttribArray(i);
+				if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+				{
+					glDisableVertexArrayAttrib(vao, i);
+				}
+				else if (glloader_GL_EXT_direct_state_access())
+				{
+					glDisableVertexArrayAttribEXT(vao, i);
+				}
+				else
+				{
+					glDisableVertexAttribArray(i);
+				}
 			}
-		}
-
-		OGLRenderEngine& ogl_re = *checked_cast<OGLRenderEngine*>(&re);
-		if (!ogl_re.HackForIntel() && this->UseIndices())
-		{
-			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
-			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
-			stream.Active(use_vao_);
 		}
 	}
 
-	void OGLRenderLayout::UnbindVertexStreams(ShaderObjectPtr const & so) const
+	void OGLRenderLayout::UnbindVertexStreams(ShaderObjectPtr const & so, GLuint vao) const
 	{
 		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
@@ -137,7 +161,18 @@ namespace KlayGE
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					glDisableVertexAttribArray(attr);
+					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					{
+						glDisableVertexArrayAttrib(vao, attr);
+					}
+					else if (glloader_GL_EXT_direct_state_access())
+					{
+						glDisableVertexArrayAttribEXT(vao, attr);
+					}
+					else
+					{
+						glDisableVertexAttribArray(attr);
+					}
 				}
 			}
 		}
@@ -152,11 +187,18 @@ namespace KlayGE
 			VAOsType::iterator iter = vaos_.find(so);
 			if (iter == vaos_.end())
 			{
-				glGenVertexArrays(1, &vao);
-				vaos_.insert(std::make_pair(so, vao));
+				if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+				{
+					glCreateVertexArrays(1, &vao);
+				}
+				else
+				{
+					glGenVertexArrays(1, &vao);
+					glBindVertexArray(vao);
+				}
 
-				glBindVertexArray(vao);
-				this->BindVertexStreams(so);
+				vaos_.insert(std::make_pair(so, vao));
+				this->BindVertexStreams(so, vao);
 			}
 			else
 			{
@@ -164,8 +206,7 @@ namespace KlayGE
 				glBindVertexArray(vao);
 			}
 
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (re.HackForIntel() && this->UseIndices())
+			if (this->UseIndices())
 			{
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
@@ -174,7 +215,7 @@ namespace KlayGE
 		}
 		else
 		{
-			this->BindVertexStreams(so);
+			this->BindVertexStreams(so, 0);
 		}
 
 		if (use_nv_pri_restart_)
@@ -200,7 +241,11 @@ namespace KlayGE
 	{
 		if (!use_vao_)
 		{
-			this->UnbindVertexStreams(so);
+			typedef KLAYGE_DECLTYPE(vaos_) VAOsType;
+			VAOsType::iterator iter = vaos_.find(so);
+			BOOST_ASSERT(iter != vaos_.end());
+
+			this->UnbindVertexStreams(so, iter->second);
 		}
 	}
 }

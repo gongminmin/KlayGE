@@ -34,8 +34,8 @@ namespace KlayGE
 		void Deactive(ShaderObjectPtr const & so) const;
 
 	private:
-		void BindVertexStreams(ShaderObjectPtr const & so) const;
-		void UnbindVertexStreams(ShaderObjectPtr const & so) const;
+		void BindVertexStreams(ShaderObjectPtr const & so, GLuint vao) const;
+		void UnbindVertexStreams(ShaderObjectPtr const & so, GLuint vao) const;
 
 	private:
 		mutable std::map<ShaderObjectPtr, GLuint> vaos_;

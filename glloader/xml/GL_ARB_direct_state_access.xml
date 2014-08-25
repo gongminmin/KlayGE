@@ -652,7 +652,7 @@
 				<param type="GLuint" name="index"/>
 			</params>
 		</function>
-		<function name="glEnableVertexArrayAttribEXT" return="void">
+		<function name="glEnableVertexArrayAttrib" return="void">
 			<params>
 				<param type="GLuint" name="vaobj"/>
 				<param type="GLuint" name="index"/>
