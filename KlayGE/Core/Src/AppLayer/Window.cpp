@@ -31,10 +31,7 @@
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-using namespace Windows::ApplicationModel::Core;
-using namespace Windows::ApplicationModel::Activation;
-using namespace Windows::UI::Core;
-using namespace Windows::Foundation;
+using namespace Windows::Graphics::Display;
 #endif
 
 namespace KlayGE
@@ -344,8 +341,13 @@ namespace KlayGE
 
 		left_ = 0;
 		top_ = 0;
-		width_ = static_cast<uint32_t>(wnd_->Bounds.Width);
-		height_ = static_cast<uint32_t>(wnd_->Bounds.Height);
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		float const dpi = DisplayInformation::GetForCurrentView()->LogicalDpi;
+#else
+		float const dpi = DisplayProperties::LogicalDpi;
+#endif
+		width_ = static_cast<uint32_t>(wnd_->Bounds.Width * dpi / 96);
+		height_ = static_cast<uint32_t>(wnd_->Bounds.Height * dpi / 96);
 	}
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX

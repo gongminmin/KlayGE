@@ -194,6 +194,12 @@ namespace KlayGE
 
 		uint32_t const screen_width = screen_frame_buffer_->Width();
 		uint32_t const screen_height = screen_frame_buffer_->Height();
+		float const screen_aspect = static_cast<float>(screen_width) / screen_height;
+		if (!MathLib::equal(screen_aspect, static_cast<float>(settings.width) / settings.height))
+		{
+			settings.width = static_cast<uint32_t>(settings.height * screen_aspect + 0.5f);
+		}
+
 		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
 		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
 
