@@ -43,29 +43,30 @@
 #if defined(__clang__)
 	// Clang++
 
-	#include <bits/c++config.h>
-	#ifdef _GLIBCXX_USE_FLOAT128
-		#undef _GLIBCXX_USE_FLOAT128
-	#endif
-	#ifdef _GLIBCXX_USE_INT128
-		#undef _GLIBCXX_USE_INT128
-	#endif
-
 	#define KLAYGE_COMPILER_CLANG
+	#define KLAYGE_COMPILER_NAME clang
 
-	#if __clang_major__ >= 3
-		#if __clang_minor__ >= 5
-			#define KLAYGE_COMPILER_VERSION 35
-		#elif __clang_minor__ >= 4
-			#define KLAYGE_COMPILER_VERSION 34
-		#elif __clang_minor__ >= 3
-			#define KLAYGE_COMPILER_VERSION 33
-		#elif __clang_minor__ >= 2
-			#define KLAYGE_COMPILER_VERSION 32
-		#elif __clang_minor__ >= 1
-			#define KLAYGE_COMPILER_VERSION 31
-		#elif __clang_minor__ >= 0
-			#define KLAYGE_COMPILER_VERSION 30
+	#if defined(__APPLE__)
+		#if __clang_major__ >= 6
+			if __clang_minor__ >= 0
+				#define KLAYGE_COMPILER_VERSION 60
+			#endif
+		#elif __clang_major__ >= 5
+			#if __clang_minor__ >= 1
+				#define KLAYGE_COMPILER_VERSION 51
+			#elif __clang_minor__ >= 0
+				#define KLAYGE_COMPILER_VERSION 50
+			#endif
+		#if __clang_major__ >= 4
+			#if __clang_minor__ >= 2
+				#define KLAYGE_COMPILER_VERSION 42
+			#elif __clang_minor__ >= 1
+				#define KLAYGE_COMPILER_VERSION 41
+			#elif __clang_minor__ >= 0
+				#define KLAYGE_COMPILER_VERSION 40
+			#endif
+		#else
+			#error Unknown compiler.
 		#endif
 
 		#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
@@ -78,39 +79,91 @@
 		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-		#if __clang_minor__ >= 1
-			#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+	#elif defined(__MINGW32__)
+		#include <bits/c++config.h>
+		#ifdef _GLIBCXX_USE_FLOAT128
+			#undef _GLIBCXX_USE_FLOAT128
+		#endif
+		#ifdef _GLIBCXX_USE_INT128
+			#undef _GLIBCXX_USE_INT128
 		#endif
 
-		#ifdef __GLIBCXX__
-			#if __GLIBCXX__ >= 20080306
-				#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+		#if __clang_major__ >= 3
+			#if __clang_minor__ >= 5
+				#define KLAYGE_COMPILER_VERSION 35
+			#elif __clang_minor__ >= 4
+				#define KLAYGE_COMPILER_VERSION 34
+			#elif __clang_minor__ >= 3
+				#define KLAYGE_COMPILER_VERSION 33
+			#elif __clang_minor__ >= 2
+				#define KLAYGE_COMPILER_VERSION 32
+			#elif __clang_minor__ >= 1
+				#define KLAYGE_COMPILER_VERSION 31
+			#elif __clang_minor__ >= 0
+				#define KLAYGE_COMPILER_VERSION 30
 			#endif
-			#if __GLIBCXX__ >= 20090421
-				#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
-				#ifdef _GLIBCXX_HAS_GTHREADS
-					#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-					#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+
+			#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
+			#define KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
+			#define KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
+			#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
+			#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
+			#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
+			#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
+			#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
+			#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+			#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
+			#if __clang_minor__ >= 1
+				#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+			#endif
+
+			#ifdef __GLIBCXX__
+				#if __GLIBCXX__ >= 20080306
+					#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+				#endif
+				#if __GLIBCXX__ >= 20090421
+					#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+					#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
+					#ifdef _GLIBCXX_HAS_GTHREADS
+						#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+						#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+					#endif
+				#endif
+				#if __GLIBCXX__ >= 20140422
+					#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 				#endif
 			#endif
-			#if __GLIBCXX__ >= 20140422
-				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-			#endif
+		#else
+			#error Unknown compiler.
 		#endif
-	#else
-		#error Unknown compiler.
 	#endif
 #elif defined(__GNUC__)
 	// GNU C++
+
+	#define KLAYGE_COMPILER_GCC
 
 	#include <bits/c++config.h>
 	#ifdef _GLIBCXX_USE_FLOAT128
@@ -119,8 +172,6 @@
 	#ifdef _GLIBCXX_USE_INT128
 		#undef _GLIBCXX_USE_INT128
 	#endif
-
-	#define KLAYGE_COMPILER_GCC
 
 	#if __GNUC__ >= 4
 		#if __GNUC_MINOR__ >= 9
@@ -282,6 +333,14 @@
 		#define KLAYGE_PLATFORM_WIN32
 	#endif
 
+	// Shut min/max in windows.h
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
+	#ifndef WINDOWS_LEAN_AND_MEAN
+		#define WINDOWS_LEAN_AND_MEAN
+	#endif
+
 	// Forces all boost's libraries to be linked as dll
 	#ifndef BOOST_ALL_DYN_LINK
 		#define BOOST_ALL_DYN_LINK
@@ -315,14 +374,6 @@
 	#else
 		#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	#endif
-
-	// Shut min/max in windows.h
-	#ifndef NOMINMAX
-		#define NOMINMAX
-	#endif
-	#ifndef WINDOWS_LEAN_AND_MEAN
-		#define WINDOWS_LEAN_AND_MEAN
-	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID
 	#define KLAYGE_COMPILER_NAME gcc
@@ -332,6 +383,12 @@
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
 	#define KLAYGE_COMPILER_NAME gcc
+#elif defined(__APPLE__)
+	#if defined(__MACH__)
+		#define KLAYGE_PLATFORM_DARWIN
+	#else
+		#define KLAYGE_PLATFORM_IOS
+	#endif
 #else
 	#error Unknown platform.
 #endif
