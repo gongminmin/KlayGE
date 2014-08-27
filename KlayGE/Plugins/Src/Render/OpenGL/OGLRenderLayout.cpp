@@ -86,14 +86,14 @@ namespace KlayGE
 				glVertexArrayVertexBuffer(vao, i, stream.GLvbo(), this->StartVertexLocation() * size, size);
 			}
 
-			uint8_t* elem_offset = nullptr;
+			uint32_t elem_offset = 0;
 			typedef KLAYGE_DECLTYPE(vertex_stream_fmt) VertexStreamFmtType;
 			KLAYGE_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					GLvoid* offset = static_cast<GLvoid*>(elem_offset + this->StartVertexLocation() * size);
+					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset + this->StartVertexLocation() * size);
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum type;
 					GLboolean normalized;
@@ -104,8 +104,7 @@ namespace KlayGE
 					stream.Active(use_vao_);
 					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 					{
-						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized,
-							reinterpret_cast<GLuint>(elem_offset));
+						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized, elem_offset);
 						glVertexArrayAttribBinding(vao, attr, i);
 						glEnableVertexArrayAttrib(vao, attr);
 					}
