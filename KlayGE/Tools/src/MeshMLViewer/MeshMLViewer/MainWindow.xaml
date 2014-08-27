@@ -89,25 +89,7 @@
                                             CanClose="False"
                                             AutoHideWidth="300">
                                 <xctk:PropertyGrid x:Name="properties" NameColumnWidth="110"
-                                           AutoGenerateProperties="False" PropertyValueChanged="PropertyGridValueChanged">
-                                    <xctk:PropertyGrid.PropertyDefinitions>
-                                        <xctk:PropertyDefinition TargetProperties="meshes" DisplayOrder="0"/>
-                                        <xctk:PropertyDefinition TargetProperties="vertex_streams" DisplayOrder="1"/>
-                                        <xctk:PropertyDefinition TargetProperties="ambient" DisplayOrder="2"/>
-                                        <xctk:PropertyDefinition TargetProperties="diffuse" DisplayOrder="3"/>
-                                        <xctk:PropertyDefinition TargetProperties="specular" DisplayOrder="4"/>
-                                        <xctk:PropertyDefinition TargetProperties="shininess" DisplayOrder="5"/>
-                                        <xctk:PropertyDefinition TargetProperties="emit" DisplayOrder="6"/>
-                                        <xctk:PropertyDefinition TargetProperties="opacity" DisplayOrder="7"/>
-                                        <xctk:PropertyDefinition TargetProperties="diffuse_tex" DisplayOrder="8"/>
-                                        <xctk:PropertyDefinition TargetProperties="specular_tex" DisplayOrder="9"/>
-                                        <xctk:PropertyDefinition TargetProperties="shininess_tex" DisplayOrder="10"/>
-                                        <xctk:PropertyDefinition TargetProperties="bump_tex" DisplayOrder="11"/>
-                                        <xctk:PropertyDefinition TargetProperties="height_tex" DisplayOrder="12"/>
-                                        <xctk:PropertyDefinition TargetProperties="emit_tex" DisplayOrder="13"/>
-                                        <xctk:PropertyDefinition TargetProperties="opacity_tex" DisplayOrder="14"/>
-                                    </xctk:PropertyGrid.PropertyDefinitions>
-                                </xctk:PropertyGrid>
+                                           PropertyValueChanged="PropertyGridValueChanged"/>
                             </xcad:LayoutAnchorable>
                         </xcad:LayoutAnchorablePane>
                     </xcad:LayoutPanel>

@@ -33,51 +33,66 @@ namespace MeshMLViewer
 			[Category("Meshes")]
 			[DisplayName("Meshes")]
 			[ItemsSource(typeof(MeshItemsSource))]
+			[PropertyOrder(0)]
 			public string meshes { get; set; }
 
 			[Category("Vertex Streams")]
 			[DisplayName("Vertex Streams")]
+			[PropertyOrder(1)]
 			public List<string> vertex_streams { get; set; }
 
 			[Category("Material")]
 			[DisplayName("Ambient")]
+			[PropertyOrder(2)]
 			public Color ambient { get; set; }
 			[Category("Material")]
 			[DisplayName("Diffuse")]
+			[PropertyOrder(3)]
 			public Color diffuse { get; set; }
 			[Category("Material")]
 			[DisplayName("Specular")]
+			[PropertyOrder(4)]
 			public Color specular { get; set; }
 			[Category("Material")]
 			[DisplayName("Shininess")]
+			[PropertyOrder(5)]
 			public float shininess { get; set; }
 			[Category("Material")]
 			[DisplayName("Emit")]
+			[PropertyOrder(6)]
 			public Color emit { get; set; }
 			[Category("Material")]
 			[DisplayName("Opacity")]
+			[PropertyOrder(7)]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
 			[DisplayName("Diffuse")]
+			[PropertyOrder(8)]
 			public string diffuse_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Specular")]
+			[PropertyOrder(9)]
 			public string specular_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Shininess")]
+			[PropertyOrder(10)]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Bump")]
+			[PropertyOrder(11)]
 			public string bump_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
+			[PropertyOrder(12)]
 			public string height_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emit")]
+			[PropertyOrder(13)]
 			public string emit_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Opacity")]
+			[PropertyOrder(14)]
 			public string opacity_tex { get; set; }
 		}
 
