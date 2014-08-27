@@ -41,19 +41,6 @@
 
 #include <C/LzmaLib.h>
 
-#ifdef KLAYGE_COMPILER_GCC
-	#define DLL_PREFIX "lib"
-#else
-	#define DLL_PREFIX ""
-#endif
-#ifdef KLAYGE_PLATFORM_WINDOWS
-	#define DLL_EXT_NAME "dll"
-#else
-	#define DLL_EXT_NAME "so"
-#endif
-
-#define DLL_SUFFIX KLAYGE_OUTPUT_SUFFIX "." DLL_EXT_NAME
-
 namespace KlayGE
 {
 	uint32_t const KFONT_VERSION = 2;
