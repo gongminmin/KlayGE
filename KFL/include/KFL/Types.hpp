@@ -379,7 +379,7 @@ private:
 	namespace KlayGE
 	{
 		using std::add_lvalue_reference;
-#if (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)
+#if ((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) || defined(KLAYGE_PLATFORM_DARWIN)
 		using std::is_trivially_destructible;
 #else
 		template <typename T>

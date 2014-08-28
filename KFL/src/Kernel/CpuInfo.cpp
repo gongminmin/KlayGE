@@ -528,6 +528,9 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
 			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
+#elif defined KLAYGE_PLATFORM_DARWIN
+		{
+			bool supported = false;
 #endif
 
 			if (supported)

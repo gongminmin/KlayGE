@@ -48,7 +48,7 @@
 
 	#if defined(__APPLE__)
 		#if __clang_major__ >= 6
-			if __clang_minor__ >= 0
+			#if __clang_minor__ >= 0
 				#define KLAYGE_COMPILER_VERSION 60
 			#endif
 		#elif __clang_major__ >= 5
@@ -57,7 +57,7 @@
 			#elif __clang_minor__ >= 0
 				#define KLAYGE_COMPILER_VERSION 50
 			#endif
-		#if __clang_major__ >= 4
+		#elif __clang_major__ >= 4
 			#if __clang_minor__ >= 2
 				#define KLAYGE_COMPILER_VERSION 42
 			#elif __clang_minor__ >= 1
@@ -386,10 +386,11 @@
 	#define KLAYGE_PLATFORM_LINUX
 	#define KLAYGE_COMPILER_NAME gcc
 #elif defined(__APPLE__)
-	#if defined(__MACH__)
-		#define KLAYGE_PLATFORM_DARWIN
-	#else
+	#include <TargetConditionals.h>
+	#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
 		#define KLAYGE_PLATFORM_IOS
+	#else
+		#define KLAYGE_PLATFORM_DARWIN
 	#endif
 #else
 	#error Unknown platform.
