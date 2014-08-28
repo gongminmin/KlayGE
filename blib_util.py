@@ -253,10 +253,12 @@ class build_info:
 			if "" == cfg:
 				cfg = ("Debug", "RelWithDebInfo")
 
+		multi_config = False
 		compilers = []
 		if "vc140" == compiler:
 			compiler_name = "vc"
 			compiler_version = 140
+			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
 					gen_name = "Visual Studio 14"
@@ -268,6 +270,7 @@ class build_info:
 		elif "vc120" == compiler:
 			compiler_name = "vc"
 			compiler_version = 120
+			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
 					gen_name = "Visual Studio 12"
@@ -279,6 +282,7 @@ class build_info:
 		elif "vc110" == compiler:
 			compiler_name = "vc"
 			compiler_version = 110
+			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
 					gen_name = "Visual Studio 11"
@@ -290,6 +294,7 @@ class build_info:
 		elif "vc100" == compiler:
 			compiler_name = "vc"
 			compiler_version = 100
+			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
 					gen_name = "Visual Studio 10"
@@ -299,6 +304,7 @@ class build_info:
 		elif "vc90" == compiler:
 			compiler_name = "vc"
 			compiler_version = 90
+			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
 					gen_name = "Visual Studio 9 2008"
@@ -312,6 +318,7 @@ class build_info:
 				gen_name = "MinGW Makefiles"
 			elif "darwin" == host_platform:
 				gen_name = "Xcode"
+				multi_config = True
 			else:
 				gen_name = "Unix Makefiles"
 			for arch in archs:
@@ -349,6 +356,7 @@ class build_info:
 
 		self.compiler_name = compiler_name
 		self.compiler_version = compiler_version
+		self.multi_config = multi_config;
 		self.compilers = compilers
 		self.cfg = cfg
 
@@ -370,6 +378,10 @@ class build_info:
 				proj_str = "/project %s" % proj_name
 			batch_cmd.add_command('@devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
 		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+		
+	def xcodebuild_add_build_command(self, batch_cmd, target_name, config):
+		batch_cmd.add_command('xcodebuild -target %s -configuration %s' % (target_name, config))
+		batch_cmd.add_command('if (($? != 0)); then exit 1; fi')
 		
 	def retrive_gcc_version(self):
 		if ("android" == self.target_platform):
@@ -433,16 +445,17 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
 
-	if "vc" == build_info.compiler_name:
-		if "x86" == compiler_info.arch:
-			vc_option = "x86"
-			vc_arch = "Win32"
-		elif "x64" == compiler_info.arch:
-			vc_option = "x86_amd64"
-			vc_arch = "x64"
-		elif "arm" == compiler_info.arch:
-			vc_option = "x86_arm"
-			vc_arch = "ARM"
+	if build_info.multi_config:
+		if "vc" == build_info.compiler_name:
+			if "x86" == compiler_info.arch:
+				vc_option = "x86"
+				vc_arch = "Win32"
+			elif "x64" == compiler_info.arch:
+				vc_option = "x86_amd64"
+				vc_arch = "x64"
+			elif "arm" == compiler_info.arch:
+				vc_option = "x86_arm"
+				vc_arch = "ARM"
 
 		if compiler_info.is_windows_runtime:
 			if compiler_info.is_windows_store:
@@ -463,11 +476,17 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			log_error("Config %s failed." % name)
 
 		build_cmd = batch_command(build_info.host_platform)
-		build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
+		if "vc" == build_info.compiler_name:
+			build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
 		for config in build_info.cfg:
-			build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
-			if need_install:
-				build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+			if "vc" == build_info.compiler_name:
+				build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
+				if need_install:
+					build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+			elif "clang" == build_info.compiler_name:
+				build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
+				if need_install:
+					build_info.xcodebuild_add_build_command(build_cmd, "install", config)
 		if build_cmd.execute() != 0:
 			log_error("Build %s failed." % name)
 
