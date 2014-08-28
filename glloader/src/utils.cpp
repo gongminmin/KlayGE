@@ -30,7 +30,7 @@
 #define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "glloader", __VA_ARGS__))
 #endif
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && defined(__MINGW32__))
 	#include <bits/c++config.h>
 	#ifdef _GLIBCXX_USE_FLOAT128
 		#undef _GLIBCXX_USE_FLOAT128
