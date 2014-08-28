@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.6)
 
 set(PY_VERSION_MAJOR 3)
 set(PY_VERSION_MINOR 4)
-set(PY_VERSION_PATCH 0)
+set(PY_VERSION_PATCH 1)
 
 project(Python C)
 

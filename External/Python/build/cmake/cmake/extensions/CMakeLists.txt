@@ -76,7 +76,7 @@ add_python_extension(termios REQUIRES UNIX SOURCES termios.c)
 # MacOSX-only extensions
 add_python_extension(_scproxy
     REQUIRES APPLE HAVE_LIBSYSTEMCONFIGURATION
-    SOURCES ${SRC_DIR}/Mac/Modules/_scproxy.c
+    SOURCES ${SRC_DIR}/Modules/_scproxy.c
     LIBRARIES ${HAVE_LIBSYSTEMCONFIGURATION}
 )
 
