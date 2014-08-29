@@ -26,7 +26,7 @@
 	#include <winsock.h>
 	#endif
 	typedef int socklen_t;
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#else
 	#include <sys/types.h>
 	#include <sys/socket.h>
 	#include <netinet/in.h>

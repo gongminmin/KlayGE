@@ -34,12 +34,10 @@
 #pragma warning(pop)
 #endif
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
-#else
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #include <agile.h>
-#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -62,7 +60,6 @@ namespace KlayGE
 		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		~Window();
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void Recreate();
 
@@ -70,14 +67,13 @@ namespace KlayGE
 		{
 			return wnd_;
 		}
-#else
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		void SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow> const & window);
 
 		Platform::Agile<Windows::UI::Core::CoreWindow> GetWindow() const
 		{
 			return wnd_;
 		}
-#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -151,12 +147,10 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, bool active)> SizeEvent;
 		typedef boost::signals2::signal<void(Window const & wnd)> SetCursorEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		typedef boost::signals2::signal<void(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)> TouchEvent;
-#endif
 #endif
 #endif
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
@@ -203,7 +197,6 @@ namespace KlayGE
 		{
 			return char_event_;
 		}
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent& OnRawInput()
 		{
@@ -214,7 +207,6 @@ namespace KlayGE
 		{
 			return touch_event_;
 		}
-#endif
 #endif
 #endif
 		PointerDownEvent& OnPointerDown()
@@ -280,12 +272,10 @@ namespace KlayGE
 		SizeEvent size_event_;
 		SetCursorEvent set_cursor_event_;
 		CharEvent char_event_;
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
 		TouchEvent touch_event_;
-#endif
 #endif
 #endif
 		PointerDownEvent pointer_down_event_;
@@ -304,14 +294,12 @@ namespace KlayGE
 #endif
 		CloseEvent close_event_;
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
 			WPARAM wParam, LPARAM lParam);
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
 		void MsgProc(XEvent const & event);

@@ -356,7 +356,10 @@ SOURCE_GROUP("UI System\\Effect Files" FILES ${UI_EFFECT_FILES})
 
 SET(APP_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/App3D.cpp
-	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/Window.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/WindowAndroid.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/WindowLinux.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/WindowWin.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/AppLayer/WindowWinRT.cpp
 )
 
 SET(APP_HEADER_FILES

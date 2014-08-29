@@ -188,9 +188,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->socket_ != INVALID_SOCKET);
 
-#if defined KLAYGE_PLATFORM_WINDOWS
+#ifdef KLAYGE_PLATFORM_WINDOWS
 		Verify(ioctlsocket(this->socket_, command, reinterpret_cast<u_long*>(argument)) != SOCKET_ERROR);
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#else
 		Verify(ioctl(this->socket_, command, argument) != SOCKET_ERROR);
 #endif
 	}
