@@ -438,27 +438,30 @@ namespace KlayGE
 #else
 				HMODULE dll = ::GetModuleHandle(TEXT("atidxx32.dll"));
 #endif
-				PFNAmdDxExtCreate11 AmdDxExtCreate11 = reinterpret_cast<PFNAmdDxExtCreate11>(::GetProcAddress(dll, "AmdDxExtCreate11"));
-				if (AmdDxExtCreate11 != nullptr)
+				if (dll != nullptr)
 				{
-					IAmdDxExt* amd_dx_ext;
-					HRESULT hr = AmdDxExtCreate11(d3d_device.get(), &amd_dx_ext);
-					if (SUCCEEDED(hr))
+					PFNAmdDxExtCreate11 AmdDxExtCreate11 = reinterpret_cast<PFNAmdDxExtCreate11>(::GetProcAddress(dll, "AmdDxExtCreate11"));
+					if (AmdDxExtCreate11 != nullptr)
 					{
-						AmdDxExtVersion ext_version;
-						hr = amd_dx_ext->GetVersion(&ext_version);
+						IAmdDxExt* amd_dx_ext;
+						HRESULT hr = AmdDxExtCreate11(d3d_device.get(), &amd_dx_ext);
 						if (SUCCEEDED(hr))
 						{
-							IAmdDxExtInterface* adti = amd_dx_ext->GetExtInterface(AmdDxExtQuadBufferStereoID);
-							IAmdDxExtQuadBufferStereo* stereo = static_cast<IAmdDxExtQuadBufferStereo*>(adti);
-							if (stereo != nullptr)
+							AmdDxExtVersion ext_version;
+							hr = amd_dx_ext->GetVersion(&ext_version);
+							if (SUCCEEDED(hr))
 							{
-								stereo_amd_qb_ext_ = MakeCOMPtr(stereo);
-								stereo_amd_qb_ext_->EnableQuadBufferStereo(true);
+								IAmdDxExtInterface* adti = amd_dx_ext->GetExtInterface(AmdDxExtQuadBufferStereoID);
+								IAmdDxExtQuadBufferStereo* stereo = static_cast<IAmdDxExtQuadBufferStereo*>(adti);
+								if (stereo != nullptr)
+								{
+									stereo_amd_qb_ext_ = MakeCOMPtr(stereo);
+									stereo_amd_qb_ext_->EnableQuadBufferStereo(true);
+								}
 							}
 						}
+						amd_dx_ext->Release();
 					}
-					amd_dx_ext->Release();
 				}
 			}
 		}

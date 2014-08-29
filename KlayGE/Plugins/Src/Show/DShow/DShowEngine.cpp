@@ -35,9 +35,10 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DShowEngine::DShowEngine()
 	{
-		::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
-
-		this->Init();
+		if (SUCCEEDED(::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED)))
+		{
+			this->Init();
+		}
 	}
 
 	// Îö¹¹º¯Êý

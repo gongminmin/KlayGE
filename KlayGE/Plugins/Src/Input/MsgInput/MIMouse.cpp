@@ -50,7 +50,7 @@ namespace KlayGE
 		buttons_state_.fill(false);
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		UINT size;
+		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, nullptr, &size))
 		{
 			std::vector<uint8_t> buf(size);

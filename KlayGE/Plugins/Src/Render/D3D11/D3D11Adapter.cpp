@@ -68,7 +68,7 @@ namespace KlayGE
 		formats.push_back(DXGI_FORMAT_R10G10B10A2_UNORM);
 
 		UINT i = 0;
-		IDXGIOutput* output;
+		IDXGIOutput* output = nullptr;
 		while (adapter_->EnumOutputs(i, &output) != DXGI_ERROR_NOT_FOUND)
 		{
 			if (output != nullptr)
@@ -99,6 +99,7 @@ namespace KlayGE
 				}
 
 				output->Release();
+				output = nullptr;
 			}
 
 			++ i;

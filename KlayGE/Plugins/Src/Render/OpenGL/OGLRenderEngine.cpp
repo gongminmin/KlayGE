@@ -89,6 +89,9 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		mod_opengl32_ = ::LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
+#ifdef KLAYGE_COMPILER_MSVC
+		__assume(mod_opengl32_ != nullptr);
+#endif
 		DynamicWglCreateContext_ = (wglCreateContextFUNC)::GetProcAddress(mod_opengl32_, "wglCreateContext");
 		DynamicWglDeleteContext_ = (wglDeleteContextFUNC)::GetProcAddress(mod_opengl32_, "wglDeleteContext");
 		DynamicWglMakeCurrent_ = (wglMakeCurrentFUNC)::GetProcAddress(mod_opengl32_, "wglMakeCurrent");

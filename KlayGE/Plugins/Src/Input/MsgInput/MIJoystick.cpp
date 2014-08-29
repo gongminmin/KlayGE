@@ -51,7 +51,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
 
-		UINT size;
+		UINT size = 0;
 		if (0 == ::GetRawInputDeviceInfo(device, RIDI_PREPARSEDDATA, nullptr, &size))
 		{
 			std::vector<uint8_t> buf(size);
@@ -90,7 +90,7 @@ namespace KlayGE
 		{
 			MsgInputEngine const & mie = *checked_cast<MsgInputEngine const *>(&Context::Instance().InputFactoryInstance().InputEngineInstance());
 
-			UINT size;
+			UINT size = 0;
 			if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_PREPARSEDDATA, nullptr, &size))
 			{
 				std::vector<uint8_t> buf(size);

@@ -123,6 +123,9 @@ namespace
 		DXBC2GLSLIniter()
 		{
 			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
+#ifdef KLAYGE_COMPILER_MSVC
+			__assume(mod_d3dcompiler_ != nullptr);
+#endif
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 
 			if (glloader_GL_VERSION_4_4())

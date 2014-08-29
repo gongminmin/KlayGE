@@ -110,7 +110,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd = main_wnd->HWnd();
 			
-		UINT devices;
+		UINT devices = 0;
 		if (::GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
 		{
 			THR(errc::function_not_supported);
@@ -144,7 +144,7 @@ namespace KlayGE
 
 			case RIM_TYPEHID:
 				{
-					UINT size;
+					UINT size = 0;
 					if (0 == ::GetRawInputDeviceInfo(raw_input_devices[i].hDevice, RIDI_DEVICEINFO, nullptr, &size))
 					{
 						std::vector<uint8_t> buf(size);
@@ -252,7 +252,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, HRAWINPUT ri)
 	{
-		UINT size;
+		UINT size = 0;
 		if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 		{
 			std::vector<uint8_t> data(size);
