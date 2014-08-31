@@ -100,6 +100,14 @@ namespace KlayGE
 				glDisableVertexAttribArray(i);
 			}
 		}
+
+		OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&re);
+		if (ogl_re.HackForAngle() && this->UseIndices())
+		{
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
+			stream.Active(use_vao_);
+		}
 	}
 
 	void OGLESRenderLayout::UnbindVertexStreams(ShaderObjectPtr const & so) const
@@ -143,7 +151,8 @@ namespace KlayGE
 				glBindVertexArray(vao);
 			}
 
-			if (this->UseIndices())
+			OGLESRenderEngine& ogl_re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (!ogl_re.HackForAngle() && this->UseIndices())
 			{
 				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
