@@ -688,8 +688,6 @@ namespace KlayGE
 		num_primitives_rendered_ += re.NumPrimitivesJustRendered();
 		num_vertices_rendered_ += re.NumVerticesJustRendered();
 
-		app.RenderOver();
-
 		urt_ = 0;
 	}
 

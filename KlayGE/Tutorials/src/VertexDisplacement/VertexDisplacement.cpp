@@ -122,7 +122,7 @@ bool VertexDisplacement::ConfirmDevice() const
 	return true;
 }
 
-void VertexDisplacement::InitObjects()
+void VertexDisplacement::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

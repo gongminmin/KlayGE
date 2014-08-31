@@ -589,7 +589,7 @@ bool ShadowCubeMap::ConfirmDevice() const
 	return true;
 }
 
-void ShadowCubeMap::InitObjects()
+void ShadowCubeMap::OnCreate()
 {
 	loading_percentage_ = 0;
 	lamp_tl_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);

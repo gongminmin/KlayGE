@@ -29,7 +29,7 @@ public:
 	{
 	}
 
-	void InitObjects()
+	void OnCreate()
 	{
 		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
 

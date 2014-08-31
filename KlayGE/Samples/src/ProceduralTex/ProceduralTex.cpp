@@ -195,7 +195,7 @@ bool ProceduralTexApp::ConfirmDevice() const
 	return true;
 }
 
-void ProceduralTexApp::InitObjects()
+void ProceduralTexApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 	UIManager::Instance().Load(ResLoader::Instance().Open("ProceduralTex.uiml"));

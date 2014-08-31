@@ -23,7 +23,7 @@ public:
 	TutorFramework();
 
 protected:
-	virtual void InitObjects();
+	virtual void OnCreate();
 
 private:
 	virtual void DoUpdateOverlay();
@@ -63,7 +63,7 @@ TutorFramework::TutorFramework()
 {
 }
 
-void TutorFramework::InitObjects()
+void TutorFramework::OnCreate()
 {
 	font_ = KlayGE::SyncLoadFont("gkai00mp.kfont");
 

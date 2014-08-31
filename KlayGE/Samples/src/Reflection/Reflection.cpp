@@ -211,7 +211,7 @@ bool ScreenSpaceReflectionApp::ConfirmDevice() const
 	return true;
 }
 
-void ScreenSpaceReflectionApp::InitObjects()
+void ScreenSpaceReflectionApp::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

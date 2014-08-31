@@ -154,7 +154,7 @@ bool VideoTextureApp::ConfirmDevice() const
 	return true;
 }
 
-void VideoTextureApp::InitObjects()
+void VideoTextureApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

@@ -119,7 +119,7 @@ bool Fractal::ConfirmDevice() const
 	return true;
 }
 
-void Fractal::InitObjects()
+void Fractal::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

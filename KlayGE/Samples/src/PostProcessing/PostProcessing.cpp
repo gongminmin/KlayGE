@@ -95,7 +95,7 @@ bool PostProcessingApp::ConfirmDevice() const
 	return true;
 }
 
-void PostProcessingApp::InitObjects()
+void PostProcessingApp::OnCreate()
 {
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);

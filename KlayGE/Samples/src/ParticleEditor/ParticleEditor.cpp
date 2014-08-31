@@ -165,7 +165,7 @@ bool ParticleEditorApp::ConfirmDevice() const
 	return true;
 }
 
-void ParticleEditorApp::InitObjects()
+void ParticleEditorApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

@@ -793,7 +793,7 @@ bool OceanApp::ConfirmDevice() const
 	return true;
 }
 
-void OceanApp::InitObjects()
+void OceanApp::OnCreate()
 {
 	this->LookAt(float3(-3455.78f, 23.4f, 8133.55f), float3(-3456.18f, 23.4f, 8134.49f));
 	this->Proj(0.1f, 5000);

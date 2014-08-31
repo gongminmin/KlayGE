@@ -497,7 +497,7 @@ bool EnvLightingApp::ConfirmDevice() const
 	return true;
 }
 
-void EnvLightingApp::InitObjects()
+void EnvLightingApp::OnCreate()
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 

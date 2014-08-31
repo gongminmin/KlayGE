@@ -117,7 +117,7 @@ bool SubSurfaceApp::ConfirmDevice() const
 	return true;
 }
 
-void SubSurfaceApp::InitObjects()
+void SubSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

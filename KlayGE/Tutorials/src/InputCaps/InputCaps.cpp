@@ -269,7 +269,7 @@ bool InputCaps::ConfirmDevice() const
 	return true;
 }
 
-void InputCaps::InitObjects()
+void InputCaps::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

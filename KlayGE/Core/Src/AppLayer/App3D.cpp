@@ -200,7 +200,7 @@ namespace KlayGE
 
 		create_task([this, deferral]()
 		{
-			// Insert your code here.
+			app_->Suspend();
 
 			deferral->Complete();
 		});
@@ -208,6 +208,7 @@ namespace KlayGE
 
 	void MetroFramework::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 	{
+		app_->Resume();
 	}
 
 	void MetroFramework::BindAppFramework(App3DFramework* app)
@@ -395,13 +396,12 @@ namespace KlayGE
 			Context::Instance().DeferredRenderingLayerInstance(MakeSharedPtr<DeferredRenderingLayer>());
 		}
 
-		this->InitObjects();
+		this->OnCreate();
 		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 	}
 
 	void App3DFramework::Destroy()
 	{
-		this->DelObjects();
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().DestroyRenderWindow();
 
 		main_wnd_.reset();
@@ -410,6 +410,18 @@ namespace KlayGE
 		PerfProfiler::Destroy();
 		UIManager::Destroy();
 		Context::Destroy();
+	}
+
+	void App3DFramework::Suspend()
+	{
+		Context::Instance().Suspend();
+		this->OnSuspend();
+	}
+
+	void App3DFramework::Resume()
+	{
+		Context::Instance().Resume();
+		this->OnResume();
 	}
 
 	void App3DFramework::Refresh()
@@ -528,7 +540,7 @@ namespace KlayGE
 		}
 #endif
 
-		this->DelObjects();
+		this->OnDestroy();
 	}
 
 	// 获取当前摄像机

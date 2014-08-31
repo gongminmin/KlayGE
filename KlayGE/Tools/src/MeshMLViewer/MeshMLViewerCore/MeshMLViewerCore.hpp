@@ -59,8 +59,8 @@ namespace KlayGE
 		void KeyPress(int key);
 
 	private:
-		virtual void InitObjects() KLAYGE_OVERRIDE;
-		virtual void DelObjects() KLAYGE_OVERRIDE;
+		virtual void OnCreate() KLAYGE_OVERRIDE;
+		virtual void OnDestroy() KLAYGE_OVERRIDE;
 		virtual void OnResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
 		virtual void DoUpdateOverlay() KLAYGE_OVERRIDE;
 		virtual uint32_t DoUpdate(uint32_t pass) KLAYGE_OVERRIDE;

@@ -735,7 +735,7 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 	return true;
 }
 
-void MotionBlurDoFApp::InitObjects()
+void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
 	model_instance_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());

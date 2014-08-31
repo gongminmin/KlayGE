@@ -136,6 +136,14 @@ namespace KlayGE
 		context_instance_.reset();
 	}
 
+	void Context::Suspend()
+	{
+	}
+
+	void Context::Resume()
+	{
+	}
+
 	void Context::LoadCfg(std::string const & cfg_file)
 	{
 		int width = 800;

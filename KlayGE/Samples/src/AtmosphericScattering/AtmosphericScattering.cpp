@@ -169,7 +169,7 @@ bool AtmosphericScatteringApp::ConfirmDevice() const
 	return true;
 }
 
-void AtmosphericScatteringApp::InitObjects()
+void AtmosphericScatteringApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

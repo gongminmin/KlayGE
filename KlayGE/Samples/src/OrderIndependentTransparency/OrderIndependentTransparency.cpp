@@ -460,7 +460,7 @@ bool OrderIndependentTransparencyApp::ConfirmDevice() const
 	return true;
 }
 
-void OrderIndependentTransparencyApp::InitObjects()
+void OrderIndependentTransparencyApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

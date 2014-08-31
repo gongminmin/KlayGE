@@ -13,7 +13,7 @@ public:
 	bool ConfirmDevice() const;
 
 private:
-	void InitObjects();
+	void OnCreate();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);

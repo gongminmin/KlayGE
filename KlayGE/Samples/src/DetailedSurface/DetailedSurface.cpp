@@ -441,7 +441,7 @@ bool DetailedSurfaceApp::ConfirmDevice() const
 	return true;
 }
 
-void DetailedSurfaceApp::InitObjects()
+void DetailedSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 	UIManager::Instance().Load(ResLoader::Instance().Open("DetailedSurface.uiml"));

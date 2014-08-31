@@ -743,7 +743,7 @@ bool GPUParticleSystemApp::ConfirmDevice() const
 	return true;
 }
 
-void GPUParticleSystemApp::InitObjects()
+void GPUParticleSystemApp::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();

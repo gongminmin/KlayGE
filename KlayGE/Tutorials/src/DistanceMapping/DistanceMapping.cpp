@@ -268,7 +268,7 @@ bool DistanceMapping::ConfirmDevice() const
 	return true;
 }
 
-void DistanceMapping::InitObjects()
+void DistanceMapping::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

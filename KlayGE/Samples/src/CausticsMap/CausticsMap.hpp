@@ -59,7 +59,7 @@ public:
 	}
 
 private:
-	void InitObjects();
+	void OnCreate();
 	void InitUI();
 	void InitBuffer();
 	void InitCubeSM();

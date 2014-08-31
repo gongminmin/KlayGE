@@ -877,7 +877,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	}
 }
 
-void ScenePlayerApp::InitObjects()
+void ScenePlayerApp::OnCreate()
 {
 	this->LoadScene("DeferredRendering.scene");
 

@@ -81,7 +81,7 @@ bool TextApp::ConfirmDevice() const
 	return true;
 }
 
-void TextApp::InitObjects()
+void TextApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

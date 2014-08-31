@@ -67,6 +67,8 @@ namespace KlayGE
 
 		static Context& Instance();
 		static void Destroy();
+		void Suspend();
+		void Resume();
 		
 #ifdef KLAYGE_PLATFORM_ANDROID
 		android_app* AppState() const

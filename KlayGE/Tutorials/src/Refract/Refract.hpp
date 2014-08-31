@@ -13,7 +13,7 @@ public:
 	bool ConfirmDevice() const;
 
 private:
-	void InitObjects();
+	void OnCreate();
 	void DoUpdateOverlay();
 	KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);

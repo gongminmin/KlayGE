@@ -265,7 +265,7 @@ namespace KlayGE
 		update_selective_buffer_ = true;
 	}
 
-	void MeshMLViewerCore::InitObjects()
+	void MeshMLViewerCore::OnCreate()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -338,7 +338,7 @@ namespace KlayGE
 		selective_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 
-	void MeshMLViewerCore::DelObjects()
+	void MeshMLViewerCore::OnDestroy()
 	{
 		selective_fb_.reset();
 		selective_tex_.reset();

@@ -26,7 +26,7 @@ public:
 	virtual bool ConfirmDevice() const KLAYGE_OVERRIDE;
 
 private:
-	virtual void InitObjects() KLAYGE_OVERRIDE;
+	virtual void OnCreate() KLAYGE_OVERRIDE;
 	virtual void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height) KLAYGE_OVERRIDE;
 	virtual void DoUpdateOverlay();
 	virtual KlayGE::uint32_t DoUpdate(KlayGE::uint32_t pass);

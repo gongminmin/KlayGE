@@ -309,7 +309,7 @@ bool JudaTexViewer::ConfirmDevice()
 	return true;
 }
 
-void JudaTexViewer::InitObjects()
+void JudaTexViewer::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 

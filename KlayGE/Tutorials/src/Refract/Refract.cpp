@@ -182,7 +182,7 @@ bool Refract::ConfirmDevice() const
 	return true;
 }
 
-void Refract::InitObjects()
+void Refract::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 

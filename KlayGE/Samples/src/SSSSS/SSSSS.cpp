@@ -76,7 +76,7 @@ bool SSSSSApp::ConfirmDevice() const
 	return true;
 }
 
-void SSSSSApp::InitObjects()
+void SSSSSApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 	  

@@ -600,7 +600,7 @@ bool CausticsMapApp::ConfirmDevice() const
 	return true;
 }
 
-void CausticsMapApp::InitObjects()
+void CausticsMapApp::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

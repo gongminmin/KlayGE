@@ -44,9 +44,12 @@ namespace KlayGE
 	// 一个用于创建3D应用程序框架的基类。建立一个3D应用程序需要继承这个类，
 	//			然后重载以下函数:
 	//
-	//			InitObjects()			- 初始化3D设备
-	//			Update()				- 刷新场景
-	//			DelObjects()			- 清除3D场景
+	//			OnCreate()				- Called when the app is creating.
+	//			OnDestroy()				- Called when the app is destroying.
+	//			OnSuspend()				- Called when the app is suspending
+	//			OnResume()				- Called when the app is resuming.
+	//			DoUpdate()				- 刷新场景
+	//			DoUpdateOverlay()		- 刷新Overlay物体
 	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API App3DFramework
 	{
@@ -71,8 +74,10 @@ namespace KlayGE
 		App3DFramework(std::string const & name, void* native_wnd);
 		virtual ~App3DFramework();
 
-		virtual void Create();
-		virtual void Destroy();
+		void Create();
+		void Destroy();
+		void Suspend();
+		void Resume();
 		void Refresh();
 
 		std::string const & Name() const
@@ -110,22 +115,23 @@ namespace KlayGE
 		void Proj(float nearPlane, float farPlane);
 
 	protected:
-		virtual void InitObjects()
-		{
-		}
-
 		uint32_t Update(uint32_t pass);
 		void UpdateStats();
 
-		virtual void RenderOver()
-		{
-		}
-
-		virtual void DelObjects()
-		{
-		}
-
 	private:
+		virtual void OnCreate()
+		{
+		}
+		virtual void OnDestroy()
+		{
+		}
+		virtual void OnSuspend()
+		{
+		}
+		virtual void OnResume()
+		{
+		}
+
 		virtual void DoUpdateOverlay() = 0;
 		virtual uint32_t DoUpdate(uint32_t pass) = 0;
 

@@ -16,7 +16,7 @@ public:
 	bool ConfirmDevice();
 
 private:
-	void InitObjects();
+	void OnCreate();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void OpenHandler(KlayGE::UIButton const & sender);
