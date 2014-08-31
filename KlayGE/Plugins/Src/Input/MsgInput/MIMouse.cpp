@@ -75,7 +75,7 @@ namespace KlayGE
 	void MsgInputMouse::OnRawInput(RAWINPUT const & ri)
 	{
 		if ((RIM_TYPEMOUSE == ri.header.dwType) && (ri.header.hDevice == device_)
-			&& (hwnd_ == ::GetFocus()))
+			&& (hwnd_ == ::GetForegroundWindow()))
 		{
 			for (int i = 0; i < 5; ++ i)
 			{
