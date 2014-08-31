@@ -31,6 +31,7 @@
 #include <KFL/KFL.hpp>
 #include <KFL/DllLoader.hpp>
 #include <KFL/Thread.hpp>
+#include <KFL/ResIdentifier.hpp>
 #include <kfont/kfont.hpp>
 
 #include <fstream>
@@ -123,16 +124,19 @@ namespace KlayGE
 
 	bool KFont::Load(std::string const & file_name)
 	{
-		std::ifstream kfont_input(file_name.c_str(), std::ios_base::binary | std::ios_base::in);
+		ResIdentifierPtr kfont_input = MakeSharedPtr<ResIdentifier>(file_name, 0,
+			MakeSharedPtr<std::ifstream>(file_name.c_str(), std::ios_base::binary | std::ios_base::in));
 		return this->Load(kfont_input);
 	}
 
-	bool KFont::Load(std::istream& kfont_input)
+	bool KFont::Load(ResIdentifierPtr const & kfont_input)
 	{
 		if (kfont_input)
 		{
+			kfont_input_ = kfont_input;
+
 			kfont_header header;
-			kfont_input.read(reinterpret_cast<char*>(&header), sizeof(header));
+			kfont_input->read(&header, sizeof(header));
 			header.fourcc = LE2Native(header.fourcc);
 			header.version = LE2Native(header.version);
 			header.start_ptr = LE2Native(header.start_ptr);
@@ -147,12 +151,12 @@ namespace KlayGE
 				dist_base_ = header.base;
 				dist_scale_ = header.scale;
 
-				kfont_input.seekg(header.start_ptr, std::ios_base::beg);
+				kfont_input->seekg(header.start_ptr, std::ios_base::beg);
 
 				std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
-				kfont_input.read(reinterpret_cast<char*>(&temp_char_index[0]), static_cast<std::streamsize>(temp_char_index.size() * sizeof(temp_char_index[0])));
+				kfont_input->read(&temp_char_index[0], temp_char_index.size() * sizeof(temp_char_index[0]));
 				std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
-				kfont_input.read(reinterpret_cast<char*>(&temp_char_advance[0]), static_cast<std::streamsize>(temp_char_advance.size() * sizeof(temp_char_advance[0])));
+				kfont_input->read(&temp_char_advance[0], temp_char_advance.size() * sizeof(temp_char_advance[0]));
 
 				typedef KLAYGE_DECLTYPE(temp_char_index) TCIType;
 				KLAYGE_FOREACH(TCIType::reference ci, temp_char_index)
@@ -180,7 +184,7 @@ namespace KlayGE
 				}
 
 				char_info_.resize(header.non_empty_chars);
-				kfont_input.read(reinterpret_cast<char*>(&char_info_[0]), static_cast<std::streamsize>(char_info_.size() * sizeof(char_info_[0])));
+				kfont_input->read(&char_info_[0], char_info_.size() * sizeof(char_info_[0]));
 
 				typedef KLAYGE_DECLTYPE(char_info_) CIType;
 				KLAYGE_FOREACH(CIType::reference ci, char_info_)
@@ -192,21 +196,23 @@ namespace KlayGE
 				}
 
 				distances_addr_.resize(header.non_empty_chars + 1);
+				distances_lzma_start_ = kfont_input->tellg();
+				size_t distances_lzma_size = 0;
 
 				std::vector<uint8_t> dist;
 				for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
 				{
-					distances_addr_[i] = distances_lzma_.size();
+					distances_addr_[i] = distances_lzma_size;
 
 					uint64_t len;
-					kfont_input.read(reinterpret_cast<char*>(&len), sizeof(len));
+					kfont_input->read(&len, sizeof(len));
 					len = LE2Native(len);
-					distances_lzma_.resize(static_cast<size_t>(distances_lzma_.size() + len));
+					distances_lzma_size += len;
 
-					kfont_input.read(reinterpret_cast<char*>(&distances_lzma_[distances_addr_[i]]), static_cast<size_t>(len));
+					kfont_input->seekg(len, std::ios_base::cur);
 				}
 
-				distances_addr_[header.non_empty_chars] = distances_lzma_.size();
+				distances_addr_[header.non_empty_chars] = distances_lzma_size;
 
 				return true;
 			}
@@ -357,12 +363,11 @@ namespace KlayGE
 	{
 		std::vector<uint8_t> decoded(char_size_ * char_size_);
 
-		uint8_t const * input;
 		uint32_t size;
-		this->GetLZMADistanceData(input, size, index);
+		this->GetLZMADistanceData(nullptr, size, index);
 
 		std::vector<uint8_t> in_data(size);
-		std::memcpy(&in_data[0], input, static_cast<std::streamsize>(in_data.size()));
+		this->GetLZMADistanceData(&in_data[0], size, index);
 
 		SizeT s_out_len = static_cast<SizeT>(decoded.size());
 
@@ -379,10 +384,22 @@ namespace KlayGE
 		}
 	}
 
-	void KFont::GetLZMADistanceData(uint8_t const *& p, uint32_t& size, int32_t index) const
+	void KFont::GetLZMADistanceData(uint8_t* p, uint32_t& size, int32_t index) const
 	{
-		p = &distances_lzma_[distances_addr_[index]];
 		size = static_cast<uint32_t>(distances_addr_[index + 1] - distances_addr_[index]);
+		if (p != nullptr)
+		{
+			if (kfont_input_)
+			{
+				kfont_input_->seekg(distances_lzma_start_ + (index + 1) * sizeof(uint64_t) + distances_addr_[index],
+					std::ios_base::beg);
+				kfont_input_->read(p, size);
+			}
+			else
+			{
+				memcpy(p, &distances_lzma_[distances_addr_[index]], size);
+			}
+		}
 	}
 
 	void KFont::CharSize(uint32_t size)

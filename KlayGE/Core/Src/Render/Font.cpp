@@ -774,7 +774,7 @@ namespace
 		void SubThreadStage()
 		{
 			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_desc_.res_name);
-			font_desc_.kfont_loader->Load(kfont_input->input_stream());
+			font_desc_.kfont_loader->Load(kfont_input);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();

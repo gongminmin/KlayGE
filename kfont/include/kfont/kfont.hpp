@@ -96,7 +96,7 @@ namespace KlayGE
 		}
 		
 		bool Load(std::string const & file_name);
-		bool Load(std::istream& kfont_input);
+		bool Load(ResIdentifierPtr const & kfont_input);
 		bool Save(std::string const & file_name);
 
 		uint32_t CharSize() const;
@@ -109,7 +109,7 @@ namespace KlayGE
 
 		font_info const & CharInfo(int32_t index) const;
 		void GetDistanceData(uint8_t* p, uint32_t pitch, int32_t index) const;
-		void GetLZMADistanceData(uint8_t const *& p, uint32_t& size, int32_t index) const;
+		void GetLZMADistanceData(uint8_t* p, uint32_t& size, int32_t index) const;
 
 		void CharSize(uint32_t size);
 		void DistBase(int16_t base);
@@ -126,6 +126,8 @@ namespace KlayGE
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;
+		ResIdentifierPtr kfont_input_;
+		int64_t distances_lzma_start_;
 	};
 }
 
