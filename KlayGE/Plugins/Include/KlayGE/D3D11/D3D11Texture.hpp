@@ -132,13 +132,14 @@ namespace KlayGE
 			return d3dTexture1D_;
 		}
 
+		virtual void OfferHWResource() KLAYGE_OVERRIDE;
+		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+
 	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t x_offset,
 			void*& data);
 		void Unmap1D(uint32_t array_index, uint32_t level);
-
-		void UpdateParams();
 
 	private:
 		D3D11_TEXTURE1D_DESC desc_;
@@ -181,13 +182,14 @@ namespace KlayGE
 			return d3dTexture2D_;
 		}
 
+		virtual void OfferHWResource() KLAYGE_OVERRIDE;
+		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+
 	private:
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t x_offset, uint32_t y_offset,
 			void*& data, uint32_t& row_pitch);
 		void Unmap2D(uint32_t array_index, uint32_t level);
-
-		void UpdateParams();
 
 	private:
 		D3D11_TEXTURE2D_DESC desc_;
@@ -230,14 +232,15 @@ namespace KlayGE
 			return d3dTexture3D_;
 		}
 
+		virtual void OfferHWResource() KLAYGE_OVERRIDE;
+		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+
 	private:
 		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t depth,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch);
 		void Unmap3D(uint32_t array_index, uint32_t level);
-
-		void UpdateParams();
 
 	private:
 		D3D11_TEXTURE3D_DESC desc_;
@@ -286,13 +289,14 @@ namespace KlayGE
 			return d3dTextureCube_;
 		}
 
+		virtual void OfferHWResource() KLAYGE_OVERRIDE;
+		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+
 	private:
 		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
 			uint32_t width, uint32_t height, uint32_t x_offset, uint32_t y_offset,
 			void*& data, uint32_t& row_pitch);
 		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
-
-		void UpdateParams();
 
 	private:
 		D3D11_TEXTURE2D_DESC desc_;

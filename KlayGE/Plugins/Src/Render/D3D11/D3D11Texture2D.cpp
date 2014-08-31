@@ -82,8 +82,16 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
-		widths_.assign(1, width);
-		heights_.assign(1, height);
+
+		widths_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
+		widths_[0] = width;
+		heights_[0] = height;
+		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
+		{
+			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
+			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
+		}
 
 		desc_.Width = width;
 		desc_.Height = height;
@@ -111,31 +119,7 @@ namespace KlayGE
 		desc_.SampleDesc.Quality = sample_quality;
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-
-		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * num_mip_maps_);
-		if (init_data != nullptr)
-		{
-			for (uint32_t j = 0; j < array_size_; ++ j)
-			{
-				for (uint32_t i = 0; i < num_mip_maps_; ++ i)
-				{
-					subres_data[j * num_mip_maps_ + i].pSysMem = init_data[j * numMipMaps + i].data;
-					subres_data[j * num_mip_maps_ + i].SysMemPitch = init_data[j * numMipMaps + i].row_pitch;
-					subres_data[j * num_mip_maps_ + i].SysMemSlicePitch = init_data[j * numMipMaps + i].slice_pitch;
-				}
-			}
-		}
-
-		ID3D11Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
-		d3dTexture2D_ = MakeCOMPtr(d3d_tex);
-
-		this->UpdateParams();
-
-		if ((access_hint & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
-		{
-			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
-		}
+		this->ReclaimHWResource(init_data);
 	}
 
 	uint32_t D3D11Texture2D::Width(uint32_t level) const
@@ -453,41 +437,38 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture2D::UpdateParams()
+	void D3D11Texture2D::OfferHWResource()
 	{
-		d3dTexture2D_->GetDesc(&desc_);
+		d3d_sr_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3dTexture2D_.reset();
+	}
 
-		num_mip_maps_ = desc_.MipLevels;
-		array_size_ = desc_.ArraySize;
-		BOOST_ASSERT(num_mip_maps_ != 0);
-
-		widths_.resize(num_mip_maps_);
-		heights_.resize(num_mip_maps_);
-		widths_[0] = desc_.Width;
-		heights_[0] = desc_.Height;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
+	void D3D11Texture2D::ReclaimHWResource(ElementInitData const * init_data)
+	{
+		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * num_mip_maps_);
+		if (init_data != nullptr)
 		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
+			for (uint32_t j = 0; j < array_size_; ++ j)
+			{
+				for (uint32_t i = 0; i < num_mip_maps_; ++ i)
+				{
+					subres_data[j * num_mip_maps_ + i].pSysMem = init_data[j * num_mip_maps_ + i].data;
+					subres_data[j * num_mip_maps_ + i].SysMemPitch = init_data[j * num_mip_maps_ + i].row_pitch;
+					subres_data[j * num_mip_maps_ + i].SysMemSlicePitch = init_data[j * num_mip_maps_ + i].slice_pitch;
+				}
+			}
 		}
 
-		switch (desc_.Format)
+		ID3D11Texture2D* d3d_tex;
+		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+		d3dTexture2D_ = MakeCOMPtr(d3d_tex);
+
+		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
-		case DXGI_FORMAT_R16_TYPELESS:
-			format_ = EF_D16;
-			break;
-
-		case DXGI_FORMAT_R24G8_TYPELESS:
-			format_ = EF_D24S8;
-			break;
-
-		case DXGI_FORMAT_R32_TYPELESS:
-			format_ = EF_D32F;
-			break;
-
-		default:
-			format_ = D3D11Mapping::MappingFormat(desc_.Format);
-			break;
+			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
 		}
 	}
 }

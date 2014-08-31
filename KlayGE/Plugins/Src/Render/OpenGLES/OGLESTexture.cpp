@@ -70,7 +70,7 @@ namespace KlayGE
 
 	OGLESTexture::~OGLESTexture()
 	{
-		glDeleteTextures(1, &texture_);
+		this->OfferHWResource();
 	}
 
 	std::wstring const & OGLESTexture::Name() const
@@ -232,5 +232,11 @@ namespace KlayGE
 		default:
 			return pf;
 		}
+	}
+
+	void OGLESTexture::OfferHWResource()
+	{
+		tex_data_.clear();
+		glDeleteTextures(1, &texture_);
 	}
 }

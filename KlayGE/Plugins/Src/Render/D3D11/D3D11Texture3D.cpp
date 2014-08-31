@@ -86,9 +86,19 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
-		widths_.assign(1, width);
-		heights_.assign(1, height);
-		depthes_.assign(1, depth);
+
+		widths_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
+		depthes_.resize(num_mip_maps_);
+		widths_[0] = width;
+		heights_[0] = height;
+		depthes_[0] = depth;
+		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
+		{
+			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
+			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
+			depthes_[level] = std::max<uint32_t>(1U, depthes_[level - 1] / 2);
+		}
 
 		desc_.Width = width;
 		desc_.Height = height;
@@ -97,28 +107,7 @@ namespace KlayGE
 		desc_.Format = D3D11Mapping::MappingFormat(format_);
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-
-		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(num_mip_maps_);
-		if (init_data != nullptr)
-		{
-			for (uint32_t i = 0; i < num_mip_maps_; ++ i)
-			{
-				subres_data[i].pSysMem = init_data[i].data;
-				subres_data[i].SysMemPitch = init_data[i].row_pitch;
-				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
-			}
-		}
-
-		ID3D11Texture3D* d3d_tex;
-		TIF(d3d_device_->CreateTexture3D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
-		d3dTexture3D_ = MakeCOMPtr(d3d_tex);
-
-		this->UpdateParams();
-
-		if ((access_hint & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
-		{
-			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
-		}
+		this->ReclaimHWResource(init_data);
 	}
 
 	uint32_t D3D11Texture3D::Width(uint32_t level) const
@@ -345,27 +334,36 @@ namespace KlayGE
 			}
 		}
 	}
-
-	void D3D11Texture3D::UpdateParams()
+	
+	void D3D11Texture3D::OfferHWResource()
 	{
-		d3dTexture3D_->GetDesc(&desc_);
+		d3d_sr_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3dTexture3D_.reset();
+	}
 
-		num_mip_maps_ = desc_.MipLevels;
-		BOOST_ASSERT(num_mip_maps_ != 0);
-
-		widths_.resize(num_mip_maps_);
-		heights_.resize(num_mip_maps_);
-		depthes_.resize(num_mip_maps_);
-		widths_[0] = desc_.Width;
-		heights_[0] = desc_.Height;
-		depthes_[0] = desc_.Depth;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
+	void D3D11Texture3D::ReclaimHWResource(ElementInitData const * init_data)
+	{
+		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(num_mip_maps_);
+		if (init_data != nullptr)
 		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
-			depthes_[level] = std::max<uint32_t>(1U, depthes_[level - 1] / 2);
+			for (uint32_t i = 0; i < num_mip_maps_; ++ i)
+			{
+				subres_data[i].pSysMem = init_data[i].data;
+				subres_data[i].SysMemPitch = init_data[i].row_pitch;
+				subres_data[i].SysMemSlicePitch = init_data[i].slice_pitch;
+			}
 		}
 
-		format_ = D3D11Mapping::MappingFormat(desc_.Format);
+		ID3D11Texture3D* d3d_tex;
+		TIF(d3d_device_->CreateTexture3D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+		d3dTexture3D_ = MakeCOMPtr(d3d_tex);
+
+		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
+		{
+			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
+		}
 	}
 }

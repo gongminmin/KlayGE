@@ -57,97 +57,19 @@ namespace KlayGE
 		}
 		array_size_ = 1;
 
-		uint32_t texel_size = NumFormatBytes(format_);
-
-		GLint glinternalFormat;
-		GLenum glformat;
-		GLenum gltype;
-		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
-
-		glGenTextures(1, &texture_);
-		glBindTexture(target_type_, texture_);
-		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-		}
-		else if (glloader_GLES_APPLE_texture_max_level())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
-		}
-		else
-		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (re.HackForTegra())
-			{
-				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-			}
-		}
-
-		tex_data_.resize(6 * num_mip_maps_);
-		widths_.resize(6 * num_mip_maps_);
-		for (int face = 0; face < 6; ++ face)
+		widths_.resize(num_mip_maps_);
 		{
 			uint32_t s = size;
 			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				widths_[face * num_mip_maps_ + level] = s;
+				widths_[level] = s;
 
-				if (IsCompressedFormat(format_))
-				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
-					GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
-
-					void* ptr;
-					if (nullptr == init_data)
-					{
-						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
-						ptr = nullptr;
-					}
-					else
-					{
-						tex_data_[face * num_mip_maps_ + level].resize(image_size);
-						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
-						ptr = &tex_data_[face * num_mip_maps_ + level][0];
-					}
-					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, image_size, ptr);
-				}
-				else
-				{
-					GLsizei const image_size = s * s * texel_size;
-
-					void* ptr;
-					if (nullptr == init_data)
-					{
-						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
-						ptr = nullptr;
-					}
-					else
-					{
-						tex_data_[face * num_mip_maps_ + level].resize(image_size);
-						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
-						ptr = &tex_data_[face * num_mip_maps_ + level][0];
-					}
-					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-						s, s, 0, glformat, gltype, ptr);
-				}
-
-				s = std::max(1U, s / 2);
+				s = std::max<uint32_t>(1U, s / 2);
 			}
 		}
+		
+		tex_data_.resize(6 * num_mip_maps_);
+		this->ReclaimHWResource(init_data);
 	}
 
 	uint32_t OGLESTextureCube::Width(uint32_t level) const
@@ -371,6 +293,94 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			break;
+		}
+	}
+
+	void OGLESTextureCube::ReclaimHWResource(ElementInitData const * init_data)
+	{
+		uint32_t texel_size = NumFormatBytes(format_);
+
+		GLint glinternalFormat;
+		GLenum glformat;
+		GLenum gltype;
+		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
+
+		glGenTextures(1, &texture_);
+		glBindTexture(target_type_, texture_);
+		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+		}
+		else if (glloader_GLES_APPLE_texture_max_level())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
+		}
+		else
+		{
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (re.HackForTegra())
+			{
+				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+			}
+		}
+
+		for (int face = 0; face < 6; ++ face)
+		{
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+			{
+				if (IsCompressedFormat(format_))
+				{
+					int block_size;
+					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
+						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
+					{
+						block_size = 8;
+					}
+					else
+					{
+						block_size = 16;
+					}
+
+					GLsizei const image_size = ((widths_[level] + 3) / 4) * ((widths_[level] + 3) / 4) * block_size;
+
+					void* ptr;
+					if (nullptr == init_data)
+					{
+						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[face * num_mip_maps_ + level].resize(image_size);
+						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[face * num_mip_maps_ + level][0];
+					}
+					glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
+						widths_[level], widths_[level], 0, image_size, ptr);
+				}
+				else
+				{
+					GLsizei const image_size = widths_[level] * widths_[level] * texel_size;
+
+					void* ptr;
+					if (nullptr == init_data)
+					{
+						tex_data_[face * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[face * num_mip_maps_ + level].resize(image_size);
+						std::memcpy(&tex_data_[face * num_mip_maps_ + level][0], init_data[face * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[face * num_mip_maps_ + level][0];
+					}
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
+						widths_[level], widths_[level], 0, glformat, gltype, ptr);
+				}
+			}
 		}
 	}
 }

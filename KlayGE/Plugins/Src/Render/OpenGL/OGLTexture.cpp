@@ -88,24 +88,7 @@ namespace KlayGE
 
 	OGLTexture::~OGLTexture()
 	{
-		if (Context::Instance().RenderFactoryValid())
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.DeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
-		}
-		else
-		{
-			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
-		}
-
-		if (sample_count_ <= 1)
-		{
-			glDeleteTextures(1, &texture_);
-		}
-		else
-		{
-			glDeleteRenderbuffersEXT(1, &texture_);
-		}
+		this->OfferHWResource();
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -313,6 +296,28 @@ namespace KlayGE
 
 		default:
 			return pf;
+		}
+	}
+
+	void OGLTexture::OfferHWResource()
+	{
+		if (Context::Instance().RenderFactoryValid())
+		{
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+		}
+		else
+		{
+			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+		}
+
+		if (sample_count_ <= 1)
+		{
+			glDeleteTextures(1, &texture_);
+		}
+		else
+		{
+			glDeleteRenderbuffersEXT(1, &texture_);
 		}
 	}
 }

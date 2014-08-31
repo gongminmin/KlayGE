@@ -3044,6 +3044,14 @@ namespace KlayGE
 		void BuildMipSubLevels()
 		{
 		}
+
+		virtual void OfferHWResource() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE
+		{
+			UNREF_PARAM(init_data);
+		}
 	};
 
 
