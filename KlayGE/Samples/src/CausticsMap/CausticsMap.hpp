@@ -1,9 +1,9 @@
 #ifndef _CAUSTICSMAP_HPP
 #define _CAUSTICSMAP_HPP
 
-#include <KlayGE\App3D.hpp>
-#include <KlayGE\Font.hpp>
-#include <KlayGE\CameraController.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Font.hpp>
+#include <KlayGE/CameraController.hpp>
 
 class CausticsMapApp : public KlayGE::App3DFramework
 {

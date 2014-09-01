@@ -27,7 +27,7 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
-#ifndef KLAYGE_PLATFORM_ANDROID
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if USE_DXBC2GLSL
 		std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass) const;
@@ -73,8 +73,10 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if !USE_DXBC2GLSL
 		std::string ConvertToESSL(std::string const & glsl, ShaderType type);
+#endif
 #endif
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 		void AttachGLSL(uint32_t type);

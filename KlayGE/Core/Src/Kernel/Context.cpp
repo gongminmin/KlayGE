@@ -480,7 +480,7 @@ namespace KlayGE
 		
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		rf_name = "D3D11";
-#elif defined(KLAYGE_PLATFORM_WINDOWS_LINUX)
+#elif defined(KLAYGE_PLATFORM_LINUX)
 		if ("D3D11" == rf_name)
 		{
 			rf_name = "OpenGL";
@@ -489,8 +489,11 @@ namespace KlayGE
 		{
 			af_name = "OpenAL";
 		}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_ANDROID)
+#elif defined(KLAYGE_PLATFORM_ANDROID)
 		rf_name = "OpenGLES";
+		af_name = "OpenAL";
+#elif defined(KLAYGE_PLATFORM_DARWIN)
+		rf_name = "OpenGL";
 		af_name = "OpenAL";
 #endif
 

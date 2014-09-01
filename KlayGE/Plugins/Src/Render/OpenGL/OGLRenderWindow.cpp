@@ -306,6 +306,9 @@ namespace KlayGE
 				}
 			}
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN		
+		// TODO
+		uint32_t sample_count = settings.sample_count;
 #endif
 
 		if (!glloader_GL_VERSION_2_1() || !glloader_GL_EXT_framebuffer_object())
@@ -474,6 +477,10 @@ namespace KlayGE
 		int screen = DefaultScreen(x_display_);
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
+#elif defined KLAYGE_PLATFORM_DARWIN
+		// TODO
+		uint32_t new_width = 0;
+		uint32_t new_height = 0;
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
