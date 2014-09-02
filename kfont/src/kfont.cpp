@@ -207,7 +207,7 @@ namespace KlayGE
 					uint64_t len;
 					kfont_input->read(&len, sizeof(len));
 					len = LE2Native(len);
-					distances_lzma_size += len;
+					distances_lzma_size += static_cast<size_t>(len);
 
 					kfont_input->seekg(len, std::ios_base::cur);
 				}
