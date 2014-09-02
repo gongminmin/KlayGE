@@ -27,14 +27,19 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/EnvLighting/EnvLighting.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/EnvLighting/EnvLighting.uiml
+	${KLAYGE_PROJECT_DIR}/Samples/media/EnvLighting/IntegratedBRDF.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
