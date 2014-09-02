@@ -107,9 +107,9 @@ float3 CalcPrefilteredEnvVec(float3 normal, float3 view)
 	return -reflect(view, normal);
 }
 
-float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_spec)
+float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_diff)
 {
-	return prefiltered_env * c_spec;
+	return prefiltered_env * c_diff;
 }
 
 float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, float3 normal, float3 view)
@@ -126,7 +126,8 @@ float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, f
 		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * roughness
 		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * roughness
 		+ float4(0.001922126f, 0.006697305f, -0.015741592f, 0.007229544f);
-	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;;
+	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
+	env_brdf = saturate(env_brdf);
 	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
 }
 		]]>

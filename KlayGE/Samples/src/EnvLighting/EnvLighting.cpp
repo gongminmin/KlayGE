@@ -19,6 +19,7 @@
 #include <KlayGE/UI.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/BlockCompression.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -129,7 +130,8 @@ namespace
 		}
 	};
 
-	array<float4, 100> diff_spec_parametes = {
+	float4 diff_spec_parametes[] =
+	{
 		float4(0.0147f,  0.0332f,  0.064f,   0.00121383f),
 		float4(0.0183f,  0.0657f,  0.0248f,  0.001264066f),
 		float4(0.0712f,  0.0263f,  0.03f,    0.000666173f),
@@ -232,7 +234,8 @@ namespace
 		float4(0.253f,   0.187f,   0.0263f,  0.00373529f)
 	};
 
-	array<float, 100> shininess_parametes = {
+	float shininess_parametes[] =
+	{
 		1,
 		1,
 		1,
@@ -412,38 +415,7 @@ namespace
 		uint32_t const WIDTH = 128;
 		uint32_t const HEIGHT = 128;
 
-		ElementFormat fmt;
-		uint32_t channels;
-		uint32_t r_offset;
-		uint32_t g_offset;
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (caps.texture_format_support(EF_GR8))
-		{
-			fmt = EF_GR8;
-			channels = 2;
-			r_offset = 0;
-			g_offset = 1;
-		}
-		else if (caps.texture_format_support(EF_ABGR8))
-		{
-			fmt = EF_ABGR8;
-			channels = 4;
-			r_offset = 0;
-			g_offset = 1;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8));
-
-			fmt = EF_ARGB8;
-			channels = 4;
-			r_offset = 2;
-			g_offset = 1;
-		}
-
-		std::vector<uint8_t> integrate_brdf(WIDTH * HEIGHT * channels, 0);
+		std::vector<uint8_t> integrate_brdf_gr(WIDTH * HEIGHT * 2, 0);
 		for (uint32_t y = 0; y < HEIGHT; ++ y)
 		{
 			float roughness = (y + 0.5f) / HEIGHT;
@@ -453,19 +425,23 @@ namespace
 				float cos_theta = (x + 0.5f) / WIDTH;
 
 				float2 lut = IntegrateBRDFBP(roughness, cos_theta);
-				integrate_brdf[(y * WIDTH + x) * channels + r_offset]
+				integrate_brdf_gr[(y * WIDTH + x) * 2 + 0]
 					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
-				integrate_brdf[(y * WIDTH + x) * channels + g_offset]
+				integrate_brdf_gr[(y * WIDTH + x) * 2 + 1]
 					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
 			}
 		}
 
+		std::vector<uint8_t> integrated_brdf_bc5(WIDTH * HEIGHT);
+		EncodeBC5(&integrated_brdf_bc5[0], WIDTH * 4, &integrate_brdf_gr[0], WIDTH, HEIGHT, WIDTH * 2);
+
 		std::vector<ElementInitData> init_data(1);
-		init_data[0].data = &integrate_brdf[0];
-		init_data[0].row_pitch = WIDTH * channels;
-		init_data[0].slice_pitch = HEIGHT * init_data[0].row_pitch;
+		init_data[0].data = &integrated_brdf_bc5[0];
+		init_data[0].row_pitch = WIDTH * 4;
+		init_data[0].slice_pitch = WIDTH * HEIGHT;
 		
-		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance(); 
+		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_BC5, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
 	}
 }
 
@@ -505,35 +481,11 @@ void EnvLightingApp::OnCreate()
 
 	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	bool regen_brdf = false;
 	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
 	{
-		regen_brdf = true;
+		SaveTexture(GenIntegrateBRDF(), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
 	}
-	else
-	{
-		Texture::TextureType type;
-		uint32_t width, height, depth;
-		uint32_t num_mipmaps;
-		uint32_t array_size;
-		ElementFormat format;
-		uint32_t row_pitch, slice_pitch;
-		GetImageInfo("IntegratedBRDF.dds", type, width, height, depth, num_mipmaps, array_size, format,
-			row_pitch, slice_pitch);
-		if (!caps.texture_format_support(format))
-		{
-			regen_brdf = true;
-		}
-	}
-	if (regen_brdf)
-	{
-		integrate_brdf_tex_ = GenIntegrateBRDF();
-		SaveTexture(integrate_brdf_tex_, "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
-	}
-	else
-	{
-		integrate_brdf_tex_ = SyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
-	}
+	integrate_brdf_tex_ = SyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);
