@@ -428,7 +428,7 @@ namespace
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 0]
 					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 1]
-					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 255 + 0.5f), 0, 255));
+					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.y() * 100 * 255 + 0.5f), 0, 255));
 			}
 		}
 

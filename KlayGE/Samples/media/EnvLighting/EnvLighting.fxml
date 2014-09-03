@@ -65,7 +65,7 @@ float3 PBPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, f
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
 	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, roughness)).xy;
-	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y);
+	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y / 100);
 }
 
 float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, float3 view)
