@@ -9,6 +9,14 @@ SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewerCore/Model.hpp
 )
 
+SET(EFFECT_FILES 
+	${KLAYGE_PROJECT_DIR}/Tools/media/MeshMLViewer/MeshMLViewer.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MeshMLViewer/MeshMLViewerNoSkinning.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MeshMLViewer/MeshMLViewerSkinning64.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MeshMLViewer/MeshMLViewerSkinning128.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MeshMLViewer/MVUtil.fxml
+)
+
 SOURCE_GROUP("Source Files" FILES ${SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${HEADER_FILES})
 SOURCE_GROUP("Resource Files" FILES ${RESOURCE_FILES})

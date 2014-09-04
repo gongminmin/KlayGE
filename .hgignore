@@ -79,7 +79,7 @@ KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
 KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*Py.zip
-KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/obj
+KlayGE/Tools/src/*/*/obj
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/
