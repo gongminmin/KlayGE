@@ -315,4 +315,12 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<PythonScriptModule>(name);
 	}
+
+	void PythonEngine::DoSuspend()
+	{
+	}
+
+	void PythonEngine::DoResume()
+	{
+	}
 }

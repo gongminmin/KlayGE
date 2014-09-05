@@ -51,8 +51,13 @@ namespace KlayGE
 		virtual std::wstring const & Name() const = 0;
 		ScriptEngine& ScriptEngineInstance();
 
+		void Suspend();
+		void Resume();
+
 	private:
 		virtual ScriptEnginePtr MakeScriptEngine() = 0;
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		ScriptEnginePtr se_;
@@ -73,6 +78,13 @@ namespace KlayGE
 		ScriptEnginePtr MakeScriptEngine()
 		{
 			return MakeSharedPtr<ScriptEngineType>();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 
 	private:

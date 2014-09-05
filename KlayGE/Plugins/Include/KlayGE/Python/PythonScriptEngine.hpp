@@ -104,6 +104,10 @@ namespace KlayGE
 		~PythonEngine();
 
 		virtual ScriptModulePtr CreateModule(std::string const & name);
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
 	};
 }
 

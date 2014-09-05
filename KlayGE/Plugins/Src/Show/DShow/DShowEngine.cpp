@@ -70,6 +70,16 @@ namespace KlayGE
 		graph_.reset();
 	}
 
+	void DShowEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void DShowEngine::DoResume()
+	{
+		// TODO
+	}
+
 	// ²¥·Å
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoPlay()

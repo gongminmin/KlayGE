@@ -50,14 +50,19 @@ namespace KlayGE
 		}
 
 	private:
+		void DoSuspend()
+		{
+		}
+		void DoResume()
+		{
+		}
+
 		void DoPlay()
 		{
 		}
-
 		void DoStop()
 		{
 		}
-
 		void DoPause()
 		{
 		}
@@ -65,6 +70,16 @@ namespace KlayGE
 
 	ShowEngine::~ShowEngine()
 	{
+	}
+
+	void ShowEngine::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void ShowEngine::Resume()
+	{
+		this->DoResume();
 	}
 
 	// ╥╣╩ь©у╤тоС

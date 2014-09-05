@@ -111,6 +111,9 @@ namespace KlayGE
 		AudioEngine();
 		virtual ~AudioEngine();
 
+		void Suspend();
+		void Resume();
+
 		static AudioEnginePtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
@@ -137,6 +140,10 @@ namespace KlayGE
 		virtual void SetListenerVel(float3 const & v) = 0;
 		virtual void GetListenerOri(float3& face, float3& up) const = 0;
 		virtual void SetListenerOri(float3 const & face, float3 const & up) = 0;
+
+	private:
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		AudioBufs	audioBufs_;

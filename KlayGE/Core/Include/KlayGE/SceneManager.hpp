@@ -44,6 +44,9 @@ namespace KlayGE
 		SceneManager();
 		virtual ~SceneManager();
 
+		void Suspend();
+		void Resume();
+
 		void SmallObjectThreshold(float area);
 		void SceneUpdateElapse(float elapse);
 		virtual void ClipScene();
@@ -99,6 +102,8 @@ namespace KlayGE
 		SceneObjsType::iterator DelSceneObjectLocked(SceneObjsType::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
 		virtual void OnDelSceneObject(SceneObjsType::iterator iter) = 0;
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 		void UpdateThreadFunc();
 

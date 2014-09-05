@@ -927,6 +927,16 @@ namespace KlayGE
 #endif
 	}
 
+	void D3D11RenderEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void D3D11RenderEngine::DoResume()
+	{
+		// TODO
+	}
+
 	bool D3D11RenderEngine::FullScreen() const
 	{
 		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen();

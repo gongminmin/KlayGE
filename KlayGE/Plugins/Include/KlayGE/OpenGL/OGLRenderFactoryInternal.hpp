@@ -81,6 +81,9 @@ namespace KlayGE
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
 
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
+
 	private:
 		OGLRenderFactory(OGLRenderFactory const &);
 		OGLRenderFactory& operator=(OGLRenderFactory const &);

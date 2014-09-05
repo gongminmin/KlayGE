@@ -80,6 +80,9 @@ namespace KlayGE
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
 
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
+
 	private:
 		D3D11RenderFactory(D3D11RenderFactory const & rhs);
 		D3D11RenderFactory& operator=(D3D11RenderFactory const & rhs);

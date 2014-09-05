@@ -64,9 +64,16 @@ namespace KlayGE
 
 		static AudioDataSourceFactoryPtr NullObject();
 
+		void Suspend();
+		void Resume();
+
 		virtual std::wstring const & Name() const = 0;
 
 		virtual AudioDataSourcePtr MakeAudioDataSource() = 0;
+
+	private:
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 	};
 }
 

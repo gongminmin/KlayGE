@@ -26,11 +26,6 @@ namespace KlayGE
 			return name;
 		}
 
-		AudioEnginePtr MakeAudioEngine()
-		{
-			return AudioEngine::NullObject();
-		}
-
 		AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & /*dataSource*/, uint32_t /*numSource*/)
 		{
 			return AudioBuffer::NullObject();
@@ -39,6 +34,19 @@ namespace KlayGE
 		AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & /*dataSource*/, uint32_t /*bufferSeconds*/)
 		{
 			return AudioBuffer::NullObject();
+		}
+
+	private:
+		virtual AudioEnginePtr MakeAudioEngine() KLAYGE_OVERRIDE
+		{
+			return AudioEngine::NullObject();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 	};
 
@@ -56,5 +64,23 @@ namespace KlayGE
 		}
 
 		return *ae_;
+	}
+
+	void AudioFactory::Suspend()
+	{
+		if (ae_)
+		{
+			ae_->Suspend();
+		}
+		this->DoSuspend();
+	}
+
+	void AudioFactory::Resume()
+	{
+		this->DoResume();
+		if (ae_)
+		{
+			ae_->Resume();
+		}
 	}
 }

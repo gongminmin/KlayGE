@@ -163,6 +163,16 @@ namespace KlayGE
 		res_loader_instance_.reset();
 	}
 
+	void ResLoader::Suspend()
+	{
+		// TODO
+	}
+
+	void ResLoader::Resume()
+	{
+		// TODO
+	}
+
 	std::string ResLoader::AbsPath(std::string const & path)
 	{
 		filesystem::path new_path(path);

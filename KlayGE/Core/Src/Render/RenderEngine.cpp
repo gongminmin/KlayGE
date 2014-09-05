@@ -125,6 +125,13 @@ namespace KlayGE
 		virtual void DoDestroy() KLAYGE_OVERRIDE
 		{
 		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	// 构造函数
@@ -147,6 +154,18 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::~RenderEngine()
 	{
+	}
+
+	void RenderEngine::Suspend()
+	{
+		// TODO
+		this->DoSuspend();
+	}
+
+	void RenderEngine::Resume()
+	{
+		// TODO
+		this->DoResume();
 	}
 
 	// 返回空对象

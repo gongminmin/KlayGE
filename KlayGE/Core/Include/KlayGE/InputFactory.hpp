@@ -29,15 +29,21 @@ namespace KlayGE
 	{
 	public:
 		virtual ~InputFactory()
-			{ }
+		{
+		}
 
 		static InputFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 		InputEngine& InputEngineInstance();
 
+		void Suspend();
+		void Resume();
+
 	private:
 		virtual InputEnginePtr DoMakeInputEngine() = 0;
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		InputEnginePtr ie_;
@@ -58,6 +64,13 @@ namespace KlayGE
 		InputEnginePtr DoMakeInputEngine()
 		{
 			return MakeSharedPtr<InputEngineType>();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 
 	private:

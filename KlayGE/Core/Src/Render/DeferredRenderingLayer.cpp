@@ -786,6 +786,16 @@ namespace KlayGE
 #endif
 	}
 
+	void DeferredRenderingLayer::Suspend()
+	{
+		// TODO
+	}
+
+	void DeferredRenderingLayer::Resume()
+	{
+		// TODO
+	}
+
 	void DeferredRenderingLayer::SSGIEnabled(uint32_t vp, bool ssgi)
 	{
 		this->SetupViewportGI(vp, ssgi);

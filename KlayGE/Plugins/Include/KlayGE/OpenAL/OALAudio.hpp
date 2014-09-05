@@ -134,6 +134,10 @@ namespace KlayGE
 		void SetListenerVel(float3 const & v);
 		void GetListenerOri(float3& face, float3& up) const;
 		void SetListenerOri(float3 const & face, float3 const & up);
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
 	};
 }
 

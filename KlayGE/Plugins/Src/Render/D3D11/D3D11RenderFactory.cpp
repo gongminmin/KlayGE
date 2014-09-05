@@ -248,6 +248,16 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<D3D11SamplerStateObject>(desc);
 	}
+
+	void D3D11RenderFactory::DoSuspend()
+	{
+		// TODO
+	}
+
+	void D3D11RenderFactory::DoResume()
+	{
+		// TODO
+	}
 }
 
 void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr)

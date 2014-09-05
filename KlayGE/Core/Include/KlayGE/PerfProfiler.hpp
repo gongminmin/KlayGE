@@ -73,6 +73,9 @@ namespace KlayGE
 		static PerfProfiler& Instance();
 		static void Destroy();
 
+		void Suspend();
+		void Resume();
+
 		PerfRangePtr CreatePerfRange(int category, std::string const & name);
 		void CollectData();
 

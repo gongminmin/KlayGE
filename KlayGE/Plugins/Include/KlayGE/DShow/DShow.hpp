@@ -53,6 +53,9 @@ namespace KlayGE
 		void Init();
 		void Free();
 
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
+
 		void DoPlay();
 		void DoStop();
 		void DoPause();

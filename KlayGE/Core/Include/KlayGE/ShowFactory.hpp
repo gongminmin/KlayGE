@@ -26,15 +26,21 @@ namespace KlayGE
 	{
 	public:
 		virtual ~ShowFactory()
-			{ }
+		{
+		}
 
 		static ShowFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 		ShowEngine& ShowEngineInstance();
 
+		void Suspend();
+		void Resume();
+
 	private:
 		virtual ShowEnginePtr MakeShowEngine() = 0;
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		ShowEnginePtr se_;
@@ -55,6 +61,13 @@ namespace KlayGE
 		ShowEnginePtr MakeShowEngine()
 		{
 			return MakeSharedPtr<ShowEngineType>();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 
 	private:

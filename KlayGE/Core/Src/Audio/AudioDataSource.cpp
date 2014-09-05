@@ -75,11 +75,29 @@ namespace KlayGE
 		{
 			return AudioDataSource::NullObject();
 		}
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	AudioDataSourceFactoryPtr AudioDataSourceFactory::NullObject()
 	{
 		static AudioDataSourceFactoryPtr obj = MakeSharedPtr<NullAudioDataSourceFactory>();
 		return obj;
+	}
+
+	void AudioDataSourceFactory::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void AudioDataSourceFactory::Resume()
+	{
+		this->DoResume();
 	}
 }

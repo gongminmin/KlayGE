@@ -51,6 +51,14 @@ namespace KlayGE
 		}
 		void SetListenerOri(float3 const & /*face*/, float3 const & /*up*/)
 			{ }
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	// 构造函数
@@ -65,6 +73,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	AudioEngine::~AudioEngine()
 	{
+	}
+
+	void AudioEngine::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void AudioEngine::Resume()
+	{
+		this->DoResume();
 	}
 
 	// 获取空对象

@@ -46,6 +46,14 @@ namespace KlayGE
 			static std::wstring name(L"Null Script Engine");
 			return name;
 		}
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	ScriptModule::ScriptModule()
@@ -81,6 +89,16 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	ScriptEngine::~ScriptEngine()
 	{
+	}
+
+	void ScriptEngine::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void ScriptEngine::Resume()
+	{
+		this->DoResume();
 	}
 
 	// ╥╣╩ь©у╤тоС

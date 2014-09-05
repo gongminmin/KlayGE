@@ -156,6 +156,10 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up);
 
 	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
+
+	private:
 		shared_ptr<IDirectSound>				dsound_;
 		shared_ptr<IDirectSound3DListener>	ds3dListener_;
 

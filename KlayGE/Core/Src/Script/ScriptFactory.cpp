@@ -51,6 +51,14 @@ namespace KlayGE
 		{
 			return ScriptEngine::NullObject();
 		}
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	ScriptFactoryPtr ScriptFactory::NullObject()
@@ -67,5 +75,23 @@ namespace KlayGE
 		}
 
 		return *se_;
+	}
+
+	void ScriptFactory::Suspend()
+	{
+		if (se_)
+		{
+			se_->Suspend();
+		}
+		this->DoSuspend();
+	}
+
+	void ScriptFactory::Resume()
+	{
+		this->DoResume();
+		if (se_)
+		{
+			se_->Resume();
+		}
 	}
 }

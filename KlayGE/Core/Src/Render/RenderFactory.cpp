@@ -236,6 +236,14 @@ namespace KlayGE
 		{
 			return SamplerStateObject::NullObject();
 		}
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 
@@ -279,6 +287,24 @@ namespace KlayGE
 		}
 
 		return *re_;
+	}
+	
+	void RenderFactory::Suspend()
+	{
+		if (re_)
+		{
+			re_->Suspend();
+		}
+		this->DoSuspend();
+	}
+	
+	void RenderFactory::Resume()
+	{
+		this->DoResume();
+		if (re_)
+		{
+			re_->Resume();
+		}
 	}
 
 	RasterizerStateObjectPtr RenderFactory::MakeRasterizerStateObject(RasterizerStateDesc const & desc)

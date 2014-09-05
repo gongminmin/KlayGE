@@ -104,6 +104,16 @@ namespace KlayGE
 		alcCloseDevice(device);
 	}
 
+	void OALAudioEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void OALAudioEngine::DoResume()
+	{
+		// TODO
+	}
+
 	// ÒôÆµÒýÇæÃû×Ö
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & OALAudioEngine::Name() const

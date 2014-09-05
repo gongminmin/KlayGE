@@ -119,6 +119,16 @@ namespace KlayGE
 		this->ClearObject();
 	}
 
+	void SceneManager::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void SceneManager::Resume()
+	{
+		this->DoResume();
+	}
+
 	void SceneManager::SmallObjectThreshold(float area)
 	{
 		small_obj_threshold_ = area;

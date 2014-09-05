@@ -29,9 +29,17 @@ namespace KlayGE
 			return name;
 		}
 
+	private:
 		InputEnginePtr DoMakeInputEngine()
 		{
 			return InputEngine::NullObject();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 	};
 
@@ -49,5 +57,23 @@ namespace KlayGE
 		}
 
 		return *ie_;
+	}
+
+	void InputFactory::Suspend()
+	{
+		if (ie_)
+		{
+			ie_->Suspend();
+		}
+		this->DoSuspend();
+	}
+
+	void InputFactory::Resume()
+	{
+		this->DoResume();
+		if (ie_)
+		{
+			ie_->Resume();
+		}
 	}
 }

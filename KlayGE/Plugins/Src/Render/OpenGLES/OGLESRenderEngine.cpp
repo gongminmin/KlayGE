@@ -1329,6 +1329,16 @@ namespace KlayGE
 		so_rl_.reset();
 	}
 
+	void OGLESRenderEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void OGLESRenderEngine::DoResume()
+	{
+		// TODO
+	}
+
 	bool OGLESRenderEngine::FullScreen() const
 	{
 		return checked_pointer_cast<OGLESRenderWindow>(screen_frame_buffer_)->FullScreen();

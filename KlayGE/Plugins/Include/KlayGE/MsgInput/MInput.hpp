@@ -300,6 +300,9 @@ namespace KlayGE
 #endif
 
 	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
+
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
 #if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)

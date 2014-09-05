@@ -27,9 +27,19 @@ namespace KlayGE
 			return name;
 		}
 
+	private:
 		AudioDataSourcePtr MakeAudioDataSource()
 		{
 			return MakeSharedPtr<OggVorbisSource>();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+			// TODO
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+			// TODO
 		}
 	};
 }

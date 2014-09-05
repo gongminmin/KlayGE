@@ -88,6 +88,9 @@ namespace KlayGE
 		RenderEngine();
 		virtual ~RenderEngine();
 
+		void Suspend();
+		void Resume();
+
 		static RenderEnginePtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
@@ -270,6 +273,9 @@ namespace KlayGE
 			GraphicsBufferPtr const & buff_args, uint32_t offset) = 0;
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 		virtual void DoDestroy() = 0;
+
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		FrameBufferPtr cur_frame_buffer_;

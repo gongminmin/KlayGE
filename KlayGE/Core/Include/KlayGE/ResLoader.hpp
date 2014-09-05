@@ -124,6 +124,9 @@ namespace KlayGE
 		static ResLoader& Instance();
 		static void Destroy();
 
+		void Suspend();
+		void Resume();
+
 		void AddPath(std::string const & path);
 		void DelPath(std::string const & path);
 

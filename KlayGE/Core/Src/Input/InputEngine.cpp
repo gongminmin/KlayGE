@@ -39,6 +39,14 @@ namespace KlayGE
 		void EnumDevices()
 		{
 		}
+
+	private:
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
+		}
 	};
 
 	// Îö¹¹º¯Êý
@@ -145,5 +153,15 @@ namespace KlayGE
 		BOOST_ASSERT(index < this->NumDevices());
 
 		return devices_[index];
+	}
+
+	void InputEngine::Suspend()
+	{
+		this->DoSuspend();
+	}
+
+	void InputEngine::Resume()
+	{
+		this->DoResume();
 	}
 }

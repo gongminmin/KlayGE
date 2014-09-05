@@ -267,6 +267,16 @@ namespace KlayGE
 		}
 	}
 
+	void OCTree::DoSuspend()
+	{
+		// TODO
+	}
+
+	void OCTree::DoResume()
+	{
+		// TODO
+	}
+
 	void OCTree::DivideNode(size_t index, uint32_t curr_depth)
 	{
 		if (octree_[index].obj_ptrs.size() > 1)

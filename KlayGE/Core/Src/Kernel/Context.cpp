@@ -138,10 +138,34 @@ namespace KlayGE
 
 	void Context::Suspend()
 	{
+		scene_mgr_->Suspend();
+
+		ResLoader::Instance().Suspend();
+		PerfProfiler::Instance().Suspend();
+
+		deferred_rendering_layer_->Suspend();
+		show_factory_->Suspend();
+		render_factory_->Suspend();
+		audio_factory_->Suspend();
+		input_factory_->Suspend();
+		script_factory_->Suspend();
+		audio_data_src_factory_->Suspend();
 	}
 
 	void Context::Resume()
 	{
+		scene_mgr_->Resume();
+
+		ResLoader::Instance().Resume();
+		PerfProfiler::Instance().Resume();
+
+		deferred_rendering_layer_->Resume();
+		show_factory_->Resume();
+		render_factory_->Resume();
+		audio_factory_->Resume();
+		input_factory_->Resume();
+		script_factory_->Resume();
+		audio_data_src_factory_->Resume();
 	}
 
 	void Context::LoadCfg(std::string const & cfg_file)

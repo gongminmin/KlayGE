@@ -388,6 +388,9 @@ namespace KlayGE
 	public:
 		virtual ~InputEngine();
 
+		void Suspend();
+		void Resume();
+
 		static InputEnginePtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
@@ -401,6 +404,10 @@ namespace KlayGE
 
 		size_t NumDevices() const;
 		InputDevicePtr Device(size_t index) const;
+
+	private:
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		typedef std::vector<InputDevicePtr>	InputDevicesType;

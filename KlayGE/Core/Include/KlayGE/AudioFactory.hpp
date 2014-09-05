@@ -29,18 +29,25 @@ namespace KlayGE
 	{
 	public:
 		virtual ~AudioFactory()
-			{ }
+		{
+		}
 
 		static AudioFactoryPtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 
 		AudioEngine& AudioEngineInstance();
+
+		void Suspend();
+		void Resume();
+
 		virtual AudioBufferPtr MakeSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource = 1) = 0;
 		virtual AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds = 2) = 0;
 
 	private:
 		virtual AudioEnginePtr MakeAudioEngine() = 0;
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	private:
 		AudioEnginePtr ae_;
@@ -73,6 +80,13 @@ namespace KlayGE
 		AudioEnginePtr MakeAudioEngine()
 		{
 			return MakeSharedPtr<AudioEngineType>();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 
 	private:

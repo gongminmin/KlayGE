@@ -35,6 +35,9 @@ namespace KlayGE
 	public:
 		virtual ~ShowEngine();
 
+		void Suspend();
+		void Resume();
+
 		static ShowEnginePtr NullObject();
 
 		bool CanPlay() const;
@@ -53,12 +56,16 @@ namespace KlayGE
 
 		virtual ShowState State(long timeout = -1) = 0;
 
-	protected:
-		ShowState	state_;
+	private:
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 		virtual void DoPlay() = 0;
 		virtual void DoStop() = 0;
 		virtual void DoPause() = 0;
+
+	protected:
+		ShowState state_;
 	};
 }
 

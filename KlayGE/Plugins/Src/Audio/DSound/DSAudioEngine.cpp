@@ -151,6 +151,16 @@ namespace KlayGE
 		::FreeLibrary(mod_dsound_);
 	}
 
+	void DSAudioEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void DSAudioEngine::DoResume()
+	{
+		// TODO
+	}
+
 	// ÒôÆµÒýÇæÃû×Ö
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & DSAudioEngine::Name() const

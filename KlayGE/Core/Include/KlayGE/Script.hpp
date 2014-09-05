@@ -92,10 +92,17 @@ namespace KlayGE
 		ScriptEngine();
 		virtual ~ScriptEngine();
 
+		void Suspend();
+		void Resume();
+
 		static ScriptEnginePtr NullObject();
 
 		// 创建一个新的脚本模块
 		virtual ScriptModulePtr CreateModule(std::string const & name);
+
+	private:
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 	};
 }
 

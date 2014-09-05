@@ -52,6 +52,8 @@ namespace KlayGE
 	private:
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) KLAYGE_OVERRIDE;
 		virtual void OnDelSceneObject(SceneObjsType::iterator iter) KLAYGE_OVERRIDE;
+		virtual void DoSuspend() KLAYGE_OVERRIDE;
+		virtual void DoResume() KLAYGE_OVERRIDE;
 
 		void DivideNode(size_t index, uint32_t curr_depth);
 		void NodeVisible(size_t index);

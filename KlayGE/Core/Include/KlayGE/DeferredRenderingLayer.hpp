@@ -146,6 +146,9 @@ namespace KlayGE
 	public:
 		DeferredRenderingLayer();
 
+		void Suspend();
+		void Resume();
+
 		void SSGIEnabled(uint32_t vp, bool ssgi);
 		void SSVOEnabled(uint32_t vp, bool ssvo);
 		void SSREnabled(bool ssr);

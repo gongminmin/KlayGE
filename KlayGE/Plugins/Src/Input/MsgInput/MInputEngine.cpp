@@ -98,6 +98,16 @@ namespace KlayGE
 #endif
 	}
 
+	void MsgInputEngine::DoSuspend()
+	{
+		// TODO
+	}
+
+	void MsgInputEngine::DoResume()
+	{
+		// TODO
+	}
+
 	std::wstring const & MsgInputEngine::Name() const
 	{
 		static std::wstring const name(L"Message-based Input Engine");

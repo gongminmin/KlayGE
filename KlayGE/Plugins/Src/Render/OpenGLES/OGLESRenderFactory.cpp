@@ -256,6 +256,16 @@ namespace KlayGE
 	{
 		return MakeSharedPtr<OGLESSamplerStateObject>(desc);
 	}
+
+	void OGLESRenderFactory::DoSuspend()
+	{
+		// TODO
+	}
+
+	void OGLESRenderFactory::DoResume()
+	{
+		// TODO
+	}
 }
 
 void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr)

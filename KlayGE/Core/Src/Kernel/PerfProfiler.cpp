@@ -122,6 +122,14 @@ namespace KlayGE
 		perf_profiler_instance_.reset();
 	}
 
+	void PerfProfiler::Suspend()
+	{
+	}
+
+	void PerfProfiler::Resume()
+	{
+	}
+
 	PerfRangePtr PerfProfiler::CreatePerfRange(int category, std::string const & name)
 	{
 		PerfRangePtr range = MakeSharedPtr<PerfRange>();

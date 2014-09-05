@@ -29,9 +29,17 @@ namespace KlayGE
 			return name;
 		}
 
+	private:
 		ShowEnginePtr MakeShowEngine()
 		{
 			return ShowEngine::NullObject();
+		}
+
+		virtual void DoSuspend() KLAYGE_OVERRIDE
+		{
+		}
+		virtual void DoResume() KLAYGE_OVERRIDE
+		{
 		}
 	};
 
@@ -49,5 +57,23 @@ namespace KlayGE
 		}
 
 		return *se_;
+	}
+
+	void ShowFactory::Suspend()
+	{
+		if (se_)
+		{
+			se_->Suspend();
+		}
+		this->DoSuspend();
+	}
+
+	void ShowFactory::Resume()
+	{
+		this->DoResume();
+		if (se_)
+		{
+			se_->Resume();
+		}
 	}
 }

@@ -50,6 +50,9 @@ namespace KlayGE
 
 		RenderEngine& RenderEngineInstance();
 
+		void Suspend();
+		void Resume();
+
 		virtual TexturePtr MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data) = 0;
 		virtual TexturePtr MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
@@ -107,6 +110,9 @@ namespace KlayGE
 		virtual DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc) = 0;
 		virtual BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc) = 0;
 		virtual SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) = 0;
+
+		virtual void DoSuspend() = 0;
+		virtual void DoResume() = 0;
 
 	protected:
 		RenderEnginePtr re_;
