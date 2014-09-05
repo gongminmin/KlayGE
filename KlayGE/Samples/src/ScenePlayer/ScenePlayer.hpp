@@ -50,8 +50,6 @@ private:
 
 	KlayGE::UIDialogPtr dialog_;
 
-	KlayGE::ScriptEngine se_;
-
 	float il_scale_;
 
 	int id_open_;
