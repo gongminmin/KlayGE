@@ -24,6 +24,21 @@ namespace MtlEditor
 	/// </summary>
 	public partial class MainWindow : RibbonWindow
 	{
+		const int MESHES_ORDER = 0;
+		const int AMBIENT_ORDER = 1;
+		const int DIFFUSE_ORDER = 2;
+		const int SPECULAR_ORDER = 3;
+		const int SHININESS_ORDER = 4;
+		const int EMIT_ORDER = 5;
+		const int OPACITY_ORDER = 6;
+		const int DIFFUSE_TEX_ORDER = 7;
+		const int SPECULAR_TEX_ORDER = 8;
+		const int SHININESS_TEX_ORDER = 9;
+		const int BUMP_TEX_ORDER = 10;
+		const int HEIGHT_TEX_ORDER = 11;
+		const int EMIT_TEX_ORDER = 12;
+		const int OPACITY_TEX_ORDER = 13;
+
 		[CategoryOrder("Meshes", 0)]
 		[CategoryOrder("Material", 1)]
 		[CategoryOrder("Textures", 2)]
@@ -32,61 +47,61 @@ namespace MtlEditor
 			[Category("Meshes")]
 			[DisplayName("Meshes")]
 			[ItemsSource(typeof(MeshItemsSource))]
-			[PropertyOrder(0)]
+			[PropertyOrder(MESHES_ORDER)]
 			public string meshes { get; set; }
 
 			[Category("Material")]
 			[DisplayName("Ambient")]
-			[PropertyOrder(1)]
+			[PropertyOrder(AMBIENT_ORDER)]
 			public Color ambient { get; set; }
 			[Category("Material")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(2)]
+			[PropertyOrder(DIFFUSE_ORDER)]
 			public Color diffuse { get; set; }
 			[Category("Material")]
 			[DisplayName("Specular")]
-			[PropertyOrder(3)]
+			[PropertyOrder(SPECULAR_ORDER)]
 			public Color specular { get; set; }
 			[Category("Material")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(4)]
+			[PropertyOrder(SHININESS_ORDER)]
 			public float shininess { get; set; }
 			[Category("Material")]
 			[DisplayName("Emit")]
-			[PropertyOrder(5)]
+			[PropertyOrder(EMIT_ORDER)]
 			public Color emit { get; set; }
 			[Category("Material")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(6)]
+			[PropertyOrder(OPACITY_ORDER)]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(7)]
+			[PropertyOrder(DIFFUSE_TEX_ORDER)]
 			public string diffuse_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Specular")]
-			[PropertyOrder(8)]
+			[PropertyOrder(SPECULAR_TEX_ORDER)]
 			public string specular_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(9)]
+			[PropertyOrder(SHININESS_TEX_ORDER)]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Bump")]
-			[PropertyOrder(10)]
+			[PropertyOrder(BUMP_TEX_ORDER)]
 			public string bump_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
-			[PropertyOrder(11)]
+			[PropertyOrder(HEIGHT_TEX_ORDER)]
 			public string height_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emit")]
-			[PropertyOrder(12)]
+			[PropertyOrder(EMIT_TEX_ORDER)]
 			public string emit_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(13)]
+			[PropertyOrder(OPACITY_TEX_ORDER)]
 			public string opacity_tex { get; set; }
 		}
 
@@ -375,18 +390,129 @@ namespace MtlEditor
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
 		{
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
-			if (0 == item.PropertyOrder)
+			switch (item.PropertyOrder)
 			{
-				uint mesh_index = 0;
-				for (; mesh_index < MeshItemsSource.items.Count; ++ mesh_index)
+			case MESHES_ORDER:
 				{
-					if (MeshItemsSource.items[(int)mesh_index].DisplayName == (e.NewValue as string))
+					uint mesh_index = 0;
+					for (; mesh_index < MeshItemsSource.items.Count; ++ mesh_index)
 					{
-						break;
+						if (MeshItemsSource.items[(int)mesh_index].DisplayName == (e.NewValue as string))
+						{
+							break;
+						}
 					}
-				}
 
-				this.UpdateMeshProperties(mesh_index);
+					this.UpdateMeshProperties(mesh_index);
+				}
+				break;
+
+			case AMBIENT_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.AmbientMaterial(mat_id, properties_obj_.ambient);
+				}
+				break;
+
+			case DIFFUSE_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.DiffuseMaterial(mat_id, properties_obj_.diffuse);
+				}
+				break;
+
+			case SPECULAR_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.SpecularMaterial(mat_id, properties_obj_.specular);
+				}
+				break;
+
+			case SHININESS_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.ShininessMaterial(mat_id, properties_obj_.shininess);
+				}
+				break;
+
+			case EMIT_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.EmitMaterial(mat_id, properties_obj_.emit);
+				}
+				break;
+
+			case OPACITY_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.OpacityMaterial(mat_id, properties_obj_.opacity);
+				}
+				break;
+
+			case DIFFUSE_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.DiffuseTexture(mat_id, properties_obj_.diffuse_tex);
+				}
+				break;
+
+			case SPECULAR_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.SpecularTexture(mat_id, properties_obj_.specular_tex);
+				}
+				break;
+
+			case SHININESS_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.ShininessTexture(mat_id, properties_obj_.shininess_tex);
+				}
+				break;
+
+			case BUMP_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.BumpTexture(mat_id, properties_obj_.bump_tex);
+				}
+				break;
+
+			case HEIGHT_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.HeightTexture(mat_id, properties_obj_.height_tex);
+				}
+				break;
+
+			case EMIT_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.EmitTexture(mat_id, properties_obj_.emit_tex);
+				}
+				break;
+
+			case OPACITY_TEX_ORDER:
+				if (selected_mesh_index_ > 0)
+				{
+					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
+					core_.OpacityTexture(mat_id, properties_obj_.opacity_tex);
+				}
+				break;
+
+			default:
+				break;
 			}
 		}
 

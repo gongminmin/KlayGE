@@ -202,15 +202,15 @@ namespace MeshMLViewer
 		}
 		public Color AmbientMaterial(uint material_index)
 		{
-			return IntPtrToColor(MeshMLViewerCoreImporter.AmbientMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.AmbientMaterial(core_, material_index));
 		}
 		public Color DiffuseMaterial(uint material_index)
 		{
-			return IntPtrToColor(MeshMLViewerCoreImporter.DiffuseMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.DiffuseMaterial(core_, material_index));
 		}
 		public Color SpecularMaterial(uint material_index)
 		{
-			return IntPtrToColor(MeshMLViewerCoreImporter.SpecularMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.SpecularMaterial(core_, material_index));
 		}
 		public float ShininessMaterial(uint material_index)
 		{
@@ -218,7 +218,7 @@ namespace MeshMLViewer
 		}
 		public Color EmitMaterial(uint material_index)
 		{
-			return IntPtrToColor(MeshMLViewerCoreImporter.EmitMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.EmitMaterial(core_, material_index));
 		}
 		public float OpacityMaterial(uint material_index)
 		{
@@ -265,9 +265,26 @@ namespace MeshMLViewer
 		{
 			float[] temp = new float[3];
 			Marshal.Copy(clr, temp, 0, 3);
+			for (int i = 0; i < 3; ++ i)
+			{
+				temp[i] = this.LinearToSRGB(temp[i]);
+			}
 			return Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
 					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
 					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+		}
+
+		private float LinearToSRGB(float linear)
+		{
+			if (linear < 0.0031308f)
+			{
+				return 12.92f * linear;
+			}
+			else
+			{
+				const float ALPHA = 0.055f;
+				return (1 + ALPHA) * (float)Math.Pow(linear, 1 / 2.4f) - ALPHA;
+			}
 		}
 
 		private IntPtr core_;

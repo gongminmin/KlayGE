@@ -24,6 +24,22 @@ namespace MeshMLViewer
 	/// </summary>
 	public partial class MainWindow : RibbonWindow
 	{
+		const int MESHES_ORDER = 0;
+		const int VERTEX_STREAMS_ORDER = 1;
+		const int AMBIENT_ORDER = 2;
+		const int DIFFUSE_ORDER = 3;
+		const int SPECULAR_ORDER = 4;
+		const int SHININESS_ORDER = 5;
+		const int EMIT_ORDER = 6;
+		const int OPACITY_ORDER = 7;
+		const int DIFFUSE_TEX_ORDER = 8;
+		const int SPECULAR_TEX_ORDER = 9;
+		const int SHININESS_TEX_ORDER = 10;
+		const int BUMP_TEX_ORDER = 11;
+		const int HEIGHT_TEX_ORDER = 12;
+		const int EMIT_TEX_ORDER = 13;
+		const int OPACITY_TEX_ORDER = 14;
+
 		[CategoryOrder("Meshes", 0)]
 		[CategoryOrder("Vertex Streams", 1)]
 		[CategoryOrder("Material", 2)]
@@ -33,66 +49,66 @@ namespace MeshMLViewer
 			[Category("Meshes")]
 			[DisplayName("Meshes")]
 			[ItemsSource(typeof(MeshItemsSource))]
-			[PropertyOrder(0)]
+			[PropertyOrder(MESHES_ORDER)]
 			public string meshes { get; set; }
 
 			[Category("Vertex Streams")]
 			[DisplayName("Vertex Streams")]
-			[PropertyOrder(1)]
+			[PropertyOrder(VERTEX_STREAMS_ORDER)]
 			public List<string> vertex_streams { get; set; }
 
 			[Category("Material")]
 			[DisplayName("Ambient")]
-			[PropertyOrder(2)]
+			[PropertyOrder(AMBIENT_ORDER)]
 			public Color ambient { get; set; }
 			[Category("Material")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(3)]
+			[PropertyOrder(DIFFUSE_ORDER)]
 			public Color diffuse { get; set; }
 			[Category("Material")]
 			[DisplayName("Specular")]
-			[PropertyOrder(4)]
+			[PropertyOrder(SPECULAR_ORDER)]
 			public Color specular { get; set; }
 			[Category("Material")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(5)]
+			[PropertyOrder(SHININESS_ORDER)]
 			public float shininess { get; set; }
 			[Category("Material")]
 			[DisplayName("Emit")]
-			[PropertyOrder(6)]
+			[PropertyOrder(EMIT_ORDER)]
 			public Color emit { get; set; }
 			[Category("Material")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(7)]
+			[PropertyOrder(OPACITY_ORDER)]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(8)]
+			[PropertyOrder(DIFFUSE_TEX_ORDER)]
 			public string diffuse_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Specular")]
-			[PropertyOrder(9)]
+			[PropertyOrder(SPECULAR_TEX_ORDER)]
 			public string specular_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(10)]
+			[PropertyOrder(SHININESS_TEX_ORDER)]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Bump")]
-			[PropertyOrder(11)]
+			[PropertyOrder(BUMP_TEX_ORDER)]
 			public string bump_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
-			[PropertyOrder(12)]
+			[PropertyOrder(HEIGHT_TEX_ORDER)]
 			public string height_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emit")]
-			[PropertyOrder(13)]
+			[PropertyOrder(EMIT_TEX_ORDER)]
 			public string emit_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(14)]
+			[PropertyOrder(OPACITY_TEX_ORDER)]
 			public string opacity_tex { get; set; }
 		}
 
@@ -456,7 +472,7 @@ namespace MeshMLViewer
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
 		{
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
-			if (0 == item.PropertyOrder)
+			if (MESHES_ORDER == item.PropertyOrder)
 			{
 				uint mesh_index = 0;
 				for (; mesh_index < MeshItemsSource.items.Count; ++ mesh_index)

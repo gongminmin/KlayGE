@@ -78,6 +78,32 @@ namespace MtlEditor
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr GetOpacityTexture(IntPtr core, uint material_index);
 		[DllImport(CORE_NAME)]
+		public static extern void SetAmbientMaterial(IntPtr core, uint material_index, IntPtr value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetDiffuseMaterial(IntPtr core, uint material_index, IntPtr value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetSpecularMaterial(IntPtr core, uint material_index, IntPtr value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetShininessMaterial(IntPtr core, uint material_index, float value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetEmitMaterial(IntPtr core, uint material_index, IntPtr value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetOpacityMaterial(IntPtr core, uint material_index, float value);
+		[DllImport(CORE_NAME)]
+		public static extern void SetDiffuseTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetSpecularTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetShininessTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetBumpTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetHeightTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetEmitTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
+		public static extern void SetOpacityTexture(IntPtr core, uint material_index, IntPtr name);
+		[DllImport(CORE_NAME)]
 		public static extern uint SelectedMesh(IntPtr core);
 		[DllImport(CORE_NAME)]
 		public static extern void SelectMesh(IntPtr core, uint mesh_index);
@@ -173,15 +199,15 @@ namespace MtlEditor
 		}
 		public Color AmbientMaterial(uint material_index)
 		{
-			return IntPtrToColor(MtlEditorCoreImporter.GetAmbientMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetAmbientMaterial(core_, material_index));
 		}
 		public Color DiffuseMaterial(uint material_index)
 		{
-			return IntPtrToColor(MtlEditorCoreImporter.GetDiffuseMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetDiffuseMaterial(core_, material_index));
 		}
 		public Color SpecularMaterial(uint material_index)
 		{
-			return IntPtrToColor(MtlEditorCoreImporter.GetSpecularMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetSpecularMaterial(core_, material_index));
 		}
 		public float ShininessMaterial(uint material_index)
 		{
@@ -189,7 +215,7 @@ namespace MtlEditor
 		}
 		public Color EmitMaterial(uint material_index)
 		{
-			return IntPtrToColor(MtlEditorCoreImporter.GetEmitMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetEmitMaterial(core_, material_index));
 		}
 		public float OpacityMaterial(uint material_index)
 		{
@@ -223,6 +249,80 @@ namespace MtlEditor
 		{
 			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetOpacityTexture(core_, material_index));
 		}
+		public void AmbientMaterial(uint material_index, Color value)
+		{
+			IntPtr ptr = this.ColorToIntPtr(value);
+			MtlEditorCoreImporter.SetAmbientMaterial(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void DiffuseMaterial(uint material_index, Color value)
+		{
+			IntPtr ptr = this.ColorToIntPtr(value);
+			MtlEditorCoreImporter.SetDiffuseMaterial(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void SpecularMaterial(uint material_index, Color value)
+		{
+			IntPtr ptr = this.ColorToIntPtr(value);
+			MtlEditorCoreImporter.SetSpecularMaterial(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void ShininessMaterial(uint material_index, float value)
+		{
+			MtlEditorCoreImporter.SetShininessMaterial(core_, material_index, value);
+		}
+		public void EmitMaterial(uint material_index, Color value)
+		{
+			IntPtr ptr = this.ColorToIntPtr(value);
+			MtlEditorCoreImporter.SetEmitMaterial(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void OpacityMaterial(uint material_index, float value)
+		{
+			MtlEditorCoreImporter.SetOpacityMaterial(core_, material_index, value);
+		}
+		public void DiffuseTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetDiffuseTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void SpecularTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetSpecularTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void ShininessTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetShininessTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void BumpTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetBumpTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void HeightTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetHeightTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void EmitTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetEmitTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
+		public void OpacityTexture(uint material_index, string name)
+		{
+			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
+			MtlEditorCoreImporter.SetOpacityTexture(core_, material_index, ptr);
+			Marshal.FreeHGlobal(ptr);
+		}
 		public uint SelectedMesh()
 		{
 			return MtlEditorCoreImporter.SelectedMesh(core_);
@@ -236,9 +336,52 @@ namespace MtlEditor
 		{
 			float[] temp = new float[3];
 			Marshal.Copy(clr, temp, 0, 3);
+			for (int i = 0; i < 3; ++ i)
+			{
+				temp[i] = this.LinearToSRGB(temp[i]);
+			}
 			return Color.FromArgb(255, (byte)Math.Max(Math.Min(temp[0] * 255 + 0.5f, 255), 0),
 					(byte)Math.Max(Math.Min(temp[1] * 255 + 0.5f, 255), 0),
 					(byte)Math.Max(Math.Min(temp[2] * 255 + 0.5f, 255), 0));
+		}
+		private IntPtr ColorToIntPtr(Color clr)
+		{
+			float[] temp = new float[3];
+			temp[0] = clr.R / 255.0f;
+			temp[1] = clr.G / 255.0f;
+			temp[2] = clr.B / 255.0f;
+			for (int i = 0; i < 3; ++ i)
+			{
+				temp[i] = this.SRGBToLinear(temp[i]);
+			}
+			IntPtr ptr = Marshal.AllocHGlobal(sizeof(float) * 3);
+			Marshal.Copy(temp, 0, ptr, 3);
+			return ptr;
+		}
+
+		private float LinearToSRGB(float linear)
+		{
+			if (linear < 0.0031308f)
+			{
+				return 12.92f * linear;
+			}
+			else
+			{
+				const float ALPHA = 0.055f;
+				return (1 + ALPHA) * (float)Math.Pow(linear, 1 / 2.4f) - ALPHA;
+			}
+		}
+		private float SRGBToLinear(float srgb)
+		{
+			if (srgb < 0.04045f)
+			{
+				return srgb / 12.92f;
+			}
+			else
+			{
+				const float ALPHA = 0.055f;
+				return (float)Math.Pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
+			}
 		}
 
 		private IntPtr core_;
