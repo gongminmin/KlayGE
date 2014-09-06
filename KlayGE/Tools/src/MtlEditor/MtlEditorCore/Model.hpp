@@ -30,6 +30,9 @@ public:
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
 	void VisualizeTexture(int slot);
 
+	void UpdateEffectAttrib(KlayGE::uint32_t mtl_index);
+	void UpdateMaterial(KlayGE::uint32_t mtl_index);
+
 	KlayGE::RenderEffectPtr const & Effect() const
 	{
 		return effect_;
@@ -73,6 +76,9 @@ public:
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
 	void VisualizeTexture(int slot);
+
+	void UpdateEffectAttrib();
+	void UpdateMaterial();
 
 private:
 	void UpdateTech();

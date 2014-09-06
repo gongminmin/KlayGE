@@ -78,30 +78,37 @@ namespace MtlEditor
 			[Category("Textures")]
 			[DisplayName("Diffuse")]
 			[PropertyOrder(DIFFUSE_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string diffuse_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Specular")]
 			[PropertyOrder(SPECULAR_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string specular_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Shininess")]
 			[PropertyOrder(SHININESS_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Bump")]
 			[PropertyOrder(BUMP_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string bump_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
 			[PropertyOrder(HEIGHT_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string height_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emit")]
 			[PropertyOrder(EMIT_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string emit_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Opacity")]
 			[PropertyOrder(OPACITY_TEX_ORDER)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string opacity_tex { get; set; }
 		}
 

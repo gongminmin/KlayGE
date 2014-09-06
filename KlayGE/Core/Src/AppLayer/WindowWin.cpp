@@ -131,7 +131,6 @@ namespace KlayGE
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
 	{
-		// Register the window class
 		Convert(wname_, name);
 
 		wnd_ = static_cast<HWND>(native_wnd);

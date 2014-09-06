@@ -709,36 +709,42 @@ namespace KlayGE
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->ambient = float3(value);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::DiffuseMaterial(uint32_t material_index, float* value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->diffuse = float3(value);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::SpecularMaterial(uint32_t material_index, float* value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->specular = float3(value);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::ShininessMaterial(uint32_t material_index, float value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->shininess = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::EmitMaterial(uint32_t material_index, float* value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->emit = float3(value);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::OpacityMaterial(uint32_t material_index, float value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(material_index)->opacity = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(material_index);
 	}
 
 	void MtlEditorCore::DiffuseTexture(uint32_t material_index, char const * name)
@@ -746,25 +752,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if (("Diffuse Color" == iter->first) || ("Color" == iter->first) || ("Diffuse Color Map" == iter->first))
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Diffuse Color";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Diffuse Color";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::SpecularTexture(uint32_t material_index, char const * name)
@@ -772,25 +789,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if (("Specular Color" == iter->first) || ("Specular Level" == iter->first))
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Specular Color";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Specular Color";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::ShininessTexture(uint32_t material_index, char const * name)
@@ -798,25 +826,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if (("Glossiness" == iter->first) || ("Reflection Glossiness Map" == iter->first))
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Glossiness";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Glossiness";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::BumpTexture(uint32_t material_index, char const * name)
@@ -824,25 +863,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if (("Bump" == iter->first) || ("Bump Map" == iter->first))
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Bump";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Bump";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::HeightTexture(uint32_t material_index, char const * name)
@@ -850,25 +900,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if (("Height" == iter->first) || ("Height Map" == iter->first))
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Height";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Height";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::EmitTexture(uint32_t material_index, char const * name)
@@ -876,25 +937,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
 			iter != material->texture_slots.end(); ++ iter)
 		{
 			if ("Self-Illumination" == iter->first)
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Self-Illumination";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Self-Illumination";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	void MtlEditorCore::OpacityTexture(uint32_t material_index, char const * name)
@@ -902,25 +974,36 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		RenderMaterialPtr material = model->GetMaterial(material_index);
 
-		bool found = false;
-		for (TextureSlotsType::iterator iter = material->texture_slots.begin();
-			iter != material->texture_slots.end(); ++iter)
+		TextureSlotsType::iterator iter;
+		for (iter = material->texture_slots.begin();
+			iter != material->texture_slots.end(); ++ iter)
 		{
 			if ("Opacity" == iter->first)
 			{
-				iter->second = name;
-				found = true;
 				break;
 			}
 		}
 
-		if (!found)
+		if ((nullptr == name) || (0 == strlen(name)))
 		{
-			std::pair<std::string, std::string> tex;
-			tex.first = "Opacity";
-			tex.second = name;
-			material->texture_slots.push_back(tex);
+			material->texture_slots.erase(iter);
 		}
+		else
+		{
+			if (iter == material->texture_slots.end())
+			{
+				std::pair<std::string, std::string> tex;
+				tex.first = "Opacity";
+				tex.second = name;
+				material->texture_slots.push_back(tex);
+			}
+			else
+			{
+				iter->second = name;
+			}
+		}
+
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(material_index);
 	}
 
 	uint32_t MtlEditorCore::SelectedMesh() const

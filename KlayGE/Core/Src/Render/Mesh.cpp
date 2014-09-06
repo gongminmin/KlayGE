@@ -551,9 +551,9 @@ namespace KlayGE
 						effect_attrs_ |= EA_TransparencyFront;
 					}
 				}
-			}				
+			}
 		}
-		
+
 		if (!(effect_attrs_ & EA_AlphaTest) && (mtl_->opacity < 1))
 		{
 			effect_attrs_ |= EA_TransparencyBack;

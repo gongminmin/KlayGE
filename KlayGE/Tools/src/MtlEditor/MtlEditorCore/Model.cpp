@@ -64,6 +64,44 @@ void DetailedSkinnedMesh::VisualizeTexture(int slot)
 	this->UpdateTech();
 }
 
+void DetailedSkinnedMesh::UpdateEffectAttrib()
+{
+	effect_attrs_ &= ~EA_TransparencyBack;
+	effect_attrs_ &= ~EA_TransparencyFront;
+	effect_attrs_ &= ~EA_SpecialShading;
+
+	if (!(effect_attrs_ & EA_AlphaTest) && (mtl_->opacity < 1))
+	{
+		effect_attrs_ |= EA_TransparencyBack;
+		effect_attrs_ |= EA_TransparencyFront;
+	}
+	if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tl_
+		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
+		|| (effect_attrs_ & EA_Reflection))
+	{
+		effect_attrs_ |= EA_SpecialShading;
+	}
+}
+
+void DetailedSkinnedMesh::UpdateMaterial()
+{
+	diffuse_tl_ = function<TexturePtr()>();
+	specular_tl_ = function<TexturePtr()>();
+	shininess_tl_ = function<TexturePtr()>();
+	normal_tl_ = function<TexturePtr()>();
+	height_tl_ = function<TexturePtr()>();
+	emit_tl_ = function<TexturePtr()>();
+
+	diffuse_tex_.reset();
+	specular_tex_.reset();
+	shininess_tex_.reset();
+	normal_tex_.reset();
+	height_tex_.reset();
+	emit_tex_.reset();
+
+	StaticMesh::BuildMeshInfo();
+}
+
 void DetailedSkinnedMesh::UpdateTech()
 {
 	shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
@@ -562,5 +600,31 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeTexture(slot);
+	}
+}
+
+void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
+{
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	{
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
+		{
+			mesh->UpdateEffectAttrib();
+		}
+	}
+}
+
+void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
+{
+	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	{
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
+		{
+			mesh->UpdateMaterial();
+		}
 	}
 }
