@@ -107,7 +107,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="OpenTexUserControlEditor.xaml.cs">
-	  <DependentUpon>OpenTexUserControlEditor.xaml</DependentUpon>
+      <DependentUpon>OpenTexUserControlEditor.xaml</DependentUpon>
+    </Compile>
+    <Page Include="SliderUserControlEditor.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Compile Include="SliderUserControlEditor.xaml.cs">
+      <DependentUpon>SliderUserControlEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="MtlEditorCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

@@ -1,5 +1,5 @@
 ﻿/**
- * @file OpenTexUserControlEditor.xaml.cs
+ * @file SliderUserControlEditor.xaml.cs
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -31,22 +31,23 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System;
 using Xceed.Wpf.Toolkit.PropertyGrid.Editors;
 
 namespace MtlEditor
 {
 	/// <summary>
-	/// Interaction logic for OpenTexUserControlEditor.xaml
+	/// Interaction logic for SliderUserControlEditor.xaml
 	/// </summary>
-	public partial class OpenTexUserControlEditor : UserControl, ITypeEditor
+	public partial class SliderUserControlEditor : UserControl, ITypeEditor
 	{
-		public OpenTexUserControlEditor()
+		public SliderUserControlEditor()
 		{
 			InitializeComponent();
 		}
 
 		public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value",
-			typeof(string), typeof(OpenTexUserControlEditor),
+			typeof(string), typeof(SliderUserControlEditor),
 			new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 		public string Value
 		{
@@ -60,17 +61,18 @@ namespace MtlEditor
 			}
 		}
 
-		private void OpenTexClick(object sender, RoutedEventArgs e)
+		private void SliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
-			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+			Value = e.NewValue.ToString();
+			_tb.Text = Value;
+		}
 
-			dlg.DefaultExt = ".dds";
-			dlg.Filter = "All Texture Files (*.dds)|*.dds|All Files|*.*";
-			dlg.CheckPathExists = true;
-			dlg.CheckFileExists = true;
-			if (true == dlg.ShowDialog())
+		private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
+		{
+			Value = _tb.Text;
+			if ((Value != null) && (Value != ""))
 			{
-				Value = dlg.FileName;
+				_sl.Value = Double.Parse(Value);
 			}
 		}
 

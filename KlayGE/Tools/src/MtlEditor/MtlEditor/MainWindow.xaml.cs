@@ -73,6 +73,7 @@ namespace MtlEditor
 			[Category("Material")]
 			[DisplayName("Opacity")]
 			[PropertyOrder(OPACITY_ORDER)]
+			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
