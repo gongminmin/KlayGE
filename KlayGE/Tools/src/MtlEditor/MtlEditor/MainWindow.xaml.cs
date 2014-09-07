@@ -136,6 +136,7 @@ namespace MtlEditor
 			last_time_ = DateTime.Now;
 
 			selected_mesh_index_ = 0;
+			opened_file_ = "";
 
 			Uri iconUri = new Uri("pack://application:,,,/Images/klayge_logo.ico", UriKind.RelativeOrAbsolute);
 			this.Icon = BitmapFrame.Create(iconUri);
@@ -191,6 +192,7 @@ namespace MtlEditor
 			if (true == dlg.ShowDialog())
 			{
 				core_.OpenModel(dlg.FileName);
+				this.FileNameChanged(dlg.FileName);
 
 				if (core_.NumFrames() != 0)
 				{
@@ -234,6 +236,11 @@ namespace MtlEditor
 
 		private void SaveClick(object sender, RoutedEventArgs e)
 		{
+			core_.SaveModel(opened_file_);
+		}
+
+		private void SaveAsClick(object sender, RoutedEventArgs e)
+		{
 			Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
 			dlg.DefaultExt = ".meshml";
@@ -242,6 +249,7 @@ namespace MtlEditor
 			if (true == dlg.ShowDialog())
 			{
 				core_.SaveModel(dlg.FileName);
+				this.FileNameChanged(dlg.FileName);
 			}
 		}
 
@@ -467,7 +475,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.DiffuseTexture(mat_id, properties_obj_.diffuse_tex);
+					core_.DiffuseTexture(mat_id, this.RelativePath(properties_obj_.diffuse_tex));
 				}
 				break;
 
@@ -475,7 +483,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.SpecularTexture(mat_id, properties_obj_.specular_tex);
+					core_.SpecularTexture(mat_id, this.RelativePath(properties_obj_.specular_tex));
 				}
 				break;
 
@@ -483,7 +491,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.ShininessTexture(mat_id, properties_obj_.shininess_tex);
+					core_.ShininessTexture(mat_id, this.RelativePath(properties_obj_.shininess_tex));
 				}
 				break;
 
@@ -491,7 +499,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.BumpTexture(mat_id, properties_obj_.bump_tex);
+					core_.BumpTexture(mat_id, this.RelativePath(properties_obj_.bump_tex));
 				}
 				break;
 
@@ -499,7 +507,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.HeightTexture(mat_id, properties_obj_.height_tex);
+					core_.HeightTexture(mat_id, this.RelativePath(properties_obj_.height_tex));
 				}
 				break;
 
@@ -507,7 +515,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.EmitTexture(mat_id, properties_obj_.emit_tex);
+					core_.EmitTexture(mat_id, this.RelativePath(properties_obj_.emit_tex));
 				}
 				break;
 
@@ -515,7 +523,7 @@ namespace MtlEditor
 				if (selected_mesh_index_ > 0)
 				{
 					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.OpacityTexture(mat_id, properties_obj_.opacity_tex);
+					core_.OpacityTexture(mat_id, this.RelativePath(properties_obj_.opacity_tex));
 				}
 				break;
 
@@ -524,11 +532,32 @@ namespace MtlEditor
 			}
 		}
 
+		private void FileNameChanged(string name)
+		{
+			opened_file_ = name;
+			int dot_offset = opened_file_.LastIndexOf('.');
+			if (".model_bin" == opened_file_.Substring(dot_offset))
+			{
+				opened_file_ = opened_file_.Substring(0, dot_offset);
+			}
+
+			doc1.Title = opened_file_;
+		}
+
+		private string RelativePath(string name)
+		{
+			Uri uri_meshml = new Uri(opened_file_);
+			Uri uri_tex = new Uri(name);
+			Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
+			return relative_uri.ToString();
+		}
+
 		private MtlEditorCore core_;
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
 		private uint selected_mesh_index_;
+		private string opened_file_;
 	}
 
 	public class MeshItemsSource : IItemsSource

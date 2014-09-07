@@ -18,7 +18,8 @@
             <RibbonTab x:Name="model" Header="Model" KeyTip="M">
                 <RibbonGroup>
                     <RibbonButton LargeImageSource="Images\Open.png" x:Name="open" Label="Open" Click="OpenClick"/>
-                    <RibbonButton LargeImageSource="Images\Save.png" x:Name="save" Label="Save as" Click="SaveClick"/>
+                    <RibbonButton LargeImageSource="Images\Save.png" x:Name="save" Label="Save" Click="SaveClick"/>
+                    <RibbonButton LargeImageSource="Images\SaveAs.png" x:Name="save_as" Label="Save as" Click="SaveAsClick"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" Checked="SkinningChecked" Unchecked="SkinningUnchecked"/>
