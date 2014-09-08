@@ -51,7 +51,7 @@
                                     <RibbonGalleryItem Content="Texture Diffuse" DataContext="10"/>
                                     <RibbonGalleryItem Content="Texture Specular" DataContext="11"/>
                                     <RibbonGalleryItem Content="Texture Shininess" DataContext="12"/>
-                                    <RibbonGalleryItem Content="Texture Bump" DataContext="13"/>
+                                    <RibbonGalleryItem Content="Texture Normal" DataContext="13"/>
                                     <RibbonGalleryItem Content="Texture Height" DataContext="14"/>
                                     <RibbonGalleryItem Content="Texture Emit" DataContext="15"/>
                                     <RibbonGalleryItem Content="Texture Opacity" DataContext="16"/>

@@ -1,5 +1,5 @@
-#ifndef _MODEL_HPP
-#define _MODEL_HPP
+#ifndef _MTL_EDITOR_CORE_MODEL_HPP
+#define _MTL_EDITOR_CORE_MODEL_HPP
 
 #include <KlayGE/PreDeclare.hpp>
 #include <string>
@@ -87,4 +87,4 @@ private:
 	int visualize_;
 };
 
-#endif		// _MODEL_HPP
+#endif		// _MTL_EDITOR_CORE_MODEL_HPP

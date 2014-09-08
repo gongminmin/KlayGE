@@ -52,44 +52,44 @@ namespace MeshMLViewer
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr MeshName(IntPtr core, uint index);
 		[DllImport(CORE_NAME)]
-		public static extern uint NumVertexStreams(IntPtr core, uint mesh_index);
+		public static extern uint NumVertexStreams(IntPtr core, uint mesh_id);
 		[DllImport(CORE_NAME)]
-		public static extern uint NumVertexStreamUsages(IntPtr core, uint mesh_index, uint stream_index);
+		public static extern uint NumVertexStreamUsages(IntPtr core, uint mesh_id, uint stream_index);
 		[DllImport(CORE_NAME)]
-		public static extern uint VertexStreamUsage(IntPtr core, uint mesh_index, uint stream_index,
+		public static extern uint VertexStreamUsage(IntPtr core, uint mesh_id, uint stream_index,
 			uint usage_index);
 		[DllImport(CORE_NAME)]
-		public static extern uint MaterialID(IntPtr core, uint mesh_index);
+		public static extern uint MaterialID(IntPtr core, uint mesh_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr AmbientMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr AmbientMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr DiffuseMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr DiffuseMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr SpecularMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr SpecularMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern float ShininessMaterial(IntPtr core, uint material_index);
+		public static extern float ShininessMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr EmitMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr EmitMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern float OpacityMaterial(IntPtr core, uint material_index);
+		public static extern float OpacityMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr DiffuseTexture(IntPtr core, uint material_index);
+		public static extern IntPtr DiffuseTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr SpecularTexture(IntPtr core, uint material_index);
+		public static extern IntPtr SpecularTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr ShininessTexture(IntPtr core, uint material_index);
+		public static extern IntPtr ShininessTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr BumpTexture(IntPtr core, uint material_index);
+		public static extern IntPtr NormalTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr HeightTexture(IntPtr core, uint material_index);
+		public static extern IntPtr HeightTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr EmitTexture(IntPtr core, uint material_index);
+		public static extern IntPtr EmitTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr OpacityTexture(IntPtr core, uint material_index);
+		public static extern IntPtr OpacityTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
 		public static extern uint SelectedMesh(IntPtr core);
 		[DllImport(CORE_NAME)]
-		public static extern void SelectMesh(IntPtr core, uint mesh_index);
+		public static extern void SelectMesh(IntPtr core, uint mesh_id);
 	}
 
 	public sealed class MeshMLViewerCore
@@ -184,81 +184,81 @@ namespace MeshMLViewer
 		{
 			return Marshal.PtrToStringUni(MeshMLViewerCoreImporter.MeshName(core_, index));
 		}
-		public uint NumVertexStreams(uint mesh_index)
+		public uint NumVertexStreams(uint mesh_id)
 		{
-			return MeshMLViewerCoreImporter.NumVertexStreams(core_, mesh_index);
+			return MeshMLViewerCoreImporter.NumVertexStreams(core_, mesh_id);
 		}
-		public uint NumVertexStreamUsages(uint mesh_index, uint stream_index)
+		public uint NumVertexStreamUsages(uint mesh_id, uint stream_index)
 		{
-			return MeshMLViewerCoreImporter.NumVertexStreamUsages(core_, mesh_index, stream_index);
+			return MeshMLViewerCoreImporter.NumVertexStreamUsages(core_, mesh_id, stream_index);
 		}
-		public uint VertexStreamUsage(uint mesh_index, uint stream_index, uint usage_index)
+		public uint VertexStreamUsage(uint mesh_id, uint stream_index, uint usage_index)
 		{
-			return MeshMLViewerCoreImporter.VertexStreamUsage(core_, mesh_index, stream_index, usage_index);
+			return MeshMLViewerCoreImporter.VertexStreamUsage(core_, mesh_id, stream_index, usage_index);
 		}
-		public uint MaterialID(uint mesh_index)
+		public uint MaterialID(uint mesh_id)
 		{
-			return MeshMLViewerCoreImporter.MaterialID(core_, mesh_index);
+			return MeshMLViewerCoreImporter.MaterialID(core_, mesh_id);
 		}
-		public Color AmbientMaterial(uint material_index)
+		public Color AmbientMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MeshMLViewerCoreImporter.AmbientMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.AmbientMaterial(core_, mtl_id));
 		}
-		public Color DiffuseMaterial(uint material_index)
+		public Color DiffuseMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MeshMLViewerCoreImporter.DiffuseMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.DiffuseMaterial(core_, mtl_id));
 		}
-		public Color SpecularMaterial(uint material_index)
+		public Color SpecularMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MeshMLViewerCoreImporter.SpecularMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.SpecularMaterial(core_, mtl_id));
 		}
-		public float ShininessMaterial(uint material_index)
+		public float ShininessMaterial(uint mtl_id)
 		{
-			return MeshMLViewerCoreImporter.ShininessMaterial(core_, material_index);
+			return MeshMLViewerCoreImporter.ShininessMaterial(core_, mtl_id);
 		}
-		public Color EmitMaterial(uint material_index)
+		public Color EmitMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MeshMLViewerCoreImporter.EmitMaterial(core_, material_index));
+			return this.IntPtrToColor(MeshMLViewerCoreImporter.EmitMaterial(core_, mtl_id));
 		}
-		public float OpacityMaterial(uint material_index)
+		public float OpacityMaterial(uint mtl_id)
 		{
-			return MeshMLViewerCoreImporter.OpacityMaterial(core_, material_index);
+			return MeshMLViewerCoreImporter.OpacityMaterial(core_, mtl_id);
 		}
-		public string DiffuseTexture(uint material_index)
+		public string DiffuseTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.DiffuseTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.DiffuseTexture(core_, mtl_id));
 		}
-		public string SpecularTexture(uint material_index)
+		public string SpecularTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.SpecularTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.SpecularTexture(core_, mtl_id));
 		}
-		public string ShininessTexture(uint material_index)
+		public string ShininessTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.ShininessTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.ShininessTexture(core_, mtl_id));
 		}
-		public string BumpTexture(uint material_index)
+		public string NormalTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.BumpTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.NormalTexture(core_, mtl_id));
 		}
-		public string HeightTexture(uint material_index)
+		public string HeightTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.HeightTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.HeightTexture(core_, mtl_id));
 		}
-		public string EmitTexture(uint material_index)
+		public string EmitTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.EmitTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.EmitTexture(core_, mtl_id));
 		}
-		public string OpacityTexture(uint material_index)
+		public string OpacityTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.OpacityTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MeshMLViewerCoreImporter.OpacityTexture(core_, mtl_id));
 		}
 		public uint SelectedMesh()
 		{
 			return MeshMLViewerCoreImporter.SelectedMesh(core_);
 		}
-		public void SelectMesh(uint mesh_index)
+		public void SelectMesh(uint mesh_id)
 		{
-			MeshMLViewerCoreImporter.SelectMesh(core_, mesh_index);
+			MeshMLViewerCoreImporter.SelectMesh(core_, mesh_id);
 		}
 
 		private Color IntPtrToColor(IntPtr clr)

@@ -35,7 +35,7 @@ namespace MeshMLViewer
 		const int DIFFUSE_TEX_ORDER = 8;
 		const int SPECULAR_TEX_ORDER = 9;
 		const int SHININESS_TEX_ORDER = 10;
-		const int BUMP_TEX_ORDER = 11;
+		const int NORMAL_TEX_ORDER = 11;
 		const int HEIGHT_TEX_ORDER = 12;
 		const int EMIT_TEX_ORDER = 13;
 		const int OPACITY_TEX_ORDER = 14;
@@ -95,9 +95,9 @@ namespace MeshMLViewer
 			[PropertyOrder(SHININESS_TEX_ORDER)]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
-			[DisplayName("Bump")]
-			[PropertyOrder(BUMP_TEX_ORDER)]
-			public string bump_tex { get; set; }
+			[DisplayName("Normal")]
+			[PropertyOrder(NORMAL_TEX_ORDER)]
+			public string normal_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
 			[PropertyOrder(HEIGHT_TEX_ORDER)]
@@ -137,7 +137,7 @@ namespace MeshMLViewer
 
 			last_time_ = DateTime.Now;
 
-			selected_mesh_index_ = 0;
+			selected_mesh_id_ = 0;
 
 			Uri iconUri = new Uri("pack://application:,,,/Images/klayge_logo.ico", UriKind.RelativeOrAbsolute);
 			this.Icon = BitmapFrame.Create(iconUri);
@@ -340,7 +340,7 @@ namespace MeshMLViewer
 			if (MouseButtons.Left == e.Button)
 			{
 				uint selected_mesh = core_.SelectedMesh();
-				if (selected_mesh != selected_mesh_index_)
+				if (selected_mesh != selected_mesh_id_)
 				{
 					this.UpdateMeshProperties(selected_mesh);
 				}
@@ -368,27 +368,27 @@ namespace MeshMLViewer
 			core_.KeyPress(e.KeyChar);
 		}
 
-		private void UpdateMeshProperties(uint mesh_index)
+		private void UpdateMeshProperties(uint mesh_id)
 		{
-			selected_mesh_index_ = mesh_index;
-			core_.SelectMesh(mesh_index);
+			selected_mesh_id_ = mesh_id;
+			core_.SelectMesh(mesh_id);
 
 			properties.SelectedObject = null;
 
-			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_index].DisplayName;
+			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_id].DisplayName;
 
 			properties_obj_.vertex_streams.Clear();
 
-			if (mesh_index > 0)
+			if (mesh_id > 0)
 			{
-				uint num_vss = core_.NumVertexStreams(mesh_index - 1);
+				uint num_vss = core_.NumVertexStreams(mesh_id - 1);
 				for (uint stream_index = 0; stream_index < num_vss; ++ stream_index)
 				{
 					string stream_name = "";
-					uint num_usages = core_.NumVertexStreamUsages(mesh_index - 1, stream_index);
+					uint num_usages = core_.NumVertexStreamUsages(mesh_id - 1, stream_index);
 					for (uint usage_index = 0; usage_index < num_usages; ++usage_index)
 					{
-						uint usage = core_.VertexStreamUsage(mesh_index - 1, stream_index, usage_index);
+						uint usage = core_.VertexStreamUsage(mesh_id - 1, stream_index, usage_index);
 						string usage_name;
 						switch (usage >> 16)
 						{
@@ -431,22 +431,22 @@ namespace MeshMLViewer
 					properties_obj_.vertex_streams.Add(stream_name);
 				}
 
-				uint mat_id = core_.MaterialID(mesh_index - 1);
+				uint mtl_id = core_.MaterialID(mesh_id - 1);
 
-				properties_obj_.ambient = core_.AmbientMaterial(mat_id);
-				properties_obj_.diffuse = core_.DiffuseMaterial(mat_id);
-				properties_obj_.specular = core_.SpecularMaterial(mat_id);
-				properties_obj_.emit = core_.EmitMaterial(mat_id);
-				properties_obj_.shininess = core_.ShininessMaterial(mat_id);
-				properties_obj_.opacity = core_.OpacityMaterial(mat_id);
+				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
+				properties_obj_.diffuse = core_.DiffuseMaterial(mtl_id);
+				properties_obj_.specular = core_.SpecularMaterial(mtl_id);
+				properties_obj_.emit = core_.EmitMaterial(mtl_id);
+				properties_obj_.shininess = core_.ShininessMaterial(mtl_id);
+				properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
-				properties_obj_.diffuse_tex = core_.DiffuseTexture(mat_id);
-				properties_obj_.specular_tex = core_.SpecularTexture(mat_id);
-				properties_obj_.shininess_tex = core_.ShininessTexture(mat_id);
-				properties_obj_.bump_tex = core_.BumpTexture(mat_id);
-				properties_obj_.height_tex = core_.HeightTexture(mat_id);
-				properties_obj_.emit_tex = core_.EmitTexture(mat_id);
-				properties_obj_.opacity_tex = core_.OpacityTexture(mat_id);
+				properties_obj_.diffuse_tex = core_.DiffuseTexture(mtl_id);
+				properties_obj_.specular_tex = core_.SpecularTexture(mtl_id);
+				properties_obj_.shininess_tex = core_.ShininessTexture(mtl_id);
+				properties_obj_.normal_tex = core_.NormalTexture(mtl_id);
+				properties_obj_.height_tex = core_.HeightTexture(mtl_id);
+				properties_obj_.emit_tex = core_.EmitTexture(mtl_id);
+				properties_obj_.opacity_tex = core_.OpacityTexture(mtl_id);
 			}
 			else
 			{
@@ -460,7 +460,7 @@ namespace MeshMLViewer
 				properties_obj_.diffuse_tex = "";
 				properties_obj_.specular_tex = "";
 				properties_obj_.shininess_tex = "";
-				properties_obj_.bump_tex = "";
+				properties_obj_.normal_tex = "";
 				properties_obj_.height_tex = "";
 				properties_obj_.emit_tex = "";
 				properties_obj_.opacity_tex = "";
@@ -474,16 +474,16 @@ namespace MeshMLViewer
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
 			if (MESHES_ORDER == item.PropertyOrder)
 			{
-				uint mesh_index = 0;
-				for (; mesh_index < MeshItemsSource.items.Count; ++ mesh_index)
+				uint mesh_id = 0;
+				for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
 				{
-					if (MeshItemsSource.items[(int)mesh_index].DisplayName == (e.NewValue as string))
+					if (MeshItemsSource.items[(int)mesh_id].DisplayName == (e.NewValue as string))
 					{
 						break;
 					}
 				}
 
-				this.UpdateMeshProperties(mesh_index);
+				this.UpdateMeshProperties(mesh_id);
 			}
 		}
 
@@ -491,7 +491,7 @@ namespace MeshMLViewer
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
-		private uint selected_mesh_index_;
+		private uint selected_mesh_id_;
 	}
 
 	public class MeshItemsSource : IItemsSource

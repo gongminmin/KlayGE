@@ -80,63 +80,63 @@ namespace MtlEditor
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr MeshName(IntPtr core, uint index);
 		[DllImport(CORE_NAME)]
-		public static extern uint MaterialID(IntPtr core, uint mesh_index);
+		public static extern uint MaterialID(IntPtr core, uint mesh_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetAmbientMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr GetAmbientMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetDiffuseMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr GetDiffuseMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetSpecularMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr GetSpecularMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern float GetShininessMaterial(IntPtr core, uint material_index);
+		public static extern float GetShininessMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetEmitMaterial(IntPtr core, uint material_index);
+		public static extern IntPtr GetEmitMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern float GetOpacityMaterial(IntPtr core, uint material_index);
+		public static extern float GetOpacityMaterial(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetDiffuseTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetDiffuseTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetSpecularTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetSpecularTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetShininessTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetShininessTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetBumpTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetNormalTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetHeightTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetHeightTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetEmitTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetEmitTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern IntPtr GetOpacityTexture(IntPtr core, uint material_index);
+		public static extern IntPtr GetOpacityTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
-		public static extern void SetAmbientMaterial(IntPtr core, uint material_index, IntPtr value);
+		public static extern void SetAmbientMaterial(IntPtr core, uint mtl_id, IntPtr value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetDiffuseMaterial(IntPtr core, uint material_index, IntPtr value);
+		public static extern void SetDiffuseMaterial(IntPtr core, uint mtl_id, IntPtr value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetSpecularMaterial(IntPtr core, uint material_index, IntPtr value);
+		public static extern void SetSpecularMaterial(IntPtr core, uint mtl_id, IntPtr value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetShininessMaterial(IntPtr core, uint material_index, float value);
+		public static extern void SetShininessMaterial(IntPtr core, uint mtl_id, float value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetEmitMaterial(IntPtr core, uint material_index, IntPtr value);
+		public static extern void SetEmitMaterial(IntPtr core, uint mtl_id, IntPtr value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetOpacityMaterial(IntPtr core, uint material_index, float value);
+		public static extern void SetOpacityMaterial(IntPtr core, uint mtl_id, float value);
 		[DllImport(CORE_NAME)]
-		public static extern void SetDiffuseTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetDiffuseTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetSpecularTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetSpecularTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetShininessTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetShininessTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetBumpTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetNormalTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetHeightTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetHeightTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetEmitTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetEmitTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
-		public static extern void SetOpacityTexture(IntPtr core, uint material_index, IntPtr name);
+		public static extern void SetOpacityTexture(IntPtr core, uint mtl_id, IntPtr name);
 		[DllImport(CORE_NAME)]
 		public static extern uint SelectedMesh(IntPtr core);
 		[DllImport(CORE_NAME)]
-		public static extern void SelectMesh(IntPtr core, uint mesh_index);
+		public static extern void SelectMesh(IntPtr core, uint mesh_id);
 	}
 
 	public sealed class MtlEditorCore
@@ -223,143 +223,143 @@ namespace MtlEditor
 		{
 			return Marshal.PtrToStringUni(MtlEditorCoreImporter.MeshName(core_, index));
 		}
-		public uint MaterialID(uint mesh_index)
+		public uint MaterialID(uint mesh_id)
 		{
-			return MtlEditorCoreImporter.MaterialID(core_, mesh_index);
+			return MtlEditorCoreImporter.MaterialID(core_, mesh_id);
 		}
-		public Color AmbientMaterial(uint material_index)
+		public Color AmbientMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MtlEditorCoreImporter.GetAmbientMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetAmbientMaterial(core_, mtl_id));
 		}
-		public Color DiffuseMaterial(uint material_index)
+		public Color DiffuseMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MtlEditorCoreImporter.GetDiffuseMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetDiffuseMaterial(core_, mtl_id));
 		}
-		public Color SpecularMaterial(uint material_index)
+		public Color SpecularMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MtlEditorCoreImporter.GetSpecularMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetSpecularMaterial(core_, mtl_id));
 		}
-		public float ShininessMaterial(uint material_index)
+		public float ShininessMaterial(uint mtl_id)
 		{
-			return MtlEditorCoreImporter.GetShininessMaterial(core_, material_index);
+			return MtlEditorCoreImporter.GetShininessMaterial(core_, mtl_id);
 		}
-		public Color EmitMaterial(uint material_index)
+		public Color EmitMaterial(uint mtl_id)
 		{
-			return this.IntPtrToColor(MtlEditorCoreImporter.GetEmitMaterial(core_, material_index));
+			return this.IntPtrToColor(MtlEditorCoreImporter.GetEmitMaterial(core_, mtl_id));
 		}
-		public float OpacityMaterial(uint material_index)
+		public float OpacityMaterial(uint mtl_id)
 		{
-			return MtlEditorCoreImporter.GetOpacityMaterial(core_, material_index);
+			return MtlEditorCoreImporter.GetOpacityMaterial(core_, mtl_id);
 		}
-		public string DiffuseTexture(uint material_index)
+		public string DiffuseTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetDiffuseTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetDiffuseTexture(core_, mtl_id));
 		}
-		public string SpecularTexture(uint material_index)
+		public string SpecularTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetSpecularTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetSpecularTexture(core_, mtl_id));
 		}
-		public string ShininessTexture(uint material_index)
+		public string ShininessTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetShininessTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetShininessTexture(core_, mtl_id));
 		}
-		public string BumpTexture(uint material_index)
+		public string NormalTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetBumpTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetNormalTexture(core_, mtl_id));
 		}
-		public string HeightTexture(uint material_index)
+		public string HeightTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetHeightTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetHeightTexture(core_, mtl_id));
 		}
-		public string EmitTexture(uint material_index)
+		public string EmitTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetEmitTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetEmitTexture(core_, mtl_id));
 		}
-		public string OpacityTexture(uint material_index)
+		public string OpacityTexture(uint mtl_id)
 		{
-			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetOpacityTexture(core_, material_index));
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetOpacityTexture(core_, mtl_id));
 		}
-		public void AmbientMaterial(uint material_index, Color value)
+		public void AmbientMaterial(uint mtl_id, Color value)
 		{
 			IntPtr ptr = this.ColorToIntPtr(value);
-			MtlEditorCoreImporter.SetAmbientMaterial(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetAmbientMaterial(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void DiffuseMaterial(uint material_index, Color value)
+		public void DiffuseMaterial(uint mtl_id, Color value)
 		{
 			IntPtr ptr = this.ColorToIntPtr(value);
-			MtlEditorCoreImporter.SetDiffuseMaterial(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetDiffuseMaterial(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void SpecularMaterial(uint material_index, Color value)
+		public void SpecularMaterial(uint mtl_id, Color value)
 		{
 			IntPtr ptr = this.ColorToIntPtr(value);
-			MtlEditorCoreImporter.SetSpecularMaterial(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetSpecularMaterial(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void ShininessMaterial(uint material_index, float value)
+		public void ShininessMaterial(uint mtl_id, float value)
 		{
-			MtlEditorCoreImporter.SetShininessMaterial(core_, material_index, value);
+			MtlEditorCoreImporter.SetShininessMaterial(core_, mtl_id, value);
 		}
-		public void EmitMaterial(uint material_index, Color value)
+		public void EmitMaterial(uint mtl_id, Color value)
 		{
 			IntPtr ptr = this.ColorToIntPtr(value);
-			MtlEditorCoreImporter.SetEmitMaterial(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetEmitMaterial(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void OpacityMaterial(uint material_index, float value)
+		public void OpacityMaterial(uint mtl_id, float value)
 		{
-			MtlEditorCoreImporter.SetOpacityMaterial(core_, material_index, value);
+			MtlEditorCoreImporter.SetOpacityMaterial(core_, mtl_id, value);
 		}
-		public void DiffuseTexture(uint material_index, string name)
+		public void DiffuseTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetDiffuseTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetDiffuseTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void SpecularTexture(uint material_index, string name)
+		public void SpecularTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetSpecularTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetSpecularTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void ShininessTexture(uint material_index, string name)
+		public void ShininessTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetShininessTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetShininessTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void BumpTexture(uint material_index, string name)
+		public void NormalTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetBumpTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetNormalTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void HeightTexture(uint material_index, string name)
+		public void HeightTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetHeightTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetHeightTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void EmitTexture(uint material_index, string name)
+		public void EmitTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetEmitTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetEmitTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
-		public void OpacityTexture(uint material_index, string name)
+		public void OpacityTexture(uint mtl_id, string name)
 		{
 			IntPtr ptr = Marshal.StringToHGlobalAnsi(name);
-			MtlEditorCoreImporter.SetOpacityTexture(core_, material_index, ptr);
+			MtlEditorCoreImporter.SetOpacityTexture(core_, mtl_id, ptr);
 			Marshal.FreeHGlobal(ptr);
 		}
 		public uint SelectedMesh()
 		{
 			return MtlEditorCoreImporter.SelectedMesh(core_);
 		}
-		public void SelectMesh(uint mesh_index)
+		public void SelectMesh(uint mesh_id)
 		{
-			MtlEditorCoreImporter.SelectMesh(core_, mesh_index);
+			MtlEditorCoreImporter.SelectMesh(core_, mesh_id);
 		}
 
 		private Color IntPtrToColor(IntPtr clr)

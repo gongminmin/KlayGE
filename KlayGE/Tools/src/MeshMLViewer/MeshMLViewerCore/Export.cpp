@@ -117,92 +117,92 @@ extern "C"
 
 	__declspec(dllexport) wchar_t const * APIENTRY MeshName(MeshMLViewerCore* core, uint32_t index)
 	{
-		return core->MeshName(index);
+		return core->MeshName(index).c_str();
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY NumVertexStreams(MeshMLViewerCore* core, uint32_t mesh_index)
+	__declspec(dllexport) uint32_t APIENTRY NumVertexStreams(MeshMLViewerCore* core, uint32_t mesh_id)
 	{
-		return core->NumVertexStreams(mesh_index);
+		return core->NumVertexStreams(mesh_id);
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY NumVertexStreamUsages(MeshMLViewerCore* core, uint32_t mesh_index, uint32_t stream_index)
+	__declspec(dllexport) uint32_t APIENTRY NumVertexStreamUsages(MeshMLViewerCore* core, uint32_t mesh_id, uint32_t stream_index)
 	{
-		return core->NumVertexStreamUsages(mesh_index, stream_index);
+		return core->NumVertexStreamUsages(mesh_id, stream_index);
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY VertexStreamUsage(MeshMLViewerCore* core, uint32_t mesh_index, uint32_t stream_index, uint32_t usage_index)
+	__declspec(dllexport) uint32_t APIENTRY VertexStreamUsage(MeshMLViewerCore* core, uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index)
 	{
-		return core->VertexStreamUsage(mesh_index, stream_index, usage_index);
+		return core->VertexStreamUsage(mesh_id, stream_index, usage_index);
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY MaterialID(MeshMLViewerCore* core, uint32_t mesh_index)
+	__declspec(dllexport) uint32_t APIENTRY MaterialID(MeshMLViewerCore* core, uint32_t mesh_id)
 	{
-		return core->MaterialID(mesh_index);
+		return core->MaterialID(mesh_id);
 	}
 
-	__declspec(dllexport) float* APIENTRY AmbientMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY AmbientMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->AmbientMaterial(material_index);
+		return &core->AmbientMaterial(mtl_id).x();
 	}
 
-	__declspec(dllexport) float* APIENTRY DiffuseMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY DiffuseMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->DiffuseMaterial(material_index);
+		return &core->DiffuseMaterial(mtl_id).x();
 	}
 
-	__declspec(dllexport) float* APIENTRY SpecularMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY SpecularMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->SpecularMaterial(material_index);
+		return &core->SpecularMaterial(mtl_id).x();
 	}
 
-	__declspec(dllexport) float APIENTRY ShininessMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float APIENTRY ShininessMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->ShininessMaterial(material_index);
+		return core->ShininessMaterial(mtl_id);
 	}
 
-	__declspec(dllexport) float* APIENTRY EmitMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY EmitMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->EmitMaterial(material_index);
+		return &core->EmitMaterial(mtl_id).x();
 	}
 
-	__declspec(dllexport) float APIENTRY OpacityMaterial(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) float APIENTRY OpacityMaterial(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->OpacityMaterial(material_index);
+		return core->OpacityMaterial(mtl_id);
 	}
 
-	__declspec(dllexport) char const * APIENTRY DiffuseTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY DiffuseTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->DiffuseTexture(material_index);
+		return core->DiffuseTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY SpecularTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY SpecularTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->SpecularTexture(material_index);
+		return core->SpecularTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY ShininessTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY ShininessTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->ShininessTexture(material_index);
+		return core->ShininessTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY BumpTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY NormalTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->BumpTexture(material_index);
+		return core->NormalTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY HeightTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY HeightTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->HeightTexture(material_index);
+		return core->HeightTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY EmitTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY EmitTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->EmitTexture(material_index);
+		return core->EmitTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) char const * APIENTRY OpacityTexture(MeshMLViewerCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY OpacityTexture(MeshMLViewerCore* core, uint32_t mtl_id)
 	{
-		return core->OpacityTexture(material_index);
+		return core->OpacityTexture(mtl_id).c_str();
 	}
 
 	__declspec(dllexport) uint32_t APIENTRY SelectedMesh(MeshMLViewerCore* core)
@@ -210,8 +210,8 @@ extern "C"
 		return core->SelectedMesh();
 	}
 
-	__declspec(dllexport) void APIENTRY SelectMesh(MeshMLViewerCore* core, uint32_t mesh_index)
+	__declspec(dllexport) void APIENTRY SelectMesh(MeshMLViewerCore* core, uint32_t mesh_id)
 	{
-		return core->SelectMesh(mesh_index);
+		return core->SelectMesh(mesh_id);
 	}
 }

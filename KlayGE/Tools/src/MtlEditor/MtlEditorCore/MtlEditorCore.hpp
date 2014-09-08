@@ -1,5 +1,5 @@
-#ifndef _MTLEDITORCORE_HPP
-#define _MTLEDITORCORE_HPP
+#ifndef _MTL_EDITOR_CORE_HPP
+#define _MTL_EDITOR_CORE_HPP
 
 #pragma once
 
@@ -8,6 +8,7 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include "Model.hpp"
+#include "Commands.hpp"
 
 namespace KlayGE
 {
@@ -24,39 +25,41 @@ namespace KlayGE
 		void SaveAsModel(std::string const & name);
 
 		uint32_t NumFrames() const;
-		void CurrFrame(float frame);
+		float CurrFrame() const;
 		float ModelFrameRate() const;
 		uint32_t NumMeshes() const;
-		wchar_t const * MeshName(uint32_t index) const;
-		uint32_t MaterialID(uint32_t mesh_index) const;
-		float* AmbientMaterial(uint32_t material_index) const;
-		float* DiffuseMaterial(uint32_t material_index) const;
-		float* SpecularMaterial(uint32_t material_index) const;
-		float ShininessMaterial(uint32_t material_index) const;
-		float* EmitMaterial(uint32_t material_index) const;
-		float OpacityMaterial(uint32_t material_index) const;
-		char const * DiffuseTexture(uint32_t material_index) const;
-		char const * SpecularTexture(uint32_t material_index) const;
-		char const * ShininessTexture(uint32_t material_index) const;
-		char const * BumpTexture(uint32_t material_index) const;
-		char const * HeightTexture(uint32_t material_index) const;
-		char const * EmitTexture(uint32_t material_index) const;
-		char const * OpacityTexture(uint32_t material_index) const;
-		void AmbientMaterial(uint32_t material_index, float* value);
-		void DiffuseMaterial(uint32_t material_index, float* value);
-		void SpecularMaterial(uint32_t material_index, float* value);
-		void ShininessMaterial(uint32_t material_index, float value);
-		void EmitMaterial(uint32_t material_index, float* value);
-		void OpacityMaterial(uint32_t material_index, float value);
-		void DiffuseTexture(uint32_t material_index, char const * name);
-		void SpecularTexture(uint32_t material_index, char const * name);
-		void ShininessTexture(uint32_t material_index, char const * name);
-		void BumpTexture(uint32_t material_index, char const * name);
-		void HeightTexture(uint32_t material_index, char const * name);
-		void EmitTexture(uint32_t material_index, char const * name);
-		void OpacityTexture(uint32_t material_index, char const * name);
+		std::wstring const & MeshName(uint32_t index) const;
 		uint32_t SelectedMesh() const;
-		void SelectMesh(uint32_t mesh_index);
+		uint32_t MaterialID(uint32_t mesh_id) const;
+		float3 const & AmbientMaterial(uint32_t mtl_id) const;
+		float3 const & DiffuseMaterial(uint32_t mtl_id) const;
+		float3 const & SpecularMaterial(uint32_t mtl_id) const;
+		float ShininessMaterial(uint32_t mtl_id) const;
+		float3 const & EmitMaterial(uint32_t mtl_id) const;
+		float OpacityMaterial(uint32_t mtl_id) const;
+		std::string const & DiffuseTexture(uint32_t mtl_id) const;
+		std::string const & SpecularTexture(uint32_t mtl_id) const;
+		std::string const & ShininessTexture(uint32_t mtl_id) const;
+		std::string const & NormalTexture(uint32_t mtl_id) const;
+		std::string const & HeightTexture(uint32_t mtl_id) const;
+		std::string const & EmitTexture(uint32_t mtl_id) const;
+		std::string const & OpacityTexture(uint32_t mtl_id) const;
+
+		void CurrFrame(float frame);
+		void SelectMesh(uint32_t mesh_id);
+		void AmbientMaterial(uint32_t mtl_id, float3 const & value);
+		void DiffuseMaterial(uint32_t mtl_id, float3 const & value);
+		void SpecularMaterial(uint32_t mtl_id, float3 const & value);
+		void ShininessMaterial(uint32_t mtl_id, float value);
+		void EmitMaterial(uint32_t mtl_id, float3 const & value);
+		void OpacityMaterial(uint32_t mtl_id, float value);
+		void DiffuseTexture(uint32_t mtl_id, std::string const & name);
+		void SpecularTexture(uint32_t mtl_id, std::string const & name);
+		void ShininessTexture(uint32_t mtl_id, std::string const & name);
+		void NormalTexture(uint32_t mtl_id, std::string const & name);
+		void HeightTexture(uint32_t mtl_id, std::string const & name);
+		void EmitTexture(uint32_t mtl_id, std::string const & name);
+		void OpacityTexture(uint32_t mtl_id, std::string const & name);
 
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);
@@ -65,6 +68,9 @@ namespace KlayGE
 		void MouseUp(int x, int y, uint32_t button);
 		void MouseDown(int x, int y, uint32_t button);
 		void KeyPress(int key);
+
+		void ExecuteCommand(MtlEditorCommandPtr const & cmd);
+		void RevokeCommand();
 
 	private:
 		virtual void OnCreate() KLAYGE_OVERRIDE;
@@ -106,7 +112,9 @@ namespace KlayGE
 		bool update_selective_buffer_;
 		uint32_t selected_obj_;
 		SceneObjectPtr selected_bb_;
+
+		std::vector<MtlEditorCommandPtr> command_history_;
 	};
 }
 
-#endif		// _MTLEDITORCORE_HPP
+#endif		// _MTL_EDITOR_CORE_HPP

@@ -34,7 +34,7 @@ namespace MtlEditor
 		const int DIFFUSE_TEX_ORDER = 7;
 		const int SPECULAR_TEX_ORDER = 8;
 		const int SHININESS_TEX_ORDER = 9;
-		const int BUMP_TEX_ORDER = 10;
+		const int NORMAL_TEX_ORDER = 10;
 		const int HEIGHT_TEX_ORDER = 11;
 		const int EMIT_TEX_ORDER = 12;
 		const int OPACITY_TEX_ORDER = 13;
@@ -92,10 +92,10 @@ namespace MtlEditor
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
-			[DisplayName("Bump")]
-			[PropertyOrder(BUMP_TEX_ORDER)]
+			[DisplayName("Normal")]
+			[PropertyOrder(NORMAL_TEX_ORDER)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
-			public string bump_tex { get; set; }
+			public string normal_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
 			[PropertyOrder(HEIGHT_TEX_ORDER)]
@@ -135,7 +135,7 @@ namespace MtlEditor
 
 			last_time_ = DateTime.Now;
 
-			selected_mesh_index_ = 0;
+			selected_mesh_id_ = 0;
 			opened_file_ = "";
 
 			Uri iconUri = new Uri("pack://application:,,,/Images/klayge_logo.ico", UriKind.RelativeOrAbsolute);
@@ -326,7 +326,7 @@ namespace MtlEditor
 			if (MouseButtons.Left == e.Button)
 			{
 				uint selected_mesh = core_.SelectedMesh();
-				if (selected_mesh != selected_mesh_index_)
+				if (selected_mesh != selected_mesh_id_)
 				{
 					this.UpdateMeshProperties(selected_mesh);
 				}
@@ -354,33 +354,33 @@ namespace MtlEditor
 			core_.KeyPress(e.KeyChar);
 		}
 
-		private void UpdateMeshProperties(uint mesh_index)
+		private void UpdateMeshProperties(uint mesh_id)
 		{
-			selected_mesh_index_ = mesh_index;
-			core_.SelectMesh(mesh_index);
+			selected_mesh_id_ = mesh_id;
+			core_.SelectMesh(mesh_id);
 
 			properties.SelectedObject = null;
 
-			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_index].DisplayName;
+			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_id].DisplayName;
 
-			if (mesh_index > 0)
+			if (mesh_id > 0)
 			{
-				uint mat_id = core_.MaterialID(mesh_index - 1);
+				uint mtl_id = core_.MaterialID(mesh_id - 1);
 
-				properties_obj_.ambient = core_.AmbientMaterial(mat_id);
-				properties_obj_.diffuse = core_.DiffuseMaterial(mat_id);
-				properties_obj_.specular = core_.SpecularMaterial(mat_id);
-				properties_obj_.emit = core_.EmitMaterial(mat_id);
-				properties_obj_.shininess = core_.ShininessMaterial(mat_id);
-				properties_obj_.opacity = core_.OpacityMaterial(mat_id);
+				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
+				properties_obj_.diffuse = core_.DiffuseMaterial(mtl_id);
+				properties_obj_.specular = core_.SpecularMaterial(mtl_id);
+				properties_obj_.emit = core_.EmitMaterial(mtl_id);
+				properties_obj_.shininess = core_.ShininessMaterial(mtl_id);
+				properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
-				properties_obj_.diffuse_tex = core_.DiffuseTexture(mat_id);
-				properties_obj_.specular_tex = core_.SpecularTexture(mat_id);
-				properties_obj_.shininess_tex = core_.ShininessTexture(mat_id);
-				properties_obj_.bump_tex = core_.BumpTexture(mat_id);
-				properties_obj_.height_tex = core_.HeightTexture(mat_id);
-				properties_obj_.emit_tex = core_.EmitTexture(mat_id);
-				properties_obj_.opacity_tex = core_.OpacityTexture(mat_id);
+				properties_obj_.diffuse_tex = core_.DiffuseTexture(mtl_id);
+				properties_obj_.specular_tex = core_.SpecularTexture(mtl_id);
+				properties_obj_.shininess_tex = core_.ShininessTexture(mtl_id);
+				properties_obj_.normal_tex = core_.NormalTexture(mtl_id);
+				properties_obj_.height_tex = core_.HeightTexture(mtl_id);
+				properties_obj_.emit_tex = core_.EmitTexture(mtl_id);
+				properties_obj_.opacity_tex = core_.OpacityTexture(mtl_id);
 			}
 			else
 			{
@@ -394,7 +394,7 @@ namespace MtlEditor
 				properties_obj_.diffuse_tex = "";
 				properties_obj_.specular_tex = "";
 				properties_obj_.shininess_tex = "";
-				properties_obj_.bump_tex = "";
+				properties_obj_.normal_tex = "";
 				properties_obj_.height_tex = "";
 				properties_obj_.emit_tex = "";
 				properties_obj_.opacity_tex = "";
@@ -410,120 +410,120 @@ namespace MtlEditor
 			{
 			case MESHES_ORDER:
 				{
-					uint mesh_index = 0;
-					for (; mesh_index < MeshItemsSource.items.Count; ++ mesh_index)
+					uint mesh_id = 0;
+					for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
 					{
-						if (MeshItemsSource.items[(int)mesh_index].DisplayName == (e.NewValue as string))
+						if (MeshItemsSource.items[(int)mesh_id].DisplayName == (e.NewValue as string))
 						{
 							break;
 						}
 					}
 
-					this.UpdateMeshProperties(mesh_index);
+					this.UpdateMeshProperties(mesh_id);
 				}
 				break;
 
 			case AMBIENT_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.AmbientMaterial(mat_id, properties_obj_.ambient);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.AmbientMaterial(mtl_id, properties_obj_.ambient);
 				}
 				break;
 
 			case DIFFUSE_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.DiffuseMaterial(mat_id, properties_obj_.diffuse);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.DiffuseMaterial(mtl_id, properties_obj_.diffuse);
 				}
 				break;
 
 			case SPECULAR_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.SpecularMaterial(mat_id, properties_obj_.specular);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.SpecularMaterial(mtl_id, properties_obj_.specular);
 				}
 				break;
 
 			case SHININESS_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.ShininessMaterial(mat_id, properties_obj_.shininess);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.ShininessMaterial(mtl_id, properties_obj_.shininess);
 				}
 				break;
 
 			case EMIT_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.EmitMaterial(mat_id, properties_obj_.emit);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.EmitMaterial(mtl_id, properties_obj_.emit);
 				}
 				break;
 
 			case OPACITY_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.OpacityMaterial(mat_id, properties_obj_.opacity);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.OpacityMaterial(mtl_id, properties_obj_.opacity);
 				}
 				break;
 
 			case DIFFUSE_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.DiffuseTexture(mat_id, this.RelativePath(properties_obj_.diffuse_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.DiffuseTexture(mtl_id, this.RelativePath(properties_obj_.diffuse_tex));
 				}
 				break;
 
 			case SPECULAR_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.SpecularTexture(mat_id, this.RelativePath(properties_obj_.specular_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.SpecularTexture(mtl_id, this.RelativePath(properties_obj_.specular_tex));
 				}
 				break;
 
 			case SHININESS_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.ShininessTexture(mat_id, this.RelativePath(properties_obj_.shininess_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.ShininessTexture(mtl_id, this.RelativePath(properties_obj_.shininess_tex));
 				}
 				break;
 
-			case BUMP_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+			case NORMAL_TEX_ORDER:
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.BumpTexture(mat_id, this.RelativePath(properties_obj_.bump_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.NormalTexture(mtl_id, this.RelativePath(properties_obj_.normal_tex));
 				}
 				break;
 
 			case HEIGHT_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.HeightTexture(mat_id, this.RelativePath(properties_obj_.height_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.HeightTexture(mtl_id, this.RelativePath(properties_obj_.height_tex));
 				}
 				break;
 
 			case EMIT_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.EmitTexture(mat_id, this.RelativePath(properties_obj_.emit_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.EmitTexture(mtl_id, this.RelativePath(properties_obj_.emit_tex));
 				}
 				break;
 
 			case OPACITY_TEX_ORDER:
-				if (selected_mesh_index_ > 0)
+				if (selected_mesh_id_ > 0)
 				{
-					uint mat_id = core_.MaterialID(selected_mesh_index_ - 1);
-					core_.OpacityTexture(mat_id, this.RelativePath(properties_obj_.opacity_tex));
+					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					core_.OpacityTexture(mtl_id, this.RelativePath(properties_obj_.opacity_tex));
 				}
 				break;
 
@@ -546,17 +546,24 @@ namespace MtlEditor
 
 		private string RelativePath(string name)
 		{
-			Uri uri_meshml = new Uri(opened_file_);
-			Uri uri_tex = new Uri(name);
-			Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
-			return relative_uri.ToString();
+			if ("" == name)
+			{
+				return "";
+			}
+			else
+			{
+				Uri uri_meshml = new Uri(opened_file_);
+				Uri uri_tex = new Uri(name);
+				Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
+				return relative_uri.ToString();
+			}
 		}
 
 		private MtlEditorCore core_;
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
-		private uint selected_mesh_index_;
+		private uint selected_mesh_id_;
 		private string opened_file_;
 	}
 

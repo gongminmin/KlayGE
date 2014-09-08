@@ -55,7 +55,7 @@ extern "C"
 	}
 	__declspec(dllexport) void APIENTRY CurrFrame(MtlEditorCore* core, float frame)
 	{
-		core->CurrFrame(frame);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetCurrFrame>(core, frame));
 	}
 	__declspec(dllexport) float APIENTRY ModelFrameRate(MtlEditorCore* core)
 	{
@@ -100,139 +100,126 @@ extern "C"
 
 	__declspec(dllexport) wchar_t const * APIENTRY MeshName(MtlEditorCore* core, uint32_t index)
 	{
-		return core->MeshName(index);
+		return core->MeshName(index).c_str();
 	}
 
-	__declspec(dllexport) uint32_t APIENTRY MaterialID(MtlEditorCore* core, uint32_t mesh_index)
+	__declspec(dllexport) uint32_t APIENTRY MaterialID(MtlEditorCore* core, uint32_t mesh_id)
 	{
-		return core->MaterialID(mesh_index);
+		return core->MaterialID(mesh_id);
 	}
 
-	__declspec(dllexport) float* APIENTRY GetAmbientMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY GetAmbientMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->AmbientMaterial(material_index);
+		return &core->AmbientMaterial(mtl_id).x();
 	}
-	__declspec(dllexport) float* APIENTRY GetDiffuseMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY GetDiffuseMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->DiffuseMaterial(material_index);
+		return &core->DiffuseMaterial(mtl_id).x();
 	}
-	__declspec(dllexport) float* APIENTRY GetSpecularMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY GetSpecularMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->SpecularMaterial(material_index);
+		return &core->SpecularMaterial(mtl_id).x();
 	}
-	__declspec(dllexport) float APIENTRY GetShininessMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float APIENTRY GetShininessMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->ShininessMaterial(material_index);
+		return core->ShininessMaterial(mtl_id);
 	}
-	__declspec(dllexport) float* APIENTRY GetEmitMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float const * APIENTRY GetEmitMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->EmitMaterial(material_index);
+		return &core->EmitMaterial(mtl_id).x();
 	}
-	__declspec(dllexport) float APIENTRY GetOpacityMaterial(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) float APIENTRY GetOpacityMaterial(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->OpacityMaterial(material_index);
+		return core->OpacityMaterial(mtl_id);
 	}
-	__declspec(dllexport) char const * APIENTRY GetDiffuseTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->DiffuseTexture(material_index);
+		return core->DiffuseTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetSpecularTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->SpecularTexture(material_index);
+		return core->SpecularTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetShininessTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetShininessTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->ShininessTexture(material_index);
+		return core->ShininessTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetBumpTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetNormalTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->BumpTexture(material_index);
+		return core->NormalTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetHeightTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetHeightTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->HeightTexture(material_index);
+		return core->HeightTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetEmitTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetEmitTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->EmitTexture(material_index);
+		return core->EmitTexture(mtl_id).c_str();
 	}
-	__declspec(dllexport) char const * APIENTRY GetOpacityTexture(MtlEditorCore* core, uint32_t material_index)
+	__declspec(dllexport) char const * APIENTRY GetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id)
 	{
-		return core->OpacityTexture(material_index);
+		return core->OpacityTexture(mtl_id).c_str();
 	}
 
-	__declspec(dllexport) void APIENTRY SetAmbientMaterial(MtlEditorCore* core,
-			uint32_t material_index, float* value)
+	__declspec(dllexport) void APIENTRY SetAmbientMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value)
 	{
-		core->AmbientMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetAmbientMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetDiffuseMaterial(MtlEditorCore* core,
-			uint32_t material_index, float* value)
+	__declspec(dllexport) void APIENTRY SetDiffuseMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value)
 	{
-		core->DiffuseMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetDiffuseMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetSpecularMaterial(MtlEditorCore* core,
-			uint32_t material_index, float* value)
+	__declspec(dllexport) void APIENTRY SetSpecularMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value)
 	{
-		core->SpecularMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetSpecularMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetShininessMaterial(MtlEditorCore* core,
-			uint32_t material_index, float value)
+	__declspec(dllexport) void APIENTRY SetShininessMaterial(MtlEditorCore* core, uint32_t mtl_id, float value)
 	{
-		core->ShininessMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetShininessMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetEmitMaterial(MtlEditorCore* core,
-			uint32_t material_index, float* value)
+	__declspec(dllexport) void APIENTRY SetEmitMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value)
 	{
-		core->EmitMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetEmitMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetOpacityMaterial(MtlEditorCore* core,
-			uint32_t material_index, float value)
+	__declspec(dllexport) void APIENTRY SetOpacityMaterial(MtlEditorCore* core, uint32_t mtl_id, float value)
 	{
-		core->OpacityMaterial(material_index, value);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetOpacityMaterial>(core, mtl_id, value));
 	}
-	__declspec(dllexport) void APIENTRY SetDiffuseTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->DiffuseTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetDiffuseTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetSpecularTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->SpecularTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetSpecularTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetShininessTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetShininessTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->ShininessTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetShininessTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetBumpTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetNormalTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->BumpTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetNormalTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetHeightTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetHeightTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->HeightTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetHeightTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetEmitTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetEmitTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->EmitTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetEmitTexture>(core, mtl_id, name));
 	}
-	__declspec(dllexport) void APIENTRY SetOpacityTexture(MtlEditorCore* core,
-			uint32_t material_index, char const * name)
+	__declspec(dllexport) void APIENTRY SetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name)
 	{
-		core->OpacityTexture(material_index, name);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetOpacityTexture>(core, mtl_id, name));
 	}
 
 	__declspec(dllexport) uint32_t APIENTRY SelectedMesh(MtlEditorCore* core)
 	{
 		return core->SelectedMesh();
 	}
-	__declspec(dllexport) void APIENTRY SelectMesh(MtlEditorCore* core, uint32_t mesh_index)
+	__declspec(dllexport) void APIENTRY SelectMesh(MtlEditorCore* core, uint32_t mesh_id)
 	{
-		return core->SelectMesh(mesh_index);
+		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSelectMesh>(core, mesh_id));
 	}
 }

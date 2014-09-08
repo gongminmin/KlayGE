@@ -555,79 +555,79 @@ namespace KlayGE
 		return model_->GetRenderable()->NumSubrenderables();
 	}
 
-	wchar_t const * MeshMLViewerCore::MeshName(uint32_t index) const
+	std::wstring const & MeshMLViewerCore::MeshName(uint32_t index) const
 	{
-		return model_->GetRenderable()->Subrenderable(index)->Name().c_str();
+		return model_->GetRenderable()->Subrenderable(index)->Name();
 	}
 
-	uint32_t MeshMLViewerCore::NumVertexStreams(uint32_t mesh_index) const
+	uint32_t MeshMLViewerCore::NumVertexStreams(uint32_t mesh_id) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_index);
+		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
 		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
 		return rl->NumVertexStreams();
 	}
 
-	uint32_t MeshMLViewerCore::NumVertexStreamUsages(uint32_t mesh_index, uint32_t stream_index) const
+	uint32_t MeshMLViewerCore::NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_index);
+		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
 		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
 		return static_cast<uint32_t>(rl->VertexStreamFormat(stream_index).size());
 	}
 
-	uint32_t MeshMLViewerCore::VertexStreamUsage(uint32_t mesh_index, uint32_t stream_index, uint32_t usage_index) const
+	uint32_t MeshMLViewerCore::VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_index);
+		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
 		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
 		return (rl->VertexStreamFormat(stream_index)[usage_index].usage << 16)
 			| (rl->VertexStreamFormat(stream_index)[usage_index].usage_index);
 	}
 
-	uint32_t MeshMLViewerCore::MaterialID(uint32_t mesh_index) const
+	uint32_t MeshMLViewerCore::MaterialID(uint32_t mesh_id) const
 	{
-		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model_->GetRenderable()->Subrenderable(mesh_index));
+		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model_->GetRenderable()->Subrenderable(mesh_id));
 		return mesh->MaterialID();
 	}
 
-	float* MeshMLViewerCore::AmbientMaterial(uint32_t material_index) const
+	float3 const & MeshMLViewerCore::AmbientMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return &model->GetMaterial(material_index)->ambient.x();
+		return model->GetMaterial(mtl_id)->ambient;
 	}
 
-	float* MeshMLViewerCore::DiffuseMaterial(uint32_t material_index) const
+	float3 const & MeshMLViewerCore::DiffuseMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return &model->GetMaterial(material_index)->diffuse.x();
+		return model->GetMaterial(mtl_id)->diffuse;
 	}
 
-	float* MeshMLViewerCore::SpecularMaterial(uint32_t material_index) const
+	float3 const & MeshMLViewerCore::SpecularMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return &model->GetMaterial(material_index)->specular.x();
+		return model->GetMaterial(mtl_id)->specular;
 	}
 
-	float MeshMLViewerCore::ShininessMaterial(uint32_t material_index) const
+	float MeshMLViewerCore::ShininessMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(material_index)->shininess;
+		return model->GetMaterial(mtl_id)->shininess;
 	}
 
-	float* MeshMLViewerCore::EmitMaterial(uint32_t material_index) const
+	float3 const & MeshMLViewerCore::EmitMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return &model->GetMaterial(material_index)->emit.x();
+		return model->GetMaterial(mtl_id)->emit;
 	}
 
-	float MeshMLViewerCore::OpacityMaterial(uint32_t material_index) const
+	float MeshMLViewerCore::OpacityMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(material_index)->opacity;
+		return model->GetMaterial(mtl_id)->opacity;
 	}
 
-	char const * MeshMLViewerCore::DiffuseTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::DiffuseTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
@@ -635,106 +635,113 @@ namespace KlayGE
 			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
 				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::SpecularTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::SpecularTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if ((CT_HASH("Specular Level") == slot_type_hash) || (CT_HASH("Specular Color") == slot_type_hash))
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::ShininessTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::ShininessTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if ((CT_HASH("Glossiness") == slot_type_hash) || (CT_HASH("Reflection Glossiness Map") == slot_type_hash))
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::BumpTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::NormalTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if ((CT_HASH("Bump") == slot_type_hash) || (CT_HASH("Bump Map") == slot_type_hash))
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::HeightTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::HeightTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if ((CT_HASH("Height") == slot_type_hash) || (CT_HASH("Height Map") == slot_type_hash))
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::EmitTexture(uint32_t material_index) const
+	std::string const & MeshMLViewerCore::EmitTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if (CT_HASH("Self-Illumination") == slot_type_hash)
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
-	char const * MeshMLViewerCore::OpacityTexture(uint32_t material_index) const
+	std::string const &MeshMLViewerCore::OpacityTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(material_index)->texture_slots;
+		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
 		for (TextureSlotsType::const_iterator iter = slots.begin();
 			iter != slots.end(); ++ iter)
 		{
 			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
 			if (CT_HASH("Opacity") == slot_type_hash)
 			{
-				return iter->second.c_str();
+				return iter->second;
 			}
 		}
-		return nullptr;
+		static std::string const empty;
+		return empty;
 	}
 
 	uint32_t MeshMLViewerCore::SelectedMesh() const
@@ -742,9 +749,9 @@ namespace KlayGE
 		return selected_obj_;
 	}
 
-	void MeshMLViewerCore::SelectMesh(uint32_t mesh_index)
+	void MeshMLViewerCore::SelectMesh(uint32_t mesh_id)
 	{
-		selected_obj_ = mesh_index;
+		selected_obj_ = mesh_id;
 		this->UpdateSelectedMesh();
 	}
 
