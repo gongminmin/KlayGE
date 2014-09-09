@@ -584,7 +584,7 @@ namespace KlayGE
 
 	uint32_t MeshMLViewerCore::MaterialID(uint32_t mesh_id) const
 	{
-		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model_->GetRenderable()->Subrenderable(mesh_id));
+		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model_->GetRenderable()->Subrenderable(mesh_id - 1));
 		return mesh->MaterialID();
 	}
 

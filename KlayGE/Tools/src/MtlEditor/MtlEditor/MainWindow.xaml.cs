@@ -122,6 +122,10 @@ namespace MtlEditor
 			properties_obj_ = new ModelPropertyTypes();
 			properties.SelectedObject = properties_obj_;
 
+			save.IsEnabled = false;
+			save_as.IsEnabled = false;
+			undo.IsEnabled = false;
+			redo.IsEnabled = false;
 			skinning.IsEnabled = false;
 			play.IsEnabled = false;
 			visualize.IsEnabled = false;
@@ -194,6 +198,11 @@ namespace MtlEditor
 				core_.OpenModel(dlg.FileName);
 				this.FileNameChanged(dlg.FileName);
 
+				core_.ClearHistroy();
+				this.UpdateHistroy();
+
+				save.IsEnabled = true;
+				save_as.IsEnabled = true;
 				if (core_.NumFrames() != 0)
 				{
 					skinning.IsEnabled = true;
@@ -253,6 +262,24 @@ namespace MtlEditor
 			}
 		}
 
+		private void UndoClick(object sender, RoutedEventArgs e)
+		{
+			core_.Undo();
+
+			selected_mesh_id_ = core_.SelectedMesh();
+			this.UpdateMeshProperties(selected_mesh_id_);
+			this.UpdateHistroy();
+		}
+
+		private void RedoClick(object sender, RoutedEventArgs e)
+		{
+			core_.Redo();
+
+			selected_mesh_id_ = core_.SelectedMesh();
+			this.UpdateMeshProperties(selected_mesh_id_);
+			this.UpdateHistroy();
+		}
+
 		private void SkinningChecked(object sender, RoutedEventArgs e)
 		{
 			core_.SkinningOn(1);
@@ -278,6 +305,8 @@ namespace MtlEditor
 			frame_ = frame_slider.Value * 0.1;
 			core_.CurrFrame((float)frame_);
 			frame_text.Content = "Frame " + (int)(frame_ + 0.5f);
+
+			this.UpdateHistroy();
 		}
 
 		private void VisualizeSelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -329,6 +358,7 @@ namespace MtlEditor
 				if (selected_mesh != selected_mesh_id_)
 				{
 					this.UpdateMeshProperties(selected_mesh);
+					this.UpdateHistroy();
 				}
 			}
 		}
@@ -357,7 +387,6 @@ namespace MtlEditor
 		private void UpdateMeshProperties(uint mesh_id)
 		{
 			selected_mesh_id_ = mesh_id;
-			core_.SelectMesh(mesh_id);
 
 			properties.SelectedObject = null;
 
@@ -365,7 +394,7 @@ namespace MtlEditor
 
 			if (mesh_id > 0)
 			{
-				uint mtl_id = core_.MaterialID(mesh_id - 1);
+				uint mtl_id = core_.MaterialID(mesh_id);
 
 				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
 				properties_obj_.diffuse = core_.DiffuseMaterial(mtl_id);
@@ -420,110 +449,126 @@ namespace MtlEditor
 					}
 
 					this.UpdateMeshProperties(mesh_id);
+
+					core_.SelectMesh(mesh_id);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case AMBIENT_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.AmbientMaterial(mtl_id, properties_obj_.ambient);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case DIFFUSE_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.DiffuseMaterial(mtl_id, properties_obj_.diffuse);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case SPECULAR_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.SpecularMaterial(mtl_id, properties_obj_.specular);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case SHININESS_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.ShininessMaterial(mtl_id, properties_obj_.shininess);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case EMIT_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.EmitMaterial(mtl_id, properties_obj_.emit);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case OPACITY_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.OpacityMaterial(mtl_id, properties_obj_.opacity);
+					this.UpdateHistroy();
 				}
 				break;
 
 			case DIFFUSE_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.DiffuseTexture(mtl_id, this.RelativePath(properties_obj_.diffuse_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case SPECULAR_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.SpecularTexture(mtl_id, this.RelativePath(properties_obj_.specular_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case SHININESS_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.ShininessTexture(mtl_id, this.RelativePath(properties_obj_.shininess_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case NORMAL_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.NormalTexture(mtl_id, this.RelativePath(properties_obj_.normal_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case HEIGHT_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.HeightTexture(mtl_id, this.RelativePath(properties_obj_.height_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case EMIT_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.EmitTexture(mtl_id, this.RelativePath(properties_obj_.emit_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
 			case OPACITY_TEX_ORDER:
 				if (selected_mesh_id_ > 0)
 				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_ - 1);
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.OpacityTexture(mtl_id, this.RelativePath(properties_obj_.opacity_tex));
+					this.UpdateHistroy();
 				}
 				break;
 
@@ -557,6 +602,12 @@ namespace MtlEditor
 				Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
 				return relative_uri.ToString();
 			}
+		}
+
+		private void UpdateHistroy()
+		{
+			undo.IsEnabled = (core_.EndCmdIndex() > 0);
+			redo.IsEnabled = (core_.EndCmdIndex() < core_.NumHistroyCmds());
 		}
 
 		private MtlEditorCore core_;

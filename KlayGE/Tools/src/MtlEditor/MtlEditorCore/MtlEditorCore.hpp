@@ -44,6 +44,9 @@ namespace KlayGE
 		std::string const & HeightTexture(uint32_t mtl_id) const;
 		std::string const & EmitTexture(uint32_t mtl_id) const;
 		std::string const & OpacityTexture(uint32_t mtl_id) const;
+		uint32_t NumHistroyCmds() const;
+		char const * HistroyCmdName(uint32_t index) const;
+		uint32_t EndCmdIndex() const;
 
 		void CurrFrame(float frame);
 		void SelectMesh(uint32_t mesh_id);
@@ -70,7 +73,9 @@ namespace KlayGE
 		void KeyPress(int key);
 
 		void ExecuteCommand(MtlEditorCommandPtr const & cmd);
-		void RevokeCommand();
+		void Undo();
+		void Redo();
+		void ClearHistroy();
 
 	private:
 		virtual void OnCreate() KLAYGE_OVERRIDE;
@@ -114,6 +119,7 @@ namespace KlayGE
 		SceneObjectPtr selected_bb_;
 
 		std::vector<MtlEditorCommandPtr> command_history_;
+		uint32_t end_command_index_;
 	};
 }
 

@@ -161,6 +161,19 @@ extern "C"
 		return core->OpacityTexture(mtl_id).c_str();
 	}
 
+	__declspec(dllexport) uint32_t APIENTRY NumHistroyCmds(MtlEditorCore* core)
+	{
+		return core->NumHistroyCmds();
+	}
+	__declspec(dllexport) char const * APIENTRY HistroyCmdName(MtlEditorCore* core, uint32_t index)
+	{
+		return core->HistroyCmdName(index);
+	}
+	__declspec(dllexport) uint32_t APIENTRY EndCmdIndex(MtlEditorCore* core)
+	{
+		return core->EndCmdIndex();
+	}
+
 	__declspec(dllexport) void APIENTRY SetAmbientMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value)
 	{
 		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSetAmbientMaterial>(core, mtl_id, value));
@@ -221,5 +234,18 @@ extern "C"
 	__declspec(dllexport) void APIENTRY SelectMesh(MtlEditorCore* core, uint32_t mesh_id)
 	{
 		core->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSelectMesh>(core, mesh_id));
+	}
+
+	__declspec(dllexport) void APIENTRY Undo(MtlEditorCore* core)
+	{
+		core->Undo();
+	}
+	__declspec(dllexport) void APIENTRY Redo(MtlEditorCore* core)
+	{
+		core->Redo();
+	}
+	__declspec(dllexport) void APIENTRY ClearHistroy(MtlEditorCore* core)
+	{
+		core->ClearHistroy();
 	}
 }

@@ -10,7 +10,21 @@ namespace KlayGE
 {
 	char const * editor_command_name[ECC_NumCommands] =
 	{
-		"Set current frame"
+		"Set current frame",
+		"Select mesh",
+		"Set ambient",
+		"Set diffuse",
+		"Set specular",
+		"Set shininess",
+		"Set emit",
+		"Set opacity",
+		"Set diffuse texture",
+		"Set specular texture",
+		"Set shininess texture",
+		"Set normal texture",
+		"Set height texture",
+		"Set emit texture",
+		"Set opacity texture"
 	};
 
 

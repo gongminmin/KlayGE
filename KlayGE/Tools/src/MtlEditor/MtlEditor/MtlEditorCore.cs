@@ -108,6 +108,12 @@ namespace MtlEditor
 		[DllImport(CORE_NAME)]
 		public static extern IntPtr GetOpacityTexture(IntPtr core, uint mtl_id);
 		[DllImport(CORE_NAME)]
+		public static extern uint NumHistroyCmds(IntPtr core);
+		[DllImport(CORE_NAME)]
+		public static extern IntPtr HistroyCmdName(IntPtr core, uint index);
+		[DllImport(CORE_NAME)]
+		public static extern uint EndCmdIndex(IntPtr core);
+		[DllImport(CORE_NAME)]
 		public static extern void SetAmbientMaterial(IntPtr core, uint mtl_id, IntPtr value);
 		[DllImport(CORE_NAME)]
 		public static extern void SetDiffuseMaterial(IntPtr core, uint mtl_id, IntPtr value);
@@ -137,6 +143,12 @@ namespace MtlEditor
 		public static extern uint SelectedMesh(IntPtr core);
 		[DllImport(CORE_NAME)]
 		public static extern void SelectMesh(IntPtr core, uint mesh_id);
+		[DllImport(CORE_NAME)]
+		public static extern void Undo(IntPtr core);
+		[DllImport(CORE_NAME)]
+		public static extern void Redo(IntPtr core);
+		[DllImport(CORE_NAME)]
+		public static extern void ClearHistroy(IntPtr core);
 	}
 
 	public sealed class MtlEditorCore
@@ -279,6 +291,20 @@ namespace MtlEditor
 		{
 			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.GetOpacityTexture(core_, mtl_id));
 		}
+
+		public uint NumHistroyCmds()
+		{
+			return MtlEditorCoreImporter.NumHistroyCmds(core_);
+		}
+		public string HistroyCmdName(uint index)
+		{
+			return Marshal.PtrToStringAnsi(MtlEditorCoreImporter.HistroyCmdName(core_, index));
+		}
+		public uint EndCmdIndex()
+		{
+			return MtlEditorCoreImporter.EndCmdIndex(core_);
+		}
+
 		public void AmbientMaterial(uint mtl_id, Color value)
 		{
 			IntPtr ptr = this.ColorToIntPtr(value);
@@ -360,6 +386,19 @@ namespace MtlEditor
 		public void SelectMesh(uint mesh_id)
 		{
 			MtlEditorCoreImporter.SelectMesh(core_, mesh_id);
+		}
+
+		public void Undo()
+		{
+			MtlEditorCoreImporter.Undo(core_);
+		}
+		public void Redo()
+		{
+			MtlEditorCoreImporter.Redo(core_);
+		}
+		public void ClearHistroy()
+		{
+			MtlEditorCoreImporter.ClearHistroy(core_);
 		}
 
 		private Color IntPtrToColor(IntPtr clr)

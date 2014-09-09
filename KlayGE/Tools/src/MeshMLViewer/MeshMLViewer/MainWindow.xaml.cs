@@ -431,7 +431,7 @@ namespace MeshMLViewer
 					properties_obj_.vertex_streams.Add(stream_name);
 				}
 
-				uint mtl_id = core_.MaterialID(mesh_id - 1);
+				uint mtl_id = core_.MaterialID(mesh_id);
 
 				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
 				properties_obj_.diffuse = core_.DiffuseMaterial(mtl_id);
