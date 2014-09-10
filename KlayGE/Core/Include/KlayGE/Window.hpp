@@ -94,6 +94,11 @@ namespace KlayGE
 		{
 			return a_window_;
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN
+		void* DWindow() const
+		{
+			return d_window_;
+		}
 #endif
 
 		int32_t Left() const
@@ -258,6 +263,10 @@ namespace KlayGE
 		{
 			return joystick_buttons_event_;
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN
+		void* CreateView() const;
+		void SetView(void* view) const;
+		void RunLoop();
 #endif
 		CloseEvent& OnClose()
 		{
@@ -337,6 +346,9 @@ namespace KlayGE
 		::Atom wm_delete_window_;
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;
+#elif defined KLAYGE_PLATFORM_DARWIN
+		uint32_t* pf_;
+		void* d_window_;
 #endif
 
 		bool external_wnd_;

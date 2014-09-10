@@ -408,7 +408,7 @@ namespace KlayGE
 	CONSTEXPR size_t _Hash(const char (&str)[N])
 	{
 		typedef const char (&truncated_str)[N - 1];
-#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+#if defined(KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT) && !defined(KLAYGE_PLATFORM_DARWIN)
 		#define seed _Hash((truncated_str)str)
 #else
 		size_t seed = _Hash((truncated_str)str);

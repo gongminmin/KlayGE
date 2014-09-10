@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme
+   LastUpgradeVersion = "0600"
+   version = "1.3">
+   <BuildAction
+      parallelizeBuildables = "YES"
+      buildImplicitDependencies = "YES">
+      <BuildActionEntries>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+               BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+               BlueprintName = "@TARGET_NAME@"
+               ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <TestAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      buildConfiguration = "Debug">
+      <Testables>
+      </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGET_NAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
+   </TestAction>
+   <LaunchAction
+      selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
+      selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
+      launchStyle = "0"
+      useCustomWorkingDirectory = "YES"
+      customWorkingDirectory = "@KLAYGE_BIN_DIR@"
+      buildConfiguration = "Debug"
+      ignoresPersistentStateOnLaunch = "NO"
+      debugDocumentVersioning = "YES"
+      allowLocationSimulation = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGET_NAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+      <AdditionalOptions>
+      </AdditionalOptions>
+   </LaunchAction>
+   <ProfileAction
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      savedToolIdentifier = ""
+      useCustomWorkingDirectory = "YES"
+      customWorkingDirectory = "@KLAYGE_BIN_DIR@"
+      buildConfiguration = "Release"
+      debugDocumentVersioning = "YES">
+      <BuildableProductRunnable>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGET_NAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
+   </ProfileAction>
+   <AnalyzeAction
+      buildConfiguration = "Debug">
+   </AnalyzeAction>
+   <ArchiveAction
+      buildConfiguration = "Release"
+      revealArchiveInOrganizer = "YES">
+   </ArchiveAction>
+</Scheme>

@@ -308,6 +308,22 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN		
 		// TODO
+
+		if (isFullScreen_)
+		{
+			left_ = 0;
+			top_ = 0;
+		}
+		else
+		{
+			left_ = settings.left;
+			top_ = settings.top;
+		}
+		
+		void* view = main_wnd->CreateView();
+		main_wnd->SetView(view);
+		glloader_init();
+
 		uint32_t sample_count = settings.sample_count;
 #endif
 
