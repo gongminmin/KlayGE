@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_surfaceless_context" reg_no="116">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_UNDEFINED_OES" value="0x8219"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ARM_mali_program_binary" reg_no="120">
+	<tokens>
+		<token name="GL_MALI_PROGRAM_BINARY_ARM" value="0x8F61"/>
+	</tokens>
+</gl_extension>

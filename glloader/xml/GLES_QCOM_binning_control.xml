@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_binning_control" reg_no="119">
+	<tokens>
+		<token name="GL_BINNING_CONTROL_HINT_QCOM" value="0x8FB0"/>
+		<token name="GL_CPU_OPTIMIZED_QCOM" value="0x8FB1"/>
+		<token name="GL_GPU_OPTIMIZED_QCOM" value="0x8FB2"/>
+		<token name="GL_RENDER_DIRECT_TO_FRAMEBUFFER_QCOM" value="0x8FB3"/>
+		<token name="GL_DONT_CARE" value="0x1100"/>
+	</tokens>
+</gl_extension>
