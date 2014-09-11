@@ -59,7 +59,8 @@ namespace KlayGE
 	AudioBuffer::AudioBuffer(AudioDataSourcePtr const & dataSource)
 			: dataSource_(dataSource),
 				format_(dataSource->Format()),
-				freq_(dataSource->Freq())
+				freq_(dataSource->Freq()),
+				resume_playing_(false)
 	{
 	}
 
@@ -71,5 +72,23 @@ namespace KlayGE
 	{
 		static AudioBufferPtr obj = MakeSharedPtr<NullAudioBuffer>();
 		return obj;
+	}
+
+	void AudioBuffer::Suspend()
+	{
+		if (this->IsPlaying())
+		{
+			resume_playing_ = true;
+			this->Stop();
+		}
+	}
+
+	void AudioBuffer::Resume()
+	{
+		if (resume_playing_)
+		{
+			this->Play();
+			resume_playing_ = false;
+		}
 	}
 }

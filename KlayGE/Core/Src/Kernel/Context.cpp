@@ -35,6 +35,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KFL/Thread.hpp>
 #include <KlayGE/PerfProfiler.hpp>
+#include <KlayGE/UI.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -101,6 +102,7 @@ namespace KlayGE
 
 		ResLoader::Destroy();
 		PerfProfiler::Destroy();
+		UIManager::Destroy();
 
 		deferred_rendering_layer_.reset();
 		show_factory_.reset();
@@ -142,6 +144,7 @@ namespace KlayGE
 
 		ResLoader::Instance().Suspend();
 		PerfProfiler::Instance().Suspend();
+		UIManager::Instance().Suspend();
 
 		deferred_rendering_layer_->Suspend();
 		show_factory_->Suspend();
@@ -158,6 +161,7 @@ namespace KlayGE
 
 		ResLoader::Instance().Resume();
 		PerfProfiler::Instance().Resume();
+		UIManager::Instance().Resume();
 
 		deferred_rendering_layer_->Resume();
 		show_factory_->Resume();

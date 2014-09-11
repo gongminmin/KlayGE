@@ -37,6 +37,9 @@ namespace KlayGE
 
 		static AudioBufferPtr NullObject();
 
+		void Suspend();
+		void Resume();
+
 		virtual void Play(bool loop = false) = 0;
 		virtual void Reset() = 0;
 		virtual void Stop() = 0;
@@ -58,6 +61,8 @@ namespace KlayGE
 
 		AudioFormat	format_;
 		uint32_t			freq_;
+
+		bool resume_playing_;
 	};
 
 	// ÉùÒô»º³åÇø

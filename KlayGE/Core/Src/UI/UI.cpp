@@ -374,6 +374,16 @@ namespace KlayGE
 		ui_mgr_instance_.reset();
 	}
 
+	void UIManager::Suspend()
+	{
+		// TODO
+	}
+
+	void UIManager::Resume()
+	{
+		// TODO
+	}
+
 	void UIManager::Load(ResIdentifierPtr const & source)
 	{
 		if (source)

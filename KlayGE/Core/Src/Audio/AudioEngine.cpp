@@ -77,12 +77,20 @@ namespace KlayGE
 
 	void AudioEngine::Suspend()
 	{
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		{
+			ab.second->Suspend();
+		}
 		this->DoSuspend();
 	}
 
 	void AudioEngine::Resume()
 	{
 		this->DoResume();
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		{
+			ab.second->Resume();
+		}
 	}
 
 	// 获取空对象
@@ -159,8 +167,7 @@ namespace KlayGE
 	{
 		soundVol_ = vol;
 
-		typedef KLAYGE_DECLTYPE(audioBufs_) AudioBufsType;
-		KLAYGE_FOREACH(AudioBufsType::reference ab, audioBufs_)
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
 		{
 			if (ab.second->IsSound())
 			{
@@ -182,8 +189,7 @@ namespace KlayGE
 	{
 		musicVol_ = vol;
 
-		typedef KLAYGE_DECLTYPE(audioBufs_) AudioBufsType;
-		KLAYGE_FOREACH(AudioBufsType::reference ab, audioBufs_)
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
 		{
 			if (!(ab.second->IsSound()))
 			{

@@ -68,18 +68,34 @@ namespace KlayGE
 		}
 	};
 
+	ShowEngine::ShowEngine()
+		: state_(SS_Uninit),
+			resume_playing_(false)
+	{
+	}
+
 	ShowEngine::~ShowEngine()
 	{
 	}
 
 	void ShowEngine::Suspend()
 	{
+		if (SS_Playing == state_)
+		{
+			resume_playing_ = true;
+			this->Pause();
+		}
 		this->DoSuspend();
 	}
 
 	void ShowEngine::Resume()
 	{
 		this->DoResume();
+		if (resume_playing_)
+		{
+			this->Play();
+			resume_playing_ = false;
+		}
 	}
 
 	// 返回空对象
@@ -94,28 +110,28 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	bool ShowEngine::CanPlay() const
 	{
-		return (SS_Stopped == this->state_) || (SS_Paused == this->state_);
+		return (SS_Stopped == state_) || (SS_Paused == state_);
 	}
 
 	// 可以停止
 	/////////////////////////////////////////////////////////////////////////////////
 	bool ShowEngine::CanStop() const
 	{
-		return (SS_Playing == this->state_) || (SS_Paused == this->state_);
+		return (SS_Playing == state_) || (SS_Paused == state_);
 	}
 
 	// 可以暂停
 	/////////////////////////////////////////////////////////////////////////////////
 	bool ShowEngine::CanPause() const
 	{
-		return (SS_Playing == this->state_) || (SS_Paused == this->state_);
+		return (SS_Playing == state_) || (SS_Paused == state_);
 	}
 
 	// 初始化完毕
 	/////////////////////////////////////////////////////////////////////////////////
 	bool ShowEngine::IsInitialized() const
 	{
-		return this->state_ != SS_Uninit;
+		return state_ != SS_Uninit;
 	}
 
 	// 播放

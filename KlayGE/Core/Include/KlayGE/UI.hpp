@@ -377,6 +377,9 @@ namespace KlayGE
 		static UIManager& Instance();
 		static void Destroy();
 
+		void Suspend();
+		void Resume();
+
 		void Load(ResIdentifierPtr const & source);
 
 		UIDialogPtr MakeDialog(TexturePtr const & control_tex = TexturePtr());

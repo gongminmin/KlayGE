@@ -33,6 +33,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API ShowEngine
 	{
 	public:
+		ShowEngine();
 		virtual ~ShowEngine();
 
 		void Suspend();
@@ -66,6 +67,7 @@ namespace KlayGE
 
 	protected:
 		ShowState state_;
+		bool resume_playing_;
 	};
 }
 
