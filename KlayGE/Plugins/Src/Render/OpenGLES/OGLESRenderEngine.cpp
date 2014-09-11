@@ -47,6 +47,132 @@
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 
+namespace
+{
+#ifndef KLAYGE_SHIP
+	char const * DebugSourceString(GLenum value)
+	{
+		char const * ret;
+		switch (value)
+		{
+		case GL_DEBUG_SOURCE_API_KHR:
+			ret = "GL";
+			break;
+		case GL_DEBUG_SOURCE_SHADER_COMPILER_KHR:
+			ret = "shader compiler";
+			break;
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR:
+			ret = "window system";
+			break;
+		case GL_DEBUG_SOURCE_THIRD_PARTY_KHR:
+			ret = "3rd party";
+			break;
+		case GL_DEBUG_SOURCE_APPLICATION_KHR:
+			ret = "application";
+			break;
+		case GL_DEBUG_SOURCE_OTHER_KHR:
+			ret = "other";
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			ret = nullptr;
+		}
+
+		return ret;
+	}
+
+	char const * DebugTypeString(GLenum value)
+	{
+		char const * ret;
+		switch (value)
+		{
+		case GL_DEBUG_TYPE_ERROR_KHR:
+			ret = "error";
+			break;
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR:
+			ret = "deprecated behavior";
+			break;
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR:
+			ret = "undefined behavior";
+			break;
+		case GL_DEBUG_TYPE_PERFORMANCE_KHR:
+			ret = "performance";
+			break;
+		case GL_DEBUG_TYPE_PORTABILITY_KHR:
+			ret = "portability";
+			break;
+		case GL_DEBUG_TYPE_MARKER_KHR:
+			ret = "marker";
+			break;
+		case GL_DEBUG_TYPE_PUSH_GROUP_KHR:
+			ret = "push group";
+			break;
+		case GL_DEBUG_TYPE_POP_GROUP_KHR:
+			ret = "pop group";
+			break;
+		case GL_DEBUG_TYPE_OTHER_KHR:
+			ret = "other";
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			ret = nullptr;
+		}
+
+		return ret;
+	}
+
+	char const * DebugSeverityString(GLenum value)
+	{
+		char const * ret;
+		switch (value)
+		{
+		case GL_DEBUG_SEVERITY_HIGH_KHR:
+			ret = "high";
+			break;
+		case GL_DEBUG_SEVERITY_MEDIUM_KHR:
+			ret = "medium";
+			break;
+		case GL_DEBUG_SEVERITY_LOW_KHR:
+			ret = "low";
+			break;
+		case GL_DEBUG_SEVERITY_NOTIFICATION_KHR:
+			ret = "notification";
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			ret = nullptr;
+		}
+
+		return ret;
+	}
+
+	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length,
+		GLchar const * message, GLvoid* user_param)
+	{
+		UNREF_PARAM(length);
+		UNREF_PARAM(user_param);
+
+		std::ostringstream ss;
+		ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
+			<< "type: " << DebugTypeString(type) << "; "
+			<< "id: " << id << "; "
+			<< "severity:" << DebugSeverityString(serverity) << "; "
+			<< "message: " << message;
+		if (GL_DEBUG_TYPE_ERROR_KHR == type)
+		{
+			KlayGE::LogError(ss.str().c_str());
+		}
+		else
+		{
+			KlayGE::LogInfo(ss.str().c_str());
+		}
+	}
+#endif
+}
+
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
@@ -97,6 +223,16 @@ namespace KlayGE
 
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
+
+#ifndef KLAYGE_SHIP
+		if (glloader_GLES_KHR_debug())
+		{
+			glEnable(GL_DEBUG_OUTPUT_KHR);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+			glDebugMessageCallbackKHR(&DebugOutputProc, NULL);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+		}
+#endif
 
 		win->Attach(FrameBuffer::ATT_Color0,
 			MakeSharedPtr<OGLESScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
