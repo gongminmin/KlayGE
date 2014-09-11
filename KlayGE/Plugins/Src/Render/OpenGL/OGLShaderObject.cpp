@@ -55,7 +55,6 @@
 
 #include <glloader/glloader.h>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
 #if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
@@ -72,7 +71,6 @@
 #include <D3DCompiler.h>
 #else
 #include <Cg/cg.h>
-#endif
 #endif
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
@@ -93,7 +91,6 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if USE_DXBC2GLSL
 	class DXBC2GLSLIniter
 	{
@@ -369,7 +366,6 @@ namespace
 		"varying out float v_gl_FogFragCoord;\n";
 
 	char const * predefined_ps_out_varyings = "varying out vec4 v_gl_FragData_%d;\n";
-#endif
 #endif
 
 	template <typename SrcType>
@@ -1144,7 +1140,6 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if !USE_DXBC2GLSL
 	std::string OGLShaderObject::GenCgShaderText(ShaderType type, RenderEffect const & effect,
 		RenderTechnique const & tech, RenderPass const & pass)
@@ -1980,7 +1975,6 @@ namespace KlayGE
 		return ss.str();
 	}
 #endif
-#endif
 
 	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block)
@@ -2287,7 +2281,6 @@ namespace KlayGE
 
 		if (is_shader_validate_[type])
 		{
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if USE_DXBC2GLSL
 			OGLRenderEngine const & re = *checked_cast<OGLRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -3175,7 +3168,6 @@ namespace KlayGE
 
 				cgDestroyProgram(cg_shader);
 			}
-#endif
 #endif
 		}
 

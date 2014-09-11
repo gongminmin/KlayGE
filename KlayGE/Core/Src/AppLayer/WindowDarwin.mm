@@ -169,6 +169,7 @@ namespace KlayGE
 			left_ = initContentRect.origin.y;
 			width_ = initContentRect.size.width;
 			height_ = initContentRect.size.height;
+		}
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
