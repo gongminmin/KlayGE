@@ -174,25 +174,28 @@ namespace
 		return ret;
 	}
 
-	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum serverity, GLsizei length,
+	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 		GLchar const * message, GLvoid* user_param)
 	{
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
 
-		std::ostringstream ss;
-		ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
-			<< "type: " << DebugTypeString(type) << "; "
-			<< "id: " << id << "; "
-			<< "severity:" << DebugSeverityString(serverity) << "; "
-			<< "message: " << message;
-		if (GL_DEBUG_TYPE_ERROR == type)
+		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
 		{
-			KlayGE::LogError(ss.str().c_str());
-		}
-		else
-		{
-			KlayGE::LogInfo(ss.str().c_str());
+			std::ostringstream ss;
+			ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
+				<< "type: " << DebugTypeString(type) << "; "
+				<< "id: " << id << "; "
+				<< "severity: " << DebugSeverityString(severity) << "; "
+				<< "message: " << message;
+			if (GL_DEBUG_TYPE_ERROR == type)
+			{
+				KlayGE::LogError(ss.str().c_str());
+			}
+			else
+			{
+				KlayGE::LogInfo(ss.str().c_str());
+			}
 		}
 	}
 #endif
@@ -256,14 +259,14 @@ namespace KlayGE
 		{
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-			glDebugMessageCallback(&DebugOutputProc, NULL);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+			glDebugMessageCallback(&DebugOutputProc, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 		else if (glloader_GL_ARB_debug_output())
 		{
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
-			glDebugMessageCallbackARB(&DebugOutputProc, NULL);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
+			glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
 		}
 #endif
 
