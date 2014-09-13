@@ -127,6 +127,82 @@ namespace KlayGE
 			}
 		}
 
+		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+		{
+			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->InstanceStream()));
+
+			uint32_t const num_instances = this->NumInstances();
+			uint32_t const instance_size = this->InstanceSize();
+			BOOST_ASSERT(num_instances * instance_size <= stream.Size());
+
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glVertexArrayVertexBuffer(vao, this->NumVertexStreams(), stream.GLvbo(),
+					this->StartInstanceLocation() * instance_size, instance_size);
+				glVertexArrayBindingDivisor(vao, this->NumVertexStreams(), 1);
+			}
+
+			size_t const inst_format_size = this->InstanceStreamFormat().size();
+			uint32_t elem_offset = 0;
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum type;
+					GLboolean normalized;
+					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset + this->StartInstanceLocation() * instance_size);
+
+					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
+					stream.Active(use_vao_);
+					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					{
+						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized, elem_offset);
+						glVertexArrayAttribBinding(vao, attr, this->NumVertexStreams());
+						glEnableVertexArrayAttrib(vao, attr);
+					}
+					else if (glloader_GL_EXT_direct_state_access())
+					{
+						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
+							normalized, instance_size, reinterpret_cast<GLintptr>(offset));
+						glEnableVertexArrayAttribEXT(vao, attr);
+
+						if (glloader_GL_VERSION_3_3())
+						{
+							glVertexAttribDivisor(attr, 1);
+						}
+						else
+						{
+							glVertexAttribDivisorARB(attr, 1);
+						}
+					}
+					else
+					{
+						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+						glEnableVertexAttribArray(attr);
+
+						if (glloader_GL_VERSION_3_3())
+						{
+							glVertexAttribDivisor(attr, 1);
+						}
+						else
+						{
+							glVertexAttribDivisorARB(attr, 1);
+						}
+					}
+
+					used_streams[attr] = 1;
+				}
+
+				elem_offset += vs_elem.element_size();
+			}
+		}
+
 		for (GLuint i = 0; i < max_vertex_streams; ++ i)
 		{
 			if (!used_streams[i])
@@ -171,6 +247,55 @@ namespace KlayGE
 					else
 					{
 						glDisableVertexAttribArray(attr);
+					}
+				}
+			}
+		}
+
+		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+		{
+			OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glVertexArrayBindingDivisor(vao, this->NumVertexStreams(), 0);
+			}
+
+			size_t const inst_format_size = this->InstanceStreamFormat().size();
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					{
+						glDisableVertexArrayAttrib(vao, attr);
+					}
+					else if (glloader_GL_EXT_direct_state_access())
+					{
+						glDisableVertexArrayAttribEXT(vao, attr);
+
+						if (glloader_GL_VERSION_3_3())
+						{
+							glVertexAttribDivisor(attr, 0);
+						}
+						else
+						{
+							glVertexAttribDivisorARB(attr, 0);
+						}
+					}
+					else
+					{
+						glDisableVertexAttribArray(attr);
+
+						if (glloader_GL_VERSION_3_3())
+						{
+							glVertexAttribDivisor(attr, 0);
+						}
+						else
+						{
+							glVertexAttribDivisorARB(attr, 0);
+						}
 					}
 				}
 			}
@@ -240,11 +365,7 @@ namespace KlayGE
 	{
 		if (!use_vao_)
 		{
-			typedef KLAYGE_DECLTYPE(vaos_) VAOsType;
-			VAOsType::iterator iter = vaos_.find(so);
-			BOOST_ASSERT(iter != vaos_.end());
-
-			this->UnbindVertexStreams(so, iter->second);
+			this->UnbindVertexStreams(so, 0);
 		}
 	}
 }

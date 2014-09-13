@@ -93,6 +93,51 @@ namespace KlayGE
 			}
 		}
 
+		if (this->InstanceStream() && (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()))
+		{
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
+
+			uint32_t const num_instances = this->NumInstances();
+			uint32_t const instance_size = this->InstanceSize();
+			BOOST_ASSERT(num_instances * instance_size <= stream.Size());
+
+			size_t const inst_format_size = this->InstanceStreamFormat().size();
+			uint8_t* elem_offset = nullptr;
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
+					GLenum type;
+					GLboolean normalized;
+					OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
+					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
+					GLvoid* offset = static_cast<GLvoid*>(elem_offset + this->StartInstanceLocation() * instance_size);
+
+					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
+					stream.Active(use_vao_);
+					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+					glEnableVertexAttribArray(attr);
+
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glVertexAttribDivisor(attr, 1);
+					}
+					else
+					{
+						glVertexAttribDivisorEXT(attr, 1);
+					}
+
+					used_streams[attr] = 1;
+				}
+
+				elem_offset += vs_elem.element_size();
+			}
+		}
+
 		for (GLuint i = 0; i < max_vertex_streams; ++ i)
 		{
 			if (!used_streams[i])
@@ -125,6 +170,28 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
+				}
+			}
+		}
+
+		if (this->InstanceStream() && (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()))
+		{
+			size_t const inst_format_size = this->InstanceStreamFormat().size();
+			for (size_t i = 0; i < inst_format_size; ++ i)
+			{
+				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
+				if (attr != -1)
+				{
+					glDisableVertexAttribArray(attr);
+					if (glloader_GLES_VERSION_3_0())
+					{
+						glVertexAttribDivisor(attr, 0);
+					}
+					else
+					{
+						glVertexAttribDivisorEXT(attr, 0);
+					}
 				}
 			}
 		}

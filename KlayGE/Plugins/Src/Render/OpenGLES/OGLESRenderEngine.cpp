@@ -976,44 +976,9 @@ namespace KlayGE
 		}
 
 		uint32_t const num_passes = tech.NumPasses();
-		size_t const inst_format_size = rl.InstanceStreamFormat().size();
 		GraphicsBufferPtr const & buff_args = rl.GetIndirectArgs();
 		if (glloader_GLES_VERSION_3_1() && buff_args)
 		{
-			if (rl.InstanceStream())
-			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(rl.InstanceStream()));
-
-				uint32_t const instance_size = rl.InstanceSize();
-				BOOST_ASSERT(num_instances * instance_size <= stream.Size());
-
-				uint8_t* elem_offset = nullptr;
-				for (size_t i = 0; i < inst_format_size; ++ i)
-				{
-					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-
-					GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-					if (attr != -1)
-					{
-						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-						GLenum type;
-						GLboolean normalized;
-						OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
-						normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-						GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
-
-						BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
-						stream.Active(false);
-						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
-						glEnableVertexAttribArray(attr);
-
-						glVertexAttribDivisor(attr, 1);
-					}
-
-					elem_offset += vs_elem.element_size();
-				}
-			}
-
 			if (so_rl_)
 			{
 				glBeginTransformFeedback(so_primitive_mode_);
@@ -1071,62 +1036,10 @@ namespace KlayGE
 				glEndTransformFeedback();
 			}
 
-			for (size_t i = 0; i < inst_format_size; ++ i)
-			{
-				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				if (attr != -1)
-				{
-					glDisableVertexAttribArray(attr);
-					glVertexAttribDivisor(attr, 0);
-				}
-			}
-
 			num_draws_just_called_ += num_passes;
 		}
 		else if ((glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()) && (rl.NumInstances() > 1))
 		{
-			if (rl.InstanceStream())
-			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(rl.InstanceStream()));
-
-				uint32_t const instance_size = rl.InstanceSize();
-				BOOST_ASSERT(num_instances * instance_size <= stream.Size());
-
-				uint8_t* elem_offset = nullptr;
-				for (size_t i = 0; i < inst_format_size; ++ i)
-				{
-					vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-
-					GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-					if (attr != -1)
-					{
-						GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
-						GLenum type;
-						GLboolean normalized;
-						OGLESMapping::MappingVertexFormat(type, normalized, vs_elem.format);
-						normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-						GLvoid* offset = static_cast<GLvoid*>(elem_offset + rl.StartInstanceLocation() * instance_size);
-
-						BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
-						stream.Active(false);
-						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
-						glEnableVertexAttribArray(attr);
-
-						if (glloader_GLES_VERSION_3_0())
-						{
-							glVertexAttribDivisor(attr, 1);
-						}
-						else
-						{
-							glVertexAttribDivisorEXT(attr, 1);
-						}
-					}
-
-					elem_offset += vs_elem.element_size();
-				}
-			}
-
 			if (so_rl_)
 			{
 				glBeginTransformFeedback(so_primitive_mode_);
@@ -1198,24 +1111,6 @@ namespace KlayGE
 				glEndTransformFeedback();
 			}
 
-			for (size_t i = 0; i < inst_format_size; ++ i)
-			{
-				vertex_element const & vs_elem = rl.InstanceStreamFormat()[i];
-				GLint attr = cur_shader->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
-				if (attr != -1)
-				{
-					glDisableVertexAttribArray(attr);
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glVertexAttribDivisor(attr, 0);
-					}
-					else
-					{
-						glVertexAttribDivisorEXT(attr, 0);
-					}
-				}
-			}
-
 			num_draws_just_called_ += num_passes;
 		}
 		else
@@ -1231,6 +1126,7 @@ namespace KlayGE
 					GraphicsBuffer::Mapper mapper(stream, BA_Read_Only);
 					uint8_t const * buffer = mapper.Pointer<uint8_t>();
 
+					size_t const inst_format_size = rl.InstanceStreamFormat().size();
 					uint32_t elem_offset = 0;
 					for (size_t i = 0; i < inst_format_size; ++ i)
 					{
