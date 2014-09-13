@@ -228,13 +228,13 @@ namespace KlayGE
 
 		if (glloader_WGL_ARB_create_context())
 		{
-			int flags = 0;//WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
-#ifdef KLAYGE_DEBUG
+			int flags = 0;
+#ifndef KLAYGE_SHIP
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
 
 			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 0, WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-				WGL_CONTEXT_FLAGS_ARB, flags, WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB, 0 };
+				WGL_CONTEXT_FLAGS_ARB, flags, WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, 0 };
 			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
 				attribs[1] = available_versions[i].second.first;
@@ -347,6 +347,11 @@ namespace KlayGE
 			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
 			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
 			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
+		}
+
+		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_seamless_cube_map())
+		{
+			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS

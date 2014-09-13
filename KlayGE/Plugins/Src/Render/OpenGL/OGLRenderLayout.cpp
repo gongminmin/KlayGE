@@ -193,8 +193,8 @@ namespace KlayGE
 				else
 				{
 					glGenVertexArrays(1, &vao);
-					glBindVertexArray(vao);
 				}
+				glBindVertexArray(vao);
 
 				vaos_.insert(std::make_pair(so, vao));
 				this->BindVertexStreams(so, vao);

@@ -180,22 +180,19 @@ namespace
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
 
-		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		std::ostringstream ss;
+		ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
+			<< "type: " << DebugTypeString(type) << "; "
+			<< "id: " << id << "; "
+			<< "severity: " << DebugSeverityString(severity) << "; "
+			<< "message: " << message;
+		if (GL_DEBUG_TYPE_ERROR == type)
 		{
-			std::ostringstream ss;
-			ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
-				<< "type: " << DebugTypeString(type) << "; "
-				<< "id: " << id << "; "
-				<< "severity: " << DebugSeverityString(severity) << "; "
-				<< "message: " << message;
-			if (GL_DEBUG_TYPE_ERROR == type)
-			{
-				KlayGE::LogError(ss.str().c_str());
-			}
-			else
-			{
-				KlayGE::LogInfo(ss.str().c_str());
-			}
+			KlayGE::LogError(ss.str().c_str());
+		}
+		else
+		{
+			KlayGE::LogInfo(ss.str().c_str());
 		}
 	}
 #endif
@@ -260,13 +257,18 @@ namespace KlayGE
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 			glDebugMessageCallback(&DebugOutputProc, nullptr);
-			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 		}
 		else if (glloader_GL_ARB_debug_output())
 		{
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
 			glDebugMessageCallbackARB(&DebugOutputProc, nullptr);
-			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_ARB, 0, nullptr, GL_TRUE);
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_ARB, 0, nullptr, GL_TRUE);
+			glDebugMessageControlARB(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_ARB, 0, nullptr, GL_FALSE);
 		}
 #endif
 

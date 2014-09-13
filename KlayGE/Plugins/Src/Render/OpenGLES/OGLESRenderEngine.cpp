@@ -155,22 +155,19 @@ namespace
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
 
-		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION_KHR)
+		std::ostringstream ss;
+		ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
+			<< "type: " << DebugTypeString(type) << "; "
+			<< "id: " << id << "; "
+			<< "severity: " << DebugSeverityString(severity) << "; "
+			<< "message: " << message;
+		if (GL_DEBUG_TYPE_ERROR_KHR == type)
 		{
-			std::ostringstream ss;
-			ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
-				<< "type: " << DebugTypeString(type) << "; "
-				<< "id: " << id << "; "
-				<< "severity: " << DebugSeverityString(severity) << "; "
-				<< "message: " << message;
-			if (GL_DEBUG_TYPE_ERROR_KHR == type)
-			{
-				KlayGE::LogError(ss.str().c_str());
-			}
-			else
-			{
-				KlayGE::LogInfo(ss.str().c_str());
-			}
+			KlayGE::LogError(ss.str().c_str());
+		}
+		else
+		{
+			KlayGE::LogInfo(ss.str().c_str());
 		}
 	}
 #endif
@@ -233,7 +230,10 @@ namespace KlayGE
 			glEnable(GL_DEBUG_OUTPUT_KHR);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
 			glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
 		}
 #endif
 
