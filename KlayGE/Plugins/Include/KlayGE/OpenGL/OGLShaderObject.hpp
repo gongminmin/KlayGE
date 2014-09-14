@@ -110,7 +110,7 @@ namespace KlayGE
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 
-		std::map<GLuint, RenderEffectConstantBufferPtr> all_cbuffs_;
+		std::vector<RenderEffectConstantBufferPtr> all_cbuffs_;
 	};
 
 	typedef shared_ptr<OGLShaderObject> OGLShaderObjectPtr;

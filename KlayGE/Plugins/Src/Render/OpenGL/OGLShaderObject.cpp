@@ -3788,7 +3788,7 @@ namespace KlayGE
 		{
 			GLint active_ubos;
 			glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
-			all_cbuffs_.clear();
+			all_cbuffs_.resize(active_ubos);
 			for (int i = 0; i < active_ubos; ++ i)
 			{
 				GLint length = 0;
@@ -3799,7 +3799,9 @@ namespace KlayGE
 
 				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByName(&ubo_name[0]);
 				BOOST_ASSERT(cbuff);
-				all_cbuffs_[glGetUniformBlockIndex(glsl_program_, &ubo_name[0])] = cbuff;
+				all_cbuffs_[i] = cbuff;
+
+				glUniformBlockBinding(glsl_program_, glGetUniformBlockIndex(glsl_program_, &ubo_name[0]), i);
 
 				GLint ubo_size = 0;
 				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
@@ -3881,12 +3883,11 @@ namespace KlayGE
 			pb.func();
 		}
 
-		typedef KLAYGE_DECLTYPE(all_cbuffs_) AllCBuffsType;
-		KLAYGE_FOREACH(AllCBuffsType::reference cbuff, all_cbuffs_)
+		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
 		{
-			cbuff.second->Update();
-			glBindBufferBase(GL_UNIFORM_BUFFER, cbuff.first, checked_cast<OGLGraphicsBuffer*>(cbuff.second->HWBuff().get())->GLvbo());
-			glUniformBlockBinding(glsl_program_, cbuff.first, cbuff.first);
+			all_cbuffs_[i]->Update();
+			glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(i),
+				checked_cast<OGLGraphicsBuffer*>(all_cbuffs_[i]->HWBuff().get())->GLvbo());
 		}
 
 		if (!gl_bind_textures_.empty())
