@@ -4907,10 +4907,10 @@ namespace KlayGE
 	}
 
 	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset,
-		uint32_t stride)
+		uint32_t stride, bool row_major)
 	{
 		cbuff_ = cbuff;
-		var_->BindToCBuffer(cbuff.get(), offset, stride);
+		var_->BindToCBuffer(cbuff.get(), offset, stride, row_major);
 	}
 
 	void RenderEffectParameter::RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff)
@@ -5388,11 +5388,13 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride)
+	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset,
+			uint32_t stride, bool row_major)
 	{
 		UNREF_PARAM(cbuff);
 		UNREF_PARAM(offset);
 		UNREF_PARAM(stride);
+		UNREF_PARAM(row_major);
 
 		BOOST_ASSERT(false);
 	}
@@ -5408,6 +5410,7 @@ namespace KlayGE
 	{
 		shared_ptr<RenderVariableFloat4x4> ret = MakeSharedPtr<RenderVariableFloat4x4>();
 		ret->in_cbuff_ = in_cbuff_;
+		ret->row_major_ = row_major_;
 		if (in_cbuff_)
 		{
 			ret->data_ = data_;
@@ -5420,13 +5423,23 @@ namespace KlayGE
 
 	RenderVariable& RenderVariableFloat4x4::operator=(float4x4 const & value)
 	{
-		return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
+		if (row_major_)
+		{
+			return RenderVariableConcrete<float4x4>::operator=(MathLib::transpose(value));
+		}
+		else
+		{
+			return RenderVariableConcrete<float4x4>::operator=(value);
+		}
 	}
 
 	void RenderVariableFloat4x4::Value(float4x4& val) const
 	{
 		RenderVariableConcrete<float4x4>::Value(val);
-		val = MathLib::transpose(val);
+		if (row_major_)
+		{
+			val = MathLib::transpose(val);
+		}
 	}
 
 	RenderVariablePtr RenderVariableFloat4x4Array::Clone()
@@ -5441,6 +5454,7 @@ namespace KlayGE
 			ret->data_ = data_;
 		}
 		ret->in_cbuff_ = in_cbuff_;
+		ret->row_major_ = row_major_;
 		std::vector<float4x4> val;
 		this->Value(val);
 		*ret = val;
@@ -5454,9 +5468,19 @@ namespace KlayGE
 			float4x4* target = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
 
 			size_ = static_cast<uint32_t>(value.size());
-			for (size_t i = 0; i < value.size(); ++ i)
+			if (row_major_)
 			{
-				target[i] = MathLib::transpose(value[i]);
+				for (size_t i = 0; i < value.size(); ++ i)
+				{
+					target[i] = MathLib::transpose(value[i]);
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < value.size(); ++ i)
+				{
+					target[i] = value[i];
+				}
 			}
 
 			data_.cbuff_desc.cbuff->Dirty(true);
@@ -5475,9 +5499,19 @@ namespace KlayGE
 			float4x4 const * src = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
 
 			val.resize(size_);
-			for (size_t i = 0; i < size_; ++ i)
+			if (row_major_)
 			{
-				val[i] = MathLib::transpose(src[i]);
+				for (size_t i = 0; i < size_; ++ i)
+				{
+					val[i] = MathLib::transpose(src[i]);
+				}
+			}
+			else
+			{
+				for (size_t i = 0; i < size_; ++ i)
+				{
+					val[i] = src[i];
+				}
 			}
 		}
 		else

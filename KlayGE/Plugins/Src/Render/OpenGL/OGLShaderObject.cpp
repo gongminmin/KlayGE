@@ -79,6 +79,7 @@
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
+#include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 
 #if !USE_DXBC2GLSL
@@ -2612,7 +2613,7 @@ namespace KlayGE
 						GLSLVersion gsv = DXBC2GLSLIniter::Instance().GLSLVer();
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
-						rules &= ~GSR_UseUBO;
+						rules &= ~GSR_UniformBlockBinding;
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), has_gs, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -3254,6 +3255,7 @@ namespace KlayGE
 			}
 
 			this->LinkGLSL();
+			this->AttachUBOs(effect);
 
 			if (is_validate_ && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()))
 			{
@@ -3422,6 +3424,8 @@ namespace KlayGE
 
 		if (ret->is_validate_)
 		{
+			ret->AttachUBOs(effect);
+
 			ret->attrib_locs_ = attrib_locs_;
 
 			typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
@@ -3778,6 +3782,94 @@ namespace KlayGE
 		is_validate_ &= linked ? true : false;
 	}
 
+	void OGLShaderObject::AttachUBOs(RenderEffect const & effect)
+	{
+		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_uniform_buffer_object())
+		{
+			GLint active_ubos;
+			glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
+			all_cbuffs_.clear();
+			for (int i = 0; i < active_ubos; ++ i)
+			{
+				GLint length = 0;
+				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &length);
+
+				std::vector<GLchar> ubo_name(length, '\0');
+				glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
+
+				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByName(&ubo_name[0]);
+				BOOST_ASSERT(cbuff);
+				all_cbuffs_[glGetUniformBlockIndex(glsl_program_, &ubo_name[0])] = cbuff;
+
+				GLint ubo_size = 0;
+				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
+				cbuff->Resize(ubo_size);
+
+				GLint uniforms = 0;
+				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
+
+				std::vector<GLuint> uniform_indices(uniforms);
+				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
+					reinterpret_cast<GLint*>(&uniform_indices[0]));
+
+				for (GLint j = 0; j < uniforms; ++ j)
+				{
+					GLint uniform_name_len = 0;
+					glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j], GL_UNIFORM_NAME_LENGTH, &uniform_name_len);
+
+					std::vector<GLchar> uniform_name(uniform_name_len, '\0');
+					glGetActiveUniformName(glsl_program_, uniform_indices[j], uniform_name_len, nullptr, &uniform_name[0]);
+
+					KLAYGE_AUTO(iter, std::find(uniform_name.begin(), uniform_name.end(), '['));
+					if (iter != uniform_name.end())
+					{
+						*iter = '\0';
+					}
+
+					size_t const uniform_name_hash = RT_HASH(&uniform_name[0]);
+					for (uint32_t k = 0; k < cbuff->NumParameters(); ++ k)
+					{
+						RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(k));
+						if (param->NameHash() == uniform_name_hash)
+						{
+							GLint stride;
+							if (param->ArraySize())
+							{
+								glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
+									GL_UNIFORM_ARRAY_STRIDE, &stride);
+							}
+							else
+							{
+								if (param->Type() != REDT_float4x4)
+								{
+									stride = 4;
+								}
+								else
+								{
+									glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
+										GL_UNIFORM_MATRIX_STRIDE, &stride);
+								}
+							}
+
+							GLint row_major = false;
+							if (REDT_float4x4 == param->Type())
+							{
+								glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
+									GL_UNIFORM_IS_ROW_MAJOR, &row_major);
+							}
+
+							GLint start_offset = 0;
+							glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j], GL_UNIFORM_OFFSET, &start_offset);
+							param->BindToCBuffer(cbuff, start_offset, stride, row_major ? true : false);
+
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
 	void OGLShaderObject::Bind()
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -3787,6 +3879,14 @@ namespace KlayGE
 		KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 		{
 			pb.func();
+		}
+
+		typedef KLAYGE_DECLTYPE(all_cbuffs_) AllCBuffsType;
+		KLAYGE_FOREACH(AllCBuffsType::reference cbuff, all_cbuffs_)
+		{
+			cbuff.second->Update();
+			glBindBufferBase(GL_UNIFORM_BUFFER, cbuff.first, checked_cast<OGLGraphicsBuffer*>(cbuff.second->HWBuff().get())->GLvbo());
+			glUniformBlockBinding(glsl_program_, cbuff.first, cbuff.first);
 		}
 
 		if (!gl_bind_textures_.empty())

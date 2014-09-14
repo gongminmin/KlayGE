@@ -15,7 +15,7 @@
 		<parameter type="float2" name="far_plane"/>
 	</cbuffer>
 
-	<cbuffer name="model">
+	<cbuffer name="per_model">
 		<parameter type="float3" name="pos_center"/>
 		<parameter type="float3" name="pos_extent"/>
 		<parameter type="float2" name="tc_center"/>
