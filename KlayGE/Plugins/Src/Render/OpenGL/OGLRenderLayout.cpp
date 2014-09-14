@@ -131,9 +131,8 @@ namespace KlayGE
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->InstanceStream()));
 
-			uint32_t const num_instances = this->NumInstances();
 			uint32_t const instance_size = this->InstanceSize();
-			BOOST_ASSERT(num_instances * instance_size <= stream.Size());
+			BOOST_ASSERT(this->NumInstances() * instance_size <= stream.Size());
 
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{

@@ -419,6 +419,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
+				pos_vb->Resize(sizeof(ParticleInstance));
 				rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
@@ -450,6 +451,7 @@ namespace
 					RenderLayout::ST_Geometry, 0);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
+				pos_vb->Resize(sizeof(ParticleInstance));
 				rl_->BindVertexStream(pos_vb,
 					KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
 						vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),

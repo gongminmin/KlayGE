@@ -97,9 +97,8 @@ namespace KlayGE
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
 
-			uint32_t const num_instances = this->NumInstances();
 			uint32_t const instance_size = this->InstanceSize();
-			BOOST_ASSERT(num_instances * instance_size <= stream.Size());
+			BOOST_ASSERT(this->NumInstances() * instance_size <= stream.Size());
 
 			size_t const inst_format_size = this->InstanceStreamFormat().size();
 			uint8_t* elem_offset = nullptr;

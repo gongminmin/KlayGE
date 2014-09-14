@@ -274,6 +274,11 @@ namespace KlayGE
 
 	void SceneManager::AddSceneObjectLocked(SceneObjectPtr const & obj)
 	{
+		App3DFramework& app = Context::Instance().AppInstance();
+		float const app_time = app.AppTime();
+		float const frame_time = app.FrameTime();
+		obj->MainThreadUpdate(app_time, frame_time);
+
 		uint32_t const attr = obj->Attrib();
 		if (attr & SceneObject::SOA_Overlay)
 		{
