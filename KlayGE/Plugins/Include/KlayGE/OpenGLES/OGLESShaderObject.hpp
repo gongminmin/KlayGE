@@ -81,6 +81,7 @@ namespace KlayGE
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
+		void AttachUBOs(RenderEffect const & effect);
 		void PrintGLSLError(ShaderType type, char const * info);
 		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
@@ -105,6 +106,8 @@ namespace KlayGE
 		std::vector<tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
+
+		std::vector<RenderEffectConstantBufferPtr> all_cbuffs_;
 	};
 
 	typedef shared_ptr<OGLESShaderObject> OGLESShaderObjectPtr;

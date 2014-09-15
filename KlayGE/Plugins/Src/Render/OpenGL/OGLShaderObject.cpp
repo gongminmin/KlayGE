@@ -3814,13 +3814,33 @@ namespace KlayGE
 				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
 					reinterpret_cast<GLint*>(&uniform_indices[0]));
 
+				std::vector<GLint> uniform_name_lens(uniforms);
+				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+					GL_UNIFORM_NAME_LENGTH, &uniform_name_lens[0]);
+
+				std::vector<GLint> uniform_array_strides(uniforms);
+				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+					GL_UNIFORM_ARRAY_STRIDE, &uniform_array_strides[0]);
+
+				std::vector<GLint> uniform_matrix_strides(uniforms);
+				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+					GL_UNIFORM_MATRIX_STRIDE, &uniform_matrix_strides[0]);
+
+				std::vector<GLint> uniform_offsets(uniforms);
+				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+					GL_UNIFORM_OFFSET, &uniform_offsets[0]);
+
+				std::vector<GLint> uniform_row_majors(uniforms);
+				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+					GL_UNIFORM_IS_ROW_MAJOR, &uniform_row_majors[0]);
+
 				for (GLint j = 0; j < uniforms; ++ j)
 				{
-					GLint uniform_name_len = 0;
-					glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j], GL_UNIFORM_NAME_LENGTH, &uniform_name_len);
-
-					std::vector<GLchar> uniform_name(uniform_name_len, '\0');
-					glGetActiveUniformName(glsl_program_, uniform_indices[j], uniform_name_len, nullptr, &uniform_name[0]);
+					std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
+					GLint size;
+					GLenum type;
+					glGetActiveUniform(glsl_program_, uniform_indices[j], uniform_name_lens[j],
+						nullptr, &size, &type, &uniform_name[0]);
 
 					KLAYGE_AUTO(iter, std::find(uniform_name.begin(), uniform_name.end(), '['));
 					if (iter != uniform_name.end())
@@ -3828,45 +3848,24 @@ namespace KlayGE
 						*iter = '\0';
 					}
 
-					size_t const uniform_name_hash = RT_HASH(&uniform_name[0]);
-					for (uint32_t k = 0; k < cbuff->NumParameters(); ++ k)
+					RenderEffectParameterPtr const & param = effect.ParameterByName(&uniform_name[0]);
+					GLint stride;
+					if (param->ArraySize())
 					{
-						RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(k));
-						if (param->NameHash() == uniform_name_hash)
+						stride = uniform_array_strides[j];
+					}
+					else
+					{
+						if (param->Type() != REDT_float4x4)
 						{
-							GLint stride;
-							if (param->ArraySize())
-							{
-								glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
-									GL_UNIFORM_ARRAY_STRIDE, &stride);
-							}
-							else
-							{
-								if (param->Type() != REDT_float4x4)
-								{
-									stride = 4;
-								}
-								else
-								{
-									glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
-										GL_UNIFORM_MATRIX_STRIDE, &stride);
-								}
-							}
-
-							GLint row_major = false;
-							if (REDT_float4x4 == param->Type())
-							{
-								glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j],
-									GL_UNIFORM_IS_ROW_MAJOR, &row_major);
-							}
-
-							GLint start_offset = 0;
-							glGetActiveUniformsiv(glsl_program_, 1, &uniform_indices[j], GL_UNIFORM_OFFSET, &start_offset);
-							param->BindToCBuffer(cbuff, start_offset, stride, row_major ? true : false);
-
-							break;
+							stride = 4;
+						}
+						else
+						{
+							stride = uniform_matrix_strides[j];
 						}
 					}
+					param->BindToCBuffer(cbuff, uniform_offsets[j], stride, uniform_row_majors[j] ? true : false);
 				}
 			}
 		}
