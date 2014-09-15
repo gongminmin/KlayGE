@@ -40,7 +40,7 @@ namespace KlayGE
 
 		if (off_screen)
 		{
-			glGenFramebuffersEXT(1, &fbo_);
+			glGenFramebuffers(1, &fbo_);
 		}
 		else
 		{
@@ -59,7 +59,7 @@ namespace KlayGE
 			}
 			else
 			{
-				glDeleteFramebuffersEXT(1, &fbo_);
+				glDeleteFramebuffers(1, &fbo_);
 			}
 		}
 	}
@@ -75,7 +75,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
-		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE_EXT == glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
 		if (fbo_ != 0)
 		{
@@ -84,7 +84,7 @@ namespace KlayGE
 			std::vector<GLenum> targets(clr_views_.size());
 			for (size_t i = 0; i < clr_views_.size(); ++ i)
 			{
-				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0_EXT + i);
+				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 			}
 			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 		}

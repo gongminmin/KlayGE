@@ -202,7 +202,7 @@ namespace KlayGE
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindTexture(0, target_type_, texture_);
-		glGenerateMipmapEXT(target_type_);
+		glGenerateMipmap(target_type_);
 	}
 
 	void OGLTexture::TexParameteri(GLenum pname, GLint param)
@@ -317,7 +317,7 @@ namespace KlayGE
 		}
 		else
 		{
-			glDeleteRenderbuffersEXT(1, &texture_);
+			glDeleteRenderbuffers(1, &texture_);
 		}
 	}
 }

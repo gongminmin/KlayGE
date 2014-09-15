@@ -116,44 +116,44 @@ namespace KlayGE
 		else
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))) && glloader_GL_EXT_framebuffer_blit())
+			if (((sample_count_ > 1) || !re.HackForATI()) && !IsCompressedFormat(format_) && (glloader_GL_ARB_texture_rg() || (4 == NumComponents(format_))))
 			{
 				GLuint fbo_src, fbo_dst;
 				re.GetFBOForBlit(fbo_src, fbo_dst);
 
 				GLuint old_fbo = re.BindFramebuffer();
 
-				glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, fbo_src);
+				glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_src);
 				if (array_size_ > 1)
 				{
-					glFramebufferTextureLayerEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture_, src_level, src_array_index);
+					glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, src_level, src_array_index);
 				}
 				else
 				{
 					if (sample_count_ <= 1)
 					{
-						glFramebufferTexture1DEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, texture_, src_level);
+						glFramebufferTexture1D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target_type_, texture_, src_level);
 					}
 					else
 					{
-						glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT,
-											GL_COLOR_ATTACHMENT0_EXT,
-											GL_RENDERBUFFER_EXT, texture_);
+						glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER,
+											GL_COLOR_ATTACHMENT0,
+											GL_RENDERBUFFER, texture_);
 					}
 				}
 
 				OGLTexture& ogl_target = *checked_cast<OGLTexture*>(&target);
-				glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo_dst);
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
 				if (array_size_ > 1)
 				{
-					glFramebufferTextureLayerEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, ogl_target.GLTexture(), dst_level, dst_array_index);
+					glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, ogl_target.GLTexture(), dst_level, dst_array_index);
 				}
 				else
 				{
-					glFramebufferTexture1DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, target_type_, ogl_target.GLTexture(), dst_level);
+					glFramebufferTexture1D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, target_type_, ogl_target.GLTexture(), dst_level);
 				}
 
-				glBlitFramebufferEXT(src_x_offset, 0, src_x_offset + src_width, 1,
+				glBlitFramebuffer(src_x_offset, 0, src_x_offset + src_width, 1,
 								dst_x_offset, 0, dst_x_offset + dst_width, 1,
 								GL_COLOR_BUFFER_BIT, (src_width == dst_width) ? GL_NEAREST : GL_LINEAR);
 
@@ -450,9 +450,9 @@ namespace KlayGE
 		}
 		else
 		{
-			glGenRenderbuffersEXT(1, &texture_);
-			glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, texture_);
-			glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, sample_count_, glinternalFormat, widths_[0], 1);
+			glGenRenderbuffers(1, &texture_);
+			glBindRenderbuffer(GL_RENDERBUFFER, texture_);
+			glRenderbufferStorageMultisample(GL_RENDERBUFFER, sample_count_, glinternalFormat, widths_[0], 1);
 		}
 	}
 }

@@ -282,8 +282,8 @@ namespace KlayGE
 
 		this->BindFrameBuffer(win);
 
-		glGenFramebuffersEXT(1, &fbo_blit_src_);
-		glGenFramebuffersEXT(1, &fbo_blit_dst_);
+		glGenFramebuffers(1, &fbo_blit_src_);
+		glGenFramebuffers(1, &fbo_blit_dst_);
 	}
 
 	void OGLRenderEngine::CheckConfig(RenderSettings& settings)
@@ -889,7 +889,7 @@ namespace KlayGE
 	{
 		if (force || (cur_fbo_ != fbo))
 		{
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+			glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 			cur_fbo_ = fbo;
 		}
 	}
@@ -903,7 +903,7 @@ namespace KlayGE
 				cur_fbo_ = 0;
 			}
 		}
-		glDeleteFramebuffersEXT(n, framebuffers);
+		glDeleteFramebuffers(n, framebuffers);
 	}
 
 	void OGLRenderEngine::SetPolygonMode(GLenum face, GLenum mode)
@@ -1449,11 +1449,11 @@ namespace KlayGE
 	{
 		if (fbo_blit_src_ != 0)
 		{
-			glDeleteFramebuffersEXT(1, &fbo_blit_src_);
+			glDeleteFramebuffers(1, &fbo_blit_src_);
 		}
 		if (fbo_blit_dst_ != 0)
 		{
-			glDeleteFramebuffersEXT(1, &fbo_blit_dst_);
+			glDeleteFramebuffers(1, &fbo_blit_dst_);
 		}
 
 		so_rl_.reset();
