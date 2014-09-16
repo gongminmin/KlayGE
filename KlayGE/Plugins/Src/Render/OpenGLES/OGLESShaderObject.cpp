@@ -3414,6 +3414,7 @@ namespace KlayGE
 			GLint active_ubos;
 			glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
 			all_cbuffs_.resize(active_ubos);
+			gl_bind_cbuffs_.resize(active_ubos);
 			for (int i = 0; i < active_ubos; ++ i)
 			{
 				GLint length = 0;
@@ -3431,6 +3432,7 @@ namespace KlayGE
 				GLint ubo_size = 0;
 				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
 				cbuff->Resize(ubo_size);
+				gl_bind_cbuffs_[i] = checked_cast<OGLESGraphicsBuffer*>(cbuff->HWBuff().get())->GLvbo();
 
 				GLint uniforms = 0;
 				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
@@ -3510,8 +3512,11 @@ namespace KlayGE
 		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
 		{
 			all_cbuffs_[i]->Update();
-			glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(i),
-				checked_cast<OGLESGraphicsBuffer*>(all_cbuffs_[i]->HWBuff().get())->GLvbo());
+		}
+
+		if (!gl_bind_cbuffs_.empty())
+		{
+			re.BindBuffersBase(GL_UNIFORM_BUFFER, 0, static_cast<GLsizei>(all_cbuffs_.size()), &gl_bind_cbuffs_[0]);
 		}
 
 		if (!gl_bind_textures_.empty())

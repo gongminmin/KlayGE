@@ -325,9 +325,9 @@ namespace KlayGE
 				-- end_dirty;
 			}
 
-			dirty = (end_dirty - start_dirty > 0);
 			first = start_dirty;
 			count = end_dirty - start_dirty;
+			dirty = (count > 0);
 		}
 
 		if (dirty)
@@ -338,18 +338,61 @@ namespace KlayGE
 				glBindTexture(targets[i], textures[i]);
 			}
 
-			memcpy(&binded_targets_[first], targets, count * sizeof(targets[0]));
-			memcpy(&binded_textures_[first], textures, count * sizeof(textures[0]));
+			memcpy(&binded_targets_[first], &targets[first], count * sizeof(targets[0]));
+			memcpy(&binded_textures_[first], &textures[first], count * sizeof(textures[0]));
 		}
 	}
 
 	void OGLESRenderEngine::BindBuffer(GLenum target, GLuint buffer, bool force)
 	{
 		KLAYGE_AUTO(iter, binded_buffers_.find(target));
-		if (force || (iter == binded_buffers_.end()) || (iter->second != buffer))
+		if (force || (iter == binded_buffers_.end()) || (iter->second[0] != buffer))
 		{
 			glBindBuffer(target, buffer);
-			binded_buffers_[target] = buffer;
+			
+			if (binded_buffers_[target].empty())
+			{
+				binded_buffers_[target].resize(1);
+			}
+			binded_buffers_[target][0] = buffer;
+		}
+	}
+
+	void OGLESRenderEngine::BindBuffersBase(GLenum target, GLuint first, GLsizei count, GLuint const * buffers, bool force)
+	{
+		KLAYGE_AUTO(binded, binded_buffers_[target]);
+		if (first + count > binded.size())
+		{
+			binded.resize(first + count, 0xFFFFFFFF);
+		}
+
+		bool dirty = force;
+		if (!dirty)
+		{
+			uint32_t start_dirty = first;
+			uint32_t end_dirty = first + count;
+			while ((start_dirty != end_dirty) && (binded[start_dirty] == buffers[start_dirty]))
+			{
+				++ start_dirty;
+			}
+			while ((start_dirty != end_dirty) && (binded[end_dirty - 1] == buffers[end_dirty - 1]))
+			{
+				-- end_dirty;
+			}
+
+			first = start_dirty;
+			count = end_dirty - start_dirty;
+			dirty = (count > 0);
+		}
+
+		if (dirty)
+		{
+			for (uint32_t i = first; i < first + count; ++ i)
+			{
+				glBindBufferBase(target, i, buffers[i]);
+			}
+
+			memcpy(&binded[first], &buffers[first], count * sizeof(buffers[0]));
 		}
 	}
 
@@ -357,15 +400,19 @@ namespace KlayGE
 	{
 		for (GLsizei i = 0; i < n; ++ i)
 		{
-			for (KLAYGE_AUTO(iter, binded_buffers_.begin()); iter != binded_buffers_.end();)
+			for (KLAYGE_AUTO(iter_target, binded_buffers_.begin()); iter_target != binded_buffers_.end();
+					++ iter_target)
 			{
-				if (iter->second == buffers[i])
+				for (KLAYGE_AUTO(iter_buff, iter_target->second.begin()); iter_buff != iter_target->second.end();)
 				{
-					binded_buffers_.erase(iter ++);
-				}
-				else
-				{
-					++ iter;
+					if (*iter_buff == buffers[i])
+					{
+						iter_target->second.erase(iter_buff ++);
+					}
+					else
+					{
+						++ iter_buff;
+					}
 				}
 			}
 		}
