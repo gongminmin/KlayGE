@@ -213,7 +213,7 @@ namespace KlayGE
 			}
 		}
 #endif
-#elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID)
+#elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,

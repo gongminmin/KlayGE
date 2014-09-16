@@ -264,9 +264,8 @@ namespace KlayGE
 			return joystick_buttons_event_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
-		void* CreateView() const;
-		void SetView(void* view) const;
-		void RunLoop();
+		void CreateView();
+		void RunLoop(RenderEngine &re);
 #endif
 		CloseEvent& OnClose()
 		{
@@ -349,6 +348,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_DARWIN
 		uint32_t* pf_;
 		void* d_window_;
+		void* d_view_;
 #endif
 
 		bool external_wnd_;

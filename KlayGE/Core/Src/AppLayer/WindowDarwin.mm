@@ -4,36 +4,35 @@
 
 #ifdef KLAYGE_PLATFORM_DARWIN
 
+#include <KFL/PreDeclare.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 
 #include <KlayGE/Window.hpp>
+#include <KlayGE/RenderEngine.hpp>
 
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 
-@interface KlayGEWindow : NSWindow
+@interface KlayGEWindow : NSWindow<NSWindowDelegate>
 {
-	void* mouseParam;
-	BOOL firstContent;
-	int status;
+	KlayGE::Window* win;
 }
-@property(assign) void *mouseParam;
-@property(assign) BOOL firstContent;
-@property(readwrite) int status;
-- (void)cvMouseEvent:(NSEvent *)event;
+@property(assign) KlayGE::Window* win;
 @end
 
 @interface KlayGEView : NSOpenGLView
 {
+	KlayGE::RenderEngine* re;
 	CVDisplayLinkRef displayLink;
 }
+@property(assign) KlayGE::RenderEngine* re;
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime;
 @end
 
 namespace KlayGE
 {
-	static NSApplication *application = nil;
+	static NSApplication* application = nil;
 	static bool wasInitialized = false;
 	
 	int InitSystem()
@@ -139,7 +138,7 @@ namespace KlayGE
 		@autoreleasepool
 		{
 			NSScreen* mainDisplay = [NSScreen mainScreen];
-			NSString *windowName = [NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]];
+			NSString* windowName = [NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]];
 			// TODO: full screen
 			NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
 			if (mainDisplay)
@@ -148,20 +147,21 @@ namespace KlayGE
 				initContentRect.origin.y = dispFrame.size.height - 20;
 			}
 			
-			KlayGEWindow *window = [[KlayGEWindow alloc] initWithContentRect:initContentRect
-												styleMask:NSTitledWindowMask | NSMiniaturizableWindowMask
+			KlayGEWindow* window = [[KlayGEWindow alloc] initWithContentRect:initContentRect
+												styleMask:NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask
 												backing:NSBackingStoreBuffered
 												defer:YES
 												screen:mainDisplay];
 			
 			[window setFrameTopLeftPoint:initContentRect.origin];
 			
-			[window setFirstContent:YES];
-			
 			[window setHasShadow:YES];
 			[window setAcceptsMouseMovedEvents:YES];
 			[window useOptimizedDrawing:YES];
 			[window setTitle:windowName];
+
+			[window setDelegate:window];
+			[window setWin:this];
 			
 			d_window_ = static_cast<void*>(window);
 			//[application run];
@@ -187,138 +187,115 @@ namespace KlayGE
 		//NSLog(@"test3");
 	}
 	
-	void* Window::CreateView() const
+	void Window::CreateView()
 	{
-		NSOpenGLPixelFormat *pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pf_];
+		NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pf_];
 		KlayGEView* view = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixelFormat];
-		return view;
-	}
-	
-	void Window::SetView(void* view) const
-	{
-		[static_cast<KlayGEWindow*>(d_window_) setContentView:static_cast<KlayGEView*>(view)];
+		d_view_ = static_cast<void*>(view);
+
+		[static_cast<KlayGEWindow*>(d_window_) setContentView:(view)];
 		[static_cast<KlayGEWindow*>(d_window_) makeKeyAndOrderFront:nil];
 	}
-	void Window::RunLoop()
+	
+	void Window::RunLoop(RenderEngine& re)
 	{
+		[static_cast<KlayGEView*>(d_view_) setRe:&re];
+
+		active_ = true;
 		[application run];
 	}
 }
 
 @implementation KlayGEWindow
+@synthesize win;
 
-//@synthesize mouseCallback;
-@synthesize mouseParam;
-@synthesize firstContent;
-@synthesize status;
-
-- (void)cvMouseEvent:(NSEvent *)event
+- (void)windowWillClose:(NSNotification*)notification
 {
-	//NSLog(@"%@", event);
-	/*
-	if(!mouseCallback)
-		return;
-	
-	int flags = 0;
-	if([event modifierFlags] & NSShiftKeyMask)		flags |= CV_EVENT_FLAG_SHIFTKEY;
-	if([event modifierFlags] & NSControlKeyMask)	flags |= CV_EVENT_FLAG_CTRLKEY;
-	if([event modifierFlags] & NSAlternateKeyMask)	flags |= CV_EVENT_FLAG_ALTKEY;
-	
-	if([event type] == NSLeftMouseDown)	{[self cvSendMouseEvent:event type:CV_EVENT_LBUTTONDOWN flags:flags | CV_EVENT_FLAG_LBUTTON];}
-	if([event type] == NSLeftMouseUp)	{[self cvSendMouseEvent:event type:CV_EVENT_LBUTTONUP   flags:flags | CV_EVENT_FLAG_LBUTTON];}
-	if([event type] == NSRightMouseDown){[self cvSendMouseEvent:event type:CV_EVENT_RBUTTONDOWN flags:flags | CV_EVENT_FLAG_RBUTTON];}
-	if([event type] == NSRightMouseUp)	{[self cvSendMouseEvent:event type:CV_EVENT_RBUTTONUP   flags:flags | CV_EVENT_FLAG_RBUTTON];}
-	if([event type] == NSOtherMouseDown){[self cvSendMouseEvent:event type:CV_EVENT_MBUTTONDOWN flags:flags];}
-	if([event type] == NSOtherMouseUp)	{[self cvSendMouseEvent:event type:CV_EVENT_MBUTTONUP   flags:flags];}
-	if([event type] == NSMouseMoved)	{[self cvSendMouseEvent:event type:CV_EVENT_MOUSEMOVE   flags:flags];}
-	if([event type] == NSLeftMouseDragged) {[self cvSendMouseEvent:event type:CV_EVENT_MOUSEMOVE   flags:flags | CV_EVENT_FLAG_LBUTTON];}
-	if([event type] == NSRightMouseDragged)	{[self cvSendMouseEvent:event type:CV_EVENT_MOUSEMOVE   flags:flags | CV_EVENT_FLAG_RBUTTON];}
-	if([event type] == NSOtherMouseDragged)	{[self cvSendMouseEvent:event type:CV_EVENT_MOUSEMOVE   flags:flags | CV_EVENT_FLAG_MBUTTON];}
-	 */
+	[(KlayGEView*)[self contentView] setRe:nil];
+	[KlayGE::application stop:nil];
 }
 
-- (void)keyDown:(NSEvent *)theEvent
+- (void)keyDown:(NSEvent*)theEvent
 {
-	[super keyDown:theEvent];
+	NSLog(@"%@", theEvent);
 }
 
-- (void)rightMouseDragged:(NSEvent *)theEvent
+- (void)rightMouseDragged:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSLog(@"%@", theEvent);
 }
 
-- (void)rightMouseUp:(NSEvent *)theEvent
+- (void)rightMouseUp:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSLog(@"%@", theEvent);
 }
 
-- (void)rightMouseDown:(NSEvent *)theEvent
+- (void)rightMouseDown:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSLog(@"%@", theEvent);
 }
 
-- (void)mouseMoved:(NSEvent *)theEvent
+- (void)mouseMoved:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, point.y);
+	win->OnPointerUpdate()(*win, pt, 0, false);
 }
 
-- (void)otherMouseDragged:(NSEvent *)theEvent
+- (void)mouseDragged:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, point.y);
+	win->OnPointerUpdate()(*win, pt, 0, true);
 }
 
-- (void)otherMouseUp:(NSEvent *)theEvent
+- (void)mouseUp:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, point.y);
+	win->OnPointerUp()(*win, pt, 0);
 }
 
-- (void)otherMouseDown:(NSEvent *)theEvent
+- (void)mouseDown:(NSEvent*)theEvent
 {
-	[self cvMouseEvent:theEvent];
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent
-{
-	[self cvMouseEvent:theEvent];
-}
-
-- (void)mouseUp:(NSEvent *)theEvent
-{
-	[self cvMouseEvent:theEvent];
-}
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-	[self cvMouseEvent:theEvent];
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, point.y);
+	win->OnPointerDown()(*win, pt, 0);
 }
 
 @end
 
 @implementation KlayGEView
 
+@synthesize re;
+
+- (id)init
+{
+	self = [super init];
+	if (self)
+	{
+		re = nil;
+	}
+	return self;
+}
+
 // https://developer.apple.com/library/mac/qa/qa1385/_index.html
 - (void)prepareOpenGL
 {
-	// Synchronize buffer swaps with vertical refresh rate
 	GLint swapInt = 1;
 	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
 	
-	// Create a display link capable of being used with all active displays
 	CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
 	
-	// Set the renderer output callback function
 	CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, self);
 	
-	// Set the display link for the current renderer
 	CGLContextObj cglContext = static_cast<CGLContextObj>([[self openGLContext] CGLContextObj]);
 	CGLPixelFormatObj cglPixelFormat = (CGLPixelFormatObj)([[self pixelFormat] CGLPixelFormatObj]);
 	CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
 	
-	// Activate the display link
 	CVDisplayLinkStart(displayLink);
 }
 
-// This is the renderer output callback function
 static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
 		const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
 {
@@ -328,14 +305,16 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
 {
-	NSOpenGLContext    *currentContext = [self openGLContext];
+	NSOpenGLContext* currentContext = [self openGLContext];
 	[currentContext makeCurrentContext];
 	
-	// must lock GL context because display link is threaded
 	CGLLockContext((CGLContextObj)[currentContext CGLContextObj]);
 	
-	// Add your drawing codes here
-	
+	if (re != nil)
+	{
+		re->Refresh();
+	}
+
 	[currentContext flushBuffer];
 	
 	CGLUnlockContext((CGLContextObj)[currentContext CGLContextObj]);
@@ -345,7 +324,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 
 - (void)dealloc
 {
-	// Release the display link
 	CVDisplayLinkRelease(displayLink);
 	
 	[super dealloc];

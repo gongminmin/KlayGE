@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+               BlueprintIdentifier = "@PACKAGE_GUID@"
                BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
                BlueprintName = "@TARGET_NAME@"
                ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
@@ -32,7 +32,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BlueprintIdentifier = "@PACKAGE_GUID@"
             BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
             BlueprintName = "@TARGET_NAME@"
             ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
@@ -52,7 +52,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BlueprintIdentifier = "@PACKAGE_GUID@"
             BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
             BlueprintName = "@TARGET_NAME@"
             ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
@@ -71,7 +71,7 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "9CDDEA6E0C224CE09FF110CF"
+            BlueprintIdentifier = "@PACKAGE_GUID@"
             BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
             BlueprintName = "@TARGET_NAME@"
             ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
