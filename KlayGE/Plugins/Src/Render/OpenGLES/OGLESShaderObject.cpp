@@ -601,6 +601,9 @@ namespace
 		{
 			float4x4 v;
 			param_->Value(v);
+#if USE_DXBC2GLSL
+			v = MathLib::transpose(v);
+#endif
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.Uniform4fv(location_, 4, &v[0]);
@@ -966,6 +969,13 @@ namespace
 
 			if (!v.empty())
 			{
+#if USE_DXBC2GLSL
+				KLAYGE_FOREACH(float4x4& m, v)
+				{
+					m = MathLib::transpose(m);
+				}
+#endif
+
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.Uniform4fv(location_, static_cast<GLsizei>(v.size()) * 4, &v[0][0]);
 			}
@@ -3492,7 +3502,7 @@ namespace KlayGE
 							stride = uniform_matrix_strides[j];
 						}
 					}
-					param->BindToCBuffer(cbuff, uniform_offsets[j], stride, uniform_row_majors[j] ? true : false);
+					param->BindToCBuffer(cbuff, uniform_offsets[j], stride);
 				}
 			}
 		}

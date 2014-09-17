@@ -6551,11 +6551,11 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									}
 									if (SVC_MATRIX_ROWS == var_iter->type_desc.var_class)
 									{
-										out << "[" << row << "]" << "[" << column << "]";
+										out << "[" << column << "]" << "[" << row << "]";
 									}
 									else
 									{
-										out << "[" << column << "]" << "[" << row << "]";
+										out << "[" << row << "]" << "[" << column << "]";
 									}
 								}
 								out << ")";
@@ -7269,7 +7269,7 @@ void GLSLGen::ToDefaultValue(std::ostream& out, DXBCShaderVariable const & var, 
 			out << "vec" << var.type_desc.rows
 				<< "[" << array_size << "](";
 		}
-		for (uint32_t column = 0; column < var.type_desc.rows; ++ column)
+		for (uint32_t column = 0; column < var.type_desc.columns; ++ column)
 		{
 			for (uint32_t row = 0; row < var.type_desc.rows; ++ row)
 			{

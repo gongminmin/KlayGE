@@ -215,7 +215,7 @@ namespace KlayGE
 		virtual void Value(std::vector<float4>& val) const;
 		virtual void Value(std::vector<float4x4>& val) const;
 
-		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride, bool row_major);
+		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset, uint32_t stride);
 		virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff);
 		virtual bool InCBuffer() const
 		{
@@ -229,10 +229,6 @@ namespace KlayGE
 		{
 			return 0;
 		}
-		virtual bool RowMajor() const
-		{
-			return false;
-		}
 	};
 
 	template <typename T>
@@ -240,7 +236,7 @@ namespace KlayGE
 	{
 	public:
 		RenderVariableConcrete()
-			: in_cbuff_(false), row_major_(true)
+			: in_cbuff_(false)
 		{
 			new (data_.val) T;
 		}
@@ -264,7 +260,6 @@ namespace KlayGE
 				ret->data_ = data_;
 			}
 			ret->in_cbuff_ = in_cbuff_;
-			ret->row_major_ = row_major_;
 			T val;
 			this->Value(val);
 			*ret = val;
@@ -302,7 +297,7 @@ namespace KlayGE
 		}
 
 		virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset,
-				uint32_t stride, bool row_major) KLAYGE_OVERRIDE
+				uint32_t stride) KLAYGE_OVERRIDE
 		{
 			if (!in_cbuff_)
 			{
@@ -310,7 +305,6 @@ namespace KlayGE
 				this->Value(val);
 				reinterpret_cast<T*>(data_.val)->~T();
 				in_cbuff_ = true;
-				row_major_ = row_major;
 				data_.cbuff_desc.cbuff = cbuff;
 				data_.cbuff_desc.offset = offset;
 				data_.cbuff_desc.stride = stride;
@@ -328,10 +322,6 @@ namespace KlayGE
 		{
 			return in_cbuff_;
 		}
-		virtual bool RowMajor() const KLAYGE_OVERRIDE
-		{
-			return row_major_;
-		}
 		virtual uint32_t CBufferOffset() const KLAYGE_OVERRIDE
 		{
 			return data_.cbuff_desc.offset;
@@ -343,7 +333,6 @@ namespace KlayGE
 
 	protected:
 		bool in_cbuff_;
-		bool row_major_;
 		union VarData
 		{
 			struct CBufferDesc
@@ -1025,8 +1014,7 @@ namespace KlayGE
 			var_->Value(val);
 		}
 
-		void BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset,
-			uint32_t stride, bool row_major);
+		void BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset, uint32_t stride);
 		void RebindToCBuffer(RenderEffectConstantBufferPtr const & cbuff);
 		RenderEffectConstantBufferPtr const & CBuffer() const
 		{

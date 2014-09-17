@@ -689,7 +689,7 @@ namespace
 
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 #if USE_DXBC2GLSL
-			re.UniformMatrix4fv(location_, 1, false, &v[0]);
+			re.UniformMatrix4fv(location_, 1, true, &v[0]);
 #else
 			re.Uniform4fv(location_, 4, &v[0]);
 #endif
@@ -3832,10 +3832,6 @@ namespace KlayGE
 				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
 					GL_UNIFORM_OFFSET, &uniform_offsets[0]);
 
-				std::vector<GLint> uniform_row_majors(uniforms);
-				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
-					GL_UNIFORM_IS_ROW_MAJOR, &uniform_row_majors[0]);
-
 				for (GLint j = 0; j < uniforms; ++ j)
 				{
 					std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
@@ -3867,7 +3863,7 @@ namespace KlayGE
 							stride = uniform_matrix_strides[j];
 						}
 					}
-					param->BindToCBuffer(cbuff, uniform_offsets[j], stride, uniform_row_majors[j] ? true : false);
+					param->BindToCBuffer(cbuff, uniform_offsets[j], stride);
 				}
 			}
 		}
