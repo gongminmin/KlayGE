@@ -97,12 +97,12 @@ namespace
 
 namespace KlayGE
 {
-	Color RGB565_to_Color(uint16_t rgb)
+	Color RGB565ToColor(uint16_t rgb)
 	{
 		return Color(((rgb >> 11) & 0x1F) / 31.0f, ((rgb >> 5) & 0x3F) / 63.0f, ((rgb >> 0) & 0x1F) / 31.0f, 1);
 	}
 
-	uint16_t Color_to_RGB565(Color const & clr)
+	uint16_t ColorToRGB565(Color const & clr)
 	{
 		return (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.r() * 31 + 0.5f), 0, 31)) << 11)
 			| (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.g() * 63 + 0.5f), 0, 63)) << 5)
@@ -112,8 +112,8 @@ namespace KlayGE
 	void DecodeBC1Internal(uint32_t* argb, BC1_layout const & bc1)
 	{
 		array<Color, 4> clr;
-		clr[0] = RGB565_to_Color(bc1.clr_0);
-		clr[1] = RGB565_to_Color(bc1.clr_1);
+		clr[0] = RGB565ToColor(bc1.clr_0);
+		clr[1] = RGB565ToColor(bc1.clr_1);
 		if (bc1.clr_0 > bc1.clr_1)
 		{
 			clr[2] = MathLib::lerp(clr[0], clr[1], 1 / 3.0f);
@@ -451,8 +451,8 @@ namespace KlayGE
 		float const frb = f * 31.0f;
 		float const fg = f * 63.0f;
 
-		uint16_t old_min = Color_to_RGB565(min_clr);
-		uint16_t old_max = Color_to_RGB565(max_clr);
+		uint16_t old_min = ColorToRGB565(min_clr);
+		uint16_t old_max = ColorToRGB565(max_clr);
 
 		// solve.
 		int max_r = MathLib::clamp<int>(static_cast<int>((At1_r * yy - At2_r * xy) * frb + 0.5f), 0, 31);
@@ -496,8 +496,8 @@ namespace KlayGE
 		{
 			Color max_clr, min_clr;
 			OptimizeColorsBlock(argb, min_clr, max_clr, method);
-			max16 = Color_to_RGB565(max_clr);
-			min16 = Color_to_RGB565(min_clr);
+			max16 = ColorToRGB565(max_clr);
+			min16 = ColorToRGB565(min_clr);
 			if (max16 != min16)
 			{
 				mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);
@@ -510,9 +510,9 @@ namespace KlayGE
 			{
 				if (RefineBlock(argb, min_clr, max_clr, mask))
 				{
-					max16 = Color_to_RGB565(max_clr);
-					min16 = Color_to_RGB565(min_clr);
-					if (max_clr != min_clr)
+					max16 = ColorToRGB565(max_clr);
+					min16 = ColorToRGB565(min_clr);
+					if (max16 != min16)
 					{
 						mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);
 					}

@@ -28,7 +28,7 @@
 #include FT_FREETYPE_H
 #include FT_STROKER_H
 
-#ifdef KLAYGE_COMPILER_GCC
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 #ifdef DEBUG
 extern "C"
 {
