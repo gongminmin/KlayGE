@@ -463,7 +463,7 @@ namespace KlayGE
 				{
 					if (*iter_buff == buffers[i])
 					{
-						iter_target->second.erase(iter_buff ++);
+						iter_buff = iter_target->second.erase(iter_buff);
 					}
 					else
 					{
