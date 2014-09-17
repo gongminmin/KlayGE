@@ -57,6 +57,8 @@ namespace KlayGE
 		void* Map(BufferAccess ba);
 		void Unmap();
 
+		void CreateBuffer(void const * data);
+
 	private:
 		GLuint vb_;
 		GLenum target_;

@@ -61,7 +61,6 @@ namespace KlayGE
 		ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 
 		uint32_t bind_flags_;
-		uint32_t hw_buf_size_;
 		ElementFormat fmt_as_shader_res_;
 	};
 	typedef shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;

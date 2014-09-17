@@ -49,20 +49,8 @@ namespace KlayGE
 		if (init_data != nullptr)
 		{
 			size_in_byte_ = init_data->row_pitch;
-
-			if (glloader_GL_EXT_direct_state_access())
-			{
-				glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), init_data->data,
-						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-			}
-			else
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.BindBuffer(target_, vb_);
-				glBufferData(target_,
-						static_cast<GLsizeiptr>(size_in_byte_), init_data->data,
-						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-			}
+			this->CreateBuffer(init_data->data);
+			hw_buff_size_ = size_in_byte_;
 		}
 	}
 
@@ -83,18 +71,23 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
+		this->CreateBuffer(nullptr);
+	}
+
+	void OGLGraphicsBuffer::CreateBuffer(void const * data)
+	{
 		if (glloader_GL_EXT_direct_state_access())
 		{
-			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), nullptr,
-						(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), data,
+				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 		}
 		else
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindBuffer(target_, vb_);
 			glBufferData(target_,
-					static_cast<GLsizeiptr>(size_in_byte_), nullptr,
-					(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+				static_cast<GLsizeiptr>(size_in_byte_), data,
+				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 		}
 	}
 

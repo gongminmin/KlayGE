@@ -30,7 +30,7 @@ namespace KlayGE
 {
 	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData const * init_data, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint),
-							bind_flags_(bind_flags), hw_buf_size_(0), fmt_as_shader_res_(fmt)
+							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
 	{
 		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
 		{
@@ -52,6 +52,7 @@ namespace KlayGE
 			subres_init.SysMemSlicePitch = init_data->slice_pitch;
 
 			this->CreateBuffer(&subres_init);
+			hw_buff_size_ = size_in_byte_;
 		}
 	}
 
@@ -134,10 +135,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(size_in_byte_ != 0);
 
-		if (this->Size() > hw_buf_size_)
-		{
-			this->CreateBuffer(nullptr);
-		}
+		this->CreateBuffer(nullptr);
 	}
 
 	void D3D11GraphicsBuffer::CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init)
@@ -150,7 +148,6 @@ namespace KlayGE
 		ID3D11Buffer* buffer;
 		TIF(d3d_device_->CreateBuffer(&desc, subres_init, &buffer));
 		buffer_ = MakeCOMPtr(buffer);
-		hw_buf_size_ = this->Size();
 
 		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
 		{

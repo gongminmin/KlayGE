@@ -129,6 +129,7 @@ namespace KlayGE
 		uint32_t access_hint_;
 
 		uint32_t size_in_byte_;
+		uint32_t hw_buff_size_;
 	};
 }
 
