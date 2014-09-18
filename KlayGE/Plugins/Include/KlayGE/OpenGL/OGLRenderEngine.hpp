@@ -197,7 +197,8 @@ namespace KlayGE
 		GLenum active_tex_unit_;
 		std::vector<GLuint> binded_targets_;
 		std::vector<GLuint> binded_textures_;
-		std::map<GLenum, std::vector<GLuint> > binded_buffers_;
+		std::map<GLenum, GLuint> binded_buffers_;
+		std::map<GLenum, std::vector<GLuint> > binded_buffers_with_binding_points_;
 
 		GLuint restart_index_;
 

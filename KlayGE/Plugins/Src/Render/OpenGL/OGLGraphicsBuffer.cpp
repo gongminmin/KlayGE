@@ -93,32 +93,50 @@ namespace KlayGE
 
 	void* OGLGraphicsBuffer::Map(BufferAccess ba)
 	{
-		GLenum flag = 0;
-		switch (ba)
-		{
-		case BA_Read_Only:
-			flag = GL_READ_ONLY;
-			break;
-
-		case BA_Write_Only:
-			flag = GL_WRITE_ONLY;
-			break;
-
-		case BA_Read_Write:
-			flag = GL_READ_WRITE;
-			break;
-		}
-
 		void* p;
-		if (glloader_GL_EXT_direct_state_access())
+		if ((glloader_GL_VERSION_3_0() || glloader_GL_ARB_map_buffer_range())
+			&& (ba == BA_Write_Only) && (BU_Dynamic == usage_))
 		{
-			p = glMapNamedBufferEXT(vb_, flag);
+			GLuint access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				p = glMapNamedBufferRangeEXT(vb_, 0, static_cast<GLsizeiptr>(size_in_byte_), access);
+			}
+			else
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindBuffer(target_, vb_);
+				p = glMapBufferRange(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), access);
+			}
 		}
 		else
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(target_, vb_);
-			p = glMapBuffer(target_, flag);
+			GLenum flag = 0;
+			switch (ba)
+			{
+			case BA_Read_Only:
+				flag = GL_READ_ONLY;
+				break;
+
+			case BA_Write_Only:
+				flag = GL_WRITE_ONLY;
+				break;
+
+			case BA_Read_Write:
+				flag = GL_READ_WRITE;
+				break;
+			}
+
+			if (glloader_GL_EXT_direct_state_access())
+			{
+				p = glMapNamedBufferEXT(vb_, flag);
+			}
+			else
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindBuffer(target_, vb_);
+				p = glMapBuffer(target_, flag);
+			}
 		}
 		return p;
 	}

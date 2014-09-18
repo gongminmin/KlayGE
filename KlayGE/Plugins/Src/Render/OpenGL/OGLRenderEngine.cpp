@@ -395,21 +395,16 @@ namespace KlayGE
 	void OGLRenderEngine::BindBuffer(GLenum target, GLuint buffer, bool force)
 	{
 		KLAYGE_AUTO(iter, binded_buffers_.find(target));
-		if (force || (iter == binded_buffers_.end()) || (iter->second[0] != buffer))
+		if (force || (iter == binded_buffers_.end()) || (iter->second != buffer))
 		{
 			glBindBuffer(target, buffer);
-
-			if (binded_buffers_[target].empty())
-			{
-				binded_buffers_[target].resize(1);
-			}
-			binded_buffers_[target][0] = buffer;
+			binded_buffers_[target] = buffer;
 		}
 	}
 
 	void OGLRenderEngine::BindBuffersBase(GLenum target, GLuint first, GLsizei count, GLuint const * buffers, bool force)
 	{
-		KLAYGE_AUTO(binded, binded_buffers_[target]);
+		KLAYGE_AUTO(binded, binded_buffers_with_binding_points_[target]);
 		if (first + count > binded.size())
 		{
 			binded.resize(first + count, 0xFFFFFFFF);
@@ -456,8 +451,21 @@ namespace KlayGE
 	{
 		for (GLsizei i = 0; i < n; ++ i)
 		{
-			for (KLAYGE_AUTO(iter_target, binded_buffers_.begin()); iter_target != binded_buffers_.end();
-					++ iter_target)
+			for (KLAYGE_AUTO(iter, binded_buffers_.begin()); iter != binded_buffers_.end();)
+			{
+				if (iter->second == buffers[i])
+				{
+					binded_buffers_.erase(iter ++);
+				}
+				else
+				{
+					++ iter;
+				}
+			}
+
+			for (KLAYGE_AUTO(iter_target, binded_buffers_with_binding_points_.begin());
+				iter_target != binded_buffers_with_binding_points_.end();
+				++ iter_target)
 			{
 				for (KLAYGE_AUTO(iter_buff, iter_target->second.begin()); iter_buff != iter_target->second.end();)
 				{
