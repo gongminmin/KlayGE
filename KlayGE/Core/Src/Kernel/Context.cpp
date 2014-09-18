@@ -140,36 +140,84 @@ namespace KlayGE
 
 	void Context::Suspend()
 	{
-		scene_mgr_->Suspend();
+		if (scene_mgr_)
+		{
+			scene_mgr_->Suspend();
+		}
 
 		ResLoader::Instance().Suspend();
 		PerfProfiler::Instance().Suspend();
 		UIManager::Instance().Suspend();
 
-		deferred_rendering_layer_->Suspend();
-		show_factory_->Suspend();
-		render_factory_->Suspend();
-		audio_factory_->Suspend();
-		input_factory_->Suspend();
-		script_factory_->Suspend();
-		audio_data_src_factory_->Suspend();
+		if (deferred_rendering_layer_)
+		{
+			deferred_rendering_layer_->Suspend();
+		}
+		if (show_factory_)
+		{
+			show_factory_->Suspend();
+		}
+		if (render_factory_)
+		{
+			render_factory_->Suspend();
+		}
+		if (audio_factory_)
+		{
+			audio_factory_->Suspend();
+		}
+		if (input_factory_)
+		{
+			input_factory_->Suspend();
+		}
+		if (script_factory_)
+		{
+			script_factory_->Suspend();
+		}
+		if (audio_data_src_factory_)
+		{
+			audio_data_src_factory_->Suspend();
+		}
 	}
 
 	void Context::Resume()
 	{
-		scene_mgr_->Resume();
+		if (scene_mgr_)
+		{
+			scene_mgr_->Resume();
+		}
 
 		ResLoader::Instance().Resume();
 		PerfProfiler::Instance().Resume();
 		UIManager::Instance().Resume();
 
-		deferred_rendering_layer_->Resume();
-		show_factory_->Resume();
-		render_factory_->Resume();
-		audio_factory_->Resume();
-		input_factory_->Resume();
-		script_factory_->Resume();
-		audio_data_src_factory_->Resume();
+		if (deferred_rendering_layer_)
+		{
+			deferred_rendering_layer_->Resume();
+		}
+		if (show_factory_)
+		{
+			show_factory_->Resume();
+		}
+		if (render_factory_)
+		{
+			render_factory_->Resume();
+		}
+		if (audio_factory_)
+		{
+			audio_factory_->Resume();
+		}
+		if (input_factory_)
+		{
+			input_factory_->Resume();
+		}
+		if (script_factory_)
+		{
+			script_factory_->Resume();
+		}
+		if (audio_data_src_factory_)
+		{
+			audio_data_src_factory_->Resume();
+		}
 	}
 
 	void Context::LoadCfg(std::string const & cfg_file)
