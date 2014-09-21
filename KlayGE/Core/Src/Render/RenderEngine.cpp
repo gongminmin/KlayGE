@@ -55,7 +55,14 @@
 #include <KlayGE/Window.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
-#include <sstream>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/RenderEngine.hpp>
 
@@ -236,9 +243,8 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				std::ostringstream iss;
-				iss << "PostToneMapping" << i;
-				ldr_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml", iss.str());
+				ldr_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml",
+					"PostToneMapping" + boost::lexical_cast<std::string>(i));
 			}
 
 			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];

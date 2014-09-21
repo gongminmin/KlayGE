@@ -23,10 +23,17 @@
 #include <KlayGE/Window.hpp>
 
 #include <map>
-#include <sstream>
 #include <boost/assert.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <glloader/glloader.h>
 
@@ -282,13 +289,11 @@ namespace KlayGE
 		Convert(vendor, reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
 		Convert(renderer, reinterpret_cast<char const *>(glGetString(GL_RENDERER)));
 		Convert(version, reinterpret_cast<char const *>(glGetString(GL_VERSION)));
-		std::wostringstream oss;
-		oss << vendor << L" " << renderer << L" " << version;
+		description_ = vendor + L" " + renderer + L" " + version;
 		if (settings.sample_count > 1)
 		{
-			oss << L" (" << settings.sample_count << L"x AA)";
+			description_ += L" (" + boost::lexical_cast<std::wstring>(settings.sample_count) + L"x AA)";
 		}
-		description_ = oss.str();
 	}
 
 	OGLESRenderWindow::~OGLESRenderWindow()

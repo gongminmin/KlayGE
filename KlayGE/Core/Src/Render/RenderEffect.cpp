@@ -55,7 +55,6 @@
 #include <KFL/XMLDom.hpp>
 #include <KFL/Thread.hpp>
 
-#include <sstream>
 #include <fstream>
 #include <boost/assert.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -1522,9 +1521,8 @@ namespace
 				{
 					for (int x = 0; x < 4; ++ x)
 					{
-						std::stringstream oss;
-						oss << "_" << static_cast<char>('0' + y) << static_cast<char>('0' + x);
-						attr = node->Attrib(oss.str().c_str());
+						attr = node->Attrib(std::string("_")
+							+ static_cast<char>('0' + y) + static_cast<char>('0' + x));
 						if (attr)
 						{
 							tmp[y * 4 + x] = attr->ValueFloat();

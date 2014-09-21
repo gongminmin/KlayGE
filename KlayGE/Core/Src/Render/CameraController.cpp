@@ -35,6 +35,14 @@
 #include <KlayGE/App3D.hpp>
 
 #include <sstream>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/CameraController.hpp>
 
@@ -875,21 +883,24 @@ namespace KlayGE
 
 				{
 					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::ostringstream attr_ss;
-					attr_ss << eye_ctrl_pt.x() << ' ' << eye_ctrl_pt.y() << ' ' << eye_ctrl_pt.z();
-					key_node->AppendAttrib(doc.AllocAttribString("eye", attr_ss.str()));					
+					std::string eye_str = boost::lexical_cast<std::string>(eye_ctrl_pt.x())
+						+ ' ' + boost::lexical_cast<std::string>(eye_ctrl_pt.y())
+						+ ' ' + boost::lexical_cast<std::string>(eye_ctrl_pt.z());
+					key_node->AppendAttrib(doc.AllocAttribString("eye", eye_str));
 				}
 				{
 					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
-					std::ostringstream attr_ss;
-					attr_ss << target_ctrl_pt.x() << ' ' << target_ctrl_pt.y() << ' ' << target_ctrl_pt.z();
-					key_node->AppendAttrib(doc.AllocAttribString("target", attr_ss.str()));					
+					std::string target_str = boost::lexical_cast<std::string>(target_ctrl_pt.x())
+						+ ' ' + boost::lexical_cast<std::string>(target_ctrl_pt.y())
+						+ ' ' + boost::lexical_cast<std::string>(target_ctrl_pt.z());
+					key_node->AppendAttrib(doc.AllocAttribString("target", target_str));
 				}
 				{
 					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::ostringstream attr_ss;
-					attr_ss << up_ctrl_pt.x() << ' ' << up_ctrl_pt.y() << ' ' << up_ctrl_pt.z();
-					key_node->AppendAttrib(doc.AllocAttribString("up", attr_ss.str()));					
+					std::string up_str = boost::lexical_cast<std::string>(up_ctrl_pt.x())
+						+ ' ' + boost::lexical_cast<std::string>(up_ctrl_pt.y())
+						+ ' ' + boost::lexical_cast<std::string>(up_ctrl_pt.z());
+					key_node->AppendAttrib(doc.AllocAttribString("up", up_str));
 				}
 
 				key_node->AppendAttrib(doc.AllocAttribUInt("corner", path->Corner(curve_id, key_id)));

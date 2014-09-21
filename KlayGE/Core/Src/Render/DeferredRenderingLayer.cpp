@@ -3623,7 +3623,6 @@ namespace KlayGE
 	void DeferredRenderingLayer::DumpIntermediaTextures()
 	{
 		static int index = 0;
-		std::stringstream ss;
 
 		shared_ptr<DeferredRenderingDebugPostProcess> pp = checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_);
 
@@ -3632,54 +3631,40 @@ namespace KlayGE
 			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write, nullptr);
 		pp->OutputPin(0, temp_tex);
 
+		std::string index_str = boost::lexical_cast<std::string>(index);
+
 		pp->Display(DT_Position);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpPosition" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpPosition" + index_str + ".dds");
 
 		pp->Display(DT_Normal);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpNormal" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpNormal" + index_str  + ".dds");
 
 		pp->Display(DT_Depth);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpDepth" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpDepth" + index_str  + ".dds");
 
 		pp->Display(DT_Diffuse);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpDiffuse" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpDiffuse" + index_str + ".dds");
 
 		pp->Display(DT_Specular);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpSpecular" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpSpecular" + index_str + ".dds");
 
 		pp->Display(DT_Shininess);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpShininess" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpShininess" + index_str + ".dds");
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		pp->Display(DT_DiffuseLighting);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpDiffuseLighting" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpDiffuseLighting" + index_str + ".dds");
 
 		pp->Display(DT_SpecularLighting);
 		pp->Apply();
-		ss.str("");
-		ss << "DumpSpecularLighting" << index << ".dds";
-		SaveTexture(temp_tex, ss.str());
+		SaveTexture(temp_tex, "DumpSpecularLighting" + index_str + ".dds");
 #endif
 
 		pp->Display(display_type_);

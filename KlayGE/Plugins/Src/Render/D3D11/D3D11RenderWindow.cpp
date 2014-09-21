@@ -22,11 +22,18 @@
 #include <KlayGE/Window.hpp>
 
 #include <vector>
-#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Mapping.hpp>
@@ -246,45 +253,47 @@ namespace KlayGE
 							dxgi_device->Release();
 						}
 
-						std::wostringstream oss;
-						oss << adapter_->Description() << L" " << get<1>(dev_type_beh);
+						description_ = adapter_->Description() + L" " + get<1>(dev_type_beh);
+						std::wstring fl_str;
 						switch (out_feature_level)
 						{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 						case D3D_FEATURE_LEVEL_11_1:
-							oss << L" D3D Level 11.1";
+							fl_str = L" D3D Level 11.1";
 							break;
 #endif
 
 						case D3D_FEATURE_LEVEL_11_0:
-							oss << L" D3D Level 11";
+							fl_str = L" D3D Level 11";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_1:
-							oss << L" D3D Level 10.1";
+							fl_str = L" D3D Level 10.1";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_0:
-							oss << L" D3D Level 10";
+							fl_str = L" D3D Level 10";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_3:
-							oss << L" D3D Level 9.3";
+							fl_str = L" D3D Level 9.3";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_2:
-							oss << L" D3D Level 9.2";
+							fl_str = L" D3D Level 9.2";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_1:
-							oss << L" D3D Level 9.1";
+							fl_str = L" D3D Level 9.1";
 							break;
 						}
+						description_ += fl_str;
 						if (settings.sample_count > 1)
 						{
-							oss << L" (" << settings.sample_count << "x AA)";
+							description_ += L" ("
+								+ boost::lexical_cast<std::wstring>(settings.sample_count)
+								+ L"x AA)";
 						}
-						description_ = oss.str();
 						break;
 					}
 				}

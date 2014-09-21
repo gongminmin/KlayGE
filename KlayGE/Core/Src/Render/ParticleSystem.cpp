@@ -41,11 +41,18 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <fstream>
-#include <sstream>
 
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/ParticleSystem.hpp>
 
@@ -879,15 +886,17 @@ namespace KlayGE
 				{
 					Color const & from = ps->ParticleColorFrom();
 					{
-						std::ostringstream ss;
-						ss << from.r() << ' ' << from.g() << ' ' << from.b();
-						color_node->AppendAttrib(doc.AllocAttribString("from", ss.str()));
+						std::string from_str = boost::lexical_cast<std::string>(from.r())
+							+ ' ' + boost::lexical_cast<std::string>(from.g())
+							+ ' ' + boost::lexical_cast<std::string>(from.b());
+						color_node->AppendAttrib(doc.AllocAttribString("from", from_str));
 					}
 					Color const & to = ps->ParticleColorTo();
 					{
-						std::ostringstream ss;
-						ss << to.r() << ' ' << to.g() << ' ' << to.b();
-						color_node->AppendAttrib(doc.AllocAttribString("to", ss.str()));
+						std::string to_str = boost::lexical_cast<std::string>(to.r())
+							+ ' ' + boost::lexical_cast<std::string>(to.g())
+							+ ' ' + boost::lexical_cast<std::string>(to.b());
+						color_node->AppendAttrib(doc.AllocAttribString("to", to_str));
 					}
 				}
 				particle_node->AppendNode(color_node);
@@ -915,18 +924,16 @@ namespace KlayGE
 			{
 				XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
 				{
-					std::ostringstream ss;
-					ss << particle_emitter->MinPosition().x() << ' '
-						<< particle_emitter->MinPosition().y() << ' '
-						<< particle_emitter->MinPosition().z();
-					pos_node->AppendAttrib(doc.AllocAttribString("min", ss.str()));
+					std::string min_str = boost::lexical_cast<std::string>(particle_emitter->MinPosition().x())
+						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MinPosition().y())
+						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MinPosition().z());
+					pos_node->AppendAttrib(doc.AllocAttribString("min", min_str));
 				}
 				{
-					std::ostringstream ss;
-					ss << particle_emitter->MaxPosition().x() << ' '
-						<< particle_emitter->MaxPosition().y() << ' '
-						<< particle_emitter->MaxPosition().z();
-					pos_node->AppendAttrib(doc.AllocAttribString("max", ss.str()));
+					std::string max_str = boost::lexical_cast<std::string>(particle_emitter->MaxPosition().x())
+						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MaxPosition().y())
+						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MaxPosition().z());
+					pos_node->AppendAttrib(doc.AllocAttribString("max", max_str));
 				}
 				emitter_node->AppendNode(pos_node);
 			}		

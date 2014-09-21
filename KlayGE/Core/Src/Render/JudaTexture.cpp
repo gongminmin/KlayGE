@@ -19,9 +19,16 @@
 #include <KlayGE/BlockCompression.hpp>
 
 #include <fstream>
-#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/JudaTexture.hpp>
 
@@ -1234,9 +1241,8 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < tex_cache_array_.size(); ++ i)
 			{
-				std::ostringstream oss;
-				oss << "juda_tex_cache_" << i;
-				*(effect.ParameterByName(oss.str())) = tex_cache_array_[i];
+				*(effect.ParameterByName("juda_tex_cache_" + boost::lexical_cast<std::string>(i)))
+					= tex_cache_array_[i];
 			}
 			*(effect.ParameterByName("inv_juda_tex_cache_size")) = float2(1.0f / tex_cache_array_[0]->Width(0), 1.0f / tex_cache_array_[0]->Height(0));
 		}

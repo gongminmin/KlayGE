@@ -35,6 +35,14 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderWindow.hpp>
@@ -155,19 +163,18 @@ namespace
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
 
-		std::ostringstream ss;
-		ss << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
-			<< "type: " << DebugTypeString(type) << "; "
-			<< "id: " << id << "; "
-			<< "severity: " << DebugSeverityString(severity) << "; "
-			<< "message: " << message;
+		std::string dbg = std::string("OpenGL debug output: source: ") + DebugSourceString(source) + "; "
+			+ "type: " + DebugTypeString(type) + "; "
+			+ "id: " + boost::lexical_cast<std::string>(id)+ "; "
+			+ "severity: " + DebugSeverityString(severity) + "; "
+			+ "message: " + message;
 		if (GL_DEBUG_TYPE_ERROR_KHR == type)
 		{
-			KlayGE::LogError(ss.str().c_str());
+			KlayGE::LogError(dbg.c_str());
 		}
 		else
 		{
-			KlayGE::LogInfo(ss.str().c_str());
+			KlayGE::LogInfo(dbg.c_str());
 		}
 	}
 #endif
@@ -971,11 +978,8 @@ namespace KlayGE
 					break;
 
 				case VEU_TextureCoord:
-					{
-						std::stringstream ss;
-						ss << "glTexCoord[" << ve.usage_index << "]";
-						so_vars_.push_back(ss.str());
-					}
+					so_vars_.push_back("glTexCoord["
+						+ boost::lexical_cast<std::string>(static_cast<int>(ve.usage_index)) + "]");
 					break;
 
 				case VEU_Tangent:
