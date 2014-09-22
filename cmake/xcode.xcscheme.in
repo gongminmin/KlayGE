@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "@PACKAGE_GUID@"
-               BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
-               BlueprintName = "@TARGET_NAME@"
-               ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+               BuildableName = "@TARGETNAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+               BlueprintName = "@TARGETNAME@"
+               ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/@PROJECTNAME@.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "@PACKAGE_GUID@"
-            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
-            BlueprintName = "@TARGET_NAME@"
-            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+            BuildableName = "@TARGETNAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGETNAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/@PROJECTNAME@.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -53,9 +53,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "@PACKAGE_GUID@"
-            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
-            BlueprintName = "@TARGET_NAME@"
-            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+            BuildableName = "@TARGETNAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGETNAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/@PROJECTNAME@.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "@PACKAGE_GUID@"
-            BuildableName = "@TARGET_NAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
-            BlueprintName = "@TARGET_NAME@"
-            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/Samples.xcodeproj">
+            BuildableName = "@TARGETNAME@_@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@@CMAKE_DEBUG_POSTFIX@"
+            BlueprintName = "@TARGETNAME@"
+            ReferencedContainer = "container:../@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@/@PROJECTNAME@.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
