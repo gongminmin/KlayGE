@@ -32,6 +32,7 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/COMPtr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
@@ -47,6 +48,7 @@ SET(KERNEL_HEADER_FILES
 )
 SET(KERNEL_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Kernel/CpuInfo.cpp
+	${KFL_PROJECT_DIR}/src/Kernel/CustomizedStreamBuf.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/DllLoader.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/KFL.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Log.cpp
