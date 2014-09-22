@@ -32,10 +32,18 @@
 #include <MeshMLLib/MeshMLLib.hpp>
 
 #include <set>
-#include <sstream>
 #include <algorithm>
 #include <cmath>
 #include <limits>
+
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <boost/assert.hpp>
 
@@ -1042,12 +1050,9 @@ namespace KlayGE
 				// Combine these meshes
 				if (!meshes_to_combine.empty())
 				{
-					std::stringstream ss;
-					ss << "combined_for_mtl_" << i;
-
 					Mesh opt_mesh;
 					opt_mesh.material_id = static_cast<int>(i);
-					opt_mesh.name = ss.str();
+					opt_mesh.name = "combined_for_mtl_" + boost::lexical_cast<std::string>(i);
 
 					typedef KLAYGE_DECLTYPE(meshes_to_combine) MeshesType;
 					KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_to_combine)

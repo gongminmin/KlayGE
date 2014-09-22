@@ -98,6 +98,7 @@ namespace KlayGE
 			std::ios_base::openmode which)
 	{
 		BOOST_ASSERT(which == std::ios_base::in);
+		UNREF_PARAM(which);
 
 		switch (way)
 		{
@@ -144,6 +145,7 @@ namespace KlayGE
 	MemStreamBuf::pos_type MemStreamBuf::seekpos(pos_type sp, std::ios_base::openmode which)
 	{
 		BOOST_ASSERT(which == std::ios_base::in);
+		UNREF_PARAM(which);
 
 		if (sp < end_ - begin_)
 		{

@@ -30,7 +30,14 @@
 
 #include <KFL/KFL.hpp>
 
-#include <sstream>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #include <KFL/ThrowErr.hpp>
 
@@ -38,8 +45,6 @@ namespace KlayGE
 {
 	std::string CombineFileLine(std::string const & file, int line)
 	{
-		std::stringstream ss;
-		ss << file << ": " << line;
-		return ss.str();
+		return file + ": " + boost::lexical_cast<std::string>(line);
 	}
 }

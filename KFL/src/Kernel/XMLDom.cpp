@@ -32,7 +32,6 @@
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 
-#include <sstream>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4702)
