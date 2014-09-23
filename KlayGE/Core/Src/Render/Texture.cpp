@@ -1056,7 +1056,6 @@ namespace
 			{
 				std::vector<uint8_t> rgba_data_block;
 
-				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.tex_data->width;
@@ -1066,23 +1065,8 @@ namespace
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
-
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
-						for (uint32_t block_y = 0; block_y < height; block_y += 4)
-						{
-							for (uint32_t block_x = 0; block_x < width; block_x += 4)
-							{
-								DecodeBC1(rgba, p);
-								p += sizeof(BC1_layout);
-
-								for (int y = 0; y < 4; ++ y)
-								{
-									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
-								}
-							}
-						}
+						DecodeBC1(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
@@ -1123,7 +1107,6 @@ namespace
 			{
 				std::vector<uint8_t> rgba_data_block;
 
-				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.tex_data->width;
@@ -1133,23 +1116,8 @@ namespace
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
-
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
-						for (uint32_t block_y = 0; block_y < height; block_y += 4)
-						{
-							for (uint32_t block_x = 0; block_x < width; block_x += 4)
-							{
-								DecodeBC2(rgba, p);
-								p += sizeof(BC2_layout);
-
-								for (int y = 0; y < 4; ++ y)
-								{
-									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
-								}
-							}
-						}
+						DecodeBC2(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
@@ -1190,7 +1158,6 @@ namespace
 			{
 				std::vector<uint8_t> rgba_data_block;
 
-				uint32_t rgba[16];
 				for (size_t index = 0; index < array_size; ++ index)
 				{
 					uint32_t width = tex_desc_.tex_data->width;
@@ -1200,23 +1167,8 @@ namespace
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
-
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-
-						uint8_t const * p = static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data);
-						for (uint32_t block_y = 0; block_y < height; block_y += 4)
-						{
-							for (uint32_t block_x = 0; block_x < width; block_x += 4)
-							{
-								DecodeBC3(rgba, p);
-								p += sizeof(BC3_layout);
-
-								for (int y = 0; y < 4; ++ y)
-								{
-									std::memcpy(&sub_rgba_data_block[((block_y + y) * width + block_x) * 4], &rgba[y * 4], sizeof(uint8_t) * 16);
-								}
-							}
-						}
+						DecodeBC3(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
