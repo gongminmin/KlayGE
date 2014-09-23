@@ -53,6 +53,7 @@
 #elif defined KLAYGE_PLATFORM_LINUX
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/asset_manager.h>
+#include <KFL/CustomizedStreamBuf.hpp>
 #endif
 
 #include <KlayGE/ResLoader.hpp>
@@ -60,6 +61,28 @@
 namespace
 {
 	KlayGE::mutex singleton_mutex;
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+	class AAssetStreamBuf : public KlayGE::MemStreamBuf
+	{
+	public:
+		explicit AAssetStreamBuf(AAsset* asset)
+			: MemStreamBuf(AAsset_getBuffer(asset), 
+					static_cast<uint8_t const *>(AAsset_getBuffer(asset)) + AAsset_getLength(asset)),
+				asset_(asset)
+		{
+			BOOST_ASSERT(asset_ != nullptr);
+		}
+
+		~AAssetStreamBuf()
+		{
+			AAsset_close(asset_);
+		}
+
+	private:
+		AAsset* asset_;
+	};
+#endif
 }
 
 namespace KlayGE
@@ -407,18 +430,9 @@ namespace KlayGE
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
 		if (asset != nullptr)
 		{
-			shared_ptr<std::stringstream> asset_file = MakeSharedPtr<std::stringstream>(std::ios_base::in | std::ios_base::out | std::ios_base::binary);
-
-			int bytes = 0;
-			char buf[1024];
-			while ((bytes = AAsset_read(asset, buf, sizeof(buf))) > 0)
-			{
-				asset_file->write(buf, bytes);
-			}
-
-			AAsset_close(asset);
-
-			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file);
+			shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
+			shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
+			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
 		}
 #endif
 

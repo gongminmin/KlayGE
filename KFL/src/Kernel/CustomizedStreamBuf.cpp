@@ -67,10 +67,9 @@ namespace KlayGE
 
 	std::streamsize MemStreamBuf::xsgetn(char_type* s, std::streamsize count)
 	{
-		if (current_ + count < end_)
+		if (current_ + count >= end_)
 		{
 			count = end_ - current_;
-			s[count] = static_cast<char_type>(traits_type::eof());
 		}
 		memcpy(s, current_, static_cast<size_t>(count * sizeof(char_type)));
 		current_ += count;
