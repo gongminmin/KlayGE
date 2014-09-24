@@ -145,6 +145,7 @@ namespace KlayGE
 			renderable_ = renderable_rl_();
 			if (renderable_)
 			{
+				this->OnAttachRenderable(false);
 				this->UpdateAbsModelMatrix();
 				refreshed = true;
 			}
