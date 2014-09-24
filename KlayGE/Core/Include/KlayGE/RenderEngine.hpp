@@ -148,7 +148,7 @@ namespace KlayGE
 		}
 		uint32_t NativeShaderVersion() const
 		{
-				return native_shader_version_;
+			return native_shader_version_;
 		}
 
 		void PostProcess(bool skip);
