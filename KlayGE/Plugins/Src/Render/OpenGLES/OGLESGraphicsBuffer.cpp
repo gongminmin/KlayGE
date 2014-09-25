@@ -67,14 +67,17 @@ namespace KlayGE
 		glBufferData(target_,
 			static_cast<GLsizeiptr>(size_in_byte_), data,
 			(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		if (data != nullptr)
+		if (!(glloader_GLES_VERSION_3_0() || glloader_GLES_OES_mapbuffer()))
 		{
-			buf_data_.assign(static_cast<uint8_t const *>(data),
-				static_cast<uint8_t const *>(data) + size_in_byte_);
-		}
-		else
-		{
-			buf_data_.resize(size_in_byte_);
+			if (data != nullptr)
+			{
+				buf_data_.assign(static_cast<uint8_t const *>(data),
+					static_cast<uint8_t const *>(data) + size_in_byte_);
+			}
+			else
+			{
+				buf_data_.resize(size_in_byte_);
+			}
 		}
 	}
 
@@ -85,14 +88,24 @@ namespace KlayGE
 		switch (ba)
 		{
 		case BA_Write_Only:
-			// TODO: fix OES_mapbuffer
-			/*if (glloader_GLES_OES_mapbuffer())
+			if (glloader_GLES_VERSION_3_0())
+			{
+				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.BindBuffer(target_, vb_);
+				uint32_t flags = GL_MAP_WRITE_BIT;
+				if (BU_Dynamic == usage_)
+				{
+					flags |= GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+				}
+				return glMapBufferRange(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), flags);
+			}
+			else if (glloader_GLES_OES_mapbuffer())
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
 				return glMapBufferOES(target_, GL_WRITE_ONLY_OES);
 			}
-			else*/
+			else
 			{
 				return &buf_data_[0];
 			}
@@ -111,12 +124,15 @@ namespace KlayGE
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
-				// TODO: fix OES_mapbuffer
-				/*if (glloader_GLES_OES_mapbuffer())
+				if (glloader_GLES_VERSION_3_0())
+				{
+					glUnmapBuffer(target_);
+				}
+				else if (glloader_GLES_OES_mapbuffer())
 				{
 					glUnmapBufferOES(target_);
 				}
-				else*/
+				else
 				{
 					glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
 				}
