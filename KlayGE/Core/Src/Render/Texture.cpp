@@ -1060,16 +1060,22 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-						DecodeBC1(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
+						for (uint32_t z = 0; z < depth; ++ z)
+						{
+							DecodeBC1(sub_rgba_data_block, width * 4, static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data)
+								+ z * tex_desc_.tex_data->init_data[i].slice_pitch, width, height);
+						}
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 
@@ -1087,6 +1093,7 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
@@ -1099,6 +1106,7 @@ namespace
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 			}
@@ -1111,16 +1119,22 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-						DecodeBC2(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
+						for (uint32_t z = 0; z < depth; ++ z)
+						{
+							DecodeBC2(sub_rgba_data_block, width * 4, static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data)
+								+ z * tex_desc_.tex_data->init_data[i].slice_pitch, width, height);
+						}
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 
@@ -1138,6 +1152,7 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
@@ -1150,6 +1165,7 @@ namespace
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 			}
@@ -1162,16 +1178,22 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t const old_size = rgba_data_block.size();
 						rgba_data_block.resize(old_size + width * height * 4);
 						uint8_t* sub_rgba_data_block = &rgba_data_block[old_size];
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
-						DecodeBC3(sub_rgba_data_block, width * 4, tex_desc_.tex_data->init_data[i].data, width, height);
+						for (uint32_t z = 0; z < depth; ++ z)
+						{
+							DecodeBC3(sub_rgba_data_block, width * 4, static_cast<uint8_t const *>(tex_desc_.tex_data->init_data[i].data)
+								+ z * tex_desc_.tex_data->init_data[i].slice_pitch, width, height);
+						}
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 
@@ -1189,6 +1211,7 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
@@ -1201,6 +1224,7 @@ namespace
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 			}
@@ -1210,24 +1234,20 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
 						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
-						for (size_t y = 0; y < height; ++ y)
-						{
-							for (size_t x = 0; x < width; ++ x)
-							{
-								p[x * 4 + 0] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 0] / 255.0f) * 255.0f), 0, 255));
-								p[x * 4 + 1] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 1] / 255.0f) * 255.0f), 0, 255));
-								p[x * 4 + 2] = static_cast<uint8_t>(MathLib::clamp<int>(static_cast<int>(MathLib::srgb_to_linear(p[x * 4 + 2] / 255.0f) * 255.0f), 0, 255));
-							}
-							p += tex_desc_.tex_data->init_data[i].row_pitch;
-						}
+						ResizeTexture(p, tex_desc_.tex_data->init_data[i].row_pitch,
+							tex_desc_.tex_data->init_data[i].slice_pitch, EF_ARGB8, width, height, depth,
+							p, tex_desc_.tex_data->init_data[i].row_pitch,
+							tex_desc_.tex_data->init_data[i].slice_pitch, EF_ARGB8_SRGB, width, height, depth, false);
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 
@@ -1239,22 +1259,20 @@ namespace
 				{
 					uint32_t width = tex_desc_.tex_data->width;
 					uint32_t height = tex_desc_.tex_data->height;
+					uint32_t depth = tex_desc_.tex_data->depth;
 					for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 					{
 						size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
 						uint8_t* p = static_cast<uint8_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
-						for (size_t y = 0; y < height; ++ y)
-						{
-							for (size_t x = 0; x < width; ++ x)
-							{
-								std::swap(p[x * 4 + 0], p[x * 4 + 2]);
-							}
-							p += tex_desc_.tex_data->init_data[i].row_pitch;
-						}
+						ResizeTexture(p, tex_desc_.tex_data->init_data[i].row_pitch,
+							tex_desc_.tex_data->init_data[i].slice_pitch, EF_ABGR8, width, height, depth,
+							p, tex_desc_.tex_data->init_data[i].row_pitch,
+							tex_desc_.tex_data->init_data[i].slice_pitch, EF_ARGB8, width, height, depth, false);
 
 						width = std::max<uint32_t>(1U, width / 2);
 						height = std::max<uint32_t>(1U, height / 2);
+						depth = std::max<uint32_t>(1U, depth / 2);
 					}
 				}
 
@@ -1284,6 +1302,7 @@ namespace
 					{
 						uint32_t width = tex_desc_.tex_data->width;
 						uint32_t height = tex_desc_.tex_data->height;
+						uint32_t depth = tex_desc_.tex_data->depth;
 						for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 						{
 							size_t const old_size = r8_data_block.size();
@@ -1292,19 +1311,24 @@ namespace
 
 							size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
 
-							uint16_t* p = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
-							for (size_t y = 0; y < height; ++ y)
+							uint16_t* base = static_cast<uint16_t*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data));
+							for (uint32_t z = 0; z < depth; ++ z)
 							{
-								for (size_t x = 0; x < width; ++ x)
+								uint16_t* p = base + z * (tex_desc_.tex_data->init_data[i].slice_pitch) / sizeof(uint16_t);
+								for (uint32_t y = 0; y < height; ++ y)
 								{
-									sub_r8_data_block[x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((p[x] / 65535.0f) * 255 + 0.5f), 0, 255));
+									for (uint32_t x = 0; x < width; ++ x)
+									{
+										sub_r8_data_block[x] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>((p[x] / 65535.0f) * 255 + 0.5f), 0, 255));
+									}
+									sub_r8_data_block += width;
+									p += (tex_desc_.tex_data->init_data[i].row_pitch) / sizeof(uint16_t);
 								}
-								sub_r8_data_block += width;
-								p += (tex_desc_.tex_data->init_data[i].row_pitch) / sizeof(uint16_t);
 							}
 
 							width = std::max<uint32_t>(1U, width / 2);
 							height = std::max<uint32_t>(1U, height / 2);
+							depth = std::max<uint32_t>(1U, depth / 2);
 						}
 					}
 
@@ -1315,6 +1339,7 @@ namespace
 					{
 						uint32_t width = tex_desc_.tex_data->width;
 						uint32_t height = tex_desc_.tex_data->height;
+						uint32_t depth = tex_desc_.tex_data->depth;
 						for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
 						{
 							size_t i = index * tex_desc_.tex_data->num_mipmaps + level;
@@ -1327,6 +1352,7 @@ namespace
 
 							width = std::max<uint32_t>(1U, width / 2);
 							height = std::max<uint32_t>(1U, height / 2);
+							depth = std::max<uint32_t>(1U, depth / 2);
 						}
 					}
 				}
