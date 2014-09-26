@@ -42,7 +42,8 @@ namespace KlayGE
 		EC_D = 4UL,
 		EC_S = 5UL,
 		EC_BC = 6UL,
-		EC_E = 7UL
+		EC_E = 7UL,
+		EC_ETC = 8UL
 	};
 
 	enum ElementChannelType
@@ -266,6 +267,29 @@ namespace KlayGE
 		// BC7 compression element format, 3 channels
 		EF_BC7 = MakeElementFormat1<EC_BC, 7, ECT_UNorm>::value,
 
+		// ETC1 compression element format
+		EF_ETC1 = MakeElementFormat1<EC_ETC, 1, ECT_UNorm>::value,
+		// ETC2 R11 compression element format
+		EF_ETC2_R11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 1, ECT_UNorm, ECT_UNorm>::value,
+		// ETC2 R11 compression element format, signed
+		EF_SIGNED_ETC2_R11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 1, ECT_UNorm, ECT_SNorm>::value,
+		// ETC2 GR11 compression element format
+		EF_ETC2_GR11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 2, ECT_UNorm, ECT_UNorm>::value,
+		// ETC2 GR11 compression element format, signed
+		EF_SIGNED_ETC2_GR11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 2, ECT_UNorm, ECT_SNorm>::value,
+		// ETC2 BGR8 compression element format
+		EF_ETC2_BGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 3, ECT_UNorm, ECT_UNorm>::value,
+		// ETC2 BGR8 compression element format. Standard RGB (gamma = 2.2).
+		EF_ETC2_BGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 3, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,
+		// ETC2 A1BGR8 compression element format
+		EF_ETC2_A1BGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 4, ECT_UNorm, ECT_UNorm>::value,
+		// ETC2 A1BGR8 compression element format. Standard RGB (gamma = 2.2).
+		EF_ETC2_A1BGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 4, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,
+		// ETC2 ABGR8 compression element format
+		EF_ETC2_ABGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 5, ECT_UNorm, ECT_UNorm>::value,
+		// ETC2 ABGR8 compression element format. Standard RGB (gamma = 2.2).
+		EF_ETC2_ABGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 5, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value,
+
 		// 16-bit element format, 16 bits depth
 		EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value,
 		// 32-bit element format, 24 bits depth and 8 bits stencil
@@ -462,6 +486,29 @@ namespace KlayGE
 	// BC7 compression element format, 3 channels
 	ElementFormat const EF_BC7 = MakeElementFormat1<EC_BC, 7, ECT_UNorm>::value;
 
+	// ETC1 compression element format
+	ElementFormat const EF_ETC1 = MakeElementFormat1<EC_ETC, 1, ECT_UNorm>::value;
+	// ETC2 R11 compression element format
+	ElementFormat const EF_ETC2_R11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 1, ECT_UNorm, ECT_UNorm>::value;
+	// ETC2 R11 compression element format, signed
+	ElementFormat const EF_SIGNED_ETC2_R11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 1, ECT_UNorm, ECT_SNorm>::value;
+	// ETC2 GR11 compression element format
+	ElementFormat const EF_ETC2_GR11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 2, ECT_UNorm, ECT_UNorm>::value;
+	// ETC2 GR11 compression element format, signed
+	ElementFormat const EF_SIGNED_ETC2_GR11 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 2, ECT_UNorm, ECT_SNorm>::value;
+	// ETC2 BGR8 compression element format
+	ElementFormat const EF_ETC2_BGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 3, ECT_UNorm, ECT_UNorm>::value;
+	// ETC2 BGR8 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_ETC2_BGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 3, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value;
+	// ETC2 A1BGR8 compression element format
+	ElementFormat const EF_ETC2_A1BGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 4, ECT_UNorm, ECT_UNorm>::value;
+	// ETC2 A1BGR8 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_ETC2_A1BGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 4, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value;
+	// ETC2 ABGR8 compression element format
+	ElementFormat const EF_ETC2_ABGR8 = MakeElementFormat2<EC_ETC, EC_ETC, 2, 5, ECT_UNorm, ECT_UNorm>::value;
+	// ETC2 ABGR8 compression element format. Standard RGB (gamma = 2.2).
+	ElementFormat const EF_ETC2_ABGR8_SRGB = MakeElementFormat2<EC_ETC, EC_ETC, 2, 5, ECT_UNorm_SRGB, ECT_UNorm_SRGB>::value;
+
 	// 16-bit element format, 16 bits depth
 	ElementFormat const EF_D16 = MakeElementFormat1<EC_D, 16, ECT_UNorm>::value;
 	// 32-bit element format, 24 bits depth and 8 bits stencil
@@ -548,7 +595,7 @@ namespace KlayGE
 	inline bool
 	IsCompressedFormat(ElementFormat format)
 	{
-		return (EC_BC == Channel<0>(format));
+		return (EC_BC == Channel<0>(format)) || (EC_ETC == Channel<0>(format));
 	}
 
 	inline bool
@@ -578,26 +625,44 @@ namespace KlayGE
 	inline uint8_t
 	NumFormatBits(ElementFormat format)
 	{
-		if (IsCompressedFormat(format))
+		switch (format)
 		{
-			switch (ChannelBits<0>(format))
-			{
-			case 1:
-			case 4:
-				return 16;
+		case EF_BC1:
+		case EF_SIGNED_BC1:
+		case EF_BC1_SRGB:
+		case EF_BC4:
+		case EF_SIGNED_BC4:
+		case EF_BC4_SRGB:
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+		case EF_ETC1:
+			return 16;
 
-			case 2:
-			case 3:
-			case 5:
-				return 32;
-
-			default:
-				BOOST_ASSERT(false);
-				return 0;
-			}
-		}
-		else
-		{
+		case EF_BC2:
+		case EF_SIGNED_BC2:
+		case EF_BC2_SRGB:
+		case EF_BC3:
+		case EF_SIGNED_BC3:
+		case EF_BC3_SRGB:
+		case EF_BC5:
+		case EF_SIGNED_BC5:
+		case EF_BC5_SRGB:
+		case EF_BC6:
+		case EF_SIGNED_BC6:
+		case EF_BC7:
+		case EF_BC7_SRGB:
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			return 32;
+		
+		default:
+			BOOST_ASSERT(!IsCompressedFormat(format));
 			return ChannelBits<0>(format) + ChannelBits<1>(format) + ChannelBits<2>(format) + ChannelBits<3>(format);
 		}
 	}
@@ -615,19 +680,22 @@ namespace KlayGE
 		{
 			format = ChannelType<0>(format, ECT_UNorm_SRGB);
 		}
-		if (!IsCompressedFormat(format))
+		if (!EC_BC == Channel<0>(format))
 		{
 			if (ECT_UNorm == ChannelType<1>(format))
 			{
 				format = ChannelType<1>(format, ECT_UNorm_SRGB);
 			}
-			if (ECT_UNorm == ChannelType<2>(format))
+			if (!EC_ETC == Channel<0>(format))
 			{
-				format = ChannelType<2>(format, ECT_UNorm_SRGB);
-			}
-			if (ECT_UNorm == ChannelType<3>(format))
-			{
-				format = ChannelType<3>(format, ECT_UNorm_SRGB);
+				if (ECT_UNorm == ChannelType<2>(format))
+				{
+					format = ChannelType<2>(format, ECT_UNorm_SRGB);
+				}
+				if (ECT_UNorm == ChannelType<3>(format))
+				{
+					format = ChannelType<3>(format, ECT_UNorm_SRGB);
+				}
 			}
 		}
 
@@ -766,28 +834,48 @@ namespace KlayGE
 	inline uint32_t
 	NumComponents(ElementFormat format)
 	{
-		if (IsCompressedFormat(format))
+		switch (format)
 		{
-			switch (ChannelBits<0>(format))
-			{
-			case 1:
-			case 2:
-			case 3:
-				return 4;
+		case EF_BC4:
+		case EF_SIGNED_BC4:
+		case EF_BC4_SRGB:
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			return 1;
 
-			case 4:
-				return 1;
+		case EF_BC5:
+		case EF_SIGNED_BC5:
+		case EF_BC5_SRGB:
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			return 2;
 
-			case 5:
-				return 2;
+		case EF_BC6:
+		case EF_SIGNED_BC6:
+		case EF_ETC1:
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			return 3;
 
-			default:
-				BOOST_ASSERT(false);
-				return 0;
-			}
-		}
-		else
-		{
+		case EF_BC1:
+		case EF_SIGNED_BC1:
+		case EF_BC1_SRGB:
+		case EF_BC2:
+		case EF_SIGNED_BC2:
+		case EF_BC2_SRGB:
+		case EF_BC3:
+		case EF_SIGNED_BC3:
+		case EF_BC3_SRGB:
+		case EF_BC7:
+		case EF_BC7_SRGB:
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			return 4;
+		
+		default:
+			BOOST_ASSERT(!IsCompressedFormat(format));
 			return (ChannelBits<0>(format) != 0) + (ChannelBits<1>(format) != 0)
 				+ (ChannelBits<2>(format) != 0) + (ChannelBits<3>(format) != 0);
 		}
