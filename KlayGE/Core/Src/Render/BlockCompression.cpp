@@ -699,14 +699,17 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
+			uint32_t const block_h = std::min(4U, height - y_base);
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
+				uint32_t const block_w = std::min(4U, width - x_base);
+
 				DecodeBC1(&uncompressed[0], src);
 				src += 8;
 
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t y = 0; y < block_h; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					for (uint32_t x = 0; x < block_w; ++ x)
 					{
 						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
 					}
@@ -723,14 +726,17 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
+			uint32_t const block_h = std::min(4U, height - y_base);
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
+				uint32_t const block_w = std::min(4U, width - x_base);
+
 				DecodeBC2(&uncompressed[0], src);
 				src += 16;
 
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t y = 0; y < block_h; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					for (uint32_t x = 0; x < block_w; ++ x)
 					{
 						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
 					}
@@ -747,14 +753,17 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
+			uint32_t const block_h = std::min(4U, height - y_base);
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
+				uint32_t const block_w = std::min(4U, width - x_base);
+
 				DecodeBC3(&uncompressed[0], src);
 				src += 16;
 
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t y = 0; y < block_h; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					for (uint32_t x = 0; x < block_w; ++ x)
 					{
 						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
 					}
@@ -771,14 +780,17 @@ namespace KlayGE
 		uint8_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
+			uint32_t const block_h = std::min(4U, height - y_base);
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
+				uint32_t const block_w = std::min(4U, width - x_base);
+
 				DecodeBC4(&uncompressed[0], src);
 				src += 8;
 
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t y = 0; y < block_h; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					for (uint32_t x = 0; x < block_w; ++ x)
 					{
 						dst[(y_base + y) * pitch + (x_base + x)] = uncompressed[y * 4 + x];
 					}
@@ -796,14 +808,17 @@ namespace KlayGE
 		uint8_t uncompressed_g[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
+			uint32_t const block_h = std::min(4U, height - y_base);
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
+				uint32_t const block_w = std::min(4U, width - x_base);
+
 				DecodeBC5(&uncompressed_r[0], &uncompressed_g[0], src);
 				src += 16;
 
-				for (int y = 0; y < 4; ++ y)
+				for (uint32_t y = 0; y < block_h; ++ y)
 				{
-					for (int x = 0; x < 4; ++ x)
+					for (uint32_t x = 0; x < block_w; ++ x)
 					{
 						dst[(y_base + y) * pitch + (x_base + x) * 2 + 0] = uncompressed_r[y * 4 + x];
 						dst[(y_base + y) * pitch + (x_base + x) * 2 + 1] = uncompressed_g[y * 4 + x];
