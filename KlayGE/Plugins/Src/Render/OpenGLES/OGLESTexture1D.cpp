@@ -169,17 +169,7 @@ namespace KlayGE
 				Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_width);
 				Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_width);
 
-				int block_size;
-				if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-					|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
-
+				uint32_t const block_size = NumFormatBytes(format_) * 4;
 				uint8_t const * s = mapper_src.Pointer<uint8_t>();
 				uint8_t* d = mapper_dst.Pointer<uint8_t>();
 				std::memcpy(d, s, src_width / 4 * block_size);
@@ -214,27 +204,11 @@ namespace KlayGE
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
-		int block_size;
-		if (IsCompressedFormat(format_))
-		{
-			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-				|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
-		}
-		else
-		{
-			block_size = 0;
-		}
 
 		uint8_t* p = &tex_data_[level][0];
 		if (IsCompressedFormat(format_))
 		{
+			uint32_t const block_size = NumFormatBytes(format_) * 4;
 			data = p + (x_offset / 4 * block_size);
 		}
 		else
@@ -266,17 +240,7 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format_))
 				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
+					uint32_t const block_size = NumFormatBytes(format_) * 4; 
 					GLsizei const image_size = ((widths_[level] + 3) / 4) * block_size;
 
 					glCompressedTexSubImage2D(target_type_, level, 0, 0,
@@ -331,17 +295,7 @@ namespace KlayGE
 		{
 			if (IsCompressedFormat(format_))
 			{
-				int block_size;
-				if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-					|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
-
+				uint32_t const block_size = NumFormatBytes(format_) * 4;
 				GLsizei const image_size = ((widths_[level] + 3) / 4) * block_size;
 
 				void* ptr;

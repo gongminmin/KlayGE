@@ -2451,16 +2451,7 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format))
 				{
-					int block_size;
-					if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-						|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
+					uint32_t const block_size = NumFormatBytes(format) * 4;
 					std::vector<uint8_t> bc(((mip_tile_with_border_size + 3) / 4) * ((mip_tile_with_border_size + 3) / 4) * block_size);
 					{
 						uint8_t const * data_with_border = &tex_a_tile_data[0];

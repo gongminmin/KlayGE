@@ -680,13 +680,13 @@ namespace KlayGE
 		{
 			format = ChannelType<0>(format, ECT_UNorm_SRGB);
 		}
-		if (!EC_BC == Channel<0>(format))
+		if (Channel<0>(format) != EC_BC)
 		{
 			if (ECT_UNorm == ChannelType<1>(format))
 			{
 				format = ChannelType<1>(format, ECT_UNorm_SRGB);
 			}
-			if (!EC_ETC == Channel<0>(format))
+			if (Channel<0>(format) != EC_ETC)
 			{
 				if (ECT_UNorm == ChannelType<2>(format))
 				{

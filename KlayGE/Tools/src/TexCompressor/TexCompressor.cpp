@@ -62,16 +62,7 @@ namespace
 				ElementInitData& src_data = in_data[sub_res * in_num_mipmaps + mip];
 				ElementInitData& dst_data = new_data[sub_res * in_num_mipmaps + mip];
 
-				int block_size;
-				if ((EF_BC1 == fmt) || (EF_SIGNED_BC1 == fmt) || (EF_BC1_SRGB == fmt)
-					|| (EF_BC4 == fmt) || (EF_SIGNED_BC4 == fmt) || (EF_BC4_SRGB == fmt))
-				{
-					block_size = 8;
-				}
-				else
-				{
-					block_size = 16;
-				}
+				uint32_t const block_size = NumFormatBytes(fmt) * 4;
 
 				dst_data.row_pitch = ((dst_width + 3) / 4) * block_size;
 				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + 3) / 4);

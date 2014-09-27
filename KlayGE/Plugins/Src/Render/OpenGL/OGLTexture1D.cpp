@@ -173,17 +173,7 @@ namespace KlayGE
 						Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, 0, this->Width(src_level));
 						Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, 0, target.Width(dst_level));
 
-						int block_size;
-						if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-							|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
+						uint32_t const block_size = NumFormatBytes(format_) * 4;
 						uint8_t const * s = mapper_src.Pointer<uint8_t>() + (src_x_offset / 4 * block_size);
 						uint8_t* d = mapper_dst.Pointer<uint8_t>() + (dst_x_offset / 4 * block_size);
 						std::memcpy(d, s, src_width / 4 * block_size);
@@ -214,23 +204,6 @@ namespace KlayGE
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
-		int block_size;
-		if (IsCompressedFormat(format_))
-		{
-			if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-				|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-			{
-				block_size = 8;
-			}
-			else
-			{
-				block_size = 16;
-			}
-		}
-		else
-		{
-			block_size = 0;
-		}
 
 		uint8_t* p;
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -275,6 +248,7 @@ namespace KlayGE
 
 		if (IsCompressedFormat(format_))
 		{
+			uint32_t const block_size = NumFormatBytes(format_) * 4;
 			data = p + (x_offset / 4 * block_size);
 		}
 		else
@@ -305,17 +279,7 @@ namespace KlayGE
 				GLsizei image_size = 0;
 				if (IsCompressedFormat(format_))
 				{
-					int block_size;
-					if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-						|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-					{
-						block_size = 8;
-					}
-					else
-					{
-						block_size = 16;
-					}
-
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
 					image_size = ((widths_[level] + 3) / 4) * block_size;
 				}
 
@@ -389,17 +353,7 @@ namespace KlayGE
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[array_index * num_mip_maps_ + level]);
 					if (IsCompressedFormat(format_))
 					{
-						int block_size;
-						if ((EF_BC1 == format_) || (EF_SIGNED_BC1 == format_) || (EF_BC1_SRGB == format_)
-							|| (EF_BC4 == format_) || (EF_SIGNED_BC4 == format_) || (EF_BC4_SRGB == format_))
-						{
-							block_size = 8;
-						}
-						else
-						{
-							block_size = 16;
-						}
-
+						uint32_t const block_size = NumFormatBytes(format_) * 4;
 						GLsizei const image_size = ((w + 3) / 4) * block_size;
 
 						glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, nullptr, GL_STREAM_DRAW);

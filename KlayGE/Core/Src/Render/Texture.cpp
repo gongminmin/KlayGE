@@ -1685,17 +1685,7 @@ namespace KlayGE
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							image_size = ((the_width + 3) / 4) * block_size;
 						}
 						else
@@ -1730,17 +1720,7 @@ namespace KlayGE
 						size_t const index = array_index * num_mipmaps + level;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 							base[index] = data_block.size();
@@ -1783,17 +1763,7 @@ namespace KlayGE
 						size_t const index = array_index * num_mipmaps + level;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
 
 							base[index] = data_block.size();
@@ -1838,17 +1808,7 @@ namespace KlayGE
 							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * num_mipmaps + level;
 							if (IsCompressedFormat(format))
 							{
-								int block_size;
-								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-								{
-									block_size = 8;
-								}
-								else
-								{
-									block_size = 16;
-								}
-
+								uint32_t const block_size = NumFormatBytes(format) * 4;
 								uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 								base[index] = data_block.size();
@@ -2300,17 +2260,7 @@ namespace KlayGE
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							image_size = ((the_width + 3) / 4) * block_size;
 						}
 						else
@@ -2337,17 +2287,7 @@ namespace KlayGE
 						size_t const index = array_index * desc.mip_map_count + level;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
@@ -2376,17 +2316,7 @@ namespace KlayGE
 						size_t const index = array_index * desc.mip_map_count + level;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
 
 							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
@@ -2416,17 +2346,7 @@ namespace KlayGE
 							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * numMipMaps + level;
 							if (IsCompressedFormat(format))
 							{
-								int block_size;
-								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-								{
-									block_size = 8;
-								}
-								else
-								{
-									block_size = 16;
-								}
-
+								uint32_t const block_size = NumFormatBytes(format) * 4;
 								uint32_t image_size = ((the_width + 3) / 4) * ((the_width + 3) / 4) * block_size;
 
 								file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
@@ -2516,17 +2436,7 @@ namespace KlayGE
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							image_size = ((texture_sys_mem->Width(level) + 3) / 4) * block_size;
 						}
 						else
@@ -2560,17 +2470,7 @@ namespace KlayGE
 
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 							{
@@ -2620,17 +2520,7 @@ namespace KlayGE
 
 						if (IsCompressedFormat(format))
 						{
-							int block_size;
-							if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-								|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-							{
-								block_size = 8;
-							}
-							else
-							{
-								block_size = 16;
-							}
-
+							uint32_t const block_size = NumFormatBytes(format) * 4;
 							uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * depth * block_size;
 
 							{
@@ -2690,17 +2580,7 @@ namespace KlayGE
 							uint32_t height = texture_sys_mem->Height(level);
 							if (IsCompressedFormat(format))
 							{
-								int block_size;
-								if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-									|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-								{
-									block_size = 8;
-								}
-								else
-								{
-									block_size = 16;
-								}
-
+								uint32_t const block_size = NumFormatBytes(format) * 4;
 								uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 								{
