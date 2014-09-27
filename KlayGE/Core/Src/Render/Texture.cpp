@@ -169,28 +169,28 @@ namespace
 		uint32_t		reserved2;
 	};
 
-	enum D3D10_RESOURCE_DIMENSION
+	enum D3D_RESOURCE_DIMENSION
 	{
-		D3D10_RESOURCE_DIMENSION_UNKNOWN = 0,
-		D3D10_RESOURCE_DIMENSION_BUFFER = 1,
-		D3D10_RESOURCE_DIMENSION_TEXTURE1D = 2,
-		D3D10_RESOURCE_DIMENSION_TEXTURE2D = 3,
-		D3D10_RESOURCE_DIMENSION_TEXTURE3D = 4,
+		D3D_RESOURCE_DIMENSION_UNKNOWN = 0,
+		D3D_RESOURCE_DIMENSION_BUFFER = 1,
+		D3D_RESOURCE_DIMENSION_TEXTURE1D = 2,
+		D3D_RESOURCE_DIMENSION_TEXTURE2D = 3,
+		D3D_RESOURCE_DIMENSION_TEXTURE3D = 4,
 	};
 
-	enum D3D10_RESOURCE_MISC_FLAG
+	enum D3D_RESOURCE_MISC_FLAG
 	{
-		D3D10_RESOURCE_MISC_GENERATE_MIPS = 0x1L,
-		D3D10_RESOURCE_MISC_SHARED = 0x2L,
-		D3D10_RESOURCE_MISC_TEXTURECUBE	= 0x4L,
-		D3D10_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x10L,
-		D3D10_RESOURCE_MISC_GDI_COMPATIBLE = 0x20L
+		D3D_RESOURCE_MISC_GENERATE_MIPS = 0x1L,
+		D3D_RESOURCE_MISC_SHARED = 0x2L,
+		D3D_RESOURCE_MISC_TEXTURECUBE = 0x4L,
+		D3D_RESOURCE_MISC_SHARED_KEYEDMUTEX = 0x10L,
+		D3D_RESOURCE_MISC_GDI_COMPATIBLE = 0x20L
 	};
 
 	struct DDS_HEADER_DXT10
 	{
 		uint32_t dxgi_format;
-		D3D10_RESOURCE_DIMENSION resource_dim;
+		D3D_RESOURCE_DIMENSION resource_dim;
 		uint32_t misc_flag;
 		uint32_t array_size;
 		uint32_t reserved;
@@ -324,10 +324,6 @@ namespace
 
 	ElementFormat FromDXGIFormat(uint32_t format)
 	{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4063)
-#endif
 		switch (format)
 		{
 		case DXGI_FORMAT_A8_UNORM:
@@ -531,9 +527,6 @@ namespace
 		default:
 			THR(errc::function_not_supported);
 		}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 	}
 
 	DXGI_FORMAT ToDXGIFormat(ElementFormat format)
@@ -980,79 +973,81 @@ namespace
 	private:
 		void LoadDDS()
 		{
-			LoadTexture(tex_desc_.res_name, tex_desc_.tex_data->type,
-				tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->depth,
-				tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size, tex_desc_.tex_data->format,
-				tex_desc_.tex_data->init_data, tex_desc_.tex_data->data_block);
+			TexDesc::TexData& tex_data = *tex_desc_.tex_data;;
 
-			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-			RenderDeviceCaps const & caps = renderFactory.RenderEngineInstance().DeviceCaps();
+			LoadTexture(tex_desc_.res_name, tex_data.type,
+				tex_data.width, tex_data.height, tex_data.depth,
+				tex_data.num_mipmaps, tex_data.array_size, tex_data.format,
+				tex_data.init_data, tex_data.data_block);
 
-			if ((Texture::TT_3D == tex_desc_.tex_data->type) && (caps.max_texture_depth < tex_desc_.tex_data->depth))
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			if ((Texture::TT_3D == tex_data.type) && (caps.max_texture_depth < tex_data.depth))
 			{
-				tex_desc_.tex_data->type = Texture::TT_2D;
-				tex_desc_.tex_data->height *= tex_desc_.tex_data->depth;
-				tex_desc_.tex_data->depth = 1;
-				tex_desc_.tex_data->num_mipmaps = 1;
-				tex_desc_.tex_data->init_data.resize(1);
+				tex_data.type = Texture::TT_2D;
+				tex_data.height *= tex_data.depth;
+				tex_data.depth = 1;
+				tex_data.num_mipmaps = 1;
+				tex_data.init_data.resize(1);
 			}
 
-			uint32_t array_size = tex_desc_.tex_data->array_size;
-			if (Texture::TT_Cube == tex_desc_.tex_data->type)
+			uint32_t array_size = tex_data.array_size;
+			if (Texture::TT_Cube == tex_data.type)
 			{
 				array_size *= 6;
 			}
 
-			if (((EF_BC5 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC5))
-				|| ((EF_BC5_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC5_SRGB)))
+			if (((EF_BC5 == tex_data.format) && !caps.texture_format_support(EF_BC5))
+				|| ((EF_BC5_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC5_SRGB)))
 			{
 				BC1_layout tmp;
-				for (size_t i = 0; i < tex_desc_.tex_data->init_data.size(); ++ i)
+				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_desc_.tex_data->init_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
+					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
 						std::memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
 					}
 				}
 
-				if (IsSRGB(tex_desc_.tex_data->format))
+				if (IsSRGB(tex_data.format))
 				{
-					tex_desc_.tex_data->format = EF_BC3_SRGB;
+					tex_data.format = EF_BC3_SRGB;
 				}
 				else
 				{
-					tex_desc_.tex_data->format = EF_BC3;
+					tex_data.format = EF_BC3;
 				}
 			}
-			if (((EF_BC4 == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC4))
-				|| ((EF_BC4_SRGB == tex_desc_.tex_data->format) && !caps.texture_format_support(EF_BC4_SRGB)))
+			if (((EF_BC4 == tex_data.format) && !caps.texture_format_support(EF_BC4))
+				|| ((EF_BC4_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC4_SRGB)))
 			{
 				BC1_layout tmp;
-				for (size_t i = 0; i < tex_desc_.tex_data->init_data.size(); ++ i)
+				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_desc_.tex_data->init_data[i].slice_pitch; j += sizeof(BC4_layout))
+					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4_layout))
 					{
-						char* p = static_cast<char*>(const_cast<void*>(tex_desc_.tex_data->init_data[i].data)) + j;
+						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
 
 						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p));
 						std::memcpy(p, &tmp, sizeof(BC1_layout));
 					}
 				}
 
-				if (IsSRGB(tex_desc_.tex_data->format))
+				if (IsSRGB(tex_data.format))
 				{
-					tex_desc_.tex_data->format = EF_BC1_SRGB;
+					tex_data.format = EF_BC1_SRGB;
 				}
 				else
 				{
-					tex_desc_.tex_data->format = EF_BC1;
+					tex_data.format = EF_BC1;
 				}
 			}
 
-			ElementFormat convert_fmts[][2] = 
+			static ElementFormat const convert_fmts[][2] = 
 			{
 				{ EF_BC1, EF_ARGB8 },
 				{ EF_BC1_SRGB, EF_ARGB8_SRGB },
@@ -1065,12 +1060,12 @@ namespace
 				{ EF_R16, EF_R16F },
 				{ EF_R16F, EF_R8 },
 			};
-			while (!caps.texture_format_support(tex_desc_.tex_data->format))
+			while (!caps.texture_format_support(tex_data.format))
 			{
 				bool found = false;
 				for (size_t i = 0; i < sizeof(convert_fmts) / sizeof(convert_fmts[0][0]) / 2; ++ i)
 				{
-					if (convert_fmts[i][0] == tex_desc_.tex_data->format)
+					if (convert_fmts[i][0] == tex_data.format)
 					{
 						uint32_t const src_elem_size = NumFormatBytes(convert_fmts[i][0]);
 						uint32_t const dst_elem_size = NumFormatBytes(convert_fmts[i][1]);
@@ -1080,13 +1075,13 @@ namespace
 						if (src_elem_size < dst_elem_size)
 						{
 							uint32_t new_data_block_size = 0;
-							new_sub_res_start.resize(array_size * tex_desc_.tex_data->num_mipmaps);
+							new_sub_res_start.resize(array_size * tex_data.num_mipmaps);
 
 							for (size_t index = 0; index < array_size; ++ index)
 							{
-								uint32_t width = tex_desc_.tex_data->width;
-								uint32_t height = tex_desc_.tex_data->height;
-								for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
+								uint32_t width = tex_data.width;
+								uint32_t height = tex_data.height;
+								for (size_t level = 0; level < tex_data.num_mipmaps; ++ level)
 								{
 									uint32_t slice_pitch;
 									if (IsCompressedFormat(convert_fmts[i][1]))
@@ -1098,7 +1093,7 @@ namespace
 										slice_pitch = width * height * dst_elem_size;
 									}
 
-									size_t sub_res = index * tex_desc_.tex_data->num_mipmaps + level;
+									size_t sub_res = index * tex_data.num_mipmaps + level;
 									new_sub_res_start[sub_res] = new_data_block_size;
 									new_data_block_size += slice_pitch;
 
@@ -1112,10 +1107,10 @@ namespace
 
 						for (size_t index = 0; index < array_size; ++ index)
 						{
-							uint32_t width = tex_desc_.tex_data->width;
-							uint32_t height = tex_desc_.tex_data->height;
-							uint32_t depth = tex_desc_.tex_data->depth;
-							for (size_t level = 0; level < tex_desc_.tex_data->num_mipmaps; ++ level)
+							uint32_t width = tex_data.width;
+							uint32_t height = tex_data.height;
+							uint32_t depth = tex_data.depth;
+							for (size_t level = 0; level < tex_data.num_mipmaps; ++ level)
 							{
 								uint32_t row_pitch, slice_pitch;
 								if (IsCompressedFormat(convert_fmts[i][1]))
@@ -1129,7 +1124,7 @@ namespace
 									slice_pitch = height * row_pitch;
 								}
 
-								size_t sub_res = index * tex_desc_.tex_data->num_mipmaps + level;
+								size_t sub_res = index * tex_data.num_mipmaps + level;
 								uint8_t* sub_data_block;
 								if (src_elem_size < dst_elem_size)
 								{
@@ -1138,31 +1133,31 @@ namespace
 								else
 								{
 									sub_data_block = static_cast<uint8_t*>(
-										const_cast<void*>(tex_desc_.tex_data->init_data[sub_res].data));
+										const_cast<void*>(tex_data.init_data[sub_res].data));
 								}
 								ResizeTexture(sub_data_block, row_pitch, slice_pitch,
 									convert_fmts[i][1], width, height, depth,
-									tex_desc_.tex_data->init_data[sub_res].data,
-									tex_desc_.tex_data->init_data[sub_res].row_pitch,
-									tex_desc_.tex_data->init_data[sub_res].slice_pitch,
+									tex_data.init_data[sub_res].data,
+									tex_data.init_data[sub_res].row_pitch,
+									tex_data.init_data[sub_res].slice_pitch,
 									convert_fmts[i][0], width, height, depth, false);
 
 								width = std::max<uint32_t>(1U, width / 2);
 								height = std::max<uint32_t>(1U, height / 2);
 								depth = std::max<uint32_t>(1U, depth / 2);
 
-								tex_desc_.tex_data->init_data[sub_res].row_pitch = row_pitch;
-								tex_desc_.tex_data->init_data[sub_res].slice_pitch = slice_pitch;
-								tex_desc_.tex_data->init_data[sub_res].data = sub_data_block;
+								tex_data.init_data[sub_res].row_pitch = row_pitch;
+								tex_data.init_data[sub_res].slice_pitch = slice_pitch;
+								tex_data.init_data[sub_res].data = sub_data_block;
 							}
 						}
 
 						if (src_elem_size < dst_elem_size)
 						{
-							tex_desc_.tex_data->data_block.swap(new_data_block);
+							tex_data.data_block.swap(new_data_block);
 						}
 
-						tex_desc_.tex_data->format = convert_fmts[i][1];
+						tex_data.format = convert_fmts[i][1];
 						found = true;
 						break;
 					}
@@ -1171,7 +1166,7 @@ namespace
 				if (!found)
 				{
 					LogError("%s's format (%ld) is not supported.",
-						tex_desc_.res_name.c_str(), tex_desc_.tex_data->format);
+						tex_desc_.res_name.c_str(), tex_data.format);
 					break;
 				}
 			}
@@ -1184,28 +1179,30 @@ namespace
 
 		TexturePtr CreateTexture()
 		{
+			TexDesc::TexData const & tex_data = *tex_desc_.tex_data;
+
 			TexturePtr texture;
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			switch (tex_desc_.tex_data->type)
+			switch (tex_data.type)
 			{
 			case Texture::TT_1D:
-				texture = rf.MakeTexture1D(tex_desc_.tex_data->width, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
-					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
+				texture = rf.MakeTexture1D(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
 				break;
 
 			case Texture::TT_2D:
-				texture = rf.MakeTexture2D(tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
-					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
+				texture = rf.MakeTexture2D(tex_data.width, tex_data.height, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
 				break;
 
 			case Texture::TT_3D:
-				texture = rf.MakeTexture3D(tex_desc_.tex_data->width, tex_desc_.tex_data->height, tex_desc_.tex_data->depth, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
-					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
+				texture = rf.MakeTexture3D(tex_data.width, tex_data.height, tex_data.depth, tex_data.num_mipmaps,
+					tex_data.array_size, tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
 				break;
 
 			case Texture::TT_Cube:
-				texture = rf.MakeTextureCube(tex_desc_.tex_data->width, tex_desc_.tex_data->num_mipmaps, tex_desc_.tex_data->array_size,
-					tex_desc_.tex_data->format, 1, 0, tex_desc_.access_hint, &tex_desc_.tex_data->init_data[0]);
+				texture = rf.MakeTextureCube(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
 				break;
 
 			default:
@@ -1359,6 +1356,7 @@ namespace KlayGE
 				format = EF_SIGNED_BC4;
 				break;
 
+			case MakeFourCC<'B', 'C', '5', 'U'>::value:
 			case MakeFourCC<'A', 'T', 'I', '2'>::value:
 				format = EF_BC5;
 				break;
@@ -1578,7 +1576,7 @@ namespace KlayGE
 
 		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
 		{
-			if (D3D10_RESOURCE_MISC_TEXTURECUBE == desc10.misc_flag)
+			if (D3D_RESOURCE_MISC_TEXTURECUBE == desc10.misc_flag)
 			{
 				type = Texture::TT_Cube;
 				array_size /= 6;
@@ -1589,19 +1587,19 @@ namespace KlayGE
 			{
 				switch (desc10.resource_dim)
 				{
-				case D3D10_RESOURCE_DIMENSION_TEXTURE1D:
+				case D3D_RESOURCE_DIMENSION_TEXTURE1D:
 					type = Texture::TT_1D;
 					height = 1;
 					depth = 1;
 					break;
 
-				case D3D10_RESOURCE_DIMENSION_TEXTURE2D:
+				case D3D_RESOURCE_DIMENSION_TEXTURE2D:
 					type = Texture::TT_2D;
 					height = desc.height;
 					depth = 1;
 					break;
 
-				case D3D10_RESOURCE_DIMENSION_TEXTURE3D:
+				case D3D_RESOURCE_DIMENSION_TEXTURE3D:
 					type = Texture::TT_3D;
 					height = desc.height;
 					depth = desc.depth;
@@ -1960,7 +1958,7 @@ namespace KlayGE
 
 				case EF_BC5:
 				case EF_BC5_SRGB:
-					desc.pixel_format.four_cc = MakeFourCC<'A', 'T', 'I', '2'>::value;
+					desc.pixel_format.four_cc = MakeFourCC<'B', 'C', '5', 'U'>::value;
 					break;
 
 				case EF_SIGNED_BC5:
@@ -2160,21 +2158,13 @@ namespace KlayGE
 		}
 
 		uint32_t format_size = NumFormatBytes(format);
-		uint32_t main_image_size = width * height * format_size;
 		if (IsCompressedFormat(format))
 		{
-			if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-				|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-			{
-				main_image_size = width * height / 2;
-			}
-			else
-			{
-				main_image_size = width * height;
-			}
+			uint32_t const block_size = NumFormatBytes(format) * 4;
+			uint32_t image_size = ((width + 3) / 4) * ((height + 3) / 4) * block_size;
 
 			desc.flags |= DDSD_LINEARSIZE;
-			desc.linear_size = main_image_size;
+			desc.linear_size = image_size;
 		}
 
 		DDSSURFACEDESC2 desc_le = desc;
@@ -2214,25 +2204,25 @@ namespace KlayGE
 			switch (type)
 			{
 			case Texture::TT_1D:
-				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE1D;
+				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE1D;
 				break;
 			
 			case Texture::TT_2D:
-				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE2D;
 				break;
 			
 			case Texture::TT_3D:
-				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE3D;
+				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE3D;
 				break;
 			
 			case Texture::TT_Cube:
-				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
-				desc10.misc_flag = D3D10_RESOURCE_MISC_TEXTURECUBE;
+				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE2D;
+				desc10.misc_flag = D3D_RESOURCE_MISC_TEXTURECUBE;
 				break;
 
 			default:
 				BOOST_ASSERT(false);
-				desc10.resource_dim = D3D10_RESOURCE_DIMENSION_TEXTURE2D;
+				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE2D;
 				break;
 			}
 			desc10.array_size = array_size;
@@ -2265,7 +2255,7 @@ namespace KlayGE
 						}
 						else
 						{
-							image_size = main_image_size / (1UL << (level * 2));
+							image_size = the_width * format_size;
 						}
 
 						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
@@ -2285,17 +2275,18 @@ namespace KlayGE
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
 						size_t const index = array_index * desc.mip_map_count + level;
+						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
 							uint32_t const block_size = NumFormatBytes(format) * 4;
-							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
-
-							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+							image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * block_size;
 						}
 						else
 						{
-							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_height * format_size));
+							image_size = the_width * the_height * format_size;
 						}
+
+						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
 						the_height = std::max<uint32_t>(the_height / 2, 1);
@@ -2314,17 +2305,18 @@ namespace KlayGE
 					for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 					{
 						size_t const index = array_index * desc.mip_map_count + level;
+						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
 							uint32_t const block_size = NumFormatBytes(format) * 4;
-							uint32_t image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
-
-							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+							image_size = ((the_width + 3) / 4) * ((the_height + 3) / 4) * the_depth * block_size;
 						}
 						else
 						{
-							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_height * the_depth * format_size));
+							image_size = the_width * the_height * the_depth * format_size;
 						}
+
+						file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
 						the_width = std::max<uint32_t>(the_width / 2, 1);
 						the_height = std::max<uint32_t>(the_height / 2, 1);
@@ -2344,17 +2336,18 @@ namespace KlayGE
 						for (uint32_t level = 0; level < desc.mip_map_count; ++ level)
 						{
 							size_t const index = (array_index * 6 + face - Texture::CF_Positive_X) * numMipMaps + level;
+							uint32_t image_size;
 							if (IsCompressedFormat(format))
 							{
 								uint32_t const block_size = NumFormatBytes(format) * 4;
-								uint32_t image_size = ((the_width + 3) / 4) * ((the_width + 3) / 4) * block_size;
-
-								file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
+								image_size = ((the_width + 3) / 4) * ((the_width + 3) / 4) * block_size;
 							}
 							else
 							{
-								file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(the_width * the_width * format_size));
+								image_size = the_width * the_width * format_size;
 							}
+
+							file.write(reinterpret_cast<char const *>(init_data[index].data), static_cast<std::streamsize>(image_size));
 
 							the_width = std::max<uint32_t>(the_width / 2, 1);
 						}
@@ -2403,20 +2396,7 @@ namespace KlayGE
 		}
 		texture->CopyToTexture(*texture_sys_mem);
 
-		uint32_t format_size = NumFormatBytes(format);
-		uint32_t main_image_size = texture_sys_mem->Width(0) * texture_sys_mem->Height(0) * format_size;
-		if (IsCompressedFormat(format))
-		{
-			if ((EF_BC1 == format) || (EF_SIGNED_BC1 == format) || (EF_BC1_SRGB == format)
-				|| (EF_BC4 == format) || (EF_SIGNED_BC4 == format) || (EF_BC4_SRGB == format))
-			{
-				main_image_size = texture_sys_mem->Width(0) * texture_sys_mem->Height(0) / 2;
-			}
-			else
-			{
-				main_image_size = texture_sys_mem->Width(0) * texture_sys_mem->Height(0);
-			}
-		}
+		uint32_t const format_size = NumFormatBytes(format);
 
 		std::vector<ElementInitData> init_data;
 		std::vector<size_t> base;
@@ -2432,20 +2412,20 @@ namespace KlayGE
 					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
 						size_t const index = array_index * numMipMaps + level;
-
+						uint32_t const width = texture_sys_mem->Width(level);
 						uint32_t image_size;
 						if (IsCompressedFormat(format))
 						{
 							uint32_t const block_size = NumFormatBytes(format) * 4;
-							image_size = ((texture_sys_mem->Width(level) + 3) / 4) * block_size;
+							image_size = ((width + 3) / 4) * block_size;
 						}
 						else
 						{
-							image_size = main_image_size / (1UL << (level * 2));
+							image_size = width * format_size;
 						}
 
 						{
-							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, texture_sys_mem->Width(level));
+							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, width);
 							base[index] = data_block.size();
 							data_block.resize(data_block.size() + image_size);
 							std::memcpy(&data_block[base[index]], mapper.Pointer<char>(), image_size);
@@ -2464,10 +2444,8 @@ namespace KlayGE
 					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
 						size_t const index = array_index * numMipMaps + level;
-
-						uint32_t width = texture_sys_mem->Width(level);
-						uint32_t height = texture_sys_mem->Height(level);
-
+						uint32_t const width = texture_sys_mem->Width(level);
+						uint32_t const height = texture_sys_mem->Height(level);
 						if (IsCompressedFormat(format))
 						{
 							uint32_t const block_size = NumFormatBytes(format) * 4;
@@ -2475,7 +2453,7 @@ namespace KlayGE
 
 							{
 								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
-								char* data = mapper.Pointer<char>();
+								char const * data = mapper.Pointer<char>();
 
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + image_size);
@@ -2489,7 +2467,7 @@ namespace KlayGE
 						else
 						{
 							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
-							char* data = mapper.Pointer<char>();
+							char const * data = mapper.Pointer<char>();
 
 							base[index] = data_block.size();
 							data_block.resize(data_block.size() + width * height * format_size);
@@ -2513,11 +2491,9 @@ namespace KlayGE
 					for (uint32_t level = 0; level < numMipMaps; ++ level)
 					{
 						size_t const index = array_index * numMipMaps + level;
-
-						uint32_t width = texture_sys_mem->Width(level);
-						uint32_t height = texture_sys_mem->Height(level);
-						uint32_t depth = texture_sys_mem->Depth(level);
-
+						uint32_t const width = texture_sys_mem->Width(level);
+						uint32_t const height = texture_sys_mem->Height(level);
+						uint32_t const depth = texture_sys_mem->Depth(level);
 						if (IsCompressedFormat(format))
 						{
 							uint32_t const block_size = NumFormatBytes(format) * 4;
@@ -2525,7 +2501,7 @@ namespace KlayGE
 
 							{
 								Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, width, height);
-								char* data = mapper.Pointer<char>();
+								char const * data = mapper.Pointer<char>();
 
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + image_size);
@@ -2544,7 +2520,7 @@ namespace KlayGE
 						else
 						{
 							Texture::Mapper mapper(*texture_sys_mem, array_index, level, TMA_Read_Only, 0, 0, 0, width, height, depth);
-							char* data = mapper.Pointer<char>();
+							char const * data = mapper.Pointer<char>();
 
 							base[index] = data_block.size();
 							data_block.resize(data_block.size() + width * height * depth * format_size);
@@ -2575,9 +2551,8 @@ namespace KlayGE
 						for (uint32_t level = 0; level < numMipMaps; ++ level)
 						{
 							size_t const index = (array_index * 6 + (face - Texture::CF_Positive_X)) * numMipMaps + level;
-
-							uint32_t width = texture_sys_mem->Width(level);
-							uint32_t height = texture_sys_mem->Height(level);
+							uint32_t const width = texture_sys_mem->Width(level);
+							uint32_t const height = texture_sys_mem->Height(level);
 							if (IsCompressedFormat(format))
 							{
 								uint32_t const block_size = NumFormatBytes(format) * 4;
@@ -2585,7 +2560,7 @@ namespace KlayGE
 
 								{
 									Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
-									char* data = mapper.Pointer<char>();
+									char const * data = mapper.Pointer<char>();
 
 									base[index] = data_block.size();
 									data_block.resize(data_block.size() + image_size);
@@ -2599,7 +2574,7 @@ namespace KlayGE
 							else
 							{
 								Texture::Mapper mapper(*texture_sys_mem, array_index, static_cast<Texture::CubeFaces>(face), level, TMA_Read_Only, 0, 0, width, height);
-								char* data = mapper.Pointer<char>();
+								char const * data = mapper.Pointer<char>();
 
 								base[index] = data_block.size();
 								data_block.resize(data_block.size() + width * height * format_size);

@@ -903,10 +903,6 @@ namespace KlayGE
 
 	ElementFormat D3D11Mapping::MappingFormat(DXGI_FORMAT format)
 	{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4063)
-#endif
 		switch (format)
 		{
 		case DXGI_FORMAT_A8_UNORM:
@@ -1113,8 +1109,5 @@ namespace KlayGE
 		default:
 			THR(errc::function_not_supported);
 		}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 	}
 }
