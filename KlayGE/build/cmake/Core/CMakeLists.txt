@@ -31,7 +31,6 @@ SOURCE_GROUP("Kernel\\Header Files" FILES ${KERNEL_HEADER_FILES})
 
 
 SET(RENDERING_SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Src/Render/BlockCompression.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CascadedShadowLayer.cpp
@@ -68,12 +67,13 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSGIPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionBC.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionETC.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Viewport.cpp
 )
 
 SET(RENDERING_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/BlockCompression.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Camera.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CameraController.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CascadedShadowLayer.hpp
@@ -112,6 +112,8 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSGIPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionBC.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionETC.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Viewport.hpp
 )

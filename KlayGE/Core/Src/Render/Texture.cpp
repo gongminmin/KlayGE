@@ -35,7 +35,7 @@
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 #include <KFL/Half.hpp>
 
 #include <cstring>
@@ -1001,15 +1001,15 @@ namespace
 			if (((EF_BC5 == tex_data.format) && !caps.texture_format_support(EF_BC5))
 				|| ((EF_BC5_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC5_SRGB)))
 			{
-				BC1_layout tmp;
+				BC1Block tmp;
 				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4_layout) * 2)
+					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4Block) * 2)
 					{
 						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
 
-						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p + sizeof(BC4_layout)));
-						std::memcpy(p + sizeof(BC4_layout), &tmp, sizeof(BC1_layout));
+						BC4ToBC1G(tmp, *reinterpret_cast<BC4Block const *>(p + sizeof(BC4Block)));
+						std::memcpy(p + sizeof(BC4Block), &tmp, sizeof(BC1Block));
 					}
 				}
 
@@ -1025,15 +1025,15 @@ namespace
 			if (((EF_BC4 == tex_data.format) && !caps.texture_format_support(EF_BC4))
 				|| ((EF_BC4_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC4_SRGB)))
 			{
-				BC1_layout tmp;
+				BC1Block tmp;
 				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
 				{
-					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4_layout))
+					for (size_t j = 0; j < tex_data.init_data[i].slice_pitch; j += sizeof(BC4Block))
 					{
 						char* p = static_cast<char*>(const_cast<void*>(tex_data.init_data[i].data)) + j;
 
-						BC4ToBC1G(tmp, *reinterpret_cast<BC4_layout const *>(p));
-						std::memcpy(p, &tmp, sizeof(BC1_layout));
+						BC4ToBC1G(tmp, *reinterpret_cast<BC4Block const *>(p));
+						std::memcpy(p, &tmp, sizeof(BC1Block));
 					}
 				}
 

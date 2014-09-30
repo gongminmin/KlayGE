@@ -1,17 +1,32 @@
-// BlockCompression.cpp
-// KlayGE 纹理分块压缩 实现文件
-// Ver 3.12.0
-// 版权所有(C) 龚敏敏, 2008-2011
-// Homepage: http://www.klayge.org
-//
-// 3.10.0
-// 增加了DecodeBC1/3/4 (2010.1.27)
-//
-// 3.8.0
-// 初次建立(2008.12.9)
-//
-// 修改记录
-//////////////////////////////////////////////////////////////////////////////////
+/**
+* @file TexCompressionBC.cpp
+* @author Minmin Gong
+*
+* @section DESCRIPTION
+*
+* This source file is part of KlayGE
+* For the latest info, see http://www.klayge.org
+*
+* @section LICENSE
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published
+* by the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*
+* You may alternatively use this source under the terms of
+* the KlayGE Proprietary License (KPL). You can obtained such a license
+* from http://www.klayge.org/licensing/.
+*/
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
@@ -23,7 +38,7 @@
 #include <cstring>
 #include <boost/assert.hpp>
 
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 
 namespace
 {
@@ -93,10 +108,7 @@ namespace
 		}
 	};
 	BCIniter bc_initer;
-}
 
-namespace KlayGE
-{
 	Color RGB565ToColor(uint16_t rgb)
 	{
 		return Color(((rgb >> 11) & 0x1F) / 31.0f, ((rgb >> 5) & 0x3F) / 63.0f, ((rgb >> 0) & 0x1F) / 31.0f, 1);
@@ -108,8 +120,11 @@ namespace KlayGE
 			| (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.g() * 63 + 0.5f), 0, 63)) << 5)
 			| (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.b() * 31 + 0.5f), 0, 31)) << 0);
 	}
+}
 
-	void DecodeBC1Internal(uint32_t* argb, BC1_layout const & bc1)
+namespace KlayGE
+{
+	void DecodeBC1Internal(uint32_t* argb, BC1Block const & bc1)
 	{
 		array<Color, 4> clr;
 		clr[0] = RGB565ToColor(bc1.clr_0);
@@ -134,7 +149,7 @@ namespace KlayGE
 		}
 	}
 
-	void DecodeBC4Internal(uint8_t* alpha_block, BC4_layout const & bc4)
+	void DecodeBC4Internal(uint8_t* alpha_block, BC4Block const & bc4)
 	{
 		array<uint8_t, 8> alpha;
 		float falpha0 = bc4.alpha_0 / 255.0f;
@@ -479,7 +494,7 @@ namespace KlayGE
 		}
 	}
 
-	void EncodeBC1Internal(BC1_layout& bc1, uint32_t const * argb, bool alpha, EBCMethod method)
+	void EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, EBCMethod method)
 	{
 		// check if block is constant
 		uint32_t min32, max32;
@@ -580,7 +595,7 @@ namespace KlayGE
 	}
 
 	// Alpha block compression (this is easy for a change)
-	void EncodeBC4Internal(BC4_layout& bc4, uint8_t const * alpha)
+	void EncodeBC4Internal(BC4Block& bc4, uint8_t const * alpha)
 	{
 		// find min/max color
 		int min, max;
@@ -629,16 +644,16 @@ namespace KlayGE
 		}
 	}
 
-	void DecodeBC1(uint32_t* argb, uint8_t const * bc1)
+	void DecodeBC1(uint32_t* argb, void const * bc1)
 	{
-		DecodeBC1Internal(argb, *reinterpret_cast<BC1_layout const *>(bc1));
+		DecodeBC1Internal(argb, *static_cast<BC1Block const *>(bc1));
 	}
 	
-	void DecodeBC2(uint32_t* argb, uint8_t const * bc2)
+	void DecodeBC2(uint32_t* argb, void const * bc2)
 	{
-		BC2_layout const * bc2_layout = reinterpret_cast<BC2_layout const *>(bc2);
+		BC2Block const * bc2_block = static_cast<BC2Block const *>(bc2);
 
-		DecodeBC1(argb, reinterpret_cast<uint8_t const *>(&bc2_layout->bc1));
+		DecodeBC1(argb, &bc2_block->bc1);
 
 		for (int i = 0; i < 16; ++ i)
 		{
@@ -649,19 +664,19 @@ namespace KlayGE
 		{
 			for (int j = 0; j < 4; ++ j)
 			{
-				argb[i * 4 + j] |= (((bc2_layout->alpha[i] >> (4 * j)) & 0xF) << 4) << 24;
+				argb[i * 4 + j] |= (((bc2_block->alpha[i] >> (4 * j)) & 0xF) << 4) << 24;
 			}
 		}
 	}
 
-	void DecodeBC3(uint32_t* argb, uint8_t const * bc3)
+	void DecodeBC3(uint32_t* argb, void const * bc3)
 	{
-		BC3_layout const * bc3_layout = reinterpret_cast<BC3_layout const *>(bc3);
+		BC3Block const * bc3_block = static_cast<BC3Block const *>(bc3);
 
-		DecodeBC1(argb, reinterpret_cast<uint8_t const *>(&bc3_layout->bc1));
+		DecodeBC1(argb, &bc3_block->bc1);
 
 		array<uint8_t, 16> alpha_block;
-		DecodeBC4Internal(&alpha_block[0], bc3_layout->alpha);
+		DecodeBC4Internal(&alpha_block[0], bc3_block->alpha);
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
 		{
@@ -670,19 +685,19 @@ namespace KlayGE
 		}
 	}
 
-	void DecodeBC4(uint8_t* r, uint8_t const * bc4)
+	void DecodeBC4(uint8_t* r, void const * bc4)
 	{
-		DecodeBC4Internal(r, *reinterpret_cast<BC4_layout const *>(bc4));
+		DecodeBC4Internal(r, *static_cast<BC4Block const *>(bc4));
 	}
 
-	void DecodeBC5(uint8_t* r, uint8_t* g, uint8_t const * bc5)
+	void DecodeBC5(uint8_t* r, uint8_t* g, void const * bc5)
 	{
-		BC5_layout const * bc5_layout = reinterpret_cast<BC5_layout const *>(bc5);
+		BC5Block const * bc5_block = static_cast<BC5Block const *>(bc5);
 
 		array<uint8_t, 16> block_0;
-		DecodeBC4(&block_0[0], reinterpret_cast<uint8_t const *>(&bc5_layout->red));
+		DecodeBC4(&block_0[0], &bc5_block->red);
 		array<uint8_t, 16> block_1;
-		DecodeBC4(&block_1[0], reinterpret_cast<uint8_t const *>(&bc5_layout->green));
+		DecodeBC4(&block_1[0], &bc5_block->green);
 
 		for (size_t i = 0; i < block_0.size(); ++ i)
 		{
@@ -693,7 +708,7 @@ namespace KlayGE
 
 	void DecodeBC1(void* argb, uint32_t pitch, void const * bc1, uint32_t width, uint32_t height)
 	{
-		uint8_t const * src = static_cast<uint8_t const *>(bc1);
+		BC1Block const * src = static_cast<BC1Block const *>(bc1);
 		uint32_t * dst = static_cast<uint32_t*>(argb);
 
 		uint32_t uncompressed[16];
@@ -705,7 +720,7 @@ namespace KlayGE
 				uint32_t const block_w = std::min(4U, width - x_base);
 
 				DecodeBC1(&uncompressed[0], src);
-				src += 8;
+				++ src;
 
 				for (uint32_t y = 0; y < block_h; ++ y)
 				{
@@ -720,7 +735,7 @@ namespace KlayGE
 
 	void DecodeBC2(void* argb, uint32_t pitch, void const * bc2, uint32_t width, uint32_t height)
 	{
-		uint8_t const * src = static_cast<uint8_t const *>(bc2);
+		BC2Block const * src = static_cast<BC2Block const *>(bc2);
 		uint32_t * dst = static_cast<uint32_t*>(argb);
 
 		uint32_t uncompressed[16];
@@ -732,7 +747,7 @@ namespace KlayGE
 				uint32_t const block_w = std::min(4U, width - x_base);
 
 				DecodeBC2(&uncompressed[0], src);
-				src += 16;
+				++ src;
 
 				for (uint32_t y = 0; y < block_h; ++ y)
 				{
@@ -747,7 +762,7 @@ namespace KlayGE
 
 	void DecodeBC3(void* argb, uint32_t pitch, void const * bc3, uint32_t width, uint32_t height)
 	{
-		uint8_t const * src = static_cast<uint8_t const *>(bc3);
+		BC3Block const * src = static_cast<BC3Block const *>(bc3);
 		uint32_t * dst = static_cast<uint32_t*>(argb);
 
 		uint32_t uncompressed[16];
@@ -759,7 +774,7 @@ namespace KlayGE
 				uint32_t const block_w = std::min(4U, width - x_base);
 
 				DecodeBC3(&uncompressed[0], src);
-				src += 16;
+				++ src;
 
 				for (uint32_t y = 0; y < block_h; ++ y)
 				{
@@ -774,7 +789,7 @@ namespace KlayGE
 
 	void DecodeBC4(void* r, uint32_t pitch, void const * bc4, uint32_t width, uint32_t height)
 	{
-		uint8_t const * src = static_cast<uint8_t const *>(bc4);
+		BC4Block const * src = static_cast<BC4Block const *>(bc4);
 		uint8_t * dst = static_cast<uint8_t*>(r);
 
 		uint8_t uncompressed[16];
@@ -786,7 +801,7 @@ namespace KlayGE
 				uint32_t const block_w = std::min(4U, width - x_base);
 
 				DecodeBC4(&uncompressed[0], src);
-				src += 8;
+				++ src;
 
 				for (uint32_t y = 0; y < block_h; ++ y)
 				{
@@ -801,7 +816,7 @@ namespace KlayGE
 
 	void DecodeBC5(void* gr, uint32_t pitch, void const * bc5, uint32_t width, uint32_t height)
 	{
-		uint8_t const * src = static_cast<uint8_t const *>(bc5);
+		BC5Block const * src = static_cast<BC5Block const *>(bc5);
 		uint8_t * dst = static_cast<uint8_t*>(gr);
 
 		uint8_t uncompressed_r[16];
@@ -814,7 +829,7 @@ namespace KlayGE
 				uint32_t const block_w = std::min(4U, width - x_base);
 
 				DecodeBC5(&uncompressed_r[0], &uncompressed_g[0], src);
-				src += 16;
+				++ src;
 
 				for (uint32_t y = 0; y < block_h; ++ y)
 				{
@@ -843,10 +858,11 @@ namespace KlayGE
 			argb8_tex = dst_tex;
 		}
 
-		Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-
-		DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		{
+			Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
+			DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		}
 
 		if (dst_tex->Format() != EF_ARGB8)
 		{
@@ -869,10 +885,11 @@ namespace KlayGE
 			argb8_tex = dst_tex;
 		}
 
-		Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-
-		DecodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		{
+			Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
+			DecodeBC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		}
 
 		if (dst_tex->Format() != EF_ARGB8)
 		{
@@ -895,10 +912,11 @@ namespace KlayGE
 			argb8_tex = dst_tex;
 		}
 
-		Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-
-		DecodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		{
+			Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
+			DecodeBC3(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		}
 
 		if (dst_tex->Format() != EF_ARGB8)
 		{
@@ -921,10 +939,11 @@ namespace KlayGE
 			r8_tex = dst_tex;
 		}
 
-		Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper mapper_dst(*r8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-
-		DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		{
+			Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper_dst(*r8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
+			DecodeBC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		}
 
 		if (dst_tex->Format() != EF_ARGB8)
 		{
@@ -947,10 +966,11 @@ namespace KlayGE
 			gr8_tex = dst_tex;
 		}
 
-		Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-		Texture::Mapper mapper_dst(*gr8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-
-		DecodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		{
+			Texture::Mapper mapper_src(*bc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
+			Texture::Mapper mapper_dst(*gr8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
+			DecodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
+		}
 
 		if (dst_tex->Format() != EF_ARGB8)
 		{
@@ -958,7 +978,7 @@ namespace KlayGE
 		}
 	}
 
-	void EncodeBC1(BC1_layout& bc1, uint32_t const * argb, EBCMethod method)
+	void EncodeBC1(BC1Block& bc1, uint32_t const * argb, EBCMethod method)
 	{
 		array<uint32_t, 16> tmp_argb;
 		bool alpha = false;
@@ -978,7 +998,7 @@ namespace KlayGE
 		EncodeBC1Internal(bc1, &tmp_argb[0], alpha, method);
 	}
 
-	void EncodeBC2(BC2_layout& bc2, uint32_t const * argb, EBCMethod method)
+	void EncodeBC2(BC2Block& bc2, uint32_t const * argb, EBCMethod method)
 	{
 		array<uint8_t, 16> alpha;
 		array<uint32_t, 16> xrgb;
@@ -997,7 +1017,7 @@ namespace KlayGE
 		}
 	}
 
-	void EncodeBC3(BC3_layout& bc3, uint32_t const * argb, EBCMethod method)
+	void EncodeBC3(BC3Block& bc3, uint32_t const * argb, EBCMethod method)
 	{
 		array<uint8_t, 16> alpha;
 		array<uint32_t, 16> xrgb;
@@ -1011,12 +1031,12 @@ namespace KlayGE
 		EncodeBC4Internal(bc3.alpha, &alpha[0]);
 	}
 
-	void EncodeBC4(BC4_layout& bc4, uint8_t const * r)
+	void EncodeBC4(BC4Block& bc4, uint8_t const * r)
 	{
 		EncodeBC4Internal(bc4, r);
 	}
 
-	void EncodeBC5(BC5_layout& bc5, uint8_t const * r, uint8_t const * g)
+	void EncodeBC5(BC5Block& bc5, uint8_t const * r, uint8_t const * g)
 	{
 		EncodeBC4(bc5.red, r);
 		EncodeBC4(bc5.green, g);
@@ -1029,7 +1049,7 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
-			BC1_layout* dst = reinterpret_cast<BC1_layout*>(static_cast<uint8_t*>(bc1) + y_base / 4 * out_pitch);
+			BC1Block* dst = reinterpret_cast<BC1Block*>(static_cast<uint8_t*>(bc1) + y_base / 4 * out_pitch);
 
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
@@ -1059,7 +1079,7 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
-			BC2_layout* dst = reinterpret_cast<BC2_layout*>(static_cast<uint8_t*>(bc2) + y_base / 4 * out_pitch);
+			BC2Block* dst = reinterpret_cast<BC2Block*>(static_cast<uint8_t*>(bc2) + y_base / 4 * out_pitch);
 
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
@@ -1089,7 +1109,7 @@ namespace KlayGE
 		uint32_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
-			BC3_layout* dst = reinterpret_cast<BC3_layout*>(static_cast<uint8_t*>(bc3) + y_base / 4 * out_pitch);
+			BC3Block* dst = reinterpret_cast<BC3Block*>(static_cast<uint8_t*>(bc3) + y_base / 4 * out_pitch);
 
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
@@ -1119,7 +1139,7 @@ namespace KlayGE
 		uint8_t uncompressed[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
-			BC4_layout* dst = reinterpret_cast<BC4_layout*>(static_cast<uint8_t*>(bc4) + y_base / 4 * out_pitch);
+			BC4Block* dst = reinterpret_cast<BC4Block*>(static_cast<uint8_t*>(bc4) + y_base / 4 * out_pitch);
 
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
@@ -1150,7 +1170,7 @@ namespace KlayGE
 		uint8_t uncompressed_g[16];
 		for (uint32_t y_base = 0; y_base < height; y_base += 4)
 		{
-			BC5_layout* dst = reinterpret_cast<BC5_layout*>(static_cast<uint8_t*>(bc5) + y_base / 4 * out_pitch);
+			BC5Block* dst = reinterpret_cast<BC5Block*>(static_cast<uint8_t*>(bc5) + y_base / 4 * out_pitch);
 
 			for (uint32_t x_base = 0; x_base < width; x_base += 4)
 			{
@@ -1285,7 +1305,7 @@ namespace KlayGE
 		EncodeBC5(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height, mapper_src.RowPitch());
 	}
 
-	void BC4ToBC1G(BC1_layout& bc1, BC4_layout const & bc4)
+	void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4)
 	{
 		bc1.clr_0 = (bc4.alpha_0 >> 2) << 5;
 		bc1.clr_1 = (bc4.alpha_1 >> 2) << 5;

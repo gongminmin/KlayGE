@@ -16,7 +16,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 
 #include <fstream>
 #include <cstring>
