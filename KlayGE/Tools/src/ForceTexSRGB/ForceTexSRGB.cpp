@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <iostream>

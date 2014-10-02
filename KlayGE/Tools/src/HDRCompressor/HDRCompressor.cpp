@@ -2,7 +2,7 @@
 #include <KFL/Half.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
@@ -151,7 +151,7 @@ namespace
 
 				if (EF_BC5 == c_format)
 				{
-					BC5_layout com_bc5;
+					BC5Block com_bc5;
 					EncodeBC4(com_bc5.red, uncom_u);
 					EncodeBC4(com_bc5.green, uncom_v);
 
@@ -169,7 +169,7 @@ namespace
 						}
 					}
 
-					BC3_layout com_bc3;
+					BC3Block com_bc3;
 					EncodeBC3(com_bc3, uncom_argb, EBCM_Quality);
 
 					std::memcpy(c_dst, &com_bc3, sizeof(com_bc3));

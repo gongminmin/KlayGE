@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
@@ -75,14 +75,14 @@ namespace
 
 				if (IsCompressedFormat(new_format))
 				{
-					BC4_layout x_bc4;
+					BC4Block x_bc4;
 					EncodeBC4(x_bc4, uncom_x);
-					BC4_layout y_bc4;
+					BC4Block y_bc4;
 					EncodeBC4(y_bc4, uncom_y);
 
 					if (EF_BC5 == new_format)
 					{
-						BC5_layout com_bc5;
+						BC5Block com_bc5;
 						com_bc5.red = x_bc4;
 						com_bc5.green = y_bc4;
 
@@ -93,7 +93,7 @@ namespace
 					{
 						BOOST_ASSERT(EF_BC3 == new_format);
 
-						BC3_layout com_bc3;
+						BC3Block com_bc3;
 						com_bc3.alpha = x_bc4;
 
 						BC4ToBC1G(com_bc3.bc1, y_bc4);

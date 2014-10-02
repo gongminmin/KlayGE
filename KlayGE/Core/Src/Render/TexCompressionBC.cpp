@@ -61,20 +61,20 @@ namespace
 	{
 		for (int i = 0; i < 256; ++ i)
 		{
-			int bestErr = 256;
+			int best_err = 256;
 
 			for (int min = 0; min < size; ++ min)
 			{
 				for (int max = 0; max < size; ++ max)
 				{
-					int mine = expand[min];
-					int maxe = expand[max];
-					int err = abs(maxe + Mul8Bit(mine - maxe, 0x55) - i);
-					if (err < bestErr)
+					int min_e = expand[min];
+					int max_e = expand[max];
+					int err = abs(max_e + Mul8Bit(min_e - max_e, 0x55) - i);
+					if (err < best_err)
 					{
 						Table[i * 2 + 0] = static_cast<uint8_t>(max);
 						Table[i * 2 + 1] = static_cast<uint8_t>(min);
-						bestErr = err;
+						best_err = err;
 					}
 				}
 			}
@@ -109,16 +109,15 @@ namespace
 	};
 	BCIniter bc_initer;
 
-	Color RGB565ToColor(uint16_t rgb)
+	uint32_t RGB565To888(uint16_t rgb)
 	{
-		return Color(((rgb >> 11) & 0x1F) / 31.0f, ((rgb >> 5) & 0x3F) / 63.0f, ((rgb >> 0) & 0x1F) / 31.0f, 1);
+		return 0xFF000000 | (Expand5[(rgb >> 11) & 0x1F] << 16) | (Expand6[(rgb >> 5) & 0x3F] << 8)
+			| (Expand5[(rgb >> 0) & 0x1F] << 0);
 	}
 
-	uint16_t ColorToRGB565(Color const & clr)
+	uint16_t RGB888To565(uint32_t rgb)
 	{
-		return (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.r() * 31 + 0.5f), 0, 31)) << 11)
-			| (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.g() * 63 + 0.5f), 0, 63)) << 5)
-			| (static_cast<uint16_t>(MathLib::clamp(static_cast<int>(clr.b() * 31 + 0.5f), 0, 31)) << 0);
+		return (((rgb >> 19) & 0x1F) << 11) | (((rgb >> 10) & 0x3F) << 5) | (((rgb >> 3) & 0x1F) << 0);
 	}
 }
 
@@ -126,25 +125,42 @@ namespace KlayGE
 {
 	void DecodeBC1Internal(uint32_t* argb, BC1Block const & bc1)
 	{
-		array<Color, 4> clr;
-		clr[0] = RGB565ToColor(bc1.clr_0);
-		clr[1] = RGB565ToColor(bc1.clr_1);
+		uint32_t max_clr = RGB565To888(bc1.clr_0);
+		uint32_t min_clr = RGB565To888(bc1.clr_1);
+		uint8_t const * max_u8 = reinterpret_cast<uint8_t const *>(&max_clr);
+		uint8_t const * min_u8 = reinterpret_cast<uint8_t const *>(&min_clr);
+
+		array<uint32_t, 4> clr;
+		clr[0] = max_clr;
+		clr[1] = min_clr;
 		if (bc1.clr_0 > bc1.clr_1)
 		{
-			clr[2] = MathLib::lerp(clr[0], clr[1], 1 / 3.0f);
-			clr[3] = MathLib::lerp(clr[0], clr[1], 2 / 3.0f);
+			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&clr[2]);
+			uint8_t* clr3_u8 = reinterpret_cast<uint8_t*>(&clr[3]);
+			clr2_u8[0] = (max_u8[0] * 2 + min_u8[0]) / 3;
+			clr2_u8[1] = (max_u8[1] * 2 + min_u8[1]) / 3;
+			clr2_u8[2] = (max_u8[2] * 2 + min_u8[2]) / 3;
+			clr2_u8[3] = 255;
+			clr3_u8[0] = (max_u8[0] + min_u8[0] * 2) / 3;
+			clr3_u8[1] = (max_u8[1] + min_u8[1] * 2) / 3;
+			clr3_u8[2] = (max_u8[2] + min_u8[2] * 2) / 3;
+			clr3_u8[3] = 255;
 		}
 		else
 		{
-			clr[2] = (clr[0] + clr[1]) / 2;
-			clr[3] = Color(0, 0, 0, 0);
+			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&clr[2]);
+			clr2_u8[0] = (max_u8[0] + min_u8[0]) / 2;
+			clr2_u8[1] = (max_u8[1] + min_u8[1]) / 2;
+			clr2_u8[2] = (max_u8[2] + min_u8[2]) / 2;
+			clr2_u8[3] = 255;
+			clr[3] = 0;
 		}
 
 		for (int i = 0; i < 2; ++ i)
 		{
 			for (int j = 0; j < 8; ++ j)
 			{
-				argb[i * 8 + j] = clr[(bc1.bitmap[i] >> (j * 2)) & 0x3].ARGB();
+				argb[i * 8 + j] = clr[(bc1.bitmap[i] >> (j * 2)) & 0x3];
 			}
 		}
 	}
@@ -186,23 +202,39 @@ namespace KlayGE
 	}
 
 	// The color matching function
-	uint32_t MatchColorsBlock(uint32_t const * argb, Color const & min_clr, Color const & max_clr, bool alpha)
+	uint32_t MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha)
 	{
 		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
+		uint8_t const * max_u8 = reinterpret_cast<uint8_t const *>(&max_clr);
+		uint8_t const * min_u8 = reinterpret_cast<uint8_t const *>(&min_clr);
 
-		Color color[4];
+		array<uint32_t, 4> color;
 		color[0] = max_clr;
 		color[1] = min_clr;
 		if (!alpha)
 		{
-			color[2] = MathLib::lerp(color[0], color[1], 1 / 3.0f);
-			color[3] = MathLib::lerp(color[0], color[1], 2 / 3.0f);
+			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&color[2]);
+			uint8_t* clr3_u8 = reinterpret_cast<uint8_t*>(&color[3]);
+			clr2_u8[0] = (max_u8[0] * 2 + min_u8[0]) / 3;
+			clr2_u8[1] = (max_u8[1] * 2 + min_u8[1]) / 3;
+			clr2_u8[2] = (max_u8[2] * 2 + min_u8[2]) / 3;
+			clr2_u8[3] = 255;
+			clr3_u8[0] = (max_u8[0] + min_u8[0] * 2) / 3;
+			clr3_u8[1] = (max_u8[1] + min_u8[1] * 2) / 3;
+			clr3_u8[2] = (max_u8[2] + min_u8[2] * 2) / 3;
+			clr3_u8[3] = 255;
 		}
 
+		array<uint8_t*, 4> color_u8;
+		color_u8[0] = reinterpret_cast<uint8_t*>(&color[0]);
+		color_u8[1] = reinterpret_cast<uint8_t*>(&color[1]);
+		color_u8[2] = reinterpret_cast<uint8_t*>(&color[2]);
+		color_u8[3] = reinterpret_cast<uint8_t*>(&color[3]);
+
 		uint32_t mask = 0;
-		int dirr = static_cast<int>((color[0].r() - color[1].r()) * 255 + 0.5f);
-		int dirg = static_cast<int>((color[0].g() - color[1].g()) * 255 + 0.5f);
-		int dirb = static_cast<int>((color[0].b() - color[1].b()) * 255 + 0.5f);
+		int dirr = color_u8[0][2] - color_u8[1][2];
+		int dirg = color_u8[0][1] - color_u8[1][1];
+		int dirb = color_u8[0][0] - color_u8[1][0];
 
 		int dots[16];
 		for (int i = 0; i < 16; ++ i)
@@ -212,16 +244,14 @@ namespace KlayGE
 
 		if (alpha)
 		{
-			int stops[2];
+			array<int, 2> stops;
 			for (int i = 0; i < 2; ++ i)
 			{
-				stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
-					+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
-					+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
+				stops[i] = color_u8[i][2] * dirr + color_u8[i][1] * dirg + color_u8[i][0] * dirb;
 			}
-  
-			int c0Point = (stops[0] + stops[1] * 2) / 3;
-			int c3Point = (stops[0] * 2 + stops[1]) / 3;
+
+			int c0_point = (stops[0] + stops[1] * 2) / 3;
+			int c3_point = (stops[0] * 2 + stops[1]) / 3;
 
 			for (int i = 15; i >= 0; -- i)
 			{
@@ -233,39 +263,37 @@ namespace KlayGE
 				}
 				else
 				{
-					if (dot >= c0Point)
+					if (dot >= c0_point)
 					{
-						mask |= (dot < c3Point) ? 2 : 1;
+						mask |= (dot < c3_point) ? 2 : 1;
 					}
 				}
 			}
 		}
 		else
 		{
-			int stops[4];
+			array<int, 4> stops;
 			for (int i = 0; i < 4; ++ i)
 			{
-				stops[i] = static_cast<int>(color[i].r() * 255 + 0.5f) * dirr
-					+ static_cast<int>(color[i].g() * 255 + 0.5f) * dirg
-					+ static_cast<int>(color[i].b() * 255 + 0.5f) * dirb;
+				stops[i] = color_u8[i][2] * dirr + color_u8[i][1] * dirg + color_u8[i][0] * dirb;
 			}
   
-			int c0Point = (stops[1] + stops[3]) >> 1;
-			int halfPoint = (stops[3] + stops[2]) >> 1;
-			int c3Point = (stops[2] + stops[0]) >> 1;
+			int c0_point = (stops[1] + stops[3]) >> 1;
+			int half_point = (stops[3] + stops[2]) >> 1;
+			int c3_point = (stops[2] + stops[0]) >> 1;
 
 			for (int i = 15; i >= 0; -- i)
 			{
 				mask <<= 2;
 				int dot = dots[i];
 
-				if (dot < halfPoint)
+				if (dot < half_point)
 				{
-					mask |= (dot < c0Point) ? 1 : 3;
+					mask |= (dot < c0_point) ? 1 : 3;
 				}
 				else
 				{
-					mask |= (dot < c3Point) ? 2 : 0;
+					mask |= (dot < c3_point) ? 2 : 0;
 				}
 			}
 		}
@@ -274,36 +302,33 @@ namespace KlayGE
 	}
 
 	// The color optimization function. (Clever code, part 1)
-	void OptimizeColorsBlock(uint32_t const * argb, Color& min_clr, Color& max_clr, EBCMethod method)
+	void OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, EBCMethod method)
 	{
 		if (method != EBCM_Quality)
 		{
 			Color const LUM_WEIGHT(0.2126f, 0.7152f, 0.0722f, 0);
 
-			min_clr = Color(argb[0]);
-			max_clr = min_clr;
-			float min_lum = MathLib::dot(min_clr, LUM_WEIGHT);
+			max_clr = min_clr = argb[0];
+			float min_lum = MathLib::dot(Color(min_clr), LUM_WEIGHT);
 			float max_lum = min_lum;
 			for (size_t i = 1; i < 16; ++ i)
 			{
-				Color float_clr(argb[i]);
-				float lum = MathLib::dot(float_clr, LUM_WEIGHT);
-
+				float lum = MathLib::dot(Color(argb[i]), LUM_WEIGHT);
 				if (lum < min_lum)
 				{
 					min_lum = lum;
-					min_clr = float_clr;
+					min_clr = argb[i];
 				}
 				if (lum > max_lum)
 				{
 					max_lum = lum;
-					max_clr = float_clr;
+					max_clr = argb[i];
 				}
 			}
 		}
 		else
 		{
-			static const int nIterPower = 4;
+			static int const ITER_POWER = 4;
 
 			uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
 
@@ -360,7 +385,7 @@ namespace KlayGE
 			vfg = static_cast<float>(max[1] - min[1]);
 			vfb = static_cast<float>(max[0] - min[0]);
 
-			for (int iter = 0; iter < nIterPower; ++ iter)
+			for (int iter = 0; iter < ITER_POWER; ++ iter)
 			{
 				float r = vfr * covf[0] + vfg * covf[1] + vfb * covf[2];
 				float g = vfr * covf[1] + vfg * covf[3] + vfb * covf[4];
@@ -389,35 +414,29 @@ namespace KlayGE
 			}
 
 			// Pick colors at extreme points
-			int mind = 0x7FFFFFFF, maxd = -mind;
-			uint32_t minp = 0;
-			uint32_t maxp = 0;
+			int min_d = 0x7FFFFFFF, max_d = -min_d;
+			min_clr = max_clr = 0;
 			for (int i = 0; i < 16; ++ i)
 			{
 				int dot = block[i * 4 + 2] * v_r + block[i * 4 + 1] * v_g + block[i * 4 + 0] * v_b;
-
-				if (dot < mind)
+				if (dot < min_d)
 				{
-					mind = dot;
-					minp = argb[i];
+					min_d = dot;
+					min_clr = argb[i];
 				}
-
-				if (dot > maxd)
+				if (dot > max_d)
 				{
-					maxd = dot;
-					maxp = argb[i];
+					max_d = dot;
+					max_clr = argb[i];
 				}
 			}
-
-			max_clr = Color(maxp);
-			min_clr = Color(minp);
 		}
 	}
 
 	// The refinement function. (Clever code, part 2)
 	// Tries to optimize colors to suit block contents better.
 	// (By solving a least squares system via normal equations+Cramer's rule)
-	bool RefineBlock(uint32_t const * argb, Color& min_clr, Color& max_clr, uint32_t mask)
+	bool RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask)
 	{
 		static int const w1Tab[4] = { 3, 0, 2, 1 };
 		static int const prods[4] = { 0x090000, 0x000900, 0x040102, 0x010402 };
@@ -466,8 +485,8 @@ namespace KlayGE
 		float const frb = f * 31.0f;
 		float const fg = f * 63.0f;
 
-		uint16_t old_min = ColorToRGB565(min_clr);
-		uint16_t old_max = ColorToRGB565(max_clr);
+		uint16_t old_min = RGB888To565(min_clr);
+		uint16_t old_max = RGB888To565(max_clr);
 
 		// solve.
 		int max_r = MathLib::clamp<int>(static_cast<int>((At1_r * yy - At2_r * xy) * frb + 0.5f), 0, 31);
@@ -483,8 +502,8 @@ namespace KlayGE
 
 		if ((old_min != min16) || (old_max != max16))
 		{
-			min_clr = Color(min_r / 31.0f, min_g / 63.0f, min_b / 31.0f, 1);
-			max_clr = Color(max_r / 31.0f, max_g / 63.0f, max_b / 31.0f, 1);
+			min_clr = RGB565To888(min16);
+			max_clr = RGB565To888(max16);
 
 			return true;
 		}
@@ -509,10 +528,10 @@ namespace KlayGE
 		uint16_t max16, min16;
 		if (min32 != max32) // no constant color
 		{
-			Color max_clr, min_clr;
+			uint32_t max_clr, min_clr;
 			OptimizeColorsBlock(argb, min_clr, max_clr, method);
-			max16 = ColorToRGB565(max_clr);
-			min16 = ColorToRGB565(min_clr);
+			max16 = RGB888To565(max_clr);
+			min16 = RGB888To565(min_clr);
 			if (max16 != min16)
 			{
 				mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);
@@ -525,8 +544,8 @@ namespace KlayGE
 			{
 				if (RefineBlock(argb, min_clr, max_clr, mask))
 				{
-					max16 = ColorToRGB565(max_clr);
-					min16 = ColorToRGB565(min_clr);
+					max16 = RGB888To565(max_clr);
+					min16 = RGB888To565(min_clr);
 					if (max16 != min16)
 					{
 						mask = MatchColorsBlock(argb, min_clr, max_clr, alpha);

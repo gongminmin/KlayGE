@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/BlockCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
@@ -170,7 +170,7 @@ namespace
 
 					array<uint8_t, 16> uncom_len;
 					uncom_len.fill(255);
-					BC4_layout len_bc4;
+					BC4Block len_bc4;
 					EncodeBC4(len_bc4, &uncom_len[0]);
 
 					uint32_t dest = 0;
@@ -187,7 +187,7 @@ namespace
 							{
 								BOOST_ASSERT(EF_BC1 == new_format);
 
-								BC1_layout len_bc1;
+								BC1Block len_bc1;
 								BC4ToBC1G(len_bc1, len_bc4);
 
 								std::memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
@@ -255,7 +255,7 @@ namespace
 
 						if (IsCompressedFormat(new_format))
 						{
-							BC4_layout len_bc4;
+							BC4Block len_bc4;
 							EncodeBC4(len_bc4, &uncom_len[0]);
 
 							if (EF_BC4 == new_format)
@@ -267,7 +267,7 @@ namespace
 							{
 								BOOST_ASSERT(EF_BC1 == new_format);
 
-								BC1_layout len_bc1;
+								BC1Block len_bc1;
 								BC4ToBC1G(len_bc1, len_bc4);
 
 								std::memcpy(&new_lengths[dest], &len_bc1, sizeof(len_bc1));
