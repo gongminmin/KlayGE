@@ -33,10 +33,12 @@
 
 #pragma once
 
+#include <KlayGE/TexCompression.hpp>
+
 namespace KlayGE
 {
 #ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(push, 1)
+#pragma pack(push, 1)
 #endif
 	struct BC1Block
 	{
@@ -68,52 +70,83 @@ namespace KlayGE
 		BC4Block green;
 	};
 #ifdef KLAYGE_HAS_STRUCT_PACK
-	#pragma pack(pop)
+#pragma pack(pop)
 #endif
 
-	enum EBCMethod
+	class KLAYGE_CORE_API TexCompressionBC1 : public TexCompression
 	{
-		EBCM_Quality,
-		EBCM_Balanced,
-		EBCM_Speed
+	public:
+		TexCompressionBC1();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+		void EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method);
+
+	private:
+		int Mul8Bit(int a, int b);
+		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size);
+		uint32_t RGB565To888(uint16_t rgb);
+		uint16_t RGB888To565(uint32_t rgb);
+		uint32_t MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha);
+		void OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method);
+		bool RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask);
+
+	private:
+		static uint8_t expand5_[32];
+		static uint8_t expand6_[64];
+		static uint8_t o_match5_[256][2];
+		static uint8_t o_match6_[256][2];
+		static uint8_t quant_rb_tab_[256 + 16];
+		static uint8_t quant_g_tab_[256 + 16];
+		static bool lut_inited_;
 	};
 
-	KLAYGE_CORE_API void DecodeBC1(uint32_t* argb, void const * bc1);
-	KLAYGE_CORE_API void DecodeBC2(uint32_t* argb, void const * bc2);
-	KLAYGE_CORE_API void DecodeBC3(uint32_t* argb, void const * bc3);
-	KLAYGE_CORE_API void DecodeBC4(uint8_t* r, void const * bc4);
-	KLAYGE_CORE_API void DecodeBC5(uint8_t* r, uint8_t* g, void const * bc5);
+	class KLAYGE_CORE_API TexCompressionBC2 : public TexCompression
+	{
+	public:
+		TexCompressionBC2();
 
-	KLAYGE_CORE_API void DecodeBC1(void* argb, uint32_t pitch, void const * bc1, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeBC2(void* argb, uint32_t pitch, void const * bc2, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeBC3(void* argb, uint32_t pitch, void const * bc3, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeBC4(void* r, uint32_t pitch, void const * bc4, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeBC5(void* gr, uint32_t pitch, void const * bc5, uint32_t width, uint32_t height);
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-	KLAYGE_CORE_API void DecodeBC1(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
-	KLAYGE_CORE_API void DecodeBC2(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
-	KLAYGE_CORE_API void DecodeBC3(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
-	KLAYGE_CORE_API void DecodeBC4(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
-	KLAYGE_CORE_API void DecodeBC5(TexturePtr const & dst_tex, TexturePtr const & bc_tex);
+	private:
+		TexCompressionBC1Ptr bc1_codec_;
+	};
 
+	class KLAYGE_CORE_API TexCompressionBC3 : public TexCompression
+	{
+	public:
+		TexCompressionBC3();
 
-	KLAYGE_CORE_API void EncodeBC1(BC1Block& bc1, uint32_t const * argb, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC2(BC2Block& bc2, uint32_t const * argb, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC3(BC3Block& bc3, uint32_t const * argb, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC4(BC4Block& bc4, uint8_t const * r);
-	KLAYGE_CORE_API void EncodeBC5(BC5Block& bc5, uint8_t const * r, uint8_t const * g);
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-	KLAYGE_CORE_API void EncodeBC1(void* bc1, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC2(void* bc2, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC3(void* bc3, uint32_t out_pitch, void const * argb, uint32_t width, uint32_t height, uint32_t in_pitch, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC4(void* bc4, uint32_t out_pitch, void const * r, uint32_t width, uint32_t height, uint32_t in_pitch);
-	KLAYGE_CORE_API void EncodeBC5(void* bc5, uint32_t out_pitch, void const * gr, uint32_t width, uint32_t height, uint32_t in_pitch);
+	private:
+		TexCompressionBC1Ptr bc1_codec_;
+		TexCompressionBC4Ptr bc4_codec_;
+	};
 
-	KLAYGE_CORE_API void EncodeBC1(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC2(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC3(TexturePtr const & bc_tex, TexturePtr const & src_tex, EBCMethod method);
-	KLAYGE_CORE_API void EncodeBC4(TexturePtr const & bc_tex, TexturePtr const & src_tex);
-	KLAYGE_CORE_API void EncodeBC5(TexturePtr const & bc_tex, TexturePtr const & src_tex);
+	class KLAYGE_CORE_API TexCompressionBC4 : public TexCompression
+	{
+	public:
+		TexCompressionBC4();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+	};
+
+	class KLAYGE_CORE_API TexCompressionBC5 : public TexCompression
+	{
+	public:
+		TexCompressionBC5();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		TexCompressionBC4Ptr bc4_codec_;
+	};
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4);
 }

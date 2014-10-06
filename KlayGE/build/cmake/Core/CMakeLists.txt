@@ -67,6 +67,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSGIPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompression.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionBC.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionETC.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
@@ -112,6 +113,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSGIPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompression.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionBC.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionETC.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp

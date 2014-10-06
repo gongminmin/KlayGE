@@ -75,9 +75,40 @@ namespace
 
 namespace KlayGE
 {
-	void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1)
+	TexCompressionETC1::TexCompressionETC1()
 	{
-		// GLES 3.1 spec Table C.6
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_ETC1) * 4;
+		decoded_fmt_ = EF_ARGB8;
+	}
+
+	void TexCompressionETC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionETC1::DecodeBlock(void* output, void const * input)
+	{
+		uint32_t* argb = static_cast<uint32_t*>(output);
+		ETC1Block const & etc1 = *static_cast<ETC1Block const *>(input);
+
+		if (etc1.cw_diff_flip & 0x2)
+		{
+			this->DecodeETCDifferentialModeInternal(argb, etc1, false);
+		}
+		else
+		{
+			this->DecodeETCIndividualModeInternal(argb, etc1);
+		}
+	}
+
+	void TexCompressionETC1::DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1)
+	{
 		static int const modifier_table[8][2] =
 		{
 			{ 2, 8 },
@@ -132,8 +163,7 @@ namespace KlayGE
 		}
 	}
 
-	template <bool ALPHA>
-	void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1)
+	void TexCompressionETC1::DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha)
 	{
 		static int const modifier_table[8][2] =
 		{
@@ -169,11 +199,7 @@ namespace KlayGE
 			for (int mod = 0; mod < 4; ++ mod)
 			{
 				int modifier;
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-				if (ALPHA)
+				if (alpha)
 				{
 					modifier = (mod & 0x1) ? modifier_table[cw][1] * ((mod & 0x2) ? -1 : 1) : 0;
 				}
@@ -181,9 +207,6 @@ namespace KlayGE
 				{
 					modifier = modifier_table[cw][mod & 0x1] * ((mod & 0x2) ? -1 : 1);
 				}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 				modified_clr[sub][mod] = ARGB(255, base_clr[sub][0] + modifier,
 					base_clr[sub][1] + modifier, base_clr[sub][2] + modifier);
 			}
@@ -199,11 +222,7 @@ namespace KlayGE
 				int msb = (etc1.msb >> bit_index) & 0x1;
 				int lsb = (etc1.lsb >> bit_index) & 0x1;
 				int pixel_index = msb * 2 + lsb;
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-				if (ALPHA && (2 == pixel_index))
+				if (alpha && (2 == pixel_index))
 				{
 					argb[y * 4 + x] = 0;
 				}
@@ -211,27 +230,68 @@ namespace KlayGE
 				{
 					argb[y * 4 + x] = modified_clr[sub_block][pixel_index];
 				}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 			}
 		}
 	}
 
-	void DecodeETC1Internal(uint32_t* argb, ETC1Block const & etc1)
+
+	TexCompressionETC2RGB8::TexCompressionETC2RGB8()
 	{
-		if (etc1.cw_diff_flip & 0x2)
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_ETC2_BGR8) * 4;
+		decoded_fmt_ = EF_ARGB8;
+
+		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
+	}
+
+	void TexCompressionETC2RGB8::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionETC2RGB8::DecodeBlock(void* output, void const * input)
+	{
+		uint32_t* argb = static_cast<uint32_t*>(output);
+		ETC2Block const & etc2 = *static_cast<ETC2Block const *>(input);
+
+		if (etc2.etc1.cw_diff_flip & 0x2)
 		{
-			DecodeETCDifferentialModeInternal<false>(argb, etc1);
+			int const dr = etc2.etc1.r & 0x7;
+			int const r = (etc2.etc1.r >> 3) - (dr & 0x4) + (dr & 0x3);
+			int const dg = etc2.etc1.g & 0x7;
+			int const g = (etc2.etc1.g >> 3) - (dg & 0x4) + (dg & 0x3);
+			int const db = etc2.etc1.b & 0x7;
+			int const b = (etc2.etc1.b >> 3) - (db & 0x4) + (db & 0x3);
+
+			if (r & 0xFFE0)
+			{
+				this->DecodeETCTModeInternal(argb, etc2.etc2_t_mode, false);
+			}
+			else if (g & 0xFFE0)
+			{
+				this->DecodeETCHModeInternal(argb, etc2.etc2_h_mode, false);
+			}
+			else if (b & 0xFFE0)
+			{
+				this->DecodeETCPlanarModeInternal(argb, etc2.etc2_planar_mode);
+			}
+			else
+			{
+				etc1_codec_->DecodeETCDifferentialModeInternal(argb, etc2.etc1, false);
+			}
 		}
 		else
 		{
-			DecodeETCIndividualModeInternal(argb, etc1);
+			etc1_codec_->DecodeETCIndividualModeInternal(argb, etc2.etc1);
 		}
 	}
 
-	template <bool ALPHA>
-	void DecodeETCTModeInternal(uint32_t* argb, ETC2TModeBlock const & etc2)
+	void TexCompressionETC2RGB8::DecodeETCTModeInternal(uint32_t* argb, ETC2TModeBlock const & etc2, bool alpha)
 	{
 		static int const distance_table[8] = { 3, 6, 11, 16, 23, 32, 41, 64 };
 
@@ -275,11 +335,7 @@ namespace KlayGE
 				int msb = (etc2.msb >> bit_index) & 0x1;
 				int lsb = (etc2.lsb >> bit_index) & 0x1;
 				int pixel_index = msb * 2 + lsb;
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-				if (ALPHA && (2 == pixel_index))
+				if (alpha && (2 == pixel_index))
 				{
 					argb[y * 4 + x] = 0;
 				}
@@ -287,15 +343,11 @@ namespace KlayGE
 				{
 					argb[y * 4 + x] = modified_clr[pixel_index];
 				}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 			}
 		}
 	}
 
-	template <bool ALPHA>
-	void DecodeETCHModeInternal(uint32_t* argb, ETC2HModeBlock const & etc2)
+	void TexCompressionETC2RGB8::DecodeETCHModeInternal(uint32_t* argb, ETC2HModeBlock const & etc2, bool alpha)
 	{
 		static int const distance_table[8] = { 3, 6, 11, 16, 23, 32, 41, 64 };
 
@@ -341,11 +393,7 @@ namespace KlayGE
 				int msb = (etc2.msb >> bit_index) & 0x1;
 				int lsb = (etc2.lsb >> bit_index) & 0x1;
 				int pixel_index = msb * 2 + lsb;
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127)
-#endif
-				if (ALPHA && (2 == pixel_index))
+				if (alpha && (2 == pixel_index))
 				{
 					argb[y * 4 + x] = 0;
 				}
@@ -353,14 +401,11 @@ namespace KlayGE
 				{
 					argb[y * 4 + x] = modified_clr[pixel_index];
 				}
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 			}
 		}
 	}
 
-	void DecodeETCPlanarModeInternal(uint32_t* argb, ETC2PlanarModeBlock const & etc2)
+	void TexCompressionETC2RGB8::DecodeETCPlanarModeInternal(uint32_t* argb, ETC2PlanarModeBlock const & etc2)
 	{
 		int const ro = (etc2.ro_go >> 1) & 0x3F;
 		int const go = ((etc2.ro_go & 0x1) << 6) | ((etc2.go_bo >> 1) & 0x3F);
@@ -405,42 +450,32 @@ namespace KlayGE
 		}
 	}
 
-	void DecodeRGB8ETC2Internal(uint32_t* argb, ETC2Block const & etc2)
-	{
-		if (etc2.etc1.cw_diff_flip & 0x2)
-		{
-			int const dr = etc2.etc1.r & 0x7;
-			int const r = (etc2.etc1.r >> 3) - (dr & 0x4) + (dr & 0x3);
-			int const dg = etc2.etc1.g & 0x7;
-			int const g = (etc2.etc1.g >> 3) - (dg & 0x4) + (dg & 0x3);
-			int const db = etc2.etc1.b & 0x7;
-			int const b = (etc2.etc1.b >> 3) - (db & 0x4) + (db & 0x3);
 
-			if (r & 0xFFE0)
-			{
-				DecodeETCTModeInternal<false>(argb, etc2.etc2_t_mode);
-			}
-			else if (g & 0xFFE0)
-			{
-				DecodeETCHModeInternal<false>(argb, etc2.etc2_h_mode);
-			}
-			else if (b & 0xFFE0)
-			{
-				DecodeETCPlanarModeInternal(argb, etc2.etc2_planar_mode);
-			}
-			else
-			{
-				DecodeETCDifferentialModeInternal<false>(argb, etc2.etc1);
-			}
-		}
-		else
-		{
-			DecodeETCIndividualModeInternal(argb, etc2.etc1);
-		}
+	TexCompressionETC2RGB8A1::TexCompressionETC2RGB8A1()
+	{
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_ETC2_A1BGR8) * 4;
+		decoded_fmt_ = EF_ARGB8;
+
+		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
+		etc2_rgb8_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();
 	}
 
-	void DecodeRGB8A1ETC2Internal(uint32_t* argb, ETC2Block const & etc2)
+	void TexCompressionETC2RGB8A1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionETC2RGB8A1::DecodeBlock(void* output, void const * input)
+	{
+		uint32_t* argb = static_cast<uint32_t*>(output);
+		ETC2Block const & etc2 = *static_cast<ETC2Block const *>(input);
+
 		int const dr = etc2.etc1.r & 0x7;
 		int const r = (etc2.etc1.r >> 3) - (dr & 0x4) + (dr & 0x3);
 		int const dg = etc2.etc1.g & 0x7;
@@ -451,217 +486,19 @@ namespace KlayGE
 
 		if (r & 0xFFE0)
 		{
-			if (op)
-			{
-				DecodeETCTModeInternal<false>(argb, etc2.etc2_t_mode);
-			}
-			else
-			{
-				DecodeETCTModeInternal<true>(argb, etc2.etc2_t_mode);
-			}
+			etc2_rgb8_codec_->DecodeETCTModeInternal(argb, etc2.etc2_t_mode, !op);
 		}
 		else if (g & 0xFFE0)
 		{
-			if (op)
-			{
-				DecodeETCHModeInternal<false>(argb, etc2.etc2_h_mode);
-			}
-			else
-			{
-				DecodeETCHModeInternal<true>(argb, etc2.etc2_h_mode);
-			}
+			etc2_rgb8_codec_->DecodeETCHModeInternal(argb, etc2.etc2_h_mode, !op);
 		}
 		else if (b & 0xFFE0)
 		{
-			DecodeETCPlanarModeInternal(argb, etc2.etc2_planar_mode);
+			etc2_rgb8_codec_->DecodeETCPlanarModeInternal(argb, etc2.etc2_planar_mode);
 		}
 		else
 		{
-			if (op)
-			{
-				DecodeETCDifferentialModeInternal<false>(argb, etc2.etc1);
-			}
-			else
-			{
-				DecodeETCDifferentialModeInternal<true>(argb, etc2.etc1);
-			}
-		}
-	}
-
-	void DecodeETC1(uint32_t* argb, void const * etc1)
-	{
-		DecodeETC1Internal(argb, *static_cast<ETC1Block const *>(etc1));
-	}
-
-	void DecodeRGB8ETC2(uint32_t* argb, void const * etc2)
-	{
-		DecodeRGB8ETC2Internal(argb, *static_cast<ETC2Block const *>(etc2));
-	}
-
-	void DecodeRGB8A1ETC2(uint32_t* argb, void const * etc2)
-	{
-		DecodeRGB8A1ETC2Internal(argb, *static_cast<ETC2Block const *>(etc2));
-	}
-
-	void DecodeETC1(void* argb, uint32_t pitch, void const * etc1, uint32_t width, uint32_t height)
-	{
-		ETC1Block const * src = static_cast<ETC1Block const *>(etc1);
-		uint32_t * dst = static_cast<uint32_t*>(argb);
-
-		uint32_t uncompressed[16];
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
-		{
-			uint32_t const block_h = std::min(4U, height - y_base);
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
-			{
-				uint32_t const block_w = std::min(4U, width - x_base);
-
-				DecodeETC1(&uncompressed[0], src);
-				++ src;
-
-				for (uint32_t y = 0; y < block_h; ++ y)
-				{
-					for (uint32_t x = 0; x < block_w; ++ x)
-					{
-						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
-					}
-				}
-			}
-		}
-	}
-
-	void DecodeRGB8ETC2(void* argb, uint32_t pitch, void const * etc2, uint32_t width, uint32_t height)
-	{
-		ETC2Block const * src = static_cast<ETC2Block const *>(etc2);
-		uint32_t * dst = static_cast<uint32_t*>(argb);
-
-		uint32_t uncompressed[16];
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
-		{
-			uint32_t const block_h = std::min(4U, height - y_base);
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
-			{
-				uint32_t const block_w = std::min(4U, width - x_base);
-
-				DecodeRGB8ETC2(&uncompressed[0], src);
-				++ src;
-
-				for (uint32_t y = 0; y < block_h; ++ y)
-				{
-					for (uint32_t x = 0; x < block_w; ++ x)
-					{
-						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
-					}
-				}
-			}
-		}
-	}
-
-	void DecodeRGB8A1ETC2(void* argb, uint32_t pitch, void const * etc2, uint32_t width, uint32_t height)
-	{
-		ETC2Block const * src = static_cast<ETC2Block const *>(etc2);
-		uint32_t * dst = static_cast<uint32_t*>(argb);
-
-		uint32_t uncompressed[16];
-		for (uint32_t y_base = 0; y_base < height; y_base += 4)
-		{
-			uint32_t const block_h = std::min(4U, height - y_base);
-			for (uint32_t x_base = 0; x_base < width; x_base += 4)
-			{
-				uint32_t const block_w = std::min(4U, width - x_base);
-
-				DecodeRGB8A1ETC2(&uncompressed[0], src);
-				++ src;
-
-				for (uint32_t y = 0; y < block_h; ++ y)
-				{
-					for (uint32_t x = 0; x < block_w; ++ x)
-					{
-						dst[(y_base + y) * pitch / 4 + (x_base + x)] = uncompressed[y * 4 + x];
-					}
-				}
-			}
-		}
-	}
-
-	void DecodeETC1(TexturePtr const & dst_tex, TexturePtr const & etc_tex)
-	{
-		uint32_t width = etc_tex->Width(0);
-		uint32_t height = etc_tex->Height(0);
-
-		TexturePtr argb8_tex;
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
-		}
-		else
-		{
-			argb8_tex = dst_tex;
-		}
-
-		{
-			Texture::Mapper mapper_src(*etc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-			DecodeETC1(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
-		}
-
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex->CopyToTexture(*dst_tex);
-		}
-	}
-
-	void DecodeRGB8ETC2(TexturePtr const & dst_tex, TexturePtr const & etc_tex)
-	{
-		uint32_t width = etc_tex->Width(0);
-		uint32_t height = etc_tex->Height(0);
-
-		TexturePtr argb8_tex;
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
-		}
-		else
-		{
-			argb8_tex = dst_tex;
-		}
-
-		{
-			Texture::Mapper mapper_src(*etc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-			DecodeRGB8ETC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
-		}
-
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex->CopyToTexture(*dst_tex);
-		}
-	}
-
-	void DecodeRGB8A1ETC2(TexturePtr const & dst_tex, TexturePtr const & etc_tex)
-	{
-		uint32_t width = etc_tex->Width(0);
-		uint32_t height = etc_tex->Height(0);
-
-		TexturePtr argb8_tex;
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height, 1, 1, EF_ARGB8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
-		}
-		else
-		{
-			argb8_tex = dst_tex;
-		}
-
-		{
-			Texture::Mapper mapper_src(*etc_tex, 0, 0, TMA_Read_Only, 0, 0, width, height);
-			Texture::Mapper mapper_dst(*argb8_tex, 0, 0, TMA_Write_Only, 0, 0, width, height);
-			DecodeRGB8A1ETC2(mapper_dst.Pointer<void>(), mapper_dst.RowPitch(), mapper_src.Pointer<void>(), width, height);
-		}
-
-		if (dst_tex->Format() != EF_ARGB8)
-		{
-			argb8_tex->CopyToTexture(*dst_tex);
+			etc1_codec_->DecodeETCDifferentialModeInternal(argb, etc2.etc1, !op);
 		}
 	}
 }

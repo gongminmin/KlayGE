@@ -1211,6 +1211,25 @@ namespace KlayGE
 			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, nullptr);
 
 			tile_free_list_.push_back(std::make_pair(0, pages));
+
+			switch (format)
+			{
+			case EF_BC1:
+				tex_codec_ = MakeSharedPtr<TexCompressionBC1>();
+				break;
+
+			case EF_BC2:
+				tex_codec_ = MakeSharedPtr<TexCompressionBC2>();
+				break;
+
+			case EF_BC3:
+				tex_codec_ = MakeSharedPtr<TexCompressionBC3>();
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
 		}
 	}
 
@@ -2451,14 +2470,21 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format))
 				{
-					uint32_t const block_size = NumFormatBytes(format) * 4;
-					std::vector<uint8_t> bc(((mip_tile_with_border_size + 3) / 4) * ((mip_tile_with_border_size + 3) / 4) * block_size);
+					uint32_t const block_width = tex_codec_->BlockWidth();
+					uint32_t const block_height = tex_codec_->BlockHeight();
+					uint32_t const block_bytes = NumFormatBytes(format) * 4;
+					uint32_t const bc_row_pitch = (mip_tile_with_border_size + block_width - 1) / block_width * block_bytes;
+					uint32_t const bc_slice_pitch = (mip_tile_with_border_size + block_height - 1) / block_height * bc_row_pitch;
+					std::vector<uint8_t> bc(bc_slice_pitch);
 					{
 						uint8_t const * data_with_border = &tex_a_tile_data[0];
-						uint32_t const data_pitch = mip_tile_with_border_size * texel_size_;
+						uint32_t const data_row_pitch = mip_tile_with_border_size * texel_size_;
+						uint32_t const data_slice_pitch = mip_tile_with_border_size
+							* mip_tile_with_border_size * texel_size_;
 
 						uint32_t const * p_argb;
-						uint32_t pitch;
+						uint32_t row_pitch;
+						uint32_t slice_pitch;
 						std::vector<uint32_t> argb_data;
 						switch (format_)
 						{
@@ -2469,11 +2495,12 @@ namespace KlayGE
 								{
 									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
 									{
-										argb_data[y * mip_tile_with_border_size + x] = data_with_border[y * data_pitch + x] << 16;
+										argb_data[y * mip_tile_with_border_size + x] = data_with_border[y * data_row_pitch + x] << 16;
 									}
 								}
 								p_argb = &argb_data[0];
-								pitch = mip_tile_with_border_size * 4;
+								row_pitch = mip_tile_with_border_size * 4;
+								slice_pitch = mip_tile_with_border_size * row_pitch;
 							}
 							break;
 
@@ -2484,12 +2511,13 @@ namespace KlayGE
 								{
 									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
 									{
-										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_pitch + x * 2 + 0] << 16)
-											| (data_with_border[y * data_pitch + x * 2 + 1] << 8);
+										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_row_pitch + x * 2 + 0] << 16)
+											| (data_with_border[y * data_row_pitch + x * 2 + 1] << 8);
 									}
 								}
 								p_argb = &argb_data[0];
-								pitch = mip_tile_with_border_size * 4;
+								row_pitch = mip_tile_with_border_size * 4;
+								slice_pitch = mip_tile_with_border_size * row_pitch;
 							}
 							break;
 
@@ -2500,59 +2528,45 @@ namespace KlayGE
 								{
 									for (uint32_t x = 0; x < mip_tile_with_border_size; ++ x)
 									{
-										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_pitch + x * 4 + 0] << 16)
-											| (data_with_border[y * data_pitch + x * 4 + 1] << 8)
-											| (data_with_border[y * data_pitch + x * 4 + 2] << 0)
-											| (data_with_border[y * data_pitch + x * 4 + 3] << 24);
+										argb_data[y * mip_tile_with_border_size + x] = (data_with_border[y * data_row_pitch + x * 4 + 0] << 16)
+											| (data_with_border[y * data_row_pitch + x * 4 + 1] << 8)
+											| (data_with_border[y * data_row_pitch + x * 4 + 2] << 0)
+											| (data_with_border[y * data_row_pitch + x * 4 + 3] << 24);
 									}
 								}
 								p_argb = &argb_data[0];
-								pitch = mip_tile_with_border_size * 4;
+								row_pitch = mip_tile_with_border_size * 4;
+								slice_pitch = mip_tile_with_border_size * row_pitch;
 							}
 							break;
 
 						case EF_ARGB8:
 							p_argb = reinterpret_cast<uint32_t const *>(data_with_border);
-							pitch = data_pitch;
+							row_pitch = data_row_pitch;
+							slice_pitch = data_slice_pitch;
 							break;
 
 						default:
 							BOOST_ASSERT(false);
 							p_argb = nullptr;
-							pitch = 0;
+							row_pitch = slice_pitch = 0;
 							break;
 						}
 
-						switch (format)
-						{
-						case EF_BC1:
-							EncodeBC1(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
-							break;
-
-						case EF_BC2:
-							EncodeBC2(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
-							break;
-
-						case EF_BC3:
-							EncodeBC3(&bc[0], (mip_tile_with_border_size + 3) / 4 * block_size, p_argb, mip_tile_with_border_size, mip_tile_with_border_size, pitch, EBCM_Quality);
-							break;
-
-						default:
-							BOOST_ASSERT(false);
-							break;
-						}
+						tex_codec_->EncodeMem(mip_tile_with_border_size, mip_tile_with_border_size,
+							&bc[0], bc_row_pitch, bc_slice_pitch, p_argb, row_pitch, slice_pitch, TCM_Quality);
 					}
 					{
 						Texture::Mapper mapper(*tex_a_tile_cache_, 0, l, TMA_Write_Only,
 							0, 0, mip_tile_with_border_size, mip_tile_with_border_size);
 
 						uint8_t const * src = &bc[0];
-						uint32_t const src_pitch = (mip_tile_with_border_size + 3) / 4 * block_size;
+						uint32_t const src_pitch = bc_row_pitch;
 
 						uint8_t* dst = mapper.Pointer<uint8_t>();
 						uint32_t const dst_pitch = mapper.RowPitch();
 
-						for (uint32_t y = 0; y < (mip_tile_with_border_size + 3) / 4; ++ y)
+						for (uint32_t y = 0; y < (mip_tile_with_border_size + block_height - 1) / block_height; ++ y)
 						{
 							std::memcpy(dst, src, src_pitch);
 							src += src_pitch;

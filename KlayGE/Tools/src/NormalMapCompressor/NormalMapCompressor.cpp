@@ -33,6 +33,8 @@ namespace
 	void CompressNormalMapSubresource(uint32_t width, uint32_t height, std::vector<Color>& in_data,
 		ElementFormat new_format, ElementInitData& new_data, std::vector<uint8_t>& new_data_block)
 	{
+		TexCompressionBC4 bc4_codec;
+
 		if (IsCompressedFormat(new_format))
 		{
 			new_data.row_pitch = (width + 3) / 4 * 16;
@@ -76,9 +78,9 @@ namespace
 				if (IsCompressedFormat(new_format))
 				{
 					BC4Block x_bc4;
-					EncodeBC4(x_bc4, uncom_x);
+					bc4_codec.EncodeBlock(&x_bc4, uncom_x, TCM_Quality);
 					BC4Block y_bc4;
-					EncodeBC4(y_bc4, uncom_y);
+					bc4_codec.EncodeBlock(&y_bc4, uncom_y, TCM_Quality);
 
 					if (EF_BC5 == new_format)
 					{
@@ -124,6 +126,22 @@ namespace
 	{
 		UNREF_PARAM(restored_format);
 
+		TexCompressionPtr tex_codec;
+		switch (com_format)
+		{
+		case EF_BC3:
+			tex_codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
+
+		case EF_BC5:
+			tex_codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
 		std::vector<uint8_t> normals(width * height * 4);
 
 		if (IsCompressedFormat(com_format))
@@ -136,19 +154,18 @@ namespace
 				
 					if (EF_BC5 == com_format)
 					{
-						uint8_t r[16];
-						uint8_t g[16];
-						DecodeBC5(r, g, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+						uint16_t gr[16];
+						tex_codec->DecodeBlock(gr, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 						for (int i = 0; i < 16; ++ i)
 						{
-							argb[i] = (r[i] << 8) | (g[i] << 24);
+							argb[i] = (gr[i] & 0xFF00) | ((gr[i] & 0xFF) << 16);
 						}
 					}
 					else
 					{
 						BOOST_ASSERT(EF_BC3 == com_format);
 
-						DecodeBC3(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+						tex_codec->DecodeBlock(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 					}
 
 					for (int y = 0; y < 4; ++ y)

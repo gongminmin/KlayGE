@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <KlayGE/TexCompression.hpp>
+
 namespace KlayGE
 {
 #ifdef KLAYGE_HAS_STRUCT_PACK
@@ -91,17 +93,46 @@ namespace KlayGE
 	#pragma pack(pop)
 #endif
 
-	KLAYGE_CORE_API void DecodeETC1(uint32_t* argb, void const * etc1);
-	KLAYGE_CORE_API void DecodeRGB8ETC2(uint32_t* argb, void const * etc2);
-	KLAYGE_CORE_API void DecodeRGB8A1ETC2(uint32_t* argb, void const * etc2);
+	class KLAYGE_CORE_API TexCompressionETC1 : public TexCompression
+	{
+	public:
+		TexCompressionETC1();
 
-	KLAYGE_CORE_API void DecodeETC1(void* argb, uint32_t pitch, void const * etc1, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeRGB8ETC2(void* argb, uint32_t pitch, void const * etc2, uint32_t width, uint32_t height);
-	KLAYGE_CORE_API void DecodeRGB8A1ETC2(void* argb, uint32_t pitch, void const * etc2, uint32_t width, uint32_t height);
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-	KLAYGE_CORE_API void DecodeETC1(TexturePtr const & dst_tex, TexturePtr const & etc_tex);
-	KLAYGE_CORE_API void DecodeRGB8ETC2(TexturePtr const & dst_tex, TexturePtr const & etc_tex);
-	KLAYGE_CORE_API void DecodeRGB8A1ETC2(TexturePtr const & dst_tex, TexturePtr const & etc_tex);
+		void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1);
+		void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha);
+	};
+
+	class KLAYGE_CORE_API TexCompressionETC2RGB8 : public TexCompression
+	{
+	public:
+		TexCompressionETC2RGB8();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+		void DecodeETCTModeInternal(uint32_t* argb, ETC2TModeBlock const & etc2, bool alpha);
+		void DecodeETCHModeInternal(uint32_t* argb, ETC2HModeBlock const & etc2, bool alpha);
+		void DecodeETCPlanarModeInternal(uint32_t* argb, ETC2PlanarModeBlock const & etc2);
+
+	private:
+		TexCompressionETC1Ptr etc1_codec_;
+	};
+
+	class KLAYGE_CORE_API TexCompressionETC2RGB8A1 : public TexCompression
+	{
+	public:
+		TexCompressionETC2RGB8A1();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		TexCompressionETC1Ptr etc1_codec_;
+		TexCompressionETC2RGB8Ptr etc2_rgb8_codec_;
+	};
 }
 
 #endif		// _TEXCOMPRESSIONETC_HPP

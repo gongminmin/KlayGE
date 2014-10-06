@@ -433,7 +433,9 @@ namespace
 		}
 
 		std::vector<uint8_t> integrated_brdf_bc5(WIDTH * HEIGHT);
-		EncodeBC5(&integrated_brdf_bc5[0], WIDTH * 4, &integrate_brdf_gr[0], WIDTH, HEIGHT, WIDTH * 2);
+		TexCompressionBC5 bc5_codec;
+		bc5_codec.EncodeMem(WIDTH, HEIGHT, &integrated_brdf_bc5[0], WIDTH * 4, WIDTH * HEIGHT,
+			&integrate_brdf_gr[0], WIDTH * 2, WIDTH * HEIGHT * 2, TCM_Quality);
 
 		std::vector<ElementInitData> init_data(1);
 		init_data[0].data = &integrated_brdf_bc5[0];

@@ -190,6 +190,7 @@ namespace KlayGE
 		TexturePtr tex_a_tile_indirect_;
 		uint32_t cache_tile_border_size_;
 		uint32_t cache_tile_size_;
+		TexCompressionPtr tex_codec_;
 
 		struct TileInfo
 		{

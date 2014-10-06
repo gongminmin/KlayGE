@@ -733,46 +733,50 @@ namespace
 		BOOST_ASSERT(IsCompressedFormat(dst_format) && !IsCompressedFormat(src_format));
 		UNREF_PARAM(src_format);
 
+		TexCompressionPtr codec;
+		switch (dst_format)
+		{
+		case EF_BC1:
+		case EF_BC1_SRGB:
+		case EF_SIGNED_BC1:
+			codec = MakeSharedPtr<TexCompressionBC1>();
+			break;
+
+		case EF_BC2:
+		case EF_BC2_SRGB:
+		case EF_SIGNED_BC2:
+			codec = MakeSharedPtr<TexCompressionBC2>();
+			break;
+
+		case EF_BC3:
+		case EF_BC3_SRGB:
+		case EF_SIGNED_BC3:
+			codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
+
+		case EF_BC4:
+		case EF_BC4_SRGB:
+		case EF_SIGNED_BC4:
+			codec = MakeSharedPtr<TexCompressionBC4>();
+			break;
+
+		case EF_BC5:
+		case EF_BC5_SRGB:
+		case EF_SIGNED_BC5:
+			codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
 		uint8_t const * src = static_cast<uint8_t const *>(src_data);
 		uint8_t* dst = static_cast<uint8_t*>(dst_data);
 		for (uint32_t z = 0; z < src_depth; ++ z)
 		{
-			switch (dst_format)
-			{
-			case EF_BC1:
-			case EF_BC1_SRGB:
-			case EF_SIGNED_BC1:
-				EncodeBC1(dst, dst_row_pitch, src, src_width, src_height, src_row_pitch, EBCM_Quality);
-				break;
-
-			case EF_BC2:
-			case EF_BC2_SRGB:
-			case EF_SIGNED_BC2:
-				EncodeBC2(dst, dst_row_pitch, src, src_width, src_height, src_row_pitch, EBCM_Quality);
-				break;
-
-			case EF_BC3:
-			case EF_BC3_SRGB:
-			case EF_SIGNED_BC3:
-				EncodeBC3(dst, dst_row_pitch, src, src_width, src_height, src_row_pitch, EBCM_Quality);
-				break;
-				
-			case EF_BC4:
-			case EF_BC4_SRGB:
-			case EF_SIGNED_BC4:
-				EncodeBC4(dst, dst_row_pitch, src, src_width, src_height, src_row_pitch);
-				break;
-
-			case EF_BC5:
-			case EF_BC5_SRGB:
-			case EF_SIGNED_BC5:
-				EncodeBC5(dst, dst_row_pitch, src, src_width, src_height, src_row_pitch);
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
+			codec->EncodeMem(src_width, src_height, dst, dst_row_pitch, dst_slice_pitch,
+				src, src_row_pitch, src_slice_pitch, TCM_Quality);
 
 			src += src_slice_pitch;
 			dst += dst_slice_pitch;
@@ -780,7 +784,7 @@ namespace
 	}
 	
 	void DecodeTexture(std::vector<uint8_t>& dst_data_block, uint32_t& dst_row_pitch, uint32_t& dst_slice_pitch, ElementFormat& dst_format,
-		void const * src_data, uint32_t src_slice_pitch, ElementFormat src_format,
+		void const * src_data, uint32_t src_row_pitch, uint32_t src_slice_pitch, ElementFormat src_format,
 		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
 		BOOST_ASSERT(IsCompressedFormat(src_format));
@@ -829,6 +833,44 @@ namespace
 			break;
 		}
 
+		TexCompressionPtr codec;
+		switch (dst_format)
+		{
+		case EF_BC1:
+		case EF_BC1_SRGB:
+		case EF_SIGNED_BC1:
+			codec = MakeSharedPtr<TexCompressionBC1>();
+			break;
+
+		case EF_BC2:
+		case EF_BC2_SRGB:
+		case EF_SIGNED_BC2:
+			codec = MakeSharedPtr<TexCompressionBC2>();
+			break;
+
+		case EF_BC3:
+		case EF_BC3_SRGB:
+		case EF_SIGNED_BC3:
+			codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
+
+		case EF_BC4:
+		case EF_BC4_SRGB:
+		case EF_SIGNED_BC4:
+			codec = MakeSharedPtr<TexCompressionBC4>();
+			break;
+
+		case EF_BC5:
+		case EF_BC5_SRGB:
+		case EF_SIGNED_BC5:
+			codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
 		dst_row_pitch = src_width * NumFormatBytes(dst_format);
 		dst_slice_pitch = dst_row_pitch * src_height;
 		dst_data_block.resize(src_depth * dst_slice_pitch);
@@ -837,42 +879,8 @@ namespace
 		uint8_t* dst = static_cast<uint8_t*>(&dst_data_block[0]);
 		for (uint32_t z = 0; z < src_depth; ++ z)
 		{
-			switch (src_format)
-			{
-			case EF_BC1:
-			case EF_BC1_SRGB:
-			case EF_SIGNED_BC1:
-				DecodeBC1(dst, dst_row_pitch, src, src_width, src_height);
-				break;
-
-			case EF_BC2:
-			case EF_BC2_SRGB:
-			case EF_SIGNED_BC2:
-				DecodeBC2(dst, dst_row_pitch, src, src_width, src_height);
-				break;
-
-			case EF_BC3:
-			case EF_BC3_SRGB:
-			case EF_SIGNED_BC3:
-				DecodeBC3(dst, dst_row_pitch, src, src_width, src_height);
-				break;
-				
-			case EF_BC4:
-			case EF_BC4_SRGB:
-			case EF_SIGNED_BC4:
-				DecodeBC4(dst, dst_row_pitch, src, src_width, src_height);
-				break;
-
-			case EF_BC5:
-			case EF_BC5_SRGB:
-			case EF_SIGNED_BC5:
-				DecodeBC5(dst, dst_row_pitch, src, src_width, src_height);
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
+			codec->DecodeMem(src_width, src_height, dst, dst_row_pitch, dst_slice_pitch,
+				src, src_row_pitch, src_slice_pitch);
 
 			src += src_slice_pitch;
 			dst += dst_slice_pitch;
@@ -3078,7 +3086,7 @@ namespace KlayGE
 		if (IsCompressedFormat(src_format))
 		{
 			DecodeTexture(src_cpu_data_block, src_cpu_row_pitch, src_cpu_slice_pitch, src_cpu_format,
-				src_data, src_slice_pitch, src_format, src_width, src_height, src_depth);
+				src_data, src_row_pitch, src_slice_pitch, src_format, src_width, src_height, src_depth);
 			src_cpu_data = static_cast<void*>(&src_cpu_data_block[0]);
 		}
 		else

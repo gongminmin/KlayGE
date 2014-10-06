@@ -111,6 +111,9 @@ namespace
 		c_data.data = &c_data_block[0];
 		uint8_t* c_dst = &c_data_block[0];
 
+		TexCompressionBC3 bc3_codec;
+		TexCompressionBC4 bc4_codec;
+
 		for (uint32_t y_base = 0; y_base < c_height; y_base += 4)
 		{
 			for (uint32_t x_base = 0; x_base < c_width; x_base += 4)
@@ -152,8 +155,8 @@ namespace
 				if (EF_BC5 == c_format)
 				{
 					BC5Block com_bc5;
-					EncodeBC4(com_bc5.red, uncom_u);
-					EncodeBC4(com_bc5.green, uncom_v);
+					bc4_codec.EncodeBlock(&com_bc5.red, uncom_u, TCM_Quality);
+					bc4_codec.EncodeBlock(&com_bc5.green, uncom_v, TCM_Quality);
 
 					std::memcpy(c_dst, &com_bc5, sizeof(com_bc5));
 					c_dst += sizeof(com_bc5);
@@ -170,7 +173,7 @@ namespace
 					}
 
 					BC3Block com_bc3;
-					EncodeBC3(com_bc3, uncom_argb, EBCM_Quality);
+					bc3_codec.EncodeBlock(&com_bc3, uncom_argb, TCM_Quality);
 
 					std::memcpy(c_dst, &com_bc3, sizeof(com_bc3));
 					c_dst += sizeof(com_bc3);
@@ -195,6 +198,22 @@ namespace
 		uint32_t c_width = std::max(width / 2, 1U);
 		uint32_t c_height = std::max(height / 2, 1U);
 
+		TexCompressionPtr tex_codec;
+		switch (c_format)
+		{
+		case EF_BC3:
+			tex_codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
+
+		case EF_BC5:
+			tex_codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
 		std::vector<uint8_t> c_data_uncom(c_width * c_height * 4);
 		for (uint32_t y_base = 0; y_base < c_height; y_base += 4)
 		{
@@ -205,17 +224,16 @@ namespace
 				uint32_t argb[16];
 				if (EF_BC5 == c_format)
 				{
-					uint8_t r[16];
-					uint8_t g[16];
-					DecodeBC5(r, g, src);
+					uint16_t gr[16];
+					tex_codec->DecodeBlock(gr, src);
 					for (int i = 0; i < 16; ++ i)
 					{
-						argb[i] = (r[i] << 8) | (g[i] << 24);
+						argb[i] = (gr[i] & 0xFF00) | ((gr[i] & 0xFF) << 16);
 					}
 				}
 				else
 				{
-					DecodeBC3(argb, src);
+					tex_codec->DecodeBlock(argb, src);
 				}
 
 				for (int y = 0; y < 4; ++ y)

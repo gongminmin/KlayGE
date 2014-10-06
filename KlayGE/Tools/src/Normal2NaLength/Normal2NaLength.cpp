@@ -39,6 +39,22 @@ namespace
 
 		if (IsCompressedFormat(com_format))
 		{
+			TexCompressionPtr tex_codec;
+			switch (com_format)
+			{
+			case EF_BC3:
+				tex_codec = MakeSharedPtr<TexCompressionBC3>();
+				break;
+
+			case EF_BC5:
+				tex_codec = MakeSharedPtr<TexCompressionBC5>();
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+
 			for (uint32_t y_base = 0; y_base < height; y_base += 4)
 			{
 				for (uint32_t x_base = 0; x_base < width; x_base += 4)
@@ -47,19 +63,18 @@ namespace
 				
 					if (EF_BC5 == com_format)
 					{
-						uint8_t r[16];
-						uint8_t g[16];
-						DecodeBC5(r, g, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+						uint16_t gr[16];
+						tex_codec->DecodeBlock(gr, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 						for (int i = 0; i < 16; ++ i)
 						{
-							argb[i] = (r[i] << 8) | (g[i] << 24);
+							argb[i] = (gr[i] & 0xFF00) | ((gr[i] & 0xFF) << 16);
 						}
 					}
 					else
 					{
 						BOOST_ASSERT(EF_BC3 == com_format);
 
-						DecodeBC3(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
+						tex_codec->DecodeBlock(argb, static_cast<uint8_t const *>(com_data.data) + ((y_base / 4) * width / 4 + x_base / 4) * 16);
 					}
 
 					for (int y = 0; y < 4; ++ y)
@@ -138,6 +153,8 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
+		TexCompressionBC4 bc4_codec;
+
 		std::vector<std::vector<uint8_t> > level_lengths(in_num_mipmaps * in_array_size);
 		std::vector<ElementInitData> new_data(level_lengths.size());
 		for (size_t array_index = 0; array_index < in_array_size; ++ array_index)
@@ -171,7 +188,7 @@ namespace
 					array<uint8_t, 16> uncom_len;
 					uncom_len.fill(255);
 					BC4Block len_bc4;
-					EncodeBC4(len_bc4, &uncom_len[0]);
+					bc4_codec.EncodeBlock(&len_bc4, &uncom_len[0], TCM_Quality);
 
 					uint32_t dest = 0;
 					for (uint32_t y_base = 0; y_base < in_height; y_base += 4)
@@ -256,7 +273,7 @@ namespace
 						if (IsCompressedFormat(new_format))
 						{
 							BC4Block len_bc4;
-							EncodeBC4(len_bc4, &uncom_len[0]);
+							bc4_codec.EncodeBlock(&len_bc4, &uncom_len[0], TCM_Quality);
 
 							if (EF_BC4 == new_format)
 							{

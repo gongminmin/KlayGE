@@ -99,6 +99,11 @@ namespace
 
 		if ((Texture::TT_2D == type) && ((EF_ABGR8 == format) || (EF_ARGB8 == format) || (EF_BC5 == format)))
 		{
+			TexCompressionBC5 bc5_codec;
+			uint32_t const block_width = bc5_codec.BlockWidth();
+			uint32_t const block_height = bc5_codec.BlockHeight();
+			uint32_t const block_bytes = NumFormatBytes(format) * 4;
+
 			uint32_t the_width = width;
 			uint32_t the_height = height;
 
@@ -110,8 +115,12 @@ namespace
 				std::vector<float3> normals(the_width * the_height);
 				if (EF_BC5 == format)
 				{
+					uint32_t const row_pitch = (the_width + block_width - 1) / block_width * block_bytes;
+					uint32_t const slice_pitch = (the_height + block_height - 1) / block_height * row_pitch;
+
 					std::vector<uint8_t> gr(std::max(the_width, 4U) * std::max(the_height, 4U) * 2);
-					DecodeBC5(&gr[0], the_width * 2, p, the_width, the_height);
+					bc5_codec.DecodeMem(the_width, the_height, &gr[0], the_width * 2, the_width * the_height * 2,
+						p, row_pitch, slice_pitch);
 					for (uint32_t y = 0; y < the_height; ++ y)
 					{
 						for (uint32_t x = 0; x < the_width; ++ x)
