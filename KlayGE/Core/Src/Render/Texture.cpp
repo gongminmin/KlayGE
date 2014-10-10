@@ -524,6 +524,41 @@ namespace
 		case DXGI_FORMAT_BC7_UNORM_SRGB:
 			return EF_BC7_SRGB;
 
+			// My extensions for ETC
+
+		case 0x80000000UL:
+			return EF_ETC1;
+
+		case 0x80000001UL:
+			return EF_ETC2_R11;
+
+		case 0x80000002UL:
+			return EF_SIGNED_ETC2_R11;
+
+		case 0x80000003UL:
+			return EF_ETC2_GR11;
+
+		case 0x80000004UL:
+			return EF_SIGNED_ETC2_GR11;
+
+		case 0x80000005UL:
+			return EF_ETC2_BGR8;
+
+		case 0x80000006UL:
+			return EF_ETC2_BGR8_SRGB;
+
+		case 0x80000007UL:
+			return EF_ETC2_A1BGR8;
+
+		case 0x80000008UL:
+			return EF_ETC2_A1BGR8_SRGB;
+
+		case 0x80000009UL:
+			return EF_ETC2_ABGR8;
+
+		case 0x8000000AUL:
+			return EF_ETC2_ABGR8_SRGB;
+
 		default:
 			THR(errc::function_not_supported);
 		}
@@ -719,6 +754,41 @@ namespace
 
 		case EF_BC3_SRGB:
 			return DXGI_FORMAT_BC3_UNORM_SRGB;
+
+			// My extensions for ETC
+
+		case EF_ETC1:
+			return static_cast<DXGI_FORMAT>(0x80000000UL);
+
+		case EF_ETC2_R11:
+			return static_cast<DXGI_FORMAT>(0x80000001UL);
+
+		case EF_SIGNED_ETC2_R11:
+			return static_cast<DXGI_FORMAT>(0x80000002UL);
+
+		case EF_ETC2_GR11:
+			return static_cast<DXGI_FORMAT>(0x80000003UL);
+
+		case EF_SIGNED_ETC2_GR11:
+			return static_cast<DXGI_FORMAT>(0x80000004UL);
+
+		case EF_ETC2_BGR8:
+			return static_cast<DXGI_FORMAT>(0x80000005UL);
+
+		case EF_ETC2_BGR8_SRGB:
+			return static_cast<DXGI_FORMAT>(0x80000006UL);
+
+		case EF_ETC2_A1BGR8:
+			return static_cast<DXGI_FORMAT>(0x80000007UL);
+
+		case EF_ETC2_A1BGR8_SRGB:
+			return static_cast<DXGI_FORMAT>(0x80000008UL);
+
+		case EF_ETC2_ABGR8:
+			return static_cast<DXGI_FORMAT>(0x80000009UL);
+
+		case EF_ETC2_ABGR8_SRGB:
+			return static_cast<DXGI_FORMAT>(0x8000000AUL);
 
 		default:
 			THR(errc::function_not_supported);
@@ -1292,7 +1362,7 @@ namespace KlayGE
 		{
 			std::memset(&desc10, 0, sizeof(desc10));
 			array_size = 1;
-	
+
 			BOOST_ASSERT((desc.flags & DDSD_CAPS) != 0);
 			BOOST_ASSERT((desc.flags & DDSD_PIXELFORMAT) != 0);
 		}
@@ -1582,7 +1652,7 @@ namespace KlayGE
 		width = desc.width;
 		num_mipmaps = desc.mip_map_count;
 
-		if (MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc)
+		if ((MakeFourCC<'D', 'X', '1', '0'>::value == desc.pixel_format.four_cc))
 		{
 			if (D3D_RESOURCE_MISC_TEXTURECUBE == desc10.misc_flag)
 			{
@@ -1974,6 +2044,17 @@ namespace KlayGE
 					break;
 
 				case EF_B10G11R11F:
+				case EF_ETC1:
+				case EF_ETC2_R11:
+				case EF_SIGNED_ETC2_R11:
+				case EF_ETC2_GR11:
+				case EF_SIGNED_ETC2_GR11:
+				case EF_ETC2_BGR8:
+				case EF_ETC2_BGR8_SRGB:
+				case EF_ETC2_A1BGR8:
+				case EF_ETC2_A1BGR8_SRGB:
+				case EF_ETC2_ABGR8:
+				case EF_ETC2_ABGR8_SRGB:
 					desc.pixel_format.four_cc = MakeFourCC<'D', 'X', '1', '0'>::value;
 					break;
 
