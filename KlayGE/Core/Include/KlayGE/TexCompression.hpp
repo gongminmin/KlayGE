@@ -91,6 +91,57 @@ namespace KlayGE
 		uint32_t block_bytes_;
 		ElementFormat decoded_fmt_;
 	};
+
+	// Helpers
+
+	inline int Mul8Bit(int a, int b)
+	{
+		int t = a * b + 128;
+		return (t + (t >> 8)) >> 8;
+	}
+
+	inline uint32_t ARGB(int a, int r, int g, int b)
+	{
+		return (MathLib::clamp(b, 0, 255) << 0)
+			| (MathLib::clamp(g, 0, 255) << 8)
+			| (MathLib::clamp(r, 0, 255) << 16)
+			| (MathLib::clamp(a, 0, 255) << 24);
+	}
+
+	inline uint8_t GetR(uint32_t argb)
+	{
+		return reinterpret_cast<uint8_t*>(&argb)[2];
+	}
+
+	inline uint8_t GetG(uint32_t argb)
+	{
+		return reinterpret_cast<uint8_t*>(&argb)[1];
+	}
+
+	inline uint8_t GetB(uint32_t argb)
+	{
+		return reinterpret_cast<uint8_t*>(&argb)[0];
+	}
+
+	inline uint8_t Extend4To8Bits(int input)
+	{
+		return static_cast<uint8_t>(input | (input << 4));
+	}
+
+	inline uint8_t Extend5To8Bits(int input)
+	{
+		return static_cast<uint8_t>((input >> 2) | (input << 3));
+	}
+
+	inline uint8_t Extend6To8Bits(int input)
+	{
+		return static_cast<uint8_t>((input >> 4) | (input << 2));
+	}
+
+	inline uint8_t Extend7To8Bits(int input)
+	{
+		return static_cast<uint8_t>((input >> 6) | (input << 1));
+	}
 }
 
 #endif		// _TEXCOMPRESSIONBC_HPP

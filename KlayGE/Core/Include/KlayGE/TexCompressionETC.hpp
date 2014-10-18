@@ -96,13 +96,115 @@ namespace KlayGE
 	class KLAYGE_CORE_API TexCompressionETC1 : public TexCompression
 	{
 	public:
+		struct Params
+		{
+			Params();
+
+			TexCompressionMethod quality_;
+
+			uint32_t num_src_pixels_;
+			uint32_t const * src_pixels_;
+
+			bool use_color4_;
+			int const * scan_deltas_;
+			uint32_t scan_delta_size_;
+
+			uint32_t base_color5_;
+			bool constrain_against_base_color5_;
+		};
+
+		struct Results
+		{
+			Results();
+
+			Results& operator=(Results const & rhs);
+
+			uint64_t error_;
+			uint32_t block_color_unscaled_;
+			uint32_t block_inten_table_;
+			std::vector<uint8_t> selectors_;
+			bool block_color4_;
+		};
+
+	public:
 		TexCompressionETC1();
 
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-		void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1);
-		void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha);
+		void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1) const;
+		void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha) const;
+
+		static int GetModifier(int cw, int selector);
+
+	private:
+		struct ETC1SolutionCoordinates
+		{
+			ETC1SolutionCoordinates();
+			ETC1SolutionCoordinates(uint32_t r, uint32_t g, uint32_t b, uint32_t inten_table, bool color4);
+			ETC1SolutionCoordinates(uint32_t c, uint32_t inten_table, bool color4);
+			ETC1SolutionCoordinates(ETC1SolutionCoordinates const & rhs);
+
+			ETC1SolutionCoordinates& operator=(ETC1SolutionCoordinates const & rhs);
+
+			void Clear();
+
+			void ScaledColor(int& br, int& bg, int& bb) const;
+			uint32_t ScaledColor() const;
+			void BlockColors(uint32_t* block_colors) const;
+
+			uint32_t unscaled_color_;
+			uint32_t inten_table_;
+			bool color4_;
+		};
+
+		struct PotentialSolution
+		{
+			PotentialSolution();
+
+			void Clear();
+
+			ETC1SolutionCoordinates coords_;
+			uint8_t selectors_[8];
+			uint64_t error_;
+			bool valid_;
+		};
+
+	private:
+		uint32_t ETC1DecodeValue(uint32_t diff, uint32_t inten, uint32_t selector, uint32_t packed_c) const;
+
+		void PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const;
+		uint32_t PackETC1UniformPartition(Results& results, uint32_t num_colors, uint32_t const * argb,
+			bool use_diff, uint32_t const * base_color5_unscaled) const;
+
+		void InitSolver(Params const & params, Results& result);
+		bool Solve();
+		bool EvaluateSolution(ETC1SolutionCoordinates const & coords, PotentialSolution& trial_solution, PotentialSolution& best_solution);
+		bool EvaluateSolutionFast(ETC1SolutionCoordinates const & coords, PotentialSolution& trial_solution, PotentialSolution& best_solution);
+
+	private:
+		static uint8_t quant_5_tab_[256 + 16];
+		static uint16_t etc1_inverse_lookup_[2 * 8 * 4][256];
+		static bool lut_inited_;
+
+		Params const * params_;
+		Results* result_;
+
+		int limit_;
+
+		float3 avg_color_;
+		int br_, bg_, bb_;
+		uint16_t luma_[8];
+		uint32_t sorted_luma_[2][8];
+		uint32_t const * sorted_luma_indices_;
+		uint32_t* sorted_luma_ptr_;
+
+		uint8_t selectors_[8];
+		uint8_t best_selectors_[8];
+
+		PotentialSolution best_solution_;
+		PotentialSolution trial_solution_;
+		uint8_t temp_selectors_[8];
 	};
 
 	class KLAYGE_CORE_API TexCompressionETC2RGB8 : public TexCompression

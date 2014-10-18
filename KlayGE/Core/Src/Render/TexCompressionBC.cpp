@@ -70,19 +70,19 @@ namespace KlayGE
 			{
 				for (int i = 0; i < 32; ++ i)
 				{
-					expand5_[i] = static_cast<uint8_t>((i << 3) | (i >> 2));
+					expand5_[i] = Extend5To8Bits(i);
 				}
 
 				for (int i = 0; i < 64; ++ i)
 				{
-					expand6_[i] = static_cast<uint8_t>((i << 2) | (i >> 4));
+					expand6_[i] = Extend6To8Bits(i);
 				}
 
 				for (int i = 0; i < 256 + 16; ++ i)
 				{
 					int v = MathLib::clamp(i - 8, 0, 255);
-					quant_rb_tab_[i] = expand5_[this->Mul8Bit(v, 31)];
-					quant_g_tab_[i] = expand6_[this->Mul8Bit(v, 63)];
+					quant_rb_tab_[i] = expand5_[Mul8Bit(v, 31)];
+					quant_g_tab_[i] = expand6_[Mul8Bit(v, 63)];
 				}
 
 				this->PrepareOptTable(&o_match5_[0][0], expand5_, 32);
@@ -161,13 +161,7 @@ namespace KlayGE
 		}
 	}
 
-	int TexCompressionBC1::Mul8Bit(int a, int b)
-	{
-		int t = a * b + 128;
-		return (t + (t >> 8)) >> 8;
-	}
-
-	void TexCompressionBC1::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size)
+	void TexCompressionBC1::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const
 	{
 		for (int i = 0; i < 256; ++ i)
 		{
@@ -191,19 +185,19 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t TexCompressionBC1::RGB565To888(uint16_t rgb)
+	uint32_t TexCompressionBC1::RGB565To888(uint16_t rgb) const
 	{
-		return 0xFF000000 | (expand5_[(rgb >> 11) & 0x1F] << 16) | (expand6_[(rgb >> 5) & 0x3F] << 8)
-			| (expand5_[(rgb >> 0) & 0x1F] << 0);
+		return ARGB(255, expand5_[(rgb >> 11) & 0x1F], expand6_[(rgb >> 5) & 0x3F],
+			expand5_[(rgb >> 0) & 0x1F]);
 	}
 
-	uint16_t TexCompressionBC1::RGB888To565(uint32_t rgb)
+	uint16_t TexCompressionBC1::RGB888To565(uint32_t rgb) const
 	{
 		return (((rgb >> 19) & 0x1F) << 11) | (((rgb >> 10) & 0x3F) << 5) | (((rgb >> 3) & 0x1F) << 0);
 	}
 
 	// The color matching function
-	uint32_t TexCompressionBC1::MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha)
+	uint32_t TexCompressionBC1::MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha) const
 	{
 		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
 		uint8_t const * max_u8 = reinterpret_cast<uint8_t const *>(&max_clr);
@@ -303,7 +297,7 @@ namespace KlayGE
 	}
 
 	// The color optimization function. (Clever code, part 1)
-	void TexCompressionBC1::OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method)
+	void TexCompressionBC1::OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method) const
 	{
 		if (method != TCM_Quality)
 		{
@@ -437,7 +431,7 @@ namespace KlayGE
 	// The refinement function. (Clever code, part 2)
 	// Tries to optimize colors to suit block contents better.
 	// (By solving a least squares system via normal equations+Cramer's rule)
-	bool TexCompressionBC1::RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask)
+	bool TexCompressionBC1::RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask) const
 	{
 		static int const w1Tab[4] = { 3, 0, 2, 1 };
 		static int const prods[4] = { 0x090000, 0x000900, 0x040102, 0x010402 };
@@ -514,7 +508,7 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionBC1::EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method)
+	void TexCompressionBC1::EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method) const
 	{
 		// check if block is constant
 		uint32_t min32, max32;
@@ -567,9 +561,9 @@ namespace KlayGE
 			}
 			else
 			{
-				int r = (argb[0] >> 16) & 0xFF;
-				int g = (argb[0] >> 8) & 0xFF;
-				int b = (argb[0] >> 0) & 0xFF;
+				int r = GetR(argb[0]) & 0xFF;
+				int g = GetG(argb[0]) & 0xFF;
+				int b = GetB(argb[0]) & 0xFF;
 
 				mask = 0xAAAAAAAA;
 				max16 = (o_match5_[r][0] << 11) | (o_match6_[g][0] << 5) | o_match5_[b][0];

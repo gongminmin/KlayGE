@@ -81,16 +81,15 @@ namespace KlayGE
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-		void EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method);
+		void EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method) const;
 
 	private:
-		int Mul8Bit(int a, int b);
-		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size);
-		uint32_t RGB565To888(uint16_t rgb);
-		uint16_t RGB888To565(uint32_t rgb);
-		uint32_t MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha);
-		void OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method);
-		bool RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask);
+		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
+		uint32_t RGB565To888(uint16_t rgb) const;
+		uint16_t RGB888To565(uint32_t rgb) const;
+		uint32_t MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha) const;
+		void OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method) const;
+		bool RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask) const;
 
 	private:
 		static uint8_t expand5_[32];
