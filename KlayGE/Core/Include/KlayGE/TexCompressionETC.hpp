@@ -132,6 +132,7 @@ namespace KlayGE
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
+		uint64_t EncodeETC1BlockInternal(ETC1Block& output, uint32_t const * argb, TexCompressionMethod method);
 		void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1) const;
 		void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha) const;
 
@@ -173,7 +174,7 @@ namespace KlayGE
 	private:
 		uint32_t ETC1DecodeValue(uint32_t diff, uint32_t inten, uint32_t selector, uint32_t packed_c) const;
 
-		void PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const;
+		uint64_t PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const;
 		uint32_t PackETC1UniformPartition(Results& results, uint32_t num_colors, uint32_t const * argb,
 			bool use_diff, uint32_t const * base_color5_unscaled) const;
 

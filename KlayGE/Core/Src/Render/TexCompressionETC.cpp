@@ -714,9 +714,11 @@ namespace KlayGE
 
 	void TexCompressionETC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		uint32_t const * argb = reinterpret_cast<uint32_t const *>(input);
-		ETC1Block& dst_block = *static_cast<ETC1Block*>(output);
+		this->EncodeETC1BlockInternal(*static_cast<ETC1Block*>(output), static_cast<uint32_t const *>(input), method);
+	}
 
+	uint64_t TexCompressionETC1::EncodeETC1BlockInternal(ETC1Block& dst_block, uint32_t const * argb, TexCompressionMethod method)
+	{
 		// Check for solid block.
 		bool uniform_block = true;
 		for (int i = 1; i < 16; ++ i)
@@ -729,8 +731,7 @@ namespace KlayGE
 		}
 		if (uniform_block)
 		{
-			this->PackETC1UniformBlock(dst_block, argb);
-			return;
+			return 16 * this->PackETC1UniformBlock(dst_block, argb);
 		}
 
 		uint64_t best_err = std::numeric_limits<uint64_t>::max();
@@ -990,6 +991,8 @@ namespace KlayGE
 
 		dst_block.msb = static_cast<uint16_t>((selector1 >> 8) | ((selector1 & 0xFF) << 8));
 		dst_block.lsb = static_cast<uint16_t>((selector0 >> 8) | ((selector0 & 0xFF) << 8));
+
+		return best_err;
 	}
 
 	void TexCompressionETC1::DecodeBlock(void* output, void const * input)
@@ -1149,7 +1152,7 @@ namespace KlayGE
 
 	// Packs solid color blocks efficiently using a set of small precomputed tables.
 	// For random 888 inputs, MSE results are better than Erricson's ETC1 packer in "slow" mode ~9.5% of the time, is slightly worse only ~.01% of the time, and is equal the rest of the time.
-	void TexCompressionETC1::PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const
+	uint64_t TexCompressionETC1::PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const
 	{
 		BOOST_ASSERT(etc1_inverse_lookup_[0][255]);
 
@@ -1245,6 +1248,8 @@ namespace KlayGE
 			bytes[next_comp[best_i + 0]] = static_cast<uint8_t>(best_packed_c1 | (best_packed_c1 << 4));
 			bytes[next_comp[best_i + 1]] = static_cast<uint8_t>(best_packed_c2 | (best_packed_c2 << 4));
 		}
+
+		return best_err;
 	}
 
 	uint32_t TexCompressionETC1::PackETC1UniformPartition(Results& results, uint32_t num_colors, uint32_t const * argb,
