@@ -47,18 +47,6 @@ namespace
 
 	KlayGE::mutex singleton_mutex;
 
-	static int const etc1_modifier_table[8][2] =
-	{
-		{ 2, 8 },
-		{ 5, 17 },
-		{ 9, 29 },
-		{ 13, 42 },
-		{ 18, 60 },
-		{ 24, 80 },
-		{ 33, 106 },
-		{ 47, 183 }
-	};
-
 	static uint8_t const selector_index_to_etc1[] = { 3, 2, 0, 1 };
 
 	// color8_to_etc_block_config_0_255[color][table_index] = Supplies for each 8-bit color value a list of packed ETC1 diff/intensity table/selectors/packed_colors that map to that color.
@@ -1042,8 +1030,8 @@ namespace KlayGE
 			int const cw = (etc1.cw_diff_flip >> (2 + (!sub * 3))) & 0x7;
 			for (int mod = 0; mod < 4; ++ mod)
 			{
-				int const modifier = etc1_modifier_table[cw][mod & 0x1] * ((mod & 0x2) ? -1 : 1);
-				modified_clr[sub][mod] = ARGB(255, base_clr[sub][0] + modifier,
+				int const modifier = GetModifier(cw, mod);
+				modified_clr[sub][selector_index_to_etc1[mod]] = ARGB(255, base_clr[sub][0] + modifier,
 					base_clr[sub][1] + modifier, base_clr[sub][2] + modifier);
 			}
 		}
@@ -1089,13 +1077,13 @@ namespace KlayGE
 				int modifier;
 				if (alpha)
 				{
-					modifier = (mod & 0x1) ? etc1_modifier_table[cw][1] * ((mod & 0x2) ? -1 : 1) : 0;
+					modifier = (mod & 0x1) ? GetModifier(cw, mod) : 0;
 				}
 				else
 				{
-					modifier = etc1_modifier_table[cw][mod & 0x1] * ((mod & 0x2) ? -1 : 1);
+					modifier = GetModifier(cw, mod);
 				}
-				modified_clr[sub][mod] = ARGB(255, base_clr[sub][0] + modifier,
+				modified_clr[sub][selector_index_to_etc1[mod]] = ARGB(255, base_clr[sub][0] + modifier,
 					base_clr[sub][1] + modifier, base_clr[sub][2] + modifier);
 			}
 		}
@@ -1124,6 +1112,18 @@ namespace KlayGE
 
 	int TexCompressionETC1::GetModifier(int cw, int selector)
 	{
+		static int const etc1_modifier_table[8][2] =
+		{
+			{ 2, 8 },
+			{ 5, 17 },
+			{ 9, 29 },
+			{ 13, 42 },
+			{ 18, 60 },
+			{ 24, 80 },
+			{ 33, 106 },
+			{ 47, 183 }
+		};
+
 		return (selector >= 2) ? etc1_modifier_table[cw][selector - 2] : -etc1_modifier_table[cw][!selector];
 	}
 
@@ -1136,11 +1136,11 @@ namespace KlayGE
 		int c;
 		if (diff)
 		{
-			c = (packed_c >> 2) | (packed_c << 3);
+			c = Extend5To8Bits(packed_c);
 		}
 		else
 		{
-			c = packed_c | (packed_c << 4);
+			c = Extend4To8Bits(packed_c);
 		}
 		c += GetModifier(inten, selector);
 		c = MathLib::clamp(c, 0, 255);
@@ -1587,7 +1587,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		{
 			uint32_t block_colors[4];
-			best_solution_.coords_.get_block_colors(block_colors);
+			best_solution_.coords_.BlockColors(block_colors);
 
 			uint32_t const * src_pixels = params_->src_pixels_;
 			uint64_t actual_err = 0;
