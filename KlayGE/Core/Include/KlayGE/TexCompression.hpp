@@ -92,6 +92,102 @@ namespace KlayGE
 		ElementFormat decoded_fmt_;
 	};
 
+	class ARGBColor32 : boost::equality_comparable<ARGBColor32>
+	{
+	public:
+		enum
+		{
+			BChannel = 0,
+			GChannel = 1,
+			RChannel = 2,
+			AChannel = 3
+		};
+
+	public:
+		ARGBColor32()
+		{
+		}
+		ARGBColor32(uint8_t a, uint8_t r, uint8_t g, uint8_t b)
+		{
+			this->a() = a;
+			this->r() = r;
+			this->g() = g;
+			this->b() = b;
+		}
+		explicit ARGBColor32(uint32_t dw)
+		{
+			clr32_.dw = dw;
+		}
+
+		uint32_t& ARGB()
+		{
+			return clr32_.dw;
+		}
+		uint32_t ARGB() const
+		{
+			return clr32_.dw;
+		}
+
+		uint8_t& operator[](uint32_t ch)
+		{
+			BOOST_ASSERT(ch < 4);
+			return clr32_.argb[ch];
+		}
+		uint8_t operator[](uint32_t ch) const
+		{
+			BOOST_ASSERT(ch < 4);
+			return clr32_.argb[ch];
+		}
+
+		uint8_t& a()
+		{
+			return (*this)[AChannel];
+		}
+		uint8_t a() const
+		{
+			return (*this)[AChannel];
+		}
+
+		uint8_t& r()
+		{
+			return (*this)[RChannel];
+		}
+		uint8_t r() const
+		{
+			return (*this)[RChannel];
+		}
+
+		uint8_t& g()
+		{
+			return (*this)[GChannel];
+		}
+		uint8_t g() const
+		{
+			return (*this)[GChannel];
+		}
+
+		uint8_t& b()
+		{
+			return (*this)[BChannel];
+		}
+		uint8_t b() const
+		{
+			return (*this)[BChannel];
+		}
+
+		bool operator==(ARGBColor32 const & rhs) const
+		{
+			return clr32_.dw == rhs.clr32_.dw;
+		}
+
+	private:
+		union Clr32
+		{
+			uint32_t dw;
+			uint8_t argb[4];
+		} clr32_;
+	};
+
 	// Helpers
 
 	inline int Mul8Bit(int a, int b)
@@ -100,27 +196,12 @@ namespace KlayGE
 		return (t + (t >> 8)) >> 8;
 	}
 
-	inline uint32_t ARGB(int a, int r, int g, int b)
+	inline ARGBColor32 From4Ints(int a, int r, int g, int b)
 	{
-		return (MathLib::clamp(b, 0, 255) << 0)
-			| (MathLib::clamp(g, 0, 255) << 8)
-			| (MathLib::clamp(r, 0, 255) << 16)
-			| (MathLib::clamp(a, 0, 255) << 24);
-	}
-
-	inline uint8_t GetR(uint32_t argb)
-	{
-		return reinterpret_cast<uint8_t*>(&argb)[2];
-	}
-
-	inline uint8_t GetG(uint32_t argb)
-	{
-		return reinterpret_cast<uint8_t*>(&argb)[1];
-	}
-
-	inline uint8_t GetB(uint32_t argb)
-	{
-		return reinterpret_cast<uint8_t*>(&argb)[0];
+		return ARGBColor32(static_cast<uint8_t>(MathLib::clamp(a, 0, 255)),
+			static_cast<uint8_t>(MathLib::clamp(r, 0, 255)),
+			static_cast<uint8_t>(MathLib::clamp(g, 0, 255)),
+			static_cast<uint8_t>(MathLib::clamp(b, 0, 255)));
 	}
 
 	inline uint8_t Extend4To8Bits(int input)

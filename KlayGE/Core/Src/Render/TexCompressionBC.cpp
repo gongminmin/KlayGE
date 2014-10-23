@@ -95,16 +95,19 @@ namespace KlayGE
 
 	void TexCompressionBC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		BC1Block& bc1 = *static_cast<BC1Block*>(output);
-		uint32_t const * argb = static_cast<uint32_t const *>(input);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
 
-		array<uint32_t, 16> tmp_argb;
+		BC1Block& bc1 = *static_cast<BC1Block*>(output);
+		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
+
+		array<ARGBColor32, 16> tmp_argb;
 		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
-			if (((argb[i] >> 24) & 0xFF) < 0x80)
+			if (argb[i].a() < 0x80)
 			{
-				tmp_argb[i] = 0;
+				tmp_argb[i] = ARGBColor32(0, 0, 0, 0);
 				alpha = true;
 			}
 			else
@@ -118,38 +121,36 @@ namespace KlayGE
 
 	void TexCompressionBC1::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		BC1Block const & bc1 = *static_cast<BC1Block const *>(input);
 
-		uint32_t max_clr = this->RGB565To888(bc1.clr_0);
-		uint32_t min_clr = this->RGB565To888(bc1.clr_1);
-		uint8_t const * max_u8 = reinterpret_cast<uint8_t const *>(&max_clr);
-		uint8_t const * min_u8 = reinterpret_cast<uint8_t const *>(&min_clr);
+		ARGBColor32 max_clr = this->RGB565To888(bc1.clr_0);
+		ARGBColor32 min_clr = this->RGB565To888(bc1.clr_1);
 
-		array<uint32_t, 4> clr;
+		array<ARGBColor32, 4> clr;
 		clr[0] = max_clr;
 		clr[1] = min_clr;
 		if (bc1.clr_0 > bc1.clr_1)
 		{
-			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&clr[2]);
-			uint8_t* clr3_u8 = reinterpret_cast<uint8_t*>(&clr[3]);
-			clr2_u8[0] = (max_u8[0] * 2 + min_u8[0]) / 3;
-			clr2_u8[1] = (max_u8[1] * 2 + min_u8[1]) / 3;
-			clr2_u8[2] = (max_u8[2] * 2 + min_u8[2]) / 3;
-			clr2_u8[3] = 255;
-			clr3_u8[0] = (max_u8[0] + min_u8[0] * 2) / 3;
-			clr3_u8[1] = (max_u8[1] + min_u8[1] * 2) / 3;
-			clr3_u8[2] = (max_u8[2] + min_u8[2] * 2) / 3;
-			clr3_u8[3] = 255;
+			clr[2].r() = (max_clr.r() * 2 + min_clr.r()) / 3;
+			clr[2].g() = (max_clr.g() * 2 + min_clr.g()) / 3;
+			clr[2].b() = (max_clr.b() * 2 + min_clr.b()) / 3;
+			clr[2].a() = 255;
+			clr[3].r() = (max_clr.r() + min_clr.r() * 2) / 3;
+			clr[3].g() = (max_clr.g() + min_clr.g() * 2) / 3;
+			clr[3].b() = (max_clr.b() + min_clr.b() * 2) / 3;
+			clr[3].a() = 255;
 		}
 		else
 		{
-			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&clr[2]);
-			clr2_u8[0] = (max_u8[0] + min_u8[0]) / 2;
-			clr2_u8[1] = (max_u8[1] + min_u8[1]) / 2;
-			clr2_u8[2] = (max_u8[2] + min_u8[2]) / 2;
-			clr2_u8[3] = 255;
-			clr[3] = 0;
+			clr[2].r() = (max_clr.r() + min_clr.r()) / 2;
+			clr[2].g() = (max_clr.g() + min_clr.g()) / 2;
+			clr[2].b() = (max_clr.b() + min_clr.b()) / 2;
+			clr[2].a() = 255;
+			clr[3] = ARGBColor32(0, 0, 0, 0);
 		}
 
 		for (int i = 0; i < 2; ++ i)
@@ -185,56 +186,45 @@ namespace KlayGE
 		}
 	}
 
-	uint32_t TexCompressionBC1::RGB565To888(uint16_t rgb) const
+	ARGBColor32 TexCompressionBC1::RGB565To888(uint16_t rgb) const
 	{
-		return ARGB(255, expand5_[(rgb >> 11) & 0x1F], expand6_[(rgb >> 5) & 0x3F],
+		return ARGBColor32(255, expand5_[(rgb >> 11) & 0x1F], expand6_[(rgb >> 5) & 0x3F],
 			expand5_[(rgb >> 0) & 0x1F]);
 	}
 
-	uint16_t TexCompressionBC1::RGB888To565(uint32_t rgb) const
+	uint16_t TexCompressionBC1::RGB888To565(ARGBColor32 const & rgb) const
 	{
-		return (((rgb >> 19) & 0x1F) << 11) | (((rgb >> 10) & 0x3F) << 5) | (((rgb >> 3) & 0x1F) << 0);
+		return ((rgb.r() >> 3) << 11) | ((rgb.g() >> 2) << 5) | ((rgb.b() >> 3) << 0);
 	}
 
 	// The color matching function
-	uint32_t TexCompressionBC1::MatchColorsBlock(uint32_t const * argb, uint32_t min_clr, uint32_t max_clr, bool alpha) const
+	uint32_t TexCompressionBC1::MatchColorsBlock(ARGBColor32 const * argb,
+			ARGBColor32 const & min_clr, ARGBColor32 const & max_clr, bool alpha) const
 	{
-		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
-		uint8_t const * max_u8 = reinterpret_cast<uint8_t const *>(&max_clr);
-		uint8_t const * min_u8 = reinterpret_cast<uint8_t const *>(&min_clr);
-
-		array<uint32_t, 4> color;
+		array<ARGBColor32, 4> color;
 		color[0] = max_clr;
 		color[1] = min_clr;
 		if (!alpha)
 		{
-			uint8_t* clr2_u8 = reinterpret_cast<uint8_t*>(&color[2]);
-			uint8_t* clr3_u8 = reinterpret_cast<uint8_t*>(&color[3]);
-			clr2_u8[0] = (max_u8[0] * 2 + min_u8[0]) / 3;
-			clr2_u8[1] = (max_u8[1] * 2 + min_u8[1]) / 3;
-			clr2_u8[2] = (max_u8[2] * 2 + min_u8[2]) / 3;
-			clr2_u8[3] = 255;
-			clr3_u8[0] = (max_u8[0] + min_u8[0] * 2) / 3;
-			clr3_u8[1] = (max_u8[1] + min_u8[1] * 2) / 3;
-			clr3_u8[2] = (max_u8[2] + min_u8[2] * 2) / 3;
-			clr3_u8[3] = 255;
+			color[2].r() = (max_clr.r() * 2 + min_clr.r()) / 3;
+			color[2].g() = (max_clr.g() * 2 + min_clr.g()) / 3;
+			color[2].b() = (max_clr.b() * 2 + min_clr.b()) / 3;
+			color[2].a() = 255;
+			color[3].r() = (max_clr.r() + min_clr.r() * 2) / 3;
+			color[3].g() = (max_clr.g() + min_clr.g() * 2) / 3;
+			color[3].b() = (max_clr.b() + min_clr.b() * 2) / 3;
+			color[3].a() = 255;
 		}
 
-		array<uint8_t*, 4> color_u8;
-		color_u8[0] = reinterpret_cast<uint8_t*>(&color[0]);
-		color_u8[1] = reinterpret_cast<uint8_t*>(&color[1]);
-		color_u8[2] = reinterpret_cast<uint8_t*>(&color[2]);
-		color_u8[3] = reinterpret_cast<uint8_t*>(&color[3]);
-
 		uint32_t mask = 0;
-		int dirr = color_u8[0][2] - color_u8[1][2];
-		int dirg = color_u8[0][1] - color_u8[1][1];
-		int dirb = color_u8[0][0] - color_u8[1][0];
+		int dirr = color[0].r() - color[1].r();
+		int dirg = color[0].g() - color[1].g();
+		int dirb = color[0].b() - color[1].b();
 
 		int dots[16];
 		for (int i = 0; i < 16; ++ i)
 		{
-			dots[i] = block[i * 4 + 2] * dirr + block[i * 4 + 1] * dirg + block[i * 4 + 0] * dirb;
+			dots[i] = argb[i].r() * dirr + argb[i].g() * dirg + argb[i].b() * dirb;
 		}
 
 		if (alpha)
@@ -242,7 +232,7 @@ namespace KlayGE
 			array<int, 2> stops;
 			for (int i = 0; i < 2; ++ i)
 			{
-				stops[i] = color_u8[i][2] * dirr + color_u8[i][1] * dirg + color_u8[i][0] * dirb;
+				stops[i] = color[i].r() * dirr + color[i].g() * dirg + color[i].b() * dirb;
 			}
 
 			int c0_point = (stops[0] + stops[1] * 2) / 3;
@@ -252,7 +242,7 @@ namespace KlayGE
 			{
 				mask <<= 2;
 				int dot = dots[i];
-				if (0 == block[i * 4 + 3])
+				if (0 == argb[i].a())
 				{
 					mask |= 3;
 				}
@@ -270,7 +260,7 @@ namespace KlayGE
 			array<int, 4> stops;
 			for (int i = 0; i < 4; ++ i)
 			{
-				stops[i] = color_u8[i][2] * dirr + color_u8[i][1] * dirg + color_u8[i][0] * dirb;
+				stops[i] = color[i].r() * dirr + color[i].g() * dirg + color[i].b() * dirb;
 			}
 
 			int c0_point = (stops[1] + stops[3]) >> 1;
@@ -297,18 +287,19 @@ namespace KlayGE
 	}
 
 	// The color optimization function. (Clever code, part 1)
-	void TexCompressionBC1::OptimizeColorsBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, TexCompressionMethod method) const
+	void TexCompressionBC1::OptimizeColorsBlock(ARGBColor32 const * argb,
+			ARGBColor32& min_clr, ARGBColor32& max_clr, TexCompressionMethod method) const
 	{
 		if (method != TCM_Quality)
 		{
 			Color const LUM_WEIGHT(0.2126f, 0.7152f, 0.0722f, 0);
 
 			max_clr = min_clr = argb[0];
-			float min_lum = MathLib::dot(Color(min_clr), LUM_WEIGHT);
+			float min_lum = MathLib::dot(Color(min_clr.ARGB()), LUM_WEIGHT);
 			float max_lum = min_lum;
 			for (size_t i = 1; i < 16; ++ i)
 			{
-				float lum = MathLib::dot(Color(argb[i]), LUM_WEIGHT);
+				float lum = MathLib::dot(Color(argb[i].ARGB()), LUM_WEIGHT);
 				if (lum < min_lum)
 				{
 					min_lum = lum;
@@ -325,22 +316,19 @@ namespace KlayGE
 		{
 			static int const ITER_POWER = 4;
 
-			uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
-
 			// determine color distribution
 			int mu[3], min[3], max[3];
 
 			for (int ch = 0; ch < 3; ++ ch)
 			{
-				uint8_t const * bp = block + ch;
 				int muv, minv, maxv;
 
-				muv = minv = maxv = bp[0];
-				for (int i = 4; i < 64; i += 4)
+				muv = minv = maxv = argb[0][ch];
+				for (int i = 1; i < 16; ++ i)
 				{
-					muv += bp[i];
-					minv = std::min<int>(minv, bp[i]);
-					maxv = std::max<int>(maxv, bp[i]);
+					muv += argb[i][ch];
+					minv = std::min<int>(minv, argb[i][ch]);
+					maxv = std::max<int>(maxv, argb[i][ch]);
 				}
 
 				mu[ch] = (muv + 8) >> 4;
@@ -357,9 +345,9 @@ namespace KlayGE
 
 			for (int i = 0; i < 16; ++ i)
 			{
-				int r = block[i * 4 + 2] - mu[2];
-				int g = block[i * 4 + 1] - mu[1];
-				int b = block[i * 4 + 0] - mu[0];
+				int r = argb[i].r() - mu[ARGBColor32::RChannel];
+				int g = argb[i].g() - mu[ARGBColor32::GChannel];
+				int b = argb[i].b() - mu[ARGBColor32::BChannel];
 
 				cov[0] += r * r;
 				cov[1] += r * g;
@@ -376,9 +364,9 @@ namespace KlayGE
 				covf[i] = cov[i] / 255.0f;
 			}
 
-			vfr = static_cast<float>(max[2] - min[2]);
-			vfg = static_cast<float>(max[1] - min[1]);
-			vfb = static_cast<float>(max[0] - min[0]);
+			vfr = static_cast<float>(max[ARGBColor32::RChannel] - min[ARGBColor32::RChannel]);
+			vfg = static_cast<float>(max[ARGBColor32::GChannel] - min[ARGBColor32::GChannel]);
+			vfb = static_cast<float>(max[ARGBColor32::BChannel] - min[ARGBColor32::BChannel]);
 
 			for (int iter = 0; iter < ITER_POWER; ++ iter)
 			{
@@ -410,10 +398,10 @@ namespace KlayGE
 
 			// Pick colors at extreme points
 			int min_d = 0x7FFFFFFF, max_d = -min_d;
-			min_clr = max_clr = 0;
+			min_clr = max_clr = ARGBColor32(0, 0, 0, 0);
 			for (int i = 0; i < 16; ++ i)
 			{
-				int dot = block[i * 4 + 2] * v_r + block[i * 4 + 1] * v_g + block[i * 4 + 0] * v_b;
+				int dot = argb[i].r() * v_r + argb[i].g() * v_g + argb[i].b() * v_b;
 				if (dot < min_d)
 				{
 					min_d = dot;
@@ -431,13 +419,12 @@ namespace KlayGE
 	// The refinement function. (Clever code, part 2)
 	// Tries to optimize colors to suit block contents better.
 	// (By solving a least squares system via normal equations+Cramer's rule)
-	bool TexCompressionBC1::RefineBlock(uint32_t const * argb, uint32_t& min_clr, uint32_t& max_clr, uint32_t mask) const
+	bool TexCompressionBC1::RefineBlock(ARGBColor32 const * argb,
+			ARGBColor32& min_clr, ARGBColor32& max_clr, uint32_t mask) const
 	{
 		static int const w1Tab[4] = { 3, 0, 2, 1 };
 		static int const prods[4] = { 0x090000, 0x000900, 0x040102, 0x010402 };
 		// ^some magic to save a lot of multiplies in the accumulating loop...
-
-		uint8_t const * block = reinterpret_cast<uint8_t const *>(argb);
 
 		int akku = 0;
 		int At1_r, At1_g, At1_b;
@@ -449,9 +436,9 @@ namespace KlayGE
 		{
 			int step = mask & 3;
 			int w1 = w1Tab[step];
-			int r = block[i * 4 + 2];
-			int g = block[i * 4 + 1];
-			int b = block[i * 4 + 0];
+			int r = argb[i].r();
+			int g = argb[i].g();
+			int b = argb[i].b();
 
 			akku += prods[step];
 			At1_r += w1 * r;
@@ -508,22 +495,25 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionBC1::EncodeBC1Internal(BC1Block& bc1, uint32_t const * argb, bool alpha, TexCompressionMethod method) const
+	void TexCompressionBC1::EncodeBC1Internal(BC1Block& bc1, ARGBColor32 const * argb,
+			bool alpha, TexCompressionMethod method) const
 	{
+		BOOST_ASSERT(argb);
+
 		// check if block is constant
 		uint32_t min32, max32;
-		min32 = max32 = argb[0];
+		min32 = max32 = argb[0].ARGB();
 		for (int i = 1; i < 16; ++ i)
 		{
-			min32 = std::min(min32, argb[i]);
-			max32 = std::max(max32, argb[i]);
+			min32 = std::min(min32, argb[i].ARGB());
+			max32 = std::max(max32, argb[i].ARGB());
 		}
 
 		uint32_t mask;
 		uint16_t max16, min16;
 		if (min32 != max32) // no constant color
 		{
-			uint32_t max_clr, min_clr;
+			ARGBColor32 max_clr, min_clr;
 			this->OptimizeColorsBlock(argb, min_clr, max_clr, method);
 			max16 = this->RGB888To565(max_clr);
 			min16 = this->RGB888To565(min_clr);
@@ -554,16 +544,16 @@ namespace KlayGE
 		}
 		else // constant color
 		{
-			if (alpha && (0 == argb[0]))
+			if (alpha && (0 == argb[0].ARGB()))
 			{
 				mask = 0xFFFFFFFF;
 				max16 = min16 = 0;
 			}
 			else
 			{
-				int r = GetR(argb[0]) & 0xFF;
-				int g = GetG(argb[0]) & 0xFF;
-				int b = GetB(argb[0]) & 0xFF;
+				int const r = argb[0].r();
+				int const g = argb[0].g();
+				int const b = argb[0].b();
 
 				mask = 0xAAAAAAAA;
 				max16 = (o_match5_[r][0] << 11) | (o_match6_[g][0] << 5) | o_match5_[b][0];
@@ -621,15 +611,19 @@ namespace KlayGE
 
 	void TexCompressionBC2::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		BC2Block& bc2 = *static_cast<BC2Block*>(output);
-		uint32_t const * argb = static_cast<uint32_t const *>(input);
+		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
 		array<uint8_t, 16> alpha;
-		array<uint32_t, 16> xrgb;
+		array<ARGBColor32, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
-			xrgb[i] = argb[i] | 0xFF000000;
-			alpha[i] = static_cast<uint8_t>(argb[i] >> 28);
+			xrgb[i] = argb[i];
+			xrgb[i].a() = 255;
+			alpha[i] = static_cast<uint8_t>(argb[i].a() >> 4);
 		}
 
 		bc1_codec_->EncodeBC1Internal(bc2.bc1, &xrgb[0], false, method);
@@ -643,21 +637,19 @@ namespace KlayGE
 
 	void TexCompressionBC2::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		BC2Block const * bc2_block = static_cast<BC2Block const *>(input);
 
 		bc1_codec_->DecodeBlock(argb, &bc2_block->bc1);
-
-		for (int i = 0; i < 16; ++ i)
-		{
-			argb[i] &= 0x00FFFFFF;
-		}
 
 		for (int i = 0; i < 4; ++ i)
 		{
 			for (int j = 0; j < 4; ++ j)
 			{
-				argb[i * 4 + j] |= (((bc2_block->alpha[i] >> (4 * j)) & 0xF) << 4) << 24;
+				argb[i * 4 + j].a() = ((bc2_block->alpha[i] >> (4 * j)) & 0xF) << 4;
 			}
 		}
 	}
@@ -676,15 +668,19 @@ namespace KlayGE
 
 	void TexCompressionBC3::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		BC3Block& bc3 = *static_cast<BC3Block*>(output);
-		uint32_t const * argb = static_cast<uint32_t const *>(input);
+		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
 		array<uint8_t, 16> alpha;
-		array<uint32_t, 16> xrgb;
+		array<ARGBColor32, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
-			xrgb[i] = argb[i] | 0xFF000000;
-			alpha[i] = static_cast<uint8_t>(argb[i] >> 24);
+			xrgb[i] = argb[i];
+			xrgb[i].a() = 255;
+			alpha[i] = static_cast<uint8_t>(argb[i].a());
 		}
 
 		bc1_codec_->EncodeBC1Internal(bc3.bc1, &xrgb[0], false, method);
@@ -693,7 +689,10 @@ namespace KlayGE
 
 	void TexCompressionBC3::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		BC3Block const * bc3_block = static_cast<BC3Block const *>(input);
 
 		bc1_codec_->DecodeBlock(argb, &bc3_block->bc1);
@@ -703,8 +702,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
 		{
-			argb[i] &= 0x00FFFFFF;
-			argb[i] |= alpha_block[i] << 24;
+			argb[i].a() = alpha_block[i];
 		}
 	}
 
@@ -720,6 +718,9 @@ namespace KlayGE
 	// Alpha block compression (this is easy for a change)
 	void TexCompressionBC4::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		UNREF_PARAM(method);
 
 		BC4Block& bc4 = *static_cast<BC4Block*>(output);
@@ -774,6 +775,9 @@ namespace KlayGE
 
 	void TexCompressionBC4::DecodeBlock(void* output, void const * input)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		uint8_t* alpha_block = static_cast<uint8_t*>(output);
 		BC4Block const & bc4 = *static_cast<BC4Block const *>(input);
 
@@ -824,6 +828,9 @@ namespace KlayGE
 
 	void TexCompressionBC5::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		BC5Block& bc5 = *static_cast<BC5Block*>(output);
 		uint16_t const * gr = static_cast<uint16_t const *>(input);
 
@@ -841,6 +848,9 @@ namespace KlayGE
 
 	void TexCompressionBC5::DecodeBlock(void* output, void const * input)
 	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
 		uint16_t* gr = static_cast<uint16_t*>(output);
 		BC5Block const * bc5_block = static_cast<BC5Block const *>(input);
 

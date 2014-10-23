@@ -554,14 +554,14 @@ namespace KlayGE
 	{
 	}
 
-	TexCompressionETC1::ETC1SolutionCoordinates::ETC1SolutionCoordinates(uint32_t r, uint32_t g, uint32_t b, uint32_t inten_table, bool color4)
-		: unscaled_color_(ARGB(255, r, g, b)),
+	TexCompressionETC1::ETC1SolutionCoordinates::ETC1SolutionCoordinates(int r, int g, int b, uint32_t inten_table, bool color4)
+		: unscaled_color_(From4Ints(255, r, g, b)),
 			inten_table_(inten_table),
 			color4_(color4)
 	{
 	}
 
-	TexCompressionETC1::ETC1SolutionCoordinates::ETC1SolutionCoordinates(uint32_t c, uint32_t inten_table, bool color4)
+	TexCompressionETC1::ETC1SolutionCoordinates::ETC1SolutionCoordinates(ARGBColor32 const & c, uint32_t inten_table, bool color4)
 		: unscaled_color_(c),
 			inten_table_(inten_table),
 			color4_(color4)
@@ -586,49 +586,49 @@ namespace KlayGE
 
 	void TexCompressionETC1::ETC1SolutionCoordinates::Clear()
 	{
-		unscaled_color_ = 0;
+		unscaled_color_ = ARGBColor32(0, 0, 0, 0);
 		inten_table_ = 0;
 		color4_ = false;
 	}
 
-	void TexCompressionETC1::ETC1SolutionCoordinates::ScaledColor(int& br, int& bg, int& bb) const
+	void TexCompressionETC1::ETC1SolutionCoordinates::ScaledColor(uint8_t& br, uint8_t& bg, uint8_t& bb) const
 	{
-		int const r = GetR(unscaled_color_);
-		int const g = GetG(unscaled_color_);
-		int const b = GetB(unscaled_color_);
+		uint8_t const r = unscaled_color_.r();
+		uint8_t const g = unscaled_color_.g();
+		uint8_t const b = unscaled_color_.b();
 
 		if (color4_)
 		{
-			br = r | (r << 4);
-			bg = g | (g << 4);
-			bb = b | (b << 4);
+			br = Extend4To8Bits(r);
+			bg = Extend4To8Bits(g);
+			bb = Extend4To8Bits(b);
 		}
 		else
 		{
-			br = (r >> 2) | (r << 3);
-			bg = (g >> 2) | (g << 3);
-			bb = (b >> 2) | (b << 3);
+			br = Extend5To8Bits(r);
+			bg = Extend5To8Bits(g);
+			bb = Extend5To8Bits(b);
 		}
 	}
 
-	uint32_t TexCompressionETC1::ETC1SolutionCoordinates::ScaledColor() const
+	ARGBColor32 TexCompressionETC1::ETC1SolutionCoordinates::ScaledColor() const
 	{
-		int r, g, b;
+		uint8_t r, g, b;
 		this->ScaledColor(r, g, b);
-		return ARGB(255, r, g, b);
+		return ARGBColor32(255, r, g, b);
 	}
 
-	void TexCompressionETC1::ETC1SolutionCoordinates::BlockColors(uint32_t* block_colors) const
+	void TexCompressionETC1::ETC1SolutionCoordinates::BlockColors(ARGBColor32* block_colors) const
 	{
-		int r, g, b;
+		uint8_t r, g, b;
 		this->ScaledColor(r, g, b);
 
 		int const modifiers[] = { GetModifier(inten_table_, 0), GetModifier(inten_table_, 1),
 			GetModifier(inten_table_, 2), GetModifier(inten_table_, 3) };
-		block_colors[0] = ARGB(255, r + modifiers[0], g + modifiers[0], b + modifiers[0]);
-		block_colors[1] = ARGB(255, r + modifiers[1], g + modifiers[1], b + modifiers[1]);
-		block_colors[2] = ARGB(255, r + modifiers[2], g + modifiers[2], b + modifiers[2]);
-		block_colors[3] = ARGB(255, r + modifiers[3], g + modifiers[3], b + modifiers[3]);
+		block_colors[0] = From4Ints(255, r + modifiers[0], g + modifiers[0], b + modifiers[0]);
+		block_colors[1] = From4Ints(255, r + modifiers[1], g + modifiers[1], b + modifiers[1]);
+		block_colors[2] = From4Ints(255, r + modifiers[2], g + modifiers[2], b + modifiers[2]);
+		block_colors[3] = From4Ints(255, r + modifiers[3], g + modifiers[3], b + modifiers[3]);
 	}
 
 
@@ -714,11 +714,16 @@ namespace KlayGE
 
 	void TexCompressionETC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		this->EncodeETC1BlockInternal(*static_cast<ETC1Block*>(output), static_cast<uint32_t const *>(input), method);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		this->EncodeETC1BlockInternal(*static_cast<ETC1Block*>(output), static_cast<ARGBColor32 const *>(input), method);
 	}
 
-	uint64_t TexCompressionETC1::EncodeETC1BlockInternal(ETC1Block& dst_block, uint32_t const * argb, TexCompressionMethod method)
+	uint64_t TexCompressionETC1::EncodeETC1BlockInternal(ETC1Block& dst_block, ARGBColor32 const * argb, TexCompressionMethod method)
 	{
+		BOOST_ASSERT(argb);
+
 		// Check for solid block.
 		bool uniform_block = true;
 		for (int i = 1; i < 16; ++ i)
@@ -740,7 +745,7 @@ namespace KlayGE
 
 		Results best_results[2];
 		Results results[3];
-		uint32_t subblock_pixels[8];
+		ARGBColor32 subblock_pixels[8];
 
 		Params params;
 		params.quality_ = method;
@@ -762,7 +767,7 @@ namespace KlayGE
 					}
 					else
 					{
-						uint32_t const * src_col = argb + subblock * 2;
+						ARGBColor32 const * src_col = argb + subblock * 2;
 						subblock_pixels[0] = src_col[0];
 						subblock_pixels[1] = src_col[4];
 						subblock_pixels[2] = src_col[8];
@@ -887,16 +892,16 @@ namespace KlayGE
 			} // use_color4
 		} // flip
 
-		int dr = GetR(best_results[1].block_color_unscaled_) - GetR(best_results[0].block_color_unscaled_);
-		int dg = GetG(best_results[1].block_color_unscaled_) - GetG(best_results[0].block_color_unscaled_);
-		int db = GetB(best_results[1].block_color_unscaled_) - GetB(best_results[0].block_color_unscaled_);
+		int dr = best_results[1].block_color_unscaled_.r() - best_results[0].block_color_unscaled_.r();
+		int dg = best_results[1].block_color_unscaled_.g() - best_results[0].block_color_unscaled_.g();
+		int db = best_results[1].block_color_unscaled_.b() - best_results[0].block_color_unscaled_.b();
 		BOOST_ASSERT(best_use_color4 || (MathLib::min3(dr, dg, db) >= -4) && (MathLib::min3(dr, dg, db) <= 3));
 
 		if (best_use_color4)
 		{
-			dst_block.r = static_cast<uint8_t>((GetR(best_results[0].block_color_unscaled_) << 4) | GetR(best_results[1].block_color_unscaled_));
-			dst_block.g = static_cast<uint8_t>((GetG(best_results[0].block_color_unscaled_) << 4) | GetG(best_results[1].block_color_unscaled_));
-			dst_block.b = static_cast<uint8_t>((GetB(best_results[0].block_color_unscaled_) << 4) | GetB(best_results[1].block_color_unscaled_));
+			dst_block.r = static_cast<uint8_t>((best_results[0].block_color_unscaled_.r() << 4) | best_results[1].block_color_unscaled_.r());
+			dst_block.g = static_cast<uint8_t>((best_results[0].block_color_unscaled_.g() << 4) | best_results[1].block_color_unscaled_.g());
+			dst_block.b = static_cast<uint8_t>((best_results[0].block_color_unscaled_.b() << 4) | best_results[1].block_color_unscaled_.b());
 		}
 		else
 		{
@@ -904,17 +909,17 @@ namespace KlayGE
 			{
 				dr += 8;
 			}
-			dst_block.r = static_cast<uint8_t>((GetR(best_results[0].block_color_unscaled_) << 3) | dr);
+			dst_block.r = static_cast<uint8_t>((best_results[0].block_color_unscaled_.r() << 3) | dr);
 			if (dg < 0)
 			{
 				dg += 8;
 			}
-			dst_block.g = static_cast<uint8_t>((GetG(best_results[0].block_color_unscaled_) << 3) | dg);
+			dst_block.g = static_cast<uint8_t>((best_results[0].block_color_unscaled_.g() << 3) | dg);
 			if (db < 0)
 			{
 				db += 8;
 			}
-			dst_block.b = static_cast<uint8_t>((GetB(best_results[0].block_color_unscaled_) << 3) | db);
+			dst_block.b = static_cast<uint8_t>((best_results[0].block_color_unscaled_.b() << 3) | db);
 		}
 
 		dst_block.cw_diff_flip = static_cast<uint8_t>((best_results[1].block_inten_table_ << 2)
@@ -997,7 +1002,10 @@ namespace KlayGE
 
 	void TexCompressionETC1::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		ETC1Block const & etc1 = *static_cast<ETC1Block const *>(input);
 
 		if (etc1.cw_diff_flip & 0x2)
@@ -1010,8 +1018,10 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionETC1::DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1) const
+	void TexCompressionETC1::DecodeETCIndividualModeInternal(ARGBColor32* argb, ETC1Block const & etc1) const
 	{
+		BOOST_ASSERT(argb);
+
 		int r1 = etc1.r >> 4;
 		int r2 = etc1.r & 0xF;
 		int g1 = etc1.g >> 4;
@@ -1027,14 +1037,14 @@ namespace KlayGE
 		base_clr[1][1] = Extend4To8Bits(g2);
 		base_clr[1][2] = Extend4To8Bits(b2);
 
-		uint32_t modified_clr[2][4];
+		ARGBColor32 modified_clr[2][4];
 		for (int sub = 0; sub < 2; ++ sub)
 		{
 			int const cw = (etc1.cw_diff_flip >> (2 + (!sub * 3))) & 0x7;
 			for (int mod = 0; mod < 4; ++ mod)
 			{
 				int const modifier = GetModifier(cw, mod);
-				modified_clr[sub][selector_index_to_etc1[mod]] = ARGB(255, base_clr[sub][0] + modifier,
+				modified_clr[sub][selector_index_to_etc1[mod]] = From4Ints(255, base_clr[sub][0] + modifier,
 					base_clr[sub][1] + modifier, base_clr[sub][2] + modifier);
 			}
 		}
@@ -1054,8 +1064,10 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionETC1::DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha) const
+	void TexCompressionETC1::DecodeETCDifferentialModeInternal(ARGBColor32* argb, ETC1Block const & etc1, bool alpha) const
 	{
+		BOOST_ASSERT(argb);
+
 		int const r = etc1.r >> 3;
 		int const dr = etc1.r & 0x7;
 		int const g = etc1.g >> 3;
@@ -1071,7 +1083,7 @@ namespace KlayGE
 		base_clr[1][1] = Extend5To8Bits(g - (dg & 0x4) + (dg & 0x3));
 		base_clr[1][2] = Extend5To8Bits(b - (db & 0x4) + (db & 0x3));
 
-		uint32_t modified_clr[2][4];
+		ARGBColor32 modified_clr[2][4];
 		for (int sub = 0; sub < 2; ++ sub)
 		{
 			int const cw = (etc1.cw_diff_flip >> (2 + (!sub * 3))) & 0x7;
@@ -1086,7 +1098,7 @@ namespace KlayGE
 				{
 					modifier = GetModifier(cw, mod);
 				}
-				modified_clr[sub][selector_index_to_etc1[mod]] = ARGB(255, base_clr[sub][0] + modifier,
+				modified_clr[sub][selector_index_to_etc1[mod]] = From4Ints(255, base_clr[sub][0] + modifier,
 					base_clr[sub][1] + modifier, base_clr[sub][2] + modifier);
 			}
 		}
@@ -1103,7 +1115,7 @@ namespace KlayGE
 				int pixel_index = msb * 2 + lsb;
 				if (alpha && (2 == pixel_index))
 				{
-					argb[y * 4 + x] = 0;
+					argb[y * 4 + x] = ARGBColor32(0, 0, 0, 0);
 				}
 				else
 				{
@@ -1152,7 +1164,7 @@ namespace KlayGE
 
 	// Packs solid color blocks efficiently using a set of small precomputed tables.
 	// For random 888 inputs, MSE results are better than Erricson's ETC1 packer in "slow" mode ~9.5% of the time, is slightly worse only ~.01% of the time, and is equal the rest of the time.
-	uint64_t TexCompressionETC1::PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const
+	uint64_t TexCompressionETC1::PackETC1UniformBlock(ETC1Block& block, ARGBColor32 const * argb) const
 	{
 		BOOST_ASSERT(etc1_inverse_lookup_[0][255]);
 
@@ -1252,8 +1264,8 @@ namespace KlayGE
 		return best_err;
 	}
 
-	uint32_t TexCompressionETC1::PackETC1UniformPartition(Results& results, uint32_t num_colors, uint32_t const * argb,
-			bool use_diff, uint32_t const * base_color5_unscaled) const
+	uint32_t TexCompressionETC1::PackETC1UniformPartition(Results& results, uint32_t num_colors, ARGBColor32 const * argb,
+			bool use_diff, ARGBColor32 const * base_color5_unscaled) const
 	{
 		BOOST_ASSERT(etc1_inverse_lookup_[0][255]);
 
@@ -1307,7 +1319,7 @@ namespace KlayGE
 					if (diff && base_color5_unscaled)
 					{
 						int const p0 = (x >> 8) & 0xFF;
-						int delta = p0 - static_cast<int>((*base_color5_unscaled >> (i * 8)) & 0xFF);
+						int delta = p0 - static_cast<int>((*base_color5_unscaled)[i]);
 						if ((delta < -4) || (delta > 3))
 						{
 							if (0xFFFF == *table)
@@ -1333,8 +1345,8 @@ namespace KlayGE
 
 					if (diff && base_color5_unscaled)
 					{
-						int delta1 = (p1 & 0xFF) - static_cast<int>((*base_color5_unscaled >> (next_comp[i + 0] * 8)) & 0xFF);
-						int delta2 = (p2 & 0xFF) - static_cast<int>((*base_color5_unscaled >> (next_comp[i + 1] * 8)) & 0xFF);
+						int delta1 = (p1 & 0xFF) - static_cast<int>((*base_color5_unscaled)[next_comp[i + 0]]);
+						int delta2 = (p2 & 0xFF) - static_cast<int>((*base_color5_unscaled)[next_comp[i + 1]]);
 						if ((delta1 < -4) || (delta1 > 3) || (delta2 < -4) || (delta2 > 3))
 						{
 							if (0xFFFF == *table)
@@ -1375,9 +1387,9 @@ namespace KlayGE
 		results.selectors_.assign(num_colors, (best_x >> 4) & 3);
 
 		uint32_t const best_packed_c0 = (best_x >> 8) & 255;
-		results.block_color_unscaled_ = (best_packed_c0 << (8 * best_i))
-			| (best_packed_c1 << (8 * next_comp[best_i + 0]))
-			| (best_packed_c2 << (8 * next_comp[best_i + 1]));
+		results.block_color_unscaled_[best_i] = static_cast<uint8_t>(best_packed_c0);
+		results.block_color_unscaled_[next_comp[best_i + 0]] = static_cast<uint8_t>(best_packed_c1);
+		results.block_color_unscaled_[next_comp[best_i + 1]] = static_cast<uint8_t>(best_packed_c2);
 		results.error_ = best_err;
 
 		return best_err;
@@ -1398,14 +1410,14 @@ namespace KlayGE
 		avg_color_ = float3(0, 0, 0);
 		for (uint32_t i = 0; i < N; ++ i)
 		{
-			uint32_t const c = params_->src_pixels_[i];
-			float3 const fc(static_cast<float>(GetR(c)),
-				static_cast<float>(GetG(c)),
-				static_cast<float>(GetB(c)));
+			ARGBColor32 const c = params_->src_pixels_[i];
+			float3 const fc(static_cast<float>(c.r()),
+				static_cast<float>(c.g()),
+				static_cast<float>(c.b()));
 
 			avg_color_ += fc;
 
-			luma_[i] = static_cast<uint16_t>(GetR(c) + GetG(c) + GetB(c));
+			luma_[i] = static_cast<uint16_t>(c.r() + c.g() + c.b());
 			sorted_luma_[0][i] = i;
 		}
 		avg_color_ /= N;
@@ -1517,16 +1529,16 @@ namespace KlayGE
 						uint8_t const * selectors = best_solution_.selectors_;
 
 						int delta_sum_r = 0, delta_sum_g = 0, delta_sum_b = 0;
-						uint32_t const base_color = best_solution_.coords_.ScaledColor();
+						ARGBColor32 const base_color = best_solution_.coords_.ScaledColor();
 						for (uint32_t r = 0; r < n; ++ r)
 						{
 							uint32_t const s = *selectors;
 							++ selectors;
 							int const yd = GetModifier(best_solution_.coords_.inten_table_, s);
 							// Compute actual delta being applied to each pixel, taking into account clamping.
-							delta_sum_r += MathLib::clamp(static_cast<int>(GetR(base_color)) + yd, 0, 255) - GetR(base_color);
-							delta_sum_g += MathLib::clamp(static_cast<int>(GetG(base_color)) + yd, 0, 255) - GetG(base_color);
-							delta_sum_b += MathLib::clamp(static_cast<int>(GetB(base_color)) + yd, 0, 255) - GetB(base_color);
+							delta_sum_r += MathLib::clamp(static_cast<int>(base_color.r()) + yd, 0, 255) - base_color.r();
+							delta_sum_g += MathLib::clamp(static_cast<int>(base_color.g()) + yd, 0, 255) - base_color.g();
+							delta_sum_b += MathLib::clamp(static_cast<int>(base_color.b()) + yd, 0, 255) - base_color.b();
 						}
 						if (!delta_sum_r && !delta_sum_g && !delta_sum_b)
 						{
@@ -1545,9 +1557,9 @@ namespace KlayGE
 						{
 							skip = true;
 						}
-						else if ((br1 == static_cast<int>(GetR(best_solution_.coords_.unscaled_color_)))
-							&& (bg1 == static_cast<int>(GetG(best_solution_.coords_.unscaled_color_)))
-							&& (bb1 == static_cast<int>(GetB(best_solution_.coords_.unscaled_color_))))
+						else if ((br1 == static_cast<int>(best_solution_.coords_.unscaled_color_.r()))
+							&& (bg1 == static_cast<int>(best_solution_.coords_.unscaled_color_.g()))
+							&& (bb1 == static_cast<int>(best_solution_.coords_.unscaled_color_.b())))
 						{
 							skip = true;
 						}
@@ -1591,16 +1603,16 @@ namespace KlayGE
 
 #ifdef KLAYGE_DEBUG
 		{
-			uint32_t block_colors[4];
+			ARGBColor32 block_colors[4];
 			best_solution_.coords_.BlockColors(block_colors);
 
-			uint32_t const * src_pixels = params_->src_pixels_;
+			ARGBColor32 const * src_pixels = params_->src_pixels_;
 			uint64_t actual_err = 0;
 			for (uint32_t i = 0; i < n; ++ i)
 			{
-				actual_err += MathLib::sqr(GetR(src_pixels[i]) - GetR(block_colors[selectors[i]]))
-					+ MathLib::sqr(GetG(src_pixels[i]) - GetG(block_colors[selectors[i]]))
-					+ MathLib::sqr(GetB(src_pixels[i]) - GetB(block_colors[selectors[i]]));
+				actual_err += MathLib::sqr(src_pixels[i].r() - block_colors[selectors[i]].r())
+					+ MathLib::sqr(src_pixels[i].g() - block_colors[selectors[i]].g())
+					+ MathLib::sqr(src_pixels[i].b() - block_colors[selectors[i]].b());
 			}
 
 			BOOST_ASSERT(actual_err == best_solution_.error_);
@@ -1624,9 +1636,9 @@ namespace KlayGE
 
 		if (params_->constrain_against_base_color5_)
 		{
-			int const dr = GetR(coords.unscaled_color_) - GetR(params_->base_color5_);
-			int const dg = GetG(coords.unscaled_color_) - GetG(params_->base_color5_);
-			int const db = GetB(coords.unscaled_color_) - GetB(params_->base_color5_);
+			int const dr = coords.unscaled_color_.r() - params_->base_color5_.r();
+			int const dg = coords.unscaled_color_.g() - params_->base_color5_.g();
+			int const db = coords.unscaled_color_.b() - params_->base_color5_.b();
 
 			if ((MathLib::min3(dr, dg, db) < -4) || (MathLib::max3(dr, dg, db) > 3))
 			{
@@ -1634,7 +1646,7 @@ namespace KlayGE
 			}
 		}
 
-		uint32_t const base_color = coords.ScaledColor();
+		ARGBColor32 const base_color = coords.ScaledColor();
 
 		uint32_t const N = 8;
 
@@ -1642,47 +1654,47 @@ namespace KlayGE
 
 		for (uint32_t inten_table = 0; inten_table < 8; ++ inten_table)
 		{
-			uint32_t block_colors[4];
+			ARGBColor32 block_colors[4];
 			for (uint32_t s = 0; s < 4; ++ s)
 			{
 				int const yd = GetModifier(inten_table, s);
-				block_colors[s] = ARGB(0, GetR(base_color) + yd, GetG(base_color) + yd, GetB(base_color) + yd);
+				block_colors[s] = From4Ints(0, base_color.r() + yd, base_color.g() + yd, base_color.b() + yd);
 			}
 
 			uint64_t total_err = 0;
 
-			uint32_t const * src_pixels = params_->src_pixels_;
+			ARGBColor32 const * src_pixels = params_->src_pixels_;
 			for (uint32_t c = 0; c < N; ++ c)
 			{
-				uint32_t src_pixel = *src_pixels;
+				ARGBColor32 src_pixel = *src_pixels;
 				++ src_pixels;
 
 				uint32_t best_selector_index = 0;
-				uint32_t best_err = MathLib::sqr(GetR(src_pixel) - GetR(block_colors[0]))
-					+ MathLib::sqr(GetG(src_pixel) - GetG(block_colors[0]))
-					+ MathLib::sqr(GetB(src_pixel) - GetB(block_colors[0]));
+				uint32_t best_err = MathLib::sqr(src_pixel.r() - block_colors[0].r())
+					+ MathLib::sqr(src_pixel.g() - block_colors[0].g())
+					+ MathLib::sqr(src_pixel.b() - block_colors[0].b());
 
-				uint32_t trial_err = MathLib::sqr(GetR(src_pixel) - GetR(block_colors[1]))
-					+ MathLib::sqr(GetG(src_pixel) - GetG(block_colors[1]))
-					+ MathLib::sqr(GetB(src_pixel) - GetB(block_colors[1]));
+				uint32_t trial_err = MathLib::sqr(src_pixel.r() - block_colors[1].r())
+					+ MathLib::sqr(src_pixel.g() - block_colors[1].g())
+					+ MathLib::sqr(src_pixel.b() - block_colors[1].b());
 				if (trial_err < best_err)
 				{
 					best_err = trial_err;
 					best_selector_index = 1;
 				}
 
-				trial_err = MathLib::sqr(GetR(src_pixel) - GetR(block_colors[2]))
-					+ MathLib::sqr(GetG(src_pixel) - GetG(block_colors[2]))
-					+ MathLib::sqr(GetB(src_pixel) - GetB(block_colors[2]));
+				trial_err = MathLib::sqr(src_pixel.r() - block_colors[2].r())
+					+ MathLib::sqr(src_pixel.g() - block_colors[2].g())
+					+ MathLib::sqr(src_pixel.b() - block_colors[2].b());
 				if (trial_err < best_err)
 				{
 					best_err = trial_err;
 					best_selector_index = 2;
 				}
 
-				trial_err = MathLib::sqr(GetR(src_pixel) - GetR(block_colors[3]))
-					+ MathLib::sqr(GetG(src_pixel) - GetG(block_colors[3]))
-					+ MathLib::sqr(GetB(src_pixel) - GetB(block_colors[3]));
+				trial_err = MathLib::sqr(src_pixel.r() - block_colors[3].r())
+					+ MathLib::sqr(src_pixel.g() - block_colors[3].g())
+					+ MathLib::sqr(src_pixel.b() - block_colors[3].b());
 				if (trial_err < best_err)
 				{
 					best_err = trial_err;
@@ -1723,9 +1735,9 @@ namespace KlayGE
 	{
 		if (params_->constrain_against_base_color5_)
 		{
-			int const dr = GetR(coords.unscaled_color_) - GetR(params_->base_color5_);
-			int const dg = GetG(coords.unscaled_color_) - GetG(params_->base_color5_);
-			int const db = GetB(coords.unscaled_color_) - GetB(params_->base_color5_);
+			int const dr = coords.unscaled_color_.r() - params_->base_color5_.r();
+			int const dg = coords.unscaled_color_.g() - params_->base_color5_.g();
+			int const db = coords.unscaled_color_.b() - params_->base_color5_.b();
 
 			if ((MathLib::min3(dr, dg, db) < -4) || (MathLib::max3(dr, dg, db) > 3))
 			{
@@ -1734,7 +1746,7 @@ namespace KlayGE
 			}
 		}
 
-		uint32_t const base_color = coords.ScaledColor();
+		ARGBColor32 const base_color = coords.ScaledColor();
 
 		uint32_t const N = 8;
 
@@ -1743,14 +1755,14 @@ namespace KlayGE
 		for (int inten_table = 7; inten_table >= 0; -- inten_table)
 		{
 			uint32_t block_inten[4];
-			uint32_t block_colors[4];
+			ARGBColor32 block_colors[4];
 			for (uint32_t s = 0; s < 4; ++ s)
 			{
 				int const yd = GetModifier(inten_table, s);
-				uint32_t const block_color = ARGB(255, GetR(base_color) + yd, GetG(base_color) + yd,
-					GetB(base_color) + yd);
+				ARGBColor32 const block_color = From4Ints(255, base_color.r() + yd, base_color.g() + yd,
+					base_color.b() + yd);
 				block_colors[s] = block_color;
-				block_inten[s] = GetR(block_color) + GetG(block_color) + GetB(block_color);
+				block_inten[s] = block_color.r() + block_color.g() + block_color.b();
 			}
 
 			// evaluate_solution_fast() enforces/assumesd a total ordering of the input colors along the intensity (1,1,1) axis to more quickly classify the inputs to selectors.
@@ -1761,7 +1773,7 @@ namespace KlayGE
 				block_inten[1] + block_inten[2], block_inten[2] + block_inten[3] };
 
 			uint64_t total_err = 0;
-			uint32_t const * src_pixels = params_->src_pixels_;
+			ARGBColor32 const * src_pixels = params_->src_pixels_;
 			if (sorted_luma_ptr_[N - 1] * 2 < block_inten_midpoints[0])
 			{
 				if (block_inten[0] > sorted_luma_ptr_[N - 1])
@@ -1777,9 +1789,9 @@ namespace KlayGE
 
 				for (uint32_t c = 0; c < N; ++ c)
 				{
-					total_err += MathLib::sqr(GetR(block_colors[0]) - GetR(src_pixels[c]))
-						+ MathLib::sqr(GetG(block_colors[0]) - GetG(src_pixels[c]))
-						+ MathLib::sqr(GetB(block_colors[0]) - GetB(src_pixels[c]));
+					total_err += MathLib::sqr(block_colors[0].r() - src_pixels[c].r())
+						+ MathLib::sqr(block_colors[0].g() - src_pixels[c].g())
+						+ MathLib::sqr(block_colors[0].b() - src_pixels[c].b());
 				}
 			}
 			else if (sorted_luma_ptr_[0] * 2 >= block_inten_midpoints[2])
@@ -1797,9 +1809,9 @@ namespace KlayGE
 
 				for (uint32_t c = 0; c < N; ++ c)
 				{
-					total_err += MathLib::sqr(GetR(block_colors[3]) - GetR(src_pixels[c]))
-						+ MathLib::sqr(GetG(block_colors[3]) - GetG(src_pixels[c]))
-						+ MathLib::sqr(GetB(block_colors[3]) - GetB(src_pixels[c]));
+					total_err += MathLib::sqr(block_colors[3].r() - src_pixels[c].r())
+						+ MathLib::sqr(block_colors[3].g() - src_pixels[c].g())
+						+ MathLib::sqr(block_colors[3].b() - src_pixels[c].b());
 				}
 			}
 			else
@@ -1817,9 +1829,9 @@ namespace KlayGE
 							{
 								uint32_t const sorted_pixel_index = sorted_luma_indices_[c];
 								temp_selectors_[sorted_pixel_index] = 3;
-								total_err += MathLib::sqr(GetR(block_colors[3]) - GetR(src_pixels[sorted_pixel_index]))
-									+ MathLib::sqr(GetG(block_colors[3]) - GetG(src_pixels[sorted_pixel_index]))
-									+ MathLib::sqr(GetB(block_colors[3]) - GetB(src_pixels[sorted_pixel_index]));
+								total_err += MathLib::sqr(block_colors[3].r() - src_pixels[sorted_pixel_index].r())
+									+ MathLib::sqr(block_colors[3].g() - src_pixels[sorted_pixel_index].g())
+									+ MathLib::sqr(block_colors[3].b() - src_pixels[sorted_pixel_index].b());
 								++ c;
 							}
 							break;
@@ -1830,9 +1842,9 @@ namespace KlayGE
 					{
 						uint32_t const sorted_pixel_index = sorted_luma_indices_[c];
 						temp_selectors_[sorted_pixel_index] = static_cast<uint8_t>(cur_selector);
-						total_err += MathLib::sqr(GetR(block_colors[cur_selector]) - GetR(src_pixels[sorted_pixel_index]))
-							+ MathLib::sqr(GetG(block_colors[cur_selector]) - GetG(src_pixels[sorted_pixel_index]))
-							+ MathLib::sqr(GetB(block_colors[cur_selector]) - GetB(src_pixels[sorted_pixel_index]));
+						total_err += MathLib::sqr(block_colors[cur_selector].r() - src_pixels[sorted_pixel_index].r())
+							+ MathLib::sqr(block_colors[cur_selector].g() - src_pixels[sorted_pixel_index].g())
+							+ MathLib::sqr(block_colors[cur_selector].b() - src_pixels[sorted_pixel_index].b());
 					}
 				}
 			}
@@ -1884,7 +1896,10 @@ namespace KlayGE
 
 	void TexCompressionETC2RGB8::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		ETC2Block const & etc2 = *static_cast<ETC2Block const *>(input);
 
 		if (etc2.etc1.cw_diff_flip & 0x2)
@@ -1919,8 +1934,10 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionETC2RGB8::DecodeETCTModeInternal(uint32_t* argb, ETC2TModeBlock const & etc2, bool alpha)
+	void TexCompressionETC2RGB8::DecodeETCTModeInternal(ARGBColor32* argb, ETC2TModeBlock const & etc2, bool alpha)
 	{
+		BOOST_ASSERT(argb);
+
 		static int const distance_table[8] = { 3, 6, 11, 16, 23, 32, 41, 64 };
 
 		int const r1 = ((etc2.r1 >> 1) & 0xC) | (etc2.r1 & 0x3);
@@ -1947,12 +1964,12 @@ namespace KlayGE
 		};
 
 		int const distance = distance_table[da | db];
-		uint32_t const modified_clr[] =
+		ARGBColor32 const modified_clr[] =
 		{
-			ARGB(255, base_clr1[0], base_clr1[1], base_clr1[2]),
-			ARGB(255, base_clr2[0] + distance, base_clr2[1] + distance, base_clr2[2] + distance),
-			ARGB(255, base_clr2[0], base_clr2[1], base_clr2[2]),
-			ARGB(255, base_clr2[0] - distance, base_clr2[1] - distance, base_clr2[2] - distance)
+			From4Ints(255, base_clr1[0], base_clr1[1], base_clr1[2]),
+			From4Ints(255, base_clr2[0] + distance, base_clr2[1] + distance, base_clr2[2] + distance),
+			From4Ints(255, base_clr2[0], base_clr2[1], base_clr2[2]),
+			From4Ints(255, base_clr2[0] - distance, base_clr2[1] - distance, base_clr2[2] - distance)
 		};
 
 		for (int x = 0; x < 4; ++ x)
@@ -1965,7 +1982,7 @@ namespace KlayGE
 				int pixel_index = msb * 2 + lsb;
 				if (alpha && (2 == pixel_index))
 				{
-					argb[y * 4 + x] = 0;
+					argb[y * 4 + x] = ARGBColor32(0, 0, 0, 0);
 				}
 				else
 				{
@@ -1975,8 +1992,10 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionETC2RGB8::DecodeETCHModeInternal(uint32_t* argb, ETC2HModeBlock const & etc2, bool alpha)
+	void TexCompressionETC2RGB8::DecodeETCHModeInternal(ARGBColor32* argb, ETC2HModeBlock const & etc2, bool alpha)
 	{
+		BOOST_ASSERT(argb);
+
 		static int const distance_table[8] = { 3, 6, 11, 16, 23, 32, 41, 64 };
 
 		int const r1 = (etc2.r1_g1 >> 3) & 0xF;
@@ -1988,29 +2007,29 @@ namespace KlayGE
 		int const da = etc2.g2_b2_d & 0x04;
 		int const db = etc2.g2_b2_d & 0x01;
 
-		int const base_clr1[] =
+		uint8_t const base_clr1[] =
 		{
 			Extend4To8Bits(r1),
 			Extend4To8Bits(g1),
 			Extend4To8Bits(b1)
 		};
 
-		int const base_clr2[] =
+		uint8_t const base_clr2[] =
 		{
 			Extend4To8Bits(r2),
 			Extend4To8Bits(g2),
 			Extend4To8Bits(b2)
 		};
 
-		int const ordering = ARGB(0, base_clr1[0], base_clr1[1], base_clr1[2])
-			>= ARGB(0, base_clr2[0], base_clr2[1], base_clr2[2]);
+		int const ordering = ARGBColor32(0, base_clr1[0], base_clr1[1], base_clr1[2]).ARGB()
+			>= ARGBColor32(0, base_clr2[0], base_clr2[1], base_clr2[2]).ARGB();
 		int distance = distance_table[da | (db << 1) | ordering];
-		uint32_t const modified_clr[] =
+		ARGBColor32 const modified_clr[] =
 		{
-			ARGB(255, base_clr1[0] + distance, base_clr1[1] + distance, base_clr1[2] + distance),
-			ARGB(255, base_clr1[0] - distance, base_clr1[1] - distance, base_clr1[2] - distance),
-			ARGB(255, base_clr2[0] + distance, base_clr2[1] + distance, base_clr2[2] + distance),
-			ARGB(255, base_clr2[0] - distance, base_clr2[1] - distance, base_clr2[2] - distance)
+			From4Ints(255, base_clr1[0] + distance, base_clr1[1] + distance, base_clr1[2] + distance),
+			From4Ints(255, base_clr1[0] - distance, base_clr1[1] - distance, base_clr1[2] - distance),
+			From4Ints(255, base_clr2[0] + distance, base_clr2[1] + distance, base_clr2[2] + distance),
+			From4Ints(255, base_clr2[0] - distance, base_clr2[1] - distance, base_clr2[2] - distance)
 		};
 
 		for (int x = 0; x < 4; ++ x)
@@ -2023,7 +2042,7 @@ namespace KlayGE
 				int pixel_index = msb * 2 + lsb;
 				if (alpha && (2 == pixel_index))
 				{
-					argb[y * 4 + x] = 0;
+					argb[y * 4 + x] = ARGBColor32(0, 0, 0, 0);
 				}
 				else
 				{
@@ -2033,7 +2052,7 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionETC2RGB8::DecodeETCPlanarModeInternal(uint32_t* argb, ETC2PlanarModeBlock const & etc2)
+	void TexCompressionETC2RGB8::DecodeETCPlanarModeInternal(ARGBColor32* argb, ETC2PlanarModeBlock const & etc2)
 	{
 		int const ro = (etc2.ro_go >> 1) & 0x3F;
 		int const go = ((etc2.ro_go & 0x1) << 6) | ((etc2.go_bo >> 1) & 0x3F);
@@ -2070,7 +2089,7 @@ namespace KlayGE
 		{
 			for (int x = 0; x < 4; ++ x)
 			{
-				argb[y * 4 + x] = ARGB(255,
+				argb[y * 4 + x] = From4Ints(255,
 					(x * (h[0] - o[0]) + y * (v[0] - o[0]) + 4 * o[0] + 2) >> 2,
 					(x * (h[1] - o[1]) + y * (v[1] - o[1]) + 4 * o[1] + 2) >> 2,
 					(x * (h[2] - o[2]) + y * (v[2] - o[2]) + 4 * o[2] + 2) >> 2);
@@ -2101,7 +2120,10 @@ namespace KlayGE
 
 	void TexCompressionETC2RGB8A1::DecodeBlock(void* output, void const * input)
 	{
-		uint32_t* argb = static_cast<uint32_t*>(output);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		ETC2Block const & etc2 = *static_cast<ETC2Block const *>(input);
 
 		int const dr = etc2.etc1.r & 0x7;

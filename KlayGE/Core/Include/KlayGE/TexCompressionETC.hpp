@@ -103,13 +103,13 @@ namespace KlayGE
 			TexCompressionMethod quality_;
 
 			uint32_t num_src_pixels_;
-			uint32_t const * src_pixels_;
+			ARGBColor32 const * src_pixels_;
 
 			bool use_color4_;
 			int const * scan_deltas_;
 			uint32_t scan_delta_size_;
 
-			uint32_t base_color5_;
+			ARGBColor32 base_color5_;
 			bool constrain_against_base_color5_;
 		};
 
@@ -120,7 +120,7 @@ namespace KlayGE
 			Results& operator=(Results const & rhs);
 
 			uint64_t error_;
-			uint32_t block_color_unscaled_;
+			ARGBColor32 block_color_unscaled_;
 			uint32_t block_inten_table_;
 			std::vector<uint8_t> selectors_;
 			bool block_color4_;
@@ -132,9 +132,9 @@ namespace KlayGE
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-		uint64_t EncodeETC1BlockInternal(ETC1Block& output, uint32_t const * argb, TexCompressionMethod method);
-		void DecodeETCIndividualModeInternal(uint32_t* argb, ETC1Block const & etc1) const;
-		void DecodeETCDifferentialModeInternal(uint32_t* argb, ETC1Block const & etc1, bool alpha) const;
+		uint64_t EncodeETC1BlockInternal(ETC1Block& output, ARGBColor32 const * argb, TexCompressionMethod method);
+		void DecodeETCIndividualModeInternal(ARGBColor32* argb, ETC1Block const & etc1) const;
+		void DecodeETCDifferentialModeInternal(ARGBColor32* argb, ETC1Block const & etc1, bool alpha) const;
 
 		static int GetModifier(int cw, int selector);
 
@@ -142,19 +142,19 @@ namespace KlayGE
 		struct ETC1SolutionCoordinates
 		{
 			ETC1SolutionCoordinates();
-			ETC1SolutionCoordinates(uint32_t r, uint32_t g, uint32_t b, uint32_t inten_table, bool color4);
-			ETC1SolutionCoordinates(uint32_t c, uint32_t inten_table, bool color4);
+			ETC1SolutionCoordinates(int r, int g, int b, uint32_t inten_table, bool color4);
+			ETC1SolutionCoordinates(ARGBColor32 const & c, uint32_t inten_table, bool color4);
 			ETC1SolutionCoordinates(ETC1SolutionCoordinates const & rhs);
 
 			ETC1SolutionCoordinates& operator=(ETC1SolutionCoordinates const & rhs);
 
 			void Clear();
 
-			void ScaledColor(int& br, int& bg, int& bb) const;
-			uint32_t ScaledColor() const;
-			void BlockColors(uint32_t* block_colors) const;
+			void ScaledColor(uint8_t& br, uint8_t& bg, uint8_t& bb) const;
+			ARGBColor32 ScaledColor() const;
+			void BlockColors(ARGBColor32* block_colors) const;
 
-			uint32_t unscaled_color_;
+			ARGBColor32 unscaled_color_;
 			uint32_t inten_table_;
 			bool color4_;
 		};
@@ -174,9 +174,9 @@ namespace KlayGE
 	private:
 		uint32_t ETC1DecodeValue(uint32_t diff, uint32_t inten, uint32_t selector, uint32_t packed_c) const;
 
-		uint64_t PackETC1UniformBlock(ETC1Block& block, uint32_t const * argb) const;
-		uint32_t PackETC1UniformPartition(Results& results, uint32_t num_colors, uint32_t const * argb,
-			bool use_diff, uint32_t const * base_color5_unscaled) const;
+		uint64_t PackETC1UniformBlock(ETC1Block& block, ARGBColor32 const * argb) const;
+		uint32_t PackETC1UniformPartition(Results& results, uint32_t num_colors, ARGBColor32 const * argb,
+			bool use_diff, ARGBColor32 const * base_color5_unscaled) const;
 
 		void InitSolver(Params const & params, Results& result);
 		bool Solve();
@@ -216,9 +216,9 @@ namespace KlayGE
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
-		void DecodeETCTModeInternal(uint32_t* argb, ETC2TModeBlock const & etc2, bool alpha);
-		void DecodeETCHModeInternal(uint32_t* argb, ETC2HModeBlock const & etc2, bool alpha);
-		void DecodeETCPlanarModeInternal(uint32_t* argb, ETC2PlanarModeBlock const & etc2);
+		void DecodeETCTModeInternal(ARGBColor32* argb, ETC2TModeBlock const & etc2, bool alpha);
+		void DecodeETCHModeInternal(ARGBColor32* argb, ETC2HModeBlock const & etc2, bool alpha);
+		void DecodeETCPlanarModeInternal(ARGBColor32* argb, ETC2PlanarModeBlock const & etc2);
 
 	private:
 		TexCompressionETC1Ptr etc1_codec_;
