@@ -44,6 +44,276 @@
 namespace
 {
 	KlayGE::mutex singleton_mutex;
+
+	// Partition, Shape, Pixel (index into 4x4 block)
+	uint8_t const bc67_partition_table[3][64][16] =
+	{
+		{   // 1 Region case has no subsets (all 0)
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+		},
+
+		{   // BC6H/BC7 Partition Set for 2 Subsets
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1 }, // Shape 0
+			{ 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1 }, // Shape 1
+			{ 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1 }, // Shape 2
+			{ 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1 }, // Shape 3
+			{ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1 }, // Shape 4
+			{ 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, // Shape 5
+			{ 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, // Shape 6
+			{ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1 }, // Shape 7
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1 }, // Shape 8
+			{ 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, // Shape 9
+			{ 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1 }, // Shape 10
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1 }, // Shape 11
+			{ 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, // Shape 12
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1 }, // Shape 13
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, // Shape 14
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 }, // Shape 15
+			{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1 }, // Shape 16
+			{ 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 }, // Shape 17
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0 }, // Shape 18
+			{ 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0 }, // Shape 19
+			{ 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0 }, // Shape 20
+			{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0 }, // Shape 21
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0 }, // Shape 22
+			{ 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1 }, // Shape 23
+			{ 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 }, // Shape 24
+			{ 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0 }, // Shape 25
+			{ 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0 }, // Shape 26
+			{ 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0 }, // Shape 27
+			{ 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0 }, // Shape 28
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }, // Shape 29
+			{ 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0 }, // Shape 30
+			{ 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0 }, // Shape 31
+
+			// BC7 Partition Set for 2 Subsets (second-half)
+			{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1 }, // Shape 32
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1 }, // Shape 33
+			{ 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0 }, // Shape 34
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0 }, // Shape 35
+			{ 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0 }, // Shape 36
+			{ 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0 }, // Shape 37
+			{ 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1 }, // Shape 38
+			{ 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1 }, // Shape 39
+			{ 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 }, // Shape 40
+			{ 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0 }, // Shape 41
+			{ 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0 }, // Shape 42
+			{ 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0 }, // Shape 43
+			{ 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0 }, // Shape 44
+			{ 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1 }, // Shape 45
+			{ 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1 }, // Shape 46
+			{ 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0 }, // Shape 47
+			{ 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0 }, // Shape 48
+			{ 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0 }, // Shape 49
+			{ 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0 }, // Shape 50
+			{ 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0 }, // Shape 51
+			{ 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1 }, // Shape 52
+			{ 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1 }, // Shape 53
+			{ 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0 }, // Shape 54
+			{ 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0 }, // Shape 55
+			{ 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1 }, // Shape 56
+			{ 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1 }, // Shape 57
+			{ 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1 }, // Shape 58
+			{ 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1 }, // Shape 59
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1 }, // Shape 60
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 }, // Shape 61
+			{ 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0 }, // Shape 62
+			{ 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1 }  // Shape 63
+		},
+
+		{   // BC7 Partition Set for 3 Subsets
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 0, 2, 2, 1, 2, 2, 2, 2 }, // Shape 0
+			{ 0, 0, 0, 1, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 2, 1 }, // Shape 1
+			{ 0, 0, 0, 0, 2, 0, 0, 1, 2, 2, 1, 1, 2, 2, 1, 1 }, // Shape 2
+			{ 0, 2, 2, 2, 0, 0, 2, 2, 0, 0, 1, 1, 0, 1, 1, 1 }, // Shape 3
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2 }, // Shape 4
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 2, 2 }, // Shape 5
+			{ 0, 0, 2, 2, 0, 0, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1 }, // Shape 6
+			{ 0, 0, 1, 1, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1 }, // Shape 7
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2 }, // Shape 8
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2 }, // Shape 9
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2 }, // Shape 10
+			{ 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2 }, // Shape 11
+			{ 0, 1, 1, 2, 0, 1, 1, 2, 0, 1, 1, 2, 0, 1, 1, 2 }, // Shape 12
+			{ 0, 1, 2, 2, 0, 1, 2, 2, 0, 1, 2, 2, 0, 1, 2, 2 }, // Shape 13
+			{ 0, 0, 1, 1, 0, 1, 1, 2, 1, 1, 2, 2, 1, 2, 2, 2 }, // Shape 14
+			{ 0, 0, 1, 1, 2, 0, 0, 1, 2, 2, 0, 0, 2, 2, 2, 0 }, // Shape 15
+			{ 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 2, 1, 1, 2, 2 }, // Shape 16
+			{ 0, 1, 1, 1, 0, 0, 1, 1, 2, 0, 0, 1, 2, 2, 0, 0 }, // Shape 17
+			{ 0, 0, 0, 0, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2 }, // Shape 18
+			{ 0, 0, 2, 2, 0, 0, 2, 2, 0, 0, 2, 2, 1, 1, 1, 1 }, // Shape 19
+			{ 0, 1, 1, 1, 0, 1, 1, 1, 0, 2, 2, 2, 0, 2, 2, 2 }, // Shape 20
+			{ 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 2, 1, 2, 2, 2, 1 }, // Shape 21
+			{ 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 2, 2, 0, 1, 2, 2 }, // Shape 22
+			{ 0, 0, 0, 0, 1, 1, 0, 0, 2, 2, 1, 0, 2, 2, 1, 0 }, // Shape 23
+			{ 0, 1, 2, 2, 0, 1, 2, 2, 0, 0, 1, 1, 0, 0, 0, 0 }, // Shape 24
+			{ 0, 0, 1, 2, 0, 0, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2 }, // Shape 25
+			{ 0, 1, 1, 0, 1, 2, 2, 1, 1, 2, 2, 1, 0, 1, 1, 0 }, // Shape 26
+			{ 0, 0, 0, 0, 0, 1, 1, 0, 1, 2, 2, 1, 1, 2, 2, 1 }, // Shape 27
+			{ 0, 0, 2, 2, 1, 1, 0, 2, 1, 1, 0, 2, 0, 0, 2, 2 }, // Shape 28
+			{ 0, 1, 1, 0, 0, 1, 1, 0, 2, 0, 0, 2, 2, 2, 2, 2 }, // Shape 29
+			{ 0, 0, 1, 1, 0, 1, 2, 2, 0, 1, 2, 2, 0, 0, 1, 1 }, // Shape 30
+			{ 0, 0, 0, 0, 2, 0, 0, 0, 2, 2, 1, 1, 2, 2, 2, 1 }, // Shape 31
+			{ 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 1, 2, 2, 2 }, // Shape 32
+			{ 0, 2, 2, 2, 0, 0, 2, 2, 0, 0, 1, 2, 0, 0, 1, 1 }, // Shape 33
+			{ 0, 0, 1, 1, 0, 0, 1, 2, 0, 0, 2, 2, 0, 2, 2, 2 }, // Shape 34
+			{ 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 0 }, // Shape 35
+			{ 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 0, 0, 0, 0 }, // Shape 36
+			{ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 }, // Shape 37
+			{ 0, 1, 2, 0, 2, 0, 1, 2, 1, 2, 0, 1, 0, 1, 2, 0 }, // Shape 38
+			{ 0, 0, 1, 1, 2, 2, 0, 0, 1, 1, 2, 2, 0, 0, 1, 1 }, // Shape 39
+			{ 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 0, 0, 0, 0, 1, 1 }, // Shape 40
+			{ 0, 1, 0, 1, 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2 }, // Shape 41
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1 }, // Shape 42
+			{ 0, 0, 2, 2, 1, 1, 2, 2, 0, 0, 2, 2, 1, 1, 2, 2 }, // Shape 43
+			{ 0, 0, 2, 2, 0, 0, 1, 1, 0, 0, 2, 2, 0, 0, 1, 1 }, // Shape 44
+			{ 0, 2, 2, 0, 1, 2, 2, 1, 0, 2, 2, 0, 1, 2, 2, 1 }, // Shape 45
+			{ 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 0, 1, 0, 1 }, // Shape 46
+			{ 0, 0, 0, 0, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1 }, // Shape 47
+			{ 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 2, 2, 2, 2 }, // Shape 48
+			{ 0, 2, 2, 2, 0, 1, 1, 1, 0, 2, 2, 2, 0, 1, 1, 1 }, // Shape 49
+			{ 0, 0, 0, 2, 1, 1, 1, 2, 0, 0, 0, 2, 1, 1, 1, 2 }, // Shape 50
+			{ 0, 0, 0, 0, 2, 1, 1, 2, 2, 1, 1, 2, 2, 1, 1, 2 }, // Shape 51
+			{ 0, 2, 2, 2, 0, 1, 1, 1, 0, 1, 1, 1, 0, 2, 2, 2 }, // Shape 52
+			{ 0, 0, 0, 2, 1, 1, 1, 2, 1, 1, 1, 2, 0, 0, 0, 2 }, // Shape 53
+			{ 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 2, 2, 2, 2 }, // Shape 54
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2, 2, 1, 1, 2 }, // Shape 55
+			{ 0, 1, 1, 0, 0, 1, 1, 0, 2, 2, 2, 2, 2, 2, 2, 2 }, // Shape 56
+			{ 0, 0, 2, 2, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 2, 2 }, // Shape 57
+			{ 0, 0, 2, 2, 1, 1, 2, 2, 1, 1, 2, 2, 0, 0, 2, 2 }, // Shape 58
+			{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 1, 2 }, // Shape 59
+			{ 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 1 }, // Shape 60
+			{ 0, 2, 2, 2, 1, 2, 2, 2, 0, 2, 2, 2, 1, 2, 2, 2 }, // Shape 61
+			{ 0, 1, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 }, // Shape 62
+			{ 0, 1, 1, 1, 2, 0, 1, 1, 2, 2, 0, 1, 2, 2, 2, 0 }  // Shape 63
+		}
+	};
+
+	// Partition, Shape, Fixup
+	uint8_t const fix_up_table[3][64][3] =
+	{
+		{   // No fix-ups for 1st subset for BC6H or BC7
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
+			{ 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }
+		},
+
+		{   // BC6H/BC7 Partition Set Fixups for 2 Subsets
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 15, 0 }, { 0, 2, 0 }, { 0, 8, 0 }, { 0, 2, 0 },
+			{ 0, 2, 0 }, { 0, 8, 0 }, { 0, 8, 0 }, { 0, 15, 0 },
+			{ 0, 2, 0 }, { 0, 8, 0 }, { 0, 2, 0 }, { 0, 2, 0 },
+			{ 0, 8, 0 }, { 0, 8, 0 }, { 0, 2, 0 }, { 0, 2, 0 },
+
+			// BC7 Partition Set Fixups for 2 Subsets (second-half)
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 6, 0 }, { 0, 8, 0 },
+			{ 0, 2, 0 }, { 0, 8, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 2, 0 }, { 0, 8, 0 }, { 0, 2, 0 }, { 0, 2, 0 },
+			{ 0, 2, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 6, 0 },
+			{ 0, 6, 0 }, { 0, 2, 0 }, { 0, 6, 0 }, { 0, 8, 0 },
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 2, 0 }, { 0, 2, 0 },
+			{ 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 }, { 0, 15, 0 },
+			{ 0, 15, 0 }, { 0, 2, 0 }, { 0, 2, 0 }, { 0, 15, 0 }
+		},
+
+		{   // BC7 Partition Set Fixups for 3 Subsets
+			{ 0, 3, 15 }, { 0, 3, 8 }, { 0, 15, 8 }, { 0, 15, 3 },
+			{ 0, 8, 15 }, { 0, 3, 15 }, { 0, 15, 3 }, { 0, 15, 8 },
+			{ 0, 8, 15 }, { 0, 8, 15 }, { 0, 6, 15 }, { 0, 6, 15 },
+			{ 0, 6, 15 }, { 0, 5, 15 }, { 0, 3, 15 }, { 0, 3, 8 },
+			{ 0, 3, 15 }, { 0, 3, 8 }, { 0, 8, 15 }, { 0, 15, 3 },
+			{ 0, 3, 15 }, { 0, 3, 8 }, { 0, 6, 15 }, { 0, 10, 8 },
+			{ 0, 5, 3 }, { 0, 8, 15 }, { 0, 8, 6 }, { 0, 6, 10 },
+			{ 0, 8, 15 }, { 0, 5, 15 }, { 0, 15, 10 }, { 0, 15, 8 },
+			{ 0, 8, 15 }, { 0, 15, 3 }, { 0, 3, 15 }, { 0, 5, 10 },
+			{ 0, 6, 10 }, { 0, 10, 8 }, { 0, 8, 9 }, { 0, 15, 10 },
+			{ 0, 15, 6 }, { 0, 3, 15 }, { 0, 15, 8 }, { 0, 5, 15 },
+			{ 0, 15, 3 }, { 0, 15, 6 }, { 0, 15, 6 }, { 0, 15, 8 },
+			{ 0, 3, 15 }, { 0, 15, 3 }, { 0, 5, 15 }, { 0, 5, 15 },
+			{ 0, 5, 15 }, { 0, 8, 15 }, { 0, 5, 15 }, { 0, 10, 15 },
+			{ 0, 5, 15 }, { 0, 10, 15 }, { 0, 8, 15 }, { 0, 13, 15 },
+			{ 0, 15, 3 }, { 0, 12, 15 }, { 0, 3, 15 }, { 0, 3, 8 }
+		}
+	};
 }
 
 namespace KlayGE
@@ -863,6 +1133,307 @@ namespace KlayGE
 		{
 			gr[i] = r[i] | (g[i] << 8);
 		}
+	}
+
+
+	// BC7 compression: partitions, partition_bits, p_bits, rotation_bits, index_mode_bits, index_prec, index_prec_2, rgba_prec, rgba_prec_with_p
+	TexCompressionBC7::ModeInfo const TexCompressionBC7::mode_info_[] =
+	{
+		{ 2, 4, 6, 0, 0, 3, 0, ARGBColor32(0, 4, 4, 4), ARGBColor32(0, 5, 5, 5) },
+		// Mode 0: Color only, 3 Subsets, RGBP 4441 (unique P-bit), 3-bit indecies, 16 partitions
+		{ 1, 6, 2, 0, 0, 3, 0, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 7, 7, 7) },
+		// Mode 1: Color only, 2 Subsets, RGBP 6661 (shared P-bit), 3-bit indecies, 64 partitions
+		{ 2, 6, 0, 0, 0, 2, 0, ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5) },
+		// Mode 2: Color only, 3 Subsets, RGB 555, 2-bit indecies, 64 partitions
+		{ 1, 6, 4, 0, 0, 2, 0, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 8, 8, 8) },
+		// Mode 3: Color only, 2 Subsets, RGBP 7771 (unique P-bit), 2-bits indecies, 64 partitions
+		{ 0, 0, 0, 2, 1, 2, 3, ARGBColor32(6, 5, 5, 5), ARGBColor32(6, 5, 5, 5) },
+		// Mode 4: Color w/ Separate Alpha, 1 Subset, RGB 555, A6, 16x2/16x3-bit indices, 2-bit rotation, 1-bit index selector
+		{ 0, 0, 0, 2, 0, 2, 2, ARGBColor32(8, 7, 7, 7), ARGBColor32(8, 7, 7, 7) },
+		// Mode 5: Color w/ Separate Alpha, 1 Subset, RGB 777, A8, 16x2/16x2-bit indices, 2-bit rotation
+		{ 0, 0, 2, 0, 0, 4, 0, ARGBColor32(7, 7, 7, 7), ARGBColor32(8, 8, 8, 8) },
+		// Mode 6: Color+Alpha, 1 Subset, RGBAP 77771 (unique P-bit), 16x4-bit indecies
+		{ 1, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6) }
+		// Mode 7: Color+Alpha, 2 Subsets, RGBAP 55551 (unique P-bit), 2-bit indices, 64 partitions
+	};
+
+	TexCompressionBC7::TexCompressionBC7()
+	{
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_BC7) * 4;
+		decoded_fmt_ = EF_ARGB8;
+	}
+
+	void TexCompressionBC7::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionBC7::DecodeBlock(void* output, void const * input)
+	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
+
+		size_t first = 0;
+		while ((first < 128) && !this->GetBit(input, first));
+		size_t mode = first - 1;
+		if (mode < 8)
+		{
+			uint8_t const partitions = mode_info_[mode].partitions;
+			BOOST_ASSERT(partitions < BC7_MAX_REGIONS);
+
+			uint8_t const num_end_pts = (partitions + 1) << 1;
+			uint8_t const index_prec_1 = mode_info_[mode].index_prec_1;
+			uint8_t const index_prec_2 = mode_info_[mode].index_prec_2;
+			size_t start_bit = mode + 1;
+			array<uint8_t, 6> p;
+			uint8_t shape = this->GetBits(input, start_bit, mode_info_[mode].partition_bits);
+			BOOST_ASSERT(shape < BC7_MAX_SHAPES);
+
+			uint8_t rotation = this->GetBits(input, start_bit, mode_info_[mode].rotation_bits);
+			BOOST_ASSERT(rotation < 4);
+
+			uint8_t index_mode = this->GetBits(input, start_bit, mode_info_[mode].index_mode_bits);
+			BOOST_ASSERT(index_mode < 2);
+
+			array<ARGBColor32, BC7_MAX_REGIONS << 1> c;
+			ARGBColor32 const & rgba_prec = mode_info_[mode].rgba_prec;
+			ARGBColor32 const & rgba_prec_with_p = mode_info_[mode].rgba_prec_with_p;
+
+			BOOST_ASSERT(num_end_pts <= (BC7_MAX_REGIONS << 1));
+
+			static int const comps[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+				ARGBColor32::BChannel, ARGBColor32::AChannel };
+
+			for (int i = 0; i < 4; ++ i)
+			{
+				int ch = comps[i];
+				for (uint32_t j = 0; j < num_end_pts; ++ j)
+				{
+					if (start_bit + rgba_prec[ch] > 128)
+					{
+						memset(argb, 0, 16 * sizeof(argb[0]));
+						return;
+					}
+
+					c[j][ch] = ((ch != ARGBColor32::AChannel) || rgba_prec.a())
+						? this->GetBits(input, start_bit, rgba_prec[ch]) : 255;
+				}
+			}
+
+			BOOST_ASSERT(mode_info_[mode].p_bits <= 6);
+			for (uint32_t i = 0; i < mode_info_[mode].p_bits; ++ i)
+			{
+				if (start_bit > 127)
+				{
+					memset(argb, 0, 16 * sizeof(argb[0]));
+					return;
+				}
+
+				p[i] = this->GetBit(input, start_bit);
+			}
+
+			if (mode_info_[mode].p_bits)
+			{
+				for (uint32_t i = 0; i < num_end_pts; ++ i)
+				{
+					size_t pi = i * mode_info_[mode].p_bits / num_end_pts;
+					for (uint8_t ch = 0; ch < BC7_NUM_CHANNELS; ++ ch)
+					{
+						if (rgba_prec[ch] != rgba_prec_with_p[ch])
+						{
+							c[i][ch] = (c[i][ch] << 1) | p[pi];
+						}
+					}
+				}
+			}
+
+			for (uint32_t i = 0; i < num_end_pts; ++ i)
+			{
+				c[i] = this->Unquantize(c[i], rgba_prec_with_p);
+			}
+
+			array<uint8_t, 16> w1;
+			array<uint8_t, 16> w2;
+
+			for (uint32_t i = 0; i < 16; ++ i)
+			{
+				size_t num_bits = this->IsFixUpOffset(mode_info_[mode].partitions, shape, i)
+					? index_prec_1 - 1 : index_prec_1;
+				if (start_bit + num_bits > 128)
+				{
+					memset(argb, 0, 16 * sizeof(argb[0]));
+					return;
+				}
+				w1[i] = this->GetBits(input, start_bit, num_bits);
+			}
+
+			if (index_prec_2)
+			{
+				for (uint32_t i = 0; i < 16; ++ i)
+				{
+					size_t num_bits = i ? index_prec_2 : index_prec_2 - 1;
+					if (start_bit + num_bits > 128)
+					{
+						memset(argb, 0, 16 * sizeof(argb[0]));
+						return;
+					}
+					w2[i] = this->GetBits(input, start_bit, num_bits);
+				}
+			}
+
+			for (uint32_t i = 0; i < 16; ++ i)
+			{
+				uint8_t region = bc67_partition_table[partitions][shape][i];
+				ARGBColor32 out_pixel;
+				if (0 == index_prec_2)
+				{
+					out_pixel = this->Interpolate(c[region << 1], c[(region << 1) + 1],
+						w1[i], w1[i], index_prec_1, index_prec_1);
+				}
+				else if (0 == index_mode)
+				{
+					out_pixel = this->Interpolate(c[region << 1], c[(region << 1) + 1],
+						w1[i], w2[i], index_prec_1, index_prec_2);
+				}
+				else
+				{
+					out_pixel = this->Interpolate(c[region << 1], c[(region << 1) + 1],
+						w2[i], w1[i], index_prec_2, index_prec_1);
+				}
+
+				switch (rotation)
+				{
+				case 1:
+					std::swap(out_pixel.r(), out_pixel.a());
+					break;
+				case 2:
+					std::swap(out_pixel.g(), out_pixel.a());
+					break;
+				case 3:
+					std::swap(out_pixel.b(), out_pixel.a());
+					break;
+				}
+
+				argb[i] = out_pixel;
+			}
+		}
+		else
+		{
+			memset(argb, 0, 16 * sizeof(argb[0]));
+		}
+	}
+
+	uint8_t TexCompressionBC7::GetBit(void const * input, size_t& start_bit) const
+	{
+		BOOST_ASSERT(start_bit < 128);
+
+		uint8_t const * bits = static_cast<uint8_t const *>(input);
+
+		size_t index = start_bit >> 3;
+		uint8_t ret = (bits[index] >> (start_bit - (index << 3))) & 0x01;
+		++ start_bit;
+
+		return ret;
+	}
+
+	uint8_t TexCompressionBC7::GetBits(void const * input, size_t& start_bit, size_t num_bits) const
+	{
+		if (0 == num_bits)
+		{
+			return 0;
+		}
+
+		uint8_t const * bits = static_cast<uint8_t const *>(input);
+
+		BOOST_ASSERT((start_bit + num_bits <= 128) && (num_bits <= 8));
+
+		uint8_t ret;
+		size_t index = start_bit / 8;
+		size_t base = start_bit - index * 8;
+		if (base + num_bits > 8)
+		{
+			size_t first_index_bits = 8 - base;
+			size_t next_index_bits = num_bits - first_index_bits;
+			ret = (bits[index] >> base) | ((bits[index + 1] & ((1 << next_index_bits) - 1)) << first_index_bits);
+		}
+		else
+		{
+			ret = (bits[index] >> base) & ((1 << num_bits) - 1);
+		}
+		BOOST_ASSERT(ret < (1 << num_bits));
+		start_bit += num_bits;
+
+		return ret;
+	}
+
+	uint8_t TexCompressionBC7::Unquantize(uint8_t comp, size_t prec) const
+	{
+		BOOST_ASSERT((0 < prec) && (prec <= 8));
+		comp = comp << (8 - prec);
+		return comp | (comp >> prec);
+	}
+
+	ARGBColor32 TexCompressionBC7::Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const
+	{
+		ARGBColor32 q;
+		q.r() = this->Unquantize(c.r(), rgba_prec.r());
+		q.g() = this->Unquantize(c.g(), rgba_prec.g());
+		q.b() = this->Unquantize(c.b(), rgba_prec.b());
+		q.a() = rgba_prec.a() ? this->Unquantize(c.a(), rgba_prec.a()) : 255;
+		return q;
+	}
+
+	bool TexCompressionBC7::IsFixUpOffset(size_t partitions, size_t shape, size_t offset) const
+	{
+		BOOST_ASSERT((partitions < 3) && (shape < 64) && (offset < 16));
+		for (size_t p = 0; p <= partitions; ++ p)
+		{
+			if (offset == fix_up_table[partitions][shape][p])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	ARGBColor32 TexCompressionBC7::Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1, size_t wc, size_t wa,
+			size_t wc_prec, size_t wa_prec) const
+	{
+		BOOST_ASSERT((wc_prec >= 2) && (wc_prec <= 4));
+		BOOST_ASSERT((wa_prec >= 2) && (wa_prec <= 4));
+		BOOST_ASSERT(wc < (static_cast<size_t>(1) << wc_prec));
+		BOOST_ASSERT(wa < (static_cast<size_t>(1) << wa_prec));
+
+		static uint32_t const prec_weights[][16] =
+		{
+			{ 0, 21, 43, 64 },
+			{ 0, 9, 18, 27, 37, 46, 55, 64 },
+			{ 0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64 }
+		};
+
+		ARGBColor32 out;
+
+		uint32_t const * weights = prec_weights[wc_prec - 2];
+		out.r() = static_cast<uint8_t>((c0.r() * (BC7_WEIGHT_MAX - weights[wc])
+			+ c1.r() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
+		out.g() = static_cast<uint8_t>((c0.g() * (BC7_WEIGHT_MAX - weights[wc])
+			+ c1.g() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
+		out.b() = static_cast<uint8_t>((c0.b() * (BC7_WEIGHT_MAX - weights[wc])
+			+ c1.b() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
+
+		weights = prec_weights[wa_prec - 2];
+		out.a() = static_cast<uint8_t>((c0.a() * (BC7_WEIGHT_MAX - weights[wa])
+			+ c1.a() * weights[wa] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
+
+		return out;
 	}
 
 

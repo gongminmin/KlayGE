@@ -147,6 +147,48 @@ namespace KlayGE
 		TexCompressionBC4Ptr bc4_codec_;
 	};
 
+	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
+	{
+	public:
+		TexCompressionBC7();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		uint8_t GetBit(void const * input, size_t& start_bit) const;
+		uint8_t GetBits(void const * input, size_t& start_bit, size_t num_bits) const;
+		uint8_t Unquantize(uint8_t comp, size_t prec) const;
+		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
+		bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset) const;
+		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
+			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
+
+	private:
+		struct ModeInfo
+		{
+			uint8_t partitions;
+			uint8_t partition_bits;
+			uint8_t p_bits;
+			uint8_t rotation_bits;
+			uint8_t index_mode_bits;
+			uint8_t index_prec_1;
+			uint8_t index_prec_2;
+			ARGBColor32 rgba_prec;
+			ARGBColor32 rgba_prec_with_p;
+		};
+
+		static ModeInfo const mode_info_[];
+
+		static uint32_t const BC7_MAX_REGIONS = 3;
+		static uint32_t const BC7_NUM_CHANNELS = 4;
+		static uint32_t const BC7_MAX_SHAPES = 64;
+
+		static uint32_t const BC7_WEIGHT_MAX = 64;
+		static uint32_t const BC7_WEIGHT_SHIFT = 6;
+		static uint32_t const BC7_WEIGHT_ROUND = 32;
+	};
+
 	KLAYGE_CORE_API void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4);
 }
 

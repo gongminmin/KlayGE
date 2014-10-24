@@ -140,6 +140,12 @@ namespace KlayGE
 	typedef shared_ptr<TexCompressionBC4> TexCompressionBC4Ptr;
 	class TexCompressionBC5;
 	typedef shared_ptr<TexCompressionBC5> TexCompressionBC5Ptr;
+	class TexCompressionBC6U;
+	typedef shared_ptr<TexCompressionBC6U> TexCompressionBC6UPtr;
+	class TexCompressionBC6S;
+	typedef shared_ptr<TexCompressionBC6S> TexCompressionBC6SPtr;
+	class TexCompressionBC7;
+	typedef shared_ptr<TexCompressionBC7> TexCompressionBC7Ptr;
 	class TexCompressionETC1;
 	typedef shared_ptr<TexCompressionETC1> TexCompressionETC1Ptr;
 	class TexCompressionETC2RGB8;
