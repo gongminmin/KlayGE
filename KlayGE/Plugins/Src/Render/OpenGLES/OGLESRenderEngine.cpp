@@ -1636,6 +1636,7 @@ namespace KlayGE
 		{
 			caps_.draw_indirect_support = false;
 		}
+		caps_.no_overwrite_support = false;
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;

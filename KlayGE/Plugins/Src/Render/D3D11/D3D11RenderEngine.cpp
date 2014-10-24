@@ -1109,6 +1109,7 @@ namespace KlayGE
 			break;
 		}
 		caps_.draw_indirect_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
+		caps_.no_overwrite_support = true;
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
