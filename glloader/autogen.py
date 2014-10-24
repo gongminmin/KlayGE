@@ -384,6 +384,12 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 			source_str.write("\n")
 		for function in extension.functions:
 			source_str.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
+		for addi in extension.additionals:
+			for addi_name in addi:
+				for addi_ext in extensions:
+					if (addi_ext.name == addi_name):
+						for function in addi_ext.functions:
+							source_str.write("\t\tLOAD_FUNC1(%s);\n" % function.name)
 		source_str.write("\t}\n")
 
 		backup = False

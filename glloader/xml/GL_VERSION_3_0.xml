@@ -785,4 +785,20 @@
 			</params>
 		</function>
 	</functions>
+
+	<additionals>
+		<ext name="GL_ARB_framebuffer_object"/>
+		<ext name="GL_ARB_depth_buffer_float"/>
+		<ext name="GL_ARB_texture_float"/>
+		<ext name="GL_EXT_packed_float"/>
+		<ext name="GL_EXT_texture_shared_exponent"/>
+		<ext name="GL_EXT_texture_array"/>
+		<ext name="GL_EXT_packed_depth_stencil"/>
+		<ext name="GL_ARB_framebuffer_sRGB"/>
+		<ext name="GL_ARB_half_float_vertex"/>
+		<ext name="GL_ARB_map_buffer_range"/>
+		<ext name="GL_ARB_texture_compression_rgtc"/>
+		<ext name="GL_ARB_texture_rg"/>
+		<ext name="GL_ARB_vertex_array_object"/>
+	</additionals>
 </gl_extension>
