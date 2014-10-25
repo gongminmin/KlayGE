@@ -147,6 +147,79 @@ namespace KlayGE
 		TexCompressionBC4Ptr bc4_codec_;
 	};
 
+	class KLAYGE_CORE_API TexCompressionBC6U : public TexCompression
+	{
+	public:
+		TexCompressionBC6U();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+		void DecodeBC6Internal(void* output, void const * input, bool signed_fmt);
+
+	private:
+		int Unquantize(int comp, uint8_t bits_per_comp, bool signed_fmt);
+		int FinishUnquantize(int comp, bool signed_fmt);
+
+	private:
+		static uint32_t const BC6_MAX_REGIONS = 2;
+		static uint32_t const BC6_MAX_INDICES = 16;
+
+		static int32_t const BC6_WEIGHT_MAX = 64;
+		static uint32_t const BC6_WEIGHT_SHIFT = 6;
+		static int32_t const BC6_WEIGHT_ROUND = 32;
+
+		enum ModeField
+		{
+			NA, // N/A
+			M,  // Mode
+			D,  // Shape
+			RW,
+			RX,
+			RY,
+			RZ,
+			GW,
+			GX,
+			GY,
+			GZ,
+			BW,
+			BX,
+			BY,
+			BZ,
+		};
+
+		struct ModeDescriptor
+		{
+			ModeField field;
+			uint8_t bit;
+		};
+
+		struct ModeInfo
+		{
+			uint8_t mode;
+			uint8_t partitions;
+			bool transformed;
+			uint8_t index_prec;
+			ARGBColor32 rgba_prec[BC6_MAX_REGIONS][2];
+		};
+
+		static ModeDescriptor const mode_desc_[][82];
+		static ModeInfo const mode_info_[];
+		static int const mode_to_info_[];
+	};
+
+	class KLAYGE_CORE_API TexCompressionBC6S : public TexCompression
+	{
+	public:
+		TexCompressionBC6S();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		TexCompressionBC6UPtr bc6u_codec_;
+	};
+
 	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
 	{
 	public:
@@ -156,11 +229,8 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
 
 	private:
-		uint8_t GetBit(void const * input, size_t& start_bit) const;
-		uint8_t GetBits(void const * input, size_t& start_bit, size_t num_bits) const;
 		uint8_t Unquantize(uint8_t comp, size_t prec) const;
 		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
-		bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset) const;
 		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
 			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
 

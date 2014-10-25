@@ -34,6 +34,7 @@
 #include <KFL/Color.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Thread.hpp>
+#include <KFL/Half.hpp>
 
 #include <vector>
 #include <cstring>
@@ -43,7 +44,16 @@
 
 namespace
 {
-	KlayGE::mutex singleton_mutex;
+	using namespace KlayGE;
+
+	mutex singleton_mutex;
+
+	int const bc67_prec_weights[][16] =
+	{
+		{ 0, 21, 43, 64 },
+		{ 0, 9, 18, 27, 37, 46, 55, 64 },
+		{ 0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64 }
+	};
 
 	// Partition, Shape, Pixel (index into 4x4 block)
 	uint8_t const bc67_partition_table[3][64][16] =
@@ -314,6 +324,132 @@ namespace
 			{ 0, 15, 3 }, { 0, 12, 15 }, { 0, 3, 15 }, { 0, 3, 8 }
 		}
 	};
+
+	uint8_t ReadBit(void const * input, size_t& start_bit)
+	{
+		BOOST_ASSERT(start_bit < 128);
+
+		uint8_t const * bits = static_cast<uint8_t const *>(input);
+
+		size_t index = start_bit >> 3;
+		uint8_t ret = (bits[index] >> (start_bit - (index << 3))) & 0x01;
+		++ start_bit;
+
+		return ret;
+	}
+
+	uint8_t ReadBits(void const * input, size_t& start_bit, size_t num_bits)
+	{
+		if (0 == num_bits)
+		{
+			return 0;
+		}
+
+		uint8_t const * bits = static_cast<uint8_t const *>(input);
+
+		BOOST_ASSERT((start_bit + num_bits <= 128) && (num_bits <= 8));
+
+		uint8_t ret;
+		size_t index = start_bit / 8;
+		size_t base = start_bit - index * 8;
+		if (base + num_bits > 8)
+		{
+			size_t first_index_bits = 8 - base;
+			size_t next_index_bits = num_bits - first_index_bits;
+			ret = (bits[index] >> base) | ((bits[index + 1] & ((1 << next_index_bits) - 1)) << first_index_bits);
+		}
+		else
+		{
+			ret = (bits[index] >> base) & ((1 << num_bits) - 1);
+		}
+		BOOST_ASSERT(ret < (1 << num_bits));
+		start_bit += num_bits;
+
+		return ret;
+	}
+
+	bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset)
+	{
+		BOOST_ASSERT((partitions < 3) && (shape < 64) && (offset < 16));
+		for (size_t p = 0; p <= partitions; ++ p)
+		{
+			if (offset == fix_up_table[partitions][shape][p])
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void SignExtend(int3& clr, ARGBColor32 const & prec)
+	{
+		if (clr.x() & (1UL << (prec.r() - 1)))
+		{
+			clr.x() |= (0xFFFFFFFF << prec.r());
+		}
+		if (clr.y() & (1UL << (prec.g() - 1)))
+		{
+			clr.y() |= (0xFFFFFFFF << prec.g());
+		}
+		if (clr.z() & (1UL << (prec.b() - 1)))
+		{
+			clr.z() |= (0xFFFFFFFF << prec.b());
+		}
+	}
+
+	half INT2F16(int input, bool signed_fmt)
+	{
+		half h;
+		uint16_t out;
+		if (signed_fmt)
+		{
+			int s = 0;
+			if (input < 0)
+			{
+				s = 0x8000;
+				input = -input;
+			}
+			out = static_cast<uint16_t>(s | input);
+		}
+		else
+		{
+			BOOST_ASSERT((input >= 0) && (input <= 0x7BFF));
+			out = static_cast<uint16_t>(input);
+		}
+
+		*(reinterpret_cast<uint16_t*>(&h)) = out;
+		return h;
+	}
+
+	void ToF16(Vector_T<half, 4>& f16, int3 const & clr, bool signed_fmt)
+	{
+		f16.x() = INT2F16(clr.x(), signed_fmt);
+		f16.y() = INT2F16(clr.y(), signed_fmt);
+		f16.z() = INT2F16(clr.z(), signed_fmt);
+	}
+
+	void TransformInverse(std::pair<int3, int3>* end_pts, ARGBColor32 const & prec, bool signed_fmt)
+	{
+		int3 wrap_mask((1 << prec.r()) - 1, (1 << prec.g()) - 1, (1 << prec.b()) - 1);
+		end_pts[0].second += end_pts[0].first;
+		end_pts[0].second.x() &= wrap_mask.x();
+		end_pts[0].second.y() &= wrap_mask.y();
+		end_pts[0].second.z() &= wrap_mask.z();
+		end_pts[1].first += end_pts[0].first;
+		end_pts[1].first.x() &= wrap_mask.x();
+		end_pts[1].first.y() &= wrap_mask.y();
+		end_pts[1].first.z() &= wrap_mask.z();
+		end_pts[1].second += end_pts[0].first;
+		end_pts[1].second.x() &= wrap_mask.x();
+		end_pts[1].second.y() &= wrap_mask.y();
+		end_pts[1].second.z() &= wrap_mask.z();
+		if (signed_fmt)
+		{
+			SignExtend(end_pts[0].second, prec);
+			SignExtend(end_pts[1].first, prec);
+			SignExtend(end_pts[1].second, prec);
+		}
+	}
 }
 
 namespace KlayGE
@@ -1136,6 +1272,537 @@ namespace KlayGE
 	}
 
 
+	// BC6H Compression
+	TexCompressionBC6U::ModeDescriptor const TexCompressionBC6U::mode_desc_[14][82] =
+	{
+		{   // Mode 1 (0x00) - 10 5 5 5
+			{ M, 0 }, { M, 1 }, { GY, 4 }, { BY, 4 }, { BZ, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { GZ, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 2 (0x01) - 7 6 6 6
+			{ M, 0 }, { M, 1 }, { GY, 5 }, { GZ, 4 }, { GZ, 5 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { BZ, 0 }, { BZ, 1 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { BY, 5 }, { BZ, 2 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BZ, 3 }, { BZ, 5 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { RY, 5 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { RZ, 5 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 3 (0x02) - 11 5 4 4
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RW, 10 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GW, 10 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BW, 10 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 4 (0x06) - 11 4 5 4
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RW, 10 }, { GZ, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GW, 10 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BW, 10 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { BZ, 0 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { GY, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 5 (0x0A) - 11 4 4 5
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RW, 10 }, { BY, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GW, 10 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BW, 10 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { BZ, 1 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { BZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 6 (0x0E) - 9 5 5 5
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { GZ, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 7 (0x12) - 8 6 5 5
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { GZ, 4 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { BZ, 2 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BZ, 3 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { RY, 5 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { RZ, 5 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 8 (0x16) - 8 5 6 5
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { BZ, 0 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GY, 5 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { GZ, 5 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { GZ, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BZ, 1 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 9 (0x1A) - 8 5 5 6
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { BZ, 1 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { BY, 5 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BZ, 5 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { GZ, 4 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { BZ, 0 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { BZ, 2 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { BZ, 3 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 10 (0x1E) - 6 6 6 6
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { GZ, 4 }, { BZ, 0 }, { BZ, 1 }, { BY, 4 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GY, 5 }, { BY, 5 }, { BZ, 2 }, { GY, 4 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { GZ, 5 }, { BZ, 3 }, { BZ, 5 }, { BZ, 4 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { GY, 0 }, { GY, 1 }, { GY, 2 }, { GY, 3 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GZ, 0 }, { GZ, 1 }, { GZ, 2 },
+			{ GZ, 3 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BY, 0 }, { BY, 1 },
+			{ BY, 2 }, { BY, 3 }, { RY, 0 }, { RY, 1 }, { RY, 2 }, { RY, 3 }, { RY, 4 }, { RY, 5 }, { RZ, 0 },
+			{ RZ, 1 }, { RZ, 2 }, { RZ, 3 }, { RZ, 4 }, { RZ, 5 }, { D, 0 }, { D, 1 }, { D, 2 }, { D, 3 },
+			{ D, 4 }
+		},
+
+		{   // Mode 11 (0x03) - 10 10
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { RX, 6 }, { RX, 7 }, { RX, 8 }, { RX, 9 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GX, 6 }, { GX, 7 }, { GX, 8 },
+			{ GX, 9 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BX, 6 }, { BX, 7 },
+			{ BX, 8 }, { BX, 9 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }
+		},
+
+		{   // Mode 12 (0x07) - 11 9
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { RX, 6 }, { RX, 7 }, { RX, 8 }, { RW, 10 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GX, 6 }, { GX, 7 }, { GX, 8 },
+			{ GW, 10 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BX, 6 }, { BX, 7 },
+			{ BX, 8 }, { BW, 10 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }
+		},
+
+		{   // Mode 13 (0x0B) - 12 8
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RX, 4 }, { RX, 5 }, { RX, 6 }, { RX, 7 }, { RW, 11 }, { RW, 10 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GX, 4 }, { GX, 5 }, { GX, 6 }, { GX, 7 }, { GW, 11 },
+			{ GW, 10 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BX, 4 }, { BX, 5 }, { BX, 6 }, { BX, 7 },
+			{ BW, 11 }, { BW, 10 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }
+		},
+
+		{   // Mode 14 (0x0F) - 16 4
+			{ M, 0 }, { M, 1 }, { M, 2 }, { M, 3 }, { M, 4 }, { RW, 0 }, { RW, 1 }, { RW, 2 }, { RW, 3 },
+			{ RW, 4 }, { RW, 5 }, { RW, 6 }, { RW, 7 }, { RW, 8 }, { RW, 9 }, { GW, 0 }, { GW, 1 }, { GW, 2 },
+			{ GW, 3 }, { GW, 4 }, { GW, 5 }, { GW, 6 }, { GW, 7 }, { GW, 8 }, { GW, 9 }, { BW, 0 }, { BW, 1 },
+			{ BW, 2 }, { BW, 3 }, { BW, 4 }, { BW, 5 }, { BW, 6 }, { BW, 7 }, { BW, 8 }, { BW, 9 }, { RX, 0 },
+			{ RX, 1 }, { RX, 2 }, { RX, 3 }, { RW, 15 }, { RW, 14 }, { RW, 13 }, { RW, 12 }, { RW, 11 }, { RW, 10 },
+			{ GX, 0 }, { GX, 1 }, { GX, 2 }, { GX, 3 }, { GW, 15 }, { GW, 14 }, { GW, 13 }, { GW, 12 }, { GW, 11 },
+			{ GW, 10 }, { BX, 0 }, { BX, 1 }, { BX, 2 }, { BX, 3 }, { BW, 15 }, { BW, 14 }, { BW, 13 }, { BW, 12 },
+			{ BW, 11 }, { BW, 10 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 }, { NA, 0 },
+			{ NA, 0 }
+		}
+	};
+
+	// Mode, Partitions, Transformed, IndexPrec, RGBAPrec
+	TexCompressionBC6U::ModeInfo const TexCompressionBC6U::mode_info_[] =
+	{
+		{ 0x00, 1, true, 3, ARGBColor32(0, 10, 10, 10), ARGBColor32(0, 5, 5, 5),
+			ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5) },
+		{ 0x01, 1, true, 3, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 6, 6, 6),
+			ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 6, 6, 6) },
+		{ 0x02, 1, true, 3, ARGBColor32(0, 11, 11, 11), ARGBColor32(0, 5, 4, 4),
+			ARGBColor32(0, 5, 4, 4), ARGBColor32(0, 5, 4, 4) },
+		{ 0x06, 1, true, 3, ARGBColor32(0, 11, 11, 11), ARGBColor32(0, 4, 5, 4),
+			ARGBColor32(0, 4, 5, 4), ARGBColor32(0, 4, 5, 4) },
+		{ 0x0A, 1, true, 3, ARGBColor32(0, 11, 11, 11), ARGBColor32(0, 4, 4, 5),
+			ARGBColor32(0, 4, 4, 5), ARGBColor32(0, 4, 4, 5) },
+		{ 0x0E, 1, true, 3, ARGBColor32(0, 9, 9, 9), ARGBColor32(0, 5, 5, 5),
+			ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5) },
+		{ 0x12, 1, true, 3, ARGBColor32(0, 8, 8, 8), ARGBColor32(0, 6, 5, 5),
+			ARGBColor32(0, 6, 5, 5), ARGBColor32(0, 6, 5, 5) },
+		{ 0x16, 1, true, 3, ARGBColor32(0, 8, 8, 8), ARGBColor32(0, 5, 6, 5),
+			ARGBColor32(0, 5, 6, 5), ARGBColor32(0, 5, 6, 5) },
+		{ 0x1A, 1, true, 3, ARGBColor32(0, 8, 8, 8), ARGBColor32(0, 5, 5, 6),
+			ARGBColor32(0, 5, 5, 6), ARGBColor32(0, 5, 5, 6) },
+		{ 0x1E, 1, false, 3, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 6, 6, 6),
+			ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 6, 6, 6) },
+		{ 0x03, 0, false, 4, ARGBColor32(0, 10, 10, 10), ARGBColor32(0, 10, 10, 10),
+			ARGBColor32(0, 0, 0, 0), ARGBColor32(0, 0, 0, 0) },
+		{ 0x07, 0, true, 4, ARGBColor32(0, 11, 11, 11), ARGBColor32(0, 9, 9, 9),
+			ARGBColor32(0, 0, 0, 0), ARGBColor32(0, 0, 0, 0) },
+		{ 0x0B, 0, true, 4, ARGBColor32(0, 12, 12, 12), ARGBColor32(0, 8, 8, 8),
+			ARGBColor32(0, 0, 0, 0), ARGBColor32(0, 0, 0, 0) },
+		{ 0x0F, 0, true, 4, ARGBColor32(0, 16, 16, 16), ARGBColor32(0, 4, 4, 4),
+			ARGBColor32(0, 0, 0, 0), ARGBColor32(0, 0, 0, 0) }
+	};
+
+	int const TexCompressionBC6U::mode_to_info_[] =
+	{
+		0, // Mode 1   - 0x00
+		1, // Mode 2   - 0x01
+		2, // Mode 3   - 0x02
+		10, // Mode 11  - 0x03
+		-1, // Invalid  - 0x04
+		-1, // Invalid  - 0x05
+		3, // Mode 4   - 0x06
+		11, // Mode 12  - 0x07
+		-1, // Invalid  - 0x08
+		-1, // Invalid  - 0x09
+		4, // Mode 5   - 0x0a
+		12, // Mode 13  - 0x0b
+		-1, // Invalid  - 0x0c
+		-1, // Invalid  - 0x0d
+		5, // Mode 6   - 0x0e
+		13, // Mode 14  - 0x0f
+		-1, // Invalid  - 0x10
+		-1, // Invalid  - 0x11
+		6, // Mode 7   - 0x12
+		-1, // Reserved - 0x13
+		-1, // Invalid  - 0x14
+		-1, // Invalid  - 0x15
+		7, // Mode 8   - 0x16
+		-1, // Reserved - 0x17
+		-1, // Invalid  - 0x18
+		-1, // Invalid  - 0x19
+		8, // Mode 9   - 0x1a
+		-1, // Reserved - 0x1b
+		-1, // Invalid  - 0x1c
+		-1, // Invalid  - 0x1d
+		9, // Mode 10  - 0x1e
+		-1, // Resreved - 0x1f
+	};
+
+	TexCompressionBC6U::TexCompressionBC6U()
+	{
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_BC6) * 4;
+		decoded_fmt_ = EF_ABGR16F;
+	}
+
+	void TexCompressionBC6U::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionBC6U::DecodeBlock(void* output, void const * input)
+	{
+		this->DecodeBC6Internal(output, input, false);
+	}
+
+	void TexCompressionBC6U::DecodeBC6Internal(void* output, void const * input, bool signed_fmt)
+	{
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+
+		Vector_T<half, 4>* abgr = static_cast<Vector_T<half, 4>*>(output);
+
+		size_t start_bit = 0;
+		uint8_t mode = ReadBits(input, start_bit, 2);
+		if (mode > 1)
+		{
+			mode = (ReadBits(input, start_bit, 3) << 2) | mode;
+		}
+		BOOST_ASSERT(mode < 32);
+
+		if (mode_to_info_[mode] >= 0)
+		{
+			BOOST_ASSERT(mode_to_info_[mode] < sizeof(mode_info_) / sizeof(mode_info_[0]));
+			ModeDescriptor const * desc = mode_desc_[mode_to_info_[mode]];
+
+			BOOST_ASSERT(mode_to_info_[mode] < sizeof(mode_desc_) / sizeof(mode_desc_[0]));
+			ModeInfo const & info = mode_info_[mode_to_info_[mode]];
+
+			array<std::pair<int3, int3>, BC6_MAX_REGIONS> end_pts;
+			memset(&end_pts[0], 0, BC6_MAX_REGIONS * sizeof(end_pts[0]));
+			uint32_t shape = 0;
+
+			// Read header
+			size_t const header_bits = info.partitions > 0 ? 82 : 65;
+			while (start_bit < header_bits)
+			{
+				size_t curr_bit = start_bit;
+				if (ReadBit(input, start_bit))
+				{
+					size_t val = 1UL << desc[curr_bit].bit;
+					switch (desc[curr_bit].field)
+					{
+					case D:
+						shape |= val;
+						break;
+					case RW:
+						end_pts[0].first.x() |= val;
+						break;
+					case RX:
+						end_pts[0].second.x() |= val;
+						break;
+					case RY:
+						end_pts[1].first.x() |= val;
+						break;
+					case RZ:
+						end_pts[1].second.x() |= val;
+						break;
+					case GW:
+						end_pts[0].first.y() |= val;
+						break;
+					case GX:
+						end_pts[0].second.y() |= val;
+						break;
+					case GY:
+						end_pts[1].first.y() |= val;
+						break;
+					case GZ:
+						end_pts[1].second.y() |= val;
+						break;
+					case BW:
+						end_pts[0].first.z() |= val;
+						break;
+					case BX:
+						end_pts[0].second.z() |= val;
+						break;
+					case BY:
+						end_pts[1].first.z() |= val;
+						break;
+					case BZ:
+						end_pts[1].second.z() |= val;
+						break;
+
+					default:
+						memset(abgr, 0, 16 * sizeof(abgr[0]));
+						return;
+					}
+				}
+			}
+
+			BOOST_ASSERT(shape < 64);
+
+			// Sign extend necessary end points
+			if (signed_fmt)
+			{
+				SignExtend(end_pts[0].first, info.rgba_prec[0][0]);
+			}
+			if (signed_fmt || info.transformed)
+			{
+				BOOST_ASSERT(info.partitions < BC6_MAX_REGIONS);
+				for (size_t p = 0; p <= info.partitions; ++ p)
+				{
+					if (p > 0)
+					{
+						SignExtend(end_pts[p].first, info.rgba_prec[p][0]);
+					}
+					SignExtend(end_pts[p].second, info.rgba_prec[p][1]);
+				}
+			}
+
+			// Inverse transform the end points
+			if (info.transformed)
+			{
+				TransformInverse(&end_pts[0], info.rgba_prec[0][0], signed_fmt);
+			}
+
+			// Read indices
+			for (size_t i = 0; i < 16; ++ i)
+			{
+				size_t num_bits = IsFixUpOffset(info.partitions, shape, i) ? info.index_prec - 1 : info.index_prec;
+				if (start_bit + num_bits > 128)
+				{
+					memset(abgr, 0, 16 * sizeof(abgr[0]));
+					return;
+				}
+
+				uint8_t index = ReadBits(input, start_bit, num_bits);
+				if (index >= ((info.partitions > 0) ? 8 : 16))
+				{
+					memset(abgr, 0, 16 * sizeof(abgr[0]));
+					return;
+				}
+
+				size_t region = bc67_partition_table[info.partitions][shape][i];
+				BOOST_ASSERT(region < BC6_MAX_REGIONS);
+
+				// Unquantize endpoints and interpolate
+				int r1 = this->Unquantize(end_pts[region].first.x(), info.rgba_prec[0][0].r(), signed_fmt);
+				int g1 = this->Unquantize(end_pts[region].first.y(), info.rgba_prec[0][0].g(), signed_fmt);
+				int b1 = this->Unquantize(end_pts[region].first.z(), info.rgba_prec[0][0].b(), signed_fmt);
+				int r2 = this->Unquantize(end_pts[region].second.x(), info.rgba_prec[0][0].r(), signed_fmt);
+				int g2 = this->Unquantize(end_pts[region].second.y(), info.rgba_prec[0][0].g(), signed_fmt);
+				int b2 = this->Unquantize(end_pts[region].second.z(), info.rgba_prec[0][0].b(), signed_fmt);
+				int const * weights = bc67_prec_weights[1 + (0 == info.partitions)];
+				int3 fc;
+				fc.x() = this->FinishUnquantize((r1 * (BC6_WEIGHT_MAX - weights[index])
+					+ r2 * weights[index] + BC6_WEIGHT_ROUND) >> BC6_WEIGHT_SHIFT, signed_fmt);
+				fc.y() = this->FinishUnquantize((g1 * (BC6_WEIGHT_MAX - weights[index])
+					+ g2 * weights[index] + BC6_WEIGHT_ROUND) >> BC6_WEIGHT_SHIFT, signed_fmt);
+				fc.z() = this->FinishUnquantize((b1 * (BC6_WEIGHT_MAX - weights[index])
+					+ b2 * weights[index] + BC6_WEIGHT_ROUND) >> BC6_WEIGHT_SHIFT, signed_fmt);
+				ToF16(abgr[i], fc, signed_fmt);
+				abgr[i].w() = half(1.0f);
+			}
+		}
+		else
+		{
+			// Per the BC6H format spec, we must return opaque black
+			for (size_t i = 0; i < 16; ++ i)
+			{
+				abgr[i] = Vector_T<half, 4>(half(0.0f), half(0.0f), half(0.0f), half(1.0f));
+			}
+		}
+	}
+
+	int TexCompressionBC6U::Unquantize(int comp, uint8_t bits_per_comp, bool signed_fmt)
+	{
+		int unq = 0, s = 0;
+		if (signed_fmt)
+		{
+			if (bits_per_comp >= 16)
+			{
+				unq = comp;
+			}
+			else
+			{
+				if (comp < 0)
+				{
+					s = 1;
+					comp = -comp;
+				}
+
+				if (0 == comp)
+				{
+					unq = 0;
+				}
+				else if (comp >= ((1 << (bits_per_comp - 1)) - 1))
+				{
+					unq = 0x7FFF;
+				}
+				else
+				{
+					unq = ((comp << 15) + 0x4000) >> (bits_per_comp - 1);
+				}
+
+				if (s)
+				{
+					unq = -unq;
+				}
+			}
+		}
+		else
+		{
+			if (bits_per_comp >= 15)
+			{
+				unq = comp;
+			}
+			else if (0 == comp)
+			{
+				unq = 0;
+			}
+			else if (comp == ((1 << bits_per_comp) - 1))
+			{
+				unq = 0xFFFF;
+			}
+			else
+			{
+				unq = ((comp << 16) + 0x8000) >> bits_per_comp;
+			}
+		}
+
+		return unq;
+	}
+
+	int TexCompressionBC6U::FinishUnquantize(int comp, bool signed_fmt)
+	{
+		if (signed_fmt)
+		{
+			return (comp < 0) ? -(((-comp) * 31) >> 5) : (comp * 31) >> 5;  // scale the magnitude by 31/32
+		}
+		else
+		{
+			return (comp * 31) >> 6;                                        // scale the magnitude by 31/64
+		}
+	}
+
+
+	TexCompressionBC6S::TexCompressionBC6S()
+	{
+		block_width_ = block_height_ = 4;
+		block_depth_ = 1;
+		block_bytes_ = NumFormatBytes(EF_SIGNED_BC6) * 4;
+		decoded_fmt_ = EF_ABGR16F;
+	}
+
+	void TexCompressionBC6S::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
+	{
+		UNREF_PARAM(output);
+		UNREF_PARAM(input);
+		UNREF_PARAM(method);
+
+		// TODO
+	}
+
+	void TexCompressionBC6S::DecodeBlock(void* output, void const * input)
+	{
+		bc6u_codec_->DecodeBC6Internal(output, input, true);
+	}
+
+
 	// BC7 compression: partitions, partition_bits, p_bits, rotation_bits, index_mode_bits, index_prec, index_prec_2, rgba_prec, rgba_prec_with_p
 	TexCompressionBC7::ModeInfo const TexCompressionBC7::mode_info_[] =
 	{
@@ -1182,7 +1849,7 @@ namespace KlayGE
 		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 
 		size_t first = 0;
-		while ((first < 128) && !this->GetBit(input, first));
+		while ((first < 128) && !ReadBit(input, first));
 		size_t mode = first - 1;
 		if (mode < 8)
 		{
@@ -1194,13 +1861,13 @@ namespace KlayGE
 			uint8_t const index_prec_2 = mode_info_[mode].index_prec_2;
 			size_t start_bit = mode + 1;
 			array<uint8_t, 6> p;
-			uint8_t shape = this->GetBits(input, start_bit, mode_info_[mode].partition_bits);
+			uint8_t shape = ReadBits(input, start_bit, mode_info_[mode].partition_bits);
 			BOOST_ASSERT(shape < BC7_MAX_SHAPES);
 
-			uint8_t rotation = this->GetBits(input, start_bit, mode_info_[mode].rotation_bits);
+			uint8_t rotation = ReadBits(input, start_bit, mode_info_[mode].rotation_bits);
 			BOOST_ASSERT(rotation < 4);
 
-			uint8_t index_mode = this->GetBits(input, start_bit, mode_info_[mode].index_mode_bits);
+			uint8_t index_mode = ReadBits(input, start_bit, mode_info_[mode].index_mode_bits);
 			BOOST_ASSERT(index_mode < 2);
 
 			array<ARGBColor32, BC7_MAX_REGIONS << 1> c;
@@ -1224,7 +1891,7 @@ namespace KlayGE
 					}
 
 					c[j][ch] = ((ch != ARGBColor32::AChannel) || rgba_prec.a())
-						? this->GetBits(input, start_bit, rgba_prec[ch]) : 255;
+						? ReadBits(input, start_bit, rgba_prec[ch]) : 255;
 				}
 			}
 
@@ -1237,7 +1904,7 @@ namespace KlayGE
 					return;
 				}
 
-				p[i] = this->GetBit(input, start_bit);
+				p[i] = ReadBit(input, start_bit);
 			}
 
 			if (mode_info_[mode].p_bits)
@@ -1265,14 +1932,14 @@ namespace KlayGE
 
 			for (uint32_t i = 0; i < 16; ++ i)
 			{
-				size_t num_bits = this->IsFixUpOffset(mode_info_[mode].partitions, shape, i)
+				size_t num_bits = IsFixUpOffset(mode_info_[mode].partitions, shape, i)
 					? index_prec_1 - 1 : index_prec_1;
 				if (start_bit + num_bits > 128)
 				{
 					memset(argb, 0, 16 * sizeof(argb[0]));
 					return;
 				}
-				w1[i] = this->GetBits(input, start_bit, num_bits);
+				w1[i] = ReadBits(input, start_bit, num_bits);
 			}
 
 			if (index_prec_2)
@@ -1285,7 +1952,7 @@ namespace KlayGE
 						memset(argb, 0, 16 * sizeof(argb[0]));
 						return;
 					}
-					w2[i] = this->GetBits(input, start_bit, num_bits);
+					w2[i] = ReadBits(input, start_bit, num_bits);
 				}
 			}
 
@@ -1331,49 +1998,6 @@ namespace KlayGE
 		}
 	}
 
-	uint8_t TexCompressionBC7::GetBit(void const * input, size_t& start_bit) const
-	{
-		BOOST_ASSERT(start_bit < 128);
-
-		uint8_t const * bits = static_cast<uint8_t const *>(input);
-
-		size_t index = start_bit >> 3;
-		uint8_t ret = (bits[index] >> (start_bit - (index << 3))) & 0x01;
-		++ start_bit;
-
-		return ret;
-	}
-
-	uint8_t TexCompressionBC7::GetBits(void const * input, size_t& start_bit, size_t num_bits) const
-	{
-		if (0 == num_bits)
-		{
-			return 0;
-		}
-
-		uint8_t const * bits = static_cast<uint8_t const *>(input);
-
-		BOOST_ASSERT((start_bit + num_bits <= 128) && (num_bits <= 8));
-
-		uint8_t ret;
-		size_t index = start_bit / 8;
-		size_t base = start_bit - index * 8;
-		if (base + num_bits > 8)
-		{
-			size_t first_index_bits = 8 - base;
-			size_t next_index_bits = num_bits - first_index_bits;
-			ret = (bits[index] >> base) | ((bits[index + 1] & ((1 << next_index_bits) - 1)) << first_index_bits);
-		}
-		else
-		{
-			ret = (bits[index] >> base) & ((1 << num_bits) - 1);
-		}
-		BOOST_ASSERT(ret < (1 << num_bits));
-		start_bit += num_bits;
-
-		return ret;
-	}
-
 	uint8_t TexCompressionBC7::Unquantize(uint8_t comp, size_t prec) const
 	{
 		BOOST_ASSERT((0 < prec) && (prec <= 8));
@@ -1391,19 +2015,6 @@ namespace KlayGE
 		return q;
 	}
 
-	bool TexCompressionBC7::IsFixUpOffset(size_t partitions, size_t shape, size_t offset) const
-	{
-		BOOST_ASSERT((partitions < 3) && (shape < 64) && (offset < 16));
-		for (size_t p = 0; p <= partitions; ++ p)
-		{
-			if (offset == fix_up_table[partitions][shape][p])
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
 	ARGBColor32 TexCompressionBC7::Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1, size_t wc, size_t wa,
 			size_t wc_prec, size_t wa_prec) const
 	{
@@ -1412,16 +2023,9 @@ namespace KlayGE
 		BOOST_ASSERT(wc < (static_cast<size_t>(1) << wc_prec));
 		BOOST_ASSERT(wa < (static_cast<size_t>(1) << wa_prec));
 
-		static uint32_t const prec_weights[][16] =
-		{
-			{ 0, 21, 43, 64 },
-			{ 0, 9, 18, 27, 37, 46, 55, 64 },
-			{ 0, 4, 9, 13, 17, 21, 26, 30, 34, 38, 43, 47, 51, 55, 60, 64 }
-		};
-
 		ARGBColor32 out;
 
-		uint32_t const * weights = prec_weights[wc_prec - 2];
+		int const * weights = bc67_prec_weights[wc_prec - 2];
 		out.r() = static_cast<uint8_t>((c0.r() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.r() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 		out.g() = static_cast<uint8_t>((c0.g() * (BC7_WEIGHT_MAX - weights[wc])
@@ -1429,7 +2033,7 @@ namespace KlayGE
 		out.b() = static_cast<uint8_t>((c0.b() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.b() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 
-		weights = prec_weights[wa_prec - 2];
+		weights = bc67_prec_weights[wa_prec - 2];
 		out.a() = static_cast<uint8_t>((c0.a() * (BC7_WEIGHT_MAX - weights[wa])
 			+ c1.a() * weights[wa] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 
