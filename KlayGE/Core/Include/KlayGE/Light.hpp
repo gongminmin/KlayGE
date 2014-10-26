@@ -29,6 +29,7 @@ namespace KlayGE
 			LT_Directional,
 			LT_Point,
 			LT_Spot,
+			LT_SphereArea,
 
 			LT_NumLightTypes
 		};
@@ -230,6 +231,19 @@ namespace KlayGE
 
 	protected:
 		CameraPtr sm_camera_;
+	};
+
+	class KLAYGE_CORE_API SphereAreaLightSource : public PointLightSource
+	{
+	public:
+		SphereAreaLightSource();
+		virtual ~SphereAreaLightSource();
+
+		virtual float Radius() const;
+		virtual void Radius(float radius);
+
+	protected:
+		float radius_;
 	};
 }
 

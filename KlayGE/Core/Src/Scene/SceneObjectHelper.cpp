@@ -189,6 +189,7 @@ namespace KlayGE
 			break;
 
 		case LightSource::LT_Point:
+		case LightSource::LT_SphereArea:
 			mesh_name = "point_light_proxy.meshml";
 			break;
 

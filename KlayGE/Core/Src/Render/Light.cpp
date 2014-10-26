@@ -603,4 +603,24 @@ namespace KlayGE
 		float3 dimensions = aabb.Max() - aabb.Min();
 		sm_camera_->ProjOrthoParams(dimensions.x(), dimensions.y(), 0.0f, dimensions.z());
 	}
+
+
+	SphereAreaLightSource::SphereAreaLightSource()
+	{
+		type_ = LT_SphereArea;
+	}
+
+	SphereAreaLightSource::~SphereAreaLightSource()
+	{
+	}
+
+	float SphereAreaLightSource::Radius() const
+	{
+		return radius_;
+	}
+
+	void SphereAreaLightSource::Radius(float radius)
+	{
+		radius_ = radius;
+	}
 }
