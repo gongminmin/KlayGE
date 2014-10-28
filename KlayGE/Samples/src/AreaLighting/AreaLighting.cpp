@@ -113,9 +113,9 @@ void AreaLightingApp::OnCreate()
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(0);
-	point_light_->Color(float3(0.8f, 0.96f, 1.0f));
+	point_light_->Color(float3(0.8f, 0.96f, 1.0f) * 40.0f);
 	point_light_->Position(float3(0, 0, 0));
-	point_light_->Falloff(float3(1, 0.5f, 0));
+	point_light_->Falloff(float3(1, 0, 1));
 	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
 	point_light_->AddToSceneManager();
 	point_light_->Enabled(false);
@@ -127,9 +127,9 @@ void AreaLightingApp::OnCreate()
 
 	sphere_area_light_ = MakeSharedPtr<SphereAreaLightSource>();
 	sphere_area_light_->Attrib(0);
-	sphere_area_light_->Color(float3(0.8f, 0.96f, 1.0f));
-	sphere_area_light_->Position(float3(0, 0, 0));
-	sphere_area_light_->Falloff(float3(1, 0.5f, 0));
+	sphere_area_light_->Color(point_light_->Color());
+	sphere_area_light_->Position(point_light_->Position());
+	sphere_area_light_->Falloff(point_light_->Falloff());
 	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
 	sphere_area_light_->AddToSceneManager();
 	sphere_area_light_->Enabled(false);

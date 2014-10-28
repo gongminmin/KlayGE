@@ -372,7 +372,32 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 	
 	return lighting;
 }
-				
+
+float4 CalcLIDRSphereAreaLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+{
+	float4 lighting = 0;
+	float3 dir = lights_pos_es[index].xyz - pos_es;
+	float dist = length(dir);
+	if (dist < lights_falloff_range[index].w)
+	{
+		dir /= dist;
+		float n_dot_l = dot(normal, dir);
+		if (n_dot_l > 0)
+		{
+			float3 shadow = 1;
+#if WITH_SHADOW
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
+#endif
+
+			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
+		}
+	}
+	return lighting;
+}
+
 float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 #if KLAYGE_DERIVATIVES
@@ -566,6 +591,103 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 
 	return shading;
 }
+
+float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+{
+#if KLAYGE_DERIVATIVES
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
+
+	int num_lights = int(lights_attrib[0].w);
+	
+	float4 shading = 0;
+	float2 tc_to_tile_scale = float2(lights_attrib[1].w, lights_attrib[2].w);
+	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
+	if (any(light_index))
+	{
+		float4 lighting = 0;
+		float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+		view_dir = normalize(view_dir);
+		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+		float3 normal = GetNormal(ndc);
+		float shininess = GetShininess(ndc);
+
+#if INTEGER_SUPPORT
+		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
+		uint nl = countbits(light_index_all);
+		for (uint il = 0; il < nl; ++ il)
+		{
+			uint index = firstbitlow(light_index_all);
+			lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			light_index_all = light_index_all & (light_index_all - 1);
+		}
+#else
+#if KLAYGE_DXBC2GLSL
+#if WITH_SHADOW
+		uint nl = 4;
+#else
+		uint nl = LIGHT_BATCH;
+#endif
+#else
+#if WITH_SHADOW
+		int nl = 4;
+#else
+		int nl = LIGHT_BATCH;
+#endif
+#endif
+		// TODO: Cg doesn't support min(int, int)
+		if (num_lights < nl)
+		{
+			nl = num_lights;
+		}
+
+#if LIGHT_BATCH > 4
+		for (uint comp = 0, li = 0; li < nl; ++ comp, li += 8)
+		{
+			uint index = li + 7;
+			uint mask = 128;
+			uint light_comp = light_index[comp];
+
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
+			[loop]
+#endif
+			while (mask > 0)
+			{
+#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
+				[branch]
+#endif
+				if (mask <= light_comp)
+				{
+					lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					light_comp -= mask;
+				}
+
+				mask /= 2;
+				-- index;
+			}
+		}
+#else
+		[unroll]
+		for (int index = 0; index < nl; ++ index)
+		{
+			if (light_index[index])
+			{
+				lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			}
+		}
+#endif
+#endif
+
+		float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
+	}
+
+	return shading;
+}
 		]]>
 	</shader>
 		
@@ -640,6 +762,15 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 		</pass>
 	</technique>
 	<technique name="LIDRSpotNoShadow" inherit="LIDRSpotShadow">
+		<macro name="WITH_SHADOW" value="0"/>
+	</technique>
+	<technique name="LIDRSphereAreaShadow" inherit="LIDRDirectional">
+		<macro name="WITH_SHADOW" value="1"/>
+		<pass name="p0">
+			<state name="pixel_shader" value="LIDRSphereAreaPS()"/>
+		</pass>
+	</technique>
+	<technique name="LIDRSphereAreaNoShadow" inherit="LIDRPointShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
 </effect>

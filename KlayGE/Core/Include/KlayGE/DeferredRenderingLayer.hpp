@@ -341,9 +341,8 @@ namespace KlayGE
 			int32_t org_no, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, uint32_t g_buffer_index,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			bool is_point, bool with_shadow);
+		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, uint32_t g_buffer_index,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
 		void UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -412,6 +411,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_lidr_point_no_shadow_;
 		RenderTechniquePtr technique_lidr_spot_shadow_;
 		RenderTechniquePtr technique_lidr_spot_no_shadow_;
+		RenderTechniquePtr technique_lidr_sphere_area_shadow_;
+		RenderTechniquePtr technique_lidr_sphere_area_no_shadow_;
 
 		RenderTechniquePtr technique_tbdr_unified_;
 #endif
