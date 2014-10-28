@@ -401,6 +401,8 @@ namespace KlayGE
 		fps_controller_.Scalers(0.01f, 0.2f);
 
 		update_selective_buffer_ = true;
+		selected_obj_ = 0;
+		this->UpdateSelectedMesh();
 	}
 
 	void MtlEditorCore::SaveAsModel(std::string const & name)
