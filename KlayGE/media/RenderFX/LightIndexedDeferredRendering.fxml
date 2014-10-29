@@ -15,6 +15,7 @@
 		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
+		<parameter type="float" name="lights_radius" array_size="LIGHT_BATCH"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="light_index_tex"/>

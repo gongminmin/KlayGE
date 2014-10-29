@@ -475,6 +475,7 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_dir_es_param_;
 		RenderEffectParameterPtr lights_falloff_range_param_;
 		RenderEffectParameterPtr lights_attrib_param_;
+		RenderEffectParameterPtr lights_radius_param_;
 		RenderEffectParameterPtr lights_aabb_min_param_;
 		RenderEffectParameterPtr lights_aabb_max_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
