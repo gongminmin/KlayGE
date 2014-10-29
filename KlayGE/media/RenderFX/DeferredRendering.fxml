@@ -20,8 +20,9 @@
 		<parameter type="float4" name="light_color"/>
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_dir_es"/>
-		<parameter type="float3" name="light_falloff"/>
+		<parameter type="float4" name="light_falloff_range"/>
 		<parameter type="float4" name="light_attrib"/>
+		<parameter type="float" name="light_radius"/>
 	</cbuffer>
 
 	<cbuffer name="cascaded_light_sources">
@@ -265,6 +266,33 @@ void DeferredRenderingVS(float4 pos : POSITION,
 #endif
 }
 
+float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float atten_factor, float2 tc_ddx, float2 tc_ddy)
+{
+	float4 lighting = 0;
+	float3 dir = light_pos - pos_es;
+	float dist = length(dir);
+	if (dist < light_falloff_range.w)
+	{
+		dir /= dist;
+		float n_dot_l = dot(normal, dir);
+		if (n_dot_l > 0)
+		{
+			float3 shadow = 1;
+			if (shadowing_channel >= 0)
+			{
+				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
+			}
+
+			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+			float atten = atten_factor * attenuation_term(light_pos, pos_es.xyz, light_falloff_range.xyz);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
+		}
+	}
+	
+	return lighting;
+}
+
 float4 DeferredRenderingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0,
@@ -286,26 +314,14 @@ float4 DeferredRenderingPointPS(
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float4 final_clr = 0;
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float3 dir = normalize(light_pos_es.xyz - pos_es);
 	float3 normal = GetNormal(ndc);
-	float n_dot_l = dot(normal, dir);
-	if (n_dot_l > 0)
-	{
-		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		float3 shadow = 1;
-		if (shadowing_channel >= 0)
-		{
-			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
-		}
-		float atten = attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-		final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
-	}
-
-	return final_clr;
+	float shininess = GetShininess(ndc);
+	
+	return CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
+		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingSpotPS(
@@ -329,7 +345,7 @@ float4 DeferredRenderingSpotPS(
 #endif
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float4 final_clr = 0;
+	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
@@ -337,23 +353,14 @@ float4 DeferredRenderingSpotPS(
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
 	{
-		float3 dir = normalize(light_pos_es.xyz - pos_es);
 		float3 normal = GetNormal(ndc);
-		float n_dot_l = dot(normal, dir);
-		if (n_dot_l > 0)
-		{
-			float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-			float3 shadow = 1;
-			if (shadowing_channel >= 0)
-			{
-				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
-			}
-			float atten = spot * attenuation_term(light_pos_es.xyz, pos_es.xyz, light_falloff);
-			final_clr = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
-		}
+		float shininess = GetShininess(ndc);
+		
+		lighting = CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
+			shininess, tc, spot, tc_ddx, tc_ddy);
 	}
 
-	return final_clr;
+	return lighting;
 }
 
 float4 DeferredRenderingSunPS(
@@ -377,7 +384,7 @@ float4 DeferredRenderingSunPS(
 #endif
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float4 final_clr = 0;
+	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 
@@ -392,10 +399,10 @@ float4 DeferredRenderingSunPS(
 		{
 			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 		}
-		final_clr = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
+		lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 	}
 
-	return final_clr;
+	return lighting;
 }
 
 float4 DeferredRenderingDirectionalPS(
@@ -411,7 +418,7 @@ float4 DeferredRenderingDirectionalPS(
 #endif
 	
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float4 final_clr = 0;
+	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 
@@ -421,10 +428,10 @@ float4 DeferredRenderingDirectionalPS(
 	if (n_dot_l > 0)
 	{
 		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
-		final_clr = CalcColor(n_dot_l, spec, 1, 1, light_color, light_attrib);
+		lighting = CalcColor(n_dot_l, spec, 1, 1, light_color, light_attrib);
 	}
 
-	return final_clr;
+	return lighting;
 }
 
 float4 DeferredRenderingAmbientPS(
@@ -443,6 +450,40 @@ float4 DeferredRenderingAmbientPS(
 	float3 normal = GetNormal(ndc);
 
 	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
+}
+
+float4 DeferredRenderingSphereAreaPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0,
+#else
+	float3 tc_w : TEXCOORD0,
+#endif
+	float3 view_dir : TEXCOORD1) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
+#endif
+
+#if KLAYGE_DERIVATIVES
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+	float3 normal = GetNormal(ndc);
+	float shininess = GetShininess(ndc);
+	
+	float3 light_pos = SphereAreaLightPositionFixup(light_pos_es.xyz, light_radius, pos_es,
+		normal, view_dir);
+		
+	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
+		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredShadowingPointPS(
@@ -608,6 +649,12 @@ float4 DeferredShadowingSunPS(
 			<state name="blend_enable" value="false"/>
 
 			<state name="pixel_shader" value="DeferredRenderingAmbientPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredRenderingSphereArea" inherit="DeferredRenderingPoint">
+		<pass name="p0">
+			<state name="pixel_shader" value="DeferredRenderingSphereAreaPS()"/>
 		</pass>
 	</technique>
 

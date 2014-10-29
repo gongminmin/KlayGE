@@ -550,7 +550,7 @@ namespace KlayGE
 		technique_lights_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
 		technique_lights_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
 		technique_lights_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredRenderingSun");
-		technique_lights_[LightSource::LT_SphereArea] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
+		technique_lights_[LightSource::LT_SphereArea] = dr_effect_->TechniqueByName("DeferredRenderingSphereArea");
 		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
 		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
 #endif
@@ -694,8 +694,9 @@ namespace KlayGE
 		shading_tex_param_ = dr_effect_->ParameterByName("shading_tex");
 		depth_near_far_invfar_param_ = dr_effect_->ParameterByName("depth_near_far_invfar");
 		light_attrib_param_ = dr_effect_->ParameterByName("light_attrib");
+		light_radius_param_ = dr_effect_->ParameterByName("light_radius");
 		light_color_param_ = dr_effect_->ParameterByName("light_color");
-		light_falloff_param_ = dr_effect_->ParameterByName("light_falloff");
+		light_falloff_range_param_ = dr_effect_->ParameterByName("light_falloff_range");
 		light_view_proj_param_ = dr_effect_->ParameterByName("light_view_proj");
 		light_volume_mv_param_ = dr_effect_->ParameterByName("light_volume_mv");
 		light_volume_mvp_param_ = dr_effect_->ParameterByName("light_volume_mvp");
@@ -1607,7 +1608,15 @@ namespace KlayGE
 							attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
 							attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
 						*light_color_param_ = light->Color();
-						*light_falloff_param_ = light->Falloff();
+						*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
+							light->Falloff().z(), light->Range() * light_scale_);
+
+						float radius = 0;
+						if (LightSource::LT_SphereArea == light->Type())
+						{
+							radius = checked_pointer_cast<SphereAreaLightSource>(light)->Radius();
+						}
+						*light_radius_param_ = radius;
 
 						this->UpdateLighting(pvp, type, li);
 					}
@@ -3111,7 +3120,8 @@ namespace KlayGE
 		*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 			attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
 		*light_color_param_ = light->Color();
-		*light_falloff_param_ = light->Falloff();
+		*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
+			light->Falloff().z(), 0);
 
 		RenderTechniquePtr tech;
 		if (LightSource::LT_Sun == type)

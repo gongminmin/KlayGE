@@ -444,8 +444,9 @@ namespace KlayGE
 		RenderEffectParameterPtr shading_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;
+		RenderEffectParameterPtr light_radius_param_;
 		RenderEffectParameterPtr light_color_param_;
-		RenderEffectParameterPtr light_falloff_param_;
+		RenderEffectParameterPtr light_falloff_range_param_;
 		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_volume_mv_param_;
 		RenderEffectParameterPtr light_volume_mvp_param_;

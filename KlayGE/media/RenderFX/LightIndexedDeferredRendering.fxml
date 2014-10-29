@@ -318,7 +318,7 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
-float4 CalcLIDRLighting(float3 light_pos, int index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcLIDRLighting(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float atten_factor, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
@@ -332,7 +332,7 @@ float4 CalcLIDRLighting(float3 light_pos, int index, float3 pos_es, float3 norma
 		{
 			float3 shadow = 1;
 #if WITH_SHADOW
-			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 #endif
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -347,7 +347,7 @@ float4 CalcLIDRLighting(float3 light_pos, int index, float3 pos_es, float3 norma
 float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
-	return CalcLIDRLighting(lights_pos_es[index].xyz, index, pos_es, normal, view_dir,
+	return CalcLIDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
@@ -359,7 +359,7 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
 	if (spot > 0)
 	{
-		lighting = CalcLIDRLighting(lights_pos_es[index].xyz, index, pos_es, normal, view_dir,
+		lighting = CalcLIDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 			shininess, tc, spot, tc_ddx, tc_ddy);
 	}
 	
@@ -371,7 +371,7 @@ float4 CalcLIDRSphereAreaLighting(int index, float3 pos_es, float3 normal, float
 {
 	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
 		normal, view_dir);
-	return CalcLIDRLighting(light_pos, index, pos_es, normal, view_dir,
+	return CalcLIDRLighting(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 

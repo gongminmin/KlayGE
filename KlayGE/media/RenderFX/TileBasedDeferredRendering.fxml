@@ -235,7 +235,7 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 	}
 }
 
-float4 CalcTBDRLighting(float3 light_pos, int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+float4 CalcTBDRLighting(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow, float atten_factor)
 {
 	float4 lighting = 0;
@@ -250,7 +250,7 @@ float4 CalcTBDRLighting(float3 light_pos, int index, int shadow_index, float3 po
 			float3 shadow = 1;
 			if (with_shadow)
 			{
-				shadow = NearestDepthUpsamplingShadowLevel(tc, int(lights_attrib[shadow_index].z)).xyz;
+				shadow = NearestDepthUpsamplingShadowLevel(tc, shadowing_channel).xyz;
 			}
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
@@ -265,7 +265,7 @@ float4 CalcTBDRLighting(float3 light_pos, int index, int shadow_index, float3 po
 float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
-	return CalcTBDRLighting(lights_pos_es[index].xyz, index, shadow_index + 1,
+	return CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 1].z),
 		pos_es, normal, view_dir, shininess, tc, with_shadow, 1);
 }
 
@@ -277,7 +277,7 @@ float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, f
 		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
 	if (spot > 0)
 	{
-		lighting = CalcTBDRLighting(lights_pos_es[index].xyz, index, shadow_index + 2,
+		lighting = CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 2].z),
 			pos_es, normal, view_dir, shininess, tc, with_shadow, spot);
 	}
 	
@@ -289,7 +289,7 @@ float4 CalcTBDRSphereArea(int index, int shadow_index, float3 pos_es, float3 nor
 {
 	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
 		normal, view_dir);
-	return CalcTBDRLighting(light_pos, index, shadow_index + 1, pos_es, normal, view_dir,
+	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z), pos_es, normal, view_dir,
 		shininess, tc, with_shadow, 1);
 }
 
