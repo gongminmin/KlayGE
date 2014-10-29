@@ -130,6 +130,18 @@ float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, f
 	env_brdf = saturate(env_brdf);
 	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
 }
+
+// Area lighting
+
+float3 SphereAreaLightPositionFixup(float3 light_pos, float light_radius, float3 point_pos,
+		float3 normal, float3 view_dir)
+{
+	float3 l = light_pos - point_pos;
+	float3 r = reflect(view_dir, normal);
+	float3 intersect_point = dot(l, r) * r;
+	float3 center_to_ray = intersect_point - l;
+	return light_pos + center_to_ray * saturate(light_radius / length(center_to_ray));
+}
 		]]>
 	</shader>
 </effect>

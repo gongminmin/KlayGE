@@ -258,7 +258,7 @@ float4 CalcTBDRLighting(float3 light_pos, int index, int shadow_index, float3 po
 			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
 		}
 	}
-	
+
 	return lighting;
 }
 
@@ -287,18 +287,10 @@ float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, f
 float4 CalcTBDRSphereArea(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
-	float radius = lights_radius[index];
-	float3 light_pos = lights_pos_es[index].xyz;
-	
-	float3 l = lights_pos_es[index].xyz - pos_es;
-	float3 r = reflect(view_dir, normal);
-	float3 intersect_point = dot(l, r) * r;
-	float3 center_to_ray = intersect_point - l;
-	float len_center_to_ray = length(center_to_ray);
-	float3 closest_point = light_pos + center_to_ray * saturate(radius / len_center_to_ray);
-	
-	return CalcTBDRLighting(closest_point, index, shadow_index + 1,
-		pos_es, normal, view_dir, shininess, tc, with_shadow, 1);
+	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
+		normal, view_dir);
+	return CalcTBDRLighting(light_pos, index, shadow_index + 1, pos_es, normal, view_dir,
+		shininess, tc, with_shadow, 1);
 }
 
 groupshared uint intersected_light_indices_sh[LIGHT_BATCH];

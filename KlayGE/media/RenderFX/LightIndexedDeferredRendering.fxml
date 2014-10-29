@@ -318,11 +318,11 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 }
 
-float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+float4 CalcLIDRLighting(float3 light_pos, int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float atten_factor, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
-	float3 dir = lights_pos_es[index].xyz - pos_es;
+	float3 dir = light_pos - pos_es;
 	float dist = length(dir);
 	if (dist < lights_falloff_range[index].w)
 	{
@@ -336,11 +336,19 @@ float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 vie
 #endif
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
+			float atten = atten_factor * attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz);
 			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
 		}
 	}
+
 	return lighting;
+}
+
+float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+{
+	return CalcLIDRLighting(lights_pos_es[index].xyz, index, pos_es, normal, view_dir,
+		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
 float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
@@ -351,24 +359,8 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
 	if (spot > 0)
 	{
-		float3 dir = lights_pos_es[index].xyz - pos_es;
-		float dist = length(dir);
-		if (dist < lights_falloff_range[index].w)
-		{
-			dir /= dist;
-			float n_dot_l = dot(normal, dir);
-			if (n_dot_l > 0)
-			{
-				float3 shadow = 1;
-#if WITH_SHADOW
-				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
-#endif
-
-				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-				float atten = spot * attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
-				lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
-			}
-		}
+		lighting = CalcLIDRLighting(lights_pos_es[index].xyz, index, pos_es, normal, view_dir,
+			shininess, tc, spot, tc_ddx, tc_ddy);
 	}
 	
 	return lighting;
@@ -377,26 +369,10 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 float4 CalcLIDRSphereAreaLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
-	float4 lighting = 0;
-	float3 dir = lights_pos_es[index].xyz - pos_es;
-	float dist = length(dir);
-	if (dist < lights_falloff_range[index].w)
-	{
-		dir /= dist;
-		float n_dot_l = dot(normal, dir);
-		if (n_dot_l > 0)
-		{
-			float3 shadow = 1;
-#if WITH_SHADOW
-			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, int(lights_attrib[index].z)).xyz;
-#endif
-
-			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
-			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
-		}
-	}
-	return lighting;
+	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
+		normal, view_dir);
+	return CalcLIDRLighting(light_pos, index, pos_es, normal, view_dir,
+		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
 float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
