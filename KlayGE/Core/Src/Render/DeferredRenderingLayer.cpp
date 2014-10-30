@@ -1610,13 +1610,7 @@ namespace KlayGE
 						*light_color_param_ = light->Color();
 						*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
 							light->Falloff().z(), light->Range() * light_scale_);
-
-						float radius = 0;
-						if (LightSource::LT_SphereArea == light->Type())
-						{
-							radius = checked_pointer_cast<SphereAreaLightSource>(light)->Radius();
-						}
-						*light_radius_param_ = radius;
+						*light_radius_param_ = light->Radius();
 
 						this->UpdateLighting(pvp, type, li);
 					}
@@ -3201,13 +3195,7 @@ namespace KlayGE
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0));
-
-			float radius = 0;
-			if (LightSource::LT_SphereArea == light->Type())
-			{
-				radius = checked_pointer_cast<SphereAreaLightSource>(light)->Radius();
-			}
-			lights_radius.push_back(radius);
+			lights_radius.push_back(light->Radius());
 		}
 
 		lights_attrib[0].w() = iter_end - iter_beg + 0.5f;
@@ -3303,13 +3291,7 @@ namespace KlayGE
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, channel + 0.5f, 0));
-
-			float radius = 0;
-			if (LightSource::LT_SphereArea == light->Type())
-			{
-				radius = checked_pointer_cast<SphereAreaLightSource>(light)->Radius();
-			}
-			lights_radius.push_back(radius);
+			lights_radius.push_back(light->Radius());
 
 			float range = light->Range() * light_scale_;
 			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
@@ -3627,13 +3609,8 @@ namespace KlayGE
 					*reinterpret_cast<float4*>(lights_attrib
 						+ offset * lights_attrib_param_->Stride()) = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
-
-					float radius = 0;
-					if (LightSource::LT_SphereArea == light->Type())
-					{
-						radius = checked_pointer_cast<SphereAreaLightSource>(light)->Radius();
-					}
-					*reinterpret_cast<float*>(lights_radius + offset * lights_radius_param_->Stride()) = radius;
+					*reinterpret_cast<float*>(lights_radius
+						+ offset * lights_radius_param_->Stride()) = light->Radius();
 
 					if (0 == (attr & LightSource::LSA_NoShadow))
 					{

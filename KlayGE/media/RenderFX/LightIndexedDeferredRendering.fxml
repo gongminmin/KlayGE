@@ -371,6 +371,7 @@ float4 CalcLIDRSphereAreaLighting(int index, float3 pos_es, float3 normal, float
 {
 	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
 		normal, view_dir);
+	shininess = SphereAreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius[index], pos_es);
 	return CalcLIDRLighting(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 		shininess, tc, 1, tc_ddx, tc_ddy);
 }

@@ -116,7 +116,7 @@ void AreaLightingApp::OnCreate()
 	point_light_->Color(float3(0.8f, 0.96f, 1.0f) * 40.0f);
 	point_light_->Position(float3(0, 0, 0));
 	point_light_->Falloff(float3(1, 0, 1));
-	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
+	point_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
 	point_light_->AddToSceneManager();
 	point_light_->Enabled(false);
 
@@ -130,7 +130,7 @@ void AreaLightingApp::OnCreate()
 	sphere_area_light_->Color(point_light_->Color());
 	sphere_area_light_->Position(point_light_->Position());
 	sphere_area_light_->Falloff(point_light_->Falloff());
-	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(2, 10, 0)));
+	sphere_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
 	sphere_area_light_->AddToSceneManager();
 	sphere_area_light_->Enabled(false);
 
@@ -141,6 +141,16 @@ void AreaLightingApp::OnCreate()
 
 	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable, 0);
 	scene_obj->AddToSceneManager();
+
+	for (int i = -5; i < 5; ++ i)
+	{
+		RenderModelPtr sphere_mesh = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
+		sphere_mesh->GetMaterial(0)->specular = float3(0.4f, 0.4f, 0.4f);
+		sphere_mesh->GetMaterial(0)->shininess = (i + 6) * 10.0f;
+		SceneObjectPtr sphere_obj = MakeSharedPtr<SceneObjectHelper>(sphere_mesh, SceneObject::SOA_Cullable);
+		sphere_obj->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f) * MathLib::translation(i + 0.5f, 5.0f, 0.0f));
+		sphere_obj->AddToSceneManager();
+	}
 
 	fpcController_.Scalers(0.05f, 0.5f);
 

@@ -289,6 +289,7 @@ float4 CalcTBDRSphereArea(int index, int shadow_index, float3 pos_es, float3 nor
 {
 	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
 		normal, view_dir);
+	shininess = SphereAreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius[index], pos_es);
 	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z), pos_es, normal, view_dir,
 		shininess, tc, with_shadow, 1);
 }

@@ -481,7 +481,7 @@ float4 DeferredRenderingSphereAreaPS(
 	
 	float3 light_pos = SphereAreaLightPositionFixup(light_pos_es.xyz, light_radius, pos_es,
 		normal, view_dir);
-		
+	shininess = SphereAreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius, pos_es);		
 	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
 		shininess, tc, 1, tc_ddx, tc_ddy);
 }

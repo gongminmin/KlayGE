@@ -142,6 +142,11 @@ float3 SphereAreaLightPositionFixup(float3 light_pos, float light_radius, float3
 	float3 center_to_ray = intersect_point - l;
 	return light_pos + center_to_ray * saturate(light_radius / length(center_to_ray));
 }
+
+float SphereAreaLightShininessFixup(float shininess, float3 light_pos, float light_radius, float3 point_pos)
+{
+	return shininess + light_radius / (2 * length(light_pos - point_pos));
+}
 		]]>
 	</shader>
 </effect>

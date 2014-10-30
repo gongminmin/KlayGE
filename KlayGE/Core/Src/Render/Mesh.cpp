@@ -183,7 +183,9 @@ namespace
 			model->NumMaterials(rhs_model->NumMaterials());
 			for (uint32_t mtl_index = 0; mtl_index < model->NumMaterials(); ++ mtl_index)
 			{
-				model->GetMaterial(mtl_index) = rhs_model->GetMaterial(mtl_index);
+				RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
+				*mtl = *rhs_model->GetMaterial(mtl_index);
+				model->GetMaterial(mtl_index) = mtl;
 			}
 
 			if (rhs_model->NumSubrenderables() > 0)

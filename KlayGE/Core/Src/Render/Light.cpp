@@ -278,6 +278,16 @@ namespace KlayGE
 		return ret;
 	}
 
+	float LightSource::Radius() const
+	{
+		return 0;
+	}
+
+	void LightSource::Radius(float radius)
+	{
+		UNREF_PARAM(radius);
+	}
+
 
 	AmbientLightSource::AmbientLightSource()
 		: LightSource(LT_Ambient)

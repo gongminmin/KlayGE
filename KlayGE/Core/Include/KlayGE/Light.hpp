@@ -98,6 +98,9 @@ namespace KlayGE
 		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
 		virtual CameraPtr const & SMCamera(uint32_t index) const;
 
+		virtual float Radius() const;
+		virtual void Radius(float radius);
+
 	protected:
 		LightType type_;
 		int32_t attrib_;
@@ -239,8 +242,8 @@ namespace KlayGE
 		SphereAreaLightSource();
 		virtual ~SphereAreaLightSource();
 
-		virtual float Radius() const;
-		virtual void Radius(float radius);
+		virtual float Radius() const KLAYGE_OVERRIDE;
+		virtual void Radius(float radius) KLAYGE_OVERRIDE;
 
 	protected:
 		float radius_;
