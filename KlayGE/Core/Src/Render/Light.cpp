@@ -288,6 +288,17 @@ namespace KlayGE
 		UNREF_PARAM(radius);
 	}
 
+	float3 const & LightSource::Extend() const
+	{
+		static const float3 ret(0, 0, 0);
+		return ret;
+	}
+
+	void LightSource::Extend(float3 const & extend)
+	{
+		UNREF_PARAM(extend);
+	}
+
 
 	AmbientLightSource::AmbientLightSource()
 		: LightSource(LT_Ambient)
@@ -632,5 +643,25 @@ namespace KlayGE
 	void SphereAreaLightSource::Radius(float radius)
 	{
 		radius_ = radius;
+	}
+
+
+	TubeAreaLightSource::TubeAreaLightSource()
+	{
+		type_ = LT_TubeArea;
+	}
+
+	TubeAreaLightSource::~TubeAreaLightSource()
+	{
+	}
+
+	float3 const & TubeAreaLightSource::Extend() const
+	{
+		return extend_;
+	}
+
+	void TubeAreaLightSource::Extend(float3 const & extend)
+	{
+		extend_ = extend;
 	}
 }

@@ -38,6 +38,8 @@ private:
 	KlayGE::SceneObjectPtr point_light_src_;
 	KlayGE::LightSourcePtr sphere_area_light_;
 	KlayGE::SceneObjectPtr sphere_area_light_src_;
+	KlayGE::LightSourcePtr tube_area_light_;
+	KlayGE::SceneObjectPtr tube_area_light_src_;
 
 	KlayGE::UIDialogPtr dialog_;
 

@@ -202,6 +202,10 @@ namespace KlayGE
 			mesh_name = "spot_light_proxy.meshml";
 			break;
 
+		case LightSource::LT_TubeArea:
+			mesh_name = "tube_light_proxy.meshml";
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;

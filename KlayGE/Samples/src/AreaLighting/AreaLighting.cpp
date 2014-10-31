@@ -53,7 +53,6 @@ namespace
 	enum
 	{
 		Exit,
-		Dump,
 		Profile
 	};
 
@@ -95,7 +94,7 @@ bool AreaLightingApp::ConfirmDevice() const
 
 void AreaLightingApp::OnCreate()
 {
-	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
+	this->LookAt(float3(-12.2f, 15.8f, -2.4f), float3(-11.5f, 15.1f, -2.2f));
 	this->Proj(0.1f, 500.0f);
 
 	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
@@ -138,6 +137,20 @@ void AreaLightingApp::OnCreate()
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
 	sphere_area_light_src_->AddToSceneManager();
 	sphere_area_light_src_->Visible(false);
+
+	tube_area_light_ = MakeSharedPtr<TubeAreaLightSource>();
+	tube_area_light_->Attrib(0);
+	tube_area_light_->Color(point_light_->Color());
+	tube_area_light_->Position(point_light_->Position());
+	tube_area_light_->Falloff(point_light_->Falloff());
+	tube_area_light_->BindUpdateFunc(PointLightSourceUpdate(1 / 1000.0f, float3(0, 10, 0)));
+	tube_area_light_->AddToSceneManager();
+	tube_area_light_->Enabled(false);
+
+	tube_area_light_src_ = MakeSharedPtr<SceneObjectLightSourceProxy>(tube_area_light_);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, 0.1f);
+	tube_area_light_src_->AddToSceneManager();
+	tube_area_light_src_->Visible(false);
 
 	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable, 0);
 	scene_obj->AddToSceneManager();
@@ -219,6 +232,8 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		point_light_src_->Visible(true);
 		sphere_area_light_->Enabled(false);
 		sphere_area_light_src_->Visible(false);
+		tube_area_light_->Enabled(false);
+		tube_area_light_src_->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(false);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(false);
 		break;
@@ -228,8 +243,24 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		point_light_src_->Visible(false);
 		sphere_area_light_->Enabled(true);
 		sphere_area_light_src_->Visible(true);
+		tube_area_light_->Enabled(false);
+		tube_area_light_src_->Visible(false);
 		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(true);
 		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(true);
+		break;
+
+	case 2:
+		point_light_->Enabled(false);
+		point_light_src_->Visible(false);
+		sphere_area_light_->Enabled(false);
+		sphere_area_light_src_->Visible(false);
+		tube_area_light_->Enabled(true);
+		tube_area_light_src_->Visible(true);
+		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(true);
+		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(true);
+		break;
+
+	default:
 		break;
 	}
 }
@@ -240,6 +271,9 @@ void AreaLightingApp::RadiusChangedHandler(UISlider const & sender)
 
 	checked_pointer_cast<SphereAreaLightSource>(sphere_area_light_)->Radius(radius);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(radius, radius, radius);
+
+	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, radius));
+	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(radius, 0.1f, 0.1f);
 
 	std::wostringstream stream;
 	stream << L"Radius: " << radius;

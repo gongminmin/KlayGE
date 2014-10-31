@@ -486,6 +486,40 @@ float4 DeferredRenderingSphereAreaPS(
 		shininess, tc, 1, tc_ddx, tc_ddy);
 }
 
+float4 DeferredRenderingTubeAreaPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD0,
+#else
+	float3 tc_w : TEXCOORD0,
+#endif
+	float3 view_dir : TEXCOORD1) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
+#endif
+
+#if KLAYGE_DERIVATIVES
+	float2 tc_ddx = ddx(tc);
+	float2 tc_ddy = ddy(tc);
+#else
+	float2 tc_ddx = 0;
+	float2 tc_ddy = 0;
+#endif
+
+	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+
+	view_dir = normalize(view_dir);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+	float3 normal = GetNormal(ndc);
+	float shininess = GetShininess(ndc);
+	
+	float3 light_pos = SphereAreaLightPositionFixup(light_pos_es.xyz, light_radius, pos_es,
+		normal, view_dir);
+	shininess = SphereAreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius, pos_es);		
+	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
+		shininess, tc, 1, tc_ddx, tc_ddy);
+}
+
 float4 DeferredShadowingPointPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0,
@@ -655,6 +689,12 @@ float4 DeferredShadowingSunPS(
 	<technique name="DeferredRenderingSphereArea" inherit="DeferredRenderingPoint">
 		<pass name="p0">
 			<state name="pixel_shader" value="DeferredRenderingSphereAreaPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DeferredRenderingTubeArea" inherit="DeferredRenderingPoint">
+		<pass name="p0">
+			<state name="pixel_shader" value="DeferredRenderingTubeAreaPS()"/>
 		</pass>
 	</technique>
 

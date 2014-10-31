@@ -413,6 +413,8 @@ namespace KlayGE
 		RenderTechniquePtr technique_lidr_spot_no_shadow_;
 		RenderTechniquePtr technique_lidr_sphere_area_shadow_;
 		RenderTechniquePtr technique_lidr_sphere_area_no_shadow_;
+		RenderTechniquePtr technique_lidr_tube_area_shadow_;
+		RenderTechniquePtr technique_lidr_tube_area_no_shadow_;
 
 		RenderTechniquePtr technique_tbdr_unified_;
 #endif
