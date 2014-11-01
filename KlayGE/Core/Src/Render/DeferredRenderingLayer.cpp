@@ -703,7 +703,7 @@ namespace KlayGE
 		shading_tex_param_ = dr_effect_->ParameterByName("shading_tex");
 		depth_near_far_invfar_param_ = dr_effect_->ParameterByName("depth_near_far_invfar");
 		light_attrib_param_ = dr_effect_->ParameterByName("light_attrib");
-		light_radius_param_ = dr_effect_->ParameterByName("light_radius");
+		light_radius_extend_param_ = dr_effect_->ParameterByName("light_radius_extend");
 		light_color_param_ = dr_effect_->ParameterByName("light_color");
 		light_falloff_range_param_ = dr_effect_->ParameterByName("light_falloff_range");
 		light_view_proj_param_ = dr_effect_->ParameterByName("light_view_proj");
@@ -749,7 +749,7 @@ namespace KlayGE
 		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
 		lights_falloff_range_param_ = dr_effect_->ParameterByName("lights_falloff_range");
 		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
-		lights_radius_param_ = dr_effect_->ParameterByName("lights_radius");
+		lights_radius_extend_param_ = dr_effect_->ParameterByName("lights_radius_extend");
 		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
 		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
 		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
@@ -1621,7 +1621,10 @@ namespace KlayGE
 						*light_color_param_ = light->Color();
 						*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
 							light->Falloff().z(), light->Range() * light_scale_);
-						*light_radius_param_ = light->Radius();
+
+						float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
+						*light_radius_extend_param_ = float4(light->Radius(), extend_es.x(),
+							extend_es.y(), extend_es.z());
 
 						this->UpdateLighting(pvp, type, li);
 					}
@@ -3234,7 +3237,6 @@ namespace KlayGE
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_dir_es;
 		std::vector<float4> lights_attrib;
-		std::vector<float> lights_radius;
 		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
 		{
 			LightSourcePtr const & light = lights_[*iter];
@@ -3248,7 +3250,6 @@ namespace KlayGE
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0));
-			lights_radius.push_back(light->Radius());
 		}
 
 		lights_attrib[0].w() = iter_end - iter_beg + 0.5f;
@@ -3256,7 +3257,6 @@ namespace KlayGE
 		*lights_color_param_ = lights_color;
 		*lights_dir_es_param_ = lights_dir_es;
 		*lights_attrib_param_ = lights_attrib;
-		*lights_radius_param_ = lights_radius;
 
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
 		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
@@ -3305,7 +3305,7 @@ namespace KlayGE
 		std::vector<float4> lights_dir_es;
 		std::vector<float4> lights_falloff_range;
 		std::vector<float4> lights_attrib;
-		std::vector<float> lights_radius;
+		std::vector<float4> lights_radius_extend;
 		std::vector<float3> lights_aabb_min;
 		std::vector<float3> lights_aabb_max;
 		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
@@ -3344,7 +3344,10 @@ namespace KlayGE
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, channel + 0.5f, 0));
-			lights_radius.push_back(light->Radius());
+
+			float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
+			lights_radius_extend.push_back(float4(light->Radius(), extend_es.x(),
+				extend_es.y(), extend_es.z()));
 
 			float range = light->Range() * light_scale_;
 			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
@@ -3381,7 +3384,7 @@ namespace KlayGE
 		*lights_dir_es_param_ = lights_dir_es;
 		*lights_falloff_range_param_ = lights_falloff_range;
 		*lights_attrib_param_ = lights_attrib;
-		*lights_radius_param_ = lights_radius;
+		*lights_radius_extend_param_ = lights_radius_extend;
 		*lights_aabb_min_param_ = lights_aabb_min;
 		*lights_aabb_max_param_ = lights_aabb_max;
 
@@ -3630,7 +3633,7 @@ namespace KlayGE
 			uint8_t* lights_dir_es = lights_dir_es_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_falloff_range = lights_falloff_range_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_attrib = lights_attrib_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_radius = lights_radius_param_->MemoryInCBuff<uint8_t>();
+			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
 			int lights_shadowing_channel[6];
@@ -3685,8 +3688,11 @@ namespace KlayGE
 					*reinterpret_cast<float4*>(lights_attrib
 						+ offset * lights_attrib_param_->Stride()) = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
-					*reinterpret_cast<float*>(lights_radius
-						+ offset * lights_radius_param_->Stride()) = light->Radius();
+
+					float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
+					*reinterpret_cast<float4*>(lights_radius_extend
+						+ offset * lights_radius_extend_param_->Stride()) = float4(light->Radius(),
+						extend_es.x(), extend_es.y(), extend_es.z());
 
 					if (0 == (attr & LightSource::LSA_NoShadow))
 					{
@@ -3746,7 +3752,7 @@ namespace KlayGE
 			lights_dir_es_param_->CBuffer()->Dirty(true);
 			lights_falloff_range_param_->CBuffer()->Dirty(true);
 			lights_attrib_param_->CBuffer()->Dirty(true);
-			lights_radius_param_->CBuffer()->Dirty(true);
+			lights_radius_extend_param_->CBuffer()->Dirty(true);
 			lights_aabb_min_param_->CBuffer()->Dirty(true);
 			lights_aabb_max_param_->CBuffer()->Dirty(true);
 

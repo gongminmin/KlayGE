@@ -261,6 +261,8 @@ namespace KlayGE
 		TubeAreaLightSource();
 		virtual ~TubeAreaLightSource();
 
+		using LightSource::Falloff;
+		virtual void Falloff(float3 const & fall_off);
 		virtual float3 const & Extend() const KLAYGE_OVERRIDE;
 		virtual void Extend(float3 const & extend) KLAYGE_OVERRIDE;
 

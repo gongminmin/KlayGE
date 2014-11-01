@@ -655,6 +655,12 @@ namespace KlayGE
 	{
 	}
 
+	void TubeAreaLightSource::Falloff(float3 const & fall_off)
+	{
+		UNREF_PARAM(fall_off);
+		LightSource::Falloff(float3(1, 0, 0));
+	}
+
 	float3 const & TubeAreaLightSource::Extend() const
 	{
 		return extend_;

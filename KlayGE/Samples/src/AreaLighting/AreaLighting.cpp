@@ -273,7 +273,7 @@ void AreaLightingApp::RadiusChangedHandler(UISlider const & sender)
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(radius, radius, radius);
 
 	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, radius));
-	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(radius, 0.1f, 0.1f);
+	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, radius);
 
 	std::wostringstream stream;
 	stream << L"Radius: " << radius;

@@ -15,7 +15,7 @@
 		<parameter type="float4" name="lights_dir_es" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_falloff_range" array_size="LIGHT_BATCH"/>
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="float" name="lights_radius" array_size="LIGHT_BATCH"/>
+		<parameter type="float4" name="lights_radius_extend" array_size="LIGHT_BATCH"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="light_index_tex"/>
@@ -319,7 +319,7 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 }
 
 float4 CalcLIDRLighting(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, float atten_factor, float2 tc_ddx, float2 tc_ddy)
+		float shininess, float2 tc, float atten_factor, float irradiance_factor, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
 	float3 dir = light_pos - pos_es;
@@ -337,7 +337,7 @@ float4 CalcLIDRLighting(float3 light_pos, int index, int shadowing_channel, floa
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 			float atten = atten_factor * attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz);
-			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, irradiance_factor * lights_color[index], lights_attrib[index]);
 		}
 	}
 
@@ -348,7 +348,7 @@ float4 CalcLIDRPointLighting(int index, float3 pos_es, float3 normal, float3 vie
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
 	return CalcLIDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
-		shininess, tc, 1, tc_ddx, tc_ddy);
+		shininess, tc, 1, 1, tc_ddx, tc_ddy);
 }
 
 float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
@@ -360,7 +360,7 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 	if (spot > 0)
 	{
 		lighting = CalcLIDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
-			shininess, tc, spot, tc_ddx, tc_ddy);
+			shininess, tc, spot, 1, tc_ddx, tc_ddy);
 	}
 	
 	return lighting;
@@ -369,11 +369,23 @@ float4 CalcLIDRSpotLighting(int index, float3 pos_es, float3 normal, float3 view
 float4 CalcLIDRSphereAreaLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
 {
-	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius[index], pos_es,
+	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es,
 		normal, view_dir);
-	shininess = SphereAreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius[index], pos_es);
+	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
 	return CalcLIDRLighting(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
-		shininess, tc, 1, tc_ddx, tc_ddy);
+		shininess, tc, 1, 1, tc_ddx, tc_ddy);
+}
+
+float4 CalcLIDRTubeAreaLighting(int index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, float2 tc_ddx, float2 tc_ddy)
+{
+	float3 l0 = lights_pos_es[index].xyz - lights_radius_extend[index].yzw - pos_es;
+	float3 l1 = lights_pos_es[index].xyz + lights_radius_extend[index].yzw - pos_es;
+	float3 light_pos = TubeAreaLightPositionFixup(l0, l1, pos_es, normal, view_dir);
+	float2 atten_irra_factor = TubeAreaLightAttenuationIrradianceFixup(l0, l1, normal);
+	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
+	return CalcLIDRLighting(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
+		shininess, tc, atten_irra_factor.x, atten_irra_factor.y, tc_ddx, tc_ddy);
 }
 
 float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -698,7 +710,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 		for (uint il = 0; il < nl; ++ il)
 		{
 			uint index = firstbitlow(light_index_all);
-			lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+			lighting += CalcLIDRTubeAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
@@ -738,7 +750,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 #endif
 				if (mask <= light_comp)
 				{
-					lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+					lighting += CalcLIDRTubeAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 					light_comp -= mask;
 				}
 
@@ -752,7 +764,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 		{
 			if (light_index[index])
 			{
-				lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
+				lighting += CalcLIDRTubeAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
 			}
 		}
 #endif
