@@ -29,6 +29,8 @@ namespace KlayGE
 			LT_Directional,
 			LT_Point,
 			LT_Spot,
+			LT_SphereArea,
+			LT_TubeArea,
 
 			LT_NumLightTypes
 		};
@@ -96,6 +98,14 @@ namespace KlayGE
 
 		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const;
 		virtual CameraPtr const & SMCamera(uint32_t index) const;
+
+		// For sphere area
+		virtual float Radius() const;
+		virtual void Radius(float radius);
+
+		// For tube area
+		virtual float3 const & Extend() const;
+		virtual void Extend(float3 const & extend);
 
 	protected:
 		LightType type_;
@@ -230,6 +240,34 @@ namespace KlayGE
 
 	protected:
 		CameraPtr sm_camera_;
+	};
+
+	class KLAYGE_CORE_API SphereAreaLightSource : public PointLightSource
+	{
+	public:
+		SphereAreaLightSource();
+		virtual ~SphereAreaLightSource();
+
+		virtual float Radius() const KLAYGE_OVERRIDE;
+		virtual void Radius(float radius) KLAYGE_OVERRIDE;
+
+	protected:
+		float radius_;
+	};
+
+	class KLAYGE_CORE_API TubeAreaLightSource : public PointLightSource
+	{
+	public:
+		TubeAreaLightSource();
+		virtual ~TubeAreaLightSource();
+
+		using LightSource::Falloff;
+		virtual void Falloff(float3 const & fall_off);
+		virtual float3 const & Extend() const KLAYGE_OVERRIDE;
+		virtual void Extend(float3 const & extend) KLAYGE_OVERRIDE;
+
+	protected:
+		float3 extend_;
 	};
 }
 

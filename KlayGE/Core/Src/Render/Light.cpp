@@ -278,6 +278,27 @@ namespace KlayGE
 		return ret;
 	}
 
+	float LightSource::Radius() const
+	{
+		return 0;
+	}
+
+	void LightSource::Radius(float radius)
+	{
+		UNREF_PARAM(radius);
+	}
+
+	float3 const & LightSource::Extend() const
+	{
+		static const float3 ret(0, 0, 0);
+		return ret;
+	}
+
+	void LightSource::Extend(float3 const & extend)
+	{
+		UNREF_PARAM(extend);
+	}
+
 
 	AmbientLightSource::AmbientLightSource()
 		: LightSource(LT_Ambient)
@@ -602,5 +623,51 @@ namespace KlayGE
 
 		float3 dimensions = aabb.Max() - aabb.Min();
 		sm_camera_->ProjOrthoParams(dimensions.x(), dimensions.y(), 0.0f, dimensions.z());
+	}
+
+
+	SphereAreaLightSource::SphereAreaLightSource()
+	{
+		type_ = LT_SphereArea;
+	}
+
+	SphereAreaLightSource::~SphereAreaLightSource()
+	{
+	}
+
+	float SphereAreaLightSource::Radius() const
+	{
+		return radius_;
+	}
+
+	void SphereAreaLightSource::Radius(float radius)
+	{
+		radius_ = radius;
+	}
+
+
+	TubeAreaLightSource::TubeAreaLightSource()
+	{
+		type_ = LT_TubeArea;
+	}
+
+	TubeAreaLightSource::~TubeAreaLightSource()
+	{
+	}
+
+	void TubeAreaLightSource::Falloff(float3 const & fall_off)
+	{
+		UNREF_PARAM(fall_off);
+		LightSource::Falloff(float3(1, 0, 0));
+	}
+
+	float3 const & TubeAreaLightSource::Extend() const
+	{
+		return extend_;
+	}
+
+	void TubeAreaLightSource::Extend(float3 const & extend)
+	{
+		extend_ = extend;
 	}
 }

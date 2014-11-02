@@ -122,7 +122,8 @@ float4 TBDRLightingMaskPS() : SV_Target
 	</cbuffer>
 	<cbuffer name="light_batch2">
 		<parameter type="float4" name="lights_attrib" array_size="LIGHT_BATCH"/>
-		<parameter type="uint" name="lights_type" array_size="8"/>
+		<parameter type="float4" name="lights_radius_extend" array_size="LIGHT_BATCH"/>
+		<parameter type="uint" name="lights_type" array_size="12"/>
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="lighting_mask_tex"/>
@@ -234,11 +235,11 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 	}
 }
 
-float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, bool with_shadow)
+float4 CalcTBDRLighting(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow, float atten_factor, float irradiance_factor)
 {
 	float4 lighting = 0;
-	float3 dir = lights_pos_es[index].xyz - pos_es;
+	float3 dir = light_pos - pos_es;
 	float dist = length(dir);
 	if (dist < lights_falloff_range[index].w)
 	{
@@ -249,15 +250,23 @@ float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, 
 			float3 shadow = 1;
 			if (with_shadow)
 			{
-				shadow = NearestDepthUpsamplingShadowLevel(tc, int(lights_attrib[shadow_index + 1].z)).xyz;
+				shadow = NearestDepthUpsamplingShadowLevel(tc, shadowing_channel).xyz;
 			}
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-			float atten = attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
-			lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
+			float atten = atten_factor * attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, irradiance_factor * lights_color[index], lights_attrib[index]);
 		}
 	}
+
 	return lighting;
+}
+
+float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow)
+{
+	return CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 1].z),
+		pos_es, normal, view_dir, shininess, tc, with_shadow, 1, 1);
 }
 
 float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
@@ -268,28 +277,33 @@ float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, f
 		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
 	if (spot > 0)
 	{
-		float3 dir = lights_pos_es[index].xyz - pos_es;
-		float dist = length(dir);
-		if (dist < lights_falloff_range[index].w)
-		{
-			dir /= dist;
-			float n_dot_l = dot(normal, dir);
-			if (n_dot_l > 0)
-			{
-				float3 shadow = 1;
-				if (with_shadow)
-				{
-					shadow = NearestDepthUpsamplingShadowLevel(tc, int(lights_attrib[shadow_index + 2].z)).xyz;
-				}
-
-				float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-				float atten = spot * attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz);
-				lighting = CalcColor(n_dot_l, spec, atten, shadow, lights_color[index], lights_attrib[index]);
-			}
-		}
+		lighting = CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 2].z),
+			pos_es, normal, view_dir, shininess, tc, with_shadow, spot, 1);
 	}
 	
 	return lighting;
+}
+
+float4 CalcTBDRSphereArea(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow)
+{
+	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es,
+		normal, view_dir);
+	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
+	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z), pos_es, normal, view_dir,
+		shininess, tc, with_shadow, 1, 1);
+}
+
+float4 CalcTBDRTubeArea(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
+		float shininess, float2 tc, bool with_shadow)
+{
+	float3 l0 = lights_pos_es[index].xyz - lights_radius_extend[index].yzw - pos_es;
+	float3 l1 = lights_pos_es[index].xyz + lights_radius_extend[index].yzw - pos_es;
+	float3 light_pos = TubeAreaLightPositionFixup(l0, l1, pos_es, normal, view_dir);
+	float2 atten_irra_factor = TubeAreaLightAttenuationIrradianceFixup(l0, l1, normal);
+	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
+	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z), pos_es, normal, view_dir,
+		shininess, tc, with_shadow, atten_irra_factor.x, atten_irra_factor.y);
 }
 
 groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
@@ -310,7 +324,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 	float2 min_max = min_max_depth_tex.Load(gid).xy;
 	CalcTileViewFrustum(gid.xy, min_max, planes);
 
-	uint light_start[4];
+	uint light_start[8];
 
 	for (uint index = lights_type[3] + GI; index < lights_type[4]; index += BLOCK_SIZE)
 	{
@@ -322,7 +336,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	light_start[0] = num_intersected_lights_sh;
 
 	for (index = lights_type[4] + GI; index < lights_type[5]; index += BLOCK_SIZE)
@@ -335,7 +349,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	light_start[1] = num_intersected_lights_sh;
 
 	for (index = lights_type[5] + GI; index < lights_type[6]; index += BLOCK_SIZE)
@@ -348,7 +362,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	light_start[2] = num_intersected_lights_sh;
 	
 	for (index = lights_type[6] + GI; index < lights_type[7]; index += BLOCK_SIZE)
@@ -361,8 +375,60 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 		}
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	light_start[3] = num_intersected_lights_sh;
+	
+	for (index = lights_type[7] + GI; index < lights_type[8]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	light_start[4] = num_intersected_lights_sh;
+
+	for (index = lights_type[8] + GI; index < lights_type[9]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	light_start[5] = num_intersected_lights_sh;
+	
+	for (index = lights_type[9] + GI; index < lights_type[10]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	light_start[6] = num_intersected_lights_sh;
+	
+	for (index = lights_type[10] + GI; index < lights_type[11]; index += BLOCK_SIZE)
+	{
+		if (OverlapTestPoint(planes, index))
+		{
+			uint light_index;
+			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
+			intersected_light_indices_sh[light_index] = index;
+		}
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	light_start[7] = num_intersected_lights_sh;
 	
 	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -433,6 +499,29 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 				{
 					lighting += CalcTBDRSpot(intersected_light_indices_sh[i],
 						intersected_light_indices_sh[i] - lights_type[6],
+						pos_es, normal, view_dir, shininess, tc, true);
+				}
+				for (i = light_start[3]; i < light_start[4]; ++ i)
+				{
+					lighting += CalcTBDRSphereArea(intersected_light_indices_sh[i], -1,
+						pos_es, normal, view_dir, shininess, tc, false);
+				}
+				for (i = light_start[4]; i < light_start[5]; ++ i)
+				{
+					lighting += CalcTBDRSphereArea(intersected_light_indices_sh[i],
+						intersected_light_indices_sh[i] - lights_type[4],
+						pos_es, normal, view_dir, shininess, tc, true);
+				}
+				for (i = light_start[5]; i < light_start[6]; ++ i)
+				{
+					lighting += CalcTBDRTubeArea(intersected_light_indices_sh[i],
+						intersected_light_indices_sh[i] - lights_type[4],
+						pos_es, normal, view_dir, shininess, tc, false);
+				}
+				for (i = light_start[6]; i < light_start[7]; ++ i)
+				{
+					lighting += CalcTBDRTubeArea(intersected_light_indices_sh[i],
+						intersected_light_indices_sh[i] - lights_type[4],
 						pos_es, normal, view_dir, shininess, tc, true);
 				}
 	

@@ -189,6 +189,7 @@ namespace KlayGE
 			break;
 
 		case LightSource::LT_Point:
+		case LightSource::LT_SphereArea:
 			mesh_name = "point_light_proxy.meshml";
 			break;
 
@@ -199,6 +200,10 @@ namespace KlayGE
 
 		case LightSource::LT_Spot:
 			mesh_name = "spot_light_proxy.meshml";
+			break;
+
+		case LightSource::LT_TubeArea:
+			mesh_name = "tube_light_proxy.meshml";
 			break;
 
 		default:

@@ -130,6 +130,40 @@ float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, f
 	env_brdf = saturate(env_brdf);
 	return prefiltered_env * (c_spec * env_brdf.x + env_brdf.y);
 }
+
+// Area lighting
+
+float AreaLightShininessFixup(float shininess, float3 light_pos, float light_radius, float3 point_pos)
+{
+	return shininess + light_radius / (2 * length(light_pos - point_pos));
+}
+
+float3 SphereAreaLightPositionFixup(float3 light_pos, float light_radius, float3 point_pos,
+		float3 normal, float3 view_dir)
+{
+	float3 l = light_pos - point_pos;
+	float3 r = reflect(view_dir, normal);
+	float3 intersect_point = dot(l, r) * r;
+	float3 center_to_ray = intersect_point - l;
+	return light_pos + center_to_ray * saturate(light_radius / length(center_to_ray));
+}
+
+float3 TubeAreaLightPositionFixup(float3 l0, float3 l1, float3 point_pos, float3 normal, float3 view_dir)
+{
+	float3 ld = l1 - l0;
+	float3 r = reflect(view_dir, normal);
+	float r_dot_ld = dot(r, ld);
+	float t = (dot(r, l0) * dot(r, ld) - dot(l0, ld)) / (dot(ld, ld) - r_dot_ld * r_dot_ld);
+	return l0 + point_pos + saturate(t) * ld;
+}
+
+float2 TubeAreaLightAttenuationIrradianceFixup(float3 l0, float3 l1, float3 normal)
+{
+	float len_l0 = length(l0);
+	float len_l1 = length(l1);
+	return float2(1.0f / (len_l0 * len_l1 + dot(l0, l1)),
+		dot(normal, l0) / len_l0 + dot(normal, l1) / len_l1);
+}
 		]]>
 	</shader>
 </effect>

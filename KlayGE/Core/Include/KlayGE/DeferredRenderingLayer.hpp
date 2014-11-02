@@ -341,9 +341,8 @@ namespace KlayGE
 			int32_t org_no, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateLightIndexedLightingPointSpot(PerViewport const & pvp, uint32_t g_buffer_index,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end,
-			bool is_point, bool with_shadow);
+		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, uint32_t g_buffer_index,
+			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
 		void UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -412,6 +411,10 @@ namespace KlayGE
 		RenderTechniquePtr technique_lidr_point_no_shadow_;
 		RenderTechniquePtr technique_lidr_spot_shadow_;
 		RenderTechniquePtr technique_lidr_spot_no_shadow_;
+		RenderTechniquePtr technique_lidr_sphere_area_shadow_;
+		RenderTechniquePtr technique_lidr_sphere_area_no_shadow_;
+		RenderTechniquePtr technique_lidr_tube_area_shadow_;
+		RenderTechniquePtr technique_lidr_tube_area_no_shadow_;
 
 		RenderTechniquePtr technique_tbdr_unified_;
 #endif
@@ -443,8 +446,9 @@ namespace KlayGE
 		RenderEffectParameterPtr shading_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;
+		RenderEffectParameterPtr light_radius_extend_param_;
 		RenderEffectParameterPtr light_color_param_;
-		RenderEffectParameterPtr light_falloff_param_;
+		RenderEffectParameterPtr light_falloff_range_param_;
 		RenderEffectParameterPtr light_view_proj_param_;
 		RenderEffectParameterPtr light_volume_mv_param_;
 		RenderEffectParameterPtr light_volume_mvp_param_;
@@ -474,6 +478,7 @@ namespace KlayGE
 		RenderEffectParameterPtr lights_dir_es_param_;
 		RenderEffectParameterPtr lights_falloff_range_param_;
 		RenderEffectParameterPtr lights_attrib_param_;
+		RenderEffectParameterPtr lights_radius_extend_param_;
 		RenderEffectParameterPtr lights_aabb_min_param_;
 		RenderEffectParameterPtr lights_aabb_max_param_;
 		RenderEffectParameterPtr light_index_tex_param_;
