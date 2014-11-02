@@ -1738,7 +1738,7 @@ namespace KlayGE
 			break;
 		}
 
-		scene_mgr.SmallObjectThreshold((PC_ShadowMap == pass_cat) ? 0.01f : 0.0f);
+		scene_mgr.SmallObjectThreshold((PC_ShadowMap == pass_cat) ? 0.002f : 0.0f);
 		return urv;
 	}
 

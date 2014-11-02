@@ -223,6 +223,10 @@ namespace KlayGE
 						{
 							obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
 						}
+						else
+						{
+							obj->VisibleMark(visible);
+						}
 					}
 					else
 					{

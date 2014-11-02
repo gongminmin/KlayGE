@@ -273,7 +273,7 @@ namespace KlayGE
 
 	bool Camera::JitterMode() const
 	{
-		return (mode_ & CM_Omni) > 0;
+		return (mode_ & CM_Jitter) > 0;
 	}
 
 	void Camera::JitterMode(bool jitter)
