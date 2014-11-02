@@ -904,7 +904,7 @@ namespace
 		}
 
 		TexCompressionPtr codec;
-		switch (dst_format)
+		switch (src_format)
 		{
 		case EF_BC1:
 		case EF_BC1_SRGB:
@@ -1051,7 +1051,7 @@ namespace
 	private:
 		void LoadDDS()
 		{
-			TexDesc::TexData& tex_data = *tex_desc_.tex_data;;
+			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
 
 			LoadTexture(tex_desc_.res_name, tex_data.type,
 				tex_data.width, tex_data.height, tex_data.depth,
@@ -1165,9 +1165,12 @@ namespace
 						uint32_t const src_elem_size = NumFormatBytes(convert_fmts[i][0]);
 						uint32_t const dst_elem_size = NumFormatBytes(convert_fmts[i][1]);
 
+						bool needs_new_data_block = (src_elem_size < dst_elem_size)
+							|| (IsCompressedFormat(convert_fmts[i][0]) && !IsCompressedFormat(convert_fmts[i][1]));
+
 						std::vector<uint8_t> new_data_block;
 						std::vector<uint32_t> new_sub_res_start;
-						if (src_elem_size < dst_elem_size)
+						if (needs_new_data_block)
 						{
 							uint32_t new_data_block_size = 0;
 							new_sub_res_start.resize(array_size * tex_data.num_mipmaps);
@@ -1221,7 +1224,7 @@ namespace
 
 								size_t sub_res = index * tex_data.num_mipmaps + level;
 								uint8_t* sub_data_block;
-								if (src_elem_size < dst_elem_size)
+								if (needs_new_data_block)
 								{
 									sub_data_block = &new_data_block[new_sub_res_start[sub_res]];
 								}
@@ -1247,7 +1250,7 @@ namespace
 							}
 						}
 
-						if (src_elem_size < dst_elem_size)
+						if (needs_new_data_block)
 						{
 							tex_data.data_block.swap(new_data_block);
 						}
