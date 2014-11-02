@@ -929,7 +929,18 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoSuspend()
 	{
-		// TODO
+#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+		if (has_d3d_11_2_runtime_)
+		{
+			IDXGIDevice3* dxgi_device = nullptr;
+			d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
+			if (dxgi_device != nullptr)
+			{
+				dxgi_device->Trim();
+				dxgi_device->Release();
+			}
+		}
+#endif
 	}
 
 	void D3D11RenderEngine::DoResume()
