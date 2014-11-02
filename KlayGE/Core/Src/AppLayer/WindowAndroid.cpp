@@ -35,6 +35,7 @@
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 
+#include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
 namespace KlayGE
@@ -131,6 +132,14 @@ namespace KlayGE
 		switch (cmd)
 		{
 		case APP_CMD_SAVE_STATE:
+			Context::Instance().AppInstance().Suspend();
+			break;
+
+		case APP_CMD_RESUME:
+			if (win->ready_)
+			{
+				Context::Instance().AppInstance().Resume();
+			}
 			break;
 
 		case APP_CMD_INIT_WINDOW:
