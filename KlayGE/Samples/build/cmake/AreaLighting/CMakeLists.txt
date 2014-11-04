@@ -16,6 +16,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Models/indirect_light_proxy.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/media/Models/point_light_proxy.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/media/Models/spot_light_proxy.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/media/Models/tube_light_proxy.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Copy2LightBuffer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Depth.ppml
@@ -61,6 +62,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/background_ddn.dds
