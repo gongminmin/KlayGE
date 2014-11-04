@@ -300,10 +300,10 @@ namespace KlayGE
 				adsf_name = adsf_node->Attrib("name")->ValueString();
 			}
 
-			XMLNodePtr perf_profile_node = context_node->FirstNode("perf_profile");
-			if (perf_profile_node)
+			XMLNodePtr perf_profiler_node = context_node->FirstNode("perf_profiler");
+			if (perf_profiler_node)
 			{
-				perf_profiler = perf_profile_node->Attrib("enabled")->ValueInt() ? true : false;
+				perf_profiler = perf_profiler_node->Attrib("enabled")->ValueInt() ? true : false;
 			}
 
 			XMLNodePtr location_sensor_node = context_node->FirstNode("location_sensor");

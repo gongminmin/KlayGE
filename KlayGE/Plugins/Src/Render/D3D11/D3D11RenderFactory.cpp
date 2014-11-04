@@ -106,7 +106,15 @@ namespace KlayGE
 
 	QueryPtr D3D11RenderFactory::MakeTimerQuery()
 	{
-		return MakeSharedPtr<D3D11TimerQuery>();
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0)
+		{
+			return MakeSharedPtr<D3D11TimerQuery>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

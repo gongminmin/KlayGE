@@ -60,7 +60,10 @@ namespace KlayGE
 		{
 			dirty_ = true;
 			cpu_timer_.restart();
-			gpu_timer_query_->Begin();
+			if (gpu_timer_query_)
+			{
+				gpu_timer_query_->Begin();
+			}
 		}
 	}
 
@@ -69,7 +72,10 @@ namespace KlayGE
 		if (Context::Instance().Config().perf_profiler)
 		{
 			cpu_time_ = cpu_timer_.elapsed();
-			gpu_timer_query_->End();
+			if (gpu_timer_query_)
+			{
+				gpu_timer_query_->End();
+			}
 		}
 	}
 
@@ -77,7 +83,10 @@ namespace KlayGE
 	{
 		if (dirty_)
 		{
-			gpu_time_ = checked_pointer_cast<TimerQuery>(gpu_timer_query_)->TimeElapsed();
+			if (gpu_timer_query_)
+			{
+				gpu_time_ = checked_pointer_cast<TimerQuery>(gpu_timer_query_)->TimeElapsed();
+			}
 			dirty_ = false;
 		}
 	}

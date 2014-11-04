@@ -164,7 +164,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::BeginFrame()
 	{
-		if (Context::Instance().Config().perf_profiler)
+		if ((d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0) && Context::Instance().Config().perf_profiler)
 		{
 			d3d_imm_ctx_->Begin(timestamp_disjoint_query_.get());
 		}
@@ -176,7 +176,7 @@ namespace KlayGE
 	{
 		RenderEngine::EndFrame();
 
-		if (Context::Instance().Config().perf_profiler)
+		if ((d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0) && Context::Instance().Config().perf_profiler)
 		{
 			d3d_imm_ctx_->End(timestamp_disjoint_query_.get());
 		}
@@ -184,9 +184,12 @@ namespace KlayGE
 
 	void D3D11RenderEngine::UpdateGPUTimestampsFrequency()
 	{
-		D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
-		while (S_OK != d3d_imm_ctx_->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
-		inv_timestamp_freq_ = disjoint.Disjoint ? 0 : (1.0 / disjoint.Frequency);
+		if (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0)
+		{
+			D3D11_QUERY_DATA_TIMESTAMP_DISJOINT disjoint;
+			while (S_OK != d3d_imm_ctx_->GetData(timestamp_disjoint_query_.get(), &disjoint, sizeof(disjoint), 0));
+			inv_timestamp_freq_ = disjoint.Disjoint ? 0 : (1.0 / disjoint.Frequency);
+		}
 	}
 
 	// 获取D3D接口
@@ -370,13 +373,16 @@ namespace KlayGE
 			}
 		}
 
-		D3D11_QUERY_DESC desc;
-		desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
-		desc.MiscFlags = 0;
+		if (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0)
+		{
+			D3D11_QUERY_DESC desc;
+			desc.Query = D3D11_QUERY_TIMESTAMP_DISJOINT;
+			desc.MiscFlags = 0;
 
-		ID3D11Query* disjoint_query;
-		d3d_device_->CreateQuery(&desc, &disjoint_query);
-		timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
+			ID3D11Query* disjoint_query;
+			d3d_device_->CreateQuery(&desc, &disjoint_query);
+			timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
+		}
 	}
 
 	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
