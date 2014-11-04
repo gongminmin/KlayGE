@@ -739,6 +739,7 @@ namespace KlayGE
 			filtered_csm_texs_param_[3] = dr_effect_->ParameterByName("filtered_csm_3_tex");
 		}
 		skylight_diff_spec_mip_param_ = dr_effect_->ParameterByName("skylight_diff_spec_mip");
+		skylight_mip_bias_param_ = dr_effect_->ParameterByName("skylight_mip_bias");
 		inv_view_param_ = dr_effect_->ParameterByName("inv_view");
 		skylight_y_cube_tex_param_ = dr_effect_->ParameterByName("skylight_y_cube_tex");
 		skylight_c_cube_tex_param_ = dr_effect_->ParameterByName("skylight_c_cube_tex");
@@ -2716,12 +2717,14 @@ namespace KlayGE
 
 				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
 				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+				*skylight_mip_bias_param_ = mip / -2.0f;
 
 				*inv_view_param_ = pvp.inv_view;
 			}
 			else
 			{
 				*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+				*skylight_mip_bias_param_ = 0.0f;
 			}
 		}
 
@@ -3205,12 +3208,14 @@ namespace KlayGE
 
 				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
 				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+				*skylight_mip_bias_param_ = mip / -2.0f;
 
 				*inv_view_param_ = pvp.inv_view;
 			}
 			else
 			{
 				*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+				*skylight_mip_bias_param_ = 0.0f;
 			}
 
 			tech = technique_lidr_ambient_;
@@ -3528,6 +3533,7 @@ namespace KlayGE
 		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
 		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
+		*skylight_mip_bias_param_ = 0.0f;
 
 		for (uint32_t li = 0; li < lights_.size();)
 		{
@@ -3551,6 +3557,7 @@ namespace KlayGE
 
 							uint32_t const mip = light->SkylightTexY()->NumMipMaps();
 							*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
+							*skylight_mip_bias_param_ = mip / -2.0f;
 
 							*inv_view_param_ = pvp.inv_view;
 						}

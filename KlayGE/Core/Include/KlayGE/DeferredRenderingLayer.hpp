@@ -503,6 +503,7 @@ namespace KlayGE
 #endif
 
 		RenderEffectParameterPtr skylight_diff_spec_mip_param_;
+		RenderEffectParameterPtr skylight_mip_bias_param_;
 		RenderEffectParameterPtr inv_view_param_;
 		RenderEffectParameterPtr skylight_y_cube_tex_param_;
 		RenderEffectParameterPtr skylight_c_cube_tex_param_;

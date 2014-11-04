@@ -997,6 +997,12 @@ namespace KlayGE
 				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
 				macros.push_back(macro_d3d11);
 			}
+			if (feature_level <= D3D_FEATURE_LEVEL_9_3)
+			{
+				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", "1" };
+				macros.push_back(macro_d3d11);
+			}
+			else
 			{
 				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", "0" };
 				macros.push_back(macro_d3d11);

@@ -795,6 +795,7 @@ float4 DeferredShadowingSunPS(
 
 	<parameter type="float4x4" name="inv_view"/>
 	<parameter type="int3" name="skylight_diff_spec_mip"/>
+	<parameter type="float" name="skylight_mip_bias"/>
 	<parameter type="textureCUBE" name="skylight_y_cube_tex"/>
 	<parameter type="textureCUBE" name="skylight_c_cube_tex"/>
 	<parameter type="sampler" name="skylight_sampler">
@@ -818,16 +819,26 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 		normal = mul(normal, (float3x3)inv_view);
 		view = mul(view, (float3x3)inv_view);
 
+#if KLAYGE_NO_TEX_LOD
+		float3 prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleBias(skylight_sampler, normal, skylight_diff_spec_mip.x).r,
+			skylight_c_cube_tex.SampleBias(skylight_sampler, normal, skylight_diff_spec_mip.x)).xyz;
+#else
 		float3 prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleLevel(skylight_sampler, normal, skylight_diff_spec_mip.x).r,
 			skylight_c_cube_tex.SampleLevel(skylight_sampler, normal, skylight_diff_spec_mip.x)).xyz;
+#endif
 		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
 		
 		shininess = log(shininess) / log(8192);
 	
 		float mip = CalcPrefilteredEnvMip(shininess, skylight_diff_spec_mip.y);
 		float3 r = CalcPrefilteredEnvVec(normal, view);
+#if KLAYGE_NO_TEX_LOD
+		prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleBias(skylight_sampler, r, skylight_mip_bias + mip).r,
+			skylight_c_cube_tex.SampleBias(skylight_sampler, r, skylight_mip_bias + mip)).xyz;
+#else
 		prefiltered_clr = decode_hdr_yc(skylight_y_cube_tex.SampleLevel(skylight_sampler, r, mip).r,
 			skylight_c_cube_tex.SampleLevel(skylight_sampler, r, mip)).xyz;
+#endif
 		shading.xyz += CalcEnvSpecular(prefiltered_clr, c_spec, shininess, normal, view);
 	}
 	

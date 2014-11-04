@@ -18,6 +18,7 @@
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="float" name="roughness"/>
 		<parameter type="int2" name="diff_spec_mip"/>
+		<parameter type="float" name="mip_bias"/>
 		<parameter type="float4" name="diff_spec"/>
 	</cbuffer>
 
@@ -42,8 +43,13 @@
 		<![CDATA[
 float3 PrefilteredDiffuseIBL(float3 c_diff, float3 normal)
 {
+#if KLAYGE_NO_TEX_LOD
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleBias(skybox_sampler, normal, diff_spec_mip.x).r,
+		skybox_Ccube_tex.SampleBias(skybox_sampler, normal, diff_spec_mip.x)).xyz;
+#else
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, normal, diff_spec_mip.x).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, normal, diff_spec_mip.x)).xyz;
+#endif
 	return CalcEnvDiffuse(prefiltered_clr, c_diff);
 }
 
@@ -52,8 +58,13 @@ float3 PrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, flo
 	float mip = CalcPrefilteredEnvMip(roughness, diff_spec_mip.y);
 	roughness = pow(8192.0f, roughness);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
+#if KLAYGE_NO_TEX_LOD
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleBias(skybox_sampler, r, mip_bias + mip).r,
+		skybox_Ccube_tex.SampleBias(skybox_sampler, r, mip_bias + mip)).xyz;
+#else
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+#endif
 	return prefiltered_clr * saturate(calc_brdf(0, diff_spec.w, roughness, r, normal, normal));
 }
 
@@ -62,8 +73,13 @@ float3 PBPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 normal, f
 	float mip = CalcPrefilteredEnvMip(roughness, diff_spec_mip.y);
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = CalcPrefilteredEnvVec(normal, view);
+#if KLAYGE_NO_TEX_LOD
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleBias(skybox_sampler, r, mip_bias + mip).r,
+		skybox_Ccube_tex.SampleBias(skybox_sampler, r, mip_bias + mip)).xyz;
+#else
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+#endif
 	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, roughness)).xy;
 	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y / 100);
 }
@@ -72,8 +88,13 @@ float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float roughness, float3 no
 {
 	float mip = CalcPrefilteredEnvMip(roughness, diff_spec_mip.y);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
+#if KLAYGE_NO_TEX_LOD
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleBias(skybox_sampler, r, mip_bias + mip).r,
+		skybox_Ccube_tex.SampleBias(skybox_sampler, r, mip_bias + mip)).xyz;
+#else
 	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
 		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
+#endif
 	return CalcEnvSpecular(prefiltered_clr, c_spec, roughness, normal, view);
 }
 

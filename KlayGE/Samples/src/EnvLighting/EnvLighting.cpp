@@ -60,6 +60,7 @@ namespace
 
 					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
 					*(technique_->Effect().ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
+					*(technique_->Effect().ParameterByName("mip_bias")) = mip / -2.0f;
 					break;
 				}
 			}
@@ -467,7 +468,7 @@ EnvLightingApp::EnvLightingApp()
 bool EnvLightingApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 3)
+	if (caps.max_shader_model < 2)
 	{
 		return false;
 	}
