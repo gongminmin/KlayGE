@@ -181,6 +181,8 @@ void AreaLightingApp::OnCreate()
 	id_light_type_combo_ = dialog_->IDFromName("LightTypeCombo");
 	id_radius_static_ = dialog_->IDFromName("RadiusStatic");
 	id_radius_slider_ = dialog_->IDFromName("RadiusSlider");
+	id_length_static_ = dialog_->IDFromName("LengthStatic");
+	id_length_slider_ = dialog_->IDFromName("LengthSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&AreaLightingApp::LightTypeChangedHandler, this, KlayGE::placeholders::_1));
@@ -188,6 +190,8 @@ void AreaLightingApp::OnCreate()
 
 	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&AreaLightingApp::RadiusChangedHandler, this, KlayGE::placeholders::_1));
 	this->RadiusChangedHandler(*dialog_->Control<UISlider>(id_radius_slider_));
+	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&AreaLightingApp::LengthChangedHandler, this, KlayGE::placeholders::_1));
+	this->LengthChangedHandler(*dialog_->Control<UISlider>(id_length_slider_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&AreaLightingApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
@@ -234,8 +238,10 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		sphere_area_light_src_->Visible(false);
 		tube_area_light_->Enabled(false);
 		tube_area_light_src_->Visible(false);
-		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(false);
-		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(false);
+		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
+		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
+		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
+		dialog_->Control<UISlider>(id_length_slider_)->SetVisible(false);
 		break;
 
 	case 1:
@@ -245,8 +251,10 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		sphere_area_light_src_->Visible(true);
 		tube_area_light_->Enabled(false);
 		tube_area_light_src_->Visible(false);
-		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(true);
-		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(true);
+		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(true);
+		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(true);
+		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(false);
+		dialog_->Control<UISlider>(id_length_slider_)->SetVisible(false);
 		break;
 
 	case 2:
@@ -256,8 +264,10 @@ void AreaLightingApp::LightTypeChangedHandler(UIComboBox const & sender)
 		sphere_area_light_src_->Visible(false);
 		tube_area_light_->Enabled(true);
 		tube_area_light_src_->Visible(true);
-		dialog_->Control<UIStatic>(id_radius_static_)->SetEnabled(true);
-		dialog_->Control<UISlider>(id_radius_slider_)->SetEnabled(true);
+		dialog_->Control<UIStatic>(id_radius_static_)->SetVisible(false);
+		dialog_->Control<UISlider>(id_radius_slider_)->SetVisible(false);
+		dialog_->Control<UIStatic>(id_length_static_)->SetVisible(true);
+		dialog_->Control<UISlider>(id_length_slider_)->SetVisible(true);
 		break;
 
 	default:
@@ -272,12 +282,21 @@ void AreaLightingApp::RadiusChangedHandler(UISlider const & sender)
 	checked_pointer_cast<SphereAreaLightSource>(sphere_area_light_)->Radius(radius);
 	checked_pointer_cast<SceneObjectLightSourceProxy>(sphere_area_light_src_)->Scaling(radius, radius, radius);
 
-	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, radius));
-	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, radius);
-
 	std::wostringstream stream;
 	stream << L"Radius: " << radius;
 	dialog_->Control<UIStatic>(id_radius_static_)->SetText(stream.str());
+}
+
+void AreaLightingApp::LengthChangedHandler(UISlider const & sender)
+{
+	float length = sender.GetValue() / 100.0f;
+
+	checked_pointer_cast<TubeAreaLightSource>(tube_area_light_)->Extend(float3(0.1f, 0.1f, length));
+	checked_pointer_cast<SceneObjectLightSourceProxy>(tube_area_light_src_)->Scaling(0.1f, 0.1f, length);
+
+	std::wostringstream stream;
+	stream << L"Length: " << length;
+	dialog_->Control<UIStatic>(id_length_static_)->SetText(stream.str());
 }
 
 void AreaLightingApp::CtrlCameraHandler(UICheckBox const & sender)
@@ -299,7 +318,7 @@ void AreaLightingApp::DoUpdateOverlay()
 
 	UIManager::Instance().Render();
 
-	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Deferred Rendering", 16);
+	font_->RenderText(0, 0, Color(1, 1, 0, 1), L"Area Lighting", 16);
 	font_->RenderText(0, 18, Color(1, 1, 0, 1), renderEngine.ScreenFrameBuffer()->Description(), 16);
 
 	std::wostringstream stream;

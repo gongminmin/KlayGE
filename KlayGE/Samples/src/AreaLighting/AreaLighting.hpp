@@ -24,6 +24,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void LightTypeChangedHandler(KlayGE::UIComboBox const & sender);
 	void RadiusChangedHandler(KlayGE::UISlider const & sender);
+	void LengthChangedHandler(KlayGE::UISlider const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -46,6 +47,8 @@ private:
 	int id_light_type_combo_;
 	int id_radius_static_;
 	int id_radius_slider_;
+	int id_length_static_;
+	int id_length_slider_;
 	int id_ctrl_camera_;
 };
 
