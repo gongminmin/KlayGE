@@ -12,6 +12,8 @@ SET(KLAYGE_ROOT_DIR "${KLAYGE_PROJECT_DIR}/..")
 
 SET(PYTHON_EXE "python" CACHE STRING "Executable of Python.")
 
+SET(FORCE_RTTI 1)
+
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)

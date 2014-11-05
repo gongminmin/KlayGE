@@ -895,7 +895,7 @@ namespace KlayGE
 		int dr = best_results[1].block_color_unscaled_.r() - best_results[0].block_color_unscaled_.r();
 		int dg = best_results[1].block_color_unscaled_.g() - best_results[0].block_color_unscaled_.g();
 		int db = best_results[1].block_color_unscaled_.b() - best_results[0].block_color_unscaled_.b();
-		BOOST_ASSERT(best_use_color4 || (MathLib::min3(dr, dg, db) >= -4) && (MathLib::min3(dr, dg, db) <= 3));
+		BOOST_ASSERT(best_use_color4 || ((MathLib::min3(dr, dg, db) >= -4) && (MathLib::min3(dr, dg, db) <= 3)));
 
 		if (best_use_color4)
 		{

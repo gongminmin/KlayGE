@@ -1566,10 +1566,10 @@ namespace KlayGE
 
 		if (mode_to_info_[mode] >= 0)
 		{
-			BOOST_ASSERT(mode_to_info_[mode] < sizeof(mode_info_) / sizeof(mode_info_[0]));
+			BOOST_ASSERT(mode_to_info_[mode] < static_cast<int>(sizeof(mode_info_) / sizeof(mode_info_[0])));
 			ModeDescriptor const * desc = mode_desc_[mode_to_info_[mode]];
 
-			BOOST_ASSERT(mode_to_info_[mode] < sizeof(mode_desc_) / sizeof(mode_desc_[0]));
+			BOOST_ASSERT(mode_to_info_[mode] < static_cast<int>(sizeof(mode_desc_) / sizeof(mode_desc_[0])));
 			ModeInfo const & info = mode_info_[mode_to_info_[mode]];
 
 			array<std::pair<int3, int3>, BC6_MAX_REGIONS> end_pts;
