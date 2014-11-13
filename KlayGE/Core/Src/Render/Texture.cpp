@@ -734,6 +734,15 @@ namespace
 		case EF_SIGNED_BC5:
 			return DXGI_FORMAT_BC5_SNORM;
 
+		case EF_BC6:
+			return DXGI_FORMAT_BC6H_UF16;
+
+		case EF_SIGNED_BC6:
+			return DXGI_FORMAT_BC6H_SF16;
+
+		case EF_BC7:
+			return DXGI_FORMAT_BC7_UNORM;
+
 		case EF_D16:
 			return DXGI_FORMAT_D16_UNORM;
 
@@ -754,6 +763,9 @@ namespace
 
 		case EF_BC3_SRGB:
 			return DXGI_FORMAT_BC3_UNORM_SRGB;
+
+		case EF_BC7_SRGB:
+			return DXGI_FORMAT_BC7_UNORM_SRGB;
 
 			// My extensions for ETC
 
@@ -2064,6 +2076,10 @@ namespace KlayGE
 					break;
 
 				case EF_B10G11R11F:
+				case EF_BC6:
+				case EF_SIGNED_BC6:
+				case EF_BC7:
+				case EF_BC7_SRGB:
 				case EF_ETC1:
 				case EF_ETC2_R11:
 				case EF_SIGNED_ETC2_R11:
