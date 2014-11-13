@@ -236,7 +236,7 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 }
 
 float4 CalcTBDRLighting(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, bool with_shadow, float atten_factor, float irradiance_factor)
+		float shininess, float2 tc, bool with_shadow, float atten, float irradiance_factor)
 {
 	float4 lighting = 0;
 	float3 dir = light_pos - pos_es;
@@ -254,7 +254,6 @@ float4 CalcTBDRLighting(float3 light_pos, int index, int shadowing_channel, floa
 			}
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-			float atten = atten_factor * attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz);
 			lighting = CalcColor(n_dot_l, spec, atten, shadow, irradiance_factor * lights_color[index], lights_attrib[index]);
 		}
 	}
@@ -265,20 +264,24 @@ float4 CalcTBDRLighting(float3 light_pos, int index, int shadowing_channel, floa
 float4 CalcTBDRPoint(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
-	return CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 1].z),
-		pos_es, normal, view_dir, shininess, tc, with_shadow, 1, 1);
+	float3 light_pos = lights_pos_es[index].xyz;
+	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z),
+		pos_es, normal, view_dir, shininess, tc, with_shadow,
+		attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz), 1);
 }
 
 float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
+	float3 light_pos = lights_pos_es[index].xyz;
 	float4 lighting = 0;
-	float spot = spot_lighting(lights_pos_es[index].xyz, lights_dir_es[index].xyz,
+	float spot = spot_lighting(light_pos, lights_dir_es[index].xyz,
 		float2(lights_pos_es[index].w, lights_dir_es[index].w), pos_es);
 	if (spot > 0)
 	{
-		lighting = CalcTBDRLighting(lights_pos_es[index].xyz, index, int(lights_attrib[shadow_index + 2].z),
-			pos_es, normal, view_dir, shininess, tc, with_shadow, spot, 1);
+		lighting = CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 2].z),
+			pos_es, normal, view_dir, shininess, tc, with_shadow,
+			spot * attenuation_term(light_pos, pos_es, lights_falloff_range[index].xyz), 1);
 	}
 	
 	return lighting;
@@ -287,11 +290,13 @@ float4 CalcTBDRSpot(int index, int shadow_index, float3 pos_es, float3 normal, f
 float4 CalcTBDRSphereArea(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,
 		float shininess, float2 tc, bool with_shadow)
 {
-	float3 light_pos = SphereAreaLightPositionFixup(lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es,
+	float3 light_pos = lights_pos_es[index].xyz;
+	light_pos = SphereAreaLightPositionFixup(light_pos, lights_radius_extend[index].x, pos_es,
 		normal, view_dir);
-	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
+	shininess = AreaLightShininessFixup(shininess, light_pos, lights_radius_extend[index].x, pos_es);
 	return CalcTBDRLighting(light_pos, index, int(lights_attrib[shadow_index + 1].z), pos_es, normal, view_dir,
-		shininess, tc, with_shadow, 1, 1);
+		shininess, tc, with_shadow,
+		attenuation_term(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz), 1);
 }
 
 float4 CalcTBDRTubeArea(int index, int shadow_index, float3 pos_es, float3 normal, float3 view_dir,

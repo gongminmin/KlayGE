@@ -267,7 +267,7 @@ void DeferredRenderingVS(float4 pos : POSITION,
 }
 
 float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, float atten_factor, float irrandance_factor, float2 tc_ddx, float2 tc_ddy)
+		float shininess, float2 tc, float atten, float irrandance_factor, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
 	float3 dir = light_pos - pos_es;
@@ -285,7 +285,6 @@ float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 vie
 			}
 
 			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
-			float atten = atten_factor * attenuation_term(light_pos, pos_es.xyz, light_falloff_range.xyz);
 			lighting = CalcColor(n_dot_l, spec, atten, shadow, irrandance_factor * light_color, light_attrib);
 		}
 	}
@@ -321,7 +320,8 @@ float4 DeferredRenderingPointPS(
 	float shininess = GetShininess(ndc);
 	
 	return CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
-		shininess, tc, 1, 1, tc_ddx, tc_ddy);
+		shininess, tc,
+		attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingSpotPS(
@@ -357,7 +357,8 @@ float4 DeferredRenderingSpotPS(
 		float shininess = GetShininess(ndc);
 		
 		lighting = CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
-			shininess, tc, spot, 1, tc_ddx, tc_ddy);
+			shininess, tc,
+			spot * attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 	}
 
 	return lighting;
@@ -483,7 +484,8 @@ float4 DeferredRenderingSphereAreaPS(
 		normal, view_dir);
 	shininess = AreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius_extend.x, pos_es);
 	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
-		shininess, tc, 1, 1, tc_ddx, tc_ddy);
+		shininess, tc,
+		attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingTubeAreaPS(
