@@ -164,6 +164,49 @@ namespace
 		return ret;
 	}
 
+	void WriteBit(void* output, size_t& start_bit, uint8_t val)
+	{
+		BOOST_ASSERT((start_bit < 128) && (val < 2));
+
+		uint8_t* bits = static_cast<uint8_t*>(output);
+
+		size_t index = start_bit >> 3;
+		size_t base = start_bit - (index << 3);
+		bits[index] &= ~(1 << base);
+		bits[index] |= val << base;
+		++ start_bit;
+	}
+
+	void WriteBits(void* output, size_t& start_bit, size_t num_bits, uint8_t val)
+	{
+		if (0 == num_bits)
+		{
+			return;
+		}
+
+		uint8_t* bits = static_cast<uint8_t*>(output);
+
+		BOOST_ASSERT((start_bit + num_bits <= 128) && (num_bits <= 8));
+		BOOST_ASSERT(val < (1 << num_bits));
+
+		size_t index = start_bit >> 3;
+		size_t base = start_bit - (index << 3);
+		if (base + num_bits > 8)
+		{
+			size_t first_index_bits = 8 - base;
+			size_t next_index_bits = num_bits - first_index_bits;
+			bits[index + 0] &= ~(((1 << first_index_bits) - 1) << base);
+			bits[index + 0] |= val << base;
+			bits[index + 1] &= ~((1 << next_index_bits) - 1);
+			bits[index + 1] |= val >> first_index_bits;
+		}
+		else
+		{
+			bits[index] &= ~(((1 << num_bits) - 1) << base);
+			bits[index] |= val << base;
+		}
+		start_bit += num_bits;
+	}
 
 	uint32_t GetPartition(uint32_t partitions, uint32_t shape, uint32_t offset)
 	{
@@ -200,7 +243,7 @@ namespace
 		}
 	}
 
-	half INT2F16(int input, bool signed_fmt)
+	half Int2F16(int input, bool signed_fmt)
 	{
 		half h;
 		uint16_t out;
@@ -226,9 +269,9 @@ namespace
 
 	void ToF16(Vector_T<half, 4>& f16, int3 const & clr, bool signed_fmt)
 	{
-		f16.x() = INT2F16(clr.x(), signed_fmt);
-		f16.y() = INT2F16(clr.y(), signed_fmt);
-		f16.z() = INT2F16(clr.z(), signed_fmt);
+		f16.x() = Int2F16(clr.x(), signed_fmt);
+		f16.y() = Int2F16(clr.y(), signed_fmt);
+		f16.z() = Int2F16(clr.z(), signed_fmt);
 	}
 
 	void TransformInverse(std::pair<int3, int3>* end_pts, ARGBColor32 const & prec, bool signed_fmt)
@@ -1606,25 +1649,25 @@ namespace KlayGE
 	}
 
 
-	// BC7 compression: partitions, partition_bits, p_bits, rotation_bits, index_mode_bits, index_prec, index_prec_2, rgba_prec, rgba_prec_with_p
+	// BC7 compression: mode partitions, partition_bits, p_bits, rotation_bits, index_mode_bits, index_prec, index_prec_2, rgba_prec, rgba_prec_with_p, p_bit_type
 	TexCompressionBC7::ModeInfo const TexCompressionBC7::mode_info_[] =
 	{
-		{ 3, 4, 6, 0, 0, 3, 0, ARGBColor32(0, 4, 4, 4), ARGBColor32(0, 5, 5, 5) },
 		// Mode 0: Color only, 3 Subsets, RGBP 4441 (unique P-bit), 3-bit indecies, 16 partitions
-		{ 2, 6, 2, 0, 0, 3, 0, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 7, 7, 7) },
+		{ 0, 3, 4, 6, 0, 0, 3, 0, ARGBColor32(0, 4, 4, 4), ARGBColor32(0, 5, 5, 5), PBT_Unique },
 		// Mode 1: Color only, 2 Subsets, RGBP 6661 (shared P-bit), 3-bit indecies, 64 partitions
-		{ 3, 6, 0, 0, 0, 2, 0, ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5) },
+		{ 1, 2, 6, 2, 0, 0, 3, 0, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 7, 7, 7), PBT_Shared },
 		// Mode 2: Color only, 3 Subsets, RGB 555, 2-bit indecies, 64 partitions
-		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 8, 8, 8) },
+		{ 2, 3, 6, 0, 0, 0, 2, 0, ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5), PBT_None },
 		// Mode 3: Color only, 2 Subsets, RGBP 7771 (unique P-bit), 2-bits indecies, 64 partitions
-		{ 1, 0, 0, 2, 1, 2, 3, ARGBColor32(6, 5, 5, 5), ARGBColor32(6, 5, 5, 5) },
+		{ 3, 2, 6, 4, 0, 0, 2, 0, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 8, 8, 8), PBT_Unique },
 		// Mode 4: Color w/ Separate Alpha, 1 Subset, RGB 555, A6, 16x2/16x3-bit indices, 2-bit rotation, 1-bit index selector
-		{ 1, 0, 0, 2, 0, 2, 2, ARGBColor32(8, 7, 7, 7), ARGBColor32(8, 7, 7, 7) },
+		{ 4, 1, 0, 0, 2, 1, 2, 3, ARGBColor32(6, 5, 5, 5), ARGBColor32(6, 5, 5, 5), PBT_None },
 		// Mode 5: Color w/ Separate Alpha, 1 Subset, RGB 777, A8, 16x2/16x2-bit indices, 2-bit rotation
-		{ 1, 0, 2, 0, 0, 4, 0, ARGBColor32(7, 7, 7, 7), ARGBColor32(8, 8, 8, 8) },
+		{ 5, 1, 0, 0, 2, 0, 2, 2, ARGBColor32(8, 7, 7, 7), ARGBColor32(8, 7, 7, 7), PBT_None },
 		// Mode 6: Color+Alpha, 1 Subset, RGBAP 77771 (unique P-bit), 16x4-bit indecies
-		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6) }
+		{ 6, 1, 0, 2, 0, 0, 4, 0, ARGBColor32(7, 7, 7, 7), ARGBColor32(8, 8, 8, 8), PBT_Unique },
 		// Mode 7: Color+Alpha, 2 Subsets, RGBAP 55551 (unique P-bit), 2-bit indices, 64 partitions
+		{ 7, 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
 	};
 
 	TexCompressionBC7::TexCompressionBC7()

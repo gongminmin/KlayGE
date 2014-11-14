@@ -235,8 +235,16 @@ namespace KlayGE
 			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
 
 	private:
+		enum PBitType
+		{
+			PBT_None,
+			PBT_Shared,
+			PBT_Unique
+		};
+
 		struct ModeInfo
 		{
+			uint8_t mode;
 			uint8_t partitions;
 			uint8_t partition_bits;
 			uint8_t p_bits;
@@ -246,6 +254,7 @@ namespace KlayGE
 			uint8_t index_prec_2;
 			ARGBColor32 rgba_prec;
 			ARGBColor32 rgba_prec_with_p;
+			PBitType p_bit_type;
 		};
 
 		static ModeInfo const mode_info_[];
