@@ -473,38 +473,41 @@ namespace KlayGE
 						float height = ci.height * rel_size_y;
 
 						KLAYGE_AUTO(cmiter, cim.find(ch));
-						Rect const & texRect(cmiter->second.rc);
-						Rect pos_rc(x + left, y + top, x + left + width, y + top + height);
+						if (cmiter != cim.end())
+						{
+							Rect const & texRect(cmiter->second.rc);
+							Rect pos_rc(x + left, y + top, x + left + width, y + top + height);
 
-						verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
+							verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.top(), sz),
 												clr32,
 												float2(texRect.left(), texRect.top())));
-						verts.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
+							verts.push_back(FontVert(float3(pos_rc.right(), pos_rc.top(), sz),
 												clr32,
 												float2(texRect.right(), texRect.top())));
-						verts.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
+							verts.push_back(FontVert(float3(pos_rc.right(), pos_rc.bottom(), sz),
 												clr32,
 												float2(texRect.right(), texRect.bottom())));
-						verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
+							verts.push_back(FontVert(float3(pos_rc.left(), pos_rc.bottom(), sz),
 												clr32,
 												float2(texRect.left(), texRect.bottom())));
 
-						inds.push_back(lastIndex + 0);
-						inds.push_back(lastIndex + 1);
-						if (restart_)
-						{
-							inds.push_back(lastIndex + 3);
-							inds.push_back(lastIndex + 2);
-							inds.push_back(0xFFFF);
-						}
-						else
-						{
-							inds.push_back(lastIndex + 2);
-							inds.push_back(lastIndex + 2);
-							inds.push_back(lastIndex + 3);
 							inds.push_back(lastIndex + 0);
+							inds.push_back(lastIndex + 1);
+							if (restart_)
+							{
+								inds.push_back(lastIndex + 3);
+								inds.push_back(lastIndex + 2);
+								inds.push_back(0xFFFF);
+							}
+							else
+							{
+								inds.push_back(lastIndex + 2);
+								inds.push_back(lastIndex + 2);
+								inds.push_back(lastIndex + 3);
+								inds.push_back(lastIndex + 0);
+							}
+							lastIndex += 4;
 						}
-						lastIndex += 4;
 					}
 
 					x += (offset_adv.second & 0xFFFF) * rel_size_x;
@@ -615,8 +618,6 @@ namespace KlayGE
 							{
 								if (chiter->second.tick == min_tick)
 								{
-									cim.erase(chiter);
-
 									uint32_t const x = static_cast<int32_t>(chiter->second.rc.left() * tex_size);
 									uint32_t const y = static_cast<int32_t>(chiter->second.rc.top() * tex_size);
 									uint32_t const id = y * num_chars_a_row + x;
@@ -626,6 +627,9 @@ namespace KlayGE
 										++ freeiter;
 									}
 									char_free_list_.insert(freeiter, std::make_pair(id, id + 1));
+
+									cim.erase(chiter);
+									break;
 								}
 							}
 							for (KLAYGE_AUTO(freeiter, char_free_list_.begin()); freeiter != char_free_list_.end();)
@@ -633,14 +637,21 @@ namespace KlayGE
 								KLAYGE_AUTO(nextiter, freeiter);
 								++ nextiter;
 
-								if (freeiter->second == nextiter->first)
+								if (nextiter != char_free_list_.end())
 								{
-									freeiter->second = nextiter->second;
-									char_free_list_.erase(nextiter);
+									if (freeiter->second == nextiter->first)
+									{
+										freeiter->second = nextiter->second;
+										char_free_list_.erase(nextiter);
+									}
+									else
+									{
+										++ freeiter;
+									}
 								}
 								else
 								{
-									++ freeiter;
+									break;
 								}
 							}
 						}
