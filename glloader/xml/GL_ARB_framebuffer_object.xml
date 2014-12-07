@@ -98,6 +98,9 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="renderbuffer"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glBindRenderbufferEXT"/>
+			</mappings>
 		</function>
 		<function name="glDeleteRenderbuffers" return="void">
 			<params>
@@ -151,6 +154,9 @@
 				<param type="GLenum" name="target"/>
 				<param type="GLuint" name="framebuffer"/>
 			</params>
+			<mappings>
+				<mapping from="GL_EXT_framebuffer_object" name="glBindFramebufferEXT"/>
+			</mappings>
 		</function>
 		<function name="glDeleteFramebuffers" return="void">
 			<params>
