@@ -1,3 +1,5 @@
+FIND_PACKAGE(PythonInterp)
+
 SET(EXE_NAME "GLCompatibility")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
 SET(MEDIA_DIR "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/")
@@ -17,7 +19,7 @@ SETUP_TOOL(GLCompatibility)
 
 ADD_CUSTOM_COMMAND(TARGET GLCompatibility
 	PRE_BUILD
-	COMMAND "${PYTHON_EXE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/MakePyZip.py")
+	COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLCompatibility/MakePyZip.py")
 
 ADD_CUSTOM_COMMAND(TARGET GLCompatibility
 	POST_BUILD

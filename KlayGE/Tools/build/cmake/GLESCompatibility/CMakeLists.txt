@@ -1,3 +1,5 @@
+FIND_PACKAGE(PythonInterp)
+
 SET(EXE_NAME "GLESCompatibility")
 SET(KLAYGE_ROOT_DIR "${KLAYGE_ROOT_DIR}")
 SET(MEDIA_DIR "${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/")
@@ -17,7 +19,7 @@ SETUP_TOOL(GLESCompatibility)
 
 ADD_CUSTOM_COMMAND(TARGET GLESCompatibility
 	PRE_BUILD
-	COMMAND "${PYTHON_EXE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/MakePyZip.py")
+	COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/MakePyZip.py")
 
 ADD_CUSTOM_COMMAND(TARGET GLESCompatibility
 	POST_BUILD
