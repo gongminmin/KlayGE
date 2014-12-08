@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_device_openwf" reg_no="80">
+	<tokens>
+		<token name="EGL_OPENWF_DEVICE_ID_EXT" value="0x3237"/>
+		<token name="EGL_OPENWF_PIPELINE_ID_EXT" value="0x3238"/>
+		<token name="EGL_OPENWF_PORT_ID_EXT" value="0x3239"/>
+	</tokens>
+</gl_extension>

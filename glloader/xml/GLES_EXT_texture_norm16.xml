@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_norm16" reg_no="207">
+	<tokens>
+		<token name="GL_R16_EXT" value="0x822A"/>
+		<token name="GL_RG16_EXT" value="0x822C"/>
+		<token name="GL_RGBA16_EXT" value="0x805B"/>
+		<token name="GL_RGB16_EXT" value="0x8054"/>
+		<token name="GL_R16_SNORM_EXT" value="0x8F98"/>
+		<token name="GL_RG16_SNORM_EXT" value="0x8F99"/>
+		<token name="GL_RGB16_SNORM_EXT" value="0x8F9A"/>
+		<token name="GL_RGBA16_SNORM_EXT" value="0x8F9B"/>
+	</tokens>
+</gl_extension>

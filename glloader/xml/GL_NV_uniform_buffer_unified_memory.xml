@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_uniform_buffer_unified_memory" reg_no="459">
+	<tokens>
+		<token name="GL_UNIFORM_BUFFER_UNIFIED_NV" value="0x936E"/>
+		<token name="GL_UNIFORM_BUFFER_ADDRESS_NV" value="0x936F"/>
+		<token name="GL_UNIFORM_BUFFER_LENGTH_NV" value="0x9370"/>
+	</tokens>
+</gl_extension>

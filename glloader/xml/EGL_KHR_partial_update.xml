@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_partial_update" reg_no="83">
+	<tokens>
+		<token name="EGL_BUFFER_AGE_KHR" value="0x313D"/>
+	</tokens>
+
+	<functions>
+		<function name="eglSetDamageRegionKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint*" name="rects"/>
+				<param type="EGLint" name="n_rects"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

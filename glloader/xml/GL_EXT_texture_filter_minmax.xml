@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_texture_filter_minmax" reg_no="464">
+	<tokens>
+		<token name="GL_TEXTURE_REDUCTION_MODE_EXT" value="0x9366"/>
+		<token name="GL_WEIGHTED_AVERAGE_EXT" value="0x9367"/>
+	</tokens>
+</gl_extension>

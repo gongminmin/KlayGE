@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_stream_consumer_egloutput" reg_no="81">
+	<functions>
+		<function name="eglStreamConsumerOutputEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLOutputLayerEXT" name="layer"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

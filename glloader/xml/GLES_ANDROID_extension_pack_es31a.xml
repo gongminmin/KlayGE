@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ANDROID_extension_pack_es31a" reg_no="187">
+<gl_extension name="GLES_ANDROID_extension_pack_es31a" reg_no="187">
 	<additionals>
 		<ext name="GLES_VERSION_3_1"/>
 		<ext name="GLES_KHR_debug"/>

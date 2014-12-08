@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_conservative_raster" reg_no="465">
+	<tokens>
+		<token name="GL_CONSERVATIVE_RASTERIZATION_NV" value="0x9346"/>
+		<token name="GL_SUBPIXEL_PRECISION_BIAS_X_BITS_NV" value="0x9347"/>
+		<token name="GL_SUBPIXEL_PRECISION_BIAS_Y_BITS_NV" value="0x9348"/>
+		<token name="GL_MAX_SUBPIXEL_PRECISION_BIAS_BITS_NV" value="0x9349"/>
+	</tokens>
+
+	<functions>
+		<function name="glSubpixelPrecisionBiasNV" return="void">
+			<params>
+				<param type="GLuint" name="xbits"/>
+				<param type="GLuint" name="ybits"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

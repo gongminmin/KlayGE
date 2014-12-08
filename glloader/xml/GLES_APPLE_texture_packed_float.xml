@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_texture_packed_float" reg_no="195">
+	<tokens>
+		<token name="GL_UNSIGNED_INT_10F_11F_11F_REV_APPLE" value="0x8C3B"/>
+		<token name="GL_UNSIGNED_INT_5_9_9_9_REV_APPLE" value="0x8C3E"/>
+		<token name="GL_R11F_G11F_B10F_APPLE" value="0x8C3A"/>
+		<token name="GL_RGB9_E5_APPLE" value="0x8C3D"/>
+	</tokens>
+</gl_extension>

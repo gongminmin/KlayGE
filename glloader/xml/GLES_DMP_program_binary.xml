@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_DMP_program_binary" reg_no="192">
+	<tokens>
+		<token name="GL_SMAPHS30_PROGRAM_BINARY_DMP" value="0x9251"/>
+		<token name="GL_SMAPHS_PROGRAM_BINARY_DMP" value="0x9252"/>
+		<token name="GL_DMP_PROGRAM_BINARY_DMP" value="0x9253"/>
+	</tokens>
+</gl_extension>

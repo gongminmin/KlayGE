@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_multi_draw_indirect" reg_no="205">
+	<functions>
+		<function name="glMultiDrawArraysIndirectEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const GLvoid*" name="indirect"/>
+				<param type="GLsizei" name="drawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+		<function name="glMultiDrawElementsIndirectEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indirect"/>
+				<param type="GLsizei" name="drawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

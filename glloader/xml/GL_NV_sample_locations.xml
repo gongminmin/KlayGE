@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_sample_locations" reg_no="472">
+	<tokens>
+		<token name="GL_SAMPLE_LOCATION_SUBPIXEL_BITS_NV" value="0x933D"/>
+		<token name="GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_NV" value="0x933E"/>
+		<token name="GL_SAMPLE_LOCATION_PIXEL_GRID_HEIGHT_NV" value="0x933F"/>
+		<token name="GL_PROGRAMMABLE_SAMPLE_LOCATION_TABLE_SIZE_NV" value="0x9340"/>
+		<token name="GL_SAMPLE_LOCATION_NV" value="0x8E50"/>
+		<token name="GL_PROGRAMMABLE_SAMPLE_LOCATION_NV" value="0x9341"/>
+		<token name="GL_FRAMEBUFFER_PROGRAMMABLE_SAMPLE_LOCATIONS_NV" value="0x9342"/>
+		<token name="GL_FRAMEBUFFER_SAMPLE_LOCATION_PIXEL_GRID_NV" value="0x9343"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferSampleLocationsfvNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glNamedFramebufferSampleLocationsfvNV" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glResolveDepthValuesNV" return="void"/>
+	</functions>
+</gl_extension>

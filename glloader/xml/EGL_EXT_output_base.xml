@@ -1,0 +1,83 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_output_base" reg_no="78">
+	<typedefs>
+		<typedef type="void*" synonym="EGLOutputLayerEXT"/>
+		<typedef type="void*" synonym="EGLOutputPortEXT"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_NO_OUTPUT_LAYER_EXT" value="((EGLOutputLayerEXT)0)"/>
+		<token name="EGL_NO_OUTPUT_PORT_EXT" value="((EGLOutputPortEXT)0)"/>
+		<token name="EGL_BAD_OUTPUT_LAYER_EXT" value="0x322D"/>
+		<token name="EGL_BAD_OUTPUT_PORT_EXT" value="0x322E"/>
+		<token name="EGL_SWAP_INTERVAL_EXT" value="0x322F"/>
+	</tokens>
+
+	<functions>
+		<function name="eglGetOutputLayersEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLAttrib const *" name="attrib_list"/>
+				<param type="EGLOutputLayerEXT*" name="layers"/>
+				<param type="EGLint" name="max_layers"/>
+				<param type="EGLint*" name="num_layers"/>
+			</params>
+		</function>
+		<function name="eglGetOutputPortsEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLAttrib const *" name="attrib_list"/>
+				<param type="EGLOutputPortEXT*" name="ports"/>
+				<param type="EGLint" name="max_ports"/>
+				<param type="EGLint*" name="num_ports"/>
+			</params>
+		</function>
+		<function name="eglOutputLayerAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputLayerEXT" name="layer"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryOutputLayerAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputLayerEXT" name="layer"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryOutputLayerStringEXT" return="char const *">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputLayerEXT" name="layer"/>
+				<param type="EGLint" name="name"/>
+			</params>
+		</function>
+		<function name="eglOutputPortAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputPortEXT" name="port"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryOutputPortAttribEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputPortEXT" name="port"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+		<function name="eglQueryOutputPortStringEXT" return="char const *">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLOutputPortEXT" name="port"/>
+				<param type="EGLint" name="name"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_conditional_render" reg_no="198">
+	<tokens>
+		<token name="GL_QUERY_WAIT_NV" value="0x8E13"/>
+		<token name="GL_QUERY_NO_WAIT_NV" value="0x8E14"/>
+		<token name="GL_QUERY_BY_REGION_WAIT_NV" value="0x8E15"/>
+		<token name="GL_QUERY_BY_REGION_NO_WAIT_NV" value="0x8E16"/>
+	</tokens>
+
+	<functions>
+		<function name="glBeginConditionalRenderNV" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+		<function name="glEndConditionalRenderNV" return="void"/>
+	</functions>
+</gl_extension>

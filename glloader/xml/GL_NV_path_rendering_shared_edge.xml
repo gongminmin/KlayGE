@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_path_rendering_shared_edge" reg_no="471">
+	<tokens>
+		<token name="GL_SHARED_EDGE_NV" value="0xC0"/>
+	</tokens>
+</gl_extension>

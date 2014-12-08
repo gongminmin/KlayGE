@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_internalformat_sample_query" reg_no="196">
+	<tokens>
+		<token name="GL_MULTISAMPLES_NV" value="0x9371"/>
+		<token name="GL_SUPERSAMPLE_SCALE_X_NV" value="0x9372"/>
+		<token name="GL_SUPERSAMPLE_SCALE_Y_NV" value="0x9373"/>
+		<token name="GL_CONFORMANT_NV" value="0x9374"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetInternalformatSampleivNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

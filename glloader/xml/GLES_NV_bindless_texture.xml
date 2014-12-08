@@ -1,0 +1,85 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_bindless_texture" reg_no="197">
+	<functions>
+		<function name="glGetTextureHandleNV" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glGetTextureSamplerHandleNV" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLuint" name="sampler"/>
+			</params>
+		</function>
+		<function name="glMakeTextureHandleResidentNV" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glMakeTextureHandleNonResidentNV" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glGetImageHandleNV" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLboolean" name="layered"/>
+				<param type="GLint" name="layer"/>
+				<param type="GLenum" name="format"/>
+			</params>
+		</function>
+		<function name="glMakeImageHandleResidentNV" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+				<param type="GLenum" name="access"/>
+			</params>
+		</function>
+		<function name="glMakeImageHandleNonResidentNV" return="void">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64NV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64vNV" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64NV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="values"/>
+			</params>
+		</function>
+		<function name="glIsTextureHandleResidentNV" return="GLboolean">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+		<function name="glIsImageHandleResidentNV" return="GLboolean">
+			<params>
+				<param type="GLuint64" name="handle"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

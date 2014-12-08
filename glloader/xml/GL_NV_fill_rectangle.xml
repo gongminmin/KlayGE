@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_fill_rectangle" reg_no="466">
+	<tokens>
+		<token name="GL_FILL_RECTANGLE_NV" value="0x933C"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,537 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_path_rendering" reg_no="199">
+	<tokens>
+		<token name="GL_PATH_FORMAT_SVG_NV" value="0x9070"/>
+		<token name="GL_PATH_FORMAT_PS_NV" value="0x9071"/>
+		<token name="GL_STANDARD_FONT_NAME_NV" value="0x9072"/>
+		<token name="GL_SYSTEM_FONT_NAME_NV" value="0x9073"/>
+		<token name="GL_FILE_NAME_NV" value="0x9074"/>
+		<token name="GL_PATH_STROKE_WIDTH_NV" value="0x9075"/>
+		<token name="GL_PATH_END_CAPS_NV" value="0x9076"/>
+		<token name="GL_PATH_INITIAL_END_CAP_NV" value="0x9077"/>
+		<token name="GL_PATH_TERMINAL_END_CAP_NV" value="0x9078"/>
+		<token name="GL_PATH_JOIN_STYLE_NV" value="0x9079"/>
+		<token name="GL_PATH_MITER_LIMIT_NV" value="0x907A"/>
+		<token name="GL_PATH_DASH_CAPS_NV" value="0x907B"/>
+		<token name="GL_PATH_INITIAL_DASH_CAP_NV" value="0x907C"/>
+		<token name="GL_PATH_TERMINAL_DASH_CAP_NV" value="0x907D"/>
+		<token name="GL_PATH_DASH_OFFSET_NV" value="0x907E"/>
+		<token name="GL_PATH_CLIENT_LENGTH_NV" value="0x907F"/>
+		<token name="GL_PATH_FILL_MODE_NV" value="0x9080"/>
+		<token name="GL_PATH_FILL_MASK_NV" value="0x9081"/>
+		<token name="GL_PATH_FILL_COVER_MODE_NV" value="0x9082"/>
+		<token name="GL_PATH_STROKE_COVER_MODE_NV" value="0x9083"/>
+		<token name="GL_PATH_STROKE_MASK_NV" value="0x9084"/>
+		<token name="GL_PATH_SAMPLE_QUALITY_NV" value="0x9085"/>
+		<token name="GL_PATH_STROKE_BOUND_NV" value="0x9086"/>
+		<token name="GL_PATH_STROKE_OVERSAMPLE_COUNT_NV" value="0x9087"/>
+		<token name="GL_COUNT_UP_NV" value="0x9088"/>
+		<token name="GL_COUNT_DOWN_NV" value="0x9089"/>
+		<token name="GL_PATH_OBJECT_BOUNDING_BOX_NV" value="0x908A"/>
+		<token name="GL_CONVEX_HULL_NV" value="0x908B"/>
+		<token name="GL_MULTI_HULLS_NV" value="0x908C"/>
+		<token name="GL_BOUNDING_BOX_NV" value="0x908D"/>
+		<token name="GL_TRANSLATE_X_NV" value="0x908E"/>
+		<token name="GL_TRANSLATE_Y_NV" value="0x908F"/>
+		<token name="GL_TRANSLATE_2D_NV" value="0x9090"/>
+		<token name="GL_TRANSLATE_3D_NV" value="0x9091"/>
+		<token name="GL_AFFINE_2D_NV" value="0x9092"/>
+		<token name="GL_PROJECTIVE_2D_NV" value="0x9093"/>
+		<token name="GL_AFFINE_3D_NV" value="0x9094"/>
+		<token name="GL_PROJECTIVE_3D_NV" value="0x9095"/>
+		<token name="GL_TRANSPOSE_AFFINE_2D_NV" value="0x9096"/>
+		<token name="GL_TRANSPOSE_PROJECTIVE_2D_NV" value="0x9097"/>
+		<token name="GL_TRANSPOSE_AFFINE_3D_NV" value="0x9098"/>
+		<token name="GL_TRANSPOSE_PROJECTIVE_3D_NV" value="0x9099"/>
+		<token name="GL_UTF8_NV" value="0x909A"/>
+		<token name="GL_UTF16_NV" value="0x909B"/>
+		<token name="GL_BOUNDING_BOX_OF_BOUNDING_BOXES_NV" value="0x909C"/>
+		<token name="GL_PATH_COMMAND_COUNT_NV" value="0x909D"/>
+		<token name="GL_PATH_COORD_COUNT_NV" value="0x909E"/>
+		<token name="GL_PATH_DASH_ARRAY_COUNT_NV" value="0x909F"/>
+		<token name="GL_PATH_COMPUTED_LENGTH_NV" value="0x90A0"/>
+		<token name="GL_PATH_FILL_BOUNDING_BOX_NV" value="0x90A1"/>
+		<token name="GL_PATH_STROKE_BOUNDING_BOX_NV" value="0x90A2"/>
+		<token name="GL_SQUARE_NV" value="0x90A3"/>
+		<token name="GL_ROUND_NV" value="0x90A4"/>
+		<token name="GL_TRIANGULAR_NV" value="0x90A5"/>
+		<token name="GL_BEVEL_NV" value="0x90A6"/>
+		<token name="GL_MITER_REVERT_NV" value="0x90A7"/>
+		<token name="GL_MITER_TRUNCATE_NV" value="0x90A8"/>
+		<token name="GL_SKIP_MISSING_GLYPH_NV" value="0x90A9"/>
+		<token name="GL_USE_MISSING_GLYPH_NV" value="0x90AA"/>
+		<token name="GL_PATH_ERROR_POSITION_NV" value="0x90AB"/>
+		<token name="GL_PATH_FOG_GEN_MODE_NV" value="0x90AC"/>
+		<token name="GL_ACCUM_ADJACENT_PAIRS_NV" value="0x90AD"/>
+		<token name="GL_ADJACENT_PAIRS_NV" value="0x90AE"/>
+		<token name="GL_FIRST_TO_REST_NV" value="0x90AF"/>
+		<token name="GL_PATH_GEN_MODE_NV" value="0x90B0"/>
+		<token name="GL_PATH_GEN_COEFF_NV" value="0x90B1"/>
+		<token name="GL_PATH_GEN_COLOR_FORMAT_NV" value="0x90B2"/>
+		<token name="GL_PATH_GEN_COMPONENTS_NV" value="0x90B3"/>
+		<token name="GL_PATH_STENCIL_FUNC_NV" value="0x90B7"/>
+		<token name="GL_PATH_STENCIL_REF_NV" value="0x90B8"/>
+		<token name="GL_PATH_STENCIL_VALUE_MASK_NV" value="0x90B9"/>
+		<token name="GL_PATH_STENCIL_DEPTH_OFFSET_FACTOR_NV" value="0x90BD"/>
+		<token name="GL_PATH_STENCIL_DEPTH_OFFSET_UNITS_NV" value="0x90BE"/>
+		<token name="GL_PATH_COVER_DEPTH_FUNC_NV" value="0x90BF"/>
+		<token name="GL_PATH_DASH_OFFSET_RESET_NV" value="0x90B4"/>
+		<token name="GL_MOVE_TO_RESETS_NV" value="0x90B5"/>
+		<token name="GL_MOVE_TO_CONTINUES_NV" value="0x90B6"/>
+		<token name="GL_CLOSE_PATH_NV" value="0x00"/>
+		<token name="GL_MOVE_TO_NV" value="0x02"/>
+		<token name="GL_RELATIVE_MOVE_TO_NV" value="0x03"/>
+		<token name="GL_LINE_TO_NV" value="0x04"/>
+		<token name="GL_RELATIVE_LINE_TO_NV" value="0x05"/>
+		<token name="GL_HORIZONTAL_LINE_TO_NV" value="0x06"/>
+		<token name="GL_RELATIVE_HORIZONTAL_LINE_TO_NV" value="0x07"/>
+		<token name="GL_VERTICAL_LINE_TO_NV" value="0x08"/>
+		<token name="GL_RELATIVE_VERTICAL_LINE_TO_NV" value="0x09"/>
+		<token name="GL_QUADRATIC_CURVE_TO_NV" value="0x0A"/>
+		<token name="GL_RELATIVE_QUADRATIC_CURVE_TO_NV" value="0x0B"/>
+		<token name="GL_CUBIC_CURVE_TO_NV" value="0x0C"/>
+		<token name="GL_RELATIVE_CUBIC_CURVE_TO_NV" value="0x0D"/>
+		<token name="GL_SMOOTH_QUADRATIC_CURVE_TO_NV" value="0x0E"/>
+		<token name="GL_RELATIVE_SMOOTH_QUADRATIC_CURVE_TO_NV" value="0x0F"/>
+		<token name="GL_SMOOTH_CUBIC_CURVE_TO_NV" value="0x10"/>
+		<token name="GL_RELATIVE_SMOOTH_CUBIC_CURVE_TO_NV" value="0x11"/>
+		<token name="GL_SMALL_CCW_ARC_TO_NV" value="0x12"/>
+		<token name="GL_RELATIVE_SMALL_CCW_ARC_TO_NV" value="0x13"/>
+		<token name="GL_SMALL_CW_ARC_TO_NV" value="0x14"/>
+		<token name="GL_RELATIVE_SMALL_CW_ARC_TO_NV" value="0x15"/>
+		<token name="GL_LARGE_CCW_ARC_TO_NV" value="0x16"/>
+		<token name="GL_RELATIVE_LARGE_CCW_ARC_TO_NV" value="0x17"/>
+		<token name="GL_LARGE_CW_ARC_TO_NV" value="0x18"/>
+		<token name="GL_RELATIVE_LARGE_CW_ARC_TO_NV" value="0x19"/>
+		<token name="GL_RESTART_PATH_NV" value="0xF0"/>
+		<token name="GL_DUP_FIRST_CUBIC_CURVE_TO_NV" value="0xF2"/>
+		<token name="GL_DUP_LAST_CUBIC_CURVE_TO_NV" value="0xF4"/>
+		<token name="GL_RECT_NV" value="0xF6"/>
+		<token name="GL_CIRCULAR_CCW_ARC_TO_NV" value="0xF8"/>
+		<token name="GL_CIRCULAR_CW_ARC_TO_NV" value="0xFA"/>
+		<token name="GL_CIRCULAR_TANGENT_ARC_TO_NV" value="0xFC"/>
+		<token name="GL_ARC_TO_NV" value="0xFE"/>
+		<token name="GL_RELATIVE_ARC_TO_NV" value="0xFF"/>
+		<token name="GL_BOLD_BIT_NV" value="0x01"/>
+		<token name="GL_ITALIC_BIT_NV" value="0x02"/>
+		<token name="GL_GLYPH_WIDTH_BIT_NV" value="0x01"/>
+		<token name="GL_GLYPH_HEIGHT_BIT_NV" value="0x02"/>
+		<token name="GL_GLYPH_HORIZONTAL_BEARING_X_BIT_NV" value="0x04"/>
+		<token name="GL_GLYPH_HORIZONTAL_BEARING_Y_BIT_NV" value="0x08"/>
+		<token name="GL_GLYPH_HORIZONTAL_BEARING_ADVANCE_BIT_NV" value="0x10"/>
+		<token name="GL_GLYPH_VERTICAL_BEARING_X_BIT_NV" value="0x20"/>
+		<token name="GL_GLYPH_VERTICAL_BEARING_Y_BIT_NV" value="0x40"/>
+		<token name="GL_GLYPH_VERTICAL_BEARING_ADVANCE_BIT_NV" value="0x80"/>
+		<token name="GL_GLYPH_HAS_KERNING_NV" value="0x100"/>
+		<token name="GL_FONT_X_MIN_BOUNDS_NV" value="0x00010000"/>
+		<token name="GL_FONT_Y_MIN_BOUNDS_NV" value="0x00020000"/>
+		<token name="GL_FONT_X_MAX_BOUNDS_NV" value="0x00040000"/>
+		<token name="GL_FONT_Y_MAX_BOUNDS_NV" value="0x00080000"/>
+		<token name="GL_FONT_UNITS_PER_EM_NV" value="0x00100000"/>
+		<token name="GL_FONT_ASCENDER_NV" value="0x00200000"/>
+		<token name="GL_FONT_DESCENDER_NV" value="0x00400000"/>
+		<token name="GL_FONT_HEIGHT_NV" value="0x00800000"/>
+		<token name="GL_FONT_MAX_ADVANCE_WIDTH_NV" value="0x01000000"/>
+		<token name="GL_FONT_MAX_ADVANCE_HEIGHT_NV" value="0x02000000"/>
+		<token name="GL_FONT_UNDERLINE_POSITION_NV" value="0x04000000"/>
+		<token name="GL_FONT_UNDERLINE_THICKNESS_NV" value="0x08000000"/>
+		<token name="GL_FONT_HAS_KERNING_NV" value="0x10000000"/>
+	</tokens>
+
+	<functions>
+		<function name="glGenPathsNV" return="GLuint">
+			<params>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glDeletePathsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="range"/>
+			</params>
+		</function>
+		<function name="glIsPathNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="path"/>
+			</params>
+		</function>
+		<function name="glPathCommandsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="numCommands"/>
+				<param type="const GLubyte*" name="commands"/>
+				<param type="GLsizei" name="numCoords"/>
+				<param type="GLenum" name="coordType"/>
+				<param type="const GLvoid*" name="coords"/>
+			</params>
+		</function>
+		<function name="glPathCoordsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="numCoords"/>
+				<param type="GLenum" name="coordType"/>
+				<param type="const GLvoid*" name="coords"/>
+			</params>
+		</function>
+		<function name="glPathSubCommandsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="commandStart"/>
+				<param type="GLsizei" name="commandsToDelete"/>
+				<param type="GLsizei" name="numCommands"/>
+				<param type="const GLubyte*" name="commands"/>
+				<param type="GLsizei" name="numCoords"/>
+				<param type="GLenum" name="coordType"/>
+				<param type="const GLvoid*" name="coords"/>
+			</params>
+		</function>
+		<function name="glPathSubCoordsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="coordStart"/>
+				<param type="GLsizei" name="numCoords"/>
+				<param type="GLenum" name="coordType"/>
+				<param type="const GLvoid*" name="coords"/>
+			</params>
+		</function>
+		<function name="glPathStringNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLvoid*" name="pathString"/>
+			</params>
+		</function>
+		<function name="glPathGlyphsNV" return="void">
+			<params>
+				<param type="GLuint" name="firstPathName"/>
+				<param type="GLenum" name="fontTarget"/>
+				<param type="const GLvoid*" name="fontName"/>
+				<param type="GLbitfield" name="fontStyle"/>
+				<param type="GLsizei" name="numGlyphs"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="charcodes"/>
+				<param type="GLenum" name="handleMissingGlyphs"/>
+				<param type="GLuint" name="pathParameterTemplate"/>
+				<param type="GLfloat" name="emScale"/>
+			</params>
+		</function>
+		<function name="glPathGlyphRangeNV" return="void">
+			<params>
+				<param type="GLuint" name="firstPathName"/>
+				<param type="GLenum" name="fontTarget"/>
+				<param type="const GLvoid*" name="fontName"/>
+				<param type="GLbitfield" name="fontStyle"/>
+				<param type="GLuint" name="firstGlyph"/>
+				<param type="GLsizei" name="numGlyphs"/>
+				<param type="GLenum" name="handleMissingGlyphs"/>
+				<param type="GLuint" name="pathParameterTemplate"/>
+				<param type="GLfloat" name="emScale"/>
+			</params>
+		</function>
+		<function name="glWeightPathsNV" return="void">
+			<params>
+				<param type="GLuint" name="resultPath"/>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="const GLuint*" name="paths"/>
+				<param type="const GLfloat*" name="weights"/>
+			</params>
+		</function>
+		<function name="glCopyPathNV" return="void">
+			<params>
+				<param type="GLuint" name="resultPath"/>
+				<param type="GLuint" name="srcPath"/>
+			</params>
+		</function>
+		<function name="glInterpolatePathsNV" return="void">
+			<params>
+				<param type="GLuint" name="resultPath"/>
+				<param type="GLuint" name="pathA"/>
+				<param type="GLuint" name="pathB"/>
+				<param type="GLfloat" name="weight"/>
+			</params>
+		</function>
+		<function name="glTransformPathNV" return="void">
+			<params>
+				<param type="GLuint" name="resultPath"/>
+				<param type="GLuint" name="srcPath"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="const GLfloat*" name="transformValues"/>
+			</params>
+		</function>
+		<function name="glPathParameterivNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glPathParameteriNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="value"/>
+			</params>
+		</function>
+		<function name="glPathParameterfvNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glPathParameterfNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat" name="value"/>
+			</params>
+		</function>
+		<function name="glPathDashArrayNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="dashCount"/>
+				<param type="const GLfloat*" name="dashArray"/>
+			</params>
+		</function>
+		<function name="glPathStencilFuncNV" return="void">
+			<params>
+				<param type="GLenum" name="func"/>
+				<param type="GLint" name="ref"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glPathStencilDepthOffsetNV" return="void">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="units"/>
+			</params>
+		</function>
+		<function name="glStencilFillPathNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="fillMode"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilStrokePathNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLint" name="reference"/>
+				<param type="GLuint" name="mask"/>
+			</params>
+		</function>
+		<function name="glStencilFillPathInstancedNV" return="void">
+			<params>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLenum" name="fillMode"/>
+				<param type="GLuint" name="mask"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="const GLfloat*" name="transformValues"/>
+			</params>
+		</function>
+		<function name="glStencilStrokePathInstancedNV" return="void">
+			<params>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLint" name="reference"/>
+				<param type="GLuint" name="mask"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="const GLfloat*" name="transformValues"/>
+			</params>
+		</function>
+		<function name="glPathCoverDepthFuncNV" return="void">
+			<params>
+				<param type="GLenum" name="func"/>
+			</params>
+		</function>
+		<function name="glPathColorGenNV" return="void">
+			<params>
+				<param type="GLenum" name="color"/>
+				<param type="GLenum" name="genMode"/>
+				<param type="GLenum" name="colorFormat"/>
+				<param type="const GLfloat*" name="coeffs"/>
+			</params>
+		</function>
+		<function name="glPathTexGenNV" return="void">
+			<params>
+				<param type="GLenum" name="texCoordSet"/>
+				<param type="GLenum" name="genMode"/>
+				<param type="GLint" name="components"/>
+				<param type="const GLfloat*" name="coeffs"/>
+			</params>
+		</function>
+		<function name="glPathFogGenNV" return="void">
+			<params>
+				<param type="GLenum" name="genMode"/>
+			</params>
+		</function>
+		<function name="glCoverFillPathNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="coverMode"/>
+			</params>
+		</function>
+		<function name="glCoverStrokePathNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="coverMode"/>
+			</params>
+		</function>
+		<function name="glCoverFillPathInstancedNV" return="void">
+			<params>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLenum" name="coverMode"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="const GLfloat*" name="transformValues"/>
+			</params>
+		</function>
+		<function name="glCoverStrokePathInstancedNV" return="void">
+			<params>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLenum" name="coverMode"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="const GLfloat*" name="transformValues"/>
+			</params>
+		</function>
+		<function name="glGetPathParameterivNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetPathParameterfvNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetPathCommandsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLubyte*" name="commands"/>
+			</params>
+		</function>
+		<function name="glGetPathCoordsNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLfloat*" name="coords"/>
+			</params>
+		</function>
+		<function name="glGetPathDashArrayNV" return="void">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLfloat*" name="dashArray"/>
+			</params>
+		</function>
+		<function name="glGetPathMetricsNV" return="void">
+			<params>
+				<param type="GLbitfield" name="metricQueryMask"/>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLfloat*" name="metrics"/>
+			</params>
+		</function>
+		<function name="glGetPathMetricRangeNV" return="void">
+			<params>
+				<param type="GLbitfield" name="metricQueryMask"/>
+				<param type="GLuint" name="firstPathName"/>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLsizei" name="stride"/>
+				<param type="GLfloat*" name="metrics"/>
+			</params>
+		</function>
+		<function name="glGetPathSpacingNV" return="void">
+			<params>
+				<param type="GLenum" name="pathListMode"/>
+				<param type="GLsizei" name="numPaths"/>
+				<param type="GLenum" name="pathNameType"/>
+				<param type="const GLvoid*" name="paths"/>
+				<param type="GLuint" name="pathBase"/>
+				<param type="GLfloat" name="advanceScale"/>
+				<param type="GLfloat" name="kerningScale"/>
+				<param type="GLenum" name="transformType"/>
+				<param type="GLfloat*" name="returnedSpacing"/>
+			</params>
+		</function>
+		<function name="glGetPathColorGenivNV" return="void">
+			<params>
+				<param type="GLenum" name="color"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetPathColorGenfvNV" return="void">
+			<params>
+				<param type="GLenum" name="color"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetPathTexGenivNV" return="void">
+			<params>
+				<param type="GLenum" name="texCoordSet"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetPathTexGenfvNV" return="void">
+			<params>
+				<param type="GLenum" name="texCoordSet"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLfloat*" name="value"/>
+			</params>
+		</function>
+		<function name="glIsPointInFillPathNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLuint" name="mask"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+			</params>
+		</function>
+		<function name="glIsPointInStrokePathNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+			</params>
+		</function>
+		<function name="glGetPathLengthNV" return="GLfloat">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="startSegment"/>
+				<param type="GLsizei" name="numSegments"/>
+			</params>
+		</function>
+		<function name="glPointAlongPathNV" return="GLboolean">
+			<params>
+				<param type="GLuint" name="path"/>
+				<param type="GLsizei" name="startSegment"/>
+				<param type="GLsizei" name="numSegments"/>
+				<param type="GLfloat" name="distance"/>
+				<param type="GLfloat*" name="x"/>
+				<param type="GLfloat*" name="y"/>
+				<param type="GLfloat*" name="tangentX"/>
+				<param type="GLfloat*" name="tangentY"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,10 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_device_drm" reg_no="79">
+	<tokens>
+		<token name="EGL_DRM_DEVICE_FILE_EXT" value="0x3233"/>
+		<token name="EGL_DRM_CRTC_EXT" value="0x3234"/>
+		<token name="EGL_DRM_PLANE_EXT" value="0x3235"/>
+		<token name="EGL_DRM_CONNECTOR_EXT" value="0x3236"/>
+	</tokens>
+</gl_extension>

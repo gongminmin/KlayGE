@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_polygon_offset_clamp" reg_no="460">
+	<tokens>
+		<token name="GL_POLYGON_OFFSET_CLAMP_EXT" value="0x8E1B"/>
+	</tokens>
+
+	<functions>
+		<function name="glPolygonOffsetClampEXT" return="void">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="units"/>
+				<param type="GLfloat" name="clamp"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,15 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_APPLE_clip_distance" reg_no="193">
+	<tokens>
+		<token name="GL_MAX_CLIP_DISTANCES_APPLE" value="0x0D32"/>
+		<token name="GL_CLIP_DISTANCE0_APPLE" value="0x3000"/>
+		<token name="GL_CLIP_DISTANCE1_APPLE" value="0x3001"/>
+		<token name="GL_CLIP_DISTANCE2_APPLE" value="0x3002"/>
+		<token name="GL_CLIP_DISTANCE3_APPLE" value="0x3003"/>
+		<token name="GL_CLIP_DISTANCE4_APPLE" value="0x3004"/>
+		<token name="GL_CLIP_DISTANCE5_APPLE" value="0x3005"/>
+		<token name="GL_CLIP_DISTANCE6_APPLE" value="0x3006"/>
+		<token name="GL_CLIP_DISTANCE7_APPLE" value="0x3007"/>
+	</tokens>
+</gl_extension>

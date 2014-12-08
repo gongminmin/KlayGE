@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_swap_buffers_with_damage" reg_no="84">
+	<functions>
+		<function name="eglSwapBuffersWithDamageKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLint*" name="rects"/>
+				<param type="EGLint" name="n_rects"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

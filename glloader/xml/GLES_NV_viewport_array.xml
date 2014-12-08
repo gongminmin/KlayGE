@@ -1,0 +1,100 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_viewport_array" reg_no="202">
+	<tokens>
+		<token name="GL_SCISSOR_BOX_NV" value="0x0C10"/>
+		<token name="GL_VIEWPORT_NV" value="0x0BA2"/>
+		<token name="GL_DEPTH_RANGE_NV" value="0x0B70"/>
+		<token name="GL_SCISSOR_TEST_NV" value="0x0C11"/>
+		<token name="GL_MAX_VIEWPORTS_NV" value="0x825B"/>
+		<token name="GL_VIEWPORT_SUBPIXEL_BITS_NV" value="0x825C"/>
+		<token name="GL_VIEWPORT_BOUNDS_RANGE_NV" value="0x825D"/>
+		<token name="GL_VIEWPORT_INDEX_PROVOKING_VERTEX_NV" value="0x825F"/>
+	</tokens>
+
+	<functions>
+		<function name="glViewportArrayvNV" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedfNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="w"/>
+				<param type="GLfloat" name="h"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedfvNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorArrayvNV" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLint const *" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorIndexedNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="left"/>
+				<param type="GLint" name="bottom"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glScissorIndexedvNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint const *" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeArrayfvNV" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeIndexedfNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="n"/>
+				<param type="GLfloat" name="f"/>
+			</params>
+		</function>
+		<function name="glGetFloati_vNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat*" name="data"/>
+			</params>
+		</function>
+		<function name="glEnableiNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableiNV" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glIsEnablediNV" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
