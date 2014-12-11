@@ -226,6 +226,10 @@ namespace KlayGE
 			type = D3D11_MAP_READ_WRITE;
 			break;
 
+		case BA_Write_No_Overwrite:
+			type = D3D11_MAP_WRITE_NO_OVERWRITE;
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			type = D3D11_MAP_READ;

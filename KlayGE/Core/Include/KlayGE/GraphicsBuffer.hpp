@@ -57,7 +57,8 @@ namespace KlayGE
 	{
 		BA_Read_Only,
 		BA_Write_Only,
-		BA_Read_Write
+		BA_Read_Write,
+		BA_Write_No_Overwrite
 	};
 
 	class KLAYGE_CORE_API GraphicsBuffer

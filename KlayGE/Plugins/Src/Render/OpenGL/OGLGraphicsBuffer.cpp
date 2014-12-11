@@ -126,6 +126,11 @@ namespace KlayGE
 			case BA_Read_Write:
 				flag = GL_READ_WRITE;
 				break;
+
+			case BA_Write_No_Overwrite:
+				// TODO
+				BOOST_ASSERT(false);
+				break;
 			}
 
 			if (glloader_GL_EXT_direct_state_access())
