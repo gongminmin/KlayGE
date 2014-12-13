@@ -244,7 +244,6 @@ namespace KlayGE
 
 		struct ModeInfo
 		{
-			uint8_t mode;
 			uint8_t partitions;
 			uint8_t partition_bits;
 			uint8_t p_bits;
