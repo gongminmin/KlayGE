@@ -1726,7 +1726,7 @@ namespace KlayGE
 		{
 			caps_.draw_indirect_support = false;
 		}
-        caps_.no_overwrite_support = false;
+		caps_.no_overwrite_support = false;
 
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
@@ -1765,11 +1765,11 @@ namespace KlayGE
 		}
 		if ((vendor.find("ATI", 0) != std::string::npos) || (vendor.find("AMD", 0) != std::string::npos))
 		{
-			hack_for_ati_ = true;
+			hack_for_amd_ = true;
 		}
 		else
 		{
-			hack_for_ati_ = false;
+			hack_for_amd_ = false;
 		}
 		if (vendor.find("Intel", 0) != std::string::npos)
 		{
