@@ -28,7 +28,8 @@ namespace KlayGE
 			: GraphicsBuffer(usage, access_hint),
 				target_(target)
 	{
-		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target));
+		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
+			|| (GL_UNIFORM_BUFFER == target));
 
 		glGenBuffers(1, &vb_);
 
