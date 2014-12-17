@@ -16,17 +16,17 @@
 
 @interface KlayGEWindow : NSWindow<NSWindowDelegate>
 {
-	KlayGE::Window* win;
+	KlayGE::Window* window_;
 }
-@property(assign) KlayGE::Window* win;
+@property(assign) KlayGE::Window* window_;
 @end
 
 @interface KlayGEView : NSOpenGLView
 {
-	KlayGE::RenderEngine* re;
+	KlayGE::RenderEngine* render_engine_;
 	CVDisplayLinkRef displayLink;
 }
-@property(assign) KlayGE::RenderEngine* re;
+@property(assign) KlayGE::RenderEngine* render_engine_;
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime;
 @end
 
@@ -126,9 +126,11 @@ namespace KlayGE
 			visual_attr.push_back(NSOpenGLPFASamples);
 			visual_attr.push_back(settings.sample_count);
 		}
-		pf_ = new NSOpenGLPixelFormatAttribute[visual_attr.size()+1];
-		std::copy(visual_attr.begin(), visual_attr.end(), pf_);
-		pf_[visual_attr.size()] = 0;
+		// TODO: OpenGL 3.x core will crash since Cg can only compile old version
+		// visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
+		// visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
+		visual_attr.push_back(0);
+		pixel_format_ = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
 		
 		if (!wasInitialized)
 		{
@@ -137,38 +139,41 @@ namespace KlayGE
 		
 		@autoreleasepool
 		{
-			NSScreen* mainDisplay = [NSScreen mainScreen];
-			NSString* windowName = [NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]];
-			// TODO: full screen
 			NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
-			if (mainDisplay)
+			NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
+			if (settings.full_screen)
 			{
-				NSRect dispFrame = [mainDisplay visibleFrame];
-				initContentRect.origin.y = dispFrame.size.height - 20;
+				// https://developer.apple.com/library/mac/documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_fullscreen/opengl_cgl.html#//apple_ref/doc/uid/TP40001987-CH210-SW6
+				initContentRect = [mainDisplay frame];
+				initStyleMask = NSBorderlessWindowMask;
 			}
-			
-			KlayGEWindow* window = [[KlayGEWindow alloc] initWithContentRect:initContentRect
-												styleMask:NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask
+			d_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
+												styleMask:initStyleMask
 												backing:NSBackingStoreBuffered
 												defer:YES
 												screen:mainDisplay];
-			
-			[window setFrameTopLeftPoint:initContentRect.origin];
-			
-			[window setHasShadow:YES];
-			[window setAcceptsMouseMovedEvents:YES];
-			[window useOptimizedDrawing:YES];
-			[window setTitle:windowName];
+            
+			if(settings.full_screen)
+			{
+				[d_window_ setLevel:NSMainMenuWindowLevel + 1];
+			}
+			else
+			{
+				[d_window_ setFrameTopLeftPoint:initContentRect.origin];
+			}
 
-			[window setDelegate:window];
-			[window setWin:this];
-			
-			d_window_ = static_cast<void*>(window);
-			//[application run];
-			top_ = initContentRect.origin.x;
-			left_ = initContentRect.origin.y;
-			width_ = initContentRect.size.width;
-			height_ = initContentRect.size.height;
+			[d_window_ setHasShadow:YES];
+			[d_window_ setAcceptsMouseMovedEvents:YES];
+			[d_window_ useOptimizedDrawing:YES];
+			[d_window_ setTitle:windowName];
+
+			[d_window_ setDelegate:window];
+			[d_window_ setWindow_:this];
+
+			top_ = d_window_.frame.origin.x;
+			left_ = d_window_.frame.origin.y;
+			width_ = d_window_.frame.size.width;
+			height_ = d_window_.frame.size.height;
 		}
 	}
 
@@ -176,105 +181,137 @@ namespace KlayGE
 		: active_(false), ready_(false), closed_(false)
 	{
 		// TODO
-		std::cout<<"test2";
-		//NSLog(@"test2");
+		std::cout << "Unimplemented Window::Window" << std::endl;
 	}
 
 	Window::~Window()
 	{
 		// TODO
-		std::cout<<"test3";
-		//NSLog(@"test3");
+		std::cout << "Unimplemented Window::~Window" << std::endl;
 	}
 	
 	void Window::CreateView()
 	{
 		NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pf_];
-		KlayGEView* view = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixelFormat];
-		d_view_ = static_cast<void*>(view);
+		// TODO: opengl 3.3
+		d_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
 
-		[static_cast<KlayGEWindow*>(d_window_) setContentView:(view)];
-		[static_cast<KlayGEWindow*>(d_window_) makeKeyAndOrderFront:nil];
+		[d_window_ setContentView:d_view_];
+		[d_window_ makeKeyAndOrderFront:nil];
 	}
 	
 	void Window::RunLoop(RenderEngine& re)
 	{
-		[static_cast<KlayGEView*>(d_view_) setRe:&re];
-
-		active_ = true;
+		[d_view_ setRender_engine_:&re];
 		[application run];
+	}
+
+	void Window::HandleCMD(int32_t cmd)
+	{
+		switch (cmd)
+		{
+		case 0:
+			OnClose()(*this);
+			active_ = false;
+			ready_ = false;
+			closed_ = true;
+
+			[d_view_ setRender_engine_:nil];
+			[application stop:nil];
+			break;
+
+		case 1:
+			active_ = true;
+			ready_ = true;
+			OnActive()(*this, true);
+			break;
+
+		case 2:
+			active_ = false;
+			OnActive()(*this, false);
+			break;
+
+		case 3:
+			top_ = d_window_.frame.origin.x;
+			left_ = d_window_.frame.origin.y;
+			width_ = d_window_.frame.size.width;
+			height_ = d_window_.frame.size.height;
+			active_ = true;
+			ready_ = true;
+			// TODO: why
+			//OnSize()(*this, true);
+			break;
+		}
 	}
 }
 
 @implementation KlayGEWindow
-@synthesize win;
+@synthesize window_;
 
 - (void)windowWillClose:(NSNotification*)notification
 {
-	[(KlayGEView*)[self contentView] setRe:nil];
-	[KlayGE::application stop:nil];
+	window_->HandleCMD(0);
 }
 
-- (void)keyDown:(NSEvent*)theEvent
+- (void)windowDidBecomeKey:(NSNotification *)notification
 {
-	NSLog(@"%@", theEvent);
+	window_->HandleCMD(1);
 }
 
-- (void)rightMouseDragged:(NSEvent*)theEvent
+- (void)windowDidResignKey:(NSNotification *)notification
 {
-	NSLog(@"%@", theEvent);
+	window_->HandleCMD(2);
 }
 
-- (void)rightMouseUp:(NSEvent*)theEvent
+- (void)windowDidResize:(NSNotification *)notification
 {
-	NSLog(@"%@", theEvent);
+	window_->HandleCMD(3);
 }
 
-- (void)rightMouseDown:(NSEvent*)theEvent
+- (void)windowDidMove:(NSNotification *)notification
 {
-	NSLog(@"%@", theEvent);
+	window_->HandleCMD(3);
 }
 
 - (void)mouseMoved:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, point.y);
-	win->OnPointerUpdate()(*win, pt, 0, false);
+	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	window_->OnPointerUpdate()(*window_, pt, 1, false);
 }
 
 - (void)mouseDragged:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, point.y);
-	win->OnPointerUpdate()(*win, pt, 0, true);
+	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	window_->OnPointerUpdate()(*window_, pt, 1, true);
 }
 
 - (void)mouseUp:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, point.y);
-	win->OnPointerUp()(*win, pt, 0);
+	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	window_->OnPointerUp()(*window_, pt, 1);
 }
 
 - (void)mouseDown:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, point.y);
-	win->OnPointerDown()(*win, pt, 0);
+	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	window_->OnPointerDown()(*window_, pt, 1);
 }
 
 @end
 
 @implementation KlayGEView
-
-@synthesize re;
+@synthesize render_engine_;
 
 - (id)init
 {
 	self = [super init];
 	if (self)
 	{
-		re = nil;
+		render_engine_ = nil;
 	}
 	return self;
 }
@@ -310,9 +347,9 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	
 	CGLLockContext((CGLContextObj)[currentContext CGLContextObj]);
 	
-	if (re != nil)
+	if (render_engine_ != nil)
 	{
-		re->Refresh();
+		render_engine_->Refresh();
 	}
 
 	[currentContext flushBuffer];

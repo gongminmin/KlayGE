@@ -988,7 +988,7 @@ namespace KlayGE
 			}
 		}
 
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX) || (defined KLAYGE_PLATFORM_DARWIN)
 		if (jit)
 		{
 			std::string meshmljit_name = "MeshMLJIT" KLAYGE_DBG_SUFFIX;
@@ -996,8 +996,23 @@ namespace KlayGE
 			meshmljit_name += ".exe";
 #endif
 			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
-			if (meshmljit_name.empty() ||
-				system((meshmljit_name + " -I \"" + meshml_name + "\" -T \"" + folder_name + "\" -q").c_str()) != 0)
+			bool failed = false;
+			if (!meshmljit_name.empty())
+			{
+#ifndef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+				meshmljit_name = "./" + meshmljit_name;
+#endif
+				if (system((meshmljit_name + " -I \"" + meshml_name + "\" -T \"" + folder_name + "\" -q").c_str()) != 0)
+				{
+					failed = true;
+				}
+			}
+			else
+			{
+				failed = true;
+			}
+
+			if (failed)
 			{
 				LogError("MeshMLJIT failed. Forgot to build Tools?");
 			}
