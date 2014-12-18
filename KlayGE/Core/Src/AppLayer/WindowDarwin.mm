@@ -139,6 +139,9 @@ namespace KlayGE
 		
 		@autoreleasepool
 		{
+			NSScreen* mainDisplay = [NSScreen mainScreen];
+			NSString* windowName = [NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]];
+
 			NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
 			NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
 			if (settings.full_screen)
@@ -167,7 +170,7 @@ namespace KlayGE
 			[d_window_ useOptimizedDrawing:YES];
 			[d_window_ setTitle:windowName];
 
-			[d_window_ setDelegate:window];
+			[d_window_ setDelegate:d_window_];
 			[d_window_ setWindow_:this];
 
 			top_ = d_window_.frame.origin.x;
@@ -192,7 +195,6 @@ namespace KlayGE
 	
 	void Window::CreateView()
 	{
-		NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:pf_];
 		// TODO: opengl 3.3
 		d_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
 
