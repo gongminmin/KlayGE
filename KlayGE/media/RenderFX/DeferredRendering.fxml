@@ -830,7 +830,7 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 #endif
 		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
 		
-		shininess = log(shininess) / log(8192);
+		shininess = log(shininess) / log(8192.0f);
 	
 		float mip = CalcPrefilteredEnvMip(shininess, skylight_diff_spec_mip.y);
 		float3 r = CalcPrefilteredEnvVec(normal, view);
