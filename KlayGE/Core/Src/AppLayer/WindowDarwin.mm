@@ -104,7 +104,7 @@ namespace KlayGE
 
 		std::vector<NSOpenGLPixelFormatAttribute> visual_attr;
 		visual_attr.push_back(NSOpenGLPFAColorSize);
-		visual_attr.push_back(r_size);
+		visual_attr.push_back(r_size * 3);
 		visual_attr.push_back(NSOpenGLPFAAlphaSize);
 		visual_attr.push_back(a_size);
 		if (d_size > 0)
@@ -127,8 +127,9 @@ namespace KlayGE
 			visual_attr.push_back(settings.sample_count);
 		}
 		// TODO: OpenGL 3.x core will crash since Cg can only compile old version
-		// visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
-		// visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
+		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
+		//visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
+		visual_attr.push_back(NSOpenGLProfileVersionLegacy);
 		visual_attr.push_back(0);
 		pixel_format_ = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
 		
@@ -155,14 +156,16 @@ namespace KlayGE
 												backing:NSBackingStoreBuffered
 												defer:YES
 												screen:mainDisplay];
-            
-			if(settings.full_screen)
+
+			if (settings.full_screen)
 			{
 				[d_window_ setLevel:NSMainMenuWindowLevel + 1];
 			}
 			else
 			{
-				[d_window_ setFrameTopLeftPoint:initContentRect.origin];
+				int const CAPTION_HEIGHT = 22;
+				int display_height = mainDisplay.frame.size.height + mainDisplay.frame.origin.y - CAPTION_HEIGHT;
+				[d_window_ setFrameTopLeftPoint:NSMakePoint(settings.left, display_height - settings.top)];
 			}
 
 			[d_window_ setHasShadow:YES];
@@ -173,10 +176,11 @@ namespace KlayGE
 			[d_window_ setDelegate:d_window_];
 			[d_window_ setWindow_:this];
 
-			top_ = d_window_.frame.origin.x;
-			left_ = d_window_.frame.origin.y;
-			width_ = d_window_.frame.size.width;
-			height_ = d_window_.frame.size.height;
+			NSRect content_rect = [d_window_ contentRectForFrameRect:d_window_.frame];
+			left_ = 0;
+			top_ = 0;
+			width_ = content_rect.size.width;
+			height_ = content_rect.size.height;
 		}
 	}
 
@@ -200,6 +204,11 @@ namespace KlayGE
 
 		[d_window_ setContentView:d_view_];
 		[d_window_ makeKeyAndOrderFront:nil];
+	}
+	
+	void Window::FlushBuffer()
+	{
+		[[d_view_ openGLContext] flushBuffer];
 	}
 	
 	void Window::RunLoop(RenderEngine& re)
@@ -234,13 +243,14 @@ namespace KlayGE
 			break;
 
 		case 3:
-			top_ = d_window_.frame.origin.x;
-			left_ = d_window_.frame.origin.y;
-			width_ = d_window_.frame.size.width;
-			height_ = d_window_.frame.size.height;
+			left_ = 0;
+			top_ = 0;
+			NSRect content_rect = [d_window_ contentRectForFrameRect:d_window_.frame];
+			width_ = content_rect.size.width;
+			height_ = content_rect.size.height;
 			active_ = true;
 			ready_ = true;
-			// TODO: why
+			// TODO: why crash
 			//OnSize()(*this, true);
 			break;
 		}
@@ -278,28 +288,28 @@ namespace KlayGE
 - (void)mouseMoved:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	KlayGE::int2 pt(point.x, window_->Height() - point.y);
 	window_->OnPointerUpdate()(*window_, pt, 1, false);
 }
 
 - (void)mouseDragged:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	KlayGE::int2 pt(point.x, window_->Height() - point.y);
 	window_->OnPointerUpdate()(*window_, pt, 1, true);
 }
 
 - (void)mouseUp:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	KlayGE::int2 pt(point.x, window_->Height() - point.y);
 	window_->OnPointerUp()(*window_, pt, 1);
 }
 
 - (void)mouseDown:(NSEvent*)theEvent
 {
 	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, self.frame.size.height - point.y);
+	KlayGE::int2 pt(point.x, window_->Height() - point.y);
 	window_->OnPointerDown()(*window_, pt, 1);
 }
 
@@ -353,8 +363,6 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 	{
 		render_engine_->Refresh();
 	}
-
-	[currentContext flushBuffer];
 	
 	CGLUnlockContext((CGLContextObj)[currentContext CGLContextObj]);
 	

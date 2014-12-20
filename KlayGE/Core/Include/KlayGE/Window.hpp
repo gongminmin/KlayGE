@@ -269,6 +269,7 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
 		void CreateView();
+		void FlushBuffer();
 		void RunLoop(RenderEngine &re);
 		void HandleCMD(int32_t cmd);
 #endif

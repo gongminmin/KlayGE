@@ -553,6 +553,11 @@ namespace KlayGE
 		::SwapBuffers(hDC_);
 #elif defined KLAYGE_PLATFORM_LINUX
 		::glXSwapBuffers(x_display_, x_window_);
+#elif defined KLAYGE_PLATFORM_DARWIN
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.ScreenFrameBuffer());
+		Context::Instance().AppInstance().MainWnd()->FlushBuffer();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
 #endif
 	}
 
