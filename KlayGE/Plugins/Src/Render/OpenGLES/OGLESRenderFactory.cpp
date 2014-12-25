@@ -85,12 +85,14 @@ namespace KlayGE
 
 	GraphicsBufferPtr OGLESRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat fmt)
 	{
-		UNREF_PARAM(usage);
-		UNREF_PARAM(access_hint);
-		UNREF_PARAM(init_data);
 		UNREF_PARAM(fmt);
 
-		return GraphicsBufferPtr();
+		GraphicsBufferPtr ret;
+		if (glloader_GLES_VERSION_3_0())
+		{
+			ret = MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, init_data);
+		}
+		return ret;
 	}
 
 	QueryPtr OGLESRenderFactory::MakeOcclusionQuery()

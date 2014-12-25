@@ -97,7 +97,7 @@ namespace KlayGE
 	void OGLConditionalRender::BeginConditionalRender()
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (!re.HackForATI())
+		if (!re.HackForAMD())
 		{
 			if (glloader_GL_VERSION_3_0())
 			{
@@ -116,7 +116,7 @@ namespace KlayGE
 	void OGLConditionalRender::EndConditionalRender()
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (!re.HackForATI())
+		if (!re.HackForAMD())
 		{
 			if (glloader_GL_VERSION_3_0())
 			{

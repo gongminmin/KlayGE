@@ -47,6 +47,15 @@
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android_native_app_glue.h>
+#elif defined KLAYGE_PLATFORM_DARWIN
+#ifdef __OBJC__
+#define OBJC_CLASS(name) @class name
+#else
+#define OBJC_CLASS(name) typedef struct objc_object name
+#endif
+OBJC_CLASS(KlayGEWindow);
+OBJC_CLASS(KlayGEView);
+OBJC_CLASS(NSOpenGLPixelFormat);
 #endif
 
 #include <string>
@@ -93,11 +102,6 @@ namespace KlayGE
 		::ANativeWindow* AWindow() const
 		{
 			return a_window_;
-		}
-#elif defined KLAYGE_PLATFORM_DARWIN
-		void* DWindow() const
-		{
-			return d_window_;
 		}
 #endif
 
@@ -265,7 +269,9 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
 		void CreateView();
+		void FlushBuffer();
 		void RunLoop(RenderEngine &re);
+		void HandleCMD(int32_t cmd);
 #endif
 		CloseEvent& OnClose()
 		{
@@ -346,9 +352,9 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;
 #elif defined KLAYGE_PLATFORM_DARWIN
-		uint32_t* pf_;
-		void* d_window_;
-		void* d_view_;
+		NSOpenGLPixelFormat* pixel_format_;
+		KlayGEWindow* d_window_;
+		KlayGEView* d_view_;
 #endif
 
 		bool external_wnd_;

@@ -2389,6 +2389,13 @@ namespace KlayGE
 							rules |= glloader_GLES_EXT_draw_buffers() ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
+						else
+						{
+							if (re.HackForAngle())
+							{
+								rules &= ~GSR_UseUBO;
+							}
+						}
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), false, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();

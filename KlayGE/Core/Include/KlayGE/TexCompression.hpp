@@ -204,24 +204,30 @@ namespace KlayGE
 			static_cast<uint8_t>(MathLib::clamp(b, 0, 255)));
 	}
 
+	template <int N>
+	inline uint8_t ExtendNTo8Bits(int input)
+	{
+		return static_cast<uint8_t>((input >> (N - (8 - N))) | (input << (8 - N)));
+	}
+
 	inline uint8_t Extend4To8Bits(int input)
 	{
-		return static_cast<uint8_t>(input | (input << 4));
+		return ExtendNTo8Bits<4>(input);
 	}
 
 	inline uint8_t Extend5To8Bits(int input)
 	{
-		return static_cast<uint8_t>((input >> 2) | (input << 3));
+		return ExtendNTo8Bits<5>(input);
 	}
 
 	inline uint8_t Extend6To8Bits(int input)
 	{
-		return static_cast<uint8_t>((input >> 4) | (input << 2));
+		return ExtendNTo8Bits<6>(input);
 	}
 
 	inline uint8_t Extend7To8Bits(int input)
 	{
-		return static_cast<uint8_t>((input >> 6) | (input << 1));
+		return ExtendNTo8Bits<7>(input);
 	}
 }
 

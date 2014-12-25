@@ -1653,21 +1653,21 @@ namespace KlayGE
 	TexCompressionBC7::ModeInfo const TexCompressionBC7::mode_info_[] =
 	{
 		// Mode 0: Color only, 3 Subsets, RGBP 4441 (unique P-bit), 3-bit indecies, 16 partitions
-		{ 0, 3, 4, 6, 0, 0, 3, 0, ARGBColor32(0, 4, 4, 4), ARGBColor32(0, 5, 5, 5), PBT_Unique },
+		{ 3, 4, 6, 0, 0, 3, 0, ARGBColor32(0, 4, 4, 4), ARGBColor32(0, 5, 5, 5), PBT_Unique },
 		// Mode 1: Color only, 2 Subsets, RGBP 6661 (shared P-bit), 3-bit indecies, 64 partitions
-		{ 1, 2, 6, 2, 0, 0, 3, 0, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 7, 7, 7), PBT_Shared },
+		{ 2, 6, 2, 0, 0, 3, 0, ARGBColor32(0, 6, 6, 6), ARGBColor32(0, 7, 7, 7), PBT_Shared },
 		// Mode 2: Color only, 3 Subsets, RGB 555, 2-bit indecies, 64 partitions
-		{ 2, 3, 6, 0, 0, 0, 2, 0, ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5), PBT_None },
+		{ 3, 6, 0, 0, 0, 2, 0, ARGBColor32(0, 5, 5, 5), ARGBColor32(0, 5, 5, 5), PBT_None },
 		// Mode 3: Color only, 2 Subsets, RGBP 7771 (unique P-bit), 2-bits indecies, 64 partitions
-		{ 3, 2, 6, 4, 0, 0, 2, 0, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 8, 8, 8), PBT_Unique },
+		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(0, 7, 7, 7), ARGBColor32(0, 8, 8, 8), PBT_Unique },
 		// Mode 4: Color w/ Separate Alpha, 1 Subset, RGB 555, A6, 16x2/16x3-bit indices, 2-bit rotation, 1-bit index selector
-		{ 4, 1, 0, 0, 2, 1, 2, 3, ARGBColor32(6, 5, 5, 5), ARGBColor32(6, 5, 5, 5), PBT_None },
+		{ 1, 0, 0, 2, 1, 2, 3, ARGBColor32(6, 5, 5, 5), ARGBColor32(6, 5, 5, 5), PBT_None },
 		// Mode 5: Color w/ Separate Alpha, 1 Subset, RGB 777, A8, 16x2/16x2-bit indices, 2-bit rotation
-		{ 5, 1, 0, 0, 2, 0, 2, 2, ARGBColor32(8, 7, 7, 7), ARGBColor32(8, 7, 7, 7), PBT_None },
+		{ 1, 0, 0, 2, 0, 2, 2, ARGBColor32(8, 7, 7, 7), ARGBColor32(8, 7, 7, 7), PBT_None },
 		// Mode 6: Color+Alpha, 1 Subset, RGBAP 77771 (unique P-bit), 16x4-bit indecies
-		{ 6, 1, 0, 2, 0, 0, 4, 0, ARGBColor32(7, 7, 7, 7), ARGBColor32(8, 8, 8, 8), PBT_Unique },
+		{ 1, 0, 2, 0, 0, 4, 0, ARGBColor32(7, 7, 7, 7), ARGBColor32(8, 8, 8, 8), PBT_Unique },
 		// Mode 7: Color+Alpha, 2 Subsets, RGBAP 55551 (unique P-bit), 2-bit indices, 64 partitions
-		{ 7, 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
+		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
 	};
 
 	TexCompressionBC7::TexCompressionBC7()
@@ -1722,12 +1722,12 @@ namespace KlayGE
 
 			BOOST_ASSERT(num_end_pts <= (BC7_MAX_REGIONS << 1));
 
-			static int const comps[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+			static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
 				ARGBColor32::BChannel, ARGBColor32::AChannel };
 
 			for (int i = 0; i < 4; ++ i)
 			{
-				int ch = comps[i];
+				int const ch = rgba_channels[i];
 				for (uint32_t j = 0; j < num_end_pts; ++ j)
 				{
 					if (start_bit + rgba_prec[ch] > 128)

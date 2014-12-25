@@ -123,9 +123,9 @@ namespace KlayGE
 		{
 			return hack_for_nv_;
 		}
-		bool HackForATI() const
+		bool HackForAMD() const
 		{
-			return hack_for_ati_;
+			return hack_for_amd_;
 		}
 		bool HackForIntel() const
 		{
@@ -214,7 +214,7 @@ namespace KlayGE
 		GLenum polygon_mode_override_;
 
 		bool hack_for_nv_;
-		bool hack_for_ati_;
+		bool hack_for_amd_;
 		bool hack_for_intel_;
 	};
 

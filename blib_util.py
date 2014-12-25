@@ -132,6 +132,10 @@ class build_info:
 					target_platform = target_platform[0:space_place]
 					if "L" == android_ver:
 						target_api_level = "L"
+					elif "5.0" == android_ver:
+						target_api_level = "21"
+					elif "4.4w" == android_ver:
+						target_api_level = "20"
 					elif "4.4" == android_ver:
 						target_api_level = "19"
 					elif "4.3" == android_ver:
@@ -444,6 +448,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
+		if "win" == build_info.host_platform:
+			make_name = "%s\\prebuilt\\windows\\bin\\make.exe" % os.environ["ANDROID_NDK"]
+			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
 
 	if build_info.multi_config:
 		if "vc" == build_info.compiler_name:
@@ -493,9 +500,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		os.chdir(curdir)
 	else:
 		if "win" == build_info.host_platform:
-			if "android" == build_info.target_platform:
-				make_name = "%s\\prebuilt\\windows\\bin\\make.exe" % os.environ["ANDROID_NDK"]
-			else:
+			if build_info.target_platform != "android":
 				make_name = "mingw32-make.exe"
 		else:
 			make_name = "make"

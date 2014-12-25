@@ -2613,7 +2613,14 @@ namespace KlayGE
 						GLSLVersion gsv = DXBC2GLSLIniter::Instance().GLSLVer();
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
-						rules &= ~GSR_UniformBlockBinding;
+						if (re.HackForIntel())
+						{
+							rules &= ~GSR_UseUBO;
+						}
+						else
+						{
+							rules &= ~GSR_UniformBlockBinding;
+						}
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), has_gs, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2873,7 +2880,14 @@ namespace KlayGE
 			args.push_back(max_tex_array_str.c_str());
 			args.push_back(max_tex_depth_str.c_str());
 			args.push_back(max_tex_units_str.c_str());
-			args.push_back("-DKLAYGE_NO_TEX_LOD=0");
+			if (glloader_GL_VERSION_3_0())
+			{
+				args.push_back("-DKLAYGE_NO_TEX_LOD=0");
+			}
+			else
+			{
+				args.push_back("-DKLAYGE_NO_TEX_LOD=1");
+			}
 			args.push_back(flipping_str.c_str());
 			args.push_back(standard_derivatives_str.c_str());
 			if (!caps.texture_format_support(EF_BC5)
@@ -3369,9 +3383,9 @@ namespace KlayGE
 				{
 					if ((*glsl_srcs_)[ST_GeometryShader] && !(*glsl_srcs_)[ST_GeometryShader]->empty())
 					{
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, ret->gs_input_type_);
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, ret->gs_output_type_);
-						glProgramParameteriEXT(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, ret->gs_max_output_vertex_);
+						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE, ret->gs_input_type_);
+						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE, ret->gs_output_type_);
+						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT, ret->gs_max_output_vertex_);
 					}
 				}
 
@@ -3708,11 +3722,20 @@ namespace KlayGE
 
 		glAttachShader(glsl_program_, object);
 
-		if ((ST_GeometryShader == type) && (glloader_GL_VERSION_3_2() || glloader_GL_EXT_geometry_shader4()))
+		if (ST_GeometryShader == type)
 		{
-			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
-			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
-			glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, gs_max_output_vertex_);
+			if (glloader_GL_VERSION_4_1() || glloader_GL_ARB_geometry_shader4())
+			{
+				glProgramParameteri(glsl_program_, GL_GEOMETRY_INPUT_TYPE, gs_input_type_);
+				glProgramParameteri(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE, gs_output_type_);
+				glProgramParameteri(glsl_program_, GL_GEOMETRY_VERTICES_OUT, gs_max_output_vertex_);
+			}
+			else if (glloader_GL_VERSION_3_2() || glloader_GL_EXT_geometry_shader4())
+			{
+				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
+				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, gs_max_output_vertex_);
+			}
 		}
 
 		glDeleteShader(object);

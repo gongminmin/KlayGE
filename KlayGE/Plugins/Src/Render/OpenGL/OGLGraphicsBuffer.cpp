@@ -100,6 +100,10 @@ namespace KlayGE
 			&& (ba == BA_Write_Only) && (BU_Dynamic == usage_)))
 		{
 			GLuint access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+			if (re.HackForAMD())
+			{
+				access &= ~GL_MAP_UNSYNCHRONIZED_BIT;
+			}
 			if (glloader_GL_EXT_direct_state_access())
 			{
 				p = glMapNamedBufferRangeEXT(vb_, 0, static_cast<GLsizeiptr>(size_in_byte_), access);
