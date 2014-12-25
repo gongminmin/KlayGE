@@ -120,6 +120,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	copy_to_dst("KlayGE/media/Models/point_light_proxy.meshml", "%s/media/Models/" % target_dir);
 	copy_to_dst("KlayGE/media/Models/spot_light_proxy.meshml", "%s/media/Models/" % target_dir);
 	copy_to_dst("KlayGE/media/Models/camera_proxy.meshml", "%s/media/Models/" % target_dir);
+	copy_to_dst("KlayGE/media/Models/tube_light_proxy.meshml", "%s/media/Models/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/PostProcessors/*.ppml"):
 		copy_to_dst(fname, "%s/media/PostProcessors" % target_dir);
 	for fname in glob.iglob("KlayGE/media/RenderFX/*.fxml"):
