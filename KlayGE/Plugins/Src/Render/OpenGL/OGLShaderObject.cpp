@@ -2613,14 +2613,7 @@ namespace KlayGE
 						GLSLVersion gsv = DXBC2GLSLIniter::Instance().GLSLVer();
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
-						if (re.HackForIntel())
-						{
-							rules &= ~GSR_UseUBO;
-						}
-						else
-						{
-							rules &= ~GSR_UniformBlockBinding;
-						}
+						rules &= ~GSR_UniformBlockBinding;
 						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), has_gs, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
