@@ -448,6 +448,7 @@ namespace KlayGE
 				{
 					glBindBufferBase(target, i, buffers[i]);
 				}
+				glBindBuffer(target, binded_buffers_[target]);
 			}
 
 			memcpy(&binded[first], &buffers[first], count * sizeof(buffers[0]));
