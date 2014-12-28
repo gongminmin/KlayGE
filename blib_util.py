@@ -16,6 +16,7 @@ except:
 #   On Windows phone, could be "vc140", "vc120", "vc110", "auto".
 #   On Android, could be "gcc", "auto".
 #   On Linux, could be "gcc", "auto".
+#   On MacOSX, could be "clang", "auto".
 compiler		= "auto"
 
 # Toolset name.
@@ -24,6 +25,7 @@ compiler		= "auto"
 #   On Windows phone, could be "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
+#   On MacOSX, could be "auto".
 toolset			= "auto"
 
 # Target CPU architecture.
@@ -32,6 +34,7 @@ toolset			= "auto"
 #   On Windows phone, could be "arm", "x86".
 #   On Android, cound be "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
 #   On Linux, could be "x86", "x64".
+#   On MacOSX, could be "x64".
 arch			= ("x64", )
 
 # Configuration. Could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo".
@@ -449,7 +452,11 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
 		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
 		if "win" == build_info.host_platform:
-			make_name = "%s\\prebuilt\\windows\\bin\\make.exe" % os.environ["ANDROID_NDK"]
+			android_ndk_path = os.environ["ANDROID_NDK"]
+			prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
+			if not os.path.isdir(prebuilt_make_path):
+				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
+			make_name = prebuilt_make_path + "\\bin\\make.exe"
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
 
 	if build_info.multi_config:
