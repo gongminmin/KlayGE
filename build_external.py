@@ -30,6 +30,9 @@ def build_Boost(build_info, compiler_info):
 	elif compiler_info.is_android:
 		with_program_options = False
 		with_regex = False
+	elif compiler_info.is_ios:
+		with_program_options = False
+		with_regex = False
 
 	additional_options = " -DWITH_ATOMIC:BOOL="
 	if with_atomic:
@@ -134,24 +137,24 @@ def build_external_libs(build_info):
 			print("\nBuilding libvorbis...\n")
 			build_libvorbis(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			print("\nBuilding freetype...\n")
 			build_freetype(build_info, compiler_info)
 
 		print("\nBuilding 7z...\n")
 		build_7z(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			if "win" == build_info.target_platform:
 				print("\nSeting up DXSDK...\n")
 				setup_DXSDK(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			print("\nSeting up Cg...\n")
 			setup_Cg(build_info, compiler_info)
 
