@@ -352,9 +352,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;
 #elif defined KLAYGE_PLATFORM_DARWIN
-		NSOpenGLPixelFormat* pixel_format_;
-		KlayGEWindow* d_window_;
-		KlayGEView* d_view_;
+		KlayGEView* ns_view_;
 #endif
 
 		bool external_wnd_;

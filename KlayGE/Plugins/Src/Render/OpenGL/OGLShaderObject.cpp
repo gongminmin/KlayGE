@@ -220,7 +220,7 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			ss << d3dcompiler_wrapper_name << ".exe";
 #else
-			ss << "/usr/local/bin/wine " << d3dcompiler_wrapper_name << ".exe.so";
+			ss << WINE_PATH << "wine " << d3dcompiler_wrapper_name << ".exe.so";
 #endif
 			ss << " " << compile_input_file;
 			ss << " " << entry_point << " " << target;
@@ -233,7 +233,7 @@ namespace
 
 			std::ifstream ifs(compile_output_file.c_str(), std::ios_base::binary);
 
-			HRESULT hr;
+			uint32_t hr;
 			ifs.read(reinterpret_cast<char*>(&hr), sizeof(hr));
 
 			ifs.read(reinterpret_cast<char*>(&buffer_size), sizeof(buffer_size));

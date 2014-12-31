@@ -73,25 +73,25 @@ int main(int argc, char* argv[])
 	FILE* fp = fopen(input_file, "rb");
 	int hlsl_size;
 	fread(&hlsl_size, sizeof(hlsl_size), 1, fp);
-	char* hlsl = new char[hlsl_size + 1];
+	char* hlsl = (char*)malloc(sizeof(char) * (hlsl_size + 1));
 	fread(hlsl, sizeof(char), hlsl_size, fp);
 	hlsl[hlsl_size] = 0;
 
 	int num_macros;
 	fread(&num_macros, sizeof(num_macros), 1, fp);
-	D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros + 1];
+	D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)malloc(sizeof(D3D_SHADER_MACRO) * (num_macros + 1));
 	char line_name[1024];
 	char line_definition[1024];
 	int idx = 0;
 	while (fgets(line_name, 1024, fp) && fgets(line_definition, 1024, fp))
 	{
-		char* t1 = new char[strlen(line_name) + 1];
+		char* t1 = (char*)malloc(sizeof(char) * (strlen(line_name) + 1));
 		strcpy(t1, line_name);
 		if ('\n' == t1[strlen(t1) - 1])
 		{
 			t1[strlen(t1) - 1] = '\0';
 		}
-		char* t2 = new char[strlen(line_definition) + 1];
+		char* t2 = (char*)malloc(sizeof(char) * (strlen(line_definition) + 1));
 		strcpy(t2, line_definition);
 		if ('\n' == t2[strlen(t2) - 1])
 		{
@@ -107,11 +107,11 @@ int main(int argc, char* argv[])
 
 	ID3DBlob* code = NULL;
 	ID3DBlob* err_msg = NULL;
-	HRESULT hr = DynamicD3DCompile(hlsl, hlsl_size, NULL, macros, NULL, entry_point,
+	int hr = DynamicD3DCompile(hlsl, hlsl_size, NULL, macros, NULL, entry_point,
 		target, flags1, flags2, &code, &err_msg);
 	if (FAILED(hr))
 	{
-		printf("Compiling error: 0x%x", hr);
+		printf("Compiling error: 0x%x\n", hr);
 	}
 	fp = fopen(output_file, "wb");
 	fwrite(&hr, sizeof(hr), 1, fp);
@@ -141,11 +141,11 @@ int main(int argc, char* argv[])
 
 	for (int i = 0; i < num_macros; ++ i)
 	{
-		delete[] macros[i].Name;
-		delete[] macros[i].Definition;
+		free((void*)macros[i].Name);
+		free((void*)macros[i].Definition);
 	}
-	delete[] macros;
-	delete[] hlsl;
+	free(macros);
+	free(hlsl);
 
 	FreeLibrary(mod_d3dcompiler);
 

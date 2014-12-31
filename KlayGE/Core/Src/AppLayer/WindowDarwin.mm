@@ -1,7 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
 
-#include <iostream>
-
 #ifdef KLAYGE_PLATFORM_DARWIN
 
 #include <KFL/PreDeclare.hpp>
@@ -10,6 +8,7 @@
 
 #include <KlayGE/Window.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderFactory.hpp>
 
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
@@ -18,46 +17,20 @@
 {
 	KlayGE::Window* window_;
 }
-@property(assign) KlayGE::Window* window_;
+- (void)setWindow:(KlayGE::Window*)window;
 @end
 
 @interface KlayGEView : NSOpenGLView
 {
-	KlayGE::RenderEngine* render_engine_;
 	CVDisplayLinkRef displayLink;
 }
-@property(assign) KlayGE::RenderEngine* render_engine_;
+- (void) startDisplayLink;
+- (void) stopDisplayLink;
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime;
 @end
 
 namespace KlayGE
 {
-	static NSApplication* application = nil;
-	static bool wasInitialized = false;
-	
-	int InitSystem()
-	{
-		wasInitialized = true;
-		
-		@autoreleasepool
-		{
-			application = [NSApplication sharedApplication];
-		
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
-		
-#ifndef NSAppKitVersionNumber10_5
-#define NSAppKitVersionNumber10_5 949
-#endif
-			if (floor(NSAppKitVersionNumber) > NSAppKitVersionNumber10_5)
-			{
-				[application setActivationPolicy:NSApplicationActivationPolicyRegular];
-			}
-#endif
-		}
-
-		return 0;
-	}
-
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false)
 	{
@@ -118,7 +91,6 @@ namespace KlayGE
 			visual_attr.push_back(s_size);
 		}
 		visual_attr.push_back(NSOpenGLPFADoubleBuffer);
-		// https://searchcode.com/codesearch/view/70048394/#l-182
 		if (settings.sample_count > 1)
 		{
 			visual_attr.push_back(NSOpenGLPFAMultisample);
@@ -126,163 +98,111 @@ namespace KlayGE
 			visual_attr.push_back(NSOpenGLPFASamples);
 			visual_attr.push_back(settings.sample_count);
 		}
-		// TODO: OpenGL 3.x core will crash since Cg can only compile old version
 		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
-		//visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
-		visual_attr.push_back(NSOpenGLProfileVersionLegacy);
+		visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
 		visual_attr.push_back(0);
-		pixel_format_ = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
+		NSOpenGLPixelFormat* pixel_format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]] autorelease];
+
+		NSScreen* mainDisplay = [NSScreen mainScreen];
+		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
+		NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
 		
-		if (!wasInitialized)
-		{
-			InitSystem();
-		}
-		
-		@autoreleasepool
-		{
-			NSScreen* mainDisplay = [NSScreen mainScreen];
-			NSString* windowName = [NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]];
+		// TODO: full screen support
+		KlayGEWindow *ns_window = [[KlayGEWindow alloc] initWithContentRect:initContentRect
+											 styleMask:initStyleMask
+											 backing:NSBackingStoreBuffered
+											 defer:YES
+											 screen:mainDisplay];
 
-			NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
-			NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
-			if (settings.full_screen)
-			{
-				// https://developer.apple.com/library/mac/documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_fullscreen/opengl_cgl.html#//apple_ref/doc/uid/TP40001987-CH210-SW6
-				initContentRect = [mainDisplay frame];
-				initStyleMask = NSBorderlessWindowMask;
-			}
-			d_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
-												styleMask:initStyleMask
-												backing:NSBackingStoreBuffered
-												defer:YES
-												screen:mainDisplay];
+		[ns_window setAcceptsMouseMovedEvents:YES];
+		[ns_window setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
 
-			if (settings.full_screen)
-			{
-				[d_window_ setLevel:NSMainMenuWindowLevel + 1];
-			}
-			else
-			{
-				int const CAPTION_HEIGHT = 22;
-				int display_height = mainDisplay.frame.size.height + mainDisplay.frame.origin.y - CAPTION_HEIGHT;
-				[d_window_ setFrameTopLeftPoint:NSMakePoint(settings.left, display_height - settings.top)];
-			}
+		[ns_window setWindow:this];
+		[ns_window setDelegate:ns_window];
 
-			[d_window_ setHasShadow:YES];
-			[d_window_ setAcceptsMouseMovedEvents:YES];
-			[d_window_ useOptimizedDrawing:YES];
-			[d_window_ setTitle:windowName];
+		NSRect content_rect = [ns_window contentRectForFrameRect:ns_window.frame];
+		left_ = 0;
+		top_ = 0;
+		width_ = content_rect.size.width;
+		height_ = content_rect.size.height;
 
-			[d_window_ setDelegate:d_window_];
-			[d_window_ setWindow_:this];
+		ns_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format];
 
-			NSRect content_rect = [d_window_ contentRectForFrameRect:d_window_.frame];
-			left_ = 0;
-			top_ = 0;
-			width_ = content_rect.size.width;
-			height_ = content_rect.size.height;
-		}
+		[ns_window setContentView:ns_view_];
+		[ns_window makeKeyAndOrderFront:nil];
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false)
 	{
-		// TODO
-		std::cout << "Unimplemented Window::Window" << std::endl;
+		LogWarn("Unimplemented Window::Window");
 	}
 
 	Window::~Window()
 	{
-		// TODO
-		std::cout << "Unimplemented Window::~Window" << std::endl;
+		LogWarn("Unimplemented Window::Window");
 	}
 	
-	void Window::CreateView()
+	void Window::StartRunLoop()
 	{
-		// TODO: opengl 3.3
-		d_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
+		[ns_view_ startDisplayLink];
+	}
 
-		[d_window_ setContentView:d_view_];
-		[d_window_ makeKeyAndOrderFront:nil];
+	void Window::StopRunLoop()
+	{
+		[ns_view_ stopDisplayLink];
 	}
 	
 	void Window::FlushBuffer()
 	{
-		[[d_view_ openGLContext] flushBuffer];
-	}
-	
-	void Window::RunLoop(RenderEngine& re)
-	{
-		[d_view_ setRender_engine_:&re];
-		[application run];
+		[[ns_view_ openGLContext] flushBuffer];
 	}
 
-	void Window::HandleCMD(int32_t cmd)
+	uint2 Window::GetNSViewSize()
 	{
-		switch (cmd)
-		{
-		case 0:
-			OnClose()(*this);
-			active_ = false;
-			ready_ = false;
-			closed_ = true;
-
-			[d_view_ setRender_engine_:nil];
-			[application stop:nil];
-			break;
-
-		case 1:
-			active_ = true;
-			ready_ = true;
-			OnActive()(*this, true);
-			break;
-
-		case 2:
-			active_ = false;
-			OnActive()(*this, false);
-			break;
-
-		case 3:
-			left_ = 0;
-			top_ = 0;
-			NSRect content_rect = [d_window_ contentRectForFrameRect:d_window_.frame];
-			width_ = content_rect.size.width;
-			height_ = content_rect.size.height;
-			active_ = true;
-			ready_ = true;
-			// TODO: why crash
-			//OnSize()(*this, true);
-			break;
-		}
+		NSRect rect = ns_view_.frame;
+		return KlayGE::uint2(rect.size.width, rect.size.height);
 	}
 }
 
 @implementation KlayGEWindow
-@synthesize window_;
+- (void)setWindow:(KlayGE::Window*)window
+{
+	window_ = window;
+}
 
 - (void)windowWillClose:(NSNotification*)notification
 {
-	window_->HandleCMD(0);
+	(void)notification;
+	window_->StopRunLoop();
+
+	window_->OnClose()(*window_);
+	window_->Active(false);
+	window_->Ready(false);
+	window_->Closed(true);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
-	window_->HandleCMD(1);
+	(void)notification;
+	window_->Active(true);
+	window_->Ready(true);
+	window_->OnActive()(*window_, true);
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification
 {
-	window_->HandleCMD(2);
+	(void)notification;
+	window_->Active(false);
+	window_->OnActive()(*window_, false);
 }
 
 - (void)windowDidResize:(NSNotification *)notification
 {
-	window_->HandleCMD(3);
-}
-
-- (void)windowDidMove:(NSNotification *)notification
-{
-	window_->HandleCMD(3);
+	(void)notification;
+	window_->Active(true);
+	window_->Ready(true);
+	window_->OnSize()(*window_, true);
 }
 
 - (void)mouseMoved:(NSEvent*)theEvent
@@ -316,33 +236,35 @@ namespace KlayGE
 @end
 
 @implementation KlayGEView
-@synthesize render_engine_;
 
 - (id)init
 {
 	self = [super init];
-	if (self)
-	{
-		render_engine_ = nil;
-	}
 	return self;
 }
 
-// https://developer.apple.com/library/mac/qa/qa1385/_index.html
 - (void)prepareOpenGL
 {
-	GLint swapInt = 1;
+	GLint swapInt = 0;
 	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
-	
+
 	CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
-	
+
 	CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, self);
-	
+
 	CGLContextObj cglContext = static_cast<CGLContextObj>([[self openGLContext] CGLContextObj]);
 	CGLPixelFormatObj cglPixelFormat = (CGLPixelFormatObj)([[self pixelFormat] CGLPixelFormatObj]);
 	CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
-	
+}
+
+- (void) startDisplayLink
+{
 	CVDisplayLinkStart(displayLink);
+}
+
+- (void) stopDisplayLink
+{
+	CVDisplayLinkStop(displayLink);
 }
 
 static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
@@ -356,23 +278,18 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTime
 {
 	NSOpenGLContext* currentContext = [self openGLContext];
 	[currentContext makeCurrentContext];
-	
+
 	CGLLockContext((CGLContextObj)[currentContext CGLContextObj]);
-	
-	if (render_engine_ != nil)
-	{
-		render_engine_->Refresh();
-	}
-	
+	KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance().Refresh();
 	CGLUnlockContext((CGLContextObj)[currentContext CGLContextObj]);
-	
+
 	return kCVReturnSuccess;
 }
 
 - (void)dealloc
 {
 	CVDisplayLinkRelease(displayLink);
-	
+
 	[super dealloc];
 }
 @end
