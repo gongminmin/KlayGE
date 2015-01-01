@@ -68,10 +68,12 @@ namespace KlayGE
 		::ANativeWindow* a_window_;
 #endif
 
+#ifndef KLAYGE_PLATFORM_IOS
 		EGLDisplay display_;
 		EGLSurface surf_;
 		EGLConfig cfg_;
 		EGLContext context_;
+#endif
 
 		bool	isFullScreen_;
 
