@@ -23,6 +23,11 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 			PATHS
 				"$ENV{ANDROID_NDK}/platforms/android-${ANDROID_NATIVE_API_LEVEL}/arch-${ANDROID_ARCH_NAME}/usr/include"
 		)
+	ELSEIF(IOS)
+		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR gltypes.h
+			PATHS
+				/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/OpenGLES.framework/Headers
+		)
 	ELSEIF(UNIX)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
 			PATHS
