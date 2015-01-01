@@ -140,7 +140,7 @@ namespace KlayGE
 
 	Window::~Window()
 	{
-		LogWarn("Unimplemented Window::Window");
+		LogWarn("Unimplemented Window::~Window");
 	}
 	
 	void Window::StartRunLoop()
@@ -182,7 +182,7 @@ namespace KlayGE
 	window_->Closed(true);
 }
 
-- (void)windowDidBecomeKey:(NSNotification *)notification
+- (void)windowDidBecomeKey:(NSNotification*)notification
 {
 	(void)notification;
 	window_->Active(true);
@@ -190,14 +190,14 @@ namespace KlayGE
 	window_->OnActive()(*window_, true);
 }
 
-- (void)windowDidResignKey:(NSNotification *)notification
+- (void)windowDidResignKey:(NSNotification*)notification
 {
 	(void)notification;
 	window_->Active(false);
 	window_->OnActive()(*window_, false);
 }
 
-- (void)windowDidResize:(NSNotification *)notification
+- (void)windowDidResize:(NSNotification*)notification
 {
 	(void)notification;
 	window_->Active(true);
@@ -267,8 +267,8 @@ namespace KlayGE
 	CVDisplayLinkStop(displayLink);
 }
 
-static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
-		const CVTimeStamp* outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
+static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, CVTimeStamp const * now,
+		CVTimeStamp const * outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
 {
 	CVReturn result = [(KlayGEView*)displayLinkContext getFrameForTime:outputTime];
 	return kCVReturnSuccess;
