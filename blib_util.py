@@ -17,6 +17,7 @@ except:
 #   On Android, could be "gcc", "auto".
 #   On Linux, could be "gcc", "auto".
 #   On MacOSX, could be "clang", "auto".
+#   On iOS, could be "clang", "auto".
 compiler		= "auto"
 
 # Toolset name.
@@ -26,6 +27,7 @@ compiler		= "auto"
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
 #   On Linux, could be "auto".
 #   On MacOSX, could be "auto".
+#   On iOS, could be "auto".
 toolset			= "auto"
 
 # Target CPU architecture.
@@ -35,12 +37,13 @@ toolset			= "auto"
 #   On Android, cound be "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
 #   On Linux, could be "x86", "x64".
 #   On MacOSX, could be "x64".
+#   On iOS, could be "arm", "x86".
 arch			= ("x64", )
 
 # Configuration. Could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo".
 config			= ("Debug", "RelWithDebInfo")
 
-# Target platform for cross compiling. Could be "android", "win_store", "win_phone" plus version number, or "auto".
+# Target platform for cross compiling. Could be "android", "win_store", "win_phone" plus version number, "ios", or "auto".
 target			= "auto"
 """)
 	cfg_build_f.close()
@@ -75,6 +78,7 @@ class compiler_info:
 		self.is_android = False
 		self.is_linux = False
 		self.is_darwin = False
+		self.is_ios = False
 
 		if "win" == target_platform:
 			self.is_windows = True
@@ -91,6 +95,8 @@ class compiler_info:
 			self.is_linux = True
 		elif "darwin" == target_platform:
 			self.is_darwin = True
+		elif "ios" == target_platform:
+			self.is_ios = True
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
@@ -190,7 +196,7 @@ class build_info:
 				else:
 					target_api_level = "8.0"
 				self.target_api_level = target_api_level
-		if "android" == target_platform:
+		if ("android" == target_platform) or ("ios" == target_platform):
 			prefer_static = True
 		else:
 			prefer_static = False
@@ -218,7 +224,7 @@ class build_info:
 						compiler = "mingw"
 				elif "linux" == target_platform:
 					compiler = "gcc"
-				elif "darwin" == target_platform:
+				elif ("darwin" == target_platform) or ("ios" == target_platform):
 					compiler = "clang"
 				else:
 					log_error("Unsupported target platform\n")
@@ -458,6 +464,14 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
 			make_name = prebuilt_make_path + "\\bin\\make.exe"
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
+	elif "ios" == build_info.target_platform:
+		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/iOS.cmake\"" % curdir
+		if "arm" == compiler_info.arch:
+			additional_options += " -DIOS_PLATFORM=OS"
+		elif "x86" == compiler_info.arch:
+			additional_options += " -DIOS_PLATFORM=SIMULATOR"
+		else:
+			log_error("Unsupported iOS arch\n")
 
 	if build_info.multi_config:
 		if "vc" == build_info.compiler_name:
@@ -499,7 +513,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 					build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
 			elif "clang" == build_info.compiler_name:
 				build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
-				if need_install:
+				if need_install and (not build_info.prefer_static):
 					build_info.xcodebuild_add_build_command(build_cmd, "install", config)
 		if build_cmd.execute() != 0:
 			log_error("Build %s failed." % name)

@@ -20,6 +20,9 @@
 #ifdef GLLOADER_AGL
 	#include <Carbon/Carbon.h>
 #endif
+#ifdef GLLOADER_EAGL
+	#include <CoreFoundation/CoreFoundation.h>
+#endif
 
 #if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 #include <dlfcn.h>
@@ -736,15 +739,20 @@ void* get_gl_proc_address_by_api(const char* name)
 {
 	void* ret = NULL;
 
-#ifdef GLLOADER_GLES
+#if defined(GLLOADER_GLES) && !defined(GLLOADER_EAGL)
 	ret = (void*)(eglGetProcAddress(name));
 #endif
 #ifdef GLLOADER_WGL
 	ret = (void*)(DynamicWglGetProcAddress(name));
 #endif
-#ifdef GLLOADER_AGL
+#if defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
 	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
+#ifdef GLLOADER_AGL
+		CFSTR("/System/Library/Frameworks/OpenGL.framework"),
+#else
+		CFSTR("OpenGLES.framework"),
+#endif
+		kCFURLPOSIXPathStyle, true);
 
 	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
 

@@ -59,8 +59,11 @@
 #define _GLLOADER_H
 
 #include <stddef.h>
+#if defined(__APPLE__) || defined(__APPLE_CC__)
+	#include <TargetConditionals.h>
+#endif
 
-#ifdef GLLOADER_GLES_SUPPORT
+#if defined(GLLOADER_GLES_SUPPORT) && !defined(TARGET_OS_IPHONE)
 #include <KHR/khrplatform.h>
 #endif
 
@@ -83,7 +86,11 @@
 
 #else
 #define GLLOADER_GLES
-#define GLLOADER_EGL
+#if TARGET_OS_IPHONE
+	#define GLLOADER_EAGL
+#else
+	#define GLLOADER_EGL
+#endif
 #endif
 
 #ifndef GLLOADER_GLES

@@ -24,7 +24,7 @@
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <al.h>
 #include <alc.h>
-#elif defined KLAYGE_PLATFORM_DARWIN
+#elif defined KLAYGE_PLATFORM_DARWIN || defined KLAYGE_PLATFORM_IOS
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #else

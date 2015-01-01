@@ -2,9 +2,15 @@ SET(LIB_NAME SampleCommon)
 
 SET(SAMPLE_COMMON_LIB_OUTPUT_DIR ${KLAYGE_PROJECT_DIR}/Samples/lib/${KLAYGE_PLATFORM_NAME})
 
-SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/src/Common/SampleCommon.cpp
-)
+IF(KLAYGE_PLATFORM_IOS)
+	SET(SOURCE_FILES
+		${KLAYGE_PROJECT_DIR}/Samples/src/Common/SampleCommon.mm
+	)
+ELSE()
+	SET(SOURCE_FILES
+		${KLAYGE_PROJECT_DIR}/Samples/src/Common/SampleCommon.cpp
+	)
+ENDIF()
 
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Common/SampleCommon.hpp

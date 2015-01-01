@@ -39,6 +39,13 @@ int SampleMain()
 	return 0;
 }
 
+#ifdef KLAYGE_PLATFORM_IOS
+App3DFramework* SampleApp()
+{
+	return new TutorFramework();
+}
+#endif
+
 TutorFramework::TutorFramework()
 	: App3DFramework("Tutor1")
 {

@@ -252,6 +252,17 @@ int SampleMain()
 	return 0;
 }
 
+#ifdef KLAYGE_PLATFORM_IOS
+App3DFramework* SampleApp()
+{
+	ContextCfg cfg = Context::Instance().Config();
+	cfg.location_sensor = true;
+	Context::Instance().Config(cfg);
+
+	return new InputCaps();
+}
+#endif
+
 InputCaps::InputCaps()
 			: App3DFramework("InputCaps")
 {

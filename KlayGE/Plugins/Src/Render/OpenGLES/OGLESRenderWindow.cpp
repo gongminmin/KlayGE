@@ -70,6 +70,9 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
+#if defined KLAYGE_PLATFORM_IOS
+		//TODO        
+#else
 		display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 		int r_size, g_size, b_size, a_size, d_size, s_size;
@@ -276,6 +279,7 @@ namespace KlayGE
 		}
 
 		eglSwapInterval(display_, 0);
+#endif
 
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -426,6 +430,10 @@ namespace KlayGE
 
 		uint32_t new_width = w - new_left;
 		uint32_t new_height = h - new_top;
+#elif defined KLAYGE_PLATFORM_IOS
+		// TODO
+		uint32_t new_width = 0;
+		uint32_t new_height = 0;
 #endif
 
 		if ((new_width != width_) || (new_height != height_))
@@ -449,6 +457,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 #endif
 
+#ifndef KLAYGE_PLATFORM_IOS
 		if (display_ != nullptr)
 		{
 			eglMakeCurrent(display_, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -457,11 +466,14 @@ namespace KlayGE
 
 			display_ = nullptr;
 		}
+#endif
 	}
 
 	void OGLESRenderWindow::SwapBuffers()
 	{
+#ifndef KLAYGE_PLATFORM_IOS
 		eglSwapBuffers(display_, surf_);
+#endif
 	}
 
 	void OGLESRenderWindow::OnPaint(Window const & win)
