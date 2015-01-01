@@ -15,7 +15,7 @@ def build_Samples(build_info):
 
 def build_Tools(build_info):
 	for compiler_info in build_info.compilers:
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			build_a_project("Tools", "KlayGE/Tools", build_info, compiler_info)
 
 def build_Tutorials(build_info):
@@ -24,7 +24,7 @@ def build_Tutorials(build_info):
 
 def build_Exporters(build_info):
 	for compiler_info in build_info.compilers:
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android):
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			build_a_project("Exporters", "KlayGE/Exporters", build_info, compiler_info)
 
 if __name__ == "__main__":
