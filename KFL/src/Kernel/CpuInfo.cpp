@@ -83,7 +83,8 @@ namespace
 			: "=a" (*peax), "=b" (*pebx), "=c" (*pecx), "=d" (*pedx)
 			: "a" (*peax), "c" (*pecx)
 		);
-	#else
+	#elif !defined(KLAYGE_PLATFORM_IOS)
+		//TODO: iOS Device compile complains: error: invalid output constraint '=a' in asm
 		__asm__
 		(
 			"pushl  %%ebx			\n\t"
@@ -528,7 +529,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
 			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
-#elif defined KLAYGE_PLATFORM_DARWIN
+#elif defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS)
 		{
 			bool supported = false;
 #endif
