@@ -105,6 +105,13 @@ int SampleMain()
 	return 0;
 }
 
+#ifdef KLAYGE_PLATFORM_IOS
+App3DFramework* SampleApp()
+{
+	return new VertexDisplacement();
+}
+#endif
+
 VertexDisplacement::VertexDisplacement()
 						: App3DFramework("VertexDisplacement")
 {
