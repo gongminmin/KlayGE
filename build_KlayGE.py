@@ -9,6 +9,11 @@ def build_KlayGE(build_info):
 	for compiler_info in build_info.compilers:
 		build_a_project("KlayGE", "KlayGE", build_info, compiler_info)
 
+def build_Tests(build_info):
+	for compiler_info in build_info.compilers:
+		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
+			build_a_project("Tests", "KlayGE/Tests", build_info, compiler_info)
+
 def build_Samples(build_info):
 	for compiler_info in build_info.compilers:
 		build_a_project("Samples", "KlayGE/Samples", build_info, compiler_info)
@@ -33,6 +38,9 @@ if __name__ == "__main__":
 
 	print("Building KlayGE...")
 	build_KlayGE(bi)
+
+	print("Building KlayGE Tests...")
+	build_Tests(bi)
 
 	print("Building KlayGE Samples...")
 	build_Samples(bi)
