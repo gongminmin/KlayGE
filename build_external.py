@@ -13,6 +13,7 @@ def build_Boost(build_info, compiler_info):
 	with_program_options = True
 	with_regex = True
 	with_system = True
+	with_test = True
 	with_thread = True
 	if "vc" == build_info.compiler_name:
 		if build_info.compiler_version >= 100:
@@ -27,12 +28,15 @@ def build_Boost(build_info, compiler_info):
 	if compiler_info.is_windows_runtime:
 		with_filesystem = False
 		with_program_options = False
+		with_test = False
 	elif compiler_info.is_android:
 		with_program_options = False
 		with_regex = False
+		with_test = False
 	elif compiler_info.is_ios:
 		with_program_options = False
 		with_regex = False
+		with_test = False
 
 	additional_options = " -DWITH_ATOMIC:BOOL="
 	if with_atomic:
@@ -66,6 +70,11 @@ def build_Boost(build_info, compiler_info):
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_SYSTEM:BOOL="
 	if with_system:
+		additional_options += "\"ON\""
+	else:
+		additional_options += "\"OFF\""
+	additional_options += " -DWITH_TEST:BOOL="
+	if with_test:
 		additional_options += "\"ON\""
 	else:
 		additional_options += "\"OFF\""
