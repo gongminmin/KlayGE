@@ -256,6 +256,16 @@ BOOST_AUTO_TEST_CASE(DecodeBC3)
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 9);
 }
 
+BOOST_AUTO_TEST_CASE(DecodeBC6U)
+{
+	TestEncodeDecodeTex("memorial.dds", "memorial_bc6u.dds", EF_BC6, 0.1f);
+}
+
+BOOST_AUTO_TEST_CASE(DecodeBC6S)
+{
+	TestEncodeDecodeTex("uffizi_probe.dds", "uffizi_probe_bc6s.dds", EF_SIGNED_BC6, 0.1f);
+}
+
 BOOST_AUTO_TEST_CASE(DecodeBC7XRGB)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc7.dds", EF_BC7, 3);
