@@ -33,6 +33,9 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+	#include <KFL/Thread.hpp>
+#endif
 #else
 	#include <KFL/Thread.hpp>
 	#include <cerrno>
@@ -151,31 +154,6 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::Sleep(ms);
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		static HANDLE singleton_event = nullptr;
-
-		HANDLE sleep_event = singleton_event;
-
-		// Demand create the event.
-		if (!sleep_event)
-		{
-			sleep_event = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
-			if (!sleep_event)
-			{
-				return;
-			}
-
-			HANDLE previous_event = ::InterlockedCompareExchangePointerRelease(&singleton_event, sleep_event, nullptr);            
-			if (previous_event)
-			{
-				// Back out if multiple threads try to demand create at the same time.
-				::CloseHandle(sleep_event);
-				sleep_event = previous_event;
-			}
-		}
-
-		// Emulate sleep by waiting with timeout on an event that is never signalled.
-		::WaitForSingleObjectEx(sleep_event, ms, false);
 #else
 		this_thread::sleep_for(chrono::milliseconds(ms));
 #endif

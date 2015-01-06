@@ -63,22 +63,22 @@ namespace
 		char const * ret;
 		switch (value)
 		{
-		case GL_DEBUG_SOURCE_API_KHR:
+		case GL_DEBUG_SOURCE_API:
 			ret = "GL";
 			break;
-		case GL_DEBUG_SOURCE_SHADER_COMPILER_KHR:
+		case GL_DEBUG_SOURCE_SHADER_COMPILER:
 			ret = "shader compiler";
 			break;
-		case GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR:
+		case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
 			ret = "window system";
 			break;
-		case GL_DEBUG_SOURCE_THIRD_PARTY_KHR:
+		case GL_DEBUG_SOURCE_THIRD_PARTY:
 			ret = "3rd party";
 			break;
-		case GL_DEBUG_SOURCE_APPLICATION_KHR:
+		case GL_DEBUG_SOURCE_APPLICATION:
 			ret = "application";
 			break;
-		case GL_DEBUG_SOURCE_OTHER_KHR:
+		case GL_DEBUG_SOURCE_OTHER:
 			ret = "other";
 			break;
 
@@ -95,31 +95,31 @@ namespace
 		char const * ret;
 		switch (value)
 		{
-		case GL_DEBUG_TYPE_ERROR_KHR:
+		case GL_DEBUG_TYPE_ERROR:
 			ret = "error";
 			break;
-		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR:
+		case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
 			ret = "deprecated behavior";
 			break;
-		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR:
+		case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
 			ret = "undefined behavior";
 			break;
-		case GL_DEBUG_TYPE_PERFORMANCE_KHR:
+		case GL_DEBUG_TYPE_PERFORMANCE:
 			ret = "performance";
 			break;
-		case GL_DEBUG_TYPE_PORTABILITY_KHR:
+		case GL_DEBUG_TYPE_PORTABILITY:
 			ret = "portability";
 			break;
-		case GL_DEBUG_TYPE_MARKER_KHR:
+		case GL_DEBUG_TYPE_MARKER:
 			ret = "marker";
 			break;
-		case GL_DEBUG_TYPE_PUSH_GROUP_KHR:
+		case GL_DEBUG_TYPE_PUSH_GROUP:
 			ret = "push group";
 			break;
-		case GL_DEBUG_TYPE_POP_GROUP_KHR:
+		case GL_DEBUG_TYPE_POP_GROUP:
 			ret = "pop group";
 			break;
-		case GL_DEBUG_TYPE_OTHER_KHR:
+		case GL_DEBUG_TYPE_OTHER:
 			ret = "other";
 			break;
 
@@ -136,16 +136,16 @@ namespace
 		char const * ret;
 		switch (value)
 		{
-		case GL_DEBUG_SEVERITY_HIGH_KHR:
+		case GL_DEBUG_SEVERITY_HIGH:
 			ret = "high";
 			break;
-		case GL_DEBUG_SEVERITY_MEDIUM_KHR:
+		case GL_DEBUG_SEVERITY_MEDIUM:
 			ret = "medium";
 			break;
-		case GL_DEBUG_SEVERITY_LOW_KHR:
+		case GL_DEBUG_SEVERITY_LOW:
 			ret = "low";
 			break;
-		case GL_DEBUG_SEVERITY_NOTIFICATION_KHR:
+		case GL_DEBUG_SEVERITY_NOTIFICATION:
 			ret = "notification";
 			break;
 
@@ -168,7 +168,7 @@ namespace
 			+ "id: " + boost::lexical_cast<std::string>(id)+ "; "
 			+ "severity: " + DebugSeverityString(severity) + "; "
 			+ "message: " + message;
-		if (GL_DEBUG_TYPE_ERROR_KHR == type)
+		if (GL_DEBUG_TYPE_ERROR == type)
 		{
 			KlayGE::LogError(dbg.c_str());
 		}
@@ -234,13 +234,13 @@ namespace KlayGE
 #ifndef KLAYGE_SHIP
 		if (glloader_GLES_KHR_debug())
 		{
-			glEnable(GL_DEBUG_OUTPUT_KHR);
-			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
-			glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
-			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
+			glEnable(GL_DEBUG_OUTPUT);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+			glDebugMessageCallback(&DebugOutputProc, nullptr);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
+			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 		}
 #endif
 

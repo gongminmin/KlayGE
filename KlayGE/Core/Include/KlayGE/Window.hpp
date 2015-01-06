@@ -268,10 +268,10 @@ namespace KlayGE
 			return joystick_buttons_event_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
-		void CreateView();
+		void StartRunLoop();
+		void StopRunLoop();
 		void FlushBuffer();
-		void RunLoop(RenderEngine &re);
-		void HandleCMD(int32_t cmd);
+		uint2 GetNSViewSize();
 #elif defined KLAYGE_PLATFORM_IOS
 		void StartRunLoop();
 		void StopRunLoop();
