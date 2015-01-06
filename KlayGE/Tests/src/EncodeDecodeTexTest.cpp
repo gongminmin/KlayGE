@@ -6,8 +6,6 @@
 #include <KFL/Half.hpp>
 
 #include <boost/assert.hpp>
-
-#define BOOST_TEST_MODULE EncodeDecodeTex
 #include <boost/test/unit_test.hpp>
 
 #include <vector>
@@ -236,10 +234,21 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 	BOOST_CHECK(mse < threshold);
 }
 
-BOOST_AUTO_TEST_CASE(Init)
+class EncodeDecodeTexFixture
 {
-	ResLoader::Instance().AddPath("../../Tests/media");
-}
+public:
+	EncodeDecodeTexFixture()
+	{
+		ResLoader::Instance().AddPath("../../Tests/media");
+	}
+
+	~EncodeDecodeTexFixture()
+	{
+		Context::Destroy();
+	}
+};
+
+BOOST_GLOBAL_FIXTURE(EncodeDecodeTexFixture);
 
 BOOST_AUTO_TEST_CASE(DecodeBC1)
 {
@@ -294,9 +303,4 @@ BOOST_AUTO_TEST_CASE(EncodeDecodeBC3)
 BOOST_AUTO_TEST_CASE(EncodeDecodeETC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_ETC1, 5);
-}
-
-BOOST_AUTO_TEST_CASE(Deinit)
-{
-	Context::Destroy();
 }
