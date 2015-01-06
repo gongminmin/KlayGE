@@ -24,7 +24,7 @@
 	#include <CoreFoundation/CoreFoundation.h>
 #endif
 
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
 #include <dlfcn.h>
 #endif
 
@@ -181,7 +181,25 @@ namespace glloader
 #endif
 #endif
 #if defined(__APPLE__) || defined(__APPLE_CC__)
-			// TODO
+	#ifdef GLLOADER_GLES
+		// http://forum.imgtec.com/discussion/comment/18323#Comment_18323
+		// For PowerVR_SDK, we need to load libGLESv2 before libEGL
+		ogl_dll = ::dlopen("libGLESv2.dylib", RTLD_LAZY);
+		if (ogl_dll != NULL)
+		{
+			gl_dlls_.push_back(ogl_dll);
+		}
+		ogl_dll = ::dlopen("libGLESv3.dylib", RTLD_LAZY);
+		if (ogl_dll != NULL)
+		{
+			gl_dlls_.push_back(ogl_dll);
+		}
+		ogl_dll = ::dlopen("libEGL.dylib", RTLD_LAZY);
+		if (ogl_dll != NULL)
+		{
+			gl_dlls_.push_back(ogl_dll);
+		}
+	#endif
 #endif
 #if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 #ifdef GLLOADER_GLES
@@ -220,10 +238,7 @@ namespace glloader
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 				::FreeLibrary(static_cast<HMODULE>(gl_dlls_[i]));
 #endif
-#if defined(__APPLE__) || defined(__APPLE_CC__)
-				// TODO
-#endif
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
 				::dlclose(gl_dlls_[i]);
 #endif
 			}
@@ -376,6 +391,12 @@ namespace glloader
 
 				major = ver[pos - 1] - '0';
 				minor = ver[pos + 1] - '0';
+				if (ver.find("Fail") != std::string::npos)
+				{
+					// Something like <Failed to query OpenGL ES version>(Host : 3.3 NVIDIA-8.24.16 310.90.9.05f01)
+					major = 2;
+					minor = 0;
+				}
 			}
 			else
 			{
@@ -722,10 +743,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 		}
 	}
 #endif
-#if defined(__APPLE__) || defined(__APPLE_CC__)
-	// TODO
-#endif
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
+#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
 		ret = ::dlsym(gl_dlls[i], name);
@@ -746,24 +764,24 @@ void* get_gl_proc_address_by_api(const char* name)
 	ret = (void*)(DynamicWglGetProcAddress(name));
 #endif
 #if defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
-	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
 #ifdef GLLOADER_AGL
-		CFSTR("/System/Library/Frameworks/OpenGL.framework"),
+	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
+		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
+	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
 #else
-		CFSTR("OpenGLES.framework"),
+	CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
 #endif
-		kCFURLPOSIXPathStyle, true);
+	assert(bundle != NULL);
 
 	CFStringRef functionName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingASCII);
 
-	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
-	assert(bundle != NULL);
-
 	ret = CFBundleGetFunctionPointerForName(bundle, functionName);
 
+#ifdef GLLOADER_AGL
 	CFRelease(bundleURL);
-	CFRelease(functionName);
 	CFRelease(bundle);
+#endif
+	CFRelease(functionName);
 #endif
 #ifdef GLLOADER_GLX
 	ret = (void*)(glXGetProcAddressARB(reinterpret_cast<const GLubyte*>(name)));
