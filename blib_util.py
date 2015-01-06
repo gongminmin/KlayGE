@@ -329,7 +329,7 @@ class build_info:
 			compiler_version = self.retrive_clang_version()
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
-			elif "darwin" == host_platform:
+			elif ("darwin" == host_platform) or ("ios" == host_platform):
 				gen_name = "Xcode"
 				multi_config = True
 			else:
@@ -464,6 +464,13 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows-x86_64"
 			make_name = prebuilt_make_path + "\\bin\\make.exe"
 			additional_options += " -DCMAKE_MAKE_PROGRAM=\"%s\"" % make_name
+	elif "darwin" == build_info.target_platform:
+		if "x64" == compiler_info.arch:
+			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
+		elif "x86" == compiler_info.arch:
+			additional_options += " -DCMAKE_OSX_ARCHITECTURES=i386"
+		else:
+			log_error("Unsupported Darwin arch\n")
 	elif "ios" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/iOS.cmake\"" % curdir
 		if "arm" == compiler_info.arch:
