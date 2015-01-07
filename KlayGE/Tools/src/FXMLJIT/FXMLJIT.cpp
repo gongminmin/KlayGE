@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3 xxx.fxml [target folder]" << endl;
+		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3|ios xxx.fxml [target folder]" << endl;
 		return 1;
 	}
 
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
 	{
 		context_cfg.render_factory_name = "OpenGL";
 	}
-	else if ("android_tegra3" == platform)
+	else if (("android_tegra3" == platform) || ("ios" == platform))
 	{
 		context_cfg.render_factory_name = "OpenGLES";
 	}
