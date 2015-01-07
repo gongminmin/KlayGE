@@ -49,24 +49,62 @@
 
 #include <glloader/glloader.h>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
-#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
-	#define __in
-	#define __in_ecount(size)
-	#define __out
-	#define __out_ecount(size)
-	#define __in_bcount(size)
-	#define __in_opt
-	#define __in_ecount_opt(size)
-	#define __out_opt
-	#define __in_xcount_opt(size) 
+
+#ifdef KLAYGE_PLATFORM_WINDOWS
+#define CALL_D3DCOMPILER_DIRECTLY
 #endif
+
+#ifdef CALL_D3DCOMPILER_DIRECTLY
+
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+#define __in
+#define __in_ecount(size)
+#define __out
+#define __out_ecount(size)
+#define __in_bcount(size)
+#define __in_opt
+#define __in_ecount_opt(size)
+#define __out_opt
+#define __in_xcount_opt(size) 
+#endif
+
 #include <D3DCompiler.h>
 #else
-#include <Cg/cg.h>
+// http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
+typedef char const * LPCSTR;
+typedef long HRESULT;
+
+#define D3DCOMPILE_DEBUG                            0x00000001
+#define D3DCOMPILE_SKIP_VALIDATION                  0x00000002
+#define D3DCOMPILE_SKIP_OPTIMIZATION                0x00000004
+#define D3DCOMPILE_PACK_MATRIX_ROW_MAJOR            0x00000008
+#define D3DCOMPILE_PACK_MATRIX_COLUMN_MAJOR         0x00000010
+#define D3DCOMPILE_PARTIAL_PRECISION                0x00000020
+#define D3DCOMPILE_FORCE_VS_SOFTWARE_NO_OPT         0x00000040
+#define D3DCOMPILE_FORCE_PS_SOFTWARE_NO_OPT         0x00000080
+#define D3DCOMPILE_NO_PRESHADER                     0x00000100
+#define D3DCOMPILE_AVOID_FLOW_CONTROL               0x00000200
+#define D3DCOMPILE_PREFER_FLOW_CONTROL              0x00000400
+#define D3DCOMPILE_ENABLE_STRICTNESS                0x00000800
+#define D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY   0x00001000
+#define D3DCOMPILE_IEEE_STRICTNESS                  0x00002000
+#define D3DCOMPILE_OPTIMIZATION_LEVEL0              0x00004000
+#define D3DCOMPILE_OPTIMIZATION_LEVEL1              0x00000000
+#define D3DCOMPILE_OPTIMIZATION_LEVEL2              0x0000c000
+#define D3DCOMPILE_OPTIMIZATION_LEVEL3              0x00008000
+#define D3DCOMPILE_WARNINGS_ARE_ERRORS              0x00040000
+
+typedef struct _D3D_SHADER_MACRO
+{
+	LPCSTR Name;
+	LPCSTR Definition;
+} D3D_SHADER_MACRO, *LPD3D_SHADER_MACRO;
 #endif
+#else
+#include <Cg/cg.h>
 #endif
 
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
@@ -88,14 +126,15 @@ namespace
 {
 	using namespace KlayGE;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if USE_DXBC2GLSL
 	class DXBC2GLSLIniter
 	{
 	public:
 		~DXBC2GLSLIniter()
 		{
+#ifdef CALL_D3DCOMPILER_DIRECTLY
 			::FreeLibrary(mod_d3dcompiler_);
+#endif
 		}
 
 		static DXBC2GLSLIniter& Instance()
@@ -104,12 +143,131 @@ namespace
 			return initer;
 		}
 
-		HRESULT D3DCompile(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
-			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
-			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs) const
+		HRESULT D3DCompile(std::string const & src_data,
+			D3D_SHADER_MACRO const * defines, std::string const & entry_point,
+			std::string const & target, uint32_t flags1, uint32_t flags2,
+			std::vector<uint8_t>& code, std::string& error_msgs) const
 		{
-			return DynamicD3DCompile_(pSrcData, SrcDataSize, pSourceName, pDefines, pInclude, pEntrypoint,
-				pTarget, Flags1, Flags2, ppCode, ppErrorMsgs);
+#ifdef CALL_D3DCOMPILER_DIRECTLY
+			ID3DBlob* code_blob = nullptr;
+			ID3DBlob* error_msgs_blob = nullptr;
+			HRESULT hr = DynamicD3DCompile_(src_data.c_str(), static_cast<UINT>(src_data.size()),
+				nullptr, defines, nullptr, entry_point.c_str(),
+				target.c_str(), flags1, flags2, &code_blob, &error_msgs_blob);
+			if (code_blob)
+			{
+				uint8_t const * p = static_cast<uint8_t const *>(code_blob->GetBufferPointer());
+				code.assign(p, p + code_blob->GetBufferSize());
+				code_blob->Release();
+			}
+			else
+			{
+				code.clear();
+			}
+			if (error_msgs_blob)
+			{
+				char const * p = static_cast<char const *>(error_msgs_blob->GetBufferPointer());
+				error_msgs.assign(p, p + error_msgs_blob->GetBufferSize());
+				error_msgs_blob->Release();
+			}
+			else
+			{
+				error_msgs.clear();
+			}
+			return hr;
+#else
+			std::string mark = boost::lexical_cast<std::string>(static_cast<void const *>(src_data.c_str()));
+			std::string compile_input_file = entry_point + mark + "Input.tmp";
+			std::string compile_output_file = entry_point + mark + "Output.tmp";
+
+			uint32_t buffer_size;
+			
+			std::ofstream ofs(compile_input_file.c_str(), std::ios_base::binary);
+
+			buffer_size = static_cast<uint32_t>(src_data.size());
+			ofs.write(reinterpret_cast<char const *>(&buffer_size), sizeof(buffer_size));
+			ofs.write(src_data.c_str(), buffer_size);
+		
+			uint32_t idx = 0;
+			while ((defines[idx].Definition != nullptr) && (defines[idx].Name != nullptr))
+			{
+				++ idx;
+			}
+
+			ofs.write(reinterpret_cast<char const *>(&idx), sizeof(idx));
+
+			idx = 0;
+			while ((defines[idx].Definition != nullptr) && (defines[idx].Name != nullptr))
+			{
+				ofs << defines[idx].Name << std::endl;
+				ofs << defines[idx].Definition << std::endl;
+				++ idx;
+			}
+
+			ofs.close();
+			
+			std::stringstream ss;
+			std::string d3dcompiler_wrapper_name = "D3DCompilerWrapper";
+#ifdef KLAYGE_DEBUG
+			d3dcompiler_wrapper_name += "_d";
+#endif
+#ifdef KLAYGE_PLATFORM_WINDOWS
+			ss << d3dcompiler_wrapper_name << ".exe";
+#else
+			static bool first = true;
+			if (first)
+			{
+				ss << WINE_PATH << "wineserver -p";
+				system(ss.str().c_str());
+				// We should hold on a persistant wineserver, or XCode will lost connection after wineserver instance close and wine may not be able to find '.exe.so' file
+				first = false;
+				ss.str(std::string());
+			}
+			ss << WINE_PATH << "wineconsole ./" << d3dcompiler_wrapper_name << ".exe.so";
+#endif
+			ss << " " << compile_input_file;
+			ss << " " << entry_point << " " << target;
+			ss << " " << flags1 << " " << flags2;
+			ss << " " << compile_output_file;
+			if (system(ss.str().c_str()) != 0)
+			{
+				return -1;
+			}
+
+			std::ifstream ifs(compile_output_file.c_str(), std::ios_base::binary);
+
+			uint32_t hr;
+			ifs.read(reinterpret_cast<char*>(&hr), sizeof(hr));
+
+			ifs.read(reinterpret_cast<char*>(&buffer_size), sizeof(buffer_size));
+			if (buffer_size > 0)
+			{
+				code.resize(buffer_size);
+				ifs.read(reinterpret_cast<char*>(&code[0]), buffer_size);
+			}
+			else
+			{
+				code.clear();
+			}
+			
+			ifs.read(reinterpret_cast<char*>(&buffer_size), sizeof(buffer_size));
+			if (buffer_size > 0)
+			{
+				error_msgs.resize(buffer_size);
+				ifs.read(&error_msgs[0], buffer_size);
+			}
+			else
+			{
+				error_msgs.clear();
+			}
+
+			ifs.close();
+
+			remove(compile_input_file.c_str());
+			remove(compile_output_file.c_str());
+			
+			return hr;
+#endif
 		}
 
 		GLSLVersion GLSLVer() const
@@ -120,11 +278,13 @@ namespace
 	private:
 		DXBC2GLSLIniter()
 		{
+#ifdef CALL_D3DCOMPILER_DIRECTLY
 			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
 #ifdef KLAYGE_COMPILER_MSVC
 			__assume(mod_d3dcompiler_ != nullptr);
 #endif
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
+#endif
 
 			if (glloader_GLES_VERSION_3_1())
 			{
@@ -141,12 +301,14 @@ namespace
 		}
 
 	private:
+#ifdef CALL_D3DCOMPILER_DIRECTLY
 		typedef HRESULT(WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
 			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
 			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
 
 		HMODULE mod_d3dcompiler_;
 		D3DCompileFunc DynamicD3DCompile_;
+#endif
 		GLSLVersion gsv_;
 	};
 #else
@@ -1057,7 +1219,7 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if !(defined(KLAYGE_PLATFORM_IOS) || defined(KLAYGE_PLATFORM_ANDROID))
 #if !USE_DXBC2GLSL
 	std::string OGLESShaderObject::GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass)
@@ -2028,7 +2190,7 @@ namespace KlayGE
 
 		if (is_shader_validate_[type])
 		{
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 #if USE_DXBC2GLSL
 			OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -2170,10 +2332,10 @@ namespace KlayGE
 				break;
 			}
 
-			ID3DBlob* code = nullptr;
+			std::vector<uint8_t> code;
 			if (is_shader_validate_[type])
 			{
-				ID3DBlob* err_msg;
+				std::string err_msg;
 				std::vector<D3D_SHADER_MACRO> macros;
 				{
 					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DXBC2GLSL", "1" };
@@ -2282,17 +2444,16 @@ namespace KlayGE
 				}
 				uint32_t flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 
-				DXBC2GLSLIniter::Instance().D3DCompile(hlsl_shader_text.c_str(),
-					static_cast<UINT>(hlsl_shader_text.size()), nullptr, &macros[0],
-					nullptr, sd.func_name.c_str(), shader_profile.c_str(),
-					flags, 0, &code, &err_msg);
-				if (err_msg != nullptr)
+				DXBC2GLSLIniter::Instance().D3DCompile(hlsl_shader_text, &macros[0],
+					sd.func_name, shader_profile,
+					flags, 0, code, err_msg);
+				if (!err_msg.empty())
 				{
 					LogError("Error when compiling %s:", sd.func_name.c_str());
 
 					std::map<int, std::vector<std::string> > err_lines;
 					{
-						std::istringstream err_iss(static_cast<char*>(err_msg->GetBufferPointer()));
+						std::istringstream err_iss(err_msg);
 						std::string err_str;
 						while (err_iss)
 						{
@@ -2367,11 +2528,9 @@ namespace KlayGE
 							LogError(msg.c_str());
 						}
 					}
-
-					err_msg->Release();
 				}
 
-				if (code)
+				if (!code.empty())
 				{
 					try
 					{
@@ -2396,7 +2555,7 @@ namespace KlayGE
 								rules &= ~GSR_UseUBO;
 							}
 						}
-						dxbc2glsl.FeedDXBC(code->GetBufferPointer(), false, gsv, rules);
+						dxbc2glsl.FeedDXBC(&code[0], false, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2545,8 +2704,6 @@ namespace KlayGE
 						LogError(ex.what());
 						LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
 					}
-
-					code->Release();
 				}
 				else
 				{

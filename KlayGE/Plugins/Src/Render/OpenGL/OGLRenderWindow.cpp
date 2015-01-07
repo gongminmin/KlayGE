@@ -313,9 +313,7 @@ namespace KlayGE
 				}
 			}
 		}
-#elif defined KLAYGE_PLATFORM_DARWIN		
-		// TODO
-
+#elif defined KLAYGE_PLATFORM_DARWIN	
 		if (isFullScreen_)
 		{
 			left_ = 0;
@@ -503,9 +501,9 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_DARWIN
-		// TODO
-		uint32_t new_width = 0;
-		uint32_t new_height = 0;
+		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
+		uint32_t new_width = screen[0];
+		uint32_t new_height = screen[1];
 #endif
 
 		if ((new_width != width_) || (new_height != height_))

@@ -220,7 +220,16 @@ namespace
 #ifdef KLAYGE_PLATFORM_WINDOWS
 			ss << d3dcompiler_wrapper_name << ".exe";
 #else
-			ss << WINE_PATH << "wine " << d3dcompiler_wrapper_name << ".exe.so";
+			static bool first = true;
+			if (first)
+			{
+				ss << WINE_PATH << "wineserver -p";
+				system(ss.str().c_str());
+				// We should hold on a persistant wineserver, or XCode will lost connection after wineserver instance close and wine may not be able to find '.exe.so' file
+				first = false;
+				ss.str(std::string());
+			}
+			ss << WINE_PATH << "wineconsole ./" << d3dcompiler_wrapper_name << ".exe.so";
 #endif
 			ss << " " << compile_input_file;
 			ss << " " << entry_point << " " << target;
