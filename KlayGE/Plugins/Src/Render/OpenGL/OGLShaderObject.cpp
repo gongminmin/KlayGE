@@ -111,6 +111,9 @@ typedef struct _D3D_SHADER_MACRO
 #endif
 #else
 #include <Cg/cg.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma comment(lib, "Cg.lib")
+#endif
 #endif
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
@@ -121,12 +124,6 @@ typedef struct _D3D_SHADER_MACRO
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
-
-#if !USE_DXBC2GLSL
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "Cg.lib")
-#endif
-#endif
 
 namespace
 {

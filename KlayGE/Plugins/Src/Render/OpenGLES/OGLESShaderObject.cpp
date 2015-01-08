@@ -105,6 +105,10 @@ typedef struct _D3D_SHADER_MACRO
 #endif
 #else
 #include <Cg/cg.h>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma comment(lib, "Cg.lib")
+#endif
+#endif
 #endif
 
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
@@ -116,16 +120,11 @@ typedef struct _D3D_SHADER_MACRO
 #include <KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 
-#if !USE_DXBC2GLSL
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "Cg.lib")
-#endif
-#endif
-
 namespace
 {
 	using namespace KlayGE;
 
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 #if USE_DXBC2GLSL
 	class DXBC2GLSLIniter
 	{
