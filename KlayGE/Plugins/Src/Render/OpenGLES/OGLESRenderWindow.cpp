@@ -73,6 +73,11 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_IOS
 		//TODO        
 #else
+#if defined KLAYGE_PLATFORM_DARWIN
+		main_wnd->CreateGLESView();
+		glloader_init();
+#endif
+
 		display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 		int r_size, g_size, b_size, a_size, d_size, s_size;

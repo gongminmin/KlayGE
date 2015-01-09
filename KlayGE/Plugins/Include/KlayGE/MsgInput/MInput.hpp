@@ -263,6 +263,9 @@ namespace KlayGE
 		boost::signals2::connection on_mouse_wheel_;
 		boost::signals2::connection on_joystick_axis_;
 		boost::signals2::connection on_joystick_buttons_;
+#elif defined KLAYGE_PLATFORM_DARWIN
+		boost::signals2::connection on_key_down_;
+		boost::signals2::connection on_key_up_;
 #endif
 		boost::signals2::connection on_touch_;
 		boost::signals2::connection on_pointer_down_;
@@ -323,6 +326,9 @@ namespace KlayGE
 		void OnMouseWheel(int2 const & pt, int32_t wheel_delta);
 		void OnJoystickAxis(uint32_t axis, int32_t value);
 		void OnJoystickButtons(uint32_t buttons);
+#elif defined KLAYGE_PLATFORM_DARWIN
+		void OnKeyDown(uint32_t key);
+		void OnKeyUp(uint32_t key);
 #endif
 	};
 
@@ -331,14 +337,14 @@ namespace KlayGE
 	public:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		MsgInputKeyboard(HWND hwnd, HANDLE device);
-#elif defined KLAYGE_PLATFORM_ANDROID
+#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 		MsgInputKeyboard();
 #endif
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
-#elif defined KLAYGE_PLATFORM_ANDROID
+#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
 #endif

@@ -28,6 +28,12 @@
 - (void) stopDisplayLink;
 - (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime;
 @end
+ 
+@interface KlayGEESView : NSView
+{
+}
+- (void) render;
+@end
 
 namespace KlayGE
 {
@@ -101,7 +107,7 @@ namespace KlayGE
 		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
 		visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
 		visual_attr.push_back(0);
-		NSOpenGLPixelFormat* pixel_format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]] autorelease];
+		pixel_format_ = [[[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]] autorelease];
 
 		NSScreen* mainDisplay = [NSScreen mainScreen];
 		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
@@ -126,15 +132,16 @@ namespace KlayGE
 		width_ = content_rect.size.width;
 		height_ = content_rect.size.height;
 
-		ns_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format];
-
-		[ns_window setContentView:ns_view_];
-		[ns_window makeKeyAndOrderFront:nil];
+		ns_view_ = nullptr;
+		ns_es_view_ = nullptr;
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false)
 	{
+		UNREF_PARAM(name);
+		UNREF_PARAM(settings);
+		UNREF_PARAM(native_wnd);
 		LogWarn("Unimplemented Window::Window");
 	}
 
@@ -142,26 +149,58 @@ namespace KlayGE
 	{
 		LogWarn("Unimplemented Window::~Window");
 	}
+
+	void Window::CreateGLView()
+	{
+		ns_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
+
+		[ns_window setContentView:ns_view_];
+		[ns_window makeKeyAndOrderFront:nil];
+	}
+
+	void Window::CreateGLESView()
+	{
+		ns_es_view_ = [[KlayGEESView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_)];
+
+		[ns_window setContentView:ns_es_view_];
+		[ns_window makeKeyAndOrderFront:nil];
+	}
 	
 	void Window::StartRunLoop()
 	{
-		[ns_view_ startDisplayLink];
+		if (ns_view_)
+		{
+			[ns_view_ startDisplayLink];
+		}
 	}
 
 	void Window::StopRunLoop()
 	{
-		[ns_view_ stopDisplayLink];
+		if (ns_view_)
+		{
+			[ns_view_ stopDisplayLink];
+		}
 	}
 	
 	void Window::FlushBuffer()
 	{
-		[[ns_view_ openGLContext] flushBuffer];
+		if (ns_view_)
+		{
+			[[ns_view_ openGLContext] flushBuffer];
+		}
 	}
 
 	uint2 Window::GetNSViewSize()
 	{
-		NSRect rect = ns_view_.frame;
-		return KlayGE::uint2(rect.size.width, rect.size.height);
+		if (ns_view_)
+		{
+			NSRect rect = ns_view_.frame;
+			return KlayGE::uint2(rect.size.width, rect.size.height);
+		}
+		else
+		{
+			return KlayGE::uint2(0, 0);
+		}
 	}
 }
 
@@ -233,6 +272,26 @@ namespace KlayGE
 	window_->OnPointerDown()(*window_, pt, 1);
 }
 
+- (void)keyDown:(NSEvent *)theEvent
+{
+	NSString *characters = [theEvent charactersIgnoringModifiers];
+	for(unsigned int i = 0; i < [characters length]; i++)
+	{
+		unichar keyChar = [characters characterAtIndex:0];
+		window_->OnKeyDown()(*window_, static_cast<wchar_t>(keyChar));
+	}
+}
+
+- (void)keyUp:(NSEvent *)theEvent
+{
+	NSString *characters = [theEvent charactersIgnoringModifiers];
+	for(unsigned int i = 0; i < [characters length]; i++)
+	{
+		unichar keyChar = [characters characterAtIndex:0];
+		window_->OnKeyUp()(*window_, static_cast<wchar_t>(keyChar));
+	}
+}
+
 @end
 
 @implementation KlayGEView
@@ -292,6 +351,15 @@ static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, CVTimeStamp 
 
 	[super dealloc];
 }
+@end
+
+@implementation KlayGEESView
+
+- (void) render
+{
+	KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance().Refresh();
+}
+
 @end
 
 #endif

@@ -32,7 +32,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_ANDROID)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 namespace
 {
 	using namespace KlayGE;
@@ -303,7 +303,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputKeyboard::MsgInputKeyboard(HWND hwnd, HANDLE device)
 		: hwnd_(hwnd), device_(device)
-#elif defined KLAYGE_PLATFORM_ANDROID
+#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 	MsgInputKeyboard::MsgInputKeyboard()
 #endif
 	{
@@ -329,10 +329,10 @@ namespace KlayGE
 			}
 		}
 	}
-#elif defined KLAYGE_PLATFORM_ANDROID
+#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 	void MsgInputKeyboard::OnKeyDown(uint32_t key)
 	{
-		// TODO: a VK_MAPPING for Android
+		// TODO: a VK_MAPPING for Android/Darwin
 		int32_t ks = VK_MAPPING[key];
 		if (ks >= 0)
 		{
@@ -342,7 +342,7 @@ namespace KlayGE
 
 	void MsgInputKeyboard::OnKeyUp(uint32_t key)
 	{
-		// TODO: a VK_MAPPING for Android
+		// TODO: a VK_MAPPING for Android/Darwin
 		int32_t ks = VK_MAPPING[key];
 		if (ks >= 0)
 		{
