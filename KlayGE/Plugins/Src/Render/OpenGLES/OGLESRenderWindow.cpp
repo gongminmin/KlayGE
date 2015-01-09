@@ -73,6 +73,11 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_IOS
 		//TODO        
 #else
+#if defined KLAYGE_PLATFORM_DARWIN
+		main_wnd->CreateGLESView();
+		glloader_init();
+#endif
+
 		display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
 		int r_size, g_size, b_size, a_size, d_size, s_size;
@@ -127,6 +132,10 @@ namespace KlayGE
 #if (__ANDROID_API__ < 18)
 		test_es_3_0 = false;
 #endif
+#endif
+#if defined(KLAYGE_PLATFORM_DARWIN)
+		test_es_3_1 = false;
+		test_es_3_0 = false;
 #endif
 
 		std::vector<KlayGE::tuple<std::string, EGLint, int, int> > available_versions;
@@ -243,6 +252,8 @@ namespace KlayGE
 		EGLint format;
 		eglGetConfigAttrib(display_, cfg_, EGL_NATIVE_VISUAL_ID, &format);
 		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
+#elif defined KLAYGE_PLATFORM_DARWIN
+		wnd = static_cast<EGLNativeWindowType>(main_wnd->NSESView());
 #endif
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
@@ -430,10 +441,14 @@ namespace KlayGE
 
 		uint32_t new_width = w - new_left;
 		uint32_t new_height = h - new_top;
+#elif defined KLAYGE_PLATFORM_DARWIN
+		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
+		uint32_t new_width = screen[0];
+		uint32_t new_height = screen[1];
 #elif defined KLAYGE_PLATFORM_IOS
-		// TODO
-		uint32_t new_width = 0;
-		uint32_t new_height = 0;
+		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetGLKViewSize();
+		uint32_t new_width = screen[0];
+		uint32_t new_height = screen[1];
 #endif
 
 		if ((new_width != width_) || (new_height != height_))

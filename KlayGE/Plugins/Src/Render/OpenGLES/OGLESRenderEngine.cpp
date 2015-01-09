@@ -232,7 +232,7 @@ namespace KlayGE
 		this->InitRenderStates();
 
 #ifndef KLAYGE_SHIP
-		if (glloader_GLES_KHR_debug())
+		if (glloader_GLES_KHR_debug() && !this->HackForPVR())
 		{
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -260,7 +260,7 @@ namespace KlayGE
 
 	void OGLESRenderEngine::CheckConfig(RenderSettings& settings)
 	{
-#if defined KLAYGE_PLATFORM_ANDROID
+#if defined KLAYGE_PLATFORM_ANDROID || defined(KLAYGE_PLATFORM_IOS)
 		settings.hdr = false;
 		settings.ppaa = false;
 		settings.gamma = false;

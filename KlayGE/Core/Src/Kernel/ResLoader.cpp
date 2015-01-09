@@ -54,6 +54,8 @@
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/asset_manager.h>
 #include <KFL/CustomizedStreamBuf.hpp>
+#elif defined KLAYGE_PLATFORM_IOS
+#include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #include <KlayGE/ResLoader.hpp>
@@ -436,6 +438,40 @@ namespace KlayGE
 		}
 #endif
 
+#ifdef KLAYGE_PLATFORM_IOS
+		std::string::size_type found = name.find_last_of(".");
+		if (found != std::string::npos)
+		{
+			CFBundleRef main_bundle = CFBundleGetMainBundle();
+			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(0, found).c_str(), kCFStringEncodingASCII);
+			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
+			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
+			CFRelease(file_name);
+			CFRelease(file_ext);
+			if (file_url != nullptr)
+			{
+				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
+				
+				char const * path = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
+				std::string const res_name(path);
+				
+				CFRelease(file_url);
+				CFRelease(file_path);
+				
+				filesystem::path res_path(res_name);
+#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
+				uint64_t timestamp = filesystem::last_write_time(res_path);
+#endif
+				
+				return MakeSharedPtr<ResIdentifier>(name, timestamp,
+					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+			}
+		}
+#endif
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		return ResIdentifierPtr();

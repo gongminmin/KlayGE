@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#ifdef KLAYGE_PLATFORM_ANDROID
+#if defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS)
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 #include <KlayGE/MsgInput/MInputFactory.hpp>
@@ -553,7 +553,7 @@ namespace KlayGE
 				rf_name = "OpenGL";
 			}
 		}
-		
+
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		rf_name = "D3D11";
 #elif defined(KLAYGE_PLATFORM_LINUX)
@@ -568,8 +568,14 @@ namespace KlayGE
 #elif defined(KLAYGE_PLATFORM_ANDROID)
 		rf_name = "OpenGLES";
 		af_name = "OpenAL";
+#elif defined(KLAYGE_PLATFORM_IOS)
+		rf_name = "OpenGLES";
+		af_name = "OpenAL";
 #elif defined(KLAYGE_PLATFORM_DARWIN)
-		rf_name = "OpenGL";
+		if ("D3D11" == rf_name)
+		{
+			rf_name = "OpenGL";
+		}
 		af_name = "OpenAL";
 #endif
 
@@ -810,7 +816,7 @@ namespace KlayGE
 	{
 		render_factory_ = RenderFactory::NullObject();
 
-#ifndef KLAYGE_PLATFORM_ANDROID
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
@@ -862,7 +868,7 @@ namespace KlayGE
 	{
 		input_factory_ = InputFactory::NullObject();
 
-#ifndef KLAYGE_PLATFORM_ANDROID
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
@@ -937,7 +943,7 @@ namespace KlayGE
 	{
 		scene_mgr_.reset();
 
-#ifndef KLAYGE_PLATFORM_ANDROID
+#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");

@@ -14,6 +14,7 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 				"$ENV{ProgramFiles}/NVIDIA Corporation/win_x86_es2emu/include"
 				"$ENV{ProgramFiles(x86)}/NVIDIA Corporation/win_x86_es2emu/include"
 				"$ENV{SystemDrive}/Imagination/PowerVR/GraphicsSDK/SDK_*/Builds/include"
+				"$ENV{SystemDrive}/Imagination/PowerVR_Graphics/PowerVR_SDK/SDK_*/Builds/include"
 				"$ENV{KHRONOS_HEADERS}"
 				"$ENV{ProgramFiles}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
 				"$ENV{ProgramFiles(x86)}/ARM/Mali Developer Tools/Mali OpenGL ES Emulator*/include"
@@ -24,9 +25,14 @@ IF(NOT KLAYGE_GLES_INCLUDE_DIR)
 				"$ENV{ANDROID_NDK}/platforms/android-${ANDROID_NATIVE_API_LEVEL}/arch-${ANDROID_ARCH_NAME}/usr/include"
 		)
 	ELSEIF(IOS)
-		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR gltypes.h
+		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR EAGL.h
 			PATHS
 				/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/OpenGLES.framework/Headers
+		)
+	ELSEIF(APPLE)
+		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h
+			PATHS
+				/Users/Shared/Imagination/PowerVR_Graphics/PowerVR_SDK/SDK_3.4/Builds/Include
 		)
 	ELSEIF(UNIX)
 		FIND_PATH(KLAYGE_GLES_INCLUDE_DIR KHR/khrplatform.h

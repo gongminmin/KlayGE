@@ -81,6 +81,9 @@ namespace KlayGE
 		on_mouse_wheel_.disconnect();
 		on_joystick_axis_.disconnect();
 		on_joystick_buttons_.disconnect();
+#elif defined KLAYGE_PLATFORM_DARWIN
+		on_key_down_.disconnect();
+		on_key_up_.disconnect();
 #endif
 		on_touch_.disconnect();
 		on_pointer_down_.disconnect();
@@ -213,7 +216,7 @@ namespace KlayGE
 			}
 		}
 #endif
-#elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
+#elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
@@ -245,6 +248,12 @@ namespace KlayGE
 		on_joystick_buttons_ = main_wnd->OnJoystickButtons().connect(KlayGE::bind(&MsgInputEngine::OnJoystickButtons, this,
 			KlayGE::placeholders::_2));
 		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
+#elif defined KLAYGE_PLATFORM_DARWIN
+		on_key_down_ = main_wnd->OnKeyDown().connect(KlayGE::bind(&MsgInputEngine::OnKeyDown, this,
+			KlayGE::placeholders::_2));
+		on_key_up_ = main_wnd->OnKeyUp().connect(KlayGE::bind(&MsgInputEngine::OnKeyUp, this,
+			KlayGE::placeholders::_2));
+		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
 #endif
 #endif
 
@@ -459,6 +468,30 @@ namespace KlayGE
 			if (InputEngine::IDT_Joystick == device->Type())
 			{
 				checked_pointer_cast<MsgInputJoystick>(device)->OnJoystickButtons(buttons);
+			}
+		}
+	}
+#elif defined KLAYGE_PLATFORM_DARWIN
+	void MsgInputEngine::OnKeyDown(uint32_t key)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Keyboard == device->Type())
+			{
+				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyDown(key);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnKeyUp(uint32_t key)
+	{
+		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+		KLAYGE_FOREACH(DevicesType::reference device, devices_)
+		{
+			if (InputEngine::IDT_Keyboard == device->Type())
+			{
+				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyUp(key);
 			}
 		}
 	}

@@ -47,7 +47,7 @@
 #include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android_native_app_glue.h>
-#elif defined KLAYGE_PLATFORM_DARWIN || defined KLAYGE_PLATFORM_IOS
+#elif (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
 #ifdef __OBJC__
 #define OBJC_CLASS(name) @class name
 #else
@@ -272,6 +272,10 @@ namespace KlayGE
 		void StopRunLoop();
 		void FlushBuffer();
 		uint2 GetNSViewSize();
+		void* NSESView()
+		{
+			return ns_es_view_;
+		}
 #elif defined KLAYGE_PLATFORM_IOS
 		void StartRunLoop();
 		void StopRunLoop();
@@ -358,6 +362,8 @@ namespace KlayGE
 		::ANativeWindow* a_window_;
 #elif defined KLAYGE_PLATFORM_DARWIN
 		KlayGEView* ns_view_;
+		KlayGEESView* ns_es_view_;
+		NSOpenGLPixelFormat* pixel_format_;
 #elif defined KLAYGE_PLATFORM_IOS
 		KlayGEView* glk_view_;
 #endif
