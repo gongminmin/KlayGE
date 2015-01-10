@@ -55,6 +55,7 @@
 #endif
 OBJC_CLASS(KlayGEWindow);
 OBJC_CLASS(KlayGEView);
+OBJC_CLASS(KlayGEESView);
 OBJC_CLASS(NSOpenGLPixelFormat);
 #endif
 
@@ -103,6 +104,22 @@ namespace KlayGE
 		{
 			return a_window_;
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN
+		void CreateGLView();
+		void CreateGLESView();
+		void StartRunLoop();
+		void StopRunLoop();
+		void FlushBuffer();
+		uint2 GetNSViewSize();
+		void* NSESView()
+		{
+			return ns_es_view_;
+		}
+#elif defined KLAYGE_PLATFORM_IOS
+		void StartRunLoop();
+		void StopRunLoop();
+		void FlushBuffer();
+		uint2 GetGLKViewSize();
 #endif
 
 		int32_t Left() const
@@ -175,6 +192,9 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t buttons)> JoystickButtonsEvent;
+#elif defined KLAYGE_PLATFORM_DARWIN
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
 #endif
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
@@ -268,19 +288,14 @@ namespace KlayGE
 			return joystick_buttons_event_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
-		void StartRunLoop();
-		void StopRunLoop();
-		void FlushBuffer();
-		uint2 GetNSViewSize();
-		void* NSESView()
+		KeyDownEvent& OnKeyDown()
 		{
-			return ns_es_view_;
+			return key_down_event_;
 		}
-#elif defined KLAYGE_PLATFORM_IOS
-		void StartRunLoop();
-		void StopRunLoop();
-		void FlushBuffer();
-		uint2 GetGLKViewSize();
+		KeyUpEvent& OnKeyUp()
+		{
+			return key_up_event_;
+		}
 #endif
 		CloseEvent& OnClose()
 		{
@@ -314,6 +329,9 @@ namespace KlayGE
 		MouseWheelEvent mouse_wheel_event_;
 		JoystickAxisEvent joystick_axis_event_;
 		JoystickButtonsEvent joystick_buttons_event_;
+#elif defined KLAYGE_PLATFORM_DARWIN
+		KeyDownEvent key_down_event_;
+		KeyUpEvent key_up_event_;
 #endif
 		CloseEvent close_event_;
 
@@ -361,6 +379,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		::ANativeWindow* a_window_;
 #elif defined KLAYGE_PLATFORM_DARWIN
+		KlayGEWindow* ns_window_;
 		KlayGEView* ns_view_;
 		KlayGEESView* ns_es_view_;
 		NSOpenGLPixelFormat* pixel_format_;

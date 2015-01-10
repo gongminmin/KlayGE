@@ -132,7 +132,7 @@ typedef struct ANativeWindow*           EGLNativeWindowType;
 typedef struct egl_native_pixmap_t*     EGLNativePixmapType;
 typedef void*                           EGLNativeDisplayType;
 
-#elif (defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__)) || (defined(__APPLE__) || defined(__APPLE_CC__)) && defined(GLLOADER_EGL)
+#elif (defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__)) || ((defined(__APPLE__) || defined(__APPLE_CC__)) && defined(GLLOADER_EGL))
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
