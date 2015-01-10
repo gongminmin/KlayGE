@@ -765,9 +765,7 @@ void* get_gl_proc_address_by_api(const char* name)
 #endif
 #if defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
 #ifdef GLLOADER_AGL
-	CFURLRef bundleURL = CFURLCreateWithFileSystemPath(kCFAllocatorDefault,
-		CFSTR("/System/Library/Frameworks/OpenGL.framework"), kCFURLPOSIXPathStyle, true);
-	CFBundleRef bundle = CFBundleCreate(kCFAllocatorDefault, bundleURL);
+	CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengl"));
 #else
 	CFBundleRef bundle = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
 #endif
@@ -777,10 +775,7 @@ void* get_gl_proc_address_by_api(const char* name)
 
 	ret = CFBundleGetFunctionPointerForName(bundle, functionName);
 
-#ifdef GLLOADER_AGL
-	CFRelease(bundleURL);
 	CFRelease(bundle);
-#endif
 	CFRelease(functionName);
 #endif
 #ifdef GLLOADER_GLX

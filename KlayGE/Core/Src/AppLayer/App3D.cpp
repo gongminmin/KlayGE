@@ -535,8 +535,6 @@ namespace KlayGE
 
 			re.Refresh();
 		}
-#elif defined KLAYGE_PLATFORM_DARWIN
-		main_wnd_->RunLoop(re);
 #endif
 
 		this->OnDestroy();

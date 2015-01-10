@@ -107,26 +107,26 @@ namespace KlayGE
 		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
 		visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
 		visual_attr.push_back(0);
-		pixel_format_ = [[[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]] autorelease];
+		pixel_format_ = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
 
 		NSScreen* mainDisplay = [NSScreen mainScreen];
 		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
 		NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
 		
 		// TODO: full screen support
-		KlayGEWindow *ns_window = [[KlayGEWindow alloc] initWithContentRect:initContentRect
+		ns_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
 											 styleMask:initStyleMask
 											 backing:NSBackingStoreBuffered
 											 defer:YES
 											 screen:mainDisplay];
 
-		[ns_window setAcceptsMouseMovedEvents:YES];
-		[ns_window setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
+		[ns_window_ setAcceptsMouseMovedEvents:YES];
+		[ns_window_ setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
 
-		[ns_window setWindow:this];
-		[ns_window setDelegate:ns_window];
+		[ns_window_ setWindow:this];
+		[ns_window_ setDelegate:ns_window_];
 
-		NSRect content_rect = [ns_window contentRectForFrameRect:ns_window.frame];
+		NSRect content_rect = [ns_window_ contentRectForFrameRect:ns_window_.frame];
 		left_ = 0;
 		top_ = 0;
 		width_ = content_rect.size.width;
@@ -154,16 +154,16 @@ namespace KlayGE
 	{
 		ns_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
 
-		[ns_window setContentView:ns_view_];
-		[ns_window makeKeyAndOrderFront:nil];
+		[ns_window_ setContentView:ns_view_];
+		[ns_window_ makeKeyAndOrderFront:nil];
 	}
 
 	void Window::CreateGLESView()
 	{
 		ns_es_view_ = [[KlayGEESView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_)];
 
-		[ns_window setContentView:ns_es_view_];
-		[ns_window makeKeyAndOrderFront:nil];
+		[ns_window_ setContentView:ns_es_view_];
+		[ns_window_ makeKeyAndOrderFront:nil];
 	}
 	
 	void Window::StartRunLoop()

@@ -75,7 +75,6 @@ namespace KlayGE
 #else
 #if defined KLAYGE_PLATFORM_DARWIN
 		main_wnd->CreateGLESView();
-		glloader_init();
 #endif
 
 		display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -253,7 +252,7 @@ namespace KlayGE
 		eglGetConfigAttrib(display_, cfg_, EGL_NATIVE_VISUAL_ID, &format);
 		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
 #elif defined KLAYGE_PLATFORM_DARWIN
-		wnd = static_cast<EGLNativeWindowType>(main_wnd->NSESView());
+		wnd = reinterpret_cast<EGLNativeWindowType>(main_wnd->NSESView());
 #endif
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
