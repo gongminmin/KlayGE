@@ -325,7 +325,7 @@ namespace KlayGE
 			top_ = settings.top;
 		}
 		
-		main_wnd->CreateGLView();
+		main_wnd->CreateGLView(settings);
 		glloader_init();
 
 		uint32_t sample_count = settings.sample_count;

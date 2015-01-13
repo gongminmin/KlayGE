@@ -13,20 +13,50 @@
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 
-@interface KlayGEWindow : NSWindow<NSWindowDelegate>
+@interface KlayGEWindow : NSWindow
+- (BOOL)canBecomeKeyWindow;
+- (BOOL)canBecomeMainWindow;
+@end
+@implementation KlayGEWindow
+- (BOOL)canBecomeKeyWindow
 {
-	KlayGE::Window* window_;
+	return YES;
 }
-- (void)setWindow:(KlayGE::Window*)window;
+
+- (BOOL)canBecomeMainWindow
+{
+	return YES;
+}
 @end
 
-@interface KlayGEView : NSOpenGLView
+@interface KlayGEWindowListener : NSResponder<NSWindowDelegate>
 {
-	CVDisplayLinkRef displayLink;
+	NSWindow *ns_window;
+	KlayGE::Window *app_window;
 }
-- (void) startDisplayLink;
-- (void) stopDisplayLink;
-- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime;
+
+-(id)initWithAppWindow:(KlayGE::Window*)_window;
+-(void)listen:(NSWindow*)_window;
+-(void)close;
+
+-(BOOL)windowShouldClose:(id)sender;
+-(void)windowDidResize:(NSNotification*)aNotification;
+-(void)windowDidBecomeKey:(NSNotification*)aNotification;
+-(void)windowDidResignKey:(NSNotification*)aNotification;
+
+-(void)mouseDown:(NSEvent*)theEvent;
+-(void)rightMouseDown:(NSEvent*)theEvent;
+-(void)otherMouseDown:(NSEvent*)theEvent;
+-(void)mouseUp:(NSEvent*)theEvent;
+-(void)rightMouseUp:(NSEvent*)theEvent;
+-(void)otherMouseUp:(NSEvent*)theEvent;
+-(void)mouseMoved:(NSEvent*)theEvent;
+-(void)mouseDragged:(NSEvent*)theEvent;
+-(void)rightMouseDragged:(NSEvent*)theEvent;
+-(void)otherMouseDragged:(NSEvent*)theEvent;
+-(void)scrollWheel:(NSEvent*)theEvent;
+-(void)keyDown:(NSEvent*)theEvent;
+-(void)keyUp:(NSEvent*)theEvent;
 @end
  
 @interface KlayGEESView : NSView
@@ -37,50 +67,125 @@
 
 namespace KlayGE
 {
+	static void RegisterApp()
+	{
+		ProcessSerialNumber psn;
+		NSAutoreleasePool* pool;
+		
+		if (!GetCurrentProcess(&psn))
+		{
+			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+			SetFrontProcess(&psn);
+		}
+		
+		pool = [[NSAutoreleasePool alloc] init];
+		if (nil == NSApp)
+		{
+			[NSApplication sharedApplication];
+			
+			[NSApp finishLaunching];
+			NSDictionary *appDefaults = [[NSDictionary alloc] initWithObjectsAndKeys:
+										 [NSNumber numberWithBool:NO], @"AppleMomentumScrollSupported",
+										 [NSNumber numberWithBool:NO], @"ApplePressAndHoldEnabled",
+										 nil];
+			[[NSUserDefaults standardUserDefaults] registerDefaults:appDefaults];
+		}
+		
+		[pool release];
+	}
+
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false)
 	{
+		RegisterApp();
+
+		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+
+		NSScreen* mainDisplay = [NSScreen mainScreen];
+		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
+		NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
+		
+		// TODO: full screen support
+		ns_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
+											 styleMask:initStyleMask
+											 backing:NSBackingStoreBuffered
+											 defer:YES
+											 screen:mainDisplay];
+
+		[ns_window_ setAcceptsMouseMovedEvents:YES];
+		[ns_window_ setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
+
+		ns_window_listener_ = [[KlayGEWindowListener alloc] initWithAppWindow:this];
+		[ns_window_listener_ listen:ns_window_];
+
+		NSRect content_rect = [ns_window_ contentRectForFrameRect:ns_window_.frame];
+		left_ = 0;
+		top_ = 0;
+		width_ = content_rect.size.width;
+		height_ = content_rect.size.height;
+		ns_view_ = nullptr;
+
+		[pool release];
+	}
+
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
+		: active_(false), ready_(false), closed_(false)
+	{
+		UNREF_PARAM(name);
+		UNREF_PARAM(settings);
+		UNREF_PARAM(native_wnd);
+		LogWarn("Unimplemented Window::Window");
+	}
+
+	Window::~Window()
+	{
+		[ns_window_listener_ close];
+	}
+
+	void Window::CreateGLView(RenderSettings const & settings)
+	{
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		int r_size, a_size, d_size, s_size;
 		switch (settings.color_fmt)
 		{
-		case EF_ARGB8:
-		case EF_ABGR8:
-			r_size = 8;
-			a_size = 8;
-			break;
-
-		case EF_A2BGR10:
-			r_size = 10;
-			a_size = 2;
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
+			case EF_ARGB8:
+			case EF_ABGR8:
+				r_size = 8;
+				a_size = 8;
+				break;
+				
+			case EF_A2BGR10:
+				r_size = 10;
+				a_size = 2;
+				break;
+				
+			default:
+				BOOST_ASSERT(false);
+				break;
 		}
 		switch (settings.depth_stencil_fmt)
 		{
-		case EF_D16:
-			d_size = 16;
-			s_size = 0;
-			break;
-
-		case EF_D24S8:
-			d_size = 24;
-			s_size = 8;
-			break;
-
-		case EF_D32F:
-			d_size = 32;
-			s_size = 0;
-			break;
-
-		default:
-			d_size = 0;
-			s_size = 0;
-			break;
+			case EF_D16:
+				d_size = 16;
+				s_size = 0;
+				break;
+				
+			case EF_D24S8:
+				d_size = 24;
+				s_size = 8;
+				break;
+				
+			case EF_D32F:
+				d_size = 32;
+				s_size = 0;
+				break;
+				
+			default:
+				d_size = 0;
+				s_size = 0;
+				break;
 		}
-
+		
 		std::vector<NSOpenGLPixelFormatAttribute> visual_attr;
 		visual_attr.push_back(NSOpenGLPFAColorSize);
 		visual_attr.push_back(r_size * 3);
@@ -107,257 +212,241 @@ namespace KlayGE
 		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
 		visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
 		visual_attr.push_back(0);
-		pixel_format_ = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
-
-		NSScreen* mainDisplay = [NSScreen mainScreen];
-		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
-		NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
 		
-		// TODO: full screen support
-		ns_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
-											 styleMask:initStyleMask
-											 backing:NSBackingStoreBuffered
-											 defer:YES
-											 screen:mainDisplay];
-
-		[ns_window_ setAcceptsMouseMovedEvents:YES];
-		[ns_window_ setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
-
-		[ns_window_ setWindow:this];
-		[ns_window_ setDelegate:ns_window_];
-
-		NSRect content_rect = [ns_window_ contentRectForFrameRect:ns_window_.frame];
-		left_ = 0;
-		top_ = 0;
-		width_ = content_rect.size.width;
-		height_ = content_rect.size.height;
-
-		ns_view_ = nullptr;
-		ns_es_view_ = nullptr;
-	}
-
-	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false)
-	{
-		UNREF_PARAM(name);
-		UNREF_PARAM(settings);
-		UNREF_PARAM(native_wnd);
-		LogWarn("Unimplemented Window::Window");
-	}
-
-	Window::~Window()
-	{
-		LogWarn("Unimplemented Window::~Window");
-	}
-
-	void Window::CreateGLView()
-	{
-		ns_view_ = [[KlayGEView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format_];
-
+		NSOpenGLPixelFormat* pixel_format = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
+		ns_view_ = [[NSOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format];
+		[pixel_format release];
+		
 		[ns_window_ setContentView:ns_view_];
 		[ns_window_ makeKeyAndOrderFront:nil];
+		
+		[pool release];
 	}
 
 	void Window::CreateGLESView()
 	{
-		ns_es_view_ = [[KlayGEESView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_)];
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		ns_view_ = [[::NSView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_)];
 
-		[ns_window_ setContentView:ns_es_view_];
+		[ns_window_ setContentView:ns_view_];
 		[ns_window_ makeKeyAndOrderFront:nil];
+
+		[pool release];
 	}
 	
-	void Window::StartRunLoop()
+	void Window::PumpEvents()
 	{
-		if (ns_view_)
+		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		for (;;)
 		{
-			[ns_view_ startDisplayLink];
+			NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
+			if (nil == event)
+			{
+				break;
+			}
+			
+			[NSApp sendEvent:event];
 		}
-	}
-
-	void Window::StopRunLoop()
-	{
-		if (ns_view_)
-		{
-			[ns_view_ stopDisplayLink];
-		}
+		[pool release];
 	}
 	
 	void Window::FlushBuffer()
 	{
-		if (ns_view_)
-		{
-			[[ns_view_ openGLContext] flushBuffer];
-		}
+		[[(NSOpenGLView*)ns_view_ openGLContext]flushBuffer];
 	}
 
 	uint2 Window::GetNSViewSize()
 	{
-		if (ns_view_)
-		{
-			NSRect rect = ns_view_.frame;
-			return KlayGE::uint2(rect.size.width, rect.size.height);
-		}
-		else
-		{
-			return KlayGE::uint2(0, 0);
-		}
+		NSRect rect = ns_view_.frame;
+		return KlayGE::uint2(rect.size.width, rect.size.height);
 	}
 }
 
-@implementation KlayGEWindow
-- (void)setWindow:(KlayGE::Window*)window
-{
-	window_ = window;
-}
+@implementation KlayGEWindowListener
 
-- (void)windowWillClose:(NSNotification*)notification
-{
-	(void)notification;
-	window_->StopRunLoop();
-
-	window_->OnClose()(*window_);
-	window_->Active(false);
-	window_->Ready(false);
-	window_->Closed(true);
-}
-
-- (void)windowDidBecomeKey:(NSNotification*)notification
-{
-	(void)notification;
-	window_->Active(true);
-	window_->Ready(true);
-	window_->OnActive()(*window_, true);
-}
-
-- (void)windowDidResignKey:(NSNotification*)notification
-{
-	(void)notification;
-	window_->Active(false);
-	window_->OnActive()(*window_, false);
-}
-
-- (void)windowDidResize:(NSNotification*)notification
-{
-	(void)notification;
-	window_->Active(true);
-	window_->Ready(true);
-	window_->OnSize()(*window_, true);
-}
-
-- (void)mouseMoved:(NSEvent*)theEvent
-{
-	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, window_->Height() - point.y);
-	window_->OnPointerUpdate()(*window_, pt, 1, false);
-}
-
-- (void)mouseDragged:(NSEvent*)theEvent
-{
-	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, window_->Height() - point.y);
-	window_->OnPointerUpdate()(*window_, pt, 1, true);
-}
-
-- (void)mouseUp:(NSEvent*)theEvent
-{
-	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, window_->Height() - point.y);
-	window_->OnPointerUp()(*window_, pt, 1);
-}
-
-- (void)mouseDown:(NSEvent*)theEvent
-{
-	NSPoint point = [theEvent locationInWindow];
-	KlayGE::int2 pt(point.x, window_->Height() - point.y);
-	window_->OnPointerDown()(*window_, pt, 1);
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-	NSString *characters = [theEvent charactersIgnoringModifiers];
-	for(unsigned int i = 0; i < [characters length]; i++)
-	{
-		unichar keyChar = [characters characterAtIndex:0];
-		window_->OnKeyDown()(*window_, static_cast<wchar_t>(keyChar));
-	}
-}
-
-- (void)keyUp:(NSEvent *)theEvent
-{
-	NSString *characters = [theEvent charactersIgnoringModifiers];
-	for(unsigned int i = 0; i < [characters length]; i++)
-	{
-		unichar keyChar = [characters characterAtIndex:0];
-		window_->OnKeyUp()(*window_, static_cast<wchar_t>(keyChar));
-	}
-}
-
-@end
-
-@implementation KlayGEView
-
-- (id)init
+- (id)initWithAppWindow:(KlayGE::Window*) _window
 {
 	self = [super init];
+	if (self)
+	{
+		app_window = _window;
+		ns_window = nil;
+	}
 	return self;
 }
 
-- (void)prepareOpenGL
+- (void)listen:(NSWindow *)_window
 {
-	GLint swapInt = 0;
-	[[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
+	ns_window = _window;
 
-	CVDisplayLinkCreateWithActiveCGDisplays(&displayLink);
+	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+	NSView *view = [ns_window contentView];
 
-	CVDisplayLinkSetOutputCallback(displayLink, &MyDisplayLinkCallback, self);
-
-	CGLContextObj cglContext = static_cast<CGLContextObj>([[self openGLContext] CGLContextObj]);
-	CGLPixelFormatObj cglPixelFormat = (CGLPixelFormatObj)([[self pixelFormat] CGLPixelFormatObj]);
-	CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(displayLink, cglContext, cglPixelFormat);
+	if ([ns_window delegate] != nil)
+	{
+		[center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:ns_window];
+		[center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:ns_window];
+		[center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:ns_window];
+	}
+	else
+	{
+		[ns_window setDelegate:self];
+	}
+	
+	[ns_window setNextResponder:self];
+	[ns_window setAcceptsMouseMovedEvents:YES];
+	
+	[view setNextResponder:self];
+	
+	if ([view respondsToSelector:@selector(setAcceptsTouchEvents:)])
+	{
+		[view setAcceptsTouchEvents:YES];
+	}
 }
 
-- (void) startDisplayLink
+- (void)close
 {
-	CVDisplayLinkStart(displayLink);
+	NSView *view = [ns_window contentView];
+	
+	NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+	
+	if ([ns_window delegate] != self)
+	{
+		[center removeObserver:self name:NSWindowDidResizeNotification object:ns_window];
+		[center removeObserver:self name:NSWindowDidBecomeKeyNotification object:ns_window];
+		[center removeObserver:self name:NSWindowDidResignKeyNotification object:ns_window];
+	}
+	else
+	{
+		[ns_window setDelegate:nil];
+	}
+		
+	if ([ns_window nextResponder] == self)
+	{
+		[ns_window setNextResponder:nil];
+	}
+	if ([view nextResponder] == self)
+	{
+		[view setNextResponder:nil];
+	}
 }
 
-- (void) stopDisplayLink
+- (BOOL)windowShouldClose:(id) sender
 {
-	CVDisplayLinkStop(displayLink);
+	UNREF_PARAM(sender);
+	app_window->OnClose()(*app_window);
+	app_window->Active(false);
+	app_window->Ready(false);
+	app_window->Closed(true);
+	return NO;
 }
 
-static CVReturn MyDisplayLinkCallback(CVDisplayLinkRef displayLink, CVTimeStamp const * now,
-		CVTimeStamp const * outputTime, CVOptionFlags flagsIn, CVOptionFlags* flagsOut, void* displayLinkContext)
+- (void)windowDidResize:(NSNotification*) aNotification
 {
-	CVReturn result = [(KlayGEView*)displayLinkContext getFrameForTime:outputTime];
-	return kCVReturnSuccess;
+	UNREF_PARAM(aNotification);
+	app_window->Active(true);
+	app_window->Ready(true);
+	app_window->OnSize()(*app_window, true);
 }
 
-- (CVReturn)getFrameForTime:(const CVTimeStamp*)outputTime
+- (void)windowDidBecomeKey:(NSNotification*) aNotification
 {
-	NSOpenGLContext* currentContext = [self openGLContext];
-	[currentContext makeCurrentContext];
-
-	CGLLockContext((CGLContextObj)[currentContext CGLContextObj]);
-	KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance().Refresh();
-	CGLUnlockContext((CGLContextObj)[currentContext CGLContextObj]);
-
-	return kCVReturnSuccess;
+	UNREF_PARAM(aNotification);
+	app_window->Active(true);
+	app_window->Ready(true);
+	app_window->OnSize()(*app_window, true);
 }
 
-- (void)dealloc
+- (void)windowDidResignKey:(NSNotification*) aNotification
 {
-	CVDisplayLinkRelease(displayLink);
-
-	[super dealloc];
+	UNREF_PARAM(aNotification);
+	app_window->Active(false);
+	app_window->OnActive()(*app_window, false);
 }
-@end
 
-@implementation KlayGEESView
-
-- (void) render
+- (void)mouseDown:(NSEvent*) theEvent
 {
-	KlayGE::Context::Instance().RenderFactoryInstance().RenderEngineInstance().Refresh();
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, app_window->Height() - point.y);
+	app_window->OnPointerDown()(*app_window, pt, [theEvent buttonNumber] + 1);
+}
+
+- (void)rightMouseDown:(NSEvent*) theEvent
+{
+	[self mouseDown:theEvent];
+}
+
+- (void)otherMouseDown:(NSEvent*) theEvent
+{
+	[self mouseDown:theEvent];
+}
+
+- (void)mouseUp:(NSEvent*) theEvent
+{
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, app_window->Height() - point.y);
+	app_window->OnPointerUp()(*app_window, pt, [theEvent buttonNumber] + 1);
+}
+
+- (void)rightMouseUp:(NSEvent*) theEvent
+{
+	[self mouseUp:theEvent];
+}
+
+- (void)otherMouseUp:(NSEvent*) theEvent
+{
+	[self mouseUp:theEvent];
+}
+
+- (void)mouseMoved:(NSEvent*) theEvent
+{
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, app_window->Height() - point.y);
+	app_window->OnPointerUpdate()(*app_window, pt, [theEvent buttonNumber]+1, false);
+}
+
+- (void)mouseDragged:(NSEvent*) theEvent
+{
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, app_window->Height() - point.y);
+	app_window->OnPointerUpdate()(*app_window, pt, [theEvent buttonNumber]+1, true);
+}
+
+- (void)rightMouseDragged:(NSEvent*) theEvent
+{
+	[self mouseDragged:theEvent];
+}
+
+- (void)otherMouseDragged:(NSEvent*) theEvent
+{
+	[self mouseDragged:theEvent];
+}
+
+- (void)scrollWheel:(NSEvent*) theEvent
+{
+	NSPoint point = [theEvent locationInWindow];
+	KlayGE::int2 pt(point.x, app_window->Height() - point.y);
+	app_window->OnPointerWheel()(*app_window, pt, [theEvent buttonNumber]+1, -[theEvent deltaY]);
+}
+
+- (void)keyDown:(NSEvent*) theEvent
+{
+	NSString* characters = [theEvent charactersIgnoringModifiers];
+	for (unsigned int i = 0; i < [characters length]; ++ i)
+	{
+		unichar keyChar = [characters characterAtIndex:0];
+		app_window->OnKeyDown()(*app_window, static_cast<wchar_t>(keyChar));
+	}
+}
+
+- (void)keyUp:(NSEvent*) theEvent
+{
+	NSString* characters = [theEvent charactersIgnoringModifiers];
+	for (unsigned int i = 0; i < [characters length]; ++ i)
+	{
+		unichar keyChar = [characters characterAtIndex:0];
+		app_window->OnKeyUp()(*app_window, static_cast<wchar_t>(keyChar));
+	}
 }
 
 @end
