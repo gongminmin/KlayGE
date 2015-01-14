@@ -535,7 +535,7 @@ namespace KlayGE
 
 			re.Refresh();
 		}
-#elif defined KLAYGE_PLATFORM_DARWIN
+#elif (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
 		while (!main_wnd_->Closed())
 		{
 			Window::PumpEvents();

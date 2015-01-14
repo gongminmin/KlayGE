@@ -37,6 +37,7 @@
 
 #include <glloader/glloader.h>
 
+#include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderWindow.hpp>
 
 namespace KlayGE
@@ -70,9 +71,7 @@ namespace KlayGE
 			left_ = settings.left;
 		}
 
-#if defined KLAYGE_PLATFORM_IOS
-		//TODO        
-#else
+#if !(defined KLAYGE_PLATFORM_IOS)
 #if defined KLAYGE_PLATFORM_DARWIN
 		main_wnd->CreateGLESView();
 #endif
@@ -441,10 +440,12 @@ namespace KlayGE
 		uint32_t new_width = w - new_left;
 		uint32_t new_height = h - new_top;
 #elif defined KLAYGE_PLATFORM_DARWIN
+		UNREF_PARAM(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #elif defined KLAYGE_PLATFORM_IOS
+		UNREF_PARAM(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetGLKViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
@@ -485,7 +486,12 @@ namespace KlayGE
 
 	void OGLESRenderWindow::SwapBuffers()
 	{
-#ifndef KLAYGE_PLATFORM_IOS
+#ifdef KLAYGE_PLATFORM_IOS
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.BindFrameBuffer(re.ScreenFrameBuffer());
+		Context::Instance().AppInstance().MainWnd()->FlushBuffer();
+		re.BindFrameBuffer(re.DefaultFrameBuffer());
+#else
 		eglSwapBuffers(display_, surf_);
 #endif
 	}

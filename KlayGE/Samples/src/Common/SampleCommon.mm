@@ -24,101 +24,58 @@ int main(int argc, char *argv[])
 
 @implementation KlayGEAppDelegate
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
-	
-	app = SampleApp();
-	app->Create();
-	// Empty app->Run()
-	KlayGE::Context::Instance().AppInstance().MainWnd()->StartRunLoop();
-	
+	UNREF_PARAM(application);
+	UNREF_PARAM(launchOptions);
+
+	NSString* path = [[NSBundle mainBundle] resourcePath];
+	KlayGE::ResLoader::Instance().AddPath(std::string([path UTF8String]));
+
+	[self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 	return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application
+- (void)applicationWillResignActive:(UIApplication*)application
 {
-	// TODO: active
+	UNREF_PARAM(application);
+	KlayGE::WindowPtr const & app_window = KlayGE::Context::Instance().AppInstance().MainWnd();
+	app_window->Active(false);
+	app_window->OnActive()(*app_window, false);
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
+- (void)applicationDidBecomeActive:(UIApplication*)application
 {
-}
+	UNREF_PARAM(application);
 
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-}
-
-- (void)applicationDidBecomeActive:(UIApplication *)application
-{
-	// TODO: active
-}
-
-- (void)applicationWillTerminate:(UIApplication *)application
-{
-	// TODO: close
-}
-
-@end
-
-#elif defined(KLAYGE_PLATFORM_DARWIN)
-#import <Cocoa/Cocoa.h>
-
-@interface KlayGEAppDelegate : NSObject<NSApplicationDelegate>
-{
-	KlayGE::App3DFramework *app;
-}
-@end
-
-int main()
-{
-	NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-	
-	NSApplication* application = [NSApplication sharedApplication];
-	[application setActivationPolicy:NSApplicationActivationPolicyRegular];
-	KlayGEAppDelegate *delegate = [[[KlayGEAppDelegate alloc] init] autorelease];
-	
-	[application setDelegate:delegate];
-	[application run];
-	
-	[pool drain];
-	
-	return EXIT_SUCCESS;
-}
-
-@implementation KlayGEAppDelegate : NSObject
-- (id)init {
-	if (self = [super init]) {
+	if (!KlayGE::Context::Instance().AppValid())
+	{
+		[self performSelector:@selector(applicationDidBecomeActive:) withObject:nil afterDelay:1.0];
+		return;
 	}
-	return self;
+
+	KlayGE::WindowPtr const & app_window = KlayGE::Context::Instance().AppInstance().MainWnd();
+	app_window->BindDrawable(); // restore GL context after awake from background
+	app_window->Active(true);
+	app_window->Ready(true);
+	app_window->OnSize()(*app_window, true);
 }
 
-- (void)applicationWillFinishLaunching:(NSNotification*)notification
+- (void)applicationWillTerminate:(UIApplication*)application
 {
-	(void)notification;
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
-	app = SampleApp();
-	app->Create();
-	// Empty app->Run()
-	KlayGE::Context::Instance().AppInstance().MainWnd()->StartRunLoop();
+	UNREF_PARAM(application);
+
+	KlayGE::WindowPtr const & app_window = KlayGE::Context::Instance().AppInstance().MainWnd();
+	app_window->OnClose()(*app_window);
+	app_window->Active(false);
+	app_window->Ready(false);
+	app_window->Closed(true);
 }
 
-- (void)applicationWillTerminate:(NSNotification*)notification
+- (void)postFinishLaunch
 {
-	delete app;    
-}
-
-- (BOOL) applicationShouldTerminateAfterLastWindowClosed: (NSApplication*)application
-{
-	(void)application;
-	return YES;
-}
-
-- (void)dealloc
-{
-	[super dealloc];
+	EntryFunc();
 }
 @end
+
 #endif
