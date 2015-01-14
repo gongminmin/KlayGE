@@ -86,6 +86,7 @@ void SSSBlurPP::Apply()
 
 	{
 		re.BindFrameBuffer(blur_y_fb_);
+		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 		technique_ = copy_tech_;
 		*color_tex_param_ = this->InputPin(0);
 		this->Render();

@@ -535,6 +535,12 @@ namespace KlayGE
 
 			re.Refresh();
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN
+		while (!main_wnd_->Closed())
+		{
+			Window::PumpEvents();
+			re.Refresh();
+		}
 #endif
 
 		this->OnDestroy();

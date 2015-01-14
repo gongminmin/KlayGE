@@ -252,7 +252,7 @@ namespace KlayGE
 		eglGetConfigAttrib(display_, cfg_, EGL_NATIVE_VISUAL_ID, &format);
 		ANativeWindow_setBuffersGeometry(wnd, 0, 0, format);
 #elif defined KLAYGE_PLATFORM_DARWIN
-		wnd = reinterpret_cast<EGLNativeWindowType>(main_wnd->NSESView());
+		wnd = reinterpret_cast<EGLNativeWindowType>(main_wnd->NSView());
 #endif
 
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);

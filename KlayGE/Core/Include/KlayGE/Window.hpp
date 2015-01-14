@@ -53,10 +53,8 @@
 #else
 #define OBJC_CLASS(name) typedef struct objc_object name
 #endif
-OBJC_CLASS(KlayGEWindow);
-OBJC_CLASS(KlayGEView);
-OBJC_CLASS(KlayGEESView);
-OBJC_CLASS(NSOpenGLPixelFormat);
+OBJC_CLASS(KlayGEWindowListener);
+OBJC_CLASS(NSView);
 #endif
 
 #include <string>
@@ -105,15 +103,14 @@ namespace KlayGE
 			return a_window_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
-		void CreateGLView();
+		void CreateGLView(RenderSettings const & settings);
 		void CreateGLESView();
-		void StartRunLoop();
-		void StopRunLoop();
+		static void PumpEvents();
 		void FlushBuffer();
 		uint2 GetNSViewSize();
-		void* NSESView()
+		void* NSView()
 		{
-			return ns_es_view_;
+			return ns_view_;
 		}
 #elif defined KLAYGE_PLATFORM_IOS
 		void StartRunLoop();
@@ -380,9 +377,8 @@ namespace KlayGE
 		::ANativeWindow* a_window_;
 #elif defined KLAYGE_PLATFORM_DARWIN
 		KlayGEWindow* ns_window_;
-		KlayGEView* ns_view_;
-		KlayGEESView* ns_es_view_;
-		NSOpenGLPixelFormat* pixel_format_;
+		KlayGEWindowListener* ns_window_listener_;
+		::NSView* ns_view_;
 #elif defined KLAYGE_PLATFORM_IOS
 		KlayGEView* glk_view_;
 #endif
