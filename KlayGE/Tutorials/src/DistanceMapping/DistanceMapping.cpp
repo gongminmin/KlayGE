@@ -251,13 +251,6 @@ int SampleMain()
 	return 0;
 }
 
-#ifdef KLAYGE_PLATFORM_IOS
-App3DFramework* SampleApp()
-{
-	return new DistanceMapping();
-}
-#endif
-
 DistanceMapping::DistanceMapping()
 					: App3DFramework("DistanceMapping")
 {

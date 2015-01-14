@@ -53,6 +53,8 @@
 #else
 #define OBJC_CLASS(name) typedef struct objc_object name
 #endif
+OBJC_CLASS(KlayGEView);
+OBJC_CLASS(KlayGEWindow);
 OBJC_CLASS(KlayGEWindowListener);
 OBJC_CLASS(NSView);
 #endif
@@ -113,8 +115,8 @@ namespace KlayGE
 			return ns_view_;
 		}
 #elif defined KLAYGE_PLATFORM_IOS
-		void StartRunLoop();
-		void StopRunLoop();
+		static void PumpEvents();
+		void BindDrawable();
 		void FlushBuffer();
 		uint2 GetGLKViewSize();
 #endif
