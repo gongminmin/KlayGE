@@ -116,7 +116,7 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_IOS
 		static void PumpEvents();
-		void BindDrawable();
+		void CreateColorRenderBuffer(ElementFormat pf);
 		void FlushBuffer();
 		uint2 GetGLKViewSize();
 #endif
@@ -382,7 +382,7 @@ namespace KlayGE
 		KlayGEWindowListener* ns_window_listener_;
 		::NSView* ns_view_;
 #elif defined KLAYGE_PLATFORM_IOS
-		KlayGEView* glk_view_;
+		KlayGEView* eagl_view_;
 #endif
 
 		bool external_wnd_;
