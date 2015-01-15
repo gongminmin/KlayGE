@@ -10,14 +10,18 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
-#include <UIKit/UIView.h>
-#include <GLKit/GLKit.h>
+#include <UIKit/UIKit.h>
+#include <OpenGLES/EAGL.h>
+#include <OpenGLES/ES2/gl.h>
 
-@interface KlayGEView : GLKView
+@interface KlayGEView : UIView
 {
 	KlayGE::array<UITouch*, 16> touch_state_;
 	KlayGE::Window* window_;
 }
+@property(readonly) CAEAGLLayer* eagl_layer;
+@property(readonly) EAGLContext* context;
+
 - (id) initWithFrame:(CGRect)frame window:(KlayGE::Window*)window;
 @end
 
@@ -27,50 +31,16 @@ namespace KlayGE
 		: active_(false), ready_(false), closed_(false)
 	{
 		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-		
+
 		CGRect bounds = [[UIScreen mainScreen] bounds];
-		glk_view_ = [[KlayGEView alloc] initWithFrame:bounds window:this];
-		glk_view_.context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-		switch (settings.color_fmt)
-		{
-		case EF_ARGB8:
-			glk_view_.drawableColorFormat = GLKViewDrawableColorFormatRGBA8888;
-			break;
+		eagl_view_ = [[KlayGEView alloc] initWithFrame:bounds window:this];
 
-		case EF_ABGR8:
-		case EF_A2BGR10:
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-		switch (settings.depth_stencil_fmt)
-		{
-		case EF_D16:
-			glk_view_.drawableDepthFormat = GLKViewDrawableDepthFormat16;
-			glk_view_.drawableStencilFormat = GLKViewDrawableStencilFormatNone;
-			break;
+		UIViewController* view_controller = [[UIViewController alloc] initWithNibName:nil bundle:nil];
+		view_controller.view = eagl_view_;
+		[view_controller setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
 
-		case EF_D24S8:
-			glk_view_.drawableDepthFormat = GLKViewDrawableDepthFormat24;
-			glk_view_.drawableStencilFormat = GLKViewDrawableStencilFormat8;
-			break;
-
-		case EF_D32F:
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-
-		glk_view_.enableSetNeedsDisplay = NO;
-		[glk_view_ bindDrawable];
-
-		GLKViewController * viewController = [[GLKViewController alloc] initWithNibName:nil bundle:nil];
-		viewController.view = glk_view_;
-		viewController.preferredFramesPerSecond = 60;
-		[viewController setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
-
-		UIWindow *window = [[UIWindow alloc] initWithFrame:bounds];
-		window.rootViewController = viewController;
+		UIWindow* window = [[UIWindow alloc] initWithFrame:bounds];
+		window.rootViewController = view_controller;
 		window.backgroundColor = [UIColor blackColor];
 		[window makeKeyAndVisible];
 
@@ -79,6 +49,8 @@ namespace KlayGE
 		top_ = 0;
 		width_ = rect.size.width;
 		height_ = rect.size.height;
+
+		[EAGLContext setCurrentContext:[eagl_view_ context]];
 
 		[pool release];
 	}
@@ -97,14 +69,27 @@ namespace KlayGE
 		LogWarn("Unimplemented Window::~Window");
 	}
 
-	void Window::BindDrawable()
+	void Window::CreateColorRenderBuffer(ElementFormat pf)
 	{
-		[glk_view_ bindDrawable];
+		NSString* format = nil;
+		switch (pf)
+		{
+		case EF_ARGB8:
+			format = kEAGLColorFormatRGBA8;
+			break;
+		case EF_ABGR8:
+		case EF_A2BGR10:
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		[[eagl_view_ eagl_layer] setDrawableProperties:[NSDictionary dictionaryWithObjectsAndKeys:format, kEAGLDrawablePropertyColorFormat, nil]];
+		[[eagl_view_ context] renderbufferStorage:GL_RENDERBUFFER fromDrawable:[eagl_view_ eagl_layer]];
 	}
 
 	void Window::FlushBuffer()
 	{
-		[glk_view_.context presentRenderbuffer:GL_RENDERBUFFER];
+		[[eagl_view_ context] presentRenderbuffer:GL_RENDERBUFFER];
 	}
 
 	void Window::PumpEvents()
@@ -125,18 +110,25 @@ namespace KlayGE
 
 	uint2 Window::GetGLKViewSize()
 	{
-		CGRect rect = glk_view_.frame;
+		CGRect rect = eagl_view_.frame;
 		return KlayGE::uint2(rect.size.width, rect.size.height);
 	}
 }
 
 @implementation KlayGEView
 
+@synthesize context, eagl_layer;
+
 - (id) initWithFrame:(CGRect)frame window:(KlayGE::Window*)window
 {
 	self = [super initWithFrame:frame];
 	if (self)
 	{
+		eagl_layer = (CAEAGLLayer*)self.layer;
+		eagl_layer.opaque = YES;
+		
+		context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+
 		for (int i = 0; i < 16; ++ i)
 		{
 			touch_state_[i] = nil;
@@ -146,9 +138,16 @@ namespace KlayGE
 	return self;
 }
 
++ (Class)layerClass
+{
+	return [CAEAGLLayer class];
+}
+
+
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	UNREF_PARAM(event);
+
 	for (UITouch* touch in touches)
 	{
 		int idx = -1;
@@ -196,6 +195,7 @@ namespace KlayGE
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	UNREF_PARAM(event);
+
 	for (UITouch* touch in touches)
 	{
 		int idx = -1;
@@ -220,6 +220,7 @@ namespace KlayGE
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
 {
 	UNREF_PARAM(event);
+
 	for (UITouch* touch in touches)
 	{
 		int idx = -1;

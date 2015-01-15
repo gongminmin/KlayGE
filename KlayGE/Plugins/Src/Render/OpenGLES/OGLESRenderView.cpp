@@ -14,6 +14,8 @@
 #include <KFL/Util.hpp>
 #include <KFL/ThrowErr.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
@@ -1012,4 +1014,68 @@ namespace KlayGE
 
 		re.BindFramebuffer(0);
 	}
+
+#if defined(KLAYGE_PLATFORM_IOS)
+	OGLESEAGLRenderView::OGLESEAGLRenderView(ElementFormat pf)
+	{
+		glGenRenderbuffers(1, &rf_);
+		glBindRenderbuffer(GL_RENDERBUFFER, rf_);
+		
+		WindowPtr const & app_window = KlayGE::Context::Instance().AppInstance().MainWnd();
+		app_window->CreateColorRenderBuffer(pf);
+		
+		pf_ = pf;
+		GLint param;
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &param);
+		width_ = param;
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &param);
+		height_ = param;
+	}
+	
+	void OGLESEAGLRenderView::ClearColor(Color const & clr)
+	{
+		this->DoClear(GL_COLOR_BUFFER_BIT, clr, 0, 0);
+	}
+	void OGLESEAGLRenderView::ClearDepth(float)
+	{
+		BOOST_ASSERT(false);
+	}
+	
+	void OGLESEAGLRenderView::Discard()
+	{
+		this->DoDiscardColor();
+	}
+	
+	void OGLESEAGLRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
+	{
+		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+		
+		index_ = att - FrameBuffer::ATT_Color0;
+		fbo_ = checked_cast<OGLESFrameBuffer*>(&fb)->OGLFbo();
+		
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindFramebuffer(fbo_);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+								  GL_RENDERBUFFER, rf_);
+		
+		re.BindFramebuffer(0);
+	}
+
+	void OGLESEAGLRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
+	{
+		UNREF_PARAM(fb);
+		
+		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
+		BOOST_ASSERT(fbo_ == checked_cast<OGLESFrameBuffer*>(&fb)->OGLFbo());
+		
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindFramebuffer(fbo_);
+		
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+								  GL_RENDERBUFFER, rf_);
+		
+		re.BindFramebuffer(0);
+	}
+#endif
 }

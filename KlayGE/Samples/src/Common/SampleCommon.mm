@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
 	}
 
 	KlayGE::WindowPtr const & app_window = KlayGE::Context::Instance().AppInstance().MainWnd();
-	app_window->BindDrawable(); // restore GL context after awake from background
 	app_window->Active(true);
 	app_window->Ready(true);
 	app_window->OnSize()(*app_window, true);

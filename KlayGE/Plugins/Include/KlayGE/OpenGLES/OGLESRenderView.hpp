@@ -50,7 +50,6 @@ namespace KlayGE
 
 	typedef shared_ptr<OGLESRenderView> OGLESRenderViewPtr;
 
-
 	class OGLESScreenColorRenderView : public OGLESRenderView, boost::noncopyable
 	{
 	public:
@@ -222,6 +221,27 @@ namespace KlayGE
 	};
 
 	typedef shared_ptr<OGLESTextureCubeDepthStencilRenderView> OGLES2TextureCubeDepthStencilRenderViewPtr;
+
+#if defined(KLAYGE_PLATFORM_IOS)
+	class OGLESEAGLRenderView : public OGLESRenderView, boost::noncopyable
+	{
+	public:
+		explicit OGLESEAGLRenderView(ElementFormat pf);
+
+		void ClearColor(Color const & clr);
+		void ClearDepth(float depth);
+
+		virtual void Discard() KLAYGE_OVERRIDE;
+
+		void OnAttached(FrameBuffer& fb, uint32_t att);
+		void OnDetached(FrameBuffer& fb, uint32_t att);
+
+	protected:
+		GLuint rf_;
+	};
+
+	typedef shared_ptr<OGLESEAGLRenderView> OGLESEAGLRenderViewPtr;
+#endif
 }
 
 #endif			// _OGLESRENDERVIEW_HPP

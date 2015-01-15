@@ -244,6 +244,17 @@ namespace KlayGE
 		}
 #endif
 
+#if defined(KLAYGE_PLATFORM_IOS)
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		OGLESEAGLRenderViewPtr screen_view = MakeSharedPtr<OGLESEAGLRenderView>(settings.color_fmt);
+		win->Attach(FrameBuffer::ATT_Color0, screen_view);
+		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
+		{
+			win->Attach(FrameBuffer::ATT_DepthStencil,
+				MakeSharedPtr<OGLESDepthStencilRenderView>(win->Width(), win->Height(),
+					settings.depth_stencil_fmt, 1, 0));
+		}
+#else
 		win->Attach(FrameBuffer::ATT_Color0,
 			MakeSharedPtr<OGLESScreenColorRenderView>(win->Width(), win->Height(), settings.color_fmt));
 		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
@@ -251,6 +262,7 @@ namespace KlayGE
 			win->Attach(FrameBuffer::ATT_DepthStencil,
 				MakeSharedPtr<OGLESScreenDepthStencilRenderView>(win->Width(), win->Height(), settings.depth_stencil_fmt));
 		}
+#endif
 
 		this->BindFrameBuffer(win);
 

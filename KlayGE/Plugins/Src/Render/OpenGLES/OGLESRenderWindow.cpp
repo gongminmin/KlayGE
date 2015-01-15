@@ -43,7 +43,11 @@
 namespace KlayGE
 {
 	OGLESRenderWindow::OGLESRenderWindow(std::string const & name, RenderSettings const & settings)
+#if defined(KLAYGE_PLATFORM_IOS)
+						: OGLESFrameBuffer(true)
+#else
 						: OGLESFrameBuffer(false)
+#endif
 	{
 		// Store info
 		name_				= name;
