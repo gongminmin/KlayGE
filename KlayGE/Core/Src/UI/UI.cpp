@@ -282,6 +282,45 @@ namespace KlayGE
 
 
 	UIManager::UIManager()
+		: mouse_on_ui_(false),
+			inited_(false)
+	{
+	}
+
+	UIManager::~UIManager()
+	{
+	}
+	
+	UIManager& UIManager::Instance()
+	{
+		if (!ui_mgr_instance_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!ui_mgr_instance_)
+			{
+				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+			}
+		}
+
+		return *ui_mgr_instance_;
+	}
+
+	void UIManager::Destroy()
+	{
+		ui_mgr_instance_.reset();
+	}
+
+	void UIManager::Suspend()
+	{
+		// TODO
+	}
+
+	void UIManager::Resume()
+	{
+		// TODO
+	}
+
+	void UIManager::Init()
 	{
 		effect_ = SyncLoadRenderEffect("UI.fxml");
 
@@ -347,47 +386,18 @@ namespace KlayGE
 		action_handler_t input_handler = MakeSharedPtr<input_signal>();
 		input_handler->connect(KlayGE::bind(&UIManager::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
 		inputEngine.ActionMap(actionMap, input_handler);
-
-		mouse_on_ui_ = false;
-	}
-
-	UIManager::~UIManager()
-	{
-	}
-	
-	UIManager& UIManager::Instance()
-	{
-		if (!ui_mgr_instance_)
-		{
-			unique_lock<mutex> lock(singleton_mutex);
-			if (!ui_mgr_instance_)
-			{
-				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
-			}
-		}
-
-		return *ui_mgr_instance_;
-	}
-
-	void UIManager::Destroy()
-	{
-		ui_mgr_instance_.reset();
-	}
-
-	void UIManager::Suspend()
-	{
-		// TODO
-	}
-
-	void UIManager::Resume()
-	{
-		// TODO
 	}
 
 	void UIManager::Load(ResIdentifierPtr const & source)
 	{
 		if (source)
 		{
+			if (!inited_)
+			{
+				this->Init();
+				inited_ = true;
+			}
+
 			XMLDocument doc;
 			XMLNodePtr root = doc.Parse(source);
 

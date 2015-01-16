@@ -430,6 +430,7 @@ namespace KlayGE
 		}
 
 	private:
+		void Init();
 		void InputHandler(InputEngine const & sender, InputAction const & action);
 
 	private:
@@ -458,6 +459,7 @@ namespace KlayGE
 		std::map<size_t, std::vector<string_cache> > strings_;
 
 		bool mouse_on_ui_;
+		bool inited_;
 	};
 
 	class KLAYGE_CORE_API UIDialog
