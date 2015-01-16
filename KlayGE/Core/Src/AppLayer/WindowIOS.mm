@@ -44,13 +44,11 @@ namespace KlayGE
 		window.backgroundColor = [UIColor blackColor];
 		[window makeKeyAndVisible];
 
-		CGRect rect = glk_view_.frame;
+		CGRect rect = eagl_view_.frame;
 		left_ = 0;
 		top_ = 0;
 		width_ = rect.size.width;
 		height_ = rect.size.height;
-
-		[EAGLContext setCurrentContext:[eagl_view_ context]];
 
 		[pool release];
 	}
@@ -126,8 +124,13 @@ namespace KlayGE
 	{
 		eagl_layer = (CAEAGLLayer*)self.layer;
 		eagl_layer.opaque = YES;
-		
-		context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+
+		context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES3];
+		if (!context || ![EAGLContext setCurrentContext:context])
+		{
+			context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+			[EAGLContext setCurrentContext:context];
+		}
 
 		for (int i = 0; i < 16; ++ i)
 		{
