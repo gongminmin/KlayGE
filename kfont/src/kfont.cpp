@@ -80,22 +80,13 @@ namespace KlayGE
 			unsigned char* outProps, size_t* outPropsSize, int level, unsigned int dictSize,
 			int lc, int lp, int pb, int fb, int numThreads)
 		{
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
-			return lzmaCompressFunc_(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
+			return lzma_compress_func_(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
 				lc, lp, pb, fb, numThreads);
-#else
-			return ::LzmaCompress(dest, destLen, src, srcLen, outProps, outPropsSize, level, dictSize,
-				lc, lp, pb, fb, numThreads);
-#endif
 		}
 		int LzmaUncompress(unsigned char* dest, size_t* destLen, unsigned char const * src, SizeT* srcLen,
 			unsigned char const * props, size_t propsSize)
 		{
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
-			return lzmaUncompressFunc_(dest, destLen, src, srcLen, props, propsSize);
-#else
-			return ::LzmaUncompress(dest, destLen, src, srcLen, props, propsSize);
-#endif
+			return lzma_uncompress_func_(dest, destLen, src, srcLen, props, propsSize);
 		}
 
 		LZMALoader()
@@ -103,20 +94,23 @@ namespace KlayGE
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 			dll_loader_.Load(DLL_PREFIX "LZMA" DLL_SUFFIX);
 
-			lzmaCompressFunc_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
-			lzmaUncompressFunc_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
-
-			BOOST_ASSERT(lzmaCompressFunc_);
-			BOOST_ASSERT(lzmaUncompressFunc_);
+			lzma_compress_func_ = (LzmaCompressFunc)dll_loader_.GetProcAddress("LzmaCompress");
+			lzma_uncompress_func_ = (LzmaUncompressFunc)dll_loader_.GetProcAddress("LzmaUncompress");
+#else
+			lzma_compress_func_ = ::LzmaCompress;
+			lzma_uncompress_func_ = ::LzmaUncompress;
 #endif
+
+			BOOST_ASSERT(lzma_compress_func_);
+			BOOST_ASSERT(lzma_uncompress_func_);
 		}
 
 	private:
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		DllLoader dll_loader_;
-		LzmaCompressFunc lzmaCompressFunc_;
-		LzmaUncompressFunc lzmaUncompressFunc_;
 #endif
+		LzmaCompressFunc lzma_compress_func_;
+		LzmaUncompressFunc lzma_uncompress_func_;
 
 		static shared_ptr<LZMALoader> instance_;
 	};
