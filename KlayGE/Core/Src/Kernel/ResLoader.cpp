@@ -333,6 +333,34 @@ namespace KlayGE
 		}
 #endif
 
+#ifdef KLAYGE_PLATFORM_IOS
+		std::string::size_type found = name.find_last_of(".");
+		if (found != std::string::npos)
+		{
+			std::string::size_type found2 = name.find_last_of("/");
+			CFBundleRef main_bundle = CFBundleGetMainBundle();
+			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(found2 + 1, found).c_str(), kCFStringEncodingASCII);
+			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
+			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
+			CFRelease(file_name);
+			CFRelease(file_ext);
+			if (file_url != nullptr)
+			{
+				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
+
+				char const * path = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
+				std::string const res_name(path);
+
+				CFRelease(file_url);
+				CFRelease(file_path);
+
+				return res_name;
+			}
+		}
+#endif
+
 #ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		return "";
 #else
@@ -442,9 +470,10 @@ namespace KlayGE
 		std::string::size_type found = name.find_last_of(".");
 		if (found != std::string::npos)
 		{
+			std::string::size_type found2 = name.find_last_of("/");
 			CFBundleRef main_bundle = CFBundleGetMainBundle();
 			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
-				name.substr(0, found).c_str(), kCFStringEncodingASCII);
+				name.substr(found2 + 1, found).c_str(), kCFStringEncodingASCII);
 			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
 				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
 			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
