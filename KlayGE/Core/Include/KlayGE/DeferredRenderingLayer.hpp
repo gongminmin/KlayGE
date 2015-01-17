@@ -100,6 +100,7 @@ namespace KlayGE
 		TexturePtr prev_merged_depth_tex;
 
 		TexturePtr small_ssvo_tex;
+		PostProcessPtr ssvo_blur_pp_;
 		bool ssvo_enabled;
 
 		float4x4 view, proj;
@@ -366,7 +367,6 @@ namespace KlayGE
 		uint32_t active_viewport_;
 
 		PostProcessPtr ssvo_pp_;
-		PostProcessPtr ssvo_blur_pp_;
 
 		PostProcessPtr ssr_pp_;
 		bool ssr_enabled_;
@@ -433,6 +433,7 @@ namespace KlayGE
 		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
+		PostProcessPtr csm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
 		PostProcessPtr depth_to_linear_pp_;
 		PostProcessPtr depth_mipmap_pp_;

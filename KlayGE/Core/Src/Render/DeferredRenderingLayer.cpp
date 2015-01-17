@@ -648,12 +648,7 @@ namespace KlayGE
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
-		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
-
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
-
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
 		if (depth_texture_support_ && mrt_g_buffer_support_ && caps.fp_color_support)
@@ -684,6 +679,9 @@ namespace KlayGE
 
 
 		sm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
+		sm_filter_pp_->InputPin(0, sm_tex_);
+		csm_filter_pp_ = MakeSharedPtr<LogGaussianBlurPostProcess>(4, true);
+		csm_filter_pp_->InputPin(0, csm_tex_);
 		if (depth_texture_support_)
 		{
 			depth_to_esm_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToESM");
@@ -1214,6 +1212,12 @@ namespace KlayGE
 			fmt = EF_ARGB8;
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+
+		pvp.ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
+		pvp.ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
+		pvp.ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (!cs_tbdr_)
@@ -2527,6 +2531,33 @@ namespace KlayGE
 			}
 		}
 
+		PostProcessChainPtr pp_chain;
+		if (LightSource::LT_Sun == type)
+		{
+			pp_chain = checked_pointer_cast<PostProcessChain>(csm_filter_pp_);
+			if (tex_array_support_)
+			{
+				pp_chain->OutputPin(0, pvp.filtered_csm_texs[0], 0, index_in_pass - 1, 0);
+			}
+			else
+			{
+				pp_chain->OutputPin(0, pvp.filtered_csm_texs[index_in_pass - 1]);
+			}
+		}
+		else
+		{
+			pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
+			if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
+				|| (LightSource::LT_TubeArea == type))
+			{
+				pp_chain->OutputPin(0, filtered_sm_cube_texs_[sm_light_indices_[org_no].first], 0, 0, index_in_pass - 1);
+			}
+			else 
+			{
+				pp_chain->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
+			}
+		}
+
 		int2 kernel_size;
 		if (LightSource::LT_Sun == type)
 		{
@@ -2540,38 +2571,12 @@ namespace KlayGE
 			kernel_size.x() = 4;
 			kernel_size.y() = 4;
 		}
-		PostProcessChainPtr pp_chain = checked_pointer_cast<PostProcessChain>(sm_filter_pp_);
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
-		if (LightSource::LT_Sun == type)
-		{
-			sm_filter_pp_->InputPin(0, csm_tex_);
-			if (tex_array_support_)
-			{
-				sm_filter_pp_->OutputPin(0, pvp.filtered_csm_texs[0], 0, index_in_pass - 1, 0);
-			}
-			else
-			{
-				sm_filter_pp_->OutputPin(0, pvp.filtered_csm_texs[index_in_pass - 1]);
-			}
-		}
-		else
-		{
-			sm_filter_pp_->InputPin(0, sm_tex_);
-			if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
-				|| (LightSource::LT_TubeArea == type))
-			{
-				sm_filter_pp_->OutputPin(0, filtered_sm_cube_texs_[sm_light_indices_[org_no].first], 0, 0, index_in_pass - 1);
-			}
-			else 
-			{
-				sm_filter_pp_->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
-			}
-		}
-		checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pp_)->ESMScaleFactor(ESM_SCALE_FACTOR,
+		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR,
 			sm_fb_->GetViewport()->camera);
-		sm_filter_pp_->Apply();
+		pp_chain->Apply();
 
 		if (!caps.pack_to_rgba_required)
 		{
@@ -2773,17 +2778,15 @@ namespace KlayGE
 			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
 			ssvo_pp_->Apply();
 
-			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
-			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
 			if (Opaque_GBuffer == g_buffer_index)
 			{
-				ssvo_blur_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+				pvp.ssvo_blur_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
 			}
 			else
 			{
-				ssvo_blur_pp_->OutputPin(0, pvp.shading_tex);
+				pvp.ssvo_blur_pp_->OutputPin(0, pvp.shading_tex);
 			}
-			ssvo_blur_pp_->Apply();
+			pvp.ssvo_blur_pp_->Apply();
 		}
 	}
 
