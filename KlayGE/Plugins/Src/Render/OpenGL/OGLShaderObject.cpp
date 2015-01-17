@@ -2483,6 +2483,12 @@ namespace KlayGE
 				ss << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
 			}
+			std::string no_tex_lod_str;
+			{
+				std::stringstream ss;
+				ss << (ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1;
+				no_tex_lod_str = ss.str();
+			}
 
 			std::string hlsl_shader_text = this->GenHLSLShaderText(type, effect, tech, pass);
 
@@ -2601,15 +2607,15 @@ namespace KlayGE
 					macros.push_back(macro_d3d11);
 				}
 				{
-					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", "0" };
-					macros.push_back(macro_d3d11);
-				}
-				{
 					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
 					macros.push_back(macro_d3d11);
 				}
 				{
 					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
+					macros.push_back(macro_d3d11);
+				}
+				{
+					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
 					macros.push_back(macro_d3d11);
 				}
 				if (!caps.texture_format_support(EF_BC5)
@@ -3019,6 +3025,12 @@ namespace KlayGE
 				ss << "-DKLAYGE_DERIVATIVES=" << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
 			}
+			std::string no_tex_lod_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_NO_TEX_LOD=" << (ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1;
+				no_tex_lod_str = ss.str();
+			}
 
 			std::string shader_text = this->GenCgShaderText(type, effect, tech, pass);
 
@@ -3029,16 +3041,9 @@ namespace KlayGE
 			args.push_back(max_tex_array_str.c_str());
 			args.push_back(max_tex_depth_str.c_str());
 			args.push_back(max_tex_units_str.c_str());
-			if (glloader_GL_VERSION_3_0())
-			{
-				args.push_back("-DKLAYGE_NO_TEX_LOD=0");
-			}
-			else
-			{
-				args.push_back("-DKLAYGE_NO_TEX_LOD=1");
-			}
 			args.push_back(flipping_str.c_str());
 			args.push_back(standard_derivatives_str.c_str());
+			args.push_back(no_tex_lod_str.c_str());
 			if (!caps.texture_format_support(EF_BC5)
 				|| !caps.texture_format_support(EF_BC5_SRGB))
 			{

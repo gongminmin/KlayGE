@@ -1627,6 +1627,7 @@ namespace KlayGE
 		caps_.mrt_independent_bit_depths_support = false;
 #if !USE_DXBC2GLSL
 		caps_.standard_derivatives_support = false;
+		caps_.shader_texture_lod_support = true;
 #else
 		if (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_standard_derivatives())
 		{
@@ -1636,6 +1637,14 @@ namespace KlayGE
 		else
 		{
 			caps_.standard_derivatives_support = false;
+		}
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_shader_texture_lod())
+		{
+			caps_.shader_texture_lod_support = true;
+		}
+		else
+		{
+			caps_.shader_texture_lod_support = false;
 		}
 #endif
 		caps_.logic_op_support = false;

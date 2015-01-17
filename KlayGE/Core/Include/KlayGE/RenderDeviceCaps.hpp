@@ -55,6 +55,7 @@ namespace KlayGE
 		bool multithread_res_creating_support : 1;
 		bool mrt_independent_bit_depths_support : 1;
 		bool standard_derivatives_support : 1;
+		bool shader_texture_lod_support : 1;
 		bool logic_op_support : 1;
 		bool independent_blend_support : 1;
 		bool depth_texture_support : 1;

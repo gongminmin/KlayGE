@@ -1705,10 +1705,12 @@ namespace KlayGE
 		if (caps_.max_shader_model < 3)
 		{
 			caps_.standard_derivatives_support = false;
+			caps_.shader_texture_lod_support = false;
 		}
 		else
 		{
 			caps_.standard_derivatives_support = true;
+			caps_.shader_texture_lod_support = true;
 		}
 		caps_.logic_op_support = true;
 		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2())

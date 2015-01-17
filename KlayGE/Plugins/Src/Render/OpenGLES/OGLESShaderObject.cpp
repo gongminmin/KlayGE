@@ -2218,13 +2218,6 @@ namespace KlayGE
 				ss << static_cast<int>(caps.max_pixel_texture_units);
 				max_tex_units_str = ss.str();
 			}
-			std::string no_tex_lod_str;
-			{
-				std::stringstream ss;
-				ss << static_cast<int>(caps.max_pixel_texture_units);
-				ss << (ST_VertexShader == type) ? 0 : (glloader_GLES_EXT_shader_texture_lod() ? 0 : 1);
-				no_tex_lod_str = ss.str();
-			}
 			std::string flipping_str;
 			{
 				std::stringstream ss;
@@ -2236,6 +2229,12 @@ namespace KlayGE
 				std::stringstream ss;
 				ss << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
+			}
+			std::string no_tex_lod_str;
+			{
+				std::stringstream ss;
+				ss << (ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1;
+				no_tex_lod_str = ss.str();
 			}
 			std::string frag_depth_str;
 			{
@@ -2361,15 +2360,15 @@ namespace KlayGE
 					macros.push_back(macro_d3d11);
 				}
 				{
-					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
-					macros.push_back(macro_d3d11);
-				}
-				{
 					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
 					macros.push_back(macro_d3d11);
 				}
 				{
 					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
+					macros.push_back(macro_d3d11);
+				}
+				{
+					D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
 					macros.push_back(macro_d3d11);
 				}
 				if (!caps.texture_format_support(EF_BC5)
@@ -2736,13 +2735,7 @@ namespace KlayGE
 				std::stringstream ss;
 				ss << "-DKLAYGE_MAX_TEX_UNITS=" << static_cast<int>(caps.max_pixel_texture_units);
 				max_tex_units_str = ss.str();
-			}
-			std::string no_tex_lod_str;
-			{
-				std::stringstream ss;
-				ss << "-DKLAYGE_NO_TEX_LOD=" << ((ST_VertexShader == type) ? 0 : 1);//(glloader_GLES_EXT_shader_texture_lod() ? 0 : 1));
-				no_tex_lod_str = ss.str();
-			}		
+			}	
 			std::string flipping_str;
 			{
 				std::stringstream ss;
@@ -2755,6 +2748,12 @@ namespace KlayGE
 				ss << "-DKLAYGE_DERIVATIVES=" << (caps.standard_derivatives_support ? 1 : 0);
 				standard_derivatives_str = ss.str();
 			}
+			std::string no_tex_lod_str;
+			{
+				std::stringstream ss;
+				ss << "-DKLAYGE_NO_TEX_LOD=" << (ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1;
+				no_tex_lod_str = ss.str();
+			}
 
 			std::string shader_text = this->GenCgShaderText(type, effect, tech, pass);
 
@@ -2765,9 +2764,9 @@ namespace KlayGE
 			args.push_back(max_tex_array_str.c_str());
 			args.push_back(max_tex_depth_str.c_str());
 			args.push_back(max_tex_units_str.c_str());
-			args.push_back(no_tex_lod_str.c_str());
 			args.push_back(flipping_str.c_str());
 			args.push_back(standard_derivatives_str.c_str());
+			args.push_back(no_tex_lod_str.c_str());
 			if (!caps.texture_format_support(EF_BC5)
 				|| !caps.texture_format_support(EF_BC5_SRGB))
 			{
