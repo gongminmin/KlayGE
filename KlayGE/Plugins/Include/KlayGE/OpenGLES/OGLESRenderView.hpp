@@ -236,6 +236,8 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
+		void BindRenderBuffer();
+
 	protected:
 		GLuint rf_;
 	};

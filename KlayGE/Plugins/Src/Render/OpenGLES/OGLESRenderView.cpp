@@ -1077,5 +1077,10 @@ namespace KlayGE
 		
 		re.BindFramebuffer(0);
 	}
+
+	void OGLESEAGLRenderView::BindRenderBuffer()
+	{
+		glBindRenderbuffer(GL_RENDERBUFFER, rf_);        
+	}
 #endif
 }

@@ -245,14 +245,13 @@ namespace KlayGE
 #endif
 
 #if defined(KLAYGE_PLATFORM_IOS)
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		OGLESEAGLRenderViewPtr screen_view = MakeSharedPtr<OGLESEAGLRenderView>(settings.color_fmt);
-		win->Attach(FrameBuffer::ATT_Color0, screen_view);
+		win->Attach(FrameBuffer::ATT_Color0,
+			MakeSharedPtr<OGLESEAGLRenderView>(settings.color_fmt));
 		if (NumDepthBits(settings.depth_stencil_fmt) > 0)
 		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			win->Attach(FrameBuffer::ATT_DepthStencil,
-				MakeSharedPtr<OGLESDepthStencilRenderView>(win->Width(), win->Height(),
-					settings.depth_stencil_fmt, 1, 0));
+				rf.Make2DDepthStencilRenderView(win->Width(), win->Height(), settings.depth_stencil_fmt, 1, 0));
 		}
 #else
 		win->Attach(FrameBuffer::ATT_Color0,

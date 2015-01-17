@@ -39,6 +39,9 @@
 
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderWindow.hpp>
+#ifdef KLAYGE_PLATFORM_IOS
+#include <KlayGE/OpenGLES/OGLESRenderView.hpp>
+#endif
 
 namespace KlayGE
 {
@@ -493,6 +496,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_IOS
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer(re.ScreenFrameBuffer());
+		checked_pointer_cast<OGLESEAGLRenderView>(this->Attached(FrameBuffer::ATT_Color0))->BindRenderBuffer();
 		Context::Instance().AppInstance().MainWnd()->FlushBuffer();
 		re.BindFrameBuffer(re.DefaultFrameBuffer());
 #else
