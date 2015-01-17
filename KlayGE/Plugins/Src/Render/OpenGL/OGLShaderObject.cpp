@@ -3533,16 +3533,6 @@ namespace KlayGE
 
 			if (ret->is_validate_)
 			{
-				if (ret->is_shader_validate_[ST_GeometryShader])
-				{
-					if ((*glsl_srcs_)[ST_GeometryShader] && !(*glsl_srcs_)[ST_GeometryShader]->empty())
-					{
-						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_INPUT_TYPE, ret->gs_input_type_);
-						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_OUTPUT_TYPE, ret->gs_output_type_);
-						glProgramParameteri(ret->glsl_program_, GL_GEOMETRY_VERTICES_OUT, ret->gs_max_output_vertex_);
-					}
-				}
-
 				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
 				glProgramBinary(ret->glsl_program_, glsl_bin_format_,
@@ -3878,17 +3868,20 @@ namespace KlayGE
 
 		if (ST_GeometryShader == type)
 		{
-			if (glloader_GL_VERSION_4_1() || glloader_GL_ARB_geometry_shader4())
+			if (!glloader_GL_VERSION_3_2())
 			{
-				glProgramParameteri(glsl_program_, GL_GEOMETRY_INPUT_TYPE, gs_input_type_);
-				glProgramParameteri(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE, gs_output_type_);
-				glProgramParameteri(glsl_program_, GL_GEOMETRY_VERTICES_OUT, gs_max_output_vertex_);
-			}
-			else if (glloader_GL_VERSION_3_2() || glloader_GL_EXT_geometry_shader4())
-			{
-				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
-				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
-				glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, gs_max_output_vertex_);
+				if (glloader_GL_ARB_geometry_shader4())
+				{
+					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_INPUT_TYPE_ARB, gs_input_type_);
+					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_ARB, gs_output_type_);
+					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_VERTICES_OUT_ARB, gs_max_output_vertex_);
+				}
+				else if (glloader_GL_EXT_geometry_shader4())
+				{
+					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
+					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
+					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, gs_max_output_vertex_);
+				}
 			}
 		}
 
