@@ -1181,6 +1181,25 @@ namespace KlayGE
 			}
 			if (IsCompressedFormat(format))
 			{
+				switch (format)
+				{
+				case EF_BC1:
+					tex_codec_ = MakeSharedPtr<TexCompressionBC1>();
+					break;
+
+				case EF_BC2:
+					tex_codec_ = MakeSharedPtr<TexCompressionBC2>();
+					break;
+
+				case EF_BC3:
+					tex_codec_ = MakeSharedPtr<TexCompressionBC3>();
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					break;
+				}
+
 				// BC format must be multiply of 4
 				while (((tile_with_border_size >> mipmap) & 0x3) != 0)
 				{
@@ -1211,25 +1230,6 @@ namespace KlayGE
 			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, nullptr);
 
 			tile_free_list_.push_back(std::make_pair(0, pages));
-
-			switch (format)
-			{
-			case EF_BC1:
-				tex_codec_ = MakeSharedPtr<TexCompressionBC1>();
-				break;
-
-			case EF_BC2:
-				tex_codec_ = MakeSharedPtr<TexCompressionBC2>();
-				break;
-
-			case EF_BC3:
-				tex_codec_ = MakeSharedPtr<TexCompressionBC3>();
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
-			}
 		}
 	}
 
