@@ -222,7 +222,7 @@ class build_info:
 						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
 						compiler = "mingw"
-				elif "linux" == target_platform:
+				elif ("linux" == target_platform) or ("android" == target_platform):
 					compiler = "gcc"
 				elif ("darwin" == target_platform) or ("ios" == target_platform):
 					compiler = "clang"
