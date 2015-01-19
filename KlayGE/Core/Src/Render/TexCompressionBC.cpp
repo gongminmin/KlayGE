@@ -1670,19 +1670,63 @@ namespace KlayGE
 		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
 	};
 
+	uint8_t TexCompressionBC7::expand6_[64];
+	uint8_t TexCompressionBC7::expand7_[128];
+	uint8_t TexCompressionBC7::o_match6_[256][2];
+	uint8_t TexCompressionBC7::o_match7_[256][2];
+	bool TexCompressionBC7::lut_inited_ = false;
+
 	TexCompressionBC7::TexCompressionBC7()
 	{
 		block_width_ = block_height_ = 4;
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC7) * 4;
 		decoded_fmt_ = EF_ARGB8;
+
+		if (!lut_inited_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!lut_inited_)
+			{
+				for (int i = 0; i < 64; ++ i)
+				{
+					expand6_[i] = Extend6To8Bits(i);
+				}
+				for (int i = 0; i < 128; ++ i)
+				{
+					expand7_[i] = Extend7To8Bits(i);
+				}
+
+				this->PrepareOptTable(&o_match6_[0][0], expand6_, 64);
+				this->PrepareOptTable2(&o_match7_[0][0], expand7_, 128);
+
+				lut_inited_ = true;
+			}
+		}
 	}
 
 	void TexCompressionBC7::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		UNREF_PARAM(output);
-		UNREF_PARAM(input);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
 		UNREF_PARAM(method);
+
+		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
+
+		bool uniform_block = true;
+		for (int i = 1; i < 16; ++ i)
+		{
+			if (argb[i] != argb[0])
+			{
+				uniform_block = false;
+				break;
+			}
+		}
+		if (uniform_block)
+		{
+			this->PackBC7UniformBlock(output, argb[0]);
+			return;
+		}
 
 		// TODO
 	}
@@ -1842,6 +1886,92 @@ namespace KlayGE
 		{
 			memset(argb, 0, 16 * sizeof(argb[0]));
 		}
+	}
+
+	void TexCompressionBC7::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const
+	{
+		for (int i = 0; i < 256; ++ i)
+		{
+			int best_err = 256;
+
+			for (int min = 0; min < size; ++ min)
+			{
+				for (int max = 0; max < size; ++ max)
+				{
+					int min_e = expand[min];
+					int max_e = expand[max];
+					int err = abs(max_e + Mul8Bit(min_e - max_e, 0x55) - i);
+					if (err < best_err)
+					{
+						table[i * 2 + 0] = static_cast<uint8_t>(max);
+						table[i * 2 + 1] = static_cast<uint8_t>(min);
+						best_err = err;
+					}
+				}
+			}
+		}
+	}
+
+	void TexCompressionBC7::PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const
+	{
+		for (int i = 0; i < 256; ++ i)
+		{
+			int best_err = 256;
+
+			for (int min = 0; min < size; ++ min)
+			{
+				for (int max = 0; max < size; ++ max)
+				{
+					int combo = (43 * expand[min] + 21 * expand[max] + 32) >> 6;
+					int err = abs(i - combo);
+					if (err < best_err)
+					{
+						table[i * 2 + 0] = static_cast<uint8_t>(min);
+						table[i * 2 + 1] = static_cast<uint8_t>(max);
+						best_err = err;
+					}
+				}
+			}
+		}
+	}
+
+	void TexCompressionBC7::PackBC7UniformBlock(void* output, ARGBColor32 const & pixel)
+	{
+		size_t start_bit = 0;
+		WriteBits(output, start_bit, 6, 1 << 5);
+		WriteBits(output, start_bit, 2, 0);
+
+		uint8_t const r = pixel.r();
+		uint8_t const g = pixel.g();
+		uint8_t const b = pixel.b();
+		uint8_t const a = pixel.a();
+
+		WriteBits(output, start_bit, 7, o_match7_[r][0]);
+		WriteBits(output, start_bit, 7, o_match7_[r][1]);
+
+		WriteBits(output, start_bit, 7, o_match7_[g][0]);
+		WriteBits(output, start_bit, 7, o_match7_[g][1]);
+
+		WriteBits(output, start_bit, 7, o_match7_[b][0]);
+		WriteBits(output, start_bit, 7, o_match7_[b][1]);
+
+		WriteBits(output, start_bit, 8, a);
+		WriteBits(output, start_bit, 8, a);
+
+		// Color indices are 1 for each pixel...
+		// Anchor index is 0, so 1 bit for the first pixel, then
+		// 01 for each following pixel giving the sequence of 31 bits:
+		// ...010101011
+		WriteBits(output, start_bit, 8, 0xAB);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 7, 0x2A);
+
+		// Alpha indices...
+		WriteBits(output, start_bit, 8, 0xAB);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 7, 0x2A);
 	}
 
 	uint8_t TexCompressionBC7::Unquantize(uint8_t comp, size_t prec) const

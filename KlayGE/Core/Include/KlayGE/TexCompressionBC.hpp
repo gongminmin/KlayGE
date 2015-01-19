@@ -222,19 +222,14 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
 	{
-	public:
-		TexCompressionBC7();
+		static uint32_t const BC7_MAX_REGIONS = 3;
+		static uint32_t const BC7_NUM_CHANNELS = 4;
+		static uint32_t const BC7_MAX_SHAPES = 64;
 
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
-		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+		static uint32_t const BC7_WEIGHT_MAX = 64;
+		static uint32_t const BC7_WEIGHT_SHIFT = 6;
+		static uint32_t const BC7_WEIGHT_ROUND = 32;
 
-	private:
-		uint8_t Unquantize(uint8_t comp, size_t prec) const;
-		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
-		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
-			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
-
-	private:
 		enum PBitType
 		{
 			PBT_None,
@@ -256,15 +251,29 @@ namespace KlayGE
 			PBitType p_bit_type;
 		};
 
+	public:
+		TexCompressionBC7();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
+		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
+		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
+		uint8_t Unquantize(uint8_t comp, size_t prec) const;
+		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
+		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
+			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
+
+	private:
 		static ModeInfo const mode_info_[];
 
-		static uint32_t const BC7_MAX_REGIONS = 3;
-		static uint32_t const BC7_NUM_CHANNELS = 4;
-		static uint32_t const BC7_MAX_SHAPES = 64;
-
-		static uint32_t const BC7_WEIGHT_MAX = 64;
-		static uint32_t const BC7_WEIGHT_SHIFT = 6;
-		static uint32_t const BC7_WEIGHT_ROUND = 32;
+		static uint8_t expand6_[64];
+		static uint8_t expand7_[128];
+		static uint8_t o_match6_[256][2];
+		static uint8_t o_match7_[256][2];
+		static bool lut_inited_;
 	};
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4);
