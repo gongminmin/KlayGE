@@ -42,6 +42,12 @@ namespace KlayGE
 		TCM_Quality
 	};
 
+	enum TexCompressionErrorMetric
+	{
+		TCEM_Uniform,     // Treats r, g, and b channels equally
+		TCEM_Nonuniform,  // { 0.3, 0.59, 0.11 }
+	};
+
 	class KLAYGE_CORE_API TexCompression
 	{
 	public:
@@ -188,6 +194,90 @@ namespace KlayGE
 		} clr32_;
 	};
 
+	class RGBACluster
+	{
+		static int const MAX_NUM_DATA_POINTS = 16;
+
+	public:
+		RGBACluster(ARGBColor32 const * pixels, uint32_t num,
+			function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition);
+
+		float4& Point(uint32_t index)
+		{
+			return data_points_[point_map_[index]];
+		}
+		float4 const & Point(uint32_t index) const
+		{
+			return data_points_[point_map_[index]];
+		}
+
+		ARGBColor32 const & Pixel(uint32_t index) const
+		{
+			return data_pixels_[point_map_[index]];
+		}
+
+		uint32_t NumValidPoints() const
+		{
+			return num_valid_points_;
+		}
+
+		float4 const & Avg() const
+		{
+			return avg_;
+		}
+
+		void BoundingBox(float4& min_clr, float4& max_clr) const
+		{
+			min_clr = min_clr_;
+			max_clr = max_clr_;
+		}
+
+		bool AllSamePoint() const
+		{
+			return min_clr_ == max_clr_;
+		}
+
+		uint32_t PrincipalAxis(float4& axis, float* eig_one, float* eig_two) const;
+
+		void ShapeIndex(uint32_t shape_index, uint32_t num_partitions)
+		{
+			shape_index_ = shape_index;
+			num_partitions_ = num_partitions;
+		}
+
+		void ShapeIndex(uint32_t shape_index)
+		{
+			this->ShapeIndex(shape_index, num_partitions_);
+		}
+
+		void Partition(uint32_t part);
+
+		bool IsPointValid(uint32_t index) const
+		{
+			return selected_partition_ == get_partition_(num_partitions_, shape_index_, index);
+		}
+
+	private:
+		void Recalculate(bool consider_valid);
+		int PowerMethod(float4x4 const & mat, float4& eig_vec, float* eig_val = nullptr) const;
+
+	private:
+		uint32_t num_valid_points_;
+		uint32_t num_partitions_;
+		uint32_t selected_partition_;
+		uint32_t shape_index_;
+
+		float4 avg_;
+
+		array<float4, MAX_NUM_DATA_POINTS> data_points_;
+		array<ARGBColor32, MAX_NUM_DATA_POINTS> data_pixels_;
+		array<uint8_t, MAX_NUM_DATA_POINTS> point_map_;
+		float4 min_clr_;
+		float4 max_clr_;
+
+		function<uint32_t(uint32_t, uint32_t, uint32_t)> get_partition_;
+	};
+
 	// Helpers
 
 	inline int Mul8Bit(int a, int b)
@@ -202,6 +292,11 @@ namespace KlayGE
 			static_cast<uint8_t>(MathLib::clamp(r, 0, 255)),
 			static_cast<uint8_t>(MathLib::clamp(g, 0, 255)),
 			static_cast<uint8_t>(MathLib::clamp(b, 0, 255)));
+	}
+
+	inline float4 FromARGBColor32(ARGBColor32 const & pixel)
+	{
+		return float4(pixel.r(), pixel.g(), pixel.b(), pixel.a());
 	}
 
 	template <int N>

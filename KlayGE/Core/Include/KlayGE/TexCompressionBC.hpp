@@ -251,6 +251,28 @@ namespace KlayGE
 			PBitType p_bit_type;
 		};
 
+		struct CompressParams
+		{
+			float4 p1[BC7_MAX_REGIONS], p2[BC7_MAX_REGIONS];
+			uint8_t indices[BC7_MAX_REGIONS][16];
+			uint8_t alpha_indices[16];
+			uint8_t pbit_combo[BC7_MAX_REGIONS];
+			int8_t rotation_mode;
+			int8_t index_mode;
+			uint32_t shape_index;
+
+			CompressParams()
+			{
+			}
+			explicit CompressParams(uint32_t shape)
+				: rotation_mode(-1), index_mode(-1), shape_index(shape)
+			{
+				memset(indices, 0xFF, sizeof(indices));
+				memset(alpha_indices, 0xFF, sizeof(alpha_indices));
+				memset(pbit_combo, 0xFF, sizeof(pbit_combo));
+			}
+		};
+
 	public:
 		TexCompressionBC7();
 
@@ -261,12 +283,18 @@ namespace KlayGE
 		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
 		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
 		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
+		void PackBC7Block(int mode, CompressParams& params, void* output);
+		uint64_t TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
+			CompressParams& params, uint32_t shape_index, RGBACluster& cluster);
+
 		uint8_t Unquantize(uint8_t comp, size_t prec) const;
 		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
 		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
 			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
 
 	private:
+		int index_mode_;
+
 		static ModeInfo const mode_info_[];
 
 		static uint8_t expand6_[64];

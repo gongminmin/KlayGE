@@ -48,7 +48,7 @@ namespace
 
 	mutex singleton_mutex;
 
-	int const bc67_prec_weights[][16] =
+	static int const BC67_PREC_WEIGHTS[][16] =
 	{
 		{ 0, 21, 43, 64 },
 		{ 0, 9, 18, 27, 37, 46, 55, 64 },
@@ -56,7 +56,7 @@ namespace
 	};
 
 	// Partition, Shape, Pixel (index into 4x4 block)
-	uint32_t const bc67_partition_table[2][64] =
+	static uint32_t const BC67_PARTITION_TABLE[2][64] =
 	{
 		{
 			0x50505050, 0x40404040, 0x54545454, 0x54505040,
@@ -97,7 +97,7 @@ namespace
 	};
 
 	// Partition, Shape, Fixup
-	uint16_t const fix_up_table[2][64] =
+	static uint16_t const FIX_UP_TABLE[2][64] =
 	{
 		{
 			0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0,
@@ -118,6 +118,28 @@ namespace
 			0x06F0, 0x0F30, 0x08F0, 0x0F50, 0x03F0, 0x06F0, 0x06F0, 0x08F0,
 			0x0F30, 0x03F0, 0x0F50, 0x0F50, 0x0F50, 0x0F80, 0x0F50, 0x0FA0,
 			0x0F50, 0x0FA0, 0x0F80, 0x0FD0, 0x03F0, 0x0FC0, 0x0F30, 0x0830
+		}
+	};
+
+	static uint32_t const BC67_MAX_NUM_DATA_POINTS = 16;
+
+	static std::pair<uint32_t, uint32_t> const BC67_INTERPOLATION_VALUES[4][16] =
+	{
+		{
+			{ 64, 0 }, { 33, 31 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 43, 21 }, { 21, 43 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 55, 9 }, { 46, 18 }, { 37, 27 }, { 27, 37 }, { 18, 46 }, { 9, 55 }, { 0, 64 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 60, 4 }, { 55, 9 }, { 51, 13 }, { 47, 17 }, { 43, 21 }, { 38, 26 }, { 34, 30 },
+			{ 30, 34 }, { 26, 38 }, { 21, 43 }, { 17, 47 }, { 13, 51 }, { 9, 55 }, { 4, 60 }, { 0, 64 }
 		}
 	};
 
@@ -211,7 +233,7 @@ namespace
 	uint32_t GetPartition(uint32_t partitions, uint32_t shape, uint32_t offset)
 	{
 		BOOST_ASSERT((partitions <= 3) && (shape < 64) && (offset < 16));
-		return (partitions > 1) ? (bc67_partition_table[partitions - 2][shape] >> (offset * 2)) & 0x3 : 0;
+		return (partitions > 1) ? (BC67_PARTITION_TABLE[partitions - 2][shape] >> (offset * 2)) & 0x3 : 0;
 	}
 
 	bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset)
@@ -219,7 +241,7 @@ namespace
 		BOOST_ASSERT((partitions <= 3) && (shape < 64) && (offset < 16));
 		for (size_t p = 0; p < partitions; ++ p)
 		{
-			if (offset == ((partitions > 1) ? (fix_up_table[partitions - 2][shape] >> (p * 4)) & 0xF : 0))
+			if (offset == ((partitions > 1) ? (FIX_UP_TABLE[partitions - 2][shape] >> (p * 4)) & 0xF : 0))
 			{
 				return true;
 			}
@@ -295,6 +317,395 @@ namespace
 			SignExtend(end_pts[1].first, prec);
 			SignExtend(end_pts[1].second, prec);
 		}
+	}
+
+	bool Bsf32(uint32_t& index, uint32_t v)
+	{
+#ifdef KLAYGE_COMPILER_MSVC
+		return _BitScanForward(reinterpret_cast<unsigned long*>(&index), v) != 0;
+#else
+		if (0 == v)
+		{
+			return 0;
+		}
+		else
+		{
+			v &= ~v + 1;
+			union FNU
+			{
+				float f;
+				uint32_t u;
+			} fnu;
+			fnu.f = static_cast<float>(v);
+			index = (fnu.u >> 23) - 127;
+			return 1;
+		}
+#endif
+	}
+
+	uint32_t CountBitsInMask(uint8_t n)
+	{
+		if (!n)
+		{
+			return 0;
+		}
+
+		uint32_t c;
+		for (c = 0; n; ++ c)
+		{
+			n &= n - 1;
+		}
+		return c;
+	}
+
+	uint8_t QuantizeChannel(uint8_t val, uint8_t mask, int bit = -1)
+	{
+		// If the mask is all the bits, then we can just return the value.
+		if (0xFF == mask)
+		{
+			return val;
+		}
+
+		// Otherwise if the mask is no bits then we'll assume that they want
+		// all the bits ... this is only really relevant for alpha...
+		if (0 == mask)
+		{
+			return 0xFF;
+		}
+
+		uint32_t prec = CountBitsInMask(mask);
+		const uint32_t step = 1 << (8 - prec);
+
+		BOOST_ASSERT(step - 1 == static_cast<uint8_t>(~mask));
+
+		uint32_t lval = val & mask;
+		uint32_t hval = lval + step;
+
+		if (bit >= 0)
+		{
+			++ prec;
+			lval |= !!bit << (8 - prec);
+			hval |= !!bit << (8 - prec);
+		}
+
+		if (lval > val)
+		{
+			lval -= step;
+			hval -= step;
+		}
+
+		lval |= lval >> prec;
+		hval |= hval >> prec;
+
+		if (abs(val - static_cast<uint8_t>(lval)) < abs(val - static_cast<uint8_t>(hval)))
+		{
+			return static_cast<uint8_t>(lval);
+		}
+		else
+		{
+			return static_cast<uint8_t>(hval);
+		}
+	}
+
+	ARGBColor32 Quantize(float4 const & p, ARGBColor32 const & channelMask = ARGBColor32(255, 255, 255, 255), int bit = -1)
+	{
+		uint8_t const r = QuantizeChannel(static_cast<uint32_t>(p.x() + 0.5) & 0xFF, channelMask.r(), bit);
+		uint8_t const g = QuantizeChannel(static_cast<uint32_t>(p.y() + 0.5) & 0xFF, channelMask.g(), bit);
+		uint8_t const b = QuantizeChannel(static_cast<uint32_t>(p.z() + 0.5) & 0xFF, channelMask.b(), bit);
+		uint8_t const a = QuantizeChannel(static_cast<uint32_t>(p.w() + 0.5) & 0xFF, channelMask.a(), bit);
+		return ARGBColor32(a, r, g, b);
+	}
+
+	// Returns the error if we were to quantize the colors right now with the
+	// given number of buckets and bit mask.
+	uint64_t QuantizedError(RGBACluster const & cluster, float4 const & p1, float4 const & p2,
+		uint32_t buckets, ARGBColor32 const & bit_mask, uint4 const & error_metric,
+		int const pbits[2] = nullptr, uint8_t* indices = nullptr)
+	{
+		BOOST_ASSERT((4 == buckets) || (8 == buckets) || (16 == buckets));
+
+		uint32_t index_prec;
+		Bsf32(index_prec, buckets);
+		BOOST_ASSERT((index_prec >= 2) && (index_prec <= 4));
+
+		std::pair<uint32_t, uint32_t> const * interp_vals = BC67_INTERPOLATION_VALUES[index_prec - 1];
+
+		ARGBColor32 qp1, qp2;
+		if (pbits)
+		{
+			qp1 = Quantize(p1, bit_mask, pbits[0]);
+			qp2 = Quantize(p2, bit_mask, pbits[1]);
+		}
+		else
+		{
+			qp1 = Quantize(p1, bit_mask);
+			qp2 = Quantize(p2, bit_mask);
+		}
+
+		static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+			ARGBColor32::BChannel, ARGBColor32::AChannel };
+
+		float4 const uqp1 = FromARGBColor32(qp1);
+		float4 const uqp2 = FromARGBColor32(qp2);
+		float const uqpl_sq = MathLib::length_sq(uqp1 - uqp2);
+		float4 const uqp_dir = uqp2 - uqp1;
+
+		uint64_t total_err = 0;
+		if (0 == uqpl_sq)
+		{
+			// If both endpoints are the same then the indices don't matter...
+			for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+			{
+				ARGBColor32 const & pixel = cluster.Pixel(i);
+
+				uint32_t interp_0 = interp_vals[0].first;
+				uint32_t interp_1 = interp_vals[0].second;
+
+				uint4 error_vec(0, 0, 0, 0);
+				for (uint32_t k = 0; k < 4; ++ k)
+				{
+					int const ch = rgba_channels[k];
+					int ip = (((qp1[ch] * interp_0) + (qp2[ch] * interp_1) + 32) >> 6) & 0xFF;
+					int dist = abs(pixel[ch] - ip);
+					error_vec[k] = dist * error_metric[k];
+				}
+
+				total_err += MathLib::dot(error_vec, error_vec);
+
+				if (indices != nullptr)
+				{
+					indices[i] = 0;
+				}
+			}
+
+			return total_err;
+		}
+
+		for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+		{
+			// Project this point unto the direction denoted by uqp_dir...
+			float4 const & pt = cluster.Point(i);
+#if 0
+			float const pct = MathLib::clamp(MathLib::dot(pt - uqp1, uqp_dir) / uqpl_sq, 0.0f, 1.0f) * (BUCKETS - 1);
+			int32_t const j1 = static_cast<int32>(pct);
+			int32_t const j2 = static_cast<int32>(pct + 0.7f);
+#else
+			float const pct = MathLib::dot(pt - uqp1, uqp_dir) / uqpl_sq * (buckets - 1);
+			int32_t const j1 = MathLib::clamp(static_cast<int32_t>(floor(pct)), 0, static_cast<int32_t>(buckets - 1));
+			int32_t const j2 = std::min(static_cast<int32_t>(ceil(pct)), static_cast<int32_t>(buckets - 1));
+#endif
+
+			BOOST_ASSERT((j1 >= 0) && (j2 <= static_cast<int32_t>(buckets - 1)));
+
+			ARGBColor32 const & pixel = cluster.Pixel(i);
+
+			uint64_t min_err = std::numeric_limits<uint64_t>::max();
+			uint32_t best_bucket = 0;
+			int32_t j = j1;
+			do
+			{
+				uint32_t interp_0 = interp_vals[j].first;
+				uint32_t interp_1 = interp_vals[j].second;
+
+				uint4 error_vec(0, 0, 0, 0);
+				for (uint32_t k = 0; k < 4; ++ k)
+				{
+					int const ch = rgba_channels[k];
+					int ip = (((qp1[ch] * interp_0) + (qp2[ch] * interp_1) + 32) >> 6) & 0xFF;
+					int dist = abs(pixel[ch] - ip);
+					error_vec[k] = dist * error_metric[k];
+				}
+
+				uint64_t error = MathLib::dot(error_vec, error_vec);
+				if (error < min_err)
+				{
+					min_err = error;
+					best_bucket = j;
+				}
+				else if (error > min_err + 1)
+				{
+					break;
+				}
+
+				++ j;
+			} while (j <= j2);
+
+			total_err += min_err;
+
+			if (indices != nullptr)
+			{
+				indices[i] = static_cast<uint8_t>(best_bucket);
+			}
+		}
+
+		return total_err;
+	}
+	// The various available block modes that a BC7 compressor can choose from.
+	// The enum is specialized to be power-of-two values so that an BC7BlockMode
+	// variable can be used as a bit mask.
+	enum BC7BlockMode
+	{
+		BC7BM_Zero = 1UL << 0,
+		BC7BM_One = 1UL << 1,
+		BC7BM_Two = 1UL << 2,
+		BC7BM_Three = 1UL << 3,
+		BC7BM_Four = 1UL << 4,
+		BC7BM_Five = 1UL << 5,
+		BC7BM_Six = 1UL << 6,
+		BC7BM_Seven = 1UL << 7
+	};
+
+	// A shape consists of an index into the table of shapes and the number
+	// of partitions that the index corresponds to. Different BPTC modes
+	// interpret the shape differently and some are even illegal (such as
+	// having an index >= 16 on mode 0). Hence, each shape corresponds to
+	// these two variables.
+	struct Shape
+	{
+		uint32_t num_partitions;
+		uint32_t index;
+	};
+
+	// A shape selection can influence the results of the compressor by choosing
+	// different modes to compress or not compress. The shape index is a value
+	// between zero and sixty-four that corresponds to one of the available
+	// partitioning schemes defined by the BPTC format.
+	struct ShapeSelection
+	{
+		// These are the shape indices to use when evaluating two-partition shapes.
+		std::vector<Shape> shapes;
+
+		// This is the additional mask to prevent modes once shape selection
+		// is done. This value is &-ed with m_BlockModes from CompressionSettings
+		// to determine what the final considered blocks are.
+		uint32_t selected_modes;
+
+		// Defaults
+		ShapeSelection()
+			: selected_modes(static_cast<BC7BlockMode>(0xFF))
+		{
+		}
+	};
+
+	static uint32_t const TWO_PARTITION_MODES = BC7BM_One | BC7BM_Three | BC7BM_Seven;
+	static uint32_t const THREE_PARTITION_MODES = BC7BM_Zero | BC7BM_Two;
+	static uint32_t const ALPHA_MODES = BC7BM_Four | BC7BM_Five | BC7BM_Six | BC7BM_Seven;
+
+	static uint4 const ERROR_METRICS[] =
+	{
+		uint4(1, 1, 1, 1),
+		uint4(55, 75, 33, 100) // sqrt(0.3f, 0.56f, 0.11f) * 100
+	};
+
+	template <int BUCKETS>
+	uint64_t EstimateNClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		float4 min_clr, max_clr;
+		c.BoundingBox(min_clr, max_clr);
+		if (min_clr == max_clr)
+		{
+			return 0;
+		}
+
+		uint4 const & w = ERROR_METRICS[metric];
+		return QuantizedError(c, min_clr, max_clr, BUCKETS,
+			ARGBColor32(255, 255, 255, 255), w) * 2 + 1;
+	}
+
+	uint64_t EstimateTwoClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		return EstimateNClusterError<8>(metric, c);
+	}
+
+	uint64_t EstimateThreeClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		return EstimateNClusterError<4>(metric, c);
+	}
+
+	ShapeSelection BoxSelection(RGBACluster& cluster, TexCompressionErrorMetric metric)
+	{
+		ShapeSelection result;
+
+		bool opaque = true;
+		for (uint32_t i = 0; i < 16; ++ i)
+		{
+			uint8_t a = cluster.Pixel(i).a();
+			opaque = opaque && (a >= 250); // For all intents and purposes...
+		}
+
+		// First we must figure out which shape to use. To do this, simply
+		// see which shape has the smallest sum of minimum bounding spheres.
+		uint64_t best_err = std::numeric_limits<uint64_t>::max();
+
+		result.shapes.resize(1);
+		result.shapes[0].num_partitions = 2;
+		for (uint32_t i = 0; i < 64; ++ i)
+		{
+			cluster.ShapeIndex(i, 2);
+
+			uint64_t err = 0;
+			for (int ci = 0; ci < 2; ++ ci)
+			{
+				cluster.Partition(ci);
+				err += EstimateTwoClusterError(metric, cluster);
+			}
+
+			if (err < best_err)
+			{
+				best_err = err;
+				result.shapes[0].index = i;
+			}
+
+			// If it's small, we'll take it!
+			if (err < 1)
+			{
+				result.selected_modes = TWO_PARTITION_MODES;
+				return result;
+			}
+		}
+
+		// There are not 3 subset blocks that support alpha, so only check these
+		// if the entire block is opaque.
+		if (!opaque)
+		{
+			result.selected_modes &= ALPHA_MODES;
+			return result;
+		}
+
+		// If it's opaque, we get more value out of mode 6 than modes
+		// 4 and 5, so just ignore those.
+		result.selected_modes &= ~(BC7BM_Four | BC7BM_Five);
+
+		best_err = std::numeric_limits<uint64_t>::max();
+
+		result.shapes.resize(2);
+		result.shapes[1].num_partitions = 3;
+		for (uint32_t i = 0; i < 64; ++ i)
+		{
+			cluster.ShapeIndex(i, 3);
+
+			uint64_t err = 0;
+			for (int ci = 0; ci < 3; ++ ci)
+			{
+				cluster.Partition(ci);
+				err += EstimateThreeClusterError(metric, cluster);
+			}
+
+			if (err < best_err)
+			{
+				best_err = err;
+				result.shapes[1].index = i;
+			}
+
+			// If it's small, we'll take it!
+			if (err < 1)
+			{
+				result.selected_modes = THREE_PARTITION_MODES;
+				return result;
+			}
+		}
+
+		return result;
 	}
 }
 
@@ -1532,7 +1943,7 @@ namespace KlayGE
 				int r2 = this->Unquantize(end_pts[region].second.x(), info.rgba_prec[0][0].r(), signed_fmt);
 				int g2 = this->Unquantize(end_pts[region].second.y(), info.rgba_prec[0][0].g(), signed_fmt);
 				int b2 = this->Unquantize(end_pts[region].second.z(), info.rgba_prec[0][0].b(), signed_fmt);
-				int const * weights = bc67_prec_weights[1 + (1 == info.partitions)];
+				int const * weights = BC67_PREC_WEIGHTS[1 + (1 == info.partitions)];
 				int3 fc;
 				fc.x() = this->FinishUnquantize((r1 * (BC6_WEIGHT_MAX - weights[index])
 					+ r2 * weights[index] + BC6_WEIGHT_ROUND) >> BC6_WEIGHT_SHIFT, signed_fmt);
@@ -1677,6 +2088,7 @@ namespace KlayGE
 	bool TexCompressionBC7::lut_inited_ = false;
 
 	TexCompressionBC7::TexCompressionBC7()
+		: index_mode_(0)
 	{
 		block_width_ = block_height_ = 4;
 		block_depth_ = 1;
@@ -1709,7 +2121,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(output);
 		BOOST_ASSERT(input);
-		UNREF_PARAM(method);
 
 		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
@@ -1728,7 +2139,80 @@ namespace KlayGE
 			return;
 		}
 
-		// TODO
+		TexCompressionErrorMetric metric = TCEM_Uniform;
+		int sa_steps;
+		switch (method)
+		{
+		case TCM_Quality:
+			sa_steps = 50;
+			break;
+		case TCM_Balanced:
+			sa_steps = 10;
+			break;
+		case TCM_Speed:
+			sa_steps = 0;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			sa_steps = 0;
+			break;
+		}
+
+		RGBACluster block_cluster(argb, block_width_ * block_height_, GetPartition);
+		ShapeSelection selection = BoxSelection(block_cluster, metric);
+		BOOST_ASSERT(selection.selected_modes > 0);
+
+		uint64_t best_err = std::numeric_limits<uint64_t>::max();
+		uint32_t best_mode = 8;
+		CompressParams best_params;
+
+		uint32_t selected_modes = selection.selected_modes;
+		size_t num_shape_indices = selection.shapes.size();
+
+		// If we don't have any indices, turn off two and three partition modes,
+		// since the compressor will simply ignore the shapeIndex variable afterwards...
+		if (0 == num_shape_indices)
+		{
+			num_shape_indices = 1;
+			selected_modes &= ~(TWO_PARTITION_MODES | THREE_PARTITION_MODES);
+		}
+
+		for (uint32_t mode = 0; mode < 8; ++ mode)
+		{
+			if ((selected_modes & (1 << mode)) != 0)
+			{
+				for (uint32_t shape_index = 0; shape_index < num_shape_indices; ++ shape_index)
+				{
+					Shape const & shape = selection.shapes[shape_index];
+
+					uint32_t partitions = mode_info_[mode].partitions;
+					if ((1 == partitions) || (partitions == shape.num_partitions))
+					{
+						// Block mode zero only has four bits for the partition index,
+						// so if the chosen three-partition shape is not within this range,
+						// then we shouldn't consider using this block mode...
+						if ((shape.index < 16) || (mode != 0))
+						{
+							block_cluster.ShapeIndex(shape.index, partitions);
+
+							CompressParams params;
+							uint64_t error = this->TryCompress(mode, sa_steps, metric, params, shape.index, block_cluster);
+							if (error < best_err)
+							{
+								best_err = error;
+								best_mode = mode;
+								best_params = params;
+							}
+						}
+					}
+				}
+			}
+		}
+		BOOST_ASSERT(best_mode < 8);
+
+		index_mode_ = 0;
+		this->PackBC7Block(best_mode, best_params, output);
 	}
 
 	void TexCompressionBC7::DecodeBlock(void* output, void const * input)
@@ -1974,6 +2458,26 @@ namespace KlayGE
 		WriteBits(output, start_bit, 7, 0x2A);
 	}
 
+	void TexCompressionBC7::PackBC7Block(int mode, CompressParams& params, void* output)
+	{
+		UNREF_PARAM(mode);
+		UNREF_PARAM(params);
+		UNREF_PARAM(output);
+	}
+
+	uint64_t TexCompressionBC7::TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
+			CompressParams& params, uint32_t shape_index, RGBACluster& cluster)
+	{
+		UNREF_PARAM(mode);
+		UNREF_PARAM(simulated_annealing_steps);
+		UNREF_PARAM(metric);
+		UNREF_PARAM(params);
+		UNREF_PARAM(shape_index);
+		UNREF_PARAM(cluster);
+
+		return 0;
+	}
+
 	uint8_t TexCompressionBC7::Unquantize(uint8_t comp, size_t prec) const
 	{
 		BOOST_ASSERT((0 < prec) && (prec <= 8));
@@ -2001,7 +2505,7 @@ namespace KlayGE
 
 		ARGBColor32 out;
 
-		int const * weights = bc67_prec_weights[wc_prec - 2];
+		int const * weights = BC67_PREC_WEIGHTS[wc_prec - 2];
 		out.r() = static_cast<uint8_t>((c0.r() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.r() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 		out.g() = static_cast<uint8_t>((c0.g() * (BC7_WEIGHT_MAX - weights[wc])
@@ -2009,7 +2513,7 @@ namespace KlayGE
 		out.b() = static_cast<uint8_t>((c0.b() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.b() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 
-		weights = bc67_prec_weights[wa_prec - 2];
+		weights = BC67_PREC_WEIGHTS[wa_prec - 2];
 		out.a() = static_cast<uint8_t>((c0.a() * (BC7_WEIGHT_MAX - weights[wa])
 			+ c1.a() * weights[wa] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 
