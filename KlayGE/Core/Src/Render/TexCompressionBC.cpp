@@ -707,6 +707,63 @@ namespace
 
 		return result;
 	}
+
+	uint32_t AnchorIndexForSubset(uint32_t partition, uint32_t shape_index, uint32_t num_partitions)
+	{
+		static int const anchor_idx_2[64] =
+		{
+			15, 15, 15, 15, 15, 15, 15, 15,
+			15, 15, 15, 15, 15, 15, 15, 15,
+			15, 2, 8, 2, 2, 8, 8, 15,
+			2, 8, 2, 2, 8, 8, 2, 2,
+			15, 15, 6, 8, 2, 8, 15, 15,
+			2, 8, 2, 2, 2, 15, 15, 6,
+			6, 2, 6, 8, 15, 15, 2, 2,
+			15, 15, 15, 15, 15, 2, 2, 15
+		};
+
+		static int const anchor_idx_3[2][64] =
+		{
+			{
+				3, 3, 15, 15, 8, 3, 15, 15,
+				8, 8, 6, 6, 6, 5, 3, 3,
+				3, 3, 8, 15, 3, 3, 6, 10,
+				5, 8, 8, 6, 8, 5, 15, 15,
+				8, 15, 3, 5, 6, 10, 8, 15,
+				15, 3, 15, 5, 15, 15, 15, 15,
+				3, 15, 5, 5, 5, 8, 5, 10,
+				5, 10, 8, 13, 15, 12, 3, 3
+			},
+			{
+				15, 8, 8, 3, 15, 15, 3, 8,
+				15, 15, 15, 15, 15, 15, 15, 8,
+				15, 8, 15, 3, 15, 8, 15, 8,
+				3, 15, 6, 10, 15, 15, 10, 8,
+				15, 3, 15, 10, 10, 8, 9, 10,
+				6, 15, 8, 15, 3, 6, 6, 8,
+				15, 3, 15, 15, 15, 15, 15, 15,
+				15, 15, 15, 15, 3, 15, 15, 8
+			}
+		};
+
+		int anchor_idx = 0;
+		switch (partition)
+		{
+		case 1:
+			anchor_idx = (2 == num_partitions) ? anchor_idx_2[shape_index] : anchor_idx_3[0][shape_index];
+			break;
+
+		case 2:
+			BOOST_ASSERT(3 == num_partitions);
+			anchor_idx = anchor_idx_3[1][shape_index];
+			break;
+
+		default:
+			break;
+		}
+
+		return anchor_idx;
+	}
 }
 
 namespace KlayGE
@@ -2460,9 +2517,262 @@ namespace KlayGE
 
 	void TexCompressionBC7::PackBC7Block(int mode, CompressParams& params, void* output)
 	{
-		UNREF_PARAM(mode);
-		UNREF_PARAM(params);
-		UNREF_PARAM(output);
+		ModeInfo const & mode_info = mode_info_[mode];
+		int const partition_bits = mode_info.partition_bits;
+		int const partitions = mode_info.partitions;
+
+		size_t start_bit = 0;
+
+		WriteBits(output, start_bit, mode + 1, 1 << mode);
+
+		BOOST_ASSERT(!partition_bits || ((((1 << partition_bits) - 1) & params.shape_index) == params.shape_index));
+		WriteBits(output, start_bit, partition_bits, static_cast<uint8_t>(params.shape_index));
+
+		WriteBits(output, start_bit, mode_info.rotation_bits, params.rotation_mode);
+		WriteBits(output, start_bit, mode_info.index_mode_bits, params.index_mode);
+
+#ifdef KLAYGE_DEBUG
+		for (int i = 0; i < 16; ++ i)
+		{
+			int set = 0;
+			for (int j = 0; j < partitions; ++ j)
+			{
+				if (params.indices[j][i] < 255)
+				{
+					++ set;
+				}
+			}
+
+			BOOST_ASSERT(1 == set);
+		}
+#endif
+
+		ARGBColor32 const qmask = this->QuantizationMask(mode_info);
+
+		ARGBColor32 pixel1[BC7_MAX_REGIONS];
+		ARGBColor32 pixel2[BC7_MAX_REGIONS];
+		for (int i = 0; i < partitions; ++ i)
+		{
+			switch (mode_info.p_bit_type)
+			{
+			case PBT_None:
+				pixel1[i] = Quantize(params.p1[i], qmask);
+				pixel2[i] = Quantize(params.p2[i], qmask);
+				break;
+
+			case PBT_Shared:
+			case PBT_Unique:
+				pixel1[i] = Quantize(params.p1[i], qmask, this->PBitCombo(mode_info, params.pbit_combo[i])[0]);
+				pixel2[i] = Quantize(params.p2[i], qmask, this->PBitCombo(mode_info, params.pbit_combo[i])[1]);
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+
+		// If the anchor index does not have 0 in the leading bit, then
+		// we need to swap EVERYTHING.
+		for (int par_index = 0; par_index < partitions; ++ par_index)
+		{
+			int anchor_index = AnchorIndexForSubset(par_index, params.shape_index, partitions);
+			BOOST_ASSERT(params.indices[par_index][anchor_index] != 255);
+
+			int const alpha_index_bits = this->NumBitsPerAlpha(mode_info, params.index_mode);
+			int const index_bits = this->NumBitsPerIndex(mode_info, params.index_mode);
+			if (params.indices[par_index][anchor_index] >> (index_bits - 1))
+			{
+				std::swap(pixel1[par_index], pixel2[par_index]);
+
+				int index_vals = 1 << index_bits;
+				for (int i = 0; i < 16; ++ i)
+				{
+					params.indices[par_index][i]
+						= static_cast<uint8_t>((index_vals - 1) - params.indices[par_index][i]);
+				}
+
+				int alpha_index_vals = 1 << alpha_index_bits;
+				if (mode_info.rotation_bits != 0)
+				{
+					for (int i = 0; i < 16; ++ i)
+					{
+						params.alpha_indices[i]
+							= static_cast<uint8_t>((alpha_index_vals - 1) - params.alpha_indices[i]);
+					}
+				}
+			}
+
+			bool const rotated = (params.alpha_indices[anchor_index] >> (alpha_index_bits - 1)) > 0;
+			if ((mode_info.rotation_bits != 0) && rotated)
+			{
+				std::swap(pixel1[par_index].a(), pixel2[par_index].a());
+
+				int alpha_index_vals = 1 << alpha_index_bits;
+				for (int i = 0; i < 16; ++ i)
+				{
+					params.alpha_indices[i] = static_cast<uint8_t>((alpha_index_vals - 1) - params.alpha_indices[i]);
+				}
+			}
+
+			BOOST_ASSERT(!(params.indices[par_index][anchor_index] >> (index_bits - 1)));
+			BOOST_ASSERT((0 == mode_info.rotation_bits)
+				|| !(params.alpha_indices[anchor_index] >> (alpha_index_bits - 1)));
+		}
+
+		static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+			ARGBColor32::BChannel, ARGBColor32::AChannel };
+		for (int i = 0; i < 4; ++ i)
+		{
+			int const ch = rgba_channels[i];
+			int const bits = mode_info.rgba_prec[ch];
+			for (int j = 0; j < partitions; ++ j)
+			{
+				WriteBits(output, start_bit, bits, pixel1[j][ch] >> (8 - bits));
+				WriteBits(output, start_bit, bits, pixel2[j][ch] >> (8 - bits));
+			}
+		}
+
+		// Write out the best pbits..
+		if (mode_info.p_bit_type != PBT_None)
+		{
+			for (int s = 0; s < partitions; ++ s)
+			{
+				int const * pbits = this->PBitCombo(mode_info, params.pbit_combo[s]);
+				WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[0]));
+				if (mode_info.p_bit_type != PBT_Shared)
+				{
+					WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[1]));
+				}
+			}
+		}
+
+		// If our index mode has changed, then we need to write the alpha indices first.
+		if ((mode_info.index_mode_bits != 0) && (1 == params.index_mode))
+		{
+			BOOST_ASSERT(mode_info.rotation_bits != 0);
+
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const idx = params.alpha_indices[i];
+				BOOST_ASSERT(0 == AnchorIndexForSubset(0, params.shape_index, partitions));
+				BOOST_ASSERT(2 == this->NumBitsPerAlpha(mode_info, params.index_mode));
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << 2)));
+				BOOST_ASSERT_MSG((i != 0) || !(idx >> 1), "Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (0 == i) ? 1 : 2, static_cast<uint8_t>(idx));
+			}
+
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const idx = params.indices[0][i];
+				BOOST_ASSERT(0 == GetPartition(partitions, params.shape_index, i));
+				BOOST_ASSERT(0 == AnchorIndexForSubset(0, params.shape_index, partitions));
+				BOOST_ASSERT(this->NumBitsPerIndex(mode_info, params.index_mode) == 3);
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << 3)));
+				BOOST_ASSERT_MSG((i != 0) || !(idx >> 2), "Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (0 == i) ? 2 : 3, static_cast<uint8_t>(idx));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const subs = GetPartition(partitions, params.shape_index, i);
+				int const idx = params.indices[subs][i];
+				int const anchor_idx = AnchorIndexForSubset(subs, params.shape_index, partitions);
+				int const bits_for_idx = this->NumBitsPerIndex(mode_info, params.index_mode);
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << bits_for_idx)));
+				BOOST_ASSERT_MSG((i != anchor_idx) || !(idx >> (bits_for_idx - 1)),
+					"Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (i == anchor_idx) ? bits_for_idx - 1 : bits_for_idx,
+					static_cast<uint8_t>(idx));
+			}
+
+			if (mode_info.rotation_bits != 0)
+			{
+				for (int i = 0; i < 16; ++ i)
+				{
+					int const idx = params.alpha_indices[i];
+					int const anchor_idx = 0;
+					int const bits_for_idx = this->NumBitsPerAlpha(mode_info, params.index_mode);
+					BOOST_ASSERT((idx >= 0) && (idx < (1 << bits_for_idx)));
+					BOOST_ASSERT_MSG((i != anchor_idx) || (!(idx >> (bits_for_idx - 1))),
+						"Leading bit of anchor index is not zero!");
+					WriteBits(output, start_bit, (i == anchor_idx) ? bits_for_idx - 1 : bits_for_idx,
+						static_cast<uint8_t>(idx));
+				}
+			}
+		}
+	}
+
+	int TexCompressionBC7::NumBitsPerIndex(ModeInfo const & mode_info, int8_t index_mode) const
+	{
+		if (index_mode < 0)
+		{
+			index_mode = static_cast<uint8_t>(index_mode_);
+		}
+		if (0 == index_mode)
+		{
+			return mode_info.index_prec_1;
+		}
+		else
+		{
+			return mode_info.index_prec_2;
+		}
+	}
+
+	int TexCompressionBC7::NumBitsPerAlpha(ModeInfo const & mode_info, int8_t index_mode) const
+	{
+		if (index_mode < 0)
+		{
+			index_mode = static_cast<uint8_t>(index_mode_);
+		}
+		if (0 == index_mode)
+		{
+			return mode_info.index_prec_2;
+		}
+		else
+		{
+			return mode_info.index_prec_1;
+		}
+	}
+
+	// This function creates an integer that represents the maximum values in each
+	// channel. We can use this to figure out the proper endpoint values for a
+	// given mode.
+	ARGBColor32 TexCompressionBC7::QuantizationMask(ModeInfo const & mode_info) const
+	{
+		int const mask_seed = 0xFFFFFF80;
+		uint32_t const alpha_prec = mode_info.rgba_prec.a();
+		uint32_t const cbits = mode_info.rgba_prec.r() - 1;
+		uint32_t const abits = mode_info.rgba_prec.a() - 1;
+		return ARGBColor32(alpha_prec > 0 ? (mask_seed >> abits) & 0xFF : 0, (mask_seed >> cbits) & 0xFF,
+			(mask_seed >> cbits) & 0xFF, (mask_seed >> cbits) & 0xFF);
+	}
+
+	int const * TexCompressionBC7::PBitCombo(ModeInfo const & mode_info, int idx) const
+	{
+		static int const pbits[4][2] =
+		{
+			{ 0, 0 },
+			{ 0, 1 },
+			{ 1, 0 },
+			{ 1, 1 }
+		};
+
+		switch (mode_info.p_bit_type)
+		{
+		case PBT_None:
+			return pbits[0];
+		case PBT_Shared:
+			return idx ? pbits[3] : pbits[0];
+		case PBT_Unique:
+			return pbits[idx % 4];
+
+		default:
+			BOOST_ASSERT(false);
+			return pbits[2];
+		}
 	}
 
 	uint64_t TexCompressionBC7::TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,

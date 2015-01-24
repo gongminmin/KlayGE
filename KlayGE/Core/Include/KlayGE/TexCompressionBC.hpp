@@ -284,6 +284,10 @@ namespace KlayGE
 		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
 		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
 		void PackBC7Block(int mode, CompressParams& params, void* output);
+		int NumBitsPerIndex(ModeInfo const & mode_info, int8_t index_mode = -1) const;
+		int NumBitsPerAlpha(ModeInfo const & mode_info, int8_t index_mode = -1) const;
+		ARGBColor32 QuantizationMask(ModeInfo const & mode_info) const;
+		int const * PBitCombo(ModeInfo const & mode_info, int idx) const;
 		uint64_t TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
 			CompressParams& params, uint32_t shape_index, RGBACluster& cluster);
 
