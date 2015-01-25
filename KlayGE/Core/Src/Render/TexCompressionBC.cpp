@@ -48,7 +48,7 @@ namespace
 
 	mutex singleton_mutex;
 
-	int const bc67_prec_weights[][16] =
+	static int const BC67_PREC_WEIGHTS[][16] =
 	{
 		{ 0, 21, 43, 64 },
 		{ 0, 9, 18, 27, 37, 46, 55, 64 },
@@ -56,7 +56,7 @@ namespace
 	};
 
 	// Partition, Shape, Pixel (index into 4x4 block)
-	uint32_t const bc67_partition_table[2][64] =
+	static uint32_t const BC67_PARTITION_TABLE[2][64] =
 	{
 		{
 			0x50505050, 0x40404040, 0x54545454, 0x54505040,
@@ -97,7 +97,7 @@ namespace
 	};
 
 	// Partition, Shape, Fixup
-	uint16_t const fix_up_table[2][64] =
+	static uint16_t const FIX_UP_TABLE[2][64] =
 	{
 		{
 			0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0, 0x00F0,
@@ -118,6 +118,28 @@ namespace
 			0x06F0, 0x0F30, 0x08F0, 0x0F50, 0x03F0, 0x06F0, 0x06F0, 0x08F0,
 			0x0F30, 0x03F0, 0x0F50, 0x0F50, 0x0F50, 0x0F80, 0x0F50, 0x0FA0,
 			0x0F50, 0x0FA0, 0x0F80, 0x0FD0, 0x03F0, 0x0FC0, 0x0F30, 0x0830
+		}
+	};
+
+	static uint32_t const BC67_MAX_NUM_DATA_POINTS = 16;
+
+	static std::pair<uint32_t, uint32_t> const BC67_INTERPOLATION_VALUES[4][16] =
+	{
+		{
+			{ 64, 0 }, { 33, 31 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 43, 21 }, { 21, 43 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 55, 9 }, { 46, 18 }, { 37, 27 }, { 27, 37 }, { 18, 46 }, { 9, 55 }, { 0, 64 },
+			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+		},
+		{
+			{ 64, 0 }, { 60, 4 }, { 55, 9 }, { 51, 13 }, { 47, 17 }, { 43, 21 }, { 38, 26 }, { 34, 30 },
+			{ 30, 34 }, { 26, 38 }, { 21, 43 }, { 17, 47 }, { 13, 51 }, { 9, 55 }, { 4, 60 }, { 0, 64 }
 		}
 	};
 
@@ -211,7 +233,7 @@ namespace
 	uint32_t GetPartition(uint32_t partitions, uint32_t shape, uint32_t offset)
 	{
 		BOOST_ASSERT((partitions <= 3) && (shape < 64) && (offset < 16));
-		return (partitions > 1) ? (bc67_partition_table[partitions - 2][shape] >> (offset * 2)) & 0x3 : 0;
+		return (partitions > 1) ? (BC67_PARTITION_TABLE[partitions - 2][shape] >> (offset * 2)) & 0x3 : 0;
 	}
 
 	bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset)
@@ -219,7 +241,7 @@ namespace
 		BOOST_ASSERT((partitions <= 3) && (shape < 64) && (offset < 16));
 		for (size_t p = 0; p < partitions; ++ p)
 		{
-			if (offset == ((partitions > 1) ? (fix_up_table[partitions - 2][shape] >> (p * 4)) & 0xF : 0))
+			if (offset == ((partitions > 1) ? (FIX_UP_TABLE[partitions - 2][shape] >> (p * 4)) & 0xF : 0))
 			{
 				return true;
 			}
@@ -294,6 +316,554 @@ namespace
 			SignExtend(end_pts[0].second, prec);
 			SignExtend(end_pts[1].first, prec);
 			SignExtend(end_pts[1].second, prec);
+		}
+	}
+
+	bool Bsf32(uint32_t& index, uint32_t v)
+	{
+#ifdef KLAYGE_COMPILER_MSVC
+		return _BitScanForward(reinterpret_cast<unsigned long*>(&index), v) != 0;
+#else
+		if (0 == v)
+		{
+			return 0;
+		}
+		else
+		{
+			v &= ~v + 1;
+			union FNU
+			{
+				float f;
+				uint32_t u;
+			} fnu;
+			fnu.f = static_cast<float>(v);
+			index = (fnu.u >> 23) - 127;
+			return 1;
+		}
+#endif
+	}
+
+	uint32_t CountBitsInMask(uint8_t n)
+	{
+		if (!n)
+		{
+			return 0;
+		}
+
+		uint32_t c;
+		for (c = 0; n; ++ c)
+		{
+			n &= n - 1;
+		}
+		return c;
+	}
+
+	uint8_t QuantizeChannel(uint8_t val, uint8_t mask, int bit = -1)
+	{
+		// If the mask is all the bits, then we can just return the value.
+		if (0xFF == mask)
+		{
+			return val;
+		}
+
+		// Otherwise if the mask is no bits then we'll assume that they want
+		// all the bits ... this is only really relevant for alpha...
+		if (0 == mask)
+		{
+			return 0xFF;
+		}
+
+		uint32_t prec = CountBitsInMask(mask);
+		const uint32_t step = 1 << (8 - prec);
+
+		BOOST_ASSERT(step - 1 == static_cast<uint8_t>(~mask));
+
+		uint32_t lval = val & mask;
+		uint32_t hval = lval + step;
+
+		if (bit >= 0)
+		{
+			++ prec;
+			lval |= !!bit << (8 - prec);
+			hval |= !!bit << (8 - prec);
+		}
+
+		if (lval > val)
+		{
+			lval -= step;
+			hval -= step;
+		}
+
+		lval |= lval >> prec;
+		hval |= hval >> prec;
+
+		if (abs(val - static_cast<uint8_t>(lval)) < abs(val - static_cast<uint8_t>(hval)))
+		{
+			return static_cast<uint8_t>(lval);
+		}
+		else
+		{
+			return static_cast<uint8_t>(hval);
+		}
+	}
+
+	ARGBColor32 Quantize(float4 const & p, ARGBColor32 const & channelMask = ARGBColor32(255, 255, 255, 255), int bit = -1)
+	{
+		uint8_t const r = QuantizeChannel(static_cast<uint32_t>(p.x() + 0.5) & 0xFF, channelMask.r(), bit);
+		uint8_t const g = QuantizeChannel(static_cast<uint32_t>(p.y() + 0.5) & 0xFF, channelMask.g(), bit);
+		uint8_t const b = QuantizeChannel(static_cast<uint32_t>(p.z() + 0.5) & 0xFF, channelMask.b(), bit);
+		uint8_t const a = QuantizeChannel(static_cast<uint32_t>(p.w() + 0.5) & 0xFF, channelMask.a(), bit);
+		return ARGBColor32(a, r, g, b);
+	}
+
+	// Returns the error if we were to quantize the colors right now with the
+	// given number of buckets and bit mask.
+	uint64_t QuantizedError(RGBACluster const & cluster, float4 const & p1, float4 const & p2,
+		uint32_t buckets, ARGBColor32 const & bit_mask, uint4 const & error_metric,
+		int const pbits[2] = nullptr, uint8_t* indices = nullptr)
+	{
+		BOOST_ASSERT((4 == buckets) || (8 == buckets) || (16 == buckets));
+
+		uint32_t index_prec;
+		Bsf32(index_prec, buckets);
+		BOOST_ASSERT((index_prec >= 2) && (index_prec <= 4));
+
+		std::pair<uint32_t, uint32_t> const * interp_vals = BC67_INTERPOLATION_VALUES[index_prec - 1];
+
+		ARGBColor32 qp1, qp2;
+		if (pbits)
+		{
+			qp1 = Quantize(p1, bit_mask, pbits[0]);
+			qp2 = Quantize(p2, bit_mask, pbits[1]);
+		}
+		else
+		{
+			qp1 = Quantize(p1, bit_mask);
+			qp2 = Quantize(p2, bit_mask);
+		}
+
+		static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+			ARGBColor32::BChannel, ARGBColor32::AChannel };
+
+		float4 const uqp1 = FromARGBColor32(qp1);
+		float4 const uqp2 = FromARGBColor32(qp2);
+		float const uqpl_sq = MathLib::length_sq(uqp1 - uqp2);
+		float4 const uqp_dir = uqp2 - uqp1;
+
+		uint64_t total_err = 0;
+		if (0 == uqpl_sq)
+		{
+			// If both endpoints are the same then the indices don't matter...
+			for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+			{
+				ARGBColor32 const & pixel = cluster.Pixel(i);
+
+				uint32_t interp_0 = interp_vals[0].first;
+				uint32_t interp_1 = interp_vals[0].second;
+
+				uint4 error_vec(0, 0, 0, 0);
+				for (uint32_t k = 0; k < 4; ++ k)
+				{
+					int const ch = rgba_channels[k];
+					int ip = (((qp1[ch] * interp_0) + (qp2[ch] * interp_1) + 32) >> 6) & 0xFF;
+					int dist = abs(pixel[ch] - ip);
+					error_vec[k] = dist * error_metric[k];
+				}
+
+				total_err += MathLib::dot(error_vec, error_vec);
+
+				if (indices != nullptr)
+				{
+					indices[i] = 0;
+				}
+			}
+
+			return total_err;
+		}
+
+		for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+		{
+			// Project this point unto the direction denoted by uqp_dir...
+			float4 const & pt = cluster.Point(i);
+#if 0
+			float const pct = MathLib::clamp(MathLib::dot(pt - uqp1, uqp_dir) / uqpl_sq, 0.0f, 1.0f) * (BUCKETS - 1);
+			int32_t const j1 = static_cast<int32>(pct);
+			int32_t const j2 = static_cast<int32>(pct + 0.7f);
+#else
+			float const pct = MathLib::dot(pt - uqp1, uqp_dir) / uqpl_sq * (buckets - 1);
+			int32_t const j1 = MathLib::clamp(static_cast<int32_t>(floor(pct)), 0, static_cast<int32_t>(buckets - 1));
+			int32_t const j2 = std::min(static_cast<int32_t>(ceil(pct)), static_cast<int32_t>(buckets - 1));
+#endif
+
+			BOOST_ASSERT((j1 >= 0) && (j2 <= static_cast<int32_t>(buckets - 1)));
+
+			ARGBColor32 const & pixel = cluster.Pixel(i);
+
+			uint64_t min_err = std::numeric_limits<uint64_t>::max();
+			uint32_t best_bucket = 0;
+			int32_t j = j1;
+			do
+			{
+				uint32_t interp_0 = interp_vals[j].first;
+				uint32_t interp_1 = interp_vals[j].second;
+
+				uint4 error_vec(0, 0, 0, 0);
+				for (uint32_t k = 0; k < 4; ++ k)
+				{
+					int const ch = rgba_channels[k];
+					int ip = (((qp1[ch] * interp_0) + (qp2[ch] * interp_1) + 32) >> 6) & 0xFF;
+					int dist = abs(pixel[ch] - ip);
+					error_vec[k] = dist * error_metric[k];
+				}
+
+				uint64_t error = MathLib::dot(error_vec, error_vec);
+				if (error < min_err)
+				{
+					min_err = error;
+					best_bucket = j;
+				}
+				else if (error > min_err + 1)
+				{
+					break;
+				}
+
+				++ j;
+			} while (j <= j2);
+
+			total_err += min_err;
+
+			if (indices != nullptr)
+			{
+				indices[i] = static_cast<uint8_t>(best_bucket);
+			}
+		}
+
+		return total_err;
+	}
+
+	void ChangePointForDirWithPbitChange(float4& v, uint32_t dir, uint32_t old_pbit, float4 const & step)
+	{
+		if ((dir & 1UL) && (0 == old_pbit))
+		{
+			v.x() -= step.x();
+		}
+		else if (!(dir & 1UL) && (1 == old_pbit))
+		{
+			v.x() += step.x();
+		}
+
+		if ((dir & 2UL) && (0 == old_pbit))
+		{
+			v.y() -= step.y();
+		}
+		else if (!(dir & 2UL) && (1 == old_pbit))
+		{
+			v.y() += step.y();
+		}
+
+		if ((dir & 4UL) && (0 == old_pbit))
+		{
+			v.z() -= step.z();
+		}
+		else if (!(dir & 4UL) && (1 == old_pbit))
+		{
+			v.z() += step.z();
+		}
+
+		if ((dir & 8UL) && (0 == old_pbit))
+		{
+			v.w() -= step.w();
+		}
+		else if (!(dir * 8UL) && (1 == old_pbit))
+		{
+			v.w() += step.w();
+		}
+	}
+
+	void ChangePointForDirWithoutPbitChange(float4& v, uint32_t dir, float4 const & step)
+	{
+		if (dir & 1UL)
+		{
+			v.x() -= step.x();
+		}
+		else
+		{
+			v.x() += step.x();
+		}
+
+		if (dir & 2UL)
+		{
+			v.y() -= step.y();
+		}
+		else
+		{
+			v.y() += step.y();
+		}
+
+		if (dir & 4UL)
+		{
+			v.z() -= step.z();
+		}
+		else
+		{
+			v.z() += step.z();
+		}
+
+		if (dir & 8UL)
+		{
+			v.w() -= step.w();
+		}
+		else
+		{
+			v.w() += step.w();
+		}
+	}
+
+	// The various available block modes that a BC7 compressor can choose from.
+	// The enum is specialized to be power-of-two values so that an BC7BlockMode
+	// variable can be used as a bit mask.
+	enum BC7BlockMode
+	{
+		BC7BM_Zero = 1UL << 0,
+		BC7BM_One = 1UL << 1,
+		BC7BM_Two = 1UL << 2,
+		BC7BM_Three = 1UL << 3,
+		BC7BM_Four = 1UL << 4,
+		BC7BM_Five = 1UL << 5,
+		BC7BM_Six = 1UL << 6,
+		BC7BM_Seven = 1UL << 7
+	};
+
+	// A shape consists of an index into the table of shapes and the number
+	// of partitions that the index corresponds to. Different BPTC modes
+	// interpret the shape differently and some are even illegal (such as
+	// having an index >= 16 on mode 0). Hence, each shape corresponds to
+	// these two variables.
+	struct Shape
+	{
+		uint32_t num_partitions;
+		uint32_t index;
+	};
+
+	// A shape selection can influence the results of the compressor by choosing
+	// different modes to compress or not compress. The shape index is a value
+	// between zero and sixty-four that corresponds to one of the available
+	// partitioning schemes defined by the BPTC format.
+	struct ShapeSelection
+	{
+		// These are the shape indices to use when evaluating two-partition shapes.
+		std::vector<Shape> shapes;
+
+		// This is the additional mask to prevent modes once shape selection
+		// is done. This value is &-ed with m_BlockModes from CompressionSettings
+		// to determine what the final considered blocks are.
+		uint32_t selected_modes;
+
+		// Defaults
+		ShapeSelection()
+			: selected_modes(static_cast<BC7BlockMode>(0xFF))
+		{
+		}
+	};
+
+	static uint32_t const TWO_PARTITION_MODES = BC7BM_One | BC7BM_Three | BC7BM_Seven;
+	static uint32_t const THREE_PARTITION_MODES = BC7BM_Zero | BC7BM_Two;
+	static uint32_t const ALPHA_MODES = BC7BM_Four | BC7BM_Five | BC7BM_Six | BC7BM_Seven;
+
+	static uint4 const ERROR_METRICS[] =
+	{
+		uint4(1, 1, 1, 1),
+		uint4(55, 75, 33, 100) // sqrt(0.3f, 0.56f, 0.11f) * 100
+	};
+
+	template <int BUCKETS>
+	uint64_t EstimateNClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		float4 min_clr, max_clr;
+		c.BoundingBox(min_clr, max_clr);
+		if (min_clr == max_clr)
+		{
+			return 0;
+		}
+
+		uint4 const & w = ERROR_METRICS[metric];
+		return QuantizedError(c, min_clr, max_clr, BUCKETS,
+			ARGBColor32(255, 255, 255, 255), w) * 2 + 1;
+	}
+
+	uint64_t EstimateTwoClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		return EstimateNClusterError<8>(metric, c);
+	}
+
+	uint64_t EstimateThreeClusterError(TexCompressionErrorMetric metric, RGBACluster& c)
+	{
+		return EstimateNClusterError<4>(metric, c);
+	}
+
+	ShapeSelection BoxSelection(RGBACluster& cluster, TexCompressionErrorMetric metric)
+	{
+		ShapeSelection result;
+
+		bool opaque = true;
+		for (uint32_t i = 0; i < 16; ++ i)
+		{
+			uint8_t a = cluster.Pixel(i).a();
+			opaque = opaque && (a >= 250); // For all intents and purposes...
+		}
+
+		// First we must figure out which shape to use. To do this, simply
+		// see which shape has the smallest sum of minimum bounding spheres.
+		uint64_t best_err = std::numeric_limits<uint64_t>::max();
+
+		result.shapes.resize(1);
+		result.shapes[0].num_partitions = 2;
+		for (uint32_t i = 0; i < 64; ++ i)
+		{
+			cluster.ShapeIndex(i, 2);
+
+			uint64_t err = 0;
+			for (int ci = 0; ci < 2; ++ ci)
+			{
+				cluster.Partition(ci);
+				err += EstimateTwoClusterError(metric, cluster);
+			}
+
+			if (err < best_err)
+			{
+				best_err = err;
+				result.shapes[0].index = i;
+			}
+
+			// If it's small, we'll take it!
+			if (err < 1)
+			{
+				result.selected_modes = TWO_PARTITION_MODES;
+				return result;
+			}
+		}
+
+		// There are not 3 subset blocks that support alpha, so only check these
+		// if the entire block is opaque.
+		if (!opaque)
+		{
+			result.selected_modes &= ALPHA_MODES;
+			return result;
+		}
+
+		// If it's opaque, we get more value out of mode 6 than modes
+		// 4 and 5, so just ignore those.
+		result.selected_modes &= ~(BC7BM_Four | BC7BM_Five);
+
+		best_err = std::numeric_limits<uint64_t>::max();
+
+		result.shapes.resize(2);
+		result.shapes[1].num_partitions = 3;
+		for (uint32_t i = 0; i < 64; ++ i)
+		{
+			cluster.ShapeIndex(i, 3);
+
+			uint64_t err = 0;
+			for (int ci = 0; ci < 3; ++ ci)
+			{
+				cluster.Partition(ci);
+				err += EstimateThreeClusterError(metric, cluster);
+			}
+
+			if (err < best_err)
+			{
+				best_err = err;
+				result.shapes[1].index = i;
+			}
+
+			// If it's small, we'll take it!
+			if (err < 1)
+			{
+				result.selected_modes = THREE_PARTITION_MODES;
+				return result;
+			}
+		}
+
+		return result;
+	}
+
+	uint32_t AnchorIndexForSubset(uint32_t partition, uint32_t shape_index, uint32_t num_partitions)
+	{
+		static int const anchor_idx_2[64] =
+		{
+			15, 15, 15, 15, 15, 15, 15, 15,
+			15, 15, 15, 15, 15, 15, 15, 15,
+			15, 2, 8, 2, 2, 8, 8, 15,
+			2, 8, 2, 2, 8, 8, 2, 2,
+			15, 15, 6, 8, 2, 8, 15, 15,
+			2, 8, 2, 2, 2, 15, 15, 6,
+			6, 2, 6, 8, 15, 15, 2, 2,
+			15, 15, 15, 15, 15, 2, 2, 15
+		};
+
+		static int const anchor_idx_3[2][64] =
+		{
+			{
+				3, 3, 15, 15, 8, 3, 15, 15,
+				8, 8, 6, 6, 6, 5, 3, 3,
+				3, 3, 8, 15, 3, 3, 6, 10,
+				5, 8, 8, 6, 8, 5, 15, 15,
+				8, 15, 3, 5, 6, 10, 8, 15,
+				15, 3, 15, 5, 15, 15, 15, 15,
+				3, 15, 5, 5, 5, 8, 5, 10,
+				5, 10, 8, 13, 15, 12, 3, 3
+			},
+			{
+				15, 8, 8, 3, 15, 15, 3, 8,
+				15, 15, 15, 15, 15, 15, 15, 8,
+				15, 8, 15, 3, 15, 8, 15, 8,
+				3, 15, 6, 10, 15, 15, 10, 8,
+				15, 3, 15, 10, 10, 8, 9, 10,
+				6, 15, 8, 15, 3, 6, 6, 8,
+				15, 3, 15, 15, 15, 15, 15, 15,
+				15, 15, 15, 15, 3, 15, 15, 8
+			}
+		};
+
+		int anchor_idx = 0;
+		switch (partition)
+		{
+		case 1:
+			anchor_idx = (2 == num_partitions) ? anchor_idx_2[shape_index] : anchor_idx_3[0][shape_index];
+			break;
+
+		case 2:
+			BOOST_ASSERT(3 == num_partitions);
+			anchor_idx = anchor_idx_3[1][shape_index];
+			break;
+
+		default:
+			break;
+		}
+
+		return anchor_idx;
+	}
+
+	template <typename T>
+	void Rotation(Vector_T<T, 4>& v, int mode)
+	{
+		switch (mode)
+		{
+		case 0:
+			break;
+		case 1:
+			std::swap(v.x(), v.w());
+			break;
+		case 2:
+			std::swap(v.y(), v.w());
+			break;
+		case 3:
+			std::swap(v.z(), v.w());
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 	}
 }
@@ -1532,7 +2102,7 @@ namespace KlayGE
 				int r2 = this->Unquantize(end_pts[region].second.x(), info.rgba_prec[0][0].r(), signed_fmt);
 				int g2 = this->Unquantize(end_pts[region].second.y(), info.rgba_prec[0][0].g(), signed_fmt);
 				int b2 = this->Unquantize(end_pts[region].second.z(), info.rgba_prec[0][0].b(), signed_fmt);
-				int const * weights = bc67_prec_weights[1 + (1 == info.partitions)];
+				int const * weights = BC67_PREC_WEIGHTS[1 + (1 == info.partitions)];
 				int3 fc;
 				fc.x() = this->FinishUnquantize((r1 * (BC6_WEIGHT_MAX - weights[index])
 					+ r2 * weights[index] + BC6_WEIGHT_ROUND) >> BC6_WEIGHT_SHIFT, signed_fmt);
@@ -1670,21 +2240,140 @@ namespace KlayGE
 		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
 	};
 
+	uint8_t TexCompressionBC7::expand6_[64];
+	uint8_t TexCompressionBC7::expand7_[128];
+	uint8_t TexCompressionBC7::o_match6_[256][2];
+	uint8_t TexCompressionBC7::o_match7_[256][2];
+	bool TexCompressionBC7::lut_inited_ = false;
+
 	TexCompressionBC7::TexCompressionBC7()
+		: index_mode_(0)
 	{
 		block_width_ = block_height_ = 4;
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC7) * 4;
 		decoded_fmt_ = EF_ARGB8;
+
+		if (!lut_inited_)
+		{
+			unique_lock<mutex> lock(singleton_mutex);
+			if (!lut_inited_)
+			{
+				for (int i = 0; i < 64; ++ i)
+				{
+					expand6_[i] = Extend6To8Bits(i);
+				}
+				for (int i = 0; i < 128; ++ i)
+				{
+					expand7_[i] = Extend7To8Bits(i);
+				}
+
+				this->PrepareOptTable(&o_match6_[0][0], expand6_, 64);
+				this->PrepareOptTable2(&o_match7_[0][0], expand7_, 128);
+
+				lut_inited_ = true;
+			}
+		}
 	}
 
 	void TexCompressionBC7::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		UNREF_PARAM(output);
-		UNREF_PARAM(input);
-		UNREF_PARAM(method);
+		BOOST_ASSERT(output);
+		BOOST_ASSERT(input);
+		
+		// Based on FasTC: Accelerated Texture Encoding (http://gamma.cs.unc.edu/FasTC/)
 
-		// TODO
+		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
+
+		bool uniform_block = true;
+		for (int i = 1; i < 16; ++ i)
+		{
+			if (argb[i] != argb[0])
+			{
+				uniform_block = false;
+				break;
+			}
+		}
+		if (uniform_block)
+		{
+			this->PackBC7UniformBlock(output, argb[0]);
+			return;
+		}
+
+		TexCompressionErrorMetric metric = TCEM_Uniform;
+		int sa_steps;
+		switch (method)
+		{
+		case TCM_Quality:
+			sa_steps = 50;
+			break;
+		case TCM_Balanced:
+			sa_steps = 10;
+			break;
+		case TCM_Speed:
+			sa_steps = 0;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			sa_steps = 0;
+			break;
+		}
+
+		RGBACluster block_cluster(argb, block_width_ * block_height_, GetPartition);
+		ShapeSelection selection = BoxSelection(block_cluster, metric);
+		BOOST_ASSERT(selection.selected_modes > 0);
+
+		uint64_t best_err = std::numeric_limits<uint64_t>::max();
+		uint32_t best_mode = 8;
+		CompressParams best_params;
+
+		uint32_t selected_modes = selection.selected_modes;
+		size_t num_shape_indices = selection.shapes.size();
+
+		// If we don't have any indices, turn off two and three partition modes,
+		// since the compressor will simply ignore the shapeIndex variable afterwards...
+		if (0 == num_shape_indices)
+		{
+			num_shape_indices = 1;
+			selected_modes &= ~(TWO_PARTITION_MODES | THREE_PARTITION_MODES);
+		}
+
+		for (uint32_t mode = 0; mode < 8; ++ mode)
+		{
+			if ((selected_modes & (1 << mode)) != 0)
+			{
+				for (uint32_t shape_index = 0; shape_index < num_shape_indices; ++ shape_index)
+				{
+					Shape const & shape = selection.shapes[shape_index];
+
+					uint32_t partitions = mode_info_[mode].partitions;
+					if ((1 == partitions) || (partitions == shape.num_partitions))
+					{
+						// Block mode zero only has four bits for the partition index,
+						// so if the chosen three-partition shape is not within this range,
+						// then we shouldn't consider using this block mode...
+						if ((shape.index < 16) || (mode != 0))
+						{
+							block_cluster.ShapeIndex(shape.index, partitions);
+
+							CompressParams params;
+							uint64_t error = this->TryCompress(mode, sa_steps, metric, params, shape.index, block_cluster);
+							if (error < best_err)
+							{
+								best_err = error;
+								best_mode = mode;
+								best_params = params;
+							}
+						}
+					}
+				}
+			}
+		}
+		BOOST_ASSERT(best_mode < 8);
+
+		index_mode_ = 0;
+		this->PackBC7Block(best_mode, best_params, output);
 	}
 
 	void TexCompressionBC7::DecodeBlock(void* output, void const * input)
@@ -1844,6 +2533,1267 @@ namespace KlayGE
 		}
 	}
 
+	void TexCompressionBC7::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const
+	{
+		for (int i = 0; i < 256; ++ i)
+		{
+			int best_err = 256;
+
+			for (int min = 0; min < size; ++ min)
+			{
+				for (int max = 0; max < size; ++ max)
+				{
+					int min_e = expand[min];
+					int max_e = expand[max];
+					int err = abs(max_e + Mul8Bit(min_e - max_e, 0x55) - i);
+					if (err < best_err)
+					{
+						table[i * 2 + 0] = static_cast<uint8_t>(max);
+						table[i * 2 + 1] = static_cast<uint8_t>(min);
+						best_err = err;
+					}
+				}
+			}
+		}
+	}
+
+	void TexCompressionBC7::PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const
+	{
+		for (int i = 0; i < 256; ++ i)
+		{
+			int best_err = 256;
+
+			for (int min = 0; min < size; ++ min)
+			{
+				for (int max = 0; max < size; ++ max)
+				{
+					int combo = (43 * expand[min] + 21 * expand[max] + 32) >> 6;
+					int err = abs(i - combo);
+					if (err < best_err)
+					{
+						table[i * 2 + 0] = static_cast<uint8_t>(min);
+						table[i * 2 + 1] = static_cast<uint8_t>(max);
+						best_err = err;
+					}
+				}
+			}
+		}
+	}
+
+	void TexCompressionBC7::PackBC7UniformBlock(void* output, ARGBColor32 const & pixel)
+	{
+		size_t start_bit = 0;
+		WriteBits(output, start_bit, 6, 1 << 5);
+		WriteBits(output, start_bit, 2, 0);
+
+		uint8_t const r = pixel.r();
+		uint8_t const g = pixel.g();
+		uint8_t const b = pixel.b();
+		uint8_t const a = pixel.a();
+
+		WriteBits(output, start_bit, 7, o_match7_[r][0]);
+		WriteBits(output, start_bit, 7, o_match7_[r][1]);
+
+		WriteBits(output, start_bit, 7, o_match7_[g][0]);
+		WriteBits(output, start_bit, 7, o_match7_[g][1]);
+
+		WriteBits(output, start_bit, 7, o_match7_[b][0]);
+		WriteBits(output, start_bit, 7, o_match7_[b][1]);
+
+		WriteBits(output, start_bit, 8, a);
+		WriteBits(output, start_bit, 8, a);
+
+		// Color indices are 1 for each pixel...
+		// Anchor index is 0, so 1 bit for the first pixel, then
+		// 01 for each following pixel giving the sequence of 31 bits:
+		// ...010101011
+		WriteBits(output, start_bit, 8, 0xAB);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 7, 0x2A);
+
+		// Alpha indices...
+		WriteBits(output, start_bit, 8, 0xAB);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 8, 0xAA);
+		WriteBits(output, start_bit, 7, 0x2A);
+	}
+
+	void TexCompressionBC7::PackBC7Block(int mode, CompressParams& params, void* output)
+	{
+		ModeInfo const & mode_info = mode_info_[mode];
+		int const partition_bits = mode_info.partition_bits;
+		int const partitions = mode_info.partitions;
+
+		size_t start_bit = 0;
+
+		WriteBits(output, start_bit, mode + 1, 1 << mode);
+
+		BOOST_ASSERT(!partition_bits || ((((1 << partition_bits) - 1) & params.shape_index) == params.shape_index));
+		WriteBits(output, start_bit, partition_bits, static_cast<uint8_t>(params.shape_index));
+
+		WriteBits(output, start_bit, mode_info.rotation_bits, params.rotation_mode);
+		WriteBits(output, start_bit, mode_info.index_mode_bits, params.index_mode);
+
+#ifdef KLAYGE_DEBUG
+		for (int i = 0; i < 16; ++ i)
+		{
+			int set = 0;
+			for (int j = 0; j < partitions; ++ j)
+			{
+				if (params.indices[j][i] < 255)
+				{
+					++ set;
+				}
+			}
+
+			BOOST_ASSERT(1 == set);
+		}
+#endif
+
+		ARGBColor32 const qmask = this->QuantizationMask(mode_info);
+
+		ARGBColor32 pixel1[BC7_MAX_REGIONS];
+		ARGBColor32 pixel2[BC7_MAX_REGIONS];
+		for (int i = 0; i < partitions; ++ i)
+		{
+			switch (mode_info.p_bit_type)
+			{
+			case PBT_None:
+				pixel1[i] = Quantize(params.p1[i], qmask);
+				pixel2[i] = Quantize(params.p2[i], qmask);
+				break;
+
+			case PBT_Shared:
+			case PBT_Unique:
+				pixel1[i] = Quantize(params.p1[i], qmask, this->PBitCombo(mode_info, params.pbit_combo[i])[0]);
+				pixel2[i] = Quantize(params.p2[i], qmask, this->PBitCombo(mode_info, params.pbit_combo[i])[1]);
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+
+		// If the anchor index does not have 0 in the leading bit, then
+		// we need to swap EVERYTHING.
+		for (int par_index = 0; par_index < partitions; ++ par_index)
+		{
+			int anchor_index = AnchorIndexForSubset(par_index, params.shape_index, partitions);
+			BOOST_ASSERT(params.indices[par_index][anchor_index] != 255);
+
+			int const alpha_index_bits = this->NumBitsPerAlpha(mode_info, params.index_mode);
+			int const index_bits = this->NumBitsPerIndex(mode_info, params.index_mode);
+			if (params.indices[par_index][anchor_index] >> (index_bits - 1))
+			{
+				std::swap(pixel1[par_index], pixel2[par_index]);
+
+				int index_vals = 1 << index_bits;
+				for (int i = 0; i < 16; ++ i)
+				{
+					params.indices[par_index][i]
+						= static_cast<uint8_t>((index_vals - 1) - params.indices[par_index][i]);
+				}
+
+				int alpha_index_vals = 1 << alpha_index_bits;
+				if (mode_info.rotation_bits != 0)
+				{
+					for (int i = 0; i < 16; ++ i)
+					{
+						params.alpha_indices[i]
+							= static_cast<uint8_t>((alpha_index_vals - 1) - params.alpha_indices[i]);
+					}
+				}
+			}
+
+			bool const rotated = (params.alpha_indices[anchor_index] >> (alpha_index_bits - 1)) > 0;
+			if ((mode_info.rotation_bits != 0) && rotated)
+			{
+				std::swap(pixel1[par_index].a(), pixel2[par_index].a());
+
+				int alpha_index_vals = 1 << alpha_index_bits;
+				for (int i = 0; i < 16; ++ i)
+				{
+					params.alpha_indices[i] = static_cast<uint8_t>((alpha_index_vals - 1) - params.alpha_indices[i]);
+				}
+			}
+
+			BOOST_ASSERT(!(params.indices[par_index][anchor_index] >> (index_bits - 1)));
+			BOOST_ASSERT((0 == mode_info.rotation_bits)
+				|| !(params.alpha_indices[anchor_index] >> (alpha_index_bits - 1)));
+		}
+
+		static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+			ARGBColor32::BChannel, ARGBColor32::AChannel };
+		for (int i = 0; i < 4; ++ i)
+		{
+			int const ch = rgba_channels[i];
+			int const bits = mode_info.rgba_prec[ch];
+			for (int j = 0; j < partitions; ++ j)
+			{
+				WriteBits(output, start_bit, bits, pixel1[j][ch] >> (8 - bits));
+				WriteBits(output, start_bit, bits, pixel2[j][ch] >> (8 - bits));
+			}
+		}
+
+		// Write out the best pbits..
+		if (mode_info.p_bit_type != PBT_None)
+		{
+			for (int s = 0; s < partitions; ++ s)
+			{
+				int const * pbits = this->PBitCombo(mode_info, params.pbit_combo[s]);
+				WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[0]));
+				if (mode_info.p_bit_type != PBT_Shared)
+				{
+					WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[1]));
+				}
+			}
+		}
+
+		// If our index mode has changed, then we need to write the alpha indices first.
+		if ((mode_info.index_mode_bits != 0) && (1 == params.index_mode))
+		{
+			BOOST_ASSERT(mode_info.rotation_bits != 0);
+
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const idx = params.alpha_indices[i];
+				BOOST_ASSERT(0 == AnchorIndexForSubset(0, params.shape_index, partitions));
+				BOOST_ASSERT(2 == this->NumBitsPerAlpha(mode_info, params.index_mode));
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << 2)));
+				BOOST_ASSERT_MSG((i != 0) || !(idx >> 1), "Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (0 == i) ? 1 : 2, static_cast<uint8_t>(idx));
+			}
+
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const idx = params.indices[0][i];
+				BOOST_ASSERT(0 == GetPartition(partitions, params.shape_index, i));
+				BOOST_ASSERT(0 == AnchorIndexForSubset(0, params.shape_index, partitions));
+				BOOST_ASSERT(this->NumBitsPerIndex(mode_info, params.index_mode) == 3);
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << 3)));
+				BOOST_ASSERT_MSG((i != 0) || !(idx >> 2), "Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (0 == i) ? 2 : 3, static_cast<uint8_t>(idx));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < 16; ++ i)
+			{
+				int const subs = GetPartition(partitions, params.shape_index, i);
+				int const idx = params.indices[subs][i];
+				int const anchor_idx = AnchorIndexForSubset(subs, params.shape_index, partitions);
+				int const bits_for_idx = this->NumBitsPerIndex(mode_info, params.index_mode);
+				BOOST_ASSERT((idx >= 0) && (idx < (1 << bits_for_idx)));
+				BOOST_ASSERT_MSG((i != anchor_idx) || !(idx >> (bits_for_idx - 1)),
+					"Leading bit of anchor index is not zero!");
+				WriteBits(output, start_bit, (i == anchor_idx) ? bits_for_idx - 1 : bits_for_idx,
+					static_cast<uint8_t>(idx));
+			}
+
+			if (mode_info.rotation_bits != 0)
+			{
+				for (int i = 0; i < 16; ++ i)
+				{
+					int const idx = params.alpha_indices[i];
+					int const anchor_idx = 0;
+					int const bits_for_idx = this->NumBitsPerAlpha(mode_info, params.index_mode);
+					BOOST_ASSERT((idx >= 0) && (idx < (1 << bits_for_idx)));
+					BOOST_ASSERT_MSG((i != anchor_idx) || (!(idx >> (bits_for_idx - 1))),
+						"Leading bit of anchor index is not zero!");
+					WriteBits(output, start_bit, (i == anchor_idx) ? bits_for_idx - 1 : bits_for_idx,
+						static_cast<uint8_t>(idx));
+				}
+			}
+		}
+	}
+
+	int TexCompressionBC7::RotationMode(ModeInfo const & mode_info) const
+	{
+		return mode_info.rotation_bits ? rotate_mode_ : 0;
+	}
+	
+	int TexCompressionBC7::NumBitsPerIndex(ModeInfo const & mode_info, int8_t index_mode) const
+	{
+		if (index_mode < 0)
+		{
+			index_mode = static_cast<uint8_t>(index_mode_);
+		}
+		if (0 == index_mode)
+		{
+			return mode_info.index_prec_1;
+		}
+		else
+		{
+			return mode_info.index_prec_2;
+		}
+	}
+
+	int TexCompressionBC7::NumBitsPerAlpha(ModeInfo const & mode_info, int8_t index_mode) const
+	{
+		if (index_mode < 0)
+		{
+			index_mode = static_cast<uint8_t>(index_mode_);
+		}
+		if (0 == index_mode)
+		{
+			return mode_info.index_prec_2;
+		}
+		else
+		{
+			return mode_info.index_prec_1;
+		}
+	}
+
+	// This returns the proper error metric even if we have rotation bits set
+	uint4 TexCompressionBC7::ErrorMetric(ModeInfo const & mode_info) const
+	{
+		uint4 w = ERROR_METRICS[error_metric_];
+		Rotation(w, this->RotationMode(mode_info));
+		return w;
+	}
+
+	// This function creates an integer that represents the maximum values in each
+	// channel. We can use this to figure out the proper endpoint values for a
+	// given mode.
+	ARGBColor32 TexCompressionBC7::QuantizationMask(ModeInfo const & mode_info) const
+	{
+		int const mask_seed = 0xFFFFFF80;
+		uint32_t const alpha_prec = mode_info.rgba_prec.a();
+		uint32_t const cbits = mode_info.rgba_prec.r() - 1;
+		uint32_t const abits = mode_info.rgba_prec.a() - 1;
+		return ARGBColor32(alpha_prec > 0 ? (mask_seed >> abits) & 0xFF : 0, (mask_seed >> cbits) & 0xFF,
+			(mask_seed >> cbits) & 0xFF, (mask_seed >> cbits) & 0xFF);
+	}
+
+	int TexCompressionBC7::NumPbitCombos(ModeInfo const & mode_info) const
+	{
+		switch (mode_info.p_bit_type)
+		{
+		case PBT_None:
+			return 1;
+		case PBT_Shared:
+			return 2;
+		case PBT_Unique:
+			return 4;
+
+		default:
+			BOOST_ASSERT(false);
+			return 1;
+		}
+	}
+
+	int const * TexCompressionBC7::PBitCombo(ModeInfo const & mode_info, int idx) const
+	{
+		static int const pbits[4][2] =
+		{
+			{ 0, 0 },
+			{ 0, 1 },
+			{ 1, 0 },
+			{ 1, 1 }
+		};
+
+		switch (mode_info.p_bit_type)
+		{
+		case PBT_None:
+			return pbits[0];
+		case PBT_Shared:
+			return idx ? pbits[3] : pbits[0];
+		case PBT_Unique:
+			return pbits[idx % 4];
+
+		default:
+			BOOST_ASSERT(false);
+			return pbits[2];
+		}
+	}
+
+	// This performs simulated annealing on the endpoints p1 and p2 based on the
+	// current MaxAnnealingIterations. This is set by calling the function
+	// SetQualityLevel
+	uint64_t TexCompressionBC7::OptimizeEndpointsForCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const
+	{
+		ModeInfo const & mode_info = mode_info_[mode];
+		const uint32_t buckets = (1 << this->NumBitsPerIndex(mode_info));
+		ARGBColor32 const qmask = this->QuantizationMask(mode_info);
+
+		// Here we use simulated annealing to traverse the space of clusters to find
+		// the best possible endpoints.
+		uint64_t cur_err = QuantizedError(cluster, p1, p2, buckets, qmask, this->ErrorMetric(mode_info),
+			this->PBitCombo(mode_info, best_pbit_combo), best_indices);
+
+		int cur_pbit_combo = best_pbit_combo;
+		uint64_t best_err = cur_err;
+
+		// Clamp endpoints to the grid...
+		ARGBColor32 qp1, qp2;
+		if (mode_info.p_bit_type != PBT_None)
+		{
+			qp1 = Quantize(p1, qmask, this->PBitCombo(mode_info, best_pbit_combo)[0]);
+			qp2 = Quantize(p2, qmask, this->PBitCombo(mode_info, best_pbit_combo)[1]);
+		}
+		else
+		{
+			qp1 = Quantize(p1, qmask);
+			qp2 = Quantize(p2, qmask);
+		}
+
+		p1 = FromARGBColor32(qp1);
+		p2 = FromARGBColor32(qp2);
+
+		float4 bp1 = p1, bp2 = p2;
+
+		int const max_energy = sa_steps_;
+		for (int energy = 0; (best_err > 0) && (energy < max_energy); ++ energy)
+		{
+			float temp = (energy + 0.5f) / static_cast<float>(max_energy - 0.5f);
+
+			uint8_t indices[BC67_MAX_NUM_DATA_POINTS];
+			float4 np1, np2;
+			int pbit_combo = 0;
+
+			this->PickBestNeighboringEndpoints(mode, p1, p2, cur_pbit_combo,
+				np1, np2, pbit_combo);
+
+			uint64_t error = QuantizedError(cluster, np1, np2, buckets, qmask,
+				this->ErrorMetric(mode_info), this->PBitCombo(mode_info, pbit_combo), indices);
+
+			if (this->AcceptNewEndpointError(error, cur_err, temp))
+			{
+				cur_err = error;
+				p1 = np1;
+				p2 = np2;
+				cur_pbit_combo = pbit_combo;
+			}
+
+			if (error < best_err)
+			{
+				memcpy(best_indices, indices, sizeof(indices));
+				bp1 = np1;
+				bp2 = np2;
+				best_pbit_combo = static_cast<uint8_t>(pbit_combo);
+				best_err = error;
+
+				// Restart...
+				energy = 0;
+			}
+		}
+
+		p1 = bp1;
+		p2 = bp2;
+
+		return best_err;
+	}
+
+	// This function performs the heuristic to choose the "best" neighboring
+	// endpoints to p1 and p2 based on the compression mode (index precision,
+	// endpoint precision etc)
+	void TexCompressionBC7::PickBestNeighboringEndpoints(int mode, float4 const & p1, float4 const & p2,
+			int cur_pbit_combo, float4& np1, float4& np2, int& pbit_combo, float step_sz) const
+	{
+		ModeInfo const & mode_info = mode_info_[mode];
+
+		// !SPEED! There might be a way to make this faster since we're working
+		// with floating point values that are powers of two. We should be able
+		// to just set the proper bits in the exponent and leave the mantissa to 0.
+		float4 step = step_sz * float4(static_cast<float>(1 << (8 - mode_info.rgba_prec[ARGBColor32::RChannel])),
+			static_cast<float>(1 << (8 - mode_info.rgba_prec[ARGBColor32::GChannel])),
+			static_cast<float>(1 << (8 - mode_info.rgba_prec[ARGBColor32::BChannel])),
+			static_cast<float>(1 << (8 - mode_info.rgba_prec[ARGBColor32::AChannel])));
+		if (mode < 4)
+		{
+			step[(this->RotationMode(mode_info) + 3) & 0x3] = 0;
+		}
+
+		// First, let's figure out the new pbit combo... if there's no pbit then we
+		// don't need to worry about it.
+		bool const has_pbits = (mode_info.p_bit_type != PBT_None);
+		if (has_pbits)
+		{
+			// If there is a pbit, then we must change it, because those will provide
+			// the closest values to the current point.
+			if (PBT_Shared == mode_info.p_bit_type)
+			{
+				pbit_combo = (cur_pbit_combo + 1) % 2;
+			}
+			else
+			{
+				// Not shared... p1 needs to change and p2 needs to change... which means
+				// that combo 0 gets rotated to combo 3, combo 1 gets rotated to combo 2
+				// and vice versa...
+				pbit_combo = 3 - cur_pbit_combo;
+			}
+
+			BOOST_ASSERT(1 == this->PBitCombo(mode_info, cur_pbit_combo)[0]
+				+ this->PBitCombo(mode_info, pbit_combo)[0]);
+			BOOST_ASSERT(1 == this->PBitCombo(mode_info, cur_pbit_combo)[1]
+				+ this->PBitCombo(mode_info, pbit_combo)[1]);
+		}
+
+		for (int pt = 0; pt < 2; ++ pt)
+		{
+			float4 const & p = pt ? p1 : p2;
+			float4& np = pt ? np1 : np2;
+			uint32_t const rdir = rand() & 0xF;
+
+			np = p;
+			if (has_pbits)
+			{
+				uint32_t const pbit = this->PBitCombo(mode_info, cur_pbit_combo)[pt];
+				ChangePointForDirWithPbitChange(np, rdir, pbit, step);
+			}
+			else
+			{
+				ChangePointForDirWithoutPbitChange(np, rdir, step);
+			}
+
+			for (uint32_t i = 0; i < np.size(); ++ i)
+			{
+				np[i] = MathLib::clamp(np[i], 0.0f, 255.0f);
+			}
+		}
+	}
+
+	// This is used by simulated annealing to determine whether or not the
+	// newError (from the neighboring endpoints) is sufficient to continue the
+	// annealing process from these new endpoints based on how good the oldError
+	// was, and how long we've been annealing (t)
+	bool TexCompressionBC7::AcceptNewEndpointError(uint64_t new_err, uint64_t old_err, float temp) const
+	{
+		// Always accept better endpoints.
+		if (new_err < old_err)
+		{
+			return true;
+		}
+
+		size_t const p = static_cast<size_t>(exp(0.1f * static_cast<int64_t>(old_err - new_err) / temp) * RAND_MAX);
+		size_t const r = rand();
+
+		return r < p;
+	}
+
+	// This function figures out the best compression for the single color p, and
+	// places the endpoints in p1 and p2. If the compression mode supports p-bits,
+	// then we choose the best p-bit combo and return it as well.
+	uint64_t TexCompressionBC7::CompressSingleColor(ModeInfo const & mode_info, ARGBColor32 const & pixel,
+			float4& p1, float4& p2, uint8_t& best_pbit_combo) const
+	{
+		uint64_t best_err = std::numeric_limits<uint64_t>::max();
+
+		for (int pbi = 0; pbi < this->NumPbitCombos(mode_info); ++ pbi)
+		{
+			int const * pbit_combo = this->PBitCombo(mode_info, pbi);
+
+			uint4 dist(0, 0, 0, 0);
+			uint4 best_val_i(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+			uint4 best_val_j = best_val_i;
+			static uint32_t const rgba_channels[] = { ARGBColor32::RChannel, ARGBColor32::GChannel,
+				ARGBColor32::BChannel, ARGBColor32::AChannel };
+
+			for (uint32_t ci = 0; ci < dist.size(); ++ ci)
+			{
+				int const ch = rgba_channels[ci];
+				uint8_t const val = pixel[ch];
+				int bits = mode_info.rgba_prec[ch];
+
+				// If we don't handle this channel, then it must be the full value (alpha)
+				if (0 == bits)
+				{
+					best_val_i[ci] = best_val_j[ci] = 0xFF;
+					dist[ci] = std::max(dist[ci], static_cast<uint32_t>(0xFF - val));
+					continue;
+				}
+
+				int const poss_vals = (1 << bits);
+				int poss_vals_h[256];
+				int poss_vals_l[256];
+
+				bool const have_pbit = (mode_info.p_bit_type != PBT_None);
+				if (have_pbit)
+				{
+					++ bits;
+				}
+
+				for (int i = 0; i < poss_vals; ++ i)
+				{
+					int vh = i, vl = i;
+					if (have_pbit)
+					{
+						vh <<= 1;
+						vl <<= 1;
+
+						vh |= pbit_combo[1];
+						vl |= pbit_combo[0];
+					}
+
+					poss_vals_h[i] = (vh << (8 - bits));
+					poss_vals_h[i] |= (poss_vals_h[i] >> bits);
+
+					poss_vals_l[i] = (vl << (8 - bits));
+					poss_vals_l[i] |= (poss_vals_l[i] >> bits);
+				}
+
+				uint8_t const bpi = static_cast<uint8_t>(this->NumBitsPerIndex(mode_info) - 1);
+				uint32_t const interp_val_0 = BC67_INTERPOLATION_VALUES[bpi][1].first;
+				uint32_t const interp_val_1 = BC67_INTERPOLATION_VALUES[bpi][1].second;
+
+				// Find the closest interpolated val that to the given val...
+				uint32_t best_channel_dist = 0xFF;
+				for (int i = 0; (best_channel_dist > 0) && (i < poss_vals); ++ i)
+				{
+					for (int j = 0; (best_channel_dist > 0) && (j < poss_vals); ++ j)
+					{
+						uint32_t const v1 = poss_vals_l[i];
+						uint32_t const v2 = poss_vals_h[j];
+
+						uint32_t const combo = (interp_val_0 * v1 + interp_val_1 * v2 + 32) >> 6;
+						uint32_t const err = (combo > val) ? combo - val : val - combo;
+
+						if (err < best_channel_dist)
+						{
+							best_channel_dist = err;
+							best_val_i[ci] = v1;
+							best_val_j[ci] = v2;
+						}
+					}
+				}
+
+				dist[ci] = std::max(best_channel_dist, dist[ci]);
+			}
+
+			uint4 const & error_weights = ERROR_METRICS[error_metric_];
+			uint64_t error = 0;
+			for (uint32_t i = 0; i < dist.size(); ++i)
+			{
+				uint32_t e = dist[i] * error_weights[i];
+				error += e * e;
+			}
+
+			if (error < best_err)
+			{
+				best_err = error;
+				best_pbit_combo = static_cast<uint8_t>(pbi);
+
+				for (uint32_t ci = 0; ci < p1.size(); ++ci)
+				{
+					p1[ci] = static_cast<float>(best_val_i[ci]);
+					p2[ci] = static_cast<float>(best_val_j[ci]);
+				}
+			}
+		}
+
+		return best_err;
+	}
+
+	// Compress the cluster using a generalized cluster fit. This figures out the
+	// proper endpoints assuming that we have no alpha.
+	uint64_t TexCompressionBC7::CompressCluster(int mode, RGBACluster const & cluster,
+		float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const
+	{
+		ModeInfo const & mode_info = mode_info_[mode];
+
+		// If all the points are the same in the cluster, then we need to figure out
+		// what the best approximation to this point is....
+		if (cluster.AllSamePoint())
+		{
+			ARGBColor32 const & p = cluster.Pixel(0);
+			uint64_t best_err = this->CompressSingleColor(mode_info, p, p1, p2, best_pbit_combo);
+
+			// We're assuming all indices will be index 1...
+			for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+			{
+				best_indices[i] = 1;
+			}
+			return cluster.NumValidPoints() * best_err;
+		}
+
+		uint32_t const buckets = (1 << this->NumBitsPerIndex(mode_info));
+
+#if 1
+		float4 axis;
+		cluster.PrincipalAxis(axis, nullptr, nullptr);
+
+		float min_dp = std::numeric_limits<float>::max();
+		float max_dp = -std::numeric_limits<float>::max();
+		for (uint32_t i = 0; i < cluster.NumValidPoints(); ++i)
+		{
+			float dp = MathLib::dot(cluster.Point(i) - cluster.Avg(), axis);
+			if (dp < min_dp)
+			{
+				min_dp = dp;
+			}
+			if (dp > max_dp)
+			{
+				max_dp = dp;
+			}
+		}
+
+		p1 = cluster.Avg() + min_dp * axis;
+		p2 = cluster.Avg() + max_dp * axis;
+#else
+		cluster.BoundingBox(p1, p2);
+#endif
+
+		this->ClampEndpoints(p1, p2);
+
+		float4 pts[1 << 4];  // At most 4 bits per index.
+		uint32_t num_pts[1 << 4];
+		BOOST_ASSERT(buckets <= 1 << 4);
+
+		for (uint32_t i = 0; i < buckets; ++ i)
+		{
+			float s = i / static_cast<float>(buckets - 1);
+			pts[i] = MathLib::lerp(p1, p2, s);
+		}
+
+		// Do k-means clustering...
+		uint32_t bucket_idx[BC67_MAX_NUM_DATA_POINTS] = { 0 };
+
+		bool fixed = false;
+		while (!fixed)
+		{
+			float4 new_pts[1 << 4];
+
+			// Assign each of the existing points to one of the buckets...
+			for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+			{
+				int min_bucket = -1;
+				float min_dist = std::numeric_limits<float>::max();
+
+				for (uint32_t j = 0; j < buckets; ++ j)
+				{
+					float4 v = cluster.Point(i) - pts[j];
+					float dist_sq = MathLib::dot(v, v);
+					if (dist_sq < min_dist)
+					{
+						min_dist = dist_sq;
+						min_bucket = j;
+					}
+				}
+
+				BOOST_ASSERT(min_bucket >= 0);
+				bucket_idx[i] = min_bucket;
+			}
+
+			// Calculate new buckets based on centroids of clusters...
+			for (uint32_t i = 0; i < buckets; ++ i)
+			{
+				num_pts[i] = 0;
+				new_pts[i] = float4(0, 0, 0, 0);
+				for (uint32_t j = 0; j < cluster.NumValidPoints(); ++ j)
+				{
+					if (bucket_idx[j] == i)
+					{
+						++ num_pts[i];
+						new_pts[i] = new_pts[i] + cluster.Point(j);
+					}
+				}
+
+				// If there are no points in this cluster, then it should
+				// remain the same as last time and avoid a divide by zero.
+				if (0 != num_pts[i])
+				{
+					new_pts[i] /= static_cast<float>(num_pts[i]);
+				}
+			}
+
+			// If we haven't changed, then we're done.
+			fixed = true;
+			for (uint32_t i = 0; i < buckets; ++ i)
+			{
+				if (pts[i] != new_pts[i])
+				{
+					fixed = false;
+					break;
+				}
+			}
+
+			// Assign the new points to be the old points.
+			for (uint32_t i = 0; i < buckets; ++ i)
+			{
+				pts[i] = new_pts[i];
+			}
+		}
+
+		// If there's only one bucket filled, then just compress for that single color
+		int num_buckets_filled = 0;
+		int last_filled_bucket = -1;
+		for (uint32_t i = 0; i < buckets; ++ i)
+		{
+			if (num_pts[i] > 0)
+			{
+				num_buckets_filled++;
+				last_filled_bucket = i;
+			}
+		}
+
+		BOOST_ASSERT(num_buckets_filled > 0);
+		if (1 == num_buckets_filled)
+		{
+			ARGBColor32 const p = Quantize(pts[last_filled_bucket]);
+			uint64_t best_err = this->CompressSingleColor(mode_info, p, p1, p2, best_pbit_combo);
+
+			// We're assuming all indices will be index 1...
+			for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
+			{
+				best_indices[i] = 1;
+			}
+			return cluster.NumValidPoints() * best_err;
+		}
+
+		// Now that we know the index of each pixel, we can assign the endpoints based
+		// on a least squares fit of the clusters. For more information, take a look
+		// at this article by NVidia: http://developer.download.nvidia.com/compute/
+		// cuda/1.1-Beta/x86_website/projects/dxtc/doc/cuda_dxtc.pdf
+		float asq = 0, bsq = 0, ab = 0;
+		float4 ax(0, 0, 0, 0), bx(0, 0, 0, 0);
+		for (uint32_t i = 0; i < buckets; ++ i)
+		{
+			float4 const x = pts[i];
+			int const n = num_pts[i];
+
+			float const fbi = static_cast<float>(buckets - 1 - i);
+			float const fb = static_cast<float>(buckets - 1);
+			float const fi = static_cast<float>(i);
+			float const fn = static_cast<float>(n);
+
+			float const a = fbi / fb;
+			float const b = fi / fb;
+
+			asq += fn * a * a;
+			bsq += fn * b * b;
+			ab += fn * a * b;
+
+			ax += x * a * fn;
+			bx += x * b * fn;
+		}
+
+		float f = 1 / (asq * bsq - ab * ab);
+		p1 = f * (ax * bsq - bx * ab);
+		p2 = f * (bx * asq - ax * ab);
+
+		this->ClampEndpointsToGrid(mode_info, p1, p2, best_pbit_combo);
+
+#ifdef KLAYGE_DEBUG
+		uint8_t pbit_combo = best_pbit_combo;
+		float4 tp1 = p1;
+		float4 tp2 = p2;
+		this->ClampEndpointsToGrid(mode_info, tp1, tp2, pbit_combo);
+
+		BOOST_ASSERT(p1 == tp1);
+		BOOST_ASSERT(p2 == tp2);
+		BOOST_ASSERT(pbit_combo == best_pbit_combo);
+#endif
+
+		BOOST_ASSERT(best_pbit_combo >= 0);
+
+		return this->OptimizeEndpointsForCluster(mode, cluster,
+			p1, p2, best_indices, best_pbit_combo);
+	}
+
+	// Compress the non-opaque cluster using a generalized cluster fit, and place
+	// the endpoints within p1 and p2. The color indices and alpha indices are
+	// computed as well.
+	uint64_t TexCompressionBC7::CompressCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t* alpha_indices) const
+	{
+		BOOST_ASSERT((4 == mode) || (5 == mode));
+		BOOST_ASSERT(1 == mode_info_[mode].partitions);
+		BOOST_ASSERT(BC67_MAX_NUM_DATA_POINTS == cluster.NumValidPoints());
+		BOOST_ASSERT(mode_info_[mode].rgba_prec.a() > 0);
+
+		// If all the points are the same in the cluster, then we need to figure out
+		// what the best approximation to this point is....
+		BOOST_ASSERT_MSG(!cluster.AllSamePoint(), "We should only be using this function in modes 4 & 5 that have a"
+			"single subset, in which case single colors should have been"
+			"detected much earlier.");
+
+		ModeInfo const & mode_info = mode_info_[mode];
+
+		RGBACluster rgb_cluster(cluster);
+		float alpha_vals[BC67_MAX_NUM_DATA_POINTS] = { 0 };
+
+		float alpha_min = std::numeric_limits<float>::max();
+		float alpha_max = -std::numeric_limits<float>::max();
+		for (uint32_t i = 0; i < rgb_cluster.NumValidPoints(); ++ i)
+		{
+			float4& v = rgb_cluster.Point(i);
+			Rotation(v, this->RotationMode(mode_info));
+
+			alpha_vals[i] = v.w();
+			v.w() = 255.0f;
+
+			alpha_min = std::min(alpha_min, alpha_vals[i]);
+			alpha_max = std::max(alpha_max, alpha_vals[i]);
+		}
+
+		uint8_t dummy_pbit = 0;
+		float4 rgb_p1, rgb_p2;
+		uint64_t rgb_err = this->CompressCluster(mode, rgb_cluster,
+			rgb_p1, rgb_p2, best_indices, dummy_pbit);
+
+		float a1 = alpha_min;
+		float a2 = alpha_max;
+		uint64_t alpha_err = std::numeric_limits<uint64_t>::max();
+
+		std::pair<uint32_t, uint32_t> const * interp_vals
+			= BC67_INTERPOLATION_VALUES[this->NumBitsPerAlpha(mode_info) - 1];
+
+		uint32_t const weight = this->ErrorMetric(mode_info).w();
+
+		uint32_t const num_buckets = (1 << this->NumBitsPerAlpha(mode_info));
+
+		// If they're the same, then we can get them exactly.
+		if (a1 == a2)
+		{
+			uint8_t const a_be = static_cast<uint8_t>(a1);
+
+			// Mode 5 has 8 bits of precision for alpha.
+			if (5 == mode)
+			{
+				for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+				{
+					alpha_indices[i] = 0;
+				}
+
+				alpha_err = 0;
+			}
+			else
+			{
+				BOOST_ASSERT(4 == mode);
+
+				// Mode 4 can be treated like the 6 channel of DXT1 compression.
+				uint32_t a1i = Extend6To8Bits(o_match6_[a_be][1]);
+				uint32_t a2i = Extend6To8Bits(o_match6_[a_be][0]);
+
+				if (1 == index_mode_)
+				{
+					for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+					{
+						alpha_indices[i] = 1;
+					}
+				}
+				else
+				{
+					for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+					{
+						alpha_indices[i] = 2;
+					}
+				}
+
+				uint32_t interp_0 = interp_vals[alpha_indices[0] & 0xFF].first;
+				uint32_t interp_1 = interp_vals[alpha_indices[0] & 0xFF].second;
+
+				uint8_t const ip = (((a1i * interp_0) + (a2i * interp_1) + 32) >> 6) & 0xFF;
+				uint64_t px_err = weight * abs(a_be - ip);
+				px_err *= px_err;
+				alpha_err = 16 * px_err;
+
+				a1 = static_cast<float>(a1i);
+				a2 = static_cast<float>(a2i);
+			}
+		}
+		else
+		{
+			// (a1 != a2)
+			float vals[1 << 3];
+			memset(vals, 0, sizeof(vals));
+
+			uint32_t buckets[BC67_MAX_NUM_DATA_POINTS];
+
+			// Figure out initial positioning.
+			for (uint32_t i = 0; i < num_buckets; ++ i)
+			{
+				float const fi = static_cast<float>(i);
+				float const fb = static_cast<float>(num_buckets - 1);
+				vals[i] = alpha_min + (fi / fb) * (alpha_max - alpha_min);
+			}
+
+			// Assign each value to a bucket
+			for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+			{
+
+				float min_dist = 255;
+				for (uint32_t j = 0; j < num_buckets; ++ j)
+				{
+					float dist = abs(alpha_vals[i] - vals[j]);
+					if (dist < min_dist)
+					{
+						min_dist = dist;
+						buckets[i] = j;
+					}
+				}
+			}
+
+			float npts[1 << 3];
+
+			// Do k-means
+			bool fixed = false;
+			while (!fixed)
+			{
+				memset(npts, 0, sizeof(npts));
+
+				float avg[1 << 3];
+				memset(avg, 0, sizeof(avg));
+
+				// Calculate average of each cluster
+				for (uint32_t i = 0; i < num_buckets; ++ i)
+				{
+					for (uint32_t j = 0; j < BC67_MAX_NUM_DATA_POINTS; ++ j)
+					{
+						if (buckets[j] == i)
+						{
+							avg[i] += alpha_vals[j];
+							npts[i] += 1;
+						}
+					}
+
+					if (npts[i] > 0)
+					{
+						avg[i] /= npts[i];
+					}
+				}
+
+				// Did we change anything?
+				fixed = true;
+				for (uint32_t i = 0; i < num_buckets; ++ i)
+				{
+					fixed = fixed && (avg[i] == vals[i]);
+					if (!fixed)
+					{
+						break;
+					}
+				}
+
+				// Reassign indices...
+				memcpy(vals, avg, sizeof(vals));
+
+				// Reassign each value to a bucket
+				for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+				{
+					float min_dist = 255.0f;
+					for (uint32_t j = 0; j < num_buckets; ++ j)
+					{
+						float dist = abs(alpha_vals[i] - vals[j]);
+						if (dist < min_dist)
+						{
+							min_dist = dist;
+							buckets[i] = j;
+						}
+					}
+				}
+			}
+
+			// Do least squares fit of vals.
+			float asq = 0, bsq = 0, ab = 0;
+			float ax = 0, bx = 0;
+			for (uint32_t i = 0; i < num_buckets; ++ i)
+			{
+				float const fbi = static_cast<float>(num_buckets - 1 - i);
+				float const fb = static_cast<float>(num_buckets - 1);
+				float const fi = static_cast<float>(i);
+
+				float a = fbi / fb;
+				float b = fi / fb;
+
+				float n = npts[i];
+				float x = vals[i];
+
+				asq += n * a * a;
+				bsq += n * b * b;
+				ab += n * a * b;
+
+				ax += x * a * n;
+				bx += x * b * n;
+			}
+
+			float f = 1.0f / (asq * bsq - ab * ab);
+			a1 = f * (ax * bsq - bx * ab);
+			a2 = f * (bx * asq - ax * ab);
+
+			a1 = MathLib::clamp(a1, 0.0f, 255.0f);
+			a2 = MathLib::clamp(a2, 0.0f, 255.0f);
+
+			int8_t const maskSeed = -0x7F;
+			uint8_t const a1b = QuantizeChannel(static_cast<uint8_t>(a1), (maskSeed >> (mode_info.rgba_prec.a() - 1)));
+			uint8_t const a2b = QuantizeChannel(static_cast<uint8_t>(a2), (maskSeed >> (mode_info.rgba_prec.a() - 1)));
+
+			// Compute error
+			alpha_err = 0;
+			for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
+			{
+				uint8_t val = static_cast<uint8_t>(alpha_vals[i]);
+
+				uint64_t min_err = std::numeric_limits<uint64_t>::max();
+				int best_bucket = -1;
+
+				for (uint32_t j = 0; j < num_buckets; ++ j)
+				{
+					uint32_t interp_0 = interp_vals[j].first;
+					uint32_t interp_1 = interp_vals[j].second;
+
+					uint8_t const ip = (((a1b * interp_0) + (a2b * interp_1) + 32) >> 6) & 0xFF;
+					uint64_t px_err = weight * abs(val - ip);
+					px_err *= px_err;
+
+					if (px_err < min_err)
+					{
+						min_err = px_err;
+						best_bucket = j;
+					}
+				}
+
+				alpha_err += min_err;
+				alpha_indices[i] = static_cast<uint8_t>(best_bucket);
+			}
+		}
+
+		for (uint32_t i = 0; i < p1.size(); ++ i)
+		{
+			p1[i] = (i == (p1.size() - 1)) ? a1 : rgb_p1[i];
+			p2[i] = (i == (p2.size() - 1)) ? a2 : rgb_p2[i];
+		}
+
+		return rgb_err + alpha_err;
+	}
+
+	void TexCompressionBC7::ClampEndpoints(float4& p1, float4& p2) const
+	{
+		for (uint32_t i = 0; i < 4; ++ i)
+		{
+			MathLib::clamp(p1[i], 0.0f, 255.0f);
+			MathLib::clamp(p2[i], 0.0f, 255.0f);
+		}
+	}
+
+	// This function takes two endpoints in the continuous domain (as floats) and
+	// clamps them to the nearest grid points based on the compression mode (and
+	// possible pbit values)
+	void TexCompressionBC7::ClampEndpointsToGrid(ModeInfo const & mode_info,
+			float4& p1, float4& p2, uint8_t& best_pbit_combo) const
+	{
+		int const pbit_combos = this->NumPbitCombos(mode_info);
+		bool const has_pbits = pbit_combos > 1;
+		ARGBColor32 const qmask = this->QuantizationMask(mode_info);
+
+		this->ClampEndpoints(p1, p2);
+
+		// !SPEED! This can be faster.
+		float min_dist = std::numeric_limits<float>::max();
+		float4 bp1, bp2;
+		for (int i = 0; i < pbit_combos; ++ i)
+		{
+			ARGBColor32 qp1, qp2;
+			if (has_pbits)
+			{
+				qp1 = Quantize(p1, qmask, this->PBitCombo(mode_info, i)[0]);
+				qp2 = Quantize(p2, qmask, this->PBitCombo(mode_info, i)[1]);
+			}
+			else
+			{
+				qp1 = Quantize(p1, qmask);
+				qp2 = Quantize(p2, qmask);
+			}
+
+			float4 np1 = FromARGBColor32(qp1);
+			float4 np2 = FromARGBColor32(qp2);
+
+			float4 d1 = np1 - p1;
+			float4 d2 = np2 - p2;
+			float dist = MathLib::dot(d1, d1) + MathLib::dot(d2, d2);
+			if (dist < min_dist)
+			{
+				min_dist = dist;
+				bp1 = np1;
+				bp2 = np2;
+				best_pbit_combo = static_cast<uint8_t>(i);
+			}
+		}
+
+		p1 = bp1;
+		p2 = bp2;
+	}
+
+	uint64_t TexCompressionBC7::TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
+			CompressParams& params, uint32_t shape_index, RGBACluster& cluster)
+	{
+		sa_steps_ = simulated_annealing_steps;
+		error_metric_ = metric;
+		rotate_mode_ = 0;
+		index_mode_ = 0;
+
+		ModeInfo const & mode_info = mode_info_[mode];
+		int const partitions = mode_info.partitions;
+
+		params = CompressParams(shape_index);
+
+		uint64_t total_err = 0;
+		for (int cidx = 0; cidx < partitions; ++ cidx)
+		{
+			uint8_t indices[BC67_MAX_NUM_DATA_POINTS] = { 0 };
+			cluster.Partition(cidx);
+
+			if (mode_info.rotation_bits != 0)
+			{
+				BOOST_ASSERT(1 == partitions);
+
+				uint8_t alpha_indices[BC67_MAX_NUM_DATA_POINTS];
+
+				uint64_t best_err = std::numeric_limits<uint64_t>::max();
+				for (int rot_mode = 0; rot_mode < 4; ++ rot_mode)
+				{
+					rotate_mode_ = rot_mode;
+
+					int const idx_modes = (4 == mode) ? 2 : 1;
+					for (int idx_mode = 0; idx_mode < idx_modes; ++ idx_mode)
+					{
+						index_mode_ = idx_mode;
+
+						float4 v1, v2;
+						uint64_t error = this->CompressCluster(mode, cluster, v1, v2, indices, alpha_indices);
+
+						if (error < best_err)
+						{
+							best_err = error;
+
+							memcpy(params.indices[cidx], indices, sizeof(indices));
+							memcpy(params.alpha_indices, alpha_indices, sizeof(alpha_indices));
+
+							params.rotation_mode = static_cast<int8_t>(rot_mode);
+							params.index_mode = static_cast<int8_t>(idx_mode);
+
+							params.p1[cidx] = v1;
+							params.p2[cidx] = v2;
+						}
+					}
+				}
+
+				total_err += best_err;
+			}
+			else
+			{
+				total_err += this->CompressCluster(mode, cluster, params.p1[cidx], params.p2[cidx],
+					indices, params.pbit_combo[cidx]);
+
+				// Map the indices to their proper position.
+				int idx = 0;
+				for (int i = 0; i < 16; ++ i)
+				{
+					int subs = GetPartition(mode_info.partitions, shape_index, i);
+					if (subs == cidx)
+					{
+						params.indices[cidx][i] = indices[idx];
+						++ idx;
+					}
+				}
+			}
+		}
+
+		return total_err;
+	}
+
 	uint8_t TexCompressionBC7::Unquantize(uint8_t comp, size_t prec) const
 	{
 		BOOST_ASSERT((0 < prec) && (prec <= 8));
@@ -1871,7 +3821,7 @@ namespace KlayGE
 
 		ARGBColor32 out;
 
-		int const * weights = bc67_prec_weights[wc_prec - 2];
+		int const * weights = BC67_PREC_WEIGHTS[wc_prec - 2];
 		out.r() = static_cast<uint8_t>((c0.r() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.r() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 		out.g() = static_cast<uint8_t>((c0.g() * (BC7_WEIGHT_MAX - weights[wc])
@@ -1879,7 +3829,7 @@ namespace KlayGE
 		out.b() = static_cast<uint8_t>((c0.b() * (BC7_WEIGHT_MAX - weights[wc])
 			+ c1.b() * weights[wc] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 
-		weights = bc67_prec_weights[wa_prec - 2];
+		weights = BC67_PREC_WEIGHTS[wa_prec - 2];
 		out.a() = static_cast<uint8_t>((c0.a() * (BC7_WEIGHT_MAX - weights[wa])
 			+ c1.a() * weights[wa] + BC7_WEIGHT_ROUND) >> BC7_WEIGHT_SHIFT);
 

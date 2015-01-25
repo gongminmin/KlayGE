@@ -170,4 +170,257 @@ namespace KlayGE
 			decoded_tex->CopyToTexture(*out_tex);
 		}
 	}
+
+	
+	RGBACluster::RGBACluster(ARGBColor32 const * pixels, uint32_t num,
+			function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition)
+		: get_partition_(get_partition)
+	{
+		for (uint32_t i = 0; i < num; ++ i)
+		{
+			data_pixels_[i] = pixels[i];
+			data_points_[i] = FromARGBColor32(pixels[i]);
+		}
+		this->Recalculate(false);
+	}
+
+	// Returns the principal axis for this point cluster.
+	uint32_t RGBACluster::PrincipalAxis(float4& axis, float* eig_one, float* eig_two) const
+	{
+		// We use these vectors for calculating the covariance matrix...
+		array<float4, MAX_NUM_DATA_POINTS> to_pts;
+		float4 to_pts_max(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),
+			-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+		for (uint32_t i = 0; i < this->NumValidPoints(); ++ i)
+		{
+			to_pts[i] = this->Point(i) - this->Avg();
+			to_pts_max = MathLib::maximize(to_pts_max, to_pts[i]);
+		}
+
+		// Generate a list of unique points...
+		array<float4, MAX_NUM_DATA_POINTS> upts;
+		uint32_t upts_idx = 0;
+		for (uint32_t i = 0; i < this->NumValidPoints(); ++ i)
+		{
+			bool has_pt = false;
+			for (uint32_t j = 0; j < upts_idx; ++ j)
+			{
+				if (upts[j] == this->Point(i))
+				{
+					has_pt = true;
+					break;
+				}
+			}
+
+			if (!has_pt)
+			{
+				upts[upts_idx] = this->Point(i);
+				++ upts_idx;
+			}
+		}
+
+		BOOST_ASSERT(upts_idx > 0);
+
+		if (1 == upts_idx)
+		{
+			axis.x() = axis.y() = axis.z() = axis.w() = 0;
+			return 0;
+
+			// Collinear?
+		}
+		else
+		{
+			float4 dir = MathLib::normalize(upts[1] - upts[0]);
+			bool collinear = true;
+			for (uint32_t i = 2; i < this->NumValidPoints(); ++ i)
+			{
+				float4 v = upts[i] - upts[0];
+				if (!MathLib::equal(abs(MathLib::dot(v, dir)), MathLib::length(v)))
+				{
+					collinear = false;
+					break;
+				}
+			}
+
+			if (collinear)
+			{
+				axis = dir;
+				return 0;
+			}
+		}
+
+		float4x4 cov_matrix;
+
+		// Compute covariance.
+		for (uint32_t i = 0; i < 4; ++ i)
+		{
+			for (uint32_t j = 0; j <= i; ++ j)
+			{
+				float sum = 0;
+				for (uint32_t k = 0; k < this->NumValidPoints(); ++ k)
+				{
+					sum += to_pts[k][i] * to_pts[k][j];
+				}
+
+				cov_matrix(i, j) = sum / 3;
+				cov_matrix(j, i) = cov_matrix(i, j);
+			}
+		}
+
+		uint32_t iters = this->PowerMethod(cov_matrix, axis, eig_one);
+		if ((eig_two != nullptr) && (eig_one != nullptr))
+		{
+			if (*eig_one != 0)
+			{
+				float4x4 reduced;
+				for (uint32_t j = 0; j < 4; ++ j)
+				{
+					for (uint32_t i = 0; i < 4; ++ i)
+					{
+						reduced(i, j) = axis[j] * axis[i];
+					}
+				}
+
+				reduced = cov_matrix - ((*eig_one) * reduced);
+				bool all_zero = true;
+				for (uint32_t i = 0; i < 16; ++ i)
+				{
+					if (abs(reduced[i]) > 0.0005f)
+					{
+						all_zero = false;
+						break;
+					}
+				}
+
+				if (all_zero)
+				{
+					*eig_two = 0;
+				}
+				else
+				{
+					float4 dummy_dir;
+					iters += this->PowerMethod(reduced, dummy_dir, eig_two);
+				}
+			}
+			else
+			{
+				*eig_two = 0;
+			}
+		}
+
+		return iters;
+	}
+
+	void RGBACluster::Partition(uint32_t part)
+	{
+		selected_partition_ = part;
+		this->Recalculate(true);
+	}
+
+	void RGBACluster::Recalculate(bool consider_valid)
+	{
+		num_valid_points_ = 0;
+		avg_ = float4(0, 0, 0, 0);
+		min_clr_ = float4(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+			std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+		max_clr_ = float4(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),
+			-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
+
+		uint32_t map = 0;
+		for (uint32_t i = 0; i < data_points_.size(); ++ i)
+		{
+			if (consider_valid && !this->IsPointValid(i))
+			{
+				continue;
+			}
+
+			float4 const & p = data_points_[i];
+
+			++ num_valid_points_;
+			avg_ += p;
+			point_map_[map] = static_cast<uint8_t>(i);
+			++ map;
+
+			min_clr_ = MathLib::minimize(min_clr_, p);
+			max_clr_ = MathLib::maximize(max_clr_, p);
+		}
+
+		avg_ /= static_cast<float>(num_valid_points_);
+	}
+
+	// Does power iteration to determine the principal eigenvector and eigenvalue.
+	// Returns them in eigVec and eigVal after kMaxNumIterations
+	int RGBACluster::PowerMethod(float4x4 const & mat, float4& eig_vec, float* eig_val) const
+	{
+		static int const ITER_POWER = 4;
+
+		float4 b;
+		float norm = 0.5f;
+		for (int i = 0; i < 4; ++ i)
+		{
+			b[i] = norm;
+		}
+
+		bool bad_eigen_value = false;
+		bool fixed = false;
+		int num_iterations = 1;
+		while (!fixed && (num_iterations < ITER_POWER))
+		{
+			float4 new_b = MathLib::transform(b, mat);
+
+			// !HACK! If the principal eigenvector of the matrix
+			// converges to zero, that could mean that there is no
+			// principal eigenvector. However, that may be due to
+			// poor initialization of the random vector, so rerandomize
+			// and try again.
+			float const new_b_len = MathLib::length(new_b);
+			if (new_b_len < 1e-6f)
+			{
+				if (bad_eigen_value)
+				{
+					eig_vec = b;
+					if (eig_val)
+					{
+						*eig_val = 0;
+					}
+					return num_iterations;
+				}
+
+				for (int i = 0; i < 2; ++ i)
+				{
+					b[i] = 1;
+				}
+
+				b = MathLib::normalize(b);
+				bad_eigen_value = true;
+				continue;
+			}
+
+			new_b = MathLib::normalize(new_b);
+
+			// If the new eigenvector is close enough to the old one,
+			// then we've converged.
+			if (MathLib::equal(1.0f, MathLib::dot(b, new_b)))
+			{
+				fixed = true;
+			}
+
+			// Save and continue.
+			b = new_b;
+
+			++ num_iterations;
+		}
+
+		// Store the eigenvector in the proper variable.
+		eig_vec = b;
+
+		// Store eigenvalue if it was requested
+		if (eig_val)
+		{
+			float4 result = MathLib::transform(b, mat);
+			*eig_val = MathLib::length(result) / MathLib::length(b);
+		}
+
+		return num_iterations;
+	}
 }

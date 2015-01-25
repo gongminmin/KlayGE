@@ -222,19 +222,14 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression
 	{
-	public:
-		TexCompressionBC7();
+		static uint32_t const BC7_MAX_REGIONS = 3;
+		static uint32_t const BC7_NUM_CHANNELS = 4;
+		static uint32_t const BC7_MAX_SHAPES = 64;
 
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
-		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+		static uint32_t const BC7_WEIGHT_MAX = 64;
+		static uint32_t const BC7_WEIGHT_SHIFT = 6;
+		static uint32_t const BC7_WEIGHT_ROUND = 32;
 
-	private:
-		uint8_t Unquantize(uint8_t comp, size_t prec) const;
-		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
-		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
-			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
-
-	private:
 		enum PBitType
 		{
 			PBT_None,
@@ -256,15 +251,81 @@ namespace KlayGE
 			PBitType p_bit_type;
 		};
 
+		struct CompressParams
+		{
+			float4 p1[BC7_MAX_REGIONS], p2[BC7_MAX_REGIONS];
+			uint8_t indices[BC7_MAX_REGIONS][16];
+			uint8_t alpha_indices[16];
+			uint8_t pbit_combo[BC7_MAX_REGIONS];
+			int8_t rotation_mode;
+			int8_t index_mode;
+			uint32_t shape_index;
+
+			CompressParams()
+			{
+			}
+			explicit CompressParams(uint32_t shape)
+				: rotation_mode(-1), index_mode(-1), shape_index(shape)
+			{
+				memset(indices, 0xFF, sizeof(indices));
+				memset(alpha_indices, 0xFF, sizeof(alpha_indices));
+				memset(pbit_combo, 0xFF, sizeof(pbit_combo));
+			}
+		};
+
+	public:
+		TexCompressionBC7();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
+		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+
+	private:
+		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
+		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
+		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
+		void PackBC7Block(int mode, CompressParams& params, void* output);
+		int RotationMode(ModeInfo const & mode_info) const;
+		int NumBitsPerIndex(ModeInfo const & mode_info, int8_t index_mode = -1) const;
+		int NumBitsPerAlpha(ModeInfo const & mode_info, int8_t index_mode = -1) const;
+		uint4 ErrorMetric(ModeInfo const & mode_info) const;
+		ARGBColor32 QuantizationMask(ModeInfo const & mode_info) const;
+		int NumPbitCombos(ModeInfo const & mode_info) const;
+		int const * PBitCombo(ModeInfo const & mode_info, int idx) const;
+		uint64_t OptimizeEndpointsForCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const;
+		void PickBestNeighboringEndpoints(int mode, float4 const & p1, float4 const & p2,
+			int cur_pbit_combo, float4& np1, float4& np2, int& pbit_combo, float step_sz = 1) const;
+		bool AcceptNewEndpointError(uint64_t new_err, uint64_t old_err, float temp) const;
+		uint64_t CompressSingleColor(ModeInfo const & mode_info,
+			ARGBColor32 const & pixel, float4& p1, float4& p2, uint8_t& best_pbit_combo) const;
+		uint64_t CompressCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const;
+		uint64_t CompressCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t *best_indices, uint8_t* alpha_indices) const;
+		void ClampEndpoints(float4& p1, float4& p2) const;
+		void ClampEndpointsToGrid(ModeInfo const & mode_info,
+			float4& p1, float4& p2, uint8_t& best_pbit_combo) const;
+		uint64_t TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
+			CompressParams& params, uint32_t shape_index, RGBACluster& cluster);
+
+		uint8_t Unquantize(uint8_t comp, size_t prec) const;
+		ARGBColor32 Unquantize(ARGBColor32 const & c, ARGBColor32 const & rgba_prec) const;
+		ARGBColor32 Interpolate(ARGBColor32 const & c0, ARGBColor32 const & c1,
+			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
+
+	private:
+		int sa_steps_;
+		TexCompressionErrorMetric error_metric_;
+		int rotate_mode_;
+		int index_mode_;
+
 		static ModeInfo const mode_info_[];
 
-		static uint32_t const BC7_MAX_REGIONS = 3;
-		static uint32_t const BC7_NUM_CHANNELS = 4;
-		static uint32_t const BC7_MAX_SHAPES = 64;
-
-		static uint32_t const BC7_WEIGHT_MAX = 64;
-		static uint32_t const BC7_WEIGHT_SHIFT = 6;
-		static uint32_t const BC7_WEIGHT_ROUND = 32;
+		static uint8_t expand6_[64];
+		static uint8_t expand7_[128];
+		static uint8_t o_match6_[256][2];
+		static uint8_t o_match7_[256][2];
+		static bool lut_inited_;
 	};
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4);
