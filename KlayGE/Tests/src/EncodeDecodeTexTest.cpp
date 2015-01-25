@@ -252,17 +252,17 @@ BOOST_GLOBAL_FIXTURE(EncodeDecodeTexFixture);
 
 BOOST_AUTO_TEST_CASE(DecodeBC1)
 {
-	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc1.dds", EF_BC1, 5);
+	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc1.dds", EF_BC1, 4.7f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC2)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 10);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.2f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC3)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 9);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.9f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC6U)
@@ -277,30 +277,40 @@ BOOST_AUTO_TEST_CASE(DecodeBC6S)
 
 BOOST_AUTO_TEST_CASE(DecodeBC7XRGB)
 {
-	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc7.dds", EF_BC7, 3);
+	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc7.dds", EF_BC7, 2.1f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 5);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 4.6f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeBC1)
 {
-	TestEncodeDecodeTex("Lenna.dds", "", EF_BC1, 5);
+	TestEncodeDecodeTex("Lenna.dds", "", EF_BC1, 4.6f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeBC2)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC2, 10);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC2, 9.1f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeBC3)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC3, 9);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC3, 8.9f);
+}
+
+BOOST_AUTO_TEST_CASE(EncodeDecodeBC7XRGB)
+{
+	TestEncodeDecodeTex("Lenna.dds", "", EF_BC7, 1.8f);
+}
+
+BOOST_AUTO_TEST_CASE(EncodeDecodeBC7ARGB)
+{
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.1f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeETC1)
 {
-	TestEncodeDecodeTex("Lenna.dds", "", EF_ETC1, 5);
+	TestEncodeDecodeTex("Lenna.dds", "", EF_ETC1, 4.8f);
 }
