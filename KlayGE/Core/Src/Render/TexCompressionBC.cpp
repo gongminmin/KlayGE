@@ -2280,6 +2280,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(output);
 		BOOST_ASSERT(input);
+		
+		// Based on FasTC: Accelerated Texture Encoding (http://gamma.cs.unc.edu/FasTC/)
 
 		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
