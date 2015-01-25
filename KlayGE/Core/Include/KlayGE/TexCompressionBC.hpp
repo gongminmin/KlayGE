@@ -284,10 +284,27 @@ namespace KlayGE
 		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
 		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
 		void PackBC7Block(int mode, CompressParams& params, void* output);
+		int RotationMode(ModeInfo const & mode_info) const;
 		int NumBitsPerIndex(ModeInfo const & mode_info, int8_t index_mode = -1) const;
 		int NumBitsPerAlpha(ModeInfo const & mode_info, int8_t index_mode = -1) const;
+		uint4 ErrorMetric(ModeInfo const & mode_info) const;
 		ARGBColor32 QuantizationMask(ModeInfo const & mode_info) const;
+		int NumPbitCombos(ModeInfo const & mode_info) const;
 		int const * PBitCombo(ModeInfo const & mode_info, int idx) const;
+		uint64_t OptimizeEndpointsForCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const;
+		void PickBestNeighboringEndpoints(int mode, float4 const & p1, float4 const & p2,
+			int cur_pbit_combo, float4& np1, float4& np2, int& pbit_combo, float step_sz = 1) const;
+		bool AcceptNewEndpointError(uint64_t new_err, uint64_t old_err, float temp) const;
+		uint64_t CompressSingleColor(ModeInfo const & mode_info,
+			ARGBColor32 const & pixel, float4& p1, float4& p2, uint8_t& best_pbit_combo) const;
+		uint64_t CompressCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t* best_indices, uint8_t& best_pbit_combo) const;
+		uint64_t CompressCluster(int mode, RGBACluster const & cluster,
+			float4& p1, float4& p2, uint8_t *best_indices, uint8_t* alpha_indices) const;
+		void ClampEndpoints(float4& p1, float4& p2) const;
+		void ClampEndpointsToGrid(ModeInfo const & mode_info,
+			float4& p1, float4& p2, uint8_t& best_pbit_combo) const;
 		uint64_t TryCompress(int mode, int simulated_annealing_steps, TexCompressionErrorMetric metric,
 			CompressParams& params, uint32_t shape_index, RGBACluster& cluster);
 
@@ -297,6 +314,9 @@ namespace KlayGE
 			size_t wc, size_t wa, size_t wc_prec, size_t wa_prec) const;
 
 	private:
+		int sa_steps_;
+		TexCompressionErrorMetric error_metric_;
+		int rotate_mode_;
 		int index_mode_;
 
 		static ModeInfo const mode_info_[];
