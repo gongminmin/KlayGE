@@ -235,7 +235,7 @@ namespace KlayGE
 			for (uint32_t i = 2; i < this->NumValidPoints(); ++ i)
 			{
 				float4 v = upts[i] - upts[0];
-				if (!MathLib::equal(abs(MathLib::dot(v, dir)), MathLib::length(v)))
+				if (!MathLib::equal(MathLib::abs(MathLib::dot(v, dir)), MathLib::length(v)))
 				{
 					collinear = false;
 					break;
