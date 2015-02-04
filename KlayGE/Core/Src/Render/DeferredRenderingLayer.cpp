@@ -926,8 +926,14 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 		if (caps.pack_to_rgba_required)
 		{
-			pvp.g_buffer_depth_pingpong_tex = rf.MakeTexture2D(width / 2, height / 2, MAX_IL_MIPMAP_LEVELS, 1,
-				depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);			
+			// Workaround for some HWs that don't support render-to-mipmap-level
+			pvp.g_buffer_depth_pingpong_texs.resize(MAX_IL_MIPMAP_LEVELS);
+			for (int i = 0; i < MAX_IL_MIPMAP_LEVELS; ++ i)
+			{
+				pvp.g_buffer_depth_pingpong_texs[i] = rf.MakeTexture2D(
+					pvp.g_buffer_depth_tex->Width(i + 1), pvp.g_buffer_depth_tex->Height(i + 1), 1, 1,
+					depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			}
 		}
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
 			EAH_GPU_Read, nullptr);
@@ -2332,11 +2338,11 @@ namespace KlayGE
 				uint32_t height = pvp.g_buffer_depth_tex->Height(i - 1);
 				depth_mipmap_pp_->SetParam(0, float2(0.5f / width, 0.5f / height));
 
-				depth_mipmap_pp_->OutputPin(0, pvp.g_buffer_depth_pingpong_tex, i - 1);
+				depth_mipmap_pp_->OutputPin(0, pvp.g_buffer_depth_pingpong_texs[i - 1], 0);
 				depth_mipmap_pp_->Apply();
 
-				pvp.g_buffer_depth_pingpong_tex->CopyToSubTexture2D(*pvp.g_buffer_depth_tex, 0, i, 0, 0, width / 2, height / 2,
-					0, i - 1, 0, 0, width / 2, height / 2);
+				pvp.g_buffer_depth_pingpong_texs[i - 1]->CopyToSubTexture2D(*pvp.g_buffer_depth_tex, 0, i, 0, 0, width / 2, height / 2,
+					0, 0, 0, 0, width / 2, height / 2);
 			}
 		}
 		else

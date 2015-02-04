@@ -66,7 +66,7 @@ namespace KlayGE
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
-		TexturePtr g_buffer_depth_pingpong_tex;
+		std::vector<TexturePtr> g_buffer_depth_pingpong_texs;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
