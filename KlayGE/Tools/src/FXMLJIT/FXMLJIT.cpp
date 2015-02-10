@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
-#include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -55,6 +54,8 @@ namespace KlayGE
 	namespace filesystem = boost::filesystem;
 }
 #endif
+
+#include "OfflineRenderEffect.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -96,33 +97,97 @@ int main(int argc, char* argv[])
 
 	std::string platform = argv[1];
 
-	Context::Instance().LoadCfg("KlayGE.cfg");
-	ContextCfg context_cfg = Context::Instance().Config();
-	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform))
+	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform)
+		|| ("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform)
+		|| ("android_tegra3" == platform) || ("ios" == platform))
 	{
-		context_cfg.render_factory_name = "D3D11";
 		if ("pc_dx11" == platform)
 		{
-			context_cfg.graphics_cfg.options = "level:11_0";
+			platform = "win_d3d_11_0";
 		}
 		else if ("pc_dx10" == platform)
 		{
-			context_cfg.graphics_cfg.options = "level:10_0";
+			platform = "win_d3d_10_0";
 		}
 		else if ("pc_dx9" == platform)
 		{
-			context_cfg.graphics_cfg.options = "level:9_3";
+			platform = "win_d3d_9_3";
 		}
 		else if ("win_tegra3" == platform)
+		{
+			platform = "win_d3d_9_1";
+		}
+		else if ("pc_gl4" == platform)
+		{
+			platform = "any_gl_4_0";
+		}
+		else if ("pc_gl3" == platform)
+		{
+			platform = "any_gl_3_0";
+		}
+		else if ("pc_gl2" == platform)
+		{
+			platform = "any_gl_2_0";
+		}
+		else if ("android_tegra3" == platform)
+		{
+			platform = "android_gles_2_0";
+		}
+		else if ("ios" == platform)
+		{
+			platform = "ios_gles_2_0";
+		}
+	}
+
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	if (("win_d3d_11_1" == platform) || ("win_d3d_11_0" == platform)
+		|| ("win_d3d_10_1" == platform) || ("win_d3d_10_0" == platform)
+		|| ("win_d3d_9_3" == platform) || ("win_d3d_9_2" == platform) || ("win_d3d_9_1" == platform))
+	{
+		context_cfg.render_factory_name = "D3D11";
+		if ("win_d3d_11_1" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:11_1";
+		}
+		else if ("win_d3d_11_0" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:11_0";
+		}
+		else if ("win_d3d_10_1" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:10_1";
+		}
+		else if ("win_d3d_10_0" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:10_0";
+		}
+		else if ("win_d3d_9_3" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:9_3";
+		}
+		else if ("win_d3d_9_2" == platform)
+		{
+			context_cfg.graphics_cfg.options = "level:9_2";
+		}
+		else if ("win_d3d_9_1" == platform)
 		{
 			context_cfg.graphics_cfg.options = "level:9_1";
 		}
 	}
-	else if (("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform))
+	else if (("any_gl_4_5" == platform) || ("any_gl_4_4" == platform)
+		|| ("any_gl_4_3" == platform) || ("any_gl_4_2" == platform)
+		|| ("any_gl_4_1" == platform) || ("any_gl_4_0" == platform)
+		|| ("any_gl_3_3" == platform) || ("any_gl_3_2" == platform)
+		|| ("any_gl_3_1" == platform) || ("any_gl_3_0" == platform)
+		|| ("any_gl_2_1" == platform) || ("any_gl_2_0" == platform))
 	{
 		context_cfg.render_factory_name = "OpenGL";
 	}
-	else if (("android_tegra3" == platform) || ("ios" == platform))
+	else if (("android_gles_3_1" == platform) || ("android_gles_3_0" == platform)
+		|| ("android_gles_2_0" == platform)
+		|| ("ios_gles_3_1" == platform) || ("ios_gles_3_0" == platform)
+		|| ("ios_gles_2_0" == platform))
 	{
 		context_cfg.render_factory_name = "OpenGLES";
 	}
@@ -197,7 +262,8 @@ int main(int argc, char* argv[])
 
 	if (!skip_jit)
 	{
-		SyncLoadRenderEffect(fxml_name);
+		Offline::RenderEffect effect(platform);
+		effect.Load(fxml_name);
 	}
 	if (!target_folder.empty())
 	{
