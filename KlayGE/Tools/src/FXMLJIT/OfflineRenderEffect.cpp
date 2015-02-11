@@ -57,9 +57,10 @@
 #pragma warning(pop)
 #endif
 
-#include "OfflineD3D11ShaderObject.hpp"
 #include "OfflineShaderObject.hpp"
 #include "OfflineRenderEffect.hpp"
+#include "OfflineD3D11ShaderObject.hpp"
+#include "OfflineOGLShaderObject.hpp"
 
 namespace
 {
@@ -2122,177 +2123,215 @@ namespace KlayGE
 
 		RenderEffect::RenderEffect(std::string const & platform)
 		{
-			if ("win_d3d_11_1" == platform)
+			caps_.platform = platform;
+
+			if (0 == platform.find("win_d3d_"))
 			{
+				caps_.requires_flipping = true;
+				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
+				caps_.native_shader_version = 5;
+
+				if ("win_d3d_11_1" == platform)
+				{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-				caps_.feature_level = D3D_FEATURE_LEVEL_11_1;
+					caps_.feature_level = D3D_FEATURE_LEVEL_11_1;
 #else
-				caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
+					caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
 #endif
 
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
+					caps_.max_shader_model = 5;
 
-				caps_.max_shader_model = 5;
+					caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+					caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
 
-				caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-				caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
 
-				caps_.standard_derivatives_support = true;
-				caps_.shader_texture_lod_support = true;
-				caps_.fp_color_support = true;
-				caps_.pack_to_rgba_required = false;
+					caps_.gs_support = true;
+					caps_.cs_support = true;
+					caps_.hs_support = true;
+					caps_.ds_support = true;
+				}
+				else if ("win_d3d_11_0" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
 
-				caps_.gs_support = true;
-				caps_.cs_support = true;
-				caps_.hs_support = true;
-				caps_.ds_support = true;
+					caps_.max_shader_model = 5;
+
+					caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+					caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
+
+					caps_.gs_support = true;
+					caps_.cs_support = true;
+					caps_.hs_support = true;
+					caps_.ds_support = true;
+				}
+				else if ("win_d3d_10_1" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_10_1;
+
+					caps_.max_shader_model = 4;
+
+					caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+					caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
+
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
+
+					caps_.gs_support = true;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if ("win_d3d_10_0" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_10_0;
+
+					caps_.max_shader_model = 4;
+
+					caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
+					caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
+
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
+
+					caps_.gs_support = true;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if ("win_d3d_9_3" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_9_3;
+
+					caps_.max_shader_model = 2;
+
+					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = 1;
+					caps_.max_pixel_texture_units = 16;
+
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = false;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = true;
+
+					caps_.gs_support = false;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if ("win_d3d_9_2" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_9_2;
+
+					caps_.max_shader_model = 2;
+
+					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = 1;
+					caps_.max_pixel_texture_units = 16;
+
+					caps_.standard_derivatives_support = false;
+					caps_.shader_texture_lod_support = false;
+					caps_.fp_color_support = false;
+					caps_.pack_to_rgba_required = true;
+
+					caps_.gs_support = false;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if ("win_d3d_9_1" == platform)
+				{
+					caps_.feature_level = D3D_FEATURE_LEVEL_9_1;
+
+					caps_.max_shader_model = 2;
+
+					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
+					caps_.max_texture_array_length = 1;
+					caps_.max_pixel_texture_units = 16;
+
+					caps_.standard_derivatives_support = false;
+					caps_.shader_texture_lod_support = false;
+					caps_.fp_color_support = false;
+					caps_.pack_to_rgba_required = true;
+
+					caps_.gs_support = false;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
 			}
-			else if ("win_d3d_11_0" == platform)
+			else if (0 == platform.find("any_gl_"))
 			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
+				if (0 == platform.find("any_gl_4_"))
+				{
+					caps_.max_shader_model = 4; // TODO
 
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
+					caps_.max_texture_depth = 2048;
+					caps_.max_texture_array_length = 1; // TODO
+					caps_.max_pixel_texture_units = 16;
 
-				caps_.max_shader_model = 5;
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
 
-				caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-				caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.gs_support = true;
+					caps_.cs_support = false; // TODO
+					caps_.hs_support = false; // TODO
+					caps_.ds_support = false; // TODO
+				}
+				else if (0 == platform.find("any_gl_3_"))
+				{
+					caps_.max_shader_model = 4;
 
-				caps_.standard_derivatives_support = true;
-				caps_.shader_texture_lod_support = true;
-				caps_.fp_color_support = true;
-				caps_.pack_to_rgba_required = false;
+					caps_.max_texture_depth = 2048;
+					caps_.max_texture_array_length = 1; // TODO
+					caps_.max_pixel_texture_units = 16;
 
-				caps_.gs_support = true;
-				caps_.cs_support = true;
-				caps_.hs_support = true;
-				caps_.ds_support = true;
-			}
-			else if ("win_d3d_10_1" == platform)
-			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_10_1;
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
 
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
+					caps_.gs_support = true;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if (0 == platform.find("any_gl_2_"))
+				{
+					caps_.max_shader_model = 2;
 
-				caps_.max_shader_model = 4;
+					caps_.max_texture_depth = 256;
+					caps_.max_texture_array_length = 1; // TODO
+					caps_.max_pixel_texture_units = 16;
 
-				caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-				caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.standard_derivatives_support = false;
+					caps_.shader_texture_lod_support = false;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = true;
 
-				caps_.standard_derivatives_support = true;
-				caps_.shader_texture_lod_support = true;
-				caps_.fp_color_support = true;
-				caps_.pack_to_rgba_required = false;
-
-				caps_.gs_support = true;
-				caps_.cs_support = false;
-				caps_.hs_support = false;
-				caps_.ds_support = false;
-			}
-			else if ("win_d3d_10_0" == platform)
-			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_10_0;
-
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
-
-				caps_.max_shader_model = 4;
-
-				caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-				caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
-
-				caps_.standard_derivatives_support = true;
-				caps_.shader_texture_lod_support = true;
-				caps_.fp_color_support = true;
-				caps_.pack_to_rgba_required = false;
-
-				caps_.gs_support = true;
-				caps_.cs_support = false;
-				caps_.hs_support = false;
-				caps_.ds_support = false;
-			}
-			else if ("win_d3d_9_3" == platform)
-			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_9_3;
-
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
-
-				caps_.max_shader_model = 2;
-
-				caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = 1;
-				caps_.max_pixel_texture_units = 16;
-
-				caps_.standard_derivatives_support = true;
-				caps_.shader_texture_lod_support = false;
-				caps_.fp_color_support = true;
-				caps_.pack_to_rgba_required = true;
-
-				caps_.gs_support = false;
-				caps_.cs_support = false;
-				caps_.hs_support = false;
-				caps_.ds_support = false;
-			}
-			else if ("win_d3d_9_2" == platform)
-			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_9_2;
-
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
-
-				caps_.max_shader_model = 2;
-
-				caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = 1;
-				caps_.max_pixel_texture_units = 16;
-
-				caps_.standard_derivatives_support = false;
-				caps_.shader_texture_lod_support = false;
-				caps_.fp_color_support = false;
-				caps_.pack_to_rgba_required = true;
-
-				caps_.gs_support = false;
-				caps_.cs_support = false;
-				caps_.hs_support = false;
-				caps_.ds_support = false;
-			}
-			else if ("win_d3d_9_1" == platform)
-			{
-				caps_.feature_level = D3D_FEATURE_LEVEL_9_1;
-
-				caps_.requires_flipping = true;
-				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-				caps_.native_shader_version = 5;
-
-				caps_.max_shader_model = 2;
-
-				caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-				caps_.max_texture_array_length = 1;
-				caps_.max_pixel_texture_units = 16;
-
-				caps_.standard_derivatives_support = false;
-				caps_.shader_texture_lod_support = false;
-				caps_.fp_color_support = false;
-				caps_.pack_to_rgba_required = true;
-
-				caps_.gs_support = false;
-				caps_.cs_support = false;
-				caps_.hs_support = false;
-				caps_.ds_support = false;
+					caps_.gs_support = false;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
 			}
 		}
 
@@ -3634,7 +3673,7 @@ namespace KlayGE
 			}
 			else if ("OpenGL" == rf_name)
 			{
-				// TODO
+				shader_obj_ = MakeSharedPtr<OGLShaderObject>(effect_.TargetDeviceCaps());
 			}
 			else if ("OpenGLES" == rf_name)
 			{

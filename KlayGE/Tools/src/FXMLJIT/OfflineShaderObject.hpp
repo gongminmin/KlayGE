@@ -52,6 +52,8 @@ namespace KlayGE
 #endif
 		struct OfflineRenderDeviceCaps
 		{
+			std::string platform;
+
 			uint32_t feature_level;
 			bool requires_flipping;
 			uint32_t native_shader_fourcc;
@@ -72,6 +74,9 @@ namespace KlayGE
 			bool cs_support : 1;
 			bool hs_support : 1;
 			bool ds_support : 1;
+
+			bool bc4_support : 1;
+			bool bc5_support : 1;
 		};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)

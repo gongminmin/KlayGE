@@ -165,4 +165,4 @@ namespace KlayGE
 	}
 }
 
-#endif			// _D3D11SHADEROBJECT_HPP
+#endif			// _OFFLINED3D11SHADEROBJECT_HPP
