@@ -2537,17 +2537,17 @@ namespace KlayGE
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
 						rules &= ~GSR_MatrixType;
-						rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
 						rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
 						if (!glloader_GLES_VERSION_3_0())
 						{
-							rules |= glloader_GLES_EXT_shader_texture_lod() ? GSR_EXTShaderTextureLod : 0;
-							rules |= glloader_GLES_OES_standard_derivatives() ? GSR_OESStandardDerivatives : 0;
-							rules |= glloader_GLES_EXT_draw_buffers() ? GSR_EXTDrawBuffers : 0;
+							rules |= caps.shader_texture_lod_support ? GSR_EXTShaderTextureLod : 0;
+							rules |= caps.standard_derivatives_support ? GSR_OESStandardDerivatives : 0;
+							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
 						else
 						{
+							rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
 							if (re.HackForAngle())
 							{
 								rules &= ~GSR_UseUBO;

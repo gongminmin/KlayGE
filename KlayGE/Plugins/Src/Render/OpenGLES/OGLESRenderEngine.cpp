@@ -1593,7 +1593,7 @@ namespace KlayGE
 			caps_.max_texture_anisotropy = 1;
 		}
 
-		if (glloader_GLES_VERSION_3_0())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_draw_buffers())
 		{
 			glGetIntegerv(GL_MAX_DRAW_BUFFERS, &temp);
 			caps_.max_simultaneous_rts = static_cast<uint8_t>(temp);
