@@ -53,8 +53,9 @@ namespace KlayGE
 		struct OfflineRenderDeviceCaps
 		{
 			std::string platform;
+			uint8_t major_version;
+			uint8_t minor_version;
 
-			uint32_t feature_level;
 			bool requires_flipping;
 			uint32_t native_shader_fourcc;
 			uint32_t native_shader_version;
@@ -64,6 +65,7 @@ namespace KlayGE
 			uint32_t max_texture_depth;
 			uint32_t max_texture_array_length;
 			uint8_t max_pixel_texture_units;
+			uint8_t max_simultaneous_rts;
 
 			bool standard_derivatives_support : 1;
 			bool shader_texture_lod_support : 1;
@@ -77,6 +79,9 @@ namespace KlayGE
 
 			bool bc4_support : 1;
 			bool bc5_support : 1;
+			bool frag_depth_support : 1;
+
+			bool hack_for_angle: 1;
 		};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)

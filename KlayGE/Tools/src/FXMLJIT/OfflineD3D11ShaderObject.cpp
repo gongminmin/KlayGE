@@ -151,7 +151,40 @@ namespace KlayGE
 		{
 			is_shader_validate_.fill(true);
 
-			switch (caps.feature_level)
+			if ("win_d3d_11_1" == caps.platform)
+			{
+#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+				feature_level_ = D3D_FEATURE_LEVEL_11_1;
+#else
+				feature_level_ = D3D_FEATURE_LEVEL_11_0;
+#endif
+			}
+			else if ("win_d3d_11_0" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_11_0;
+			}
+			else if ("win_d3d_10_1" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_10_1;
+			}
+			else if ("win_d3d_10_0" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_10_0;
+			}
+			else if ("win_d3d_9_3" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_9_3;
+			}
+			else if ("win_d3d_9_2" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_9_2;
+			}
+			else if ("win_d3d_9_1" == caps.platform)
+			{
+				feature_level_ = D3D_FEATURE_LEVEL_9_1;
+			}
+
+			switch (feature_level_)
 			{
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			case D3D_FEATURE_LEVEL_11_1:
@@ -657,7 +690,7 @@ namespace KlayGE
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			D3D_FEATURE_LEVEL feature_level = static_cast<D3D_FEATURE_LEVEL>(caps_.feature_level);
+			D3D_FEATURE_LEVEL const feature_level = feature_level_;
 			OfflineRenderDeviceCaps const & caps = caps_;
 
 			std::string max_sm_str;

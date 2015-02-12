@@ -2131,19 +2131,20 @@ namespace KlayGE
 				caps_.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 				caps_.native_shader_version = 5;
 
+				caps_.frag_depth_support = true;
+				caps_.hack_for_angle = false;
+
 				if ("win_d3d_11_1" == platform)
 				{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-					caps_.feature_level = D3D_FEATURE_LEVEL_11_1;
-#else
-					caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
-#endif
+					caps_.major_version = 11;
+					caps_.minor_version = 1;
 
 					caps_.max_shader_model = 5;
 
 					caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
 					caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.max_simultaneous_rts = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2157,13 +2158,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_11_0" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_11_0;
+					caps_.major_version = 11;
+					caps_.minor_version = 0;
 
 					caps_.max_shader_model = 5;
 
 					caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
 					caps_.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.max_simultaneous_rts = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2177,13 +2180,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_10_1" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_10_1;
+					caps_.major_version = 10;
+					caps_.minor_version = 1;
 
 					caps_.max_shader_model = 4;
 
 					caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
 					caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.max_simultaneous_rts = D3D10_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2197,13 +2202,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_10_0" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_10_0;
+					caps_.major_version = 10;
+					caps_.minor_version = 0;
 
 					caps_.max_shader_model = 4;
 
 					caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
 					caps_.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
+					caps_.max_simultaneous_rts = D3D10_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2217,13 +2224,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_9_3" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_9_3;
+					caps_.major_version = 9;
+					caps_.minor_version = 3;
 
 					caps_.max_shader_model = 2;
 
 					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = 1;
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = D3D_FL9_3_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = false;
@@ -2237,13 +2246,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_9_2" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_9_2;
+					caps_.major_version = 9;
+					caps_.minor_version = 2;
 
 					caps_.max_shader_model = 2;
 
 					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = 1;
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = false;
 					caps_.shader_texture_lod_support = false;
@@ -2257,13 +2268,15 @@ namespace KlayGE
 				}
 				else if ("win_d3d_9_1" == platform)
 				{
-					caps_.feature_level = D3D_FEATURE_LEVEL_9_1;
+					caps_.major_version = 9;
+					caps_.minor_version = 1;
 
 					caps_.max_shader_model = 2;
 
 					caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 					caps_.max_texture_array_length = 1;
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT;
 
 					caps_.standard_derivatives_support = false;
 					caps_.shader_texture_lod_support = false;
@@ -2278,13 +2291,47 @@ namespace KlayGE
 			}
 			else if (0 == platform.find("any_gl_"))
 			{
+				caps_.requires_flipping = false;
+				caps_.native_shader_fourcc = MakeFourCC<'G', 'L', 'S', 'L'>::value;
+				caps_.native_shader_version = 3;
+
+				caps_.frag_depth_support = true;
+				caps_.hack_for_angle = false;
+
 				if (0 == platform.find("any_gl_4_"))
 				{
+					caps_.major_version = 4;
+					if ("any_gl_4_5" == platform)
+					{
+						caps_.minor_version = 5;
+					}
+					else if ("any_gl_4_4" == platform)
+					{
+						caps_.minor_version = 4;
+					}
+					else if ("any_gl_4_3" == platform)
+					{
+						caps_.minor_version = 3;
+					}
+					else if ("any_gl_4_2" == platform)
+					{
+						caps_.minor_version = 2;
+					}
+					else if ("any_gl_4_1" == platform)
+					{
+						caps_.minor_version = 1;
+					}
+					else if ("any_gl_4_0" == platform)
+					{
+						caps_.minor_version = 0;
+					}
+
 					caps_.max_shader_model = 4; // TODO
 
 					caps_.max_texture_depth = 2048;
 					caps_.max_texture_array_length = 1; // TODO
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = 8;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2298,11 +2345,30 @@ namespace KlayGE
 				}
 				else if (0 == platform.find("any_gl_3_"))
 				{
+					caps_.major_version = 3;
+					if ("any_gl_3_3" == platform)
+					{
+						caps_.minor_version = 3;
+					}
+					else if ("any_gl_3_2" == platform)
+					{
+						caps_.minor_version = 2;
+					}
+					else if ("any_gl_3_1" == platform)
+					{
+						caps_.minor_version = 1;
+					}
+					else if ("any_gl_3_0" == platform)
+					{
+						caps_.minor_version = 0;
+					}
+
 					caps_.max_shader_model = 4;
 
 					caps_.max_texture_depth = 2048;
 					caps_.max_texture_array_length = 1; // TODO
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = 8;
 
 					caps_.standard_derivatives_support = true;
 					caps_.shader_texture_lod_support = true;
@@ -2316,15 +2382,87 @@ namespace KlayGE
 				}
 				else if (0 == platform.find("any_gl_2_"))
 				{
+					caps_.major_version = 2;
+					if ("any_gl_2_1" == platform)
+					{
+						caps_.minor_version = 1;
+					}
+					else if ("any_gl_2_0" == platform)
+					{
+						caps_.minor_version = 0;
+					}
+
 					caps_.max_shader_model = 2;
 
 					caps_.max_texture_depth = 256;
-					caps_.max_texture_array_length = 1; // TODO
+					caps_.max_texture_array_length = 1;
 					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = 4;
 
 					caps_.standard_derivatives_support = false;
 					caps_.shader_texture_lod_support = false;
 					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = true;
+
+					caps_.gs_support = false;
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+			}
+			else if (0 == platform.find("any_gles_"))
+			{
+				caps_.requires_flipping = false;
+				caps_.native_shader_fourcc = MakeFourCC<'E', 'S', 'S', 'L'>::value;
+				caps_.native_shader_version = 3;
+
+				caps_.frag_depth_support = false;
+				caps_.hack_for_angle = false;
+
+				if (0 == platform.find("any_gles_3_"))
+				{
+					caps_.major_version = 3;
+					if ("any_gles_3_1" == platform)
+					{
+						caps_.minor_version = 1;
+					}
+					else if ("any_gles_3_0" == platform)
+					{
+						caps_.minor_version = 0;
+					}
+
+					caps_.max_shader_model = 4;
+
+					caps_.max_texture_depth = 2048;
+					caps_.max_texture_array_length = 1; // TODO
+					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = 8;
+
+					caps_.standard_derivatives_support = true;
+					caps_.shader_texture_lod_support = true;
+					caps_.fp_color_support = true;
+					caps_.pack_to_rgba_required = false;
+
+					caps_.gs_support = false; // TODO
+					caps_.cs_support = false;
+					caps_.hs_support = false;
+					caps_.ds_support = false;
+				}
+				else if (0 == platform.find("any_gles_2_"))
+				{
+					caps_.major_version = 2;
+					caps_.minor_version = 0;
+
+					caps_.max_shader_model = 2;
+
+					caps_.max_texture_depth = 256;
+					caps_.max_texture_array_length = 1;
+					caps_.max_pixel_texture_units = 16;
+					caps_.max_simultaneous_rts = 1;
+
+					caps_.standard_derivatives_support = false;
+					caps_.shader_texture_lod_support = false;
+					caps_.fp_color_support = false;
 					caps_.pack_to_rgba_required = true;
 
 					caps_.gs_support = false;

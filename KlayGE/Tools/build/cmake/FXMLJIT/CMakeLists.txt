@@ -1,5 +1,6 @@
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineD3D11ShaderObject.hpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineOGLESShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineOGLShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineRenderEffect.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineShaderObject.hpp
@@ -8,6 +9,7 @@ SET(HEADER_FILES
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/FXMLJIT.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineD3D11ShaderObject.cpp
+	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineOGLESShaderObject.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineOGLShaderObject.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineRenderEffect.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineShaderObject.cpp

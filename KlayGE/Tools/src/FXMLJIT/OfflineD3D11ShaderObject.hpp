@@ -137,13 +137,6 @@ namespace KlayGE
 			}
 
 		private:
-			struct parameter_bind_t
-			{
-				RenderEffectParameterPtr param;
-				D3D11ShaderParameterHandle p_handle;
-			};
-			typedef std::vector<parameter_bind_t> parameter_binds_t;
-
 			std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
 			shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
@@ -159,6 +152,8 @@ namespace KlayGE
 			uint32_t vs_signature_;
 
 			std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+
+			D3D_FEATURE_LEVEL feature_level_;
 		};
 
 		typedef shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
