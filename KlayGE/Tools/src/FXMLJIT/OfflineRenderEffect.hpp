@@ -40,11 +40,11 @@
 
 #include <boost/noncopyable.hpp>
 
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderStateObject.hpp>
-#include "OfflineShaderObject.hpp"
 #include <KFL/Math.hpp>
+
+#include "OfflineShaderObject.hpp"
 
 namespace KlayGE
 {
@@ -52,27 +52,18 @@ namespace KlayGE
 	{
 		class RenderVariable;
 		typedef shared_ptr<RenderVariable> RenderVariablePtr;
-
 		class RenderEffectConstantBuffer;
 		typedef shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
-
 		class RenderEffectParameter;
 		typedef shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
-
 		class RenderTechnique;
 		typedef shared_ptr<RenderTechnique> RenderTechniquePtr;
-
 		class RenderEffect;
 		typedef shared_ptr<RenderEffect> RenderEffectPtr;
-
 		class RenderEffectAnnotation;
 		typedef shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
-
 		class RenderPass;
 		typedef shared_ptr<RenderPass> RenderPassPtr;
-
-		class ShaderObject;
-		typedef shared_ptr<ShaderObject> ShaderObjectPtr;
 
 		inline bool operator==(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs)
 		{
@@ -540,7 +531,7 @@ namespace KlayGE
 		class RenderEffect
 		{
 		public:
-			explicit RenderEffect(std::string const & platform);
+			explicit RenderEffect(OfflineRenderDeviceCaps const & caps);
 
 			void Load(std::string const & name);
 

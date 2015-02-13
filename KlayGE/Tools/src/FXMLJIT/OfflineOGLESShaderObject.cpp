@@ -32,7 +32,6 @@
 #include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
-#include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include "OfflineRenderEffect.hpp"
 
@@ -284,16 +283,24 @@ namespace
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 #endif
 
-			if ("any_gles_3_1" == caps.platform)
+			switch (caps.major_version)
 			{
-				gsv_ = GSV_310_ES;
-			}
-			else if ("any_gles_3_0" == caps.platform)
-			{
-				gsv_ = GSV_300_ES;
-			}
-			else
-			{
+			case 3:
+				switch (caps.minor_version)
+				{
+				case 1:
+					gsv_ = GSV_310_ES;
+					break;
+
+				default:
+				case 0:
+					gsv_ = GSV_300_ES;
+					break;
+				}
+				break;
+
+			default:
+			case 2:
 				gsv_ = GSV_100_ES;
 			}
 		}

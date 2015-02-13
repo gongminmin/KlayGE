@@ -151,37 +151,57 @@ namespace KlayGE
 		{
 			is_shader_validate_.fill(true);
 
-			if ("win_d3d_11_1" == caps.platform)
+			switch (caps.major_version)
 			{
+			case 11:
+				switch (caps.minor_version)
+				{
+				case 1:
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
-				feature_level_ = D3D_FEATURE_LEVEL_11_1;
+					feature_level_ = D3D_FEATURE_LEVEL_11_1;
 #else
-				feature_level_ = D3D_FEATURE_LEVEL_11_0;
+					feature_level_ = D3D_FEATURE_LEVEL_11_0;
 #endif
-			}
-			else if ("win_d3d_11_0" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_11_0;
-			}
-			else if ("win_d3d_10_1" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_10_1;
-			}
-			else if ("win_d3d_10_0" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_10_0;
-			}
-			else if ("win_d3d_9_3" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_9_3;
-			}
-			else if ("win_d3d_9_2" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_9_2;
-			}
-			else if ("win_d3d_9_1" == caps.platform)
-			{
-				feature_level_ = D3D_FEATURE_LEVEL_9_1;
+					break;
+
+				default:
+				case 0:
+					feature_level_ = D3D_FEATURE_LEVEL_11_0;
+					break;
+				}
+				break;
+
+			case 10:
+				switch (caps.minor_version)
+				{
+				case 1:
+					feature_level_ = D3D_FEATURE_LEVEL_10_1;
+					break;
+
+				default:
+				case 0:
+					feature_level_ = D3D_FEATURE_LEVEL_10_0;
+					break;
+				}
+				break;
+
+			case 9:
+				switch (caps.minor_version)
+				{
+				case 3:
+					feature_level_ = D3D_FEATURE_LEVEL_9_3;
+					break;
+
+				case 2:
+					feature_level_ = D3D_FEATURE_LEVEL_9_2;
+					break;
+
+				default:
+				case 1:
+					feature_level_ = D3D_FEATURE_LEVEL_9_1;
+					break;
+				}
+				break;
 			}
 
 			switch (feature_level_)

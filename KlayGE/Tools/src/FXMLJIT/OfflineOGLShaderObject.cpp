@@ -32,7 +32,6 @@
 #include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
-#include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include "OfflineRenderEffect.hpp"
 
@@ -280,45 +279,73 @@ namespace
 #endif
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 #endif
-			if ("any_gl_4_4" == caps.platform)
+			switch (caps.major_version)
 			{
-				gsv_ = GSV_440;
-			}
-			else if ("any_gl_4_3" == caps.platform)
-			{
-				gsv_ = GSV_430;
-			}
-			else if ("any_gl_4_2" == caps.platform)
-			{
-				gsv_ = GSV_420;
-			}
-			else if ("any_gl_4_1" == caps.platform)
-			{
-				gsv_ = GSV_410;
-			}
-			else if ("any_gl_4_0" == caps.platform)
-			{
-				gsv_ = GSV_400;
-			}
-			else if ("any_gl_3_3" == caps.platform)
-			{
-				gsv_ = GSV_330;
-			}
-			else if ("any_gl_3_2" == caps.platform)
-			{
-				gsv_ = GSV_150;
-			}
-			else if ("any_gl_3_1" == caps.platform)
-			{
-				gsv_ = GSV_140;
-			}
-			else if ("any_gl_3_0" == caps.platform)
-			{
-				gsv_ = GSV_130;
-			}
-			else
-			{
-				gsv_ = GSV_120;
+			case 4:
+				switch (caps.minor_version)
+				{
+				case 5:
+					gsv_ = GSV_440; // TODO
+					break;
+
+				case 4:
+					gsv_ = GSV_440;
+					break;
+
+				case 3:
+					gsv_ = GSV_430;
+					break;
+
+				case 2:
+					gsv_ = GSV_420;
+					break;
+
+				case 1:
+					gsv_ = GSV_410;
+					break;
+
+				default:
+				case 0:
+					gsv_ = GSV_400;
+					break;
+				}
+				break;
+
+			case 3:
+				switch (caps.minor_version)
+				{
+				case 3:
+					gsv_ = GSV_330;
+					break;
+
+				case 2:
+					gsv_ = GSV_150;
+					break;
+
+				case 1:
+					gsv_ = GSV_140;
+					break;
+
+				default:
+				case 0:
+					gsv_ = GSV_130;
+					break;
+				}
+				break;
+
+			case 2:
+				switch (caps.minor_version)
+				{
+				case 1:
+					gsv_ = GSV_120;
+					break;
+
+				default:
+				case 0:
+					gsv_ = GSV_110;
+					break;
+				}
+				break;
 			}
 		}
 
