@@ -307,6 +307,7 @@
 		#define KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
 	#endif
 
+	#pragma warning(disable: 4503)
 	#if _MSC_VER >= 1400
 		#pragma warning(disable: 4251 4275 4819)
 

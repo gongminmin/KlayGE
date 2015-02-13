@@ -210,6 +210,7 @@ typedef EGLNativeWindowType  NativeWindowType;
 #endif
 
 #if defined(_MSC_VER)
+	#pragma warning(disable: 4055)
 	#define GLLOADER_HAS_DECLSPEC
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 	#if !defined(__GNUC__) && !defined(GLLOADER_HAS_DECLSPEC)
