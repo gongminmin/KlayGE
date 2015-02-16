@@ -160,6 +160,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = true;
 			caps.hs_support = true;
 			caps.ds_support = true;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_11_0" == platform)
 		{
@@ -182,6 +188,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = true;
 			caps.hs_support = true;
 			caps.ds_support = true;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_10_1" == platform)
 		{
@@ -204,6 +216,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_10_0" == platform)
 		{
@@ -226,6 +244,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_3" == platform)
 		{
@@ -248,6 +272,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = false;
+			caps.bc5_support = false;
+			caps.frag_depth_support = false;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_2" == platform)
 		{
@@ -270,6 +300,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = false;
+			caps.bc5_support = false;
+			caps.frag_depth_support = false;
+
+			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_1" == platform)
 		{
@@ -292,6 +328,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = false;
+			caps.bc5_support = false;
+			caps.frag_depth_support = false;
+
+			caps.hack_for_angle = false;
 		}
 	}
 	else if (0 == platform.find("gl_"))
@@ -347,6 +389,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false; // TODO
 			caps.hs_support = false; // TODO
 			caps.ds_support = false; // TODO
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if (0 == platform.find("gl_3_"))
 		{
@@ -384,6 +432,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 		else if (0 == platform.find("gl_2_"))
 		{
@@ -413,6 +467,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = false;
+			caps.bc5_support = false;
+			caps.frag_depth_support = true;
+
+			caps.hack_for_angle = false;
 		}
 	}
 	else if (0 == platform.find("gles_"))
@@ -452,6 +512,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = true;
+			caps.bc5_support = true;
+			caps.frag_depth_support = false;
+
+			caps.hack_for_angle = false;
 		}
 		else if (0 == platform.find("gles_2_"))
 		{
@@ -460,9 +526,9 @@ int main(int argc, char* argv[])
 
 			caps.max_shader_model = 2;
 
-			caps.max_texture_depth = 256;
+			caps.max_texture_depth = 1;
 			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 16;
+			caps.max_pixel_texture_units = 8;
 			caps.max_simultaneous_rts = 1;
 
 			caps.standard_derivatives_support = false;
@@ -474,6 +540,12 @@ int main(int argc, char* argv[])
 			caps.cs_support = false;
 			caps.hs_support = false;
 			caps.ds_support = false;
+
+			caps.bc4_support = false;
+			caps.bc5_support = false;
+			caps.frag_depth_support = false;
+
+			caps.hack_for_angle = false;
 		}
 	}
 
