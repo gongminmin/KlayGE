@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 		caps.native_shader_version = 5;
 
 		caps.frag_depth_support = true;
-		caps.hack_for_angle = false;
+		caps.ubo_support = false;
 
 		if ("d3d_11_1" == platform)
 		{
@@ -163,9 +163,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_11_0" == platform)
 		{
@@ -191,9 +188,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_10_1" == platform)
 		{
@@ -219,9 +213,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_10_0" == platform)
 		{
@@ -247,9 +238,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_3" == platform)
 		{
@@ -275,9 +263,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = false;
 			caps.bc5_support = false;
-			caps.frag_depth_support = false;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_2" == platform)
 		{
@@ -303,9 +288,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = false;
 			caps.bc5_support = false;
-			caps.frag_depth_support = false;
-
-			caps.hack_for_angle = false;
 		}
 		else if ("d3d_9_1" == platform)
 		{
@@ -331,9 +313,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = false;
 			caps.bc5_support = false;
-			caps.frag_depth_support = false;
-
-			caps.hack_for_angle = false;
 		}
 	}
 	else if (0 == platform.find("gl_"))
@@ -343,7 +322,7 @@ int main(int argc, char* argv[])
 		caps.native_shader_version = 3;
 
 		caps.frag_depth_support = true;
-		caps.hack_for_angle = false;
+		caps.ubo_support = true;
 
 		if (0 == platform.find("gl_4_"))
 		{
@@ -392,9 +371,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if (0 == platform.find("gl_3_"))
 		{
@@ -435,9 +411,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 		else if (0 == platform.find("gl_2_"))
 		{
@@ -470,9 +443,6 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = false;
 			caps.bc5_support = false;
-			caps.frag_depth_support = true;
-
-			caps.hack_for_angle = false;
 		}
 	}
 	else if (0 == platform.find("gles_"))
@@ -482,7 +452,6 @@ int main(int argc, char* argv[])
 		caps.native_shader_version = 3;
 
 		caps.frag_depth_support = false;
-		caps.hack_for_angle = false;
 
 		if (0 == platform.find("gles_3_"))
 		{
@@ -515,9 +484,8 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = true;
 			caps.bc5_support = true;
-			caps.frag_depth_support = false;
 
-			caps.hack_for_angle = false;
+			caps.ubo_support = true;
 		}
 		else if (0 == platform.find("gles_2_"))
 		{
@@ -543,9 +511,8 @@ int main(int argc, char* argv[])
 
 			caps.bc4_support = false;
 			caps.bc5_support = false;
-			caps.frag_depth_support = false;
 
-			caps.hack_for_angle = false;
+			caps.ubo_support = false;
 		}
 	}
 

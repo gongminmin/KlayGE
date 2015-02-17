@@ -80,8 +80,7 @@ namespace KlayGE
 			bool bc4_support : 1;
 			bool bc5_support : 1;
 			bool frag_depth_support : 1;
-
-			bool hack_for_angle: 1;
+			bool ubo_support : 1;
 		};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)

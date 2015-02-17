@@ -1100,7 +1100,7 @@ namespace KlayGE
 							else
 							{
 								rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
-								if (caps.hack_for_angle)
+								if (!caps.ubo_support)
 								{
 									rules &= ~GSR_UseUBO;
 								}
