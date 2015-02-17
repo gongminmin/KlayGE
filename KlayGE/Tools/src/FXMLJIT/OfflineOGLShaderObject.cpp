@@ -285,7 +285,7 @@ namespace
 				switch (caps.minor_version)
 				{
 				case 5:
-					gsv_ = GSV_440; // TODO
+					gsv_ = GSV_450;
 					break;
 
 				case 4:

@@ -38,21 +38,22 @@
 
 enum GLSLVersion
 {
-	GSV_110 = 0,	// GL 2.0
-	GSV_120,		// GL 2.1
-	GSV_130,		// GL 3.0
-	GSV_140,		// GL 3.1
-	GSV_150,		// GL 3.2
-	GSV_330,		// GL 3.3
-	GSV_400,		// GL 4.0
-	GSV_410,		// GL 4.1
-	GSV_420,		// GL 4.2
-	GSV_430,		// GL 4.3
-	GSV_440,		// GL 4.4
+	GSV_110 = 0,		// GL 2.0
+	GSV_120,			// GL 2.1
+	GSV_130,			// GL 3.0
+	GSV_140,			// GL 3.1
+	GSV_150,			// GL 3.2
+	GSV_330,			// GL 3.3
+	GSV_400,			// GL 4.0
+	GSV_410,			// GL 4.1
+	GSV_420,			// GL 4.2
+	GSV_430,			// GL 4.3
+	GSV_440,			// GL 4.4
+	GSV_450,			// GL 4.5
 
-	GSV_100_ES,		// GL ES 2.0
-	GSV_300_ES,		// GL ES 3.0
-	GSV_310_ES		// GL ES 3.1
+	GSV_100_ES = 10000,	// GL ES 2.0
+	GSV_300_ES,			// GL ES 3.0
+	GSV_310_ES			// GL ES 3.1
 };
 
 enum GLSLRules

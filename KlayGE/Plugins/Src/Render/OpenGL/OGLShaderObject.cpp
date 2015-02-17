@@ -288,7 +288,11 @@ namespace
 #endif
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 #endif
-			if (glloader_GL_VERSION_4_4())
+			if (glloader_GL_VERSION_4_5())
+			{
+				gsv_ = GSV_450;
+			}
+			else if (glloader_GL_VERSION_4_4())
 			{
 				gsv_ = GSV_440;
 			}
