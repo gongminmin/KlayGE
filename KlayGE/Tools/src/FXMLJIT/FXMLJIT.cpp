@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KFL/XMLDom.hpp>
 
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
@@ -68,6 +69,93 @@ extern "C"
 
 uint32_t const KFX_VERSION = 0x0106;
 
+int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
+{
+	XMLAttributePtr attr = node->Attrib(attr_name);
+	if (attr)
+	{
+		return attr->ValueInt();
+	}
+
+	return default_value;
+}
+
+std::string RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, std::string const & default_value)
+{
+	XMLAttributePtr attr = node->Attrib(attr_name);
+	if (attr)
+	{
+		return attr->ValueString();
+	}
+
+	return default_value;
+}
+
+int RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, int default_value)
+{
+	XMLNodePtr node = root->FirstNode(node_name);
+	if (node)
+	{
+		return RetrieveAttrValue(node, "value", default_value);
+	}
+
+	return default_value;
+}
+
+std::string RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, std::string const & default_value)
+{
+	XMLNodePtr node = root->FirstNode(node_name);
+	if (node)
+	{
+		return RetrieveAttrValue(node, "value", default_value);
+	}
+
+	return default_value;
+}
+
+Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
+{
+	ResIdentifierPtr plat = ResLoader::Instance().Open("PlatConf/" + platform + ".plat");
+
+	KlayGE::XMLDocument doc;
+	XMLNodePtr root = doc.Parse(plat);
+
+	Offline::OfflineRenderDeviceCaps caps;
+
+	caps.platform = RetrieveAttrValue(root, "name", "");
+	caps.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
+	caps.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
+
+	caps.requires_flipping = RetrieveNodeValue(root, "requires_flipping", 0) ? true : false;
+	std::string const fourcc_str = RetrieveNodeValue(root, "native_shader_fourcc", "");
+	caps.native_shader_fourcc = (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
+	caps.native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
+
+	caps.max_shader_model = static_cast<uint8_t>(RetrieveNodeValue(root, "max_shader_model", 0));
+
+	caps.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
+	caps.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
+	caps.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
+	caps.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
+
+	caps.standard_derivatives_support = RetrieveNodeValue(root, "standard_derivatives_support", 0) ? true : false;
+	caps.shader_texture_lod_support = RetrieveNodeValue(root, "shader_texture_lod_support", 0) ? true : false;
+	caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
+	caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
+
+	caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
+	caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
+	caps.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
+	caps.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
+
+	caps.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
+	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
+	caps.frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
+	caps.ubo_support = RetrieveNodeValue(root, "ubo_support", 0) ? true : false;
+
+	return caps;
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
@@ -75,6 +163,8 @@ int main(int argc, char* argv[])
 		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3|ios xxx.fxml [target folder]" << endl;
 		return 1;
 	}
+
+	ResLoader::Instance().AddPath("../../Tools/media/PlatformDeployer");
 
 	std::string platform = argv[1];
 
@@ -126,395 +216,7 @@ int main(int argc, char* argv[])
 		target_folder = argv[3];
 	}
 
-	Offline::OfflineRenderDeviceCaps caps;
-
-	caps.platform = platform;
-
-	if (0 == platform.find("d3d_"))
-	{
-		caps.requires_flipping = true;
-		caps.native_shader_fourcc = MakeFourCC<'D', 'X', 'B', 'C'>::value;
-		caps.native_shader_version = 5;
-
-		caps.frag_depth_support = true;
-		caps.ubo_support = false;
-
-		if ("d3d_11_1" == platform)
-		{
-			caps.major_version = 11;
-			caps.minor_version = 1;
-
-			caps.max_shader_model = 5;
-
-			caps.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-			caps.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
-			caps.max_simultaneous_rts = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = true;
-			caps.hs_support = true;
-			caps.ds_support = true;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if ("d3d_11_0" == platform)
-		{
-			caps.major_version = 11;
-			caps.minor_version = 0;
-
-			caps.max_shader_model = 5;
-
-			caps.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-			caps.max_pixel_texture_units = D3D11_COMMONSHADER_SAMPLER_SLOT_COUNT;
-			caps.max_simultaneous_rts = D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = true;
-			caps.hs_support = true;
-			caps.ds_support = true;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if ("d3d_10_1" == platform)
-		{
-			caps.major_version = 10;
-			caps.minor_version = 1;
-
-			caps.max_shader_model = 4;
-
-			caps.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-			caps.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
-			caps.max_simultaneous_rts = D3D10_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if ("d3d_10_0" == platform)
-		{
-			caps.major_version = 10;
-			caps.minor_version = 0;
-
-			caps.max_shader_model = 4;
-
-			caps.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = D3D10_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION;
-			caps.max_pixel_texture_units = D3D10_COMMONSHADER_SAMPLER_SLOT_COUNT;
-			caps.max_simultaneous_rts = D3D10_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if ("d3d_9_3" == platform)
-		{
-			caps.major_version = 9;
-			caps.minor_version = 3;
-
-			caps.max_shader_model = 2;
-
-			caps.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = D3D_FL9_3_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = false;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = true;
-
-			caps.gs_support = false;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = false;
-			caps.bc5_support = false;
-		}
-		else if ("d3d_9_2" == platform)
-		{
-			caps.major_version = 9;
-			caps.minor_version = 2;
-
-			caps.max_shader_model = 2;
-
-			caps.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = false;
-			caps.shader_texture_lod_support = false;
-			caps.fp_color_support = false;
-			caps.pack_to_rgba_required = true;
-
-			caps.gs_support = false;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = false;
-			caps.bc5_support = false;
-		}
-		else if ("d3d_9_1" == platform)
-		{
-			caps.major_version = 9;
-			caps.minor_version = 1;
-
-			caps.max_shader_model = 2;
-
-			caps.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT;
-
-			caps.standard_derivatives_support = false;
-			caps.shader_texture_lod_support = false;
-			caps.fp_color_support = false;
-			caps.pack_to_rgba_required = true;
-
-			caps.gs_support = false;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = false;
-			caps.bc5_support = false;
-		}
-	}
-	else if (0 == platform.find("gl_"))
-	{
-		caps.requires_flipping = false;
-		caps.native_shader_fourcc = MakeFourCC<'G', 'L', 'S', 'L'>::value;
-		caps.native_shader_version = 3;
-
-		caps.frag_depth_support = true;
-		caps.ubo_support = true;
-
-		if (0 == platform.find("gl_4_"))
-		{
-			caps.major_version = 4;
-			if ("gl_4_5" == platform)
-			{
-				caps.minor_version = 5;
-			}
-			else if ("gl_4_4" == platform)
-			{
-				caps.minor_version = 4;
-			}
-			else if ("gl_4_3" == platform)
-			{
-				caps.minor_version = 3;
-			}
-			else if ("gl_4_2" == platform)
-			{
-				caps.minor_version = 2;
-			}
-			else if ("gl_4_1" == platform)
-			{
-				caps.minor_version = 1;
-			}
-			else if ("gl_4_0" == platform)
-			{
-				caps.minor_version = 0;
-			}
-
-			caps.max_shader_model = 4; // TODO
-
-			caps.max_texture_depth = 2048;
-			caps.max_texture_array_length = 1; // TODO
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = 8;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = false; // TODO
-			caps.hs_support = false; // TODO
-			caps.ds_support = false; // TODO
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if (0 == platform.find("gl_3_"))
-		{
-			caps.major_version = 3;
-			if ("gl_3_3" == platform)
-			{
-				caps.minor_version = 3;
-			}
-			else if ("gl_3_2" == platform)
-			{
-				caps.minor_version = 2;
-			}
-			else if ("gl_3_1" == platform)
-			{
-				caps.minor_version = 1;
-			}
-			else if ("gl_3_0" == platform)
-			{
-				caps.minor_version = 0;
-			}
-
-			caps.max_shader_model = 4;
-
-			caps.max_texture_depth = 2048;
-			caps.max_texture_array_length = 1; // TODO
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = 8;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = true;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-		}
-		else if (0 == platform.find("gl_2_"))
-		{
-			caps.major_version = 2;
-			if ("gl_2_1" == platform)
-			{
-				caps.minor_version = 1;
-			}
-			else if ("gl_2_0" == platform)
-			{
-				caps.minor_version = 0;
-			}
-
-			caps.max_shader_model = 2;
-
-			caps.max_texture_depth = 256;
-			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = 4;
-
-			caps.standard_derivatives_support = false;
-			caps.shader_texture_lod_support = false;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = true;
-
-			caps.gs_support = false;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = false;
-			caps.bc5_support = false;
-		}
-	}
-	else if (0 == platform.find("gles_"))
-	{
-		caps.requires_flipping = false;
-		caps.native_shader_fourcc = MakeFourCC<'E', 'S', 'S', 'L'>::value;
-		caps.native_shader_version = 3;
-
-		caps.frag_depth_support = false;
-
-		if (0 == platform.find("gles_3_"))
-		{
-			caps.major_version = 3;
-			if ("gles_3_1" == platform)
-			{
-				caps.minor_version = 1;
-			}
-			else if ("gles_3_0" == platform)
-			{
-				caps.minor_version = 0;
-			}
-
-			caps.max_shader_model = 4;
-
-			caps.max_texture_depth = 2048;
-			caps.max_texture_array_length = 1; // TODO
-			caps.max_pixel_texture_units = 16;
-			caps.max_simultaneous_rts = 8;
-
-			caps.standard_derivatives_support = true;
-			caps.shader_texture_lod_support = true;
-			caps.fp_color_support = true;
-			caps.pack_to_rgba_required = false;
-
-			caps.gs_support = false; // TODO
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = true;
-			caps.bc5_support = true;
-
-			caps.ubo_support = true;
-		}
-		else if (0 == platform.find("gles_2_"))
-		{
-			caps.major_version = 2;
-			caps.minor_version = 0;
-
-			caps.max_shader_model = 2;
-
-			caps.max_texture_depth = 1;
-			caps.max_texture_array_length = 1;
-			caps.max_pixel_texture_units = 8;
-			caps.max_simultaneous_rts = 1;
-
-			caps.standard_derivatives_support = false;
-			caps.shader_texture_lod_support = false;
-			caps.fp_color_support = false;
-			caps.pack_to_rgba_required = true;
-
-			caps.gs_support = false;
-			caps.cs_support = false;
-			caps.hs_support = false;
-			caps.ds_support = false;
-
-			caps.bc4_support = false;
-			caps.bc5_support = false;
-
-			caps.ubo_support = false;
-		}
-	}
+	Offline::OfflineRenderDeviceCaps caps = LoadPlatformConfig(platform);
 
 	std::string fxml_name(argv[2]);
 	filesystem::path fxml_path(fxml_name);
