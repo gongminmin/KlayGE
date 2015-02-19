@@ -59,6 +59,8 @@ class compiler_info:
 		elif "ios" == target_platform:
 			self.is_ios = True
 
+		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
+
 class build_info:
 	def __init__(self, compiler, archs, cfg):
 		try:

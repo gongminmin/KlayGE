@@ -558,4 +558,10 @@
 	#endif
 #endif
 
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
+	#define KLAYGE_IS_DEV_PLATFORM 1
+#else
+	#define KLAYGE_IS_DEV_PLATFORM 0
+#endif
+
 #endif		// _KFL_CONFIG_HPP

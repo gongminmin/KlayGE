@@ -146,7 +146,7 @@ def build_external_libs(build_info):
 			print("\nBuilding libvorbis...\n")
 			build_libvorbis(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
+		if compiler_info.is_dev_platform:
 			print("\nBuilding freetype...\n")
 			build_freetype(build_info, compiler_info)
 

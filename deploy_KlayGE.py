@@ -17,7 +17,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	if "win" == build_info.target_platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
-	elif "linux" == target_platform:
+	elif "linux" == build_info.target_platform:
 		bat_suffix = "sh"
 		dll_suffix = "so"
 	output_suffix = "_%s%d*" % (build_info.compiler_name, build_info.compiler_version)

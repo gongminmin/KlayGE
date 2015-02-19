@@ -988,7 +988,7 @@ namespace KlayGE
 			}
 		}
 
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) || (defined KLAYGE_PLATFORM_LINUX) || (defined KLAYGE_PLATFORM_DARWIN)
+#if KLAYGE_IS_DEV_PLATFORM
 		if (jit)
 		{
 			std::string meshmljit_name = "MeshMLJIT" KLAYGE_DBG_SUFFIX;

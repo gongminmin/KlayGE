@@ -49,7 +49,7 @@
 
 #include <glloader/glloader.h>
 
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#if KLAYGE_IS_DEV_PLATFORM
 #if USE_DXBC2GLSL
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
 
@@ -124,7 +124,7 @@ namespace
 {
 	using namespace KlayGE;
 
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#if KLAYGE_IS_DEV_PLATFORM
 #if USE_DXBC2GLSL
 	class DXBC2GLSLIniter
 	{
@@ -1218,7 +1218,7 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-#if !(defined(KLAYGE_PLATFORM_IOS) || defined(KLAYGE_PLATFORM_ANDROID))
+#if KLAYGE_IS_DEV_PLATFORM
 #if !USE_DXBC2GLSL
 	std::string OGLESShaderObject::GenCgShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass)
@@ -2189,7 +2189,7 @@ namespace KlayGE
 
 		if (is_shader_validate_[type])
 		{
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#if KLAYGE_IS_DEV_PLATFORM
 #if USE_DXBC2GLSL
 			OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			RenderDeviceCaps const & caps = re.DeviceCaps();
