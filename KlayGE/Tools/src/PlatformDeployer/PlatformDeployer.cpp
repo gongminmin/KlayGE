@@ -1,6 +1,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/JudaTexture.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KFL/XMLDom.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -60,6 +62,21 @@
 using namespace std;
 using namespace KlayGE;
 
+struct OfflineRenderDeviceCaps
+{
+	std::string platform;
+	uint8_t major_version;
+	uint8_t minor_version;
+
+	bool bc1_support : 1;
+	bool bc3_support : 1;
+	bool bc5_support : 1;
+	bool etc1_support : 1;
+	bool r16_support : 1;
+	bool r16f_support : 1;
+	bool srgb_support : 1;
+};
+
 std::string DosWildcardToRegex(std::string const & wildcard)
 {
 	std::string ret;
@@ -100,174 +117,190 @@ std::string DosWildcardToRegex(std::string const & wildcard)
 	return ret;
 }
 
-void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, std::string const & platform)
+int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
+{
+	XMLAttributePtr attr = node->Attrib(attr_name);
+	if (attr)
+	{
+		return attr->ValueInt();
+	}
+
+	return default_value;
+}
+
+std::string RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, std::string const & default_value)
+{
+	XMLAttributePtr attr = node->Attrib(attr_name);
+	if (attr)
+	{
+		return attr->ValueString();
+	}
+
+	return default_value;
+}
+
+int RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, int default_value)
+{
+	XMLNodePtr node = root->FirstNode(node_name);
+	if (node)
+	{
+		return RetrieveAttrValue(node, "value", default_value);
+	}
+
+	return default_value;
+}
+
+std::string RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, std::string const & default_value)
+{
+	XMLNodePtr node = root->FirstNode(node_name);
+	if (node)
+	{
+		return RetrieveAttrValue(node, "value", default_value);
+	}
+
+	return default_value;
+}
+
+OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
+{
+	ResIdentifierPtr plat = ResLoader::Instance().Open("PlatConf/" + platform + ".plat");
+
+	KlayGE::XMLDocument doc;
+	XMLNodePtr root = doc.Parse(plat);
+
+	OfflineRenderDeviceCaps caps;
+
+	caps.platform = RetrieveAttrValue(root, "name", "");
+	caps.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
+	caps.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
+
+	caps.bc1_support = RetrieveNodeValue(root, "bc1_support", 0) ? true : false;
+	caps.bc3_support = RetrieveNodeValue(root, "bc3_support", 0) ? true : false;
+	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
+	caps.etc1_support = RetrieveNodeValue(root, "etc1_support", 0) ? true : false;
+	caps.r16_support = RetrieveNodeValue(root, "r16_support", 0) ? true : false;
+	caps.r16f_support = RetrieveNodeValue(root, "r16f_support", 0) ? true : false;
+	caps.srgb_support = RetrieveNodeValue(root, "srgb_support", 0) ? true : false;
+
+	return caps;
+}
+
+void Deploy(std::vector<std::string> const & res_names, std::string const & res_type, OfflineRenderDeviceCaps const & caps)
 {
 	std::ofstream ofs("convert.bat");
 
 	ofs << "@echo off" << std::endl << std::endl;
-		
-	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_gl4" == platform) || ("pc_gl3" == platform))
+	
+	if (("diffuse" == res_type)
+		|| ("specular" == res_type)
+		|| ("emit" == res_type))
 	{
-		if (("diffuse" == res_type)
-			|| ("specular" == res_type)
-			|| ("emit" == res_type))
+		for (size_t i = 0; i < res_names.size(); ++i)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			if (caps.srgb_support)
 			{
 				ofs << "ForceTexSRGB \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "Mipmapper temp.dds" << std::endl; 
+			}
+			else
+			{
+				ofs << "copy \"" << res_names[i] << "\" temp.dds" << std::endl;
+			}
+			ofs << "Mipmapper temp.dds" << std::endl;
+			if (caps.bc1_support)
+			{
 				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-				ofs << "del temp.dds" << std::endl;
 			}
-		}
-		else if ("normal" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else if (caps.etc1_support)
 			{
-				ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
-		}
-		else if ("bump" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else
 			{
-				ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-				ofs << "Mipmapper temp.dds" << std::endl; 
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
-		}
-		else if ("cubemap" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "HDRCompressor \"" << res_names[i] << "\" R16 BC5" << std::endl;
-			}
-		}
-		else if ("model" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
-			}
-		}
-		else if ("effect" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"" << std::endl;
-			}
+			ofs << "del temp.dds" << std::endl;
 		}
 	}
-	else if (("pc_dx9" == platform) || ("pc_gl2" == platform))
+	else if ("normal" == res_type)
 	{
-		if (("diffuse" == res_type)
-			|| ("specular" == res_type)
-			|| ("emit" == res_type))
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
+			if (caps.bc5_support)
 			{
-				ofs << "ForceTexSRGB \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "Mipmapper temp.dds" << std::endl;
-				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
 			}
-		}
-		else if ("normal" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else if (caps.bc3_support)
 			{
-				ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
 				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-				ofs << "del temp.dds" << std::endl;
 			}
-		}
-		else if ("bump" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else
 			{
-				ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-				ofs << "Mipmapper temp.dds" << std::endl;
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
-		}
-		else if ("cubemap" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "HDRCompressor \"" << res_names[i] << "\" R16 BC3" << std::endl;
-			}
-		}
-		else if ("model" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
-			}
-		}
-		else if ("effect" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"" << std::endl;
-			}
+			ofs << "del temp.dds" << std::endl;
 		}
 	}
-	else if ("android_tegra3" == platform)
+	else if ("bump" == res_type)
 	{
-		if (("diffuse" == res_type)
-			|| ("specular" == res_type)
-			|| ("emit" == res_type))
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
+			ofs << "Mipmapper temp.dds" << std::endl; 
+			if (caps.bc5_support)
 			{
-				ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
-				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC5" << std::endl;
 			}
-		}
-		else if ("normal" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else if (caps.bc3_support)
 			{
-				ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
 				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-				ofs << "del temp.dds" << std::endl;
 			}
-		}
-		else if ("bump" == res_type)
-		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
+			else
 			{
-				ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
-				ofs << "Mipmapper temp.dds" << std::endl;
-				ofs << "NormalMapCompressor temp.dds \"" << res_names[i] << "\" BC3" << std::endl;
-				ofs << "del temp.dds" << std::endl;
+				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
+			ofs << "del temp.dds" << std::endl;
 		}
-		else if ("cubemap" == res_type)
+	}
+	else if ("cubemap" == res_type)
+	{
+		std::string y_fmt;
+		std::string c_fmt;
+		if (caps.r16_support)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "HDRCompressor \"" << res_names[i] << "\" R16F BC3" << std::endl;
-			}
+			y_fmt = "R16";
 		}
-		else if ("model" == res_type)
+		else if (caps.r16f_support)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << platform << std::endl;
-			}
+			y_fmt = "R16F";
 		}
-		else if ("effect" == res_type)
+		if (caps.bc5_support)
 		{
-			for (size_t i = 0; i < res_names.size(); ++ i)
-			{
-				ofs << "FXMLJIT " << platform << " \"" << res_names[i] << "\"" << std::endl;
-			}
+			c_fmt = "BC5";
+		}
+		else if (caps.bc3_support)
+		{
+			c_fmt = "BC3";
+		}
+
+		for (size_t i = 0; i < res_names.size(); ++ i)
+		{
+			
+			ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
+		}
+	}
+	else if ("model" == res_type)
+	{
+		for (size_t i = 0; i < res_names.size(); ++ i)
+		{
+			ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << caps.platform << std::endl;
+		}
+	}
+	else if ("effect" == res_type)
+	{
+		for (size_t i = 0; i < res_names.size(); ++ i)
+		{
+			ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
 		}
 	}
 
@@ -282,6 +315,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 
 int main(int argc, char* argv[])
 {
+	ResLoader::Instance().AddPath("../../Tools/media/PlatformDeployer");
+
 	std::vector<std::string> res_names;
 	std::string res_type;
 	std::string platform;
@@ -381,13 +416,58 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		platform = "pc_dx11";
+		platform = "d3d_11_0";
 	}
 
 	boost::algorithm::to_lower(res_type);
 	boost::algorithm::to_lower(platform);
 
-	Deploy(res_names, res_type, platform);
+	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform)
+		|| ("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform)
+		|| ("android_tegra3" == platform) || ("ios" == platform))
+	{
+		if ("pc_dx11" == platform)
+		{
+			platform = "d3d_11_0";
+		}
+		else if ("pc_dx10" == platform)
+		{
+			platform = "d3d_10_0";
+		}
+		else if ("pc_dx9" == platform)
+		{
+			platform = "d3d_9_3";
+		}
+		else if ("win_tegra3" == platform)
+		{
+			platform = "d3d_9_1";
+		}
+		else if ("pc_gl4" == platform)
+		{
+			platform = "gl_4_0";
+		}
+		else if ("pc_gl3" == platform)
+		{
+			platform = "gl_3_0";
+		}
+		else if ("pc_gl2" == platform)
+		{
+			platform = "gl_2_0";
+		}
+		else if ("android_tegra3" == platform)
+		{
+			platform = "gles_2_0";
+		}
+		else if ("ios" == platform)
+		{
+			platform = "gles_2_0";
+		}
+	}
+
+	OfflineRenderDeviceCaps caps = LoadPlatformConfig(platform);
+	Deploy(res_names, res_type, caps);
+
+	Context::Destroy();
 
 	return 0;
 }

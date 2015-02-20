@@ -41,6 +41,8 @@
 #include <vector>
 #include <cstring>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
 #include <filesystem>
 namespace KlayGE
@@ -209,6 +211,8 @@ int main(int argc, char* argv[])
 			platform = "gles_2_0";
 		}
 	}
+
+	boost::algorithm::to_lower(platform);
 
 	filesystem::path target_folder;
 	if (argc >= 4)
