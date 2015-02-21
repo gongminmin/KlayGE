@@ -71,6 +71,7 @@ struct OfflineRenderDeviceCaps
 	bool bc1_support : 1;
 	bool bc3_support : 1;
 	bool bc5_support : 1;
+	bool bc7_support : 1;
 	bool etc1_support : 1;
 	bool r16_support : 1;
 	bool r16f_support : 1;
@@ -177,6 +178,7 @@ OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
 	caps.bc1_support = RetrieveNodeValue(root, "bc1_support", 0) ? true : false;
 	caps.bc3_support = RetrieveNodeValue(root, "bc3_support", 0) ? true : false;
 	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
+	caps.bc7_support = RetrieveNodeValue(root, "bc7_support", 0) ? true : false;
 	caps.etc1_support = RetrieveNodeValue(root, "etc1_support", 0) ? true : false;
 	caps.r16_support = RetrieveNodeValue(root, "r16_support", 0) ? true : false;
 	caps.r16f_support = RetrieveNodeValue(root, "r16f_support", 0) ? true : false;
@@ -206,7 +208,11 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "copy \"" << res_names[i] << "\" temp.dds" << std::endl;
 			}
 			ofs << "Mipmapper temp.dds" << std::endl;
-			if (caps.bc1_support)
+			if (caps.bc7_support)
+			{
+				ofs << "TexCompressor BC7 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.bc1_support)
 			{
 				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}

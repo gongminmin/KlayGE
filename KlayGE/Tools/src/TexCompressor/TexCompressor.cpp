@@ -4,6 +4,8 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/ResLoader.hpp>
 
+#include <boost/algorithm/string/case_conv.hpp>
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -88,41 +90,60 @@ namespace
 
 		SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, fmt, new_data);
 	}
+
+	void PrintSupportedFormats()
+	{
+		cout << "Supported formats: bc1, bc2, bc3, bc4, bc5, bc7, etc1" << endl;
+	}
 }
 
 int main(int argc, char* argv[])
 {
 	if (argc < 3)
 	{
-		cout << "Usage: TexCompressor BC1|BC2|BC3|BC4|BC5 xxx.dds [yyy.dds]" << endl;
+		cout << "Usage: TexCompressor format xxx.dds [yyy.dds]" << endl;
+		cout << "\t";
+		PrintSupportedFormats();
 		return 1;
 	}
 
 	std::string fmt_str = argv[1];
+	boost::algorithm::to_lower(fmt_str);
+	size_t const fmt_hash = RT_HASH(fmt_str.c_str());
+
 	ElementFormat fmt;
-	if ("BC1" == fmt_str)
+	if (CT_HASH("bc1") == fmt_hash)
 	{
 		fmt = EF_BC1;
 	}
-	else if ("BC2" == fmt_str)
+	else if (CT_HASH("bc2") == fmt_hash)
 	{
 		fmt = EF_BC2;
 	}
-	else if ("BC3" == fmt_str)
+	else if (CT_HASH("bc3") == fmt_hash)
 	{
 		fmt = EF_BC3;
 	}
-	else if ("BC4" == fmt_str)
+	else if (CT_HASH("bc4") == fmt_hash)
 	{
 		fmt = EF_BC4;
 	}
-	else if ("BC5" == fmt_str)
+	else if (CT_HASH("bc5") == fmt_hash)
 	{
 		fmt = EF_BC5;
 	}
+	else if (CT_HASH("bc7") == fmt_hash)
+	{
+		fmt = EF_BC7;
+	}
+	else if (CT_HASH("etc1") == fmt_hash)
+	{
+		fmt = EF_ETC1;
+	}
 	else
 	{
-		cout << "Unknown output format. Should be BC1, BC2, BC3, BC4, or BC5." << endl;
+		cout << "Unknown output format. ";
+		PrintSupportedFormats();
 		return 1;
 	}
 
