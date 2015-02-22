@@ -284,9 +284,7 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case D3D_FEATURE_LEVEL_11_1:
-#endif
 		case D3D_FEATURE_LEVEL_11_0:
 			vs_profile_ = "vs_5_0";
 			ps_profile_ = "ps_5_0";
@@ -1021,9 +1019,7 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case D3D_FEATURE_LEVEL_11_1:
-#endif
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_shader_model = 5;
 			caps_.max_texture_width = caps_.max_texture_height = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
@@ -1094,9 +1090,7 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case D3D_FEATURE_LEVEL_11_1:
-#endif
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_vertex_streams = D3D11_STANDARD_VERTEX_ELEMENT_COUNT;
 			break;
@@ -1118,9 +1112,7 @@ namespace KlayGE
 		}
 		switch (d3d_feature_level_)
 		{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 		case D3D_FEATURE_LEVEL_11_1:
-#endif
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_texture_anisotropy = D3D11_MAX_MAXANISOTROPY;
 			break;

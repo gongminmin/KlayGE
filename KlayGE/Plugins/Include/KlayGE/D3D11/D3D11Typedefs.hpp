@@ -27,6 +27,7 @@
 	#endif
 
 	#define DXGI_FORMAT_B4G4R4A4_UNORM static_cast<DXGI_FORMAT>(115)
+	#define D3D_FEATURE_LEVEL_11_1 0xb100
 #elif (_WIN32_WINNT < 0x0603 /*_WIN32_WINNT_WINBLUE*/)
 	#include <d3d11_1.h>
 #else

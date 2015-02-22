@@ -150,12 +150,12 @@ namespace KlayGE
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-			std::vector<tuple<D3D_DRIVER_TYPE, std::wstring> > dev_type_behaviors;
-			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_HARDWARE, std::wstring(L"HW")));
-			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_WARP, std::wstring(L"WARP")));
-			dev_type_behaviors.push_back(KlayGE::make_tuple(D3D_DRIVER_TYPE_REFERENCE, std::wstring(L"REF")));
+			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *> > dev_type_behaviors;
+			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"));
+			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP"));
+			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
 
-			std::vector<std::pair<std::string, D3D_FEATURE_LEVEL> > available_feature_levels;	
+			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL> > available_feature_levels;	
 #if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 			if (has_dxgi_1_2_)
 			{
@@ -179,12 +179,12 @@ namespace KlayGE
 				std::string opt_name = opt.substr(0, loc);
 				std::string opt_val = opt.substr(loc + 1);
 
-				if ("level" == opt_name)
+				if (0 == strcmp("level", opt_name.c_str()))
 				{
 					size_t feature_index = 0;
 					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
 					{
-						if (available_feature_levels[i].first == opt_val)
+						if (0 == strcmp(available_feature_levels[i].first, opt_val.c_str()))
 						{
 							feature_index = i;
 							break;
@@ -211,7 +211,7 @@ namespace KlayGE
 				ID3D11Device* device = nullptr;
 				ID3D11DeviceContext* imm_ctx = nullptr;
 				IDXGIAdapter* dx_adapter = nullptr;
-				D3D_DRIVER_TYPE dev_type = get<0>(dev_type_beh);
+				D3D_DRIVER_TYPE dev_type = dev_type_beh.first;
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
 				{
 					dx_adapter = adapter_->DXGIAdapter().get();
@@ -253,40 +253,43 @@ namespace KlayGE
 							dxgi_device->Release();
 						}
 
-						description_ = adapter_->Description() + L" " + get<1>(dev_type_beh);
-						std::wstring fl_str;
+						description_ = adapter_->Description() + L" " + dev_type_beh.second;
+						wchar_t const * fl_str;
 						switch (out_feature_level)
 						{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
 						case D3D_FEATURE_LEVEL_11_1:
-							fl_str = L" D3D Level 11.1";
+							fl_str = L"11.1";
 							break;
-#endif
 
 						case D3D_FEATURE_LEVEL_11_0:
-							fl_str = L" D3D Level 11";
+							fl_str = L"11.0";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_1:
-							fl_str = L" D3D Level 10.1";
+							fl_str = L"10.1";
 							break;
 
 						case D3D_FEATURE_LEVEL_10_0:
-							fl_str = L" D3D Level 10";
+							fl_str = L"10.0";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_3:
-							fl_str = L" D3D Level 9.3";
+							fl_str = L"9.3";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_2:
-							fl_str = L" D3D Level 9.2";
+							fl_str = L"9.2";
 							break;
 
 						case D3D_FEATURE_LEVEL_9_1:
-							fl_str = L" D3D Level 9.1";
+							fl_str = L"9.1";
+							break;
+
+						default:
+							fl_str = L"Unknown";
 							break;
 						}
+						description_ += L" D3D Level ";
 						description_ += fl_str;
 						if (settings.sample_count > 1)
 						{
