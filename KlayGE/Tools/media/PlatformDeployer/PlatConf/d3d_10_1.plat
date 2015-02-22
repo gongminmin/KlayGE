@@ -30,6 +30,9 @@
 	<bc6_support value="0"/>
 	<bc7_support value="0"/>
 	<etc1_support value="0"/>
+	<r16_support value="1"/>
+	<r16f_support value="1"/>
+	<srgb_support value="1"/>
 
 	<frag_depth_support value="1"/>
 	<ubo_support value="0"/>
