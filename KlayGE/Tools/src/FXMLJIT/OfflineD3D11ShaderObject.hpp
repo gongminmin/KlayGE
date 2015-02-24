@@ -36,6 +36,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include "OfflineShaderObject.hpp"
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <D3D11Shader.h>
 
@@ -159,5 +161,7 @@ namespace KlayGE
 		typedef shared_ptr<D3D11ShaderObject> D3D11ShaderObjectPtr;
 	}
 }
+
+#endif
 
 #endif			// _OFFLINED3D11SHADEROBJECT_HPP

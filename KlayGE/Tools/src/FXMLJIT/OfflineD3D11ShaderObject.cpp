@@ -52,6 +52,8 @@
 #pragma warning(pop)
 #endif
 
+#ifdef KLAYGE_PLATFORM_WINDOWS
+
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <D3DCompiler.h>
@@ -1436,3 +1438,5 @@ namespace KlayGE
 		}
 	}
 }
+
+#endif

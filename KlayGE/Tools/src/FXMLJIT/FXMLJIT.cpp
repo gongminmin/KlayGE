@@ -33,8 +33,6 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>

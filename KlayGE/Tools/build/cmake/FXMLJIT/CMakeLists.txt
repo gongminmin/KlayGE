@@ -15,6 +15,16 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/FXMLJIT/OfflineShaderObject.cpp
 )
 
+IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
+	FIND_PATH(WINE_PATH "winegcc" #searching for 'wine' may result in include path
+		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin)
+
+	IF(NOT WINE_PATH)
+		MESSAGE(FATAL_ERROR "Cound NOT find wine")
+	ENDIF()
+	ADD_DEFINITIONS(-DWINE_PATH="\\"${WINE_PATH}/\\"")
+ENDIF()
+
 SET(EXTRA_INCLUDE_DIRS ${EXTRA_INCLUDE_DIRS}
 	${KLAYGE_PROJECT_DIR}/Plugins/Include
 	${KLAYGE_PROJECT_DIR}/../glloader/include
