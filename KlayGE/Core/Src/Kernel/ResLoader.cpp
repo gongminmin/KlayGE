@@ -149,6 +149,13 @@ namespace KlayGE
 		this->AddPath("Assets/");
 #else
 		this->AddPath("");
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		::GetCurrentDirectoryA(sizeof(buf), buf);
+		char* colon = std::find(buf, buf + sizeof(buf), ':');
+		BOOST_ASSERT(colon != buf + sizeof(buf));
+		colon[1] = '\0';
+		this->AddPath(buf);
+#endif
 		this->AddPath("../");
 		this->AddPath("../../media/RenderFX/");
 		this->AddPath("../../media/Models/");
@@ -264,57 +271,47 @@ namespace KlayGE
 
 	std::string ResLoader::Locate(std::string const & name)
 	{
-		if (('/' == name[0]) || ('\\' == name[0]))
+		typedef KLAYGE_DECLTYPE(paths_) PathsType;
+		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
-			if (filesystem::exists(filesystem::path(name)))
-			{
-				return name;
-			}
-		}
-		else
-		{
-			typedef KLAYGE_DECLTYPE(paths_) PathsType;
-			KLAYGE_FOREACH(PathsType::const_reference path, paths_)
-			{
-				std::string const res_name(path + name);
+			std::string const res_name(path + name);
 
-				if (filesystem::exists(filesystem::path(res_name)))
+			if (filesystem::exists(filesystem::path(res_name)))
+			{
+				return res_name;
+			}
+			else
+			{
+				std::string::size_type const pkt_offset(res_name.find("//"));
+				if (pkt_offset != std::string::npos)
 				{
-					return res_name;
-				}
-				else
-				{
-					std::string::size_type const pkt_offset(res_name.find("//"));
-					if (pkt_offset != std::string::npos)
+					std::string pkt_name = res_name.substr(0, pkt_offset);
+					filesystem::path pkt_path(pkt_name);
+					if (filesystem::exists(pkt_path)
+							&& (filesystem::is_regular_file(pkt_path)
+									|| filesystem::is_symlink(pkt_path)))
 					{
-						std::string pkt_name = res_name.substr(0, pkt_offset);
-						filesystem::path pkt_path(pkt_name);
-						if (filesystem::exists(pkt_path)
-								&& (filesystem::is_regular_file(pkt_path)
-										|| filesystem::is_symlink(pkt_path)))
+						std::string::size_type const password_offset = pkt_name.find("|");
+						std::string password;
+						if (password_offset != std::string::npos)
 						{
-							std::string::size_type const password_offset = pkt_name.find("|");
-							std::string password;
-							if (password_offset != std::string::npos)
-							{
-								password = pkt_name.substr(password_offset + 1);
-								pkt_name = pkt_name.substr(0, password_offset - 1);
-							}
-							std::string const file_name = res_name.substr(pkt_offset + 2);
+							password = pkt_name.substr(password_offset + 1);
+							pkt_name = pkt_name.substr(0, password_offset - 1);
+						}
+						std::string const file_name = res_name.substr(pkt_offset + 2);
 
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
-							uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
+						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
 #else
-							uint64_t timestamp = filesystem::last_write_time(pkt_path);
+						uint64_t timestamp = filesystem::last_write_time(pkt_path);
 #endif
-							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
-								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-							if (*pkt_file)
+						ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
+							MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+						if (*pkt_file)
+						{
+							if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
 							{
-								if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
-								{
-									return res_name;
-								}
+								return res_name;
 							}
 						}
 					}
@@ -322,7 +319,7 @@ namespace KlayGE
 			}
 		}
 
-#ifdef KLAYGE_PLATFORM_ANDROID
+#if defined(KLAYGE_PLATFORM_ANDROID)
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
@@ -331,9 +328,7 @@ namespace KlayGE
 			AAsset_close(asset);
 			return name;
 		}
-#endif
-
-#ifdef KLAYGE_PLATFORM_IOS
+#elif defined(KLAYGE_PLATFORM_IOS)
 		std::string::size_type found = name.find_last_of(".");
 		if (found != std::string::npos)
 		{
@@ -359,11 +354,7 @@ namespace KlayGE
 				return res_name;
 			}
 		}
-#endif
-
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		return "";
-#else
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		std::string::size_type pos = name.rfind('/');
 		if (std::string::npos == pos)
 		{
@@ -378,14 +369,19 @@ namespace KlayGE
 		{
 			return "";
 		}
+#else
+		return "";
 #endif
 	}
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
-		if (('/' == name[0]) || ('\\' == name[0]))
+		typedef KLAYGE_DECLTYPE(paths_) PathsType;
+		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
-			filesystem::path res_path(name);
+			std::string const res_name(path + name);
+
+			filesystem::path res_path(res_name);
 			if (filesystem::exists(res_path))
 			{
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
@@ -394,67 +390,47 @@ namespace KlayGE
 				uint64_t timestamp = filesystem::last_write_time(res_path);
 #endif
 				return MakeSharedPtr<ResIdentifier>(name, timestamp,
-					MakeSharedPtr<std::ifstream>(name.c_str(), std::ios_base::binary));
+					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 			}
-		}
-		else
-		{
-			typedef KLAYGE_DECLTYPE(paths_) PathsType;
-			KLAYGE_FOREACH(PathsType::const_reference path, paths_)
+			else
 			{
-				std::string const res_name(path + name);
-
-				filesystem::path res_path(res_name);
-				if (filesystem::exists(res_path))
+				std::string::size_type const pkt_offset(res_name.find("//"));
+				if (pkt_offset != std::string::npos)
 				{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
-					uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
-#else
-					uint64_t timestamp = filesystem::last_write_time(res_path);
-#endif
-					return MakeSharedPtr<ResIdentifier>(name, timestamp,
-						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
-				}
-				else
-				{
-					std::string::size_type const pkt_offset(res_name.find("//"));
-					if (pkt_offset != std::string::npos)
+					std::string pkt_name = res_name.substr(0, pkt_offset);
+					filesystem::path pkt_path(pkt_name);
+					if (filesystem::exists(pkt_path)
+							&& (filesystem::is_regular_file(pkt_path)
+									|| filesystem::is_symlink(pkt_path)))
 					{
-						std::string pkt_name = res_name.substr(0, pkt_offset);
-						filesystem::path pkt_path(pkt_name);
-						if (filesystem::exists(pkt_path)
-								&& (filesystem::is_regular_file(pkt_path)
-										|| filesystem::is_symlink(pkt_path)))
+						std::string::size_type const password_offset = pkt_name.find("|");
+						std::string password;
+						if (password_offset != std::string::npos)
 						{
-							std::string::size_type const password_offset = pkt_name.find("|");
-							std::string password;
-							if (password_offset != std::string::npos)
-							{
-								password = pkt_name.substr(password_offset + 1);
-								pkt_name = pkt_name.substr(0, password_offset - 1);
-							}
-							std::string const file_name = res_name.substr(pkt_offset + 2);
+							password = pkt_name.substr(password_offset + 1);
+							pkt_name = pkt_name.substr(0, password_offset - 1);
+						}
+						std::string const file_name = res_name.substr(pkt_offset + 2);
 
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
-							uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
+						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
 #else
-							uint64_t timestamp = filesystem::last_write_time(pkt_path);
+						uint64_t timestamp = filesystem::last_write_time(pkt_path);
 #endif
-							ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
-								MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-							if (*pkt_file)
-							{
-								shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
-								Extract7z(pkt_file, password, file_name, packet_file);
-								return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
-							}
+						ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
+							MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+						if (*pkt_file)
+						{
+							shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+							Extract7z(pkt_file, password, file_name, packet_file);
+							return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
 						}
 					}
 				}
 			}
 		}
 
-#ifdef KLAYGE_PLATFORM_ANDROID
+#if defined(KLAYGE_PLATFORM_ANDROID)
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
@@ -464,9 +440,7 @@ namespace KlayGE
 			shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
 			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
 		}
-#endif
-
-#ifdef KLAYGE_PLATFORM_IOS
+#elif defined(KLAYGE_PLATFORM_IOS)
 		std::string::size_type found = name.find_last_of(".");
 		if (found != std::string::npos)
 		{
@@ -500,11 +474,7 @@ namespace KlayGE
 					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 			}
 		}
-#endif
-
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		return ResIdentifierPtr();
-#else
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		std::string::size_type pos = name.rfind('/');
 		if (std::string::npos == pos)
 		{
@@ -519,6 +489,8 @@ namespace KlayGE
 		{
 			return ResIdentifierPtr();
 		}
+#else
+		return ResIdentifierPtr();
 #endif
 	}
 
