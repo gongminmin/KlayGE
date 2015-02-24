@@ -9,4 +9,4 @@ output = sys.argv[2]
 
 my_env = os.environ.copy()
 my_env["PATH"] = "/usr/local/bin:opt/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" + my_env["PATH"]
-subprocess.Popen(["winegcc", input, "-o", output], env = my_env)
+subprocess.Popen(["winegcc", "-mwindows", input, "-o", output], env = my_env)

@@ -1,6 +1,7 @@
 IF(KLAYGE_PLATFORM_WINDOWS)
 	SET(SOURCE_FILES
 		${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp
+		${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py
 	)
 
 	SETUP_TOOL(D3DCompilerWrapper)

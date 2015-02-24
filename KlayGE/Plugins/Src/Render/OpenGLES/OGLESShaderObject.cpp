@@ -222,7 +222,7 @@ namespace
 				first = false;
 				ss.str(std::string());
 			}
-			ss << WINE_PATH << "wineconsole ./" << d3dcompiler_wrapper_name << ".exe.so";
+			ss << WINE_PATH << "wine ./" << d3dcompiler_wrapper_name << ".exe.so";
 #endif
 			ss << " " << compile_input_file;
 			ss << " " << entry_point << " " << target;
