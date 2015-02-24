@@ -239,7 +239,7 @@ namespace KlayGE
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		for (;;)
 		{
-			NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];
+			NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
 			if (nil == event)
 			{
 				break;
