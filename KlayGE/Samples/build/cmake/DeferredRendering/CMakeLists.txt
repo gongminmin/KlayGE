@@ -1,3 +1,5 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/DeferredRendering/fire.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRendering.cpp
 )

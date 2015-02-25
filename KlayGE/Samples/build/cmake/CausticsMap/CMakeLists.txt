@@ -1,3 +1,6 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/bunny.7z")
+DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/point.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/CausticsMap/CausticsMap.cpp
 )

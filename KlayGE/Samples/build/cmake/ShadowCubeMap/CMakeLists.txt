@@ -1,3 +1,5 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/ShadowCubeMap/lamp.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubeMap/ShadowCubeMap.cpp
 )

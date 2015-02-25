@@ -1,3 +1,7 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02.meshml")
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Map-COL.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSBlur.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSSS.cpp

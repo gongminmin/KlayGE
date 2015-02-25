@@ -1,3 +1,9 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Dragon.7z")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Eye_022green.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/REDRUST2.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/SCALE_B_W.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Stucco8.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/SubSurface/Model.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/SubSurface/SubSurface.cpp

@@ -1,3 +1,8 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/grass.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/particle.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_height.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_normal.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/GPUParticleSystem/GPUParticleSystem.cpp
 )

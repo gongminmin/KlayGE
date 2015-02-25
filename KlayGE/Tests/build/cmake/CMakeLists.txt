@@ -14,6 +14,18 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 
+DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc2.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc3.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc7.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/Lenna.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/Lenna_bc1.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/Lenna_bc7.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/memorial.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/memorial_bc6u.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/uffizi_probe.dds")
+DOWNLOAD_FILE("KlayGE/Tests/media/uffizi_probe_bc6s.dds")
+
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 SET(KLAYGE_OUTPUT_DIR "${KLAYGE_PROJECT_DIR}/lib/${KLAYGE_PLATFORM_NAME}")

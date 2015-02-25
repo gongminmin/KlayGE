@@ -1,3 +1,9 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_specular.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/OrderIndependentTransparency/OrderIndependentTransparency.cpp
 )

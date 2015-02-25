@@ -1,3 +1,9 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/DetailedSurface.jdt")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/diffuse.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/height.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/na_length.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/normal.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DetailedSurface/DetailedSurface.cpp
 )

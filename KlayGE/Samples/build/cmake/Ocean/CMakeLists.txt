@@ -1,3 +1,11 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/DH001cross_c.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/DH001cross_y.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/Dirt.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/grass.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/GrassGreenTexture0002.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/RealSand40BoH.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/snow_DM.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Ocean/Ocean.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/Ocean/OceanSimulator.cpp

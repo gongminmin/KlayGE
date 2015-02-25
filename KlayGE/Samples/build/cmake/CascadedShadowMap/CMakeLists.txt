@@ -1,3 +1,11 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_e.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_f.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_fb.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/plane.meshml")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/stones.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/tau_bump.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/CascadedShadowMap/CascadedShadowMap.cpp
 )

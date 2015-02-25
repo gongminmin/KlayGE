@@ -1,3 +1,5 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/VideoTexture/big_buck_bunny.avi")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/VideoTexture/VideoTexture.cpp
 )

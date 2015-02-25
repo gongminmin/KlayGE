@@ -1,3 +1,5 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/MotionBlurDoF/bokeh_pattern.dds")
+
 FIND_PACKAGE(PythonInterp)
 
 SET(EXE_NAME "MotionBlurDoF")

@@ -1,3 +1,7 @@
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_color.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.7z")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds")
+
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/AtmosphericScattering/AtmosphericScattering.cpp
 )
