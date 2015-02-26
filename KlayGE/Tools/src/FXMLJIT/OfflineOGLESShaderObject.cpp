@@ -222,6 +222,7 @@ namespace
 			}
 			ss << WINE_PATH << "wine ./" << d3dcompiler_wrapper_name << ".exe.so";
 #endif
+			ss << " compile";
 			ss << " " << compile_input_file;
 			ss << " " << entry_point << " " << target;
 			ss << " " << flags1 << " " << flags2;
