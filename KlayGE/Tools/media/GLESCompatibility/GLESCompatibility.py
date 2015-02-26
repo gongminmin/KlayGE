@@ -202,5 +202,8 @@ def gles_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, g
 	info.to_html(report_file)
 	report_file.close()
 
+	command = ""
 	import os
-	os.system(report_file_name);
+	if(os.uname()[0] == "Darwin"):
+		command = "open "
+	os.system(command + report_file_name);
