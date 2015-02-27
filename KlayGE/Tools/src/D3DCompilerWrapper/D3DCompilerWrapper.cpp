@@ -38,7 +38,7 @@
 
 #include <stdio.h>
 #include <windows.h>
-#include <D3Dcompiler.h>
+#include <D3D11Shader.h>
 
 DEFINE_GUID(IID_ID3D11ShaderReflection_47,
 	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
