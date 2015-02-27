@@ -396,9 +396,6 @@ class information:
 def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, ext_str):
 	exts = ext_str.split(' ')
 
-	print('OpenGL Compatibility Viewer')
-	print('Copyright(C) 2004-2014 Minmin Gong\n')
-
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
 

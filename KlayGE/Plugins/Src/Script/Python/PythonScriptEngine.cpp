@@ -45,6 +45,139 @@
 
 namespace KlayGE
 {
+	// http://stackoverflow.com/questions/4307187/how-to-catch-python-stdout-in-c-code
+
+	PyObject* StdoutWrite(PyObject* self, PyObject* args)
+	{
+		UNREF_PARAM(self);
+		UNREF_PARAM(args);
+
+		char* data;
+		if (!PyArg_ParseTuple(args, "s", &data))
+		{
+			return 0;
+		}
+
+		if (data[0] != '\n')
+		{
+			LogInfo(data);
+		}
+
+		return PyLong_FromSize_t(strlen(data));
+	}
+	
+	PyObject* StdoutFlush(PyObject* self, PyObject* args)
+	{
+		UNREF_PARAM(self);
+		UNREF_PARAM(args);
+
+		// no-op
+		return Py_BuildValue("");
+	}
+	
+	PyMethodDef Stdout_methods[] =
+	{
+		{ "write", StdoutWrite, METH_VARARGS, "sys.stdout.write" },
+		{ "flush", StdoutFlush, METH_VARARGS, "sys.stdout.write" },
+		{ 0, 0, 0, 0 } // sentinel
+	};
+	
+	PyTypeObject stdout_type =
+	{
+		PyVarObject_HEAD_INIT(0, 0)
+		"emb.StdoutType",     /* tp_name */
+		sizeof(PyObject),     /* tp_basicsize */
+		0,                    /* tp_itemsize */
+		0,                    /* tp_dealloc */
+		0,                    /* tp_print */
+		0,                    /* tp_getattr */
+		0,                    /* tp_setattr */
+		0,                    /* tp_reserved */
+		0,                    /* tp_repr */
+		0,                    /* tp_as_number */
+		0,                    /* tp_as_sequence */
+		0,                    /* tp_as_mapping */
+		0,                    /* tp_hash  */
+		0,                    /* tp_call */
+		0,                    /* tp_str */
+		0,                    /* tp_getattro */
+		0,                    /* tp_setattro */
+		0,                    /* tp_as_buffer */
+		Py_TPFLAGS_DEFAULT,   /* tp_flags */
+		"emb.Stdout objects", /* tp_doc */
+		0,                    /* tp_traverse */
+		0,                    /* tp_clear */
+		0,                    /* tp_richcompare */
+		0,                    /* tp_weaklistoffset */
+		0,                    /* tp_iter */
+		0,                    /* tp_iternext */
+		Stdout_methods,       /* tp_methods */
+		0,                    /* tp_members */
+		0,                    /* tp_getset */
+		0,                    /* tp_base */
+		0,                    /* tp_dict */
+		0,                    /* tp_descr_get */
+		0,                    /* tp_descr_set */
+		0,                    /* tp_dictoffset */
+		0,                    /* tp_init */
+		0,                    /* tp_alloc */
+		0,                    /* tp_new */
+	};
+	
+	PyModuleDef emb_module =
+	{
+		PyModuleDef_HEAD_INIT,
+		"emb", 0, -1, 0,
+	};
+	
+	PyObjectPtr stdout_obj;
+	PyObjectPtr stdout_saved_obj;
+	
+	PyMODINIT_FUNC PyInit_emb()
+	{
+		stdout_obj.reset();
+		stdout_saved_obj.reset();
+
+		stdout_type.tp_new = PyType_GenericNew;
+		if (PyType_Ready(&stdout_type) < 0)
+		{
+			return 0;
+		}
+
+		PyObject* m = PyModule_Create(&emb_module);
+		if (m)
+		{
+			PyObject* o = reinterpret_cast<PyObject*>(&stdout_type);
+			Py_IncRef(o);
+			PyModule_AddObject(m, "Stdout", o);
+		}
+		return m;
+	}
+	
+	void SetStdout()
+	{
+		if (!stdout_obj)
+		{
+			stdout_saved_obj = MakePyObjectPtr(PySys_GetObject("stdout"));
+			Py_IncRef(stdout_saved_obj.get());
+			stdout_obj = MakePyObjectPtr(stdout_type.tp_new(&stdout_type, 0, 0));
+			Py_IncRef(stdout_obj.get());
+		}
+
+		PySys_SetObject("stdout", stdout_obj.get());
+	}
+	
+	void ResetStdout()
+	{
+		if (stdout_saved_obj)
+		{
+			PySys_SetObject("stdout", stdout_saved_obj.get());
+		}
+
+		stdout_obj.reset();
+		stdout_saved_obj.reset();
+	}
+
 	class PyObjDeleter
 	{
 	public:
@@ -303,11 +436,17 @@ namespace KlayGE
 		std::wstring py_lib;
 		Convert(py_lib, ResLoader::Instance().AbsPath(Context::Instance().AppInstance().Name() + "Py.zip"));
 		Py_SetPath(&py_lib[0]);
+
+		PyImport_AppendInittab("emb", PyInit_emb);
 		Py_InitializeEx(0);
+		PyImport_ImportModule("emb");
+
+		SetStdout();
 	}
 
 	PythonEngine::~PythonEngine()
 	{
+		ResetStdout();
 		Py_Finalize();
 	}
 
