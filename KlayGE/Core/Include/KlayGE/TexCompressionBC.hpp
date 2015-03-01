@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include <KlayGE/TexCompression.hpp>
 
 namespace KlayGE

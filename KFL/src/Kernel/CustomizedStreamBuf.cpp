@@ -30,6 +30,8 @@
 
 #include <KFL/KFL.hpp>
 
+#include <cstring>
+
 #include <boost/assert.hpp>
 
 #include <KFL/CustomizedStreamBuf.hpp>

@@ -35,6 +35,8 @@
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 
+#include <glloader/glloader.h>
+
 #include <KlayGE/Window.hpp>
 
 namespace KlayGE
@@ -273,7 +275,7 @@ namespace KlayGE
 								| SubstructureNotifyMask
 								| FocusChangeMask
 								| ResizeRedirectMask;
-		x_window_ = static_cast<::Window>(native_wnd);
+		x_window_ = reinterpret_cast<::Window>(native_wnd);
 		XStoreName(x_display_, x_window_, name.c_str());
 		XMapWindow(x_display_, x_window_);
 		XFlush(x_display_);

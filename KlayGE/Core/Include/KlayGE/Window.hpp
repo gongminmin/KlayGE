@@ -44,7 +44,6 @@
 #include <X11/Xutil.h>
 #include <X11/keysym.h>
 
-#include <glloader/glloader.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android_native_app_glue.h>
 #elif (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
@@ -191,6 +190,9 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t buttons)> JoystickButtonsEvent;
+#elif defined KLAYGE_PLATFORM_LINUX
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
 #elif defined KLAYGE_PLATFORM_DARWIN
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
@@ -286,6 +288,15 @@ namespace KlayGE
 		{
 			return joystick_buttons_event_;
 		}
+#elif defined KLAYGE_PLATFORM_LINUX
+		KeyDownEvent& OnKeyDown()
+		{
+			return key_down_event_;
+		}
+		KeyUpEvent& OnKeyUp()
+		{
+			return key_up_event_;
+		}
 #elif defined KLAYGE_PLATFORM_DARWIN
 		KeyDownEvent& OnKeyDown()
 		{
@@ -328,6 +339,9 @@ namespace KlayGE
 		MouseWheelEvent mouse_wheel_event_;
 		JoystickAxisEvent joystick_axis_event_;
 		JoystickButtonsEvent joystick_buttons_event_;
+#elif defined KLAYGE_PLATFORM_LINUX
+		KeyDownEvent key_down_event_;
+		KeyUpEvent key_up_event_;
 #elif defined KLAYGE_PLATFORM_DARWIN
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;
@@ -371,7 +385,6 @@ namespace KlayGE
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
-		::GLXFBConfig* fbc_;
 		::XVisualInfo* vi_;
 		::Window x_window_;
 		::Atom wm_delete_window_;

@@ -532,7 +532,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
 			else:
 				build_cmd.add_command("%s %s" % (make_name, install_str))
-				build_cmd.add_command('if (($? != 0)); then exit 1; fi')
+				build_cmd.add_command('if [ $? -ne 0 ]; then exit 1; fi')
 			if build_cmd.execute() != 0:
 				log_error("Build %s failed." % name)
 

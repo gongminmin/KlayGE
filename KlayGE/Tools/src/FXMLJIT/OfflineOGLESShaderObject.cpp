@@ -33,7 +33,6 @@
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Math.hpp>
-#include "OfflineRenderEffect.hpp"
 
 #include <cstdio>
 #include <string>
@@ -116,6 +115,7 @@ typedef struct _D3D_SHADER_MACRO
 #endif
 #endif
 
+#include "OfflineRenderEffect.hpp"
 #include "OfflineOGLESShaderObject.hpp"
 
 namespace

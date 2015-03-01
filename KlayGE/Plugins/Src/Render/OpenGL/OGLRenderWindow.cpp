@@ -73,6 +73,48 @@ namespace KlayGE
 		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLRenderWindow::OnSize, this,
 			placeholders::_1, placeholders::_2));
 
+		std::vector<std::pair<std::string, std::pair<int, int> > > available_versions;
+		available_versions.push_back(std::make_pair("4.5", std::make_pair(4, 5)));
+		available_versions.push_back(std::make_pair("4.4", std::make_pair(4, 4)));
+		available_versions.push_back(std::make_pair("4.3", std::make_pair(4, 3)));
+		available_versions.push_back(std::make_pair("4.2", std::make_pair(4, 2)));
+		available_versions.push_back(std::make_pair("4.1", std::make_pair(4, 1)));
+		available_versions.push_back(std::make_pair("4.0", std::make_pair(4, 0)));
+		available_versions.push_back(std::make_pair("3.3", std::make_pair(3, 3)));
+		available_versions.push_back(std::make_pair("3.2", std::make_pair(3, 2)));
+		available_versions.push_back(std::make_pair("3.1", std::make_pair(3, 1)));
+		available_versions.push_back(std::make_pair("3.0", std::make_pair(3, 0)));
+
+		std::vector<std::string> strs;
+		boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
+		for (size_t index = 0; index < strs.size(); ++ index)
+		{
+			std::string& opt = strs[index];
+			boost::algorithm::trim(opt);
+			std::string::size_type loc = opt.find(':');
+			std::string opt_name = opt.substr(0, loc);
+			std::string opt_val = opt.substr(loc + 1);
+
+			if ("version" == opt_name)
+			{
+				size_t feature_index = 0;
+				for (size_t i = 0; i < available_versions.size(); ++ i)
+				{
+					if (available_versions[i].first == opt_val)
+					{
+						feature_index = i;
+						break;
+					}
+				}
+
+				if (feature_index > 0)
+				{
+					available_versions.erase(available_versions.begin(),
+						available_versions.begin() + feature_index);
+				}
+			}
+		}
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 		hWnd_ = main_wnd->HWnd();
 		hDC_ = ::GetDC(hWnd_);
@@ -188,48 +230,6 @@ namespace KlayGE
 
 				// reinit glloader
 				glloader_init();
-			}
-		}
-
-		std::vector<std::pair<std::string, std::pair<int, int> > > available_versions;
-		available_versions.push_back(std::make_pair("4.5", std::make_pair(4, 5)));
-		available_versions.push_back(std::make_pair("4.4", std::make_pair(4, 4)));
-		available_versions.push_back(std::make_pair("4.3", std::make_pair(4, 3)));
-		available_versions.push_back(std::make_pair("4.2", std::make_pair(4, 2)));
-		available_versions.push_back(std::make_pair("4.1", std::make_pair(4, 1)));
-		available_versions.push_back(std::make_pair("4.0", std::make_pair(4, 0)));
-		available_versions.push_back(std::make_pair("3.3", std::make_pair(3, 3)));
-		available_versions.push_back(std::make_pair("3.2", std::make_pair(3, 2)));
-		available_versions.push_back(std::make_pair("3.1", std::make_pair(3, 1)));
-		available_versions.push_back(std::make_pair("3.0", std::make_pair(3, 0)));
-
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
-		for (size_t index = 0; index < strs.size(); ++ index)
-		{
-			std::string& opt = strs[index];
-			boost::algorithm::trim(opt);
-			std::string::size_type loc = opt.find(':');
-			std::string opt_name = opt.substr(0, loc);
-			std::string opt_val = opt.substr(loc + 1);
-
-			if ("version" == opt_name)
-			{
-				size_t feature_index = 0;
-				for (size_t i = 0; i < available_versions.size(); ++ i)
-				{
-					if (available_versions[i].first == opt_val)
-					{
-						feature_index = i;
-						break;
-					}
-				}
-
-				if (feature_index > 0)
-				{
-					available_versions.erase(available_versions.begin(),
-						available_versions.begin() + feature_index);
-				}
 			}
 		}
 

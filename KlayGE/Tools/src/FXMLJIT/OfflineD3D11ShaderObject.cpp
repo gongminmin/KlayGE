@@ -35,7 +35,6 @@
 #include <KFL/Math.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/ResIdentifier.hpp>
-#include "OfflineRenderEffect.hpp"
 
 #include <string>
 #include <map>
@@ -59,6 +58,7 @@
 #include <D3DCompiler.h>
 #endif
 
+#include "OfflineRenderEffect.hpp"
 #include "OfflineD3D11ShaderObject.hpp"
 
 DEFINE_GUID(IID_ID3D11ShaderReflection_47,
