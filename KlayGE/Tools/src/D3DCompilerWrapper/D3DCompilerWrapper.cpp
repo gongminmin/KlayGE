@@ -40,6 +40,22 @@
 #include <windows.h>
 #include <D3D11Shader.h>
 
+#ifndef D3D11_SHVER_GET_TYPE
+enum D3D11_SHADER_VERSION_TYPE
+{
+	D3D11_SHVER_PIXEL_SHADER = 0,
+	D3D11_SHVER_VERTEX_SHADER = 1,
+	D3D11_SHVER_GEOMETRY_SHADER = 2,
+
+	// D3D11 Shaders
+	D3D11_SHVER_HULL_SHADER = 3,
+	D3D11_SHVER_DOMAIN_SHADER = 4,
+	D3D11_SHVER_COMPUTE_SHADER = 5,
+};
+
+#define D3D11_SHVER_GET_TYPE(_Version) (((_Version) >> 16) & 0xFFFF)
+#endif
+
 DEFINE_GUID(IID_ID3D11ShaderReflection_47,
 	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
 
