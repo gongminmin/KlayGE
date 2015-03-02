@@ -45,8 +45,8 @@
 #pragma warning(push)
 #pragma warning(disable: 4100 6011 6313)
 #endif
-#include <rapidxml/rapidxml.hpp>
-#include <rapidxml/rapidxml_print.hpp>
+#include <rapidxml.hpp>
+#include <rapidxml_print.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
