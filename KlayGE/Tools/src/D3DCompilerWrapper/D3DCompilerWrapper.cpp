@@ -28,7 +28,7 @@
 * from http://www.klayge.org/licensing/.
 */
 
-// Keep this file STL free because of winegcc compatibility.
+// Keep this file STL free because of wineg++ compatibility.
 
 #define INITGUID
 
@@ -38,7 +38,7 @@
 
 #include <stdio.h>
 #include <windows.h>
-#include <D3D11Shader.h>
+#include <d3d11shader.h>
 
 #ifndef D3D11_SHVER_GET_TYPE
 enum D3D11_SHADER_VERSION_TYPE
@@ -181,25 +181,25 @@ int main(int argc, char* argv[])
 		FILE* fp = fopen(input_file, "rb");
 		int hlsl_size;
 		fread(&hlsl_size, sizeof(hlsl_size), 1, fp);
-		char* hlsl = (char*)malloc(sizeof(char) * (hlsl_size + 1));
+		char* hlsl = new char[hlsl_size + 1];
 		fread(hlsl, sizeof(char), hlsl_size, fp);
 		hlsl[hlsl_size] = 0;
 
 		int num_macros;
 		fread(&num_macros, sizeof(num_macros), 1, fp);
-		D3D_SHADER_MACRO* macros = (D3D_SHADER_MACRO*)malloc(sizeof(D3D_SHADER_MACRO) * (num_macros + 1));
+		D3D_SHADER_MACRO* macros = new D3D_SHADER_MACRO[num_macros + 1];
 		char line_name[1024];
 		char line_definition[1024];
 		int idx = 0;
 		while (fgets(line_name, 1024, fp) && fgets(line_definition, 1024, fp))
 		{
-			char* t1 = (char*)malloc(sizeof(char) * (strlen(line_name) + 1));
+			char* t1 = new char[strlen(line_name) + 1];
 			strcpy(t1, line_name);
 			if ('\n' == t1[strlen(t1) - 1])
 			{
 				t1[strlen(t1) - 1] = '\0';
 			}
-			char* t2 = (char*)malloc(sizeof(char) * (strlen(line_definition) + 1));
+			char* t2 = new char[strlen(line_definition) + 1];
 			strcpy(t2, line_definition);
 			if ('\n' == t2[strlen(t2) - 1])
 			{
@@ -249,11 +249,11 @@ int main(int argc, char* argv[])
 
 		for (int i = 0; i < num_macros; ++ i)
 		{
-			free((void*)macros[i].Name);
-			free((void*)macros[i].Definition);
+			delete[] macros[i].Name;
+			delete[] macros[i].Definition;
 		}
-		free(macros);
-		free(hlsl);
+		delete[] macros;
+		delete[] hlsl;
 	}
 	else if (0 == strcmp(argv[1], "reflect"))
 	{
@@ -270,7 +270,7 @@ int main(int argc, char* argv[])
 		fseek(fp, 0, SEEK_END);
 		long bytecode_size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
-		char* bytecode = (char*)malloc(sizeof(char) * bytecode_size);
+		char* bytecode = new char[bytecode_size];
 		fread(bytecode, sizeof(char), bytecode_size, fp);
 		fclose(fp);
 
@@ -413,6 +413,8 @@ int main(int argc, char* argv[])
 
 			fclose(fp);
 		}
+
+		delete[] bytecode;
 	}
 	else if (0 == strcmp(argv[1], "strip"))
 	{
@@ -430,7 +432,7 @@ int main(int argc, char* argv[])
 		fseek(fp, 0, SEEK_END);
 		long bytecode_size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
-		char* bytecode = (char*)malloc(sizeof(char) * bytecode_size);
+		char* bytecode = new char[bytecode_size];
 		fread(bytecode, sizeof(char), bytecode_size, fp);
 		fclose(fp);
 
@@ -444,6 +446,8 @@ int main(int argc, char* argv[])
 		fp = fopen(output_file, "wb");
 		fwrite(code->GetBufferPointer(), sizeof(char), code->GetBufferSize(), fp);
 		fclose(fp);
+
+		delete[] bytecode;
 	}
 
 	return 0;
