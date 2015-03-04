@@ -1,3 +1,12 @@
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Camera.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/klayge_logo.ico")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/LineMode.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Open.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Play.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Save.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Skinning.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Smooth.png")
+
 SET(SOURCE_FILES 
 	${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewerCore/Export.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewerCore/MeshMLViewerCore.cpp

@@ -68,7 +68,8 @@ KlayGE/Exporters/3DSMax/MeshML/build/*/ipch/
 KlayGE/Exporters/Maya/build/*/Debug/
 KlayGE/Exporters/Maya/build/*/Release/
 KlayGE/Exporters/Maya/build/*/ipch/
-KlayGE/media/Fonts/*.kfont
+KlayGE/media/Fonts
+KlayGE/media/Models
 KlayGE/media/Textures
 KlayGE/Samples/media/Common/Assets/*.png
 KlayGE/Samples/media/Common/*.pfx
@@ -84,7 +85,10 @@ KlayGE/Tests/media/*
 KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*Py.zip
 KlayGE/Tools/src/*/*/obj
+KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images
+KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tutorials/media/*/*.dds
+KlayGE/klayge_logo.png
 External/boost/lib/
 External/Cg/bin/
 External/DXSDK/Redist/

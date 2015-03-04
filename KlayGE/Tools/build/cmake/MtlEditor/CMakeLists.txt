@@ -1,3 +1,13 @@
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Camera.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/klayge_logo.ico")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Open.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Play.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Redo.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Save.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/SaveAs.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Skinning.png")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Undo.png")
+
 SET(SOURCE_FILES 
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Commands.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Export.cpp
