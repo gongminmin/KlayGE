@@ -91,6 +91,7 @@ KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
 External/boost/lib/
 External/Cg/bin/
+External/Downloads/
 External/DXSDK/Redist/
 External/Python/Lib/__pycache__/
 External/Python/Lib/encodings/__pycache__/
@@ -123,5 +124,6 @@ External/libvorbis/vorbis*.pc
 External/libvorbis/stamp-h1
 External/libvorbis/doc/Doxyfile
 External/OpenALSDK/redist/
+External/rapidxml/*
 External/wpftoolkit/bin
 External/wpftoolkit/Source/ExtendedWPFToolkitSolution/Src/*/obj

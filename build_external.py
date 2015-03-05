@@ -121,6 +121,9 @@ def setup_OpenALSDK(build_info, compiler_info):
 def setup_Cg(build_info, compiler_info):
 	build_a_project("Cg", "External/Cg", build_info, compiler_info)
 
+def setup_rapidxml(build_info, compiler_info):
+	build_a_project("Cg", "External/rapidxml", build_info, compiler_info)
+
 def setup_wpftoolkit(build_info, compiler_info):
 	build_a_project("wpftoolkit", "External/wpftoolkit", build_info, compiler_info)
 
@@ -166,6 +169,9 @@ def build_external_libs(build_info):
 		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			print("\nSeting up Cg...\n")
 			setup_Cg(build_info, compiler_info)
+			
+		print("\nSeting up rapidxml...\n")
+		setup_rapidxml(build_info, compiler_info)
 
 		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
 			print("\nSeting up wpftoolkit...\n")
