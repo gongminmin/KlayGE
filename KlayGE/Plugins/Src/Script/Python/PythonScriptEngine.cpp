@@ -58,12 +58,12 @@ namespace KlayGE
 			return 0;
 		}
 
-		if (data[0] != '\n')
+		size_t const len = strlen(data);
+		if ((1 == len) && (data[0] != '\n'))
 		{
 			LogInfo(data);
 		}
-
-		return PyLong_FromSize_t(strlen(data));
+		return PyLong_FromSize_t(len);
 	}
 	
 	PyObject* StdoutFlush(PyObject* self, PyObject* args)
