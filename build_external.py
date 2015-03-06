@@ -122,7 +122,7 @@ def setup_Cg(build_info, compiler_info):
 	build_a_project("Cg", "External/Cg", build_info, compiler_info)
 
 def setup_rapidxml(build_info, compiler_info):
-	build_a_project("Cg", "External/rapidxml", build_info, compiler_info)
+	build_a_project("rapidxml", "External/rapidxml", build_info, compiler_info)
 
 def setup_wpftoolkit(build_info, compiler_info):
 	build_a_project("wpftoolkit", "External/wpftoolkit", build_info, compiler_info)
