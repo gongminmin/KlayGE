@@ -34,6 +34,14 @@ ELSE()
 ENDIF()
 DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip")
 
+IF(EXISTS ${DST_PATH})
+	SET(RAPIDXML_VERSION 0)
+	FILE(STRINGS ${DST_PATH} RAPIDXML_VERSION REGEX "// Version ")
+	IF(NOT (${RAPIDXML_VERSION} STREQUAL "// Version 1.13"))
+		FILE(REMOVE ${DST_PATH})
+	ENDIF()
+ENDIF()
+
 ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
 	COMMAND ${SEVENZIP_PATH} x -y ${KLAYGE_ROOT_DIR}/${REL_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory rapidxml-${RAPIDXML_VER} .
