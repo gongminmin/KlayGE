@@ -201,6 +201,12 @@ def gles_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, g
 
 	command = ""
 	import os
-	if(os.uname()[0] == "Darwin"):
-		command = "open "
+	if (os.name != "nt"):
+		try:
+			if ("Darwin" == os.uname()[0]):
+				command = "open "
+			else:
+				command = "firefox "
+		except:
+			pass
 	os.system(command + report_file_name);

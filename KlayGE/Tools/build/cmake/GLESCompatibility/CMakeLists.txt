@@ -25,6 +25,6 @@ ADD_CUSTOM_COMMAND(TARGET GLESCompatibility
 	POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/GLESCompatibilityPy.zip ${KLAYGE_BIN_DIR})
 
-INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/GLESCompatibilityPy.py
+INSTALL(FILES ${KLAYGE_PROJECT_DIR}/Tools/media/GLESCompatibility/GLESCompatibilityPy.zip
 	DESTINATION ${KLAYGE_BIN_DIR}
 )

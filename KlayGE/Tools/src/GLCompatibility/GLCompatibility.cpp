@@ -136,6 +136,9 @@ int main()
 	context_cfg.script_factory_name = "Python";
 	context_cfg.graphics_cfg.hide_win = true;
 	context_cfg.graphics_cfg.hdr = false;
+	context_cfg.graphics_cfg.ppaa = false;
+	context_cfg.graphics_cfg.color_grading = false;
+	context_cfg.graphics_cfg.gamma = false;
 	Context::Instance().Config(context_cfg);
 
 	GLCompatibilityApp app;
