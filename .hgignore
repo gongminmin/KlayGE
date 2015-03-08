@@ -114,15 +114,7 @@ External/libogg/ogg*.pc
 External/libogg/stamp-h1
 External/libogg/conftest.make
 External/libogg/confdefs.h
-External/libvorbis/libs/
-External/libvorbis/*/.deps/
-External/libvorbis/config.h
-External/libvorbis/config.log
-External/libvorbis/config.status
-External/libvorbis/libtool
-External/libvorbis/vorbis*.pc
-External/libvorbis/stamp-h1
-External/libvorbis/doc/Doxyfile
+External/libvorbis/*
 External/OpenALSDK/redist/
 External/rapidxml/*
 External/wpftoolkit/bin
