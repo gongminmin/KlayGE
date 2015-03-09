@@ -101,8 +101,7 @@ External/Python/PC/python_nt_d.h
 External/Python/PC/pythonnt_rc.h
 External/Python/PC/pythonnt_rc_d.h
 External/Python/libs/
-External/freetype/config.mk
-External/freetype/objs/*
+External/freetype
 External/libogg
 External/libvorbis
 External/OpenALSDK/redist/
