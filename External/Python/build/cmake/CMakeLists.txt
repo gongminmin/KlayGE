@@ -3,12 +3,55 @@ cmake_minimum_required(VERSION 2.8.6)
 set(PY_VERSION_MAJOR 3)
 set(PY_VERSION_MINOR 4)
 set(PY_VERSION_PATCH 1)
+SET(PY_VERSION ${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH})
 
 project(Python C)
 
-INCLUDE(${CMAKE_SOURCE_DIR}/../../../../cmake/Common.cmake)
-INCLUDE(${CMAKE_SOURCE_DIR}/../../../../cmake/Platform.cmake)
-INCLUDE(${CMAKE_SOURCE_DIR}/../../../../cmake/Compiler.cmake)
+SET(PYTHON_PROJECT_DIR "${CMAKE_HOME_DIRECTORY}/../..")
+SET(KLAYGE_ROOT_DIR "${PYTHON_PROJECT_DIR}/../..")
+
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
+
+SET(REL_PATH "External/Downloads/Python-${PY_VERSION}.tar.xz")
+SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/Python/README")
+SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
+IF(KLAYGE_PLATFORM_WINDOWS)
+	SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/patc")
+ELSE()
+	SET(PATCH_PATH "patch")
+ENDIF()
+
+IF(KLAYGE_PLATFORM_WINDOWS)
+	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.exe")
+	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.dll")
+	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/patc.exe")
+ELSE()
+	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
+	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.so")
+ENDIF()
+DOWNLOAD_FILE_URL(${REL_PATH} "https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tar.xz")
+
+IF(EXISTS ${DST_PATH})
+	SET(PY_VERSION_STR 0)
+	FILE(STRINGS ${DST_PATH} PY_VERSION_STR REGEX "This is Python version ")
+	STRING(FIND "${PY_VERSION_STR}" "This is Python version 3.4.1" POS)
+	IF(NOT POS EQUAL 0)
+		FILE(REMOVE ${DST_PATH})
+	ENDIF()
+ENDIF()
+
+ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
+	COMMAND ${SEVENZIP_PATH} x -y ${KLAYGE_ROOT_DIR}/${REL_PATH}
+	COMMAND ${SEVENZIP_PATH} x -y Python-${PY_VERSION}.tar
+	COMMAND ${CMAKE_COMMAND} -E copy_directory Python-${PY_VERSION} .
+	COMMAND ${CMAKE_COMMAND} -E remove Python-${PY_VERSION}.tar
+	COMMAND ${CMAKE_COMMAND} -E remove_directory Python-${PY_VERSION}
+	COMMAND ${PATCH_PATH} -p0 -i Patches/ForAndroidLinuxDarwinAndWinRT.patch
+	WORKING_DIRECTORY ${KLAYGE_ROOT_DIR}/External/Python)
+ADD_CUSTOM_TARGET(python_download ALL DEPENDS ${DST_PATH})
+
 IF(MSVC)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX- /wd4273 /we4013 /we4133")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /WX- /wd4273 /we4013 /we4133")

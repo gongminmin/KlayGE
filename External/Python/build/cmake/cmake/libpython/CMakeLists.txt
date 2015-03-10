@@ -225,7 +225,12 @@ configure_file(
 
 
 function(add_libpython name type)
+	FOREACH(item ${LIBPYTHON_SOURCES})
+		SET_SOURCE_FILES_PROPERTIES(${item} PROPERTIES GENERATED 1)
+	ENDFOREACH()
+
     add_library(${name} ${type} ${LIBPYTHON_SOURCES})
+	ADD_DEPENDENCIES(${name} "python_download")
     if(BUILD_SHARED)
         target_link_libraries(${name}
             ${builtin_link_libraries}

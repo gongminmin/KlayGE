@@ -93,14 +93,7 @@ External/boost/lib/
 External/Cg/bin/
 External/Downloads/
 External/DXSDK/Redist/
-External/Python/Lib/__pycache__/
-External/Python/Lib/encodings/__pycache__/
-External/Python/PC/python3dll.obj
-External/Python/PC/python_nt.h
-External/Python/PC/python_nt_d.h
-External/Python/PC/pythonnt_rc.h
-External/Python/PC/pythonnt_rc_d.h
-External/Python/libs/
+External/Python
 External/freetype
 External/libogg
 External/libvorbis
