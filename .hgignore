@@ -106,5 +106,4 @@ External/libogg
 External/libvorbis
 External/OpenALSDK/redist/
 External/rapidxml
-External/wpftoolkit/bin
-External/wpftoolkit/Source/ExtendedWPFToolkitSolution/Src/*/obj
+External/wpftoolkit
