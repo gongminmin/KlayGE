@@ -105,47 +105,7 @@ option(WITH_PYMALLOC "Define if you want to compile in Python-specific mallocs" 
 option(WITH_THREAD "Compile in rudimentary thread support" ON)
 
 # Detect source directory
-set(_landmark "pyconfig.h.in") # CMake will look for this file.
-if(EXISTS ${CMAKE_SOURCE_DIR}/../../${_landmark})
-	set(SRC_DIR ${CMAKE_SOURCE_DIR}/../../)
-elseif(NOT "${SRC_DIR}" STREQUAL "" AND EXISTS ${SRC_DIR}/${_landmark})
-	# Do nothing - SRC_DIR is already set.
-else()
-	foreach(dirname
-		cpython-${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}
-		Python-${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}
-	)
-		set(SRC_DIR "${CMAKE_CURRENT_BINARY_DIR}/../${dirname}")
-		if(EXISTS ${SRC_DIR}/${_landmark})
-			break()
-		endif()
-	endforeach()
-endif()
-if(NOT IS_ABSOLUTE ${SRC_DIR})
-	set(SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/${SRC_DIR})
-endif()
-get_filename_component(_parent_dir ${CMAKE_CURRENT_BINARY_DIR} PATH)
-set(_download_link "http://www.python.org/ftp/python/3.4.1/Python-3.4.1.tgz")
-set(_extracted_dir "Python-3.4.1")
-if(WIN32)
-	set(_download_link "https://github.com/jonashaag/cpython/archive/v3.4.1.zip")
-	set(_extracted_dir "cpython-3.4.1")
-endif(WIN32)
-if(NOT EXISTS ${SRC_DIR}/${_landmark})
-	message(FATAL_ERROR "Failed to locate python source.
-The searched locations were:
-   <CMAKE_CURRENT_BINARY_DIR>
-   <CMAKE_CURRENT_BINARY_DIR>/../cpython-${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}
-   <CMAKE_CURRENT_BINARY_DIR>/../Python-${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH}
-   <SRC_DIR>
-You could try to:
-  1) download ${_download_link}
-  2) extract the archive in folder: ${_parent_dir}
-  3) Check that file \"${_parent_dir}/${_extracted_dir}/${_landmark}\" exists.
-  4) re-configure.
-If you already downloaded the source, you could try to re-configure this project passing -DSRC_DIR:PATH=/path/to/Python-3.2.0 using cmake or adding an PATH entry named SRC_DIR from cmake-gui.")
-endif()
-message(STATUS "SRC_DIR: ${SRC_DIR}")
+set(SRC_DIR ${PYTHON_PROJECT_DIR})
 
 # Proceed to the configure checks
 include(cmake/ConfigureChecks.cmake)
