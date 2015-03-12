@@ -6,6 +6,8 @@ IF(COMMAND cmake_policy)
 	CMAKE_POLICY(SET CMP0003 NEW)
 ENDIF(COMMAND cmake_policy)
 
+FIND_PACKAGE(PythonInterp)
+
 SET(RAPIDXML_DIR "${CMAKE_HOME_DIRECTORY}/../../")
 SET(KLAYGE_ROOT_DIR "${RAPIDXML_DIR}/../../")
 
@@ -18,19 +20,17 @@ SET(RAPIDXML_VER "1.13")
 SET(REL_PATH "External/Downloads/rapidxml-${RAPIDXML_VER}.zip")
 SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/rapidxml/rapidxml.hpp")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
-IF(KLAYGE_PLATFORM_WINDOWS)
-	SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/patc")
-ELSE()
-	SET(PATCH_PATH "patch")
-ENDIF()
+SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/patch.py")
 
 IF(KLAYGE_PLATFORM_WINDOWS)
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.exe")
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.dll")
-	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/patc.exe")
+	DOWNLOAD_FILE("External/Downloads/patch.py")
 ELSE()
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.so")
+	FILE(COPY SEVENZIP_PATH DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads")
+	FILE(COPY "${KLAYGE_ROOT_DIR}/External/Downloads" DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}" FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 ENDIF()
 DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip")
 
@@ -46,6 +46,6 @@ ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
 	COMMAND ${SEVENZIP_PATH} x -y ${KLAYGE_ROOT_DIR}/${REL_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory rapidxml-${RAPIDXML_VER} .
 	COMMAND ${CMAKE_COMMAND} -E remove_directory rapidxml-${RAPIDXML_VER}
-	COMMAND ${PATCH_PATH} -i Patches/ForGCC.patch
+	COMMAND ${PYTHON_EXECUTABLE} ${PATCH_PATH} -p0 Patches/ForGCC.patch
 	WORKING_DIRECTORY ${KLAYGE_ROOT_DIR}/External/rapidxml)
 ADD_CUSTOM_TARGET(rapidxml ALL DEPENDS ${DST_PATH})

@@ -5,6 +5,8 @@ set(PY_VERSION_MINOR 4)
 set(PY_VERSION_PATCH 1)
 SET(PY_VERSION ${PY_VERSION_MAJOR}.${PY_VERSION_MINOR}.${PY_VERSION_PATCH})
 
+FIND_PACKAGE(PythonInterp)
+
 project(Python C)
 
 SET(PYTHON_PROJECT_DIR "${CMAKE_HOME_DIRECTORY}/../..")
@@ -17,19 +19,17 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 SET(REL_PATH "External/Downloads/Python-${PY_VERSION}.tar.xz")
 SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/Python/README")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
-IF(KLAYGE_PLATFORM_WINDOWS)
-	SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/patc")
-ELSE()
-	SET(PATCH_PATH "patch")
-ENDIF()
+SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/patch.py")
 
 IF(KLAYGE_PLATFORM_WINDOWS)
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.exe")
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.dll")
-	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/patc.exe")
+	DOWNLOAD_FILE("External/Downloads/patch.py")
 ELSE()
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
 	DOWNLOAD_FILE("External/Downloads/${KLAYGE_PLATFORM_NAME}/7z.so")
+	FILE(COPY SEVENZIP_PATH DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads")
+	FILE(COPY "${KLAYGE_ROOT_DIR}/External/Downloads" DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}" FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 ENDIF()
 DOWNLOAD_FILE_URL(${REL_PATH} "https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tar.xz")
 
@@ -48,7 +48,12 @@ ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory Python-${PY_VERSION} .
 	COMMAND ${CMAKE_COMMAND} -E remove Python-${PY_VERSION}.tar
 	COMMAND ${CMAKE_COMMAND} -E remove_directory Python-${PY_VERSION}
-	COMMAND ${PATCH_PATH} -p0 -i Patches/ForAndroidLinuxDarwinAndWinRT.patch
+	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.android.h"
+	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.darwin.h"
+	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.h"
+	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.linux.h"
+	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.win.h"
+	COMMAND ${PYTHON_EXECUTABLE} ${PATCH_PATH} -p0 Patches/ForAndroidLinuxDarwinAndWinRT.patch
 	WORKING_DIRECTORY ${KLAYGE_ROOT_DIR}/External/Python)
 ADD_CUSTOM_TARGET(python_download ALL DEPENDS ${DST_PATH})
 
