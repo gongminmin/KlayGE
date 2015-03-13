@@ -48,11 +48,6 @@ ADD_CUSTOM_COMMAND(OUTPUT ${DST_PATH}
 	COMMAND ${CMAKE_COMMAND} -E copy_directory Python-${PY_VERSION} .
 	COMMAND ${CMAKE_COMMAND} -E remove Python-${PY_VERSION}.tar
 	COMMAND ${CMAKE_COMMAND} -E remove_directory Python-${PY_VERSION}
-	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.android.h"
-	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.darwin.h"
-	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.h"
-	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.linux.h"
-	COMMAND ${CMAKE_COMMAND} -E touch "Include/pyconfig.win.h"
 	COMMAND ${PYTHON_EXECUTABLE} ${PATCH_PATH} -p0 Patches/ForAndroidLinuxDarwinAndWinRT.patch
 	WORKING_DIRECTORY ${KLAYGE_ROOT_DIR}/External/Python)
 ADD_CUSTOM_TARGET(python_download ALL DEPENDS ${DST_PATH})
