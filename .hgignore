@@ -89,7 +89,7 @@ KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
-External/boost/lib/
+External/boost
 External/Cg/bin/
 External/Downloads/
 External/DXSDK/Redist/
