@@ -89,10 +89,11 @@ KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
+External/7z
 External/boost
 External/Cg/bin/
 External/Downloads/
-External/DXSDK/Redist/
+External/DXSDK
 External/Python
 External/freetype
 External/libogg
