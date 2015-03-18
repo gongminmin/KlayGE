@@ -90,6 +90,7 @@ KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
 External/7z
+External/android_native_app_glue
 External/boost
 External/Cg
 External/Downloads

@@ -127,6 +127,9 @@ def setup_rapidxml(build_info, compiler_info):
 def setup_wpftoolkit(build_info, compiler_info):
 	build_a_project("wpftoolkit", "External/wpftoolkit", build_info, compiler_info)
 
+def setup_android_native_app_glue(build_info, compiler_info):
+	build_a_project("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
+
 def build_external_libs(build_info):
 	import glob
 
@@ -176,6 +179,9 @@ def build_external_libs(build_info):
 		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
 			print("\nSeting up wpftoolkit...\n")
 			setup_wpftoolkit(build_info, compiler_info)
+
+		print("\nSeting up android_native_app_glue...\n")
+		setup_android_native_app_glue(build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
