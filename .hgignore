@@ -91,13 +91,13 @@ KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
 External/7z
 External/boost
-External/Cg/bin/
-External/Downloads/
+External/Cg
+External/Downloads
 External/DXSDK
 External/Python
 External/freetype
 External/libogg
 External/libvorbis
-External/OpenALSDK/redist/
+External/OpenALSDK
 External/rapidxml
 External/wpftoolkit
