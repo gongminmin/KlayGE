@@ -51,6 +51,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "http://download-codeplex.sec.s-msft.com/Download/SourceControlFileDownload.ashx?ProjectName=wpftoolkit&changeSetId=${CHANGESET_NUM}")
+	DOWNLOAD_FILE("External/wpftoolkit/Patches/ForVS.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/wpftoolkit")
 	FILE(COPY "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/" DESTINATION "${KLAYGE_ROOT_DIR}/External/wpftoolkit/")

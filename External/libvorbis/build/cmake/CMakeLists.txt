@@ -52,6 +52,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.xiph.org/releases/vorbis/libvorbis-${VORBIS_VERSION}.tar.xz")
+	DOWNLOAD_FILE("External/libvorbis/Patches/ForMinGWAndWindowsARM.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/libvorbis")
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "libvorbis-${VORBIS_VERSION}.tar" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/libvorbis")

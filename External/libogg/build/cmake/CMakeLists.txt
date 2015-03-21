@@ -52,6 +52,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.xiph.org/releases/ogg/libogg-${LIBOGG_VERSION}.tar.xz")
+	DOWNLOAD_FILE("External/libogg/Patches/ForAndroidLinuxAndVC14.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/libogg")
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "libogg-${LIBOGG_VERSION}.tar" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/libogg")

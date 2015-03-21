@@ -45,6 +45,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "https://www.python.org/ftp/python/3.4.1/Python-3.4.1.tar.xz")
+	DOWNLOAD_FILE("External/Python/Patches/ForAndroidLinuxDarwinAndWinRT.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/Python")
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "Python-${PY_VERSION}.tar" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/Python")

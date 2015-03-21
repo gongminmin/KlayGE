@@ -49,6 +49,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%20${RAPIDXML_VERSION}/rapidxml-${RAPIDXML_VERSION}.zip")
+	DOWNLOAD_FILE("External/rapidxml/Patches/ForGCC.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/rapidxml")
 	FILE(COPY "${KLAYGE_ROOT_DIR}/External/rapidxml/rapidxml-${RAPIDXML_VERSION}/" DESTINATION "${KLAYGE_ROOT_DIR}/External/rapidxml/")

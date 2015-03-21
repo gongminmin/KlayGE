@@ -61,6 +61,7 @@ IF(REGEN)
 	ENDIF()
 	DOWNLOAD_FILE("External/Downloads/patch.py")
 	DOWNLOAD_FILE_URL(${REL_PATH} "http://downloads.sourceforge.net/project/boost/boost/${BOOST_MAJOR_VERSION}.${BOOST_MINOR_VERSION}.0/boost_${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_0.7z")
+	DOWNLOAD_FILE("External/boost/Patches/ForClangAndroidAndWinRT.patch")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/boost")
 	FILE(COPY "${KLAYGE_ROOT_DIR}/External/boost/boost_${BOOST_MAJOR_VERSION}_${BOOST_MINOR_VERSION}_0/boost/" DESTINATION "${KLAYGE_ROOT_DIR}/External/boost/boost/")
