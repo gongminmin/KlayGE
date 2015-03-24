@@ -2226,7 +2226,7 @@ namespace KlayGE
 					include_docs.push_back(MakeSharedPtr<XMLDocument>());
 					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
 
-					std::vector<std::string> include_names;
+					include_names.clear();
 					this->RecursiveIncludeNode(include_root, include_names);
 
 					if (!include_names.empty())

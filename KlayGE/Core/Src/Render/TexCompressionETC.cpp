@@ -1319,8 +1319,8 @@ namespace KlayGE
 					if (diff && base_color5_unscaled)
 					{
 						int const p0 = (x >> 8) & 0xFF;
-						int delta = p0 - static_cast<int>((*base_color5_unscaled)[i]);
-						if ((delta < -4) || (delta > 3))
+						int delta0 = p0 - static_cast<int>((*base_color5_unscaled)[i]);
+						if ((delta0 < -4) || (delta0 > 3))
 						{
 							if (0xFFFF == *table)
 							{
@@ -1534,11 +1534,11 @@ namespace KlayGE
 						{
 							uint32_t const s = *selectors;
 							++ selectors;
-							int const yd = GetModifier(best_solution_.coords_.inten_table_, s);
+							int const yd0 = GetModifier(best_solution_.coords_.inten_table_, s);
 							// Compute actual delta being applied to each pixel, taking into account clamping.
-							delta_sum_r += MathLib::clamp(static_cast<int>(base_color.r()) + yd, 0, 255) - base_color.r();
-							delta_sum_g += MathLib::clamp(static_cast<int>(base_color.g()) + yd, 0, 255) - base_color.g();
-							delta_sum_b += MathLib::clamp(static_cast<int>(base_color.b()) + yd, 0, 255) - base_color.b();
+							delta_sum_r += MathLib::clamp(static_cast<int>(base_color.r()) + yd0, 0, 255) - base_color.r();
+							delta_sum_g += MathLib::clamp(static_cast<int>(base_color.g()) + yd0, 0, 255) - base_color.g();
+							delta_sum_b += MathLib::clamp(static_cast<int>(base_color.b()) + yd0, 0, 255) - base_color.b();
 						}
 						if (!delta_sum_r && !delta_sum_g && !delta_sum_b)
 						{

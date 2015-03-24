@@ -126,18 +126,20 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::PlayAll(bool loop)
 	{
-		std::for_each(audioBufs_.begin(), audioBufs_.end(),
-			KlayGE::bind(&AudioBuffer::Play,
-				KlayGE::bind(select2nd<AudioBufs::value_type>(), KlayGE::placeholders::_1), loop));
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		{
+			ab.second->Play(loop);
+		}
 	}
 
 	// 停止所有的声音
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		std::for_each(audioBufs_.begin(), audioBufs_.end(),
-			KlayGE::bind(&AudioBuffer::Stop,
-				KlayGE::bind(select2nd<AudioBufs::value_type>(), KlayGE::placeholders::_1)));
+		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		{
+			ab.second->Stop();
+		}
 	}
 
 	// 列表里缓冲区的数目

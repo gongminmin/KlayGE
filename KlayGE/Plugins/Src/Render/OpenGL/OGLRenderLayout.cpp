@@ -93,7 +93,7 @@ namespace KlayGE
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset + this->StartVertexLocation() * size);
+					GLintptr offset = elem_offset + this->StartVertexLocation() * size;
 					GLint const num_components = static_cast<GLint>(NumComponents(vs_elem.format));
 					GLenum type;
 					GLboolean normalized;
@@ -111,12 +111,12 @@ namespace KlayGE
 					else if (glloader_GL_EXT_direct_state_access())
 					{
 						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
-							normalized, size, reinterpret_cast<GLintptr>(offset));
+							normalized, size, offset);
 						glEnableVertexArrayAttribEXT(vao, attr);
 					}
 					else
 					{
-						glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
+						glVertexAttribPointer(attr, num_components, type, normalized, size, reinterpret_cast<GLvoid*>(offset));
 						glEnableVertexAttribArray(attr);
 					}
 
@@ -155,7 +155,7 @@ namespace KlayGE
 					GLboolean normalized;
 					OGLMapping::MappingVertexFormat(type, normalized, vs_elem.format);
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
-					GLvoid* offset = reinterpret_cast<GLvoid*>(elem_offset + this->StartInstanceLocation() * instance_size);
+					GLintptr offset = elem_offset + this->StartInstanceLocation() * instance_size;
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(use_vao_);
@@ -168,7 +168,7 @@ namespace KlayGE
 					else if (glloader_GL_EXT_direct_state_access())
 					{
 						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
-							normalized, instance_size, reinterpret_cast<GLintptr>(offset));
+							normalized, instance_size, offset);
 						glEnableVertexArrayAttribEXT(vao, attr);
 
 						if (glloader_GL_VERSION_3_3())
@@ -182,7 +182,8 @@ namespace KlayGE
 					}
 					else
 					{
-						glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
+						glVertexAttribPointer(attr, num_components, type, normalized, instance_size,
+							reinterpret_cast<GLvoid*>(offset));
 						glEnableVertexAttribArray(attr);
 
 						if (glloader_GL_VERSION_3_3())
@@ -253,7 +254,6 @@ namespace KlayGE
 
 		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
 		{
-			OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{
 				glVertexArrayBindingDivisor(vao, this->NumVertexStreams(), 0);
