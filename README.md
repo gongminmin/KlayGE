@@ -19,3 +19,19 @@ KlayGE can be deployed and run on those runtime platforms. Some of them doesn't 
 * Linux
 * MacOSX
 * iOS
+
+# Contribute
+As an open source project, KlayGE benefits greatly from both the volunteer work of helpful developers and good bug reports made by users. 
+
+## Bug Reports & Feature Requests
+
+If you've noticed a bug or have an idea that you'd like to see come real, why not work on it? Bug reports and feature requests are typically submitted to the issue tracker on our Trac system http://www.klayge.org/trac.
+
+## Engineering Workflow
+
+If you want contribute some code, please check http://www.klayge.org/wiki/index.php/Workflow_of_contributing_code before submitting a patch or pull request.
+
+# Links
+Website: http://www.klayge.org
+Wiki: http://www.klayge.org/wiki
+Roadmap: http://www.klayge.org/trac
