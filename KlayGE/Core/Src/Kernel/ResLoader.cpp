@@ -97,7 +97,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		char buf[MAX_PATH];
-		GetModuleFileNameA(nullptr, buf, sizeof(buf));
+		::GetModuleFileNameA(nullptr, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
 #else
@@ -153,7 +153,8 @@ namespace KlayGE
 		::GetCurrentDirectoryA(sizeof(buf), buf);
 		char* colon = std::find(buf, buf + sizeof(buf), ':');
 		BOOST_ASSERT(colon != buf + sizeof(buf));
-		colon[1] = '\0';
+		colon[1] = '/';
+		colon[2] = '\0';
 		this->AddPath(buf);
 #endif
 		this->AddPath("../");
@@ -233,7 +234,11 @@ namespace KlayGE
 			}
 			new_path = full_path;
 		}
-		return new_path.string();
+		std::string ret = new_path.string();
+#if defined KLAYGE_PLATFORM_WINDOWS
+		std::replace(ret.begin(), ret.end(), '\\', '/');
+#endif
+		return ret;
 	}
 
 	std::string ResLoader::RealPath(std::string const & path)
