@@ -252,9 +252,10 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	}
 	out << "\n";
 
-	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_Precision))
+	if (glsl_rules_ & GSR_Precision)
 	{
-		out << "precision highp float;" << std::endl << std::endl;
+		out << "precision highp float;" << std::endl;
+		out << "precision highp int;" << std::endl << std::endl;
 	}
 
 	if ((ST_PS == shader_type_) && (glsl_rules_ & GSR_EXTShaderTextureLod))
