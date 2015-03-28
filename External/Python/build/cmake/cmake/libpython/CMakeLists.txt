@@ -111,7 +111,7 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/pythonrun.c
     ${SRC_DIR}/Python/pytime.c
     ${SRC_DIR}/Python/random.c
-    ${SRC_DIR}/Python/strdup.c
+    #${SRC_DIR}/Python/strdup.c   # Have some problems under Linux RelWithDebInfo
     ${SRC_DIR}/Python/structmember.c
     ${SRC_DIR}/Python/symtable.c
     ${SRC_DIR}/Python/sysmodule.c

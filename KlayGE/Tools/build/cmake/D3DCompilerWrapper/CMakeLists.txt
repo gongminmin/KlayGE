@@ -16,6 +16,6 @@ ELSE()
 	ENDIF()
 
 	ADD_CUSTOM_TARGET(D3DCompilerWrapper ALL
-		COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp" "${KLAYGE_BIN_DIR}/D3DCompilerWrapper${CMAKE_DEBUG_POSTFIX}"
+		COMMAND "${PYTHON_EXECUTABLE}" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.py" "${KLAYGE_PROJECT_DIR}/Tools/src/D3DCompilerWrapper/D3DCompilerWrapper.cpp" "${KLAYGE_BIN_DIR}/D3DCompilerWrapper$<$<CONFIG:Debug>:${CMAKE_DEBUG_POSTFIX}>"
 	)
 ENDIF()
