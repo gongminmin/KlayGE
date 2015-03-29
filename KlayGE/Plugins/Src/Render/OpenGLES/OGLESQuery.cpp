@@ -26,54 +26,59 @@
 
 namespace KlayGE
 {
+	glGenQueriesFUNC OGLESConditionalRender::glGenQueries_ = nullptr;
+	glDeleteQueriesFUNC OGLESConditionalRender::glDeleteQueries_ = nullptr;
+	glBeginQueryFUNC OGLESConditionalRender::glBeginQuery_ = nullptr;
+	glEndQueryFUNC OGLESConditionalRender::glEndQuery_ = nullptr;
+	glGetQueryObjectuivFUNC OGLESConditionalRender::glGetQueryObjectuiv_ = nullptr;
+
+	glGenQueriesFUNC OGLESTimerQuery::glGenQueries_ = nullptr;
+	glDeleteQueriesFUNC OGLESTimerQuery::glDeleteQueries_ = nullptr;
+	glBeginQueryFUNC OGLESTimerQuery::glBeginQuery_ = nullptr;
+	glEndQueryFUNC OGLESTimerQuery::glEndQuery_ = nullptr;
+	glGetQueryObjectuivFUNC OGLESTimerQuery::glGetQueryObjectuiv_ = nullptr;
+
 	OGLESConditionalRender::OGLESConditionalRender()
 	{
 		BOOST_ASSERT(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_occlusion_query_boolean());
 
-		if (glloader_GLES_VERSION_3_0())
+		// TODO: No thread safety here
+		if (!glGenQueries_)
 		{
-			glGenQueries(1, &query_);
+			if (glloader_GLES_VERSION_3_0())
+			{
+				glGenQueries_ = glGenQueries;
+				glDeleteQueries_ = glDeleteQueries;
+				glBeginQuery_ = glBeginQuery;
+				glEndQuery_ = glEndQuery;
+				glGetQueryObjectuiv_ = glGetQueryObjectuiv;
+			}
+			else
+			{
+				glGenQueries_ = glGenQueriesEXT;
+				glDeleteQueries_ = glDeleteQueriesEXT;
+				glBeginQuery_ = glBeginQueryEXT;
+				glEndQuery_ = glEndQueryEXT;
+				glGetQueryObjectuiv_ = glGetQueryObjectuivEXT;
+			}
 		}
-		else
-		{
-			glGenQueriesEXT(1, &query_);
-		}
+
+		glGenQueries_(1, &query_);
 	}
 
 	OGLESConditionalRender::~OGLESConditionalRender()
 	{
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glDeleteQueries(1, &query_);
-		}
-		else
-		{
-			glDeleteQueriesEXT(1, &query_);
-		}
+		glDeleteQueries_(1, &query_);
 	}
 
 	void OGLESConditionalRender::Begin()
 	{
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
-		}
-		else
-		{
-			glBeginQueryEXT(GL_ANY_SAMPLES_PASSED_EXT, query_);
-		}
+		glBeginQuery_(GL_ANY_SAMPLES_PASSED, query_);
 	}
 
 	void OGLESConditionalRender::End()
 	{
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glEndQuery(GL_ANY_SAMPLES_PASSED);
-		}
-		else
-		{
-			glEndQueryEXT(GL_ANY_SAMPLES_PASSED_EXT);
-		}
+		glEndQuery_(GL_ANY_SAMPLES_PASSED);
 	}
 
 	void OGLESConditionalRender::BeginConditionalRender()
@@ -87,26 +92,13 @@ namespace KlayGE
 	bool OGLESConditionalRender::AnySamplesPassed()
 	{
 		GLuint ret = 0;
-		if (glloader_GLES_VERSION_3_0())
+		GLuint available = 0;
+		while (!available)
 		{
-			GLuint available = 0;
-			while (!available)
-			{
-				glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
-			}
-
-			glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
+			glGetQueryObjectuiv_(query_, GL_QUERY_RESULT_AVAILABLE, &available);
 		}
-		else
-		{
-			GLuint available = 0;
-			while (!available)
-			{
-				glGetQueryObjectuivEXT(query_, GL_QUERY_RESULT_AVAILABLE_EXT, &available);
-			}
 
-			glGetQueryObjectuivEXT(query_, GL_QUERY_RESULT_EXT, &ret);
-		}
+		glGetQueryObjectuiv_(query_, GL_QUERY_RESULT, &ret);
 		return (ret != 0);
 	}
 
@@ -115,22 +107,43 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glloader_GLES_EXT_disjoint_timer_query());
 
-		glGenQueriesEXT(1, &query_);
+		// TODO: No thread safety here
+		if (!glGenQueries_)
+		{
+			if (glloader_GLES_VERSION_3_0())
+			{
+				glGenQueries_ = glGenQueries;
+				glDeleteQueries_ = glDeleteQueries;
+				glBeginQuery_ = glBeginQuery;
+				glEndQuery_ = glEndQuery;
+				glGetQueryObjectuiv_ = glGetQueryObjectuiv;
+			}
+			else
+			{
+				glGenQueries_ = glGenQueriesEXT;
+				glDeleteQueries_ = glDeleteQueriesEXT;
+				glBeginQuery_ = glBeginQueryEXT;
+				glEndQuery_ = glEndQueryEXT;
+				glGetQueryObjectuiv_ = glGetQueryObjectuivEXT;
+			}
+		}
+
+		glGenQueries_(1, &query_);
 	}
 
 	OGLESTimerQuery::~OGLESTimerQuery()
 	{
-		glDeleteQueriesEXT(1, &query_);
+		glDeleteQueries_(1, &query_);
 	}
 
 	void OGLESTimerQuery::Begin()
 	{
-		glBeginQueryEXT(GL_TIME_ELAPSED_EXT, query_);
+		glBeginQuery_(GL_TIME_ELAPSED_EXT, query_);
 	}
 
 	void OGLESTimerQuery::End()
 	{
-		glEndQueryEXT(GL_TIME_ELAPSED_EXT);
+		glEndQuery_(GL_TIME_ELAPSED_EXT);
 	}
 
 	double OGLESTimerQuery::TimeElapsed()
@@ -138,7 +151,7 @@ namespace KlayGE
 		GLuint available = 0;
 		while (!available)
 		{
-			glGetQueryObjectuivEXT(query_, GL_QUERY_RESULT_AVAILABLE_EXT, &available);
+			glGetQueryObjectuiv_(query_, GL_QUERY_RESULT_AVAILABLE, &available);
 		}
 
 		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -146,7 +159,7 @@ namespace KlayGE
 		{
 			GLuint64 ret;
 			glGetQueryObjectui64vEXT(query_, GL_QUERY_RESULT_EXT, &ret);
-			return static_cast<uint64_t>(ret)* 1e-9;
+			return static_cast<uint64_t>(ret) * 1e-9;
 		}
 		else
 		{

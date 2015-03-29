@@ -35,6 +35,12 @@ namespace KlayGE
 
 	private:
 		GLuint query_;
+
+		static glGenQueriesFUNC glGenQueries_;
+		static glDeleteQueriesFUNC glDeleteQueries_;
+		static glBeginQueryFUNC glBeginQuery_;
+		static glEndQueryFUNC glEndQuery_;
+		static glGetQueryObjectuivFUNC glGetQueryObjectuiv_;
 	};
 
 	class OGLESTimerQuery : public TimerQuery
@@ -50,6 +56,12 @@ namespace KlayGE
 
 	private:
 		GLuint query_;
+
+		static glGenQueriesFUNC glGenQueries_;
+		static glDeleteQueriesFUNC glDeleteQueries_;
+		static glBeginQueryFUNC glBeginQuery_;
+		static glEndQueryFUNC glEndQuery_;
+		static glGetQueryObjectuivFUNC glGetQueryObjectuiv_;
 	};
 }
 
