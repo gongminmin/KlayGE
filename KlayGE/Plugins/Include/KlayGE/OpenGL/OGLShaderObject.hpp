@@ -33,13 +33,8 @@ namespace KlayGE
 		OGLShaderObject();
 		~OGLShaderObject();
 
-#if USE_DXBC2GLSL
 		std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass) const;
-#else
-		std::string GenCgShaderText(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass);
-#endif
 
 		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block);
@@ -77,9 +72,6 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-#if !USE_DXBC2GLSL
-		std::string ConvertToGLSL(std::string const & glsl, ShaderType type, uint32_t gs_input_vertices, bool has_gs);
-#endif
 		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();

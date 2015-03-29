@@ -111,17 +111,10 @@ void ParticleVS2(float4 pos : POSITION,
 	oColor = float4(lerp(particle_color_from, particle_color_to, spin_size_lf_alpha.z), spin_size_lf_alpha.w);
 }
 
-#if KLAYGE_CG
-POINT TRIANGLE_OUT void ParticleGS(AttribArray<float4> in_CenterView_Life : SV_Position, AttribArray<float3> in_spin_radius_lf : TEXCOORD0,
-	AttribArray<float4> in_color : TEXCOORD1)
-{
-#else
 [maxvertexcount(4)]
 void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 in_spin_radius_lf[1] : TEXCOORD0,
 	point float4 in_color[1] : TEXCOORD1, inout TriangleStream<PS_IN> out_stream)
 {
-#endif
-
 	float4 CenterView_Life = in_CenterView_Life[0];
 	float spin = in_spin_radius_lf[0].x;
 	float radius = in_spin_radius_lf[0].y;
@@ -163,12 +156,7 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 i
 		gs_out.view_dir.xyz = view_pos.xyz;
 		gs_out.tex = float3(float2(tex.x, -tex.y) / 2 + 0.5f, life_factor);
 
-#if KLAYGE_CG
-		emitVertex(gs_out.pos : POSITION, gs_out.clr : COLOR0, gs_out.PosSS : TEXCOORD0,
-			gs_out.CenterView : TEXCOORD1, gs_out.view_dir : TEXCOORD2, gs_out.tex : TEXCOORD3);
-#else
 		out_stream.Append(gs_out);
-#endif
 	}
 }
 		]]>

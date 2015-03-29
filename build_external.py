@@ -118,9 +118,6 @@ def setup_DXSDK(build_info, compiler_info):
 def setup_OpenALSDK(build_info, compiler_info):
 	build_a_project("OpenALSDK", "External/OpenALSDK", build_info, compiler_info)
 
-def setup_Cg(build_info, compiler_info):
-	build_a_project("Cg", "External/Cg", build_info, compiler_info)
-
 def setup_rapidxml(build_info, compiler_info):
 	build_a_project("rapidxml", "External/rapidxml", build_info, compiler_info)
 
@@ -167,10 +164,6 @@ def build_external_libs(build_info):
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
-
-		if (not compiler_info.is_windows_runtime) and (compiler_info.arch != "arm") and (not compiler_info.is_android) and (not compiler_info.is_ios):
-			print("\nSeting up Cg...\n")
-			setup_Cg(build_info, compiler_info)
 			
 		print("\nSeting up rapidxml...\n")
 		setup_rapidxml(build_info, compiler_info)

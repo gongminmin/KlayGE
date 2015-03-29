@@ -56,7 +56,7 @@ float4 DepthOfFieldSpreadingPS(float2 tc : TEXCOORD0, float4 vpos : SV_Position)
 	float4 offset[4] = { float4(+1, +1, 0, 0), float4(-1, +1, -1, 0), float4(+1, -1, 0, -1), float4(-1, -1, -1, -1) };
 	float scale[4] = { +1, -1, -1, +1 };
 	int radius = 8;
-	// TODO: Cg doesn't support min(int, int)
+	// TODO: DXBC2GLSL has a problem in min(int, int)
 	if (max_radius < radius)
 	{
 		radius = max_radius;
@@ -319,14 +319,9 @@ void SeparateBokehVS4(float2 pos : POSITION,
 	}
 }
 
-#if KLAYGE_CG
-POINT TRIANGLE_OUT void SeparateBokehGS4(AttribArray<float3> in_clr : TEXCOORD0, AttribArray<float4> in_pos : POSITION)
-{
-#else
 [maxvertexcount(4)]
 void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1] : SV_Position, inout TriangleStream<PS_IN> out_stream)
 {
-#endif
 	if (in_pos[0].w > 0.5f)
 	{
 		float2 center_pos = in_pos[0].xy;
@@ -343,11 +338,7 @@ void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1]
 			gs_out.clr = clr;
 			gs_out.tc = offset * 0.5f + 0.5f;
 		
-#if KLAYGE_CG
-			emitVertex(gs_out.tc : TEXCOORD0, gs_out.clr : TEXCOORD1, gs_out.pos : POSITION);
-#else
 			out_stream.Append(gs_out);
-#endif
 		}
 	}
 }

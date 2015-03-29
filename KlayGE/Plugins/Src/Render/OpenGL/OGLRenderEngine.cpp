@@ -1684,11 +1684,7 @@ namespace KlayGE
 		caps_.is_tbdr = false;
 
 		caps_.hw_instancing_support = true;
-#if USE_DXBC2GLSL
 		caps_.instance_id_support = glloader_GL_VERSION_3_1() || glloader_GL_ARB_draw_instanced();
-#else
-		caps_.instance_id_support = false;
-#endif
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_NV_primitive_restart())
@@ -1745,7 +1741,6 @@ namespace KlayGE
 		{
 			//caps_.hs_support = true;
 			//caps_.ds_support = true;
-			// Cg compiler don't support Cg->GLSL hull/domain shader
 			caps_.hs_support = false;
 			caps_.ds_support = false;
 		}

@@ -317,15 +317,9 @@ void GenCubeOneShadowMapVS(float4 Position : POSITION,
 	oDist = calc_dist(Position);
 }
 
-#if KLAYGE_CG
-TRIANGLE TRIANGLE_OUT void GenCubeOneShadowMapGS(AttribArray<float4> in_pos : POSITION, AttribArray<float> in_dist : TEXCOORD0)
-{
-#else
 [maxvertexcount(18)]
 void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
-#endif
-	
 	PS_IN output;
 	for (int f = 0; f < 6; ++ f)
 	{
@@ -344,18 +338,10 @@ void GenCubeOneShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float 
 			{
 				output.pos = pos[v];
 				output.dist = in_dist[v];
-#if KLAYGE_CG
-				emitVertex(output.dist : TEXCOORD0, output.pos : POSITION, output.rt_index : LAYER);
-#else
 				out_stream.Append(output);
-#endif
 			}
 		}
-#if KLAYGE_CG
-		restartStrip();
-#else
 		out_stream.RestartStrip();
-#endif
 	}
 }
 		]]>
@@ -384,28 +370,14 @@ void GenCubeOneInstanceShadowMapVS(float4 Position : POSITION,
 	oPos = mul(Position, mvps[instance_id]);
 
 	oDist.x = calc_dist(Position);
-#if KLAYGE_CG
-	oDist.y = intBitsToFloat(instance_id);
-#else
 	oDist.y = asfloat(instance_id);
-#endif
 }
 
-#if KLAYGE_CG
-TRIANGLE TRIANGLE_OUT void GenCubeOneInstanceShadowMapGS(AttribArray<float4> in_pos : POSITION, AttribArray<float2> in_dist : TEXCOORD0)
-{
-#else
 [maxvertexcount(3)]
 void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangle float2 in_dist[3] : TEXCOORD0, inout TriangleStream<PS_IN> out_stream)
 {
-#endif
-
 	PS_IN output;
-#if KLAYGE_CG
-	output.rt_index = floatToIntBits(in_dist[0].y);
-#else
 	output.rt_index = asuint(in_dist[0].y);
-#endif
 
 	[branch]
 	if (frustum_culling(in_pos[0], in_pos[1], in_pos[2]))
@@ -415,11 +387,7 @@ void GenCubeOneInstanceShadowMapGS(triangle float4 in_pos[3] : POSITION, triangl
 		{
 			output.pos = in_pos[v];
 			output.dist = in_dist[v].x;
-#if KLAYGE_CG
-			emitVertex(output.dist : TEXCOORD0, output.pos : POSITION, output.rt_index : LAYER);
-#else
 			out_stream.Append(output);
-#endif
 		}
 	}
 }

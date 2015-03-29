@@ -21,15 +21,9 @@ struct CAUSTICS_GS_OUT
 	
 	<shader type="geometry_shader" version="4">
 		<![CDATA[
-#if KLAYGE_CG
-POINT TRIANGLE_OUT void PointGS(AttribArray<float4> in_pos : POSITION, AttribArray<float4> in_color : TEXCOORD0)
-{
-#else
 [maxvertexcount(4)]
 void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCOORD0, inout TriangleStream<CAUSTICS_GS_OUT> out_stream)
 {
-#endif
-
 	CAUSTICS_GS_OUT gs_out;
 	float4 point_center = mul(in_pos[0], light_view);
 	gs_out.color = in_color[0];
@@ -40,11 +34,7 @@ void PointGS(point float4 in_pos[1] : POSITION, point float4 in_color[1] : TEXCO
 		gs_out.pos = mul(float4(point_center.xy + point_size * tex, point_center.zw), light_proj);
 		gs_out.tc = tex * 0.5f + 0.5f;
 
-#if KLAYGE_CG
-		emitVertex(gs_out.tc : TEXCOORD0, gs_out.color : TEXCOORD1, gs_out.pos : POSITION);
-#else
 		out_stream.Append(gs_out);
-#endif
 	}
 }
 		]]>
