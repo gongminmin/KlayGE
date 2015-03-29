@@ -159,10 +159,9 @@ def build_external_libs(build_info):
 		print("\nBuilding 7z...\n")
 		build_7z(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
-			if "win" == build_info.target_platform:
-				print("\nSeting up DXSDK...\n")
-				setup_DXSDK(build_info, compiler_info)
+		if compiler_info.is_dev_platform:
+			print("\nSeting up DXSDK...\n")
+			setup_DXSDK(build_info, compiler_info)
 
 		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
