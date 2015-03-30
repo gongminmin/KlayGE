@@ -215,17 +215,20 @@ namespace KlayGE
 							obj->UpdateAbsModelMatrix();
 						}
 
-						if (!(attr & SceneObject::SOA_Cullable))
+						if (attr & SceneObject::SOA_Cullable)
 						{
-							obj->VisibleMark(BO_Yes);
-						}
-						else if (attr & SceneObject::SOA_Moveable)
-						{
-							obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
+							if (attr & SceneObject::SOA_Moveable)
+							{
+								obj->VisibleMark(this->AABBVisible(*obj->PosBoundWS()));
+							}
+							else
+							{
+								obj->VisibleMark(visible);
+							}
 						}
 						else
 						{
-							obj->VisibleMark(visible);
+							obj->VisibleMark(BO_Yes);
 						}
 					}
 					else

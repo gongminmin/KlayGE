@@ -147,17 +147,9 @@ namespace KlayGE
 	{
 		UI_Control_State iState = UICS_Normal;
 
-		if (!visible_)
+		if (visible_)
 		{
-			iState = UICS_Hidden;
-		}
-		else
-		{
-			if (!enabled_)
-			{
-				iState = UICS_Disabled;
-			}
-			else
+			if (enabled_)
 			{
 				if (pressed_)
 				{
@@ -178,6 +170,14 @@ namespace KlayGE
 					}
 				}
 			}
+			else
+			{
+				iState = UICS_Disabled;
+			}
+		}
+		else
+		{
+			iState = UICS_Hidden;
 		}
 
 		//TODO: remove magic numbers

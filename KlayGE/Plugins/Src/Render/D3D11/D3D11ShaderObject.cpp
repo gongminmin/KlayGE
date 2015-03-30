@@ -1358,11 +1358,7 @@ namespace KlayGE
 	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 		std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob)
 	{
-		if (!code_blob)
-		{
-			is_shader_validate_[type] = false;
-		}
-		else
+		if (code_blob)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
@@ -1447,7 +1443,20 @@ namespace KlayGE
 				case ST_GeometryShader:
 					if (caps.gs_support)
 					{
-						if (!sd.so_decl.empty())
+						if (sd.so_decl.empty())
+						{
+							ID3D11GeometryShader* gs;
+							if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
+							{
+								is_shader_validate_[type] = false;
+							}
+							else
+							{
+								geometry_shader_ = MakeCOMPtr(gs);
+								shader_code_[type].first = code_blob;
+							}
+						}
+						else
 						{
 							std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
 							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
@@ -1464,19 +1473,6 @@ namespace KlayGE
 							ID3D11GeometryShader* gs;
 							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
 								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								geometry_shader_ = MakeCOMPtr(gs);
-								shader_code_[type].first = code_blob;
-							}
-						}
-						else
-						{
-							ID3D11GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShader(&((*code_blob)[0]), code_blob->size(), nullptr, &gs)))
 							{
 								is_shader_validate_[type] = false;
 							}
@@ -1649,6 +1645,10 @@ namespace KlayGE
 
 				param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
 			}
+		}
+		else
+		{
+			is_shader_validate_[type] = false;
 		}
 	}
 

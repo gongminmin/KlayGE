@@ -110,13 +110,13 @@ namespace KlayGE
 			fft_y_pp_->InputPin(2, lookup_i_wr_wi_y_tex_[i]);
 			if (log_y_ - 1 == i)
 			{
-				if (!forward_)
+				if (forward_)
 				{
-					fft_y_pp_->SetParam(0, 1.0f / (width_ * height_));
+					fft_y_pp_->SetParam(0, -1.0f);
 				}
 				else
 				{
-					fft_y_pp_->SetParam(0, -1.0f);
+					fft_y_pp_->SetParam(0, 1.0f / (width_ * height_));
 				}
 				fft_y_pp_->OutputPin(0, out_real);
 				fft_y_pp_->OutputPin(1, out_imag);
@@ -508,7 +508,11 @@ namespace KlayGE
 
 		// Shader
 		RenderTechniquePtr tech;
-		if (!final_pass_x)
+		if (final_pass_x)
+		{
+			tech = radix008a_final_x_tech_;
+		}
+		else
 		{
 			if (final_pass_y && !forward_)
 			{
@@ -518,10 +522,6 @@ namespace KlayGE
 			{
 				tech = radix008a_tech_;
 			}
-		}
-		else
-		{
-			tech = radix008a_final_x_tech_;
 		}
 		re.Dispatch(*tech, grid_x, grid_y, 1);
 	}

@@ -4740,13 +4740,13 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						if (!ResLoader::Instance().Locate(val).empty())
+						if (ResLoader::Instance().Locate(val).empty())
 						{
-							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+							LogError("%s NOT found", val.c_str());
 						}
 						else
 						{
-							LogError("%s NOT found", val.c_str());
+							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
 						}
 					}
 				}
@@ -4769,7 +4769,11 @@ namespace KlayGE
 
 		uint32_t as;
 		std::string as_str = ReadShortString(res);
-		if (!as_str.empty())
+		if (as_str.empty())
+		{
+			as = 0;
+		}
+		else
 		{
 			array_size_ = MakeSharedPtr<std::string>(as_str);
 
@@ -4781,10 +4785,6 @@ namespace KlayGE
 			{
 				as = 1;  // dummy array size
 			}
-		}
-		else
-		{
-			as = 0;
 		}
 		var_ = stream_in_var(res, type_, as);
 
@@ -4815,13 +4815,13 @@ namespace KlayGE
 						std::string val;
 						(*annotations_)[i]->Value(val);
 
-						if (!ResLoader::Instance().Locate(val).empty())
+						if (ResLoader::Instance().Locate(val).empty())
 						{
-							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
+							LogError("%s NOT found", val.c_str());
 						}
 						else
 						{
-							LogError("%s NOT found", val.c_str());
+							*var_ = SyncLoadTexture(val, EAH_GPU_Read | EAH_Immutable);
 						}
 					}
 				}

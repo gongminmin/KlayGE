@@ -1974,7 +1974,11 @@ namespace KlayGE
 					}
 				}
 
-				if (!code.empty())
+				if (code.empty())
+				{
+					is_shader_validate_[type] = false;
+				}
+				else
 				{
 					try
 					{
@@ -1984,20 +1988,20 @@ namespace KlayGE
 						rules &= ~GSR_UniformBlockBinding;
 						rules &= ~GSR_MatrixType;
 						rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
-						if (!glloader_GLES_VERSION_3_0())
-						{
-							rules |= caps.shader_texture_lod_support ? GSR_EXTShaderTextureLod : 0;
-							rules |= caps.standard_derivatives_support ? GSR_OESStandardDerivatives : 0;
-							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
-							rules &= ~GSR_VersionDecl;
-						}
-						else
+						if (glloader_GLES_VERSION_3_0())
 						{
 							rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
 							if (re.HackForAngle())
 							{
 								rules &= ~GSR_UseUBO;
 							}
+						}
+						else
+						{
+							rules |= caps.shader_texture_lod_support ? GSR_EXTShaderTextureLod : 0;
+							rules |= caps.standard_derivatives_support ? GSR_OESStandardDerivatives : 0;
+							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
+							rules &= ~GSR_VersionDecl;
 						}
 						dxbc2glsl.FeedDXBC(&code[0], false, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
@@ -2148,10 +2152,6 @@ namespace KlayGE
 						LogError(ex.what());
 						LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
 					}
-				}
-				else
-				{
-					is_shader_validate_[type] = false;
 				}
 			}
 #else

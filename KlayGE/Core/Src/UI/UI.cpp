@@ -1269,13 +1269,13 @@ namespace KlayGE
 					opacity_(0.5f)
 	{
 		TexturePtr ct;
-		if (!control_tex)
+		if (control_tex)
 		{
-			ct = SyncLoadTexture("ui.dds", EAH_GPU_Read | EAH_Immutable);
+			ct = control_tex;
 		}
 		else
 		{
-			ct = control_tex;
+			ct = SyncLoadTexture("ui.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
 		tex_index_ = UIManager::Instance().AddTexture(ct);

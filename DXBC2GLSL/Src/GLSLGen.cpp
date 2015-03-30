@@ -948,11 +948,7 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						break;
 
 					case SN_UNDEFINED:
-						if (!strcmp("POSITION", sig_desc.semantic_name))
-						{
-							out << "gl_in[i].gl_Position";
-						}
-						else
+						if (strcmp("POSITION", sig_desc.semantic_name))
 						{
 							out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index;
 							if (((ST_HS == shader_type_) && has_gs_)
@@ -961,6 +957,10 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 								out << "In";
 							}
 							out << "[i]";
+						}
+						else
+						{
+							out << "gl_in[i].gl_Position";
 						}
 						need_comps = true;
 						break;
@@ -1139,11 +1139,7 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 					break;
 
 				case SN_UNDEFINED:
-					if (!strcmp("WORLDPOS", sig_desc.semantic_name))
-					{
-						out << "gl_out[gl_InvocationID].gl_Position";
-					}
-					else
+					if (strcmp("WORLDPOS", sig_desc.semantic_name))
 					{
 						out << "v_" << sig_desc.semantic_name << sig_desc.semantic_index;
 						if (!has_gs_)
@@ -1151,6 +1147,10 @@ void GLSLGen::ToCopyToInterShaderOutputRecords(std::ostream& out) const
 							out << "In";
 						}
 						out << "[gl_InvocationID]";
+					}
+					else
+					{
+						out << "gl_out[gl_InvocationID].gl_Position";
 					}
 					need_comps = true;
 					break;
@@ -3236,14 +3236,17 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 			this->ToCopyToInterShaderOutputRecords(out);
 			out << "return;\n";
 		}
-		else if (!enter_hs_fork_phase_)
+		else if (enter_hs_fork_phase_)
+		{
+			if (enter_final_hs_fork_phase_)
+			{
+				this->ToCopyToInterShaderPatchConstantRecords(out);
+				out << "return;\n";
+			}
+		}
+		else
 		{
 			this->ToCopyToInterShaderOutputRecords(out);
-		}
-		else if (enter_final_hs_fork_phase_)
-		{
-			this->ToCopyToInterShaderPatchConstantRecords(out);
-			out << "return;\n";
 		}
 		break;
 
@@ -4092,7 +4095,6 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 					{
 						DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_SAMPLER, static_cast<uint32_t>(iter->samplers[0].index));
 						s = std::string("_") + desc.name;
-						//sprintf(s,"_%d",iter->samplers[0].index);
 					}
 					this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
 					out << " = uint(textureSize(";
@@ -5758,7 +5760,7 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 			for (uint32_t i = 0; i < op.num_indices; ++ i)
 			{
 				//第一层索引不需要[]，如cb0[22]中0为第一层,naked==false需要[]
-				if (!naked || i != 0)
+				if (!naked || (i != 0))
 				{
 					out << '[';
 				}
@@ -5774,12 +5776,21 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 				}
 				else
 				{
-					if (i == 0)
+					if (0 == i)
 					{
-						if (!dcl_array)
+						if (dcl_array)
+						{
+							// Declare an array
+							out << op.indices[i].disp;
+							if (1 == flag)
+							{
+								out << "[" << num << "]";
+							}
+						}
+						else
 						{
 							// Use an array
-							if (flag == 0)
+							if (0 == flag)
 							{
 								out << op.indices[i].disp;
 							}
@@ -5788,22 +5799,13 @@ void GLSLGen::ToOperands(std::ostream& out, ShaderOperand const & op, uint32_t i
 								out << start << "[" << index << "]";
 							}
 						}
-						else
-						{
-							// Declare an array
-							out << op.indices[i].disp;
-							if (flag == 1)
-							{
-								out << "[" << num << "]";
-							}
-						}
 					}
 					else
 					{
 						out << op.indices[i].disp;
 					}
 				}
-				if (!naked || i != 0)
+				if (!naked || (i != 0))
 				{
 					out << ']';
 				}
@@ -6359,58 +6361,9 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 						{
 						case SVC_VECTOR:
 						case SVC_SCALAR:
-							if (!contain_multi_var)
+							if (contain_multi_var)
 							{
-								out << var_iter->var_desc.name;
-								if (element_count != 0)
-								{
-									out << "[";
-									if (dynamic_indexed && op.indices[1].reg)
-									{
-										this->ToOperands(out, *op.indices[1].reg, SIT_Int);
-									}
-									else
-									{
-										element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16;
-										out << element_index;
-									}
-									out << "]";
-								}
-								else
-								{
-									// array is not packed, so doesn't need remap component_selector
-									// if not, because of register packing, we need to remap it.
-									// see: http://msdn.microsoft.com/zh-cn/library/windows/desktop/bb509632
 
-									*need_comps = false;
-									if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
-									{
-										// remap register component to the right cb member variable component
-										// example case:
-										// |a  |b  |c.x|c.y|->this is a register,a b c is three variables
-										// |.x |.y |.z |.w |->this is register component
-										// so we need to remap .zw to .xy
-										for (uint32_t i = 0; i < num_selectors; ++ i)
-										{
-											if (i == 0)
-											{
-												out << ".";
-											}
-											uint32_t variable_offset = var_iter->var_desc.start_offset;
-											uint32_t register_component_offset = 16 * register_index + 4 * this->GetComponentSelector(op, i);
-											uint32_t remapped_component = (register_component_offset - variable_offset) / 4;
-											out << "xyzw"[remapped_component];
-										}
-									}
-								}
-
-								if (SVC_SCALAR == var_iter->type_desc.var_class)
-								{
-									*need_comps = false;
-								}
-							}
-							else
-							{
 								//if a current register references more than one variable,things become more
 								//complex:
 								//e.g.
@@ -6497,6 +6450,56 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									}
 								}
 								out << ")";
+							}
+							else
+							{
+								out << var_iter->var_desc.name;
+								if (element_count != 0)
+								{
+									out << "[";
+									if (dynamic_indexed && op.indices[1].reg)
+									{
+										this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+									}
+									else
+									{
+										element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16;
+										out << element_index;
+									}
+									out << "]";
+								}
+								else
+								{
+									// array is not packed, so doesn't need remap component_selector
+									// if not, because of register packing, we need to remap it.
+									// see: http://msdn.microsoft.com/zh-cn/library/windows/desktop/bb509632
+
+									*need_comps = false;
+									if ((SVC_VECTOR == var_iter->type_desc.var_class) && !no_swizzle)
+									{
+										// remap register component to the right cb member variable component
+										// example case:
+										// |a  |b  |c.x|c.y|->this is a register,a b c is three variables
+										// |.x |.y |.z |.w |->this is register component
+										// so we need to remap .zw to .xy
+										for (uint32_t i = 0; i < num_selectors; ++ i)
+										{
+											if (i == 0)
+											{
+												out << ".";
+											}
+											uint32_t variable_offset = var_iter->var_desc.start_offset;
+											uint32_t register_component_offset = 16 * register_index + 4 * this->GetComponentSelector(op, i);
+											uint32_t remapped_component = (register_component_offset - variable_offset) / 4;
+											out << "xyzw"[remapped_component];
+										}
+									}
+								}
+
+								if (SVC_SCALAR == var_iter->type_desc.var_class)
+								{
+									*need_comps = false;
+								}
 							}
 							break;
 
@@ -7684,13 +7687,16 @@ void GLSLGen::ToCopyToInterShaderPatchConstantRecords(std::ostream& out)const
 			case SN_FINAL_TRI_INSIDE_TESSFACTOR:
 			case SN_FINAL_LINE_DETAIL_TESSFACTOR:
 			case SN_FINAL_LINE_DENSITY_TESSFACTOR:
-				if (!strcmp("SV_TessFactor", sig_desc.semantic_name))
+				if (strcmp("SV_TessFactor", sig_desc.semantic_name))
+				{
+					if (!strcmp("SV_InsideTessFactor", sig_desc.semantic_name))
+					{
+						out << "gl_TessLevelInner[" << sig_desc.semantic_index << ']';
+					}
+				}
+				else
 				{
 					out << "gl_TessLevelOuter[" << sig_desc.semantic_index << ']';
-				}
-				else if (!strcmp("SV_InsideTessFactor", sig_desc.semantic_name))
-				{
-					out << "gl_TessLevelInner[" << sig_desc.semantic_index << ']';
 				}
 				break;
 
@@ -7718,7 +7724,11 @@ void GLSLGen::ToCopyToInterShaderPatchConstantRecords(std::ostream& out)const
 
 void GLSLGen::ToHSControlPointPhase(std::ostream& out)
 {
-	if (!hs_control_point_phase_.empty())
+	if (hs_control_point_phase_.empty())
+	{
+		this->ToDefaultHSControlPointPhase(out);
+	}
+	else
 	{
 		HSControlPointPhase& phase = hs_control_point_phase_[0];
 		for (size_t i = 0; i < phase.dcls.size(); ++ i)
@@ -7731,10 +7741,6 @@ void GLSLGen::ToHSControlPointPhase(std::ostream& out)
 			out << '\n';
 		}
 	}
-	else
-	{
-		this->ToDefaultHSControlPointPhase(out);
-	}
 }
 
 void GLSLGen::ToDefaultHSControlPointPhase(std::ostream& out)const
@@ -7746,19 +7752,19 @@ void GLSLGen::ToDefaultHSControlPointPhase(std::ostream& out)const
 		{
 			if (ST_HS == shader_type_)
 			{
-				if (!strcmp("WORLDPOS", program_->params_out[i].semantic_name))
-				{
-					out << "gl_out[gl_InvocationID].gl_Position";
-				}
-				else
+				if (strcmp("WORLDPOS", program_->params_out[i].semantic_name))
 				{
 					out << "v_" << program_->params_out[i].semantic_name
 						<< program_->params_out[i].semantic_index;
 					if (!has_gs_)
 					{
-						out<< "In";
+						out << "In";
 					}
-					out<< "[gl_InvocationID]";
+					out << "[gl_InvocationID]";
+				}
+				else
+				{
+					out << "gl_out[gl_InvocationID].gl_Position";
 				}
 			}
 		}
@@ -7767,11 +7773,7 @@ void GLSLGen::ToDefaultHSControlPointPhase(std::ostream& out)const
 		{
 			if (ST_HS == shader_type_)
 			{
-				if (!strcmp("POSITION", program_->params_in[i].semantic_name))
-				{
-					out << "gl_in[gl_InvocationID].gl_Position";
-				}
-				else
+				if (strcmp("POSITION", program_->params_in[i].semantic_name))
 				{
 					out << "v_";
 					out << program_->params_in[i].semantic_name << program_->params_in[i].semantic_index;
@@ -7780,6 +7782,10 @@ void GLSLGen::ToDefaultHSControlPointPhase(std::ostream& out)const
 						out << "In";
 					}
 					out << "[gl_InvocationID]";
+				}
+				else
+				{
+					out << "gl_in[gl_InvocationID].gl_Position";
 				}
 			}
 			
@@ -7892,13 +7898,16 @@ void GLSLGen::ToCopyToInterShaderPatchConstantRegisters(std::ostream& out)const
 			case SN_FINAL_TRI_INSIDE_TESSFACTOR:
 			case SN_FINAL_LINE_DETAIL_TESSFACTOR:
 			case SN_FINAL_LINE_DENSITY_TESSFACTOR:
-				if (!strcmp("SV_TessFactor", sig_desc.semantic_name))
+				if (strcmp("SV_TessFactor", sig_desc.semantic_name))
+				{
+					if (!strcmp("SV_InsideTessFactor", sig_desc.semantic_name))
+					{
+						out << "gl_TessLevelInner[" << sig_desc.semantic_index << ']';
+					}
+				}
+				else
 				{
 					out << "gl_TessLevelOuter[" << sig_desc.semantic_index << ']';
-				}
-				else if (!strcmp("SV_InsideTessFactor", sig_desc.semantic_name))
-				{
-					out << "gl_TessLevelInner[" << sig_desc.semantic_index << ']';
 				}
 				break;
 

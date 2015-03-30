@@ -155,15 +155,15 @@ namespace KlayGE
 		}
 
 		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (!re.GPUDisjointOccurred())
+		if (re.GPUDisjointOccurred())
+		{
+			return -1;
+		}
+		else
 		{
 			GLuint64 ret;
 			glGetQueryObjectui64vEXT(query_, GL_QUERY_RESULT_EXT, &ret);
 			return static_cast<uint64_t>(ret) * 1e-9;
-		}
-		else
-		{
-			return -1;
 		}
 	}
 }

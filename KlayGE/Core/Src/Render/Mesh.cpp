@@ -259,13 +259,13 @@ namespace
 		RenderModelPtr CreateModel()
 		{
 			std::wstring model_name;
-			if (!model_desc_.model_data->joints.empty())
+			if (model_desc_.model_data->joints.empty())
 			{
-				model_name = L"SkinnedMesh";
+				model_name = L"Mesh";
 			}
 			else
 			{
-				model_name = L"Mesh";
+				model_name = L"SkinnedMesh";
 			}
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(model_name);
 
@@ -997,7 +997,11 @@ namespace KlayGE
 #endif
 			meshmljit_name = ResLoader::Instance().Locate(meshmljit_name);
 			bool failed = false;
-			if (!meshmljit_name.empty())
+			if (meshmljit_name.empty())
+			{
+				failed = true;
+			}
+			else
 			{
 #ifndef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 				meshmljit_name = "./" + meshmljit_name;
@@ -1006,10 +1010,6 @@ namespace KlayGE
 				{
 					failed = true;
 				}
-			}
-			else
-			{
-				failed = true;
 			}
 
 			if (failed)

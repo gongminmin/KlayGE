@@ -366,12 +366,7 @@ namespace KlayGE
 
 	void D3D11TextureCube::BuildMipSubLevels()
 	{
-		if (!d3d_sr_views_.empty())
-		{
-			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
-			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
-		}
-		else
+		if (d3d_sr_views_.empty())
 		{
 			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
 			{
@@ -385,6 +380,11 @@ namespace KlayGE
 					}
 				}
 			}
+		}
+		else
+		{
+			BOOST_ASSERT(access_hint_ & EAH_Generate_Mips);
+			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 	}
 	

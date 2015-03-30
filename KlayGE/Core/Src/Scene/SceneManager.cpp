@@ -74,20 +74,20 @@ namespace
 	template <typename T>
 	bool cmp_weight(T const & lhs, T const & rhs)
 	{
-		if (!lhs.first)
+		if (lhs.first)
 		{
-			return true;
-		}
-		else
-		{
-			if (!rhs.first)
-			{
-				return false;
-			}
-			else
+			if (rhs.first)
 			{
 				return lhs.first->Weight() < rhs.first->Weight();
 			}
+			else
+			{
+				return false;
+			}
+		}
+		else
+		{
+			return true;
 		}
 	}
 }

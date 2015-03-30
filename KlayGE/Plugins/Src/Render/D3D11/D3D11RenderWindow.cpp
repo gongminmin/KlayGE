@@ -226,12 +226,7 @@ namespace KlayGE
 					d3d_imm_ctx = MakeCOMPtr(imm_ctx);
 					d3d11_re.D3DDevice(d3d_device, d3d_imm_ctx, out_feature_level);
 
-					if (!Context::Instance().AppInstance().ConfirmDevice())
-					{
-						d3d_device.reset();
-						d3d_imm_ctx.reset();
-					}
-					else
+					if (Context::Instance().AppInstance().ConfirmDevice())
 					{
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
@@ -298,6 +293,11 @@ namespace KlayGE
 								+ L"x AA)";
 						}
 						break;
+					}
+					else
+					{
+						d3d_device.reset();
+						d3d_imm_ctx.reset();
 					}
 				}
 			}

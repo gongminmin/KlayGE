@@ -226,19 +226,19 @@ namespace KlayGE
 			RenderLayoutPtr const & rl = this->GetRenderLayout();
 
 			GraphicsBufferPtr inst_stream = rl->InstanceStream();
-			if (!inst_stream)
-			{
-				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
-
-				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
-				rl->BindVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
-			}
-			else
+			if (inst_stream)
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
 					BOOST_ASSERT(rl->InstanceStreamFormat() == instances_[i].lock()->InstanceFormat());
 				}
+			}
+			else
+			{
+				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
+
+				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
+				rl->BindVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
 			}
 
 			uint32_t const size = rl->InstanceSize();

@@ -866,13 +866,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	Size_T<float> Font::CalcSize(std::wstring const & text, float font_size)
 	{
-		if (!text.empty())
+		if (text.empty())
 		{
-			return font_renderable_->CalcSize(text, font_size);
+			return Size_T<float>(0, 0);
 		}
 		else
 		{
-			return Size_T<float>(0, 0);
+			return font_renderable_->CalcSize(text, font_size);
 		}
 	}
 

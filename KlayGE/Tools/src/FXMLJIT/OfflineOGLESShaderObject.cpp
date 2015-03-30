@@ -926,14 +926,14 @@ namespace KlayGE
 						D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
 						macros.push_back(macro_d3d11);
 					}
-					if (!caps.bc5_support)
+					if (caps.bc5_support)
 					{
-						D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
+						D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GA", "1" };
 						macros.push_back(macro_bc5_as_bc3);
 					}
 					else
 					{
-						D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_GA", "1" };
+						D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
 						macros.push_back(macro_bc5_as_bc3);
 					}
 					if (!caps.bc4_support)
@@ -1081,7 +1081,11 @@ namespace KlayGE
 						}
 					}
 
-					if (!code.empty())
+					if (code.empty())
+					{
+						is_shader_validate_[type] = false;
+					}
+					else
 					{
 						try
 						{
@@ -1255,10 +1259,6 @@ namespace KlayGE
 							LogError(ex.what());
 							LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
 						}
-					}
-					else
-					{
-						is_shader_validate_[type] = false;
 					}
 				}
 #else

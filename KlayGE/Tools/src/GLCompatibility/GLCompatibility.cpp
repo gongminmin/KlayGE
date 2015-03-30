@@ -38,16 +38,16 @@ namespace
 
 			std::string glsl_ver_str;
 			re.GetCustomAttrib("SHADING_LANGUAGE_VERSION", &glsl_ver_str);
-			if (!glsl_ver_str.empty())
+			if (glsl_ver_str.empty())
+			{
+				glsl_major_ver_ = 0;
+				glsl_minor_ver_ = 0;
+			}
+			else
 			{
 				std::string::size_type const glsl_dot_pos = glsl_ver_str.find(".");
 				glsl_major_ver_ = glsl_ver_str[glsl_dot_pos - 1] - '0';
 				glsl_minor_ver_ = glsl_ver_str[glsl_dot_pos + 1] - '0';
-			}
-			else
-			{
-				glsl_major_ver_ = 0;
-				glsl_minor_ver_ = 0;
 			}
 
 			int num_exts;

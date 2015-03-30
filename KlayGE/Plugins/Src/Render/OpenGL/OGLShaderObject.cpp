@@ -2012,7 +2012,11 @@ namespace KlayGE
 					}
 				}
 
-				if (!code.empty())
+				if (code.empty())
+				{
+					is_shader_validate_[type] = false;
+				}
+				else
 				{
 					try
 					{
@@ -2221,10 +2225,6 @@ namespace KlayGE
 						LogError(ex.what());
 						LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
 					}
-				}
-				else
-				{
-					is_shader_validate_[type] = false;
 				}
 			}
 		}

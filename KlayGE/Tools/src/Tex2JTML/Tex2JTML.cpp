@@ -125,18 +125,7 @@ public:
 	
 	KlayGE::shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
 	{
-		if (!this->IsLeaf())
-		{
-			// try first child
-			KlayGE::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
-			if (new_node)
-			{
-				return new_node;
-			}
-			// no room, then insert second child
-			return child_[1]->Insert(tex_desc);
-		}
-		else
+		if (this->IsLeaf())
 		{
 			// room don't fit or already have picture here
 			if (!this->CanInsert(tex_desc))
@@ -170,6 +159,17 @@ public:
 			}
 			// insert first child we create
 			return child_[0]->Insert(tex_desc);
+		}
+		else
+		{
+			// try first child
+			KlayGE::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
+			if (new_node)
+			{
+				return new_node;
+			}
+			// no room, then insert second child
+			return child_[1]->Insert(tex_desc);
 		}
 	}
 	

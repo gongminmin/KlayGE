@@ -1228,11 +1228,7 @@ namespace KlayGE
 		void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 			std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob)
 		{
-			if (!code_blob)
-			{
-				is_shader_validate_[type] = false;
-			}
-			else
+			if (code_blob)
 			{
 				OfflineRenderDeviceCaps const & caps = caps_;
 
@@ -1337,6 +1333,10 @@ namespace KlayGE
 					}
 					BOOST_ASSERT(found);
 				}
+			}
+			else
+			{
+				is_shader_validate_[type] = false;
 			}
 		}
 

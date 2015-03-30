@@ -573,13 +573,13 @@ namespace KlayGE
 	void RenderEngine::BindFrameBuffer(FrameBufferPtr const & fb)
 	{
 		FrameBufferPtr new_fb;
-		if (!fb)
+		if (fb)
 		{
-			new_fb = this->DefaultFrameBuffer();
+			new_fb = fb;
 		}
 		else
 		{
-			new_fb = fb;
+			new_fb = this->DefaultFrameBuffer();
 		}
 
 		if ((fb != new_fb) || (fb && fb->Dirty()))

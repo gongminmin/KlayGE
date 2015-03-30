@@ -389,7 +389,13 @@ namespace
 
 		void Apply()
 		{
-			if (!show_blur_factor_)
+			if (show_blur_factor_)
+			{
+				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
+				PostProcess::Apply();
+			}
+			else
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				spreading_pp_->SetParam(2, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
@@ -403,12 +409,6 @@ namespace
 
 				re.BindFrameBuffer(frame_buffer_);
 				re.Render(*technique_, *normalization_rl_);
-			}
-			else
-			{
-				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
-				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
-				PostProcess::Apply();
 			}
 		}
 

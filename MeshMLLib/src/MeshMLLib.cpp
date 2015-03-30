@@ -385,7 +385,11 @@ namespace KlayGE
 
 		std::map<int, int> joint_id_to_index;
 		std::vector<int> joint_index_to_id;
-		if (!joints_.empty())
+		if (joints_.empty())
+		{
+			keyframes_.clear();
+		}
+		else
 		{
 			typedef KLAYGE_DECLTYPE(joints_) JointsType;
 			KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
@@ -443,10 +447,6 @@ namespace KlayGE
 					iter = keyframes_.erase(iter);
 				}
 			}
-		}
-		else
-		{
-			keyframes_.clear();
 		}
 
 		int model_ver = 6;
@@ -527,7 +527,11 @@ namespace KlayGE
 				<< "\" opacity=\"" << mtl.opacity
 				<< "\" shininess=\"" << mtl.shininess << "\"";
 
-			if (!mtl.texture_slots.empty())
+			if (mtl.texture_slots.empty())
+			{
+				os << "/>" << std::endl;
+			}
+			else
 			{
 				os << ">" << std::endl;
 
@@ -539,10 +543,6 @@ namespace KlayGE
 				}
 
 				os << "\t\t</material>" << std::endl;
-			}
-			else
-			{
-				os << "/>" << std::endl;
 			}
 		}
 		os << "\t</materials_chunk>" << std::endl;

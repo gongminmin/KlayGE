@@ -349,23 +349,23 @@ namespace KlayGE
 	{
 		UI_Control_State iState = UICS_Normal;
 
-		if (!visible_)
+		if (visible_)
 		{
-			iState = UICS_Hidden;
-		}
-		else
-		{
-			if (!enabled_)
-			{
-				iState = UICS_Disabled;
-			}
-			else
+			if (enabled_)
 			{
 				if (has_focus_)
 				{
 					iState = UICS_Focus;
 				}
 			}
+			else
+			{
+				iState = UICS_Disabled;
+			}
+		}
+		else
+		{
+			iState = UICS_Hidden;
 		}
 
 		if (visible_)

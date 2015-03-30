@@ -124,14 +124,14 @@ float3 FxaaPixelShader(float2 pos)
 	bool horzSpan = edgeHorz >= edgeVert;
 	float subpixA = subpixNSWE * 2 + subpixNWSWNESE;
 
-	if (!horzSpan)
+	if (horzSpan)
 	{
-		lumaN = lumaW;
-		lumaS = lumaE;
+		lengthSign = inv_width_height.y;
 	}
 	else
 	{
-		lengthSign = inv_width_height.y;
+		lumaN = lumaW;
+		lumaS = lumaE;
 	}
 	float subpixB = subpixA / 12 - lumaM;
 	float gradientN = lumaN - lumaM;
@@ -148,17 +148,17 @@ float3 FxaaPixelShader(float2 pos)
 
 	float2 posB = posM;
 	float2 offNP;
-	if (!horzSpan)
-	{
-		offNP.x = 0;
-		offNP.y = inv_width_height.y;
-		posB.x += lengthSign * 0.5f;
-	}
-	else
+	if (horzSpan)
 	{
 		offNP.x = inv_width_height.x;
 		offNP.y = 0;
 		posB.y += lengthSign * 0.5f;
+	}
+	else
+	{
+		offNP.x = 0;
+		offNP.y = inv_width_height.y;
+		posB.x += lengthSign * 0.5f;
 	}
 
 	float2 posN = posB - offNP;
@@ -241,13 +241,13 @@ float3 FxaaPixelShader(float2 pos)
 
 	float pixelOffsetGood = goodSpan ? pixelOffset : 0;
 	float pixelOffsetSubpix = max(pixelOffsetGood, subpixH);
-	if (!horzSpan)
+	if (horzSpan)
 	{
-		posM.x += pixelOffsetSubpix * lengthSign;
+		posM.y += pixelOffsetSubpix * lengthSign;
 	}
 	else
 	{
-		posM.y += pixelOffsetSubpix * lengthSign;
+		posM.x += pixelOffsetSubpix * lengthSign;
 	}
 
 	return color_tex.Sample(linear_wrap_sampler, posM).xyz;

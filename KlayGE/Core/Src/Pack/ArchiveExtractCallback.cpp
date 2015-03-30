@@ -80,11 +80,7 @@ namespace KlayGE
 
 	STDMETHODIMP CArchiveExtractCallback::CryptoGetTextPassword(BSTR* password)
 	{
-		if (!password_is_defined_)
-		{
-			return E_ABORT;
-		}
-		else
+		if (password_is_defined_)
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			*password = SysAllocString(password_.c_str());
@@ -92,6 +88,10 @@ namespace KlayGE
 			*password = nullptr;
 #endif
 			return S_OK;
+		}
+		else
+		{
+			return E_ABORT;
 		}
 	}
 

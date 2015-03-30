@@ -170,13 +170,13 @@ namespace KlayGE
 		uint32_t n;
 		if (0xFFFFFFFF == force_num_instances_)
 		{
-			if (!vertex_streams_.empty())
+			if (vertex_streams_.empty())
 			{
-				n = vertex_streams_[0].freq;
+				n = 1;
 			}
 			else
 			{
-				n = 1;
+				n = vertex_streams_[0].freq;
 			}
 		}
 		else

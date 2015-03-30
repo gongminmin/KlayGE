@@ -995,21 +995,7 @@ namespace
 					}
 				}
 
-				if (!tangent_quats.empty())
-				{
-					for (size_t i = 0; i < ves.size(); ++ i)
-					{
-						if (VEU_Tangent == ves[i].usage)
-						{
-							uint32_t buf_index = ves_mapping[i];
-							uint32_t compact = Native2LE(tangent_quats[vert_index]);
-							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
-								&compact, sizeof(compact));
-							break;
-						}
-					}
-				}
-				else
+				if (tangent_quats.empty())
 				{
 					if (!normals.empty())
 					{
@@ -1023,6 +1009,20 @@ namespace
 									&compact, sizeof(compact));
 								break;
 							}
+						}
+					}
+				}
+				else
+				{
+					for (size_t i = 0; i < ves.size(); ++ i)
+					{
+						if (VEU_Tangent == ves[i].usage)
+						{
+							uint32_t buf_index = ves_mapping[i];
+							uint32_t compact = Native2LE(tangent_quats[vert_index]);
+							std::memcpy(&merged_vertices[buf_index][(base_vertices + vert_index) * merged_ves[buf_index].element_size()],
+								&compact, sizeof(compact));
+							break;
 						}
 					}
 				}

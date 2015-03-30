@@ -505,17 +505,7 @@ namespace KlayGE
 
 		shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
 		shared_ptr<void> res;
-		if (!loaded_res)
-		{
-			if (res_desc->HasSubThreadStage())
-			{
-				res_desc->SubThreadStage();
-			}
-
-			res = res_desc->MainThreadStage();
-			this->AddLoadedResource(res_desc, res);
-		}
-		else
+		if (loaded_res)
 		{
 			if (res_desc->StateLess())
 			{
@@ -530,6 +520,16 @@ namespace KlayGE
 				}
 			}
 		}
+		else
+		{
+			if (res_desc->HasSubThreadStage())
+			{
+				res_desc->SubThreadStage();
+			}
+
+			res = res_desc->MainThreadStage();
+			this->AddLoadedResource(res_desc, res);
+		}
 
 		return res;
 	}
@@ -539,7 +539,24 @@ namespace KlayGE
 		this->RemoveUnrefResources();
 
 		shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-		if (!loaded_res)
+		if (loaded_res)
+		{
+			shared_ptr<void> res;
+			if (res_desc->StateLess())
+			{
+				res = loaded_res;
+			}
+			else
+			{
+				res = res_desc->CloneResourceFrom(loaded_res);
+				if (res != loaded_res)
+				{
+					this->AddLoadedResource(res_desc, res);
+				}
+			}
+			return ResLoader::ASyncReuseFunctor(res);
+		}
+		else
 		{
 			shared_ptr<volatile bool> async_is_done;
 			bool found = false;
@@ -583,23 +600,6 @@ namespace KlayGE
 					return ResLoader::ASyncReuseFunctor(res);
 				}
 			}
-		}
-		else
-		{
-			shared_ptr<void> res;
-			if (res_desc->StateLess())
-			{
-				res = loaded_res;
-			}
-			else
-			{
-				res = res_desc->CloneResourceFrom(loaded_res);
-				if (res != loaded_res)
-				{
-					this->AddLoadedResource(res_desc, res);
-				}
-			}
-			return ResLoader::ASyncReuseFunctor(res);
 		}
 	}
 
@@ -661,13 +661,13 @@ namespace KlayGE
 
 		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
 		{
-			if (!iter->second.lock())
+			if (iter->second.lock())
 			{
-				iter = loaded_res_.erase(iter);
+				++ iter;
 			}
 			else
 			{
-				++ iter;
+				iter = loaded_res_.erase(iter);
 			}
 		}
 	}
@@ -719,12 +719,7 @@ namespace KlayGE
 			{
 				ResLoader& rl = ResLoader::Instance();
 				shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc_);
-				if (!loaded_res)
-				{
-					res_ = res_desc_->MainThreadStage();
-					rl.AddLoadedResource(res_desc_, res_);
-				}
-				else
+				if (loaded_res)
 				{
 					if (res_desc_->StateLess())
 					{
@@ -738,6 +733,11 @@ namespace KlayGE
 							rl.AddLoadedResource(res_desc_, res_);
 						}
 					}
+				}
+				else
+				{
+					res_ = res_desc_->MainThreadStage();
+					rl.AddLoadedResource(res_desc_, res_);
 				}
 			}
 		}

@@ -826,7 +826,11 @@ namespace KlayGE
 
 			// 行列式的值
 			T const det(determinant(rhs));
-			if (!equal<T>(det, 0))
+			if (equal<T>(det, 0))
+			{
+				return rhs;
+			}
+			else
 			{
 				T invDet(T(1) / det);
 
@@ -850,10 +854,6 @@ namespace KlayGE
 					+invDet * (rhs(0, 0) * _3243_3342 - rhs(0, 1) * _3143_3341 + rhs(0, 2) * _3142_3241),
 					-invDet * (rhs(0, 0) * _2243_2342 - rhs(0, 1) * _2143_2341 + rhs(0, 2) * _2142_2241),
 					+invDet * (rhs(0, 0) * _2233_2332 - rhs(0, 1) * _2133_2331 + rhs(0, 2) * _2132_2231));
-			}
-			else
-			{
-				return rhs;
 			}
 		}
 
@@ -1211,57 +1211,57 @@ namespace KlayGE
 			Vector_T<T, 3> const * rotation_center, Quaternion_T<T> const * rotation, Vector_T<T, 3> const * trans)
 		{
 			Vector_T<T, 3> psc, prc, pt;
-			if (!scaling_center)
-			{
-				psc = Vector_T<T, 3>(T(0), T(0), T(0));
-			}
-			else
+			if (scaling_center)
 			{
 				psc = *scaling_center;
 			}
-			if (!rotation_center)
-			{
-				prc = Vector_T<T, 3>(T(0), T(0), T(0));
-			}
 			else
+			{
+				psc = Vector_T<T, 3>(T(0), T(0), T(0));
+			}
+			if (rotation_center)
 			{
 				prc = *rotation_center;
 			}
-			if (!trans)
+			else
 			{
-				pt = Vector_T<T, 3>(T(0), T(0), T(0));
+				prc = Vector_T<T, 3>(T(0), T(0), T(0));
+			}
+			if (trans)
+			{
+				pt = *trans;
 			}
 			else
 			{
-				pt = *trans;
+				pt = Vector_T<T, 3>(T(0), T(0), T(0));
 			}
 
 			Matrix4_T<T> m1, m2, m3, m4, m5, m6, m7;
 			m1 = translation(-psc);
-			if (!scaling_rotation)
-			{
-				m2 = m4 = Matrix4_T<T>::Identity();
-			}
-			else
+			if (scaling_rotation)
 			{
 				m4 = to_matrix(*scaling_rotation);
 				m2 = inverse(m4);
 			}
-			if (!scale)
-			{
-				m3 = Matrix4_T<T>::Identity();
-			}
 			else
+			{
+				m2 = m4 = Matrix4_T<T>::Identity();
+			}
+			if (scale)
 			{
 				m3 = scaling(*scale);
 			}
-			if (!rotation)
+			else
 			{
-				m6 = Matrix4_T<T>::Identity();
+				m3 = Matrix4_T<T>::Identity();
+			}
+			if (rotation)
+			{
+				m6 = to_matrix(*rotation);
 			}
 			else
 			{
-				m6 = to_matrix(*rotation);
+				m6 = Matrix4_T<T>::Identity();
 			}
 			m5 = translation(psc - prc);
 			m7 = translation(prc + pt);

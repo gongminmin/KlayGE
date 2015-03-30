@@ -355,13 +355,7 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 	float side_len = max(abs(ip[1].position.x - ip[0].position.x), abs(ip[1].position.x - ip[2].position.x));		// assume square & uniform
 	float diag_len = sqrt(side_len * side_len * 2);
 
-	if (!InFrustum(center, eye_pos / world_scale, view_dir, diag_len))
-	{
-		output.inside[0] = output.inside[1] = -1;
-		output.edges[0] = output.edges[1] = output.edges[2] = output.edges[3] = -1;
-		output.world_xz[0] = output.world_xz[1] = output.world_xz[2] = output.world_xz[3] = 0;
-	}
-	else
+	if (InFrustum(center, eye_pos / world_scale, view_dir, diag_len))
 	{
 		output.edges[0] = SphereToScreenSpaceTessellation(ip[0].position, ip[1].position, side_len);
 		output.edges[3] = SphereToScreenSpaceTessellation(ip[1].position, ip[2].position, side_len);
@@ -413,6 +407,12 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 		output.world_xz[1] = ip[1].world_xz;
 		output.world_xz[2] = ip[2].world_xz;
 		output.world_xz[3] = ip[3].world_xz;
+	}
+	else
+	{
+		output.inside[0] = output.inside[1] = -1;
+		output.edges[0] = output.edges[1] = output.edges[2] = output.edges[3] = -1;
+		output.world_xz[0] = output.world_xz[1] = output.world_xz[2] = output.world_xz[3] = 0;
 	}
 
 	return output;

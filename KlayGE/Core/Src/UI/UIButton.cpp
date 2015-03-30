@@ -134,37 +134,31 @@ namespace KlayGE
 	{
 		UI_Control_State iState = UICS_Normal;
 
-		if (!visible_)
+		if (visible_)
 		{
-			iState = UICS_Hidden;
-		}
-		else
-		{
-			if (!enabled_)
-			{
-				iState = UICS_Disabled;
-			}
-			else
+			if (enabled_)
 			{
 				if (pressed_)
 				{
 					iState = UICS_Pressed;
 				}
-				else
+				else if (is_mouse_over_)
 				{
-					if (is_mouse_over_)
-					{
-						iState = UICS_MouseOver;
-					}
-					else
-					{
-						if (has_focus_)
-						{
-							iState = UICS_Focus;
-						}
-					}
+					iState = UICS_MouseOver;
+				}
+				else if (has_focus_)
+				{
+					iState = UICS_Focus;
 				}
 			}
+			else
+			{
+				iState = UICS_Disabled;
+			}
+		}
+		else
+		{
+			iState = UICS_Hidden;
 		}
 
 		// Background fill layer

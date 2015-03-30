@@ -335,8 +335,8 @@ namespace KlayGE
 					}
 					break;
 
-                default:
-                    BOOST_ASSERT(false);
+				default:
+					BOOST_ASSERT(false);
 					break;
 				}
 			}
@@ -363,9 +363,9 @@ namespace KlayGE
 						}
 						break;
 
-                    default:
-                        BOOST_ASSERT(false);
-                        break;
+					default:
+						BOOST_ASSERT(false);
+						break;
 					}
 				}
 			}
@@ -373,11 +373,7 @@ namespace KlayGE
 
 		UI_Control_State iState = UICS_Normal;
 
-		if (!visible_)
-		{
-			iState = UICS_Hidden;
-		}
-		else
+		if (visible_)
 		{
 			if (!enabled_ || !show_thumb_)
 			{
@@ -389,14 +385,15 @@ namespace KlayGE
 				{
 					iState = UICS_MouseOver;
 				}
-				else
+				else if (has_focus_)
 				{
-					if (has_focus_)
-					{
-						iState = UICS_Focus;
-					}
+					iState = UICS_Focus;
 				}
 			}
+		}
+		else
+		{
+			iState = UICS_Hidden;
 		}
 
 

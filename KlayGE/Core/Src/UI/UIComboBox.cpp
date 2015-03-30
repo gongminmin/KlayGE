@@ -25,7 +25,7 @@ namespace KlayGE
 						: UIControl(UIComboBox::Type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),
-                            sb_width_(16), opened_(false),
+							sb_width_(16), opened_(false),
 							pressed_(false)
 	{
 		this->InitDefaultElements();
@@ -37,7 +37,7 @@ namespace KlayGE
 						: UIControl(type, dialog),
 							selected_(-1), focused_(-1),
 							drop_height_(100), scroll_bar_(dialog),
-                            sb_width_(16), opened_(false),
+							sb_width_(16), opened_(false),
 							pressed_(false)
 	{
 		this->InitDefaultElements();
@@ -508,37 +508,31 @@ namespace KlayGE
 
 		iState = UICS_Normal;
 
-		if (!visible_)
+		if (visible_)
 		{
-			iState = UICS_Hidden;
-		}
-		else
-		{
-			if (!enabled_)
-			{
-				iState = UICS_Disabled;
-			}
-			else
+			if (enabled_)
 			{
 				if (pressed_)
 				{
 					iState = UICS_Pressed;
 				}
-				else
+				else if (is_mouse_over_)
 				{
-					if (is_mouse_over_)
-					{
-						iState = UICS_MouseOver;
-					}
-					else
-					{
-						if (has_focus_)
-						{
-							iState = UICS_Focus;
-						}
-					}
+					iState = UICS_MouseOver;
+				}
+				else if (has_focus_)
+				{
+					iState = UICS_Focus;
 				}
 			}
+			else
+			{
+				iState = UICS_Disabled;
+			}
+		}
+		else
+		{
+			iState = UICS_Hidden;
 		}
 
 		// Button

@@ -89,13 +89,7 @@ namespace KlayGE
 
 					std::vector<uint8_t> data(READSIZE);
 					data.resize(dataSource_->Read(&data[0], data.size()));
-					if (!data.empty())
-					{
-						alBufferData(buf, Convert(format_), &data[0],
-							static_cast<ALsizei>(data.size()), freq_);
-						alSourceQueueBuffers(source_, 1, &buf);
-					}
-					else
+					if (data.empty())
 					{
 						if (loop_)
 						{
@@ -108,6 +102,12 @@ namespace KlayGE
 						{
 							stopped_ = true;
 						}
+					}
+					else
+					{
+						alBufferData(buf, Convert(format_), &data[0],
+							static_cast<ALsizei>(data.size()), freq_);
+						alSourceQueueBuffers(source_, 1, &buf);
 					}
 				}
 			}
@@ -141,15 +141,15 @@ namespace KlayGE
 		KLAYGE_FOREACH(BufferQueueType::reference buf, bufferQueue_)
 		{
 			data.resize(dataSource_->Read(&data[0], data.size()));
-			if (!data.empty())
+			if (data.empty())
+			{
+				break;
+			}
+			else
 			{
 				++ non_empty_buf;
 				alBufferData(buf, format, &data[0],
 					static_cast<ALuint>(data.size()), static_cast<ALuint>(freq_));
-			}
-			else
-			{
-				break;
 			}
 		}
 
