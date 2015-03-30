@@ -332,7 +332,7 @@ class build_info:
 
 		self.compiler_name = compiler_name
 		self.compiler_version = compiler_version
-		self.multi_config = multi_config;
+		self.multi_config = multi_config
 		self.compilers = compilers
 		self.cfg = cfg
 

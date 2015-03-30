@@ -160,7 +160,7 @@ def build_external_libs(build_info):
 			print("\nSeting up DXSDK...\n")
 			setup_DXSDK(build_info, compiler_info)
 
-		if (not compiler_info.is_windows_runtime) and (not compiler_info.is_android) and (not compiler_info.is_ios):
+		if compiler_info.is_dev_platform:
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
