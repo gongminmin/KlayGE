@@ -13,6 +13,7 @@ SET(KLAYGE_ROOT_DIR "${KLAYGE_PROJECT_DIR}/..")
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/ConfigBoost.cmake)
 
 DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex.dds")
 DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc2.dds")

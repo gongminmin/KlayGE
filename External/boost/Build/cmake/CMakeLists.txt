@@ -27,6 +27,7 @@ SET(KLAYGE_ROOT_DIR "${BOOST_PROJECT_DIR}/../..")
 
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -80,7 +81,7 @@ IF(REGEN)
 	EXECUTE_PROCESS(COMMAND "${PYTHON_EXECUTABLE}" "${PATCH_PATH}" "-p0" "Patches/ForClangAndroidAndWinRT.patch" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/boost")
 ENDIF()
 
-INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
+INCLUDE(${KLAYGE_ROOT_DIR}/cmake/ConfigBoost.cmake)
 
 IF(MSVC)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX-")
