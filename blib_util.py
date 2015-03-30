@@ -462,7 +462,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				system_name = "WindowsPhone"
 			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
 
-		build_dir = "%s/build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+		build_dir = "%s/Build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if not os.path.exists(build_dir):
 			os.makedirs(build_dir)
 
@@ -498,7 +498,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in build_info.cfg:
-			build_dir = "%s/build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
+			build_dir = "%s/Build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
 				if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
