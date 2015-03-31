@@ -126,14 +126,8 @@ namespace KlayGE
 		}
 		visual_attr.push_back(None);				// end of list
 
-		glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
-		glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
-
-		//int num_elements;
-		//fbc_ = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
-
-		//vi_ = glXGetVisualFromFBConfig(x_display_, fbc_[0]);
-		vi_ = glXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
+		glXChooseVisualFUNC DynamicGlXChooseVisual = (glXChooseVisualFUNC)(glloader_get_gl_proc_address("glXChooseVisual"));
+		vi_ = DynamicGlXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
 
 		XSetWindowAttributes attr;
 		attr.colormap     = XCreateColormap(x_display_, RootWindow(x_display_, vi_->screen), vi_->visual, AllocNone);
@@ -252,14 +246,8 @@ namespace KlayGE
 		}
 		visual_attr.push_back(None);				// end of list
 
-		glXChooseFBConfig = (glXChooseFBConfigFUNC)(glloader_get_gl_proc_address("glXChooseFBConfig"));
-		glXGetVisualFromFBConfig = (glXGetVisualFromFBConfigFUNC)(glloader_get_gl_proc_address("glXGetVisualFromFBConfig"));
-
-		//int num_elements;
-		//fbc_ = glXChooseFBConfig(x_display_, DefaultScreen(x_display_), &visual_attr[0], &num_elements);
-
-		//vi_ = glXGetVisualFromFBConfig(x_display_, fbc_[0]);
-		vi_ = glXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
+		glXChooseVisualFUNC DynamicGlXChooseVisual = (glXChooseVisualFUNC)(glloader_get_gl_proc_address("glXChooseVisual"));
+		vi_ = DynamicGlXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
 
 		XSetWindowAttributes attr;
 		attr.colormap     = XCreateColormap(x_display_, RootWindow(x_display_, vi_->screen), vi_->visual, AllocNone);

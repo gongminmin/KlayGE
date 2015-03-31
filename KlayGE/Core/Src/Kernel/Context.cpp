@@ -243,7 +243,7 @@ namespace KlayGE
 
 		std::string rf_name = "D3D11";
 		std::string af_name = "OpenAL";
-		std::string if_name = "DInput";
+		std::string if_name = "MsgInput";
 		std::string sf_name = "DShow";
 		std::string scf_name = "Python";
 		std::string sm_name;

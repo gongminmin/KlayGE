@@ -572,7 +572,10 @@ namespace glloader
 		void glx_version(int& major, int& minor)
 		{
 #ifdef GLLOADER_GLX
-			glXQueryVersion(glXGetCurrentDisplay(), &major, &minor);
+			LOAD_FUNC1(glXQueryVersion);
+			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay 
+				= (glXGetCurrentDisplayFUNC)(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
+			glXQueryVersion(DynamicGlXGetCurrentDisplay(), &major, &minor);
 #else
 			major = minor = 0;
 #endif		// GLLOADER_GLX
@@ -580,7 +583,10 @@ namespace glloader
 		void glx_features()
 		{
 #ifdef GLLOADER_GLX
-			char const * str = glXGetClientString(glXGetCurrentDisplay(), GLX_EXTENSIONS);
+			LOAD_FUNC1(glXGetClientString);
+			glXGetCurrentDisplayFUNC DynamicGlXGetCurrentDisplay 
+				= (glXGetCurrentDisplayFUNC)(glloader_get_gl_proc_address("glXGetCurrentDisplay"));
+			char const * str = glXGetClientString(DynamicGlXGetCurrentDisplay(), GLX_EXTENSIONS);
 			if (str != NULL)
 			{
 				std::vector<std::string> glx_exts = split(str);

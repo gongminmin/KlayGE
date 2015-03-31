@@ -297,7 +297,7 @@ namespace KlayGE
 			{
 				attribs[1] = available_versions[i].second.first;
 				attribs[3] = available_versions[i].second.second;
-				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, fbc_[0], nullptr, GL_TRUE, attribs);
+				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, nullptr, nullptr, GL_TRUE, attribs);
 				if (x_context_new != nullptr)
 				{
 					glXMakeCurrent(x_display_, x_window_, nullptr);
