@@ -30,15 +30,16 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/COMPtr.hpp>
 
 #include <boost/assert.hpp>
 
-#include <comdef.h>
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#include <KFL/COMPtr.hpp>
 #include <WbemIdl.h>
 
 DEFINE_GUID(IID_IWbemLocator, 0xdc12a687, 0x737f, 0x11cf, 0x88, 0x4d, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
 DEFINE_GUID(CLSID_WbemLocator, 0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
+#endif
 
 #include <KlayGE/HWDetect.hpp>
 
@@ -62,6 +63,7 @@ namespace KlayGE
 		"InterconnectBoard"
 	};
 
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	class WMI : boost::noncopyable
 	{
 	public:
@@ -192,6 +194,7 @@ namespace KlayGE
 		shared_ptr<IWbemLocator> wbem_locator_;
 		shared_ptr<IWbemServices> wbem_services_;
 	};
+#endif
 
 
 	SMBios& SMBios::Intance()
@@ -212,6 +215,7 @@ namespace KlayGE
 
 	bool SMBios::ReadVersionAndData()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		WMI wmi;
 
 		if (!wmi.Init())
@@ -219,12 +223,12 @@ namespace KlayGE
 			return false;
 		}
 
-		if (!wmi.ConnectServer(bstr_t(L"root\\WMI")))
+		if (!wmi.ConnectServer(L"root\\WMI"))
 		{
 			return false;
 		}
 
-		if (!wmi.ExecuteQuery(bstr_t("SELECT * FROM MSSMBios_RawSMBiosTables")))
+		if (!wmi.ExecuteQuery(L"SELECT * FROM MSSMBios_RawSMBiosTables"))
 		{
 			return false;
 		}
@@ -247,6 +251,7 @@ namespace KlayGE
 
 			return true;
 		}
+#endif
 
 		return false;
 	}

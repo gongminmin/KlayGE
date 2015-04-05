@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <map>
 #include <boost/noncopyable.hpp>
 
 namespace KlayGE
@@ -311,7 +310,6 @@ namespace KlayGE
 	public:
 		static SMBios& Intance();
 
-	public:
 		uint8_t MajorVersion() const
 		{
 			return major_ver_;
@@ -372,7 +370,6 @@ namespace KlayGE
 	public:
 		Mainboard();
 
-	public:
 		char const * Manufacturer() const;
 		char const * Product() const;
 		char const * BiosVendor() const;
@@ -398,7 +395,6 @@ namespace KlayGE
 	public:
 		MemoryBank();
 
-	public:
 		size_t SlotCount() const
 		{
 			return devices_.size();
