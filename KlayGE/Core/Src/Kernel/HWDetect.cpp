@@ -35,9 +35,12 @@
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KFL/COMPtr.hpp>
+#include <comdef.h>
 #include <WbemIdl.h>
 
+#if defined KLAYGE_COMPILER_MSVC
 DEFINE_GUID(IID_IWbemLocator, 0xdc12a687, 0x737f, 0x11cf, 0x88, 0x4d, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
+#endif
 DEFINE_GUID(CLSID_WbemLocator, 0x4590f811, 0x1d3a, 0x11d0, 0x89, 0x1f, 0x00, 0xaa, 0x00, 0x4b, 0x2e, 0x24);
 #endif
 
@@ -99,7 +102,7 @@ namespace KlayGE
 			BOOST_ASSERT(wbem_services_);
 
 			IEnumWbemClassObject* wbem_enum_result;
-			HRESULT hr = wbem_services_->ExecQuery(L"WQL", wql,
+			HRESULT hr = wbem_services_->ExecQuery(bstr_t(L"WQL"), wql,
 				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &wbem_enum_result);
 			wbem_enum_result_ = MakeCOMPtr(wbem_enum_result);
 			if (FAILED(hr))
@@ -223,12 +226,12 @@ namespace KlayGE
 			return false;
 		}
 
-		if (!wmi.ConnectServer(L"root\\WMI"))
+		if (!wmi.ConnectServer(bstr_t(L"root\\WMI")))
 		{
 			return false;
 		}
 
-		if (!wmi.ExecuteQuery(L"SELECT * FROM MSSMBios_RawSMBiosTables"))
+		if (!wmi.ExecuteQuery(bstr_t(L"SELECT * FROM MSSMBios_RawSMBiosTables")))
 		{
 			return false;
 		}
