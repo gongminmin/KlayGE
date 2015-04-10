@@ -126,20 +126,28 @@ namespace
 	static std::pair<uint32_t, uint32_t> const BC67_INTERPOLATION_VALUES[4][16] =
 	{
 		{
-			{ 64, 0 }, { 33, 31 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
-			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+			std::make_pair(64, 0), std::make_pair(33, 31), std::make_pair(0, 64), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0)
 		},
 		{
-			{ 64, 0 }, { 43, 21 }, { 21, 43 }, { 0, 64 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 },
-			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+			std::make_pair(64, 0), std::make_pair(43, 21), std::make_pair(21, 43), std::make_pair(0, 64),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0)
 		},
 		{
-			{ 64, 0 }, { 55, 9 }, { 46, 18 }, { 37, 27 }, { 27, 37 }, { 18, 46 }, { 9, 55 }, { 0, 64 },
-			{ 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }, { 0, 0 }
+			std::make_pair(64, 0), std::make_pair(55, 9), std::make_pair(46, 18), std::make_pair(37, 27),
+			std::make_pair(27, 37), std::make_pair(18, 46), std::make_pair(9, 55), std::make_pair(0, 64),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0),
+			std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0), std::make_pair(0, 0)
 		},
 		{
-			{ 64, 0 }, { 60, 4 }, { 55, 9 }, { 51, 13 }, { 47, 17 }, { 43, 21 }, { 38, 26 }, { 34, 30 },
-			{ 30, 34 }, { 26, 38 }, { 21, 43 }, { 17, 47 }, { 13, 51 }, { 9, 55 }, { 4, 60 }, { 0, 64 }
+			std::make_pair(64, 0), std::make_pair(60, 4), std::make_pair(55, 9), std::make_pair(51, 13),
+			std::make_pair(47, 17), std::make_pair(43, 21), std::make_pair(38, 26), std::make_pair(34, 30),
+			std::make_pair(30, 34), std::make_pair(26, 38), std::make_pair(21, 43), std::make_pair(17, 47),
+			std::make_pair(13, 51), std::make_pair(9, 55), std::make_pair(4, 60), std::make_pair(0, 64)
 		}
 	};
 
@@ -3386,8 +3394,6 @@ namespace KlayGE
 		BOOST_ASSERT(p2 == tp2);
 		BOOST_ASSERT(pbit_combo == best_pbit_combo);
 #endif
-
-		BOOST_ASSERT(best_pbit_combo >= 0);
 
 		return this->OptimizeEndpointsForCluster(mode, cluster,
 			p1, p2, best_indices, best_pbit_combo);
