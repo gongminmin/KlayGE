@@ -176,7 +176,9 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 res = x.Vec();
+			__m128 data_temp = _mm_sub_ps(_mm_setzero_ps(), res);
+			ret.Vec() = _mm_max_ps(data_temp, res);
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -490,7 +492,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			ret.Vec() = _mm_max_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -504,7 +506,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			ret.Vec() = _mm_min_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -553,7 +555,12 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 res1 = lhs.Vec();
+			__m128 res2 = rhs.Vec();
+			res1 = _mm_mul_ps(res1, res2);
+			__m128 y = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(1, 1, 1, 1));
+			res1 = _mm_add_ps(res1, y);
+			ret.Vec() = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(0, 0, 0, 0));
 #else
 			ret = SetVector(GetX(lhs) * GetX(rhs) + GetY(lhs) * GetY(rhs));
 #endif
@@ -562,20 +569,14 @@ namespace KlayGE
 
 		SIMDVectorF4 LengthSqVector2(SIMDVectorF4 const & rhs)
 		{
-			SIMDVectorF4 ret;
-#if defined(SIMD_MATH_SSE)
-			// TODO
-#else
-			ret = DotVector2(rhs, rhs);
-#endif
-			return ret;
+			return DotVector2(rhs, rhs);
 		}
 
 		SIMDVectorF4 LengthVector2(SIMDVectorF4 const & rhs)
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			ret.Vec() = _mm_sqrt_ps(LengthSqVector2(rhs).Vec());
 #else
 			ret = SetVector(sqrt(GetX(LengthSqVector2(rhs))));
 #endif
@@ -586,7 +587,9 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = _mm_sqrt_ps(LengthSqVector2(rhs).Vec());
+			temp = _mm_rcp_ps(temp);
+			ret.Vec() = _mm_mul_ps(rhs.Vec(), temp);
 #else
 			ret = rhs * MathLib::recip_sqrt(GetX(LengthSqVector2(rhs)));
 #endif
@@ -597,7 +600,14 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = v.Vec();
+			__m128 res1 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(0, 0, 0, 0)), mat.Row(0).Vec());
+			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			res1 = _mm_add_ps(res1, mat.Row(3).Vec());
+			__m128 w = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(3, 3, 3, 3));
+			__m128 inv_w = _mm_rcp_ps(w);
+			ret.Vec() = _mm_mul_ps(res1, inv_w);
 #else
 			SIMDVectorF4 temp;
 			for (int i = 0; i < 4; ++ i)
@@ -627,7 +637,10 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = v.Vec();
+			__m128 res1 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(0, 0, 0, 0)), mat.Row(0).Vec());
+			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
+			ret.Vec() = _mm_add_ps(res1, res2);
 #else
 			for (int i = 0; i < 2; ++ i)
 			{
@@ -666,7 +679,14 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 res1 = lhs.Vec();
+			__m128 res2 = rhs.Vec();
+			res1 = _mm_mul_ps(res1, res2);
+			__m128 y = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(1, 1, 1, 1));
+			__m128 z = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(2, 2, 2, 2));
+			res1 = _mm_add_ps(res1, y);
+			res1 = _mm_add_ps(res1, z);
+			ret.Vec() = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(0, 0, 0, 0));
 #else
 			ret = SetVector(GetX(lhs) * GetX(rhs) + GetY(lhs) * GetY(rhs)
 				+ GetZ(lhs) * GetZ(rhs));
@@ -676,20 +696,14 @@ namespace KlayGE
 
 		SIMDVectorF4 LengthSqVector3(SIMDVectorF4 const & rhs)
 		{
-			SIMDVectorF4 ret;
-#if defined(SIMD_MATH_SSE)
-			// TODO
-#else
-			ret = DotVector3(rhs, rhs);
-#endif
-			return ret;
+			return DotVector3(rhs, rhs);
 		}
 
 		SIMDVectorF4 LengthVector3(SIMDVectorF4 const & rhs)
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			ret.Vec() = _mm_sqrt_ps(LengthSqVector3(rhs).Vec());
 #else
 			ret = SetVector(sqrt(GetX(LengthSqVector3(rhs))));
 #endif
@@ -700,7 +714,9 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = _mm_sqrt_ps(LengthSqVector3(rhs).Vec());
+			temp = _mm_rcp_ps(temp);
+			ret.Vec() = _mm_mul_ps(rhs.Vec(), temp);
 #else
 			ret = rhs * MathLib::recip_sqrt(GetX(LengthSqVector3(rhs)));
 #endif
@@ -711,7 +727,16 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = v.Vec();
+			__m128 res1 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(0, 0, 0, 0)), mat.Row(0).Vec());
+			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(2, 2, 2, 2)), mat.Row(2).Vec());
+			res2 = _mm_add_ps(res2, mat.Row(3).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			__m128 w = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(3, 3, 3, 3));
+			__m128 inv_w = _mm_rcp_ps(w);
+			ret.Vec() = _mm_mul_ps(res1, inv_w);
 #else
 			SIMDVectorF4 temp;
 			for (int i = 0; i < 4; ++ i)
@@ -742,7 +767,12 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = v.Vec();
+			__m128 res1 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(0, 0, 0, 0)), mat.Row(0).Vec());
+			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(2, 2, 2, 2)), mat.Row(2).Vec());
+			ret.Vec() = _mm_add_ps(res1, res2);
 #else
 			for (int i = 0; i < 3; ++ i)
 			{
@@ -838,7 +868,14 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 res1 = lhs.Vec();
+			__m128 res2 = rhs.Vec();
+			res1 = _mm_mul_ps(res1, res2);
+			__m128 yw = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(1, 1, 3, 3));
+			res1 = _mm_add_ps(res1, yw);
+			__m128 zw = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(2, 2, 2, 2));
+			res1 = _mm_add_ps(res1, zw);
+			ret.Vec() = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(0, 0, 0, 0));
 #else
 			ret = SetVector(GetX(lhs) * GetX(rhs) + GetY(lhs) * GetY(rhs)
 				+ GetZ(lhs) * GetZ(rhs) + GetW(lhs) * GetW(rhs));
@@ -848,20 +885,14 @@ namespace KlayGE
 
 		SIMDVectorF4 LengthSqVector4(SIMDVectorF4 const & rhs)
 		{
-			SIMDVectorF4 ret;
-#if defined(SIMD_MATH_SSE)
-			// TODO
-#else
-			ret = DotVector4(rhs, rhs);
-#endif
-			return ret;
+			return DotVector4(rhs, rhs);
 		}
 
 		SIMDVectorF4 LengthVector4(SIMDVectorF4 const & rhs)
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			ret.Vec() = _mm_sqrt_ps(LengthSqVector4(rhs).Vec());
 #else
 			ret = SetVector(sqrt(GetX(LengthSqVector4(rhs))));
 #endif
@@ -872,7 +903,9 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = _mm_sqrt_ps(LengthSqVector4(rhs).Vec());
+			temp = _mm_rcp_ps(temp);
+			ret.Vec() = _mm_mul_ps(rhs.Vec(), temp);
 #else
 			ret = rhs * MathLib::recip_sqrt(GetX(LengthSqVector4(rhs)));
 #endif
@@ -883,7 +916,14 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 temp = v.Vec();
+			__m128 res1 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(0, 0, 0, 0)), mat.Row(0).Vec());
+			__m128 res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(1, 1, 1, 1)), mat.Row(1).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(2, 2, 2, 2)), mat.Row(2).Vec());
+			res1 = _mm_add_ps(res1, res2);
+			res2 = _mm_mul_ps(_mm_shuffle_ps(temp, temp, _MM_SHUFFLE(3, 3, 3, 3)), mat.Row(3).Vec());
+			ret.Vec() = _mm_add_ps(res1, res2);
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
