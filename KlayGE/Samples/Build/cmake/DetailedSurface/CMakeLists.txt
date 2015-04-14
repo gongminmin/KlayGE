@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/DetailedSurface.jdt")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/diffuse.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/height.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/na_length.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/normal.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/DetailedSurface.jdt" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/height.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/na_length.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/normal.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DetailedSurface/DetailedSurface.cpp

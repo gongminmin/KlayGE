@@ -1,6 +1,6 @@
-DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/diffuse.dds")
-DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/distance.dds")
-DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/normal.dds")
+DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/distance.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Tutorials/media/DistanceMapping/normal.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tutorials/src/DistanceMapping/DistanceMapping.cpp

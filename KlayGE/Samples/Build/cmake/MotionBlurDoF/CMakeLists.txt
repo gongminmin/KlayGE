@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/MotionBlurDoF/bokeh_pattern.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/MotionBlurDoF/bokeh_pattern.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 FIND_PACKAGE(PythonInterp)
 

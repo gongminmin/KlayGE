@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_specular.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_specular.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/OrderIndependentTransparency/OrderIndependentTransparency.cpp

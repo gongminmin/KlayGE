@@ -1,6 +1,6 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02.meshml")
-DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Map-COL.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02.meshml" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Map-COL.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSBlur.cpp

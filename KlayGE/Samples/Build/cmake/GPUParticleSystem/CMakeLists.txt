@@ -1,7 +1,7 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/grass.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/particle.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_height.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_normal.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/grass.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/particle.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_height.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/GPUParticleSystem/terrain_normal.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/GPUParticleSystem/GPUParticleSystem.cpp

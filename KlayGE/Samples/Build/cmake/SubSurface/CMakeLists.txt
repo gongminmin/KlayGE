@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Dragon.7z")
-DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Eye_022green.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/REDRUST2.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/SCALE_B_W.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Stucco8.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Dragon.7z" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Eye_022green.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/REDRUST2.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/SCALE_B_W.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/SubSurface/Stucco8.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/SubSurface/Model.cpp

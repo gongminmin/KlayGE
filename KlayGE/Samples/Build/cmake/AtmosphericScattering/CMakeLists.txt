@@ -1,6 +1,6 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_color.dds")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.7z")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_color.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.7z" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/AtmosphericScattering/AtmosphericScattering.cpp
