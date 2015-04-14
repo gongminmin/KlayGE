@@ -56,25 +56,12 @@ namespace
 	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #if defined(KLAYGE_COMPILER_MSVC)
-	#if KLAYGE_COMPILER_VERSION >= 90 
 		int CPUInfo[4];
 		__cpuidex(CPUInfo, *peax, *pecx);
 		*peax = CPUInfo[0];
 		*pebx = CPUInfo[1];
 		*pecx = CPUInfo[2];
 		*pedx = CPUInfo[3];
-	#else
-		__asm
-		{
-			mov		eax, [peax]
-			mov		ecx, [pecx]
-			cpuid
-			mov		[peax], eax
-			mov		[pebx], ebx
-			mov		[pecx], ecx
-			mov		[pedx], edx
-		}
-	#endif
 #elif (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG))
 	#ifdef KLAYGE_CPU_X64
 		__asm__

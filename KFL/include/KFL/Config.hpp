@@ -66,7 +66,7 @@
 				#define KLAYGE_COMPILER_VERSION 40
 			#endif
 		#else
-			#error Unknown compiler.
+			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
 
 		#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
@@ -157,7 +157,7 @@
 				#endif
 			#endif
 		#else
-			#error Unknown compiler.
+			#error "Unsupported compiler version. Please install clang++ 3.0 or up."
 		#endif
 	#endif
 #elif defined(__GNUC__)
@@ -188,55 +188,53 @@
 			#define KLAYGE_COMPILER_VERSION 44
 		#elif __GNUC_MINOR__ >= 3
 			#define KLAYGE_COMPILER_VERSION 43
-		#elif __GNUC_MINOR__ >= 2
-			#define KLAYGE_COMPILER_VERSION 42
-		#elif __GNUC_MINOR__ >= 1
-			#define KLAYGE_COMPILER_VERSION 41
-		#elif __GNUC_MINOR__ >= 0
-			#define KLAYGE_COMPILER_VERSION 40
+		#else
+			#error "Unsupported compiler version. Please install g++ 4.3 or up."
 		#endif
 
-		#ifdef __GXX_EXPERIMENTAL_CXX0X__
-			#if __GNUC_MINOR__ >= 3
-				#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
-				#define KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
-				#define KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
-				#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
-				#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
-				#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
-			#endif
-			#if __GNUC_MINOR__ >= 4
-				#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
-				#ifdef _GLIBCXX_HAS_GTHREADS
-					#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-					#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-				#endif
-			#endif
-			#if __GNUC_MINOR__ >= 6
-				#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
-				#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
-				#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-				#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-			#endif
-			#if __GNUC_MINOR__ >= 7
-				#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-			#endif
-			#if __GNUC_MINOR__ >= 9
-				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+		#ifndef __GXX_EXPERIMENTAL_CXX0X__
+			#error "-std=c++11 or -std=c++0x must be turned on."
+		#endif
+
+		#if __GNUC_MINOR__ >= 3
+			#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
+			#define KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
+			#define KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
+			#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
+			#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
+			#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
+		#endif
+		#if __GNUC_MINOR__ >= 4
+			#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
+			#ifdef _GLIBCXX_HAS_GTHREADS
+				#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+				#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 			#endif
 		#endif
+		#if __GNUC_MINOR__ >= 6
+			#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
+			#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
+			#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+			#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+		#endif
+		#if __GNUC_MINOR__ >= 7
+			#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
+		#endif
+		#if __GNUC_MINOR__ >= 9
+			#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+		#endif
 	#else
-		#error Unknown compiler.
+		#error "Unsupported compiler version. Please install g++ 4.3 or up."
 	#endif
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
@@ -252,26 +250,12 @@
 		#define KLAYGE_COMPILER_VERSION 110
 	#elif _MSC_VER >= 1600
 		#define KLAYGE_COMPILER_VERSION 100
-	#elif _MSC_VER >= 1500
-		#define KLAYGE_COMPILER_VERSION 90
-
-		#ifndef KLAYGE_DEBUG
-			#define _SECURE_SCL 0
-		#endif
-	#elif _MSC_VER >= 1400
-		#define KLAYGE_COMPILER_VERSION 80
-
-		#ifndef KLAYGE_DEBUG
-			#define _SECURE_SCL 0
-		#endif
 	#else
-		#error Unknown compiler.
+		#error "Unsupported compiler version. Please install vc10 or up."
 	#endif
 
-	#if _MSC_VER >= 1500
-		#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
-	#endif
 	#if _MSC_VER >= 1600
+		#define KLAYGE_CXX11_CORE_EXTERN_TEMPLATES_SUPPORT
 		#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
 		#define KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
 		#define KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
@@ -307,19 +291,19 @@
 		#define KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
 	#endif
 
-	#pragma warning(disable: 4503)
-	#if _MSC_VER >= 1400
-		#pragma warning(disable: 4251 4275 4819)
+	#pragma warning(disable: 4251) // STL classes are not dllexport.
+	#pragma warning(disable: 4275) // Derived from non dllexport classes.
+	#pragma warning(disable: 4503) // Some decorated name in boost are very long.
+	#pragma warning(disable: 4819) // Allow non-ANSI characters.
 
-		#ifndef _CRT_SECURE_NO_DEPRECATE
-			#define _CRT_SECURE_NO_DEPRECATE
-		#endif
-		#ifndef _SCL_SECURE_NO_DEPRECATE
-			#define _SCL_SECURE_NO_DEPRECATE
-		#endif
+	#ifndef _CRT_SECURE_NO_DEPRECATE
+		#define _CRT_SECURE_NO_DEPRECATE
+	#endif
+	#ifndef _SCL_SECURE_NO_DEPRECATE
+		#define _SCL_SECURE_NO_DEPRECATE
 	#endif
 #else
-	#error Unknown compiler.
+	#error "Unknown compiler. Please install vc, g++ or clang."
 #endif
 
 // Defines supported platforms
@@ -394,7 +378,7 @@
 		#define KLAYGE_PLATFORM_DARWIN
 	#endif
 #else
-	#error Unknown platform.
+	#error "Unknown platform. The supported target platforms are Windows, Android, Linux, OSX and iOS."
 #endif
 
 // Defines supported CPUs
@@ -409,7 +393,7 @@
 		#define KLAYGE_CPU_ARM
 		#define KLAYGE_COMPILER_TARGET arm
 	#else
-		#error Unknown CPU type.
+		#error "Unknown CPU type. In vc, x86, x64 and arm are supported."
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#if defined(__x86_64__)
@@ -425,7 +409,7 @@
 		#define KLAYGE_CPU_ARM64
 		#define KLAYGE_COMPILER_TARGET arm64
 	#else
-		#error Unknown CPU type.
+		#error "Unknown CPU type. In g++/clang, x86, x64, arm and arm64 are supported."
 	#endif
 #endif
 
@@ -439,7 +423,7 @@
 #elif defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
 	#define KLAYGE_LITTLE_ENDIAN
 #else
-	#error Unknown CPU endian.
+	#error "Unknown CPU endian."
 #endif
 
 #define KLAYGE_IDENTITY_SUPPORT

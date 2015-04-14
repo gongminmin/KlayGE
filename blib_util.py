@@ -179,8 +179,6 @@ class build_info:
 						compiler = "vc110"
 					elif "VS100COMNTOOLS" in env:
 						compiler = "vc100"
-					elif "VS90COMNTOOLS" in env:
-						compiler = "vc90"
 					elif 0 == os.system("where clang++"):
 						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
@@ -190,11 +188,11 @@ class build_info:
 				elif ("darwin" == target_platform) or ("ios" == target_platform):
 					compiler = "clang"
 				else:
-					log_error("Unsupported target platform\n")
+					log_error("Unsupported target platform.\n")
 			else:
 				compiler = cfg_build.compiler
 
-				if compiler in ("vc14", "vc12", "vc11", "vc10", "vc9"):
+				if compiler in ("vc14", "vc12", "vc11", "vc10"):
 					compiler += '0'
 					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
 
@@ -211,8 +209,6 @@ class build_info:
 					toolset = "v110"
 				elif "vc100" == compiler:
 					toolset = "v100"
-				elif "vc90" == compiler:
-					toolset = "v90"
 			elif "android" == target_platform:
 				if "L" == target_api_level:
 					toolset = "4.9"
@@ -277,16 +273,6 @@ class build_info:
 				elif "x64" == arch:
 					gen_name = "Visual Studio 10 Win64"
 				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
-		elif "vc90" == compiler:
-			compiler_name = "vc"
-			compiler_version = 90
-			multi_config = True
-			for arch in archs:
-				if "x86" == arch:
-					gen_name = "Visual Studio 9 2008"
-				elif "x64" == arch:
-					gen_name = "Visual Studio 9 2008 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "clang" == compiler:
 			compiler_name = "clang"
 			compiler_version = self.retrive_clang_version()
@@ -317,17 +303,11 @@ class build_info:
 		else:
 			compiler_name = ""
 			compiler_version = 0
-			log_error("Wrong configuration\n")
+			log_error("Unsupported compiler.\n")
 
 		if "vc" == compiler_name:
-			if compiler_version >= 100:
-				self.use_msbuild = True
-				self.proj_ext_name = "vcxproj"
-			else:
-				self.use_msbuild = False
-				self.proj_ext_name = "vcproj"
+			self.proj_ext_name = "vcxproj"
 		else:
-			self.use_msbuild = False
 			self.proj_ext_name = ""
 
 		self.compiler_name = compiler_name
@@ -337,22 +317,15 @@ class build_info:
 		self.cfg = cfg
 
 	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
-		if self.use_msbuild:
-			batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.compiler_version / 10))
-			if len(proj_name) != 0:
-				file_name = "%s.%s" % (proj_name, self.proj_ext_name)
-			else:
-				file_name = "%s.sln" % sln_name
-			config_str = "Configuration=%s" % config
-			if len(arch) != 0:
-				config_str = "%s,Platform=%s" % (config_str, arch)
-			batch_cmd.add_command('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
+		batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.compiler_version / 10))
+		if len(proj_name) != 0:
+			file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 		else:
-			config_str = config
-			proj_str = ""
-			if len(proj_name) != 0:
-				proj_str = "/project %s" % proj_name
-			batch_cmd.add_command('@devenv %s.sln /Build %s %s' % (sln_name, config_str, proj_str))
+			file_name = "%s.sln" % sln_name
+		config_str = "Configuration=%s" % config
+		if len(arch) != 0:
+			config_str = "%s,Platform=%s" % (config_str, arch)
+		batch_cmd.add_command('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
 		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
 		
 	def xcodebuild_add_build_command(self, batch_cmd, target_name, config):

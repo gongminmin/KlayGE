@@ -110,11 +110,7 @@ namespace KlayGE
 
 			for (uint32_t id = 0; id < action_handlers_.size(); ++ id)
 			{
-#ifdef KLAYGE_DONT_USE_BOOST_FLAT_MAP
-				std::map<uint16_t, InputActionParamPtr> actions;
-#else
 				boost::container::flat_map<uint16_t, InputActionParamPtr> actions;
-#endif
 
 				// 访问所有设备
 				typedef KLAYGE_DECLTYPE(devices_) DevicesType;

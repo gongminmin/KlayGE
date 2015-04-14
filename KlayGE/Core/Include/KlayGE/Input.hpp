@@ -38,15 +38,7 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
 
-#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION <= 90)
-#define KLAYGE_DONT_USE_BOOST_FLAT_MAP
-#endif
-
-#ifdef KLAYGE_DONT_USE_BOOST_FLAT_MAP
-#include <map>
-#else
 #include <boost/container/flat_map.hpp>
-#endif
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 4512 4702 4913 6011)
@@ -354,20 +346,12 @@ namespace KlayGE
 		uint16_t Action(uint16_t key) const;
 
 	private:
-#ifdef KLAYGE_DONT_USE_BOOST_FLAT_MAP
-		std::map<uint16_t, uint16_t> actionMap_;
-#else
 		boost::container::flat_map<uint16_t, uint16_t> actionMap_;
-#endif
 	};
 
 	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
 	typedef shared_ptr<input_signal> action_handler_t;
-#ifdef KLAYGE_DONT_USE_BOOST_FLAT_MAP
-	typedef std::map<uint32_t, InputActionMap> action_maps_t;
-#else
 	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
-#endif
 
 	//  ‰»Î“˝«Ê
 	/////////////////////////////////////////////////////////////////////////////////
