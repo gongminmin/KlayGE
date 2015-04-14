@@ -247,9 +247,10 @@ namespace
 	bool IsFixUpOffset(size_t partitions, size_t shape, size_t offset)
 	{
 		BOOST_ASSERT((partitions <= 3) && (shape < 64) && (offset < 16));
+		size_t const fix_up = (partitions > 1) ? FIX_UP_TABLE[partitions - 2][shape] : 0;
 		for (size_t p = 0; p < partitions; ++ p)
 		{
-			if (offset == ((partitions > 1) ? (FIX_UP_TABLE[partitions - 2][shape] >> (p * 4)) & 0xF : 0))
+			if (offset == ((fix_up >> (p * 4)) & 0xF))
 			{
 				return true;
 			}

@@ -5404,7 +5404,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_EMIT_STREAM:
 		this->ToCopyToInterShaderOutputRecords(out);
 		if ((glsl_rules_ & GSR_MultiStreamGS)
-			&& (SPT_PointList == program_->gs_output_topology[insn.ops[0]->indices[0].disp]))
+			&& (SPT_PointList == program_->gs_output_topology[static_cast<uint32_t>(insn.ops[0]->indices[0].disp)]))
 		{
 			out << "EmitStreamVertex(" << insn.ops[0]->indices[0].disp << ");";
 		}
@@ -5417,7 +5417,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 	case SO_EMITTHENCUT_STREAM:
 		this->ToCopyToInterShaderOutputRecords(out);
 		if ((glsl_rules_ & GSR_MultiStreamGS)
-			&& (SPT_PointList == program_->gs_output_topology[insn.ops[0]->indices[0].disp]))
+			&& (SPT_PointList == program_->gs_output_topology[static_cast<uint32_t>(insn.ops[0]->indices[0].disp)]))
 		{
 			out << "EmitStreamVertex(" << insn.ops[0]->indices[0].disp << ");\n";
 			out << "EndStreamPrimitive(" << insn.ops[0]->indices[0].disp << ");";
@@ -5431,7 +5431,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 
 	case SO_CUT_STREAM:
 		if ((glsl_rules_ & GSR_MultiStreamGS)
-			&& (SPT_PointList == program_->gs_output_topology[insn.ops[0]->indices[0].disp]))
+			&& (SPT_PointList == program_->gs_output_topology[static_cast<uint32_t>(insn.ops[0]->indices[0].disp)]))
 		{
 			out << "EndStreamPrimitive(" << insn.ops[0]->indices[0].disp << ");";
 		}
