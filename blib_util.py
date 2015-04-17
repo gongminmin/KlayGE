@@ -21,7 +21,7 @@ class cfg_from_argv:
 		else:
 			self.archs = ""
 		if len(argv) > base + 3:
-			self.cfg = argv[base + 3]
+			self.cfg = (argv[base + 3], )
 		else:
 			self.cfg = ""
 
