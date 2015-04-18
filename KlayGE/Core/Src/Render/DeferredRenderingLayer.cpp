@@ -364,7 +364,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if ((caps.max_shader_model >= 5) && (caps.cs_support))
 		{
-			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE);
+			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
 			cs_tbdr_ = true;
 		}

@@ -1294,7 +1294,7 @@ namespace KlayGE
 		std::vector<uint32_t> neighbor_ids;
 		std::vector<uint32_t> tile_attrs;
 		std::vector<bool> in_same_image;
-		KLAYGE_DECLTYPE(tile_info_map_)& tim = tile_info_map_;
+		KLAYGE_AUTO(&tim, tile_info_map_);
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
 			KLAYGE_AUTO(tmiter, tim.find(tile_ids[i]));

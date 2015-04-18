@@ -206,7 +206,7 @@ namespace KlayGE
 
 			std::vector<float> lines(1, 0);
 
-			typedef KLAYGE_DECLTYPE(text) TextType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(text)>::type TextType;
 			KLAYGE_FOREACH(TextType::const_reference ch, text)
 			{
 				if (ch != L'\n')
@@ -255,9 +255,9 @@ namespace KlayGE
 			this->UpdateTexture(text);
 
 			KFont& kl = *kfont_loader_;
-			KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
-			KLAYGE_DECLTYPE(vertices_)& verts = vertices_;
-			KLAYGE_DECLTYPE(indices_)& inds = indices_;
+			KLAYGE_AUTO(&cim, char_info_map_);
+			KLAYGE_AUTO(&verts, vertices_);
+			KLAYGE_AUTO(&inds, indices_);
 
 			float const h = font_size * yScale;
 			float const rel_size = font_size / kl.CharSize();
@@ -266,7 +266,7 @@ namespace KlayGE
 
 			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
 
-			typedef KLAYGE_DECLTYPE(text) TextType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(text)>::type TextType;
 			KLAYGE_FOREACH(TextType::const_reference ch, text)
 			{
 				if (ch != L'\n')
@@ -427,9 +427,9 @@ namespace KlayGE
 			this->UpdateTexture(text);
 
 			KFont& kl = *kfont_loader_;
-			KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
-			KLAYGE_DECLTYPE(vertices_)& verts = vertices_;
-			KLAYGE_DECLTYPE(indices_)& inds = indices_;
+			KLAYGE_AUTO(&cim, char_info_map_);
+			KLAYGE_AUTO(&verts, vertices_);
+			KLAYGE_AUTO(&inds, indices_);
 
 			uint32_t const clr32 = clr.ABGR();
 			float const h = font_size * yScale;
@@ -457,7 +457,7 @@ namespace KlayGE
 
 			uint16_t lastIndex(static_cast<uint16_t>(verts.size()));
 
-			typedef KLAYGE_DECLTYPE(text) TextType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(text)>::type TextType;
 			KLAYGE_FOREACH(TextType::const_reference ch, text)
 			{
 				if (ch != L'\n')
@@ -542,14 +542,14 @@ namespace KlayGE
 			uint32_t const tex_size = dist_texture_->Width(0);
 
 			KFont& kl = *kfont_loader_;
-			KLAYGE_DECLTYPE(char_info_map_)& cim = char_info_map_;
+			KLAYGE_AUTO(&cim, char_info_map_);
 
 			uint32_t const kfont_char_size = kl.CharSize();
 
 			uint32_t const num_chars_a_row = tex_size / kfont_char_size;
 			uint32_t const num_total_chars = num_chars_a_row * num_chars_a_row;
 
-			typedef KLAYGE_DECLTYPE(text) TextType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(text)>::type TextType;
 			KLAYGE_FOREACH(TextType::const_reference ch, text)
 			{
 				int32_t offset = kl.CharIndex(ch);

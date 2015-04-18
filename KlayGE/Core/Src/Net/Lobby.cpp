@@ -107,7 +107,7 @@ namespace KlayGE
 			KLAYGE_FOREACH(PlayersType::reference player, players_)
 			{
 				SendQueueType& msgs = player.second.msgs;
-				typedef KLAYGE_DECLTYPE(msgs) MsgsType;
+				typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type MsgsType;
 				KLAYGE_FOREACH(MsgsType::reference msg, msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);

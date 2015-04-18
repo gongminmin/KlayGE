@@ -523,7 +523,7 @@ namespace KlayGE
 	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
 	{
 		size_t elems_signature = 0;
-		typedef KLAYGE_DECLTYPE(elems) ElemsType;
+		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(elems)>::type ElemsType;
 		KLAYGE_FOREACH(ElemsType::const_reference elem, elems)
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));

@@ -55,18 +55,18 @@ private:
 #endif
 
 #ifdef KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
-	#define KLAYGE_STATIC_ASSERT(x) static_assert(x, #x)
+	#define KLAYGE_STATIC_ASSERT(x, msg) static_assert(x, msg)
 #else
 	#include <boost/static_assert.hpp>
-	#define KLAYGE_STATIC_ASSERT(x) BOOST_STATIC_ASSERT(x)
+	#define KLAYGE_STATIC_ASSERT(x, msg) BOOST_STATIC_ASSERT_MSG(x, msg)
 #endif
 
 #ifdef KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
 	#define KLAYGE_AUTO(var, expr) auto var = expr
-	#define KLAYGE_DECLTYPE(expr) KlayGE::remove_reference<decltype(expr)>::type
+	#define KLAYGE_DECLTYPE(expr) decltype(expr)
 #else
 	#include <boost/typeof/typeof.hpp>
-	#define KLAYGE_AUTO(Var, Expr) BOOST_AUTO(Var, Expr)
+	#define KLAYGE_AUTO(var, expr) BOOST_AUTO(var, expr)
 	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
 #endif
 

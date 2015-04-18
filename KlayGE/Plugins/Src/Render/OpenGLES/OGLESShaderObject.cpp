@@ -1919,7 +1919,7 @@ namespace KlayGE
 
 							std::vector<std::string>& msgs = err_lines[err_line];
 							bool found = false;
-							typedef KLAYGE_DECLTYPE(msgs) ErrMsgsType;
+							typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type ErrMsgsType;
 							KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 							{
 								if (msg == err_str)

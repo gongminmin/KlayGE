@@ -142,7 +142,7 @@ namespace KlayGE
 	PerfRangePtr PerfProfiler::CreatePerfRange(int category, std::string const & name)
 	{
 		PerfRangePtr range = MakeSharedPtr<PerfRange>();
-		typedef KLAYGE_DECLTYPE(get<3>(perf_ranges_[0])) PerfDataType;
+		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(get<3>(perf_ranges_[0]))>::type PerfDataType;
 		perf_ranges_.push_back(KlayGE::make_tuple(category, name, range, PerfDataType()));
 		return range;
 	}
@@ -181,7 +181,7 @@ namespace KlayGE
 			typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
 			KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
 			{
-				typedef KLAYGE_DECLTYPE(get<3>(range)) PerfDataType;
+				typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(get<3>(range))>::type PerfDataType;
 				KLAYGE_FOREACH(PerfDataType::const_reference data, get<3>(range))
 				{
 					ofs << get<0>(data) << ',' << get<0>(range) << ',' << get<1>(range) << ','

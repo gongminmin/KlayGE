@@ -2869,7 +2869,7 @@ namespace KlayGE
 				shaders_.reset();
 				techniques_.clear();
 
-				shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
+				shader_descs_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shader_descs_)>::type>(1);
 
 				XMLAttributePtr attr;
 
@@ -2942,7 +2942,7 @@ namespace KlayGE
 					XMLNodePtr macro_node = root->FirstNode("macro");
 					if (macro_node)
 					{
-						macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+						macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 					}
 					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 					{
@@ -3019,7 +3019,7 @@ namespace KlayGE
 					XMLNodePtr shader_node = root->FirstNode("shader");
 					if (shader_node)
 					{
-						shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>();
+						shaders_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shaders_)>::type>();
 						for (; shader_node; shader_node = shader_node->NextSibling("shader"))
 						{
 							shaders_->push_back(RenderShaderFunc());
@@ -3075,7 +3075,7 @@ namespace KlayGE
 					timestamp = LE2Native(timestamp);
 					if (timestamp_ <= timestamp)
 					{
-						shader_descs_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_descs_)>(1);
+						shader_descs_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shader_descs_)>::type>(1);
 
 						{
 							uint16_t num_macros;
@@ -3084,7 +3084,7 @@ namespace KlayGE
 
 							if (num_macros > 0)
 							{
-								macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+								macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 							}
 							for (uint32_t i = 0; i < num_macros; ++ i)
 							{
@@ -3126,7 +3126,7 @@ namespace KlayGE
 							num_shaders = LE2Native(num_shaders);
 							if (num_shaders > 0)
 							{
-								shaders_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shaders_)>(num_shaders);
+								shaders_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shaders_)>::type>(num_shaders);
 								for (uint32_t i = 0; i < num_shaders; ++ i)
 								{
 									(*shaders_)[i].StreamIn(source);
@@ -3425,7 +3425,7 @@ namespace KlayGE
 
 	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(node->Attrib("name")->ValueString());
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		RenderTechniquePtr parent_tech;
@@ -3446,7 +3446,7 @@ namespace KlayGE
 			{
 				if (!annotations_)
 				{
-					annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+					annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 				}
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
@@ -3464,7 +3464,7 @@ namespace KlayGE
 			{
 				if (!macros_)
 				{
-					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+					macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 				}				
 				if (parent_tech && parent_tech->macros_)
 				{
@@ -3581,14 +3581,14 @@ namespace KlayGE
 
 	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
 	{
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+			annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 			annotations_->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{
@@ -3603,7 +3603,7 @@ namespace KlayGE
 		res->read(&num_macro, sizeof(num_macro));
 		if (num_macro > 0)
 		{
-			macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+			macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 			macros_->resize(num_macro);
 			for (uint32_t i = 0; i < num_macro; ++ i)
 			{
@@ -3721,7 +3721,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(node->Attrib("name")->ValueString());
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		if (inherit_pass)
@@ -3733,7 +3733,7 @@ namespace KlayGE
 			XMLNodePtr anno_node = node->FirstNode("annotation");
 			if (anno_node)
 			{
-				annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+				annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
@@ -3750,7 +3750,7 @@ namespace KlayGE
 			{
 				if (!macros_)
 				{
-					macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+					macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 				}
 				if (inherit_pass && inherit_pass->macros_)
 				{
@@ -3807,7 +3807,7 @@ namespace KlayGE
 		BlendStateDesc bs_desc;
 		shader_obj_ = rf.MakeShaderObject();
 
-		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
+		shader_desc_ids_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shader_desc_ids_)>::type>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 
 		if (inherit_pass)
@@ -4243,7 +4243,7 @@ namespace KlayGE
 
 		shader_obj_ = rf.MakeShaderObject();
 
-		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
+		shader_desc_ids_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shader_desc_ids_)>::type>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 
 		rasterizer_state_obj_ = inherit_pass->rasterizer_state_obj_;
@@ -4278,14 +4278,14 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+			annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 			annotations_->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{
@@ -4300,7 +4300,7 @@ namespace KlayGE
 		res->read(&num_macro, sizeof(num_macro));
 		if (num_macro > 0)
 		{
-			macros_ = MakeSharedPtr<KLAYGE_DECLTYPE(*macros_)>();
+			macros_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*macros_)>::type>();
 			macros_->resize(num_macro);
 			for (uint32_t i = 0; i < num_macro; ++ i)
 			{
@@ -4363,7 +4363,7 @@ namespace KlayGE
 		res->read(&sample_mask_, sizeof(sample_mask_));
 		sample_mask_ = LE2Native(sample_mask_);
 
-		shader_desc_ids_ = MakeSharedPtr<KLAYGE_DECLTYPE(*shader_desc_ids_)>();
+		shader_desc_ids_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*shader_desc_ids_)>::type>();
 		shader_desc_ids_->resize(ShaderObject::ST_NumShaderTypes, 0);
 		res->read(&(*shader_desc_ids_)[0], shader_desc_ids_->size() * sizeof((*shader_desc_ids_)[0]));
 		for (int i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
@@ -4572,16 +4572,16 @@ namespace KlayGE
 
 	void RenderEffectConstantBuffer::Load(std::string const & name)
 	{
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(name);
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(name);
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
-		param_indices_ = MakeSharedPtr<KLAYGE_DECLTYPE(*param_indices_)>();
+		param_indices_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*param_indices_)>::type>();
 	}
 
 	void RenderEffectConstantBuffer::StreamIn(ResIdentifierPtr const & res)
 	{
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
-		param_indices_ = MakeSharedPtr<KLAYGE_DECLTYPE(*param_indices_)>();
+		param_indices_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*param_indices_)>::type>();
 
 		uint16_t len;
 		res->read(&len, sizeof(len));
@@ -4683,13 +4683,13 @@ namespace KlayGE
 	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(node->Attrib("name")->ValueString());
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(node->Attrib("name")->ValueString());
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		XMLAttributePtr attr = node->Attrib("semantic");
 		if (attr)
 		{
-			semantic_ = MakeSharedPtr<KLAYGE_DECLTYPE(*semantic_)>(attr->ValueString());
+			semantic_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*semantic_)>::type>(attr->ValueString());
 		}
 
 		uint32_t as;
@@ -4717,7 +4717,7 @@ namespace KlayGE
 			XMLNodePtr anno_node = node->FirstNode("annotation");
 			if (anno_node)
 			{
-				annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+				annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 				for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 				{
 					RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
@@ -4758,13 +4758,13 @@ namespace KlayGE
 	{
 		res->read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
-		name_ = MakeSharedPtr<KLAYGE_DECLTYPE(*name_)>(ReadShortString(res));
+		name_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*name_)>::type>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
 		std::string sem = ReadShortString(res);
 		if (!sem.empty())
 		{
-			semantic_ = MakeSharedPtr<KLAYGE_DECLTYPE(*semantic_)>(sem);
+			semantic_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*semantic_)>::type>(sem);
 		}
 
 		uint32_t as;
@@ -4792,7 +4792,7 @@ namespace KlayGE
 		res->read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
 		{
-			annotations_ = MakeSharedPtr<KLAYGE_DECLTYPE(*annotations_)>();
+			annotations_ = MakeSharedPtr<KlayGE::remove_reference<KLAYGE_DECLTYPE(*annotations_)>::type>();
 			annotations_->resize(num_anno);
 			for (uint32_t i = 0; i < num_anno; ++ i)
 			{

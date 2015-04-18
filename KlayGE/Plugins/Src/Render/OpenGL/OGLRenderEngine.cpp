@@ -411,7 +411,7 @@ namespace KlayGE
 
 	void OGLRenderEngine::BindBuffersBase(GLenum target, GLuint first, GLsizei count, GLuint const * buffers, bool force)
 	{
-		KLAYGE_AUTO(binded, binded_buffers_with_binding_points_[target]);
+		KLAYGE_AUTO(&binded, binded_buffers_with_binding_points_[target]);
 		if (first + count > binded.size())
 		{
 			binded.resize(first + count, 0xFFFFFFFF);

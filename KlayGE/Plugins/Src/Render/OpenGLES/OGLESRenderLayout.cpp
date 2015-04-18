@@ -68,7 +68,7 @@ namespace KlayGE
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
 			uint8_t* elem_offset = nullptr;
-			typedef KLAYGE_DECLTYPE(vertex_stream_fmt) VertexStreamFmtType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(vertex_stream_fmt)>::type VertexStreamFmtType;
 			KLAYGE_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
@@ -162,7 +162,7 @@ namespace KlayGE
 		{
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
-			typedef KLAYGE_DECLTYPE(vertex_stream_fmt) VertexStreamFmtType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(vertex_stream_fmt)>::type VertexStreamFmtType;
 			KLAYGE_FOREACH(VertexStreamFmtType::const_reference vs_elem, vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);

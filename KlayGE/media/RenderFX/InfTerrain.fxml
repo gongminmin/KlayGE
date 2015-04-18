@@ -387,7 +387,7 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 		{
 			output.edges[0] = LargerNeighbourAdjacencyFix(ip[0].position, ip[1].position, patch_xy.y, side_len);
 		}
-		if ((ip[0].neighbor_minus_plus_xy.y > 1 )&& (0 == patch_xy.y))
+		if ((ip[0].neighbor_minus_plus_xy.y > 1) && (0 == patch_xy.y))
 		{
 			output.edges[1] = LargerNeighbourAdjacencyFix(ip[0].position, ip[3].position, patch_xy.x, side_len);
 		}

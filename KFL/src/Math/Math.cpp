@@ -352,7 +352,7 @@ namespace KlayGE
 		template <typename T>
 		T transform_coord(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			KLAYGE_STATIC_ASSERT(T::elem_num < 4);
+			KLAYGE_STATIC_ASSERT(T::elem_num < 4, "Must be at most 4D vector.");
 
 			Vector_T<typename T::value_type, 4> temp(detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat));
 			Vector_T<typename T::value_type, T::elem_num> ret(&temp[0]);
@@ -373,7 +373,7 @@ namespace KlayGE
 		template <typename T>
 		T transform_normal(T const & v, Matrix4_T<typename T::value_type> const & mat)
 		{
-			KLAYGE_STATIC_ASSERT(T::elem_num < 4);
+			KLAYGE_STATIC_ASSERT(T::elem_num < 4, "Must be at most 4D vector.");
 
 			return detail::transform_normal_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}
@@ -479,11 +479,11 @@ namespace KlayGE
 			T const s2 = s * s;
 			T const s3 = s2 * s;
 			T const h1 = T(2) * s3 - T(3) * s2 + T(1);
-		    T const h2 = s3 - T(2) * s2 + s;
-		    T const h3 = T(-2) * s3 + T(3) * s2;
-		    T const h4 = s3 - s2;
+			T const h2 = s3 - T(2) * s2 + s;
+			T const h3 = T(-2) * s3 + T(3) * s2;
+			T const h4 = s3 - s2;
 
-		    return h1 * v1 + h2 * t1 + h3 * v2 + h4 * t2;
+			return h1 * v1 + h2 * t1 + h3 * v2 + h4 * t2;
 		}
 
 		template float2 cubic_b_spline(float2 const & v0, float2 const & v1, float2 const & v2,

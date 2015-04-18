@@ -1110,7 +1110,7 @@ namespace KlayGE
 
 						std::vector<std::string>& msgs = err_lines[err_line];
 						bool found = false;
-						typedef KLAYGE_DECLTYPE(msgs) ErrMsgsType;
+						typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type ErrMsgsType;
 						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 						{
 							if (msg == err_str)
@@ -1723,7 +1723,7 @@ namespace KlayGE
 			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
 
 			param_binds_[type].reserve(so.param_binds_[type].size());
-			typedef KLAYGE_DECLTYPE(so.param_binds_[type]) ParamBindsType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(so.param_binds_[type])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::const_reference pb, so.param_binds_[type])
 			{
 				param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, pb.param));
@@ -1829,7 +1829,7 @@ namespace KlayGE
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
-			typedef KLAYGE_DECLTYPE(param_binds_[i]) ParamBindsType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(param_binds_[i])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::const_reference pb, param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
@@ -1931,7 +1931,7 @@ namespace KlayGE
 
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			typedef KLAYGE_DECLTYPE(param_binds_[st]) ParamBindsType;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(param_binds_[st])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_[st])
 			{
 				pb.func();
