@@ -22,10 +22,9 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
-SET(REL_PATH "External/Downloads/wpftoolkit-${CHANGESET_NUM}.zip")
+SET(REL_PATH "External/Downloads/wpftoolkit-${CHANGESET_NUM}.patched.7z")
 SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/AssemblyVersionInfo.cs")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
-SET(PATCH_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/patch.py")
 
 SET(REGEN FALSE)
 IF(EXISTS ${DST_PATH})
@@ -49,33 +48,25 @@ IF(REGEN)
 		FILE(COPY ${SEVENZIP_PATH} DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads")
 		FILE(COPY "${KLAYGE_ROOT_DIR}/External/Downloads/7z" DESTINATION "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/" FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 	ENDIF()
-	DOWNLOAD_FILE("External/Downloads/patch.py" "cbda47a1678ce70b6720856736100979d469e159")
-	#DOWNLOAD_FILE_URL(${REL_PATH} "http://download-codeplex.sec.s-msft.com/Download/SourceControlFileDownload.ashx?ProjectName=wpftoolkit&changeSetId=${CHANGESET_NUM}")
-	DOWNLOAD_FILE("External/Downloads/wpftoolkit-${CHANGESET_NUM}.zip" "cbda47a1678ce70b6720856736100979d469e159")
-	DOWNLOAD_FILE("External/wpftoolkit/Patches/ForVS.patch" "cbda47a1678ce70b6720856736100979d469e159")
+	DOWNLOAD_FILE(${REL_PATH} "9f3de43e07f09990641aa5855d5cd9d17646120e")
 
 	EXECUTE_PROCESS(COMMAND "${SEVENZIP_PATH}" "x" "-y" "${KLAYGE_ROOT_DIR}/${REL_PATH}" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/wpftoolkit")
-	FILE(COPY "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/" DESTINATION "${KLAYGE_ROOT_DIR}/External/wpftoolkit/")
-	FILE(REMOVE_RECURSE "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main")
-	FILE(REMOVE_RECURSE "${KLAYGE_ROOT_DIR}/External/wpftoolkit/BuildProcessTemplates")
-	FILE(REMOVE_RECURSE "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Source/ExtendedWPFToolkitSolution_35")
-	EXECUTE_PROCESS(COMMAND "${PYTHON_EXECUTABLE}" "${PATCH_PATH}" "-p0" "Patches/ForVS.patch" WORKING_DIRECTORY "${KLAYGE_ROOT_DIR}/External/wpftoolkit")
 ENDIF()
 
 INCLUDE_EXTERNAL_MSPROJECT(
-	Xceed.Wpf.AvalonDock ${WPFTOOLKIT_PROJECT_DIR}/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
+	Xceed.Wpf.AvalonDock ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 INCLUDE_EXTERNAL_MSPROJECT(
-	Xceed.Wpf.AvalonDock.Themes.Aero ${WPFTOOLKIT_PROJECT_DIR}/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
+	Xceed.Wpf.AvalonDock.Themes.Aero ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/Xceed.Wpf.AvalonDock.Themes.Aero.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 INCLUDE_EXTERNAL_MSPROJECT(
-	Xceed.Wpf.AvalonDock.Themes.Metro ${WPFTOOLKIT_PROJECT_DIR}/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
+	Xceed.Wpf.AvalonDock.Themes.Metro ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Metro/Xceed.Wpf.AvalonDock.Themes.Metro.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 INCLUDE_EXTERNAL_MSPROJECT(
-	Xceed.Wpf.AvalonDock.Themes.VS2010 ${WPFTOOLKIT_PROJECT_DIR}/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
+	Xceed.Wpf.AvalonDock.Themes.VS2010 ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.VS2010/Xceed.Wpf.AvalonDock.Themes.VS2010.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 INCLUDE_EXTERNAL_MSPROJECT(
-	Xceed.Wpf.Toolkit ${WPFTOOLKIT_PROJECT_DIR}/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
+	Xceed.Wpf.Toolkit ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.Toolkit/Xceed.Wpf.Toolkit.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 
 SET_TARGET_PROPERTIES(Xceed.Wpf.AvalonDock.Themes.Aero PROPERTIES FOLDER "Themes")
