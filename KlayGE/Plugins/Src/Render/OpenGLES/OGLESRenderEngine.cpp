@@ -1408,9 +1408,7 @@ namespace KlayGE
 		}
 		else if (0 == name.find("FEATURE_NAME_"))
 		{
-			std::istringstream iss(name.substr(13));
-			int n;
-			iss >> n;
+			int const n = boost::lexical_cast<int>(name.substr(13));
 			*static_cast<std::string*>(value) = glloader_get_feature_name(n);
 		}
 	}

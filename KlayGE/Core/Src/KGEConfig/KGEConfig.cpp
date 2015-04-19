@@ -20,6 +20,14 @@
 #include <stdlib.h>
 #include <commctrl.h>
 #include <sstream>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4702)
+#endif
+#include <boost/lexical_cast.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 #include "resource.h"
 
 using namespace KlayGE;
@@ -142,12 +150,12 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			{
 				SendMessage(hResCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(buf));
 
-				std::ostringstream oss;
-				oss << cfg.graphics_cfg.width << "x" << cfg.graphics_cfg.height << ' ';
+				std::string const res = boost::lexical_cast<std::string>(cfg.graphics_cfg.width) + 'x'
+					+ boost::lexical_cast<std::string>(cfg.graphics_cfg.height) + ' ';
 
 				std::string str;
 				Convert(str, buf);
-				if (0 == str.find(oss.str()))
+				if (0 == str.find(res))
 				{
 					sel = i;
 				}
@@ -281,10 +289,8 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			HWND hMBFramesEdit = GetDlgItem(hDlg, IDC_MB_FRAMES_EDIT);
 
-			std::ostringstream oss;
-			oss << cfg.graphics_cfg.motion_frames;
 			std::basic_string<TCHAR> str;
-			Convert(str, oss.str());
+			Convert(str, boost::lexical_cast<std::string>(cfg.graphics_cfg.motion_frames));
 
 			SetWindowText(hMBFramesEdit, str.c_str());
 		}
