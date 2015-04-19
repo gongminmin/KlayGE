@@ -195,7 +195,7 @@ namespace KlayGE
 			physique_mods_.clear();
 			skins_.clear();
 			skin_mods_.clear();
-			typedef KLAYGE_DECLTYPE(nodes) nodes_type;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(nodes)>::type nodes_type;
 			KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 			{
 				Object* obj_ref = node->GetObjectRef();
@@ -248,7 +248,7 @@ namespace KlayGE
 				jnodes.push_back(jn.first);
 			}
 		}
-		typedef KLAYGE_DECLTYPE(nodes) nodes_type;
+		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(nodes)>::type nodes_type;
 		KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 		{
 			if (is_bone(node))
@@ -906,7 +906,7 @@ namespace KlayGE
 		if (weight > 0)
 		{
 			bool repeat = false;
-			typedef KLAYGE_DECLTYPE(binds) binds_type;
+			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(binds)>::type binds_type;
 			KLAYGE_FOREACH(binds_type::reference bind, binds)
 			{
 				if (bind.first == joint_node)
