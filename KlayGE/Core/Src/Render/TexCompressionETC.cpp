@@ -1331,14 +1331,15 @@ namespace KlayGE
 					}
 
 #ifdef KLAYGE_DEBUG
-				   {
-					   uint32_t const inten = (x >> 1) & 7;
-					   uint32_t const selector = (x >> 4) & 3;
-					   uint32_t const p0 = (x >> 8) & 0xFF;
-					   BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
-				   }
+					{
+						uint32_t const inten = (x >> 1) & 7;
+						uint32_t const selector = (x >> 4) & 3;
+						uint32_t const p0 = (x >> 8) & 0xFF;
+						BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
+					}
 #endif
 
+					BOOST_ASSERT((x & 0xFF) < 64);
 					uint16_t const * inverse_table = etc1_inverse_lookup_[x & 0xFF];
 					uint16_t p1 = inverse_table[c1];
 					uint16_t p2 = inverse_table[c2];

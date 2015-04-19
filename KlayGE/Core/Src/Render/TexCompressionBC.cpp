@@ -2008,7 +2008,7 @@ namespace KlayGE
 				size_t curr_bit = start_bit;
 				if (ReadBit(input, start_bit))
 				{
-					size_t val = 1UL << desc[curr_bit].bit;
+					uint32_t val = 1UL << desc[curr_bit].bit;
 					switch (desc[curr_bit].field)
 					{
 					case D:

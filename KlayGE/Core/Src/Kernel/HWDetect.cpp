@@ -101,15 +101,14 @@ namespace KlayGE
 		{
 			BOOST_ASSERT(wbem_services_);
 
-			IEnumWbemClassObject* wbem_enum_result;
+			IEnumWbemClassObject* wbem_enum_result = nullptr;
 			HRESULT hr = wbem_services_->ExecQuery(bstr_t(L"WQL"), wql,
 				WBEM_FLAG_FORWARD_ONLY | WBEM_FLAG_RETURN_IMMEDIATELY, nullptr, &wbem_enum_result);
-			wbem_enum_result_ = MakeCOMPtr(wbem_enum_result);
 			if (FAILED(hr))
 			{
-				wbem_enum_result_.reset();
 				return false;
 			}
+			wbem_enum_result_ = MakeCOMPtr(wbem_enum_result);
 
 			return true;
 		}
@@ -120,15 +119,13 @@ namespace KlayGE
 			ULONG result = 0;
 			if (wbem_enum_result_)
 			{
-				IWbemClassObject* wbem_object;
+				IWbemClassObject* wbem_object = nullptr;
 				hr = wbem_enum_result_->Next(WBEM_INFINITE, 1, &wbem_object, &result);
+				if (FAILED(hr) || (0 == result) || !wbem_object_)
+				{
+					return false;
+				}
 				wbem_object_ = MakeCOMPtr(wbem_object);
-			}
-
-			if (FAILED(hr) || (0 == result) || !wbem_object_)
-			{
-				wbem_object_.reset();
-				return false;
 			}
 
 			return true;
