@@ -382,30 +382,22 @@ namespace KlayGE
 		bool dirty = force;
 		if (!dirty)
 		{
-			uint32_t start_dirty = first;
-			uint32_t end_dirty = first + count;
-			while ((start_dirty != end_dirty) && (binded[start_dirty] == buffers[start_dirty]))
-			{
-				++ start_dirty;
-			}
-			while ((start_dirty != end_dirty) && (binded[end_dirty - 1] == buffers[end_dirty - 1]))
-			{
-				-- end_dirty;
-			}
-
-			first = start_dirty;
-			count = end_dirty - start_dirty;
-			dirty = (count > 0);
+			dirty = (memcmp(&binded[first], buffers, count * sizeof(buffers[0])) != 0);
 		}
 
 		if (dirty)
 		{
 			for (uint32_t i = first; i < first + count; ++ i)
 			{
-				glBindBufferBase(target, i, buffers[i]);
+				glBindBufferBase(target, i, buffers[i - first]);
+			}
+			KLAYGE_AUTO(iter, binded_buffers_.find(target));
+			if (iter != binded_buffers_.end())
+			{
+				glBindBuffer(target, iter->second);
 			}
 
-			memcpy(&binded[first], &buffers[first], count * sizeof(buffers[0]));
+			memcpy(&binded[first], buffers, count * sizeof(buffers[0]));
 		}
 	}
 
