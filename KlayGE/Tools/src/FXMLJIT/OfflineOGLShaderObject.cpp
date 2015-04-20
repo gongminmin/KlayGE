@@ -33,6 +33,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Math.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <cstdio>
 #include <string>
@@ -217,7 +218,9 @@ namespace
 				first = false;
 				ss.str(std::string());
 			}
-			ss << WINE_PATH << "wine ./" << d3dcompiler_wrapper_name << ".exe.so";
+			d3dcompiler_wrapper_name += ".exe.so";
+			std::string wrapper_path = ResLoader::Instance().Locate(d3dcompiler_wrapper_name);
+			ss << WINE_PATH << "wine " << wrapper_path;
 #endif
 			ss << " compile";
 			ss << " " << compile_input_file;

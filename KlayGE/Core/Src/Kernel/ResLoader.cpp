@@ -54,6 +54,8 @@
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/asset_manager.h>
 #include <KFL/CustomizedStreamBuf.hpp>
+#elif defined KLAYGE_PLATFORM_DARWIN
+#include <mach-o/dyld.h>
 #elif defined KLAYGE_PLATFORM_IOS
 #include <CoreFoundation/CoreFoundation.h>
 #endif
@@ -141,6 +143,13 @@ namespace KlayGE
 			exe_path_ = "/data/data/" + exe_path_;
 #endif
 		}
+#elif defined KLAYGE_PLATFORM_DARWIN
+		uint32_t size = 0;
+		_NSGetExecutablePath(nullptr, &size);
+		std::vector<char> buffer(size + 1, '\0');
+		_NSGetExecutablePath(buffer.data(), &size);
+		exe_path_ = buffer.data();
+		exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/") + 1);
 #endif
 
 		paths_.push_back("");
