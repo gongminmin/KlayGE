@@ -83,7 +83,7 @@ def build_Boost(build_info, compiler_info):
 		additional_options += "\"ON\""
 	else:
 		additional_options += "\"OFF\""
-	build_a_project("boost", "External/boost", build_info, compiler_info, True, additional_options)
+	build_a_project("boost", "External/boost", build_info, compiler_info, compiler_info.is_windows, additional_options)
 
 def build_Python(build_info, compiler_info):
 	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" \
@@ -110,7 +110,7 @@ def build_freetype(build_info, compiler_info):
 	build_a_project("freetype", "External/freetype", build_info, compiler_info)
 
 def build_7z(build_info, compiler_info):
-	build_a_project("7z", "External/7z", build_info, compiler_info, True)
+	build_a_project("7z", "External/7z", build_info, compiler_info, compiler_info.is_windows)
 
 def setup_DXSDK(build_info, compiler_info):
 	build_a_project("DXSDK", "External/DXSDK", build_info, compiler_info)

@@ -48,7 +48,9 @@
 
 	#if defined(__APPLE__)
 		#if __clang_major__ >= 6
-			#if __clang_minor__ >= 0
+			#if __clang_minor__ >= 1
+				#define KLAYGE_COMPILER_VERSION 61
+			#elif __clang_minor__ >= 0
 				#define KLAYGE_COMPILER_VERSION 60
 			#endif
 		#elif __clang_major__ >= 5
