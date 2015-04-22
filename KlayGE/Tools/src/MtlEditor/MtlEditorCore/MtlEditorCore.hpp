@@ -8,11 +8,18 @@
 #include <KlayGE/Font.hpp>
 #include <KlayGE/CameraController.hpp>
 #include "Model.hpp"
+
+#ifdef KLAYGE_MTL_EDITOR_CORE_SOURCE		// Build dll
+#define KLAYGE_MTL_EDITOR_CORE_API __declspec(dllexport)
+#else							// Use dll
+#define KLAYGE_MTL_EDITOR_CORE_API __declspec(dllimport)
+#endif
+
 #include "Commands.hpp"
 
 namespace KlayGE
 {
-	class MtlEditorCore : public App3DFramework
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCore : public App3DFramework
 	{
 	public:
 		explicit MtlEditorCore(void* native_wnd);

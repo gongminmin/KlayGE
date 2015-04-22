@@ -9,9 +9,15 @@
 #include <KlayGE/CameraController.hpp>
 #include "Model.hpp"
 
+#ifdef KLAYGE_MESHML_VIEWER_CORE_SOURCE		// Build dll
+#define KLAYGE_MESHML_VIEWER_CORE_API __declspec(dllexport)
+#else										// Use dll
+#define KLAYGE_MESHML_VIEWER_CORE_API __declspec(dllimport)
+#endif
+
 namespace KlayGE
 {
-	class MeshMLViewerCore : public App3DFramework
+	class KLAYGE_MESHML_VIEWER_CORE_API MeshMLViewerCore : public App3DFramework
 	{
 	public:
 		explicit MeshMLViewerCore(void* native_wnd);

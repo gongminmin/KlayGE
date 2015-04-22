@@ -116,7 +116,6 @@
     <Compile Include="SliderUserControlEditor.xaml.cs">
       <DependentUpon>SliderUserControlEditor.xaml</DependentUpon>
     </Compile>
-    <Compile Include="MtlEditorCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -177,6 +176,12 @@
     <Resource Include="Images\Undo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Build\vc120_win_x64\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">
+      <Project>{db2419b1-8832-4c57-be0e-6fbc3afa51e5}</Project>
+      <Name>MtlEditorCoreWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

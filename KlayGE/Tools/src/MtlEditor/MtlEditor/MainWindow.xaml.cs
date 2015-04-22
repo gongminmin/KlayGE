@@ -149,14 +149,14 @@ namespace MtlEditor
 		void MainWindowLoaded(object sender, RoutedEventArgs e)
 		{
 			IntPtr wnd = editor_wnd.Handle;
-			core_ = new MtlEditorCore(wnd);
+			core_ = new KlayGE.MtlEditorCoreWrapper(wnd);
 
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
 		void MainWindowUnloaded(object sender, RoutedEventArgs e)
 		{
 			CompositionTarget.Rendering -= this.MainWindowIdle;
-			core_.Destroy();
+			core_ = null;
 		}
 
 		private void MainWindowIdle(object sender, EventArgs e)
@@ -610,7 +610,7 @@ namespace MtlEditor
 			redo.IsEnabled = (core_.EndCmdIndex() < core_.NumHistroyCmds());
 		}
 
-		private MtlEditorCore core_;
+		private KlayGE.MtlEditorCoreWrapper core_;
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;

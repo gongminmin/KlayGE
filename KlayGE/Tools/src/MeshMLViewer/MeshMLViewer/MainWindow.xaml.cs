@@ -146,14 +146,14 @@ namespace MeshMLViewer
 		void MainWindowLoaded(object sender, RoutedEventArgs e)
 		{
 			IntPtr wnd = viewer_wnd.Handle;
-			core_ = new MeshMLViewerCore(wnd);
+			core_ = new KlayGE.MeshMLViewerCoreWrapper(wnd);
 
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
 		void MainWindowUnloaded(object sender, RoutedEventArgs e)
 		{
 			CompositionTarget.Rendering -= this.MainWindowIdle;
-			core_.Destroy();
+			core_ = null;
 		}
 
 		private void MainWindowIdle(object sender, EventArgs e)
@@ -487,7 +487,7 @@ namespace MeshMLViewer
 			}
 		}
 
-		private MeshMLViewerCore core_;
+		private KlayGE.MeshMLViewerCoreWrapper core_;
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;

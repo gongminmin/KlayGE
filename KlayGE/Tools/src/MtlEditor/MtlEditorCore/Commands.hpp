@@ -30,7 +30,7 @@ namespace KlayGE
 
 	extern char const * editor_command_name[ECC_NumCommands];
 
-	class MtlEditorCommand
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommand
 	{
 	public:
 		explicit MtlEditorCommand(MtlEditorCore* core);
@@ -51,7 +51,7 @@ namespace KlayGE
 	typedef shared_ptr<MtlEditorCommand> MtlEditorCommandPtr;
 
 	template <MtlEditorCommandCode code>
-	class MtlEditorCommandConcrete : public MtlEditorCommand
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandConcrete : public MtlEditorCommand
 	{
 	public:
 		explicit MtlEditorCommandConcrete(MtlEditorCore* core)
@@ -69,7 +69,7 @@ namespace KlayGE
 		}
 	};
 
-	class MtlEditorCommandSetCurrFrame : public MtlEditorCommandConcrete<ECC_SetCurrFrame>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetCurrFrame : public MtlEditorCommandConcrete<ECC_SetCurrFrame>
 	{
 	public:
 		MtlEditorCommandSetCurrFrame(MtlEditorCore* core, float frame);
@@ -82,7 +82,7 @@ namespace KlayGE
 		float old_frame_;
 	};
 
-	class MtlEditorCommandSelectMesh : public MtlEditorCommandConcrete<ECC_SelectMesh>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSelectMesh : public MtlEditorCommandConcrete<ECC_SelectMesh>
 	{
 	public:
 		MtlEditorCommandSelectMesh(MtlEditorCore* core, uint32_t mesh_id);
@@ -95,7 +95,7 @@ namespace KlayGE
 		uint32_t old_mesh_id_;
 	};
 
-	class MtlEditorCommandSetAmbientMaterial : public MtlEditorCommandConcrete<ECC_SetAmbientMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetAmbientMaterial : public MtlEditorCommandConcrete<ECC_SetAmbientMaterial>
 	{
 	public:
 		MtlEditorCommandSetAmbientMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
@@ -109,7 +109,7 @@ namespace KlayGE
 		float3 old_ambient_;
 	};
 
-	class MtlEditorCommandSetDiffuseMaterial : public MtlEditorCommandConcrete<ECC_SetDiffuseMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetDiffuseMaterial : public MtlEditorCommandConcrete<ECC_SetDiffuseMaterial>
 	{
 	public:
 		MtlEditorCommandSetDiffuseMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
@@ -123,7 +123,7 @@ namespace KlayGE
 		float3 old_diffuse_;
 	};
 
-	class MtlEditorCommandSetSpecularMaterial : public MtlEditorCommandConcrete<ECC_SetSpecularMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetSpecularMaterial : public MtlEditorCommandConcrete<ECC_SetSpecularMaterial>
 	{
 	public:
 		MtlEditorCommandSetSpecularMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
@@ -137,7 +137,7 @@ namespace KlayGE
 		float3 old_specular_;
 	};
 
-	class MtlEditorCommandSetShininessMaterial : public MtlEditorCommandConcrete<ECC_SetShininessMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetShininessMaterial : public MtlEditorCommandConcrete<ECC_SetShininessMaterial>
 	{
 	public:
 		MtlEditorCommandSetShininessMaterial(MtlEditorCore* core, uint32_t mtl_id, float value);
@@ -151,7 +151,7 @@ namespace KlayGE
 		float old_shininess_;
 	};
 
-	class MtlEditorCommandSetEmitMaterial : public MtlEditorCommandConcrete<ECC_SetEmitMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetEmitMaterial : public MtlEditorCommandConcrete<ECC_SetEmitMaterial>
 	{
 	public:
 		MtlEditorCommandSetEmitMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
@@ -165,7 +165,7 @@ namespace KlayGE
 		float3 old_emit_;
 	};
 
-	class MtlEditorCommandSetOpacityMaterial : public MtlEditorCommandConcrete<ECC_SetOpacityMaterial>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetOpacityMaterial : public MtlEditorCommandConcrete<ECC_SetOpacityMaterial>
 	{
 	public:
 		MtlEditorCommandSetOpacityMaterial(MtlEditorCore* core, uint32_t mtl_id, float value);
@@ -179,7 +179,7 @@ namespace KlayGE
 		float old_opacity_;
 	};
 
-	class MtlEditorCommandSetDiffuseTexture : public MtlEditorCommandConcrete<ECC_SetDiffuseTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetDiffuseTexture : public MtlEditorCommandConcrete<ECC_SetDiffuseTexture>
 	{
 	public:
 		MtlEditorCommandSetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -193,7 +193,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetSpecularTexture : public MtlEditorCommandConcrete<ECC_SetSpecularTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetSpecularTexture : public MtlEditorCommandConcrete<ECC_SetSpecularTexture>
 	{
 	public:
 		MtlEditorCommandSetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -207,7 +207,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetShininessTexture : public MtlEditorCommandConcrete<ECC_SetShininessTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetShininessTexture : public MtlEditorCommandConcrete<ECC_SetShininessTexture>
 	{
 	public:
 		MtlEditorCommandSetShininessTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -221,7 +221,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetNormalTexture : public MtlEditorCommandConcrete<ECC_SetNormalTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetNormalTexture : public MtlEditorCommandConcrete<ECC_SetNormalTexture>
 	{
 	public:
 		MtlEditorCommandSetNormalTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -235,7 +235,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetHeightTexture : public MtlEditorCommandConcrete<ECC_SetHeightTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetHeightTexture : public MtlEditorCommandConcrete<ECC_SetHeightTexture>
 	{
 	public:
 		MtlEditorCommandSetHeightTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -249,7 +249,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetEmitTexture : public MtlEditorCommandConcrete<ECC_SetEmitTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetEmitTexture : public MtlEditorCommandConcrete<ECC_SetEmitTexture>
 	{
 	public:
 		MtlEditorCommandSetEmitTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
@@ -263,7 +263,7 @@ namespace KlayGE
 		std::string old_name_;
 	};
 
-	class MtlEditorCommandSetOpacityTexture : public MtlEditorCommandConcrete<ECC_SetOpacityTexture>
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetOpacityTexture : public MtlEditorCommandConcrete<ECC_SetOpacityTexture>
 	{
 	public:
 		MtlEditorCommandSetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
