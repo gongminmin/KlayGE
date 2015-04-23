@@ -473,7 +473,7 @@ namespace KlayGE
 		int32_t wheel_delta_state_;
 	};
 	
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)
 	class MsgInputSensor : public InputSensor
 	{
 	public:

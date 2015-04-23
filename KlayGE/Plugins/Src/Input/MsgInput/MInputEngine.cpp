@@ -262,7 +262,7 @@ namespace KlayGE
 		devices_.push_back(MakeSharedPtr<MsgInputOVR>());
 #endif
 
-#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)) \
+#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)) \
 			|| (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID)
 		devices_.push_back(MakeSharedPtr<MsgInputSensor>());
 #endif
