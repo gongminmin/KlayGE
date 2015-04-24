@@ -60,6 +60,22 @@
     <ApplicationIcon>Images\klayge_logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MeshMLViewerCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\win_x64\MeshMLViewerCoreWrapper_d.dll</HintPath>
+    </Reference>
+    <Reference Include="MeshMLViewerCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='MinSizeRel'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\win_x64\MeshMLViewerCoreWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="MeshMLViewerCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='RelWithDebInfo'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\win_x64\MeshMLViewerCoreWrapper.dll</HintPath>
+    </Reference>
+    <Reference Include="MeshMLViewerCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Release'">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\bin\win_x64\MeshMLViewerCoreWrapper.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Controls.Ribbon" />
@@ -157,10 +173,6 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Build\vc120_win_x64\MeshMLViewer\MeshMLViewerCoreWrapper\MeshMLViewerCoreWrapper.vcxproj">
-      <Project>{c18d7993-43cf-47be-b002-d7315f2ac8eb}</Project>
-      <Name>MeshMLViewerCoreWrapper</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
