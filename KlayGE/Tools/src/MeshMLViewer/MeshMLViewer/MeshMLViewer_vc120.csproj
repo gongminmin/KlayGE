@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <ProjectGuid>{852504B5-C8DD-4C77-8966-9B55206BC144}</ProjectGuid>
+    <ProjectGuid>{B54DF50F-4B0B-4230-B27F-6087ECC2A3A0}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MtlEditor</RootNamespace>
-    <AssemblyName>MtlEditor</AssemblyName>
+    <RootNamespace>MeshMLViewer</RootNamespace>
+    <AssemblyName>MeshMLViewer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -60,22 +60,6 @@
     <ApplicationIcon>Images\klayge_logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MtlEditorCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Debug'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\win_x64\MtlEditorCoreWrapper_d.dll</HintPath>
-    </Reference>
-    <Reference Include="MtlEditorCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='MinSizeRel'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\win_x64\MtlEditorCoreWrapper.dll</HintPath>
-    </Reference>
-    <Reference Include="MtlEditorCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='RelWithDebInfo'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\win_x64\MtlEditorCoreWrapper.dll</HintPath>
-    </Reference>
-    <Reference Include="MtlEditorCoreWrapper, Version=1.0.5590.40110, Culture=neutral, processorArchitecture=AMD64" Condition="'$(Configuration)'=='Release'">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\bin\win_x64\MtlEditorCoreWrapper.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Windows.Controls.Ribbon" />
@@ -92,12 +76,10 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsFormsIntegration" />
-    <Reference Include="Xceed.Wpf.AvalonDock, Version=2.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Xceed.Wpf.AvalonDock">
       <HintPath>..\..\..\..\..\External\wpftoolkit\bin\Xceed.Wpf.AvalonDock.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.Toolkit, Version=2.2.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Xceed.Wpf.Toolkit">
       <HintPath>..\..\..\..\..\External\wpftoolkit\bin\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
@@ -118,20 +100,8 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="OpenTexUserControlEditor.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="OpenTexUserControlEditor.xaml.cs">
-      <DependentUpon>OpenTexUserControlEditor.xaml</DependentUpon>
-    </Compile>
-    <Page Include="SliderUserControlEditor.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="SliderUserControlEditor.xaml.cs">
-      <DependentUpon>SliderUserControlEditor.xaml</DependentUpon>
-    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -167,6 +137,9 @@
     <Resource Include="Images\Camera.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\LineMode.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\Open.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
@@ -179,19 +152,15 @@
     <Resource Include="Images\Skinning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\SaveAs.png">
+    <Resource Include="Images\Smooth.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Redo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Undo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <ProjectReference Include="..\..\..\Build\vc120_win_x64\MeshMLViewer\MeshMLViewerCoreWrapper\MeshMLViewerCoreWrapper.vcxproj">
+      <Project>{c18d7993-43cf-47be-b002-d7315f2ac8eb}</Project>
+      <Name>MeshMLViewerCoreWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

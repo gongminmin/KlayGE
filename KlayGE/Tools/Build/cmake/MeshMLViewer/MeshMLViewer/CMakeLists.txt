@@ -8,7 +8,7 @@ DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Skinning.png" "
 DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Smooth.png" "cbda47a1678ce70b6720856736100979d469e159")
 
 INCLUDE_EXTERNAL_MSPROJECT(
-	MeshMLViewer ${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewer/MeshMLViewer.csproj
+	MeshMLViewer ${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewer/MeshMLViewer${KLAYGE_OUTPUT_SUFFIX}.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
 
 ADD_DEPENDENCIES(MeshMLViewer MeshMLViewerCoreWrapper)
