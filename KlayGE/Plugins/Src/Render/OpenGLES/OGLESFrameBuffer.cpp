@@ -119,13 +119,13 @@ namespace KlayGE
 		}
 		if (flags & CBM_Stencil)
 		{
-			if (!ds_desc.front_stencil_write_mask)
+			if (ds_desc.front_stencil_write_mask != 0xFF)
 			{
-				glStencilMaskSeparate(GL_FRONT, GL_TRUE);
+				glStencilMaskSeparate(GL_FRONT, 0xFF);
 			}
-			if (!ds_desc.back_stencil_write_mask)
+			if (ds_desc.back_stencil_write_mask != 0xFF)
 			{
-				glStencilMaskSeparate(GL_BACK, GL_TRUE);
+				glStencilMaskSeparate(GL_BACK, 0xFF);
 			}
 		}
 
@@ -210,13 +210,13 @@ namespace KlayGE
 		}
 		if (flags & CBM_Stencil)
 		{
-			if (!ds_desc.front_stencil_write_mask)
+			if (ds_desc.front_stencil_write_mask != 0xFF)
 			{
-				glStencilMaskSeparate(GL_FRONT, GL_FALSE);
+				glStencilMaskSeparate(GL_FRONT, ds_desc.front_stencil_write_mask);
 			}
-			if (!ds_desc.back_stencil_write_mask)
+			if (ds_desc.back_stencil_write_mask != 0xFF)
 			{
-				glStencilMaskSeparate(GL_BACK, GL_FALSE);
+				glStencilMaskSeparate(GL_BACK, ds_desc.back_stencil_write_mask);
 			}
 		}
 
