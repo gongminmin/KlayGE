@@ -45,4 +45,4 @@ namespace KlayGE
 	typedef shared_ptr<D3D11FrameBuffer> D3D11FrameBufferPtr;
 }
 
-#endif			// _D3D11RENDERTEXTURE_HPP
+#endif			// _D3D11FRAMEBUFFER_HPP

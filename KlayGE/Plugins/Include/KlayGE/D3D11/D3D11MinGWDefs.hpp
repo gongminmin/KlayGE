@@ -1,4 +1,4 @@
-// D3D10MinGWDefs.hpp
+// D3D11MinGWDefs.hpp
 // KlayGE 让MinGW能使用D3D10的一些定义 头文件
 // Ver 3.8.0
 // 版权所有(C) 龚敏敏, 2008
