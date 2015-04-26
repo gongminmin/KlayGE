@@ -159,7 +159,7 @@ namespace KlayGE
 				switch (caps.minor_version)
 				{
 				case 1:
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 					feature_level_ = D3D_FEATURE_LEVEL_11_1;
 #else
 					feature_level_ = D3D_FEATURE_LEVEL_11_0;
@@ -208,7 +208,7 @@ namespace KlayGE
 
 			switch (feature_level_)
 			{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			case D3D_FEATURE_LEVEL_11_1:
 #endif
 			case D3D_FEATURE_LEVEL_11_0:

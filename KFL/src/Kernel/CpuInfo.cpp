@@ -34,7 +34,7 @@
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 #include <VersionHelpers.h>
 #endif
 #endif
@@ -418,7 +418,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		GetLogicalProcessorInformationPtr glpi = nullptr;
 		{
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 			if (IsWindowsVistaOrGreater())
 #else
 			OSVERSIONINFO os_ver_info;

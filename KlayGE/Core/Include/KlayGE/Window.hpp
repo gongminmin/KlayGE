@@ -173,7 +173,7 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		typedef boost::signals2::signal<void(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)> TouchEvent;
 #endif
 #endif
@@ -232,7 +232,7 @@ namespace KlayGE
 		{
 			return raw_input_event_;
 		}
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		TouchEvent& OnTouch()
 		{
 			return touch_event_;
@@ -322,7 +322,7 @@ namespace KlayGE
 		CharEvent char_event_;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		TouchEvent touch_event_;
 #endif
 #endif

@@ -57,7 +57,7 @@ namespace KlayGE
 			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
 		}
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		HMODULE mod_user = ::GetModuleHandle(TEXT("user32"));
 		BOOST_ASSERT(mod_user != nullptr);
 
@@ -195,7 +195,7 @@ namespace KlayGE
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				placeholders::_1, placeholders::_2));
 		}
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(KlayGE::bind(&MsgInputEngine::OnPointerDown, this,
 			KlayGE::placeholders::_2, placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(KlayGE::bind(&MsgInputEngine::OnPointerUp, this,
@@ -205,7 +205,7 @@ namespace KlayGE
 		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(KlayGE::bind(&MsgInputEngine::OnPointerWheel, this,
 			KlayGE::placeholders::_2, KlayGE::placeholders::_3, KlayGE::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
-#elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
 		{
 			if (this->RegisterTouchWindow(hwnd, TWF_WANTPALM))
@@ -262,7 +262,7 @@ namespace KlayGE
 		devices_.push_back(MakeSharedPtr<MsgInputOVR>());
 #endif
 
-#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)) \
+#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)) \
 			|| (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID)
 		devices_.push_back(MakeSharedPtr<MsgInputSensor>());
 #endif
@@ -312,7 +312,7 @@ namespace KlayGE
 		}
 	}
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 	void MsgInputEngine::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
 		typedef KLAYGE_DECLTYPE(devices_) DevicesType;
@@ -531,7 +531,7 @@ namespace KlayGE
 			Report, ReportLength);
 	}
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 	BOOL MsgInputEngine::RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const
 	{
 		return DynamicRegisterTouchWindow_(hWnd, ulFlags);

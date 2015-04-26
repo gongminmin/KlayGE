@@ -81,7 +81,7 @@ namespace KlayGE
 		{
 			return depth_stencil_view_;
 		}
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11RenderTargetViewPtr const & D3DBackBufferRightEyeRTV() const
 		{
 			return render_target_view_right_eye_;
@@ -92,7 +92,7 @@ namespace KlayGE
 			return stereo_amd_right_eye_height_;
 		}
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11DepthStencilViewPtr const & D3DDepthStencilBufferRightEyeDSV() const
 		{
 			return depth_stencil_view_right_eye_;
@@ -125,7 +125,7 @@ namespace KlayGE
 			friend class D3D11RenderWindow;
 
 		public:
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 			void OnStereoEnabledChanged(Windows::Graphics::Display::DisplayInformation^ sender,
 				Platform::Object^ args);
 #else
@@ -146,19 +146,19 @@ namespace KlayGE
 		D3D11AdapterPtr			adapter_;
 
 		IDXGIFactory1Ptr gi_factory_;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		IDXGIFactory2Ptr gi_factory_2_;
 		bool has_dxgi_1_2_;
 		bool dxgi_stereo_support_;
 #endif
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		IDXGIFactory3Ptr gi_factory_3_;
 		bool has_dxgi_1_3_;
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
@@ -176,7 +176,7 @@ namespace KlayGE
 		ID3D11Texture2DPtr			depth_stencil_;
 		ID3D11RenderTargetViewPtr	render_target_view_;
 		ID3D11DepthStencilViewPtr	depth_stencil_view_;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11RenderTargetViewPtr	render_target_view_right_eye_;
 		ID3D11DepthStencilViewPtr	depth_stencil_view_right_eye_;
 #endif

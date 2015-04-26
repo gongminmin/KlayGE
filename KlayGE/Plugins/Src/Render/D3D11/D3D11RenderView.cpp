@@ -135,7 +135,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::BindDiscardFunc()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.HasD3D11_1Runtime())
 		{
@@ -150,7 +150,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::HWDiscard()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(rt_view_.get());
 #endif
@@ -291,7 +291,7 @@ namespace KlayGE
 	
 	void D3D11DepthStencilRenderView::BindDiscardFunc()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.HasD3D11_1Runtime())
 		{
@@ -306,7 +306,7 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::HWDiscard()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(ds_view_.get());
 #endif
@@ -433,7 +433,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::BindDiscardFunc()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.HasD3D11_1Runtime())
 		{
@@ -448,7 +448,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(ua_view_.get());
 #endif

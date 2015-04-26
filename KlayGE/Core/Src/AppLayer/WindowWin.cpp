@@ -272,7 +272,7 @@ namespace KlayGE
 			this->OnRawInput()(*this, reinterpret_cast<HRAWINPUT>(lParam));
 			break;
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		case WM_POINTERDOWN:
 		{
 			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
@@ -307,7 +307,7 @@ namespace KlayGE
 		}
 			break;
 
-#elif (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		case WM_TOUCH:
 			this->OnTouch()(*this, reinterpret_cast<HTOUCHINPUT>(lParam), LOWORD(wParam));
 			break;

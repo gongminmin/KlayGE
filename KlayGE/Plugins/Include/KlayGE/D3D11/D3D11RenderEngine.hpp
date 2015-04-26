@@ -192,10 +192,10 @@ namespace KlayGE
 		IDXGIFactory1Ptr	gi_factory_;
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		bool has_d3d_11_1_runtime_;
 #endif
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		bool has_d3d_11_2_runtime_;
 #endif
 		D3D_FEATURE_LEVEL d3d_feature_level_;

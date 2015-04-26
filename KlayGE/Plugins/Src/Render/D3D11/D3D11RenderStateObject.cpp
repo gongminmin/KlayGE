@@ -44,7 +44,7 @@ namespace KlayGE
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
 		d3d_desc.AntialiasedLineEnable = false;
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
@@ -133,7 +133,7 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.HasD3D11_1Runtime())
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);

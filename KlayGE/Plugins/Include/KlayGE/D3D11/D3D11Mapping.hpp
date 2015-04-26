@@ -41,7 +41,7 @@ namespace KlayGE
 		static D3D11_TEXTURE_ADDRESS_MODE Mapping(TexAddressingMode mode);
 		static D3D11_FILTER Mapping(TexFilterOp filter);
 		static D3D11_DEPTH_WRITE_MASK Mapping(bool depth_write_mask);
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		static D3D11_LOGIC_OP Mapping(LogicOperation lo);
 #endif
 

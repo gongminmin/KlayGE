@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
-#if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
 	#ifdef KLAYGE_COMPILER_MSVC
 	#pragma warning(push)
 	#pragma warning(disable: 4005)
@@ -28,7 +28,7 @@
 
 	#define DXGI_FORMAT_B4G4R4A4_UNORM static_cast<DXGI_FORMAT>(115)
 	#define D3D_FEATURE_LEVEL_11_1 0xb100
-#elif (_WIN32_WINNT < 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#elif (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	#include <d3d11_1.h>
 #else
 	#include <d3d11_2.h>
@@ -38,22 +38,22 @@ namespace KlayGE
 {
 	typedef shared_ptr<IDXGIFactory1>				IDXGIFactory1Ptr;
 	typedef shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	typedef shared_ptr<IDXGIFactory2>				IDXGIFactory2Ptr;
 	typedef shared_ptr<IDXGIAdapter2>				IDXGIAdapter2Ptr;
 #endif
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	typedef shared_ptr<IDXGIFactory3>				IDXGIFactory3Ptr;
 #endif
 	typedef shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef shared_ptr<ID3D11Device>				ID3D11DevicePtr;
 	typedef shared_ptr<ID3D11DeviceContext>			ID3D11DeviceContextPtr;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	typedef shared_ptr<IDXGISwapChain1>				IDXGISwapChain1Ptr;
 	typedef shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
 	typedef shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
 #endif
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	typedef shared_ptr<IDXGISwapChain2>				IDXGISwapChain2Ptr;
 	typedef shared_ptr<ID3D11Device2>				ID3D11Device2Ptr;
 	typedef shared_ptr<ID3D11DeviceContext2>		ID3D11DeviceContext2Ptr;
@@ -77,12 +77,12 @@ namespace KlayGE
 	typedef shared_ptr<ID3D11DepthStencilView>		ID3D11DepthStencilViewPtr;
 	typedef shared_ptr<ID3D11UnorderedAccessView>	ID3D11UnorderedAccessViewPtr;
 	typedef shared_ptr<ID3D11RasterizerState>		ID3D11RasterizerStatePtr;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	typedef shared_ptr<ID3D11RasterizerState1>		ID3D11RasterizerState1Ptr;
 #endif
 	typedef shared_ptr<ID3D11DepthStencilState>		ID3D11DepthStencilStatePtr;
 	typedef shared_ptr<ID3D11BlendState>			ID3D11BlendStatePtr;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	typedef shared_ptr<ID3D11BlendState1>			ID3D11BlendState1Ptr;
 #endif
 	typedef shared_ptr<ID3D11SamplerState>			ID3D11SamplerStatePtr;

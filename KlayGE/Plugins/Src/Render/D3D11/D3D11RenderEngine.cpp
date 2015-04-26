@@ -237,7 +237,7 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::HasD3D11_1Runtime() const
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		return has_d3d_11_1_runtime_;
 #else
 		return false;
@@ -246,7 +246,7 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::HasD3D11_2Runtime() const
 	{
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		return has_d3d_11_2_runtime_;
 #else
 		return false;
@@ -338,7 +338,7 @@ namespace KlayGE
 		{
 			stereo_method_ = SM_None;
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			IDXGIFactory2* factory;
 			gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
 			if (factory != nullptr)
@@ -420,14 +420,14 @@ namespace KlayGE
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		this->DetectD3D11_2Runtime(device, imm_ctx);
 
 		if (!has_d3d_11_2_runtime_)
 		{
 			this->DetectD3D11_1Runtime(device, imm_ctx);
 		}
-#elif (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		this->DetectD3D11_1Runtime(device, imm_ctx);
 #else
 		d3d_device_ = device;
@@ -955,7 +955,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoSuspend()
 	{
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		if (has_d3d_11_2_runtime_)
 		{
 			IDXGIDevice3* dxgi_device = nullptr;
@@ -1132,7 +1132,7 @@ namespace KlayGE
 			caps_.max_texture_anisotropy = 2;
 			break;
 		}
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_d3d_11_1_runtime_)
 		{
 			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
@@ -1144,7 +1144,7 @@ namespace KlayGE
 		{
 			caps_.is_tbdr = false;
 		}
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		if (has_d3d_11_2_runtime_)
 		{
 			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
@@ -1169,7 +1169,7 @@ namespace KlayGE
 		caps_.mrt_independent_bit_depths_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.standard_derivatives_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
 		caps_.shader_texture_lod_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_d3d_11_1_runtime_)
 		{
 			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
@@ -1365,7 +1365,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		has_d3d_11_1_runtime_ = false;
 
 		ID3D11Device1* d3d_device_1;
@@ -1399,7 +1399,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		has_d3d_11_1_runtime_ = false;
 		has_d3d_11_2_runtime_ = false;
 
@@ -1435,7 +1435,7 @@ namespace KlayGE
 
 		switch (stereo_method_)
 		{
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		case SM_DXGI:
 			{
 				ID3D11RenderTargetView* rtv = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();

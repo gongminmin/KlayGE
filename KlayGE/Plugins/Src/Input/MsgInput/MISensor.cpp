@@ -36,7 +36,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)) \
+#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)) \
 	|| (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) \
 	|| (defined KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
@@ -53,14 +53,14 @@ namespace KlayGE
 }
 #endif
 
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 
-#if (_WIN32_WINNT < 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	// Magnetometer Accuracy Data Types
 	DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_MAGNETOMETER_ACCURACY,
 		0X1637D8A2, 0X4248, 0X4275, 0X86, 0X5D, 0X55, 0X8D, 0XE8, 0X4A, 0XED, 0XFD, 22); //[VT_I4]
 
-	#if (_WIN32_WINNT < 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
 		// Additional Motion Data Types
 		DEFINE_PROPERTYKEY(SENSOR_DATA_TYPE_ANGULAR_VELOCITY_X_DEGREES_PER_SECOND,
 			0X3F8A69A2, 0X7C5, 0X4E48, 0XA9, 0X65, 0XCD, 0X79, 0X7A, 0XAB, 0X56, 0XD5, 10); //[VT_R8]
@@ -875,7 +875,7 @@ namespace KlayGE
 	void MsgInputSensor::OnPositionChanged(Geolocator^ sender, PositionChangedEventArgs^ e)
 	{
 		Geocoordinate^ coordinate = e->Position->Coordinate;
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		latitude_ = static_cast<float>(coordinate->Point->Position.Latitude);
 		longitude_ = static_cast<float>(coordinate->Point->Position.Longitude);
 		altitude_ = static_cast<float>(coordinate->Point->Position.Altitude);
@@ -924,7 +924,7 @@ namespace KlayGE
 	{
 		CompassReading^ reading = e->Reading;
 		magnetic_heading_north_ = static_cast<float>(reading->HeadingMagneticNorth);
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		magnetometer_accuracy_ = static_cast<int32_t>(reading->HeadingAccuracy);
 #else
 		magnetometer_accuracy_ = 0;

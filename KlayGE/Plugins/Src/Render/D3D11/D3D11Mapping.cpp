@@ -359,7 +359,7 @@ namespace KlayGE
 		}
 	}
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	D3D11_LOGIC_OP D3D11Mapping::Mapping(LogicOperation lo)
 	{
 		switch (lo)

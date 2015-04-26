@@ -345,7 +345,26 @@
 		#include <sdkddkver.h>
 	#endif
 
-	#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+	#ifndef _WIN32_WINNT_WINXP
+		#define _WIN32_WINNT_WINXP 0x0501
+	#endif
+	#ifndef _WIN32_WINNT_VISTA
+		#define _WIN32_WINNT_VISTA 0x0600
+	#endif
+	#ifndef _WIN32_WINNT_WIN7
+		#define _WIN32_WINNT_WIN7 0x0601
+	#endif
+	#ifndef _WIN32_WINNT_WIN8
+		#define _WIN32_WINNT_WIN8 0x0602
+	#endif
+	#ifndef _WIN32_WINNT_WINBLUE
+		#define _WIN32_WINNT_WINBLUE 0x0603
+	#endif
+	#ifndef _WIN32_WINNT_WIN10
+		#define _WIN32_WINNT_WIN10 0x0A00
+	#endif
+
+	#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		#include <winapifamily.h>
 		#if defined(WINAPI_FAMILY)
 			#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP

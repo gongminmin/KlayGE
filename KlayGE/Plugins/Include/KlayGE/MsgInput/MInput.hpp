@@ -38,7 +38,7 @@
 #if defined KLAYGE_HAVE_LIBOVR
 #include <OVR.h>
 #endif
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 #include <hidsdi.h>
 #else
 #ifndef _NTDEF_
@@ -206,7 +206,7 @@ typedef struct _HIDP_VALUE_CAPS
 #define HIDP_STATUS_SUCCESS                  (HIDP_ERROR_CODES(0x0,0))
 #endif
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 #include <LocationApi.h>
 #include <SensorsApi.h>
 #include <Sensors.h>
@@ -244,7 +244,7 @@ namespace KlayGE
 			USHORT LinkCollection, USAGE Usage, PULONG UsageValue, PHIDP_PREPARSED_DATA PreparsedData,
 			PCHAR Report, ULONG ReportLength) const;
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		BOOL RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const;
 		BOOL GetTouchInputInfo(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize) const;
 		BOOL CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const;
@@ -292,7 +292,7 @@ namespace KlayGE
 		HidP_GetUsagesFunc DynamicHidP_GetUsages_;
 		HidP_GetUsageValueFunc DynamicHidP_GetUsageValue_;
 
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		typedef BOOL (WINAPI *RegisterTouchWindowFunc)(HWND hWnd, ULONG ulFlags);
 		typedef BOOL (WINAPI *GetTouchInputInfoFunc)(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize);
 		typedef BOOL (WINAPI *CloseTouchInputHandleFunc)(HTOUCHINPUT hTouchInput);
@@ -308,7 +308,7 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
-#if (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
 #endif
@@ -455,7 +455,7 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
@@ -473,7 +473,7 @@ namespace KlayGE
 		int32_t wheel_delta_state_;
 	};
 	
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= 0x0601 /*_WIN32_WINNT_WIN7*/) && (_WIN32_WINNT < 0x0A00 /*_WIN32_WINNT_WINTHRESHOLD*/)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 	class MsgInputSensor : public InputSensor
 	{
 	public:

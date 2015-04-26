@@ -99,7 +99,7 @@ namespace KlayGE
 
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		has_dxgi_1_2_ = false;
 		dxgi_stereo_support_ = false;
 		{
@@ -113,7 +113,7 @@ namespace KlayGE
 			}
 		}
 #endif
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		has_dxgi_1_3_ = false;
 		{
 			IDXGIFactory3* factory;
@@ -156,7 +156,7 @@ namespace KlayGE
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL> > available_feature_levels;	
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (has_dxgi_1_2_)
 			{
 				available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
@@ -363,7 +363,7 @@ namespace KlayGE
 		}
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
@@ -414,7 +414,7 @@ namespace KlayGE
 
 		using namespace Windows::Graphics::Display;
 		using namespace Windows::Foundation;
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		DisplayInformation::GetForCurrentView()->StereoEnabledChanged +=
 			ref new TypedEventHandler<DisplayInformation^, Platform::Object^>(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
 #else
@@ -438,7 +438,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if ((STM_LCDShutter == settings.stereo_method)
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			&& !dxgi_stereo_support_
 #endif
 			)
@@ -478,7 +478,7 @@ namespace KlayGE
 			}
 		}
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			IDXGISwapChain1* sc = nullptr;
@@ -562,7 +562,7 @@ namespace KlayGE
 		this->OnUnbind();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			dxgi_stereo_support_ = gi_factory_2_->IsWindowedStereoEnabled() ? true : false;
@@ -594,7 +594,7 @@ namespace KlayGE
 			ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (has_dxgi_1_2_)
 			{
 				IDXGISwapChain1* sc = nullptr;
@@ -674,7 +674,7 @@ namespace KlayGE
 			height_ = rc.bottom - rc.top;
 			::SetWindowPos(hWnd_, nullptr, left_, top_, width_, height_, SWP_NOZORDER);
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (has_dxgi_1_2_)
 			{
 				sc_desc1_.Width = width_;
@@ -732,7 +732,7 @@ namespace KlayGE
 		}
 
 		bool stereo_changed = false;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			stereo_changed = ((gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_);
@@ -755,7 +755,7 @@ namespace KlayGE
 			swap_chain_->SetFullscreenState(false, nullptr);
 		}
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_ && !!gi_factory_2_)
 		{
 			gi_factory_2_->UnregisterStereoStatus(stereo_cookie_);
@@ -763,7 +763,7 @@ namespace KlayGE
 #endif
 #endif
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		render_target_view_right_eye_.reset();
 		depth_stencil_view_right_eye_.reset();
 #endif
@@ -772,7 +772,7 @@ namespace KlayGE
 		back_buffer_.reset();
 		depth_stencil_.reset();
 		swap_chain_.reset();
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		gi_factory_2_.reset();
 #endif
 		gi_factory_.reset();
@@ -793,7 +793,7 @@ namespace KlayGE
 
 		D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
 		rtv_desc.Format = bb_desc.Format;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
@@ -827,7 +827,7 @@ namespace KlayGE
 		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 
 		if (stereo)
@@ -873,7 +873,7 @@ namespace KlayGE
 		D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
 		dsv_desc.Format = depth_stencil_format_;
 		dsv_desc.Flags = 0;
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (has_dxgi_1_2_)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
@@ -907,7 +907,7 @@ namespace KlayGE
 		TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
 		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (stereo)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
@@ -948,7 +948,7 @@ namespace KlayGE
 		{
 			TIF(swap_chain_->Present(sync_interval_, 0));
 
-#if (_WIN32_WINNT >= 0x0602 /*_WIN32_WINNT_WIN8*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (has_dxgi_1_2_)
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -1003,7 +1003,7 @@ namespace KlayGE
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(
 		Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/)
 #else
