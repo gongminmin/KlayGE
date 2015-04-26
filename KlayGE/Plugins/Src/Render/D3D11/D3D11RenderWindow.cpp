@@ -99,8 +99,8 @@ namespace KlayGE
 
 		back_buffer_format_ = D3D11Mapping::MappingFormat(format);
 
+		dxgi_sub_ver_ = 1;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		has_dxgi_1_2_ = false;
 		dxgi_stereo_support_ = false;
 		{
 			IDXGIFactory2* factory;
@@ -108,20 +108,19 @@ namespace KlayGE
 			if (factory != nullptr)
 			{
 				gi_factory_2_ = MakeCOMPtr(factory);
-				has_dxgi_1_2_ = true;
+				dxgi_sub_ver_ = 2;
 				dxgi_stereo_support_ = gi_factory_2_->IsWindowedStereoEnabled() ? true : false;
 			}
 		}
 #endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		has_dxgi_1_3_ = false;
 		{
 			IDXGIFactory3* factory;
 			gi_factory->QueryInterface(IID_IDXGIFactory3, reinterpret_cast<void**>(&factory));
 			if (factory != nullptr)
 			{
 				gi_factory_3_ = MakeCOMPtr(factory);
-				has_dxgi_1_3_ = true;
+				dxgi_sub_ver_ = 3;
 			}
 		}
 #endif
@@ -157,7 +156,7 @@ namespace KlayGE
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL> > available_feature_levels;	
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-			if (has_dxgi_1_2_)
+			if (dxgi_sub_ver_ >= 2)
 			{
 				available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
 			}
@@ -364,7 +363,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
@@ -479,7 +478,7 @@ namespace KlayGE
 		}
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			IDXGISwapChain1* sc = nullptr;
 			gi_factory_2_->CreateSwapChainForHwnd(d3d_device.get(), hWnd_,
@@ -563,7 +562,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			dxgi_stereo_support_ = gi_factory_2_->IsWindowedStereoEnabled() ? true : false;
 
@@ -595,7 +594,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-			if (has_dxgi_1_2_)
+			if (dxgi_sub_ver_ >= 2)
 			{
 				IDXGISwapChain1* sc = nullptr;
 				gi_factory_2_->CreateSwapChainForHwnd(d3d_device.get(), hWnd_,
@@ -675,7 +674,7 @@ namespace KlayGE
 			::SetWindowPos(hWnd_, nullptr, left_, top_, width_, height_, SWP_NOZORDER);
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-			if (has_dxgi_1_2_)
+			if (dxgi_sub_ver_ >= 2)
 			{
 				sc_desc1_.Width = width_;
 				sc_desc1_.Height = height_;
@@ -733,7 +732,7 @@ namespace KlayGE
 
 		bool stereo_changed = false;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			stereo_changed = ((gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_);
 		}
@@ -756,7 +755,7 @@ namespace KlayGE
 		}
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_ && !!gi_factory_2_)
+		if (dxgi_sub_ver_ >= 2 && !!gi_factory_2_)
 		{
 			gi_factory_2_->UnregisterStereoStatus(stereo_cookie_);
 		}
@@ -772,6 +771,9 @@ namespace KlayGE
 		back_buffer_.reset();
 		depth_stencil_.reset();
 		swap_chain_.reset();
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		gi_factory_3_.reset();
+#endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		gi_factory_2_.reset();
 #endif
@@ -794,7 +796,7 @@ namespace KlayGE
 		D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
 		rtv_desc.Format = bb_desc.Format;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
 			{
@@ -874,7 +876,7 @@ namespace KlayGE
 		dsv_desc.Format = depth_stencil_format_;
 		dsv_desc.Flags = 0;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_dxgi_1_2_)
+		if (dxgi_sub_ver_ >= 2)
 		{
 			if (bb_desc.SampleDesc.Count > 1)
 			{
@@ -949,7 +951,7 @@ namespace KlayGE
 			TIF(swap_chain_->Present(sync_interval_, 0));
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-			if (has_dxgi_1_2_)
+			if (dxgi_sub_ver_ >= 2)
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());

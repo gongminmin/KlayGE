@@ -137,7 +137,7 @@ namespace KlayGE
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.HasD3D11_1Runtime())
+		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = KlayGE::bind(&D3D11RenderTargetRenderView::HWDiscard, this);
 		}
@@ -293,7 +293,7 @@ namespace KlayGE
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.HasD3D11_1Runtime())
+		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = KlayGE::bind(&D3D11DepthStencilRenderView::HWDiscard, this);
 		}
@@ -435,7 +435,7 @@ namespace KlayGE
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.HasD3D11_1Runtime())
+		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			discard_func_ = KlayGE::bind(&D3D11UnorderedAccessView::HWDiscard, this);
 		}

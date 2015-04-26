@@ -45,7 +45,7 @@ namespace KlayGE
 		d3d_desc.AntialiasedLineEnable = false;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (re.HasD3D11_1Runtime())
+		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
@@ -134,7 +134,7 @@ namespace KlayGE
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (re.HasD3D11_1Runtime())
+		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_BLEND_DESC1 d3d_desc1;

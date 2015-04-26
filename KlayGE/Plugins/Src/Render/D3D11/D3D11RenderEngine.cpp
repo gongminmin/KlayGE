@@ -235,22 +235,9 @@ namespace KlayGE
 		return d3d_imm_ctx_;
 	}
 
-	bool D3D11RenderEngine::HasD3D11_1Runtime() const
+	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		return has_d3d_11_1_runtime_;
-#else
-		return false;
-#endif
-	}
-
-	bool D3D11RenderEngine::HasD3D11_2Runtime() const
-	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		return has_d3d_11_2_runtime_;
-#else
-		return false;
-#endif
+		return d3d_11_runtime_sub_ver_;
 	}
 
 	D3D_FEATURE_LEVEL D3D11RenderEngine::DeviceFeatureLevel() const
@@ -420,19 +407,8 @@ namespace KlayGE
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		this->DetectD3D11_2Runtime(device, imm_ctx);
+		this->DetectD3D11Runtime(device, imm_ctx);
 
-		if (!has_d3d_11_2_runtime_)
-		{
-			this->DetectD3D11_1Runtime(device, imm_ctx);
-		}
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		this->DetectD3D11_1Runtime(device, imm_ctx);
-#else
-		d3d_device_ = device;
-		d3d_imm_ctx_ = imm_ctx;
-#endif
 		d3d_feature_level_ = feature_level;
 		Verify(!!d3d_device_);
 
@@ -956,7 +932,7 @@ namespace KlayGE
 	void D3D11RenderEngine::DoSuspend()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		if (has_d3d_11_2_runtime_)
+		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
 			IDXGIDevice3* dxgi_device = nullptr;
 			d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
@@ -1133,7 +1109,7 @@ namespace KlayGE
 			break;
 		}
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_d3d_11_1_runtime_)
+		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_ARCHITECTURE_INFO, &arch_feature, sizeof(arch_feature));
@@ -1145,7 +1121,7 @@ namespace KlayGE
 			caps_.is_tbdr = false;
 		}
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		if (has_d3d_11_2_runtime_)
+		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
 			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D9_SIMPLE_INSTANCING_SUPPORT, &d3d11_feature, sizeof(d3d11_feature));
@@ -1170,7 +1146,7 @@ namespace KlayGE
 		caps_.standard_derivatives_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
 		caps_.shader_texture_lod_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (has_d3d_11_1_runtime_)
+		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
@@ -1363,10 +1339,24 @@ namespace KlayGE
 			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
 	}
 
+	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		this->DetectD3D11_2Runtime(device, imm_ctx);
+#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+		this->DetectD3D11_1Runtime(device, imm_ctx);
+#else
+		d3d_11_runtime_sub_ver_ = 0;
+
+		d3d_device_ = device;
+		d3d_imm_ctx_ = imm_ctx;
+#endif
+	}
+
 	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		has_d3d_11_1_runtime_ = false;
+		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device1* d3d_device_1;
 		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
@@ -1378,15 +1368,17 @@ namespace KlayGE
 			{
 				d3d_device_ = MakeCOMPtr(d3d_device_1);
 				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
-				has_d3d_11_1_runtime_ = true;
+				d3d_11_runtime_sub_ver_ = 1;
 			}
 			else
 			{
 				d3d_device_1->Release();
+
+				d3d_device_ = device;
+				d3d_imm_ctx_ = imm_ctx;
 			}
 		}
-
-		if (!has_d3d_11_1_runtime_)
+		else
 		{
 			d3d_device_ = device;
 			d3d_imm_ctx_ = imm_ctx;
@@ -1400,8 +1392,7 @@ namespace KlayGE
 	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		has_d3d_11_1_runtime_ = false;
-		has_d3d_11_2_runtime_ = false;
+		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device2* d3d_device_2;
 		device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
@@ -1413,13 +1404,18 @@ namespace KlayGE
 			{
 				d3d_device_ = MakeCOMPtr(d3d_device_2);
 				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_2);
-				has_d3d_11_1_runtime_ = true;
-				has_d3d_11_2_runtime_ = true;
+				d3d_11_runtime_sub_ver_ = 2;
 			}
 			else
 			{
 				d3d_device_2->Release();
+
+				this->DetectD3D11_1Runtime(device, imm_ctx);
 			}
+		}
+		else
+		{
+			this->DetectD3D11_1Runtime(device, imm_ctx);
 		}
 #else
 		UNREF_PARAM(device);

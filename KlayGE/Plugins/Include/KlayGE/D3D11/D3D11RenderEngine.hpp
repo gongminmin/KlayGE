@@ -62,8 +62,7 @@ namespace KlayGE
 		IDXGIFactory1Ptr const & DXGIFactory() const;
 		ID3D11DevicePtr const & D3DDevice() const;
 		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
-		bool HasD3D11_1Runtime() const;
-		bool HasD3D11_2Runtime() const;
+		uint8_t D3D11RuntimeSubVer() const;
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
 		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
@@ -149,6 +148,7 @@ namespace KlayGE
 		virtual void DoResume() KLAYGE_OVERRIDE;
 
 		void FillRenderDeviceCaps();
+		void DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 		void DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 		void DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 
@@ -192,12 +192,7 @@ namespace KlayGE
 		IDXGIFactory1Ptr	gi_factory_;
 		ID3D11DevicePtr		d3d_device_;
 		ID3D11DeviceContextPtr d3d_imm_ctx_;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		bool has_d3d_11_1_runtime_;
-#endif
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		bool has_d3d_11_2_runtime_;
-#endif
+		uint8_t d3d_11_runtime_sub_ver_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
 
 		// List of D3D drivers installed (video cards)

@@ -145,15 +145,14 @@ namespace KlayGE
 
 		D3D11AdapterPtr			adapter_;
 
+		uint8_t dxgi_sub_ver_;
 		IDXGIFactory1Ptr gi_factory_;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		IDXGIFactory2Ptr gi_factory_2_;
-		bool has_dxgi_1_2_;
 		bool dxgi_stereo_support_;
 #endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		IDXGIFactory3Ptr gi_factory_3_;
-		bool has_dxgi_1_3_;
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
