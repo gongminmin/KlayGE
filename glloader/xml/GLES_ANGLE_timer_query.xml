@@ -1,0 +1,89 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_timer_query" reg_no="319">
+	<typedefs>
+		<typedef type="GLint64" synonym="GLint64EXT"/>
+		<typedef type="GLuint64" synonym="GLuint64EXT"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GL_QUERY_COUNTER_BITS_ANGLE" value="0x8864"/>
+		<token name="GL_CURRENT_QUERY_ANGLE" value="0x8865"/>
+		<token name="GL_QUERY_RESULT_ANGLE" value="0x8866"/>
+		<token name="GL_QUERY_RESULT_AVAILABLE_ANGLE" value="0x8867"/>
+		<token name="GL_TIME_ELAPSED_ANGLE" value="0x88BF"/>
+		<token name="GL_TIMESTAMP_ANGLE" value="0x8E28"/>
+	</tokens>
+
+	<functions>
+		<function name="glGenQueriesANGLE" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="ids"/>
+			</params>
+		</function>
+		<function name="glDeleteQueriesANGLE" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="ids"/>
+			</params>
+		</function>
+		<function name="glIsQueryANGLE" return="GLboolean">
+			<params>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glBeginQueryANGLE" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="id"/>
+			</params>
+		</function>
+		<function name="glEndQueryANGLE" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glQueryCounterANGLE" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="target"/>
+			</params>
+		</function>
+		<function name="glGetQueryivANGLE" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectivANGLE" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectuivANGLE" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjecti64vANGLE" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetQueryObjectui64vANGLE" return="void">
+			<params>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

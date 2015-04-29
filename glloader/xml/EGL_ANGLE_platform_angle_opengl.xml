@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_platform_angle_opengl">
+	<tokens>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_OPENGL_ANGLE" value="0x320D"/>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE" value="0x320E"/>
+	</tokens>
+</gl_extension>

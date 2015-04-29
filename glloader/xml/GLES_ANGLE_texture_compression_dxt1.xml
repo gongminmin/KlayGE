@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_texture_compression_dxt1" reg_no="111">
+	<tokens>
+		<token name="GL_COMPRESSED_RGB_S3TC_DXT1_ANGLE" value="0x83F0"/>
+		<token name="GL_COMPRESSED_RGBA_S3TC_DXT1_ANGLE" value="0x83F1"/>
+	</tokens>
+</gl_extension>

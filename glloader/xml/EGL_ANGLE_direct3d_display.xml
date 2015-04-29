@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_direct3d_display">
+	<tokens>
+		<token name="EGL_D3D11_ELSE_D3D9_DISPLAY_ANGLE" value="(EGLNativeDisplayType)-2"/>
+		<token name="EGL_D3D11_ONLY_DISPLAY_ANGLE" value="(EGLNativeDisplayType)-3"/>
+	</tokens>
+</gl_extension>

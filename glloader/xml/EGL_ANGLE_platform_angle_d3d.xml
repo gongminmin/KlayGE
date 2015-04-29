@@ -1,0 +1,13 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_platform_angle_d3d">
+	<tokens>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE" value="0x3207"/>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE" value="0x3208"/>
+		<token name="EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE" value="0x3209"/>
+		<token name="EGL_PLATFORM_ANGLE_ENABLE_AUTOMATIC_TRIM_ANGLE" value="0x320F"/>
+		<token name="EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE" value="0x320A"/>
+		<token name="EGL_PLATFORM_ANGLE_DEVICE_TYPE_WARP_ANGLE" value="0x320B"/>
+		<token name="EGL_PLATFORM_ANGLE_DEVICE_TYPE_REFERENCE_ANGLE" value="0x320C"/>
+	</tokens>
+</gl_extension>

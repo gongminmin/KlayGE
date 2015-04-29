@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_ANGLE_robust_resource_initialization">
+	<tokens>
+		<token name="GL_CONTEXT_ROBUST_RESOURCE_INITIALIZATION_ANGLE" value="0x93A7"/>
+	</tokens>
+</gl_extension>

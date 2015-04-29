@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_platform_angle">
+	<tokens>
+		<token name="EGL_PLATFORM_ANGLE_ANGLE" value="0x3202"/>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_ANGLE" value="0x3203"/>
+		<token name="EGL_PLATFORM_ANGLE_MAX_VERSION_MAJOR_ANGLE" value="0x3204"/>
+		<token name="EGL_PLATFORM_ANGLE_MAX_VERSION_MINOR_ANGLE" value="0x3205"/>
+		<token name="EGL_PLATFORM_ANGLE_TYPE_DEFAULT_ANGLE" value="0x3206"/>
+	</tokens>
+</gl_extension>

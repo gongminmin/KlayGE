@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_software_display">
+	<tokens>
+		<token name="EGL_SOFTWARE_DISPLAY_ANGLE" value="(EGLNativeDisplayType)-1"/>
+	</tokens>
+</gl_extension>

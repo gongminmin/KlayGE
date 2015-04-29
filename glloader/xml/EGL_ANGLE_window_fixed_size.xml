@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_window_fixed_size">
+	<tokens>
+		<token name="EGL_FIXED_SIZE_ANGLE" value="0x3201"/>
+	</tokens>
+</gl_extension>
