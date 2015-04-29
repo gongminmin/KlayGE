@@ -157,13 +157,13 @@ namespace KlayGE
 			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
 			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
 		}
+#else
+		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
+		DynamicD3D11CreateDevice_ = ::D3D11CreateDevice;
+#endif
 
 		IDXGIFactory1* gi_factory;
 		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
-#else
-		IDXGIFactory2* gi_factory;
-		TIF(CreateDXGIFactory1(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory)));
-#endif
 		gi_factory_ = MakeCOMPtr(gi_factory);
 
 		adapterList_.Enumerate(gi_factory_);
@@ -1725,41 +1725,34 @@ namespace KlayGE
 		}
 	}
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	HRESULT D3D11RenderEngine::D3D11CreateDevice(IDXGIAdapter* pAdapter,
-					D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
-					D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
-					ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const
+			D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
+			D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
+			ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const
 	{
 		return DynamicD3D11CreateDevice_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 			ppDevice, pFeatureLevel, ppImmediateContext);
 	}
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	HRESULT D3D11RenderEngine::D3DCompile(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
-					D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
-					LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs) const
+			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
+			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs) const
 	{
 		return DynamicD3DCompile_(pSrcData, SrcDataSize, pSourceName, pDefines, pInclude, pEntrypoint,
 					pTarget, Flags1, Flags2, ppCode, ppErrorMsgs);
 	}
 	
-	HRESULT D3D11RenderEngine::D3DReflect(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector) const
+	HRESULT D3D11RenderEngine::D3DReflect(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface,
+			void** ppReflector) const
 	{
 		return DynamicD3DReflect_(pSrcData, SrcDataSize, pInterface, ppReflector);
 	}
 
-	HRESULT D3D11RenderEngine::D3DStripShader(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags, ID3DBlob** ppStrippedBlob) const
+	HRESULT D3D11RenderEngine::D3DStripShader(LPCVOID pShaderBytecode, SIZE_T BytecodeLength,
+			UINT uStripFlags, ID3DBlob** ppStrippedBlob) const
 	{
 		return DynamicD3DStripShader_(pShaderBytecode, BytecodeLength, uStripFlags, ppStrippedBlob);
-	}
-#else
-	HRESULT D3D11RenderEngine::D3D11CreateDevice(IDXGIAdapter* pAdapter,
-					D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
-					D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
-					ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const
-	{
-		return ::D3D11CreateDevice(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
-			ppDevice, pFeatureLevel, ppImmediateContext);
 	}
 #endif
 }
