@@ -1003,6 +1003,10 @@ namespace KlayGE
 			}
 			else
 			{
+				if (std::string::npos == meshmljit_name.find("/"))
+				{
+					meshmljit_name = "./" + meshmljit_name;
+				}
 				if (system((meshmljit_name + " -I \"" + meshml_name + "\" -T \"" + folder_name + "\" -q").c_str()) != 0)
 				{
 					failed = true;

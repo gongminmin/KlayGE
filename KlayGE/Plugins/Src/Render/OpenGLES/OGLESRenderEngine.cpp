@@ -231,6 +231,10 @@ namespace KlayGE
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
 
+#ifdef KLAYGE_PLATFORM_DARWIN
+		Context::Instance().AppInstance().MainWnd()->BindListeners();
+#endif
+
 #ifndef KLAYGE_SHIP
 		if (glloader_GLES_KHR_debug() && !this->HackForPVR())
 		{

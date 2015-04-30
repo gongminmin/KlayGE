@@ -104,6 +104,7 @@ namespace KlayGE
 			return a_window_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
+		void BindListeners();
 		void CreateGLView(RenderSettings const & settings);
 		void CreateGLESView();
 		static void PumpEvents();

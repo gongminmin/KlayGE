@@ -13,11 +13,11 @@ SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Add a postfix, usually empty on wi
 
 FIND_PACKAGE(PythonInterp)
 IF (PYTHONINTERP_FOUND)
-	IF (${PYTHON_VERSION_STRING} VERSION_LESS "2.7.9")
-		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 2.7.9 or up.")
+	IF (${PYTHON_VERSION_STRING} VERSION_LESS "2.7.0")
+		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 2.7.0 or up.")
 	ENDIF()
 ELSE()
-	MESSAGE(FATAL_ERROR "Could NOT find Python. Please install Python 2.7.9 or up first.")
+	MESSAGE(FATAL_ERROR "Could NOT find Python. Please install Python 2.7.0 or up first.")
 ENDIF()
 
 FUNCTION(ADD_POST_BUILD TARGET_NAME SUBFOLDER)

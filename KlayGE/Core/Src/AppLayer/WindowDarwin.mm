@@ -115,9 +115,6 @@ namespace KlayGE
 		[ns_window_ setAcceptsMouseMovedEvents:YES];
 		[ns_window_ setTitle:[NSString stringWithCString:name.c_str() encoding:[NSString defaultCStringEncoding]]];
 
-		ns_window_listener_ = [[KlayGEWindowListener alloc] initWithAppWindow:this];
-		[ns_window_listener_ listen:ns_window_];
-
 		NSRect content_rect = [ns_window_ contentRectForFrameRect:ns_window_.frame];
 		left_ = 0;
 		top_ = 0;
@@ -140,6 +137,12 @@ namespace KlayGE
 	Window::~Window()
 	{
 		[ns_window_listener_ close];
+	}
+
+	void Window::BindListeners()
+	{
+		ns_window_listener_ = [[KlayGEWindowListener alloc] initWithAppWindow:this];
+		[ns_window_listener_ listen:ns_window_];
 	}
 
 	void Window::CreateGLView(RenderSettings const & settings)
