@@ -93,6 +93,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionBC.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionETC.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Texture.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TransientBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Viewport.cpp
 )
 
@@ -139,6 +140,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionBC.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionETC.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Texture.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TransientBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Viewport.hpp
 )
 

@@ -40,41 +40,50 @@
 
 namespace KlayGE
 {
-	enum BindFlag
-	{
-		BF_Vertex,
-		BF_Index
-	};
-
-	//A part of transient buffer that is allocated
+	// A part of transient buffer that is allocated
 	struct SubAlloc
 	{
 		uint32_t offset_;
 		uint32_t length_;
 		void* data_;
-		SubAlloc():offset_(0),length_(0),data_(0){};
-		SubAlloc(int offset,int length):offset_(offset),length_(length),data_(0){};
+		
+		SubAlloc()
+			: offset_(0), length_(0), data_(0)
+		{
+		};
+		
+		SubAlloc(int offset, int length)
+			: offset_(offset), length_(length), data_(0)
+		{
+		};
 	};
 
-	//Frames that have ended
+	// Frames that have ended
 	struct RetiredFrame
 	{
-		//Sub allocs that are unuseful and will be freed at the end of the frame
+		// Sub allocs that are unuseful and will be freed at the end of the frame
 		std::list<SubAlloc> pending_frees_;
-		//QueryPtr frame_complete_query_;
-		int frameID;
-		RetiredFrame(int frameID):
-		frameID(frameID)
+		uint32_t frame_id;
+
+		explicit RetiredFrame(int id)
+			: frame_id(id)
 		{
-		
-		};
+		}
 	};
 
 	class TransientBuffer
 	{
 	public:
-		TransientBuffer(uint32_t size_in_byte,BindFlag bind_flag);
+		enum BindFlag
+		{
+			BF_Vertex,
+			BF_Index
+		};
+
+	public:
+		TransientBuffer(uint32_t size_in_byte, BindFlag bind_flag);
 		~TransientBuffer();
+
 		GraphicsBufferPtr CreateBuffer(BindFlag bind_flag);
 		//Allocate a sub space from transient buffer
 		SubAlloc Alloc(uint32_t size_in_byte, void* data);
@@ -88,8 +97,6 @@ namespace KlayGE
 		void UploadData();
 		//Do with retired frames
 		void OnPresent();
-		//QueryPtr CreateAndIssueFrameCompleteQuery() const;
-		//bool IsQueryComplete(QueryPtr query) const;
 
 	private:
 		GraphicsBufferPtr buffer_;
