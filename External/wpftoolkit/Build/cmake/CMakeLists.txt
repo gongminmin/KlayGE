@@ -23,7 +23,7 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS ON)
 
 SET(REL_PATH "External/Downloads/wpftoolkit-${CHANGESET_NUM}.patched.7z")
-SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/AssemblyVersionInfo.cs")
+SET(DST_PATH "${KLAYGE_ROOT_DIR}/External/wpftoolkit/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/AssemblyVersionInfo.cs")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
 
 SET(REGEN FALSE)
