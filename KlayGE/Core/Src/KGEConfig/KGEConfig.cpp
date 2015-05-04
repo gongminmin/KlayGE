@@ -132,10 +132,17 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		}
 		{
 			HWND hResCombo = GetDlgItem(hDlg, IDC_RES_COMBO);
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("4096x2304 (16:9)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("3200x2000 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("2560x1600 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("2160x1440 (3:2)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1280 (3:2)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1200 (16:10)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1080 (16:9)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1680x1050 (16:10)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1600x900 (16:9)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1440x900 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1366x768 (16:9)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x1024 (5:4)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x960 (4:3)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1280x800 (16:10)")));
