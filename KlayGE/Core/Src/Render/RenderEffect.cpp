@@ -93,7 +93,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<type_define>();
@@ -199,7 +199,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<shade_mode_define>();
@@ -243,7 +243,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<compare_function_define>();
@@ -293,7 +293,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<cull_mode_define>();
@@ -338,7 +338,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<polygon_mode_define>();
@@ -383,7 +383,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<alpha_blend_factor_define>();
@@ -442,7 +442,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<blend_operation_define>();
@@ -489,7 +489,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<stencil_operation_define>();
@@ -539,7 +539,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<texture_filter_mode_define>();
@@ -605,7 +605,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<texture_addr_mode_define>();
@@ -651,7 +651,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<logic_operation_define>();

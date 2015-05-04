@@ -213,7 +213,7 @@ namespace KlayGE
 
 	std::vector<CameraPtr>::iterator SceneManager::DelCamera(std::vector<CameraPtr>::iterator iter)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		return cameras_.erase(iter);
 	}
 
@@ -245,7 +245,7 @@ namespace KlayGE
 
 	std::vector<LightSourcePtr>::iterator SceneManager::DelLight(std::vector<LightSourcePtr>::iterator iter)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		return lights_.erase(iter);
 	}
 
@@ -268,7 +268,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		this->AddSceneObjectLocked(obj);
 	}
 
@@ -301,7 +301,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::DelSceneObject(SceneObjectPtr const & obj)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		this->DelSceneObjectLocked(obj);
 	}
 
@@ -319,7 +319,7 @@ namespace KlayGE
 
 	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjsType::iterator iter)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		return this->DelSceneObjectLocked(iter);
 	}
 
@@ -462,7 +462,7 @@ namespace KlayGE
 
 	void SceneManager::ClearObject()
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		scene_objs_.resize(0);
 		overlay_scene_objs_.resize(0);
 	}
@@ -508,7 +508,7 @@ namespace KlayGE
 
 		std::vector<SceneObjectPtr> added_scene_objs;
 		{
-			unique_lock<mutex> lock(update_mutex_);
+			lock_guard<mutex> lock(update_mutex_);
 
 			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 			{
@@ -545,7 +545,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Flush(uint32_t urt)
 	{
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 
 		urt_ = urt;
 
@@ -801,7 +801,7 @@ namespace KlayGE
 				WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 				if (win && win->Active())
 				{
-					unique_lock<mutex> lock(update_mutex_);
+					lock_guard<mutex> lock(update_mutex_);
 
 					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 					{

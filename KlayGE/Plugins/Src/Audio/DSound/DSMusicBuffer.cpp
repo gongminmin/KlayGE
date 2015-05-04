@@ -185,7 +185,7 @@ namespace KlayGE
 
 		stopped_ = false;
 		{
-			unique_lock<mutex> lock(play_mutex_);
+			lock_guard<mutex> lock(play_mutex_);
 			played_ = true;
 		}
 		play_cond_.notify_one();

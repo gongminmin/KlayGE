@@ -121,7 +121,7 @@ namespace KlayGE
 	{
 		if (!context_instance_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!context_instance_)
 			{
 				context_instance_ = MakeSharedPtr<Context>();
@@ -134,7 +134,7 @@ namespace KlayGE
 	{
 		context_instance_->DestroyAll();
 
-		unique_lock<mutex> lock(singleton_mutex);
+		lock_guard<mutex> lock(singleton_mutex);
 		context_instance_.reset();
 	}
 
@@ -995,7 +995,7 @@ namespace KlayGE
 	{
 		if (!scene_mgr_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!scene_mgr_)
 			{
 				this->LoadSceneManager(cfg_.scene_manager_name);
@@ -1008,7 +1008,7 @@ namespace KlayGE
 	{
 		if (!render_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!render_factory_)
 			{
 				this->LoadRenderFactory(cfg_.render_factory_name);
@@ -1021,7 +1021,7 @@ namespace KlayGE
 	{
 		if (!audio_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!audio_factory_)
 			{
 				this->LoadAudioFactory(cfg_.audio_factory_name);
@@ -1034,7 +1034,7 @@ namespace KlayGE
 	{
 		if (!input_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!input_factory_)
 			{
 				this->LoadInputFactory(cfg_.input_factory_name);
@@ -1047,7 +1047,7 @@ namespace KlayGE
 	{
 		if (!show_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!show_factory_)
 			{
 				this->LoadShowFactory(cfg_.show_factory_name);
@@ -1060,7 +1060,7 @@ namespace KlayGE
 	{
 		if (!script_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!script_factory_)
 			{
 				this->LoadScriptFactory(cfg_.script_factory_name);
@@ -1073,7 +1073,7 @@ namespace KlayGE
 	{
 		if (!audio_data_src_factory_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!audio_data_src_factory_)
 			{
 				this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);

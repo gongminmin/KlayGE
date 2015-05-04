@@ -896,7 +896,7 @@ namespace KlayGE
 
 		if (!lut_inited_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!lut_inited_)
 			{
 				for (int i = 0; i < 32; ++ i)
@@ -2265,7 +2265,7 @@ namespace KlayGE
 
 		if (!lut_inited_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!lut_inited_)
 			{
 				for (int i = 0; i < 64; ++ i)

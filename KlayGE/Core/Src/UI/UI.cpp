@@ -295,7 +295,7 @@ namespace KlayGE
 	{
 		if (!ui_mgr_instance_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!ui_mgr_instance_)
 			{
 				ui_mgr_instance_ = MakeSharedPtr<UIManager>();

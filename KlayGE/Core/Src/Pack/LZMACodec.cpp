@@ -65,7 +65,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				unique_lock<mutex> lock(singleton_mutex);
+				lock_guard<mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<LZMALoader>();

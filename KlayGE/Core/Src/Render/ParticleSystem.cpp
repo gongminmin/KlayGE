@@ -773,7 +773,7 @@ namespace KlayGE
 			checked_pointer_cast<RenderParticles>(renderable_)->PosBound(AABBox(min_bb, max_bb));
 		}
 
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 		active_particles_ = active_particles;
 	}
 
@@ -782,7 +782,7 @@ namespace KlayGE
 		UNREF_PARAM(app_time);
 		UNREF_PARAM(elapsed_time);
 
-		unique_lock<mutex> lock(update_mutex_);
+		lock_guard<mutex> lock(update_mutex_);
 
 		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
@@ -1089,7 +1089,7 @@ namespace KlayGE
 		std::vector<float2> local_opacity_over_life;
 
 		{
-			unique_lock<mutex> lock(update_mutex_);
+			lock_guard<mutex> lock(update_mutex_);
 			local_size_over_life = size_over_life_;
 			local_mass_over_life = mass_over_life_;
 			local_opacity_over_life = opacity_over_life_;

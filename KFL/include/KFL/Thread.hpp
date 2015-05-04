@@ -44,6 +44,7 @@
 		using std::condition_variable;
 		using std::mutex;
 		using std::unique_lock;
+		using std::lock_guard;
 		namespace this_thread = std::this_thread;
 	}
 #else
@@ -61,6 +62,7 @@
 		using boost::condition_variable;
 		using boost::mutex;
 		using boost::unique_lock;
+		using boost::lock_guard;
 		namespace this_thread = boost::this_thread;
 	}
 #endif

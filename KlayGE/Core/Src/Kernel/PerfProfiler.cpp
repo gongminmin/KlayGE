@@ -116,7 +116,7 @@ namespace KlayGE
 	{
 		if (!perf_profiler_instance_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!perf_profiler_instance_)
 			{
 				perf_profiler_instance_ = MakeSharedPtr<PerfProfiler>();
@@ -127,7 +127,7 @@ namespace KlayGE
 
 	void PerfProfiler::Destroy()
 	{
-		unique_lock<mutex> lock(singleton_mutex);
+		lock_guard<mutex> lock(singleton_mutex);
 		perf_profiler_instance_.reset();
 	}
 

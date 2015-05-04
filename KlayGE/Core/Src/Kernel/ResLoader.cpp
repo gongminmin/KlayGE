@@ -191,7 +191,7 @@ namespace KlayGE
 	{
 		if (!res_loader_instance_)
 		{
-			unique_lock<mutex> lock(singleton_mutex);
+			lock_guard<mutex> lock(singleton_mutex);
 			if (!res_loader_instance_)
 			{
 				res_loader_instance_ = MakeSharedPtr<ResLoader>();
@@ -570,7 +570,7 @@ namespace KlayGE
 			shared_ptr<volatile bool> async_is_done;
 			bool found = false;
 			{
-				unique_lock<mutex> lock(loading_mutex_);
+				lock_guard<mutex> lock(loading_mutex_);
 
 				typedef KLAYGE_DECLTYPE(loading_res_) LoadingResQueueType;
 				KLAYGE_FOREACH(LoadingResQueueType::const_reference lrq, loading_res_)
@@ -594,7 +594,7 @@ namespace KlayGE
 				if (res_desc->HasSubThreadStage())
 				{
 					{
-						unique_lock<mutex> lock(loading_mutex_);
+						lock_guard<mutex> lock(loading_mutex_);
 
 						async_is_done = MakeSharedPtr<bool>(false);
 						loading_res_.push_back(std::make_pair(res_desc, async_is_done));
@@ -614,7 +614,7 @@ namespace KlayGE
 
 	void ResLoader::Unload(shared_ptr<void> const & res)
 	{
-		unique_lock<mutex> lock(loading_mutex_);
+		lock_guard<mutex> lock(loading_mutex_);
 
 		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end(); ++ iter)
 		{
@@ -628,7 +628,7 @@ namespace KlayGE
 
 	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
 	{
-		unique_lock<mutex> lock(loading_mutex_);
+		lock_guard<mutex> lock(loading_mutex_);
 
 		bool found = false;
 		typedef KLAYGE_DECLTYPE(loaded_res_) CachedDescType;
@@ -649,7 +649,7 @@ namespace KlayGE
 
 	shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
 	{
-		unique_lock<mutex> lock(loading_mutex_);
+		lock_guard<mutex> lock(loading_mutex_);
 
 		shared_ptr<void> loaded_res;
 		typedef KLAYGE_DECLTYPE(loaded_res_) LoadedResType;
@@ -666,7 +666,7 @@ namespace KlayGE
 
 	void ResLoader::RemoveUnrefResources()
 	{
-		unique_lock<mutex> lock(loading_mutex_);
+		lock_guard<mutex> lock(loading_mutex_);
 
 		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
 		{
@@ -683,7 +683,7 @@ namespace KlayGE
 
 	void ResLoader::Update()
 	{
-		unique_lock<mutex> lock(loading_mutex_);
+		lock_guard<mutex> lock(loading_mutex_);
 
 		for (KLAYGE_AUTO(iter, loading_res_.begin()); iter != loading_res_.end();)
 		{
