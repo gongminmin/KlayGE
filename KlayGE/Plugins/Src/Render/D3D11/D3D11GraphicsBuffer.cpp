@@ -250,9 +250,23 @@ namespace KlayGE
 
 	void D3D11GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
-		BOOST_ASSERT(this->Size() == rhs.Size());
+		BOOST_ASSERT(this->Size() <= rhs.Size());
 
 		D3D11GraphicsBuffer& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&rhs);
-		d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer().get(), buffer_.get());
+		if (this->Size() == rhs.Size())
+		{
+			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer().get(), buffer_.get());
+		}
+		else
+		{
+			D3D11_BOX box;
+			box.left = 0;
+			box.right = this->Size();
+			box.top = 0;
+			box.bottom = 1;
+			box.front = 0;
+			box.back = 1;
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer().get(), 0, 0, 0, 0, buffer_.get(), 0, &box);
+		}
 	}
 }
