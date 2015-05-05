@@ -303,6 +303,8 @@ namespace KlayGE
 	typedef shared_ptr<SSRPostProcess> SSRPostProcessPtr;
 	class LightShaftPostProcess;
 	typedef shared_ptr<LightShaftPostProcess> LightShaftPostProcessPtr;
+	class TransientBuffer;
+	typedef shared_ptr<TransientBuffer> TransientBufferPtr;
 
 	class UIManager;
 	typedef shared_ptr<UIManager> UIManagerPtr;

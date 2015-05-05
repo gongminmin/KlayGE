@@ -100,6 +100,7 @@ namespace KlayGE
 		Camera const & ActiveCamera() const;
 		Camera& ActiveCamera();
 
+		uint32_t TotalNumFrames() const;
 		float FPS() const;
 		float AppTime() const;
 		float FrameTime() const;
@@ -139,6 +140,7 @@ namespace KlayGE
 		std::string name_;
 
 		// Stats
+		uint32_t total_num_frames_;
 		float	fps_;
 		float	accumulate_time_;
 		uint32_t num_frames_;

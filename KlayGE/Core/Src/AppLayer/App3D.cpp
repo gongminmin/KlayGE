@@ -332,7 +332,7 @@ namespace KlayGE
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	App3DFramework::App3DFramework(std::string const & name)
-						: name_(name),
+						: name_(name), total_num_frames_(0),
 							fps_(0), accumulate_time_(0), num_frames_(0),
 							app_time_(0), frame_time_(0)
 	{
@@ -350,7 +350,7 @@ namespace KlayGE
 	}
 
 	App3DFramework::App3DFramework(std::string const & name, void* native_wnd)
-						: name_(name),
+						: name_(name), total_num_frames_(0),
 							fps_(0), accumulate_time_(0), num_frames_(0),
 							app_time_(0), frame_time_(0)
 	{
@@ -632,6 +632,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void App3DFramework::UpdateStats()
 	{
+		++ total_num_frames_;
+
 		// measure statistics
 		frame_time_ = static_cast<float>(timer_.elapsed());
 		++ num_frames_;
@@ -649,6 +651,11 @@ namespace KlayGE
 		}
 
 		timer_.restart();
+	}
+
+	uint32_t App3DFramework::TotalNumFrames() const
+	{
+		return total_num_frames_;
 	}
 
 	// 获取渲染目标的每秒帧数

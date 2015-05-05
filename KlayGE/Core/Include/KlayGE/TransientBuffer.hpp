@@ -1,6 +1,6 @@
 /**
  * @file TransientBuffer.hpp
- * @author Shenghua Lin,Minmin Gong
+ * @author Shenghua Lin, Minmin Gong
  *
  * @section DESCRIPTION
  *
@@ -33,10 +33,10 @@
 
 #pragma once
 
-#include <KlayGE/KlayGE.hpp>
-#include <KlayGE/RenderFactory.hpp>
-#include <KlayGE/RenderEngine.hpp>
-#include <KlayGE/Query.hpp>
+#include <KlayGE/PreDeclare.hpp>
+
+#include <vector>
+#include <list>
 
 namespace KlayGE
 {
@@ -48,14 +48,14 @@ namespace KlayGE
 		void* data_;
 		
 		SubAlloc()
-			: offset_(0), length_(0), data_(0)
+			: offset_(0), length_(0), data_(nullptr)
 		{
-		};
+		}
 		
 		SubAlloc(int offset, int length)
-			: offset_(offset), length_(length), data_(0)
+			: offset_(offset), length_(length), data_(nullptr)
 		{
-		};
+		}
 	};
 
 	// Frames that have ended
@@ -71,7 +71,7 @@ namespace KlayGE
 		}
 	};
 
-	class TransientBuffer
+	class KLAYGE_CORE_API TransientBuffer
 	{
 	public:
 		enum BindFlag
@@ -82,21 +82,27 @@ namespace KlayGE
 
 	public:
 		TransientBuffer(uint32_t size_in_byte, BindFlag bind_flag);
-		~TransientBuffer();
 
-		GraphicsBufferPtr CreateBuffer(BindFlag bind_flag);
-		//Allocate a sub space from transient buffer
+		// Allocate a sub space from transient buffer
 		SubAlloc Alloc(uint32_t size_in_byte, void* data);
-		//Knowtify transient buffer that this alloc is unused and will be freed at the end of the frame.
+		// Knowtify transient buffer that this alloc is unused and will be freed at the end of the frame.
 		void KnowtifyUnused(SubAlloc const & alloc);
-		//Free the sub alloc and return the space allocated back to transient buffer.
-		void Free(SubAlloc const & alloc);
-		//Feed data to transient buffer and cache them.
-		void FeedData(SubAlloc const & alloc);
-		//Bufferred Map/Unmap.
+		// Bufferred Map/Unmap.
 		void UploadData();
-		//Do with retired frames
+		// Do with retired frames
 		void OnPresent();
+
+		GraphicsBufferPtr const & GetBuffer() const
+		{
+			return buffer_;
+		}
+
+	private:
+		GraphicsBufferPtr CreateBuffer(BindFlag bind_flag);
+		// Free the sub alloc and return the space allocated back to transient buffer.
+		void Free(SubAlloc const & alloc);
+		// Feed data to transient buffer and cache them.
+		void FeedData(SubAlloc const & alloc);
 
 	private:
 		GraphicsBufferPtr buffer_;
@@ -105,7 +111,6 @@ namespace KlayGE
 		std::vector<SubAlloc> data_list_;
 		std::list<RetiredFrame> retired_frames_;
 		BindFlag bind_flag_;
-		uint32_t frame_id_;
 	};
 }
 

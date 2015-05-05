@@ -1,6 +1,6 @@
 /**
  * @file TransientBuffer.cpp
- * @author Shenghua Lin,Minmin Gong
+ * @author Shenghua Lin, Minmin Gong
  *
  * @section DESCRIPTION
  *
@@ -29,20 +29,25 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/App3D.hpp>
+
 #include <KlayGE/TransientBuffer.hpp>
 
 namespace KlayGE
 {
 	TransientBuffer::TransientBuffer(uint32_t size_in_byte, TransientBuffer::BindFlag bind_flag)
-		: buffer_size_(size_in_byte), bind_flag_(bind_flag), frame_id_(1)
+		: buffer_size_(size_in_byte), bind_flag_(bind_flag)
 	{
-		buffer_ = CreateBuffer(bind_flag_);
+		buffer_ = this->CreateBuffer(bind_flag_);
 		buffer_->Resize(buffer_size_);
 
 		SubAlloc alloc(0, size_in_byte);
 		free_list_.push_back(alloc);
 
-		retired_frames_.push_back(RetiredFrame(frame_id_));
+		App3DFramework const & app = Context::Instance().AppInstance();
+		retired_frames_.push_back(RetiredFrame(app.TotalNumFrames() + 1));
 	}
 
 	GraphicsBufferPtr TransientBuffer::CreateBuffer(TransientBuffer::BindFlag bind_flag)
@@ -52,11 +57,11 @@ namespace KlayGE
 		switch (bind_flag)
 		{
 		case BF_Vertex:
-			buffer = rf.MakeVertexBuffer(BU_Dynamic, BA_Write_No_Overwrite, nullptr);
+			buffer = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 			break;
 
 		case BF_Index:
-			buffer = rf.MakeIndexBuffer(BU_Dynamic, BA_Write_No_Overwrite, nullptr);
+			buffer = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
 			break;
 
 		default:
@@ -76,7 +81,7 @@ namespace KlayGE
 		std::list<SubAlloc>::iterator first_fit_iter = iter;
 		for (; iter != free_list_.end(); ++ iter)
 		{
-			if ((iter->length_ == size_in_byte) || (iter->length_ - size_in_byte >= 4))
+			if (iter->length_ >= size_in_byte)
 			{
 				first_fit_iter = iter;
 				found = true;
@@ -84,20 +89,28 @@ namespace KlayGE
 			}
 		}
 
-		// If there is not enough space,reallocate a larger buffer.
+		// If there is not enough space, reallocate a larger buffer.
 		if (!found)
 		{
-			GraphicsBufferPtr larger_buffer = CreateBuffer(bind_flag_);
+			GraphicsBufferPtr larger_buffer = this->CreateBuffer(bind_flag_);
 			uint32_t larger_buffer_size = buffer_size_ * 2 > buffer_size_ + size_in_byte ? buffer_size_ * 2 : buffer_size_ + size_in_byte;
 			larger_buffer->Resize(larger_buffer_size);
-			SubAlloc alloc(buffer_size_,larger_buffer_size - buffer_size_);
+			SubAlloc alloc(buffer_size_, larger_buffer_size - buffer_size_);
 			buffer_size_ = larger_buffer_size;
-			free_list_.push_back(alloc);
+			if (free_list_.back().offset_ + free_list_.back().length_ == alloc.offset_)
+			{
+				free_list_.back().length_ += alloc.length_;
+			}
+			else
+			{
+				free_list_.push_back(alloc);
+			}
 			first_fit_iter = free_list_.end();
 			-- first_fit_iter;
 			buffer_->CopyToBuffer(*larger_buffer);
-			buffer_=larger_buffer;
+			buffer_ = larger_buffer;
 		}
+
 		uint32_t left_size = first_fit_iter->length_ - size_in_byte;
 		ret.length_ = size_in_byte;
 		ret.offset_ = first_fit_iter->offset_;
@@ -105,7 +118,8 @@ namespace KlayGE
 		if (0 == left_size)
 		{
 			free_list_.erase(first_fit_iter);
-		}else
+		}
+		else
 		{
 			first_fit_iter->length_ = left_size;
 			first_fit_iter->offset_ += size_in_byte;
@@ -119,24 +133,30 @@ namespace KlayGE
 
 	void TransientBuffer::KnowtifyUnused(SubAlloc const & alloc)
 	{
-		RetiredFrame& frame = retired_frames_.back();
-		frame.pending_frees_.push_back(alloc);
+		if (alloc.length_ > 0)
+		{
+			RetiredFrame& frame = retired_frames_.back();
+			frame.pending_frees_.push_back(alloc);
+		}
 	}
 
 	void TransientBuffer::OnPresent()
 	{
+		App3DFramework const & app = Context::Instance().AppInstance();
+		uint32_t const frame_id = app.TotalNumFrames();
+
 		// First, deal with deletes from this frame
 		RetiredFrame& ret_frame = retired_frames_.back();
 		if (!ret_frame.pending_frees_.empty()) 
 		{
 			// Append a new (empty) RetiredFrame to retired_frames_
-			retired_frames_.push_back(RetiredFrame(frame_id_ + 1));
+			retired_frames_.push_back(RetiredFrame(frame_id + 1));
 		}
 		// Second, return pending frees to free_list
 		std::list<RetiredFrame>::iterator frame_iter = retired_frames_.begin();
 		for (; frame_iter != retired_frames_.end();)
 		{
-			if (frame_iter->frame_id + 3 == frame_id_)
+			if (frame_iter->frame_id + 3 <= frame_id)
 			{
 				std::list<SubAlloc>::iterator iter = frame_iter->pending_frees_.begin();
 				for (; iter != frame_iter->pending_frees_.end(); ++ iter)
@@ -144,12 +164,12 @@ namespace KlayGE
 					this->Free(*iter);
 				}
 				frame_iter = retired_frames_.erase(frame_iter);
-			}else
+			}
+			else
 			{
 				++ frame_iter;
 			}
 		}
-		++ frame_id_;		
 	}
 
 	void TransientBuffer::Free(SubAlloc const & alloc)
@@ -210,7 +230,7 @@ namespace KlayGE
 		}
 		if (!left_merged && !right_merged)
 		{
-			free_list_.insert(insert_position,alloc);
+			free_list_.insert(insert_position, alloc);
 		}
 	}
 
