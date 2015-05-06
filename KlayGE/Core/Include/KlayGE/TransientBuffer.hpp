@@ -45,7 +45,7 @@ namespace KlayGE
 	{
 		uint32_t offset_;
 		uint32_t length_;
-		void* data_;
+		void const * data_;
 		
 		SubAlloc()
 			: offset_(0), length_(0), data_(nullptr)
@@ -84,11 +84,10 @@ namespace KlayGE
 		TransientBuffer(uint32_t size_in_byte, BindFlag bind_flag);
 
 		// Allocate a sub space from transient buffer
-		SubAlloc Alloc(uint32_t size_in_byte, void* data);
+		SubAlloc Alloc(uint32_t size_in_byte, void const * data);
 		// Knowtify transient buffer that this alloc is unused and will be freed at the end of the frame.
-		void KnowtifyUnused(SubAlloc const & alloc);
-		// Bufferred Map/Unmap.
-		void UploadData();
+		void Dealloc(SubAlloc const & alloc);
+		void EnsureDataReady();
 		// Do with retired frames
 		void OnPresent();
 
@@ -98,19 +97,21 @@ namespace KlayGE
 		}
 
 	private:
-		GraphicsBufferPtr CreateBuffer(BindFlag bind_flag);
+		GraphicsBufferPtr DoCreateBuffer(BindFlag bind_flag);
 		// Free the sub alloc and return the space allocated back to transient buffer.
-		void Free(SubAlloc const & alloc);
-		// Feed data to transient buffer and cache them.
-		void FeedData(SubAlloc const & alloc);
+		void DoFree(SubAlloc const & alloc);
 
 	private:
+		bool use_no_overwrite_;
+
 		GraphicsBufferPtr buffer_;
-		uint32_t buffer_size_;
 		std::list<SubAlloc> free_list_;
-		std::vector<SubAlloc> data_list_;
 		std::list<RetiredFrame> retired_frames_;
 		BindFlag bind_flag_;
+
+		std::vector<uint8_t> simulate_buffer_;
+		uint32_t valid_min_;
+		uint32_t valid_max_;
 	};
 }
 
