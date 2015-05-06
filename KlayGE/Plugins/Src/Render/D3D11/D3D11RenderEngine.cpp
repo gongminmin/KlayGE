@@ -1164,6 +1164,17 @@ namespace KlayGE
 		caps_.hs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.ds_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 
+		bool check_16bpp_fmts = false;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+		IDXGIFactory2* factory;
+		gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
+		if (factory != nullptr)
+		{
+			check_16bpp_fmts = true;
+			factory->Release();
+		}
+#endif
+
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
 			std::make_pair(EF_A8, DXGI_FORMAT_A8_UNORM),
@@ -1241,6 +1252,12 @@ namespace KlayGE
 			if ((caps_.max_shader_model < 5)
 				&& ((EF_BC6 == fmts[i].first) || (EF_SIGNED_BC6 == fmts[i].first)
 					|| (EF_BC7 == fmts[i].first) || (EF_BC7_SRGB == fmts[i].first)))
+			{
+				continue;
+			}
+
+			if (!check_16bpp_fmts
+				&& ((EF_R5G6B5 == fmts[i].first) || (EF_A1RGB5 == fmts[i].first) || (EF_ARGB4 == fmts[i].first)))
 			{
 				continue;
 			}
