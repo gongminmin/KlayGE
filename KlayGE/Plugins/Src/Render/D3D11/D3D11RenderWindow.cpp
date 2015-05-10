@@ -547,6 +547,10 @@ namespace KlayGE
 		}
 		rs_view_.reset();
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+		render_target_view_right_eye_.reset();
+		depth_stencil_view_right_eye_.reset();
+#endif
 		render_target_view_.reset();
 		depth_stencil_view_.reset();
 		back_buffer_.reset();
