@@ -34,6 +34,16 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
+#elif defined(__GNUC__) || defined(__clang__)
+#define __in
+#define __in_ecount(size)
+#define __out
+#define __out_ecount(size)
+#define __in_bcount(size)
+#define __in_opt
+#define __in_ecount_opt(size)
+#define __out_opt
+#define __in_xcount_opt(size) 
 #endif
 
 #include <stdio.h>
