@@ -206,15 +206,20 @@ namespace KlayGE
 			if (iter == vaos_.end())
 			{
 				glGenVertexArrays(1, &vao);
-				vaos_.insert(std::make_pair(so, vao));
-
 				glBindVertexArray(vao);
+				
+				vaos_.insert(std::make_pair(so, vao));
 				this->BindVertexStreams(so);
 			}
 			else
 			{
 				vao = iter->second;
 				glBindVertexArray(vao);
+				if (streams_dirty_)
+				{
+					this->BindVertexStreams(so);
+					streams_dirty_ = false;
+				}
 			}
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());

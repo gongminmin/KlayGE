@@ -81,7 +81,7 @@ namespace KlayGE
 			uint32_t const size = this->VertexSize(i);
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
-			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 			{
 				glVertexArrayVertexBuffer(vao, i, stream.GLvbo(), this->StartVertexLocation() * size, size);
 			}
@@ -102,13 +102,13 @@ namespace KlayGE
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(use_vao_);
-					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 					{
 						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized, elem_offset);
 						glVertexArrayAttribBinding(vao, attr, i);
 						glEnableVertexArrayAttrib(vao, attr);
 					}
-					else if (glloader_GL_EXT_direct_state_access())
+					else if (use_vao_ && glloader_GL_EXT_direct_state_access())
 					{
 						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
 							normalized, size, offset);
@@ -134,7 +134,7 @@ namespace KlayGE
 			uint32_t const instance_size = this->InstanceSize();
 			BOOST_ASSERT(this->NumInstances() * instance_size <= stream.Size());
 
-			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 			{
 				glVertexArrayVertexBuffer(vao, this->NumVertexStreams(), stream.GLvbo(),
 					this->StartInstanceLocation() * instance_size, instance_size);
@@ -159,13 +159,13 @@ namespace KlayGE
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
 					stream.Active(use_vao_);
-					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 					{
 						glVertexArrayAttribFormat(vao, attr, num_components, type, normalized, elem_offset);
 						glVertexArrayAttribBinding(vao, attr, this->NumVertexStreams());
 						glEnableVertexArrayAttrib(vao, attr);
 					}
-					else if (glloader_GL_EXT_direct_state_access())
+					else if (use_vao_ && glloader_GL_EXT_direct_state_access())
 					{
 						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
 							normalized, instance_size, offset);
@@ -207,11 +207,11 @@ namespace KlayGE
 		{
 			if (!used_streams[i])
 			{
-				if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+				if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 				{
 					glDisableVertexArrayAttrib(vao, i);
 				}
-				else if (glloader_GL_EXT_direct_state_access())
+				else if (use_vao_ && glloader_GL_EXT_direct_state_access())
 				{
 					glDisableVertexArrayAttribEXT(vao, i);
 				}
@@ -236,11 +236,11 @@ namespace KlayGE
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 					{
 						glDisableVertexArrayAttrib(vao, attr);
 					}
-					else if (glloader_GL_EXT_direct_state_access())
+					else if (use_vao_ && glloader_GL_EXT_direct_state_access())
 					{
 						glDisableVertexArrayAttribEXT(vao, attr);
 					}
@@ -254,7 +254,7 @@ namespace KlayGE
 
 		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
 		{
-			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 			{
 				glVertexArrayBindingDivisor(vao, this->NumVertexStreams(), 0);
 			}
@@ -266,11 +266,11 @@ namespace KlayGE
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{
-					if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+					if (use_vao_ && (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access()))
 					{
 						glDisableVertexArrayAttrib(vao, attr);
 					}
-					else if (glloader_GL_EXT_direct_state_access())
+					else if (use_vao_ && glloader_GL_EXT_direct_state_access())
 					{
 						glDisableVertexArrayAttribEXT(vao, attr);
 
@@ -327,6 +327,11 @@ namespace KlayGE
 			{
 				vao = iter->second;
 				glBindVertexArray(vao);
+				if (streams_dirty_)
+				{
+					this->BindVertexStreams(so, vao);
+					streams_dirty_ = false;
+				}
 			}
 
 			if (this->UseIndices())

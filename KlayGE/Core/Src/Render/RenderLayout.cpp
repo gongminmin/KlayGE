@@ -37,7 +37,8 @@ namespace KlayGE
 				start_vertex_location_(0),
 				start_index_location_(0),
 				base_vertex_location_(0),
-				start_instance_location_(0)
+				start_instance_location_(0),
+				streams_dirty_(true)
 	{
 		vertex_streams_.reserve(4);
 	}
@@ -55,6 +56,7 @@ namespace KlayGE
 	void RenderLayout::NumVertices(uint32_t n)
 	{
 		force_num_vertices_ = n;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::NumVertices() const
@@ -112,6 +114,8 @@ namespace KlayGE
 			instance_stream_.type = type;
 			instance_stream_.freq = freq;
 		}
+
+		streams_dirty_ = true;
 	}
 
 	bool RenderLayout::UseIndices() const
@@ -122,6 +126,7 @@ namespace KlayGE
 	void RenderLayout::NumIndices(uint32_t n)
 	{
 		force_num_indices_ = n;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::NumIndices() const
@@ -147,6 +152,8 @@ namespace KlayGE
 
 		index_stream_ = buffer;
 		index_format_ = format;
+
+		streams_dirty_ = true;
 	}
 
 	GraphicsBufferPtr const & RenderLayout::GetIndexStream() const
@@ -163,6 +170,7 @@ namespace KlayGE
 	void RenderLayout::NumInstances(uint32_t n)
 	{
 		force_num_instances_ = n;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::NumInstances() const
@@ -189,6 +197,7 @@ namespace KlayGE
 	void RenderLayout::StartVertexLocation(uint32_t location)
 	{
 		start_vertex_location_ = location;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::StartVertexLocation() const
@@ -199,6 +208,7 @@ namespace KlayGE
 	void RenderLayout::StartIndexLocation(uint32_t location)
 	{
 		start_index_location_ = location;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::StartIndexLocation() const
@@ -209,6 +219,7 @@ namespace KlayGE
 	void RenderLayout::StartInstanceLocation(uint32_t location)
 	{
 		start_instance_location_ = location;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::StartInstanceLocation() const
@@ -219,6 +230,7 @@ namespace KlayGE
 	void RenderLayout::BindIndirectArgs(GraphicsBufferPtr const & args_buff)
 	{
 		indirect_args_buff_ = args_buff;
+		streams_dirty_ = true;
 	}
 
 	GraphicsBufferPtr const & RenderLayout::GetIndirectArgs() const
@@ -229,6 +241,7 @@ namespace KlayGE
 	void RenderLayout::IndirectArgsOffset(uint32_t offset)
 	{
 		indirect_args_offset = offset;
+		streams_dirty_ = true;
 	}
 
 	uint32_t RenderLayout::IndirectArgsOffset() const

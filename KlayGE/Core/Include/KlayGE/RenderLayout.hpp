@@ -171,6 +171,7 @@ namespace KlayGE
 		void SetVertexStream(uint32_t index, GraphicsBufferPtr const & gb)
 		{
 			vertex_streams_[index].stream = gb;
+			streams_dirty_ = true;
 		}
 		template <typename tuple_type>
 		void VertexStreamFormat(uint32_t index, tuple_type const & vertex_elems)
@@ -186,6 +187,8 @@ namespace KlayGE
 				size += vet[i].element_size();
 			}
 			vertex_streams_[index].vertex_size = size;
+
+			streams_dirty_ = true;
 		}
 		vertex_elements_type const & VertexStreamFormat(uint32_t index) const
 		{
@@ -207,6 +210,7 @@ namespace KlayGE
 		{
 			vertex_streams_[index].type = type;
 			vertex_streams_[index].freq = freq;
+			streams_dirty_ = true;
 		}
 
 		bool UseIndices() const;
@@ -298,6 +302,8 @@ namespace KlayGE
 
 		GraphicsBufferPtr indirect_args_buff_;
 		uint32_t indirect_args_offset;
+
+		mutable bool streams_dirty_;
 	};
 }
 
