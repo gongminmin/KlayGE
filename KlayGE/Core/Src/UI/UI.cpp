@@ -206,25 +206,23 @@ namespace KlayGE
 			
 			uint16_t const last_index = static_cast<uint16_t>(tb_vb_sub_allocs_.back().offset_ / sizeof(UIManager::VertexFormat));
 			std::vector<uint16_t> indices;
+			indices.resize(restart_ ? 5 : 6);
+			indices[0] = last_index + 0;
+			indices[1] = last_index + 1;
 			if (restart_)
 			{
-				indices.reserve(5);
-				indices.push_back(last_index + 0);
-				indices.push_back(last_index + 1);
-				indices.push_back(last_index + 3);
-				indices.push_back(last_index + 2);
-				indices.push_back(0xFFFF);
+				indices[2] = last_index + 3;
+				indices[3] = last_index + 2;
+				indices[4] = 0xFFFF;
 			}
 			else
 			{
-				indices.reserve(6);
-				indices.push_back(last_index + 0);
-				indices.push_back(last_index + 1);
-				indices.push_back(last_index + 2);
-				indices.push_back(last_index + 2);
-				indices.push_back(last_index + 3);
-				indices.push_back(last_index + 0);
+				indices[2] = last_index + 2;
+				indices[3] = last_index + 2;
+				indices[4] = last_index + 3;
+				indices[5] = last_index + 0;
 			}
+			BOOST_ASSERT(last_index + 3 <= 0xFFFF);
 
 			tb_ib_sub_allocs_.push_back(tb_ib_->Alloc(static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]));
 		}

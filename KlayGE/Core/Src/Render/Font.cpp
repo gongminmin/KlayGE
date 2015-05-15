@@ -101,10 +101,10 @@ namespace KlayGE
 			half_width_height_ep_ = effect_->ParameterByName("half_width_height");
 			mvp_ep_ = effect_->ParameterByName("mvp");
 
-			uint32_t const index_per_char = restart_ ? 5 : 6;
+			uint32_t const INDEX_PER_CHAR = restart_ ? 5 : 6;
 			uint32_t const INIT_NUM_CHAR = 1024;
 			tb_vb_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * 4 * sizeof(FontVert)), TransientBuffer::BF_Vertex);
-			tb_ib_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * index_per_char * sizeof(uint16_t)), TransientBuffer::BF_Index);
+			tb_ib_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * INDEX_PER_CHAR * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
 			rl_->BindVertexStream(tb_vb_->GetBuffer(), make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 											vertex_element(VEU_Diffuse, 0, EF_ABGR8),
@@ -411,6 +411,7 @@ namespace KlayGE
 					}
 					last_index += 4;
 				}
+				BOOST_ASSERT(last_index + 3 <= 0xFFFF);
 				tb_ib_sub_allocs_.push_back(tb_ib_->Alloc(static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]));
 
 				pos_aabb_ |= AABBox(float3(sx[i], sy[i], sz), float3(sx[i] + lines[i].first, sy[i] + h, sz + 0.1f));
