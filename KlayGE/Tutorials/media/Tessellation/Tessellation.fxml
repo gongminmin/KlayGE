@@ -1,0 +1,105 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="float4" name="tess_factors"/>
+
+	<shader>
+		<![CDATA[
+void NoTessellationVS(float4 pos		: POSITION,
+					out float4 oPos		: SV_Position)
+{
+	oPos = pos;
+}
+
+float4 ShadePS() : SV_Target
+{
+	return float4(1, 1, 0, 1);
+}
+		]]>
+	</shader>
+	
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+	float3 Pos : POSITION;
+};
+
+VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION)
+{
+	VS_CONTROL_POINT_OUTPUT output;
+	
+	output.Pos = pos.xyz;
+
+	return output;
+}
+		
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	// Tess factor for the FF HW block
+	float edges[3]	: SV_TessFactor;
+	float inside	: SV_InsideTessFactor;
+};
+
+HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
+{
+	HS_CONSTANT_DATA_OUTPUT output;
+
+	// Edge 0
+	output.edges[0] = tess_factors.x;
+	// Edge 1
+	output.edges[1] = tess_factors.y;
+	// Edge 2
+	output.edges[2] = tess_factors.z;
+	// Inside
+	output.inside = tess_factors.w;
+
+	return output;
+}
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("TessellationConstantsHS")]
+VS_CONTROL_POINT_OUTPUT TessellationHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+										uint i : SV_OutputControlPointID)
+{
+	return p[i];
+}
+
+[domain("tri")]
+void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<VS_CONTROL_POINT_OUTPUT, 3> patch,
+
+							out float4 oPos : SV_Position)
+{
+	oPos = float4(patch[0].Pos * bc_coords.z
+			+ patch[1].Pos * bc_coords.x
+			+ patch[2].Pos * bc_coords.y, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="NoTessellation">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+
+			<state name="vertex_shader" value="NoTessellationVS()"/>
+			<state name="pixel_shader" value="ShadePS()"/>
+		</pass>
+	</technique>
+
+	<technique name="Tessellation">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+			
+			<state name="vertex_shader" value="TessellationVS()"/>
+			<state name="hull_shader" value="TessellationHS()"/>
+			<state name="domain_shader" value="TessellationDS()"/>
+			<state name="pixel_shader" value="ShadePS()"/>
+		</pass>
+	</technique>
+</effect>
+

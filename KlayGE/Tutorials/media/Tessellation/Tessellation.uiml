@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Parameters" caption="Parameters" x="-160" y="140" align_x="right" width="160" height="390">
+		<control type="check_box" id="Tessellation" caption="Tessellation On" x="20" y="20" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+
+		<control type="static" id="Edge0Static" caption="Edge 0:" x="20" y="90" width="120" height="24" is_default="0"/>
+		<control type="slider" id="Edge0Slider" x="20" y="110" width="120" height="24" min="10" max="320" value="100" is_default="0"/>
+
+		<control type="static" id="Edge1Static" caption="Edge 1:" x="20" y="150" width="120" height="24" is_default="0"/>
+		<control type="slider" id="Edge1Slider" x="20" y="170" width="120" height="24" min="10" max="320" value="100" is_default="0"/>
+
+		<control type="static" id="Edge2Static" caption="Edge 2:" x="20" y="210" width="120" height="24" is_default="0"/>
+		<control type="slider" id="Edge2Slider" x="20" y="230" width="120" height="24" min="10" max="320" value="100" is_default="0"/>
+
+		<control type="static" id="InsideStatic" caption="Inside:" x="20" y="300" width="120" height="24" is_default="0"/>
+		<control type="slider" id="InsideSlider" x="20" y="320" width="120" height="24" min="10" max="320" value="100" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>
