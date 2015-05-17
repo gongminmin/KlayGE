@@ -61,7 +61,6 @@ namespace
 			};
 
 			rl_ = rf.MakeRenderLayout();
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 			ElementInitData init_data;
 			init_data.row_pitch = sizeof(xyzs);
@@ -78,10 +77,12 @@ namespace
 		{
 			if (enabled)
 			{
+				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 				technique_ = technique_->Effect().TechniqueByName("Tessellation");
 			}
 			else
 			{
+				rl_->TopologyType(RenderLayout::TT_TriangleList);
 				technique_ = technique_->Effect().TechniqueByName("NoTessellation");
 			}
 		}

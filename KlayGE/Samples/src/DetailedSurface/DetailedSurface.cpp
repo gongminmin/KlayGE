@@ -304,6 +304,15 @@ namespace
 			}
 
 			technique_ = technique_->Effect().TechniqueByName(tech_name);
+
+			if (DT_Tessellation == detail_type_)
+			{
+				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+			}
+			else
+			{
+				rl_->TopologyType(RenderLayout::TT_TriangleList);
+			}
 		}
 
 	private:

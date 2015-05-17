@@ -1113,7 +1113,7 @@ namespace KlayGE
 									rules &= ~GSR_UseUBO;
 								}
 							}
-							dxbc2glsl.FeedDXBC(&code[0], false, gsv, rules);
+							dxbc2glsl.FeedDXBC(&code[0], false, STP_Undefined, STOP_Undefined, gsv, rules);
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();

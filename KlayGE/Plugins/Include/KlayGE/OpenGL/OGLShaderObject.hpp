@@ -91,6 +91,7 @@ namespace KlayGE
 		shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
 		shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
 		GLint gs_input_type_, gs_output_type_, gs_max_output_vertex_;
+		uint32_t ds_partitioning_, ds_output_primitive_;
 
 		parameter_binds_t param_binds_;
 

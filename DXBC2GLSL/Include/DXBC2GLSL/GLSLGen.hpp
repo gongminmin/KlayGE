@@ -95,16 +95,30 @@ struct RegisterDesc
 struct HSForkPhase
 {
 	uint32_t fork_instance_count;
-	std::vector<KlayGE::shared_ptr<ShaderDecl>> dcls;
+	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
 	
 	HSForkPhase()
-		:fork_instance_count(0){}
+		: fork_instance_count(0)
+	{
+	}
+};
+
+struct HSJoinPhase
+{
+	uint32_t join_instance_count;
+	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
+	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	
+	HSJoinPhase()
+		: join_instance_count(0)
+	{
+	}
 };
 
 struct HSControlPointPhase
 {
-	std::vector<KlayGE::shared_ptr<ShaderDecl>> dcls;
+	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
 	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
 };
 
@@ -113,10 +127,13 @@ class GLSLGen
 public:
 	static uint32_t DefaultRules(GLSLVersion version);
 
-	void FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
+	void FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program,
+		bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+		GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
-	void ToHSForkPhases(std::ostream& out);
 	void ToHSControlPointPhase(std::ostream& out);
+	void ToHSForkPhases(std::ostream& out);
+	void ToHSJoinPhases(std::ostream& out);
 
 private:
 	void ToDeclarations(std::ostream& out);
@@ -172,22 +189,28 @@ private:
 	void FindLabels();
 	void FindEndOfProgram();
 	void FindTempDcls();
-	void FindHSForkPhases();
 	void FindHSControlPointPhase();
+	void FindHSForkPhases();
+	void FindHSJoinPhases();
 
 private:
 	KlayGE::shared_ptr<ShaderProgram> program_;
 
 	ShaderType shader_type_;
 	bool has_gs_;
+	ShaderTessellatorPartitioning ds_partitioning_;
+	ShaderTessellatorOutputPrimitive ds_output_primitive_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;
 	std::vector<TextureSamplerInfo> textures_;
-	std::vector<KlayGE::shared_ptr<ShaderDecl> > temp_dcls_;
+	std::vector<ShaderDecl> temp_dcls_;
 	std::map<int64_t, bool> cb_index_mode_;
-	std::vector<HSForkPhase> hs_fork_phases_;
 	std::vector<HSControlPointPhase> hs_control_point_phase_;
+	std::vector<HSForkPhase> hs_fork_phases_;
+	std::vector<HSJoinPhase> hs_join_phases_;
 	bool enter_hs_fork_phase_;
 	bool enter_final_hs_fork_phase_;
+	bool enter_hs_join_phase_;
+	bool enter_final_hs_join_phase_;
 
 	// for ifs, the insn number of the else or endif if there is no else
 	// for elses, the insn number of the endif

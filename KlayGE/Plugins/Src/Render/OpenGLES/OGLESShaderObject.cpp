@@ -1672,25 +1672,21 @@ namespace KlayGE
 				break;
 
 			case ST_GeometryShader:
-				if (caps.max_shader_model < 4)
-				{
-					is_shader_validate_[type] = false;
-				}
-				else
+				if (caps.gs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "gs_5_0";
 					}
 				}
-				break;
-
-			case ST_ComputeShader:
-				if (caps.max_shader_model < 4)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_ComputeShader:
+				if (caps.cs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
@@ -1701,33 +1697,37 @@ namespace KlayGE
 						is_shader_validate_[type] = false;
 					}
 				}
-				break;
-
-			case ST_HullShader:
-				if (caps.max_shader_model < 5)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_HullShader:
+				if (caps.hs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "hs_5_0";
 					}
 				}
-				break;
-
-			case ST_DomainShader:
-				if (caps.max_shader_model < 5)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_DomainShader:
+				if (caps.ds_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "ds_5_0";
 					}
+				}
+				else
+				{
+					is_shader_validate_[type] = false;
 				}
 				break;
 
@@ -1963,7 +1963,7 @@ namespace KlayGE
 							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
-						dxbc2glsl.FeedDXBC(&code[0], false, gsv, rules);
+						dxbc2glsl.FeedDXBC(&code[0], false, STP_Undefined, STOP_Undefined, gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();

@@ -1581,8 +1581,7 @@ namespace KlayGE
 
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_gpu_shader5())
 		{
-			//caps_.max_shader_model = 5;
-			caps_.max_shader_model = 4;
+			caps_.max_shader_model = 5;
 		}
 		else
 		{
@@ -1732,18 +1731,16 @@ namespace KlayGE
 		caps_.cs_support = false;
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
 		{
-			//caps_.hs_support = true;
-			//caps_.ds_support = true;
-			caps_.hs_support = false;
-			caps_.ds_support = false;
+			caps_.hs_support = true;
+			caps_.ds_support = true;
+			caps_.tess_method = TM_Hardware;
 		}
 		else
 		{
 			caps_.hs_support = false;
 			caps_.ds_support = false;
+			caps_.tess_method = TM_No;
 		}
-
-		caps_.tess_method = TM_No;
 
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
 		if (vendor.find("NVIDIA", 0) != std::string::npos)

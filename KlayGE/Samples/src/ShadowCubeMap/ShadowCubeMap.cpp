@@ -390,6 +390,8 @@ namespace
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
+			mesh_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
 			if (gen_sm)
 			{
 				switch (sm_type_)
@@ -402,6 +404,7 @@ namespace
 							if (TM_Hardware == caps.tess_method)
 							{
 								technique_ = effect_->TechniqueByName("GenDPShadowMapTess5Tech");
+								mesh_rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 							}
 							else
 							{

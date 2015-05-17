@@ -1082,7 +1082,8 @@ namespace
 namespace KlayGE
 {
 	OGLShaderObject::OGLShaderObject()
-		: gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0)
+		: gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0),
+			ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 	{
 		has_discard_ = false;
 		has_tessellation_ = false;
@@ -1680,6 +1681,8 @@ namespace KlayGE
 		case ST_VertexShader:
 		case ST_PixelShader:
 		case ST_GeometryShader:
+		case ST_HullShader:
+		case ST_DomainShader:
 			break;
 
 		default:
@@ -1723,25 +1726,21 @@ namespace KlayGE
 				break;
 
 			case ST_GeometryShader:
-				if (caps.max_shader_model < 4)
-				{
-					is_shader_validate_[type] = false;
-				}
-				else
+				if (caps.gs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "gs_5_0";
 					}
 				}
-				break;
-
-			case ST_ComputeShader:
-				if (caps.max_shader_model < 4)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_ComputeShader:
+				if (caps.cs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
@@ -1752,33 +1751,37 @@ namespace KlayGE
 						is_shader_validate_[type] = false;
 					}
 				}
-				break;
-
-			case ST_HullShader:
-				if (caps.max_shader_model < 5)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_HullShader:
+				if (caps.hs_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "hs_5_0";
 					}
 				}
-				break;
-
-			case ST_DomainShader:
-				if (caps.max_shader_model < 5)
+				else
 				{
 					is_shader_validate_[type] = false;
 				}
-				else
+				break;
+
+			case ST_DomainShader:
+				if (caps.ds_support)
 				{
 					if (CT_HASH("auto") == shader_profile_hash)
 					{
 						shader_profile = "ds_5_0";
 					}
+				}
+				else
+				{
+					is_shader_validate_[type] = false;
 				}
 				break;
 
@@ -1992,7 +1995,10 @@ namespace KlayGE
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
-						dxbc2glsl.FeedDXBC(&code[0], has_gs, gsv, rules);
+						dxbc2glsl.FeedDXBC(&code[0],
+							has_gs, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
+							static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
+							gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2184,6 +2190,11 @@ namespace KlayGE
 
 							gs_max_output_vertex_ = dxbc2glsl.MaxGSOutputVertex();
 						}
+						else if (ST_HullShader == type)
+						{
+							ds_partitioning_ = dxbc2glsl.DSPartitioning();
+							ds_output_primitive_ = dxbc2glsl.DSOutputPrimitive();
+						}
 					}
 					catch (std::exception& ex)
 					{
@@ -2232,6 +2243,11 @@ namespace KlayGE
 			else if (ST_PixelShader == type)
 			{
 				has_discard_ = so->has_discard_;
+			}
+			else if (ST_HullShader == type)
+			{
+				ds_partitioning_ = so->ds_partitioning_;
+				ds_output_primitive_ = so->ds_output_primitive_;
 			}
 
 			for (uint32_t j = 0; j < so->tex_sampler_binds_.size(); ++ j)
@@ -2370,6 +2386,8 @@ namespace KlayGE
 		ret->gs_input_type_ = gs_input_type_;
 		ret->gs_output_type_ = gs_output_type_;
 		ret->gs_max_output_vertex_ = gs_max_output_vertex_;
+		ret->ds_partitioning_ = ds_partitioning_;
+		ret->ds_output_primitive_ = ds_output_primitive_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
@@ -2687,6 +2705,14 @@ namespace KlayGE
 			shader_type = GL_GEOMETRY_SHADER_EXT;
 			break;
 
+		case ST_HullShader:
+			shader_type = GL_TESS_CONTROL_SHADER;
+			break;
+
+		case ST_DomainShader:
+			shader_type = GL_TESS_EVALUATION_SHADER;
+			break;
+
 		default:
 			shader_type = 0;
 			break;
@@ -2780,19 +2806,30 @@ namespace KlayGE
 				if (re.HackForNV())
 				{
 					std::istringstream err_iss(&info[0]);
-					std::string type;
-					err_iss >> type;
-					if ("Vertex" == type)
+					std::string type1, type2;
+					err_iss >> type1 >> type2;
+					if ("Vertex" == type1)
 					{
 						this->PrintGLSLError(ST_VertexShader, &info[0]);
 					}
-					else if ("Geometry" == type)
+					else if ("Geometry" == type1)
 					{
-						this->PrintGLSLError(ST_VertexShader, &info[0]);
+						this->PrintGLSLError(ST_GeometryShader, &info[0]);
 					}
-					else if ("Fragment" == type)
+					else if ("Fragment" == type1)
 					{
-						this->PrintGLSLError(ST_VertexShader, &info[0]);
+						this->PrintGLSLError(ST_PixelShader, &info[0]);
+					}
+					else if ("Tessellation" == type1)
+					{
+						if ("control" == type2)
+						{
+							this->PrintGLSLError(ST_HullShader, &info[0]);
+						}
+						else
+						{
+							this->PrintGLSLError(ST_DomainShader, &info[0]);
+						}
 					}
 					else
 					{

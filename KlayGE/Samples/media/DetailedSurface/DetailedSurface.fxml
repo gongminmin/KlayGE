@@ -349,7 +349,7 @@ VS_CONTROL_POINT_OUTPUT TessellationVS(float4 pos	: POSITION,
 
 	return output;
 }
-		
+
 struct HS_CONSTANT_DATA_OUTPUT
 {
 	// Tess factor for the FF HW block
@@ -409,7 +409,7 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	float u = bc_coords.x;
 	float v = bc_coords.y;
 	float w = bc_coords.z;
-	
+
 	float2 texcoord0 = patch[0].Texcoord0 * w
 			+ patch[1].Texcoord0 * u
 			+ patch[2].Texcoord0 * v;
@@ -435,9 +435,9 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			+ patch[2].Pos * v;
 	float height = (judatex2d_level_wrap(height_tex_bb, texcoord0, 0).r - 1) * distortion;
 	pos += height * normal;
-	
+
 	oPos = mul(float4(pos, 1), mvp);
-	
+
 	float3x3 obj_to_tangent;
 	obj_to_tangent[0] = tangent;
 	obj_to_tangent[1] = binormal;
@@ -450,7 +450,7 @@ void TessellationDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	oL.xyz = mul(obj_to_tangent, light_vec);
 	oH.xyz = mul(obj_to_tangent, half_vec);
 	oV = mul(obj_to_tangent, view_vec);
-	
+
 	oL.w = texcoord0.x;
 	oH.w = texcoord0.y;
 }

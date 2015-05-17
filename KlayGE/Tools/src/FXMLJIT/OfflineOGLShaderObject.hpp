@@ -65,6 +65,7 @@ namespace KlayGE
 			shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
 			shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
 			int32_t gs_input_type_, gs_output_type_, gs_max_output_vertex_;
+			uint32_t ds_partitioning_, ds_output_primitive_;
 
 			std::vector<tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
 		};

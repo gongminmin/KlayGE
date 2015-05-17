@@ -383,6 +383,51 @@ namespace KlayGE
 			primCount = vertexCount - 2;
 			break;
 
+		case RenderLayout::TT_1_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_2_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_3_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_4_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_5_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_6_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_7_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_8_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_9_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_10_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_11_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_12_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_13_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_14_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_15_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_16_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_17_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_18_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_19_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_20_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_21_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_22_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_23_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_24_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_25_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_26_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_27_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_28_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_29_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_30_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_31_Ctrl_Pt_PatchList:
+		case RenderLayout::TT_32_Ctrl_Pt_PatchList:
+			if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
+			{
+				primType = GL_PATCHES;
+				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;
+				glPatchParameteri(GL_PATCH_VERTICES, n);
+				primCount = vertexCount / 3;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
 		default:
 			THR(errc::function_not_supported);
 		}

@@ -51,8 +51,12 @@ namespace DXBC2GLSL
 	public:
 		static uint32_t DefaultRules(GLSLVersion version);
 
-		void FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version);
-		void FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version, uint32_t glsl_rules);
+		void FeedDXBC(void const * dxbc_data,
+			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+			GLSLVersion version);
+		void FeedDXBC(void const * dxbc_data,
+			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+			GLSLVersion version, uint32_t glsl_rules);
 
 		std::string const & GLSLString() const;
 
@@ -78,6 +82,9 @@ namespace DXBC2GLSL
 		ShaderPrimitiveTopology GSOutputTopology(uint32_t index) const;
 		uint32_t MaxGSOutputVertex() const;
 		uint32_t GSInstanceCount() const;
+
+		ShaderTessellatorPartitioning DSPartitioning() const;
+		ShaderTessellatorOutputPrimitive DSOutputPrimitive() const;
 
 	private:
 		KlayGE::shared_ptr<DXBCContainer> dxbc_;

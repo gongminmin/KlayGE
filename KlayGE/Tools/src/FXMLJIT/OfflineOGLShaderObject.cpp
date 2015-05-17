@@ -372,7 +372,8 @@ namespace KlayGE
 	{
 		OGLShaderObject::OGLShaderObject(OfflineRenderDeviceCaps const & caps)
 			: ShaderObject(caps),
-				gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0)
+				gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0),
+				ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 		{
 			is_shader_validate_.fill(true);
 
@@ -1135,7 +1136,10 @@ namespace KlayGE
 							DXBC2GLSL::DXBC2GLSL dxbc2glsl;
 							uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 							rules &= ~GSR_UniformBlockBinding;
-							dxbc2glsl.FeedDXBC(&code[0], has_gs, gsv, rules);
+							dxbc2glsl.FeedDXBC(&code[0],
+								has_gs, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
+								static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
+								gsv, rules);
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -1326,6 +1330,11 @@ namespace KlayGE
 								}
 
 								gs_max_output_vertex_ = dxbc2glsl.MaxGSOutputVertex();
+							}
+							else if (ST_HullShader == type)
+							{
+								ds_partitioning_ = dxbc2glsl.DSPartitioning();
+								ds_output_primitive_ = dxbc2glsl.DSOutputPrimitive();
 							}
 						}
 						catch (std::exception& ex)

@@ -412,15 +412,17 @@ struct ShaderParser
 					break;
 				
 				case SO_DCL_TESS_OUTPUT_PRIMITIVE:
-					program->ds_tessellator_output_primitive = dcl->dcl_tess_output_primitive.primitive;
+					program->ds_tessellator_output_primitive
+						= static_cast<ShaderTessellatorOutputPrimitive>(dcl->dcl_tess_output_primitive.primitive & 0x7);
 					break;
 
 				case SO_DCL_TESS_PARTITIONING:
-					program->ds_tessellator_partitioning = dcl->dcl_tess_partitioning.partitioning;
+					program->ds_tessellator_partitioning
+						= static_cast<ShaderTessellatorPartitioning>(dcl->dcl_tess_partitioning.partitioning & 0x7);
 					break;
 
 				case SO_DCL_TESS_DOMAIN:
-					program->ds_tessellator_domain = dcl->dcl_tess_domain.domain;
+					program->ds_tessellator_domain = static_cast<ShaderTessellatorDomain>(dcl->dcl_tess_domain.domain & 0x7);
 					break;
 
 				case SO_DCL_OUTPUT_CONTROL_POINT_COUNT:

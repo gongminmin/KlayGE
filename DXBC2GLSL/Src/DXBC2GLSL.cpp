@@ -40,12 +40,16 @@ namespace DXBC2GLSL
 		return GLSLGen::DefaultRules(version);
 	}
 
-	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version)
+	void DXBC2GLSL::FeedDXBC(void const * dxbc_data,
+			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+			GLSLVersion version)
 	{
-		this->FeedDXBC(dxbc_data, has_gs, version, this->DefaultRules(version));
+		this->FeedDXBC(dxbc_data, has_gs, ds_partitioning, ds_output_primitive, version, this->DefaultRules(version));
 	}
 
-	void DXBC2GLSL::FeedDXBC(void const * dxbc_data, bool has_gs, GLSLVersion version, uint32_t glsl_rules)
+	void DXBC2GLSL::FeedDXBC(void const * dxbc_data,
+			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive, 
+			GLSLVersion version, uint32_t glsl_rules)
 	{
 		dxbc_ = DXBCParse(dxbc_data);
 		if (dxbc_)
@@ -57,7 +61,7 @@ namespace DXBC2GLSL
 				std::stringstream ss;
 
 				GLSLGen converter;
-				converter.FeedDXBC(shader_, has_gs, version, glsl_rules);
+				converter.FeedDXBC(shader_, has_gs, ds_partitioning, ds_output_primitive, version, glsl_rules);
 				converter.ToGLSL(ss);
 
 				glsl_ = ss.str();
@@ -165,5 +169,15 @@ namespace DXBC2GLSL
 	uint32_t DXBC2GLSL::MaxGSOutputVertex() const
 	{
 		return shader_->max_gs_output_vertex;
+	}
+
+	ShaderTessellatorPartitioning DXBC2GLSL::DSPartitioning() const
+	{
+		return shader_->ds_tessellator_partitioning;
+	}
+
+	ShaderTessellatorOutputPrimitive DXBC2GLSL::DSOutputPrimitive() const
+	{
+		return shader_->ds_tessellator_output_primitive;
 	}
 }
