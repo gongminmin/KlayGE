@@ -282,6 +282,10 @@ void GLSLGen::ToGLSL(std::ostream& out)
 	{
 		out << "#extension GL_EXT_frag_depth : enable\n";
 	}
+	if (((ST_HS == shader_type_) || (ST_DS == shader_type_)) && (glsl_rules_ & GSR_EXTTessellationShader))
+	{
+		out << "#extension GL_EXT_tessellation_shader : enable\n";
+	}
 	out << "\n";
 
 	if (glsl_rules_ & GSR_Precision)

@@ -328,7 +328,8 @@ namespace KlayGE
 	namespace Offline
 	{
 		OGLESShaderObject::OGLESShaderObject(OfflineRenderDeviceCaps const & caps)
-			: ShaderObject(caps)
+			: ShaderObject(caps),
+				ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 		{
 			is_shader_validate_.fill(true);
 
@@ -1113,7 +1114,10 @@ namespace KlayGE
 									rules &= ~GSR_UseUBO;
 								}
 							}
-							dxbc2glsl.FeedDXBC(&code[0], false, STP_Undefined, STOP_Undefined, gsv, rules);
+							dxbc2glsl.FeedDXBC(&code[0],
+								false, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
+								static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
+								gsv, rules);
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -1252,6 +1256,11 @@ namespace KlayGE
 										}
 									}
 								}
+							}
+							else if (ST_HullShader == type)
+							{
+								ds_partitioning_ = dxbc2glsl.DSPartitioning();
+								ds_output_primitive_ = dxbc2glsl.DSOutputPrimitive();
 							}
 						}
 						catch (std::exception& ex)

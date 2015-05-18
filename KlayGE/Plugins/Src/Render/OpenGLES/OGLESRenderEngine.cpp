@@ -1649,10 +1649,18 @@ namespace KlayGE
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;
-		caps_.hs_support = false;
-		caps_.ds_support = false;
-		caps_.tess_method = TM_No;
-
+		if (glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
+		{
+			caps_.hs_support = true;
+			caps_.ds_support = true;
+			caps_.tess_method = TM_Hardware;
+		}
+		else
+		{
+			caps_.hs_support = false;
+			caps_.ds_support = false;
+			caps_.tess_method = TM_No;
+		}
 		
 		vertex_format_.insert(EF_A8);
 		vertex_format_.insert(EF_R8);

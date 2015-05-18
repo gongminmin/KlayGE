@@ -1051,6 +1051,7 @@ namespace
 namespace KlayGE
 {
 	OGLESShaderObject::OGLESShaderObject()
+		: ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 	{
 		has_discard_ = false;
 		has_tessellation_ = false;
@@ -1627,6 +1628,8 @@ namespace KlayGE
 		{
 		case ST_VertexShader:
 		case ST_PixelShader:
+		case ST_HullShader:
+		case ST_DomainShader:
 			break;
 
 		default:
@@ -1963,7 +1966,14 @@ namespace KlayGE
 							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
 							rules &= ~GSR_VersionDecl;
 						}
-						dxbc2glsl.FeedDXBC(&code[0], false, STP_Undefined, STOP_Undefined, gsv, rules);
+						if ((ST_HullShader == type) || (ST_DomainShader == type))
+						{
+							rules |= GSR_EXTTessellationShader;
+						}
+						dxbc2glsl.FeedDXBC(&code[0],
+							false, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
+							static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
+							gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
 						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
 						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
@@ -2103,6 +2113,11 @@ namespace KlayGE
 								}
 							}
 						}
+						else if (ST_HullShader == type)
+						{
+							ds_partitioning_ = dxbc2glsl.DSPartitioning();
+							ds_output_primitive_ = dxbc2glsl.DSOutputPrimitive();
+						}
 					}
 					catch (std::exception& ex)
 					{
@@ -2149,6 +2164,11 @@ namespace KlayGE
 			else if (ST_PixelShader == type)
 			{
 				has_discard_ = so->has_discard_;
+			}
+			else if (ST_HullShader == type)
+			{
+				ds_partitioning_ = so->ds_partitioning_;
+				ds_output_primitive_ = so->ds_output_primitive_;
 			}
 
 			for (uint32_t j = 0; j < so->tex_sampler_binds_.size(); ++ j)
@@ -2291,6 +2311,8 @@ namespace KlayGE
 		ret->vs_usages_ = vs_usages_;
 		ret->vs_usage_indices_ = vs_usage_indices_;
 		ret->glsl_vs_attrib_names_ = glsl_vs_attrib_names_;
+		ret->ds_partitioning_ = ds_partitioning_;
+		ret->ds_output_primitive_ = ds_output_primitive_;
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
@@ -2610,6 +2632,14 @@ namespace KlayGE
 
 		case ST_PixelShader:
 			shader_type = GL_FRAGMENT_SHADER;
+			break;
+
+		case ST_HullShader:
+			shader_type = GL_TESS_CONTROL_SHADER_EXT;
+			break;
+
+		case ST_DomainShader:
+			shader_type = GL_TESS_EVALUATION_SHADER_EXT;
 			break;
 
 		default:
