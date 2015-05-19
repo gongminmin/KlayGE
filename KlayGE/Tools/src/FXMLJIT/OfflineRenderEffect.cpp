@@ -3458,16 +3458,16 @@ namespace KlayGE
 		void RenderPass::CreateShaderObject()
 		{
 			OfflineRenderDeviceCaps const & caps = effect_.TargetDeviceCaps();
-			if (caps.platform.find("gl_") != -1)
+			if (caps.platform.find("gl_") != std::string::npos)
 			{
 				shader_obj_ = MakeSharedPtr<OGLShaderObject>(caps);
 			}
-			else if (caps.platform.find("gles_") != -1)
+			else if (caps.platform.find("gles_") != std::string::npos)
 			{
 				shader_obj_ = MakeSharedPtr<OGLESShaderObject>(caps);
 			}
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			else if (caps.platform.find("d3d_") != -1)
+			else if (caps.platform.find("d3d_") != std::string::npos)
 			{
 				shader_obj_ = MakeSharedPtr<D3D11ShaderObject>(caps);
 			}
