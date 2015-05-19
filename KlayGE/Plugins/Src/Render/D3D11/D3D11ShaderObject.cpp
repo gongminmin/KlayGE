@@ -540,7 +540,7 @@ namespace KlayGE
 			break;
 
 		case ST_GeometryShader:
-			if (caps.max_shader_model >= ShaderModel(4, 0))
+			if (caps.gs_support)
 			{
 				if (CT_HASH("auto") == shader_profile_hash)
 				{
@@ -550,7 +550,7 @@ namespace KlayGE
 			break;
 
 		case ST_ComputeShader:
-			if (caps.max_shader_model >= ShaderModel(4, 0))
+			if (caps.cs_support)
 			{
 				if (CT_HASH("auto") == shader_profile_hash)
 				{
@@ -560,7 +560,7 @@ namespace KlayGE
 			break;
 
 		case ST_HullShader:
-			if (caps.max_shader_model >= ShaderModel(5, 0))
+			if (caps.hs_support)
 			{
 				if (CT_HASH("auto") == shader_profile_hash)
 				{
@@ -570,7 +570,7 @@ namespace KlayGE
 			break;
 
 		case ST_DomainShader:
-			if (caps.max_shader_model >= ShaderModel(5, 0))
+			if (caps.ds_support)
 			{
 				if (CT_HASH("auto") == shader_profile_hash)
 				{
