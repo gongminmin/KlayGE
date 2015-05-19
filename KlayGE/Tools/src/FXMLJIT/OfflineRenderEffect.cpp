@@ -67,7 +67,7 @@ namespace
 	using namespace KlayGE;
 	using namespace KlayGE::Offline;
 
-	uint32_t const KFX_VERSION = 0x0106;
+	uint32_t const KFX_VERSION = 0x0107;
 
 	mutex singleton_mutex;
 
@@ -3678,11 +3678,25 @@ namespace KlayGE
 				}
 			}
 		
-			version_ = 0;
-			attr = node->Attrib("version");
+			ver_ = ShaderModel(0, 0);
+			attr = node->Attrib("major_version");
 			if (attr)
 			{
-				version_ = attr->ValueInt();
+				uint8_t minor_ver = 0;
+				XMLAttributePtr minor_attr = node->Attrib("minor_version");
+				if (minor_attr)
+				{
+					minor_ver = static_cast<uint8_t>(minor_attr->ValueInt());
+				}
+				ver_ = ShaderModel(static_cast<uint8_t>(attr->ValueInt()), minor_ver);
+			}
+			else
+			{
+				attr = node->Attrib("version");
+				if (attr)
+				{
+					ver_ = ShaderModel(static_cast<uint8_t>(attr->ValueInt()), 0);
+				}
 			}
 
 			for (XMLNodePtr shader_text_node = node->FirstNode(); shader_text_node; shader_text_node = shader_text_node->NextSibling())
@@ -3699,8 +3713,7 @@ namespace KlayGE
 			uint32_t tmp;
 			tmp = Native2LE(type_);
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
-			tmp = Native2LE(version_);
-			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
+			os.write(reinterpret_cast<char const *>(&ver_), sizeof(ver_));
 
 			uint32_t len = static_cast<uint32_t>(str_.size());
 			tmp = Native2LE(len);

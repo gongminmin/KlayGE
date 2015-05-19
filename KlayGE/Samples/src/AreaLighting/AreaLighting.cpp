@@ -84,11 +84,6 @@ AreaLightingApp::AreaLightingApp()
 
 bool AreaLightingApp::ConfirmDevice() const
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
-	{
-		return false;
-	}
 	return true;
 }
 

@@ -362,7 +362,7 @@ namespace KlayGE
 		tex_array_support_ = (caps.max_texture_array_length >= 4);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if ((caps.max_shader_model >= 5) && (caps.cs_support))
+		if ((caps.max_shader_model >= ShaderModel(5, 0)) && (caps.cs_support))
 		{
 			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
@@ -512,7 +512,7 @@ namespace KlayGE
 		}
 		else
 		{
-			if (caps.max_shader_model >= 4)
+			if (caps.max_shader_model >= ShaderModel(4, 0))
 			{
 				light_batch_ = 32;
 				dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering32.fxml");
@@ -2899,7 +2899,7 @@ namespace KlayGE
 			{
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				RenderDeviceCaps const & caps = re.DeviceCaps();
-				if (caps.cs_support && (caps.max_shader_model >= 5))
+				if (caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0)))
 				{
 					cascaded_shadow_layer_ = MakeSharedPtr<SDSMCascadedShadowLayer>();
 				}

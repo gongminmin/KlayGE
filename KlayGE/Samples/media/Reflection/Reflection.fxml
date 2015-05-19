@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
+	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	<include name="GBufferNoSkinning.fxml"/>
 	<include name="PostProcess.fxml"/>
@@ -113,7 +114,7 @@ float4 ReflectSpecialShadingPS(
 
 	float fresnel = fresnel_term_schlick(-normalize(pos_es_front), normal_es_front, specular).x;
 	float4 ssr;
-#if KLAYGE_SHADER_MODEL >= 3
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	if (reflect_vec_front.z > 0)
 	{
 		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 1);

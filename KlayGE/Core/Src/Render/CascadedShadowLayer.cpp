@@ -183,7 +183,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
+		cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 
 		if (cs_support_)
 		{

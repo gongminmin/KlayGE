@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
+	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
 	
 	<parameter type="float4x4" name="mvp"/>
@@ -121,7 +122,7 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	// initialization of
 	// the integration loop variables
 
-#if KLAYGE_SHADER_MODEL >= 3
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	const int NMAX = 8;
 #else
 	const int NMAX = 4;

@@ -68,7 +68,7 @@ SSSSSApp::SSSSSApp()
 bool SSSSSApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
+	if (caps.max_simultaneous_rts < 3)
 	{
 		return false;
 	}

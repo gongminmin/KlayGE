@@ -18,6 +18,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
+#include <boost/operators.hpp>
+
 namespace KlayGE
 {
 	enum TessellationMethod
@@ -27,9 +29,39 @@ namespace KlayGE
 		TM_No
 	};
 
+	struct ShaderModel : boost::less_than_comparable<ShaderModel,
+							boost::equality_comparable<ShaderModel> >
+	{
+		uint8_t major_ver : 6;
+		uint8_t minor_ver : 2;
+
+		ShaderModel()
+			: major_ver(0), minor_ver(0)
+		{
+		}
+		ShaderModel(uint8_t major, uint8_t minor)
+			: major_ver(major), minor_ver(minor)
+		{
+		}
+
+		uint32_t FullVersion() const
+		{
+			return (major_ver << 2) | minor_ver;
+		}
+
+		bool operator<(ShaderModel const & rhs) const
+		{
+			return this->FullVersion() < rhs.FullVersion();
+		}
+		bool operator==(ShaderModel const & rhs) const
+		{
+			return this->FullVersion() == rhs.FullVersion();
+		}
+	};
+
 	struct RenderDeviceCaps
 	{
-		uint8_t max_shader_model;
+		ShaderModel max_shader_model;
 
 		uint32_t max_texture_width;
 		uint32_t max_texture_height;

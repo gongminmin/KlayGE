@@ -5,7 +5,7 @@
 	<native_shader_fourcc value="ESSL"/>
 	<native_shader_version value="3"/>
 
-	<max_shader_model value="2"/>
+	<max_shader_model major="2" minor="0"/>
 
 	<max_texture_depth value="1"/>
 	<max_texture_array_length value="1"/>

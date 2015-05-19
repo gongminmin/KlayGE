@@ -62,11 +62,6 @@ CascadedShadowMapApp::CascadedShadowMapApp()
 
 bool CascadedShadowMapApp::ConfirmDevice() const
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
-	{
-		return false;
-	}
 	return true;
 }
 
@@ -144,7 +139,7 @@ void CascadedShadowMapApp::OnCreate()
 	sky_box_->AddToSceneManager();
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 5)
+	if (caps.max_shader_model < ShaderModel(5, 0))
 	{
 		dialog_->Control<UIComboBox>(id_csm_type_combo_)->SetSelectedByIndex(0);
 		dialog_->Control<UIComboBox>(id_csm_type_combo_)->SetEnabled(false);

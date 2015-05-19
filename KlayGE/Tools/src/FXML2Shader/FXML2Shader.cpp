@@ -35,7 +35,7 @@ public:
 
 		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
 		ofs << "#define KLAYGE_D3D11 1" << "\r\n";
-		ofs << "#define KLAYGE_SHADER_MODEL 5" << "\r\n";
+		ofs << "#define KLAYGE_SHADER_MODEL (5 * 4 + 0)" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_ARRAY_LEN 512" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_DEPTH 512" << "\r\n";
 		ofs << "#define KLAYGE_MAX_TEX_UNITS 32" << "\r\n";

@@ -219,12 +219,6 @@ namespace KlayGE
 
 	bool MtlEditorCore::ConfirmDevice() const
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model < 2)
-		{
-			return false;
-		}
 		return true;
 	}
 

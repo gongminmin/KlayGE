@@ -657,7 +657,7 @@ namespace
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
-			if (3 == caps.max_shader_model)
+			if (ShaderModel(3, 0) == caps.max_shader_model)
 			{
 				if (caps.texture_format_support(EF_R32F))
 				{
@@ -735,7 +735,7 @@ GPUParticleSystemApp::GPUParticleSystemApp()
 bool GPUParticleSystemApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 3)
+	if (caps.max_shader_model < ShaderModel(3, 0))
 	{
 		return false;
 	}

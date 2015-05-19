@@ -997,7 +997,7 @@ namespace KlayGE
 		{
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			caps_.max_shader_model = 5;
+			caps_.max_shader_model = ShaderModel(5, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D11_REQ_TEXTURECUBE_DIMENSION;
@@ -1013,7 +1013,14 @@ namespace KlayGE
 
 		case D3D_FEATURE_LEVEL_10_1:
 		case D3D_FEATURE_LEVEL_10_0:
-			caps_.max_shader_model = 4;
+			if (D3D_FEATURE_LEVEL_10_1 == d3d_feature_level_)
+			{
+				caps_.max_shader_model = ShaderModel(4, 1);
+			}
+			else
+			{
+				caps_.max_shader_model = ShaderModel(4, 0);
+			}
 			caps_.max_texture_width = caps_.max_texture_height = D3D10_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D10_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D10_REQ_TEXTURECUBE_DIMENSION;
@@ -1032,7 +1039,7 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
-			caps_.max_shader_model = 2;
+			caps_.max_shader_model = ShaderModel(2, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D_FL9_3_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D_FL9_3_REQ_TEXTURECUBE_DIMENSION;
@@ -1049,7 +1056,7 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_9_2:
 		case D3D_FEATURE_LEVEL_9_1:
 		default:
-			caps_.max_shader_model = 2;
+			caps_.max_shader_model = ShaderModel(2, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D_FL9_1_REQ_TEXTURECUBE_DIMENSION;
@@ -1249,7 +1256,7 @@ namespace KlayGE
 		UINT s;
 		for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++ i)
 		{
-			if ((caps_.max_shader_model < 5)
+			if ((caps_.max_shader_model < ShaderModel(5, 0))
 				&& ((EF_BC6 == fmts[i].first) || (EF_SIGNED_BC6 == fmts[i].first)
 					|| (EF_BC7 == fmts[i].first) || (EF_BC7_SRGB == fmts[i].first)))
 			{

@@ -593,7 +593,7 @@ CausticsMapApp::CausticsMapApp()
 bool CausticsMapApp::ConfirmDevice() const
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 3)
+	if (caps.max_shader_model < ShaderModel(3, 0))
 	{
 		return false;
 	}

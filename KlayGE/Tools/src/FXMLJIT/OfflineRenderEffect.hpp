@@ -510,9 +510,9 @@ namespace KlayGE
 				return type_;
 			}
 
-			uint32_t Version() const
+			ShaderModel Version() const
 			{
-				return version_;
+				return ver_;
 			}
 
 			std::string const & str() const
@@ -522,7 +522,7 @@ namespace KlayGE
 
 		private:
 			ShaderObject::ShaderType type_;
-			uint32_t version_;
+			ShaderModel ver_;
 			std::string str_;
 		};
 

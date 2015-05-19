@@ -1581,7 +1581,7 @@ namespace KlayGE
 
 		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_gpu_shader5())
 		{
-			caps_.max_shader_model = 5;
+			caps_.max_shader_model = ShaderModel(5, 0);
 		}
 		else
 		{
@@ -1592,27 +1592,27 @@ namespace KlayGE
 				{
 					if (glloader_GL_EXT_gpu_shader4())
 					{
-						caps_.max_shader_model = 4;
+						caps_.max_shader_model = ShaderModel(4, 0);
 					}
 					else
 					{
-						caps_.max_shader_model = 3;
+						caps_.max_shader_model = ShaderModel(3, 0);
 					}
 				}
 				else
 				{
-					caps_.max_shader_model = 2;
+					caps_.max_shader_model = ShaderModel(2, 0);
 				}
 			}
 			else
 			{
 				if (glloader_GL_ARB_vertex_program() && glloader_GL_ARB_fragment_program())
 				{
-					caps_.max_shader_model = 1;
+					caps_.max_shader_model = ShaderModel(1, 0);
 				}
 				else
 				{
-					caps_.max_shader_model = 0;
+					caps_.max_shader_model = ShaderModel(0, 0);
 				}
 			}
 		}
@@ -1690,7 +1690,7 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		if (caps_.max_shader_model < 3)
+		if (caps_.max_shader_model < ShaderModel(3, 0))
 		{
 			caps_.standard_derivatives_support = false;
 			caps_.shader_texture_lod_support = false;

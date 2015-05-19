@@ -1540,11 +1540,11 @@ namespace KlayGE
 		{
 			if (caps_.max_vertex_texture_units != 0)
 			{
-				caps_.max_shader_model = 3;
+				caps_.max_shader_model = ShaderModel(3, 0);
 			}
 			else
 			{
-				caps_.max_shader_model = 2;
+				caps_.max_shader_model = ShaderModel(2, 0);
 			}
 		}
 

@@ -269,7 +269,7 @@ namespace
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
+			cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			this->Technique(effect->TechniqueByName("DepthOfFieldNormalization"));
@@ -444,7 +444,7 @@ namespace
 			output_pins_.push_back(std::make_pair("output", TexturePtr()));
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			gs_support_ = (caps.max_shader_model >= 4);
+			gs_support_ = (caps.max_shader_model >= ShaderModel(4, 0));
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			if (gs_support_)
@@ -726,12 +726,6 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 
 bool MotionBlurDoFApp::ConfirmDevice() const
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -772,7 +766,7 @@ void MotionBlurDoFApp::OnCreate()
 		&& caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
 	{
 		depth_of_field_ = MakeSharedPtr<DepthOfField>();
-		if (caps.max_shader_model >= 3)
+		if (caps.max_shader_model >= ShaderModel(3, 0))
 		{
 			bokeh_filter_ = MakeSharedPtr<BokehFilter>();
 		}

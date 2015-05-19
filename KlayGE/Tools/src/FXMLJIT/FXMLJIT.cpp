@@ -67,7 +67,7 @@ extern "C"
 }
 #endif
 
-uint32_t const KFX_VERSION = 0x0106;
+uint32_t const KFX_VERSION = 0x0107;
 
 int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
 {
@@ -131,7 +131,9 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 	caps.native_shader_fourcc = (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
 	caps.native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
 
-	caps.max_shader_model = static_cast<uint8_t>(RetrieveNodeValue(root, "max_shader_model", 0));
+	XMLNodePtr max_shader_model_node = root->FirstNode("max_shader_model");
+	caps.max_shader_model = ShaderModel(static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
+		static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "minor", 0)));
 
 	caps.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
 	caps.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);

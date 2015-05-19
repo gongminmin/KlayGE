@@ -467,12 +467,6 @@ EnvLightingApp::EnvLightingApp()
 
 bool EnvLightingApp::ConfirmDevice() const
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 2)
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -538,7 +532,7 @@ void EnvLightingApp::OnCreate()
 	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&EnvLightingApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
 	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 
-	if (caps.max_shader_model < 4)
+	if (caps.max_shader_model < ShaderModel(4, 0))
 	{
 		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(4);
 		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(3);

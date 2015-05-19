@@ -60,7 +60,7 @@ namespace KlayGE
 			uint32_t native_shader_fourcc;
 			uint32_t native_shader_version;
 
-			uint8_t max_shader_model;
+			ShaderModel max_shader_model;
 
 			uint32_t max_texture_depth;
 			uint32_t max_texture_array_length;

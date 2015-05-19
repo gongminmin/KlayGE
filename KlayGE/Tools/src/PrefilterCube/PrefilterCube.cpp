@@ -512,7 +512,7 @@ int main(int argc, char* argv[])
 	Timer timer;
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < 4)
+	if (caps.max_shader_model < ShaderModel(4, 0))
 	{
 		PrefilterCube(input, output);
 	}

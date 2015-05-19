@@ -1467,7 +1467,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (2 == caps.max_shader_model)
+		if (caps.max_shader_model <= ShaderModel(2, 0))
 		{
 			kernel_radius_ = std::min(kernel_radius_, 2);
 		}
@@ -1502,7 +1502,7 @@ namespace KlayGE
 		kernel_radius_ = radius;
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (2 == caps.max_shader_model)
+		if (caps.max_shader_model <= ShaderModel(2, 0))
 		{
 			kernel_radius_ = std::min(kernel_radius_, 2);
 		}

@@ -219,7 +219,7 @@ namespace KlayGE
 		
 		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
 		RenderTechniquePtr tech;
-		if (caps.max_shader_model >= 3)
+		if (caps.max_shader_model >= ShaderModel(3, 0))
 		{
 			tech = effect->TechniqueByName("ToneMapping30");
 		}
@@ -494,7 +494,7 @@ namespace KlayGE
 		uint32_t tex_creation_flags = EAH_GPU_Read | EAH_GPU_Write;
 		if (caps.cs_support)
 		{
-			if (caps.max_shader_model >= 5)
+			if (caps.max_shader_model >= ShaderModel(5, 0))
 			{
 				fft_ = MakeSharedPtr<GpuFftCS5>(WIDTH, HEIGHT, true);
 				ifft_ = MakeSharedPtr<GpuFftCS5>(WIDTH, HEIGHT, false);
@@ -623,7 +623,7 @@ namespace KlayGE
 		: PostProcess(L"HDR")
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		cs_support_ = caps.cs_support && (caps.max_shader_model >= 5);
+		cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 
 		fp_texture_support_ = caps.fp_color_support;
 

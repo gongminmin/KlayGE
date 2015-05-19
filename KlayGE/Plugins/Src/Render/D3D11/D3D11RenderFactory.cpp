@@ -94,7 +94,7 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
-		if (caps.max_shader_model >= 4)
+		if (caps.max_shader_model >= ShaderModel(4, 0))
 		{
 			return MakeSharedPtr<D3D11ConditionalRender>();
 		}

@@ -3,6 +3,8 @@
 <effect>
 	<shader>
 		<![CDATA[
+#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))
+
 float get_x_channel(float4 v)
 {
 #ifdef KLAYGE_BC4_AS_G
@@ -174,7 +176,7 @@ float2 ReadTwoHalf(float4 v, float scale = 1, float bias = 0)
 }
 
 
-#if KLAYGE_SHADER_MODEL < 5
+#if KLAYGE_SHADER_MODEL < SHADER_MODEL(5, 0)
 float mad(float mvalue, float avalue, float bvalue)
 {
 	return mvalue * avalue + bvalue;
@@ -209,7 +211,7 @@ float4 rcp(float4 v)
 	return 1 / v;
 }
 
-#if KLAYGE_SHADER_MODEL >= 4
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 uint countbits(uint v)
 {
 	v = v - ((v >> 1) & 0x55555555);

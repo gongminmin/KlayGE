@@ -108,14 +108,6 @@ Fractal::Fractal()
 
 bool Fractal::ConfirmDevice() const
 {
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-	RenderEngine& re = rf.RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (caps.max_shader_model < 2)
-	{
-		return false;
-	}
-
 	return true;
 }
 

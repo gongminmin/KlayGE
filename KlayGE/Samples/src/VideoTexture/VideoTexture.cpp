@@ -145,12 +145,6 @@ VideoTextureApp::VideoTextureApp()
 
 bool VideoTextureApp::ConfirmDevice() const
 {
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	RenderDeviceCaps const & caps = re.DeviceCaps();
-	if (caps.max_shader_model < 1)
-	{
-		return false;
-	}
 	return true;
 }
 
