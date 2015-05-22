@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_OVR_multiview" reg_no="478">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR" value="0x9630"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR" value="0x9632"/>
+		<token name="GL_MAX_VIEWS_OVR" value="0x9631"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_VIEW_TARGETS_OVR" value="0x9633"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferTextureMultiviewOVR" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="baseViewIndex"/>
+				<param type="GLsizei" name="numViews"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

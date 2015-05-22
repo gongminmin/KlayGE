@@ -1,0 +1,65 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_tessellation_shader" reg_no="214">
+	<tokens>
+		<token name="GL_PATCHES_OES" value="0x000E"/>
+		<token name="GL_PATCH_VERTICES_OES" value="0x8E72"/>
+		<token name="GL_TESS_CONTROL_OUTPUT_VERTICES_OES" value="0x8E75"/>
+		<token name="GL_TESS_GEN_MODE_OES" value="0x8E76"/>
+		<token name="GL_TESS_GEN_SPACING_OES" value="0x8E77"/>
+		<token name="GL_TESS_GEN_VERTEX_ORDER_OES" value="0x8E78"/>
+		<token name="GL_TESS_GEN_POINT_MODE_OES" value="0x8E79"/>
+		<token name="GL_TRIANGLES" value="0x0004"/>
+		<token name="GL_ISOLINES_OES" value="0x8E7A"/>
+		<token name="GL_QUADS_OES" value="0x0007"/>
+		<token name="GL_EQUAL" value="0x0202"/>
+		<token name="GL_FRACTIONAL_ODD_OES" value="0x8E7B"/>
+		<token name="GL_FRACTIONAL_EVEN_OES" value="0x8E7C"/>
+		<token name="GL_CCW" value="0x0901"/>
+		<token name="GL_CW" value="0x0900"/>
+		<token name="GL_MAX_PATCH_VERTICES_OES" value="0x8E7D"/>
+		<token name="GL_MAX_TESS_GEN_LEVEL_OES" value="0x8E7E"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS_OES" value="0x8E7F"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS_OES" value="0x8E80"/>
+		<token name="GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS_OES" value="0x8E81"/>
+		<token name="GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS_OES" value="0x8E82"/>
+		<token name="GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS_OES" value="0x8E83"/>
+		<token name="GL_MAX_TESS_PATCH_COMPONENTS_OES" value="0x8E84"/>
+		<token name="GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS_OES" value="0x8E85"/>
+		<token name="GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS_OES" value="0x8E86"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS_OES" value="0x8E89"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS_OES" value="0x8E8A"/>
+		<token name="GL_MAX_TESS_CONTROL_INPUT_COMPONENTS_OES" value="0x886C"/>
+		<token name="GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS_OES" value="0x886D"/>
+		<token name="GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS_OES" value="0x8E1E"/>
+		<token name="GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS_OES" value="0x8E1F"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS_OES" value="0x92CD"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS_OES" value="0x92CE"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS_OES" value="0x92D3"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS_OES" value="0x92D4"/>
+		<token name="GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS_OES" value="0x90CB"/>
+		<token name="GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS_OES" value="0x90CC"/>
+		<token name="GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS_OES" value="0x90D8"/>
+		<token name="GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS_OES" value="0x90D9"/>
+		<token name="GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED_OES" value="0x8221"/>
+		<token name="GL_IS_PER_PATCH_OES" value="0x92E7"/>
+		<token name="GL_REFERENCED_BY_TESS_CONTROL_SHADER_OES" value="0x9307"/>
+		<token name="GL_REFERENCED_BY_TESS_EVALUATION_SHADER_OES" value="0x9308"/>
+		<token name="GL_TESS_EVALUATION_SHADER_OES" value="0x8E87"/>
+		<token name="GL_TESS_CONTROL_SHADER_OES" value="0x8E88"/>
+		<token name="GL_TESS_CONTROL_SHADER_BIT_OES" value="0x00000008"/>
+		<token name="GL_TESS_EVALUATION_SHADER_BIT_OES" value="0x00000010"/>
+	</tokens>
+
+	<functions>
+		<function name="glPatchParameteriOES" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="value"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_tessellation_shader" name="glPatchParameteriEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

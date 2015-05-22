@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_draw_buffers_indexed" reg_no="176">
+<gl_extension name="GLES_EXT_draw_buffers_indexed" reg_no="176" prefer="GLES_OES_draw_buffers_indexed">
 	<functions>
 		<function name="glEnableiEXT" return="void">
 			<params>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_copy_image" reg_no="175">
+<gl_extension name="GLES_EXT_copy_image" reg_no="175" prefer="GLES_OES_copy_image">
 	<functions>
 		<function name="glCopyImageSubDataEXT" return="void">
 			<params>

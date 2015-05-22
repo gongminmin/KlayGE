@@ -1,0 +1,28 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_copy_image" reg_no="208">
+	<functions>
+		<function name="glCopyImageSubDataOES" return="void">
+			<params>
+				<param type="GLuint" name="srcName"/>
+				<param type="GLenum" name="srcTarget"/>
+				<param type="GLint" name="srcLevel"/>
+				<param type="GLint" name="srcX"/>
+				<param type="GLint" name="srcY"/>
+				<param type="GLint" name="srcZ"/>
+				<param type="GLuint" name="dstName"/>
+				<param type="GLenum" name="dstTarget"/>
+				<param type="GLint" name="dstLevel"/>
+				<param type="GLint" name="dstX"/>
+				<param type="GLint" name="dstY"/>
+				<param type="GLint" name="dstZ"/>
+				<param type="GLsizei" name="srcWidth"/>
+				<param type="GLsizei" name="srcHeight"/>
+				<param type="GLsizei" name="srcDepth"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_copy_image" name="glCopyImageSubDataEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_tessellation_shader" reg_no="181">
+<gl_extension name="GLES_EXT_tessellation_shader" reg_no="181" prefer="GLES_OES_tessellation_shader">
 	<tokens>
 		<token name="GL_PATCHES_EXT" value="0x000E"/>
 		<token name="GL_PATCH_VERTICES_EXT" value="0x8E72"/>

@@ -1,0 +1,91 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_texture_border_clamp" reg_no="215">
+	<tokens>
+		<token name="GL_TEXTURE_BORDER_COLOR_OES" value="0x1004"/>
+		<token name="GL_CLAMP_TO_BORDER_OES" value="0x812D"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexParameterIivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glTexParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexParameterIuivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glTexParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetTexParameterIivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetTexParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetTexParameterIuivOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetTexParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glSamplerParameterIivOES" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glSamplerParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glSamplerParameterIuivOES" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLuint*" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glSamplerParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetSamplerParameterIivOES" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetSamplerParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetSamplerParameterIuivOES" return="void">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetSamplerParameterIuivEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

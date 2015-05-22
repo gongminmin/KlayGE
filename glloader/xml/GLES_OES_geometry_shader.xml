@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_geometry_shader" reg_no="210">
+	<tokens>
+		<token name="GL_GEOMETRY_SHADER_OES" value="0x8DD9"/>
+		<token name="GL_GEOMETRY_SHADER_BIT_OES" value="0x00000004"/>
+		<token name="GL_GEOMETRY_VERTICES_OUT_OES" value="0x8DDA"/>
+		<token name="GL_GEOMETRY_INPUT_TYPE_OES" value="0x8DDB"/>
+		<token name="GL_GEOMETRY_OUTPUT_TYPE_OES" value="0x8DDC"/>
+		<token name="GL_GEOMETRY_SHADER_INVOCATIONS_OES" value="0x887F"/>
+		<token name="GL_LAYER_PROVOKING_VERTEX_OES" value="0x825E"/>
+		<token name="GL_MAX_GEOMETRY_UNIFORM_COMPONENTS_OES" value="0x8DDF"/>
+		<token name="GL_MAX_GEOMETRY_UNIFORM_BLOCKS_OES" value="0x8A2C"/>
+		<token name="GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS_OES" value="0x8A32"/>
+		<token name="GL_MAX_GEOMETRY_INPUT_COMPONENTS_OES" value="0x9123"/>
+		<token name="GL_MAX_GEOMETRY_OUTPUT_COMPONENTS_OES" value="0x9124"/>
+		<token name="GL_MAX_GEOMETRY_OUTPUT_VERTICES_OES" value="0x8DE0"/>
+		<token name="GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS_OES" value="0x8DE1"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_INVOCATIONS_OES" value="0x8E5A"/>
+		<token name="GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS_OES" value="0x8C29"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS_OES" value="0x92CF"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTERS_OES" value="0x92D5"/>
+		<token name="GL_MAX_GEOMETRY_IMAGE_UNIFORMS_OES" value="0x90CD"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS_OES" value="0x90D7"/>
+		<token name="GL_FIRST_VERTEX_CONVENTION_OES" value="0x8E4D"/>
+		<token name="GL_LAST_VERTEX_CONVENTION_OES" value="0x8E4E"/>
+		<token name="GL_UNDEFINED_VERTEX_OES" value="0x8260"/>
+		<token name="GL_PRIMITIVES_GENERATED_OES" value="0x8C87"/>
+		<token name="GL_LINES_ADJACENCY_OES" value="0x000A"/>
+		<token name="GL_LINE_STRIP_ADJACENCY_OES" value="0x000B"/>
+		<token name="GL_TRIANGLES_ADJACENCY_OES" value="0x000C"/>
+		<token name="GL_TRIANGLE_STRIP_ADJACENCY_OES" value="0x000D"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_LAYERS_OES" value="0x9312"/>
+		<token name="GL_MAX_FRAMEBUFFER_LAYERS_OES" value="0x9317"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS_OES" value="0x8DA8"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_LAYERED_OES" value="0x8DA7"/>
+		<token name="GL_REFERENCED_BY_GEOMETRY_SHADER_OES" value="0x9309"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferTextureOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

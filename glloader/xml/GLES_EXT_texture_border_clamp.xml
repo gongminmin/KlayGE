@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_texture_border_clamp" reg_no="182">
+<gl_extension name="GLES_EXT_texture_border_clamp" reg_no="182" prefer="GLES_OES_texture_border_clamp">
 	<tokens>
 		<token name="GL_TEXTURE_BORDER_COLOR_EXT" value="0x1004"/>
 		<token name="GL_CLAMP_TO_BORDER_EXT" value="0x812D"/>
@@ -35,28 +35,28 @@
 				<param type="GLuint*" name="params"/>
 			</params>
 		</function>
-		<function name="glSamplerParameterIiv" return="void">
+		<function name="glSamplerParameterIivEXT" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
 				<param type="const GLint*" name="param"/>
 			</params>
 		</function>
-		<function name="glSamplerParameterIuiv" return="void">
+		<function name="glSamplerParameterIuivEXT" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
 				<param type="const GLuint*" name="param"/>
 			</params>
 		</function>
-		<function name="glGetSamplerParameterIiv" return="void">
+		<function name="glGetSamplerParameterIivEXT" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>
 				<param type="GLint*" name="params"/>
 			</params>
 		</function>
-		<function name="glGetSamplerParameterIuiv" return="void">
+		<function name="glGetSamplerParameterIuivEXT" return="void">
 			<params>
 				<param type="GLuint" name="sampler"/>
 				<param type="GLenum" name="pname"/>

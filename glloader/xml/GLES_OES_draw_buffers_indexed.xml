@@ -1,0 +1,86 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_draw_buffers_indexed" reg_no="176">
+	<functions>
+		<function name="glEnableiOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glEnableiEXT"/>
+			</mappings>
+		</function>
+		<function name="glDisableiOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glDisableiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationiOES" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendEquationiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationSeparateiOES" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendEquationSeparateiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendFunciOES" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="src"/>
+				<param type="GLenum" name="dst"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendFunciEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendFuncSeparateiOES" return="void">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="srcRGB"/>
+				<param type="GLenum" name="dstRGB"/>
+				<param type="GLenum" name="srcAlpha"/>
+				<param type="GLenum" name="dstAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendFuncSeparateiEXT"/>
+			</mappings>
+		</function>
+		<function name="glColorMaskiOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLboolean" name="r"/>
+				<param type="GLboolean" name="g"/>
+				<param type="GLboolean" name="b"/>
+				<param type="GLboolean" name="a"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glColorMaskiEXT"/>
+			</mappings>
+		</function>
+		<function name="glIsEnablediOES" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glIsEnablediEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>
