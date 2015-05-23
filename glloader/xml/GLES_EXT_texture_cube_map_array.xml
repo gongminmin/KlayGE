@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_texture_cube_map_array" reg_no="184">
+<gl_extension name="GLES_EXT_texture_cube_map_array" reg_no="184" prefer="GLES_OES_texture_cube_map_array">
 	<tokens>
 		<token name="GL_TEXTURE_CUBE_MAP_ARRAY_EXT" value="0x9009"/>
 		<token name="GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_EXT" value="0x900A"/>

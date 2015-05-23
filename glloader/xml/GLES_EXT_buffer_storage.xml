@@ -1,0 +1,34 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_buffer_storage" reg_no="239">
+	<tokens>
+		<token name="GL_MAP_READ_BIT" value="0x0001"/>
+		<token name="GL_MAP_WRITE_BIT" value="0x0002"/>
+		<token name="GL_MAP_PERSISTENT_BIT_EXT" value="0x0040"/>
+		<token name="GL_MAP_COHERENT_BIT_EXT" value="0x0080"/>
+		<token name="GL_DYNAMIC_STORAGE_BIT_EXT" value="0x0100"/>
+		<token name="GL_CLIENT_STORAGE_BIT_EXT" value="0x0200"/>
+		<token name="GL_BUFFER_IMMUTABLE_STORAGE_EXT" value="0x821F"/>
+		<token name="GL_BUFFER_STORAGE_FLAGS_EXT" value="0x8220"/>
+		<token name="GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT_EXT" value="0x00004000"/>
+	</tokens>
+
+	<functions>
+		<function name="glBufferStorageEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="void const *" name="data"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+		<function name="glNamedBufferStorageEXT" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="void const *" name="data"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

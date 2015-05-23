@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_geometry_shader" reg_no="177">
+<gl_extension name="GLES_EXT_geometry_shader" reg_no="177" prefer="GLES_OES_geometry_shader">
 	<tokens>
 		<token name="GL_GEOMETRY_SHADER_EXT" value="0x8DD9"/>
 		<token name="GL_GEOMETRY_SHADER_BIT_EXT" value="0x00000004"/>

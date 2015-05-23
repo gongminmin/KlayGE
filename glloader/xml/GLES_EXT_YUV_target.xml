@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_YUV_target" reg_no="222">
+	<tokens>
+		<token name="GL_SAMPLER_EXTERNAL_2D_Y2Y_EXT" value="0x8BE7"/>
+	</tokens>
+</gl_extension>

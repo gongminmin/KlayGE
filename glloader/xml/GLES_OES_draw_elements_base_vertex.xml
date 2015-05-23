@@ -1,0 +1,58 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_draw_elements_base_vertex" reg_no="219">
+	<functions>
+		<function name="glDrawElementsBaseVertexOES" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawElementsBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawRangeElementsBaseVertexOES" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLuint" name="end"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawRangeElementsBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawElementsInstancedBaseVertexOES" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawElementsInstancedBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawElementsBaseVertexOES" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const GLsizei*" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const GLvoid**" name="indices"/>
+				<param type="GLsizei" name="drawcount"/>
+				<param type="const GLint*" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glMultiDrawElementsBaseVertexEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

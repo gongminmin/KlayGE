@@ -1,0 +1,31 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_yuv_surface" reg_no="86">
+	<tokens>
+		<token name="EGL_YUV_ORDER_EXT" value="0x3301"/>
+		<token name="EGL_YUV_NUMBER_OF_PLANES_EXT" value="0x3311"/>
+		<token name="EGL_YUV_SUBSAMPLE_EXT" value="0x3312"/>
+		<token name="EGL_YUV_DEPTH_RANGE_EXT" value="0x3317"/>
+		<token name="EGL_YUV_CSC_STANDARD_EXT" value="0x330A"/>
+		<token name="EGL_YUV_PLANE_BPP_EXT" value="0x331A"/>
+		<token name="EGL_YUV_BUFFER_EXT" value="0x3300"/>
+		<token name="EGL_YUV_ORDER_YUV_EXT" value="0x3302"/>
+		<token name="EGL_YUV_ORDER_YVU_EXT" value="0x3303"/>
+		<token name="EGL_YUV_ORDER_YUYV_EXT" value="0x3304"/>
+		<token name="EGL_YUV_ORDER_UYVY_EXT" value="0x3305"/>
+		<token name="EGL_YUV_ORDER_YVYU_EXT" value="0x3306"/>
+		<token name="EGL_YUV_ORDER_VYUY_EXT" value="0x3307"/>
+		<token name="EGL_YUV_ORDER_AYUV_EXT" value="0x3308"/>
+		<token name="EGL_YUV_SUBSAMPLE_4_2_0_EXT" value="0x3313"/>
+		<token name="EGL_YUV_SUBSAMPLE_4_2_2_EXT" value="0x3314"/>
+		<token name="EGL_YUV_SUBSAMPLE_4_4_4_EXT" value="0x3315"/>
+		<token name="EGL_YUV_DEPTH_RANGE_LIMITED_EXT" value="0x3318"/>
+		<token name="EGL_YUV_DEPTH_RANGE_FULL_EXT" value="0x3319"/>
+		<token name="EGL_YUV_CSC_STANDARD_601_EXT" value="0x330B"/>
+		<token name="EGL_YUV_CSC_STANDARD_709_EXT" value="0x330C"/>
+		<token name="EGL_YUV_CSC_STANDARD_2020_EXT" value="0x330D"/>
+		<token name="EGL_YUV_PLANE_BPP_0_EXT" value="0x331B"/>
+		<token name="EGL_YUV_PLANE_BPP_8_EXT" value="0x331C"/>
+		<token name="EGL_YUV_PLANE_BPP_10_EXT" value="0x331D"/>
+	</tokens>
+</gl_extension>

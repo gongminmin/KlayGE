@@ -1,4 +1,4 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_shader_io_blocks" reg_no="180">
+<gl_extension name="GLES_EXT_shader_io_blocks" reg_no="180" prefer="GLES_OES_shader_io_blocks">
 </gl_extension>

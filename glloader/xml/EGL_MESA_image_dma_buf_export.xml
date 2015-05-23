@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_MESA_image_dma_buf_export" reg_no="87">
+	<functions>
+		<function name="eglExportDMABUFImageQueryMESA" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLImageKHR" name="image"/>
+				<param type="EGLint*" name="fourcc"/>
+				<param type="EGLint*" name="num_planes"/>
+				<param type="EGLuint64KHR*" name="modifiers"/>
+			</params>
+		</function>
+		<function name="eglExportDMABUFImageMESA" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLImageKHR" name="image"/>
+				<param type="EGLint*" name="fds"/>
+				<param type="EGLint*" name="strides"/>
+				<param type="EGLint*" name="offsets"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

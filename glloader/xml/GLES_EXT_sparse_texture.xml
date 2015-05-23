@@ -1,0 +1,52 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_sparse_texture" reg_no="240">
+	<tokens>
+		<token name="GL_TEXTURE_SPARSE_EXT" value="0x91A6"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_INDEX_EXT" value="0x91A7"/>
+		<token name="GL_NUM_SPARSE_LEVELS_EXT" value="0x91AA"/>
+		<token name="GL_NUM_VIRTUAL_PAGE_SIZES_EXT" value="0x91A8"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_X_EXT" value="0x9195"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Y_EXT" value="0x9196"/>
+		<token name="GL_VIRTUAL_PAGE_SIZE_Z_EXT" value="0x9197"/>
+		<token name="GL_TEXTURE_2D" value="0x0DE1"/>
+		<token name="GL_TEXTURE_2D_ARRAY" value="0x8C1A"/>
+		<token name="GL_TEXTURE_CUBE_MAP" value="0x8513"/>
+		<token name="GL_TEXTURE_CUBE_MAP_ARRAY_OES" value="0x9009"/>
+		<token name="GL_TEXTURE_3D" value="0x806F"/>
+		<token name="GL_MAX_SPARSE_TEXTURE_SIZE_EXT" value="0x9198"/>
+		<token name="GL_MAX_SPARSE_3D_TEXTURE_SIZE_EXT" value="0x9199"/>
+		<token name="GL_MAX_SPARSE_ARRAY_TEXTURE_LAYERS_EXT" value="0x919A"/>
+		<token name="GL_SPARSE_TEXTURE_FULL_ARRAY_CUBE_MIPMAPS_EXT" value="0x91A9"/>
+	</tokens>
+
+	<functions>
+		<function name="glTexPageCommitmentEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="commit"/>
+			</params>
+		</function>
+		<function name="glTexturePageCommitmentEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLenum" name="target"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="commit"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

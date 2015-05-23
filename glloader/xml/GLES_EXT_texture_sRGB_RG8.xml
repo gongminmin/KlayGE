@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_texture_sRGB_RG8" reg_no="223">
+	<tokens>
+		<token name="GL_SRG8_EXT" value="0x8FBE"/>
+	</tokens>
+</gl_extension>

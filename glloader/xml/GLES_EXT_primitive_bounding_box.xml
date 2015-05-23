@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_primitive_bounding_box" reg_no="186">
+<gl_extension name="GLES_EXT_primitive_bounding_box" reg_no="186" prefer="GL_OES_primitive_bounding_box">
 	<tokens>
 		<token name="GL_PRIMITIVE_BOUNDING_BOX_EXT" value="0x92BE"/>
 	</tokens>

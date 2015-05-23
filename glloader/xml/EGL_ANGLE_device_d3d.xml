@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANGLE_device_d3d" reg_no="90">
+	<tokens>
+		<token name="EGL_D3D9_DEVICE_ANGLE" value="0x33A0"/>
+		<token name="EGL_D3D11_DEVICE_ANGLE" value="0x33A1"/>
+	</tokens>
+</gl_extension>

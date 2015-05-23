@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_draw_elements_base_vertex" reg_no="204">
+<gl_extension name="GLES_EXT_draw_elements_base_vertex" reg_no="204" prefer="GLES_OES_draw_elements_base_vertex">
 	<functions>
 		<function name="glDrawElementsBaseVertexEXT" return="void">
 			<params>

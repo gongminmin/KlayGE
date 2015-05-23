@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GLES_EXT_texture_view" reg_no="185">
+<gl_extension name="GLES_EXT_texture_view" reg_no="185" prefer="GLES_OES_texture_view">
 	<tokens>
 		<token name="GL_TEXTURE_VIEW_MIN_LEVEL_EXT" value="0x82DB"/>
 		<token name="GL_TEXTURE_VIEW_NUM_LEVELS_EXT" value="0x82DC"/>

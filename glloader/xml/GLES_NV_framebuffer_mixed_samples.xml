@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_framebuffer_mixed_samples" reg_no="231">
+	<tokens>
+		<token name="GL_RASTER_MULTISAMPLE_EXT" value="0x9327"/>
+		<token name="GL_COVERAGE_MODULATION_TABLE_NV" value="0x9331"/>
+		<token name="GL_RASTER_SAMPLES_EXT" value="0x9328"/>
+		<token name="GL_MAX_RASTER_SAMPLES_EXT" value="0x9329"/>
+		<token name="GL_RASTER_FIXED_SAMPLE_LOCATIONS_EXT" value="0x932A"/>
+		<token name="GL_MULTISAMPLE_RASTERIZATION_ALLOWED_EXT" value="0x932B"/>
+		<token name="GL_EFFECTIVE_RASTER_SAMPLES_EXT" value="0x932C"/>
+		<token name="GL_COLOR_SAMPLES_NV" value="0x8E20"/>
+		<token name="GL_DEPTH_SAMPLES_NV" value="0x932D"/>
+		<token name="GL_STENCIL_SAMPLES_NV" value="0x932E"/>
+		<token name="GL_MIXED_DEPTH_SAMPLES_SUPPORTED_NV" value="0x932F"/>
+		<token name="GL_MIXED_STENCIL_SAMPLES_SUPPORTED_NV" value="0x9330"/>
+		<token name="GL_COVERAGE_MODULATION_NV" value="0x9332"/>
+		<token name="GL_COVERAGE_MODULATION_TABLE_SIZE_NV" value="0x9333"/>
+	</tokens>
+
+	<functions>
+		<function name="glRasterSamplesEXT" return="void">
+			<params>
+				<param type="GLuint" name="samples"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+		<function name="glCoverageModulationTableNV" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLfloat const *" name="v"/>
+			</params>
+		</function>
+		<function name="glGetCoverageModulationTableNV" return="void">
+			<params>
+				<param type="GLsizei" name="bufsize"/>
+				<param type="GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glCoverageModulationNV" return="void">
+			<params>
+				<param type="GLenum" name="components"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

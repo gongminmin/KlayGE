@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_fragment_coverage_to_color" reg_no="229">
+	<tokens>
+		<token name="GL_FRAGMENT_COVERAGE_TO_COLOR_NV" value="0x92DD"/>
+		<token name="GL_FRAGMENT_COVERAGE_COLOR_NV" value="0x92DE"/>
+	</tokens>
+
+	<functions>
+		<function name="glFragmentCoverageColorNV" return="void">
+			<params>
+				<param type="GLuint" name="color"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

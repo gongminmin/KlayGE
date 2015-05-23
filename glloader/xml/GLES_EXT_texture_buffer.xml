@@ -26,7 +26,6 @@
 				<param type="GLuint" name="buffer"/>
 			</params>
 		</function>
-	</functions>
 		<function name="glTexBufferRangeEXT" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -36,4 +35,5 @@
 				<param type="GLsizeiptr" name="size"/>
 			</params>
 		</function>
+	</functions>
 </gl_extension>

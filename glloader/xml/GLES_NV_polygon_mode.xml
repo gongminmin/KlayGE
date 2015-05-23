@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_polygon_mode" reg_no="238">
+	<tokens>
+		<token name="GL_POLYGON_MODE_NV" value="0x0B40"/>
+		<token name="GL_POLYGON_OFFSET_POINT_NV" value="0x2A01"/>
+		<token name="GL_POLYGON_OFFSET_LINE_NV" value="0x2A02"/>
+		<token name="GL_POINT_NV" value="0x1B00"/>
+		<token name="GL_LINE_NV" value="0x1B01"/>
+		<token name="GL_FILL_NV" value="0x1B02"/>
+	</tokens>
+
+	<functions>
+		<function name="glPolygonModeNV" return="void">
+			<params>
+				<param type="GLenum" name="face"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

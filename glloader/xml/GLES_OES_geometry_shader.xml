@@ -45,6 +45,9 @@
 				<param type="GLuint" name="texture"/>
 				<param type="GLint" name="level"/>
 			</params>
+			<mappings>
+				<mapping from="GLES_EXT_geometry_shader" name="glFramebufferTextureEXT"/>
+			</mappings>
 		</function>
 	</functions>
 </gl_extension>

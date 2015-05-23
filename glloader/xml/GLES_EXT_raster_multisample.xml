@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_raster_multisample" reg_no="226">
+	<tokens>
+		<token name="GL_RASTER_MULTISAMPLE_EXT" value="0x9327"/>
+		<token name="GL_RASTER_SAMPLES_EXT" value="0x9328"/>
+		<token name="GL_MAX_RASTER_SAMPLES_EXT" value="0x9329"/>
+		<token name="GL_RASTER_FIXED_SAMPLE_LOCATIONS_EXT" value="0x932A"/>
+		<token name="GL_MULTISAMPLE_RASTERIZATION_ALLOWED_EXT" value="0x932B"/>
+		<token name="GL_EFFECTIVE_RASTER_SAMPLES_EXT" value="0x932C"/>
+	</tokens>
+
+	<functions>
+		<function name="glRasterSamplesEXT" return="void">
+			<params>
+				<param type="GLuint" name="samples"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

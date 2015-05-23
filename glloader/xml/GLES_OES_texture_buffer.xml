@@ -29,7 +29,6 @@
 				<mapping from="GLES_EXT_texture_buffer" name="glTexBufferEXT"/>
 			</mappings>
 		</function>
-	</functions>
 		<function name="glTexBufferRangeOES" return="void">
 			<params>
 				<param type="GLenum" name="target"/>
@@ -42,4 +41,5 @@
 				<mapping from="GLES_EXT_texture_buffer" name="glTexBufferRangeEXT"/>
 			</mappings>
 		</function>
+	</functions>
 </gl_extension>
