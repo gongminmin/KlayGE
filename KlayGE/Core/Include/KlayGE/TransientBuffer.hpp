@@ -45,34 +45,31 @@ namespace KlayGE
 	{
 		uint32_t offset_;
 		uint32_t length_;
-		void const * data_;
 		
 		SubAlloc()
-			: offset_(0), length_(0), data_(nullptr)
 		{
 		}
-		
 		SubAlloc(int offset, int length)
-			: offset_(offset), length_(length), data_(nullptr)
-		{
-		}
-	};
-
-	// Frames that have ended
-	struct RetiredFrame
-	{
-		// Sub allocs that are unuseful and will be freed at the end of the frame
-		std::list<SubAlloc> pending_frees_;
-		uint32_t frame_id;
-
-		explicit RetiredFrame(int id)
-			: frame_id(id)
+			: offset_(offset), length_(length)
 		{
 		}
 	};
 
 	class KLAYGE_CORE_API TransientBuffer
 	{
+		// Frames that have ended
+		struct RetiredFrame
+		{
+			// Sub allocs that are unuseful and will be freed at the end of the frame
+			std::list<SubAlloc> pending_frees_;
+			uint32_t frame_id;
+
+			explicit RetiredFrame(uint32_t id)
+				: frame_id(id)
+			{
+			}
+		};
+
 	public:
 		enum BindFlag
 		{
@@ -103,6 +100,7 @@ namespace KlayGE
 
 	private:
 		bool use_no_overwrite_;
+		uint32_t num_pre_frames_;
 
 		GraphicsBufferPtr buffer_;
 		std::list<SubAlloc> free_list_;

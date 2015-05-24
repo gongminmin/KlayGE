@@ -37,8 +37,6 @@
 
 namespace KlayGE
 {
-	const uint32_t  PRE_FRAMES = 3;
-
 	TransientBuffer::TransientBuffer(uint32_t size_in_byte, TransientBuffer::BindFlag bind_flag)
 		: bind_flag_(bind_flag)
 	{
@@ -49,8 +47,13 @@ namespace KlayGE
 
 		buffer_ = this->DoCreateBuffer(bind_flag_);
 		buffer_->Resize(size_in_byte);
-		if (!use_no_overwrite_)
+		if (use_no_overwrite_)
 		{
+			num_pre_frames_ = 3;
+		}
+		else
+		{
+			num_pre_frames_ = 1;
 			simulate_buffer_.resize(buffer_->Size());
 			valid_min_ = 0;
 			valid_max_ = 0;
@@ -134,7 +137,6 @@ namespace KlayGE
 		uint32_t left_size = first_fit_iter->length_ - size_in_byte;
 		ret.length_ = size_in_byte;
 		ret.offset_ = first_fit_iter->offset_;
-		ret.data_ = data;
 		if (0 == left_size)
 		{
 			free_list_.erase(first_fit_iter);
@@ -149,11 +151,11 @@ namespace KlayGE
 		{
 			GraphicsBuffer::Mapper mapper(*buffer_, BA_Write_No_Overwrite);
 			uint8_t* buffer_data = mapper.Pointer<uint8_t>();
-			memcpy(buffer_data + ret.offset_, ret.data_, ret.length_);
+			memcpy(buffer_data + ret.offset_, data, ret.length_);
 		}
 		else
 		{
-			memcpy(&simulate_buffer_[ret.offset_], ret.data_, ret.length_);
+			memcpy(&simulate_buffer_[ret.offset_], data, ret.length_);
 			valid_min_ = std::min(valid_min_, ret.offset_);
 			valid_max_ = std::max(valid_max_, ret.offset_ + ret.length_);
 		}
@@ -200,7 +202,7 @@ namespace KlayGE
 			std::list<RetiredFrame>::iterator frame_iter = retired_frames_.begin();
 			for (; frame_iter != retired_frames_.end();)
 			{
-				if (frame_iter->frame_id + PRE_FRAMES <= frame_id)
+				if (frame_iter->frame_id + num_pre_frames_ <= frame_id)
 				{
 					std::list<SubAlloc>::iterator iter = frame_iter->pending_frees_.begin();
 					for (; iter != frame_iter->pending_frees_.end(); ++ iter)
@@ -222,60 +224,61 @@ namespace KlayGE
 		if (free_list_.empty())
 		{
 			free_list_.push_back(alloc);
-			return;
 		}
-
-		// Find where to insert the alloc
-		std::list<SubAlloc>::iterator insert_position = free_list_.begin();
-		while (insert_position != free_list_.end())
+		else
 		{
-			if (insert_position->offset_ > alloc.offset_)
+			// Find where to insert the alloc
+			std::list<SubAlloc>::iterator insert_position = free_list_.begin();
+			while (insert_position != free_list_.end())
 			{
-				break;
-			}
-			++ insert_position;
-		}
-
-		bool left_merged = false;
-		// If the alloc is adjacent to previous alloc, merge them.
-		std::list<SubAlloc>::iterator previous = insert_position;
-		if (insert_position != free_list_.begin())
-		{
-			-- previous;
-			if(previous->offset_ + previous->length_ == alloc.offset_)
-			{
-				previous->length_ += alloc.length_;
-				left_merged = true;
-			}
-		}
-
-		bool right_merged = false;
-		// If the alloc is adjecent to next alloc, merge them.
-		std::list<SubAlloc>::iterator next = insert_position;
-		if (insert_position != free_list_.end())
-		{
-			if (left_merged)
-			{
-				if (previous->offset_ + previous->length_ == next->offset_)
+				if (insert_position->offset_ > alloc.offset_)
 				{
-					previous->length_ += next->length_;
-					free_list_.erase(next);
-					right_merged = true;
+					break;
+				}
+				++ insert_position;
+			}
+
+			bool left_merged = false;
+			// If the alloc is adjacent to previous alloc, merge them.
+			std::list<SubAlloc>::iterator previous = insert_position;
+			if (insert_position != free_list_.begin())
+			{
+				-- previous;
+				if (previous->offset_ + previous->length_ == alloc.offset_)
+				{
+					previous->length_ += alloc.length_;
+					left_merged = true;
 				}
 			}
-			else
+
+			bool right_merged = false;
+			// If the alloc is adjecent to next alloc, merge them.
+			std::list<SubAlloc>::iterator next = insert_position;
+			if (insert_position != free_list_.end())
 			{
-				if (alloc.offset_ + alloc.length_ == next->offset_)
+				if (left_merged)
 				{
-					next->offset_ -= alloc.length_;
-					next->length_ += alloc.length_;
-					right_merged = true;
+					if (previous->offset_ + previous->length_ == next->offset_)
+					{
+						previous->length_ += next->length_;
+						free_list_.erase(next);
+						right_merged = true;
+					}
+				}
+				else
+				{
+					if (alloc.offset_ + alloc.length_ == next->offset_)
+					{
+						next->offset_ -= alloc.length_;
+						next->length_ += alloc.length_;
+						right_merged = true;
+					}
 				}
 			}
-		}
-		if (!(left_merged || right_merged))
-		{
-			free_list_.insert(insert_position, alloc);
+			if (!(left_merged || right_merged))
+			{
+				free_list_.insert(insert_position, alloc);
+			}
 		}
 	}
 
