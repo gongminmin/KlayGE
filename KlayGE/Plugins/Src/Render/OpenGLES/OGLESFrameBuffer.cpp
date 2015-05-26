@@ -100,24 +100,34 @@ namespace KlayGE
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
 
+		bool has_color = (flags & CBM_Color) && !!this->Attached(ATT_Color0);
+		bool has_depth = false;
+		bool has_stencil = false;
+		RenderViewPtr const & ds_view = this->Attached(ATT_DepthStencil);
+		if (ds_view)
+		{
+			has_depth = (flags & CBM_Depth) && IsDepthFormat(ds_view->Format());
+			has_stencil = (flags & CBM_Stencil) && IsStencilFormat(ds_view->Format());
+		}
+
 		DepthStencilStateDesc const & ds_desc = re.CurDSSObj()->GetDesc();
 		BlendStateDesc const & blend_desc = re.CurBSObj()->GetDesc();
 
-		if (flags & CBM_Color)
+		if (has_color)
 		{
 			if (blend_desc.color_write_mask[0] != CMASK_All)
 			{
 				glColorMask(true, true, true, true);
 			}
 		}
-		if (flags & CBM_Depth)
+		if (has_depth)
 		{
 			if (!ds_desc.depth_write_mask)
 			{
 				glDepthMask(GL_TRUE);
 			}
 		}
-		if (flags & CBM_Stencil)
+		if (has_stencil)
 		{
 			if (ds_desc.front_stencil_write_mask != 0xFF)
 			{
@@ -149,40 +159,37 @@ namespace KlayGE
 				}
 			}
 
-			if ((flags & CBM_Depth) && (flags & CBM_Stencil))
+			if (has_depth && has_stencil)
 			{
 				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 			}
 			else
 			{
-				if (flags & CBM_Depth)
+				if (has_depth)
 				{
 					glClearBufferfv(GL_DEPTH, 0, &depth);
 				}
-				else
+				else if (has_stencil)
 				{
-					if (flags & CBM_Stencil)
-					{
-						GLint s = stencil;
-						glClearBufferiv(GL_STENCIL, 0, &s);
-					}
+					GLint s = stencil;
+					glClearBufferiv(GL_STENCIL, 0, &s);
 				}
 			}
 		}
 		else
 		{
 			GLbitfield ogl_flags = 0;
-			if (flags & CBM_Color)
+			if (has_color)
 			{
 				ogl_flags |= GL_COLOR_BUFFER_BIT;
 				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
 			}
-			if (flags & CBM_Depth)
+			if (has_depth)
 			{
 				ogl_flags |= GL_DEPTH_BUFFER_BIT;
 				re.ClearDepth(depth);
 			}
-			if (flags & CBM_Stencil)
+			if (has_stencil)
 			{
 				ogl_flags |= GL_STENCIL_BUFFER_BIT;
 				re.ClearStencil(stencil);
@@ -201,14 +208,14 @@ namespace KlayGE
 						(blend_desc.color_write_mask[0] & CMASK_Alpha) != 0);
 			}
 		}
-		if (flags & CBM_Depth)
+		if (has_depth)
 		{
 			if (!ds_desc.depth_write_mask)
 			{
 				glDepthMask(GL_FALSE);
 			}
 		}
-		if (flags & CBM_Stencil)
+		if (has_stencil)
 		{
 			if (ds_desc.front_stencil_write_mask != 0xFF)
 			{

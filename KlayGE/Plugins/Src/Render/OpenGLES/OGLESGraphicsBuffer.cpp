@@ -68,17 +68,14 @@ namespace KlayGE
 		glBufferData(target_,
 			static_cast<GLsizeiptr>(size_in_byte_), data,
 			(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
-		if (!(glloader_GLES_VERSION_3_0() || glloader_GLES_OES_mapbuffer()))
+		if (data != nullptr)
 		{
-			if (data != nullptr)
-			{
-				buf_data_.assign(static_cast<uint8_t const *>(data),
-					static_cast<uint8_t const *>(data) + size_in_byte_);
-			}
-			else
-			{
-				buf_data_.resize(size_in_byte_);
-			}
+			buf_data_.assign(static_cast<uint8_t const *>(data),
+				static_cast<uint8_t const *>(data) + size_in_byte_);
+		}
+		else
+		{
+			buf_data_.resize(size_in_byte_);
 		}
 	}
 
@@ -96,7 +93,7 @@ namespace KlayGE
 				uint32_t flags = GL_MAP_WRITE_BIT;
 				if (BU_Dynamic == usage_)
 				{
-					flags |= GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT;
+					flags |= GL_MAP_INVALIDATE_BUFFER_BIT;
 				}
 				return glMapBufferRange(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), flags);
 			}
