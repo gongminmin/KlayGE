@@ -334,11 +334,26 @@ namespace KlayGE
 				}
 			}
 
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()); 
+			{
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
+				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
+			}
+			if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+			{
+				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->InstanceStream()));
+				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
+			}
+
 			if (this->UseIndices())
 			{
 				OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetIndexStream()));
 				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 				stream.Active(use_vao_);
+			}
+			else
+			{
+				re.OverrideBindBufferCache(GL_ELEMENT_ARRAY_BUFFER, 0);
 			}
 		}
 		else

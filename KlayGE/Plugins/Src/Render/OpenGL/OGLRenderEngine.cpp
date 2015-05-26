@@ -486,6 +486,15 @@ namespace KlayGE
 		glDeleteBuffers(n, buffers);
 	}
 
+	void OGLRenderEngine::OverrideBindBufferCache(GLenum target, GLuint buffer)
+	{
+		KLAYGE_AUTO(iter, binded_buffers_.find(target));
+		if (iter != binded_buffers_.end())
+		{
+			iter->second = buffer;
+		}
+	}
+
 	void OGLRenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
 	{
 		if ((clear_clr_[0] != r) || (clear_clr_[1] != g) || (clear_clr_[2] != b) || (clear_clr_[3] != a))

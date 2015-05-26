@@ -78,6 +78,7 @@ namespace KlayGE
 		void BindBuffer(GLenum target, GLuint buffer, bool force = false);
 		void BindBuffersBase(GLenum target, GLuint first, GLsizei count, GLuint const * buffers, bool force = false);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
+		void OverrideBindBufferCache(GLenum target, GLuint buffer);
 
 		void ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a);
 		void ClearDepth(GLfloat depth);

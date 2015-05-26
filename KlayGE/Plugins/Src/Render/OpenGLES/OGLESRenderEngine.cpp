@@ -296,7 +296,7 @@ namespace KlayGE
 		checked_pointer_cast<OGLESBlendStateObject>(cur_bs_obj_)->ForceDefaultState();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		if (glloader_GLES_VERSION_3_0())
+		if (caps_.primitive_restart_support)
 		{
 			glEnable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
 		}
@@ -439,6 +439,15 @@ namespace KlayGE
 			}
 		}
 		glDeleteBuffers(n, buffers);
+	}
+
+	void OGLESRenderEngine::OverrideBindBufferCache(GLenum target, GLuint buffer)
+	{
+		KLAYGE_AUTO(iter, binded_buffers_.find(target));
+		if (iter != binded_buffers_.end())
+		{
+			iter->second = buffer;
+		}
 	}
 
 	void OGLESRenderEngine::ClearColor(GLfloat r, GLfloat g, GLfloat b, GLfloat a)
@@ -1607,7 +1616,7 @@ namespace KlayGE
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
-		if (glloader_GLES_VERSION_3_0() && !hack_for_adreno_)
+		if (glloader_GLES_VERSION_3_0() && !hack_for_adreno_ && !hack_for_angle_)
 		{
 			caps_.primitive_restart_support = true;
 		}

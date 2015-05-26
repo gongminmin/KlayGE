@@ -2211,7 +2211,8 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
-			if (glloader_GLES_VERSION_3_0())
+			OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (glloader_GLES_VERSION_3_0() && !re.HackForAngle())
 			{
 				glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 			}
@@ -2335,7 +2336,11 @@ namespace KlayGE
 			{
 				if (glloader_GLES_VERSION_3_0())
 				{
-					glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+					OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+					if (!re.HackForAngle())
+					{
+						glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+					}
 
 					glProgramBinary(ret->glsl_program_, glsl_bin_format_,
 						&(*glsl_bin_program_)[0], static_cast<GLsizei>(glsl_bin_program_->size()));
