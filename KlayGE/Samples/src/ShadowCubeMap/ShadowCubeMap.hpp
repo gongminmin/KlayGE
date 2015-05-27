@@ -8,8 +8,8 @@
 
 enum SM_TYPE
 {
-	SMT_DP,
 	SMT_Cube,
+	SMT_DP,
 	SMT_CubeOne,
 	SMT_CubeOneInstance,
 	SMT_CubeOneInstanceGS

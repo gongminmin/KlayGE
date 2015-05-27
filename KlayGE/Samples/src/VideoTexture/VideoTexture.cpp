@@ -155,8 +155,8 @@ void VideoTextureApp::OnCreate()
 	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
 	this->Proj(0.01f, 100);
 
-	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.1f);
+	tb_controller_.AttachCamera(this->ActiveCamera());
+	tb_controller_.Scalers(0.003f, 0.0001f);
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);

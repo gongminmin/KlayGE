@@ -761,8 +761,8 @@ void GPUParticleSystemApp::OnCreate()
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
 
-	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.1f);
+	tb_controller_.AttachCamera(this->ActiveCamera());
+	tb_controller_.Scalers(0.003f, 0.003f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

@@ -158,6 +158,7 @@ namespace
 			}
 			light_proj_ = app.ActiveCamera().ProjMatrix();
 
+			light_color_ = light_src->Color();
 			light_falloff_ = light_src->Falloff();
 
 			light_inv_range_ = 1.0f / (light_src->SMCamera(0)->FarPlane() - light_src->SMCamera(0)->NearPlane());
@@ -231,6 +232,7 @@ namespace
 				*(effect->ParameterByName("shadow_cube_tex")) = sm_cube_tex_;
 				*(effect->ParameterByName("shadow_dual_tex")) = sm_dual_tex_;
 
+				*(effect->ParameterByName("light_color")) = light_color_;
 				*(effect->ParameterByName("light_falloff")) = light_falloff_;
 
 				if (SMT_DP == sm_type_)
@@ -253,6 +255,7 @@ namespace
 		float4x4 inv_light_model_;
 		float4x4 light_views_[6];
 		float4x4 light_proj_;
+		float3 light_color_;
 		float3 light_falloff_;
 
 		float esm_scale_factor_;
@@ -662,8 +665,8 @@ void ShadowCubeMap::OnCreate()
 
 	light_ = MakeSharedPtr<PointLightSource>();
 	light_->Attrib(0);
-	light_->Color(float3(1, 1, 1));
-	light_->Falloff(float3(1, 0.05f, 0));
+	light_->Color(float3(20, 20, 20));
+	light_->Falloff(float3(1, 1, 0));
 	light_->BindUpdateFunc(PointLightSourceUpdate());
 	light_->AddToSceneManager();
 
@@ -703,6 +706,17 @@ void ShadowCubeMap::OnCreate()
 
 	this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 	this->SMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_sm_type_combo_));
+
+	if (caps.max_shader_model < ShaderModel(5, 0))
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(4);
+	}
+	if (caps.max_shader_model < ShaderModel(4, 0))
+	{
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(3);
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(2);
+		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(1);
+	}
 
 	while (!teapot_model_)
 	{

@@ -6,9 +6,9 @@
 		<control type="slider" id="ScaleFactorSlider" x="20" y="40" width="100" height="24" min="1" max="300" value="160" is_default="0"/>
 
 		<control type="static" id="SMStatic" caption="Shadow map type:" x="20" y="100" width="100" height="24" is_default="0"/>
-		<control type="combo_box" id="SMCombo" x="20" y="100" width="120" height="24" selected="1" hotkey="0" is_default="0">
-			<item name="Dual Paraboloid"/>
+		<control type="combo_box" id="SMCombo" x="20" y="100" width="120" height="24" selected="0" hotkey="0" is_default="0">
 			<item name="Cube"/>
+			<item name="Dual Paraboloid"/>
 			<item name="1 pass Cube"/>
 			<item name="1 pass Cube with instance"/>
 			<item name="1 pass Cube with instance GS"/>

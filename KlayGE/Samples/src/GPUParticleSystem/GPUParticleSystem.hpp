@@ -27,7 +27,7 @@ private:
 	KlayGE::SceneObjectPtr particles_;
 	KlayGE::SceneObjectPtr terrain_;
 
-	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController tb_controller_;
 
 	KlayGE::TexturePtr scene_tex_;
 	KlayGE::FrameBufferPtr scene_buffer_;

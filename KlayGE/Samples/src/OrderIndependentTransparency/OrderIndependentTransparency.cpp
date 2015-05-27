@@ -509,7 +509,8 @@ void OrderIndependentTransparencyApp::OnCreate()
 		linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
 
-	fpcController_.Scalers(0.05f, 0.1f);
+	tb_controller_.AttachCamera(this->ActiveCamera());
+	tb_controller_.Scalers(0.003f, 0.003f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
@@ -528,7 +529,6 @@ void OrderIndependentTransparencyApp::OnCreate()
 	id_oit_mode_ = dialog_oit_->IDFromName("OITMode");
 	id_alpha_static_ = dialog_oit_->IDFromName("AlphaStatic");
 	id_alpha_slider_ = dialog_oit_->IDFromName("Alpha");
-	id_ctrl_camera_ = dialog_oit_->IDFromName("CtrlCamera");
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
@@ -542,8 +542,6 @@ void OrderIndependentTransparencyApp::OnCreate()
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
 	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, KlayGE::placeholders::_1));
 	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
-	dialog_oit_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
-	this->CtrlCameraHandler(*dialog_oit_->Control<UICheckBox>(id_ctrl_camera_));
 
 	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, KlayGE::placeholders::_1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
@@ -684,18 +682,6 @@ void OrderIndependentTransparencyApp::AlphaHandler(KlayGE::UISlider const & send
 	stream.precision(2);
 	stream << std::fixed << "Alpha: " << alpha;
 	dialog_oit_->Control<UIStatic>(id_alpha_static_)->SetText(stream.str());
-}
-
-void OrderIndependentTransparencyApp::CtrlCameraHandler(KlayGE::UICheckBox const & sender)
-{
-	if (sender.GetChecked())
-	{
-		fpcController_.AttachCamera(this->ActiveCamera());
-	}
-	else
-	{
-		fpcController_.DetachCamera();
-	}
 }
 
 void OrderIndependentTransparencyApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)

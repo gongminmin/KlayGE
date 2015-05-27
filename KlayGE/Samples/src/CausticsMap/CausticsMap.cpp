@@ -1232,7 +1232,7 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 			}
 
 			re.BindFrameBuffer(caustics_fb_);
-			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0.0f, 0.0f, 0.0f, 0.0f), 1.0f, 0);
 			re.CurFrameBuffer()->GetViewport()->camera = light_->SMCamera(0);
 
 			caustics_grid_->Render();

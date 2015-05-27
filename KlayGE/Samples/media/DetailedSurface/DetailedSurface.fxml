@@ -359,7 +359,7 @@ struct HS_CONSTANT_DATA_OUTPUT
 
 HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
 {
-	float4 tess_factors = float4(5, 5, 1, 9);
+	float4 tess_factors = float4(15, 15, 1, 30);
 	
 	HS_CONSTANT_DATA_OUTPUT output;
 

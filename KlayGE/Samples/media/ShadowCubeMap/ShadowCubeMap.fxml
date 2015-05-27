@@ -15,6 +15,7 @@
 	<parameter type="float2" name="tc_center"/>
 	<parameter type="float2" name="tc_extent"/>
 
+	<parameter type="float3" name="light_color"/>
 	<parameter type="float3" name="light_falloff"/>
 
 	<parameter type="float" name="esm_scale_factor"/>
@@ -542,7 +543,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 halfway = normalize(light_vec + normal);
 	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
-	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb;
+	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb * light_color;
 	float occluder;
 	float dist;
 #if USE_DPSM
@@ -569,7 +570,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
 	
-	float3 clr = ambient_clr.rgb * 0.2f * c_diff + emit + lighting * ori_color * atten;	
+	float3 clr = ambient_clr.rgb * c_diff + emit + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>

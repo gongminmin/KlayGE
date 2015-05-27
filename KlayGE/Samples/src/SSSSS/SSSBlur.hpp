@@ -25,7 +25,7 @@ private:
 	KlayGE::RenderTechniquePtr blur_x_tech_;
 	KlayGE::RenderTechniquePtr blur_y_techs_[3];
 	KlayGE::RenderTechniquePtr accum_techs_[3];
-	KlayGE::RenderEffectParameterPtr color_tex_param_;
+	KlayGE::RenderEffectParameterPtr src_tex_param_;
 	KlayGE::RenderEffectParameterPtr step_param_;
 	KlayGE::RenderEffectParameterPtr far_plane_param_;
 };

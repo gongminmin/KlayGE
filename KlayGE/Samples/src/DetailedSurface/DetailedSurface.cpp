@@ -139,7 +139,7 @@ namespace
 
 				float geom_area = MathLib::length(MathLib::cross(positions[i1] - positions[i0], positions[i2] - positions[i0]));
 				float tex_area = MathLib::cross(texs[i1] - texs[i0], texs[i2] - texs[i0]);
-				float tri_distortion = sqrt(geom_area / tex_area);
+				float tri_distortion = sqrt(geom_area / tex_area) / 2.5f;
 				distortions[i0] += tri_distortion;
 				distortions[i1] += tri_distortion;
 				distortions[i2] += tri_distortion;
@@ -567,7 +567,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			this->Proj(0.01f, 100);
 
 			tb_controller_.AttachCamera(this->ActiveCamera());
-			tb_controller_.Scalers(0.01f, 0.003f);
+			tb_controller_.Scalers(0.01f, 0.001f);
 
 			loading_percentage_ = 60;
 			progress_bar->SetValue(loading_percentage_);
@@ -632,6 +632,12 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 
 			dialog_->SetVisible(true);
 			dialog_loading->SetVisible(false);
+
+			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+			if (!(caps.hs_support && caps.ds_support))
+			{
+				dialog_->Control<UIComboBox>(id_detail_type_combo_)->RemoveItem(4);
+			}
 		}
 
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);

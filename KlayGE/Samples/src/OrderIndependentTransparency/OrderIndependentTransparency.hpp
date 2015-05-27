@@ -31,14 +31,13 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void OITModeHandler(KlayGE::UIComboBox const & sender);
 	void AlphaHandler(KlayGE::UISlider const & sender);
-	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 	void LayerChangedHandler(KlayGE::UIComboBox const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr polygon_;
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController tb_controller_;
 
 	bool depth_texture_support_;
 
@@ -68,7 +67,6 @@ private:
 	int id_oit_mode_;
 	int id_alpha_static_;
 	int id_alpha_slider_;
-	int id_ctrl_camera_;
 	int id_layer_combo_;
 	int id_layer_tex_;
 };

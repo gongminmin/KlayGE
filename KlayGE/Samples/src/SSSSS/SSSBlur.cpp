@@ -12,7 +12,7 @@ SSSBlurPP::SSSBlurPP()
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 	mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;
 
-	input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+	input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
 	input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
 
 	output_pins_.push_back(std::make_pair("output", TexturePtr()));
@@ -48,7 +48,7 @@ SSSBlurPP::SSSBlurPP()
 	blur_x_fb_ = rf.MakeFrameBuffer();
 	blur_y_fb_ = rf.MakeFrameBuffer();
 
-	color_tex_param_ = technique_->Effect().ParameterByName("color_tex");
+	src_tex_param_ = technique_->Effect().ParameterByName("src_tex");
 	step_param_ = technique_->Effect().ParameterByName("step");
 	far_plane_param_ = technique_->Effect().ParameterByName("far_plane");
 }
@@ -88,7 +88,7 @@ void SSSBlurPP::Apply()
 		re.BindFrameBuffer(blur_y_fb_);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 		technique_ = copy_tech_;
-		*color_tex_param_ = this->InputPin(0);
+		*src_tex_param_ = this->InputPin(0);
 		this->Render();
 	}
 	for (uint32_t i = 0; i < 3; ++ i)
@@ -96,11 +96,11 @@ void SSSBlurPP::Apply()
 		re.BindFrameBuffer(blur_x_fb_);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
 		technique_ = blur_x_tech_;
-		*color_tex_param_ = blur_y_tex_;
+		*src_tex_param_ = blur_y_tex_;
 		*step_param_ = float2((i + 1) * sss_strength / frame_buffer_->Width(), 0);
 		this->Render();
 
-		*color_tex_param_ = blur_x_tex_;
+		*src_tex_param_ = blur_x_tex_;
 		*step_param_ = float2(0, (i + 1) * sss_strength / frame_buffer_->Height());
 		if (mrt_blend_support_)
 		{
@@ -114,7 +114,7 @@ void SSSBlurPP::Apply()
 			this->Render();
 
 			technique_ = accum_techs_[i];
-			*color_tex_param_ = blur_y_tex_;
+			*src_tex_param_ = blur_y_tex_;
 		}
 
 		re.BindFrameBuffer(frame_buffer_);
