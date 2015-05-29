@@ -140,7 +140,7 @@ namespace KlayGE
 
 	void D3D11GraphicsBuffer::CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init)
 	{
-		D3D11_BUFFER_DESC desc;
+		D3D11_BUFFER_DESC desc = {};
 		this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
 		desc.ByteWidth = size_in_byte_;
 		desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);

@@ -438,6 +438,12 @@ namespace KlayGE
 		}
 		return seed;
 	}
+
+#ifdef KLAYGE_COMPILER_MSVC
+	#define KLAYGE_ASSUME(x) (__assume(x))
+#else
+	#define KLAYGE_ASSUME(x) (BOOST_ASSERT(x))
+#endif
 }
 
 #endif		// _KFL_UTIL_HPP

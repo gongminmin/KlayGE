@@ -59,7 +59,7 @@ namespace KlayGE
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		HMODULE mod_user = ::GetModuleHandle(TEXT("user32"));
-		BOOST_ASSERT(mod_user != nullptr);
+		KLAYGE_ASSUME(mod_user != nullptr);
 
 		DynamicRegisterTouchWindow_ = reinterpret_cast<RegisterTouchWindowFunc>(::GetProcAddress(mod_user, "RegisterTouchWindow"));
 		DynamicGetTouchInputInfo_ = reinterpret_cast<GetTouchInputInfoFunc>(::GetProcAddress(mod_user, "GetTouchInputInfo"));

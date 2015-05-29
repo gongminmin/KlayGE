@@ -247,7 +247,7 @@ namespace KlayGE
 							dxgi_device->Release();
 						}
 
-						description_ = adapter_->Description() + L" " + dev_type_beh.second;
+						description_ = adapter_->Description() + L" " + dev_type_beh.second + L" FL ";
 						wchar_t const * fl_str;
 						switch (out_feature_level)
 						{
@@ -283,7 +283,6 @@ namespace KlayGE
 							fl_str = L"Unknown";
 							break;
 						}
-						description_ += L" D3D Level ";
 						description_ += fl_str;
 						if (settings.sample_count > 1)
 						{

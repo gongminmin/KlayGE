@@ -279,11 +279,11 @@ namespace
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
-#ifdef KLAYGE_COMPILER_MSVC
-			__assume(mod_d3dcompiler_ != nullptr);
-#endif
+			KLAYGE_ASSUME(mod_d3dcompiler_ != nullptr);
+
 			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 #endif
+
 			if (glloader_GL_VERSION_4_5())
 			{
 				gsv_ = GSV_450;
