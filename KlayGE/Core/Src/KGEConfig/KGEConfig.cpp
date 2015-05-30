@@ -198,23 +198,24 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		}
 		{
 			HWND hDepthFmtCombo = GetDlgItem(hDlg, IDC_DEPTH_FMT_COMBO);
+			SendMessage(hDepthFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("None")));
 			SendMessage(hDepthFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D16")));
 			SendMessage(hDepthFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D24S8")));
 			SendMessage(hDepthFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D32F")));
 
-			int sel = 0;
+			int sel = 2;
 			switch (cfg.graphics_cfg.depth_stencil_fmt)
 			{
 			case EF_D16:
-				sel = 0;
-				break;
-
-			case EF_D24S8:
 				sel = 1;
 				break;
 
-			case EF_D32F:
+			case EF_D24S8:
 				sel = 2;
+				break;
+
+			case EF_D32F:
+				sel = 3;
 				break;
 
 			default:
@@ -593,20 +594,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					int n = static_cast<int>(SendMessage(hDepthFmtCombo, CB_GETCURSEL, 0, 0));
 					switch (n)
 					{
-					case 0:
+					case 1:
 						cfg.graphics_cfg.depth_stencil_fmt = EF_D16;
 						break;
 
-					case 1:
+					case 2:
 						cfg.graphics_cfg.depth_stencil_fmt = EF_D24S8;
 						break;
 
-					case 2:
+					case 3:
 						cfg.graphics_cfg.depth_stencil_fmt = EF_D32F;
 						break;
 
 					default:
-						cfg.graphics_cfg.depth_stencil_fmt = EF_D16;
+						cfg.graphics_cfg.depth_stencil_fmt = EF_Unknown;
 						break;
 					}
 				}

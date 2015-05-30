@@ -289,10 +289,12 @@ namespace KlayGE
 		RenderViewPtr ds_view;
 		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
 		{
-			if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+			if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
+				|| caps.texture_format_support(EF_D16))
 			{
 				ElementFormat fmt;
-				if (caps.texture_format_support(settings.depth_stencil_fmt))
+				if ((settings.depth_stencil_fmt != EF_Unknown)
+					&& caps.texture_format_support(settings.depth_stencil_fmt))
 				{
 					fmt = settings.depth_stencil_fmt;
 				}
@@ -308,7 +310,8 @@ namespace KlayGE
 			else
 			{
 				ElementFormat fmt;
-				if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+				if ((settings.depth_stencil_fmt != EF_Unknown)
+					&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
 				{
 					fmt = settings.depth_stencil_fmt;
 				}
@@ -712,7 +715,8 @@ namespace KlayGE
 			RenderViewPtr ds_view;
 			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 			{
-				if (caps.texture_format_support(EF_D24S8) || caps.texture_format_support(EF_D16))
+				if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
+					|| caps.texture_format_support(EF_D16))
 				{
 					ElementFormat fmt = ds_tex_->Format();
 					ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -721,7 +725,8 @@ namespace KlayGE
 				else
 				{
 					ElementFormat fmt;
-					if (caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+					if ((settings.depth_stencil_fmt != EF_Unknown)
+						&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
 					{
 						fmt = settings.depth_stencil_fmt;
 					}
@@ -895,7 +900,11 @@ namespace KlayGE
 			}
 		}
 
-		this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+		RenderViewPtr const & ds_view = this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
+		if (ds_view)
+		{
+			ds_view->ClearDepth(1.0f);
+		}
 
 		fb_stage_ = 0;
 	}

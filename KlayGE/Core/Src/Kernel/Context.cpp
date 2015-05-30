@@ -377,6 +377,10 @@ namespace KlayGE
 			{
 				depth_stencil_fmt = EF_D32F;
 			}
+			else
+			{
+				depth_stencil_fmt = EF_Unknown;
+			}
 
 			XMLNodePtr sample_node = frame_node->FirstNode("sample");
 			attr = sample_node->Attrib("count");
@@ -699,7 +703,7 @@ namespace KlayGE
 				break;
 
 			default:
-				depth_stencil_fmt_str = "D16";
+				depth_stencil_fmt_str = "None";
 				break;
 			}
 			frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));

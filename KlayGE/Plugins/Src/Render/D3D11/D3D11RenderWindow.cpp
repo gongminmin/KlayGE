@@ -306,56 +306,46 @@ namespace KlayGE
 		Verify(!!d3d_device);
 		Verify(!!d3d_imm_ctx);
 
-		bool isDepthBuffered = IsDepthFormat(settings.depth_stencil_fmt);
-		uint32_t depthBits = NumDepthBits(settings.depth_stencil_fmt);
-		uint32_t stencilBits = NumStencilBits(settings.depth_stencil_fmt);
-		if (isDepthBuffered)
+		depth_stencil_format_ = DXGI_FORMAT_UNKNOWN;
+		ElementFormat depth_stencil_fmt = settings.depth_stencil_fmt;
+		if (IsDepthFormat(depth_stencil_fmt))
 		{
-			BOOST_ASSERT((32 == depthBits) || (24 == depthBits) || (16 == depthBits) || (0 == depthBits));
-			BOOST_ASSERT((8 == stencilBits) || (0 == stencilBits));
+			BOOST_ASSERT((EF_D32F == depth_stencil_fmt) || (EF_D24S8 == depth_stencil_fmt)
+				|| (EF_D16 == depth_stencil_fmt));
 
 			UINT format_support;
 
-			if (32 == depthBits)
+			if (EF_D32F == depth_stencil_fmt)
 			{
-				BOOST_ASSERT(0 == stencilBits);
-
 				// Try 32-bit zbuffer
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D32_FLOAT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D32_FLOAT;
-					stencilBits = 0;
 				}
 				else
 				{
-					depthBits = 24;
+					depth_stencil_fmt = EF_D24S8;
 				}
 			}
-			if (24 == depthBits)
+			if (EF_D24S8 == depth_stencil_fmt)
 			{
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
-					stencilBits = 8;
 				}
 				else
 				{
-					depthBits = 16;
+					depth_stencil_fmt = EF_D16;
 				}
 			}
-			if (16 == depthBits)
+			if (EF_D16 == depth_stencil_fmt)
 			{
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D16_UNORM, &format_support);
 				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
 				{
 					depth_stencil_format_ = DXGI_FORMAT_D16_UNORM;
-					stencilBits = 0;
-				}
-				else
-				{
-					depthBits = 0;
 				}
 			}
 		}
@@ -857,81 +847,84 @@ namespace KlayGE
 		bool stereo = false;
 #endif
 
-		// Create depth stencil texture
-		D3D11_TEXTURE2D_DESC ds_desc;
-		ds_desc.Width = this->Width();
-		ds_desc.Height = this->Height();
-		ds_desc.MipLevels = 1;
-		ds_desc.ArraySize = stereo ? 2 : 1;
-		ds_desc.Format = depth_stencil_format_;
-		ds_desc.SampleDesc.Count = bb_desc.SampleDesc.Count;
-		ds_desc.SampleDesc.Quality = bb_desc.SampleDesc.Quality;
-		ds_desc.Usage = D3D11_USAGE_DEFAULT;
-		ds_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		ds_desc.CPUAccessFlags = 0;
-		ds_desc.MiscFlags = 0;
-		ID3D11Texture2D* depth_stencil;
-		TIF(d3d_device->CreateTexture2D(&ds_desc, nullptr, &depth_stencil));
-		depth_stencil_ = MakeCOMPtr(depth_stencil);
-
-		// Create the depth stencil view
-		D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
-		dsv_desc.Format = depth_stencil_format_;
-		dsv_desc.Flags = 0;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (dxgi_sub_ver_ >= 2)
+		if (depth_stencil_format_ != DXGI_FORMAT_UNKNOWN)
 		{
-			if (bb_desc.SampleDesc.Count > 1)
+			// Create depth stencil texture
+			D3D11_TEXTURE2D_DESC ds_desc;
+			ds_desc.Width = this->Width();
+			ds_desc.Height = this->Height();
+			ds_desc.MipLevels = 1;
+			ds_desc.ArraySize = stereo ? 2 : 1;
+			ds_desc.Format = depth_stencil_format_;
+			ds_desc.SampleDesc.Count = bb_desc.SampleDesc.Count;
+			ds_desc.SampleDesc.Quality = bb_desc.SampleDesc.Quality;
+			ds_desc.Usage = D3D11_USAGE_DEFAULT;
+			ds_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+			ds_desc.CPUAccessFlags = 0;
+			ds_desc.MiscFlags = 0;
+			ID3D11Texture2D* depth_stencil;
+			TIF(d3d_device->CreateTexture2D(&ds_desc, nullptr, &depth_stencil));
+			depth_stencil_ = MakeCOMPtr(depth_stencil);
+
+			// Create the depth stencil view
+			D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
+			dsv_desc.Format = depth_stencil_format_;
+			dsv_desc.Flags = 0;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+			if (dxgi_sub_ver_ >= 2)
 			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
-				dsv_desc.Texture2DMSArray.FirstArraySlice = 0;
-				dsv_desc.Texture2DMSArray.ArraySize = 1;
+				if (bb_desc.SampleDesc.Count > 1)
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+					dsv_desc.Texture2DMSArray.FirstArraySlice = 0;
+					dsv_desc.Texture2DMSArray.ArraySize = 1;
+				}
+				else
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+					dsv_desc.Texture2DArray.MipSlice = 0;
+					dsv_desc.Texture2DArray.FirstArraySlice = 0;
+					dsv_desc.Texture2DArray.ArraySize = 1;
+				}
 			}
 			else
-			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-				dsv_desc.Texture2DArray.MipSlice = 0;
-				dsv_desc.Texture2DArray.FirstArraySlice = 0;
-				dsv_desc.Texture2DArray.ArraySize = 1;
-			}
-		}
-		else
 #endif
-		{
-			if (bb_desc.SampleDesc.Count > 1)
 			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+				if (bb_desc.SampleDesc.Count > 1)
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+				}
+				else
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+					dsv_desc.Texture2D.MipSlice = 0;
+				}
 			}
-			else
-			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-				dsv_desc.Texture2D.MipSlice = 0;
-			}
-		}
-		ID3D11DepthStencilView* depth_stencil_view;
-		TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
-		depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (stereo)
-		{
-			if (bb_desc.SampleDesc.Count > 1)
-			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
-				dsv_desc.Texture2DMSArray.FirstArraySlice = 1;
-				dsv_desc.Texture2DMSArray.ArraySize = 1;
-			}
-			else
-			{
-				dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-				dsv_desc.Texture2DArray.MipSlice = 0;
-				dsv_desc.Texture2DArray.FirstArraySlice = 1;
-				dsv_desc.Texture2DArray.ArraySize = 1;
-			}
+			ID3D11DepthStencilView* depth_stencil_view;
 			TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
-			depth_stencil_view_right_eye_ = MakeCOMPtr(depth_stencil_view);
-		}
+			depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+			if (stereo)
+			{
+				if (bb_desc.SampleDesc.Count > 1)
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+					dsv_desc.Texture2DMSArray.FirstArraySlice = 1;
+					dsv_desc.Texture2DMSArray.ArraySize = 1;
+				}
+				else
+				{
+					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+					dsv_desc.Texture2DArray.MipSlice = 0;
+					dsv_desc.Texture2DArray.FirstArraySlice = 1;
+					dsv_desc.Texture2DArray.ArraySize = 1;
+				}
+				TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
+				depth_stencil_view_right_eye_ = MakeCOMPtr(depth_stencil_view);
+			}
 #endif
+		}
 
 		if (!!stereo_amd_qb_ext_)
 		{
@@ -961,7 +954,10 @@ namespace KlayGE
 				ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
 				ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
 				d3d_imm_ctx_1->DiscardView(render_target_view_.get());
-				d3d_imm_ctx_1->DiscardView(depth_stencil_view_.get());
+				if (depth_stencil_view_)
+				{
+					d3d_imm_ctx_1->DiscardView(depth_stencil_view_.get());
+				}
 				if (render_target_view_right_eye_)
 				{
 					d3d_imm_ctx_1->DiscardView(render_target_view_right_eye_.get());
