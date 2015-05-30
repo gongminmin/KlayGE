@@ -319,8 +319,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
-		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (ri.header.hDevice == device_)
-			&& (hwnd_ == ::GetForegroundWindow()))
+		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (hwnd_ == ::GetForegroundWindow()))
 		{
 			int32_t ks = VK_MAPPING[ri.data.keyboard.VKey];
 			if (ks >= 0)
