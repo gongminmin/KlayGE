@@ -140,11 +140,11 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		target_dir = sys.argv[1]
+
+		cfg = cfg_from_argv(sys.argv, 1)
+		bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
+
+		for compiler_info in bi.compilers:
+			deploy_KlayGE(target_dir, bi, compiler_info.arch)
 	else:
-		target_dir = ""
-
-	cfg = cfg_from_argv(sys.argv, 1)
-	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
-
-	for compiler_info in bi.compilers:
-		deploy_KlayGE(target_dir, bi, compiler_info.arch)
+		print("Usage: deploy_KlayGE.py target_dir [compiler] [arch] [config]")
