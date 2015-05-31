@@ -38,26 +38,33 @@ using namespace KlayGE;
 
 int main()
 {
-	cout << "SMBios Ver: " << static_cast<int>(SMBios::Intance().MajorVersion())
-		<< '.' << static_cast<int>(SMBios::Intance().MinorVersion()) << endl;
-	cout << endl;
-
-	Mainboard mainboard;
-	cout << "Mainboard: " << mainboard.Manufacturer() << ' ' << mainboard.Product() << endl;
-	cout << "Bios: " << mainboard.BiosVendor() << ' ' << mainboard.BiosVersion() << endl;
-	cout << "Release Date: " << mainboard.BiosReleaseDate() << endl;
-	cout << endl;
-
-	MemoryBank mem;
-	for (size_t i = 0; i < mem.SlotCount(); ++ i)
+	if (SMBios::Instance().Available())
 	{
-		if (mem[i].size != 0)
+		cout << "SMBios Ver: " << static_cast<int>(SMBios::Instance().MajorVersion())
+			<< '.' << static_cast<int>(SMBios::Instance().MinorVersion()) << endl;
+		cout << endl;
+
+		Mainboard mainboard;
+		cout << "Mainboard: " << mainboard.Manufacturer() << ' ' << mainboard.Product() << endl;
+		cout << "Bios: " << mainboard.BiosVendor() << ' ' << mainboard.BiosVersion() << endl;
+		cout << "Release Date: " << mainboard.BiosReleaseDate() << endl;
+		cout << endl;
+
+		MemoryBank mem;
+		for (size_t i = 0; i < mem.SlotCount(); ++i)
 		{
-			cout << mem[i].manufacturer << ' ' << mem[i].size << " MB" << endl;
-			cout << "Part #: " << mem[i].part_number << endl;
-			cout << "Serial #: " << mem[i].serial_num << endl;
-			cout << endl;
+			if (mem[i].size != 0)
+			{
+				cout << mem[i].manufacturer << ' ' << mem[i].size << " MB" << endl;
+				cout << "Part #: " << mem[i].part_number << endl;
+				cout << "Serial #: " << mem[i].serial_num << endl;
+				cout << endl;
+			}
 		}
+	}
+	else
+	{
+		cout << "Could not read from SMBios." << endl;
 	}
 
 	return 0;

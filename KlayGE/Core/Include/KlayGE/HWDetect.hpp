@@ -308,7 +308,12 @@ namespace KlayGE
 	class KLAYGE_CORE_API SMBios : boost::noncopyable
 	{
 	public:
-		static SMBios& Intance();
+		static SMBios& Instance();
+
+		bool Available() const
+		{
+			return smbios_data_ != nullptr;
+		}
 
 		uint8_t MajorVersion() const
 		{

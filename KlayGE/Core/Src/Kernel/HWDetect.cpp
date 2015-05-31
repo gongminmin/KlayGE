@@ -121,7 +121,7 @@ namespace KlayGE
 			{
 				IWbemClassObject* wbem_object = nullptr;
 				hr = wbem_enum_result_->Next(WBEM_INFINITE, 1, &wbem_object, &result);
-				if (FAILED(hr) || (0 == result) || !wbem_object_)
+				if (FAILED(hr) || (0 == result) || !wbem_object)
 				{
 					return false;
 				}
@@ -197,7 +197,7 @@ namespace KlayGE
 #endif
 
 
-	SMBios& SMBios::Intance()
+	SMBios& SMBios::Instance()
 	{
 		static SMBios smbios;
 		return smbios;
@@ -389,7 +389,7 @@ namespace KlayGE
 
 	bool Mainboard::ReadMainboard()
 	{
-		if (SMBios::Intance().FindFirstTargetType(SMBT_Mainboard))
+		if (SMBios::Instance().FindFirstTargetType(SMBT_Mainboard))
 		{
 			memset(&mainboard_, 0, sizeof(mainboard_));
 			this->FillData(mainboard_);
@@ -401,7 +401,7 @@ namespace KlayGE
 
 	bool Mainboard::ReadBios()
 	{
-		if (SMBios::Intance().FindFirstTargetType(SMBT_Bios))
+		if (SMBios::Instance().FindFirstTargetType(SMBT_Bios))
 		{
 			this->FillData(bios_);
 			return true;
@@ -412,35 +412,35 @@ namespace KlayGE
 
 	void Mainboard::FillData(MainboardInfo& mb_info)
 	{
-		SMBios::Intance().FillDataField(mb_info.feature_flag, 0x09);
-		SMBios::Intance().FillDataField(mb_info.board_type, 0x0D);
-		SMBios::Intance().FillDataField(mb_info.contain_object_handler_num, 0x0E);
+		SMBios::Instance().FillDataField(mb_info.feature_flag, 0x09);
+		SMBios::Instance().FillDataField(mb_info.board_type, 0x0D);
+		SMBios::Instance().FillDataField(mb_info.contain_object_handler_num, 0x0E);
 
-		SMBios::Intance().FillDataField(mb_info.chas_handler, 0x0B);
+		SMBios::Instance().FillDataField(mb_info.chas_handler, 0x0B);
 
-		SMBios::Intance().FillStringField(mb_info.manufacturer, 0x04);
-		SMBios::Intance().FillStringField(mb_info.product, 0x05);
-		SMBios::Intance().FillStringField(mb_info.version, 0x06);
-		SMBios::Intance().FillStringField(mb_info.serial_num, 0x07);
-		SMBios::Intance().FillStringField(mb_info.asset_tag, 0x08);
-		SMBios::Intance().FillStringField(mb_info.location_within_chassis, 0x0A);
+		SMBios::Instance().FillStringField(mb_info.manufacturer, 0x04);
+		SMBios::Instance().FillStringField(mb_info.product, 0x05);
+		SMBios::Instance().FillStringField(mb_info.version, 0x06);
+		SMBios::Instance().FillStringField(mb_info.serial_num, 0x07);
+		SMBios::Instance().FillStringField(mb_info.asset_tag, 0x08);
+		SMBios::Instance().FillStringField(mb_info.location_within_chassis, 0x0A);
 	}
 
 	void Mainboard::FillData(BiosInfo& bios_info)
 	{
-		SMBios::Intance().FillStringField(bios_info.vendor, 0x04);
-		SMBios::Intance().FillStringField(bios_info.version, 0x05);
-		SMBios::Intance().FillStringField(bios_info.release_date, 0x08);
+		SMBios::Instance().FillStringField(bios_info.vendor, 0x04);
+		SMBios::Instance().FillStringField(bios_info.version, 0x05);
+		SMBios::Instance().FillStringField(bios_info.release_date, 0x08);
 
-		SMBios::Intance().FillDataField(bios_info.start_addr_segment, 0x06);
-		SMBios::Intance().FillDataField(bios_info.rom_size, 0x09);
-		SMBios::Intance().FillDataField(bios_info.characteristics, 0x0A);
-		SMBios::Intance().FillDataField(bios_info.extension1, 0x12);
-		SMBios::Intance().FillDataField(bios_info.extension2, 0x13);
-		SMBios::Intance().FillDataField(bios_info.major, 0x14);
-		SMBios::Intance().FillDataField(bios_info.minor, 0x15);
-		SMBios::Intance().FillDataField(bios_info.firmware_major, 0x16);
-		SMBios::Intance().FillDataField(bios_info.firmware_minor, 0x17);
+		SMBios::Instance().FillDataField(bios_info.start_addr_segment, 0x06);
+		SMBios::Instance().FillDataField(bios_info.rom_size, 0x09);
+		SMBios::Instance().FillDataField(bios_info.characteristics, 0x0A);
+		SMBios::Instance().FillDataField(bios_info.extension1, 0x12);
+		SMBios::Instance().FillDataField(bios_info.extension2, 0x13);
+		SMBios::Instance().FillDataField(bios_info.major, 0x14);
+		SMBios::Instance().FillDataField(bios_info.minor, 0x15);
+		SMBios::Instance().FillDataField(bios_info.firmware_major, 0x16);
+		SMBios::Instance().FillDataField(bios_info.firmware_minor, 0x17);
 	}
 
 	char const * Mainboard::Manufacturer() const
@@ -482,7 +482,7 @@ namespace KlayGE
 
 	MemoryBank::MemoryBank()
 	{
-		if (SMBios::Intance().FindFirstTargetType(SMBT_MemDevice))
+		if (SMBios::Instance().FindFirstTargetType(SMBT_MemDevice))
 		{
 			do
 			{
@@ -490,34 +490,34 @@ namespace KlayGE
 				memset(&device, 0, sizeof(device));
 				this->DataFill(device);
 				devices_.push_back(device);
-			} while (SMBios::Intance().FindNextTargetType());
+			} while (SMBios::Instance().FindNextTargetType());
 		}
 	}
 
 	void MemoryBank::DataFill(MemoryDeviceInfo& md_info)
 	{
-		SMBios::Intance().FillDataField(md_info.physical_memory_array_handle, 0x04);
-		SMBios::Intance().FillDataField(md_info.mem_error_info_handle, 0x06);
-		SMBios::Intance().FillDataField(md_info.total_width, 0x08);
-		SMBios::Intance().FillDataField(md_info.data_width, 0x0A);
-		SMBios::Intance().FillDataField(md_info.size, 0x0C);
-		SMBios::Intance().FillDataField(md_info.form_factor, 0x0E);
-		SMBios::Intance().FillDataField(md_info.device_set, 0x0F);
-		SMBios::Intance().FillDataField(md_info.memory_type, 0x12);
-		SMBios::Intance().FillDataField(md_info.type_detail, 0x13);
-		SMBios::Intance().FillDataField(md_info.speed, 0x15);
-		SMBios::Intance().FillDataField(md_info.attributes, 0x1B);
-		SMBios::Intance().FillDataField(md_info.extended_size, 0x1C);
-		SMBios::Intance().FillDataField(md_info.configured_memory_clk_speed, 0x20);
-		SMBios::Intance().FillDataField(md_info.min_voltage, 0x22);
-		SMBios::Intance().FillDataField(md_info.max_voltage, 0x24);
-		SMBios::Intance().FillDataField(md_info.configured_voltage, 0x26);
+		SMBios::Instance().FillDataField(md_info.physical_memory_array_handle, 0x04);
+		SMBios::Instance().FillDataField(md_info.mem_error_info_handle, 0x06);
+		SMBios::Instance().FillDataField(md_info.total_width, 0x08);
+		SMBios::Instance().FillDataField(md_info.data_width, 0x0A);
+		SMBios::Instance().FillDataField(md_info.size, 0x0C);
+		SMBios::Instance().FillDataField(md_info.form_factor, 0x0E);
+		SMBios::Instance().FillDataField(md_info.device_set, 0x0F);
+		SMBios::Instance().FillDataField(md_info.memory_type, 0x12);
+		SMBios::Instance().FillDataField(md_info.type_detail, 0x13);
+		SMBios::Instance().FillDataField(md_info.speed, 0x15);
+		SMBios::Instance().FillDataField(md_info.attributes, 0x1B);
+		SMBios::Instance().FillDataField(md_info.extended_size, 0x1C);
+		SMBios::Instance().FillDataField(md_info.configured_memory_clk_speed, 0x20);
+		SMBios::Instance().FillDataField(md_info.min_voltage, 0x22);
+		SMBios::Instance().FillDataField(md_info.max_voltage, 0x24);
+		SMBios::Instance().FillDataField(md_info.configured_voltage, 0x26);
 
-		SMBios::Intance().FillStringField(md_info.device_locator, 0x10);
-		SMBios::Intance().FillStringField(md_info.bank_locator, 0x11);
-		SMBios::Intance().FillStringField(md_info.manufacturer, 0x17);
-		SMBios::Intance().FillStringField(md_info.serial_num, 0x18);
-		SMBios::Intance().FillStringField(md_info.asset_tag, 0x19);
-		SMBios::Intance().FillStringField(md_info.part_number, 0x1A);
+		SMBios::Instance().FillStringField(md_info.device_locator, 0x10);
+		SMBios::Instance().FillStringField(md_info.bank_locator, 0x11);
+		SMBios::Instance().FillStringField(md_info.manufacturer, 0x17);
+		SMBios::Instance().FillStringField(md_info.serial_num, 0x18);
+		SMBios::Instance().FillStringField(md_info.asset_tag, 0x19);
+		SMBios::Instance().FillStringField(md_info.part_number, 0x1A);
 	}
 }
