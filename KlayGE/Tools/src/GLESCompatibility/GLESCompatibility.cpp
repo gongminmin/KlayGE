@@ -31,7 +31,7 @@ namespace
 
 			std::string glsl_ver_str;
 			re.GetCustomAttrib("SHADING_LANGUAGE_VERSION", &glsl_ver_str);
-			if (!glsl_ver_str.empty())
+			if (glsl_ver_str.empty())
 			{
 				glsl_major_ver_ = 0;
 				glsl_minor_ver_ = 0;

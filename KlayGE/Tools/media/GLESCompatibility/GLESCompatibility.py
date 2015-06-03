@@ -30,7 +30,7 @@ features_db = {
 			'Fence sync objects' : lambda : is_supported('GLES_APPLE_sync'),
 			'Pixel buffer object' : lambda : is_supported('GLES_NV_pixel_buffer_object'),
 			'Map buffer range' : lambda : is_supported('GLES_EXT_map_buffer_range'),
-			'Data copying between buffer objects' : lambda : support_one(['GL_ARB_copy_buffer', 'GL_EXT_copy_buffer']),
+			'Data copying between buffer objects' : lambda : is_supported('GLES_NV_copy_buffer'),
 			'Simple boolean occlusion queries' : lambda : is_supported('GLES_EXT_occlusion_query_boolean'),
 			'Instanced rendering' : lambda : support_one(['GLES_EXT_draw_instanced', 'GLES_NV_draw_instanced']),
 			'Instanced array' : lambda : support_one(['GLES_EXT_instanced_arrays', 'GLES_NV_instanced_arrays', 'GLES_ANGLE_instanced_arrays']),
@@ -44,7 +44,7 @@ features_db = {
 			'Non-Power-Of-Two Textures' : lambda : is_supported('GLES_OES_texture_npot'),
 			'Texture LOD Bias' : lambda : is_supported('GLES_EXT_texture_lod_bias'),
 			'Integer texture' : lambda : is_supported('GL_EXT_texture_integer'),
-			'sRGB-encoded framebuffer' : lambda : is_supported('GL_EXT_sRGB'),
+			'sRGB-encoded framebuffer' : lambda : is_supported('GLES_EXT_sRGB'),
 			'Packed float' : lambda : is_supported('GLES_NV_packed_float'),
 			'Shared exponent' : lambda : is_supported('GL_EXT_texture_shared_exponent'),
 			'Unsigned 10.10.10.2 integer textures format' : lambda : is_supported('GL_ARB_texture_rgb10_a2ui'),
@@ -82,7 +82,7 @@ class information:
 		stream.write('\t<title>OpenGL Compatibility</title>\n')
 		stream.write('</head>\n')
 		stream.write('<body>\n')
-		stream.write('<h1>OpenGL Compatibility</h1>\n')
+		stream.write('<h1>OpenGL ES Compatibility</h1>\n')
 		stream.write('\t<table width="100%">\n')
 		stream.write('\t\t<tr>\n')
 		stream.write('\t\t\t<th style="background: gray; color: white">Vendor:</th>\n')
@@ -109,7 +109,7 @@ class information:
 
 			potential_rate = len(supported) * 100.0 / (len(supported) + len(unsupported))
 
-			stream.write('\t<h3>OpenGL %s potential support rate: %.1f%%</h3>\n' % (feature_info[0], potential_rate))
+			stream.write('\t<h3>OpenGL ES %s potential support rate: %.1f%%</h3>\n' % (feature_info[0], potential_rate))
 			stream.write('\t<table width="100%" style="border-bottom: 1px solid black">\n')
 
 			if len(supported) > 0:
