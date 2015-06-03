@@ -59,7 +59,7 @@ namespace KlayGE
 		}
 
 		size_t const len = strlen(data);
-		if ((1 == len) && (data[0] != '\n'))
+		if ((len > 1) || (data[0] != '\n'))
 		{
 			LogInfo(data);
 		}
