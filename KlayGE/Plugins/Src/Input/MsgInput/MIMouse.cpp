@@ -76,7 +76,7 @@ namespace KlayGE
 	{
 		if ((RIM_TYPEMOUSE == ri.header.dwType) && (hwnd_ == ::GetForegroundWindow()))
 		{
-			for (int i = 0; i < 5; ++ i)
+			for (uint32_t i = 0; i < num_buttons_; ++ i)
 			{
 				if (ri.data.mouse.usButtonFlags & (1UL << (i * 2 + 0)))
 				{
@@ -102,7 +102,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 	void MsgInputMouse::OnMouseDown(int2 const & pt, uint32_t buttons)
 	{
-		for (int i = 0; i < 5; ++ i)
+		for (uint32_t i = 0; i < num_buttons_; ++ i)
 		{
 			if (buttons & (1UL << i))
 			{
@@ -115,7 +115,7 @@ namespace KlayGE
 
 	void MsgInputMouse::OnMouseUp(int2 const & pt, uint32_t buttons)
 	{
-		for (int i = 0; i < 5; ++ i)
+		for (uint32_t i = 0; i < num_buttons_; ++ i)
 		{
 			if (buttons & (1UL << i))
 			{
@@ -163,9 +163,9 @@ namespace KlayGE
 		buttons_[index_] = buttons_state_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		shift_ctrl_alt_ = ((GetKeyState(VK_SHIFT) & 0x80) ? MB_Shift : 0)
-			| ((GetKeyState(VK_CONTROL) & 0x80) ? MB_Ctrl : 0)
-			| ((GetKeyState(VK_MENU) & 0x80) ? MB_Alt : 0);
+		shift_ctrl_alt_ = ((::GetKeyState(VK_SHIFT) & 0x80) ? MB_Shift : 0)
+			| ((::GetKeyState(VK_CONTROL) & 0x80) ? MB_Ctrl : 0)
+			| ((::GetKeyState(VK_MENU) & 0x80) ? MB_Alt : 0);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// TODO
 #endif

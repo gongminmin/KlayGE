@@ -4,10 +4,12 @@
 	<include name="util.fxml"/>
 	<include name="Copy.fxml"/>
 
-	<parameter type="float2" name="step"/>
-	<parameter type="float" name="far_plane"/>
-	<parameter type="texture2D" name="depth_tex"/>
-	<parameter type="float" name="correction"/>
+	<cbuffer name="sss_cb">
+		<parameter type="float2" name="step"/>
+		<parameter type="float" name="far_plane"/>
+		<parameter type="texture2D" name="depth_tex"/>
+		<parameter type="float" name="correction"/>
+	</cbuffer>
 
 	<shader>
 		<![CDATA[
@@ -19,37 +21,36 @@ float4 GuassBlur(float2 texcoord)
 	float o[6] = {  -1.0f, -0.6667f, -0.3333f, 0.3333f, 0.6667f,   1.0f };
 
 	// Fetch color and linear depth for current pixel:
-	float4 colorM = src_tex.Sample(point_sampler, texcoord);
-	float depthM = ReadAFloat(depth_tex.Sample(point_sampler, texcoord), far_plane);
+	float4 color_m = src_tex.Sample(point_sampler, texcoord);
+	float depth_m = ReadAFloat(depth_tex.Sample(point_sampler, texcoord), far_plane);
 
 	// Accumulate center sample, multiplying it with its gaussian weight:
-	float4 colorBlurred = colorM;
-	colorBlurred.rgb *= 0.382f;
+	float4 color_blurred = color_m * 0.382f;
 	
 	// Calculate the step that we will use to fetch the surrounding pixels,
 	// where "step" is:
-	//     step = sssStrength * gaussianWidth * pixelSize * dir
+	//     step = sss_strength * gaussian_width * pixel_size * dir
 	// The closer the pixel, the stronger the effect needs to be, hence
-	// the factor 1.0 / depthM.
-	float2 finalStep = colorM.a * step / depthM;
+	// the factor 1.0 / depth_m.
+	float2 final_step = color_m.a * step / depth_m;
 	for (int i = 0; i < 6; ++ i)
 	{
 		// Fetch color and depth for current sample:
-		float2 offset = texcoord + o[i] * finalStep;
+		float2 offset = texcoord + o[i] * final_step;
 		float3 color = src_tex.Sample(point_sampler, offset).rgb;
 		float depth = ReadAFloat(depth_tex.Sample(point_sampler, offset), far_plane);
 
-		// If the difference in depth is huge, we lerp color back to "colorM":
-		float s = min(0.0125f * correction * abs(depthM - depth), 1);
-		color = lerp(color, colorM.rgb, s);
+		// If the difference in depth is huge, we lerp color back to "color_m":
+		float s = min(0.0125f * correction * abs(depth_m - depth), 1);
+		color = lerp(color, color_m.rgb, s);
 
 		// Accumulate:
-		colorBlurred.rgb += w[i] * color;
+		color_blurred.rgb += w[i] * color;
 	}
 
 	// The result will be alpha blended with current buffer by using specific
 	// RGB weights. For more details, I refer you to the GPU Pro chapter :)
-	return colorBlurred;
+	return color_blurred;
 }
 
 float4 BlurRT0PS(float2 texcoord : TEXCOORD0) : SV_Target
@@ -97,7 +98,7 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="pixel_shader" value="BlurRT0PS()"/>
 		</pass>
 	</technique>
-	
+
 	<technique name="BlurY1">
 		<pass name="p1">
 			<state name="depth_enable" value="false"/>
@@ -108,7 +109,7 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_read_mask" value="32"/>
 			<state name="front_stencil_write_mask" value="0"/>
-			
+
 			<state name="independent_blend_enable" value="true"/>
 			<state name="blend_enable" index="0" value="true"/>
 			<state name="blend_enable" index="1" value="false"/>
@@ -171,13 +172,15 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 	</technique>
 
 
-	<parameter type="float3" name= "light_color"/>
-	<parameter type="float3" name= "light_falloff"/>
-	<parameter type="float4x4"  name="inv_proj"/>
-	<parameter type="float3"  name="light_pos_es"/>
-	<parameter type="float4x4"  name="light_view_proj"/>
-	<parameter type="float" name="strength"/>
-	<parameter type="float" name="sm_far_plane"/>
+	<cbuffer name="translucency_cb">
+		<parameter type="float3" name= "light_color"/>
+		<parameter type="float3" name= "light_falloff"/>
+		<parameter type="float4x4"  name="inv_proj"/>
+		<parameter type="float3"  name="light_pos_es"/>
+		<parameter type="float4x4"  name="light_view_proj"/>
+		<parameter type="float" name="strength"/>
+		<parameter type="float" name="sm_far_plane"/>
+	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
@@ -186,7 +189,7 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 	
 	<shader>
 		<![CDATA[
-float3 T(float s)
+float3 CalcTransmit(float s)
 {
 	return float3(0.233f, 0.455f, 0.649f) * exp(-s * s / 0.0064f)
 		+ float3(0.1f, 0.336f, 0.344f) * exp(-s * s / 0.0484f)
@@ -203,7 +206,7 @@ void TranslucencyVS(float4 pos : POSITION,
 {
 	oTex = TexCoordFromPos(pos);
 	oPos = pos;
-	
+
 	oViewDir = mul(oPos, inv_proj).xyz;
 }
 
@@ -217,10 +220,10 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	coord_ls.y *= KLAYGE_FLIPPING;
 	coord_ls += 0.5f;
 	float s = abs(light_vp_pos.w - ReadAFloat(shadow_tex.Sample(bilinear_sampler, coord_ls), sm_far_plane));
-	
-	float3 L = normalize(pos_es - light_pos_es);
-	float irradiance = max(0.3f + dot(normal, L), 0);
-	float3 transmittance = T(s * strength) * light_color * irradiance * albedo_tex.Sample(point_sampler, tc).rgb;
+
+	float3 light_vec = normalize(pos_es - light_pos_es);
+	float irradiance = max(0.3f + dot(normal, light_vec), 0);
+	float3 transmittance = CalcTransmit(s * strength) * light_color * irradiance * albedo_tex.Sample(point_sampler, tc).rgb;
 	return float4(transmittance, 1);
 }
 		]]>
