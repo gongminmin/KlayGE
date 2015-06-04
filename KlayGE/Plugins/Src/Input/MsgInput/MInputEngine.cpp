@@ -142,7 +142,7 @@ namespace KlayGE
 			switch (raw_input_devices[i].dwType)
 			{
 			case RIM_TYPEKEYBOARD:
-				device = MakeSharedPtr<MsgInputKeyboard>(hwnd, raw_input_devices[i].hDevice);
+				device = MakeSharedPtr<MsgInputKeyboard>();
 				rid.usUsage = HID_USAGE_GENERIC_KEYBOARD;
 				rid.dwFlags = 0;
 				rids.push_back(rid);
@@ -269,44 +269,47 @@ namespace KlayGE
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	void MsgInputEngine::OnRawInput(Window const & /*wnd*/, HRAWINPUT ri)
+	void MsgInputEngine::OnRawInput(Window const & wnd, HRAWINPUT ri)
 	{
-		UINT size = 0;
-		if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
+		if (wnd.HWnd() == ::GetForegroundWindow())
 		{
-			std::vector<uint8_t> data(size);
-			::GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER));
-
-			RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
-
-			typedef KLAYGE_DECLTYPE(devices_) DevicesType;
-			KLAYGE_FOREACH(DevicesType::reference device, devices_)
+			UINT size = 0;
+			if (0 == ::GetRawInputData(ri, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER)))
 			{
-				switch (raw->header.dwType)
+				std::vector<uint8_t> data(size);
+				::GetRawInputData(ri, RID_INPUT, &data[0], &size, sizeof(RAWINPUTHEADER));
+
+				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
+
+				typedef KLAYGE_DECLTYPE(devices_) DevicesType;
+				KLAYGE_FOREACH(DevicesType::reference device, devices_)
 				{
-				case RIM_TYPEKEYBOARD:
-					if (IDT_Keyboard == device->Type())
+					switch (raw->header.dwType)
 					{
-						checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
-					}
-					break;
+					case RIM_TYPEKEYBOARD:
+						if (IDT_Keyboard == device->Type())
+						{
+							checked_pointer_cast<MsgInputKeyboard>(device)->OnRawInput(*raw);
+						}
+						break;
 
-				case RIM_TYPEMOUSE:
-					if (IDT_Mouse == device->Type())
-					{
-						checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
-					}
-					break;
+					case RIM_TYPEMOUSE:
+						if (IDT_Mouse == device->Type())
+						{
+							checked_pointer_cast<MsgInputMouse>(device)->OnRawInput(*raw);
+						}
+						break;
 
-				case RIM_TYPEHID:
-					if (IDT_Joystick == device->Type())
-					{
-						checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
-					}
-					break;
+					case RIM_TYPEHID:
+						if (IDT_Joystick == device->Type())
+						{
+							checked_pointer_cast<MsgInputJoystick>(device)->OnRawInput(*raw);
+						}
+						break;
 
-				default:
-					break;
+					default:
+						break;
+					}
 				}
 			}
 		}

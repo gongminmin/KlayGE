@@ -335,11 +335,7 @@ namespace KlayGE
 	class MsgInputKeyboard : public InputKeyboard
 	{
 	public:
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		MsgInputKeyboard(HWND hwnd, HANDLE device);
-#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 		MsgInputKeyboard();
-#endif
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -353,10 +349,6 @@ namespace KlayGE
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HWND hwnd_;
-		HANDLE device_;
-#endif
 		array<bool, 256> keys_state_;
 	};
 
@@ -385,7 +377,7 @@ namespace KlayGE
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd_;
-		HANDLE device_;
+		uint32_t device_id_;
 #elif defined KLAYGE_PLATFORM_ANDROID
 		int2 last_abs_state_;
 		int2 abs_state_;
@@ -416,7 +408,7 @@ namespace KlayGE
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HANDLE device_;
+		uint32_t device_id_;
 #endif
 		int3 pos_state_;
 		int3 rot_state_;

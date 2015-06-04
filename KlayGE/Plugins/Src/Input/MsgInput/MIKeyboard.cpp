@@ -300,12 +300,7 @@ namespace
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	MsgInputKeyboard::MsgInputKeyboard(HWND hwnd, HANDLE device)
-		: hwnd_(hwnd), device_(device)
-#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
 	MsgInputKeyboard::MsgInputKeyboard()
-#endif
 	{
 		keys_state_.fill(false);
 	}
@@ -319,13 +314,12 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputKeyboard::OnRawInput(RAWINPUT const & ri)
 	{
-		if ((RIM_TYPEKEYBOARD == ri.header.dwType) && (hwnd_ == ::GetForegroundWindow()))
+		BOOST_ASSERT(RIM_TYPEKEYBOARD == ri.header.dwType);
+
+		int32_t ks = VK_MAPPING[ri.data.keyboard.VKey];
+		if (ks >= 0)
 		{
-			int32_t ks = VK_MAPPING[ri.data.keyboard.VKey];
-			if (ks >= 0)
-			{
-				keys_state_[ks] = (RI_KEY_MAKE == (ri.data.keyboard.Flags & 1UL));
-			}
+			keys_state_[ks] = (RI_KEY_MAKE == (ri.data.keyboard.Flags & 1UL));
 		}
 	}
 #elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)

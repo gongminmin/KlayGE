@@ -40,7 +40,7 @@ namespace KlayGE
 {
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputMouse::MsgInputMouse(HWND hwnd, HANDLE device)
-		: hwnd_(hwnd), device_(device),
+		: hwnd_(hwnd), device_id_(0xFFFFFFFF),
 #elif defined KLAYGE_PLATFORM_ANDROID
 	MsgInputMouse::MsgInputMouse()
 		: last_abs_state_(-1, -1), abs_state_(0, 0),
@@ -57,6 +57,7 @@ namespace KlayGE
 			::GetRawInputDeviceInfo(device, RIDI_DEVICEINFO, &buf[0], &size);
 
 			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			device_id_ = info->mouse.dwId;
 			num_buttons_ = std::min(static_cast<uint32_t>(buttons_[0].size()),
 				static_cast<uint32_t>(info->mouse.dwNumberOfButtons));
 		}
@@ -74,29 +75,41 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	void MsgInputMouse::OnRawInput(RAWINPUT const & ri)
 	{
-		if ((RIM_TYPEMOUSE == ri.header.dwType) && (hwnd_ == ::GetForegroundWindow()))
-		{
-			for (uint32_t i = 0; i < num_buttons_; ++ i)
-			{
-				if (ri.data.mouse.usButtonFlags & (1UL << (i * 2 + 0)))
-				{
-					buttons_state_[i] = true;
-				}
-				if (ri.data.mouse.usButtonFlags & (1UL << (i * 2 + 1)))
-				{
-					buttons_state_[i] = false;
-				}
-			}
+		BOOST_ASSERT(RIM_TYPEMOUSE == ri.header.dwType);
 
-			if (MOUSE_MOVE_RELATIVE == (ri.data.mouse.usFlags & 1UL))
+		UINT size = 0;
+		if (0 == ::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, nullptr, &size))
+		{
+			std::vector<uint8_t> buf(size);
+			::GetRawInputDeviceInfo(ri.header.hDevice, RIDI_DEVICEINFO, &buf[0], &size);
+
+			RID_DEVICE_INFO* info = reinterpret_cast<RID_DEVICE_INFO*>(&buf[0]);
+			if (device_id_ != info->mouse.dwId)
 			{
-				offset_state_.x() += ri.data.mouse.lLastX;
-				offset_state_.y() += ri.data.mouse.lLastY;
+				return;
 			}
-			if (ri.data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
+		}
+
+		for (uint32_t i = 0; i < num_buttons_; ++ i)
+		{
+			if (ri.data.mouse.usButtonFlags & (1UL << (i * 2 + 0)))
 			{
-				offset_state_.z() += static_cast<short>(ri.data.mouse.usButtonData);
+				buttons_state_[i] = true;
 			}
+			if (ri.data.mouse.usButtonFlags & (1UL << (i * 2 + 1)))
+			{
+				buttons_state_[i] = false;
+			}
+		}
+
+		if (MOUSE_MOVE_RELATIVE == (ri.data.mouse.usFlags & 1UL))
+		{
+			offset_state_.x() += ri.data.mouse.lLastX;
+			offset_state_.y() += ri.data.mouse.lLastY;
+		}
+		if (ri.data.mouse.usButtonFlags & RI_MOUSE_WHEEL)
+		{
+			offset_state_.z() += static_cast<short>(ri.data.mouse.usButtonData);
 		}
 	}
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -152,7 +165,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		POINT pt;
 		::GetCursorPos(&pt);
-		::ScreenToClient(Context::Instance().AppInstance().MainWnd()->HWnd(), &pt);
+		::ScreenToClient(hwnd_, &pt);
 		abs_pos_ = int2(pt.x, pt.y);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		abs_pos_ = abs_state_;
