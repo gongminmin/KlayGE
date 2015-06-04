@@ -4,16 +4,18 @@
 	<post_processor name="Translucency">
 		<params>
 			<param name="light_view_proj"/>
+			<param name="light_view"/>
 			<param name="inv_proj"/>
 			<param name="light_pos_es"/>
 			<param name="light_color"/>
+			<param name="light_falloff"/>
 			<param name="strength"/>
 			<param name="far_plane"/>
 			<param name="sm_far_plane"/>
 		</params>
 		<input>
-			<pin name="normal_tex"/>
-			<pin name="albedo_tex"/>
+			<pin name="g_buffer_tex"/>
+			<pin name="g_buffer_1_tex"/>
 			<pin name="depth_tex"/>
 			<pin name="shadow_tex"/>
 		</input>

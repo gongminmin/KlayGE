@@ -88,6 +88,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SkyBox.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSGIPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSRPostProcess.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSSBlur.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SSVOPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompression.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/TexCompressionBC.cpp
@@ -135,6 +136,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SkyBox.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSGIPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSRPostProcess.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSSBlur.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SSVOPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompression.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/TexCompressionBC.hpp
@@ -192,6 +194,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSS.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Stereoscopic.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
@@ -223,6 +226,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Translucency.ppml
 )
 
 SOURCE_GROUP("Rendering System\\Source Files" FILES ${RENDERING_SOURCE_FILES})

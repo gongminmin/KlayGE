@@ -3,13 +3,16 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Copy.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="DeferredRenderingUtil.fxml"/>
 
 	<cbuffer name="sss_cb">
 		<parameter type="float2" name="step"/>
 		<parameter type="float" name="far_plane"/>
-		<parameter type="texture2D" name="depth_tex"/>
 		<parameter type="float" name="correction"/>
 	</cbuffer>
+
+	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
 		<![CDATA[
@@ -173,19 +176,20 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 
 
 	<cbuffer name="translucency_cb">
-		<parameter type="float3" name= "light_color"/>
-		<parameter type="float3" name= "light_falloff"/>
-		<parameter type="float4x4"  name="inv_proj"/>
-		<parameter type="float3"  name="light_pos_es"/>
-		<parameter type="float4x4"  name="light_view_proj"/>
+		<parameter type="float4x4" name="inv_proj"/>
+		<parameter type="float4x4" name="light_view_proj"/>
+		<parameter type="float4x4" name="light_view"/>
+		<parameter type="float3" name="light_color"/>
+		<parameter type="float3" name="light_falloff"/>
+		<parameter type="float3" name="light_pos_es"/>
 		<parameter type="float" name="strength"/>
 		<parameter type="float" name="sm_far_plane"/>
 	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
-	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_1_tex"/>
 	
 	<shader>
 		<![CDATA[
@@ -212,18 +216,23 @@ void TranslucencyVS(float4 pos : POSITION,
 
 float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
 {
+	float4 mrt0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane) / view_dir.z);
 	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
-	float3 normal = normal_tex.Sample(point_sampler, tc).rgb;
+	float4 light_view_pos = mul(float4(pos_es, 1), light_view);
+	float3 normal = GetNormal(mrt0);
 
 	float2 coord_ls = light_vp_pos.xy / light_vp_pos.w * 0.5f;
 	coord_ls.y *= KLAYGE_FLIPPING;
 	coord_ls += 0.5f;
-	float s = abs(light_vp_pos.w - ReadAFloat(shadow_tex.Sample(bilinear_sampler, coord_ls), sm_far_plane));
+	float s = abs(length(light_view_pos.xyz) - ReadAFloat(shadow_tex.Sample(bilinear_sampler, coord_ls), sm_far_plane));
 
+	float3 color = light_color * attenuation_term(light_pos_es, pos_es, light_falloff);
 	float3 light_vec = normalize(pos_es - light_pos_es);
 	float irradiance = max(0.3f + dot(normal, light_vec), 0);
-	float3 transmittance = CalcTransmit(s * strength) * light_color * irradiance * albedo_tex.Sample(point_sampler, tc).rgb;
+	float3 transmittance = CalcTransmit(s * strength) * color * irradiance * GetDiffuse(mrt1).rgb;
 	return float4(transmittance, 1);
 }
 		]]>

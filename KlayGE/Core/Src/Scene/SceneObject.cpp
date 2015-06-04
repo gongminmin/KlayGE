@@ -301,6 +301,18 @@ namespace KlayGE
 		}
 	}
 
+	bool SceneObject::SSS() const
+	{
+		if (renderable_)
+		{
+			return renderable_->SSS();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	bool SceneObject::Reflection() const
 	{
 		if (renderable_)

@@ -38,31 +38,17 @@ private:
 	void TranslucencyHandler(KlayGE::UICheckBox const & sender);
 	void TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sender);
 
+	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController obj_controller_;
 	KlayGE::TrackballCameraController light_controller_;
-	KlayGE::SceneObjectHelperPtr subsurface_obj_;
-
-	KlayGE::FrameBufferPtr depth_ls_fb_;
-	KlayGE::FrameBufferPtr color_fb_;
-	KlayGE::FrameBufferPtr sss_fb_;
-	KlayGE::TexturePtr shadow_tex_, shadow_ds_tex_;
-	KlayGE::TexturePtr shading_tex_, normal_tex_, albedo_tex_;
-	KlayGE::TexturePtr depth_tex_, ds_tex_;
 
 	KlayGE::LightSourcePtr light_;
 	KlayGE::SceneObjectLightSourceProxyPtr light_proxy_;
-	KlayGE::PostProcessPtr sss_blur_pp_;
-	KlayGE::PostProcessPtr translucency_pp_;
 
 	KlayGE::CameraPtr scene_camera_;
 	KlayGE::CameraPtr light_camera_;
-
-	KlayGE::PostProcessPtr depth_to_linear_pp_;
-	KlayGE::PostProcessPtr copy_pp_;
-
-	bool sss_on_;
-	bool translucency_on_;
 
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_sss_;

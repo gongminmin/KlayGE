@@ -1,14 +1,32 @@
-// DeferredRenderingLayer.cpp
-// KlayGE Deferred Rendering Layer implement file
-// Ver 4.0.0
-// Copyright(C) Minmin Gong, 2011
-// Homepage: http://www.klayge.org
-//
-// 4.0.0
-// First release (2011.8.28)
-//
-// CHANGE LIST
-//////////////////////////////////////////////////////////////////////////////////
+/**
+* @file DeferredRenderingLayer.cpp
+* @author Minmin Gong
+*
+* @section DESCRIPTION
+*
+* This source file is part of KlayGE
+* For the latest info, see http ://www.klayge.org
+*
+* @section LICENSE
+*
+* This program is free software; you can redistribute it and / or modify
+* it under the terms of the GNU General Public License as published
+* by the Free Software Foundation; either version 2 of the License, or
+*(at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+*but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 - 1307 USA
+*
+* You may alternatively use this source under the terms of
+* the KlayGE Proprietary License(KPL).You can obtained such a license
+* from http ://www.klayge.org/licensing/.
+*/
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
@@ -29,6 +47,7 @@
 #include <KlayGE/Mesh.hpp>
 #include <KlayGE/SSVOPostProcess.hpp>
 #include <KlayGE/SSRPostProcess.hpp>
+#include <KlayGE/SSSBlur.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -336,7 +355,9 @@ namespace KlayGE
 
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
-		: active_viewport_(0), ssr_enabled_(true), taa_enabled_(true),
+		: active_viewport_(0),
+			sss_enabled_(true), translucency_enabled_(true),
+			ssr_enabled_(true), taa_enabled_(true),
 			light_scale_(1), illum_(0), indirect_scale_(1.0f),
 			curr_cascade_index_(-1), force_line_mode_(false),
 			dr_debug_pp_(MakeSharedPtr<DeferredRenderingDebugPostProcess>()),
@@ -640,6 +661,7 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
 		{
+			unfiltered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
 		for (uint32_t i = 0; i < filtered_sm_cube_texs_.size(); ++ i)
@@ -650,6 +672,12 @@ namespace KlayGE
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
+
+		sss_blur_pp_ = MakeSharedPtr<SSSBlurPP>();
+		sss_blur_pp_->SetParam(0, 1.0f);
+		sss_blur_pp_->SetParam(1, 1.0f);
+
+		translucency_pp_ = SyncLoadPostProcess("Translucency.ppml", "Translucency");
 
 		if (depth_texture_support_ && mrt_g_buffer_support_ && caps.fp_color_support)
 		{
@@ -799,6 +827,7 @@ namespace KlayGE
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
 			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
 		}
+		sss_blur_pp_perf_ = profiler.CreatePerfRange(0, "SSS Blur PP");
 		ssr_pp_perf_ = profiler.CreatePerfRange(0, "SSR PP");
 		atmospheric_pp_perf_ = profiler.CreatePerfRange(0, "Atmospheric PP");
 		taa_pp_perf_ = profiler.CreatePerfRange(0, "TAA PP");
@@ -823,6 +852,31 @@ namespace KlayGE
 	void DeferredRenderingLayer::SSVOEnabled(uint32_t vp, bool ssvo)
 	{
 		viewports_[vp].ssvo_enabled = ssvo;
+	}
+
+	void DeferredRenderingLayer::SSSEnabled(bool ssr)
+	{
+		sss_enabled_ = ssr;
+	}
+
+	void DeferredRenderingLayer::SSSStrength(float strength)
+	{
+		sss_blur_pp_->SetParam(0, strength);
+	}
+
+	void DeferredRenderingLayer::SSSCorrection(float correction)
+	{
+		sss_blur_pp_->SetParam(1, correction);
+	}
+
+	void DeferredRenderingLayer::TranslucencyEnabled(bool trans)
+	{
+		translucency_enabled_ = trans;
+	}
+
+	void DeferredRenderingLayer::TranslucencyStrength(float strength)
+	{
+		translucency_pp_->SetParam(6, strength);
 	}
 
 	void DeferredRenderingLayer::SSREnabled(bool ssr)
@@ -1644,6 +1698,14 @@ namespace KlayGE
 				this->UpdateShading(pvp, pass_tb);
 #endif
 
+				if (has_sss_objs_ && translucency_enabled_)
+				{
+					for (uint32_t li = 0; li < lights_.size(); ++ li)
+					{
+						this->AddTranslucency(li, pvp, pass_tb);
+					}
+				}
+
 				if (PTB_Opaque == pass_tb)
 				{
 					this->MergeIndirectLighting(pvp, pass_tb);
@@ -1675,6 +1737,17 @@ namespace KlayGE
 			}
 			else
 			{
+				if (has_sss_objs_ && sss_enabled_)
+				{
+#ifndef KLAYGE_SHIP
+					sss_blur_pp_perf_->Begin();
+#endif
+					this->AddSSS(pvp);
+#ifndef KLAYGE_SHIP
+					sss_blur_pp_perf_->End();
+#endif
+				}
+
 				if (has_reflective_objs_ && ssr_enabled_)
 				{
 #ifndef KLAYGE_SHIP
@@ -1887,6 +1960,7 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 
 		has_opaque_objs = false;
+		has_sss_objs_ = false;
 		has_reflective_objs_ = false;
 		has_simple_forward_objs_ = false;
 		visible_scene_objs_.clear();
@@ -1907,6 +1981,10 @@ namespace KlayGE
 				if (so->TransparencyFrontFace())
 				{
 					has_transparency_front_objs = true;
+				}
+				if (so->SSS())
+				{
+					has_sss_objs_ = true;
 				}
 				if (so->Reflection())
 				{
@@ -1939,11 +2017,18 @@ namespace KlayGE
 		pass_scaned_.push_back(this->ComposePassScanCode(0, PT_GenShadowMap, 0, 1, true));
 #endif
 
+#ifdef KLAYGE_DEBUG
+		bool no_viewport = true;
+#endif
 		for (uint32_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
 			if (pvp.attrib & VPAM_Enabled)
 			{
+#ifdef KLAYGE_DEBUG
+				no_viewport = false;
+#endif
+
 				pvp.g_buffer_enables[Opaque_GBuffer] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
 				pvp.g_buffer_enables[TransparencyBack_GBuffer] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
 				pvp.g_buffer_enables[TransparencyFront_GBuffer] = (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
@@ -2024,6 +2109,13 @@ namespace KlayGE
 				pass_scaned_.push_back(this->ComposePassScanCode(vpi, PT_OpaqueSpecialShading, 0, 2, false));
 			}
 		}
+
+#ifdef KLAYGE_DEBUG
+		if (no_viewport)
+		{
+			LogError("No viewport available.");
+		}
+#endif
 	}
 
 	void DeferredRenderingLayer::CheckLightVisible(uint32_t vp_index, uint32_t light_index)
@@ -2561,6 +2653,7 @@ namespace KlayGE
 			else 
 			{
 				pp_chain->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
+				sm_tex_->CopyToTexture(*unfiltered_sm_2d_texs_[sm_light_indices_[org_no].first]);
 			}
 		}
 
@@ -2784,16 +2877,72 @@ namespace KlayGE
 			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
 			ssvo_pp_->Apply();
 
-			if (Opaque_GBuffer == g_buffer_index)
-			{
-				pvp.ssvo_blur_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
-			}
-			else
-			{
-				pvp.ssvo_blur_pp_->OutputPin(0, pvp.shading_tex);
-			}
+			pvp.ssvo_blur_pp_->OutputPin(0,
+				(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 			pvp.ssvo_blur_pp_->Apply();
 		}
+	}
+
+	void DeferredRenderingLayer::AddTranslucency(uint32_t org_no,
+			PerViewport const & pvp, uint32_t g_buffer_index)
+	{
+		LightSourcePtr const & light = lights_[org_no];
+		LightSource::LightType type = light->Type();
+		int32_t light_index = sm_light_indices_[org_no].first;
+		if (light->Enabled() && pvp.light_visibles[org_no]
+			&& ((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
+				|| (LightSource::LT_Sun == type))
+		{
+			CameraPtr light_camera;
+
+			switch (type)
+			{
+			case LightSource::LT_Spot:
+				light_camera = light->SMCamera(0);
+				translucency_pp_->InputPin(3, unfiltered_sm_2d_texs_[light_index]);
+				break;
+
+			case LightSource::LT_Sun:
+				// TODO
+				break;
+
+			default:
+				break;
+			}
+
+			if (light_camera)
+			{
+				translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
+					pvp.g_buffer->Attached(FrameBuffer::ATT_DepthStencil));
+				translucency_pp_->InputPin(0, pvp.g_buffer_rt0_tex);
+				translucency_pp_->InputPin(1, pvp.g_buffer_rt1_tex);
+				translucency_pp_->InputPin(2, pvp.g_buffer_depth_tex);
+				translucency_pp_->OutputPin(0,
+					(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+
+				CameraPtr const & scene_camera = pvp.frame_buffer->GetViewport()->camera;
+
+				translucency_pp_->SetParam(0, pvp.inv_view * light_camera->ViewProjMatrix());
+				translucency_pp_->SetParam(1, pvp.inv_view * light_camera->ViewMatrix());
+				translucency_pp_->SetParam(2, pvp.inv_proj);
+				translucency_pp_->SetParam(3, MathLib::transform_coord(light->Position(), pvp.view));
+				translucency_pp_->SetParam(4, float3(light->Color()));
+				translucency_pp_->SetParam(5, light->Falloff());
+				translucency_pp_->SetParam(7, scene_camera->FarPlane());
+				translucency_pp_->SetParam(8, light_camera->FarPlane());
+				translucency_pp_->Apply();
+			}
+		}
+	}
+
+	void DeferredRenderingLayer::AddSSS(PerViewport const & pvp)
+	{
+		sss_blur_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
+			pvp.g_buffer->Attached(FrameBuffer::ATT_DepthStencil));
+		sss_blur_pp_->InputPin(0, pvp.curr_merged_shading_tex);
+		sss_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
+		sss_blur_pp_->OutputPin(0, pvp.curr_merged_shading_tex);
+		sss_blur_pp_->Apply();
 	}
 
 	void DeferredRenderingLayer::AddSSR(PerViewport const & pvp)
@@ -2942,14 +3091,8 @@ namespace KlayGE
 		copy_to_light_buffer_pp->InputPin(1, pvp.g_buffer_rt0_tex);
 		copy_to_light_buffer_pp->InputPin(2, pvp.g_buffer_rt1_tex);
 		copy_to_light_buffer_pp->InputPin(3, pvp.g_buffer_depth_tex);
-		if (Opaque_GBuffer == g_buffer_index)
-		{
-			copy_to_light_buffer_pp->OutputPin(0, pvp.curr_merged_shading_tex);
-		}
-		else
-		{
-			copy_to_light_buffer_pp->OutputPin(0, pvp.shading_tex);
-		}
+		copy_to_light_buffer_pp->OutputPin(0,
+			(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 		copy_to_light_buffer_pp->Apply();
 	}
 

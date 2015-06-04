@@ -3,24 +3,11 @@ DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds
 DOWNLOAD_FILE("KlayGE/Samples/media/SSSSS/Map-COL.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSBlur.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSSS.cpp
-	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SubsurfaceMesh.cpp
 )
 
 SET(HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSBlur.hpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SSSSS.hpp
-	${KLAYGE_PROJECT_DIR}/Samples/src/SSSSS/SubsurfaceMesh.hpp
-)
-
-SET(EFFECT_FILES
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/SubsurfaceMesh.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/SSS.fxml
-)
-
-SET(POST_PROCESSORS
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Translucency.ppml
 )
 
 SET(UI_FILES
@@ -36,6 +23,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Translucency.ppml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
@@ -44,6 +32,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSS.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
@@ -53,8 +42,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Infinite-Level_02_Tangent_SmoothUV.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/Map-COL.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/SSS.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/SSSSS/SubsurfaceMesh.kfx
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)

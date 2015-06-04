@@ -1,14 +1,32 @@
-// DeferredRenderingLayer.hpp
-// KlayGE Deferred Rendering Layer header file
-// Ver 4.0.0
-// Copyright(C) Minmin Gong, 2011
-// Homepage: http://www.klayge.org
-//
-// 4.0.0
-// First release (2011.8.28)
-//
-// CHANGE LIST
-//////////////////////////////////////////////////////////////////////////////////
+/**
+* @file DeferredRenderingLayer.hpp
+* @author Minmin Gong
+*
+* @section DESCRIPTION
+*
+* This source file is part of KlayGE
+* For the latest info, see http ://www.klayge.org
+*
+* @section LICENSE
+*
+* This program is free software; you can redistribute it and / or modify
+* it under the terms of the GNU General Public License as published
+* by the Free Software Foundation; either version 2 of the License, or
+*(at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+*but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111 - 1307 USA
+*
+* You may alternatively use this source under the terms of
+* the KlayGE Proprietary License(KPL).You can obtained such a license
+* from http ://www.klayge.org/licensing/.
+*/
 
 #ifndef _DEFERREDRENDERINGLAYER_HPP
 #define _DEFERREDRENDERINGLAYER_HPP
@@ -152,6 +170,11 @@ namespace KlayGE
 
 		void SSGIEnabled(uint32_t vp, bool ssgi);
 		void SSVOEnabled(uint32_t vp, bool ssvo);
+		void SSSEnabled(bool ssr);
+		void SSSStrength(float strength);
+		void SSSCorrection(float correction);
+		void TranslucencyEnabled(bool trans);
+		void TranslucencyStrength(float strength);
 		void SSREnabled(bool ssr);
 		void TemporalAAEnabled(bool taa);
 
@@ -332,6 +355,8 @@ namespace KlayGE
 		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
+		void AddTranslucency(uint32_t light_index, PerViewport const & pvp, uint32_t g_buffer_index);
+		void AddSSS(PerViewport const & pvp);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
@@ -367,6 +392,12 @@ namespace KlayGE
 		uint32_t active_viewport_;
 
 		PostProcessPtr ssvo_pp_;
+
+		PostProcessPtr sss_blur_pp_;
+		bool sss_enabled_;
+
+		PostProcessPtr translucency_pp_;
+		bool translucency_enabled_;
 
 		PostProcessPtr ssr_pp_;
 		bool ssr_enabled_;
@@ -429,6 +460,7 @@ namespace KlayGE
 		TexturePtr sm_depth_tex_;
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
+		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> unfiltered_sm_2d_texs_;
 		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> filtered_sm_2d_texs_;
 		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
 
@@ -510,6 +542,7 @@ namespace KlayGE
 		RenderEffectParameterPtr skylight_c_cube_tex_param_;
 
 		std::vector<SceneObject*> visible_scene_objs_;
+		bool has_sss_objs_;
 		bool has_reflective_objs_;
 		bool has_simple_forward_objs_;
 
@@ -548,6 +581,7 @@ namespace KlayGE
 		array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
 		array<PerfRangePtr, PTB_None> shading_perfs_;
 		array<PerfRangePtr, PTB_None> special_shading_perfs_;
+		PerfRangePtr sss_blur_pp_perf_;
 		PerfRangePtr ssr_pp_perf_;
 		PerfRangePtr atmospheric_pp_perf_;
 		PerfRangePtr taa_pp_perf_;

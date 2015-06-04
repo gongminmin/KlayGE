@@ -34,7 +34,8 @@ namespace KlayGE
 			SOA_Overlay = 1UL << 1,
 			SOA_Moveable = 1UL << 2,
 			SOA_Invisible = 1UL << 3,
-			SOA_NotCastShadow = 1UL << 4
+			SOA_NotCastShadow = 1UL << 4,
+			SOA_SSS = 1UL << 5
 		};
 
 	public:
@@ -86,6 +87,7 @@ namespace KlayGE
 
 		bool TransparencyBackFace() const;
 		bool TransparencyFrontFace() const;
+		bool SSS() const;
 		bool Reflection() const;
 		bool SimpleForward() const;
 

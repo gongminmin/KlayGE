@@ -449,6 +449,15 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
+	<technique name="DepthSSSTech" inherit="DepthTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
 
 	<technique name="GBufferRT0Tech">
 		<pass name="p0">
@@ -487,6 +496,15 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="depth_func" value="less"/>
 			
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+	<technique name="GBufferSSSRT0Tech" inherit="GBufferRT0Tech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
@@ -530,6 +548,15 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
+	<technique name="GBufferSSSRT1Tech" inherit="GBufferRT1Tech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
 
 	<technique name="GBufferMRTTech">
 		<pass name="p0">
@@ -568,6 +595,15 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="depth_func" value="less"/>
 			
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+	<technique name="GBufferSSSMRTTech" inherit="GBufferMRTTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
@@ -617,6 +653,11 @@ void GenShadowMapVS(float4 pos : POSITION,
 #endif
 				oTc, result_pos,
 				result_tangent_quat);
+
+#if TRANSPARENCY_ON
+	float3 normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
+	result_pos.xyz += normal * 0.005f;
+#endif
 
 	oPos = mul(float4(result_pos, 1), mvp);
 }
@@ -733,7 +774,7 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 	</shader>
 
 	<technique name="GenShadowMapTech">
-		<pass name="p0">
+		<pass name="p0">			
 			<state name="cull_mode" value="none"/>
 			<state name="color_write_mask" value="0"/>
 			
@@ -742,6 +783,15 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		</pass>
 	</technique>
 	<technique name="GenShadowMapAlphaTestTech" inherit="GenShadowMapTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenShadowMapSSSTech" inherit="GenShadowMapTech">
+		<macro name="TRANSPARENCY_ON" value="1"/>
+	</technique>
+	<technique name="GenShadowMapAlphaTestSSSTech" inherit="GenShadowMapSSSTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
 		</pass>
