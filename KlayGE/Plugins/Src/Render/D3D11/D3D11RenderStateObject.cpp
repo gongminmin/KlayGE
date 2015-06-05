@@ -115,22 +115,26 @@ namespace KlayGE
 	D3D11BlendStateObject::D3D11BlendStateObject(BlendStateDesc const & desc)
 		: BlendStateObject(desc)
 	{
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderDeviceCaps const & caps = re.DeviceCaps();
+
 		D3D11_BLEND_DESC d3d_desc;
 		d3d_desc.AlphaToCoverageEnable = desc.alpha_to_coverage_enable;
-		d3d_desc.IndependentBlendEnable = desc.independent_blend_enable;
+		d3d_desc.IndependentBlendEnable = caps.independent_blend_support ? desc.independent_blend_enable : false;
 		for (int i = 0; i < 8; ++ i)
 		{
-			d3d_desc.RenderTarget[i].BlendEnable = desc.blend_enable[i];
-			d3d_desc.RenderTarget[i].SrcBlend = D3D11Mapping::Mapping(desc.src_blend[i]);
-			d3d_desc.RenderTarget[i].DestBlend = D3D11Mapping::Mapping(desc.dest_blend[i]);
-			d3d_desc.RenderTarget[i].BlendOp = D3D11Mapping::Mapping(desc.blend_op[i]);
-			d3d_desc.RenderTarget[i].SrcBlendAlpha = D3D11Mapping::Mapping(desc.src_blend_alpha[i]);
-			d3d_desc.RenderTarget[i].DestBlendAlpha = D3D11Mapping::Mapping(desc.dest_blend_alpha[i]);
-			d3d_desc.RenderTarget[i].BlendOpAlpha = D3D11Mapping::Mapping(desc.blend_op_alpha[i]);
-			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[i]));
+			uint32_t const rt_index = caps.independent_blend_support ? i : 0;
+
+			d3d_desc.RenderTarget[i].BlendEnable = desc.blend_enable[rt_index];
+			d3d_desc.RenderTarget[i].SrcBlend = D3D11Mapping::Mapping(desc.src_blend[rt_index]);
+			d3d_desc.RenderTarget[i].DestBlend = D3D11Mapping::Mapping(desc.dest_blend[rt_index]);
+			d3d_desc.RenderTarget[i].BlendOp = D3D11Mapping::Mapping(desc.blend_op[rt_index]);
+			d3d_desc.RenderTarget[i].SrcBlendAlpha = D3D11Mapping::Mapping(desc.src_blend_alpha[rt_index]);
+			d3d_desc.RenderTarget[i].DestBlendAlpha = D3D11Mapping::Mapping(desc.dest_blend_alpha[rt_index]);
+			d3d_desc.RenderTarget[i].BlendOpAlpha = D3D11Mapping::Mapping(desc.blend_op_alpha[rt_index]);
+			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[rt_index]));
 		}
 
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
@@ -142,6 +146,8 @@ namespace KlayGE
 			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;
 			for (int i = 0; i < 8; ++ i)
 			{
+				uint32_t const rt_index = caps.independent_blend_support ? i : 0;
+
 				d3d_desc1.RenderTarget[i].BlendEnable = d3d_desc.RenderTarget[i].BlendEnable;
 				d3d_desc1.RenderTarget[i].LogicOpEnable = desc.logic_op_enable[i];
 				d3d_desc1.RenderTarget[i].SrcBlend = d3d_desc.RenderTarget[i].SrcBlend;
@@ -150,7 +156,8 @@ namespace KlayGE
 				d3d_desc1.RenderTarget[i].SrcBlendAlpha = d3d_desc.RenderTarget[i].SrcBlendAlpha;
 				d3d_desc1.RenderTarget[i].DestBlendAlpha = d3d_desc.RenderTarget[i].DestBlendAlpha;
 				d3d_desc1.RenderTarget[i].BlendOpAlpha = d3d_desc.RenderTarget[i].BlendOpAlpha;
-				d3d_desc1.RenderTarget[i].LogicOp = D3D11Mapping::Mapping(desc.logic_op[i]);
+				d3d_desc1.RenderTarget[i].LogicOp
+					= caps.logic_op_support ? D3D11Mapping::Mapping(desc.logic_op[rt_index]) : D3D11_LOGIC_OP_NOOP;
 				d3d_desc1.RenderTarget[i].RenderTargetWriteMask = d3d_desc.RenderTarget[i].RenderTargetWriteMask;
 			}
 

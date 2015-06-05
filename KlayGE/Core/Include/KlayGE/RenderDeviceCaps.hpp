@@ -95,6 +95,7 @@ namespace KlayGE
 		bool pack_to_rgba_required : 1;
 		bool draw_indirect_support : 1;
 		bool no_overwrite_support : 1;
+		bool full_npot_texture_support : 1;
 
 		bool gs_support : 1;
 		bool cs_support : 1;

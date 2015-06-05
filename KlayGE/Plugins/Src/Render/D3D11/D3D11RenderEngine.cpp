@@ -1167,6 +1167,18 @@ namespace KlayGE
 		caps_.independent_blend_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.draw_indirect_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.no_overwrite_support = true;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+		if (d3d_11_runtime_sub_ver_ >= 1)
+		{
+			D3D11_FEATURE_DATA_D3D9_OPTIONS d3d11_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D9_OPTIONS, &d3d11_feature, sizeof(d3d11_feature));
+			caps_.full_npot_texture_support = d3d11_feature.FullNonPow2TextureSupport ? true : false;
+		}
+		else
+#endif
+		{
+			caps_.full_npot_texture_support = false;
+		}
 		caps_.gs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.hs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.ds_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);

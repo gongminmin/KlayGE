@@ -1726,6 +1726,7 @@ namespace KlayGE
 			caps_.draw_indirect_support = false;
 		}
 		caps_.no_overwrite_support = false;
+		caps_.full_npot_texture_support = true;
 
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{
