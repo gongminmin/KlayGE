@@ -667,9 +667,11 @@ float4 DeferredShadowingSunPS(
 		<pass name="p0">
 			<state name="front_stencil_func" value="equal"/>
 			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="128"/>
 			<state name="front_stencil_write_mask" value="0"/>
 			<state name="back_stencil_func" value="equal"/>
 			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="128"/>
 			<state name="back_stencil_write_mask" value="0"/>
 			
 			<state name="pixel_shader" value="DeferredRenderingSunPS()"/>
