@@ -31,6 +31,8 @@
 #ifndef _SSRPOSTPROCESS_HPP
 #define _SSRPOSTPROCESS_HPP
 
+#pragma once
+
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/PostProcess.hpp>
 
