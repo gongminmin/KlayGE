@@ -57,7 +57,8 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
 		{
-			if ((num_mip_maps_ > 1) && (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0) || ((depth & (depth - 1)) != 0)))
+			if (!re.DeviceCaps().full_npot_texture_support
+				&& (num_mip_maps_ > 1) && (((width & (width - 1)) != 0) || ((height & (height - 1)) != 0) || ((depth & (depth - 1)) != 0)))
 			{
 				// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
 				num_mip_maps_ = 1;
@@ -66,21 +67,17 @@ namespace KlayGE
 			if ((num_mip_maps_ > 1) && IsCompressedFormat(format))
 			{
 				// height or width is not a multiply of 4 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
-				num_mip_maps_ = 1;
-				uint32_t w = width;
-				uint32_t h = height;
-				while ((w != 1) || (h != 1))
+				uint32_t clamped_num_mip_maps;
+				for (clamped_num_mip_maps = 0; clamped_num_mip_maps < num_mip_maps_; ++ clamped_num_mip_maps)
 				{
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
-
+					uint32_t w = std::max<uint32_t>(1U, width >> clamped_num_mip_maps);
+					uint32_t h = std::max<uint32_t>(1U, height >> clamped_num_mip_maps);
 					if (((w & 0x3) != 0) || ((h & 0x3) != 0))
 					{
 						break;
 					}
-
-					++ num_mip_maps_;
 				}
+				num_mip_maps_ = clamped_num_mip_maps;
 			}
 		}
 

@@ -51,7 +51,8 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
 		{
-			if ((num_mip_maps_ > 1) && ((width & (width - 1)) != 0))
+			if (!re.DeviceCaps().full_npot_texture_support
+				&& (num_mip_maps_ > 1) && ((width & (width - 1)) != 0))
 			{
 				// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
 				num_mip_maps_ = 1;

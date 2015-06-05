@@ -63,21 +63,17 @@ namespace KlayGE
 			if ((num_mip_maps_ > 1) && IsCompressedFormat(format))
 			{
 				// height or width is not a multiply of 4 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
-				num_mip_maps_ = 1;
-				uint32_t w = width;
-				uint32_t h = height;
-				while ((w != 1) || (h != 1))
+				uint32_t clamped_num_mip_maps;
+				for (clamped_num_mip_maps = 0; clamped_num_mip_maps < num_mip_maps_; ++ clamped_num_mip_maps)
 				{
-					w = std::max<uint32_t>(1U, w / 2);
-					h = std::max<uint32_t>(1U, h / 2);
-
+					uint32_t w = std::max<uint32_t>(1U, width >> clamped_num_mip_maps);
+					uint32_t h = std::max<uint32_t>(1U, height >> clamped_num_mip_maps);
 					if (((w & 0x3) != 0) || ((h & 0x3) != 0))
 					{
 						break;
 					}
-
-					++ num_mip_maps_;
 				}
+				num_mip_maps_ = clamped_num_mip_maps;
 			}
 		}
 

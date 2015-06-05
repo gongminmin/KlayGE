@@ -638,6 +638,10 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			{
 				dialog_->Control<UIComboBox>(id_detail_type_combo_)->RemoveItem(4);
 			}
+			if (caps.max_shader_model <= ShaderModel(2, 0))
+			{
+				dialog_->Control<UIComboBox>(id_detail_type_combo_)->RemoveItem(3);
+			}
 		}
 
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.0f, 0.0f, 0.0f, 1), 1.0f, 0);
