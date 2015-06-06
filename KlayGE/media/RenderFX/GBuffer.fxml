@@ -456,6 +456,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_pass" value="replace"/>
 			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
@@ -505,6 +510,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_pass" value="replace"/>
 			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
@@ -555,6 +565,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_pass" value="replace"/>
 			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
@@ -604,6 +619,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_pass" value="replace"/>
 			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
 		</pass>
 	</technique>
 
