@@ -373,7 +373,7 @@ void JudaTexViewer::InputHandler(InputEngine const & /*sender*/, InputAction con
 	case Scale:
 		{
 			InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
-			float f = 1.0f + (param->wheel_delta * 0.1f) / 120;
+			float f = 1.0f + MathLib::clamp(param->wheel_delta / 1200.0f, -0.5f, 0.5f);
 			float2 p = float2(-param->abs_coord) / scale_ + position_;
 			float2 new_position = (position_ - p * (1 - f)) / f;
 			float new_scale = scale_ * f;
