@@ -1091,7 +1091,6 @@ namespace
 		std::vector<uint32_t> bone_indices;
 		std::vector<uint32_t> bone_weights;
 		std::vector<uint8_t> triangle_indices;
-		char is_index_16s;
 
 		uint32_t mesh_index = 0;
 		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
@@ -1129,11 +1128,11 @@ namespace
 			}
 
 			triangle_indices.clear();
-			is_index_16s = true;
 
 			XMLNodePtr triangles_chunk = mesh_node->FirstNode("triangles_chunk");
 			if (triangles_chunk)
 			{
+				char is_index_16s = true;
 				CompileMeshesTrianglesChunk(triangles_chunk,
 					triangle_indices, is_index_16s);
 				AppendMeshIndices(triangle_indices, is_index_16s,

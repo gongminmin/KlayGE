@@ -344,6 +344,11 @@ namespace KlayGE
 		class RenderVariableArray : public RenderVariableConcrete<std::vector<T> >
 		{
 		public:
+			RenderVariableArray()
+				: size_(0)
+			{
+			}
+
 			virtual RenderVariable& operator=(std::vector<T> const & value) KLAYGE_OVERRIDE
 			{
 				if (this->in_cbuff_)
@@ -363,7 +368,7 @@ namespace KlayGE
 				return *this;
 			}
 
-				virtual void Value(std::vector<T>& val) const KLAYGE_OVERRIDE
+			virtual void Value(std::vector<T>& val) const KLAYGE_OVERRIDE
 			{
 				if (this->in_cbuff_)
 				{
@@ -388,6 +393,11 @@ namespace KlayGE
 		class RenderVariableFloat4x4Array : public RenderVariableConcrete<std::vector<float4x4> >
 		{
 		public:
+			RenderVariableFloat4x4Array()
+				: size_(0)
+			{
+			}
+
 			virtual RenderVariable& operator=(std::vector<float4x4> const & value) KLAYGE_OVERRIDE;
 			virtual void Value(std::vector<float4x4>& val) const KLAYGE_OVERRIDE;
 
@@ -472,6 +482,11 @@ namespace KlayGE
 		class RenderEffectAnnotation
 		{
 		public:
+			RenderEffectAnnotation()
+				: type_()
+			{
+			}
+
 			void Load(XMLNodePtr const & node);
 
 			void StreamOut(std::ostream& os);
@@ -501,6 +516,11 @@ namespace KlayGE
 		class RenderShaderFunc
 		{
 		public:
+			RenderShaderFunc()
+				: type_(), ver_(0, 0)
+			{
+			}
+
 			void Load(XMLNodePtr const & node);
 
 			void StreamOut(std::ostream& os);
@@ -643,7 +663,8 @@ namespace KlayGE
 		{
 		public:
 			explicit RenderTechnique(RenderEffect& effect)
-				: effect_(effect)
+				: effect_(effect),
+					name_hash_(), weight_(), transparent_(), is_validate_(false)
 			{
 			}
 

@@ -45,7 +45,7 @@ namespace
 	class RenderDetailedModel : public RenderModel
 	{
 	public:
-		RenderDetailedModel(std::wstring const & name)
+		explicit RenderDetailedModel(std::wstring const & name)
 			: RenderModel(name)
 		{
 		}

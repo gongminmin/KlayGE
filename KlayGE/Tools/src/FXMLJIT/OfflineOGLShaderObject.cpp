@@ -274,7 +274,7 @@ namespace
 		}
 
 	private:
-		DXBC2GLSLIniter(OfflineRenderDeviceCaps const & caps)
+		explicit DXBC2GLSLIniter(OfflineRenderDeviceCaps const & caps)
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);

@@ -86,7 +86,8 @@ namespace KlayGE
 
 
 		CInStream()
-			: ref_count_(1)
+			: ref_count_(1),
+				stream_size_(0)
 		{
 		}
 		virtual ~CInStream()

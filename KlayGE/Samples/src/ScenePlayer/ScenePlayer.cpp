@@ -56,7 +56,7 @@ namespace
 	class PyScriptUpdate
 	{
 	public:
-		PyScriptUpdate(std::string const & script)
+		explicit PyScriptUpdate(std::string const & script)
 		{
 			ScriptEngine& scriptEngine = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
 			module_ = scriptEngine.CreateModule("");
@@ -84,7 +84,7 @@ namespace
 	class LightSourceUpdate : public PyScriptUpdate
 	{
 	public:
-		LightSourceUpdate(std::string const & script)
+		explicit LightSourceUpdate(std::string const & script)
 			: PyScriptUpdate(script)
 		{
 		}
@@ -173,7 +173,7 @@ namespace
 	class SceneObjectUpdate : public PyScriptUpdate
 	{
 	public:
-		SceneObjectUpdate(std::string const & script)
+		explicit SceneObjectUpdate(std::string const & script)
 			: PyScriptUpdate(script)
 		{
 		}
@@ -210,7 +210,7 @@ namespace
 	class CameraUpdate : public PyScriptUpdate
 	{
 	public:
-		CameraUpdate(std::string const & script)
+		explicit CameraUpdate(std::string const & script)
 			: PyScriptUpdate(script)
 		{
 		}

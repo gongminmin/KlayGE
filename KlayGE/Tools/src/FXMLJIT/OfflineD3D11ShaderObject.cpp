@@ -157,7 +157,7 @@ namespace KlayGE
 	namespace Offline
 	{
 		D3D11ShaderObject::D3D11ShaderObject(OfflineRenderDeviceCaps const & caps)
-				: ShaderObject(caps)
+				: ShaderObject(caps), vs_signature_(0)
 		{
 			is_shader_validate_.fill(true);
 
@@ -543,75 +543,6 @@ namespace KlayGE
 			}
 
 			return ss.str();
-		}
-
-		std::string D3D11ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
-		{
-			OfflineRenderDeviceCaps const & caps = caps_;
-			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_id);
-			std::string shader_profile = sd.profile;
-			size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
-			switch (type)
-			{
-			case ST_VertexShader:
-				if (CT_HASH("auto") == shader_profile_hash)
-				{
-					shader_profile = vs_profile_;
-				}
-				break;
-
-			case ST_PixelShader:
-				if (CT_HASH("auto") == shader_profile_hash)
-				{
-					shader_profile = ps_profile_;
-				}
-				break;
-
-			case ST_GeometryShader:
-				if (caps.max_shader_model >= ShaderModel(4, 0))
-				{
-					if (CT_HASH("auto") == shader_profile_hash)
-					{
-						shader_profile = gs_profile_;
-					}
-				}
-				break;
-
-			case ST_ComputeShader:
-				if (caps.max_shader_model >= ShaderModel(4, 0))
-				{
-					if (CT_HASH("auto") == shader_profile_hash)
-					{
-						shader_profile = cs_profile_;
-					}
-				}
-				break;
-
-			case ST_HullShader:
-				if (caps.max_shader_model >= ShaderModel(5, 0))
-				{
-					if (CT_HASH("auto") == shader_profile_hash)
-					{
-						shader_profile = hs_profile_;
-					}
-				}
-				break;
-
-			case ST_DomainShader:
-				if (caps.max_shader_model >= ShaderModel(5, 0))
-				{
-					if (CT_HASH("auto") == shader_profile_hash)
-					{
-						shader_profile = ds_profile_;
-					}
-				}
-				break;
-
-			default:
-				break;
-			}
-
-			return shader_profile;
 		}
 
 		void D3D11ShaderObject::StreamOut(std::ostream& os, ShaderType type)

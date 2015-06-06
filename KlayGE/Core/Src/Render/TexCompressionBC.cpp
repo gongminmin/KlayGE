@@ -2135,7 +2135,7 @@ namespace KlayGE
 
 	int TexCompressionBC6U::Unquantize(int comp, uint8_t bits_per_comp, bool signed_fmt)
 	{
-		int unq = 0, s = 0;
+		int unq = 0;
 		if (signed_fmt)
 		{
 			if (bits_per_comp >= 16)
@@ -2144,6 +2144,7 @@ namespace KlayGE
 			}
 			else
 			{
+				int s = 0;
 				if (comp < 0)
 				{
 					s = 1;

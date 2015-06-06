@@ -2122,13 +2122,12 @@ namespace KlayGE
 
 
 		RenderEffect::RenderEffect(OfflineRenderDeviceCaps const & caps)
-			: caps_(caps)
+			: timestamp_(0), caps_(caps)
 		{
 		}
 
 		void RenderEffect::RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const
 		{
-			std::vector<XMLDocumentPtr> include_docs;
 			for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
 			{
 				XMLAttributePtr attr = node->Attrib("name");
@@ -3476,6 +3475,7 @@ namespace KlayGE
 
 
 		RenderEffectConstantBuffer::RenderEffectConstantBuffer()
+			: name_hash_(0)
 		{
 		}
 
@@ -3515,6 +3515,7 @@ namespace KlayGE
 
 
 		RenderEffectParameter::RenderEffectParameter()
+			: name_hash_(0), semantic_hash_(0), type_(0)
 		{
 		}
 

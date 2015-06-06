@@ -72,7 +72,7 @@ namespace KlayGE
 			struct ConstantBufferDesc
 			{
 				ConstantBufferDesc()
-					: size(0)
+					: name_hash(0), size(0)
 				{
 				}
 
@@ -137,7 +137,6 @@ namespace KlayGE
 			}
 
 		private:
-			std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
 			shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
 			void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,

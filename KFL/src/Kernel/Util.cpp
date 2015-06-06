@@ -112,16 +112,14 @@ namespace KlayGE
 		for (std::string::const_iterator iter = src.begin(); iter != src.end(); ++ iter)
 		{
 			unsigned char ch = *iter;
-			wchar_t wch;
-			if (ch < 0x80)
+			wchar_t wch = ch;
+			if (ch >= 0x80)
 			{
-				wch = ch;
-			}
-			else
-			{
-				wchar_t wch = ch;
 				++ iter;
-				wch |= (*iter) << 8;
+				if (iter != src.end())
+				{
+					wch |= (*iter) << 8;
+				}
 			}
 			tmp.push_back(wch);
 		}

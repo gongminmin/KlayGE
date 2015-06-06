@@ -53,16 +53,16 @@ namespace KlayGE
 			rl_quad_ = rf.MakeRenderLayout();
 			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			std::vector<float3> pos;
-			std::vector<uint16_t> index;
-
-			pos.push_back(float3(+1, +1, 1));
-			pos.push_back(float3(-1, +1, 1));
-			pos.push_back(float3(+1, -1, 1));
-			pos.push_back(float3(-1, -1, 1));
+			float3 pos[] = 
+			{
+				float3(+1, +1, 1),
+				float3(-1, +1, 1),
+				float3(+1, -1, 1),
+				float3(-1, -1, 1)
+			};
 
 			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.row_pitch = static_cast<uint32_t>(sizeof(pos));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),

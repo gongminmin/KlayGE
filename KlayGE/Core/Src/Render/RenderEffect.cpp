@@ -2776,7 +2776,6 @@ namespace KlayGE
 
 	void RenderEffect::RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const
 	{
-		std::vector<XMLDocumentPtr> include_docs;
 		for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
 		{
 			XMLAttributePtr attr = node->Attrib("name");

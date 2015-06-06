@@ -12,7 +12,7 @@ class DetailedModel : public KlayGE::RenderModel
 	friend class DetailedMesh;
 
 public:
-	DetailedModel(std::wstring const & name);
+	explicit DetailedModel(std::wstring const & name);
 
 	void EyePos(KlayGE::float3 const & eye_pos);
 	void LightPos(KlayGE::float3 const & light_pos);

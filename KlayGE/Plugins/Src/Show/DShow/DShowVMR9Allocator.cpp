@@ -129,8 +129,6 @@ namespace KlayGE
 			return E_FAIL;
 		}
 
-		HRESULT hr = S_OK;
-
 		// NOTE:
 		// we need to make sure that we create textures because
 		// surfaces can not be textured onto a primitive.
@@ -138,7 +136,7 @@ namespace KlayGE
 
 		this->DeleteSurfaces();
 		surfaces_.resize(*lpNumBuffers);
-		hr = vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]);
+		HRESULT hr = vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]);
 
 		// If we couldn't create a texture surface and
 		// the format is not an alpha format,

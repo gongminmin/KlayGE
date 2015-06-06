@@ -25,12 +25,6 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
-		uint32_t num_sub_res = in_array_size;
-		if (Texture::TT_Cube == in_type)
-		{
-			num_sub_res *= 6;
-		}
-
 		if (IsSRGB(in_format))
 		{
 			cout << "This texture is already in sRGB format." << endl;

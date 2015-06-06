@@ -493,16 +493,16 @@ namespace KlayGE
 			rl_quad_ = rf.MakeRenderLayout();
 			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			std::vector<float3> pos;
-			std::vector<uint16_t> index;
-
-			pos.push_back(float3(+1, +1, 1));
-			pos.push_back(float3(-1, +1, 1));
-			pos.push_back(float3(+1, -1, 1));
-			pos.push_back(float3(-1, -1, 1));
+			float3 pos[] = 
+			{
+				float3(+1, +1, 1),
+				float3(-1, +1, 1),
+				float3(+1, -1, 1),
+				float3(-1, -1, 1)
+			};
 
 			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(pos.size() * sizeof(pos[0]));
+			init_data.row_pitch = static_cast<uint32_t>(sizeof(pos));
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
@@ -1639,9 +1639,10 @@ namespace KlayGE
 					*projective_map_2d_tex_param_ = light->ProjectiveTexture();
 				}
 
-				*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-					attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
+				*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+					(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f,
+					(attr & LightSource::LSA_NoShadow) ? -1.0f : 1.0f,
+					light->ProjectiveTexture() ? 1.0f : -1.0f);
 
 				this->UpdateShadowing(pvp, org_no);
 

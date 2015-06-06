@@ -99,7 +99,7 @@ namespace
 		};
 
 	public:
-		ParticleSystemLoadingDesc(std::string const & res_name)
+		explicit ParticleSystemLoadingDesc(std::string const & res_name)
 		{
 			ps_desc_.res_name = res_name;
 			ps_desc_.ps_data = MakeSharedPtr<ParticleSystemDesc::ParticleSystemData>();

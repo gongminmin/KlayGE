@@ -35,6 +35,8 @@
 namespace KlayGE
 {
 	meshml_export::meshml_export()
+		: max_interface_(nullptr),
+			in_chs_(false)
 	{
 	}
 

@@ -1879,7 +1879,6 @@ namespace KlayGE
 		shared_ptr<KeyFramesType> kfs;
 		uint32_t num_frame = 0;
 		uint32_t frame_rate = 0;
-		std::vector<shared_ptr<AABBKeyFrames> > frame_pos_bbs;
 		if (model->IsSkinned())
 		{
 			SkinnedModelPtr skinned = checked_pointer_cast<SkinnedModel>(model);

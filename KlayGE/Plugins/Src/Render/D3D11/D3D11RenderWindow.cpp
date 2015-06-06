@@ -822,33 +822,33 @@ namespace KlayGE
 		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
 		render_target_view_ = MakeCOMPtr(render_target_view);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
-
-		if (stereo)
-		{
-			if (bb_desc.SampleDesc.Count > 1)
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
-				rtv_desc.Texture2DMSArray.FirstArraySlice = 1;
-				rtv_desc.Texture2DMSArray.ArraySize = 1;
-			}
-			else
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-				rtv_desc.Texture2DArray.MipSlice = 0;
-				rtv_desc.Texture2DArray.FirstArraySlice = 1;
-				rtv_desc.Texture2DArray.ArraySize = 1;
-			}
-			TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
-			render_target_view_right_eye_ = MakeCOMPtr(render_target_view);
-		}
-#else
-		bool stereo = false;
-#endif
-
 		if (depth_stencil_format_ != DXGI_FORMAT_UNKNOWN)
 		{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+			bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
+	
+			if (stereo)
+			{
+				if (bb_desc.SampleDesc.Count > 1)
+				{
+					rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+					rtv_desc.Texture2DMSArray.FirstArraySlice = 1;
+					rtv_desc.Texture2DMSArray.ArraySize = 1;
+				}
+				else
+				{
+					rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+					rtv_desc.Texture2DArray.MipSlice = 0;
+					rtv_desc.Texture2DArray.FirstArraySlice = 1;
+					rtv_desc.Texture2DArray.ArraySize = 1;
+				}
+				TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
+				render_target_view_right_eye_ = MakeCOMPtr(render_target_view);
+			}
+#else
+			bool stereo = false;
+#endif
+
 			// Create depth stencil texture
 			D3D11_TEXTURE2D_DESC ds_desc;
 			ds_desc.Width = this->Width();

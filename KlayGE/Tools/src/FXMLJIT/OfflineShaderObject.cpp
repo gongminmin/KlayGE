@@ -41,7 +41,7 @@ namespace KlayGE
 	namespace Offline
 	{
 		ShaderObject::ShaderObject(OfflineRenderDeviceCaps const & caps)
-			: caps_(caps),
+			: caps_(caps), is_validate_(false),
 				cs_block_size_x_(0), cs_block_size_y_(0), cs_block_size_z_(0)
 		{
 		}

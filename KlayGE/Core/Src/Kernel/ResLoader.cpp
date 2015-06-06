@@ -109,13 +109,12 @@ namespace KlayGE
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
 		{
-			char line[1024];
-			void const * symbol = "";
 			FILE* fp = fopen("/proc/self/maps", "r");
 			if (fp != nullptr)
 			{
 				while (!feof(fp))
 				{
+					char line[1024];
 					unsigned long start, end;
 					if (!fgets(line, sizeof(line), fp))
 					{
@@ -126,6 +125,7 @@ namespace KlayGE
 						continue;
 					}
 
+					void const * symbol = "";
 					sscanf(line, "%lx-%lx ", &start, &end);
 					if ((symbol >= reinterpret_cast<void const *>(start)) && (symbol < reinterpret_cast<void const *>(end)))
 					{

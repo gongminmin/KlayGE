@@ -30,7 +30,7 @@ namespace
 	class ReceiveThreadFunc
 	{
 	public:
-		ReceiveThreadFunc(KlayGE::Player* player)
+		explicit ReceiveThreadFunc(KlayGE::Player* player)
 			: player_(player)
 			{ }
 

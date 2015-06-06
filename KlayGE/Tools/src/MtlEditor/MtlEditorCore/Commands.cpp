@@ -35,7 +35,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetCurrFrame::MtlEditorCommandSetCurrFrame(MtlEditorCore* core, float frame)
-		: MtlEditorCommandConcrete<ECC_SetCurrFrame>(core), frame_(frame)
+		: MtlEditorCommandConcrete<ECC_SetCurrFrame>(core), frame_(frame), old_frame_()
 	{
 	}
 
@@ -52,7 +52,7 @@ namespace KlayGE
 	
 	
 	MtlEditorCommandSelectMesh::MtlEditorCommandSelectMesh(MtlEditorCore* core, uint32_t mesh_id)
-		: MtlEditorCommandConcrete<ECC_SelectMesh>(core), mesh_id_(mesh_id)
+		: MtlEditorCommandConcrete<ECC_SelectMesh>(core), mesh_id_(mesh_id), old_mesh_id_()
 	{
 	}
 
@@ -128,7 +128,7 @@ namespace KlayGE
 	MtlEditorCommandSetShininessMaterial::MtlEditorCommandSetShininessMaterial(MtlEditorCore* core,
 			uint32_t mtl_id, float value)
 		: MtlEditorCommandConcrete<ECC_SetShininessMaterial>(core),
-			mtl_id_(mtl_id), shininess_(value)
+			mtl_id_(mtl_id), shininess_(value), old_shininess_()
 	{
 	}
 
@@ -166,7 +166,7 @@ namespace KlayGE
 	MtlEditorCommandSetOpacityMaterial::MtlEditorCommandSetOpacityMaterial(MtlEditorCore* core,
 			uint32_t mtl_id, float value)
 		: MtlEditorCommandConcrete<ECC_SetOpacityMaterial>(core),
-			mtl_id_(mtl_id), opacity_(value)
+			mtl_id_(mtl_id), opacity_(value), old_opacity_()
 	{
 	}
 

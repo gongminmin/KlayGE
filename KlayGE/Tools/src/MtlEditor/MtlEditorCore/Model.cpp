@@ -133,7 +133,8 @@ void DetailedSkinnedMesh::UpdateTech()
 
 
 DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
-		: SkinnedModel(name)
+		: SkinnedModel(name),
+			is_skinned_(false)
 {
 }
 

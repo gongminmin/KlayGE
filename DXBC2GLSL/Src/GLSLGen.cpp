@@ -6006,15 +6006,6 @@ ShaderImmType GLSLGen::OperandAsType(ShaderOperand const & op, uint32_t imm_as_t
 							if ((offset >= var_iter->var_desc.start_offset)
 								&& (var_iter->var_desc.start_offset + var_iter->var_desc.size > offset))
 							{
-								// indicate if a register contains more than one variables because of register packing
-								bool contain_multi_var = false;
-								uint32_t max_selector = this->GetMaxComponentSelector(op);
-								if ((offset + (max_selector - min_selector + 1) * 4) > (var_iter->var_desc.start_offset + var_iter->var_desc.size))
-								{
-									contain_multi_var = true;
-								}
-								BOOST_ASSERT_MSG(var_iter->has_type_desc, "Constant buffer should have type desc");
-
 								switch (var_iter->type_desc.type)
 								{
 								case SVT_INT:
@@ -6557,7 +6548,6 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									element_index = (16 * register_index - var_iter->var_desc.start_offset) / 16 / register_stride;
 								}
 								uint32_t row = (16 * register_index - var_iter->var_desc.start_offset) / 16 - element_index * register_stride;
-								uint32_t column = 0;
 								uint32_t count = this->GetOperandComponentNum(op);
 								if (count == 1)
 								{
@@ -6573,7 +6563,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									}
 									//convert component selector to column number
 									//x y z w--> 0 1 2 3
-									column = this->GetComponentSelector(op, i);
+									uint32_t column = this->GetComponentSelector(op, i);
 									out << var_iter->var_desc.name;
 									if (element_count)
 									{
@@ -7954,8 +7944,7 @@ void GLSLGen::ToDclInterShaderPatchConstantRecords(std::ostream& out)
 				out << "in ";
 			}
 		
-			int num_comps = 4;
-			num_comps = bitcount32(program_->params_patch[i].mask);
+			int num_comps = bitcount32(program_->params_patch[i].mask);
 
 			if (1 == num_comps)
 			{

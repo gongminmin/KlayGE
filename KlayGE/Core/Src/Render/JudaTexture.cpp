@@ -591,17 +591,6 @@ namespace KlayGE
 				branches[i] = this->GetLevelBranch(shuff, i);
 			}
 
-			uint32_t start_sub_tile_x = 0;
-			uint32_t start_sub_tile_y = 0;
-			for (uint32_t i = 1; i <= tree_levels_ - 1; ++ i)
-			{
-				uint32_t branch = branches[i];
-				uint32_t by = (branch >> 1) & 1UL;
-				uint32_t bx = (branch >> 0) & 1UL;
-				start_sub_tile_x = (start_sub_tile_x << 1) + bx;
-				start_sub_tile_y = (start_sub_tile_y << 1) + by;
-			}
-
 			for (uint32_t ll = 1; ll <= target_level; ll += step)
 			{
 				uint32_t const ll_b = ll;
@@ -613,9 +602,6 @@ namespace KlayGE
 
 				for (uint32_t i = ll_b, i_end = std::min(target_level + 1, ll_e); i < i_end; ++ i)
 				{
-					start_sub_tile_x &= ~(1UL << (tree_levels_ - 1 - i));
-					start_sub_tile_y &= ~(1UL << (tree_levels_ - 1 - i));
-
 					if (node)
 					{
 						node = node->children[branches[i]];

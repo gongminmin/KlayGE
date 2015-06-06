@@ -193,7 +193,6 @@ namespace KlayGE
 				distances_lzma_start_ = kfont_input->tellg();
 				size_t distances_lzma_size = 0;
 
-				std::vector<uint8_t> dist;
 				for (uint32_t i = 0; i < header.non_empty_chars; ++ i)
 				{
 					distances_addr_[i] = distances_lzma_size;
