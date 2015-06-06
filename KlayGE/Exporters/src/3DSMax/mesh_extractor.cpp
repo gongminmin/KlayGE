@@ -17,7 +17,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4238 4239 4244 4245 4512)
+#pragma warning(disable: 4100 4238 4239 4244 4245 4458 4459 4512)
 #include <max.h>
 #include <modstack.h>
 #include <stdmat.h>
@@ -728,11 +728,11 @@ namespace KlayGE
 
 				vertex.binormal = -vertex.binormal;
 
-				int uv_layer = 0;
+				int uv_layer_index = 0;
 				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
-					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer)
+					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer_index)
 				{
-					Point2 const & tex = uv_iter->second[vertex_index.tex_indices[uv_layer]];
+					Point2 const & tex = uv_iter->second[vertex_index.tex_indices[uv_layer_index]];
 					obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
 				}
 
@@ -781,12 +781,12 @@ namespace KlayGE
 						float3 normal(vert.normal.x, vert.normal.y, vert.normal.z);
 						float3 tangent(vert.tangent.x, vert.tangent.y, vert.tangent.z);
 						float3 binormal(vert.binormal.x, vert.binormal.y, vert.binormal.z);
-						std::vector<float3> texs(vert.tex.size());
+						std::vector<float3> tex_coords(vert.tex.size());
 						for (size_t ti = 0; ti < texs.size(); ++ ti)
 						{
-							texs[ti] = float3(vert.tex[ti].x, vert.tex[ti].y, 0);
+							tex_coords[ti] = float3(vert.tex[ti].x, vert.tex[ti].y, 0);
 						}
-						meshml_obj_.SetVertex(mesh_id, vertex_id, pos, tangent, binormal, normal, 2, texs);
+						meshml_obj_.SetVertex(mesh_id, vertex_id, pos, tangent, binormal, normal, 2, tex_coords);
 
 						for (size_t bi = 0; bi < obj_vertices[*iter].binds.size(); ++ bi)
 						{

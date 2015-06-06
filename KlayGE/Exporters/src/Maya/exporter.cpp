@@ -303,22 +303,22 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 			MAnimControl::setCurrentTime(MTime(i + start_frame, MTime::kNTSCField));
 			KLAYGE_FOREACH(JointsType::const_reference joint, joint_to_id_)
 			{
-				MDagPath& dag_path = joint_id_to_path_[joint.second];
+				MDagPath& joint_dag_path = joint_id_to_path_[joint.second];
 				MMatrix inv_parent;
-				if (1 == dag_path.length())
+				if (1 == joint_dag_path.length())
 				{
 					inv_parent = MMatrix::identity;
 				}
 				else
 				{
-					MDagPath parent_path = dag_path;
+					MDagPath parent_path = joint_dag_path;
 					parent_path.pop();
 
 					inv_parent = parent_path.inclusiveMatrixInverse();
 				}
 
-				int kfs_id = joint_id_to_kfs_id[joint_to_id_[dag_path.fullPathName().asChar()]];
-				this->ExportKeyframe(kfs_id, i, dag_path, inv_parent);
+				int kfs_id = joint_id_to_kfs_id[joint_to_id_[joint_dag_path.fullPathName().asChar()]];
+				this->ExportKeyframe(kfs_id, i, joint_dag_path, inv_parent);
 			}
 		}
 	}
@@ -503,9 +503,9 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 			MItGeometry geom_iterator(dag_path);
 			for (int i = 0; !geom_iterator.isDone(); geom_iterator.next(), ++ i)
 			{
-				MObject component = geom_iterator.component();
+				MObject geom_component = geom_iterator.component();
 				MFloatArray vertex_weights;
-				status = skin_clusters_[skin_cluster_index].first->getWeights(dag_path, component, vertex_weights, num_weights);
+				status = skin_clusters_[skin_cluster_index].first->getWeights(dag_path, geom_component, vertex_weights, num_weights);
 				if (status != MS::kSuccess)
 				{
 					std::cout << "Fail to retrieve vertex weights." << std::endl;

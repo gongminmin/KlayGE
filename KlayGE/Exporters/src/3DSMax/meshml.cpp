@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4238 4239 4244 4245 4512)
+#pragma warning(disable: 4100 4238 4239 4244 4245 4458 4459 4512)
 #include <max.h>
 #include <Interval.h>
 #pragma warning(pop)
