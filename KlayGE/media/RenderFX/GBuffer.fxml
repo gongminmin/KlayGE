@@ -707,6 +707,11 @@ void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
 				oTc, result_pos,
 				result_tangent_quat);
 
+#if TRANSPARENCY_ON
+	float3 normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
+	result_pos.xyz += normal * 0.005f;
+#endif
+
 	oPos = mul(float4(result_pos, 1), mvp);
 	oViewDir = mul(float4(result_pos, 1), model_view).xyz;
 }
@@ -806,6 +811,15 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		</pass>
 	</technique>
 	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapWODepthTextureTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenShadowMapWODepthTextureSSSTech" inherit="GenShadowMapWODepthTextureTech">
+		<macro name="TRANSPARENCY_ON" value="1"/>
+	</technique>
+	<technique name="GenShadowMapWODepthTextureAlphaTestSSSTech" inherit="GenShadowMapWODepthTextureSSSTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
 		</pass>

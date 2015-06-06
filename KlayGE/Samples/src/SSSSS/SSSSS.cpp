@@ -58,6 +58,8 @@ namespace
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSSSMRTTech");
 			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapSSSTech");
 			gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestSSSTech");
+			gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureSSSTech");
+			gen_sm_wo_dt_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestSSSTech");
 
 			effect_attrs_ |= EA_SSS;
 		}
@@ -97,12 +99,6 @@ SSSSSApp::SSSSSApp()
 
 bool SSSSSApp::ConfirmDevice() const
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_simultaneous_rts < 3)
-	{
-		return false;
-	}
-
 	return true;
 }
 
@@ -124,7 +120,7 @@ void SSSSSApp::OnCreate()
 	deferred_rendering_->SSVOEnabled(0, false);
 	  
 	this->LookAt(float3(0.5f, 5, -0.5f), float3(0, 5, 0));
-	this->Proj(0.05f, 80.0f);
+	this->Proj(0.05f, 200.0f);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_tl, c_cube_tl);
@@ -188,7 +184,7 @@ void SSSSSApp::OnCreate()
 	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, KlayGE::placeholders::_1));
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
-	KlayGE::SceneObjectHelperPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model_ml, SceneObject::SOA_Cullable, 0);
 	subsurface_obj->ModelMatrix(MathLib::translation(0.0f, 5.0f, 0.0f));
 	subsurface_obj->AddToSceneManager();
 
