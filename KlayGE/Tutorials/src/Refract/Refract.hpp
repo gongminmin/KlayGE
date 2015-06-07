@@ -24,7 +24,7 @@ private:
 	KlayGE::SceneObjectPtr refractor_;
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::FirstPersonCameraController fpcController_;
+	KlayGE::TrackballCameraController tb_controller_;
 
 	KlayGE::TexturePtr y_cube_map_;
 	KlayGE::TexturePtr c_cube_map_;

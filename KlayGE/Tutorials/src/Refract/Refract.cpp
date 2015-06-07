@@ -196,8 +196,8 @@ void Refract::OnCreate()
 	this->LookAt(float3(0.36f, 0.11f, -0.39f), float3(0, 0.11f, 0));
 	this->Proj(0.05f, 100);
 
-	fpcController_.AttachCamera(this->ActiveCamera());
-	fpcController_.Scalers(0.05f, 0.05f);
+	tb_controller_.AttachCamera(this->ActiveCamera());
+	tb_controller_.Scalers(0.05f, 0.005f);
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

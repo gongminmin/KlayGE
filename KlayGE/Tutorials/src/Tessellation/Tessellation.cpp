@@ -196,6 +196,12 @@ void TessellationApp::OnCreate()
 	this->Edge2ChangedHandler(*dialog_->Control<UISlider>(id_edge2_slider_));
 	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&TessellationApp::InsideChangedHandler, this, KlayGE::placeholders::_1));
 	this->InsideChangedHandler(*dialog_->Control<UISlider>(id_inside_slider_));
+
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (!caps.ds_support)
+	{
+		dialog_->Control<UICheckBox>(id_tess_enabled_)->SetEnabled(false);
+	}
 }
 
 void TessellationApp::OnResize(uint32_t width, uint32_t height)
