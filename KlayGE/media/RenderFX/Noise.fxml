@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="util.fxml"/>
+
 	<parameter type="texture2D" name="simplex_tex">
 		<annotation type="string" name="SasResourceAddress" value="noise_simplex.dds"/>
 	</parameter>
@@ -21,11 +23,7 @@
 		<![CDATA[
 float perm2d(float2 xy)
 {
-#ifdef KLAYGE_PIXEL_SHADER
-	return grad3_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256).w * 255;
-#else
-	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).w * 255;
-#endif
+	return Tex2DSampleLevel(grad3_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0).w * 255;
 }
 
 float perm(float x)
@@ -35,29 +33,17 @@ float perm(float x)
 
 float3 grad3_perm(float2 xy)
 {
-#ifdef KLAYGE_PIXEL_SHADER
-	return grad3_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256).xyz * 2 - 1;
-#else
-	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).xyz * 2 - 1;
-#endif
+	return Tex2DSampleLevel(grad3_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0).xyz * 2 - 1;
 }
 
 float4 grad4_perm(float2 xy)
 {
-#ifdef KLAYGE_PIXEL_SHADER
-	return grad4_perm_tex.Sample(noise_point_sampler, (xy + 0.5f) / 256) * 2 - 1;
-#else
-	return grad4_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0) * 2 - 1;
-#endif
+	return Tex2DSampleLevel(grad4_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0) * 2 - 1;
 }
 
 float4 simplex(float x)
 {
-#ifdef KLAYGE_PIXEL_SHADER
-	return simplex_tex.Sample(noise_point_sampler, float2((x + 0.5f) / 64, 0.5f)) * 255;
-#else
-	return simplex_tex.SampleLevel(noise_point_sampler, float2((x + 0.5f) / 64, 0.5f), 0) * 255;
-#endif
+	return Tex2DSampleLevel(simplex_tex, noise_point_sampler, float2((x + 0.5f) / 64, 0.5f), 0, 0) * 255;
 }
 
 float simplex_noise(float2 p)
