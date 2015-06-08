@@ -152,7 +152,7 @@ void VideoTextureApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	this->LookAt(float3(-0.2f, 0.3f, -0.2f), float3(0, 0, 0));
+	this->LookAt(float3(-0.18f, 0.24f, -0.18f), float3(0, 0.05f, 0));
 	this->Proj(0.01f, 100);
 
 	tb_controller_.AttachCamera(this->ActiveCamera());

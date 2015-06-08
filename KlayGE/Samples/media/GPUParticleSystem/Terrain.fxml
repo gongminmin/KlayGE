@@ -41,7 +41,7 @@
 void TerrainVS(float4 pos			: POSITION,
 					float2 tex			: TEXCOORD0,
 					out float4 oTex  : TEXCOORD0,
-					out float4 oLightVec_Depth : TEXCOORD1,
+					out float oDepth : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -51,18 +51,16 @@ void TerrainVS(float4 pos			: POSITION,
 
 	pos = pos.xzyw;
 	pos.y += height_map_tex.SampleLevel(point_sampler, oTex.xy, 0).r;
-	
-	oLightVec_Depth.xyz = LightDir;
-	
+
 	oPos = mul(pos, mvp);
-	oLightVec_Depth.w = oPos.w;
+	oDepth = oPos.w;
 }
 
-float4 TerrainPS(float4 tex : TEXCOORD0, float4 light_vec_depth : TEXCOORD1) : SV_Target
+float4 TerrainPS(float4 tex : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
 	float3 normal = normalize(decompress_normal(normal_map_tex.Sample(normal_map_sampler, tex.xy)).xzy * float3(4, 1, 4));
-	return float4(grass_tex.Sample(trilinear_sampler, tex.zw).rgb * dot(normalize(light_vec_depth.xyz), normal),
-		light_vec_depth.w * inv_far);
+	return float4(grass_tex.Sample(trilinear_sampler, tex.zw).rgb * dot(normalize(LightDir), normal),
+		depth * inv_far);
 }
 		]]>
 	</shader>
