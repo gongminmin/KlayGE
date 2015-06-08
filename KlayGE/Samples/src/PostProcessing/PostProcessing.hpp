@@ -30,6 +30,8 @@ private:
 	void HDRHandler(KlayGE::UIRadioButton const & sender);
 	void NightVisionHandler(KlayGE::UIRadioButton const & sender);
 	void OldFashionHandler(KlayGE::UIRadioButton const & sender);
+	void CrossStitchingHandler(KlayGE::UIRadioButton const & sender);
+	void FrostedGlassHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr sky_box_;
@@ -48,6 +50,8 @@ private:
 	KlayGE::PostProcessPtr hdr_;
 	KlayGE::PostProcessPtr night_vision_;
 	KlayGE::PostProcessPtr old_fashion_;
+	KlayGE::PostProcessPtr cross_stitching_;
+	KlayGE::PostProcessPtr frosted_glass_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_fps_camera_;
@@ -58,6 +62,8 @@ private:
 	int id_hdr_;
 	int id_night_vision_;
 	int id_old_fashion_;
+	int id_cross_stitching_;
+	int id_frosted_glass_;
 
 	KlayGE::PointLightSourcePtr point_light_;
 };

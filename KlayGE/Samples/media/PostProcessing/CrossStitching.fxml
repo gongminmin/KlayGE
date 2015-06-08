@@ -1,0 +1,60 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="float4" name="width_height"/>
+	<parameter type="float" name="stitching_size" value="8"/>
+	<parameter type="int" name="invert" value="0"/>
+
+	<shader>
+		<![CDATA[
+float4 CrossStitchingPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	int2 c_pos = tc0 * width_height.xy;
+
+	int2 rem = int2(fmod(c_pos.xy, stitching_size));
+	int2 bl_pos = floor(c_pos / stitching_size) * stitching_size;
+	int2 tl_pos = bl_pos + stitching_size / 2;
+	bl_pos.y += stitching_size - 1;
+	bl_pos -= c_pos;
+
+	float4 ret = src_tex.Sample(point_sampler, tl_pos * width_height.zw) * 1.8f;
+	if ((rem.x == rem.y) // TL to BR
+		|| (-bl_pos.x == bl_pos.y)) // BL to TR
+	{
+		if (1 == invert)
+		{
+			ret = float4(0.2f, 0.15f, 0.05f, 1);
+		}
+	}
+	else
+	{
+		if (invert != 1)
+		{
+			ret = float4(0, 0, 0, 1);
+		}
+	}
+
+	return ret;
+}
+		]]>
+	</shader>
+
+	<technique name="CrossStitching">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="CrossStitchingPS()"/>
+		</pass>
+	</technique>
+</effect>

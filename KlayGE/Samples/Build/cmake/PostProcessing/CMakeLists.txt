@@ -21,12 +21,16 @@ SET(HEADER_FILES
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.fxml
 )
 
 SET(POST_PROCESSORS
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.ppml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.ppml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.ppml
 )
 

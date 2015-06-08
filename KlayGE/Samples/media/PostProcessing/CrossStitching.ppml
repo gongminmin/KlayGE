@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="cross_stitching">
+		<params>
+			<param name="stitching_size"/>
+			<param name="invert"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="CrossStitching.fxml" tech="CrossStitching"/>
+	</post_processor>
+</post_processors>

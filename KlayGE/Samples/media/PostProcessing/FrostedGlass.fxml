@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+
+	<parameter type="float" name="rnd_factor" value="0.03"/>
+	<parameter type="float" name="rnd_scale" value="0.6"/>
+	<parameter type="float2" name="v1" x="92.0" y="80.0"/>
+	<parameter type="float2" name="v2" x="41.0" y="62.0"/>
+
+	<shader>
+		<![CDATA[
+float rand(float2 co)
+{
+	return frac(sin(dot(co ,v1)) + cos(dot(co ,v2)) * rnd_scale) - 0.5f;
+}
+
+float4 FrostedGlassPS(float2 tc0 : TEXCOORD0) : SV_Target
+{
+	float2 rnd = float2(rand(tc0.xy), rand(tc0.yx));  
+	return src_tex.Sample(point_sampler, tc0 + rnd * rnd_factor);
+}
+		]]>
+	</shader>
+
+	<technique name="FrostedGlass">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="FrostedGlassPS()"/>
+		</pass>
+	</technique>
+</effect>

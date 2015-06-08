@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="frosted_glass">
+		<params>
+			<param name="rnd_factor"/>
+			<param name="rnd_scale"/>
+			<param name="v1"/>
+			<param name="v2"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="FrostedGlass.fxml" tech="FrostedGlass"/>
+	</post_processor>
+</post_processors>

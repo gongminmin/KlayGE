@@ -140,6 +140,8 @@ void PostProcessingApp::OnCreate()
 	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
 	old_fashion_ = SyncLoadPostProcess("OldFashion.ppml", "old_fashion");
+	cross_stitching_ = SyncLoadPostProcess("CrossStitching.ppml", "cross_stitching");
+	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -152,6 +154,8 @@ void PostProcessingApp::OnCreate()
 	id_hdr_ = dialog_->IDFromName("HDRPP");
 	id_night_vision_ = dialog_->IDFromName("NightVisionPP");
 	id_old_fashion_ = dialog_->IDFromName("OldFashionPP");
+	id_cross_stitching_ = dialog_->IDFromName("CrossStitchingPP");
+	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CopyHandler, this, KlayGE::placeholders::_1));
@@ -161,6 +165,8 @@ void PostProcessingApp::OnCreate()
 	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::HDRHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::NightVisionHandler, this, KlayGE::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::OldFashionHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CrossStitchingHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::FrostedGlassHandler, this, KlayGE::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
@@ -211,6 +217,10 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	night_vision_->InputPin(0, color_tex_);
 
 	old_fashion_->InputPin(0, color_tex_);
+
+	cross_stitching_->InputPin(0, color_tex_);
+
+	frosted_glass_->InputPin(0, color_tex_);
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -290,6 +300,22 @@ void PostProcessingApp::OldFashionHandler(UIRadioButton const & sender)
 	if (sender.GetChecked())
 	{
 		active_pp_ = old_fashion_;
+	}
+}
+
+void PostProcessingApp::CrossStitchingHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = cross_stitching_;
+	}
+}
+
+void PostProcessingApp::FrostedGlassHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = frosted_glass_;
 	}
 }
 

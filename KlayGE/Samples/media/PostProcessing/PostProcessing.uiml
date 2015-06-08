@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="PostProcessing" caption="Post Processing" x="-140" y="0" align_x="right" width="140" height="600">
+	<dialog id="PostProcessing" caption="Post Processing" x="-140" y="0" align_x="right" width="140" height="500">
 		<control type="radio_button" id="CopyPP" caption="None" x="20" y="20" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="AsciiArtsPP" caption="Ascii Arts" x="20" y="45" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="CartoonPP" caption="Cartoon" x="20" y="70" width="100" height="24" button_group="0" checked="1" hotkey="0" is_default="0"/>
@@ -9,8 +9,10 @@
 		<control type="radio_button" id="HDRPP" caption="HDR" x="20" y="120" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="NightVisionPP" caption="Night Vision" x="20" y="145" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="OldFashionPP" caption="Old Fashion" x="20" y="170" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
+		<control type="radio_button" id="CrossStitchingPP" caption="Cross Stitchint" x="20" y="195" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
+		<control type="radio_button" id="FrostedGlassPP" caption="Frosted Glass" x="20" y="220" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 
-		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="560" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="460" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
 	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
