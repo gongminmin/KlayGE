@@ -399,7 +399,7 @@ def gl_compatibility(vendor, renderer, major_ver, minor_ver, glsl_major_ver, gls
 	info = information()
 	info.make_reports(vendor, renderer, major_ver, minor_ver, glsl_major_ver, glsl_minor_ver, exts)
 
-	report_file_name = 'report.html'
+	report_file_name = 'GLCompatibilityReport.html'
 	report_file = open(report_file_name, 'w')
 	info.to_html(report_file)
 	report_file.close()

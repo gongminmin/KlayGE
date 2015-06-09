@@ -391,11 +391,11 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		TexturePtr downsample_texs[3];
-		TexturePtr glow_texs[3];
+		array<TexturePtr, 3> downsample_texs;
+		array<TexturePtr, 3> glow_texs;
 
 		ElementFormat fmt = tex->Format();
-		for (size_t i = 0; i < 3; ++ i)
+		for (size_t i = 0; i < downsample_texs.size(); ++ i)
 		{
 			downsample_texs[i] = rf.MakeTexture2D(width / (2 << i), height / (2 << i), 1, 1, fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -408,12 +408,12 @@ namespace KlayGE
 			bright_pass_downsampler_->InputPin(index, tex);
 			bright_pass_downsampler_->OutputPin(index, downsample_texs[0]);
 		}
-		for (size_t i = 0; i < 2; ++ i)
+		for (size_t i = 0; i < downsamplers_.size(); ++ i)
 		{
 			downsamplers_[i]->InputPin(0, downsample_texs[i]);
 			downsamplers_[i]->OutputPin(0, downsample_texs[i + 1]);
 		}
-		for (size_t i = 0; i < 3; ++ i)
+		for (size_t i = 0; i < blurs_.size(); ++ i)
 		{
 			blurs_[i]->InputPin(0, downsample_texs[i]);
 			blurs_[i]->OutputPin(0, glow_texs[i]);
@@ -446,11 +446,11 @@ namespace KlayGE
 	void LensEffectsPostProcess::Apply()
 	{
 		bright_pass_downsampler_->Apply();
-		for (size_t i = 0; i < 2; ++ i)
+		for (size_t i = 0; i < downsamplers_.size(); ++ i)
 		{
 			downsamplers_[i]->Apply();
 		}
-		for (size_t i = 0; i < 3; ++ i)
+		for (size_t i = 0; i < blurs_.size(); ++ i)
 		{
 			blurs_[i]->Apply();
 		}

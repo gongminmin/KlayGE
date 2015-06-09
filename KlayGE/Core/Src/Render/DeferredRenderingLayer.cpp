@@ -518,8 +518,11 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_TubeArea] = rl_box_;
 
 		g_buffer_effect_ = SyncLoadRenderEffect("GBufferNoSkinning.fxml");
-		g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning128.fxml");
-		if (!g_buffer_skinning_effect_->TechniqueByName("GBufferRT0Tech")->Validate())
+		if (caps.max_shader_model >= ShaderModel(3, 0))
+		{
+			g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning128.fxml");
+		}
+		else
 		{
 			g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning64.fxml");
 		}
@@ -678,6 +681,7 @@ namespace KlayGE
 		sss_blur_pp_->SetParam(1, 1.0f);
 
 		translucency_pp_ = SyncLoadPostProcess("Translucency.ppml", "Translucency");
+		translucency_pp_->SetParam(6, 100.0f);
 
 		if (depth_texture_support_ && mrt_g_buffer_support_ && caps.fp_color_support)
 		{
@@ -2561,7 +2565,7 @@ namespace KlayGE
 				case LightSource::LT_TubeArea:
 					if ((PC_Shadowing == pass_cat) || (PC_Shading == pass_cat))
 					{
-						float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
+						float4x4 const light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
 						*light_volume_mv_param_ = light_model * pvp.view;
 						*light_volume_mvp_param_ = light_model * pvp.view * pvp.proj;
@@ -2591,7 +2595,7 @@ namespace KlayGE
 
 		case LightSource::LT_Directional:
 			{
-				float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+				float3 const dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
 			*light_volume_mv_param_ = pvp.inv_proj;
@@ -2600,7 +2604,7 @@ namespace KlayGE
 
 		case LightSource::LT_Ambient:
 			{
-				float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
+				float3 const dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
 			*light_volume_mv_param_ = pvp.inv_proj;
@@ -2707,8 +2711,8 @@ namespace KlayGE
 
 		BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
 
-		int32_t light_index = sm_light_indices_[org_no].first;
-		int32_t shadowing_channel = sm_light_indices_[org_no].second;
+		int32_t const light_index = sm_light_indices_[org_no].first;
+		int32_t const shadowing_channel = sm_light_indices_[org_no].second;
 		if (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
 			|| (LightSource::LT_Sun == type))
 		{
@@ -2888,14 +2892,13 @@ namespace KlayGE
 			PerViewport const & pvp, uint32_t g_buffer_index)
 	{
 		LightSourcePtr const & light = lights_[org_no];
-		LightSource::LightType type = light->Type();
-		int32_t light_index = sm_light_indices_[org_no].first;
+		LightSource::LightType const type = light->Type();
+		int32_t const light_index = sm_light_indices_[org_no].first;
 		if (light->Enabled() && pvp.light_visibles[org_no]
 			&& ((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
 				|| (LightSource::LT_Sun == type))
 		{
 			CameraPtr light_camera;
-
 			switch (type)
 			{
 			case LightSource::LT_Spot:
@@ -3108,14 +3111,14 @@ namespace KlayGE
 	}
 
 	uint32_t DeferredRenderingLayer::ComposePassScanCode(uint32_t vp_index, PassType pass_type,
-		int32_t org_no, int32_t index_in_pass, bool is_profile)
+		int32_t org_no, int32_t index_in_pass, bool is_profile) const
 	{
 		return (vp_index << 28) | (pass_type << 18) | (org_no << 6)
 			| (index_in_pass << 1) | (is_profile ? 1 : 0);
 	}
 
 	void DeferredRenderingLayer::DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
-		int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code)
+		int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code) const
 	{
 		vp_index = code >> 28;				//  4 bits, [31 - 28]
 		pass_type = static_cast<PassType>((code >> 18) & 0x03FF);	//  10 bits, [27 - 18]
@@ -3141,7 +3144,7 @@ namespace KlayGE
 			LightSourcePtr const & light = lights_[li];
 			if (light->Enabled() && pvp.light_visibles[li])
 			{
-				LightSource::LightType type = light->Type();
+				LightSource::LightType const type = light->Type();
 				switch (type)
 				{
 				case LightSource::LT_Ambient:
@@ -3422,14 +3425,8 @@ namespace KlayGE
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		if (Opaque_GBuffer == g_buffer_index)
-		{
-			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
-		}
-		else
-		{
-			re.BindFrameBuffer(pvp.shading_fb);
-		}
+		re.BindFrameBuffer(
+			(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_fb : pvp.shading_fb);
 		re.Render(*technique_lidr_directional_, *rl_quad_);
 	}
 
@@ -3471,12 +3468,12 @@ namespace KlayGE
 			LightSourcePtr const & light = lights_[*iter];
 			BOOST_ASSERT(type == light->Type());
 
-			int32_t attr = light->Attrib();
+			int32_t const attr = light->Attrib();
 
 			lights_color.push_back(light->Color());
 
 			float3 const & p = light->Position();
-			float3 loc_es = MathLib::transform_coord(p, pvp.view);
+			float3 const loc_es = MathLib::transform_coord(p, pvp.view);
 			lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
 
 			float3 dir_es(0, 0, 0);
@@ -3507,7 +3504,7 @@ namespace KlayGE
 			lights_radius_extend.push_back(float4(light->Radius(), extend_es.x(),
 				extend_es.y(), extend_es.z()));
 
-			float range = light->Range() * light_scale_;
+			float const range = light->Range() * light_scale_;
 			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 			if (LightSource::LT_Spot == type)
 			{
@@ -3575,47 +3572,19 @@ namespace KlayGE
 		switch (type)
 		{
 		case LightSource::LT_Point:
-			if (with_shadow)
-			{
-				tech = technique_lidr_point_shadow_;
-			}
-			else
-			{
-				tech = technique_lidr_point_no_shadow_;
-			}
+			tech = with_shadow ? technique_lidr_point_shadow_ : technique_lidr_point_no_shadow_;
 			break;
 		
 		case LightSource::LT_Spot:
-			if (with_shadow)
-			{
-				tech = technique_lidr_spot_shadow_;
-			}
-			else
-			{
-				tech = technique_lidr_spot_no_shadow_;
-			}
+			tech = with_shadow ? technique_lidr_spot_shadow_ : technique_lidr_spot_no_shadow_;
 			break;
 
 		case LightSource::LT_SphereArea:
-			if (with_shadow)
-			{
-				tech = technique_lidr_sphere_area_shadow_;
-			}
-			else
-			{
-				tech = technique_lidr_sphere_area_no_shadow_;
-			}
+			tech = with_shadow ? technique_lidr_sphere_area_shadow_ : technique_lidr_sphere_area_no_shadow_;
 			break;
 
 		case LightSource::LT_TubeArea:
-			if (with_shadow)
-			{
-				tech = technique_lidr_tube_area_shadow_;
-			}
-			else
-			{
-				tech = technique_lidr_tube_area_no_shadow_;
-			}
+			tech = with_shadow ? technique_lidr_tube_area_shadow_ : technique_lidr_tube_area_no_shadow_;
 			break;
 
 		default:
@@ -3796,8 +3765,8 @@ namespace KlayGE
 			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-			int lights_shadowing_channel[6];
-			memset(lights_shadowing_channel, 0xFF, 6 * sizeof(int));
+			array<int, 6> lights_shadowing_channel;
+			lights_shadowing_channel.fill(-1);
 			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{
 				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
@@ -3900,7 +3869,7 @@ namespace KlayGE
 				}
 			}
 
-			for (int i = 0; i < 6; ++ i)
+			for (size_t i = 0; i < lights_shadowing_channel.size(); ++ i)
 			{
 				reinterpret_cast<float4*>(lights_attrib
 					+ i * lights_attrib_param_->Stride())->z() = lights_shadowing_channel[i] + 0.5f;

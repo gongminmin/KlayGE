@@ -138,8 +138,8 @@ namespace KlayGE
 
 	private:
 		PostProcessPtr bright_pass_downsampler_;
-		PostProcessPtr downsamplers_[2];
-		PostProcessPtr blurs_[3];
+		array<PostProcessPtr, 2> downsamplers_;
+		array<PostProcessPtr, 3> blurs_;
 		PostProcessPtr glow_merger_;
 	};
 

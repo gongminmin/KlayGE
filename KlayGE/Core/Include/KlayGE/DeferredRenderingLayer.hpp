@@ -90,11 +90,6 @@ namespace KlayGE
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 #endif
 
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		FrameBufferPtr lighting_fb;
-		TexturePtr lighting_tex;
-#endif
-
 		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;
 
@@ -130,7 +125,10 @@ namespace KlayGE
 
 		std::vector<char> light_visibles;
 
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		FrameBufferPtr lighting_fb;
+		TexturePtr lighting_tex;
+#elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
 
@@ -325,9 +323,9 @@ namespace KlayGE
 		void AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type,
-			int32_t org_no, int32_t index_in_pass, bool is_profile);
+			int32_t org_no, int32_t index_in_pass, bool is_profile) const;
 		void DecomposePassScanCode(uint32_t& vp_index, PassType& pass_type,
-			int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code);
+			int32_t& org_no, int32_t& index_in_pass, bool& is_profile, uint32_t code) const;
 
 		void BuildLightList();
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
@@ -348,10 +346,6 @@ namespace KlayGE
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
-		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
-#endif
 		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
 		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
@@ -361,7 +355,10 @@ namespace KlayGE
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
 
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
+		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+#elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateLightIndexedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
 			int32_t org_no, uint32_t g_buffer_index);
@@ -421,18 +418,17 @@ namespace KlayGE
 		std::vector<uint32_t> pass_scaned_;
 
 		array<array<RenderTechniquePtr, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
-		RenderTechniquePtr technique_light_depth_only_;
-		RenderTechniquePtr technique_light_stencil_;
-#endif
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
 		array<RenderTechniquePtr, 2> technique_merge_shadings_;
 		array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
+		RenderTechniquePtr technique_light_depth_only_;
+		RenderTechniquePtr technique_light_stencil_;
+#elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderTechniquePtr technique_draw_light_index_point_;
 		RenderTechniquePtr technique_draw_light_index_spot_;
 		RenderTechniquePtr technique_lidr_ambient_;
@@ -473,9 +469,6 @@ namespace KlayGE
 		RenderEffectParameterPtr g_buffer_tex_param_;
 		RenderEffectParameterPtr g_buffer_1_tex_param_;
 		RenderEffectParameterPtr depth_tex_param_;
-#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		RenderEffectParameterPtr lighting_tex_param_;
-#endif
 		RenderEffectParameterPtr shading_tex_param_;
 		RenderEffectParameterPtr depth_near_far_invfar_param_;
 		RenderEffectParameterPtr light_attrib_param_;
@@ -504,7 +497,9 @@ namespace KlayGE
 		RenderEffectParameterPtr num_cascades_param_;
 		RenderEffectParameterPtr view_z_to_light_view_param_;
 		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+#if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
+		RenderEffectParameterPtr lighting_tex_param_;
+#elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		RenderEffectParameterPtr min_max_depth_tex_param_;
 		RenderEffectParameterPtr lights_color_param_;
 		RenderEffectParameterPtr lights_pos_es_param_;
