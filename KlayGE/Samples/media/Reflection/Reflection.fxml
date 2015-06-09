@@ -109,30 +109,23 @@ float4 ReflectSpecialShadingPS(
 	}
 
 	float3 reflect_vec_ws = mul(reflect_vec_front, (float3x3)inv_view);
-	float3 sky = decode_hdr_yc(skybox_tex.SampleLevel(skybox_sampler, reflect_vec_front, 0).r,
-			skybox_C_tex.SampleLevel(skybox_sampler, reflect_vec_front, 0)).xyz;
+	float3 sky = decode_hdr_yc(TexCubeSampleLevel(skybox_tex, skybox_sampler, reflect_vec_front, 0, 0).r,
+			TexCubeSampleLevel(skybox_C_tex, skybox_sampler, reflect_vec_front, 0, 0)).xyz;
 
 	float fresnel = fresnel_term_schlick(-normalize(pos_es_front), normal_es_front, specular).x;
 	float4 ssr;
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	if (reflect_vec_front.z > 0)
 	{
 		ssr = CalcSSR(tc_front, normal_es_front, pos_es_front, pos_es_front, 1, 1);
 	}
+	else if (reflect_vec_back.z < 0)
+	{
+		ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0, 1);
+	}
 	else
 	{
-		if (reflect_vec_back.z < 0)
-		{
-			ssr = CalcSSR(tc_back, normal_es_back, pos_es_back, pos_es_back - eye_in_back_camera, 0, 1);
-		}
-		else
-		{
-			ssr = 0;
-		}
+		ssr = 0;
 	}
-#else
-	ssr = 0;
-#endif
 
 	ssr.xyz = lerp(sky, ssr.xyz, ssr.w);
 	ssr.w = fresnel;

@@ -84,11 +84,14 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 
 	float3 tex_offset = min(t1, t2) * tex_reflect_vec;
 	
-	float orientation_factor = dot(reflect_vec, float3(0, 0, 1));
+	float orientation_factor = reflect_vec.z;
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	int num_steps = (int)lerp(max_samples, min_samples, abs(orientation_factor));
+#else
+	int num_steps = 8;
+#endif
 
-	float step = 1.0f / num_steps;
-	float3 sample_step = tex_offset * step;
+	float4 sample_step = float4(tex_offset, 1) / num_steps;
 
 	float3 cur_tex_pos = tex_pos;
 #if KLAYGE_DERIVATIVES
@@ -100,12 +103,10 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 #endif
 
 	float t = 0;
-	float2 pt1 = float2(linear_depth, linear_depth);
-	float2 pt2 = float2(linear_depth, linear_depth);
-
+	float4 pt = linear_depth;
 	for (int sample_index = 0; sample_index < num_steps; ++ sample_index)
 	{
-		cur_tex_pos += sample_step;
+		cur_tex_pos += sample_step.xyz;
 		float cur_sample_depth;
 		if (front_side)
 		{
@@ -116,43 +117,34 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 			cur_sample_depth = ReadAFloat(back_side_depth_tex.SampleGrad(ssr_linear_sampler, cur_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
 		}
 		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q_far.x, near_q_far.y);
-	
-		t += step;
-		
+
+		t += sample_step.w;
+
 		if (cur_ray_march_depth > cur_sample_depth)
 		{
-			pt2 = float2(cur_sample_depth, cur_ray_march_depth);
+			pt.zw = float2(cur_sample_depth, cur_ray_march_depth);
 			break;
 		}
 		else
 		{
-			pt1 = float2(cur_sample_depth, cur_ray_march_depth);
+			pt.xy = float2(cur_sample_depth, cur_ray_march_depth);
 		}
 	}
 
-	float delta1 = pt1.x - pt1.y;
-	float delta2 = pt2.x - pt2.y;
+	float delta1 = pt.x - pt.y;
+	float delta2 = pt.z - pt.w;
 	float delta = delta1 - delta2;
-
-	float3 sample_tex_pos;
-	if (delta2 == 0)
-	{
-		sample_tex_pos = tex_pos + tex_offset;
-	}
-	else
-	{
-		t = (delta1 * t - delta2 * (t - step)) / delta;
-		sample_tex_pos = tex_pos + t * tex_offset;
-	}
+	t = (delta1 * t - delta2 * (t - sample_step.w)) / delta;
+	float3 sample_tex_pos = tex_pos + t * tex_offset;
 
 	float sample_z;
 	if (front_side)
 	{
-		sample_z = ReadAFloat(front_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+		sample_z = ReadAFloat(front_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
 	}
 	else
 	{
-		sample_z = ReadAFloat(back_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+		sample_z = ReadAFloat(back_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
 	}
 
 	float4 ret;
@@ -162,18 +154,15 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		float reflect_dir_fade_out_factor = 1 - orientation_factor;
 		float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);
 
-		float3 clr;
 		if (front_side)
 		{
-			clr = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+			ret.xyz = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
 		}
 		else
 		{
-			clr = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+			ret.xyz = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
 		}
-		float alpha = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
-
-		ret = float4(clr, alpha);
+		ret.w = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
 	}
 	else
 	{
