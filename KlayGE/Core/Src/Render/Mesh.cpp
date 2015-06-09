@@ -567,6 +567,8 @@ namespace KlayGE
 		{
 			effect_attrs_ |= EA_SpecialShading;
 		}
+
+		this->UpdateTechniques();
 	}
 
 	std::wstring const & StaticMesh::Name() const

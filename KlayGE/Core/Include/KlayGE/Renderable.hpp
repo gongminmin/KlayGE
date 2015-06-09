@@ -262,6 +262,7 @@ namespace KlayGE
 		// For deferred only
 		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
 		virtual RenderTechniquePtr const & PassTech(PassType type) const;
+		virtual void UpdateTechniques();
 
 	protected:
 		std::vector<weak_ptr<SceneObject> > instances_;
@@ -280,29 +281,21 @@ namespace KlayGE
 		RenderEffectPtr deferred_effect_;
 
 		RenderTechniquePtr depth_tech_;
-		RenderTechniquePtr depth_alpha_test_tech_;
 		RenderTechniquePtr depth_alpha_blend_back_tech_;
 		RenderTechniquePtr depth_alpha_blend_front_tech_;
 		RenderTechniquePtr gbuffer_rt0_tech_;
-		RenderTechniquePtr gbuffer_alpha_test_rt0_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_rt0_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_front_rt0_tech_;
 		RenderTechniquePtr gbuffer_rt1_tech_;
-		RenderTechniquePtr gbuffer_alpha_test_rt1_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_rt1_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_front_rt1_tech_;
 		RenderTechniquePtr gbuffer_mrt_tech_;
-		RenderTechniquePtr gbuffer_alpha_test_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_back_mrt_tech_;
 		RenderTechniquePtr gbuffer_alpha_blend_front_mrt_tech_;
 		RenderTechniquePtr gen_sm_tech_;
-		RenderTechniquePtr gen_sm_alpha_test_tech_;
 		RenderTechniquePtr gen_sm_wo_dt_tech_;
-		RenderTechniquePtr gen_sm_wo_dt_alpha_test_tech_;
 		RenderTechniquePtr gen_cascaded_sm_tech_;
-		RenderTechniquePtr gen_cascaded_sm_alpha_test_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
-		RenderTechniquePtr gen_rsm_alpha_test_tech_;
 		RenderTechniquePtr special_shading_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_back_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_front_tech_;

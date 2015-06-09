@@ -609,10 +609,10 @@ namespace KlayGE
 	{
 		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
 
-		gbuffer_alpha_test_rt0_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT0Tech");
-		gbuffer_alpha_test_rt1_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT1Tech");
-		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
-		technique_ = gbuffer_alpha_test_rt0_tech_;
+		gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT0Tech");
+		gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestRT1Tech");
+		gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("DecalGBufferAlphaTestMRTTech");
+		technique_ = gbuffer_rt0_tech_;
 
 		pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));

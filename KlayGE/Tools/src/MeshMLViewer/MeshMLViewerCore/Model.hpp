@@ -82,7 +82,7 @@ public:
 	void SetTessFactor(KlayGE::int32_t tess_factor);
 
 private:
-	void UpdateTech();
+	virtual void UpdateTechniques() KLAYGE_OVERRIDE;
 
 private:
 	float tess_factor_;

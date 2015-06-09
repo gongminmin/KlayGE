@@ -449,7 +449,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
-	<technique name="DepthSSSTech" inherit="DepthTech">
+	<technique name="SSSDepthTech" inherit="DepthTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -461,6 +461,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+	<technique name="SSSDepthAlphaTestTech" inherit="SSSDepthTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="DepthAlphaTestPS()"/>
 		</pass>
 	</technique>
 
@@ -503,7 +508,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
-	<technique name="GBufferSSSRT0Tech" inherit="GBufferRT0Tech">
+	<technique name="SSSGBufferRT0Tech" inherit="GBufferRT0Tech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -515,6 +520,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferAlphaTestRT0Tech" inherit="SSSGBufferRT0Tech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferAlphaTestRT0PS()"/>
 		</pass>
 	</technique>
 
@@ -558,7 +568,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
-	<technique name="GBufferSSSRT1Tech" inherit="GBufferRT1Tech">
+	<technique name="SSSGBufferRT1Tech" inherit="GBufferRT1Tech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -570,6 +580,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferAlphaTestRT1Tech" inherit="SSSGBufferRT1Tech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferAlphaTestRT1PS()"/>
 		</pass>
 	</technique>
 
@@ -612,7 +627,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
-	<technique name="GBufferSSSMRTTech" inherit="GBufferMRTTech">
+	<technique name="SSSGBufferMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -624,6 +639,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferAlphaTestMRTTech" inherit="SSSGBufferMRTTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferAlphaTestMRTPS()"/>
 		</pass>
 	</technique>
 
@@ -813,10 +833,10 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		</pass>
 	</technique>
 
-	<technique name="GenShadowMapSSSTech" inherit="GenShadowMapTech">
+	<technique name="SSSGenShadowMapTech" inherit="GenShadowMapTech">
 		<macro name="TRANSPARENCY_ON" value="1"/>
 	</technique>
-	<technique name="GenShadowMapAlphaTestSSSTech" inherit="GenShadowMapSSSTech">
+	<technique name="SSSGenShadowMapAlphaTestTech" inherit="SSSGenShadowMapTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
 		</pass>
@@ -836,10 +856,10 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		</pass>
 	</technique>
 
-	<technique name="GenShadowMapWODepthTextureSSSTech" inherit="GenShadowMapWODepthTextureTech">
+	<technique name="SSSGenShadowMapWODepthTextureTech" inherit="GenShadowMapWODepthTextureTech">
 		<macro name="TRANSPARENCY_ON" value="1"/>
 	</technique>
-	<technique name="GenShadowMapWODepthTextureAlphaTestSSSTech" inherit="GenShadowMapWODepthTextureSSSTech">
+	<technique name="SSSGenShadowMapWODepthTextureAlphaTestTech" inherit="SSSGenShadowMapWODepthTextureTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
 		</pass>

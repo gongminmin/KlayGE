@@ -81,7 +81,7 @@ public:
 	void UpdateMaterial();
 
 private:
-	void UpdateTech();
+	virtual void UpdateTechniques() KLAYGE_OVERRIDE;
 
 private:
 	int visualize_;

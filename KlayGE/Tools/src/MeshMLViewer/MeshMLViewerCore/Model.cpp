@@ -163,8 +163,6 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 		this->SetTessFactor(static_cast<int32_t>(tess_factor_));
 	}
-
-	this->UpdateTech();
 }
 
 void DetailedSkinnedMesh::OnRenderBegin()
@@ -206,7 +204,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 void DetailedSkinnedMesh::VisualizeLighting()
 {
 	visualize_ = 0;
-	this->UpdateTech();
+	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
@@ -214,20 +212,20 @@ void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usag
 	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
 	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
 	visualize_ = 1;
-	this->UpdateTech();
+	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
 	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
 	visualize_ = 2;
-	this->UpdateTech();
+	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::SmoothMesh(bool smooth)
 {
 	smooth_mesh_ = smooth;
-	this->UpdateTech();
+	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
@@ -250,30 +248,33 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 	tess_factor_ = static_cast<float>(tess_factor);
 }
 
-void DetailedSkinnedMesh::UpdateTech()
+void DetailedSkinnedMesh::UpdateTechniques()
 {
 	shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
-	depth_tech_ = model->depth_techs_[visualize_][smooth_mesh_];
-	depth_alpha_test_tech_ = model->depth_alpha_test_techs_[visualize_][smooth_mesh_];
+	if (this->AlphaTest())
+	{
+		depth_tech_ = model->depth_alpha_test_techs_[visualize_][smooth_mesh_];
+		gbuffer_rt0_tech_ = model->gbuffer_alpha_test_rt0_techs_[visualize_][smooth_mesh_];
+		gbuffer_rt1_tech_ = model->gbuffer_alpha_test_rt1_techs_[visualize_][smooth_mesh_];
+		gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][smooth_mesh_];
+	}
+	else
+	{
+		depth_tech_ = model->depth_techs_[visualize_][smooth_mesh_];
+		gbuffer_rt0_tech_ = model->gbuffer_rt0_techs_[visualize_][smooth_mesh_];
+		gbuffer_rt1_tech_ = model->gbuffer_rt1_techs_[visualize_][smooth_mesh_];
+		gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][smooth_mesh_];
+	}
+
 	depth_alpha_blend_back_tech_ = model->depth_alpha_blend_back_techs_[visualize_][smooth_mesh_];
 	depth_alpha_blend_front_tech_ = model->depth_alpha_blend_front_techs_[visualize_][smooth_mesh_];
-
-	gbuffer_rt0_tech_ = model->gbuffer_rt0_techs_[visualize_][smooth_mesh_];
-	gbuffer_alpha_test_rt0_tech_ = model->gbuffer_alpha_test_rt0_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_back_rt0_tech_ = model->gbuffer_alpha_blend_back_rt0_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_front_rt0_tech_ = model->gbuffer_alpha_blend_front_rt0_techs_[visualize_][smooth_mesh_];
-
-	gbuffer_rt1_tech_ = model->gbuffer_rt1_techs_[visualize_][smooth_mesh_];
-	gbuffer_alpha_test_rt1_tech_ = model->gbuffer_alpha_test_rt1_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_back_rt1_tech_ = model->gbuffer_alpha_blend_back_rt1_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_front_rt1_tech_ = model->gbuffer_alpha_blend_front_rt1_techs_[visualize_][smooth_mesh_];
-
-	gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][smooth_mesh_];
-	gbuffer_alpha_test_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][smooth_mesh_];
 	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][smooth_mesh_];
-
 	special_shading_tech_ = model->special_shading_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_][smooth_mesh_];

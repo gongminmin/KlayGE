@@ -52,6 +52,8 @@ namespace KlayGE
 		RenderEffectPtr effect = SyncLoadRenderEffect("SkyBox.fxml");
 		if (deferred_effect_)
 		{
+			effect_attrs_ |= EA_SpecialShading;
+
 			this->BindDeferredEffect(effect);
 			depth_tech_ = effect->TechniqueByName("DepthSkyBoxTech");
 			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferSkyBoxRT0Tech");
@@ -59,8 +61,6 @@ namespace KlayGE
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
 			special_shading_tech_ = effect->TechniqueByName("SkyBoxTech");
 			this->Technique(gbuffer_rt0_tech_);
-
-			effect_attrs_ |= EA_SpecialShading;
 		}
 		else
 		{

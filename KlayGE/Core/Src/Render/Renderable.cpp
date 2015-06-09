@@ -293,35 +293,8 @@ namespace KlayGE
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
 	{
 		deferred_effect_ = deferred_effect;
-			
-		depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
-		depth_alpha_test_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
-		depth_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendBackTech");
-		depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendFrontTech");
-		gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferRT0Tech");
-		gbuffer_alpha_test_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT0Tech");
-		gbuffer_alpha_blend_back_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT0Tech");
-		gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT0Tech");
-		gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferRT1Tech");
-		gbuffer_alpha_test_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT1Tech");
-		gbuffer_alpha_blend_back_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT1Tech");
-		gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT1Tech");
-		gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
-		gbuffer_alpha_test_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-		gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-		gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-		gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-		gen_rsm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-		gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-		gen_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-		gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
-		gen_cascaded_sm_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
-		gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
-		gen_sm_wo_dt_alpha_test_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
-		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
-		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
+
+		this->UpdateTechniques();
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
@@ -348,19 +321,50 @@ namespace KlayGE
 		select_mode_object_id_param_ = deferred_effect_->ParameterByName("object_id");
 	}
 
+	void Renderable::UpdateTechniques()
+	{
+		if (this->AlphaTest())
+		{
+			depth_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT0Tech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT1Tech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
+			gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
+		}
+		else
+		{
+			depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
+			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferRT0Tech");
+			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferRT1Tech");
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
+			gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
+		}
+		depth_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendBackTech");
+		depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendFrontTech");
+		gbuffer_alpha_blend_back_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT0Tech");
+		gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT0Tech");
+		gbuffer_alpha_blend_back_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT1Tech");
+		gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT1Tech");
+		gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+		gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
+		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
+	}
+
 	RenderTechniquePtr const & Renderable::PassTech(PassType type) const
 	{
 		switch (type)
 		{
 		case PT_OpaqueDepth:
-			if (this->AlphaTest())
-			{
-				return depth_alpha_test_tech_;
-			}
-			else
-			{
-				return depth_tech_;
-			}
+			return depth_tech_;
 
 		case PT_TransparencyBackDepth:
 			return depth_alpha_blend_back_tech_;
@@ -369,24 +373,10 @@ namespace KlayGE
 			return depth_alpha_blend_front_tech_;
 
 		case PT_OpaqueGBufferRT0:
-			if (this->AlphaTest())
-			{
-				return gbuffer_alpha_test_rt0_tech_;
-			}
-			else
-			{
-				return gbuffer_rt0_tech_;
-			}
+			return gbuffer_rt0_tech_;
 
 		case PT_OpaqueGBufferRT1:
-			if (this->AlphaTest())
-			{
-				return gbuffer_alpha_test_rt1_tech_;
-			}
-			else
-			{
-				return gbuffer_rt1_tech_;
-			}
+			return gbuffer_rt1_tech_;
 
 		case PT_TransparencyBackGBufferRT0:
 			return gbuffer_alpha_blend_back_rt0_tech_;
@@ -401,14 +391,7 @@ namespace KlayGE
 			return gbuffer_alpha_blend_front_rt1_tech_;
 
 		case PT_OpaqueGBufferMRT:
-			if (this->AlphaTest())
-			{
-				return gbuffer_alpha_test_mrt_tech_;
-			}
-			else
-			{
-				return gbuffer_mrt_tech_;
-			}
+			return gbuffer_mrt_tech_;
 
 		case PT_TransparencyBackGBufferMRT:
 			return gbuffer_alpha_blend_back_mrt_tech_;
@@ -417,44 +400,16 @@ namespace KlayGE
 			return gbuffer_alpha_blend_front_mrt_tech_;
 
 		case PT_GenReflectiveShadowMap:
-			if (this->AlphaTest())
-			{
-				return gen_rsm_alpha_test_tech_;
-			}
-			else
-			{
-				return gen_rsm_tech_;
-			}
+			return gen_rsm_tech_;
 
 		case PT_GenShadowMap:
-			if (this->AlphaTest())
-			{
-				return gen_sm_alpha_test_tech_;
-			}
-			else
-			{
-				return gen_sm_tech_;
-			}
+			return gen_sm_tech_;
 
 		case PT_GenCascadedShadowMap:
-			if (this->AlphaTest())
-			{
-				return gen_cascaded_sm_alpha_test_tech_;
-			}
-			else
-			{
-				return gen_cascaded_sm_tech_;
-			}
+			return gen_cascaded_sm_tech_;
 
 		case PT_GenShadowMapWODepthTexture:
-			if (this->AlphaTest())
-			{
-				return gen_sm_wo_dt_alpha_test_tech_;
-			}
-			else
-			{
-				return gen_sm_wo_dt_tech_;
-			}
+			return gen_sm_wo_dt_tech_;
 
 		case PT_OpaqueSpecialShading:
 			return special_shading_tech_;
