@@ -568,7 +568,11 @@ namespace KlayGE
 			effect_attrs_ |= EA_SpecialShading;
 		}
 
-		this->UpdateTechniques();
+		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl)
+		{
+			this->UpdateTechniques();
+		}
 	}
 
 	std::wstring const & StaticMesh::Name() const
