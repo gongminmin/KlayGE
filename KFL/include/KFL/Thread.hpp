@@ -67,12 +67,16 @@
 	}
 #endif
 #include <boost/optional.hpp>
-#include <boost/mpl/void.hpp>
 #include <exception>
 #include <vector>
 
 namespace KlayGE
 {
+	struct void_t
+	{
+		typedef void_t type;
+	};
+
 	typedef thread::id thread_id;
 
 	// Threadof operator simulation for threadof(0) expression
@@ -106,12 +110,12 @@ namespace KlayGE
 	public:
 		// Representation of the storage to hold the return type:
 		//	if result_type == void
-		//		boost::optional<boost::mpl::void_>
+		//		boost::optional<void_t>
 		//	else
 		//		boost::optional<result_type>
 		typedef boost::optional<
 			typename conditional<is_same<result_type, void>::value,
-				boost::mpl::void_, result_type>::type
+				void_t, result_type>::type
 			>  result_opt;
 
 		typedef typename conditional<is_same<result_type, void>::value,
@@ -285,7 +289,6 @@ namespace KlayGE
 			typedef typename result_of<Threadable()>::type			result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
-			typedef boost::mpl::void_								void_t;
 			typedef boost::optional<void_t>							void_optional_t;
 
 			//Helper function to construct the optional from the
