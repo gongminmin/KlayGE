@@ -3,17 +3,17 @@
 <ui>
 	<dialog id="AreaLighting" caption="Area Lighting" x="-160" y="140" align_x="right" width="160" height="390">
 		<control type="static" id="LightTypeStatic" caption="Light Type:" x="20" y="20" width="120" height="24" is_default="0"/>
-		<control type="combo_box" id="LightTypeCombo" x="20" y="40" width="100" height="24" hotkey="0" is_default="0">
+		<control type="combo_box" id="LightTypeCombo" x="20" y="40" width="100" height="24" selected="2" hotkey="0" is_default="0">
 			<item name="Point"/>
 			<item name="Sphere Area"/>
 			<item name="Tube Area"/>
 		</control>
 
 		<control type="static" id="RadiusStatic" caption="Radius:" x="20" y="80" width="120" height="24" is_default="0"/>
-		<control type="slider" id="RadiusSlider" x="20" y="100" width="120" height="24" min="10" max="500" value="10" is_default="0"/>
+		<control type="slider" id="RadiusSlider" x="20" y="100" width="120" height="24" min="10" max="500" value="60" is_default="0"/>
 
 		<control type="static" id="LengthStatic" caption="Length:" x="20" y="80" width="120" height="24" is_default="0"/>
-		<control type="slider" id="LengthSlider" x="20" y="100" width="120" height="24" min="10" max="500" value="10" is_default="0"/>
+		<control type="slider" id="LengthSlider" x="20" y="100" width="120" height="24" min="10" max="500" value="200" is_default="0"/>
 		
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="348" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
