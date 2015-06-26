@@ -1,4 +1,7 @@
 DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/bunny.7z" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/diffuse.dds" "55df1241283c25a5174c96090d7918060aef9966")
+DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/distance.dds" "55df1241283c25a5174c96090d7918060aef9966")
+DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/normal.dds" "55df1241283c25a5174c96090d7918060aef9966")
 DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/point.dds" "cbda47a1678ce70b6720856736100979d469e159")
 
 SET(SOURCE_FILES
@@ -46,13 +49,13 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sphere_high.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/bunny.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/diffuse.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/distance.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/normal.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/point.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/Caustics.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/CausticsMap/Scene.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/ShadowCubeMap.kfx
-	${KLAYGE_PROJECT_DIR}/Tutorials/media/DistanceMapping/diffuse.dds
-	${KLAYGE_PROJECT_DIR}/Tutorials/media/DistanceMapping/distance.dds
-	${KLAYGE_PROJECT_DIR}/Tutorials/media/DistanceMapping/normal.dds
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)

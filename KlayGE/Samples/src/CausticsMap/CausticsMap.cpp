@@ -585,7 +585,6 @@ int SampleMain()
 CausticsMapApp::CausticsMapApp()
 	: App3DFramework("Caustics Map")
 {
-	ResLoader::Instance().AddPath("../../Tutorials/media/DistanceMapping");
 	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
 }
