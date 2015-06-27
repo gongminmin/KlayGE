@@ -33,12 +33,7 @@ namespace
 		ReflectMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderEffectPtr effect = SyncLoadRenderEffect("Reflection.fxml");
-			this->BindDeferredEffect(effect);
-
-			special_shading_tech_ = effect->TechniqueByName("ReflectSpecialShadingTech");
-			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
-			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
+			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
 			technique_ = special_shading_tech_;
 		}
 
@@ -49,6 +44,10 @@ namespace
 			mtl_->diffuse = float3(0.2f, 0.2f, 0.2f);
 			mtl_->shininess = 128;
 			mtl_->specular = float3(0.6f, 0.6f, 0.6f);
+
+			special_shading_tech_ = technique_->Effect().TechniqueByName("ReflectSpecialShadingTech");
+			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
+			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
 		}
 
 		void OnRenderBegin()

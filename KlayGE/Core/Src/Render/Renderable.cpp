@@ -116,7 +116,7 @@ namespace KlayGE
 				*height_tex_param_ = height_tex_;
 				*specular_tex_param_ = specular_tex_;
 				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
-				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
+				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? log(mtl_->shininess) * INV_LOG_8192 : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
 				*shininess_tex_param_ = shininess_tex_;
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
@@ -131,7 +131,7 @@ namespace KlayGE
 			case PT_OpaqueShading:
 			case PT_TransparencyBackShading:
 			case PT_TransparencyFrontShading:
-				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->shininess / 256.0f : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
+				*shininess_clr_param_ = float2(MathLib::clamp(mtl_ ? log(mtl_->shininess) * INV_LOG_8192 : 0, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
 				*shininess_tex_param_ = shininess_tex_;
 				*diffuse_tex_param_ = diffuse_tex_;
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));

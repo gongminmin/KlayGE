@@ -135,6 +135,8 @@ namespace KlayGE
 		TextureSlotsType texture_slots;
 	};
 
+	float const INV_LOG_8192 = 1 / log(8192.0f);
+
 	// Abstract class defining the interface all renderable objects must implement.
 	class KLAYGE_CORE_API Renderable : public enable_shared_from_this<Renderable>
 	{
