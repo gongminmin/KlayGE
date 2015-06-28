@@ -2895,8 +2895,8 @@ namespace KlayGE
 		LightSource::LightType const type = light->Type();
 		int32_t const light_index = sm_light_indices_[org_no].first;
 		if (light->Enabled() && pvp.light_visibles[org_no]
-			&& ((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
-				|| (LightSource::LT_Sun == type))
+			&& (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
+				|| (LightSource::LT_Sun == type)))
 		{
 			CameraPtr light_camera;
 			switch (type)

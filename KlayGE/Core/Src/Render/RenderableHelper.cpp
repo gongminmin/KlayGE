@@ -689,7 +689,7 @@ namespace KlayGE
 		case PT_TransparencyFrontGBufferMRT:
 			*diffuse_clr_param_ = float4(diffuse_clr_.x(), diffuse_clr_.y(), diffuse_clr_.z(), static_cast<float>(!!diffuse_tex_));
 			*specular_clr_param_ = float4(specular_level_, specular_level_, specular_level_, static_cast<float>(!!specular_tex_));
-			*shininess_clr_param_ = float2(MathLib::clamp(log(shininess_) * INV_LOG_8192, 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
+			*shininess_clr_param_ = float2(MathLib::clamp(static_cast<float>(log(shininess_) * INV_LOG_8192), 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
 			*shininess_tex_param_ = shininess_tex_;
 			*inv_mv_ep_ = view_to_decal;
 			*opaque_depth_tex_param_ = drl->DepthTex(drl->ActiveViewport());

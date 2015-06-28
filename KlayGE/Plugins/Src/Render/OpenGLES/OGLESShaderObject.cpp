@@ -1042,7 +1042,9 @@ namespace
 namespace KlayGE
 {
 	OGLESShaderObject::OGLESShaderObject()
+#if KLAYGE_IS_DEV_PLATFORM
 		: ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
+#endif
 	{
 		has_discard_ = false;
 		has_tessellation_ = false;
@@ -2156,11 +2158,13 @@ namespace KlayGE
 			{
 				has_discard_ = so->has_discard_;
 			}
+#if KLAYGE_IS_DEV_PLATFORM
 			else if (ST_HullShader == type)
 			{
 				ds_partitioning_ = so->ds_partitioning_;
 				ds_output_primitive_ = so->ds_output_primitive_;
 			}
+#endif
 
 			for (uint32_t j = 0; j < so->tex_sampler_binds_.size(); ++ j)
 			{
@@ -2303,8 +2307,10 @@ namespace KlayGE
 		ret->vs_usages_ = vs_usages_;
 		ret->vs_usage_indices_ = vs_usage_indices_;
 		ret->glsl_vs_attrib_names_ = glsl_vs_attrib_names_;
+#if KLAYGE_IS_DEV_PLATFORM
 		ret->ds_partitioning_ = ds_partitioning_;
 		ret->ds_output_primitive_ = ds_output_primitive_;
+#endif
 
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)

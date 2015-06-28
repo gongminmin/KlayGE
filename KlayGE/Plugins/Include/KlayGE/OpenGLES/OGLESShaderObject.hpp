@@ -84,7 +84,9 @@ namespace KlayGE
 		shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
 		shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
 		shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
+#if KLAYGE_IS_DEV_PLATFORM
 		uint32_t ds_partitioning_, ds_output_primitive_;
+#endif
 
 		parameter_binds_t param_binds_;
 
