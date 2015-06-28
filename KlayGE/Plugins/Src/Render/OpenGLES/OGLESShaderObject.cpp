@@ -1943,7 +1943,6 @@ namespace KlayGE
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
 						rules &= ~GSR_MatrixType;
-						rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
 						if (glloader_GLES_VERSION_3_0())
 						{
 							rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
@@ -1957,6 +1956,7 @@ namespace KlayGE
 							rules |= caps.shader_texture_lod_support ? GSR_EXTShaderTextureLod : 0;
 							rules |= caps.standard_derivatives_support ? GSR_OESStandardDerivatives : 0;
 							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
+							rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
 							rules &= ~GSR_VersionDecl;
 						}
 						if ((ST_HullShader == type) || (ST_DomainShader == type))
