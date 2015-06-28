@@ -13,7 +13,7 @@
 compiler		= "auto"
 
 # Toolset name.
-#   On Windows desktop, could be "vc140", "v140_xp", "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
+#   On Windows desktop, could be "v140", "v140_xp", "v120", "v120_xp", "v110", "v110_xp", "v100", "auto".
 #   On Windows store, could be "auto".
 #   On Windows phone, could be "auto".
 #   On Android, could be "4.4.3", "4.6", "4.8", "4.9", "auto".
