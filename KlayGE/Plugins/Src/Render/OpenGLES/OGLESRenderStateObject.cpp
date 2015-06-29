@@ -393,32 +393,42 @@ namespace KlayGE
 
 	void OGLESSamplerStateObject::Active(TexturePtr const & texture)
 	{
+		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		RenderDeviceCaps const & caps = re.DeviceCaps();
+
 		OGLESTexture& tex = *checked_pointer_cast<OGLESTexture>(texture);
 
 		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
 		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		if (glloader_GLES_OES_texture_3D())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
+		}
+		else if (glloader_GLES_OES_texture_3D())
 		{
 			tex.TexParameteri(GL_TEXTURE_WRAP_R_OES, ogl_addr_mode_w_);
 		}
 
 		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
 		GLenum min_filter = ogl_min_filter_;
-		// Only POT texture with full mipmap chain supports mipmap filter for now.
-		uint32_t pot = 1UL << (texture->NumMipMaps() - 1);
-		if ((pot != texture->Width(0)) || (pot != texture->Height(0)))
+		if (!caps.full_npot_texture_support)
 		{
-			switch (ogl_min_filter_)
+			// Only POT texture with full mipmap chain supports mipmap filter for now.
+			uint32_t pot = 1UL << (texture->NumMipMaps() - 1);
+			if ((pot != texture->Width(0)) || (pot != texture->Height(0)))
 			{
-			case GL_NEAREST_MIPMAP_NEAREST:
-			case GL_NEAREST_MIPMAP_LINEAR:
-				min_filter = GL_NEAREST;
-				break;
+				switch (ogl_min_filter_)
+				{
+				case GL_NEAREST_MIPMAP_NEAREST:
+				case GL_NEAREST_MIPMAP_LINEAR:
+					min_filter = GL_NEAREST;
+					break;
 
-			case GL_LINEAR_MIPMAP_NEAREST:
-			case GL_LINEAR_MIPMAP_LINEAR:
-				min_filter = GL_LINEAR;
-				break;
+				case GL_LINEAR_MIPMAP_NEAREST:
+				case GL_LINEAR_MIPMAP_LINEAR:
+					min_filter = GL_LINEAR;
+					break;
+				}
 			}
 		}
 		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, min_filter);
