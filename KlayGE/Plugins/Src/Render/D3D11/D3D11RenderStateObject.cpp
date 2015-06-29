@@ -201,7 +201,7 @@ namespace KlayGE
 			addr_mode_v = TAM_Clamp;
 		}
 		d3d_desc.AddressV = D3D11Mapping::Mapping(addr_mode_v);
-		TexAddressingMode addr_mode_w = desc.addr_mode_u;
+		TexAddressingMode addr_mode_w = desc.addr_mode_w;
 		if ((feature_level <= D3D_FEATURE_LEVEL_9_2) && (TAM_Border == desc.addr_mode_u))
 		{
 			addr_mode_w = TAM_Clamp;
