@@ -1655,7 +1655,14 @@ namespace KlayGE
 			caps_.draw_indirect_support = false;
 		}
 		caps_.no_overwrite_support = false;
-		caps_.full_npot_texture_support = (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_npot());
+		if (hack_for_android_emulator_)
+		{
+			caps_.full_npot_texture_support = false;
+		}
+		else
+		{
+			caps_.full_npot_texture_support = (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_npot());
+		}
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;
