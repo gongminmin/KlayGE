@@ -35,6 +35,7 @@
 
 #include <vector>
 #include <istream>
+#include <unordered_map>
 
 #ifndef KFONT_SOURCE
 	#define KLAYGE_LIB_NAME kfont
@@ -122,7 +123,7 @@ namespace KlayGE
 		uint32_t char_size_;
 		int16_t dist_base_;
 		int16_t dist_scale_;
-		unordered_map<int32_t, std::pair<int32_t, uint32_t> > char_index_advance_;
+		std::unordered_map<int32_t, std::pair<int32_t, uint32_t> > char_index_advance_;
 		std::vector<font_info> char_info_;
 		std::vector<size_t> distances_addr_;
 		std::vector<uint8_t> distances_lzma_;

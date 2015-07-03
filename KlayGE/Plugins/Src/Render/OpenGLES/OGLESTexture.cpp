@@ -189,7 +189,7 @@ namespace KlayGE
 
 	void OGLESTexture::TexParameteri(GLenum pname, GLint param)
 	{
-		KLAYGE_AUTO(iter, tex_param_i_.find(pname));
+		auto iter = tex_param_i_.find(pname);
 		if ((iter == tex_param_i_.end()) || (iter->second != param))
 		{
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -202,7 +202,7 @@ namespace KlayGE
 
 	void OGLESTexture::TexParameterf(GLenum pname, GLfloat param)
 	{
-		KLAYGE_AUTO(iter, tex_param_f_.find(pname));
+		auto iter = tex_param_f_.find(pname);
 		if ((iter == tex_param_f_.end()) || (iter->second != param))
 		{
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());

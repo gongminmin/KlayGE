@@ -160,7 +160,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = &distortions[0];
 			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl->BindVertexStream(distortion_vb, KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
+			rl->BindVertexStream(distortion_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
 		}
 	};
 

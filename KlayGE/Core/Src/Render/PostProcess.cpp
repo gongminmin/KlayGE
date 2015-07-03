@@ -821,7 +821,7 @@ namespace KlayGE
 				init_data.row_pitch = sizeof(pos);
 				init_data.slice_pitch = 0;
 				pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(pos_vb_, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(pos_vb_, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				frame_buffer_ = rf.MakeFrameBuffer();
 				frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;
@@ -1218,7 +1218,7 @@ namespace KlayGE
 
 	void PostProcessChain::Apply()
 	{
-		typedef KLAYGE_DECLTYPE(pp_chain_) PPChainType;
+		typedef decltype(pp_chain_) PPChainType;
 		KLAYGE_FOREACH(PPChainType::reference pp, pp_chain_)
 		{
 			pp->Apply();

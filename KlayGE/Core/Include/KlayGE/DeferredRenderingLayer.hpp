@@ -34,6 +34,9 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+
+#include <array>
+
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
@@ -74,7 +77,7 @@ namespace KlayGE
 
 		FrameBufferPtr frame_buffer;
 
-		array<bool, Num_GBuffers> g_buffer_enables;
+		std::array<bool, Num_GBuffers> g_buffer_enables;
 
 		FrameBufferPtr pre_depth_fb;
 
@@ -100,7 +103,7 @@ namespace KlayGE
 		TexturePtr shading_tex;
 
 		uint32_t num_cascades;
-		array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs;
+		std::array<TexturePtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs;
 
 		FrameBufferPtr curr_merged_shading_fb;
 		TexturePtr curr_merged_shading_tex;
@@ -385,7 +388,7 @@ namespace KlayGE
 		bool cs_tbdr_;
 #endif
 
-		array<PerViewport, 8> viewports_;
+		std::array<PerViewport, 8> viewports_;
 		uint32_t active_viewport_;
 
 		PostProcessPtr ssvo_pp_;
@@ -407,7 +410,7 @@ namespace KlayGE
 		RenderLayoutPtr rl_pyramid_;
 		RenderLayoutPtr rl_box_;
 		RenderLayoutPtr rl_quad_;
-		array<RenderLayoutPtr, LightSource::LT_NumLightTypes> light_volume_rl_;
+		std::array<RenderLayoutPtr, LightSource::LT_NumLightTypes> light_volume_rl_;
 		AABBox cone_aabb_;
 		AABBox pyramid_aabb_;
 		AABBox box_aabb_;
@@ -417,11 +420,11 @@ namespace KlayGE
 
 		std::vector<uint32_t> pass_scaned_;
 
-		array<array<RenderTechniquePtr, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
+		std::array<std::array<RenderTechniquePtr, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechniquePtr technique_no_lighting_;
 		RenderTechniquePtr technique_shading_;
-		array<RenderTechniquePtr, 2> technique_merge_shadings_;
-		array<RenderTechniquePtr, 2> technique_merge_depths_;
+		std::array<RenderTechniquePtr, 2> technique_merge_shadings_;
+		std::array<RenderTechniquePtr, 2> technique_merge_depths_;
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -456,9 +459,9 @@ namespace KlayGE
 		TexturePtr sm_depth_tex_;
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
-		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> unfiltered_sm_2d_texs_;
-		array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> filtered_sm_2d_texs_;
-		array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> unfiltered_sm_2d_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> filtered_sm_2d_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr csm_filter_pp_;
@@ -496,7 +499,7 @@ namespace KlayGE
 		RenderEffectParameterPtr cascade_scale_bias_param_;
 		RenderEffectParameterPtr num_cascades_param_;
 		RenderEffectParameterPtr view_z_to_light_view_param_;
-		array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
+		std::array<RenderEffectParameterPtr, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		RenderEffectParameterPtr lighting_tex_param_;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -544,7 +547,7 @@ namespace KlayGE
 		PostProcessPtr atmospheric_pp_;
 
 		FrameBufferPtr rsm_fb_;
-		array<TexturePtr, 2> rsm_texs_;
+		std::array<TexturePtr, 2> rsm_texs_;
 
 		bool indirect_lighting_enabled_;
 		int32_t cascaded_shadow_index_;
@@ -570,12 +573,12 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr shadow_map_perf_;
-		array<PerfRangePtr, PTB_None> depth_perfs_;
-		array<PerfRangePtr, PTB_None> gbuffer_perfs_;
-		array<PerfRangePtr, PTB_None> shadowing_perfs_;
-		array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
-		array<PerfRangePtr, PTB_None> shading_perfs_;
-		array<PerfRangePtr, PTB_None> special_shading_perfs_;
+		std::array<PerfRangePtr, PTB_None> depth_perfs_;
+		std::array<PerfRangePtr, PTB_None> gbuffer_perfs_;
+		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
+		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
+		std::array<PerfRangePtr, PTB_None> shading_perfs_;
+		std::array<PerfRangePtr, PTB_None> special_shading_perfs_;
 		PerfRangePtr sss_blur_pp_perf_;
 		PerfRangePtr ssr_pp_perf_;
 		PerfRangePtr atmospheric_pp_perf_;

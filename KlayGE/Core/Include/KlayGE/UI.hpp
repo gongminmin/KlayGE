@@ -23,6 +23,8 @@
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
+#include <array>
+
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable: 4100 4512 4702 4913 6011)
@@ -444,7 +446,7 @@ namespace KlayGE
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
 		std::vector<std::pair<FontPtr, float> > font_cache_;         // Shared fonts
 
-		array<std::vector<IRect >, UICT_Num_Control_Types> elem_texture_rcs_;
+		std::array<std::vector<IRect >, UICT_Num_Control_Types> elem_texture_rcs_;
 
 		std::map<TexturePtr, RenderablePtr> rects_;
 

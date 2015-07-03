@@ -178,7 +178,7 @@ namespace KlayGE
 		GLuint fbo_blit_src_;
 		GLuint fbo_blit_dst_;
 
-		array<GLfloat, 4> clear_clr_;
+		std::array<GLfloat, 4> clear_clr_;
 		GLfloat clear_depth_;
 		GLuint clear_stencil_;
 

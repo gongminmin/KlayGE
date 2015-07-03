@@ -175,7 +175,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
@@ -578,7 +578,7 @@ void DetailedSkinnedModel::SetTime(float time)
 
 void DetailedSkinnedModel::VisualizeLighting()
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -588,7 +588,7 @@ void DetailedSkinnedModel::VisualizeLighting()
 
 void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
@@ -598,7 +598,7 @@ void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usa
 
 void DetailedSkinnedModel::VisualizeTexture(int slot)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -608,7 +608,7 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 
 void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -621,7 +621,7 @@ void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 
 void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());

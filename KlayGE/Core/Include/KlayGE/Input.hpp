@@ -51,6 +51,7 @@
 #include <vector>
 #include <string>
 #include <bitset>
+#include <array>
 
 namespace KlayGE
 {
@@ -442,7 +443,7 @@ namespace KlayGE
 		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
 
 	protected:
-		array<array<bool, 256>, 2> keys_;
+		std::array<std::array<bool, 256>, 2> keys_;
 		bool index_;
 
 		InputKeyboardActionParamPtr action_param_;
@@ -483,7 +484,7 @@ namespace KlayGE
 		int3 offset_;
 
 		uint32_t num_buttons_;
-		array<array<bool, 8>, 2> buttons_;
+		std::array<std::array<bool, 8>, 2> buttons_;
 		bool index_;
 
 		uint16_t shift_ctrl_alt_;
@@ -528,7 +529,7 @@ namespace KlayGE
 		int2 slider_;		// extra axes positions
 
 		uint32_t num_buttons_;
-		array<array<bool, 32>, 2> buttons_;	// 32 buttons
+		std::array<std::array<bool, 32>, 2> buttons_;	// 32 buttons
 		bool index_;
 
 		InputJoystickActionParamPtr action_param_;
@@ -575,8 +576,8 @@ namespace KlayGE
 		void CurrState(GestureState state);
 
 	protected:
-		array<array<int2, 16>, 2> touch_coords_;
-		array<array<bool, 16>, 2> touch_downs_;
+		std::array<std::array<int2, 16>, 2> touch_coords_;
+		std::array<std::array<bool, 16>, 2> touch_downs_;
 		int32_t wheel_delta_;
 		bool index_;
 		uint32_t num_available_touch_;
@@ -704,7 +705,7 @@ namespace KlayGE
 		float zoom;
 		float rotate_angle;
 		int32_t wheel_delta;
-		array<int2, 16> touches_coord;
+		std::array<int2, 16> touches_coord;
 		uint16_t touches_state;
 		uint16_t touches_down;
 		uint16_t touches_up;

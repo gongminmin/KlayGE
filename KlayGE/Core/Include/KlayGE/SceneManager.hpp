@@ -28,6 +28,7 @@
 #include <KFL/Thread.hpp>
 
 #include <vector>
+#include <unordered_map>
 
 #include <boost/noncopyable.hpp>
 
@@ -117,7 +118,7 @@ namespace KlayGE
 		SceneObjsType scene_objs_;
 		SceneObjsType overlay_scene_objs_;
 
-		unordered_map<size_t, shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
+		std::unordered_map<size_t, shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;

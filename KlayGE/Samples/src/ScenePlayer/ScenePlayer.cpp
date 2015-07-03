@@ -73,7 +73,7 @@ namespace
 		{
 			module_->RunString(*script_);
 
-			return module_->Call("update", KlayGE::make_tuple(app_time, elapsed_time));
+			return module_->Call("update", std::make_tuple(app_time, elapsed_time));
 		}
 
 	private:
@@ -387,7 +387,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					boost::char_separator<char> sep("", " \t|");
 					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
 					std::string this_token;
-					for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 					{
 						this_token = *beg;
 						if ("noshadow" == this_token)
@@ -636,7 +636,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					boost::char_separator<char> sep("", " \t|");
 					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
 					std::string this_token;
-					for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 					{
 						this_token = *beg;
 						if ("cullable" == this_token)

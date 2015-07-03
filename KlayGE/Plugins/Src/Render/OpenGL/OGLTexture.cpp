@@ -207,7 +207,7 @@ namespace KlayGE
 
 	void OGLTexture::TexParameteri(GLenum pname, GLint param)
 	{
-		KLAYGE_AUTO(iter, tex_param_i_.find(pname));
+		auto iter = tex_param_i_.find(pname);
 		if ((iter == tex_param_i_.end()) || (iter->second != param))
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
@@ -231,7 +231,7 @@ namespace KlayGE
 
 	void OGLTexture::TexParameterf(GLenum pname, GLfloat param)
 	{
-		KLAYGE_AUTO(iter, tex_param_f_.find(pname));
+		auto iter = tex_param_f_.find(pname);
 		if ((iter == tex_param_f_.end()) || (iter->second != param))
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
@@ -256,7 +256,7 @@ namespace KlayGE
 	void OGLTexture::TexParameterfv(GLenum pname, GLfloat const * param)
 	{
 		float4 const f4_param(param);
-		KLAYGE_AUTO(iter, tex_param_fv_.find(pname));
+		auto iter = tex_param_fv_.find(pname);
 		if ((iter == tex_param_fv_.end()) || (iter->second != f4_param))
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())

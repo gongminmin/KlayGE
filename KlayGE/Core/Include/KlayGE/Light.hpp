@@ -17,6 +17,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <array>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API LightSource : public enable_shared_from_this<LightSource>
@@ -171,8 +173,8 @@ namespace KlayGE
 	protected:
 		TexturePtr projective_tex_;
 
-		array<ConditionalRenderPtr, 7> crs_;
-		array<CameraPtr, 6> sm_cameras_;
+		std::array<ConditionalRenderPtr, 7> crs_;
+		std::array<CameraPtr, 6> sm_cameras_;
 	};
 
 	class KLAYGE_CORE_API SpotLightSource : public LightSource

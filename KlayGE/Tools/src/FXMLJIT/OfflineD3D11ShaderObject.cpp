@@ -884,7 +884,7 @@ namespace KlayGE
 
 							std::vector<std::string>& msgs = err_lines[err_line];
 							bool found = false;
-							typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type ErrMsgsType;
+							typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
 							KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 							{
 								if (msg == err_str)
@@ -907,7 +907,7 @@ namespace KlayGE
 						}
 					}
 
-					for (KLAYGE_AUTO(iter, err_lines.begin()); iter != err_lines.end(); ++ iter)
+					for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
 					{
 						if (iter->first >= 0)
 						{
@@ -937,7 +937,7 @@ namespace KlayGE
 							LogInfo("...");
 						}
 
-						typedef KLAYGE_DECLTYPE(iter->second) ErrMsgsType;
+						typedef decltype(iter->second) ErrMsgsType;
 						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
 						{
 							LogError(msg.c_str());

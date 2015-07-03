@@ -97,7 +97,7 @@ namespace KlayGE
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
 
-		KLAYGE_AUTO(iter, std::upper_bound(frame_ids.begin(), frame_ids.end(), frame));
+		auto iter = std::upper_bound(frame_ids.begin(), frame_ids.end(), frame);
 		int index = static_cast<int>(iter - frame_ids.begin());
 
 		int index0 = index - 1;
@@ -391,7 +391,7 @@ namespace KlayGE
 		}
 		else
 		{
-			typedef KLAYGE_DECLTYPE(joints_) JointsType;
+			typedef decltype(joints_) JointsType;
 			KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 			{
 				joint_index_to_id.push_back(joint.first);
@@ -403,12 +403,12 @@ namespace KlayGE
 			}
 
 			// Replace parent_id
-			typedef KLAYGE_DECLTYPE(joints_) JointsType;
+			typedef decltype(joints_) JointsType;
 			KLAYGE_FOREACH(JointsType::reference joint, joints_)
 			{
 				if (joint.second.parent_id != -1)
 				{
-					KLAYGE_AUTO(fiter, joint_id_to_index.find(joint.second.parent_id));
+					auto fiter = joint_id_to_index.find(joint.second.parent_id);
 					BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 					joint.second.parent_id = fiter->second;
@@ -416,16 +416,16 @@ namespace KlayGE
 			}
 
 			// Replace joint_id in weight
-			typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+			typedef decltype(meshes_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 			{
-				typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
+				typedef decltype(mesh.vertices) VerticesType;
 				KLAYGE_FOREACH(VerticesType::reference vertex, mesh.vertices)
 				{
-					typedef KLAYGE_DECLTYPE(vertex.binds) BindsType;
+					typedef decltype(vertex.binds) BindsType;
 					KLAYGE_FOREACH(BindsType::reference bind, vertex.binds)
 					{
-						KLAYGE_AUTO(fiter, joint_id_to_index.find(bind.first));
+						auto fiter = joint_id_to_index.find(bind.first);
 						BOOST_ASSERT(fiter != joint_id_to_index.end());
 
 						bind.first = fiter->second;
@@ -434,9 +434,9 @@ namespace KlayGE
 			}
 
 			// Replace joint_id in keyframes and remove unused keyframes
-			for (KLAYGE_AUTO(iter, keyframes_.begin()); iter != keyframes_.end();)
+			for (auto iter = keyframes_.begin(); iter != keyframes_.end();)
 			{
-				KLAYGE_AUTO(fiter, joint_id_to_index.find(iter->joint_id));
+				auto fiter = joint_id_to_index.find(iter->joint_id);
 				if (fiter != joint_id_to_index.end())
 				{
 					iter->joint_id = fiter->second;
@@ -486,7 +486,7 @@ namespace KlayGE
 	void MeshMLObj::WriteJointChunk(std::ostream& os)
 	{
 		os << "\t<bones_chunk>" << std::endl;
-		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		typedef decltype(joints_) JointsType;
 		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			os << "\t\t<bone name=\"" << RemoveQuote(joint.second.name);
@@ -509,7 +509,7 @@ namespace KlayGE
 	void MeshMLObj::WriteMaterialChunk(std::ostream& os)
 	{
 		os << "\t<materials_chunk>" << std::endl;
-		typedef KLAYGE_DECLTYPE(materials_) MaterialsType;
+		typedef decltype(materials_) MaterialsType;
 		KLAYGE_FOREACH(MaterialsType::const_reference mtl, materials_)
 		{
 			os << "\t\t<material ambient=\"" << mtl.ambient[0]
@@ -535,7 +535,7 @@ namespace KlayGE
 			{
 				os << ">" << std::endl;
 
-				typedef KLAYGE_DECLTYPE(mtl.texture_slots) TextureSlotsType;
+				typedef decltype(mtl.texture_slots) TextureSlotsType;
 				KLAYGE_FOREACH(TextureSlotsType::const_reference tl, mtl.texture_slots)
 				{
 					os << "\t\t\t<texture type=\"" << RemoveQuote(tl.first)
@@ -551,7 +551,7 @@ namespace KlayGE
 	void MeshMLObj::WriteMeshChunk(std::ostream& os, int vertex_export_settings)
 	{
 		os << "\t<meshes_chunk>" << std::endl;
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		typedef decltype(meshes_) MeshesType;
 		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
 			os << "\t\t<mesh name=\"" << RemoveQuote(mesh.name)
@@ -559,7 +559,7 @@ namespace KlayGE
 
 			os << "\t\t\t<vertices_chunk>" << std::endl;
 
-			typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
+			typedef decltype(mesh.vertices) VerticesType;
 			float3 pos_min_bb = mesh.vertices[0].position;
 			float3 pos_max_bb = pos_min_bb;
 			float2 tc_min_bb(-1, -1);
@@ -624,7 +624,7 @@ namespace KlayGE
 
 					if (vertex_export_settings & VES_Texcoord)
 					{
-						typedef KLAYGE_DECLTYPE(vertex.texcoords) TexcoordsType;
+						typedef decltype(vertex.texcoords) TexcoordsType;
 						switch (vertex.texcoord_components)
 						{
 						case 1:
@@ -688,7 +688,7 @@ namespace KlayGE
 			os << "\t\t\t</vertices_chunk>" << std::endl;
 
 			os << "\t\t\t<triangles_chunk>" << std::endl;
-			typedef KLAYGE_DECLTYPE(mesh.triangles) TrianglesType;
+			typedef decltype(mesh.triangles) TrianglesType;
 			KLAYGE_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 			{
 				os << "\t\t\t\t<triangle index=\"" << tri.vertex_index[0]
@@ -716,7 +716,7 @@ namespace KlayGE
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
 		for (int joint_index = 0; joint_index < static_cast<int>(joints_.size()); ++ joint_index)
 		{
-			KLAYGE_AUTO(iter, joint_index_to_kf.find(joint_index));
+			auto iter = joint_index_to_kf.find(joint_index);
 			BOOST_ASSERT(iter != joint_index_to_kf.end());
 
 			Keyframes kf = keyframes_[iter->second];
@@ -947,13 +947,13 @@ namespace KlayGE
 		std::set<int> joints_used;
 
 		// Find all joints used in the mesh list
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		typedef decltype(meshes_) MeshesType;
 		KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_)
 		{
-			typedef KLAYGE_DECLTYPE(mesh.vertices) VerticesType;
+			typedef decltype(mesh.vertices) VerticesType;
 			KLAYGE_FOREACH(VerticesType::const_reference vertex, mesh.vertices)
 			{
-				typedef KLAYGE_DECLTYPE(vertex.binds) BindsType;
+				typedef decltype(vertex.binds) BindsType;
 				KLAYGE_FOREACH(BindsType::const_reference bind, vertex.binds)
 				{
 					joints_used.insert(bind.first);
@@ -963,7 +963,7 @@ namespace KlayGE
 
 		// Traverse the joint list and see if used joints' parents can be added
 		std::set<int> parent_joints_used;
-		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		typedef decltype(joints_) JointsType;
 		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			if (joints_used.find(joint.first) != joints_used.end())
@@ -980,7 +980,7 @@ namespace KlayGE
 		joints_used.insert(parent_joints_used.begin(), parent_joints_used.end());
 
 		// Traverse the joint list and erase those never recorded by joints_used
-		for (KLAYGE_AUTO(iter, joints_.begin()); iter != joints_.end();)
+		for (auto iter = joints_.begin(); iter != joints_.end();)
 		{
 			if (joints_used.find(iter->first) == joints_used.end())
 			{
@@ -1021,7 +1021,7 @@ namespace KlayGE
 
 		materials_ = mtls_used;
 
-		typedef KLAYGE_DECLTYPE(meshes_) MeshesType;
+		typedef decltype(meshes_) MeshesType;
 		KLAYGE_FOREACH(MeshesType::reference mesh, meshes_)
 		{
 			mesh.material_id = mtl_mapping[mesh.material_id];
@@ -1054,14 +1054,14 @@ namespace KlayGE
 					opt_mesh.material_id = static_cast<int>(i);
 					opt_mesh.name = "combined_for_mtl_" + boost::lexical_cast<std::string>(i);
 
-					typedef KLAYGE_DECLTYPE(meshes_to_combine) MeshesType;
+					typedef decltype(meshes_to_combine) MeshesType;
 					KLAYGE_FOREACH(MeshesType::const_reference mesh, meshes_to_combine)
 					{
 						int base = static_cast<int>(opt_mesh.vertices.size());
 						opt_mesh.vertices.insert(opt_mesh.vertices.end(),
 							mesh.vertices.begin(), mesh.vertices.end());
 
-						typedef KLAYGE_DECLTYPE(mesh.triangles) TrianglesType;
+						typedef decltype(mesh.triangles) TrianglesType;
 						KLAYGE_FOREACH(TrianglesType::const_reference tri, mesh.triangles)
 						{
 							Triangle opt_tri;
@@ -1125,7 +1125,7 @@ namespace KlayGE
 	void MeshMLObj::UpdateJoints(int frame, std::vector<Quaternion>& bind_reals, std::vector<Quaternion>& bind_duals) const
 	{
 		std::vector<Joint> bind_joints;
-		typedef KLAYGE_DECLTYPE(joints_) JointsType;
+		typedef decltype(joints_) JointsType;
 		KLAYGE_FOREACH(JointsType::const_reference joint, joints_)
 		{
 			bind_joints.push_back(joint.second);

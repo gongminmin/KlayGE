@@ -110,7 +110,7 @@ namespace KlayGE
 			tb_vb_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * 4 * sizeof(UIManager::VertexFormat)), TransientBuffer::BF_Vertex);
 			tb_ib_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * INDEX_PER_QUAD * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
-			rl_->BindVertexStream(tb_vb_->GetBuffer(), make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
+			rl_->BindVertexStream(tb_vb_->GetBuffer(), std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			rl_->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
@@ -922,19 +922,19 @@ namespace KlayGE
 
 	void UIManager::Render()
 	{
-		typedef KLAYGE_DECLTYPE(strings_) StringsType;
+		typedef decltype(strings_) StringsType;
 		KLAYGE_FOREACH(StringsType::reference str, strings_)
 		{
 			str.second.clear();
 		}
 
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+		typedef decltype(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			dialog->Render();
 		}
 
-		typedef KLAYGE_DECLTYPE(rects_) RectsType;
+		typedef decltype(rects_) RectsType;
 		KLAYGE_FOREACH(RectsType::const_reference rect, rects_)
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
@@ -946,9 +946,9 @@ namespace KlayGE
 		}
 		KLAYGE_FOREACH(StringsType::reference str, strings_)
 		{
-			typedef KLAYGE_DECLTYPE(font_cache_) FontCacheType;
+			typedef decltype(font_cache_) FontCacheType;
 			FontCacheType::reference font = font_cache_[str.first];
-			typedef KLAYGE_DECLTYPE(str.second) StrType;
+			typedef decltype(str.second) StrType;
 			KLAYGE_FOREACH(StrType::reference s, str.second)
 			{
 				font.first->RenderText(s.rc, s.depth, 1, 1, s.clr, s.text, font.second, s.align);
@@ -1039,7 +1039,7 @@ namespace KlayGE
 	Size_T<float> UIManager::CalcSize(std::wstring const & strText, uint32_t font_index,
 		IRect const & /*rc*/, uint32_t /*align*/)
 	{
-		typedef KLAYGE_DECLTYPE(font_cache_) FontCacheType;
+		typedef decltype(font_cache_) FontCacheType;
 		FontCacheType::reference font = font_cache_[font_index];
 		return font.first->CalcSize(strText, font.second);
 	}
@@ -1057,7 +1057,7 @@ namespace KlayGE
 					uint16_t shift_ctrl_alt = ((param->buttons_down[KS_LeftShift] || param->buttons_down[KS_RightShift]) ? MB_Shift : 0)
 						| ((param->buttons_down[KS_LeftCtrl] || param->buttons_down[KS_RightCtrl]) ? MB_Ctrl : 0)
 						| ((param->buttons_down[KS_LeftAlt] || param->buttons_down[KS_RightAlt]) ? MB_Alt : 0);
-					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					typedef decltype(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
 						if (dialog->GetVisible())
@@ -1090,7 +1090,7 @@ namespace KlayGE
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
-					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					typedef decltype(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
@@ -1114,7 +1114,7 @@ namespace KlayGE
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
-					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					typedef decltype(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
@@ -1138,7 +1138,7 @@ namespace KlayGE
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
-					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					typedef decltype(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
@@ -1169,7 +1169,7 @@ namespace KlayGE
 				{
 					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
 					mouse_on_ui_ = false;
-					typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+					typedef decltype(dialogs_) DialogsType;
 					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->touches_coord[0]))
@@ -1215,7 +1215,7 @@ namespace KlayGE
 
 	void UIManager::SettleCtrls()
 	{
-		typedef KLAYGE_DECLTYPE(dialogs_) DialogsType;
+		typedef decltype(dialogs_) DialogsType;
 		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
 		{
 			dialog->SettleCtrls();
@@ -1268,7 +1268,7 @@ namespace KlayGE
 	UIControlPtr const & UIDialog::GetControl(int ID) const
 	{
 		// Try to find the control with the given ID
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			if (control->GetID() == ID)
@@ -1285,7 +1285,7 @@ namespace KlayGE
 	UIControlPtr const & UIDialog::GetControl(int ID, uint32_t type) const
 	{
 		// Try to find the control with the given ID
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			if ((control->GetID() == ID) && (control->GetType() == type))
@@ -1303,7 +1303,7 @@ namespace KlayGE
 	{
 		// Search through all child controls for the first one which
 		// contains the mouse point
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			if (!control)
@@ -1360,7 +1360,7 @@ namespace KlayGE
 			|| (bottom_right_clr_.a() != 0) || (bottom_left_clr_.a() != 0);
 		if (!minimized_ && bBackgroundIsVisible)
 		{
-			array<Color, 4> clrs;
+			std::array<Color, 4> clrs;
 			clrs[0] = top_left_clr_;
 			clrs[1] = top_right_clr_;
 			clrs[2] = bottom_right_clr_;
@@ -1469,7 +1469,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < controls_.size(); ++ i)
 			{
-				typedef KLAYGE_DECLTYPE(intersected_controls) ControlsType;
+				typedef decltype(intersected_controls) ControlsType;
 				ControlsType::iterator iter
 					= std::lower_bound(intersected_controls.begin(), intersected_controls.end(), i);
 				if ((iter == intersected_controls.end()) || (*iter != i))
@@ -1525,7 +1525,7 @@ namespace KlayGE
 		{
 			int2 const local_pt = this->ToLocal(pt);
 
-			typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+			typedef decltype(controls_) ControlsType;
 			KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 			{
 				if (control->ContainsPoint(local_pt))
@@ -1601,7 +1601,7 @@ namespace KlayGE
 	void UIDialog::ClearRadioButtonGroup(uint32_t nButtonGroup)
 	{
 		// Find all radio buttons with the given group number
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			if (UICT_RadioButton == control->GetType())
@@ -1664,7 +1664,7 @@ namespace KlayGE
 		}
 		control_mouse_over_.reset();
 
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			control->Refresh();
@@ -1701,7 +1701,7 @@ namespace KlayGE
 	void UIDialog::FocusDefaultControl()
 	{
 		// Check for default control in this dialog
-		typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+		typedef decltype(controls_) ControlsType;
 		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
 		{
 			if (control->GetIsDefault())
@@ -1727,7 +1727,7 @@ namespace KlayGE
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth);
-		array<Color, 4> clrs;
+		std::array<Color, 4> clrs;
 		clrs.fill(clr);
 		if (!always_in_opacity_)
 		{
@@ -1770,7 +1770,7 @@ namespace KlayGE
 		}
 
 		float3 pos(static_cast<float>(rcScreen.left()), static_cast<float>(rcScreen.top()), depth_base_ + depth_bias);
-		array<Color, 4> clrs;
+		std::array<Color, 4> clrs;
 		clrs.fill(element.TextureColor().Current);
 		if (!always_in_opacity_)
 		{
@@ -1918,7 +1918,7 @@ namespace KlayGE
 		uint32_t width = re.ScreenFrameBuffer()->Width();
 		uint32_t height = re.ScreenFrameBuffer()->Height();
 
-		typedef KLAYGE_DECLTYPE(id_location_) IDLocationType;
+		typedef decltype(id_location_) IDLocationType;
 		KLAYGE_FOREACH(IDLocationType::reference id_loc, id_location_)
 		{
 			int x = id_loc.second.x;
@@ -1988,7 +1988,7 @@ namespace KlayGE
 				// See if this matches a control's hotkey
 				// Activate the hotkey if the focus doesn't belong to an
 				// edit box.
-				typedef KLAYGE_DECLTYPE(controls_) ControlsType;
+				typedef decltype(controls_) ControlsType;
 				KLAYGE_FOREACH(ControlsType::reference control, controls_)
 				{
 					if (control->GetHotkey() == static_cast<uint8_t>(key & 0xFF))

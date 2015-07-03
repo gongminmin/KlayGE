@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <deque>
+#include <unordered_map>
 
 #include <KlayGE/LZMACodec.hpp>
 
@@ -178,7 +179,7 @@ namespace KlayGE
 			{
 			}
 		};
-		unordered_map<uint32_t, DecodedBlockInfo> decoded_block_cache_;
+		std::unordered_map<uint32_t, DecodedBlockInfo> decoded_block_cache_;
 		uint64_t decode_tick_;
 
 	private:
@@ -198,7 +199,7 @@ namespace KlayGE
 			uint32_t attr;
 			uint64_t tick;
 		};
-		unordered_map<uint32_t, TileInfo> tile_info_map_;
+		std::unordered_map<uint32_t, TileInfo> tile_info_map_;
 		std::deque<std::pair<uint32_t, uint32_t> > tile_free_list_;
 		uint64_t tile_tick_;
 	};

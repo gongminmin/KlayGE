@@ -24,6 +24,8 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
+#include <array>
+
 namespace KlayGE
 {
 	struct ShaderDesc
@@ -146,7 +148,7 @@ namespace KlayGE
 		}
 
 	protected:
-		array<bool, ST_NumShaderTypes> is_shader_validate_;
+		std::array<bool, ST_NumShaderTypes> is_shader_validate_;
 		
 		bool is_validate_;
 		bool has_discard_;

@@ -385,7 +385,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if ((caps.max_shader_model >= ShaderModel(5, 0)) && (caps.cs_support))
 		{
-			KLAYGE_STATIC_ASSERT(32 == TILE_SIZE, "TILE_SIZE must be 32.");
+			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
 			cs_tbdr_ = true;
 		}
@@ -443,7 +443,7 @@ namespace KlayGE
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_cone_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
-				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
@@ -463,7 +463,7 @@ namespace KlayGE
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_pyramid_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
-				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
@@ -483,7 +483,7 @@ namespace KlayGE
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_box_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
-				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
 			init_data.data = &index[0];
@@ -506,7 +506,7 @@ namespace KlayGE
 			init_data.slice_pitch = 0;
 			init_data.data = &pos[0];
 			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
-				make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 
 		light_volume_rl_[LightSource::LT_Ambient] = rl_quad_;
@@ -1420,7 +1420,7 @@ namespace KlayGE
 
 		if ((pass_cat != PC_Shadowing) && (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
 		{
-			typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
+			typedef decltype(visible_scene_objs_) VisibleSceneObjsType;
 			KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 			{
 				deo->Pass(pass_type);
@@ -1790,7 +1790,7 @@ namespace KlayGE
 
 				if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 				{
-					typedef KLAYGE_DECLTYPE(visible_scene_objs_) VisibleSceneObjsType;
+					typedef decltype(visible_scene_objs_) VisibleSceneObjsType;
 					KLAYGE_FOREACH(VisibleSceneObjsType::reference deo, visible_scene_objs_)
 					{
 						if (deo->SimpleForward())
@@ -2470,7 +2470,7 @@ namespace KlayGE
 
 		re.BindFrameBuffer((PT_OpaqueGBufferRT1 == pass_type) ? pvp.g_buffer_rt1
 			: pvp.g_buffer);
-		typedef KLAYGE_DECLTYPE(decals_) DecalsType;
+		typedef decltype(decals_) DecalsType;
 		KLAYGE_FOREACH(DecalsType::reference de, decals_)
 		{
 			de->Pass(pass_type);
@@ -3659,7 +3659,7 @@ namespace KlayGE
 
 		for (uint32_t li = 0; li < lights_.size();)
 		{
-			array<std::vector<uint32_t>, 11> available_lights;
+			std::array<std::vector<uint32_t>, 11> available_lights;
 			for (uint32_t batch = 0; (batch < light_batch_) && (li < lights_.size()); ++ li)
 			{
 				LightSourcePtr const & light = lights_[li];
@@ -3765,7 +3765,7 @@ namespace KlayGE
 			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-			array<int, 6> lights_shadowing_channel;
+			std::array<int, 6> lights_shadowing_channel;
 			lights_shadowing_channel.fill(-1);
 			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{

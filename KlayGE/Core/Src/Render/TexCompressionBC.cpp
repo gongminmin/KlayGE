@@ -932,7 +932,7 @@ namespace KlayGE
 		BC1Block& bc1 = *static_cast<BC1Block*>(output);
 		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
-		array<ARGBColor32, 16> tmp_argb;
+		std::array<ARGBColor32, 16> tmp_argb;
 		bool alpha = false;
 		for (size_t i = 0; i < tmp_argb.size(); ++ i)
 		{
@@ -961,7 +961,7 @@ namespace KlayGE
 		ARGBColor32 max_clr = this->RGB565To888(bc1.clr_0);
 		ARGBColor32 min_clr = this->RGB565To888(bc1.clr_1);
 
-		array<ARGBColor32, 4> clr;
+		std::array<ARGBColor32, 4> clr;
 		clr[0] = max_clr;
 		clr[1] = min_clr;
 		if (bc1.clr_0 > bc1.clr_1)
@@ -1032,7 +1032,7 @@ namespace KlayGE
 	uint32_t TexCompressionBC1::MatchColorsBlock(ARGBColor32 const * argb,
 			ARGBColor32 const & min_clr, ARGBColor32 const & max_clr, bool alpha) const
 	{
-		array<ARGBColor32, 4> color;
+		std::array<ARGBColor32, 4> color;
 		color[0] = max_clr;
 		color[1] = min_clr;
 		if (!alpha)
@@ -1060,7 +1060,7 @@ namespace KlayGE
 
 		if (alpha)
 		{
-			array<int, 2> stops;
+			std::array<int, 2> stops;
 			for (int i = 0; i < 2; ++ i)
 			{
 				stops[i] = color[i].r() * dirr + color[i].g() * dirg + color[i].b() * dirb;
@@ -1088,7 +1088,7 @@ namespace KlayGE
 		}
 		else
 		{
-			array<int, 4> stops;
+			std::array<int, 4> stops;
 			for (int i = 0; i < 4; ++ i)
 			{
 				stops[i] = color[i].r() * dirr + color[i].g() * dirg + color[i].b() * dirb;
@@ -1448,8 +1448,8 @@ namespace KlayGE
 		BC2Block& bc2 = *static_cast<BC2Block*>(output);
 		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
-		array<uint8_t, 16> alpha;
-		array<ARGBColor32, 16> xrgb;
+		std::array<uint8_t, 16> alpha;
+		std::array<ARGBColor32, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			xrgb[i] = argb[i];
@@ -1505,8 +1505,8 @@ namespace KlayGE
 		BC3Block& bc3 = *static_cast<BC3Block*>(output);
 		ARGBColor32 const * argb = static_cast<ARGBColor32 const *>(input);
 
-		array<uint8_t, 16> alpha;
-		array<ARGBColor32, 16> xrgb;
+		std::array<uint8_t, 16> alpha;
+		std::array<ARGBColor32, 16> xrgb;
 		for (size_t i = 0; i < xrgb.size(); ++ i)
 		{
 			xrgb[i] = argb[i];
@@ -1528,7 +1528,7 @@ namespace KlayGE
 
 		bc1_codec_->DecodeBlock(argb, &bc3_block->bc1);
 
-		array<uint8_t, 16> alpha_block;
+		std::array<uint8_t, 16> alpha_block;
 		bc4_codec_->DecodeBlock(&alpha_block[0], &bc3_block->alpha);
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
@@ -1612,7 +1612,7 @@ namespace KlayGE
 		uint8_t* alpha_block = static_cast<uint8_t*>(output);
 		BC4Block const & bc4 = *static_cast<BC4Block const *>(input);
 
-		array<uint8_t, 8> alpha;
+		std::array<uint8_t, 8> alpha;
 		float falpha0 = bc4.alpha_0 / 255.0f;
 		float falpha1 = bc4.alpha_1 / 255.0f;
 		alpha[0] = bc4.alpha_0;
@@ -1665,8 +1665,8 @@ namespace KlayGE
 		BC5Block& bc5 = *static_cast<BC5Block*>(output);
 		uint16_t const * gr = static_cast<uint16_t const *>(input);
 
-		array<uint8_t, 16> r;
-		array<uint8_t, 16> g;
+		std::array<uint8_t, 16> r;
+		std::array<uint8_t, 16> g;
 		for (size_t i = 0; i < r.size(); ++ i)
 		{
 			r[i] = gr[i] & 0xFF;
@@ -1685,9 +1685,9 @@ namespace KlayGE
 		uint16_t* gr = static_cast<uint16_t*>(output);
 		BC5Block const * bc5_block = static_cast<BC5Block const *>(input);
 
-		array<uint8_t, 16> r;
+		std::array<uint8_t, 16> r;
 		bc4_codec_->DecodeBlock(&r[0], &bc5_block->red);
-		array<uint8_t, 16> g;
+		std::array<uint8_t, 16> g;
 		bc4_codec_->DecodeBlock(&g[0], &bc5_block->green);
 
 		for (size_t i = 0; i < r.size(); ++ i)
@@ -1997,7 +1997,7 @@ namespace KlayGE
 			BOOST_ASSERT(mode_to_info_[mode] < static_cast<int>(sizeof(mode_desc_) / sizeof(mode_desc_[0])));
 			ModeInfo const & info = mode_info_[mode_to_info_[mode]];
 
-			array<std::pair<int3, int3>, BC6_MAX_REGIONS> end_pts;
+			std::array<std::pair<int3, int3>, BC6_MAX_REGIONS> end_pts;
 			memset(&end_pts[0], 0, BC6_MAX_REGIONS * sizeof(end_pts[0]));
 			uint32_t shape = 0;
 
@@ -2405,7 +2405,7 @@ namespace KlayGE
 			uint8_t const index_prec_1 = mode_info_[mode].index_prec_1;
 			uint8_t const index_prec_2 = mode_info_[mode].index_prec_2;
 			size_t start_bit = mode + 1;
-			array<uint8_t, 6> p;
+			std::array<uint8_t, 6> p;
 			uint8_t shape = ReadBits(input, start_bit, mode_info_[mode].partition_bits);
 			BOOST_ASSERT(shape < BC7_MAX_SHAPES);
 
@@ -2415,7 +2415,7 @@ namespace KlayGE
 			uint8_t index_mode = ReadBits(input, start_bit, mode_info_[mode].index_mode_bits);
 			BOOST_ASSERT(index_mode < 2);
 
-			array<ARGBColor32, BC7_MAX_REGIONS << 1> c;
+			std::array<ARGBColor32, BC7_MAX_REGIONS << 1> c;
 			ARGBColor32 const & rgba_prec = mode_info_[mode].rgba_prec;
 			ARGBColor32 const & rgba_prec_with_p = mode_info_[mode].rgba_prec_with_p;
 
@@ -2472,8 +2472,8 @@ namespace KlayGE
 				c[i] = this->Unquantize(c[i], rgba_prec_with_p);
 			}
 
-			array<uint8_t, 16> w1;
-			array<uint8_t, 16> w2;
+			std::array<uint8_t, 16> w1;
+			std::array<uint8_t, 16> w2;
 
 			for (uint32_t i = 0; i < 16; ++ i)
 			{

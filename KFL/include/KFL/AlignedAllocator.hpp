@@ -71,8 +71,8 @@ namespace KlayGE
 
 		static const int alignment_size = alignment;
 
-		KLAYGE_STATIC_ASSERT(0 == (alignment & (alignment - 1)), "Alignment must be power of 2.");
-		KLAYGE_STATIC_ASSERT(alignment <= 65536, "Alignment can't be larger than 64k.");
+		static_assert(0 == (alignment & (alignment - 1)), "Alignment must be power of 2.");
+		static_assert(alignment <= 65536, "Alignment can't be larger than 64k.");
 
 		template <typename U>
 		struct rebind

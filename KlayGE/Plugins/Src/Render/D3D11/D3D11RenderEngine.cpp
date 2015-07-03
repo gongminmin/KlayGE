@@ -499,7 +499,7 @@ namespace KlayGE
 	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
 	{
 		size_t elems_signature = 0;
-		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(elems)>::type ElemsType;
+		typedef std::remove_reference<decltype(elems)>::type ElemsType;
 		KLAYGE_FOREACH(ElemsType::const_reference elem, elems)
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
@@ -515,7 +515,7 @@ namespace KlayGE
 
 		boost::hash_combine(signature, elems_signature);
 
-		KLAYGE_AUTO(iter, input_layout_bank_.find(signature));
+		auto iter = input_layout_bank_.find(signature);
 		if (iter != input_layout_bank_.end())
 		{
 			return iter->second;
@@ -526,8 +526,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
-			KLAYGE_AUTO(in, input_layout_bank_.insert(std::make_pair(signature, ret)));
-
+			auto in = input_layout_bank_.insert(std::make_pair(signature, ret));
 			return in.first->second;
 		}
 	}
@@ -972,10 +971,10 @@ namespace KlayGE
 
 	bool D3D11RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
 	{
-		KLAYGE_AUTO(iter, rendertarget_format_.find(elem_fmt));
+		auto iter = rendertarget_format_.find(elem_fmt);
 		if (iter != rendertarget_format_.end())
 		{
-			typedef KLAYGE_DECLTYPE(iter->second) RTType;
+			typedef decltype(iter->second) RTType;
 			KLAYGE_FOREACH(RTType::const_reference p, iter->second)
 			{
 				if ((sample_count == p.first) && (sample_quality < p.second))
@@ -1650,7 +1649,9 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st,
+			std::vector<std::tuple<void*, uint32_t, uint32_t> > const & srvsrcs,
+			std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
@@ -1733,12 +1734,12 @@ namespace KlayGE
 			bool cleared = false;
 			for (uint32_t i = 0; i < shader_srvsrc_cache_[st].size(); ++ i)
 			{
-				if (get<0>(shader_srvsrc_cache_[st][i]))
+				if (std::get<0>(shader_srvsrc_cache_[st][i]))
 				{
-					if (get<0>(shader_srvsrc_cache_[st][i]) == rtv_src)
+					if (std::get<0>(shader_srvsrc_cache_[st][i]) == rtv_src)
 					{
-						uint32_t const first = get<1>(shader_srvsrc_cache_[st][i]);
-						uint32_t const last = first + get<2>(shader_srvsrc_cache_[st][i]);
+						uint32_t const first = std::get<1>(shader_srvsrc_cache_[st][i]);
+						uint32_t const last = first + std::get<2>(shader_srvsrc_cache_[st][i]);
 						uint32_t const rt_first = rt_first_subres;
 						uint32_t const rt_last = rt_first_subres + rt_num_subres;
 						if (((first >= rt_first) && (first < rt_last))

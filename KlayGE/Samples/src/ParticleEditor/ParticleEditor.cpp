@@ -74,7 +74,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = &vertices[0];
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			pos_aabb_ = MathLib::compute_aabbox(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));
 			pos_aabb_.Min().y() = -0.1f;

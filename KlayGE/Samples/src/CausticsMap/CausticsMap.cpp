@@ -371,7 +371,7 @@ namespace
 
 		void BindLight(LightSourcePtr const & light)
 		{
-			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			typedef decltype(subrenderables_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->BindLight(light);
@@ -380,7 +380,7 @@ namespace
 
 		void SceneTexture(TexturePtr const & scene_texture)
 		{
-			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			typedef decltype(subrenderables_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SceneTexture(scene_texture);
@@ -389,7 +389,7 @@ namespace
 
 		void ModelMatrix(float4x4 const & model)
 		{
-			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			typedef decltype(subrenderables_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->ModelMatrix(model);
@@ -398,7 +398,7 @@ namespace
 
 		void SetEnvCube(TexturePtr const & texture)
 		{
-			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			typedef decltype(subrenderables_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->SetEnvCube(texture);
@@ -407,7 +407,7 @@ namespace
 
 		void Pass(uint32_t pass)
 		{
-			typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+			typedef decltype(subrenderables_) MeshesType;
 			KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 			{
 				checked_pointer_cast<RefractMesh>(mesh)->Pass(pass);
@@ -445,7 +445,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(point_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMapWithGS");
 				BOOST_ASSERT(single_caustics_pass_->Validate());
@@ -461,7 +461,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = &xys[0];
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(point_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
+				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
 
 				float2 texs[] =
 				{
@@ -480,7 +480,7 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
+				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
 
 				init_data.row_pitch = sizeof(indices);
 				init_data.slice_pitch = 0;

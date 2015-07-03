@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <KFL/CXX11.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
@@ -45,6 +46,15 @@
 
 namespace KlayGE
 {
+	using std::uint64_t;
+	using std::uint32_t;
+	using std::uint16_t;
+	using std::uint8_t;
+	using std::int64_t;
+	using std::int32_t;
+	using std::int16_t;
+	using std::int8_t;
+
 #ifdef KLAYGE_COMPILER_MSVC
 	#ifndef _WCHAR_T_DEFINED
 		typedef unsigned short		wchar_t;

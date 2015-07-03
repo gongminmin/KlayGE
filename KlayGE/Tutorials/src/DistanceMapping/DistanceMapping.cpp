@@ -87,8 +87,8 @@ namespace
 			init_data.data = texs;
 			GraphicsBufferPtr tex0_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
 
-			rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
-			rl_->BindVertexStream(tex0_vb, KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(tex0_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 			float3 normal_float3[sizeof(xyzs) / sizeof(xyzs[0])];
 			MathLib::compute_normal(normal_float3,
@@ -146,7 +146,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = tangent;
 			GraphicsBufferPtr tan_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tan_vb, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
+			rl_->BindVertexStream(tan_vb, std::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;

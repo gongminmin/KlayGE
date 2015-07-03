@@ -1677,7 +1677,7 @@ namespace
 		}
 
 		std::vector<std::pair<filesystem::path, std::string> > deploy_files;
-		typedef KLAYGE_DECLTYPE(all_texture_slots) AllTextureSlotsType;
+		typedef decltype(all_texture_slots) AllTextureSlotsType;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
@@ -1740,13 +1740,13 @@ namespace
 			}
 		}
 
-		typedef KLAYGE_DECLTYPE(dup_files) DupFilesType;
+		typedef decltype(dup_files) DupFilesType;
 		KLAYGE_FOREACH(DupFilesType::const_reference dup, dup_files)
 		{
-			filesystem::copy_file(KlayGE::get<0>(dup), KlayGE::get<1>(dup));
+			filesystem::copy_file(std::get<0>(dup), std::get<1>(dup));
 		}
 
-		typedef KLAYGE_DECLTYPE(deploy_files) DeployFilesType;
+		typedef decltype(deploy_files) DeployFilesType;
 		KLAYGE_FOREACH(DeployFilesType::const_reference df, deploy_files)
 		{
 			std::string deploy_type;
@@ -1789,12 +1789,12 @@ namespace
 		}
 
 		filesystem::path output_folder = filesystem::path(output_name).parent_path();
-		typedef KLAYGE_DECLTYPE(augmented_texture_slots) AugmentedTextureSlotsType;
+		typedef decltype(augmented_texture_slots) AugmentedTextureSlotsType;
 		KLAYGE_FOREACH(AugmentedTextureSlotsType::const_reference slot, augmented_texture_slots)
 		{
 			std::string rel_path = make_relative(output_folder, slot.first).string();
 
-			typedef KLAYGE_DECLTYPE(slot.second) SlotIndexType;
+			typedef decltype(slot.second) SlotIndexType;
 			KLAYGE_FOREACH(SlotIndexType::const_reference slot_index, slot.second)
 			{
 				mtls[slot_index.first].texture_slots[slot_index.second].second = rel_path;

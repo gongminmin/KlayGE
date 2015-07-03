@@ -21,6 +21,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
+#include <array>
 
 #include <KFL/Timer.hpp>
 #include <KlayGE/PostProcess.hpp>
@@ -138,8 +139,8 @@ namespace KlayGE
 
 	private:
 		PostProcessPtr bright_pass_downsampler_;
-		array<PostProcessPtr, 2> downsamplers_;
-		array<PostProcessPtr, 3> blurs_;
+		std::array<PostProcessPtr, 2> downsamplers_;
+		std::array<PostProcessPtr, 3> blurs_;
 		PostProcessPtr glow_merger_;
 	};
 

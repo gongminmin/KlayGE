@@ -19,6 +19,8 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
+#include <tuple>
+
 #include <boost/assert.hpp>
 
 #include <KlayGE/FFT.hpp>
@@ -237,7 +239,7 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = xyzs;
 		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		quad_layout_->BindVertexStream(quad_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		quad_layout_->BindVertexStream(quad_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		tex_fb_ = rf.MakeFrameBuffer();
 

@@ -110,7 +110,7 @@ namespace
 	class SetD3D11ShaderParameterTextureSRV
 	{
 	public:
-		SetD3D11ShaderParameterTextureSRV(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -121,7 +121,7 @@ namespace
 			param_->Value(tex_subres);
 			if (tex_subres.tex)
 			{
-				*srvsrc_ = make_tuple(tex_subres.tex.get(),
+				*srvsrc_ = std::make_tuple(tex_subres.tex.get(),
 					tex_subres.first_array_index * tex_subres.tex->NumMipMaps() + tex_subres.first_level,
 					tex_subres.num_items * tex_subres.num_levels);
 				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
@@ -130,12 +130,12 @@ namespace
 			}
 			else
 			{
-				get<0>(*srvsrc_) = nullptr;
+				std::get<0>(*srvsrc_) = nullptr;
 			}
 		}
 
 	private:
-		tuple<void*, uint32_t, uint32_t>* srvsrc_;
+		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -143,7 +143,7 @@ namespace
 	class SetD3D11ShaderParameterGraphicsBufferSRV
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferSRV(tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -154,17 +154,17 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
-				*srvsrc_ = make_tuple(buf.get(), 0, 1);
+				*srvsrc_ = std::make_tuple(buf.get(), 0, 1);
 				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
 			}
 			else
 			{
-				get<0>(*srvsrc_) = nullptr;
+				std::get<0>(*srvsrc_) = nullptr;
 			}
 		}
 
 	private:
-		tuple<void*, uint32_t, uint32_t>* srvsrc_;
+		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceViewPtr* srv_;
 		RenderEffectParameterPtr param_;
 	};
@@ -1083,7 +1083,7 @@ namespace KlayGE
 
 						std::vector<std::string>& msgs = err_lines[err_line];
 						bool found = false;
-						typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type ErrMsgsType;
+						typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
 						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 						{
 							if (msg == err_str)
@@ -1106,7 +1106,7 @@ namespace KlayGE
 					}
 				}
 
-				for (KLAYGE_AUTO(iter, err_lines.begin()); iter != err_lines.end(); ++ iter)
+				for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
 				{
 					if (iter->first >= 0)
 					{
@@ -1136,7 +1136,7 @@ namespace KlayGE
 						LogInfo("...");
 					}
 
-					typedef KLAYGE_DECLTYPE(iter->second) ErrMsgsType;
+					typedef decltype(iter->second) ErrMsgsType;
 					KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
 					{
 						LogError(msg.c_str());
@@ -1584,7 +1584,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(shader_desc_[type].num_samplers);
-			srvsrcs_[type].resize(shader_desc_[type].num_srvs, make_tuple(static_cast<void*>(nullptr), 0, 0));
+			srvsrcs_[type].resize(shader_desc_[type].num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(shader_desc_[type].num_srvs);
 			uavsrcs_[type].resize(shader_desc_[type].num_uavs, nullptr);
 			uavs_[type].resize(shader_desc_[type].num_uavs);
@@ -1688,7 +1688,7 @@ namespace KlayGE
 			}
 
 			samplers_[type].resize(so.samplers_[type].size());
-			srvsrcs_[type].resize(so.srvs_[type].size(), make_tuple(static_cast<void*>(nullptr), 0, 0));
+			srvsrcs_[type].resize(so.srvs_[type].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(), nullptr);
 			uavs_[type].resize(so.uavs_[type].size());
@@ -1697,7 +1697,7 @@ namespace KlayGE
 			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
 
 			param_binds_[type].reserve(so.param_binds_[type].size());
-			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(so.param_binds_[type])>::type ParamBindsType;
+			typedef std::remove_reference<decltype(so.param_binds_[type])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::const_reference pb, so.param_binds_[type])
 			{
 				param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, pb.param));
@@ -1788,7 +1788,7 @@ namespace KlayGE
 			ret->shader_desc_[i] = shader_desc_[i];
 
 			ret->samplers_[i].resize(samplers_[i].size());
-			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), make_tuple(static_cast<void*>(nullptr), 0, 0));
+			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
 			ret->uavs_[i].resize(uavs_[i].size());
@@ -1803,7 +1803,7 @@ namespace KlayGE
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
-			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(param_binds_[i])>::type ParamBindsType;
+			typedef std::remove_reference<decltype(param_binds_[i])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::const_reference pb, param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
@@ -1905,7 +1905,7 @@ namespace KlayGE
 
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(param_binds_[st])>::type ParamBindsType;
+			typedef std::remove_reference<decltype(param_binds_[st])>::type ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_[st])
 			{
 				pb.func();

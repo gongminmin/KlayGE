@@ -391,8 +391,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		array<TexturePtr, 3> downsample_texs;
-		array<TexturePtr, 3> glow_texs;
+		std::array<TexturePtr, 3> downsample_texs;
+		std::array<TexturePtr, 3> glow_texs;
 
 		ElementFormat fmt = tex->Format();
 		for (size_t i = 0; i < downsample_texs.size(); ++ i)

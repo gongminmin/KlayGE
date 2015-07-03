@@ -13,6 +13,8 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
+#include <random>
+
 #include <boost/assert.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
@@ -48,7 +50,7 @@ namespace KlayGE
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
-		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		typedef decltype(sources_) SourcesType;
 		KLAYGE_FOREACH(SourcesType::reference source, sources_)
 		{
 			alSourcef(source, AL_PITCH, 1);
@@ -79,12 +81,12 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		KLAYGE_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
+		auto iter = std::find_if(sources_.begin(), sources_.end(), IsSourceFree);
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
-			ranlux24_base gen;
-			uniform_int_distribution<> dis(0, static_cast<int>(sources_.size()));
+			std::ranlux24_base gen;
+			std::uniform_int_distribution<> dis(0, static_cast<int>(sources_.size()));
 			std::advance(iter, dis(gen));
 		}
 

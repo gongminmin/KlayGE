@@ -622,7 +622,7 @@ namespace KlayGE
 	{
 		if (data_blocks_.empty())
 		{
-			typedef KLAYGE_DECLTYPE(decoded_block_cache_) DecodedBlockCacheType;
+			typedef decltype(decoded_block_cache_) DecodedBlockCacheType;
 			DecodedBlockCacheType::iterator iter = decoded_block_cache_.find(data_index);
 			if (iter != decoded_block_cache_.end())
 			{
@@ -1275,15 +1275,15 @@ namespace KlayGE
 		uint32_t const num_cache_tiles_a_layer = num_cache_tiles_a_row * tex_height / tile_with_border_size;
 		uint32_t const num_cache_total_tiles = num_cache_tiles_a_layer * tex_layer;
 
-		unordered_map<uint32_t, uint32_t> neighbor_id_map;
+		std::unordered_map<uint32_t, uint32_t> neighbor_id_map;
 		std::vector<uint32_t> all_neighbor_ids;
 		std::vector<uint32_t> neighbor_ids;
 		std::vector<uint32_t> tile_attrs;
 		std::vector<bool> in_same_image;
-		KLAYGE_AUTO(&tim, tile_info_map_);
+		auto& tim = tile_info_map_;
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
-			KLAYGE_AUTO(tmiter, tim.find(tile_ids[i]));
+			auto tmiter = tim.find(tile_ids[i]);
 			if (tmiter != tim.end())
 			{
 				// Exists in cache
@@ -1295,11 +1295,11 @@ namespace KlayGE
 				uint32_t level, tile_x, tile_y;
 				this->DecodeTileID(level, tile_x, tile_y, tile_ids[i]);
 
-				array<uint32_t, 9> new_tile_id_with_neighbors;
+				std::array<uint32_t, 9> new_tile_id_with_neighbors;
 				new_tile_id_with_neighbors.fill(0xFFFFFFFF);
 				new_tile_id_with_neighbors[0] = tile_ids[i];
 
-				array<bool, 9> new_in_same_image;
+				std::array<bool, 9> new_in_same_image;
 				new_in_same_image.fill(false);
 				new_in_same_image[0] = true;
 
@@ -1307,8 +1307,8 @@ namespace KlayGE
 				tile_attrs.push_back(attr);
 				if (attr != 0xFFFFFFFF)
 				{
-					array<int32_t, 9> new_tile_id_x;
-					array<int32_t, 9> new_tile_id_y;
+					std::array<int32_t, 9> new_tile_id_x;
+					std::array<int32_t, 9> new_tile_id_y;
 
 					int32_t left = tile_x - 1;
 					int32_t right = tile_x + 1;
@@ -1429,8 +1429,8 @@ namespace KlayGE
 				// Find tiles that are not used for the longest time
 
 				uint64_t min_tick = tim.begin()->second.tick;
-				KLAYGE_AUTO(min_tileiter, tim.begin());
-				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end(); ++ tileiter)
+				auto min_tileiter = tim.begin();
+				for (auto tileiter = tim.begin(); tileiter != tim.end(); ++ tileiter)
 				{
 					if (tileiter->second.tick < min_tick)
 					{
@@ -1443,12 +1443,12 @@ namespace KlayGE
 				tile_info.y = min_tileiter->second.y;
 				tile_info.z = min_tileiter->second.z;
 
-				for (KLAYGE_AUTO(tileiter, tim.begin()); tileiter != tim.end();)
+				for (auto tileiter = tim.begin(); tileiter != tim.end();)
 				{
 					if (tileiter->second.tick == min_tick)
 					{
 						uint32_t const id = tileiter->second.z * num_cache_tiles_a_layer + tileiter->second.y * num_cache_tiles_a_row + tileiter->second.x;
-						KLAYGE_AUTO(freeiter, tile_free_list_.begin());
+						auto freeiter = tile_free_list_.begin();
 						while ((freeiter != tile_free_list_.end()) && (freeiter->second <= id))
 						{
 							++ freeiter;
@@ -1462,9 +1462,9 @@ namespace KlayGE
 						 ++ tileiter;
 					}
 				}
-				for (KLAYGE_AUTO(freeiter, tile_free_list_.begin()); freeiter != tile_free_list_.end() - 1;)
+				for (auto freeiter = tile_free_list_.begin(); freeiter != tile_free_list_.end() - 1;)
 				{
-					KLAYGE_AUTO(nextiter, freeiter);
+					auto nextiter = freeiter;
 					++ nextiter;
 
 					if (freeiter->second == nextiter->first)
@@ -1480,7 +1480,7 @@ namespace KlayGE
 				}
 			}
 
-			array<uint32_t, 9> index_with_neighbors;
+			std::array<uint32_t, 9> index_with_neighbors;
 			for (size_t j = 0; j < index_with_neighbors.size(); ++ j)
 			{
 				if (all_neighbor_ids[i + j] != 0xFFFFFFFF)
@@ -1501,7 +1501,7 @@ namespace KlayGE
 			uint32_t mip_border_size = cache_tile_border_size_;
 			for (uint32_t l = 0; l < mipmaps; ++ l)
 			{
-				array<uint8_t const *, 9> neighbor_data_ptr;
+				std::array<uint8_t const *, 9> neighbor_data_ptr;
 				for (uint32_t j = 0; j < neighbor_data_ptr.size(); ++ j)
 				{
 					if (index_with_neighbors[j] != 0xFFFFFFFF)

@@ -275,7 +275,7 @@ namespace KlayGE
 		std::string real_path = this->RealPath(path);
 		if (!real_path.empty())
 		{
-			KLAYGE_AUTO(iter, std::find(paths_.begin(), paths_.end(), real_path));
+			auto iter = std::find(paths_.begin(), paths_.end(), real_path);
 			if (iter != paths_.end())
 			{
 				paths_.erase(iter);
@@ -321,7 +321,7 @@ namespace KlayGE
 			}
 		}
 #else
-		typedef KLAYGE_DECLTYPE(paths_) PathsType;
+		typedef decltype(paths_) PathsType;
 		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
 			std::string const res_name(path + name);
@@ -433,7 +433,7 @@ namespace KlayGE
 			}
 		}
 #else
-		typedef KLAYGE_DECLTYPE(paths_) PathsType;
+		typedef decltype(paths_) PathsType;
 		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
 			std::string const res_name(path + name);
@@ -568,7 +568,7 @@ namespace KlayGE
 			{
 				lock_guard<mutex> lock(loading_mutex_);
 
-				typedef KLAYGE_DECLTYPE(loading_res_) LoadingResQueueType;
+				typedef decltype(loading_res_) LoadingResQueueType;
 				KLAYGE_FOREACH(LoadingResQueueType::const_reference lrq, loading_res_)
 				{
 					if (lrq.first->Match(*res_desc))
@@ -612,7 +612,7 @@ namespace KlayGE
 	{
 		lock_guard<mutex> lock(loading_mutex_);
 
-		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end(); ++ iter)
+		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end(); ++ iter)
 		{
 			if (res == iter->second.lock())
 			{
@@ -627,7 +627,7 @@ namespace KlayGE
 		lock_guard<mutex> lock(loading_mutex_);
 
 		bool found = false;
-		typedef KLAYGE_DECLTYPE(loaded_res_) CachedDescType;
+		typedef decltype(loaded_res_) CachedDescType;
 		KLAYGE_FOREACH(CachedDescType::reference c_desc, loaded_res_)
 		{
 			if (c_desc.first == res_desc)
@@ -648,7 +648,7 @@ namespace KlayGE
 		lock_guard<mutex> lock(loading_mutex_);
 
 		shared_ptr<void> loaded_res;
-		typedef KLAYGE_DECLTYPE(loaded_res_) LoadedResType;
+		typedef decltype(loaded_res_) LoadedResType;
 		KLAYGE_FOREACH(LoadedResType::const_reference lr, loaded_res_)
 		{
 			if (lr.first->Match(*res_desc))
@@ -664,7 +664,7 @@ namespace KlayGE
 	{
 		lock_guard<mutex> lock(loading_mutex_);
 
-		for (KLAYGE_AUTO(iter, loaded_res_.begin()); iter != loaded_res_.end();)
+		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end();)
 		{
 			if (iter->second.lock())
 			{
@@ -681,7 +681,7 @@ namespace KlayGE
 	{
 		lock_guard<mutex> lock(loading_mutex_);
 
-		for (KLAYGE_AUTO(iter, loading_res_.begin()); iter != loading_res_.end();)
+		for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
 		{
 			if (*(iter->second))
 			{

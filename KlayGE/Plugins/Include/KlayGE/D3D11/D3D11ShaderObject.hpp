@@ -143,7 +143,7 @@ namespace KlayGE
 			std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob);
 
 	private:
-		array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
+		std::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 
 		ID3D11VertexShaderPtr vertex_shader_;
 		ID3D11PixelShaderPtr pixel_shader_;
@@ -151,16 +151,16 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		array<std::pair<shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
-		array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
+		std::array<std::pair<shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+		std::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
-		array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
-		array<std::vector<tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
-		array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
-		array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
-		array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
-		array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;
-		array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> d3d11_cbuffs_;
+		std::array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
+		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
+		std::array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
+		std::array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
+		std::array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;
+		std::array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;
+		std::array<std::vector<ID3D11BufferPtr>, ST_NumShaderTypes> d3d11_cbuffs_;
 
 		std::vector<RenderEffectConstantBufferPtr> all_cbuffs_;
 

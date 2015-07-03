@@ -30,6 +30,7 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <unordered_map>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -112,7 +113,7 @@ namespace KlayGE
 		void CSSetShader(ID3D11ComputeShaderPtr const & shader);
 		void HSSetShader(ID3D11HullShaderPtr const & shader);
 		void DSSetShader(ID3D11DomainShaderPtr const & shader);
-		void SetShaderResources(ShaderObject::ShaderType st, std::vector<tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs);
+		void SetShaderResources(ShaderObject::ShaderType st, std::vector<std::tuple<void*, uint32_t, uint32_t> > const & srvsrcs, std::vector<ID3D11ShaderResourceViewPtr> const & srvs);
 		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerStatePtr> const & samplers);
 		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11BufferPtr> const & cbs);
 		void RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports);
@@ -222,15 +223,15 @@ namespace KlayGE
 		std::vector<UINT> vb_offset_cache_;
 		ID3D11BufferPtr ib_cache_;
 
-		array<std::vector<tuple<void*, uint32_t, uint32_t> >, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
-		array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;
-		array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_ptr_cache_;
-		array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_ptr_cache_;
-		array<std::vector<ID3D11ShaderResourceViewPtr>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
-		array<std::vector<ID3D11SamplerStatePtr>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
-		array<std::vector<ID3D11BufferPtr>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
+		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t> >, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
+		std::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;
+		std::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_ptr_cache_;
+		std::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_ptr_cache_;
+		std::array<std::vector<ID3D11ShaderResourceViewPtr>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
+		std::array<std::vector<ID3D11SamplerStatePtr>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
+		std::array<std::vector<ID3D11BufferPtr>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
 
-		unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
+		std::unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 
 		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
 

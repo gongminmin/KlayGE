@@ -207,7 +207,7 @@ namespace KlayGE
 	
 	void SceneManager::DelCamera(CameraPtr const & camera)
 	{
-		KLAYGE_AUTO(iter, std::find(cameras_.begin(), cameras_.end(), camera));
+		auto iter = std::find(cameras_.begin(), cameras_.end(), camera);
 		cameras_.erase(iter);
 	}
 
@@ -239,7 +239,7 @@ namespace KlayGE
 	
 	void SceneManager::DelLight(LightSourcePtr const & light)
 	{
-		KLAYGE_AUTO(iter, std::find(lights_.begin(), lights_.end(), light));
+		auto iter = std::find(lights_.begin(), lights_.end(), light);
 		lights_.erase(iter);
 	}
 
@@ -373,9 +373,9 @@ namespace KlayGE
 			RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
 			BOOST_ASSERT(obj_tech);
 			RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
-			KLAYGE_AUTO(iter, std::find_if(render_queue_.begin(), render_queue_.end(),
+			auto iter = std::find_if(render_queue_.begin(), render_queue_.end(),
 				KlayGE::bind(std::equal_to<RenderTechniquePtr>(),
-					KlayGE::bind(select1st<RenderQueueType::value_type>(), KlayGE::placeholders::_1), tech)));
+					KlayGE::bind(select1st<RenderQueueType::value_type>(), KlayGE::placeholders::_1), tech));
 			if (iter != render_queue_.end())
 			{
 				iter->second.push_back(obj);
@@ -491,13 +491,13 @@ namespace KlayGE
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
 
-		typedef KLAYGE_DECLTYPE(cameras_) CamerasType;
+		typedef decltype(cameras_) CamerasType;
 		KLAYGE_FOREACH(CamerasType::const_reference camera, cameras_)
 		{
 			camera->Update(app_time, frame_time);
 		}
 
-		typedef KLAYGE_DECLTYPE(lights_) LightsType;
+		typedef decltype(lights_) LightsType;
 		KLAYGE_FOREACH(LightsType::const_reference light, lights_)
 		{
 			if (light->Enabled())
@@ -519,7 +519,7 @@ namespace KlayGE
 			}
 
 			overlay_scene_objs_.clear();
-			for (KLAYGE_AUTO(iter, lights_.begin()); iter != lights_.end();)
+			for (auto iter = lights_.begin(); iter != lights_.end();)
 			{
 				if ((*iter)->Attrib() & LightSource::LSA_Temporary)
 				{
@@ -583,7 +583,7 @@ namespace KlayGE
 			boost::hash_combine(seed, camera.OmniDirectionalMode());
 			boost::hash_combine(seed, &camera);
 
-			KLAYGE_AUTO(vmiter, visible_marks_map_.find(seed));
+			auto vmiter = visible_marks_map_.find(seed);
 			if (vmiter == visible_marks_map_.end())
 			{
 				this->ClipScene();
@@ -625,7 +625,7 @@ namespace KlayGE
 					RenderablePtr const & renderable = so->GetRenderable();
 					if (renderable)
 					{
-						KLAYGE_AUTO(iter, renderables_map.lower_bound(renderable));
+						auto iter = renderables_map.lower_bound(renderable);
 						if ((iter != renderables_map.end()) && (iter->first == renderable))
 						{
 							renderables[iter->second].second.push_back(so);
@@ -642,7 +642,7 @@ namespace KlayGE
 			}
 		}
 		renderables_map.clear();
-		typedef KLAYGE_DECLTYPE(renderables) RenderablesType;
+		typedef decltype(renderables) RenderablesType;
 		KLAYGE_FOREACH(RenderablesType::const_reference renderable, renderables)
 		{
 			Renderable& ra(*renderable.first);
@@ -653,7 +653,7 @@ namespace KlayGE
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
-		typedef KLAYGE_DECLTYPE(render_queue_) RenderQueueType;
+		typedef decltype(render_queue_) RenderQueueType;
 		KLAYGE_FOREACH(RenderQueueType::reference items, render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
@@ -691,7 +691,7 @@ namespace KlayGE
 				items.second.swap(sorted_items);
 			}
 
-			typedef KLAYGE_DECLTYPE(items.second) ItemsType;
+			typedef decltype(items.second) ItemsType;
 			KLAYGE_FOREACH(ItemsType::reference item, items.second)
 			{
 				item->Render();

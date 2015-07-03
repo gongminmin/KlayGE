@@ -218,6 +218,9 @@ typedef struct _HIDP_VALUE_CAPS
 
 #include <KlayGE/Input.hpp>
 #include <KFL/Timer.hpp>
+
+#include <array>
+
 #include <boost/noncopyable.hpp>
 
 namespace KlayGE
@@ -349,7 +352,7 @@ namespace KlayGE
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
-		array<bool, 256> keys_state_;
+		std::array<bool, 256> keys_state_;
 	};
 
 	class MsgInputMouse : public InputMouse
@@ -383,7 +386,7 @@ namespace KlayGE
 		int2 abs_state_;
 #endif
 		int3 offset_state_;
-		array<bool, 8> buttons_state_;
+		std::array<bool, 8> buttons_state_;
 	};
 
 	class MsgInputJoystick : public InputJoystick
@@ -413,7 +416,7 @@ namespace KlayGE
 		int3 pos_state_;
 		int3 rot_state_;
 		int2 slider_state_;
-		array<bool, 32> buttons_state_;
+		std::array<bool, 32> buttons_state_;
 	};
 
 #if defined KLAYGE_HAVE_LIBOVR
@@ -460,8 +463,8 @@ namespace KlayGE
 		int2 AdjustPoint(int2 const & pt) const;
 
 		Timer timer_;
-		array<int2, 16> touch_coord_state_;
-		array<bool, 16> touch_down_state_;
+		std::array<int2, 16> touch_coord_state_;
+		std::array<bool, 16> touch_down_state_;
 		int32_t wheel_delta_state_;
 	};
 	

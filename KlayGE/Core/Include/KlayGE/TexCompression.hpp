@@ -33,6 +33,10 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
+#include <array>
+
 namespace KlayGE
 {
 	enum TexCompressionMethod
@@ -269,9 +273,9 @@ namespace KlayGE
 
 		float4 avg_;
 
-		array<float4, MAX_NUM_DATA_POINTS> data_points_;
-		array<ARGBColor32, MAX_NUM_DATA_POINTS> data_pixels_;
-		array<uint8_t, MAX_NUM_DATA_POINTS> point_map_;
+		std::array<float4, MAX_NUM_DATA_POINTS> data_points_;
+		std::array<ARGBColor32, MAX_NUM_DATA_POINTS> data_pixels_;
+		std::array<uint8_t, MAX_NUM_DATA_POINTS> point_map_;
 		float4 min_clr_;
 		float4 max_clr_;
 

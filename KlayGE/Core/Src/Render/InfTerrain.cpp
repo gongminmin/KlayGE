@@ -83,7 +83,7 @@ namespace KlayGE
 		init_data.slice_pitch = init_data.row_pitch = static_cast<uint32_t>(vertices.size() * sizeof(vertices[0]));
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		rl_->BindVertexStream(pos_vb, make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		std::vector<uint32_t> indices;
 		for (uint32_t y = 0; y < num_grids - 1; ++ y)
@@ -347,18 +347,18 @@ namespace KlayGE
 		tile_non_tess_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 		tile_non_tess_rl_->BindIndexStream(tile_non_tess_ib_, EF_R16UI);
 		tile_non_tess_rl_->NumIndices(NON_TESS_INDEX_COUNT);
-		tile_non_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
+		tile_non_tess_rl_->BindVertexStream(vb_, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
 		tile_non_tess_rl_->BindVertexStream(tile_non_tess_vid_vb_,
-			make_tuple(vertex_element(VEU_TextureCoord, 2, EF_R32F)));
+			std::make_tuple(vertex_element(VEU_TextureCoord, 2, EF_R32F)));
 		tile_non_tess_rl_->NumInstances(num_tiles_);
 
 		tile_tess_rl_ = rf.MakeRenderLayout();
 		tile_tess_rl_->TopologyType(RenderLayout::TT_4_Ctrl_Pt_PatchList);
 		tile_tess_rl_->BindIndexStream(tile_tess_ib_, EF_R16UI);
 		tile_tess_rl_->NumIndices(TESS_INDEX_COUNT);
-		tile_tess_rl_->BindVertexStream(vb_, make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
+		tile_tess_rl_->BindVertexStream(vb_, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F),
 			vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 			RenderLayout::ST_Instance);
 		tile_tess_rl_->NumInstances(num_tiles_);

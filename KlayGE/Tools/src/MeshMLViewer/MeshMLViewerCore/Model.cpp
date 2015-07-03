@@ -135,9 +135,9 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
 		skinned_tex_vb_->Resize(this->NumVertices() * sizeof(float2));
 		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
-		skinned_rl_->BindVertexStream(skinned_pos_vb_, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-		skinned_rl_->BindVertexStream(skinned_tex_vb_, KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
-		skinned_rl_->BindVertexStream(skinned_tangent_vb_, KlayGE::make_tuple(vertex_element(VEU_Tangent, 0, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_pos_vb_, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+		skinned_rl_->BindVertexStream(skinned_tex_vb_, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+		skinned_rl_->BindVertexStream(skinned_tangent_vb_, std::make_tuple(vertex_element(VEU_Tangent, 0, EF_ABGR32F)));
 		skinned_rl_->BindIndexStream(rl_->GetIndexStream(), rl_->IndexStreamFormat());
 
 		for (uint32_t i = 0; i < rl_->NumVertexStreams(); ++ i)
@@ -241,7 +241,7 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 		tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
 
 		tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
-		tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
+		tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
 			RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
 	}
 
@@ -355,7 +355,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
@@ -807,7 +807,7 @@ void DetailedSkinnedModel::SetTime(float time)
 
 void DetailedSkinnedModel::VisualizeLighting()
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -817,7 +817,7 @@ void DetailedSkinnedModel::VisualizeLighting()
 
 void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
@@ -827,7 +827,7 @@ void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usa
 
 void DetailedSkinnedModel::VisualizeTexture(int slot)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -837,7 +837,7 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 
 void DetailedSkinnedModel::SmoothMesh(bool smooth)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
@@ -847,7 +847,7 @@ void DetailedSkinnedModel::SmoothMesh(bool smooth)
 
 void DetailedSkinnedModel::SetTessFactor(int32_t tess_factor)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());

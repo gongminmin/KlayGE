@@ -188,7 +188,7 @@ namespace KlayGE
 	uint32_t RGBACluster::PrincipalAxis(float4& axis, float* eig_one, float* eig_two) const
 	{
 		// We use these vectors for calculating the covariance matrix...
-		array<float4, MAX_NUM_DATA_POINTS> to_pts;
+		std::array<float4, MAX_NUM_DATA_POINTS> to_pts;
 		float4 to_pts_max(-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max(),
 			-std::numeric_limits<float>::max(), -std::numeric_limits<float>::max());
 		for (uint32_t i = 0; i < this->NumValidPoints(); ++ i)
@@ -198,7 +198,7 @@ namespace KlayGE
 		}
 
 		// Generate a list of unique points...
-		array<float4, MAX_NUM_DATA_POINTS> upts;
+		std::array<float4, MAX_NUM_DATA_POINTS> upts;
 		uint32_t upts_idx = 0;
 		for (uint32_t i = 0; i < this->NumValidPoints(); ++ i)
 		{

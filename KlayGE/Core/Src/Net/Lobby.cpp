@@ -40,7 +40,7 @@ namespace KlayGE
 
 	Lobby::PlayerAddrsIter Lobby::ID(sockaddr_in const & addr)
 	{
-		for (KLAYGE_AUTO(iter, players_.begin()); iter != players_.end(); ++ iter)
+		for (auto iter = players_.begin(); iter != players_.end(); ++ iter)
 		{
 			if (0 == std::memcmp(&addr, &(iter->second.addr), sizeof(addr)))
 			{
@@ -103,11 +103,11 @@ namespace KlayGE
 			}
 
 			// 发送信息
-			typedef KLAYGE_DECLTYPE(players_) PlayersType;
+			typedef decltype(players_) PlayersType;
 			KLAYGE_FOREACH(PlayersType::reference player, players_)
 			{
 				SendQueueType& msgs = player.second.msgs;
-				typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type MsgsType;
+				typedef std::remove_reference<decltype(msgs)>::type MsgsType;
 				KLAYGE_FOREACH(MsgsType::reference msg, msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
@@ -115,7 +115,7 @@ namespace KlayGE
 			}
 
 			// 检查是否有在线用户超时
-			for (KLAYGE_AUTO(iter, players_.begin()); iter != players_.end();)
+			for (auto iter = players_.begin(); iter != players_.end();)
 			{
 				// 大于20秒
 				if (std::time(nullptr) - iter->second.time >= 20 * 1000)
@@ -135,7 +135,7 @@ namespace KlayGE
 	char Lobby::NumPlayer() const
 	{
 		char n = 0;
-		typedef KLAYGE_DECLTYPE(players_) PlayersType;
+		typedef decltype(players_) PlayersType;
 		KLAYGE_FOREACH(PlayersType::const_reference player, players_)
 		{
 			if (player.first != 0)
@@ -175,7 +175,7 @@ namespace KlayGE
 		players_.resize(maxPlayers);
 		PlayerAddrs(players_).swap(players_);
 
-		typedef KLAYGE_DECLTYPE(players_) PlayersType;
+		typedef decltype(players_) PlayersType;
 		KLAYGE_FOREACH(PlayersType::reference player, players_)
 		{
 			player.first = 0;
@@ -218,7 +218,7 @@ namespace KlayGE
 		//			Player名字		16 字节
 
 		char id = 1;
-		KLAYGE_AUTO(iter, players_.begin());
+		auto iter = players_.begin();
 		for (; iter != this->players_.end(); ++ iter, ++ id)
 		{
 			if (0 == iter->first)

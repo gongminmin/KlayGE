@@ -161,7 +161,7 @@ DetailedModel::DetailedModel(std::wstring const & name)
 
 void DetailedModel::EyePos(KlayGE::float3 const & eye_pos)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->EyePos(eye_pos);
@@ -170,7 +170,7 @@ void DetailedModel::EyePos(KlayGE::float3 const & eye_pos)
 
 void DetailedModel::LightPos(KlayGE::float3 const & light_pos)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->LightPos(light_pos);
@@ -179,7 +179,7 @@ void DetailedModel::LightPos(KlayGE::float3 const & light_pos)
 
 void DetailedModel::LightColor(KlayGE::float3 const & light_color)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->LightColor(light_color);
@@ -188,7 +188,7 @@ void DetailedModel::LightColor(KlayGE::float3 const & light_color)
 
 void DetailedModel::LightFalloff(KlayGE::float3 const & light_falloff)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->LightFalloff(light_falloff);
@@ -197,7 +197,7 @@ void DetailedModel::LightFalloff(KlayGE::float3 const & light_falloff)
 
 void DetailedModel::BackFaceDepthPass(bool dfdp)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->BackFaceDepthPass(dfdp);
@@ -206,7 +206,7 @@ void DetailedModel::BackFaceDepthPass(bool dfdp)
 
 void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->BackFaceDepthTex(tex);
@@ -215,7 +215,7 @@ void DetailedModel::BackFaceDepthTex(KlayGE::TexturePtr const & tex)
 
 void DetailedModel::SigmaT(float sigma_t)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->SigmaT(sigma_t);
@@ -224,7 +224,7 @@ void DetailedModel::SigmaT(float sigma_t)
 
 void DetailedModel::MtlThickness(float thickness)
 {
-	typedef KLAYGE_DECLTYPE(subrenderables_) MeshesType;
+	typedef decltype(subrenderables_) MeshesType;
 	KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
 	{
 		checked_pointer_cast<DetailedMesh>(mesh)->MtlThickness(thickness);

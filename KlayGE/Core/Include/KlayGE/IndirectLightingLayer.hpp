@@ -35,6 +35,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <array>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API IndirectLightingLayer
@@ -83,10 +85,10 @@ namespace KlayGE
 		TexturePtr g_buffer_depth_tex_;
 		CameraPtr g_buffer_camera_;
 
-		array<TexturePtr, 2> rsm_texs_;
+		std::array<TexturePtr, 2> rsm_texs_;
 		TexturePtr rsm_depth_tex_;
 
-		array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
+		std::array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
 
 		RenderTechniquePtr vpls_lighting_instance_id_tech_;

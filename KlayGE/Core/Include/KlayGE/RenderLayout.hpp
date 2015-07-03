@@ -21,6 +21,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <vector>
+#include <tuple>
 
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/ElementFormat.hpp>
@@ -155,7 +156,7 @@ namespace KlayGE
 		void BindVertexStream(GraphicsBufferPtr const & buffer, tuple_type const & vertex_elems,
 			stream_type type = ST_Geometry, uint32_t freq = 1)
 		{
-			this->BindVertexStream(buffer, Tuple2Vector<tuple_type, tuple_size<tuple_type>::value>::Do(vertex_elems), type, freq);
+			this->BindVertexStream(buffer, Tuple2Vector<tuple_type, std::tuple_size<tuple_type>::value>::Do(vertex_elems), type, freq);
 		}
 		void BindVertexStream(GraphicsBufferPtr const & buffer, vertex_elements_type const & vet,
 			stream_type type = ST_Geometry, uint32_t freq = 1);
@@ -259,7 +260,7 @@ namespace KlayGE
 			static vertex_elements_type Do(tuple_type const & t)
 			{
 				vertex_elements_type ret = Tuple2Vector<tuple_type, N - 1>::Do(t);
-				ret.push_back(get<N - 1>(t));
+				ret.push_back(std::get<N - 1>(t));
 				return ret;
 			}
 		};
@@ -268,7 +269,7 @@ namespace KlayGE
 		{
 			static vertex_elements_type Do(tuple_type const & t)
 			{
-				return vertex_elements_type(1, get<0>(t));
+				return vertex_elements_type(1, std::get<0>(t));
 			}
 		};
 

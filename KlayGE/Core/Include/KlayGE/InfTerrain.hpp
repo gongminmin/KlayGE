@@ -15,6 +15,10 @@
 
 #pragma once
 
+#include <KlayGE/PreDeclare.hpp>
+
+#include <array>
+
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
@@ -231,8 +235,8 @@ namespace KlayGE
 		RenderEffectParameterPtr detail_uv_param_;
 		RenderEffectParameterPtr sample_spacing_param_;
 		RenderEffectParameterPtr frame_size_param_;
-		KlayGE::array<RenderEffectParameterPtr, 4> terrain_tex_layer_params_;
-		KlayGE::array<RenderEffectParameterPtr, 4> terrain_tex_layer_scale_params_;
+		std::array<RenderEffectParameterPtr, 4> terrain_tex_layer_params_;
+		std::array<RenderEffectParameterPtr, 4> terrain_tex_layer_scale_params_;
 
 		GraphicsBufferPtr tile_non_tess_ib_;
 		GraphicsBufferPtr tile_non_tess_vid_vb_;

@@ -44,10 +44,10 @@ private:
 	// Depth Peeling
 	std::vector<KlayGE::FrameBufferPtr> peeling_fbs_;
 	std::vector<KlayGE::TexturePtr> peeled_texs_;
-	KlayGE::array<KlayGE::FrameBufferPtr, 2> depth_fbs_;
-	KlayGE::array<KlayGE::TexturePtr, 2> depth_texs_;
-	KlayGE::array<KlayGE::RenderViewPtr, 2> depth_views_;
-	KlayGE::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
+	std::array<KlayGE::FrameBufferPtr, 2> depth_fbs_;
+	std::array<KlayGE::TexturePtr, 2> depth_texs_;
+	std::array<KlayGE::RenderViewPtr, 2> depth_views_;
+	std::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 	KlayGE::PostProcessPtr blend_pp_;
 	KlayGE::uint32_t num_layers_;
 

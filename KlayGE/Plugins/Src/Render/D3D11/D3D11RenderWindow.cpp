@@ -204,7 +204,7 @@ namespace KlayGE
 				feature_levels.push_back(available_feature_levels[i].second);
 			}
 
-			typedef KLAYGE_DECLTYPE(dev_type_behaviors) DevTypeBehaviorsType;
+			typedef decltype(dev_type_behaviors) DevTypeBehaviorsType;
 			KLAYGE_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
 			{
 				ID3D11Device* device = nullptr;

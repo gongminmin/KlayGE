@@ -377,7 +377,7 @@ namespace
 					init_data.row_pitch = sizeof(pos);
 					init_data.data = &pos[0];
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-					normalization_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					normalization_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
 				sat_pp_->InputPin(0, spread_tex_);
@@ -525,7 +525,7 @@ namespace
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 				}
 				else
 				{
@@ -587,7 +587,7 @@ namespace
 					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
 					init_data.slice_pitch = 0;
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-					bokeh_rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
 					init_data.data = &indices[0];
 					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
@@ -1105,14 +1105,14 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				int32_t i = loading_percentage_ - (80 - NUM_LINE);
 				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 				{
-					std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+					std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 					float3 pos;
 					pos.x() = boost::any_cast<float>(scr_pos[0]);
 					pos.y() = boost::any_cast<float>(scr_pos[1]);
 					pos.z() = boost::any_cast<float>(scr_pos[2]);
 
-					std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", KlayGE::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+					std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 					Color clr;
 					clr.r() = boost::any_cast<float>(scr_clr[0]);

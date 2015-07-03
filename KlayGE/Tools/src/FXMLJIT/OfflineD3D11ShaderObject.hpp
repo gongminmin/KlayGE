@@ -143,10 +143,10 @@ namespace KlayGE
 				std::vector<uint32_t> const & shader_desc_ids, shared_ptr<std::vector<uint8_t> > const & code_blob);
 
 		private:
-			array<std::pair<shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
-			array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
+			std::array<std::pair<shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+			std::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
-			array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;
+			std::array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;
 
 			uint32_t vs_signature_;
 

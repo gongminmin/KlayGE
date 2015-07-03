@@ -142,8 +142,8 @@ namespace KlayGE
 	PerfRangePtr PerfProfiler::CreatePerfRange(int category, std::string const & name)
 	{
 		PerfRangePtr range = MakeSharedPtr<PerfRange>();
-		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(get<3>(perf_ranges_[0]))>::type PerfDataType;
-		perf_ranges_.push_back(KlayGE::make_tuple(category, name, range, PerfDataType()));
+		typedef std::remove_reference<decltype(std::get<3>(perf_ranges_[0]))>::type PerfDataType;
+		perf_ranges_.push_back(std::make_tuple(category, name, range, PerfDataType()));
 		return range;
 	}
 
@@ -155,14 +155,14 @@ namespace KlayGE
 			RenderEngine& re = rf.RenderEngineInstance();
 			re.UpdateGPUTimestampsFrequency();
 
-			typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
+			typedef decltype(perf_ranges_) PerfRangesType;
 			KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
 			{
-				if (get<2>(range)->Dirty())
+				if (std::get<2>(range)->Dirty())
 				{
-					get<2>(range)->CollectData();
-					get<3>(range).push_back(KlayGE::make_tuple(frame_id_,
-						get<2>(range)->CPUTime(), get<2>(range)->GPUTime()));
+					std::get<2>(range)->CollectData();
+					std::get<3>(range).push_back(std::make_tuple(frame_id_,
+						std::get<2>(range)->CPUTime(), std::get<2>(range)->GPUTime()));
 				}
 			}
 
@@ -178,17 +178,17 @@ namespace KlayGE
 			ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','
 				<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
 
-			typedef KLAYGE_DECLTYPE(perf_ranges_) PerfRangesType;
+			typedef decltype(perf_ranges_) PerfRangesType;
 			KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
 			{
-				typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(get<3>(range))>::type PerfDataType;
-				KLAYGE_FOREACH(PerfDataType::const_reference data, get<3>(range))
+				typedef std::remove_reference<decltype(std::get<3>(range))>::type PerfDataType;
+				KLAYGE_FOREACH(PerfDataType::const_reference data, std::get<3>(range))
 				{
-					ofs << get<0>(data) << ',' << get<0>(range) << ',' << get<1>(range) << ','
-						<< get<1>(data) * 1000 << ',';
-					if (get<2>(data) >= 0)
+					ofs << std::get<0>(data) << ',' << std::get<0>(range) << ',' << std::get<1>(range) << ','
+						<< std::get<1>(data) * 1000 << ',';
+					if (std::get<2>(data) >= 0)
 					{
-						ofs << get<2>(data) * 1000;
+						ofs << std::get<2>(data) * 1000;
 					}
 					ofs << std::endl;
 				}

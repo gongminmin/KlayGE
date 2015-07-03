@@ -38,6 +38,7 @@
 
 #include <map>
 #include <string>
+#include <tuple>
 
 namespace KlayGE
 {
@@ -84,8 +85,8 @@ namespace KlayGE
 	private:
 		static shared_ptr<PerfProfiler> perf_profiler_instance_;
 
-		std::vector<tuple<int, std::string, PerfRangePtr,
-			std::vector<tuple<uint32_t, double, double> > > > perf_ranges_;
+		std::vector<std::tuple<int, std::string, PerfRangePtr,
+			std::vector<std::tuple<uint32_t, double, double> > > > perf_ranges_;
 		uint32_t frame_id_;
 	};
 }

@@ -1052,11 +1052,11 @@ namespace KlayGE
 
 		glsl_program_ = glCreateProgram();
 
-		shader_func_names_ = MakeSharedPtr<array<std::string, ST_NumShaderTypes> >();
-		glsl_srcs_ = MakeSharedPtr<array<shared_ptr<std::string>, ST_NumShaderTypes> >();
+		shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes> >();
+		glsl_srcs_ = MakeSharedPtr<std::array<shared_ptr<std::string>, ST_NumShaderTypes> >();
 
-		pnames_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
-		glsl_res_names_ = MakeSharedPtr<array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		pnames_ = MakeSharedPtr<std::array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		glsl_res_names_ = MakeSharedPtr<std::array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
 
 		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
@@ -1437,16 +1437,16 @@ namespace KlayGE
 				bool found = false;
 				for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
 				{
-					if (get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
+					if (std::get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
 					{
-						get<3>(tex_sampler_binds_[k]) |= 1UL << type;
+						std::get<3>(tex_sampler_binds_[k]) |= 1UL << type;
 						found = true;
 						break;
 					}
 				}
 				if (!found)
 				{
-					tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
+					tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name,
 						effect.ParameterByName(tex_name), effect.ParameterByName(sampler_name), 1UL << type));
 				}
 			}
@@ -1546,10 +1546,10 @@ namespace KlayGE
 			std::vector<std::pair<std::string, std::string> > tex_sampler_pairs;
 			for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 			{
-				if (get<3>(tex_sampler_binds_[i]) | (1UL << type))
+				if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
 				{
-					tex_sampler_pairs.push_back(std::make_pair(*get<1>(tex_sampler_binds_[i])->Name(),
-						*get<2>(tex_sampler_binds_[i])->Name()));
+					tex_sampler_pairs.push_back(std::make_pair(*std::get<1>(tex_sampler_binds_[i])->Name(),
+						*std::get<2>(tex_sampler_binds_[i])->Name()));
 				}
 			}
 
@@ -1875,7 +1875,7 @@ namespace KlayGE
 
 							std::vector<std::string>& msgs = err_lines[err_line];
 							bool found = false;
-							typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(msgs)>::type ErrMsgsType;
+							typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
 							KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
 							{
 								if (msg == err_str)
@@ -1892,7 +1892,7 @@ namespace KlayGE
 						}
 					}
 
-					for (KLAYGE_AUTO(iter, err_lines.begin()); iter != err_lines.end(); ++ iter)
+					for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
 					{
 						if (iter->first >= 0)
 						{
@@ -1922,7 +1922,7 @@ namespace KlayGE
 							LogInfo("...");
 						}
 
-						typedef KLAYGE_DECLTYPE(iter->second) ErrMsgsType;
+						typedef decltype(iter->second) ErrMsgsType;
 						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
 						{
 							LogError(msg.c_str());
@@ -2009,16 +2009,16 @@ namespace KlayGE
 								bool found = false;
 								for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
 								{
-									if (get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
+									if (std::get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
 									{
-										get<3>(tex_sampler_binds_[k]) |= 1UL << type;
+										std::get<3>(tex_sampler_binds_[k]) |= 1UL << type;
 										found = true;
 										break;
 									}
 								}
 								if (!found)
 								{
-									tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
+									tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name,
 										param, effect.ParameterByName(sampler_names[j]), 1UL << type));
 								}
 
@@ -2168,23 +2168,23 @@ namespace KlayGE
 
 			for (uint32_t j = 0; j < so->tex_sampler_binds_.size(); ++ j)
 			{
-				if (get<3>(so->tex_sampler_binds_[j]) | (1UL << type))
+				if (std::get<3>(so->tex_sampler_binds_[j]) | (1UL << type))
 				{
-					std::string const & combined_sampler_name = get<0>(so->tex_sampler_binds_[j]);
+					std::string const & combined_sampler_name = std::get<0>(so->tex_sampler_binds_[j]);
 					bool found = false;
 					for (uint32_t k = 0; k < tex_sampler_binds_.size(); ++ k)
 					{
-						if (get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
+						if (std::get<0>(tex_sampler_binds_[k]) == combined_sampler_name)
 						{
-							get<3>(tex_sampler_binds_[k]) |= 1UL << type;
+							std::get<3>(tex_sampler_binds_[k]) |= 1UL << type;
 							found = true;
 							break;
 						}
 					}
 					if (!found)
 					{
-						tex_sampler_binds_.push_back(KlayGE::make_tuple(combined_sampler_name,
-							get<1>(so->tex_sampler_binds_[j]), get<2>(so->tex_sampler_binds_[j]), 1UL << type));
+						tex_sampler_binds_.push_back(std::make_tuple(combined_sampler_name,
+							std::get<1>(so->tex_sampler_binds_[j]), std::get<2>(so->tex_sampler_binds_[j]), 1UL << type));
 					}
 				}
 			}
@@ -2253,10 +2253,10 @@ namespace KlayGE
 							{
 								for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 								{
-									if (get<0>(tex_sampler_binds_[i]) == (*(*pnames_)[type])[pi])
+									if (std::get<0>(tex_sampler_binds_[i]) == (*(*pnames_)[type])[pi])
 									{
 										parameter_bind_t pb;
-										pb.combined_sampler_name = get<0>(tex_sampler_binds_[i]);
+										pb.combined_sampler_name = std::get<0>(tex_sampler_binds_[i]);
 										pb.location = location;
 										pb.shader_type = type;
 										pb.tex_sampler_bind_index = static_cast<int>(i);
@@ -2268,7 +2268,7 @@ namespace KlayGE
 
 										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_,
 											gl_bind_targets_, gl_bind_textures_,
-											location, index, get<1>(tex_sampler_binds_[i]), get<2>(tex_sampler_binds_[i]));
+											location, index, std::get<1>(tex_sampler_binds_[i]), std::get<2>(tex_sampler_binds_[i]));
 
 										param_binds_.push_back(pb);
 
@@ -2315,10 +2315,10 @@ namespace KlayGE
 		ret->tex_sampler_binds_.resize(tex_sampler_binds_.size());
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 		{
-			get<0>(ret->tex_sampler_binds_[i]) = get<0>(tex_sampler_binds_[i]);
-			get<1>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(get<1>(tex_sampler_binds_[i])->Name()));
-			get<2>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(get<2>(tex_sampler_binds_[i])->Name()));
-			get<3>(ret->tex_sampler_binds_[i]) = get<3>(tex_sampler_binds_[i]);
+			std::get<0>(ret->tex_sampler_binds_[i]) = std::get<0>(tex_sampler_binds_[i]);
+			std::get<1>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(std::get<1>(tex_sampler_binds_[i])->Name()));
+			std::get<2>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(std::get<2>(tex_sampler_binds_[i])->Name()));
+			std::get<3>(ret->tex_sampler_binds_[i]) = std::get<3>(tex_sampler_binds_[i]);
 		}
 
 		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_get_program_binary()) && glsl_bin_program_)
@@ -2396,7 +2396,7 @@ namespace KlayGE
 
 			ret->attrib_locs_ = attrib_locs_;
 
-			typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
+			typedef decltype(param_binds_) ParamBindsType;
 			KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 			{
 				if (pb.param)
@@ -2409,7 +2409,7 @@ namespace KlayGE
 					std::string const & pname = pb.combined_sampler_name;
 					for (size_t j = 0; j < ret->tex_sampler_binds_.size(); ++ j)
 					{
-						if (get<0>(ret->tex_sampler_binds_[j]) == pname)
+						if (std::get<0>(ret->tex_sampler_binds_[j]) == pname)
 						{
 							parameter_bind_t new_pb;
 							new_pb.combined_sampler_name = pname;
@@ -2425,8 +2425,8 @@ namespace KlayGE
 							new_pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_,
 								ret->gl_bind_targets_, ret->gl_bind_textures_,
 								new_pb.location, index,
-								get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
-								get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
+								std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
+								std::get<2>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]));
 
 							ret->param_binds_.push_back(new_pb);
 
@@ -2442,7 +2442,7 @@ namespace KlayGE
 
 	GLint OGLESShaderObject::GetAttribLocation(VertexElementUsage usage, uint8_t usage_index)
 	{
-		KLAYGE_AUTO(iter, attrib_locs_.find(std::make_pair(usage, usage_index)));
+		auto iter = attrib_locs_.find(std::make_pair(usage, usage_index));
 		if (iter != attrib_locs_.end())
 		{
 			return iter->second;
@@ -2783,7 +2783,7 @@ namespace KlayGE
 					glGetActiveUniform(glsl_program_, uniform_indices[j], uniform_name_lens[j],
 						nullptr, &size, &type, &uniform_name[0]);
 
-					KLAYGE_AUTO(iter, std::find(uniform_name.begin(), uniform_name.end(), '['));
+					auto iter = std::find(uniform_name.begin(), uniform_name.end(), '[');
 					if (iter != uniform_name.end())
 					{
 						*iter = '\0';
@@ -2817,7 +2817,7 @@ namespace KlayGE
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
-		typedef KLAYGE_DECLTYPE(param_binds_) ParamBindsType;
+		typedef decltype(param_binds_) ParamBindsType;
 		KLAYGE_FOREACH(ParamBindsType::reference pb, param_binds_)
 		{
 			pb.func();

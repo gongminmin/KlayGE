@@ -189,7 +189,7 @@ namespace KlayGE
 		protected:
 			OfflineRenderDeviceCaps caps_;
 
-			array<bool, ST_NumShaderTypes> is_shader_validate_;
+			std::array<bool, ST_NumShaderTypes> is_shader_validate_;
 
 			bool is_validate_;
 			uint32_t cs_block_size_x_, cs_block_size_y_, cs_block_size_z_;

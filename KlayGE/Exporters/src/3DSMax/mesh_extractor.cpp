@@ -195,7 +195,7 @@ namespace KlayGE
 			physique_mods_.clear();
 			skins_.clear();
 			skin_mods_.clear();
-			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(nodes)>::type nodes_type;
+			typedef std::remove_reference<decltype(nodes)>::type nodes_type;
 			KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 			{
 				Object* obj_ref = node->GetObjectRef();
@@ -240,7 +240,7 @@ namespace KlayGE
 		std::vector<INode*> jnodes;
 		std::vector<INode*> mnodes;
 
-		typedef KLAYGE_DECLTYPE(joint_nodes_) jn_type;
+		typedef decltype(joint_nodes_) jn_type;
 		KLAYGE_FOREACH(jn_type::const_reference jn, joint_nodes_)
 		{
 			if (is_bone(jn.first))
@@ -248,7 +248,7 @@ namespace KlayGE
 				jnodes.push_back(jn.first);
 			}
 		}
-		typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(nodes)>::type nodes_type;
+		typedef std::remove_reference<decltype(nodes)>::type nodes_type;
 		KLAYGE_FOREACH(nodes_type::const_reference node, nodes)
 		{
 			if (is_bone(node))
@@ -269,13 +269,13 @@ namespace KlayGE
 		std::sort(mnodes.begin(), mnodes.end());
 		mnodes.erase(std::unique(mnodes.begin(), mnodes.end()), mnodes.end());
 
-		typedef KLAYGE_DECLTYPE(jnodes) jnodes_type;
+		typedef decltype(jnodes) jnodes_type;
 		KLAYGE_FOREACH(jnodes_type::const_reference jnode, jnodes)
 		{
 			this->extract_bone(jnode);
 		}
 		
-		typedef KLAYGE_DECLTYPE(mnodes) mnodes_type;
+		typedef decltype(mnodes) mnodes_type;
 		KLAYGE_FOREACH(mnodes_type::const_reference mnode, mnodes)
 		{
 			this->extract_object(mnode);
@@ -560,7 +560,7 @@ namespace KlayGE
 					}
 
 					vertex_index.pos_index = pos_indices[offset];
-					typedef KLAYGE_DECLTYPE(tex_indices) ti_type;
+					typedef decltype(tex_indices) ti_type;
 					KLAYGE_FOREACH(ti_type::const_reference tex_index, tex_indices)
 					{
 						vertex_index.tex_indices.push_back(tex_index.second[offset]);
@@ -618,7 +618,7 @@ namespace KlayGE
 				}
 
 				Matrix3 tm = node->GetObjTMAfterWSM(0);
-				typedef KLAYGE_DECLTYPE(positions) positions_type;
+				typedef decltype(positions) positions_type;
 				KLAYGE_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					if (pos_binds.second.empty())
@@ -664,7 +664,7 @@ namespace KlayGE
 			}
 			else
 			{
-				typedef KLAYGE_DECLTYPE(positions) positions_type;
+				typedef decltype(positions) positions_type;
 				KLAYGE_FOREACH(positions_type::reference pos_binds, positions)
 				{
 					pos_binds.first = pos_binds.first * obj_matrix;
@@ -688,7 +688,7 @@ namespace KlayGE
 
 			obj_vertices.resize(vertex_indices.size());
 			int ver_index = 0;
-			typedef KLAYGE_DECLTYPE(vertex_indices) vi_type;
+			typedef decltype(vertex_indices) vi_type;
 			KLAYGE_FOREACH(vi_type::const_reference vertex_index, vertex_indices)
 			{
 				vertex_t& vertex = obj_vertices[ver_index];
@@ -850,7 +850,7 @@ namespace KlayGE
 
 	void meshml_extractor::extract_all_joint_tms()
 	{
-		typedef KLAYGE_DECLTYPE(joint_nodes_) jn_type;
+		typedef decltype(joint_nodes_) jn_type;
 		KLAYGE_FOREACH(jn_type::reference jn, joint_nodes_)
 		{
 			INode* parent_node = jn.first->GetParentNode();
@@ -892,9 +892,9 @@ namespace KlayGE
 
 			jn.second = Inverse(jn.first->GetNodeTM(0)) * skin_init_tm;
 
-			KLAYGE_AUTO(iter, joint_node_to_id_.find(jn.first));
+			auto iter = joint_node_to_id_.find(jn.first);
 			assert(iter != joint_node_to_id_.end());
-			KLAYGE_AUTO(par_iter, joint_node_to_id_.find(parent_node));
+			auto par_iter = joint_node_to_id_.find(parent_node);
 			assert(par_iter != joint_node_to_id_.end());
 			meshml_obj_.SetJoint(iter->second, tstr_to_str(jn.first->GetName()), par_iter->second,
 				this->rh_to_lh(skin_init_tm));
@@ -906,7 +906,7 @@ namespace KlayGE
 		if (weight > 0)
 		{
 			bool repeat = false;
-			typedef KlayGE::remove_reference<KLAYGE_DECLTYPE(binds)>::type binds_type;
+			typedef std::remove_reference<decltype(binds)>::type binds_type;
 			KLAYGE_FOREACH(binds_type::reference bind, binds)
 			{
 				if (bind.first == joint_node)

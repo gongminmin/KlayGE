@@ -75,7 +75,7 @@ namespace KlayGE
 			if (!sendQueue_.empty())
 			{
 				// 发送队列里的消息
-				typedef KLAYGE_DECLTYPE(sendQueue_) SendQueneType;
+				typedef decltype(sendQueue_) SendQueneType;
 				KLAYGE_FOREACH(SendQueneType::reference msg, sendQueue_)
 				{
 					socket_.Send(&msg[0], static_cast<int>(msg.size()));
@@ -90,7 +90,7 @@ namespace KlayGE
 				std::memcpy(&ID, &revBuf[1], 4);
 
 				// 删除已发送的信息
-				for (KLAYGE_AUTO(iter, sendQueue_.begin()); iter != sendQueue_.end();)
+				for (auto iter = sendQueue_.begin(); iter != sendQueue_.end();)
 				{
 					std::vector<char>& msg = *iter;
 

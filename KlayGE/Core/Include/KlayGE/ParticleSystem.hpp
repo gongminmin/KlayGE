@@ -39,6 +39,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 
 #include <vector>
+#include <random>
 
 namespace KlayGE
 {
@@ -375,8 +376,8 @@ namespace KlayGE
 		float RandomGen();
 
 	private:
-		ranlux24_base gen_;
-		uniform_int_distribution<> random_dis_;
+		std::ranlux24_base gen_;
+		std::uniform_int_distribution<> random_dis_;
 	};
 
 	class KLAYGE_CORE_API PolylineParticleUpdater : public ParticleUpdater

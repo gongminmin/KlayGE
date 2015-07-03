@@ -54,20 +54,6 @@ private:
 } nullptr = {};
 #endif
 
-#ifdef KLAYGE_CXX11_CORE_STATIC_ASSERT_SUPPORT
-	#define KLAYGE_STATIC_ASSERT(x, msg) static_assert(x, msg)
-#else
-	#include <boost/static_assert.hpp>
-	#define KLAYGE_STATIC_ASSERT(x, msg) BOOST_STATIC_ASSERT_MSG(x, msg)
-#endif
-#ifdef KLAYGE_CXX11_CORE_DECLTYPE_SUPPORT
-	#define KLAYGE_AUTO(var, expr) auto var = expr
-	#define KLAYGE_DECLTYPE(expr) decltype(expr)
-#else
-	#include <boost/typeof/typeof.hpp>
-	#define KLAYGE_AUTO(var, expr) BOOST_AUTO(var, expr)
-	#define KLAYGE_DECLTYPE(expr) BOOST_TYPEOF(expr)
-#endif
 #ifdef KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 	#define KLAYGE_FOREACH(var, col) for (var : col)
 #else
@@ -102,27 +88,6 @@ private:
 	namespace KlayGE
 	{
 		using boost::move;
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_ARRAY_SUPPORT
-	#include <array>
-	namespace KlayGE
-	{
-		using std::array;
-	}
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 6385)
-	#endif
-	#include <boost/array.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace KlayGE
-	{
-		using boost::array;
 	}
 #endif
 
@@ -212,71 +177,6 @@ private:
 	namespace KlayGE
 	{
 		namespace chrono = boost::chrono;
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_CSTDINT_SUPPORT
-	#include <cstdint>
-	namespace KlayGE
-	{
-		using std::uint64_t;
-		using std::uint32_t;
-		using std::uint16_t;
-		using std::uint8_t;
-		using std::int64_t;
-		using std::int32_t;
-		using std::int16_t;
-		using std::int8_t;
-	}
-#else
-	#include <boost/cstdint.hpp>
-	namespace KlayGE
-	{
-		using boost::uint64_t;
-		using boost::uint32_t;
-		using boost::uint16_t;
-		using boost::uint8_t;
-		using boost::int64_t;
-		using boost::int32_t;
-		using boost::int16_t;
-		using boost::int8_t;
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_FUNCTIONAL_SUPPORT
-	#include <functional>
-	namespace KlayGE
-	{
-		using std::result_of;
-	}
-#else
-	#include <boost/utility/result_of.hpp>
-	namespace KlayGE
-	{
-		using boost::result_of;
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_RANDOM_SUPPORT
-	#include <random>
-	namespace KlayGE
-	{
-		using std::ranlux24_base;
-		using std::uniform_int_distribution;
-	}
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 4100 4127 4512 6297 6326 6385)
-	#endif
-	#include <boost/random.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace KlayGE
-	{
-		using boost::random::ranlux24_base;
-		using boost::random::uniform_int_distribution;
 	}
 #endif
 
@@ -373,102 +273,18 @@ private:
 	}
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_TYPE_TRAITS_SUPPORT
-	#include <type_traits>
-	namespace KlayGE
+#if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
+		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
+		|| (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 140)))
+#include <type_traits>
+namespace std
+{
+	template <typename T>
+	struct is_trivially_destructible
 	{
-		using std::add_lvalue_reference;
-		using std::is_same;
-		using std::remove_reference;
-		using std::conditional;
-#if ((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
-			|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
-			|| (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 140))
-		using std::is_trivially_destructible;
-#else
-		template <typename T>
-		struct is_trivially_destructible
-		{
-			static const bool value = std::has_trivial_destructor<T>::value;
-		};
-#endif
-	}
-#else
-	#include <boost/type_traits.hpp>
-	namespace KlayGE
-	{
-		using boost::add_lvalue_reference;
-		using boost::is_same;
-		using boost::remove_reference;
-		template <bool B, typename T, typename F>
-		struct conditional
-		{
-			typedef T type;
-		};
-		template <typename T, typename F>
-		struct conditional<false, T, F>
-		{
-			typedef F type;
-		};
-		template <typename T>
-		struct is_trivially_destructible
-		{
-			static const bool value = boost::has_trivial_destructor<T>::value;
-		};
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_TUPLE_SUPPORT
-	#include <tuple>
-	namespace KlayGE
-	{
-		using std::tuple;
-		using std::get;
-		using std::make_tuple;
-		using std::tuple_size;
-	}
-#else
-	#include <boost/tuple/tuple.hpp>
-	namespace KlayGE
-	{
-		using boost::tuple;
-		using boost::get;
-		using boost::make_tuple;
-		template <typename tuple_type>
-		struct tuple_size
-		{
-			static const size_t value = boost::tuples::length<tuple_type>::value;
-		};
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_UNORDERED_SUPPORT
-	#include <unordered_map>
-	#include <unordered_set>
-	namespace KlayGE
-	{
-		using std::unordered_map;
-		using std::unordered_multimap;
-		using std::unordered_set;
-		using std::unordered_multiset;
-	}
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 4100 6011 6334)
-	#endif
-		#include <boost/unordered_map.hpp>
-		#include <boost/unordered_set.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace KlayGE
-	{
-		using boost::unordered_map;
-		using boost::unordered_multimap;
-		using boost::unordered_set;
-		using boost::unordered_multiset;
-	}
+		static const bool value = std::has_trivial_destructor<T>::value;
+	};
+}
 #endif
 
 #endif		// _KFL_CXX11_HPP

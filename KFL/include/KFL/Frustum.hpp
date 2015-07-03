@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
+#include <array>
 
 namespace KlayGE
 {
@@ -72,10 +73,10 @@ namespace KlayGE
 		BoundOverlap Intersect(Frustum_T<T> const & frustum) const;
 
 	private:
-		typedef array<Plane_T<T>, 6> planes_t;
+		typedef std::array<Plane_T<T>, 6> planes_t;
 		planes_t planes_;
 
-		typedef array<Vector_T<T, 3>, 8> corners_t;
+		typedef std::array<Vector_T<T, 3>, 8> corners_t;
 		corners_t corners_;
 	};
 }

@@ -259,7 +259,7 @@ namespace KlayGE
 	uint32_t SMBios::TypeCount(uint8_t type) const
 	{
 		uint32_t ret = 0;
-		typedef KLAYGE_DECLTYPE(smbios_tables_) SMBiosTablesType;
+		typedef decltype(smbios_tables_) SMBiosTablesType;
 		KLAYGE_FOREACH(SMBiosTablesType::const_reference table, smbios_tables_)
 		{
 			if (table.type == type)
@@ -306,7 +306,7 @@ namespace KlayGE
 		BOOST_ASSERT(smbios_data_);
 
 		smbios_index_iter_ = smbios_tables_.end();
-		for (KLAYGE_AUTO(iter, smbios_tables_.begin()); iter != smbios_tables_.end(); ++ iter)
+		for (auto iter = smbios_tables_.begin(); iter != smbios_tables_.end(); ++ iter)
 		{
 			if (iter->type == type)
 			{
@@ -325,7 +325,7 @@ namespace KlayGE
 		if (smbios_index_iter_ != smbios_tables_.end())
 		{
 			uint8_t const type = smbios_index_iter_->type;
-			KLAYGE_AUTO(iter, smbios_index_iter_ + 1);
+			auto iter = smbios_index_iter_ + 1;
 			smbios_index_iter_ = smbios_tables_.end();
 			for (; iter != smbios_tables_.end(); ++ iter)
 			{

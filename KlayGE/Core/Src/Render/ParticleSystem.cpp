@@ -427,7 +427,7 @@ namespace
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				pos_vb->Resize(sizeof(ParticleInstance));
-				rl_->BindVertexStream(pos_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
+				rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
 				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("ParticleWithGS");
@@ -454,13 +454,13 @@ namespace
 				init_data.slice_pitch = 0;
 				init_data.data = texs;
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-				rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
 					RenderLayout::ST_Geometry, 0);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
 				pos_vb->Resize(sizeof(ParticleInstance));
 				rl_->BindVertexStream(pos_vb,
-					KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
+					std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
 						vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 					RenderLayout::ST_Instance);
 
@@ -666,7 +666,7 @@ namespace KlayGE
 
 	void ParticleSystem::DelEmitter(ParticleEmitterPtr const & emitter)
 	{
-		KLAYGE_AUTO(iter, std::find(emitters_.begin(), emitters_.end(), emitter));
+		auto iter = std::find(emitters_.begin(), emitters_.end(), emitter);
 		if (iter != emitters_.end())
 		{
 			emitters_.erase(iter);
@@ -685,7 +685,7 @@ namespace KlayGE
 
 	void ParticleSystem::DelUpdater(ParticleUpdaterPtr const & updater)
 	{
-		KLAYGE_AUTO(iter, std::find(updaters_.begin(), updaters_.end(), updater));
+		auto iter = std::find(updaters_.begin(), updaters_.end(), updater);
 		if (iter != updaters_.end())
 		{
 			updaters_.erase(iter);
@@ -699,7 +699,7 @@ namespace KlayGE
 
 	void ParticleSystem::ClearParticles()
 	{
-		typedef KLAYGE_DECLTYPE(particles_) ParticlesType;
+		typedef decltype(particles_) ParticlesType;
 		KLAYGE_FOREACH(ParticlesType::reference particle, particles_)
 		{
 			particle.life = 0;
@@ -708,7 +708,7 @@ namespace KlayGE
 
 	void ParticleSystem::SubThreadUpdate(float /*app_time*/, float elapsed_time)
 	{
-		KLAYGE_AUTO(emitter_iter, emitters_.begin());
+		auto emitter_iter = emitters_.begin();
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 		
 		float4x4 view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
@@ -721,7 +721,7 @@ namespace KlayGE
 		{
 			Particle& particle = particles_[i];
 
-			typedef KLAYGE_DECLTYPE(updaters_) UpdatersType;
+			typedef decltype(updaters_) UpdatersType;
 			if (particle.life > 0)
 			{
 				KLAYGE_FOREACH(UpdatersType::reference updater, updaters_)
@@ -1102,7 +1102,7 @@ namespace KlayGE
 		float pos = (par.init_life - par.life) / par.init_life;
 
 		float cur_size = local_size_over_life.back().y();
-		for (KLAYGE_AUTO(iter, local_size_over_life.begin()); iter != local_size_over_life.end() - 1; ++ iter)
+		for (auto iter = local_size_over_life.begin(); iter != local_size_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -1113,7 +1113,7 @@ namespace KlayGE
 		}
 
 		float cur_mass = local_mass_over_life.back().y();
-		for (KLAYGE_AUTO(iter, local_mass_over_life.begin()); iter != local_mass_over_life.end() - 1; ++ iter)
+		for (auto iter = local_mass_over_life.begin(); iter != local_mass_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{
@@ -1124,7 +1124,7 @@ namespace KlayGE
 		}
 
 		float cur_alpha = local_opacity_over_life.back().y();
-		for (KLAYGE_AUTO(iter, local_opacity_over_life.begin()); iter != local_opacity_over_life.end() - 1; ++ iter)
+		for (auto iter = local_opacity_over_life.begin(); iter != local_opacity_over_life.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{

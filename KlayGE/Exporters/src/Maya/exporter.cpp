@@ -200,7 +200,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 					MFnIkJoint fn_joint(root_path);
 
 					// Don't work on existing joints
-					KLAYGE_AUTO(iter, joint_to_id_.find(fn_joint.fullPathName().asChar()));
+					auto iter = joint_to_id_.find(fn_joint.fullPathName().asChar());
 					if (iter == joint_to_id_.end())
 					{
 						this->ExportJoint(NULL, fn_joint, root_path);
@@ -289,7 +289,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 	if (num_frames > 0)
 	{
 		std::map<int, int> joint_id_to_kfs_id;
-		typedef KLAYGE_DECLTYPE(joint_to_id_) JointsType;
+		typedef decltype(joint_to_id_) JointsType;
 		KLAYGE_FOREACH(JointsType::const_reference joint, joint_to_id_)
 		{
 			int kfs_id = meshml_obj_.AllocKeyframes();
@@ -521,7 +521,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 				{
 					for (unsigned int j = 0; j < influence_objs.length(); ++ j)
 					{
-						KLAYGE_AUTO(iter, joint_to_id_.find(influence_objs[j].fullPathName().asChar()));
+						auto iter = joint_to_id_.find(influence_objs[j].fullPathName().asChar());
 						BOOST_ASSERT(iter != joint_to_id_.end());
 
 						joint_paths[i][j] = influence_objs[j];
@@ -543,7 +543,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 
 			while (parent_path.length() > 0)
 			{
-				KLAYGE_AUTO(iter, joint_to_id_.find(parent_path.fullPathName().asChar()));
+				auto iter = joint_to_id_.find(parent_path.fullPathName().asChar());
 				if (iter != joint_to_id_.end())
 				{
 					MItGeometry geom_iterator(dag_path);
@@ -628,7 +628,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 					{
 						if (vert_weights[n] > 0)
 						{
-							KLAYGE_AUTO(iter, joint_to_id_.find(joint_dag_paths[n].fullPathName().asChar()));
+							auto iter = joint_to_id_.find(joint_dag_paths[n].fullPathName().asChar());
 							BOOST_ASSERT(iter != joint_to_id_.end());
 
 							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, vertex_id);
@@ -682,7 +682,7 @@ void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_
 	int parent_id = -1;
 	if (parent_path)
 	{
-		KLAYGE_AUTO(iter, joint_to_id_.find(parent_path->fullPathName().asChar()));
+		auto iter = joint_to_id_.find(parent_path->fullPathName().asChar());
 		BOOST_ASSERT(iter != joint_to_id_.end());
 
 		parent_id = iter->second;
@@ -705,7 +705,7 @@ void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_
 		if (child_path.hasFn(MFn::kJoint))
 		{
 			MFnIkJoint fn_child_joint(child_path);
-			KLAYGE_AUTO(iter, joint_to_id_.find(fn_child_joint.fullPathName().asChar()));
+			auto iter = joint_to_id_.find(fn_child_joint.fullPathName().asChar());
 			if (iter == joint_to_id_.end())
 			{
 				this->ExportJoint(&dag_path, fn_child_joint, child_path);

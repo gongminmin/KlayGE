@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <random>
 
 #include <boost/assert.hpp>
 
@@ -73,7 +74,7 @@ namespace KlayGE
 		sources_[0] = IDSBufferPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
-		for (KLAYGE_AUTO(iter, sources_.begin() + 1); iter != sources_.end(); ++ iter)
+		for (auto iter = sources_.begin() + 1; iter != sources_.end(); ++ iter)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
 			*iter = IDSBufferPtr(temp);
@@ -134,12 +135,12 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(!sources_.empty());
 
-		KLAYGE_AUTO(iter, std::find_if(sources_.begin(), sources_.end(), IsSourceFree));
+		auto iter = std::find_if(sources_.begin(), sources_.end(), IsSourceFree);
 		if (iter == sources_.end())
 		{
 			iter = sources_.begin();
-			ranlux24_base gen;
-			uniform_int_distribution<> dis(0, static_cast<int>(sources_.size()));
+			std::ranlux24_base gen;
+			std::uniform_int_distribution<> dis(0, static_cast<int>(sources_.size()));
 			std::advance(iter, dis(gen));
 		}
 
@@ -160,8 +161,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Play(bool loop)
 	{
-		KLAYGE_AUTO(iter, FreeSource());
-		KLAYGE_AUTO(ds3DBuf, Get3DBufferInterface(iter));
+		auto iter = this->FreeSource();
+		auto ds3DBuf = this->Get3DBufferInterface(iter);
 		if (ds3DBuf)
 		{
 			ds3DBuf->SetPosition(pos_[0], pos_[1], pos_[2], DS3D_IMMEDIATE);
@@ -176,7 +177,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::Stop()
 	{
-		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		typedef decltype(sources_) SourcesType;
 		KLAYGE_FOREACH(SourcesType::reference src, sources_)
 		{
 			src->Stop();
@@ -187,7 +188,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSSoundBuffer::DoReset()
 	{
-		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		typedef decltype(sources_) SourcesType;
 		KLAYGE_FOREACH(SourcesType::reference src, sources_)
 		{
 			src->SetCurrentPosition(0);
@@ -207,7 +208,7 @@ namespace KlayGE
 	void DSSoundBuffer::Volume(float vol)
 	{
 		long const dB(LinearGainToDB(vol));
-		typedef KLAYGE_DECLTYPE(sources_) SourcesType;
+		typedef decltype(sources_) SourcesType;
 		KLAYGE_FOREACH(SourcesType::reference src, sources_)
 		{
 			src->SetVolume(dB);

@@ -75,7 +75,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
@@ -87,7 +87,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rl_->BindVertexStream(pos_vb,
-				KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
+				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
 				RenderLayout::ST_Instance);
 		}
 
@@ -181,7 +181,7 @@ namespace
 			init_data.slice_pitch = 0;
 			init_data.data = texs;
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-			rl_->BindVertexStream(tex_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 			init_data.row_pitch = sizeof(indices);
 			init_data.slice_pitch = 0;
@@ -193,7 +193,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rl_->BindVertexStream(pos_vb,
-				KlayGE::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
+				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
 				RenderLayout::ST_Instance);
 		}
 

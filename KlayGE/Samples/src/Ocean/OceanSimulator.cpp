@@ -81,7 +81,7 @@ namespace KlayGE
 		init_data.slice_pitch = 0;
 		init_data.data = xys;
 		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-		quad_layout_->BindVertexStream(quad_vb, KlayGE::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		quad_layout_->BindVertexStream(quad_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		time_param_ = effect->ParameterByName("time");
 

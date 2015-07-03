@@ -23,6 +23,8 @@
 
 #include <KlayGE/PreDeclare.hpp>
 
+#include <array>
+
 #include <KFL/Color.hpp>
 
 namespace KlayGE
@@ -261,16 +263,16 @@ namespace KlayGE
 		bool				alpha_to_coverage_enable;
 		bool				independent_blend_enable;
 
-		array<bool, 8>				blend_enable;
-		array<bool, 8>				logic_op_enable;
-		array<BlendOperation, 8>		blend_op;
-		array<AlphaBlendFactor, 8>	src_blend;
-		array<AlphaBlendFactor, 8>	dest_blend;
-		array<BlendOperation, 8>		blend_op_alpha;
-		array<AlphaBlendFactor, 8>	src_blend_alpha;
-		array<AlphaBlendFactor, 8>	dest_blend_alpha;
-		array<LogicOperation, 8>		logic_op;
-		array<uint8_t, 8>			color_write_mask;
+		std::array<bool, 8>				blend_enable;
+		std::array<bool, 8>				logic_op_enable;
+		std::array<BlendOperation, 8>	blend_op;
+		std::array<AlphaBlendFactor, 8>	src_blend;
+		std::array<AlphaBlendFactor, 8>	dest_blend;
+		std::array<BlendOperation, 8>	blend_op_alpha;
+		std::array<AlphaBlendFactor, 8>	src_blend_alpha;
+		std::array<AlphaBlendFactor, 8>	dest_blend_alpha;
+		std::array<LogicOperation, 8>	logic_op;
+		std::array<uint8_t, 8>			color_write_mask;
 
 		BlendStateDesc();
 

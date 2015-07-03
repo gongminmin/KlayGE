@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 
 		boost::char_separator<char> sep("", ",;");
 		boost::tokenizer<boost::char_separator<char> > tok(input_name_str, sep);
-		for (KLAYGE_AUTO(beg, tok.begin()); beg != tok.end(); ++ beg)
+		for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 		{
 			std::string arg = *beg;
 			if ((std::string::npos == arg.find("*")) && (std::string::npos == arg.find("?")))

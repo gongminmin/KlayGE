@@ -69,6 +69,7 @@
 #include <boost/optional.hpp>
 #include <exception>
 #include <vector>
+#include <functional>
 
 namespace KlayGE
 {
@@ -114,12 +115,12 @@ namespace KlayGE
 		//	else
 		//		boost::optional<result_type>
 		typedef boost::optional<
-			typename conditional<is_same<result_type, void>::value,
+			typename std::conditional<std::is_same<result_type, void>::value,
 				void_t, result_type>::type
 			>  result_opt;
 
-		typedef typename conditional<is_same<result_type, void>::value,
-			result_type, typename add_lvalue_reference<result_type>::type
+		typedef typename std::conditional<std::is_same<result_type, void>::value,
+			result_type, typename std::add_lvalue_reference<result_type>::type
 			>::type const_result_type_ref;
 
 	public:
@@ -286,7 +287,7 @@ namespace KlayGE
 		class threaded
 		{
 			typedef threaded<Threadable, JoinerImpl>				threaded_t;
-			typedef typename result_of<Threadable()>::type			result_t;
+			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
 			typedef boost::optional<void_t>							void_optional_t;
@@ -369,9 +370,9 @@ namespace KlayGE
 	public:
 		// Launches threadable function in a new thread. Returns a joiner that can be used to wait thread completion.
 		template <typename Threadable>
-		joiner<typename result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename std::result_of<Threadable()>::type> operator()(Threadable const & function)
 		{
-			typedef typename result_of<Threadable()>::type			result_t;
+			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_simple_thread_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;
@@ -389,7 +390,7 @@ namespace KlayGE
 	// Threader function that creates a new thread to execute the Threadable. Just creates a temporary object of class threader
 	//  and uses operator()(Threadable)
 	template <typename Threadable>
-	inline joiner<typename result_of<Threadable()>::type> create_thread(Threadable const & function)
+	inline joiner<typename std::result_of<Threadable()>::type> create_thread(Threadable const & function)
 	{
 		return threader()(function);
 	}
@@ -602,9 +603,9 @@ namespace KlayGE
 
 		// Launches threadable function in a new thread. If there is a pooled thread available, reuses that thread.
 		template <typename Threadable>
-		joiner<typename result_of<Threadable()>::type> operator()(Threadable const & function)
+		joiner<typename std::result_of<Threadable()>::type> operator()(Threadable const & function)
 		{
-			typedef typename result_of<Threadable()>::type			result_t;
+			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef joiner<result_t>								joiner_t;
 			typedef joiner_thread_pool_impl<result_t>				joiner_impl_t;
 			typedef typename joiner_impl_t::result_opt				result_opt;

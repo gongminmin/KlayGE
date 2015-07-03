@@ -249,22 +249,22 @@ namespace KlayGE
 
 	RenderFactory::~RenderFactory()
 	{
-		typedef KLAYGE_DECLTYPE(rs_pool_) RSPoolType;
+		typedef decltype(rs_pool_) RSPoolType;
 		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
 		{
 			rs.second.reset();
 		}
-		typedef KLAYGE_DECLTYPE(dss_pool_) DSSPoolType;
+		typedef decltype(dss_pool_) DSSPoolType;
 		KLAYGE_FOREACH(DSSPoolType::reference dss, dss_pool_)
 		{
 			dss.second.reset();
 		}
-		typedef KLAYGE_DECLTYPE(bs_pool_) BSPoolType;
+		typedef decltype(bs_pool_) BSPoolType;
 		KLAYGE_FOREACH(BSPoolType::reference bs, bs_pool_)
 		{
 			bs.second.reset();
 		}
-		typedef KLAYGE_DECLTYPE(ss_pool_) SSPoolType;
+		typedef decltype(ss_pool_) SSPoolType;
 		KLAYGE_FOREACH(SSPoolType::reference ss, ss_pool_)
 		{
 			ss.second.reset();
@@ -311,7 +311,7 @@ namespace KlayGE
 	{
 		RasterizerStateObjectPtr ret;
 
-		KLAYGE_AUTO(iter, rs_pool_.find(desc));
+		auto iter = rs_pool_.find(desc);
 		if (iter == rs_pool_.end())
 		{
 			ret = this->DoMakeRasterizerStateObject(desc);
@@ -329,7 +329,7 @@ namespace KlayGE
 	{
 		DepthStencilStateObjectPtr ret;
 
-		KLAYGE_AUTO(iter, dss_pool_.find(desc));
+		auto iter = dss_pool_.find(desc);
 		if (iter == dss_pool_.end())
 		{
 			ret = this->DoMakeDepthStencilStateObject(desc);
@@ -347,7 +347,7 @@ namespace KlayGE
 	{
 		BlendStateObjectPtr ret;
 
-		KLAYGE_AUTO(iter, bs_pool_.find(desc));
+		auto iter = bs_pool_.find(desc);
 		if (iter == bs_pool_.end())
 		{
 			ret = this->DoMakeBlendStateObject(desc);
@@ -365,7 +365,7 @@ namespace KlayGE
 	{
 		SamplerStateObjectPtr ret;
 
-		KLAYGE_AUTO(iter, ss_pool_.find(desc));
+		auto iter = ss_pool_.find(desc);
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);
