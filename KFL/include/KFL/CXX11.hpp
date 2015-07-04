@@ -77,16 +77,6 @@ private:
 	#define KLAYGE_FINAL
 #endif
 
-#ifdef KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
-	#include <utility>
-#else
-	#include <boost/move/move.hpp>
-	namespace std
-	{
-		using boost::move;
-	}
-#endif
-
 #ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
 	#ifndef KLAYGE_PLATFORM_ANDROID
 		#if defined(KLAYGE_COMPILER_GCC) && defined(__MINGW32__)

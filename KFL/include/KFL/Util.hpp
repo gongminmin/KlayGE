@@ -187,6 +187,32 @@ namespace KlayGE
 	std::string ReadShortString(ResIdentifierPtr const & res);
 	void WriteShortString(std::ostream& os, std::string const & str);
 
+#ifdef KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
+	namespace Detail
+	{
+#if defined(KLAYGE_COMPILER_GCC) && KLAYGE_COMPILER_VERSION <= 44
+		// GCC 4.4 supports an outdated version of rvalue references and creates a copy of the forwarded object.
+		// This results in warnings 'returning reference to temporary'. Therefore we use a special version similar to std::forward.
+		template <typename T>
+		T&& Forward(T&& t) KLAYGE_NOEXCEPT
+		{
+			return t;
+		}
+#else
+		template <typename T>
+		T&& Forward(T& t) KLAYGE_NOEXCEPT
+		{
+			return static_cast<T&&>(t);
+		}
+#endif
+	}
+
+	template <typename T, typename... Args>
+	inline std::shared_ptr<T> MakeSharedPtr(Args&& ... args)
+	{
+		return std::shared_ptr<T>(new T(Detail::Forward<Args>(args)...), boost::checked_deleter<T>());
+	}
+#else
 	template <typename T>
 	inline std::shared_ptr<T> MakeSharedPtr()
 	{
@@ -329,6 +355,7 @@ namespace KlayGE
 	{
 		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), boost::checked_deleter<T>());
 	}
+#endif
 
 #ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define CONSTEXPR constexpr
