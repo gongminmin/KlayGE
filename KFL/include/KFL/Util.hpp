@@ -175,218 +175,159 @@ namespace KlayGE
 	}
 
 	template <typename To, typename From>
-	inline shared_ptr<To>
-	checked_pointer_cast(shared_ptr<From> const & p)
+	inline std::shared_ptr<To>
+	checked_pointer_cast(std::shared_ptr<From> const & p)
 	{
-		BOOST_ASSERT(dynamic_pointer_cast<To>(p) == static_pointer_cast<To>(p));
-		return static_pointer_cast<To>(p);
+		BOOST_ASSERT(std::dynamic_pointer_cast<To>(p) == std::static_pointer_cast<To>(p));
+		return std::static_pointer_cast<To>(p);
 	}
 
 	uint32_t LastError();
-
-#ifdef KLAYGE_IDENTITY_SUPPORT
-	template <typename arg_type>
-	struct identity : public std::unary_function<arg_type, arg_type>
-	{
-		arg_type const & operator()(arg_type const & x) const
-		{
-			return x;
-		}
-	};
-#else
-	using std::identity;
-#endif		// KLAYGE_IDENTITY_SUPPORT
-
-#ifdef KLAYGE_SELECT1ST2ND_SUPPORT
-	template <typename pair_type>
-	struct select1st : public std::unary_function<pair_type, typename pair_type::first_type>
-	{
-		typename pair_type::first_type const & operator()(pair_type const & x) const
-		{
-			return x.first;
-		}
-	};
-
-	template <typename pair_type>
-	struct select2nd : public std::unary_function<pair_type, typename pair_type::second_type>
-	{
-		typename pair_type::second_type const & operator()(pair_type const & x) const
-		{
-			return x.second;
-		}
-	};
-#else
-	using std::select1st;
-	using std::select2nd;
-#endif		// KLAYGE_SELECT1ST2ND_SUPPORT
-
-#ifdef KLAYGE_PROJECT1ST2ND_SUPPORT
-	template <typename arg1_type, typename arg2_type>
-	struct project1st : public std::binary_function<arg1_type, arg2_type, arg1_type>
-	{
-		arg1_type operator()(arg1_type const & x, arg2_type const & /*y*/) const
-		{
-			return x;
-		}
-	};
-
-	template <typename arg1_type, typename arg2_type>
-	struct project2nd : public std::binary_function<arg1_type, arg2_type, arg2_type>
-	{
-		arg2_type operator()(arg1_type const & /*x*/, arg2_type const & y) const
-		{
-			return y;
-		}
-	};
-#else
-	using std::project1st;
-	using std::project2nd;
-#endif		// KLAYGE_PROJECT1ST2ND_SUPPORT
 
 	std::string ReadShortString(ResIdentifierPtr const & res);
 	void WriteShortString(std::ostream& os, std::string const & str);
 
 	template <typename T>
-	inline shared_ptr<T> MakeSharedPtr()
+	inline std::shared_ptr<T> MakeSharedPtr()
 	{
-		return shared_ptr<T>(new T, boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T, boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1)
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1)
 	{
-		return shared_ptr<T>(new T(a1), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1)
 	{
-		return shared_ptr<T>(new T(a1), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2)
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2)
 	{
-		return shared_ptr<T>(new T(a1, a2), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2)
 	{
-		return shared_ptr<T>(new T(a1, a2), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3)
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4)
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5, A6 const & a6)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5, A6 const & a6, A7 const & a7)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7)
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5, A6 const & a6, A7 const & a7, A8 const & a8)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
 		A8& a8)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8, typename A9>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5, A6 const & a6, A7 const & a7, A8 const & a8, A9 const & a9)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8, typename A9>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
 		A8& a8, A9& a9)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8, typename A9, typename A10>
-	inline shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
+	inline std::shared_ptr<T> MakeSharedPtr(A1 const & a1, A2 const & a2, A3 const & a3, A4 const & a4,
 		A5 const & a5, A6 const & a6, A7 const & a7, A8 const & a8, A9 const & a9, A10 const & a10)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), boost::checked_deleter<T>());
 	}
 
 	template <typename T, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6,
 		typename A7, typename A8, typename A9, typename A10>
-	inline shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
+	inline std::shared_ptr<T> MakeSharedPtr(A1& a1, A2& a2, A3& a3, A4& a4, A5& a5, A6& a6, A7& a7,
 		A8& a8, A9& a9, A10& a10)
 	{
-		return shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), boost::checked_deleter<T>());
+		return std::shared_ptr<T>(new T(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10), boost::checked_deleter<T>());
 	}
 
 #ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT

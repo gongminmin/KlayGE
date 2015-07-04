@@ -102,7 +102,7 @@ namespace KlayGE
 		STDMETHOD(GetSize)(UInt64* size);
 
 	private:
-		atomic<int32_t> ref_count_;
+		std::atomic<int32_t> ref_count_;
 
 		ResIdentifierPtr is_;
 		uint64_t stream_size_;
@@ -149,16 +149,16 @@ namespace KlayGE
 		{
 		}
 
-		void Attach(shared_ptr<std::ostream> const & os);
+		void Attach(std::shared_ptr<std::ostream> const & os);
 
 		STDMETHOD(Write)(const void* data, UInt32 size, UInt32* processedSize);
 		STDMETHOD(Seek)(Int64 offset, UInt32 seekOrigin, UInt64* newPosition);
 		STDMETHOD(SetSize)(UInt64 newSize);
 
 	private:
-		atomic<int32_t> ref_count_;
+		std::atomic<int32_t> ref_count_;
 
-		shared_ptr<std::ostream> os_;
+		std::shared_ptr<std::ostream> os_;
 	};
 }
 

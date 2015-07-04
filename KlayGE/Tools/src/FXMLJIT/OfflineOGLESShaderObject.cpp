@@ -334,10 +334,10 @@ namespace KlayGE
 			is_shader_validate_.fill(true);
 
 			shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes> >();
-			glsl_srcs_ = MakeSharedPtr<std::array<shared_ptr<std::string>, ST_NumShaderTypes> >();
+			glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes> >();
 
-			pnames_ = MakeSharedPtr<std::array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
-			glsl_res_names_ = MakeSharedPtr<std::array<shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+			pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+			glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
 
 			vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
 			vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();

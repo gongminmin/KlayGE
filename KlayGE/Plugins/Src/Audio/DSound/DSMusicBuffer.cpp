@@ -42,7 +42,7 @@ namespace KlayGE
 
 		bool const mono(1 == wfx.nChannels);
 
-		shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
+		std::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
@@ -89,7 +89,7 @@ namespace KlayGE
 
 	void DSMusicBuffer::LoopUpdateBuffer()
 	{
-		unique_lock<mutex> lock(play_mutex_);
+		std::unique_lock<std::mutex> lock(play_mutex_);
 		while (!played_)
 		{
 			play_cond_.wait(lock);
@@ -179,13 +179,13 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoPlay(bool loop)
 	{
-		play_thread_ = Context::Instance().ThreadPool()(bind(&DSMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = Context::Instance().ThreadPool()(std::bind(&DSMusicBuffer::LoopUpdateBuffer, this));
 
 		loop_ = loop;
 
 		stopped_ = false;
 		{
-			lock_guard<mutex> lock(play_mutex_);
+			std::lock_guard<std::mutex> lock(play_mutex_);
 			played_ = true;
 		}
 		play_cond_.notify_one();

@@ -104,7 +104,7 @@ namespace KlayGE
 		frustum_dirty_ = true;
 	}
 
-	void Camera::BindUpdateFunc(function<void(Camera&, float, float)> const & update_func)
+	void Camera::BindUpdateFunc(std::function<void(Camera&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;
 	}

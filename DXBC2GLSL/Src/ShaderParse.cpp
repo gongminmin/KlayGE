@@ -92,9 +92,9 @@ struct ShaderParser
 	DXBCChunkSignatureHeader const * input_signature;
 	DXBCChunkSignatureHeader const * output_signature;
 	DXBCChunkSignatureHeader const * patch_constant_signature;
-	KlayGE::shared_ptr<ShaderProgram> program;
+	std::shared_ptr<ShaderProgram> program;
 
-	ShaderParser(const DXBCContainer& dxbc, KlayGE::shared_ptr<ShaderProgram> const & program)
+	ShaderParser(const DXBCContainer& dxbc, std::shared_ptr<ShaderProgram> const & program)
 		: program(program)
 	{
 		resource_chunk = dxbc.resource_chunk;
@@ -293,7 +293,7 @@ struct ShaderParser
 				// immediate constant buffer data
 				uint32_t customlen = this->Read32() - 2;
 
-				KlayGE::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
+				std::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
 				program->dcls.push_back(dcl);
 
 				dcl->opcode = SO_IMMEDIATE_CONSTANT_BUFFER;
@@ -310,7 +310,7 @@ struct ShaderParser
 			{
 				// need to interleave these with the declarations or we cannot
 				// assign fork/join phase instance counts to phases
-				KlayGE::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
+				std::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
 				program->dcls.push_back(dcl);
 				dcl->opcode = opcode;
 			}
@@ -319,7 +319,7 @@ struct ShaderParser
 				|| ((opcode >= SO_DCL_STREAM) && (opcode <= SO_DCL_RESOURCE_STRUCTURED))
 				|| (SO_DCL_GS_INSTANCE_COUNT == opcode))
 			{
-				KlayGE::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
+				std::shared_ptr<ShaderDecl> dcl = KlayGE::MakeSharedPtr<ShaderDecl>();
 				program->dcls.push_back(dcl);
 				reinterpret_cast<TokenizedShaderInstruction&>(*dcl) = insntok;
 
@@ -531,7 +531,7 @@ struct ShaderParser
 				{
 					continue;
 				}
-				KlayGE::shared_ptr<ShaderInstruction> insn = KlayGE::MakeSharedPtr<ShaderInstruction>();
+				std::shared_ptr<ShaderInstruction> insn = KlayGE::MakeSharedPtr<ShaderInstruction>();
 				program->insns.push_back(insn);
 				reinterpret_cast<TokenizedShaderInstruction&>(*insn) = insntok;
 
@@ -900,17 +900,16 @@ struct ShaderParser
 			}
 		}
 	}
-
 };
 
-KlayGE::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc)
+std::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc)
 {
-	KlayGE::shared_ptr<ShaderProgram> program = KlayGE::MakeSharedPtr<ShaderProgram>();
+	std::shared_ptr<ShaderProgram> program = KlayGE::MakeSharedPtr<ShaderProgram>();
 	ShaderParser parser(dxbc, program);
 	if (!parser.Parse())
 	{
 		return program;
 	}
 	
-	return KlayGE::shared_ptr<ShaderProgram>();
+	return std::shared_ptr<ShaderProgram>();
 }

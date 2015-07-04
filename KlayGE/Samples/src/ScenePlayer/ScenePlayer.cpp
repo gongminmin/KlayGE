@@ -77,8 +77,8 @@ namespace
 		}
 
 	private:
-		KlayGE::shared_ptr<ScriptModule> module_;
-		KlayGE::shared_ptr<std::string> script_;
+		std::shared_ptr<ScriptModule> module_;
+		std::shared_ptr<std::string> script_;
 	};
 
 	class LightSourceUpdate : public PyScriptUpdate
@@ -887,7 +887,7 @@ void ScenePlayerApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&ScenePlayerApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&ScenePlayerApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ScenePlayer.uiml"));
@@ -904,31 +904,31 @@ void ScenePlayerApp::OnCreate()
 	id_cg_ = dialog_->IDFromName("CG");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(KlayGE::bind(&ScenePlayerApp::OpenHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(std::bind(&ScenePlayerApp::OpenHandler, this, std::placeholders::_1));
 
-	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::IllumChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(std::bind(&ScenePlayerApp::IllumChangedHandler, this, std::placeholders::_1));
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
 
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
-	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::ILScaleChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(std::bind(&ScenePlayerApp::ILScaleChangedHandler, this, std::placeholders::_1));
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
-	dialog_->Control<UICheckBox>(id_ssgi_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::SSGIHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ssgi_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::SSGIHandler, this, std::placeholders::_1));
 	this->SSGIHandler(*dialog_->Control<UICheckBox>(id_ssgi_));
 
-	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::SSVOHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::SSVOHandler, this, std::placeholders::_1));
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
 
-	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::HDRHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::HDRHandler, this, std::placeholders::_1));
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
 
-	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::AAHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::AAHandler, this, std::placeholders::_1));
 	this->AAHandler(*dialog_->Control<UICheckBox>(id_aa_));
 
-	dialog_->Control<UICheckBox>(id_cg_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::ColorGradingHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_cg_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::ColorGradingHandler, this, std::placeholders::_1));
 	this->ColorGradingHandler(*dialog_->Control<UICheckBox>(id_cg_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&ScenePlayerApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&ScenePlayerApp::CtrlCameraHandler, this, std::placeholders::_1));
 }
 
 void ScenePlayerApp::OnResize(uint32_t width, uint32_t height)

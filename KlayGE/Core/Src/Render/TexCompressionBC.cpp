@@ -46,7 +46,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 	static int const BC67_PREC_WEIGHTS[][16] =
 	{
@@ -896,7 +896,7 @@ namespace KlayGE
 
 		if (!lut_inited_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!lut_inited_)
 			{
 				for (int i = 0; i < 32; ++ i)
@@ -2266,7 +2266,7 @@ namespace KlayGE
 
 		if (!lut_inited_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!lut_inited_)
 			{
 				for (int i = 0; i < 64; ++ i)

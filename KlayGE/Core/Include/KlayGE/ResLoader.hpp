@@ -63,13 +63,13 @@ namespace KlayGE
 		virtual bool StateLess() const = 0;
 
 		virtual void SubThreadStage() = 0;
-		virtual shared_ptr<void> MainThreadStage() = 0;
+		virtual std::shared_ptr<void> MainThreadStage() = 0;
 
 		virtual bool HasSubThreadStage() const = 0;
 
 		virtual bool Match(ResLoadingDesc const & rhs) const = 0;
 		virtual void CopyDataFrom(ResLoadingDesc const & rhs) = 0;
-		virtual shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource) = 0;
+		virtual std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) = 0;
 	};
 
 	class KLAYGE_CORE_API ResLoader
@@ -78,43 +78,43 @@ namespace KlayGE
 		class EmptyFuncToT
 		{
 		public:
-			explicit EmptyFuncToT(function<shared_ptr<void>()> const & func)
+			explicit EmptyFuncToT(std::function<std::shared_ptr<void>()> const & func)
 				: func_(func)
 			{
 			}
 
-			shared_ptr<T> operator()()
+			std::shared_ptr<T> operator()()
 			{
-				return static_pointer_cast<T>(func_());
+				return std::static_pointer_cast<T>(func_());
 			}
 
 		private:
-			function<shared_ptr<void>()> func_;
+			std::function<std::shared_ptr<void>()> func_;
 		};
 
 		class ASyncRecreateFunctor
 		{
 		public:
-			ASyncRecreateFunctor(shared_ptr<void> const & res,
-				ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done);
+			ASyncRecreateFunctor(std::shared_ptr<void> const & res,
+				ResLoadingDescPtr const & res_desc, std::shared_ptr<volatile bool> const & is_done);
 
-			shared_ptr<void> operator()();
+			std::shared_ptr<void> operator()();
 
 		private:
-			shared_ptr<void> res_;
+			std::shared_ptr<void> res_;
 			ResLoadingDescPtr res_desc_;
-			shared_ptr<volatile bool> is_done_;
+			std::shared_ptr<volatile bool> is_done_;
 		};
 
 		class ASyncReuseFunctor
 		{
 		public:
-			explicit ASyncReuseFunctor(shared_ptr<void> const & res);
+			explicit ASyncReuseFunctor(std::shared_ptr<void> const & res);
 
-			shared_ptr<void> operator()();
+			std::shared_ptr<void> operator()();
 
 		private:
-			shared_ptr<void> res_;
+			std::shared_ptr<void> res_;
 		};
 
 	public:
@@ -134,26 +134,26 @@ namespace KlayGE
 		std::string Locate(std::string const & name);
 		std::string AbsPath(std::string const & path);
 
-		shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
-		function<shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
-		void Unload(shared_ptr<void> const & res);
+		std::shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
+		std::function<std::shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
+		void Unload(std::shared_ptr<void> const & res);
 
 		template <typename T>
-		shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
+		std::shared_ptr<T> SyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return static_pointer_cast<T>(this->SyncQuery(res_desc));
+			return std::static_pointer_cast<T>(this->SyncQuery(res_desc));
 		}
 
 		template <typename T>
-		function<shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
+		std::function<std::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
 			return EmptyFuncToT<T>(this->ASyncQuery(res_desc));
 		}
 
 		template <typename T>
-		void Unload(shared_ptr<T> const & res)
+		void Unload(std::shared_ptr<T> const & res)
 		{
-			this->Unload(static_pointer_cast<void>(res));
+			this->Unload(std::static_pointer_cast<void>(res));
 		}
 
 		void Update();
@@ -161,25 +161,25 @@ namespace KlayGE
 	private:
 		std::string RealPath(std::string const & path);
 
-		void AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res);
-		shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const & res_desc);
+		void AddLoadedResource(ResLoadingDescPtr const & res_desc, std::shared_ptr<void> const & res);
+		std::shared_ptr<void> FindMatchLoadedResource(ResLoadingDescPtr const & res_desc);
 		void RemoveUnrefResources();
 
 		void LoadingThreadFunc();
 
 	private:
-		static shared_ptr<ResLoader> res_loader_instance_;
+		static std::shared_ptr<ResLoader> res_loader_instance_;
 
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
-		mutex loading_mutex_;
-		std::vector<std::pair<ResLoadingDescPtr, weak_ptr<void> > > loaded_res_;
-		std::vector<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> > > loading_res_;
-		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> >,
+		std::mutex loading_mutex_;
+		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void> > > loaded_res_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> > > loading_res_;
+		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> >,
 			boost::lockfree::capacity<1024> > loading_res_queue_;
 
-		shared_ptr<joiner<void> > loading_thread_;
+		std::shared_ptr<joiner<void> > loading_thread_;
 		bool quit_;
 	};
 }

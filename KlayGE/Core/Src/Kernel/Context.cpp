@@ -61,12 +61,12 @@
 
 namespace
 {
-	KlayGE::mutex singleton_mutex;
+	std::mutex singleton_mutex;
 }
 
 namespace KlayGE
 {
-	shared_ptr<Context> Context::context_instance_;
+	std::shared_ptr<Context> Context::context_instance_;
 
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
@@ -121,7 +121,7 @@ namespace KlayGE
 	{
 		if (!context_instance_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!context_instance_)
 			{
 				context_instance_ = MakeSharedPtr<Context>();
@@ -134,7 +134,7 @@ namespace KlayGE
 	{
 		context_instance_->DestroyAll();
 
-		lock_guard<mutex> lock(singleton_mutex);
+		std::lock_guard<std::mutex> lock(singleton_mutex);
 		context_instance_.reset();
 	}
 
@@ -999,7 +999,7 @@ namespace KlayGE
 	{
 		if (!scene_mgr_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!scene_mgr_)
 			{
 				this->LoadSceneManager(cfg_.scene_manager_name);
@@ -1012,7 +1012,7 @@ namespace KlayGE
 	{
 		if (!render_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!render_factory_)
 			{
 				this->LoadRenderFactory(cfg_.render_factory_name);
@@ -1025,7 +1025,7 @@ namespace KlayGE
 	{
 		if (!audio_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!audio_factory_)
 			{
 				this->LoadAudioFactory(cfg_.audio_factory_name);
@@ -1038,7 +1038,7 @@ namespace KlayGE
 	{
 		if (!input_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!input_factory_)
 			{
 				this->LoadInputFactory(cfg_.input_factory_name);
@@ -1051,7 +1051,7 @@ namespace KlayGE
 	{
 		if (!show_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!show_factory_)
 			{
 				this->LoadShowFactory(cfg_.show_factory_name);
@@ -1064,7 +1064,7 @@ namespace KlayGE
 	{
 		if (!script_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!script_factory_)
 			{
 				this->LoadScriptFactory(cfg_.script_factory_name);
@@ -1077,7 +1077,7 @@ namespace KlayGE
 	{
 		if (!audio_data_src_factory_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!audio_data_src_factory_)
 			{
 				this->LoadAudioDataSourceFactory(cfg_.audio_data_source_factory_name);

@@ -185,7 +185,7 @@ namespace KlayGE
 		void DoClone(ParticleEmitterPtr const & rhs);
 
 	protected:
-		weak_ptr<ParticleSystem> ps_;
+		std::weak_ptr<ParticleSystem> ps_;
 
 		float emit_freq_;
 
@@ -221,7 +221,7 @@ namespace KlayGE
 		void DoClone(ParticleUpdaterPtr const & rhs);
 
 	protected:
-		weak_ptr<ParticleSystem> ps_;
+		std::weak_ptr<ParticleSystem> ps_;
 	};
 
 	class KLAYGE_CORE_API ParticleSystem : public SceneObjectHelper
@@ -353,11 +353,11 @@ namespace KlayGE
 
 		bool gs_support_;
 
-		mutex update_mutex_;
+		std::mutex update_mutex_;
 	};
 
 	KLAYGE_CORE_API ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name);
-	KLAYGE_CORE_API function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name);
+	KLAYGE_CORE_API std::function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name);
 
 	KLAYGE_CORE_API void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name);
 
@@ -390,7 +390,7 @@ namespace KlayGE
 
 		void SizeOverLife(std::vector<float2> const & size_over_life)
 		{
-			lock_guard<mutex> lock(update_mutex_);
+			std::lock_guard<std::mutex> lock(update_mutex_);
 			size_over_life_ = size_over_life;
 		}
 		std::vector<float2> const & SizeOverLife() const
@@ -399,7 +399,7 @@ namespace KlayGE
 		}
 		void MassOverLife(std::vector<float2> const & mass_over_life)
 		{
-			lock_guard<mutex> lock(update_mutex_);
+			std::lock_guard<std::mutex> lock(update_mutex_);
 			mass_over_life_ = mass_over_life;
 		}
 		std::vector<float2> const & MassOverLife() const
@@ -408,7 +408,7 @@ namespace KlayGE
 		}
 		void OpacityOverLife(std::vector<float2> const & opacity_over_life)
 		{
-			lock_guard<mutex> lock(update_mutex_);
+			std::lock_guard<std::mutex> lock(update_mutex_);
 			opacity_over_life_ = opacity_over_life;
 		}
 		std::vector<float2> const & OpacityOverLife() const
@@ -419,7 +419,7 @@ namespace KlayGE
 		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
 
 	private:
-		mutex update_mutex_;
+		std::mutex update_mutex_;
 		std::vector<float2> size_over_life_;
 		std::vector<float2> mass_over_life_;
 		std::vector<float2> opacity_over_life_;

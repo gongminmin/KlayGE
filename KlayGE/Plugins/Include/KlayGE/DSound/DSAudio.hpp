@@ -51,7 +51,7 @@
 
 namespace KlayGE
 {
-	typedef shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
+	typedef std::shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
 
 	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource);
 	long LinearGainToDB(float vol);
@@ -79,7 +79,7 @@ namespace KlayGE
 		void Direction(float3 const & v);
 
 	private:
-		shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
+		std::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
 
 		void DoReset();
 		std::vector<IDSBufferPtr>::iterator FreeSource();
@@ -124,14 +124,14 @@ namespace KlayGE
 		uint32_t		fillCount_;
 		uint32_t		writePos_;
 
-		shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
+		std::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
 
 		bool		loop_;
 
 		bool played_;
 		bool stopped_;
-		condition_variable play_cond_;
-		mutex play_mutex_;
+		std::condition_variable play_cond_;
+		std::mutex play_mutex_;
 		joiner<void> play_thread_;
 	};
 
@@ -143,7 +143,7 @@ namespace KlayGE
 		DSAudioEngine();
 		~DSAudioEngine();
 
-		shared_ptr<IDirectSound> const & DSound() const
+		std::shared_ptr<IDirectSound> const & DSound() const
 			{ return dsound_; }
 
 		std::wstring const & Name() const;
@@ -160,8 +160,8 @@ namespace KlayGE
 		virtual void DoResume() KLAYGE_OVERRIDE;
 
 	private:
-		shared_ptr<IDirectSound>				dsound_;
-		shared_ptr<IDirectSound3DListener>	ds3dListener_;
+		std::shared_ptr<IDirectSound>				dsound_;
+		std::shared_ptr<IDirectSound3DListener>	ds3dListener_;
 
 		HMODULE mod_dsound_;
 		typedef HRESULT (WINAPI *DirectSoundCreateFunc)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);

@@ -111,7 +111,7 @@ namespace KlayGE
 		std::map<GLenum, float4> tex_param_fv_;
 	};
 
-	typedef shared_ptr<OGLTexture> OGLTexturePtr;
+	typedef std::shared_ptr<OGLTexture> OGLTexturePtr;
 
 
 	class OGLTexture1D : public OGLTexture

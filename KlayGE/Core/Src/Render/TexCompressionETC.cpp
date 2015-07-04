@@ -45,7 +45,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	KlayGE::mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 	static uint8_t const selector_index_to_etc1[] = { 3, 2, 0, 1 };
 
@@ -654,7 +654,7 @@ namespace KlayGE
 
 		if (!lut_inited_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!lut_inited_)
 			{
 				for (uint32_t diff = 0; diff < 2; ++ diff)

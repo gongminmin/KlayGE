@@ -41,7 +41,7 @@ namespace KlayGE
 
 	void thread_pool::thread_pool_join_info::join()
 	{
-		unique_lock<mutex> lock(join_mut_);
+		std::unique_lock<std::mutex> lock(join_mut_);
 		while (!join_now_)
 		{
 			cond_.wait(lock);
@@ -51,21 +51,21 @@ namespace KlayGE
 
 	void thread_pool::thread_pool_join_info::notify_join()
 	{
-		unique_lock<mutex> lock(join_mut_);
+		std::lock_guard<std::mutex> lock(join_mut_);
 		join_now_ = true;
 		cond_.notify_one();
 	}
 
 	void thread_pool::thread_pool_join_info::recycle()
 	{
-		unique_lock<mutex> lock(join_mut_);
+		std::lock_guard<std::mutex> lock(join_mut_);
 		can_recycle_thread_ = true;
 		cond_.notify_one();
 	}
 
 	void thread_pool::thread_pool_join_info::wait_recycle()
 	{
-		unique_lock<mutex> lock(join_mut_);
+		std::unique_lock<std::mutex> lock(join_mut_);
 		while (!can_recycle_thread_)
 		{
 			cond_.wait(lock);
@@ -74,21 +74,21 @@ namespace KlayGE
 	}
 
 
-	thread_pool::thread_pool_thread_info::thread_pool_thread_info(shared_ptr<thread_pool::thread_pool_common_data_t> const & pdata)
-		:  wake_up_(false), data_(weak_ptr<thread_pool::thread_pool_common_data_t>(pdata))
+	thread_pool::thread_pool_thread_info::thread_pool_thread_info(std::shared_ptr<thread_pool::thread_pool_common_data_t> const & pdata)
+		:  wake_up_(false), data_(std::weak_ptr<thread_pool::thread_pool_common_data_t>(pdata))
 	{
 	}
 
 	// Wakes up a pooled thread saying it should die
 	void thread_pool::thread_pool_thread_info::kill()
 	{
-		unique_lock<mutex> lock(wake_up_mut_);
-		func_ = function<void()>();
+		std::lock_guard<std::mutex> lock(wake_up_mut_);
+		func_ = std::function<void()>();
 		wake_up_ = true;
 		wake_up_cond_.notify_one();
 	}
 
-	thread_pool::thread_pool_common_data_t::wait_function::wait_function(shared_ptr<thread_pool::thread_pool_thread_info> const & info)
+	thread_pool::thread_pool_common_data_t::wait_function::wait_function(std::shared_ptr<thread_pool::thread_pool_thread_info> const & info)
 		:  info_(info)
 	{
 	}
@@ -100,10 +100,10 @@ namespace KlayGE
 		for (;;)
 		{
 			{
-				shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
+				std::shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
 				if (data)
 				{
-					unique_lock<mutex> lock(info_->wake_up_mut_);
+					std::unique_lock<std::mutex> lock(info_->wake_up_mut_);
 
 					// Sleep until someone has a job to do or the pool is being destroyed
 					while (!info_->wake_up_ && !data->general_cleanup_)
@@ -130,7 +130,7 @@ namespace KlayGE
 			info_->func_();
 
 			// Reset execution functor
-			info_->func_ = function<void()>();
+			info_->func_ = std::function<void()>();
 
 			// First notify joiner_thread_pool_impl that data is ready and wake-up if it's blocked waiting for data
 			info_->thpool_join_info_->notify_join();
@@ -144,10 +144,10 @@ namespace KlayGE
 
 			// Locked code to try to insert the thread again in the thread pool
 			{
-				shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
+				std::shared_ptr<thread_pool_common_data_t> data = info_->data_.lock();
 				if (data)
 				{
-					unique_lock<mutex> lock(data->mut_);
+					std::lock_guard<std::mutex> lock(data->mut_);
 
 					// If there is a general cleanup request, finish
 					if (data->general_cleanup_)
@@ -181,17 +181,17 @@ namespace KlayGE
 	{
 	}
 
-	void thread_pool::thread_pool_common_data_t::add_waiting_threads(shared_ptr<thread_pool::thread_pool_common_data_t> const & pdata, size_t number)
+	void thread_pool::thread_pool_common_data_t::add_waiting_threads(std::shared_ptr<thread_pool::thread_pool_common_data_t> const & pdata, size_t number)
 	{
-		unique_lock<mutex> lock(pdata->mut_);
+		std::lock_guard<std::mutex> lock(pdata->mut_);
 		add_waiting_threads_no_lock(pdata, number);
 	}
 
-	void thread_pool::thread_pool_common_data_t::add_waiting_threads_no_lock(shared_ptr<thread_pool::thread_pool_common_data_t> const & data, size_t number)
+	void thread_pool::thread_pool_common_data_t::add_waiting_threads_no_lock(std::shared_ptr<thread_pool::thread_pool_common_data_t> const & data, size_t number)
 	{
 		for (size_t i = 0; i < number; ++ i)
 		{
-			shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
+			std::shared_ptr<thread_pool_thread_info> th_info = MakeSharedPtr<thread_pool_thread_info>(data);
 			joiner<void> j = data->threader_(wait_function(th_info));
 			th_info->set_thread_id(j.get_thread_id());
 			data->threads_.push_back(th_info);
@@ -201,7 +201,7 @@ namespace KlayGE
 
 	void thread_pool::thread_pool_common_data_t::kill_all()
 	{
-		unique_lock<mutex> lock(mut_);
+		std::lock_guard<std::mutex> lock(mut_);
 
 		// Notify cleanup command to not queued threads
 		general_cleanup_ = true;
@@ -217,7 +217,7 @@ namespace KlayGE
 
 	void thread_pool::thread_pool_common_data_t::num_min_cached_threads(size_t num)
 	{
-		unique_lock<mutex> lock(mut_);
+		std::lock_guard<std::mutex> lock(mut_);
 
 		if (num > num_min_cached_threads_)
 		{

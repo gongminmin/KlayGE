@@ -66,12 +66,12 @@ namespace KlayGE
 		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&OGLRenderWindow::OnPaint, this,
-			placeholders::_1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&OGLRenderWindow::OnExitSizeMove, this,
-			placeholders::_1));
-		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLRenderWindow::OnSize, this,
-			placeholders::_1, placeholders::_2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&OGLRenderWindow::OnPaint, this,
+			std::placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&OGLRenderWindow::OnExitSizeMove, this,
+			std::placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&OGLRenderWindow::OnSize, this,
+			std::placeholders::_1, std::placeholders::_2));
 
 		std::vector<std::pair<std::string, std::pair<int, int> > > available_versions;
 		available_versions.push_back(std::make_pair("4.5", std::make_pair(4, 5)));

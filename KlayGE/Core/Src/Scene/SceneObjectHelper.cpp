@@ -52,7 +52,7 @@ namespace KlayGE
 		this->OnAttachRenderable(false);
 	}
 
-	SceneObjectHelper::SceneObjectHelper(function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy)
+	SceneObjectHelper::SceneObjectHelper(std::function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy)
 		: SceneObject(attrib)
 	{
 		UNREF_PARAM(dummy);
@@ -94,7 +94,7 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 
-	void SceneObjectSkyBox::CubeMap(function<TexturePtr()> const & cube_tl)
+	void SceneObjectSkyBox::CubeMap(std::function<TexturePtr()> const & cube_tl)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube_tl);
 	}
@@ -104,8 +104,8 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
 	}
 
-	void SceneObjectSkyBox::CompressedCubeMap(function<TexturePtr()> const & y_cube_tl,
-			function<TexturePtr()> const & c_cube_tl)
+	void SceneObjectSkyBox::CompressedCubeMap(std::function<TexturePtr()> const & y_cube_tl,
+			std::function<TexturePtr()> const & c_cube_tl)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
 	}
@@ -126,7 +126,7 @@ namespace KlayGE
 	}
 
 	SceneObjectLightSourceProxy::SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			light_(light)
 	{
@@ -179,7 +179,7 @@ namespace KlayGE
 	}
 
 	void SceneObjectLightSourceProxy::Init(LightSourcePtr const & light,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		std::string mesh_name;
 		switch (light->Type())
@@ -231,7 +231,7 @@ namespace KlayGE
 	}
 
 	SceneObjectCameraProxy::SceneObjectCameraProxy(CameraPtr const & camera,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		: SceneObjectHelper(SOA_Cullable | SOA_Moveable | SOA_NotCastShadow),
 			camera_(camera)
 	{
@@ -270,7 +270,7 @@ namespace KlayGE
 	}
 
 	void SceneObjectCameraProxy::Init(CameraPtr const & camera,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 	{
 		RenderModelPtr camera_model = SyncLoadModel("camera_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
 			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);

@@ -250,7 +250,7 @@ void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 
 void DetailedSkinnedMesh::UpdateTechniques()
 {
-	shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+	std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
 	if (this->AlphaTest())
 	{

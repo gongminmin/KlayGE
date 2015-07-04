@@ -32,7 +32,7 @@
 #endif
 
 class IAmdDxExtQuadBufferStereo;
-typedef KlayGE::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
+typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
 
 namespace KlayGE
 {
@@ -191,7 +191,7 @@ namespace KlayGE
 		boost::signals2::connection on_set_cursor_connect_;
 	};
 
-	typedef shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;
+	typedef std::shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;
 }
 
 #endif			// _D3D11RENDERWINDOW_HPP

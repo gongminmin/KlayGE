@@ -47,7 +47,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
+			ID3D11Device1Ptr const & d3d_device_1 = std::static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
 			d3d_desc1.FillMode = d3d_desc.FillMode;
 			d3d_desc1.CullMode = d3d_desc.CullMode;
@@ -140,7 +140,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1Ptr const & d3d_device_1 = static_pointer_cast<ID3D11Device1>(d3d_device);
+			ID3D11Device1Ptr const & d3d_device_1 = std::static_pointer_cast<ID3D11Device1>(d3d_device);
 			D3D11_BLEND_DESC1 d3d_desc1;
 			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;
 			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;

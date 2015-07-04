@@ -64,7 +64,7 @@
 
 namespace
 {
-	KlayGE::mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 	class AAssetStreamBuf : public KlayGE::MemStreamBuf
@@ -91,7 +91,7 @@ namespace
 
 namespace KlayGE
 {
-	shared_ptr<ResLoader> ResLoader::res_loader_instance_;
+	std::shared_ptr<ResLoader> ResLoader::res_loader_instance_;
 
 	ResLoader::ResLoader()
 		: quit_(false)
@@ -178,7 +178,7 @@ namespace KlayGE
 #endif
 
 		loading_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
-				bind(&ResLoader::LoadingThreadFunc, this)));
+				std::bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
 	ResLoader::~ResLoader()
@@ -191,7 +191,7 @@ namespace KlayGE
 	{
 		if (!res_loader_instance_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!res_loader_instance_)
 			{
 				res_loader_instance_ = MakeSharedPtr<ResLoader>();
@@ -478,7 +478,7 @@ namespace KlayGE
 							MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 						if (*pkt_file)
 						{
-							shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+							std::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
 							Extract7z(pkt_file, password, file_name, packet_file);
 							return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
 						}
@@ -504,12 +504,12 @@ namespace KlayGE
 		return ResIdentifierPtr();
 	}
 
-	shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
+	std::shared_ptr<void> ResLoader::SyncQuery(ResLoadingDescPtr const & res_desc)
 	{
 		this->RemoveUnrefResources();
 
-		shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
-		shared_ptr<void> res;
+		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+		std::shared_ptr<void> res;
 		if (loaded_res)
 		{
 			if (res_desc->StateLess())
@@ -539,14 +539,14 @@ namespace KlayGE
 		return res;
 	}
 
-	function<shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
+	std::function<std::shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
 		this->RemoveUnrefResources();
 
-		shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
 		if (loaded_res)
 		{
-			shared_ptr<void> res;
+			std::shared_ptr<void> res;
 			if (res_desc->StateLess())
 			{
 				res = loaded_res;
@@ -563,10 +563,10 @@ namespace KlayGE
 		}
 		else
 		{
-			shared_ptr<volatile bool> async_is_done;
+			std::shared_ptr<volatile bool> async_is_done;
 			bool found = false;
 			{
-				lock_guard<mutex> lock(loading_mutex_);
+				std::lock_guard<std::mutex> lock(loading_mutex_);
 
 				typedef decltype(loading_res_) LoadingResQueueType;
 				KLAYGE_FOREACH(LoadingResQueueType::const_reference lrq, loading_res_)
@@ -590,7 +590,7 @@ namespace KlayGE
 				if (res_desc->HasSubThreadStage())
 				{
 					{
-						lock_guard<mutex> lock(loading_mutex_);
+						std::lock_guard<std::mutex> lock(loading_mutex_);
 
 						async_is_done = MakeSharedPtr<bool>(false);
 						loading_res_.push_back(std::make_pair(res_desc, async_is_done));
@@ -600,7 +600,7 @@ namespace KlayGE
 				}
 				else
 				{
-					shared_ptr<void> res = res_desc->MainThreadStage();
+					std::shared_ptr<void> res = res_desc->MainThreadStage();
 					this->AddLoadedResource(res_desc, res);
 					return ResLoader::ASyncReuseFunctor(res);
 				}
@@ -608,9 +608,9 @@ namespace KlayGE
 		}
 	}
 
-	void ResLoader::Unload(shared_ptr<void> const & res)
+	void ResLoader::Unload(std::shared_ptr<void> const & res)
 	{
-		lock_guard<mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end(); ++ iter)
 		{
@@ -622,9 +622,9 @@ namespace KlayGE
 		}
 	}
 
-	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, shared_ptr<void> const & res)
+	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, std::shared_ptr<void> const & res)
 	{
-		lock_guard<mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		bool found = false;
 		typedef decltype(loaded_res_) CachedDescType;
@@ -632,22 +632,22 @@ namespace KlayGE
 		{
 			if (c_desc.first == res_desc)
 			{
-				c_desc.second = weak_ptr<void>(res);
+				c_desc.second = std::weak_ptr<void>(res);
 				found = true;
 				break;
 			}
 		}
 		if (!found)
 		{
-			loaded_res_.push_back(std::make_pair(res_desc, weak_ptr<void>(res)));
+			loaded_res_.push_back(std::make_pair(res_desc, std::weak_ptr<void>(res)));
 		}
 	}
 
-	shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
+	std::shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
 	{
-		lock_guard<mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loading_mutex_);
 
-		shared_ptr<void> loaded_res;
+		std::shared_ptr<void> loaded_res;
 		typedef decltype(loaded_res_) LoadedResType;
 		KLAYGE_FOREACH(LoadedResType::const_reference lr, loaded_res_)
 		{
@@ -662,7 +662,7 @@ namespace KlayGE
 
 	void ResLoader::RemoveUnrefResources()
 	{
-		lock_guard<mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end();)
 		{
@@ -679,7 +679,7 @@ namespace KlayGE
 
 	void ResLoader::Update()
 	{
-		lock_guard<mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
 		{
@@ -698,7 +698,7 @@ namespace KlayGE
 	{
 		while (!quit_)
 		{
-			std::pair<ResLoadingDescPtr, shared_ptr<volatile bool> > res_pair;
+			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> > res_pair;
 			while (loading_res_queue_.pop(res_pair))
 			{
 				res_pair.first->SubThreadStage();
@@ -710,20 +710,20 @@ namespace KlayGE
 	}
 
 
-	ResLoader::ASyncRecreateFunctor::ASyncRecreateFunctor(shared_ptr<void> const & res,
-				ResLoadingDescPtr const & res_desc, shared_ptr<volatile bool> const & is_done)
+	ResLoader::ASyncRecreateFunctor::ASyncRecreateFunctor(std::shared_ptr<void> const & res,
+				ResLoadingDescPtr const & res_desc, std::shared_ptr<volatile bool> const & is_done)
 		: res_(res), res_desc_(res_desc), is_done_(is_done)
 	{
 	}
 
-	shared_ptr<void> ResLoader::ASyncRecreateFunctor::operator()()
+	std::shared_ptr<void> ResLoader::ASyncRecreateFunctor::operator()()
 	{
 		if (!res_)
 		{
 			if (*is_done_)
 			{
 				ResLoader& rl = ResLoader::Instance();
-				shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc_);
+				std::shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc_);
 				if (loaded_res)
 				{
 					if (res_desc_->StateLess())
@@ -749,12 +749,12 @@ namespace KlayGE
 		return res_;
 	}
 
-	ResLoader::ASyncReuseFunctor::ASyncReuseFunctor(shared_ptr<void> const & res)
+	ResLoader::ASyncReuseFunctor::ASyncReuseFunctor(std::shared_ptr<void> const & res)
 		: res_(res)
 	{
 	}
 
-	shared_ptr<void> ResLoader::ASyncReuseFunctor::operator()()
+	std::shared_ptr<void> ResLoader::ASyncReuseFunctor::operator()()
 	{
 		return res_;
 	}

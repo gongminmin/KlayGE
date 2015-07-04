@@ -70,7 +70,7 @@ namespace
 
 	typedef KlayGE::uint32_t (WINAPI *CreateObjectFunc)(const GUID* clsID, const GUID* interfaceID, void** outObject);
 
-	HRESULT GetArchiveItemPath(shared_ptr<IInArchive> const & archive, uint32_t index, std::string& result)
+	HRESULT GetArchiveItemPath(std::shared_ptr<IInArchive> const & archive, uint32_t index, std::string& result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -90,7 +90,7 @@ namespace
 		}
 	}
 
-	HRESULT IsArchiveItemFolder(shared_ptr<IInArchive> const & archive, uint32_t index, bool &result)
+	HRESULT IsArchiveItemFolder(std::shared_ptr<IInArchive> const & archive, uint32_t index, bool &result)
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
@@ -140,7 +140,7 @@ namespace
 	};
 
 
-	void GetArchiveIndex(shared_ptr<IInArchive>& archive, uint32_t& real_index,
+	void GetArchiveIndex(std::shared_ptr<IInArchive>& archive, uint32_t& real_index,
 								ResIdentifierPtr const & archive_is,
 								std::string const & password,
 								std::string const & extract_file_path)
@@ -153,10 +153,10 @@ namespace
 			archive = MakeCOMPtr(tmp);
 		}
 
-		shared_ptr<IInStream> file = MakeCOMPtr(new CInStream);
+		std::shared_ptr<IInStream> file = MakeCOMPtr(new CInStream);
 		checked_pointer_cast<CInStream>(file)->Attach(archive_is);
 
-		shared_ptr<IArchiveOpenCallback> ocb = MakeCOMPtr(new CArchiveOpenCallback);
+		std::shared_ptr<IArchiveOpenCallback> ocb = MakeCOMPtr(new CArchiveOpenCallback);
 		checked_pointer_cast<CArchiveOpenCallback>(ocb)->Init(password);
 		TIF(archive->Open(file.get(), 0, ocb.get()));
 
@@ -212,7 +212,7 @@ namespace KlayGE
 								std::string const & password,
 								std::string const & extract_file_path)
 	{
-		shared_ptr<IInArchive> archive;
+		std::shared_ptr<IInArchive> archive;
 		uint32_t real_index;
 		GetArchiveIndex(archive, real_index, archive_is, password, extract_file_path);
 		return real_index;
@@ -221,17 +221,17 @@ namespace KlayGE
 	void Extract7z(ResIdentifierPtr const & archive_is,
 							   std::string const & password,
 							   std::string const & extract_file_path,
-							   shared_ptr<std::ostream> const & os)
+		std::shared_ptr<std::ostream> const & os)
 	{
-		shared_ptr<IInArchive> archive;
+		std::shared_ptr<IInArchive> archive;
 		uint32_t real_index;
 		GetArchiveIndex(archive, real_index, archive_is, password, extract_file_path);
 		if (real_index != 0xFFFFFFFF)
 		{
-			shared_ptr<ISequentialOutStream> out_stream = MakeCOMPtr(new COutStream);
+			std::shared_ptr<ISequentialOutStream> out_stream = MakeCOMPtr(new COutStream);
 			checked_pointer_cast<COutStream>(out_stream)->Attach(os);
 
-			shared_ptr<IArchiveExtractCallback> ecb = MakeCOMPtr(new CArchiveExtractCallback);
+			std::shared_ptr<IArchiveExtractCallback> ecb = MakeCOMPtr(new CArchiveExtractCallback);
 			checked_pointer_cast<CArchiveExtractCallback>(ecb)->Init(password, out_stream);
 
 			TIF(archive->Extract(&real_index, 1, false, ecb.get()));

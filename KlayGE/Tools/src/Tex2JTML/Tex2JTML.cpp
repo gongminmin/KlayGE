@@ -28,15 +28,9 @@
 #endif
 #ifdef KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#include <regex>
-	namespace KlayGE
-	{
-		using std::regex;
-		using std::regex_match;
-		using std::smatch;
-	}
 #else
 	#include <boost/regex.hpp>
-	namespace KlayGE
+	namespace std
 	{
 		using boost::regex;
 		using boost::regex_match;
@@ -72,7 +66,7 @@ struct TextureDesc
 	uint32_t width;
 	uint32_t height;
 };
-typedef KlayGE::shared_ptr<TextureDesc> TextureDescPtr;
+typedef std::shared_ptr<TextureDesc> TextureDescPtr;
 
 std::string DosWildcardToRegex(std::string const & wildcard)
 {
@@ -115,7 +109,7 @@ std::string DosWildcardToRegex(std::string const & wildcard)
 }
 
 // From http://www.blackpawn.com/texts/lightmaps/default.html
-class TexPackNode : public KlayGE::enable_shared_from_this<TexPackNode>
+class TexPackNode : public std::enable_shared_from_this<TexPackNode>
 {
 public:
 	TexPackNode()
@@ -123,14 +117,14 @@ public:
 	{
 	}
 	
-	KlayGE::shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
+	std::shared_ptr<TexPackNode> Insert(TextureDescPtr const & tex_desc)
 	{
 		if (this->IsLeaf())
 		{
 			// room don't fit or already have picture here
 			if (!this->CanInsert(tex_desc))
 			{
-				return KlayGE::shared_ptr<TexPackNode>();
+				return std::shared_ptr<TexPackNode>();
 			}
 			// result comes form perfecly fit
 			if (this->CanPerfectlyInsert(tex_desc))
@@ -163,7 +157,7 @@ public:
 		else
 		{
 			// try first child
-			KlayGE::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
+			std::shared_ptr<TexPackNode> new_node = child_[0]->Insert(tex_desc);
 			if (new_node)
 			{
 				return new_node;
@@ -193,7 +187,7 @@ public:
 		return (rect_.Width() == tex_desc->width) && (rect_.Height() == tex_desc->height);
 	}
 
-	KlayGE::shared_ptr<TexPackNode> Child(uint32_t index)
+	std::shared_ptr<TexPackNode> Child(uint32_t index)
 	{
 		BOOST_ASSERT(index < 2);
 		return child_[index];
@@ -218,13 +212,13 @@ public:
 	}
 
 private:
-	KlayGE::shared_ptr<TexPackNode> child_[2];
+	std::shared_ptr<TexPackNode> child_[2];
 	KlayGE::Rect_T<uint32_t> rect_;
 	TextureDescPtr tex_desc_;
 };
 
 
-void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size, KlayGE::shared_ptr<TexPackNode>& root)
+void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size, std::shared_ptr<TexPackNode>& root)
 {
 	root = MakeSharedPtr<TexPackNode>();
 	int size = num_tiles * tile_size;
@@ -233,7 +227,7 @@ void CalcPackInfo(std::vector<TextureDescPtr>& ta, int num_tiles, int tile_size,
 	// It returns the pointer of the node the lightmap can go into or null to say it can't fit.
 	for (size_t i = 0; i < ta.size(); ++ i)
 	{
-		KlayGE::shared_ptr<TexPackNode> node = root->Insert(ta[i]);
+		std::shared_ptr<TexPackNode> node = root->Insert(ta[i]);
 		if (node)
 		{
 			node->TextureDesc(ta[i]);
@@ -268,7 +262,7 @@ struct JTMLImageRecord
 };
 typedef std::vector<JTMLImageRecord> JTMLImageRecordArray;
 
-void ConvertTreeToJTML(KlayGE::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
+void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
 {
 	if (node->TextureDesc())
 	{
@@ -289,7 +283,7 @@ void ConvertTreeToJTML(KlayGE::shared_ptr<TexPackNode> const & node, JTMLImageRe
 	}
 }
 
-void WriteJTML(KlayGE::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
+void WriteJTML(std::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
 {
 	JTMLImageRecordArray jirs;
 	ConvertTreeToJTML(root, jirs, tile_size);
@@ -348,7 +342,7 @@ void Tex2JTML(std::vector<std::string>& tex_names, uint32_t num_tiles, uint32_t 
 		cout << " DONE" << endl;
 	}
 
-	KlayGE::shared_ptr<TexPackNode> root;
+	std::shared_ptr<TexPackNode> root;
 	CalcPackInfo(tex_descs, num_tiles, tile_size, root);
 
 	WriteJTML(root, jtml_name, num_tiles, tile_size, EF_ABGR8);
@@ -399,20 +393,20 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				regex const filter(DosWildcardToRegex(arg));
+				std::regex const filter(DosWildcardToRegex(arg));
 
 				filesystem::directory_iterator end_itr;
 				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
 				{
 					if (filesystem::is_regular_file(i->status()))
 					{
-						smatch what;
+						std::smatch what;
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
 						std::string const name = i->path().filename();
 #else
 						std::string const name = i->path().filename().string();
 #endif
-						if (regex_match(name, what, filter))
+						if (std::regex_match(name, what, filter))
 						{
 							tex_names.push_back(name);
 						}

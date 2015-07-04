@@ -51,19 +51,19 @@ namespace KlayGE
 	namespace Offline
 	{
 		class RenderVariable;
-		typedef shared_ptr<RenderVariable> RenderVariablePtr;
+		typedef std::shared_ptr<RenderVariable> RenderVariablePtr;
 		class RenderEffectConstantBuffer;
-		typedef shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
+		typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 		class RenderEffectParameter;
-		typedef shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
+		typedef std::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
 		class RenderTechnique;
-		typedef shared_ptr<RenderTechnique> RenderTechniquePtr;
+		typedef std::shared_ptr<RenderTechnique> RenderTechniquePtr;
 		class RenderEffect;
-		typedef shared_ptr<RenderEffect> RenderEffectPtr;
+		typedef std::shared_ptr<RenderEffect> RenderEffectPtr;
 		class RenderEffectAnnotation;
-		typedef shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
+		typedef std::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 		class RenderPass;
-		typedef shared_ptr<RenderPass> RenderPassPtr;
+		typedef std::shared_ptr<RenderPass> RenderPassPtr;
 
 		inline bool operator==(SamplerStateDesc const & lhs, SamplerStateDesc const & rhs)
 		{
@@ -164,7 +164,7 @@ namespace KlayGE
 			virtual RenderVariable& operator=(float4x4 const & value);
 			virtual RenderVariable& operator=(TexturePtr const & value);
 			virtual RenderVariable& operator=(TextureSubresource const & value);
-			virtual RenderVariable& operator=(function<TexturePtr()> const & value);
+			virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 			virtual RenderVariable& operator=(SamplerStateDesc const & value);
 			virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 			virtual RenderVariable& operator=(std::string const & value);
@@ -410,7 +410,7 @@ namespace KlayGE
 		public:
 			virtual RenderVariable& operator=(TexturePtr const & value);
 			virtual RenderVariable& operator=(TextureSubresource const & value);
-			virtual RenderVariable& operator=(function<TexturePtr()> const & value);
+			virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 			virtual RenderVariable& operator=(std::string const & value);
 
 			virtual void Value(TexturePtr& val) const;
@@ -418,7 +418,7 @@ namespace KlayGE
 			virtual void Value(std::string& val) const;
 
 		protected:
-			function<TexturePtr()> tl_;
+			std::function<TexturePtr()> tl_;
 			mutable TextureSubresource val_;
 			std::string elem_type_;
 		};
@@ -510,7 +510,7 @@ namespace KlayGE
 			uint32_t type_;
 			std::string name_;
 
-			shared_ptr<RenderVariable> var_;
+			std::shared_ptr<RenderVariable> var_;
 		};
 
 		class RenderShaderFunc
@@ -642,19 +642,19 @@ namespace KlayGE
 				XMLNodePtr const & target_place, XMLNodePtr const & include_root) const;
 
 		private:
-			shared_ptr<std::string> res_name_;
+			std::shared_ptr<std::string> res_name_;
 			uint64_t timestamp_;
 
 			std::vector<RenderEffectParameterPtr> params_;
 			std::vector<RenderEffectConstantBufferPtr> cbuffers_;
 			std::vector<RenderTechniquePtr> techniques_;
 
-			shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
-			shared_ptr<std::vector<RenderShaderFunc> > shaders_;
+			std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
+			std::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
 
 			RenderEffectPtr prototype_effect_;
 
-			shared_ptr<std::vector<ShaderDesc> > shader_descs_;
+			std::shared_ptr<std::vector<ShaderDesc> > shader_descs_;
 
 			OfflineRenderDeviceCaps caps_;
 		};
@@ -733,12 +733,12 @@ namespace KlayGE
 
 		private:
 			RenderEffect& effect_;
-			shared_ptr<std::string> name_;
+			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
 
 			std::vector<RenderPassPtr> passes_;
-			shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-			shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+			std::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
 
 			float weight_;
 			bool transparent_;
@@ -806,11 +806,11 @@ namespace KlayGE
 		private:
 			RenderEffect& effect_;
 
-			shared_ptr<std::string> name_;
+			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
-			shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-			shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
-			shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+			std::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
+			std::shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
 
 			RasterizerStateDesc rasterizer_state_desc_;
 			DepthStencilStateDesc depth_stencil_state_desc_;
@@ -833,7 +833,7 @@ namespace KlayGE
 
 			void StreamOut(std::ostream& os);
 
-			shared_ptr<std::string> const & Name() const
+			std::shared_ptr<std::string> const & Name() const
 			{
 				return name_;
 			}
@@ -867,9 +867,9 @@ namespace KlayGE
 			}
 
 		private:
-			shared_ptr<std::string> name_;
+			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
-			shared_ptr<std::vector<uint32_t> > param_indices_;
+			std::shared_ptr<std::vector<uint32_t> > param_indices_;
 
 			std::vector<uint8_t> buff_;
 		};
@@ -894,12 +894,12 @@ namespace KlayGE
 				return var_;
 			}
 
-			shared_ptr<std::string> const & ArraySize() const
+			std::shared_ptr<std::string> const & ArraySize() const
 			{
 				return array_size_;
 			}
 
-			shared_ptr<std::string> const & Name() const
+			std::shared_ptr<std::string> const & Name() const
 			{
 				return name_;
 			}
@@ -907,7 +907,7 @@ namespace KlayGE
 			{
 				return name_hash_;
 			}
-			shared_ptr<std::string> const & Semantic() const
+			std::shared_ptr<std::string> const & Semantic() const
 			{
 				return semantic_;
 			}
@@ -969,16 +969,16 @@ namespace KlayGE
 			}
 
 		private:
-			shared_ptr<std::string> name_;
+			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
-			shared_ptr<std::string> semantic_;
+			std::shared_ptr<std::string> semantic_;
 			size_t semantic_hash_;
 
 			uint32_t type_;
-			shared_ptr<RenderVariable> var_;
-			shared_ptr<std::string> array_size_;
+			std::shared_ptr<RenderVariable> var_;
+			std::shared_ptr<std::string> array_size_;
 
-			shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
 
 			RenderEffectConstantBufferPtr cbuff_;
 		};

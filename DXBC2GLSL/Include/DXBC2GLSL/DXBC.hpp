@@ -190,7 +190,7 @@ enum DXBCFindSignature
 	DFS_OUTPUT1
 };
 
-KlayGE::shared_ptr<DXBCContainer> DXBCParse(void const * data);
+std::shared_ptr<DXBCContainer> DXBCParse(void const * data);
 DXBCChunkHeader const * DXBCFindChunk(void const * data, uint32_t fourcc);
 DXBCChunkHeader const * DXBCFindShaderBytecode(void const * data);
 DXBCChunkSignatureHeader const * DXBCFindSignature(void const * data, uint32_t kind);

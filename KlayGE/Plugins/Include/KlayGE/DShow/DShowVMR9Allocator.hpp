@@ -83,18 +83,18 @@ namespace KlayGE
 
 	private:
 		// needed to make this a thread safe object
-		mutex			mutex_;
+		std::mutex		mutex_;
 		HWND			wnd_;
-		atomic<int32_t>	ref_count_;
+		std::atomic<int32_t>	ref_count_;
 
-		shared_ptr<IDirect3D9> d3d_;
-		shared_ptr<IDirect3DDevice9> d3d_device_;
+		std::shared_ptr<IDirect3D9> d3d_;
+		std::shared_ptr<IDirect3DDevice9> d3d_device_;
 
-		shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
+		std::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify_;
 		std::vector<IDirect3DSurface9*>	surfaces_;
 		uint32_t cur_surf_index_;
 
-		shared_ptr<IDirect3DSurface9> cache_surf_;
+		std::shared_ptr<IDirect3DSurface9> cache_surf_;
 		TexturePtr			present_tex_;
 
 		HMODULE mod_d3d9_;

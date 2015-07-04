@@ -103,8 +103,8 @@ namespace KlayGE
 			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(KlayGE::bind(&FirstPersonCameraController::InputHandler, this,
-				KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+			input_handler->connect(std::bind(&FirstPersonCameraController::InputHandler, this,
+				std::placeholders::_1, std::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler);
 		}
 	}
@@ -294,8 +294,8 @@ namespace KlayGE
 			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(KlayGE::bind(&TrackballCameraController::InputHandler, this,
-				KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+			input_handler->connect(std::bind(&TrackballCameraController::InputHandler, this,
+				std::placeholders::_1, std::placeholders::_2));
 			inputEngine.ActionMap(actionMap, input_handler);
 		}
 	}
@@ -614,13 +614,13 @@ namespace KlayGE
 		CameraController::AttachCamera(camera);
 
 		start_time_ = Context::Instance().AppInstance().AppTime();
-		camera.BindUpdateFunc(bind(&CameraPathController::UpdateCameraFunc, this,
-			KlayGE::placeholders::_1, KlayGE::placeholders::_2, KlayGE::placeholders::_3));
+		camera.BindUpdateFunc(std::bind(&CameraPathController::UpdateCameraFunc, this,
+			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	}
 
 	void CameraPathController::DetachCamera()
 	{
-		camera_->BindUpdateFunc(function<void(Camera&, float, float)>());
+		camera_->BindUpdateFunc(std::function<void(Camera&, float, float)>());
 
 		CameraController::DetachCamera();
 	}

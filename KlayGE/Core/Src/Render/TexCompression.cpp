@@ -173,7 +173,7 @@ namespace KlayGE
 
 	
 	RGBACluster::RGBACluster(ARGBColor32 const * pixels, uint32_t num,
-			function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition)
+			std::function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition)
 		: get_partition_(get_partition)
 	{
 		for (uint32_t i = 0; i < num; ++ i)

@@ -66,7 +66,7 @@ namespace KlayGE
 		dsbd.dwBufferBytes		= static_cast<uint32_t>(dataSource->Size());
 		dsbd.lpwfxFormat		= &wfx;
 
-		shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
+		std::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
@@ -149,7 +149,7 @@ namespace KlayGE
 
 	// 返回3D缓冲区的接口
 	/////////////////////////////////////////////////////////////////////////////////
-	shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter)
+	std::shared_ptr<IDirectSound3DBuffer> DSSoundBuffer::Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter)
 	{
 		IDirectSound3DBuffer* ds3DBuffer;
 		(*iter)->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds3DBuffer));
@@ -200,7 +200,7 @@ namespace KlayGE
 	bool DSSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			KlayGE::bind(std::logical_not<bool>(), KlayGE::bind(IsSourceFree, KlayGE::placeholders::_1))) != sources_.end());
+			std::bind(std::logical_not<bool>(), std::bind(IsSourceFree, std::placeholders::_1))) != sources_.end());
 	}
 
 	// 设置音量

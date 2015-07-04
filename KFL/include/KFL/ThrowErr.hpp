@@ -40,14 +40,8 @@
 	#include <system_error>
 	namespace KlayGE
 	{
-		using std::system_error;
-		using std::make_error_code;
-#ifdef KLAYGE_COMPILER_MSVC
-#if KLAYGE_COMPILER_VERSION >= 120
-		using std::errc;
-#else
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION < 120)
 		namespace errc = std::errc;
-#endif
 #else
 		using std::errc;
 #endif
@@ -55,10 +49,13 @@
 #else
 	#include <boost/system/error_code.hpp>
 	#include <boost/system/system_error.hpp>
-	namespace KlayGE
+	namespace std
 	{
 		using boost::system::system_error;
 		using boost::system::errc::make_error_code;
+	}
+	namespace KlayGE
+	{
 		namespace errc = boost::system::errc;
 	}
 #endif
@@ -73,16 +70,14 @@ namespace KlayGE
 	std::string CombineFileLine(std::string const & file, int line);
 }
 
-#define THR(x)			{ throw KlayGE::system_error(KlayGE::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
+#define THR(x)			{ throw std::system_error(std::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
 
-// 如果错误，就抛出错误代码
+// Throw if failed
 #define TIF(x)			{ HRESULT _hr = x; if (static_cast<HRESULT>(_hr) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
 
 namespace KlayGE
 {
-	// 断言
-	inline void
-	Verify(bool x)
+	inline void Verify(bool x)
 	{
 		if (!x)
 		{

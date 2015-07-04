@@ -95,9 +95,9 @@ void PostProcessingApp::OnCreate()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<RenderablePtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<RenderablePtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -130,7 +130,7 @@ void PostProcessingApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&PostProcessingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&PostProcessingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	copy_ = SyncLoadPostProcess("Copy.ppml", "copy");
@@ -157,16 +157,16 @@ void PostProcessingApp::OnCreate()
 	id_cross_stitching_ = dialog_->IDFromName("CrossStitchingPP");
 	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::FPSCameraHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CopyHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::AsciiArtsHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CartoonHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::TilingHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::HDRHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::NightVisionHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::OldFashionHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::CrossStitchingHandler, this, KlayGE::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(KlayGE::bind(&PostProcessingApp::FrostedGlassHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FPSCameraHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CopyHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::AsciiArtsHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CartoonHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::TilingHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::HDRHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::NightVisionHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::OldFashionHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CrossStitchingHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FrostedGlassHandler, this, std::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

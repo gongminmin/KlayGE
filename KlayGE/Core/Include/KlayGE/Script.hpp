@@ -82,7 +82,7 @@ namespace KlayGE
 		virtual boost::any RunString(std::string const & script);
 	};
 
-	typedef shared_ptr<ScriptModule> ScriptModulePtr;
+	typedef std::shared_ptr<ScriptModule> ScriptModulePtr;
 
 	// 实现脚本引擎的功能
 	/////////////////////////////////////////////////////////////////////////////////

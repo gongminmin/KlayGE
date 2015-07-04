@@ -118,7 +118,7 @@ namespace KlayGE
 			IID_IBaseFilter, reinterpret_cast<void**>(&filter)));
 		filter_ = MakeCOMPtr(filter);
 
-		shared_ptr<IVMRFilterConfig9> filter_config;
+		std::shared_ptr<IVMRFilterConfig9> filter_config;
 		{
 			IVMRFilterConfig9* tmp;
 			TIF(filter_->QueryInterface(IID_IVMRFilterConfig9, reinterpret_cast<void**>(&tmp)));
@@ -128,7 +128,7 @@ namespace KlayGE
 		TIF(filter_config->SetRenderingMode(VMR9Mode_Renderless));
 		TIF(filter_config->SetNumberOfStreams(1));
 
-		shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify;
+		std::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify;
 		{
 			IVMRSurfaceAllocatorNotify9* tmp;
 			TIF(filter_->QueryInterface(IID_IVMRSurfaceAllocatorNotify9, reinterpret_cast<void**>(&tmp)));

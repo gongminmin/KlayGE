@@ -26,15 +26,9 @@
 #endif
 #ifdef KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#include <regex>
-	namespace KlayGE
-	{
-		using std::regex;
-		using std::regex_match;
-		using std::smatch;
-	}
 #else
 	#include <boost/regex.hpp>
-	namespace KlayGE
+	namespace std
 	{
 		using boost::regex;
 		using boost::regex_match;
@@ -364,20 +358,20 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				regex const filter(DosWildcardToRegex(arg));
+				std::regex const filter(DosWildcardToRegex(arg));
 
 				filesystem::directory_iterator end_itr;
 				for (filesystem::directory_iterator i("."); i != end_itr; ++ i)
 				{
 					if (filesystem::is_regular_file(i->status()))
 					{
-						smatch what;
+						std::smatch what;
 #ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
 						std::string const name = i->path().filename();
 #else
 						std::string const name = i->path().filename().string();
 #endif
-						if (regex_match(name, what, filter))
+						if (std::regex_match(name, what, filter))
 						{
 							res_names.push_back(name);
 						}

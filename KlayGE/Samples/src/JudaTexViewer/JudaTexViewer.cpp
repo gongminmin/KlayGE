@@ -326,14 +326,14 @@ void JudaTexViewer::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&JudaTexViewer::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&JudaTexViewer::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("JudaTexViewer.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_open_ = dialog_->IDFromName("Open");
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(KlayGE::bind(&JudaTexViewer::OpenHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(std::bind(&JudaTexViewer::OpenHandler, this, std::placeholders::_1));
 }
 
 void JudaTexViewer::OnResize(uint32_t width, uint32_t height)

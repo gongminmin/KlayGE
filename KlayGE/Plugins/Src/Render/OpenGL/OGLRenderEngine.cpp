@@ -2018,12 +2018,12 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR8_SRGB);
 		}
 
-		caps_.vertex_format_support = bind<bool>(&OGLRenderEngine::VertexFormatSupport, this,
-			placeholders::_1);
-		caps_.texture_format_support = bind<bool>(&OGLRenderEngine::TextureFormatSupport, this,
-			placeholders::_1);
-		caps_.rendertarget_format_support = bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this,
-			placeholders::_1, placeholders::_2, placeholders::_3);
+		caps_.vertex_format_support = std::bind<bool>(&OGLRenderEngine::VertexFormatSupport, this,
+			std::placeholders::_1);
+		caps_.texture_format_support = std::bind<bool>(&OGLRenderEngine::TextureFormatSupport, this,
+			std::placeholders::_1);
+		caps_.rendertarget_format_support = std::bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this,
+			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

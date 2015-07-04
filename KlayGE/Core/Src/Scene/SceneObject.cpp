@@ -119,12 +119,12 @@ namespace KlayGE
 		return visible_mark_;
 	}
 
-	void SceneObject::BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)
+	void SceneObject::BindSubThreadUpdateFunc(std::function<void(SceneObject&, float, float)> const & update_func)
 	{
 		sub_thread_update_func_ = update_func;
 	}
 
-	void SceneObject::BindMainThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func)
+	void SceneObject::BindMainThreadUpdateFunc(std::function<void(SceneObject&, float, float)> const & update_func)
 	{
 		main_thread_update_func_ = update_func;
 	}

@@ -123,7 +123,7 @@ namespace KlayGE
 
 	int UIListBox::AddItem(std::wstring const & strText)
 	{
-		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->rcActive = IRect(0, 0, 0, 0);
 		pNewItem->bSelected = false;
@@ -143,7 +143,7 @@ namespace KlayGE
 
 	int UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
 	{
-		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = IRect(0, 0, 0, 0);
@@ -159,7 +159,7 @@ namespace KlayGE
 
 	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)
 	{
-		shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
+		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
 		pNewItem->data = data;
 		pNewItem->rcActive = IRect(0, 0, 0, 0);
@@ -189,7 +189,7 @@ namespace KlayGE
 		scroll_bar_.SetTrackRange(0, 1);
 	}
 
-	shared_ptr<UIListBoxItem> UIListBox::GetItem(int nIndex) const
+	std::shared_ptr<UIListBoxItem> UIListBox::GetItem(int nIndex) const
 	{
 		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 
@@ -483,7 +483,7 @@ namespace KlayGE
 					{
 						// Determine behavior based on the state of Shift and Ctrl
 
-						shared_ptr<UIListBoxItem> const & pSelItem = items_[selected_];
+						std::shared_ptr<UIListBoxItem> const & pSelItem = items_[selected_];
 						if (MB_Ctrl == (buttons & (MB_Shift | MB_Ctrl)))
 						{
 							// Control click. Reverse the selection of this item.
@@ -667,7 +667,7 @@ namespace KlayGE
 					break;
 				}
 
-				shared_ptr<UIListBoxItem> const & pItem = items_[i];
+				std::shared_ptr<UIListBoxItem> const & pItem = items_[i];
 
 				// Determine if we need to render this item with the
 				// selected element.

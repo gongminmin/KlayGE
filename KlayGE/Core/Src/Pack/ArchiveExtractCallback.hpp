@@ -105,15 +105,15 @@ namespace KlayGE
 		{
 		}
 
-		void Init(std::string const & pw, shared_ptr<ISequentialOutStream> const & outFileStream);
+		void Init(std::string const & pw, std::shared_ptr<ISequentialOutStream> const & outFileStream);
 
 	private:
-		atomic<int32_t> ref_count_;
+		std::atomic<int32_t> ref_count_;
 
 		bool password_is_defined_;
 		std::wstring password_;
 
-		shared_ptr<ISequentialOutStream> _outFileStream;
+		std::shared_ptr<ISequentialOutStream> _outFileStream;
 	};
 }
 

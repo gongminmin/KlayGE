@@ -36,15 +36,15 @@
 namespace KlayGE
 {
 	class ResIdentifier;
-	typedef shared_ptr<ResIdentifier> ResIdentifierPtr;
+	typedef std::shared_ptr<ResIdentifier> ResIdentifierPtr;
 	class DllLoader;
 
 	class XMLDocument;
-	typedef shared_ptr<XMLDocument> XMLDocumentPtr;
+	typedef std::shared_ptr<XMLDocument> XMLDocumentPtr;
 	class XMLNode;
-	typedef shared_ptr<XMLNode> XMLNodePtr;
+	typedef std::shared_ptr<XMLNode> XMLNodePtr;
 	class XMLAttribute;
-	typedef shared_ptr<XMLAttribute> XMLAttributePtr;
+	typedef std::shared_ptr<XMLAttribute> XMLAttributePtr;
 
 	class bad_join;
 	template <typename ResultType>
@@ -84,37 +84,37 @@ namespace KlayGE
 	typedef Size_T<float> Size;
 	typedef Size_T<int32_t> ISize;
 	typedef Size_T<uint32_t> UISize;
-	typedef shared_ptr<Size> SizePtr;
-	typedef shared_ptr<ISize> ISizePtr;
-	typedef shared_ptr<UISize> UISizePtr;
+	typedef std::shared_ptr<Size> SizePtr;
+	typedef std::shared_ptr<ISize> ISizePtr;
+	typedef std::shared_ptr<UISize> UISizePtr;
 	template <typename T>
 	class Rect_T;
 	typedef Rect_T<float> Rect;
 	typedef Rect_T<int32_t> IRect;
 	typedef Rect_T<uint32_t> UIRect;
-	typedef shared_ptr<Rect> RectPtr;
-	typedef shared_ptr<IRect> IRectPtr;
-	typedef shared_ptr<UIRect> UIRectPtr;
+	typedef std::shared_ptr<Rect> RectPtr;
+	typedef std::shared_ptr<IRect> IRectPtr;
+	typedef std::shared_ptr<UIRect> UIRectPtr;
 	template <typename T>
 	class Bound_T;
 	typedef Bound_T<float> Bound;
-	typedef shared_ptr<Bound> BoundPtr;
+	typedef std::shared_ptr<Bound> BoundPtr;
 	template <typename T>
 	class Sphere_T;
 	typedef Sphere_T<float> Sphere;
-	typedef shared_ptr<Sphere> SpherePtr;
+	typedef std::shared_ptr<Sphere> SpherePtr;
 	template <typename T>
 	class AABBox_T;
 	typedef AABBox_T<float> AABBox;
-	typedef shared_ptr<AABBox> AABBoxPtr;
+	typedef std::shared_ptr<AABBox> AABBoxPtr;
 	template <typename T>
 	class Frustum_T;
 	typedef Frustum_T<float> Frustum;
-	typedef shared_ptr<Frustum> FrustumPtr;
+	typedef std::shared_ptr<Frustum> FrustumPtr;
 	template <typename T>
 	class OBBox_T;
 	typedef OBBox_T<float> OBBox;
-	typedef shared_ptr<OBBox> OBBoxPtr;
+	typedef std::shared_ptr<OBBox> OBBoxPtr;
 }
 
 #endif			// _KFL_PREDECLARE_HPP

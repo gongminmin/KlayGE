@@ -200,7 +200,7 @@ namespace KlayGE
 		void DestroyAll();
 
 	private:
-		static shared_ptr<Context> context_instance_;
+		static std::shared_ptr<Context> context_instance_;
 
 		ContextCfg cfg_;
 
@@ -228,7 +228,7 @@ namespace KlayGE
 		DllLoader sm_loader_;
 		DllLoader ads_loader_;
 
-		shared_ptr<thread_pool> gtp_instance_;
+		std::shared_ptr<thread_pool> gtp_instance_;
 	};
 }
 

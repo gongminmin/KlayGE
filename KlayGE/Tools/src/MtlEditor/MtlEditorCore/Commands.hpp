@@ -48,7 +48,7 @@ namespace KlayGE
 		MtlEditorCore* core_;
 	};
 
-	typedef shared_ptr<MtlEditorCommand> MtlEditorCommandPtr;
+	typedef std::shared_ptr<MtlEditorCommand> MtlEditorCommandPtr;
 
 	template <MtlEditorCommandCode code>
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandConcrete : public MtlEditorCommand

@@ -45,7 +45,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void Extract7z(ResIdentifierPtr const & archive_is,
 		std::string const & password,
 		std::string const & extract_file_path,
-		shared_ptr<std::ostream> const & os);
+		std::shared_ptr<std::ostream> const & os);
 }
 
 #endif		// _KFL_EXTRACT7Z_HPP

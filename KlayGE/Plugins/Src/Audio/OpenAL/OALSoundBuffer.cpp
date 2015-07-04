@@ -126,7 +126,7 @@ namespace KlayGE
 	bool OALSoundBuffer::IsPlaying() const
 	{
 		return (std::find_if(sources_.begin(), sources_.end(),
-			KlayGE::bind(std::logical_not<bool>(), KlayGE::bind(IsSourceFree, KlayGE::placeholders::_1))) != sources_.end());
+			std::bind(std::logical_not<bool>(), std::bind(IsSourceFree, std::placeholders::_1))) != sources_.end());
 	}
 
 	// 设置音量
@@ -134,7 +134,7 @@ namespace KlayGE
 	void OALSoundBuffer::Volume(float vol)
 	{
 		std::for_each(sources_.begin(), sources_.end(),
-			KlayGE::bind(alSourcef, KlayGE::placeholders::_1, AL_GAIN, vol));
+			std::bind(alSourcef, std::placeholders::_1, AL_GAIN, vol));
 	}
 
 	// 获取声源位置

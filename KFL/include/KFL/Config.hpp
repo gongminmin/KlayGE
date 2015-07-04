@@ -422,10 +422,6 @@
 	#error "Unknown CPU endian."
 #endif
 
-#define KLAYGE_IDENTITY_SUPPORT
-#define KLAYGE_SELECT1ST2ND_SUPPORT
-#define KLAYGE_PROJECT1ST2ND_SUPPORT
-
 // Defines some MACROs from compile options
 #ifdef KLAYGE_CPU_X64
 	#define KLAYGE_SSE_SUPPORT

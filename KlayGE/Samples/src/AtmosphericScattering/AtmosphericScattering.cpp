@@ -195,14 +195,14 @@ void AtmosphericScatteringApp::OnCreate()
 	id_beta_button_ = dialog_param_->IDFromName("beta_button");
 	id_absorb_button_ = dialog_param_->IDFromName("absorb_button");
 
-	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(KlayGE::bind(&AtmosphericScatteringApp::AtmosphereTopHandler, this, KlayGE::placeholders::_1));
+	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(std::bind(&AtmosphericScatteringApp::AtmosphereTopHandler, this, std::placeholders::_1));
 	this->AtmosphereTopHandler(*(dialog_param_->Control<UISlider>(id_atmosphere_top_)));
 
-	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(KlayGE::bind(&AtmosphericScatteringApp::DensityHandler, this, KlayGE::placeholders::_1));
+	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(std::bind(&AtmosphericScatteringApp::DensityHandler, this, std::placeholders::_1));
 	this->DensityHandler(*(dialog_param_->Control<UISlider>(id_density_)));
 
-	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(KlayGE::bind(&AtmosphericScatteringApp::ChangeBetaHandler, this, KlayGE::placeholders::_1));
-	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(KlayGE::bind(&AtmosphericScatteringApp::ChangeAbsorbHandler, this, KlayGE::placeholders::_1));
+	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(std::bind(&AtmosphericScatteringApp::ChangeBetaHandler, this, std::placeholders::_1));
+	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(std::bind(&AtmosphericScatteringApp::ChangeAbsorbHandler, this, std::placeholders::_1));
 
 	this->LoadBeta(Color(38.05f, 82.36f, 214.65f, 1));
 	this->LoadAbsorb(Color(0.75f, 0.85f, 1, 1));
@@ -221,7 +221,7 @@ void AtmosphericScatteringApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&AtmosphericScatteringApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&AtmosphericScatteringApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 }
 

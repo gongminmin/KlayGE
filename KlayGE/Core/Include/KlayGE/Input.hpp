@@ -351,7 +351,7 @@ namespace KlayGE
 	};
 
 	typedef boost::signals2::signal<void(InputEngine const & sender, InputAction const & action)> input_signal;
-	typedef shared_ptr<input_signal> action_handler_t;
+	typedef std::shared_ptr<input_signal> action_handler_t;
 	typedef boost::container::flat_map<uint32_t, InputActionMap> action_maps_t;
 
 	//  ‰»Î“˝«Ê
@@ -586,8 +586,8 @@ namespace KlayGE
 		InputTouchActionParamPtr action_param_;
 
 		GestureState curr_state_;
-		function<void(float)> curr_gesture_;
-		function<void(float)> gesture_funcs_[GS_NumGestures];
+		std::function<void(float)> curr_gesture_;
+		std::function<void(float)> gesture_funcs_[GS_NumGestures];
 
 		// 1-finger
 		float one_finger_tap_timer_;

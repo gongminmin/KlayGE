@@ -33,7 +33,7 @@ namespace KlayGE
 	public:
 		explicit SceneObjectHelper(uint32_t attrib);
 		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
-		SceneObjectHelper(function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy);
+		SceneObjectHelper(std::function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy);
 		virtual ~SceneObjectHelper()
 		{
 		}
@@ -51,9 +51,9 @@ namespace KlayGE
 
 		void Technique(RenderTechniquePtr const & tech);
 		void CubeMap(TexturePtr const & cube);
-		void CubeMap(function<TexturePtr()> const & cube);
+		void CubeMap(std::function<TexturePtr()> const & cube);
 		void CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube);
-		void CompressedCubeMap(function<TexturePtr()> const & y_cube, function<TexturePtr()> const & c_cube);
+		void CompressedCubeMap(std::function<TexturePtr()> const & y_cube, std::function<TexturePtr()> const & c_cube);
 	};
 
 	class KLAYGE_CORE_API SceneObjectLightSourceProxy : public SceneObjectHelper
@@ -62,7 +62,7 @@ namespace KlayGE
 		explicit SceneObjectLightSourceProxy(LightSourcePtr const & light);
 		SceneObjectLightSourceProxy(LightSourcePtr const & light, RenderModelPtr const & light_model);
 		SceneObjectLightSourceProxy(LightSourcePtr const & light,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
@@ -72,7 +72,7 @@ namespace KlayGE
 	private:
 		void Init(LightSourcePtr const & light, RenderModelPtr const & light_model);
 		void Init(LightSourcePtr const & light,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
 		float4x4 model_scaling_;
@@ -86,7 +86,7 @@ namespace KlayGE
 		explicit SceneObjectCameraProxy(CameraPtr const & camera);
 		SceneObjectCameraProxy(CameraPtr const & camera, RenderModelPtr const & camera_model);
 		SceneObjectCameraProxy(CameraPtr const & camera,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
 
@@ -96,7 +96,7 @@ namespace KlayGE
 	private:
 		void Init(CameraPtr const & camera, RenderModelPtr const & camera_model);
 		void Init(CameraPtr const & camera,
-			function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
+			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
 		float4x4 model_scaling_;

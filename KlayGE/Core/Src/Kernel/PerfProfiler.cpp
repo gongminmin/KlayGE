@@ -40,12 +40,12 @@
 
 namespace
 {
-	KlayGE::mutex singleton_mutex;
+	std::mutex singleton_mutex;
 }
 
 namespace KlayGE
 {
-	shared_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
+	std::shared_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
 
 	PerfRange::PerfRange()
 		: cpu_time_(0), gpu_time_(0), dirty_(false)
@@ -116,7 +116,7 @@ namespace KlayGE
 	{
 		if (!perf_profiler_instance_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!perf_profiler_instance_)
 			{
 				perf_profiler_instance_ = MakeSharedPtr<PerfProfiler>();
@@ -127,7 +127,7 @@ namespace KlayGE
 
 	void PerfProfiler::Destroy()
 	{
-		lock_guard<mutex> lock(singleton_mutex);
+		std::lock_guard<std::mutex> lock(singleton_mutex);
 		perf_profiler_instance_.reset();
 	}
 

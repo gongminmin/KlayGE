@@ -100,7 +100,7 @@ namespace KlayGE
 		void Init(std::string const & pw);
 
 	private:
-		atomic<int32_t> ref_count_;
+		std::atomic<int32_t> ref_count_;
 
 		bool password_is_defined_;
 		std::wstring password_;

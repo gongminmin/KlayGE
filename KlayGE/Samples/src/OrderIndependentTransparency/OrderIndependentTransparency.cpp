@@ -517,7 +517,7 @@ void OrderIndependentTransparencyApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&OrderIndependentTransparencyApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&OrderIndependentTransparencyApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
@@ -538,12 +538,12 @@ void OrderIndependentTransparencyApp::OnCreate()
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
 	}
 
-	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, KlayGE::placeholders::_1));
+	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, std::placeholders::_1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
-	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, KlayGE::placeholders::_1));
+	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, std::placeholders::_1));
 	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
 
-	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, std::placeholders::_1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
 
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)

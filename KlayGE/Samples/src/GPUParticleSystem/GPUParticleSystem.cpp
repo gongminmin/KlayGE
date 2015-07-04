@@ -701,7 +701,7 @@ namespace
 		}
 	};
 
-	KlayGE::shared_ptr<GPUParticleSystem> gpu_ps;
+	std::shared_ptr<GPUParticleSystem> gpu_ps;
 
 
 	enum
@@ -770,7 +770,7 @@ void GPUParticleSystemApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&GPUParticleSystemApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&GPUParticleSystemApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);

@@ -38,15 +38,6 @@
 	#include <thread>
 	#include <condition_variable>
 	#include <mutex>
-	namespace KlayGE
-	{
-		using std::thread;
-		using std::condition_variable;
-		using std::mutex;
-		using std::unique_lock;
-		using std::lock_guard;
-		namespace this_thread = std::this_thread;
-	}
 #else
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(push)
@@ -56,7 +47,7 @@
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(pop)
 	#endif
-	namespace KlayGE
+	namespace std
 	{
 		using boost::thread;
 		using boost::condition_variable;
@@ -78,12 +69,12 @@ namespace KlayGE
 		typedef void_t type;
 	};
 
-	typedef thread::id thread_id;
+	typedef std::thread::id thread_id;
 
 	// Threadof operator simulation for threadof(0) expression
 	inline thread_id threadof(int)
 	{
-		return this_thread::get_id();
+		return std::this_thread::get_id();
 	}
 
 	// Threadof operator simulation for threadof(joiner) expression
@@ -145,7 +136,7 @@ namespace KlayGE
 			//  thread from different threads.
 			try
 			{
-				unique_lock<mutex> locker(joiner_mutex_);
+				std::lock_guard<std::mutex> locker(joiner_mutex_);
 
 				// Check if already joined
 				if (!joined_)
@@ -188,9 +179,9 @@ namespace KlayGE
 	protected:
 		// This is a shared pointer to the optional<result> and it's shared between joiners (that can be in
 		//  different threads) and the launched thread that joiners represent
-		shared_ptr<result_opt>			result_;
+		std::shared_ptr<result_opt>		result_;
 		volatile bool					joined_;
-		mutex							joiner_mutex_;
+		std::mutex						joiner_mutex_;
 		thread_id						id_;
 	};
 
@@ -214,7 +205,7 @@ namespace KlayGE
 		{
 		}
 
-		explicit joiner(shared_ptr<joiner_impl_base<ResultType> > const & handle)
+		explicit joiner(std::shared_ptr<joiner_impl_base<ResultType> > const & handle)
 			: handle_(handle)
 		{
 		}
@@ -276,7 +267,7 @@ namespace KlayGE
 		}
 
 	private:
-		shared_ptr<joiner_impl_base<ResultType> > handle_;
+		std::shared_ptr<joiner_impl_base<ResultType> > handle_;
 	};
 
 	namespace detail
@@ -309,14 +300,14 @@ namespace KlayGE
 
 		public:
 			threaded(Threadable const & main,
-						shared_ptr<result_opt> const & result)
+						std::shared_ptr<result_opt> const & result)
 				: main_(main), result_(result)
 			{
 			}
 
 			// This function is the function executed by the underlying thread system. It takes ownership of
 			//  the threaded object, calls user's Threadable
-			static void needle(shared_ptr<threaded_t> const & that)
+			static void needle(std::shared_ptr<threaded_t> const & that)
 			{
 				// Call Threadable
 				try
@@ -331,8 +322,8 @@ namespace KlayGE
 			}
 
 		private:
-			Threadable				main_;
-			shared_ptr<result_opt>	result_;
+			Threadable					main_;
+			std::shared_ptr<result_opt>	result_;
 		};
 	}
 
@@ -344,8 +335,8 @@ namespace KlayGE
 		class joiner_simple_thread_impl : public joiner_impl_base<result_type>
 		{
 		public:
-			joiner_simple_thread_impl(shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
-											function<void()> const & func)
+			joiner_simple_thread_impl(std::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
+											std::function<void()> const & func)
 				: thread_(func)
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
@@ -364,7 +355,7 @@ namespace KlayGE
 			}
 
 		private:
-			thread thread_;
+			std::thread thread_;
 		};
 
 	public:
@@ -378,9 +369,9 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
-			shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
+			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			std::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
 				bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
@@ -426,8 +417,8 @@ namespace KlayGE
 		private:
 			volatile bool     join_now_;
 			volatile bool     can_recycle_thread_;
-			condition_variable  cond_;
-			mutex      join_mut_;
+			std::condition_variable  cond_;
+			std::mutex      join_mut_;
 		};
 
 		// A class used to storage information of a pooled thread. Each object of this class represents a pooled thread.
@@ -435,17 +426,17 @@ namespace KlayGE
 		//  to definitively tell to the thread that it should die.
 		struct thread_pool_thread_info
 		{
-			explicit thread_pool_thread_info(shared_ptr<thread_pool_common_data_t> const & pdata);
+			explicit thread_pool_thread_info(std::shared_ptr<thread_pool_common_data_t> const & pdata);
 
 			// Wakes up a pooled thread assigning a task to it
 			template <typename Threadable>
-			void wake_up(Threadable const & func, shared_ptr<thread_pool_join_info> const & pthpool_join_info)
+			void wake_up(Threadable const & func, std::shared_ptr<thread_pool_join_info> const & pthpool_join_info)
 			{
 				// Assign function to execute and joiner notifier
 				thpool_join_info_ = pthpool_join_info;
 				func_ = func;
 				{
-					unique_lock<mutex> lock(wake_up_mut_);
+					std::lock_guard<std::mutex> lock(wake_up_mut_);
 					wake_up_ = true;
 					wake_up_cond_.notify_one();
 				}
@@ -464,51 +455,51 @@ namespace KlayGE
 				id_ = id;
 			}
 
-			shared_ptr<thread_pool_join_info> thpool_join_info_;
-			function<void()>		func_;
+			std::shared_ptr<thread_pool_join_info> thpool_join_info_;
+			std::function<void()>	func_;
 			bool					wake_up_;
-			mutex					wake_up_mut_;
-			condition_variable		wake_up_cond_;
-			weak_ptr<thread_pool_common_data_t>	data_;
+			std::mutex				wake_up_mut_;
+			std::condition_variable	wake_up_cond_;
+			std::weak_ptr<thread_pool_common_data_t>	data_;
 			thread_id				id_;
 		};
 
 		// A class used to storage information of the thread pool. It stores the pooled thread information container
 		//  and the functor that will envelop users Threadable to return it to the pool.
-		class thread_pool_common_data_t : public enable_shared_from_this<thread_pool_common_data_t>
+		class thread_pool_common_data_t : public std::enable_shared_from_this<thread_pool_common_data_t>
 		{
 			// This functor is the functor that implements thread pooling logic. Waits until someone fills
 			//  the func_ and thpool_join_info_ using the wake_up(...) function of the pooled thread's info.
 			class wait_function
 			{
 			public:
-				// Stores a shared_ptr with the data that holds the thread pool.
-				explicit wait_function(shared_ptr<thread_pool_thread_info> const & info);
+				// Stores a std::shared_ptr with the data that holds the thread pool.
+				explicit wait_function(std::shared_ptr<thread_pool_thread_info> const & info);
 
 				// This is the thread pool loop. Waits for task, executes it and if there are not enough threads
 				//  in the pool, enqueues itself again in the queue.
 				void operator()();
 
 			private:
-				shared_ptr<thread_pool_thread_info> info_;
+				std::shared_ptr<thread_pool_thread_info> info_;
 			};
 
 		public:
-			typedef std::vector<shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
+			typedef std::vector<std::shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
 
 			thread_pool_common_data_t(size_t num_min_cached_threads, size_t num_max_cached_threads);
 
 			// Creates and adds more threads to the pool. Can throw
-			static void add_waiting_threads(shared_ptr<thread_pool_common_data_t> const & pdata, size_t number);
+			static void add_waiting_threads(std::shared_ptr<thread_pool_common_data_t> const & pdata, size_t number);
 
 			// Creates and adds more threads to the pool. This function does not lock the pool mutex and that be
 			//  only called when we externally have locked that mutex. Can throw
-			static void add_waiting_threads_no_lock(shared_ptr<thread_pool_common_data_t> const & data, size_t number);
+			static void add_waiting_threads_no_lock(std::shared_ptr<thread_pool_common_data_t> const & data, size_t number);
 
 			// Notifies all pooled threads that this is the end
 			void kill_all();
 
-			mutex& mut()
+			std::mutex& mut()
 			{
 				return mut_;
 			}
@@ -537,7 +528,7 @@ namespace KlayGE
 			// Shared data between thread_pool, all threads and joiners
 			size_t						num_min_cached_threads_;
 			size_t						num_max_cached_threads_;
-			mutex						mut_;
+			std::mutex					mut_;
 			bool						general_cleanup_;
 			thread_info_queue_t			threads_;
 			threader					threader_;
@@ -551,15 +542,15 @@ namespace KlayGE
 
 		public:
 			template <typename Threadable>
-			joiner_thread_pool_impl(shared_ptr<thread_pool_common_data_t> const & data,
-						shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
+			joiner_thread_pool_impl(std::shared_ptr<thread_pool_common_data_t> const & data,
+						std::shared_ptr<typename joiner_impl_base<result_type>::result_opt> const & result_op,
 						Threadable const & func)
 				: thread_pool_join_info_(MakeSharedPtr<thread_pool_join_info>())
 			{
 				joiner_impl_base<result_type>::result_ = result_op;
 
-				shared_ptr<thread_pool_thread_info> th_info;
-				unique_lock<mutex> lock(data->mut());
+				std::shared_ptr<thread_pool_thread_info> th_info;
+				std::lock_guard<std::mutex> lock(data->mut());
 
 				// If there are no threads, add more to the pool
 				if (data->threads().empty())
@@ -594,7 +585,7 @@ namespace KlayGE
 			}
 
 		private:
-			shared_ptr<thread_pool_join_info> thread_pool_join_info_;
+			std::shared_ptr<thread_pool_join_info> thread_pool_join_info_;
 		};
 
 	public:
@@ -611,10 +602,10 @@ namespace KlayGE
 			typedef typename joiner_impl_t::result_opt				result_opt;
 			typedef detail::threaded<Threadable, joiner_impl_t>		threaded_t;
 
-			shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
-			shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
-				myreturn, KlayGE::bind(&threaded_t::needle, mythreaded));
+			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
+			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
+			std::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
+				myreturn, std::bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
 		}
@@ -638,7 +629,7 @@ namespace KlayGE
 		}
 
 	private:
-		shared_ptr<thread_pool_common_data_t> data_;
+		std::shared_ptr<thread_pool_common_data_t> data_;
 	};
 }
 

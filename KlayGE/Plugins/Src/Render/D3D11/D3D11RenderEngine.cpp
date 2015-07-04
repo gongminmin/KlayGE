@@ -83,7 +83,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
+	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
 	{
 		mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
 		mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
@@ -93,7 +93,7 @@ namespace
 		mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
 	
-	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
+	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
 	{
 		mem_fn(&ID3D11DeviceContext::VSSetSamplers),
 		mem_fn(&ID3D11DeviceContext::PSSetSamplers),
@@ -103,7 +103,7 @@ namespace
 		mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
 
-	function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
+	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
 	{
 		mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
 		mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
@@ -1360,12 +1360,12 @@ namespace KlayGE
 			}
 		}
 
-		caps_.vertex_format_support = bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this,
-			placeholders::_1);
-		caps_.texture_format_support = bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this,
-			placeholders::_1);
-		caps_.rendertarget_format_support = bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
-			placeholders::_1, placeholders::_2, placeholders::_3);
+		caps_.vertex_format_support = std::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this,
+			std::placeholders::_1);
+		caps_.texture_format_support = std::bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this,
+			std::placeholders::_1);
+		caps_.rendertarget_format_support = std::bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
+			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

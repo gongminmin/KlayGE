@@ -82,7 +82,7 @@ struct calc_border : public address_calculator
 	}
 };
 
-KlayGE::shared_ptr<address_calculator> address_calculators[4] = 
+std::shared_ptr<address_calculator> address_calculators[4] =
 {
 	MakeSharedPtr<calc_wrap>(),
 	MakeSharedPtr<calc_mirror>(),
@@ -156,7 +156,7 @@ void PackJTML(std::string const & jtml_name)
 		}
 
 		TexAddressingMode addr_u, addr_v;
-		KlayGE::shared_ptr<address_calculator> calc_u, calc_v;
+		std::shared_ptr<address_calculator> calc_u, calc_v;
 		if ("mirror" == address_u_str)
 		{
 			addr_u = TAM_Mirror;

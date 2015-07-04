@@ -79,13 +79,9 @@ private:
 
 #ifdef KLAYGE_CXX11_CORE_RVALUE_REFERENCES_SUPPORT
 	#include <utility>
-	namespace KlayGE
-	{
-		using std::move;
-	}
 #else
 	#include <boost/move/move.hpp>
-	namespace KlayGE
+	namespace std
 	{
 		using boost::move;
 	}
@@ -99,10 +95,6 @@ private:
 		#endif
 	#endif
 	#include <algorithm>
-	namespace KlayGE
-	{
-		using std::copy_if;
-	}
 #else
 	namespace KlayGE
 	{
@@ -128,19 +120,6 @@ private:
 #ifdef KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
 #ifndef _M_CEE
 	#include <atomic>
-	namespace KlayGE
-	{
-		using std::atomic;
-		using std::atomic_thread_fence;
-		using std::atomic_signal_fence;
-
-		using std::memory_order_relaxed;
-		using std::memory_order_release;
-		using std::memory_order_acquire;
-		using std::memory_order_consume;
-		using std::memory_order_acq_rel;
-		using std::memory_order_seq_cst;
-	}
 #endif
 #else
 	#ifdef KLAYGE_COMPILER_MSVC
@@ -151,7 +130,7 @@ private:
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(pop)
 	#endif
-	namespace KlayGE
+	namespace std
 	{
 		using boost::atomic;
 		using boost::atomic_thread_fence;
@@ -168,13 +147,9 @@ private:
 
 #ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 	#include <chrono>
-	namespace KlayGE
-	{
-		namespace chrono = std::chrono;
-	}
 #else
 	#include <boost/chrono.hpp>
-	namespace KlayGE
+	namespace std
 	{
 		namespace chrono = boost::chrono;
 	}
@@ -183,31 +158,6 @@ private:
 #ifdef KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
 	#include <functional>
 	#include <memory>
-	namespace KlayGE
-	{
-		using std::bind;
-		using std::function;
-		namespace placeholders
-		{
-			using std::placeholders::_1;
-			using std::placeholders::_2;
-			using std::placeholders::_3;
-			using std::placeholders::_4;
-			using std::placeholders::_5;
-			using std::placeholders::_6;
-			using std::placeholders::_7;
-			using std::placeholders::_8;
-			using std::placeholders::_9;
-		}
-
-		using std::shared_ptr;
-		using std::weak_ptr;
-		using std::enable_shared_from_this;
-		using std::static_pointer_cast;
-		using std::dynamic_pointer_cast;
-		using std::ref;
-		using std::cref;
-	}
 
 #ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 	namespace KlayGE
@@ -219,8 +169,7 @@ private:
 		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
 			#define BOOST_MEM_FN_ENABLE_STDCALL
 		#endif
-	#endif
-	
+	#endif	
 	#include <boost/mem_fn.hpp>
 	namespace KlayGE
 	{
@@ -228,12 +177,6 @@ private:
 	}
 #endif
 #else
-	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
-		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-			#define BOOST_MEM_FN_ENABLE_STDCALL
-		#endif
-	#endif
-	#include <boost/mem_fn.hpp>
 	#include <boost/bind.hpp>
 	#include <boost/function.hpp>
 	#include <boost/ref.hpp>
@@ -245,10 +188,9 @@ private:
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(pop)
 	#endif
-	namespace KlayGE
+	namespace std
 	{
 		using boost::bind;
-		using boost::mem_fn;
 		using boost::function;
 		namespace placeholders
 		{
@@ -270,6 +212,17 @@ private:
 		using boost::dynamic_pointer_cast;
 		using boost::ref;
 		using boost::cref;
+	}
+
+	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
+		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
+			#define BOOST_MEM_FN_ENABLE_STDCALL
+		#endif
+	#endif
+	#include <boost/mem_fn.hpp>
+	namespace KlayGE
+	{
+		using boost::mem_fn;
 	}
 #endif
 

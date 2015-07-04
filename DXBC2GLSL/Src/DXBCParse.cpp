@@ -32,15 +32,15 @@
 #include <DXBC2GLSL/DXBC.hpp>
 #include <memory>
 
-KlayGE::shared_ptr<DXBCContainer> DXBCParse(void const * data)
+std::shared_ptr<DXBCContainer> DXBCParse(void const * data)
 {
-	KlayGE::shared_ptr<DXBCContainer> container = KlayGE::MakeSharedPtr<DXBCContainer>();
+	std::shared_ptr<DXBCContainer> container = KlayGE::MakeSharedPtr<DXBCContainer>();
 
 	DXBCContainerHeader const * header = reinterpret_cast<DXBCContainerHeader const *>(data);
 	uint32_t fourcc = KlayGE::LE2Native(header->fourcc);
 	if (fourcc != FOURCC_DXBC)
 	{
-		return KlayGE::shared_ptr<DXBCContainer>();
+		return std::shared_ptr<DXBCContainer>();
 	}
 	container->shader_chunk = DXBCFindShaderBytecode(data);
 	container->input_signature = DXBCFindSignature(data, DFS_INPUT1);

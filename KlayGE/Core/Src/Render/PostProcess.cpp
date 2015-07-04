@@ -62,9 +62,9 @@ namespace
 				std::string effect_name;
 				std::string tech_name;
 			};
-			shared_ptr<PostProcessData> pp_data;
+			std::shared_ptr<PostProcessData> pp_data;
 
-			shared_ptr<PostProcessPtr> pp;
+			std::shared_ptr<PostProcessPtr> pp;
 		};
 
 	public:
@@ -162,7 +162,7 @@ namespace
 			}
 		}
 
-		shared_ptr<void> MainThreadStage()
+		std::shared_ptr<void> MainThreadStage()
 		{
 			if (!*pp_desc_.pp)
 			{
@@ -175,7 +175,7 @@ namespace
 				pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
 				*pp_desc_.pp = pp;
 			}
-			return static_pointer_cast<void>(*pp_desc_.pp);
+			return std::static_pointer_cast<void>(*pp_desc_.pp);
 		}
 
 		bool HasSubThreadStage() const
@@ -204,10 +204,10 @@ namespace
 			pp_desc_.pp_data = ppld.pp_desc_.pp_data;
 		}
 
-		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
 		{
-			PostProcessPtr rhs_pp = static_pointer_cast<PostProcess>(resource);
-			return static_pointer_cast<void>(rhs_pp->Clone());
+			PostProcessPtr rhs_pp = std::static_pointer_cast<PostProcess>(resource);
+			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
 	private:
@@ -835,7 +835,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
-	function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
+	std::function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
 	{
 		return ResLoader::Instance().ASyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}

@@ -94,7 +94,7 @@ namespace KlayGE
 
 	void DShowVMR9Allocator::DeleteSurfaces()
 	{
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		// clear out the private texture
 		cache_surf_.reset();
@@ -236,7 +236,7 @@ namespace KlayGE
 			return E_FAIL;
 		}
 
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		*lplpSurface = surfaces_[SurfaceIndex];
 		(*lplpSurface)->AddRef();
@@ -245,7 +245,7 @@ namespace KlayGE
 
 	HRESULT DShowVMR9Allocator::AdviseNotify(IVMRSurfaceAllocatorNotify9* lpIVMRSurfAllocNotify)
 	{
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		vmr_surf_alloc_notify_ = MakeCOMPtr(lpIVMRSurfAllocNotify);
 		vmr_surf_alloc_notify_->AddRef();
@@ -263,7 +263,7 @@ namespace KlayGE
 			return S_OK;
 		}
 
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		if (!d3d_device_)
 		{
@@ -303,7 +303,7 @@ namespace KlayGE
 			}
 		}
 
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		cur_surf_index_ = 0xFFFFFFFF;
 		for (uint32_t i = 0; i < surfaces_.size(); ++ i)
@@ -397,7 +397,7 @@ namespace KlayGE
 
 	TexturePtr DShowVMR9Allocator::PresentTexture()
 	{
-		lock_guard<mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(mutex_);
 
 		if (FAILED(d3d_device_->TestCooperativeLevel()))
 		{

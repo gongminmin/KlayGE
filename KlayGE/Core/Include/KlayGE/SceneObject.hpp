@@ -25,7 +25,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObject : public enable_shared_from_this<SceneObject>
+	class KLAYGE_CORE_API SceneObject : public std::enable_shared_from_this<SceneObject>
 	{
 	public:
 		enum SOAttrib
@@ -64,8 +64,8 @@ namespace KlayGE
 		virtual void DelFromSceneManager();
 		virtual void DelFromSceneManagerLocked();
 
-		void BindSubThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
-		void BindMainThreadUpdateFunc(function<void(SceneObject&, float, float)> const & update_func);
+		void BindSubThreadUpdateFunc(std::function<void(SceneObject&, float, float)> const & update_func);
+		void BindMainThreadUpdateFunc(std::function<void(SceneObject&, float, float)> const & update_func);
 
 		virtual void SubThreadUpdate(float app_time, float elapsed_time);
 		virtual bool MainThreadUpdate(float app_time, float elapsed_time);
@@ -97,7 +97,7 @@ namespace KlayGE
 		SceneObject* parent_;
 		std::vector<SceneObjectPtr> children_;
 
-		function<RenderablePtr()> renderable_rl_;
+		std::function<RenderablePtr()> renderable_rl_;
 		RenderablePtr renderable_;
 		vertex_elements_type instance_format_;
 
@@ -106,8 +106,8 @@ namespace KlayGE
 		AABBoxPtr pos_aabb_ws_;
 		BoundOverlap visible_mark_;
 
-		function<void(SceneObject&, float, float)> sub_thread_update_func_;
-		function<void(SceneObject&, float, float)> main_thread_update_func_;
+		std::function<void(SceneObject&, float, float)> sub_thread_update_func_;
+		std::function<void(SceneObject&, float, float)> main_thread_update_func_;
 	};
 }
 

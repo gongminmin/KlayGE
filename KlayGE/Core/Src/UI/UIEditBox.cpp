@@ -345,7 +345,7 @@ namespace KlayGE
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		on_char_connect_ = main_wnd->OnChar().connect(bind(&UIEditBox::CharHandler, this,
-			placeholders::_1, placeholders::_2));
+			std::placeholders::_1, std::placeholders::_2));
 	}
 
 	UIEditBox::~UIEditBox()

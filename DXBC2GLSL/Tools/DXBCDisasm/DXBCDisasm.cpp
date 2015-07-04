@@ -74,12 +74,12 @@ int main(int argc, char** argv)
 	}
 	in.close();
 
-	KlayGE::shared_ptr<DXBCContainer> dxbc = DXBCParse(&data[0]);
+	std::shared_ptr<DXBCContainer> dxbc = DXBCParse(&data[0]);
 	if (dxbc)
 	{
 		if (dxbc->shader_chunk)
 		{
-			KlayGE::shared_ptr<ShaderProgram> shader = ShaderParse(*dxbc);
+			std::shared_ptr<ShaderProgram> shader = ShaderParse(*dxbc);
 			if (shader)
 			{
 				ASMGen converter(shader);

@@ -43,11 +43,11 @@ namespace KlayGE
 		ShowState State(long msTimeout = -1);
 
 	private:
-		shared_ptr<IGraphBuilder>	graph_;
-		shared_ptr<IBaseFilter>      filter_;
-		shared_ptr<IMediaControl>	media_control_;
-		shared_ptr<IMediaEvent>		media_event_;
-		shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
+		std::shared_ptr<IGraphBuilder>		graph_;
+		std::shared_ptr<IBaseFilter>		filter_;
+		std::shared_ptr<IMediaControl>		media_control_;
+		std::shared_ptr<IMediaEvent>		media_event_;
+		std::shared_ptr<IVMRSurfaceAllocator9> vmr_allocator_;
 
 	private:
 		void Init();

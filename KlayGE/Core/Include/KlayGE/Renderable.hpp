@@ -138,7 +138,7 @@ namespace KlayGE
 	float const INV_LOG_8192 = 1 / log(8192.0f);
 
 	// Abstract class defining the interface all renderable objects must implement.
-	class KLAYGE_CORE_API Renderable : public enable_shared_from_this<Renderable>
+	class KLAYGE_CORE_API Renderable : public std::enable_shared_from_this<Renderable>
 	{
 	public:
 		enum EffectAttribute
@@ -267,7 +267,7 @@ namespace KlayGE
 		virtual void UpdateTechniques();
 
 	protected:
-		std::vector<weak_ptr<SceneObject> > instances_;
+		std::vector<std::weak_ptr<SceneObject> > instances_;
 
 		RenderTechniquePtr technique_;
 

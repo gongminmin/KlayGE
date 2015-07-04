@@ -521,7 +521,7 @@ void EnvLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&EnvLightingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&EnvLightingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
@@ -529,7 +529,7 @@ void EnvLightingApp::OnCreate()
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
 
-	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&EnvLightingApp::TypeChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&EnvLightingApp::TypeChangedHandler, this, std::placeholders::_1));
 	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 
 	if (caps.max_shader_model < ShaderModel(4, 0))

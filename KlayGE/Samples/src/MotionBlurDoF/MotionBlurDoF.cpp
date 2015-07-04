@@ -759,7 +759,7 @@ void MotionBlurDoFApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&MotionBlurDoFApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&MotionBlurDoFApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	if (caps.fp_color_support && caps.texture_format_support(EF_ABGR32F)
@@ -795,15 +795,15 @@ void MotionBlurDoFApp::OnCreate()
 
 	if (depth_of_field_)
 	{
-		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::DoFOnHandler, this, KlayGE::placeholders::_1));
+		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::DoFOnHandler, this, std::placeholders::_1));
 		this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
-		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BokehOnHandler, this, KlayGE::placeholders::_1));
+		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::BokehOnHandler, this, std::placeholders::_1));
 		this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
-		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, KlayGE::placeholders::_1));
+		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(std::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, std::placeholders::_1));
 		this->FocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_plane_slider_));
-		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, KlayGE::placeholders::_1));
+		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(std::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, std::placeholders::_1));
 		this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
-		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::BlurFactorHandler, this, KlayGE::placeholders::_1));
+		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::BlurFactorHandler, this, std::placeholders::_1));
 		this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
 	}
 	else
@@ -816,12 +816,12 @@ void MotionBlurDoFApp::OnCreate()
 		dof_on_ = false;
 	}
 
-	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MBOnHandler, this, KlayGE::placeholders::_1));
-	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::MotionVecHandler, this, KlayGE::placeholders::_1));
+	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::MBOnHandler, this, std::placeholders::_1));
+	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::MotionVecHandler, this, std::placeholders::_1));
 
-	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
+	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, std::placeholders::_1));
 
-	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(KlayGE::bind(&MotionBlurDoFApp::UseInstancingHandler, this, KlayGE::placeholders::_1));
+	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::UseInstancingHandler, this, std::placeholders::_1));
 
 	use_instance_ = true;
 }

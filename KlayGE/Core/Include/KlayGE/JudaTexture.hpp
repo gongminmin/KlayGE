@@ -39,7 +39,7 @@ namespace KlayGE
 		static uint32_t const EMPTY_DATA_INDEX = static_cast<uint32_t>(-1);
 
 		struct quadtree_node;
-		typedef shared_ptr<quadtree_node> quadtree_node_ptr;
+		typedef std::shared_ptr<quadtree_node> quadtree_node_ptr;
 
 		struct quadtree_node
 		{
@@ -171,10 +171,10 @@ namespace KlayGE
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			shared_ptr<std::vector<uint8_t> > data;
+			std::shared_ptr<std::vector<uint8_t> > data;
 			uint64_t tick;
 
-			DecodedBlockInfo(shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
+			DecodedBlockInfo(std::shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
 				: data(d), tick(t)
 			{
 			}

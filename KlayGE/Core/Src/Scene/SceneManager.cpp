@@ -213,7 +213,7 @@ namespace KlayGE
 
 	std::vector<CameraPtr>::iterator SceneManager::DelCamera(std::vector<CameraPtr>::iterator iter)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		return cameras_.erase(iter);
 	}
 
@@ -245,7 +245,7 @@ namespace KlayGE
 
 	std::vector<LightSourcePtr>::iterator SceneManager::DelLight(std::vector<LightSourcePtr>::iterator iter)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		return lights_.erase(iter);
 	}
 
@@ -268,7 +268,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddSceneObject(SceneObjectPtr const & obj)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		this->AddSceneObjectLocked(obj);
 	}
 
@@ -301,7 +301,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::DelSceneObject(SceneObjectPtr const & obj)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		this->DelSceneObjectLocked(obj);
 	}
 
@@ -319,7 +319,7 @@ namespace KlayGE
 
 	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjsType::iterator iter)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		return this->DelSceneObjectLocked(iter);
 	}
 
@@ -373,14 +373,18 @@ namespace KlayGE
 			RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
 			BOOST_ASSERT(obj_tech);
 			RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
-			auto iter = std::find_if(render_queue_.begin(), render_queue_.end(),
-				KlayGE::bind(std::equal_to<RenderTechniquePtr>(),
-					KlayGE::bind(select1st<RenderQueueType::value_type>(), KlayGE::placeholders::_1), tech));
-			if (iter != render_queue_.end())
+			bool found = false;
+			typedef decltype(render_queue_) RenderQueueType;
+			KLAYGE_FOREACH(RenderQueueType::reference items, render_queue_)
 			{
-				iter->second.push_back(obj);
+				if (items.first == tech)
+				{
+					items.second.push_back(obj);
+					found = true;
+					break;
+				}
 			}
-			else
+			if (!found)
 			{
 				render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
 			}
@@ -462,7 +466,7 @@ namespace KlayGE
 
 	void SceneManager::ClearObject()
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		scene_objs_.resize(0);
 		overlay_scene_objs_.resize(0);
 	}
@@ -481,7 +485,7 @@ namespace KlayGE
 		if (!update_thread_ && !quit_)
 		{
 			update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
-				bind(&SceneManager::UpdateThreadFunc, this)));
+				std::bind(&SceneManager::UpdateThreadFunc, this)));
 		}
 
 		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
@@ -508,7 +512,7 @@ namespace KlayGE
 
 		std::vector<SceneObjectPtr> added_scene_objs;
 		{
-			lock_guard<mutex> lock(update_mutex_);
+			std::lock_guard<std::mutex> lock(update_mutex_);
 
 			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 			{
@@ -545,7 +549,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::Flush(uint32_t urt)
 	{
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 
 		urt_ = urt;
 
@@ -588,7 +592,7 @@ namespace KlayGE
 			{
 				this->ClipScene();
 
-				shared_ptr<std::vector<BoundOverlap> > visible_marks
+				std::shared_ptr<std::vector<BoundOverlap> > visible_marks
 					= MakeSharedPtr<std::vector<BoundOverlap> >(scene_objs.size());
 				for (size_t i = 0; i < scene_objs.size(); ++ i)
 				{
@@ -801,7 +805,7 @@ namespace KlayGE
 				WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
 				if (win && win->Active())
 				{
-					lock_guard<mutex> lock(update_mutex_);
+					std::lock_guard<std::mutex> lock(update_mutex_);
 
 					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
 					{

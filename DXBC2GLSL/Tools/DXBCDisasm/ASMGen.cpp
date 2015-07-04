@@ -38,7 +38,7 @@
 
 bool sm_dump_short_syntax = true;
 
-ASMGen::ASMGen(KlayGE::shared_ptr<ShaderProgram> const & program)
+ASMGen::ASMGen(std::shared_ptr<ShaderProgram> const & program)
 	: program_(program)
 {
 }

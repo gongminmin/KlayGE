@@ -40,7 +40,7 @@ namespace KlayGE
 		uint32_t			current_adapter_;
 	};
 
-	typedef shared_ptr<D3D11AdapterList> D3D11AdapterListPtr;
+	typedef std::shared_ptr<D3D11AdapterList> D3D11AdapterListPtr;
 }
 
 #endif			// _D3D11ADAPTERLIST_HPP

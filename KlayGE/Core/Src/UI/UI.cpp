@@ -45,7 +45,7 @@
 
 namespace
 {
-	KlayGE::mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 	bool ReadBool(KlayGE::XMLNodePtr& node, std::string const & name, bool default_val)
 	{
@@ -307,7 +307,7 @@ namespace KlayGE
 	{
 		if (!ui_mgr_instance_)
 		{
-			lock_guard<mutex> lock(singleton_mutex);
+			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!ui_mgr_instance_)
 			{
 				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
@@ -396,7 +396,7 @@ namespace KlayGE
 		actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
 
 		action_handler_t input_handler = MakeSharedPtr<input_signal>();
-		input_handler->connect(KlayGE::bind(&UIManager::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+		input_handler->connect(std::bind(&UIManager::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 		inputEngine.ActionMap(actionMap, input_handler);
 	}
 
@@ -972,7 +972,7 @@ namespace KlayGE
 			texcoord = Rect(0, 0, 0, 0);
 		}
 
-		shared_ptr<UIRectRenderable> renderable;
+		std::shared_ptr<UIRectRenderable> renderable;
 		if (rects_.find(texture) == rects_.end())
 		{
 			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);
@@ -999,7 +999,7 @@ namespace KlayGE
 
 	void UIManager::DrawQuad(float3 const & offset, VertexFormat const * vertices, TexturePtr const & texture)
 	{
-		shared_ptr<UIRectRenderable> renderable;
+		std::shared_ptr<UIRectRenderable> renderable;
 		if (rects_.find(texture) == rects_.end())
 		{
 			renderable = MakeSharedPtr<UIRectRenderable>(texture, effect_);

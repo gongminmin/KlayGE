@@ -37,10 +37,10 @@ namespace KlayGE
 {
 	// 得到COM对象的智能指针
 	template <typename T>
-	inline shared_ptr<T>
+	inline std::shared_ptr<T>
 	MakeCOMPtr(T* p)
 	{
-		return p ? shared_ptr<T>(p, mem_fn(&T::Release)) : shared_ptr<T>();
+		return p ? std::shared_ptr<T>(p, mem_fn(&T::Release)) : std::shared_ptr<T>();
 	}
 }
 

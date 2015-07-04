@@ -189,10 +189,10 @@ namespace KlayGE
 		}
 
 	private:
-		shared_ptr<IWbemClassObject> wbem_object_;
-		shared_ptr<IEnumWbemClassObject> wbem_enum_result_;
-		shared_ptr<IWbemLocator> wbem_locator_;
-		shared_ptr<IWbemServices> wbem_services_;
+		std::shared_ptr<IWbemClassObject> wbem_object_;
+		std::shared_ptr<IEnumWbemClassObject> wbem_enum_result_;
+		std::shared_ptr<IWbemLocator> wbem_locator_;
+		std::shared_ptr<IWbemServices> wbem_services_;
 	};
 #endif
 

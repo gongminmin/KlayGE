@@ -87,8 +87,8 @@ namespace DXBC2GLSL
 		ShaderTessellatorOutputPrimitive DSOutputPrimitive() const;
 
 	private:
-		KlayGE::shared_ptr<DXBCContainer> dxbc_;
-		KlayGE::shared_ptr<ShaderProgram> shader_;
+		std::shared_ptr<DXBCContainer> dxbc_;
+		std::shared_ptr<ShaderProgram> shader_;
 		std::string glsl_;
 	};
 }

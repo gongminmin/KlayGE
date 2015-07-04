@@ -255,7 +255,7 @@ namespace KlayGE
 		double inv_timestamp_freq_;
 	};
 
-	typedef shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
+	typedef std::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
 }
 
 #endif			// _D3D11RENDERENGINE_HPP

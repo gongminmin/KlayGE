@@ -48,7 +48,7 @@ namespace KlayGE
 		GLuint index_;
 	};
 
-	typedef shared_ptr<OGLESRenderView> OGLESRenderViewPtr;
+	typedef std::shared_ptr<OGLESRenderView> OGLESRenderViewPtr;
 
 	class OGLESScreenColorRenderView : public OGLESRenderView, boost::noncopyable
 	{
@@ -66,7 +66,7 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
 
-	typedef shared_ptr<OGLESScreenColorRenderView> OGLES2ScreenColorRenderViewPtr;
+	typedef std::shared_ptr<OGLESScreenColorRenderView> OGLES2ScreenColorRenderViewPtr;
 
 
 	class OGLESScreenDepthStencilRenderView : public OGLESRenderView, boost::noncopyable
@@ -82,7 +82,7 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
 
-	typedef shared_ptr<OGLESScreenDepthStencilRenderView> OGLES2ScreenDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESScreenDepthStencilRenderView> OGLES2ScreenDepthStencilRenderViewPtr;
 
 
 	class OGLESTexture1DRenderView : public OGLESRenderView, boost::noncopyable
@@ -103,7 +103,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLESTexture1DRenderView> OGLES2Texture1DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture1DRenderView> OGLES2Texture1DRenderViewPtr;
 
 
 	class OGLESTexture2DRenderView : public OGLESRenderView, boost::noncopyable
@@ -124,7 +124,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLESTexture2DRenderView> OGLES2Texture2DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture2DRenderView> OGLES2Texture2DRenderViewPtr;
 
 
 	class OGLESTexture3DRenderView : public OGLESRenderView, boost::noncopyable
@@ -153,7 +153,7 @@ namespace KlayGE
 		GLuint tex_2d_;
 	};
 
-	typedef shared_ptr<OGLESTexture3DRenderView> OGLES2Texture3DRenderViewPtr;
+	typedef std::shared_ptr<OGLESTexture3DRenderView> OGLES2Texture3DRenderViewPtr;
 
 
 	class OGLESTextureCubeRenderView : public OGLESRenderView, boost::noncopyable
@@ -174,7 +174,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLESTextureCubeRenderView> OGLES2TextureCubeRenderViewPtr;
+	typedef std::shared_ptr<OGLESTextureCubeRenderView> OGLES2TextureCubeRenderViewPtr;
 
 
 	class OGLESDepthStencilRenderView : public OGLESRenderView, boost::noncopyable
@@ -199,7 +199,7 @@ namespace KlayGE
 		GLuint rbos_[2];
 	};
 
-	typedef shared_ptr<OGLESDepthStencilRenderView> OGLES2DepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESDepthStencilRenderView> OGLES2DepthStencilRenderViewPtr;
 
 
 	class OGLESTextureCubeDepthStencilRenderView : public OGLESRenderView, boost::noncopyable
@@ -220,7 +220,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLESTextureCubeDepthStencilRenderView> OGLES2TextureCubeDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLESTextureCubeDepthStencilRenderView> OGLES2TextureCubeDepthStencilRenderViewPtr;
 
 #if defined(KLAYGE_PLATFORM_IOS)
 	class OGLESEAGLRenderView : public OGLESRenderView, boost::noncopyable
@@ -242,7 +242,7 @@ namespace KlayGE
 		GLuint rf_;
 	};
 
-	typedef shared_ptr<OGLESEAGLRenderView> OGLESEAGLRenderViewPtr;
+	typedef std::shared_ptr<OGLESEAGLRenderView> OGLESEAGLRenderViewPtr;
 #endif
 }
 

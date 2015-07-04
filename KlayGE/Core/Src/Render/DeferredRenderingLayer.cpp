@@ -3933,7 +3933,7 @@ namespace KlayGE
 	{
 		static int index = 0;
 
-		shared_ptr<DeferredRenderingDebugPostProcess> pp = checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_);
+		std::shared_ptr<DeferredRenderingDebugPostProcess> pp = checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer->Width(), viewports_[0].g_buffer->Height(),

@@ -51,7 +51,7 @@ namespace KlayGE
 		GLuint index_;
 	};
 
-	typedef shared_ptr<OGLRenderView> OGLRenderViewPtr;
+	typedef std::shared_ptr<OGLRenderView> OGLRenderViewPtr;
 
 
 	class OGLScreenColorRenderView : public OGLRenderView, boost::noncopyable
@@ -70,7 +70,7 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
 
-	typedef shared_ptr<OGLScreenColorRenderView> OGLScreenColorRenderViewPtr;
+	typedef std::shared_ptr<OGLScreenColorRenderView> OGLScreenColorRenderViewPtr;
 
 
 	class OGLScreenDepthStencilRenderView : public OGLRenderView, boost::noncopyable
@@ -86,7 +86,7 @@ namespace KlayGE
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 	};
 
-	typedef shared_ptr<OGLScreenDepthStencilRenderView> OGLScreenDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLScreenDepthStencilRenderView> OGLScreenDepthStencilRenderViewPtr;
 
 
 	class OGLTexture1DRenderView : public OGLRenderView, boost::noncopyable
@@ -107,7 +107,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLTexture1DRenderView> OGLTexture1DRenderViewPtr;
+	typedef std::shared_ptr<OGLTexture1DRenderView> OGLTexture1DRenderViewPtr;
 
 
 	class OGLTexture2DRenderView : public OGLRenderView, boost::noncopyable
@@ -128,7 +128,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLTexture2DRenderView> OGLTexture2DRenderViewPtr;
+	typedef std::shared_ptr<OGLTexture2DRenderView> OGLTexture2DRenderViewPtr;
 
 
 	class OGLTexture3DRenderView : public OGLRenderView, boost::noncopyable
@@ -157,7 +157,7 @@ namespace KlayGE
 		GLuint tex_2d_;
 	};
 
-	typedef shared_ptr<OGLTexture3DRenderView> OGLTexture3DRenderViewPtr;
+	typedef std::shared_ptr<OGLTexture3DRenderView> OGLTexture3DRenderViewPtr;
 
 
 	class OGLTextureCubeRenderView : public OGLRenderView, boost::noncopyable
@@ -178,7 +178,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLTextureCubeRenderView> OGLTextureCubeRenderViewPtr;
+	typedef std::shared_ptr<OGLTextureCubeRenderView> OGLTextureCubeRenderViewPtr;
 
 
 	class OGLGraphicsBufferRenderView : public OGLRenderView, boost::noncopyable
@@ -204,7 +204,7 @@ namespace KlayGE
 		GraphicsBuffer& gbuffer_;
 	};
 
-	typedef shared_ptr<OGLGraphicsBufferRenderView> OGLGraphicsBufferRenderViewPtr;
+	typedef std::shared_ptr<OGLGraphicsBufferRenderView> OGLGraphicsBufferRenderViewPtr;
 
 
 	class OGLDepthStencilRenderView : public OGLRenderView, boost::noncopyable
@@ -229,7 +229,7 @@ namespace KlayGE
 		GLuint rbo_;
 	};
 
-	typedef shared_ptr<OGLDepthStencilRenderView> OGLDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLDepthStencilRenderView> OGLDepthStencilRenderViewPtr;
 
 	class OGLTextureCubeDepthStencilRenderView : public OGLRenderView, boost::noncopyable
 	{
@@ -249,7 +249,7 @@ namespace KlayGE
 		int level_;
 	};
 
-	typedef shared_ptr<OGLTextureCubeDepthStencilRenderView> OGLTextureCubeDepthStencilRenderViewPtr;
+	typedef std::shared_ptr<OGLTextureCubeDepthStencilRenderView> OGLTextureCubeDepthStencilRenderViewPtr;
 }
 
 #endif			// _OGLRENDERVIEW_HPP

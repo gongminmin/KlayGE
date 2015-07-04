@@ -57,7 +57,7 @@
 
 namespace KlayGE
 {
-	typedef shared_ptr<PyObject> PyObjectPtr;
+	typedef std::shared_ptr<PyObject> PyObjectPtr;
 
 	// PyObject÷∏’Î
 	/////////////////////////////////////////////////////////////////////////////////

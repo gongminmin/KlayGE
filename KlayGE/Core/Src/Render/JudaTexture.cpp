@@ -659,7 +659,7 @@ namespace KlayGE
 				}
 
 				uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-				shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
+				std::shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint64_t offsets[2];
@@ -1017,7 +1017,7 @@ namespace KlayGE
 		std::vector<JudaTexture::quadtree_node_ptr> this_level;
 		std::vector<JudaTexture::quadtree_node_ptr> next_level;
 
-		shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
+		std::shared_ptr<std::ostream> ofs = MakeSharedPtr<std::ofstream>(file_name.c_str(), std::ios_base::out | std::ios_base::binary);
 		
 		uint32_t fourcc = MakeFourCC<'J', 'D', 'T', ' '>::value;
 		ofs->write(reinterpret_cast<char const *>(&fourcc), sizeof(fourcc));

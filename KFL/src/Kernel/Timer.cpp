@@ -82,7 +82,7 @@ namespace KlayGE
 #ifdef USE_QUERY_PERFORMANCE
 		return static_cast<double>(std::numeric_limits<uint64_t>::max()) / CPS() - start_time_;
 #else
-		return chrono::duration<double>::max().count();
+		return std::chrono::duration<double>::max().count();
 #endif
 	}
 
@@ -92,7 +92,7 @@ namespace KlayGE
 #ifdef USE_QUERY_PERFORMANCE
 		return 1.0 / CPS();
 #else
-		return chrono::duration<double>::min().count();
+		return std::chrono::duration<double>::min().count();
 #endif
 	}
 
@@ -103,8 +103,8 @@ namespace KlayGE
 		::QueryPerformanceCounter(&count);
 		return static_cast<double>(count.QuadPart) / CPS();
 #else
-		chrono::high_resolution_clock::time_point tp = chrono::high_resolution_clock::now();
-		return chrono::duration_cast<chrono::duration<double> >(tp.time_since_epoch()).count();
+		std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
+		return std::chrono::duration_cast<std::chrono::duration<double> >(tp.time_since_epoch()).count();
 #endif
 	}
 }

@@ -96,8 +96,8 @@ struct RegisterDesc
 struct HSForkPhase
 {
 	uint32_t fork_instance_count;
-	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
-	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl> > dcls;
+	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
 	
 	HSForkPhase()
 		: fork_instance_count(0)
@@ -108,8 +108,8 @@ struct HSForkPhase
 struct HSJoinPhase
 {
 	uint32_t join_instance_count;
-	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
-	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl> > dcls;
+	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
 	
 	HSJoinPhase()
 		: join_instance_count(0)
@@ -119,8 +119,8 @@ struct HSJoinPhase
 
 struct HSControlPointPhase
 {
-	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;
-	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl> > dcls;
+	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
 };
 
 class GLSLGen
@@ -128,7 +128,7 @@ class GLSLGen
 public:
 	static uint32_t DefaultRules(GLSLVersion version);
 
-	void FeedDXBC(KlayGE::shared_ptr<ShaderProgram> const & program,
+	void FeedDXBC(std::shared_ptr<ShaderProgram> const & program,
 		bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
 		GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
@@ -195,7 +195,7 @@ private:
 	void FindHSJoinPhases();
 
 private:
-	KlayGE::shared_ptr<ShaderProgram> program_;
+	std::shared_ptr<ShaderProgram> program_;
 
 	ShaderType shader_type_;
 	bool has_gs_;

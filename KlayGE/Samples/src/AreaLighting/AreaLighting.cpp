@@ -92,9 +92,9 @@ void AreaLightingApp::OnCreate()
 	this->LookAt(float3(-12.2f, 15.8f, -2.4f), float3(-11.5f, 15.1f, -2.2f));
 	this->Proj(0.1f, 500.0f);
 
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -167,7 +167,7 @@ void AreaLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&AreaLightingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&AreaLightingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AreaLighting.uiml"));
@@ -180,15 +180,15 @@ void AreaLightingApp::OnCreate()
 	id_length_slider_ = dialog_->IDFromName("LengthSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&AreaLightingApp::LightTypeChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&AreaLightingApp::LightTypeChangedHandler, this, std::placeholders::_1));
 	this->LightTypeChangedHandler(*dialog_->Control<UIComboBox>(id_light_type_combo_));
 
-	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&AreaLightingApp::RadiusChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(std::bind(&AreaLightingApp::RadiusChangedHandler, this, std::placeholders::_1));
 	this->RadiusChangedHandler(*dialog_->Control<UISlider>(id_radius_slider_));
-	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&AreaLightingApp::LengthChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(std::bind(&AreaLightingApp::LengthChangedHandler, this, std::placeholders::_1));
 	this->LengthChangedHandler(*dialog_->Control<UISlider>(id_length_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&AreaLightingApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&AreaLightingApp::CtrlCameraHandler, this, std::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

@@ -62,7 +62,7 @@ namespace KlayGE
 		enabled_ = enabled;
 	}
 
-	void LightSource::BindUpdateFunc(function<void(LightSource&, float, float)> const & update_func)
+	void LightSource::BindUpdateFunc(std::function<void(LightSource&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;
 	}
@@ -134,8 +134,8 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void LightSource::SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
-		KlayGE::function<TexturePtr()> const & c_cube_tl)
+	void LightSource::SkylightTex(std::function<TexturePtr()> const & y_cube_tl,
+		std::function<TexturePtr()> const & c_cube_tl)
 	{
 		UNREF_PARAM(y_cube_tl);
 		UNREF_PARAM(c_cube_tl);
@@ -143,7 +143,7 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	void LightSource::SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl)
+	void LightSource::SkylightTex(std::function<TexturePtr()> const & cube_tl)
 	{
 		UNREF_PARAM(cube_tl);
 
@@ -358,14 +358,14 @@ namespace KlayGE
 		sky_tex_y_ = tex;
 	}
 
-	void AmbientLightSource::SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
-		KlayGE::function<TexturePtr()> const & c_cube_tl)
+	void AmbientLightSource::SkylightTex(std::function<TexturePtr()> const & y_cube_tl,
+		std::function<TexturePtr()> const & c_cube_tl)
 	{
 		sky_tex_y_tl_ = y_cube_tl;
 		sky_tex_c_tl_ = c_cube_tl;
 	}
 
-	void AmbientLightSource::SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl)
+	void AmbientLightSource::SkylightTex(std::function<TexturePtr()> const & cube_tl)
 	{
 		sky_tex_y_tl_ = cube_tl;
 	}

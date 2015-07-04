@@ -67,7 +67,7 @@ namespace KlayGE
 	class FontRenderable : public RenderableHelper
 	{
 	public:
-		explicit FontRenderable(shared_ptr<KFont> const & kfl)
+		explicit FontRenderable(std::shared_ptr<KFont> const & kfl)
 				: RenderableHelper(L"Font"),
 					three_dim_(false),
 					kfont_loader_(kfl),
@@ -720,7 +720,7 @@ namespace KlayGE
 		RenderEffectParameterPtr half_width_height_ep_;
 		RenderEffectParameterPtr mvp_ep_;
 
-		shared_ptr<KFont> kfont_loader_;
+		std::shared_ptr<KFont> kfont_loader_;
 
 		uint64_t tick_;
 	};
@@ -738,8 +738,8 @@ namespace
 			std::string res_name;
 			uint32_t flag;
 
-			shared_ptr<KFont> kfont_loader;
-			shared_ptr<FontPtr> kfont;
+			std::shared_ptr<KFont> kfont_loader;
+			std::shared_ptr<FontPtr> kfont;
 		};
 
 	public:
@@ -775,14 +775,14 @@ namespace
 			}
 		}
 
-		shared_ptr<void> MainThreadStage()
+		std::shared_ptr<void> MainThreadStage()
 		{
 			if (!*font_desc_.kfont)
 			{
-				shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
+				std::shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
 				*font_desc_.kfont = MakeSharedPtr<Font>(fr, font_desc_.flag);
 			}
-			return static_pointer_cast<void>(*font_desc_.kfont);
+			return std::static_pointer_cast<void>(*font_desc_.kfont);
 		}
 
 		bool HasSubThreadStage() const
@@ -812,7 +812,7 @@ namespace
 			font_desc_.kfont = fld.font_desc_.kfont;
 		}
 
-		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
 		{
 			return resource;
 		}
@@ -826,13 +826,13 @@ namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
-	Font::Font(shared_ptr<FontRenderable> const & fr)
+	Font::Font(std::shared_ptr<FontRenderable> const & fr)
 			: font_renderable_(fr)
 	{
 		fso_attrib_ = SceneObject::SOA_Overlay;
 	}
 
-	Font::Font(shared_ptr<FontRenderable> const & fr, uint32_t flags)
+	Font::Font(std::shared_ptr<FontRenderable> const & fr, uint32_t flags)
 			: font_renderable_(fr)
 	{
 		fso_attrib_ = SceneObject::SOA_Overlay;
@@ -910,7 +910,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 
-	function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags)
+	std::function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags)
 	{
 		return ResLoader::Instance().ASyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}

@@ -84,12 +84,12 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	diffuse_tl_ = function<TexturePtr()>();
-	specular_tl_ = function<TexturePtr()>();
-	shininess_tl_ = function<TexturePtr()>();
-	normal_tl_ = function<TexturePtr()>();
-	height_tl_ = function<TexturePtr()>();
-	emit_tl_ = function<TexturePtr()>();
+	diffuse_tl_ = std::function<TexturePtr()>();
+	specular_tl_ = std::function<TexturePtr()>();
+	shininess_tl_ = std::function<TexturePtr()>();
+	normal_tl_ = std::function<TexturePtr()>();
+	height_tl_ = std::function<TexturePtr()>();
+	emit_tl_ = std::function<TexturePtr()>();
 
 	diffuse_tex_.reset();
 	specular_tex_.reset();
@@ -103,7 +103,7 @@ void DetailedSkinnedMesh::UpdateMaterial()
 
 void DetailedSkinnedMesh::UpdateTechniques()
 {
-	shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+	std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
 	if (this->AlphaTest())
 	{

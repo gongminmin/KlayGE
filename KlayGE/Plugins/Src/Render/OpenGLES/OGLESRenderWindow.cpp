@@ -60,12 +60,12 @@ namespace KlayGE
 		color_bits_			= NumFormatBits(settings.color_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();		
-		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&OGLESRenderWindow::OnPaint, this,
-			placeholders::_1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&OGLESRenderWindow::OnExitSizeMove, this,
-			placeholders::_1));
-		on_size_connect_ = main_wnd->OnSize().connect(bind(&OGLESRenderWindow::OnSize, this,
-			placeholders::_1, placeholders::_2));
+		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&OGLESRenderWindow::OnPaint, this,
+			std::placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&OGLESRenderWindow::OnExitSizeMove, this,
+			std::placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&OGLESRenderWindow::OnSize, this,
+			std::placeholders::_1, std::placeholders::_2));
 
 		if (isFullScreen_)
 		{

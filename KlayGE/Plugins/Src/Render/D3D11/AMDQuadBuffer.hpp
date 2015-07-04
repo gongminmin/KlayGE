@@ -93,6 +93,6 @@ public:
 HRESULT WINAPI AmdDxExtCreate11(ID3D11Device* pDevice, IAmdDxExt** ppExt);
 typedef HRESULT (WINAPI *PFNAmdDxExtCreate11)(ID3D11Device* pDevice, IAmdDxExt** ppExt);
 
-typedef KlayGE::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
+typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
 
 #endif		// _KLAYGE_AMDQUADBUFFER_HPP

@@ -63,7 +63,7 @@ namespace KlayGE
 		uint32_t bind_flags_;
 		ElementFormat fmt_as_shader_res_;
 	};
-	typedef shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
+	typedef std::shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
 }
 
 #endif			// _D3D11GRAPHICSBUFFER_HPP

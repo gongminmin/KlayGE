@@ -114,14 +114,14 @@ bool SSSSSApp::ConfirmDevice() const
 
 void SSSSSApp::OnCreate()
 {
-	KlayGE::function<RenderablePtr()> sponza_model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml",
+	std::function<RenderablePtr()> sponza_model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml",
 		EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<RenderablePtr()> sss_model_ml = ASyncLoadModel("Infinite-Level_02.meshml",
+	std::function<RenderablePtr()> sss_model_ml = ASyncLoadModel("Infinite-Level_02.meshml",
 		EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<SSSMesh>());
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds",
+	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds",
 		EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds",
+	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds",
 		EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -169,7 +169,7 @@ void SSSSSApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&SSSSSApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&SSSSSApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("SSSSS.uiml"));
@@ -183,15 +183,15 @@ void SSSSSApp::OnCreate()
 	id_translucency_strength_static_ = dialog_params_->IDFromName("TranslucencyStrengthStatic");
 	id_translucency_strength_slider_ = dialog_params_->IDFromName("TranslucencyStrengthSlider");
 
-	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSHandler, this, KlayGE::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(std::bind(&SSSSSApp::SSSHandler, this, std::placeholders::_1));
 	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_sss_));
-	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSStrengthChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::SSSStrengthChangedHandler, this, std::placeholders::_1));
 	this->SSSStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_sss_strength_slider_));
-	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::SSSCorrectionChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::SSSCorrectionChangedHandler, this, std::placeholders::_1));
 	this->SSSCorrectionChangedHandler(*dialog_params_->Control<UISlider>(id_sss_correction_slider_));
-	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyHandler, this, KlayGE::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(std::bind(&SSSSSApp::TranslucencyHandler, this, std::placeholders::_1));
 	this->TranslucencyHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
-	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, std::placeholders::_1));
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
 	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model_ml, SceneObject::SOA_Cullable, 0);

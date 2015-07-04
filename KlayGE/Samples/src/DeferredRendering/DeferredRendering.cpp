@@ -131,9 +131,9 @@ void DeferredRenderingApp::OnCreate()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	KlayGE::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	KlayGE::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	std::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -194,7 +194,7 @@ void DeferredRenderingApp::OnCreate()
 	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(KlayGE::bind(&DeferredRenderingApp::InputHandler, this, KlayGE::placeholders::_1, KlayGE::placeholders::_2));
+	input_handler->connect(std::bind(&DeferredRenderingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
@@ -216,26 +216,26 @@ void DeferredRenderingApp::OnCreate()
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(9);
 #endif
 
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::BufferChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(std::bind(&DeferredRenderingApp::BufferChangedHandler, this, std::placeholders::_1));
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
-	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::IllumChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(std::bind(&DeferredRenderingApp::IllumChangedHandler, this, std::placeholders::_1));
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
 
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
-	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::ILScaleChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(std::bind(&DeferredRenderingApp::ILScaleChangedHandler, this, std::placeholders::_1));
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
-	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::SSVOHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::SSVOHandler, this, std::placeholders::_1));
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
-	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::HDRHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::HDRHandler, this, std::placeholders::_1));
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
-	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::AntiAliasHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::AntiAliasHandler, this, std::placeholders::_1));
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
-	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::NumLightsChangedHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(std::bind(&DeferredRenderingApp::NumLightsChangedHandler, this, std::placeholders::_1));
 	this->NumLightsChangedHandler(*dialog_->Control<UISlider>(id_num_lights_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(KlayGE::bind(&DeferredRenderingApp::CtrlCameraHandler, this, KlayGE::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::CtrlCameraHandler, this, std::placeholders::_1));
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

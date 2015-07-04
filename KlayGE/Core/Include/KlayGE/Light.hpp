@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LightSource : public enable_shared_from_this<LightSource>
+	class KLAYGE_CORE_API LightSource : public std::enable_shared_from_this<LightSource>
 	{
 	public:
 		enum LightType
@@ -59,7 +59,7 @@ namespace KlayGE
 		bool Enabled() const;
 		void Enabled(bool enabled);
 
-		void BindUpdateFunc(function<void(LightSource&, float, float)> const & update_func);
+		void BindUpdateFunc(std::function<void(LightSource&, float, float)> const & update_func);
 
 		virtual void Update(float app_time, float elapsed_time);
 
@@ -74,9 +74,9 @@ namespace KlayGE
 		virtual TexturePtr const & SkylightTex() const;
 		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c);
 		virtual void SkylightTex(TexturePtr const & tex);
-		virtual void SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
-			KlayGE::function<TexturePtr()> const & c_cube_tl);
-		virtual void SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl);
+		virtual void SkylightTex(std::function<TexturePtr()> const & y_cube_tl,
+			std::function<TexturePtr()> const & c_cube_tl);
+		virtual void SkylightTex(std::function<TexturePtr()> const & cube_tl);
 
 		virtual float3 const & Position() const;
 		virtual void Position(float3 const & pos);
@@ -119,7 +119,7 @@ namespace KlayGE
 		float3 falloff_;
 		float range_;
 
-		function<void(LightSource&, float, float)> update_func_;
+		std::function<void(LightSource&, float, float)> update_func_;
 	};
 
 	class KLAYGE_CORE_API AmbientLightSource : public LightSource
@@ -136,15 +136,15 @@ namespace KlayGE
 		virtual TexturePtr const & SkylightTex() const KLAYGE_OVERRIDE;
 		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c) KLAYGE_OVERRIDE;
 		virtual void SkylightTex(TexturePtr const & tex) KLAYGE_OVERRIDE;
-		virtual void SkylightTex(KlayGE::function<TexturePtr()> const & y_cube_tl,
-			KlayGE::function<TexturePtr()> const & c_cube_tl) KLAYGE_OVERRIDE;
-		virtual void SkylightTex(KlayGE::function<TexturePtr()> const & cube_tl) KLAYGE_OVERRIDE;
+		virtual void SkylightTex(std::function<TexturePtr()> const & y_cube_tl,
+			std::function<TexturePtr()> const & c_cube_tl) KLAYGE_OVERRIDE;
+		virtual void SkylightTex(std::function<TexturePtr()> const & cube_tl) KLAYGE_OVERRIDE;
 
 	private:
 		mutable TexturePtr sky_tex_y_;
 		mutable TexturePtr sky_tex_c_;
-		KlayGE::function<TexturePtr()> sky_tex_y_tl_;
-		KlayGE::function<TexturePtr()> sky_tex_c_tl_;
+		std::function<TexturePtr()> sky_tex_y_tl_;
+		std::function<TexturePtr()> sky_tex_c_tl_;
 	};
 
 	class KLAYGE_CORE_API PointLightSource : public LightSource

@@ -45,7 +45,7 @@ namespace KlayGE
 		class RenderTechnique;
 		class RenderPass;
 		class ShaderObject;
-		typedef shared_ptr<ShaderObject> ShaderObjectPtr;
+		typedef std::shared_ptr<ShaderObject> ShaderObjectPtr;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)

@@ -186,7 +186,7 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API PostProcessPtr SyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
-	KLAYGE_CORE_API function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
+	KLAYGE_CORE_API std::function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name);
 
 
 	class KLAYGE_CORE_API PostProcessChain : public PostProcess

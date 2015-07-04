@@ -284,7 +284,7 @@ struct ShaderOperand
 	struct
 	{
 		int64_t disp;
-		KlayGE::shared_ptr<ShaderOperand> reg;
+		std::shared_ptr<ShaderOperand> reg;
 	} indices[3];
 
 	bool IsIndexSimple(uint32_t i) const
@@ -319,7 +319,7 @@ struct ShaderInstruction : public TokenizedShaderInstruction
 
 	uint32_t num;
 	uint32_t num_ops;
-	KlayGE::shared_ptr<ShaderOperand> ops[SM_MAX_OPS];
+	std::shared_ptr<ShaderOperand> ops[SM_MAX_OPS];
 
 	ShaderInstruction()
 		: resource_target(0), num(0), num_ops(0)
@@ -331,7 +331,7 @@ struct ShaderInstruction : public TokenizedShaderInstruction
 
 struct ShaderDecl : public TokenizedShaderInstruction
 {
-	KlayGE::shared_ptr<ShaderOperand> op;
+	std::shared_ptr<ShaderOperand> op;
 	union
 	{
 		uint32_t num;
@@ -375,8 +375,8 @@ struct LabelInfo
 struct ShaderProgram
 {
 	TokenizedShaderVersion version;//program version
-	std::vector<KlayGE::shared_ptr<ShaderDecl> > dcls;//declarations
-	std::vector<KlayGE::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl> > dcls;//declarations
+	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
 
 	std::vector<DXBCSignatureParamDesc> params_in; //input signature
 	std::vector<DXBCSignatureParamDesc> params_out;//output signature
@@ -408,7 +408,7 @@ struct ShaderProgram
 	}
 };
 
-KlayGE::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
+std::shared_ptr<ShaderProgram> ShaderParse(DXBCContainer const & dxbc);
 
 // Return the opcode's input type
 inline ShaderImmType GetOpInType(uint32_t opcode)

@@ -532,7 +532,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
 				&validate_chars[0], &char_info[0], &char_dist_data[0], cur_num_char[i],
 				cur_package, static_cast<uint32_t>(validate_chars.size()),
-				KlayGE::ref(min_values[i]), KlayGE::ref(max_values[i]),
+				std::ref(min_values[i]), std::ref(max_values[i]),
 				i, num_threads, 64));
 		}
 	
@@ -677,7 +677,7 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		param.char_size_sq = char_size_sq;
 		param.s = s;
 		param.e = e;
-		joiners[i] = tp(KlayGE::bind(quantizer_chars, KlayGE::ref(lzma_dists[i]), KlayGE::ref(mses[i]), param));
+		joiners[i] = tp(std::bind(quantizer_chars, std::ref(lzma_dists[i]), std::ref(mses[i]), param));
 	}
 
 	float mse = 0;

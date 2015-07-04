@@ -69,7 +69,7 @@ namespace
 
 	uint32_t const KFX_VERSION = 0x0107;
 
-	mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 	class type_define
 	{
@@ -78,7 +78,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<type_define>();
@@ -173,9 +173,9 @@ namespace
 		std::vector<std::string> types_;
 		std::vector<size_t> types_hash_;
 
-		static shared_ptr<type_define> instance_;
+		static std::shared_ptr<type_define> instance_;
 	};
-	shared_ptr<type_define> type_define::instance_;
+	std::shared_ptr<type_define> type_define::instance_;
 
 	class shade_mode_define
 	{
@@ -184,7 +184,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<shade_mode_define>();
@@ -217,9 +217,9 @@ namespace
 	private:
 		std::vector<size_t> sms_hash_;
 
-		static shared_ptr<shade_mode_define> instance_;
+		static std::shared_ptr<shade_mode_define> instance_;
 	};
-	shared_ptr<shade_mode_define> shade_mode_define::instance_;
+	std::shared_ptr<shade_mode_define> shade_mode_define::instance_;
 
 	class compare_function_define
 	{
@@ -228,7 +228,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<compare_function_define>();
@@ -267,9 +267,9 @@ namespace
 	private:
 		std::vector<size_t> cfs_hash_;
 
-		static shared_ptr<compare_function_define> instance_;
+		static std::shared_ptr<compare_function_define> instance_;
 	};
-	shared_ptr<compare_function_define> compare_function_define::instance_;
+	std::shared_ptr<compare_function_define> compare_function_define::instance_;
 
 	class cull_mode_define
 	{
@@ -278,7 +278,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<cull_mode_define>();
@@ -312,9 +312,9 @@ namespace
 	private:
 		std::vector<size_t> cms_hash_;
 
-		static shared_ptr<cull_mode_define> instance_;
+		static std::shared_ptr<cull_mode_define> instance_;
 	};
-	shared_ptr<cull_mode_define> cull_mode_define::instance_;
+	std::shared_ptr<cull_mode_define> cull_mode_define::instance_;
 
 	class polygon_mode_define
 	{
@@ -323,7 +323,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<polygon_mode_define>();
@@ -357,9 +357,9 @@ namespace
 	private:
 		std::vector<size_t> pms_hash_;
 
-		static shared_ptr<polygon_mode_define> instance_;
+		static std::shared_ptr<polygon_mode_define> instance_;
 	};
-	shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
+	std::shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
 
 	class alpha_blend_factor_define
 	{
@@ -368,7 +368,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<alpha_blend_factor_define>();
@@ -416,9 +416,9 @@ namespace
 	private:
 		std::vector<size_t> abfs_hash_;
 
-		static shared_ptr<alpha_blend_factor_define> instance_;
+		static std::shared_ptr<alpha_blend_factor_define> instance_;
 	};
-	shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
+	std::shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
 
 	class blend_operation_define
 	{
@@ -427,7 +427,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<blend_operation_define>();
@@ -463,9 +463,9 @@ namespace
 	private:
 		std::vector<size_t> bops_hash_;
 
-		static shared_ptr<blend_operation_define> instance_;
+		static std::shared_ptr<blend_operation_define> instance_;
 	};
-	shared_ptr<blend_operation_define> blend_operation_define::instance_;
+	std::shared_ptr<blend_operation_define> blend_operation_define::instance_;
 
 	class stencil_operation_define
 	{
@@ -474,7 +474,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<stencil_operation_define>();
@@ -513,9 +513,9 @@ namespace
 	private:
 		std::vector<size_t> sops_hash_;
 
-		static shared_ptr<stencil_operation_define> instance_;
+		static std::shared_ptr<stencil_operation_define> instance_;
 	};
-	shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
+	std::shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
 
 	class texture_filter_mode_define
 	{
@@ -524,7 +524,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<texture_filter_mode_define>();
@@ -579,9 +579,9 @@ namespace
 	private:
 		std::vector<size_t> tfs_hash_;
 
-		static shared_ptr<texture_filter_mode_define> instance_;
+		static std::shared_ptr<texture_filter_mode_define> instance_;
 	};
-	shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
+	std::shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
 
 	class texture_addr_mode_define
 	{
@@ -590,7 +590,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<texture_addr_mode_define>();
@@ -625,9 +625,9 @@ namespace
 	private:
 		std::vector<size_t> tams_hash_;
 
-		static shared_ptr<texture_addr_mode_define> instance_;
+		static std::shared_ptr<texture_addr_mode_define> instance_;
 	};
-	shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
+	std::shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
 
 	class logic_operation_define
 	{
@@ -636,7 +636,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<logic_operation_define>();
@@ -683,9 +683,9 @@ namespace
 	private:
 		std::vector<size_t> lops_hash_;
 
-		static shared_ptr<logic_operation_define> instance_;
+		static std::shared_ptr<logic_operation_define> instance_;
 	};
-	shared_ptr<logic_operation_define> logic_operation_define::instance_;
+	std::shared_ptr<logic_operation_define> logic_operation_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{
@@ -3827,7 +3827,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		RenderVariable& RenderVariable::operator=(function<TexturePtr()> const & /*value*/)
+		RenderVariable& RenderVariable::operator=(std::function<TexturePtr()> const & /*value*/)
 		{
 			BOOST_ASSERT(false);
 			return *this;
@@ -4194,7 +4194,7 @@ namespace KlayGE
 			return *this;
 		}
 
-		RenderVariable& RenderVariableTexture::operator=(function<TexturePtr()> const & value)
+		RenderVariable& RenderVariableTexture::operator=(std::function<TexturePtr()> const & value)
 		{
 			tl_ = value;
 			if (tl_)

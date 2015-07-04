@@ -988,9 +988,9 @@ namespace
 				std::vector<ElementInitData> init_data;
 				std::vector<uint8_t> data_block;
 			};
-			shared_ptr<TexData> tex_data;
+			std::shared_ptr<TexData> tex_data;
 
-			shared_ptr<TexturePtr> tex;
+			std::shared_ptr<TexturePtr> tex;
 		};
 
 	public:
@@ -1018,14 +1018,14 @@ namespace
 			this->LoadDDS();
 		}
 
-		shared_ptr<void> MainThreadStage()
+		std::shared_ptr<void> MainThreadStage()
 		{
 			if (!*tex_desc_.tex)
 			{
 				*tex_desc_.tex = this->CreateTexture();
 				tex_desc_.tex_data.reset();
 			}
-			return static_pointer_cast<void>(*tex_desc_.tex);
+			return std::static_pointer_cast<void>(*tex_desc_.tex);
 		}
 
 		bool HasSubThreadStage() const
@@ -1055,7 +1055,7 @@ namespace
 			tex_desc_.tex = tld.tex_desc_.tex;
 		}
 
-		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
 		{
 			return resource;
 		}
@@ -1958,7 +1958,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
-	function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	std::function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
 		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}

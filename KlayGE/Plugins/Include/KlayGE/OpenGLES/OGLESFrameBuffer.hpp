@@ -42,7 +42,7 @@ namespace KlayGE
 		GLuint fbo_;
 	};
 
-	typedef shared_ptr<OGLESFrameBuffer> OGLESFrameBufferPtr;
+	typedef std::shared_ptr<OGLESFrameBuffer> OGLESFrameBufferPtr;
 }
 
 #endif			// _OGLESFRAMEBUFFER_HPP

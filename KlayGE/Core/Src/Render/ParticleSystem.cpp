@@ -93,9 +93,9 @@ namespace
 				std::vector<KlayGE::float2> mass_over_life_ctrl_pts;
 				std::vector<KlayGE::float2> opacity_over_life_ctrl_pts;
 			};
-			shared_ptr<ParticleSystemData> ps_data;
+			std::shared_ptr<ParticleSystemData> ps_data;
 
-			shared_ptr<ParticleSystemPtr> ps;
+			std::shared_ptr<ParticleSystemPtr> ps;
 		};
 
 	public:
@@ -327,7 +327,7 @@ namespace
 			}
 		}
 
-		shared_ptr<void> MainThreadStage()
+		std::shared_ptr<void> MainThreadStage()
 		{
 			if (!*ps_desc_.ps)
 			{
@@ -358,7 +358,7 @@ namespace
 
 				*ps_desc_.ps = ps;
 			}
-			return static_pointer_cast<void>(*ps_desc_.ps);
+			return std::static_pointer_cast<void>(*ps_desc_.ps);
 		}
 
 		bool HasSubThreadStage() const
@@ -386,10 +386,10 @@ namespace
 			ps_desc_.ps = psld.ps_desc_.ps;
 		}
 
-		shared_ptr<void> CloneResourceFrom(shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
 		{
-			ParticleSystemPtr rhs_pp = static_pointer_cast<ParticleSystem>(resource);
-			return static_pointer_cast<void>(rhs_pp->Clone());
+			ParticleSystemPtr rhs_pp = std::static_pointer_cast<ParticleSystem>(resource);
+			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
 	private:
@@ -773,7 +773,7 @@ namespace KlayGE
 			checked_pointer_cast<RenderParticles>(renderable_)->PosBound(AABBox(min_bb, max_bb));
 		}
 
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 		active_particles_ = active_particles;
 	}
 
@@ -782,7 +782,7 @@ namespace KlayGE
 		UNREF_PARAM(app_time);
 		UNREF_PARAM(elapsed_time);
 
-		lock_guard<mutex> lock(update_mutex_);
+		std::lock_guard<std::mutex> lock(update_mutex_);
 
 		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
@@ -861,7 +861,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
-	function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name)
+	std::function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name)
 	{
 		return ResLoader::Instance().ASyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
@@ -961,7 +961,7 @@ namespace KlayGE
 
 			if ("polyline" == particle_updater->Type())
 			{
-				shared_ptr<PolylineParticleUpdater> polyline_updater = checked_pointer_cast<PolylineParticleUpdater>(particle_updater);
+				std::shared_ptr<PolylineParticleUpdater> polyline_updater = checked_pointer_cast<PolylineParticleUpdater>(particle_updater);
 
 				XMLNodePtr size_over_life_node = doc.AllocNode(XNT_Element, "curve");
 				size_over_life_node->AppendAttrib(doc.AllocAttribString("name", "size_over_life"));
@@ -1031,7 +1031,7 @@ namespace KlayGE
 
 	ParticleEmitterPtr PointParticleEmitter::Clone()
 	{
-		shared_ptr<PointParticleEmitter> ret = MakeSharedPtr<PointParticleEmitter>(ps_.lock());
+		std::shared_ptr<PointParticleEmitter> ret = MakeSharedPtr<PointParticleEmitter>(ps_.lock());
 		this->DoClone(ret);
 		return ret;
 	}
@@ -1074,7 +1074,7 @@ namespace KlayGE
 
 	ParticleUpdaterPtr PolylineParticleUpdater::Clone()
 	{
-		shared_ptr<PolylineParticleUpdater> ret = MakeSharedPtr<PolylineParticleUpdater>(ps_.lock());
+		std::shared_ptr<PolylineParticleUpdater> ret = MakeSharedPtr<PolylineParticleUpdater>(ps_.lock());
 		this->DoClone(ret);
 		ret->size_over_life_ = size_over_life_;
 		ret->mass_over_life_ = mass_over_life_;
@@ -1089,7 +1089,7 @@ namespace KlayGE
 		std::vector<float2> local_opacity_over_life;
 
 		{
-			lock_guard<mutex> lock(update_mutex_);
+			std::lock_guard<std::mutex> lock(update_mutex_);
 			local_size_over_life = size_over_life_;
 			local_mass_over_life = mass_over_life_;
 			local_opacity_over_life = opacity_over_life_;

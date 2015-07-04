@@ -118,7 +118,7 @@ namespace KlayGE
 		SceneObjsType scene_objs_;
 		SceneObjsType overlay_scene_objs_;
 
-		std::unordered_map<size_t, shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
+		std::unordered_map<size_t, std::shared_ptr<std::vector<BoundOverlap> > > visible_marks_map_;
 
 		float small_obj_threshold_;
 		float update_elapse_;
@@ -138,8 +138,8 @@ namespace KlayGE
 		uint32_t num_draw_calls_;
 		uint32_t num_dispatch_calls_;
 
-		mutex update_mutex_;
-		shared_ptr<joiner<void> > update_thread_;
+		std::mutex update_mutex_;
+		std::shared_ptr<joiner<void> > update_thread_;
 		bool quit_;
 
 		bool deferred_mode_;

@@ -376,7 +376,7 @@ namespace
 		param.processed_texels = &processed_texels;
 		for (size_t face = 0; face < joiners.size(); ++ face)
 		{
-			joiners[face] = tp(KlayGE::bind(PrefilterCubeFace, KlayGE::ref(param), static_cast<uint32_t>(face)));
+			joiners[face] = tp(std::bind(PrefilterCubeFace, std::ref(param), static_cast<uint32_t>(face)));
 		}
 
 		for (;;)

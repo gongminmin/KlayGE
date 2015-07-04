@@ -69,7 +69,7 @@ namespace KlayGE
 		void RootNode(XMLNodePtr const & new_node);
 
 	private:
-		shared_ptr<void> doc_;
+		std::shared_ptr<void> doc_;
 		std::vector<char> xml_src_;
 
 		XMLNodePtr root_;

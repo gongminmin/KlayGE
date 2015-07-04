@@ -73,8 +73,8 @@ namespace KlayGE
 		};
 
 	public:
-		explicit Font(shared_ptr<FontRenderable> const & fr);
-		Font(shared_ptr<FontRenderable> const & fr, uint32_t flags);
+		explicit Font(std::shared_ptr<FontRenderable> const & fr);
+		Font(std::shared_ptr<FontRenderable> const & fr, uint32_t flags);
 
 		Size_T<float> CalcSize(std::wstring const & text, float font_size);
 		void RenderText(float x, float y, Color const & clr,
@@ -86,12 +86,12 @@ namespace KlayGE
 		void RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, float font_size);
 
 	private:
-		shared_ptr<FontRenderable> font_renderable_;
+		std::shared_ptr<FontRenderable> font_renderable_;
 		uint32_t		fso_attrib_;
 	};
 
 	KLAYGE_CORE_API FontPtr SyncLoadFont(std::string const & font_name, uint32_t flags = 0);
-	KLAYGE_CORE_API function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags = 0);
+	KLAYGE_CORE_API std::function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags = 0);
 }
 
 #endif		// _FONT_HPP

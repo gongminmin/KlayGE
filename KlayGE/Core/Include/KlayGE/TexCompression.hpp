@@ -204,7 +204,7 @@ namespace KlayGE
 
 	public:
 		RGBACluster(ARGBColor32 const * pixels, uint32_t num,
-			function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition);
+			std::function<uint32_t(uint32_t, uint32_t, uint32_t)> const & get_partition);
 
 		float4& Point(uint32_t index)
 		{
@@ -279,7 +279,7 @@ namespace KlayGE
 		float4 min_clr_;
 		float4 max_clr_;
 
-		function<uint32_t(uint32_t, uint32_t, uint32_t)> get_partition_;
+		std::function<uint32_t(uint32_t, uint32_t, uint32_t)> get_partition_;
 	};
 
 	// Helpers

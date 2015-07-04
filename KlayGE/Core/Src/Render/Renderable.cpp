@@ -216,7 +216,7 @@ namespace KlayGE
 
 	void Renderable::AddInstance(SceneObjectPtr const & obj)
 	{
-		instances_.push_back(weak_ptr<SceneObject>(obj));
+		instances_.push_back(std::weak_ptr<SceneObject>(obj));
 	}
 
 	void Renderable::UpdateInstanceStream()

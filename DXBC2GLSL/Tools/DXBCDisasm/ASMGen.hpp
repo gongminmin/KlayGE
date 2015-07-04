@@ -38,7 +38,7 @@
 class ASMGen
 {
 public:
-	explicit ASMGen(KlayGE::shared_ptr<ShaderProgram> const & program);
+	explicit ASMGen(std::shared_ptr<ShaderProgram> const & program);
 
 	void ToASM(std::ostream& out);
 
@@ -55,7 +55,7 @@ private:
 	void Disasm(std::ostream& out, const char* value, ShaderVariableType type);
 
 private:
-	KlayGE::shared_ptr<ShaderProgram> program_;
+	std::shared_ptr<ShaderProgram> program_;
 };
 
 #endif		// _DXBC2GLSL_ASMGEN_HPP

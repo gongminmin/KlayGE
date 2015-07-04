@@ -114,7 +114,7 @@ private:
 	std::map<std::string, int> joint_to_id_;
 	std::map<int, MDagPath> joint_id_to_path_;
 
-	std::vector<std::pair<shared_ptr<MFnSkinCluster>, std::vector<MObject> > > skin_clusters_;
+	std::vector<std::pair<std::shared_ptr<MFnSkinCluster>, std::vector<MObject> > > skin_clusters_;
 };
 
 MayaMeshExporter::MayaMeshExporter()
@@ -160,7 +160,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 	{
 		MStatus status = MS::kSuccess;
 		MObject object = dn.item();
-		shared_ptr<MFnSkinCluster> skin_cluster = MakeSharedPtr<MFnSkinCluster>(object, &status);
+		std::shared_ptr<MFnSkinCluster> skin_cluster = MakeSharedPtr<MFnSkinCluster>(object, &status);
 
 		std::vector<MObject> objs;
 		unsigned int num_geometries = skin_cluster->numOutputConnections();

@@ -715,7 +715,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < tile_rings_.size(); ++ i)
 		{
-			KlayGE::shared_ptr<TileRing> const & ring = tile_rings_[i];
+			std::shared_ptr<TileRing> const & ring = tile_rings_[i];
 
 			if (need_tess)
 			{
@@ -767,7 +767,7 @@ namespace KlayGE
 		last_eye_pos_ = re.CurFrameBuffer()->GetViewport()->camera->EyePos();
 
 		renderable_ = renderable;
-		BOOST_ASSERT(!!dynamic_pointer_cast<HQTerrainRenderable>(renderable));
+		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
 	}
 
 	HQTerrainSceneObject::~HQTerrainSceneObject()

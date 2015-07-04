@@ -113,8 +113,8 @@ namespace KlayGE
 
 		bool played_;
 		bool stopped_;
-		condition_variable play_cond_;
-		mutex play_mutex_;
+		std::condition_variable play_cond_;
+		std::mutex play_mutex_;
 		joiner<void> play_thread_;
 	};
 

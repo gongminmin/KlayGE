@@ -73,14 +73,14 @@ namespace KlayGE
 		wnd_ = main_wnd->GetWindow();
 		metro_d3d_render_win_->BindD3D11RenderWindow(this);
 #endif
-		on_paint_connect_ = main_wnd->OnPaint().connect(bind(&D3D11RenderWindow::OnPaint, this,
-			placeholders::_1));
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(bind(&D3D11RenderWindow::OnExitSizeMove, this,
-			placeholders::_1));
-		on_size_connect_ = main_wnd->OnSize().connect(bind(&D3D11RenderWindow::OnSize, this,
-			placeholders::_1, placeholders::_2));
-		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(bind(&D3D11RenderWindow::OnSetCursor, this,
-			placeholders::_1));
+		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&D3D11RenderWindow::OnPaint, this,
+			std::placeholders::_1));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&D3D11RenderWindow::OnExitSizeMove, this,
+			std::placeholders::_1));
+		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&D3D11RenderWindow::OnSize, this,
+			std::placeholders::_1, std::placeholders::_2));
+		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(std::bind(&D3D11RenderWindow::OnSetCursor, this,
+			std::placeholders::_1));
 
 		if (this->FullScreen())
 		{
@@ -952,7 +952,7 @@ namespace KlayGE
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
 				ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
-				ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
+				ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
 				d3d_imm_ctx_1->DiscardView(render_target_view_.get());
 				if (depth_stencil_view_)
 				{

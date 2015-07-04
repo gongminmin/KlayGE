@@ -44,7 +44,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	mutex singleton_mutex;
+	std::mutex singleton_mutex;
 
 	typedef int (MY_STD_CALL *LzmaCompressFunc)(unsigned char* dest, size_t* destLen, unsigned char const * src, size_t srcLen,
 		unsigned char* outProps, size_t* outPropsSize, /* *outPropsSize must be = 5 */
@@ -65,7 +65,7 @@ namespace
 		{
 			if (!instance_)
 			{
-				lock_guard<mutex> lock(singleton_mutex);
+				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
 					instance_ = MakeSharedPtr<LZMALoader>();
@@ -110,9 +110,9 @@ namespace
 		LzmaCompressFunc lzma_compress_func_;
 		LzmaUncompressFunc lzma_uncompress_func_;
 
-		static shared_ptr<LZMALoader> instance_;
+		static std::shared_ptr<LZMALoader> instance_;
 	};
-	shared_ptr<LZMALoader> LZMALoader::instance_;
+	std::shared_ptr<LZMALoader> LZMALoader::instance_;
 }
 
 namespace KlayGE

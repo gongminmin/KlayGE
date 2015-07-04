@@ -139,19 +139,19 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = KlayGE::bind(&D3D11RenderTargetRenderView::HWDiscard, this);
+			discard_func_ = std::bind(&D3D11RenderTargetRenderView::HWDiscard, this);
 		}
 		else
 #endif
 		{
-			discard_func_ = KlayGE::bind(&D3D11RenderTargetRenderView::FackDiscard, this);
+			discard_func_ = std::bind(&D3D11RenderTargetRenderView::FackDiscard, this);
 		}
 	}
 
 	void D3D11RenderTargetRenderView::HWDiscard()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(rt_view_.get());
 #endif
 	}
@@ -295,19 +295,19 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = KlayGE::bind(&D3D11DepthStencilRenderView::HWDiscard, this);
+			discard_func_ = std::bind(&D3D11DepthStencilRenderView::HWDiscard, this);
 		}
 		else
 #endif
 		{
-			discard_func_ = KlayGE::bind(&D3D11DepthStencilRenderView::FackDiscard, this);
+			discard_func_ = std::bind(&D3D11DepthStencilRenderView::FackDiscard, this);
 		}
 	}
 
 	void D3D11DepthStencilRenderView::HWDiscard()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(ds_view_.get());
 #endif
 	}
@@ -437,19 +437,19 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = KlayGE::bind(&D3D11UnorderedAccessView::HWDiscard, this);
+			discard_func_ = std::bind(&D3D11UnorderedAccessView::HWDiscard, this);
 		}
 		else
 #endif
 		{
-			discard_func_ = KlayGE::bind(&D3D11UnorderedAccessView::FackDiscard, this);
+			discard_func_ = std::bind(&D3D11UnorderedAccessView::FackDiscard, this);
 		}
 	}
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
 		d3d_imm_ctx_1->DiscardView(ua_view_.get());
 #endif
 	}

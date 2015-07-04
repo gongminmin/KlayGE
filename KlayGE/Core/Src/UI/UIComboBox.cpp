@@ -266,7 +266,7 @@ namespace KlayGE
 			// Determine which item has been selected
 			for (size_t i = 0; i < items_.size(); ++ i)
 			{
-				shared_ptr<UIComboBoxItem> const & pItem = items_[i];
+				std::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 				if (pItem->bVisible && pItem->rcActive.PtInRect(pt))
 				{
 					focused_ = static_cast<int>(i);
@@ -315,7 +315,7 @@ namespace KlayGE
 				// Determine which item has been selected
 				for (size_t i = scroll_bar_.GetTrackPos(); i < items_.size(); ++ i)
 				{
-					shared_ptr<UIComboBoxItem> const & pItem = items_[i];
+					std::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 					if (pItem -> bVisible && pItem->rcActive.PtInRect(pt))
 					{
 						focused_ = static_cast<int>(i);
@@ -471,7 +471,7 @@ namespace KlayGE
 
 			for (size_t i = scroll_bar_.GetTrackPos(); i < items_.size(); ++ i)
 			{
-				shared_ptr<UIComboBoxItem> const & pItem = items_[i];
+				std::shared_ptr<UIComboBoxItem> const & pItem = items_[i];
 
 				// Make sure there's room left in the dropdown
 				nRemainingHeight -= font_size;
@@ -560,7 +560,7 @@ namespace KlayGE
 
 		if ((selected_ >= 0) && (selected_ < static_cast<int>(items_.size())))
 		{
-			shared_ptr<UIComboBoxItem> const & pItem = items_[selected_];
+			std::shared_ptr<UIComboBoxItem> const & pItem = items_[selected_];
 			if (pItem)
 			{
 				this->GetDialog()->DrawString(pItem->strText, *pElement, text_rc_, false, depth_bias);
@@ -573,7 +573,7 @@ namespace KlayGE
 		BOOST_ASSERT(!strText.empty());
 
 		// Create a new item and set the data
-		shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
+		std::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
 		pItem->rcActive = IRect(0, 0, 0, 0);
 		pItem->bVisible = false;
@@ -606,7 +606,7 @@ namespace KlayGE
 		BOOST_ASSERT(!strText.empty());
 
 		// Create a new item and set the data
-		shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
+		std::shared_ptr<UIComboBoxItem> pItem = MakeSharedPtr<UIComboBoxItem>();
 		pItem->strText = strText;
 		pItem->data = data;
 		pItem->rcActive = IRect(0, 0, 0, 0);
@@ -680,11 +680,11 @@ namespace KlayGE
 		return items_[selected_]->data;
 	}
 
-	shared_ptr<UIComboBoxItem> UIComboBox::GetSelectedItem() const
+	std::shared_ptr<UIComboBoxItem> UIComboBox::GetSelectedItem() const
 	{
 		if (selected_ < 0)
 		{
-			return shared_ptr<UIComboBoxItem>();
+			return std::shared_ptr<UIComboBoxItem>();
 		}
 
 		return items_[selected_];
@@ -703,7 +703,7 @@ namespace KlayGE
 			return boost::any();
 		}
 
-		shared_ptr<UIComboBoxItem> const & pItem = items_[index];
+		std::shared_ptr<UIComboBoxItem> const & pItem = items_[index];
 		if (!pItem)
 		{
 			return boost::any();

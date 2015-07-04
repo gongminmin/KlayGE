@@ -60,9 +60,9 @@ private:
 	KlayGE::SceneObjectPtr light_proxy_;
 	KlayGE::LightSourcePtr light_;
 
-	KlayGE::function<KlayGE::RenderModelPtr()> model_ml_;
-	KlayGE::function<KlayGE::RenderModelPtr()> teapot_ml_;
-	KlayGE::function<KlayGE::TexturePtr()> lamp_tl_;
+	std::function<KlayGE::RenderModelPtr()> model_ml_;
+	std::function<KlayGE::RenderModelPtr()> teapot_ml_;
+	std::function<KlayGE::TexturePtr()> lamp_tl_;
 	KlayGE::uint32_t loading_percentage_;
 
 	SM_TYPE sm_type_;

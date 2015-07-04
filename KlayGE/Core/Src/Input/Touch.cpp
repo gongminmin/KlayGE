@@ -56,13 +56,13 @@ namespace KlayGE
 		touch_downs_[0].fill(false);
 		touch_downs_[1].fill(false);
 
-		gesture_funcs_[GS_None] = bind(&InputTouch::GestureNone, this, placeholders::_1);
-		gesture_funcs_[GS_Pan] = bind(&InputTouch::GesturePan, this, placeholders::_1);
-		gesture_funcs_[GS_Tap] = bind(&InputTouch::GestureTap, this, placeholders::_1);
-		gesture_funcs_[GS_PressAndTap] = bind(&InputTouch::GesturePressAndTap, this, placeholders::_1);
-		gesture_funcs_[GS_TwoFingerIntermediate] = bind(&InputTouch::GestureTwoFingerIntermediate, this, placeholders::_1);
-		gesture_funcs_[GS_Zoom] = bind(&InputTouch::GestureZoom, this, placeholders::_1);
-		gesture_funcs_[GS_Rotate] = bind(&InputTouch::GestureRotate, this, placeholders::_1);
+		gesture_funcs_[GS_None] = std::bind(&InputTouch::GestureNone, this, std::placeholders::_1);
+		gesture_funcs_[GS_Pan] = std::bind(&InputTouch::GesturePan, this, std::placeholders::_1);
+		gesture_funcs_[GS_Tap] = std::bind(&InputTouch::GestureTap, this, std::placeholders::_1);
+		gesture_funcs_[GS_PressAndTap] = std::bind(&InputTouch::GesturePressAndTap, this, std::placeholders::_1);
+		gesture_funcs_[GS_TwoFingerIntermediate] = std::bind(&InputTouch::GestureTwoFingerIntermediate, this, std::placeholders::_1);
+		gesture_funcs_[GS_Zoom] = std::bind(&InputTouch::GestureZoom, this, std::placeholders::_1);
+		gesture_funcs_[GS_Rotate] = std::bind(&InputTouch::GestureRotate, this, std::placeholders::_1);
 
 		curr_gesture_ = gesture_funcs_[GS_None];
 	}
