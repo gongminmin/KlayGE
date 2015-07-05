@@ -49,7 +49,7 @@ namespace KlayGE
 						boost::dividable2<Matrix4_T<T>, T,
 						boost::multipliable2<Matrix4_T<T>, T,
 						boost::multipliable<Matrix4_T<T>,
-						boost::equality_comparable<Matrix4_T<T> > > > > > >
+						boost::equality_comparable<Matrix4_T<T>>>>>>>
 	{
 	public:
 		typedef T					value_type;

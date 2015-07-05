@@ -226,7 +226,7 @@ void PackJTML(std::string const & jtml_name)
 
 		juda_tex->AddImageEntry(name, x, y, in_num_tiles_x, in_num_tiles_y, addr_u, addr_v, border_clr);
 
-		std::vector<std::vector<uint8_t> > tiles;
+		std::vector<std::vector<uint8_t>> tiles;
 		std::vector<uint32_t> tile_ids;
 		std::vector<uint32_t> tile_attrs;
 		for (int32_t by = beg_tile_y; by < end_tile_y; ++ by)

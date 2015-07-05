@@ -3123,7 +3123,7 @@ namespace KlayGE
 		template std::pair<Quaternion, Quaternion> conjugate(Quaternion const & real, Quaternion const & dual);
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
 			return std::make_pair(conjugate(real), conjugate(dual));
 		}
@@ -3131,13 +3131,13 @@ namespace KlayGE
 		template std::pair<Quaternion, Quaternion> inverse(Quaternion const & real, Quaternion const & dual);
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
 		{
 			float sqr_len_0 = dot(real, real);
 			float sqr_len_e = 2.0f * dot(real, dual);
 			float inv_sqr_len_0 = 1.0f / sqr_len_0;
 			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
-			std::pair<Quaternion_T<T>, Quaternion_T<T> > conj = conjugate(real, dual);
+			std::pair<Quaternion_T<T>, Quaternion_T<T>> conj = conjugate(real, dual);
 			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
 		}
 
@@ -3214,7 +3214,7 @@ namespace KlayGE
 		template std::pair<Quaternion, Quaternion> udq_from_screw(float const & angle, float const & pitch, float3 const & dir, float3 const & moment);
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
 		{
 			T sa, ca;
 			sincos(angle * T(0.5), sa, ca);
@@ -3227,7 +3227,7 @@ namespace KlayGE
 			Quaternion const & rhs_real, Quaternion const & rhs_dual, float s);
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T> > sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
 			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s)
 		{
 			// Make sure dot product is >= 0
@@ -3240,7 +3240,7 @@ namespace KlayGE
 				to_sign_corrected_dual = -to_sign_corrected_dual;
 			}
 
-			std::pair<Quaternion_T<T>, Quaternion_T<T> > dif_dq = inverse(lhs_real, lhs_dual);
+			std::pair<Quaternion_T<T>, Quaternion_T<T>> dif_dq = inverse(lhs_real, lhs_dual);
 			dif_dq.second = mul_dual(dif_dq.first, dif_dq.second, to_sign_corrected_real, to_sign_corrected_dual);
 			dif_dq.first = mul_real(dif_dq.first, to_sign_corrected_real);
 	

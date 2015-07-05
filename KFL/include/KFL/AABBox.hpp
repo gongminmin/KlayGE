@@ -48,7 +48,7 @@ namespace KlayGE
 						boost::dividable2<AABBox_T<T>, T,
 						boost::andable<AABBox_T<T>,
 						boost::orable<AABBox_T<T>,
-						boost::equality_comparable<AABBox_T<T> > > > > > > >,
+						boost::equality_comparable<AABBox_T<T>>>>>>>>,
 				public Bound_T<T>
 	{
 	public:

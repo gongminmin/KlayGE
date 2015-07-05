@@ -282,7 +282,7 @@ namespace
 		uint32_t out_width = (in_width + 3) & ~3;
 		uint32_t out_height = (in_height + 3) & ~3;
 
-		std::vector<std::vector<Color> > in_color(in_data.size());
+		std::vector<std::vector<Color>> in_color(in_data.size());
 		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{
 			uint32_t src_width = in_width;
@@ -313,7 +313,7 @@ namespace
 		}
 
 		std::vector<ElementInitData> new_data(in_data.size());
-		std::vector<std::vector<uint8_t> > new_data_block(in_data.size());
+		std::vector<std::vector<uint8_t>> new_data_block(in_data.size());
 
 		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{

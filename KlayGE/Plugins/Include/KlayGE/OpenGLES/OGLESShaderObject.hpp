@@ -76,26 +76,26 @@ namespace KlayGE
 	private:
 		GLuint glsl_program_;
 		GLenum glsl_bin_format_;
-		std::shared_ptr<std::vector<uint8_t> > glsl_bin_program_;
-		std::shared_ptr<std::array<std::string, ST_NumShaderTypes> > shader_func_names_;
-		std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes> > glsl_srcs_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > pnames_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> > glsl_res_names_;
-		std::shared_ptr<std::vector<VertexElementUsage> > vs_usages_;
-		std::shared_ptr<std::vector<uint8_t> > vs_usage_indices_;
-		std::shared_ptr<std::vector<std::string> > glsl_vs_attrib_names_;
+		std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
+		std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
+		std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
+		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
+		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
+		std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
+		std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
+		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
 #if KLAYGE_IS_DEV_PLATFORM
 		uint32_t ds_partitioning_, ds_output_primitive_;
 #endif
 
 		parameter_binds_t param_binds_;
 
-		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> > samplers_;
+		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>> samplers_;
 		std::vector<GLuint> gl_bind_targets_;
 		std::vector<GLuint> gl_bind_textures_;
 		std::vector<GLuint> gl_bind_cbuffs_;
 
-		std::vector<std::tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t> > tex_sampler_binds_;
+		std::vector<std::tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t>> tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 

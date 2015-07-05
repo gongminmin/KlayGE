@@ -26,7 +26,7 @@
 
 namespace KlayGE
 {
-	typedef std::list<std::vector<char> > SendQueueType;
+	typedef std::list<std::vector<char>> SendQueueType;
 
 	uint32_t const Max_Buffer(64);
 
@@ -62,7 +62,7 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API Lobby
 	{
-		typedef std::vector<std::pair<uint32_t, PlayerDes> >	PlayerAddrs;
+		typedef std::vector<std::pair<uint32_t, PlayerDes>>	PlayerAddrs;
 		typedef PlayerAddrs::iterator		PlayerAddrsIter;
 
 	public:

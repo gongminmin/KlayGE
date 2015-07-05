@@ -1105,14 +1105,14 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				int32_t i = loading_percentage_ - (80 - NUM_LINE);
 				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 				{
-					std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_pos", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+					std::vector<boost::any> scr_pos = boost::any_cast<std::vector<boost::any>>(script_module_->Call("get_pos", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 					float3 pos;
 					pos.x() = boost::any_cast<float>(scr_pos[0]);
 					pos.y() = boost::any_cast<float>(scr_pos[1]);
 					pos.z() = boost::any_cast<float>(scr_pos[2]);
 
-					std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any> >(script_module_->Call("get_clr", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+					std::vector<boost::any> scr_clr = boost::any_cast<std::vector<boost::any>>(script_module_->Call("get_clr", std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
 
 					Color clr;
 					clr.r() = boost::any_cast<float>(scr_clr[0]);

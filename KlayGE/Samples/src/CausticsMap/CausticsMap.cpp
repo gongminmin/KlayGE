@@ -690,7 +690,7 @@ void CausticsMapApp::OnCreate()
 
 	this->InitEnvCube();
 
-	caustics_map_pps_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(5, 1.0f);
+	caustics_map_pps_ = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(5, 1.0f);
 	caustics_map_pps_->InputPin(0, caustics_texture_);
 	caustics_map_pps_->OutputPin(0, caustics_texture_filtered_);
 }

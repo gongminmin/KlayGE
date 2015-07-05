@@ -216,7 +216,7 @@ namespace KlayGE
 		{
 		}
 
-		explicit joiner(std::shared_ptr<joiner_impl_base<ResultType> > const & handle)
+		explicit joiner(std::shared_ptr<joiner_impl_base<ResultType>> const & handle)
 			: handle_(handle)
 		{
 		}
@@ -278,7 +278,7 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<joiner_impl_base<ResultType> > handle_;
+		std::shared_ptr<joiner_impl_base<ResultType>> handle_;
 	};
 
 	namespace detail
@@ -382,7 +382,7 @@ namespace KlayGE
 
 			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
 			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			std::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
+			std::shared_ptr<joiner_impl_base<result_t>> myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
 				bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);
@@ -496,7 +496,7 @@ namespace KlayGE
 			};
 
 		public:
-			typedef std::vector<std::shared_ptr<thread_pool_thread_info> > thread_info_queue_t;
+			typedef std::vector<std::shared_ptr<thread_pool_thread_info>> thread_info_queue_t;
 
 			thread_pool_common_data_t(size_t num_min_cached_threads, size_t num_max_cached_threads);
 
@@ -615,7 +615,7 @@ namespace KlayGE
 
 			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
 			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
-			std::shared_ptr<joiner_impl_base<result_t> > myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
+			std::shared_ptr<joiner_impl_base<result_t>> myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
 				myreturn, std::bind(&threaded_t::needle, mythreaded));
 
 			return joiner_t(myjoiner_data);

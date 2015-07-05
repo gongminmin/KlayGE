@@ -126,7 +126,7 @@ namespace KlayGE
 				RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
 			void LinkShaders(RenderEffect const & effect);
 
-			std::shared_ptr<std::vector<uint8_t> > const & VSCode() const
+			std::shared_ptr<std::vector<uint8_t>> const & VSCode() const
 			{
 				return shader_code_[ST_VertexShader].first;
 			}
@@ -137,13 +137,13 @@ namespace KlayGE
 			}
 
 		private:
-			std::shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect,
+			std::shared_ptr<std::vector<uint8_t>> CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
 			void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
-				std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t> > const & code_blob);
+				std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
 
 		private:
-			std::array<std::pair<std::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+			std::array<std::pair<std::shared_ptr<std::vector<uint8_t>>, std::string>, ST_NumShaderTypes> shader_code_;
 			std::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 			std::array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;

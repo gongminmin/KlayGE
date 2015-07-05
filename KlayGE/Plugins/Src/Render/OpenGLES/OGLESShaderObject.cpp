@@ -995,10 +995,10 @@ namespace
 	};
 
 	template <>
-	class SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >
+	class SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>
 	{
 	public:
-		SetOGLESShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >& samplers,
+		SetOGLESShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>>& samplers,
 					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures,
 					GLint location, GLuint stage,
 					RenderEffectParameterPtr const & tex_param, RenderEffectParameterPtr const & sampler_param)
@@ -1029,7 +1029,7 @@ namespace
 		}
 
 	private:
-		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr> >* samplers_;
+		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>>* samplers_;
 		std::vector<GLuint>* gl_bind_targets_;
 		std::vector<GLuint>* gl_bind_textures_;
 		GLint location_;
@@ -1052,15 +1052,15 @@ namespace KlayGE
 
 		glsl_program_ = glCreateProgram();
 
-		shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes> >();
-		glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes> >();
+		shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes>>();
+		glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>>();
 
-		pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
-		glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+		pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>>();
+		glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>>();
 
-		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
-		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
-		glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string> >();
+		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage>>();
+		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t>>();
+		glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string>>();
 	}
 
 	OGLESShaderObject::~OGLESShaderObject()
@@ -1383,7 +1383,7 @@ namespace KlayGE
 			std::memcpy(&num16, nsbp, sizeof(num16));
 			nsbp += sizeof(num16);
 			num16 = LE2Native(num16);
-			(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+			(*pnames_)[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
@@ -1398,7 +1398,7 @@ namespace KlayGE
 			std::memcpy(&num16, nsbp, sizeof(num16));
 			nsbp += sizeof(num16);
 			num16 = LE2Native(num16);
-			(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >(num16);
+			(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
@@ -1543,7 +1543,7 @@ namespace KlayGE
 				oss.write(&(*(*glsl_res_names_)[type])[i][0], (*(*glsl_res_names_)[type])[i].size());
 			}
 
-			std::vector<std::pair<std::string, std::string> > tex_sampler_pairs;
+			std::vector<std::pair<std::string, std::string>> tex_sampler_pairs;
 			for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 			{
 				if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
@@ -1851,7 +1851,7 @@ namespace KlayGE
 				{
 					LogError("Error when compiling %s:", sd.func_name.c_str());
 
-					std::map<int, std::vector<std::string> > err_lines;
+					std::map<int, std::vector<std::string>> err_lines;
 					{
 						std::istringstream err_iss(err_msg);
 						std::string err_str;
@@ -1968,8 +1968,8 @@ namespace KlayGE
 							static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
 							gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
-						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
-						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
+						(*pnames_)[type] = MakeSharedPtr<std::vector<std::string>>();
+						(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string>>();
 
 						for (uint32_t i = 0; i < dxbc2glsl.NumCBuffers(); ++ i)
 						{
@@ -2223,7 +2223,7 @@ namespace KlayGE
 				{
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
-					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t> >(len);
+					glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t>>(len);
 					if (glloader_GLES_VERSION_3_0())
 					{
 						glGetProgramBinary(glsl_program_, len, nullptr, &glsl_bin_format_, &(*glsl_bin_program_)[0]);
@@ -2266,7 +2266,7 @@ namespace KlayGE
 										gl_bind_targets_.resize(index + 1);
 										gl_bind_textures_.resize(index + 1);
 
-										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(samplers_,
+										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>(samplers_,
 											gl_bind_targets_, gl_bind_textures_,
 											location, index, std::get<1>(tex_sampler_binds_[i]), std::get<2>(tex_sampler_binds_[i]));
 
@@ -2422,7 +2422,7 @@ namespace KlayGE
 							ret->gl_bind_targets_.resize(index + 1);
 							ret->gl_bind_textures_.resize(index + 1);
 
-							new_pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr> >(ret->samplers_,
+							new_pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>(ret->samplers_,
 								ret->gl_bind_targets_, ret->gl_bind_textures_,
 								new_pb.location, index,
 								std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),

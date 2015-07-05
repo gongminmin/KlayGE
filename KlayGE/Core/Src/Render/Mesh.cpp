@@ -63,7 +63,7 @@ namespace
 				std::vector<RenderMaterialPtr> mtls;
 				std::vector<vertex_element> merged_ves;
 				char all_is_index_16_bit;
-				std::vector<std::vector<uint8_t> > merged_buff;
+				std::vector<std::vector<uint8_t>> merged_buff;
 				std::vector<uint8_t> merged_indices;
 				std::vector<std::string> mesh_names;
 				std::vector<int32_t> mtl_ids;
@@ -78,7 +78,7 @@ namespace
 				std::shared_ptr<KeyFramesType> kfs;
 				uint32_t num_frames;
 				uint32_t frame_rate;
-				std::vector<std::shared_ptr<AABBKeyFrames> > frame_pos_bbs;
+				std::vector<std::shared_ptr<AABBKeyFrames>> frame_pos_bbs;
 			};
 			std::shared_ptr<ModelData> model_data;
 
@@ -1033,14 +1033,14 @@ namespace KlayGE
 
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
-		std::vector<std::vector<uint8_t> >& merged_buff, std::vector<uint8_t>& merged_indices,
+		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
 		std::vector<Joint>& joints, std::shared_ptr<AnimationActionsType>& actions,
 		std::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
-		std::vector<std::shared_ptr<AABBKeyFrames> >& frame_pos_bbs)
+		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs)
 	{
 		ResIdentifierPtr lzma_file;
 		if (meshml_name.rfind(jit_ext_name) + jit_ext_name.size() == meshml_name.size())
@@ -1465,7 +1465,7 @@ namespace KlayGE
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 
-		std::vector<std::vector<uint8_t> > const & merged_buffs, std::vector<uint8_t> const & merged_indices,
+		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
@@ -1541,7 +1541,7 @@ namespace KlayGE
 				float3 normal;
 				Quaternion tangent_quat;
 				std::vector<float3> texcoords;
-				std::vector<std::pair<int, float> > bindings;
+				std::vector<std::pair<int, float>> bindings;
 				bool has_normal = false;
 				for (size_t ve = 0; ve < merged_ves.size(); ++ ve)
 				{
@@ -1801,7 +1801,7 @@ namespace KlayGE
 		}
 
 		std::vector<vertex_element> merged_ves;
-		std::vector<std::vector<uint8_t> > merged_buffs;
+		std::vector<std::vector<uint8_t>> merged_buffs;
 		char all_is_index_16_bit = false;
 		std::vector<uint8_t> merged_indices;
 		std::vector<std::string> mesh_names(model->NumSubrenderables());

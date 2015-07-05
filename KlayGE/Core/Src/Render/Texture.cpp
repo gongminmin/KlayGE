@@ -3411,7 +3411,7 @@ namespace KlayGE
 	template KLAYGE_CORE_API std::pair<float3, float3> CubeMapViewVector(Texture::CubeFaces face);
 
 	template <typename T>
-	std::pair<Vector_T<T, 3>, Vector_T<T, 3> > CubeMapViewVector(Texture::CubeFaces face)
+	std::pair<Vector_T<T, 3>, Vector_T<T, 3>> CubeMapViewVector(Texture::CubeFaces face)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 

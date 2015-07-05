@@ -45,7 +45,7 @@ namespace KlayGE
 						boost::dividable2<Quaternion_T<T>, T,
 						boost::multipliable<Quaternion_T<T>,
 						boost::multipliable2<Quaternion_T<T>, T,
-						boost::equality_comparable<Quaternion_T<T> > > > > > >
+						boost::equality_comparable<Quaternion_T<T>>>>>>>
 	{
 	public:
 		enum { elem_num = 4 };

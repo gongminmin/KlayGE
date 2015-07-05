@@ -169,10 +169,10 @@ namespace KlayGE
 		uint32_t cs_pixel_per_thread_y_;
 		uint32_t cs_pixel_per_thread_z_;
 
-		std::vector<std::pair<std::string, TexturePtr> > input_pins_;
-		std::vector<std::pair<std::string, TexturePtr> > output_pins_;
+		std::vector<std::pair<std::string, TexturePtr>> input_pins_;
+		std::vector<std::pair<std::string, TexturePtr>> output_pins_;
 		uint32_t num_bind_output_;
-		std::vector<std::pair<std::string, RenderEffectParameterPtr> > params_;
+		std::vector<std::pair<std::string, RenderEffectParameterPtr>> params_;
 
 		FrameBufferPtr frame_buffer_;
 

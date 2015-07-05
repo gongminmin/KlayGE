@@ -155,7 +155,7 @@ namespace
 
 		TexCompressionBC4 bc4_codec;
 
-		std::vector<std::vector<uint8_t> > level_lengths(in_num_mipmaps * in_array_size);
+		std::vector<std::vector<uint8_t>> level_lengths(in_num_mipmaps * in_array_size);
 		std::vector<ElementInitData> new_data(level_lengths.size());
 		for (size_t array_index = 0; array_index < in_array_size; ++ array_index)
 		{

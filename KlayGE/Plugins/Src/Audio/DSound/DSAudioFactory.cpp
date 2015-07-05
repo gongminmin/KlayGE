@@ -20,5 +20,5 @@
 void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr)
 {
 	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
-		KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer> >(L"DirectSound Audio Factory");
+		KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer>>(L"DirectSound Audio Factory");
 }

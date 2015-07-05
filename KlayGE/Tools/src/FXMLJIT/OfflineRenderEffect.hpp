@@ -341,7 +341,7 @@ namespace KlayGE
 		};
 
 		template <typename T>
-		class RenderVariableArray : public RenderVariableConcrete<std::vector<T> >
+		class RenderVariableArray : public RenderVariableConcrete<std::vector<T>>
 		{
 		public:
 			RenderVariableArray()
@@ -390,7 +390,7 @@ namespace KlayGE
 			uint32_t size_;
 		};
 
-		class RenderVariableFloat4x4Array : public RenderVariableConcrete<std::vector<float4x4> >
+		class RenderVariableFloat4x4Array : public RenderVariableConcrete<std::vector<float4x4>>
 		{
 		public:
 			RenderVariableFloat4x4Array()
@@ -649,12 +649,12 @@ namespace KlayGE
 			std::vector<RenderEffectConstantBufferPtr> cbuffers_;
 			std::vector<RenderTechniquePtr> techniques_;
 
-			std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool> > > macros_;
-			std::shared_ptr<std::vector<RenderShaderFunc> > shaders_;
+			std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
+			std::shared_ptr<std::vector<RenderShaderFunc>> shaders_;
 
 			RenderEffectPtr prototype_effect_;
 
-			std::shared_ptr<std::vector<ShaderDesc> > shader_descs_;
+			std::shared_ptr<std::vector<ShaderDesc>> shader_descs_;
 
 			OfflineRenderDeviceCaps caps_;
 		};
@@ -737,8 +737,8 @@ namespace KlayGE
 			size_t name_hash_;
 
 			std::vector<RenderPassPtr> passes_;
-			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-			std::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
+			std::shared_ptr<std::vector<std::pair<std::string, std::string>>> macros_;
 
 			float weight_;
 			bool transparent_;
@@ -808,9 +808,9 @@ namespace KlayGE
 
 			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
-			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
-			std::shared_ptr<std::vector<std::pair<std::string, std::string> > > macros_;
-			std::shared_ptr<std::vector<uint32_t> > shader_desc_ids_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
+			std::shared_ptr<std::vector<std::pair<std::string, std::string>>> macros_;
+			std::shared_ptr<std::vector<uint32_t>> shader_desc_ids_;
 
 			RasterizerStateDesc rasterizer_state_desc_;
 			DepthStencilStateDesc depth_stencil_state_desc_;
@@ -869,7 +869,7 @@ namespace KlayGE
 		private:
 			std::shared_ptr<std::string> name_;
 			size_t name_hash_;
-			std::shared_ptr<std::vector<uint32_t> > param_indices_;
+			std::shared_ptr<std::vector<uint32_t>> param_indices_;
 
 			std::vector<uint8_t> buff_;
 		};
@@ -978,7 +978,7 @@ namespace KlayGE
 			std::shared_ptr<RenderVariable> var_;
 			std::shared_ptr<std::string> array_size_;
 
-			std::shared_ptr<std::vector<RenderEffectAnnotationPtr> > annotations_;
+			std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
 
 			RenderEffectConstantBufferPtr cbuff_;
 		};

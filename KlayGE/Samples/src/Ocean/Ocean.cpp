@@ -639,7 +639,7 @@ namespace
 				{
 					uint32_t const disp_pixel_size = NumFormatBytes(displacement_tex_[0]->Format());
 					std::vector<ElementInitData> disp_init_data(ocean_param_.num_frames);
-					std::vector<std::vector<uint8_t> > disp_data(ocean_param_.num_frames);
+					std::vector<std::vector<uint8_t>> disp_data(ocean_param_.num_frames);
 					TexturePtr disp_slice = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 						1, 1, displacement_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
@@ -669,7 +669,7 @@ namespace
 				{
 					uint32_t const grad_pixel_size = NumFormatBytes(gradient_tex_[0]->Format());
 					std::vector<ElementInitData> grad_init_data(ocean_param_.num_frames);
-					std::vector<std::vector<uint8_t> > grad_data(ocean_param_.num_frames);
+					std::vector<std::vector<uint8_t>> grad_data(ocean_param_.num_frames);
 					TexturePtr grad_slice = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 						1, 1, gradient_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)

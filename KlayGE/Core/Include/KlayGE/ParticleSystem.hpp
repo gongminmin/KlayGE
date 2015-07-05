@@ -340,7 +340,7 @@ namespace KlayGE
 		std::vector<ParticleUpdaterPtr> updaters_;
 
 		std::vector<Particle> particles_;
-		std::vector<std::pair<uint32_t, float> > active_particles_;
+		std::vector<std::pair<uint32_t, float>> active_particles_;
 
 		float gravity_;
 		float3 force_;

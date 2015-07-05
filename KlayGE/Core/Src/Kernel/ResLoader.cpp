@@ -185,7 +185,7 @@ namespace KlayGE
 		this->AddPath("../../media/PostProcessors/");
 #endif
 
-		loading_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
+		loading_thread_ = MakeSharedPtr<joiner<void>>(Context::Instance().ThreadPool()(
 				std::bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
@@ -712,7 +712,7 @@ namespace KlayGE
 	{
 		while (!quit_)
 		{
-			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> > res_pair;
+			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>> res_pair;
 			while (loading_res_queue_.pop(res_pair))
 			{
 				res_pair.first->SubThreadStage();

@@ -143,7 +143,7 @@ namespace KlayGE
 		test_es_3_0 = false;
 #endif
 
-		std::vector<std::tuple<std::string, EGLint, int, int> > available_versions;
+		std::vector<std::tuple<std::string, EGLint, int, int>> available_versions;
 		if (test_es_3_1)
 		{
 			available_versions.push_back(std::make_tuple("3.1", EGL_OPENGL_ES3_BIT_KHR, 3, 1));

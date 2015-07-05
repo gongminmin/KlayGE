@@ -119,7 +119,7 @@ namespace glloader
 			return gl_dlls_;
 		}
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-		std::vector<std::map<std::string, std::string> > const & gl_dll_entries() const
+		std::vector<std::map<std::string, std::string>> const & gl_dll_entries() const
 		{
 			return gl_dll_entries_;
 		}
@@ -297,7 +297,7 @@ namespace glloader
 	private:
 		std::vector<void*> gl_dlls_;
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-		std::vector<std::map<std::string, std::string> > gl_dll_entries_;
+		std::vector<std::map<std::string, std::string>> gl_dll_entries_;
 #endif
 
 		static gl_dll_container* inst_;
@@ -731,7 +731,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 	std::vector<void*> const & gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
 
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
-	std::vector<std::map<std::string, std::string> > const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
+	std::vector<std::map<std::string, std::string>> const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
 		ret = (void*)(::GetProcAddress(static_cast<HMODULE>(gl_dlls[i]), name));

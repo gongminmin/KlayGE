@@ -78,7 +78,7 @@ namespace KlayGE
 						boost::subtractable<half,
 						boost::multipliable<half,
 						boost::dividable<half,
-						boost::equality_comparable<half> > > > >
+						boost::equality_comparable<half>>>>>
 	{
 	public:
 		half()

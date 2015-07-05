@@ -790,9 +790,9 @@ namespace KlayGE
 
 		std::vector<Quaternion> bind_reals;
 		std::vector<Quaternion> bind_duals;
-		std::vector<std::vector<int> > frame_ids(meshes_.size());
-		std::vector<std::vector<float3> > bb_min_key_frames(meshes_.size());
-		std::vector<std::vector<float3> > bb_max_key_frames(meshes_.size());
+		std::vector<std::vector<int>> frame_ids(meshes_.size());
+		std::vector<std::vector<float3>> bb_min_key_frames(meshes_.size());
+		std::vector<std::vector<float3>> bb_max_key_frames(meshes_.size());
 		for (size_t m = 0; m < meshes_.size(); ++ m)
 		{
 			frame_ids[m].resize(num_frames_);

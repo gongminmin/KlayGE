@@ -50,7 +50,7 @@ namespace KlayGE
 						boost::multipliable2<Vector_T<T, N>, T,
 						boost::addable2<Vector_T<T, N>, T,
 						boost::subtractable2<Vector_T<T, N>, T,
-						boost::equality_comparable<Vector_T<T, N> > > > > > > > > >
+						boost::equality_comparable<Vector_T<T, N>>>>>>>>>>
 	{
 		template <typename U, int M>
 		friend class Vector_T;

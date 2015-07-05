@@ -375,8 +375,8 @@ struct LabelInfo
 struct ShaderProgram
 {
 	TokenizedShaderVersion version;//program version
-	std::vector<std::shared_ptr<ShaderDecl> > dcls;//declarations
-	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl>> dcls;//declarations
+	std::vector<std::shared_ptr<ShaderInstruction>> insns;//instructions
 
 	std::vector<DXBCSignatureParamDesc> params_in; //input signature
 	std::vector<DXBCSignatureParamDesc> params_out;//output signature

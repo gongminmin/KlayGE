@@ -92,17 +92,17 @@ namespace
 		void operator()(LightSource& light, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
+			if (boost::any_cast<std::vector<boost::any>>(&py_ret) != nullptr)
 			{
-				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any>>(py_ret);
 				size_t s = ret.size();
 
 				if (s > 0)
 				{
 					boost::any py_mat = ret[0];
-					if (boost::any_cast<std::vector<boost::any> >(&py_mat) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_mat) != nullptr)
 					{
-						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
+						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any>>(py_mat);
 						if (!mat.empty())
 						{
 							float4x4 light_mat;
@@ -117,9 +117,9 @@ namespace
 				if (s > 1)
 				{
 					boost::any py_clr = ret[1];
-					if (boost::any_cast<std::vector<boost::any> >(&py_clr) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_clr) != nullptr)
 					{
-						std::vector<boost::any> clr = boost::any_cast<std::vector<boost::any> >(py_clr);
+						std::vector<boost::any> clr = boost::any_cast<std::vector<boost::any>>(py_clr);
 						if (!clr.empty())
 						{
 							float3 light_clr;
@@ -134,9 +134,9 @@ namespace
 				if (s > 2)
 				{
 					boost::any py_fo = ret[2];
-					if (boost::any_cast<std::vector<boost::any> >(&py_fo) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_fo) != nullptr)
 					{
-						std::vector<boost::any> fo = boost::any_cast<std::vector<boost::any> >(py_fo);
+						std::vector<boost::any> fo = boost::any_cast<std::vector<boost::any>>(py_fo);
 						if (!fo.empty())
 						{
 							float3 light_fall_off;
@@ -151,9 +151,9 @@ namespace
 				if (s > 3)
 				{
 					boost::any py_oi = ret[3];
-					if (boost::any_cast<std::vector<boost::any> >(&py_oi) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_oi) != nullptr)
 					{
-						std::vector<boost::any> oi = boost::any_cast<std::vector<boost::any> >(py_oi);
+						std::vector<boost::any> oi = boost::any_cast<std::vector<boost::any>>(py_oi);
 						if (!oi.empty())
 						{
 							float2 light_outer_inner;
@@ -181,17 +181,17 @@ namespace
 		void operator()(SceneObject& obj, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
+			if (boost::any_cast<std::vector<boost::any>>(&py_ret) != nullptr)
 			{
-				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any>>(py_ret);
 				size_t s = ret.size();
 
 				if (s > 0)
 				{
 					boost::any py_mat = ret[0];
-					if (boost::any_cast<std::vector<boost::any> >(&py_mat) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_mat) != nullptr)
 					{
-						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any> >(py_mat);
+						std::vector<boost::any> mat = boost::any_cast<std::vector<boost::any>>(py_mat);
 						if (!mat.empty())
 						{
 							float4x4 obj_mat;
@@ -218,9 +218,9 @@ namespace
 		void operator()(Camera& camera, float app_time, float elapsed_time)
 		{
 			boost::any py_ret = this->Run(app_time, elapsed_time);
-			if (boost::any_cast<std::vector<boost::any> >(&py_ret) != nullptr)
+			if (boost::any_cast<std::vector<boost::any>>(&py_ret) != nullptr)
 			{
-				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any> >(py_ret);
+				std::vector<boost::any> ret = boost::any_cast<std::vector<boost::any>>(py_ret);
 				size_t s = ret.size();
 
 				float3 cam_eye = camera.EyePos();
@@ -234,9 +234,9 @@ namespace
 				if (s > 0)
 				{
 					boost::any py_eye = ret[0];
-					if (boost::any_cast<std::vector<boost::any> >(&py_eye) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_eye) != nullptr)
 					{
-						std::vector<boost::any> eye = boost::any_cast<std::vector<boost::any> >(py_eye);
+						std::vector<boost::any> eye = boost::any_cast<std::vector<boost::any>>(py_eye);
 						if (!eye.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
@@ -249,9 +249,9 @@ namespace
 				if (s > 1)
 				{
 					boost::any py_lookat = ret[1];
-					if (boost::any_cast<std::vector<boost::any> >(&py_lookat) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_lookat) != nullptr)
 					{
-						std::vector<boost::any> lookat = boost::any_cast<std::vector<boost::any> >(py_lookat);
+						std::vector<boost::any> lookat = boost::any_cast<std::vector<boost::any>>(py_lookat);
 						if (!lookat.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
@@ -264,9 +264,9 @@ namespace
 				if (s > 2)
 				{
 					boost::any py_up = ret[2];
-					if (boost::any_cast<std::vector<boost::any> >(&py_up) != nullptr)
+					if (boost::any_cast<std::vector<boost::any>>(&py_up) != nullptr)
 					{
-						std::vector<boost::any> up = boost::any_cast<std::vector<boost::any> >(py_up);
+						std::vector<boost::any> up = boost::any_cast<std::vector<boost::any>>(py_up);
 						if (!up.empty())
 						{
 							for (int i = 0; i < 3; ++ i)
@@ -385,7 +385,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					std::string attribute_str = attr->ValueString();
 			
 					boost::char_separator<char> sep("", " \t|");
-					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
+					boost::tokenizer<boost::char_separator<char>> tok(attribute_str, sep);
 					std::string this_token;
 					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 					{
@@ -634,7 +634,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					std::string attribute_str = attr->ValueString();
 			
 					boost::char_separator<char> sep("", " \t|");
-					boost::tokenizer<boost::char_separator<char> > tok(attribute_str, sep);
+					boost::tokenizer<boost::char_separator<char>> tok(attribute_str, sep);
 					std::string this_token;
 					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 					{

@@ -38,5 +38,5 @@
 
 void MakeScriptFactory(KlayGE::ScriptFactoryPtr& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteScriptFactory<KlayGE::PythonEngine> >(L"Python Script Factory");
+	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteScriptFactory<KlayGE::PythonEngine>>(L"Python Script Factory");
 }

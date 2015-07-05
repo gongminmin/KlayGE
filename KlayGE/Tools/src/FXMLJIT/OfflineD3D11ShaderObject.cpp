@@ -549,7 +549,7 @@ namespace KlayGE
 		{
 			std::vector<uint8_t> native_shader_block;
 
-			std::shared_ptr<std::vector<uint8_t> > code_blob = shader_code_[type].first;
+			std::shared_ptr<std::vector<uint8_t>> code_blob = shader_code_[type].first;
 			if (code_blob)
 			{
 				std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
@@ -647,7 +647,7 @@ namespace KlayGE
 			}
 		}
 
-		std::shared_ptr<std::vector<uint8_t> > D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect,
+		std::shared_ptr<std::vector<uint8_t>> D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -860,7 +860,7 @@ namespace KlayGE
 				{
 					LogError("Error when compiling %s:", sd.func_name.c_str());
 
-					std::map<int, std::vector<std::string> > err_lines;
+					std::map<int, std::vector<std::string>> err_lines;
 					{
 						std::istringstream err_iss(static_cast<char*>(err_msg->GetBufferPointer()));
 						std::string err_str;
@@ -1109,10 +1109,10 @@ namespace KlayGE
 				}
 			}
 
-			std::shared_ptr<std::vector<uint8_t> > ret;
+			std::shared_ptr<std::vector<uint8_t>> ret;
 			if (code)
 			{
-				ret = MakeSharedPtr<std::vector<uint8_t> >(code->GetBufferSize());
+				ret = MakeSharedPtr<std::vector<uint8_t>>(code->GetBufferSize());
 				std::memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
 				code->Release();
 			}
@@ -1125,12 +1125,12 @@ namespace KlayGE
 			UNREF_PARAM(pass);
 			UNREF_PARAM(shader_desc_ids);
 
-			return shared_ptr<std::vector<uint8_t> >();
+			return shared_ptr<std::vector<uint8_t>>();
 	#endif
 		}
 
 		void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t> > const & code_blob)
+			std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob)
 		{
 			if (code_blob)
 			{
@@ -1248,7 +1248,7 @@ namespace KlayGE
 		void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 		{
-			std::shared_ptr<std::vector<uint8_t> > code_blob = this->CompiteToBytecode(type, effect, tech, pass, shader_desc_ids);
+			std::shared_ptr<std::vector<uint8_t>> code_blob = this->CompiteToBytecode(type, effect, tech, pass, shader_desc_ids);
 			this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
 		}
 

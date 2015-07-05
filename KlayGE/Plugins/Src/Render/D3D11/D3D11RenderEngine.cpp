@@ -1650,7 +1650,7 @@ namespace KlayGE
 	}
 
 	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st,
-			std::vector<std::tuple<void*, uint32_t, uint32_t> > const & srvsrcs,
+			std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs,
 			std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)

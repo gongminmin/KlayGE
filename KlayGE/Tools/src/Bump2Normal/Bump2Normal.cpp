@@ -54,7 +54,7 @@ namespace
 
 		uint32_t const elem_size = NumFormatBytes(in_format);
 
-		std::vector<std::vector<Color> > in_color(in_data.size());
+		std::vector<std::vector<Color>> in_color(in_data.size());
 		for (size_t sub_res = 0; sub_res < in_color.size(); ++ sub_res)
 		{
 			uint32_t the_width = in_data[sub_res].row_pitch / elem_size;
@@ -72,7 +72,7 @@ namespace
 		}
 
 		std::vector<ElementInitData> new_data(in_data.size());
-		std::vector<std::vector<uint8_t> > new_data_block(in_data.size());
+		std::vector<std::vector<uint8_t>> new_data_block(in_data.size());
 
 		for (size_t sub_res = 0; sub_res < in_data.size(); ++ sub_res)
 		{

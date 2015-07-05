@@ -42,7 +42,7 @@ namespace KlayGE
 	// 描述一个平面 ax + by + cz + d = 0
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Plane_T : boost::equality_comparable<Plane_T<T> >
+	class Plane_T : boost::equality_comparable<Plane_T<T>>
 	{
 	public:
 		enum { elem_num = 4 };

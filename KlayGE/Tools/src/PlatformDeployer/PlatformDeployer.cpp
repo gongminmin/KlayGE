@@ -357,7 +357,7 @@ int main(int argc, char* argv[])
 		std::string input_name_str = vm["input-name"].as<std::string>();
 
 		boost::char_separator<char> sep("", ",;");
-		boost::tokenizer<boost::char_separator<char> > tok(input_name_str, sep);
+		boost::tokenizer<boost::char_separator<char>> tok(input_name_str, sep);
 		for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
 		{
 			std::string arg = *beg;

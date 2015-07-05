@@ -484,7 +484,7 @@ namespace KlayGE
 
 		if (!update_thread_ && !quit_)
 		{
-			update_thread_ = MakeSharedPtr<joiner<void> >(Context::Instance().ThreadPool()(
+			update_thread_ = MakeSharedPtr<joiner<void>>(Context::Instance().ThreadPool()(
 				std::bind(&SceneManager::UpdateThreadFunc, this)));
 		}
 
@@ -592,8 +592,8 @@ namespace KlayGE
 			{
 				this->ClipScene();
 
-				std::shared_ptr<std::vector<BoundOverlap> > visible_marks
-					= MakeSharedPtr<std::vector<BoundOverlap> >(scene_objs.size());
+				std::shared_ptr<std::vector<BoundOverlap>> visible_marks
+					= MakeSharedPtr<std::vector<BoundOverlap>>(scene_objs.size());
 				for (size_t i = 0; i < scene_objs.size(); ++ i)
 				{
 					(*visible_marks)[i] = scene_objs[i]->VisibleMark();
@@ -618,7 +618,7 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr> > > renderables;
+		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr>>> renderables;
 		std::map<RenderablePtr, size_t> renderables_map;
 		KLAYGE_FOREACH(SceneObjsType::const_reference so, scene_objs)
 		{
@@ -654,7 +654,7 @@ namespace KlayGE
 			ra.AddToRenderQueue();
 		}
 
-		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType> >);
+		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType>>);
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
 		typedef decltype(render_queue_) RenderQueueType;
@@ -662,7 +662,7 @@ namespace KlayGE
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
-				std::vector<std::pair<float, uint32_t> > min_depthes(items.second.size());
+				std::vector<std::pair<float, uint32_t>> min_depthes(items.second.size());
 				for (size_t j = 0; j < min_depthes.size(); ++ j)
 				{
 					RenderablePtr const & renderable = items.second[j];

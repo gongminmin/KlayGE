@@ -1427,7 +1427,7 @@ namespace KlayGE
 		// its controls.
 		if (!minimized_)
 		{
-			std::vector<std::vector<size_t> > intersected_groups;
+			std::vector<std::vector<size_t>> intersected_groups;
 			for (size_t i = 0; i < controls_.size(); ++ i)
 			{
 				for (size_t j = 0; j < i; ++ j)

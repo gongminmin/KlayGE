@@ -274,7 +274,7 @@ namespace KlayGE
 		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
 
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
-		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(4, 1.0f,
+		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(4, 1.0f,
 			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurX"),
 			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurY"));
 	}

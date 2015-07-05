@@ -329,7 +329,7 @@ namespace KlayGE
 	// return the lookat and up vector in cubemap view
 	//////////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	std::pair<Vector_T<T, 3>, Vector_T<T, 3> > CubeMapViewVector(Texture::CubeFaces face);
+	std::pair<Vector_T<T, 3>, Vector_T<T, 3>> CubeMapViewVector(Texture::CubeFaces face);
 }
 
 #endif			// _TEXTURE_HPP

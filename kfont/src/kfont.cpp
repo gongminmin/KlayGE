@@ -147,9 +147,9 @@ namespace KlayGE
 
 				kfont_input->seekg(header.start_ptr, std::ios_base::beg);
 
-				std::vector<std::pair<int32_t, int32_t> > temp_char_index(header.non_empty_chars);
+				std::vector<std::pair<int32_t, int32_t>> temp_char_index(header.non_empty_chars);
 				kfont_input->read(&temp_char_index[0], temp_char_index.size() * sizeof(temp_char_index[0]));
-				std::vector<std::pair<int32_t, uint32_t> > temp_char_advance(header.validate_chars);
+				std::vector<std::pair<int32_t, uint32_t>> temp_char_advance(header.validate_chars);
 				kfont_input->read(&temp_char_advance[0], temp_char_advance.size() * sizeof(temp_char_advance[0]));
 
 				typedef decltype(temp_char_index) TCIType;
@@ -241,8 +241,8 @@ namespace KlayGE
 			}
 			std::sort(chars.begin(), chars.end());
 
-			std::vector<std::pair<int32_t, int32_t> > temp_char_index;
-			std::vector<std::pair<int32_t, uint32_t> > temp_char_advance;
+			std::vector<std::pair<int32_t, int32_t>> temp_char_index;
+			std::vector<std::pair<int32_t, uint32_t>> temp_char_advance;
 			typedef decltype(chars) CharsType;
 			KLAYGE_FOREACH(CharsType::reference ch, chars)
 			{
@@ -457,7 +457,7 @@ namespace KlayGE
 		}
 		std::sort(chars.begin(), chars.end());
 
-		std::unordered_map<int32_t, std::pair<int32_t, uint32_t> > new_char_index_advance;
+		std::unordered_map<int32_t, std::pair<int32_t, uint32_t>> new_char_index_advance;
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;
 		std::vector<uint8_t> new_distances_lzma;

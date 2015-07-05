@@ -76,8 +76,8 @@ namespace KlayGE
 
 		void AddImageEntry(std::string const & name, uint32_t x, uint32_t y, uint32_t w, uint32_t h, TexAddressingMode addr_u, TexAddressingMode addr_v, Color const & border_clr);
 
-		void CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs);
-		void DecodeTiles(std::vector<std::vector<uint8_t> >& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps);
+		void CommitTiles(std::vector<std::vector<uint8_t>> const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs);
+		void DecodeTiles(std::vector<std::vector<uint8_t>>& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps);
 
 		void CacheProperty(uint32_t pages, ElementFormat format, uint32_t border_size, uint32_t cache_tile_size = 0);
 
@@ -161,7 +161,7 @@ namespace KlayGE
 
 	private:
 		// Output only
-		std::vector<std::vector<uint8_t> > data_blocks_;
+		std::vector<std::vector<uint8_t>> data_blocks_;
 		std::deque<uint32_t> data_block_free_list_;
 
 	private:
@@ -171,10 +171,10 @@ namespace KlayGE
 		LZMACodec lzma_dec_;
 		struct DecodedBlockInfo
 		{
-			std::shared_ptr<std::vector<uint8_t> > data;
+			std::shared_ptr<std::vector<uint8_t>> data;
 			uint64_t tick;
 
-			DecodedBlockInfo(std::shared_ptr<std::vector<uint8_t> > const & d, uint64_t t)
+			DecodedBlockInfo(std::shared_ptr<std::vector<uint8_t>> const & d, uint64_t t)
 				: data(d), tick(t)
 			{
 			}
@@ -200,7 +200,7 @@ namespace KlayGE
 			uint64_t tick;
 		};
 		std::unordered_map<uint32_t, TileInfo> tile_info_map_;
-		std::deque<std::pair<uint32_t, uint32_t> > tile_free_list_;
+		std::deque<std::pair<uint32_t, uint32_t>> tile_free_list_;
 		uint64_t tile_tick_;
 	};
 }

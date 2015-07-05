@@ -457,7 +457,7 @@ namespace KlayGE
 		std::vector<UIDialogPtr> dialogs_;            // Dialogs registered
 
 		std::vector<TexturePtr> texture_cache_;   // Shared textures
-		std::vector<std::pair<FontPtr, float> > font_cache_;         // Shared fonts
+		std::vector<std::pair<FontPtr, float>> font_cache_;         // Shared fonts
 
 		std::array<std::vector<IRect >, UICT_Num_Control_Types> elem_texture_rcs_;
 
@@ -471,7 +471,7 @@ namespace KlayGE
 			std::wstring text;
 			uint32_t align;
 		};
-		std::map<size_t, std::vector<string_cache> > strings_;
+		std::map<size_t, std::vector<string_cache>> strings_;
 
 		bool mouse_on_ui_;
 		bool inited_;
@@ -1293,7 +1293,7 @@ namespace KlayGE
 		int sel_start_;    // Index of the item where selection starts (for handling multi-selection)
 		bool drag_;       // Whether the user is dragging the mouse to select
 
-		std::vector<std::shared_ptr<UIListBoxItem> > items_;
+		std::vector<std::shared_ptr<UIListBoxItem>> items_;
 	};
 
 	struct UIComboBoxItem
@@ -1419,7 +1419,7 @@ namespace KlayGE
 		IRect dropdown_rc_;
 		IRect dropdown_text_rc_;
 
-		std::vector<std::shared_ptr<UIComboBoxItem> > items_;
+		std::vector<std::shared_ptr<UIComboBoxItem>> items_;
 
 		bool pressed_;
 	};

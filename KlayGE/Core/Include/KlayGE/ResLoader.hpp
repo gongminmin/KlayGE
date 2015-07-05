@@ -174,12 +174,12 @@ namespace KlayGE
 		std::vector<std::string> paths_;
 
 		std::mutex loading_mutex_;
-		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void> > > loaded_res_;
-		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> > > loading_res_;
-		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool> >,
-			boost::lockfree::capacity<1024> > loading_res_queue_;
+		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>> loading_res_;
+		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>,
+			boost::lockfree::capacity<1024>> loading_res_queue_;
 
-		std::shared_ptr<joiner<void> > loading_thread_;
+		std::shared_ptr<joiner<void>> loading_thread_;
 		bool quit_;
 	};
 }

@@ -1277,7 +1277,7 @@ namespace KlayGE
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-		pvp.ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess> >(8, 1.0f,
+		pvp.ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(8, 1.0f,
 			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
 			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 		pvp.ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);

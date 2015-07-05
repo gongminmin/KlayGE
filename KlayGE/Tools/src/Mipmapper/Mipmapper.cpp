@@ -39,7 +39,7 @@ namespace
 		}
 
 		std::vector<ElementInitData> new_data(in_array_size * num_full_mip_maps);
-		std::vector<std::vector<uint8_t> > new_data_block(new_data.size());
+		std::vector<std::vector<uint8_t>> new_data_block(new_data.size());
 
 		for (uint32_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
 		{

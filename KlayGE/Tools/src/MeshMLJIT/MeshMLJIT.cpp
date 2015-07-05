@@ -872,7 +872,7 @@ namespace
 		std::vector<uint32_t>& mesh_num_vertices,
 		std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<vertex_element>& merged_ves,
-		std::vector<std::vector<uint8_t> >& merged_vertices)
+		std::vector<std::vector<uint8_t>>& merged_vertices)
 	{
 		uint32_t num_vertices = static_cast<uint32_t>(positions.size() / 4);
 		uint32_t base_vertices = mesh_base_vertices.back();
@@ -1075,7 +1075,7 @@ namespace
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs, 
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_start_indices,
-		std::vector<vertex_element>& merged_ves, std::vector<std::vector<uint8_t> >& merged_vertices,
+		std::vector<vertex_element>& merged_ves, std::vector<std::vector<uint8_t>>& merged_vertices,
 		std::vector<uint8_t>& merged_indices, char& is_index_16_bit)
 	{
 		mesh_names.clear();
@@ -1512,7 +1512,7 @@ namespace
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_start_indices,
 		std::vector<vertex_element> const & merged_ves,
-		std::vector<std::vector<uint8_t> > const & merged_vertices, std::vector<uint8_t> const & merged_indices,
+		std::vector<std::vector<uint8_t>> const & merged_vertices, std::vector<uint8_t> const & merged_indices,
 		char is_index_16_bit, std::ostream& os)
 	{
 		uint32_t num_merged_ves = Native2LE(static_cast<uint32_t>(merged_ves.size()));
@@ -1676,7 +1676,7 @@ namespace
 
 	void ConvertTextures(std::string const & output_name, std::vector<RenderMaterial>& mtls, std::string const & platform)
 	{
-		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > all_texture_slots;
+		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> all_texture_slots;
 		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
 			for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
@@ -1685,7 +1685,7 @@ namespace
 			}
 		}
 
-		std::vector<std::pair<filesystem::path, std::string> > deploy_files;
+		std::vector<std::pair<filesystem::path, std::string>> deploy_files;
 		typedef decltype(all_texture_slots) AllTextureSlotsType;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
@@ -1709,8 +1709,8 @@ namespace
 			}
 		}
 
-		std::vector<std::pair<filesystem::path, filesystem::path> > dup_files;
-		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > augmented_texture_slots;
+		std::vector<std::pair<filesystem::path, filesystem::path>> dup_files;
+		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> augmented_texture_slots;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
@@ -1846,7 +1846,7 @@ namespace
 		std::vector<uint32_t> mesh_num_indices;
 		std::vector<uint32_t> mesh_start_indices;
 		std::vector<vertex_element> merged_ves;
-		std::vector<std::vector<uint8_t> > merged_vertices;
+		std::vector<std::vector<uint8_t>> merged_vertices;
 		std::vector<uint8_t> merged_indices;
 		char is_index_16_bit = true;
 		if (meshes_chunk)

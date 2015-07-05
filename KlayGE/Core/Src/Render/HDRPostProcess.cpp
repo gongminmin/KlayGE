@@ -377,9 +377,9 @@ namespace KlayGE
 		bright_pass_downsampler_ = SyncLoadPostProcess("LensEffects.ppml", "sqr_bright");
 		downsamplers_[0] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
 		downsamplers_[1] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
-		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
-		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
-		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess> >(8, 1.0f);
+		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
+		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
+		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
 
 		glow_merger_ = SyncLoadPostProcess("LensEffects.ppml", "glow_merger");
 	}

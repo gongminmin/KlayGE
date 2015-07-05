@@ -56,7 +56,7 @@
 namespace KlayGE
 {
 	XMLDocument::XMLDocument()
-		: doc_(MakeSharedPtr<rapidxml::xml_document<> >())
+		: doc_(MakeSharedPtr<rapidxml::xml_document<>>())
 	{
 	}
 

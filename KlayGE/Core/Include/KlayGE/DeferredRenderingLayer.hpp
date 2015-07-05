@@ -453,7 +453,7 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
 
 		int32_t projective_light_index_;
-		std::vector<std::pair<int32_t, uint32_t> > sm_light_indices_;
+		std::vector<std::pair<int32_t, uint32_t>> sm_light_indices_;
 		FrameBufferPtr sm_fb_;
 		TexturePtr sm_tex_;
 		TexturePtr sm_depth_tex_;

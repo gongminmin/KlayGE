@@ -115,7 +115,7 @@ namespace KlayGE
 		void Bind();
 		void Unbind();
 
-		std::shared_ptr<std::vector<uint8_t> > const & VSCode() const
+		std::shared_ptr<std::vector<uint8_t>> const & VSCode() const
 		{
 			return shader_code_[ST_VertexShader].first;
 		}
@@ -137,10 +137,10 @@ namespace KlayGE
 		parameter_bind_t GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param);
 
 		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
-		std::shared_ptr<std::vector<uint8_t> > CompiteToBytecode(ShaderType type, RenderEffect const & effect,
+		std::shared_ptr<std::vector<uint8_t>> CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t> > const & code_blob);
+			std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
 
 	private:
 		std::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
@@ -151,11 +151,11 @@ namespace KlayGE
 		ID3D11ComputeShaderPtr compute_shader_;
 		ID3D11HullShaderPtr hull_shader_;
 		ID3D11DomainShaderPtr domain_shader_;
-		std::array<std::pair<std::shared_ptr<std::vector<uint8_t> >, std::string>, ST_NumShaderTypes> shader_code_;
+		std::array<std::pair<std::shared_ptr<std::vector<uint8_t>>, std::string>, ST_NumShaderTypes> shader_code_;
 		std::array<D3D11ShaderDesc, ST_NumShaderTypes> shader_desc_;
 
 		std::array<std::vector<ID3D11SamplerStatePtr>, ST_NumShaderTypes> samplers_;
-		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t> >, ST_NumShaderTypes> srvsrcs_;
+		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
 		std::array<std::vector<ID3D11ShaderResourceViewPtr>, ST_NumShaderTypes> srvs_;
 		std::array<std::vector<void*>, ST_NumShaderTypes> uavsrcs_;
 		std::array<std::vector<ID3D11UnorderedAccessViewPtr>, ST_NumShaderTypes> uavs_;

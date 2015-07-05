@@ -267,7 +267,7 @@ namespace KlayGE
 			float const rel_size_x = rel_size * xScale;
 			float const rel_size_y = rel_size * yScale;
 
-			std::vector<std::pair<float, std::wstring> > lines(1, std::make_pair(0.0f, L""));
+			std::vector<std::pair<float, std::wstring>> lines(1, std::make_pair(0.0f, L""));
 
 			typedef std::remove_reference<decltype(text)>::type TextType;
 			KLAYGE_FOREACH(TextType::const_reference ch, text)
@@ -704,7 +704,7 @@ namespace KlayGE
 		bool restart_;
 
 		std::unordered_map<wchar_t, CharInfo> char_info_map_;
-		std::list<std::pair<uint32_t, uint32_t> > char_free_list_;
+		std::list<std::pair<uint32_t, uint32_t>> char_free_list_;
 
 		bool three_dim_;
 

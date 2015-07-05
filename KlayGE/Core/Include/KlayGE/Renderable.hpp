@@ -122,7 +122,7 @@ namespace KlayGE
 	}
 
 
-	typedef std::vector<std::pair<std::string, std::string> > TextureSlotsType;
+	typedef std::vector<std::pair<std::string, std::string>> TextureSlotsType;
 	struct KLAYGE_CORE_API RenderMaterial
 	{
 		float3 ambient;
@@ -267,7 +267,7 @@ namespace KlayGE
 		virtual void UpdateTechniques();
 
 	protected:
-		std::vector<std::weak_ptr<SceneObject> > instances_;
+		std::vector<std::weak_ptr<SceneObject>> instances_;
 
 		RenderTechniquePtr technique_;
 

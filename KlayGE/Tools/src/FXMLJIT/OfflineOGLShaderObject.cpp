@@ -377,15 +377,15 @@ namespace KlayGE
 		{
 			is_shader_validate_.fill(true);
 
-			shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes> >();
-			glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes> >();
+			shader_func_names_ = MakeSharedPtr<std::array<std::string, ST_NumShaderTypes>>();
+			glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>>();
 
-			pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
-			glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string> >, ST_NumShaderTypes> >();
+			pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>>();
+			glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>>();
 
-			vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage> >();
-			vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t> >();
-			glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string> >();
+			vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage>>();
+			vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t>>();
+			glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string>>();
 		}
 
 		std::string OGLShaderObject::GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
@@ -696,7 +696,7 @@ namespace KlayGE
 					oss.write(&(*(*glsl_res_names_)[type])[i][0], (*(*glsl_res_names_)[type])[i].size());
 				}
 
-				std::vector<std::pair<std::string, std::string> > tex_sampler_pairs;
+				std::vector<std::pair<std::string, std::string>> tex_sampler_pairs;
 				for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 				{
 					if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
@@ -1010,7 +1010,7 @@ namespace KlayGE
 					{
 						LogError("Error when compiling %s:", sd.func_name.c_str());
 
-						std::map<int, std::vector<std::string> > err_lines;
+						std::map<int, std::vector<std::string>> err_lines;
 						{
 							std::istringstream err_iss(err_msg);
 							std::string err_str;
@@ -1106,8 +1106,8 @@ namespace KlayGE
 								static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
 								gsv, rules);
 							(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
-							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string> >();
-							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string> >();
+							(*pnames_)[type] = MakeSharedPtr<std::vector<std::string>>();
+							(*glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string>>();
 
 							for (uint32_t i = 0; i < dxbc2glsl.NumCBuffers(); ++ i)
 							{

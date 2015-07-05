@@ -212,7 +212,7 @@ namespace KlayGE
 
 		float snap_grid_size_;
 		float snapped_x_, snapped_z_;
-		std::vector<std::shared_ptr<TileRing> > tile_rings_;
+		std::vector<std::shared_ptr<TileRing>> tile_rings_;
 
 		float3 texture_world_offset_;
 

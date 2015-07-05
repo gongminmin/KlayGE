@@ -107,7 +107,7 @@ namespace
 			uint32_t the_width = width;
 			uint32_t the_height = height;
 
-			std::vector<std::vector<float> > heights(in_data.size());
+			std::vector<std::vector<float>> heights(in_data.size());
 			for (size_t i = 0; i < in_data.size(); ++ i)
 			{
 				uint8_t const * p = static_cast<uint8_t const *>(in_data[i].data);

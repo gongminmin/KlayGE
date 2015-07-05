@@ -19,5 +19,5 @@
 
 void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine> >(L"DirectShow Show Factory");
+	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine>>(L"DirectShow Show Factory");
 }

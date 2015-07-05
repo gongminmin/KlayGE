@@ -321,7 +321,7 @@ public:
 
 		float const scale = 1 / MathLib::sqrt(static_cast<float>(char_size_ * char_size_ + char_size_ * char_size_));
 
-		std::vector<uint8_t, aligned_allocator<uint8_t, 16> > char_bitmap(internal_char_size_ / 8 * internal_char_size_);
+		std::vector<uint8_t, aligned_allocator<uint8_t, 16>> char_bitmap(internal_char_size_ / 8 * internal_char_size_);
 		std::vector<float> aa_char_bitmap_2x(char_size_ * char_size_ * 4);
 		std::vector<float> aa_char_bitmap(char_size_ * char_size_);
 		std::vector<float2> grad(char_size_ * char_size_);
@@ -497,7 +497,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 
 	std::vector<FT_Library> ft_libs(num_threads);
 	std::vector<FT_Face> ft_faces(num_threads);
-	std::vector<joiner<void> > joiners(num_threads);
+	std::vector<joiner<void>> joiners(num_threads);
 
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -648,7 +648,7 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 {
 	thread_pool tp(1, num_threads);
 
-	std::vector<joiner<void> > joiners(num_threads);
+	std::vector<joiner<void>> joiners(num_threads);
 
 	float fscale = max_value - min_value;
 	base = static_cast<int16_t>(min_value * 32768 + 0.5f);
@@ -658,7 +658,7 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 	float const frscale = (scale / 32768.0f + 1) / 255.0f;
 	float const fbase = base / 32768.0f;
 
-	std::vector<std::vector<uint8_t> > lzma_dists(num_threads);
+	std::vector<std::vector<uint8_t>> lzma_dists(num_threads);
 	std::vector<float> mses(num_threads);
 	for (int i = 0; i < num_threads; ++ i)
 	{
@@ -752,7 +752,7 @@ int main(int argc, char* argv[])
 		kfont_name = ttf_name.substr(0, ttf_name.find_last_of('.')) + ".kfont";
 	}
 
-	std::vector<std::pair<int32_t, int32_t> > char_index;
+	std::vector<std::pair<int32_t, int32_t>> char_index;
 	std::vector<font_info> char_info(NUM_CHARS);
 	std::vector<float> char_dist_data;
 	{
@@ -867,7 +867,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t> > > advance;
+	std::vector<std::pair<int32_t, std::pair<uint16_t, uint16_t>>> advance;
 	header.validate_chars = 0;
 	for (size_t i = 0; i < char_info.size(); ++ i)
 	{
@@ -909,7 +909,7 @@ int main(int argc, char* argv[])
 
 		if (!advance.empty())
 		{
-			unordered_map<int32_t, std::pair<int32_t, uint32_t> > char_index_advance;
+			unordered_map<int32_t, std::pair<int32_t, uint32_t>> char_index_advance;
 			for (size_t i = 0; i < advance.size(); ++ i)
 			{
 				char_index_advance.insert(std::make_pair(advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first)));

@@ -389,7 +389,7 @@ namespace KlayGE
 
 			Texture::Mapper interval_mapper(*interval_cpu_texs_[read_back_index], 0, 0,
 				TMA_Read_Only, 0, 0, num_cascades, 1);
-			Vector_T<half, 2>* interval_ptr = interval_mapper.Pointer<Vector_T<half, 2> >();
+			Vector_T<half, 2>* interval_ptr = interval_mapper.Pointer<Vector_T<half, 2>>();
 
 			for (size_t i = 0; i < intervals_.size(); ++ i)
 			{

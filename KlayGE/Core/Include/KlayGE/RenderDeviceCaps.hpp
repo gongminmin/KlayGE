@@ -30,7 +30,7 @@ namespace KlayGE
 	};
 
 	struct ShaderModel : boost::less_than_comparable<ShaderModel,
-							boost::equality_comparable<ShaderModel> >
+							boost::equality_comparable<ShaderModel>>
 	{
 		uint8_t major_ver : 6;
 		uint8_t minor_ver : 2;

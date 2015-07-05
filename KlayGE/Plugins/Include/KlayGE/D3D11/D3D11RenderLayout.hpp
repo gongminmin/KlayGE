@@ -36,7 +36,7 @@ namespace KlayGE
 		typedef std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems_type;
 		input_elems_type vertex_elems_;
 
-		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr> > input_layouts_;
+		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr>> input_layouts_;
 	};
 }
 

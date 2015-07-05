@@ -7579,8 +7579,8 @@ void GLSLGen::ToComponentSelector(std::ostream& out, uint32_t comps, uint32_t of
 
 void GLSLGen::FindHSForkPhases()
 {
-	std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
-	std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
+	std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl = program_->dcls.begin();
+	std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn = program_->insns.begin();
 	for (;;)
 	{
 		// find iterator to next hs_fork_phase.
@@ -7604,7 +7604,7 @@ void GLSLGen::FindHSForkPhases()
 				break;
 			}
 		}
-		std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl1 = itr_dcl + 1;
+		std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl1 = itr_dcl + 1;
 		for (; itr_dcl1 != program_->dcls.end(); ++ itr_dcl1)
 		{
 			if (SO_HS_FORK_PHASE == (*itr_dcl1)->opcode)
@@ -7621,7 +7621,7 @@ void GLSLGen::FindHSForkPhases()
 				phase.dcls.push_back(*itr_dcl1);
 			}
 		}
-		std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn1 = itr_insn + 1;
+		std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn1 = itr_insn + 1;
 		for (; itr_insn1 != program_->insns.end(); ++ itr_insn1)
 		{
 			if (SO_HS_FORK_PHASE == (*itr_insn1)->opcode)
@@ -7638,8 +7638,8 @@ void GLSLGen::FindHSForkPhases()
 
 void GLSLGen::FindHSJoinPhases()
 {
-	std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
-	std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
+	std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl = program_->dcls.begin();
+	std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn = program_->insns.begin();
 	for (;;)
 	{
 		// find iterator to next hs_join_phase.
@@ -7663,7 +7663,7 @@ void GLSLGen::FindHSJoinPhases()
 				break;
 			}
 		}
-		std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl1 = itr_dcl + 1;
+		std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl1 = itr_dcl + 1;
 		for (; itr_dcl1 != program_->dcls.end(); ++ itr_dcl1)
 		{
 			if (SO_HS_JOIN_PHASE == (*itr_dcl1)->opcode)
@@ -7680,7 +7680,7 @@ void GLSLGen::FindHSJoinPhases()
 				phase.dcls.push_back(*itr_dcl1);
 			}
 		}
-		std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn1 = itr_insn + 1;
+		std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn1 = itr_insn + 1;
 		for (; itr_insn1 != program_->insns.end(); ++ itr_insn1)
 		{
 			if (SO_HS_JOIN_PHASE == (*itr_insn1)->opcode)
@@ -7697,8 +7697,8 @@ void GLSLGen::FindHSJoinPhases()
 
 void GLSLGen::FindHSControlPointPhase()
 {
-	std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl = program_->dcls.begin();
-	std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn = program_->insns.begin();
+	std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl = program_->dcls.begin();
+	std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn = program_->insns.begin();
 	for (; itr_dcl != program_->dcls.end(); ++ itr_dcl)
 	{
 		if (SO_HS_CONTROL_POINT_PHASE == (*itr_dcl)->opcode)
@@ -7709,14 +7709,14 @@ void GLSLGen::FindHSControlPointPhase()
 	if (itr_dcl != program_->dcls.end())
 	{
 		HSControlPointPhase phase;
-		std::vector<std::shared_ptr<ShaderDecl> >::const_iterator itr_dcl1 = itr_dcl;
+		std::vector<std::shared_ptr<ShaderDecl>>::const_iterator itr_dcl1 = itr_dcl;
 		for (; (itr_dcl1 != program_->dcls.end())
 			&& ((*itr_dcl1)->opcode != SO_HS_FORK_PHASE) && ((*itr_dcl1)->opcode != SO_HS_JOIN_PHASE);
 			++ itr_dcl1)
 		{
 			phase.dcls.push_back(*itr_dcl1);
 		}
-		std::vector<std::shared_ptr<ShaderInstruction> >::const_iterator itr_insn1 = itr_insn;
+		std::vector<std::shared_ptr<ShaderInstruction>>::const_iterator itr_insn1 = itr_insn;
 		for (; static_cast<uint32_t>(itr_insn1 - program_->insns.begin()) != end_of_program_; ++ itr_insn1)
 		{
 			phase.insns.push_back(*itr_insn1);

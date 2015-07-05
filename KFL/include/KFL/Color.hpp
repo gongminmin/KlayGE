@@ -49,7 +49,7 @@ namespace KlayGE
 						boost::dividable2<Color_T<T>, T,
 						boost::multipliable<Color_T<T>,
 						boost::multipliable2<Color_T<T>, T,
-						boost::equality_comparable<Color_T<T> > > > > > >
+						boost::equality_comparable<Color_T<T>>>>>>>
 	{
 	public:
 		enum { elem_num = 4 };

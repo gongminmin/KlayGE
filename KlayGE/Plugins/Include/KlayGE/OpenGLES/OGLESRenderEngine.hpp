@@ -178,15 +178,15 @@ namespace KlayGE
 		std::vector<GLuint> binded_targets_;
 		std::vector<GLuint> binded_textures_;
 		std::map<GLenum, GLuint> binded_buffers_;
-		std::map<GLenum, std::vector<GLuint> > binded_buffers_with_binding_points_;
+		std::map<GLenum, std::vector<GLuint>> binded_buffers_with_binding_points_;
 
 		std::set<ElementFormat> vertex_format_;
 		std::set<ElementFormat> texture_format_;
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
-		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
-		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
+		std::map<GLuint, std::map<GLint, int4>> uniformi_cache_;
+		std::map<GLuint, std::map<GLint, float4>> uniformf_cache_;
 
 		bool hack_for_tegra_;
 		bool hack_for_pvr_;

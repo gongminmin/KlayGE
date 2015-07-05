@@ -92,7 +92,7 @@ namespace
 	{
 	private:
 		typedef boost::container::flat_map<float, uint8_t> lum_to_char_type;
-		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator> > diff_lum_to_iter_type;
+		typedef std::vector<std::pair<float, lum_to_char_type::const_iterator>> diff_lum_to_iter_type;
 
 	public:
 		ascii_lums_builder(size_t input_num_ascii, size_t output_num_ascii,

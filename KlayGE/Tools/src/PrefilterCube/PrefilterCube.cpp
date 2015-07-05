@@ -256,9 +256,9 @@ namespace
 
 	struct PrefilterCubeFaceParam
 	{
-		std::vector<std::vector<Color> >* prefilted_data;
+		std::vector<std::vector<Color>>* prefilted_data;
 		std::vector<ElementInitData>* out_data;
-		std::vector<std::vector<half> >* out_data_block;
+		std::vector<std::vector<half>>* out_data_block;
 		uint32_t width;
 		uint32_t num_mipmaps;
 		atomic<uint32_t>* processed_texels;
@@ -266,9 +266,9 @@ namespace
 
 	void PrefilterCubeFace(PrefilterCubeFaceParam& param, uint32_t face)
 	{
-		std::vector<std::vector<Color> >& prefilted_data = *param.prefilted_data;
+		std::vector<std::vector<Color>>& prefilted_data = *param.prefilted_data;
 		std::vector<ElementInitData>& out_data = *param.out_data;
-		std::vector<std::vector<half> >& out_data_block = *param.out_data_block;
+		std::vector<std::vector<half>>& out_data_block = *param.out_data_block;
 		uint32_t width = param.width;
 		uint32_t num_mipmaps = param.num_mipmaps;
 		atomic<uint32_t>& processed_texels = *param.processed_texels;
@@ -353,7 +353,7 @@ namespace
 		}
 
 		uint32_t w = in_width;
-		std::vector<std::vector<Color> > prefilted_data(out_num_mipmaps * 6);
+		std::vector<std::vector<Color>> prefilted_data(out_num_mipmaps * 6);
 		Color* env_map[6];
 		for (uint32_t face = 0; face < 6; ++ face)
 		{
@@ -370,12 +370,12 @@ namespace
 		}
 
 		std::vector<ElementInitData> out_data(out_num_mipmaps * 6);
-		std::vector<std::vector<half> > out_data_block(out_num_mipmaps * 6);
+		std::vector<std::vector<half>> out_data_block(out_num_mipmaps * 6);
 
 		atomic<uint32_t> processed_texels(0);
 
 		thread_pool tp(1, 6);
-		std::vector<joiner<void> > joiners(6);
+		std::vector<joiner<void>> joiners(6);
 		PrefilterCubeFaceParam param;
 		param.prefilted_data = &prefilted_data;
 		param.out_data = &out_data;

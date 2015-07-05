@@ -199,7 +199,7 @@ namespace KlayGE
 		std::vector<GLuint> binded_targets_;
 		std::vector<GLuint> binded_textures_;
 		std::map<GLenum, GLuint> binded_buffers_;
-		std::map<GLenum, std::vector<GLuint> > binded_buffers_with_binding_points_;
+		std::map<GLenum, std::vector<GLuint>> binded_buffers_with_binding_points_;
 
 		GLuint restart_index_;
 
@@ -208,8 +208,8 @@ namespace KlayGE
 		std::set<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
-		std::map<GLuint, std::map<GLint, int4> > uniformi_cache_;
-		std::map<GLuint, std::map<GLint, float4> > uniformf_cache_;
+		std::map<GLuint, std::map<GLint, int4>> uniformi_cache_;
+		std::map<GLuint, std::map<GLint, float4>> uniformf_cache_;
 		bool fb_srgb_cache_;
 
 		GLenum polygon_mode_override_;

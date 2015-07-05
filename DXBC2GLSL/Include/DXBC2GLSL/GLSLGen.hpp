@@ -96,8 +96,8 @@ struct RegisterDesc
 struct HSForkPhase
 {
 	uint32_t fork_instance_count;
-	std::vector<std::shared_ptr<ShaderDecl> > dcls;
-	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl>> dcls;
+	std::vector<std::shared_ptr<ShaderInstruction>> insns;//instructions
 	
 	HSForkPhase()
 		: fork_instance_count(0)
@@ -108,8 +108,8 @@ struct HSForkPhase
 struct HSJoinPhase
 {
 	uint32_t join_instance_count;
-	std::vector<std::shared_ptr<ShaderDecl> > dcls;
-	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl>> dcls;
+	std::vector<std::shared_ptr<ShaderInstruction>> insns;//instructions
 	
 	HSJoinPhase()
 		: join_instance_count(0)
@@ -119,8 +119,8 @@ struct HSJoinPhase
 
 struct HSControlPointPhase
 {
-	std::vector<std::shared_ptr<ShaderDecl> > dcls;
-	std::vector<std::shared_ptr<ShaderInstruction> > insns;//instructions
+	std::vector<std::shared_ptr<ShaderDecl>> dcls;
+	std::vector<std::shared_ptr<ShaderInstruction>> insns;//instructions
 };
 
 class GLSLGen

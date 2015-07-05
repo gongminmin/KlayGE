@@ -104,7 +104,7 @@ namespace KlayGE
 		return static_cast<double>(count.QuadPart) / CPS();
 #else
 		std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
-		return std::chrono::duration_cast<std::chrono::duration<double> >(tp.time_since_epoch()).count();
+		return std::chrono::duration_cast<std::chrono::duration<double>>(tp.time_since_epoch()).count();
 #endif
 	}
 }

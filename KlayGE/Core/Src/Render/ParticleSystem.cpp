@@ -712,7 +712,7 @@ namespace KlayGE
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 		
 		float4x4 view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
-		std::vector<std::pair<uint32_t, float> > active_particles;
+		std::vector<std::pair<uint32_t, float>> active_particles;
 
 		float3 min_bb(+1e10f, +1e10f, +1e10f);
 		float3 max_bb(-1e10f, -1e10f, -1e10f);

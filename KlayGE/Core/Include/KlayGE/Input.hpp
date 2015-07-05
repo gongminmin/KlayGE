@@ -358,7 +358,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API InputEngine
 	{
-		typedef std::vector<std::pair<InputActionMap, action_handler_t> > action_handlers_t;
+		typedef std::vector<std::pair<InputActionMap, action_handler_t>> action_handlers_t;
 
 	public:
 		enum InputDeviceType

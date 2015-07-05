@@ -149,12 +149,12 @@ namespace KlayGE
 			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *> > dev_type_behaviors;
+			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *>> dev_type_behaviors;
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"));
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP"));
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
 
-			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL> > available_feature_levels;	
+			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;	
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (dxgi_sub_ver_ >= 2)
 			{

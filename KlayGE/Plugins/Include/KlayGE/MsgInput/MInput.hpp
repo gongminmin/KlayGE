@@ -488,9 +488,9 @@ namespace KlayGE
 		std::shared_ptr<ILocation> locator_;
 		std::shared_ptr<ILocationEvents> location_event_;
 		std::shared_ptr<ISensorCollection> motion_sensor_collection_;
-		std::vector<std::shared_ptr<ISensorEvents> > motion_sensor_events_;
+		std::vector<std::shared_ptr<ISensorEvents>> motion_sensor_events_;
 		std::shared_ptr<ISensorCollection> orientation_sensor_collection_;
-		std::vector<std::shared_ptr<ISensorEvents> > orientation_sensor_events_;
+		std::vector<std::shared_ptr<ISensorEvents>> orientation_sensor_events_;
 	};
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	ref class MetroMsgInputSensorEvent;

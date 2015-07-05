@@ -267,7 +267,7 @@ namespace KlayGE
 		image_entries_.push_back(entry);
 	}
 
-	void JudaTexture::CommitTiles(std::vector<std::vector<uint8_t> > const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs)
+	void JudaTexture::CommitTiles(std::vector<std::vector<uint8_t>> const & data, std::vector<uint32_t> const & tile_ids, std::vector<uint32_t> const & tile_attrs)
 	{
 		uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
 
@@ -409,12 +409,12 @@ namespace KlayGE
 		}
 	}
 
-	void JudaTexture::DecodeTiles(std::vector<std::vector<uint8_t> >& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps)
+	void JudaTexture::DecodeTiles(std::vector<std::vector<uint8_t>>& data, std::vector<uint32_t> const & tile_ids, uint32_t mipmaps)
 	{
 		BOOST_ASSERT(mipmaps - 1 <= lower_levels_);
 
 		data.resize(tile_ids.size() * mipmaps);
-		std::vector<std::pair<uint32_t, uint32_t> > shuffs(tile_ids.size());
+		std::vector<std::pair<uint32_t, uint32_t>> shuffs(tile_ids.size());
 		for (size_t i = 0; i < tile_ids.size(); ++ i)
 		{
 			uint32_t level, tile_x, tile_y;
@@ -659,7 +659,7 @@ namespace KlayGE
 				}
 
 				uint32_t const full_tile_bytes = tile_size_ * tile_size_ * texel_size_;
-				std::shared_ptr<std::vector<uint8_t> > data = MakeSharedPtr<std::vector<uint8_t> >(full_tile_bytes);
+				std::shared_ptr<std::vector<uint8_t>> data = MakeSharedPtr<std::vector<uint8_t>>(full_tile_bytes);
 				if (data_index != EMPTY_DATA_INDEX)
 				{
 					uint64_t offsets[2];
@@ -1385,7 +1385,7 @@ namespace KlayGE
 		}
 
 		uint32_t mipmaps = tex_a_tile_cache_->NumMipMaps();
-		std::vector<std::vector<uint8_t> > neighbor_data;
+		std::vector<std::vector<uint8_t>> neighbor_data;
 		this->DecodeTiles(neighbor_data, neighbor_ids, mipmaps);
 
 		TileInfo tile_info;

@@ -86,7 +86,7 @@ namespace KlayGE
 		static std::shared_ptr<PerfProfiler> perf_profiler_instance_;
 
 		std::vector<std::tuple<int, std::string, PerfRangePtr,
-			std::vector<std::tuple<uint32_t, double, double> > > > perf_ranges_;
+			std::vector<std::tuple<uint32_t, double, double>>>> perf_ranges_;
 		uint32_t frame_id_;
 	};
 }

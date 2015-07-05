@@ -46,7 +46,7 @@ namespace KlayGE
 						boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
 						boost::multipliable2<Sphere_T<T>, T,
 						boost::dividable2<Sphere_T<T>, T,
-						boost::equality_comparable<Sphere_T<T> > > > > >,
+						boost::equality_comparable<Sphere_T<T>>>>>>,
 				public Bound_T<T>
 	{
 	public:

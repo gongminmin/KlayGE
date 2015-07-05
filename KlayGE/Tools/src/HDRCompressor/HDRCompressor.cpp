@@ -382,8 +382,8 @@ namespace
 
 		std::vector<ElementInitData> y_data(in_data.size());
 		std::vector<ElementInitData> c_data(in_data.size());
-		std::vector<std::vector<uint8_t> > y_data_block(in_data.size());
-		std::vector<std::vector<uint8_t> > c_data_block(in_data.size());
+		std::vector<std::vector<uint8_t>> y_data_block(in_data.size());
+		std::vector<std::vector<uint8_t>> c_data_block(in_data.size());
 		for (size_t i = 0; i < in_data.size(); ++ i)
 		{
 			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i], y_format, c_format);

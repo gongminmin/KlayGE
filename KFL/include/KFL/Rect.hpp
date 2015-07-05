@@ -49,7 +49,7 @@ namespace KlayGE
 						boost::subtractable2<Rect_T<T>, Vector_T<T, 2>,
 						boost::andable<Rect_T<T>,
 						boost::orable<Rect_T<T>,
-						boost::equality_comparable<Rect_T<T> > > > > > > >
+						boost::equality_comparable<Rect_T<T>>>>>>>>
 	{
 		template <typename U>
 		friend class Rect_T;

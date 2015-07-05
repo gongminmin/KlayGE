@@ -37,5 +37,5 @@
 
 void MakeInputFactory(KlayGE::InputFactoryPtr& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::MsgInputEngine> >(L"MsgInput Input Factory");
+	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::MsgInputEngine>>(L"MsgInput Input Factory");
 }
