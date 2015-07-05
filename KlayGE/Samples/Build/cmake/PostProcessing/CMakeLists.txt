@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/PostProcessing/font.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/PostProcessing/font.dds" "cbda47a1678ce70b6720856736100979d469e159" "7485b591c78aa3fd2c25a068b981582b724d1e18")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/PostProcessing/PostProcessing.cpp

@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml" "cbda47a1678ce70b6720856736100979d469e159")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds" "cbda47a1678ce70b6720856736100979d469e159")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds" "cbda47a1678ce70b6720856736100979d469e159")
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_specular.dds" "cbda47a1678ce70b6720856736100979d469e159")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml" "cbda47a1678ce70b6720856736100979d469e159" "bf4a707865347ac588bdfd5aa284de835ded778a")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159" "218c7dd270c056d5c4681c4cafbb00c9e8675260")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds" "cbda47a1678ce70b6720856736100979d469e159" "131ef20c80fae0592ec768cb8f624a93c4b978e3")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds" "cbda47a1678ce70b6720856736100979d469e159" "cead9708e3350029fe597b13d26110adfab003bd")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_specular.dds" "cbda47a1678ce70b6720856736100979d469e159" "f3593162a63958ea2f11654fb03d24acc40178aa")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/OrderIndependentTransparency/OrderIndependentTransparency.cpp
