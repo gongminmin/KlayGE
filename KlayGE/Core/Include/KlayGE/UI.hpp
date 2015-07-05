@@ -1376,7 +1376,7 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < items_.size(); ++ i)
 			{
-				shared_ptr<UIComboBoxItem> pItem = items_[i];
+				std::shared_ptr<UIComboBoxItem> pItem = items_[i];
 
 				if (std::experimental::any_cast<T>(pItem->data) == data)
 				{

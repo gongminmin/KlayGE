@@ -65,7 +65,7 @@ namespace KlayGE
 			static AnyDataListType Do(tuple_type const & t)
 			{
 				AnyDataListType ret = Tuple2Vector<tuple_type, N - 1>::Do(t);
-				ret.push_back(get<N - 1>(t));
+				ret.push_back(std::get<N - 1>(t));
 				return ret;
 			}
 		};
@@ -75,7 +75,7 @@ namespace KlayGE
 		{
 			static AnyDataListType Do(tuple_type const & t)
 			{
-				return AnyDataListType(1, get<0>(t));
+				return AnyDataListType(1, std::get<0>(t));
 			}
 		};
 
@@ -86,7 +86,7 @@ namespace KlayGE
 		template <typename TupleType>
 		std::experimental::any Call(std::string const & func_name, TupleType const & t)
 		{
-			AnyDataListType v(Tuple2Vector<TupleType, tuple_size<TupleType>::value>::Do(t));
+			AnyDataListType v(Tuple2Vector<TupleType, std::tuple_size<TupleType>::value>::Do(t));
 			return Call(func_name, v);
 		}
 

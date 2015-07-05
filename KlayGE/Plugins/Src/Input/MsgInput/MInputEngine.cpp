@@ -218,7 +218,7 @@ namespace KlayGE
 #endif
 #elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
-			std::placeholders::_2, placeholders::_3));
+			std::placeholders::_2, std::placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
 			std::placeholders::_2, std::placeholders::_3));
 		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(std::bind(&MsgInputEngine::OnPointerUpdate, this,

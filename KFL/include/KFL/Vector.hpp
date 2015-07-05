@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <array>
+
 #include <boost/operators.hpp>
 
 #include <KFL/Detail/MathHelper.hpp>

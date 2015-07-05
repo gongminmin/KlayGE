@@ -406,8 +406,8 @@ namespace KlayGE
 		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
 		if (asset != nullptr)
 		{
-			shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
-			shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
+			std::shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
+			std::shared_ptr<std::istream> asset_file = MakeSharedPtr<std::istream>(asb.get());
 			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
 		}
 #elif defined(KLAYGE_PLATFORM_IOS)

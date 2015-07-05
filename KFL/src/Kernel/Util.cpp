@@ -153,7 +153,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::Sleep(ms);
 #else
-		this_thread::sleep_for(chrono::milliseconds(ms));
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 #endif
 	}
 
