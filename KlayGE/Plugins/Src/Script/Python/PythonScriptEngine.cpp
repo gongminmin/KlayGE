@@ -272,113 +272,113 @@ namespace KlayGE
 		return t;
 	}
 
-	PyObjectPtr CppType2PyObjectPtr(boost::any const & t)
+	PyObjectPtr CppType2PyObjectPtr(std::experimental::any const & t)
 	{
-		if (boost::any_cast<std::string>(&t) != nullptr)
+		if (std::experimental::any_cast<std::string>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<std::string>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<std::string>(t));
 		}
-		else if (boost::any_cast<char*>(&t) != nullptr)
+		else if (std::experimental::any_cast<char*>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<char*>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<char*>(t));
 		}
-		else if (boost::any_cast<wchar_t*>(&t) != nullptr)
+		else if (std::experimental::any_cast<wchar_t*>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<wchar_t*>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<wchar_t*>(t));
 		}
-		else if (boost::any_cast<int8_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<int8_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<int8_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<int8_t>(t));
 		}
-		else if (boost::any_cast<int16_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<int16_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<int16_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<int16_t>(t));
 		}
-		else if (boost::any_cast<int32_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<int32_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<int32_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<int32_t>(t));
 		}
-		else if (boost::any_cast<int64_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<int64_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<int64_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<int64_t>(t));
 		}
-		else if (boost::any_cast<uint8_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<uint8_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<uint8_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<uint8_t>(t));
 		}
-		else if (boost::any_cast<uint16_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<uint16_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<uint16_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<uint16_t>(t));
 		}
-		else if (boost::any_cast<uint32_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<uint32_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<uint32_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<uint32_t>(t));
 		}
-		else if (boost::any_cast<uint64_t>(&t) != nullptr)
+		else if (std::experimental::any_cast<uint64_t>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<uint64_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<uint64_t>(t));
 		}
-		else if (boost::any_cast<double>(&t) != nullptr)
+		else if (std::experimental::any_cast<double>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<double>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<double>(t));
 		}
-		else if (boost::any_cast<float>(&t) != nullptr)
+		else if (std::experimental::any_cast<float>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<float>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<float>(t));
 		}
-		else if (boost::any_cast<PyObject*>(&t) != nullptr)
+		else if (std::experimental::any_cast<PyObject*>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<PyObject*>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<PyObject*>(t));
 		}
-		else if (boost::any_cast<PyObjectPtr>(&t) != nullptr)
+		else if (std::experimental::any_cast<PyObjectPtr>(&t) != nullptr)
 		{
-			return CppType2PyObjectPtr(boost::any_cast<PyObjectPtr>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<PyObjectPtr>(t));
 		}
 		else
 		{
 			BOOST_ASSERT(false);
-			return CppType2PyObjectPtr(boost::any_cast<int32_t>(t));
+			return CppType2PyObjectPtr(std::experimental::any_cast<int32_t>(t));
 		}
 	}
 
-	boost::any PyObjectPtr2CppType(PyObjectPtr const & t)
+	std::experimental::any PyObjectPtr2CppType(PyObjectPtr const & t)
 	{
-		boost::any ret;
+		std::experimental::any ret;
 		if (PyObject_TypeCheck(t.get(), &PyUnicode_Type))
 		{
-			ret = boost::any(std::string(PyBytes_AsString(PyUnicode_AsASCIIString(t.get()))));
+			ret = std::experimental::any(std::string(PyBytes_AsString(PyUnicode_AsASCIIString(t.get()))));
 		}
 		else if (PyObject_TypeCheck(t.get(), &PyLong_Type))
 		{
-			ret = boost::any(static_cast<int32_t>(PyLong_AsLong(t.get())));
+			ret = std::experimental::any(static_cast<int32_t>(PyLong_AsLong(t.get())));
 		}
 		else if (PyObject_TypeCheck(t.get(), &PyFloat_Type))
 		{
-			ret = boost::any(static_cast<float>(PyFloat_AsDouble(t.get())));
+			ret = std::experimental::any(static_cast<float>(PyFloat_AsDouble(t.get())));
 		}
 		else if (PyObject_TypeCheck(t.get(), &PyList_Type))
 		{
 			size_t len = PyList_Size(t.get());
-			std::vector<boost::any> v(len);
+			std::vector<std::experimental::any> v(len);
 			for (size_t i = 0; i < len; ++ i)
 			{
 				PyObjectPtr py_obj = MakePyObjectPtr(PyList_GetItem(t.get(), i));
 				Py_IncRef(py_obj.get());
 				v[i] = PyObjectPtr2CppType(py_obj);
 			}
-			ret = boost::any(v);
+			ret = std::experimental::any(v);
 		}
 		else if (PyObject_TypeCheck(t.get(), &PyTuple_Type))
 		{
 			size_t len = PyTuple_Size(t.get());
-			std::vector<boost::any> v(len);
+			std::vector<std::experimental::any> v(len);
 			for (size_t i = 0; i < len; ++ i)
 			{
 				PyObjectPtr py_obj = MakePyObjectPtr(PyTuple_GetItem(t.get(), i));
 				Py_IncRef(py_obj.get());
 				v[i] = PyObjectPtr2CppType(py_obj);
 			}
-			ret = boost::any(v);
+			ret = std::experimental::any(v);
 		}
 		return ret;
 	}
@@ -404,14 +404,14 @@ namespace KlayGE
 		module_.reset();
 	}
 
-	boost::any PythonScriptModule::Value(std::string const & name)
+	std::experimental::any PythonScriptModule::Value(std::string const & name)
 	{
 		PyObject* p = PyDict_GetItemString(dict_.get(), name.c_str());
 		Py_IncRef(p);
 		return MakePyObjectPtr(p);
 	}
 
-	boost::any PythonScriptModule::Call(std::string const & func_name, const AnyDataListType& args)
+	std::experimental::any PythonScriptModule::Call(std::string const & func_name, const AnyDataListType& args)
 	{
 		PyObjectPtr py_args = MakePyObjectPtr(PyTuple_New(args.size()));
 		for (size_t i = 0; i < args.size(); ++ i)
@@ -421,11 +421,11 @@ namespace KlayGE
 			PyTuple_SetItem(py_args.get(), i, value.get());
 		}
 
-		PyObjectPtr func = boost::any_cast<PyObjectPtr>(this->Value(func_name));
+		PyObjectPtr func = std::experimental::any_cast<PyObjectPtr>(this->Value(func_name));
 		return PyObjectPtr2CppType(MakePyObjectPtr(PyObject_CallObject(func.get(), py_args.get())));
 	}
 
-	boost::any PythonScriptModule::RunString(std::string const & script)
+	std::experimental::any PythonScriptModule::RunString(std::string const & script)
 	{
 		return MakePyObjectPtr(PyRun_String(script.c_str(), Py_file_input, dict_.get(), dict_.get()));
 	}

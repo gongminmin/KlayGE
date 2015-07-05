@@ -9,17 +9,25 @@
 #include <fstream>
 #include <vector>
 #include <cstring>
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
 	#include <filesystem>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = std::tr2::sys;
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
 	}
 #else
 	#include <boost/filesystem.hpp>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
 	}
 #endif
 #include <boost/assert.hpp>
@@ -434,6 +442,7 @@ namespace
 int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
+	using namespace std::experimental;
 
 	if (argc < 2)
 	{
@@ -462,7 +471,7 @@ int main(int argc, char* argv[])
 	}
 
 	filesystem::path output_path(argv[1]);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	std::string y_file = output_path.stem() + "_y" + output_path.extension();
 	std::string c_file = output_path.stem() + "_c" + output_path.extension();
 #else

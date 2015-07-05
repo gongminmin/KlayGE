@@ -11,17 +11,25 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
 	#include <filesystem>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = std::tr2::sys;
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
 	}
 #else
 	#include <boost/filesystem.hpp>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
 	}
 #endif
 #ifdef KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
@@ -55,6 +63,7 @@
 
 using namespace std;
 using namespace KlayGE;
+using namespace std::experimental;
 
 struct OfflineRenderDeviceCaps
 {
@@ -366,7 +375,7 @@ int main(int argc, char* argv[])
 					if (filesystem::is_regular_file(i->status()))
 					{
 						std::smatch what;
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 						std::string const name = i->path().filename();
 #else
 						std::string const name = i->path().filename().string();
@@ -391,7 +400,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		std::string ext_name = filesystem::path(res_names[0]).extension();
 #else
 		std::string ext_name = filesystem::path(res_names[0]).extension().string();

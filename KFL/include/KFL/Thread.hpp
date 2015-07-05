@@ -57,7 +57,18 @@
 		namespace this_thread = boost::this_thread;
 	}
 #endif
-#include <boost/optional.hpp>
+#ifdef KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+	#include <experimental/optional>
+#else
+	#include <boost/optional.hpp>
+	namespace std
+	{
+		namespace experimental
+		{
+			using boost::optional;
+		}
+	}
+#endif
 #include <exception>
 #include <vector>
 #include <functional>
@@ -102,10 +113,10 @@ namespace KlayGE
 	public:
 		// Representation of the storage to hold the return type:
 		//	if result_type == void
-		//		boost::optional<void_t>
+		//		std::experimental::optional<void_t>
 		//	else
-		//		boost::optional<result_type>
-		typedef boost::optional<
+		//		std::experimental::optional<result_type>
+		typedef std::experimental::optional<
 			typename std::conditional<std::is_same<result_type, void>::value,
 				void_t, result_type>::type
 			>  result_opt;
@@ -281,7 +292,7 @@ namespace KlayGE
 			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
-			typedef boost::optional<void_t>							void_optional_t;
+			typedef std::experimental::optional<void_t>				void_optional_t;
 
 			//Helper function to construct the optional from the
 			//return value and handle void return types

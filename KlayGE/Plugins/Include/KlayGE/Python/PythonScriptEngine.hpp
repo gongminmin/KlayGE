@@ -78,7 +78,7 @@ namespace KlayGE
 	PyObjectPtr CppType2PyObjectPtr(float t);
 	PyObjectPtr CppType2PyObjectPtr(PyObject* t);
 	PyObjectPtr CppType2PyObjectPtr(PyObjectPtr const & t);
-	PyObjectPtr CppType2PyObjectPtr(boost::any const & t);
+	PyObjectPtr CppType2PyObjectPtr(std::experimental::any const & t);
 
 	// Py Script module
 	/////////////////////////////////////////////////////////////////////////////////
@@ -88,9 +88,9 @@ namespace KlayGE
 		explicit PythonScriptModule(std::string const & name);
 		~PythonScriptModule();
 
-		virtual boost::any Value(std::string const & name);
-		virtual boost::any Call(std::string const & func_name, const AnyDataListType& args);
-		virtual boost::any RunString(std::string const & script);
+		virtual std::experimental::any Value(std::string const & name);
+		virtual std::experimental::any Call(std::string const & func_name, const AnyDataListType& args);
+		virtual std::experimental::any RunString(std::string const & script);
 
 	private:
 		PyObjectPtr module_;

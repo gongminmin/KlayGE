@@ -41,18 +41,26 @@
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
-#include <filesystem>
-namespace KlayGE
-{
-	namespace filesystem = std::tr2::sys;
-}
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
+	#include <filesystem>
+	namespace std
+	{
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
+	}
 #else
-#include <boost/filesystem.hpp>
-namespace KlayGE
-{
-	namespace filesystem = boost::filesystem;
-}
+	#include <boost/filesystem.hpp>
+	namespace std
+	{
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
+	}
 #endif
 
 #include "OfflineRenderEffect.hpp"
@@ -160,6 +168,8 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 
 int main(int argc, char* argv[])
 {
+	using namespace std::experimental;
+
 	if (argc < 2)
 	{
 		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3|ios xxx.fxml [target folder]" << endl;
@@ -224,7 +234,7 @@ int main(int argc, char* argv[])
 
 	std::string fxml_name(argv[2]);
 	filesystem::path fxml_path(fxml_name);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	std::string const base_name = fxml_path.stem();
 #else
 	std::string const base_name = fxml_path.stem().string();
@@ -281,7 +291,7 @@ int main(int argc, char* argv[])
 	if (!target_folder.empty())
 	{
 		filesystem::copy_file(kfx_path, target_folder / kfx_name,
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 			filesystem::copy_options::overwrite_existing);
 #else
 			filesystem::copy_option::overwrite_if_exists);

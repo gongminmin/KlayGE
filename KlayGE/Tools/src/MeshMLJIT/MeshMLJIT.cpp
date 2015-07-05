@@ -17,17 +17,25 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
 	#include <filesystem>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = std::tr2::sys;
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
 	}
 #else
 	#include <boost/filesystem.hpp>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
 	}
 #endif
 #ifdef KLAYGE_COMPILER_MSVC
@@ -41,13 +49,14 @@
 
 using namespace std;
 using namespace KlayGE;
+using namespace std::experimental;
 
 namespace
 {
 	// Return path when appended to a_From will resolve to same as a_To
 	filesystem::path make_relative(filesystem::path from_path, filesystem::path to_path)
 	{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		from_path = filesystem::complete(from_path);
 		to_path = filesystem::complete(to_path);
 #else
@@ -1680,7 +1689,7 @@ namespace
 		typedef decltype(all_texture_slots) AllTextureSlotsType;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 			std::string ext_name = slot.first.extension();
 #else
 			std::string ext_name = slot.first.extension().string();
@@ -1690,7 +1699,7 @@ namespace
 				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
 				system(cmd.c_str());
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 				std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
 #else
 				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
@@ -1704,7 +1713,7 @@ namespace
 		std::map<filesystem::path, std::vector<std::pair<size_t, size_t> > > augmented_texture_slots;
 		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
 		{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 			std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
 #else
 			std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
@@ -1996,7 +2005,7 @@ int main(int argc, char* argv[])
 	if (meshml_name.empty())
 	{
 		filesystem::path input_path(input_name);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		std::string base_name = input_path.stem();
 #else
 		std::string base_name = input_path.stem().string();
@@ -2030,7 +2039,7 @@ int main(int argc, char* argv[])
 		{
 			target_folder = meshml_path.parent_path();
 		}
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		file_name = meshml_path.filename();
 #else
 		file_name = meshml_path.filename().string();

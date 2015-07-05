@@ -34,17 +34,25 @@
 
 #include <fstream>
 #include <sstream>
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
 	#include <filesystem>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = std::tr2::sys;
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
 	}
 #else
 	#include <boost/filesystem.hpp>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
 	}
 #endif
 
@@ -217,8 +225,10 @@ namespace KlayGE
 
 	std::string ResLoader::AbsPath(std::string const & path)
 	{
+		using namespace std::experimental;
+
 		filesystem::path new_path(path);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		if (!new_path.is_complete())
 #else
 		if (!new_path.is_absolute())
@@ -228,7 +238,7 @@ namespace KlayGE
 			if (!filesystem::exists(full_path))
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 				full_path = filesystem::current_path<filesystem::path>() / new_path;
 #else
 				full_path = filesystem::current_path() / new_path;
@@ -321,6 +331,8 @@ namespace KlayGE
 			}
 		}
 #else
+		using namespace std::experimental;
+
 		typedef decltype(paths_) PathsType;
 		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
@@ -350,7 +362,7 @@ namespace KlayGE
 						}
 						std::string const file_name = res_name.substr(pkt_offset + 2);
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
 #else
 						uint64_t timestamp = filesystem::last_write_time(pkt_path);
@@ -422,7 +434,7 @@ namespace KlayGE
 				CFRelease(file_path);
 				
 				filesystem::path res_path(res_name);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
 				uint64_t timestamp = filesystem::last_write_time(res_path);
@@ -433,6 +445,8 @@ namespace KlayGE
 			}
 		}
 #else
+		using namespace std::experimental;
+
 		typedef decltype(paths_) PathsType;
 		KLAYGE_FOREACH(PathsType::const_reference path, paths_)
 		{
@@ -441,7 +455,7 @@ namespace KlayGE
 			filesystem::path res_path(res_name);
 			if (filesystem::exists(res_path))
 			{
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
 				uint64_t timestamp = filesystem::last_write_time(res_path);
@@ -469,7 +483,7 @@ namespace KlayGE
 						}
 						std::string const file_name = res_name.substr(pkt_offset + 2);
 
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
 #else
 						uint64_t timestamp = filesystem::last_write_time(pkt_path);

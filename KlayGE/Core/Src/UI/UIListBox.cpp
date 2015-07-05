@@ -136,12 +136,12 @@ namespace KlayGE
 		return ret;
 	}
 
-	void UIListBox::SetItemData(int nIndex, boost::any const & data)
+	void UIListBox::SetItemData(int nIndex, std::experimental::any const & data)
 	{
 		items_[nIndex]->data = data;
 	}
 
-	int UIListBox::AddItem(std::wstring const & strText, boost::any const & data)
+	int UIListBox::AddItem(std::wstring const & strText, std::experimental::any const & data)
 	{
 		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;
@@ -157,7 +157,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, boost::any const & data)
+	void UIListBox::InsertItem(int nIndex, std::wstring const & strText, std::experimental::any const & data)
 	{
 		std::shared_ptr<UIListBoxItem> pNewItem = MakeSharedPtr<UIListBoxItem>();
 		pNewItem->strText = strText;

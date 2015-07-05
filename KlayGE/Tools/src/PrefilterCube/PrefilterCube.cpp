@@ -12,26 +12,35 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#if defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT) || defined(KLAYGE_TR2_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
 	#include <filesystem>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = std::tr2::sys;
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
 	}
 #else
 	#include <boost/filesystem.hpp>
-	namespace KlayGE
+	namespace std
 	{
-		namespace filesystem = boost::filesystem;
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
 	}
 #endif
 #include <boost/assert.hpp>
 
 using namespace std;
+using namespace KlayGE;
+using namespace std::experimental;
+
 namespace
 {
-	using namespace KlayGE;
-
 	float3 ToDir(uint32_t face, uint32_t x, uint32_t y, uint32_t size)
 	{
 		float3 dir;
@@ -502,7 +511,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		filesystem::path output_path(argv[1]);
-#ifdef KLAYGE_TR2_LIBRARY_FILESYSTEM_V2_SUPPORT
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		output = output_path.stem() + "_filtered.dds";
 #else
 		output = output_path.stem().string() + "_filtered.dds";
