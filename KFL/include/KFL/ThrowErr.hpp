@@ -36,29 +36,15 @@
 #include <string>
 #include <stdexcept>
 
-#ifdef KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
-	#include <system_error>
-	namespace KlayGE
-	{
+#include <system_error>
+namespace KlayGE
+{
 #if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION < 120)
-		namespace errc = std::errc;
+	namespace errc = std::errc;
 #else
-		using std::errc;
+	using std::errc;
 #endif
-	}
-#else
-	#include <boost/system/error_code.hpp>
-	#include <boost/system/system_error.hpp>
-	namespace std
-	{
-		using boost::system::system_error;
-		using boost::system::errc::make_error_code;
-	}
-	namespace KlayGE
-	{
-		namespace errc = boost::system::errc;
-	}
-#endif
+}
 
 #ifndef _HRESULT_DEFINED
 #define _HRESULT_DEFINED

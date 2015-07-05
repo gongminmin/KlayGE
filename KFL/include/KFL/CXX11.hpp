@@ -33,27 +33,6 @@
 
 #pragma once
 
-#ifndef KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
-const class nullptr_t
-{
-public:
-	template <typename T>
-	operator T*() const
-	{
-		return reinterpret_cast<T*>(0);
-	}
-
-	template <typename C, typename T>
-	operator T C::*() const
-	{
-		return reinterpret_cast<T C::*>(0);
-	}
-
-private:
-	void operator&() const;
-} nullptr = {};
-#endif
-
 #ifdef KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 	#define KLAYGE_FOREACH(var, col) for (var : col)
 #else

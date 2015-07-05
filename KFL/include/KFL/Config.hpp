@@ -39,19 +39,25 @@
 	#define KLAYGE_DEBUG
 #endif
 
-// KlayGE requires vc 10.0+, g++ 4.3+, clang 3.0+, with C++11 option on.
+// KlayGE requires vc 10.0+, g++ 4.6+, clang 3.4+, with C++11 option on.
 
 // All those C++11 features are supported by those compilers. Use them safely without wrapper.
 //   Static assertions (N1720)
+//   Multi-declarator auto (N1737)
 //   Right angle brackets (N1757)
-//   Extern templates (N1987)
 //   auto-typed variables (N1984)
+//   Extern templates (N1987)
 //   Rvalue references (N2118)
 //   Declared type of an expression (N2343)
+//   nullptr (N2431)
+//   New function declarator syntax (N2541)
+//   Removal of auto as a storage-class specifier (N2546)
+//   New wording for C++11 lambdas (N2927)
 //   <array>
 //   <cstdint>
 //   <functional>
 //   <random>
+//   <system_error>
 //   <tuple>
 //   <type_traits>
 //   <unordered_map>
@@ -91,7 +97,6 @@
 
 		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
-		#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
 		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
@@ -102,7 +107,6 @@
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#elif defined(__MINGW32__)
 		#if CLANG_VERSION >= 36
@@ -111,16 +115,8 @@
 			#define KLAYGE_COMPILER_VERSION 35
 		#elif CLANG_VERSION >= 34
 			#define KLAYGE_COMPILER_VERSION 34
-		#elif CLANG_VERSION >= 33
-			#define KLAYGE_COMPILER_VERSION 33
-		#elif CLANG_VERSION >= 32
-			#define KLAYGE_COMPILER_VERSION 32
-		#elif CLANG_VERSION >= 31
-			#define KLAYGE_COMPILER_VERSION 31
-		#elif CLANG_VERSION >= 30
-			#define KLAYGE_COMPILER_VERSION 30
 		#else
-			#error "Unsupported compiler version. Please install clang++ 3.0 or up."
+			#error "Unsupported compiler version. Please install clang++ 3.4 or up."
 		#endif
 			
 		#include <bits/c++config.h>
@@ -133,32 +129,31 @@
 
 		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
-		#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
 		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-		#if KLAYGE_COMPILER_VERSION >= 31
-			#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-		#endif
+		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 
 		#ifdef __GLIBCXX__
-			#if __GLIBCXX__ >= 20080306
-				#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+			#if __GLIBCXX__ < 20080306 // g++ 4.3
+				#error "Unsupported library version. Please install clang++ with g++ 4.3 or up."
 			#endif
-			#if __GLIBCXX__ >= 20090421
-				#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
-				#ifdef _GLIBCXX_HAS_GTHREADS
-					#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-					#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-				#endif
+
+			#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
+			#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+			#ifdef _GLIBCXX_HAS_GTHREADS
+				#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+				#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 			#endif
 			#if __GLIBCXX__ >= 20130322 // g++ 4.8
 				#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 			#endif
 			#if __GLIBCXX__ >= 20140422 // g++ 4.9
 				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+				#if __cplusplus > 201103L
+					#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+				#endif
 			#endif
 		#endif
 	#else
@@ -188,14 +183,8 @@
 		#define KLAYGE_COMPILER_VERSION 47
 	#elif GCC_VERSION >= 46
 		#define KLAYGE_COMPILER_VERSION 46
-	#elif GCC_VERSION >= 45
-		#define KLAYGE_COMPILER_VERSION 45
-	#elif GCC_VERSION >= 44
-		#define KLAYGE_COMPILER_VERSION 44
-	#elif GCC_VERSION >= 43
-		#define KLAYGE_COMPILER_VERSION 43
 	#else
-		#error "Unsupported compiler version. Please install g++ 4.3 or up."
+		#error "Unsupported compiler version. Please install g++ 4.6 or up."
 	#endif
 
 	#if !defined(__GXX_EXPERIMENTAL_CXX0X__) && (__cplusplus < 201103L)
@@ -205,21 +194,15 @@
 	#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 	#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-	#if KLAYGE_COMPILER_VERSION >= 44
-		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
-		#ifdef _GLIBCXX_HAS_GTHREADS
-			#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-			#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-		#endif
+	#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
+	#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
+	#ifdef _GLIBCXX_HAS_GTHREADS
+		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#endif
-	#if KLAYGE_COMPILER_VERSION >= 46
-		#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
-		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
-		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#endif
+	#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
+	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#if KLAYGE_COMPILER_VERSION >= 47
 		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
 	#endif
@@ -250,9 +233,7 @@
 		#error "Unsupported compiler version. Please install vc10 or up."
 	#endif
 
-	#define KLAYGE_CXX11_CORE_NULLPTR_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-	#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
 	#if _MSC_VER >= 1700
 		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
 		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
