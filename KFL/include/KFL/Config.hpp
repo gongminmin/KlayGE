@@ -42,9 +42,9 @@
 // KlayGE requires vc 10.0+, g++ 4.3+, clang 3.0+, with C++11 option on.
 
 // All those C++11 features are supported by those compilers. Use them safely without wrapper.
+//   Static assertions (N1720)
 //   Right angle brackets (N1757)
 //   Extern templates (N1987)
-//   Static assertions (N1720)
 //   auto-typed variables (N1984)
 //   Rvalue references (N2118)
 //   Declared type of an expression (N2343)
@@ -217,6 +217,7 @@
 	#endif
 	#if _MSC_VER >= 1900
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 		#undef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
 	#endif
