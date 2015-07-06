@@ -146,30 +146,8 @@ private:
 #endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-	#include <functional>
 	#include <memory>
-
-#ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
-	namespace KlayGE
-	{
-		using std::mem_fn;
-	}
 #else
-	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
-		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-			#define BOOST_MEM_FN_ENABLE_STDCALL
-		#endif
-	#endif	
-	#include <boost/mem_fn.hpp>
-	namespace KlayGE
-	{
-		using boost::mem_fn;
-	}
-#endif
-#else
-	#include <boost/bind.hpp>
-	#include <boost/function.hpp>
-	#include <boost/ref.hpp>
 	#ifdef KLAYGE_COMPILER_MSVC
 		#pragma warning(push)
 		#pragma warning(disable: 6011)
@@ -180,30 +158,21 @@ private:
 	#endif
 	namespace std
 	{
-		using boost::bind;
-		using boost::function;
-		namespace placeholders
-		{
-			static boost::arg<1> _1;
-			static boost::arg<2> _2;
-			static boost::arg<3> _3;
-			static boost::arg<4> _4;
-			static boost::arg<5> _5;
-			static boost::arg<6> _6;
-			static boost::arg<7> _7;
-			static boost::arg<8> _8;
-			static boost::arg<9> _9;
-		}
-
 		using boost::shared_ptr;
 		using boost::weak_ptr;
 		using boost::enable_shared_from_this;
 		using boost::static_pointer_cast;
 		using boost::dynamic_pointer_cast;
-		using boost::ref;
-		using boost::cref;
 	}
+#endif
 
+#ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
+	#include <functional>
+	namespace KlayGE
+	{
+		using std::mem_fn;
+	}
+#else
 	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
 		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
 			#define BOOST_MEM_FN_ENABLE_STDCALL
