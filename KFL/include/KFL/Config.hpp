@@ -68,10 +68,24 @@
 	#define KLAYGE_COMPILER_CLANG
 	#define KLAYGE_COMPILER_NAME clang
 
-	#define KLAYGE_COMPILER_VERSION (__clang_major__ * 10 + __clang_minor__)
+	#define CLANG_VERSION (__clang_major__ * 10 + __clang_minor__)
 
 	#if defined(__APPLE__)
-		#if KLAYGE_COMPILER_VERSION < 40
+		#if CLANG_VERSION >= 61
+			#define KLAYGE_COMPILER_VERSION 51
+		#elif CLANG_VERSION >= 60
+			#define KLAYGE_COMPILER_VERSION 60
+		#elif CLANG_VERSION >= 51
+			#define KLAYGE_COMPILER_VERSION 51
+		#elif CLANG_VERSION >= 50
+			#define KLAYGE_COMPILER_VERSION 50
+		#elif CLANG_VERSION >= 42
+			#define KLAYGE_COMPILER_VERSION 42
+		#elif CLANG_VERSION >= 41
+			#define KLAYGE_COMPILER_VERSION 41
+		#elif CLANG_VERSION >= 40
+			#define KLAYGE_COMPILER_VERSION 40
+		#else
 			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
 
@@ -90,16 +104,30 @@
 		#define KLAYGE_CXX11_LIBRARY_SYSTEM_ERROR_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#elif defined(__MINGW32__)
+		#if CLANG_VERSION >= 36
+			#define KLAYGE_COMPILER_VERSION 36
+		#elif CLANG_VERSION >= 35
+			#define KLAYGE_COMPILER_VERSION 35
+		#elif CLANG_VERSION >= 34
+			#define KLAYGE_COMPILER_VERSION 34
+		#elif CLANG_VERSION >= 33
+			#define KLAYGE_COMPILER_VERSION 33
+		#elif CLANG_VERSION >= 32
+			#define KLAYGE_COMPILER_VERSION 32
+		#elif CLANG_VERSION >= 31
+			#define KLAYGE_COMPILER_VERSION 31
+		#elif CLANG_VERSION >= 30
+			#define KLAYGE_COMPILER_VERSION 30
+		#else
+			#error "Unsupported compiler version. Please install clang++ 3.0 or up."
+		#endif
+			
 		#include <bits/c++config.h>
 		#ifdef _GLIBCXX_USE_FLOAT128
 			#undef _GLIBCXX_USE_FLOAT128
 		#endif
 		#ifdef _GLIBCXX_USE_INT128
 			#undef _GLIBCXX_USE_INT128
-		#endif
-
-		#if KLAYGE_COMPILER_VERSION < 30
-			#error "Unsupported compiler version. Please install clang++ 3.0 or up."
 		#endif
 
 		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
@@ -145,8 +173,24 @@
 		#undef _GLIBCXX_USE_INT128
 	#endif
 
-	#define KLAYGE_COMPILER_VERSION (__GNUC__ * 10 + __GNUC_MINOR__)
-	#if KLAYGE_COMPILER_VERSION < 43
+	#define GCC_VERSION (__GNUC__ * 10 + __GNUC_MINOR__)
+	#if GCC_VERSION >= 51
+		#define KLAYGE_COMPILER_VERSION 51
+	#elif GCC_VERSION >= 49
+		#define KLAYGE_COMPILER_VERSION 49
+	#elif GCC_VERSION >= 48
+		#define KLAYGE_COMPILER_VERSION 48
+	#elif GCC_VERSION >= 47
+		#define KLAYGE_COMPILER_VERSION 47
+	#elif GCC_VERSION >= 46
+		#define KLAYGE_COMPILER_VERSION 46
+	#elif GCC_VERSION >= 45
+		#define KLAYGE_COMPILER_VERSION 45
+	#elif GCC_VERSION >= 44
+		#define KLAYGE_COMPILER_VERSION 44
+	#elif GCC_VERSION >= 43
+		#define KLAYGE_COMPILER_VERSION 43
+	#else
 		#error "Unsupported compiler version. Please install g++ 4.3 or up."
 	#endif
 
@@ -177,7 +221,9 @@
 	#endif
 	#if KLAYGE_COMPILER_VERSION >= 49
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-		#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+		#if __cplusplus > 201103L
+			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+		#endif
 	#endif
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC

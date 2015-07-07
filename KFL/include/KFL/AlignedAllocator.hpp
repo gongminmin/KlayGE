@@ -34,6 +34,7 @@
 #pragma once
 
 #include <limits>
+#include <type_traits>
 
 namespace KlayGE
 {
@@ -145,7 +146,7 @@ namespace KlayGE
 
 		void destroy(pointer p)
 		{
-			destroy_t<pointer, is_trivially_destructible<value_type>::value>()(p);
+			destroy_t<pointer, std::is_trivially_destructible<value_type>::value>()(p);
 		}
 
 		size_type max_size() const throw()
