@@ -45,9 +45,11 @@ class compiler_info:
 			self.is_windows = True
 			self.is_windows_desktop = True
 		elif "win_store" == target_platform:
+			self.is_windows = True
 			self.is_windows_store = True
 			self.is_windows_runtime = True
 		elif "win_phone" == target_platform:
+			self.is_windows = True
 			self.is_windows_phone = True
 			self.is_windows_runtime = True
 		elif "android" == target_platform:
