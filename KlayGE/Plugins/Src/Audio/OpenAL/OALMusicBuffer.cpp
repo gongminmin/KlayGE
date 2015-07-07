@@ -138,7 +138,7 @@ namespace KlayGE
 		ALsizei non_empty_buf = 0;
 		// 每个缓冲区中装1 / PreSecond秒的数据
 		typedef decltype(bufferQueue_) BufferQueueType;
-		KLAYGE_FOREACH(BufferQueueType::reference buf, bufferQueue_)
+		for (BufferQueueType::reference buf : bufferQueue_)
 		{
 			data.resize(dataSource_->Read(&data[0], data.size()));
 			if (data.empty())

@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-#if defined(KLAYGE_COMPILER_MSVC) && ((KLAYGE_COMPILER_VERSION >= 110) && (KLAYGE_COMPILER_VERSION < 140))
+#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION < 140)
 	// In vc11 and vc12, a system_clock is synonymous with a high_resolution_clock.
 	//  So using QueryPerformance* for high resolution timing.
 	#define USE_QUERY_PERFORMANCE

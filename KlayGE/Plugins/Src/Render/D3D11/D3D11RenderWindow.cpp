@@ -205,7 +205,7 @@ namespace KlayGE
 			}
 
 			typedef decltype(dev_type_behaviors) DevTypeBehaviorsType;
-			KLAYGE_FOREACH(DevTypeBehaviorsType::reference dev_type_beh, dev_type_behaviors)
+			for (DevTypeBehaviorsType::reference dev_type_beh : dev_type_behaviors)
 			{
 				ID3D11Device* device = nullptr;
 				ID3D11DeviceContext* imm_ctx = nullptr;

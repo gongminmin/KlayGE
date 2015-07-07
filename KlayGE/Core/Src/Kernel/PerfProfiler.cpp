@@ -156,7 +156,7 @@ namespace KlayGE
 			re.UpdateGPUTimestampsFrequency();
 
 			typedef decltype(perf_ranges_) PerfRangesType;
-			KLAYGE_FOREACH(PerfRangesType::reference range, perf_ranges_)
+			for (PerfRangesType::reference range : perf_ranges_)
 			{
 				if (std::get<2>(range)->Dirty())
 				{
@@ -179,10 +179,10 @@ namespace KlayGE
 				<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
 
 			typedef decltype(perf_ranges_) PerfRangesType;
-			KLAYGE_FOREACH(PerfRangesType::const_reference range, perf_ranges_)
+			for (PerfRangesType::const_reference range : perf_ranges_)
 			{
 				typedef std::remove_reference<decltype(std::get<3>(range))>::type PerfDataType;
-				KLAYGE_FOREACH(PerfDataType::const_reference data, std::get<3>(range))
+				for (PerfDataType::const_reference data : std::get<3>(range))
 				{
 					ofs << std::get<0>(data) << ',' << std::get<0>(range) << ',' << std::get<1>(range) << ','
 						<< std::get<1>(data) * 1000 << ',';

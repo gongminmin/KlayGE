@@ -63,7 +63,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for wcstombs
 		std::vector<char> tmp;
-		KLAYGE_FOREACH(std::wstring::const_reference ch, src)
+		for (std::wstring::const_reference ch : src)
 		{
 			if (ch < 0x80)
 			{

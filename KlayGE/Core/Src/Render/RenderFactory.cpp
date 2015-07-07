@@ -250,22 +250,22 @@ namespace KlayGE
 	RenderFactory::~RenderFactory()
 	{
 		typedef decltype(rs_pool_) RSPoolType;
-		KLAYGE_FOREACH(RSPoolType::reference rs, rs_pool_)
+		for (RSPoolType::reference rs : rs_pool_)
 		{
 			rs.second.reset();
 		}
 		typedef decltype(dss_pool_) DSSPoolType;
-		KLAYGE_FOREACH(DSSPoolType::reference dss, dss_pool_)
+		for (DSSPoolType::reference dss : dss_pool_)
 		{
 			dss.second.reset();
 		}
 		typedef decltype(bs_pool_) BSPoolType;
-		KLAYGE_FOREACH(BSPoolType::reference bs, bs_pool_)
+		for (BSPoolType::reference bs : bs_pool_)
 		{
 			bs.second.reset();
 		}
 		typedef decltype(ss_pool_) SSPoolType;
-		KLAYGE_FOREACH(SSPoolType::reference ss, ss_pool_)
+		for (SSPoolType::reference ss : ss_pool_)
 		{
 			ss.second.reset();
 		}

@@ -923,19 +923,19 @@ namespace KlayGE
 	void UIManager::Render()
 	{
 		typedef decltype(strings_) StringsType;
-		KLAYGE_FOREACH(StringsType::reference str, strings_)
+		for (StringsType::reference str : strings_)
 		{
 			str.second.clear();
 		}
 
 		typedef decltype(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+		for (DialogsType::reference dialog : dialogs_)
 		{
 			dialog->Render();
 		}
 
 		typedef decltype(rects_) RectsType;
-		KLAYGE_FOREACH(RectsType::const_reference rect, rects_)
+		for (RectsType::const_reference rect : rects_)
 		{
 			if (!checked_pointer_cast<UIRectRenderable>(rect.second)->Empty())
 			{
@@ -944,12 +944,12 @@ namespace KlayGE
 				ui_rect_obj->AddToSceneManager();
 			}
 		}
-		KLAYGE_FOREACH(StringsType::reference str, strings_)
+		for (StringsType::reference str : strings_)
 		{
 			typedef decltype(font_cache_) FontCacheType;
 			FontCacheType::reference font = font_cache_[str.first];
 			typedef decltype(str.second) StrType;
-			KLAYGE_FOREACH(StrType::reference s, str.second)
+			for (StrType::reference s : str.second)
 			{
 				font.first->RenderText(s.rc, s.depth, 1, 1, s.clr, s.text, font.second, s.align);
 			}
@@ -1058,7 +1058,7 @@ namespace KlayGE
 						| ((param->buttons_down[KS_LeftCtrl] || param->buttons_down[KS_RightCtrl]) ? MB_Ctrl : 0)
 						| ((param->buttons_down[KS_LeftAlt] || param->buttons_down[KS_RightAlt]) ? MB_Alt : 0);
 					typedef decltype(dialogs_) DialogsType;
-					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					for (DialogsType::reference dialog : dialogs_)
 					{
 						if (dialog->GetVisible())
 						{
@@ -1091,7 +1091,7 @@ namespace KlayGE
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
 					typedef decltype(dialogs_) DialogsType;
-					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					for (DialogsType::reference dialog : dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
@@ -1115,7 +1115,7 @@ namespace KlayGE
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
 					typedef decltype(dialogs_) DialogsType;
-					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					for (DialogsType::reference dialog : dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
@@ -1139,7 +1139,7 @@ namespace KlayGE
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
 					mouse_on_ui_ = false;
 					typedef decltype(dialogs_) DialogsType;
-					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					for (DialogsType::reference dialog : dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
 						{
@@ -1170,7 +1170,7 @@ namespace KlayGE
 					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
 					mouse_on_ui_ = false;
 					typedef decltype(dialogs_) DialogsType;
-					KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+					for (DialogsType::reference dialog : dialogs_)
 					{
 						if (dialog->GetVisible() && dialog->ContainsPoint(param->touches_coord[0]))
 						{
@@ -1216,7 +1216,7 @@ namespace KlayGE
 	void UIManager::SettleCtrls()
 	{
 		typedef decltype(dialogs_) DialogsType;
-		KLAYGE_FOREACH(DialogsType::reference dialog, dialogs_)
+		for (DialogsType::reference dialog : dialogs_)
 		{
 			dialog->SettleCtrls();
 		}
@@ -1269,7 +1269,7 @@ namespace KlayGE
 	{
 		// Try to find the control with the given ID
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			if (control->GetID() == ID)
 			{
@@ -1286,7 +1286,7 @@ namespace KlayGE
 	{
 		// Try to find the control with the given ID
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			if ((control->GetID() == ID) && (control->GetType() == type))
 			{
@@ -1304,7 +1304,7 @@ namespace KlayGE
 		// Search through all child controls for the first one which
 		// contains the mouse point
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			if (!control)
 			{
@@ -1526,7 +1526,7 @@ namespace KlayGE
 			int2 const local_pt = this->ToLocal(pt);
 
 			typedef decltype(controls_) ControlsType;
-			KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+			for (ControlsType::const_reference control : controls_)
 			{
 				if (control->ContainsPoint(local_pt))
 				{
@@ -1602,7 +1602,7 @@ namespace KlayGE
 	{
 		// Find all radio buttons with the given group number
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			if (UICT_RadioButton == control->GetType())
 			{
@@ -1665,7 +1665,7 @@ namespace KlayGE
 		control_mouse_over_.reset();
 
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			control->Refresh();
 		}
@@ -1702,7 +1702,7 @@ namespace KlayGE
 	{
 		// Check for default control in this dialog
 		typedef decltype(controls_) ControlsType;
-		KLAYGE_FOREACH(ControlsType::const_reference control, controls_)
+		for (ControlsType::const_reference control : controls_)
 		{
 			if (control->GetIsDefault())
 			{
@@ -1919,7 +1919,7 @@ namespace KlayGE
 		uint32_t height = re.ScreenFrameBuffer()->Height();
 
 		typedef decltype(id_location_) IDLocationType;
-		KLAYGE_FOREACH(IDLocationType::reference id_loc, id_location_)
+		for (IDLocationType::reference id_loc : id_location_)
 		{
 			int x = id_loc.second.x;
 			int y = id_loc.second.y;
@@ -1989,7 +1989,7 @@ namespace KlayGE
 				// Activate the hotkey if the focus doesn't belong to an
 				// edit box.
 				typedef decltype(controls_) ControlsType;
-				KLAYGE_FOREACH(ControlsType::reference control, controls_)
+				for (ControlsType::reference control : controls_)
 				{
 					if (control->GetHotkey() == static_cast<uint8_t>(key & 0xFF))
 					{

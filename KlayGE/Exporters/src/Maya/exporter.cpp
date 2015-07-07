@@ -290,7 +290,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 	{
 		std::map<int, int> joint_id_to_kfs_id;
 		typedef decltype(joint_to_id_) JointsType;
-		KLAYGE_FOREACH(JointsType::const_reference joint, joint_to_id_)
+		for (JointsType::const_reference joint : joint_to_id_)
 		{
 			int kfs_id = meshml_obj_.AllocKeyframes();
 			meshml_obj_.SetKeyframes(kfs_id, joint.second);
@@ -301,7 +301,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 		for (int i = 0; i < num_frames; ++ i)
 		{
 			MAnimControl::setCurrentTime(MTime(i + start_frame, MTime::kNTSCField));
-			KLAYGE_FOREACH(JointsType::const_reference joint, joint_to_id_)
+			for (JointsType::const_reference joint : joint_to_id_)
 			{
 				MDagPath& joint_dag_path = joint_id_to_path_[joint.second];
 				MMatrix inv_parent;

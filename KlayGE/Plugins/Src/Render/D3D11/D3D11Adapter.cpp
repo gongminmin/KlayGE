@@ -74,7 +74,7 @@ namespace KlayGE
 			if (output != nullptr)
 			{
 				typedef decltype(formats) FormatsType;
-				KLAYGE_FOREACH(FormatsType::reference format, formats)
+				for (FormatsType::reference format : formats)
 				{
 					UINT num = 0;
 					output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, 0);
@@ -84,7 +84,7 @@ namespace KlayGE
 						output->GetDisplayModeList(format, DXGI_ENUM_MODES_SCALING, &num, &mode_descs[0]);
 
 						typedef decltype(mode_descs) ModeDescsType;
-						KLAYGE_FOREACH(ModeDescsType::reference mode_desc, mode_descs)
+						for (ModeDescsType::reference mode_desc : mode_descs)
 						{
 							D3D11VideoMode const video_mode(mode_desc.Width, mode_desc.Height,
 								mode_desc.Format);

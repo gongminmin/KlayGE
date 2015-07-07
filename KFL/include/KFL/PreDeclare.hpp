@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <memory>
+
 namespace KlayGE
 {
 	class ResIdentifier;

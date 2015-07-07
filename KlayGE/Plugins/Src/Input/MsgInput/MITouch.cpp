@@ -62,7 +62,7 @@ namespace KlayGE
 		if (mie.GetTouchInputInfo(hti, num_inputs, &inputs[0], sizeof(inputs[0])))
 		{
 			typedef decltype(inputs) InputsType;
-			KLAYGE_FOREACH(InputsType::const_reference ti, inputs)
+			for (InputsType::const_reference ti : inputs)
 			{
 				POINT pt = { TOUCH_COORD_TO_PIXEL(ti.x), TOUCH_COORD_TO_PIXEL(ti.y) };
 				::MapWindowPoints(nullptr, wnd.HWnd(), &pt, 1);
@@ -123,7 +123,7 @@ namespace KlayGE
 		wheel_delta_ = wheel_delta_state_;
 		num_available_touch_ = 0;
 		typedef decltype(touch_down_state_) TDSType;
-		KLAYGE_FOREACH(TDSType::const_reference tds, touch_down_state_)
+		for (TDSType::const_reference tds : touch_down_state_)
 		{
 			num_available_touch_ += tds;
 		}

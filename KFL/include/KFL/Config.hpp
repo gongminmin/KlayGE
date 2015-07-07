@@ -49,13 +49,20 @@
 //   Extern templates (N1987)
 //   Rvalue references (N2118)
 //   Declared type of an expression (N2343)
-//   nullptr (N2431)
+//   Standard Layout Types (N2342)
+//   Strongly-typed enums (N2347)
+//   Null pointer constant (N2431)
 //   New function declarator syntax (N2541)
 //   Removal of auto as a storage-class specifier (N2546)
+//   Forward declarations for enums (N2764)
 //   New wording for C++11 lambdas (N2927)
+//   Range-based for (N2930)
+//   <algorithm>
 //   <array>
+//   <atomic>
 //   <cstdint>
 //   <functional>
+//   <memory>
 //   <random>
 //   <system_error>
 //   <tuple>
@@ -77,10 +84,8 @@
 	#define CLANG_VERSION (__clang_major__ * 10 + __clang_minor__)
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-	#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
 	#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 
 	#if defined(__APPLE__)
@@ -102,12 +107,9 @@
 			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
 
-		#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#elif defined(__MINGW32__)
 		#if CLANG_VERSION >= 36
@@ -133,9 +135,6 @@
 				#error "Unsupported library version. Please install clang++ with g++ 4.3 or up."
 			#endif
 
-			#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-			#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-			#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
 			#ifdef _GLIBCXX_HAS_GTHREADS
 				#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 				#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
@@ -186,13 +185,8 @@
 	#endif
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-	#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
 	#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
-	#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-	#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-	#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
 	#ifdef _GLIBCXX_HAS_GTHREADS
 		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
@@ -221,24 +215,15 @@
 		#define KLAYGE_COMPILER_VERSION 120
 	#elif _MSC_VER >= 1700
 		#define KLAYGE_COMPILER_VERSION 110
-	#elif _MSC_VER >= 1600
-		#define KLAYGE_COMPILER_VERSION 100
 	#else
-		#error "Unsupported compiler version. Please install vc10 or up."
+		#error "Unsupported compiler version. Please install vc11 or up."
 	#endif
 
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-	#if _MSC_VER >= 1700
-		#define KLAYGE_CXX11_CORE_FOREACH_SUPPORT
-		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-		#define KLAYGE_CXX11_CORE_STRONGLY_TYPED_ENUMS_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	#endif
+	#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
+	#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+	#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#if _MSC_VER >= 1800
 		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
@@ -509,11 +494,9 @@
 	#endif
 #endif
 
-#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG) || (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 110))
-	// Prevent Boost to link the Boost.DateTime
-	#ifndef BOOST_DATE_TIME_NO_LIB
-		#define BOOST_DATE_TIME_NO_LIB
-	#endif
+// Prevent Boost to link the Boost.DateTime
+#ifndef BOOST_DATE_TIME_NO_LIB
+	#define BOOST_DATE_TIME_NO_LIB
 #endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)

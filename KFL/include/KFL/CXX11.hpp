@@ -33,12 +33,6 @@
 
 #pragma once
 
-#ifdef KLAYGE_CXX11_CORE_FOREACH_SUPPORT
-	#define KLAYGE_FOREACH(var, col) for (var : col)
-#else
-	#include <boost/foreach.hpp>
-	#define KLAYGE_FOREACH(var, col) BOOST_FOREACH(var, col)
-#endif
 #ifdef KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_NOEXCEPT noexcept
 	#define KLAYGE_NOEXCEPT_IF(predicate) noexcept((predicate))
@@ -56,64 +50,6 @@
 	#define KLAYGE_FINAL
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_ALGORITHM_SUPPORT
-	#ifndef KLAYGE_PLATFORM_ANDROID
-		#if defined(KLAYGE_COMPILER_GCC) && defined(__MINGW32__)
-			// Fix C++ linkage problem in MinGW 4.8.2
-			#include <intrin.h>
-		#endif
-	#endif
-	#include <algorithm>
-#else
-	namespace KlayGE
-	{
-		template<typename InputIterator, typename OutputIterator, typename Predicate>
-		OutputIterator copy_if(InputIterator first, InputIterator last,
-								OutputIterator dest_first,
-								Predicate p)
-		{
-			for (InputIterator iter = first; iter != last; ++ iter)
-			{
-				if (p(*iter))
-				{
-					*dest_first = *iter;
-					++ dest_first;
-				}
-			}
-
-			return dest_first;
-		}
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_ATOMIC_SUPPORT
-#ifndef _M_CEE
-	#include <atomic>
-#endif
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 4100)
-	#endif
-	#include <boost/atomic.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace std
-	{
-		using boost::atomic;
-		using boost::atomic_thread_fence;
-		using boost::atomic_signal_fence;
-
-		using boost::memory_order_relaxed;
-		using boost::memory_order_release;
-		using boost::memory_order_acquire;
-		using boost::memory_order_consume;
-		using boost::memory_order_acq_rel;
-		using boost::memory_order_seq_cst;
-	}
-#endif
-
 #ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 	#include <chrono>
 #else
@@ -121,27 +57,6 @@
 	namespace std
 	{
 		namespace chrono = boost::chrono;
-	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_SMART_PTR_SUPPORT
-	#include <memory>
-#else
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(push)
-		#pragma warning(disable: 6011)
-	#endif
-	#include <boost/smart_ptr.hpp>
-	#ifdef KLAYGE_COMPILER_MSVC
-		#pragma warning(pop)
-	#endif
-	namespace std
-	{
-		using boost::shared_ptr;
-		using boost::weak_ptr;
-		using boost::enable_shared_from_this;
-		using boost::static_pointer_cast;
-		using boost::dynamic_pointer_cast;
 	}
 #endif
 

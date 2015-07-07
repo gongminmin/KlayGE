@@ -77,7 +77,7 @@ namespace KlayGE
 
 	void AudioEngine::Suspend()
 	{
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			ab.second->Suspend();
 		}
@@ -87,7 +87,7 @@ namespace KlayGE
 	void AudioEngine::Resume()
 	{
 		this->DoResume();
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			ab.second->Resume();
 		}
@@ -126,7 +126,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::PlayAll(bool loop)
 	{
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			ab.second->Play(loop);
 		}
@@ -136,7 +136,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			ab.second->Stop();
 		}
@@ -169,7 +169,7 @@ namespace KlayGE
 	{
 		soundVol_ = vol;
 
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			if (ab.second->IsSound())
 			{
@@ -191,7 +191,7 @@ namespace KlayGE
 	{
 		musicVol_ = vol;
 
-		KLAYGE_FOREACH(AudioBufs::reference ab, audioBufs_)
+		for (AudioBufs::reference ab : audioBufs_)
 		{
 			if (!(ab.second->IsSound()))
 			{

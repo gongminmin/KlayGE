@@ -37,6 +37,7 @@
 
 #include <fstream>
 #include <string>
+#include <atomic>
 
 #include <CPP/7zip/IStream.h>
 
