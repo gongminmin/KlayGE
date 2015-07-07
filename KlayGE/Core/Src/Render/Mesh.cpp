@@ -360,7 +360,7 @@ namespace KlayGE
 	void RenderModel::AddToRenderQueue()
 	{
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
+		for (MeshesType::reference mesh : subrenderables_)
 		{
 			mesh->AddToRenderQueue();
 		}
@@ -369,7 +369,7 @@ namespace KlayGE
 	void RenderModel::OnRenderBegin()
 	{
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
+		for (MeshesType::reference mesh : subrenderables_)
 		{
 			mesh->OnRenderBegin();
 		}
@@ -378,7 +378,7 @@ namespace KlayGE
 	void RenderModel::OnRenderEnd()
 	{
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::reference mesh, subrenderables_)
+		for (MeshesType::reference mesh : subrenderables_)
 		{
 			mesh->OnRenderEnd();
 		}
@@ -399,7 +399,7 @@ namespace KlayGE
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			pos_aabb_ |= mesh->PosBound();
 			tc_aabb_ |= mesh->TexcoordBound();
@@ -410,7 +410,7 @@ namespace KlayGE
 	{
 		Renderable::Pass(type);
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			mesh->Pass(type);
 		}
@@ -420,7 +420,7 @@ namespace KlayGE
 	{
 		bool ss = false;
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			ss |= mesh->SpecialShading();
 		}
@@ -431,7 +431,7 @@ namespace KlayGE
 	{
 		bool ab = false;
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			ab |= mesh->TransparencyBackFace();
 		}
@@ -442,7 +442,7 @@ namespace KlayGE
 	{
 		bool ab = false;
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			ab |= mesh->TransparencyFrontFace();
 		}
@@ -453,7 +453,7 @@ namespace KlayGE
 	{
 		bool ab = false;
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			ab |= mesh->Reflection();
 		}
@@ -464,7 +464,7 @@ namespace KlayGE
 	{
 		bool ab = false;
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			ab |= mesh->SimpleForward();
 		}
@@ -871,7 +871,7 @@ namespace KlayGE
 	{
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
 		typedef decltype(subrenderables_) MeshesType;
-		KLAYGE_FOREACH(MeshesType::const_reference mesh, subrenderables_)
+		for (MeshesType::const_reference mesh : subrenderables_)
 		{
 			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
 		}

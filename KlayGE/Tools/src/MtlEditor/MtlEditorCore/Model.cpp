@@ -176,7 +176,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	uint32_t total_num_vertices = 0;
 	uint32_t total_num_indices = 0;
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 		total_num_vertices += mesh->NumVertices();
@@ -339,7 +339,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			texcoords[i] = float2(positions[i].x(), positions[i].y());
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+		for (MeshesType::const_reference renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
@@ -349,7 +349,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 	if (!has_normal && !has_tc)
 	{
-		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+		for (MeshesType::const_reference renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
@@ -395,7 +395,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+		for (MeshesType::const_reference renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
@@ -408,7 +408,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		std::vector<float3> binormals(total_num_vertices);
 		
 		// Compute TBN
-		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+		for (MeshesType::const_reference renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
@@ -449,7 +449,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 			}
 		}
 
-		KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+		for (MeshesType::const_reference renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
@@ -579,7 +579,7 @@ void DetailedSkinnedModel::SetTime(float time)
 void DetailedSkinnedModel::VisualizeLighting()
 {
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeLighting();
@@ -589,7 +589,7 @@ void DetailedSkinnedModel::VisualizeLighting()
 void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usage_index)
 {
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get()); 
 		mesh->VisualizeVertex(usage, usage_index);
@@ -599,7 +599,7 @@ void DetailedSkinnedModel::VisualizeVertex(VertexElementUsage usage, uint8_t usa
 void DetailedSkinnedModel::VisualizeTexture(int slot)
 {
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeTexture(slot);
@@ -609,7 +609,7 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 {
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
@@ -622,7 +622,7 @@ void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
 {
 	typedef decltype(subrenderables_) MeshesType;
-	KLAYGE_FOREACH(MeshesType::const_reference renderable, subrenderables_)
+	for (MeshesType::const_reference renderable : subrenderables_)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))

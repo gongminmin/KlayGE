@@ -158,7 +158,7 @@ namespace KlayGE
 			}
 		}
 
-		KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
+		for (SceneObjsType::const_reference obj : scene_objs_)
 		{
 			BoundOverlap visible;
 			uint32_t const attr = obj->Attrib();
@@ -375,7 +375,7 @@ namespace KlayGE
 			RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
 			bool found = false;
 			typedef decltype(render_queue_) RenderQueueType;
-			KLAYGE_FOREACH(RenderQueueType::reference items, render_queue_)
+			for (RenderQueueType::reference items : render_queue_)
 			{
 				if (items.first == tech)
 				{
@@ -496,13 +496,13 @@ namespace KlayGE
 		float const frame_time = app.FrameTime();
 
 		typedef decltype(cameras_) CamerasType;
-		KLAYGE_FOREACH(CamerasType::const_reference camera, cameras_)
+		for (CamerasType::const_reference camera : cameras_)
 		{
 			camera->Update(app_time, frame_time);
 		}
 
 		typedef decltype(lights_) LightsType;
-		KLAYGE_FOREACH(LightsType::const_reference light, lights_)
+		for (LightsType::const_reference light : lights_)
 		{
 			if (light->Enabled())
 			{
@@ -514,7 +514,7 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
-			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+			for (SceneObjsType::const_reference scene_obj : scene_objs_)
 			{
 				if (scene_obj->MainThreadUpdate(app_time, frame_time))
 				{
@@ -535,7 +535,7 @@ namespace KlayGE
 				}
 			}
 		
-			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, added_scene_objs)
+			for (SceneObjsType::const_reference scene_obj : added_scene_objs)
 			{
 				scene_obj->OnAttachRenderable(true);
 				this->OnAddSceneObject(scene_obj);
@@ -566,7 +566,7 @@ namespace KlayGE
 		Camera& camera = app.ActiveCamera();
 		SceneObjsType& scene_objs = (urt & App3DFramework::URV_Overlay) ? overlay_scene_objs_ : scene_objs_;
 
-		KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs)
+		for (SceneObjsType::const_reference scene_obj : scene_objs)
 		{
 			scene_obj->VisibleMark(BO_No);
 		}
@@ -611,7 +611,7 @@ namespace KlayGE
 		}
 		if (urt & App3DFramework::URV_Overlay)
 		{
-			KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs)
+			for (SceneObjsType::const_reference scene_obj : scene_objs)
 			{
 				scene_obj->MainThreadUpdate(app_time, frame_time);
 				scene_obj->VisibleMark(scene_obj->Visible() ? BO_Yes : BO_No);
@@ -620,7 +620,7 @@ namespace KlayGE
 
 		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr>>> renderables;
 		std::map<RenderablePtr, size_t> renderables_map;
-		KLAYGE_FOREACH(SceneObjsType::const_reference so, scene_objs)
+		for (SceneObjsType::const_reference so : scene_objs)
 		{
 			if (so->VisibleMark() != BO_No)
 			{
@@ -647,7 +647,7 @@ namespace KlayGE
 		}
 		renderables_map.clear();
 		typedef decltype(renderables) RenderablesType;
-		KLAYGE_FOREACH(RenderablesType::const_reference renderable, renderables)
+		for (RenderablesType::const_reference renderable : renderables)
 		{
 			Renderable& ra(*renderable.first);
 			ra.AssignInstances(renderable.second.begin(), renderable.second.end());
@@ -658,7 +658,7 @@ namespace KlayGE
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
 		typedef decltype(render_queue_) RenderQueueType;
-		KLAYGE_FOREACH(RenderQueueType::reference items, render_queue_)
+		for (RenderQueueType::reference items : render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
@@ -696,7 +696,7 @@ namespace KlayGE
 			}
 
 			typedef decltype(items.second) ItemsType;
-			KLAYGE_FOREACH(ItemsType::reference item, items.second)
+			for (ItemsType::reference item : items.second)
 			{
 				item->Render();
 			}
@@ -807,11 +807,11 @@ namespace KlayGE
 				{
 					std::lock_guard<std::mutex> lock(update_mutex_);
 
-					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, scene_objs_)
+					for (SceneObjsType::const_reference scene_obj : scene_objs_)
 					{
 						scene_obj->SubThreadUpdate(app_time, frame_time);
 					}
-					KLAYGE_FOREACH(SceneObjsType::const_reference scene_obj, overlay_scene_objs_)
+					for (SceneObjsType::const_reference scene_obj : overlay_scene_objs_)
 					{
 						scene_obj->SubThreadUpdate(app_time, frame_time);
 					}

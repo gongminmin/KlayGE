@@ -70,7 +70,7 @@ namespace KlayGE
 		planes_[5] = column4 + column3;	// near
 
 		// Loop through each side of the frustum and normalize it.
-		KLAYGE_FOREACH(typename planes_t::reference plane, planes_)
+		for (typename planes_t::reference plane : planes_)
 		{
 			plane = MathLib::normalize(plane);
 		}

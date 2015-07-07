@@ -121,7 +121,7 @@ namespace KlayGE
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			octree_[0].visible = BO_No;
-			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
+			for (SceneObjsType::const_reference obj : scene_objs_)
 			{
 				uint32_t const attr = obj->Attrib();
 				if ((attr & SceneObject::SOA_Cullable)
@@ -172,7 +172,7 @@ namespace KlayGE
 
 		if (camera.OmniDirectionalMode())
 		{
-			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
+			for (SceneObjsType::const_reference obj : scene_objs_)
 			{
 				if (obj->Visible())
 				{
@@ -202,7 +202,7 @@ namespace KlayGE
 				this->MarkNodeObjs(0, false);
 			}
 
-			KLAYGE_FOREACH(SceneObjsType::const_reference obj, scene_objs_)
+			for (SceneObjsType::const_reference obj : scene_objs_)
 			{
 				if (obj->Visible())
 				{
@@ -295,7 +295,7 @@ namespace KlayGE
 			octree_[index].visible = BO_No;
 
 			octree_.resize(this_size + 8);
-			KLAYGE_FOREACH(SceneObjsType::const_reference so, octree_[index].obj_ptrs)
+			for (SceneObjsType::const_reference so : octree_[index].obj_ptrs)
 			{
 				AABBox const & aabb = *so->PosBoundWS();
 				int mark[6];
@@ -408,7 +408,7 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
-			KLAYGE_FOREACH(SceneObjsType::const_reference so, node.obj_ptrs)
+			for (SceneObjsType::const_reference so : node.obj_ptrs)
 			{
 				if ((BO_No == so->VisibleMark()) && so->Visible())
 				{

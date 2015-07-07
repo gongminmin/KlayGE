@@ -179,8 +179,6 @@ class build_info:
 						compiler = "vc120"
 					elif "VS110COMNTOOLS" in env:
 						compiler = "vc110"
-					elif "VS100COMNTOOLS" in env:
-						compiler = "vc100"
 					elif 0 == os.system("where clang++"):
 						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
@@ -209,8 +207,6 @@ class build_info:
 					toolset = "v120"
 				elif "vc110" == compiler:
 					toolset = "v110"
-				elif "vc100" == compiler:
-					toolset = "v100"
 			elif "android" == target_platform:
 				if "L" == target_api_level:
 					toolset = "4.9"
@@ -264,16 +260,6 @@ class build_info:
 					gen_name = "Visual Studio 11 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 11 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
-		elif "vc100" == compiler:
-			compiler_name = "vc"
-			compiler_version = 100
-			multi_config = True
-			for arch in archs:
-				if "x86" == arch:
-					gen_name = "Visual Studio 10"
-				elif "x64" == arch:
-					gen_name = "Visual Studio 10 Win64"
 				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "clang" == compiler:
 			compiler_name = "clang"
@@ -387,7 +373,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 100) and (not compiler_info.is_windows_runtime):
+	if ("vc" == build_info.compiler_name) and (not compiler_info.is_windows_runtime):
 		toolset_name = "-T %s" % compiler_info.toolset
 
 	if build_info.compiler_name != "vc":

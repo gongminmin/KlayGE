@@ -500,7 +500,7 @@ namespace KlayGE
 	{
 		size_t elems_signature = 0;
 		typedef std::remove_reference<decltype(elems)>::type ElemsType;
-		KLAYGE_FOREACH(ElemsType::const_reference elem, elems)
+		for (ElemsType::const_reference elem : elems)
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
 			boost::hash_combine(seed, elem.SemanticIndex);
@@ -975,7 +975,7 @@ namespace KlayGE
 		if (iter != rendertarget_format_.end())
 		{
 			typedef decltype(iter->second) RTType;
-			KLAYGE_FOREACH(RTType::const_reference p, iter->second)
+			for (RTType::const_reference p : iter->second)
 			{
 				if ((sample_count == p.first) && (sample_quality < p.second))
 				{

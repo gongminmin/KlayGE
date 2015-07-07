@@ -2194,7 +2194,7 @@ namespace KlayGE
 				this->RecursiveIncludeNode(root, include_names);
 
 				typedef decltype(include_names) IncludeNamesType;
-				KLAYGE_FOREACH(IncludeNamesType::const_reference include_name, include_names)
+				for (IncludeNamesType::const_reference include_name : include_names)
 				{
 					ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
 					if (include_source)
@@ -2498,7 +2498,7 @@ namespace KlayGE
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
 			typedef decltype(params_) ParamsType;
-			KLAYGE_FOREACH(ParamsType::const_reference param, params_)
+			for (ParamsType::const_reference param : params_)
 			{
 				if (name_hash == param->NameHash())
 				{
@@ -2513,7 +2513,7 @@ namespace KlayGE
 		{
 			size_t const semantic_hash = boost::hash_range(semantic.begin(), semantic.end());
 			typedef decltype(params_) ParamsType;
-			KLAYGE_FOREACH(ParamsType::const_reference param, params_)
+			for (ParamsType::const_reference param : params_)
 			{
 				if (semantic_hash == param->SemanticHash())
 				{
@@ -2528,7 +2528,7 @@ namespace KlayGE
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
 			typedef decltype(cbuffers_) CBuffersType;
-			KLAYGE_FOREACH(CBuffersType::const_reference cbuffer, cbuffers_)
+			for (CBuffersType::const_reference cbuffer : cbuffers_)
 			{
 				if (name_hash == cbuffer->NameHash())
 				{
@@ -2543,7 +2543,7 @@ namespace KlayGE
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
 			typedef decltype(techniques_) TechsType;
-			KLAYGE_FOREACH(TechsType::const_reference tech, techniques_)
+			for (TechsType::const_reference tech : techniques_)
 			{
 				if (name_hash == tech->NameHash())
 				{

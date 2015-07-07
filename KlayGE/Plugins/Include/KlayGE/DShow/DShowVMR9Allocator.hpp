@@ -22,6 +22,7 @@
 #include <strmif.h>
 #include <vmr9.h>
 #include <vector>
+#include <atomic>
 
 namespace KlayGE
 {

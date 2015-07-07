@@ -14,6 +14,7 @@
 #include <vector>
 #include <fstream>
 #include <cstring>
+#include <atomic>
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -302,7 +303,7 @@ class ttf_to_dist
 public:
 	ttf_to_dist(FT_Library ft_lib, FT_Face ft_face, uint32_t internal_char_size, uint32_t char_size,
 		uint32_t const * validate_chars, font_info* char_info, float* char_dist_data,
-		int32_t& cur_num_char, atomic<int32_t>& cur_package, uint32_t num_chars,
+		int32_t& cur_num_char, std::atomic<int32_t>& cur_package, uint32_t num_chars,
 		float& min_value, float& max_value, uint32_t thread_id, uint32_t num_threads, uint32_t num_chars_per_package)
 		: ft_lib_(ft_lib), ft_face_(ft_face), internal_char_size_(internal_char_size), char_size_(char_size),
 			validate_chars_(validate_chars), char_info_(char_info), char_dist_data_(char_dist_data),
@@ -476,7 +477,7 @@ private:
 	font_info* char_info_;
 	float* char_dist_data_;
 	int32_t* cur_num_char_;
-	atomic<int32_t>* cur_package_;
+	std::atomic<int32_t>* cur_package_;
 	uint32_t num_chars_;
 	uint32_t thread_id_;
 	uint32_t num_threads_;
@@ -526,7 +527,7 @@ void compute_distance(std::vector<font_info>& char_info, std::vector<float>& cha
 	{
 		std::vector<float> max_values(num_threads);
 		std::vector<float> min_values(num_threads);
-		atomic<int32_t> cur_package(0);
+		std::atomic<int32_t> cur_package(0);
 		for (int i = 0; i < num_threads; ++ i)
 		{
 			joiners[i] = tp(ttf_to_dist(ft_libs[i], ft_faces[i], internal_char_size, char_size,
@@ -942,7 +943,7 @@ int main(int argc, char* argv[])
 			}
 		
 			typedef decltype(char_index_advance) CIAType;
-			KLAYGE_FOREACH(CIAType::reference cia, char_index_advance)
+			for (CIAType::reference cia : char_index_advance)
 			{
 				int const ch = cia.first;
 				int const index = cia.second.first;

@@ -104,11 +104,11 @@ namespace KlayGE
 
 			// ∑¢ÀÕ–≈œ¢
 			typedef decltype(players_) PlayersType;
-			KLAYGE_FOREACH(PlayersType::reference player, players_)
+			for (PlayersType::reference player : players_)
 			{
 				SendQueueType& msgs = player.second.msgs;
 				typedef std::remove_reference<decltype(msgs)>::type MsgsType;
-				KLAYGE_FOREACH(MsgsType::reference msg, msgs)
+				for (MsgsType::reference msg : msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
 				}
@@ -136,7 +136,7 @@ namespace KlayGE
 	{
 		char n = 0;
 		typedef decltype(players_) PlayersType;
-		KLAYGE_FOREACH(PlayersType::const_reference player, players_)
+		for (PlayersType::const_reference player : players_)
 		{
 			if (player.first != 0)
 			{
@@ -176,7 +176,7 @@ namespace KlayGE
 		PlayerAddrs(players_).swap(players_);
 
 		typedef decltype(players_) PlayersType;
-		KLAYGE_FOREACH(PlayersType::reference player, players_)
+		for (PlayersType::reference player : players_)
 		{
 			player.first = 0;
 		}

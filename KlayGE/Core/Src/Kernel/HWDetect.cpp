@@ -262,7 +262,7 @@ namespace KlayGE
 	{
 		uint32_t ret = 0;
 		typedef decltype(smbios_tables_) SMBiosTablesType;
-		KLAYGE_FOREACH(SMBiosTablesType::const_reference table, smbios_tables_)
+		for (SMBiosTablesType::const_reference table : smbios_tables_)
 		{
 			if (table.type == type)
 			{

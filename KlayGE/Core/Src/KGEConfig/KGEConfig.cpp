@@ -797,7 +797,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	return save_cfg;
 }
 
-#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 100)
+#if defined(KLAYGE_COMPILER_MSVC)
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_ HINSTANCE /*hPrevInstance*/, _In_ LPSTR /*lpszCmdLine*/, _In_ int /*nCmdShow*/)
 #else
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpszCmdLine*/, int /*nCmdShow*/)

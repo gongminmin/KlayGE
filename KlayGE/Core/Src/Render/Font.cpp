@@ -209,7 +209,7 @@ namespace KlayGE
 			std::vector<float> lines(1, 0);
 
 			typedef std::remove_reference<decltype(text)>::type TextType;
-			KLAYGE_FOREACH(TextType::const_reference ch, text)
+			for (TextType::const_reference ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -270,7 +270,7 @@ namespace KlayGE
 			std::vector<std::pair<float, std::wstring>> lines(1, std::make_pair(0.0f, L""));
 
 			typedef std::remove_reference<decltype(text)>::type TextType;
-			KLAYGE_FOREACH(TextType::const_reference ch, text)
+			for (TextType::const_reference ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -298,7 +298,7 @@ namespace KlayGE
 				if (align & Font::FA_Hor_Right)
 				{
 					typedef decltype(lines) LinesType;
-					KLAYGE_FOREACH(LinesType::const_reference p, lines)
+					for (LinesType::const_reference p : lines)
 					{
 						sx.push_back(rc.right() - p.first);
 					}
@@ -307,7 +307,7 @@ namespace KlayGE
 				{
 					// Font::FA_Hor_Center
 					typedef decltype(lines) LinesType;
-					KLAYGE_FOREACH(LinesType::const_reference p, lines)
+					for (LinesType::const_reference p : lines)
 					{
 						sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
 					}
@@ -352,7 +352,7 @@ namespace KlayGE
 				vertices.reserve(maxSize * 4);
 
 				typedef decltype(lines[i].second) LinesType;
-				KLAYGE_FOREACH(LinesType::const_reference ch, lines[i].second)
+				for (LinesType::const_reference ch : lines[i].second)
 				{
 					std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 					if (offset_adv.first != -1)
@@ -446,7 +446,7 @@ namespace KlayGE
 			vertices.reserve(maxSize * 4);
 
 			typedef std::remove_reference<decltype(text)>::type TextType;
-			KLAYGE_FOREACH(TextType::const_reference ch, text)
+			for (TextType::const_reference ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -547,7 +547,7 @@ namespace KlayGE
 			uint32_t const num_total_chars = num_chars_a_row * num_chars_a_row;
 
 			typedef std::remove_reference<decltype(text)>::type TextType;
-			KLAYGE_FOREACH(TextType::const_reference ch, text)
+			for (TextType::const_reference ch : text)
 			{
 				int32_t offset = kl.CharIndex(ch);
 				if (offset != -1)

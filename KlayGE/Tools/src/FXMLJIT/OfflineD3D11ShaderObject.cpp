@@ -885,7 +885,7 @@ namespace KlayGE
 							std::vector<std::string>& msgs = err_lines[err_line];
 							bool found = false;
 							typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
-							KLAYGE_FOREACH(ErrMsgsType::const_reference msg, msgs)
+							for (ErrMsgsType::const_reference msg : msgs)
 							{
 								if (msg == err_str)
 								{
@@ -938,7 +938,7 @@ namespace KlayGE
 						}
 
 						typedef decltype(iter->second) ErrMsgsType;
-						KLAYGE_FOREACH(ErrMsgsType::const_reference msg, iter->second)
+						for (ErrMsgsType::const_reference msg : iter->second)
 						{
 							LogError(msg.c_str());
 						}

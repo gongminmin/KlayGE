@@ -178,7 +178,7 @@ namespace KlayGE
 	void DSSoundBuffer::Stop()
 	{
 		typedef decltype(sources_) SourcesType;
-		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		for (SourcesType::reference src : sources_)
 		{
 			src->Stop();
 		}
@@ -189,7 +189,7 @@ namespace KlayGE
 	void DSSoundBuffer::DoReset()
 	{
 		typedef decltype(sources_) SourcesType;
-		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		for (SourcesType::reference src : sources_)
 		{
 			src->SetCurrentPosition(0);
 		}
@@ -209,7 +209,7 @@ namespace KlayGE
 	{
 		long const dB(LinearGainToDB(vol));
 		typedef decltype(sources_) SourcesType;
-		KLAYGE_FOREACH(SourcesType::reference src, sources_)
+		for (SourcesType::reference src : sources_)
 		{
 			src->SetVolume(dB);
 		}

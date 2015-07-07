@@ -163,7 +163,7 @@ namespace KlayGE
 	{
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
 		typedef decltype(children_) ChildrenType;
-		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		for (ChildrenType::reference child : children_)
 		{
 			child->AddToSceneManager();
 		}
@@ -173,7 +173,7 @@ namespace KlayGE
 	{
 		Context::Instance().SceneManagerInstance().AddSceneObjectLocked(this->shared_from_this());
 		typedef decltype(children_) ChildrenType;
-		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		for (ChildrenType::reference child : children_)
 		{
 			child->AddToSceneManagerLocked();
 		}
@@ -182,7 +182,7 @@ namespace KlayGE
 	void SceneObject::DelFromSceneManager()
 	{
 		typedef decltype(children_) ChildrenType;
-		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		for (ChildrenType::reference child : children_)
 		{
 			child->DelFromSceneManager();
 		}
@@ -192,7 +192,7 @@ namespace KlayGE
 	void SceneObject::DelFromSceneManagerLocked()
 	{
 		typedef decltype(children_) ChildrenType;
-		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		for (ChildrenType::reference child : children_)
 		{
 			child->DelFromSceneManagerLocked();
 		}
@@ -221,7 +221,7 @@ namespace KlayGE
 		}
 
 		typedef decltype(children_) ChildrenType;
-		KLAYGE_FOREACH(ChildrenType::reference child, children_)
+		for (ChildrenType::reference child : children_)
 		{
 			child->Visible(vis);
 		}

@@ -1687,7 +1687,7 @@ namespace
 
 		std::vector<std::pair<filesystem::path, std::string>> deploy_files;
 		typedef decltype(all_texture_slots) AllTextureSlotsType;
-		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
+		for (AllTextureSlotsType::reference slot : all_texture_slots)
 		{
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 			std::string ext_name = slot.first.extension();
@@ -1711,7 +1711,7 @@ namespace
 
 		std::vector<std::pair<filesystem::path, filesystem::path>> dup_files;
 		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> augmented_texture_slots;
-		KLAYGE_FOREACH(AllTextureSlotsType::reference slot, all_texture_slots)
+		for (AllTextureSlotsType::reference slot : all_texture_slots)
 		{
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 			std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
@@ -1750,13 +1750,13 @@ namespace
 		}
 
 		typedef decltype(dup_files) DupFilesType;
-		KLAYGE_FOREACH(DupFilesType::const_reference dup, dup_files)
+		for (DupFilesType::const_reference dup : dup_files)
 		{
 			filesystem::copy_file(std::get<0>(dup), std::get<1>(dup));
 		}
 
 		typedef decltype(deploy_files) DeployFilesType;
-		KLAYGE_FOREACH(DeployFilesType::const_reference df, deploy_files)
+		for (DeployFilesType::const_reference df : deploy_files)
 		{
 			std::string deploy_type;
 			size_t const type_hash = RT_HASH(df.second.c_str());
@@ -1799,12 +1799,12 @@ namespace
 
 		filesystem::path output_folder = filesystem::path(output_name).parent_path();
 		typedef decltype(augmented_texture_slots) AugmentedTextureSlotsType;
-		KLAYGE_FOREACH(AugmentedTextureSlotsType::const_reference slot, augmented_texture_slots)
+		for (AugmentedTextureSlotsType::const_reference slot : augmented_texture_slots)
 		{
 			std::string rel_path = make_relative(output_folder, slot.first).string();
 
 			typedef decltype(slot.second) SlotIndexType;
-			KLAYGE_FOREACH(SlotIndexType::const_reference slot_index, slot.second)
+			for (SlotIndexType::const_reference slot_index : slot.second)
 			{
 				mtls[slot_index.first].texture_slots[slot_index.second].second = rel_path;
 			}
