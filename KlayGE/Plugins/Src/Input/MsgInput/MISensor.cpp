@@ -353,7 +353,7 @@ namespace KlayGE
 						hr = motion_sensor_collection_->GetAt(i, &sensor);
 						if (SUCCEEDED(hr))
 						{
-							shared_ptr<MsgInputMotionSensorEvents> motion_event = MakeSharedPtr<MsgInputMotionSensorEvents>(this);
+							std::shared_ptr<MsgInputMotionSensorEvents> motion_event = MakeSharedPtr<MsgInputMotionSensorEvents>(this);
 							ISensorEvents* sensor_event;
 							motion_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
 							motion_sensor_events_.push_back(motion_event);
@@ -383,7 +383,7 @@ namespace KlayGE
 						hr = orientation_sensor_collection_->GetAt(i, &sensor);
 						if (SUCCEEDED(hr))
 						{
-							shared_ptr<MsgInputOrientationSensorEvents> orientation_event = MakeSharedPtr<MsgInputOrientationSensorEvents>(this);
+							std::shared_ptr<MsgInputOrientationSensorEvents> orientation_event = MakeSharedPtr<MsgInputOrientationSensorEvents>(this);
 							ISensorEvents* sensor_event;
 							orientation_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
 							orientation_sensor_events_.push_back(orientation_event);

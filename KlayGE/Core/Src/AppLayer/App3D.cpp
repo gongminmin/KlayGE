@@ -125,7 +125,7 @@ namespace KlayGE
 	private:
 		WindowPtr win_;
 
-		array<uint32_t, 16> pointer_id_map_;
+		std::array<uint32_t, 16> pointer_id_map_;
 	};
 
 	MetroFramework::MetroFramework()
