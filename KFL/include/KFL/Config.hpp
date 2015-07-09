@@ -39,7 +39,7 @@
 	#define KLAYGE_DEBUG
 #endif
 
-// KlayGE requires vc 10.0+, g++ 4.6+, clang 3.4+, with C++11 option on.
+// KlayGE requires vc 11.0+, g++ 4.6+, clang 3.4+, with C++11 option on.
 
 // All those C++11 features are supported by those compilers. Use them safely without wrapper.
 //   Static assertions (N1720)
@@ -219,9 +219,9 @@
 		#error "Unsupported compiler version. Please install vc11 or up."
 	#endif
 
-	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
+	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#if _MSC_VER >= 1800
