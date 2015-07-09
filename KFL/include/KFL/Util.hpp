@@ -39,7 +39,6 @@
 #include <functional>
 
 #include <boost/assert.hpp>
-#include <boost/checked_delete.hpp>
 
 #define UNREF_PARAM(x) (void)(x)
 
@@ -364,18 +363,22 @@ namespace KlayGE
 #pragma warning(disable: 4307) // The hash here could cause integral constant overflow
 #endif
 
-	constexpr size_t _Hash(const char* str, size_t seed)
+	constexpr size_t _Hash(char const * str, size_t seed)
 	{
 		return 0 == *str ? seed : _Hash(str + 1, seed ^ (*str + PRIME_NUM + (seed << 6) + (seed >> 2)));
 	}
 
+#ifdef KLAYGE_COMPILER_MSVC
 	template <size_t N>
 	struct EnsureConst
 	{
 		static const size_t value = N;
 	};
 
-	#define CT_HASH(x) EnsureConst<_Hash(x, 0)>::value
+	#define CT_HASH(x) (EnsureConst<_Hash(x, 0)>::value)
+#else
+	#define CT_HASH(x) (_Hash(x, 0))
+#endif
 #else
 	#if defined(KLAYGE_COMPILER_MSVC)
 		#define FORCEINLINE __forceinline
