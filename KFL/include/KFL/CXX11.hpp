@@ -49,6 +49,11 @@
 	#define KLAYGE_OVERRIDE
 	#define KLAYGE_FINAL
 #endif
+#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
+	#define KLAYGE_CONSTEXPR constexpr
+#else
+	#define KLAYGE_CONSTEXPR
+#endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 	#include <chrono>
