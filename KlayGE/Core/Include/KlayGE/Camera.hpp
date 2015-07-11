@@ -19,14 +19,7 @@
 
 #pragma once
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4172 4913 6011)
-#endif
 #include <boost/circular_buffer.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>

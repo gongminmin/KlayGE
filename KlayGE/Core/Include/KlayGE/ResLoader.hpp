@@ -39,7 +39,7 @@
 #include <string>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4512)
+#pragma warning(disable: 4512) // consume_via_copy in lockfree doesn't have assignment operator.
 #endif
 #include <boost/lockfree/spsc_queue.hpp>
 #ifdef KLAYGE_COMPILER_MSVC

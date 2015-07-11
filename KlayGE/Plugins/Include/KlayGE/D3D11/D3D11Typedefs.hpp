@@ -19,7 +19,7 @@
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
 	#ifdef KLAYGE_COMPILER_MSVC
 	#pragma warning(push)
-	#pragma warning(disable: 4005)
+	#pragma warning(disable: 4005) // Macro redefinition
 	#endif
 	#include <d3d11.h>
 	#ifdef KLAYGE_COMPILER_MSVC

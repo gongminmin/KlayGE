@@ -42,22 +42,8 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011 6334)
-#endif
 #include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 

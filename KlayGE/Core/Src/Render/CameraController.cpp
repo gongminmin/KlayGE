@@ -35,14 +35,7 @@
 #include <KlayGE/App3D.hpp>
 
 #include <sstream>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/CameraController.hpp>
 
