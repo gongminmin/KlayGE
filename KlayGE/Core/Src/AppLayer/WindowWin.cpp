@@ -274,37 +274,37 @@ namespace KlayGE
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		case WM_POINTERDOWN:
-		{
-			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			::ScreenToClient(this->HWnd(), &pt);
-			this->OnPointerDown()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
-		}
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerDown()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
+			}
 			break;
 
 		case WM_POINTERUP:
-		{
-			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			::ScreenToClient(this->HWnd(), &pt);
-			this->OnPointerUp()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
-		}
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerUp()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam));
+			}
 			break;
 
 		case WM_POINTERUPDATE:
-		{
-			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			::ScreenToClient(this->HWnd(), &pt);
-			this->OnPointerUpdate()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
-				IS_POINTER_INCONTACT_WPARAM(wParam));
-		}
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerUpdate()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
+					IS_POINTER_INCONTACT_WPARAM(wParam));
+			}
 			break;
 
 		case WM_POINTERWHEEL:
-		{
-			POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-			::ScreenToClient(this->HWnd(), &pt);
-			this->OnPointerWheel()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
-				GET_WHEEL_DELTA_WPARAM(wParam));
-		}
+			{
+				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+				::ScreenToClient(this->HWnd(), &pt);
+				this->OnPointerWheel()(*this, int2(pt.x, pt.y), GET_POINTERID_WPARAM(wParam),
+					GET_WHEEL_DELTA_WPARAM(wParam));
+			}
 			break;
 
 #elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
