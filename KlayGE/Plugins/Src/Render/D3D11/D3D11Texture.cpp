@@ -22,14 +22,7 @@
 
 #include <cstring>
 #include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6334)
-#endif
 #include <boost/functional/hash.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>

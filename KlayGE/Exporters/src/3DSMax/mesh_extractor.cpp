@@ -17,16 +17,37 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #pragma warning(push)
-#pragma warning(disable: 4100 4238 4239 4244 4245 4458 4459 4512)
+#pragma warning(disable: 4100) // Many unreferended parameters.
+#pragma warning(disable: 4238) // Rvalue used as lvalue.
+#pragma warning(disable: 4239) // Default argument with type conversion.
+#pragma warning(disable: 4244) // Many conversion from int to WORD.
+#pragma warning(disable: 4245) // Signed/unsigned conversion.
+#pragma warning(disable: 4458) // Declaration of '...' hides class member.
+#pragma warning(disable: 4459) // Declaration of '...' hides global declaration.
+#pragma warning(disable: 4512) // BitArray::NumberSetProxy and DelayedNodeMat don't have assignment operator.
 #include <max.h>
+#pragma warning(pop)
 #include <modstack.h>
+#pragma warning(push)
+#pragma warning(disable: 4100) // Many unreferended parameters.
+#pragma warning(disable: 4458) // Declaration of '...' hides class member.
 #include <stdmat.h>
+#pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4100) // Many unreferended parameters.
+#pragma warning(disable: 4458) // Declaration of '...' hides class member.
 #include <iparamb2.h>
+#pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4100) // Many unreferended parameters.
 #if VERSION_3DSMAX >= 7 << 16
 #include <CS/phyexp.h>
 #else
 #include <phyexp.h>
 #endif
+#pragma warning(pop)
+#pragma warning(push)
+#pragma warning(disable: 4100) // Many unreferended parameters.
 #include <iskin.h>
 #pragma warning(pop)
 
@@ -39,12 +60,13 @@
 #include <KFL/KFL.hpp>
 
 #include <fstream>
-#include <sstream>
 #include <algorithm>
 #include <set>
 #include <vector>
 #include <limits>
 #include <functional>
+
+#include <boost/lexical_cast.hpp>
 
 #include "util.hpp"
 #include "mesh_extractor.hpp"
@@ -808,9 +830,8 @@ namespace KlayGE
 					}
 					else
 					{
-						std::ostringstream oss;
-						oss << obj_name << "__mat_" << (i - mtl_base_index);
-						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], oss.str());
+						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], 
+							obj_name + "__mat_" + boost::lexical_cast<std::string>(i - mtl_base_index));
 					}
 				}
 			}

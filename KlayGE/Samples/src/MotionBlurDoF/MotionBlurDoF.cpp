@@ -25,14 +25,7 @@
 
 #include <sstream>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 6011)
-#endif
 #include <boost/circular_buffer.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "SampleCommon.hpp"
 #include "MotionBlurDoF.hpp"

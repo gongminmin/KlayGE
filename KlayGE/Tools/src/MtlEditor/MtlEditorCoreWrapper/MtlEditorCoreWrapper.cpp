@@ -2,7 +2,7 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4793)
+#pragma warning(disable: 4793) // boost::signals2::detail::do_postconstruct/do_predestruct can't have /clr
 #endif
 #include "../MtlEditorCore/MtlEditorCore.hpp"
 #include "../MtlEditorCore/Commands.hpp"

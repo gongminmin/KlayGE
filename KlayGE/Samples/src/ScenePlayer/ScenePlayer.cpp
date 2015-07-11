@@ -28,22 +28,9 @@
 #include <vector>
 #include <sstream>
 #include <fstream>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 6328)
-#endif
-#include <boost/tokenizer.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include "SampleCommon.hpp"
 #include "ScenePlayer.hpp"
@@ -382,27 +369,25 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				{
 					light_attr = 0;
 
-					std::string attribute_str = attr->ValueString();
-			
-					boost::char_separator<char> sep("", " \t|");
-					boost::tokenizer<boost::char_separator<char>> tok(attribute_str, sep);
-					std::string this_token;
-					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
+					std::vector<std::string> tokens;
+					boost::algorithm::split(tokens, attr->ValueString(), boost::is_any_of(" \t|"));
+					typedef std::vector<std::string> StringsType;
+					for (StringsType::reference token : tokens)
 					{
-						this_token = *beg;
-						if ("noshadow" == this_token)
+						boost::algorithm::trim(token);
+						if ("noshadow" == token)
 						{
 							light_attr |= LightSource::LSA_NoShadow;
 						}
-						else if ("nodiffuse" == this_token)
+						else if ("nodiffuse" == token)
 						{
 							light_attr |= LightSource::LSA_NoDiffuse;
 						}
-						else if ("nospecular" == this_token)
+						else if ("nospecular" == token)
 						{
 							light_attr |= LightSource::LSA_NoSpecular;
 						}
-						else if ("indirect" == this_token)
+						else if ("indirect" == token)
 						{
 							light_attr |= LightSource::LSA_IndirectLighting;
 						}
@@ -631,27 +616,25 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				{
 					obj_attr = SceneObject::SOA_Cullable;
 
-					std::string attribute_str = attr->ValueString();
-			
-					boost::char_separator<char> sep("", " \t|");
-					boost::tokenizer<boost::char_separator<char>> tok(attribute_str, sep);
-					std::string this_token;
-					for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
+					std::vector<std::string> tokens;
+					boost::algorithm::split(tokens, attr->ValueString(), boost::is_any_of(" \t|"));
+					typedef std::vector<std::string> StringsType;
+					for (StringsType::reference token : tokens)
 					{
-						this_token = *beg;
-						if ("cullable" == this_token)
+						boost::algorithm::trim(token);
+						if ("cullable" == token)
 						{
 							obj_attr |= SceneObject::SOA_Cullable;
 						}
-						else if ("overlay" == this_token)
+						else if ("overlay" == token)
 						{
 							obj_attr |= SceneObject::SOA_Overlay;
 						}
-						else if ("moveable" == this_token)
+						else if ("moveable" == token)
 						{
 							obj_attr |= SceneObject::SOA_Moveable;
 						}
-						else if ("invisible" == this_token)
+						else if ("invisible" == token)
 						{
 							obj_attr |= SceneObject::SOA_Invisible;
 						}

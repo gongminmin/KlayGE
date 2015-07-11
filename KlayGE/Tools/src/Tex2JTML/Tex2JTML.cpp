@@ -48,20 +48,14 @@
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4100 4251 4275 4273 4512 4701 4702)
+#pragma warning(disable: 4512) // boost::program_options::options_description doesn't have assignment operator
 #endif
 #include <boost/program_options.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4127 6328)
-#endif
-#include <boost/tokenizer.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
 
@@ -391,12 +385,13 @@ int main(int argc, char* argv[])
 	{
 		std::string input_name_str = vm["input-name"].as<std::string>();
 
-		boost::char_separator<char> sep("", ",;");
-		boost::tokenizer<boost::char_separator<char>> tok(input_name_str, sep);
-		for (auto beg = tok.begin(); beg != tok.end(); ++ beg)
+		std::vector<std::string> tokens;
+		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
+		typedef std::vector<std::string> StringsType;
+		for (StringsType::reference arg : tokens)
 		{
-			std::string arg = *beg;
-			if ((std::string::npos == arg.find("*")) && (std::string::npos == arg.find("?")))
+			boost::algorithm::trim(arg);
+			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))
 			{
 				tex_names.push_back(arg);
 			}

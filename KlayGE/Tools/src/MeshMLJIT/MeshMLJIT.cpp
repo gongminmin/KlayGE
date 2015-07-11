@@ -40,7 +40,7 @@
 #endif
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4100 4251 4275 4273 4512 4701 4702)
+#pragma warning(disable: 4512) // boost::program_options::options_description doesn't have assignment operator
 #endif
 #include <boost/program_options.hpp>
 #ifdef KLAYGE_COMPILER_MSVC
