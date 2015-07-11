@@ -36,15 +36,7 @@
 #include <cmath>
 #include <limits>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
 #include <boost/assert.hpp>
 
 namespace
