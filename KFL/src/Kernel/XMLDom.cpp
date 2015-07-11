@@ -32,24 +32,10 @@
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4702)
-#endif
 #include <boost/lexical_cast.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4100 6011 6313)
-#endif
 #include <rapidxml.hpp>
 #include <rapidxml_print.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include <KFL/XMLDom.hpp>
 
