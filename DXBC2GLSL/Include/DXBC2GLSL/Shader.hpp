@@ -70,7 +70,7 @@ struct TokenizedShaderVersion // 32-bit
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4201)
+#pragma warning(disable: 4201) // Allow unnamed struct.
 #endif
 struct TokenizedShaderInstruction // 32-bit
 {
@@ -177,14 +177,7 @@ struct TokenizedShaderInstruction // 32-bit
 		} dcl_tess_output_primitive;
 	};
 };
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4201)
-#endif
 union TokenizedShaderInstructionExtended
 {
 	struct
