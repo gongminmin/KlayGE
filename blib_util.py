@@ -104,50 +104,48 @@ class build_info:
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
 					target_platform = target_platform[0:space_place]
-					if "L" == android_ver:
-						target_api_level = "L"
-					elif "5.0" == android_ver:
-						target_api_level = "21"
+					if "5.0" == android_ver:
+						target_api_level = 21
 					elif "4.4w" == android_ver:
-						target_api_level = "20"
+						target_api_level = 20
 					elif "4.4" == android_ver:
-						target_api_level = "19"
+						target_api_level = 19
 					elif "4.3" == android_ver:
-						target_api_level = "18"
+						target_api_level = 18
 					elif "4.2" == android_ver:
-						target_api_level = "17"
+						target_api_level = 17
 					elif "4.1" == android_ver:
-						target_api_level = "16"
+						target_api_level = 16
 					elif ("4.0.3" == android_ver) or ("4.0.4" == android_ver):
-						target_api_level = "15"
+						target_api_level = 15
 					elif "4.0" == android_ver:
-						target_api_level = "14"
+						target_api_level = 14
 					elif "3.2" == android_ver:
-						target_api_level = "13"
+						target_api_level = 13
 					elif "3.1" == android_ver:
-						target_api_level = "12"
+						target_api_level = 12
 					elif "3.0" == android_ver:
-						target_api_level = "11"
+						target_api_level = 11
 					elif ("2.3.4" == android_ver) or ("2.3.3" == android_ver):
-						target_api_level = "10"
+						target_api_level = 10
 					elif "2.3" == android_ver:
-						target_api_level = "9"
+						target_api_level = 9
 					elif "2.2" == android_ver:
-						target_api_level = "8"
+						target_api_level = 8
 					elif "2.1" == android_ver:
-						target_api_level = "7"
+						target_api_level = 7
 					elif "2.0.1" == android_ver:
-						target_api_level = "6"
+						target_api_level = 6
 					elif "2.0" == android_ver:
-						target_api_level = "5"
+						target_api_level = 5
 					elif "1.6" == android_ver:
-						target_api_level = "4"
+						target_api_level = 4
 					elif "1.5" == android_ver:
-						target_api_level = "3"
+						target_api_level = 3
 					elif "1.1" == android_ver:
-						target_api_level = "2"
+						target_api_level = 2
 					elif "1.0" == android_ver:
-						target_api_level = "1"
+						target_api_level = 1
 					else:
 						log_error("Unsupported android version\n")
 				else:
@@ -208,7 +206,7 @@ class build_info:
 				elif "vc110" == compiler:
 					toolset = "v110"
 			elif "android" == target_platform:
-				if "L" == target_api_level:
+				if target_api_level >= 21:
 					toolset = "4.9"
 				else:
 					toolset = "4.6"
@@ -380,7 +378,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
 	if "android" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/android.toolchain.cmake\"" % curdir
-		additional_options += " -DANDROID_NATIVE_API_LEVEL=%s" % build_info.target_api_level
+		additional_options += " -DANDROID_NATIVE_API_LEVEL=%d" % build_info.target_api_level
 		if "win" == build_info.host_platform:
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_make_path = android_ndk_path + "\\prebuilt\\windows"
