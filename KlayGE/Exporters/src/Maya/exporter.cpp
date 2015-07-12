@@ -295,7 +295,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 			int kfs_id = meshml_obj_.AllocKeyframes();
 			meshml_obj_.SetKeyframes(kfs_id, joint.second);
 
-			joint_id_to_kfs_id.insert(std::make_pair(joint.second, kfs_id));
+			joint_id_to_kfs_id.emplace(joint.second, kfs_id);
 		}
 
 		for (int i = 0; i < num_frames; ++ i)
@@ -687,8 +687,8 @@ void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_
 
 		parent_id = iter->second;
 	}
-	joint_to_id_.insert(std::make_pair(dag_path.fullPathName().asChar(), joint_id));
-	joint_id_to_path_.insert(std::make_pair(joint_id, dag_path));
+	joint_to_id_.emplace(dag_path.fullPathName().asChar(), joint_id);
+	joint_id_to_path_.emplace(joint_id, dag_path);
 
 	meshml_obj_.SetJoint(joint_id, joint_name, parent_id,
 		float4x4(bind_mat(0, 0), bind_mat(0, 1), bind_mat(0, 2), bind_mat(0, 3),

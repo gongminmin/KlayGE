@@ -277,7 +277,7 @@ namespace KlayGE
 			}
 			if (!(left_merged || right_merged))
 			{
-				free_list_.insert(insert_position, alloc);
+				free_list_.emplace(insert_position, alloc);
 			}
 		}
 	}

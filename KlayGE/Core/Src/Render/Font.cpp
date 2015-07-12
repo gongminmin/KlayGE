@@ -667,7 +667,7 @@ namespace KlayGE
 							0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
 							0, 0, 0, 0, kfont_char_size, kfont_char_size);
 
-						cim.insert(std::make_pair(ch, charInfo));
+						cim.emplace(ch, charInfo);
 					}
 				}
 			}

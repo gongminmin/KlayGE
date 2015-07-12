@@ -105,7 +105,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::AddBuffer(size_t id, AudioBufferPtr const & buffer)
 	{
-		audioBufs_.insert(std::make_pair(id, buffer));
+		audioBufs_.emplace(id, buffer);
 	}
 
 	// 播放id所指定的声音
