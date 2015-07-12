@@ -22,7 +22,7 @@ namespace KlayGE
 	//////////////////////////////////////////////////////////////////////////////////
 	void InputActionMap::AddAction(InputActionDefine const & action_define)
 	{
-		actionMap_.insert(std::make_pair(action_define.second, action_define.first));
+		actionMap_.emplace(action_define.second, action_define.first);
 	}
 
 	// 更新输入动作

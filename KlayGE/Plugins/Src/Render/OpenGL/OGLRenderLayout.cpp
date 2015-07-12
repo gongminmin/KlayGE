@@ -320,7 +320,7 @@ namespace KlayGE
 				}
 				glBindVertexArray(vao);
 
-				vaos_.insert(std::make_pair(so, vao));
+				vaos_.emplace(so, vao);
 				this->BindVertexStreams(so, vao);
 			}
 			else

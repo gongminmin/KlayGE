@@ -591,7 +591,7 @@ namespace KlayGE
 					(*visible_marks)[i] = scene_objs[i]->VisibleMark();
 				}
 
-				visible_marks_map_.insert(std::make_pair(seed, visible_marks));
+				visible_marks_map_.emplace(seed, visible_marks);
 			}
 			else
 			{
@@ -628,7 +628,7 @@ namespace KlayGE
 						}
 						else
 						{
-							renderables_map.insert(std::make_pair(renderable, renderables.size()));
+							renderables_map.emplace(renderable, renderables.size());
 							renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
 						}
 

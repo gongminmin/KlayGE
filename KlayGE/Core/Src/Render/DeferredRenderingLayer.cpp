@@ -76,28 +76,32 @@ namespace KlayGE
 	{
 		for (int i = 0; i < n; ++ i)
 		{
-			vb.push_back(T());
-			vb.back().x() = vb.back().y() = vb.back().z() = 0;
+			T v;
+			v.x() = v.y() = v.z() = 0;
+			vb.push_back(v);
 		}
 
 		float outer_radius = radius / cos(PI / n);
 		for (int i = 0; i < n; ++ i)
 		{
-			vb.push_back(T());
+			T v;
 			float angle = i * 2 * PI / n;
-			vb.back().x() = outer_radius * cos(angle);
-			vb.back().y() = outer_radius * sin(angle);
-			vb.back().z() = height;
+			v.x() = outer_radius * cos(angle);
+			v.y() = outer_radius * sin(angle);
+			v.z() = height;
+			vb.push_back(v);
 		}
 
-		vb.push_back(T());
-		vb.back().x() = vb.back().y() = 0;
-		vb.back().z() = height;
+		{
+			T v;
+			v.x() = v.y() = 0;
+			v.z() = height;
+			vb.push_back(v);
+		}
 
 		for (int i = 0; i < n; ++ i)
 		{
-			vb.push_back(T());
-			vb.back() = vb[vertex_base + n + i];
+			vb.push_back(vb[vertex_base + n + i]);
 		}
 
 		for (uint16_t i = 0; i < n - 1; ++ i)
@@ -126,36 +130,51 @@ namespace KlayGE
 	{
 		for (int i = 0; i < 4; ++ i)
 		{
-			vb.push_back(T());
-			vb.back().x() = vb.back().y() = vb.back().z() = 0;
+			T v;
+			v.x() = v.y() = v.z() = 0;
+			vb.push_back(v);
 		}
 
 		float outer_radius = radius * sqrt(2.0f);
-		vb.push_back(T());
-		vb.back().x() = -outer_radius;
-		vb.back().y() = -outer_radius;
-		vb.back().z() = height;
-		vb.push_back(T());
-		vb.back().x() = +outer_radius;
-		vb.back().y() = -outer_radius;
-		vb.back().z() = height;
-		vb.push_back(T());
-		vb.back().x() = +outer_radius;
-		vb.back().y() = +outer_radius;
-		vb.back().z() = height;
-		vb.push_back(T());
-		vb.back().x() = -outer_radius;
-		vb.back().y() = +outer_radius;
-		vb.back().z() = height;
+		{
+			T v;
+			v.x() = -outer_radius;
+			v.y() = -outer_radius;
+			v.z() = height;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +outer_radius;
+			v.y() = -outer_radius;
+			v.z() = height;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +outer_radius;
+			v.y() = +outer_radius;
+			v.z() = height;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = -outer_radius;
+			v.y() = +outer_radius;
+			v.z() = height;
+			vb.push_back(v);
+		}
 
-		vb.push_back(T());
-		vb.back().x() = vb.back().y() = 0;
-		vb.back().z() = height;
+		{
+			T v;
+			v.x() = v.y() = 0;
+			v.z() = height;
+			vb.push_back(v);
+		}
 
 		for (int i = 0; i < 4; ++ i)
 		{
-			vb.push_back(T());
-			vb.back() = vb[vertex_base + 4 + i];
+			vb.push_back(vb[vertex_base + 4 + i]);
 		}
 
 		ib.push_back(vertex_base + 0);
@@ -188,39 +207,63 @@ namespace KlayGE
 	template <typename T>
 	void CreateBoxMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float half_length)
 	{
-		vb.push_back(T());
-		vb.back().x() = -half_length;
-		vb.back().y() = +half_length;
-		vb.back().z() = -half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = +half_length;
-		vb.back().z() = -half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = -half_length;
-		vb.push_back(T());
-		vb.back().x() = -half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = -half_length;
+		{
+			T v;
+			v.x() = -half_length;
+			v.y() = +half_length;
+			v.z() = -half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +half_length;
+			v.y() = +half_length;
+			v.z() = -half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +half_length;
+			v.y() = -half_length;
+			v.z() = -half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = -half_length;
+			v.y() = -half_length;
+			v.z() = -half_length;
+			vb.push_back(v);
+		}
 
-		vb.push_back(T());
-		vb.back().x() = -half_length;
-		vb.back().y() = +half_length;
-		vb.back().z() = +half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = +half_length;
-		vb.back().z() = +half_length;
-		vb.push_back(T());
-		vb.back().x() = +half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = +half_length;
-		vb.push_back(T());
-		vb.back().x() = -half_length;
-		vb.back().y() = -half_length;
-		vb.back().z() = +half_length;
+		{
+			T v;
+			v.x() = -half_length;
+			v.y() = +half_length;
+			v.z() = +half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +half_length;
+			v.y() = +half_length;
+			v.z() = +half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = +half_length;
+			v.y() = -half_length;
+			v.z() = +half_length;
+			vb.push_back(v);
+		}
+		{
+			T v;
+			v.x() = -half_length;
+			v.y() = -half_length;
+			v.z() = +half_length;
+			vb.push_back(v);
+		}
 
 		ib.push_back(vertex_base + 0);
 		ib.push_back(vertex_base + 1);

@@ -179,10 +179,10 @@ namespace KlayGE
 	{
 		if (is_bone(node))
 		{
-			joint_nodes_.insert(std::make_pair(node, Matrix3()));
+			joint_nodes_.emplace(node, Matrix3());
 
 			int joint_id = meshml_obj_.AllocJoint();
-			joint_node_to_id_.insert(std::make_pair(node, joint_id));
+			joint_node_to_id_.emplace(node, joint_id);
 		}
 		for (int i = 0; i < node->NumberOfChildren(); ++ i)
 		{
@@ -197,7 +197,7 @@ namespace KlayGE
 			// root bone
 			int joint_id = meshml_obj_.AllocJoint();
 			meshml_obj_.SetJoint(joint_id, tstr_to_str(root_node_->GetName()), -1, Quaternion(0, 0, 0, 1), Quaternion(0, 0, 0, 0));
-			joint_node_to_id_.insert(std::make_pair(root_node_, joint_id));
+			joint_node_to_id_.emplace(root_node_, joint_id);
 
 			int kfs_id = meshml_obj_.AllocKeyframes();
 			meshml_obj_.SetKeyframes(kfs_id, joint_id);
@@ -794,7 +794,7 @@ namespace KlayGE
 					int new_index = 0;
 					for (std::vector<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
 					{
-						mapping.insert(std::make_pair(*iter, new_index));
+						mapping.emplace(*iter, new_index);
 
 						vertex_t const & vert = obj_vertices[*iter];
 
