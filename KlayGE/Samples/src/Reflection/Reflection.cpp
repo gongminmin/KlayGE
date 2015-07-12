@@ -403,11 +403,7 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 			float3 center = MathLib::transform_coord(teapot_->GetRenderable()->PosBound().Center(), teapot_->ModelMatrix());
 			float3 direction = eye - at;
-			Plane refl_plane = MathLib::normalize(MathLib::from_point_normal(center, direction));
-			float4x4 refl_mat = MathLib::reflect(refl_plane);
 
-			float3 refl_eye_pos = MathLib::transform_coord(eye, refl_mat);
-			float3 refl_eye_at = MathLib::transform_coord(at, refl_mat);
 			back_camera->ViewParams(center, center + direction, screen_camera_->UpVec());
 			back_camera->ProjParams(PI / 2, 1, screen_camera_->NearPlane(), screen_camera_->FarPlane());
 

@@ -335,6 +335,7 @@ namespace
 #else
 		if (0 == v)
 		{
+			index = 0;
 			return 0;
 		}
 		else
@@ -2753,10 +2754,10 @@ namespace KlayGE
 			for (int s = 0; s < partitions; ++ s)
 			{
 				int const * pbits = this->PBitCombo(mode_info, params.pbit_combo[s]);
-				WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[0]));
+				WriteBit(output, start_bit, static_cast<uint8_t>(pbits[0]));
 				if (mode_info.p_bit_type != PBT_Shared)
 				{
-					WriteBits(output, start_bit, 1, static_cast<uint8_t>(pbits[1]));
+					WriteBit(output, start_bit,  static_cast<uint8_t>(pbits[1]));
 				}
 			}
 		}

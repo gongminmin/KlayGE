@@ -479,14 +479,16 @@ INT_PTR CreateTabDialogs(HWND hWnd, HINSTANCE hInstance)
 
 	RECT rc;
 	GetClientRect(hTab, &rc);
-	TabCtrl_AdjustRect(hTab, false, &rc);
+	int ret = TabCtrl_AdjustRect(hTab, false, &rc);
+	UNREF_PARAM(ret);
 	rc.top += 20;
 
 	for (int i = 0; i < NTABS; ++ i)
 	{
 		tci.pszText    = const_cast<TCHAR*>(tab_dlg_titles[i].c_str());
 		tci.cchTextMax = static_cast<int>(tab_dlg_titles[i].size());
-		TabCtrl_InsertItem(hTab, i, &tci);
+		ret = TabCtrl_InsertItem(hTab, i, &tci);
+		UNREF_PARAM(ret);
 
 		hTabDlg[i] = CreateDialogParam(hInstance, tab_dlg_ids[i].c_str(), hTab, tab_dlg_procs[i], 0);
 		MoveWindow(hTabDlg[i], rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, FALSE);

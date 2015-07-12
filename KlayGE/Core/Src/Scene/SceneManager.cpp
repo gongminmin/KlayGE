@@ -143,7 +143,6 @@ namespace KlayGE
 		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			float4x4 proj = camera.ProjMatrix();
 			int32_t cas_index = drl->CurrCascadeIndex();
 			if (cas_index >= 0)
 			{

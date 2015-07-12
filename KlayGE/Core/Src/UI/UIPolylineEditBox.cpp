@@ -347,27 +347,6 @@ namespace KlayGE
 
 	void UIPolylineEditBox::Render()
 	{
-		UI_Control_State iState = UICS_Normal;
-
-		if (visible_)
-		{
-			if (enabled_)
-			{
-				if (has_focus_)
-				{
-					iState = UICS_Focus;
-				}
-			}
-			else
-			{
-				iState = UICS_Disabled;
-			}
-		}
-		else
-		{
-			iState = UICS_Hidden;
-		}
-
 		if (visible_)
 		{
 			UIDialogPtr dlg = this->GetDialog();
