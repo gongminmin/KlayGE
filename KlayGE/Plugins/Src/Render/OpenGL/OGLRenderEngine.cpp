@@ -57,7 +57,6 @@
 #endif
 
 #include <algorithm>
-#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>

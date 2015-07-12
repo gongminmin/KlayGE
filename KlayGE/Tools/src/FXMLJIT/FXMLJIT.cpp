@@ -34,10 +34,6 @@
 #include <KFL/XMLDom.hpp>
 
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <vector>
-#include <cstring>
 
 #include <boost/algorithm/string/case_conv.hpp>
 

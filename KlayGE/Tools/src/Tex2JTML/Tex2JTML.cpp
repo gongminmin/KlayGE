@@ -10,7 +10,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 
 #if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)

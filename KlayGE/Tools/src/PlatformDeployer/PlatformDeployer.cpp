@@ -6,7 +6,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 
 #include <boost/algorithm/string/case_conv.hpp>
