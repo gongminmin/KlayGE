@@ -6,6 +6,7 @@
 	<include name="GBufferNoSkinning.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="SSR.fxml"/>
+	<include name="Noise.fxml"/>
 
 	<parameter type="float4x4" name="back_mvp"/>
 	<parameter type="float4x4" name="back_model_view"/>
@@ -35,8 +36,8 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 #endif
 			out float3 oPosESFront : TEXCOORD2,
 			out float3 oPosESBack : TEXCOORD3,
-			out float3 oNormalESFront : TEXCOORD4,
-			out float3 oNormalESBack : TEXCOORD5,
+			out float3 oNormalOS : TEXCOORD4,
+			out float3 oPosOS : TEXCOORD5,
 			out float2 oTexcoord : TEXCOORD6,
 			out float4 oPos : SV_Position)
 {
@@ -52,9 +53,8 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 	oPosESBack = mul(pos, back_model_view).xyz;
 	
 	tangent_quat = tangent_quat * 2 - 1;
-	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
-	oNormalESFront = mul(normal, (float3x3)model_view);
-	oNormalESBack = mul(normal, (float3x3)back_model_view);
+	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
+	oPosOS = pos.xyz * 200;
 
 	oTcFront.xy = oPos.xy / oPos.w;
 	oTcFront.y *= KLAYGE_FLIPPING;
@@ -83,14 +83,19 @@ float4 ReflectSpecialShadingPS(
 #endif
 			float3 pos_es_front : TEXCOORD2,
 			float3 pos_es_back : TEXCOORD3,
-			float3 normal_es_front : TEXCOORD4,
-			float3 normal_es_back : TEXCOORD5,
+			float3 normal_os : TEXCOORD4,
+			float3 pos_os : TEXCOORD5,
 			float2 texcoord : TEXCOORD6) : SV_Target
 {
 #ifndef NOPERSPECTIVE_SUPPORT
 	float2 tc_front = tc_w_front.xy / tc_w_front.z;
 	float2 tc_back = tc_w_back.xy / tc_w_back.z;
 #endif
+
+	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
+	float3 normal = normalize(normal_os + bump * 0.01f);
+	float3 normal_es_front = mul(normal, (float3x3)model_view);
+	float3 normal_es_back = mul(normal, (float3x3)back_model_view);
 
 	normal_es_front = normalize(normal_es_front);
 	normal_es_back = normalize(normal_es_back);
