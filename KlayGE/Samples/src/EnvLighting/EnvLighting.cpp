@@ -98,7 +98,6 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			float4x4 const mv = model_mat_ * camera.ViewMatrix();
 			float4x4 const mvp = model_mat_ * camera.ViewProjMatrix();
 
 			*(technique_->Effect().ParameterByName("model")) = model_mat_;

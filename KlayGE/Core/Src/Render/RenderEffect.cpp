@@ -5432,7 +5432,7 @@ namespace KlayGE
 		{
 			if (!ret->in_cbuff_)
 			{
-				reinterpret_cast<std::vector<float4x4>*>(ret->data_.val)->~vector();
+				ret->RetriveT().~vector();
 			}
 			ret->data_ = data_;
 		}
@@ -5459,7 +5459,7 @@ namespace KlayGE
 		}
 		else
 		{
-			*reinterpret_cast<std::vector<float4x4>*>(data_.val) = value;
+			this->RetriveT() = value;
 		}
 		return *this;
 	}
@@ -5478,7 +5478,7 @@ namespace KlayGE
 		}
 		else
 		{
-			val = *reinterpret_cast<std::vector<float4x4> const *>(data_.val);
+			val = this->RetriveT();
 		}
 	}
 
