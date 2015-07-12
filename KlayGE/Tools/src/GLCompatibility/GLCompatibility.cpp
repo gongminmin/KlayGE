@@ -12,8 +12,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <fstream>
-#include <sstream>
+#include <boost/lexical_cast.hpp>
 
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
@@ -54,11 +53,8 @@ namespace
 			re.GetCustomAttrib("NUM_FEATURES", &num_exts);
 			for (int i = 0; i < num_exts; ++ i)
 			{
-				std::ostringstream oss;
-				oss << "FEATURE_NAME_" << i;
-
 				std::string name;
-				re.GetCustomAttrib(oss.str(), &name);
+				re.GetCustomAttrib("FEATURE_NAME_" + boost::lexical_cast<std::string>(i), &name);
 				std::string::size_type p = name.find("GL_VERSION_");
 				if (std::string::npos == p)
 				{

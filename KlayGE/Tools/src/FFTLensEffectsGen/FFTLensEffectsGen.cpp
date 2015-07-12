@@ -8,11 +8,8 @@
 
 #include <cmath>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <cassert>
-#include <ctime>
 
 using namespace std;
 using namespace KlayGE;

@@ -10,8 +10,6 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <list>
 #include <map>
