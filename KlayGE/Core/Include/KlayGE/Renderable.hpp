@@ -34,6 +34,7 @@ namespace KlayGE
 		PC_Shadowing,
 		PC_IndirectLighting,
 		PC_Shading,
+		PC_Reflection,
 		PC_SpecialShading,
 		PC_SimpleForward,
 		PC_None
@@ -96,6 +97,10 @@ namespace KlayGE
 		PT_OpaqueShading = MakePassType<PRT_None, PTB_Opaque, PC_Shading>::value,
 		PT_TransparencyBackShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_Shading>::value,
 		PT_TransparencyFrontShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_Shading>::value,
+
+		PT_OpaqueReflection = MakePassType<PRT_None, PTB_Opaque, PC_Reflection>::value,
+		PT_TransparencyBackReflection = MakePassType<PRT_None, PTB_TransparencyBack, PC_Reflection>::value,
+		PT_TransparencyFrontReflection = MakePassType<PRT_None, PTB_TransparencyFront, PC_Reflection>::value,
 		
 		PT_OpaqueSpecialShading = MakePassType<PRT_None, PTB_Opaque, PC_SpecialShading>::value,
 		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
@@ -298,6 +303,9 @@ namespace KlayGE
 		RenderTechniquePtr gen_sm_wo_dt_tech_;
 		RenderTechniquePtr gen_cascaded_sm_tech_;
 		RenderTechniquePtr gen_rsm_tech_;
+		RenderTechniquePtr reflection_tech_;
+		RenderTechniquePtr reflection_alpha_blend_back_tech_;
+		RenderTechniquePtr reflection_alpha_blend_front_tech_;
 		RenderTechniquePtr special_shading_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_back_tech_;
 		RenderTechniquePtr special_shading_alpha_blend_front_tech_;
@@ -333,6 +341,7 @@ namespace KlayGE
 		RenderEffectParameterPtr opacity_clr_param_;
 		RenderEffectParameterPtr opacity_map_enabled_param_;
 		RenderEffectParameterPtr opaque_depth_tex_param_;
+		RenderEffectParameterPtr reflection_tex_param_;
 
 		TexturePtr diffuse_tex_;
 		TexturePtr specular_tex_;

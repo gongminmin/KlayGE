@@ -31,6 +31,7 @@
 		<parameter type="float3" name="disp_range0"/>
 		<parameter type="float3" name="disp_range1"/>
 		<parameter type="float" name="interpolate_frac"/>
+		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
@@ -41,6 +42,13 @@
 		<state name="filtering" value="min_mag_mip_point"/>
 		<state name="address_u" value="clamp"/>
 		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<parameter type="sampler" name="reflection_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
 	</parameter>
 
 	<shader>
@@ -92,16 +100,16 @@ void OceanGBufferVS(float2 pos : POSITION,
 	normal = normalize(float3(normal.x, 1, normal.z));
 	tangent.xyz = normalize(float3(1, (fx - pos_os.y) * stretch, 0));
 	tangent.w = 1;
-	
+
 	oPos = mul(pos_os, mvp);
-	
+
 	oTexCoordDepth.xy = tex_coord;
 	oTexCoordDepth.z = oPos.w;
-	
+
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
 	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
-	
+
 #ifndef NOPERSPECTIVE_SUPPORT
 	oScreenTc.z = oPos.w;
 	oScreenTc.xy *= oScreenTc.z;
@@ -199,6 +207,59 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 		mrt_0, mrt_1);
 }
 
+void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
+					out float3 eye_dir : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+					out noperspective float2 oTc : TEXCOORD1,
+#else
+					out float3 oTc : TEXCOORD1,
+#endif
+					out float4 oPos : SV_Position)
+{
+	float4 pos_os = GetInfTerrainPosOS(pos, 10);
+	float2 tex_coord = pos_os.xz / (patch_length * 3.2f);
+
+	eye_dir = eye_pos - pos_os.xyz;
+	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
+	float height_scale = 1 - fog_scale;
+	
+	eye_dir = mul(eye_dir, (float3x3)model_view);
+
+	pos_os.y = base_level;
+
+	oPos = mul(pos_os, mvp);
+
+	oTc.xy = oPos.xy / oPos.w;
+	oTc.y *= KLAYGE_FLIPPING;
+	oTc.xy = oTc.xy * 0.5f + 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oTc.z = oPos.w;
+	oTc.xy *= oTc.z;
+#endif
+}
+
+float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+	noperspective float2 tc : TEXCOORD1
+#else
+	float3 tc_w : TEXCOORD1
+#endif
+	) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
+#endif
+
+	float3 normal = view[1].xyz;
+
+	eye_dir = normalize(eye_dir);
+
+	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, 1, 0);
+	float3 reflection = reflection4.xyz * reflection4.w;
+	return float4(reflection, 1);
+}
+
 void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 					out float3 eye_dir : TEXCOORD0,
 					out float4 tex_coord_noise_grad : TEXCOORD1,
@@ -272,15 +333,14 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);
-	
+
 	float3 normal_ws = mul(normal, (float3x3)inv_view);
-	
+
 	eye_dir = normalize(eye_dir);
 
 	float2 bump = normal_ws.xz / (pos_ss.z / pos_ss.w);
-	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, 1, 0);
-	float3 reflection = reflection4.xyz * reflection4.w;
-	
+	float3 reflection = reflection_tex.Sample(reflection_sampler, tc + bump * 0.2f).xyz;
+
 	float no_water_depth = ReadAFloat(opaque_depth_tex.Sample(point_clamp_sampler, tc), near_q_far.z);
 
 	float3 refraction;
@@ -297,11 +357,11 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 	}
 
 	float water_depth = clamp(no_water_depth - pos_ss.w, 0, 100.0f);
-	
+
 	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f).x;
 
 	float3 water_color = lerp(refraction * exp(-water_depth * 0.05f) * saturate(10 / pos_ss.w), reflection, fresnel);
-	
+
 	return float4(water_color, saturate(water_depth * 0.1f));
 }
 		]]>
@@ -313,7 +373,7 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 			<state name="pixel_shader" value="OceanDepthAlphaBlendPS()"/>
 		</pass>
 	</technique>
-	
+
 	<technique name="OceanGBufferAlphaBlendFrontRT0" inherit="GBufferAlphaBlendFrontRT0Tech">
 		<pass name="p0">
 			<state name="vertex_shader" value="OceanGBufferVS()"/>
@@ -332,6 +392,13 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 		<pass name="p0">
 			<state name="vertex_shader" value="OceanGBufferVS()"/>
 			<state name="pixel_shader" value="OceanGBufferAlphaBlendMRTPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="OceanReflectionAlphaBlendFront">
+		<pass name="p0">
+			<state name="vertex_shader" value="OceanReflectionAlphaBlendVS()"/>
+			<state name="pixel_shader" value="OceanReflectionAlphaBlendPS()"/>
 		</pass>
 	</technique>
 
@@ -395,7 +462,7 @@ float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="GBufferFoggySkyBoxRT1PS()"/>
 		</pass>
 	</technique>
-	
+
 	<technique name="GBufferFoggySkyBoxMRT" inherit="GBufferSkyBoxMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="FoggySkyBoxVS()"/>

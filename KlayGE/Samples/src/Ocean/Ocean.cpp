@@ -46,14 +46,18 @@ namespace
 			gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT0");
 			gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT1");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
+			reflection_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
 			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
 			technique_ = gbuffer_alpha_blend_front_mrt_tech_;
+
+			reflection_tex_param_ = technique_->Effect().ParameterByName("reflection_tex");
 
 			this->SetStretch(strength);
 			this->SetBaseLevel(base_level);
 
 			model_mat_ = float4x4::Identity();
 			effect_attrs_ |= EA_TransparencyFront;
+			effect_attrs_ |= EA_Reflection;
 			effect_attrs_ |= EA_SpecialShading;
 		}
 
@@ -105,7 +109,7 @@ namespace
 		void OnRenderBegin()
 		{
 			InfTerrainRenderable::OnRenderBegin();
-					
+
 			switch (type_)
 			{
 			case PT_OpaqueGBufferRT0:
@@ -125,6 +129,33 @@ namespace
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
 				break;
 
+			case PT_OpaqueReflection:
+			case PT_TransparencyBackReflection:
+			case PT_TransparencyFrontReflection:
+				*diffuse_tex_param_ = TexturePtr();
+				*emit_tex_param_ = TexturePtr();
+				*emit_clr_param_ = float4(0, 0, 0, 0);
+				*opacity_clr_param_ = 1.0f;
+				*opacity_map_enabled_param_ = static_cast<int32_t>(0);
+				*(technique_->Effect().ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
+				{
+					App3DFramework const & app = Context::Instance().AppInstance();
+					Camera const & camera = app.ActiveCamera();
+					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
+					*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
+					*(technique_->Effect().ParameterByName("near_q_far")) = near_q_far;
+					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
+					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
+					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
+					*(technique_->Effect().ParameterByName("view")) = camera.ViewMatrix();
+					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
+				}
+				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
+				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
+				break;
+
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
@@ -138,20 +169,13 @@ namespace
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
-					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
-					*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
 					*(technique_->Effect().ParameterByName("near_q_far")) = near_q_far;
-					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
-					*(technique_->Effect().ParameterByName("min_samples")) = static_cast<int32_t>(20);
-					*(technique_->Effect().ParameterByName("max_samples")) = static_cast<int32_t>(30);
 					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
-				*(technique_->Effect().ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
-				*(technique_->Effect().ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
 				break;
-				
+
 			default:
 				break;
 			}

@@ -143,6 +143,13 @@ namespace KlayGE
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
 				break;
 
+			case PT_OpaqueReflection:
+			case PT_TransparencyBackReflection:
+			case PT_TransparencyFrontReflection:
+				*specular_tex_param_ = specular_tex_;
+				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
+				break;
+
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
@@ -151,6 +158,10 @@ namespace KlayGE
 				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
 				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
 				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
+				if (reflection_tex_param_)
+				{
+					*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
+				}
 				break;
 
 			default:
@@ -410,6 +421,15 @@ namespace KlayGE
 
 		case PT_GenShadowMapWODepthTexture:
 			return gen_sm_wo_dt_tech_;
+
+		case PT_OpaqueReflection:
+			return reflection_tech_;
+
+		case PT_TransparencyBackReflection:
+			return reflection_alpha_blend_back_tech_;
+
+		case PT_TransparencyFrontReflection:
+			return reflection_alpha_blend_front_tech_;
 
 		case PT_OpaqueSpecialShading:
 			return special_shading_tech_;

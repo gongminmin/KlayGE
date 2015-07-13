@@ -99,6 +99,9 @@ namespace KlayGE
 		FrameBufferPtr projective_shadowing_fb;
 		TexturePtr projective_shadowing_tex;
 
+		FrameBufferPtr reflection_fb;
+		TexturePtr reflection_tex;
+
 		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
 
@@ -246,6 +249,11 @@ namespace KlayGE
 		TexturePtr const & GBufferRT0BackupTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_rt0_backup_tex;
+		}
+
+		TexturePtr const & ReflectionTex(uint32_t vp) const
+		{
+			return viewports_[vp].reflection_tex;
 		}
 
 		uint32_t ActiveViewport() const
@@ -578,6 +586,7 @@ namespace KlayGE
 		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
 		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
 		std::array<PerfRangePtr, PTB_None> shading_perfs_;
+		std::array<PerfRangePtr, PTB_None> reflection_perfs_;
 		std::array<PerfRangePtr, PTB_None> special_shading_perfs_;
 		PerfRangePtr sss_blur_pp_perf_;
 		PerfRangePtr ssr_pp_perf_;
