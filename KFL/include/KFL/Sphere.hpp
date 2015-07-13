@@ -54,6 +54,8 @@ namespace KlayGE
 		{
 		}
 		Sphere_T(Vector_T<T, 3> const & center, T radius);
+		Sphere_T(Sphere_T const & rhs);
+		Sphere_T(Sphere_T&& rhs);
 
 		// 赋值操作符
 		Sphere_T& operator+=(Vector_T<T, 3> const & rhs);
@@ -62,6 +64,7 @@ namespace KlayGE
 		Sphere_T& operator/=(T rhs);
 
 		Sphere_T& operator=(Sphere_T const & rhs);
+		Sphere_T& operator=(Sphere_T&& rhs);
 
 		// 一元操作符
 		Sphere_T const & operator+() const;

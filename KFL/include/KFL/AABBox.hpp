@@ -56,7 +56,9 @@ namespace KlayGE
 		{
 		}
 		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax);
+		AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax);
 		AABBox_T(AABBox_T<T> const & rhs);
+		AABBox_T(AABBox_T<T>&& rhs);
 
 		// 赋值操作符
 		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
@@ -67,6 +69,7 @@ namespace KlayGE
 		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs);
 
 		AABBox_T<T>& operator=(AABBox_T<T> const & rhs);
+		AABBox_T<T>& operator=(AABBox_T<T>&& rhs);
 
 		// 一元操作符
 		AABBox_T<T> const operator+() const;

@@ -36,10 +36,14 @@ namespace KlayGE
 {
 	template Plane_T<float>::Plane_T(float const * rhs);
 	template Plane_T<float>::Plane_T(Plane_T const & rhs);
+	template Plane_T<float>::Plane_T(Plane_T&& rhs);
 	template Plane_T<float>::Plane_T(float4 const & rhs);
+	template Plane_T<float>::Plane_T(float4&& rhs);
 	template Plane_T<float>::Plane_T(float a, float b, float c, float d);
 	template Plane_T<float>& Plane_T<float>::operator=(Plane const & rhs);
+	template Plane_T<float>& Plane_T<float>::operator=(Plane&& rhs);
 	template Plane_T<float>& Plane_T<float>::operator=(float4 const & rhs);
+	template Plane_T<float>& Plane_T<float>::operator=(float4&& rhs);
 	template Plane_T<float> const Plane_T<float>::operator+() const;
 	template Plane_T<float> const Plane_T<float>::operator-() const;
 	template float3 const Plane_T<float>::Normal() const;
@@ -52,19 +56,31 @@ namespace KlayGE
 		: plane_(rhs)
 	{
 	}
-	
+
 	template <typename T>
 	Plane_T<T>::Plane_T(Plane_T const & rhs)
 		: plane_(rhs.plane_)
 	{
 	}
-	
+
+	template <typename T>
+	Plane_T<T>::Plane_T(Plane_T&& rhs)
+		: plane_(std::move(rhs.plane_))
+	{
+	}
+
 	template <typename T>
 	Plane_T<T>::Plane_T(Vector_T<T, elem_num> const & rhs)
-	{
-		plane_ = rhs;
+		: plane_(rhs)
+	{		
 	}
-	
+
+	template <typename T>
+	Plane_T<T>::Plane_T(Vector_T<T, elem_num>&& rhs)
+		: plane_(std::move(rhs))
+	{
+	}
+
 	template <typename T>
 	Plane_T<T>::Plane_T(T a, T b, T c, T d)
 	{
@@ -83,7 +99,14 @@ namespace KlayGE
 		}
 		return *this;
 	}
-	
+
+	template <typename T>
+	Plane_T<T>& Plane_T<T>::operator=(Plane_T<T>&& rhs)
+	{
+		plane_ = std::move(rhs.plane_);
+		return *this;
+	}
+
 	template <typename T>
 	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num> const & rhs)
 	{
@@ -92,11 +115,18 @@ namespace KlayGE
 	}
 
 	template <typename T>
+	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num>&& rhs)
+	{
+		plane_ = std::move(rhs);
+		return *this;
+	}
+
+	template <typename T>
 	Plane_T<T> const Plane_T<T>::operator+() const
 	{
 		return *this;
 	}
-	
+
 	template <typename T>
 	Plane_T<T> const Plane_T<T>::operator-() const
 	{
@@ -108,7 +138,7 @@ namespace KlayGE
 	{
 		return Vector_T<T, 3>(this->a(), this->b(), this->c());
 	}
-	
+
 	template <typename T>
 	void Plane_T<T>::Normal(Vector_T<T, 3> const & rhs)
 	{

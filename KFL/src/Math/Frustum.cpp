@@ -34,6 +34,10 @@
 
 namespace KlayGE
 {
+	template Frustum_T<float>::Frustum_T(Frustum const & rhs);
+	template Frustum_T<float>::Frustum_T(Frustum&& rhs);
+	template Frustum& Frustum_T<float>::operator=(Frustum const & rhs);
+	template Frustum& Frustum_T<float>::operator=(Frustum&& rhs);
 	template void Frustum_T<float>::ClipMatrix(float4x4 const & clip, float4x4 const & inv_clip);
 	template bool Frustum_T<float>::IsEmpty() const;
 	template bool Frustum_T<float>::VecInBound(float3 const & v) const;
@@ -43,6 +47,37 @@ namespace KlayGE
 	template BoundOverlap Frustum_T<float>::Intersect(Sphere const & sphere) const;
 	template BoundOverlap Frustum_T<float>::Intersect(Frustum const & frustum) const;
 
+
+	template <typename T>
+	Frustum_T<T>::Frustum_T(Frustum_T<T> const & rhs)
+		: planes_(rhs.planes_), corners_(rhs.corners_)
+	{
+	}
+
+	template <typename T>
+	Frustum_T<T>::Frustum_T(Frustum_T<T>&& rhs)
+		: planes_(std::move(rhs.planes_)), corners_(std::move(rhs.corners_))
+	{
+	}
+
+	template <typename T>
+	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T> const & rhs)
+	{
+		if (this != &rhs)
+		{
+			planes_ = rhs.planes_;
+			corners_ = rhs.corners_;
+		}
+		return *this;
+	}
+
+	template <typename T>
+	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T>&& rhs)
+	{
+		planes_ = std::move(rhs.planes_);
+		corners_ = std::move(rhs.corners_);
+		return *this;
+	}
 
 	template <typename T>
 	void Frustum_T<T>::ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip)
@@ -70,7 +105,8 @@ namespace KlayGE
 		planes_[5] = column4 + column3;	// near
 
 		// Loop through each side of the frustum and normalize it.
-		for (typename planes_t::reference plane : planes_)
+		typedef decltype(planes_) PlanesType;
+		for (PlanesType::reference plane : planes_)
 		{
 			plane = MathLib::normalize(plane);
 		}

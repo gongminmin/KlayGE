@@ -42,6 +42,15 @@ namespace KlayGE
 	class Frustum_T : public Bound_T<T>
 	{
 	public:
+		Frustum_T()
+		{
+		}
+		Frustum_T(Frustum_T<T> const & rhs);
+		Frustum_T(Frustum_T<T>&& rhs);
+
+		Frustum_T& operator=(Frustum_T const & rhs);
+		Frustum_T& operator=(Frustum_T&& rhs);
+
 		void ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip);
 
 		virtual bool IsEmpty() const KLAYGE_OVERRIDE;
@@ -73,11 +82,8 @@ namespace KlayGE
 		BoundOverlap Intersect(Frustum_T<T> const & frustum) const;
 
 	private:
-		typedef std::array<Plane_T<T>, 6> planes_t;
-		planes_t planes_;
-
-		typedef std::array<Vector_T<T, 3>, 8> corners_t;
-		corners_t corners_;
+		std::array<Plane_T<T>, 6> planes_;
+		std::array<Vector_T<T, 3>, 8> corners_;
 	};
 }
 

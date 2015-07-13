@@ -90,6 +90,10 @@ namespace KlayGE
 		{
 			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
 		}
+		Vector_T(Vector_T&& rhs)
+			: vec_(std::move(rhs.vec_))
+		{
+		}
 		template <typename U, int M>
 		Vector_T(Vector_T<U, M> const & rhs)
 		{
@@ -105,6 +109,13 @@ namespace KlayGE
 			this->x() = x;
 			this->y() = y;
 		}
+		Vector_T(T&& x, T&& y)
+		{
+			static_assert(2 == elem_num, "Must be 2D vector.");
+
+			vec_[0] = std::move(x);
+			vec_[1] = std::move(y);
+		}
 		Vector_T(T const & x, T const & y, T const & z)
 		{
 			static_assert(3 == elem_num, "Must be 3D vector.");
@@ -112,6 +123,14 @@ namespace KlayGE
 			this->x() = x;
 			this->y() = y;
 			this->z() = z;
+		}
+		Vector_T(T&& x, T&& y, T&& z)
+		{
+			static_assert(3 == elem_num, "Must be 3D vector.");
+
+			vec_[0] = std::move(x);
+			vec_[1] = std::move(y);
+			vec_[2] = std::move(z);
 		}
 		Vector_T(T const & x, T const & y, T const & z, T const & w)
 		{
@@ -121,6 +140,15 @@ namespace KlayGE
 			this->y() = y;
 			this->z() = z;
 			this->w() = w;
+		}
+		Vector_T(T&& x, T&& y, T&& z, T&& w)
+		{
+			static_assert(4 == elem_num, "Must be 4D vector.");
+
+			vec_[0] = std::move(x);
+			vec_[1] = std::move(y);
+			vec_[2] = std::move(z);
+			vec_[3] = std::move(w);
 		}
 
 		static size_t size()
@@ -259,6 +287,11 @@ namespace KlayGE
 			{
 				vec_ = rhs.vec_;
 			}
+			return *this;
+		}
+		Vector_T& operator=(Vector_T&& rhs)
+		{
+			vec_ = std::move(rhs.vec_);
 			return *this;
 		}
 		template <typename U, int M>

@@ -73,15 +73,10 @@ namespace KlayGE
 		{
 		}
 		explicit Rect_T(T const * rhs);
-		Rect_T(Rect_T const & rhs)
-			: rect_(rhs.rect_)
-		{
-		}
+		Rect_T(Rect_T const & rhs);
+		Rect_T(Rect_T&& rhs);
 		template <typename U>
-		Rect_T(Rect_T<U> const & rhs)
-			: rect_(rhs.rect_)
-		{
-		}
+		Rect_T(Rect_T<U> const & rhs);
 		Rect_T(T left, T top, T right, T bottom);
 
 		// 取向量
@@ -132,20 +127,10 @@ namespace KlayGE
 		template <typename U>
 		Rect_T const & operator|=(Rect_T<U> const & rhs);
 
-		Rect_T& operator=(Rect_T const & rhs)
-		{
-			if (this != &rhs)
-			{
-				rect_ = rhs.rect_;
-			}
-			return *this;
-		}
+		Rect_T& operator=(Rect_T const & rhs);
+		Rect_T& operator=(Rect_T&& rhs);
 		template <typename U>
-		Rect_T& operator=(Rect_T<U> const & rhs)
-		{
-			rect_ = rhs.rect_;
-			return *this;
-		}
+		Rect_T& operator=(Rect_T<U> const & rhs);
 
 		// 一元操作符
 		Rect_T const operator+() const;

@@ -68,6 +68,7 @@ namespace KlayGE
 		explicit Quaternion_T(T const * rhs);
 		Quaternion_T(Vector_T<T, 3> const & vec, T s);
 		Quaternion_T(Quaternion_T const & rhs);
+		Quaternion_T(Quaternion_T&& rhs);
 		Quaternion_T(T x, T y, T z, T w);
 
 		static Quaternion_T const & Identity();
@@ -140,6 +141,7 @@ namespace KlayGE
 		Quaternion_T const & operator/=(T rhs);
 
 		Quaternion_T& operator=(Quaternion_T const & rhs);
+		Quaternion_T& operator=(Quaternion_T&& rhs);
 
 		// Ò»Ôª²Ù×÷·û
 		Quaternion_T const operator+() const;

@@ -37,7 +37,9 @@
 namespace KlayGE
 {
 	template AABBox_T<float>::AABBox_T(float3 const & vMin, float3 const & vMax);
+	template AABBox_T<float>::AABBox_T(float3&& vMin, float3&& vMax);
 	template AABBox_T<float>::AABBox_T(AABBox const & rhs);
+	template AABBox_T<float>::AABBox_T(AABBox&& rhs);
 	template AABBox& AABBox_T<float>::operator+=(float3 const & rhs);
 	template AABBox& AABBox_T<float>::operator-=(float3 const & rhs);
 	template AABBox& AABBox_T<float>::operator*=(float rhs);
@@ -45,6 +47,7 @@ namespace KlayGE
 	template AABBox& AABBox_T<float>::operator&=(AABBox const & rhs);
 	template AABBox& AABBox_T<float>::operator|=(AABBox const & rhs);
 	template AABBox& AABBox_T<float>::operator=(AABBox const & rhs);
+	template AABBox& AABBox_T<float>::operator=(AABBox&& rhs);
 	template AABBox const AABBox_T<float>::operator+() const;
 	template AABBox const AABBox_T<float>::operator-() const;
 	template float AABBox_T<float>::Width() const;
@@ -81,9 +84,25 @@ namespace KlayGE
 	}
 
 	template <typename T>
+	AABBox_T<T>::AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax)
+		: min_(std::move(vMin)), max_(std::move(vMax))
+	{
+		BOOST_ASSERT(vMin.x() <= vMax.x());
+		BOOST_ASSERT(vMin.y() <= vMax.y());
+		BOOST_ASSERT(vMin.z() <= vMax.z());
+	}
+
+	template <typename T>
 	AABBox_T<T>::AABBox_T(AABBox_T<T> const & rhs)
 			: Bound_T<T>(rhs),
-			min_(rhs.min_), max_(rhs.max_)
+				min_(rhs.min_), max_(rhs.max_)
+	{
+	}
+
+	template <typename T>
+	AABBox_T<T>::AABBox_T(AABBox_T<T>&& rhs)
+		: Bound_T<T>(rhs),
+			min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
 	{
 	}
 
@@ -141,6 +160,14 @@ namespace KlayGE
 			this->Min() = rhs.Min();
 			this->Max() = rhs.Max();
 		}
+		return *this;
+	}
+
+	template <typename T>
+	AABBox_T<T>& AABBox_T<T>::operator=(AABBox_T<T>&& rhs)
+	{
+		min_ = std::move(rhs.min_);
+		max_ = std::move(rhs.max_);
 		return *this;
 	}
 

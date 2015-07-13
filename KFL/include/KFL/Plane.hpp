@@ -64,7 +64,9 @@ namespace KlayGE
 		}
 		explicit Plane_T(T const * rhs);
 		Plane_T(Plane_T const & rhs);
+		Plane_T(Plane_T&& rhs);
 		Plane_T(Vector_T<T, elem_num> const & rhs);
+		Plane_T(Vector_T<T, elem_num>&& rhs);
 		Plane_T(T a, T b, T c, T d);
 
 		// 取向量
@@ -128,7 +130,9 @@ namespace KlayGE
 
 		// 赋值操作符
 		Plane_T& operator=(Plane_T const & rhs);
+		Plane_T& operator=(Plane_T&& rhs);
 		Plane_T& operator=(Vector_T<T, elem_num> const & rhs);
+		Plane_T& operator=(Vector_T<T, elem_num>&& rhs);
 
 		// 一元操作符
 		Plane_T const operator+() const;

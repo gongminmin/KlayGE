@@ -68,15 +68,10 @@ namespace KlayGE
 		{
 		}
 		explicit Size_T(T const * rhs);
-		Size_T(Size_T const & rhs)
-			: size_(rhs.size_)
-		{
-		}
+		Size_T(Size_T const & rhs);
+		Size_T(Size_T&& rhs);
 		template <typename U>
-		Size_T(Size_T<U> const & rhs)
-			: size_(rhs.size_)
-		{
-		}
+		Size_T(Size_T<U> const & rhs);
 		Size_T(T cx, T cy);
 
 		// 取向量
@@ -103,20 +98,10 @@ namespace KlayGE
 		template <typename U>
 		Size_T const & operator-=(Size_T<U> const & rhs);
 
-		Size_T& operator=(Size_T const & rhs)
-		{
-			if (this != &rhs)
-			{
-				size_ = rhs.size_;
-			}
-			return *this;
-		}
+		Size_T& operator=(Size_T const & rhs);
+		Size_T& operator=(Size_T&& rhs);
 		template <typename U>
-		Size_T& operator=(Size_T<U> const & rhs)
-		{
-			size_ = rhs.size_;
-			return *this;
-		}
+		Size_T& operator=(Size_T<U> const & rhs);
 
 		// 一元操作符
 		Size_T<T> const operator+() const;

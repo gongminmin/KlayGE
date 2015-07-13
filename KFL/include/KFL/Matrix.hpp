@@ -72,6 +72,7 @@ namespace KlayGE
 		}
 		explicit Matrix4_T(T const * rhs);
 		Matrix4_T(Matrix4_T const & rhs);
+		Matrix4_T(Matrix4_T&& rhs);
 		Matrix4_T(T f11, T f12, T f13, T f14,
 			T f21, T f22, T f23, T f24,
 			T f31, T f32, T f33, T f34,
@@ -131,6 +132,7 @@ namespace KlayGE
 		Matrix4_T& operator/=(T rhs);
 
 		Matrix4_T& operator=(Matrix4_T const & rhs);
+		Matrix4_T& operator=(Matrix4_T&& rhs);
 
 		// Ò»Ôª²Ù×÷·û
 		Matrix4_T const operator+() const;
