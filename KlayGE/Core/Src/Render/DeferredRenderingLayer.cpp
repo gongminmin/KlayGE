@@ -449,6 +449,7 @@ namespace KlayGE
 			pvp.shading_fb = rf.MakeFrameBuffer();
 			pvp.shadowing_fb = rf.MakeFrameBuffer();
 			pvp.projective_shadowing_fb = rf.MakeFrameBuffer();
+			pvp.reflection_fb = rf.MakeFrameBuffer();
 			pvp.curr_merged_shading_fb = rf.MakeFrameBuffer();
 			pvp.curr_merged_depth_fb = rf.MakeFrameBuffer();
 			pvp.prev_merged_shading_fb = rf.MakeFrameBuffer();
@@ -865,6 +866,7 @@ namespace KlayGE
 			shadowing_perfs_[i] = profiler.CreatePerfRange(0, "Shadowing (" + buffer_name[i] + ")");
 			indirect_lighting_perfs_[i] = profiler.CreatePerfRange(0, "Indirect lighting (" + buffer_name[i] + ")");
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
+			reflection_perfs_[i] = profiler.CreatePerfRange(0, "Reflection (" + buffer_name[i] + ")");
 			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
 		}
 		sss_blur_pp_perf_ = profiler.CreatePerfRange(0, "SSS Blur PP");
@@ -1188,6 +1190,11 @@ namespace KlayGE
 		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		pvp.projective_shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
 
+		pvp.reflection_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.reflection_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.reflection_tex, 0, 1, 0));
+		pvp.reflection_fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(
+			pvp.reflection_tex->Width(0), pvp.reflection_tex->Height(0), ds_view->Format(), 1, 0));
+
 		ElementFormat shading_fmt;
 		if (caps.fp_color_support)
 		{
@@ -1428,6 +1435,10 @@ namespace KlayGE
 				perf = shading_perfs_[pass_tb];
 				break;
 
+			case PC_Reflection:
+				perf = reflection_perfs_[pass_tb];
+				break;
+
 			case PC_SpecialShading:
 				perf = special_shading_perfs_[pass_tb];
 				break;
@@ -1484,6 +1495,7 @@ namespace KlayGE
 					CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 					pvp.shadowing_fb->GetViewport()->camera = camera;
 					pvp.projective_shadowing_fb->GetViewport()->camera = camera;
+					pvp.reflection_fb->GetViewport()->camera = camera;
 
 					if (depth_texture_support_)
 					{
@@ -1753,6 +1765,13 @@ namespace KlayGE
 				}
 				urv = 0;
 			}
+			break;
+
+		case PC_Reflection:
+			re.BindFrameBuffer(pvp.reflection_fb);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(1.0f);
+			urv = App3DFramework::URV_NeedFlush | App3DFramework::URV_ReflectionOnly
+				| (App3DFramework::URV_OpaqueOnly << pass_tb);
 			break;
 
 		case PC_SpecialShading:
@@ -2377,6 +2396,23 @@ namespace KlayGE
 #ifndef KLAYGE_SHIP
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
 			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 1, true));
+#endif
+
+		if (has_reflective_objs_)
+		{
+#ifndef KLAYGE_SHIP
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, true));
+#endif
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, false));
+#ifndef KLAYGE_SHIP
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
+				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 1, true));
+#endif
+		}
+
+#ifndef KLAYGE_SHIP
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
 			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, true));
 #endif
