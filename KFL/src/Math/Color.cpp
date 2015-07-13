@@ -36,6 +36,7 @@ namespace KlayGE
 {
 	template Color_T<float>::Color_T(float const * rhs);
 	template Color_T<float>::Color_T(Color const & rhs);
+	template Color_T<float>::Color_T(Color&& rhs);
 	template Color_T<float>::Color_T(float r, float g, float b, float a);
 	template Color_T<float>::Color_T(uint32_t dw);
 	template void Color_T<float>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const;
@@ -47,6 +48,7 @@ namespace KlayGE
 	template Color& Color_T<float>::operator*=(Color const & rhs);
 	template Color& Color_T<float>::operator/=(float rhs);
 	template Color& Color_T<float>::operator=(Color const & rhs);
+	template Color& Color_T<float>::operator=(Color&& rhs);
 	template Color const Color_T<float>::operator+() const;
 	template Color const Color_T<float>::operator-() const;
 	template bool Color_T<float>::operator==(Color const & rhs) const;
@@ -57,13 +59,19 @@ namespace KlayGE
 		: col_(rhs)
 	{
 	}
-	
+
 	template <typename T>
 	Color_T<T>::Color_T(Color_T const & rhs)
 		: col_(rhs.col_)
 	{
 	}
-	
+
+	template <typename T>
+	Color_T<T>::Color_T(Color_T&& rhs)
+		: col_(std::move(rhs.col_))
+	{
+	}
+
 	template <typename T>
 	Color_T<T>::Color_T(T r, T g, T b, T a)
 	{
@@ -72,7 +80,7 @@ namespace KlayGE
 		this->b() = b;
 		this->a() = a;
 	}
-	
+
 	template <typename T>
 	Color_T<T>::Color_T(uint32_t dw)
 	{
@@ -114,28 +122,28 @@ namespace KlayGE
 		col_ += rhs.col_;
 		return *this;
 	}
-	
+
 	template <typename T>
 	Color_T<T>& Color_T<T>::operator-=(Color_T<T> const & rhs)
 	{
 		col_ -= rhs.col_;
 		return *this;
 	}
-	
+
 	template <typename T>
 	Color_T<T>& Color_T<T>::operator*=(T rhs)
 	{
 		col_ *= rhs;
 		return *this;
 	}
-	
+
 	template <typename T>
 	Color_T<T>& Color_T<T>::operator*=(Color_T<T> const & rhs)
 	{
 		*this = MathLib::modulate(*this, rhs);
 		return *this;
 	}
-	
+
 	template <typename T>
 	Color_T<T>& Color_T<T>::operator/=(T rhs)
 	{
@@ -150,6 +158,13 @@ namespace KlayGE
 		{
 			col_ = rhs.col_;
 		}
+		return *this;
+	}
+
+	template <typename T>
+	Color_T<T>& Color_T<T>::operator=(Color_T<T>&& rhs)
+	{
+		col_ = std::move(rhs.col_);
 		return *this;
 	}
 

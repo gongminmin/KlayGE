@@ -36,6 +36,7 @@ namespace KlayGE
 {
 	template Matrix4_T<float>::Matrix4_T(float const * rhs);
 	template Matrix4_T<float>::Matrix4_T(float4x4 const & rhs);
+	template Matrix4_T<float>::Matrix4_T(float4x4&& rhs);
 	template Matrix4_T<float>::Matrix4_T(float f11, float f12, float f13, float f14,
 		float f21, float f22, float f23, float f24,
 		float f31, float f32, float f33, float f34,
@@ -52,6 +53,7 @@ namespace KlayGE
 	template float4x4& Matrix4_T<float>::operator*=(float rhs);
 	template float4x4& Matrix4_T<float>::operator/=(float rhs);
 	template float4x4& Matrix4_T<float>::operator=(float4x4 const & rhs);
+	template float4x4& Matrix4_T<float>::operator=(float4x4&& rhs);
 	template float4x4 const Matrix4_T<float>::operator+() const;
 	template float4x4 const Matrix4_T<float>::operator-() const;
 	template bool Matrix4_T<float>::operator==(float4x4 const & rhs) const;
@@ -70,6 +72,12 @@ namespace KlayGE
 	template <typename T>
 	Matrix4_T<T>::Matrix4_T(Matrix4_T const & rhs)
 		: m_(rhs.m_)
+	{
+	}
+
+	template <typename T>
+	Matrix4_T<T>::Matrix4_T(Matrix4_T&& rhs)
+		: m_(std::move(rhs.m_))
 	{
 	}
 	
@@ -183,6 +191,13 @@ namespace KlayGE
 		{
 			m_ = rhs.m_;
 		}
+		return *this;
+	}
+
+	template <typename T>
+	Matrix4_T<T>& Matrix4_T<T>::operator=(Matrix4_T<T>&& rhs)
+	{
+		m_ = std::move(rhs.m_);
 		return *this;
 	}
 

@@ -57,7 +57,11 @@ namespace KlayGE
 		OBBox_T(Vector_T<T, 3> const & center,
 			Quaternion_T<T> const & rotation,
 			Vector_T<T, 3> const & extent);
+		OBBox_T(Vector_T<T, 3>&& center,
+			Quaternion_T<T>&& rotation,
+			Vector_T<T, 3>&& extent);
 		OBBox_T(OBBox_T<T> const & rhs);
+		OBBox_T(OBBox_T<T>&& rhs);
 
 		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
 		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs);
@@ -65,6 +69,7 @@ namespace KlayGE
 		OBBox_T<T>& operator/=(T rhs);
 
 		OBBox_T<T>& operator=(OBBox_T<T> const & rhs);
+		OBBox_T<T>& operator=(OBBox_T<T>&& rhs);
 
 		OBBox_T<T> const operator+() const;
 		OBBox_T<T> const operator-() const;

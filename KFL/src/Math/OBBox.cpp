@@ -43,12 +43,17 @@ namespace KlayGE
 	template OBBox_T<float>::OBBox_T(float3 const & center,
 		Quaternion const & rotation,
 		float3 const & extent);
+	template OBBox_T<float>::OBBox_T(float3&& center,
+		Quaternion&& rotation,
+		float3&& extent);
 	template OBBox_T<float>::OBBox_T(OBBox const & rhs);
+	template OBBox_T<float>::OBBox_T(OBBox&& rhs);
 	template OBBox& OBBox_T<float>::operator+=(float3 const & rhs);
 	template OBBox& OBBox_T<float>::operator-=(float3 const & rhs);
 	template OBBox& OBBox_T<float>::operator*=(float rhs);
 	template OBBox& OBBox_T<float>::operator/=(float rhs);
 	template OBBox& OBBox_T<float>::operator=(OBBox const & rhs);
+	template OBBox& OBBox_T<float>::operator=(OBBox&& rhs);
 	template OBBox const OBBox_T<float>::operator+() const;
 	template OBBox const OBBox_T<float>::operator-() const;
 	template bool OBBox_T<float>::IsEmpty() const;
@@ -87,9 +92,24 @@ namespace KlayGE
 	}
 
 	template <typename T>
+	OBBox_T<T>::OBBox_T(Vector_T<T, 3>&& center,
+		Quaternion_T<T>&& rotation,
+		Vector_T<T, 3>&& extent)
+		: center_(std::move(center)), rotation_(std::move(rotation)), extent_(std::move(extent))
+	{
+	}
+
+	template <typename T>
 	OBBox_T<T>::OBBox_T(OBBox_T<T> const & rhs)
 		: Bound_T<T>(rhs),
 			center_(rhs.center_), rotation_(rhs.rotation_), extent_(rhs.extent_)
+	{
+	}
+
+	template <typename T>
+	OBBox_T<T>::OBBox_T(OBBox_T<T>&& rhs)
+		: Bound_T<T>(rhs),
+			center_(std::move(rhs.center_)), rotation_(std::move(rhs.rotation_)), extent_(std::move(rhs.extent_))
 	{
 	}
 
@@ -129,6 +149,15 @@ namespace KlayGE
 			rotation_ = rhs.rotation_;
 			extent_ = rhs.extent_;
 		}
+		return *this;
+	}
+
+	template <typename T>
+	OBBox_T<T>& OBBox_T<T>::operator=(OBBox_T<T>&& rhs)
+	{
+		center_ = std::move(rhs.center_);
+		rotation_ = std::move(rhs.rotation_);
+		extent_ = std::move(rhs.extent_);
 		return *this;
 	}
 

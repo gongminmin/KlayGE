@@ -71,6 +71,7 @@ namespace KlayGE
 		}
 		explicit Color_T(T const * rhs);
 		Color_T(Color_T const & rhs);
+		Color_T(Color_T&& rhs);
 		Color_T(T r, T g, T b, T a);
 		explicit Color_T(uint32_t dw);
 
@@ -146,6 +147,7 @@ namespace KlayGE
 		Color_T& operator/=(T rhs);
 
 		Color_T& operator=(Color_T const & rhs);
+		Color_T& operator=(Color_T&& rhs);
 
 		// Ò»Ôª²Ù×÷·û
 		Color_T const operator+() const;

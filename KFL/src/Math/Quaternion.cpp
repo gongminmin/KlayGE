@@ -37,6 +37,7 @@ namespace KlayGE
 	template Quaternion_T<float>::Quaternion_T(float const * rhs);
 	template Quaternion_T<float>::Quaternion_T(float3 const & vec, float s);
 	template Quaternion_T<float>::Quaternion_T(Quaternion const & rhs);
+	template Quaternion_T<float>::Quaternion_T(Quaternion&& rhs);
 	template Quaternion_T<float>::Quaternion_T(float x, float y, float z, float w);
 	template Quaternion const & Quaternion_T<float>::Identity();
 	template Quaternion const & Quaternion_T<float>::operator+=(Quaternion const & rhs);
@@ -45,6 +46,7 @@ namespace KlayGE
 	template Quaternion const & Quaternion_T<float>::operator*=(float rhs);
 	template Quaternion const & Quaternion_T<float>::operator/=(float rhs);
 	template Quaternion& Quaternion_T<float>::operator=(Quaternion const & rhs);
+	template Quaternion& Quaternion_T<float>::operator=(Quaternion&& rhs);
 	template Quaternion const Quaternion_T<float>::operator+() const;
 	template Quaternion const Quaternion_T<float>::operator-() const;
 	template float3 const Quaternion_T<float>::v() const;
@@ -57,7 +59,7 @@ namespace KlayGE
 		: quat_(rhs)
 	{
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T>::Quaternion_T(Vector_T<T, 3> const & vec, T s)
 	{
@@ -66,13 +68,19 @@ namespace KlayGE
 		this->z() = vec.z();
 		this->w() = s;
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T>::Quaternion_T(Quaternion_T const & rhs)
 		: quat_(rhs.quat_)
 	{
 	}
-	
+
+	template <typename T>
+	Quaternion_T<T>::Quaternion_T(Quaternion_T&& rhs)
+		: quat_(std::move(rhs.quat_))
+	{
+	}
+
 	template <typename T>
 	Quaternion_T<T>::Quaternion_T(T x, T y, T z, T w)
 	{
@@ -95,7 +103,7 @@ namespace KlayGE
 		quat_ += rhs.quat_;
 		return *this;
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T> const & Quaternion_T<T>::operator-=(Quaternion_T<T> const & rhs)
 	{
@@ -109,14 +117,14 @@ namespace KlayGE
 		*this = MathLib::mul(*this, rhs);
 		return *this;
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T> const & Quaternion_T<T>::operator*=(T rhs)
 	{
 		quat_ *= static_cast<T>(rhs);
 		return *this;
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T> const & Quaternion_T<T>::operator/=(T rhs)
 	{
@@ -135,11 +143,18 @@ namespace KlayGE
 	}
 
 	template <typename T>
+	Quaternion_T<T>& Quaternion_T<T>::operator=(Quaternion_T&& rhs)
+	{
+		quat_ = std::move(rhs.quat_);
+		return *this;
+	}
+
+	template <typename T>
 	Quaternion_T<T> const Quaternion_T<T>::operator+() const
 	{
 		return *this;
 	}
-	
+
 	template <typename T>
 	Quaternion_T<T> const Quaternion_T<T>::operator-() const
 	{
@@ -151,7 +166,7 @@ namespace KlayGE
 	{
 		return Vector_T<T, 3>(this->x(), this->y(), this->z());
 	}
-	
+
 	template <typename T>
 	void Quaternion_T<T>::v(Vector_T<T, 3> const & rhs)
 	{

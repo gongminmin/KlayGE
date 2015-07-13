@@ -35,6 +35,10 @@
 namespace KlayGE
 {
 	template Rect_T<float>::Rect_T(float const * rhs);
+	template Rect_T<float>::Rect_T(Rect const & rhs);
+	template Rect_T<float>::Rect_T(Rect&& rhs);
+	template Rect_T<float>::Rect_T(IRect const & rhs);
+	template Rect_T<float>::Rect_T(UIRect const & rhs);
 	template Rect_T<float>::Rect_T(float left, float top, float right, float bottom);
 	template Rect const & Rect_T<float>::operator+=(float2 const & rhs);
 	template Rect const & Rect_T<float>::operator+=(int2 const & rhs);
@@ -54,6 +58,10 @@ namespace KlayGE
 	template Rect const & Rect_T<float>::operator|=(Rect const & rhs);
 	template Rect const & Rect_T<float>::operator|=(IRect const & rhs);
 	template Rect const & Rect_T<float>::operator|=(UIRect const & rhs);
+	template Rect& Rect_T<float>::operator=(Rect const & rhs);
+	template Rect& Rect_T<float>::operator=(Rect&& rhs);
+	template Rect& Rect_T<float>::operator=(IRect const & rhs);
+	template Rect& Rect_T<float>::operator=(UIRect const & rhs);
 	template Rect const Rect_T<float>::operator+() const;
 	template Rect const Rect_T<float>::operator-() const;
 	template float Rect_T<float>::Width() const;
@@ -64,6 +72,10 @@ namespace KlayGE
 	template bool Rect_T<float>::PtInRect(float2 const & pt) const;
 
 	template Rect_T<int32_t>::Rect_T(int32_t const * rhs);
+	template Rect_T<int32_t>::Rect_T(IRect const & rhs);
+	template Rect_T<int32_t>::Rect_T(IRect&& rhs);
+	template Rect_T<int32_t>::Rect_T(Rect const & rhs);
+	template Rect_T<int32_t>::Rect_T(UIRect const & rhs);
 	template Rect_T<int32_t>::Rect_T(int32_t left, int32_t top, int32_t right, int32_t bottom);
 	template IRect const & Rect_T<int32_t>::operator+=(float2 const & rhs);
 	template IRect const & Rect_T<int32_t>::operator+=(int2 const & rhs);
@@ -83,6 +95,10 @@ namespace KlayGE
 	template IRect const & Rect_T<int32_t>::operator|=(Rect const & rhs);
 	template IRect const & Rect_T<int32_t>::operator|=(IRect const & rhs);
 	template IRect const & Rect_T<int32_t>::operator|=(UIRect const & rhs);
+	template IRect& Rect_T<int32_t>::operator=(IRect const & rhs);
+	template IRect& Rect_T<int32_t>::operator=(IRect&& rhs);
+	template IRect& Rect_T<int32_t>::operator=(Rect const & rhs);
+	template IRect& Rect_T<int32_t>::operator=(UIRect const & rhs);
 	template IRect const Rect_T<int32_t>::operator+() const;
 	template IRect const Rect_T<int32_t>::operator-() const;
 	template int32_t Rect_T<int32_t>::Width() const;
@@ -94,6 +110,10 @@ namespace KlayGE
 
 	template Rect_T<uint32_t>::Rect_T(uint32_t const * rhs);
 	template Rect_T<uint32_t>::Rect_T(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom);
+	template Rect_T<uint32_t>::Rect_T(UIRect const & rhs);
+	template Rect_T<uint32_t>::Rect_T(UIRect&& rhs);
+	template Rect_T<uint32_t>::Rect_T(Rect const & rhs);
+	template Rect_T<uint32_t>::Rect_T(IRect const & rhs);
 	template UIRect const & Rect_T<uint32_t>::operator+=(float2 const & rhs);
 	template UIRect const & Rect_T<uint32_t>::operator+=(int2 const & rhs);
 	template UIRect const & Rect_T<uint32_t>::operator+=(uint2 const & rhs);
@@ -112,6 +132,10 @@ namespace KlayGE
 	template UIRect const & Rect_T<uint32_t>::operator|=(Rect const & rhs);
 	template UIRect const & Rect_T<uint32_t>::operator|=(IRect const & rhs);
 	template UIRect const & Rect_T<uint32_t>::operator|=(UIRect const & rhs);
+	template UIRect& Rect_T<uint32_t>::operator=(UIRect const & rhs);
+	template UIRect& Rect_T<uint32_t>::operator=(UIRect&& rhs);
+	template UIRect& Rect_T<uint32_t>::operator=(IRect const & rhs);
+	template UIRect& Rect_T<uint32_t>::operator=(UIRect const & rhs);
 	template UIRect const Rect_T<uint32_t>::operator+() const;
 	template uint32_t Rect_T<uint32_t>::Width() const;
 	template uint32_t Rect_T<uint32_t>::Height() const;
@@ -124,6 +148,25 @@ namespace KlayGE
 	template <typename T>
 	Rect_T<T>::Rect_T(T const * rhs)
 		: rect_(rhs)
+	{
+	}
+
+	template <typename T>
+	Rect_T<T>::Rect_T(Rect_T const & rhs)
+		: rect_(rhs.rect_)
+	{
+	}
+
+	template <typename T>
+	Rect_T<T>::Rect_T(Rect_T&& rhs)
+		: rect_(std::move(rhs.rect_))
+	{
+	}
+
+	template <typename T>
+	template <typename U>
+	Rect_T<T>::Rect_T(Rect_T<U> const & rhs)
+		: rect_(rhs.rect_)
 	{
 	}
 
@@ -193,6 +236,31 @@ namespace KlayGE
 		this->top()		= std::min(this->top(),		static_cast<T>(rhs.top()));
 		this->right()	= std::max(this->right(),	static_cast<T>(rhs.right()));
 		this->bottom()	= std::max(this->bottom(),	static_cast<T>(rhs.bottom()));
+		return *this;
+	}
+
+	template <typename T>
+	Rect_T<T>& Rect_T<T>::operator=(Rect_T<T> const & rhs)
+	{
+		if (this != &rhs)
+		{
+			rect_ = rhs.rect_;
+		}
+		return *this;
+	}
+
+	template <typename T>
+	Rect_T<T>& Rect_T<T>::operator=(Rect_T<T>&& rhs)
+	{
+		rect_ = std::move(rhs.rect_);
+		return *this;
+	}
+
+	template <typename T>
+	template <typename U>
+	Rect_T<T>& Rect_T<T>::operator=(Rect_T<U> const & rhs)
+	{
+		rect_ = rhs.rect_;
 		return *this;
 	}
 

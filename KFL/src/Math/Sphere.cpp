@@ -37,11 +37,14 @@
 namespace KlayGE
 {
 	template Sphere_T<float>::Sphere_T(float3 const & center, float radius);
+	template Sphere_T<float>::Sphere_T(Sphere_T<float> const & rhs);
+	template Sphere_T<float>::Sphere_T(Sphere_T<float>&& rhs);
 	template Sphere& Sphere_T<float>::operator+=(float3 const & rhs);
 	template Sphere& Sphere_T<float>::operator-=(float3 const & rhs);
 	template Sphere& Sphere_T<float>::operator*=(float rhs);
 	template Sphere& Sphere_T<float>::operator/=(float rhs);
 	template Sphere& Sphere_T<float>::operator=(Sphere const & rhs);
+	template Sphere& Sphere_T<float>::operator=(Sphere&& rhs);
 	template Sphere const & Sphere_T<float>::operator+() const;
 	template Sphere const & Sphere_T<float>::operator-() const;
 	template bool Sphere_T<float>::IsEmpty() const;
@@ -58,6 +61,20 @@ namespace KlayGE
 	Sphere_T<T>::Sphere_T(Vector_T<T, 3> const & center, T radius)
 		: center_(center),
 			radius_(radius)
+	{
+	}
+
+	template <typename T>
+	Sphere_T<T>::Sphere_T(Sphere_T<T> const & rhs)
+		: center_(rhs.center_),
+			radius_(rhs.radius_)
+	{
+	}
+
+	template <typename T>
+	Sphere_T<T>::Sphere_T(Sphere_T<T>&& rhs)
+		: center_(std::move(rhs.center_)),
+			radius_(std::move(rhs.radius_))
 	{
 	}
 
@@ -96,6 +113,14 @@ namespace KlayGE
 			this->Center() = rhs.Center();
 			this->Radius() = rhs.Radius();
 		}
+		return *this;
+	}
+
+	template <typename T>
+	Sphere_T<T>& Sphere_T<T>::operator=(Sphere_T&& rhs)
+	{
+		center_ = std::move(rhs.center_);
+		radius_ = std::move(rhs.radius_);
 		return *this;
 	}
 
