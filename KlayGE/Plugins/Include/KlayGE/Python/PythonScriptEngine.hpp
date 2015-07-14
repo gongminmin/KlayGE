@@ -44,6 +44,7 @@
 #pragma warning(disable: 4273) // 'round' in pymath.h inconsistent dll linkage
 #pragma warning(disable: 4510) // No default constructor for PyHash_FuncDef
 #pragma warning(disable: 4512) // No assignment operator for PyHash_FuncDef
+#pragma warning(disable: 4610) // No user-defined constructor for PyHash_FuncDef in vc12
 #endif
 #include <Python.h>
 #ifdef KLAYGE_COMPILER_MSVC
