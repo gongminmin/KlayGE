@@ -86,7 +86,7 @@
 
 #if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
 		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
-		|| (defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION >= 120)))
+		|| defined(KLAYGE_COMPILER_MSVC))
 #include <type_traits>
 namespace std
 {
