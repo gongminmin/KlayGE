@@ -1456,8 +1456,7 @@ namespace KlayGE
 
 		if ((pass_cat != PC_Shadowing) && (pass_cat != PC_IndirectLighting) && (pass_cat != PC_Shading))
 		{
-			typedef decltype(visible_scene_objs_) VisibleSceneObjsType;
-			for (VisibleSceneObjsType::reference deo : visible_scene_objs_)
+			for (auto const & deo : visible_scene_objs_)
 			{
 				deo->Pass(pass_type);
 			}
@@ -1826,8 +1825,7 @@ namespace KlayGE
 
 				if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 				{
-					typedef decltype(visible_scene_objs_) VisibleSceneObjsType;
-					for (VisibleSceneObjsType::reference deo : visible_scene_objs_)
+					for (auto const & deo : visible_scene_objs_)
 					{
 						if (deo->SimpleForward())
 						{
@@ -2506,8 +2504,7 @@ namespace KlayGE
 
 		re.BindFrameBuffer((PT_OpaqueGBufferRT1 == pass_type) ? pvp.g_buffer_rt1
 			: pvp.g_buffer);
-		typedef decltype(decals_) DecalsType;
-		for (DecalsType::reference de : decals_)
+		for (auto const & de : decals_)
 		{
 			de->Pass(pass_type);
 			de->Render();

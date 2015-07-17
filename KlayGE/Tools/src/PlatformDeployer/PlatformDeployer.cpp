@@ -370,8 +370,7 @@ int main(int argc, char* argv[])
 
 		std::vector<std::string> tokens;
 		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
-		typedef std::vector<std::string> StringsType;
-		for (StringsType::reference arg : tokens)
+		for (auto& arg : tokens)
 		{
 			boost::algorithm::trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))

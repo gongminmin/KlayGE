@@ -75,8 +75,7 @@ namespace KlayGE
 			if (!sendQueue_.empty())
 			{
 				// 发送队列里的消息
-				typedef decltype(sendQueue_) SendQueneType;
-				for (SendQueneType::reference msg : sendQueue_)
+				for (auto const & msg : sendQueue_)
 				{
 					socket_.Send(&msg[0], static_cast<int>(msg.size()));
 				}

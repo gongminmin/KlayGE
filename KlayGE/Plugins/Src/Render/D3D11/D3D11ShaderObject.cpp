@@ -1069,8 +1069,7 @@ namespace KlayGE
 
 						std::vector<std::string>& msgs = err_lines[err_line];
 						bool found = false;
-						typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
-						for (ErrMsgsType::const_reference msg : msgs)
+						for (auto const & msg : msgs)
 						{
 							if (msg == err_str)
 							{
@@ -1122,8 +1121,7 @@ namespace KlayGE
 						LogInfo("...");
 					}
 
-					typedef decltype(iter->second) ErrMsgsType;
-					for (ErrMsgsType::const_reference msg : iter->second)
+					for (auto const & msg : iter->second)
 					{
 						LogError(msg.c_str());
 					}
@@ -1683,8 +1681,7 @@ namespace KlayGE
 			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
 
 			param_binds_[type].reserve(so.param_binds_[type].size());
-			typedef std::remove_reference<decltype(so.param_binds_[type])>::type ParamBindsType;
-			for (ParamBindsType::const_reference pb : so.param_binds_[type])
+			for (auto const & pb : so.param_binds_[type])
 			{
 				param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, pb.param));
 			}
@@ -1789,8 +1786,7 @@ namespace KlayGE
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
-			typedef std::remove_reference<decltype(param_binds_[i])>::type ParamBindsType;
-			for (ParamBindsType::const_reference pb : param_binds_[i])
+			for (auto const & pb : param_binds_[i])
 			{
 				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(*(pb.param->Name()))));
 			}
@@ -1891,8 +1887,7 @@ namespace KlayGE
 
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
-			typedef std::remove_reference<decltype(param_binds_[st])>::type ParamBindsType;
-			for (ParamBindsType::reference pb : param_binds_[st])
+			for (auto const & pb : param_binds_[st])
 			{
 				pb.func();
 			}

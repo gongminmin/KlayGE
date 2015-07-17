@@ -77,7 +77,7 @@ namespace KlayGE
 
 	void AudioEngine::Suspend()
 	{
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			ab.second->Suspend();
 		}
@@ -87,7 +87,7 @@ namespace KlayGE
 	void AudioEngine::Resume()
 	{
 		this->DoResume();
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			ab.second->Resume();
 		}
@@ -126,7 +126,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::PlayAll(bool loop)
 	{
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			ab.second->Play(loop);
 		}
@@ -136,7 +136,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			ab.second->Stop();
 		}
@@ -153,7 +153,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	AudioBufferPtr AudioEngine::Buffer(size_t bufID) const
 	{
-		AudioBufsConstIter iter(audioBufs_.find(bufID));
+		auto iter = audioBufs_.find(bufID);
 		if (iter != audioBufs_.end())
 		{
 			return iter->second;
@@ -169,7 +169,7 @@ namespace KlayGE
 	{
 		soundVol_ = vol;
 
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			if (ab.second->IsSound())
 			{
@@ -191,7 +191,7 @@ namespace KlayGE
 	{
 		musicVol_ = vol;
 
-		for (AudioBufs::reference ab : audioBufs_)
+		for (auto const & ab : audioBufs_)
 		{
 			if (!(ab.second->IsSound()))
 			{

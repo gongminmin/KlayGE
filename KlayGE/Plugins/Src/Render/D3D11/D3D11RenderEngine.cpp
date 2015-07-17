@@ -492,8 +492,7 @@ namespace KlayGE
 	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
 	{
 		size_t elems_signature = 0;
-		typedef std::remove_reference<decltype(elems)>::type ElemsType;
-		for (ElemsType::const_reference elem : elems)
+		for (auto const & elem : elems)
 		{
 			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
 			boost::hash_combine(seed, elem.SemanticIndex);
@@ -967,8 +966,7 @@ namespace KlayGE
 		auto iter = rendertarget_format_.find(elem_fmt);
 		if (iter != rendertarget_format_.end())
 		{
-			typedef decltype(iter->second) RTType;
-			for (RTType::const_reference p : iter->second)
+			for (auto const & p : iter->second)
 			{
 				if ((sample_count == p.first) && (sample_quality < p.second))
 				{

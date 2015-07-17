@@ -261,8 +261,7 @@ namespace KlayGE
 	uint32_t SMBios::TypeCount(uint8_t type) const
 	{
 		uint32_t ret = 0;
-		typedef decltype(smbios_tables_) SMBiosTablesType;
-		for (SMBiosTablesType::const_reference table : smbios_tables_)
+		for (auto const & table : smbios_tables_)
 		{
 			if (table.type == type)
 			{

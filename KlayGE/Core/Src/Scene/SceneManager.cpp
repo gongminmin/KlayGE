@@ -366,8 +366,7 @@ namespace KlayGE
 			BOOST_ASSERT(obj_tech);
 			RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
 			bool found = false;
-			typedef decltype(render_queue_) RenderQueueType;
-			for (RenderQueueType::reference items : render_queue_)
+			for (auto& items : render_queue_)
 			{
 				if (items.first == tech)
 				{
@@ -487,14 +486,12 @@ namespace KlayGE
 		float const app_time = app.AppTime();
 		float const frame_time = app.FrameTime();
 
-		typedef decltype(cameras_) CamerasType;
-		for (CamerasType::const_reference camera : cameras_)
+		for (auto const & camera : cameras_)
 		{
 			camera->Update(app_time, frame_time);
 		}
 
-		typedef decltype(lights_) LightsType;
-		for (LightsType::const_reference light : lights_)
+		for (auto const & light : lights_)
 		{
 			if (light->Enabled())
 			{
@@ -638,8 +635,7 @@ namespace KlayGE
 			}
 		}
 		renderables_map.clear();
-		typedef decltype(renderables) RenderablesType;
-		for (RenderablesType::const_reference renderable : renderables)
+		for (auto const & renderable : renderables)
 		{
 			Renderable& ra(*renderable.first);
 			ra.AssignInstances(renderable.second.begin(), renderable.second.end());
@@ -649,8 +645,7 @@ namespace KlayGE
 		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType>>);
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
-		typedef decltype(render_queue_) RenderQueueType;
-		for (RenderQueueType::reference items : render_queue_)
+		for (auto& items : render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
@@ -687,8 +682,7 @@ namespace KlayGE
 				items.second.swap(sorted_items);
 			}
 
-			typedef decltype(items.second) ItemsType;
-			for (ItemsType::reference item : items.second)
+			for (auto const & item : items.second)
 			{
 				item->Render();
 			}

@@ -105,8 +105,7 @@ namespace KlayGE
 		planes_[5] = column4 + column3;	// near
 
 		// Loop through each side of the frustum and normalize it.
-		typedef decltype(planes_) PlanesType;
-		for (PlanesType::reference plane : planes_)
+		for (auto& plane : planes_)
 		{
 			plane = MathLib::normalize(plane);
 		}

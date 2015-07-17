@@ -281,9 +281,8 @@ struct JTMLImageRecord
 	uint32_t x, y, h, w;
 	TexAddressingMode u, v;
 };
-typedef std::vector<JTMLImageRecord> JTMLImageRecordArray;
 
-void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, JTMLImageRecordArray& jirs, int tile_size)
+void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, std::vector<JTMLImageRecord>& jirs, int tile_size)
 {
 	if (node->TextureDesc())
 	{
@@ -306,7 +305,7 @@ void ConvertTreeToJTML(std::shared_ptr<TexPackNode> const & node, JTMLImageRecor
 
 void WriteJTML(std::shared_ptr<TexPackNode> const & root, std::string const & jtml_name, int num_tiles, int tile_size, ElementFormat fmt)
 {
-	JTMLImageRecordArray jirs;
+	std::vector<JTMLImageRecord> jirs;
 	ConvertTreeToJTML(root, jirs, tile_size);
 
 	std::string fmt_str;
@@ -405,8 +404,7 @@ int main(int argc, char* argv[])
 
 		std::vector<std::string> tokens;
 		boost::algorithm::split(tokens, input_name_str, boost::is_any_of(",;"));
-		typedef std::vector<std::string> StringsType;
-		for (StringsType::reference arg : tokens)
+		for (auto& arg : tokens)
 		{
 			boost::algorithm::trim(arg);
 			if ((std::string::npos == arg.find('*')) && (std::string::npos == arg.find('?')))

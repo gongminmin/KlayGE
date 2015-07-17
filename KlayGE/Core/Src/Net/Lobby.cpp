@@ -103,12 +103,10 @@ namespace KlayGE
 			}
 
 			// ∑¢ÀÕ–≈œ¢
-			typedef decltype(players_) PlayersType;
-			for (PlayersType::reference player : players_)
+			for (auto const & player : players_)
 			{
-				SendQueueType& msgs = player.second.msgs;
-				typedef std::remove_reference<decltype(msgs)>::type MsgsType;
-				for (MsgsType::reference msg : msgs)
+				auto const & msgs = player.second.msgs;
+				for (auto const & msg : msgs)
 				{
 					socket_.SendTo(&msg[0], static_cast<int>(msg.size()), player.second.addr);
 				}
@@ -135,8 +133,7 @@ namespace KlayGE
 	char Lobby::NumPlayer() const
 	{
 		char n = 0;
-		typedef decltype(players_) PlayersType;
-		for (PlayersType::const_reference player : players_)
+		for (auto const & player : players_)
 		{
 			if (player.first != 0)
 			{
@@ -175,8 +172,7 @@ namespace KlayGE
 		players_.resize(maxPlayers);
 		PlayerAddrs(players_).swap(players_);
 
-		typedef decltype(players_) PlayersType;
-		for (PlayersType::reference player : players_)
+		for (auto& player : players_)
 		{
 			player.first = 0;
 		}

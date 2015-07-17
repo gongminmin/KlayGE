@@ -18,8 +18,7 @@ namespace KlayGE
 			{ renderables_.push_back(renderable); }
 
 	protected:
-		typedef std::vector<RenderablePtr> RenderablesType;
-		RenderablesType renderables_;
+		std::vector<RenderablePtr> renderables_;
 	};
 }
 

@@ -155,8 +155,7 @@ namespace KlayGE
 			RenderEngine& re = rf.RenderEngineInstance();
 			re.UpdateGPUTimestampsFrequency();
 
-			typedef decltype(perf_ranges_) PerfRangesType;
-			for (PerfRangesType::reference range : perf_ranges_)
+			for (auto& range : perf_ranges_)
 			{
 				if (std::get<2>(range)->Dirty())
 				{
@@ -178,11 +177,9 @@ namespace KlayGE
 			ofs << "Frame" << ',' << "Category" << ',' << "Name" << ','
 				<< "CPU Timing (ms)" << ',' << "GPU Timing (ms)" << std::endl;
 
-			typedef decltype(perf_ranges_) PerfRangesType;
-			for (PerfRangesType::const_reference range : perf_ranges_)
+			for (auto const & range : perf_ranges_)
 			{
-				typedef std::remove_reference<decltype(std::get<3>(range))>::type PerfDataType;
-				for (PerfDataType::const_reference data : std::get<3>(range))
+				for (auto const & data : std::get<3>(range))
 				{
 					ofs << std::get<0>(data) << ',' << std::get<0>(range) << ',' << std::get<1>(range) << ','
 						<< std::get<1>(data) * 1000 << ',';

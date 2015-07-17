@@ -108,10 +108,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API AudioEngine
 	{
-		typedef std::map<size_t, AudioBufferPtr>	AudioBufs;
-		typedef AudioBufs::iterator					AudioBufsIter;
-		typedef AudioBufs::const_iterator			AudioBufsConstIter;
-
 	public:
 		AudioEngine();
 		virtual ~AudioEngine();
@@ -151,7 +147,7 @@ namespace KlayGE
 		virtual void DoResume() = 0;
 
 	protected:
-		AudioBufs	audioBufs_;
+		std::map<size_t, AudioBufferPtr> audioBufs_;
 
 		float		soundVol_;
 		float		musicVol_;

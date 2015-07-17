@@ -359,8 +359,7 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			mesh->AddToRenderQueue();
 		}
@@ -368,8 +367,7 @@ namespace KlayGE
 
 	void RenderModel::OnRenderBegin()
 	{
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			mesh->OnRenderBegin();
 		}
@@ -377,8 +375,7 @@ namespace KlayGE
 
 	void RenderModel::OnRenderEnd()
 	{
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			mesh->OnRenderEnd();
 		}
@@ -398,8 +395,7 @@ namespace KlayGE
 	{
 		pos_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			pos_aabb_ |= mesh->PosBound();
 			tc_aabb_ |= mesh->TexcoordBound();
@@ -409,8 +405,7 @@ namespace KlayGE
 	void RenderModel::Pass(PassType type)
 	{
 		Renderable::Pass(type);
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			mesh->Pass(type);
 		}
@@ -419,8 +414,7 @@ namespace KlayGE
 	bool RenderModel::SpecialShading() const
 	{
 		bool ss = false;
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			ss |= mesh->SpecialShading();
 		}
@@ -430,8 +424,7 @@ namespace KlayGE
 	bool RenderModel::TransparencyBackFace() const
 	{
 		bool ab = false;
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			ab |= mesh->TransparencyBackFace();
 		}
@@ -441,8 +434,7 @@ namespace KlayGE
 	bool RenderModel::TransparencyFrontFace() const
 	{
 		bool ab = false;
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			ab |= mesh->TransparencyFrontFace();
 		}
@@ -452,8 +444,7 @@ namespace KlayGE
 	bool RenderModel::Reflection() const
 	{
 		bool ab = false;
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			ab |= mesh->Reflection();
 		}
@@ -463,8 +454,7 @@ namespace KlayGE
 	bool RenderModel::SimpleForward() const
 	{
 		bool ab = false;
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			ab |= mesh->SimpleForward();
 		}
@@ -870,8 +860,7 @@ namespace KlayGE
 	AABBox SkinnedModel::FramePosBound(uint32_t frame) const
 	{
 		AABBox pos_aabb(float3(0, 0, 0), float3(0, 0, 0));
-		typedef decltype(subrenderables_) MeshesType;
-		for (MeshesType::const_reference mesh : subrenderables_)
+		for (auto const & mesh : subrenderables_)
 		{
 			pos_aabb |= checked_pointer_cast<SkinnedMesh>(mesh)->FramePosBound(frame);
 		}

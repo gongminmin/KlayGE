@@ -204,8 +204,7 @@ namespace KlayGE
 				feature_levels.push_back(available_feature_levels[i].second);
 			}
 
-			typedef decltype(dev_type_behaviors) DevTypeBehaviorsType;
-			for (DevTypeBehaviorsType::reference dev_type_beh : dev_type_behaviors)
+			for (auto const & dev_type_beh : dev_type_behaviors)
 			{
 				ID3D11Device* device = nullptr;
 				ID3D11DeviceContext* imm_ctx = nullptr;

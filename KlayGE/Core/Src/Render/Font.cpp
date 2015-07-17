@@ -208,8 +208,7 @@ namespace KlayGE
 
 			std::vector<float> lines(1, 0);
 
-			typedef std::remove_reference<decltype(text)>::type TextType;
-			for (TextType::const_reference ch : text)
+			for (auto const & ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -256,8 +255,8 @@ namespace KlayGE
 		{
 			this->UpdateTexture(text);
 
-			KFont& kl = *kfont_loader_;
-			auto& cim = char_info_map_;
+			KFont const & kl = *kfont_loader_;
+			auto const & cim = char_info_map_;
 
 			std::vector<FontVert> vertices;
 			std::vector<uint16_t> indices;
@@ -269,8 +268,7 @@ namespace KlayGE
 
 			std::vector<std::pair<float, std::wstring>> lines(1, std::make_pair(0.0f, L""));
 
-			typedef std::remove_reference<decltype(text)>::type TextType;
-			for (TextType::const_reference ch : text)
+			for (auto const & ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -297,8 +295,7 @@ namespace KlayGE
 			{
 				if (align & Font::FA_Hor_Right)
 				{
-					typedef decltype(lines) LinesType;
-					for (LinesType::const_reference p : lines)
+					for (auto const & p : lines)
 					{
 						sx.push_back(rc.right() - p.first);
 					}
@@ -306,8 +303,7 @@ namespace KlayGE
 				else
 				{
 					// Font::FA_Hor_Center
-					typedef decltype(lines) LinesType;
-					for (LinesType::const_reference p : lines)
+					for (auto const & p : lines)
 					{
 						sx.push_back((rc.left() + rc.right()) / 2 - p.first / 2);
 					}
@@ -351,8 +347,7 @@ namespace KlayGE
 
 				vertices.reserve(maxSize * 4);
 
-				typedef decltype(lines[i].second) LinesType;
-				for (LinesType::const_reference ch : lines[i].second)
+				for (auto const & ch : lines[i].second)
 				{
 					std::pair<int32_t, uint32_t> const & offset_adv = kl.CharIndexAdvance(ch);
 					if (offset_adv.first != -1)
@@ -426,8 +421,8 @@ namespace KlayGE
 		{
 			this->UpdateTexture(text);
 
-			KFont& kl = *kfont_loader_;
-			auto& cim = char_info_map_;
+			KFont const & kl = *kfont_loader_;
+			auto const & cim = char_info_map_;
 
 			std::vector<FontVert> vertices;
 			std::vector<uint16_t> indices;
@@ -445,8 +440,7 @@ namespace KlayGE
 
 			vertices.reserve(maxSize * 4);
 
-			typedef std::remove_reference<decltype(text)>::type TextType;
-			for (TextType::const_reference ch : text)
+			for (auto const & ch : text)
 			{
 				if (ch != L'\n')
 				{
@@ -546,8 +540,7 @@ namespace KlayGE
 			uint32_t const num_chars_a_row = tex_size / kfont_char_size;
 			uint32_t const num_total_chars = num_chars_a_row * num_chars_a_row;
 
-			typedef std::remove_reference<decltype(text)>::type TextType;
-			for (TextType::const_reference ch : text)
+			for (auto const & ch : text)
 			{
 				int32_t offset = kl.CharIndex(ch);
 				if (offset != -1)

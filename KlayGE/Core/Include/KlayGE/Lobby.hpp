@@ -26,8 +26,6 @@
 
 namespace KlayGE
 {
-	typedef std::list<std::vector<char>> SendQueueType;
-
 	uint32_t const Max_Buffer(64);
 
 	class Processor
@@ -55,9 +53,9 @@ namespace KlayGE
 		std::string		name;
 		sockaddr_in		addr;
 
-		uint32_t				time;
+		uint32_t		time;
 
-		SendQueueType	msgs;
+		std::list<std::vector<char>> msgs;
 	};
 
 	class KLAYGE_CORE_API Lobby

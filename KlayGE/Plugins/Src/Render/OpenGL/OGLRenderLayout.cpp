@@ -59,8 +59,7 @@ namespace KlayGE
 	{
 		if (use_vao_)
 		{
-			typedef decltype(vaos_) VAOsType;
-			for (VAOsType::reference vao : vaos_)
+			for (auto const & vao : vaos_)
 			{
 				glDeleteVertexArrays(1, &vao.second);
 			}
@@ -87,8 +86,7 @@ namespace KlayGE
 			}
 
 			uint32_t elem_offset = 0;
-			typedef std::remove_reference<decltype(vertex_stream_fmt)>::type VertexStreamFmtType;
-			for (VertexStreamFmtType::const_reference vs_elem : vertex_stream_fmt)
+			for (auto const & vs_elem : vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
@@ -230,8 +228,7 @@ namespace KlayGE
 		{
 			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
-			typedef std::remove_reference<decltype(vertex_stream_fmt)>::type VertexStreamFmtType;
-			for (VertexStreamFmtType::const_reference vs_elem : vertex_stream_fmt)
+			for (auto const & vs_elem : vertex_stream_fmt)
 			{
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
@@ -306,8 +303,7 @@ namespace KlayGE
 		if (use_vao_)
 		{
 			GLuint vao;
-			typedef decltype(vaos_) VAOsType;
-			VAOsType::iterator iter = vaos_.find(so);
+			auto iter = vaos_.find(so);
 			if (iter == vaos_.end())
 			{
 				if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
