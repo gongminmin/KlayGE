@@ -42,7 +42,14 @@
 #include <algorithm>
 
 #include <boost/assert.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#endif
 #include <boost/algorithm/string.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 #include <CPP/7zip/Archive/IArchive.h>
 

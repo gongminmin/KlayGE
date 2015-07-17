@@ -17,13 +17,18 @@
 
 #include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
-	#ifdef KLAYGE_COMPILER_MSVC
+	#if defined(KLAYGE_COMPILER_MSVC)
 	#pragma warning(push)
 	#pragma warning(disable: 4005) // Macro redefinition
+	#elif defined(KLAYGE_COMPILER_GCC)
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
 	#endif
 	#include <d3d11.h>
-	#ifdef KLAYGE_COMPILER_MSVC
+	#if defined(KLAYGE_COMPILER_MSVC)
 	#pragma warning(pop)
+	#elif defined(KLAYGE_COMPILER_GCC)
+	#pragma GCC diagnostic pop
 	#endif
 
 	#define DXGI_FORMAT_B4G4R4A4_UNORM static_cast<DXGI_FORMAT>(115)

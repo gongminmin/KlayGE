@@ -37,7 +37,14 @@
 
 #include <fstream>
 #include <boost/assert.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#endif
 #include <boost/algorithm/string/split.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/functional/hash.hpp>
@@ -4139,7 +4146,7 @@ namespace KlayGE
 			}
 			else
 			{
-				*reinterpret_cast<std::vector<float4x4>*>(data_.val) = value;
+				this->RetriveT() = value;
 			}
 			return *this;
 		}
@@ -4158,7 +4165,7 @@ namespace KlayGE
 			}
 			else
 			{
-				val = *reinterpret_cast<std::vector<float4x4> const *>(data_.val);
+                val = this->RetriveT();
 			}
 		}
 

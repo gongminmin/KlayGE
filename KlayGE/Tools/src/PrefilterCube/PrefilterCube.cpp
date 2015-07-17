@@ -24,7 +24,14 @@
 		}
 	}
 #else
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+	#endif
 	#include <boost/filesystem.hpp>
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic pop
+	#endif
 	namespace std
 	{
 		namespace experimental
@@ -354,7 +361,6 @@ namespace
 
 		uint32_t w = in_width;
 		std::vector<std::vector<Color>> prefilted_data(out_num_mipmaps * 6);
-		Color* env_map[6];
 		for (uint32_t face = 0; face < 6; ++ face)
 		{
 			prefilted_data[face * out_num_mipmaps].resize(w * w);
@@ -365,8 +371,6 @@ namespace
 				ConvertToABGR32F(in_format, src, w, &prefilted_data[face * out_num_mipmaps][y * w]);
 				src += in_data[face * in_num_mipmaps].row_pitch;
 			}
-
-			env_map[face] = &prefilted_data[face * out_num_mipmaps][0];
 		}
 
 		std::vector<ElementInitData> out_data(out_num_mipmaps * 6);

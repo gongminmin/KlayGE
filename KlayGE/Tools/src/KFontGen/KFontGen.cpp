@@ -16,13 +16,18 @@
 #include <cstring>
 #include <atomic>
 
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4512) // boost::program_options::options_description doesn't have assignment operator
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
 #endif
 #include <boost/program_options.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
 #endif
 
 #include <ft2build.h>
