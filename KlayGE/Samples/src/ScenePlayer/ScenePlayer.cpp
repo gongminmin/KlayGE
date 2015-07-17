@@ -371,8 +371,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 					std::vector<std::string> tokens;
 					boost::algorithm::split(tokens, attr->ValueString(), boost::is_any_of(" \t|"));
-					typedef std::vector<std::string> StringsType;
-					for (StringsType::reference token : tokens)
+					for (auto& token : tokens)
 					{
 						boost::algorithm::trim(token);
 						if ("noshadow" == token)
@@ -618,8 +617,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 					std::vector<std::string> tokens;
 					boost::algorithm::split(tokens, attr->ValueString(), boost::is_any_of(" \t|"));
-					typedef std::vector<std::string> StringsType;
-					for (StringsType::reference token : tokens)
+					for (auto& token : tokens)
 					{
 						boost::algorithm::trim(token);
 						if ("cullable" == token)

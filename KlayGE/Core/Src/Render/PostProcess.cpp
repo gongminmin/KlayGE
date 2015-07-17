@@ -1218,8 +1218,7 @@ namespace KlayGE
 
 	void PostProcessChain::Apply()
 	{
-		typedef decltype(pp_chain_) PPChainType;
-		for (PPChainType::reference pp : pp_chain_)
+		for (auto const & pp : pp_chain_)
 		{
 			pp->Apply();
 		}

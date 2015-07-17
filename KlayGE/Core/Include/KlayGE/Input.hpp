@@ -364,8 +364,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API InputEngine
 	{
-		typedef std::vector<std::pair<InputActionMap, action_handler_t>> action_handlers_t;
-
 	public:
 		enum InputDeviceType
 		{
@@ -401,10 +399,9 @@ namespace KlayGE
 		virtual void DoResume() = 0;
 
 	protected:
-		typedef std::vector<InputDevicePtr>	InputDevicesType;
-		InputDevicesType	devices_;
+		std::vector<InputDevicePtr> devices_;
 
-		action_handlers_t action_handlers_;
+		std::vector<std::pair<InputActionMap, action_handler_t>> action_handlers_;
 
 		Timer timer_;
 		float elapsed_time_;

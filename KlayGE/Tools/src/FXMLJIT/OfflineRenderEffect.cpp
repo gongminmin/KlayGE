@@ -2186,8 +2186,7 @@ namespace KlayGE
 				std::vector<std::string> include_names;
 				this->RecursiveIncludeNode(root, include_names);
 
-				typedef decltype(include_names) IncludeNamesType;
-				for (IncludeNamesType::const_reference include_name : include_names)
+				for (auto const & include_name : include_names)
 				{
 					ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
 					if (include_source)
@@ -2490,8 +2489,7 @@ namespace KlayGE
 		RenderEffectParameterPtr const & RenderEffect::ParameterByName(std::string const & name) const
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
-			typedef decltype(params_) ParamsType;
-			for (ParamsType::const_reference param : params_)
+			for (auto const & param : params_)
 			{
 				if (name_hash == param->NameHash())
 				{
@@ -2505,8 +2503,7 @@ namespace KlayGE
 		RenderEffectParameterPtr const & RenderEffect::ParameterBySemantic(std::string const & semantic) const
 		{
 			size_t const semantic_hash = boost::hash_range(semantic.begin(), semantic.end());
-			typedef decltype(params_) ParamsType;
-			for (ParamsType::const_reference param : params_)
+			for (auto const & param : params_)
 			{
 				if (semantic_hash == param->SemanticHash())
 				{
@@ -2520,8 +2517,7 @@ namespace KlayGE
 		RenderEffectConstantBufferPtr const & RenderEffect::CBufferByName(std::string const & name) const
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
-			typedef decltype(cbuffers_) CBuffersType;
-			for (CBuffersType::const_reference cbuffer : cbuffers_)
+			for (auto const & cbuffer : cbuffers_)
 			{
 				if (name_hash == cbuffer->NameHash())
 				{
@@ -2535,8 +2531,7 @@ namespace KlayGE
 		RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
 		{
 			size_t const name_hash = boost::hash_range(name.begin(), name.end());
-			typedef decltype(techniques_) TechsType;
-			for (TechsType::const_reference tech : techniques_)
+			for (auto const & tech : techniques_)
 			{
 				if (name_hash == tech->NameHash())
 				{

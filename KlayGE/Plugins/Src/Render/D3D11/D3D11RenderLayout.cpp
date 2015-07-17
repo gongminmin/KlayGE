@@ -43,18 +43,18 @@ namespace KlayGE
 			}
 		}
 
-		input_elems_type elems;
+		std::vector<D3D11_INPUT_ELEMENT_DESC> elems;
 		elems.reserve(vertex_streams_.size());
 
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
-			input_elems_type stream_elems;
+			std::vector<D3D11_INPUT_ELEMENT_DESC> stream_elems;
 			D3D11Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i), vertex_streams_[i].type, vertex_streams_[i].freq);
 			elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 		}
 		if (instance_stream_.stream)
 		{
-			input_elems_type stream_elems;
+			std::vector<D3D11_INPUT_ELEMENT_DESC> stream_elems;
 			D3D11Mapping::Mapping(stream_elems, this->NumVertexStreams(), this->InstanceStreamFormat(), instance_stream_.type, instance_stream_.freq);
 			elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 		}

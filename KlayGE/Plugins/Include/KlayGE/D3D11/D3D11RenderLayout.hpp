@@ -33,8 +33,7 @@ namespace KlayGE
 		ID3D11InputLayoutPtr const & InputLayout(size_t signature, std::vector<uint8_t> const & vs_code) const;
 
 	private:
-		typedef std::vector<D3D11_INPUT_ELEMENT_DESC> input_elems_type;
-		input_elems_type vertex_elems_;
+		std::vector<D3D11_INPUT_ELEMENT_DESC> vertex_elems_;
 
 		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr>> input_layouts_;
 	};

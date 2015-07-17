@@ -63,8 +63,7 @@ namespace KlayGE
 		DXGI_ADAPTER_DESC1	adapter_desc_;
 
 		// 显示模式列表
-		typedef std::vector<D3D11VideoMode> ModeType;
-		ModeType modes_;
+		std::vector<D3D11VideoMode> modes_;
 	};
 
 	typedef std::shared_ptr<D3D11Adapter> D3D11AdapterPtr;

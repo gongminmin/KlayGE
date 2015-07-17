@@ -65,8 +65,7 @@ namespace KlayGE
 		joiner<void>	receiveThread_;
 		bool			receiveLoop_;
 
-		typedef std::list<std::vector<char>> SendQueueType;
-		SendQueueType	sendQueue_;
+		std::list<std::vector<char>> sendQueue_;
 	};
 }
 

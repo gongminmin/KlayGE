@@ -340,8 +340,7 @@ namespace KlayGE
 #else
 		using namespace std::experimental;
 
-		typedef decltype(paths_) PathsType;
-		for (PathsType::const_reference path : paths_)
+		for (auto const & path : paths_)
 		{
 			std::string const res_name(path + name);
 
@@ -454,8 +453,7 @@ namespace KlayGE
 #else
 		using namespace std::experimental;
 
-		typedef decltype(paths_) PathsType;
-		for (PathsType::const_reference path : paths_)
+		for (auto const & path : paths_)
 		{
 			std::string const res_name(path + name);
 
@@ -589,8 +587,7 @@ namespace KlayGE
 			{
 				std::lock_guard<std::mutex> lock(loading_mutex_);
 
-				typedef decltype(loading_res_) LoadingResQueueType;
-				for (LoadingResQueueType::const_reference lrq : loading_res_)
+				for (auto const & lrq : loading_res_)
 				{
 					if (lrq.first->Match(*res_desc))
 					{
@@ -648,8 +645,7 @@ namespace KlayGE
 		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		bool found = false;
-		typedef decltype(loaded_res_) CachedDescType;
-		for (CachedDescType::reference c_desc : loaded_res_)
+		for (auto& c_desc : loaded_res_)
 		{
 			if (c_desc.first == res_desc)
 			{
@@ -669,8 +665,7 @@ namespace KlayGE
 		std::lock_guard<std::mutex> lock(loading_mutex_);
 
 		std::shared_ptr<void> loaded_res;
-		typedef decltype(loaded_res_) LoadedResType;
-		for (LoadedResType::const_reference lr : loaded_res_)
+		for (auto const & lr : loaded_res_)
 		{
 			if (lr.first->Match(*res_desc))
 			{

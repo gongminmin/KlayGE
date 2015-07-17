@@ -699,8 +699,7 @@ namespace KlayGE
 
 	void ParticleSystem::ClearParticles()
 	{
-		typedef decltype(particles_) ParticlesType;
-		for (ParticlesType::reference particle : particles_)
+		for (auto& particle : particles_)
 		{
 			particle.life = 0;
 		}
@@ -721,10 +720,9 @@ namespace KlayGE
 		{
 			Particle& particle = particles_[i];
 
-			typedef decltype(updaters_) UpdatersType;
 			if (particle.life > 0)
 			{
-				for (UpdatersType::reference updater : updaters_)
+				for (auto const & updater : updaters_)
 				{
 					updater->Update(particle, elapsed_time);
 				}
@@ -734,7 +732,7 @@ namespace KlayGE
 				if (new_particle > 0)
 				{
 					(*emitter_iter)->Emit(particle);
-					for (UpdatersType::reference updater : updaters_)
+					for (auto const & updater : updaters_)
 					{
 						updater->Update(particle, 0);
 					}

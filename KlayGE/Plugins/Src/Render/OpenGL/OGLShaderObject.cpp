@@ -1913,8 +1913,7 @@ namespace KlayGE
 
 							std::vector<std::string>& msgs = err_lines[err_line];
 							bool found = false;
-							typedef std::remove_reference<decltype(msgs)>::type ErrMsgsType;
-							for (ErrMsgsType::const_reference msg : msgs)
+							for (auto const & msg : msgs)
 							{
 								if (msg == err_str)
 								{
@@ -1960,8 +1959,7 @@ namespace KlayGE
 							LogInfo("...");
 						}
 
-						typedef decltype(iter->second) ErrMsgsType;
-						for (ErrMsgsType::const_reference msg : iter->second)
+						for (auto const & msg : iter->second)
 						{
 							LogError(msg.c_str());
 						}
@@ -2446,8 +2444,7 @@ namespace KlayGE
 
 			ret->attrib_locs_ = attrib_locs_;
 
-			typedef decltype(param_binds_) ParamBindsType;
-			for (ParamBindsType::reference pb : param_binds_)
+			for (auto const & pb : param_binds_)
 			{
 				if (pb.param)
 				{
@@ -2923,8 +2920,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
-		typedef decltype(param_binds_) ParamBindsType;
-		for (ParamBindsType::reference pb : param_binds_)
+		for (auto const & pb : param_binds_)
 		{
 			pb.func();
 		}

@@ -281,8 +281,7 @@ namespace KlayGE
 
 				RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(&data[0]);
 
-				typedef decltype(devices_) DevicesType;
-				for (DevicesType::reference device : devices_)
+				for (auto const & device : devices_)
 				{
 					switch (raw->header.dwType)
 					{
@@ -318,8 +317,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 	void MsgInputEngine::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
@@ -332,8 +330,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
@@ -344,8 +341,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnPointerUp(int2 const & pt, uint32_t id)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
@@ -356,8 +352,7 @@ namespace KlayGE
 	
 	void MsgInputEngine::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
@@ -368,8 +363,7 @@ namespace KlayGE
 	
 	void MsgInputEngine::OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Touch == device->Type())
 			{
@@ -381,8 +375,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_ANDROID
 	void MsgInputEngine::OnKeyDown(uint32_t key)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Keyboard == device->Type())
 			{
@@ -393,8 +386,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnKeyUp(uint32_t key)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Keyboard == device->Type())
 			{
@@ -405,8 +397,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnMouseDown(int2 const & pt, uint32_t buttons)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Mouse == device->Type())
 			{
@@ -417,8 +408,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnMouseUp(int2 const & pt, uint32_t buttons)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Mouse == device->Type())
 			{
@@ -429,8 +419,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnMouseMove(int2 const & pt)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Mouse == device->Type())
 			{
@@ -441,8 +430,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnMouseWheel(int2 const & pt, int32_t wheel_delta)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Mouse == device->Type())
 			{
@@ -453,8 +441,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnJoystickAxis(uint32_t axis, int32_t value)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Joystick == device->Type())
 			{
@@ -465,8 +452,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnJoystickButtons(uint32_t buttons)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Joystick == device->Type())
 			{
@@ -477,8 +463,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_DARWIN
 	void MsgInputEngine::OnKeyDown(uint32_t key)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Keyboard == device->Type())
 			{
@@ -489,8 +474,7 @@ namespace KlayGE
 
 	void MsgInputEngine::OnKeyUp(uint32_t key)
 	{
-		typedef decltype(devices_) DevicesType;
-		for (DevicesType::reference device : devices_)
+		for (auto const & device : devices_)
 		{
 			if (InputEngine::IDT_Keyboard == device->Type())
 			{

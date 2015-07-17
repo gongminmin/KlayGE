@@ -50,8 +50,7 @@ namespace KlayGE
 
 		alGenSources(static_cast<ALsizei>(sources_.size()), &sources_[0]);
 
-		typedef decltype(sources_) SourcesType;
-		for (SourcesType::reference source : sources_)
+		for (auto const & source : sources_)
 		{
 			alSourcef(source, AL_PITCH, 1);
 			alSourcef(source, AL_GAIN, volume);

@@ -162,8 +162,7 @@ namespace KlayGE
 	void SceneObject::AddToSceneManager()
 	{
 		Context::Instance().SceneManagerInstance().AddSceneObject(this->shared_from_this());
-		typedef decltype(children_) ChildrenType;
-		for (ChildrenType::reference child : children_)
+		for (auto const & child : children_)
 		{
 			child->AddToSceneManager();
 		}
@@ -172,8 +171,7 @@ namespace KlayGE
 	void SceneObject::AddToSceneManagerLocked()
 	{
 		Context::Instance().SceneManagerInstance().AddSceneObjectLocked(this->shared_from_this());
-		typedef decltype(children_) ChildrenType;
-		for (ChildrenType::reference child : children_)
+		for (auto const & child : children_)
 		{
 			child->AddToSceneManagerLocked();
 		}
@@ -181,8 +179,7 @@ namespace KlayGE
 
 	void SceneObject::DelFromSceneManager()
 	{
-		typedef decltype(children_) ChildrenType;
-		for (ChildrenType::reference child : children_)
+		for (auto const & child : children_)
 		{
 			child->DelFromSceneManager();
 		}
@@ -191,8 +188,7 @@ namespace KlayGE
 
 	void SceneObject::DelFromSceneManagerLocked()
 	{
-		typedef decltype(children_) ChildrenType;
-		for (ChildrenType::reference child : children_)
+		for (auto const & child : children_)
 		{
 			child->DelFromSceneManagerLocked();
 		}
@@ -220,8 +216,7 @@ namespace KlayGE
 			attrib_ |= SOA_Invisible;
 		}
 
-		typedef decltype(children_) ChildrenType;
-		for (ChildrenType::reference child : children_)
+		for (auto const & child : children_)
 		{
 			child->Visible(vis);
 		}

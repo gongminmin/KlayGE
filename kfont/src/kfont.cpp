@@ -152,16 +152,14 @@ namespace KlayGE
 				std::vector<std::pair<int32_t, uint32_t>> temp_char_advance(header.validate_chars);
 				kfont_input->read(&temp_char_advance[0], temp_char_advance.size() * sizeof(temp_char_advance[0]));
 
-				typedef decltype(temp_char_index) TCIType;
-				for (TCIType::reference ci : temp_char_index)
+				for (auto& ci : temp_char_index)
 				{
 					ci.first = LE2Native(ci.first);
 					ci.second = LE2Native(ci.second);
 
 					char_index_advance_.emplace(ci.first, std::make_pair(ci.second, 0));
 				}
-				typedef decltype(temp_char_advance) TCAType;
-				for (TCAType::reference ca : temp_char_advance)
+				for (auto& ca : temp_char_advance)
 				{
 					ca.first = LE2Native(ca.first);
 					ca.second = LE2Native(ca.second);
@@ -180,8 +178,7 @@ namespace KlayGE
 				char_info_.resize(header.non_empty_chars);
 				kfont_input->read(&char_info_[0], char_info_.size() * sizeof(char_info_[0]));
 
-				typedef decltype(char_info_) CIType;
-				for (CIType::reference ci : char_info_)
+				for (auto& ci : char_info_)
 				{
 					ci.left = LE2Native(ci.left);
 					ci.top = LE2Native(ci.top);
@@ -234,8 +231,7 @@ namespace KlayGE
 			kfont_output.write(reinterpret_cast<char*>(&header), sizeof(header));
 
 			std::vector<int32_t> chars;
-			typedef decltype(char_index_advance_) CIAType;
-			for (CIAType::reference cia : char_index_advance_)
+			for (auto const & cia : char_index_advance_)
 			{
 				chars.push_back(cia.first);
 			}
@@ -243,8 +239,7 @@ namespace KlayGE
 
 			std::vector<std::pair<int32_t, int32_t>> temp_char_index;
 			std::vector<std::pair<int32_t, uint32_t>> temp_char_advance;
-			typedef decltype(chars) CharsType;
-			for (CharsType::reference ch : chars)
+			for (auto const & ch : chars)
 			{
 				std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
 
@@ -257,22 +252,14 @@ namespace KlayGE
 			BOOST_ASSERT(temp_char_index.size() == char_info_.size());
 			BOOST_ASSERT(temp_char_advance.size() == char_index_advance_.size());
 
-			typedef decltype(temp_char_index) TCIType;
-			for (TCIType::reference ci : temp_char_index)
+			for (auto const & ci : temp_char_index)
 			{
-				TCIType::value_type tci;
-				tci.first = Native2LE(ci.first);
-				tci.second = Native2LE(ci.second);
-
+				auto tci = std::make_pair(Native2LE(ci.first), Native2LE(ci.second));
 				kfont_output.write(reinterpret_cast<char*>(&tci), sizeof(tci));
 			}
-			typedef decltype(temp_char_advance) TCAType;
-			for (TCAType::reference ca : temp_char_advance)
+			for (auto const & ca : temp_char_advance)
 			{
-				TCAType::value_type tca;
-				tca.first = Native2LE(ca.first);
-				tca.second = Native2LE(ca.second);
-
+				auto tca = std::make_pair(Native2LE(ca.first), Native2LE(ca.second));
 				kfont_output.write(reinterpret_cast<char*>(&tca), sizeof(tca));
 			}
 
@@ -450,8 +437,7 @@ namespace KlayGE
 	void KFont::Compact()
 	{
 		std::vector<int32_t> chars;
-		typedef decltype(char_index_advance_) CIAType;
-		for (CIAType::reference cia : char_index_advance_)
+		for (auto const & cia : char_index_advance_)
 		{
 			chars.push_back(cia.first);
 		}
@@ -461,8 +447,7 @@ namespace KlayGE
 		std::vector<font_info> new_char_info;
 		std::vector<size_t> new_distances_addr;
 		std::vector<uint8_t> new_distances_lzma;
-		typedef decltype(chars) CharsType;
-		for (CharsType::reference ch : chars)
+		for (auto const & ch : chars)
 		{
 			std::pair<int32_t, uint32_t> const & ci = char_index_advance_[ch];
 			int32_t new_ci;

@@ -947,8 +947,7 @@ int main(int argc, char* argv[])
 				}
 			}
 		
-			typedef decltype(char_index_advance) CIAType;
-			for (CIAType::reference cia : char_index_advance)
+			for (auto const & cia : char_index_advance)
 			{
 				int const ch = cia.first;
 				int const index = cia.second.first;
