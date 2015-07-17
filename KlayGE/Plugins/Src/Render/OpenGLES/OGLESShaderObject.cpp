@@ -1938,7 +1938,7 @@ namespace KlayGE
 						rules &= ~GSR_MatrixType;
 						if (glloader_GLES_VERSION_3_0())
 						{
-							rules |= caps.max_simultaneous_rts > 1 ? GSR_DrawBuffers : 0;
+							rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_DrawBuffers) : 0;
 							if (re.HackForAngle())
 							{
 								rules &= ~GSR_UseUBO;
@@ -1946,15 +1946,15 @@ namespace KlayGE
 						}
 						else
 						{
-							rules |= caps.shader_texture_lod_support ? GSR_EXTShaderTextureLod : 0;
-							rules |= caps.standard_derivatives_support ? GSR_OESStandardDerivatives : 0;
-							rules |= caps.max_simultaneous_rts > 1 ? GSR_EXTDrawBuffers : 0;
-							rules |= glloader_GLES_EXT_frag_depth() ? GSR_EXTFragDepth : 0;
+							rules |= caps.shader_texture_lod_support ? static_cast<uint32_t>(GSR_EXTShaderTextureLod) : 0;
+							rules |= caps.standard_derivatives_support ? static_cast<uint32_t>(GSR_OESStandardDerivatives) : 0;
+							rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_EXTDrawBuffers) : 0;
+							rules |= glloader_GLES_EXT_frag_depth() ? static_cast<uint32_t>(GSR_EXTFragDepth) : 0;
 							rules &= ~GSR_VersionDecl;
 						}
 						if ((ST_HullShader == type) || (ST_DomainShader == type))
 						{
-							rules |= GSR_EXTTessellationShader;
+							rules |= static_cast<uint32_t>(GSR_EXTTessellationShader);
 						}
 						dxbc2glsl.FeedDXBC(&code[0],
 							false, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),

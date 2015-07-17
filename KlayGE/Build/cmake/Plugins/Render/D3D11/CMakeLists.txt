@@ -65,6 +65,10 @@ ELSE()
 	SET(USE_DX_SDK TRUE)
 ENDIF()
 
+IF(NOT MSVC)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-unknown-pragmas -Wno-comment -Wno-switch")
+ENDIF()
+
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 IF(USE_DX_SDK)
 	INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/DXSDK/Include)

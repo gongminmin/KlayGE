@@ -24,7 +24,14 @@
 
 #include <istream>
 #include <vorbis/codec.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable" // Ignore OV_CALLBACKS_DEFAULT
+#endif
 #include <vorbis/vorbisfile.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 namespace KlayGE
 {

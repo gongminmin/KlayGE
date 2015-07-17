@@ -39,16 +39,21 @@
 #endif
 #endif
 
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4273) // 'round' in pymath.h inconsistent dll linkage
 #pragma warning(disable: 4510) // No default constructor for PyHash_FuncDef
 #pragma warning(disable: 4512) // No assignment operator for PyHash_FuncDef
 #pragma warning(disable: 4610) // No user-defined constructor for PyHash_FuncDef in vc12
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers" // Some uninitializers in python.h
 #endif
 #include <Python.h>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
 #endif
 #include <vector>
 #include <string>

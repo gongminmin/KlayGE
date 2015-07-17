@@ -1223,6 +1223,7 @@ namespace KlayGE
 						}
 					}
 					BOOST_ASSERT(found);
+					UNREF_PARAM(found);
 				}
 			}
 			else

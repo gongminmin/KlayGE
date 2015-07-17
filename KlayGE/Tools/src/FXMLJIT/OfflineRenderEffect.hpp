@@ -248,7 +248,7 @@ namespace KlayGE
 			{
 				if (!in_cbuff_)
 				{
-					reinterpret_cast<T*>(data_.val)->~T();
+					this->RetriveT().~T();
 				}
 			}
 
@@ -264,7 +264,7 @@ namespace KlayGE
 				}
 				else
 				{
-					*reinterpret_cast<T*>(data_.val) = value;
+					this->RetriveT() = value;
 				}
 				return *this;
 			}
@@ -277,7 +277,7 @@ namespace KlayGE
 				}
 				else
 				{
-					val = *reinterpret_cast<T const *>(data_.val);
+					val = this->RetriveT();
 				}
 			}
 
@@ -288,7 +288,7 @@ namespace KlayGE
 				{
 					T val;
 					this->Value(val);
-					reinterpret_cast<T*>(data_.val)->~T();
+					this->RetriveT().~T();
 					in_cbuff_ = true;
 					data_.cbuff_desc.cbuff = cbuff;
 					data_.cbuff_desc.offset = offset;
@@ -314,6 +314,28 @@ namespace KlayGE
 			virtual uint32_t Stride() const KLAYGE_OVERRIDE
 			{
 				return data_.cbuff_desc.stride;
+			}
+
+		protected:
+			T& RetriveT()
+			{
+				union Raw2T
+				{
+					uint8_t* raw;
+					T* t;
+				} r2t;
+				r2t.raw = data_.val;
+				return *r2t.t;
+			}
+			T const & RetriveT() const
+			{
+				union Raw2T
+				{
+					uint8_t const * raw;
+					T const * t;
+				} r2t;
+				r2t.raw = data_.val;
+				return *r2t.t;
 			}
 
 		protected:
@@ -363,7 +385,7 @@ namespace KlayGE
 				}
 				else
 				{
-					*reinterpret_cast<std::vector<T>*>(this->data_.val) = value;
+					this->RetriveT() = value;
 				}
 				return *this;
 			}
@@ -382,7 +404,7 @@ namespace KlayGE
 				}
 				else
 				{
-					val = *reinterpret_cast<std::vector<T> const *>(this->data_.val);
+					val = this->RetriveT();
 				}
 			}
 
@@ -858,12 +880,24 @@ namespace KlayGE
 			template <typename T>
 			T const * VariableInBuff(uint32_t offset) const
 			{
-				return reinterpret_cast<T*>(&buff_[offset]);
+				union Raw2T
+				{
+					uint8_t const * raw;
+					T const * t;
+				} r2t;
+				r2t.raw = &buff_[offset];
+				return r2t.t;
 			}
 			template <typename T>
 			T* VariableInBuff(uint32_t offset)
 			{
-				return reinterpret_cast<T*>(&buff_[offset]);
+				union Raw2T
+				{
+					uint8_t* raw;
+					T* t;
+				} r2t;
+				r2t.raw = &buff_[offset];
+				return r2t.t;
 			}
 
 		private:

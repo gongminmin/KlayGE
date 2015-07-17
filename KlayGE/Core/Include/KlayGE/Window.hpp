@@ -25,14 +25,19 @@
 
 #include <KlayGE/RenderSettings.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4512) // boost::iterators::function_output_iterator<T>::output_proxy doesn't have assignment operator
 #pragma warning(disable: 4913) // User defined binary operator ',' exists but no overload could convert all operands
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
 #endif
 #include <boost/signals2.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
 #endif
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
