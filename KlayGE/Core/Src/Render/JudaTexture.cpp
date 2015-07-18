@@ -870,7 +870,7 @@ namespace KlayGE
 
 	void JudaTexture::DeallocateDataBlock(uint32_t index)
 	{
-		std::deque<uint32_t>::iterator iter = std::lower_bound(data_block_free_list_.begin(), data_block_free_list_.end(), index);
+		auto iter = std::lower_bound(data_block_free_list_.begin(), data_block_free_list_.end(), index);
 		data_block_free_list_.insert(iter, index);
 		data_blocks_[index].clear();
 	}

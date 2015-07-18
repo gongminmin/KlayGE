@@ -93,8 +93,8 @@ namespace KlayGE
 
 		// Use first fit method to find a free sub alloc
 		bool found = false;
-		std::list<SubAlloc>::iterator iter = free_list_.begin();
-		std::list<SubAlloc>::iterator first_fit_iter = iter;
+		auto iter = free_list_.begin();
+		auto first_fit_iter = iter;
 		for (; iter != free_list_.end(); ++ iter)
 		{
 			if (iter->length_ >= size_in_byte)
@@ -199,12 +199,12 @@ namespace KlayGE
 				retired_frames_.push_back(RetiredFrame(frame_id + 1));
 			}
 			// Second, return pending frees to free_list
-			std::list<RetiredFrame>::iterator frame_iter = retired_frames_.begin();
+			auto frame_iter = retired_frames_.begin();
 			for (; frame_iter != retired_frames_.end();)
 			{
 				if (frame_iter->frame_id + num_pre_frames_ <= frame_id)
 				{
-					std::list<SubAlloc>::iterator iter = frame_iter->pending_frees_.begin();
+					auto iter = frame_iter->pending_frees_.begin();
 					for (; iter != frame_iter->pending_frees_.end(); ++ iter)
 					{
 						this->DoFree(*iter);
@@ -228,7 +228,7 @@ namespace KlayGE
 		else
 		{
 			// Find where to insert the alloc
-			std::list<SubAlloc>::iterator insert_position = free_list_.begin();
+			auto insert_position = free_list_.begin();
 			while (insert_position != free_list_.end())
 			{
 				if (insert_position->offset_ > alloc.offset_)
@@ -240,7 +240,7 @@ namespace KlayGE
 
 			bool left_merged = false;
 			// If the alloc is adjacent to previous alloc, merge them.
-			std::list<SubAlloc>::iterator previous = insert_position;
+			auto previous = insert_position;
 			if (insert_position != free_list_.begin())
 			{
 				-- previous;
@@ -253,7 +253,7 @@ namespace KlayGE
 
 			bool right_merged = false;
 			// If the alloc is adjecent to next alloc, merge them.
-			std::list<SubAlloc>::iterator next = insert_position;
+			auto next = insert_position;
 			if (insert_position != free_list_.end())
 			{
 				if (left_merged)

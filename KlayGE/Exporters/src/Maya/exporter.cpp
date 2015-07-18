@@ -114,7 +114,7 @@ private:
 	std::map<std::string, int> joint_to_id_;
 	std::map<int, MDagPath> joint_id_to_path_;
 
-	std::vector<std::pair<std::shared_ptr<MFnSkinCluster>, std::vector<MObject> > > skin_clusters_;
+	std::vector<std::pair<std::shared_ptr<MFnSkinCluster>, std::vector<MObject>>> skin_clusters_;
 };
 
 MayaMeshExporter::MayaMeshExporter()
@@ -480,8 +480,8 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 		fn_mesh.getBinormals(binormals, space, uv_set_name);
 
 		// Get associated joints and weights
-		std::vector<std::vector<float> > weights(num_vertices);
-		std::vector<std::vector<MDagPath> > joint_paths(num_vertices);
+		std::vector<std::vector<float>> weights(num_vertices);
+		std::vector<std::vector<MDagPath>> joint_paths(num_vertices);
 
 		int skin_cluster_index = -1;
 		for (size_t i = 0; (i < skin_clusters_.size()) && (skin_cluster_index < 0); ++ i)
@@ -586,7 +586,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 					attr.tangent_index = polygon_iterator.tangentIndex(i);
 				}
 
-				std::set<IndexAttributes>::iterator itr = index_attributes.find(attr);
+				auto itr = index_attributes.find(attr);
 				if (itr != index_attributes.end())
 				{
 					// Reuse existing vertex
@@ -801,10 +801,9 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 	if (has_surface_shader)
 	{
 		MFnDependencyNode surface_dn(surface_shader);
-		for (std::map<std::string, std::string>::const_iterator iter = texture_type_map.begin();
-			iter != texture_type_map.end(); ++ iter)
+		for (auto const & tex : texture_type_map)
 		{
-			MPlug plug_specified = surface_dn.findPlug(iter->second.c_str(), true);
+			MPlug plug_specified = surface_dn.findPlug(tex.second.c_str(), true);
 			if (!plug_specified.isConnected())
 			{
 				continue;
@@ -824,7 +823,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 					plug.getValue(texture_name);
 
 					int slot_id = meshml_obj_.AllocTextureSlot(mtl_id);
-					meshml_obj_.SetTextureSlot(mtl_id, slot_id, iter->first, texture_name.asChar());
+					meshml_obj_.SetTextureSlot(mtl_id, slot_id, tex.first, texture_name.asChar());
 				}
 				else
 				{

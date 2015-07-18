@@ -146,8 +146,7 @@ namespace
 			std::vector<float> lums = this->cal_lums(ascii_data);
 
 			float max_lum = *std::max_element(lums.begin(), lums.end());
-			for (std::vector<float>::const_iterator iter = lums.begin();
-				iter != lums.end(); ++ iter)
+			for (auto iter = lums.begin(); iter != lums.end(); ++ iter)
 			{
 				float char_lum = *iter / max_lum * output_num_ascii_;
 				if (ret.find(char_lum) == ret.end())
@@ -166,13 +165,13 @@ namespace
 
 			diff_lum_to_iter_type diff_lum_to_iter;
 
-			for (lum_to_char_type::const_iterator iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
+			for (auto iter = lum_to_char.begin(); iter != lum_to_char.end(); ++ iter)
 			{
 				float diff_lum;
 
 				if (iter != lum_to_char.begin())
 				{
-					lum_to_char_type::const_iterator prev_iter = iter;
+					auto prev_iter = iter;
 					-- prev_iter;
 					diff_lum = iter->first - prev_iter->first;
 				}
@@ -190,16 +189,15 @@ namespace
 			diff_lum_to_iter.resize(output_num_ascii_);
 
 			lum_to_char_type final_lum_to_char;
-			for (size_t i = 0; i < diff_lum_to_iter.size(); ++ i)
+			for (auto const & lum_to_iter : diff_lum_to_iter)
 			{
-				final_lum_to_char.insert(*diff_lum_to_iter[i].second);
+				final_lum_to_char.insert(*lum_to_iter.second);
 			}
 
 			std::vector<uint8_t> ret;
-			for (lum_to_char_type::iterator iter = final_lum_to_char.begin();
-				iter != final_lum_to_char.end(); ++ iter)
+			for (auto const & l2c : final_lum_to_char)
 			{
-				ret.push_back(iter->second);
+				ret.push_back(l2c.second);
 			}
 
 			return ret;

@@ -299,7 +299,7 @@ namespace KlayGE
 		}
 	}
 
-	void meshml_extractor::get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl)
+	void meshml_extractor::get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int>>>& uv_transss, Mtl* max_mtl)
 	{
 		if (max_mtl != NULL)
 		{
@@ -308,8 +308,8 @@ namespace KlayGE
 				int mtl_id = meshml_obj_.AllocMaterial();
 				mtls_id.push_back(mtl_id);
 
-				uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
-				std::map<int, std::pair<Matrix3, int> >& uv_transs = uv_transss.back();
+				uv_transss.push_back(std::map<int, std::pair<Matrix3, int>>());
+				std::map<int, std::pair<Matrix3, int>>& uv_transs = uv_transss.back();
 
 				::Color ambient = max_mtl->GetAmbient();
 				::Color diffuse = max_mtl->GetDiffuse();
@@ -389,7 +389,7 @@ namespace KlayGE
 			int mtl_id = meshml_obj_.AllocMaterial();
 			mtls_id.push_back(mtl_id);
 
-			uv_transss.push_back(std::map<int, std::pair<Matrix3, int> >());
+			uv_transss.push_back(std::map<int, std::pair<Matrix3, int>>());
 
 			meshml_obj_.SetMaterial(mtl_id, float3(0.5f, 0.5f, 0.5f),
 				float3(0.5f, 0.5f, 0.5f), float3(0, 0, 0), float3(0, 0, 0), 1, 1);
@@ -409,18 +409,18 @@ namespace KlayGE
 		Matrix3 obj_matrix = node->GetObjTMAfterWSM(cur_time_);
 		bool flip_normals = obj_matrix.Parity() ? true : false;
 
-		std::vector<std::pair<Point3, binds_t> > positions;
-		std::map<int, std::vector<Point2> > texs;
+		std::vector<std::pair<Point3, binds_t>> positions;
+		std::map<int, std::vector<Point2>> texs;
 		std::vector<int> pos_indices;
-		std::map<int, std::vector<int> > tex_indices;
-		std::vector<std::map<int, std::pair<Matrix3, int> > > uv_transs;
+		std::map<int, std::vector<int>> tex_indices;
+		std::vector<std::map<int, std::pair<Matrix3, int>>> uv_transs;
 
 		size_t mtl_base_index = objs_mtl_id_.size();
 		this->get_material(objs_mtl_id_, uv_transs, node->GetMtl());
 
 		std::vector<unsigned int> face_sm_group;
 		std::vector<unsigned int> face_mtl_id;
-		std::vector<std::vector<std::vector<unsigned int> > > vertex_sm_group;
+		std::vector<std::vector<std::vector<unsigned int>>> vertex_sm_group;
 
 		Object* obj = node->EvalWorldState(cur_time_).obj;
 		if ((obj != NULL) && obj->CanConvertToType(Class_ID(TRIOBJ_CLASS_ID, 0)))
@@ -594,7 +594,7 @@ namespace KlayGE
 						}
 					}
 
-					std::set<vertex_index_t>::iterator v_iter = vertex_indices.find(vertex_index);
+					auto v_iter = vertex_indices.find(vertex_index);
 					if (v_iter != vertex_indices.end())
 					{
 						// Respect set Immutability in C++0x
@@ -742,8 +742,7 @@ namespace KlayGE
 				vertex.binormal = -vertex.binormal;
 
 				int uv_layer_index = 0;
-				for (std::map<int, std::vector<Point2> >::iterator uv_iter = texs.begin();
-					uv_iter != texs.end(); ++ uv_iter, ++ uv_layer_index)
+				for (auto uv_iter = texs.begin(); uv_iter != texs.end(); ++ uv_iter, ++ uv_layer_index)
 				{
 					Point2 const & tex = uv_iter->second[vertex_index.tex_indices[uv_layer_index]];
 					obj_vertices[ver_index].tex.push_back(Point2(tex.x, 1 - tex.y));
@@ -783,7 +782,7 @@ namespace KlayGE
 
 					std::map<int, int> mapping;
 					int new_index = 0;
-					for (std::vector<int>::iterator iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
+					for (auto iter = index_set.begin(); iter != index_set.end(); ++ iter, ++ new_index)
 					{
 						mapping.emplace(*iter, new_index);
 
@@ -934,7 +933,7 @@ namespace KlayGE
 	}
 
 	void meshml_extractor::physique_modifier(Modifier* mod, INode* node,
-										std::vector<std::pair<Point3, binds_t> >& positions)
+										std::vector<std::pair<Point3, binds_t>>& positions)
 	{
 		assert(mod != NULL);
 		// Is this Physique?
@@ -990,7 +989,7 @@ namespace KlayGE
 	}
 
 	void meshml_extractor::skin_modifier(Modifier* mod, INode* node,
-									std::vector<std::pair<Point3, binds_t> >& positions)
+									std::vector<std::pair<Point3, binds_t>>& positions)
 	{
 		assert(mod != NULL);
 		// Is this Skin?

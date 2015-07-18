@@ -24,7 +24,7 @@ class ISkin;
 
 namespace KlayGE
 {
-	typedef std::vector<std::pair<INode*, float> > binds_t;
+	typedef std::vector<std::pair<INode*, float>> binds_t;
 
 	struct vertex_t
 	{
@@ -72,11 +72,11 @@ namespace KlayGE
 		void add_joint_weight(binds_t& binds, INode* joint_node, float weight);
 
 		void physique_modifier(Modifier* mod, INode* node,
-			std::vector<std::pair<Point3, binds_t> >& positions);
+			std::vector<std::pair<Point3, binds_t>>& positions);
 		void skin_modifier(Modifier* mod, INode* node,
-			std::vector<std::pair<Point3, binds_t> >& positions);
+			std::vector<std::pair<Point3, binds_t>>& positions);
 
-		void get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int> > >& uv_transss, Mtl* max_mtl);
+		void get_material(std::vector<int>& mtls_id, std::vector<std::map<int, std::pair<Matrix3, int>>>& uv_transss, Mtl* max_mtl);
 
 	private:
 		MeshMLObj meshml_obj_;

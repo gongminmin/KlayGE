@@ -116,7 +116,7 @@ namespace KlayGE
 		int index;
 		if (ctrl_points_.size() >= 1)
 		{
-			std::vector<float2>::iterator iter = ctrl_points_.begin();
+			auto iter = ctrl_points_.begin();
 			while ((iter != ctrl_points_.end() - 1) && ((iter + 1)->x() < pos))
 			{
 				++ iter;
@@ -193,7 +193,7 @@ namespace KlayGE
 
 	float UIPolylineEditBox::GetValue(float pos) const
 	{
-		for (std::vector<float2>::const_iterator iter = ctrl_points_.begin(); iter != ctrl_points_.end() - 1; ++ iter)
+		for (auto iter = ctrl_points_.begin(); iter != ctrl_points_.end() - 1; ++ iter)
 		{
 			if ((iter + 1)->x() >= pos)
 			{

@@ -623,15 +623,13 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::DiffuseTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
 				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -641,14 +639,12 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::SpecularTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Specular Level") == slot_type_hash) || (CT_HASH("Specular Color") == slot_type_hash))
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -658,14 +654,12 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::ShininessTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Glossiness") == slot_type_hash) || (CT_HASH("Reflection Glossiness Map") == slot_type_hash))
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -675,14 +669,12 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::NormalTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Bump") == slot_type_hash) || (CT_HASH("Bump Map") == slot_type_hash))
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -692,14 +684,12 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::HeightTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Height") == slot_type_hash) || (CT_HASH("Height Map") == slot_type_hash))
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -709,14 +699,12 @@ namespace KlayGE
 	std::string const & MeshMLViewerCore::EmitTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if (CT_HASH("Self-Illumination") == slot_type_hash)
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
@@ -726,14 +714,12 @@ namespace KlayGE
 	std::string const &MeshMLViewerCore::OpacityTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		TextureSlotsType const & slots = model->GetMaterial(mtl_id)->texture_slots;
-		for (TextureSlotsType::const_iterator iter = slots.begin();
-			iter != slots.end(); ++ iter)
+		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
 		{
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if (CT_HASH("Opacity") == slot_type_hash)
 			{
-				return iter->second;
+				return slot.second;
 			}
 		}
 		static std::string const empty;
