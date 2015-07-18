@@ -91,20 +91,20 @@ namespace KlayGE
 			return &val;
 		}
 
-		aligned_allocator() throw()
+		aligned_allocator() KLAYGE_NOEXCEPT
 		{
 		}
 
-		aligned_allocator(const aligned_allocator<T, alignment>&) throw()
+		aligned_allocator(const aligned_allocator<T, alignment>&) KLAYGE_NOEXCEPT
 		{
 		}
 
 		template <typename U, int alignment2>
-		aligned_allocator(const aligned_allocator<U, alignment2>&) throw()
+		aligned_allocator(const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
 		{
 		}
 
-		~aligned_allocator() throw()
+		~aligned_allocator() KLAYGE_NOEXCEPT
 		{
 		}
 
@@ -149,20 +149,20 @@ namespace KlayGE
 			destroy_t<pointer, std::is_trivially_destructible<value_type>::value>()(p);
 		}
 
-		size_type max_size() const throw()
+		size_type max_size() const KLAYGE_NOEXCEPT
 		{
 			return std::numeric_limits<size_t>::max() / sizeof(T);
 		}
 	};
 	
 	template <typename T, int alignment1, typename U, int alignment2>
-	inline bool operator==(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) throw()
+	inline bool operator==(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
 	{
 		return true;
 	}
 
 	template <typename T, int alignment1, typename U, int alignment2>
-	inline bool operator!=(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) throw()
+	inline bool operator!=(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
 	{
 		return false;
 	}
@@ -182,16 +182,16 @@ namespace KlayGE
 			typedef aligned_allocator<U, alignment> other;
 		};
 
-		aligned_allocator() throw()
+		aligned_allocator() KLAYGE_NOEXCEPT
 		{
 		}
 
-		aligned_allocator(const aligned_allocator<void, alignment>&) throw()
+		aligned_allocator(const aligned_allocator<void, alignment>&) KLAYGE_NOEXCEPT
 		{
 		}
 
 		template <typename U, int alignment2>
-		aligned_allocator(const aligned_allocator<U, alignment2>&) throw()
+		aligned_allocator(const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
 		{
 		}
 

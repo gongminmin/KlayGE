@@ -152,36 +152,36 @@ namespace std
 		static bool const tinyness_before = false;
 		static float_round_style const round_style = round_to_nearest;
 
-		static KlayGE::half min() throw()
+		static KlayGE::half min() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half(HALF_NRM_MIN);
 		}
-		static KlayGE::half max() throw()
+		static KlayGE::half max() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half(HALF_MAX);
 		}
-		static KlayGE::half epsilon() throw()
+		static KlayGE::half epsilon() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half(HALF_EPSILON);
 		}
-		static KlayGE::half round_error() throw()
+		static KlayGE::half round_error() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half(HALF_EPSILON / 2);
 		}
 
-		static KlayGE::half infinity() throw()
+		static KlayGE::half infinity() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half::pos_inf();
 		}
-		static KlayGE::half quiet_NaN() throw()
+		static KlayGE::half quiet_NaN() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half::q_nan();
 		}
-		static KlayGE::half signaling_NaN() throw()
+		static KlayGE::half signaling_NaN() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half::s_nan();
 		}
-		static KlayGE::half denorm_min() throw()
+		static KlayGE::half denorm_min() KLAYGE_NOEXCEPT
 		{
 			return KlayGE::half(HALF_MIN);
 		}
