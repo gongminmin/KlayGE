@@ -50,7 +50,7 @@ namespace
 			what_ = ss.str();
 		}
 
-		char const * what() const throw()
+		char const * what() const KLAYGE_NOEXCEPT
 		{
 			return what_.c_str();
 		}
