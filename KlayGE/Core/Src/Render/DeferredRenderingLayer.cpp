@@ -3245,8 +3245,8 @@ namespace KlayGE
 			while (li < directional_lights.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
-				std::vector<uint32_t>::const_iterator iter_beg = directional_lights.begin() + li;
-				std::vector<uint32_t>::const_iterator iter_end = iter_beg + nl;
+				auto iter_beg = directional_lights.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingDirectional(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3256,8 +3256,8 @@ namespace KlayGE
 			while (li < point_lights_no_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = point_lights_no_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = point_lights_no_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3267,8 +3267,8 @@ namespace KlayGE
 			while (li < point_lights_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = point_lights_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = point_lights_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3278,8 +3278,8 @@ namespace KlayGE
 			while (li < spot_lights_no_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = spot_lights_no_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = spot_lights_no_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3289,8 +3289,8 @@ namespace KlayGE
 			while (li < spot_lights_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = spot_lights_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = spot_lights_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3300,8 +3300,8 @@ namespace KlayGE
 			while (li < sphere_area_lights_no_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_no_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = sphere_area_lights_no_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = sphere_area_lights_no_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3311,8 +3311,8 @@ namespace KlayGE
 			while (li < sphere_area_lights_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = sphere_area_lights_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = sphere_area_lights_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3322,8 +3322,8 @@ namespace KlayGE
 			while (li < tube_area_lights_no_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_no_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = tube_area_lights_no_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = tube_area_lights_no_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3333,8 +3333,8 @@ namespace KlayGE
 			while (li < tube_area_lights_shadow.size())
 			{
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_shadow.size() - li));
-				std::vector<uint32_t>::iterator iter_beg = tube_area_lights_shadow.begin() + li;
-				std::vector<uint32_t>::iterator iter_end = iter_beg + nl;
+				auto iter_beg = tube_area_lights_shadow.begin() + li;
+				auto iter_end = iter_beg + nl;
 				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
 				li += nl;
 			}
@@ -3431,7 +3431,7 @@ namespace KlayGE
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_dir_es;
 		std::vector<float4> lights_attrib;
-		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
+		for (auto iter = iter_beg; iter != iter_end; ++ iter)
 		{
 			LightSourcePtr const & light = lights_[*iter];
 			BOOST_ASSERT(LightSource::LT_Directional == light->Type());
@@ -3496,7 +3496,7 @@ namespace KlayGE
 		std::vector<float4> lights_radius_extend;
 		std::vector<float3> lights_aabb_min;
 		std::vector<float3> lights_aabb_max;
-		for (std::vector<uint32_t>::const_iterator iter = iter_beg; iter != iter_end; ++ iter)
+		for (auto iter = iter_beg; iter != iter_end; ++ iter)
 		{
 			LightSourcePtr const & light = lights_[*iter];
 			BOOST_ASSERT(type == light->Type());

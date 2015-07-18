@@ -299,7 +299,7 @@ namespace KlayGE
 
 	void SceneManager::DelSceneObjectLocked(SceneObjectPtr const & obj)
 	{
-		for (SceneObjsType::iterator iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
+		for (auto iter = scene_objs_.begin(); iter != scene_objs_.end(); ++ iter)
 		{
 			if (*iter == obj)
 			{

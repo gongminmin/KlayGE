@@ -480,17 +480,15 @@ namespace KlayGE
 		RenderModelPtr model = model_.lock();
 
 		mtl_ = model->GetMaterial(this->MaterialID());
-		TextureSlotsType const & texture_slots = mtl_->texture_slots;
-		for (TextureSlotsType::const_iterator iter = texture_slots.begin();
-			iter != texture_slots.end(); ++ iter)
+		for (auto const & texture_slot : mtl_->texture_slots)
 		{
 			std::function<TexturePtr()> tl;
-			if (!ResLoader::Instance().Locate(iter->second).empty())
+			if (!ResLoader::Instance().Locate(texture_slot.second).empty())
 			{
-				tl = ASyncLoadTexture(iter->second, EAH_GPU_Read | EAH_Immutable);
+				tl = ASyncLoadTexture(texture_slot.second, EAH_GPU_Read | EAH_Immutable);
 			}
 
-			size_t const slot_type_hash = RT_HASH(iter->first.c_str());
+			size_t const slot_type_hash = RT_HASH(texture_slot.first.c_str());
 
 			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
 				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
@@ -519,7 +517,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("Opacity") == slot_type_hash)
 			{
-				ResIdentifierPtr tex_file = ResLoader::Instance().Open(iter->second);
+				ResIdentifierPtr tex_file = ResLoader::Instance().Open(texture_slot.second);
 				if (tex_file)
 				{
 					Texture::TextureType type;
@@ -658,7 +656,7 @@ namespace KlayGE
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
 
-		std::vector<uint32_t>::const_iterator iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+		auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
 		int index = static_cast<int>(iter - frame_id.begin());
 
 		int index0 = index - 1;
@@ -676,7 +674,7 @@ namespace KlayGE
 	{
 		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
 
-		std::vector<uint32_t>::const_iterator iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+		auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
 		int index = static_cast<int>(iter - frame_id.begin());
 
 		int index0 = index - 1;

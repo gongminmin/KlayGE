@@ -73,10 +73,9 @@ namespace
 			ret.push_back(glsl_minor_ver_);
 
 			std::string ext_str;
-			for (std::vector<std::string>::const_iterator iter = extensions_.begin();
-					iter != extensions_.end(); ++ iter)
+			for (auto const & ext : extensions_)
 			{
-				ext_str += *iter + ' ';
+				ext_str += ext + ' ';
 			}
 			ret.push_back(ext_str);
 
