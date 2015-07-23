@@ -695,10 +695,12 @@ namespace KlayGE
 		uint32_t const old_screen_height = default_frame_buffers_[3]->Height();
 		uint32_t const old_render_width = default_frame_buffers_[0]->Width();
 		uint32_t const old_render_height = default_frame_buffers_[0]->Height();
+		float const old_scale = std::min(static_cast<float>(old_screen_width) / old_render_width,
+			static_cast<float>(old_screen_height) / old_render_height);
 		uint32_t const new_screen_width = width;
 		uint32_t const new_screen_height = height;
-		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_width_scale_ + 0.5f);
-		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ + 0.5f);
+		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * old_scale + 0.5f);
+		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * old_scale + 0.5f);
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
 			RenderSettings const & settings = Context::Instance().Config().graphics_cfg;
@@ -750,9 +752,22 @@ namespace KlayGE
 
 					float const scale_x = static_cast<float>(new_screen_width) / new_render_width;
 					float const scale_y = static_cast<float>(new_screen_height) / new_render_height;
+
+					float2 pos_scale;
+					if (scale_x < scale_y)
+					{
+						pos_scale.x() = 1;
+						pos_scale.y() = (scale_x * new_render_height) / new_screen_height;
+					}
+					else
+					{
+						pos_scale.x() = (scale_y * new_render_width) / new_screen_width;
+						pos_scale.y() = 1;
+					}
+
 					for (size_t i = 0; i < 2; ++ i)
 					{
-						resize_pps_[i]->SetParam(0, float2(scale_x, scale_y));
+						resize_pps_[i]->SetParam(0, pos_scale);
 					}
 				}
 			}
