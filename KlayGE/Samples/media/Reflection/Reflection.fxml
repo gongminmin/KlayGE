@@ -21,10 +21,18 @@
 		<state name="address_v" value="clamp"/>
 		<state name="address_w" value="clamp"/>
 	</parameter>
+	
+	<parameter type="texture2D" name="reflection_tex"/>
+	<parameter type="sampler" name="reflection_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+		<state name="address_w" value="clamp"/>
+	</parameter>
 
 	<shader>
 		<![CDATA[
-void ReflectSpecialShadingVS(float4 pos : POSITION,
+void ReflectReflectionVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
 #ifdef NOPERSPECTIVE_SUPPORT
@@ -73,7 +81,7 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 #endif
 }
 
-float4 ReflectSpecialShadingPS(
+float4 ReflectReflectionPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 			noperspective float2 tc_front : TEXCOORD0,
 			noperspective float2 tc_back : TEXCOORD1,
@@ -102,22 +110,11 @@ float4 ReflectSpecialShadingPS(
 
 	float3 reflect_vec_front = reflect(pos_es_front, normal_es_front);
 	float3 reflect_vec_back = reflect(pos_es_back, normal_es_back);
-	
-	float3 specular;
-	if (specular_clr.w > 0.5f)
-	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
-	else
-	{
-		specular = specular_clr.rgb;
-	}
 
 	float3 reflect_vec_ws = mul(reflect_vec_front, (float3x3)inv_view);
 	float3 sky = decode_hdr_yc(TexCubeSampleLevel(skybox_tex, skybox_sampler, reflect_vec_front, 0, 0).r,
 			TexCubeSampleLevel(skybox_C_tex, skybox_sampler, reflect_vec_front, 0, 0)).xyz;
 
-	float fresnel = fresnel_term_schlick(-normalize(pos_es_front), normal_es_front, specular).x;
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
 	{
@@ -131,14 +128,90 @@ float4 ReflectSpecialShadingPS(
 	{
 		ssr = 0;
 	}
-
 	ssr.xyz = lerp(sky, ssr.xyz, ssr.w);
-	ssr.w = fresnel;
-	
+
 	return ssr;
+}
+
+void ReflectSpecialShadingVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float4 tangent_quat : TANGENT,
+#ifdef NOPERSPECTIVE_SUPPORT
+			out noperspective float2 oTc : TEXCOORD0,
+#else
+			out float3 oTc : TEXCOORD0,
+#endif
+			out float3 oPosES : TEXCOORD1,
+			out float3 oNormalOS : TEXCOORD2,
+			out float3 oPosOS : TEXCOORD3,
+			out float2 oTexcoord : TEXCOORD4,
+			out float4 oPos : SV_Position)
+{
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+
+	oPos = mul(pos, mvp);
+	oPosES = mul(pos, model_view).xyz;
+
+	oTexcoord = texcoord;
+	
+	tangent_quat = tangent_quat * 2 - 1;
+	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
+	oPosOS = pos.xyz * 200;
+
+	oTc.xy = oPos.xy / oPos.w;
+	oTc.y *= KLAYGE_FLIPPING;
+	oTc.xy = oTc.xy * 0.5f + 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oTc.z = oPos.w;
+	oTc.xy *= oTcW.z;
+#endif
+}
+
+float4 ReflectSpecialShadingPS(
+#ifdef NOPERSPECTIVE_SUPPORT
+			noperspective float2 tc : TEXCOORD0,
+#else
+			float3 tc_w : TEXCOORD0,
+#endif
+			float3 pos_es : TEXCOORD1,
+			float3 normal_os : TEXCOORD2,
+			float3 pos_os : TEXCOORD3,
+			float2 texcoord : TEXCOORD4) : SV_Target
+{
+#ifndef NOPERSPECTIVE_SUPPORT
+	float2 tc = tc_w.xy / tc_w.z;
+#endif
+
+	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
+	float3 normal = normal_os + bump * 0.01f;
+	float3 normal_es = normalize(mul(normal, (float3x3)model_view));
+
+	float3 specular;
+	if (specular_clr.w > 0.5f)
+	{
+		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	else
+	{
+		specular = specular_clr.rgb;
+	}
+	
+	float fresnel = fresnel_term_schlick(-normalize(pos_es), normal_es, specular).x;
+	return float4(reflection_tex.Sample(reflection_sampler, tc).xyz, fresnel);
 }
 		]]>
 	</shader>
+
+	<technique name="ReflectReflectionTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+
+			<state name="vertex_shader" value="ReflectReflectionVS()"/>
+			<state name="pixel_shader" value="ReflectReflectionPS()"/>
+		</pass>
+	</technique>
 
 	<technique name="ReflectSpecialShadingTech" inherit="SpecialShadingTech">
 		<pass name="p0">

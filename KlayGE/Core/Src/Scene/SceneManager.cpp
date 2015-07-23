@@ -349,9 +349,16 @@ namespace KlayGE
 				add = true;
 			}
 
-			if (deferred_mode_ && (urt_ & App3DFramework::URV_SpecialShadingOnly))
+			if (deferred_mode_)
 			{
-				add &= obj->SpecialShading();
+				if (urt_ & App3DFramework::URV_SpecialShadingOnly)
+				{
+					add &= obj->SpecialShading();
+				}
+				else if (urt_ & App3DFramework::URV_ReflectionOnly)
+				{
+					add &= obj->Reflection();
+				}
 			}
 
 			add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly))

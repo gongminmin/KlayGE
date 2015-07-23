@@ -45,9 +45,17 @@ namespace
 			mtl_->shininess = 128;
 			mtl_->specular = float3(0.6f, 0.6f, 0.6f);
 
+			effect_attrs_ |= EA_Reflection;
+
+			reflection_tech_ = technique_->Effect().TechniqueByName("ReflectReflectionTech");
+			reflection_alpha_blend_back_tech_ = reflection_tech_;
+			reflection_alpha_blend_front_tech_ = reflection_tech_;
+
 			special_shading_tech_ = technique_->Effect().TechniqueByName("ReflectSpecialShadingTech");
 			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
 			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
+
+			reflection_tex_param_ = technique_->Effect().ParameterByName("reflection_tex");
 		}
 
 		void OnRenderBegin()
@@ -56,9 +64,9 @@ namespace
 					
 			switch (type_)
 			{
-			case PT_OpaqueSpecialShading:
-			case PT_TransparencyBackSpecialShading:
-			case PT_TransparencyFrontSpecialShading:
+			case PT_OpaqueReflection:
+			case PT_TransparencyBackReflection:
+			case PT_TransparencyFrontReflection:
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();

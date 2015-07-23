@@ -16,13 +16,12 @@ def build_Boost(build_info, compiler_info):
 	with_test = True
 	with_thread = True
 	if "vc" == build_info.compiler_name:
-		if build_info.compiler_version >= 100:
-			with_regex = False
 		if build_info.compiler_version >= 110:
 			with_atomic = False
 			with_chrono = False
 			with_date_time = False
 			with_filesystem = False
+			with_regex = False
 			with_system = False
 			with_thread = False
 	if compiler_info.is_windows_runtime:
