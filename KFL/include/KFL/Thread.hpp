@@ -39,7 +39,14 @@
 	#include <condition_variable>
 	#include <mutex>
 #else
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'lk'
+	#endif
 	#include <boost/thread.hpp>
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic pop
+	#endif
 	namespace std
 	{
 		using boost::thread;
