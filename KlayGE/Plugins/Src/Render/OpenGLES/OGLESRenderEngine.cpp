@@ -488,13 +488,13 @@ namespace KlayGE
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformi_cache_.emplace(cur_program_, std::map<GLint, int4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformi_cache_, cur_program_, (std::map<GLint, int4>())).first;
 		}
 		auto iter_v = iter_p->second.find(location);
 		if (iter_v == iter_p->second.end())
 		{
 			dirty = true;
-			iter_p->second.emplace(location, int4(value, 0, 0, 0));
+			KLAYGE_EMPLACE(iter_p->second, location, int4(value, 0, 0, 0));
 		}
 		else
 		{
@@ -523,13 +523,13 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		auto iter_v = iter_p->second.find(location);
 		if (iter_v == iter_p->second.end())
 		{
 			dirty = true;
-			iter_p->second.emplace(location, float4(value, 0, 0, 0));
+			KLAYGE_EMPLACE(iter_p->second, location, float4(value, 0, 0, 0));
 		}
 		else
 		{
@@ -553,7 +553,7 @@ namespace KlayGE
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformi_cache_.emplace(cur_program_, std::map<GLint, int4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformi_cache_, cur_program_, (std::map<GLint, int4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -561,7 +561,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, int4(value[i], 0, 0, 0));
+				KLAYGE_EMPLACE(iter_p->second, location, int4(value[i], 0, 0, 0));
 			}
 			else
 			{
@@ -591,7 +591,7 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -599,7 +599,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, float4(value[i], 0, 0, 0));
+				KLAYGE_EMPLACE(iter_p->second, location, float4(value[i], 0, 0, 0));
 			}
 			else
 			{
@@ -624,7 +624,7 @@ namespace KlayGE
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformi_cache_.emplace(cur_program_, std::map<GLint, int4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformi_cache_, cur_program_, (std::map<GLint, int4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -632,7 +632,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, int4(value[i * 2 + 0], value[i * 2 + 1], 0, 0));
+				KLAYGE_EMPLACE(iter_p->second, location, int4(value[i * 2 + 0], value[i * 2 + 1], 0, 0));
 			}
 			else
 			{
@@ -663,7 +663,7 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -671,7 +671,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, float4(value[i * 2 + 0], value[i * 2 + 1], 0, 0));
+				KLAYGE_EMPLACE(iter_p->second, location, float4(value[i * 2 + 0], value[i * 2 + 1], 0, 0));
 			}
 			else
 			{
@@ -697,7 +697,7 @@ namespace KlayGE
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformi_cache_.emplace(cur_program_, std::map<GLint, int4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformi_cache_, cur_program_, (std::map<GLint, int4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -705,7 +705,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, int4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0));
+				KLAYGE_EMPLACE(iter_p->second, location, int4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0));
 			}
 			else
 			{
@@ -738,7 +738,7 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -746,7 +746,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location, float4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0));
+				KLAYGE_EMPLACE(iter_p->second, location, float4(value[i * 3 + 0], value[i * 3 + 1], value[i * 3 + 2], 0));
 			}
 			else
 			{
@@ -774,7 +774,7 @@ namespace KlayGE
 		if (iter_p == uniformi_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformi_cache_.emplace(cur_program_, std::map<GLint, int4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformi_cache_, cur_program_, (std::map<GLint, int4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -782,7 +782,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location,
+				KLAYGE_EMPLACE(iter_p->second, location,
 					int4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3]));
 			}
 			else
@@ -817,7 +817,7 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		for (GLsizei i = 0; i < count; ++ i)
 		{
@@ -825,7 +825,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location,
+				KLAYGE_EMPLACE(iter_p->second, location,
 					float4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3]));
 			}
 			else
@@ -855,7 +855,7 @@ namespace KlayGE
 		if (iter_p == uniformf_cache_.end())
 		{
 			dirty = true;
-			iter_p = uniformf_cache_.emplace(cur_program_, std::map<GLint, float4>()).first;
+			iter_p = KLAYGE_EMPLACE(uniformf_cache_, cur_program_, (std::map<GLint, float4>())).first;
 		}
 		for (GLsizei i = 0; i < count * 4; ++ i)
 		{
@@ -863,7 +863,7 @@ namespace KlayGE
 			if (iter_v == iter_p->second.end())
 			{
 				dirty = true;
-				iter_p->second.emplace(location,
+				KLAYGE_EMPLACE(iter_p->second, location,
 					float4(value[i * 4 + 0], value[i * 4 + 1], value[i * 4 + 2], value[i * 4 + 3]));
 			}
 			else

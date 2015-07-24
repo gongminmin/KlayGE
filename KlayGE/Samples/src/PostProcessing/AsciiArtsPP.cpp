@@ -151,7 +151,7 @@ namespace
 				float char_lum = *iter / max_lum * output_num_ascii_;
 				if (ret.find(char_lum) == ret.end())
 				{
-					ret.emplace(char_lum, static_cast<uint8_t>(iter - lums.begin()));
+					KLAYGE_EMPLACE(ret, char_lum, static_cast<uint8_t>(iter - lums.begin()));
 				}
 			}
 			BOOST_ASSERT(ret.size() >= output_num_ascii_);

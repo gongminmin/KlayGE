@@ -1871,7 +1871,7 @@ namespace KlayGE
 
 	void UIDialog::AddIDName(std::string const & name, int id)
 	{
-		id_name_.emplace(name, id);
+		KLAYGE_EMPLACE(id_name_, name, id);
 	}
 
 	int UIDialog::IDFromName(std::string const & name)
@@ -1881,7 +1881,7 @@ namespace KlayGE
 
 	void UIDialog::CtrlLocation(int id, UIDialog::ControlLocation const & loc)
 	{
-		id_location_.emplace(id, loc);
+		KLAYGE_EMPLACE(id_location_, id, loc);
 	}
 
 	UIDialog::ControlLocation const & UIDialog::CtrlLocation(int id)

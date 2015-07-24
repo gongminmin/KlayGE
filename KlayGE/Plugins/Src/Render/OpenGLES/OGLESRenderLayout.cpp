@@ -204,7 +204,7 @@ namespace KlayGE
 				glGenVertexArrays(1, &vao);
 				glBindVertexArray(vao);
 				
-				vaos_.emplace(so, vao);
+				KLAYGE_EMPLACE(vaos_, so, vao);
 				this->BindVertexStreams(so);
 			}
 			else

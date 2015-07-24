@@ -1015,6 +1015,7 @@ namespace KlayGE
 		}
 #else
 		BOOST_ASSERT(!jit);
+		UNREF_PARAM(jit);
 #endif
 	}
 
@@ -1468,7 +1469,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints.size(); ++ i)
 		{
 			int joint_id = obj.AllocJoint();
-			joint_map.emplace(i, joint_id);
+			KLAYGE_EMPLACE(joint_map, i, joint_id);
 
 			int parent_id = -1;
 			if (joints[i].parent != -1)
@@ -1483,7 +1484,7 @@ namespace KlayGE
 		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
 			int mtl_id = obj.AllocMaterial();
-			mtl_map.emplace(i, mtl_id);
+			KLAYGE_EMPLACE(mtl_map, i, mtl_id);
 
 			float3 ambient = mtls[i]->ambient;
 			float3 diffuse = mtls[i]->diffuse;

@@ -2275,7 +2275,7 @@ namespace KlayGE
 				{
 					for (size_t pi = 0; pi < glsl_vs_attrib_names_->size(); ++ pi)
 					{
-						attrib_locs_.emplace(std::make_pair((*vs_usages_)[pi], (*vs_usage_indices_)[pi]),
+						KLAYGE_EMPLACE(attrib_locs_, std::make_pair((*vs_usages_)[pi], (*vs_usage_indices_)[pi]),
 								glGetAttribLocation(glsl_program_, (*glsl_vs_attrib_names_)[pi].c_str()));
 					}
 				}

@@ -311,7 +311,7 @@ namespace KlayGE
 		if (iter == rs_pool_.end())
 		{
 			ret = this->DoMakeRasterizerStateObject(desc);
-			rs_pool_.emplace(desc, ret);
+			KLAYGE_EMPLACE(rs_pool_, desc, ret);
 		}
 		else
 		{
@@ -329,7 +329,7 @@ namespace KlayGE
 		if (iter == dss_pool_.end())
 		{
 			ret = this->DoMakeDepthStencilStateObject(desc);
-			dss_pool_.emplace(desc, ret);
+			KLAYGE_EMPLACE(dss_pool_, desc, ret);
 		}
 		else
 		{
@@ -347,7 +347,7 @@ namespace KlayGE
 		if (iter == bs_pool_.end())
 		{
 			ret = this->DoMakeBlendStateObject(desc);
-			bs_pool_.emplace(desc, ret);
+			KLAYGE_EMPLACE(bs_pool_, desc, ret);
 		}
 		else
 		{
@@ -365,7 +365,7 @@ namespace KlayGE
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);
-			ss_pool_.emplace(desc, ret);
+			KLAYGE_EMPLACE(ss_pool_, desc, ret);
 		}
 		else
 		{

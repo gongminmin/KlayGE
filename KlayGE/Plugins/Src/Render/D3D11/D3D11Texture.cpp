@@ -272,7 +272,7 @@ namespace KlayGE
 
 		ID3D11ShaderResourceView* d3d_sr_view;
 		d3d_device_->CreateShaderResourceView(this->D3DResource().get(), &desc, &d3d_sr_view);
-		auto ret = d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view));
+		auto ret = KLAYGE_EMPLACE(d3d_sr_views_, hash_val, MakeCOMPtr(d3d_sr_view));
 		return ret.first->second;
 	}
 
@@ -290,7 +290,7 @@ namespace KlayGE
 
 		ID3D11UnorderedAccessView* d3d_ua_view;
 		d3d_device_->CreateUnorderedAccessView(this->D3DResource().get(), &desc, &d3d_ua_view);
-		auto ret = d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view));
+		auto ret = KLAYGE_EMPLACE(d3d_ua_views_, hash_val, MakeCOMPtr(d3d_ua_view));
 		return ret.first->second;
 	}
 
@@ -308,7 +308,7 @@ namespace KlayGE
 
 		ID3D11RenderTargetView* rt_view;
 		d3d_device_->CreateRenderTargetView(this->D3DResource().get(), &desc, &rt_view);
-		auto ret = d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view));
+		auto ret = KLAYGE_EMPLACE(d3d_rt_views_, hash_val, MakeCOMPtr(rt_view));
 		return ret.first->second;
 	}
 
@@ -326,7 +326,7 @@ namespace KlayGE
 
 		ID3D11DepthStencilView* ds_view;
 		d3d_device_->CreateDepthStencilView(this->D3DResource().get(), &desc, &ds_view);
-		auto ret = d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view));
+		auto ret = KLAYGE_EMPLACE(d3d_ds_views_, hash_val, MakeCOMPtr(ds_view));
 		return ret.first->second;
 	}
 

@@ -65,6 +65,12 @@
 	}
 #endif
 
+#ifdef KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
+	#define KLAYGE_EMPLACE(container, key, value) (container).emplace((key), (value))
+#else
+	#define KLAYGE_EMPLACE(container, key, value) (container).insert(std::make_pair((key), (value)))
+#endif
+
 #ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 	#include <functional>
 	namespace KlayGE
