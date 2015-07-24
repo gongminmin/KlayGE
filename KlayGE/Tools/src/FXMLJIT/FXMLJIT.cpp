@@ -71,13 +71,6 @@
 using namespace std;
 using namespace KlayGE;
 
-#ifdef KLAYGE_COMPILER_MSVC
-extern "C"
-{
-	_declspec(dllexport) KlayGE::uint32_t NvOptimusEnablement = 0x00000001;
-}
-#endif
-
 uint32_t const KFX_VERSION = 0x0107;
 
 int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)

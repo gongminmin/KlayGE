@@ -48,15 +48,11 @@
 	#include <KFL/Detail/AutoLink.hpp>
 #endif
 
-#ifdef KLAYGE_HAS_DECLSPEC
-	#ifdef KLAYGE_CORE_SOURCE		// Build dll
-		#define KLAYGE_CORE_API __declspec(dllexport)
-	#else							// Use dll
-		#define KLAYGE_CORE_API __declspec(dllimport)
-	#endif
-#else
-	#define KLAYGE_CORE_API
-#endif // KLAYGE_HAS_DECLSPEC
+#ifdef KLAYGE_CORE_SOURCE		// Build dll
+	#define KLAYGE_CORE_API KLAYGE_SYMBOL_EXPORT
+#else							// Use dll
+	#define KLAYGE_CORE_API KLAYGE_SYMBOL_IMPORT
+#endif
 
 #include <vector>
 #include <string>

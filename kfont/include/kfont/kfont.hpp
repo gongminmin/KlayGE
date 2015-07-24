@@ -42,15 +42,11 @@
 	#include <KFL/Detail/AutoLink.hpp>
 #endif	// KFONT_SOURCE
 
-#ifdef KLAYGE_HAS_DECLSPEC
-	#ifdef KFONT_SOURCE		// Build dll
-		#define KFONT_API __declspec(dllexport)
-	#else							// Use dll
-		#define KFONT_API __declspec(dllimport)
-	#endif
-#else
-	#define KFONT_API
-#endif // KFONT_HAS_DECLSPEC
+#ifdef KFONT_SOURCE		// Build dll
+	#define KFONT_API KLAYGE_SYMBOL_EXPORT
+#else							// Use dll
+	#define KFONT_API KLAYGE_SYMBOL_IMPORT
+#endif
 
 namespace KlayGE
 {

@@ -17,7 +17,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
 {
-	_declspec(dllexport) KlayGE::uint32_t NvOptimusEnablement = 0x00000001;
+	KLAYGE_SYMBOL_EXPORT KlayGE::uint32_t NvOptimusEnablement = 0x00000001;
 }
 #endif
 

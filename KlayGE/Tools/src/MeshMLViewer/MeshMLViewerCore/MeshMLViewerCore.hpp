@@ -10,9 +10,9 @@
 #include "Model.hpp"
 
 #ifdef KLAYGE_MESHML_VIEWER_CORE_SOURCE		// Build dll
-#define KLAYGE_MESHML_VIEWER_CORE_API __declspec(dllexport)
+#define KLAYGE_MESHML_VIEWER_CORE_API KLAYGE_SYMBOL_EXPORT
 #else										// Use dll
-#define KLAYGE_MESHML_VIEWER_CORE_API __declspec(dllimport)
+#define KLAYGE_MESHML_VIEWER_CORE_API KLAYGE_SYMBOL_IMPORT
 #endif
 
 namespace KlayGE

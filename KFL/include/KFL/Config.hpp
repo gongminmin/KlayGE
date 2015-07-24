@@ -111,6 +111,9 @@
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT
 	#elif defined(__MINGW32__)
 		#if CLANG_VERSION >= 36
 			#define KLAYGE_COMPILER_VERSION 36
@@ -149,6 +152,9 @@
 				#endif
 			#endif
 		#endif
+
+		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 	#else
 		#error "Clang++ on an unknown platform. Only Apple and Windows are supported."
 	#endif
@@ -203,11 +209,21 @@
 			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 		#endif
 	#endif
+
+	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__dllexport__))
+		#define KLAYGE_SYMBOL_IMPORT __attribute__((__dllimport__))
+	#else
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT
+	#endif
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
 	#define KLAYGE_COMPILER_NAME vc
 
 	#define KLAYGE_HAS_DECLSPEC
+	#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+	#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 
 	#if _MSC_VER >= 1900
 		#define KLAYGE_COMPILER_VERSION 140
