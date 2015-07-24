@@ -42,10 +42,6 @@ typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-	ref class MetroD3D11RenderWindow;
-#endif
-
 	struct RenderSettings;
 
 	class D3D11RenderWindow : public D3D11FrameBuffer
@@ -125,6 +121,7 @@ namespace KlayGE
 		HWND	hWnd_;				// Win32 Window handle
 #else
 		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
+		Windows::Foundation::EventRegistrationToken stereo_enabled_changed_token_;
 
 		ref class MetroD3D11RenderWindow
 		{

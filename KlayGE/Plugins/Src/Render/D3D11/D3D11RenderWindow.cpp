@@ -402,10 +402,10 @@ namespace KlayGE
 		using namespace Windows::Graphics::Display;
 		using namespace Windows::Foundation;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		DisplayInformation::GetForCurrentView()->StereoEnabledChanged +=
+		stereo_enabled_changed_token_ = DisplayInformation::GetForCurrentView()->StereoEnabledChanged +=
 			ref new TypedEventHandler<DisplayInformation^, Platform::Object^>(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
 #else
-		DisplayProperties::StereoEnabledChanged +=
+		stereo_enabled_changed_token_ = DisplayProperties::StereoEnabledChanged +=
 			ref new DisplayPropertiesEventHandler(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
 #endif
 
@@ -497,6 +497,15 @@ namespace KlayGE
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+		using namespace Windows::Graphics::Display;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		DisplayInformation::GetForCurrentView()->StereoEnabledChanged -= stereo_enabled_changed_token_;
+#else
+		DisplayProperties::StereoEnabledChanged -= stereo_enabled_changed_token_;
+#endif
+#endif
+
 		on_paint_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();

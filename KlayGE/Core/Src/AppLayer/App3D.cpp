@@ -87,6 +87,20 @@ namespace KlayGE
 	private:
 		App3DFramework* app_;
 		MetroMsgs^ msgs_;
+		Platform::Agile<CoreApplicationView> app_view_;
+		Platform::Agile<CoreWindow> window_;
+
+		EventRegistrationToken app_activated_token_;
+		EventRegistrationToken app_suspending_token_;
+		EventRegistrationToken app_resuming_token_;
+
+		EventRegistrationToken win_size_changed_token_;
+		EventRegistrationToken visibility_changed_token_;
+		EventRegistrationToken win_closed_token_;
+		EventRegistrationToken pointer_pressed_token_;
+		EventRegistrationToken pointer_released_token_;
+		EventRegistrationToken pointer_moved_token_;
+		EventRegistrationToken pointer_wheel_changed_token_;
 	};
 
 	ref class MetroFrameworkSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
@@ -135,40 +149,44 @@ namespace KlayGE
 
 	void MetroFramework::Initialize(CoreApplicationView^ application_view)
 	{
-		application_view->Activated +=
+		app_view_ = application_view;
+
+		app_activated_token_ = application_view->Activated +=
 			ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &MetroFramework::OnActivated);
 
-		CoreApplication::Suspending +=
+		app_suspending_token_ = CoreApplication::Suspending +=
 			ref new EventHandler<SuspendingEventArgs^>(this, &MetroFramework::OnSuspending);
 
-		CoreApplication::Resuming +=
+		app_resuming_token_ = CoreApplication::Resuming +=
 			ref new EventHandler<Platform::Object^>(this, &MetroFramework::OnResuming);
 	}
 
 	void MetroFramework::SetWindow(CoreWindow^ window)
 	{
+		window_ = window;
+
 		msgs_->BindWindow(app_->MainWnd());
 
-		window->SizeChanged += 
+		win_size_changed_token_ = window->SizeChanged +=
 			ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(msgs_, &MetroMsgs::OnWindowSizeChanged);
 
-		window->VisibilityChanged +=
+		visibility_changed_token_ = window->VisibilityChanged +=
 			ref new TypedEventHandler<CoreWindow^, VisibilityChangedEventArgs^>(msgs_, &MetroMsgs::OnVisibilityChanged);
 
-		window->Closed += 
+		win_closed_token_ = window->Closed += 
 			ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(msgs_, &MetroMsgs::OnWindowClosed);
 
 #ifndef KLAYGE_PLATFORM_WINDOWS_PHONE
 		window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
 #endif
 
-		window->PointerPressed +=
+		pointer_pressed_token_ = window->PointerPressed +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerPressed);
-		window->PointerReleased +=
+		pointer_released_token_ = window->PointerReleased +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerReleased);
-		window->PointerMoved +=
+		pointer_moved_token_ = window->PointerMoved +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerMoved);
-		window->PointerWheelChanged +=
+		pointer_wheel_changed_token_ = window->PointerWheelChanged +=
 			ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(msgs_, &MetroMsgs::OnPointerWheelChanged);
 
 		app_->MainWnd()->SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow>(window));
@@ -186,6 +204,17 @@ namespace KlayGE
 
 	void MetroFramework::Uninitialize()
 	{
+		window_->PointerWheelChanged -= pointer_wheel_changed_token_;
+		window_->PointerMoved -= pointer_moved_token_;
+		window_->PointerReleased -= pointer_released_token_;
+		window_->PointerPressed -= pointer_pressed_token_;
+		window_->Closed -= win_closed_token_;
+		window_->VisibilityChanged -= visibility_changed_token_;
+		window_->SizeChanged -= win_size_changed_token_;
+
+		CoreApplication::Resuming -= app_resuming_token_;
+		CoreApplication::Suspending -= app_suspending_token_;
+		app_view_->Activated -= app_activated_token_;
 	}
 
 	void MetroFramework::OnActivated(CoreApplicationView^ application_view, IActivatedEventArgs^ args)
