@@ -31,8 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/Window.hpp>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 

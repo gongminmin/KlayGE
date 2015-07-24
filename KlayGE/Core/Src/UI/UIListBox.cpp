@@ -14,7 +14,6 @@
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Font.hpp>

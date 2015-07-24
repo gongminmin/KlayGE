@@ -13,7 +13,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
-#include <KlayGE/Window.hpp>
 #include <KlayGE/Input.hpp>
 
 #include <KlayGE/UI.hpp>

@@ -16,8 +16,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/App3D.hpp>
-#include <KlayGE/Window.hpp>
 #include <KlayGE/Font.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
