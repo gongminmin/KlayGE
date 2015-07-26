@@ -3523,8 +3523,8 @@ namespace KlayGE
 			// Assign each value to a bucket
 			for (uint32_t i = 0; i < BC67_MAX_NUM_DATA_POINTS; ++ i)
 			{
-
 				float min_dist = 255;
+				buckets[i] = num_buckets;
 				for (uint32_t j = 0; j < num_buckets; ++ j)
 				{
 					float dist = abs(alpha_vals[i] - vals[j]);
