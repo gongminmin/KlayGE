@@ -34,70 +34,70 @@
 
 namespace KlayGE
 {
-	template Size_T<float>::Size_T(float const * rhs);
-	template Size_T<float>::Size_T(Size&& rhs);
-	template Size_T<float>::Size_T(float cx, float cy);
-	template Size const & Size_T<float>::operator+=(Size const & rhs);
-	template Size const & Size_T<float>::operator+=(ISize const & rhs);
-	template Size const & Size_T<float>::operator+=(UISize const & rhs);
-	template Size const & Size_T<float>::operator-=(Size const & rhs);
-	template Size const & Size_T<float>::operator-=(ISize const & rhs);
-	template Size const & Size_T<float>::operator-=(UISize const & rhs);
-	template Size& Size_T<float>::operator=(Size&& rhs);
-	template Size const Size_T<float>::operator+() const;
-	template Size const Size_T<float>::operator-() const;
-	template bool Size_T<float>::operator==(Size const & rhs) const;
+	template Size_T<float>::Size_T(float const * rhs) KLAYGE_NOEXCEPT;
+	template Size_T<float>::Size_T(Size&& rhs) KLAYGE_NOEXCEPT;
+	template Size_T<float>::Size_T(float cx, float cy) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator+=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator+=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator+=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator-=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator-=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template Size const & Size_T<float>::operator-=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template Size& Size_T<float>::operator=(Size&& rhs) KLAYGE_NOEXCEPT;
+	template Size const Size_T<float>::operator+() const KLAYGE_NOEXCEPT;
+	template Size const Size_T<float>::operator-() const KLAYGE_NOEXCEPT;
+	template bool Size_T<float>::operator==(Size const & rhs) const KLAYGE_NOEXCEPT;
 
-	template Size_T<int32_t>::Size_T(int32_t const * rhs);
-	template Size_T<int32_t>::Size_T(ISize&& rhs);
-	template Size_T<int32_t>::Size_T(int32_t cx, int32_t cy);
-	template ISize const & Size_T<int32_t>::operator+=(Size const & rhs);
-	template ISize const & Size_T<int32_t>::operator+=(ISize const & rhs);
-	template ISize const & Size_T<int32_t>::operator+=(UISize const & rhs);
-	template ISize const & Size_T<int32_t>::operator-=(Size const & rhs);
-	template ISize const & Size_T<int32_t>::operator-=(ISize const & rhs);
-	template ISize const & Size_T<int32_t>::operator-=(UISize const & rhs);
-	template ISize& Size_T<int32_t>::operator=(ISize&& rhs);
-	template ISize const Size_T<int32_t>::operator+() const;
-	template ISize const Size_T<int32_t>::operator-() const;
-	template bool Size_T<int32_t>::operator==(ISize const & rhs) const;	
+	template Size_T<int32_t>::Size_T(int32_t const * rhs) KLAYGE_NOEXCEPT;
+	template Size_T<int32_t>::Size_T(ISize&& rhs) KLAYGE_NOEXCEPT;
+	template Size_T<int32_t>::Size_T(int32_t cx, int32_t cy) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator+=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator+=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator+=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator-=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator-=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template ISize const & Size_T<int32_t>::operator-=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template ISize& Size_T<int32_t>::operator=(ISize&& rhs) KLAYGE_NOEXCEPT;
+	template ISize const Size_T<int32_t>::operator+() const KLAYGE_NOEXCEPT;
+	template ISize const Size_T<int32_t>::operator-() const KLAYGE_NOEXCEPT;
+	template bool Size_T<int32_t>::operator==(ISize const & rhs) const KLAYGE_NOEXCEPT;
 
-	template Size_T<uint32_t>::Size_T(uint32_t const * rhs);
-	template Size_T<uint32_t>::Size_T(UISize&& rhs);
-	template Size_T<uint32_t>::Size_T(uint32_t cx, uint32_t cy);
-	template UISize const & Size_T<uint32_t>::operator+=(Size const & rhs);
-	template UISize const & Size_T<uint32_t>::operator+=(ISize const & rhs);
-	template UISize const & Size_T<uint32_t>::operator+=(UISize const & rhs);
-	template UISize const & Size_T<uint32_t>::operator-=(Size const & rhs);
-	template UISize const & Size_T<uint32_t>::operator-=(ISize const & rhs);
-	template UISize const & Size_T<uint32_t>::operator-=(UISize const & rhs);
-	template UISize& Size_T<uint32_t>::operator=(UISize&& rhs);
-	template UISize const Size_T<uint32_t>::operator+() const;
-	template bool Size_T<uint32_t>::operator==(UISize const & rhs) const;
+	template Size_T<uint32_t>::Size_T(uint32_t const * rhs) KLAYGE_NOEXCEPT;
+	template Size_T<uint32_t>::Size_T(UISize&& rhs) KLAYGE_NOEXCEPT;
+	template Size_T<uint32_t>::Size_T(uint32_t cx, uint32_t cy) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator+=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator+=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator+=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator-=(Size const & rhs) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator-=(ISize const & rhs) KLAYGE_NOEXCEPT;
+	template UISize const & Size_T<uint32_t>::operator-=(UISize const & rhs) KLAYGE_NOEXCEPT;
+	template UISize& Size_T<uint32_t>::operator=(UISize&& rhs) KLAYGE_NOEXCEPT;
+	template UISize const Size_T<uint32_t>::operator+() const KLAYGE_NOEXCEPT;
+	template bool Size_T<uint32_t>::operator==(UISize const & rhs) const KLAYGE_NOEXCEPT;
 
 
 	template <typename T>
-	Size_T<T>::Size_T(T const * rhs)
+	Size_T<T>::Size_T(T const * rhs) KLAYGE_NOEXCEPT
 		: size_(rhs)
 	{
 	}
 
 	template <typename T>
-	Size_T<T>::Size_T(T cx, T cy)
+	Size_T<T>::Size_T(T cx, T cy) KLAYGE_NOEXCEPT
 	{
 		this->cx() = cx;
 		this->cy() = cy;
 	}
 
 	template <typename T>
-	Size_T<T>::Size_T(Size_T<T>&& rhs)
+	Size_T<T>::Size_T(Size_T<T>&& rhs) KLAYGE_NOEXCEPT
 		: size_(std::move(rhs.size_))
 	{
 	}
 
 	template <typename T>
 	template <typename U>
-	Size_T<T> const & Size_T<T>::operator+=(Size_T<U> const & rhs)
+	Size_T<T> const & Size_T<T>::operator+=(Size_T<U> const & rhs) KLAYGE_NOEXCEPT
 	{
 		size_ += Size_T<T>(rhs).size_;
 		return *this;
@@ -105,33 +105,33 @@ namespace KlayGE
 
 	template <typename T>
 	template <typename U>
-	Size_T<T> const & Size_T<T>::operator-=(Size_T<U> const & rhs)
+	Size_T<T> const & Size_T<T>::operator-=(Size_T<U> const & rhs) KLAYGE_NOEXCEPT
 	{
 		size_ -= Size_T<T>(rhs).size_;
 		return *this;
 	}
 
 	template <typename T>
-	Size_T<T>& Size_T<T>::operator=(Size_T<T>&& rhs)
+	Size_T<T>& Size_T<T>::operator=(Size_T<T>&& rhs) KLAYGE_NOEXCEPT
 	{
 		size_ = std::move(rhs.size_);
 		return *this;
 	}
 
 	template <typename T>
-	Size_T<T> const Size_T<T>::operator+() const
+	Size_T<T> const Size_T<T>::operator+() const KLAYGE_NOEXCEPT
 	{
 		return *this;
 	}
 
 	template <typename T>
-	Size_T<T> const Size_T<T>::operator-() const
+	Size_T<T> const Size_T<T>::operator-() const KLAYGE_NOEXCEPT
 	{
 		return Size_T<T>(-this->cx(), -this->cy());
 	}
 
 	template <typename T>
-	bool Size_T<T>::operator==(Size_T<T> const & rhs) const
+	bool Size_T<T>::operator==(Size_T<T> const & rhs) const KLAYGE_NOEXCEPT
 	{
 		return size_ == rhs.size_;
 	}

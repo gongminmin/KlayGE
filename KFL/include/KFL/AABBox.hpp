@@ -52,74 +52,74 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		AABBox_T()
+		AABBox_T() KLAYGE_NOEXCEPT
 		{
 		}
-		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax);
-		AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax);
-		AABBox_T(AABBox_T<T> const & rhs);
-		AABBox_T(AABBox_T<T>&& rhs);
+		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) KLAYGE_NOEXCEPT;
+		AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax) KLAYGE_NOEXCEPT;
+		AABBox_T(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		AABBox_T(AABBox_T<T>&& rhs) KLAYGE_NOEXCEPT;
 
 		// 赋值操作符
-		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs);
-		AABBox_T<T>& operator-=(Vector_T<T, 3> const & rhs);
-		AABBox_T<T>& operator*=(T rhs);
-		AABBox_T<T>& operator/=(T rhs);
-		AABBox_T<T>& operator&=(AABBox_T<T> const & rhs);
-		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs);
+		AABBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator-=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator*=(T rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator/=(T rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator&=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator|=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
 
-		AABBox_T<T>& operator=(AABBox_T<T> const & rhs);
-		AABBox_T<T>& operator=(AABBox_T<T>&& rhs);
+		AABBox_T<T>& operator=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		AABBox_T<T>& operator=(AABBox_T<T>&& rhs) KLAYGE_NOEXCEPT;
 
 		// 一元操作符
-		AABBox_T<T> const operator+() const;
-		AABBox_T<T> const operator-() const;
+		AABBox_T<T> const operator+() const KLAYGE_NOEXCEPT;
+		AABBox_T<T> const operator-() const KLAYGE_NOEXCEPT;
 
 		// 属性
-		T Width() const;
-		T Height() const;
-		T Depth() const;
-		virtual bool IsEmpty() const KLAYGE_OVERRIDE;
+		T Width() const KLAYGE_NOEXCEPT;
+		T Height() const KLAYGE_NOEXCEPT;
+		T Depth() const KLAYGE_NOEXCEPT;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
 
-		Vector_T<T, 3> const LeftBottomNear() const;
-		Vector_T<T, 3> const LeftTopNear() const;
-		Vector_T<T, 3> const RightBottomNear() const;
-		Vector_T<T, 3> const RightTopNear() const;
-		Vector_T<T, 3> const LeftBottomFar() const;
-		Vector_T<T, 3> const LeftTopFar() const;
-		Vector_T<T, 3> const RightBottomFar() const;
-		Vector_T<T, 3> const RightTopFar() const;
+		Vector_T<T, 3> const LeftBottomNear() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const LeftTopNear() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const RightBottomNear() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const RightTopNear() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const LeftBottomFar() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const LeftTopFar() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const RightBottomFar() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> const RightTopFar() const KLAYGE_NOEXCEPT;
 
-		Vector_T<T, 3>& Min()
+		Vector_T<T, 3>& Min() KLAYGE_NOEXCEPT
 		{
 			return min_;
 		}
-		Vector_T<T, 3> const & Min() const
+		Vector_T<T, 3> const & Min() const KLAYGE_NOEXCEPT
 		{
 			return min_;
 		}
-		Vector_T<T, 3>& Max()
+		Vector_T<T, 3>& Max() KLAYGE_NOEXCEPT
 		{
 			return max_;
 		}
-		Vector_T<T, 3> const & Max() const
+		Vector_T<T, 3> const & Max() const KLAYGE_NOEXCEPT
 		{
 			return max_;
 		}
-		Vector_T<T, 3> Center() const;
-		Vector_T<T, 3> HalfSize() const;
+		Vector_T<T, 3> Center() const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> HalfSize() const KLAYGE_NOEXCEPT;
 
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_OVERRIDE;
-		virtual T MaxRadiusSq() const KLAYGE_OVERRIDE;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
 
-		bool Intersect(AABBox_T<T> const & aabb) const;
-		bool Intersect(OBBox_T<T> const & obb) const;
-		bool Intersect(Sphere_T<T> const & sphere) const;
-		bool Intersect(Frustum_T<T> const & frustum) const;
+		bool Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT;
+		bool Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT;
+		bool Intersect(Sphere_T<T> const & sphere) const KLAYGE_NOEXCEPT;
+		bool Intersect(Frustum_T<T> const & frustum) const KLAYGE_NOEXCEPT;
 
-		Vector_T<T, 3> Corner(size_t index) const;
+		Vector_T<T, 3> Corner(size_t index) const KLAYGE_NOEXCEPT;
 
-		bool operator==(AABBox_T<T> const & rhs) const;
+		bool operator==(AABBox_T<T> const & rhs) const KLAYGE_NOEXCEPT;
 
 	private:
 		Vector_T<T, 3> min_, max_;

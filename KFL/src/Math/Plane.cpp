@@ -34,55 +34,55 @@
 
 namespace KlayGE
 {
-	template Plane_T<float>::Plane_T(float const * rhs);
-	template Plane_T<float>::Plane_T(Plane_T const & rhs);
-	template Plane_T<float>::Plane_T(Plane_T&& rhs);
-	template Plane_T<float>::Plane_T(float4 const & rhs);
-	template Plane_T<float>::Plane_T(float4&& rhs);
-	template Plane_T<float>::Plane_T(float a, float b, float c, float d);
-	template Plane_T<float>& Plane_T<float>::operator=(Plane const & rhs);
-	template Plane_T<float>& Plane_T<float>::operator=(Plane&& rhs);
-	template Plane_T<float>& Plane_T<float>::operator=(float4 const & rhs);
-	template Plane_T<float>& Plane_T<float>::operator=(float4&& rhs);
-	template Plane_T<float> const Plane_T<float>::operator+() const;
-	template Plane_T<float> const Plane_T<float>::operator-() const;
-	template float3 const Plane_T<float>::Normal() const;
-	template void Plane_T<float>::Normal(Vector_T<float, 3> const & rhs);
-	template bool Plane_T<float>::operator==(Plane_T<float> const & rhs) const;
+	template Plane_T<float>::Plane_T(float const * rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>::Plane_T(Plane_T const & rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>::Plane_T(Plane_T&& rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>::Plane_T(float4 const & rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>::Plane_T(float4&& rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>::Plane_T(float a, float b, float c, float d) KLAYGE_NOEXCEPT;
+	template Plane_T<float>& Plane_T<float>::operator=(Plane const & rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>& Plane_T<float>::operator=(Plane&& rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>& Plane_T<float>::operator=(float4 const & rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float>& Plane_T<float>::operator=(float4&& rhs) KLAYGE_NOEXCEPT;
+	template Plane_T<float> const Plane_T<float>::operator+() const KLAYGE_NOEXCEPT;
+	template Plane_T<float> const Plane_T<float>::operator-() const KLAYGE_NOEXCEPT;
+	template float3 const Plane_T<float>::Normal() const KLAYGE_NOEXCEPT;
+	template void Plane_T<float>::Normal(Vector_T<float, 3> const & rhs) KLAYGE_NOEXCEPT;
+	template bool Plane_T<float>::operator==(Plane_T<float> const & rhs) const KLAYGE_NOEXCEPT;
 
 
 	template <typename T>
-	Plane_T<T>::Plane_T(T const * rhs)
+	Plane_T<T>::Plane_T(T const * rhs) KLAYGE_NOEXCEPT
 		: plane_(rhs)
 	{
 	}
 
 	template <typename T>
-	Plane_T<T>::Plane_T(Plane_T const & rhs)
+	Plane_T<T>::Plane_T(Plane_T const & rhs) KLAYGE_NOEXCEPT
 		: plane_(rhs.plane_)
 	{
 	}
 
 	template <typename T>
-	Plane_T<T>::Plane_T(Plane_T&& rhs)
+	Plane_T<T>::Plane_T(Plane_T&& rhs) KLAYGE_NOEXCEPT
 		: plane_(std::move(rhs.plane_))
 	{
 	}
 
 	template <typename T>
-	Plane_T<T>::Plane_T(Vector_T<T, elem_num> const & rhs)
+	Plane_T<T>::Plane_T(Vector_T<T, elem_num> const & rhs) KLAYGE_NOEXCEPT
 		: plane_(rhs)
 	{		
 	}
 
 	template <typename T>
-	Plane_T<T>::Plane_T(Vector_T<T, elem_num>&& rhs)
+	Plane_T<T>::Plane_T(Vector_T<T, elem_num>&& rhs) KLAYGE_NOEXCEPT
 		: plane_(std::move(rhs))
 	{
 	}
 
 	template <typename T>
-	Plane_T<T>::Plane_T(T a, T b, T c, T d)
+	Plane_T<T>::Plane_T(T a, T b, T c, T d) KLAYGE_NOEXCEPT
 	{
 		this->a() = a;
 		this->b() = b;
@@ -91,7 +91,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Plane_T<T>& Plane_T<T>::operator=(Plane_T<T> const & rhs)
+	Plane_T<T>& Plane_T<T>::operator=(Plane_T<T> const & rhs) KLAYGE_NOEXCEPT
 	{
 		if (this != &rhs)
 		{
@@ -101,46 +101,46 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Plane_T<T>& Plane_T<T>::operator=(Plane_T<T>&& rhs)
+	Plane_T<T>& Plane_T<T>::operator=(Plane_T<T>&& rhs) KLAYGE_NOEXCEPT
 	{
 		plane_ = std::move(rhs.plane_);
 		return *this;
 	}
 
 	template <typename T>
-	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num> const & rhs)
+	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num> const & rhs) KLAYGE_NOEXCEPT
 	{
 		plane_ = rhs;
 		return *this;
 	}
 
 	template <typename T>
-	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num>&& rhs)
+	Plane_T<T>& Plane_T<T>::operator=(Vector_T<T, elem_num>&& rhs) KLAYGE_NOEXCEPT
 	{
 		plane_ = std::move(rhs);
 		return *this;
 	}
 
 	template <typename T>
-	Plane_T<T> const Plane_T<T>::operator+() const
+	Plane_T<T> const Plane_T<T>::operator+() const KLAYGE_NOEXCEPT
 	{
 		return *this;
 	}
 
 	template <typename T>
-	Plane_T<T> const Plane_T<T>::operator-() const
+	Plane_T<T> const Plane_T<T>::operator-() const KLAYGE_NOEXCEPT
 	{
 		return Plane_T<T>(-this->a(), -this->b(), -this->c(), -this->d());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const Plane_T<T>::Normal() const
+	Vector_T<T, 3> const Plane_T<T>::Normal() const KLAYGE_NOEXCEPT
 	{
 		return Vector_T<T, 3>(this->a(), this->b(), this->c());
 	}
 
 	template <typename T>
-	void Plane_T<T>::Normal(Vector_T<T, 3> const & rhs)
+	void Plane_T<T>::Normal(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
 	{
 		this->a() = rhs.x();
 		this->b() = rhs.y();
@@ -148,7 +148,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	bool Plane_T<T>::operator==(Plane_T<T> const & rhs) const
+	bool Plane_T<T>::operator==(Plane_T<T> const & rhs) const KLAYGE_NOEXCEPT
 	{
 		return plane_ == rhs.plane_;
 	}

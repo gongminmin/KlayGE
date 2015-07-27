@@ -37,17 +37,17 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
-		template int1 abs(int1 const & x);
-		template int2 abs(int2 const & x);
-		template int3 abs(int3 const & x);
-		template int4 abs(int4 const & x);
-		template float1 abs(float1 const & x);
-		template float2 abs(float2 const & x);
-		template float3 abs(float3 const & x);
-		template float4 abs(float4 const & x);
+		template int1 abs(int1 const & x) KLAYGE_NOEXCEPT;
+		template int2 abs(int2 const & x) KLAYGE_NOEXCEPT;
+		template int3 abs(int3 const & x) KLAYGE_NOEXCEPT;
+		template int4 abs(int4 const & x) KLAYGE_NOEXCEPT;
+		template float1 abs(float1 const & x) KLAYGE_NOEXCEPT;
+		template float2 abs(float2 const & x) KLAYGE_NOEXCEPT;
+		template float3 abs(float3 const & x) KLAYGE_NOEXCEPT;
+		template float4 abs(float4 const & x) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
-		Vector_T<T, N> abs(Vector_T<T, N> const & x)
+		Vector_T<T, N> abs(Vector_T<T, N> const & x) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, N> ret;
 			for (int i = 0; i < N; ++ i)
@@ -57,17 +57,17 @@ namespace KlayGE
 			return ret;
 		}
 
-		template int1 sgn(int1 const & x);
-		template int2 sgn(int2 const & x);
-		template int3 sgn(int3 const & x);
-		template int4 sgn(int4 const & x);
-		template float1 sgn(float1 const & x);
-		template float2 sgn(float2 const & x);
-		template float3 sgn(float3 const & x);
-		template float4 sgn(float4 const & x);
+		template int1 sgn(int1 const & x) KLAYGE_NOEXCEPT;
+		template int2 sgn(int2 const & x) KLAYGE_NOEXCEPT;
+		template int3 sgn(int3 const & x) KLAYGE_NOEXCEPT;
+		template int4 sgn(int4 const & x) KLAYGE_NOEXCEPT;
+		template float1 sgn(float1 const & x) KLAYGE_NOEXCEPT;
+		template float2 sgn(float2 const & x) KLAYGE_NOEXCEPT;
+		template float3 sgn(float3 const & x) KLAYGE_NOEXCEPT;
+		template float4 sgn(float4 const & x) KLAYGE_NOEXCEPT;
 		
 		template <typename T, int N>
-		Vector_T<T, N> sgn(Vector_T<T, N> const & x)
+		Vector_T<T, N> sgn(Vector_T<T, N> const & x) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, N> ret;
 			for (int i = 0; i < N; ++ i)
@@ -77,17 +77,17 @@ namespace KlayGE
 			return ret;
 		}
 
-		template int1 sqr(int1 const & x);
-		template int2 sqr(int2 const & x);
-		template int3 sqr(int3 const & x);
-		template int4 sqr(int4 const & x);
-		template float1 sqr(float1 const & x);
-		template float2 sqr(float2 const & x);
-		template float3 sqr(float3 const & x);
-		template float4 sqr(float4 const & x);
+		template int1 sqr(int1 const & x) KLAYGE_NOEXCEPT;
+		template int2 sqr(int2 const & x) KLAYGE_NOEXCEPT;
+		template int3 sqr(int3 const & x) KLAYGE_NOEXCEPT;
+		template int4 sqr(int4 const & x) KLAYGE_NOEXCEPT;
+		template float1 sqr(float1 const & x) KLAYGE_NOEXCEPT;
+		template float2 sqr(float2 const & x) KLAYGE_NOEXCEPT;
+		template float3 sqr(float3 const & x) KLAYGE_NOEXCEPT;
+		template float4 sqr(float4 const & x) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
-		Vector_T<T, N> sqr(Vector_T<T, N> const & x)
+		Vector_T<T, N> sqr(Vector_T<T, N> const & x) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, N> ret;
 			for (int i = 0; i < N; ++ i)
@@ -97,17 +97,17 @@ namespace KlayGE
 			return ret;
 		}
 
-		template int1 cube(int1 const & x);
-		template int2 cube(int2 const & x);
-		template int3 cube(int3 const & x);
-		template int4 cube(int4 const & x);
-		template float1 cube(float1 const & x);
-		template float2 cube(float2 const & x);
-		template float3 cube(float3 const & x);
-		template float4 cube(float4 const & x);
+		template int1 cube(int1 const & x) KLAYGE_NOEXCEPT;
+		template int2 cube(int2 const & x) KLAYGE_NOEXCEPT;
+		template int3 cube(int3 const & x) KLAYGE_NOEXCEPT;
+		template int4 cube(int4 const & x) KLAYGE_NOEXCEPT;
+		template float1 cube(float1 const & x) KLAYGE_NOEXCEPT;
+		template float2 cube(float2 const & x) KLAYGE_NOEXCEPT;
+		template float3 cube(float3 const & x) KLAYGE_NOEXCEPT;
+		template float4 cube(float4 const & x) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
-		Vector_T<T, N> cube(Vector_T<T, N> const & x)
+		Vector_T<T, N> cube(Vector_T<T, N> const & x) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, N> ret;
 			for (int i = 0; i < N; ++ i)
@@ -117,7 +117,7 @@ namespace KlayGE
 			return ret;
 		}
 
-		float abs(float x)
+		float abs(float x) KLAYGE_NOEXCEPT
 		{
 			union FNI
 			{
@@ -129,13 +129,13 @@ namespace KlayGE
 			return fni.f;
 		}
 		
-		float sqrt(float x)
+		float sqrt(float x) KLAYGE_NOEXCEPT
 		{
 			return std::sqrt(x);
 		}
 
 		// From Quake III. But the magic number is from http://www.lomont.org/Math/Papers/2003/InvSqrt.pdf
-		float recip_sqrt(float number)
+		float recip_sqrt(float number) KLAYGE_NOEXCEPT
 		{
 			float const threehalfs = 1.5f;
 
@@ -153,204 +153,204 @@ namespace KlayGE
 			return fni.f;
 		}
 
-		float pow(float x, float y)
+		float pow(float x, float y) KLAYGE_NOEXCEPT
 		{
 			return std::pow(x, y);
 		}
 
-		float exp(float x)
+		float exp(float x) KLAYGE_NOEXCEPT
 		{
 			return std::exp(x);
 		}
 
-		float log(float x)
+		float log(float x) KLAYGE_NOEXCEPT
 		{
 			return std::log(x);
 		}
 
-		float log10(float x)
+		float log10(float x) KLAYGE_NOEXCEPT
 		{
 			return std::log10(x);
 		}
 
-		float sin(float x)
+		float sin(float x) KLAYGE_NOEXCEPT
 		{
 			return std::sin(x);
 		}
 
-		float cos(float x)
+		float cos(float x) KLAYGE_NOEXCEPT
 		{
 			return sin(x + PI / 2);
 		}
 		
-		void sincos(float x, float& s, float& c)
+		void sincos(float x, float& s, float& c) KLAYGE_NOEXCEPT
 		{
 			s = sin(x);
 			c = cos(x);
 		}
 
-		float tan(float x)
+		float tan(float x) KLAYGE_NOEXCEPT
 		{
 			return std::tan(x);
 		}
 
-		float asin(float x)
+		float asin(float x) KLAYGE_NOEXCEPT
 		{
 			return std::asin(x);
 		}
 
-		float acos(float x)
+		float acos(float x) KLAYGE_NOEXCEPT
 		{
 			return std::acos(x);
 		}
 
-		float atan(float x)
+		float atan(float x) KLAYGE_NOEXCEPT
 		{
 			return std::atan(x);
 		}
 
-		float sinh(float x)
+		float sinh(float x) KLAYGE_NOEXCEPT
 		{
 			return std::sinh(x);
 		}
 		
-		float cosh(float x)
+		float cosh(float x) KLAYGE_NOEXCEPT
 		{
 			return std::cosh(x);
 		}
 
-		float tanh(float x)
+		float tanh(float x) KLAYGE_NOEXCEPT
 		{
 			return std::tanh(x);
 		}
 
 
-		template int32_t dot(int1 const & lhs, int1 const & rhs);
-		template int32_t dot(int2 const & lhs, int2 const & rhs);
-		template int32_t dot(int3 const & lhs, int3 const & rhs);
-		template int32_t dot(int4 const & lhs, int4 const & rhs);
-		template uint32_t dot(uint1 const & lhs, uint1 const & rhs);
-		template uint32_t dot(uint2 const & lhs, uint2 const & rhs);
-		template uint32_t dot(uint3 const & lhs, uint3 const & rhs);
-		template uint32_t dot(uint4 const & lhs, uint4 const & rhs);
-		template float dot(float1 const & lhs, float1 const & rhs);
-		template float dot(float2 const & lhs, float2 const & rhs);
-		template float dot(float3 const & lhs, float3 const & rhs);
-		template float dot(float4 const & lhs, float4 const & rhs);
-		template float dot(Quaternion const & lhs, Quaternion const & rhs);
-		template float dot(Color const & lhs, Color const & rhs);
+		template int32_t dot(int1 const & lhs, int1 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t dot(int2 const & lhs, int2 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t dot(int3 const & lhs, int3 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t dot(int4 const & lhs, int4 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t dot(uint1 const & lhs, uint1 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t dot(uint2 const & lhs, uint2 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t dot(uint3 const & lhs, uint3 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t dot(uint4 const & lhs, uint4 const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(float1 const & lhs, float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(float2 const & lhs, float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(float3 const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(float4 const & lhs, float4 const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(Quaternion const & lhs, Quaternion const & rhs) KLAYGE_NOEXCEPT;
+		template float dot(Color const & lhs, Color const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		typename T::value_type dot(T const & lhs, T const & rhs)
+		typename T::value_type dot(T const & lhs, T const & rhs) KLAYGE_NOEXCEPT
 		{
 			return detail::dot_helper<typename T::value_type,
 							T::elem_num>::Do(&lhs[0], &rhs[0]);
 		}
 
-		template int32_t length_sq(int1 const & rhs);
-		template int32_t length_sq(int2 const & rhs);
-		template int32_t length_sq(int3 const & rhs);
-		template int32_t length_sq(int4 const & rhs);
-		template uint32_t length_sq(uint1 const & rhs);
-		template uint32_t length_sq(uint2 const & rhs);
-		template uint32_t length_sq(uint3 const & rhs);
-		template uint32_t length_sq(uint4 const & rhs);
-		template float length_sq(float1 const & rhs);
-		template float length_sq(float2 const & rhs);
-		template float length_sq(float3 const & rhs);
-		template float length_sq(float4 const & rhs);
-		template float length_sq(Quaternion const & rhs);
-		template float length_sq(Plane const & rhs);
+		template int32_t length_sq(int1 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t length_sq(int2 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t length_sq(int3 const & rhs) KLAYGE_NOEXCEPT;
+		template int32_t length_sq(int4 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t length_sq(uint1 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t length_sq(uint2 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t length_sq(uint3 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t length_sq(uint4 const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(float4 const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(Quaternion const & rhs) KLAYGE_NOEXCEPT;
+		template float length_sq(Plane const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		typename T::value_type length_sq(T const & rhs)
+		typename T::value_type length_sq(T const & rhs) KLAYGE_NOEXCEPT
 		{
 			return dot(rhs, rhs);
 		}
 
-		template float length(float1 const & rhs);
-		template float length(float2 const & rhs);
-		template float length(float3 const & rhs);
-		template float length(float4 const & rhs);
-		template float length(Quaternion const & rhs);
-		template float length(Plane const & rhs);
+		template float length(float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float length(float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float length(float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float length(float4 const & rhs) KLAYGE_NOEXCEPT;
+		template float length(Quaternion const & rhs) KLAYGE_NOEXCEPT;
+		template float length(Plane const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		typename T::value_type length(T const & rhs)
+		typename T::value_type length(T const & rhs) KLAYGE_NOEXCEPT
 		{
 			return sqrt(length_sq(rhs));
 		}
 
-		template float lerp(float const & lhs, float const & rhs, float s);
-		template float1 lerp(float1 const & lhs, float1 const & rhs, float s);
-		template float2 lerp(float2 const & lhs, float2 const & rhs, float s);
-		template float3 lerp(float3 const & lhs, float3 const & rhs, float s);
-		template float4 lerp(float4 const & lhs, float4 const & rhs, float s);
-		template Color lerp(Color const & lhs, Color const & rhs, float s);
+		template float lerp(float const & lhs, float const & rhs, float s) KLAYGE_NOEXCEPT;
+		template float1 lerp(float1 const & lhs, float1 const & rhs, float s) KLAYGE_NOEXCEPT;
+		template float2 lerp(float2 const & lhs, float2 const & rhs, float s) KLAYGE_NOEXCEPT;
+		template float3 lerp(float3 const & lhs, float3 const & rhs, float s) KLAYGE_NOEXCEPT;
+		template float4 lerp(float4 const & lhs, float4 const & rhs, float s) KLAYGE_NOEXCEPT;
+		template Color lerp(Color const & lhs, Color const & rhs, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T lerp(T const & lhs, T const & rhs, float s)
+		T lerp(T const & lhs, T const & rhs, float s) KLAYGE_NOEXCEPT
 		{
 			return lhs + (rhs - lhs) * s;
 		}
 
-		template int1 maximize(int1 const & lhs, int1 const & rhs);
-		template int2 maximize(int2 const & lhs, int2 const & rhs);
-		template int3 maximize(int3 const & lhs, int3 const & rhs);
-		template int4 maximize(int4 const & lhs, int4 const & rhs);
-		template uint1 maximize(uint1 const & lhs, uint1 const & rhs);
-		template uint2 maximize(uint2 const & lhs, uint2 const & rhs);
-		template uint3 maximize(uint3 const & lhs, uint3 const & rhs);
-		template uint4 maximize(uint4 const & lhs, uint4 const & rhs);
-		template float1 maximize(float1 const & lhs, float1 const & rhs);
-		template float2 maximize(float2 const & lhs, float2 const & rhs);
-		template float3 maximize(float3 const & lhs, float3 const & rhs);
-		template float4 maximize(float4 const & lhs, float4 const & rhs);
+		template int1 maximize(int1 const & lhs, int1 const & rhs) KLAYGE_NOEXCEPT;
+		template int2 maximize(int2 const & lhs, int2 const & rhs) KLAYGE_NOEXCEPT;
+		template int3 maximize(int3 const & lhs, int3 const & rhs) KLAYGE_NOEXCEPT;
+		template int4 maximize(int4 const & lhs, int4 const & rhs) KLAYGE_NOEXCEPT;
+		template uint1 maximize(uint1 const & lhs, uint1 const & rhs) KLAYGE_NOEXCEPT;
+		template uint2 maximize(uint2 const & lhs, uint2 const & rhs) KLAYGE_NOEXCEPT;
+		template uint3 maximize(uint3 const & lhs, uint3 const & rhs) KLAYGE_NOEXCEPT;
+		template uint4 maximize(uint4 const & lhs, uint4 const & rhs) KLAYGE_NOEXCEPT;
+		template float1 maximize(float1 const & lhs, float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float2 maximize(float2 const & lhs, float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float3 maximize(float3 const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float4 maximize(float4 const & lhs, float4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T maximize(T const & lhs, T const & rhs)
+		T maximize(T const & lhs, T const & rhs) KLAYGE_NOEXCEPT
 		{
 			T ret;
 			detail::max_minimize_helper<typename T::value_type, T::elem_num>::DoMax(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
 
-		template int1 minimize(int1 const & lhs, int1 const & rhs);
-		template int2 minimize(int2 const & lhs, int2 const & rhs);
-		template int3 minimize(int3 const & lhs, int3 const & rhs);
-		template int4 minimize(int4 const & lhs, int4 const & rhs);
-		template uint1 minimize(uint1 const & lhs, uint1 const & rhs);
-		template uint2 minimize(uint2 const & lhs, uint2 const & rhs);
-		template uint3 minimize(uint3 const & lhs, uint3 const & rhs);
-		template uint4 minimize(uint4 const & lhs, uint4 const & rhs);
-		template float1 minimize(float1 const & lhs, float1 const & rhs);
-		template float2 minimize(float2 const & lhs, float2 const & rhs);
-		template float3 minimize(float3 const & lhs, float3 const & rhs);
-		template float4 minimize(float4 const & lhs, float4 const & rhs);
+		template int1 minimize(int1 const & lhs, int1 const & rhs) KLAYGE_NOEXCEPT;
+		template int2 minimize(int2 const & lhs, int2 const & rhs) KLAYGE_NOEXCEPT;
+		template int3 minimize(int3 const & lhs, int3 const & rhs) KLAYGE_NOEXCEPT;
+		template int4 minimize(int4 const & lhs, int4 const & rhs) KLAYGE_NOEXCEPT;
+		template uint1 minimize(uint1 const & lhs, uint1 const & rhs) KLAYGE_NOEXCEPT;
+		template uint2 minimize(uint2 const & lhs, uint2 const & rhs) KLAYGE_NOEXCEPT;
+		template uint3 minimize(uint3 const & lhs, uint3 const & rhs) KLAYGE_NOEXCEPT;
+		template uint4 minimize(uint4 const & lhs, uint4 const & rhs) KLAYGE_NOEXCEPT;
+		template float1 minimize(float1 const & lhs, float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float2 minimize(float2 const & lhs, float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float3 minimize(float3 const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float4 minimize(float4 const & lhs, float4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T minimize(T const & lhs, T const & rhs)
+		T minimize(T const & lhs, T const & rhs) KLAYGE_NOEXCEPT
 		{
 			T ret;
 			detail::max_minimize_helper<typename T::value_type, T::elem_num>::DoMin(&ret[0], &lhs[0], &rhs[0]);
 			return ret;
 		}
 
-		template float4 transform(float2 const & v, float4x4 const & mat);
-		template float4 transform(float3 const & v, float4x4 const & mat);
-		template float4 transform(float4 const & v, float4x4 const & mat);
+		template float4 transform(float2 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
+		template float4 transform(float3 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
+		template float4 transform(float4 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<typename T::value_type, 4> transform(T const & v, Matrix4_T<typename T::value_type> const & mat)
+		Vector_T<typename T::value_type, 4> transform(T const & v, Matrix4_T<typename T::value_type> const & mat) KLAYGE_NOEXCEPT
 		{
 			return detail::transform_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}
 
-		template float2 transform_coord(float2 const & v, float4x4 const & mat);
-		template float3 transform_coord(float3 const & v, float4x4 const & mat);
+		template float2 transform_coord(float2 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
+		template float3 transform_coord(float3 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T transform_coord(T const & v, Matrix4_T<typename T::value_type> const & mat)
+		T transform_coord(T const & v, Matrix4_T<typename T::value_type> const & mat) KLAYGE_NOEXCEPT
 		{
 			static_assert(T::elem_num < 4, "Must be at most 4D vector.");
 
@@ -367,61 +367,61 @@ namespace KlayGE
 			return ret;
 		}
 
-		template float2 transform_normal(float2 const & v, float4x4 const & mat);
-		template float3 transform_normal(float3 const & v, float4x4 const & mat);
+		template float2 transform_normal(float2 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
+		template float3 transform_normal(float3 const & v, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T transform_normal(T const & v, Matrix4_T<typename T::value_type> const & mat)
+		T transform_normal(T const & v, Matrix4_T<typename T::value_type> const & mat) KLAYGE_NOEXCEPT
 		{
 			static_assert(T::elem_num < 4, "Must be at most 4D vector.");
 
 			return detail::transform_normal_helper<typename T::value_type, T::elem_num>::Do(v, mat);
 		}
 
-		template float1 bary_centric(float1 const & v1, float1 const & v2, float1 const & v3, float const & f, float const & g);
-		template float2 bary_centric(float2 const & v1, float2 const & v2, float2 const & v3, float const & f, float const & g);
-		template float3 bary_centric(float3 const & v1, float3 const & v2, float3 const & v3, float const & f, float const & g);
-		template float4 bary_centric(float4 const & v1, float4 const & v2, float4 const & v3, float const & f, float const & g);
+		template float1 bary_centric(float1 const & v1, float1 const & v2, float1 const & v3, float const & f, float const & g) KLAYGE_NOEXCEPT;
+		template float2 bary_centric(float2 const & v1, float2 const & v2, float2 const & v3, float const & f, float const & g) KLAYGE_NOEXCEPT;
+		template float3 bary_centric(float3 const & v1, float3 const & v2, float3 const & v3, float const & f, float const & g) KLAYGE_NOEXCEPT;
+		template float4 bary_centric(float4 const & v1, float4 const & v2, float4 const & v3, float const & f, float const & g) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T bary_centric(T const & v1, T const & v2, T const & v3, typename T::value_type const & f, typename T::value_type const & g)
+		T bary_centric(T const & v1, T const & v2, T const & v3, typename T::value_type const & f, typename T::value_type const & g) KLAYGE_NOEXCEPT
 		{
 			return (1 - f - g) * v1 + f * v2 + g * v3;
 		}
 
-		template float1 normalize(float1 const & rhs);
-		template float2 normalize(float2 const & rhs);
-		template float3 normalize(float3 const & rhs);
-		template float4 normalize(float4 const & rhs);
-		template Quaternion normalize(Quaternion const & rhs);
+		template float1 normalize(float1 const & rhs) KLAYGE_NOEXCEPT;
+		template float2 normalize(float2 const & rhs) KLAYGE_NOEXCEPT;
+		template float3 normalize(float3 const & rhs) KLAYGE_NOEXCEPT;
+		template float4 normalize(float4 const & rhs) KLAYGE_NOEXCEPT;
+		template Quaternion normalize(Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T normalize(T const & rhs)
+		T normalize(T const & rhs) KLAYGE_NOEXCEPT
 		{
 			return rhs * recip_sqrt(length_sq(rhs));
 		}
 
-		template Plane normalize(Plane const & rhs);
+		template Plane normalize(Plane const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Plane_T<T> normalize(Plane_T<T> const & rhs)
+		Plane_T<T> normalize(Plane_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const inv(T(1) / length(rhs.Normal()));
 			return Plane_T<T>(rhs.a() * inv, rhs.b() * inv, rhs.c() * inv, rhs.d() * inv);
 		}
 
-		template float3 reflect(float3 const & incident, float3 const & normal);
+		template float3 reflect(float3 const & incident, float3 const & normal) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T reflect(T const & incident, T const & normal)
+		T reflect(T const & incident, T const & normal) KLAYGE_NOEXCEPT
 		{
 			return incident - 2 * dot(incident, normal) * normal;
 		}
 
-		template float3 refract(float3 const & incident, float3 const & normal, float const & refraction_index);
+		template float3 refract(float3 const & incident, float3 const & normal, float const & refraction_index) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T refract(T const & incident, T const & normal, typename T::value_type const & refraction_index)
+		T refract(T const & incident, T const & normal, typename T::value_type const & refraction_index) KLAYGE_NOEXCEPT
 		{
 			typename T::value_type t = dot(incident, normal);
 			typename T::value_type r = typename T::value_type(1) - refraction_index * refraction_index * (typename T::value_type(1) - t * t);
@@ -438,10 +438,10 @@ namespace KlayGE
 			}
 		}
 
-		template float fresnel_term(float const & cos_theta, float const & refraction_index);
+		template float fresnel_term(float const & cos_theta, float const & refraction_index) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T fresnel_term(T const & cos_theta, T const & refraction_index)
+		T fresnel_term(T const & cos_theta, T const & refraction_index) KLAYGE_NOEXCEPT
 		{
 			T g = sqrt(sqr(refraction_index) + sqr(cos_theta) - 1);
 			return T(0.5) * sqr(g + cos_theta) / sqr(g - cos_theta)
@@ -449,15 +449,15 @@ namespace KlayGE
 		}
 
 		template float2 catmull_rom(float2 const & v0, float2 const & v1, float2 const & v2,
-			float2 const & v3, float s);
+			float2 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float3 catmull_rom(float3 const & v0, float3 const & v1, float3 const & v2,
-			float3 const & v3, float s);
+			float3 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float4 catmull_rom(float4 const & v0, float4 const & v1, float4 const & v2,
-			float4 const & v3, float s);
+			float4 const & v3, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
 		Vector_T<T, N> catmull_rom(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
-			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) KLAYGE_NOEXCEPT
 		{
 			T const s2 = s * s;
 			T const s3 = s2 * s;
@@ -466,15 +466,15 @@ namespace KlayGE
 		}
 
 		template float2 hermite(float2 const & v1, float2 const & t1, float2 const & v2,
-			float2 const & t2, float s);
+			float2 const & t2, float s) KLAYGE_NOEXCEPT;
 		template float3 hermite(float3 const & v1, float3 const & t1, float3 const & v2,
-			float3 const & t2, float s);
+			float3 const & t2, float s) KLAYGE_NOEXCEPT;
 		template float4 hermite(float4 const & v1, float4 const & t1, float4 const & v2,
-			float4 const & t2, float s);
+			float4 const & t2, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
 		Vector_T<T, N> hermite(Vector_T<T, N> const & v1, Vector_T<T, N> const & t1,
-			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s)
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & t2, T s) KLAYGE_NOEXCEPT
 		{
 			T const s2 = s * s;
 			T const s3 = s2 * s;
@@ -487,15 +487,15 @@ namespace KlayGE
 		}
 
 		template float2 cubic_b_spline(float2 const & v0, float2 const & v1, float2 const & v2,
-			float2 const & v3, float s);
+			float2 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float3 cubic_b_spline(float3 const & v0, float3 const & v1, float3 const & v2,
-			float3 const & v3, float s);
+			float3 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float4 cubic_b_spline(float4 const & v0, float4 const & v1, float4 const & v2,
-			float4 const & v3, float s);
+			float4 const & v3, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
 		Vector_T<T, N> cubic_b_spline(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
-			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) KLAYGE_NOEXCEPT
 		{
 			// From http://en.wikipedia.org/wiki/B-spline
 
@@ -506,15 +506,15 @@ namespace KlayGE
 		}
 
 		template float2 cubic_bezier(float2 const & v0, float2 const & v1, float2 const & v2,
-			float2 const & v3, float s);
+			float2 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float3 cubic_bezier(float3 const & v0, float3 const & v1, float3 const & v2,
-			float3 const & v3, float s);
+			float3 const & v3, float s) KLAYGE_NOEXCEPT;
 		template float4 cubic_bezier(float4 const & v0, float4 const & v1, float4 const & v2,
-			float4 const & v3, float s);
+			float4 const & v3, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T, int N>
 		Vector_T<T, N> cubic_bezier(Vector_T<T, N> const & v0, Vector_T<T, N> const & v1,
-			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s)
+			Vector_T<T, N> const & v2, Vector_T<T, N> const & v3, T s) KLAYGE_NOEXCEPT
 		{
 			// From http://en.wikipedia.org/wiki/B%C3%A9zier_curve
 
@@ -527,12 +527,12 @@ namespace KlayGE
 		// 2D Vector
 		///////////////////////////////////////////////////////////////////////////////
 
-		template int32_t cross(int2 const & lhs, int2 const & rhs);
-		template uint32_t cross(uint2 const & lhs, uint2 const & rhs);
-		template float cross(float2 const & lhs, float2 const & rhs);
+		template int32_t cross(int2 const & lhs, int2 const & rhs) KLAYGE_NOEXCEPT;
+		template uint32_t cross(uint2 const & lhs, uint2 const & rhs) KLAYGE_NOEXCEPT;
+		template float cross(float2 const & lhs, float2 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T cross(Vector_T<T, 2> const & lhs, Vector_T<T, 2> const & rhs)
+		T cross(Vector_T<T, 2> const & lhs, Vector_T<T, 2> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return lhs.x() * rhs.y() - lhs.y() * rhs.x();
 		}
@@ -540,42 +540,42 @@ namespace KlayGE
 		// 3D Vector
 		///////////////////////////////////////////////////////////////////////////////
 
-		template float angle(float3 const & lhs, float3 const & rhs);
+		template float angle(float3 const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T angle(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs)
+		T angle(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return acos(dot(lhs, rhs) / (length(lhs) * length(rhs)));
 		}
 
-		template int3 cross(int3 const & lhs, int3 const & rhs);
-		template uint3 cross(uint3 const & lhs, uint3 const & rhs);
-		template float3 cross(float3 const & lhs, float3 const & rhs);
+		template int3 cross(int3 const & lhs, int3 const & rhs) KLAYGE_NOEXCEPT;
+		template uint3 cross(uint3 const & lhs, uint3 const & rhs) KLAYGE_NOEXCEPT;
+		template float3 cross(float3 const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<T, 3> cross(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs)
+		Vector_T<T, 3> cross(Vector_T<T, 3> const & lhs, Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Vector_T<T, 3>(lhs.y() * rhs.z() - lhs.z() * rhs.y(),
 				lhs.z() * rhs.x() - lhs.x() * rhs.z(),
 				lhs.x() * rhs.y() - lhs.y() * rhs.x());
 		}
 
-		template float3 transform_quat(float3 const & v, Quaternion const & quat);
+		template float3 transform_quat(float3 const & v, Quaternion const & quat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<T, 3> transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat)
+		Vector_T<T, 3> transform_quat(Vector_T<T, 3> const & v, Quaternion_T<T> const & quat) KLAYGE_NOEXCEPT
 		{
 			return v + cross(quat.v(), cross(quat.v(), v) + quat.w() * v) * T(2);
 		}
 
 		template float3 project(float3 const & vec,
 			float4x4 const & world, float4x4 const & view, float4x4 const & proj,
-			int const viewport[4], float const & nearPlane, float const & farPlane);
+			int const viewport[4], float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Vector_T<T, 3> project(Vector_T<T, 3> const & vec,
 			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
-			int const viewport[4], T const & nearPlane, T const & farPlane)
+			int const viewport[4], T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 4> temp(transform(vec, world));
 			temp = transform(temp, view);
@@ -591,12 +591,12 @@ namespace KlayGE
 
 		template float3 unproject(float3 const & winVec, float const & clipW,
 			float4x4 const & world, float4x4 const & view, float4x4 const & proj,
-			int const viewport[4], float const & nearPlane, float const & farPlane);
+			int const viewport[4], float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Vector_T<T, 3> unproject(Vector_T<T, 3> const & winVec, T const & clipW,
 			Matrix4_T<T> const & world, Matrix4_T<T> const & view, Matrix4_T<T> const & proj,
-			int const viewport[4], T const & nearPlane, T const & farPlane)
+			int const viewport[4], T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 4> temp;
 			temp.x() = 2 * (winVec.x() - viewport[0]) / viewport[2] - 1;
@@ -610,21 +610,21 @@ namespace KlayGE
 			return Vector_T<T, 3>(temp.x(), temp.y(), temp.z()) / temp.w();
 		}
 
-		template float ortho_area(float3 const & view_dir, AABBox const & aabbox);
+		template float ortho_area(float3 const & view_dir, AABBox const & aabbox) KLAYGE_NOEXCEPT;
 
 		// From http://www.codersnotes.com/notes/projected-area-of-an-aabb, mentioned by Ming Tu
 		template <typename T>
-		T ortho_area(Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox)
+		T ortho_area(Vector_T<T, 3> const & view_dir, AABBox_T<T> const & aabbox) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> size = aabbox.Max() - aabbox.Min();
 			return dot(Vector_T<T, 3>(abs(view_dir.x()), abs(view_dir.y()), abs(view_dir.z())),
 				Vector_T<T, 3>(size.y() * size.z(), size.z() * size.x(), size.x() * size.y()));
 		}
 
-		template float perspective_area(float3 const & view_pos, float4x4 const & view_proj, AABBox const & aabbox);
+		template float perspective_area(float3 const & view_pos, float4x4 const & view_proj, AABBox const & aabbox) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T perspective_area(Vector_T<T, 3> const & view_pos, Matrix4_T<T> const & view_proj, AABBox_T<T> const & aabbox)
+		T perspective_area(Vector_T<T, 3> const & view_pos, Matrix4_T<T> const & view_proj, AABBox_T<T> const & aabbox) KLAYGE_NOEXCEPT
 		{
 			static uint32_t const HULL_VERTEX[64][7] = 
 			{
@@ -730,11 +730,11 @@ namespace KlayGE
 		// 4D Vector
 		///////////////////////////////////////////////////////////////////////////////
 		
-		template int4 cross(int4 const & v1, int4 const & v2, int4 const & v3);
-		template float4 cross(float4 const & v1, float4 const & v2, float4 const & v3);
+		template int4 cross(int4 const & v1, int4 const & v2, int4 const & v3) KLAYGE_NOEXCEPT;
+		template float4 cross(float4 const & v1, float4 const & v2, float4 const & v3) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<T, 4> cross(Vector_T<T, 4> const & v1, Vector_T<T, 4> const & v2, Vector_T<T, 4> const & v3)
+		Vector_T<T, 4> cross(Vector_T<T, 4> const & v1, Vector_T<T, 4> const & v2, Vector_T<T, 4> const & v3) KLAYGE_NOEXCEPT
 		{
 			T const A = (v2.x() * v3.y()) - (v2.y() * v3.x());
 			T const B = (v2.x() * v3.z()) - (v2.z() * v3.x());
@@ -753,10 +753,10 @@ namespace KlayGE
 		// 4D Matrix
 		///////////////////////////////////////////////////////////////////////////////
 
-		template float4x4 mul(float4x4 const & lhs, float4x4 const & rhs);
+		template float4x4 mul(float4x4 const & lhs, float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs)
+		Matrix4_T<T> mul(Matrix4_T<T> const & lhs, Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			Matrix4_T<T> const tmp(transpose(rhs));
 
@@ -782,10 +782,10 @@ namespace KlayGE
 				lhs(3, 0) * tmp(3, 0) + lhs(3, 1) * tmp(3, 1) + lhs(3, 2) * tmp(3, 2) + lhs(3, 3) * tmp(3, 3));
 		}
 
-		template float determinant(float4x4 const & rhs);
+		template float determinant(float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T determinant(Matrix4_T<T> const & rhs)
+		T determinant(Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const _3142_3241(rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0));
 			T const _3143_3341(rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0));
@@ -800,10 +800,10 @@ namespace KlayGE
 				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
 		}
 
-		template float4x4 inverse(float4x4 const & rhs);
+		template float4x4 inverse(float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs)
+		Matrix4_T<T> inverse(Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const _2132_2231(rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0));
 			T const _2133_2331(rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0));
@@ -857,20 +857,20 @@ namespace KlayGE
 			}
 		}
 
-		template float4x4 look_at_lh(float3 const & vEye, float3 const & vAt);
+		template float4x4 look_at_lh(float3 const & vEye, float3 const & vAt) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt)
+		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt) KLAYGE_NOEXCEPT
 		{
 			return look_at_lh(vEye, vAt, Vector_T<T, 3>(0, 1, 0));
 		}
 
 		template float4x4 look_at_lh(float3 const & vEye, float3 const & vAt,
-			float3 const & vUp);
+			float3 const & vUp) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> look_at_lh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
-			Vector_T<T, 3> const & vUp)
+			Vector_T<T, 3> const & vUp) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> zAxis(normalize(vAt - vEye));
 			Vector_T<T, 3> xAxis(normalize(cross(vUp, zAxis)));
@@ -883,20 +883,20 @@ namespace KlayGE
 				-dot(xAxis, vEye),	-dot(yAxis, vEye),	-dot(zAxis, vEye),	1);
 		}
 
-		template float4x4 look_at_rh(float3 const & vEye, float3 const & vAt);
+		template float4x4 look_at_rh(float3 const & vEye, float3 const & vAt) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt)
+		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt) KLAYGE_NOEXCEPT
 		{
 			return look_at_rh(vEye, vAt, Vector_T<T, 3>(0, 1, 0));
 		}
 
 		template float4x4 look_at_rh(float3 const & vEye, float3 const & vAt,
-			float3 const & vUp);
+			float3 const & vUp) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> look_at_rh(Vector_T<T, 3> const & vEye, Vector_T<T, 3> const & vAt,
-			Vector_T<T, 3> const & vUp)
+			Vector_T<T, 3> const & vUp) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> zAxis(normalize(vEye - vAt));
 			Vector_T<T, 3> xAxis(normalize(cross(vUp, zAxis)));
@@ -910,10 +910,10 @@ namespace KlayGE
 		}
 
 		template float4x4 ortho_lh(float const & w, float const & h,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> ortho_lh(T const & w, T const & h, T const & nearPlane, T const & farPlane)
+		Matrix4_T<T> ortho_lh(T const & w, T const & h, T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			T const w_2(w / 2);
 			T const h_2(h / 2);
@@ -921,11 +921,11 @@ namespace KlayGE
 		}
 
 		template float4x4 ortho_off_center_lh(float const & left, float const & right, float const & bottom, float const & top,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> ortho_off_center_lh(T const & left, T const & right, T const & bottom, T const & top,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			T const q(T(1) / (farPlane - nearPlane));
 			T const invWidth(T(1) / (right - left));
@@ -938,10 +938,10 @@ namespace KlayGE
 				-(left + right) * invWidth,	-(top + bottom) * invHeight,	-nearPlane * q,		1);
 		}
 
-		template float4x4 perspective_lh(float const & width, float const & height, float const & nearPlane, float const & farPlane);
+		template float4x4 perspective_lh(float const & width, float const & height, float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> perspective_lh(T const & width, T const & height, T const & nearPlane, T const & farPlane)
+		Matrix4_T<T> perspective_lh(T const & width, T const & height, T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			T const q(farPlane / (farPlane - nearPlane));
 			T const near2(nearPlane + nearPlane);
@@ -953,10 +953,10 @@ namespace KlayGE
 				0,				0,				-nearPlane * q, 0);
 		}
 
-		template float4x4 perspective_fov_lh(float const & fov, float const & aspect, float const & nearPlane, float const & farPlane);
+		template float4x4 perspective_fov_lh(float const & fov, float const & aspect, float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> perspective_fov_lh(T const & fov, T const & aspect, T const & nearPlane, T const & farPlane)
+		Matrix4_T<T> perspective_fov_lh(T const & fov, T const & aspect, T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			T const h(T(1) / tan(fov / 2));
 			T const w(h / aspect);
@@ -970,11 +970,11 @@ namespace KlayGE
 		}
 
 		template float4x4 perspective_off_center_lh(float const & left, float const & right, float const & bottom, float const & top,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> perspective_off_center_lh(T const & left, T const & right, T const & bottom, T const & top,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			T const q(farPlane / (farPlane - nearPlane));
 			T const near2(nearPlane + nearPlane);
@@ -988,10 +988,10 @@ namespace KlayGE
 				0,							0,								-nearPlane * q, 0);
 		}
 
-		template float4x4 reflect(Plane const & p);
+		template float4x4 reflect(Plane const & p) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> reflect(Plane_T<T> const & p)
+		Matrix4_T<T> reflect(Plane_T<T> const & p) KLAYGE_NOEXCEPT
 		{
 			Plane_T<T> P(normalize(p));
 			T const aa2(-2 * P.a() * P.a()), ab2(-2 * P.a() * P.b()), ac2(-2 * P.a() * P.c()), ad2(-2 * P.a() * P.d());
@@ -1005,10 +1005,10 @@ namespace KlayGE
 				ad2,		bd2,		cd2,		1);
 		}
 
-		template float4x4 rotation_x(float const & x);
+		template float4x4 rotation_x(float const & x) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation_x(T const & x)
+		Matrix4_T<T> rotation_x(T const & x) KLAYGE_NOEXCEPT
 		{
 			float sx, cx;
 			sincos(x, sx, cx);
@@ -1020,10 +1020,10 @@ namespace KlayGE
 				0,	0,		0,		1);
 		}
 
-		template float4x4 rotation_y(float const & y);
+		template float4x4 rotation_y(float const & y) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation_y(T const & y)
+		Matrix4_T<T> rotation_y(T const & y) KLAYGE_NOEXCEPT
 		{
 			float sy, cy;
 			sincos(y, sy, cy);
@@ -1035,10 +1035,10 @@ namespace KlayGE
 				0,		0,		0,		1);
 		}
 
-		template float4x4 rotation_z(float const & z);
+		template float4x4 rotation_z(float const & z) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation_z(T const & z)
+		Matrix4_T<T> rotation_z(T const & z) KLAYGE_NOEXCEPT
 		{
 			float sz, cz;
 			sincos(z, sz, cz);
@@ -1050,19 +1050,19 @@ namespace KlayGE
 				0,		0,		0,		1);
 		}
 
-		template float4x4 rotation(float const & angle, float const & x, float const & y, float const & z);
+		template float4x4 rotation(float const & angle, float const & x, float const & y, float const & z) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation(T const & angle, T const & x, T const & y, T const & z)
+		Matrix4_T<T> rotation(T const & angle, T const & x, T const & y, T const & z) KLAYGE_NOEXCEPT
 		{
 			Quaternion_T<T> quat(rotation_axis(Vector_T<T, 3>(x, y, z), angle));
 			return to_matrix(quat);
 		}
 
-		template float4x4 rotation_matrix_yaw_pitch_roll(float const & yaw, float const & pitch, float const & roll);
+		template float4x4 rotation_matrix_yaw_pitch_roll(float const & yaw, float const & pitch, float const & roll) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation_matrix_yaw_pitch_roll(T const & yaw, T const & pitch, T const & roll)
+		Matrix4_T<T> rotation_matrix_yaw_pitch_roll(T const & yaw, T const & pitch, T const & roll) KLAYGE_NOEXCEPT
 		{
 			Matrix4_T<T> rotX(rotation_x(pitch));
 			Matrix4_T<T> rotY(rotation_y(yaw));
@@ -1070,10 +1070,10 @@ namespace KlayGE
 			return rotZ * rotX * rotY;
 		}
 
-		template float4x4 scaling(float const & sx, float const & sy, float const & sz);
+		template float4x4 scaling(float const & sx, float const & sy, float const & sz) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> scaling(T const & sx, T const & sy, T const & sz)
+		Matrix4_T<T> scaling(T const & sx, T const & sy, T const & sz) KLAYGE_NOEXCEPT
 		{
 			return Matrix4_T<T>(
 				sx,	0,	0,	0,
@@ -1082,18 +1082,18 @@ namespace KlayGE
 				0,	0,	0,	1);
 		}
 
-		template float4x4 scaling(float3 const & s);
+		template float4x4 scaling(float3 const & s) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> scaling(Vector_T<T, 3> const & s)
+		Matrix4_T<T> scaling(Vector_T<T, 3> const & s) KLAYGE_NOEXCEPT
 		{
 			return scaling(s.x(), s.y(), s.z());
 		}
 
-		template float4x4 shadow(float4 const & l, Plane const & p);
+		template float4x4 shadow(float4 const & l, Plane const & p) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> shadow(Vector_T<T, 4> const & l, Plane_T<T> const & p)
+		Matrix4_T<T> shadow(Vector_T<T, 4> const & l, Plane_T<T> const & p) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 4> const v(-l);
 			Plane_T<T> P(normalize(p));
@@ -1106,10 +1106,10 @@ namespace KlayGE
 				P.d() * v.x(),		P.d() * v.y(),		P.d() * v.z(),		P.d() * v.w() + d);
 		}
 
-		template float4x4 to_matrix(Quaternion const & quat);
+		template float4x4 to_matrix(Quaternion const & quat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> to_matrix(Quaternion_T<T> const & quat)
+		Matrix4_T<T> to_matrix(Quaternion_T<T> const & quat) KLAYGE_NOEXCEPT
 		{
 			// calculate coefficients
 			T const x2(quat.x() + quat.x());
@@ -1127,10 +1127,10 @@ namespace KlayGE
 				0,				0,				0,				1);
 		}
 
-		template float4x4 translation(float const & x, float const & y, float const & z);
+		template float4x4 translation(float const & x, float const & y, float const & z) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> translation(T const & x, T const & y, T const & z)
+		Matrix4_T<T> translation(T const & x, T const & y, T const & z) KLAYGE_NOEXCEPT
 		{
 			return Matrix4_T<T>(
 				1,	0,	0,	0,
@@ -1139,18 +1139,18 @@ namespace KlayGE
 				x,	y,	z,	1);
 		}
 
-		template float4x4 translation(float3 const & pos);
+		template float4x4 translation(float3 const & pos) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> translation(Vector_T<T, 3> const & pos)
+		Matrix4_T<T> translation(Vector_T<T, 3> const & pos) KLAYGE_NOEXCEPT
 		{
 			return translation(pos.x(), pos.y(), pos.z());
 		}
 
-		template float4x4 transpose(float4x4 const & rhs);
+		template float4x4 transpose(float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs)
+		Matrix4_T<T> transpose(Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Matrix4_T<T>(
 				rhs(0, 0), rhs(1, 0), rhs(2, 0), rhs(3, 0),
@@ -1159,10 +1159,10 @@ namespace KlayGE
 				rhs(0, 3), rhs(1, 3), rhs(2, 3), rhs(3, 3));
 		}
 
-		template float4x4 lh_to_rh(float4x4 const & rhs);
+		template float4x4 lh_to_rh(float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> lh_to_rh(Matrix4_T<T> const & rhs)
+		Matrix4_T<T> lh_to_rh(Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			Matrix4_T<T> ret = rhs;
 			ret(2, 0) = -ret(2, 0);
@@ -1172,10 +1172,10 @@ namespace KlayGE
 			return ret;
 		}
 
-		template void decompose(float3& scale, Quaternion& rot, float3& trans, float4x4 const & rhs);
+		template void decompose(float3& scale, Quaternion& rot, float3& trans, float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		void decompose(Vector_T<T, 3>& scale, Quaternion_T<T>& rot, Vector_T<T, 3>& trans, Matrix4_T<T> const & rhs)
+		void decompose(Vector_T<T, 3>& scale, Quaternion_T<T>& rot, Vector_T<T, 3>& trans, Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			scale.x() = sqrt(rhs(0, 0) * rhs(0, 0) + rhs(0, 1) * rhs(0, 1) + rhs(0, 2) * rhs(0, 2));
 			scale.y() = sqrt(rhs(1, 0) * rhs(1, 0) + rhs(1, 1) * rhs(1, 1) + rhs(1, 2) * rhs(1, 2));
@@ -1204,11 +1204,11 @@ namespace KlayGE
 		}
 
 		template float4x4 transformation(float3 const * scaling_center, Quaternion const * scaling_rotation, float3 const * scale,
-			float3 const * rotation_center, Quaternion const * rotation, float3 const * trans);
+			float3 const * rotation_center, Quaternion const * rotation, float3 const * trans) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> transformation(Vector_T<T, 3> const * scaling_center, Quaternion_T<T> const * scaling_rotation, Vector_T<T, 3> const * scale,
-			Vector_T<T, 3> const * rotation_center, Quaternion_T<T> const * rotation, Vector_T<T, 3> const * trans)
+			Vector_T<T, 3> const * rotation_center, Quaternion_T<T> const * rotation, Vector_T<T, 3> const * trans) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> psc, prc, pt;
 			if (scaling_center)
@@ -1269,83 +1269,83 @@ namespace KlayGE
 			return m1 * m2 * m3 * m4 * m5 * m6 * m7;
 		}
 
-		template float4x4 ortho_rh(float const & width, float const & height, float const & nearPlane, float const & farPlane);
+		template float4x4 ortho_rh(float const & width, float const & height, float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> ortho_rh(T const & width, T const & height, T const & nearPlane, T const & farPlane)
+		Matrix4_T<T> ortho_rh(T const & width, T const & height, T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(ortho_lh(width, height, nearPlane, farPlane));
 		}
 
 		template float4x4 ortho_off_center_rh(float const & left, float const & right, float const & bottom, float const & top,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 		
 		template <typename T>
 		Matrix4_T<T> ortho_off_center_rh(T const & left, T const & right, T const & bottom, T const & top,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(ortho_off_center_lh(left, right, bottom, top, nearPlane, farPlane));
 		}
 
 		template float4x4 perspective_rh(float const & width, float const & height,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> perspective_rh(T const & width, T const & height,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(perspective_lh(width, height, nearPlane, farPlane));
 		}
 
 		template float4x4 perspective_fov_rh(float const & fov, float const & aspect,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> perspective_fov_rh(T const & fov, T const & aspect,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(perspective_fov_lh(fov, aspect, nearPlane, farPlane));
 		}
 
 		template float4x4 perspective_off_center_rh(float const & left, float const & right, float const & bottom, float const & top,
-			float const & nearPlane, float const & farPlane);
+			float const & nearPlane, float const & farPlane) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Matrix4_T<T> perspective_off_center_rh(T const & left, T const & right, T const & bottom, T const & top,
-			T const & nearPlane, T const & farPlane)
+			T const & nearPlane, T const & farPlane) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(perspective_off_center_lh(left, right, bottom, top, nearPlane, farPlane));
 		}
 
-		template float4x4 rh_to_lh(float4x4 const & rhs);
+		template float4x4 rh_to_lh(float4x4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rh_to_lh(Matrix4_T<T> const & rhs)
+		Matrix4_T<T> rh_to_lh(Matrix4_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return lh_to_rh(rhs);
 		}
 
-		template float4x4 rotation_matrix_yaw_pitch_roll(float3 const & ang);
+		template float4x4 rotation_matrix_yaw_pitch_roll(float3 const & ang) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> rotation_matrix_yaw_pitch_roll(Vector_T<T, 3> const & ang)
+		Matrix4_T<T> rotation_matrix_yaw_pitch_roll(Vector_T<T, 3> const & ang) KLAYGE_NOEXCEPT
 		{
 			return rotation_matrix_yaw_pitch_roll(ang.x(), ang.y(), ang.z());
 		}
 
 
-		template Quaternion conjugate(Quaternion const & rhs);
+		template Quaternion conjugate(Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> conjugate(Quaternion_T<T> const & rhs)
+		Quaternion_T<T> conjugate(Quaternion_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Quaternion_T<T>(-rhs.x(), -rhs.y(), -rhs.z(), rhs.w());
 		}
 
-		template Quaternion axis_to_axis(float3 const & from, float3 const & to);
+		template Quaternion axis_to_axis(float3 const & from, float3 const & to) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> axis_to_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
+		Quaternion_T<T> axis_to_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> a(normalize(from));
 			Vector_T<T, 3> b(normalize(to));
@@ -1353,10 +1353,10 @@ namespace KlayGE
 			return unit_axis_to_unit_axis(a, b);
 		}
 
-		template Quaternion unit_axis_to_unit_axis(float3 const & from, float3 const & to);
+		template Quaternion unit_axis_to_unit_axis(float3 const & from, float3 const & to) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> unit_axis_to_unit_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to)
+		Quaternion_T<T> unit_axis_to_unit_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to) KLAYGE_NOEXCEPT
 		{
 			T const cos_theta = dot(from, to);
 			if (equal(cos_theta, T(1)))
@@ -1380,11 +1380,11 @@ namespace KlayGE
 		}
 
 		template Quaternion bary_centric(Quaternion const & q1, Quaternion const & q2,
-			Quaternion const & q3, Quaternion::value_type const & f, Quaternion::value_type const & g);
+			Quaternion const & q3, Quaternion::value_type const & f, Quaternion::value_type const & g) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Quaternion_T<T> bary_centric(Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
-			Quaternion_T<T> const & q3, T f, T g)
+			Quaternion_T<T> const & q3, T f, T g) KLAYGE_NOEXCEPT
 		{
 			Quaternion_T<T> ret;
 			T const s = f + g;
@@ -1400,37 +1400,37 @@ namespace KlayGE
 			return ret;
 		}
 
-		template Quaternion exp(Quaternion const & rhs);
+		template Quaternion exp(Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> exp(Quaternion_T<T> const & rhs)
+		Quaternion_T<T> exp(Quaternion_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const theta(length(rhs.v()));
 			return Quaternion_T<T>(normalize(rhs.v()) * sin(theta), cos(theta));
 		}
 
-		template Quaternion ln(Quaternion const & rhs);
+		template Quaternion ln(Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> ln(Quaternion_T<T> const & rhs)
+		Quaternion_T<T> ln(Quaternion_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const theta_2(acos(rhs.w()));
 			return Quaternion_T<T>(normalize(rhs.v()) * (theta_2 + theta_2), 0);
 		}
 
-		template Quaternion inverse(Quaternion const & rhs);
+		template Quaternion inverse(Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> inverse(Quaternion_T<T> const & rhs)
+		Quaternion_T<T> inverse(Quaternion_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			T const inv(T(1) / length(rhs));
 			return Quaternion(-rhs.x() * inv, -rhs.y() * inv, -rhs.z() * inv, rhs.w() * inv);
 		}
 
-		template Quaternion mul(Quaternion const & lhs, Quaternion const & rhs);
+		template Quaternion mul(Quaternion const & lhs, Quaternion const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs)
+		Quaternion_T<T> mul(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Quaternion_T<T>(
 				lhs.x() * rhs.w() - lhs.y() * rhs.z() + lhs.z() * rhs.y() + lhs.w() * rhs.x(),
@@ -1439,10 +1439,10 @@ namespace KlayGE
 				lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z());
 		}
 
-		template Quaternion rotation_quat_yaw_pitch_roll(float const & yaw, float const & pitch, float const & roll);
+		template Quaternion rotation_quat_yaw_pitch_roll(float const & yaw, float const & pitch, float const & roll) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> rotation_quat_yaw_pitch_roll(T const & yaw, T const & pitch, T const & roll)
+		Quaternion_T<T> rotation_quat_yaw_pitch_roll(T const & yaw, T const & pitch, T const & roll) KLAYGE_NOEXCEPT
 		{
 			T const angX(pitch / 2), angY(yaw / 2), angZ(roll / 2);
 			T sx, sy, sz;
@@ -1458,11 +1458,11 @@ namespace KlayGE
 				sx * sy * sz + cx * cy * cz);
 		}
 
-		template void to_yaw_pitch_roll(float& yaw, float& pitch, float& roll, Quaternion const & quat);
+		template void to_yaw_pitch_roll(float& yaw, float& pitch, float& roll, Quaternion const & quat) KLAYGE_NOEXCEPT;
 
 		// From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
 		template <typename T>
-		void to_yaw_pitch_roll(T& yaw, T& pitch, T& roll, Quaternion_T<T> const & quat)
+		void to_yaw_pitch_roll(T& yaw, T& pitch, T& roll, Quaternion_T<T> const & quat) KLAYGE_NOEXCEPT
 		{
 			T sqx = quat.x() * quat.x();
 			T sqy = quat.y() * quat.y();
@@ -1495,10 +1495,10 @@ namespace KlayGE
 			}
 		}
 
-		template void to_axis_angle(float3& vec, float& ang, Quaternion const & quat);
+		template void to_axis_angle(float3& vec, float& ang, Quaternion const & quat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		void to_axis_angle(Vector_T<T, 3>& vec, T& ang, Quaternion_T<T> const & quat)
+		void to_axis_angle(Vector_T<T, 3>& vec, T& ang, Quaternion_T<T> const & quat) KLAYGE_NOEXCEPT
 		{
 			T const tw(acos(quat.w()));
 			T const stw = sin(tw);
@@ -1511,10 +1511,10 @@ namespace KlayGE
 			}
 		}
 
-		template Quaternion to_quaternion(float4x4 const & mat);
+		template Quaternion to_quaternion(float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat)
+		Quaternion_T<T> to_quaternion(Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			Quaternion_T<T> quat;
 			T s;
@@ -1595,10 +1595,10 @@ namespace KlayGE
 			return normalize(quat);
 		}
 
-		template Quaternion to_quaternion(float3 const & tangent, float3 const & binormal, float3 const & normal, int bits);
+		template Quaternion to_quaternion(float3 const & tangent, float3 const & binormal, float3 const & normal, int bits) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits)
+		Quaternion_T<T> to_quaternion(Vector_T<T, 3> const & tangent, Vector_T<T, 3> const & binormal, Vector_T<T, 3> const & normal, int bits) KLAYGE_NOEXCEPT
 		{
 			T k = 1;
 			if (dot(binormal, cross(normal, tangent)) < 0)
@@ -1635,10 +1635,10 @@ namespace KlayGE
 			return tangent_quat;
 		}
 
-		template Quaternion rotation_axis(float3 const & v, float const & angle);
+		template Quaternion rotation_axis(float3 const & v, float const & angle) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> rotation_axis(Vector_T<T, 3> const & v, T const & angle)
+		Quaternion_T<T> rotation_axis(Vector_T<T, 3> const & v, T const & angle) KLAYGE_NOEXCEPT
 		{
 			T sa, ca;
 			sincos(angle * T(0.5), sa, ca);
@@ -1653,10 +1653,10 @@ namespace KlayGE
 			}
 		}
 
-		template Quaternion slerp(Quaternion const & lhs, Quaternion const & rhs, float s);
+		template Quaternion slerp(Quaternion const & lhs, Quaternion const & rhs, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T s)
+		Quaternion_T<T> slerp(Quaternion_T<T> const & lhs, Quaternion_T<T> const & rhs, T s) KLAYGE_NOEXCEPT
 		{
 			T scale0, scale1;
 
@@ -1692,12 +1692,12 @@ namespace KlayGE
 
 		template void squad_setup(Quaternion& a, Quaternion& b, Quaternion& c,
 			Quaternion const & q0, Quaternion const & q1, Quaternion const & q2,
-			Quaternion const & q3);
+			Quaternion const & q3) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		void squad_setup(Quaternion_T<T>& a, Quaternion_T<T>& b, Quaternion_T<T>& c,
 			Quaternion_T<T> const & q0, Quaternion_T<T> const & q1, Quaternion_T<T> const & q2,
-			Quaternion_T<T> const & q3)
+			Quaternion_T<T> const & q3) KLAYGE_NOEXCEPT
 		{
 			Quaternion_T<T> q, temp1, temp2, temp3;
 
@@ -1744,68 +1744,68 @@ namespace KlayGE
 		}
 
 		template Quaternion squad(Quaternion const & q1, Quaternion const & a, Quaternion const & b,
-			Quaternion const & c, float t);
+			Quaternion const & c, float t) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Quaternion_T<T> squad(Quaternion_T<T> const & q1, Quaternion_T<T> const & a, Quaternion_T<T> const & b,
-			Quaternion_T<T> const & c, float t)
+			Quaternion_T<T> const & c, float t) KLAYGE_NOEXCEPT
 		{
 			return slerp(slerp(q1, c, t), slerp(a, b, t), T(2) * t * (T(1) - t));
 		}
 
-		template Quaternion rotation_quat_yaw_pitch_roll(float3 const & ang);
+		template Quaternion rotation_quat_yaw_pitch_roll(float3 const & ang) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> rotation_quat_yaw_pitch_roll(Vector_T<T, 3> const & ang)
+		Quaternion_T<T> rotation_quat_yaw_pitch_roll(Vector_T<T, 3> const & ang) KLAYGE_NOEXCEPT
 		{
 			return rotation_quat_yaw_pitch_roll(ang.x(), ang.y(), ang.z());
 		}
 
-		template float dot(Plane const & lhs, float4 const & rhs);
+		template float dot(Plane const & lhs, float4 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T dot(Plane_T<T> const & lhs, Vector_T<T, 4> const & rhs)
+		T dot(Plane_T<T> const & lhs, Vector_T<T, 4> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d() * rhs.w();
 		}
 
-		template float dot_coord(Plane const & lhs, float3 const & rhs);
+		template float dot_coord(Plane const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T dot_coord(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs)
+		T dot_coord(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z() + lhs.d();
 		}
 
-		template float dot_normal(Plane const & lhs, float3 const & rhs);
+		template float dot_normal(Plane const & lhs, float3 const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		T dot_normal(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs)
+		T dot_normal(Plane_T<T> const & lhs, Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return lhs.a() * rhs.x() + lhs.b() * rhs.y() + lhs.c() * rhs.z();
 		}
 
-		template Plane from_point_normal(float3 const & point, float3 const & normal);
+		template Plane from_point_normal(float3 const & point, float3 const & normal) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Plane_T<T> from_point_normal(Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal)
+		Plane_T<T> from_point_normal(Vector_T<T, 3> const & point, Vector_T<T, 3> const & normal) KLAYGE_NOEXCEPT
 		{
 			return Plane_T<T>(normal.x(), normal.y(), normal.z(), -dot(point, normal));
 		}
 
-		template Plane from_points(float3 const & v0, float3 const & v1, float3 const & v2);
+		template Plane from_points(float3 const & v0, float3 const & v1, float3 const & v2) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Plane_T<T> from_points(Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2)
+		Plane_T<T> from_points(Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> vec(cross(v1 - v0, v2 - v0));
 			return from_point_normal(v0, normalize(vec));
 		}
 
-		template Plane mul(Plane const & p, float4x4 const & mat);
+		template Plane mul(Plane const & p, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Plane_T<T> mul(Plane_T<T> const & p, Matrix4_T<T> const & mat)
+		Plane_T<T> mul(Plane_T<T> const & p, Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			return Plane_T<T>(
 				p.a() * mat(0, 0) + p.b() * mat(1, 0) + p.c() * mat(2, 0) + p.d() * mat(3, 0),
@@ -1814,11 +1814,11 @@ namespace KlayGE
 				p.a() * mat(0, 3) + p.b() * mat(1, 3) + p.c() * mat(2, 3) + p.d() * mat(3, 3));
 		}
 
-		template float intersect_ray(Plane const & p, float3 const & orig, float3 const & dir);
+		template float intersect_ray(Plane const & p, float3 const & orig, float3 const & dir) KLAYGE_NOEXCEPT;
 
 		// 求直线和平面的交点，直线orig + t * dir
 		template <typename T>
-		T intersect_ray(Plane_T<T> const & p, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir)
+		T intersect_ray(Plane_T<T> const & p, Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir) KLAYGE_NOEXCEPT
 		{
 			T deno(dot(dir, p.Normal()));
 			if (equal(deno, T(0)))
@@ -1830,11 +1830,11 @@ namespace KlayGE
 		}
 
 
-		template void oblique_clipping(float4x4& proj, Plane const & clip_plane);
+		template void oblique_clipping(float4x4& proj, Plane const & clip_plane) KLAYGE_NOEXCEPT;
 		
 		// From Game Programming Gems 5, Section 2.6.
 		template <typename T>
-		void oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane)
+		void oblique_clipping(Matrix4_T<T>& proj, Plane_T<T> const & clip_plane) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 4> q;
 			q.x() = (sgn(clip_plane.a()) - proj(2, 0)) / proj(0, 0);
@@ -1851,34 +1851,34 @@ namespace KlayGE
 		}
 
 
-		template Color negative(Color const & rhs);
+		template Color negative(Color const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Color_T<T> negative(Color_T<T> const & rhs)
+		Color_T<T> negative(Color_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Color_T<T>(1 - rhs.r(), 1 - rhs.g(), 1 - rhs.b(), rhs.a());
 		}
 
-		template Color modulate(Color const & lhs, Color const & rhs);
+		template Color modulate(Color const & lhs, Color const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Color_T<T> modulate(Color_T<T> const & lhs, Color_T<T> const & rhs)
+		Color_T<T> modulate(Color_T<T> const & lhs, Color_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			return Color_T<T>(lhs.r() * rhs.r(), lhs.g() * rhs.g(), lhs.b() * rhs.b(), lhs.a() * rhs.a());
 		}
 
 
-		template AABBox compute_aabbox(float3* first, float3* last);
-		template AABBox compute_aabbox(float4* first, float4* last);
-		template AABBox compute_aabbox(float3 const * first, float3 const * last);
-		template AABBox compute_aabbox(float4 const * first, float4 const * last);
-		template AABBox compute_aabbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
-		template AABBox compute_aabbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
-		template AABBox compute_aabbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
-		template AABBox compute_aabbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+		template AABBox compute_aabbox(float3* first, float3* last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(float4* first, float4* last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(float3 const * first, float3 const * last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(float4 const * first, float4 const * last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last) KLAYGE_NOEXCEPT;
+		template AABBox compute_aabbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last) KLAYGE_NOEXCEPT;
 
 		template <typename Iterator>
-		AABBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_aabbox(Iterator first, Iterator last)
+		AABBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_aabbox(Iterator first, Iterator last) KLAYGE_NOEXCEPT
 		{
 			typedef typename std::iterator_traits<Iterator>::value_type::value_type value_type;
 
@@ -1895,17 +1895,17 @@ namespace KlayGE
 			return AABBox_T<value_type>(minVec, maxVec);
 		}
 
-		template OBBox compute_obbox(float3* first, float3* last);
-		template OBBox compute_obbox(float4* first, float4* last);
-		template OBBox compute_obbox(float3 const * first, float3 const * last);
-		template OBBox compute_obbox(float4 const * first, float4 const * last);
-		template OBBox compute_obbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
-		template OBBox compute_obbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
-		template OBBox compute_obbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
-		template OBBox compute_obbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+		template OBBox compute_obbox(float3* first, float3* last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(float4* first, float4* last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(float3 const * first, float3 const * last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(float4 const * first, float4 const * last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(std::vector<float3>::iterator first, std::vector<float3>::iterator last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(std::vector<float4>::iterator first, std::vector<float4>::iterator last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last) KLAYGE_NOEXCEPT;
+		template OBBox compute_obbox(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last) KLAYGE_NOEXCEPT;
 
 		template <typename Iterator>
-		OBBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_obbox(Iterator first, Iterator last)
+		OBBox_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_obbox(Iterator first, Iterator last) KLAYGE_NOEXCEPT
 		{
 			typedef typename std::iterator_traits<Iterator>::value_type::value_type value_type;
 
@@ -2172,17 +2172,17 @@ namespace KlayGE
 			return OBBox_T<value_type>(center, axis[0], axis[1], axis[2], extent);
 		}
 
-		template Sphere compute_sphere(float3* first, float3* last);
-		template Sphere compute_sphere(float4* first, float4* last);
-		template Sphere compute_sphere(float3 const * first, float3 const * last);
-		template Sphere compute_sphere(float4 const * first, float4 const * last);
-		template Sphere compute_sphere(std::vector<float3>::iterator first, std::vector<float3>::iterator last);
-		template Sphere compute_sphere(std::vector<float4>::iterator first, std::vector<float4>::iterator last);
-		template Sphere compute_sphere(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last);
-		template Sphere compute_sphere(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last);
+		template Sphere compute_sphere(float3* first, float3* last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(float4* first, float4* last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(float3 const * first, float3 const * last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(float4 const * first, float4 const * last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(std::vector<float3>::iterator first, std::vector<float3>::iterator last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(std::vector<float4>::iterator first, std::vector<float4>::iterator last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(std::vector<float3>::const_iterator first, std::vector<float3>::const_iterator last) KLAYGE_NOEXCEPT;
+		template Sphere compute_sphere(std::vector<float4>::const_iterator first, std::vector<float4>::const_iterator last) KLAYGE_NOEXCEPT;
 
 		template <typename Iterator>
-		Sphere_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_sphere(Iterator first, Iterator last)
+		Sphere_T<typename std::iterator_traits<Iterator>::value_type::value_type> compute_sphere(Iterator first, Iterator last) KLAYGE_NOEXCEPT
 		{
 			// from Graphics Gems I p301
 
@@ -2263,10 +2263,10 @@ namespace KlayGE
 		}
 
 
-		template AABBox convert_to_aabbox(OBBox const & obb);
+		template AABBox convert_to_aabbox(OBBox const & obb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		AABBox_T<T> convert_to_aabbox(OBBox_T<T> const & obb)
+		AABBox_T<T> convert_to_aabbox(OBBox_T<T> const & obb) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> min(+1e10f, +1e10f, +1e10f);
 			Vector_T<T, 3> max(-1e10f, -1e10f, -1e10f);
@@ -2288,19 +2288,19 @@ namespace KlayGE
 			return AABBox_T<T>(min, max);
 		}
 
-		template OBBox convert_to_obbox(AABBox const & aabb);
+		template OBBox convert_to_obbox(AABBox const & aabb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		OBBox_T<T> convert_to_obbox(AABBox_T<T> const & aabb)
+		OBBox_T<T> convert_to_obbox(AABBox_T<T> const & aabb) KLAYGE_NOEXCEPT
 		{
 			return OBBox_T<T>(aabb.Center(), Quaternion_T<T>::Identity(), aabb.HalfSize());
 		}
 
 
-		template AABBox transform_aabb(AABBox const & aabb, float4x4 const & mat);
+		template AABBox transform_aabb(AABBox const & aabb, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat)
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> scale, trans;
 			Quaternion_T<T> rot;
@@ -2309,10 +2309,10 @@ namespace KlayGE
 			return transform_aabb(aabb, scale, rot, trans);
 		}
 
-		template AABBox transform_aabb(AABBox const & aabb, float3 const & scale, Quaternion const & rot, float3 const & trans);
+		template AABBox transform_aabb(AABBox const & aabb, float3 const & scale, Quaternion const & rot, float3 const & trans) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		AABBox_T<T> transform_aabb(AABBox_T<T> const & aabb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> min, max;
 			min = max = transform_quat(aabb.Corner(0) * scale, rot) + trans;
@@ -2326,10 +2326,10 @@ namespace KlayGE
 			return AABBox_T<T>(min, max);
 		}
 
-		template OBBox transform_obb(OBBox const & obb, float4x4 const & mat);
+		template OBBox transform_obb(OBBox const & obb, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Matrix4_T<T> const & mat)
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> scale, trans;
 			Quaternion_T<T> rot;
@@ -2338,10 +2338,10 @@ namespace KlayGE
 			return transform_obb(obb, scale, rot, trans);
 		}
 
-		template OBBox transform_obb(OBBox const & obb, float3 const & scale, Quaternion const & rot, float3 const & trans);
+		template OBBox transform_obb(OBBox const & obb, float3 const & scale, Quaternion const & rot, float3 const & trans) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		OBBox_T<T> transform_obb(OBBox_T<T> const & obb, Vector_T<T, 3> const & scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> center = transform_quat(obb.Center() * scale, rot) + trans;
 			Quaternion_T<T> rotation = mul(obb.Rotation(), rot);
@@ -2349,10 +2349,10 @@ namespace KlayGE
 			return OBBox_T<T>(center, rotation, extent);
 		}
 
-		template Sphere transform_sphere(Sphere const & sphere, float4x4 const & mat);
+		template Sphere transform_sphere(Sphere const & sphere, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, Matrix4_T<T> const & mat)
+		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> scale, trans;
 			Quaternion_T<T> rot;
@@ -2361,20 +2361,20 @@ namespace KlayGE
 			return transform_sphere(sphere, scale.x(), rot, trans);
 		}
 
-		template Sphere transform_sphere(Sphere const & sphere, float scale, Quaternion const & rot, float3 const & trans);
+		template Sphere transform_sphere(Sphere const & sphere, float scale, Quaternion const & rot, float3 const & trans) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		Sphere_T<T> transform_sphere(Sphere_T<T> const & sphere, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> center = transform_quat(sphere.Center() * scale, rot) + trans;
 			T radius = sphere.Radius() * scale;
 			return Sphere_T<T>(center, radius);
 		}
 
-		template Frustum transform_frustum(Frustum const & frustum, float4x4 const & mat);
+		template Frustum transform_frustum(Frustum const & frustum, float4x4 const & mat) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, Matrix4_T<T> const & mat)
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, Matrix4_T<T> const & mat) KLAYGE_NOEXCEPT
 		{
 			Frustum_T<T> ret;
 			for (int i = 0; i < 6; ++ i)
@@ -2389,30 +2389,30 @@ namespace KlayGE
 			return ret;
 		}
 
-		template Frustum transform_frustum(Frustum const & frustum, float scale, Quaternion const & rot, float3 const & trans);
+		template Frustum transform_frustum(Frustum const & frustum, float scale, Quaternion const & rot, float3 const & trans) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans)
+		Frustum_T<T> transform_frustum(Frustum_T<T> const & frustum, T scale, Quaternion_T<T> const & rot, Vector_T<T, 3> const & trans) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> vscale(scale, scale, scale);
 			return transform_frustum(frustum, transformation<T>(nullptr, nullptr, &vscale, nullptr, &rot, &trans));
 		}
 
 
-		template bool intersect_point_aabb(float3 const & v, AABBox const & aabb);
+		template bool intersect_point_aabb(float3 const & v, AABBox const & aabb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_point_aabb(Vector_T<T, 3> const & v, AABBox_T<T> const & aabb)
+		bool intersect_point_aabb(Vector_T<T, 3> const & v, AABBox_T<T> const & aabb) KLAYGE_NOEXCEPT
 		{
 			return (in_bound(v.x(), aabb.Min().x(), aabb.Max().x()))
 				&& (in_bound(v.y(), aabb.Min().y(), aabb.Max().y()))
 				&& (in_bound(v.z(), aabb.Min().z(), aabb.Max().z()));
 		}
 
-		template bool intersect_point_obb(float3 const & v, OBBox const & obb);
+		template bool intersect_point_obb(float3 const & v, OBBox const & obb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_point_obb(Vector_T<T, 3> const & v, OBBox_T<T> const & obb)
+		bool intersect_point_obb(Vector_T<T, 3> const & v, OBBox_T<T> const & obb) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> d = v - obb.Center();
 			return (dot(d, obb.Axis(0)) <= obb.HalfSize().x())
@@ -2420,18 +2420,18 @@ namespace KlayGE
 				&& (dot(d, obb.Axis(2)) <= obb.HalfSize().z());
 		}
 
-		template bool intersect_point_sphere(float3 const & v, Sphere const & sphere);
+		template bool intersect_point_sphere(float3 const & v, Sphere const & sphere) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_point_sphere(Vector_T<T, 3> const & v, Sphere_T<T> const & sphere)
+		bool intersect_point_sphere(Vector_T<T, 3> const & v, Sphere_T<T> const & sphere) KLAYGE_NOEXCEPT
 		{
 			return length(v - sphere.Center()) < sphere.Radius();
 		}
 
-		template bool intersect_point_frustum(float3 const & v, Frustum const & frustum);
+		template bool intersect_point_frustum(float3 const & v, Frustum const & frustum) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_point_frustum(Vector_T<T, 3> const & v, Frustum_T<T> const & frustum)
+		bool intersect_point_frustum(Vector_T<T, 3> const & v, Frustum_T<T> const & frustum) KLAYGE_NOEXCEPT
 		{
 			for (int i = 0; i < 6; ++ i)
 			{
@@ -2444,10 +2444,10 @@ namespace KlayGE
 		}
 
 
-		template bool intersect_ray_aabb(float3 const & orig, float3 const & dir, AABBox const & aabb);
+		template bool intersect_ray_aabb(float3 const & orig, float3 const & dir, AABBox const & aabb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_ray_aabb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, AABBox_T<T> const & aabb)
+		bool intersect_ray_aabb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, AABBox_T<T> const & aabb) KLAYGE_NOEXCEPT
 		{
 			T t_near = T(-1e10);
 			T t_far = T(+1e10);
@@ -2494,10 +2494,10 @@ namespace KlayGE
 			return true;
 		}
 
-		template bool intersect_ray_obb(float3 const & orig, float3 const & dir, OBBox const & obb);
+		template bool intersect_ray_obb(float3 const & orig, float3 const & dir, OBBox const & obb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_ray_obb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, OBBox_T<T> const & obb)
+		bool intersect_ray_obb(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, OBBox_T<T> const & obb) KLAYGE_NOEXCEPT
 		{
 			T t_near = T(-1e10);
 			T t_far = T(+1e10);
@@ -2548,10 +2548,10 @@ namespace KlayGE
 			return true;
 		}
 		
-		template bool intersect_ray_sphere(float3 const & orig, float3 const & dir, Sphere const & sphere);
+		template bool intersect_ray_sphere(float3 const & orig, float3 const & dir, Sphere const & sphere) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_ray_sphere(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, Sphere_T<T> const & sphere)
+		bool intersect_ray_sphere(Vector_T<T, 3> const & orig, Vector_T<T, 3> const & dir, Sphere_T<T> const & sphere) KLAYGE_NOEXCEPT
 		{
 			T const a = length_sq(dir);
 			T const b = 2 * dot(dir, orig - sphere.Center());
@@ -2565,28 +2565,28 @@ namespace KlayGE
 		}
 
 
-		template bool intersect_aabb_aabb(AABBox const & lhs, AABBox const & aabb);
+		template bool intersect_aabb_aabb(AABBox const & lhs, AABBox const & aabb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_aabb_aabb(AABBox_T<T> const & lhs, AABBox_T<T> const & aabb)
+		bool intersect_aabb_aabb(AABBox_T<T> const & lhs, AABBox_T<T> const & aabb) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> const t = aabb.Center() - lhs.Center();
 			Vector_T<T, 3> const e = aabb.HalfSize() + lhs.HalfSize();
 			return (MathLib::abs(t.x()) <= e.x()) && (MathLib::abs(t.y()) <= e.y()) && (MathLib::abs(t.z()) <= e.z());
 		}
 
-		template bool intersect_aabb_obb(AABBox const & lhs, OBBox const & obb);
+		template bool intersect_aabb_obb(AABBox const & lhs, OBBox const & obb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb)
+		bool intersect_aabb_obb(AABBox_T<T> const & lhs, OBBox_T<T> const & obb) KLAYGE_NOEXCEPT
 		{
 			return obb.Intersect(convert_to_obbox(lhs));
 		}
 
-		template bool intersect_aabb_sphere(AABBox const & lhs, Sphere const & sphere);
+		template bool intersect_aabb_sphere(AABBox const & lhs, Sphere const & sphere) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_aabb_sphere(AABBox_T<T> const & lhs, Sphere_T<T> const & sphere)
+		bool intersect_aabb_sphere(AABBox_T<T> const & lhs, Sphere_T<T> const & sphere) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> half_size = lhs.HalfSize();
 			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
@@ -2611,10 +2611,10 @@ namespace KlayGE
 			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
-		template bool intersect_obb_obb(OBBox const & lhs, OBBox const & obb);
+		template bool intersect_obb_obb(OBBox const & lhs, OBBox const & obb) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_obb_obb(OBBox_T<T> const & lhs, OBBox_T<T> const & obb)
+		bool intersect_obb_obb(OBBox_T<T> const & lhs, OBBox_T<T> const & obb) KLAYGE_NOEXCEPT
 		{
 			// From Real-Time Collision Detection, p. 101-106. See http://realtimecollisiondetection.net/
 
@@ -2743,10 +2743,10 @@ namespace KlayGE
 			return true;
 		}
 
-		template bool intersect_obb_sphere(OBBox const & lhs, Sphere const & sphere);
+		template bool intersect_obb_sphere(OBBox const & lhs, Sphere const & sphere) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_obb_sphere(OBBox_T<T> const & lhs, Sphere_T<T> const & sphere)
+		bool intersect_obb_sphere(OBBox_T<T> const & lhs, Sphere_T<T> const & sphere) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
 			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
@@ -2768,10 +2768,10 @@ namespace KlayGE
 			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
-		template bool intersect_sphere_sphere(Sphere const & lhs, Sphere const & sphere);
+		template bool intersect_sphere_sphere(Sphere const & lhs, Sphere const & sphere) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool intersect_sphere_sphere(Sphere_T<T> const & lhs, Sphere_T<T> const & sphere)
+		bool intersect_sphere_sphere(Sphere_T<T> const & lhs, Sphere_T<T> const & sphere) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> d = lhs.Center() - sphere.Center();
 			float r = lhs.Radius() + sphere.Radius();
@@ -2779,10 +2779,10 @@ namespace KlayGE
 		}
 
 
-		template BoundOverlap intersect_aabb_frustum(AABBox const & aabb, Frustum const & frustum);
+		template BoundOverlap intersect_aabb_frustum(AABBox const & aabb, Frustum const & frustum) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & aabb, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_aabb_frustum(AABBox_T<T> const & aabb, Frustum_T<T> const & frustum) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> const & min_pt = aabb.Min();
 			Vector_T<T, 3> const & max_pt = aabb.Max();
@@ -2809,10 +2809,10 @@ namespace KlayGE
 			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_obb_frustum(OBBox const & obb, Frustum const & frustum);
+		template BoundOverlap intersect_obb_frustum(OBBox const & obb, Frustum const & frustum) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & obb, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_obb_frustum(OBBox_T<T> const & obb, Frustum_T<T> const & frustum) KLAYGE_NOEXCEPT
 		{
 			Vector_T<T, 3> min_pt = obb.Corner(0);
 			Vector_T<T, 3> max_pt = min_pt;
@@ -2846,10 +2846,10 @@ namespace KlayGE
 			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_sphere_frustum(Sphere const & sphere, Frustum const & frustum);
+		template BoundOverlap intersect_sphere_frustum(Sphere const & sphere, Frustum const & frustum) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & sphere, Frustum_T<T> const & frustum)
+		BoundOverlap intersect_sphere_frustum(Sphere_T<T> const & sphere, Frustum_T<T> const & frustum) KLAYGE_NOEXCEPT
 		{
 			bool intersect = false;
 			for (int i = 0; i < 6; ++ i)
@@ -2870,10 +2870,10 @@ namespace KlayGE
 			return intersect ? BO_Partial : BO_Yes;
 		}
 
-		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & rhs);
+		template BoundOverlap intersect_frustum_frustum(Frustum const & lhs, Frustum const & rhs) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & rhs)
+		BoundOverlap intersect_frustum_frustum(Frustum_T<T> const & lhs, Frustum_T<T> const & rhs) KLAYGE_NOEXCEPT
 		{
 			bool outside = false;
 			bool inside_all = true;
@@ -2971,12 +2971,12 @@ namespace KlayGE
 
 		template void intersect(float3 const & v0, float3 const & v1, float3 const & v2,
 						float3 const & ray_orig, float3 const & ray_dir,
-						float& t, float& u, float& v);
+						float& t, float& u, float& v) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		void intersect(Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2,
 						Vector_T<T, 3> const & ray_orig, Vector_T<T, 3> const & ray_dir,
-						T& t, T& u, T& v)
+						T& t, T& u, T& v) KLAYGE_NOEXCEPT
 		{
 			// Find vectors for two edges sharing vert0
 			Vector_T<T, 3> edge1 = v1 - v0;
@@ -3017,10 +3017,10 @@ namespace KlayGE
 			t *= inv_det;
 		}
 
-		template bool bary_centric_in_triangle(float const & u, float const & v);
+		template bool bary_centric_in_triangle(float const & u, float const & v) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		bool bary_centric_in_triangle(T const & u, T const & v)
+		bool bary_centric_in_triangle(T const & u, T const & v) KLAYGE_NOEXCEPT
 		{
 			// test bounds
 			if ((u < 0) || (u > 1))
@@ -3034,7 +3034,7 @@ namespace KlayGE
 			return true;
 		}
 
-		float linear_to_srgb(float linear)
+		float linear_to_srgb(float linear) KLAYGE_NOEXCEPT
 		{
 			if (linear < 0.0031308f)
 			{
@@ -3047,7 +3047,7 @@ namespace KlayGE
 			}
 		}
 
-		float srgb_to_linear(float srgb)
+		float srgb_to_linear(float srgb) KLAYGE_NOEXCEPT
 		{
 			if (srgb < 0.04045f)
 			{
@@ -3060,35 +3060,35 @@ namespace KlayGE
 			}
 		}
 
-		template Quaternion quat_trans_to_udq(Quaternion const & q, float3 const & t);
+		template Quaternion quat_trans_to_udq(Quaternion const & q, float3 const & t) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t)
+		Quaternion_T<T> quat_trans_to_udq(Quaternion_T<T> const & q, Vector_T<T, 3> const & t) KLAYGE_NOEXCEPT
 		{
 			return mul(q, Quaternion_T<T>(T(0.5) * t.x(), T(0.5) * t.y(), T(0.5) * t.z(), T(0.0)));
 		}
 
-		template float3 udq_to_trans(Quaternion const & real, Quaternion const & dual);
+		template float3 udq_to_trans(Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		Vector_T<T, 3> udq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			Quaternion_T<T> qeq0 = mul(conjugate(real), dual);
 			return T(2.0) * Vector_T<T, 3>(qeq0.x(), qeq0.y(), qeq0.z());
 		}
 
-		template float3 dq_to_trans(Quaternion const & real, Quaternion const & dual);
+		template float3 dq_to_trans(Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		Vector_T<T, 3> dq_to_trans(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			return udq_to_trans(real, dual) / length(real);
 		}
 
-		template float4x4 udq_to_matrix(Quaternion const & real, Quaternion const & dual);
+		template float4x4 udq_to_matrix(Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		Matrix4_T<T> udq_to_matrix(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			Matrix4_T<T> m;
 
@@ -3120,18 +3120,18 @@ namespace KlayGE
 			return m;
 		}
 
-		template std::pair<Quaternion, Quaternion> conjugate(Quaternion const & real, Quaternion const & dual);
+		template std::pair<Quaternion, Quaternion> conjugate(Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T>> conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> conjugate(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			return std::make_pair(conjugate(real), conjugate(dual));
 		}
 
-		template std::pair<Quaternion, Quaternion> inverse(Quaternion const & real, Quaternion const & dual);
+		template std::pair<Quaternion, Quaternion> inverse(Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T>> inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			float sqr_len_0 = dot(real, real);
 			float sqr_len_e = 2.0f * dot(real, dual);
@@ -3141,30 +3141,30 @@ namespace KlayGE
 			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
 		}
 
-		template Quaternion mul_real(Quaternion const & lhs_real, Quaternion const & rhs_real);
+		template Quaternion mul_real(Quaternion const & lhs_real, Quaternion const & rhs_real) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real)
+		Quaternion_T<T> mul_real(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & rhs_real) KLAYGE_NOEXCEPT
 		{
 			return lhs_real * rhs_real;
 		}
 
 		template Quaternion mul_dual(Quaternion const & lhs_real, Quaternion const & lhs_dual,
-			Quaternion const & rhs_real, Quaternion const & rhs_dual);
+			Quaternion const & rhs_real, Quaternion const & rhs_dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		Quaternion_T<T> mul_dual(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual)
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual) KLAYGE_NOEXCEPT
 		{
 			return lhs_real * rhs_dual + lhs_dual * rhs_real;
 		}
 
 		template void udq_to_screw(float& angle, float& pitch, float3& dir, float3& moment,
-			Quaternion const & real, Quaternion const & dual);
+			Quaternion const & real, Quaternion const & dual) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		void udq_to_screw(T& angle, T& pitch, Vector_T<T, 3>& dir, Vector_T<T, 3>& moment,
-			Quaternion_T<T> const & real, Quaternion_T<T> const & dual)
+			Quaternion_T<T> const & real, Quaternion_T<T> const & dual) KLAYGE_NOEXCEPT
 		{
 			if (abs(real.w()) >= 1)
 			{
@@ -3211,10 +3211,10 @@ namespace KlayGE
 			}
 		}
 
-		template std::pair<Quaternion, Quaternion> udq_from_screw(float const & angle, float const & pitch, float3 const & dir, float3 const & moment);
+		template std::pair<Quaternion, Quaternion> udq_from_screw(float const & angle, float const & pitch, float3 const & dir, float3 const & moment) KLAYGE_NOEXCEPT;
 
 		template <typename T>
-		std::pair<Quaternion_T<T>, Quaternion_T<T>> udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment)
+		std::pair<Quaternion_T<T>, Quaternion_T<T>> udq_from_screw(T const & angle, T const & pitch, Vector_T<T, 3> const & dir, Vector_T<T, 3> const & moment) KLAYGE_NOEXCEPT
 		{
 			T sa, ca;
 			sincos(angle * T(0.5), sa, ca);
@@ -3224,11 +3224,11 @@ namespace KlayGE
 
 
 		template std::pair<Quaternion, Quaternion> sclerp(Quaternion const & lhs_real, Quaternion const & lhs_dual,
-			Quaternion const & rhs_real, Quaternion const & rhs_dual, float s);
+			Quaternion const & rhs_real, Quaternion const & rhs_dual, float s) KLAYGE_NOEXCEPT;
 
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T>> sclerp(Quaternion_T<T> const & lhs_real, Quaternion_T<T> const & lhs_dual,
-			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s)
+			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s) KLAYGE_NOEXCEPT
 		{
 			// Make sure dot product is >= 0
 			float quat_dot = dot(lhs_real, rhs_real);

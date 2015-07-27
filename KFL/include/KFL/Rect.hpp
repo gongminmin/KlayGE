@@ -69,73 +69,73 @@ namespace KlayGE
 		enum { elem_num = 4 };
 
 	public:
-		Rect_T()
+		Rect_T() KLAYGE_NOEXCEPT
 		{
 		}
-		explicit Rect_T(T const * rhs);
+		explicit Rect_T(T const * rhs) KLAYGE_NOEXCEPT;
 		// Leave them in header due to a compiling issue under GCC
-		Rect_T(Rect_T const & rhs)
+		Rect_T(Rect_T const & rhs) KLAYGE_NOEXCEPT
 			: rect_(rhs.rect_)
 		{
 		}
 		template <typename U>
-		Rect_T(Rect_T<U> const & rhs)
+		Rect_T(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT
 			: rect_(rhs.rect_)
 		{
 		}
-		Rect_T(Rect_T&& rhs);
-		Rect_T(T left, T top, T right, T bottom);
+		Rect_T(Rect_T&& rhs) KLAYGE_NOEXCEPT;
+		Rect_T(T left, T top, T right, T bottom) KLAYGE_NOEXCEPT;
 
 		// 取向量
-		reference left()
+		reference left() KLAYGE_NOEXCEPT
 		{
 			return rect_[0];
 		}
-		const_reference left() const
+		const_reference left() const KLAYGE_NOEXCEPT
 		{
 			return rect_[0];
 		}
-		reference top()
+		reference top() KLAYGE_NOEXCEPT
 		{
 			return rect_[1];
 		}
-		const_reference top() const
+		const_reference top() const KLAYGE_NOEXCEPT
 		{
 			return rect_[1];
 		}
-		reference right()
+		reference right() KLAYGE_NOEXCEPT
 		{
 			return rect_[2];
 		}
-		const_reference right() const
+		const_reference right() const KLAYGE_NOEXCEPT
 		{
 			return rect_[2];
 		}
-		reference bottom()
+		reference bottom() KLAYGE_NOEXCEPT
 		{
 			return rect_[3];
 		}
-		const_reference bottom() const
+		const_reference bottom() const KLAYGE_NOEXCEPT
 		{
 			return rect_[3];
 		}
 
 		// 赋值操作符
 		template <typename U>
-		Rect_T const & operator+=(Vector_T<U, 2> const & rhs);
+		Rect_T const & operator+=(Vector_T<U, 2> const & rhs) KLAYGE_NOEXCEPT;
 		template <typename U>
-		Rect_T const & operator-=(Vector_T<U, 2> const & rhs);
+		Rect_T const & operator-=(Vector_T<U, 2> const & rhs) KLAYGE_NOEXCEPT;
 		template <typename U>
-		Rect_T const & operator+=(Rect_T<U> const & rhs);
+		Rect_T const & operator+=(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT;
 		template <typename U>
-		Rect_T const & operator-=(Rect_T<U> const & rhs);
+		Rect_T const & operator-=(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT;
 		template <typename U>
-		Rect_T const & operator&=(Rect_T<U> const & rhs);
+		Rect_T const & operator&=(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT;
 		template <typename U>
-		Rect_T const & operator|=(Rect_T<U> const & rhs);
+		Rect_T const & operator|=(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT;
 
 		// Leave them in header due to a compiling issue under GCC
-		Rect_T& operator=(Rect_T const & rhs)
+		Rect_T& operator=(Rect_T const & rhs) KLAYGE_NOEXCEPT
 		{
 			if (this != &rhs)
 			{
@@ -144,26 +144,26 @@ namespace KlayGE
 		return *this;
 		}
 		template <typename U>
-		Rect_T& operator=(Rect_T<U> const & rhs)
+		Rect_T& operator=(Rect_T<U> const & rhs) KLAYGE_NOEXCEPT
 		{
 			rect_ = rhs.rect_;
 			return *this;
 		}
-		Rect_T& operator=(Rect_T&& rhs);
+		Rect_T& operator=(Rect_T&& rhs) KLAYGE_NOEXCEPT;
 
 		// 一元操作符
-		Rect_T const operator+() const;
-		Rect_T const operator-() const;
+		Rect_T const operator+() const KLAYGE_NOEXCEPT;
+		Rect_T const operator-() const KLAYGE_NOEXCEPT;
 
 		// 属性
-		T Width() const;
-		T Height() const;
-		Size_T<T> const Size() const;
-		bool IsEmpty() const;
+		T Width() const KLAYGE_NOEXCEPT;
+		T Height() const KLAYGE_NOEXCEPT;
+		Size_T<T> const Size() const KLAYGE_NOEXCEPT;
+		bool IsEmpty() const KLAYGE_NOEXCEPT;
 
-		bool operator==(Rect_T<T> const & rhs) const;
+		bool operator==(Rect_T<T> const & rhs) const KLAYGE_NOEXCEPT;
 
-		bool PtInRect(Vector_T<T, 2> const & pt) const;
+		bool PtInRect(Vector_T<T, 2> const & pt) const KLAYGE_NOEXCEPT;
 
 	private:
 		Vector_T<T, elem_num> rect_;

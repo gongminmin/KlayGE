@@ -42,44 +42,44 @@ namespace KlayGE
 	class Frustum_T : public Bound_T<T>
 	{
 	public:
-		Frustum_T()
+		Frustum_T() KLAYGE_NOEXCEPT
 		{
 		}
-		Frustum_T(Frustum_T<T> const & rhs);
-		Frustum_T(Frustum_T<T>&& rhs);
+		Frustum_T(Frustum_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		Frustum_T(Frustum_T<T>&& rhs) KLAYGE_NOEXCEPT;
 
-		Frustum_T& operator=(Frustum_T const & rhs);
-		Frustum_T& operator=(Frustum_T&& rhs);
+		Frustum_T& operator=(Frustum_T const & rhs) KLAYGE_NOEXCEPT;
+		Frustum_T& operator=(Frustum_T&& rhs) KLAYGE_NOEXCEPT;
 
-		void ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip);
+		void ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip) KLAYGE_NOEXCEPT;
 
-		virtual bool IsEmpty() const KLAYGE_OVERRIDE;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
 
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_OVERRIDE;
-		virtual float MaxRadiusSq() const KLAYGE_OVERRIDE;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual float MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
 
-		void FrustumPlane(uint32_t index, Plane_T<T> const & plane)
+		void FrustumPlane(uint32_t index, Plane_T<T> const & plane) KLAYGE_NOEXCEPT
 		{
 			planes_[index] = plane;
 		}
-		Plane_T<T> const & FrustumPlane(uint32_t index) const
+		Plane_T<T> const & FrustumPlane(uint32_t index) const KLAYGE_NOEXCEPT
 		{
 			return planes_[index];
 		}
 
-		void Corner(uint32_t index, Vector_T<T, 3> const & corner)
+		void Corner(uint32_t index, Vector_T<T, 3> const & corner) KLAYGE_NOEXCEPT
 		{
 			corners_[index] = corner;
 		}
-		Vector_T<T, 3> const & Corner(uint32_t index) const
+		Vector_T<T, 3> const & Corner(uint32_t index) const KLAYGE_NOEXCEPT
 		{
 			return corners_[index];
 		}
 
-		BoundOverlap Intersect(AABBox_T<T> const & aabb) const;
-		BoundOverlap Intersect(OBBox_T<T> const & obb) const;
-		BoundOverlap Intersect(Sphere_T<T> const & sphere) const;
-		BoundOverlap Intersect(Frustum_T<T> const & frustum) const;
+		BoundOverlap Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT;
+		BoundOverlap Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT;
+		BoundOverlap Intersect(Sphere_T<T> const & sphere) const KLAYGE_NOEXCEPT;
+		BoundOverlap Intersect(Frustum_T<T> const & frustum) const KLAYGE_NOEXCEPT;
 
 	private:
 		std::array<Plane_T<T>, 6> planes_;

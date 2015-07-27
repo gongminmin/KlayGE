@@ -64,13 +64,13 @@ namespace KlayGE
 		typedef T value_type;
 		typedef value_type* pointer;
 		typedef value_type& reference;
-		typedef const value_type* const_pointer;
-		typedef const value_type& const_reference;
+		typedef value_type const * const_pointer;
+		typedef value_type const & const_reference;
 
 		typedef size_t size_type;
 		typedef ptrdiff_t difference_type;
 
-		static const int alignment_size = alignment;
+		static int const alignment_size = alignment;
 
 		static_assert(0 == (alignment & (alignment - 1)), "Alignment must be power of 2.");
 		static_assert(alignment <= 65536, "Alignment can't be larger than 64k.");
@@ -81,12 +81,12 @@ namespace KlayGE
 			typedef aligned_allocator<U, alignment> other;
 		};
 
-		pointer address(reference val) const
+		pointer address(reference val) const KLAYGE_NOEXCEPT
 		{
 			return &val;
 		}
 
-		const_pointer address(const_reference val) const
+		const_pointer address(const_reference val) const KLAYGE_NOEXCEPT
 		{
 			return &val;
 		}
@@ -95,12 +95,12 @@ namespace KlayGE
 		{
 		}
 
-		aligned_allocator(const aligned_allocator<T, alignment>&) KLAYGE_NOEXCEPT
+		aligned_allocator(aligned_allocator<T, alignment> const &) KLAYGE_NOEXCEPT
 		{
 		}
 
 		template <typename U, int alignment2>
-		aligned_allocator(const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
+		aligned_allocator(aligned_allocator<U, alignment2> const &) KLAYGE_NOEXCEPT
 		{
 		}
 
@@ -109,7 +109,7 @@ namespace KlayGE
 		}
 
 		template <typename U, int alignment2>
-		aligned_allocator<T, alignment>& operator=(const aligned_allocator<U, alignment2>&)
+		aligned_allocator<T, alignment>& operator=(aligned_allocator<U, alignment2> const &)
 		{
 			return *this;
 		}
@@ -138,15 +138,17 @@ namespace KlayGE
 			return p;
 		}
 
-		void construct(pointer p, const T& val)
+		template<typename U, typename... Args>
+		void construct(U* p, Args&&... args)
 		{
 			void* vp = p;
-			::new (vp) T(val);
+			::new (vp) U(std::forward<Args>(args)...);
 		}
 
-		void destroy(pointer p)
+		template <typename U>
+		void destroy(U* p)
 		{
-			destroy_t<pointer, std::is_trivially_destructible<value_type>::value>()(p);
+			destroy_t<U*, std::is_trivially_destructible<U>::value>()(p);
 		}
 
 		size_type max_size() const KLAYGE_NOEXCEPT
@@ -156,13 +158,13 @@ namespace KlayGE
 	};
 	
 	template <typename T, int alignment1, typename U, int alignment2>
-	inline bool operator==(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
+	inline bool operator==(aligned_allocator<T, alignment1> const &, aligned_allocator<U, alignment2> const &) KLAYGE_NOEXCEPT
 	{
 		return true;
 	}
 
 	template <typename T, int alignment1, typename U, int alignment2>
-	inline bool operator!=(const aligned_allocator<T, alignment1>&, const aligned_allocator<U, alignment2>&) KLAYGE_NOEXCEPT
+	inline bool operator!=(aligned_allocator<T, alignment1> const &, aligned_allocator<U, alignment2> const &) KLAYGE_NOEXCEPT
 	{
 		return false;
 	}

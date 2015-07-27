@@ -34,34 +34,34 @@
 
 namespace KlayGE
 {
-	template Frustum_T<float>::Frustum_T(Frustum const & rhs);
-	template Frustum_T<float>::Frustum_T(Frustum&& rhs);
-	template Frustum& Frustum_T<float>::operator=(Frustum const & rhs);
-	template Frustum& Frustum_T<float>::operator=(Frustum&& rhs);
-	template void Frustum_T<float>::ClipMatrix(float4x4 const & clip, float4x4 const & inv_clip);
-	template bool Frustum_T<float>::IsEmpty() const;
-	template bool Frustum_T<float>::VecInBound(float3 const & v) const;
-	template float Frustum_T<float>::MaxRadiusSq() const;
-	template BoundOverlap Frustum_T<float>::Intersect(AABBox const & aabb) const;
-	template BoundOverlap Frustum_T<float>::Intersect(OBBox const & obb) const;
-	template BoundOverlap Frustum_T<float>::Intersect(Sphere const & sphere) const;
-	template BoundOverlap Frustum_T<float>::Intersect(Frustum const & frustum) const;
+	template Frustum_T<float>::Frustum_T(Frustum const & rhs) KLAYGE_NOEXCEPT;
+	template Frustum_T<float>::Frustum_T(Frustum&& rhs) KLAYGE_NOEXCEPT;
+	template Frustum& Frustum_T<float>::operator=(Frustum const & rhs) KLAYGE_NOEXCEPT;
+	template Frustum& Frustum_T<float>::operator=(Frustum&& rhs) KLAYGE_NOEXCEPT;
+	template void Frustum_T<float>::ClipMatrix(float4x4 const & clip, float4x4 const & inv_clip) KLAYGE_NOEXCEPT;
+	template bool Frustum_T<float>::IsEmpty() const KLAYGE_NOEXCEPT;
+	template bool Frustum_T<float>::VecInBound(float3 const & v) const KLAYGE_NOEXCEPT;
+	template float Frustum_T<float>::MaxRadiusSq() const KLAYGE_NOEXCEPT;
+	template BoundOverlap Frustum_T<float>::Intersect(AABBox const & aabb) const KLAYGE_NOEXCEPT;
+	template BoundOverlap Frustum_T<float>::Intersect(OBBox const & obb) const KLAYGE_NOEXCEPT;
+	template BoundOverlap Frustum_T<float>::Intersect(Sphere const & sphere) const KLAYGE_NOEXCEPT;
+	template BoundOverlap Frustum_T<float>::Intersect(Frustum const & frustum) const KLAYGE_NOEXCEPT;
 
 
 	template <typename T>
-	Frustum_T<T>::Frustum_T(Frustum_T<T> const & rhs)
+	Frustum_T<T>::Frustum_T(Frustum_T<T> const & rhs) KLAYGE_NOEXCEPT
 		: planes_(rhs.planes_), corners_(rhs.corners_)
 	{
 	}
 
 	template <typename T>
-	Frustum_T<T>::Frustum_T(Frustum_T<T>&& rhs)
+	Frustum_T<T>::Frustum_T(Frustum_T<T>&& rhs) KLAYGE_NOEXCEPT
 		: planes_(std::move(rhs.planes_)), corners_(std::move(rhs.corners_))
 	{
 	}
 
 	template <typename T>
-	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T> const & rhs)
+	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T> const & rhs) KLAYGE_NOEXCEPT
 	{
 		if (this != &rhs)
 		{
@@ -72,7 +72,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T>&& rhs)
+	Frustum_T<T>& Frustum_T<T>::operator=(Frustum_T<T>&& rhs) KLAYGE_NOEXCEPT
 	{
 		planes_ = std::move(rhs.planes_);
 		corners_ = std::move(rhs.corners_);
@@ -80,7 +80,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	void Frustum_T<T>::ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip)
+	void Frustum_T<T>::ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip) KLAYGE_NOEXCEPT
 	{
 		corners_[0] = MathLib::transform_coord(Vector_T<T, 3>(-1, -1, 0), inv_clip); // left bottom near
 		corners_[1] = MathLib::transform_coord(Vector_T<T, 3>(+1, -1, 0), inv_clip); // right bottom near
@@ -112,43 +112,43 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	bool Frustum_T<T>::IsEmpty() const
+	bool Frustum_T<T>::IsEmpty() const KLAYGE_NOEXCEPT
 	{
 		return false;
 	}
 
 	template <typename T>
-	bool Frustum_T<T>::VecInBound(Vector_T<T, 3> const & v) const
+	bool Frustum_T<T>::VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT
 	{
 		return MathLib::intersect_point_frustum(v, *this);
 	}
 
 	template <typename T>
-	float Frustum_T<T>::MaxRadiusSq() const
+	float Frustum_T<T>::MaxRadiusSq() const KLAYGE_NOEXCEPT
 	{
 		return 0;
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::Intersect(AABBox_T<T> const & aabb) const
+	BoundOverlap Frustum_T<T>::Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT
 	{
 		return MathLib::intersect_aabb_frustum(aabb, *this);
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::Intersect(OBBox_T<T> const & obb) const
+	BoundOverlap Frustum_T<T>::Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT
 	{
 		return MathLib::intersect_obb_frustum(obb, *this);
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::Intersect(Sphere_T<T> const & sphere) const
+	BoundOverlap Frustum_T<T>::Intersect(Sphere_T<T> const & sphere) const KLAYGE_NOEXCEPT
 	{
 		return MathLib::intersect_sphere_frustum(sphere, *this);
 	}
 
 	template <typename T>
-	BoundOverlap Frustum_T<T>::Intersect(Frustum_T<T> const & frustum) const
+	BoundOverlap Frustum_T<T>::Intersect(Frustum_T<T> const & frustum) const KLAYGE_NOEXCEPT
 	{
 		return MathLib::intersect_frustum_frustum(frustum, *this);
 	}

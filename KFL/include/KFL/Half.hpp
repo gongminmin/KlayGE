@@ -81,42 +81,42 @@ namespace KlayGE
 						boost::equality_comparable<half>>>>>
 	{
 	public:
-		half()
+		half() KLAYGE_NOEXCEPT
 		{
 		}
 
-		explicit half(float f);
+		explicit half(float f) KLAYGE_NOEXCEPT;
 
-		operator float() const;
+		operator float() const KLAYGE_NOEXCEPT;
 
 		// 特殊值
 
 		// returns +infinity
-		static half pos_inf();
+		static half pos_inf() KLAYGE_NOEXCEPT;
 
 		// returns -infinity
-		static half neg_inf();
+		static half neg_inf() KLAYGE_NOEXCEPT;
 
 		// returns a NAN with the bit pattern 0111111111111111
-		static half q_nan();
+		static half q_nan() KLAYGE_NOEXCEPT;
 
 		// returns a NAN with the bit pattern 0111110111111111
-		static half s_nan();
+		static half s_nan() KLAYGE_NOEXCEPT;
 
 
 		// 赋值操作符
-		half const & operator+=(half const & rhs);
-		half const & operator-=(half const & rhs);
-		half const & operator*=(half const & rhs);
-		half const & operator/=(half const & rhs);
+		half const & operator+=(half const & rhs) KLAYGE_NOEXCEPT;
+		half const & operator-=(half const & rhs) KLAYGE_NOEXCEPT;
+		half const & operator*=(half const & rhs) KLAYGE_NOEXCEPT;
+		half const & operator/=(half const & rhs) KLAYGE_NOEXCEPT;
 
-		half& operator=(half const & rhs);
+		half& operator=(half const & rhs) KLAYGE_NOEXCEPT;
 
 		// 一元操作符
-		half const operator+() const;
-		half const operator-() const;
+		half const operator+() const KLAYGE_NOEXCEPT;
+		half const operator-() const KLAYGE_NOEXCEPT;
 
-		bool operator==(half const & rhs);
+		bool operator==(half const & rhs) KLAYGE_NOEXCEPT;
 
 	private:
 		uint16_t value_;

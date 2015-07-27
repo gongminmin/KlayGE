@@ -66,94 +66,94 @@ namespace KlayGE
 		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
-		Color_T()
+		Color_T() KLAYGE_NOEXCEPT
 		{
 		}
-		explicit Color_T(T const * rhs);
-		Color_T(Color_T const & rhs);
-		Color_T(Color_T&& rhs);
-		Color_T(T r, T g, T b, T a);
-		explicit Color_T(uint32_t dw);
+		explicit Color_T(T const * rhs) KLAYGE_NOEXCEPT;
+		Color_T(Color_T const & rhs) KLAYGE_NOEXCEPT;
+		Color_T(Color_T&& rhs) KLAYGE_NOEXCEPT;
+		Color_T(T r, T g, T b, T a) KLAYGE_NOEXCEPT;
+		explicit Color_T(uint32_t dw) KLAYGE_NOEXCEPT;
 
 		// 取颜色
-		iterator begin()
+		iterator begin() KLAYGE_NOEXCEPT
 		{
 			return col_.begin();
 		}
-		const_iterator begin() const
+		const_iterator begin() const KLAYGE_NOEXCEPT
 		{
 			return col_.begin();
 		}
-		iterator end()
+		iterator end() KLAYGE_NOEXCEPT
 		{
 			return col_.end();
 		}
-		const_iterator end() const
+		const_iterator end() const KLAYGE_NOEXCEPT
 		{
 			return col_.end();
 		}
-		reference operator[](size_t index)
+		reference operator[](size_t index) KLAYGE_NOEXCEPT
 		{
 			return col_[index];
 		}
-		const_reference operator[](size_t index) const
+		const_reference operator[](size_t index) const KLAYGE_NOEXCEPT
 		{
 			return col_[index];
 		}
 
-		reference r()
+		reference r() KLAYGE_NOEXCEPT
 		{
 			return col_[0];
 		}
-		const_reference r() const
+		const_reference r() const KLAYGE_NOEXCEPT
 		{
 			return col_[0];
 		}
-		reference g()
+		reference g() KLAYGE_NOEXCEPT
 		{
 			return col_[1];
 		}
-		const_reference g() const
+		const_reference g() const KLAYGE_NOEXCEPT
 		{
 			return col_[1];
 		}
-		reference b()
+		reference b() KLAYGE_NOEXCEPT
 		{
 			return col_[2];
 		}
-		const_reference b() const
+		const_reference b() const KLAYGE_NOEXCEPT
 		{
 			return col_[2];
 		}
-		reference a()
+		reference a() KLAYGE_NOEXCEPT
 		{
 			return col_[3];
 		}
-		const_reference a() const
+		const_reference a() const KLAYGE_NOEXCEPT
 		{
 			return col_[3];
 		}
 
-		void RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const;
+		void RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const KLAYGE_NOEXCEPT;
 
-		uint32_t ARGB() const;
-		uint32_t ABGR() const;
+		uint32_t ARGB() const KLAYGE_NOEXCEPT;
+		uint32_t ABGR() const KLAYGE_NOEXCEPT;
 
 		// 赋值操作符
-		Color_T& operator+=(Color_T<T> const & rhs);
-		Color_T& operator-=(Color_T<T> const & rhs);
-		Color_T& operator*=(T rhs);
-		Color_T& operator*=(Color_T<T> const & rhs);
-		Color_T& operator/=(T rhs);
+		Color_T& operator+=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		Color_T& operator-=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		Color_T& operator*=(T rhs) KLAYGE_NOEXCEPT;
+		Color_T& operator*=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT;
+		Color_T& operator/=(T rhs) KLAYGE_NOEXCEPT;
 
-		Color_T& operator=(Color_T const & rhs);
-		Color_T& operator=(Color_T&& rhs);
+		Color_T& operator=(Color_T const & rhs) KLAYGE_NOEXCEPT;
+		Color_T& operator=(Color_T&& rhs) KLAYGE_NOEXCEPT;
 
 		// 一元操作符
-		Color_T const operator+() const;
-		Color_T const operator-() const;
+		Color_T const operator+() const KLAYGE_NOEXCEPT;
+		Color_T const operator-() const KLAYGE_NOEXCEPT;
 
-		bool operator==(Color_T<T> const & rhs) const;
+		bool operator==(Color_T<T> const & rhs) const KLAYGE_NOEXCEPT;
 
 	private:
 		Vector_T<T, elem_num> col_;

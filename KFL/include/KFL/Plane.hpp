@@ -59,90 +59,90 @@ namespace KlayGE
 		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
-		Plane_T()
+		Plane_T() KLAYGE_NOEXCEPT
 		{
 		}
-		explicit Plane_T(T const * rhs);
-		Plane_T(Plane_T const & rhs);
-		Plane_T(Plane_T&& rhs);
-		Plane_T(Vector_T<T, elem_num> const & rhs);
-		Plane_T(Vector_T<T, elem_num>&& rhs);
-		Plane_T(T a, T b, T c, T d);
+		explicit Plane_T(T const * rhs) KLAYGE_NOEXCEPT;
+		Plane_T(Plane_T const & rhs) KLAYGE_NOEXCEPT;
+		Plane_T(Plane_T&& rhs) KLAYGE_NOEXCEPT;
+		Plane_T(Vector_T<T, elem_num> const & rhs) KLAYGE_NOEXCEPT;
+		Plane_T(Vector_T<T, elem_num>&& rhs) KLAYGE_NOEXCEPT;
+		Plane_T(T a, T b, T c, T d) KLAYGE_NOEXCEPT;
 
 		// 取向量
-		iterator begin()
+		iterator begin() KLAYGE_NOEXCEPT
 		{
 			return plane_.begin();
 		}
-		const_iterator begin() const
+		const_iterator begin() const KLAYGE_NOEXCEPT
 		{
 			return plane_.begin();
 		}
-		iterator end()
+		iterator end() KLAYGE_NOEXCEPT
 		{
 			return plane_.end();
 		}
-		const_iterator end() const
+		const_iterator end() const KLAYGE_NOEXCEPT
 		{
 			return plane_.end();
 		}
-		reference operator[](size_t index)
+		reference operator[](size_t index) KLAYGE_NOEXCEPT
 		{
 			return plane_[index];
 		}
-		const_reference operator[](size_t index) const
+		const_reference operator[](size_t index) const KLAYGE_NOEXCEPT
 		{
 			return plane_[index];
 		}
 
-		reference a()
+		reference a() KLAYGE_NOEXCEPT
 		{
 			return plane_[0];
 		}
-		const_reference a() const
+		const_reference a() const KLAYGE_NOEXCEPT
 		{
 			return plane_[0];
 		}
-		reference b()
+		reference b() KLAYGE_NOEXCEPT
 		{
 			return plane_[1];
 		}
-		const_reference b() const
+		const_reference b() const KLAYGE_NOEXCEPT
 		{
 			return plane_[1];
 		}
-		reference c()
+		reference c() KLAYGE_NOEXCEPT
 		{
 			return plane_[2];
 		}
-		const_reference c() const
+		const_reference c() const KLAYGE_NOEXCEPT
 		{
 			return plane_[2];
 		}
-		reference d()
+		reference d() KLAYGE_NOEXCEPT
 		{
 			return plane_[3];
 		}
-		const_reference d() const
+		const_reference d() const KLAYGE_NOEXCEPT
 		{
 			return plane_[3];
 		}
 
 		// 赋值操作符
-		Plane_T& operator=(Plane_T const & rhs);
-		Plane_T& operator=(Plane_T&& rhs);
-		Plane_T& operator=(Vector_T<T, elem_num> const & rhs);
-		Plane_T& operator=(Vector_T<T, elem_num>&& rhs);
+		Plane_T& operator=(Plane_T const & rhs) KLAYGE_NOEXCEPT;
+		Plane_T& operator=(Plane_T&& rhs) KLAYGE_NOEXCEPT;
+		Plane_T& operator=(Vector_T<T, elem_num> const & rhs) KLAYGE_NOEXCEPT;
+		Plane_T& operator=(Vector_T<T, elem_num>&& rhs) KLAYGE_NOEXCEPT;
 
 		// 一元操作符
-		Plane_T const operator+() const;
-		Plane_T const operator-() const;
+		Plane_T const operator+() const KLAYGE_NOEXCEPT;
+		Plane_T const operator-() const KLAYGE_NOEXCEPT;
 
 		// 取法向向量
-		Vector_T<T, 3> const Normal() const;
-		void Normal(Vector_T<T, 3> const & rhs);
+		Vector_T<T, 3> const Normal() const KLAYGE_NOEXCEPT;
+		void Normal(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT;
 
-		bool operator==(Plane_T<T> const & rhs) const;
+		bool operator==(Plane_T<T> const & rhs) const KLAYGE_NOEXCEPT;
 
 	private:
 		Vector_T<T, elem_num> plane_;
