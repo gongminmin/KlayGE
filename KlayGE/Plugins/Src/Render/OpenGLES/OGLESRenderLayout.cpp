@@ -219,7 +219,7 @@ namespace KlayGE
 			}
 
 			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
+			if (this->NumVertexStreams() > 0)
 			{
 				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
 				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
