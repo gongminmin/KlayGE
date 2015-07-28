@@ -263,9 +263,9 @@ namespace KlayGE
 				kfont_output.write(reinterpret_cast<char*>(&tca), sizeof(tca));
 			}
 
-			for (size_t i = 0; i < temp_char_index.size(); ++ i)
+			for (auto const & ci : temp_char_index)
 			{
-				int const index = temp_char_index[i].second;
+				int const index = ci.second;
 
 				int16_t tmp;
 				tmp = Native2LE(char_info_[index].top);
@@ -278,9 +278,9 @@ namespace KlayGE
 				kfont_output.write(reinterpret_cast<char*>(&tmp), sizeof(tmp));
 			}
 
-			for (size_t i = 0; i < temp_char_index.size(); ++ i)
+			for (auto const & ci : temp_char_index)
 			{
-				uint32_t index = temp_char_index[i].second;
+				uint32_t index = ci.second;
 				size_t addr = distances_addr_[index];
 				uint64_t len = distances_addr_[index + 1] - addr;
 				uint64_t len_le = Native2LE(len);
