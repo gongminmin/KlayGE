@@ -566,15 +566,15 @@ void ASMGen::ToASM(std::ostream& out)
 	this->Disasm(out, program_->params_out, FOURCC_OSGN);
 	
 	out << "pvghdc"[program_->version.type] << "s_" << program_->version.major << "_" << program_->version.minor << "\n";
-	for (size_t i = 0; i < program_->dcls.size(); ++ i)
+	for (auto const & dcl : program_->dcls)
 	{
-		this->Disasm(out, *program_->dcls[i]);
+		this->Disasm(out, *dcl);
 		out << "\n";
 	}
 
-	for (size_t i = 0; i < program_->insns.size(); ++ i)
+	for (auto const & insn : program_->insns)
 	{
-		this->Disasm(out, *program_->insns[i]);
+		this->Disasm(out, *insn);
 		out << "\n";
 	}
 }
@@ -640,83 +640,82 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 	out << "//\n";
 }
 
-void ASMGen::Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & cb)
+void ASMGen::Disasm(std::ostream& out, std::vector<DXBCConstantBuffer> const & cbs)
 {
-	if (cb.empty())
+	if (cbs.empty())
 	{
 		return;
 	}
 	out << "//\n//Buffer Definitions:\n"
 		<< "//\n";
-	for (std::vector<DXBCConstantBuffer>::const_iterator cb_iter = cb.begin(); cb_iter != cb.end(); ++ cb_iter)
+	for (auto const & cb : cbs)
 	{
-		out << "//" << ShaderCBufferTypeName(cb_iter->desc.type) << " "
-			<< cb_iter->desc.name << "\n"
+		out << "//" << ShaderCBufferTypeName(cb.desc.type) << " "
+			<< cb.desc.name << "\n"
 			<< "//{\n";
 		
-		for (std::vector<DXBCShaderVariable>::const_iterator var_iter = cb_iter->vars.begin();
-			var_iter != cb_iter->vars.end(); ++ var_iter)
+		for (auto const & var : cb.vars)
 		{
-			BOOST_ASSERT_MSG(var_iter->has_type_desc, "CB member must have type desc");
+			BOOST_ASSERT_MSG(var.has_type_desc, "CB member must have type desc");
 
 			//array element count,0 if not a array
-			uint32_t element_count = var_iter->type_desc.elements;
+			uint32_t element_count = var.type_desc.elements;
 			out << "// ";
-			switch (var_iter->type_desc.var_class)
+			switch (var.type_desc.var_class)
 			{
 			case SVC_MATRIX_ROWS:
 				out << "row_major "
-					<< std::setw(5) << var_iter->type_desc.name
-					<< var_iter->type_desc.rows << "x"
-					<< var_iter->type_desc.columns;
+					<< std::setw(5) << var.type_desc.name
+					<< var.type_desc.rows << "x"
+					<< var.type_desc.columns;
 				break;
 
 			case SVC_MATRIX_COLUMNS:
-				out << std::setw(15) << var_iter->type_desc.name
-					<< var_iter->type_desc.rows << "x"
-					<< var_iter->type_desc.columns;
+				out << std::setw(15) << var.type_desc.name
+					<< var.type_desc.rows << "x"
+					<< var.type_desc.columns;
 				break;
 
 			case SVC_VECTOR:
-				out << std::setw(17) << var_iter->type_desc.name
-					<< var_iter->type_desc.columns;
+				out << std::setw(17) << var.type_desc.name
+					<< var.type_desc.columns;
 				break;
 
 			case SVC_SCALAR:
-				out << std::setw(18) << var_iter->type_desc.name;
+				out << std::setw(18) << var.type_desc.name;
 				break;
 
 				// TODO: to be fixed here
 			case SVC_STRUCT:
-				out << ShaderVariableClassName(var_iter->type_desc.var_class)
-					<< " " << var_iter->type_desc.offset;
+				out << ShaderVariableClassName(var.type_desc.var_class)
+					<< " " << var.type_desc.offset;
 				break;
 
 			default:
 				BOOST_ASSERT_MSG(false, "Unhandled type");
 				break;
 			}
-			out << std::setw(20) << var_iter->var_desc.name;
+			out << std::setw(20) << var.var_desc.name;
 			if (element_count)
 			{
 				out << "[" << element_count << "]";
 			}
 			out << ";"
 				<< " //" << "Offset: " << std::setw(5)
-				<< var_iter->var_desc.start_offset
+				<< var.var_desc.start_offset
 				<< " Size: " << std::setw(5)
-				<< var_iter->var_desc.size;
-			if (!var_iter->var_desc.flags)
+				<< var.var_desc.size;
+			if (!var.var_desc.flags)
 			{
 				out << " [unused]";
 			}
 			out << "\n";
 
 			// cb default value
-			if (var_iter->var_desc.default_val)
+			if (var.var_desc.default_val)
 			{
 				out << "//=";
-				this->Disasm(out, *var_iter);
+				this->Disasm(out, var);
 				out << "\n";
 			}
 		}
@@ -740,13 +739,12 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCInputBindDesc> const & bi
 		<< std::setw(30) << "--------------------------"
 		<< std::setw(10) << "--------\n";
 	
-	for (std::vector<DXBCInputBindDesc>::const_iterator iter = bindings.begin();
-		iter != bindings.end(); ++ iter)
+	for (auto const & ibd : bindings)
 	{
 		out << "//";
-		out << std::setw(20) << iter->name
-			<< std::setw(30) << ShaderInputTypeName(iter->type)
-			<< std::setw(10) << iter->bind_point
+		out << std::setw(20) << ibd.name
+			<< std::setw(30) << ShaderInputTypeName(ibd.type)
+			<< std::setw(10) << ibd.bind_point
 			<< "\n";
 	}
 }
