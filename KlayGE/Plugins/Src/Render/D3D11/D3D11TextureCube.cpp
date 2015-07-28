@@ -95,7 +95,7 @@ namespace KlayGE
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 		desc_.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
-		this->ReclaimHWResource(init_data);
+		this->CreateHWResource(init_data);
 	}
 
 	uint32_t D3D11TextureCube::Width(uint32_t level) const
@@ -385,17 +385,8 @@ namespace KlayGE
 			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 	}
-	
-	void D3D11TextureCube::OfferHWResource()
-	{
-		d3d_sr_views_.clear();
-		d3d_ua_views_.clear();
-		d3d_rt_views_.clear();
-		d3d_ds_views_.clear();
-		d3dTextureCube_.reset();
-	}
 
-	void D3D11TextureCube::ReclaimHWResource(ElementInitData const * init_data)
+	void D3D11TextureCube::CreateHWResource(ElementInitData const * init_data)
 	{
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(6 * num_mip_maps_);
 		if (init_data != nullptr)
@@ -419,5 +410,14 @@ namespace KlayGE
 		{
 			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
 		}
+	}
+
+	void D3D11TextureCube::DeleteHWResource()
+	{
+		d3d_sr_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3dTextureCube_.reset();
 	}
 }

@@ -69,7 +69,7 @@ namespace KlayGE
 		}
 		
 		tex_data_.resize(6 * num_mip_maps_);
-		this->ReclaimHWResource(init_data);
+		this->CreateHWResource(init_data);
 	}
 
 	uint32_t OGLESTextureCube::Width(uint32_t level) const
@@ -260,7 +260,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTextureCube::ReclaimHWResource(ElementInitData const * init_data)
+	void OGLESTextureCube::CreateHWResource(ElementInitData const * init_data)
 	{
 		uint32_t texel_size = NumFormatBytes(format_);
 

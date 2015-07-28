@@ -62,7 +62,7 @@ namespace KlayGE
 		void TexParameteri(GLenum pname, GLint param);
 		void TexParameterf(GLenum pname, GLfloat param);
 
-		virtual void OfferHWResource() KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -113,7 +113,7 @@ namespace KlayGE
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
 
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
 
 	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -141,7 +141,7 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
 
 	private:
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -169,7 +169,7 @@ namespace KlayGE
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
 
 	private:
 		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -198,7 +198,7 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
 
 	private:
 		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,

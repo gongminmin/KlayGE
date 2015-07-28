@@ -104,7 +104,7 @@ namespace KlayGE
 		desc_.Format = D3D11Mapping::MappingFormat(format_);
 
 		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-		this->ReclaimHWResource(init_data);
+		this->CreateHWResource(init_data);
 	}
 
 	uint32_t D3D11Texture3D::Width(uint32_t level) const
@@ -331,17 +331,8 @@ namespace KlayGE
 			d3d_imm_ctx_->GenerateMips(d3d_sr_views_.begin()->second.get());
 		}
 	}
-	
-	void D3D11Texture3D::OfferHWResource()
-	{
-		d3d_sr_views_.clear();
-		d3d_ua_views_.clear();
-		d3d_rt_views_.clear();
-		d3d_ds_views_.clear();
-		d3dTexture3D_.reset();
-	}
 
-	void D3D11Texture3D::ReclaimHWResource(ElementInitData const * init_data)
+	void D3D11Texture3D::CreateHWResource(ElementInitData const * init_data)
 	{
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(num_mip_maps_);
 		if (init_data != nullptr)
@@ -362,5 +353,14 @@ namespace KlayGE
 		{
 			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
 		}
+	}
+
+	void D3D11Texture3D::DeleteHWResource()
+	{
+		d3d_sr_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3dTexture3D_.reset();
 	}
 }

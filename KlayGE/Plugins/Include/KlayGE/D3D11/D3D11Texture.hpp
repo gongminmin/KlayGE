@@ -132,8 +132,8 @@ namespace KlayGE
 			return d3dTexture1D_;
 		}
 
-		virtual void OfferHWResource() KLAYGE_OVERRIDE;
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -182,8 +182,8 @@ namespace KlayGE
 			return d3dTexture2D_;
 		}
 
-		virtual void OfferHWResource() KLAYGE_OVERRIDE;
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -232,8 +232,8 @@ namespace KlayGE
 			return d3dTexture3D_;
 		}
 
-		virtual void OfferHWResource() KLAYGE_OVERRIDE;
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -289,8 +289,8 @@ namespace KlayGE
 			return d3dTextureCube_;
 		}
 
-		virtual void OfferHWResource() KLAYGE_OVERRIDE;
-		virtual void ReclaimHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,

@@ -268,8 +268,8 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) = 0;
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) = 0;
 
-		virtual void OfferHWResource() = 0;
-		virtual void ReclaimHWResource(ElementInitData const * init_data) = 0;
+		virtual void CreateHWResource(ElementInitData const * init_data) = 0;
+		virtual void DeleteHWResource() = 0;
 
 	protected:
 		void ResizeTexture1D(Texture& target,

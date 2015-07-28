@@ -78,7 +78,7 @@ namespace KlayGE
 		}
 
 		pbos_.resize(array_size * num_mip_maps_);
-		this->ReclaimHWResource(init_data);
+		this->CreateHWResource(init_data);
 	}
 
 	uint32_t OGLTexture2D::Width(uint32_t level) const
@@ -483,7 +483,7 @@ namespace KlayGE
 		}
 	}
 	
-	void OGLTexture2D::ReclaimHWResource(ElementInitData const * init_data)
+	void OGLTexture2D::CreateHWResource(ElementInitData const * init_data)
 	{
 		uint32_t texel_size = NumFormatBytes(format_);
 

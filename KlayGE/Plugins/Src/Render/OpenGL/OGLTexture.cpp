@@ -88,7 +88,7 @@ namespace KlayGE
 
 	OGLTexture::~OGLTexture()
 	{
-		this->OfferHWResource();
+		this->DeleteHWResource();
 	}
 
 	std::wstring const & OGLTexture::Name() const
@@ -299,7 +299,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture::OfferHWResource()
+	void OGLTexture::DeleteHWResource()
 	{
 		if (Context::Instance().RenderFactoryValid())
 		{
