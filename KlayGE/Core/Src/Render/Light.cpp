@@ -421,9 +421,8 @@ namespace KlayGE
 
 		for (int j = 0; j < 6; ++ j)
 		{
-			std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
-			float3 const & d = ad.first;
-			float3 const & u = ad.second;
+			float3 d, u;
+			std::tie(d, u) = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(j));
 
 			float3 lookat = MathLib::transform_quat(d, quat_);
 			float3 up = MathLib::transform_quat(u, quat_);

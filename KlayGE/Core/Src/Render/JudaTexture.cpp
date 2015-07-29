@@ -668,8 +668,7 @@ namespace KlayGE
 					memset(&(*data)[0], 0, full_tile_bytes);
 				}
 
-				auto p = KLAYGE_EMPLACE(decoded_block_cache_, data_index, DecodedBlockInfo(data, decode_tick_));
-				iter = p.first;
+				iter = KLAYGE_EMPLACE(decoded_block_cache_, data_index, DecodedBlockInfo(data, decode_tick_)).first;
 			}
 
 			return &(*iter->second.data)[0];
