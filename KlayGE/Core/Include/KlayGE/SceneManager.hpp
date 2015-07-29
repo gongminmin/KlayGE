@@ -140,7 +140,7 @@ namespace KlayGE
 
 		std::mutex update_mutex_;
 		std::shared_ptr<joiner<void>> update_thread_;
-		bool quit_;
+		volatile bool quit_;
 
 		bool deferred_mode_;
 	};

@@ -452,7 +452,7 @@ int main(int argc, char* argv[])
 
 	Tex2JTML(tex_names, num_tiles, tile_size, jtml_name);
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }

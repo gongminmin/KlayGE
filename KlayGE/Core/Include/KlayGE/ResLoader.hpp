@@ -180,7 +180,7 @@ namespace KlayGE
 			boost::lockfree::capacity<1024>> loading_res_queue_;
 
 		std::shared_ptr<joiner<void>> loading_thread_;
-		bool quit_;
+		volatile bool quit_;
 	};
 }
 

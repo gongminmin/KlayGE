@@ -329,7 +329,7 @@ int main(int argc, char* argv[])
 	if (in_file.empty())
 	{
 		cout << "Couldn't locate " << in_file << endl;
-		ResLoader::Destroy();
+		Context::Destroy();
 		return 1;
 	}
 
@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
 
 	cout << "Na Length map is saved to " << argv[2] << endl;
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }

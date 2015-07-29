@@ -490,7 +490,7 @@ int main(int argc, char* argv[])
 
 	cout << "HDR texture is compressed into " << y_file << " and " << c_file << endl;
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }

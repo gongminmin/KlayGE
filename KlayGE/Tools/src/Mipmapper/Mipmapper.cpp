@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
 	if (in_file.empty())
 	{
 		cout << "Couldn't locate " << in_file << endl;
-		ResLoader::Destroy();
+		Context::Destroy();
 		return 1;
 	}
 
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 
 	cout << "Mipmapped texture is saved." << endl;
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }

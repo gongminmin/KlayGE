@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 		cout << "Color grading 3D texture is saved to " << argv[2] << endl;
 	}
 
-	ResLoader::Destroy();
+	Context::Destroy();
 
 	return 0;
 }
