@@ -1777,7 +1777,7 @@ namespace KlayGE
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->cbuff_indices_[i] = cbuff_indices_[i];
-			ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_.size());
+			ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_[i].size());
 			all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i].begin(), cbuff_indices_[i].end());
 			for (size_t j = 0; j < cbuff_indices_[i].size(); ++ j)
 			{

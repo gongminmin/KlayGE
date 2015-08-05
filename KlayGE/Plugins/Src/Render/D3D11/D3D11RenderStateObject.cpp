@@ -35,7 +35,7 @@ namespace KlayGE
 		D3D11_RASTERIZER_DESC d3d_desc;
 		d3d_desc.FillMode = D3D11Mapping::Mapping(desc.polygon_mode);
 		d3d_desc.CullMode = D3D11Mapping::Mapping(desc.cull_mode);
-		d3d_desc.FrontCounterClockwise = D3D11Mapping::Mapping(desc.front_face_ccw);
+		d3d_desc.FrontCounterClockwise = desc.front_face_ccw;
 		d3d_desc.DepthBias = static_cast<int>(desc.polygon_offset_units);
 		d3d_desc.DepthBiasClamp = desc.polygon_offset_units;
 		d3d_desc.SlopeScaledDepthBias = desc.polygon_offset_factor;
