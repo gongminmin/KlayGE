@@ -38,7 +38,14 @@
 #include <KFL/Vector.hpp>
 #include <KFL/Timer.hpp>
 
+#if defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
+#endif
 #include <boost/container/flat_map.hpp>
+#if defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4512) // boost::iterators::function_output_iterator<T>::output_proxy doesn't have assignment operator
@@ -46,12 +53,17 @@
 #elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
 #endif
 #include <boost/signals2.hpp>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
 #elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
 #endif
 
 #include <vector>

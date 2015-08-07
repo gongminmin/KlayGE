@@ -69,15 +69,17 @@ namespace KlayGE
 {
 	static void RegisterApp()
 	{
-		ProcessSerialNumber psn;
 		NSAutoreleasePool* pool;
-		
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
+		[[NSApplication sharedApplication] activateIgnoringOtherApps: YES];
+#else
+		ProcessSerialNumber psn;
 		if (!GetCurrentProcess(&psn))
 		{
 			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
 			SetFrontProcess(&psn);
 		}
-		
+#endif
 		pool = [[NSAutoreleasePool alloc] init];
 		if (nil == NSApp)
 		{
@@ -163,6 +165,8 @@ namespace KlayGE
 				break;
 				
 			default:
+				r_size = 0;
+				a_size = 0;
 				BOOST_ASSERT(false);
 				break;
 		}

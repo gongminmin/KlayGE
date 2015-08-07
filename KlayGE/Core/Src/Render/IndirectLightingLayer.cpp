@@ -46,8 +46,6 @@
 
 namespace KlayGE
 {
-	int const VPL_COUNT_SQRT = 16;
-
 	int const MIN_RSM_MIPMAP_SIZE = 8; // minimum mipmap size is 8x8
 	int const MAX_RSM_MIPMAP_LEVELS = 7; // (log(512)-log(4))/log(2) + 1
 	int const BEGIN_RSM_SAMPLING_LIGHT_LEVEL = 5;

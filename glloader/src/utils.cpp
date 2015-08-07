@@ -128,10 +128,9 @@ namespace glloader
 	private:
 		gl_dll_container()
 		{
-			void* ogl_dll;
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 #ifdef GLLOADER_GLES
-			ogl_dll = ::LoadLibraryExA("libEGL.dll", NULL, 0);
+			void* ogl_dll = ::LoadLibraryExA("libEGL.dll", NULL, 0);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
@@ -172,7 +171,7 @@ namespace glloader
 				}
 			}
 #else
-			ogl_dll = ::LoadLibraryExA("opengl32.dll", NULL, 0);
+			void* ogl_dll = ::LoadLibraryExA("opengl32.dll", NULL, 0);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
@@ -182,28 +181,28 @@ namespace glloader
 #endif
 #if defined(__APPLE__) || defined(__APPLE_CC__)
 	#ifdef GLLOADER_GLES
-		// http://forum.imgtec.com/discussion/comment/18323#Comment_18323
-		// For PowerVR_SDK, we need to load libGLESv2 before libEGL
-		ogl_dll = ::dlopen("libGLESv2.dylib", RTLD_LAZY);
-		if (ogl_dll != NULL)
-		{
-			gl_dlls_.push_back(ogl_dll);
-		}
-		ogl_dll = ::dlopen("libGLESv3.dylib", RTLD_LAZY);
-		if (ogl_dll != NULL)
-		{
-			gl_dlls_.push_back(ogl_dll);
-		}
-		ogl_dll = ::dlopen("libEGL.dylib", RTLD_LAZY);
-		if (ogl_dll != NULL)
-		{
-			gl_dlls_.push_back(ogl_dll);
-		}
+			// http://forum.imgtec.com/discussion/comment/18323#Comment_18323
+			// For PowerVR_SDK, we need to load libGLESv2 before libEGL
+			void* ogl_dll = ::dlopen("libGLESv2.dylib", RTLD_LAZY);
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::dlopen("libGLESv3.dylib", RTLD_LAZY);
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
+			ogl_dll = ::dlopen("libEGL.dylib", RTLD_LAZY);
+			if (ogl_dll != NULL)
+			{
+				gl_dlls_.push_back(ogl_dll);
+			}
 	#endif
 #endif
 #if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__ANDROID__) || defined(ANDROID)
 #ifdef GLLOADER_GLES
-			ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
+			void* ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);
@@ -222,7 +221,7 @@ namespace glloader
 				}
 			}
 #else
-			ogl_dll = ::dlopen("libGL.so", RTLD_LAZY);
+			void* ogl_dll = ::dlopen("libGL.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
 			{
 				gl_dlls_.push_back(ogl_dll);

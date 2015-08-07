@@ -24,7 +24,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SATSeparableScanSweepPostProcess : public PostProcess
 	{
 	public:
-		SATSeparableScanSweepPostProcess(RenderTechniquePtr const & tech, bool dir);
+		SATSeparableScanSweepPostProcess(RenderTechniquePtr const & tech);
 
 		void ChildBuffer(TexturePtr const & tex);
 		void Length(int32_t length);
@@ -33,7 +33,6 @@ namespace KlayGE
 
 	private:
 		int32_t length_;
-		bool dir_;
 
 		RenderEffectParameterPtr child_tex_ep_;
 		RenderEffectParameterPtr addr_offset_ep_;

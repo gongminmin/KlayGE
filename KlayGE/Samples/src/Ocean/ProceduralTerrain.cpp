@@ -9,7 +9,6 @@
 namespace KlayGE
 {
 	uint32_t const COARSE_HEIGHT_MAP_SIZE = 1024;
-	uint32_t const MAX_RINGS = 10;
 
 	ProceduralTerrain::ProceduralTerrain()
 		: HQTerrainRenderable(SyncLoadRenderEffect("ProceduralTerrain.fxml"))

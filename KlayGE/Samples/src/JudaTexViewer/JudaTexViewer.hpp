@@ -13,7 +13,7 @@ class JudaTexViewer : public KlayGE::App3DFramework
 public:
 	JudaTexViewer();
 
-	bool ConfirmDevice();
+	bool ConfirmDevice() const;
 
 private:
 	void OnCreate();

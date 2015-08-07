@@ -37,13 +37,18 @@
 #include <istream>
 #include <vector>
 #include <string>
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
 #pragma warning(disable: 4512) // consume_via_copy in lockfree doesn't have assignment operator.
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'x', 'alloc'
 #endif
 #include <boost/lockfree/spsc_queue.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
 #endif
 
 #include <KFL/ResIdentifier.hpp>

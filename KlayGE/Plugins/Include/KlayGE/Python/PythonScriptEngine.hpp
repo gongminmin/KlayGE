@@ -48,12 +48,17 @@
 #elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers" // Some uninitializers in python.h
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmacro-redefined" // 'Py_USING_UNICODE' redefined
 #endif
 #include <Python.h>
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #elif defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
+#elif defined(KLAYGE_COMPILER_CLANG)
+#pragma clang diagnostic pop
 #endif
 #include <vector>
 #include <string>

@@ -1211,7 +1211,7 @@ namespace KlayGE
 				vfb = b;
 			}
 
-			float magn = std::max(std::max(abs(vfr), abs(vfg)), abs(vfb));
+			float magn = std::max(std::max(std::abs(vfr), std::abs(vfg)), std::abs(vfb));
 			int v_r, v_g, v_b;
 
 			if (magn < 4.0f) // too small, default to luminance
@@ -3527,7 +3527,7 @@ namespace KlayGE
 				buckets[i] = num_buckets;
 				for (uint32_t j = 0; j < num_buckets; ++ j)
 				{
-					float dist = abs(alpha_vals[i] - vals[j]);
+					float dist = std::abs(alpha_vals[i] - vals[j]);
 					if (dist < min_dist)
 					{
 						min_dist = dist;
@@ -3585,7 +3585,7 @@ namespace KlayGE
 					float min_dist = 255.0f;
 					for (uint32_t j = 0; j < num_buckets; ++ j)
 					{
-						float dist = abs(alpha_vals[i] - vals[j]);
+						float dist = std::abs(alpha_vals[i] - vals[j]);
 						if (dist < min_dist)
 						{
 							min_dist = dist;

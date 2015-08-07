@@ -1210,9 +1210,9 @@ namespace KlayGE
 
 
 	UIDialog::UIDialog(TexturePtr const & control_tex)
-			: keyboard_input_(false), mouse_input_(true), default_control_id_(0xFFFF),
+			: keyboard_input_(false), mouse_input_(true),
 					visible_(true), show_caption_(true),
-					minimized_(false), drag_(false),
+					minimized_(false),
 					bounding_box_(0, 0, 0, 0),
 					caption_height_(18),
 					top_left_clr_(0, 0, 0, 0), top_right_clr_(0, 0, 0, 0),

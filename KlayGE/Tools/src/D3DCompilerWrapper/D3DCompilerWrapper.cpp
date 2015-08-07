@@ -86,10 +86,10 @@ class D3DCompiler
 {
 public:
 	D3DCompiler()
-		: mod_d3dcompiler_(nullptr),
-			DynamicD3DCompile_(nullptr),
-			DynamicD3DReflect_(nullptr),
-			DynamicD3DStripShader_(nullptr)
+		: mod_d3dcompiler_(NULL),
+			DynamicD3DCompile_(NULL),
+			DynamicD3DReflect_(NULL),
+			DynamicD3DStripShader_(NULL)
 	{
 		mod_d3dcompiler_ = LoadLibraryEx(TEXT("d3dcompiler_47.dll"), NULL, 0);
 		if (mod_d3dcompiler_)

@@ -120,9 +120,6 @@ namespace
 		}
 	};
 
-	int const NUM_PARTICLE = 4096;
-
-
 	enum
 	{
 		Exit

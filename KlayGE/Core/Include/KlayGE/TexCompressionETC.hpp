@@ -200,9 +200,6 @@ namespace KlayGE
 		uint32_t const * sorted_luma_indices_;
 		uint32_t* sorted_luma_ptr_;
 
-		uint8_t selectors_[8];
-		uint8_t best_selectors_[8];
-
 		PotentialSolution best_solution_;
 		PotentialSolution trial_solution_;
 		uint8_t temp_selectors_[8];
