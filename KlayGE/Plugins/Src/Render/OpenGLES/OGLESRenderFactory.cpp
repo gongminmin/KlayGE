@@ -73,24 +73,27 @@ namespace KlayGE
 		return MakeSharedPtr<OGLESRenderLayout>();
 	}
 
-	GraphicsBufferPtr OGLESRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLESRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, init_data);
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte, init_data);
 	}
 
-	GraphicsBufferPtr OGLESRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLESRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data);
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte, init_data);
 	}
 
-	GraphicsBufferPtr OGLESRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr OGLESRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
 	{
 		UNREF_PARAM(fmt);
 
 		GraphicsBufferPtr ret;
 		if (glloader_GLES_VERSION_3_0())
 		{
-			ret = MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, init_data);
+			ret = MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, init_data);
 		}
 		return ret;
 	}

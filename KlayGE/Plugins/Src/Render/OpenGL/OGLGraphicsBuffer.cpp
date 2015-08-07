@@ -37,21 +37,16 @@
 
 namespace KlayGE
 {
-	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData const * init_data)
-			: GraphicsBuffer(usage, access_hint),
+	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
+					uint32_t size_in_byte, void const * init_data)
+			: GraphicsBuffer(usage, access_hint, size_in_byte),
 				target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
 			|| (GL_UNIFORM_BUFFER == target));
 
 		glGenBuffers(1, &vb_);
-
-		if (init_data != nullptr)
-		{
-			size_in_byte_ = init_data->row_pitch;
-			this->CreateBuffer(init_data->data);
-			hw_buff_size_ = size_in_byte_;
-		}
+		this->CreateBuffer(init_data);
 	}
 
 	OGLGraphicsBuffer::~OGLGraphicsBuffer()
@@ -65,13 +60,6 @@ namespace KlayGE
 		{
 			glDeleteBuffers(1, &vb_);
 		}
-	}
-
-	void OGLGraphicsBuffer::DoResize()
-	{
-		BOOST_ASSERT(size_in_byte_ != 0);
-
-		this->CreateBuffer(nullptr);
 	}
 
 	void OGLGraphicsBuffer::CreateBuffer(void const * data)

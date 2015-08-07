@@ -425,8 +425,8 @@ namespace
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
-				pos_vb->Resize(sizeof(ParticleInstance));
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
+					sizeof(ParticleInstance), nullptr);
 				rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
@@ -449,25 +449,20 @@ namespace
 
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-				ElementInitData init_data;
-				init_data.row_pitch = sizeof(texs);
-				init_data.slice_pitch = 0;
-				init_data.data = texs;
-				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					sizeof(texs), texs);
 				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
 					RenderLayout::ST_Geometry, 0);
 
-				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write, nullptr);
-				pos_vb->Resize(sizeof(ParticleInstance));
+				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
+					sizeof(ParticleInstance), nullptr);
 				rl_->BindVertexStream(pos_vb,
 					std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
 						vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
 					RenderLayout::ST_Instance);
 
-				init_data.row_pitch = sizeof(indices);
-				init_data.slice_pitch = 0;
-				init_data.data = indices;
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					sizeof(indices), indices);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
 				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("Particle");
@@ -785,24 +780,43 @@ namespace KlayGE
 		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
 		RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
-		GraphicsBufferPtr instance_gb;
-		if (gs_support_)
-		{
-			instance_gb = rl->GetVertexStream(0);
-		}
-		else
-		{
-			instance_gb = rl->InstanceStream();
-
-			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
-			{
-				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
-			}
-		}
-
 		if (!active_particles_.empty())
 		{
-			instance_gb->Resize(sizeof(ParticleInstance) * num_active_particles);
+			GraphicsBufferPtr instance_gb;
+			if (gs_support_)
+			{
+				instance_gb = rl->GetVertexStream(0);
+			}
+			else
+			{
+				instance_gb = rl->InstanceStream();
+			}
+
+			uint32_t const new_instance_size = num_active_particles * sizeof(ParticleInstance);
+			if (!instance_gb || (instance_gb->Size() < new_instance_size))
+			{
+				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				instance_gb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
+					new_instance_size, nullptr);
+
+				if (gs_support_)
+				{
+					rl->SetVertexStream(0, instance_gb);
+				}
+				else
+				{
+					rl->InstanceStream(instance_gb);
+				}
+			}
+
+			if (!gs_support_)
+			{
+				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++i)
+				{
+					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
+				}
+			}
+
 			{
 				GraphicsBuffer::Mapper mapper(*instance_gb, BA_Write_Only);
 				ParticleInstance* instance_data = mapper.Pointer<ParticleInstance>();

@@ -45,8 +45,7 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 		use_no_overwrite_ = caps.no_overwrite_support;
 
-		buffer_ = this->DoCreateBuffer(bind_flag_);
-		buffer_->Resize(size_in_byte);
+		buffer_ = this->DoCreateBuffer(bind_flag_, size_in_byte);
 		if (use_no_overwrite_)
 		{
 			num_pre_frames_ = 3;
@@ -66,18 +65,18 @@ namespace KlayGE
 		retired_frames_.push_back(RetiredFrame(app.TotalNumFrames() + 1));
 	}
 
-	GraphicsBufferPtr TransientBuffer::DoCreateBuffer(TransientBuffer::BindFlag bind_flag)
+	GraphicsBufferPtr TransientBuffer::DoCreateBuffer(TransientBuffer::BindFlag bind_flag, uint32_t size_in_byte)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		GraphicsBufferPtr buffer;
 		switch (bind_flag)
 		{
 		case BF_Vertex:
-			buffer = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
+			buffer = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, size_in_byte, nullptr);
 			break;
 
 		case BF_Index:
-			buffer = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
+			buffer = rf.MakeIndexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, size_in_byte, nullptr);
 			break;
 
 		default:
@@ -109,9 +108,8 @@ namespace KlayGE
 		if (!found)
 		{
 			uint32_t const old_buffer_size = buffer_->Size();
-			GraphicsBufferPtr larger_buffer = this->DoCreateBuffer(bind_flag_);
 			uint32_t larger_buffer_size = std::max(old_buffer_size * 2, old_buffer_size + size_in_byte);
-			larger_buffer->Resize(larger_buffer_size);
+			GraphicsBufferPtr larger_buffer = this->DoCreateBuffer(bind_flag_, larger_buffer_size);
 			SubAlloc alloc(old_buffer_size, larger_buffer_size - old_buffer_size);
 			if (free_list_.back().offset_ + free_list_.back().length_ == alloc.offset_)
 			{

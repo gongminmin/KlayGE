@@ -94,7 +94,7 @@ namespace KlayGE
 		}
 
 	private:
-		GraphicsBufferPtr DoCreateBuffer(BindFlag bind_flag);
+		GraphicsBufferPtr DoCreateBuffer(BindFlag bind_flag, uint32_t size_in_byte);
 		// Free the sub alloc and return the space allocated back to transient buffer.
 		void DoFree(SubAlloc const & alloc);
 

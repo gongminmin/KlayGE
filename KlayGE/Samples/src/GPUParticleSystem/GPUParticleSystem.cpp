@@ -155,8 +155,6 @@ namespace
 				0, 1, 2, 3,
 			};
 
-			ElementInitData init_data;
-
 			rl_ = rf.MakeRenderLayout();
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
@@ -178,10 +176,8 @@ namespace
 						p_in_tex[i] = float2((i % tex_width_ + 0.5f) / tex_width_,
 							(static_cast<float>(i) / tex_width_) / tex_height_);
 					}
-					init_data.row_pitch = max_num_particles * sizeof(float2);
-					init_data.slice_pitch = 0;
-					init_data.data = &p_in_tex[0];
-					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						max_num_particles * sizeof(float2), &p_in_tex[0]);
 
 					rl_->BindVertexStream(pos, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 					technique_ = effect->TechniqueByName("ParticlesWithGS");
@@ -195,20 +191,14 @@ namespace
 					p_in_tex[i] = float2((i % tex_width_ + 0.5f) / tex_width_,
 						(static_cast<float>(i) / tex_width_) / tex_height_);
 				}
-				init_data.row_pitch = max_num_particles * sizeof(float2);
-				init_data.slice_pitch = 0;
-				init_data.data = &p_in_tex[0];
-				GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					max_num_particles * sizeof(float2), &p_in_tex[0]);
 
-				init_data.row_pitch = sizeof(texs);
-				init_data.slice_pitch = 0;
-				init_data.data = texs;
-				GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr tex0 = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					sizeof(texs), texs);
 
-				init_data.row_pitch = sizeof(indices);
-				init_data.slice_pitch = 0;
-				init_data.data = indices;
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					sizeof(indices), indices);
 
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 				rl_->BindVertexStream(tex0, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
@@ -309,20 +299,18 @@ namespace
 				{
 					p[i] = float4(0, 0, 0, -1);
 				}
-				ElementInitData pos_init;
-				pos_init.data = &p[0];
-				pos_init.row_pitch = max_num_particles_ * sizeof(float4);
-				pos_init.slice_pitch = 0;
 
 				particle_rl_[0] = rf.MakeRenderLayout();
 				particle_rl_[1] = rf.MakeRenderLayout();
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, &pos_init, EF_ABGR32F);
-				particle_pos_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, &pos_init, EF_ABGR32F);
-				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
-				particle_vel_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
-				particle_vel_vb_[0]->Resize(max_num_particles_ * sizeof(float4));
-				particle_vel_vb_[1]->Resize(max_num_particles_ * sizeof(float4));
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_pos_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
+				particle_vel_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
 
 				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
@@ -336,12 +324,9 @@ namespace
 
 					p[i] = float4(r * cos(angel), 0.2f + abs(this->RandomGen()) * 3, r * sin(angel), 0);
 				}
-				ElementInitData vel_init;
-				vel_init.data = &p[0];
-				vel_init.row_pitch = max_num_particles_ * sizeof(float4);
-				vel_init.slice_pitch = 0;
 
-				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &vel_init, EF_ABGR32F);
+				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
 				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
 
 				particle_pos_buff_param_ = technique_->Effect().ParameterByName("particle_pos_buff");
@@ -359,12 +344,9 @@ namespace
 						float3(-1, -1, 0),
 						float3(+1, -1, 0)
 					};
-					ElementInitData init_data;
-					init_data.row_pitch = sizeof(xyzs);
-					init_data.slice_pitch = 0;
-					init_data.data = &xyzs[0];
 
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						sizeof(xyzs), &xyzs[0]);
 					rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 					pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
@@ -377,12 +359,9 @@ namespace
 						float2(0, 1),
 						float2(1, 1)
 					};
-					ElementInitData init_data;
-					init_data.row_pitch = sizeof(texs);
-					init_data.slice_pitch = 0;
-					init_data.data = &texs[0];
 
-					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						sizeof(texs), &texs[0]);
 					rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 
 					tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
@@ -504,21 +483,20 @@ namespace
 				time_v[i] = half(time);
 				time += inv_emit_freq_;
 			}
-			ElementInitData init_data;
-			init_data.data = &time_v[0];
-			init_data.slice_pitch = 0;
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			if (use_so)
 			{
-				init_data.row_pitch = max_num_particles_ * sizeof(half);
-
-				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_R16F);
+				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					max_num_particles_ * sizeof(half), &time_v[0], EF_R16F);
 				*(technique_->Effect().ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
 			}
 			else
 			{
+				ElementInitData init_data;
+				init_data.data = &time_v[0];
 				init_data.row_pitch = tex_width_ * sizeof(half);
+				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
 				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
 				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;

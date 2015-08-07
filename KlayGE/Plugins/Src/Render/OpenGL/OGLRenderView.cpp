@@ -1132,8 +1132,6 @@ namespace KlayGE
 	{
 		UNREF_PARAM(fb);
 
-		gbuffer_.Resize(width_ * height_ * 4 * sizeof(GL_FLOAT));
-
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 

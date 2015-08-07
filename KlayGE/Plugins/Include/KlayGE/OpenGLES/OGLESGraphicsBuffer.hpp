@@ -25,7 +25,8 @@ namespace KlayGE
 	class OGLESGraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		explicit OGLESGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target, ElementInitData const * init_data);
+		explicit OGLESGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
+			uint32_t size_in_byte, void const * init_data);
 		~OGLESGraphicsBuffer();
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
@@ -42,8 +43,6 @@ namespace KlayGE
 		}
 
 	private:
-		void DoResize();
-
 		void* Map(BufferAccess ba);
 		void Unmap();
 

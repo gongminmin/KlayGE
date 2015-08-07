@@ -96,12 +96,11 @@ namespace KlayGE
 		};
 
 	public:
-		explicit GraphicsBuffer(BufferUsage usage, uint32_t access_hint);
+		GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte);
 		virtual ~GraphicsBuffer();
 
 		static GraphicsBufferPtr NullObject();
 
-		void Resize(uint32_t size_in_byte);
 		uint32_t Size() const
 		{
 			return size_in_byte_;
@@ -120,8 +119,6 @@ namespace KlayGE
 		virtual void CopyToBuffer(GraphicsBuffer& rhs) = 0;
 
 	private:
-		virtual void DoResize() = 0;
-
 		virtual void* Map(BufferAccess ba) = 0;
 		virtual void Unmap() = 0;
 
@@ -130,7 +127,6 @@ namespace KlayGE
 		uint32_t access_hint_;
 
 		uint32_t size_in_byte_;
-		uint32_t hw_buff_size_;
 	};
 }
 

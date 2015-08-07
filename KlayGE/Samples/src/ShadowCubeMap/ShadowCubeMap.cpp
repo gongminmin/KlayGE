@@ -45,25 +45,19 @@ namespace
 		tess_pattern_vbs.resize(32);
 		tess_pattern_ibs.resize(tess_pattern_vbs.size());
 
-		ElementInitData init_data;
-		
 		std::vector<float2> vert;
 		vert.push_back(float2(0, 0));
 		vert.push_back(float2(1, 0));
 		vert.push_back(float2(0, 1));
-		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
-		init_data.slice_pitch = 0;
-		init_data.data = &vert[0];
-		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
 
 		std::vector<uint16_t> index;
 		index.push_back(0);
 		index.push_back(1);
 		index.push_back(2);
-		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
-		init_data.slice_pitch = 0;
-		init_data.data = &index[0];
-		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
 
 		for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
 		{
@@ -96,15 +90,10 @@ namespace
 			index.push_back(static_cast<uint16_t>(last_1_row + i));
 			index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
 
-			init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &vert[0];
-			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-
-			init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &index[0];
-			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
+			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
 		}
 	}
 
@@ -308,8 +297,8 @@ namespace
 					float3 const pos_center = pos_aabb_.Center();
 					float3 const pos_extent = pos_aabb_.HalfSize();
 
-					GraphicsBufferPtr vb_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-					vb_sysmem->Resize(rl_->GetVertexStream(0)->Size());
+					GraphicsBufferPtr vb_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read,
+						rl_->GetVertexStream(0)->Size(), nullptr);
 					rl_->GetVertexStream(0)->CopyToBuffer(*vb_sysmem);
 
 					GraphicsBuffer::Mapper mapper(*vb_sysmem, BA_Read_Only);
@@ -351,25 +340,21 @@ namespace
 						break;
 					}
 				
-					ElementInitData init_data;
-					init_data.data = &dst[0];
-					init_data.row_pitch = this->NumVertices() * sizeof(float4);
-					init_data.slice_pitch = init_data.row_pitch;
-					skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, EF_ABGR32F);
+					skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						this->NumVertices() * sizeof(float4), &dst[0], EF_ABGR32F);
 				}
 				{
 					uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
 
-					GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-					ib_sysmem->Resize(rl_->GetIndexStream()->Size());
+					GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read,
+						rl_->GetIndexStream()->Size(), nullptr);
 					rl_->GetIndexStream()->CopyToBuffer(*ib_sysmem);
 				
 					GraphicsBuffer::Mapper mapper(*ib_sysmem, BA_Read_Only);
-					ElementInitData init_data;
-					init_data.data = mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size;
-					init_data.row_pitch = this->NumTriangles() * 3 * index_size;
-					init_data.slice_pitch = init_data.row_pitch;
-					bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, rl_->IndexStreamFormat());
+					bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						this->NumTriangles() * 3 * index_size,
+						mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size,
+						rl_->IndexStreamFormat());
 				}
 
 				this->SetTessFactor(static_cast<int32_t>(tess_factor_));

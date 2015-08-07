@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 	public:
 		NullGraphicsBuffer()
-			: GraphicsBuffer(BU_Static, 0)
+			: GraphicsBuffer(BU_Static, 0, 0)
 		{
 		}
 
@@ -50,18 +50,14 @@ namespace KlayGE
 		{
 		}
 
-		void DoResize()
-		{
-		}
-
 		RenderViewPtr CreateRenderView(uint32_t /*width*/, uint32_t /*height*/)
 		{
 			return RenderView::NullObject();
 		}
 	};
 
-	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint)
-			: usage_(usage), access_hint_(access_hint), size_in_byte_(0), hw_buff_size_(0)
+	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte)
+			: usage_(usage), access_hint_(access_hint), size_in_byte_(size_in_byte)
 	{
 	}
 
@@ -73,15 +69,5 @@ namespace KlayGE
 	{
 		static GraphicsBufferPtr obj = MakeSharedPtr<NullGraphicsBuffer>();
 		return obj;
-	}
-
-	void GraphicsBuffer::Resize(uint32_t size_in_byte)
-	{
-		size_in_byte_ = size_in_byte;
-		if (size_in_byte_ > hw_buff_size_)
-		{
-			this->DoResize();
-			hw_buff_size_ = size_in_byte_;
-		}
 	}
 }

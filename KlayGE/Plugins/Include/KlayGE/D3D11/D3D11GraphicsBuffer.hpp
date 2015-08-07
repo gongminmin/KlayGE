@@ -24,7 +24,8 @@ namespace KlayGE
 	class D3D11GraphicsBuffer : public GraphicsBuffer
 	{
 	public:
-		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData const * init_data, ElementFormat fmt);
+		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
+			uint32_t size_in_byte, void const * init_data, ElementFormat fmt);
 
 		ID3D11BufferPtr const & D3DBuffer() const
 		{
@@ -47,8 +48,7 @@ namespace KlayGE
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);
 
 	private:
-		void DoResize();
-		void CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init);
+		void CreateBuffer(void const * init_data);
 
 		void* Map(BufferAccess ba);
 		void Unmap();

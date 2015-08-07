@@ -73,24 +73,27 @@ namespace KlayGE
 		return MakeSharedPtr<OGLRenderLayout>();
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, init_data);
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte, init_data);
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, init_data);
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte, init_data);
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, ElementInitData const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr OGLRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
 	{
 		UNREF_PARAM(fmt);
 
 		GraphicsBufferPtr ret;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_uniform_buffer_object())
 		{
-			ret = MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, init_data);
+			ret = MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, init_data);
 		}
 		return ret;
 	}

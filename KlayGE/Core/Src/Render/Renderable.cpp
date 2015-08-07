@@ -234,10 +234,19 @@ namespace KlayGE
 	{
 		if (!instances_.empty() && !instances_[0].lock()->InstanceFormat().empty())
 		{
+			vertex_elements_type const & vet = instances_[0].lock()->InstanceFormat();
+			uint32_t size = 0;
+			for (size_t i = 0; i < vet.size(); ++i)
+			{
+				size += vet[i].element_size();
+			}
+
+			uint32_t const inst_size = static_cast<uint32_t>(size * instances_.size());
+
 			RenderLayoutPtr const & rl = this->GetRenderLayout();
 
 			GraphicsBufferPtr inst_stream = rl->InstanceStream();
-			if (inst_stream)
+			if (inst_stream && (inst_stream->Size() >= inst_size))
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
@@ -247,14 +256,11 @@ namespace KlayGE
 			else
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
-
-				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, nullptr);
-				rl->BindVertexStream(inst_stream, instances_[0].lock()->InstanceFormat(), RenderLayout::ST_Instance, 1);
+				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, inst_size, nullptr);
+				rl->BindVertexStream(inst_stream, vet, RenderLayout::ST_Instance, 1);
+				rl->InstanceStream(inst_stream);
 			}
 
-			uint32_t const size = rl->InstanceSize();
-
-			inst_stream->Resize(static_cast<uint32_t>(size * instances_.size()));
 			{
 				GraphicsBuffer::Mapper mapper(*inst_stream, BA_Write_Only);
 				for (size_t i = 0; i < instances_.size(); ++ i)

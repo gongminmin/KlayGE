@@ -73,15 +73,15 @@ namespace KlayGE
 			return RenderLayout::NullObject();
 		}
 
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, ElementInitData const * /*init_data*/, ElementFormat /*fmt*/)
+		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, ElementInitData const * /*init_data*/, ElementFormat /*fmt*/)
+		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeConstantBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, ElementInitData const * /*init_data*/, ElementFormat /*fmt*/)
+		GraphicsBufferPtr MakeConstantBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
 		{
 			return GraphicsBuffer::NullObject();
 		}

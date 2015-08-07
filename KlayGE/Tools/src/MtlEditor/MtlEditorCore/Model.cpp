@@ -202,8 +202,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		{
 		case VEU_Position:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -219,8 +218,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_TextureCoord:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -235,8 +233,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_Normal:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -276,8 +273,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		
 		case VEU_Tangent:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -314,8 +310,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	std::vector<uint32_t> indices(total_num_indices);
 	{
 		GraphicsBufferPtr ib = rl->GetIndexStream();
-		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-		ib_cpu->Resize(ib->Size());
+		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
 		ib->CopyToBuffer(*ib_cpu);
 
 		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);

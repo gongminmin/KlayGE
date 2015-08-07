@@ -4627,14 +4627,10 @@ namespace KlayGE
 		buff_.resize(size);
 		if (size > 0)
 		{
-			if (!hw_buff_)
+			if (!hw_buff_ || (size > hw_buff_->Size()))
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				hw_buff_ = rf.MakeConstantBuffer(BU_Dynamic, EAH_CPU_Write, nullptr);
-			}
-			if (hw_buff_)
-			{
-				hw_buff_->Resize(size);
+				hw_buff_ = rf.MakeConstantBuffer(BU_Dynamic, EAH_CPU_Write, size, nullptr);
 			}
 		}
 

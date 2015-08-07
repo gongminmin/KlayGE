@@ -69,11 +69,7 @@ namespace
 				float3(+10, 0, -10),
 			};
 
-			ElementInitData init_data;
-			init_data.row_pitch = sizeof(vertices);
-			init_data.slice_pitch = 0;
-			init_data.data = &vertices[0];
-			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
 			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 			pos_aabb_ = MathLib::compute_aabbox(vertices, vertices + sizeof(vertices) / sizeof(vertices[0]));

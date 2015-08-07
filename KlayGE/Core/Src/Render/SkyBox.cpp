@@ -75,15 +75,10 @@ namespace KlayGE
 			float3(-1.0f, -1.0f, 1.0f),
 		};
 
-		ElementInitData init_data;
-		init_data.row_pitch = sizeof(xyzs);
-		init_data.slice_pitch = 0;
-		init_data.data = xyzs;
-
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 
 		pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);

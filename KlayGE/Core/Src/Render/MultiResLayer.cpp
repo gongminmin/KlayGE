@@ -61,11 +61,8 @@ namespace KlayGE
 				float3(-1, -1, 1)
 			};
 
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(sizeof(pos));
-			init_data.slice_pitch = 0;
-			init_data.data = &pos[0];
-			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data),
+			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				static_cast<uint32_t>(sizeof(pos)), &pos[0]),
 				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
 		}
 

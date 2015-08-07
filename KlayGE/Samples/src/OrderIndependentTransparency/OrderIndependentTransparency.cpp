@@ -503,8 +503,6 @@ void OrderIndependentTransparencyApp::OnCreate()
 	{
 		opaque_bg_fb_ = rf.MakeFrameBuffer();
 		opaque_bg_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
-		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter, nullptr, EF_ABGR32F);
-		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw, nullptr, EF_R32UI);
 		linked_list_fb_ = rf.MakeFrameBuffer();
 		linked_list_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	}
@@ -642,8 +640,12 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));
-		frag_link_buf_->Resize(width * height * 4 * sizeof(float4));
-		start_offset_buf_->Resize(width * height * sizeof(uint32_t));
+		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
+			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter,
+			width * height * 4 * sizeof(float4), nullptr, EF_ABGR32F);
+		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
+			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
+			width * height * sizeof(uint32_t), nullptr, EF_R32UI);
 		frag_link_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*frag_link_buf_, EF_ABGR32F);
 		start_offset_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*start_offset_buf_, EF_R32UI);
 		linked_list_fb_->AttachUAV(0, frag_link_uav_);

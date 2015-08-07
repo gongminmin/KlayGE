@@ -72,8 +72,7 @@ namespace
 				{
 				case VEU_Position:
 					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-						vb_cpu->Resize(vb->Size());
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 						vb->CopyToBuffer(*vb_cpu);
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -90,8 +89,7 @@ namespace
 				case VEU_TextureCoord:
 					if (0 == rl->VertexStreamFormat(i)[0].usage_index)
 					{
-						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-						vb_cpu->Resize(vb->Size());
+						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 						vb->CopyToBuffer(*vb_cpu);
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -112,8 +110,7 @@ namespace
 			std::vector<uint32_t> indices(rl->NumIndices());
 			{
 				GraphicsBufferPtr ib = rl->GetIndexStream();
-				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				ib_cpu->Resize(ib->Size());
+				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
 				ib->CopyToBuffer(*ib_cpu);
 
 				GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
@@ -155,11 +152,8 @@ namespace
 				}
 			}
 
-			ElementInitData init_data;
-			init_data.row_pitch = static_cast<uint32_t>(distortions.size() * sizeof(distortions[0]));
-			init_data.slice_pitch = 0;
-			init_data.data = &distortions[0];
-			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				static_cast<uint32_t>(distortions.size() * sizeof(distortions[0])), &distortions[0]);
 			rl->BindVertexStream(distortion_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
 		}
 	};

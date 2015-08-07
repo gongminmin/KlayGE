@@ -366,10 +366,7 @@ namespace
 						float4(+1, -1, 1 - (max_radius_ * 2 + 1.0f) / width, 1 - (max_radius_ * 2 + 1.0f) / height)
 					};
 				
-					ElementInitData init_data;
-					init_data.row_pitch = sizeof(pos);
-					init_data.data = &pos[0];
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
 					normalization_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 				}
 
@@ -513,11 +510,8 @@ namespace
 						}
 					}
 
-					ElementInitData init_data;
-					init_data.data = &points[0];
-					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
 					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 				}
 				else
@@ -575,17 +569,12 @@ namespace
 						}
 					}
 
-					ElementInitData init_data;
-					init_data.data = &points[0];
-					init_data.row_pitch = static_cast<uint32_t>(points.size() * sizeof(points[0]));
-					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
 					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 
-					init_data.data = &indices[0];
-					init_data.row_pitch = static_cast<uint32_t>(indices.size() * sizeof(indices[0]));
-					init_data.slice_pitch = 0;
-					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+						static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
 					bokeh_rl_->BindIndexStream(pos_ib, EF_R32UI);
 				}
 

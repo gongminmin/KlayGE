@@ -435,11 +435,8 @@ namespace
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
-				ElementInitData init_data;
-				init_data.row_pitch = static_cast<uint32_t>(xys.size() * sizeof(xys[0]));
-				init_data.slice_pitch = 0;
-				init_data.data = &xys[0];
-				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
 				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMapWithGS");
@@ -451,11 +448,8 @@ namespace
 			{
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-				ElementInitData init_data;
-				init_data.row_pitch = static_cast<uint32_t>(xys.size() * sizeof(xys[0]));
-				init_data.slice_pitch = 0;
-				init_data.data = &xys[0];
-				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
 				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
 
 				float2 texs[] =
@@ -471,16 +465,10 @@ namespace
 					0, 1, 2, 3
 				};
 
-				init_data.row_pitch = sizeof(texs);
-				init_data.slice_pitch = 0;
-				init_data.data = texs;
-				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
 				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
 
-				init_data.row_pitch = sizeof(indices);
-				init_data.slice_pitch = 0;
-				init_data.data = indices;
-				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
 				single_caustics_pass_ = effect->TechniqueByName("GenSingleFaceCausticsMap");

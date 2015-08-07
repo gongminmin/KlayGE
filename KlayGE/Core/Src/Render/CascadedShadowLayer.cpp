@@ -187,27 +187,28 @@ namespace KlayGE
 
 		if (cs_support_)
 		{
-			interval_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_GR32F);
-			scale_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
-			bias_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
-			cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
-			cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_BGR32F);
-
-			interval_buff_->Resize(MAX_NUM_CASCADES * sizeof(float2));
-			scale_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
-			bias_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
-			cascade_min_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
-			cascade_max_buff_->Resize(MAX_NUM_CASCADES * sizeof(float3));
+			interval_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				MAX_NUM_CASCADES * sizeof(float2), nullptr, EF_GR32F);
+			scale_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			bias_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			cascade_min_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
+			cascade_max_buff_ = rf.MakeVertexBuffer(BU_Dynamic,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				MAX_NUM_CASCADES * sizeof(float3), nullptr, EF_BGR32F);
 
 			for (uint32_t i = 0; i < 2; ++ i)
 			{
-				interval_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-				scale_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-				bias_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read, nullptr);
-
-				interval_cpu_buffs_[i]->Resize(interval_buff_->Size());
-				scale_cpu_buffs_[i]->Resize(scale_buff_->Size());
-				bias_cpu_buffs_[i]->Resize(bias_buff_->Size());
+				interval_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
+					interval_buff_->Size(), nullptr);
+				scale_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
+					scale_buff_->Size(), nullptr);
+				bias_cpu_buffs_[i] = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Read,
+					bias_buff_->Size(), nullptr);
 			}
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("CascadedShadow.fxml");

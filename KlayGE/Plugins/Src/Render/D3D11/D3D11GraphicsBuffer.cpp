@@ -28,8 +28,9 @@
 
 namespace KlayGE
 {
-	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags, ElementInitData const * init_data, ElementFormat fmt)
-						: GraphicsBuffer(usage, access_hint),
+	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
+											uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+						: GraphicsBuffer(usage, access_hint, size_in_byte),
 							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
 	{
 		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
@@ -40,20 +41,8 @@ namespace KlayGE
 		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
-		size_in_byte_ = 0;
 
-		if (init_data != nullptr)
-		{
-			size_in_byte_ = init_data->row_pitch;
-
-			D3D11_SUBRESOURCE_DATA subres_init;
-			subres_init.pSysMem = init_data->data;
-			subres_init.SysMemPitch = init_data->row_pitch;
-			subres_init.SysMemSlicePitch = init_data->slice_pitch;
-
-			this->CreateBuffer(&subres_init);
-			hw_buff_size_ = size_in_byte_;
-		}
+		this->CreateBuffer(init_data);
 	}
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
@@ -131,22 +120,26 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11GraphicsBuffer::DoResize()
+	void D3D11GraphicsBuffer::CreateBuffer(void const * init_data)
 	{
-		BOOST_ASSERT(size_in_byte_ != 0);
+		D3D11_SUBRESOURCE_DATA subres_init;
+		D3D11_SUBRESOURCE_DATA* p_subres = nullptr;
+		if (init_data != nullptr)
+		{
+			subres_init.pSysMem = init_data;
+			subres_init.SysMemPitch = size_in_byte_;
+			subres_init.SysMemSlicePitch = size_in_byte_;
 
-		this->CreateBuffer(nullptr);
-	}
+			p_subres = &subres_init;
+		}
 
-	void D3D11GraphicsBuffer::CreateBuffer(D3D11_SUBRESOURCE_DATA const * subres_init)
-	{
 		D3D11_BUFFER_DESC desc = {};
 		this->GetD3DFlags(desc.Usage, desc.CPUAccessFlags, desc.BindFlags, desc.MiscFlags);
 		desc.ByteWidth = size_in_byte_;
 		desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
 		ID3D11Buffer* buffer;
-		TIF(d3d_device_->CreateBuffer(&desc, subres_init, &buffer));
+		TIF(d3d_device_->CreateBuffer(&desc, p_subres, &buffer));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))

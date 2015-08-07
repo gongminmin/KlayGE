@@ -27,25 +27,17 @@ void InitInstancedTessBuffs()
 	tess_pattern_vbs.resize(32);
 	tess_pattern_ibs.resize(tess_pattern_vbs.size());
 
-	ElementInitData init_data;
-		
 	std::vector<float2> vert;
 	vert.push_back(float2(0, 0));
 	vert.push_back(float2(1, 0));
 	vert.push_back(float2(0, 1));
-	init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
-	init_data.slice_pitch = 0;
-	init_data.data = &vert[0];
-	tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+	tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
 
 	std::vector<uint16_t> index;
 	index.push_back(0);
 	index.push_back(1);
 	index.push_back(2);
-	init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
-	init_data.slice_pitch = 0;
-	init_data.data = &index[0];
-	tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+	tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
 
 	for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
 	{
@@ -78,15 +70,10 @@ void InitInstancedTessBuffs()
 		index.push_back(static_cast<uint16_t>(last_1_row + i));
 		index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
 
-		init_data.row_pitch = static_cast<uint32_t>(vert.size() * sizeof(vert[0]));
-		init_data.slice_pitch = 0;
-		init_data.data = &vert[0];
-		tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
-
-		init_data.row_pitch = static_cast<uint32_t>(index.size() * sizeof(index[0]));
-		init_data.slice_pitch = 0;
-		init_data.data = &index[0];
-		tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
+		tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+			static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
 	}
 }
 
@@ -108,9 +95,6 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 		tess_pattern_rl_ = rf.MakeRenderLayout();
 		tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
-		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_GR32F);
-		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write, nullptr, EF_ABGR32F);
 		skinned_rl_ = rf.MakeRenderLayout();
 		skinned_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
@@ -132,9 +116,12 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 	if (TM_Instanced == caps.tess_method)
 	{
-		skinned_pos_vb_->Resize(this->NumVertices() * sizeof(float4));
-		skinned_tex_vb_->Resize(this->NumVertices() * sizeof(float2));
-		skinned_tangent_vb_->Resize(this->NumVertices() * sizeof(float4));
+		skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+			this->NumVertices() * sizeof(float4), nullptr, EF_ABGR32F);
+		skinned_tex_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+			this->NumVertices() * sizeof(float2), nullptr, EF_GR32F);
+		skinned_tangent_vb_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
+			this->NumVertices() * sizeof(float4), nullptr, EF_ABGR32F);
 		skinned_rl_->BindVertexStream(skinned_pos_vb_, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
 		skinned_rl_->BindVertexStream(skinned_tex_vb_, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 		skinned_rl_->BindVertexStream(skinned_tangent_vb_, std::make_tuple(vertex_element(VEU_Tangent, 0, EF_ABGR32F)));
@@ -149,16 +136,15 @@ void DetailedSkinnedMesh::BuildMeshInfo()
 
 		uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
 
-		GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-		ib_sysmem->Resize(rl_->GetIndexStream()->Size());
+		GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read,
+			rl_->GetIndexStream()->Size(), nullptr);
 		rl_->GetIndexStream()->CopyToBuffer(*ib_sysmem);
 		{
 			GraphicsBuffer::Mapper mapper(*ib_sysmem, BA_Read_Only);
-			ElementInitData init_data;
-			init_data.data = mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size;
-			init_data.row_pitch = this->NumTriangles() * 3 * index_size;
-			init_data.slice_pitch = init_data.row_pitch;
-			bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data, rl_->IndexStreamFormat());
+			bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+				this->NumTriangles() * 3 * index_size,
+				mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size,
+				rl_->IndexStreamFormat());
 		}
 
 		this->SetTessFactor(static_cast<int32_t>(tess_factor_));
@@ -382,8 +368,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		{
 		case VEU_Position:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -399,8 +384,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_TextureCoord:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -415,8 +399,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 
 		case VEU_Normal:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -456,8 +439,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 		
 		case VEU_Tangent:
 			{
-				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-				vb_cpu->Resize(vb->Size());
+				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 				vb->CopyToBuffer(*vb_cpu);
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
@@ -494,8 +476,7 @@ void DetailedSkinnedModel::BuildModelInfo()
 	std::vector<uint32_t> indices(total_num_indices);
 	{
 		GraphicsBufferPtr ib = rl->GetIndexStream();
-		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, nullptr);
-		ib_cpu->Resize(ib->Size());
+		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
 		ib->CopyToBuffer(*ib_cpu);
 
 		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);

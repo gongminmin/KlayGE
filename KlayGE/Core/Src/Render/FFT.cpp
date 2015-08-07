@@ -215,14 +215,14 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_GR32F);
-		src_->Resize(3 * width * height * sizeof(float) * 2);
+		src_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
+			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
 
-		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_GR32F);
-		dst_->Resize(3 * width * height * sizeof(float) * 2);
+		dst_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
+			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
 
-		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured, nullptr, EF_GR32F);
-		tmp_buffer_->Resize(3 * width * height * sizeof(float) * 2);
+		tmp_buffer_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Unordered | EAH_GPU_Structured,
+			3 * width * height * sizeof(float) * 2, nullptr, EF_GR32F);
 
 		quad_layout_ = rf.MakeRenderLayout();
 		quad_layout_->TopologyType(RenderLayout::TT_TriangleStrip);
@@ -234,11 +234,7 @@ namespace KlayGE
 			float2(-1, -1),
 			float2(+1, -1)
 		};
-		ElementInitData init_data;
-		init_data.row_pitch = sizeof(xyzs);
-		init_data.slice_pitch = 0;
-		init_data.data = xyzs;
-		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, &init_data);
+		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 		quad_layout_->BindVertexStream(quad_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 		tex_fb_ = rf.MakeFrameBuffer();

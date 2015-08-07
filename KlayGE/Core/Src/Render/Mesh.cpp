@@ -277,23 +277,17 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			ElementInitData init_data;
 			std::vector<GraphicsBufferPtr> merged_vbs(model_desc_.model_data->merged_buff.size());
 			for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
 			{
-				init_data.data = &model_desc_.model_data->merged_buff[i][0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc_.model_data->merged_buff[i].size());
-				init_data.slice_pitch = 0;
-				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc_.access_hint, &init_data);
+				merged_vbs[i] = rf.MakeVertexBuffer(BU_Static, model_desc_.access_hint,
+					static_cast<uint32_t>(model_desc_.model_data->merged_buff[i].size()),
+					&model_desc_.model_data->merged_buff[i][0]);
 			}
 
-			GraphicsBufferPtr merged_ib;
-			{
-				init_data.data = &model_desc_.model_data->merged_indices[0];
-				init_data.row_pitch = static_cast<uint32_t>(model_desc_.model_data->merged_indices.size());
-				init_data.slice_pitch = 0;
-				merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc_.access_hint, &init_data);
-			}
+			GraphicsBufferPtr merged_ib = rf.MakeIndexBuffer(BU_Static, model_desc_.access_hint,
+				static_cast<uint32_t>(model_desc_.model_data->merged_indices.size()),
+				&model_desc_.model_data->merged_indices[0]);
 
 			std::vector<StaticMeshPtr> meshes(model_desc_.model_data->mesh_names.size());
 			for (uint32_t mesh_index = 0; mesh_index < model_desc_.model_data->mesh_names.size(); ++ mesh_index)
@@ -621,11 +615,7 @@ namespace KlayGE
 	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		ElementInitData init_data;
-		init_data.data = buf;
-		init_data.row_pitch = size;
-		init_data.slice_pitch = 0;
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, &init_data);
+		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, size, buf);
 		this->AddVertexStream(vb, ve);
 	}
 
@@ -638,11 +628,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		ElementInitData init_data;
-		init_data.data = buf;
-		init_data.row_pitch = size;
-		init_data.slice_pitch = 0;
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, &init_data);
+		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, size, buf);
 		this->AddIndexStream(ib, format);
 	}
 
@@ -1816,9 +1802,8 @@ namespace KlayGE
 				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
 				{
 					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
-					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 					uint32_t size = vb->Size();
-					vb_cpu->Resize(size);
+					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					vb->CopyToBuffer(*vb_cpu);
 
 					merged_buffs[j].resize(size);
@@ -1839,9 +1824,8 @@ namespace KlayGE
 
 				{
 					GraphicsBufferPtr ib = rl->GetIndexStream();
-					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, nullptr);
 					uint32_t size = ib->Size();
-					ib_cpu->Resize(size);
+					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					ib->CopyToBuffer(*ib_cpu);
 
 					merged_indices.resize(size);

@@ -226,6 +226,7 @@ namespace KlayGE
 		}
 
 		GraphicsBufferPtr const & InstanceStream() const;
+		void InstanceStream(GraphicsBufferPtr const & buffer);
 		vertex_elements_type const & InstanceStreamFormat() const
 		{
 			return instance_stream_.format;
