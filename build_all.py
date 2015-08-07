@@ -37,6 +37,9 @@ if __name__ == "__main__":
 	print("Building KlayGE...")
 	build_KlayGE(bi)
 
+	print("Building KlayGE Tests...")
+	build_Tests(bi)
+
 	print("Building KlayGE Samples...")
 	build_Samples(bi)
 
