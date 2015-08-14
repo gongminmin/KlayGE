@@ -104,7 +104,9 @@ class build_info:
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
 					target_platform = target_platform[0:space_place]
-					if "5.0" == android_ver:
+					if "5.1" == android_ver:
+						target_api_level = 22
+					elif "5.0" == android_ver:
 						target_api_level = 21
 					elif "4.4w" == android_ver:
 						target_api_level = 20
