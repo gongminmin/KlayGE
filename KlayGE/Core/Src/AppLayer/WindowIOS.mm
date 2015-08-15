@@ -16,7 +16,7 @@
 
 @interface KlayGEView : UIView
 {
-	KlayGE::array<UITouch*, 16> touch_state_;
+	std::array<UITouch*, 16> touch_state_;
 	KlayGE::Window* window_;
 }
 @property(readonly) CAEAGLLayer* eagl_layer;
@@ -30,6 +30,7 @@ namespace KlayGE
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false)
 	{
+		UNREF_PARAM(settings);
 		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 		CGRect bounds = [[UIScreen mainScreen] bounds];

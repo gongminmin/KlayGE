@@ -356,6 +356,8 @@ namespace KlayGE
 		: texture_1d_(*checked_cast<OGLESTexture1D*>(&texture_1d)),
 			array_index_(array_index), level_(level)
 	{
+		UNREF_PARAM(array_index_);
+		UNREF_PARAM(level_);
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 
 		if (array_index > 0)
@@ -434,6 +436,8 @@ namespace KlayGE
 		: texture_2d_(*checked_cast<OGLESTexture2D*>(&texture_2d)),
 			array_index_(array_index), level_(level)
 	{
+		UNREF_PARAM(array_index_);
+		UNREF_PARAM(level_);
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
 
 		if (array_index > 0)
@@ -749,6 +753,10 @@ namespace KlayGE
 		: target_type_(0), array_index_(0), level_(-1),
 			sample_count_(sample_count), sample_quality_(sample_quality)
 	{
+		UNREF_PARAM(array_index_);
+		UNREF_PARAM(level_);
+		UNREF_PARAM(sample_count_);
+		UNREF_PARAM(sample_quality_);
 		BOOST_ASSERT(IsDepthFormat(pf));
 
 		width_ = width;
@@ -804,6 +812,7 @@ namespace KlayGE
 	OGLESDepthStencilRenderView::OGLESDepthStencilRenderView(Texture& texture, int array_index, int level)
 		: target_type_(checked_cast<OGLESTexture2D*>(&texture)->GLType()), array_index_(array_index), level_(level)
 	{
+		UNREF_PARAM(array_index);
 		BOOST_ASSERT(Texture::TT_2D == texture.Type());
 		BOOST_ASSERT(IsDepthFormat(texture.Format()));
 
@@ -1065,6 +1074,7 @@ namespace KlayGE
 	void OGLESEAGLRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
 		UNREF_PARAM(fb);
+		UNREF_PARAM(att);
 		
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 		BOOST_ASSERT(fbo_ == checked_cast<OGLESFrameBuffer*>(&fb)->OGLFbo());

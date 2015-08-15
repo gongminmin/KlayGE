@@ -60,7 +60,15 @@
 #ifdef KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 	#include <experimental/optional>
 #else
+
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'out', 'v'
+#endif
 	#include <boost/optional.hpp>
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 	namespace std
 	{
 		namespace experimental

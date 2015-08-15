@@ -284,7 +284,7 @@ JudaTexViewer::JudaTexViewer()
 	ResLoader::Instance().AddPath("../../Samples/media/JudaTexViewer");
 }
 
-bool JudaTexViewer::ConfirmDevice()
+bool JudaTexViewer::ConfirmDevice() const
 {
 	return true;
 }

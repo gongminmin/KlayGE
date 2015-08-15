@@ -90,7 +90,7 @@
 
 	#if defined(__APPLE__)
 		#if CLANG_VERSION >= 61
-			#define KLAYGE_COMPILER_VERSION 51
+			#define KLAYGE_COMPILER_VERSION 61
 		#elif CLANG_VERSION >= 60
 			#define KLAYGE_COMPILER_VERSION 60
 		#elif CLANG_VERSION >= 51

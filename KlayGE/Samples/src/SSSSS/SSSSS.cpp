@@ -31,8 +31,6 @@
 #include "SampleCommon.hpp"
 #include "SSSSS.hpp"
 
-KlayGE::uint32_t const SHADOW_MAP_SIZE = 512;
-
 using namespace KlayGE;
 
 namespace

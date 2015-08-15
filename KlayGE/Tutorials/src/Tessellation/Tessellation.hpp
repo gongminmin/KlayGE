@@ -29,7 +29,6 @@ private:
 	KlayGE::SceneObjectPtr polygon_;
 
 	KlayGE::UIDialogPtr dialog_;
-	bool tess_enabled_;
 	KlayGE::float4 tess_factor_;
 
 	int id_tess_enabled_;

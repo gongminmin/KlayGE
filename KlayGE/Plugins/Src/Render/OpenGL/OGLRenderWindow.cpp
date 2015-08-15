@@ -62,9 +62,6 @@ namespace KlayGE
 		isFullScreen_		= settings.full_screen;
 		color_bits_ = NumFormatBits(settings.color_fmt);
 
-		uint32_t depth_bits	= NumDepthBits(settings.depth_stencil_fmt);
-		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
-
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
 		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&OGLRenderWindow::OnPaint, this,
 			std::placeholders::_1));
@@ -116,6 +113,9 @@ namespace KlayGE
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS
+		uint32_t depth_bits	= NumDepthBits(settings.depth_stencil_fmt);
+		uint32_t stencil_bits = NumStencilBits(settings.depth_stencil_fmt);
+
 		hWnd_ = main_wnd->HWnd();
 		hDC_ = ::GetDC(hWnd_);
 

@@ -1162,6 +1162,8 @@ namespace KlayGE
 			sample_count_(sample_count), sample_quality_(sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
+		UNREF_PARAM(sample_count_);
+		UNREF_PARAM(sample_quality_);
 
 		width_ = width;
 		height_ = height;

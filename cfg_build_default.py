@@ -35,5 +35,5 @@ arch			= ("x64", )
 # Configuration. Could be "Debug", "Release", "MinSizeRel", "RelWithDebInfo".
 config			= ("Debug", "RelWithDebInfo")
 
-# Target platform for cross compiling. Could be "android", "win_store", "win_phone" plus version number, "ios", or "auto".
+# Target platform for cross compiling. Could be "android" plus version number, "win_store", "win_phone" plus version number, "ios", or "auto".
 target			= "auto"

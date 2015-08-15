@@ -285,7 +285,7 @@ namespace KlayGE
 				bool all_zero = true;
 				for (uint32_t i = 0; i < 16; ++ i)
 				{
-					if (abs(reduced[i]) > 0.0005f)
+					if (std::abs(reduced[i]) > 0.0005f)
 					{
 						all_zero = false;
 						break;

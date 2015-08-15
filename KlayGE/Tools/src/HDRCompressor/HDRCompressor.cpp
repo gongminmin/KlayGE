@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
 
 	if (argc < 2)
 	{
-		cout << "使用方法: HDRCompressor xxx.dds [R16 | R16F] [BC5 | BC3]" << endl;
+		cout << "Usage: HDRCompressor xxx.dds [R16 | R16F] [BC5 | BC3]" << endl;
 		return 1;
 	}
 

@@ -406,6 +406,7 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
+		using namespace std::experimental;
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		android_app* state = Context::Instance().AppState();
 		AAssetManager* am = state->activity->assetManager;
@@ -451,7 +452,6 @@ namespace KlayGE
 			}
 		}
 #else
-		using namespace std::experimental;
 
 		for (auto const & path : paths_)
 		{

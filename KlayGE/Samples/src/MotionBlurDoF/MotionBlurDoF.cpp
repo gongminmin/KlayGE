@@ -38,8 +38,6 @@ namespace
 	int32_t const NUM_LINE = 10;
 	int32_t const NUM_INSTANCE = 400;
 
-	int const MOTION_FRAMES = 5;
-
 	class MotionBlurRenderMesh : public StaticMesh
 	{
 	public:

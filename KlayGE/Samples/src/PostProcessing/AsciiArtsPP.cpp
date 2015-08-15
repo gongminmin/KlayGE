@@ -8,7 +8,14 @@
 
 #include <numeric>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
+#endif
 #include <boost/container/flat_map.hpp>
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #include "AsciiArtsPP.hpp"
 
@@ -101,6 +108,8 @@ namespace
 						output_num_ascii_(output_num_ascii),
 						ascii_width_(ascii_width), ascii_height_(ascii_height)
 		{
+			UNREF_PARAM(ascii_width_);
+			UNREF_PARAM(ascii_height_);
 		}
 
 		ascii_tiles_type build(ascii_tiles_type const & ascii_data)

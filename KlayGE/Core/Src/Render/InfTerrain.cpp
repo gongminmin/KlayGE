@@ -372,6 +372,7 @@ namespace KlayGE
 
 		int widths[] = { 0, 16, 16, 16, 16 };
 		uint32_t const rings = sizeof(widths) / sizeof(widths[0]) - 1;
+		UNREF_PARAM(MAX_RINGS);
 		BOOST_ASSERT(rings <= MAX_RINGS);
 
 		tile_rings_.resize(rings);

@@ -169,10 +169,6 @@ namespace KlayGE
 	bool UIEditBox::hide_caret_;   // If true, we don't render the caret.
 	Timer UIEditBox::timer_;
 
-	// When scrolling, EDITBOX_SCROLLEXTENT is reciprocal of the amount to scroll.
-	// If EDITBOX_SCROLLEXTENT = 4, then we scroll 1/4 of the control each time.
-	int const EDITBOX_SCROLLEXTENT = 4;
-
 	UIEditBox::UIEditBox(UIDialogPtr const & dialog)
 					: UIControl(UIEditBox::Type, dialog),
 						border_(5),	// Default border width
