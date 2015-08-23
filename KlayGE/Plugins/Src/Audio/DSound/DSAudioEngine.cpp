@@ -117,13 +117,13 @@ namespace KlayGE
 		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, nullptr));
 
 		WAVEFORMATEX wfx;
-		std::memset(&wfx, 0, sizeof(wfx));
 		wfx.wFormatTag		= WAVE_FORMAT_PCM;
 		wfx.nChannels		= 2;
 		wfx.nSamplesPerSec	= 22050;
 		wfx.wBitsPerSample	= 16;
 		wfx.nBlockAlign		= wfx.wBitsPerSample * wfx.nChannels / 8;
 		wfx.nAvgBytesPerSec	= wfx.nSamplesPerSec * wfx.nBlockAlign;
+		wfx.cbSize			= 0;
 
 		TIF(pDSBPrimary->SetFormat(&wfx));
 

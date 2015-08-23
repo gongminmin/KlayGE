@@ -811,7 +811,7 @@ namespace KlayGE
 
 			if (!gs_support_)
 			{
-				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++i)
+				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
 				{
 					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
 				}

@@ -1660,6 +1660,7 @@ namespace KlayGE
 
 			case ST_DomainShader:
 				domain_shader_ = so.domain_shader_;
+				geometry_shader_ = so.geometry_shader_;
 				if (domain_shader_)
 				{
 					has_tessellation_ = true;
@@ -1781,7 +1782,7 @@ namespace KlayGE
 			all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i].begin(), cbuff_indices_[i].end());
 			for (size_t j = 0; j < cbuff_indices_[i].size(); ++ j)
 			{
-				RenderEffectConstantBufferPtr cbuff = effect.CBufferByIndex(cbuff_indices_[i][j]);
+				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(cbuff_indices_[i][j]);
 				ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 			}
 

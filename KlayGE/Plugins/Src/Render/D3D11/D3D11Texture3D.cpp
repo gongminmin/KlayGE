@@ -136,7 +136,7 @@ namespace KlayGE
 
 		if ((this->Width(0) == target.Width(0)) && (this->Height(0) == target.Height(0))
 			&& (this->Depth(0) == target.Depth(0)) && (this->Format() == target.Format())
-			&& (this->NumMipMaps() == target.NumMipMaps()))
+			&& (this->ArraySize() == target.ArraySize()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
 			d3d_imm_ctx_->CopyResource(other.D3DTexture().get(), d3dTexture3D_.get());
 		}
@@ -192,7 +192,6 @@ namespace KlayGE
 		UNREF_PARAM(num_items);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
-		memset(&desc, 0, sizeof(desc));
 		switch (format_)
 		{
 		case EF_D16:
@@ -228,10 +227,11 @@ namespace KlayGE
 		UNREF_PARAM(num_items);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		memset(&desc, 0, sizeof(desc));
 		desc.Format = desc_.Format;
 		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
+		desc.Texture3D.FirstWSlice = 0;
+		desc.Texture3D.WSize = this->Depth(level);
 
 		return this->RetriveD3DUAV(desc);
 	}
@@ -242,7 +242,6 @@ namespace KlayGE
 		UNREF_PARAM(array_index);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		memset(&desc, 0, sizeof(desc));
 		desc.Format = desc_.Format;
 		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
@@ -259,7 +258,6 @@ namespace KlayGE
 		UNREF_PARAM(array_index);
 
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
-		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE3D;
 		desc.Texture3D.MipSlice = level;
@@ -276,7 +274,6 @@ namespace KlayGE
 		UNREF_PARAM(array_index);
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		memset(&desc, 0, sizeof(desc));
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.Flags = 0;
 		if (this->SampleCount() > 1)
@@ -288,8 +285,8 @@ namespace KlayGE
 			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
 		}
 		desc.Texture2DArray.MipSlice = level;
-		desc.Texture2DArray.ArraySize = num_slices;
 		desc.Texture2DArray.FirstArraySlice = first_slice;
+		desc.Texture2DArray.ArraySize = num_slices;
 
 		return this->RetriveD3DDSV(desc);
 	}

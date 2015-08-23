@@ -41,7 +41,7 @@ namespace KlayGE
 	{
 	}
 
-	ID3D11RenderTargetViewPtr D3D11FrameBuffer::D3DRTView(uint32_t n) const
+	ID3D11RenderTargetViewPtr const & D3D11FrameBuffer::D3DRTView(uint32_t n) const
 	{
 		if (n < clr_views_.size())
 		{
@@ -50,31 +50,25 @@ namespace KlayGE
 				D3D11RenderTargetRenderView const & d3d_view(*checked_pointer_cast<D3D11RenderTargetRenderView>(clr_views_[n]));
 				return d3d_view.D3DRenderTargetView();
 			}
-			else
-			{
-				return ID3D11RenderTargetViewPtr();
-			}
 		}
-		else
-		{
-			return ID3D11RenderTargetViewPtr();
-		}
+
+		static ID3D11RenderTargetViewPtr const null_rtv;
+		return null_rtv;
 	}
 
-	ID3D11DepthStencilViewPtr D3D11FrameBuffer::D3DDSView() const
+	ID3D11DepthStencilViewPtr const & D3D11FrameBuffer::D3DDSView() const
 	{
 		if (rs_view_)
 		{
 			D3D11DepthStencilRenderView const & d3d_view(*checked_pointer_cast<D3D11DepthStencilRenderView>(rs_view_));
 			return d3d_view.D3DDepthStencilView();
 		}
-		else
-		{
-			return ID3D11DepthStencilViewPtr();
-		}
+
+		static ID3D11DepthStencilViewPtr const null_dsv;
+		return null_dsv;
 	}
 
-	ID3D11UnorderedAccessViewPtr D3D11FrameBuffer::D3DUAView(uint32_t n) const
+	ID3D11UnorderedAccessViewPtr const & D3D11FrameBuffer::D3DUAView(uint32_t n) const
 	{
 		if (n < ua_views_.size())
 		{
@@ -83,15 +77,10 @@ namespace KlayGE
 				D3D11UnorderedAccessView const & d3d_view(*checked_pointer_cast<D3D11UnorderedAccessView>(ua_views_[n]));
 				return d3d_view.D3DUnorderedAccessView();
 			}
-			else
-			{
-				return ID3D11UnorderedAccessViewPtr();
-			}
 		}
-		else
-		{
-			return ID3D11UnorderedAccessViewPtr();
-		}
+
+		static ID3D11UnorderedAccessViewPtr const null_uav;
+		return null_uav;
 	}
 
 	std::wstring const & D3D11FrameBuffer::Description() const

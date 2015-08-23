@@ -783,8 +783,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	CreateTabDialogs(hWnd, hInstance);
 	CreateButtons(hWnd, hInstance);
 
-	MSG msg;
-	memset(&msg, 0, sizeof(msg));
+	MSG msg = {};
 	while (::GetMessage(&msg, nullptr, 0, 0))
 	{
 		::TranslateMessage(&msg);

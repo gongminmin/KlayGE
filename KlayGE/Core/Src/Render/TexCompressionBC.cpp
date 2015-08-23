@@ -3176,7 +3176,7 @@ namespace KlayGE
 
 			uint4 const & error_weights = ERROR_METRICS[error_metric_];
 			uint64_t error = 0;
-			for (uint32_t i = 0; i < dist.size(); ++i)
+			for (uint32_t i = 0; i < dist.size(); ++ i)
 			{
 				uint32_t e = dist[i] * error_weights[i];
 				error += e * e;
@@ -3228,7 +3228,7 @@ namespace KlayGE
 
 		float min_dp = std::numeric_limits<float>::max();
 		float max_dp = -std::numeric_limits<float>::max();
-		for (uint32_t i = 0; i < cluster.NumValidPoints(); ++i)
+		for (uint32_t i = 0; i < cluster.NumValidPoints(); ++ i)
 		{
 			float dp = MathLib::dot(cluster.Point(i) - cluster.Avg(), axis);
 			if (dp < min_dp)

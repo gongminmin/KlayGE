@@ -140,12 +140,12 @@ namespace KlayGE
 							reinterpret_cast<CHAR*>(const_cast<BYTE*>(ri.data.hid.bRawData)), ri.data.hid.dwSizeHid))
 						{
 							buttons_state_.fill(false);
-							for (uint32_t i = 0; i < usage_length; ++i)
+							for (uint32_t i = 0; i < usage_length; ++ i)
 							{
 								buttons_state_[usage[i] - button_caps[0].Range.UsageMin] = true;
 							}
 
-							for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++i)
+							for (uint32_t i = 0; i < caps.NumberInputValueCaps; ++ i)
 							{
 								long center;
 								long shift;

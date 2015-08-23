@@ -345,7 +345,7 @@ namespace KlayGE
 				hr = motion_sensor_collection_->GetCount(&count);
 				if (SUCCEEDED(hr))
 				{
-					for (ULONG i = 0; i < count; ++i)
+					for (ULONG i = 0; i < count; ++ i)
 					{
 						ISensor* sensor;
 						hr = motion_sensor_collection_->GetAt(i, &sensor);
@@ -375,7 +375,7 @@ namespace KlayGE
 				hr = orientation_sensor_collection_->GetCount(&count);
 				if (SUCCEEDED(hr))
 				{
-					for (ULONG i = 0; i < count; ++i)
+					for (ULONG i = 0; i < count; ++ i)
 					{
 						ISensor* sensor;
 						hr = orientation_sensor_collection_->GetAt(i, &sensor);
@@ -419,7 +419,7 @@ namespace KlayGE
 			HRESULT hr = motion_sensor_collection_->GetCount(&count);
 			if (SUCCEEDED(hr))
 			{
-				for (ULONG i = 0; i < count; ++i)
+				for (ULONG i = 0; i < count; ++ i)
 				{
 					ISensor* sensor;
 					hr = motion_sensor_collection_->GetAt(i, &sensor);
@@ -441,7 +441,7 @@ namespace KlayGE
 			HRESULT hr = orientation_sensor_collection_->GetCount(&count);
 			if (SUCCEEDED(hr))
 			{
-				for (ULONG i = 0; i < count; ++i)
+				for (ULONG i = 0; i < count; ++ i)
 				{
 					ISensor* sensor;
 					hr = orientation_sensor_collection_->GetAt(i, &sensor);

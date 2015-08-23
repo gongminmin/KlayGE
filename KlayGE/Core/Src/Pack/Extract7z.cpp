@@ -171,7 +171,7 @@ namespace
 		uint32_t num_items;
 		TIF(archive->GetNumberOfItems(&num_items));
 
-		for (uint32_t i = 0; i < num_items; ++i)
+		for (uint32_t i = 0; i < num_items; ++ i)
 		{
 			bool is_folder = true;
 			TIF(IsArchiveItemFolder(archive, i, is_folder));

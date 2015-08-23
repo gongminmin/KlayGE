@@ -47,7 +47,6 @@ namespace KlayGE
 		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
 		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
-		std::memset(&dsbd, 0, sizeof(dsbd));
 		dsbd.dwSize = sizeof(dsbd);
 		dsbd.dwFlags = DSBCAPS_CTRLVOLUME;
 		if (mono)
@@ -56,6 +55,7 @@ namespace KlayGE
 			dsbd.guid3DAlgorithm	= GUID_NULL;
 		}
 		dsbd.dwBufferBytes		= fillSize_ * fillCount_;
+		dsbd.dwReserved			= 0;
 		dsbd.lpwfxFormat		= &wfx;
 
 		// DirectSound只能播放PCM数据。其他格式可能不能工作。

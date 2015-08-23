@@ -26,9 +26,9 @@ namespace KlayGE
 		D3D11FrameBuffer();
 		virtual ~D3D11FrameBuffer();
 
-		ID3D11RenderTargetViewPtr D3DRTView(uint32_t n) const;
-		ID3D11DepthStencilViewPtr D3DDSView() const;
-		ID3D11UnorderedAccessViewPtr D3DUAView(uint32_t n) const;
+		ID3D11RenderTargetViewPtr const & D3DRTView(uint32_t n) const;
+		ID3D11DepthStencilViewPtr const & D3DDSView() const;
+		ID3D11UnorderedAccessViewPtr const & D3DUAView(uint32_t n) const;
 
 		virtual std::wstring const & Description() const;
 

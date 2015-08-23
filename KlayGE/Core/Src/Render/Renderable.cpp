@@ -236,7 +236,7 @@ namespace KlayGE
 		{
 			vertex_elements_type const & vet = instances_[0].lock()->InstanceFormat();
 			uint32_t size = 0;
-			for (size_t i = 0; i < vet.size(); ++i)
+			for (size_t i = 0; i < vet.size(); ++ i)
 			{
 				size += vet[i].element_size();
 			}

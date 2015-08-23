@@ -109,21 +109,21 @@ namespace KlayGE
 	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DShaderResourceView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*first_level*/, uint32_t /*num_levels*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11ShaderResourceViewPtr ret;
+		static ID3D11ShaderResourceViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr ret;
+		static ID3D11UnorderedAccessViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr ret;
+		static ID3D11UnorderedAccessViewPtr const ret;
 		return ret;
 	}
 
@@ -131,49 +131,49 @@ namespace KlayGE
 		uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr ret;
+		static ID3D11UnorderedAccessViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr ret;
+		static ID3D11RenderTargetViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr ret;
+		static ID3D11RenderTargetViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr ret;
+		static ID3D11RenderTargetViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr ret;
+		static ID3D11DepthStencilViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr ret;
+		static ID3D11DepthStencilViewPtr const ret;
 		return ret;
 	}
 
 	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr ret;
+		static ID3D11DepthStencilViewPtr const ret;
 		return ret;
 	}
 
