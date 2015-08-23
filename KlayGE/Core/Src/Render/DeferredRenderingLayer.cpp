@@ -993,7 +993,7 @@ namespace KlayGE
 			}
 
 			pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 0, 0);
+			ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 1, 0);
 		}
 		else
 		{
