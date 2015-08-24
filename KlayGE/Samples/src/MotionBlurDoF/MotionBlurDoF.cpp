@@ -349,7 +349,7 @@ namespace
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), nullptr);
-				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 0, 0));
+				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 1, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
 					static_cast<float>(height), 1.0f / width, 1.0f / height));
@@ -493,7 +493,7 @@ namespace
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 0, 0));
+				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 1, 0));
 
 				if (gs_support_)
 				{
