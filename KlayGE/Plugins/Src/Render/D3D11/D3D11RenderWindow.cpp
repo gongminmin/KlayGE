@@ -739,8 +739,8 @@ namespace KlayGE
 		}
 #endif
 
-		uint32_t new_width = rect.right - rect.left;
-		uint32_t new_height = rect.bottom - rect.top;
+		uint32_t new_width = std::max(rect.right - rect.left, 16L);
+		uint32_t new_height = std::max(rect.bottom - rect.top, 16L);
 		if ((new_width != width_) || (new_height != height_) || stereo_changed)
 		{
 			Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(new_width, new_height);
