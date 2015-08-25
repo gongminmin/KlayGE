@@ -316,7 +316,7 @@ namespace
 
 			if (model_desc_.model_data->kfs && !model_desc_.model_data->kfs->empty())
 			{
-				if (model->IsSkinned())
+				if (!model_desc_.model_data->joints.empty())
 				{
 					SkinnedModelPtr skinned_model = checked_pointer_cast<SkinnedModel>(model);
 
