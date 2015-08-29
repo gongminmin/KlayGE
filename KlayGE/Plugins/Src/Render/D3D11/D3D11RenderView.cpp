@@ -98,16 +98,6 @@ namespace KlayGE
 		this->BindDiscardFunc();
 	}
 
-	D3D11RenderTargetRenderView::D3D11RenderTargetRenderView(ID3D11RenderTargetViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: rt_view_(view), rt_src_(nullptr), rt_first_subres_(0), rt_num_subres_(1)
-	{
-		width_ = width;
-		height_ = height;
-		pf_ = pf;
-
-		this->BindDiscardFunc();
-	}
-
 	void D3D11RenderTargetRenderView::ClearColor(Color const & clr)
 	{
 		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), &clr.r());
@@ -203,16 +193,6 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
-
-		this->BindDiscardFunc();
-	}
-
-	D3D11DepthStencilRenderView::D3D11DepthStencilRenderView(ID3D11DepthStencilViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: ds_view_(view), rt_src_(nullptr), rt_first_subres_(0), rt_num_subres_(1)
-	{
-		width_ = width;
-		height_ = height;
-		pf_ = pf;
 
 		this->BindDiscardFunc();
 	}

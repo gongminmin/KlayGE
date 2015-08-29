@@ -24,7 +24,7 @@ namespace KlayGE
 	class D3D11Texture : public Texture
 	{
 	public:
-		explicit D3D11Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
+		D3D11Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~D3D11Texture();
 
 		std::wstring const & Name() const;
@@ -152,6 +152,7 @@ namespace KlayGE
 	{
 	public:
 		D3D11Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+		explicit D3D11Texture2D(ID3D11Texture2DPtr const & d3d_tex);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

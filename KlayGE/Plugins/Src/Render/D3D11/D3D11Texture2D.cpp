@@ -119,6 +119,80 @@ namespace KlayGE
 		this->CreateHWResource(init_data);
 	}
 
+	D3D11Texture2D::D3D11Texture2D(ID3D11Texture2DPtr const & d3d_tex)
+					: D3D11Texture(TT_2D, 1, 0, 0)
+	{
+		d3d_tex->GetDesc(&desc_);
+
+		num_mip_maps_ = desc_.MipLevels;
+		array_size_ = desc_.ArraySize;
+		format_ = D3D11Mapping::MappingFormat(desc_.Format);
+		sample_count_ = desc_.SampleDesc.Count;
+		sample_quality_ = desc_.SampleDesc.Quality;
+
+		widths_.resize(num_mip_maps_);
+		heights_.resize(num_mip_maps_);
+		widths_[0] = desc_.Width;
+		heights_[0] = desc_.Height;
+		for (uint32_t level = 1; level < num_mip_maps_; ++level)
+		{
+			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
+			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
+		}
+
+		access_hint_ = 0;
+		switch (desc_.Usage)
+		{
+		case D3D11_USAGE_DEFAULT:
+			access_hint_ |= EAH_GPU_Read | EAH_GPU_Write;
+			break;
+
+		case D3D11_USAGE_IMMUTABLE:
+			access_hint_ |= EAH_Immutable;
+			break;
+
+		case D3D11_USAGE_DYNAMIC:
+			access_hint_ |= EAH_GPU_Read;
+			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
+			{
+				access_hint_ |= EAH_CPU_Write;
+			}
+			break;
+
+		case D3D11_USAGE_STAGING:
+			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_READ)
+			{
+				access_hint_ |= EAH_CPU_Read;
+			}
+			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
+			{
+				access_hint_ |= EAH_CPU_Write;
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+		if (desc_.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+		{
+			access_hint_ |= EAH_GPU_Unordered;
+		}
+		if (desc_.MiscFlags & D3D11_RESOURCE_MISC_GENERATE_MIPS)
+		{
+			access_hint_ |= EAH_Generate_Mips;
+		}
+
+		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
+
+		d3dTexture2D_ = d3d_tex;
+
+		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
+		{
+			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
+		}
+	}
+
 	uint32_t D3D11Texture2D::Width(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);

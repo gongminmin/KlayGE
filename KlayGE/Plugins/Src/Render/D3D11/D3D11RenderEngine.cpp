@@ -1459,7 +1459,8 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		case SM_DXGI:
 			{
-				ID3D11RenderTargetView* rtv = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
+				RenderViewPtr const & view = (0 == eye) ? win->D3DBackBufferRTV() : win->D3DBackBufferRightEyeRTV();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView*>(view.get())->D3DRenderTargetView().get();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1495,7 +1496,7 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11Texture2DPtr back = win->D3DBackBuffer();
+					ID3D11Texture2DPtr back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DTexture();
 					ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DTexture();
 
 					D3D11_BOX box;
@@ -1512,7 +1513,8 @@ namespace KlayGE
 
 		case SM_AMDQuadBuffer:
 			{
-				ID3D11RenderTargetView* rtv = win->D3DBackBufferRTV().get();
+				RenderViewPtr const & view = win->D3DBackBufferRTV();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView*>(view.get())->D3DRenderTargetView().get();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;

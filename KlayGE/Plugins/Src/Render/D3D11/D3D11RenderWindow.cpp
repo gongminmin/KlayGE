@@ -41,6 +41,7 @@
 #include <KlayGE/D3D11/D3D11RenderFactoryInternal.hpp>
 #include <KlayGE/D3D11/D3D11RenderView.hpp>
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>
+#include <KlayGE/D3D11/D3D11Texture.hpp>
 
 #include "AMDQuadBuffer.hpp"
 
@@ -305,46 +306,37 @@ namespace KlayGE
 		Verify(!!d3d_device);
 		Verify(!!d3d_imm_ctx);
 
-		depth_stencil_format_ = DXGI_FORMAT_UNKNOWN;
-		ElementFormat depth_stencil_fmt = settings.depth_stencil_fmt;
-		if (IsDepthFormat(depth_stencil_fmt))
+		depth_stencil_fmt_ = settings.depth_stencil_fmt;
+		if (IsDepthFormat(depth_stencil_fmt_))
 		{
-			BOOST_ASSERT((EF_D32F == depth_stencil_fmt) || (EF_D24S8 == depth_stencil_fmt)
-				|| (EF_D16 == depth_stencil_fmt));
+			BOOST_ASSERT((EF_D32F == depth_stencil_fmt_) || (EF_D24S8 == depth_stencil_fmt_)
+				|| (EF_D16 == depth_stencil_fmt_));
 
 			UINT format_support;
 
-			if (EF_D32F == depth_stencil_fmt)
+			if (EF_D32F == depth_stencil_fmt_)
 			{
 				// Try 32-bit zbuffer
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D32_FLOAT, &format_support);
-				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
+				if (!(format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))
 				{
-					depth_stencil_format_ = DXGI_FORMAT_D32_FLOAT;
-				}
-				else
-				{
-					depth_stencil_fmt = EF_D24S8;
+					depth_stencil_fmt_ = EF_D24S8;
 				}
 			}
-			if (EF_D24S8 == depth_stencil_fmt)
+			if (EF_D24S8 == depth_stencil_fmt_)
 			{
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D24_UNORM_S8_UINT, &format_support);
-				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
+				if (!(format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))
 				{
-					depth_stencil_format_ = DXGI_FORMAT_D24_UNORM_S8_UINT;
-				}
-				else
-				{
-					depth_stencil_fmt = EF_D16;
+					depth_stencil_fmt_ = EF_D16;
 				}
 			}
-			if (EF_D16 == depth_stencil_fmt)
+			if (EF_D16 == depth_stencil_fmt_)
 			{
 				d3d_device->CheckFormatSupport(DXGI_FORMAT_D16_UNORM, &format_support);
-				if (format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
+				if (!(format_support & D3D11_FORMAT_SUPPORT_DEPTH_STENCIL))
 				{
-					depth_stencil_format_ = DXGI_FORMAT_D16_UNORM;
+					depth_stencil_fmt_ = EF_Unknown;
 				}
 			}
 		}
@@ -790,146 +782,33 @@ namespace KlayGE
 		// Create a render target view
 		ID3D11Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
-		back_buffer_ = MakeCOMPtr(back_buffer);
-		D3D11_TEXTURE2D_DESC bb_desc;
-		back_buffer_->GetDesc(&bb_desc);
+		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(MakeCOMPtr(back_buffer));
 
-		D3D11_RENDER_TARGET_VIEW_DESC rtv_desc;
-		rtv_desc.Format = bb_desc.Format;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		if (dxgi_sub_ver_ >= 2)
-		{
-			if (bb_desc.SampleDesc.Count > 1)
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
-				rtv_desc.Texture2DMSArray.FirstArraySlice = 0;
-				rtv_desc.Texture2DMSArray.ArraySize = 1;
-			}
-			else
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-				rtv_desc.Texture2DArray.MipSlice = 0;
-				rtv_desc.Texture2DArray.FirstArraySlice = 0;
-				rtv_desc.Texture2DArray.ArraySize = 1;
-			}
-		}
-		else
-#endif
-		{
-			if (bb_desc.SampleDesc.Count > 1)
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
-			}
-			else
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-				rtv_desc.Texture2D.MipSlice = 0;
-			}
-		}
-		ID3D11RenderTargetView* render_target_view;
-		TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
-		render_target_view_ = MakeCOMPtr(render_target_view);
+		render_target_view_ = rf.Make2DRenderView(*back_buffer_, 0, 1, 0);
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		bool stereo = (STM_LCDShutter == Context::Instance().Config().graphics_cfg.stereo_method) && dxgi_stereo_support_;
 	
 		if (stereo)
 		{
-			if (bb_desc.SampleDesc.Count > 1)
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
-				rtv_desc.Texture2DMSArray.FirstArraySlice = 1;
-				rtv_desc.Texture2DMSArray.ArraySize = 1;
-			}
-			else
-			{
-				rtv_desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
-				rtv_desc.Texture2DArray.MipSlice = 0;
-				rtv_desc.Texture2DArray.FirstArraySlice = 1;
-				rtv_desc.Texture2DArray.ArraySize = 1;
-			}
-			TIF(d3d_device->CreateRenderTargetView(back_buffer_.get(), &rtv_desc, &render_target_view));
-			render_target_view_right_eye_ = MakeCOMPtr(render_target_view);
+			render_target_view_right_eye_ = rf.Make2DRenderView(*back_buffer_, 1, 1, 0);
 		}
 #else
 		bool stereo = false;
 #endif
 
-		if (depth_stencil_format_ != DXGI_FORMAT_UNKNOWN)
+		if (depth_stencil_fmt_ != EF_Unknown)
 		{
-			// Create depth stencil texture
-			D3D11_TEXTURE2D_DESC ds_desc;
-			ds_desc.Width = this->Width();
-			ds_desc.Height = this->Height();
-			ds_desc.MipLevels = 1;
-			ds_desc.ArraySize = stereo ? 2 : 1;
-			ds_desc.Format = depth_stencil_format_;
-			ds_desc.SampleDesc.Count = bb_desc.SampleDesc.Count;
-			ds_desc.SampleDesc.Quality = bb_desc.SampleDesc.Quality;
-			ds_desc.Usage = D3D11_USAGE_DEFAULT;
-			ds_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-			ds_desc.CPUAccessFlags = 0;
-			ds_desc.MiscFlags = 0;
-			ID3D11Texture2D* depth_stencil;
-			TIF(d3d_device->CreateTexture2D(&ds_desc, nullptr, &depth_stencil));
-			depth_stencil_ = MakeCOMPtr(depth_stencil);
+			depth_stencil_ = rf.MakeTexture2D(width_, height_, 1, stereo ? 2 : 1, depth_stencil_fmt_,
+				back_buffer_->SampleCount(), back_buffer_->SampleQuality(),
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-			// Create the depth stencil view
-			D3D11_DEPTH_STENCIL_VIEW_DESC dsv_desc;
-			dsv_desc.Format = depth_stencil_format_;
-			dsv_desc.Flags = 0;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-			if (dxgi_sub_ver_ >= 2)
-			{
-				if (bb_desc.SampleDesc.Count > 1)
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
-					dsv_desc.Texture2DMSArray.FirstArraySlice = 0;
-					dsv_desc.Texture2DMSArray.ArraySize = 1;
-				}
-				else
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-					dsv_desc.Texture2DArray.MipSlice = 0;
-					dsv_desc.Texture2DArray.FirstArraySlice = 0;
-					dsv_desc.Texture2DArray.ArraySize = 1;
-				}
-			}
-			else
-#endif
-			{
-				if (bb_desc.SampleDesc.Count > 1)
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-				}
-				else
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-					dsv_desc.Texture2D.MipSlice = 0;
-				}
-			}
-			ID3D11DepthStencilView* depth_stencil_view;
-			TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
-			depth_stencil_view_ = MakeCOMPtr(depth_stencil_view);
+			depth_stencil_view_ = rf.Make2DDepthStencilRenderView(*depth_stencil_, 0, 1, 0);
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (stereo)
 			{
-				if (bb_desc.SampleDesc.Count > 1)
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
-					dsv_desc.Texture2DMSArray.FirstArraySlice = 1;
-					dsv_desc.Texture2DMSArray.ArraySize = 1;
-				}
-				else
-				{
-					dsv_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
-					dsv_desc.Texture2DArray.MipSlice = 0;
-					dsv_desc.Texture2DArray.FirstArraySlice = 1;
-					dsv_desc.Texture2DArray.ArraySize = 1;
-				}
-				TIF(d3d_device->CreateDepthStencilView(depth_stencil_.get(), &dsv_desc, &depth_stencil_view));
-				depth_stencil_view_right_eye_ = MakeCOMPtr(depth_stencil_view);
+				depth_stencil_view_right_eye_ = rf.Make2DDepthStencilRenderView(*depth_stencil_, 1, 1, 0);
 			}
 #endif
 		}
@@ -939,12 +818,10 @@ namespace KlayGE
 			stereo_amd_right_eye_height_ = stereo_amd_qb_ext_->GetLineOffset(swap_chain_.get());
 		}
 
-		this->Attach(ATT_Color0, MakeSharedPtr<D3D11RenderTargetRenderView>(render_target_view_,
-			this->Width(), this->Height(), D3D11Mapping::MappingFormat(back_buffer_format_)));
+		this->Attach(ATT_Color0, render_target_view_);
 		if (depth_stencil_view_)
 		{
-			this->Attach(ATT_DepthStencil, MakeSharedPtr<D3D11DepthStencilRenderView>(depth_stencil_view_,
-				this->Width(), this->Height(), D3D11Mapping::MappingFormat(depth_stencil_format_)));
+			this->Attach(ATT_DepthStencil, depth_stencil_view_);
 		}
 	}
 
@@ -957,22 +834,18 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (dxgi_sub_ver_ >= 2)
 			{
-				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-				ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
-				ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx);
-				d3d_imm_ctx_1->DiscardView(render_target_view_.get());
+				render_target_view_->Discard();
 				if (depth_stencil_view_)
 				{
-					d3d_imm_ctx_1->DiscardView(depth_stencil_view_.get());
+					depth_stencil_view_->Discard();
 				}
 				if (render_target_view_right_eye_)
 				{
-					d3d_imm_ctx_1->DiscardView(render_target_view_right_eye_.get());
+					render_target_view_right_eye_->Discard();
 				}
 				if (depth_stencil_view_right_eye_)
 				{
-					d3d_imm_ctx_1->DiscardView(depth_stencil_view_right_eye_.get());
+					depth_stencil_view_right_eye_->Discard();
 				}
 			}
 #endif
