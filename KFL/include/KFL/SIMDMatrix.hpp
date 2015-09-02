@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <array>
 #include <boost/operators.hpp>
 
 namespace KlayGE
@@ -82,7 +83,7 @@ namespace KlayGE
 		SIMDMatrixF4 const operator-() const;
 
 	private:
-		array<SIMDVectorF4, 4> m_;
+		std::array<SIMDVectorF4, 4> m_;
 	};
 }
 
