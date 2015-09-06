@@ -70,29 +70,6 @@ namespace
 {
 	using namespace KlayGE;
 
-	class SetD3D11ShaderParameterSampler
-	{
-	public:
-		SetD3D11ShaderParameterSampler(ID3D11SamplerStatePtr& sampler, RenderEffectParameterPtr const & param)
-			: sampler_(&sampler), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			SamplerStateObjectPtr sampler;
-			param_->Value(sampler);
-			if (sampler)
-			{
-				*sampler_ = checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
-			}
-		}
-
-	private:
-		ID3D11SamplerStatePtr* sampler_;
-		RenderEffectParameterPtr param_;
-	};
-
 	class SetD3D11ShaderParameterTextureSRV
 	{
 	public:
@@ -1580,9 +1557,22 @@ namespace KlayGE
 
 				D3D11ShaderParameterHandle p_handle;
 				p_handle.shader_type = static_cast<uint8_t>(type);
+				p_handle.cbuff = 0;
+				p_handle.offset = shader_desc_[type].res_desc[i].bind_point;
+				p_handle.elements = 1;
+				p_handle.rows = 0;
+				p_handle.columns = 1;
 				if (D3D_SIT_SAMPLER == shader_desc_[type].res_desc[i].type)
 				{
 					p_handle.param_type = D3D_SVT_SAMPLER;
+
+					SamplerStateObjectPtr sampler;
+					p->Value(sampler);
+					if (sampler)
+					{
+						samplers_[p_handle.shader_type][p_handle.offset]
+							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
+					}
 				}
 				else
 				{
@@ -1594,14 +1584,9 @@ namespace KlayGE
 					{
 						p_handle.param_type = D3D_SVT_TEXTURE;
 					}
-				}
-				p_handle.cbuff = 0;
-				p_handle.offset = shader_desc_[type].res_desc[i].bind_point;
-				p_handle.elements = 1;
-				p_handle.rows = 0;
-				p_handle.columns = 1;
 
-				param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+					param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+				}
 			}
 		}
 		else
@@ -1672,7 +1657,7 @@ namespace KlayGE
 				break;
 			}
 
-			samplers_[type].resize(so.samplers_[type].size());
+			samplers_[type] = so.samplers_[type];
 			srvsrcs_[type].resize(so.srvs_[type].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(), nullptr);
@@ -1771,7 +1756,7 @@ namespace KlayGE
 			ret->shader_code_[i] = shader_code_[i];
 			ret->shader_desc_[i] = shader_desc_[i];
 
-			ret->samplers_[i].resize(samplers_[i].size());
+			ret->samplers_[i] = samplers_[i];
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(), nullptr);
@@ -1827,10 +1812,7 @@ namespace KlayGE
 		case REDT_float3:
 		case REDT_float4:
 		case REDT_float4x4:
-			break;
-
 		case REDT_sampler:
-			ret.func = SetD3D11ShaderParameterSampler(samplers_[p_handle.shader_type][p_handle.offset], param);
 			break;
 
 		case REDT_texture1D:
