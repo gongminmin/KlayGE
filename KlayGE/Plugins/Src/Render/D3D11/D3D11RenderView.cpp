@@ -17,7 +17,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
-#include <KlayGe/FrameBuffer.hpp>
+#include <KlayGE/FrameBuffer.hpp>
 
 #include <boost/assert.hpp>
 
