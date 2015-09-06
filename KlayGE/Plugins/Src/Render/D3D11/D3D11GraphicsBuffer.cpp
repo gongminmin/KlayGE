@@ -91,7 +91,7 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.DeviceFeatureLevel() > D3D_FEATURE_LEVEL_9_3)
 		{
-			if (access_hint_ & EAH_GPU_Read)
+			if ((access_hint_ & EAH_GPU_Read) && !(access_hint_ & EAH_CPU_Write))
 			{
 				bind_flags |= D3D11_BIND_SHADER_RESOURCE;
 			}
