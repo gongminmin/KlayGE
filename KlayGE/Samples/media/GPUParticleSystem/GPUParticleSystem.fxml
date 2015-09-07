@@ -121,7 +121,7 @@ float4 ParticlesPS(PS_IN ps_in) : SV_Target
 	<technique name="Particles">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 			
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -292,21 +292,22 @@ float4 UpdateVelPS(float2 tex : TEXCOORD0) : SV_Target
 
 	<technique name="Update">
 		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
 			<state name="vertex_shader" value="UpdateVS()"/>
 			<state name="pixel_shader" value="UpdatePS()"/>
 		</pass>
 	</technique>
 
-	<technique name="UpdatePos">
+	<technique name="UpdatePos" inherit="Update">
 		<pass name="p0">
-			<state name="vertex_shader" value="UpdateVS()"/>
 			<state name="pixel_shader" value="UpdatePosPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="UpdateVel">
+	<technique name="UpdateVel" inherit="Update">
 		<pass name="p0">
-			<state name="vertex_shader" value="UpdateVS()"/>
 			<state name="pixel_shader" value="UpdateVelPS()"/>
 		</pass>
 	</technique>
@@ -373,7 +374,7 @@ void ParticlesGS(point float4 input[1] : SV_Position, inout TriangleStream<PS_IN
 	<technique name="ParticlesWithGS">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -392,7 +393,7 @@ void ParticlesGS(point float4 input[1] : SV_Position, inout TriangleStream<PS_IN
 	<technique name="ParticlesWithGSSO">
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
+			<state name="depth_write_mask" value="0"/>
 
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
