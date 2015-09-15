@@ -3705,8 +3705,6 @@ namespace KlayGE
 		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
 		*width_height_param_ = uint2(w, h);
 
-		*shading_in_tex_param_ = (Opaque_GBuffer == g_buffer_index)
-			? pvp.curr_merged_shading_tex : pvp.shading_tex;
 		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
 		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
@@ -3942,10 +3940,13 @@ namespace KlayGE
 
 			if (available_lights[0].empty())
 			{
+				*shading_in_tex_param_ = (Opaque_GBuffer == g_buffer_index)
+					? pvp.curr_merged_shading_tex : pvp.shading_tex;
 				*shading_rw_tex_param_ = pvp.temp_shading_tex;
 			}
 			else
 			{
+				*shading_in_tex_param_ = TexturePtr();
 				*shading_rw_tex_param_ = (Opaque_GBuffer == g_buffer_index)
 					? pvp.curr_merged_shading_tex : pvp.shading_tex;
 			}
