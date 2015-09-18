@@ -1179,6 +1179,7 @@ namespace KlayGE
 						case D3D_SIT_UAV_RWBYTEADDRESS:
 						case D3D_SIT_UAV_APPEND_STRUCTURED:
 						case D3D_SIT_UAV_CONSUME_STRUCTURED:
+						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 							num_uavs = std::max(num_uavs, static_cast<int>(si_desc.BindPoint));
 							break;
 
@@ -1207,6 +1208,7 @@ namespace KlayGE
 						case D3D_SIT_UAV_RWBYTEADDRESS:
 						case D3D_SIT_UAV_APPEND_STRUCTURED:
 						case D3D_SIT_UAV_CONSUME_STRUCTURED:
+						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
 							{
 								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
 								if (p)
