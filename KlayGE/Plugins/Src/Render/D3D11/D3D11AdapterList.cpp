@@ -76,9 +76,6 @@ namespace KlayGE
 		{
 			if (dxgi_adapter != nullptr)
 			{
-				DXGI_ADAPTER_DESC ad;
-				dxgi_adapter->GetDesc(&ad);
-
 				D3D11AdapterPtr adapter = MakeSharedPtr<D3D11Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
 				adapter->Enumerate();
 				adapters_.push_back(adapter);
