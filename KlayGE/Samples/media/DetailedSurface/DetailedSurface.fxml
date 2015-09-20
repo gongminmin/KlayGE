@@ -160,8 +160,7 @@ void ParallaxOcclusionMappingVS(float4 pos				: POSITION,
 float4 ParallaxOcclusionMappingPS(float4 L		: TEXCOORD0,
 					float4 H					: TEXCOORD1,
 					float3 V					: TEXCOORD2,
-					float4 vParallaxOffsetTS	: TEXCOORD3,
-					float distortion			: TEXCOORD4) : SV_Target
+					float4 vParallaxOffsetTS	: TEXCOORD3) : SV_Target
 {
 	float3 view = normalize(V);
 	float2 texCoord = float2(L.w, H.w);
