@@ -125,6 +125,17 @@ namespace KlayGE
 			}
 		}
 #endif
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		{
+			IDXGIFactory4* factory;
+			gi_factory->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&factory));
+			if (factory != nullptr)
+			{
+				gi_factory_4_ = MakeCOMPtr(factory);
+				dxgi_sub_ver_ = 4;
+			}
+		}
+#endif
 
 		viewport_->left		= 0;
 		viewport_->top		= 0;
@@ -155,7 +166,7 @@ namespace KlayGE
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP"));
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
 
-			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;	
+			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (dxgi_sub_ver_ >= 2)
 			{
@@ -424,10 +435,11 @@ namespace KlayGE
 			if (adapter_->Description().find(L"AMD", 0) != std::wstring::npos)
 			{
 #ifdef KLAYGE_PLATFORM_WIN64
-				HMODULE dll = ::GetModuleHandle(TEXT("atidxx64.dll"));
+				const TCHAR* ati_driver = TEXT("atidxx64.dll");
 #else
-				HMODULE dll = ::GetModuleHandle(TEXT("atidxx32.dll"));
+				const TCHAR* ati_driver = TEXT("atidxx32.dll");
 #endif
+				HMODULE dll = ::GetModuleHandle(ati_driver);
 				if (dll != nullptr)
 				{
 					PFNAmdDxExtCreate11 AmdDxExtCreate11 = reinterpret_cast<PFNAmdDxExtCreate11>(::GetProcAddress(dll, "AmdDxExtCreate11"));
@@ -582,7 +594,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
+			ID3D11DevicePtr const & d3d_device = d3d11_re.D3DDevice();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
@@ -764,6 +776,9 @@ namespace KlayGE
 		back_buffer_.reset();
 		depth_stencil_.reset();
 		swap_chain_.reset();
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		gi_factory_4_.reset();
+#endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		gi_factory_3_.reset();
 #endif
@@ -776,8 +791,6 @@ namespace KlayGE
 	void D3D11RenderWindow::UpdateSurfacesPtrs()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
 
 		// Create a render target view
 		ID3D11Texture2D* back_buffer;

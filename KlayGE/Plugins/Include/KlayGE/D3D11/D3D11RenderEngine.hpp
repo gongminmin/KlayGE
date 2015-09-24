@@ -152,6 +152,7 @@ namespace KlayGE
 		void DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 		void DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 		void DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
+		void DetectD3D11_3Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
 
 		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
 

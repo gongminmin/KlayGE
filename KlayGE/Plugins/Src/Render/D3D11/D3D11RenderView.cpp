@@ -377,20 +377,6 @@ namespace KlayGE
 
 		this->BindDiscardFunc();
 	}
-
-	D3D11UnorderedAccessView::D3D11UnorderedAccessView(ID3D11UnorderedAccessViewPtr const & view, uint32_t width, uint32_t height, ElementFormat pf)
-		: ua_view_(view), ua_src_(nullptr), ua_first_subres_(0), ua_num_subres_(0)
-	{
-		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3DDevice();
-		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
-
-		width_ = width;
-		height_ = height;
-		pf_ = pf;
-
-		this->BindDiscardFunc();
-	}
 	
 	D3D11UnorderedAccessView::~D3D11UnorderedAccessView()
 	{

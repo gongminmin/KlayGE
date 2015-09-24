@@ -46,7 +46,10 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		virtual ID3D11ResourcePtr D3DResource() const = 0;
+		ID3D11ResourcePtr const & D3DResource()
+		{
+			return d3d_texture_;
+		}
 
 		virtual ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
 
@@ -60,6 +63,8 @@ namespace KlayGE
 		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
 		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
 		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
+
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
@@ -93,6 +98,7 @@ namespace KlayGE
 		ID3D11DevicePtr				d3d_device_;
 		ID3D11DeviceContextPtr		d3d_imm_ctx_;
 
+		ID3D11ResourcePtr d3d_texture_;
 		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
 		std::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
 		std::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
@@ -123,17 +129,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D11ResourcePtr D3DResource() const
-		{
-			return d3dTexture1D_;
-		}
-		ID3D11Texture1DPtr const & D3DTexture() const
-		{
-			return d3dTexture1D_;
-		}
-
 		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -142,8 +138,7 @@ namespace KlayGE
 		virtual void Unmap1D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		D3D11_TEXTURE1D_DESC desc_;
-		ID3D11Texture1DPtr d3dTexture1D_;
+		DXGI_FORMAT dxgi_fmt_;
 
 		std::vector<uint32_t> widths_;
 	};
@@ -174,17 +169,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D11ResourcePtr D3DResource() const
-		{
-			return d3dTexture2D_;
-		}
-		ID3D11Texture2DPtr const & D3DTexture() const
-		{
-			return d3dTexture2D_;
-		}
-
 		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		virtual void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -193,8 +178,7 @@ namespace KlayGE
 		virtual void Unmap2D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		D3D11_TEXTURE2D_DESC desc_;
-		ID3D11Texture2DPtr d3dTexture2D_;
+		DXGI_FORMAT dxgi_fmt_;
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
@@ -224,17 +208,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D11ResourcePtr D3DResource() const
-		{
-			return d3dTexture3D_;
-		}
-		ID3D11Texture3DPtr const & D3DTexture() const
-		{
-			return d3dTexture3D_;
-		}
-
 		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		virtual void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -244,8 +218,7 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		D3D11_TEXTURE3D_DESC desc_;
-		ID3D11Texture3DPtr d3dTexture3D_;
+		DXGI_FORMAT dxgi_fmt_;
 
 		std::vector<uint32_t>	widths_;
 		std::vector<uint32_t>	heights_;
@@ -281,17 +254,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		ID3D11ResourcePtr D3DResource() const
-		{
-			return d3dTextureCube_;
-		}
-		ID3D11TextureCubePtr const & D3DTexture() const
-		{
-			return d3dTextureCube_;
-		}
-
 		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE;
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
 
 	private:
 		virtual void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
@@ -300,8 +263,7 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		D3D11_TEXTURE2D_DESC desc_;
-		ID3D11TextureCubePtr d3dTextureCube_;
+		DXGI_FORMAT dxgi_fmt_;
 
 		std::vector<uint32_t>	widths_;
 	};

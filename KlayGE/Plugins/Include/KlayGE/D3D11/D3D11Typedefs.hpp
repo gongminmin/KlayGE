@@ -35,8 +35,11 @@
 	#define D3D_FEATURE_LEVEL_11_1 0xb100
 #elif (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	#include <d3d11_1.h>
-#else
+#elif (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 	#include <d3d11_2.h>
+#else
+	#include <dxgi1_4.h>
+	#include <d3d11_3.h>
 #endif
 
 namespace KlayGE
@@ -49,6 +52,9 @@ namespace KlayGE
 #endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	typedef std::shared_ptr<IDXGIFactory3>				IDXGIFactory3Ptr;
+#endif
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+	typedef std::shared_ptr<IDXGIFactory4>				IDXGIFactory4Ptr;
 #endif
 	typedef std::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
 	typedef std::shared_ptr<ID3D11Device>				ID3D11DevicePtr;

@@ -374,4 +374,13 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(false);
 	}
+
+	void D3D11Texture::DeleteHWResource()
+	{
+		d3d_sr_views_.clear();
+		d3d_ua_views_.clear();
+		d3d_rt_views_.clear();
+		d3d_ds_views_.clear();
+		d3d_texture_.reset();
+	}
 }

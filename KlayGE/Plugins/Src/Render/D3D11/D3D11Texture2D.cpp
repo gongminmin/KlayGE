@@ -79,6 +79,7 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
+		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 
 		widths_.resize(num_mip_maps_);
 		heights_.resize(num_mip_maps_);
@@ -90,50 +91,25 @@ namespace KlayGE
 			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
 		}
 
-		desc_.Width = width;
-		desc_.Height = height;
-		desc_.MipLevels = num_mip_maps_;
-		desc_.ArraySize = array_size_;
-		switch (format_)
-		{
-		case EF_D16:
-			desc_.Format = DXGI_FORMAT_R16_TYPELESS;
-			break;
-
-		case EF_D24S8:
-			desc_.Format = DXGI_FORMAT_R24G8_TYPELESS;
-			break;
-
-		case EF_D32F:
-			desc_.Format = DXGI_FORMAT_R32_TYPELESS;
-			break;
-
-		default:
-			desc_.Format = D3D11Mapping::MappingFormat(format_);
-			break;
-		}
-		desc_.SampleDesc.Count = sample_count;
-		desc_.SampleDesc.Quality = sample_quality;
-
-		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
 		this->CreateHWResource(init_data);
 	}
 
 	D3D11Texture2D::D3D11Texture2D(ID3D11Texture2DPtr const & d3d_tex)
 					: D3D11Texture(TT_2D, 1, 0, 0)
 	{
-		d3d_tex->GetDesc(&desc_);
+		D3D11_TEXTURE2D_DESC desc;
+		d3d_tex->GetDesc(&desc);
 
-		num_mip_maps_ = desc_.MipLevels;
-		array_size_ = desc_.ArraySize;
-		format_ = D3D11Mapping::MappingFormat(desc_.Format);
-		sample_count_ = desc_.SampleDesc.Count;
-		sample_quality_ = desc_.SampleDesc.Quality;
+		num_mip_maps_ = desc.MipLevels;
+		array_size_ = desc.ArraySize;
+		format_ = D3D11Mapping::MappingFormat(desc.Format);
+		sample_count_ = desc.SampleDesc.Count;
+		sample_quality_ = desc.SampleDesc.Quality;
 
 		widths_.resize(num_mip_maps_);
 		heights_.resize(num_mip_maps_);
-		widths_[0] = desc_.Width;
-		heights_[0] = desc_.Height;
+		widths_[0] = desc.Width;
+		heights_[0] = desc.Height;
 		for (uint32_t level = 1; level < num_mip_maps_; ++level)
 		{
 			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
@@ -141,7 +117,7 @@ namespace KlayGE
 		}
 
 		access_hint_ = 0;
-		switch (desc_.Usage)
+		switch (desc.Usage)
 		{
 		case D3D11_USAGE_DEFAULT:
 			access_hint_ |= EAH_GPU_Read | EAH_GPU_Write;
@@ -153,18 +129,18 @@ namespace KlayGE
 
 		case D3D11_USAGE_DYNAMIC:
 			access_hint_ |= EAH_GPU_Read;
-			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
+			if (desc.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
 			{
 				access_hint_ |= EAH_CPU_Write;
 			}
 			break;
 
 		case D3D11_USAGE_STAGING:
-			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_READ)
+			if (desc.CPUAccessFlags & D3D11_CPU_ACCESS_READ)
 			{
 				access_hint_ |= EAH_CPU_Read;
 			}
-			if (desc_.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
+			if (desc.CPUAccessFlags & D3D11_CPU_ACCESS_WRITE)
 			{
 				access_hint_ |= EAH_CPU_Write;
 			}
@@ -174,18 +150,16 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		if (desc_.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
+		if (desc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
 		{
 			access_hint_ |= EAH_GPU_Unordered;
 		}
-		if (desc_.MiscFlags & D3D11_RESOURCE_MISC_GENERATE_MIPS)
+		if (desc.MiscFlags & D3D11_RESOURCE_MISC_GENERATE_MIPS)
 		{
 			access_hint_ |= EAH_Generate_Mips;
 		}
 
-		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-
-		d3dTexture2D_ = d3d_tex;
+		d3d_texture_ = d3d_tex;
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
@@ -220,13 +194,13 @@ namespace KlayGE
 			{
 				for (uint32_t l = 0; l < this->NumMipMaps(); ++ l)
 				{
-					d3d_imm_ctx_->ResolveSubresource(other.D3DTexture().get(), D3D11CalcSubresource(l, 0, other.NumMipMaps()),
-						d3dTexture2D_.get(), D3D11CalcSubresource(l, 0, this->NumMipMaps()), D3D11Mapping::MappingFormat(target.Format()));
+					d3d_imm_ctx_->ResolveSubresource(other.d3d_texture_.get(), D3D11CalcSubresource(l, 0, other.NumMipMaps()),
+						d3d_texture_.get(), D3D11CalcSubresource(l, 0, this->NumMipMaps()), D3D11Mapping::MappingFormat(target.Format()));
 				}
 			}
 			else
 			{
-				d3d_imm_ctx_->CopyResource(other.D3DTexture().get(), d3dTexture2D_.get());
+				d3d_imm_ctx_->CopyResource(other.d3d_texture_.get(), d3d_texture_.get());
 			}
 		}
 		else
@@ -321,7 +295,7 @@ namespace KlayGE
 			break;
 
 		default:
-			desc.Format = desc_.Format;
+			desc.Format = dxgi_fmt_;
 			break;
 		}
 
@@ -362,7 +336,7 @@ namespace KlayGE
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = desc_.Format;
+		desc.Format = dxgi_fmt_;
 		if (array_size_ > 1)
 		{
 			desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
@@ -473,7 +447,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTexture2D_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_), D3D11Mapping::Mapping(tma, type_, access_hint_, num_mip_maps_), 0, &mapped));
+		TIF(d3d_imm_ctx_->Map(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_), D3D11Mapping::Mapping(tma, type_, access_hint_, num_mip_maps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + y_offset * mapped.RowPitch + x_offset * NumFormatBytes(format_);
 		row_pitch = mapped.RowPitch;
@@ -481,7 +455,7 @@ namespace KlayGE
 
 	void D3D11Texture2D::Unmap2D(uint32_t array_index, uint32_t level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTexture2D_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
+		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_));
 	}
 
 	void D3D11Texture2D::BuildMipSubLevels()
@@ -506,6 +480,33 @@ namespace KlayGE
 
 	void D3D11Texture2D::CreateHWResource(ElementInitData const * init_data)
 	{
+		D3D11_TEXTURE2D_DESC desc;
+		desc.Width = widths_[0];
+		desc.Height = heights_[0];
+		desc.MipLevels = num_mip_maps_;
+		desc.ArraySize = array_size_;
+		switch (format_)
+		{
+		case EF_D16:
+			desc.Format = DXGI_FORMAT_R16_TYPELESS;
+			break;
+
+		case EF_D24S8:
+			desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+			break;
+
+		case EF_D32F:
+			desc.Format = DXGI_FORMAT_R32_TYPELESS;
+			break;
+
+		default:
+			desc.Format = dxgi_fmt_;
+			break;
+		}
+		desc.SampleDesc.Count = sample_count_;
+		desc.SampleDesc.Quality = sample_quality_;
+		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
+
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(array_size_ * num_mip_maps_);
 		if (init_data != nullptr)
 		{
@@ -521,21 +522,12 @@ namespace KlayGE
 		}
 
 		ID3D11Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
-		d3dTexture2D_ = MakeCOMPtr(d3d_tex);
+		TIF(d3d_device_->CreateTexture2D(&desc, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+		d3d_texture_ = MakeCOMPtr(d3d_tex);
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
 			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
 		}
-	}
-
-	void D3D11Texture2D::DeleteHWResource()
-	{
-		d3d_sr_views_.clear();
-		d3d_ua_views_.clear();
-		d3d_rt_views_.clear();
-		d3d_ds_views_.clear();
-		d3dTexture2D_.reset();
 	}
 }

@@ -76,6 +76,7 @@ namespace KlayGE
 
 		array_size_ = array_size;
 		format_		= format;
+		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 
 		widths_.resize(num_mip_maps_);
 		widths_[0] = size;
@@ -83,17 +84,6 @@ namespace KlayGE
 		{
 			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
 		}
-
-		desc_.Width = size;
-		desc_.Height = size;
-		desc_.MipLevels = num_mip_maps_;
-		desc_.ArraySize = 6 * array_size_;
-		desc_.Format = D3D11Mapping::MappingFormat(format_);
-		desc_.SampleDesc.Count = 1;
-		desc_.SampleDesc.Quality = 0;
-
-		this->GetD3DFlags(desc_.Usage, desc_.BindFlags, desc_.CPUAccessFlags, desc_.MiscFlags);
-		desc_.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
 
 		this->CreateHWResource(init_data);
 	}
@@ -119,7 +109,7 @@ namespace KlayGE
 		if ((this->Width(0) == target.Width(0)) && (this->Format() == target.Format())
 			&& (this->ArraySize() == target.ArraySize()) && (this->NumMipMaps() == target.NumMipMaps()))
 		{
-			d3d_imm_ctx_->CopyResource(other.D3DTexture().get(), d3dTextureCube_.get());
+			d3d_imm_ctx_->CopyResource(other.d3d_texture_.get(), d3d_texture_.get());
 		}
 		else
 		{
@@ -220,7 +210,7 @@ namespace KlayGE
 			break;
 
 		default:
-			desc.Format = desc_.Format;
+			desc.Format = dxgi_fmt_;
 			break;
 		}
 
@@ -241,7 +231,7 @@ namespace KlayGE
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
-		desc.Format = desc_.Format;
+		desc.Format = dxgi_fmt_;
 		desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 		desc.Texture2DArray.MipSlice = level;
 		desc.Texture2DArray.FirstArraySlice = first_array_index * 6 + first_face;
@@ -345,7 +335,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch)
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_),
+		TIF(d3d_imm_ctx_->Map(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_),
 			D3D11Mapping::Mapping(tma, type_, access_hint_, num_mip_maps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
 		data = p + y_offset * mapped.RowPitch + x_offset * NumFormatBytes(format_);
@@ -354,7 +344,7 @@ namespace KlayGE
 
 	void D3D11TextureCube::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
 	{
-		d3d_imm_ctx_->Unmap(d3dTextureCube_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_));
+		d3d_imm_ctx_->Unmap(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face - CF_Positive_X, num_mip_maps_));
 	}
 
 	void D3D11TextureCube::BuildMipSubLevels()
@@ -383,6 +373,17 @@ namespace KlayGE
 
 	void D3D11TextureCube::CreateHWResource(ElementInitData const * init_data)
 	{
+		D3D11_TEXTURE2D_DESC desc;
+		desc.Width = widths_[0];
+		desc.Height = widths_[0];
+		desc.MipLevels = num_mip_maps_;
+		desc.ArraySize = 6 * array_size_;
+		desc.Format = D3D11Mapping::MappingFormat(format_);
+		desc.SampleDesc.Count = 1;
+		desc.SampleDesc.Quality = 0;
+		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
+		desc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+
 		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(6 * num_mip_maps_);
 		if (init_data != nullptr)
 		{
@@ -398,21 +399,12 @@ namespace KlayGE
 		}
 
 		ID3D11Texture2D* d3d_tex;
-		TIF(d3d_device_->CreateTexture2D(&desc_, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
-		d3dTextureCube_ = MakeCOMPtr(d3d_tex);
+		TIF(d3d_device_->CreateTexture2D(&desc, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+		d3d_texture_ = MakeCOMPtr(d3d_tex);
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))
 		{
 			this->RetriveD3DShaderResourceView(0, array_size_, 0, num_mip_maps_);
 		}
-	}
-
-	void D3D11TextureCube::DeleteHWResource()
-	{
-		d3d_sr_views_.clear();
-		d3d_ua_views_.clear();
-		d3d_rt_views_.clear();
-		d3d_ds_views_.clear();
-		d3dTextureCube_.reset();
 	}
 }

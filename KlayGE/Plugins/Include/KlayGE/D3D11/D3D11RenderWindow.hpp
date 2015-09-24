@@ -146,6 +146,9 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		IDXGIFactory3Ptr gi_factory_3_;
 #endif
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		IDXGIFactory4Ptr gi_factory_4_;
+#endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;

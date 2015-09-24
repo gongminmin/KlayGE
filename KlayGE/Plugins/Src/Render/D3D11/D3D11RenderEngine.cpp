@@ -1448,6 +1448,40 @@ namespace KlayGE
 #endif
 	}
 
+	void D3D11RenderEngine::DetectD3D11_3Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		d3d_11_runtime_sub_ver_ = 0;
+
+		ID3D11Device3* d3d_device_3;
+		device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
+		if (d3d_device_3)
+		{
+			ID3D11DeviceContext3* d3d_imm_ctx_3;
+			imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
+			if (d3d_imm_ctx_3)
+			{
+				d3d_device_ = MakeCOMPtr(d3d_device_3);
+				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_3);
+				d3d_11_runtime_sub_ver_ = 3;
+			}
+			else
+			{
+				d3d_device_3->Release();
+
+				this->DetectD3D11_2Runtime(device, imm_ctx);
+			}
+		}
+		else
+		{
+			this->DetectD3D11_2Runtime(device, imm_ctx);
+		}
+#else
+		UNREF_PARAM(device);
+		UNREF_PARAM(imm_ctx);
+#endif
+	}
+
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)
 	{
 		uint32_t const width = mono_tex_->Width(0);
@@ -1496,8 +1530,8 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11Texture2DPtr back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DTexture();
-					ID3D11Texture2DPtr stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DTexture();
+					ID3D11ResourcePtr back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource();
+					ID3D11ResourcePtr stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource();
 
 					D3D11_BOX box;
 					box.left = 0;
