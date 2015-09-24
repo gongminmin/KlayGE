@@ -78,12 +78,7 @@ namespace KlayGE
 		format_		= format;
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 
-		widths_.resize(num_mip_maps_);
-		widths_[0] = size;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
-		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-		}
+		width_ = size;
 
 		this->CreateHWResource(init_data);
 	}
@@ -92,7 +87,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widths_[level];
+		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
 	uint32_t D3D11TextureCube::Height(uint32_t level) const
@@ -374,8 +369,8 @@ namespace KlayGE
 	void D3D11TextureCube::CreateHWResource(ElementInitData const * init_data)
 	{
 		D3D11_TEXTURE2D_DESC desc;
-		desc.Width = widths_[0];
-		desc.Height = widths_[0];
+		desc.Width = width_;
+		desc.Height = width_;
 		desc.MipLevels = num_mip_maps_;
 		desc.ArraySize = 6 * array_size_;
 		desc.Format = D3D11Mapping::MappingFormat(format_);

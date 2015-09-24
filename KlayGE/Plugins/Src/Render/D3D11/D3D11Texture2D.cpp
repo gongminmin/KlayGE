@@ -80,16 +80,8 @@ namespace KlayGE
 		array_size_ = array_size;
 		format_		= format;
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
-
-		widths_.resize(num_mip_maps_);
-		heights_.resize(num_mip_maps_);
-		widths_[0] = width;
-		heights_[0] = height;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
-		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
-		}
+		width_ = width;
+		height_ = height;
 
 		this->CreateHWResource(init_data);
 	}
@@ -105,16 +97,8 @@ namespace KlayGE
 		format_ = D3D11Mapping::MappingFormat(desc.Format);
 		sample_count_ = desc.SampleDesc.Count;
 		sample_quality_ = desc.SampleDesc.Quality;
-
-		widths_.resize(num_mip_maps_);
-		heights_.resize(num_mip_maps_);
-		widths_[0] = desc.Width;
-		heights_[0] = desc.Height;
-		for (uint32_t level = 1; level < num_mip_maps_; ++level)
-		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
-		}
+		width_ = desc.Width;
+		height_ = desc.Height;
 
 		access_hint_ = 0;
 		switch (desc.Usage)
@@ -171,14 +155,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widths_[level];
+		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
 	uint32_t D3D11Texture2D::Height(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return heights_[level];
+		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
 	void D3D11Texture2D::CopyToTexture(Texture& target)
@@ -481,8 +465,8 @@ namespace KlayGE
 	void D3D11Texture2D::CreateHWResource(ElementInitData const * init_data)
 	{
 		D3D11_TEXTURE2D_DESC desc;
-		desc.Width = widths_[0];
-		desc.Height = heights_[0];
+		desc.Width = width_;
+		desc.Height = height_;
 		desc.MipLevels = num_mip_maps_;
 		desc.ArraySize = array_size_;
 		switch (format_)

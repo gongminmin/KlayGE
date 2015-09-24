@@ -98,6 +98,8 @@ namespace KlayGE
 		ID3D11DevicePtr				d3d_device_;
 		ID3D11DeviceContextPtr		d3d_imm_ctx_;
 
+		DXGI_FORMAT dxgi_fmt_;
+
 		ID3D11ResourcePtr d3d_texture_;
 		std::unordered_map<size_t, ID3D11ShaderResourceViewPtr> d3d_sr_views_;
 		std::unordered_map<size_t, ID3D11UnorderedAccessViewPtr> d3d_ua_views_;
@@ -138,9 +140,7 @@ namespace KlayGE
 		virtual void Unmap1D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		DXGI_FORMAT dxgi_fmt_;
-
-		std::vector<uint32_t> widths_;
+		uint32_t width_;
 	};
 
 	class D3D11Texture2D : public D3D11Texture
@@ -178,10 +178,8 @@ namespace KlayGE
 		virtual void Unmap2D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		DXGI_FORMAT dxgi_fmt_;
-
-		std::vector<uint32_t>	widths_;
-		std::vector<uint32_t>	heights_;
+		uint32_t width_;
+		uint32_t height_;
 	};
 
 	class D3D11Texture3D : public D3D11Texture
@@ -218,11 +216,9 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		DXGI_FORMAT dxgi_fmt_;
-
-		std::vector<uint32_t>	widths_;
-		std::vector<uint32_t>	heights_;
-		std::vector<uint32_t>	depthes_;
+		uint32_t width_;
+		uint32_t height_;
+		uint32_t depth_;
 	};
 
 	class D3D11TextureCube : public D3D11Texture
@@ -263,9 +259,7 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		DXGI_FORMAT dxgi_fmt_;
-
-		std::vector<uint32_t>	widths_;
+		uint32_t width_;
 	};
 }
 

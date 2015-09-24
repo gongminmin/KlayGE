@@ -135,7 +135,7 @@ namespace KlayGE
 		virtual void Unmap1D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		std::vector<uint32_t> widths_;
+		uint32_t width_;
 	};
 
 	class OGLTexture2D : public OGLTexture
@@ -164,8 +164,8 @@ namespace KlayGE
 		virtual void Unmap2D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		std::vector<uint32_t> widths_;
-		std::vector<uint32_t> heights_;
+		uint32_t width_;
+		uint32_t height_;
 	};
 
 	class OGLTexture3D : public OGLTexture
@@ -193,9 +193,9 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		std::vector<uint32_t> widths_;
-		std::vector<uint32_t> heights_;
-		std::vector<uint32_t> depthes_;
+		uint32_t width_;
+		uint32_t height_;
+		uint32_t depth_;
 	};
 
 	class OGLTextureCube : public OGLTexture
@@ -221,7 +221,7 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) KLAYGE_OVERRIDE;
 
 	private:
-		std::vector<uint32_t> widths_;
+		uint32_t width_;
 	};
 }
 

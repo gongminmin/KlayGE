@@ -85,18 +85,9 @@ namespace KlayGE
 		format_		= format;
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 
-		widths_.resize(num_mip_maps_);
-		heights_.resize(num_mip_maps_);
-		depthes_.resize(num_mip_maps_);
-		widths_[0] = width;
-		heights_[0] = height;
-		depthes_[0] = depth;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
-		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-			heights_[level] = std::max<uint32_t>(1U, heights_[level - 1] / 2);
-			depthes_[level] = std::max<uint32_t>(1U, depthes_[level - 1] / 2);
-		}
+		width_ = width;
+		height_ = height;
+		depth_ = depth;
 
 		this->CreateHWResource(init_data);
 	}
@@ -105,21 +96,21 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widths_[level];
+		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
 	uint32_t D3D11Texture3D::Height(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return heights_[level];
+		return std::max<uint32_t>(1U, height_ >> level);
 	}
 
 	uint32_t D3D11Texture3D::Depth(uint32_t level) const
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return depthes_[level];
+		return std::max<uint32_t>(1U, depth_ >> level);
 	}
 
 	void D3D11Texture3D::CopyToTexture(Texture& target)
@@ -326,9 +317,9 @@ namespace KlayGE
 	void D3D11Texture3D::CreateHWResource(ElementInitData const * init_data)
 	{
 		D3D11_TEXTURE3D_DESC desc;
-		desc.Width = widths_[0];
-		desc.Height = heights_[0];
-		desc.Depth = depthes_[0];
+		desc.Width = width_;
+		desc.Height = height_;
+		desc.Depth = depth_;
 		desc.MipLevels = num_mip_maps_;
 		desc.Format = D3D11Mapping::MappingFormat(format_);
 		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);

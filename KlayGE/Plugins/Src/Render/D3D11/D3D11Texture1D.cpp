@@ -62,13 +62,7 @@ namespace KlayGE
 		array_size_ = array_size;
 		format_		= format;
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
-
-		widths_.resize(num_mip_maps_);
-		widths_[0] = width;
-		for (uint32_t level = 1; level < num_mip_maps_; ++ level)
-		{
-			widths_[level] = std::max<uint32_t>(1U, widths_[level - 1] / 2);
-		}
+		width_ = width;
 
 		this->CreateHWResource(init_data);
 	}
@@ -77,7 +71,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(level < num_mip_maps_);
 
-		return widths_[level];
+		return std::max<uint32_t>(1U, width_ >> level);
 	}
 
 	void D3D11Texture1D::CopyToTexture(Texture& target)
@@ -284,7 +278,7 @@ namespace KlayGE
 	void D3D11Texture1D::CreateHWResource(ElementInitData const * init_data)
 	{
 		D3D11_TEXTURE1D_DESC desc;
-		desc.Width = widths_[0];
+		desc.Width = width_;
 		desc.MipLevels = num_mip_maps_;
 		desc.ArraySize = array_size_;
 		desc.Format = dxgi_fmt_;
