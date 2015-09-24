@@ -142,24 +142,25 @@ namespace KlayGE
 		viewport_->width	= width_;
 		viewport_->height	= height_;
 
-		ID3D11DevicePtr d3d_device;
-		ID3D11DeviceContextPtr d3d_imm_ctx;
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		if (d3d11_re.D3DDevice())
+		ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
+		ID3D11DeviceContextPtr d3d_imm_ctx;
+
+		if (d3d_device)
 		{
-			d3d_device = d3d11_re.D3DDevice();
 			d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
 
 			main_wnd_ = false;
 		}
 		else
 		{
+			std::vector<UINT> available_create_device_flags;
 			UINT create_device_flags = 0;
 #ifdef KLAYGE_DEBUG
-			create_device_flags |= D3D11_CREATE_DEVICE_DEBUG;
+			available_create_device_flags.push_back(create_device_flags | D3D11_CREATE_DEVICE_DEBUG);
 #endif
+			available_create_device_flags.push_back(create_device_flags);
 
 			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *>> dev_type_behaviors;
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"));
@@ -227,10 +228,25 @@ namespace KlayGE
 					dx_adapter = adapter_->DXGIAdapter().get();
 					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
 				}
-				D3D_FEATURE_LEVEL out_feature_level;
-				if (SUCCEEDED(d3d11_re.D3D11CreateDevice(dx_adapter, dev_type, nullptr, create_device_flags,
-					&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &device,
-					&out_feature_level, &imm_ctx)))
+				D3D_FEATURE_LEVEL out_feature_level = D3D_FEATURE_LEVEL_9_1;
+				HRESULT hr = E_FAIL;
+				for (auto const & flags : available_create_device_flags)
+				{
+					ID3D11Device* this_device = nullptr;
+					ID3D11DeviceContext* this_imm_ctx = nullptr;
+					D3D_FEATURE_LEVEL this_out_feature_level;
+					hr = d3d11_re.D3D11CreateDevice(dx_adapter, dev_type, nullptr, flags,
+						&feature_levels[0], static_cast<UINT>(feature_levels.size()), D3D11_SDK_VERSION, &this_device,
+						&this_out_feature_level, &this_imm_ctx);
+					if (SUCCEEDED(hr))
+					{
+						device = this_device;
+						imm_ctx = this_imm_ctx;
+						out_feature_level = this_out_feature_level;
+						break;
+					}
+				}
+				if (SUCCEEDED(hr))
 				{
 					d3d_device = MakeCOMPtr(device);
 					d3d_imm_ctx = MakeCOMPtr(imm_ctx);
@@ -241,7 +257,7 @@ namespace KlayGE
 						if (dev_type != D3D_DRIVER_TYPE_HARDWARE)
 						{
 							IDXGIDevice1* dxgi_device = nullptr;
-							HRESULT hr = d3d_device->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
+							hr = d3d_device->QueryInterface(IID_IDXGIDevice1, reinterpret_cast<void**>(&dxgi_device));
 							if (SUCCEEDED(hr) && (dxgi_device != nullptr))
 							{
 								IDXGIAdapter* ada;
@@ -535,7 +551,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D11DeviceContextPtr d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
+		ID3D11DeviceContextPtr const & d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
 		if (d3d_imm_ctx)
 		{
 			d3d_imm_ctx->ClearState();
@@ -792,7 +808,6 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		// Create a render target view
 		ID3D11Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
 		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(MakeCOMPtr(back_buffer));
