@@ -120,6 +120,15 @@ namespace KlayGE
 			DXGI_ADAPTER_DESC2 desc2;
 			adapter2->GetDesc2(&desc2);
 			memcpy(adapter_desc_.Description, desc2.Description, sizeof(desc2.Description));
+			adapter_desc_.VendorId = desc2.VendorId;
+			adapter_desc_.DeviceId = desc2.DeviceId;
+			adapter_desc_.SubSysId = desc2.SubSysId;
+			adapter_desc_.Revision = desc2.Revision;
+			adapter_desc_.DedicatedVideoMemory = desc2.DedicatedVideoMemory;
+			adapter_desc_.DedicatedSystemMemory = desc2.DedicatedSystemMemory;
+			adapter_desc_.SharedSystemMemory = desc2.SharedSystemMemory;
+			adapter_desc_.AdapterLuid = desc2.AdapterLuid;
+			adapter_desc_.Flags = desc2.Flags;
 			adapter2->Release();
 		}
 #endif
