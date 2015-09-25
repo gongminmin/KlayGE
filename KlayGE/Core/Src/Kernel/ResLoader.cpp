@@ -303,40 +303,14 @@ namespace KlayGE
 	std::string ResLoader::Locate(std::string const & name)
 	{
 #if defined(KLAYGE_PLATFORM_ANDROID)
-		android_app* state = Context::Instance().AppState();
-		AAssetManager* am = state->activity->assetManager;
-		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
+		AAsset* asset = LocateFileAndroid(name);
 		if (asset != nullptr)
 		{
 			AAsset_close(asset);
 			return name;
 		}
 #elif defined(KLAYGE_PLATFORM_IOS)
-		std::string::size_type found = name.find_last_of(".");
-		if (found != std::string::npos)
-		{
-			std::string::size_type found2 = name.find_last_of("/");
-			CFBundleRef main_bundle = CFBundleGetMainBundle();
-			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
-				name.substr(found2 + 1, found - found2 - 1).c_str(), kCFStringEncodingASCII);
-			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
-				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
-			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
-			CFRelease(file_name);
-			CFRelease(file_ext);
-			if (file_url != nullptr)
-			{
-				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
-
-				char const * path = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
-				std::string const res_name(path);
-
-				CFRelease(file_url);
-				CFRelease(file_path);
-
-				return res_name;
-			}
-		}
+		return LocateFileIOS();
 #else
 		using namespace std::experimental;
 
@@ -350,53 +324,24 @@ namespace KlayGE
 			}
 			else
 			{
-				std::string::size_type const pkt_offset(res_name.find("//"));
-				if (pkt_offset != std::string::npos)
+				std::string password;
+				std::string internal_name;
+				ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
+				if (pkt_file && *pkt_file)
 				{
-					std::string pkt_name = res_name.substr(0, pkt_offset);
-					filesystem::path pkt_path(pkt_name);
-					if (filesystem::exists(pkt_path)
-							&& (filesystem::is_regular_file(pkt_path)
-									|| filesystem::is_symlink(pkt_path)))
+					if (Find7z(pkt_file, password, internal_name) != 0xFFFFFFFF)
 					{
-						std::string::size_type const password_offset = pkt_name.find("|");
-						std::string password;
-						if (password_offset != std::string::npos)
-						{
-							password = pkt_name.substr(password_offset + 1);
-							pkt_name = pkt_name.substr(0, password_offset - 1);
-						}
-						std::string const file_name = res_name.substr(pkt_offset + 2);
-
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
-						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
-#else
-						uint64_t timestamp = filesystem::last_write_time(pkt_path);
-#endif
-						ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
-							MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-						if (*pkt_file)
-						{
-							if (Find7z(pkt_file, password, file_name) != 0xFFFFFFFF)
-							{
-								return res_name;
-							}
-						}
+						return res_name;
 					}
 				}
 			}
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		std::string::size_type pos = name.rfind('/');
-		if (std::string::npos == pos)
+		std::string const & res_name = LocateFileWinRT(name);
+		if (!res_name.empty())
 		{
-			pos = name.rfind('\\');
-		}
-		if (pos != std::string::npos)
-		{
-			std::string file_name = name.substr(pos + 1);
-			return this->Locate(file_name);
+			return this->Locate(res_name);
 		}
 #endif
 #endif
@@ -408,9 +353,7 @@ namespace KlayGE
 	{
 		using namespace std::experimental;
 #if defined(KLAYGE_PLATFORM_ANDROID)
-		android_app* state = Context::Instance().AppState();
-		AAssetManager* am = state->activity->assetManager;
-		AAsset* asset = AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
+		AAsset* asset = LocateFileAndroid(name);
 		if (asset != nullptr)
 		{
 			std::shared_ptr<AAssetStreamBuf> asb = MakeSharedPtr<AAssetStreamBuf>(asset);
@@ -418,41 +361,20 @@ namespace KlayGE
 			return MakeSharedPtr<ResIdentifier>(name, 0, asset_file, asb);
 		}
 #elif defined(KLAYGE_PLATFORM_IOS)
-		std::string::size_type found = name.find_last_of(".");
-		if (found != std::string::npos)
+		std::string const & res_name = LocateFileIOS(name);
+		if (!res_name.empty())
 		{
-			std::string::size_type found2 = name.find_last_of("/");
-			CFBundleRef main_bundle = CFBundleGetMainBundle();
-			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
-				name.substr(found2 + 1, found - found2 - 1).c_str(), kCFStringEncodingASCII);
-			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
-				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
-			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
-			CFRelease(file_name);
-			CFRelease(file_ext);
-			if (file_url != nullptr)
-			{
-				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
-				
-				char const * path = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
-				std::string const res_name(path);
-				
-				CFRelease(file_url);
-				CFRelease(file_path);
-				
-				filesystem::path res_path(res_name);
+			filesystem::path res_path(res_name);
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
-				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
+			uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
-				uint64_t timestamp = filesystem::last_write_time(res_path);
+			uint64_t timestamp = filesystem::last_write_time(res_path);
 #endif
-				
-				return MakeSharedPtr<ResIdentifier>(name, timestamp,
-					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
-			}
+
+			return MakeSharedPtr<ResIdentifier>(name, timestamp,
+				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 		}
 #else
-
 		for (auto const & path : paths_)
 		{
 			std::string const res_name(path + name);
@@ -470,52 +392,23 @@ namespace KlayGE
 			}
 			else
 			{
-				std::string::size_type const pkt_offset(res_name.find("//"));
-				if (pkt_offset != std::string::npos)
+				std::string password;
+				std::string internal_name;
+				ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
+				if (pkt_file && *pkt_file)
 				{
-					std::string pkt_name = res_name.substr(0, pkt_offset);
-					filesystem::path pkt_path(pkt_name);
-					if (filesystem::exists(pkt_path)
-							&& (filesystem::is_regular_file(pkt_path)
-									|| filesystem::is_symlink(pkt_path)))
-					{
-						std::string::size_type const password_offset = pkt_name.find("|");
-						std::string password;
-						if (password_offset != std::string::npos)
-						{
-							password = pkt_name.substr(password_offset + 1);
-							pkt_name = pkt_name.substr(0, password_offset - 1);
-						}
-						std::string const file_name = res_name.substr(pkt_offset + 2);
-
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
-						uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
-#else
-						uint64_t timestamp = filesystem::last_write_time(pkt_path);
-#endif
-						ResIdentifierPtr pkt_file = MakeSharedPtr<ResIdentifier>(name, timestamp,
-							MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
-						if (*pkt_file)
-						{
-							std::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
-							Extract7z(pkt_file, password, file_name, packet_file);
-							return MakeSharedPtr<ResIdentifier>(name, timestamp, packet_file);
-						}
-					}
+					std::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+					Extract7z(pkt_file, password, internal_name, packet_file);
+					return MakeSharedPtr<ResIdentifier>(name, pkt_file->Timestamp(), packet_file);
 				}
 			}
 		}
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
-		std::string::size_type pos = name.rfind('/');
-		if (std::string::npos == pos)
+		std::string const & res_name = LocateFileWinRT(name);
+		if (!res_name.empty())
 		{
-			pos = name.rfind('\\');
-		}
-		if (pos != std::string::npos)
-		{
-			std::string file_name = name.substr(pos + 1);
-			return this->Open(file_name);
+			return this->Open(res_name);
 		}
 #endif
 #endif
@@ -774,4 +667,92 @@ namespace KlayGE
 	{
 		return res_;
 	}
+
+	ResIdentifierPtr ResLoader::LocatePkt(std::string const & name, std::string const & res_name,
+			std::string& password, std::string& internal_name)
+	{
+		using namespace std::experimental;
+
+		ResIdentifierPtr res;
+		std::string::size_type const pkt_offset(res_name.find("//"));
+		if (pkt_offset != std::string::npos)
+		{
+			std::string pkt_name = res_name.substr(0, pkt_offset);
+			filesystem::path pkt_path(pkt_name);
+			if (filesystem::exists(pkt_path)
+				&& (filesystem::is_regular_file(pkt_path)
+					|| filesystem::is_symlink(pkt_path)))
+			{
+				std::string::size_type const password_offset = pkt_name.find("|");
+				if (password_offset != std::string::npos)
+				{
+					password = pkt_name.substr(password_offset + 1);
+					pkt_name = pkt_name.substr(0, password_offset - 1);
+				}
+				internal_name = res_name.substr(pkt_offset + 2);
+
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+				uint64_t timestamp = filesystem::last_write_time(pkt_path).time_since_epoch().count();
+#else
+				uint64_t timestamp = filesystem::last_write_time(pkt_path);
+#endif
+				res = MakeSharedPtr<ResIdentifier>(name, timestamp,
+					MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+			}
+		}
+
+		return res;
+	}
+
+#if defined(KLAYGE_PLATFORM_ANDROID)
+	AAsset* ResLoader::LocateFileAndroid(std::string const & name)
+	{
+		android_app* state = Context::Instance().AppState();
+		AAssetManager* am = state->activity->assetManager;
+		return AAssetManager_open(am, name.c_str(), AASSET_MODE_UNKNOWN);
+	}
+#elif defined(KLAYGE_PLATFORM_IOS)
+	std::string ResLoader::LocateFileIOS(std::string const & name)
+	{
+		std::string res_name;
+		std::string::size_type found = name.find_last_of(".");
+		if (found != std::string::npos)
+		{
+			std::string::size_type found2 = name.find_last_of("/");
+			CFBundleRef main_bundle = CFBundleGetMainBundle();
+			CFStringRef file_name = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(found2 + 1, found - found2 - 1).c_str(), kCFStringEncodingASCII);
+			CFStringRef file_ext = CFStringCreateWithCString(kCFAllocatorDefault,
+				name.substr(found + 1).c_str(), kCFStringEncodingASCII);
+			CFURLRef file_url = CFBundleCopyResourceURL(main_bundle, file_name, file_ext, NULL);
+			CFRelease(file_name);
+			CFRelease(file_ext);
+			if (file_url != nullptr)
+			{
+				CFStringRef file_path = CFURLCopyFileSystemPath(file_url, kCFURLPOSIXPathStyle);
+
+				res_name = CFStringGetCStringPtr(file_path, CFStringGetSystemEncoding());
+
+				CFRelease(file_url);
+				CFRelease(file_path);
+			}
+		}
+		return res_name;
+	}
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+	std::string ResLoader::LocateFileWinRT(std::string const & name)
+	{
+		std::string res_name;
+		std::string::size_type pos = name.rfind('/');
+		if (std::string::npos == pos)
+		{
+			pos = name.rfind('\\');
+		}
+		if (pos != std::string::npos)
+		{
+			res_name = name.substr(pos + 1);
+		}
+		return res_name;
+	}
+#endif
 }

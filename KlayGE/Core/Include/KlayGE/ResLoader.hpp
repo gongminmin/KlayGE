@@ -172,6 +172,16 @@ namespace KlayGE
 
 		void LoadingThreadFunc();
 
+		ResIdentifierPtr LocatePkt(std::string const & name, std::string const & res_name,
+			std::string& password, std::string& internal_name);
+#if defined(KLAYGE_PLATFORM_ANDROID)
+		AAsset* LocateFileAndroid(std::string const & name);
+#elif defined(KLAYGE_PLATFORM_IOS)
+		std::string LocateFileIOS(std::string const & name);
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+		std::string LocateFileWinRT(std::string const & name);
+#endif
+
 	private:
 		static std::shared_ptr<ResLoader> res_loader_instance_;
 
