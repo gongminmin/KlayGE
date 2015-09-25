@@ -122,7 +122,7 @@ namespace KlayGE
 		Windows::Storage::StorageFolder^ installed_loc = package->InstalledLocation;
 		Convert(exe_path_, installed_loc->Path->Data());
 #endif
-#elif defined KLAYGE_PLATFORM_LINUX || defined KLAYGE_PLATFORM_ANDROID
+#elif defined KLAYGE_PLATFORM_LINUX
 		{
 			FILE* fp = fopen("/proc/self/maps", "r");
 			if (fp != nullptr)
@@ -181,6 +181,8 @@ namespace KlayGE
 		colon[2] = '\0';
 		this->AddPath(buf);
 #endif
+
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		this->AddPath("../");
 		this->AddPath("../../media/RenderFX/");
 		this->AddPath("../../media/Models/");
@@ -190,6 +192,7 @@ namespace KlayGE
 		this->AddPath("../../media/Textures/Juda/");
 		this->AddPath("../../media/Fonts/");
 		this->AddPath("../../media/PostProcessors/");
+#endif
 #endif
 
 		loading_thread_ = MakeSharedPtr<joiner<void>>(Context::Instance().ThreadPool()(
