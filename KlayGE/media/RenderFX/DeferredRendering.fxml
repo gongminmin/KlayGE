@@ -77,7 +77,7 @@
 
 	<shader>
 		<![CDATA[
-#if KLAYGE_D3D11
+#if !KLAYGE_DXBC2GLSL
 #if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 #define NOPERSPECTIVE_SUPPORT
 #endif
@@ -880,7 +880,7 @@ float4 MergeDepthPS(float2 tc : TEXCOORD0) : SV_Target
 	return depth_tex.Sample(point_sampler, tc);
 }
 
-#if KLAYGE_D3D11 || KLAYGE_OPENGL
+#if !KLAYGE_OPENGLES
 void CopyShadingDepthPS(float2 tc : TEXCOORD0,
 		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
 {

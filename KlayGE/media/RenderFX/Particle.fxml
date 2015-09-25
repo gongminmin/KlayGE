@@ -86,9 +86,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 						ps_in.tex.z);
 		float intersect_z = (v - sqrt(disc)) * ps_in.view_dir.z;
 		clr.a *= saturate((depth - intersect_z) * 5);
-#if !KLAYGE_OPENGL && !KLAYGE_OPENGLES
 		clip(clr.a - 0.03f);
-#endif
 	}
 
 	return clr;

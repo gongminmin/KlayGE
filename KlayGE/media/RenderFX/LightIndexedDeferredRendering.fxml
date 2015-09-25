@@ -27,10 +27,8 @@
 	
 	<shader>
 		<![CDATA[
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 #if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 #define INTEGER_SUPPORT 1
-#endif
 #endif
  
 void DrawLightIndexVS(float4 pos : POSITION,
@@ -451,14 +449,10 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
-#endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
-#endif
 				if (mask <= light_comp)
 				{
 					lighting += CalcLIDRPointLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
@@ -548,14 +542,10 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
-#endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
-#endif
 				if (mask <= light_comp)
 				{
 					lighting += CalcLIDRSpotLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
@@ -645,14 +635,10 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
-#endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
-#endif
 				if (mask <= light_comp)
 				{
 					lighting += CalcLIDRSphereAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
@@ -743,14 +729,10 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 			uint mask = 128;
 			uint light_comp = light_index[comp];
 
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 			[loop]
-#endif
 			while (mask > 0)
 			{
-#if KLAYGE_D3D11 || KLAYGE_DXBC2GLSL
 				[branch]
-#endif
 				if (mask <= light_comp)
 				{
 					lighting += CalcLIDRTubeAreaLighting(index, pos_es, normal, view_dir, shininess, tc, tc_ddx, tc_ddy);
