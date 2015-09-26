@@ -156,14 +156,11 @@ namespace KlayGE
 				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
 		}
 	
-		if (!rt_view.empty())
-		{
-			d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
-			d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
-			d3d_viewport_.Width = static_cast<float>(viewport_->width);
-			d3d_viewport_.Height = static_cast<float>(viewport_->height);
-			re.RSSetViewports(1, &d3d_viewport_);
-		}
+		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
+		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
+		d3d_viewport_.Width = static_cast<float>(viewport_->width);
+		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+		re.RSSetViewports(1, &d3d_viewport_);
 	}
 
 	void D3D11FrameBuffer::OnUnbind()
