@@ -2,54 +2,54 @@
 
 <gl_extension name="GLES_KHR_debug" reg_no="118">
 	<typedefs>
-		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)"/>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROCKHR)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)"/>
 	</typedefs>
 
 	<tokens>
-		<token name="GL_DEBUG_OUTPUT" value="0x92E0"/>
-		<token name="GL_DEBUG_OUTPUT_SYNCHRONOUS" value="0x8242"/>
-		<token name="GL_CONTEXT_FLAG_DEBUG_BIT" value="0x00000002"/>
-		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH" value="0x9143"/>
-		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES" value="0x9144"/>
-		<token name="GL_DEBUG_LOGGED_MESSAGES" value="0x9145"/>
-		<token name="GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH" value="0x8243"/>
-		<token name="GL_MAX_DEBUG_GROUP_STACK_DEPTH" value="0x826C"/>
-		<token name="GL_DEBUG_GROUP_STACK_DEPTH" value="0x826D"/>
-		<token name="GL_MAX_LABEL_LENGTH" value="0x82E8"/>
-		<token name="GL_DEBUG_CALLBACK_FUNCTION" value="0x8244"/>
-		<token name="GL_DEBUG_CALLBACK_USER_PARAM" value="0x8245"/>
-		<token name="GL_DEBUG_SOURCE_API" value="0x8246"/>
-		<token name="GL_DEBUG_SOURCE_WINDOW_SYSTEM" value="0x8247"/>
-		<token name="GL_DEBUG_SOURCE_SHADER_COMPILER" value="0x8248"/>
-		<token name="GL_DEBUG_SOURCE_THIRD_PARTY" value="0x8249"/>
-		<token name="GL_DEBUG_SOURCE_APPLICATION" value="0x824A"/>
-		<token name="GL_DEBUG_SOURCE_OTHER" value="0x824B"/>
-		<token name="GL_DEBUG_TYPE_ERROR" value="0x824C"/>
-		<token name="GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR" value="0x824D"/>
-		<token name="GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR" value="0x824E"/>
-		<token name="GL_DEBUG_TYPE_PORTABILITY" value="0x824F"/>
-		<token name="GL_DEBUG_TYPE_PERFORMANCE" value="0x8250"/>
-		<token name="GL_DEBUG_TYPE_OTHER" value="0x8251"/>
-		<token name="GL_DEBUG_TYPE_MARKER" value="0x8268"/>
-		<token name="GL_DEBUG_TYPE_PUSH_GROUP" value="0x8269"/>
-		<token name="GL_DEBUG_TYPE_POP_GROUP" value="0x826A"/>
-		<token name="GL_DEBUG_SEVERITY_HIGH" value="0x9146"/>
-		<token name="GL_DEBUG_SEVERITY_MEDIUM" value="0x9147"/>
-		<token name="GL_DEBUG_SEVERITY_LOW" value="0x9148"/>
-		<token name="GL_DEBUG_SEVERITY_NOTIFICATION" value="0x826B"/>
-		<token name="GL_STACK_UNDERFLOW" value="0x0504"/>
-		<token name="GL_STACK_OVERFLOW" value="0x0503"/>
-		<token name="GL_BUFFER" value="0x82E0"/>
-		<token name="GL_SHADER" value="0x82E1"/>
-		<token name="GL_PROGRAM" value="0x82E2"/>
-		<token name="GL_QUERY" value="0x82E3"/>
-		<token name="GL_PROGRAM_PIPELINE" value="0x82E4"/>
-		<token name="GL_SAMPLER" value="0x82E6"/>
-		<token name="GL_DISPLAY_LIST" value="0x82E7"/>		
+		<token name="GL_DEBUG_OUTPUT_KHR" value="0x92E0"/>
+		<token name="GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR" value="0x8242"/>
+		<token name="GL_CONTEXT_FLAG_DEBUG_BIT_KHR" value="0x00000002"/>
+		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH_KHR" value="0x9143"/>
+		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES_KHR" value="0x9144"/>
+		<token name="GL_DEBUG_LOGGED_MESSAGES_KHR" value="0x9145"/>
+		<token name="GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR" value="0x8243"/>
+		<token name="GL_MAX_DEBUG_GROUP_STACK_DEPTH_KHR" value="0x826C"/>
+		<token name="GL_DEBUG_GROUP_STACK_DEPTH_KHR" value="0x826D"/>
+		<token name="GL_MAX_LABEL_LENGTH_KHR" value="0x82E8"/>
+		<token name="GL_DEBUG_CALLBACK_FUNCTION_KHR" value="0x8244"/>
+		<token name="GL_DEBUG_CALLBACK_USER_PARAM_KHR" value="0x8245"/>
+		<token name="GL_DEBUG_SOURCE_API_KHR" value="0x8246"/>
+		<token name="GL_DEBUG_SOURCE_WINDOW_SYSTEM_KHR" value="0x8247"/>
+		<token name="GL_DEBUG_SOURCE_SHADER_COMPILER_KHR" value="0x8248"/>
+		<token name="GL_DEBUG_SOURCE_THIRD_PARTY_KHR" value="0x8249"/>
+		<token name="GL_DEBUG_SOURCE_APPLICATION_KHR" value="0x824A"/>
+		<token name="GL_DEBUG_SOURCE_OTHER_KHR" value="0x824B"/>
+		<token name="GL_DEBUG_TYPE_ERROR_KHR" value="0x824C"/>
+		<token name="GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_KHR" value="0x824D"/>
+		<token name="GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_KHR" value="0x824E"/>
+		<token name="GL_DEBUG_TYPE_PORTABILITY_KHR" value="0x824F"/>
+		<token name="GL_DEBUG_TYPE_PERFORMANCE_KHR" value="0x8250"/>
+		<token name="GL_DEBUG_TYPE_OTHER_KHR" value="0x8251"/>
+		<token name="GL_DEBUG_TYPE_MARKER_KHR" value="0x8268"/>
+		<token name="GL_DEBUG_TYPE_PUSH_GROUP_KHR" value="0x8269"/>
+		<token name="GL_DEBUG_TYPE_POP_GROUP_KHR" value="0x826A"/>
+		<token name="GL_DEBUG_SEVERITY_HIGH_KHR" value="0x9146"/>
+		<token name="GL_DEBUG_SEVERITY_MEDIUM_KHR" value="0x9147"/>
+		<token name="GL_DEBUG_SEVERITY_LOW_KHR" value="0x9148"/>
+		<token name="GL_DEBUG_SEVERITY_NOTIFICATION_KHR" value="0x826B"/>
+		<token name="GL_STACK_UNDERFLOW_KHR" value="0x0504"/>
+		<token name="GL_STACK_OVERFLOW_KHR" value="0x0503"/>
+		<token name="GL_BUFFER_KHR" value="0x82E0"/>
+		<token name="GL_SHADER_KHR" value="0x82E1"/>
+		<token name="GL_PROGRAM_KHR" value="0x82E2"/>
+		<token name="GL_QUERY_KHR" value="0x82E3"/>
+		<token name="GL_PROGRAM_PIPELINE_KHR" value="0x82E4"/>
+		<token name="GL_SAMPLER_KHR" value="0x82E6"/>
+		<token name="GL_DISPLAY_LIST_KHR" value="0x82E7"/>		
 	</tokens>
 
 	<functions>
-		<function name="glDebugMessageControl" return="void">
+		<function name="glDebugMessageControlKHR" return="void">
 			<params>
 				<param type="GLenum" name="source"/>
 				<param type="GLenum" name="type"/>
@@ -59,7 +59,7 @@
 				<param type="GLboolean" name="enabled"/>
 			</params>
 		</function>
-		<function name="glDebugMessageInsert" return="void">
+		<function name="glDebugMessageInsertKHR" return="void">
 			<params>
 				<param type="GLenum" name="source"/>
 				<param type="GLenum" name="type"/>
@@ -69,13 +69,13 @@
 				<param type="const GLchar*" name="buf"/>
 			</params>
 		</function>
-		<function name="glDebugMessageCallback" return="void">
+		<function name="glDebugMessageCallbackKHR" return="void">
 			<params>
 				<param type="GLDEBUGPROC" name="callback"/>
 				<param type="const GLvoid*" name="userParam"/>
 			</params>
 		</function>
-		<function name="glGetDebugMessageLog" return="GLuint">
+		<function name="glGetDebugMessageLogKHR" return="GLuint">
 			<params>
 				<param type="GLuint" name="count"/>
 				<param type="GLsizei" name="bufsize"/>
@@ -87,13 +87,13 @@
 				<param type="GLchar*" name="messageLog"/>
 			</params>
 		</function>
-		<function name="glGetPointerv" return="void">
+		<function name="glGetPointervKHR" return="void">
 			<params>
 				<param type="GLenum" name="pname"/>
 				<param type="void**" name="params"/>
 			</params>
 		</function>
-		<function name="glPushDebugGroup" return="void">
+		<function name="glPushDebugGroupKHR" return="void">
 			<params>
 				<param type="GLenum" name="source"/>
 				<param type="GLuint" name="id"/>
@@ -101,8 +101,8 @@
 				<param type="const GLchar*" name="message"/>
 			</params>
 		</function>
-		<function name="glPopDebugGroup" return="void"/>
-		<function name="glObjectLabel" return="void">
+		<function name="glPopDebugGroupKHR" return="void"/>
+		<function name="glObjectLabelKHR" return="void">
 			<params>
 				<param type="GLenum" name="identifier"/>
 				<param type="GLuint" name="name"/>
@@ -110,7 +110,7 @@
 				<param type="const GLchar*" name="label"/>
 			</params>
 		</function>
-		<function name="glGetObjectLabel" return="void">
+		<function name="glGetObjectLabelKHR" return="void">
 			<params>
 				<param type="GLenum" name="identifier"/>
 				<param type="GLuint" name="name"/>
@@ -119,14 +119,14 @@
 				<param type="GLchar*" name="label"/>
 			</params>
 		</function>
-		<function name="glObjectPtrLabel" return="void">
+		<function name="glObjectPtrLabelKHR" return="void">
 			<params>
 				<param type="const GLvoid*" name="ptr"/>
 				<param type="GLsizei" name="length"/>
 				<param type="const GLchar*" name="label"/>
 			</params>
 		</function>
-		<function name="glGetObjectPtrLabel" return="void">
+		<function name="glGetObjectPtrLabelKHR" return="void">
 			<params>
 				<param type="const GLvoid*" name="ptr"/>
 				<param type="GLsizei" name="bufSize"/>

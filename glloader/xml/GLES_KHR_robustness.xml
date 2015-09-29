@@ -2,24 +2,24 @@
 
 <gl_extension name="GLES_KHR_robustness" reg_no="190">
 	<tokens>
-		<token name="GL_NO_ERROR" value="0x0000"/>
-		<token name="GL_GUILTY_CONTEXT_RESET" value="0x8253"/>
-		<token name="GL_INNOCENT_CONTEXT_RESET" value="0x8254"/>
-		<token name="GL_UNKNOWN_CONTEXT_RESET" value="0x8255"/>
-		<token name="GL_CONTEXT_ROBUST_ACCESS" value="0x90F3"/>
-		<token name="GL_RESET_NOTIFICATION_STRATEGY" value="0x8256"/>
-		<token name="GL_LOSE_CONTEXT_ON_RESET" value="0x8252"/>
-		<token name="GL_NO_RESET_NOTIFICATION" value="0x8261"/>
-		<token name="GL_CONTEXT_LOST" value="0x0507"/>
+		<token name="GL_NO_ERROR_KHR" value="0x0000"/>
+		<token name="GL_GUILTY_CONTEXT_RESET_KHR" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET_KHR" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET_KHR" value="0x8255"/>
+		<token name="GL_CONTEXT_ROBUST_ACCESS_KHR" value="0x90F3"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY_KHR" value="0x8256"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET_KHR" value="0x8252"/>
+		<token name="GL_NO_RESET_NOTIFICATION_KHR" value="0x8261"/>
+		<token name="GL_CONTEXT_LOST_KHR" value="0x0507"/>
 	</tokens>
 
 	<functions>
-		<function name="glGetGraphicsResetStatus" return="GLenum">
+		<function name="glGetGraphicsResetStatusKHR" return="GLenum">
 			<mappings>
 				<mapping from="GLES_EXT_robustness" name="glGetGraphicsResetStatusEXT"/>
 			</mappings>
 		</function>
-		<function name="glReadnPixels" return="void">
+		<function name="glReadnPixelsKHR" return="void">
 			<params>
 				<param type="GLint" name="x"/>
 				<param type="GLint" name="y"/>
@@ -34,7 +34,7 @@
 				<mapping from="GLES_EXT_robustness" name="glReadnPixelsEXT"/>
 			</mappings>
 		</function>
-		<function name="glGetnUniformfv" return="void">
+		<function name="glGetnUniformfvKHR" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
@@ -45,7 +45,7 @@
 				<mapping from="GLES_EXT_robustness" name="glGetnUniformfvEXT"/>
 			</mappings>
 		</function>
-		<function name="glGetnUniformiv" return="void">
+		<function name="glGetnUniformivKHR" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>
@@ -56,7 +56,7 @@
 				<mapping from="GLES_EXT_robustness" name="glGetnUniformivEXT"/>
 			</mappings>
 		</function>
-		<function name="glGetnUniformuiv" return="void">
+		<function name="glGetnUniformuivKHR" return="void">
 			<params>
 				<param type="GLuint" name="program"/>
 				<param type="GLint" name="location"/>

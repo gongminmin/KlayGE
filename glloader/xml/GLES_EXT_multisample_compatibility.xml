@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_multisample_compatibility" reg_no="248">
+	<tokens>
+		<token name="GL_MULTISAMPLE_EXT" value="0x809D"/>
+		<token name="GL_SAMPLE_ALPHA_TO_ONE_EXT" value="0x809F"/>
+	</tokens>
+</gl_extension>

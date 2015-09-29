@@ -532,7 +532,9 @@ def auto_gen_glloader_files(base_dir, quite_mode):
 	import os
 	exts = os.listdir(base_dir + "/xml")
 
+	core_set = {}
 	extension_set = {}
+	feature_set = {}
 
 	from xml.dom.minidom import parse
 	for ext in exts:
@@ -540,24 +542,37 @@ def auto_gen_glloader_files(base_dir, quite_mode):
 			if not quite_mode:
 				print("Processing " + ext)
 			prefix = ext[0 : ext.find("_")]
-			if prefix not in extension_set:
-				extension_set[prefix] = []
-			extension_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext), quite_mode))
+			if (-1 == ext.find("_VERSION_")):
+				if prefix not in extension_set:
+					extension_set[prefix] = []
+				extension_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext), quite_mode))
+			else:
+				if prefix not in core_set:
+					core_set[prefix] = []
+				core_set[prefix].append(Extension(parse(base_dir + "/xml/" + ext), quite_mode))
+
+	for cores in core_set.items():
+		feature_set[cores[0]] = cores[1]
+	for extensions in extension_set.items():
+		prefix = extensions[0]
+		if prefix not in feature_set:
+			feature_set[prefix] = []
+		feature_set[prefix].extend(extensions[1])
 
 	if not quite_mode:
 		print("")
 
 	if not quite_mode:
 		print("Creating Header Files...")
-	for extensions in extension_set.items():
-		create_header(extensions[0], extensions[1], base_dir, quite_mode)
+	for features in feature_set.items():
+		create_header(features[0], features[1], base_dir, quite_mode)
 	if not quite_mode:
 		print("")
 
 	if not quite_mode:
 		print("Creating Source Files...")
-	for extensions in extension_set.items():
-		create_source(extensions[0], extensions[1], base_dir, quite_mode)
+	for features in feature_set.items():
+		create_source(features[0], features[1], base_dir, quite_mode)
 	if not quite_mode:
 		print("")
 

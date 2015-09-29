@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_INTEL_framebuffer_CMAA" reg_no="481">
+	<functions>
+		<function name="glApplyFramebufferAttachmentCMAAINTEL" return="void"/>
+	</functions>
+</gl_extension>

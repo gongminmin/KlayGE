@@ -1,0 +1,47 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_debug" reg_no="92">
+	<typedefs>
+		<typedef type="void*" synonym="EGLObjectKHR"/>
+		<typedef type="void*" synonym="EGLLabelKHR"/>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *EGLDEBUGPROC)(EGLenum error, const char *command, EGLint messageType, EGLLabelKHR threadLabel, EGLLabelKHR objectLabel, const char* message)"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_OBJECT_THREAD_KHR" value="0x33B0"/>
+		<token name="EGL_OBJECT_DISPLAY_KHR" value="0x33B1"/>
+		<token name="EGL_OBJECT_CONTEXT_KHR" value="0x33B2"/>
+		<token name="EGL_OBJECT_SURFACE_KHR" value="0x33B3"/>
+		<token name="EGL_OBJECT_IMAGE_KHR" value="0x33B4"/>
+		<token name="EGL_OBJECT_SYNC_KHR" value="0x33B5"/>
+		<token name="EGL_OBJECT_STREAM_KHR" value="0x33B6"/>
+		<token name="EGL_DEBUG_MSG_CRITICAL_KHR" value="0x33B9"/>
+		<token name="EGL_DEBUG_MSG_ERROR_KHR" value="0x33BA"/>
+		<token name="EGL_DEBUG_MSG_WARN_KHR" value="0x33BB"/>
+		<token name="EGL_DEBUG_MSG_INFO_KHR" value="0x33BC"/>
+		<token name="EGL_DEBUG_CALLBACK_KHR" value="0x33B8"/>
+	</tokens>
+
+	<functions>			
+		<function name="eglDebugMessageControlKHR" return="EGLint">
+			<params>
+				<param type="EGLDEBUGPROC" name="callback"/>
+				<param type="const EGLAttrib*" name="attrib_list"/>
+			</params>
+		</function>
+		<function name="eglQueryDebugKHR" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+		<function name="eglLabelObjectKHR" return="EGLint">
+			<params>
+				<param type="EGLDisplay" name="display"/>
+				<param type="EGLenum" name="objectType"/>
+				<param type="EGLObjectKHR" name="object"/>
+				<param type="EGLLabelKHR" name="label"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

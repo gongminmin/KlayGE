@@ -1,9 +1,9 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_EXT_timer_query" reg_no="319">
+<gl_extension name="GLES_ANGLE_timer_query" reg_no="319">
 	<typedefs>
-		<typedef type="GLint64" synonym="GLint64EXT"/>
-		<typedef type="GLuint64" synonym="GLuint64EXT"/>
+		<typedef type="GLint64" synonym="GLint64ANGLE"/>
+		<typedef type="GLuint64" synonym="GLuint64ANGLE"/>
 	</typedefs>
 
 	<tokens>

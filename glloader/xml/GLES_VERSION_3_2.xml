@@ -1,0 +1,738 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_VERSION_3_2">
+	<typedefs>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)"/>
+	</typedefs>
+
+	<tokens>
+		<token name="GL_MULTISAMPLE_LINE_WIDTH_RANGE" value="0x9381"/>
+		<token name="GL_MULTISAMPLE_LINE_WIDTH_GRANULARITY" value="0x9382"/>
+		<token name="GL_MULTIPLY" value="0x9294"/>
+		<token name="GL_SCREEN" value="0x9295"/>
+		<token name="GL_OVERLAY" value="0x9296"/>
+		<token name="GL_DARKEN" value="0x9297"/>
+		<token name="GL_LIGHTEN" value="0x9298"/>
+		<token name="GL_COLORDODGE" value="0x9299"/>
+		<token name="GL_COLORBURN" value="0x929A"/>
+		<token name="GL_HARDLIGHT" value="0x929B"/>
+		<token name="GL_SOFTLIGHT" value="0x929C"/>
+		<token name="GL_DIFFERENCE" value="0x929E"/>
+		<token name="GL_EXCLUSION" value="0x92A0"/>
+		<token name="GL_HSL_HUE" value="0x92AD"/>
+		<token name="GL_HSL_SATURATION" value="0x92AE"/>
+		<token name="GL_HSL_COLOR" value="0x92AF"/>
+		<token name="GL_HSL_LUMINOSITY" value="0x92B0"/>
+		<token name="GL_DEBUG_OUTPUT_SYNCHRONOUS" value="0x8242"/>
+		<token name="GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH" value="0x8243"/>
+		<token name="GL_DEBUG_CALLBACK_FUNCTION" value="0x8244"/>
+		<token name="GL_DEBUG_CALLBACK_USER_PARAM" value="0x8245"/>
+		<token name="GL_DEBUG_SOURCE_API" value="0x8246"/>
+		<token name="GL_DEBUG_SOURCE_WINDOW_SYSTEM" value="0x8247"/>
+		<token name="GL_DEBUG_SOURCE_SHADER_COMPILER" value="0x8248"/>
+		<token name="GL_DEBUG_SOURCE_THIRD_PARTY" value="0x8249"/>
+		<token name="GL_DEBUG_SOURCE_APPLICATION" value="0x824A"/>
+		<token name="GL_DEBUG_SOURCE_OTHER" value="0x824B"/>
+		<token name="GL_DEBUG_TYPE_ERROR" value="0x824C"/>
+		<token name="GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR" value="0x824D"/>
+		<token name="GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR" value="0x824E"/>
+		<token name="GL_DEBUG_TYPE_PORTABILITY" value="0x824F"/>
+		<token name="GL_DEBUG_TYPE_PERFORMANCE" value="0x8250"/>
+		<token name="GL_DEBUG_TYPE_OTHER" value="0x8251"/>
+		<token name="GL_DEBUG_TYPE_MARKER" value="0x8268"/>
+		<token name="GL_DEBUG_TYPE_PUSH_GROUP" value="0x8269"/>
+		<token name="GL_DEBUG_TYPE_POP_GROUP" value="0x826A"/>
+		<token name="GL_DEBUG_SEVERITY_NOTIFICATION" value="0x826B"/>
+		<token name="GL_MAX_DEBUG_GROUP_STACK_DEPTH" value="0x826C"/>
+		<token name="GL_DEBUG_GROUP_STACK_DEPTH" value="0x826D"/>
+		<token name="GL_BUFFER" value="0x82E0"/>
+		<token name="GL_SHADER" value="0x82E1"/>
+		<token name="GL_PROGRAM" value="0x82E2"/>
+		<token name="GL_VERTEX_ARRAY" value="0x8074"/>
+		<token name="GL_QUERY" value="0x82E3"/>
+		<token name="GL_PROGRAM_PIPELINE" value="0x82E4"/>
+		<token name="GL_SAMPLER" value="0x82E6"/>
+		<token name="GL_MAX_LABEL_LENGTH" value="0x82E8"/>
+		<token name="GL_MAX_DEBUG_MESSAGE_LENGTH" value="0x9143"/>
+		<token name="GL_MAX_DEBUG_LOGGED_MESSAGES" value="0x9144"/>
+		<token name="GL_DEBUG_LOGGED_MESSAGES" value="0x9145"/>
+		<token name="GL_DEBUG_SEVERITY_HIGH" value="0x9146"/>
+		<token name="GL_DEBUG_SEVERITY_MEDIUM" value="0x9147"/>
+		<token name="GL_DEBUG_SEVERITY_LOW" value="0x9148"/>
+		<token name="GL_DEBUG_OUTPUT" value="0x92E0"/>
+		<token name="GL_CONTEXT_FLAG_DEBUG_BIT" value="0x00000002"/>
+		<token name="GL_STACK_OVERFLOW" value="0x0503"/>
+		<token name="GL_STACK_UNDERFLOW" value="0x0504"/>
+		<token name="GL_GEOMETRY_SHADER" value="0x8DD9"/>
+		<token name="GL_GEOMETRY_SHADER_BIT" value="0x00000004"/>
+		<token name="GL_GEOMETRY_VERTICES_OUT" value="0x8916"/>
+		<token name="GL_GEOMETRY_INPUT_TYPE" value="0x8917"/>
+		<token name="GL_GEOMETRY_OUTPUT_TYPE" value="0x8918"/>
+		<token name="GL_GEOMETRY_SHADER_INVOCATIONS" value="0x887F"/>
+		<token name="GL_LAYER_PROVOKING_VERTEX" value="0x825E"/>
+		<token name="GL_LINES_ADJACENCY" value="0x000A"/>
+		<token name="GL_LINE_STRIP_ADJACENCY" value="0x000B"/>
+		<token name="GL_TRIANGLES_ADJACENCY" value="0x000C"/>
+		<token name="GL_TRIANGLE_STRIP_ADJACENCY" value="0x000D"/>
+		<token name="GL_MAX_GEOMETRY_UNIFORM_COMPONENTS" value="0x8DDF"/>
+		<token name="GL_MAX_GEOMETRY_UNIFORM_BLOCKS" value="0x8A2C"/>
+		<token name="GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS" value="0x8A32"/>
+		<token name="GL_MAX_GEOMETRY_INPUT_COMPONENTS" value="0x9123"/>
+		<token name="GL_MAX_GEOMETRY_OUTPUT_COMPONENTS" value="0x9124"/>
+		<token name="GL_MAX_GEOMETRY_OUTPUT_VERTICES" value="0x8DE0"/>
+		<token name="GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS" value="0x8DE1"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_INVOCATIONS" value="0x8E5A"/>
+		<token name="GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS" value="0x8C29"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS" value="0x92CF"/>
+		<token name="GL_MAX_GEOMETRY_ATOMIC_COUNTERS" value="0x92D5"/>
+		<token name="GL_MAX_GEOMETRY_IMAGE_UNIFORMS" value="0x90CD"/>
+		<token name="GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS" value="0x90D7"/>
+		<token name="GL_FIRST_VERTEX_CONVENTION" value="0x8E4D"/>
+		<token name="GL_LAST_VERTEX_CONVENTION" value="0x8E4E"/>
+		<token name="GL_UNDEFINED_VERTEX" value="0x8260"/>
+		<token name="GL_PRIMITIVES_GENERATED" value="0x8C87"/>
+		<token name="GL_FRAMEBUFFER_DEFAULT_LAYERS" value="0x9312"/>
+		<token name="GL_MAX_FRAMEBUFFER_LAYERS" value="0x9317"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS" value="0x8DA8"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_LAYERED" value="0x8DA7"/>
+		<token name="GL_REFERENCED_BY_GEOMETRY_SHADER" value="0x9309"/>
+		<token name="GL_PRIMITIVE_BOUNDING_BOX" value="0x92BE"/>
+		<token name="GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT" value="0x00000004"/>
+		<token name="GL_CONTEXT_FLAGS" value="0x821E"/>
+		<token name="GL_LOSE_CONTEXT_ON_RESET" value="0x8252"/>
+		<token name="GL_GUILTY_CONTEXT_RESET" value="0x8253"/>
+		<token name="GL_INNOCENT_CONTEXT_RESET" value="0x8254"/>
+		<token name="GL_UNKNOWN_CONTEXT_RESET" value="0x8255"/>
+		<token name="GL_RESET_NOTIFICATION_STRATEGY" value="0x8256"/>
+		<token name="GL_NO_RESET_NOTIFICATION" value="0x8261"/>
+		<token name="GL_CONTEXT_LOST" value="0x0507"/>
+		<token name="GL_SAMPLE_SHADING" value="0x8C36"/>
+		<token name="GL_MIN_SAMPLE_SHADING_VALUE" value="0x8C37"/>
+		<token name="GL_MIN_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5B"/>
+		<token name="GL_MAX_FRAGMENT_INTERPOLATION_OFFSET" value="0x8E5C"/>
+		<token name="GL_FRAGMENT_INTERPOLATION_OFFSET_BITS" value="0x8E5D"/>
+		<token name="GL_PATCHES" value="0x000E"/>
+		<token name="GL_PATCH_VERTICES" value="0x8E72"/>
+		<token name="GL_TESS_CONTROL_OUTPUT_VERTICES" value="0x8E75"/>
+		<token name="GL_TESS_GEN_MODE" value="0x8E76"/>
+		<token name="GL_TESS_GEN_SPACING" value="0x8E77"/>
+		<token name="GL_TESS_GEN_VERTEX_ORDER" value="0x8E78"/>
+		<token name="GL_TESS_GEN_POINT_MODE" value="0x8E79"/>
+		<token name="GL_ISOLINES" value="0x8E7A"/>
+		<token name="GL_QUADS" value="0x0007"/>
+		<token name="GL_FRACTIONAL_ODD" value="0x8E7B"/>
+		<token name="GL_FRACTIONAL_EVEN" value="0x8E7C"/>
+		<token name="GL_MAX_PATCH_VERTICES" value="0x8E7D"/>
+		<token name="GL_MAX_TESS_GEN_LEVEL" value="0x8E7E"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS" value="0x8E7F"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS" value="0x8E80"/>
+		<token name="GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS" value="0x8E81"/>
+		<token name="GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS" value="0x8E82"/>
+		<token name="GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS" value="0x8E83"/>
+		<token name="GL_MAX_TESS_PATCH_COMPONENTS" value="0x8E84"/>
+		<token name="GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS" value="0x8E85"/>
+		<token name="GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS" value="0x8E86"/>
+		<token name="GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS" value="0x8E89"/>
+		<token name="GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS" value="0x8E8A"/>
+		<token name="GL_MAX_TESS_CONTROL_INPUT_COMPONENTS" value="0x886C"/>
+		<token name="GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS" value="0x886D"/>
+		<token name="GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS" value="0x8E1E"/>
+		<token name="GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS" value="0x8E1F"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS" value="0x92CD"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS" value="0x92CE"/>
+		<token name="GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS" value="0x92D3"/>
+		<token name="GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS" value="0x92D4"/>
+		<token name="GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS" value="0x90CB"/>
+		<token name="GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS" value="0x90CC"/>
+		<token name="GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS" value="0x90D8"/>
+		<token name="GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS" value="0x90D9"/>
+		<token name="GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED" value="0x8221"/>
+		<token name="GL_IS_PER_PATCH" value="0x92E7"/>
+		<token name="GL_REFERENCED_BY_TESS_CONTROL_SHADER" value="0x9307"/>
+		<token name="GL_REFERENCED_BY_TESS_EVALUATION_SHADER" value="0x9308"/>
+		<token name="GL_TESS_CONTROL_SHADER" value="0x8E88"/>
+		<token name="GL_TESS_EVALUATION_SHADER" value="0x8E87"/>
+		<token name="GL_TESS_CONTROL_SHADER_BIT" value="0x00000008"/>
+		<token name="GL_TESS_EVALUATION_SHADER_BIT" value="0x00000010"/>
+		<token name="GL_TEXTURE_BORDER_COLOR" value="0x1004"/>
+		<token name="GL_CLAMP_TO_BORDER" value="0x812D"/>
+		<token name="GL_TEXTURE_BUFFER" value="0x8C2A"/>
+		<token name="GL_TEXTURE_BUFFER_BINDING" value="0x8C2A"/>
+		<token name="GL_MAX_TEXTURE_BUFFER_SIZE" value="0x8C2B"/>
+		<token name="GL_TEXTURE_BINDING_BUFFER" value="0x8C2C"/>
+		<token name="GL_TEXTURE_BUFFER_DATA_STORE_BINDING" value="0x8C2D"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT" value="0x919F"/>
+		<token name="GL_SAMPLER_BUFFER" value="0x8DC2"/>
+		<token name="GL_INT_SAMPLER_BUFFER" value="0x8DD0"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_BUFFER" value="0x8DD8"/>
+		<token name="GL_IMAGE_BUFFER" value="0x9051"/>
+		<token name="GL_INT_IMAGE_BUFFER" value="0x905C"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_BUFFER" value="0x9067"/>
+		<token name="GL_TEXTURE_BUFFER_OFFSET" value="0x919D"/>
+		<token name="GL_TEXTURE_BUFFER_SIZE" value="0x919E"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_4x4" value="0x93B0"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_5x4" value="0x93B1"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_5x5" value="0x93B2"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_6x5" value="0x93B3"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_6x6" value="0x93B4"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x5" value="0x93B5"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x6" value="0x93B6"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_8x8" value="0x93B7"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x5" value="0x93B8"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x6" value="0x93B9"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x8" value="0x93BA"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_10x10" value="0x93BB"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_12x10" value="0x93BC"/>
+		<token name="GL_COMPRESSED_RGBA_ASTC_12x12" value="0x93BD"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4" value="0x93D0"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4" value="0x93D1"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5" value="0x93D2"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5" value="0x93D3"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6" value="0x93D4"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5" value="0x93D5"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6" value="0x93D6"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8" value="0x93D7"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5" value="0x93D8"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6" value="0x93D9"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8" value="0x93DA"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10" value="0x93DB"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10" value="0x93DC"/>
+		<token name="GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12" value="0x93DD"/>
+		<token name="GL_TEXTURE_CUBE_MAP_ARRAY" value="0x9009"/>
+		<token name="GL_TEXTURE_BINDING_CUBE_MAP_ARRAY" value="0x900A"/>
+		<token name="GL_SAMPLER_CUBE_MAP_ARRAY" value="0x900C"/>
+		<token name="GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW" value="0x900D"/>
+		<token name="GL_INT_SAMPLER_CUBE_MAP_ARRAY" value="0x900E"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY" value="0x900F"/>
+		<token name="GL_IMAGE_CUBE_MAP_ARRAY" value="0x9054"/>
+		<token name="GL_INT_IMAGE_CUBE_MAP_ARRAY" value="0x905F"/>
+		<token name="GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY" value="0x906A"/>
+		<token name="GL_TEXTURE_2D_MULTISAMPLE_ARRAY" value="0x9102"/>
+		<token name="GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY" value="0x9105"/>
+		<token name="GL_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910B"/>
+		<token name="GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910C"/>
+		<token name="GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY" value="0x910D"/>
+	</tokens>
+
+	<functions>
+		<function name="glBlendBarrier" return="void" link="static">
+			<mappings>
+				<mapping from="GLES_KHR_blend_equation_advanced" name="glBlendBarrierKHR"/>
+				<mapping from="GLES_NV_blend_equation_advanced" name="glBlendBarrierNV"/>
+			</mappings>
+		</function>
+		<function name="glCopyImageSubData" return="void" link="static">
+			<params>
+				<param type="GLuint" name="srcName"/>
+				<param type="GLenum" name="srcTarget"/>
+				<param type="GLint" name="srcLevel"/>
+				<param type="GLint" name="srcX"/>
+				<param type="GLint" name="srcY"/>
+				<param type="GLint" name="srcZ"/>
+				<param type="GLuint" name="dstName"/>
+				<param type="GLenum" name="dstTarget"/>
+				<param type="GLint" name="dstLevel"/>
+				<param type="GLint" name="dstX"/>
+				<param type="GLint" name="dstY"/>
+				<param type="GLint" name="dstZ"/>
+				<param type="GLsizei" name="srcWidth"/>
+				<param type="GLsizei" name="srcHeight"/>
+				<param type="GLsizei" name="srcDepth"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_copy_image" name="glCopyImageSubDataOES"/>
+				<mapping from="GLES_EXT_copy_image" name="glCopyImageSubDataEXT"/>
+			</mappings>
+		</function>
+		<function name="glDebugMessageControl" return="void" link="static">
+			<params>
+				<param type="GLenum" name="source"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLenum" name="severity"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint*" name="ids"/>
+				<param type="GLboolean" name="enabled"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glDebugMessageControlKHR"/>
+			</mappings>
+		</function>
+		<function name="glDebugMessageInsert" return="void" link="static">
+			<params>
+				<param type="GLenum" name="source"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="severity"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="buf"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glDebugMessageInsertKHR"/>
+			</mappings>
+		</function>
+		<function name="glDebugMessageCallback" return="void" link="static">
+			<params>
+				<param type="GLDEBUGPROC" name="callback"/>
+				<param type="const void*" name="userParam"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glDebugMessageCallbackKHR"/>
+			</mappings>
+		</function>
+		<function name="glGetDebugMessageLog" return="GLuint" link="static">
+			<params>
+				<param type="GLuint" name="count"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLenum*" name="sources"/>
+				<param type="GLenum*" name="types"/>
+				<param type="GLuint*" name="ids"/>
+				<param type="GLenum*" name="severities"/>
+				<param type="GLsizei*" name="lengths"/>
+				<param type="GLchar*" name="messageLog"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glGetDebugMessageLogKHR"/>
+			</mappings>
+		</function>
+		<function name="glPushDebugGroup" return="void" link="static">
+			<params>
+				<param type="GLenum" name="source"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="message"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glPushDebugGroupKHR"/>
+			</mappings>
+		</function>
+		<function name="glPopDebugGroup" return="void" link="static">
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glPopDebugGroupKHR"/>
+			</mappings>
+		</function>
+		<function name="glObjectLabel" return="void" link="static">
+			<params>
+				<param type="GLenum" name="identifier"/>
+				<param type="GLuint" name="name"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="label"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glObjectLabelKHR"/>
+			</mappings>
+		</function>
+		<function name="glGetObjectLabel" return="void" link="static">
+			<params>
+				<param type="GLenum" name="identifier"/>
+				<param type="GLuint" name="name"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="label"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glGetObjectLabelKHR"/>
+			</mappings>
+		</function>
+		<function name="glObjectPtrLabel" return="void" link="static">
+			<params>
+				<param type="const void*" name="ptr"/>
+				<param type="GLsizei" name="length"/>
+				<param type="const GLchar*" name="label"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glObjectPtrLabelKHR"/>
+			</mappings>
+		</function>
+		<function name="glGetObjectPtrLabel" return="void" link="static">
+			<params>
+				<param type="const void*" name="ptr"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLsizei*" name="length"/>
+				<param type="GLchar*" name="label"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glGetObjectPtrLabelKHR"/>
+			</mappings>
+		</function>
+		<function name="glGetPointerv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="void**" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_debug" name="glGetPointervKHR"/>
+			</mappings>
+		</function>
+		<function name="glEnablei" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glEnableiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glEnableiEXT"/>
+			</mappings>
+		</function>
+		<function name="glDisablei" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glDisableiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glDisableiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationi" return="void" link="static">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="mode"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glBlendEquationiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendEquationiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendEquationSeparatei" return="void" link="static">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="modeRGB"/>
+				<param type="GLenum" name="modeAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glBlendEquationSeparateiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendEquationSeparateiEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendFunci" return="void" link="static">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="src"/>
+				<param type="GLenum" name="dst"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glBlendFunciOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendFunciEXT"/>
+			</mappings>
+		</function>
+		<function name="glBlendFuncSeparatei" return="void" link="static">
+			<params>
+				<param type="GLuint" name="buf"/>
+				<param type="GLenum" name="srcRGB"/>
+				<param type="GLenum" name="dstRGB"/>
+				<param type="GLenum" name="srcAlpha"/>
+				<param type="GLenum" name="dstAlpha"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glBlendFuncSeparateiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glBlendFuncSeparateiEXT"/>
+			</mappings>
+		</function>
+		<function name="glColorMaski" return="void" link="static">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLboolean" name="r"/>
+				<param type="GLboolean" name="g"/>
+				<param type="GLboolean" name="b"/>
+				<param type="GLboolean" name="a"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glColorMaskiOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glColorMaskiEXT"/>
+			</mappings>
+		</function>
+		<function name="glIsEnabledi" return="GLboolean" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_buffers_indexed" name="glIsEnablediOES"/>
+				<mapping from="GLES_EXT_draw_buffers_indexed" name="glIsEnablediEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawElementsBaseVertex" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_elements_base_vertex" name="glDrawElementsBaseVertexOES"/>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawElementsBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawRangeElementsBaseVertex" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLuint" name="end"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_elements_base_vertex" name="glDrawRangeElementsBaseVertexOES"/>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawRangeElementsBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glDrawElementsInstancedBaseVertex" return="void" link="static">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indices"/>
+				<param type="GLsizei" name="instancecount"/>
+				<param type="GLint" name="basevertex"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_draw_elements_base_vertex" name="glDrawElementsInstancedBaseVertexOES"/>
+				<mapping from="GLES_EXT_draw_elements_base_vertex" name="glDrawElementsInstancedBaseVertexEXT"/>
+			</mappings>
+		</function>
+		<function name="glFramebufferTexture" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_geometry_shader" name="glFramebufferTextureOES"/>
+				<mapping from="GLES_EXT_geometry_shader" name="glFramebufferTextureEXT"/>
+				<mapping from="GLES_ANDROID_extension_pack_es31a" name="glFramebufferTextureEXT"/>
+			</mappings>
+		</function>
+		<function name="glPrimitiveBoundingBox" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="minX"/>
+				<param type="GLfloat" name="minY"/>
+				<param type="GLfloat" name="minZ"/>
+				<param type="GLfloat" name="minW"/>
+				<param type="GLfloat" name="maxX"/>
+				<param type="GLfloat" name="maxY"/>
+				<param type="GLfloat" name="maxZ"/>
+				<param type="GLfloat" name="maxW"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_geometry_shader" name="glPrimitiveBoundingBoxOES"/>
+				<mapping from="GLES_EXT_geometry_shader" name="glPrimitiveBoundingBoxEXT"/>
+				<mapping from="GLES_ANDROID_extension_pack_es31a" name="glPrimitiveBoundingBoxEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetGraphicsResetStatus" return="GLenum" link="static">
+			<mappings>
+				<mapping from="GLES_KHR_robustness" name="glGetGraphicsResetStatusKHR"/>
+				<mapping from="GLES_EXT_robustness" name="glGetGraphicsResetStatusEXT"/>
+			</mappings>
+		</function>
+		<function name="glReadnPixels" return="void" link="static">
+			<params>
+				<param type="GLint" name="x"/>
+				<param type="GLint" name="y"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="void*" name="data"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_robustness" name="glReadnPixelsKHR"/>
+				<mapping from="GLES_EXT_robustness" name="glReadnPixelsEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformfv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLfloat*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_robustness" name="glGetnUniformfvKHR"/>
+				<mapping from="GLES_EXT_robustness" name="glGetnUniformfvEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_robustness" name="glGetnUniformivKHR"/>
+				<mapping from="GLES_EXT_robustness" name="glGetnUniformivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetnUniformuiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_KHR_robustness" name="glGetnUniformuivKHR"/>
+				<mapping from="GLES_EXT_robustness" name="glGetnUniformuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glMinSampleShading" return="void" link="static">
+			<params>
+				<param type="GLfloat" name="value"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_sample_shading" name="glMinSampleShadingOES"/>
+			</mappings>
+		</function>
+		<function name="glPatchParameteri" return="void" link="static">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="value"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_tessellation_shader" name="glPatchParameteriOES"/>
+				<mapping from="GLES_EXT_tessellation_shader" name="glPatchParameteriEXT"/>
+				<mapping from="GLES_ANDROID_extension_pack_es31a" name="glPatchParameteriEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexParameterIiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glTexParameterIivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glTexParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexParameterIuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glTexParameterIuivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glTexParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetTexParameterIiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glGetTexParameterIivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetTexParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetTexParameterIuiv" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glGetTexParameterIuivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetTexParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glSamplerParameterIiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glSamplerParameterIivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glSamplerParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glSamplerParameterIuiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLuint*" name="param"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glSamplerParameterIuivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glSamplerParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetSamplerParameterIiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glGetSamplerParameterIivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetSamplerParameterIivEXT"/>
+			</mappings>
+		</function>
+		<function name="glGetSamplerParameterIuiv" return="void" link="static">
+			<params>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_border_clamp" name="glGetSamplerParameterIuivOES"/>
+				<mapping from="GLES_EXT_texture_border_clamp" name="glGetSamplerParameterIuivEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexBuffer" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_buffer" name="glTexBufferOES"/>
+				<mapping from="GLES_EXT_texture_buffer" name="glTexBufferEXT"/>
+				<mapping from="GLES_ANDROID_extension_pack_es31a" name="glTexBufferEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexBufferRange" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_buffer" name="glTexBufferRangeOES"/>
+				<mapping from="GLES_EXT_texture_buffer" name="glTexBufferRangeEXT"/>
+				<mapping from="GLES_ANDROID_extension_pack_es31a" name="glTexBufferRangeEXT"/>
+			</mappings>
+		</function>
+		<function name="glTexStorage3DMultisample" return="void" link="static">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalformat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedsamplelocations"/>
+			</params>
+			<mappings>
+				<mapping from="GLES_OES_texture_storage_multisample_2d_array" name="glTexStorage3DMultisampleOES"/>
+			</mappings>
+		</function>
+	</functions>
+	<additionals>
+		<ext name="GLES_EXT_primitive_bounding_box"/>
+		<ext name="GLES_OES_shader_multisample_interpolation"/>
+		<ext name="GLES_OES_texture_compression_astc"/>
+		<ext name="GLES_EXT_texture_cube_map_array"/>
+	</additionals>
+</gl_extension>

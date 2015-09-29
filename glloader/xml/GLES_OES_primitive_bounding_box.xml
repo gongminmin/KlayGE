@@ -18,7 +18,7 @@
 				<param type="GLfloat" name="maxW"/>
 			</params>
 			<mappings>
-				<mapping from="GL_EXT_primitive_bounding_box" name="glPrimitiveBoundingBoxEXT"/>
+				<mapping from="GLES_EXT_primitive_bounding_box" name="glPrimitiveBoundingBoxEXT"/>
 			</mappings>
 		</function>
 	</functions>

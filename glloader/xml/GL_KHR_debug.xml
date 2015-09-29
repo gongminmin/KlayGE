@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_KHR_debug" reg_no="119">
 	<typedefs>
-		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)"/>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)"/>
 	</typedefs>
 
 	<tokens>

@@ -2,7 +2,7 @@
 
 <gl_extension name="GL_ARB_debug_output" reg_no="104">
 	<typedefs>
-		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam)"/>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)"/>
 	</typedefs>
 
 	<tokens>
