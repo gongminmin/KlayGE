@@ -296,7 +296,21 @@ namespace KlayGE
 		case RenderLayout::TT_30_Ctrl_Pt_PatchList:
 		case RenderLayout::TT_31_Ctrl_Pt_PatchList:
 		case RenderLayout::TT_32_Ctrl_Pt_PatchList:
-			if (glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
+			if (glloader_GLES_VERSION_3_2())
+			{
+				primType = GL_PATCHES;
+				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;
+				glPatchParameteriOES(GL_PATCH_VERTICES, n);
+				primCount = vertexCount / 3;
+			}
+			else if (glloader_GLES_OES_tessellation_shader())
+			{
+				primType = GL_PATCHES_OES;
+				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;
+				glPatchParameteriOES(GL_PATCH_VERTICES_OES, n);
+				primCount = vertexCount / 3;
+			}
+			else if (glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
 			{
 				primType = GL_PATCHES_EXT;
 				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;

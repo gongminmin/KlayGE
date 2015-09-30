@@ -150,7 +150,7 @@ namespace
 	}
 
 	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-		GLchar const * message, GLvoid* user_param)
+			GLchar const * message, void const * user_param)
 	{
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
@@ -228,7 +228,7 @@ namespace KlayGE
 #endif
 
 #ifndef KLAYGE_SHIP
-		if (glloader_GLES_KHR_debug() && !this->HackForPVR())
+		if (glloader_GLES_VERSION_3_2())
 		{
 			glEnable(GL_DEBUG_OUTPUT);
 			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -237,6 +237,16 @@ namespace KlayGE
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, GL_TRUE);
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr, GL_FALSE);
 			glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
+		}
+		else if (glloader_GLES_KHR_debug())
+		{
+			glEnable(GL_DEBUG_OUTPUT_KHR);
+			glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR);
+			glDebugMessageCallbackKHR(&DebugOutputProc, nullptr);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH_KHR, 0, nullptr, GL_TRUE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM_KHR, 0, nullptr, GL_TRUE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW_KHR, 0, nullptr, GL_FALSE);
+			glDebugMessageControlKHR(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION_KHR, 0, nullptr, GL_FALSE);
 		}
 #endif
 
@@ -1658,7 +1668,8 @@ namespace KlayGE
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;
-		if (glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_tessellation_shader()
+			|| glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
 		{
 			caps_.hs_support = true;
 			caps_.ds_support = true;

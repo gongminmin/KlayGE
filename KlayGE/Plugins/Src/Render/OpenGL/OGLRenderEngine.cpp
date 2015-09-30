@@ -175,7 +175,7 @@ namespace
 	}
 
 	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
-		GLchar const * message, GLvoid* user_param)
+			GLchar const * message, void const * user_param)
 	{
 		UNREF_PARAM(length);
 		UNREF_PARAM(user_param);
