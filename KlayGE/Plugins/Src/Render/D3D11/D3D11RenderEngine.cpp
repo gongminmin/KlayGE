@@ -264,6 +264,8 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
+		case D3D_FEATURE_LEVEL_12_1:
+		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
 			vs_profile_ = "vs_5_0";
@@ -984,9 +986,12 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
+		case D3D_FEATURE_LEVEL_12_1:
+		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			caps_.max_shader_model = ShaderModel(5, 0);
+			caps_.max_shader_model
+				= (d3d_feature_level_ > D3D_FEATURE_LEVEL_12_0) ? ShaderModel(5, 1) : ShaderModel(5, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
 			caps_.max_texture_cube_size = D3D11_REQ_TEXTURECUBE_DIMENSION;
@@ -1062,6 +1067,8 @@ namespace KlayGE
 
 		switch (d3d_feature_level_)
 		{
+		case D3D_FEATURE_LEVEL_12_1:
+		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_vertex_streams = D3D11_STANDARD_VERTEX_ELEMENT_COUNT;
@@ -1084,6 +1091,8 @@ namespace KlayGE
 		}
 		switch (d3d_feature_level_)
 		{
+		case D3D_FEATURE_LEVEL_12_1:
+		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_texture_anisotropy = D3D11_MAX_MAXANISOTROPY;

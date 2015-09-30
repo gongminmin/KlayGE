@@ -30,9 +30,6 @@
 	#elif defined(KLAYGE_COMPILER_GCC)
 	#pragma GCC diagnostic pop
 	#endif
-
-	#define DXGI_FORMAT_B4G4R4A4_UNORM static_cast<DXGI_FORMAT>(115)
-	#define D3D_FEATURE_LEVEL_11_1 0xb100
 #elif (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	#include <d3d11_1.h>
 #elif (_WIN32_WINNT < _WIN32_WINNT_WIN10)
@@ -40,6 +37,15 @@
 #else
 	#include <dxgi1_4.h>
 	#include <d3d11_3.h>
+#endif
+
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
+	#define DXGI_FORMAT_B4G4R4A4_UNORM static_cast<DXGI_FORMAT>(115)
+	#define D3D_FEATURE_LEVEL_11_1 0xb100
+#endif
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+	#define D3D_FEATURE_LEVEL_12_0 0xc000
+	#define D3D_FEATURE_LEVEL_12_1 0xc100
 #endif
 
 namespace KlayGE

@@ -168,6 +168,13 @@ namespace KlayGE
 			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+			if (dxgi_sub_ver_ >= 4)
+			{
+				available_feature_levels.push_back(std::make_pair("12_1", D3D_FEATURE_LEVEL_12_1));
+				available_feature_levels.push_back(std::make_pair("12_0", D3D_FEATURE_LEVEL_12_0));
+			}
+#endif
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			if (dxgi_sub_ver_ >= 2)
 			{
@@ -278,6 +285,14 @@ namespace KlayGE
 						wchar_t const * fl_str;
 						switch (out_feature_level)
 						{
+						case D3D_FEATURE_LEVEL_12_1:
+							fl_str = L"12.1";
+							break;
+
+						case D3D_FEATURE_LEVEL_12_0:
+							fl_str = L"12.0";
+							break;
+
 						case D3D_FEATURE_LEVEL_11_1:
 							fl_str = L"11.1";
 							break;
