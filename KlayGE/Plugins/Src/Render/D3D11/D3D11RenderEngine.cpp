@@ -262,7 +262,7 @@ namespace KlayGE
 		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(gi_factory_, this->ActiveAdapter(),
 			name, settings);
 
-		switch (d3d_feature_level_)
+		switch (static_cast<uint32_t>(d3d_feature_level_))
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -984,7 +984,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
-		switch (d3d_feature_level_)
+		switch (static_cast<uint32_t>(d3d_feature_level_))
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -1065,7 +1065,7 @@ namespace KlayGE
 			break;
 		}
 
-		switch (d3d_feature_level_)
+		switch (static_cast<uint32_t>(d3d_feature_level_))
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -1089,7 +1089,7 @@ namespace KlayGE
 			caps_.max_vertex_streams = 16;
 			break;
 		}
-		switch (d3d_feature_level_)
+		switch (static_cast<uint32_t>(d3d_feature_level_))
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:

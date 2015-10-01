@@ -283,7 +283,7 @@ namespace KlayGE
 
 						description_ = adapter_->Description() + L" " + dev_type_beh.second + L" FL ";
 						wchar_t const * fl_str;
-						switch (out_feature_level)
+						switch (static_cast<uint32_t>(out_feature_level))
 						{
 						case D3D_FEATURE_LEVEL_12_1:
 							fl_str = L"12.1";
