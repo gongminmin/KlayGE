@@ -106,80 +106,48 @@ namespace KlayGE
 			return *app_;
 		}
 
-		void SceneManagerInstance(SceneManagerPtr const & mgr)
-		{
-			scene_mgr_ = mgr;
-		}
 		bool SceneManagerValid() const
 		{
-			return !!scene_mgr_;
+			return scene_mgr_.get() != nullptr;
 		}
 		SceneManager& SceneManagerInstance();
 
-		void RenderFactoryInstance(RenderFactoryPtr const & factory)
-		{
-			render_factory_ = factory;
-		}
 		bool RenderFactoryValid() const
 		{
-			return !!render_factory_;
+			return render_factory_.get() != nullptr;
 		}
 		RenderFactory& RenderFactoryInstance();
 
-		void AudioFactoryInstance(AudioFactoryPtr const & factory)
-		{
-			audio_factory_ = factory;
-		}
 		bool AudioFactoryValid() const
 		{
-			return !!audio_factory_;
+			return audio_factory_.get() != nullptr;
 		}
 		AudioFactory& AudioFactoryInstance();
 
-		void InputFactoryInstance(InputFactoryPtr const & factory)
-		{
-			input_factory_ = factory;
-		}
 		bool InputFactoryValid() const
 		{
-			return !!input_factory_;
+			return input_factory_.get() != nullptr;
 		}
 		InputFactory& InputFactoryInstance();
 
-		void ShowFactoryInstance(ShowFactoryPtr const & factory)
-		{
-			show_factory_ = factory;
-		}
 		bool ShowFactoryValid() const
 		{
-			return !!show_factory_;
+			return show_factory_.get() != nullptr;
 		}
 		ShowFactory& ShowFactoryInstance();
 
-		void ScriptFactoryInstance(ScriptFactoryPtr const & factory)
-		{
-			script_factory_ = factory;
-		}
 		bool ScriptFactoryValid() const
 		{
-			return !!script_factory_;
+			return script_factory_.get() != nullptr;
 		}
 		ScriptFactory& ScriptFactoryInstance();
 
-		void AudioDataSourceFactoryInstance(AudioDataSourceFactoryPtr const & factory)
-		{
-			audio_data_src_factory_ = factory;
-		}
 		bool AudioDataSourceFactoryValid() const
 		{
-			return !!audio_data_src_factory_;
+			return audio_data_src_factory_.get() != nullptr;
 		}
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 
-		void DeferredRenderingLayerInstance(DeferredRenderingLayerPtr const & drl)
-		{
-			deferred_rendering_layer_ = drl;
-		}
 		DeferredRenderingLayerPtr const & DeferredRenderingLayerInstance()
 		{
 			return deferred_rendering_layer_;

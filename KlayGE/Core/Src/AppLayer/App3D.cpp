@@ -419,11 +419,6 @@ namespace KlayGE
 			cfg.graphics_cfg);
 		Context::Instance().Config(cfg);
 
-		if (cfg.deferred_rendering)
-		{
-			Context::Instance().DeferredRenderingLayerInstance(MakeSharedPtr<DeferredRenderingLayer>());
-		}
-
 		this->OnCreate();
 		this->OnResize(cfg.graphics_cfg.width, cfg.graphics_cfg.height);
 	}

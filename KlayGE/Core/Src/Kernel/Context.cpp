@@ -809,6 +809,21 @@ namespace KlayGE
 	void Context::Config(ContextCfg const & cfg)
 	{
 		cfg_ = cfg;
+
+		if (this->RenderFactoryValid())
+		{
+			if (cfg_.deferred_rendering)
+			{
+				if (!deferred_rendering_layer_)
+				{
+					deferred_rendering_layer_ = MakeSharedPtr<DeferredRenderingLayer>();
+				}
+			}
+			else
+			{
+				deferred_rendering_layer_.reset();
+			}
+		}
 	}
 
 	ContextCfg const & Context::Config() const
