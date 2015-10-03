@@ -2779,6 +2779,8 @@ namespace KlayGE
 				break;
 
 			case LightSource::LT_Point:
+			case LightSource::LT_SphereArea:
+			case LightSource::LT_TubeArea:
 				sm_camera = light->SMCamera(0);
 				*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
 				break;
