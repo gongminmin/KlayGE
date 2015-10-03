@@ -424,7 +424,7 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
 		cur_pos.w -= elapse_time;
-		
+
 		float2 tex_pos = cur_pos.xz / 4 + 0.5;
 		tex_pos.y = 1 - tex_pos.y;
 		float height = height_map_tex.SampleLevel(point_sampler, tex_pos, 0).r;
@@ -432,7 +432,7 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 		{
 			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.SampleLevel(normal_map_sampler, tex_pos, 0)).xzy) * 0.99f;
 		}
-		
+
 		out_pos = cur_pos;
 		out_vel = float4(cur_vel, 1);
 	}
@@ -444,7 +444,7 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
 			pos /= pos.w;
 
-			float3 vel = particle_init_vel_buff.Load((vid + uint(cur_pos.z * 256 * 256 + cur_pos.x * 256)) % 65536).xyz;
+			float3 vel = particle_init_vel_buff.Load((vid + uint((cur_pos.z * 256 + cur_pos.x) * 256)) % 65536).xyz;
 			vel = mul(vel, (float3x3)ps_model_mat);
 
 			out_pos = float4(pos.xyz, init_pos_life.w);
@@ -471,6 +471,71 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 					<slot usage="TEXCOORD" usage_index="0" component="xyzw"/>
 				</stream_output>
 			</state>
+		</pass>
+	</technique>
+
+	<parameter type="rw_structured_buffer" elem_type="float4" name="particle_pos_stru_buff"/>
+	<parameter type="rw_structured_buffer" elem_type="float4" name="particle_vel_stru_buff"/>
+
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+[numthreads(256, 1, 1)]
+void UpdateCS(uint3 dtid : SV_DispatchThreadID)
+{
+	float4 out_pos;
+	float4 out_vel;
+
+	uint id = dtid.x;
+
+	float4 cur_pos = particle_pos_stru_buff[id];
+	if (cur_pos.w > 0)
+	{
+		float3 cur_vel = particle_vel_stru_buff[id].xyz;
+		cur_vel += float3(0, -0.1f, 0) * elapse_time;
+		cur_pos.xyz += cur_vel * elapse_time;
+		cur_pos.w -= elapse_time;
+
+		float2 tex_pos = cur_pos.xz / 4 + 0.5;
+		tex_pos.y = 1 - tex_pos.y;
+		float height = height_map_tex.SampleLevel(point_sampler, tex_pos, 0).r;
+		if (cur_pos.y < height)
+		{
+			cur_vel = reflect(cur_vel, decompress_normal(normal_map_tex.SampleLevel(normal_map_sampler, tex_pos, 0)).xzy) * 0.99f;
+		}
+
+		out_pos = cur_pos;
+		out_vel = float4(cur_vel, 1);
+	}
+	else
+	{
+		float t = accumulate_time - particle_birth_time_buff[id].r;
+		if ((t > 0) && (t < elapse_time))
+		{
+			float4 pos = mul(float4(init_pos_life.xyz, 1), ps_model_mat);
+			pos /= pos.w;
+
+			float3 vel = particle_init_vel_buff[(id + uint((cur_pos.z * 256 + cur_pos.x) * 256)) & 0xFFFF].xyz;
+			vel = mul(vel, (float3x3)ps_model_mat);
+
+			out_pos = float4(pos.xyz, init_pos_life.w);
+			out_vel = float4(vel, 1);
+		}
+		else
+		{
+			out_pos = float4(0, 0, 0, -1);
+			out_vel = 0;
+		}
+	}
+
+	particle_pos_stru_buff[id] = out_pos;
+	particle_vel_stru_buff[id] = out_vel;
+}
+		]]>
+	</shader>
+
+	<technique name="UpdateCS">
+		<pass name="p0">
+			<state name="compute_shader" value="UpdateCS()"/>
 		</pass>
 	</technique>
 </effect>

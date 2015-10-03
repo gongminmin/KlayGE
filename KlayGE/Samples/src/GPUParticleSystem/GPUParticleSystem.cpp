@@ -38,6 +38,7 @@ namespace
 {
 	bool use_gs = false;
 	bool use_so = false;
+	bool use_cs = false;
 	bool use_mrt = false;
 
 	int const NUM_PARTICLE = 65536;
@@ -163,7 +164,7 @@ namespace
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
-				if (use_so)
+				if (use_so || use_cs)
 				{
 					technique_ = effect->TechniqueByName("ParticlesWithGSSO");
 					rl_->NumVertices(max_num_particles);
@@ -285,7 +286,40 @@ namespace
 			RenderEngine& re = rf.RenderEngineInstance();
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
-			if (use_so)
+			if (use_cs)
+			{
+				update_cs_tech_ = effect->TechniqueByName("UpdateCS");
+				technique_ = update_cs_tech_;
+
+				std::vector<float4> p(max_num_particles_);
+				for (size_t i = 0; i < p.size(); ++i)
+				{
+					p[i] = float4(0, 0, 0, -1);
+				}
+
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				particle_pos_vb_[1] = particle_pos_vb_[0];
+				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
+				particle_vel_vb_[1] = particle_vel_vb_[0];
+
+				*(technique_->Effect().ParameterByName("particle_pos_stru_buff")) = particle_pos_vb_[0];
+				*(technique_->Effect().ParameterByName("particle_vel_stru_buff")) = particle_vel_vb_[0];
+
+				for (int i = 0; i < max_num_particles_; ++i)
+				{
+					float const angel = this->RandomGen() / 0.05f * PI;
+					float const r = this->RandomGen() * 3;
+
+					p[i] = float4(r * cos(angel), 0.2f + abs(this->RandomGen()) * 3, r * sin(angel), 0);
+				}
+
+				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
+					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
+				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
+			}
+			else if (use_so)
 			{
 				rl_ = rf.MakeRenderLayout();
 				rl_->TopologyType(RenderLayout::TT_PointList);
@@ -485,7 +519,7 @@ namespace
 			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			if (use_so)
+			if (use_so || use_cs)
 			{
 				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					max_num_particles_ * sizeof(half), &time_v[0], EF_R16F);
@@ -516,7 +550,11 @@ namespace
 			*elapse_time_param_ = elapsed_time;
 			*accumulate_time_param_ = accumulate_time_;
 
-			if (use_so)
+			if (use_cs)
+			{
+				technique_ = update_cs_tech_;
+			}
+			else if (use_so)
 			{
 				re.BindSOBuffers(particle_rl_[rt_index_]);
 				*particle_pos_buff_param_ = this->PosVB();
@@ -541,7 +579,19 @@ namespace
 				*particle_vel_tex_param_ = this->VelTexture();
 			}
 
-			this->Render();
+			if (use_cs)
+			{
+				re.BindFrameBuffer(re.DefaultFrameBuffer());
+				re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
+
+				this->OnRenderBegin();
+				re.Dispatch(*technique_, (max_num_particles_ + 255) / 256, 1, 1);
+				this->OnRenderEnd();
+			}
+			else
+			{
+				this->Render();
+			}
 
 			if (!use_so && !use_mrt)
 			{
@@ -614,6 +664,7 @@ namespace
 		RenderTechniquePtr update_mrt_tech_;
 		RenderTechniquePtr update_pos_tech_;
 		RenderTechniquePtr update_vel_tech_;
+		RenderTechniquePtr update_cs_tech_;
 		RenderEffectParameterPtr vel_offset_param_;
 		RenderEffectParameterPtr particle_pos_tex_param_;
 		RenderEffectParameterPtr particle_vel_tex_param_;
@@ -729,7 +780,11 @@ void GPUParticleSystemApp::OnCreate()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	use_gs = caps.gs_support;
-	use_so = caps.stream_output_support;
+	use_cs = caps.cs_support;
+	if (!use_cs)
+	{
+		use_so = caps.stream_output_support;
+	}
 	use_mrt = caps.max_simultaneous_rts > 1;
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -771,7 +826,7 @@ void GPUParticleSystemApp::OnCreate()
 	terrain_ = MakeSharedPtr<TerrainObject>(terrain_height_tex, terrain_normal_tex);
 	terrain_->AddToSceneManager();
 
-	FrameBufferPtr screen_buffer = re.CurFrameBuffer();
+	FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 	
 	scene_buffer_ = rf.MakeFrameBuffer();
 	scene_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
@@ -779,6 +834,11 @@ void GPUParticleSystemApp::OnCreate()
 	fog_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
+
+	if (use_cs)
+	{
+		checked_pointer_cast<ParticlesObject>(particles_)->PosVB(gpu_ps->PosVB());
+	}
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("GPUParticleSystem.uiml"));
 }
