@@ -794,7 +794,6 @@ namespace KlayGE
 	{
 		if (cs_based_)
 		{
-			pos_vb_.reset();
 			rl_.reset();
 			frame_buffer_.reset();
 		}
@@ -804,20 +803,10 @@ namespace KlayGE
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-				rl_ = rf.MakeRenderLayout();
-				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+				rl_ = rf.RenderEngineInstance().PostProcessRenderLayout();
 
-				float2 pos[] =
-				{
-					float2(-1, +1),
-					float2(+1, +1),
-					float2(-1, -1),
-					float2(+1, -1)
-				};
 				pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
-				pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
-				rl_->BindVertexStream(pos_vb_, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 
 				frame_buffer_ = rf.MakeFrameBuffer();
 				frame_buffer_->GetViewport()->camera = rf.RenderEngineInstance().CurFrameBuffer()->GetViewport()->camera;

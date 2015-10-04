@@ -219,6 +219,21 @@ namespace KlayGE
 			settings.width = static_cast<uint32_t>(settings.height * screen_aspect + 0.5f);
 		}
 
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		pp_rl_ = rf.MakeRenderLayout();
+		pp_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+		float2 pos[] =
+		{
+			float2(-1, +1),
+			float2(+1, +1),
+			float2(-1, -1),
+			float2(+1, -1)
+		};
+		GraphicsBufferPtr pp_pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
+		pp_rl_->BindVertexStream(pp_pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
 		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
 		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
 
@@ -276,8 +291,6 @@ namespace KlayGE
 		{
 			default_frame_buffers_[i] = screen_frame_buffer_;
 		}
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		RenderViewPtr ds_view;
 		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
@@ -1226,6 +1239,8 @@ namespace KlayGE
 		cur_line_rs_obj_.reset();
 		cur_dss_obj_.reset();
 		cur_bs_obj_.reset();
+
+		pp_rl_.reset();
 
 		hdr_pp_.reset();
 		skip_hdr_pp_.reset();

@@ -176,8 +176,6 @@ namespace KlayGE
 
 		FrameBufferPtr frame_buffer_;
 
-		GraphicsBufferPtr pos_vb_;
-
 		std::vector<RenderEffectParameterPtr> input_pins_ep_;
 		std::vector<RenderEffectParameterPtr> output_pins_ep_;
 

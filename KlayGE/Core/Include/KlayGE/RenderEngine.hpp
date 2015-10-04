@@ -218,6 +218,11 @@ namespace KlayGE
 			return cur_sample_mask_;
 		}
 
+		RenderLayoutPtr const & PostProcessRenderLayout() const
+		{
+			return pp_rl_;
+		}
+
 		StereoMethod Stereo() const
 		{
 			return stereo_method_;
@@ -325,6 +330,8 @@ namespace KlayGE
 		float4 ovr_chrom_ab_param_;
 		float ovr_x_center_offset_;
 		float ovr_scale_;
+
+		RenderLayoutPtr pp_rl_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
