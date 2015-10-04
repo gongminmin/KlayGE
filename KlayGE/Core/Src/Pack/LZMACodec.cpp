@@ -68,7 +68,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<LZMALoader>();
+					instance_ = MakeUniquePtr<LZMALoader>();
 				}
 			}
 			return *instance_;
@@ -110,9 +110,9 @@ namespace
 		LzmaCompressFunc lzma_compress_func_;
 		LzmaUncompressFunc lzma_uncompress_func_;
 
-		static std::shared_ptr<LZMALoader> instance_;
+		static std::unique_ptr<LZMALoader> instance_;
 	};
-	std::shared_ptr<LZMALoader> LZMALoader::instance_;
+	std::unique_ptr<LZMALoader> LZMALoader::instance_;
 }
 
 namespace KlayGE

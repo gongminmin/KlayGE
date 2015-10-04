@@ -106,7 +106,7 @@ namespace
 
 namespace KlayGE
 {
-	std::shared_ptr<ResLoader> ResLoader::res_loader_instance_;
+	std::unique_ptr<ResLoader> ResLoader::res_loader_instance_;
 
 	ResLoader::ResLoader()
 		: quit_(false)
@@ -195,7 +195,7 @@ namespace KlayGE
 #endif
 #endif
 
-		loading_thread_ = MakeSharedPtr<joiner<void>>(Context::Instance().ThreadPool()(
+		loading_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
 				std::bind(&ResLoader::LoadingThreadFunc, this)));
 	}
 
@@ -212,7 +212,7 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!res_loader_instance_)
 			{
-				res_loader_instance_ = MakeSharedPtr<ResLoader>();
+				res_loader_instance_ = MakeUniquePtr<ResLoader>();
 			}
 		}
 		return *res_loader_instance_;

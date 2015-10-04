@@ -66,7 +66,7 @@ namespace
 
 namespace KlayGE
 {
-	std::shared_ptr<Context> Context::context_instance_;
+	std::unique_ptr<Context> Context::context_instance_;
 
 	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
 	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
@@ -89,7 +89,7 @@ namespace KlayGE
 #endif
 #endif
 
-		gtp_instance_ = MakeSharedPtr<thread_pool>(1, 16);
+		gtp_instance_ = MakeUniquePtr<thread_pool>(1, 16);
 	}
 
 	Context::~Context()
@@ -124,7 +124,7 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!context_instance_)
 			{
-				context_instance_ = MakeSharedPtr<Context>();
+				context_instance_ = MakeUniquePtr<Context>();
 			}
 		}
 		return *context_instance_;

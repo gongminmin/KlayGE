@@ -482,7 +482,7 @@ namespace KlayGE
 
 		if (!update_thread_ && !quit_)
 		{
-			update_thread_ = MakeSharedPtr<joiner<void>>(Context::Instance().ThreadPool()(
+			update_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
 				std::bind(&SceneManager::UpdateThreadFunc, this)));
 		}
 

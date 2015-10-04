@@ -45,7 +45,7 @@ namespace
 
 namespace KlayGE
 {
-	std::shared_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
+	std::unique_ptr<PerfProfiler> PerfProfiler::perf_profiler_instance_;
 
 	PerfRange::PerfRange()
 		: cpu_time_(0), gpu_time_(0), dirty_(false)
@@ -119,7 +119,7 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!perf_profiler_instance_)
 			{
-				perf_profiler_instance_ = MakeSharedPtr<PerfProfiler>();
+				perf_profiler_instance_ = MakeUniquePtr<PerfProfiler>();
 			}
 		}
 		return *perf_profiler_instance_;

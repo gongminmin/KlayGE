@@ -450,7 +450,7 @@ namespace KlayGE
 		void InputHandler(InputEngine const & sender, InputAction const & action);
 
 	private:
-		static UIManagerPtr ui_mgr_instance_;
+		static std::unique_ptr<UIManager> ui_mgr_instance_;
 
 		// Shared between all dialogs
 		RenderEffectPtr effect_;

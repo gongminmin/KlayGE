@@ -183,7 +183,7 @@ namespace KlayGE
 #endif
 
 	private:
-		static std::shared_ptr<ResLoader> res_loader_instance_;
+		static std::unique_ptr<ResLoader> res_loader_instance_;
 
 		std::string exe_path_;
 		std::vector<std::string> paths_;
@@ -194,7 +194,7 @@ namespace KlayGE
 		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>,
 			boost::lockfree::capacity<1024>> loading_res_queue_;
 
-		std::shared_ptr<joiner<void>> loading_thread_;
+		std::unique_ptr<joiner<void>> loading_thread_;
 		volatile bool quit_;
 	};
 }

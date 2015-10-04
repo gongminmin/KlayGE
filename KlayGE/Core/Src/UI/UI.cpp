@@ -79,7 +79,7 @@ namespace
 
 namespace KlayGE
 {
-	UIManagerPtr UIManager::ui_mgr_instance_;
+	std::unique_ptr<UIManager> UIManager::ui_mgr_instance_;
 
 
 	class UIRectRenderable : public RenderableHelper
@@ -308,7 +308,7 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(singleton_mutex);
 			if (!ui_mgr_instance_)
 			{
-				ui_mgr_instance_ = MakeSharedPtr<UIManager>();
+				ui_mgr_instance_ = MakeUniquePtr<UIManager>();
 			}
 		}
 
