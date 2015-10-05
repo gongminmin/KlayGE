@@ -51,7 +51,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
@@ -73,7 +73,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		handle_ = re.RTVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocRTV();
@@ -95,7 +95,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		handle_ = re.DSVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocDSV();
@@ -117,7 +117,7 @@ namespace KlayGE
 		: res_(res), counter_offset_(0)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		ID3D12Resource* counter = nullptr;
 		if (D3D12_UAV_DIMENSION_BUFFER == uav_desc.ViewDimension)
@@ -147,8 +147,8 @@ namespace KlayGE
 	D3D12RenderView::D3D12RenderView()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3D12Device();
-		d3d_cmd_list_ = re.D3D12GraphicsCmdList();
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 	}
 
 	D3D12RenderView::~D3D12RenderView()
@@ -483,8 +483,8 @@ namespace KlayGE
 		: ua_first_subres_(first_array_index * texture.NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3D12Device();
-		d3d_cmd_list_ = re.D3D12GraphicsCmdList();
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(first_array_index, array_size, level);
@@ -500,8 +500,8 @@ namespace KlayGE
 		: ua_first_subres_((array_index * texture_3d.Depth(level) + first_slice) * texture_3d.NumMipMaps() + level), ua_num_subres_(num_slices * texture_3d.NumMipMaps() + level)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3D12Device();
-		d3d_cmd_list_ = re.D3D12GraphicsCmdList();
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(array_index, first_slice, num_slices, level);
@@ -517,8 +517,8 @@ namespace KlayGE
 		: ua_first_subres_((array_index * 6 + face) * texture_cube.NumMipMaps() + level), ua_num_subres_(1)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3D12Device();
-		d3d_cmd_list_ = re.D3D12GraphicsCmdList();
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(array_index, face, level);
@@ -536,8 +536,8 @@ namespace KlayGE
 		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		d3d_device_ = re.D3D12Device();
-		d3d_cmd_list_ = re.D3D12GraphicsCmdList();
+		d3d_device_ = re.D3DDevice();
+		d3d_cmd_list_ = re.D3DRenderCmdList();
 
 		D3D12GraphicsBuffer* d3d_buff = checked_cast<D3D12GraphicsBuffer*>(&gb);
 		ua_view_ = d3d_buff->D3DUnorderedAccessView();

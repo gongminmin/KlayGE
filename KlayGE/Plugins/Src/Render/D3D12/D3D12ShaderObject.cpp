@@ -1638,7 +1638,7 @@ namespace KlayGE
 	void D3D12ShaderObject::CreateRootSignature()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & d3d_12_device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		std::array<size_t, ShaderObject::ST_NumShaderTypes * 4> num;
 		size_t num_sampler = 0;
@@ -1662,10 +1662,10 @@ namespace KlayGE
 			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			sampler_heap_desc.NodeMask = 0;
 			ID3D12DescriptorHeap* s_heap;
-			TIF(d3d_12_device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&s_heap)));
+			TIF(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&s_heap)));
 			sampler_heap_ = MakeCOMPtr(s_heap);
 
-			UINT const sampler_desc_size = d3d_12_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			UINT const sampler_desc_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_sampler_handle = sampler_heap_->GetCPUDescriptorHandleForHeapStart();
 			for (uint32_t i = 0; i < ST_NumShaderTypes; ++ i)
 			{
@@ -1673,7 +1673,7 @@ namespace KlayGE
 				{
 					for (uint32_t j = 0; j < samplers_[i].size(); ++ j)
 					{
-						d3d_12_device->CreateSampler(&samplers_[i][j], cpu_sampler_handle);
+						device->CreateSampler(&samplers_[i][j], cpu_sampler_handle);
 						cpu_sampler_handle.ptr += sampler_desc_size;
 					}
 				}
@@ -1886,8 +1886,7 @@ namespace KlayGE
 		if (!barriers.empty())
 		{
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
-			cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+			re.D3DRenderCmdList()->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 
 		for (size_t i = 0; i < all_cbuffs_.size(); ++ i)
@@ -1969,8 +1968,7 @@ namespace KlayGE
 		if (!barriers.empty())
 		{
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
-			cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+			re.D3DRenderCmdList()->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 	}
 }

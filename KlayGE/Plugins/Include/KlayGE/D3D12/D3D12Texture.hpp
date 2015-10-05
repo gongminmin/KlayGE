@@ -127,8 +127,6 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 	protected:
-		ID3D12DevicePtr d3d_device_;
-		ID3D12GraphicsCommandListPtr d3d_cmd_list_;
 		DXGI_FORMAT dxgi_fmt_;
 
 		ID3D12ResourcePtr d3d_texture_;

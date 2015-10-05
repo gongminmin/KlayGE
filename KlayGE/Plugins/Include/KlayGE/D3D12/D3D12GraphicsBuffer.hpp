@@ -80,8 +80,6 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D12DevicePtr d3d_device_;
-		ID3D12GraphicsCommandListPtr d3d_cmd_list_;
 		ID3D12ResourcePtr buffer_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;

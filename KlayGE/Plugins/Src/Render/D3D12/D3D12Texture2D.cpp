@@ -400,8 +400,8 @@ namespace KlayGE
 		else
 		{
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D12DevicePtr const & device = re.D3D12Device();
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+			ID3D12DevicePtr const & device = re.D3DDevice();
+			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 			RenderTechniquePtr tech = re.BilinearBlitTech();
 			RenderPassPtr pass = tech->Pass(0);
@@ -483,7 +483,7 @@ namespace KlayGE
 			pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-			ID3D12PipelineStatePtr const & pso = re.CreateGraphicsPSO(pso_desc);
+			ID3D12PipelineStatePtr const & pso = re.CreateRenderPSO(pso_desc);
 
 			cmd_list->SetPipelineState(pso.get());
 			cmd_list->SetGraphicsRootSignature(so->RootSignature().get());

@@ -52,10 +52,6 @@ namespace KlayGE
 							counter_offset_(0),
 							fmt_as_shader_res_(fmt)
 	{
-		D3D12RenderEngine const & renderEngine(*checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
-		d3d_device_ = renderEngine.D3D12Device();
-		d3d_cmd_list_ = renderEngine.D3D12GraphicsCmdList();
-
 		this->CreateBuffer(init_data);
 	}
 
@@ -71,6 +67,7 @@ namespace KlayGE
 	void D3D12GraphicsBuffer::CreateBuffer(void const * subres_init)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		D3D12_RESOURCE_STATES init_state;
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -125,19 +122,19 @@ namespace KlayGE
 		}
 
 		ID3D12Resource* buffer;
-		TIF(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if (subres_init != nullptr)
 		{
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12ResCmdList();
-			std::lock_guard<std::mutex> lock(re.D3D12ResCmdListMutex());
+			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
+			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 
-			TIF(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+			TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 			ID3D12ResourcePtr buffer_upload = MakeCOMPtr(buffer);
@@ -182,7 +179,7 @@ namespace KlayGE
 
 				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 				res_desc.Width = sizeof(uint32_t);
-				TIF(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+				TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 					&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 					IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 				buffer_counter_upload_ = MakeCOMPtr(buffer);
@@ -273,7 +270,7 @@ namespace KlayGE
 		BOOST_ASSERT(this->Size() <= rhs.Size());
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 		D3D12GraphicsBuffer& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&rhs);
 
 		D3D12_RESOURCE_BARRIER src_barrier_before, dst_barrier_before;
@@ -340,7 +337,7 @@ namespace KlayGE
 			cmd_list->ResourceBarrier(n, &barrier_before[0]);
 		}
 
-		d3d_cmd_list_->CopyBufferRegion(d3d_gb.D3DBuffer().get(), 0, buffer_.get(), 0, size_in_byte_);
+		cmd_list->CopyBufferRegion(d3d_gb.D3DBuffer().get(), 0, buffer_.get(), 0, size_in_byte_);
 
 		D3D12_RESOURCE_BARRIER barrier_after[2];
 		if (n > 0)

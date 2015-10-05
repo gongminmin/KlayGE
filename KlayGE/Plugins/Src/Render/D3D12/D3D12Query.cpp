@@ -45,7 +45,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&rf.RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		D3D12_QUERY_HEAP_DESC query_heap_desc;
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
@@ -94,7 +94,7 @@ namespace KlayGE
 	void D3D12OcclusionQuery::Begin()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->BeginQuery(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0);
 	}
@@ -102,7 +102,7 @@ namespace KlayGE
 	void D3D12OcclusionQuery::End()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->EndQuery(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0);
 
@@ -146,7 +146,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&rf.RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		D3D12_QUERY_HEAP_DESC query_heap_desc;
 		query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_OCCLUSION;
@@ -195,7 +195,7 @@ namespace KlayGE
 	void D3D12ConditionalRender::Begin()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->BeginQuery(predicate_heap_.get(), D3D12_QUERY_TYPE_BINARY_OCCLUSION, 0);
 	}
@@ -203,7 +203,7 @@ namespace KlayGE
 	void D3D12ConditionalRender::End()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->EndQuery(predicate_heap_.get(), D3D12_QUERY_TYPE_BINARY_OCCLUSION, 0);
 
@@ -232,7 +232,7 @@ namespace KlayGE
 	void D3D12ConditionalRender::BeginConditionalRender()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->SetPredication(predicate_result_.get(), 0, D3D12_PREDICATION_OP_NOT_EQUAL_ZERO);
 	}
@@ -240,7 +240,7 @@ namespace KlayGE
 	void D3D12ConditionalRender::EndConditionalRender()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->SetPredication(nullptr, 0, D3D12_PREDICATION_OP_NOT_EQUAL_ZERO);
 	}
@@ -262,7 +262,7 @@ namespace KlayGE
 	D3D12TimerQuery::D3D12TimerQuery()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3D12Device();
+		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		D3D12_QUERY_HEAP_DESC timestamp_query_heap_desc;
 		timestamp_query_heap_desc.Type = D3D12_QUERY_HEAP_TYPE_TIMESTAMP;
@@ -310,7 +310,7 @@ namespace KlayGE
 	void D3D12TimerQuery::Begin()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->EndQuery(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0);
 	}
@@ -318,7 +318,7 @@ namespace KlayGE
 	void D3D12TimerQuery::End()
 	{
 		D3D12RenderEngine const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
 		cmd_list->EndQuery(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 1);
 

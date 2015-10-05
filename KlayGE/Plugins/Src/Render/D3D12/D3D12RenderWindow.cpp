@@ -73,7 +73,7 @@ namespace KlayGE
 #endif
 							adapter_(adapter),
 							gi_factory_(gi_factory),
-							graphics_fence_value_(0), compute_fence_value_(0)
+							render_fence_value_(0), compute_fence_value_(0), copy_fence_value_(0)
 	{
 		// Store info
 		name_				= name;
@@ -125,15 +125,15 @@ namespace KlayGE
 		viewport_->width	= width_;
 		viewport_->height	= height_;
 
-		ID3D12DevicePtr d3d_12_device;
-		ID3D12CommandQueuePtr d3d_12_cmd_queue;
+		ID3D12DevicePtr d3d_device;
+		ID3D12CommandQueuePtr d3d_cmd_queue;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-		if (d3d12_re.D3D12Device())
+		if (d3d12_re.D3DDevice())
 		{
-			d3d_12_device = d3d12_re.D3D12Device();
-			d3d_12_cmd_queue = d3d12_re.D3D12GraphicsCmdQueue();
+			d3d_device = d3d12_re.D3DDevice();
+			d3d_cmd_queue = d3d12_re.D3DRenderCmdQueue();
 
 			main_wnd_ = false;
 		}
@@ -214,7 +214,7 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter().get(),
 						feature_levels_for_12[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
 				{
-					d3d_12_device = MakeCOMPtr(device);
+					d3d_device = MakeCOMPtr(device);
 
 					D3D12_COMMAND_QUEUE_DESC queue_desc;
 					queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -223,16 +223,16 @@ namespace KlayGE
 					queue_desc.NodeMask = 0;
 
 					ID3D12CommandQueue* cmd_queue;
-					TIF(d3d_12_device->CreateCommandQueue(&queue_desc,
+					TIF(d3d_device->CreateCommandQueue(&queue_desc,
 						IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
-					d3d_12_cmd_queue = MakeCOMPtr(cmd_queue);
+					d3d_cmd_queue = MakeCOMPtr(cmd_queue);
 
 					D3D12_FEATURE_DATA_FEATURE_LEVELS feature_levels;
 					feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels_for_11.size());
 					feature_levels.pFeatureLevelsRequested = &feature_levels_for_11[0];
-					d3d_12_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &feature_levels, sizeof(feature_levels));
+					d3d_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &feature_levels, sizeof(feature_levels));
 
-					d3d12_re.D3DDevice(d3d_12_device, d3d_12_cmd_queue, feature_levels.MaxSupportedFeatureLevel);
+					d3d12_re.D3DDevice(d3d_device, d3d_cmd_queue, feature_levels.MaxSupportedFeatureLevel);
 
 					if (Context::Instance().AppInstance().ConfirmDevice())
 					{
@@ -271,8 +271,8 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_12_device.reset();
-						d3d_12_cmd_queue.reset();
+						d3d_device.reset();
+						d3d_cmd_queue.reset();
 					}
 				}
 			}
@@ -280,8 +280,8 @@ namespace KlayGE
 			main_wnd_ = true;
 		}
 
-		Verify(!!d3d_12_device);
-		Verify(!!d3d_12_cmd_queue);
+		Verify(!!d3d_device);
+		Verify(!!d3d_cmd_queue);
 
 		depth_stencil_fmt_ = settings.depth_stencil_fmt;
 
@@ -317,7 +317,7 @@ namespace KlayGE
 
 		IDXGISwapChain1* sc = nullptr;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		gi_factory_->CreateSwapChainForHwnd(d3d_12_cmd_queue.get(), hWnd_,
+		gi_factory_->CreateSwapChainForHwnd(d3d_cmd_queue.get(), hWnd_,
 			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
 #else
 		gi_factory_->CreateSwapChainForCoreWindow(d3d_12_cmd_queue.get(),
@@ -339,17 +339,23 @@ namespace KlayGE
 		curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 		
 		ID3D12Fence* fence;
-		TIF(d3d_12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		graphics_fence_ = MakeCOMPtr(fence);
-		graphics_fence_value_ = 1;
+		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		render_fence_ = MakeCOMPtr(fence);
+		render_fence_value_ = 1;
 
-		graphics_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		render_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
 
-		TIF(d3d_12_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		compute_fence_ = MakeCOMPtr(fence);
 		compute_fence_value_ = 1;
 
 		compute_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+
+		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		copy_fence_ = MakeCOMPtr(fence);
+		copy_fence_value_ = 1;
+
+		copy_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
 
 		this->UpdateSurfacesPtrs();
 
@@ -384,7 +390,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3D12GraphicsCmdList();
+		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 		if (cmd_list)
 		{
 			cmd_list->ClearState(nullptr);
@@ -424,7 +430,7 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D12CommandQueuePtr const & cmd_queue = re.D3D12GraphicsCmdQueue();
+			ID3D12CommandQueuePtr const & cmd_queue = re.D3DRenderCmdQueue();
 
 			IDXGISwapChain1* sc = nullptr;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -580,12 +586,15 @@ namespace KlayGE
 			render_targets_[i].reset();
 		}
 
-		graphics_fence_.reset();
-		::CloseHandle(graphics_fence_event_);
+		render_fence_.reset();
+		::CloseHandle(render_fence_event_);
 
 		compute_fence_.reset();
 		::CloseHandle(compute_fence_event_);
-		
+
+		copy_fence_.reset();
+		::CloseHandle(copy_fence_event_);
+
 		depth_stencil_.reset();
 		swap_chain_.reset();
 		gi_factory_.reset();
@@ -648,8 +657,9 @@ namespace KlayGE
 
 			this->WaitForGPU();
 
-			re.ResetGraphicsCmd();
+			re.ResetRenderCmd();
 			re.ResetComputeCmd();
+			re.ResetCopyCmd();
 			re.ClearPSOCache();
 		}
 	}
@@ -713,20 +723,20 @@ namespace KlayGE
 	void D3D12RenderWindow::WaitForGPU()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 
-		ID3D12CommandQueuePtr const & graphics_cmd_queue = d3d12_re.D3D12GraphicsCmdQueue();
-		uint64_t const graphics_fence = graphics_fence_value_;
-		TIF(graphics_cmd_queue->Signal(graphics_fence_.get(), graphics_fence));
-		++ graphics_fence_value_;
+		ID3D12CommandQueuePtr const & render_cmd_queue = re.D3DRenderCmdQueue();
+		uint64_t const render_fence = render_fence_value_;
+		TIF(render_cmd_queue->Signal(render_fence_.get(), render_fence));
+		++ render_fence_value_;
 
-		if (graphics_fence_->GetCompletedValue() < graphics_fence)
+		if (render_fence_->GetCompletedValue() < render_fence)
 		{
-			TIF(graphics_fence_->SetEventOnCompletion(graphics_fence, graphics_fence_event_));
-			::WaitForSingleObjectEx(graphics_fence_event_, INFINITE, FALSE);
+			TIF(render_fence_->SetEventOnCompletion(render_fence, render_fence_event_));
+			::WaitForSingleObjectEx(render_fence_event_, INFINITE, FALSE);
 		}
 
-		ID3D12CommandQueuePtr const & compute_cmd_queue = d3d12_re.D3D12ComputeCmdQueue();
+		ID3D12CommandQueuePtr const & compute_cmd_queue = re.D3DComputeCmdQueue();
 		uint64_t const compute_fence = compute_fence_value_;
 		TIF(compute_cmd_queue->Signal(compute_fence_.get(), compute_fence));
 		++ compute_fence_value_;
@@ -735,6 +745,17 @@ namespace KlayGE
 		{
 			TIF(compute_fence_->SetEventOnCompletion(compute_fence, compute_fence_event_));
 			::WaitForSingleObjectEx(compute_fence_event_, INFINITE, FALSE);
+		}
+
+		ID3D12CommandQueuePtr const & copy_cmd_queue = re.D3DCopyCmdQueue();
+		uint64_t const copy_fence = copy_fence_value_;
+		TIF(copy_cmd_queue->Signal(copy_fence_.get(), copy_fence));
+		++ copy_fence_value_;
+
+		if (copy_fence_->GetCompletedValue() < copy_fence)
+		{
+			TIF(copy_fence_->SetEventOnCompletion(copy_fence, copy_fence_event_));
+			::WaitForSingleObjectEx(copy_fence_event_, INFINITE, FALSE);
 		}
 	}
 }

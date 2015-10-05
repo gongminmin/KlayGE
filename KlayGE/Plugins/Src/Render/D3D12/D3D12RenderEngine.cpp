@@ -72,7 +72,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D12RenderEngine::D3D12RenderEngine()
 		: inv_timestamp_freq_(0),
-			res_cmd_fence_val_(0), graphics_cmd_fence_val_(0), compute_cmd_fence_val_(0)
+			render_cmd_fence_val_(0), compute_cmd_fence_val_(0), copy_cmd_fence_val_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 5;
@@ -109,10 +109,10 @@ namespace KlayGE
 	void D3D12RenderEngine::UpdateGPUTimestampsFrequency()
 	{
 		inv_timestamp_freq_ = 0;
-		if (d3d_graphics_cmd_queue_)
+		if (d3d_render_cmd_queue_)
 		{
 			UINT64 freq;
-			if (SUCCEEDED(d3d_graphics_cmd_queue_->GetTimestampFrequency(&freq)))
+			if (SUCCEEDED(d3d_render_cmd_queue_->GetTimestampFrequency(&freq)))
 			{
 				inv_timestamp_freq_ = 1.0 / freq;
 			}
@@ -126,47 +126,62 @@ namespace KlayGE
 		return gi_factory_;
 	}
 
-	ID3D12DevicePtr const & D3D12RenderEngine::D3D12Device() const
+	ID3D12DevicePtr const & D3D12RenderEngine::D3DDevice() const
 	{
-		return d3d_12_device_;
+		return d3d_device_;
 	}
 
-	ID3D12CommandQueuePtr const & D3D12RenderEngine::D3D12GraphicsCmdQueue() const
+	ID3D12CommandQueuePtr const & D3D12RenderEngine::D3DRenderCmdQueue() const
 	{
-		return d3d_graphics_cmd_queue_;
+		return d3d_render_cmd_queue_;
 	}
 
-	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3D12GraphicsCmdAllocator() const
+	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3DRenderCmdAllocator() const
 	{
-		return d3d_graphics_cmd_allocator_;
+		return d3d_render_cmd_allocator_;
 	}
 
-	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3D12GraphicsCmdList() const
+	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3DRenderCmdList() const
 	{
-		return d3d_graphics_cmd_list_;
+		return d3d_render_cmd_list_;
 	}
 
-	ID3D12CommandQueuePtr const & D3D12RenderEngine::D3D12ComputeCmdQueue() const
+	ID3D12CommandQueuePtr const & D3D12RenderEngine::D3DComputeCmdQueue() const
 	{
 		return d3d_compute_cmd_queue_;
 	}
 
-	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3D12ComputeCmdAllocator() const
+	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3DComputeCmdAllocator() const
 	{
 		return d3d_compute_cmd_allocator_;
 	}
 
-	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3D12ComputeCmdList() const
+	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3DComputeCmdList() const
 	{
 		return d3d_compute_cmd_list_;
 	}
 
-	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3D12ResCmdAllocator() const
+	ID3D12CommandQueuePtr const & D3D12RenderEngine::D3DCopyCmdQueue() const
+	{
+		return d3d_copy_cmd_queue_;
+	}
+
+	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3DCopyCmdAllocator() const
+	{
+		return d3d_copy_cmd_allocator_;
+	}
+
+	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3DCopyCmdList() const
+	{
+		return d3d_copy_cmd_list_;
+	}
+
+	ID3D12CommandAllocatorPtr const & D3D12RenderEngine::D3DResCmdAllocator() const
 	{
 		return d3d_res_cmd_allocator_;
 	}
 
-	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3D12ResCmdList() const
+	ID3D12GraphicsCommandListPtr const & D3D12RenderEngine::D3DResCmdList() const
 	{
 		return d3d_res_cmd_list_;
 	}
@@ -262,14 +277,24 @@ namespace KlayGE
 		UNREF_PARAM(settings);
 	}
 
-	void D3D12RenderEngine::D3DDevice(ID3D12DevicePtr const & device_12, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level)
+	void D3D12RenderEngine::D3DDevice(ID3D12DevicePtr const & device, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level)
 	{
-		d3d_12_device_ = device_12;
-		d3d_graphics_cmd_queue_ = cmd_queue;
+		d3d_device_ = device;
+		d3d_render_cmd_queue_ = cmd_queue;
 		d3d_feature_level_ = feature_level;
 
-		Verify(!!d3d_graphics_cmd_queue_);
-		Verify(!!d3d_12_device_);
+		Verify(!!d3d_render_cmd_queue_);
+		Verify(!!d3d_device_);
+
+		ID3D12CommandAllocator* d3d_render_cmd_allocator;
+		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_render_cmd_allocator)));
+		d3d_render_cmd_allocator_ = MakeCOMPtr(d3d_render_cmd_allocator);
+
+		ID3D12GraphicsCommandList* d3d_render_cmd_list;
+		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_render_cmd_allocator_.get(), nullptr,
+			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_render_cmd_list)));
+		d3d_render_cmd_list_ = MakeCOMPtr(d3d_render_cmd_list);
 
 		D3D12_COMMAND_QUEUE_DESC queue_desc;
 		queue_desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
@@ -278,37 +303,44 @@ namespace KlayGE
 		queue_desc.NodeMask = 0;
 
 		ID3D12CommandQueue* d3d_compute_cmd_queue;
-		TIF(d3d_12_device_->CreateCommandQueue(&queue_desc,
+		TIF(d3d_device_->CreateCommandQueue(&queue_desc,
 			IID_ID3D12CommandQueue, reinterpret_cast<void**>(&d3d_compute_cmd_queue)));
 		d3d_compute_cmd_queue_ = MakeCOMPtr(d3d_compute_cmd_queue);
 
-		ID3D12CommandAllocator* d3d_graphics_cmd_allocator;
-		TIF(d3d_12_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_graphics_cmd_allocator)));
-		d3d_graphics_cmd_allocator_ = MakeCOMPtr(d3d_graphics_cmd_allocator);
-
-		ID3D12GraphicsCommandList* d3d_graphics_cmd_list;
-		TIF(d3d_12_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_graphics_cmd_allocator_.get(), nullptr,
-			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_graphics_cmd_list)));
-		d3d_graphics_cmd_list_ = MakeCOMPtr(d3d_graphics_cmd_list);
-
 		ID3D12CommandAllocator* d3d_compute_cmd_allocator;
-		TIF(d3d_12_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE,
+		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_compute_cmd_allocator)));
 		d3d_compute_cmd_allocator_ = MakeCOMPtr(d3d_compute_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_compute_cmd_list;
-		TIF(d3d_12_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, d3d_compute_cmd_allocator_.get(), nullptr,
+		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, d3d_compute_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_compute_cmd_list)));
 		d3d_compute_cmd_list_ = MakeCOMPtr(d3d_compute_cmd_list);
 
+		queue_desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
+
+		ID3D12CommandQueue* d3d_copy_cmd_queue;
+		TIF(d3d_device_->CreateCommandQueue(&queue_desc,
+			IID_ID3D12CommandQueue, reinterpret_cast<void**>(&d3d_copy_cmd_queue)));
+		d3d_copy_cmd_queue_ = MakeCOMPtr(d3d_copy_cmd_queue);
+
+		ID3D12CommandAllocator* d3d_copy_cmd_allocator;
+		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COPY,
+			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_copy_cmd_allocator)));
+		d3d_copy_cmd_allocator_ = MakeCOMPtr(d3d_copy_cmd_allocator);
+
+		ID3D12GraphicsCommandList* d3d_copy_cmd_list;
+		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COPY, d3d_copy_cmd_allocator_.get(), nullptr,
+			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_copy_cmd_list)));
+		d3d_copy_cmd_list_ = MakeCOMPtr(d3d_copy_cmd_list);
+
 		ID3D12CommandAllocator* d3d_res_cmd_allocator;
-		TIF(d3d_12_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_res_cmd_allocator)));
 		d3d_res_cmd_allocator_ = MakeCOMPtr(d3d_res_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_res_cmd_list;
-		TIF(d3d_12_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_res_cmd_allocator_.get(), nullptr,
+		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_res_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_res_cmd_list)));
 		d3d_res_cmd_list_ = MakeCOMPtr(d3d_res_cmd_list);
 
@@ -318,10 +350,10 @@ namespace KlayGE
 		rtv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtv_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* rtv_descriptor_heap;
-		TIF(d3d_12_device_->CreateDescriptorHeap(&rtv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIF(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&rtv_descriptor_heap)));
 		rtv_desc_heap_ = MakeCOMPtr(rtv_descriptor_heap);
-		rtv_desc_size_ = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		rtv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
 		D3D12_DESCRIPTOR_HEAP_DESC dsv_desc_heap;
 		dsv_desc_heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -329,10 +361,10 @@ namespace KlayGE
 		dsv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsv_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* dsv_descriptor_heap;
-		TIF(d3d_12_device_->CreateDescriptorHeap(&dsv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIF(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&dsv_descriptor_heap)));
 		dsv_desc_heap_ = MakeCOMPtr(dsv_descriptor_heap);
-		dsv_desc_size_ = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+		dsv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 
 		D3D12_DESCRIPTOR_HEAP_DESC cbv_srv_uav_desc_heap;
 		cbv_srv_uav_desc_heap.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
@@ -340,10 +372,10 @@ namespace KlayGE
 		cbv_srv_uav_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		cbv_srv_uav_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* cbv_srv_uav_descriptor_heap;
-		TIF(d3d_12_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, IID_ID3D12DescriptorHeap,
+		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&cbv_srv_uav_descriptor_heap)));
 		cbv_srv_uav_desc_heap_ = MakeCOMPtr(cbv_srv_uav_descriptor_heap);
-		cbv_srv_uav_desc_size_ = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		cbv_srv_uav_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 		rtv_heap_occupied_.assign(NUM_MAX_RENDER_TARGET_VIEWS, false);
 		dsv_heap_occupied_.assign(NUM_MAX_DEPTH_STENCIL_VIEWS, false);
@@ -351,30 +383,36 @@ namespace KlayGE
 
 		null_srv_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
 		null_srv_handle_.ptr += this->AllocCBVSRVUAV();
-		d3d_12_device_->CreateShaderResourceView(nullptr, &this->NullSRVDesc(), null_srv_handle_);
+		d3d_device_->CreateShaderResourceView(nullptr, &this->NullSRVDesc(), null_srv_handle_);
 
 		null_uav_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
 		null_uav_handle_.ptr += this->AllocCBVSRVUAV();
-		d3d_12_device_->CreateUnorderedAccessView(nullptr, nullptr, &this->NullUAVDesc(), null_uav_handle_);
+		d3d_device_->CreateUnorderedAccessView(nullptr, nullptr, &this->NullUAVDesc(), null_uav_handle_);
 
 		ID3D12Fence* fence;
-		TIF(d3d_12_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		res_cmd_fence_ = MakeCOMPtr(fence);
 		res_cmd_fence_val_ = 1;
 
 		res_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
 
-		TIF(d3d_12_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		graphics_cmd_fence_ = MakeCOMPtr(fence);
-		graphics_cmd_fence_val_ = 1;
+		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		render_cmd_fence_ = MakeCOMPtr(fence);
+		render_cmd_fence_val_ = 1;
 
-		graphics_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		render_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
 
-		TIF(d3d_12_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		compute_cmd_fence_ = MakeCOMPtr(fence);
 		compute_cmd_fence_val_ = 1;
 
 		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+
+		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		copy_cmd_fence_ = MakeCOMPtr(fence);
+		copy_cmd_fence_val_ = 1;
+
+		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
 
 		this->FillRenderDeviceCaps();
 	}
@@ -390,10 +428,10 @@ namespace KlayGE
 	{
 		TIF(d3d_res_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_res_cmd_list_.get() };
-		d3d_graphics_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 
 		uint64_t const fence_val = res_cmd_fence_val_;
-		TIF(d3d_graphics_cmd_queue_->Signal(res_cmd_fence_.get(), fence_val));
+		TIF(d3d_render_cmd_queue_->Signal(res_cmd_fence_.get(), fence_val));
 		++ res_cmd_fence_val_;
 
 		if (res_cmd_fence_->GetCompletedValue() < fence_val)
@@ -406,20 +444,20 @@ namespace KlayGE
 		d3d_res_cmd_list_->Reset(d3d_res_cmd_allocator_.get(), nullptr);
 	}
 
-	void D3D12RenderEngine::CommitGraphicsCmd()
+	void D3D12RenderEngine::CommitRenderCmd()
 	{
-		TIF(d3d_graphics_cmd_list_->Close());
-		ID3D12CommandList* cmd_lists[] = { d3d_graphics_cmd_list_.get() };
-		d3d_graphics_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		TIF(d3d_render_cmd_list_->Close());
+		ID3D12CommandList* cmd_lists[] = { d3d_render_cmd_list_.get() };
+		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 
-		uint64_t const fence_val = graphics_cmd_fence_val_;
-		TIF(d3d_graphics_cmd_queue_->Signal(graphics_cmd_fence_.get(), fence_val));
-		++ graphics_cmd_fence_val_;
+		uint64_t const fence_val = render_cmd_fence_val_;
+		TIF(d3d_render_cmd_queue_->Signal(render_cmd_fence_.get(), fence_val));
+		++ render_cmd_fence_val_;
 
-		if (graphics_cmd_fence_->GetCompletedValue() < fence_val)
+		if (render_cmd_fence_->GetCompletedValue() < fence_val)
 		{
-			TIF(graphics_cmd_fence_->SetEventOnCompletion(fence_val, graphics_cmd_fence_event_));
-			::WaitForSingleObjectEx(graphics_cmd_fence_event_, INFINITE, FALSE);
+			TIF(render_cmd_fence_->SetEventOnCompletion(fence_val, render_cmd_fence_event_));
+			::WaitForSingleObjectEx(render_cmd_fence_event_, INFINITE, FALSE);
 		}
 	}
 
@@ -440,16 +478,39 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::ResetGraphicsCmd()
+	void D3D12RenderEngine::CommitCopyCmd()
 	{
-		d3d_graphics_cmd_allocator_->Reset();
-		d3d_graphics_cmd_list_->Reset(d3d_graphics_cmd_allocator_.get(), nullptr);
+		TIF(d3d_copy_cmd_list_->Close());
+		ID3D12CommandList* cmd_lists[] = { d3d_copy_cmd_list_.get() };
+		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+
+		uint64_t const fence_val = copy_cmd_fence_val_;
+		TIF(d3d_copy_cmd_queue_->Signal(copy_cmd_fence_.get(), fence_val));
+		++ copy_cmd_fence_val_;
+
+		if (copy_cmd_fence_->GetCompletedValue() < fence_val)
+		{
+			TIF(copy_cmd_fence_->SetEventOnCompletion(fence_val, copy_cmd_fence_event_));
+			::WaitForSingleObjectEx(copy_cmd_fence_event_, INFINITE, FALSE);
+		}
+	}
+
+	void D3D12RenderEngine::ResetRenderCmd()
+	{
+		d3d_render_cmd_allocator_->Reset();
+		d3d_render_cmd_list_->Reset(d3d_render_cmd_allocator_.get(), nullptr);
 	}
 
 	void D3D12RenderEngine::ResetComputeCmd()
 	{
 		d3d_compute_cmd_allocator_->Reset();
 		d3d_compute_cmd_list_->Reset(d3d_compute_cmd_allocator_.get(), nullptr);
+	}
+
+	void D3D12RenderEngine::ResetCopyCmd()
+	{
+		d3d_copy_cmd_allocator_->Reset();
+		d3d_copy_cmd_list_->Reset(d3d_copy_cmd_allocator_.get(), nullptr);
 	}
 
 	void D3D12RenderEngine::ResetRenderStates()
@@ -468,10 +529,9 @@ namespace KlayGE
 		sample_mask_cache_ = 0xFFFFFFFF;
 
 		topology_type_cache_ = RenderLayout::TT_PointList;
-		d3d_graphics_cmd_list_->IASetPrimitiveTopology(D3D12Mapping::Mapping(topology_type_cache_));
+		d3d_render_cmd_list_->IASetPrimitiveTopology(D3D12Mapping::Mapping(topology_type_cache_));
 
 		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
-
 		memset(&scissor_rc_cache_, 0, sizeof(scissor_rc_cache_));
 
 		this->ClearPSOCache();
@@ -483,7 +543,7 @@ namespace KlayGE
 	{
 		UNREF_PARAM(fb);
 
-		BOOST_ASSERT(d3d_12_device_);
+		BOOST_ASSERT(d3d_device_);
 		BOOST_ASSERT(fb);
 	}
 
@@ -508,17 +568,17 @@ namespace KlayGE
 				buff_cache_.insert(d3d12_buf->D3DBuffer());
 			}
 
-			d3d_graphics_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), &sobv[0]);
+			d3d_render_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), &sobv[0]);
 		}
 		else
 		{
-			d3d_graphics_cmd_list_->SOSetTargets(0, 0, nullptr);
+			d3d_render_cmd_list_->SOSetTargets(0, 0, nullptr);
 
 			so_buffs_.clear();
 		}
 	}
 
-	void D3D12RenderEngine::UpdateGraphicsPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl)
+	void D3D12RenderEngine::UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl)
 	{
 		D3D12RenderLayout const & d3d12_rl = *checked_cast<D3D12RenderLayout const *>(&rl);
 
@@ -669,15 +729,15 @@ namespace KlayGE
 		pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
-		ID3D12PipelineStatePtr pso = this->CreateGraphicsPSO(pso_desc);
+		ID3D12PipelineStatePtr pso = this->CreateRenderPSO(pso_desc);
 		pso_cache_.push_back(pso);
 
-		d3d_graphics_cmd_list_->SetPipelineState(pso.get());
-		d3d_graphics_cmd_list_->SetGraphicsRootSignature(so->RootSignature().get());
+		d3d_render_cmd_list_->SetPipelineState(pso.get());
+		d3d_render_cmd_list_->SetGraphicsRootSignature(so->RootSignature().get());
 
 		if (pass->GetRasterizerStateObject()->GetDesc().scissor_enable)
 		{
-			d3d_graphics_cmd_list_->RSSetScissorRects(1, &scissor_rc_cache_);
+			d3d_render_cmd_list_->RSSetScissorRects(1, &scissor_rc_cache_);
 		}
 		else
 		{
@@ -688,7 +748,7 @@ namespace KlayGE
 				static_cast<LONG>(viewport_cache_.TopLeftX + viewport_cache_.Width),
 				static_cast<LONG>(viewport_cache_.TopLeftY + viewport_cache_.Height)
 			};
-			d3d_graphics_cmd_list_->RSSetScissorRects(1, &rc);
+			d3d_render_cmd_list_->RSSetScissorRects(1, &rc);
 		}
 
 		size_t num_handle = 0;
@@ -747,7 +807,7 @@ namespace KlayGE
 
 		if (num_heaps > 0)
 		{
-			d3d_graphics_cmd_list_->SetDescriptorHeaps(num_heaps, &heaps[0]);
+			d3d_render_cmd_list_->SetDescriptorHeaps(num_heaps, &heaps[0]);
 		}
 
 		uint32_t root_param_index = 0;
@@ -761,7 +821,7 @@ namespace KlayGE
 					ID3D12ResourcePtr buff = checked_pointer_cast<D3D12GraphicsBuffer>(so->CBuffers(st)[j])->D3DBuffer();
 					if (buff)
 					{
-						d3d_graphics_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
+						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
 
 						++ root_param_index;
 
@@ -769,14 +829,14 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_graphics_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, 0);
+						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, 0);
 					}
 				}
 			}
 		}
 		if (cbv_srv_uav_heap)
 		{
-			UINT const cbv_srv_uav_desc_size = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			UINT const cbv_srv_uav_desc_size = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -786,11 +846,11 @@ namespace KlayGE
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(i);
 				if (!so->SRVs(st).empty())
 				{
-					d3d_graphics_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
+					d3d_render_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 
 					for (uint32_t j = 0; j < so->SRVs(st).size(); ++ j)
 					{
-						d3d_12_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
+						d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
 							std::get<0>(so->SRVSrcs(st)[j]) ? so->SRVs(st)[j]->Handle() : null_srv_handle_,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
@@ -805,11 +865,11 @@ namespace KlayGE
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(i);
 				if (!so->UAVs(st).empty())
 				{
-					d3d_graphics_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
+					d3d_render_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_cbv_srv_uav_handle);
 
 					for (uint32_t j = 0; j < so->UAVs(st).size(); ++ j)
 					{
-						d3d_12_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
+						d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
 							so->UAVSrcs(st)[j].first ? so->UAVs(st)[j]->Handle() : null_uav_handle_,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
@@ -823,7 +883,7 @@ namespace KlayGE
 
 		if (sampler_heap)
 		{
-			UINT const sampler_desc_size = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			UINT const sampler_desc_size = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
 
@@ -832,7 +892,7 @@ namespace KlayGE
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(i);
 				if (!so->Samplers(st).empty())
 				{
-					d3d_graphics_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_sampler_handle);
+					d3d_render_cmd_list_->SetGraphicsRootDescriptorTable(root_param_index, gpu_sampler_handle);
 
 					gpu_sampler_handle.ptr += sampler_desc_size * so->Samplers(st).size();
 
@@ -941,7 +1001,7 @@ namespace KlayGE
 		}
 		if (cbv_srv_uav_heap)
 		{
-			UINT const cbv_srv_uav_desc_size = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			UINT const cbv_srv_uav_desc_size = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -952,7 +1012,7 @@ namespace KlayGE
 
 				for (uint32_t j = 0; j < so->SRVs(st).size(); ++ j)
 				{
-					d3d_12_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
+					d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
 						std::get<0>(so->SRVSrcs(st)[j]) ? so->SRVs(st)[j]->Handle() : null_srv_handle_,
 						D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 					cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
@@ -967,7 +1027,7 @@ namespace KlayGE
 
 				for (uint32_t j = 0; j < so->UAVs(st).size(); ++ j)
 				{
-					d3d_12_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, 
+					d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle, 
 						so->UAVSrcs(st)[j].first ? so->UAVs(st)[j]->Handle() : null_uav_handle_,
 						D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 					cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
@@ -980,7 +1040,7 @@ namespace KlayGE
 
 		if (sampler_heap)
 		{
-			UINT const sampler_desc_size = d3d_12_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
+			UINT const sampler_desc_size = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
 
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_sampler_handle = sampler_heap->GetGPUDescriptorHandleForHeapStart();
 
@@ -1003,8 +1063,8 @@ namespace KlayGE
 		fb.SetRenderTargets();
 		fb.BindBarrier();
 
-		d3d_graphics_cmd_list_->OMSetStencilRef(stencil_ref_cache_);
-		d3d_graphics_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
+		d3d_render_cmd_list_->OMSetStencilRef(stencil_ref_cache_);
+		d3d_render_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
@@ -1091,7 +1151,7 @@ namespace KlayGE
 
 		if (!barriers.empty())
 		{
-			d3d_graphics_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 
 		if (all_num_vertex_stream != 0)
@@ -1104,7 +1164,7 @@ namespace KlayGE
 				vbvs[i].StrideInBytes = strides[i];
 			}
 
-			d3d_graphics_cmd_list_->IASetVertexBuffers(0, all_num_vertex_stream, &vbvs[0]);
+			d3d_render_cmd_list_->IASetVertexBuffers(0, all_num_vertex_stream, &vbvs[0]);
 
 			buff_cache_.insert(vbs.begin(), vbs.end());
 		}
@@ -1136,7 +1196,7 @@ namespace KlayGE
 		{
 			topology_type_cache_ = tt;
 		}
-		d3d_graphics_cmd_list_->IASetPrimitiveTopology(D3D12Mapping::Mapping(tt));
+		d3d_render_cmd_list_->IASetPrimitiveTopology(D3D12Mapping::Mapping(tt));
 
 		uint32_t prim_count;
 		switch (tt)
@@ -1192,7 +1252,7 @@ namespace KlayGE
 			ibv.BufferLocation = ib.D3DBuffer()->GetGPUVirtualAddress();
 			ibv.SizeInBytes = ib.Size();
 			ibv.Format = D3D12Mapping::MappingFormat(rl.IndexStreamFormat());
-			d3d_graphics_cmd_list_->IASetIndexBuffer(&ibv);
+			d3d_render_cmd_list_->IASetIndexBuffer(&ibv);
 
 			buff_cache_.insert(ib.D3DBuffer());
 		}
@@ -1209,8 +1269,8 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					this->UpdateGraphicsPSO(tech, pass, rl);
-					d3d_graphics_cmd_list_->ExecuteIndirect(nullptr, 0, 
+					this->UpdateRenderPSO(tech, pass, rl);
+					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
 						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
 					pass->Unbind();
@@ -1223,8 +1283,8 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					this->UpdateGraphicsPSO(tech, pass, rl);
-					d3d_graphics_cmd_list_->ExecuteIndirect(nullptr, 0,
+					this->UpdateRenderPSO(tech, pass, rl);
+					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
 						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
 					pass->Unbind();
@@ -1241,8 +1301,8 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					this->UpdateGraphicsPSO(tech, pass, rl);
-					d3d_graphics_cmd_list_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(),
+					this->UpdateRenderPSO(tech, pass, rl);
+					d3d_render_cmd_list_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(),
 						rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass->Unbind();
 				}
@@ -1255,8 +1315,8 @@ namespace KlayGE
 					RenderPassPtr const & pass = tech.Pass(i);
 
 					pass->Bind();
-					this->UpdateGraphicsPSO(tech, pass, rl);
-					d3d_graphics_cmd_list_->DrawInstanced(num_vertices, num_instances,
+					this->UpdateRenderPSO(tech, pass, rl);
+					d3d_render_cmd_list_->DrawInstanced(num_vertices, num_instances,
 						rl.StartVertexLocation(), rl.StartInstanceLocation());
 					pass->Unbind();
 				}
@@ -1271,7 +1331,7 @@ namespace KlayGE
 				std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
 			}
 
-			d3d_graphics_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 
 		num_draws_just_called_ += num_passes;
@@ -1329,24 +1389,31 @@ namespace KlayGE
 
 	void D3D12RenderEngine::ForceFlush()
 	{
-		TIF(d3d_graphics_cmd_list_->Close());
+		TIF(d3d_render_cmd_list_->Close());
 		TIF(d3d_compute_cmd_list_->Close());
+		TIF(d3d_copy_cmd_list_->Close());
 
 		ID3D12CommandList* cmd_lists[1];
 
-		cmd_lists[0] = d3d_graphics_cmd_list_.get();
-		d3d_graphics_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		cmd_lists[0] = d3d_render_cmd_list_.get();
+		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 
 		cmd_lists[0] = d3d_compute_cmd_list_.get();
 		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+
+		cmd_lists[0] = d3d_copy_cmd_list_.get();
+		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 	}
 
 	void D3D12RenderEngine::ForceCPUGPUSync()
 	{
-		this->CommitGraphicsCmd();
+		this->CommitRenderCmd();
 		this->CommitComputeCmd();
-		this->ResetGraphicsCmd();
+		this->CommitCopyCmd();
+		this->ResetRenderCmd();
 		this->ResetComputeCmd();
+		this->ResetCopyCmd();
+
 		this->ClearPSOCache();
 	}
 
@@ -1372,11 +1439,14 @@ namespace KlayGE
 		::CloseHandle(res_cmd_fence_event_);
 		res_cmd_fence_.reset();
 
-		::CloseHandle(graphics_cmd_fence_event_);
-		graphics_cmd_fence_.reset();
+		::CloseHandle(render_cmd_fence_event_);
+		render_cmd_fence_.reset();
 
 		::CloseHandle(compute_cmd_fence_event_);
 		compute_cmd_fence_.reset();
+
+		::CloseHandle(copy_cmd_fence_event_);
+		copy_cmd_fence_.reset();
 
 		this->ClearPSOCache();
 
@@ -1395,13 +1465,16 @@ namespace KlayGE
 
 		d3d_res_cmd_list_.reset();
 		d3d_res_cmd_allocator_.reset();
-		d3d_graphics_cmd_list_.reset();
-		d3d_graphics_cmd_allocator_.reset();
+		d3d_render_cmd_list_.reset();
+		d3d_render_cmd_allocator_.reset();
+		d3d_render_cmd_queue_.reset();
 		d3d_compute_cmd_list_.reset();
 		d3d_compute_cmd_allocator_.reset();
-		d3d_graphics_cmd_queue_.reset();
 		d3d_compute_cmd_queue_.reset();
-		d3d_12_device_.reset();
+		d3d_copy_cmd_list_.reset();
+		d3d_copy_cmd_allocator_.reset();
+		d3d_copy_cmd_queue_.reset();
+		d3d_device_.reset();
 
 		gi_factory_.reset();
 	}
@@ -1409,7 +1482,7 @@ namespace KlayGE
 	void D3D12RenderEngine::DoSuspend()
 	{
 		IDXGIDevice3* dxgi_device = nullptr;
-		d3d_12_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
+		d3d_device_->QueryInterface(IID_IDXGIDevice3, reinterpret_cast<void**>(&dxgi_device));
 		if (dxgi_device != nullptr)
 		{
 			dxgi_device->Trim();
@@ -1462,7 +1535,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12RenderEngine::FillRenderDeviceCaps()
 	{
-		BOOST_ASSERT(d3d_12_device_);
+		BOOST_ASSERT(d3d_device_);
 
 		switch (d3d_feature_level_)
 		{
@@ -1520,7 +1593,7 @@ namespace KlayGE
 		{
 			D3D12_FEATURE_DATA_ARCHITECTURE arch_feature;
 			arch_feature.NodeIndex = 0;
-			d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch_feature, sizeof(arch_feature));
+			d3d_device_->CheckFeatureSupport(D3D12_FEATURE_ARCHITECTURE, &arch_feature, sizeof(arch_feature));
 			caps_.is_tbdr = arch_feature.TileBasedRenderer ? true : false;
 		}
 		caps_.hw_instancing_support = true;
@@ -1638,38 +1711,38 @@ namespace KlayGE
 				fmt_support.Format = dxgi_fmt;
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					vertex_format_.insert(fmts[i].first);
 				}
 
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_LOAD;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
@@ -1681,33 +1754,33 @@ namespace KlayGE
 				fmt_support.Format = dxgi_fmt;
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					vertex_format_.insert(fmts[i].first);
 				}
 
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
-				if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
 					texture_format_.insert(fmts[i].first);
 				}
@@ -1717,17 +1790,17 @@ namespace KlayGE
 			fmt_support.Format = dxgi_fmt;
 			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_RENDER_TARGET;
 			fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
-			if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 			{
 				rt_supported = true;
 			}
 			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_MULTISAMPLE_RENDERTARGET;
-			if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 			{
 				rt_supported = true;
 			}
 			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL;
-			if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 			{
 				rt_supported = true;
 			}
@@ -1741,7 +1814,7 @@ namespace KlayGE
 				while (count <= D3D12_MAX_MULTISAMPLE_SAMPLE_COUNT)
 				{
 					msaa_quality_levels.SampleCount = count;
-					if (SUCCEEDED(d3d_12_device_->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msaa_quality_levels, sizeof(msaa_quality_levels))))
+					if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msaa_quality_levels, sizeof(msaa_quality_levels))))
 					{
 						if (msaa_quality_levels.NumQualityLevels > 0)
 						{
@@ -1789,7 +1862,7 @@ namespace KlayGE
 					(0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get());
 
 				D3D12_CPU_DESCRIPTOR_HANDLE rt_handle = rtv->D3DRenderTargetView()->Handle();
-				d3d_graphics_cmd_list_->OMSetRenderTargets(1, &rt_handle, false, nullptr);
+				d3d_render_cmd_list_->OMSetRenderTargets(1, &rt_handle, false, nullptr);
 
 				D3D12_VIEWPORT vp;
 				vp.TopLeftX = 0;
@@ -1799,7 +1872,7 @@ namespace KlayGE
 				vp.MinDepth = 0;
 				vp.MaxDepth = 1;
 
-				d3d_graphics_cmd_list_->RSSetViewports(1, &vp);
+				d3d_render_cmd_list_->RSSetViewports(1, &vp);
 				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 			}
@@ -1815,7 +1888,7 @@ namespace KlayGE
 		if (stencil_ref_cache_ != stencil_ref)
 		{
 			stencil_ref_cache_ = stencil_ref;
-			d3d_graphics_cmd_list_->OMSetStencilRef(stencil_ref_cache_);
+			d3d_render_cmd_list_->OMSetStencilRef(stencil_ref_cache_);
 		}
 	}
 
@@ -1824,7 +1897,7 @@ namespace KlayGE
 		if (blend_factor_cache_ != blend_factor)
 		{
 			blend_factor_cache_ = blend_factor;
-			d3d_graphics_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
+			d3d_render_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
 		}
 		sample_mask_cache_ = sample_mask;
 	}
@@ -1832,7 +1905,7 @@ namespace KlayGE
 	void D3D12RenderEngine::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)
 	{
 		viewport_cache_ = pViewports[0];
-		d3d_graphics_cmd_list_->RSSetViewports(NumViewports, reinterpret_cast<D3D12_VIEWPORT const *>(pViewports));
+		d3d_render_cmd_list_->RSSetViewports(NumViewports, reinterpret_cast<D3D12_VIEWPORT const *>(pViewports));
 	}
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC const & D3D12RenderEngine::NullSRVDesc() const
@@ -2179,7 +2252,7 @@ namespace KlayGE
 			ID3DBlob* error;
 			TIF(D3D12InterfaceLoader::Instance().D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 			ID3D12RootSignature* rs;
-			TIF(d3d_12_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+			TIF(d3d_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
 				IID_ID3D12RootSignature, reinterpret_cast<void**>(&rs)));
 			signature->Release();
 			if (error)
@@ -2195,7 +2268,7 @@ namespace KlayGE
 		}
 	}
 
-	ID3D12PipelineStatePtr const & D3D12RenderEngine::CreateGraphicsPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc)
+	ID3D12PipelineStatePtr const & D3D12RenderEngine::CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc)
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
 		size_t hash_val = 0;
@@ -2205,7 +2278,7 @@ namespace KlayGE
 		if (iter == graphics_psos_.end())
 		{
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_12_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIF(d3d_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return KLAYGE_EMPLACE(graphics_psos_, hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
@@ -2224,7 +2297,7 @@ namespace KlayGE
 		if (iter == compute_psos_.end())
 		{
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_12_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIF(d3d_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return KLAYGE_EMPLACE(compute_psos_, hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
@@ -2241,7 +2314,7 @@ namespace KlayGE
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeap* csu_heap;
-		TIF(d3d_12_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
+		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 		cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
 		return cbv_srv_uav_heap;

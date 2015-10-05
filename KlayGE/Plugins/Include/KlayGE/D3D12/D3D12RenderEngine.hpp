@@ -83,27 +83,32 @@ namespace KlayGE
 		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
 
 		IDXGIFactory4Ptr const & DXGIFactory() const;
-		ID3D12DevicePtr const & D3D12Device() const;
-		ID3D12CommandQueuePtr const & D3D12GraphicsCmdQueue() const;
-		ID3D12CommandAllocatorPtr const & D3D12GraphicsCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3D12GraphicsCmdList() const;
-		ID3D12CommandQueuePtr const & D3D12ComputeCmdQueue() const;
-		ID3D12CommandAllocatorPtr const & D3D12ComputeCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3D12ComputeCmdList() const;
-		ID3D12CommandAllocatorPtr const & D3D12ResCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3D12ResCmdList() const;
-		std::mutex& D3D12ResCmdListMutex()
+		ID3D12DevicePtr const & D3DDevice() const;
+		ID3D12CommandQueuePtr const & D3DRenderCmdQueue() const;
+		ID3D12CommandAllocatorPtr const & D3DRenderCmdAllocator() const;
+		ID3D12GraphicsCommandListPtr const & D3DRenderCmdList() const;
+		ID3D12CommandQueuePtr const & D3DComputeCmdQueue() const;
+		ID3D12CommandAllocatorPtr const & D3DComputeCmdAllocator() const;
+		ID3D12GraphicsCommandListPtr const & D3DComputeCmdList() const;
+		ID3D12CommandQueuePtr const & D3DCopyCmdQueue() const;
+		ID3D12CommandAllocatorPtr const & D3DCopyCmdAllocator() const;
+		ID3D12GraphicsCommandListPtr const & D3DCopyCmdList() const;
+		ID3D12CommandAllocatorPtr const & D3DResCmdAllocator() const;
+		ID3D12GraphicsCommandListPtr const & D3DResCmdList() const;
+		std::mutex& D3DResCmdListMutex()
 		{
 			return res_cmd_list_mutex_;
 		}
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
-		void D3DDevice(ID3D12DevicePtr const & device_12, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level);
+		void D3DDevice(ID3D12DevicePtr const & device, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level);
 		void ClearPSOCache();
-		void CommitResCmd();
-		void CommitGraphicsCmd();
+		void CommitRenderCmd();
 		void CommitComputeCmd();
-		void ResetGraphicsCmd();
+		void CommitCopyCmd();
+		void ResetRenderCmd();
 		void ResetComputeCmd();
+		void ResetCopyCmd();
+		void CommitResCmd();
 
 		void ForceFlush();
 		void ForceCPUGPUSync();
@@ -198,7 +203,7 @@ namespace KlayGE
 		ID3D12RootSignaturePtr const & CreateRootSignature(
 			std::array<size_t, ShaderObject::ST_NumShaderTypes * 4> const & num,
 			bool has_vs, bool has_stream_output);
-		ID3D12PipelineStatePtr const & CreateGraphicsPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
+		ID3D12PipelineStatePtr const & CreateRenderPSO(D3D12_GRAPHICS_PIPELINE_STATE_DESC const & desc);
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
@@ -225,7 +230,7 @@ namespace KlayGE
 
 		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
 
-		void UpdateGraphicsPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl);
+		void UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl);
 		void UpdateComputePSO(RenderPassPtr const & pass);
 
 	private:
@@ -234,14 +239,17 @@ namespace KlayGE
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		IDXGIFactory4Ptr	gi_factory_;
-		ID3D12DevicePtr		d3d_12_device_;
-		ID3D12CommandQueuePtr d3d_graphics_cmd_queue_;
-		ID3D12CommandAllocatorPtr d3d_graphics_cmd_allocator_;
-		ID3D12GraphicsCommandListPtr d3d_graphics_cmd_list_;
+		IDXGIFactory4Ptr gi_factory_;
+		ID3D12DevicePtr d3d_device_;
+		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
+		ID3D12CommandAllocatorPtr d3d_render_cmd_allocator_;
+		ID3D12GraphicsCommandListPtr d3d_render_cmd_list_;
 		ID3D12CommandQueuePtr d3d_compute_cmd_queue_;
 		ID3D12CommandAllocatorPtr d3d_compute_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_compute_cmd_list_;
+		ID3D12CommandQueuePtr d3d_copy_cmd_queue_;
+		ID3D12CommandAllocatorPtr d3d_copy_cmd_allocator_;
+		ID3D12GraphicsCommandListPtr d3d_copy_cmd_list_;
 		ID3D12CommandAllocatorPtr d3d_res_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
 		std::mutex res_cmd_list_mutex_;
@@ -295,17 +303,21 @@ namespace KlayGE
 
 		double inv_timestamp_freq_;
 
-		ID3D12FencePtr res_cmd_fence_;
-		uint64_t res_cmd_fence_val_;
-		HANDLE res_cmd_fence_event_;
-
-		ID3D12FencePtr graphics_cmd_fence_;
-		uint64_t graphics_cmd_fence_val_;
-		HANDLE graphics_cmd_fence_event_;
+		ID3D12FencePtr render_cmd_fence_;
+		uint64_t render_cmd_fence_val_;
+		HANDLE render_cmd_fence_event_;
 
 		ID3D12FencePtr compute_cmd_fence_;
 		uint64_t compute_cmd_fence_val_;
 		HANDLE compute_cmd_fence_event_;
+
+		ID3D12FencePtr copy_cmd_fence_;
+		uint64_t copy_cmd_fence_val_;
+		HANDLE copy_cmd_fence_event_;
+
+		ID3D12FencePtr res_cmd_fence_;
+		uint64_t res_cmd_fence_val_;
+		HANDLE res_cmd_fence_event_;
 
 		RenderEffectPtr blit_effect_;
 		RenderTechniquePtr bilinear_blit_tech_;
