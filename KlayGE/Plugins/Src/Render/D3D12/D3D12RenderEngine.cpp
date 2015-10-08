@@ -394,25 +394,25 @@ namespace KlayGE
 		res_cmd_fence_ = MakeCOMPtr(fence);
 		res_cmd_fence_val_ = 1;
 
-		res_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		res_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		render_cmd_fence_ = MakeCOMPtr(fence);
 		render_cmd_fence_val_ = 1;
 
-		render_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		render_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		compute_cmd_fence_ = MakeCOMPtr(fence);
 		compute_cmd_fence_val_ = 1;
 
-		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		compute_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		copy_cmd_fence_ = MakeCOMPtr(fence);
 		copy_cmd_fence_val_ = 1;
 
-		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		copy_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		this->FillRenderDeviceCaps();
 	}

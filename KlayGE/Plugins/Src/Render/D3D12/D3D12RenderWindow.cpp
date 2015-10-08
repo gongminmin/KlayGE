@@ -343,19 +343,19 @@ namespace KlayGE
 		render_fence_ = MakeCOMPtr(fence);
 		render_fence_value_ = 1;
 
-		render_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		render_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		compute_fence_ = MakeCOMPtr(fence);
 		compute_fence_value_ = 1;
 
-		compute_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		compute_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		copy_fence_ = MakeCOMPtr(fence);
 		copy_fence_value_ = 1;
 
-		copy_fence_event_ = ::CreateEventEx(nullptr, FALSE, FALSE, EVENT_ALL_ACCESS);
+		copy_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		this->UpdateSurfacesPtrs();
 
