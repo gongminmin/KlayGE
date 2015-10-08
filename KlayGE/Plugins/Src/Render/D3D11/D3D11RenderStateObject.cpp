@@ -44,7 +44,6 @@ namespace KlayGE
 		d3d_desc.MultisampleEnable = desc.multisample_enable;
 		d3d_desc.AntialiasedLineEnable = false;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = std::static_pointer_cast<ID3D11Device1>(d3d_device);
@@ -66,7 +65,6 @@ namespace KlayGE
 			rasterizer_state_ = MakeCOMPtr(rasterizer_state);
 		}
 		else
-#endif
 		{
 			ID3D11RasterizerState* rasterizer_state;
 			TIF(d3d_device->CreateRasterizerState(&d3d_desc, &rasterizer_state));
@@ -137,7 +135,6 @@ namespace KlayGE
 
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
 			ID3D11Device1Ptr const & d3d_device_1 = std::static_pointer_cast<ID3D11Device1>(d3d_device);
@@ -166,7 +163,6 @@ namespace KlayGE
 			blend_state_ = MakeCOMPtr(blend_state);
 		}
 		else
-#endif
 		{
 			ID3D11BlendState* blend_state;
 			TIF(d3d_device->CreateBlendState(&d3d_desc, &blend_state));

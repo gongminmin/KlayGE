@@ -39,7 +39,7 @@
 #ifdef KLAYGE_PLATFORM_WINDOWS
 
 #include <KlayGE/SALWrapper.hpp>
-#include <D3D11Shader.h>
+#include <d3d11shader.h>
 
 namespace KlayGE
 {

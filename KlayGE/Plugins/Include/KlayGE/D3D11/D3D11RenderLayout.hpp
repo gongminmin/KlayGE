@@ -17,9 +17,6 @@
 
 #include <vector>
 
-#include <KlayGE/SALWrapper.hpp>
-#include <D3D11Shader.h>
-
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 

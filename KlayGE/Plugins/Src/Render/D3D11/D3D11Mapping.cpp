@@ -359,7 +359,6 @@ namespace KlayGE
 		}
 	}
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 	D3D11_LOGIC_OP D3D11Mapping::Mapping(LogicOperation lo)
 	{
 		switch (lo)
@@ -417,7 +416,6 @@ namespace KlayGE
 			return D3D11_LOGIC_OP_NOOP;
 		}
 	}
-#endif
 
 	D3D11_PRIMITIVE_TOPOLOGY D3D11Mapping::Mapping(RenderLayout::topology_type tt)
 	{

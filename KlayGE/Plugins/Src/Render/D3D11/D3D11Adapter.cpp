@@ -112,7 +112,6 @@ namespace KlayGE
 		adapter_->GetDesc1(&adapter_desc_);
 		modes_.resize(0);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		IDXGIAdapter2* adapter2;
 		adapter_->QueryInterface(IID_IDXGIAdapter2, reinterpret_cast<void**>(&adapter2));
 		if (adapter2 != nullptr)
@@ -131,6 +130,5 @@ namespace KlayGE
 			adapter_desc_.Flags = desc2.Flags;
 			adapter2->Release();
 		}
-#endif
 	}
 }

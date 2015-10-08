@@ -18,9 +18,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
-#include <KlayGE/SALWrapper.hpp>
-#include <D3D11Shader.h>
-
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
 namespace KlayGE

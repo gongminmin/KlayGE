@@ -44,7 +44,7 @@
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 
 #include <KlayGE/SALWrapper.hpp>
-#include <D3DCompiler.h>
+#include <d3dcompiler.h>
 #else
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx
 typedef char const * LPCSTR;

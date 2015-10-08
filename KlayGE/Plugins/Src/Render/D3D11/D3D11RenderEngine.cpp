@@ -50,28 +50,6 @@
 using namespace Windows::UI::Core;
 #endif
 
-#ifndef D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION
-#define D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION 2048
-#endif
-#ifndef D3D_FL9_3_REQ_TEXTURE2D_U_OR_V_DIMENSION
-#define D3D_FL9_3_REQ_TEXTURE2D_U_OR_V_DIMENSION 4096
-#endif
-#ifndef D3D_FL9_1_REQ_TEXTURECUBE_DIMENSION
-#define D3D_FL9_1_REQ_TEXTURECUBE_DIMENSION 512
-#endif
-#ifndef D3D_FL9_3_REQ_TEXTURECUBE_DIMENSION
-#define D3D_FL9_3_REQ_TEXTURECUBE_DIMENSION 4096
-#endif
-#ifndef D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION
-#define D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION 256
-#endif
-#ifndef D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT
-#define D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT 1
-#endif
-#ifndef D3D_FL9_3_SIMULTANEOUS_RENDER_TARGET_COUNT
-#define D3D_FL9_3_SIMULTANEOUS_RENDER_TARGET_COUNT 4
-#endif
-
 namespace
 {
 	using namespace KlayGE;
@@ -125,7 +103,7 @@ namespace KlayGE
 		{
 			::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
 		}
-		mod_d3d11_ = ::LoadLibraryEx(TEXT("D3D11.dll"), nullptr, 0);
+		mod_d3d11_ = ::LoadLibraryEx(TEXT("d3d11.dll"), nullptr, 0);
 		if (nullptr == mod_d3d11_)
 		{
 			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
@@ -320,7 +298,6 @@ namespace KlayGE
 		{
 			stereo_method_ = SM_None;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 			IDXGIFactory2* factory;
 			gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
 			if (factory != nullptr)
@@ -331,7 +308,6 @@ namespace KlayGE
 				}
 				factory->Release();
 			}
-#endif
 
 			if (SM_None == stereo_method_)
 			{
@@ -923,7 +899,6 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoSuspend()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
 			IDXGIDevice3* dxgi_device = nullptr;
@@ -934,7 +909,6 @@ namespace KlayGE
 				dxgi_device->Release();
 			}
 		}
-#endif
 	}
 
 	void D3D11RenderEngine::DoResume()
@@ -1113,7 +1087,6 @@ namespace KlayGE
 			caps_.max_texture_anisotropy = 2;
 			break;
 		}
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_ARCHITECTURE_INFO arch_feature;
@@ -1121,11 +1094,9 @@ namespace KlayGE
 			caps_.is_tbdr = arch_feature.TileBasedDeferredRenderer ? true : false;
 		}
 		else
-#endif
 		{
 			caps_.is_tbdr = false;
 		}
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		if (d3d_11_runtime_sub_ver_ >= 2)
 		{
 			D3D11_FEATURE_DATA_D3D9_SIMPLE_INSTANCING_SUPPORT d3d11_feature;
@@ -1133,7 +1104,6 @@ namespace KlayGE
 			caps_.hw_instancing_support = d3d11_feature.SimpleInstancingSupported ? true : false;
 		}
 		else
-#endif
 		{
 			caps_.hw_instancing_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
 		}
@@ -1150,7 +1120,6 @@ namespace KlayGE
 		caps_.mrt_independent_bit_depths_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.standard_derivatives_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_9_3);
 		caps_.shader_texture_lod_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;
@@ -1158,14 +1127,12 @@ namespace KlayGE
 			caps_.logic_op_support = d3d11_feature.OutputMergerLogicOp ? true : false;
 		}
 		else
-#endif
 		{
 			caps_.logic_op_support = false;
 		}
 		caps_.independent_blend_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.draw_indirect_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.no_overwrite_support = true;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_D3D9_OPTIONS d3d11_feature;
@@ -1173,7 +1140,6 @@ namespace KlayGE
 			caps_.full_npot_texture_support = d3d11_feature.FullNonPow2TextureSupport ? true : false;
 		}
 		else
-#endif
 		{
 			caps_.full_npot_texture_support = false;
 		}
@@ -1182,7 +1148,6 @@ namespace KlayGE
 		caps_.ds_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 
 		bool check_16bpp_fmts = false;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		IDXGIFactory2* factory;
 		gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
 		if (factory != nullptr)
@@ -1190,7 +1155,6 @@ namespace KlayGE
 			check_16bpp_fmts = true;
 			factory->Release();
 		}
-#endif
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
@@ -1375,21 +1339,16 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		this->DetectD3D11_2Runtime(device, imm_ctx);
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		this->DetectD3D11_1Runtime(device, imm_ctx);
-#else
 		d3d_11_runtime_sub_ver_ = 0;
 
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
-#endif
 	}
 
 	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device1* d3d_device_1;
@@ -1417,15 +1376,10 @@ namespace KlayGE
 			d3d_device_ = device;
 			d3d_imm_ctx_ = imm_ctx;
 		}
-#else
-		UNREF_PARAM(device);
-		UNREF_PARAM(imm_ctx);
-#endif
 	}
 
 	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device2* d3d_device_2;
@@ -1451,15 +1405,10 @@ namespace KlayGE
 		{
 			this->DetectD3D11_1Runtime(device, imm_ctx);
 		}
-#else
-		UNREF_PARAM(device);
-		UNREF_PARAM(imm_ctx);
-#endif
 	}
 
 	void D3D11RenderEngine::DetectD3D11_3Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device3* d3d_device_3;
@@ -1485,10 +1434,6 @@ namespace KlayGE
 		{
 			this->DetectD3D11_2Runtime(device, imm_ctx);
 		}
-#else
-		UNREF_PARAM(device);
-		UNREF_PARAM(imm_ctx);
-#endif
 	}
 
 	void D3D11RenderEngine::StereoscopicForLCDShutter(int32_t eye)
@@ -1499,7 +1444,6 @@ namespace KlayGE
 
 		switch (stereo_method_)
 		{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		case SM_DXGI:
 			{
 				RenderViewPtr const & view = (0 == eye) ? win->D3DBackBufferRTV() : win->D3DBackBufferRightEyeRTV();
@@ -1519,7 +1463,6 @@ namespace KlayGE
 				stereoscopic_pp_->Render();
 			}
 			break;
-#endif
 
 		case SM_NV3DVision:
 			{

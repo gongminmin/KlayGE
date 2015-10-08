@@ -79,12 +79,10 @@ namespace KlayGE
 		{
 			return render_target_view_;
 		}
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		RenderViewPtr const & D3DBackBufferRightEyeRTV() const
 		{
 			return render_target_view_right_eye_;
 		}
-#endif
 		uint32_t StereoRightEyeHeight() const
 		{
 			return stereo_amd_right_eye_height_;
@@ -138,25 +136,17 @@ namespace KlayGE
 		D3D11AdapterPtr			adapter_;
 
 		uint8_t dxgi_sub_ver_;
-		IDXGIFactory1Ptr gi_factory_;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+		IDXGIFactory1Ptr gi_factory_1_;
 		IDXGIFactory2Ptr gi_factory_2_;
-		bool dxgi_stereo_support_;
-#endif
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		IDXGIFactory3Ptr gi_factory_3_;
-#endif
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		IDXGIFactory4Ptr gi_factory_4_;
-#endif
+		bool dxgi_stereo_support_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC sc_fs_desc_;
 		DWORD stereo_cookie_;
-#endif
 #else
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #endif
@@ -170,10 +160,8 @@ namespace KlayGE
 		TexturePtr					depth_stencil_;
 		RenderViewPtr				render_target_view_;
 		RenderViewPtr				depth_stencil_view_;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
 		RenderViewPtr				render_target_view_right_eye_;
 		RenderViewPtr				depth_stencil_view_right_eye_;
-#endif
 
 		DXGI_FORMAT					back_buffer_format_;
 		ElementFormat				depth_stencil_fmt_;

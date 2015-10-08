@@ -36,9 +36,6 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ShaderObject.hpp>
 
-#include <KlayGE/SALWrapper.hpp>
-#include <D3D12Shader.h>
-
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 

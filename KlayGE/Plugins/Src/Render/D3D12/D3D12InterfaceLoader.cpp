@@ -44,7 +44,7 @@ namespace KlayGE
         {
             ::MessageBoxW(nullptr, L"Can't load dxgi.dll", L"Error", MB_OK);
         }
-        mod_d3d12_ = ::LoadLibraryEx(TEXT("D3D12.dll"), nullptr, 0);
+        mod_d3d12_ = ::LoadLibraryEx(TEXT("d3d12.dll"), nullptr, 0);
         if (nullptr == mod_d3d12_)
         {
             ::MessageBoxW(nullptr, L"Can't load d3d12.dll", L"Error", MB_OK);

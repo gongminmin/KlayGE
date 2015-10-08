@@ -82,13 +82,13 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 	case WM_INITDIALOG:
 		{
 			HWND hFactoryCombo = GetDlgItem(hDlg, IDC_FACTORY_COMBO);
-			HMODULE mod_d3d11 = LoadLibraryEx(TEXT("D3D11.dll"), nullptr, 0);
+			HMODULE mod_d3d11 = LoadLibraryEx(TEXT("d3d11.dll"), nullptr, 0);
 			if (mod_d3d11)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D11")));
 				FreeLibrary(mod_d3d11);
 			}
-			HMODULE mod_gl = LoadLibraryEx(TEXT("OpenGL32.dll"), nullptr, 0);
+			HMODULE mod_gl = LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
 			if (mod_gl)
 			{
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenGL")));

@@ -33,7 +33,6 @@
 
 #pragma once
 
-#include <KlayGE/SALWrapper.hpp>
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 
 namespace KlayGE

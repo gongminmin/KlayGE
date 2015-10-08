@@ -52,7 +52,7 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KlayGE/SALWrapper.hpp>
-#include <D3DCompiler.h>
+#include <d3dcompiler.h>
 #endif
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
@@ -64,19 +64,6 @@
 
 DEFINE_GUID(IID_ID3D12ShaderReflection_47,
 	0x5a58797d, 0xa72c, 0x478d, 0x8b, 0xa2, 0xef, 0xc6, 0xb0, 0xef, 0xe8, 0x8e);
-
-struct D3D12_SIGNATURE_PARAMETER_DESC_47
-{
-	LPCSTR						SemanticName;
-	UINT						SemanticIndex;
-	UINT						Register;
-	D3D_NAME					SystemValueType;
-	D3D_REGISTER_COMPONENT_TYPE	ComponentType;
-	BYTE						Mask;
-	BYTE						ReadWriteMask;
-	UINT						Stream;
-	D3D_MIN_PRECISION			MinPrecision;
-};
 
 namespace
 {
@@ -1223,10 +1210,10 @@ namespace KlayGE
 					if (ST_VertexShader == type)
 					{
 						vs_signature_ = 0;
-						D3D12_SIGNATURE_PARAMETER_DESC_47 signature;
+						D3D12_SIGNATURE_PARAMETER_DESC signature;
 						for (uint32_t i = 0; i < desc.InputParameters; ++ i)
 						{
-							reflection->GetInputParameterDesc(i, reinterpret_cast<D3D12_SIGNATURE_PARAMETER_DESC*>(&signature));
+							reflection->GetInputParameterDesc(i, &signature);
 
 							size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
 							boost::hash_combine(seed, signature.SemanticIndex);
