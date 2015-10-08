@@ -46,6 +46,7 @@ SET(KERNEL_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PreDeclare.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PerfProfiler.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ResLoader.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/SALWrapper.hpp
 )
 
 SOURCE_GROUP("Kernel\\Source Files" FILES ${KERNEL_SOURCE_FILES})

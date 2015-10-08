@@ -33,7 +33,7 @@
 
 #pragma once
 
-#include <KlayGE/D3D12/D3D12MinGWDefs.hpp>
+#include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_4.h>
 #include <d3d12.h>
 

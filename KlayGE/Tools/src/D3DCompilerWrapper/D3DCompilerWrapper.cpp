@@ -34,20 +34,15 @@
 
 #ifdef _MSC_VER
 #define _CRT_SECURE_NO_WARNINGS
-#elif defined(__GNUC__) || defined(__clang__)
-#define __in
-#define __in_ecount(size)
-#define __out
-#define __out_ecount(size)
-#define __in_bcount(size)
-#define __in_opt
-#define __in_ecount_opt(size)
-#define __out_opt
-#define __in_xcount_opt(size) 
+#elif defined(__GNUC__)
+#define KLAYGE_COMPILER_GCC
+#elif defined(__clang__)
+#define KLAYGE_COMPILER_CLANG
 #endif
 
 #include <stdio.h>
 #include <windows.h>
+#include <KlayGE/SALWrapper.hpp>
 #include <d3d11shader.h>
 
 #ifndef D3D11_SHVER_GET_TYPE

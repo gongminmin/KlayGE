@@ -38,7 +38,7 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
+#include <KlayGE/SALWrapper.hpp>
 #include <D3D11Shader.h>
 
 namespace KlayGE

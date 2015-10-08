@@ -37,7 +37,7 @@
 #include <KFL/Color.hpp>
 #include <KFL/Thread.hpp>
 
-#include <KlayGE/D3D12/D3D12MinGWDefs.hpp>
+#include <KlayGE/SALWrapper.hpp>
 #include <D3D11Shader.h>
 
 #include <vector>

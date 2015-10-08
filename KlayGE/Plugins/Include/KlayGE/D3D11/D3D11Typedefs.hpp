@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
+#include <KlayGE/SALWrapper.hpp>
 #if (_WIN32_WINNT < _WIN32_WINNT_WIN8)
 	#if defined(KLAYGE_COMPILER_MSVC)
 	#pragma warning(push)

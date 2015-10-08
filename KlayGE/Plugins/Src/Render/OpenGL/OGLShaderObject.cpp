@@ -50,18 +50,7 @@
 
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 
-#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
-#define __in
-#define __in_ecount(size)
-#define __out
-#define __out_ecount(size)
-#define __in_bcount(size)
-#define __in_opt
-#define __in_ecount_opt(size)
-#define __out_opt
-#define __in_xcount_opt(size) 
-#endif
-
+#include <KlayGE/SALWrapper.hpp>
 #include <D3DCompiler.h>
 #else
 // http://msdn.microsoft.com/en-us/library/windows/desktop/aa383751(v=vs.85).aspx

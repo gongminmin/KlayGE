@@ -42,7 +42,6 @@
 #include <boost/assert.hpp>
 #include <boost/functional/hash.hpp>
 
-#include <KlayGE/D3D12/D3D12MinGWDefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 

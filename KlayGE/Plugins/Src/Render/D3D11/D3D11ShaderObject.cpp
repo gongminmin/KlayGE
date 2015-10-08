@@ -35,8 +35,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/functional/hash.hpp>
 
-#include <KlayGE/D3D11/D3D11MinGWDefs.hpp>
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#include <KlayGE/SALWrapper.hpp>
 #include <D3DCompiler.h>
 #endif
 
