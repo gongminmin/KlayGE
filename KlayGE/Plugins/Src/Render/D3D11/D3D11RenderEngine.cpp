@@ -1339,83 +1339,15 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
 	{
-		this->DetectD3D11_2Runtime(device, imm_ctx);
-		this->DetectD3D11_1Runtime(device, imm_ctx);
-		d3d_11_runtime_sub_ver_ = 0;
-
 		d3d_device_ = device;
 		d3d_imm_ctx_ = imm_ctx;
-	}
-
-	void D3D11RenderEngine::DetectD3D11_1Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
-	{
 		d3d_11_runtime_sub_ver_ = 0;
 
-		ID3D11Device1* d3d_device_1;
-		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-		if (d3d_device_1)
-		{
-			ID3D11DeviceContext1* d3d_imm_ctx_1;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
-			if (d3d_imm_ctx_1)
-			{
-				d3d_device_ = MakeCOMPtr(d3d_device_1);
-				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
-				d3d_11_runtime_sub_ver_ = 1;
-			}
-			else
-			{
-				d3d_device_1->Release();
-
-				d3d_device_ = device;
-				d3d_imm_ctx_ = imm_ctx;
-			}
-		}
-		else
-		{
-			d3d_device_ = device;
-			d3d_imm_ctx_ = imm_ctx;
-		}
-	}
-
-	void D3D11RenderEngine::DetectD3D11_2Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
-	{
-		d3d_11_runtime_sub_ver_ = 0;
-
-		ID3D11Device2* d3d_device_2;
-		device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
-		if (d3d_device_2)
-		{
-			ID3D11DeviceContext2* d3d_imm_ctx_2;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
-			if (d3d_imm_ctx_2)
-			{
-				d3d_device_ = MakeCOMPtr(d3d_device_2);
-				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_2);
-				d3d_11_runtime_sub_ver_ = 2;
-			}
-			else
-			{
-				d3d_device_2->Release();
-
-				this->DetectD3D11_1Runtime(device, imm_ctx);
-			}
-		}
-		else
-		{
-			this->DetectD3D11_1Runtime(device, imm_ctx);
-		}
-	}
-
-	void D3D11RenderEngine::DetectD3D11_3Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
-	{
-		d3d_11_runtime_sub_ver_ = 0;
-
-		ID3D11Device3* d3d_device_3;
+		ID3D11Device3* d3d_device_3 = nullptr;
 		device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
 		if (d3d_device_3)
 		{
-			ID3D11DeviceContext3* d3d_imm_ctx_3;
+			ID3D11DeviceContext3* d3d_imm_ctx_3 = nullptr;
 			imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
 			if (d3d_imm_ctx_3)
 			{
@@ -1426,13 +1358,52 @@ namespace KlayGE
 			else
 			{
 				d3d_device_3->Release();
-
-				this->DetectD3D11_2Runtime(device, imm_ctx);
+				d3d_device_3 = nullptr;
 			}
 		}
-		else
+
+		if (!d3d_device_3)
 		{
-			this->DetectD3D11_2Runtime(device, imm_ctx);
+			ID3D11Device2* d3d_device_2 = nullptr;
+			device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
+			if (d3d_device_2)
+			{
+				ID3D11DeviceContext2* d3d_imm_ctx_2 = nullptr;
+				imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
+				if (d3d_imm_ctx_2)
+				{
+					d3d_device_ = MakeCOMPtr(d3d_device_2);
+					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_2);
+					d3d_11_runtime_sub_ver_ = 2;
+				}
+				else
+				{
+					d3d_device_2->Release();
+					d3d_device_2 = nullptr;
+				}
+			}
+
+			if (!d3d_device_2)
+			{
+				ID3D11Device1* d3d_device_1 = nullptr;
+				device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+				if (d3d_device_1)
+				{
+					ID3D11DeviceContext1* d3d_imm_ctx_1 = nullptr;
+					imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+					if (d3d_imm_ctx_1)
+					{
+						d3d_device_ = MakeCOMPtr(d3d_device_1);
+						d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
+						d3d_11_runtime_sub_ver_ = 1;
+					}
+					else
+					{
+						d3d_device_1->Release();
+						d3d_device_1  = nullptr;
+					}
+				}
+			}
 		}
 	}
 
