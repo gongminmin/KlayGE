@@ -4681,11 +4681,7 @@ namespace KlayGE
 		{
 			array_size_ = MakeSharedPtr<std::string>(attr->ValueString());
 
-			try
-			{
-				as = attr->ValueUInt();
-			}
-			catch (...)
+			if (!attr->TryConvert(as))
 			{
 				as = 1;  // dummy array size
 			}
@@ -4760,11 +4756,7 @@ namespace KlayGE
 		{
 			array_size_ = MakeSharedPtr<std::string>(as_str);
 
-			try
-			{
-				as = boost::lexical_cast<uint32_t>(as_str);
-			}
-			catch (...)
+			if (!boost::conversion::try_lexical_convert(as_str, as))
 			{
 				as = 1;  // dummy array size
 			}
@@ -4839,11 +4831,7 @@ namespace KlayGE
 		uint32_t as;
 		if (array_size_)
 		{
-			try
-			{
-				as = boost::lexical_cast<uint32_t>(*array_size_);
-			}
-			catch (...)
+			if (!boost::conversion::try_lexical_convert(*array_size_, as))
 			{
 				as = 1;  // dummy array size
 			}

@@ -361,11 +361,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLAttributePtr attr = attribute_node->Attrib("value");
 			if (attr)
 			{
-				try
-				{
-					light_attr = attr->ValueInt();
-				}
-				catch (boost::bad_lexical_cast const &)
+				if (!attr->TryConvert(light_attr))
 				{
 					light_attr = 0;
 
@@ -607,11 +603,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLAttributePtr attr = attribute_node->Attrib("value");
 			if (attr)
 			{
-				try
-				{
-					obj_attr = attr->ValueInt();
-				}
-				catch (boost::bad_lexical_cast const &)
+				if (!attr->TryConvert(obj_attr))
 				{
 					obj_attr = SceneObject::SOA_Cullable;
 

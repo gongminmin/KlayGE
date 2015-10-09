@@ -263,6 +263,30 @@ namespace KlayGE
 		return this->FirstAttrib(name);
 	}
 
+	bool XMLNode::TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val)
+	{
+		val = default_val;
+
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->TryConvert(val) : true;
+	}
+
+	bool XMLNode::TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val)
+	{
+		val = default_val;
+
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->TryConvert(val) : true;
+	}
+
+	bool XMLNode::TryConvertAttrib(std::string const & name, float& val, float default_val)
+	{
+		val = default_val;
+
+		XMLAttributePtr attr = this->Attrib(name);
+		return attr ? attr->TryConvert(val) : true;
+	}
+
 	int32_t XMLNode::AttribInt(std::string const & name, int32_t default_val)
 	{
 		XMLAttributePtr attr = this->Attrib(name);
@@ -457,6 +481,21 @@ namespace KlayGE
 		}
 	}
 
+	bool XMLNode::TryConvert(int32_t& val) const
+	{
+		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+	}
+
+	bool XMLNode::TryConvert(uint32_t& val) const
+	{
+		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+	}
+
+	bool XMLNode::TryConvert(float& val) const
+	{
+		return boost::conversion::try_lexical_convert(this->ValueString(), val);
+	}
+
 	int32_t XMLNode::ValueInt() const
 	{
 		return boost::lexical_cast<int32_t>(this->ValueString());
@@ -524,6 +563,21 @@ namespace KlayGE
 		{
 			return XMLAttributePtr();
 		}
+	}
+
+	bool XMLAttribute::TryConvert(int32_t& val) const
+	{
+		return boost::conversion::try_lexical_convert(value_, val);
+	}
+
+	bool XMLAttribute::TryConvert(uint32_t& val) const
+	{
+		return boost::conversion::try_lexical_convert(value_, val);
+	}
+
+	bool XMLAttribute::TryConvert(float& val) const
+	{
+		return boost::conversion::try_lexical_convert(value_, val);
 	}
 
 	int32_t XMLAttribute::ValueInt() const

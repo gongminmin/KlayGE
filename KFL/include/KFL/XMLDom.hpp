@@ -94,6 +94,11 @@ namespace KlayGE
 		XMLAttributePtr LastAttrib();
 
 		XMLAttributePtr Attrib(std::string const & name);
+
+		bool TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val);
+		bool TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val);
+		bool TryConvertAttrib(std::string const & name, float& val, float default_val);
+
 		int32_t AttribInt(std::string const & name, int32_t default_val);
 		uint32_t AttribUInt(std::string const & name, uint32_t default_val);
 		float AttribFloat(std::string const & name, float default_val);
@@ -116,6 +121,10 @@ namespace KlayGE
 
 		void RemoveNode(XMLNodePtr const & node);
 		void RemoveAttrib(XMLAttributePtr const & attr);
+
+		bool TryConvert(int32_t& val) const;
+		bool TryConvert(uint32_t& val) const;
+		bool TryConvert(float& val) const;
 
 		int32_t ValueInt() const;
 		uint32_t ValueUInt() const;
@@ -143,6 +152,10 @@ namespace KlayGE
 
 		XMLAttributePtr NextAttrib(std::string const & name);
 		XMLAttributePtr NextAttrib();
+
+		bool TryConvert(int32_t& val) const;
+		bool TryConvert(uint32_t& val) const;
+		bool TryConvert(float& val) const;
 
 		int32_t ValueInt() const;
 		uint32_t ValueUInt() const;
