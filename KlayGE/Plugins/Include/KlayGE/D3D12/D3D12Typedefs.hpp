@@ -36,6 +36,9 @@
 #include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_4.h>
 #include <d3d12.h>
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+#undef __out
+#endif
 
 namespace KlayGE
 {

@@ -1406,17 +1406,16 @@ namespace KlayGE
 			d3d_cbuffs_[type].resize(shader_desc_[type].cb_desc.size());
 			for (size_t c = 0; c < shader_desc_[type].cb_desc.size(); ++ c)
 			{
-				bool found = false;
-				for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
+				uint32_t i = 0;
+				for (; i < effect.NumCBuffers(); ++ i)
 				{
 					if (effect.CBufferByIndex(i)->NameHash() == shader_desc_[type].cb_desc[c].name_hash)
 					{
 						cbuff_indices_[type][c] = static_cast<uint8_t>(i);
-						found = true;
 						break;
 					}
 				}
-				BOOST_ASSERT(found);
+				BOOST_ASSERT(i < effect.NumCBuffers());
 			}
 
 			samplers_[type].resize(shader_desc_[type].num_samplers);

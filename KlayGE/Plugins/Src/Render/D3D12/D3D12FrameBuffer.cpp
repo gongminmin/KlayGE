@@ -101,27 +101,17 @@ namespace KlayGE
 			}
 		}
 
-		ID3D12Resource* ds_src;
-		uint32_t ds_first_subres;
-		uint32_t ds_num_subres;
 		D3D12_CPU_DESCRIPTOR_HANDLE ds_handle;
 		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;
 		if (rs_view_)
 		{
 			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(rs_view_.get());
-			ds_src = p->DSSrc().get();
-			ds_first_subres = p->DSFirstSubRes();
-			ds_num_subres = p->DSNumSubRes();
 
 			ds_handle = p->D3DDepthStencilView()->Handle();
 			ds_handle_ptr = &ds_handle;
 		}
 		else
 		{
-			ds_src = nullptr;
-			ds_first_subres = 0;
-			ds_num_subres = 0;
-
 			ds_handle_ptr = nullptr;
 		}
 
