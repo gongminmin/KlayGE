@@ -78,6 +78,7 @@
 	#define _Outptr_
 	#define _Outptr_result_bytebuffer_(size)
 	#define _Outptr_result_maybenull_
+	#define _Outptr_opt_
 	#define _Outptr_opt_result_maybenull_
 	#define _Outptr_opt_result_bytebuffer_(size)
 	#define _Check_return_

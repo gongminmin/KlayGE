@@ -17,7 +17,14 @@
 
 #include <KlayGE/SALWrapper.hpp>
 #include <dxgi1_4.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
+#endif
 #include <d3d11_3.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 
 namespace KlayGE
 {
