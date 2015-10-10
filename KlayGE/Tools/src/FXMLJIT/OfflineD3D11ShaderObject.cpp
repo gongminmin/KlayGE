@@ -59,10 +59,10 @@ DEFINE_GUID(IID_ID3D11ShaderReflection_47,
 	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-class D3DCompilerInit
+class D3D11CompilerInit
 {
 public:
-	D3DCompilerInit()
+	D3D11CompilerInit()
 	{
 		mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
 		if (mod_d3dcompiler_)
@@ -77,7 +77,7 @@ public:
 		}
 	}
 
-	~D3DCompilerInit()
+	~D3D11CompilerInit()
 	{
 		if (mod_d3dcompiler_)
 		{
@@ -118,7 +118,7 @@ private:
 	D3DStripShaderFunc DynamicD3DStripShader_;
 };
 
-D3DCompilerInit d3dcompiler;
+D3D11CompilerInit d3d11compiler;
 #endif
 
 namespace KlayGE
@@ -132,6 +132,20 @@ namespace KlayGE
 
 			switch (caps.major_version)
 			{
+			case 12:
+				switch (caps.minor_version)
+				{
+				case 1:
+					feature_level_ = D3D_FEATURE_LEVEL_12_1;
+					break;
+
+				default:
+				case 0:
+					feature_level_ = D3D_FEATURE_LEVEL_12_0;
+					break;
+				}
+				break;
+
 			case 11:
 				switch (caps.minor_version)
 				{
@@ -181,6 +195,8 @@ namespace KlayGE
 
 			switch (feature_level_)
 			{
+			case D3D_FEATURE_LEVEL_12_1:
+			case D3D_FEATURE_LEVEL_12_0:
 			case D3D_FEATURE_LEVEL_11_1:
 			case D3D_FEATURE_LEVEL_11_0:
 				vs_profile_ = "vs_5_0";
@@ -816,7 +832,7 @@ namespace KlayGE
 #if !defined(KLAYGE_DEBUG)
 				flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-				d3dcompiler.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), nullptr, &macros[0],
+				d3d11compiler.D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), nullptr, &macros[0],
 					nullptr, sd.func_name.c_str(), shader_profile.c_str(),
 					flags, 0, &code, &err_msg);
 				if (err_msg != nullptr)
@@ -911,7 +927,7 @@ namespace KlayGE
 				if (code)
 				{
 					ID3D11ShaderReflection* reflection;
-					d3dcompiler.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(),
+					d3d11compiler.D3DReflect(code->GetBufferPointer(), code->GetBufferSize(),
 						IID_ID3D11ShaderReflection_47, reinterpret_cast<void**>(&reflection));
 					if (reflection != nullptr)
 					{
@@ -1058,7 +1074,7 @@ namespace KlayGE
 					}
 
 					ID3DBlob* strip_code = nullptr;
-					d3dcompiler.D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+					d3d11compiler.D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
 						D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
 						| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA,
 						&strip_code);

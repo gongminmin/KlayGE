@@ -52,6 +52,7 @@
 #include "OfflineShaderObject.hpp"
 #include "OfflineRenderEffect.hpp"
 #include "OfflineD3D11ShaderObject.hpp"
+#include "OfflineD3D12ShaderObject.hpp"
 #include "OfflineOGLShaderObject.hpp"
 #include "OfflineOGLESShaderObject.hpp"
 
@@ -3454,9 +3455,13 @@ namespace KlayGE
 				shader_obj_ = MakeSharedPtr<OGLESShaderObject>(caps);
 			}
 #ifdef KLAYGE_PLATFORM_WINDOWS
-			else if (caps.platform.find("d3d_") != std::string::npos)
+			else if (caps.platform.find("d3d_11") != std::string::npos)
 			{
 				shader_obj_ = MakeSharedPtr<D3D11ShaderObject>(caps);
+			}
+			else if (caps.platform.find("d3d_12") != std::string::npos)
+			{
+				shader_obj_ = MakeSharedPtr<D3D12ShaderObject>(caps);
 			}
 #endif
 		}

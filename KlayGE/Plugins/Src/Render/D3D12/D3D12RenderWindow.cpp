@@ -152,16 +152,11 @@ namespace KlayGE
 			}
 #endif
 
-			std::vector<std::tuple<char const *, D3D_FEATURE_LEVEL, bool>> available_feature_levels;
-			available_feature_levels.push_back(std::make_tuple("12_1", D3D_FEATURE_LEVEL_12_1, true));
-			available_feature_levels.push_back(std::make_tuple("12_0", D3D_FEATURE_LEVEL_12_0, true));
-			available_feature_levels.push_back(std::make_tuple("11_1", D3D_FEATURE_LEVEL_11_1, true));
-			available_feature_levels.push_back(std::make_tuple("11_0", D3D_FEATURE_LEVEL_11_0, true));
-			available_feature_levels.push_back(std::make_tuple("10_1", D3D_FEATURE_LEVEL_10_1, false));
-			available_feature_levels.push_back(std::make_tuple("10_0", D3D_FEATURE_LEVEL_10_0, false));
-			available_feature_levels.push_back(std::make_tuple("9_3", D3D_FEATURE_LEVEL_9_3, false));
-			available_feature_levels.push_back(std::make_tuple("9_2", D3D_FEATURE_LEVEL_9_2, false));
-			available_feature_levels.push_back(std::make_tuple("9_1", D3D_FEATURE_LEVEL_9_1, false));
+			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
+			available_feature_levels.push_back(std::make_pair("12_1", D3D_FEATURE_LEVEL_12_1));
+			available_feature_levels.push_back(std::make_pair("12_0", D3D_FEATURE_LEVEL_12_0));
+			available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
+			available_feature_levels.push_back(std::make_pair("11_0", D3D_FEATURE_LEVEL_11_0));
 
 			std::vector<std::string> strs;
 			boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
@@ -178,7 +173,7 @@ namespace KlayGE
 					size_t feature_index = 0;
 					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
 					{
-						if (0 == strcmp(std::get<0>(available_feature_levels[i]), opt_val.c_str()))
+						if (0 == strcmp(available_feature_levels[i].first, opt_val.c_str()))
 						{
 							feature_index = i;
 							break;
@@ -193,26 +188,17 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<D3D_FEATURE_LEVEL> feature_levels_for_12;
-			for (size_t i = 0; i < available_feature_levels.size(); ++i)
-			{
-				if (std::get<2>(available_feature_levels[i]))
-				{
-					feature_levels_for_12.push_back(std::get<1>(available_feature_levels[i]));
-				}
-			}
-
-			std::vector<D3D_FEATURE_LEVEL> feature_levels_for_11;
+			std::vector<D3D_FEATURE_LEVEL> feature_levels;
 			for (size_t i = 0; i < available_feature_levels.size(); ++ i)
 			{
-				feature_levels_for_11.push_back(std::get<1>(available_feature_levels[i]));
+				feature_levels.push_back(available_feature_levels[i].second);
 			}
 
-			for (size_t i = 0; i < feature_levels_for_12.size(); ++ i)
+			for (size_t i = 0; i < feature_levels.size(); ++ i)
 			{
 				ID3D12Device* device = nullptr;
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter().get(),
-						feature_levels_for_12[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
+						feature_levels[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
 				{
 					d3d_device = MakeCOMPtr(device);
 
@@ -227,18 +213,18 @@ namespace KlayGE
 						IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
 					d3d_cmd_queue = MakeCOMPtr(cmd_queue);
 
-					D3D12_FEATURE_DATA_FEATURE_LEVELS feature_levels;
-					feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels_for_11.size());
-					feature_levels.pFeatureLevelsRequested = &feature_levels_for_11[0];
-					d3d_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &feature_levels, sizeof(feature_levels));
+					D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
+					req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
+					req_feature_levels.pFeatureLevelsRequested = &feature_levels[0];
+					d3d_device->CheckFeatureSupport(D3D12_FEATURE_FEATURE_LEVELS, &req_feature_levels, sizeof(req_feature_levels));
 
-					d3d12_re.D3DDevice(d3d_device, d3d_cmd_queue, feature_levels.MaxSupportedFeatureLevel);
+					d3d12_re.D3DDevice(d3d_device, d3d_cmd_queue, req_feature_levels.MaxSupportedFeatureLevel);
 
 					if (Context::Instance().AppInstance().ConfirmDevice())
 					{
 						description_ = adapter_->Description() + L" FL ";
 						wchar_t const * fl_str;
-						switch (feature_levels.MaxSupportedFeatureLevel)
+						switch (req_feature_levels.MaxSupportedFeatureLevel)
 						{
 						case D3D_FEATURE_LEVEL_12_1:
 							fl_str = L"12.1";

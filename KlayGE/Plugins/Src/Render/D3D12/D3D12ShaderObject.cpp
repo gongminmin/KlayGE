@@ -797,7 +797,6 @@ namespace KlayGE
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D12RenderEngine const & render_eng = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 
 		std::string max_sm_str = boost::lexical_cast<std::string>(caps.max_shader_model.FullVersion());
@@ -900,44 +899,36 @@ namespace KlayGE
 			ID3DBlob* err_msg;
 			std::vector<D3D_SHADER_MACRO> macros;
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_D3D11", "1" }; // TODO
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_D3D12", "1" }; // TODO
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
-				macros.push_back(macro_d3d11);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			{
-				D3D_SHADER_MACRO macro_d3d11 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
-				macros.push_back(macro_d3d11);
-			}
-			if (feature_level <= D3D_FEATURE_LEVEL_9_3)
-			{
-				D3D_SHADER_MACRO macro_bc5_as_bc3 = { "KLAYGE_BC5_AS_AG", "1" };
-				macros.push_back(macro_bc5_as_bc3);
-
-				D3D_SHADER_MACRO macro_bc4_as_bc1 = { "KLAYGE_BC4_AS_G", "1" };
-				macros.push_back(macro_bc4_as_bc1);
+				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
+				macros.push_back(macro_d3d12);
 			}
 			if (!caps.fp_color_support)
 			{
