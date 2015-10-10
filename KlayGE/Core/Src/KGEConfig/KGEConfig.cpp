@@ -88,6 +88,12 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D11")));
 				FreeLibrary(mod_d3d11);
 			}
+			HMODULE mod_d3d12 = LoadLibraryEx(TEXT("d3d12.dll"), nullptr, 0);
+			if (mod_d3d12)
+			{
+				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("D3D12")));
+				FreeLibrary(mod_d3d12);
+			}
 			HMODULE mod_gl = LoadLibraryEx(TEXT("opengl32.dll"), nullptr, 0);
 			if (mod_gl)
 			{
@@ -129,6 +135,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			HWND hResCombo = GetDlgItem(hDlg, IDC_RES_COMBO);
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("4096x2304 (16:9)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("3200x2000 (16:10)")));
+			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("3000x2000 (3:2)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("2560x1600 (16:10)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("2160x1440 (3:2)")));
 			SendMessage(hResCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("1920x1280 (3:2)")));
