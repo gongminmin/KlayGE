@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 
 #include <KlayGE/ShaderObject.hpp>
 

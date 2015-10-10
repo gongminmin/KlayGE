@@ -683,6 +683,9 @@ namespace KlayGE
 
 		std::string const & TypeName(uint32_t code) const;
 
+		void GenHLSLShaderText();
+		std::string const & HLSLShaderText() const;
+
 	private:
 		void RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const;
 		void InsertIncludeNodes(XMLDocument& target_doc, XMLNodePtr const & target_root,
@@ -698,6 +701,7 @@ namespace KlayGE
 
 		std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
 		std::shared_ptr<std::vector<RenderShaderFunc>> shaders_;
+		std::shared_ptr<std::string> hlsl_shader_;
 
 		RenderEffectPtr prototype_effect_;
 

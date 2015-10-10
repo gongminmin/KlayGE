@@ -2858,6 +2858,7 @@ namespace KlayGE
 				cbuffers_.clear();
 				params_.clear();
 				shaders_.reset();
+				hlsl_shader_.reset();
 				techniques_.clear();
 
 				shader_descs_ = MakeSharedPtr<std::remove_reference<decltype(*shader_descs_)>::type>(1);
@@ -3019,6 +3020,8 @@ namespace KlayGE
 					}
 				}
 
+				this->GenHLSLShaderText();
+
 				uint32_t index = 0;
 				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 				{
@@ -3152,6 +3155,8 @@ namespace KlayGE
 								}
 							}
 						}
+
+						this->GenHLSLShaderText();
 
 						ret = true;
 						{
@@ -3298,6 +3303,7 @@ namespace KlayGE
 		ret->prototype_effect_ = prototype_effect_;
 		ret->macros_ = macros_;
 		ret->shaders_ = shaders_;
+		ret->hlsl_shader_ = hlsl_shader_;
 		ret->shader_descs_ = shader_descs_;
 
 		ret->params_.resize(params_.size());
@@ -3407,6 +3413,375 @@ namespace KlayGE
 	std::string const & RenderEffect::TypeName(uint32_t code) const
 	{
 		return type_define::instance().type_name(code);
+	}
+
+	void RenderEffect::GenHLSLShaderText()
+	{
+		std::ostringstream ss;
+
+		ss << "#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))" << std::endl << std::endl;
+
+		for (uint32_t i = 0; i < this->NumMacros(); ++ i)
+		{
+			std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
+			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+		}
+		ss << std::endl;
+
+		for (uint32_t i = 0; i < this->NumCBuffers(); ++ i)
+		{
+			RenderEffectConstantBufferPtr const & cbuff = this->CBufferByIndex(i);
+			ss << "cbuffer " << *cbuff->Name() << std::endl;
+			ss << "{" << std::endl;
+
+			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
+			{
+				RenderEffectParameter& param = *this->ParameterByIndex(cbuff->ParameterIndex(j));
+				switch (param.Type())
+				{
+				case REDT_texture1D:
+				case REDT_texture2D:
+				case REDT_texture3D:
+				case REDT_textureCUBE:
+				case REDT_texture1DArray:
+				case REDT_texture2DArray:
+				case REDT_texture3DArray:
+				case REDT_textureCUBEArray:
+				case REDT_sampler:
+				case REDT_buffer:
+				case REDT_structured_buffer:
+				case REDT_byte_address_buffer:
+				case REDT_rw_buffer:
+				case REDT_rw_structured_buffer:
+				case REDT_rw_texture1D:
+				case REDT_rw_texture2D:
+				case REDT_rw_texture3D:
+				case REDT_rw_texture1DArray:
+				case REDT_rw_texture2DArray:
+				case REDT_rw_byte_address_buffer:
+				case REDT_append_structured_buffer:
+				case REDT_consume_structured_buffer:
+					break;
+
+				default:
+					ss << this->TypeName(param.Type()) << " " << *param.Name();
+					if (param.ArraySize())
+					{
+						ss << "[" << *param.ArraySize() << "]";
+					}
+					ss << ";" << std::endl;
+					break;
+				}
+			}
+
+			ss << "};" << std::endl;
+		}
+
+		for (uint32_t i = 0; i < this->NumParameters(); ++ i)
+		{
+			RenderEffectParameter& param = *this->ParameterByIndex(i);
+
+			switch (param.Type())
+			{
+			case REDT_texture1D:
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture2D:
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture3D:
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "#if KLAYGE_MAX_TEX_DEPTH <= 1" << std::endl;
+					ss << "Texture2D" << "<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+					ss << "#else" << std::endl;
+					ss << "Texture3D" << "<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_textureCUBE:
+				{
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+				}
+				break;
+
+			case REDT_texture1DArray:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_texture2DArray:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_textureCUBEArray:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 1)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_sampler:
+				ss << "sampler " << *param.Name() << ";" << std::endl;
+				break;
+
+			case REDT_structured_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_byte_address_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					ss << "ByteAddressBuffer " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_structured_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture1D:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture2D:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture3D:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+			case REDT_rw_texture1DArray:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_texture2DArray:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_rw_byte_address_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+					ss << "RWByteAddressBuffer " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_append_structured_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			case REDT_consume_structured_buffer:
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+					std::string elem_type;
+					param.Var()->Value(elem_type);
+					ss << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+					ss << "#endif" << std::endl;
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		for (uint32_t i = 0; i < this->NumShaders(); ++ i)
+		{
+			RenderShaderFunc const & effect_shader = this->ShaderByIndex(i);
+			ShaderObject::ShaderType const shader_type = effect_shader.Type();
+			switch (shader_type)
+			{
+			case ShaderObject::ST_VertexShader:
+				ss << "#if KLAYGE_VERTEX_SHADER" << std::endl;
+				break;
+
+			case ShaderObject::ST_PixelShader:
+				ss << "#if KLAYGE_PIXEL_SHADER" << std::endl;
+				break;
+
+			case ShaderObject::ST_GeometryShader:
+				ss << "#if KLAYGE_GEOMETRY_SHADER" << std::endl;
+				break;
+
+			case ShaderObject::ST_ComputeShader:
+				ss << "#if KLAYGE_COMPUTE_SHADER" << std::endl;
+				break;
+
+			case ShaderObject::ST_HullShader:
+				ss << "#if KLAYGE_HULL_SHADER" << std::endl;
+				break;
+
+			case ShaderObject::ST_DomainShader:
+				ss << "#if KLAYGE_DOMAIN_SHADER" << std::endl;
+				break;
+
+			default:
+				break;
+			}
+			ShaderModel const & ver = effect_shader.Version();
+			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
+			{
+				ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
+					<< static_cast<int>(ver.major_ver) << ", "
+					<< static_cast<int>(ver.minor_ver) << ")" << std::endl;
+			}
+
+			ss << effect_shader.str() << std::endl;
+
+			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
+			{
+				ss << "#endif" << std::endl;
+			}
+			if (shader_type != ShaderObject::ST_NumShaderTypes)
+			{
+				ss << "#endif" << std::endl;
+			}
+		}
+
+		hlsl_shader_ = MakeSharedPtr<std::string>(ss.str());
+	}
+
+	std::string const & RenderEffect::HLSLShaderText() const
+	{
+		if (hlsl_shader_)
+		{
+			return *hlsl_shader_;
+		}
+		else
+		{
+			static std::string empty;
+			return empty;
+		}
 	}
 
 

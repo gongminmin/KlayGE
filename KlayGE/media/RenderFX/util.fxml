@@ -3,8 +3,6 @@
 <effect>
 	<shader>
 		<![CDATA[
-#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))
-
 float get_x_channel(float4 v)
 {
 #ifdef KLAYGE_BC4_AS_G

@@ -205,264 +205,6 @@ namespace KlayGE
 		rasterized_stream_ = 0;
 	}
 
-	std::string D3D12ShaderObject::GenShaderText(ShaderType type, RenderEffect const & effect,
-		RenderTechnique const & tech, RenderPass const & pass) const
-	{
-		std::ostringstream ss;
-
-		for (uint32_t i = 0; i < effect.NumMacros(); ++ i)
-		{
-			std::pair<std::string, std::string> const & name_value = effect.MacroByIndex(i);
-			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
-		}
-		ss << std::endl;
-
-		for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
-		{
-			std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
-			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
-		}
-		ss << std::endl;
-
-		for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
-		{
-			std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
-			ss << "#define " << name_value.first << " " << name_value.second << std::endl;
-		}
-		ss << std::endl;
-
-		for (uint32_t i = 0; i < effect.NumCBuffers(); ++ i)
-		{
-			RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(i);
-			ss << "cbuffer " << *cbuff->Name() << std::endl;
-			ss << "{" << std::endl;
-
-			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
-			{
-				RenderEffectParameter& param = *effect.ParameterByIndex(cbuff->ParameterIndex(j));
-				switch (param.Type())
-				{
-				case REDT_texture1D:
-				case REDT_texture2D:
-				case REDT_texture3D:
-				case REDT_textureCUBE:
-				case REDT_texture1DArray:
-				case REDT_texture2DArray:
-				case REDT_texture3DArray:
-				case REDT_textureCUBEArray:
-				case REDT_sampler:
-				case REDT_buffer:
-				case REDT_structured_buffer:
-				case REDT_byte_address_buffer:
-				case REDT_rw_buffer:
-				case REDT_rw_structured_buffer:
-				case REDT_rw_texture1D:
-				case REDT_rw_texture2D:
-				case REDT_rw_texture3D:
-				case REDT_rw_texture1DArray:
-				case REDT_rw_texture2DArray:
-				case REDT_rw_byte_address_buffer:
-				case REDT_append_structured_buffer:
-				case REDT_consume_structured_buffer:
-					break;
-
-				default:
-					ss << effect.TypeName(param.Type()) << " " << *param.Name();
-					if (param.ArraySize())
-					{
-						ss << "[" << *param.ArraySize() << "]";
-					}
-					ss << ";" << std::endl;
-					break;
-				}
-			}
-
-			ss << "};" << std::endl;
-		}
-
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		for (uint32_t i = 0; i < effect.NumParameters(); ++ i)
-		{
-			RenderEffectParameter& param = *effect.ParameterByIndex(i);
-
-			switch (param.Type())
-			{
-			case REDT_texture1D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_texture2D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_texture3D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Texture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_textureCUBE:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_texture1DArray:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_texture2DArray:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_textureCUBEArray:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_sampler:
-				ss << "sampler " << *param.Name() << ";" << std::endl;
-				break;
-
-			case REDT_structured_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_byte_address_buffer:
-				ss << "ByteAddressBuffer " << *param.Name() << ";" << std::endl;
-				break;
-
-			case REDT_rw_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_structured_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_texture1D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_texture2D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_texture3D:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-			case REDT_rw_texture1DArray:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_texture2DArray:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_rw_byte_address_buffer:
-				ss << "RWByteAddressBuffer " << *param.Name() << ";" << std::endl;
-				break;
-
-			case REDT_append_structured_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			case REDT_consume_structured_buffer:
-				{
-					std::string elem_type;
-					param.Var()->Value(elem_type);
-					ss << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
-				}
-				break;
-
-			default:
-				break;
-			}
-		}
-
-		for (uint32_t i = 0; i < effect.NumShaders(); ++ i)
-		{
-			RenderShaderFunc const & effect_shader = effect.ShaderByIndex(i);
-			ShaderType shader_type = effect_shader.Type();
-			if ((ST_NumShaderTypes == shader_type) || (type == shader_type))
-			{
-				if (caps.max_shader_model >= effect_shader.Version())
-				{
-					ss << effect_shader.str() << std::endl;
-				}
-			}
-		}
-
-		return ss.str();
-	}
-
 	std::string D3D12ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_id);
@@ -809,7 +551,7 @@ namespace KlayGE
 
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
-		std::string shader_text = this->GenShaderText(static_cast<ShaderType>(type), effect, tech, pass);
+		std::string const & shader_text = effect.HLSLShaderText();
 
 		is_shader_validate_[type] = true;
 
@@ -978,6 +720,21 @@ namespace KlayGE
 				}
 				macros.push_back(macro_shader_type);
 			}
+
+			for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
+				D3D_SHADER_MACRO macro_d3d11 = { name_value.first.c_str(), name_value.second.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+
+			for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
+				D3D_SHADER_MACRO macro_d3d11 = { name_value.first.c_str(), name_value.second.c_str() };
+				macros.push_back(macro_d3d11);
+			}
+
 			{
 				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
 				macros.push_back(macro_end);
