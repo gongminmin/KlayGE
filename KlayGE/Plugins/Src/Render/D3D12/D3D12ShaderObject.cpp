@@ -47,7 +47,6 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/functional/hash.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -541,17 +540,7 @@ namespace KlayGE
 		D3D12RenderEngine const & render_eng = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 
-		std::string max_sm_str = boost::lexical_cast<std::string>(caps.max_shader_model.FullVersion());
-		std::string max_tex_array_str = boost::lexical_cast<std::string>(caps.max_texture_array_length);
-		std::string max_tex_depth_str = boost::lexical_cast<std::string>(caps.max_texture_depth);
-		std::string max_tex_units_str = boost::lexical_cast<std::string>(static_cast<int>(caps.max_pixel_texture_units));
-		std::string flipping_str = boost::lexical_cast<std::string>(render_eng.RequiresFlipping() ? -1 : +1);
-		std::string standard_derivatives_str = boost::lexical_cast<std::string>(caps.standard_derivatives_support ? 1 : 0);
-		std::string no_tex_lod_str = boost::lexical_cast<std::string>((ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1);
-
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
-
-		std::string const & shader_text = effect.HLSLShaderText();
 
 		is_shader_validate_[type] = true;
 
@@ -583,7 +572,7 @@ namespace KlayGE
 			}
 			else
 			{
-				is_shader_validate_[type] = false;				
+				is_shader_validate_[type] = false;
 			}
 			break;
 
@@ -635,210 +624,23 @@ namespace KlayGE
 		}
 		shader_code_[type].second = shader_profile;
 
-		ID3DBlob* code = nullptr;
+		std::shared_ptr<std::vector<uint8_t>> code = MakeSharedPtr<std::vector<uint8_t>>();
 		if (is_shader_validate_[type])
 		{
-			ID3DBlob* err_msg;
-			std::vector<D3D_SHADER_MACRO> macros;
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_D3D12", "1" }; // TODO
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_SHADER_MODEL", max_sm_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_ARRAY_LEN", max_tex_array_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_DEPTH", max_tex_depth_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_MAX_TEX_UNITS", max_tex_units_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_FLIPPING", flipping_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			{
-				D3D_SHADER_MACRO macro_d3d12 = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
-				macros.push_back(macro_d3d12);
-			}
-			if (!caps.fp_color_support)
-			{
-				D3D_SHADER_MACRO macro_no_fp_tex = { "KLAYGE_NO_FP_COLOR", "1" };
-				macros.push_back(macro_no_fp_tex);
-			}
-			if (caps.pack_to_rgba_required)
-			{
-				D3D_SHADER_MACRO macro_pack_to_rgba = { "KLAYGE_PACK_TO_RGBA", "1" };
-				macros.push_back(macro_pack_to_rgba);
-			}
-			{
-				D3D_SHADER_MACRO macro_frag_depth = { "KLAYGE_FRAG_DEPTH", "1" };
-				macros.push_back(macro_frag_depth);
-			}
-			{
-				D3D_SHADER_MACRO macro_shader_type = { "", "1" };
-				switch (type)
-				{
-				case ST_VertexShader:
-					macro_shader_type.Name = "KLAYGE_VERTEX_SHADER";
-					break;
+			std::vector<std::pair<char const *, char const *>> macros;
+			macros.push_back(std::make_pair("KLAYGE_D3D12", "1"));
+			macros.push_back(std::make_pair("KLAYGE_FRAG_DEPTH", "1"));
 
-				case ST_PixelShader:
-					macro_shader_type.Name = "KLAYGE_PIXEL_SHADER";
-					break;
-
-				case ST_GeometryShader:
-					macro_shader_type.Name = "KLAYGE_GEOMETRY_SHADER";
-					break;
-
-				case ST_ComputeShader:
-					macro_shader_type.Name = "KLAYGE_COMPUTE_SHADER";
-					break;
-
-				case ST_HullShader:
-					macro_shader_type.Name = "KLAYGE_HULL_SHADER";
-					break;
-
-				case ST_DomainShader:
-					macro_shader_type.Name = "KLAYGE_DOMAIN_SHADER";
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-				macros.push_back(macro_shader_type);
-			}
-
-			for (uint32_t i = 0; i < tech.NumMacros(); ++ i)
-			{
-				std::pair<std::string, std::string> const & name_value = tech.MacroByIndex(i);
-				D3D_SHADER_MACRO macro_d3d11 = { name_value.first.c_str(), name_value.second.c_str() };
-				macros.push_back(macro_d3d11);
-			}
-
-			for (uint32_t i = 0; i < pass.NumMacros(); ++ i)
-			{
-				std::pair<std::string, std::string> const & name_value = pass.MacroByIndex(i);
-				D3D_SHADER_MACRO macro_d3d11 = { name_value.first.c_str(), name_value.second.c_str() };
-				macros.push_back(macro_d3d11);
-			}
-
-			{
-				D3D_SHADER_MACRO macro_end = { nullptr, nullptr };
-				macros.push_back(macro_end);
-			}
 			uint32_t flags = 0;
 #if !defined(KLAYGE_DEBUG)
 			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-			D3D12InterfaceLoader::Instance().D3DCompile(shader_text.c_str(), static_cast<UINT>(shader_text.size()), nullptr, &macros[0],
-				nullptr, sd.func_name.c_str(), shader_profile.c_str(),
-				flags, 0, &code, &err_msg);
-			if (err_msg != nullptr)
-			{
-				LogError("Error when compiling %s:", sd.func_name.c_str());
+			*code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name, shader_profile, flags);
 
-				std::map<int, std::vector<std::string>> err_lines;
-				{
-					std::istringstream err_iss(static_cast<char*>(err_msg->GetBufferPointer()));
-					std::string err_str;
-					while (err_iss)
-					{
-						std::getline(err_iss, err_str);
-
-						int err_line = -1;
-						std::string::size_type pos = err_str.find("): error X");
-						if (pos == std::string::npos)
-						{
-							pos = err_str.find("): warning X");
-						}
-						if (pos != std::string::npos)
-						{
-							std::string part_err_str = err_str.substr(0, pos);
-							pos = part_err_str.rfind("(");
-							part_err_str = part_err_str.substr(pos + 1);
-							std::istringstream(part_err_str) >> err_line;
-						}
-
-						std::vector<std::string>& msgs = err_lines[err_line];
-						bool found = false;
-						for (auto const & msg : msgs)
-						{
-							if (msg == err_str)
-							{
-								found = true;
-								break;
-							}
-						}
-
-						if (!found)
-						{
-							// To make the error message unrecognized by Visual Studio
-							if ((0 == err_str.find("error X")) || (0 == err_str.find("warning X")))
-							{
-								err_str = "(0): " + err_str;
-							}
-
-							msgs.push_back(err_str);
-						}
-					}
-				}
-
-				for (auto iter = err_lines.begin(); iter != err_lines.end(); ++ iter)
-				{
-					if (iter->first >= 0)
-					{
-						std::istringstream iss(shader_text);
-						std::string s;
-						int line = 1;
-
-						LogInfo("...");
-						while (iss && ((iter->first - line) >= 3))
-						{
-							std::getline(iss, s);
-							++ line;
-						}
-						while (iss && (abs(line - iter->first) < 3))
-						{
-							std::getline(iss, s);
-							
-							while (!s.empty() && (('\r' == s[s.size() - 1]) || ('\n' == s[s.size() - 1])))
-							{
-								s.resize(s.size() - 1);
-							}
-
-							LogInfo("%d %s", line, s.c_str());
-
-							++ line;
-						}
-						LogInfo("...");
-					}
-
-					for (auto const & msg : iter->second)
-					{
-						LogError(msg.c_str());
-					}
-				}
-
-				err_msg->Release();
-			}
-
-			if (code)
+			if (!code->empty())
 			{
 				ID3D12ShaderReflection* reflection;
-				D3D12InterfaceLoader::Instance().D3DReflect(code->GetBufferPointer(), code->GetBufferSize(),
+				D3D12InterfaceLoader::Instance().D3DReflect(&(*code)[0], static_cast<SIZE_T>(code->size()),
 					IID_ID3D12ShaderReflection_47, reinterpret_cast<void**>(&reflection));
 				if (reflection != nullptr)
 				{
@@ -987,27 +789,25 @@ namespace KlayGE
 				}
 
 				ID3DBlob* strip_code = nullptr;
-				D3D12InterfaceLoader::Instance().D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+				D3D12InterfaceLoader::Instance().D3DStripShader(&(*code)[0], static_cast<SIZE_T>(code->size()),
 					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
 					| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA,
 					&strip_code);
 				if (strip_code)
 				{
-					code->Release();
-					code = strip_code;
+					uint8_t const * p = static_cast<uint8_t const *>(strip_code->GetBufferPointer());
+					code->assign(p, p + strip_code->GetBufferSize());
+					strip_code->Release();
 				}
 			}
 		}
 
-		std::shared_ptr<std::vector<uint8_t>> ret;
-		if (code)
+		if (code->empty())
 		{
-			ret = MakeSharedPtr<std::vector<uint8_t>>(code->GetBufferSize());
-			std::memcpy(&((*ret)[0]), code->GetBufferPointer(), code->GetBufferSize());
-			code->Release();
+			code.reset();
 		}
 
-		return ret;
+		return code;
 #else
 		UNREF_PARAM(type);
 		UNREF_PARAM(effect);
