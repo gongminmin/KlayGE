@@ -754,6 +754,10 @@ uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(false);
 
 			re.BindFrameBuffer(FrameBufferPtr());
+			if (OM_PerPixelLinkedLists == oit_mode_)
+			{
+				re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			}
 			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
 			return App3DFramework::URV_Finished;
 		}
