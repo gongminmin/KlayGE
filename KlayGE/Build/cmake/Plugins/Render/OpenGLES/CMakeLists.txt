@@ -43,15 +43,6 @@ SOURCE_GROUP("Source Files" FILES ${OPENGLES_RE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${OPENGLES_RE_HEADER_FILES})
 
 ADD_DEFINITIONS(-DKLAYGE_BUILD_DLL -DKLAYGE_OGLES_RE_SOURCE -DGLLOADER_GLES_SUPPORT)
-IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
-	FIND_PATH(WINE_PATH "winegcc" #searching for 'wine' may result in include path
-		PATHS /usr/local/bin opt/local/sbin /usr/bin /bin /usr/sbin /sbin /usr/local/bin)
-
-	IF(NOT WINE_PATH)
-		MESSAGE(FATAL_ERROR "Cound NOT find wine")
-	ENDIF()
-	ADD_DEFINITIONS(-DWINE_PATH="\\"${WINE_PATH}/\\"")
-ENDIF()
 
 IF(NOT MSVC)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
