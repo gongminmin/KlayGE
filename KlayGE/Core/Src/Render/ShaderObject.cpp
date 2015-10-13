@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <sstream>
 
 #include <boost/lexical_cast.hpp>
@@ -65,7 +66,8 @@ struct D3D_SHADER_MACRO
 #endif
 
 namespace
-{using namespace KlayGE;
+{
+	using namespace KlayGE;
 
 	class D3DCompilerLoader
 	{

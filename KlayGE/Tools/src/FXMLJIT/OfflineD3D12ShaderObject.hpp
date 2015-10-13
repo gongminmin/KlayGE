@@ -115,9 +115,6 @@ namespace KlayGE
 		public:
 			explicit D3D12ShaderObject(OfflineRenderDeviceCaps const & caps);
 
-			std::string GenShaderText(ShaderType type, RenderEffect const & effect,
-				RenderTechnique const & tech, RenderPass const & pass) const;
-
 			virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE;
 
 			void AttachShader(ShaderType type, RenderEffect const & effect,

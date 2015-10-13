@@ -75,7 +75,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<type_define>();
+					instance_ = MakeUniquePtr<type_define>();
 				}
 			}
 			return *instance_;
@@ -167,9 +167,9 @@ namespace
 		std::vector<std::string> types_;
 		std::vector<size_t> types_hash_;
 
-		static std::shared_ptr<type_define> instance_;
+		static std::unique_ptr<type_define> instance_;
 	};
-	std::shared_ptr<type_define> type_define::instance_;
+	std::unique_ptr<type_define> type_define::instance_;
 
 	class shade_mode_define
 	{
@@ -181,7 +181,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<shade_mode_define>();
+					instance_ = MakeUniquePtr<shade_mode_define>();
 				}
 			}
 			return *instance_;
@@ -211,9 +211,9 @@ namespace
 	private:
 		std::vector<size_t> sms_hash_;
 
-		static std::shared_ptr<shade_mode_define> instance_;
+		static std::unique_ptr<shade_mode_define> instance_;
 	};
-	std::shared_ptr<shade_mode_define> shade_mode_define::instance_;
+	std::unique_ptr<shade_mode_define> shade_mode_define::instance_;
 
 	class compare_function_define
 	{
@@ -225,7 +225,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<compare_function_define>();
+					instance_ = MakeUniquePtr<compare_function_define>();
 				}
 			}
 			return *instance_;
@@ -261,9 +261,9 @@ namespace
 	private:
 		std::vector<size_t> cfs_hash_;
 
-		static std::shared_ptr<compare_function_define> instance_;
+		static std::unique_ptr<compare_function_define> instance_;
 	};
-	std::shared_ptr<compare_function_define> compare_function_define::instance_;
+	std::unique_ptr<compare_function_define> compare_function_define::instance_;
 
 	class cull_mode_define
 	{
@@ -275,7 +275,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<cull_mode_define>();
+					instance_ = MakeUniquePtr<cull_mode_define>();
 				}
 			}
 			return *instance_;
@@ -306,9 +306,9 @@ namespace
 	private:
 		std::vector<size_t> cms_hash_;
 
-		static std::shared_ptr<cull_mode_define> instance_;
+		static std::unique_ptr<cull_mode_define> instance_;
 	};
-	std::shared_ptr<cull_mode_define> cull_mode_define::instance_;
+	std::unique_ptr<cull_mode_define> cull_mode_define::instance_;
 
 	class polygon_mode_define
 	{
@@ -320,7 +320,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<polygon_mode_define>();
+					instance_ = MakeUniquePtr<polygon_mode_define>();
 				}
 			}
 			return *instance_;
@@ -351,9 +351,9 @@ namespace
 	private:
 		std::vector<size_t> pms_hash_;
 
-		static std::shared_ptr<polygon_mode_define> instance_;
+		static std::unique_ptr<polygon_mode_define> instance_;
 	};
-	std::shared_ptr<polygon_mode_define> polygon_mode_define::instance_;
+	std::unique_ptr<polygon_mode_define> polygon_mode_define::instance_;
 
 	class alpha_blend_factor_define
 	{
@@ -365,7 +365,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<alpha_blend_factor_define>();
+					instance_ = MakeUniquePtr<alpha_blend_factor_define>();
 				}
 			}
 			return *instance_;
@@ -410,9 +410,9 @@ namespace
 	private:
 		std::vector<size_t> abfs_hash_;
 
-		static std::shared_ptr<alpha_blend_factor_define> instance_;
+		static std::unique_ptr<alpha_blend_factor_define> instance_;
 	};
-	std::shared_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
+	std::unique_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
 
 	class blend_operation_define
 	{
@@ -424,7 +424,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<blend_operation_define>();
+					instance_ = MakeUniquePtr<blend_operation_define>();
 				}
 			}
 			return *instance_;
@@ -457,9 +457,9 @@ namespace
 	private:
 		std::vector<size_t> bops_hash_;
 
-		static std::shared_ptr<blend_operation_define> instance_;
+		static std::unique_ptr<blend_operation_define> instance_;
 	};
-	std::shared_ptr<blend_operation_define> blend_operation_define::instance_;
+	std::unique_ptr<blend_operation_define> blend_operation_define::instance_;
 
 	class stencil_operation_define
 	{
@@ -471,7 +471,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<stencil_operation_define>();
+					instance_ = MakeUniquePtr<stencil_operation_define>();
 				}
 			}
 			return *instance_;
@@ -507,9 +507,9 @@ namespace
 	private:
 		std::vector<size_t> sops_hash_;
 
-		static std::shared_ptr<stencil_operation_define> instance_;
+		static std::unique_ptr<stencil_operation_define> instance_;
 	};
-	std::shared_ptr<stencil_operation_define> stencil_operation_define::instance_;
+	std::unique_ptr<stencil_operation_define> stencil_operation_define::instance_;
 
 	class texture_filter_mode_define
 	{
@@ -521,7 +521,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<texture_filter_mode_define>();
+					instance_ = MakeUniquePtr<texture_filter_mode_define>();
 				}
 			}
 			return *instance_;
@@ -573,9 +573,9 @@ namespace
 	private:
 		std::vector<size_t> tfs_hash_;
 
-		static std::shared_ptr<texture_filter_mode_define> instance_;
+		static std::unique_ptr<texture_filter_mode_define> instance_;
 	};
-	std::shared_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
+	std::unique_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
 
 	class texture_addr_mode_define
 	{
@@ -587,7 +587,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<texture_addr_mode_define>();
+					instance_ = MakeUniquePtr<texture_addr_mode_define>();
 				}
 			}
 			return *instance_;
@@ -619,9 +619,9 @@ namespace
 	private:
 		std::vector<size_t> tams_hash_;
 
-		static std::shared_ptr<texture_addr_mode_define> instance_;
+		static std::unique_ptr<texture_addr_mode_define> instance_;
 	};
-	std::shared_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
+	std::unique_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
 
 	class logic_operation_define
 	{
@@ -633,7 +633,7 @@ namespace
 				std::lock_guard<std::mutex> lock(singleton_mutex);
 				if (!instance_)
 				{
-					instance_ = MakeSharedPtr<logic_operation_define>();
+					instance_ = MakeUniquePtr<logic_operation_define>();
 				}
 			}
 			return *instance_;
@@ -677,9 +677,9 @@ namespace
 	private:
 		std::vector<size_t> lops_hash_;
 
-		static std::shared_ptr<logic_operation_define> instance_;
+		static std::unique_ptr<logic_operation_define> instance_;
 	};
-	std::shared_ptr<logic_operation_define> logic_operation_define::instance_;
+	std::unique_ptr<logic_operation_define> logic_operation_define::instance_;
 
 	bool bool_from_str(std::string const & name)
 	{
@@ -2362,6 +2362,8 @@ namespace KlayGE
 					}
 				}
 
+				this->GenHLSLShaderText();
+
 				uint32_t index = 0;
 				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 				{
@@ -2573,6 +2575,375 @@ namespace KlayGE
 		std::string const & RenderEffect::TypeName(uint32_t code) const
 		{
 			return type_define::instance().type_name(code);
+		}
+
+		void RenderEffect::GenHLSLShaderText()
+		{
+			std::ostringstream ss;
+
+			ss << "#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))" << std::endl << std::endl;
+
+			for (uint32_t i = 0; i < this->NumMacros(); ++ i)
+			{
+				std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
+				ss << "#define " << name_value.first << " " << name_value.second << std::endl;
+			}
+			ss << std::endl;
+
+			for (uint32_t i = 0; i < this->NumCBuffers(); ++ i)
+			{
+				RenderEffectConstantBufferPtr const & cbuff = this->CBufferByIndex(i);
+				ss << "cbuffer " << *cbuff->Name() << std::endl;
+				ss << "{" << std::endl;
+
+				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
+				{
+					RenderEffectParameter& param = *this->ParameterByIndex(cbuff->ParameterIndex(j));
+					switch (param.Type())
+					{
+					case REDT_texture1D:
+					case REDT_texture2D:
+					case REDT_texture3D:
+					case REDT_textureCUBE:
+					case REDT_texture1DArray:
+					case REDT_texture2DArray:
+					case REDT_texture3DArray:
+					case REDT_textureCUBEArray:
+					case REDT_sampler:
+					case REDT_buffer:
+					case REDT_structured_buffer:
+					case REDT_byte_address_buffer:
+					case REDT_rw_buffer:
+					case REDT_rw_structured_buffer:
+					case REDT_rw_texture1D:
+					case REDT_rw_texture2D:
+					case REDT_rw_texture3D:
+					case REDT_rw_texture1DArray:
+					case REDT_rw_texture2DArray:
+					case REDT_rw_byte_address_buffer:
+					case REDT_append_structured_buffer:
+					case REDT_consume_structured_buffer:
+						break;
+
+					default:
+						ss << this->TypeName(param.Type()) << " " << *param.Name();
+						if (param.ArraySize())
+						{
+							ss << "[" << *param.ArraySize() << "]";
+						}
+						ss << ";" << std::endl;
+						break;
+					}
+				}
+
+				ss << "};" << std::endl;
+			}
+
+			for (uint32_t i = 0; i < this->NumParameters(); ++ i)
+			{
+				RenderEffectParameter& param = *this->ParameterByIndex(i);
+
+				switch (param.Type())
+				{
+				case REDT_texture1D:
+					{
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "Texture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+					}
+					break;
+
+				case REDT_texture2D:
+					{
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "Texture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+					}
+					break;
+
+				case REDT_texture3D:
+					{
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "#if KLAYGE_MAX_TEX_DEPTH <= 1" << std::endl;
+						ss << "Texture2D" << "<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+						ss << "#else" << std::endl;
+						ss << "Texture3D" << "<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_textureCUBE:
+					{
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "TextureCube<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+					}
+					break;
+
+				case REDT_texture1DArray:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "Texture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_texture2DArray:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "Texture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_textureCUBEArray:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 1)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "TextureCubeArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "Buffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_sampler:
+					ss << "sampler " << *param.Name() << ";" << std::endl;
+					break;
+
+				case REDT_structured_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "StructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_byte_address_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						ss << "ByteAddressBuffer " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_structured_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_texture1D:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWTexture1D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_texture2D:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWTexture2D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_texture3D:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWTexture3D<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+				case REDT_rw_texture1DArray:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWTexture1DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_texture2DArray:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "RWTexture2DArray<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_rw_byte_address_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+
+						ss << "RWByteAddressBuffer " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_append_structured_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "AppendStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				case REDT_consume_structured_buffer:
+					{
+						ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)" << std::endl;
+
+						std::string elem_type;
+						param.Var()->Value(elem_type);
+						ss << "ConsumeStructuredBuffer<" << elem_type << "> " << *param.Name() << ";" << std::endl;
+
+						ss << "#endif" << std::endl;
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+
+			for (uint32_t i = 0; i < this->NumShaders(); ++ i)
+			{
+				RenderShaderFunc const & effect_shader = this->ShaderByIndex(i);
+				ShaderObject::ShaderType const shader_type = effect_shader.Type();
+				switch (shader_type)
+				{
+				case ShaderObject::ST_VertexShader:
+					ss << "#if KLAYGE_VERTEX_SHADER" << std::endl;
+					break;
+
+				case ShaderObject::ST_PixelShader:
+					ss << "#if KLAYGE_PIXEL_SHADER" << std::endl;
+					break;
+
+				case ShaderObject::ST_GeometryShader:
+					ss << "#if KLAYGE_GEOMETRY_SHADER" << std::endl;
+					break;
+
+				case ShaderObject::ST_ComputeShader:
+					ss << "#if KLAYGE_COMPUTE_SHADER" << std::endl;
+					break;
+
+				case ShaderObject::ST_HullShader:
+					ss << "#if KLAYGE_HULL_SHADER" << std::endl;
+					break;
+
+				case ShaderObject::ST_DomainShader:
+					ss << "#if KLAYGE_DOMAIN_SHADER" << std::endl;
+					break;
+
+				default:
+					break;
+				}
+				ShaderModel const & ver = effect_shader.Version();
+				if ((ver.major_ver != 0) || (ver.minor_ver != 0))
+				{
+					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
+						<< static_cast<int>(ver.major_ver) << ", "
+						<< static_cast<int>(ver.minor_ver) << ")" << std::endl;
+				}
+
+				ss << effect_shader.str() << std::endl;
+
+				if ((ver.major_ver != 0) || (ver.minor_ver != 0))
+				{
+					ss << "#endif" << std::endl;
+				}
+				if (shader_type != ShaderObject::ST_NumShaderTypes)
+				{
+					ss << "#endif" << std::endl;
+				}
+			}
+
+			hlsl_shader_ = MakeSharedPtr<std::string>(ss.str());
+		}
+
+		std::string const & RenderEffect::HLSLShaderText() const
+		{
+			if (hlsl_shader_)
+			{
+				return *hlsl_shader_;
+			}
+			else
+			{
+				static std::string empty;
+				return empty;
+			}
 		}
 
 

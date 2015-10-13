@@ -45,9 +45,6 @@ namespace KlayGE
 		public:
 			explicit OGLShaderObject(OfflineRenderDeviceCaps const & caps);
 
-			std::string GenHLSLShaderText(ShaderType type, RenderEffect const & effect,
-				RenderTechnique const & tech, RenderPass const & pass) const;
-
 			virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE;
 
 			void AttachShader(ShaderType type, RenderEffect const & effect,

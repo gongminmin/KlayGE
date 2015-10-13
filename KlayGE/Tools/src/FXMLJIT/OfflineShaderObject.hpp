@@ -187,6 +187,12 @@ namespace KlayGE
 			}
 
 		protected:
+			std::vector<uint8_t> CompileToDXBC(ShaderType type, RenderEffect const & effect,
+				RenderTechnique const & tech, RenderPass const & pass,
+				std::vector<std::pair<char const *, char const *>> const & api_special_macros,
+				std::string const & func_name, std::string const & shader_profile, uint32_t flags);
+
+		protected:
 			OfflineRenderDeviceCaps caps_;
 
 			std::array<bool, ST_NumShaderTypes> is_shader_validate_;

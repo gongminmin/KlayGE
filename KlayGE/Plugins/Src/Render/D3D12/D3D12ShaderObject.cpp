@@ -815,7 +815,7 @@ namespace KlayGE
 		UNREF_PARAM(pass);
 		UNREF_PARAM(shader_desc_ids);
 
-		return shared_ptr<std::vector<uint8_t>>();
+		return std::shared_ptr<std::vector<uint8_t>>();
 #endif
 	}
 
