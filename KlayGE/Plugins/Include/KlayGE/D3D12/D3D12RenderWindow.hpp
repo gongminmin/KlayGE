@@ -160,15 +160,6 @@ namespace KlayGE
 
 		TexturePtr depth_stencil_;
 
-		ID3D12FencePtr render_fence_;
-		uint64_t render_fence_value_;
-		HANDLE render_fence_event_;
-		ID3D12FencePtr compute_fence_;
-		uint64_t compute_fence_value_;
-		HANDLE compute_fence_event_;
-		ID3D12FencePtr copy_fence_;
-		uint64_t copy_fence_value_;
-		HANDLE copy_fence_event_;
 		uint32_t curr_back_buffer_;
 
 		DXGI_FORMAT					back_buffer_format_;

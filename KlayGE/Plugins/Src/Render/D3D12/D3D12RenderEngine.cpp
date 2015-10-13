@@ -449,7 +449,24 @@ namespace KlayGE
 		TIF(d3d_render_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_render_cmd_list_.get() };
 		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+	}
 
+	void D3D12RenderEngine::CommitComputeCmd()
+	{
+		TIF(d3d_compute_cmd_list_->Close());
+		ID3D12CommandList* cmd_lists[] = { d3d_compute_cmd_list_.get() };
+		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+	}
+
+	void D3D12RenderEngine::CommitCopyCmd()
+	{
+		TIF(d3d_copy_cmd_list_->Close());
+		ID3D12CommandList* cmd_lists[] = { d3d_copy_cmd_list_.get() };
+		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+	}
+
+	void D3D12RenderEngine::SyncRenderCmd()
+	{
 		uint64_t const fence_val = render_cmd_fence_val_;
 		TIF(d3d_render_cmd_queue_->Signal(render_cmd_fence_.get(), fence_val));
 		++ render_cmd_fence_val_;
@@ -461,12 +478,8 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::CommitComputeCmd()
+	void D3D12RenderEngine::SyncComputeCmd()
 	{
-		TIF(d3d_compute_cmd_list_->Close());
-		ID3D12CommandList* cmd_lists[] = { d3d_compute_cmd_list_.get() };
-		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
-
 		uint64_t const fence_val = compute_cmd_fence_val_;
 		TIF(d3d_compute_cmd_queue_->Signal(compute_cmd_fence_.get(), fence_val));
 		++ compute_cmd_fence_val_;
@@ -478,12 +491,8 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::CommitCopyCmd()
+	void D3D12RenderEngine::SyncCopyCmd()
 	{
-		TIF(d3d_copy_cmd_list_->Close());
-		ID3D12CommandList* cmd_lists[] = { d3d_copy_cmd_list_.get() };
-		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
-
 		uint64_t const fence_val = copy_cmd_fence_val_;
 		TIF(d3d_copy_cmd_queue_->Signal(copy_cmd_fence_.get(), fence_val));
 		++ copy_cmd_fence_val_;
@@ -1410,6 +1419,9 @@ namespace KlayGE
 		this->CommitRenderCmd();
 		this->CommitComputeCmd();
 		this->CommitCopyCmd();
+		this->SyncRenderCmd();
+		this->SyncComputeCmd();
+		this->SyncCopyCmd();
 		this->ResetRenderCmd();
 		this->ResetComputeCmd();
 		this->ResetCopyCmd();

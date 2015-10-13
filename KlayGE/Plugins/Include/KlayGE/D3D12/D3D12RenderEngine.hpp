@@ -102,6 +102,9 @@ namespace KlayGE
 		void CommitRenderCmd();
 		void CommitComputeCmd();
 		void CommitCopyCmd();
+		void SyncRenderCmd();
+		void SyncComputeCmd();
+		void SyncCopyCmd();
 		void ResetRenderCmd();
 		void ResetComputeCmd();
 		void ResetCopyCmd();

@@ -72,8 +72,7 @@ namespace KlayGE
 						: metro_d3d_render_win_(ref new MetroD3D12RenderWindow),
 #endif
 							adapter_(adapter),
-							gi_factory_(gi_factory),
-							render_fence_value_(0), compute_fence_value_(0), copy_fence_value_(0)
+							gi_factory_(gi_factory)
 	{
 		// Store info
 		name_				= name;
@@ -323,25 +322,6 @@ namespace KlayGE
 		Verify(!!swap_chain_);
 
 		curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
-		
-		ID3D12Fence* fence;
-		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		render_fence_ = MakeCOMPtr(fence);
-		render_fence_value_ = 1;
-
-		render_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-
-		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		compute_fence_ = MakeCOMPtr(fence);
-		compute_fence_value_ = 1;
-
-		compute_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-
-		TIF(d3d_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		copy_fence_ = MakeCOMPtr(fence);
-		copy_fence_value_ = 1;
-
-		copy_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 		this->UpdateSurfacesPtrs();
 
@@ -572,15 +552,6 @@ namespace KlayGE
 			render_targets_[i].reset();
 		}
 
-		render_fence_.reset();
-		::CloseHandle(render_fence_event_);
-
-		compute_fence_.reset();
-		::CloseHandle(compute_fence_event_);
-
-		copy_fence_.reset();
-		::CloseHandle(copy_fence_event_);
-
 		depth_stencil_.reset();
 		swap_chain_.reset();
 		gi_factory_.reset();
@@ -711,37 +682,8 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 
-		ID3D12CommandQueuePtr const & render_cmd_queue = re.D3DRenderCmdQueue();
-		uint64_t const render_fence = render_fence_value_;
-		TIF(render_cmd_queue->Signal(render_fence_.get(), render_fence));
-		++ render_fence_value_;
-
-		if (render_fence_->GetCompletedValue() < render_fence)
-		{
-			TIF(render_fence_->SetEventOnCompletion(render_fence, render_fence_event_));
-			::WaitForSingleObjectEx(render_fence_event_, INFINITE, FALSE);
-		}
-
-		ID3D12CommandQueuePtr const & compute_cmd_queue = re.D3DComputeCmdQueue();
-		uint64_t const compute_fence = compute_fence_value_;
-		TIF(compute_cmd_queue->Signal(compute_fence_.get(), compute_fence));
-		++ compute_fence_value_;
-
-		if (compute_fence_->GetCompletedValue() < compute_fence)
-		{
-			TIF(compute_fence_->SetEventOnCompletion(compute_fence, compute_fence_event_));
-			::WaitForSingleObjectEx(compute_fence_event_, INFINITE, FALSE);
-		}
-
-		ID3D12CommandQueuePtr const & copy_cmd_queue = re.D3DCopyCmdQueue();
-		uint64_t const copy_fence = copy_fence_value_;
-		TIF(copy_cmd_queue->Signal(copy_fence_.get(), copy_fence));
-		++ copy_fence_value_;
-
-		if (copy_fence_->GetCompletedValue() < copy_fence)
-		{
-			TIF(copy_fence_->SetEventOnCompletion(copy_fence, copy_fence_event_));
-			::WaitForSingleObjectEx(copy_fence_event_, INFINITE, FALSE);
-		}
+		re.SyncRenderCmd();
+		re.SyncComputeCmd();
+		re.SyncCopyCmd();
 	}
 }
