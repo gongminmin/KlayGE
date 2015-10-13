@@ -840,6 +840,11 @@ namespace KlayGE
 		d3d_imm_ctx_->Flush();
 	}
 
+	TexturePtr const & D3D11RenderEngine::ScreenDepthStencilTexture() const
+	{
+		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->D3DDepthStencilBuffer();
+	}
+
 	// ÉèÖÃ¼ô³ı¾ØÕó
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

@@ -84,6 +84,10 @@ namespace KlayGE
 			return *adapter_;
 		}
 
+		TexturePtr const & D3DDepthStencilBuffer() const
+		{
+			return depth_stencil_;
+		}
 		RenderViewPtr const & D3DBackBufferRTV() const
 		{
 			return render_target_render_views_[curr_back_buffer_];

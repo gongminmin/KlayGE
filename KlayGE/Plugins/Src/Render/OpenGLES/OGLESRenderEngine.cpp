@@ -27,9 +27,6 @@
 #include <KlayGE/RenderFactory.hpp>
 
 #include <glloader/glloader.h>
-#ifdef Bool
-#undef Bool		// for boost::foreach
-#endif
 
 #include <algorithm>
 #include <cstring>
@@ -1349,6 +1346,12 @@ namespace KlayGE
 	void OGLESRenderEngine::ForceFlush()
 	{
 		glFlush();
+	}
+
+	TexturePtr const & OGLESRenderEngine::ScreenDepthStencilTexture() const
+	{
+		static TexturePtr ret;
+		return ret;
 	}
 
 	// …Ë÷√ºÙ≥˝æÿ’Û

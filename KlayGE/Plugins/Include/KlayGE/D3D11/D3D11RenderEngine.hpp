@@ -66,6 +66,8 @@ namespace KlayGE
 
 		void ForceFlush();
 
+		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE;
+
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 		bool FullScreen() const;

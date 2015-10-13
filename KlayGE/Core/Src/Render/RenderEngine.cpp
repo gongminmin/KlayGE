@@ -79,6 +79,12 @@ namespace KlayGE
 		{
 		}
 
+		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE
+		{
+			static TexturePtr ret;
+			return ret;
+		}
+
 		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
 		{
 		}
@@ -295,39 +301,47 @@ namespace KlayGE
 		RenderViewPtr ds_view;
 		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
 		{
-			if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
-				|| caps.texture_format_support(EF_D16))
+			ds_tex_ = this->ScreenDepthStencilTexture();
+			if (ds_tex_)
 			{
-				ElementFormat fmt;
-				if ((settings.depth_stencil_fmt != EF_Unknown)
-					&& caps.texture_format_support(settings.depth_stencil_fmt))
-				{
-					fmt = settings.depth_stencil_fmt;
-				}
-				else
-				{
-					BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
-					fmt = EF_D16;
-				}
-				ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
 			else
 			{
-				ElementFormat fmt;
-				if ((settings.depth_stencil_fmt != EF_Unknown)
-					&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+				if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
+					|| caps.texture_format_support(EF_D16))
 				{
-					fmt = settings.depth_stencil_fmt;
+					ElementFormat fmt;
+					if ((settings.depth_stencil_fmt != EF_Unknown)
+						&& caps.texture_format_support(settings.depth_stencil_fmt))
+					{
+						fmt = settings.depth_stencil_fmt;
+					}
+					else
+					{
+						BOOST_ASSERT(caps.texture_format_support(EF_D16));
+
+						fmt = EF_D16;
+					}
+					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 				}
 				else
 				{
-					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+					ElementFormat fmt;
+					if ((settings.depth_stencil_fmt != EF_Unknown)
+						&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+					{
+						fmt = settings.depth_stencil_fmt;
+					}
+					else
+					{
+						BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-					fmt = EF_D16;
+						fmt = EF_D16;
+					}
+					ds_view = rf.Make2DDepthStencilRenderView(render_width, render_height, fmt, 1, 0);
 				}
-				ds_view = rf.Make2DDepthStencilRenderView(render_width, render_height, fmt, 1, 0);
 			}
 		}
 
@@ -723,28 +737,36 @@ namespace KlayGE
 			RenderViewPtr ds_view;
 			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 			{
-				if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
-					|| caps.texture_format_support(EF_D16))
+				ds_tex_ = this->ScreenDepthStencilTexture();
+				if (ds_tex_)
 				{
-					ElementFormat fmt = ds_tex_->Format();
-					ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 					ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 				}
 				else
 				{
-					ElementFormat fmt;
-					if ((settings.depth_stencil_fmt != EF_Unknown)
-						&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+					if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
+						|| caps.texture_format_support(EF_D16))
 					{
-						fmt = settings.depth_stencil_fmt;
+						ElementFormat fmt = ds_tex_->Format();
+						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+						ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 					}
 					else
 					{
-						BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+						ElementFormat fmt;
+						if ((settings.depth_stencil_fmt != EF_Unknown)
+							&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+						{
+							fmt = settings.depth_stencil_fmt;
+						}
+						else
+						{
+							BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
 
-						fmt = EF_D16;
+							fmt = EF_D16;
+						}
+						ds_view = rf.Make2DDepthStencilRenderView(new_render_width, new_render_height, fmt, 1, 0);
 					}
-					ds_view = rf.Make2DDepthStencilRenderView(new_render_width, new_render_height, fmt, 1, 0);
 				}
 			}
 
@@ -908,10 +930,13 @@ namespace KlayGE
 			}
 		}
 
-		RenderViewPtr const & ds_view = this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
-		if (ds_view)
+		if (!this->ScreenDepthStencilTexture())
 		{
-			ds_view->ClearDepth(1.0f);
+			RenderViewPtr const & ds_view = this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
+			if (ds_view)
+			{
+				ds_view->ClearDepth(1.0f);
+			}
 		}
 
 		fb_stage_ = 0;

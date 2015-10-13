@@ -127,6 +127,8 @@ namespace KlayGE
 		FrameBufferPtr const & ScreenFrameBuffer() const;
 		FrameBufferPtr const & OverlayFrameBuffer() const;
 
+		virtual TexturePtr const & ScreenDepthStencilTexture() const = 0;
+
 		void BindSOBuffers(RenderLayoutPtr const & rl);
 
 		// Get render device capabilities
