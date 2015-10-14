@@ -395,7 +395,7 @@ namespace KlayGE
 		res_cmd_fence_val_ = 1;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		res_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+		res_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 #else
 		res_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #endif
@@ -405,7 +405,7 @@ namespace KlayGE
 		render_cmd_fence_val_ = 1;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		render_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+		render_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 #else
 		render_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #endif
@@ -415,7 +415,7 @@ namespace KlayGE
 		compute_cmd_fence_val_ = 1;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 #else
 		compute_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #endif
@@ -425,7 +425,7 @@ namespace KlayGE
 		copy_cmd_fence_val_ = 1;
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
 #else
 		copy_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
 #endif
