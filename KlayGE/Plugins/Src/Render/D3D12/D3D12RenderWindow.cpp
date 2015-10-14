@@ -294,18 +294,20 @@ namespace KlayGE
 		sc_desc1_.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		sc_desc1_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		sc_fs_desc_.RefreshRate.Numerator = 60;
 		sc_fs_desc_.RefreshRate.Denominator = 1;
 		sc_fs_desc_.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 		sc_fs_desc_.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 		sc_fs_desc_.Windowed = !this->FullScreen();
+#endif
 
 		IDXGISwapChain1* sc = nullptr;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		gi_factory_->CreateSwapChainForHwnd(d3d_cmd_queue.get(), hWnd_,
 			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
 #else
-		gi_factory_->CreateSwapChainForCoreWindow(d3d_12_cmd_queue.get(),
+		gi_factory_->CreateSwapChainForCoreWindow(d3d_cmd_queue.get(),
 			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc1_, nullptr, &sc);
 #endif
 
@@ -664,7 +666,7 @@ namespace KlayGE
 	void D3D12RenderWindow::MetroD3D12RenderWindow::OnStereoEnabledChanged(
 		Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/)
 	{
-		if ((win_->gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != win_->dxgi_stereo_support_)
+		if ((win_->gi_factory_->IsWindowedStereoEnabled() ? true : false) != win_->dxgi_stereo_support_)
 		{
 			win_->swap_chain_.reset();
 			win_->WindowMovedOrResized();

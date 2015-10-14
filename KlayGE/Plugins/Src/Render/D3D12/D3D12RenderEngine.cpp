@@ -394,25 +394,41 @@ namespace KlayGE
 		res_cmd_fence_ = MakeCOMPtr(fence);
 		res_cmd_fence_val_ = 1;
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		res_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+#else
 		res_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+#endif
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		render_cmd_fence_ = MakeCOMPtr(fence);
 		render_cmd_fence_val_ = 1;
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		render_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+#else
 		render_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+#endif
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		compute_cmd_fence_ = MakeCOMPtr(fence);
 		compute_cmd_fence_val_ = 1;
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+#else
 		compute_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+#endif
 
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		copy_cmd_fence_ = MakeCOMPtr(fence);
 		copy_cmd_fence_val_ = 1;
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, 0);
+#else
 		copy_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+#endif
 
 		this->FillRenderDeviceCaps();
 	}

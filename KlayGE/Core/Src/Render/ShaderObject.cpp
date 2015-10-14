@@ -26,6 +26,8 @@
 
 #include <KlayGE/ShaderObject.hpp>
 
+#if KLAYGE_IS_DEV_PLATFORM
+
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #define CALL_D3DCOMPILER_DIRECTLY
 #endif
@@ -234,6 +236,8 @@ namespace
 	};
 }
 
+#endif
+
 namespace KlayGE
 {
 	class NullShaderObject : public ShaderObject
@@ -306,6 +310,7 @@ namespace KlayGE
 	{
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	std::vector<uint8_t> ShaderObject::CompileToDXBC(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass,
 			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
@@ -519,4 +524,5 @@ namespace KlayGE
 
 		return code;
 	}
+#endif
 }
