@@ -41,6 +41,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <atomic>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -210,6 +211,9 @@ namespace KlayGE
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
 	private:
+		D3D12AdapterList const & D3DAdapters() const;
+		D3D12AdapterPtr const & ActiveAdapter() const;
+
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) KLAYGE_OVERRIDE;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) KLAYGE_OVERRIDE;
@@ -236,8 +240,12 @@ namespace KlayGE
 		void UpdateComputePSO(RenderPassPtr const & pass);
 
 	private:
-		D3D12AdapterList const & D3DAdapters() const;
-		D3D12AdapterPtr const & ActiveAdapter() const;
+		enum EngineType
+		{
+			ET_Render,
+			ET_Compute,
+			ET_Copy
+		};
 
 		// Direct3D rendering device
 		// Only created after top-level window created
@@ -256,6 +264,7 @@ namespace KlayGE
 		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
 		std::mutex res_cmd_list_mutex_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
+		EngineType last_engine_type_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -306,19 +315,19 @@ namespace KlayGE
 		double inv_timestamp_freq_;
 
 		ID3D12FencePtr render_cmd_fence_;
-		uint64_t render_cmd_fence_val_;
+		std::atomic<uint64_t> render_cmd_fence_val_;
 		HANDLE render_cmd_fence_event_;
 
 		ID3D12FencePtr compute_cmd_fence_;
-		uint64_t compute_cmd_fence_val_;
+		std::atomic<uint64_t> compute_cmd_fence_val_;
 		HANDLE compute_cmd_fence_event_;
 
 		ID3D12FencePtr copy_cmd_fence_;
-		uint64_t copy_cmd_fence_val_;
+		std::atomic<uint64_t> copy_cmd_fence_val_;
 		HANDLE copy_cmd_fence_event_;
 
 		ID3D12FencePtr res_cmd_fence_;
-		uint64_t res_cmd_fence_val_;
+		std::atomic<uint64_t> res_cmd_fence_val_;
 		HANDLE res_cmd_fence_event_;
 
 		RenderEffectPtr blit_effect_;

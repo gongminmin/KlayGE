@@ -71,7 +71,7 @@ namespace KlayGE
 	// ¹¹Ôìº¯Êý
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D12RenderEngine::D3D12RenderEngine()
-		: inv_timestamp_freq_(0),
+		: last_engine_type_(ET_Render), inv_timestamp_freq_(0),
 			render_cmd_fence_val_(0), compute_cmd_fence_val_(0), copy_cmd_fence_val_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
@@ -1084,6 +1084,11 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
 	{
+		if (last_engine_type_ != ET_Render)
+		{
+			this->ForceCPUGPUSync();
+		}
+
 		D3D12FrameBuffer& fb = *checked_cast<D3D12FrameBuffer*>(this->CurFrameBuffer().get());
 		fb.SetRenderTargets();
 		fb.BindBarrier();
@@ -1363,15 +1368,15 @@ namespace KlayGE
 
 		fb.UnbindBarrier();
 
-		if ((cbv_srv_uav_heap_cache_.size() > 1024) || (buff_cache_.size() > 1024))
-		{
-			this->ForceCPUGPUSync();
-		}
+		last_engine_type_ = ET_Render;
 	}
 
 	void D3D12RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		this->ForceCPUGPUSync();
+		if (last_engine_type_ != ET_Compute)
+		{
+			this->ForceCPUGPUSync();
+		}
 
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
@@ -1385,14 +1390,16 @@ namespace KlayGE
 		}
 
 		num_dispatches_just_called_ += num_passes;
-
-		this->ForceCPUGPUSync();
+		last_engine_type_ = ET_Compute;
 	}
 
 	void D3D12RenderEngine::DoDispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args,
 			uint32_t offset)
 	{
-		this->ForceCPUGPUSync();
+		if (last_engine_type_ != ET_Compute)
+		{
+			this->ForceCPUGPUSync();
+		}
 
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
@@ -1408,8 +1415,7 @@ namespace KlayGE
 		}
 
 		num_dispatches_just_called_ += num_passes;
-
-		this->ForceCPUGPUSync();
+		last_engine_type_ = ET_Compute;
 	}
 
 	void D3D12RenderEngine::ForceFlush()

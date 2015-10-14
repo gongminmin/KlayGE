@@ -575,8 +575,6 @@ namespace KlayGE
 		{
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
-			re.ForceCPUGPUSync();
-
 			D3D12_RESOURCE_BARRIER barrier_before;
 			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
