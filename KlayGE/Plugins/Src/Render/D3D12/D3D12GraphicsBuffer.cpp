@@ -50,7 +50,7 @@ namespace KlayGE
 							uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
 							counter_offset_(0),
-							fmt_as_shader_res_(fmt)
+							fmt_as_shader_res_(fmt), curr_state_(D3D12_RESOURCE_STATE_COMMON)
 	{
 		this->CreateBuffer(init_data);
 	}
@@ -126,6 +126,7 @@ namespace KlayGE
 			&res_desc, init_state, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 		buffer_ = MakeCOMPtr(buffer);
+		curr_state_ = init_state;
 
 		if (subres_init != nullptr)
 		{
@@ -361,6 +362,22 @@ namespace KlayGE
 		if (n > 0)
 		{
 			cmd_list->ResourceBarrier(n, &barrier_after[0]);
+		}
+	}
+
+	bool D3D12GraphicsBuffer::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state)
+	{
+		if (curr_state_ == target_state)
+		{
+			return false;
+		}
+		else
+		{
+			barrier.Transition.pResource = buffer_.get();
+			barrier.Transition.StateBefore = curr_state_;
+			barrier.Transition.StateAfter = target_state;
+			curr_state_ = target_state;
+			return true;
 		}
 	}
 }

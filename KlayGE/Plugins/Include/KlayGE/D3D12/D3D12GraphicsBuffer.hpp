@@ -73,6 +73,8 @@ namespace KlayGE
 			return counter_offset_;
 		}
 
+		bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
+
 	private:
 		void CreateBuffer(void const * init_data);
 
@@ -87,6 +89,8 @@ namespace KlayGE
 		uint32_t counter_offset_;
 
 		ElementFormat fmt_as_shader_res_;
+
+		D3D12_RESOURCE_STATES curr_state_;
 	};
 	typedef std::shared_ptr<D3D12GraphicsBuffer> D3D12GraphicsBufferPtr;
 }

@@ -276,7 +276,7 @@ namespace KlayGE
 		RenderLayout::topology_type topology_type_cache_;
 		D3D12_VIEWPORT viewport_cache_;
 		D3D12_RECT scissor_rc_cache_;
-		std::vector<ID3D12ResourcePtr> so_buffs_;
+		std::vector<GraphicsBufferPtr> so_buffs_;
 		std::set<ID3D12ResourcePtr> buff_cache_;
 		std::vector<ID3D12PipelineStatePtr> pso_cache_;
 		std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;

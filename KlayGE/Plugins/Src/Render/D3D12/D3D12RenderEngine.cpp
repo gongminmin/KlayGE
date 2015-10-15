@@ -583,9 +583,9 @@ namespace KlayGE
 			std::vector<D3D12_STREAM_OUTPUT_BUFFER_VIEW> sobv(num_buffs);
 			for (uint32_t i = 0; i < num_buffs; ++ i)
 			{
-				D3D12GraphicsBuffer* d3d12_buf = checked_cast<D3D12GraphicsBuffer*>(rl->GetVertexStream(i).get());
+				D3D12GraphicsBufferPtr d3d12_buf = checked_pointer_cast<D3D12GraphicsBuffer>(rl->GetVertexStream(i));
 
-				so_buffs_[i] = d3d12_buf->D3DBuffer();
+				so_buffs_[i] = d3d12_buf;
 				sobv[i].BufferLocation = d3d12_buf->D3DBuffer()->GetGPUVirtualAddress();
 				sobv[i].SizeInBytes = d3d12_buf->Size();
 				sobv[i].BufferFilledSizeLocation = sobv[i].BufferLocation + d3d12_buf->CounterOffset();
@@ -1100,14 +1100,16 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < so_buffs_.size(); ++ i)
 		{
+			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(so_buffs_[i].get());
+
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = so_buffs_[i].get();
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_STREAM_OUT;
 			barrier.Transition.Subresource = 0;
-			barriers.push_back(barrier);
+			if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_STREAM_OUT))
+			{
+				barriers.push_back(barrier);
+			}
 		}
 
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
@@ -1121,7 +1123,7 @@ namespace KlayGE
 		{
 			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
-			D3D12GraphicsBuffer const & d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
+			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
 			vbs[i] = d3dvb.D3DBuffer();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
@@ -1132,11 +1134,11 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.pResource = vbs[i].get();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 				barrier.Transition.Subresource = 0;
-				barriers.push_back(barrier);
+				if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
+				{
+					barriers.push_back(barrier);
+				}
 			}
 		}
 		if (rl.InstanceStream())
@@ -1144,7 +1146,7 @@ namespace KlayGE
 			uint32_t number = num_vertex_streams;
 			GraphicsBufferPtr stream = rl.InstanceStream();
 
-			D3D12GraphicsBuffer const & d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
+			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
 			vbs[number] = d3dvb.D3DBuffer();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
@@ -1155,11 +1157,11 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.pResource = vbs[number].get();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 				barrier.Transition.Subresource = 0;
-				barriers.push_back(barrier);
+				if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
+				{
+					barriers.push_back(barrier);
+				}
 			}
 		}
 
@@ -1171,11 +1173,11 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.pResource = ib.D3DBuffer().get();
-				barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-				barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_INDEX_BUFFER;
 				barrier.Transition.Subresource = 0;
-				barriers.push_back(barrier);
+				if (ib.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER))
+				{
+					barriers.push_back(barrier);
+				}
 			}
 		}
 
@@ -1351,17 +1353,6 @@ namespace KlayGE
 					pass->Unbind();
 				}
 			}
-		}
-
-		if (!barriers.empty())
-		{
-			for (size_t i = 0; i < barriers.size(); ++ i)
-			{
-				D3D12_RESOURCE_BARRIER& barrier = barriers[i];
-				std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter);
-			}
-
-			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 
 		num_draws_just_called_ += num_passes;
