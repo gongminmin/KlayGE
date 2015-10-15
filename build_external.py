@@ -127,8 +127,6 @@ def setup_android_native_app_glue(build_info, compiler_info):
 	build_a_project("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
 
 def build_external_libs(build_info):
-	import glob
-
 	for compiler_info in build_info.compilers:
 		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
 		dst_dir = "KlayGE/bin/%s/" % platform_dir

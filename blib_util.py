@@ -151,7 +151,7 @@ class build_info:
 					else:
 						log_error("Unsupported android version\n")
 				else:
-					target_api_level = "10"
+					target_api_level = 10
 				self.target_api_level = target_api_level
 			elif (0 == target_platform.find("win_store")) or (0 == target_platform.find("win_phone")):
 				space_place = target_platform.find(' ')
