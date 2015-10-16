@@ -238,6 +238,7 @@ namespace KlayGE
 		case BA_Write_Only:
 			if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
+				re.AddResourceForRemovingAfterSync(buffer_);
 				this->CreateBuffer(nullptr);
 			}
 			else

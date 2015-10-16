@@ -210,6 +210,11 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
+		void AddResourceForRemovingAfterSync(ID3D12ResourcePtr const & res)
+		{
+			remove_res_after_sync_.insert(res);
+		}
+
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
 		D3D12AdapterPtr const & ActiveAdapter() const;
@@ -277,7 +282,7 @@ namespace KlayGE
 		D3D12_VIEWPORT viewport_cache_;
 		D3D12_RECT scissor_rc_cache_;
 		std::vector<GraphicsBufferPtr> so_buffs_;
-		std::set<ID3D12ResourcePtr> buff_cache_;
+		std::set<ID3D12ResourcePtr> remove_res_after_sync_;
 		std::vector<ID3D12PipelineStatePtr> pso_cache_;
 		std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
 		std::unordered_map<size_t, ID3D12RootSignaturePtr> root_signatures_;

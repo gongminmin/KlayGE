@@ -437,7 +437,7 @@ namespace KlayGE
 	{
 		cbv_srv_uav_heap_cache_.clear();
 		pso_cache_.clear();
-		buff_cache_.clear();
+		remove_res_after_sync_.clear();
 	}
 
 	void D3D12RenderEngine::CommitResCmd()
@@ -589,8 +589,6 @@ namespace KlayGE
 				sobv[i].BufferLocation = d3d12_buf->D3DBuffer()->GetGPUVirtualAddress();
 				sobv[i].SizeInBytes = d3d12_buf->Size();
 				sobv[i].BufferFilledSizeLocation = sobv[i].BufferLocation + d3d12_buf->CounterOffset();
-
-				buff_cache_.insert(d3d12_buf->D3DBuffer());
 			}
 
 			d3d_render_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), &sobv[0]);
@@ -849,8 +847,6 @@ namespace KlayGE
 						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
 
 						++ root_param_index;
-
-						buff_cache_.insert(buff);
 					}
 					else
 					{
@@ -1015,8 +1011,6 @@ namespace KlayGE
 					d3d_compute_cmd_list_->SetComputeRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
 
 					++ root_param_index;
-
-					buff_cache_.insert(buff);
 				}
 				else
 				{
@@ -1197,8 +1191,6 @@ namespace KlayGE
 			}
 
 			d3d_render_cmd_list_->IASetVertexBuffers(0, all_num_vertex_stream, &vbvs[0]);
-
-			buff_cache_.insert(vbs.begin(), vbs.end());
 		}
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
@@ -1285,8 +1277,6 @@ namespace KlayGE
 			ibv.SizeInBytes = ib.Size();
 			ibv.Format = D3D12Mapping::MappingFormat(rl.IndexStreamFormat());
 			d3d_render_cmd_list_->IASetIndexBuffer(&ibv);
-
-			buff_cache_.insert(ib.D3DBuffer());
 		}
 
 		uint32_t const num_passes = tech.NumPasses();
