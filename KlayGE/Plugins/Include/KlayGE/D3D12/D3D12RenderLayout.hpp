@@ -47,8 +47,13 @@ namespace KlayGE
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> const & InputElementDesc() const;
 
+		void Active() const;
+
 	private:
 		mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems_12_;
+
+		mutable std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
+		mutable D3D12_INDEX_BUFFER_VIEW ibv_;
 	};
 }
 

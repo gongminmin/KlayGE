@@ -1107,22 +1107,12 @@ namespace KlayGE
 		}
 
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
-		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
 
-		std::vector<ID3D12ResourcePtr> vbs(all_num_vertex_stream);
-		std::vector<UINT> strides(all_num_vertex_stream);
-		std::vector<UINT> offsets(all_num_vertex_stream);
-		std::vector<UINT> sizes(all_num_vertex_stream);
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
 			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
 
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
-			vbs[i] = d3dvb.D3DBuffer();
-			strides[i] = rl.VertexSize(i);
-			offsets[i] = 0;
-			sizes[i] = d3dvb.Size();
-
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
 				D3D12_RESOURCE_BARRIER barrier;
@@ -1137,15 +1127,9 @@ namespace KlayGE
 		}
 		if (rl.InstanceStream())
 		{
-			uint32_t number = num_vertex_streams;
-			GraphicsBufferPtr stream = rl.InstanceStream();
+			GraphicsBufferPtr const & stream = rl.InstanceStream();
 
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
-			vbs[number] = d3dvb.D3DBuffer();
-			strides[number] = rl.InstanceSize();
-			offsets[number] = 0;
-			sizes[number] = d3dvb.Size();
-
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
 				D3D12_RESOURCE_BARRIER barrier;
@@ -1180,18 +1164,7 @@ namespace KlayGE
 			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 
-		if (all_num_vertex_stream != 0)
-		{
-			std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs(all_num_vertex_stream);
-			for (size_t i = 0; i < vbvs.size(); ++ i)
-			{
-				vbvs[i].BufferLocation = vbs[i]->GetGPUVirtualAddress() + offsets[i];
-				vbvs[i].SizeInBytes = sizes[i];
-				vbvs[i].StrideInBytes = strides[i];
-			}
-
-			d3d_render_cmd_list_->IASetVertexBuffers(0, all_num_vertex_stream, &vbvs[0]);
-		}
+		checked_cast<D3D12RenderLayout const *>(&rl)->Active();
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
 
@@ -1267,17 +1240,6 @@ namespace KlayGE
 
 		num_primitives_just_rendered_ += num_instances * prim_count;
 		num_vertices_just_rendered_ += num_instances * vertex_count;
-
-		if (rl.UseIndices())
-		{
-			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(rl.GetIndexStream().get());
-
-			D3D12_INDEX_BUFFER_VIEW ibv;
-			ibv.BufferLocation = ib.D3DBuffer()->GetGPUVirtualAddress();
-			ibv.SizeInBytes = ib.Size();
-			ibv.Format = D3D12Mapping::MappingFormat(rl.IndexStreamFormat());
-			d3d_render_cmd_list_->IASetIndexBuffer(&ibv);
-		}
 
 		uint32_t const num_passes = tech.NumPasses();
 		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
