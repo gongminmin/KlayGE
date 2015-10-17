@@ -705,7 +705,7 @@ namespace KlayGE
 		auto emitter_iter = emitters_.begin();
 		uint32_t new_particle = (*emitter_iter)->Update(elapsed_time);
 		
-		float4x4 view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
+		float4x4 const & view_mat = Context::Instance().AppInstance().ActiveCamera().ViewMatrix();
 		std::vector<std::pair<uint32_t, float>> active_particles;
 
 		float3 min_bb(+1e10f, +1e10f, +1e10f);

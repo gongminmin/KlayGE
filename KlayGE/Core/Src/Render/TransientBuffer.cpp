@@ -111,7 +111,7 @@ namespace KlayGE
 			uint32_t larger_buffer_size = std::max(old_buffer_size * 2, old_buffer_size + size_in_byte);
 			GraphicsBufferPtr larger_buffer = this->DoCreateBuffer(bind_flag_, larger_buffer_size);
 			SubAlloc alloc(old_buffer_size, larger_buffer_size - old_buffer_size);
-			if (free_list_.back().offset_ + free_list_.back().length_ == alloc.offset_)
+			if (!free_list_.empty() && (free_list_.back().offset_ + free_list_.back().length_ == alloc.offset_))
 			{
 				free_list_.back().length_ += alloc.length_;
 			}
