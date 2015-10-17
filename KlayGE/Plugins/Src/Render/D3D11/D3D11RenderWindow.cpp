@@ -45,6 +45,17 @@
 
 #include "AMDQuadBuffer.hpp"
 
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#include <wrl/client.h>
+#include <wrl/event.h>
+#include <wrl/wrappers/corewrappers.h>
+
+using namespace ABI::Windows::Foundation;
+using namespace ABI::Windows::Graphics::Display;
+using namespace Microsoft::WRL;
+using namespace Microsoft::WRL::Wrappers;
+#endif
+
 namespace KlayGE
 {
 	D3D11RenderWindow::D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
@@ -52,7 +63,7 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						: hWnd_(nullptr),
 #else
-						: metro_d3d_render_win_(ref new MetroD3D11RenderWindow),
+						:
 #endif
 							adapter_(adapter),
 							gi_factory_1_(gi_factory)
@@ -72,7 +83,6 @@ namespace KlayGE
 		hWnd_ = main_wnd->HWnd();
 #else
 		wnd_ = main_wnd->GetWindow();
-		metro_d3d_render_win_->BindD3D11RenderWindow(this);
 #endif
 		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&D3D11RenderWindow::OnPaint, this,
 			std::placeholders::_1));
@@ -420,14 +430,26 @@ namespace KlayGE
 #else
 		bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
-		using namespace Windows::Graphics::Display;
-		using namespace Windows::Foundation;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		stereo_enabled_changed_token_ = DisplayInformation::GetForCurrentView()->StereoEnabledChanged +=
-			ref new TypedEventHandler<DisplayInformation^, Platform::Object^>(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat));
+
+		auto callback = Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
+			std::bind(&D3D11RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
+
+		ComPtr<IDisplayInformation> disp_info;
+		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		disp_info->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
 #else
-		stereo_enabled_changed_token_ = DisplayProperties::StereoEnabledChanged +=
-			ref new DisplayPropertiesEventHandler(metro_d3d_render_win_, &MetroD3D11RenderWindow::OnStereoEnabledChanged);
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop));
+
+		auto callback = Callback<IDisplayPropertiesEventHandler>(
+			std::bind(&D3D11RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1));
+
+		disp_prop->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
 #endif
 
 		sc_desc1_.Width = this->Width();
@@ -502,7 +524,7 @@ namespace KlayGE
 #else
 		IDXGISwapChain1* sc = nullptr;
 		gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device.get(),
-			reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc1_, nullptr, &sc);
+			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
 		swap_chain_ = MakeCOMPtr(sc);
 #endif
 
@@ -514,11 +536,20 @@ namespace KlayGE
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		using namespace Windows::Graphics::Display;
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		DisplayInformation::GetForCurrentView()->StereoEnabledChanged -= stereo_enabled_changed_token_;
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat));
+
+		ComPtr<IDisplayInformation> disp_info;
+		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
 #else
-		DisplayProperties::StereoEnabledChanged -= stereo_enabled_changed_token_;
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop));
+
+		disp_prop->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
 #endif
 #endif
 
@@ -624,7 +655,7 @@ namespace KlayGE
 #else
 			IDXGISwapChain1* sc = nullptr;
 			gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device.get(),
-				reinterpret_cast<IUnknown*>(wnd_.Get()), &sc_desc1_, nullptr, &sc);
+				static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
 			swap_chain_ = MakeCOMPtr(sc);
 #endif
 
@@ -727,10 +758,12 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
-		rect.left = static_cast<LONG>(wnd_->Bounds.Left);
-		rect.right = static_cast<LONG>(wnd_->Bounds.Right);
-		rect.top = static_cast<LONG>(wnd_->Bounds.Top);
-		rect.bottom = static_cast<LONG>(wnd_->Bounds.Bottom);
+		ABI::Windows::Foundation::Rect rc;
+		wnd_->get_Bounds(&rc);
+		rect.left = static_cast<LONG>(rc.X);
+		rect.right = static_cast<LONG>(rc.X + rc.Width);
+		rect.top = static_cast<LONG>(rc.Y);
+		rect.bottom = static_cast<LONG>(rc.Y + rc.Height);
 #endif
 
 		uint32_t new_left = rect.left;
@@ -883,22 +916,23 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(
-		Windows::Graphics::Display::DisplayInformation^ /*sender*/, Platform::Object^ /*args*/)
+	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(IDisplayInformation* sender, IInspectable* args)
 #else
-	void D3D11RenderWindow::MetroD3D11RenderWindow::OnStereoEnabledChanged(Platform::Object^ /*sender*/)
+	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(IInspectable* sender)
 #endif
 	{
-		if ((win_->gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != win_->dxgi_stereo_support_)
-		{
-			win_->swap_chain_.reset();
-			win_->WindowMovedOrResized();
-		}
-	}
+		UNREF_PARAM(sender);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		UNREF_PARAM(args);
+#endif
 
-	void D3D11RenderWindow::MetroD3D11RenderWindow::BindD3D11RenderWindow(D3D11RenderWindow* win)
-	{
-		win_ = win;
+		if ((gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)
+		{
+			swap_chain_.reset();
+			this->WindowMovedOrResized();
+		}
+
+		return S_OK;
 	}
 #endif
 }

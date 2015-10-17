@@ -34,10 +34,18 @@
 
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/ThrowErr.hpp>
+
+#include <windows.graphics.display.h>
+#include <wrl/client.h>
+#include <wrl/wrappers/corewrappers.h>
 
 #include <KlayGE/Window.hpp>
 
-using namespace Windows::Graphics::Display;
+using namespace ABI::Windows::Foundation;
+using namespace ABI::Windows::Graphics::Display;
+using namespace Microsoft::WRL;
+using namespace Microsoft::WRL::Wrappers;
 
 namespace KlayGE
 {
@@ -57,19 +65,34 @@ namespace KlayGE
 	{
 	}
 
-	void Window::SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow> const & window)
+	void Window::SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window)
 	{
 		wnd_ = window;
 
 		left_ = 0;
 		top_ = 0;
-#if (_WIN32_WINNT >= 0x0603 /*_WIN32_WINNT_WINBLUE*/)
-		float const dpi = DisplayInformation::GetForCurrentView()->LogicalDpi;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat));
+
+		ComPtr<IDisplayInformation> disp_info;
+		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+
+		float dpi;
+		TIF(disp_info->get_LogicalDpi(&dpi));
 #else
-		float const dpi = DisplayProperties::LogicalDpi;
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop));
+
+		float dpi;
+		TIF(disp_prop->get_LogicalDpi(&dpi));
 #endif
-		width_ = static_cast<uint32_t>(wnd_->Bounds.Width * dpi / 96);
-		height_ = static_cast<uint32_t>(wnd_->Bounds.Height * dpi / 96);
+		ABI::Windows::Foundation::Rect rc;
+		wnd_->get_Bounds(&rc);
+		width_ = static_cast<uint32_t>(rc.Width * dpi / 96);
+		height_ = static_cast<uint32_t>(rc.Height * dpi / 96);
 	}
 }
 

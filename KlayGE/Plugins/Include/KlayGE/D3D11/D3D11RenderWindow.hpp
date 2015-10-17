@@ -19,7 +19,8 @@
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#include <agile.h>
+#include <windows.ui.core.h>
+#include <windows.graphics.display.h>
 #endif
 
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -97,6 +98,15 @@ namespace KlayGE
 		void OnSize(Window const & win, bool active);
 		void OnSetCursor(Window const & win);
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
+			IInspectable* args);
+#else
+		HRESULT OnStereoEnabledChanged(IInspectable* sender);
+#endif
+#endif
+
 	private:
 		void UpdateSurfacesPtrs();
 		void ResetDevice();
@@ -107,28 +117,8 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND	hWnd_;				// Win32 Window handle
 #else
-		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
-		Windows::Foundation::EventRegistrationToken stereo_enabled_changed_token_;
-
-		ref class MetroD3D11RenderWindow
-		{
-			friend class D3D11RenderWindow;
-
-		public:
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-			void OnStereoEnabledChanged(Windows::Graphics::Display::DisplayInformation^ sender,
-				Platform::Object^ args);
-#else
-			void OnStereoEnabledChanged(Platform::Object^ sender);
-#endif
-
-		private:
-			void BindD3D11RenderWindow(D3D11RenderWindow* win);
-
-			D3D11RenderWindow* win_;
-		};
-
-		MetroD3D11RenderWindow^ metro_d3d_render_win_;
+		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
+		EventRegistrationToken stereo_enabled_changed_token_;
 #endif
 		bool	isFullScreen_;
 		uint32_t sync_interval_;

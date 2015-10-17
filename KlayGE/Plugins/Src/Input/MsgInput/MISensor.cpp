@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
+#include <KFL/ThrowErr.hpp>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -738,107 +739,111 @@ namespace KlayGE
 
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 
-using namespace Windows::Foundation;
-using namespace Windows::Devices::Geolocation;
-using namespace Windows::Devices::Sensors;
+#include <wrl/client.h>
+#include <wrl/event.h>
+#include <wrl/wrappers/corewrappers.h>
+
+using namespace ABI::Windows::Foundation;
+using namespace ABI::Windows::Devices::Geolocation;
+using namespace ABI::Windows::Devices::Sensors;
+using namespace Microsoft::WRL;
 
 namespace KlayGE
 {
-	ref class MetroMsgInputSensorEvent sealed
-	{
-		friend MsgInputSensor;
-
-	public:
-		MetroMsgInputSensorEvent()
-		{
-		}
-
-	private:
-		void OnPositionChanged(Geolocator^ sender, PositionChangedEventArgs^ e)
-		{
-			input_sensor_->OnPositionChanged(sender, e);
-		}
-
-		void OnAccelerometeReadingChanged(Accelerometer^ sender, AccelerometerReadingChangedEventArgs^ e)
-		{
-			input_sensor_->OnAccelerometeReadingChanged(sender, e);
-		}
-
-		void OnGyrometerReadingChanged(Gyrometer^ sender, GyrometerReadingChangedEventArgs^ e)
-		{
-			input_sensor_->OnGyrometerReadingChanged(sender, e);
-		}
-
-		void OnInclinometerReadingChanged(Inclinometer^ sender, InclinometerReadingChangedEventArgs^ e)
-		{
-			input_sensor_->OnInclinometerReadingChanged(sender, e);
-		}
-
-		void OnCompassReadingChanged(Compass^ sender, CompassReadingChangedEventArgs^ e)
-		{
-			input_sensor_->OnCompassReadingChanged(sender, e);
-		}
-
-		void OnOrientationSensorReadingChanged(OrientationSensor^ sender, OrientationSensorReadingChangedEventArgs^ e)
-		{
-			input_sensor_->OnOrientationSensorReadingChanged(sender, e);
-		}
-
-		void BindSensor(MsgInputSensor* input_sensor)
-		{
-			input_sensor_ = input_sensor;
-		}
-
-	private:
-		MsgInputSensor* input_sensor_;
-	};
-
 	MsgInputSensor::MsgInputSensor()
-		: sensor_event_(ref new MetroMsgInputSensorEvent),
-			accelerometer_(Accelerometer::GetDefault()),
-			gyrometer_(Gyrometer::GetDefault()),
-			inclinometer_(Inclinometer::GetDefault()),
-			compass_(Compass::GetDefault()),
-			orientation_(OrientationSensor::GetDefault())
 	{
-		sensor_event_->BindSensor(this);
+		using namespace Microsoft::WRL::Wrappers;
 
 		if (Context::Instance().Config().location_sensor)
 		{
-			locator_ = ref new Geolocator;
-			position_token_ = locator_->PositionChanged::add(
-				ref new TypedEventHandler<Geolocator^, PositionChangedEventArgs^>(sensor_event_,
-				&MetroMsgInputSensorEvent::OnPositionChanged));
+			ABI::Windows::Devices::Geolocation::IGeolocator* locator;
+			TIF(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_Devices_Geolocation_Geolocator).Get(),
+				&locator));
+			locator_ = MakeCOMPtr(locator);
+
+			auto callback = Callback<ITypedEventHandler<Geolocator*, PositionChangedEventArgs*>>(
+				std::bind(&MsgInputSensor::OnPositionChanged, this, std::placeholders::_1, std::placeholders::_2));
+			TIF(locator_->add_PositionChanged(callback.Get(), &position_token_));
 		}
-		if (accelerometer_)
 		{
-			accelerometer_reading_token_ = accelerometer_->ReadingChanged::add(
-				ref new TypedEventHandler<Accelerometer^, AccelerometerReadingChangedEventArgs^>(sensor_event_,
-					&MetroMsgInputSensorEvent::OnAccelerometeReadingChanged));
+			ComPtr<IAccelerometerStatics> accelerometer_stat;
+			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Accelerometer).Get(),
+				&accelerometer_stat));
+
+			IAccelerometer* accelerometer;
+			TIF(accelerometer_stat->GetDefault(&accelerometer));
+			if (accelerometer)
+			{
+				accelerometer_ = MakeCOMPtr(accelerometer);
+
+				auto callback = Callback<ITypedEventHandler<Accelerometer*, AccelerometerReadingChangedEventArgs*>>(
+					std::bind(&MsgInputSensor::OnAccelerometeReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+				TIF(accelerometer_->add_ReadingChanged(callback.Get(), &accelerometer_reading_token_));
+			}
 		}
-		if (gyrometer_)
 		{
-			gyrometer_reading_token_ = gyrometer_->ReadingChanged::add(
-				ref new TypedEventHandler<Gyrometer^, GyrometerReadingChangedEventArgs^>(sensor_event_,
-					&MetroMsgInputSensorEvent::OnGyrometerReadingChanged));
+			ComPtr<IGyrometerStatics> gyrometer_stat;
+			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Gyrometer).Get(),
+				&gyrometer_stat));
+
+			IGyrometer* gyrometer;
+			TIF(gyrometer_stat->GetDefault(&gyrometer));
+			if (gyrometer)
+			{
+				gyrometer_ = MakeCOMPtr(gyrometer);
+
+				auto callback = Callback<ITypedEventHandler<Gyrometer*, GyrometerReadingChangedEventArgs*>>(
+					std::bind(&MsgInputSensor::OnGyrometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+				TIF(gyrometer_->add_ReadingChanged(callback.Get(), &gyrometer_reading_token_));
+			}
 		}
-		if (inclinometer_)
 		{
-			inclinometer_reading_token_ = inclinometer_->ReadingChanged::add(
-				ref new TypedEventHandler<Inclinometer^, InclinometerReadingChangedEventArgs^>(sensor_event_,
-					&MetroMsgInputSensorEvent::OnInclinometerReadingChanged));
+			ComPtr<IInclinometerStatics> inclinometer_stat;
+			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Inclinometer).Get(),
+				&inclinometer_stat));
+
+			IInclinometer* inclinometer;
+			TIF(inclinometer_stat->GetDefault(&inclinometer));
+			if (inclinometer)
+			{
+				inclinometer_ = MakeCOMPtr(inclinometer);
+
+				auto callback = Callback<ITypedEventHandler<Inclinometer*, InclinometerReadingChangedEventArgs*>>(
+					std::bind(&MsgInputSensor::OnInclinometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+				TIF(inclinometer_->add_ReadingChanged(callback.Get(), &inclinometer_reading_token_));
+			}
 		}
-		if (compass_)
 		{
-			compass_reading_token_ = compass_->ReadingChanged::add(
-				ref new TypedEventHandler<Compass^, CompassReadingChangedEventArgs^>(sensor_event_,
-					&MetroMsgInputSensorEvent::OnCompassReadingChanged));
+			ComPtr<ICompassStatics> compass_stat;
+			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Compass).Get(),
+				&compass_stat));
+
+			ICompass* compass;
+			TIF(compass_stat->GetDefault(&compass));
+			if (compass)
+			{
+				compass_ = MakeCOMPtr(compass);
+
+				auto callback = Callback<ITypedEventHandler<Compass*, CompassReadingChangedEventArgs*>>(
+					std::bind(&MsgInputSensor::OnCompassReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+				TIF(compass_->add_ReadingChanged(callback.Get(), &compass_reading_token_));
+			}
 		}
-		if (orientation_)
 		{
-			orientation_reading_token_ = orientation_->ReadingChanged::add(
-				ref new TypedEventHandler<OrientationSensor^, OrientationSensorReadingChangedEventArgs^>(sensor_event_,
-					&MetroMsgInputSensorEvent::OnOrientationSensorReadingChanged));
+			ComPtr<IOrientationSensorStatics> orientation_stat;
+			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_OrientationSensor).Get(),
+				&orientation_stat));
+			
+			IOrientationSensor* orientation;
+			TIF(orientation_stat->GetDefault(&orientation));
+			if (orientation)
+			{
+				orientation_ = MakeCOMPtr(orientation);
+
+				auto callback = Callback<ITypedEventHandler<OrientationSensor*, OrientationSensorReadingChangedEventArgs*>>(
+					std::bind(&MsgInputSensor::OnOrientationSensorReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+				TIF(orientation_->add_ReadingChanged(callback.Get(), &orientation_reading_token_));
+			}
 		}
 	}
 
@@ -846,95 +851,190 @@ namespace KlayGE
 	{
 		if (Context::Instance().Config().location_sensor)
 		{
-			locator_->PositionChanged::remove(position_token_);
+			locator_->remove_PositionChanged(position_token_);
 		}
 		if (accelerometer_)
 		{
-			accelerometer_->ReadingChanged::remove(accelerometer_reading_token_);
+			accelerometer_->remove_ReadingChanged(accelerometer_reading_token_);
 		}
 		if (gyrometer_)
 		{
-			gyrometer_->ReadingChanged::remove(gyrometer_reading_token_);
+			gyrometer_->remove_ReadingChanged(gyrometer_reading_token_);
 		}
 		if (inclinometer_)
 		{
-			inclinometer_->ReadingChanged::remove(inclinometer_reading_token_);
+			inclinometer_->remove_ReadingChanged(inclinometer_reading_token_);
 		}
 		if (compass_)
 		{
-			compass_->ReadingChanged::remove(compass_reading_token_);
+			compass_->remove_ReadingChanged(compass_reading_token_);
 		}
 		if (orientation_)
 		{
-			orientation_->ReadingChanged::remove(orientation_reading_token_);
+			orientation_->remove_ReadingChanged(orientation_reading_token_);
 		}
 	}
 
-	void MsgInputSensor::OnPositionChanged(Geolocator^ sender, PositionChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnPositionChanged(IGeolocator* sender, IPositionChangedEventArgs* e)
 	{
-		Geocoordinate^ coordinate = e->Position->Coordinate;
+		UNREF_PARAM(sender);
+
+		ComPtr<IGeoposition> position;
+		TIF(e->get_Position(&position));
+		ComPtr<IGeocoordinate> coordinate;
+		TIF(position->get_Coordinate(&coordinate));
+		
+		double tmp;
+		IReference<double>* rtmp;
+
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		latitude_ = static_cast<float>(coordinate->Point->Position.Latitude);
-		longitude_ = static_cast<float>(coordinate->Point->Position.Longitude);
-		altitude_ = static_cast<float>(coordinate->Point->Position.Altitude);
+		ComPtr<IGeocoordinateWithPoint> coordinate_with_point;
+		TIF(coordinate.As(&coordinate_with_point));
+		ComPtr<IGeopoint> point;
+		TIF(coordinate_with_point->get_Point(&point));
+		BasicGeoposition geo_position;
+		TIF(point->get_Position(&geo_position));
+		latitude_ = static_cast<float>(geo_position.Latitude);
+		longitude_ = static_cast<float>(geo_position.Longitude);
+		altitude_ = static_cast<float>(geo_position.Altitude);
 #else
-		latitude_ = static_cast<float>(coordinate->Latitude);
-		longitude_ = static_cast<float>(coordinate->Longitude);
-		if (coordinate->Altitude)
+		TIF(coordinate->get_Latitude(&tmp));
+		latitude_ = static_cast<float>(tmp);
+		TIF(coordinate->get_Longitude(&tmp));
+		longitude_ = static_cast<float>(tmp);
+		TIF(coordinate->get_Altitude(&rtmp));
+		if (rtmp)
 		{
-			altitude_ = static_cast<float>(coordinate->Altitude->Value);
+			TIF(rtmp->get_Value(&tmp));
+			altitude_ = static_cast<float>(tmp);
 		}
 #endif
 
-		location_error_radius_ = static_cast<float>(coordinate->Accuracy);
-		if (coordinate->AltitudeAccuracy)
+		TIF(coordinate->get_Accuracy(&tmp));
+		location_error_radius_ = static_cast<float>(tmp);
+
+		TIF(coordinate->get_AltitudeAccuracy(&rtmp));
+		if (rtmp)
 		{
-			location_altitude_error_ = static_cast<float>(coordinate->AltitudeAccuracy->Value);
+			TIF(rtmp->get_Value(&tmp));
+			location_altitude_error_ = static_cast<float>(tmp);
 		}
 
-		if (coordinate->Speed)
+		rtmp = nullptr;
+		TIF(coordinate->get_Speed(&rtmp));
+		if (rtmp)
 		{
-			speed_ = static_cast<float>(coordinate->Speed->Value);
+			TIF(rtmp->get_Value(&tmp));
+			speed_ = static_cast<float>(tmp);
 		}
+
+		return S_OK;
 	}
 
-	void MsgInputSensor::OnAccelerometeReadingChanged(Accelerometer^ sender, AccelerometerReadingChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnAccelerometeReadingChanged(IAccelerometer* sender, IAccelerometerReadingChangedEventArgs* e)
 	{
-		AccelerometerReading^ reading = e->Reading;
-		accel_ = float3(static_cast<float>(reading->AccelerationX), static_cast<float>(reading->AccelerationY),
-			static_cast<float>(reading->AccelerationZ));
+		UNREF_PARAM(sender);
+
+		ComPtr<IAccelerometerReading> reading;
+		TIF(e->get_Reading(&reading));
+
+		double tmp;
+
+		TIF(reading->get_AccelerationX(&tmp));
+		accel_.x() = static_cast<float>(tmp);
+
+		TIF(reading->get_AccelerationY(&tmp));
+		accel_.y() = static_cast<float>(tmp);
+
+		TIF(reading->get_AccelerationZ(&tmp));
+		accel_.z() = static_cast<float>(tmp);
+
+		return S_OK;
 	}
 
-	void MsgInputSensor::OnGyrometerReadingChanged(Gyrometer^ sender, GyrometerReadingChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnGyrometerReadingChanged(IGyrometer* sender, IGyrometerReadingChangedEventArgs* e)
 	{
-		GyrometerReading^ reading = e->Reading;
-		angular_velocity_ = float3(static_cast<float>(reading->AngularVelocityX), static_cast<float>(reading->AngularVelocityY),
-			static_cast<float>(reading->AngularVelocityZ));
+		UNREF_PARAM(sender);
+
+		ComPtr<IGyrometerReading> reading;
+		TIF(e->get_Reading(&reading));
+
+		double tmp;
+
+		TIF(reading->get_AngularVelocityX(&tmp));
+		angular_velocity_.x() = static_cast<float>(tmp);
+
+		TIF(reading->get_AngularVelocityY(&tmp));
+		angular_velocity_.y() = static_cast<float>(tmp);
+
+		TIF(reading->get_AngularVelocityZ(&tmp));
+		angular_velocity_.z() = static_cast<float>(tmp);
+
+		return S_OK;
 	}
 
-	void MsgInputSensor::OnInclinometerReadingChanged(Inclinometer^ sender, InclinometerReadingChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnInclinometerReadingChanged(IInclinometer* sender, IInclinometerReadingChangedEventArgs* e)
 	{
-		InclinometerReading^ reading = e->Reading;
-		tilt_ = float3(reading->PitchDegrees, reading->RollDegrees, reading->YawDegrees);
+		UNREF_PARAM(sender);
+
+		ComPtr<IInclinometerReading> reading;
+		TIF(e->get_Reading(&reading));
+
+		TIF(reading->get_PitchDegrees(&tilt_.x()));
+		TIF(reading->get_RollDegrees(&tilt_.y()));
+		TIF(reading->get_YawDegrees(&tilt_.z()));
+
+		return S_OK;
 	}
 
-	void MsgInputSensor::OnCompassReadingChanged(Compass^ sender, CompassReadingChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnCompassReadingChanged(ICompass* sender, ICompassReadingChangedEventArgs* e)
 	{
-		CompassReading^ reading = e->Reading;
-		magnetic_heading_north_ = static_cast<float>(reading->HeadingMagneticNorth);
+		UNREF_PARAM(sender);
+
+		ComPtr<ICompassReading> reading;
+		TIF(e->get_Reading(&reading));
+
+		double tmp;
+
+		TIF(reading->get_HeadingMagneticNorth(&tmp));
+		magnetic_heading_north_ = static_cast<float>(tmp);
+
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		magnetometer_accuracy_ = static_cast<int32_t>(reading->HeadingAccuracy);
+		ComPtr<ICompassReadingHeadingAccuracy> reading_with_accuracy;
+		if (SUCCEEDED(reading.As(&reading_with_accuracy)))
+		{
+			ABI::Windows::Devices::Sensors::MagnetometerAccuracy accuracy;
+			TIF(reading_with_accuracy->get_HeadingAccuracy(&accuracy));
+			magnetometer_accuracy_ = static_cast<int32_t>(accuracy);
+		}
+		else
+		{
+			magnetometer_accuracy_ = 0;
+		}
 #else
 		magnetometer_accuracy_ = 0;
 #endif
+
+		return S_OK;
 	}
 
-	void MsgInputSensor::OnOrientationSensorReadingChanged(OrientationSensor^ sender,
-		OrientationSensorReadingChangedEventArgs^ e)
+	HRESULT MsgInputSensor::OnOrientationSensorReadingChanged(IOrientationSensor* sender,
+		IOrientationSensorReadingChangedEventArgs* e)
 	{
-		OrientationSensorReading^ reading = e->Reading;
-		orientation_quat_ = Quaternion(reading->Quaternion->X, reading->Quaternion->Y,
-			reading->Quaternion->Z, reading->Quaternion->W);
+		UNREF_PARAM(sender);
+
+		ComPtr<IOrientationSensorReading> reading;
+		TIF(e->get_Reading(&reading));
+
+		ComPtr<ISensorQuaternion> quat;
+		TIF(reading->get_Quaternion(&quat));
+
+		TIF(quat->get_X(&orientation_quat_.x()));
+		TIF(quat->get_Y(&orientation_quat_.y()));
+		TIF(quat->get_Z(&orientation_quat_.z()));
+		TIF(quat->get_W(&orientation_quat_.w()));
+
+		return S_OK;
 	}
 }
 

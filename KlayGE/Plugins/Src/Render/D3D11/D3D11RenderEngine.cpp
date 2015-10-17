@@ -46,10 +46,6 @@
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include "NV3DVision.hpp"
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-using namespace Windows::UI::Core;
-#endif
-
 namespace
 {
 	using namespace KlayGE;

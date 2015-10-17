@@ -63,8 +63,16 @@
 	}
 #endif
 
-#if defined KLAYGE_PLATFORM_WINDOWS
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#include <Windows.ApplicationModel.h>
+#include <windows.storage.h>
+
+#include <wrl/client.h>
+#include <wrl/wrappers/corewrappers.h>
+
+#include <KFL/ThrowErr.hpp>
 #elif defined KLAYGE_PLATFORM_LINUX
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/asset_manager.h>
@@ -118,9 +126,28 @@ namespace KlayGE
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
 #else
-		Windows::ApplicationModel::Package^ package = Windows::ApplicationModel::Package::Current;
-		Windows::Storage::StorageFolder^ installed_loc = package->InstalledLocation;
-		Convert(exe_path_, installed_loc->Path->Data());
+		using namespace ABI::Windows::Foundation;
+		using namespace ABI::Windows::ApplicationModel;
+		using namespace ABI::Windows::Storage;
+		using namespace Microsoft::WRL;
+		using namespace Microsoft::WRL::Wrappers;
+
+		ComPtr<IPackageStatics> package_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Package).Get(), &package_stat));
+
+		ComPtr<IPackage> package;
+		TIF(package_stat->get_Current(&package));
+
+		ComPtr<IStorageFolder> installed_loc;
+		TIF(package->get_InstalledLocation(&installed_loc));
+
+		ComPtr<IStorageItem> storage_item;
+		TIF(installed_loc.As(&storage_item));
+
+		HString folder_name;
+		TIF(storage_item->get_Path(folder_name.GetAddressOf()));
+
+		Convert(exe_path_, folder_name.GetRawBuffer(nullptr));
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		{

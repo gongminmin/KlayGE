@@ -212,6 +212,9 @@ typedef struct _HIDP_VALUE_CAPS
 #include <Sensors.h>
 #endif
 
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#include <windows.devices.geolocation.h>
+#include <windows.devices.sensors.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/sensor.h>
 #endif
@@ -493,8 +496,6 @@ namespace KlayGE
 		std::vector<std::shared_ptr<ISensorEvents>> orientation_sensor_events_;
 	};
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-	ref class MetroMsgInputSensorEvent;
-
 	class MsgInputSensor : public InputSensor
 	{
 	public:
@@ -503,42 +504,40 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
 
-		void OnPositionChanged(Windows::Devices::Geolocation::Geolocator^ sender,
-			Windows::Devices::Geolocation::PositionChangedEventArgs^ e);
-		void OnAccelerometeReadingChanged(Windows::Devices::Sensors::Accelerometer^ sender,
-			Windows::Devices::Sensors::AccelerometerReadingChangedEventArgs^ e);
-		void OnGyrometerReadingChanged(Windows::Devices::Sensors::Gyrometer^ sender,
-			Windows::Devices::Sensors::GyrometerReadingChangedEventArgs^ e);
-		void OnInclinometerReadingChanged(Windows::Devices::Sensors::Inclinometer^ sender,
-			Windows::Devices::Sensors::InclinometerReadingChangedEventArgs^ e);
-		void OnCompassReadingChanged(Windows::Devices::Sensors::Compass^ sender,
-			Windows::Devices::Sensors::CompassReadingChangedEventArgs^ e);
-		void OnOrientationSensorReadingChanged(Windows::Devices::Sensors::OrientationSensor^ sender,
-			Windows::Devices::Sensors::OrientationSensorReadingChangedEventArgs^ e);
+		HRESULT OnPositionChanged(ABI::Windows::Devices::Geolocation::IGeolocator* sender,
+			ABI::Windows::Devices::Geolocation::IPositionChangedEventArgs* e);
+		HRESULT OnAccelerometeReadingChanged(ABI::Windows::Devices::Sensors::IAccelerometer* sender,
+			ABI::Windows::Devices::Sensors::IAccelerometerReadingChangedEventArgs* e);
+		HRESULT OnGyrometerReadingChanged(ABI::Windows::Devices::Sensors::IGyrometer* sender,
+			ABI::Windows::Devices::Sensors::IGyrometerReadingChangedEventArgs* e);
+		HRESULT OnInclinometerReadingChanged(ABI::Windows::Devices::Sensors::IInclinometer* sender,
+			ABI::Windows::Devices::Sensors::IInclinometerReadingChangedEventArgs* e);
+		HRESULT OnCompassReadingChanged(ABI::Windows::Devices::Sensors::ICompass* sender,
+			ABI::Windows::Devices::Sensors::ICompassReadingChangedEventArgs* e);
+		HRESULT OnOrientationSensorReadingChanged(ABI::Windows::Devices::Sensors::IOrientationSensor* sender,
+			ABI::Windows::Devices::Sensors::IOrientationSensorReadingChangedEventArgs* e);
 
 	private:
 		virtual void UpdateInputs() KLAYGE_OVERRIDE;
 
 	private:
-		MetroMsgInputSensorEvent^ sensor_event_;
+		std::shared_ptr<ABI::Windows::Devices::Geolocation::IGeolocator> locator_;
+		EventRegistrationToken position_token_;
 
-		Windows::Devices::Geolocation::Geolocator^ locator_;
-		Windows::Foundation::EventRegistrationToken position_token_;
+		std::shared_ptr<ABI::Windows::Devices::Sensors::IAccelerometer> accelerometer_;
+		EventRegistrationToken accelerometer_reading_token_;
 
-		Windows::Devices::Sensors::Accelerometer^ accelerometer_;
-		Windows::Foundation::EventRegistrationToken accelerometer_reading_token_;
+		std::shared_ptr<ABI::Windows::Devices::Sensors::IGyrometer> gyrometer_;
+		EventRegistrationToken gyrometer_reading_token_;
 
-		Windows::Devices::Sensors::Gyrometer^ gyrometer_;
-		Windows::Foundation::EventRegistrationToken gyrometer_reading_token_;
+		std::shared_ptr<ABI::Windows::Devices::Sensors::IInclinometer> inclinometer_;
+		EventRegistrationToken inclinometer_reading_token_;
 
-		Windows::Devices::Sensors::Inclinometer^ inclinometer_;
-		Windows::Foundation::EventRegistrationToken inclinometer_reading_token_;
+		std::shared_ptr<ABI::Windows::Devices::Sensors::ICompass> compass_;
+		::EventRegistrationToken compass_reading_token_;
 
-		Windows::Devices::Sensors::Compass^ compass_;
-		Windows::Foundation::EventRegistrationToken compass_reading_token_;
-
-		Windows::Devices::Sensors::OrientationSensor^ orientation_;
-		Windows::Foundation::EventRegistrationToken orientation_reading_token_;
+		std::shared_ptr<ABI::Windows::Devices::Sensors::IOrientationSensor> orientation_;
+		EventRegistrationToken orientation_reading_token_;
 	};
 #elif defined KLAYGE_PLATFORM_ANDROID
 	class MsgInputSensor : public InputSensor

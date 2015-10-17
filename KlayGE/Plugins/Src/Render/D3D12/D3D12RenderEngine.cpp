@@ -63,10 +63,6 @@
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-using namespace Windows::UI::Core;
-#endif
-
 namespace KlayGE
 {
 	// ¹¹Ôìº¯Êý

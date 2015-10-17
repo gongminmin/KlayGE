@@ -48,7 +48,7 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#include <agile.h>
+#include <windows.ui.core.h>
 #elif defined KLAYGE_PLATFORM_LINUX
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -88,9 +88,9 @@ namespace KlayGE
 			return wnd_;
 		}
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		void SetWindow(Platform::Agile<Windows::UI::Core::CoreWindow> const & window);
+		void SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window);
 
-		Platform::Agile<Windows::UI::Core::CoreWindow> GetWindow() const
+		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> GetWindow() const
 		{
 			return wnd_;
 		}
@@ -394,7 +394,7 @@ namespace KlayGE
 		HWND wnd_;
 		WNDPROC default_wnd_proc_;
 #else
-		Platform::Agile<Windows::UI::Core::CoreWindow> wnd_;
+		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
