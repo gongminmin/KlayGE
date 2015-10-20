@@ -170,6 +170,7 @@ namespace KlayGE
 	void RenderLayout::InstanceStream(GraphicsBufferPtr const & buffer)
 	{
 		instance_stream_.stream = buffer;
+		streams_dirty_ = true;
 	}
 
 	void RenderLayout::NumInstances(uint32_t n)
