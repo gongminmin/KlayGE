@@ -583,8 +583,9 @@ namespace KlayGE
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+		clear_f4_val_ = val;
 		d3d_cmd_list_->ClearUnorderedAccessViewFloat(gpu_handle, ua_view_->Handle(),
-			ua_src_.get(), &val.x(), 0, nullptr);
+			ua_src_.get(), &clear_f4_val_.x(), 0, nullptr);
 
 		D3D12_RESOURCE_BARRIER barrier_after;
 		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -594,9 +595,6 @@ namespace KlayGE
 		barrier_after.Transition.StateAfter = ua_src_init_state_;
 		barrier_after.Transition.Subresource = 0;
 		d3d_cmd_list_->ResourceBarrier(1, &barrier_after);
-
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.ForceCPUGPUSync();
 	}
 
 	void D3D12UnorderedAccessView::Clear(uint4 const & val)
@@ -623,8 +621,9 @@ namespace KlayGE
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 		d3d_device_->CopyDescriptorsSimple(1, cpu_handle, ua_view_->Handle(), D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
+		clear_ui4_val_ = val;
 		d3d_cmd_list_->ClearUnorderedAccessViewUint(gpu_handle, ua_view_->Handle(),
-			ua_src_.get(), &val.x(), 0, nullptr);
+			ua_src_.get(), &clear_ui4_val_.x(), 0, nullptr);
 
 		D3D12_RESOURCE_BARRIER barrier_after;
 		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -634,9 +633,6 @@ namespace KlayGE
 		barrier_after.Transition.StateAfter = ua_src_init_state_;
 		barrier_after.Transition.Subresource = 0;
 		d3d_cmd_list_->ResourceBarrier(1, &barrier_after);
-
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.ForceCPUGPUSync();
 	}
 
 	void D3D12UnorderedAccessView::Discard()
