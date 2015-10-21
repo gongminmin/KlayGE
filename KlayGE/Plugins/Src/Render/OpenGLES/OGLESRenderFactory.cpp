@@ -23,6 +23,7 @@
 #include <KlayGE/OpenGLES/OGLESRenderView.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderStateObject.hpp>
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
+#include <KlayGE/OpenGLES/OGLESFence.hpp>
 
 #include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp>
@@ -125,6 +126,16 @@ namespace KlayGE
 		{
 			return QueryPtr();
 		}
+	}
+
+	FencePtr OGLESRenderFactory::MakeFence()
+	{
+		FencePtr ret;
+		if (glloader_GLES_VERSION_3_0())
+		{
+			ret = MakeSharedPtr<OGLESFence>();
+		}
+		return ret;
 	}
 
 	RenderViewPtr OGLESRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)

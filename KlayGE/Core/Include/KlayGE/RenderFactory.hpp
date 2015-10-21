@@ -73,6 +73,8 @@ namespace KlayGE
 		virtual QueryPtr MakeConditionalRender() = 0;
 		virtual QueryPtr MakeTimerQuery() = 0;
 
+		virtual FencePtr MakeFence() = 0;
+
 		virtual RenderViewPtr Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level) = 0;
 		virtual RenderViewPtr Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level) = 0;
 		virtual RenderViewPtr Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level) = 0;

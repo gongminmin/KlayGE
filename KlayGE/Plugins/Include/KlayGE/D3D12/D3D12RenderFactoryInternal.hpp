@@ -67,6 +67,8 @@ namespace KlayGE
 		QueryPtr MakeConditionalRender();
 		QueryPtr MakeTimerQuery();
 
+		virtual FencePtr MakeFence() KLAYGE_OVERRIDE;
+
 		RenderViewPtr Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int array_index, Texture::CubeFaces face, int level);

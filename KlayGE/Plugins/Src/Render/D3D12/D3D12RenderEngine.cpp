@@ -44,6 +44,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KlayGE/Fence.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderWindow.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
@@ -72,7 +73,8 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D12RenderEngine::D3D12RenderEngine()
 		: last_engine_type_(ET_Render), inv_timestamp_freq_(0),
-			render_cmd_fence_val_(0), compute_cmd_fence_val_(0), copy_cmd_fence_val_(0)
+			render_cmd_fence_val_(0), compute_cmd_fence_val_(0), copy_cmd_fence_val_(0),
+			res_cmd_fence_val_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 5;
@@ -387,46 +389,13 @@ namespace KlayGE
 		null_uav_handle_.ptr += this->AllocCBVSRVUAV();
 		d3d_device_->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle_);
 
-		ID3D12Fence* fence;
-		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		res_cmd_fence_ = MakeCOMPtr(fence);
-		res_cmd_fence_val_ = 1;
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		res_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-#else
-		res_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-#endif
+		res_cmd_fence_ = rf.MakeFence();
 
-		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		render_cmd_fence_ = MakeCOMPtr(fence);
-		render_cmd_fence_val_ = 1;
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		render_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-#else
-		render_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-#endif
-
-		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		compute_cmd_fence_ = MakeCOMPtr(fence);
-		compute_cmd_fence_val_ = 1;
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		compute_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-#else
-		compute_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-#endif
-
-		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
-		copy_cmd_fence_ = MakeCOMPtr(fence);
-		copy_cmd_fence_val_ = 1;
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
-		copy_cmd_fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
-#else
-		copy_cmd_fence_event_ = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
-#endif
+		render_cmd_fence_ = rf.MakeFence();
+		compute_cmd_fence_ = rf.MakeFence();
+		copy_cmd_fence_ = rf.MakeFence();
 
 		this->FillRenderDeviceCaps();
 	}
@@ -444,15 +413,8 @@ namespace KlayGE
 		ID3D12CommandList* cmd_lists[] = { d3d_res_cmd_list_.get() };
 		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 
-		uint64_t const fence_val = res_cmd_fence_val_;
-		TIF(d3d_render_cmd_queue_->Signal(res_cmd_fence_.get(), fence_val));
-		++ res_cmd_fence_val_;
-
-		if (res_cmd_fence_->GetCompletedValue() < fence_val)
-		{
-			TIF(res_cmd_fence_->SetEventOnCompletion(fence_val, res_cmd_fence_event_));
-			::WaitForSingleObjectEx(res_cmd_fence_event_, INFINITE, FALSE);
-		}
+		res_cmd_fence_val_ = res_cmd_fence_->Signal(Fence::FT_Render);
+		res_cmd_fence_->Wait(res_cmd_fence_val_);
 
 		d3d_res_cmd_allocator_->Reset();
 		d3d_res_cmd_list_->Reset(d3d_res_cmd_allocator_.get(), nullptr);
@@ -481,41 +443,20 @@ namespace KlayGE
 
 	void D3D12RenderEngine::SyncRenderCmd()
 	{
-		uint64_t const fence_val = render_cmd_fence_val_;
-		TIF(d3d_render_cmd_queue_->Signal(render_cmd_fence_.get(), fence_val));
-		++ render_cmd_fence_val_;
-
-		if (render_cmd_fence_->GetCompletedValue() < fence_val)
-		{
-			TIF(render_cmd_fence_->SetEventOnCompletion(fence_val, render_cmd_fence_event_));
-			::WaitForSingleObjectEx(render_cmd_fence_event_, INFINITE, FALSE);
-		}
+		render_cmd_fence_val_ = render_cmd_fence_->Signal(Fence::FT_Render);
+		render_cmd_fence_->Wait(render_cmd_fence_val_);
 	}
 
 	void D3D12RenderEngine::SyncComputeCmd()
 	{
-		uint64_t const fence_val = compute_cmd_fence_val_;
-		TIF(d3d_compute_cmd_queue_->Signal(compute_cmd_fence_.get(), fence_val));
-		++ compute_cmd_fence_val_;
-
-		if (compute_cmd_fence_->GetCompletedValue() < fence_val)
-		{
-			TIF(compute_cmd_fence_->SetEventOnCompletion(fence_val, compute_cmd_fence_event_));
-			::WaitForSingleObjectEx(compute_cmd_fence_event_, INFINITE, FALSE);
-		}
+		compute_cmd_fence_val_ = compute_cmd_fence_->Signal(Fence::FT_Render);
+		compute_cmd_fence_->Wait(compute_cmd_fence_val_);
 	}
 
 	void D3D12RenderEngine::SyncCopyCmd()
 	{
-		uint64_t const fence_val = copy_cmd_fence_val_;
-		TIF(d3d_copy_cmd_queue_->Signal(copy_cmd_fence_.get(), fence_val));
-		++ copy_cmd_fence_val_;
-
-		if (copy_cmd_fence_->GetCompletedValue() < fence_val)
-		{
-			TIF(copy_cmd_fence_->SetEventOnCompletion(fence_val, copy_cmd_fence_event_));
-			::WaitForSingleObjectEx(copy_cmd_fence_event_, INFINITE, FALSE);
-		}
+		copy_cmd_fence_val_ = copy_cmd_fence_->Signal(Fence::FT_Render);
+		copy_cmd_fence_->Wait(copy_cmd_fence_val_);
 	}
 
 	void D3D12RenderEngine::ResetRenderCmd()
@@ -1416,16 +1357,10 @@ namespace KlayGE
 	{
 		adapterList_.Destroy();
 
-		::CloseHandle(res_cmd_fence_event_);
 		res_cmd_fence_.reset();
-
-		::CloseHandle(render_cmd_fence_event_);
 		render_cmd_fence_.reset();
-
-		::CloseHandle(compute_cmd_fence_event_);
 		compute_cmd_fence_.reset();
 
-		::CloseHandle(copy_cmd_fence_event_);
 		copy_cmd_fence_.reset();
 
 		this->ClearPSOCache();

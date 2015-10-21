@@ -3,6 +3,7 @@ SET(LIB_NAME KlayGE_RenderEngine_D3D11)
 SET(D3D11_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Adapter.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11AdapterList.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Fence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11FrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/D3D11Mapping.cpp
@@ -26,6 +27,7 @@ SET(D3D11_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D11/AMDQuadBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Adapter.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11AdapterList.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Fence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11FrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Mapping.hpp

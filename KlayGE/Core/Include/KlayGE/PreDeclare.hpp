@@ -305,6 +305,8 @@ namespace KlayGE
 	typedef std::shared_ptr<LightShaftPostProcess> LightShaftPostProcessPtr;
 	class TransientBuffer;
 	typedef std::shared_ptr<TransientBuffer> TransientBufferPtr;
+	class Fence;
+	typedef std::shared_ptr<Fence> FencePtr;
 
 	class UIManager;
 	typedef std::shared_ptr<UIManager> UIManagerPtr;

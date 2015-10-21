@@ -23,6 +23,7 @@
 #include <KlayGE/D3D11/D3D11RenderView.hpp>
 #include <KlayGE/D3D11/D3D11RenderStateObject.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
+#include <KlayGE/D3D11/D3D11Fence.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderFactory.hpp>
 #include <KlayGE/D3D11/D3D11RenderFactoryInternal.hpp>
@@ -117,6 +118,11 @@ namespace KlayGE
 		{
 			return QueryPtr();
 		}
+	}
+
+	FencePtr D3D11RenderFactory::MakeFence()
+	{
+		return MakeSharedPtr<D3D11Fence>();
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

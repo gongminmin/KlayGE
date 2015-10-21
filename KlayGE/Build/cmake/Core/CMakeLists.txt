@@ -59,6 +59,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CascadedShadowLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/DeferredRenderingLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ElementFormat.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Fence.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FFT.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Font.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/FrameBuffer.cpp
@@ -105,6 +106,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CascadedShadowLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/DeferredRenderingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ElementFormat.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Fence.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FFT.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Font.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/FrameBuffer.hpp

@@ -5,6 +5,7 @@ IF(KLAYGE_GLES_FOUND)
 SET(LIB_NAME KlayGE_RenderEngine_OpenGLES)
 
 SET(OPENGLES_RE_SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESFence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESFrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESGraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGLES/OGLESMapping.cpp
@@ -24,6 +25,7 @@ SET(OPENGLES_RE_SOURCE_FILES
 )
 
 SET(OPENGLES_RE_HEADER_FILES
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESFence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESFrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESGraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESMapping.hpp

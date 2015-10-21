@@ -26,6 +26,7 @@
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
+#include <KlayGE/Fence.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 
@@ -99,6 +100,11 @@ namespace KlayGE
 		QueryPtr MakeTimerQuery()
 		{
 			return Query::NullObject();
+		}
+
+		virtual FencePtr MakeFence() KLAYGE_OVERRIDE
+		{
+			return Fence::NullObject();
 		}
 
 		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)

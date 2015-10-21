@@ -1,6 +1,7 @@
 SET(LIB_NAME KlayGE_RenderEngine_OpenGL)
 
 SET(OPENGL_RE_SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLFence.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLFrameBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLGraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/OpenGL/OGLMapping.cpp
@@ -20,6 +21,7 @@ SET(OPENGL_RE_SOURCE_FILES
 )
 
 SET(OPENGL_RE_HEADER_FILES
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLFence.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLFrameBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLGraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLMapping.hpp

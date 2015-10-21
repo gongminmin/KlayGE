@@ -23,6 +23,7 @@
 #include <KlayGE/OpenGL/OGLRenderView.hpp>
 #include <KlayGE/OpenGL/OGLRenderStateObject.hpp>
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
+#include <KlayGE/OpenGL/OGLFence.hpp>
 
 #include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
@@ -111,6 +112,16 @@ namespace KlayGE
 	QueryPtr OGLRenderFactory::MakeTimerQuery()
 	{
 		return MakeSharedPtr<OGLTimerQuery>();
+	}
+
+	FencePtr OGLRenderFactory::MakeFence()
+	{
+		FencePtr ret;
+		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_sync())
+		{
+			ret = MakeSharedPtr<OGLFence>();
+		}
+		return ret;
 	}
 
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int /*array_size*/, int level)

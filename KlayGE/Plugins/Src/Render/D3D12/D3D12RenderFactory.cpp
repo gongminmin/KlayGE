@@ -41,6 +41,7 @@
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
+#include <KlayGE/D3D12/D3D12Fence.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderFactory.hpp>
 #include <KlayGE/D3D12/D3D12RenderFactoryInternal.hpp>
@@ -122,6 +123,11 @@ namespace KlayGE
 	QueryPtr D3D12RenderFactory::MakeTimerQuery()
 	{
 		return MakeSharedPtr<D3D12TimerQuery>();
+	}
+
+	FencePtr D3D12RenderFactory::MakeFence()
+	{
+		return MakeSharedPtr<D3D12Fence>();
 	}
 
 	RenderViewPtr D3D12RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

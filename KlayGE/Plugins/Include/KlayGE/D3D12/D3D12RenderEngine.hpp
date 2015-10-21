@@ -310,21 +310,15 @@ namespace KlayGE
 
 		double inv_timestamp_freq_;
 
-		ID3D12FencePtr render_cmd_fence_;
-		std::atomic<uint64_t> render_cmd_fence_val_;
-		HANDLE render_cmd_fence_event_;
+		FencePtr render_cmd_fence_;
+		uint64_t render_cmd_fence_val_;
+		FencePtr compute_cmd_fence_;
+		uint64_t compute_cmd_fence_val_;
+		FencePtr copy_cmd_fence_;
+		uint64_t copy_cmd_fence_val_;
 
-		ID3D12FencePtr compute_cmd_fence_;
-		std::atomic<uint64_t> compute_cmd_fence_val_;
-		HANDLE compute_cmd_fence_event_;
-
-		ID3D12FencePtr copy_cmd_fence_;
-		std::atomic<uint64_t> copy_cmd_fence_val_;
-		HANDLE copy_cmd_fence_event_;
-
-		ID3D12FencePtr res_cmd_fence_;
-		std::atomic<uint64_t> res_cmd_fence_val_;
-		HANDLE res_cmd_fence_event_;
+		FencePtr res_cmd_fence_;
+		uint64_t res_cmd_fence_val_;
 
 		RenderEffectPtr blit_effect_;
 		RenderTechniquePtr bilinear_blit_tech_;
