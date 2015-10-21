@@ -407,7 +407,7 @@ namespace KlayGE
 			pass->Bind();
 			D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass->GetShaderObject());
 
-			D3D12RenderLayout& rl = *checked_pointer_cast<D3D12RenderLayout>(re.BlitRL());
+			D3D12RenderLayout& rl = *checked_pointer_cast<D3D12RenderLayout>(re.PostProcessRenderLayout());
 
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
 			pso_desc.pRootSignature = so->RootSignature().get();

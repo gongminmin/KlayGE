@@ -157,11 +157,6 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC const & NullSRVDesc() const;
-		D3D12_UNORDERED_ACCESS_VIEW_DESC const & NullUAVDesc() const;
-		D3D12_RENDER_TARGET_VIEW_DESC const & NullRTVDesc() const;
-		D3D12_DEPTH_STENCIL_VIEW_DESC const & NullDSVDesc() const;
-
 		ID3D12DescriptorHeapPtr const & RTVDescHeap() const
 		{
 			return rtv_desc_heap_;
@@ -197,10 +192,6 @@ namespace KlayGE
 		RenderTechniquePtr BilinearBlitTech() const
 		{
 			return bilinear_blit_tech_;
-		}
-		RenderLayoutPtr BlitRL() const
-		{
-			return blit_rl_;
 		}
 
 		ID3D12RootSignaturePtr const & CreateRootSignature(
@@ -337,8 +328,6 @@ namespace KlayGE
 
 		RenderEffectPtr blit_effect_;
 		RenderTechniquePtr bilinear_blit_tech_;
-		RenderLayoutPtr blit_rl_;
-		GraphicsBufferPtr blit_vb_;
 	};
 
 	typedef std::shared_ptr<D3D12RenderEngine> D3D12RenderEnginePtr;

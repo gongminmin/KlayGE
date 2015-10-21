@@ -255,21 +255,6 @@ namespace KlayGE
 
 		blit_effect_ = SyncLoadRenderEffect("Copy.fxml");
 		bilinear_blit_tech_ = blit_effect_->TechniqueByName("BilinearCopy");
-
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		blit_rl_ = rf.MakeRenderLayout();
-		blit_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-
-		float2 pos[] =
-		{
-			float2(-1, +1),
-			float2(+1, +1),
-			float2(-1, -1),
-			float2(+1, -1)
-		};
-		blit_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
-		blit_rl_->BindVertexStream(blit_vb_, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
 	}
 
 	void D3D12RenderEngine::CheckConfig(RenderSettings& settings)
@@ -381,13 +366,26 @@ namespace KlayGE
 		dsv_heap_occupied_.assign(NUM_MAX_DEPTH_STENCIL_VIEWS, false);
 		cbv_srv_uav_heap_occupied_.assign(NUM_MAX_CBV_SRV_UAVS, false);
 
+		D3D12_SHADER_RESOURCE_VIEW_DESC null_srv_desc;
+		null_srv_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		null_srv_desc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		null_srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		null_srv_desc.Texture2D.MipLevels = 1;
+		null_srv_desc.Texture2D.MostDetailedMip = 0;
+		null_srv_desc.Texture2D.PlaneSlice = 0;
+		null_srv_desc.Texture2D.ResourceMinLODClamp = 0;
 		null_srv_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
 		null_srv_handle_.ptr += this->AllocCBVSRVUAV();
-		d3d_device_->CreateShaderResourceView(nullptr, &this->NullSRVDesc(), null_srv_handle_);
+		d3d_device_->CreateShaderResourceView(nullptr, &null_srv_desc, null_srv_handle_);
 
+		D3D12_UNORDERED_ACCESS_VIEW_DESC null_uav_desc;
+		null_uav_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		null_uav_desc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+		null_uav_desc.Texture2D.MipSlice = 0;
+		null_uav_desc.Texture2D.PlaneSlice = 0;
 		null_uav_handle_ = cbv_srv_uav_desc_heap_->GetCPUDescriptorHandleForHeapStart();
 		null_uav_handle_.ptr += this->AllocCBVSRVUAV();
-		d3d_device_->CreateUnorderedAccessView(nullptr, nullptr, &this->NullUAVDesc(), null_uav_handle_);
+		d3d_device_->CreateUnorderedAccessView(nullptr, nullptr, &null_uav_desc, null_uav_handle_);
 
 		ID3D12Fence* fence;
 		TIF(d3d_device_->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
@@ -1438,8 +1436,6 @@ namespace KlayGE
 
 		bilinear_blit_tech_.reset();
 		blit_effect_.reset();
-		blit_vb_.reset();
-		blit_rl_.reset();
 
 		cbv_srv_uav_desc_heap_.reset();
 		dsv_desc_heap_.reset();
@@ -1888,64 +1884,6 @@ namespace KlayGE
 	{
 		viewport_cache_ = pViewports[0];
 		d3d_render_cmd_list_->RSSetViewports(NumViewports, reinterpret_cast<D3D12_VIEWPORT const *>(pViewports));
-	}
-
-	D3D12_SHADER_RESOURCE_VIEW_DESC const & D3D12RenderEngine::NullSRVDesc() const
-	{
-		static D3D12_SHADER_RESOURCE_VIEW_DESC null_srv_desc = []()->D3D12_SHADER_RESOURCE_VIEW_DESC
-		{
-			D3D12_SHADER_RESOURCE_VIEW_DESC ret;
-			ret.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			ret.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-			ret.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-			ret.Texture2D.MipLevels = 1;
-			ret.Texture2D.MostDetailedMip = 0;
-			ret.Texture2D.PlaneSlice = 0;
-			ret.Texture2D.ResourceMinLODClamp = 0;
-			return ret;
-		}();
-		return null_srv_desc;
-	}
-
-	D3D12_UNORDERED_ACCESS_VIEW_DESC const & D3D12RenderEngine::NullUAVDesc() const
-	{
-		static D3D12_UNORDERED_ACCESS_VIEW_DESC null_uav_desc = []()->D3D12_UNORDERED_ACCESS_VIEW_DESC
-		{
-			D3D12_UNORDERED_ACCESS_VIEW_DESC ret;
-			ret.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			ret.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-			ret.Texture2D.MipSlice = 0;
-			ret.Texture2D.PlaneSlice = 0;
-			return ret;
-		}();
-		return null_uav_desc;
-	}
-
-	D3D12_RENDER_TARGET_VIEW_DESC const & D3D12RenderEngine::NullRTVDesc() const
-	{
-		static D3D12_RENDER_TARGET_VIEW_DESC null_rtv_desc = []()->D3D12_RENDER_TARGET_VIEW_DESC
-		{
-			D3D12_RENDER_TARGET_VIEW_DESC ret;
-			ret.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-			ret.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-			ret.Texture2D.MipSlice = 0;
-			ret.Texture2D.PlaneSlice = 0;
-			return ret;
-		}();
-		return null_rtv_desc;
-	}
-
-	D3D12_DEPTH_STENCIL_VIEW_DESC const & D3D12RenderEngine::NullDSVDesc() const
-	{
-		static D3D12_DEPTH_STENCIL_VIEW_DESC null_rtv_desc = []()->D3D12_DEPTH_STENCIL_VIEW_DESC
-		{
-			D3D12_DEPTH_STENCIL_VIEW_DESC ret;
-			ret.Format = DXGI_FORMAT_D16_UNORM;
-			ret.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-			ret.Texture2D.MipSlice = 0;
-			return ret;
-		}();
-		return null_rtv_desc;
 	}
 
 	uint32_t D3D12RenderEngine::AllocRTV()
