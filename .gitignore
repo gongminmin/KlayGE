@@ -52,6 +52,7 @@ KlayGE/Samples/media/*/*.meshml
 KlayGE/Samples/media/*/*.7z
 KlayGE/Samples/media/*/*.jdt
 KlayGE/Samples/media/*/*.avi
+KlayGE/Samples/media/*/*.ogg
 KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
 KlayGE/Tests/media/*
