@@ -16,7 +16,7 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/External/Build/CMake/ExternalCommon.cmake)
 
 SET(REL_PATH "External/Downloads/Python-${PY_VERSION}.patched.7z")
-SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
+SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
 SET(PACKAGE_COMMIT_ID "8ca659ede2b46e378a44e63f3fcbd15db6128276")
 SET(PACKAGE_FILE_ID "ecf790e693361283e2e3ae6fac9b50c1c2dad886")
 

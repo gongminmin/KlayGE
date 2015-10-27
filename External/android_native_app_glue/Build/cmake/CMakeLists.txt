@@ -15,7 +15,7 @@ INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/External/Build/CMake/ExternalCommon.cmake)
 
 SET(REL_PATH "External/Downloads/android_native_app_glue.7z")
-SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_PLATFORM_NAME}/7z")
+SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
 SET(PACKAGE_COMMIT_ID "ca8fbdac4333e6b6ecb8c962f5e36b39b7e6499d")
 SET(PACKAGE_FILE_ID "a656000a68b67b84c866df5089a2b71661913bf0")
 

@@ -97,7 +97,11 @@ namespace KlayGE
 			}
 			else
 			{
+#ifdef KLAYGE_CPU_X64
 				rt_handles[i].ptr = ~0ULL;
+#else
+				rt_handles[i].ptr = ~0UL;
+#endif
 			}
 		}
 

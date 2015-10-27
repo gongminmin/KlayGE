@@ -514,7 +514,7 @@ namespace KlayGE
 					for (UINT y = 0; y < num_rows[i]; ++ y)
 					{
 						memcpy(dest_slice + dest_data.RowPitch * y, src_slice + src_data.RowPitch * y,
-							row_sizes_in_bytes[i]);
+							static_cast<size_t>(row_sizes_in_bytes[i]));
 					}
 				}
 			}
