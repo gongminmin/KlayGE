@@ -295,7 +295,14 @@ int main(int argc, char* argv[])
 		kfx_path = target_folder / kfx_name;
 	}
 
-	cout << "Compiled kfx has been saved to " << kfx_path << "." << endl;
+	if (filesystem::exists(kfx_path))
+	{
+		cout << "Compiled kfx has been saved to " << kfx_path << "." << endl;
+	}
+	else
+	{
+		cout << "Couldn't find " << fxml_name << "." << endl;
+	}
 
 	Context::Destroy();
 
