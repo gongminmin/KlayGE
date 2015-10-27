@@ -16,11 +16,13 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <string>
 #include <vector>
 #include <map>
 #include <sstream>
+#include <fstream>
 
 #include <boost/lexical_cast.hpp>
 

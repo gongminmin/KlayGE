@@ -29,12 +29,14 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
 
 #include <string>
 #include <vector>
 #include <map>
 #include <sstream>
+#include <fstream>
 
 #include <boost/lexical_cast.hpp>
 
