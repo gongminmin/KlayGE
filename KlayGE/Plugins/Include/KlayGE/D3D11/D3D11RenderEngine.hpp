@@ -70,6 +70,8 @@ namespace KlayGE
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
+		virtual void GetCustomAttrib(std::string const & name, void* value) KLAYGE_OVERRIDE;
+
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 

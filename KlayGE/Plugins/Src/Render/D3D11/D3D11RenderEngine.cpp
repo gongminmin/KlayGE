@@ -854,6 +854,27 @@ namespace KlayGE
 		d3d_imm_ctx_->RSSetScissorRects(1, &rc);
 	}
 
+	void D3D11RenderEngine::GetCustomAttrib(std::string const & name, void* value)
+	{
+		size_t const name_hash = RT_HASH(name.c_str());
+		if (CT_HASH("D3D_DEVICE") == name_hash)
+		{
+			*static_cast<ID3D11Device**>(value) = d3d_device_.get();
+		}
+		else if (CT_HASH("D3D_IMM_CONTEXT") == name_hash)
+		{
+			*static_cast<ID3D11DeviceContext**>(value) = d3d_imm_ctx_.get();
+		}
+		else if (CT_HASH("FEATURE_LEVEL") == name_hash)
+		{
+			*static_cast<D3D_FEATURE_LEVEL*>(value) = d3d_feature_level_;
+		}
+		else if (CT_HASH("DXGI_FACTORY") == name_hash)
+		{
+			*static_cast<IDXGIFactory1**>(value) = gi_factory_.get();
+		}
+	}
+
 	void D3D11RenderEngine::DoResize(uint32_t width, uint32_t height)
 	{
 		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->Resize(width, height);
