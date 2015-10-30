@@ -299,13 +299,6 @@ namespace KlayGE
 				GLenum gl_type;
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
-				GLsizei image_size = 0;
-				if (IsCompressedFormat(format_))
-				{
-					uint32_t const block_size = NumFormatBytes(format_) * 4;
-					image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
-				}
-
 				re.BindTexture(0, target_type_, texture_);
 
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -314,6 +307,9 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format_))
 				{
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
+					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+
 					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
 							w, h, d, gl_format, image_size,
 							nullptr);
