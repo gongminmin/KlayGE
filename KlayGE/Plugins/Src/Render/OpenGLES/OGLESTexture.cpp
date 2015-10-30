@@ -30,7 +30,9 @@ namespace KlayGE
 	OGLESTexture::OGLESTexture(TextureType type, uint32_t array_size, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: Texture(type, sample_count, sample_quality, access_hint)
 	{
-		if (array_size > 1)
+		array_size_ = array_size;
+
+		if ((array_size > 1) && !glloader_GLES_VERSION_3_0())
 		{
 			THR(errc::function_not_supported);
 		}
@@ -39,7 +41,14 @@ namespace KlayGE
 		{
 		case TT_1D:
 		case TT_2D:
-			target_type_ = GL_TEXTURE_2D;
+			if (array_size > 1)
+			{
+				target_type_ = GL_TEXTURE_2D_ARRAY;
+			}
+			else
+			{
+				target_type_ = GL_TEXTURE_2D;
+			}
 			break;
 
 		case TT_3D:

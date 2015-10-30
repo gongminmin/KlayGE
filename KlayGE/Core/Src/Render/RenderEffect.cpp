@@ -3521,7 +3521,7 @@ namespace KlayGE
 
 			case REDT_texture1DArray:
 				{
-					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+					ss << "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1" << std::endl;
 
 					std::string elem_type;
 					param.Var()->Value(elem_type);
@@ -3533,7 +3533,7 @@ namespace KlayGE
 
 			case REDT_texture2DArray:
 				{
-					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)" << std::endl;
+					ss << "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1" << std::endl;
 
 					std::string elem_type;
 					param.Var()->Value(elem_type);
@@ -3545,7 +3545,7 @@ namespace KlayGE
 
 			case REDT_textureCUBEArray:
 				{
-					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 1)" << std::endl;
+					ss << "#if (KLAYGE_MAX_TEX_ARRAY_LEN > 1) && (KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 1))" << std::endl;
 
 					std::string elem_type;
 					param.Var()->Value(elem_type);

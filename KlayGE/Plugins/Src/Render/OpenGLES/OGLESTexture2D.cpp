@@ -57,12 +57,11 @@ namespace KlayGE
 		{
 			num_mip_maps_ = numMipMaps;
 		}
-		array_size_ = 1;
 
 		width_ = width;
 		height_ = height;
 
-		tex_data_.resize(num_mip_maps_);
+		tex_data_.resize(array_size_ * num_mip_maps_);
 		this->CreateHWResource(init_data);
 	}
 
@@ -307,9 +306,6 @@ namespace KlayGE
 					uint32_t x_offset, uint32_t y_offset, uint32_t /*width*/, uint32_t /*height*/,
 					void*& data, uint32_t& row_pitch)
 	{
-		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
-
 		last_tma_ = tma;
 
 		uint32_t const texel_size = NumFormatBytes(format_);
@@ -317,7 +313,7 @@ namespace KlayGE
 
 		row_pitch = w * texel_size;
 
-		uint8_t* p = &tex_data_[level][0];
+		uint8_t* p = &tex_data_[array_index * num_mip_maps_ + level][0];
 		if (IsCompressedFormat(format_))
 		{
 			uint32_t const block_size = NumFormatBytes(format_) * 4;
@@ -331,9 +327,6 @@ namespace KlayGE
 
 	void OGLESTexture2D::Unmap2D(uint32_t array_index, uint32_t level)
 	{
-		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
-
 		switch (last_tma_)
 		{
 		case TMA_Read_Only:
@@ -358,12 +351,29 @@ namespace KlayGE
 					uint32_t const block_size = NumFormatBytes(format_) * 4;
 					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
 
-					glCompressedTexSubImage2D(target_type_, level, 0, 0,
-						w, h, gl_format, image_size, &tex_data_[level][0]);
+					if (array_size_ > 1)
+					{
+						glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index,
+							w, h, 1, gl_format, image_size, &tex_data_[array_index * num_mip_maps_ + level][0]);
+					}
+					else
+					{
+						glCompressedTexSubImage2D(target_type_, level, 0, 0,
+							w, h, gl_format, image_size, &tex_data_[array_index * num_mip_maps_ + level][0]);
+					}
 				}
 				else
 				{
-					glTexSubImage2D(target_type_, level, 0, 0, w, h, gl_format, gl_type, &tex_data_[level][0]);
+					if (array_size_ > 1)
+					{
+						glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+							gl_format, gl_type, &tex_data_[array_index * num_mip_maps_ + level][0]);
+					}
+					else
+					{
+						glTexSubImage2D(target_type_, level, 0, 0, w, h,
+							gl_format, gl_type, &tex_data_[array_index * num_mip_maps_ + level][0]);
+					}
 				}
 			}
 			break;
@@ -405,48 +415,88 @@ namespace KlayGE
 			}
 		}
 
-		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+		for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
 		{
-			uint32_t const w = this->Width(level);
-			uint32_t const h = this->Height(level);
-
-			if (IsCompressedFormat(format_))
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				uint32_t const block_size = NumFormatBytes(format_) * 4;
-				GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+				uint32_t const w = this->Width(level);
+				uint32_t const h = this->Height(level);
 
-				void* ptr;
-				if (nullptr == init_data)
+				if (IsCompressedFormat(format_))
 				{
-					tex_data_[level].resize(image_size, 0);
-					ptr = nullptr;
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
+					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+
+					void* ptr;
+					if (nullptr == init_data)
+					{
+						tex_data_[array_index * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[array_index * num_mip_maps_ + level].resize(image_size);
+						std::memcpy(&tex_data_[array_index * num_mip_maps_ + level][0],
+							init_data[array_index * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[array_index * num_mip_maps_ + level][0];
+					}
+
+					if (array_size_ > 1)
+					{
+						if (0 == array_index)
+						{
+							glCompressedTexImage3D(target_type_, level, glinternalFormat,
+								w, h, array_size_, 0, image_size * array_size_, nullptr);
+						}
+
+						if (init_data != nullptr)
+						{
+							glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+								glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
+						}
+					}
+					else
+					{
+						glCompressedTexImage2D(target_type_, level, glinternalFormat,
+							w, h, 0, image_size, ptr);
+					}
 				}
 				else
 				{
-					tex_data_[level].resize(image_size);
-					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
-					ptr = &tex_data_[level][0];
-				}
-				glCompressedTexImage2D(target_type_, level, glinternalFormat,
-					w, h, 0, image_size, ptr);
-			}
-			else
-			{
-				GLsizei const image_size = w * h * texel_size;
+					GLsizei const image_size = w * h * texel_size;
 
-				void* ptr;
-				if (nullptr == init_data)
-				{
-					tex_data_[level].resize(image_size, 0);
-					ptr = nullptr;
+					void* ptr;
+					if (nullptr == init_data)
+					{
+						tex_data_[array_index * num_mip_maps_ + level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[array_index * num_mip_maps_ + level].resize(image_size);
+						std::memcpy(&tex_data_[array_index * num_mip_maps_ + level][0],
+							init_data[array_index * num_mip_maps_ + level].data, image_size);
+						ptr = &tex_data_[array_index * num_mip_maps_ + level][0];
+					}
+
+					if (array_size_ > 1)
+					{
+						if (0 == array_index)
+						{
+							glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size_, 0, glformat, gltype, nullptr);
+						}
+
+						if (init_data != nullptr)
+						{
+							glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+								glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
+						}
+					}
+					else
+					{
+						glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype, ptr);
+					}
 				}
-				else
-				{
-					tex_data_[level].resize(image_size);
-					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
-					ptr = &tex_data_[level][0];
-				}
-				glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype, ptr);
 			}
 		}
 	}
