@@ -1628,7 +1628,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
-		/*if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())
+		if (glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())
 		{
 			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS_EXT, &temp);
 			caps_.max_texture_array_length = temp;
@@ -1636,8 +1636,7 @@ namespace KlayGE
 		else
 		{
 			caps_.max_texture_array_length = 1;
-		}*/
-		caps_.max_texture_array_length = 1;
+		}
 
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_pixel_texture_units = static_cast<uint8_t>(temp);

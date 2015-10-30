@@ -515,11 +515,14 @@ namespace KlayGE
 							if (0 == array_index)
 							{
 								glCompressedTexImage3D(target_type_, level, glinternalFormat,
-									w, h, array_size_, 0, image_size, nullptr);
+									w, h, array_size_, 0, image_size * array_size_, nullptr);
 							}
 
-							glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-								glformat, image_size, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+							if (init_data != nullptr)
+							{
+								glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+									glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
+							}
 						}
 						else
 						{
@@ -541,8 +544,11 @@ namespace KlayGE
 								glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size_, 0, glformat, gltype, nullptr);
 							}
 
-							glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
-								glformat, gltype, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+							if (init_data != nullptr)
+							{
+								glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
+									glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
+							}
 						}
 						else
 						{
