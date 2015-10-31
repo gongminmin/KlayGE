@@ -538,6 +538,10 @@ namespace glloader
 				{
 					features_.push_back("GLES_VERSION_3_1");
 				}
+				if (ver_code >= 32)
+				{
+					features_.push_back("GLES_VERSION_3_2");
+				}
 #endif
 			}
 		}
@@ -673,6 +677,10 @@ namespace glloader
 				if (ver_code >= 14)
 				{
 					features_.push_back("EGL_VERSION_1_4");
+				}
+				if (ver_code >= 15)
+				{
+					features_.push_back("EGL_VERSION_1_5");
 				}
 			}
 #endif		// GLLOADER_EGL
