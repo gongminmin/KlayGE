@@ -302,7 +302,7 @@ namespace KlayGE
 		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
 		{
 			ds_tex_ = this->ScreenDepthStencilTexture();
-			if (ds_tex_)
+			if (ds_tex_ && (screen_width == render_width) && (screen_height == render_height))
 			{
 				ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 			}
@@ -738,7 +738,7 @@ namespace KlayGE
 			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 			{
 				ds_tex_ = this->ScreenDepthStencilTexture();
-				if (ds_tex_)
+				if (ds_tex_ && (new_screen_width == new_render_width) && (new_screen_height == new_render_height))
 				{
 					ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 				}
@@ -896,13 +896,13 @@ namespace KlayGE
 
 		fb_stage_ = 3;
 
+		uint32_t const screen_width = default_frame_buffers_[3]->Width();
+		uint32_t const screen_height = default_frame_buffers_[3]->Height();
+		uint32_t const render_width = default_frame_buffers_[0]->Width();
+		uint32_t const render_height = default_frame_buffers_[0]->Height();
+		bool const need_resize = ((render_width != screen_width) || (render_height != screen_height));
 		if (resize_pps_[0])
 		{
-			uint32_t const screen_width = default_frame_buffers_[3]->Width();
-			uint32_t const screen_height = default_frame_buffers_[3]->Height();
-			uint32_t const render_width = default_frame_buffers_[0]->Width();
-			uint32_t const render_height = default_frame_buffers_[0]->Height();
-			bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
 			if ((STM_None == stereo_method_) && need_resize)
 			{
 #ifndef KLAYGE_SHIP
@@ -930,7 +930,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!this->ScreenDepthStencilTexture())
+		if (!this->ScreenDepthStencilTexture() || need_resize)
 		{
 			RenderViewPtr const & ds_view = this->DefaultFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil);
 			if (ds_view)
