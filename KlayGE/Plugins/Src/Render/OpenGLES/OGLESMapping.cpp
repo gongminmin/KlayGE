@@ -1079,7 +1079,7 @@ namespace KlayGE
 			break;
 
 		case EF_ABGR8_SRGB:
-			if (glloader_GLES_VERSION_3_0())
+			if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_sRGB())
 			{
 				internalFormat = GL_SRGB8_ALPHA8;
 				glformat = GL_RGBA;

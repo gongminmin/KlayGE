@@ -1841,7 +1841,7 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_D32F);
 		}
-		if (glloader_GLES_VERSION_3_0())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_sRGB())
 		{
 			texture_format_.insert(EF_ABGR8_SRGB);
 		}
@@ -1918,7 +1918,7 @@ namespace KlayGE
 		{
 			rendertarget_format_.insert(EF_D32F);
 		}
-		if (glloader_GLES_VERSION_3_0())
+		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_sRGB())
 		{
 			rendertarget_format_.insert(EF_ABGR8_SRGB);
 		}
