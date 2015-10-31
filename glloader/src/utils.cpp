@@ -708,7 +708,7 @@ void promote_high(char const * high_name)
 
 void glloader_init()
 {
-	glloader_uninit();
+	glloader::gl_features_extractor::delete_instance();
 
 #ifdef GLLOADER_GL
 	gl_init();
