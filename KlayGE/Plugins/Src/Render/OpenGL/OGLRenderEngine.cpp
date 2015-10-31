@@ -1521,6 +1521,8 @@ namespace KlayGE
 
 		so_rl_.reset();
 
+		glloader_uninit();
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::FreeLibrary(mod_opengl32_);
 #endif

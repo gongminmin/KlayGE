@@ -1440,6 +1440,8 @@ namespace KlayGE
 		}
 
 		so_rl_.reset();
+
+		glloader_uninit();
 	}
 
 	void OGLESRenderEngine::DoSuspend()
