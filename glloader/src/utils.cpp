@@ -700,7 +700,7 @@ void promote_high(char const * high_name)
 
 void glloader_init()
 {
-	glloader::gl_features_extractor::delete_instance();
+	glloader_uninit();
 
 #ifdef GLLOADER_GL
 	gl_init();
@@ -721,6 +721,12 @@ void glloader_init()
 #ifdef GLLOADER_EGL
 	egl_init();
 #endif
+}
+
+void glloader_uninit()
+{
+	glloader::gl_features_extractor::delete_instance();
+	glloader::gl_dll_container::delete_instance();
 }
 
 void* get_gl_proc_address_by_dll(const char* name)

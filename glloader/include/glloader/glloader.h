@@ -342,6 +342,11 @@ extern "C"
 GLLOADER_API void glloader_init();
 
 /**
+ * Uninitiate GLLoader
+ */
+GLLOADER_API void glloader_uninit();
+
+/**
  * Find out if a particular feature is available on your platform, including the core and the extensions.
  *
  * @param name The name string of a feature.
