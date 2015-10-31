@@ -59,7 +59,8 @@ namespace
 
 		"100",
 		"300 es",
-		"310 es"
+		"310 es",
+		"320 es"
 	};
 
 
@@ -216,6 +217,9 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 			rules |= GSR_DrawBuffers;
 		}
 		if (version >= GSV_310_ES)
+		{
+		}
+		if (version >= GSV_320_ES)
 		{
 		}
 	}

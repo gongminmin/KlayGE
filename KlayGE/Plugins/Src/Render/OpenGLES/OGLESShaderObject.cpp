@@ -1225,7 +1225,11 @@ namespace KlayGE
 					try
 					{
 						GLSLVersion gsv;
-						if (glloader_GLES_VERSION_3_1())
+						if (glloader_GLES_VERSION_3_2())
+						{
+							gsv = GSV_320_ES;
+						}
+						else if (glloader_GLES_VERSION_3_1())
 						{
 							gsv = GSV_310_ES;
 						}

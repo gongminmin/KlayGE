@@ -53,7 +53,8 @@ enum GLSLVersion
 
 	GSV_100_ES,			// GL ES 2.0
 	GSV_300_ES,			// GL ES 3.0
-	GSV_310_ES			// GL ES 3.1
+	GSV_310_ES,			// GL ES 3.1
+	GSV_320_ES			// GL ES 3.2
 };
 
 enum GLSLRules
