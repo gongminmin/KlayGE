@@ -488,7 +488,7 @@ namespace KlayGE
 			re.BindFramebuffer(fbo_);
 
 			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
-				tex_, array_index_, level_);
+				tex_, level_, array_index_);
 
 			re.BindFramebuffer(0);
 		}
@@ -649,7 +649,7 @@ namespace KlayGE
 			re.BindFramebuffer(fbo_);
 
 			glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + att - FrameBuffer::ATT_Color0,
-				tex_, array_index_, level_);
+				tex_, level_, array_index_);
 
 			re.BindFramebuffer(0);
 		}
@@ -1305,12 +1305,12 @@ namespace KlayGE
 				if (IsDepthFormat(pf_))
 				{
 					glFramebufferTextureLayer(GL_FRAMEBUFFER,
-						GL_DEPTH_ATTACHMENT, tex_, array_index_, level_);
+						GL_DEPTH_ATTACHMENT, tex_, level_, array_index_);
 				}
 				if (IsStencilFormat(pf_))
 				{
 					glFramebufferTextureLayer(GL_FRAMEBUFFER,
-						GL_STENCIL_ATTACHMENT, tex_, array_index_, level_);
+						GL_STENCIL_ATTACHMENT, tex_, level_, array_index_);
 				}
 
 				re.BindFramebuffer(0);

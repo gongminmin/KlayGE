@@ -1524,6 +1524,7 @@ namespace KlayGE
 		caps_.draw_indirect_support = true;
 		caps_.no_overwrite_support = true;
 		caps_.full_npot_texture_support = true;
+		caps_.render_to_texture_array_support = true;
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

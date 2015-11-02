@@ -625,7 +625,7 @@ void ShadowCubeMap::OnCreate()
 
 	shadow_cube_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 
-	if (caps.max_texture_array_length > 1)
+	if (caps.render_to_texture_array_support)
 	{
 		shadow_cube_one_tex_ = rf.MakeTextureCube(SHADOW_MAP_SIZE, 1, 1, shadow_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		shadow_cube_one_buffer_ = rf.MakeFrameBuffer();
@@ -931,7 +931,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		break;
 
 	default:
-		if (renderEngine.DeviceCaps().max_texture_array_length > 1)
+		if (renderEngine.DeviceCaps().render_to_texture_array_support)
 		{
 			switch (pass)
 			{
