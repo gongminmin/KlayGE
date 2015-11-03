@@ -43,9 +43,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(lhs);
-			UNREF_PARAM(rhs);
-			// TODO
+			ret.Vec() = _mm_add_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -59,9 +57,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(lhs);
-			UNREF_PARAM(rhs);
-			// TODO
+			ret.Vec() = _mm_sub_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -75,9 +71,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(lhs);
-			UNREF_PARAM(rhs);
-			// TODO
+			ret.Vec() = _mm_mul_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -91,9 +85,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(lhs);
-			UNREF_PARAM(rhs);
-			// TODO
+			ret.Vec() = _mm_div_ps(lhs.Vec(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -107,8 +99,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(rhs);
-			// TODO
+			ret.Vec() = _mm_sub_ps(_mm_setzero_ps(), rhs.Vec());
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -192,7 +183,14 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
+			__m128 const zero = _mm_setzero_ps();
+
+			__m128 res1 = _mm_cmplt_ps(x.Vec(), zero);
+			res1 = _mm_cvtepi32_ps(_mm_castps_si128(res1));
+			__m128 res2 = _mm_cmpgt_ps(x.Vec(), zero);
+			res2 = _mm_cvtepi32_ps(_mm_castps_si128(res2));
+			res2 = _mm_sub_ps(zero, res2);
+			ret.Vec() = _mm_add_ps(res1,res2);
 #else
 			for (int i = 0; i < 4; ++ i)
 			{
@@ -355,7 +353,7 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			ret.Vec() = _mm_set_ps(x, y, z, w);
+			ret.Vec() = _mm_set_ps(w, z, y, x);
 #else
 			ret.Vec()[0] = x;
 			ret.Vec()[1] = y;
@@ -545,6 +543,13 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
+			__m128 res1 = lhs.Vec();
+			__m128 res2 = rhs.Vec();
+			res2 = _mm_shuffle_ps(res2, res2, _MM_SHUFFLE(0, 0, 0, 1));
+			res1 = _mm_mul_ps(res1, res2);
+			res2 = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(1, 1, 1, 1));
+			res1 = _mm_sub_ps(res1, res2);
+			ret.Vec() = _mm_shuffle_ps(res1, res1, _MM_SHUFFLE(0, 0, 0, 0));
 #else
 			ret = SetVector(GetX(lhs) * GetY(rhs) - GetY(lhs) * GetX(rhs));
 #endif
@@ -666,6 +671,17 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
+			//__m128 m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(1, 2, 0, 0));
+			//__m128 m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(2, 0, 1, 0));
+			__m128 m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(0, 0, 2, 1));
+			__m128 m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(0, 1, 0, 2));
+			__m128 res1 = _mm_mul_ps(m1, m2);
+			//m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(2, 0, 1, 0));
+			//m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(1, 2, 0, 0));
+			m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(0, 1, 0, 2));
+			m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(0, 0, 2, 1));
+			__m128 res2 = _mm_mul_ps(m1, m2);
+			ret.Vec() = _mm_sub_ps(res1, res2);
 #else
 			ret = SetVector(GetY(lhs) * GetZ(rhs) - GetZ(lhs) * GetY(rhs),
 				GetZ(lhs) * GetX(rhs) - GetX(lhs) * GetZ(rhs),
@@ -848,6 +864,28 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
+			//    RA	 * RB  -   RC     * RD +   f*RE    * RF
+			// (GetY(v1) * F) - (GetZ(v1) * E) + (GetW(v1) * D),
+			// (GetZ(v1) * C) - (GetX(v1) * F) - (GetW(v1) * B),
+			// (GetX(v1) * E) - (GetY(v1) * C) + (GetW(v1) * A),
+			// (GetY(v1) * B) - (GetX(v1) * D) - (GetZ(v1) * A));	
+			__m128 ABDE = _mm_sub_ps(
+				_mm_mul_ps(_mm_shuffle_ps(v2.Vec(), v2.Vec(), _MM_SHUFFLE(1, 1, 0, 0)), _mm_shuffle_ps(v3.Vec(), v3.Vec(), _MM_SHUFFLE(3, 2, 2, 1))),
+				_mm_mul_ps(_mm_shuffle_ps(v3.Vec(), v3.Vec(), _MM_SHUFFLE(1, 1, 0, 0)), _mm_shuffle_ps(v2.Vec(), v2.Vec(), _MM_SHUFFLE(3, 2, 2, 1))));
+			__m128 CDEF = _mm_sub_ps(
+				_mm_mul_ps(_mm_shuffle_ps(v2.Vec(), v2.Vec(), _MM_SHUFFLE(2, 1, 1, 0)), _mm_shuffle_ps(v3.Vec(), v3.Vec(), _MM_SHUFFLE(3, 3, 2, 3))),
+				_mm_mul_ps(_mm_shuffle_ps(v3.Vec(), v3.Vec(), _MM_SHUFFLE(2, 1, 1, 0)), _mm_shuffle_ps(v2.Vec(), v2.Vec(), _MM_SHUFFLE(3, 3, 2, 3))));
+
+			__m128 RA = _mm_shuffle_ps(v1.Vec(), v1.Vec(), _MM_SHUFFLE(1, 0, 2, 1));
+			__m128 RB = _mm_shuffle_ps(CDEF, ABDE, _MM_SHUFFLE(1, 3, 0, 3));
+			__m128 RC = _mm_shuffle_ps(v1.Vec(), v1.Vec(), _MM_SHUFFLE(0, 1, 0, 2));
+			__m128 RD = _mm_shuffle_ps(CDEF, CDEF, _MM_SHUFFLE(1, 0, 3, 2));
+			__m128 f = _mm_set_ps(-1.0f, 1.0f, -1.0f, 1.0f);
+			__m128 RE = _mm_shuffle_ps(v1.Vec(), v1.Vec(), _MM_SHUFFLE(2, 3, 3, 3));
+			__m128 RF = _mm_shuffle_ps(ABDE, ABDE, _MM_SHUFFLE(0, 0, 1, 2));
+
+			ret.Vec() = _mm_add_ps(_mm_sub_ps(_mm_mul_ps(RA, RB), _mm_mul_ps(RC, RD)),
+				_mm_mul_ps(f, _mm_mul_ps(RE, RF)));
 #else
 			float const A = (GetX(v2) * GetY(v3)) - (GetY(v2) * GetX(v3));
 			float const B = (GetX(v2) * GetZ(v3)) - (GetZ(v2) * GetX(v3));
@@ -951,13 +989,48 @@ namespace KlayGE
 				Substract(lhs.Row(2), rhs.Row(2)),
 				Substract(lhs.Row(3), rhs.Row(3)));
 		}
+#if defined(SIMD_MATH_SSE)
+		#define GetVector(v, i) _mm_shuffle_ps(v, v, _MM_SHUFFLE(i, i, i, i))
+#endif
 
 		SIMDMatrixF4 Multiply(SIMDMatrixF4 const & lhs, SIMDMatrixF4 const & rhs)
 		{
 #if defined(SIMD_MATH_SSE)
-			UNREF_PARAM(lhs);
-			// TODO
-			return rhs;
+			V4TYPE const & l0 = lhs.Row(0).Vec();
+			V4TYPE const & l1 = lhs.Row(1).Vec();
+			V4TYPE const & l2 = lhs.Row(2).Vec();
+			V4TYPE const & l3 = lhs.Row(3).Vec();
+
+			V4TYPE const & t0 = rhs.Row(0).Vec();
+			V4TYPE const & t1 = rhs.Row(1).Vec();
+			V4TYPE const & t2 = rhs.Row(2).Vec();
+			V4TYPE const & t3 = rhs.Row(3).Vec();
+
+			SIMDVectorF4 row1;			
+			SIMDVectorF4 row2;			
+			SIMDVectorF4 row3;	
+			SIMDVectorF4 row4;
+			row1.Vec() = _mm_mul_ps(t0, GetVector(l0, 0));
+			row2.Vec() = _mm_mul_ps(t0, GetVector(l1, 0));
+			row3.Vec() = _mm_mul_ps(t0, GetVector(l2, 0));
+			row4.Vec() = _mm_mul_ps(t0, GetVector(l3, 0));
+
+			row1.Vec() = _mm_add_ps(row1.Vec(), _mm_mul_ps(t1, GetVector(l0, 1)));
+			row2.Vec() = _mm_add_ps(row2.Vec(), _mm_mul_ps(t1, GetVector(l1, 1)));
+			row3.Vec() = _mm_add_ps(row3.Vec(), _mm_mul_ps(t1, GetVector(l2, 1)));
+			row4.Vec() = _mm_add_ps(row4.Vec(), _mm_mul_ps(t1, GetVector(l3, 1)));
+
+			row1.Vec() = _mm_add_ps(row1.Vec(), _mm_mul_ps(t2, GetVector(l0, 2)));
+			row2.Vec() = _mm_add_ps(row2.Vec(), _mm_mul_ps(t2, GetVector(l1, 2)));
+			row3.Vec() = _mm_add_ps(row3.Vec(), _mm_mul_ps(t2, GetVector(l2, 2)));
+			row4.Vec() = _mm_add_ps(row4.Vec(), _mm_mul_ps(t2, GetVector(l3, 2)));
+
+			row1.Vec() = _mm_add_ps(row1.Vec(), _mm_mul_ps(t3, GetVector(l0, 3)));
+			row2.Vec() = _mm_add_ps(row2.Vec(), _mm_mul_ps(t3, GetVector(l1, 3)));
+			row3.Vec() = _mm_add_ps(row3.Vec(), _mm_mul_ps(t3, GetVector(l2, 3)));
+			row4.Vec() = _mm_add_ps(row4.Vec(), _mm_mul_ps(t3, GetVector(l3, 3)));
+
+			return SIMDMatrixF4(row1, row2,row3,row4);
 #else
 			SIMDMatrixF4 const tmp = Transpose(rhs);
 
@@ -1003,6 +1076,81 @@ namespace KlayGE
 				Multiply(lhs.Row(3), r));
 		}
 
+		SIMDVectorF4 Determinant(SIMDMatrixF4 const & rhs)
+		{
+			SIMDVectorF4 ret;
+#if defined(SIMD_MATH_SSE)	
+			__m128 row0 = rhs.Row(0).Vec();
+			__m128 row1 = rhs.Row(1).Vec();
+			__m128 row2 = rhs.Row(2).Vec();
+			__m128 row3 = rhs.Row(3).Vec();
+			__m128 f = _mm_set_ps(-1.0f, 1.0f, -1.0f, 1.0f);
+			__m128 r1 = _mm_shuffle_ps(row1, row1, _MM_SHUFFLE(1, 0, 2, 1));
+			__m128 r2 = _mm_shuffle_ps(row2, row2, _MM_SHUFFLE(0, 1, 0, 2));
+			__m128 r3 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(2, 3, 3, 3));
+			__m128 r4 = _mm_shuffle_ps(row2, row2, _MM_SHUFFLE(2, 3, 3, 3));
+			__m128 r5 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(0, 1, 0, 2));
+			__m128 r6 = _mm_shuffle_ps(row1, row1, _MM_SHUFFLE(0, 1, 0, 2));
+			__m128 r7 = _mm_shuffle_ps(row2, row2, _MM_SHUFFLE(1, 0, 2, 1));
+			//__m128 r8 = r3
+			//__m128 r9 = r4
+			__m128 r10 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(1, 0, 2, 1));
+			__m128 r11 = _mm_shuffle_ps(row0, row0, _MM_SHUFFLE(3, 1, 1, 0));
+			__m128 r12 = _mm_shuffle_ps(row1, row1, _MM_SHUFFLE(2, 3, 3, 3));
+			__m128 r13 = _mm_shuffle_ps(row2, row2, _MM_SHUFFLE(0, 0, 0, 1));
+			__m128 r14 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(2, 1, 2, 2));
+			__m128 r15 = _mm_shuffle_ps(row2, row2, _MM_SHUFFLE(1, 1, 2, 2));
+			__m128 r16 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(0, 0, 0, 1));
+	
+			__m128 t1 = _mm_mul_ps(r2, r3);
+			__m128 t2 = _mm_mul_ps(r4, r5);
+			__m128 t3 = _mm_mul_ps(r7, r3);
+			__m128 t4 = _mm_mul_ps(r4, r10);
+			__m128 t5 = _mm_mul_ps(r13, r14);
+			__m128 t6 = _mm_mul_ps(r15, r16);
+
+			t1 = _mm_sub_ps(t1, t2);
+			t3 = _mm_sub_ps(t3, t4);
+			t5 = _mm_sub_ps(t5, t6);
+
+			t1 = _mm_mul_ps(r1, t1);
+			t3 = _mm_mul_ps(r6, t3);
+			t5 = _mm_mul_ps(r12, t5);
+
+			t1 = _mm_sub_ps(t1, t3);
+			t5 = _mm_mul_ps(r11, t5);
+
+			t1 = _mm_mul_ps(row0, t1);
+			t5 = _mm_mul_ps(f, t5);
+
+			t1 = _mm_add_ps(t1, t5);
+
+			__m128 res2 = _mm_set_ps(1, 1, 1, 1);
+			t1 = _mm_mul_ps(t1, res2);
+			__m128 y = _mm_shuffle_ps(t1, t1, _MM_SHUFFLE(1, 1, 1, 1));
+			__m128 z = _mm_shuffle_ps(t1, t1, _MM_SHUFFLE(2, 2, 2, 2));
+			t1 = _mm_add_ps(t1, y);
+			t1 = _mm_add_ps(t1, z);
+			ret.Vec() = _mm_shuffle_ps(t1, t1, _MM_SHUFFLE(0, 0, 0, 0));
+#else
+			float const _3142_3241 = rhs(2, 0) * rhs(3, 1) - rhs(2, 1) * rhs(3, 0);
+			float const _3143_3341 = rhs(2, 0) * rhs(3, 2) - rhs(2, 2) * rhs(3, 0);
+			float const _3144_3441 = rhs(2, 0) * rhs(3, 3) - rhs(2, 3) * rhs(3, 0);
+			float const _3243_3342 = rhs(2, 1) * rhs(3, 2) - rhs(2, 2) * rhs(3, 1);
+			float const _3244_3442 = rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1);
+			float const _3344_3443 = rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2);
+
+			ret.Vec()[0] = rhs(0, 0) * (rhs(1, 1) * _3344_3443 - rhs(1, 2) * _3244_3442 + rhs(1, 3) * _3243_3342)
+				- rhs(0, 1) * (rhs(1, 0) * _3344_3443 - rhs(1, 2) * _3144_3441 + rhs(1, 3) * _3143_3341)
+				+ rhs(0, 2) * (rhs(1, 0) * _3244_3442 - rhs(1, 1) * _3144_3441 + rhs(1, 3) * _3142_3241)
+				- rhs(0, 3) * (rhs(1, 0) * _3243_3342 - rhs(1, 1) * _3143_3341 + rhs(1, 2) * _3142_3241);
+			ret.Vec()[1] = ret.Vec()[0];
+			ret.Vec()[2] = ret.Vec()[0];
+			ret.Vec()[3] = ret.Vec()[0];
+#endif
+			return ret;
+		}
+
 		SIMDMatrixF4 Negative(SIMDMatrixF4 const & rhs)
 		{
 			return SIMDMatrixF4(Negative(rhs.Row(0)),
@@ -1016,6 +1164,89 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
+			__m128 minor0, minor1, minor2, minor3;
+			__m128 row0, row1, row2, row3;
+			__m128 det, tmp1;
+
+			row0 = rhs.Col(0).Vec();
+			row1 = rhs.Col(1).Vec();
+			row2 = rhs.Col(2).Vec();
+			row3 = rhs.Col(3).Vec();
+			row1 = _mm_shuffle_ps(row1, row1, _MM_SHUFFLE(1, 0, 3, 2));
+			row3 = _mm_shuffle_ps(row3, row3, _MM_SHUFFLE(1, 0, 3, 2));
+
+			tmp1= _mm_mul_ps(row2, row3);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+			minor0= _mm_mul_ps(row1, tmp1);
+			minor1= _mm_mul_ps(row0, tmp1);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor0= _mm_sub_ps(_mm_mul_ps(row1, tmp1), minor0);
+			minor1= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor1);
+			minor1= _mm_shuffle_ps(minor1, minor1, 0x4E);
+
+			tmp1= _mm_mul_ps(row1, row2);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+			minor0= _mm_add_ps(_mm_mul_ps(row3, tmp1), minor0);
+			minor3= _mm_mul_ps(row0, tmp1);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor0= _mm_sub_ps(minor0, _mm_mul_ps(row3, tmp1));
+			minor3= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor3);
+			minor3= _mm_shuffle_ps(minor3, minor3, 0x4E);
+
+			tmp1= _mm_mul_ps(_mm_shuffle_ps(row1, row1, 0x4E), row3);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+			row2= _mm_shuffle_ps(row2, row2, 0x4E);
+			minor0= _mm_add_ps(_mm_mul_ps(row2, tmp1), minor0);
+			minor2= _mm_mul_ps(row0, tmp1);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor0= _mm_sub_ps(minor0, _mm_mul_ps(row2, tmp1));
+			minor2= _mm_sub_ps(_mm_mul_ps(row0, tmp1), minor2);
+			minor2= _mm_shuffle_ps(minor2, minor2, 0x4E);
+
+			tmp1= _mm_mul_ps(row0, row1);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+
+			minor2= _mm_add_ps(_mm_mul_ps(row3, tmp1), minor2);
+			minor3= _mm_sub_ps(_mm_mul_ps(row2, tmp1), minor3);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor2= _mm_sub_ps(_mm_mul_ps(row3, tmp1), minor2);
+			minor3= _mm_sub_ps(minor3, _mm_mul_ps(row2, tmp1));
+
+			tmp1= _mm_mul_ps(row0, row3);
+			tmp1= _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+			minor1= _mm_sub_ps(minor1, _mm_mul_ps(row2, tmp1));
+			minor2= _mm_add_ps(_mm_mul_ps(row1, tmp1), minor2);
+			tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor1 = _mm_add_ps(_mm_mul_ps(row2, tmp1), minor1);
+			minor2 = _mm_sub_ps(minor2, _mm_mul_ps(row1, tmp1));
+
+			tmp1 = _mm_mul_ps(row0, row2);
+			tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0xB1);
+			minor1 = _mm_add_ps(_mm_mul_ps(row3, tmp1), minor1);
+			minor3 = _mm_sub_ps(minor3, _mm_mul_ps(row1, tmp1));
+			tmp1 = _mm_shuffle_ps(tmp1, tmp1, 0x4E);
+			minor1 = _mm_sub_ps(minor1, _mm_mul_ps(row3, tmp1));
+			minor3 = _mm_add_ps(_mm_mul_ps(row1, tmp1), minor3);
+			// -----------------------------------------------
+			// -----------------------------------------------
+			// -----------------------------------------------
+			det = _mm_mul_ps(row0, minor0);
+			det = _mm_add_ps(_mm_shuffle_ps(det, det, 0x4E), det);
+			det = _mm_add_ss(_mm_shuffle_ps(det, det, 0xB1), det);
+			tmp1 = _mm_rcp_ss(det);
+			det = _mm_sub_ss(_mm_add_ss(tmp1, tmp1), _mm_mul_ss(det, _mm_mul_ss(tmp1, tmp1)));
+			det = _mm_shuffle_ps(det, det, 0x00);
+			SIMDVectorF4 r0;
+			SIMDVectorF4 r1;
+			SIMDVectorF4 r2;
+			SIMDVectorF4 r3;
+			r0.Vec() = _mm_mul_ps(det, minor0);
+			r1.Vec() = _mm_mul_ps(det, minor1);
+			r2.Vec() = _mm_mul_ps(det, minor2);
+			r3.Vec() = _mm_mul_ps(det, minor3);
+			
+			ret = SIMDMatrixF4(r0, r1, r2, r3);
+
 #else
 			float const _2132_2231 = rhs(1, 0) * rhs(2, 1) - rhs(1, 1) * rhs(2, 0);
 			float const _2133_2331 = rhs(1, 0) * rhs(2, 2) - rhs(1, 2) * rhs(2, 0);
@@ -1036,7 +1267,7 @@ namespace KlayGE
 			float const _3244_3442 = rhs(2, 1) * rhs(3, 3) - rhs(2, 3) * rhs(3, 1);
 			float const _3344_3443 = rhs(2, 2) * rhs(3, 3) - rhs(2, 3) * rhs(3, 2);
 
-			float const det = Determinant(rhs);
+			float const det = GetX(Determinant(rhs));
 			if (MathLib::equal(det, 0.0f))
 			{
 				ret = rhs;
@@ -1370,7 +1601,17 @@ namespace KlayGE
 		{
 #if defined(SIMD_MATH_SSE)
 			// TODO
-			return rhs;
+			SIMDVectorF4 r0;
+			SIMDVectorF4 r1;
+			SIMDVectorF4 r2;
+			SIMDVectorF4 r3;
+			r0.Vec() = rhs.Row(0).Vec();
+			r1.Vec() = rhs.Row(1).Vec();
+			r2.Vec() = rhs.Row(2).Vec();
+			r3.Vec() = rhs.Row(3).Vec();
+			_MM_TRANSPOSE4_PS(r0.Vec(), r1.Vec(), r2.Vec(), r3.Vec());
+			return SIMDMatrixF4(r0, r1, r2, r3);
+			//return rhs;
 #else
 			V4TYPE const & r0 = rhs.Row(0).Vec();
 			V4TYPE const & r1 = rhs.Row(1).Vec();

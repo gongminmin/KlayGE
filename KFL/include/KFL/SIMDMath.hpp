@@ -146,7 +146,7 @@ namespace KlayGE
 		SIMDMatrixF4 Substract(SIMDMatrixF4 const & lhs, SIMDMatrixF4 const & rhs);
 		SIMDMatrixF4 Multiply(SIMDMatrixF4 const & lhs, SIMDMatrixF4 const & rhs);
 		SIMDMatrixF4 Multiply(SIMDMatrixF4 const & lhs, float rhs);
-		float Determinant(SIMDMatrixF4 const & rhs);
+		SIMDVectorF4 Determinant(SIMDMatrixF4 const & rhs);
 		SIMDMatrixF4 Negative(SIMDMatrixF4 const & rhs);
 		SIMDMatrixF4 Inverse(SIMDMatrixF4 const & rhs);
 
