@@ -17,22 +17,4 @@ extern "C"
 
 int SampleMain();
 
-inline int EntryFunc()
-{
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
-
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
-
-	return SampleMain();
-}
-
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-[Platform::MTAThread]
-int main(Platform::Array<Platform::String^>^ /*args*/)
-{
-	return EntryFunc();
-}
-#endif
-
-
 #endif		// _SAMPLECOMMON_HPP

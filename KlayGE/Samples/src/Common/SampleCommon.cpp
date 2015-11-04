@@ -3,9 +3,11 @@
 
 #include "SampleCommon.hpp"
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 int main()
 {
-    return EntryFunc();
+	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
+
+	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
+
+	return SampleMain();
 }
-#endif
