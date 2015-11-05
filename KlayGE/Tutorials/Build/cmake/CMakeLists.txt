@@ -50,10 +50,18 @@ MACRO(SETUP_TUTORIAL EXE_NAME)
 		SET(CONTENT_FILES ${CONTENT_FILES}
 			${CMAKE_CURRENT_BINARY_DIR}/Package.appxmanifest
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Logo.png
-			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/StoreLogo.png
 		)
+		IF(KLAYGE_PLATFORM_WINDOWS_UWP)
+			SET(CONTENT_FILES ${CONTENT_FILES}
+				${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo44.png
+			)
+		ELSE()
+			SET(CONTENT_FILES ${CONTENT_FILES}
+				${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo.png
+			)
+		ENDIF()
 
 		SET(DEBUG_CONTENT_FILES ${DEBUG_CONTENT_FILES}
 			${KLAYGE_PROJECT_DIR}/bin/${KLAYGE_PLATFORM_NAME}/7zxa${KLAYGE_OUTPUT_SUFFIX}${CMAKE_DEBUG_POSTFIX}.dll
