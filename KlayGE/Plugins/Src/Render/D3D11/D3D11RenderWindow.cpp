@@ -535,24 +535,6 @@ namespace KlayGE
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
-			&disp_info_stat));
-
-		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
-		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop));
-
-		disp_prop->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
-#endif
-#endif
-
 		on_paint_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
@@ -799,6 +781,22 @@ namespace KlayGE
 		{
 			gi_factory_2_->UnregisterStereoStatus(stereo_cookie_);
 		}
+#else
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat));
+
+		ComPtr<IDisplayInformation> disp_info;
+		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
+#else
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop));
+
+		disp_prop->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
+#endif
 #endif
 
 		render_target_view_right_eye_.reset();
