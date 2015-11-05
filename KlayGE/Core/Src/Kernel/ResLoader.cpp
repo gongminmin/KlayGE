@@ -278,7 +278,14 @@ namespace KlayGE
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 				full_path = filesystem::current_path<filesystem::path>() / new_path;
 #else
-				full_path = filesystem::current_path() / new_path;
+				try
+				{
+					full_path = filesystem::current_path() / new_path;
+				}
+				catch (...)
+				{
+					full_path = new_path;
+				}
 #endif
 				if (!filesystem::exists(full_path))
 				{
