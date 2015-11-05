@@ -10,79 +10,81 @@ def build_Boost(build_info, compiler_info):
 	with_chrono = True
 	with_date_time = True
 	with_filesystem = True
-	with_program_options = True
-	with_regex = True
 	with_system = True
-	with_test = True
 	with_thread = True
-	if "vc" == build_info.compiler_name:
-		if build_info.compiler_version >= 110:
-			with_atomic = False
-			with_chrono = False
-			with_date_time = False
-			with_filesystem = False
-			with_regex = False
-			with_system = False
-			with_thread = False
-	if compiler_info.is_windows_runtime:
+	if compiler_info.is_dev_platform:
+		with_program_options = True
+		with_regex = True
+		with_test = True
+	else:
+		with_program_options = False
+		with_regex = False
+		with_test = False
+	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
+		with_atomic = False
+		with_chrono = False
+		with_date_time = False
 		with_filesystem = False
-		with_program_options = False
-		with_test = False
-	elif compiler_info.is_android:
-		with_program_options = False
 		with_regex = False
-		with_test = False
-	elif compiler_info.is_ios:
-		with_program_options = False
-		with_regex = False
-		with_test = False
+		with_system = False
+		with_thread = False
 
+	need_install = False
 	additional_options = " -DWITH_ATOMIC:BOOL="
 	if with_atomic:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_CHRONO:BOOL="
 	if with_chrono:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_DATE_TIME:BOOL="
 	if with_date_time:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_FILESYSTEM:BOOL="
 	if with_filesystem:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL="
 	if with_program_options:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_REGEX:BOOL="
 	if with_regex:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_SYSTEM:BOOL="
 	if with_system:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_TEST:BOOL="
 	if with_test:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_THREAD:BOOL="
 	if with_thread:
 		additional_options += "\"ON\""
+		need_install = True
 	else:
 		additional_options += "\"OFF\""
-	build_a_project("boost", "External/boost", build_info, compiler_info, compiler_info.is_windows, additional_options)
+	build_a_project("boost", "External/boost", build_info, compiler_info, compiler_info.is_windows and need_install, additional_options)
 
 def build_Python(build_info, compiler_info):
 	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" \
@@ -131,12 +133,20 @@ def build_external_libs(build_info):
 		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-		if not compiler_info.is_windows_runtime:
-			print("\nBuilding boost...\n")
-			build_Boost(build_info, compiler_info)
+		print("\nBuilding boost...\n")
+		build_Boost(build_info, compiler_info)
 
 		print("\nBuilding Python...\n")
 		build_Python(build_info, compiler_info)
+
+		print("\nBuilding 7z...\n")
+		build_7z(build_info, compiler_info)
+
+		print("\nSeting up rapidxml...\n")
+		setup_rapidxml(build_info, compiler_info)
+
+		print("\nSeting up android_native_app_glue...\n")
+		setup_android_native_app_glue(build_info, compiler_info)
 
 		if not compiler_info.is_windows_runtime:
 			print("\nBuilding libogg...\n")
@@ -149,28 +159,17 @@ def build_external_libs(build_info):
 		if compiler_info.is_dev_platform:
 			print("\nBuilding freetype...\n")
 			build_freetype(build_info, compiler_info)
-
-		print("\nBuilding 7z...\n")
-		build_7z(build_info, compiler_info)
-
-		if compiler_info.is_dev_platform:
+			
 			print("\nSeting up DXSDK...\n")
 			setup_DXSDK(build_info, compiler_info)
 
-		if compiler_info.is_dev_platform:
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
-			
-		print("\nSeting up rapidxml...\n")
-		setup_rapidxml(build_info, compiler_info)
 
 		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
 			print("\nSeting up wpftoolkit...\n")
 			setup_wpftoolkit(build_info, compiler_info)
-
-		print("\nSeting up android_native_app_glue...\n")
-		setup_android_native_app_glue(build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
