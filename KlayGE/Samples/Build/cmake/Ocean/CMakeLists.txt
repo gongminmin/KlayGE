@@ -84,6 +84,9 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/fBm5_grad_tex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/fBm5_tex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/flare.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/noise_grad3_perm.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/noise_grad4_perm.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/noise_simplex.dds

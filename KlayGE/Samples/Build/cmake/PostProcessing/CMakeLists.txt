@@ -93,7 +93,9 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/font.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.kfx

@@ -62,6 +62,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/bokeh_pattern.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/DepthOfFieldPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurDoF.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/MotionBlurDoF/MotionBlurPP.kfx
