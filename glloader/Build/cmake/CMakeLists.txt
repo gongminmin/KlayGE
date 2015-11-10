@@ -33,18 +33,7 @@ SET(GLLOADER_OUTPUT_DIR "${CMAKE_HOME_DIRECTORY}/../../lib/${KLAYGE_PLATFORM_NAM
 SET(KLAYGE_BIN_DIR "${CMAKE_HOME_DIRECTORY}/../../../KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
 
 
-ADD_CUSTOM_COMMAND(OUTPUT ${GLLOADER_PROJECT_DIR}/src/glloader_egl.c
-		${GLLOADER_PROJECT_DIR}/src/glloader_gl.c
-		${GLLOADER_PROJECT_DIR}/src/glloader_gles.c
-		${GLLOADER_PROJECT_DIR}/src/glloader_glx.c
-		${GLLOADER_PROJECT_DIR}/src/glloader_wgl.c
-		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_egl.h
-		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_gl.h
-		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_gles.h
-		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_glx.h
-		${GLLOADER_PROJECT_DIR}/include/glloader/glloader_wgl.h
-	COMMAND "${PYTHON_EXECUTABLE}" "${GLLOADER_PROJECT_DIR}/autogen.py" "-q")
-ADD_CUSTOM_TARGET(autogen ALL DEPENDS ${GLLOADER_PROJECT_DIR}/src/glloader_gl.c)
+ADD_CUSTOM_TARGET(autogen ALL "${PYTHON_EXECUTABLE}" "${GLLOADER_PROJECT_DIR}/autogen.py" "-q")
 
 # The project settings
 

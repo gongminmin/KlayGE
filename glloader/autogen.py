@@ -563,14 +563,14 @@ def auto_gen_glloader_files(base_dir, quite_mode):
 		print("")
 
 	if not quite_mode:
-		print("Creating Header Files...")
+		print("Creating header files...")
 	for features in feature_set.items():
 		create_header(features[0], features[1], base_dir, quite_mode)
 	if not quite_mode:
 		print("")
 
 	if not quite_mode:
-		print("Creating Source Files...")
+		print("Creating source files...")
 	for features in feature_set.items():
 		create_source(features[0], features[1], base_dir, quite_mode)
 	if not quite_mode:
@@ -580,7 +580,9 @@ def auto_gen_glloader_files(base_dir, quite_mode):
 if __name__ == "__main__":
 	import os
 	import sys
-	
+
+	print("Generating glloader files...")
+
 	quite_mode = False
 	if (len(sys.argv) >= 2):
 		if ("-q" == sys.argv[1]):
