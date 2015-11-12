@@ -531,6 +531,10 @@ namespace KlayGE
 
 			if (found)
 			{
+				{
+					std::lock_guard<std::mutex> lock(loading_mutex_);
+					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
+				}
 				return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 			}
 			else
@@ -558,7 +562,7 @@ namespace KlayGE
 
 	void ResLoader::Unload(std::shared_ptr<void> const & res)
 	{
-		std::lock_guard<std::mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loaded_mutex_);
 
 		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end(); ++ iter)
 		{
@@ -572,7 +576,7 @@ namespace KlayGE
 
 	void ResLoader::AddLoadedResource(ResLoadingDescPtr const & res_desc, std::shared_ptr<void> const & res)
 	{
-		std::lock_guard<std::mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loaded_mutex_);
 
 		bool found = false;
 		for (auto& c_desc : loaded_res_)
@@ -592,7 +596,7 @@ namespace KlayGE
 
 	std::shared_ptr<void> ResLoader::FindMatchLoadedResource(ResLoadingDescPtr const & res_desc)
 	{
-		std::lock_guard<std::mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loaded_mutex_);
 
 		std::shared_ptr<void> loaded_res;
 		for (auto const & lr : loaded_res_)
@@ -608,7 +612,7 @@ namespace KlayGE
 
 	void ResLoader::RemoveUnrefResources()
 	{
-		std::lock_guard<std::mutex> lock(loading_mutex_);
+		std::lock_guard<std::mutex> lock(loaded_mutex_);
 
 		for (auto iter = loaded_res_.begin(); iter != loaded_res_.end();)
 		{
@@ -631,6 +635,34 @@ namespace KlayGE
 		{
 			if (*(iter->second))
 			{
+				ResLoadingDescPtr const & res_desc = iter->first;
+
+				std::shared_ptr<void> res;
+				std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
+				if (loaded_res)
+				{
+					if (res_desc->StateLess())
+					{
+						res = loaded_res;
+					}
+					else
+					{
+						res = res_desc->CloneResourceFrom(loaded_res);
+						if (res != loaded_res)
+						{
+							this->AddLoadedResource(res_desc, res);
+						}
+					}
+				}
+				else
+				{
+					res = res_desc->MainThreadStage();
+					this->AddLoadedResource(res_desc, res);
+				}
+
+				BOOST_ASSERT(res);
+				res_desc->LoadedRes(res);
+
 				iter = loading_res_.erase(iter);
 			}
 			else
@@ -664,33 +696,9 @@ namespace KlayGE
 
 	std::shared_ptr<void> ResLoader::ASyncRecreateFunctor::operator()()
 	{
-		if (!res_)
+		if (!res_ && *is_done_)
 		{
-			if (*is_done_)
-			{
-				ResLoader& rl = ResLoader::Instance();
-				std::shared_ptr<void> loaded_res = rl.FindMatchLoadedResource(res_desc_);
-				if (loaded_res)
-				{
-					if (res_desc_->StateLess())
-					{
-						res_ = loaded_res;
-					}
-					else
-					{
-						res_ = res_desc_->CloneResourceFrom(loaded_res);
-						if (res_ != loaded_res)
-						{
-							rl.AddLoadedResource(res_desc_, res_);
-						}
-					}
-				}
-				else
-				{
-					res_ = res_desc_->MainThreadStage();
-					rl.AddLoadedResource(res_desc_, res_);
-				}
-			}
+			res_ = res_desc_->LoadedRes();
 		}
 		return res_;
 	}

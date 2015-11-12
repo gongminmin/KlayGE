@@ -75,6 +75,18 @@ namespace KlayGE
 		virtual bool Match(ResLoadingDesc const & rhs) const = 0;
 		virtual void CopyDataFrom(ResLoadingDesc const & rhs) = 0;
 		virtual std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) = 0;
+
+		void LoadedRes(std::shared_ptr<void> const & res)
+		{
+			loaded_res_ = res;
+		}
+		std::shared_ptr<void> const & LoadedRes() const
+		{
+			return loaded_res_;
+		}
+
+	private:
+		std::shared_ptr<void> loaded_res_;
 	};
 
 	class KLAYGE_CORE_API ResLoader
@@ -188,6 +200,7 @@ namespace KlayGE
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
+		std::mutex loaded_mutex_;
 		std::mutex loading_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
 		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>> loading_res_;
