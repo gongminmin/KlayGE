@@ -730,6 +730,8 @@ namespace KlayGE
 		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * old_scale + 0.5f);
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
+			this->DoResize(new_screen_width, new_screen_height);
+
 			RenderSettings const & settings = Context::Instance().Config().graphics_cfg;
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -737,6 +739,7 @@ namespace KlayGE
 			RenderViewPtr ds_view;
 			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
 			{
+				ElementFormat fmt = ds_tex_->Format();
 				ds_tex_ = this->ScreenDepthStencilTexture();
 				if (ds_tex_ && (new_screen_width == new_render_width) && (new_screen_height == new_render_height))
 				{
@@ -747,13 +750,11 @@ namespace KlayGE
 					if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
 						|| caps.texture_format_support(EF_D16))
 					{
-						ElementFormat fmt = ds_tex_->Format();
 						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 						ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 					}
 					else
 					{
-						ElementFormat fmt;
 						if ((settings.depth_stencil_fmt != EF_Unknown)
 							&& caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
 						{
@@ -822,8 +823,6 @@ namespace KlayGE
 			}
 
 			pp_chain_dirty_ = true;
-
-			this->DoResize(new_screen_width, new_screen_height);
 		}
 		else
 		{
