@@ -40,28 +40,55 @@ namespace KlayGE
 			return name;
 		}
 
-		TexturePtr MakeTexture1D(uint32_t /*width*/, uint32_t /*numMipMaps*/, uint32_t /*array_size*/,
-			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
-			ElementInitData const * /*init_data*/)
+		TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
+			UNREF_PARAM(width);
+			UNREF_PARAM(num_mip_maps);
+			UNREF_PARAM(array_size);
+			UNREF_PARAM(format);
+			UNREF_PARAM(sample_count);
+			UNREF_PARAM(sample_quality);
+			UNREF_PARAM(access_hint);
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture2D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*numMipMaps*/, uint32_t /*array_size*/,
-			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
-			ElementInitData const * /*init_data*/)
+		TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
+			UNREF_PARAM(width);
+			UNREF_PARAM(height);
+			UNREF_PARAM(num_mip_maps);
+			UNREF_PARAM(array_size);
+			UNREF_PARAM(format);
+			UNREF_PARAM(sample_count);
+			UNREF_PARAM(sample_quality);
+			UNREF_PARAM(access_hint);
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTexture3D(uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/, uint32_t /*numMipMaps*/, uint32_t /*array_size*/,
-			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
-			ElementInitData const * /*init_data*/)
+		TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
+			UNREF_PARAM(width);
+			UNREF_PARAM(height);
+			UNREF_PARAM(depth);
+			UNREF_PARAM(num_mip_maps);
+			UNREF_PARAM(array_size);
+			UNREF_PARAM(format);
+			UNREF_PARAM(sample_count);
+			UNREF_PARAM(sample_quality);
+			UNREF_PARAM(access_hint);
 			return Texture::NullObject();
 		}
-		TexturePtr MakeTextureCube(uint32_t /*size*/, uint32_t /*numMipMaps*/, uint32_t /*array_size*/,
-			ElementFormat /*format*/, uint32_t /*sample_count*/, uint32_t /*sample_quality*/, uint32_t /*access_hint*/,
-			ElementInitData const * /*init_data*/)
+		TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
+			UNREF_PARAM(size);
+			UNREF_PARAM(num_mip_maps);
+			UNREF_PARAM(array_size);
+			UNREF_PARAM(format);
+			UNREF_PARAM(sample_count);
+			UNREF_PARAM(sample_quality);
+			UNREF_PARAM(access_hint);
 			return Texture::NullObject();
 		}
 		FrameBufferPtr MakeFrameBuffer()
@@ -74,16 +101,28 @@ namespace KlayGE
 			return RenderLayout::NullObject();
 		}
 
-		GraphicsBufferPtr MakeVertexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
+		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
+			UNREF_PARAM(usage);
+			UNREF_PARAM(access_hint);
+			UNREF_PARAM(size_in_bytes);
+			UNREF_PARAM(fmt);
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeIndexBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
+		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
+			UNREF_PARAM(usage);
+			UNREF_PARAM(access_hint);
+			UNREF_PARAM(size_in_bytes);
+			UNREF_PARAM(fmt);
 			return GraphicsBuffer::NullObject();
 		}
-		GraphicsBufferPtr MakeConstantBuffer(BufferUsage /*usage*/, uint32_t /*access_hint*/, uint32_t /*size_in_bytes*/, void const * /*init_data*/, ElementFormat /*fmt*/)
+		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
+			UNREF_PARAM(usage);
+			UNREF_PARAM(access_hint);
+			UNREF_PARAM(size_in_bytes);
+			UNREF_PARAM(fmt);
 			return GraphicsBuffer::NullObject();
 		}
 
@@ -307,6 +346,59 @@ namespace KlayGE
 		{
 			re_->Resume();
 		}
+	}
+
+	TexturePtr RenderFactory::MakeTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	{
+		TexturePtr ret = this->MakeDelayCreationTexture1D(width, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	TexturePtr RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	{
+		TexturePtr ret = this->MakeDelayCreationTexture2D(width, height, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	TexturePtr RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	{
+		TexturePtr ret = this->MakeDelayCreationTexture3D(width, height, depth, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	TexturePtr RenderFactory::MakeTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+		ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	{
+		TexturePtr ret = this->MakeDelayCreationTextureCube(size, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	GraphicsBufferPtr RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	{
+		GraphicsBufferPtr ret = this->MakeDelayCreationVertexBuffer(usage, access_hint, size_in_byte, fmt);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	GraphicsBufferPtr RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	{
+		GraphicsBufferPtr ret = this->MakeDelayCreationIndexBuffer(usage, access_hint, size_in_byte, fmt);
+		ret->CreateHWResource(init_data);
+		return ret;
+	}
+
+	GraphicsBufferPtr RenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	{
+		GraphicsBufferPtr ret = this->MakeDelayCreationConstantBuffer(usage, access_hint, size_in_byte, fmt);
+		ret->CreateHWResource(init_data);
+		return ret;
 	}
 
 	RasterizerStateObjectPtr RenderFactory::MakeRasterizerStateObject(RasterizerStateDesc const & desc)

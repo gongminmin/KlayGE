@@ -25,7 +25,7 @@ namespace KlayGE
 	{
 	public:
 		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt);
+			uint32_t size_in_byte, ElementFormat fmt);
 
 		ID3D11BufferPtr const & D3DBuffer() const
 		{
@@ -44,12 +44,13 @@ namespace KlayGE
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
+		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
+
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);
 
 	private:
-		void CreateBuffer(void const * init_data);
-
 		void* Map(BufferAccess ba);
 		void Unmap();
 

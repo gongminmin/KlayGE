@@ -49,7 +49,7 @@
 namespace KlayGE
 {
 	D3D12Texture3D::D3D12Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: D3D12Texture(TT_3D, sample_count, sample_quality, access_hint)
 	{
 		BOOST_ASSERT(1 == array_size);
@@ -79,8 +79,6 @@ namespace KlayGE
 		depth_ = depth;
 
 		dxgi_fmt_ = D3D12Mapping::MappingFormat(format_);
-
-		this->CreateHWResource(init_data);
 	}
 
 	uint32_t D3D12Texture3D::Width(uint32_t level) const

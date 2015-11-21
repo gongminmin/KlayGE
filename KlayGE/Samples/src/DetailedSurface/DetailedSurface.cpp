@@ -50,7 +50,7 @@ namespace
 		{
 		}
 
-		void BuildModelInfo()
+		virtual void DoBuildModelInfo() KLAYGE_OVERRIDE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -178,7 +178,7 @@ namespace
 			*(technique_->Effect().ParameterByName("na_length_tex")) = SyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
 			AABBox const & pos_bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();

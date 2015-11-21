@@ -99,6 +99,7 @@ namespace KlayGE
 
 		std::function<RenderablePtr()> renderable_rl_;
 		RenderablePtr renderable_;
+		bool renderable_hw_res_ready_;
 		vertex_elements_type instance_format_;
 
 		float4x4 model_;

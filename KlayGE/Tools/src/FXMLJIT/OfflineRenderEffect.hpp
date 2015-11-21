@@ -164,7 +164,6 @@ namespace KlayGE
 			virtual RenderVariable& operator=(float4x4 const & value);
 			virtual RenderVariable& operator=(TexturePtr const & value);
 			virtual RenderVariable& operator=(TextureSubresource const & value);
-			virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 			virtual RenderVariable& operator=(SamplerStateDesc const & value);
 			virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 			virtual RenderVariable& operator=(std::string const & value);
@@ -432,7 +431,6 @@ namespace KlayGE
 		public:
 			virtual RenderVariable& operator=(TexturePtr const & value);
 			virtual RenderVariable& operator=(TextureSubresource const & value);
-			virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 			virtual RenderVariable& operator=(std::string const & value);
 
 			virtual void Value(TexturePtr& val) const;
@@ -440,7 +438,6 @@ namespace KlayGE
 			virtual void Value(std::string& val) const;
 
 		protected:
-			std::function<TexturePtr()> tl_;
 			mutable TextureSubresource val_;
 			std::string elem_type_;
 		};

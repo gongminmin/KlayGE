@@ -31,7 +31,7 @@
 namespace KlayGE
 {
 	D3D11Texture2D::D3D11Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: D3D11Texture(TT_2D, sample_count, sample_quality, access_hint)
 	{
 		if (0 == numMipMaps)
@@ -81,8 +81,6 @@ namespace KlayGE
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 		width_ = width;
 		height_ = height;
-
-		this->CreateHWResource(init_data);
 	}
 
 	D3D11Texture2D::D3D11Texture2D(ID3D11Texture2DPtr const & d3d_tex)

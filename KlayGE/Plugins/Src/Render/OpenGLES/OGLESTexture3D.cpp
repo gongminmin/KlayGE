@@ -30,7 +30,7 @@
 namespace KlayGE
 {
 	OGLESTexture3D::OGLESTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: OGLESTexture(TT_3D, array_size, sample_count, sample_quality, access_hint)
 	{
 		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
@@ -71,7 +71,25 @@ namespace KlayGE
 		depth_ = depth;
 
 		tex_data_.resize(num_mip_maps_);
-		this->CreateHWResource(init_data);
+
+		glBindTexture(target_type_, texture_);
+		if (glloader_GLES_VERSION_3_0())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+		}
+		else if (glloader_GLES_APPLE_texture_max_level())
+		{
+			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
+		}
+		else
+		{
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (re.HackForTegra())
+			{
+				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+			}
+		}
 	}
 
 	uint32_t OGLESTexture3D::Width(uint32_t level) const
@@ -267,28 +285,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
-		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-		}
-		else if (glloader_GLES_APPLE_texture_max_level())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
-		}
-		else
-		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (re.HackForTegra())
-			{
-				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-			}
-		}
-
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
 			uint32_t const w = this->Width(level);
@@ -349,5 +346,7 @@ namespace KlayGE
 				}
 			}
 		}
+
+		hw_res_ready_ = true;
 	}
 }

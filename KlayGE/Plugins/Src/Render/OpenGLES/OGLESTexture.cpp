@@ -28,7 +28,8 @@
 namespace KlayGE
 {
 	OGLESTexture::OGLESTexture(TextureType type, uint32_t array_size, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-					: Texture(type, sample_count, sample_quality, access_hint)
+					: Texture(type, sample_count, sample_quality, access_hint),
+						hw_res_ready_(false)
 	{
 		array_size_ = array_size;
 
@@ -75,11 +76,18 @@ namespace KlayGE
 			target_type_ = GL_TEXTURE_2D;
 			break;
 		}
+
+		glGenTextures(1, &texture_);
+		glBindTexture(target_type_, texture_);
+		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
 	OGLESTexture::~OGLESTexture()
 	{
 		this->DeleteHWResource();
+
+		glDeleteTextures(1, &texture_);
 	}
 
 	std::wstring const & OGLESTexture::Name() const
@@ -245,7 +253,11 @@ namespace KlayGE
 
 	void OGLESTexture::DeleteHWResource()
 	{
-		tex_data_.clear();
-		glDeleteTextures(1, &texture_);
+		hw_res_ready_ = false;
+	}
+
+	bool OGLESTexture::HWResourceReady() const
+	{
+		return hw_res_ready_;
 	}
 }

@@ -17,7 +17,7 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 public:
 	explicit DetailedSkinnedModel(std::wstring const & name);
 
-	void BuildModelInfo();
+	virtual void DoBuildModelInfo() KLAYGE_OVERRIDE;
 
 	virtual bool IsSkinned() const KLAYGE_OVERRIDE
 	{
@@ -69,7 +69,7 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
 
-	void BuildMeshInfo();
+	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
 
 	void OnRenderBegin();
 

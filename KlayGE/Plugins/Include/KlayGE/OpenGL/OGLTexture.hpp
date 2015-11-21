@@ -76,6 +76,7 @@ namespace KlayGE
 		void TexParameterfv(GLenum pname, GLfloat const * param);
 
 		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
+		virtual bool HWResourceReady() const KLAYGE_OVERRIDE;
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -109,6 +110,8 @@ namespace KlayGE
 		std::map<GLenum, GLint> tex_param_i_;
 		std::map<GLenum, GLfloat> tex_param_f_;
 		std::map<GLenum, float4> tex_param_fv_;
+
+		bool hw_res_ready_;
 	};
 
 	typedef std::shared_ptr<OGLTexture> OGLTexturePtr;
@@ -118,7 +121,7 @@ namespace KlayGE
 	{
 	public:
 		OGLTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 
@@ -142,7 +145,7 @@ namespace KlayGE
 	{
 	public:
 		OGLTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
@@ -172,7 +175,7 @@ namespace KlayGE
 	{
 	public:
 		OGLTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
@@ -202,7 +205,7 @@ namespace KlayGE
 	{
 	public:
 		OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

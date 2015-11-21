@@ -44,7 +44,7 @@ namespace KlayGE
 	{
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt);
+			uint32_t size_in_byte, ElementFormat fmt);
 		virtual ~D3D12GraphicsBuffer();
 
 		ID3D12ResourcePtr const & D3DBuffer() const
@@ -68,6 +68,9 @@ namespace KlayGE
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
+		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE;
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
+
 		uint32_t CounterOffset() const
 		{
 			return counter_offset_;
@@ -76,7 +79,6 @@ namespace KlayGE
 		bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
 
 	private:
-		void CreateBuffer(void const * init_data);
 
 		void* Map(BufferAccess ba);
 		void Unmap();

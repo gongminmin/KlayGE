@@ -67,6 +67,10 @@ namespace KlayGE
 
 		virtual bool StateLess() const = 0;
 
+		virtual std::shared_ptr<void> CreateResource()
+		{
+			return std::shared_ptr<void>();
+		}
 		virtual void SubThreadStage() = 0;
 		virtual std::shared_ptr<void> MainThreadStage() = 0;
 
@@ -76,64 +80,11 @@ namespace KlayGE
 		virtual void CopyDataFrom(ResLoadingDesc const & rhs) = 0;
 		virtual std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) = 0;
 
-		void LoadedRes(std::shared_ptr<void> const & res)
-		{
-			loaded_res_ = res;
-		}
-		std::shared_ptr<void> const & LoadedRes() const
-		{
-			return loaded_res_;
-		}
-
-	private:
-		std::shared_ptr<void> loaded_res_;
+		virtual std::shared_ptr<void> Resource() const = 0;
 	};
 
 	class KLAYGE_CORE_API ResLoader
 	{
-		template <typename T>
-		class EmptyFuncToT
-		{
-		public:
-			explicit EmptyFuncToT(std::function<std::shared_ptr<void>()> const & func)
-				: func_(func)
-			{
-			}
-
-			std::shared_ptr<T> operator()()
-			{
-				return std::static_pointer_cast<T>(func_());
-			}
-
-		private:
-			std::function<std::shared_ptr<void>()> func_;
-		};
-
-		class ASyncRecreateFunctor
-		{
-		public:
-			ASyncRecreateFunctor(std::shared_ptr<void> const & res,
-				ResLoadingDescPtr const & res_desc, std::shared_ptr<volatile bool> const & is_done);
-
-			std::shared_ptr<void> operator()();
-
-		private:
-			std::shared_ptr<void> res_;
-			ResLoadingDescPtr res_desc_;
-			std::shared_ptr<volatile bool> is_done_;
-		};
-
-		class ASyncReuseFunctor
-		{
-		public:
-			explicit ASyncReuseFunctor(std::shared_ptr<void> const & res);
-
-			std::shared_ptr<void> operator()();
-
-		private:
-			std::shared_ptr<void> res_;
-		};
-
 	public:
 		ResLoader();
 		~ResLoader();
@@ -152,7 +103,7 @@ namespace KlayGE
 		std::string AbsPath(std::string const & path);
 
 		std::shared_ptr<void> SyncQuery(ResLoadingDescPtr const & res_desc);
-		std::function<std::shared_ptr<void>()> ASyncQuery(ResLoadingDescPtr const & res_desc);
+		std::shared_ptr<void> ASyncQuery(ResLoadingDescPtr const & res_desc);
 		void Unload(std::shared_ptr<void> const & res);
 
 		template <typename T>
@@ -162,9 +113,9 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		std::function<std::shared_ptr<T>()> ASyncQueryT(ResLoadingDescPtr const & res_desc)
+		std::shared_ptr<T> ASyncQueryT(ResLoadingDescPtr const & res_desc)
 		{
-			return EmptyFuncToT<T>(this->ASyncQuery(res_desc));
+			return std::static_pointer_cast<T>(this->ASyncQuery(res_desc));
 		}
 
 		template <typename T>
@@ -197,14 +148,21 @@ namespace KlayGE
 	private:
 		static std::unique_ptr<ResLoader> res_loader_instance_;
 
+		enum LoadingStatus
+		{
+			LS_Loading,
+			LS_Complete,
+			LS_CanBeRemoved
+		};
+
 		std::string exe_path_;
 		std::vector<std::string> paths_;
 
 		std::mutex loaded_mutex_;
 		std::mutex loading_mutex_;
 		std::vector<std::pair<ResLoadingDescPtr, std::weak_ptr<void>>> loaded_res_;
-		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>> loading_res_;
-		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>>,
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> loading_res_;
+		boost::lockfree::spsc_queue<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>,
 			boost::lockfree::capacity<1024>> loading_res_queue_;
 
 		std::unique_ptr<joiner<void>> loading_thread_;

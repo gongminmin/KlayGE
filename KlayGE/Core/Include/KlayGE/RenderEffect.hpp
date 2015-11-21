@@ -160,7 +160,6 @@ namespace KlayGE
 		virtual RenderVariable& operator=(float4x4 const & value);
 		virtual RenderVariable& operator=(TexturePtr const & value);
 		virtual RenderVariable& operator=(TextureSubresource const & value);
-		virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 		virtual RenderVariable& operator=(SamplerStateObjectPtr const & value);
 		virtual RenderVariable& operator=(GraphicsBufferPtr const & value);
 		virtual RenderVariable& operator=(std::string const & value);
@@ -463,7 +462,6 @@ namespace KlayGE
 
 		virtual RenderVariable& operator=(TexturePtr const & value);
 		virtual RenderVariable& operator=(TextureSubresource const & value);
-		virtual RenderVariable& operator=(std::function<TexturePtr()> const & value);
 		virtual RenderVariable& operator=(std::string const & value);
 
 		virtual void Value(TexturePtr& val) const;
@@ -471,7 +469,6 @@ namespace KlayGE
 		virtual void Value(std::string& val) const;
 
 	protected:
-		std::function<TexturePtr()> tl_;
 		mutable TextureSubresource val_;
 		std::string elem_type_;
 	};
@@ -1097,7 +1094,7 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API RenderEffectPtr SyncLoadRenderEffect(std::string const & effect_name);
-	KLAYGE_CORE_API std::function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name);
+	KLAYGE_CORE_API RenderEffectPtr ASyncLoadRenderEffect(std::string const & effect_name);
 }
 
 #endif		// _RENDEREFFECT_HPP

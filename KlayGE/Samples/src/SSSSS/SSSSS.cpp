@@ -43,9 +43,9 @@ namespace
 		{
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
-			StaticMesh::BuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo();
 
 			mtl_->shininess = 32;
 			mtl_->specular = float3(0.028f, 0.028f, 0.028f);
@@ -112,14 +112,14 @@ bool SSSSSApp::ConfirmDevice() const
 
 void SSSSSApp::OnCreate()
 {
-	std::function<RenderablePtr()> sponza_model_ml = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml",
+	RenderablePtr scene_model = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml",
 		EAH_GPU_Read | EAH_Immutable);
-	std::function<RenderablePtr()> sss_model_ml = ASyncLoadModel("Infinite-Level_02.meshml",
+	RenderablePtr sss_model = ASyncLoadModel("Infinite-Level_02.meshml",
 		EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<SSSMesh>());
-	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds",
+	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds",
 		EAH_GPU_Read | EAH_Immutable);
-	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds",
+	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds",
 		EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
@@ -131,7 +131,7 @@ void SSSSSApp::OnCreate()
 	this->Proj(0.05f, 200.0f);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
-	ambient_light->SkylightTex(y_cube_tl, c_cube_tl);
+	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.3f, 0.3f, 0.3f));
 	ambient_light->AddToSceneManager();
 	
@@ -192,15 +192,15 @@ void SSSSSApp::OnCreate()
 	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, std::placeholders::_1));
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
-	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model, SceneObject::SOA_Cullable);
 	subsurface_obj->ModelMatrix(MathLib::translation(0.0f, 5.0f, 0.0f));
 	subsurface_obj->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(sponza_model_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj->AddToSceneManager();
 
 	SceneObjectSkyBoxPtr sky_box = MakeSharedPtr<SceneObjectSkyBox>();
-	sky_box->CompressedCubeMap(y_cube_tl, c_cube_tl);
+	sky_box->CompressedCubeMap(y_cube, c_cube);
 	sky_box->AddToSceneManager();
 }
 

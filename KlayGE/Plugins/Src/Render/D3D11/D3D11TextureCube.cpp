@@ -31,7 +31,7 @@
 namespace KlayGE
 {
 	D3D11TextureCube::D3D11TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+						uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: D3D11Texture(TT_Cube, sample_count, sample_quality, access_hint)
 	{
 		if (0 == numMipMaps)
@@ -78,8 +78,6 @@ namespace KlayGE
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);
 
 		width_ = size;
-
-		this->CreateHWResource(init_data);
 	}
 
 	uint32_t D3D11TextureCube::Width(uint32_t level) const

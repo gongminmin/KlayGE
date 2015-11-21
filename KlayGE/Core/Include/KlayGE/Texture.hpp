@@ -270,6 +270,7 @@ namespace KlayGE
 
 		virtual void CreateHWResource(ElementInitData const * init_data) = 0;
 		virtual void DeleteHWResource() = 0;
+		virtual bool HWResourceReady() const = 0;
 
 	protected:
 		void ResizeTexture1D(Texture& target,
@@ -313,7 +314,7 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
 	KLAYGE_CORE_API TexturePtr SyncLoadTexture(std::string const & tex_name, uint32_t access_hint);
-	KLAYGE_CORE_API std::function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint);
+	KLAYGE_CORE_API TexturePtr ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint);
 
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,

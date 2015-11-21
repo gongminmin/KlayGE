@@ -476,6 +476,33 @@ namespace KlayGE
 		}
 		else
 		{
+			std::shared_ptr<volatile LoadingStatus> async_is_done;
+			bool found = false;
+			{
+				std::lock_guard<std::mutex> lock(loading_mutex_);
+
+				for (auto const & lrq : loading_res_)
+				{
+					if (lrq.first->Match(*res_desc))
+					{
+						res_desc->CopyDataFrom(*lrq.first);
+						res = lrq.first->Resource();
+						async_is_done = lrq.second;
+						found = true;
+						break;
+					}
+				}
+			}
+
+			if (found)
+			{
+				*async_is_done = LS_Complete;
+			}
+			else
+			{
+				res = res_desc->CreateResource();
+			}
+
 			if (res_desc->HasSubThreadStage())
 			{
 				res_desc->SubThreadStage();
@@ -488,14 +515,14 @@ namespace KlayGE
 		return res;
 	}
 
-	std::function<std::shared_ptr<void>()> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
+	std::shared_ptr<void> ResLoader::ASyncQuery(ResLoadingDescPtr const & res_desc)
 	{
 		this->RemoveUnrefResources();
 
+		std::shared_ptr<void> res;
 		std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
 		if (loaded_res)
 		{
-			std::shared_ptr<void> res;
 			if (res_desc->StateLess())
 			{
 				res = loaded_res;
@@ -508,11 +535,10 @@ namespace KlayGE
 					this->AddLoadedResource(res_desc, res);
 				}
 			}
-			return ResLoader::ASyncReuseFunctor(res);
 		}
 		else
 		{
-			std::shared_ptr<volatile bool> async_is_done;
+			std::shared_ptr<volatile LoadingStatus> async_is_done;
 			bool found = false;
 			{
 				std::lock_guard<std::mutex> lock(loading_mutex_);
@@ -522,6 +548,7 @@ namespace KlayGE
 					if (lrq.first->Match(*res_desc))
 					{
 						res_desc->CopyDataFrom(*lrq.first);
+						res = lrq.first->Resource();
 						async_is_done = lrq.second;
 						found = true;
 						break;
@@ -531,33 +558,34 @@ namespace KlayGE
 
 			if (found)
 			{
+				if (!res_desc->StateLess())
 				{
 					std::lock_guard<std::mutex> lock(loading_mutex_);
 					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
 				}
-				return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 			}
 			else
 			{
 				if (res_desc->HasSubThreadStage())
 				{
+					res = res_desc->CreateResource();
+
+					async_is_done = MakeSharedPtr<LoadingStatus>(LS_Loading);
+
 					{
 						std::lock_guard<std::mutex> lock(loading_mutex_);
-
-						async_is_done = MakeSharedPtr<bool>(false);
 						loading_res_.push_back(std::make_pair(res_desc, async_is_done));
 					}
 					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
-					return ResLoader::ASyncRecreateFunctor(loaded_res, res_desc, async_is_done);
 				}
 				else
 				{
-					std::shared_ptr<void> res = res_desc->MainThreadStage();
+					res = res_desc->MainThreadStage();
 					this->AddLoadedResource(res_desc, res);
-					return ResLoader::ASyncReuseFunctor(res);
 				}
 			}
 		}
+		return res;
 	}
 
 	void ResLoader::Unload(std::shared_ptr<void> const & res)
@@ -629,23 +657,23 @@ namespace KlayGE
 
 	void ResLoader::Update()
 	{
-		std::lock_guard<std::mutex> lock(loading_mutex_);
-
-		for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
+		std::vector<std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>>> tmp_loading_res;
 		{
-			if (*(iter->second))
+			std::lock_guard<std::mutex> lock(loading_mutex_);
+			tmp_loading_res = loading_res_;
+		}
+
+		for (auto& lrq : tmp_loading_res)
+		{
+			if (LS_Complete == *lrq.second)
 			{
-				ResLoadingDescPtr const & res_desc = iter->first;
+				ResLoadingDescPtr const & res_desc = lrq.first;
 
 				std::shared_ptr<void> res;
 				std::shared_ptr<void> loaded_res = this->FindMatchLoadedResource(res_desc);
 				if (loaded_res)
 				{
-					if (res_desc->StateLess())
-					{
-						res = loaded_res;
-					}
-					else
+					if (!res_desc->StateLess())
 					{
 						res = res_desc->CloneResourceFrom(loaded_res);
 						if (res != loaded_res)
@@ -660,14 +688,22 @@ namespace KlayGE
 					this->AddLoadedResource(res_desc, res);
 				}
 
-				BOOST_ASSERT(res);
-				res_desc->LoadedRes(res);
-
-				iter = loading_res_.erase(iter);
+				*lrq.second = LS_CanBeRemoved;
 			}
-			else
+		}
+
+		{
+			std::lock_guard<std::mutex> lock(loading_mutex_);
+			for (auto iter = loading_res_.begin(); iter != loading_res_.end();)
 			{
-				++ iter;
+				if (LS_CanBeRemoved == *(iter->second))
+				{
+					iter = loading_res_.erase(iter);
+				}
+				else
+				{
+					++ iter;
+				}
 			}
 		}
 	}
@@ -676,42 +712,20 @@ namespace KlayGE
 	{
 		while (!quit_)
 		{
-			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile bool>> res_pair;
+			std::pair<ResLoadingDescPtr, std::shared_ptr<volatile LoadingStatus>> res_pair;
 			while (loading_res_queue_.pop(res_pair))
 			{
-				res_pair.first->SubThreadStage();
-				*res_pair.second = true;
+				if (LS_Loading == *res_pair.second)
+				{
+					res_pair.first->SubThreadStage();
+					*res_pair.second = LS_Complete;
+				}
 			}
 
 			Sleep(10);
 		}
 	}
 
-
-	ResLoader::ASyncRecreateFunctor::ASyncRecreateFunctor(std::shared_ptr<void> const & res,
-				ResLoadingDescPtr const & res_desc, std::shared_ptr<volatile bool> const & is_done)
-		: res_(res), res_desc_(res_desc), is_done_(is_done)
-	{
-	}
-
-	std::shared_ptr<void> ResLoader::ASyncRecreateFunctor::operator()()
-	{
-		if (!res_ && *is_done_)
-		{
-			res_ = res_desc_->LoadedRes();
-		}
-		return res_;
-	}
-
-	ResLoader::ASyncReuseFunctor::ASyncReuseFunctor(std::shared_ptr<void> const & res)
-		: res_(res)
-	{
-	}
-
-	std::shared_ptr<void> ResLoader::ASyncReuseFunctor::operator()()
-	{
-		return res_;
-	}
 
 	ResIdentifierPtr ResLoader::LocatePkt(std::string const & name, std::string const & res_name,
 			std::string& password, std::string& internal_name)

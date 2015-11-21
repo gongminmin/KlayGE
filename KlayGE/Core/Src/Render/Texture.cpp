@@ -1013,6 +1013,115 @@ namespace
 			return true;
 		}
 
+		virtual std::shared_ptr<void> CreateResource() KLAYGE_OVERRIDE
+		{
+			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
+
+			{
+				uint32_t row_pitch, slice_pitch;
+				GetImageInfo(tex_desc_.res_name, tex_data.type, tex_data.width, tex_data.height, tex_data.depth,
+					tex_data.num_mipmaps, tex_data.array_size, tex_data.format,
+					row_pitch, slice_pitch);
+			}
+
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
+
+			if ((Texture::TT_3D == tex_data.type) && (caps.max_texture_depth < tex_data.depth))
+			{
+				tex_data.type = Texture::TT_2D;
+				tex_data.height *= tex_data.depth;
+				tex_data.depth = 1;
+				tex_data.num_mipmaps = 1;
+				tex_data.init_data.resize(1);
+			}
+
+			uint32_t array_size = tex_data.array_size;
+			if (Texture::TT_Cube == tex_data.type)
+			{
+				array_size *= 6;
+			}
+
+			if (((EF_BC5 == tex_data.format) && !caps.texture_format_support(EF_BC5))
+				|| ((EF_BC5_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC5_SRGB)))
+			{
+				if (IsSRGB(tex_data.format))
+				{
+					tex_data.format = EF_BC3_SRGB;
+				}
+				else
+				{
+					tex_data.format = EF_BC3;
+				}
+			}
+			if (((EF_BC4 == tex_data.format) && !caps.texture_format_support(EF_BC4))
+				|| ((EF_BC4_SRGB == tex_data.format) && !caps.texture_format_support(EF_BC4_SRGB)))
+			{
+				if (IsSRGB(tex_data.format))
+				{
+					tex_data.format = EF_BC1_SRGB;
+				}
+				else
+				{
+					tex_data.format = EF_BC1;
+				}
+			}
+
+			static ElementFormat const convert_fmts[][2] =
+			{
+				{ EF_BC1, EF_ARGB8 },
+				{ EF_BC1_SRGB, EF_ARGB8_SRGB },
+				{ EF_BC2, EF_ARGB8 },
+				{ EF_BC2_SRGB, EF_ARGB8_SRGB },
+				{ EF_BC3, EF_ARGB8 },
+				{ EF_BC3_SRGB, EF_ARGB8_SRGB },
+				{ EF_BC4, EF_R8 },
+				{ EF_BC4_SRGB, EF_R8 },
+				{ EF_SIGNED_BC4, EF_SIGNED_R8 },
+				{ EF_BC5, EF_GR8 },
+				{ EF_BC5_SRGB, EF_GR8 },
+				{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
+				{ EF_ETC1, EF_ARGB8 },
+				{ EF_ETC2_BGR8, EF_ARGB8 },
+				{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
+				{ EF_ETC2_A1BGR8, EF_ARGB8 },
+				{ EF_ETC2_A1BGR8_SRGB, EF_ARGB8_SRGB },
+				{ EF_ETC2_ABGR8, EF_ARGB8 },
+				{ EF_ETC2_ABGR8_SRGB, EF_ARGB8_SRGB },
+				{ EF_R8, EF_ARGB8 },
+				{ EF_SIGNED_R8, EF_SIGNED_ABGR8 },
+				{ EF_GR8, EF_ARGB8 },
+				{ EF_SIGNED_GR8, EF_SIGNED_ABGR8 },
+				{ EF_ARGB8_SRGB, EF_ARGB8 },
+				{ EF_ARGB8, EF_ABGR8 },
+				{ EF_R16, EF_R16F },
+				{ EF_R16F, EF_R8 },
+			};
+			while (!caps.texture_format_support(tex_data.format))
+			{
+				bool found = false;
+				for (size_t i = 0; i < sizeof(convert_fmts) / sizeof(convert_fmts[0][0]) / 2; ++ i)
+				{
+					if (convert_fmts[i][0] == tex_data.format)
+					{
+						tex_data.format = convert_fmts[i][1];
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					LogError("%s's format (%ld) is not supported.",
+						tex_desc_.res_name.c_str(), tex_data.format);
+					break;
+				}
+			}
+
+			*tex_desc_.tex = this->CreateTexture();
+			return *tex_desc_.tex;
+		}
+
 		void SubThreadStage()
 		{
 			this->LoadDDS();
@@ -1020,12 +1129,13 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
-			if (!*tex_desc_.tex)
+			TexturePtr const & tex = *tex_desc_.tex;
+			if (!tex || !tex->HWResourceReady())
 			{
-				*tex_desc_.tex = this->CreateTexture();
+				tex->CreateHWResource(&tex_desc_.tex_data->init_data[0]);
 				tex_desc_.tex_data.reset();
 			}
-			return std::static_pointer_cast<void>(*tex_desc_.tex);
+			return std::static_pointer_cast<void>(tex);
 		}
 
 		bool HasSubThreadStage() const
@@ -1060,6 +1170,11 @@ namespace
 			return resource;
 		}
 
+		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		{
+			return *tex_desc_.tex;
+		}
+
 	private:
 		void LoadDDS()
 		{
@@ -1072,7 +1187,6 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
 			if ((Texture::TT_3D == tex_data.type) && (caps.max_texture_depth < tex_data.depth))
 			{
 				tex_data.type = Texture::TT_2D;
@@ -1137,7 +1251,7 @@ namespace
 				}
 			}
 
-			static ElementFormat const convert_fmts[][2] = 
+			static ElementFormat const convert_fmts[][2] =
 			{
 				{ EF_BC1, EF_ARGB8 },
 				{ EF_BC1_SRGB, EF_ARGB8_SRGB },
@@ -1275,8 +1389,6 @@ namespace
 
 				if (!found)
 				{
-					LogError("%s's format (%ld) is not supported.",
-						tex_desc_.res_name.c_str(), tex_data.format);
 					break;
 				}
 			}
@@ -1296,23 +1408,23 @@ namespace
 			switch (tex_data.type)
 			{
 			case Texture::TT_1D:
-				texture = rf.MakeTexture1D(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
-					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
+				texture = rf.MakeDelayCreationTexture1D(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint);
 				break;
 
 			case Texture::TT_2D:
-				texture = rf.MakeTexture2D(tex_data.width, tex_data.height, tex_data.num_mipmaps, tex_data.array_size,
-					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
+				texture = rf.MakeDelayCreationTexture2D(tex_data.width, tex_data.height, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint);
 				break;
 
 			case Texture::TT_3D:
-				texture = rf.MakeTexture3D(tex_data.width, tex_data.height, tex_data.depth, tex_data.num_mipmaps,
-					tex_data.array_size, tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
+				texture = rf.MakeDelayCreationTexture3D(tex_data.width, tex_data.height, tex_data.depth, tex_data.num_mipmaps,
+					tex_data.array_size, tex_data.format, 1, 0, tex_desc_.access_hint);
 				break;
 
 			case Texture::TT_Cube:
-				texture = rf.MakeTextureCube(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
-					tex_data.format, 1, 0, tex_desc_.access_hint, &tex_data.init_data[0]);
+				texture = rf.MakeDelayCreationTextureCube(tex_data.width, tex_data.num_mipmaps, tex_data.array_size,
+					tex_data.format, 1, 0, tex_desc_.access_hint);
 				break;
 
 			default:
@@ -1958,7 +2070,7 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
 
-	std::function<TexturePtr()> ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
+	TexturePtr ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
 	{
 		return ResLoader::Instance().ASyncQueryT<Texture>(MakeSharedPtr<TextureLoadingDesc>(tex_name, access_hint));
 	}
@@ -2827,6 +2939,10 @@ namespace KlayGE
 		}
 		virtual void DeleteHWResource() KLAYGE_OVERRIDE
 		{
+		}
+		virtual bool HWResourceReady() const KLAYGE_OVERRIDE
+		{
+			return true;
 		}
 	};
 

@@ -50,9 +50,13 @@ namespace KlayGE
 		{
 		}
 
-		RenderViewPtr CreateRenderView(uint32_t /*width*/, uint32_t /*height*/)
+		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE
 		{
-			return RenderView::NullObject();
+			UNREF_PARAM(init_data);
+		}
+
+		virtual void DeleteHWResource() KLAYGE_OVERRIDE
+		{
 		}
 	};
 

@@ -274,20 +274,20 @@ namespace
 			mesh_rl_ = rl_;
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
-			StaticMesh::BuildMeshInfo();
+			StaticMesh::DoBuildMeshInfo();
 
-			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tl_;
-			*(effect_->ParameterByName("specular_tex")) = specular_tl_;
-			*(effect_->ParameterByName("shininess_tex")) = shininess_tl_;
-			*(effect_->ParameterByName("emit_tex")) = emit_tl_;
+			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+			*(effect_->ParameterByName("specular_tex")) = specular_tex_;
+			*(effect_->ParameterByName("shininess_tex")) = shininess_tex_;
+			*(effect_->ParameterByName("emit_tex")) = emit_tex_;
 
 			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tl_);
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tl_);
-			*(effect_->ParameterByName("shininess_clr")) = float2(MathLib::clamp(mtl_->shininess, 1e-6f, 0.999f), !!shininess_tl_);
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), !!emit_tl_);
+			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tex_);
+			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
+			*(effect_->ParameterByName("shininess_clr")) = float2(MathLib::clamp(mtl_->shininess, 1e-6f, 0.999f), !!shininess_tex_);
+			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), !!emit_tex_);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -577,9 +577,9 @@ bool ShadowCubeMap::ConfirmDevice() const
 void ShadowCubeMap::OnCreate()
 {
 	loading_percentage_ = 0;
-	lamp_tl_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
-	model_ml_ = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
-	teapot_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	lamp_tex_ = ASyncLoadTexture("lamp.dds", EAH_GPU_Read | EAH_Immutable);
+	scene_model_ = ASyncLoadModel("ScifiRoom.7z//ScifiRoom.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
+	teapot_model_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<OccluderMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderEngine& re = rf.RenderEngineInstance();
@@ -702,15 +702,6 @@ void ShadowCubeMap::OnCreate()
 		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(2);
 		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(1);
 	}
-
-	while (!teapot_model_)
-	{
-		teapot_model_ = teapot_ml_();
-	}
-	while (!scene_model_)
-	{
-		scene_model_ = model_ml_();
-	}
 }
 
 void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)
@@ -780,8 +771,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 		{
 			if (loading_percentage_ < 10)
 			{
-				lamp_tex_ = lamp_tl_();
-				if (lamp_tex_)
+				if (lamp_tex_->HWResourceReady())
 				{
 					light_->ProjectiveTexture(lamp_tex_);
 					loading_percentage_ = 10;
@@ -789,7 +779,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else if (loading_percentage_ < 80)
 			{
-				if (scene_model_)
+				if (scene_model_->HWResourceReady())
 				{
 					SceneObjectPtr so = MakeSharedPtr<SceneObjectHelper>(scene_model_, SceneObject::SOA_Cullable);
 					so->AddToSceneManager();
@@ -808,7 +798,7 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 			}
 			else if (loading_percentage_ < 95)
 			{
-				if (teapot_model_)
+				if (teapot_model_->HWResourceReady())
 				{
 					loading_percentage_ = 95;
 				}

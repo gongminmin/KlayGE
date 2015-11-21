@@ -822,8 +822,8 @@ void OceanApp::OnCreate()
 	this->LookAt(float3(-3455.78f, 23.4f, 8133.55f), float3(-3456.18f, 23.4f, 8134.49f));
 	this->Proj(0.1f, 5000);
 
-	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube = ASyncLoadTexture("DH001cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube = ASyncLoadTexture("DH001cross_y.dds", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -860,7 +860,7 @@ void OceanApp::OnCreate()
 	ocean_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
-	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
+	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
 	sky_box_->AddToSceneManager();
 

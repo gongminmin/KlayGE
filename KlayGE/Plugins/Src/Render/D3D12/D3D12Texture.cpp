@@ -250,6 +250,11 @@ namespace KlayGE
 		d3d_texture_upload_heaps_.reset();
 	}
 
+	bool D3D12Texture::HWResourceReady() const
+	{
+		return d3d_texture_.get() ? true : false;
+	}
+
 	void D3D12Texture::DoHWCopyToTexture(Texture& target)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -676,65 +681,97 @@ namespace KlayGE
 
 	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetriveD3DSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
 	{
-		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
-
-		auto iter = d3d_sr_views_.find(hash_val);
-		if (iter != d3d_sr_views_.end())
+		if (this->HWResourceReady())
 		{
-			return iter->second;
-		}
+			char const * p = reinterpret_cast<char const *>(&desc);
+			size_t hash_val = 0;
+			boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(d3d_texture_, desc);
-		return KLAYGE_EMPLACE(d3d_sr_views_, hash_val, sr_view).first->second;
+			auto iter = d3d_sr_views_.find(hash_val);
+			if (iter != d3d_sr_views_.end())
+			{
+				return iter->second;
+			}
+
+			D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(d3d_texture_, desc);
+			return KLAYGE_EMPLACE(d3d_sr_views_, hash_val, sr_view).first->second;
+		}
+		else
+		{
+			static D3D12ShaderResourceViewSimulationPtr view;
+			return view;
+		}
 	}
 
 	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
 	{
-		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
-
-		auto iter = d3d_ua_views_.find(hash_val);
-		if (iter != d3d_ua_views_.end())
+		if (this->HWResourceReady())
 		{
-			return iter->second;
-		}
+			char const * p = reinterpret_cast<char const *>(&desc);
+			size_t hash_val = 0;
+			boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
-		return KLAYGE_EMPLACE(d3d_ua_views_, hash_val, ua_view).first->second;
+			auto iter = d3d_ua_views_.find(hash_val);
+			if (iter != d3d_ua_views_.end())
+			{
+				return iter->second;
+			}
+
+			D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
+			return KLAYGE_EMPLACE(d3d_ua_views_, hash_val, ua_view).first->second;
+		}
+		else
+		{
+			static D3D12UnorderedAccessViewSimulationPtr view;
+			return view;
+		}
 	}
 
 	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
 	{
-		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
-
-		auto iter = d3d_rt_views_.find(hash_val);
-		if (iter != d3d_rt_views_.end())
+		if (this->HWResourceReady())
 		{
-			return iter->second;
-		}
+			char const * p = reinterpret_cast<char const *>(&desc);
+			size_t hash_val = 0;
+			boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
-		return KLAYGE_EMPLACE(d3d_rt_views_, hash_val, rt_view).first->second;
+			auto iter = d3d_rt_views_.find(hash_val);
+			if (iter != d3d_rt_views_.end())
+			{
+				return iter->second;
+			}
+
+			D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
+			return KLAYGE_EMPLACE(d3d_rt_views_, hash_val, rt_view).first->second;
+		}
+		else
+		{
+			static D3D12RenderTargetViewSimulationPtr view;
+			return view;
+		}
 	}
 
 	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
 	{
-		char const * p = reinterpret_cast<char const *>(&desc);
-		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
-
-		auto iter = d3d_ds_views_.find(hash_val);
-		if (iter != d3d_ds_views_.end())
+		if (this->HWResourceReady())
 		{
-			return iter->second;
-		}
+			char const * p = reinterpret_cast<char const *>(&desc);
+			size_t hash_val = 0;
+			boost::hash_range(hash_val, p, p + sizeof(desc));
 
-		D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
-		return KLAYGE_EMPLACE(d3d_ds_views_, hash_val, ds_view).first->second;
+			auto iter = d3d_ds_views_.find(hash_val);
+			if (iter != d3d_ds_views_.end())
+			{
+				return iter->second;
+			}
+
+			D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
+			return KLAYGE_EMPLACE(d3d_ds_views_, hash_val, ds_view).first->second;
+		}
+		else
+		{
+			static D3D12DepthStencilViewSimulationPtr view;
+			return view;
+		}
 	}
 }

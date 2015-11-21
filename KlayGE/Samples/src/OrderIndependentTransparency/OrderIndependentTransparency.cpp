@@ -70,7 +70,7 @@ namespace
 			effect_attrs_ = EA_TransparencyFront;
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
 			AABBox const & pos_bb = this->PosBound();
 			*(no_oit_tech_->Effect().ParameterByName("pos_center")) = pos_bb.Center();

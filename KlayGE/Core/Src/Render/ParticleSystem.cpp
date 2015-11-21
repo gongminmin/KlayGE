@@ -392,6 +392,11 @@ namespace
 			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
+		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		{
+			return *ps_desc_.ps;
+		}
+
 	private:
 		ParticleSystemDesc ps_desc_;
 	};
@@ -877,9 +882,10 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
-	std::function<ParticleSystemPtr()> ASyncLoadParticleSystem(std::string const & psml_name)
+	ParticleSystemPtr ASyncLoadParticleSystem(std::string const & psml_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
+		// TODO: Make it really async
+		return ResLoader::Instance().SyncQueryT<ParticleSystem>(MakeSharedPtr<ParticleSystemLoadingDesc>(psml_name));
 	}
 
 	void SaveParticleSystem(ParticleSystemPtr const & ps, std::string const & psml_name)

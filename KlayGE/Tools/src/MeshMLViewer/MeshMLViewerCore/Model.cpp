@@ -105,9 +105,9 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 	mesh_rl_ = rl_;
 }
 
-void DetailedSkinnedMesh::BuildMeshInfo()
+void DetailedSkinnedMesh::DoBuildMeshInfo()
 {
-	SkinnedMesh::BuildMeshInfo();
+	SkinnedMesh::DoBuildMeshInfo();
 
 	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->Effect());
 
@@ -306,7 +306,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 {
 }
 
-void DetailedSkinnedModel::BuildModelInfo()
+void DetailedSkinnedModel::DoBuildModelInfo()
 {
 	bool has_tc = false;
 	bool has_normal = false;

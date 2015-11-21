@@ -789,8 +789,8 @@ void GPUParticleSystemApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	auto terrain_height = ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable);
-	auto terrain_normal = ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr terrain_height_tex = ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr terrain_normal_tex = ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable);
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
@@ -808,17 +808,6 @@ void GPUParticleSystemApp::OnCreate()
 
 	particles_ = MakeSharedPtr<ParticlesObject>(NUM_PARTICLE);
 	particles_->AddToSceneManager();
-
-	TexturePtr terrain_height_tex;
-	while (!terrain_height_tex)
-	{
-		terrain_height_tex = terrain_height();
-	}
-	TexturePtr terrain_normal_tex;
-	while (!terrain_normal_tex)
-	{
-		terrain_normal_tex = terrain_normal();
-	}
 
 	gpu_ps = MakeSharedPtr<GPUParticleSystem>(NUM_PARTICLE, terrain_height_tex, terrain_normal_tex);
 	gpu_ps->AutoEmit(256);

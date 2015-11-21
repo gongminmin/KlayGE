@@ -39,7 +39,7 @@
 namespace KlayGE
 {
 	OGLTextureCube::OGLTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+								uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: OGLTexture(TT_Cube, array_size, sample_count, sample_quality, access_hint)
 	{
 		format_ = format;
@@ -63,7 +63,7 @@ namespace KlayGE
 		width_ = size;
 
 		pbos_.resize(array_size * num_mip_maps_ * 6);
-		this->CreateHWResource(init_data);
+		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
 	}
 
 	uint32_t OGLTextureCube::Width(uint32_t level) const
@@ -339,12 +339,7 @@ namespace KlayGE
 		GLenum gltype;
 		OGLMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
-
-		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
-		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -414,5 +409,7 @@ namespace KlayGE
 				}
 			}
 		}
+
+		hw_res_ready_ = true;
 	}
 }

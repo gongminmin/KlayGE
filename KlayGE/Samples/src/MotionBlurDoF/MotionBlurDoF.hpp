@@ -59,8 +59,8 @@ private:
 	KlayGE::PostProcessPtr motion_blur_copy_pp_;
 
 	KlayGE::ScriptModulePtr script_module_;
-	std::function<KlayGE::RenderModelPtr()> model_instance_ml_;
-	std::function<KlayGE::RenderModelPtr()> model_mesh_ml_;
+	KlayGE::RenderModelPtr model_instance_;
+	KlayGE::RenderModelPtr model_mesh_;
 	KlayGE::uint32_t loading_percentage_;
 
 	bool dof_on_;

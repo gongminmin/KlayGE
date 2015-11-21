@@ -101,24 +101,10 @@ namespace KlayGE
 		*skybox_compressed_ep_ = static_cast<int32_t>(0);
 	}
 
-	void RenderableSkyBox::CubeMap(std::function<TexturePtr()> const & cube_tl)
-	{
-		*skybox_cube_tex_ep_ = cube_tl;
-		*skybox_compressed_ep_ = static_cast<int32_t>(0);
-	}
-
 	void RenderableSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
 		*skybox_cube_tex_ep_ = y_cube;
 		*skybox_Ccube_tex_ep_ = c_cube;
-		*skybox_compressed_ep_ = static_cast<int32_t>(1);
-	}
-
-	void RenderableSkyBox::CompressedCubeMap(std::function<TexturePtr()> const & y_cube_tl,
-			std::function<TexturePtr()> const & c_cube_tl)
-	{
-		*skybox_cube_tex_ep_ = y_cube_tl;
-		*skybox_Ccube_tex_ep_ = c_cube_tl;
 		*skybox_compressed_ep_ = static_cast<int32_t>(1);
 	}
 

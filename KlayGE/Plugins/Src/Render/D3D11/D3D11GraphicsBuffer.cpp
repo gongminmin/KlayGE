@@ -29,7 +29,7 @@
 namespace KlayGE
 {
 	D3D11GraphicsBuffer::D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
-											uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+											uint32_t size_in_byte, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
 							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
 	{
@@ -41,8 +41,6 @@ namespace KlayGE
 		D3D11RenderEngine const & renderEngine(*checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
-
-		this->CreateBuffer(init_data);
 	}
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
@@ -120,7 +118,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11GraphicsBuffer::CreateBuffer(void const * init_data)
+	void D3D11GraphicsBuffer::CreateHWResource(void const * init_data)
 	{
 		D3D11_SUBRESOURCE_DATA subres_init;
 		D3D11_SUBRESOURCE_DATA* p_subres = nullptr;
@@ -191,6 +189,13 @@ namespace KlayGE
 			TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
 			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 		}
+	}
+
+	void D3D11GraphicsBuffer::DeleteHWResource()
+	{
+		d3d_sr_view_.reset();
+		d3d_ua_view_.reset();
+		buffer_.reset();
 	}
 
 	void* D3D11GraphicsBuffer::Map(BufferAccess ba)

@@ -58,25 +58,25 @@ namespace KlayGE
 		return name;
 	}
 
-	TexturePtr D3D12RenderFactory::MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr D3D12RenderFactory::MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<D3D12Texture1D>(width, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<D3D12Texture1D>(width, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
-	TexturePtr D3D12RenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr D3D12RenderFactory::MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<D3D12Texture2D>(width, height, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<D3D12Texture2D>(width, height, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
-	TexturePtr D3D12RenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr D3D12RenderFactory::MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<D3D12Texture3D>(width, height, depth, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<D3D12Texture3D>(width, height, depth, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
-	TexturePtr D3D12RenderFactory::MakeTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr D3D12RenderFactory::MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<D3D12TextureCube>(size, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<D3D12TextureCube>(size, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
 
 	FrameBufferPtr D3D12RenderFactory::MakeFrameBuffer()
@@ -89,25 +89,25 @@ namespace KlayGE
 		return MakeSharedPtr<D3D12RenderLayout>();
 	}
 
-	GraphicsBufferPtr D3D12RenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat fmt)
 	{
 		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, init_data, fmt);
+			size_in_byte, fmt);
 	}
 
-	GraphicsBufferPtr D3D12RenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat fmt)
 	{
 		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			size_in_byte, init_data, fmt);
+			size_in_byte, fmt);
 	}
 
-	GraphicsBufferPtr D3D12RenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr D3D12RenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat fmt)
 	{
 		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			(size_in_byte + 255) & ~255, init_data, fmt);
+			(size_in_byte + 255) & ~255, fmt);
 	}
 
 	QueryPtr D3D12RenderFactory::MakeOcclusionQuery()

@@ -4183,12 +4183,6 @@ namespace KlayGE
 			return *this;
 		}
 
-		RenderVariable& RenderVariable::operator=(std::function<TexturePtr()> const & /*value*/)
-		{
-			BOOST_ASSERT(false);
-			return *this;
-		}
-
 		RenderVariable& RenderVariable::operator=(SamplerStateDesc const & /*value*/)
 		{
 			BOOST_ASSERT(false);
@@ -4550,52 +4544,22 @@ namespace KlayGE
 			return *this;
 		}
 
-		RenderVariable& RenderVariableTexture::operator=(std::function<TexturePtr()> const & value)
-		{
-			tl_ = value;
-			if (tl_)
-			{
-				val_.tex = tl_();
-				val_.first_array_index = 0;
-				val_.first_level = 0;
-				if (val_.tex)
-				{
-					val_.num_items = val_.tex->ArraySize();
-					val_.num_levels = val_.tex->NumMipMaps();
-				}
-				else
-				{
-					val_.num_items = 1;
-					val_.num_levels = 1;
-				}
-			}
-			return *this;
-		}
-
 		void RenderVariableTexture::Value(TexturePtr& val) const
 		{
-			if (tl_ && !val_.tex)
+			if (val_.tex)
 			{
-				val_.tex = tl_();
-				if (val_.tex)
-				{
-					val_.num_items = val_.tex->ArraySize();
-					val_.num_levels = val_.tex->NumMipMaps();
-				}
+				val_.num_items = val_.tex->ArraySize();
+				val_.num_levels = val_.tex->NumMipMaps();
 			}
 			val = val_.tex;
 		}
 
 		void RenderVariableTexture::Value(TextureSubresource& val) const
 		{
-			if (tl_ && !val_.tex)
+			if (val_.tex)
 			{
-				val_.tex = tl_();
-				if (val_.tex)
-				{
-					val_.num_items = val_.tex->ArraySize();
-					val_.num_levels = val_.tex->NumMipMaps();
-				}
+				val_.num_items = val_.tex->ArraySize();
+				val_.num_levels = val_.tex->NumMipMaps();
 			}
 			val = val_;
 		}

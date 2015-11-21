@@ -38,32 +38,25 @@
 namespace KlayGE
 {
 	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
-					uint32_t size_in_byte, void const * init_data)
+					uint32_t size_in_byte)
 			: GraphicsBuffer(usage, access_hint, size_in_byte),
-				target_(target)
+				vb_(0), target_(target)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
 			|| (GL_UNIFORM_BUFFER == target));
-
-		glGenBuffers(1, &vb_);
-		this->CreateBuffer(init_data);
 	}
 
 	OGLGraphicsBuffer::~OGLGraphicsBuffer()
 	{
-		if (Context::Instance().RenderFactoryValid())
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.DeleteBuffers(1, &vb_);
-		}
-		else
-		{
-			glDeleteBuffers(1, &vb_);
-		}
+		this->DeleteHWResource();
 	}
 
-	void OGLGraphicsBuffer::CreateBuffer(void const * data)
+	void OGLGraphicsBuffer::CreateHWResource(void const * data)
 	{
+		BOOST_ASSERT(0 == vb_);
+
+		glGenBuffers(1, &vb_);
+
 		if (glloader_GL_EXT_direct_state_access())
 		{
 			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), data,
@@ -76,6 +69,24 @@ namespace KlayGE
 			glBufferData(target_,
 				static_cast<GLsizeiptr>(size_in_byte_), data,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
+	}
+
+	void OGLGraphicsBuffer::DeleteHWResource()
+	{
+		if (vb_ != 0)
+		{
+			if (Context::Instance().RenderFactoryValid())
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteBuffers(1, &vb_);
+			}
+			else
+			{
+				glDeleteBuffers(1, &vb_);
+			}
+
+			vb_ = 0;
 		}
 	}
 

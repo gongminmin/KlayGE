@@ -45,9 +45,9 @@ private:
 	KlayGE::CameraPtr screen_camera_;
 	KlayGE::CameraPathControllerPtr screen_camera_path_;
 
-	std::function<KlayGE::RenderModelPtr()> teapot_ml_;
-	std::function<KlayGE::TexturePtr()> y_cube_tl_;
-	std::function<KlayGE::TexturePtr()> c_cube_tl_;
+	KlayGE::RenderModelPtr teapot_model_;
+	KlayGE::TexturePtr y_cube_;
+	KlayGE::TexturePtr c_cube_;
 	KlayGE::uint32_t loading_percentage_;
 
 	KlayGE::UIDialogPtr parameter_dialog_;

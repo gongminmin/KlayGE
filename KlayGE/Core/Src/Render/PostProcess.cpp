@@ -210,6 +210,11 @@ namespace
 			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
+		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		{
+			return *pp_desc_.pp;
+		}
+
 	private:
 		PostProcessDesc pp_desc_;
 	};
@@ -820,9 +825,10 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
-	std::function<PostProcessPtr()> ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
+	PostProcessPtr ASyncLoadPostProcess(std::string const & ppml_name, std::string const & pp_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
+		// TODO: Make it really async
+		return ResLoader::Instance().SyncQueryT<PostProcess>(MakeSharedPtr<PostProcessLoadingDesc>(ppml_name, pp_name));
 	}
 
 

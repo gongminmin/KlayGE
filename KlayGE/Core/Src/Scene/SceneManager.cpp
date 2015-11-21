@@ -325,66 +325,69 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void SceneManager::AddRenderable(RenderablePtr const & obj)
 	{
-		bool add;
-		if (obj->SelectMode())
+		if (obj->HWResourceReady())
 		{
-			add = true;
-		}
-		else
-		{
-			if (urt_ & App3DFramework::URV_OpaqueOnly)
-			{
-				add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
-			}
-			else if (urt_ & App3DFramework::URV_TransparencyBackOnly)
-			{
-				add = obj->TransparencyBackFace();
-			}
-			else if (urt_ & App3DFramework::URV_TransparencyFrontOnly)
-			{
-				add = obj->TransparencyFrontFace();
-			}
-			else
+			bool add;
+			if (obj->SelectMode())
 			{
 				add = true;
 			}
-
-			if (deferred_mode_)
+			else
 			{
-				if (urt_ & App3DFramework::URV_SpecialShadingOnly)
+				if (urt_ & App3DFramework::URV_OpaqueOnly)
 				{
-					add &= obj->SpecialShading();
+					add = !(obj->TransparencyBackFace() || obj->TransparencyFrontFace());
 				}
-				else if (urt_ & App3DFramework::URV_ReflectionOnly)
+				else if (urt_ & App3DFramework::URV_TransparencyBackOnly)
 				{
-					add &= obj->Reflection();
+					add = obj->TransparencyBackFace();
 				}
+				else if (urt_ & App3DFramework::URV_TransparencyFrontOnly)
+				{
+					add = obj->TransparencyFrontFace();
+				}
+				else
+				{
+					add = true;
+				}
+
+				if (deferred_mode_)
+				{
+					if (urt_ & App3DFramework::URV_SpecialShadingOnly)
+					{
+						add &= obj->SpecialShading();
+					}
+					else if (urt_ & App3DFramework::URV_ReflectionOnly)
+					{
+						add &= obj->Reflection();
+					}
+				}
+
+				add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly))
+					|| !deferred_mode_;
+
+				add |= (deferred_mode_ && obj->SimpleForward() && (urt_ & App3DFramework::URV_SimpleForwardOnly));
 			}
 
-			add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly))
-				|| !deferred_mode_;
-
-			add |= (deferred_mode_ && obj->SimpleForward() && (urt_ & App3DFramework::URV_SimpleForwardOnly));
-		}
-
-		if (add)
-		{
-			RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
-			BOOST_ASSERT(obj_tech);
-			RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
-			bool found = false;
-			for (auto& items : render_queue_)
+			if (add)
 			{
-				if (items.first == tech)
+				RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
+				BOOST_ASSERT(obj_tech);
+				RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
+				bool found = false;
+				for (auto& items : render_queue_)
 				{
-					items.second.push_back(obj);
-					found = true;
-					break;
+					if (items.first == tech)
+					{
+						items.second.push_back(obj);
+						found = true;
+						break;
+					}
 				}
-			}
-			if (!found)
-			{
-				render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
+				if (!found)
+				{
+					render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
+				}
 			}
 		}
 	}

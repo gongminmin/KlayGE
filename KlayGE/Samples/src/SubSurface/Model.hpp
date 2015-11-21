@@ -50,7 +50,7 @@ public:
 	void SigmaT(float sigma_t);
 	void MtlThickness(float thickness);
 
-	void BuildMeshInfo();
+	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
 
 private:
 	bool depth_texture_support_;

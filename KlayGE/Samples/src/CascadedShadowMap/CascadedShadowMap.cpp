@@ -74,11 +74,11 @@ void CascadedShadowMapApp::OnCreate()
 	light_controller_.AttachCamera(light_ctrl_camera_);
 	light_controller_.Scalers(0.003f, 0.003f);
 
-	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<RenderablePtr()> plane_ml = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
+	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	RenderablePtr plane_model = ASyncLoadModel("plane.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
-	std::function<RenderablePtr()> katapult_ml = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
+	RenderablePtr katapult_model = ASyncLoadModel("katapult.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -86,7 +86,7 @@ void CascadedShadowMapApp::OnCreate()
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
-	ambient_light->SkylightTex(y_cube_tl, c_cube_tl);
+	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 	ambient_light->AddToSceneManager();
 	
@@ -96,11 +96,11 @@ void CascadedShadowMapApp::OnCreate()
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 
-	SceneObjectPtr plane_so = MakeSharedPtr<SceneObjectHelper>(plane_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr plane_so = MakeSharedPtr<SceneObjectHelper>(plane_model, SceneObject::SOA_Cullable);
 	plane_so->ModelMatrix(MathLib::scaling(200.0f, 1.0f, 200.0f));
 	plane_so->AddToSceneManager();
 
-	SceneObjectPtr katapult_so = MakeSharedPtr<SceneObjectHelper>(katapult_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr katapult_so = MakeSharedPtr<SceneObjectHelper>(katapult_model, SceneObject::SOA_Cullable);
 	katapult_so->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -135,7 +135,7 @@ void CascadedShadowMapApp::OnCreate()
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	sky_box_->AddToSceneManager();
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();

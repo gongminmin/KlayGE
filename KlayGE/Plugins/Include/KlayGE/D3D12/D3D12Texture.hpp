@@ -83,6 +83,7 @@ namespace KlayGE
 		virtual D3D12DepthStencilViewSimulationPtr const & RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
 
 		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
+		virtual bool HWResourceReady() const KLAYGE_OVERRIDE;
 
 	protected:
 		void DoHWCopyToTexture(Texture& target);
@@ -146,7 +147,7 @@ namespace KlayGE
 	class D3D12Texture1D : public D3D12Texture
 	{
 	public:
-		D3D12Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+		D3D12Texture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 
@@ -179,7 +180,7 @@ namespace KlayGE
 	class D3D12Texture2D : public D3D12Texture
 	{
 	public:
-		D3D12Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+		D3D12Texture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		explicit D3D12Texture2D(ID3D12ResourcePtr const & d3d_tex);
 
 		uint32_t Width(uint32_t level) const;
@@ -218,7 +219,7 @@ namespace KlayGE
 	class D3D12Texture3D : public D3D12Texture
 	{
 	public:
-		D3D12Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+		D3D12Texture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;
@@ -258,7 +259,7 @@ namespace KlayGE
 	{
 	public:
 		D3D12TextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size, ElementFormat format,
-			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data);
+			uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 
 		uint32_t Width(uint32_t level) const;
 		uint32_t Height(uint32_t level) const;

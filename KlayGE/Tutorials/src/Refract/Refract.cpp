@@ -48,7 +48,7 @@ namespace
 			*(technique_->Effect().ParameterByName("eta_ratio")) = float3(1 / 1.1f, 1 / 1.11f, 1 / 1.12f);
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
 			AABBox const & pos_bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();

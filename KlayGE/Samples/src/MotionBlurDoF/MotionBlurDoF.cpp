@@ -58,7 +58,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -113,7 +113,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		void BuildMeshInfo()
+		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -712,8 +712,8 @@ bool MotionBlurDoFApp::ConfirmDevice() const
 void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
-	model_instance_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	model_mesh_ml_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -1073,10 +1073,9 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		{
 			if (loading_percentage_ < 80 - NUM_LINE)
 			{
-				RenderModelPtr model = model_instance_ml_();
-				if (model)
+				if (model_instance_->HWResourceReady())
 				{
-					renderInstance_ = model->Subrenderable(0);
+					renderInstance_ = model_instance_->Subrenderable(0);
 					loading_percentage_ = 80 - NUM_LINE;
 				}
 			}
@@ -1115,10 +1114,9 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			}
 			else
 			{
-				RenderModelPtr model = model_mesh_ml_();
-				if (model)
+				if (model_mesh_)
 				{
-					renderMesh_ = model->Subrenderable(0);
+					renderMesh_ = model_mesh_->Subrenderable(0);
 					loading_percentage_ = 100;
 				}
 			}

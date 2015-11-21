@@ -27,7 +27,7 @@
 namespace KlayGE
 {
 	SceneObject::SceneObject(uint32_t attrib)
-		: attrib_(attrib), parent_(nullptr),
+		: attrib_(attrib), parent_(nullptr), renderable_hw_res_ready_(false),
 			model_(float4x4::Identity()), abs_model_(float4x4::Identity()),
 			visible_mark_(BO_No)
 	{
@@ -148,7 +148,15 @@ namespace KlayGE
 				this->OnAttachRenderable(false);
 				this->UpdateAbsModelMatrix();
 				refreshed = true;
+				renderable_hw_res_ready_ = true;
 			}
+		}
+		if (renderable_ && !renderable_rl_ && !renderable_hw_res_ready_ && renderable_->HWResourceReady())
+		{
+			this->OnAttachRenderable(false);
+			this->UpdateAbsModelMatrix();
+			refreshed = true;
+			renderable_hw_res_ready_ = true;
 		}
 
 		if (main_thread_update_func_)

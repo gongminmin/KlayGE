@@ -118,6 +118,9 @@ namespace KlayGE
 
 		virtual void CopyToBuffer(GraphicsBuffer& rhs) = 0;
 
+		virtual void CreateHWResource(void const * init_data) = 0;
+		virtual void DeleteHWResource() = 0;
+
 	private:
 		virtual void* Map(BufferAccess ba) = 0;
 		virtual void Unmap() = 0;

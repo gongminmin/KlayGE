@@ -23,9 +23,9 @@ DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstr
 {
 }
 
-void DetailedSkinnedMesh::BuildMeshInfo()
+void DetailedSkinnedMesh::DoBuildMeshInfo()
 {
-	SkinnedMesh::BuildMeshInfo();
+	SkinnedMesh::DoBuildMeshInfo();
 
 	this->BindDeferredEffect(checked_pointer_cast<DetailedSkinnedModel>(model_.lock())->Effect());
 }
@@ -74,7 +74,7 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 		effect_attrs_ |= EA_TransparencyBack;
 		effect_attrs_ |= EA_TransparencyFront;
 	}
-	if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tl_
+	if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
 		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 		|| (effect_attrs_ & EA_Reflection))
 	{
@@ -84,13 +84,6 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	diffuse_tl_ = std::function<TexturePtr()>();
-	specular_tl_ = std::function<TexturePtr()>();
-	shininess_tl_ = std::function<TexturePtr()>();
-	normal_tl_ = std::function<TexturePtr()>();
-	height_tl_ = std::function<TexturePtr()>();
-	emit_tl_ = std::function<TexturePtr()>();
-
 	diffuse_tex_.reset();
 	specular_tex_.reset();
 	shininess_tex_.reset();
@@ -140,7 +133,7 @@ DetailedSkinnedModel::DetailedSkinnedModel(std::wstring const & name)
 {
 }
 
-void DetailedSkinnedModel::BuildModelInfo()
+void DetailedSkinnedModel::DoBuildModelInfo()
 {
 	bool has_tc = false;
 	bool has_normal = false;

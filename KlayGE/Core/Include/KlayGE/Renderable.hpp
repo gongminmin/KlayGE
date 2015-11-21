@@ -220,6 +220,11 @@ namespace KlayGE
 			return static_cast<uint32_t>(subrenderables_.size());
 		}
 
+		virtual bool HWResourceReady() const
+		{
+			return true;
+		}
+
 		// For select mode
 
 		virtual void ObjectID(uint32_t id);

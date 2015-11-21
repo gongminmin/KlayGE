@@ -47,12 +47,11 @@
 namespace KlayGE
 {
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
-							uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+							uint32_t size_in_byte, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
 							counter_offset_(0),
 							fmt_as_shader_res_(fmt), curr_state_(D3D12_RESOURCE_STATE_COMMON)
 	{
-		this->CreateBuffer(init_data);
 	}
 
 	D3D12GraphicsBuffer::~D3D12GraphicsBuffer()
@@ -64,7 +63,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12GraphicsBuffer::CreateBuffer(void const * subres_init)
+	void D3D12GraphicsBuffer::CreateHWResource(void const * subres_init)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12DevicePtr const & device = re.D3DDevice();
@@ -223,6 +222,15 @@ namespace KlayGE
 		}
 	}
 
+	void D3D12GraphicsBuffer::DeleteHWResource()
+	{
+		d3d_sr_view_.reset();
+		d3d_ua_view_.reset();
+		counter_offset_ = 0;
+		buffer_counter_upload_.reset();
+		buffer_.reset();
+	}
+
 	void* D3D12GraphicsBuffer::Map(BufferAccess ba)
 	{
 		BOOST_ASSERT(buffer_);
@@ -239,7 +247,7 @@ namespace KlayGE
 			if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
 				re.AddResourceForRemovingAfterSync(buffer_);
-				this->CreateBuffer(nullptr);
+				this->CreateHWResource(nullptr);
 			}
 			else
 			{

@@ -810,6 +810,11 @@ namespace
 			return resource;
 		}
 
+		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		{
+			return *font_desc_.kfont;
+		}
+
 	private:
 		FontDesc font_desc_;
 	};
@@ -903,8 +908,9 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 
-	std::function<FontPtr()> ASyncLoadFont(std::string const & font_name, uint32_t flags)
+	FontPtr ASyncLoadFont(std::string const & font_name, uint32_t flags)
 	{
-		return ResLoader::Instance().ASyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
+		// TODO: Make it really async
+		return ResLoader::Instance().SyncQueryT<Font>(MakeSharedPtr<FontLoadingDesc>(font_name, flags));
 	}
 }

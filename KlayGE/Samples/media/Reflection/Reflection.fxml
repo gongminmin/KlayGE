@@ -165,7 +165,7 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 
 #ifndef NOPERSPECTIVE_SUPPORT
 	oTc.z = oPos.w;
-	oTc.xy *= oTcW.z;
+	oTc.xy *= oTc.z;
 #endif
 }
 

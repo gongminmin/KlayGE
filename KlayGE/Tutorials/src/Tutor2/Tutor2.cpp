@@ -44,7 +44,7 @@ class RenderPolygon : public KlayGE::StaticMesh
 public:
 	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
 
-	void BuildMeshInfo();
+	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
 
 	virtual void OnRenderBegin();
 };
@@ -180,7 +180,7 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
 
-void RenderPolygon::BuildMeshInfo()
+void RenderPolygon::DoBuildMeshInfo()
 {
 	KlayGE::AABBox const & pos_bb = this->PosBound();
 	*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();

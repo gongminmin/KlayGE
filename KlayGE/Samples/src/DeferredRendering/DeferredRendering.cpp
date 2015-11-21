@@ -131,16 +131,16 @@ void DeferredRenderingApp::OnCreate()
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));
 	this->Proj(0.1f, 500.0f);
 
-	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<RenderablePtr()> model_ml = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube = ASyncLoadTexture("Lake_CraterLake03_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	RenderablePtr scene_model = ASyncLoadModel("sponza_crytek.7z//sponza_crytek.meshml", EAH_GPU_Read | EAH_Immutable);
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
-	ambient_light->SkylightTex(y_cube_tl, c_cube_tl);
+	ambient_light->SkylightTex(y_cube, c_cube);
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 	ambient_light->AddToSceneManager();
 	
@@ -184,7 +184,7 @@ void DeferredRenderingApp::OnCreate()
 	spot_light_src_[2] = MakeSharedPtr<SceneObjectLightSourceProxy>(spot_light_[2]);
 	spot_light_src_[2]->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable, 0);
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable);
 	scene_obj->AddToSceneManager();
 
 	fpcController_.Scalers(0.05f, 0.5f);
@@ -239,7 +239,7 @@ void DeferredRenderingApp::OnCreate()
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	sky_box_->AddToSceneManager();
 
 	ps_ = SyncLoadParticleSystem("Fire.psml");

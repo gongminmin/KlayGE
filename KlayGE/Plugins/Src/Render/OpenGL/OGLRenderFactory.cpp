@@ -40,28 +40,28 @@ namespace KlayGE
 		return name;
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr OGLRenderFactory::MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<OGLTexture1D>(width, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<OGLTexture1D>(width, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr OGLRenderFactory::MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<OGLTexture2D>(width, height, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<OGLTexture2D>(width, height, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr OGLRenderFactory::MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<OGLTexture3D>(width, height, depth, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<OGLTexture3D>(width, height, depth, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
 
-	TexturePtr OGLRenderFactory::MakeTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint, ElementInitData const * init_data)
+	TexturePtr OGLRenderFactory::MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 	{
-		return MakeSharedPtr<OGLTextureCube>(size, numMipMaps, array_size, format, sample_count, sample_quality, access_hint, init_data);
+		return MakeSharedPtr<OGLTextureCube>(size, num_mip_maps, array_size, format, sample_count, sample_quality, access_hint);
 	}
 
 	FrameBufferPtr OGLRenderFactory::MakeFrameBuffer()
@@ -74,27 +74,27 @@ namespace KlayGE
 		return MakeSharedPtr<OGLRenderLayout>();
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLRenderFactory::MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte, init_data);
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ARRAY_BUFFER, size_in_byte);
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat /*fmt*/)
+	GraphicsBufferPtr OGLRenderFactory::MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat /*fmt*/)
 	{
-		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte, init_data);
+		return MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_ELEMENT_ARRAY_BUFFER, size_in_byte);
 	}
 
-	GraphicsBufferPtr OGLRenderFactory::MakeConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, void const * init_data, ElementFormat fmt)
+	GraphicsBufferPtr OGLRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
+			uint32_t size_in_byte, ElementFormat fmt)
 	{
 		UNREF_PARAM(fmt);
 
 		GraphicsBufferPtr ret;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_uniform_buffer_object())
 		{
-			ret = MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, init_data);
+			ret = MakeSharedPtr<OGLGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte);
 		}
 		return ret;
 	}

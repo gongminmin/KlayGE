@@ -95,9 +95,9 @@ void PostProcessingApp::OnCreate()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	std::function<TexturePtr()> c_cube_tl = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<TexturePtr()> y_cube_tl = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
-	std::function<RenderablePtr()> model_ml = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
+	TexturePtr c_cube = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	RenderablePtr scene_model = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -119,7 +119,7 @@ void PostProcessingApp::OnCreate()
 	point_light_->BindUpdateFunc(PointLightSourceUpdate());
 	point_light_->AddToSceneManager();
 
-	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model_ml, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable, 0);
+	SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(scene_model, SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 	scene_obj->BindMainThreadUpdateFunc(ObjectUpdate());
 	scene_obj->AddToSceneManager();
 
@@ -170,7 +170,7 @@ void PostProcessingApp::OnCreate()
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
+	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	sky_box_->AddToSceneManager();
 
 	color_fb_ = rf.MakeFrameBuffer();

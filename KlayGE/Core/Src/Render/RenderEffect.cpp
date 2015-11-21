@@ -2734,6 +2734,11 @@ namespace KlayGE
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
+		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		{
+			return effect_desc_.effect;
+		}
+
 	private:
 		EffectDesc effect_desc_;
 	};
@@ -5460,12 +5465,6 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariable::operator=(std::function<TexturePtr()> const & /*value*/)
-	{
-		BOOST_ASSERT(false);
-		return *this;
-	}
-
 	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
 	{
 		BOOST_ASSERT(false);
@@ -5873,52 +5872,22 @@ namespace KlayGE
 		return *this;
 	}
 
-	RenderVariable& RenderVariableTexture::operator=(std::function<TexturePtr()> const & value)
-	{
-		tl_ = value;
-		if (tl_)
-		{
-			val_.tex = tl_();
-			val_.first_array_index = 0;
-			val_.first_level = 0;
-			if (val_.tex)
-			{
-				val_.num_items = val_.tex->ArraySize();
-				val_.num_levels = val_.tex->NumMipMaps();
-			}
-			else
-			{
-				val_.num_items = 1;
-				val_.num_levels = 1;
-			}
-		}
-		return *this;
-	}
-
 	void RenderVariableTexture::Value(TexturePtr& val) const
 	{
-		if (tl_ && !val_.tex)
+		if (val_.tex)
 		{
-			val_.tex = tl_();
-			if (val_.tex)
-			{
-				val_.num_items = val_.tex->ArraySize();
-				val_.num_levels = val_.tex->NumMipMaps();
-			}
+			val_.num_items = val_.tex->ArraySize();
+			val_.num_levels = val_.tex->NumMipMaps();
 		}
 		val = val_.tex;
 	}
 
 	void RenderVariableTexture::Value(TextureSubresource& val) const
 	{
-		if (tl_ && !val_.tex)
+		if (val_.tex)
 		{
-			val_.tex = tl_();
-			if (val_.tex)
-			{
-				val_.num_items = val_.tex->ArraySize();
-				val_.num_levels = val_.tex->NumMipMaps();
-			}
+			val_.num_items = val_.tex->ArraySize();
+			val_.num_levels = val_.tex->NumMipMaps();
 		}
 		val = val_;
 	}
@@ -6010,8 +5979,9 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
 	}
 
-	std::function<RenderEffectPtr()> ASyncLoadRenderEffect(std::string const & effect_name)
+	RenderEffectPtr ASyncLoadRenderEffect(std::string const & effect_name)
 	{
-		return ResLoader::Instance().ASyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
+		// TODO: Make it really async
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
 	}
 }

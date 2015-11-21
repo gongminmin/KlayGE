@@ -49,6 +49,7 @@ namespace KlayGE
 		: SceneObject(attrib)
 	{
 		renderable_ = renderable;
+		renderable_hw_res_ready_ = renderable_->HWResourceReady();
 		this->OnAttachRenderable(false);
 	}
 
@@ -94,20 +95,9 @@ namespace KlayGE
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube);
 	}
 
-	void SceneObjectSkyBox::CubeMap(std::function<TexturePtr()> const & cube_tl)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->CubeMap(cube_tl);
-	}
-
 	void SceneObjectSkyBox::CompressedCubeMap(TexturePtr const & y_cube, TexturePtr const & c_cube)
 	{
 		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube, c_cube);
-	}
-
-	void SceneObjectSkyBox::CompressedCubeMap(std::function<TexturePtr()> const & y_cube_tl,
-			std::function<TexturePtr()> const & c_cube_tl)
-	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->CompressedCubeMap(y_cube_tl, c_cube_tl);
 	}
 
 
