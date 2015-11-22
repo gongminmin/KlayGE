@@ -348,7 +348,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 		}
 		if (program_->gs_instance_count > 0)
 		{
-			out << ", invocation = " << program_->gs_instance_count;
+			out << ", invocations = " << program_->gs_instance_count;
 		}
 		out << ") in;\n";
 
