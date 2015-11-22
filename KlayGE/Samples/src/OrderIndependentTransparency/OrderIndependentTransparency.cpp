@@ -53,7 +53,7 @@ namespace
 				dp_nth_depth_tech_ = dp_1st_tech_->Effect().TechniqueByName("DepthPeelingNthDepth");
 			}
 
-			if (caps.max_shader_model >= ShaderModel(5, 0))
+			if (caps.max_simultaneous_uavs > 0)
 			{
 				gen_ppll_tech_ = SyncLoadRenderEffect("FragmentList.fxml")->TechniqueByName("GenPerPixelLinkedLists");
 				rl_quad_ = rf.MakeRenderLayout();
@@ -499,7 +499,7 @@ void OrderIndependentTransparencyApp::OnCreate()
 		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
-	if (caps.max_shader_model >= ShaderModel(5, 0))
+	if (caps.max_simultaneous_uavs > 0)
 	{
 		opaque_bg_fb_ = rf.MakeFrameBuffer();
 		opaque_bg_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
@@ -530,7 +530,7 @@ void OrderIndependentTransparencyApp::OnCreate()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
-	if (caps.max_shader_model < ShaderModel(5, 0))
+	if (0 == caps.max_simultaneous_uavs)
 	{
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(3);
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
@@ -626,7 +626,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	if (caps.max_shader_model >= ShaderModel(5, 0))
+	if (caps.max_simultaneous_uavs > 0)
 	{
 		ElementFormat opaque_bg_format;
 		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
