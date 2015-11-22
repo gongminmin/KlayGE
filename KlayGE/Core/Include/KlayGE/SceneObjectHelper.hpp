@@ -33,7 +33,6 @@ namespace KlayGE
 	public:
 		explicit SceneObjectHelper(uint32_t attrib);
 		SceneObjectHelper(RenderablePtr const & renderable, uint32_t attrib);
-		SceneObjectHelper(std::function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy);
 		virtual ~SceneObjectHelper()
 		{
 		}

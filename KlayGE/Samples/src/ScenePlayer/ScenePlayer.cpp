@@ -451,7 +451,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLAttributePtr attr = projective_node->Attrib("name");
 			if (attr)
 			{
-				projective = SyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+				projective = ASyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
 			}
 		}
 
@@ -647,7 +647,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = model_node->Attrib("name");
 		BOOST_ASSERT(attr);
 
-		RenderModelPtr model = SyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+		RenderModelPtr model = ASyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
 		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model, obj_attr);
 		scene_obj->ModelMatrix(obj_mat);
@@ -670,8 +670,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 
 			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(
-				SyncLoadTexture(y_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable),
-				SyncLoadTexture(c_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+				ASyncLoadTexture(y_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable),
+				ASyncLoadTexture(c_cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
 		}
 		else
 		{
@@ -680,7 +680,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			{
 				sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(
-					SyncLoadTexture(cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
+					ASyncLoadTexture(cube_attr->ValueString(), EAH_GPU_Read | EAH_Immutable));
 			}
 			else
 			{

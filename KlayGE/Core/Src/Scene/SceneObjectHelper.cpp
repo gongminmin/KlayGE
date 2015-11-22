@@ -53,14 +53,6 @@ namespace KlayGE
 		this->OnAttachRenderable(false);
 	}
 
-	SceneObjectHelper::SceneObjectHelper(std::function<RenderablePtr()> const & renderable_rl, uint32_t attrib, int dummy)
-		: SceneObject(attrib)
-	{
-		UNREF_PARAM(dummy);
-
-		renderable_rl_ = renderable_rl;
-	}
-
 	void SceneObjectHelper::OnAttachRenderable(bool add_to_scene)
 	{
 		if (renderable_ && (renderable_->NumSubrenderables() > 0))

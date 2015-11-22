@@ -97,7 +97,6 @@ namespace KlayGE
 		SceneObject* parent_;
 		std::vector<SceneObjectPtr> children_;
 
-		std::function<RenderablePtr()> renderable_rl_;
 		RenderablePtr renderable_;
 		bool renderable_hw_res_ready_;
 		vertex_elements_type instance_format_;

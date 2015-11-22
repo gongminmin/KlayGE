@@ -140,18 +140,7 @@ namespace KlayGE
 	bool SceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
 		bool refreshed = false;
-		if (!renderable_ && renderable_rl_)
-		{
-			renderable_ = renderable_rl_();
-			if (renderable_)
-			{
-				this->OnAttachRenderable(false);
-				this->UpdateAbsModelMatrix();
-				refreshed = true;
-				renderable_hw_res_ready_ = true;
-			}
-		}
-		if (renderable_ && !renderable_rl_ && !renderable_hw_res_ready_ && renderable_->HWResourceReady())
+		if (renderable_ && !renderable_hw_res_ready_ && renderable_->HWResourceReady())
 		{
 			this->OnAttachRenderable(false);
 			this->UpdateAbsModelMatrix();

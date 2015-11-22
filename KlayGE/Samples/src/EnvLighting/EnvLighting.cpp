@@ -475,13 +475,13 @@ void EnvLightingApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube_map = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	if (ResLoader::Instance().Locate("IntegratedBRDF.dds").empty())
 	{
 		SaveTexture(GenIntegrateBRDF(), "../../Samples/media/EnvLighting/IntegratedBRDF.dds");
 	}
-	integrate_brdf_tex_ = SyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
+	integrate_brdf_tex_ = ASyncLoadTexture("IntegratedBRDF.dds", EAH_GPU_Read | EAH_Immutable);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube_map, c_cube_map);

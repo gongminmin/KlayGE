@@ -175,7 +175,7 @@ namespace
 			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb_[1];
 			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb_[2];
 			*(technique_->Effect().ParameterByName("tex_size")) = int2(512, 512);
-			*(technique_->Effect().ParameterByName("na_length_tex")) = SyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
+			*(technique_->Effect().ParameterByName("na_length_tex")) = ASyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
 		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE

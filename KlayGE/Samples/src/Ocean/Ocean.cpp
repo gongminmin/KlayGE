@@ -845,10 +845,10 @@ void OceanApp::OnCreate()
 	}
 
 	HQTerrainSceneObjectPtr terrain = MakeSharedPtr<HQTerrainSceneObject>(MakeSharedPtr<ProceduralTerrain>());
-	terrain->TextureLayer(0, SyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(1, SyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(2, SyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
-	terrain->TextureLayer(3, SyncLoadTexture("Dirt.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(0, ASyncLoadTexture("RealSand40BoH.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(1, ASyncLoadTexture("snow_DM.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(2, ASyncLoadTexture("GrassGreenTexture0002.dds", EAH_GPU_Read | EAH_Immutable));
+	terrain->TextureLayer(3, ASyncLoadTexture("Dirt.dds", EAH_GPU_Read | EAH_Immutable));
 	terrain->TextureScale(0, float2(7, 7));
 	terrain->TextureScale(1, float2(1, 1));
 	terrain->TextureScale(2, float2(3, 3));

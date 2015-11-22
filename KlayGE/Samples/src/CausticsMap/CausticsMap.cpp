@@ -634,14 +634,14 @@ void CausticsMapApp::OnCreate()
 	plane_object_ = MakeSharedPtr<PlaneObject>(50.f, 50.f);
 	plane_object_->AddToSceneManager();
 
-	RenderablePtr model_sphere = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
+	RenderablePtr model_sphere = ASyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	sphere_ = MakeSharedPtr<SceneObjectHelper>(model_sphere, SceneObjectHelper::SOA_Cullable);
 	sphere_->ModelMatrix(MathLib::scaling(200.0f, 200.0f, 200.0f) * MathLib::translation(0.0f, 10.0f, 0.0f));
 	sphere_->AddToSceneManager();
 	sphere_->Visible(false);
 
-	RenderablePtr model_bunny = SyncLoadModel("bunny.7z//bunny.meshml", EAH_GPU_Read | EAH_Immutable,
+	RenderablePtr model_bunny = ASyncLoadModel("bunny.7z//bunny.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RefractModel>(), CreateMeshFactory<RefractMesh>());
 	bunny_ = MakeSharedPtr<SceneObjectHelper>(model_bunny, SceneObjectHelper::SOA_Cullable);
 	bunny_->ModelMatrix(MathLib::scaling(320.0f, 320.0f, 320.0f) * MathLib::translation(3.0f, 2.0f, 0.0f));
@@ -653,8 +653,8 @@ void CausticsMapApp::OnCreate()
 	caustics_grid_ = MakeSharedPtr<CausticsGrid>();
 
 	//Sky Box
-	y_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	c_cube_map_ = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	y_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	c_cube_map_ = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();

@@ -94,10 +94,10 @@ namespace
 				*(gen_ppll_tech_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			}
 
-			TexturePtr diffuse_tex = SyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
-			TexturePtr specular_tex = SyncLoadTexture("robot-clean_specular.dds", EAH_GPU_Read | EAH_Immutable);
-			TexturePtr normal_tex = SyncLoadTexture("robot-clean_normal.dds", EAH_GPU_Read | EAH_Immutable);
-			TexturePtr emit_tex = SyncLoadTexture("robot-clean_selfillumination.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr diffuse_tex = ASyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr specular_tex = ASyncLoadTexture("robot-clean_specular.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr normal_tex = ASyncLoadTexture("robot-clean_normal.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr emit_tex = ASyncLoadTexture("robot-clean_selfillumination.dds", EAH_GPU_Read | EAH_Immutable);
 
 			*(no_oit_tech_->Effect().ParameterByName("diffuse_tex")) = diffuse_tex;
 			*(no_oit_tech_->Effect().ParameterByName("specular_tex")) = specular_tex;
@@ -469,8 +469,8 @@ void OrderIndependentTransparencyApp::OnCreate()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	TexturePtr y_cube_map = SyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr c_cube_map = SyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube_map = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube_map = ASyncLoadTexture("uffizi_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
 	sky_box_->AddToSceneManager();
