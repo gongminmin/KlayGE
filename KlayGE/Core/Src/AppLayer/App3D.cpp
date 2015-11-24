@@ -368,7 +368,9 @@ namespace KlayGE
 		Point position;
 		TIF(point->get_Position(&position));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerDown()(*win, int2(static_cast<int>(position.X), static_cast<int>(position.Y)), conv_id);
+		win->OnPointerDown()(*win,
+			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
+			conv_id);
 
 		return S_OK;
 	}
@@ -397,7 +399,9 @@ namespace KlayGE
 		Point position;
 		TIF(point->get_Position(&position));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerUp()(*win, int2(static_cast<int>(position.X), static_cast<int>(position.Y)), conv_id);
+		win->OnPointerUp()(*win,
+			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
+			conv_id);
 
 		return S_OK;
 	}
@@ -427,7 +431,8 @@ namespace KlayGE
 		boolean contact;
 		TIF(point->get_IsInContact(&contact));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerUpdate()(*win, int2(static_cast<int>(position.X), static_cast<int>(position.Y)),
+		win->OnPointerUpdate()(*win,
+			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
 			conv_id, contact ? true : false);
 
 		return S_OK;
@@ -460,7 +465,8 @@ namespace KlayGE
 		INT32 wheel;
 		TIF(properties->get_MouseWheelDelta(&wheel));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerWheel()(*win, int2(static_cast<int>(position.X), static_cast<int>(position.Y)),
+		win->OnPointerWheel()(*win,
+			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
 			conv_id, wheel);
 
 		return S_OK;

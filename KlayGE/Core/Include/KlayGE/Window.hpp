@@ -94,6 +94,11 @@ namespace KlayGE
 		{
 			return wnd_;
 		}
+
+		float DPIScale() const
+		{
+			return dpi_scale_;
+		}
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -395,6 +400,7 @@ namespace KlayGE
 		WNDPROC default_wnd_proc_;
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
+		float dpi_scale_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;

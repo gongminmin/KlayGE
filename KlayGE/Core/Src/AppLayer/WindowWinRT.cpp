@@ -50,13 +50,15 @@ using namespace Microsoft::WRL::Wrappers;
 namespace KlayGE
 {
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false),
+			dpi_scale_(1)
 	{
 		Convert(wname_, name);
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false),
+			dpi_scale_(1)
 	{
 		Convert(wname_, name);
 	}
@@ -89,10 +91,13 @@ namespace KlayGE
 		float dpi;
 		TIF(disp_prop->get_LogicalDpi(&dpi));
 #endif
+
+		dpi_scale_ = dpi / 96;
+
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
-		width_ = static_cast<uint32_t>(rc.Width * dpi / 96);
-		height_ = static_cast<uint32_t>(rc.Height * dpi / 96);
+		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_);
+		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_);
 	}
 }
 
