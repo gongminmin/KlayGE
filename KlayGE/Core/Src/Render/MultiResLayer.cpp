@@ -194,8 +194,10 @@ namespace KlayGE
 		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
 		for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
 		{
-			int width = depth_deriative_tex_->Width(i - 1);
-			int height = depth_deriative_tex_->Height(i - 1);
+			uint32_t const width = depth_deriative_tex_->Width(i - 1);
+			uint32_t const height = depth_deriative_tex_->Height(i - 1);
+			uint32_t const lower_width = depth_deriative_tex_->Width(i);
+			uint32_t const lower_height = depth_deriative_tex_->Height(i);
 
 			delta_x = 1.0f / width;
 			delta_y = 1.0f / height;
@@ -206,8 +208,8 @@ namespace KlayGE
 			depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 			depth_derivate_mipmap_pp_->Apply();
 
-			depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, width / 2, height / 2,
-				0, i - 1, 0, 0, width / 2, height / 2);
+			depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, lower_width, lower_height,
+				0, i - 1, 0, 0, lower_width, lower_height);
 		}
 	}
 
@@ -224,8 +226,11 @@ namespace KlayGE
 		normal_cone_mipmap_pp_->InputPin(0, normal_cone_tex_);
 		for (uint32_t i = 1; i < normal_cone_tex_->NumMipMaps(); ++ i)
 		{
-			int width = normal_cone_tex_->Width(i - 1);
-			int height = normal_cone_tex_->Height(i - 1);
+			uint32_t const width = normal_cone_tex_->Width(i - 1);
+			uint32_t const height = normal_cone_tex_->Height(i - 1);
+			uint32_t const lower_width = normal_cone_tex_->Width(i);
+			uint32_t const lower_height = normal_cone_tex_->Height(i);
+
 			delta_x = 1.0f / width;
 			delta_y = 1.0f / height;
 			delta_offset = float4(delta_x, delta_y, delta_x / 2, delta_y / 2);
@@ -235,8 +240,8 @@ namespace KlayGE
 			normal_cone_mipmap_pp_->OutputPin(0, normal_cone_small_tex_, i - 1);
 			normal_cone_mipmap_pp_->Apply();
 
-			normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, width / 2, height / 2,
-				0, i - 1, 0, 0, width / 2, height / 2);
+			normal_cone_small_tex_->CopyToSubTexture2D(*normal_cone_tex_, 0, i, 0, 0, lower_width, lower_height,
+				0, i - 1, 0, 0, lower_width, lower_height);
 		}
 	}
 

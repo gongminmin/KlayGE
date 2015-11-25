@@ -363,22 +363,21 @@ namespace KlayGE
 
 			for (uint32_t i = 1; i < depth_deriative_tex_->NumMipMaps(); ++ i)
 			{
-				int width = depth_deriative_tex_->Width(i - 1);
-				int height = depth_deriative_tex_->Height(i - 1);
+				uint32_t const width = depth_deriative_tex_->Width(i - 1);
+				uint32_t const height = depth_deriative_tex_->Height(i - 1);
+				uint32_t const lower_width = depth_deriative_tex_->Width(i);
+				uint32_t const lower_height = depth_deriative_tex_->Height(i);
 
-				float delta_x = 1.0f / width;
-				float delta_y = 1.0f / height;
-				float4 delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);			
+				float const delta_x = 1.0f / width;
+				float const delta_y = 1.0f / height;
+				float4 const delta_offset(delta_x, delta_y, -delta_x / 2, -delta_y / 2);			
 				reduce_z_bounds_from_depth_mip_map_pp_->SetParam(0, delta_offset);
 
 				reduce_z_bounds_from_depth_mip_map_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 				reduce_z_bounds_from_depth_mip_map_pp_->Apply();
 
-				int sw = depth_deriative_tex_->Width(i);
-				int sh = depth_deriative_tex_->Height(i);
-
-				depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0, sw, sh,
-					0, i - 1, 0, 0, sw, sh);
+				depth_deriative_small_tex_->CopyToSubTexture2D(*depth_deriative_tex_, 0, i, 0, 0,
+					lower_width, lower_height, 0, i - 1, 0, 0, lower_width, lower_height);
 			}
 
 			compute_log_cascades_from_z_bounds_pp_->SetParam(1, static_cast<int32_t>(num_cascades));

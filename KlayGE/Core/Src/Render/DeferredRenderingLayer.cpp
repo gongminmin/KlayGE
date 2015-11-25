@@ -2487,15 +2487,18 @@ namespace KlayGE
 			depth_mipmap_pp_->InputPin(0, pvp.g_buffer_depth_tex);
 			for (uint32_t i = 1; i < pvp.g_buffer_depth_tex->NumMipMaps(); ++ i)
 			{
-				uint32_t width = pvp.g_buffer_depth_tex->Width(i - 1);
-				uint32_t height = pvp.g_buffer_depth_tex->Height(i - 1);
+				uint32_t const width = pvp.g_buffer_depth_tex->Width(i - 1);
+				uint32_t const height = pvp.g_buffer_depth_tex->Height(i - 1);
+				uint32_t const lower_width = pvp.g_buffer_depth_tex->Width(i);
+				uint32_t const lower_height = pvp.g_buffer_depth_tex->Height(i);
+
 				depth_mipmap_pp_->SetParam(0, float2(0.5f / width, 0.5f / height));
 
 				depth_mipmap_pp_->OutputPin(0, pvp.g_buffer_depth_pingpong_texs[i - 1], 0);
 				depth_mipmap_pp_->Apply();
 
-				pvp.g_buffer_depth_pingpong_texs[i - 1]->CopyToSubTexture2D(*pvp.g_buffer_depth_tex, 0, i, 0, 0, width / 2, height / 2,
-					0, 0, 0, 0, width / 2, height / 2);
+				pvp.g_buffer_depth_pingpong_texs[i - 1]->CopyToSubTexture2D(*pvp.g_buffer_depth_tex, 0, i, 0, 0,
+					lower_width, lower_height, 0, 0, 0, 0, lower_width, lower_height);
 			}
 		}
 		else
