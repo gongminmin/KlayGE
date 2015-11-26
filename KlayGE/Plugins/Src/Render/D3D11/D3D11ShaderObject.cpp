@@ -629,8 +629,7 @@ namespace KlayGE
 			if (!code->empty())
 			{
 				ID3D11ShaderReflection* reflection;
-				render_eng.D3DReflect(&(*code)[0], static_cast<SIZE_T>(code->size()),
-					IID_ID3D11ShaderReflection_47, reinterpret_cast<void**>(&reflection));
+				this->ReflectDXBC(*code, reinterpret_cast<void**>(&reflection));
 				if (reflection != nullptr)
 				{
 					D3D11_SHADER_DESC desc;
@@ -777,17 +776,8 @@ namespace KlayGE
 					reflection->Release();
 				}
 
-				ID3DBlob* strip_code = nullptr;
-				render_eng.D3DStripShader(&(*code)[0], static_cast<SIZE_T>(code->size()),
-					D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
-					| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA,
-					&strip_code);
-				if (strip_code)
-				{
-					uint8_t const * p = static_cast<uint8_t const *>(strip_code->GetBufferPointer());
-					code->assign(p, p + strip_code->GetBufferSize());
-					strip_code->Release();
-				}
+				*code = this->StripDXBC(*code, D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
+					| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA);
 			}
 		}
 

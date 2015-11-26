@@ -219,6 +219,36 @@ namespace
 #endif
 		}
 
+		HRESULT D3DReflect(std::vector<uint8_t> const & shader_code, void** reflector)
+		{
+#ifdef CALL_D3DCOMPILER_DIRECTLY
+			static GUID const IID_ID3D11ShaderReflection_47
+				= { 0x8d536ca1, 0x0cca, 0x4956, { 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84 } };
+
+			return DynamicD3DReflect_(&shader_code[0], static_cast<UINT>(shader_code.size()), IID_ID3D11ShaderReflection_47, reflector);
+#else
+			// TODO
+			return S_OK;
+#endif
+		}
+
+		HRESULT D3DStripShader(std::vector<uint8_t> const & shader_code, uint32_t strip_flags, std::vector<uint8_t>& stripped_code)
+		{
+#ifdef CALL_D3DCOMPILER_DIRECTLY
+			ID3DBlob* stripped_blob = nullptr;
+			HRESULT hr = DynamicD3DStripShader_(&shader_code[0], static_cast<UINT>(shader_code.size()), strip_flags, &stripped_blob);
+
+			uint8_t const * p = static_cast<uint8_t const *>(stripped_blob->GetBufferPointer());
+			stripped_code.assign(p, p + stripped_blob->GetBufferSize());
+			stripped_blob->Release();
+
+			return hr;
+#else
+			// TODO
+			return S_OK;
+#endif
+		}
+
 	private:
 		D3DCompilerLoader()
 		{
@@ -227,13 +257,21 @@ namespace
 			KLAYGE_ASSUME(mod_d3dcompiler_ != nullptr);
 
 			DynamicD3DCompile_ = reinterpret_cast<pD3DCompile>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
+			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
+			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));           
 #endif
 		}
 
 	private:
 #ifdef CALL_D3DCOMPILER_DIRECTLY
+		typedef HRESULT (WINAPI *D3DReflectFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector);
+		typedef HRESULT (WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags,
+			ID3DBlob** ppStrippedBlob);
+
 		HMODULE mod_d3dcompiler_;
 		pD3DCompile DynamicD3DCompile_;
+		D3DReflectFunc DynamicD3DReflect_;
+		D3DStripShaderFunc DynamicD3DStripShader_;
 #endif
 	};
 }
@@ -525,6 +563,18 @@ namespace KlayGE
 		}
 
 		return code;
+	}
+
+	void ShaderObject::ReflectDXBC(std::vector<uint8_t> const & code, void** reflector)
+	{
+		D3DCompilerLoader::Instance().D3DReflect(code, reflector);
+	}
+
+	std::vector<uint8_t> ShaderObject::StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags)
+	{
+		std::vector<uint8_t> ret;
+		D3DCompilerLoader::Instance().D3DStripShader(code, strip_flags, ret);
+		return ret;
 	}
 #endif
 }

@@ -104,11 +104,6 @@ namespace KlayGE
 		{
 			::MessageBoxW(nullptr, L"Can't load d3d11.dll", L"Error", MB_OK);
 		}
-		mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
-		if (nullptr == mod_d3dcompiler_)
-		{
-			::MessageBoxW(nullptr, L"Can't load d3dcompiler_47.dll", L"Error", MB_OK);
-		}
 
 		if (mod_dxgi_ != nullptr)
 		{
@@ -117,12 +112,6 @@ namespace KlayGE
 		if (mod_d3d11_ != nullptr)
 		{
 			DynamicD3D11CreateDevice_ = reinterpret_cast<D3D11CreateDeviceFunc>(::GetProcAddress(mod_d3d11_, "D3D11CreateDevice"));
-		}
-		if (mod_d3dcompiler_ != nullptr)
-		{
-			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
-			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
-			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
 		}
 #else
 		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
@@ -913,7 +902,6 @@ namespace KlayGE
 		gi_factory_.reset();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_d3dcompiler_);
 		::FreeLibrary(mod_d3d11_);
 		::FreeLibrary(mod_dxgi_);
 #endif
@@ -1742,26 +1730,4 @@ namespace KlayGE
 		return DynamicD3D11CreateDevice_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 			ppDevice, pFeatureLevel, ppImmediateContext);
 	}
-
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-	HRESULT D3D11RenderEngine::D3DCompile(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
-			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
-			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs) const
-	{
-		return DynamicD3DCompile_(pSrcData, SrcDataSize, pSourceName, pDefines, pInclude, pEntrypoint,
-					pTarget, Flags1, Flags2, ppCode, ppErrorMsgs);
-	}
-	
-	HRESULT D3D11RenderEngine::D3DReflect(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface,
-			void** ppReflector) const
-	{
-		return DynamicD3DReflect_(pSrcData, SrcDataSize, pInterface, ppReflector);
-	}
-
-	HRESULT D3D11RenderEngine::D3DStripShader(LPCVOID pShaderBytecode, SIZE_T BytecodeLength,
-			UINT uStripFlags, ID3DBlob** ppStrippedBlob) const
-	{
-		return DynamicD3DStripShader_(pShaderBytecode, BytecodeLength, uStripFlags, ppStrippedBlob);
-	}
-#endif
 }

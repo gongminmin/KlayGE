@@ -152,6 +152,8 @@ namespace KlayGE
 			RenderTechnique const & tech, RenderPass const & pass,
 			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
 			std::string const & func_name, std::string const & shader_profile, uint32_t flags);
+		void ReflectDXBC(std::vector<uint8_t> const & code, void** reflector);
+		std::vector<uint8_t> StripDXBC(std::vector<uint8_t> const & code, uint32_t strip_flags);
 
 	protected:
 		std::array<bool, ST_NumShaderTypes> is_shader_validate_;

@@ -436,7 +436,7 @@ namespace KlayGE
 		RenderTechniquePtr technique_copy_shading_depth_;
 		RenderTechniquePtr technique_copy_depth_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
+		std::array<RenderTechniquePtr, LightSource::LT_NumLightTypes> technique_lights_;
 		RenderTechniquePtr technique_light_depth_only_;
 		RenderTechniquePtr technique_light_stencil_;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
