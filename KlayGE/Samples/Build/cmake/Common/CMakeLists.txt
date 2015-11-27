@@ -4,6 +4,7 @@ DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/drawable-mdpi-icon.png" "cbda4
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/drawable-xhdpi-icon.png" "cbda47a1678ce70b6720856736100979d469e159" "eea1ce5b5766c40e7744f018a4199db47abf196a")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/Logo.png" "cbda47a1678ce70b6720856736100979d469e159" "456cf38b04afcbc7510a23f3e4a4bce9bdb88d37")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/SmallLogo.png" "cbda47a1678ce70b6720856736100979d469e159" "e2539cfcdde8423bd2f3db5e32f0840115b1d1a4")
+DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/SmallLogo44.png" "1fe55162372ebe4494ced0b4ed437f11b5031211" "37618221906cae2e592abe69ed8581525c2e5ead")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/SplashScreen.png" "cbda47a1678ce70b6720856736100979d469e159" "a6aaabf642afb84cc3deeb7d0a9e873ea7270a03")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/Assets/StoreLogo.png" "cbda47a1678ce70b6720856736100979d469e159" "7aea004dd6483199fc1a1117b8e0513e33a50bef")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/ScifiRoom/Sci1.dds" "cbda47a1678ce70b6720856736100979d469e159" "498e138f2834620dd2892c20585ecf9979b6dce7")
