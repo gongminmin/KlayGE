@@ -239,23 +239,17 @@ namespace KlayGE
 			ready_ = true;
 			break;
 
-		case WM_SIZING:
-			ready_ = false;
-			break;
-
 		case WM_SIZE:
 			// Check to see if we are losing or gaining our window.  Set the
 			// active flag to match
 			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
 			{
 				active_ = false;
-				ready_ = false;
 				this->OnSize()(*this, false);
 			}
 			else
 			{
 				active_ = true;
-				ready_ = true;
 				this->OnSize()(*this, true);
 			}
 			break;
