@@ -84,14 +84,10 @@ namespace KlayGE
 #else
 		wnd_ = main_wnd->GetWindow();
 #endif
-		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&D3D11RenderWindow::OnPaint, this,
-			std::placeholders::_1));
 		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&D3D11RenderWindow::OnExitSizeMove, this,
 			std::placeholders::_1));
 		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&D3D11RenderWindow::OnSize, this,
 			std::placeholders::_1, std::placeholders::_2));
-		on_set_cursor_connect_ = main_wnd->OnSetCursor().connect(std::bind(&D3D11RenderWindow::OnSetCursor, this,
-			std::placeholders::_1));
 
 		if (this->FullScreen())
 		{
@@ -535,10 +531,8 @@ namespace KlayGE
 
 	D3D11RenderWindow::~D3D11RenderWindow()
 	{
-		on_paint_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
-		on_set_cursor_connect_.disconnect();
 
 		this->Destroy();
 	}
@@ -880,18 +874,6 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderWindow::OnPaint(Window const & win)
-	{
-		// If we get WM_PAINT messges, it usually means our window was
-		// comvered up, so we need to refresh it by re-showing the contents
-		// of the current frame.
-		if (win.Active() && win.Ready())
-		{
-			Context::Instance().SceneManagerInstance().Update();
-			this->SwapBuffers();
-		}
-	}
-
 	void D3D11RenderWindow::OnExitSizeMove(Window const & /*win*/)
 	{
 		this->WindowMovedOrResized();
@@ -906,10 +888,6 @@ namespace KlayGE
 				this->WindowMovedOrResized();
 			}
 		}
-	}
-
-	void D3D11RenderWindow::OnSetCursor(Window const & /*win*/)
-	{
 	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME

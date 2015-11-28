@@ -108,10 +108,8 @@ namespace KlayGE
 
 	private:
 		virtual void OnBind() KLAYGE_OVERRIDE;
-		void OnPaint(Window const & win);
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
-		void OnSetCursor(Window const & win);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
@@ -161,10 +159,8 @@ namespace KlayGE
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_paint_connect_;
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
-		boost::signals2::connection on_set_cursor_connect_;
 	};
 
 	typedef std::shared_ptr<D3D12RenderWindow> D3D12RenderWindowPtr;

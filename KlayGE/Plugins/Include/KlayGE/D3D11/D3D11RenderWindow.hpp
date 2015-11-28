@@ -93,10 +93,8 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		void OnPaint(Window const & win);
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
-		void OnSetCursor(Window const & win);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
@@ -158,10 +156,8 @@ namespace KlayGE
 
 		std::wstring			description_;
 
-		boost::signals2::connection on_paint_connect_;
 		boost::signals2::connection on_exit_size_move_connect_;
 		boost::signals2::connection on_size_connect_;
-		boost::signals2::connection on_set_cursor_connect_;
 	};
 
 	typedef std::shared_ptr<D3D11RenderWindow> D3D11RenderWindowPtr;

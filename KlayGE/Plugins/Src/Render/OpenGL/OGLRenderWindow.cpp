@@ -63,8 +63,6 @@ namespace KlayGE
 		color_bits_ = NumFormatBits(settings.color_fmt);
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		on_paint_connect_ = main_wnd->OnPaint().connect(std::bind(&OGLRenderWindow::OnPaint, this,
-			std::placeholders::_1));
 		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&OGLRenderWindow::OnExitSizeMove, this,
 			std::placeholders::_1));
 		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&OGLRenderWindow::OnSize, this,
@@ -391,7 +389,6 @@ namespace KlayGE
 
 	OGLRenderWindow::~OGLRenderWindow()
 	{
-		on_paint_connect_.disconnect();
 		on_exit_size_move_connect_.disconnect();
 		on_size_connect_.disconnect();
 
@@ -557,18 +554,6 @@ namespace KlayGE
 		Context::Instance().AppInstance().MainWnd()->FlushBuffer();
 		re.BindFrameBuffer(re.DefaultFrameBuffer());
 #endif
-	}
-
-	void OGLRenderWindow::OnPaint(Window const & win)
-	{
-		// If we get WM_PAINT messges, it usually means our window was
-		// comvered up, so we need to refresh it by re-showing the contents
-		// of the current frame.
-		if (win.Active() && win.Ready())
-		{
-			Context::Instance().SceneManagerInstance().Update();
-			this->SwapBuffers();
-		}
 	}
 
 	void OGLRenderWindow::OnExitSizeMove(Window const & /*win*/)
