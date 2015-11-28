@@ -696,6 +696,9 @@ namespace KlayGE
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
+		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(8, 1.0f,
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
+			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
@@ -948,7 +951,6 @@ namespace KlayGE
 		else
 		{
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
 			fmt8 = EF_ARGB8;
 		}
 		ElementFormat depth_fmt;
@@ -988,7 +990,6 @@ namespace KlayGE
 			else
 			{
 				BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
 				ds_fmt = EF_D16;
 			}
 
@@ -1306,12 +1307,6 @@ namespace KlayGE
 			fmt = EF_ARGB8;
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-
-		pvp.ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(8, 1.0f,
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
-		pvp.ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
-		pvp.ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (!cs_tbdr_)
@@ -2121,31 +2116,34 @@ namespace KlayGE
 								this->AppendShadowingPassScanCode(vpi, i, li);
 							}
 						}
-#ifndef KLAYGE_SHIP
 						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
 							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 1, true));
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 0, true));
-#endif
-						for (uint32_t li = 0; li < lights_.size(); ++ li)
+						if (!(pvp.attrib & VPAM_NoGI))
 						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled())
+#ifndef KLAYGE_SHIP
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+								ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 0, true));
+#endif
+							for (uint32_t li = 0; li < lights_.size(); ++ li)
 							{
-								PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
-								if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
-									&& (light->Attrib() & LightSource::LSA_IndirectLighting)
-									&& rsm_fb_ && (illum_ != 1)
-									&& pvp.light_visibles[li])
+								LightSourcePtr const & light = lights_[li];
+								if (light->Enabled())
 								{
-									this->AppendIndirectLightingPassScanCode(vpi, li);
+									PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
+									if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
+										&& (light->Attrib() & LightSource::LSA_IndirectLighting)
+										&& rsm_fb_ && (illum_ != 1)
+										&& pvp.light_visibles[li])
+									{
+										this->AppendIndirectLightingPassScanCode(vpi, li);
+									}
 								}
 							}
-						}
 #ifndef KLAYGE_SHIP
-						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 1, true));
+							pass_scaned_.push_back(this->ComposePassScanCode(vpi,
+								ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 1, true));
 #endif
+						}
 
 						this->AppendShadingPassScanCode(vpi, i);
 					}
@@ -2946,9 +2944,10 @@ namespace KlayGE
 			ssvo_pp_->OutputPin(0, pvp.small_ssvo_tex);
 			ssvo_pp_->Apply();
 
-			pvp.ssvo_blur_pp_->OutputPin(0,
-				(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
-			pvp.ssvo_blur_pp_->Apply();
+			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
+			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
+			ssvo_blur_pp_->OutputPin(0, (Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+			ssvo_blur_pp_->Apply();
 		}
 	}
 
