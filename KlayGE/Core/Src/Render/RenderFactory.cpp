@@ -43,52 +43,52 @@ namespace KlayGE
 		TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
-			UNREF_PARAM(width);
-			UNREF_PARAM(num_mip_maps);
-			UNREF_PARAM(array_size);
-			UNREF_PARAM(format);
-			UNREF_PARAM(sample_count);
-			UNREF_PARAM(sample_quality);
-			UNREF_PARAM(access_hint);
+			KFL_UNUSED(width);
+			KFL_UNUSED(num_mip_maps);
+			KFL_UNUSED(array_size);
+			KFL_UNUSED(format);
+			KFL_UNUSED(sample_count);
+			KFL_UNUSED(sample_quality);
+			KFL_UNUSED(access_hint);
 			return Texture::NullObject();
 		}
 		TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
-			UNREF_PARAM(width);
-			UNREF_PARAM(height);
-			UNREF_PARAM(num_mip_maps);
-			UNREF_PARAM(array_size);
-			UNREF_PARAM(format);
-			UNREF_PARAM(sample_count);
-			UNREF_PARAM(sample_quality);
-			UNREF_PARAM(access_hint);
+			KFL_UNUSED(width);
+			KFL_UNUSED(height);
+			KFL_UNUSED(num_mip_maps);
+			KFL_UNUSED(array_size);
+			KFL_UNUSED(format);
+			KFL_UNUSED(sample_count);
+			KFL_UNUSED(sample_quality);
+			KFL_UNUSED(access_hint);
 			return Texture::NullObject();
 		}
 		TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
-			UNREF_PARAM(width);
-			UNREF_PARAM(height);
-			UNREF_PARAM(depth);
-			UNREF_PARAM(num_mip_maps);
-			UNREF_PARAM(array_size);
-			UNREF_PARAM(format);
-			UNREF_PARAM(sample_count);
-			UNREF_PARAM(sample_quality);
-			UNREF_PARAM(access_hint);
+			KFL_UNUSED(width);
+			KFL_UNUSED(height);
+			KFL_UNUSED(depth);
+			KFL_UNUSED(num_mip_maps);
+			KFL_UNUSED(array_size);
+			KFL_UNUSED(format);
+			KFL_UNUSED(sample_count);
+			KFL_UNUSED(sample_quality);
+			KFL_UNUSED(access_hint);
 			return Texture::NullObject();
 		}
 		TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 		{
-			UNREF_PARAM(size);
-			UNREF_PARAM(num_mip_maps);
-			UNREF_PARAM(array_size);
-			UNREF_PARAM(format);
-			UNREF_PARAM(sample_count);
-			UNREF_PARAM(sample_quality);
-			UNREF_PARAM(access_hint);
+			KFL_UNUSED(size);
+			KFL_UNUSED(num_mip_maps);
+			KFL_UNUSED(array_size);
+			KFL_UNUSED(format);
+			KFL_UNUSED(sample_count);
+			KFL_UNUSED(sample_quality);
+			KFL_UNUSED(access_hint);
 			return Texture::NullObject();
 		}
 		FrameBufferPtr MakeFrameBuffer()
@@ -103,26 +103,26 @@ namespace KlayGE
 
 		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(usage);
-			UNREF_PARAM(access_hint);
-			UNREF_PARAM(size_in_bytes);
-			UNREF_PARAM(fmt);
+			KFL_UNUSED(usage);
+			KFL_UNUSED(access_hint);
+			KFL_UNUSED(size_in_bytes);
+			KFL_UNUSED(fmt);
 			return GraphicsBuffer::NullObject();
 		}
 		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(usage);
-			UNREF_PARAM(access_hint);
-			UNREF_PARAM(size_in_bytes);
-			UNREF_PARAM(fmt);
+			KFL_UNUSED(usage);
+			KFL_UNUSED(access_hint);
+			KFL_UNUSED(size_in_bytes);
+			KFL_UNUSED(fmt);
 			return GraphicsBuffer::NullObject();
 		}
 		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(usage);
-			UNREF_PARAM(access_hint);
-			UNREF_PARAM(size_in_bytes);
-			UNREF_PARAM(fmt);
+			KFL_UNUSED(usage);
+			KFL_UNUSED(access_hint);
+			KFL_UNUSED(size_in_bytes);
+			KFL_UNUSED(fmt);
 			return GraphicsBuffer::NullObject();
 		}
 

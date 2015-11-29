@@ -121,15 +121,15 @@ namespace KlayGE
 
 	void LightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
 	{
-		UNREF_PARAM(tex_y);
-		UNREF_PARAM(tex_c);
+		KFL_UNUSED(tex_y);
+		KFL_UNUSED(tex_c);
 
 		BOOST_ASSERT(false);
 	}
 
 	void LightSource::SkylightTex(TexturePtr const & tex)
 	{
-		UNREF_PARAM(tex);
+		KFL_UNUSED(tex);
 
 		BOOST_ASSERT(false);
 	}
@@ -269,7 +269,7 @@ namespace KlayGE
 
 	void LightSource::Radius(float radius)
 	{
-		UNREF_PARAM(radius);
+		KFL_UNUSED(radius);
 	}
 
 	float3 const & LightSource::Extend() const
@@ -280,7 +280,7 @@ namespace KlayGE
 
 	void LightSource::Extend(float3 const & extend)
 	{
-		UNREF_PARAM(extend);
+		KFL_UNUSED(extend);
 	}
 
 
@@ -616,7 +616,7 @@ namespace KlayGE
 
 	void TubeAreaLightSource::Falloff(float3 const & fall_off)
 	{
-		UNREF_PARAM(fall_off);
+		KFL_UNUSED(fall_off);
 		LightSource::Falloff(float3(1, 0, 0));
 	}
 

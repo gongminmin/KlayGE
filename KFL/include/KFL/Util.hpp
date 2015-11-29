@@ -40,7 +40,7 @@
 
 #include <boost/assert.hpp>
 
-#define UNREF_PARAM(x) (void)(x)
+#define KFL_UNUSED(x) (void)(x)
 
 #include <KFL/Log.hpp>
 
@@ -138,7 +138,7 @@ namespace KlayGE
 #ifdef KLAYGE_LITTLE_ENDIAN
 		EndianSwitch<sizeof(T)>(&x);
 #else
-		UNREF_PARAM(x);
+		KFL_UNUSED(x);
 #endif
 		return x;
 	}
@@ -146,7 +146,7 @@ namespace KlayGE
 	T Native2LE(T x)
 	{
 #ifdef KLAYGE_LITTLE_ENDIAN
-		UNREF_PARAM(x);
+		KFL_UNUSED(x);
 #else
 		EndianSwitch<sizeof(T)>(&x);
 #endif

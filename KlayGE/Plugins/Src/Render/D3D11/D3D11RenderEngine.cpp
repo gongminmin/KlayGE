@@ -489,7 +489,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(d3d_device_);
 		BOOST_ASSERT(fb);

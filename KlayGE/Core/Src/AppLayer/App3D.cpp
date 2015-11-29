@@ -222,7 +222,7 @@ namespace KlayGE
 
 	IFACEMETHODIMP MetroFramework::Load(HSTRING entry_point)
 	{
-		UNREF_PARAM(entry_point);
+		KFL_UNUSED(entry_point);
 
 		return S_OK;
 	}
@@ -258,8 +258,8 @@ namespace KlayGE
 	HRESULT MetroFramework::OnActivated(ICoreApplicationView* application_view,
 			IActivatedEventArgs* args)
 	{
-		UNREF_PARAM(application_view);
-		UNREF_PARAM(args);
+		KFL_UNUSED(application_view);
+		KFL_UNUSED(args);
 
 		ComPtr<ICoreWindowStatic> core_win_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
@@ -274,7 +274,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnSuspending(IInspectable* sender, ISuspendingEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<ISuspendingOperation> op;
 		args->get_SuspendingOperation(&op);
@@ -294,8 +294,8 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnResuming(IInspectable* sender, IInspectable* args)
 	{
-		UNREF_PARAM(sender);
-		UNREF_PARAM(args);
+		KFL_UNUSED(sender);
+		KFL_UNUSED(args);
 
 		app_->Resume();
 
@@ -304,8 +304,8 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnWindowSizeChanged(ICoreWindow* sender, IWindowSizeChangedEventArgs* args)
 	{
-		UNREF_PARAM(sender);
-		UNREF_PARAM(args);
+		KFL_UNUSED(sender);
+		KFL_UNUSED(args);
 
 		WindowPtr const & win = app_->MainWnd();
 		win->Active(true);
@@ -317,7 +317,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnVisibilityChanged(ICoreWindow* sender, IVisibilityChangedEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		boolean vis;
 		TIF(args->get_Visible(&vis));
@@ -332,8 +332,8 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnWindowClosed(ICoreWindow* sender, ICoreWindowEventArgs* args)
 	{
-		UNREF_PARAM(sender);
-		UNREF_PARAM(args);
+		KFL_UNUSED(sender);
+		KFL_UNUSED(args);
 
 		WindowPtr const & win = app_->MainWnd();
 		win->OnClose()(*win);
@@ -346,7 +346,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnPointerPressed(ICoreWindow* sender, IPointerEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IPointerPoint> point;
 		TIF(args->get_CurrentPoint(&point));
@@ -377,7 +377,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnPointerReleased(ICoreWindow* sender, IPointerEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IPointerPoint> point;
 		TIF(args->get_CurrentPoint(&point));
@@ -408,7 +408,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnPointerMoved(ICoreWindow* sender, IPointerEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IPointerPoint> point;
 		TIF(args->get_CurrentPoint(&point));
@@ -440,7 +440,7 @@ namespace KlayGE
 
 	HRESULT MetroFramework::OnPointerWheelChanged(ICoreWindow* sender, IPointerEventArgs* args)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IPointerPoint> point;
 		TIF(args->get_CurrentPoint(&point));

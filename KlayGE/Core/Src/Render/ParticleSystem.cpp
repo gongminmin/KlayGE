@@ -777,8 +777,8 @@ namespace KlayGE
 
 	bool ParticleSystem::MainThreadUpdate(float app_time, float elapsed_time)
 	{
-		UNREF_PARAM(app_time);
-		UNREF_PARAM(elapsed_time);
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
 
 		std::lock_guard<std::mutex> lock(update_mutex_);
 

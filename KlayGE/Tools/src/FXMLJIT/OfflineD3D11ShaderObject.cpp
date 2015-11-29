@@ -618,11 +618,11 @@ namespace KlayGE
 
 			return code;
 	#else
-			UNREF_PARAM(type);
-			UNREF_PARAM(effect);
-			UNREF_PARAM(tech);
-			UNREF_PARAM(pass);
-			UNREF_PARAM(shader_desc_ids);
+			KFL_UNUSED(type);
+			KFL_UNUSED(effect);
+			KFL_UNUSED(tech);
+			KFL_UNUSED(pass);
+			KFL_UNUSED(shader_desc_ids);
 
 			return std::shared_ptr<std::vector<uint8_t>>();
 	#endif
@@ -736,7 +736,7 @@ namespace KlayGE
 						}
 					}
 					BOOST_ASSERT(found);
-					UNREF_PARAM(found);
+					KFL_UNUSED(found);
 				}
 			}
 			else

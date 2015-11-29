@@ -1165,7 +1165,7 @@ namespace KlayGE
 
 	void MtlEditorCore::MouseDown(int x, int y, uint32_t button)
 	{
-		UNREF_PARAM(button);
+		KFL_UNUSED(button);
 
 		mouse_down_in_wnd_ = true;
 		last_mouse_pt_ = int2(x, y);

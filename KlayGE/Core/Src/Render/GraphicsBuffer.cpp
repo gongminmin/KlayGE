@@ -52,7 +52,7 @@ namespace KlayGE
 
 		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(init_data);
+			KFL_UNUSED(init_data);
 		}
 
 		virtual void DeleteHWResource() KLAYGE_OVERRIDE

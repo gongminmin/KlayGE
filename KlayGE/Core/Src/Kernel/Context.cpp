@@ -855,7 +855,7 @@ namespace KlayGE
 			render_loader_.Free();
 		}
 #else
-		UNREF_PARAM(rf_name);
+		KFL_UNUSED(rf_name);
 		MakeRenderFactory(render_factory_);
 #endif
 	}
@@ -907,7 +907,7 @@ namespace KlayGE
 			input_loader_.Free();
 		}
 #else
-		UNREF_PARAM(if_name);
+		KFL_UNUSED(if_name);
 		MakeInputFactory(input_factory_);
 #endif
 	}
@@ -982,7 +982,7 @@ namespace KlayGE
 			sm_loader_.Free();
 		}
 #else
-		UNREF_PARAM(sm_name);
+		KFL_UNUSED(sm_name);
 		MakeSceneManager(scene_mgr_);
 #endif
 	}

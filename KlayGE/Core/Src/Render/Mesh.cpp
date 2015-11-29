@@ -996,7 +996,7 @@ namespace KlayGE
 		}
 #else
 		BOOST_ASSERT(!jit);
-		UNREF_PARAM(jit);
+		KFL_UNUSED(jit);
 #endif
 	}
 

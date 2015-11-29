@@ -183,8 +183,8 @@ namespace KlayGE
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == num_items);
-		UNREF_PARAM(first_array_index);
-		UNREF_PARAM(num_items);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(num_items);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 		switch (format_)

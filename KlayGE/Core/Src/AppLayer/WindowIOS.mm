@@ -30,7 +30,7 @@ namespace KlayGE
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false)
 	{
-		UNREF_PARAM(settings);
+		KFL_UNUSED(settings);
 		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 		CGRect bounds = [[UIScreen mainScreen] bounds];
@@ -57,9 +57,9 @@ namespace KlayGE
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false)
 	{
-		UNREF_PARAM(name);
-		UNREF_PARAM(settings);
-		UNREF_PARAM(native_wnd);
+		KFL_UNUSED(name);
+		KFL_UNUSED(settings);
+		KFL_UNUSED(native_wnd);
 		LogWarn("Unimplemented Window::Window");
 	}
 
@@ -150,7 +150,7 @@ namespace KlayGE
 
 - (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	UNREF_PARAM(event);
+	KFL_UNUSED(event);
 
 	for (UITouch* touch in touches)
 	{
@@ -175,7 +175,7 @@ namespace KlayGE
 
 - (void)touchesMoved:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	UNREF_PARAM(event);
+	KFL_UNUSED(event);
 	for (UITouch* touch in touches)
 	{
 		int idx = -1;
@@ -198,7 +198,7 @@ namespace KlayGE
 
 - (void)touchesEnded:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	UNREF_PARAM(event);
+	KFL_UNUSED(event);
 
 	for (UITouch* touch in touches)
 	{
@@ -223,7 +223,7 @@ namespace KlayGE
 
 - (void)touchesCancelled:(NSSet*)touches withEvent:(UIEvent*)event
 {
-	UNREF_PARAM(event);
+	KFL_UNUSED(event);
 
 	for (UITouch* touch in touches)
 	{

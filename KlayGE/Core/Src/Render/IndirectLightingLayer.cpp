@@ -186,8 +186,8 @@ namespace KlayGE
 
 	void MultiResSILLayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev)
 	{
-		UNREF_PARAM(prev_shading_tex);
-		UNREF_PARAM(proj_to_prev);
+		KFL_UNUSED(prev_shading_tex);
+		KFL_UNUSED(proj_to_prev);
 
 		if (g_buffer_rt0_tex_->NumMipMaps() > 1)
 		{
@@ -279,7 +279,7 @@ namespace KlayGE
 
 	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-		UNREF_PARAM(rt1_tex);
+		KFL_UNUSED(rt1_tex);
 
 		BOOST_ASSERT(rt0_tex->NumMipMaps() >= 3);
 
@@ -312,9 +312,9 @@ namespace KlayGE
 
 	void SSGILayer::RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
 	{
-		UNREF_PARAM(rt0_tex);
-		UNREF_PARAM(rt1_tex);
-		UNREF_PARAM(depth_tex);
+		KFL_UNUSED(rt0_tex);
+		KFL_UNUSED(rt1_tex);
+		KFL_UNUSED(depth_tex);
 	}
 
 	void SSGILayer::UpdateGBuffer(CameraPtr const & vp_camera)
@@ -324,13 +324,13 @@ namespace KlayGE
 
 	void SSGILayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
 	{
-		UNREF_PARAM(rsm_camera);
-		UNREF_PARAM(light);
+		KFL_UNUSED(rsm_camera);
+		KFL_UNUSED(light);
 	}
 
 	void SSGILayer::CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev)
 	{
-		UNREF_PARAM(proj_to_prev);
+		KFL_UNUSED(proj_to_prev);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 

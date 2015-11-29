@@ -108,8 +108,8 @@ namespace
 						output_num_ascii_(output_num_ascii),
 						ascii_width_(ascii_width), ascii_height_(ascii_height)
 		{
-			UNREF_PARAM(ascii_width_);
-			UNREF_PARAM(ascii_height_);
+			KFL_UNUSED(ascii_width_);
+			KFL_UNUSED(ascii_height_);
 		}
 
 		ascii_tiles_type build(ascii_tiles_type const & ascii_data)

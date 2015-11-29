@@ -87,7 +87,7 @@ namespace KlayGE
 	void MultiResLayer::BindBuffers(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex,
 			TexturePtr const & multi_res_tex)
 	{
-		UNREF_PARAM(rt1_tex);
+		KFL_UNUSED(rt1_tex);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();

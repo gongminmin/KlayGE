@@ -508,7 +508,7 @@ namespace KlayGE
 			::UpdateWindow(hWnd_);
 		}
 #else
-		UNREF_PARAM(fs);
+		KFL_UNUSED(fs);
 #endif
 	}
 
@@ -666,8 +666,8 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	HRESULT D3D12RenderWindow::OnStereoEnabledChanged(IDisplayInformation* sender, IInspectable* args)
 	{
-		UNREF_PARAM(sender);
-		UNREF_PARAM(args);
+		KFL_UNUSED(sender);
+		KFL_UNUSED(args);
 
 		if ((gi_factory_->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)
 		{

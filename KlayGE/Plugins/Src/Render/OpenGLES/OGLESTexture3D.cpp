@@ -129,7 +129,7 @@ namespace KlayGE
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
-		UNREF_PARAM(dst_depth);
+		KFL_UNUSED(dst_depth);
 
 		BOOST_ASSERT(type_ == target.Type());
 		BOOST_ASSERT(0 == src_array_index);
@@ -198,7 +198,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		last_tma_ = tma;
 
@@ -216,7 +216,7 @@ namespace KlayGE
 	void OGLESTexture3D::Unmap3D(uint32_t array_index, uint32_t level)
 	{
 		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		switch (last_tma_)
 		{

@@ -147,8 +147,8 @@ namespace KlayGE
 
 		STDMETHODIMP OnStatusChanged(REFIID report_type, LOCATION_REPORT_STATUS new_status)
 		{
-			UNREF_PARAM(report_type);
-			UNREF_PARAM(new_status);
+			KFL_UNUSED(report_type);
+			KFL_UNUSED(new_status);
 
 			return S_OK;
 		}
@@ -213,23 +213,23 @@ namespace KlayGE
 
 		STDMETHODIMP OnEvent(ISensor* sensor, REFGUID event_id, IPortableDeviceValues* event_data)
 		{
-			UNREF_PARAM(sensor);
-			UNREF_PARAM(event_id);
-			UNREF_PARAM(event_data);
+			KFL_UNUSED(sensor);
+			KFL_UNUSED(event_id);
+			KFL_UNUSED(event_data);
 
 			return S_OK;
 		}
 
 		STDMETHODIMP OnLeave(REFSENSOR_ID sensor_id)
 		{
-			UNREF_PARAM(sensor_id);
+			KFL_UNUSED(sensor_id);
 
 			return S_OK;
 		}
 
 		STDMETHODIMP OnStateChanged(ISensor* sensor, SensorState state)
 		{
-			UNREF_PARAM(state);
+			KFL_UNUSED(state);
 
 			HRESULT hr = S_OK;
 
@@ -877,7 +877,7 @@ namespace KlayGE
 
 	HRESULT MsgInputSensor::OnPositionChanged(IGeolocator* sender, IPositionChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IGeoposition> position;
 		TIF(e->get_Position(&position));
@@ -933,7 +933,7 @@ namespace KlayGE
 
 	HRESULT MsgInputSensor::OnAccelerometeReadingChanged(IAccelerometer* sender, IAccelerometerReadingChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IAccelerometerReading> reading;
 		TIF(e->get_Reading(&reading));
@@ -954,7 +954,7 @@ namespace KlayGE
 
 	HRESULT MsgInputSensor::OnGyrometerReadingChanged(IGyrometer* sender, IGyrometerReadingChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IGyrometerReading> reading;
 		TIF(e->get_Reading(&reading));
@@ -975,7 +975,7 @@ namespace KlayGE
 
 	HRESULT MsgInputSensor::OnInclinometerReadingChanged(IInclinometer* sender, IInclinometerReadingChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IInclinometerReading> reading;
 		TIF(e->get_Reading(&reading));
@@ -989,7 +989,7 @@ namespace KlayGE
 
 	HRESULT MsgInputSensor::OnCompassReadingChanged(ICompass* sender, ICompassReadingChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<ICompassReading> reading;
 		TIF(e->get_Reading(&reading));
@@ -1021,7 +1021,7 @@ namespace KlayGE
 	HRESULT MsgInputSensor::OnOrientationSensorReadingChanged(IOrientationSensor* sender,
 		IOrientationSensorReadingChangedEventArgs* e)
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 
 		ComPtr<IOrientationSensorReading> reading;
 		TIF(e->get_Reading(&reading));
@@ -1086,8 +1086,8 @@ namespace KlayGE
 
 	int MsgInputSensor::SensorCallback(int fd, int events, void* data)
 	{
-		UNREF_PARAM(fd);
-		UNREF_PARAM(events);
+		KFL_UNUSED(fd);
+		KFL_UNUSED(events);
 
 		MsgInputSensor* input_sensor = static_cast<MsgInputSensor*>(data);
 

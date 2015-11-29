@@ -1888,9 +1888,9 @@ namespace KlayGE
 
 	void TexCompressionETC2RGB8::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		UNREF_PARAM(output);
-		UNREF_PARAM(input);
-		UNREF_PARAM(method);
+		KFL_UNUSED(output);
+		KFL_UNUSED(input);
+		KFL_UNUSED(method);
 
 		// TODO
 	}
@@ -2112,9 +2112,9 @@ namespace KlayGE
 
 	void TexCompressionETC2RGB8A1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
 	{
-		UNREF_PARAM(output);
-		UNREF_PARAM(input);
-		UNREF_PARAM(method);
+		KFL_UNUSED(output);
+		KFL_UNUSED(input);
+		KFL_UNUSED(method);
 
 		// TODO
 	}

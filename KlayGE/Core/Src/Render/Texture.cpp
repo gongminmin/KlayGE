@@ -813,7 +813,7 @@ namespace
 		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
 		BOOST_ASSERT(IsCompressedFormat(dst_format) && !IsCompressedFormat(src_format));
-		UNREF_PARAM(src_format);
+		KFL_UNUSED(src_format);
 
 		TexCompressionPtr codec;
 		switch (dst_format)
@@ -2935,7 +2935,7 @@ namespace KlayGE
 
 		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(init_data);
+			KFL_UNUSED(init_data);
 		}
 		virtual void DeleteHWResource() KLAYGE_OVERRIDE
 		{

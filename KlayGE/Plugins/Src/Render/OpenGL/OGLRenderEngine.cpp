@@ -174,8 +174,8 @@ namespace
 	void GLLOADER_APIENTRY DebugOutputProc(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
 			GLchar const * message, void const * user_param)
 	{
-		UNREF_PARAM(length);
-		UNREF_PARAM(user_param);
+		KFL_UNUSED(length);
+		KFL_UNUSED(user_param);
 
 		std::string dbg = std::string("OpenGL debug output: source: ") + DebugSourceString(source) + "; "
 			+ "type: " + DebugTypeString(type) + "; "
@@ -1418,9 +1418,9 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(false);
 
-		UNREF_PARAM(tech);
-		UNREF_PARAM(buff_args);
-		UNREF_PARAM(offset);
+		KFL_UNUSED(tech);
+		KFL_UNUSED(buff_args);
+		KFL_UNUSED(offset);
 	}
 
 	void OGLRenderEngine::ForceFlush()

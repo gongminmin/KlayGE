@@ -372,7 +372,7 @@ namespace KlayGE
 
 		int widths[] = { 0, 16, 16, 16, 16 };
 		uint32_t const rings = sizeof(widths) / sizeof(widths[0]) - 1;
-		UNREF_PARAM(MAX_RINGS);
+		KFL_UNUSED(MAX_RINGS);
 		BOOST_ASSERT(rings <= MAX_RINGS);
 
 		tile_rings_.resize(rings);
@@ -433,7 +433,7 @@ namespace KlayGE
 
 	void HQTerrainRenderable::ModelMatrix(float4x4 const & mat)
 	{
-		UNREF_PARAM(mat);
+		KFL_UNUSED(mat);
 		// Calculate matrix in SetMatrices.
 	}
 
@@ -752,8 +752,8 @@ namespace KlayGE
 
 	bool HQTerrainSceneObject::MainThreadUpdate(float app_time, float elapsed_time)
 	{
-		UNREF_PARAM(app_time);
-		UNREF_PARAM(elapsed_time);
+		KFL_UNUSED(app_time);
+		KFL_UNUSED(elapsed_time);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		CameraPtr const & camera = re.ScreenFrameBuffer()->GetViewport()->camera;

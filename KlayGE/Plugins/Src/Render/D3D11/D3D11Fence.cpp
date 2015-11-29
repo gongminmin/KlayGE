@@ -47,7 +47,7 @@ namespace KlayGE
 
 	uint64_t D3D11Fence::Signal(FenceType ft)
 	{
-		UNREF_PARAM(ft);
+		KFL_UNUSED(ft);
 
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DevicePtr const & d3d_device = re.D3DDevice();

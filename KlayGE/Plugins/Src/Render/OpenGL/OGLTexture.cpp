@@ -131,7 +131,7 @@ namespace KlayGE
 
 	uint32_t OGLTexture::Width(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -139,7 +139,7 @@ namespace KlayGE
 
 	uint32_t OGLTexture::Height(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -147,7 +147,7 @@ namespace KlayGE
 
 	uint32_t OGLTexture::Depth(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;

@@ -724,7 +724,7 @@ namespace KlayGE
 			::UpdateWindow(hWnd_);
 		}
 #else
-		UNREF_PARAM(fs);
+		KFL_UNUSED(fs);
 #endif
 	}
 
@@ -897,9 +897,9 @@ namespace KlayGE
 	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(IInspectable* sender)
 #endif
 	{
-		UNREF_PARAM(sender);
+		KFL_UNUSED(sender);
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		UNREF_PARAM(args);
+		KFL_UNUSED(args);
 #endif
 
 		if ((gi_factory_2_->IsWindowedStereoEnabled() ? true : false) != dxgi_stereo_support_)

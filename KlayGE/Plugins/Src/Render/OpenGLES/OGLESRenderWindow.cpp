@@ -410,7 +410,7 @@ namespace KlayGE
 	void OGLESRenderWindow::WindowMovedOrResized(Window const & win)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
-		UNREF_PARAM(win);
+		KFL_UNUSED(win);
 
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
@@ -444,12 +444,12 @@ namespace KlayGE
 		uint32_t new_width = w - new_left;
 		uint32_t new_height = h - new_top;
 #elif defined KLAYGE_PLATFORM_DARWIN
-		UNREF_PARAM(win);
+		KFL_UNUSED(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #elif defined KLAYGE_PLATFORM_IOS
-		UNREF_PARAM(win);
+		KFL_UNUSED(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetGLKViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];

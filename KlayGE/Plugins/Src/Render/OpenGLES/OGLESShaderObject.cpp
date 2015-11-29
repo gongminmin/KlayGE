@@ -1426,8 +1426,8 @@ namespace KlayGE
 				}
 			}
 #else
-			UNREF_PARAM(tech);
-			UNREF_PARAM(pass);
+			KFL_UNUSED(tech);
+			KFL_UNUSED(pass);
 #endif
 		}
 

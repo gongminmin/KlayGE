@@ -327,7 +327,7 @@ namespace KlayGE
 
 	void OGLScreenColorRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
@@ -339,7 +339,7 @@ namespace KlayGE
 
 	void OGLScreenColorRenderView::OnDetached(FrameBuffer& fb, uint32_t /*att*/)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
@@ -370,7 +370,7 @@ namespace KlayGE
 
 	void OGLScreenDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t /*att*/)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
@@ -382,7 +382,7 @@ namespace KlayGE
 
 	void OGLScreenDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t /*att*/)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(0 == checked_cast<OGLFrameBuffer*>(&fb)->OGLFbo());
 
@@ -496,7 +496,7 @@ namespace KlayGE
 
 	void OGLTexture1DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
@@ -657,7 +657,7 @@ namespace KlayGE
 
 	void OGLTexture2DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
@@ -717,7 +717,7 @@ namespace KlayGE
 		: texture_3d_(*checked_cast<OGLTexture3D*>(&texture_3d)),
 			slice_(slice), level_(level), copy_to_tex_(0)
 	{
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
@@ -859,7 +859,7 @@ namespace KlayGE
 
 	void OGLTexture3DRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
@@ -935,7 +935,7 @@ namespace KlayGE
 		: texture_cube_(*checked_cast<OGLTextureCube*>(&texture_cube)),
 			face_(face), level_(level)
 	{
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(0 == array_index);
@@ -1004,7 +1004,7 @@ namespace KlayGE
 
 	void OGLTextureCubeRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(att != FrameBuffer::ATT_DepthStencil);
 
@@ -1103,7 +1103,7 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		if (glloader_GL_EXT_direct_state_access())
 		{
@@ -1130,7 +1130,7 @@ namespace KlayGE
 
 	void OGLGraphicsBufferRenderView::OnUnbind(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
@@ -1162,8 +1162,8 @@ namespace KlayGE
 			sample_count_(sample_count), sample_quality_(sample_quality)
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
-		UNREF_PARAM(sample_count_);
-		UNREF_PARAM(sample_quality_);
+		KFL_UNUSED(sample_count_);
+		KFL_UNUSED(sample_quality_);
 
 		width_ = width;
 		height_ = height;
@@ -1223,7 +1223,7 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(att);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
@@ -1320,8 +1320,8 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
@@ -1437,7 +1437,7 @@ namespace KlayGE
 
 	void OGLTextureCubeDepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(att);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 
@@ -1480,8 +1480,8 @@ namespace KlayGE
 
 	void OGLTextureCubeDepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 

@@ -265,14 +265,14 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 	}
 
 	void D3D12RenderTargetRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 	}
 
 
@@ -370,7 +370,7 @@ namespace KlayGE
 
 	void D3D12DepthStencilRenderView::ClearColor(Color const & clr)
 	{
-		UNREF_PARAM(clr);
+		KFL_UNUSED(clr);
 		BOOST_ASSERT(false);
 	}
 
@@ -464,16 +464,16 @@ namespace KlayGE
 
 	void D3D12DepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
 
 	void D3D12DepthStencilRenderView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 
 		BOOST_ASSERT(FrameBuffer::ATT_DepthStencil == att);
 	}
@@ -647,14 +647,14 @@ namespace KlayGE
 
 	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 	}
 
 	void D3D12UnorderedAccessView::OnDetached(FrameBuffer& fb, uint32_t att)
 	{
-		UNREF_PARAM(fb);
-		UNREF_PARAM(att);
+		KFL_UNUSED(fb);
+		KFL_UNUSED(att);
 	}
 
 	void D3D12UnorderedAccessView::ResetInitCount()

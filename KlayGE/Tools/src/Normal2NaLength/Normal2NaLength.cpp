@@ -33,7 +33,7 @@ namespace
 	void DecompressNormalMapSubresource(uint32_t width, uint32_t height, ElementFormat restored_format, 
 		ElementInitData& restored_data, std::vector<uint8_t>& restored_data_block, ElementFormat com_format, ElementInitData const & com_data)
 	{
-		UNREF_PARAM(restored_format);
+		KFL_UNUSED(restored_format);
 
 		std::vector<uint8_t> normals(width * height * 4);
 

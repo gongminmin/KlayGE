@@ -678,7 +678,7 @@ namespace KlayGE
 
 		void OGLShaderObject::LinkShaders(RenderEffect const & effect)
 		{
-			UNREF_PARAM(effect);
+			KFL_UNUSED(effect);
 
 			is_validate_ = true;
 			for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)

@@ -89,7 +89,7 @@ namespace KlayGE
 	GraphicsBufferPtr OGLESRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, ElementFormat fmt)
 	{
-		UNREF_PARAM(fmt);
+		KFL_UNUSED(fmt);
 
 		GraphicsBufferPtr ret;
 		if (glloader_GLES_VERSION_3_0())

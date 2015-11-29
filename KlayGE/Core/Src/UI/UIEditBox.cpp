@@ -744,7 +744,7 @@ namespace KlayGE
 			}
 		}
 #else
-		UNREF_PARAM(ch);
+		KFL_UNUSED(ch);
 #endif
 	}
 

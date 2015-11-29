@@ -56,7 +56,7 @@ namespace KlayGE
 
 	uint32_t D3D11Texture::Width(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -64,7 +64,7 @@ namespace KlayGE
 
 	uint32_t D3D11Texture::Height(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -72,7 +72,7 @@ namespace KlayGE
 
 	uint32_t D3D11Texture::Depth(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;

@@ -130,9 +130,9 @@ namespace KlayGE
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false)
 	{
-		UNREF_PARAM(name);
-		UNREF_PARAM(settings);
-		UNREF_PARAM(native_wnd);
+		KFL_UNUSED(name);
+		KFL_UNUSED(settings);
+		KFL_UNUSED(native_wnd);
 		LogWarn("Unimplemented Window::Window");
 	}
 
@@ -340,7 +340,7 @@ namespace KlayGE
 
 - (BOOL)windowShouldClose:(id) sender
 {
-	UNREF_PARAM(sender);
+	KFL_UNUSED(sender);
 	app_window->OnClose()(*app_window);
 	app_window->Active(false);
 	app_window->Ready(false);
@@ -350,7 +350,7 @@ namespace KlayGE
 
 - (void)windowDidResize:(NSNotification*) aNotification
 {
-	UNREF_PARAM(aNotification);
+	KFL_UNUSED(aNotification);
 	app_window->Active(true);
 	app_window->Ready(true);
 	app_window->OnSize()(*app_window, true);
@@ -358,7 +358,7 @@ namespace KlayGE
 
 - (void)windowDidBecomeKey:(NSNotification*) aNotification
 {
-	UNREF_PARAM(aNotification);
+	KFL_UNUSED(aNotification);
 	app_window->Active(true);
 	app_window->Ready(true);
 	app_window->OnSize()(*app_window, true);
@@ -366,7 +366,7 @@ namespace KlayGE
 
 - (void)windowDidResignKey:(NSNotification*) aNotification
 {
-	UNREF_PARAM(aNotification);
+	KFL_UNUSED(aNotification);
 	app_window->Active(false);
 	app_window->OnActive()(*app_window, false);
 }

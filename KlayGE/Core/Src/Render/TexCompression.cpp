@@ -45,8 +45,8 @@ namespace KlayGE
 		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch,
 		TexCompressionMethod method)
 	{
-		UNREF_PARAM(out_slice_pitch);
-		UNREF_PARAM(in_slice_pitch);
+		KFL_UNUSED(out_slice_pitch);
+		KFL_UNUSED(in_slice_pitch);
 
 		uint32_t const elem_size = NumFormatBytes(decoded_fmt_);
 
@@ -87,8 +87,8 @@ namespace KlayGE
 		void* output, uint32_t out_row_pitch, uint32_t out_slice_pitch,
 		void const * input, uint32_t in_row_pitch, uint32_t in_slice_pitch)
 	{
-		UNREF_PARAM(out_slice_pitch);
-		UNREF_PARAM(in_slice_pitch);
+		KFL_UNUSED(out_slice_pitch);
+		KFL_UNUSED(in_slice_pitch);
 
 		uint32_t const elem_size = NumFormatBytes(decoded_fmt_);
 

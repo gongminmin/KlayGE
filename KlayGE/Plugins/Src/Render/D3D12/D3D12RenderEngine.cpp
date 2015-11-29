@@ -257,7 +257,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::CheckConfig(RenderSettings& settings)
 	{
-		UNREF_PARAM(settings);
+		KFL_UNUSED(settings);
 	}
 
 	void D3D12RenderEngine::D3DDevice(ID3D12DevicePtr const & device, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level)
@@ -501,7 +501,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
 	{
-		UNREF_PARAM(fb);
+		KFL_UNUSED(fb);
 
 		BOOST_ASSERT(d3d_device_);
 		BOOST_ASSERT(fb);

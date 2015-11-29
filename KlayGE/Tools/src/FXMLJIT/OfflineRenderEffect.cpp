@@ -4464,16 +4464,16 @@ namespace KlayGE
 		void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset,
 				uint32_t stride)
 		{
-			UNREF_PARAM(cbuff);
-			UNREF_PARAM(offset);
-			UNREF_PARAM(stride);
+			KFL_UNUSED(cbuff);
+			KFL_UNUSED(offset);
+			KFL_UNUSED(stride);
 
 			BOOST_ASSERT(false);
 		}
 
 		void RenderVariable::RebindToCBuffer(RenderEffectConstantBuffer* cbuff)
 		{
-			UNREF_PARAM(cbuff);
+			KFL_UNUSED(cbuff);
 
 			BOOST_ASSERT(false);
 		}

@@ -74,7 +74,7 @@ namespace KlayGE
 
 	uint32_t D3D12Texture::Width(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -82,7 +82,7 @@ namespace KlayGE
 
 	uint32_t D3D12Texture::Height(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -90,7 +90,7 @@ namespace KlayGE
 
 	uint32_t D3D12Texture::Depth(uint32_t level) const
 	{
-		UNREF_PARAM(level);
+		KFL_UNUSED(level);
 		BOOST_ASSERT(level < num_mip_maps_);
 
 		return 1;
@@ -562,9 +562,9 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12DevicePtr const & device = re.D3DDevice();
 
-		UNREF_PARAM(width);
-		UNREF_PARAM(height);
-		UNREF_PARAM(depth);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(depth);
 
 		last_tma_ = tma;
 

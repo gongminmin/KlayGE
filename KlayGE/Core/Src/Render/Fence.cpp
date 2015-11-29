@@ -39,18 +39,18 @@ namespace KlayGE
 	public:
 		virtual uint64_t Signal(FenceType ft) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(ft);
+			KFL_UNUSED(ft);
 			return 0;
 		}
 
 		virtual void Wait(uint64_t id) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(id);
+			KFL_UNUSED(id);
 		}
 
 		virtual bool Completed(uint64_t id) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(id);
+			KFL_UNUSED(id);
 			return true;
 		}
 	};

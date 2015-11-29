@@ -293,18 +293,18 @@ namespace KlayGE
 		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
 			std::vector<uint32_t> const & shader_desc_ids) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(res);
-			UNREF_PARAM(type);
-			UNREF_PARAM(effect);
-			UNREF_PARAM(shader_desc_ids);
+			KFL_UNUSED(res);
+			KFL_UNUSED(type);
+			KFL_UNUSED(effect);
+			KFL_UNUSED(shader_desc_ids);
 
 			return true;
 		}
 
 		virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE
 		{
-			UNREF_PARAM(os);
-			UNREF_PARAM(type);
+			KFL_UNUSED(os);
+			KFL_UNUSED(type);
 		}
 
 		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,

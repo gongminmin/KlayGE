@@ -170,8 +170,8 @@ namespace KlayGE
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == num_items);
-		UNREF_PARAM(first_array_index);
-		UNREF_PARAM(num_items);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(num_items);
 
 		D3D11_SHADER_RESOURCE_VIEW_DESC desc;
 		switch (format_)
@@ -205,8 +205,8 @@ namespace KlayGE
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 		BOOST_ASSERT(0 == first_array_index);
 		BOOST_ASSERT(1 == num_items);
-		UNREF_PARAM(first_array_index);
-		UNREF_PARAM(num_items);
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(num_items);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
 		desc.Format = dxgi_fmt_;
@@ -221,7 +221,7 @@ namespace KlayGE
 	ID3D11UnorderedAccessViewPtr const & D3D11Texture3D::RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
 	{
 		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
 		desc.Format = dxgi_fmt_;
@@ -237,7 +237,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
@@ -253,7 +253,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
-		UNREF_PARAM(array_index);
+		KFL_UNUSED(array_index);
 
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
