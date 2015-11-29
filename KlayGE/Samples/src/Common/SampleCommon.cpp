@@ -5,9 +5,5 @@
 
 int main()
 {
-	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
-
-	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
-
-	return SampleMain();
+	return EntryFunc();
 }

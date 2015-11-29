@@ -42,6 +42,8 @@
 typedef char const * LPCSTR;
 typedef long HRESULT;
 
+#define S_OK                                        0x00000000
+
 #define D3DCOMPILE_DEBUG                            0x00000001
 #define D3DCOMPILE_SKIP_VALIDATION                  0x00000002
 #define D3DCOMPILE_SKIP_OPTIMIZATION                0x00000004
@@ -228,6 +230,8 @@ namespace
 			return DynamicD3DReflect_(&shader_code[0], static_cast<UINT>(shader_code.size()), IID_ID3D11ShaderReflection_47, reflector);
 #else
 			// TODO
+			KFL_UNUSED(shader_code);
+			KFL_UNUSED(reflector);
 			return S_OK;
 #endif
 		}
@@ -245,6 +249,9 @@ namespace
 			return hr;
 #else
 			// TODO
+			KFL_UNUSED(shader_code);
+			KFL_UNUSED(strip_flags);
+			KFL_UNUSED(stripped_code);
 			return S_OK;
 #endif
 		}

@@ -347,7 +347,7 @@ namespace KlayGE
 			return name;
 		}
 #elif defined(KLAYGE_PLATFORM_IOS)
-		return LocateFileIOS();
+		return LocateFileIOS(name);
 #else
 		using namespace std::experimental;
 

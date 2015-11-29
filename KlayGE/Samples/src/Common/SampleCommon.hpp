@@ -17,4 +17,13 @@ extern "C"
 
 int SampleMain();
 
+inline int EntryFunc()
+{
+	KlayGE::ResLoader::Instance().AddPath("../../Samples/media/Common");
+
+	KlayGE::Context::Instance().LoadCfg("KlayGE.cfg");
+
+	return SampleMain();
+}
+
 #endif		// _SAMPLECOMMON_HPP
