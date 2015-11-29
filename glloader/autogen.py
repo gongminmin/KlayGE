@@ -366,16 +366,6 @@ def create_source(prefix, extensions, base_dir, quite_mode):
 			if not function.static_link:
 				all_static = False
 
-		if not all_static:
-			if (len(extension.functions) != 0):
-				source_str.write("\t{\n")
-
-				for function in extension.functions:
-					if not function.static_link:
-						source_str.write("\t\t%s = NULL;\n" % function.name)
-
-				source_str.write("\t}\n\n")
-
 		source_str.write("\t_%s = 0;\n" % extension.name)
 		source_str.write("\tif (glloader_is_supported(\"%s\"))\n" % extension.name)
 		source_str.write("\t{\n")
