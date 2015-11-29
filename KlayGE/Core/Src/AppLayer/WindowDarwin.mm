@@ -10,6 +10,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
+#import <CoreServices/CoreServices.h>
 #import <Cocoa/Cocoa.h>
 #import <OpenGL/gl.h>
 
@@ -70,16 +71,15 @@ namespace KlayGE
 	static void RegisterApp()
 	{
 		NSAutoreleasePool* pool;
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9
-		[[NSApplication sharedApplication] activateIgnoringOtherApps: YES];
-#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"	// Ignore GetCurrentProcess/SetFrontProcess
 		ProcessSerialNumber psn;
 		if (!GetCurrentProcess(&psn))
 		{
 			TransformProcessType(&psn, kProcessTransformToForegroundApplication);
 			SetFrontProcess(&psn);
 		}
-#endif
+#pragma GCC diagnostic pop
 		pool = [[NSAutoreleasePool alloc] init];
 		if (nil == NSApp)
 		{
@@ -192,7 +192,7 @@ namespace KlayGE
 				s_size = 0;
 				break;
 		}
-		
+
 		std::vector<NSOpenGLPixelFormatAttribute> visual_attr;
 		visual_attr.push_back(NSOpenGLPFAColorSize);
 		visual_attr.push_back(r_size * 3);
@@ -217,16 +217,35 @@ namespace KlayGE
 			visual_attr.push_back(settings.sample_count);
 		}
 		visual_attr.push_back(NSOpenGLPFAOpenGLProfile);
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_9
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+		SInt32 major, minor;
+		Gestalt(gestaltSystemVersionMajor, &major);
+		Gestalt(gestaltSystemVersionMinor, &minor);
+		if ((major > 10) || ((major == 10) && (minor >= 10)))
+		{
+			visual_attr.push_back(NSOpenGLProfileVersion4_1Core);
+		}
+		else
+		{
+			visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
+		}
+#pragma GCC diagnostic pop
+#else
 		visual_attr.push_back(NSOpenGLProfileVersion3_2Core);
+#endif
 		visual_attr.push_back(0);
-		
+
 		NSOpenGLPixelFormat* pixel_format = [[NSOpenGLPixelFormat alloc] initWithAttributes:&visual_attr[0]];
 		ns_view_ = [[NSOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, width_, height_) pixelFormat:pixel_format];
 		[pixel_format release];
-		
+
 		[ns_window_ setContentView:ns_view_];
 		[ns_window_ makeKeyAndOrderFront:nil];
-		
+
+		[(NSOpenGLView*)ns_view_ openGLContext];	// Create GL Context
+
 		[pool release];
 	}
 

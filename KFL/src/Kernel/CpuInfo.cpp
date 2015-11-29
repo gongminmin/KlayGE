@@ -70,8 +70,13 @@ namespace
 			: "=a" (*peax), "=b" (*pebx), "=c" (*pecx), "=d" (*pedx)
 			: "a" (*peax), "c" (*pecx)
 		);
-	#elif !defined(KLAYGE_PLATFORM_IOS)
-		//TODO: iOS Device compile complains: error: invalid output constraint '=a' in asm
+	#elif defined(KLAYGE_PLATFORM_IOS)
+		// TODO: iOS Device compile complains: error: invalid output constraint '=a' in asm
+		KFL_UNUSED(peax);
+		KFL_UNUSED(pebx);
+		KFL_UNUSED(pecx);
+		KFL_UNUSED(pedx);
+	#else
 		__asm__
 		(
 			"pushl  %%ebx			\n\t"
