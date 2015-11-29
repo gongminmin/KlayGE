@@ -89,20 +89,8 @@
 	#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 
 	#if defined(__APPLE__)
-		#if CLANG_VERSION >= 61
-			#define KLAYGE_COMPILER_VERSION 61
-		#elif CLANG_VERSION >= 60
-			#define KLAYGE_COMPILER_VERSION 60
-		#elif CLANG_VERSION >= 51
-			#define KLAYGE_COMPILER_VERSION 51
-		#elif CLANG_VERSION >= 50
-			#define KLAYGE_COMPILER_VERSION 50
-		#elif CLANG_VERSION >= 42
-			#define KLAYGE_COMPILER_VERSION 42
-		#elif CLANG_VERSION >= 41
-			#define KLAYGE_COMPILER_VERSION 41
-		#elif CLANG_VERSION >= 40
-			#define KLAYGE_COMPILER_VERSION 40
+		#if CLANG_VERSION >= 40
+			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
 			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
@@ -116,12 +104,8 @@
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
 	#elif defined(__MINGW32__)
-		#if CLANG_VERSION >= 36
-			#define KLAYGE_COMPILER_VERSION 36
-		#elif CLANG_VERSION >= 35
-			#define KLAYGE_COMPILER_VERSION 35
-		#elif CLANG_VERSION >= 34
-			#define KLAYGE_COMPILER_VERSION 34
+		#if CLANG_VERSION >= 34
+			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
 			#error "Unsupported compiler version. Please install clang++ 3.4 or up."
 		#endif
@@ -173,17 +157,8 @@
 		#undef _GLIBCXX_USE_INT128
 	#endif
 
-	#define GCC_VERSION (__GNUC__ * 10 + __GNUC_MINOR__)
-	#if GCC_VERSION >= 51
-		#define KLAYGE_COMPILER_VERSION 51
-	#elif GCC_VERSION >= 49
-		#define KLAYGE_COMPILER_VERSION 49
-	#elif GCC_VERSION >= 48
-		#define KLAYGE_COMPILER_VERSION 48
-	#elif GCC_VERSION >= 47
-		#define KLAYGE_COMPILER_VERSION 47
-	#elif GCC_VERSION >= 46
-		#define KLAYGE_COMPILER_VERSION 46
+	#if GCC_VERSION >= 46
+		#define KLAYGE_COMPILER_VERSION (__GNUC__ * 10 + __GNUC_MINOR__)
 	#else
 		#error "Unsupported compiler version. Please install g++ 4.6 or up."
 	#endif
@@ -244,11 +219,11 @@
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	#if _MSC_VER >= 1800
+	#if KLAYGE_COMPILER_VERSION >= 120
 		#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 	#endif
-	#if _MSC_VER >= 1900
+	#if KLAYGE_COMPILER_VERSION >= 140
 		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 		#undef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
