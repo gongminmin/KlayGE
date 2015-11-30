@@ -44,13 +44,6 @@
 
 #include <KFL/Log.hpp>
 
-#define KFL_STRINGIZE(X) KFL_DO_STRINGIZE(X)
-#define KFL_DO_STRINGIZE(X) #X
-
-#define KFL_JOIN(X, Y) KFL_DO_JOIN(X, Y)
-#define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
-#define KFL_DO_JOIN2(X, Y) X##Y
-
 #ifdef KLAYGE_DEBUG
 #define KLAYGE_DBG_SUFFIX "_d"
 #else

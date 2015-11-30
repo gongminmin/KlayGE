@@ -39,6 +39,13 @@
 	#define KLAYGE_DEBUG
 #endif
 
+#define KFL_STRINGIZE(X) KFL_DO_STRINGIZE(X)
+#define KFL_DO_STRINGIZE(X) #X
+
+#define KFL_JOIN(X, Y) KFL_DO_JOIN(X, Y)
+#define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
+#define KFL_DO_JOIN2(X, Y) X##Y
+
 // KlayGE requires vc 11.0+, g++ 4.6+, clang 3.4+, with C++11 option on.
 
 // All those C++11 features are supported by those compilers. Use them safely without wrapper.
@@ -81,7 +88,7 @@
 	#define KLAYGE_COMPILER_CLANG
 	#define KLAYGE_COMPILER_NAME clang
 
-	#define CLANG_VERSION (__clang_major__ * 10 + __clang_minor__)
+	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
@@ -158,7 +165,7 @@
 	#endif
 
 	#if GCC_VERSION >= 46
-		#define KLAYGE_COMPILER_VERSION (__GNUC__ * 10 + __GNUC_MINOR__)
+		#define KLAYGE_COMPILER_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 	#else
 		#error "Unsupported compiler version. Please install g++ 4.6 or up."
 	#endif
