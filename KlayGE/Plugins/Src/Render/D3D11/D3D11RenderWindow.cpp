@@ -559,6 +559,7 @@ namespace KlayGE
 		if (d3d_imm_ctx)
 		{
 			d3d_imm_ctx->ClearState();
+			d3d_imm_ctx->Flush();
 		}
 
 		for (size_t i = 0; i < clr_views_.size(); ++ i)
@@ -730,6 +731,8 @@ namespace KlayGE
 
 	void D3D11RenderWindow::WindowMovedOrResized()
 	{
+		LogInfo("1");
+
 		::RECT rect;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
