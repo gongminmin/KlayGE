@@ -17,20 +17,29 @@
 
 #include <glloader/glloader.h>
 
-#ifdef GLLOADER_AGL
-	#include <Carbon/Carbon.h>
+#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+	#define GLLOADER_WINDOWS_PLATFORM
+#elif defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__)
+	#define GLLOADER_LINUX_PLATFORM
+#elif defined(__ANDROID__) || defined(ANDROID)
+	#define GLLOADER_ANDROID_PLATFORM
+#elif defined(__APPLE__) || defined(__APPLE_CC__)
+	#define GLLOADER_APPLE_PLATFORM
 #endif
-#ifdef GLLOADER_EAGL
+
+#if defined(GLLOADER_AGL)
+	#include <Carbon/Carbon.h>
+#elif defined(GLLOADER_EAGL)
 	#include <CoreFoundation/CoreFoundation.h>
 #endif
 
-#if defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
-#include <dlfcn.h>
+#if defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
+	#include <dlfcn.h>
 #endif
 
-#if defined(__ANDROID__) || defined(ANDROID)
-#include <android/log.h>
-#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "glloader", __VA_ARGS__))
+#if defined(GLLOADER_ANDROID_PLATFORM)
+	#include <android/log.h>
+	#define LOGW(...) ((void)__android_log_print(ANDROID_LOG_WARN, "glloader", __VA_ARGS__))
 #endif
 
 #if (defined(__GNUC__) && !defined(__clang__)) || (defined(__clang__) && defined(__MINGW32__))
@@ -51,7 +60,7 @@
 #include <sstream>
 
 #ifdef GLLOADER_DEBUG
-#include <iostream>
+	#include <iostream>
 #endif
 
 #include "utils.h"
@@ -118,7 +127,7 @@ namespace glloader
 		{
 			return gl_dlls_;
 		}
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 		std::vector<std::map<std::string, std::string>> const & gl_dll_entries() const
 		{
 			return gl_dll_entries_;
@@ -133,7 +142,7 @@ namespace glloader
 	private:
 		gl_dll_container()
 		{
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 	#ifdef GLLOADER_GLES
 			void* ogl_dll = ::LoadLibraryExA("libEGL.dll", NULL, 0);
 			if (ogl_dll != NULL)
@@ -183,7 +192,7 @@ namespace glloader
 				this->DumpEntries("opengl32.dll");
 			}
 	#endif
-#elif defined(__APPLE__) || defined(__APPLE_CC__)
+#elif defined(GLLOADER_APPLE_PLATFORM)
 	#ifdef GLLOADER_GLES
 			// http://forum.imgtec.com/discussion/comment/18323#Comment_18323
 			// For PowerVR_SDK, we need to load libGLESv2 before libEGL
@@ -210,7 +219,7 @@ namespace glloader
 			gl_bundle_ = CFBundleGetBundleWithIdentifier(CFSTR("com.apple.opengles"));
 	#endif
 			assert(gl_bundle_ != NULL);
-#eif defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__ANDROID__) || defined(ANDROID)
+#elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM)
 	#ifdef GLLOADER_GLES
 			void* ogl_dll = ::dlopen("libEGL.so", RTLD_LAZY);
 			if (ogl_dll != NULL)
@@ -244,17 +253,18 @@ namespace glloader
 		{
 			for (size_t i = 0; i < gl_dlls_.size(); ++ i)
 			{
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 				::FreeLibrary(static_cast<HMODULE>(gl_dlls_[i]));
-#elif defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
+#elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
 				::dlclose(gl_dlls_[i]);
-#elif defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
-				CFRelease(gl_bundle_);
 #endif
 			}
+#if defined(GLLOADER_APPLE_PLATFORM)
+			CFRelease(gl_bundle_);
+#endif
 		}
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 		void DumpEntries(char const * name)
 		{
 			HMODULE dll = ::LoadLibraryExA(name, NULL, DONT_RESOLVE_DLL_REFERENCES);
@@ -306,9 +316,9 @@ namespace glloader
 
 	private:
 		std::vector<void*> gl_dlls_;
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 		std::vector<std::map<std::string, std::string>> gl_dll_entries_;
-#elif defined(GLLOADER_AGL) || defined(GLLOADER_EAGL)
+#elif defined(GLLOADER_APPLE_PLATFORM)
 		CFBundleRef gl_bundle_;
 #endif
 
@@ -756,7 +766,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 
 	std::vector<void*> const & gl_dlls = glloader::gl_dll_container::instance().gl_dlls();
 
-#if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(GLLOADER_WINDOWS_PLATFORM)
 	std::vector<std::map<std::string, std::string>> const & gl_dll_entries = glloader::gl_dll_container::instance().gl_dll_entries();
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
@@ -774,7 +784,7 @@ void* get_gl_proc_address_by_dll(const char* name)
 			}
 		}
 	}
-#elif defined(__unix__) || defined(linux) || defined(__linux) || defined(__linux__) || defined(__ANDROID__) || defined(ANDROID) || defined(__APPLE__) || defined(__APPLE_CC__)
+#elif defined(GLLOADER_LINUX_PLATFORM) || defined(GLLOADER_ANDROID_PLATFORM) || defined(GLLOADER_APPLE_PLATFORM)
 	for (size_t i = 0; (i < gl_dlls.size()) && (NULL == ret); ++ i)
 	{
 		ret = ::dlsym(gl_dlls[i], name);
@@ -816,7 +826,7 @@ void* glloader_get_gl_proc_address(const char* name)
 #ifdef GLLOADER_DEBUG
 	if (NULL == ret)
 	{
-#if defined(__ANDROID__) || defined(ANDROID)
+#if defined(GLLOADER_ANDROID_PLATFORM)
 		LOGW("%s is missing!\n", name);
 #else
 		std::cerr << name << " is missing!" << std::endl;
