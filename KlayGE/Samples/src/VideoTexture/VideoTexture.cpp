@@ -184,6 +184,27 @@ void VideoTextureApp::OnCreate()
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
+#else
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+	ElementFormat fmt;
+	uint32_t data = 0xFF000000;
+	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
+	{
+		fmt = EF_ABGR8;
+	}
+	else
+	{
+		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
+		fmt = EF_ARGB8;
+	}
+
+	ElementInitData init_data;
+	init_data.data = &data;
+	init_data.slice_pitch = init_data.row_pitch = sizeof(data);
+
+	TexturePtr dummy_tex = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(dummy_tex);
 #endif
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
