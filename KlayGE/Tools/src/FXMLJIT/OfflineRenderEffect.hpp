@@ -586,15 +586,6 @@ namespace KlayGE
 				return caps_;
 			}
 
-			void PrototypeEffect(RenderEffectPtr const & prototype_effect)
-			{
-				prototype_effect_ = prototype_effect;
-			}
-			RenderEffectPtr const & PrototypeEffect() const
-			{
-				return prototype_effect_;
-			}
-
 			uint32_t NumParameters() const
 			{
 				return static_cast<uint32_t>(params_.size());
@@ -674,8 +665,6 @@ namespace KlayGE
 			std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
 			std::shared_ptr<std::vector<RenderShaderFragment>> shader_frags_;
 			std::shared_ptr<std::string> hlsl_shader_;
-
-			RenderEffectPtr prototype_effect_;
 
 			std::shared_ptr<std::vector<ShaderDesc>> shader_descs_;
 

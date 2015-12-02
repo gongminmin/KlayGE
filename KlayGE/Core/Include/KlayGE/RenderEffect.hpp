@@ -611,15 +611,6 @@ namespace KlayGE
 			return *res_name_;
 		}
 
-		void PrototypeEffect(RenderEffectPtr const & prototype_effect)
-		{
-			prototype_effect_ = prototype_effect;
-		}
-		RenderEffectPtr const & PrototypeEffect() const
-		{
-			return prototype_effect_;
-		}
-
 		uint32_t NumParameters() const
 		{
 			return static_cast<uint32_t>(params_.size());
@@ -700,8 +691,6 @@ namespace KlayGE
 		std::shared_ptr<std::vector<RenderShaderFragment>> shader_frags_;
 		std::shared_ptr<std::string> hlsl_shader_;
 
-		RenderEffectPtr prototype_effect_;
-
 		std::shared_ptr<std::vector<ShaderDesc>> shader_descs_;
 	};
 
@@ -719,6 +708,11 @@ namespace KlayGE
 		void StreamOut(std::ostream& os, uint32_t tech_index);
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
+
+		size_t TechHash() const
+		{
+			return tech_hash_;
+		}
 
 		std::string const & Name() const
 		{
@@ -790,6 +784,9 @@ namespace KlayGE
 
 	private:
 		RenderEffect& effect_;
+
+		size_t tech_hash_;
+
 		std::shared_ptr<std::string> name_;
 		size_t name_hash_;
 

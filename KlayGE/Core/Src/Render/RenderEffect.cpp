@@ -2696,10 +2696,8 @@ namespace KlayGE
 
 		std::shared_ptr<void> MainThreadStage()
 		{
-			RenderEffectPtr prototype = MakeSharedPtr<RenderEffect>();
-			prototype->Load(effect_desc_.res_name);
-			effect_desc_.effect = prototype->Clone();
-			effect_desc_.effect->PrototypeEffect(prototype);
+			effect_desc_.effect = MakeSharedPtr<RenderEffect>();
+			effect_desc_.effect->Load(effect_desc_.res_name);
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
@@ -2728,9 +2726,7 @@ namespace KlayGE
 
 		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
 		{
-			RenderEffectPtr prototype = std::static_pointer_cast<RenderEffect>(resource)->PrototypeEffect();
-			effect_desc_.effect = prototype->Clone();
-			effect_desc_.effect->PrototypeEffect(prototype);
+			effect_desc_.effect = std::static_pointer_cast<RenderEffect>(resource)->Clone();
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
@@ -3305,7 +3301,6 @@ namespace KlayGE
 		ret->res_name_ = res_name_;
 		ret->timestamp_ = timestamp_;
 
-		ret->prototype_effect_ = prototype_effect_;
 		ret->macros_ = macros_;
 		ret->shader_frags_ = shader_frags_;
 		ret->hlsl_shader_ = hlsl_shader_;
@@ -3795,6 +3790,10 @@ namespace KlayGE
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
+		std::string const & res_name = effect_.ResName();
+		tech_hash_ = boost::hash_range(res_name.begin(), res_name.end());
+		boost::hash_combine(tech_hash_, name_hash_);
+
 		RenderTechniquePtr parent_tech;
 		XMLAttributePtr inherit_attr = node->Attrib("inherit");
 		if (inherit_attr)
@@ -3951,6 +3950,10 @@ namespace KlayGE
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(ReadShortString(res));
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
+		std::string const & res_name = effect_.ResName();
+		tech_hash_ = boost::hash_range(res_name.begin(), res_name.end());
+		boost::hash_combine(tech_hash_, name_hash_);
+
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
 		if (num_anno > 0)
@@ -4062,6 +4065,8 @@ namespace KlayGE
 	RenderTechniquePtr RenderTechnique::Clone(RenderEffect& effect)
 	{
 		RenderTechniquePtr ret = MakeSharedPtr<RenderTechnique>(effect);
+
+		ret->tech_hash_ = tech_hash_;
 
 		ret->name_ = name_;
 		ret->name_hash_ = name_hash_;

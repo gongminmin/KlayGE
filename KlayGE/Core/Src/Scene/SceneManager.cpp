@@ -373,11 +373,10 @@ namespace KlayGE
 			{
 				RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
 				BOOST_ASSERT(obj_tech);
-				RenderTechniquePtr const & tech = obj_tech->Effect().PrototypeEffect()->TechniqueByName(obj_tech->Name());
 				bool found = false;
 				for (auto& items : render_queue_)
 				{
-					if (items.first == tech)
+					if (items.first->TechHash() == obj_tech->TechHash())
 					{
 						items.second.push_back(obj);
 						found = true;
@@ -386,7 +385,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					render_queue_.push_back(std::make_pair(tech, RenderItemsType(1, obj)));
+					render_queue_.push_back(std::make_pair(obj_tech, RenderItemsType(1, obj)));
 				}
 			}
 		}
