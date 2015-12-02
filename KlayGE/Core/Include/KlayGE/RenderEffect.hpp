@@ -563,7 +563,7 @@ namespace KlayGE
 		std::shared_ptr<RenderVariable> var_;
 	};
 
-	class KLAYGE_CORE_API RenderShaderFunc
+	class KLAYGE_CORE_API RenderShaderFragment
 	{
 	public:
 		void Load(XMLNodePtr const & node);
@@ -654,14 +654,14 @@ namespace KlayGE
 			return techniques_[n];
 		}
 
-		uint32_t NumShaders() const
+		uint32_t NumShaderFragments() const
 		{
-			return shaders_ ? static_cast<uint32_t>(shaders_->size()) : 0;
+			return shader_frags_ ? static_cast<uint32_t>(shader_frags_->size()) : 0;
 		}
-		RenderShaderFunc const & ShaderByIndex(uint32_t n) const
+		RenderShaderFragment const & ShaderFragmentByIndex(uint32_t n) const
 		{
-			BOOST_ASSERT(n < this->NumShaders());
-			return (*shaders_)[n];
+			BOOST_ASSERT(n < this->NumShaderFragments());
+			return (*shader_frags_)[n];
 		}
 
 		uint32_t AddShaderDesc(ShaderDesc const & sd);
@@ -697,7 +697,7 @@ namespace KlayGE
 		std::vector<RenderTechniquePtr> techniques_;
 
 		std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
-		std::shared_ptr<std::vector<RenderShaderFunc>> shaders_;
+		std::shared_ptr<std::vector<RenderShaderFragment>> shader_frags_;
 		std::shared_ptr<std::string> hlsl_shader_;
 
 		RenderEffectPtr prototype_effect_;

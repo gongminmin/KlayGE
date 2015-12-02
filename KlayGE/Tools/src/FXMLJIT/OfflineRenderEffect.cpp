@@ -2200,7 +2200,7 @@ namespace KlayGE
 				macros_.reset();
 				cbuffers_.clear();
 				params_.clear();
-				shaders_.reset();
+				shader_frags_.reset();
 				techniques_.clear();
 
 				shader_descs_ = MakeSharedPtr<std::remove_reference<decltype(*shader_descs_)>::type>(1);
@@ -2353,11 +2353,11 @@ namespace KlayGE
 					XMLNodePtr shader_node = root->FirstNode("shader");
 					if (shader_node)
 					{
-						shaders_ = MakeSharedPtr<std::remove_reference<decltype(*shaders_)>::type>();
+						shader_frags_ = MakeSharedPtr<std::remove_reference<decltype(*shader_frags_)>::type>();
 						for (; shader_node; shader_node = shader_node->NextSibling("shader"))
 						{
-							shaders_->push_back(RenderShaderFunc());
-							shaders_->back().Load(shader_node);
+							shader_frags_->push_back(RenderShaderFragment());
+							shader_frags_->back().Load(shader_node);
 						}
 					}
 				}
@@ -2443,13 +2443,13 @@ namespace KlayGE
 			}
 
 			{
-				uint16_t num_shaders = Native2LE(static_cast<uint16_t>(shaders_ ? shaders_->size() : 0));
-				os.write(reinterpret_cast<char const *>(&num_shaders), sizeof(num_shaders));
-				if (shaders_)
+				uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(shader_frags_ ? shader_frags_->size() : 0));
+				os.write(reinterpret_cast<char const *>(&num_shader_frags), sizeof(num_shader_frags));
+				if (shader_frags_)
 				{
-					for (uint32_t i = 0; i < shaders_->size(); ++ i)
+					for (uint32_t i = 0; i < shader_frags_->size(); ++ i)
 					{
-						(*shaders_)[i].StreamOut(os);
+						(*shader_frags_)[i].StreamOut(os);
 					}
 				}
 			}
@@ -2877,10 +2877,10 @@ namespace KlayGE
 				}
 			}
 
-			for (uint32_t i = 0; i < this->NumShaders(); ++ i)
+			for (uint32_t i = 0; i < this->NumShaderFragments(); ++ i)
 			{
-				RenderShaderFunc const & effect_shader = this->ShaderByIndex(i);
-				ShaderObject::ShaderType const shader_type = effect_shader.Type();
+				RenderShaderFragment const & effect_shader_frag = this->ShaderFragmentByIndex(i);
+				ShaderObject::ShaderType const shader_type = effect_shader_frag.Type();
 				switch (shader_type)
 				{
 				case ShaderObject::ST_VertexShader:
@@ -2910,7 +2910,7 @@ namespace KlayGE
 				default:
 					break;
 				}
-				ShaderModel const & ver = effect_shader.Version();
+				ShaderModel const & ver = effect_shader_frag.Version();
 				if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 				{
 					ss << "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
@@ -2918,7 +2918,7 @@ namespace KlayGE
 						<< static_cast<int>(ver.minor_ver) << ")" << std::endl;
 				}
 
-				ss << effect_shader.str() << std::endl;
+				ss << effect_shader_frag.str() << std::endl;
 
 				if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 				{
@@ -4000,7 +4000,7 @@ namespace KlayGE
 		}
 
 
-		void RenderShaderFunc::Load(XMLNodePtr const & node)
+		void RenderShaderFragment::Load(XMLNodePtr const & node)
 		{
 			type_ = ShaderObject::ST_NumShaderTypes;
 			XMLAttributePtr attr = node->Attrib("type");
@@ -4065,7 +4065,7 @@ namespace KlayGE
 			}
 		}
 
-		void RenderShaderFunc::StreamOut(std::ostream& os)
+		void RenderShaderFragment::StreamOut(std::ostream& os)
 		{
 			uint32_t tmp;
 			tmp = Native2LE(type_);
