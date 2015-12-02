@@ -61,9 +61,6 @@
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 
-DEFINE_GUID(IID_ID3D12ShaderReflection_47,
-	0x5a58797d, 0xa72c, 0x478d, 0x8b, 0xa2, 0xef, 0xc6, 0xb0, 0xef, 0xe8, 0x8e);
-
 namespace
 {
 	using namespace KlayGE;
@@ -287,7 +284,7 @@ namespace KlayGE
 
 			uint8_t len = *nsbp;
 			++ nsbp;
-			std::string profile;
+			std::string profile = shader_code_[type].second;
 			profile.resize(len);
 			std::memcpy(&profile[0], nsbp, len);
 			nsbp += len;
@@ -433,16 +430,18 @@ namespace KlayGE
 
 	void D3D12ShaderObject::StreamOut(std::ostream& os, ShaderType type)
 	{
-		std::vector<uint8_t> native_shader_block;
+		std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+
+		{
+			uint8_t len = static_cast<uint8_t>(shader_code_[type].second.size());
+			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
+			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
+		}
 
 		std::shared_ptr<std::vector<uint8_t>> code_blob = shader_code_[type].first;
 		if (code_blob)
 		{
-			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
-
-			uint8_t len = static_cast<uint8_t>(shader_code_[type].second.size());
-			oss.write(reinterpret_cast<char const *>(&len), sizeof(len));
-			oss.write(reinterpret_cast<char const *>(&shader_code_[type].second[0]), len);
+			uint8_t len;
 
 			uint32_t blob_size = Native2LE(static_cast<uint32_t>(code_blob->size()));
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
@@ -516,12 +515,9 @@ namespace KlayGE
 				uint32_t cs_block_size_z = Native2LE(cs_block_size_z_);
 				oss.write(reinterpret_cast<char const *>(&cs_block_size_z), sizeof(cs_block_size_z));
 			}
-
-			std::string out_str = oss.str();
-			native_shader_block.resize(out_str.size());
-			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
 		}
 
+		std::string native_shader_block = oss.str();
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
 		{
 			uint32_t tmp = Native2LE(len);

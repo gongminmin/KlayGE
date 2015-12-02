@@ -731,8 +731,6 @@ namespace KlayGE
 
 	void D3D11RenderWindow::WindowMovedOrResized()
 	{
-		LogInfo("1");
-
 		::RECT rect;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
