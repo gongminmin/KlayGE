@@ -806,9 +806,7 @@ namespace KlayGE
 	{
 	public:
 		explicit RenderPass(RenderEffect& effect)
-			: effect_(effect),
-				front_stencil_ref_(0), back_stencil_ref_(0),
-				blend_factor_(1, 1, 1, 1), sample_mask_(0xFFFFFFFF)
+			: effect_(effect)
 		{
 		}
 

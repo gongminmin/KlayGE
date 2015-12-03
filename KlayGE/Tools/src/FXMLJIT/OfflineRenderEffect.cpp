@@ -2961,16 +2961,16 @@ namespace KlayGE
 
 				parent_tech = effect_.TechniqueByName(inherit);
 				BOOST_ASSERT(parent_tech);
-				annotations_ = parent_tech->annotations_;
 			}
 
 			{
 				XMLNodePtr anno_node = node->FirstNode("annotation");
 				if (anno_node)
 				{
-					if (!annotations_)
+					annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
+					if (parent_tech && parent_tech->annotations_)
 					{
-						annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
+						*annotations_ = *parent_tech->annotations_;
 					}
 					for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 					{
@@ -2980,16 +2980,17 @@ namespace KlayGE
 						annotation->Load(anno_node);
 					}
 				}
+				else if (parent_tech)
+				{
+					annotations_ = parent_tech->annotations_;
+				}
 			}
 
 			{
 				XMLNodePtr macro_node = node->FirstNode("macro");
 				if (macro_node)
 				{
-					if (!macros_)
-					{
-						macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
-					}				
+					macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
 					if (parent_tech && parent_tech->macros_)
 					{
 						*macros_ = *parent_tech->macros_;
@@ -3152,16 +3153,15 @@ namespace KlayGE
 			name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
 			name_hash_ = boost::hash_range(name_->begin(), name_->end());
 
-			if (inherit_pass)
-			{
-				annotations_ = inherit_pass->annotations_;
-			}
-
 			{
 				XMLNodePtr anno_node = node->FirstNode("annotation");
 				if (anno_node)
 				{
 					annotations_ = MakeSharedPtr<std::remove_reference<decltype(*annotations_)>::type>();
+					if (inherit_pass && inherit_pass->annotations_)
+					{
+						*annotations_ = *inherit_pass->annotations_;
+					}
 					for (; anno_node; anno_node = anno_node->NextSibling("annotation"))
 					{
 						RenderEffectAnnotationPtr annotation = MakeSharedPtr<RenderEffectAnnotation>();
@@ -3170,16 +3170,17 @@ namespace KlayGE
 						annotation->Load(anno_node);
 					}
 				}
+				else if (inherit_pass)
+				{
+					annotations_ = inherit_pass->annotations_;
+				}
 			}
 
 			{
 				XMLNodePtr macro_node = node->FirstNode("macro");
 				if (macro_node)
 				{
-					if (!macros_)
-					{
-						macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
-					}
+					macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
 					if (inherit_pass && inherit_pass->macros_)
 					{
 						*macros_ = *inherit_pass->macros_;
