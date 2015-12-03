@@ -536,10 +536,14 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectAnnotation
 	{
 	public:
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node);
+#endif
 
 		void StreamIn(ResIdentifierPtr const & res);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os);
+#endif
 
 		uint32_t Type() const
 		{
@@ -566,10 +570,14 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderShaderFragment
 	{
 	public:
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node);
+#endif
 
 		void StreamIn(ResIdentifierPtr const & res);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os);
+#endif
 
 		ShaderObject::ShaderType Type() const
 		{
@@ -602,7 +610,9 @@ namespace KlayGE
 		void Load(std::string const & name);
 
 		bool StreamIn(ResIdentifierPtr const & source);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os);
+#endif
 
 		RenderEffectPtr Clone();
 
@@ -671,8 +681,10 @@ namespace KlayGE
 
 		std::string const & TypeName(uint32_t code) const;
 
+#if KLAYGE_IS_DEV_PLATFORM
 		void GenHLSLShaderText();
 		std::string const & HLSLShaderText() const;
+#endif
 
 	private:
 		void RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const;
@@ -681,7 +693,9 @@ namespace KlayGE
 
 	private:
 		std::shared_ptr<std::string> res_name_;
+#if KLAYGE_IS_DEV_PLATFORM
 		uint64_t timestamp_;
+#endif
 
 		std::vector<RenderEffectParameterPtr> params_;
 		std::vector<RenderEffectConstantBufferPtr> cbuffers_;
@@ -689,7 +703,9 @@ namespace KlayGE
 
 		std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
 		std::shared_ptr<std::vector<RenderShaderFragment>> shader_frags_;
+#if KLAYGE_IS_DEV_PLATFORM
 		std::shared_ptr<std::string> hlsl_shader_;
+#endif
 
 		std::shared_ptr<std::vector<ShaderDesc>> shader_descs_;
 	};
@@ -702,10 +718,14 @@ namespace KlayGE
 		{
 		}
 
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node, uint32_t tech_index);
+#endif
 
 		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os, uint32_t tech_index);
+#endif
 
 		RenderTechniquePtr Clone(RenderEffect& effect);
 
@@ -810,11 +830,15 @@ namespace KlayGE
 		{
 		}
 
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
 		void Load(uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass);
+#endif
 
 		bool StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index);
+#endif
 
 		RenderPassPtr Clone(RenderEffect& effect);
 
@@ -898,10 +922,14 @@ namespace KlayGE
 		RenderEffectConstantBuffer();
 		~RenderEffectConstantBuffer();
 
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(std::string const & name);
+#endif
 
 		void StreamIn(ResIdentifierPtr const & res);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os);
+#endif
 
 		RenderEffectConstantBufferPtr Clone(RenderEffect& src_effect, RenderEffect& dst_effect);
 
@@ -982,10 +1010,14 @@ namespace KlayGE
 		explicit RenderEffectParameter();
 		~RenderEffectParameter();
 
+#if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node);
+#endif
 
 		void StreamIn(ResIdentifierPtr const & res);
+#if KLAYGE_IS_DEV_PLATFORM
 		void StreamOut(std::ostream& os);
+#endif
 
 		RenderEffectParameterPtr Clone();
 

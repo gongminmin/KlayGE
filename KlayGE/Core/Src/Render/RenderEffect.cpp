@@ -738,6 +738,7 @@ namespace
 	}
 
 
+#if KLAYGE_IS_DEV_PLATFORM
 	RenderVariablePtr read_var(XMLNodePtr const & node, uint32_t type, uint32_t array_size)
 	{
 		RenderVariablePtr var;
@@ -1589,6 +1590,7 @@ namespace
 
 		return var;
 	}
+#endif
 
 	RenderVariablePtr stream_in_var(ResIdentifierPtr const & res, uint32_t type, uint32_t array_size)
 	{
@@ -2141,6 +2143,7 @@ namespace
 		return var;
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void stream_out_var(std::ostream& os, RenderVariablePtr const & var, uint32_t type, uint32_t array_size)
 	{
 		switch (type)
@@ -2659,6 +2662,7 @@ namespace
 			break;
 		}
 	}
+#endif
 }
 
 namespace KlayGE
@@ -2740,12 +2744,14 @@ namespace KlayGE
 	};
 
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
 		name_ = node->Attrib("name")->ValueString();
 		var_ = read_var(node, type_, 0);
 	}
+#endif
 
 	void RenderEffectAnnotation::StreamIn(ResIdentifierPtr const & res)
 	{
@@ -2755,6 +2761,7 @@ namespace KlayGE
 		var_ = stream_in_var(res, type_, 0);
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectAnnotation::StreamOut(std::ostream& os)
 	{
 		uint32_t t = Native2LE(type_);
@@ -2762,6 +2769,7 @@ namespace KlayGE
 		WriteShortString(os, name_);
 		stream_out_var(os, var_, type_, 0);
 	}
+#endif
 
 
 	RenderEffect::RenderEffect()
@@ -2819,13 +2827,16 @@ namespace KlayGE
 		}
 		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
 
+#if KLAYGE_IS_DEV_PLATFORM
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
+#endif
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
 
 		XMLDocumentPtr doc;
 		XMLNodePtr root;
 
 		res_name_ = MakeSharedPtr<std::string>(fxml_name);
+#if KLAYGE_IS_DEV_PLATFORM
 		if (source)
 		{
 			timestamp_ = source->Timestamp();
@@ -2849,9 +2860,11 @@ namespace KlayGE
 		{
 			timestamp_ = 0;
 		}
+#endif
 
 		if (!this->StreamIn(kfx_source))
 		{
+#if KLAYGE_IS_DEV_PLATFORM
 			if (source)
 			{
 				shader_descs_.reset();
@@ -3035,6 +3048,7 @@ namespace KlayGE
 
 			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
 			this->StreamOut(ofs);
+#endif
 		}
 	}
 
@@ -3067,8 +3081,10 @@ namespace KlayGE
 				{
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
+#if KLAYGE_IS_DEV_PLATFORM
 					timestamp = LE2Native(timestamp);
 					if (timestamp_ <= timestamp)
+#endif
 					{
 						shader_descs_ = MakeSharedPtr<std::remove_reference<decltype(*shader_descs_)>::type>(1);
 
@@ -3157,8 +3173,6 @@ namespace KlayGE
 							}
 						}
 
-						this->GenHLSLShaderText();
-
 						ret = true;
 						{
 							uint16_t num_techs;
@@ -3181,6 +3195,7 @@ namespace KlayGE
 		return ret;
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffect::StreamOut(std::ostream& os)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -3293,17 +3308,22 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	RenderEffectPtr RenderEffect::Clone()
 	{
 		RenderEffectPtr ret = MakeSharedPtr<RenderEffect>();
 
 		ret->res_name_ = res_name_;
+#if KLAYGE_IS_DEV_PLATFORM
 		ret->timestamp_ = timestamp_;
+#endif
 
 		ret->macros_ = macros_;
 		ret->shader_frags_ = shader_frags_;
+#if KLAYGE_IS_DEV_PLATFORM
 		ret->hlsl_shader_ = hlsl_shader_;
+#endif
 		ret->shader_descs_ = shader_descs_;
 
 		ret->params_.resize(params_.size());
@@ -3415,6 +3435,7 @@ namespace KlayGE
 		return type_define::instance().type_name(code);
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffect::GenHLSLShaderText()
 	{
 		std::ostringstream ss;
@@ -3783,8 +3804,10 @@ namespace KlayGE
 			return empty;
 		}
 	}
+#endif
 
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
@@ -3945,6 +3968,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
 	{
@@ -4013,6 +4037,7 @@ namespace KlayGE
 		return ret;
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index)
 	{
 		WriteShortString(os, *name_);
@@ -4062,6 +4087,7 @@ namespace KlayGE
 			passes_[pass_index]->StreamOut(os, tech_index, pass_index);
 		}
 	}
+#endif
 
 	RenderTechniquePtr RenderTechnique::Clone(RenderEffect& effect)
 	{
@@ -4090,6 +4116,7 @@ namespace KlayGE
 	}
 
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -4646,6 +4673,7 @@ namespace KlayGE
 
 		is_validate_ = shader_obj_->Validate();
 	}
+#endif
 
 	bool RenderPass::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index, uint32_t pass_index)
 	{
@@ -4781,6 +4809,7 @@ namespace KlayGE
 		return native_accepted;
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index)
 	{
 		WriteShortString(os, *name_);
@@ -4894,6 +4923,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	RenderPassPtr RenderPass::Clone(RenderEffect& effect)
 	{
@@ -4943,12 +4973,14 @@ namespace KlayGE
 	{
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::Load(std::string const & name)
 	{
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(name);
 		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 	}
+#endif
 
 	void RenderEffectConstantBuffer::StreamIn(ResIdentifierPtr const & res)
 	{
@@ -4967,6 +4999,7 @@ namespace KlayGE
 		}
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::StreamOut(std::ostream& os)
 	{
 		WriteShortString(os, *name_);
@@ -4979,6 +5012,7 @@ namespace KlayGE
 			os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		}
 	}
+#endif
 
 	RenderEffectConstantBufferPtr RenderEffectConstantBuffer::Clone(RenderEffect& src_effect, RenderEffect& dst_effect)
 	{
@@ -5049,6 +5083,7 @@ namespace KlayGE
 	{
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
@@ -5118,6 +5153,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	void RenderEffectParameter::StreamIn(ResIdentifierPtr const & res)
 	{
@@ -5190,6 +5226,7 @@ namespace KlayGE
 		}
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::StreamOut(std::ostream& os)
 	{
 		uint32_t t = Native2LE(type_);
@@ -5243,6 +5280,7 @@ namespace KlayGE
 			(*annotations_)[i]->StreamOut(os);
 		}
 	}
+#endif
 
 	RenderEffectParameterPtr RenderEffectParameter::Clone()
 	{
@@ -5275,6 +5313,7 @@ namespace KlayGE
 	}
 
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderShaderFragment::Load(XMLNodePtr const & node)
 	{
 		type_ = ShaderObject::ST_NumShaderTypes;
@@ -5339,6 +5378,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	void RenderShaderFragment::StreamIn(ResIdentifierPtr const & res)
 	{
@@ -5353,6 +5393,7 @@ namespace KlayGE
 		res->read(&str_[0], len * sizeof(str_[0]));
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderShaderFragment::StreamOut(std::ostream& os)
 	{
 		uint32_t tmp;
@@ -5365,6 +5406,7 @@ namespace KlayGE
 		os.write(reinterpret_cast<char const *>(&tmp), sizeof(tmp));
 		os.write(&str_[0], len * sizeof(str_[0]));
 	}
+#endif
 
 
 	RenderVariable::RenderVariable()
