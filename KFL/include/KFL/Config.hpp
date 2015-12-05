@@ -164,8 +164,10 @@
 		#undef _GLIBCXX_USE_INT128
 	#endif
 
+	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
+
 	#if GCC_VERSION >= 46
-		#define KLAYGE_COMPILER_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
+		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
 		#error "Unsupported compiler version. Please install g++ 4.6 or up."
 	#endif
