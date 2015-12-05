@@ -4225,6 +4225,13 @@ namespace KlayGE
 				(*shader_desc_ids_)[i] = (*inherit_pass->shader_desc_ids_)[i];
 			}
 		}
+		else
+		{
+			front_stencil_ref_ = 0;
+			back_stencil_ref_ = 0;
+			blend_factor_ = Color(1, 1, 1, 1);
+			sample_mask_ = 0xFFFFFFFF;
+		}
 
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
