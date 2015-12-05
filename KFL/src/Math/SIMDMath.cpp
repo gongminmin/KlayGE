@@ -31,8 +31,6 @@
 #include <KFL/KFL.hpp>
 #include <KFL/SIMDMath.hpp>
 
-#pragma warning(disable: 4100) // Will be removed after all functions are implemented
-
 namespace KlayGE
 {
 	namespace SIMDMathLib
@@ -542,7 +540,6 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
 			__m128 res1 = lhs.Vec();
 			__m128 res2 = rhs.Vec();
 			res2 = _mm_shuffle_ps(res2, res2, _MM_SHUFFLE(0, 0, 0, 1));
@@ -670,14 +667,9 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
-			//__m128 m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(1, 2, 0, 0));
-			//__m128 m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(2, 0, 1, 0));
 			__m128 m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(0, 0, 2, 1));
 			__m128 m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(0, 1, 0, 2));
 			__m128 res1 = _mm_mul_ps(m1, m2);
-			//m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(2, 0, 1, 0));
-			//m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(1, 2, 0, 0));
 			m1 = _mm_shuffle_ps(lhs.Vec(), lhs.Vec(), _MM_SHUFFLE(0, 1, 0, 2));
 			m2 = _mm_shuffle_ps(rhs.Vec(), rhs.Vec(), _MM_SHUFFLE(0, 0, 2, 1));
 			__m128 res2 = _mm_mul_ps(m1, m2);
@@ -808,9 +800,8 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
-			ret = v + CrossVector3(quat, CrossVector3(quat, v) + GetW(quat) * v) * 2;
 #endif
+			ret = v + CrossVector3(quat, CrossVector3(quat, v) + GetW(quat) * v) * 2;
 			return ret;
 		}
 
@@ -821,17 +812,16 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			SIMDVectorF4 temp(TransformVector4(vec, world));
 			temp = TransformVector4(temp, view);
 			temp = TransformVector4(temp, proj);
 			temp /= GetW(temp);
 
-			ret.Vec()[0] = (GetX(temp) + 1) * viewport[2] / 2 + viewport[0];
-			ret.Vec()[1] = (-GetY(temp) + 1) * viewport[3] / 2 + viewport[1];
-			ret.Vec()[2] = GetZ(temp) * (far_plane - near_plane) + near_plane;
-			ret.Vec()[3] = 1.0f;
-#endif
+			ret = SetVector((GetX(temp) + 1) * viewport[2] / 2 + viewport[0],
+				(-GetY(temp) + 1) * viewport[3] / 2 + viewport[1],
+				GetZ(temp) * (far_plane - near_plane) + near_plane,
+				1.0f);
 			return ret;
 		}
 
@@ -842,18 +832,16 @@ namespace KlayGE
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
-			SIMDVectorF4 temp;
-			temp.Vec()[0] = 2 * (GetX(win_vec) - viewport[0]) / viewport[2] - 1;
-			temp.Vec()[1] = -(2 * (GetY(win_vec) - viewport[1]) / viewport[3] - 1);
-			temp.Vec()[2] = (GetZ(win_vec) - near_plane) / (far_plane - near_plane);
-			temp.Vec()[3] = clip_w;
+#endif
+			SIMDVectorF4 temp = SetVector(2 * (GetX(win_vec) - viewport[0]) / viewport[2] - 1,
+				-(2 * (GetY(win_vec) - viewport[1]) / viewport[3] - 1),
+				(GetZ(win_vec) - near_plane) / (far_plane - near_plane),
+				clip_w);
 
 			SIMDMatrixF4 mat(Inverse(world * view * proj));
 			temp = TransformVector4(temp, mat);
 
 			ret = SetVector(GetX(temp), GetY(temp), GetZ(temp), 0.0f) / GetW(temp);
-#endif
 			return ret;
 		}
 
@@ -863,7 +851,6 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
 			//    RA	 * RB  -   RC     * RD +   f*RE    * RF
 			// (GetY(v1) * F) - (GetZ(v1) * E) + (GetW(v1) * D),
 			// (GetZ(v1) * C) - (GetX(v1) * F) - (GetW(v1) * B),
@@ -1163,7 +1150,6 @@ namespace KlayGE
 		{
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
-			// TODO
 			__m128 minor0, minor1, minor2, minor3;
 			__m128 row0, row1, row2, row3;
 			__m128 det, tmp1;
@@ -1312,7 +1298,7 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			SIMDVectorF4 z_axis = NormalizeVector3(at - eye);
 			SIMDVectorF4 x_axis = NormalizeVector3(CrossVector3(up, z_axis));
 			SIMDVectorF4 y_axis = CrossVector3(z_axis, x_axis);
@@ -1322,7 +1308,6 @@ namespace KlayGE
 				GetY(x_axis), GetY(y_axis), GetY(z_axis), 0,
 				GetZ(x_axis), GetZ(y_axis), GetZ(z_axis), 0,
 				-GetX(DotVector3(x_axis, eye)), -GetX(DotVector3(y_axis, eye)), -GetX(DotVector3(z_axis, eye)), 1);
-#endif
 			return ret;
 		}
 
@@ -1337,7 +1322,7 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			SIMDVectorF4 z_axis = NormalizeVector3(eye - at);
 			SIMDVectorF4 x_axis = NormalizeVector3(CrossVector3(up, z_axis));
 			SIMDVectorF4 y_axis = CrossVector3(z_axis, x_axis);
@@ -1347,7 +1332,6 @@ namespace KlayGE
 				GetY(x_axis), GetY(y_axis), GetY(z_axis), 0,
 				GetZ(x_axis), GetZ(y_axis), GetZ(z_axis), 0,
 				-GetX(DotVector3(x_axis, eye)), -GetX(DotVector3(y_axis, eye)), -GetX(DotVector3(z_axis, eye)), 1);
-#endif
 			return ret;
 		}
 
@@ -1356,11 +1340,10 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			float const w_2 = w / 2;
 			float const h_2 = h / 2;
 			ret = OrthoOffCenterLH(-w_2, w_2, -h_2, h_2, near_plane, far_plane);
-#endif
 			return ret;
 		}
 
@@ -1370,7 +1353,7 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			float const q = 1 / (far_plane - near_plane);
 			float const inv_width = 1 / (right - left);
 			float const inv_height = 1 / (top - bottom);
@@ -1380,7 +1363,6 @@ namespace KlayGE
 				0, inv_height + inv_height, 0, 0,
 				0, 0, q, 0,
 				-(left + right) * inv_width, -(top + bottom) * inv_height, -near_plane * q, 1);
-#endif
 			return ret;
 		}
 
@@ -1400,7 +1382,7 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			float const q = far_plane / (far_plane - near_plane);
 			float const near2 = near_plane + near_plane;
 
@@ -1409,7 +1391,6 @@ namespace KlayGE
 				0,				near2 / height,	0,					0,
 				0,				0,				q,					1,
 				0,				0,				-near_plane * q,	0);
-#endif
 			return ret;
 		}
 
@@ -1418,7 +1399,7 @@ namespace KlayGE
 			SIMDMatrixF4 ret;
 #if defined(SIMD_MATH_SSE)
 			// TODO
-#else
+#endif
 			float const h = 1 / tan(fov / 2);
 			float const w = h / aspect;
 			float const q = far_plane / (far_plane - near_plane);
@@ -1428,7 +1409,6 @@ namespace KlayGE
 				0, h, 0, 0,
 				0, 0, q, 1,
 				0, 0, -near_plane * q, 0);
-#endif
 			return ret;
 		}
 
@@ -1600,7 +1580,6 @@ namespace KlayGE
 		SIMDMatrixF4 Transpose(SIMDMatrixF4 const & rhs)
 		{
 #if defined(SIMD_MATH_SSE)
-			// TODO
 			SIMDVectorF4 r0;
 			SIMDVectorF4 r1;
 			SIMDVectorF4 r2;
@@ -1611,7 +1590,6 @@ namespace KlayGE
 			r3.Vec() = rhs.Row(3).Vec();
 			_MM_TRANSPOSE4_PS(r0.Vec(), r1.Vec(), r2.Vec(), r3.Vec());
 			return SIMDMatrixF4(r0, r1, r2, r3);
-			//return rhs;
 #else
 			V4TYPE const & r0 = rhs.Row(0).Vec();
 			V4TYPE const & r1 = rhs.Row(1).Vec();

@@ -40,7 +40,7 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 	typedef __m128 V4TYPE;
 #else
-	typedef array<float, 4> V4TYPE;
+	typedef std::array<float, 4> V4TYPE;
 #endif
 
 	class SIMDVectorF4 : boost::addable<SIMDVectorF4,
