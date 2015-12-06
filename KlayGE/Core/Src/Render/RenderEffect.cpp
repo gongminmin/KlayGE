@@ -3506,13 +3506,28 @@ namespace KlayGE
 			std::string elem_type;
 			switch (param.Type())
 			{
-			case REDT_sampler:
-			case REDT_byte_address_buffer:
-			case REDT_rw_byte_address_buffer:
+			case REDT_texture1D:
+			case REDT_texture2D:
+			case REDT_texture3D:
+			case REDT_textureCUBE:
+			case REDT_texture1DArray:
+			case REDT_texture2DArray:
+			case REDT_textureCUBEArray:
+			case REDT_buffer:
+			case REDT_structured_buffer:
+			case REDT_rw_buffer:
+			case REDT_rw_structured_buffer:
+			case REDT_rw_texture1D:
+			case REDT_rw_texture2D:
+			case REDT_rw_texture3D:
+			case REDT_rw_texture1DArray:
+			case REDT_rw_texture2DArray:
+			case REDT_append_structured_buffer:
+			case REDT_consume_structured_buffer:
+				param.Var()->Value(elem_type);
 				break;
 
 			default:
-				param.Var()->Value(elem_type);
 				break;
 			}
 
