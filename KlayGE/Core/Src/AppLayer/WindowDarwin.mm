@@ -244,7 +244,8 @@ namespace KlayGE
 		[ns_window_ setContentView:ns_view_];
 		[ns_window_ makeKeyAndOrderFront:nil];
 
-		[(NSOpenGLView*)ns_view_ openGLContext];	// Create GL Context
+		[[(NSOpenGLView*)ns_view_ openGLContext] makeCurrentContext];	// Create GL Context
+		[[(NSOpenGLView*)ns_view_ openGLContext] setView:ns_view_];		// initilize fbo 0
 
 		[pool release];
 	}
