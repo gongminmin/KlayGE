@@ -417,7 +417,17 @@ namespace KlayGE
 		float GetByIndex(SIMDVectorF4 const & rhs, size_t index)
 		{
 #if defined(SIMD_MATH_SSE)
+#ifdef KLAYGE_COMPILER_MSVC
 			return rhs.Vec().m128_f32[index];
+#else
+			union
+			{
+				__m128 v;
+				float comp[4];
+			} converter;
+			converter.v = rhs.Vec();
+			return converter.comp[index];
+#endif
 #else
 			return rhs.Vec()[index];
 #endif
@@ -477,7 +487,17 @@ namespace KlayGE
 		{
 			SIMDVectorF4 ret = rhs;
 #if defined(SIMD_MATH_SSE)
+#ifdef KLAYGE_COMPILER_MSVC
 			ret.Vec().m128_f32[index] = v;
+#else
+			union
+			{
+				__m128 v;
+				float comp[4];
+			} converter;
+			converter.v = rhs.Vec();
+			converter.comp[index] = v;
+#endif
 #else
 			ret.Vec()[index] = v;
 #endif
@@ -529,7 +549,7 @@ namespace KlayGE
 			}
 			else
 			{
-				float s = refraction_index * t + sqrt(abs(r));
+				float s = refraction_index * t + sqrt(std::abs(r));
 				return refraction_index * incident - s * normal;
 			}
 		}
