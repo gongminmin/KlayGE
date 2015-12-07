@@ -45,9 +45,6 @@
 #include <KlayGE/D3D11/D3D11Texture.hpp>
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 
-DEFINE_GUID(IID_ID3D11ShaderReflection_47,
-	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
-
 namespace
 {
 	using namespace KlayGE;
@@ -726,16 +723,13 @@ namespace KlayGE
 						case D3D_SIT_UAV_APPEND_STRUCTURED:
 						case D3D_SIT_UAV_CONSUME_STRUCTURED:
 						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+							if (effect.ParameterByName(si_desc.Name))
 							{
-								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-								if (p)
-								{
-									D3D11ShaderDesc::BoundResourceDesc brd;
-									brd.name = si_desc.Name;
-									brd.type = static_cast<uint8_t>(si_desc.Type);
-									brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-									shader_desc_[type].res_desc.push_back(brd);
-								}
+								D3D11ShaderDesc::BoundResourceDesc brd;
+								brd.name = si_desc.Name;
+								brd.type = static_cast<uint8_t>(si_desc.Type);
+								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
+								shader_desc_[type].res_desc.push_back(brd);
 							}
 							break;
 

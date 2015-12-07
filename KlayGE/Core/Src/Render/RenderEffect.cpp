@@ -3622,6 +3622,7 @@ namespace KlayGE
 				str += "RWTexture3D<" + elem_type + "> " + *param.Name() + ";\n";
 				str += "#endif\n";
 				break;
+
 			case REDT_rw_texture1DArray:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
 				str += "RWTexture1DArray<" + elem_type + "> " + *param.Name() + ";\n";

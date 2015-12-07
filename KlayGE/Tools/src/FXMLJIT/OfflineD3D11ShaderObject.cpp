@@ -54,59 +54,6 @@
 #include "OfflineRenderEffect.hpp"
 #include "OfflineD3D11ShaderObject.hpp"
 
-DEFINE_GUID(IID_ID3D11ShaderReflection_47,
-	0x8d536ca1, 0x0cca, 0x4956, 0xa8, 0x37, 0x78, 0x69, 0x63, 0x75, 0x55, 0x84);
-
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-class D3D11CompilerInit
-{
-public:
-	D3D11CompilerInit()
-	{
-		mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
-		if (mod_d3dcompiler_)
-		{
-			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
-			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
-		}
-		else
-		{
-			::MessageBoxW(nullptr, L"Can't load d3dcompiler_47.dll", L"Error", MB_OK);
-		}
-	}
-
-	~D3D11CompilerInit()
-	{
-		if (mod_d3dcompiler_)
-		{
-			::FreeLibrary(mod_d3dcompiler_);
-		}
-	}
-
-	HRESULT D3DReflect(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector) const
-	{
-		return DynamicD3DReflect_(pSrcData, SrcDataSize, pInterface, ppReflector);
-	}
-
-	HRESULT D3DStripShader(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags, ID3DBlob** ppStrippedBlob) const
-	{
-		return DynamicD3DStripShader_(pShaderBytecode, BytecodeLength, uStripFlags, ppStrippedBlob);
-	}
-
-private:
-	typedef HRESULT(WINAPI *D3DReflectFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector);
-	typedef HRESULT(WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags, ID3DBlob** ppStrippedBlob);
-
-private:
-	HMODULE mod_d3dcompiler_;
-
-	D3DReflectFunc DynamicD3DReflect_;
-	D3DStripShaderFunc DynamicD3DStripShader_;
-};
-
-D3D11CompilerInit d3d11compiler;
-#endif
-
 namespace KlayGE
 {
 	namespace Offline
@@ -448,8 +395,7 @@ namespace KlayGE
 				if (!code->empty())
 				{
 					ID3D11ShaderReflection* reflection;
-					d3d11compiler.D3DReflect(&(*code)[0], static_cast<SIZE_T>(code->size()),
-						IID_ID3D11ShaderReflection_47, reinterpret_cast<void**>(&reflection));
+					this->ReflectDXBC(*code, reinterpret_cast<void**>(&reflection));
 					if (reflection != nullptr)
 					{
 						D3D11_SHADER_DESC desc;
@@ -547,16 +493,13 @@ namespace KlayGE
 							case D3D_SIT_UAV_APPEND_STRUCTURED:
 							case D3D_SIT_UAV_CONSUME_STRUCTURED:
 							case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+								if (effect.ParameterByName(si_desc.Name))
 								{
-									RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-									if (p)
-									{
-										D3D11ShaderDesc::BoundResourceDesc brd;
-										brd.name = si_desc.Name;
-										brd.type = static_cast<uint8_t>(si_desc.Type);
-										brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-										shader_desc_[type].res_desc.push_back(brd);
-									}
+									D3D11ShaderDesc::BoundResourceDesc brd;
+									brd.name = si_desc.Name;
+									brd.type = static_cast<uint8_t>(si_desc.Type);
+									brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
+									shader_desc_[type].res_desc.push_back(brd);
 								}
 								break;
 
@@ -596,17 +539,8 @@ namespace KlayGE
 						reflection->Release();
 					}
 
-					ID3DBlob* strip_code = nullptr;
-					d3d11compiler.D3DStripShader(&(*code)[0], static_cast<SIZE_T>(code->size()),
-						D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
-						| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA,
-						&strip_code);
-					if (strip_code)
-					{
-						uint8_t const * p = static_cast<uint8_t const *>(strip_code->GetBufferPointer());
-						code->assign(p, p + strip_code->GetBufferSize());
-						strip_code->Release();
-					}
+					*code = this->StripDXBC(*code, D3DCOMPILER_STRIP_REFLECTION_DATA | D3DCOMPILER_STRIP_DEBUG_INFO
+						| D3DCOMPILER_STRIP_TEST_BLOBS | D3DCOMPILER_STRIP_PRIVATE_DATA);
 				}
 			}
 

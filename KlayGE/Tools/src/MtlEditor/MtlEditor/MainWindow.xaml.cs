@@ -153,6 +153,7 @@ namespace MtlEditor
 
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
+
 		void MainWindowUnloaded(object sender, RoutedEventArgs e)
 		{
 			CompositionTarget.Rendering -= this.MainWindowIdle;

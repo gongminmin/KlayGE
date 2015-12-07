@@ -734,16 +734,13 @@ namespace KlayGE
 						case D3D_SIT_UAV_APPEND_STRUCTURED:
 						case D3D_SIT_UAV_CONSUME_STRUCTURED:
 						case D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+							if (effect.ParameterByName(si_desc.Name))
 							{
-								RenderEffectParameterPtr const & p = effect.ParameterByName(si_desc.Name);
-								if (p)
-								{
-									D3D12ShaderDesc::BoundResourceDesc brd;
-									brd.name = si_desc.Name;
-									brd.type = static_cast<uint8_t>(si_desc.Type);
-									brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-									shader_desc_[type].res_desc.push_back(brd);
-								}
+								D3D12ShaderDesc::BoundResourceDesc brd;
+								brd.name = si_desc.Name;
+								brd.type = static_cast<uint8_t>(si_desc.Type);
+								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
+								shader_desc_[type].res_desc.push_back(brd);
 							}
 							break;
 
