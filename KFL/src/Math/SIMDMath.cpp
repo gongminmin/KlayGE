@@ -497,6 +497,7 @@ namespace KlayGE
 			} converter;
 			converter.v = rhs.Vec();
 			converter.comp[index] = v;
+			ret.Vec() = converter.v;
 #endif
 #else
 			ret.Vec()[index] = v;
