@@ -117,7 +117,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_TR, possible loss of data
+#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
 #endif
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 #ifdef KLAYGE_COMPILER_MSVC
@@ -147,7 +147,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_TR, possible loss of data
+#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
 #endif
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 #ifdef KLAYGE_COMPILER_MSVC
@@ -163,7 +163,7 @@ namespace KlayGE
 		{
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_TR, possible loss of data
+#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
 #endif
 			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
 #ifdef KLAYGE_COMPILER_MSVC
@@ -200,7 +200,7 @@ namespace KlayGE
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_TR, possible loss of data
+#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
 #endif
 			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 #ifdef KLAYGE_COMPILER_MSVC

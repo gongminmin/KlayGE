@@ -1020,8 +1020,8 @@ namespace KlayGE
 			{
 				if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
 				{
-					tex_sampler_pairs.push_back(std::make_pair(*std::get<1>(tex_sampler_binds_[i])->Name(),
-						*std::get<2>(tex_sampler_binds_[i])->Name()));
+					tex_sampler_pairs.push_back(std::make_pair(std::get<1>(tex_sampler_binds_[i])->Name(),
+						std::get<2>(tex_sampler_binds_[i])->Name()));
 				}
 			}
 
@@ -1619,8 +1619,8 @@ namespace KlayGE
 		for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 		{
 			std::get<0>(ret->tex_sampler_binds_[i]) = std::get<0>(tex_sampler_binds_[i]);
-			std::get<1>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(std::get<1>(tex_sampler_binds_[i])->Name()));
-			std::get<2>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(*(std::get<2>(tex_sampler_binds_[i])->Name()));
+			std::get<1>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(std::get<1>(tex_sampler_binds_[i])->Name());
+			std::get<2>(ret->tex_sampler_binds_[i]) = effect.ParameterByName(std::get<2>(tex_sampler_binds_[i])->Name());
 			std::get<3>(ret->tex_sampler_binds_[i]) = std::get<3>(tex_sampler_binds_[i]);
 		}
 
@@ -1703,7 +1703,7 @@ namespace KlayGE
 			{
 				if (pb.param)
 				{
-					RenderEffectParameterPtr const & p = effect.ParameterByName(*pb.param->Name());
+					RenderEffectParameterPtr const & p = effect.ParameterByName(pb.param->Name());
 					ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
 				}
 				else

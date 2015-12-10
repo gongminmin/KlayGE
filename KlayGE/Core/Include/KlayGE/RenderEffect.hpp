@@ -618,7 +618,11 @@ namespace KlayGE
 
 		std::string const & ResName() const
 		{
-			return *res_name_;
+			return res_name_->first;
+		}
+		size_t ResNameHash() const
+		{
+			return res_name_->second;
 		}
 
 		uint32_t NumParameters() const
@@ -687,12 +691,14 @@ namespace KlayGE
 #endif
 
 	private:
+#if KLAYGE_IS_DEV_PLATFORM
 		void RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const;
 		void InsertIncludeNodes(XMLDocument& target_doc, XMLNodePtr const & target_root,
 			XMLNodePtr const & target_place, XMLNodePtr const & include_root) const;
+#endif
 
 	private:
-		std::shared_ptr<std::string> res_name_;
+		std::shared_ptr<std::pair<std::string, size_t>> res_name_;
 #if KLAYGE_IS_DEV_PLATFORM
 		uint64_t timestamp_;
 #endif
@@ -736,11 +742,11 @@ namespace KlayGE
 
 		std::string const & Name() const
 		{
-			return *name_;
+			return name_->first;
 		}
 		size_t NameHash() const
 		{
-			return name_hash_;
+			return name_->second;
 		}
 
 		RenderEffect& Effect() const
@@ -807,8 +813,7 @@ namespace KlayGE
 
 		size_t tech_hash_;
 
-		std::shared_ptr<std::string> name_;
-		size_t name_hash_;
+		std::shared_ptr<std::pair<std::string, size_t>> name_;
 
 		std::vector<RenderPassPtr> passes_;
 		std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
@@ -844,11 +849,11 @@ namespace KlayGE
 
 		std::string const & Name() const
 		{
-			return *name_;
+			return name_->first;
 		}
 		size_t NameHash() const
 		{
-			return name_hash_;
+			return name_->second;
 		}
 
 		void Bind();
@@ -899,8 +904,7 @@ namespace KlayGE
 	private:
 		RenderEffect& effect_;
 
-		std::shared_ptr<std::string> name_;
-		size_t name_hash_;
+		std::shared_ptr<std::pair<std::string, size_t>> name_;
 		std::shared_ptr<std::vector<RenderEffectAnnotationPtr>> annotations_;
 		std::shared_ptr<std::vector<std::pair<std::string, std::string>>> macros_;
 		std::shared_ptr<std::vector<uint32_t>> shader_desc_ids_;
@@ -933,13 +937,13 @@ namespace KlayGE
 
 		RenderEffectConstantBufferPtr Clone(RenderEffect& src_effect, RenderEffect& dst_effect);
 
-		std::shared_ptr<std::string> const & Name() const
+		std::string const & Name() const
 		{
-			return name_;
+			return name_->first;
 		}
 		size_t NameHash() const
 		{
-			return name_hash_;
+			return name_->second;
 		}
 
 		void AddParameter(uint32_t index);
@@ -995,8 +999,7 @@ namespace KlayGE
 		void BindHWBuff(GraphicsBufferPtr const & buff);
 
 	private:
-		std::shared_ptr<std::string> name_;
-		size_t name_hash_;
+		std::shared_ptr<std::pair<std::string, size_t>> name_;
 		std::shared_ptr<std::vector<uint32_t>> param_indices_;
 
 		GraphicsBufferPtr hw_buff_;
@@ -1036,22 +1039,20 @@ namespace KlayGE
 			return array_size_;
 		}
 
-		std::shared_ptr<std::string> const & Name() const
+		std::string const & Name() const
 		{
-			return name_;
+			return name_->first;
 		}
 		size_t NameHash() const
 		{
-			return name_hash_;
+			return name_->second;
 		}
-		std::shared_ptr<std::string> const & Semantic() const
+		bool HasSemantic() const
 		{
-			return semantic_;
+			return !!semantic_;
 		}
-		size_t SemanticHash() const
-		{
-			return semantic_hash_;
-		}
+		std::string const & Semantic() const;
+		size_t SemanticHash() const;
 
 		uint32_t NumAnnotations() const
 		{
@@ -1106,10 +1107,8 @@ namespace KlayGE
 		}
 
 	private:
-		std::shared_ptr<std::string> name_;
-		size_t name_hash_;
-		std::shared_ptr<std::string> semantic_;
-		size_t semantic_hash_;
+		std::shared_ptr<std::pair<std::string, size_t>> name_;
+		std::shared_ptr<std::pair<std::string, size_t>> semantic_;
 
 		uint32_t type_;
 		std::shared_ptr<RenderVariable> var_;

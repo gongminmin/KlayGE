@@ -2776,6 +2776,7 @@ namespace KlayGE
 	{
 	}
 
+#if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffect::RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const
 	{
 		for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
@@ -2817,6 +2818,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	void RenderEffect::Load(std::string const & name)
 	{
@@ -2832,10 +2834,14 @@ namespace KlayGE
 #endif
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
 
+#if KLAYGE_IS_DEV_PLATFORM
 		XMLDocumentPtr doc;
 		XMLNodePtr root;
+#endif
 
-		res_name_ = MakeSharedPtr<std::string>(fxml_name);
+		res_name_ = MakeSharedPtr<std::remove_reference<decltype(*res_name_)>::type>();
+		res_name_->first = fxml_name;
+		res_name_->second = boost::hash_range(fxml_name.begin(), fxml_name.end());
 #if KLAYGE_IS_DEV_PLATFORM
 		if (source)
 		{
@@ -3453,7 +3459,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < this->NumCBuffers(); ++ i)
 		{
 			RenderEffectConstantBufferPtr const & cbuff = this->CBufferByIndex(i);
-			str += "cbuffer " + *cbuff->Name() + "\n";
+			str += "cbuffer " + cbuff->Name() + "\n";
 			str += "{\n";
 
 			for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
@@ -3486,7 +3492,7 @@ namespace KlayGE
 					break;
 
 				default:
-					str += this->TypeName(param.Type()) + " " + *param.Name();
+					str += this->TypeName(param.Type()) + " " + param.Name();
 					if (param.ArraySize())
 					{
 						str += "[" + *param.ArraySize() + "]";
@@ -3531,125 +3537,126 @@ namespace KlayGE
 				break;
 			}
 
+			std::string const & param_name = param.Name();
 			switch (param.Type())
 			{
 			case REDT_texture1D:
-				str += "Texture1D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture1D<" + elem_type + "> " + param_name + ";\n";
 				break;
 
 			case REDT_texture2D:
-				str += "Texture2D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture2D<" + elem_type + "> " + param_name + ";\n";
 				break;
 
 			case REDT_texture3D:
 				str += "#if KLAYGE_MAX_TEX_DEPTH <= 1\n";
-				str += "Texture2D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture2D<" + elem_type + "> " + param_name + ";\n";
 				str += "#else\n";
-				str += "Texture3D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture3D<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_textureCUBE:
-				str += "TextureCube<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "TextureCube<" + elem_type + "> " + param_name + ";\n";
 				break;
 
 			case REDT_texture1DArray:
 				str += "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1\n";
-				str += "Texture1DArray<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture1DArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_texture2DArray:
 				str += "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1\n";
-				str += "Texture2DArray<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Texture2DArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_textureCUBEArray:
 				str += "#if (KLAYGE_MAX_TEX_ARRAY_LEN > 1) && (KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 1))\n";
-				str += "TextureCubeArray<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "TextureCubeArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
-				str += "Buffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "Buffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_sampler:
-				str += "sampler " + *param.Name() + ";\n";
+				str += "sampler " + param_name + ";\n";
 				break;
 
 			case REDT_structured_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
-				str += "StructuredBuffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "StructuredBuffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_byte_address_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
-				str += "ByteAddressBuffer " + *param.Name() + ";\n";
+				str += "ByteAddressBuffer " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWBuffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWBuffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_structured_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
-				str += "RWStructuredBuffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture1D:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWTexture1D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWTexture1D<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture2D:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWTexture2D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWTexture2D<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture3D:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWTexture3D<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWTexture3D<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture1DArray:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWTexture1DArray<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWTexture1DArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture2DArray:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "RWTexture2DArray<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "RWTexture2DArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_rw_byte_address_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
-				str += "RWByteAddressBuffer " + *param.Name() + ";\n";
+				str += "RWByteAddressBuffer " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_append_structured_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "AppendStructuredBuffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "AppendStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
 			case REDT_consume_structured_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
-				str += "ConsumeStructuredBuffer<" + elem_type + "> " + *param.Name() + ";\n";
+				str += "ConsumeStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
@@ -3734,19 +3741,19 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = node->Attrib("name")->ValueString();
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
-		std::string const & res_name = effect_.ResName();
-		tech_hash_ = boost::hash_range(res_name.begin(), res_name.end());
-		boost::hash_combine(tech_hash_, name_hash_);
+		tech_hash_ = effect_.ResNameHash();
+		boost::hash_combine(tech_hash_, name_->second);
 
 		RenderTechniquePtr parent_tech;
 		XMLAttributePtr inherit_attr = node->Attrib("inherit");
 		if (inherit_attr)
 		{
 			std::string inherit = inherit_attr->ValueString();
-			BOOST_ASSERT(inherit != *name_);
+			BOOST_ASSERT(inherit != name_->first);
 
 			parent_tech = effect_.TechniqueByName(inherit);
 			BOOST_ASSERT(parent_tech);
@@ -3896,12 +3903,12 @@ namespace KlayGE
 
 	bool RenderTechnique::StreamIn(ResIdentifierPtr const & res, uint32_t tech_index)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(ReadShortString(res));
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = ReadShortString(res);
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
-		std::string const & res_name = effect_.ResName();
-		tech_hash_ = boost::hash_range(res_name.begin(), res_name.end());
-		boost::hash_combine(tech_hash_, name_hash_);
+		tech_hash_ = effect_.ResNameHash();
+		boost::hash_combine(tech_hash_, name_->second);
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -3964,7 +3971,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderTechnique::StreamOut(std::ostream& os, uint32_t tech_index)
 	{
-		WriteShortString(os, *name_);
+		WriteShortString(os, name_->first);
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -4020,7 +4027,6 @@ namespace KlayGE
 		ret->tech_hash_ = tech_hash_;
 
 		ret->name_ = name_;
-		ret->name_hash_ = name_hash_;
 
 		ret->annotations_ = annotations_;
 		ret->macros_ = macros_;
@@ -4045,8 +4051,9 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = node->Attrib("name")->ValueString();
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
 		{
 			XMLNodePtr anno_node = node->FirstNode("annotation");
@@ -4548,7 +4555,6 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		name_ = inherit_pass->name_;
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
 		annotations_ = inherit_pass->annotations_;
 		macros_ = inherit_pass->macros_;
 
@@ -4610,8 +4616,9 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(ReadShortString(res));
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = ReadShortString(res);
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
 		uint8_t num_anno;
 		res->read(&num_anno, sizeof(num_anno));
@@ -4743,7 +4750,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderPass::StreamOut(std::ostream& os, uint32_t tech_index, uint32_t pass_index)
 	{
-		WriteShortString(os, *name_);
+		WriteShortString(os, name_->first);
 
 		uint8_t num_anno;
 		if (annotations_)
@@ -4861,7 +4868,6 @@ namespace KlayGE
 		RenderPassPtr ret = MakeSharedPtr<RenderPass>(effect);
 
 		ret->name_ = name_;
-		ret->name_hash_ = name_hash_;
 		ret->annotations_ = annotations_;
 		ret->macros_ = macros_;
 		ret->shader_desc_ids_ = shader_desc_ids_;
@@ -4907,16 +4913,18 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::Load(std::string const & name)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(name);
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = name;
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 	}
 #endif
 
 	void RenderEffectConstantBuffer::StreamIn(ResIdentifierPtr const & res)
 	{
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(ReadShortString(res));
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = ReadShortString(res);
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 		param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 
 		uint16_t len;
@@ -4933,7 +4941,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::StreamOut(std::ostream& os)
 	{
-		WriteShortString(os, *name_);
+		WriteShortString(os, name_->first);
 
 		uint16_t len = Native2LE(static_cast<uint16_t>(param_indices_->size()));
 		os.write(reinterpret_cast<char const *>(&len), sizeof(len));
@@ -4950,7 +4958,6 @@ namespace KlayGE
 		RenderEffectConstantBufferPtr ret = MakeSharedPtr<RenderEffectConstantBuffer>();
 
 		ret->name_ = name_;
-		ret->name_hash_ = name_hash_;
 		ret->param_indices_ = param_indices_;
 		ret->buff_ = buff_;
 		ret->Resize(static_cast<uint32_t>(buff_.size()));
@@ -5018,13 +5025,16 @@ namespace KlayGE
 	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
 		type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = node->Attrib("name")->ValueString();
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
 		XMLAttributePtr attr = node->Attrib("semantic");
 		if (attr)
 		{
-			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>(attr->ValueString());
+			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
+			semantic_->first = attr->ValueString();
+			semantic_->second = boost::hash_range(semantic_->first.begin(), semantic_->first.end());
 		}
 
 		uint32_t as;
@@ -5090,13 +5100,16 @@ namespace KlayGE
 	{
 		res->read(&type_, sizeof(type_));
 		type_ = LE2Native(type_);
-		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(ReadShortString(res));
-		name_hash_ = boost::hash_range(name_->begin(), name_->end());
+		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
+		name_->first = ReadShortString(res);
+		name_->second = boost::hash_range(name_->first.begin(), name_->first.end());
 
 		std::string sem = ReadShortString(res);
 		if (!sem.empty())
 		{
-			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>(sem);
+			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
+			semantic_->first = sem;
+			semantic_->second = boost::hash_range(sem.begin(), sem.end());
 		}
 
 		uint32_t as;
@@ -5162,10 +5175,10 @@ namespace KlayGE
 	{
 		uint32_t t = Native2LE(type_);
 		os.write(reinterpret_cast<char const *>(&t), sizeof(t));
-		WriteShortString(os, *name_);
+		WriteShortString(os, name_->first);
 		if (semantic_)
 		{
-			WriteShortString(os, *semantic_);
+			WriteShortString(os, semantic_->first);
 		}
 		else
 		{
@@ -5218,7 +5231,6 @@ namespace KlayGE
 		RenderEffectParameterPtr ret = MakeSharedPtr<RenderEffectParameter>();
 
 		ret->name_ = name_;
-		ret->name_hash_ = name_hash_;
 		ret->semantic_ = semantic_;
 
 		ret->type_ = type_;
@@ -5228,6 +5240,24 @@ namespace KlayGE
 		ret->annotations_ = annotations_;
 
 		return ret;
+	}
+
+	std::string const & RenderEffectParameter::Semantic() const
+	{
+		if (this->HasSemantic())
+		{
+			return semantic_->first;
+		}
+		else
+		{
+			static std::string empty("");
+			return empty;
+		}
+	}
+
+	size_t RenderEffectParameter::SemanticHash() const
+	{
+		return this->HasSemantic() ? semantic_->second : 0;
 	}
 
 	void RenderEffectParameter::BindToCBuffer(RenderEffectConstantBufferPtr const & cbuff, uint32_t offset,
