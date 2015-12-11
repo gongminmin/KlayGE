@@ -735,8 +735,14 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		float const dpi_scale = main_wnd->DPIScale();
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
+		rc.X *= dpi_scale;
+		rc.Y *= dpi_scale;
+		rc.Width *= dpi_scale;
+		rc.Height *= dpi_scale;
 		rect.left = static_cast<LONG>(rc.X);
 		rect.right = static_cast<LONG>(rc.X + rc.Width);
 		rect.top = static_cast<LONG>(rc.Y);
