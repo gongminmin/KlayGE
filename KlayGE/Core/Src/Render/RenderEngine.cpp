@@ -417,6 +417,20 @@ namespace KlayGE
 					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
 
+				ElementFormat ds_fmt;
+				if ((settings.depth_stencil_fmt != EF_Unknown) && caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+				{
+					ds_fmt = settings.depth_stencil_fmt;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+
+					ds_fmt = EF_D16;
+				}
+				resize_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil,
+					rf.Make2DDepthStencilRenderView(render_width, render_height, ds_fmt, 1, 0));
+
 				default_frame_buffers_[0] = default_frame_buffers_[1]
 					= default_frame_buffers_[2] = resize_frame_buffer_;
 			}
