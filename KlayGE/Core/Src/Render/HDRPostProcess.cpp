@@ -541,15 +541,11 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		std::vector<uint32_t> widths;
-		std::vector<uint32_t> heights;
+		int n = 1;
 		{
 			uint32_t ori_w = tex->Width(0);
 			uint32_t ori_h = tex->Height(0);
 			uint32_t ori_s = std::max(ori_w, ori_h);
-
-			widths.push_back(ori_w);
-			heights.push_back(ori_h);
 
 			while (ori_s > static_cast<uint32_t>(WIDTH))
 			{
@@ -557,26 +553,25 @@ namespace KlayGE
 				ori_h >>= 1;
 				ori_s >>= 1;
 
-				widths.push_back(ori_w);
-				heights.push_back(ori_h);
+				++ n;
 			}
 		}
 
-		restore_chain_.resize(widths.size() - 1);
-		for (size_t i = 1; i < widths.size(); ++ i)
+		restore_chain_.resize(n - 1);
+		for (size_t i = 1; i < n; ++ i)
 		{
-			restore_chain_[i - 1] = rf.MakeTexture2D(widths[i], heights[i],
+			restore_chain_[i - 1] = rf.MakeTexture2D(tex->Width(0) >> i, tex->Height(0) >> i,
 				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
 
-		width_ = widths.back();
-		height_ = heights.back();
+		uint32_t const final_width = restore_chain_.back()->Width(0);
+		uint32_t const final_height = restore_chain_.back()->Height(0);
 
-		bright_pass_pp_->SetParam(0, float4(1, 1, static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT));
+		bright_pass_pp_->SetParam(0, float4(1, 1, static_cast<float>(final_width) / WIDTH, static_cast<float>(final_height) / HEIGHT));
 		bright_pass_pp_->SetParam(1, static_cast<float>(1UL << (2 * restore_chain_.size())));
 		bright_pass_pp_->InputPin(0, input_tex_);
 
-		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(width_) / WIDTH, static_cast<float>(height_) / HEIGHT, 1, 1));
+		scaled_copy_pp_->SetParam(0, float4(static_cast<float>(final_width) / WIDTH, static_cast<float>(final_height) / HEIGHT, 1, 1));
 		scaled_copy_pp_->OutputPin(0, restore_chain_.back());
 	}
 

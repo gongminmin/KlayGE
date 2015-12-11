@@ -152,7 +152,7 @@ namespace KlayGE
 		void InputPin(uint32_t index, TexturePtr const & tex);
 		TexturePtr const & InputPin(uint32_t index) const;
 		void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
-		TexturePtr const & OutputPin(uint32_t index) const;		
+		TexturePtr const & OutputPin(uint32_t index) const;
 		void Apply();
 
 	private:
@@ -174,8 +174,6 @@ namespace KlayGE
 		TexturePtr pattern_imag_tex_;
 		TexturePtr mul_real_tex_;
 		TexturePtr mul_imag_tex_;
-
-		uint32_t width_, height_;
 
 		GpuFftPtr fft_;
 		GpuFftPtr ifft_;
