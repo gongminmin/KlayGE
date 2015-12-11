@@ -128,10 +128,6 @@ namespace KlayGE
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		HRESULT D3DReflect(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector) const;
-		HRESULT D3DStripShader(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags, ID3DBlob** ppStrippedBlob) const;
-#endif
 
 	private:
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
@@ -170,10 +166,8 @@ namespace KlayGE
 		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
 		D3D11CreateDeviceFunc DynamicD3D11CreateDevice_;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
-#endif
 
 		// Direct3D rendering device
 		// Only created after top-level window created

@@ -298,31 +298,31 @@ namespace KlayGE
 		uint32_t NumVerticesRendered() const;
 
 #ifndef KLAYGE_SHIP
-		PerfRangePtr ShadowMapPerf() const
+		PerfRangePtr const & ShadowMapPerf() const
 		{
 			return shadow_map_perf_;
 		}
-		PerfRangePtr DepthPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & DepthPerf(PassTargetBuffer ptb) const
 		{
 			return depth_perfs_[ptb];
 		}
-		PerfRangePtr GBufferPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & GBufferPerf(PassTargetBuffer ptb) const
 		{
 			return gbuffer_perfs_[ptb];
 		}
-		PerfRangePtr ShadowingPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & ShadowingPerf(PassTargetBuffer ptb) const
 		{
 			return shadowing_perfs_[ptb];
 		}
-		PerfRangePtr IndirectLightingPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & IndirectLightingPerf(PassTargetBuffer ptb) const
 		{
 			return indirect_lighting_perfs_[ptb];
 		}
-		PerfRangePtr ShadingPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & ShadingPerf(PassTargetBuffer ptb) const
 		{
 			return shading_perfs_[ptb];
 		}
-		PerfRangePtr SpecialShadingPerf(PassTargetBuffer ptb) const
+		PerfRangePtr const & SpecialShadingPerf(PassTargetBuffer ptb) const
 		{
 			return special_shading_perfs_[ptb];
 		}

@@ -164,12 +164,10 @@ namespace KlayGE
 						obj->UpdateAbsModelMatrix();
 					}
 
-					AABBoxPtr aabb_ws;
 					if (attr & SceneObject::SOA_Cullable)
 					{
-						aabb_ws = obj->PosBoundWS();
 						visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-							*aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
+							obj->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
 					}
 					else
 					{
@@ -179,7 +177,7 @@ namespace KlayGE
 					if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable)
 						&& (BO_Yes == visible))
 					{
-						visible = this->AABBVisible(*aabb_ws);
+						visible = this->AABBVisible(obj->PosBoundWS());
 					}
 				}
 			}
@@ -839,12 +837,10 @@ namespace KlayGE
 					obj->UpdateAbsModelMatrix();
 				}
 
-				AABBoxPtr aabb_ws;
 				if (attr & SceneObject::SOA_Cullable)
 				{
-					aabb_ws = obj->PosBoundWS();
 					visible = (MathLib::perspective_area(eye_pos, view_proj,
-						*aabb_ws) > small_obj_threshold_) ? parent_bo : BO_No;
+						obj->PosBoundWS()) > small_obj_threshold_) ? parent_bo : BO_No;
 				}
 				else
 				{

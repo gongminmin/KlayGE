@@ -52,7 +52,7 @@ namespace KlayGE
 		virtual void ModelMatrix(float4x4 const & mat);
 		virtual float4x4 const & ModelMatrix() const;
 		virtual float4x4 const & AbsModelMatrix() const;
-		virtual AABBoxPtr const & PosBoundWS() const;
+		virtual AABBox const & PosBoundWS() const;
 		void UpdateAbsModelMatrix();
 		void VisibleMark(BoundOverlap vm);
 		BoundOverlap VisibleMark() const;

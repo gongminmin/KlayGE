@@ -82,9 +82,9 @@ namespace KlayGE
 		return abs_model_;
 	}
 
-	AABBoxPtr const & SceneObject::PosBoundWS() const
+	AABBox const & SceneObject::PosBoundWS() const
 	{
-		return pos_aabb_ws_;
+		return *pos_aabb_ws_;
 	}
 
 	void SceneObject::UpdateAbsModelMatrix()
