@@ -350,15 +350,20 @@ namespace KlayGE
 
 	void D3D11RenderEngine::CheckConfig(RenderSettings& settings)
 	{
+#ifdef KLAYGE_CPU_ARM
+		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_3)
+		{
+			settings.hdr = false;
+			settings.ppaa = false;
+			settings.gamma = false;
+			settings.color_grading = false;
+		}
+#else
 		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
 		{
 			settings.ppaa = false;
-#ifdef KLAYGE_CPU_ARM
-			settings.hdr = false;
-			settings.gamma = false;
-			settings.color_grading = false;
-#endif
 		}
+#endif
 	}
 
 	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
