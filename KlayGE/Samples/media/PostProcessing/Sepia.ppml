@@ -1,13 +1,13 @@
 <?xml version='1.0'?>
 
 <post_processors>
-	<post_processor name="old_fashion">
+	<post_processor name="sepia">
 		<input>
 			<pin name="src_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
 		</output>
-		<shader effect="OldFashion.fxml" tech="OldFashion"/>
+		<shader effect="Sepia.fxml" tech="Sepia"/>
 	</post_processor>
 </post_processors>

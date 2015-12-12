@@ -29,7 +29,7 @@ private:
 	void TilingHandler(KlayGE::UIRadioButton const & sender);
 	void HDRHandler(KlayGE::UIRadioButton const & sender);
 	void NightVisionHandler(KlayGE::UIRadioButton const & sender);
-	void OldFashionHandler(KlayGE::UIRadioButton const & sender);
+	void SepiaHandler(KlayGE::UIRadioButton const & sender);
 	void CrossStitchingHandler(KlayGE::UIRadioButton const & sender);
 	void FrostedGlassHandler(KlayGE::UIRadioButton const & sender);
 
@@ -49,7 +49,7 @@ private:
 	KlayGE::PostProcessPtr tiling_;
 	KlayGE::PostProcessPtr hdr_;
 	KlayGE::PostProcessPtr night_vision_;
-	KlayGE::PostProcessPtr old_fashion_;
+	KlayGE::PostProcessPtr sepia_;
 	KlayGE::PostProcessPtr cross_stitching_;
 	KlayGE::PostProcessPtr frosted_glass_;
 

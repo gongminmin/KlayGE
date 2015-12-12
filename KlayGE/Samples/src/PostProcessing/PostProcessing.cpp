@@ -139,7 +139,7 @@ void PostProcessingApp::OnCreate()
 	tiling_ = MakeSharedPtr<TilingPostProcess>();
 	hdr_ = MakeSharedPtr<HDRPostProcess>(false);
 	night_vision_ = MakeSharedPtr<NightVisionPostProcess>();
-	old_fashion_ = SyncLoadPostProcess("OldFashion.ppml", "old_fashion");
+	sepia_ = SyncLoadPostProcess("Sepia.ppml", "sepia");
 	cross_stitching_ = SyncLoadPostProcess("CrossStitching.ppml", "cross_stitching");
 	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
 
@@ -153,7 +153,7 @@ void PostProcessingApp::OnCreate()
 	id_tiling_ = dialog_->IDFromName("TilingPP");
 	id_hdr_ = dialog_->IDFromName("HDRPP");
 	id_night_vision_ = dialog_->IDFromName("NightVisionPP");
-	id_old_fashion_ = dialog_->IDFromName("OldFashionPP");
+	id_old_fashion_ = dialog_->IDFromName("SepiaPP");
 	id_cross_stitching_ = dialog_->IDFromName("CrossStitchingPP");
 	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
 
@@ -164,7 +164,7 @@ void PostProcessingApp::OnCreate()
 	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::TilingHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::HDRHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::NightVisionHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::OldFashionHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::SepiaHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CrossStitchingHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FrostedGlassHandler, this, std::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
@@ -217,7 +217,7 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 
 	night_vision_->InputPin(0, color_tex_);
 
-	old_fashion_->InputPin(0, color_tex_);
+	sepia_->InputPin(0, color_tex_);
 
 	cross_stitching_->InputPin(0, color_tex_);
 
@@ -296,11 +296,11 @@ void PostProcessingApp::NightVisionHandler(UIRadioButton const & sender)
 	}
 }
 
-void PostProcessingApp::OldFashionHandler(UIRadioButton const & sender)
+void PostProcessingApp::SepiaHandler(UIRadioButton const & sender)
 {
 	if (sender.GetChecked())
 	{
-		active_pp_ = old_fashion_;
+		active_pp_ = sepia_;
 	}
 }
 

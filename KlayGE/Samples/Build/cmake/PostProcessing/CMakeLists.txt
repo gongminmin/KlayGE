@@ -24,14 +24,14 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/Sepia.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.fxml
 )
 
 SET(POST_PROCESSORS
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.ppml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.ppml
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.ppml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/Sepia.ppml
 )
 
 SET(UI_FILES
@@ -97,7 +97,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/font.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/OldFashion.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/Sepia.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.meshml.model_bin
 )
