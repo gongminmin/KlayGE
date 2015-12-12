@@ -132,10 +132,12 @@ namespace KlayGE
 
 	void Context::Destroy()
 	{
-		context_instance_->DestroyAll();
-
 		std::lock_guard<std::mutex> lock(singleton_mutex);
-		context_instance_.reset();
+		if (context_instance_)
+		{
+			context_instance_->DestroyAll();
+			context_instance_.reset();
+		}
 	}
 
 	void Context::Suspend()
