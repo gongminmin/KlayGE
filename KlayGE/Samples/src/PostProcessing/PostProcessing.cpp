@@ -95,8 +95,8 @@ void PostProcessingApp::OnCreate()
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));
 	this->Proj(0.1f, 150.0f);
 
-	TexturePtr c_cube = ASyncLoadTexture("rnl_cross_c.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr y_cube = ASyncLoadTexture("rnl_cross_y.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr c_cube = ASyncLoadTexture("rnl_cross_filtered_c.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr y_cube = ASyncLoadTexture("rnl_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
 	RenderablePtr scene_model = ASyncLoadModel("dino50.7z//dino50.meshml", EAH_GPU_Read | EAH_Immutable,
 		CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
 
@@ -110,6 +110,11 @@ void PostProcessingApp::OnCreate()
 	re.HDREnabled(false);
 	re.PPAAEnabled(0);
 	re.ColorGradingEnabled(false);
+
+	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
+	ambient_light->SkylightTex(y_cube, c_cube);
+	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
+	ambient_light->AddToSceneManager();
 
 	point_light_ = MakeSharedPtr<PointLightSource>();
 	point_light_->Attrib(LightSource::LSA_NoShadow);

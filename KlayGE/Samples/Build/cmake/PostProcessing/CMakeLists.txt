@@ -89,8 +89,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_c.dds
-	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_y.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_c.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.kfx
@@ -101,6 +101,11 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/TilingPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/dino50.meshml.model_bin
 )
+
+SET(EXTRA_INCLUDE_DIRS
+	${KLAYGE_PROJECT_DIR}/../kfont/include)
+SET(EXTRA_LINKED_DIRS
+	${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
 
 IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 	SET(PACKAGE_GUID "AC840C84-9653-4F0C-BC5D-E30D102E5BEA")
