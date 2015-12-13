@@ -89,11 +89,6 @@ void ScaledCopyVS(float4 pos : POSITION,
 	oTex = TexCoordFromPos(float4(pos.xy * scale.xy, pos.zw));
 	oPos = float4(pos.xy * scale.zw, pos.zw);
 }
-
-float4 ScaledCopyPS(float2 tc : TEXCOORD0) : SV_Target
-{
-	return src_tex.Sample(bilinear_sampler, tc);
-}
 		]]>
 	</shader>
 
@@ -103,7 +98,7 @@ float4 ScaledCopyPS(float2 tc : TEXCOORD0) : SV_Target
 			<state name="depth_write_mask" value="0"/>
 
 			<state name="vertex_shader" value="ScaledCopyVS()"/>
-			<state name="pixel_shader" value="ScaledCopyPS()"/>
+			<state name="pixel_shader" value="BilinearCopyPS()"/>
 		</pass>
 	</technique>
 

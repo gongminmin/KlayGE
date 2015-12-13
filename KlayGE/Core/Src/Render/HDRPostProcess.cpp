@@ -541,7 +541,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		int n = 1;
+		size_t n = 1;
 		{
 			uint32_t ori_w = tex->Width(0);
 			uint32_t ori_h = tex->Height(0);
@@ -556,11 +556,12 @@ namespace KlayGE
 				++ n;
 			}
 		}
+		n = std::max<size_t>(n, 2);
 
 		restore_chain_.resize(n - 1);
 		for (size_t i = 1; i < n; ++ i)
 		{
-			restore_chain_[i - 1] = rf.MakeTexture2D(tex->Width(0) >> i, tex->Height(0) >> i,
+			restore_chain_[i - 1] = rf.MakeTexture2D(std::max(1U, tex->Width(0) >> i), std::max(1U, tex->Height(0) >> i),
 				1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 		}
 
