@@ -132,7 +132,8 @@ int SampleMain()
 }
 
 TessellationApp::TessellationApp()
-					: App3DFramework("Tessellation")
+					: App3DFramework("Tessellation"),
+						tess_factor_(0, 0, 0, 0)
 {
 	ResLoader::Instance().AddPath("../../Tutorials/media/Tessellation");
 }
