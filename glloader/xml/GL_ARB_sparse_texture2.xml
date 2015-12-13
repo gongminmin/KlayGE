@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_sparse_texture2" reg_no="186">
+	<additionals>
+		<ext name="GL_EXT_sparse_texture2"/>
+	</additionals>
+</gl_extension>

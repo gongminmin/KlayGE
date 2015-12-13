@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OVR_multiview_multisampled_render_to_texture" reg_no="250">
+	<functions>
+		<function name="glFramebufferTextureMultisampleMultiviewOVR" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLint" name="baseViewIndex"/>
+				<param type="GLsizei" name="numViews"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

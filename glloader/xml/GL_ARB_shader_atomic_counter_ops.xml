@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_shader_atomic_counter_ops" reg_no="182">
+	<additionals>
+		<ext name="GL_NV_shader_atomic_counter_ops"/>
+	</additionals>
+</gl_extension>

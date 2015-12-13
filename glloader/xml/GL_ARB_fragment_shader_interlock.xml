@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_fragment_shader_interlock" reg_no="177">
+	<additionals>
+		<ext name="GL_NV_fragment_shader_interlock"/>
+	</additionals>
+</gl_extension>

@@ -1,0 +1,287 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_gpu_shader_int64" reg_no="178">
+	<tokens>
+		<token name="GL_INT64_ARB" value="0x140E"/>
+		<token name="GL_UNSIGNED_INT64_ARB" value="0x140F"/>
+		<token name="GL_INT64_VEC2_ARB" value="0x8FE9"/>
+		<token name="GL_INT64_VEC3_ARB" value="0x8FEA"/>
+		<token name="GL_INT64_VEC4_ARB" value="0x8FEB"/>
+		<token name="GL_UNSIGNED_INT64_VEC2_ARB" value="0x8FF5"/>
+		<token name="GL_UNSIGNED_INT64_VEC3_ARB" value="0x8FF6"/>
+		<token name="GL_UNSIGNED_INT64_VEC4_ARB" value="0x8FF7"/>
+	</tokens>
+
+	<functions>
+		<function name="glUniform1i64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+			</params>
+		</function>
+		<function name="glUniform2i64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+			</params>
+		</function>
+		<function name="glUniform3i64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+				<param type="GLint64" name="z"/>
+			</params>
+		</function>
+		<function name="glUniform4i64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+				<param type="GLint64" name="z"/>
+				<param type="GLint64" name="w"/>
+			</params>
+		</function>
+		<function name="glUniform1i64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2i64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3i64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4i64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform1ui64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+			</params>
+		</function>
+		<function name="glUniform2ui64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+			</params>
+		</function>
+		<function name="glUniform3ui64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+				<param type="GLuint64" name="z"/>
+			</params>
+		</function>
+		<function name="glUniform4ui64ARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+				<param type="GLuint64" name="z"/>
+				<param type="GLuint64" name="w"/>
+			</params>
+		</function>
+		<function name="glUniform1ui64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform2ui64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform3ui64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glUniform4ui64vARB" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glGetUniformi64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetUniformui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetnUniformui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="bufSize"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1i64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2i64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3i64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+				<param type="GLint64" name="z"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4i64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLint64" name="x"/>
+				<param type="GLint64" name="y"/>
+				<param type="GLint64" name="z"/>
+				<param type="GLint64" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1i64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2i64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3i64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4i64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1ui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2ui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3ui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+				<param type="GLuint64" name="z"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4ui64ARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="x"/>
+				<param type="GLuint64" name="y"/>
+				<param type="GLuint64" name="z"/>
+				<param type="GLuint64" name="w"/>
+			</params>
+		</function>
+		<function name="glProgramUniform1ui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform2ui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform3ui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniform4ui64vARB" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

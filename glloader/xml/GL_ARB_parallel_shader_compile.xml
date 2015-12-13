@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_parallel_shader_compile" reg_no="179">
+	<tokens>
+		<token name="GL_MAX_SHADER_COMPILER_THREADS_ARB" value="0x91B0"/>
+		<token name="GL_COMPLETION_STATUS_ARB" value="0x91B1"/>
+	</tokens>
+
+	<functions>
+		<function name="glMaxShaderCompilerThreadsARB" return="void">
+			<params>
+				<param type="GLuint" name="count"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

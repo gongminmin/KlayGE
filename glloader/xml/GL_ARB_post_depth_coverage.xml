@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_post_depth_coverage" reg_no="180">
+	<additionals>
+		<ext name="GL_EXT_post_depth_coverage"/>
+	</additionals>
+</gl_extension>

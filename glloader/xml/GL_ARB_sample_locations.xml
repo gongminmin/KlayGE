@@ -1,0 +1,44 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_sample_locations" reg_no="181">
+	<tokens>
+		<token name="GL_SAMPLE_LOCATION_SUBPIXEL_BITS_ARB" value="0x933D"/>
+		<token name="GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_ARB" value="0x933E"/>
+		<token name="GL_SAMPLE_LOCATION_PIXEL_GRID_HEIGHT_ARB" value="0x933F"/>
+		<token name="GL_PROGRAMMABLE_SAMPLE_LOCATION_TABLE_SIZE_ARB" value="0x9340"/>
+		<token name="GL_SAMPLE_LOCATION_ARB" value="0x8E50"/>
+		<token name="GL_PROGRAMMABLE_SAMPLE_LOCATION_ARB" value="0x9341"/>
+		<token name="GL_FRAMEBUFFER_PROGRAMMABLE_SAMPLE_LOCATIONS_ARB" value="0x9342"/>
+		<token name="GL_FRAMEBUFFER_SAMPLE_LOCATION_PIXEL_GRID_ARB" value="0x9343"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferSampleLocationsfvARB" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_sample_locations" name="glFramebufferSampleLocationsfvNV"/>
+			</mappings>
+		</function>
+		<function name="glNamedFramebufferSampleLocationsfvARB" return="void">
+			<params>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+			<mappings>
+				<mapping from="GL_NV_sample_locations" name="glNamedFramebufferSampleLocationsfvNV"/>
+			</mappings>
+		</function>
+		<function name="glEvaluateDepthValuesARB" return="void">
+			<mappings>
+				<mapping from="GL_NV_sample_locations" name="glEvaluateDepthValuesNV"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

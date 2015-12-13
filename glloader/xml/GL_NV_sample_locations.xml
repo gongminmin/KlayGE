@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_NV_sample_locations" reg_no="472">
+<gl_extension name="GL_NV_sample_locations" reg_no="472" prefer="GL_ARB_sample_locations">
 	<tokens>
 		<token name="GL_SAMPLE_LOCATION_SUBPIXEL_BITS_NV" value="0x933D"/>
 		<token name="GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_NV" value="0x933E"/>

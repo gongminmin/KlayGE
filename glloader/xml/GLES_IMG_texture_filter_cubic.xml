@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_texture_filter_cubic" reg_no="251">
+	<tokens>
+		<token name="GL_CUBIC_IMG" value="0x9139"/>
+		<token name="GL_CUBIC_MIPMAP_NEAREST_IMG" value="0x913A"/>
+		<token name="GL_CUBIC_MIPMAP_LINEAR_IMG" value="0x913B"/>
+	</tokens>
+</gl_extension>

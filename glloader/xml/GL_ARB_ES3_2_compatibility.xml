@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_ES3_2_compatibility" reg_no="176">
+	<tokens>
+		<token name="GL_PRIMITIVE_BOUNDING_BOX_ARB" value="0x92BE"/>
+		<token name="GL_MULTISAMPLE_LINE_WIDTH_RANGE_ARB" value="0x9381"/>
+		<token name="GL_MULTISAMPLE_LINE_WIDTH_GRANULARITY_ARB" value="0x9382"/>
+	</tokens>
+
+	<functions>
+		<function name="glPrimitiveBoundingBoxARB" return="void">
+			<params>
+				<param type="GLfloat" name="minX"/>
+				<param type="GLfloat" name="minY"/>
+				<param type="GLfloat" name="minZ"/>
+				<param type="GLfloat" name="minW"/>
+				<param type="GLfloat" name="maxX"/>
+				<param type="GLfloat" name="maxY"/>
+				<param type="GLfloat" name="maxZ"/>
+				<param type="GLfloat" name="maxW"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

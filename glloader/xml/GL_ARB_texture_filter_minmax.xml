@@ -1,0 +1,12 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_texture_filter_minmax" reg_no="188">
+	<tokens>
+		<token name="GL_TEXTURE_REDUCTION_MODE_ARB" value="0x9366"/>
+		<token name="GL_WEIGHTED_AVERAGE_ARB" value="0x9367"/>
+	</tokens>
+
+	<additionals>
+		<ext name="GL_EXT_texture_filter_minmax"/>
+	</additionals>
+</gl_extension>
