@@ -1,5 +1,3 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/PostProcessing/font.dds" "cbda47a1678ce70b6720856736100979d469e159" "7485b591c78aa3fd2c25a068b981582b724d1e18")
-
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/PostProcessing/PostProcessing.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/src/PostProcessing/AsciiArtsPP.cpp
@@ -94,7 +92,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/font.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/NightVisionPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/Sepia.kfx

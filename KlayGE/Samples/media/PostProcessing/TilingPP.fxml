@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
 
 	<parameter type="texture2D" name="src_tex"/>
 	<parameter type="sampler" name="src_sampler">
@@ -35,7 +36,7 @@ float4 TilingPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	{
 		factor *= 2;
 	}
-	return src_tex.SampleLevel(src_sampler, tex_coord0, 3) * factor;
+	return Tex2DSampleLevel(src_tex, src_sampler, tex_coord0, 3, 0) * factor;
 }
 		]]>
 	</shader>
