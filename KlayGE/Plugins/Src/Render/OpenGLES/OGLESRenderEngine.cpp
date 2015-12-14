@@ -1567,7 +1567,7 @@ namespace KlayGE
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
-		if (hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_)
+		if (this->HackForPVR() || this->HackForMali() || this->HackForAdreno())
 		{
 			caps_.max_texture_depth = 1;
 		}
@@ -1587,7 +1587,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
-		if (glloader_GLES_VERSION_3_0() && !hack_for_angle_)
+		if (glloader_GLES_VERSION_3_0() && !this->HackForAngle())
 		{
 			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &temp);
 			caps_.max_texture_array_length = temp;
@@ -1632,7 +1632,7 @@ namespace KlayGE
 		caps_.instance_id_support = false;
 		caps_.stream_output_support = false;
 		caps_.alpha_to_coverage_support = true;
-		if (glloader_GLES_VERSION_3_0() && !hack_for_adreno_ && !hack_for_angle_)
+		if (glloader_GLES_VERSION_3_0() && !this->HackForAdreno())
 		{
 			caps_.primitive_restart_support = true;
 		}
@@ -1671,7 +1671,7 @@ namespace KlayGE
 			caps_.draw_indirect_support = false;
 		}
 		caps_.no_overwrite_support = false;
-		if (hack_for_android_emulator_)
+		if (this->HackForAndroidEmulator())
 		{
 			caps_.full_npot_texture_support = false;
 		}
@@ -1808,7 +1808,8 @@ namespace KlayGE
 			texture_format_.insert(EF_ABGR32UI);
 			texture_format_.insert(EF_ABGR32I);
 		}
-		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float()) && !hack_for_pvr_ && !hack_for_android_emulator_)
+		if ((glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_half_float())
+			&& !this->HackForPVR() && !this->HackForAndroidEmulator())
 		{
 			texture_format_.insert(EF_R16F);
 			texture_format_.insert(EF_GR16F);
@@ -1835,7 +1836,7 @@ namespace KlayGE
 			texture_format_.insert(EF_BC2);
 			texture_format_.insert(EF_BC3);
 		}
-		if (glloader_GLES_EXT_texture_compression_latc() && !(hack_for_pvr_ || hack_for_mali_ || hack_for_adreno_))
+		if (glloader_GLES_EXT_texture_compression_latc() && !(this->HackForPVR() || this->HackForMali() || this->HackForAdreno()))
 		{
 			texture_format_.insert(EF_BC4);
 			texture_format_.insert(EF_BC5);
@@ -1912,7 +1913,7 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
 		}
-		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || hack_for_tegra_)
+		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || this->HackForTegra())
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
