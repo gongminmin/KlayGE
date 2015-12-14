@@ -1537,6 +1537,7 @@ namespace KlayGE
 		}
 		else
 		{
+			hack_for_angle_ = false;
 			hack_for_android_emulator_ = false;
 		}
 
@@ -1586,7 +1587,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
-		if (glloader_GLES_VERSION_3_0())
+		if (glloader_GLES_VERSION_3_0() && !hack_for_angle_)
 		{
 			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &temp);
 			caps_.max_texture_array_length = temp;
