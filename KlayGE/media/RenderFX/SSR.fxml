@@ -56,120 +56,123 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 	float3 tex_reflect_vec = tex_reflect_pos - tex_pos;
 	
 	// the reflect vector completely perpendiculars to screen
+	[branch]
 	if (!any(tex_reflect_vec.xy))
 	{
 		return 0;
 	}
+	else
+	{
+		// try to compute the intersection point of reflection vector and screen edge
+		float t1 = 1;
+		if (tex_reflect_pos.x < 0)
+		{
+			t1 = -tex_pos.x / tex_reflect_vec.x;
+		}
+		else if (tex_reflect_pos.x > 1)
+		{
+			t1 = (1 - tex_pos.x) / tex_reflect_vec.x;
+		}
 
-	// try to compute the intersection point of reflection vector and screen edge
-	float t1 = 1;
-	if (tex_reflect_pos.x < 0)
-	{
-		t1 = -tex_pos.x / tex_reflect_vec.x;
-	}
-	else if (tex_reflect_pos.x > 1)
-	{
-		t1 = (1 - tex_pos.x) / tex_reflect_vec.x;
-	}
+		float t2 = 1;
+		if (tex_reflect_pos.y < 0)
+		{
+			t2 = -tex_pos.y / tex_reflect_vec.y;
+		}
+		else if (tex_reflect_pos.y > 1)
+		{
+			t2 = (1 - tex_pos.y) / tex_reflect_vec.y;
+		}
 
-	float t2 = 1;
-	if (tex_reflect_pos.y < 0)
-	{
-		t2 = -tex_pos.y / tex_reflect_vec.y;
-	}
-	else if (tex_reflect_pos.y > 1)
-	{
-		t2 = (1 - tex_pos.y) / tex_reflect_vec.y;
-	}
+		float3 tex_offset = min(t1, t2) * tex_reflect_vec;
 
-	float3 tex_offset = min(t1, t2) * tex_reflect_vec;
-	
-	float orientation_factor = reflect_vec.z;
+		float orientation_factor = reflect_vec.z;
 #if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
-	int num_steps = (int)lerp(max_samples, min_samples, abs(orientation_factor));
+		int num_steps = (int)lerp(max_samples, min_samples, abs(orientation_factor));
 #else
-	int num_steps = 8;
+		int num_steps = 8;
 #endif
 
-	float4 sample_step = float4(tex_offset, 1) / num_steps;
+		float4 sample_step = float4(tex_offset, 1) / num_steps;
 
-	float3 cur_tex_pos = tex_pos;
+		float3 cur_tex_pos = tex_pos;
 #if KLAYGE_DERIVATIVES
-	float2 tex_ddx = ddx(cur_tex_pos.xy);
-	float2 tex_ddy = ddy(cur_tex_pos.xy);
+		float2 tex_ddx = ddx(cur_tex_pos.xy);
+		float2 tex_ddy = ddy(cur_tex_pos.xy);
 #else
-	float2 tex_ddx = 0;
-	float2 tex_ddy = 0;
+		float2 tex_ddx = 0;
+		float2 tex_ddy = 0;
 #endif
 
-	float t = 0;
-	float4 pt = linear_depth;
-	for (int sample_index = 0; sample_index < num_steps; ++ sample_index)
-	{
-		cur_tex_pos += sample_step.xyz;
-		float cur_sample_depth;
+		float t = 0;
+		float4 pt = linear_depth;
+		for (int sample_index = 0; sample_index < num_steps; ++ sample_index)
+		{
+			cur_tex_pos += sample_step.xyz;
+			float cur_sample_depth;
+			if (front_side)
+			{
+				cur_sample_depth = ReadAFloat(front_side_depth_tex.SampleGrad(ssr_linear_sampler, cur_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+			}
+			else
+			{
+				cur_sample_depth = ReadAFloat(back_side_depth_tex.SampleGrad(ssr_linear_sampler, cur_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+			}
+			float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q_far.x, near_q_far.y);
+
+			t += sample_step.w;
+
+			if (cur_ray_march_depth > cur_sample_depth)
+			{
+				pt.zw = float2(cur_sample_depth, cur_ray_march_depth);
+				break;
+			}
+			else
+			{
+				pt.xy = float2(cur_sample_depth, cur_ray_march_depth);
+			}
+		}
+
+		float delta1 = pt.x - pt.y;
+		float delta2 = pt.z - pt.w;
+		float delta = delta1 - delta2;
+		t = (delta1 * t - delta2 * (t - sample_step.w)) / delta;
+		float3 sample_tex_pos = tex_pos + t * tex_offset;
+
+		float sample_z;
 		if (front_side)
 		{
-			cur_sample_depth = ReadAFloat(front_side_depth_tex.SampleGrad(ssr_linear_sampler, cur_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+			sample_z = ReadAFloat(front_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
 		}
 		else
 		{
-			cur_sample_depth = ReadAFloat(back_side_depth_tex.SampleGrad(ssr_linear_sampler, cur_tex_pos.xy, tex_ddx, tex_ddy), near_q_far.z);
+			sample_z = ReadAFloat(back_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
 		}
-		float cur_ray_march_depth = non_linear_depth_to_linear(cur_tex_pos.z, near_q_far.x, near_q_far.y);
 
-		t += sample_step.w;
-
-		if (cur_ray_march_depth > cur_sample_depth)
+		float4 ret;
+		if (!strictness || ((sample_z < near_q_far.z - 1e-6f)
+			&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q_far.x, near_q_far.y)) < 0.1f)))
 		{
-			pt.zw = float2(cur_sample_depth, cur_ray_march_depth);
-			break;
+			float reflect_dir_fade_out_factor = 1 - orientation_factor;
+			float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);
+
+			if (front_side)
+			{
+				ret.xyz = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+			}
+			else
+			{
+				ret.xyz = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+			}
+			ret.w = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
 		}
 		else
 		{
-			pt.xy = float2(cur_sample_depth, cur_ray_march_depth);
+			ret = 0;
 		}
-	}
 
-	float delta1 = pt.x - pt.y;
-	float delta2 = pt.z - pt.w;
-	float delta = delta1 - delta2;
-	t = (delta1 * t - delta2 * (t - sample_step.w)) / delta;
-	float3 sample_tex_pos = tex_pos + t * tex_offset;
-
-	float sample_z;
-	if (front_side)
-	{
-		sample_z = ReadAFloat(front_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
+		return ret;
 	}
-	else
-	{
-		sample_z = ReadAFloat(back_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy), near_q_far.z);
-	}
-
-	float4 ret;
-	if (!strictness || ((sample_z < near_q_far.z - 1e-6f)
-		&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q_far.x, near_q_far.y)) < 0.1f)))
-	{
-		float reflect_dir_fade_out_factor = 1 - orientation_factor;
-		float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);
-
-		if (front_side)
-		{
-			ret.xyz = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
-		}
-		else
-		{
-			ret.xyz = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
-		}
-		ret.w = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
-	}
-	else
-	{
-		ret = 0;
-	}
-	
-	return ret;
 }
 
 void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,

@@ -423,18 +423,10 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
-#if KLAYGE_DXBC2GLSL
-#if WITH_SHADOW
-		uint nl = 4;
-#else
-		uint nl = LIGHT_BATCH;
-#endif
-#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = LIGHT_BATCH;
-#endif
 #endif
 		// TODO: DXBC2GLSL has a problem in min(int, int)
 		if (num_lights < nl)
@@ -516,18 +508,10 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
-#if KLAYGE_DXBC2GLSL
-#if WITH_SHADOW
-		uint nl = 4;
-#else
-		uint nl = LIGHT_BATCH;
-#endif
-#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = LIGHT_BATCH;
-#endif
 #endif
 		// TODO: DXBC2GLSL has a problem in min(int, int)
 		if (num_lights < nl)
@@ -609,18 +593,10 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
-#if KLAYGE_DXBC2GLSL
-#if WITH_SHADOW
-		uint nl = 4;
-#else
-		uint nl = LIGHT_BATCH;
-#endif
-#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = LIGHT_BATCH;
-#endif
 #endif
 		// TODO: DXBC2GLSL has a problem in min(int, int)
 		if (num_lights < nl)
@@ -703,18 +679,10 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 			light_index_all = light_index_all & (light_index_all - 1);
 		}
 #else
-#if KLAYGE_DXBC2GLSL
-#if WITH_SHADOW
-		uint nl = 4;
-#else
-		uint nl = LIGHT_BATCH;
-#endif
-#else
 #if WITH_SHADOW
 		int nl = 4;
 #else
 		int nl = LIGHT_BATCH;
-#endif
 #endif
 		// TODO: DXBC2GLSL has a problem in min(int, int)
 		if (num_lights < nl)
