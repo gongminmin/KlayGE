@@ -83,6 +83,7 @@ enum GLSLRules
 	GSR_OESStandardDerivatives = 1UL << 21,
 	GSR_EXTFragDepth = 1UL << 22,
 	GSR_EXTTessellationShader = 1UL << 23,
+	GSR_PrecisionOnSampler = 1UL << 24,
 	GSR_ForceUInt32 = 0xFFFFFFFF
 };
 

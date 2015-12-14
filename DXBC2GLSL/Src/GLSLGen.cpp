@@ -215,6 +215,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 			rules |= GSR_MatrixType;
 			rules |= GSR_ArrayConstructors;
 			rules |= GSR_DrawBuffers;
+			rules |= GSR_PrecisionOnSampler;
 		}
 		if (version >= GSV_310_ES)
 		{
@@ -1508,6 +1509,10 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 					for (auto const & sampler : tex.samplers)
 					{
 						out << "uniform ";
+						if (glsl_rules_ & GSR_PrecisionOnSampler)
+						{
+							out << "highp ";
+						}
 						switch (dcl.rrt.x)
 						{
 						case SRRT_UNORM:
@@ -1590,6 +1595,10 @@ void GLSLGen::ToDeclaration(std::ostream& out, ShaderDecl const & dcl)
 					if (tex.samplers.empty())
 					{
 						out << "uniform ";
+						if (glsl_rules_ & GSR_PrecisionOnSampler)
+						{
+							out << "highp ";
+						}
 						switch (dcl.rrt.x)
 						{
 						case SRRT_UNORM:
