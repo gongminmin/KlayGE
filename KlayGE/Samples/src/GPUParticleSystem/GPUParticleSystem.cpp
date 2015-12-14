@@ -789,8 +789,8 @@ void GPUParticleSystemApp::OnCreate()
 
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
-	TexturePtr terrain_height_tex = ASyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable);
-	TexturePtr terrain_normal_tex = ASyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr terrain_height_tex = SyncLoadTexture("terrain_height.dds", EAH_GPU_Read | EAH_Immutable);
+	TexturePtr terrain_normal_tex = SyncLoadTexture("terrain_normal.dds", EAH_GPU_Read | EAH_Immutable);
 
 	this->LookAt(float3(-1.2f, 2.2f, -1.2f), float3(0, 0.5f, 0));
 	this->Proj(0.01f, 100);
