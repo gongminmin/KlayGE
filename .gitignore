@@ -41,6 +41,7 @@ KlayGE/bin/*/*.pdb
 KlayGE/bin/*/*.py
 KlayGE/bin/*/*Py.zip
 KlayGE/bin/*/GL*CompatibilityReport.html
+KlayGE/bin/*/HWCollect.txt
 KlayGE/media/Fonts
 KlayGE/media/Models
 KlayGE/media/Textures
