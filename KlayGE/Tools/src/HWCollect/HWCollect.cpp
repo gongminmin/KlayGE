@@ -335,6 +335,8 @@ void DetectGpuInfo(std::ostream& os)
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	::FreeLibrary(dxgi);
 #endif
+#else
+	os << "Unknown GPU" << endl;
 #endif
 }
 
@@ -383,7 +385,7 @@ int main()
 	DetectCpuInfo(ss);
 	ss << endl;
 
-	ss << "=== CPU information ===" << endl;
+	ss << "=== GPU information ===" << endl;
 	DetectGpuInfo(ss);
 	ss << endl;
 

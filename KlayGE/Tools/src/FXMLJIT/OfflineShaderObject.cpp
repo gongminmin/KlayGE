@@ -55,6 +55,8 @@
 typedef char const * LPCSTR;
 typedef long HRESULT;
 
+#define S_OK                                        0x00000000
+
 #define D3DCOMPILE_DEBUG                            0x00000001
 #define D3DCOMPILE_SKIP_VALIDATION                  0x00000002
 #define D3DCOMPILE_SKIP_OPTIMIZATION                0x00000004
