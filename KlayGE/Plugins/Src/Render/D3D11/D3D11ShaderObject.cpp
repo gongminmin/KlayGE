@@ -52,7 +52,8 @@ namespace
 	class SetD3D11ShaderParameterTextureSRV
 	{
 	public:
-		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
+				ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -68,7 +69,7 @@ namespace
 					tex_subres.num_items * tex_subres.num_levels);
 				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
 					tex_subres.first_array_index, tex_subres.num_items,
-					tex_subres.first_level, tex_subres.num_levels);
+					tex_subres.first_level, tex_subres.num_levels).get();
 			}
 			else
 			{
@@ -78,14 +79,15 @@ namespace
 
 	private:
 		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceViewPtr* srv_;
+		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferSRV
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc, ID3D11ShaderResourceViewPtr& srv, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
+				ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -97,7 +99,7 @@ namespace
 			if (buf)
 			{
 				*srvsrc_ = std::make_tuple(buf.get(), 0, 1);
-				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
+				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
 			}
 			else
 			{
@@ -107,14 +109,14 @@ namespace
 
 	private:
 		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
-		ID3D11ShaderResourceViewPtr* srv_;
+		ID3D11ShaderResourceView** srv_;
 		RenderEffectParameterPtr param_;
 	};
 
 	class SetD3D11ShaderParameterTextureUAV
 	{
 	public:
-		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -127,7 +129,7 @@ namespace
 			{
 				*uavsrc_ = tex_subres.tex.get();
 				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
-					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level);
+					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
 			}
 			else
 			{
@@ -137,14 +139,14 @@ namespace
 
 	private:
 		void** uavsrc_;
-		ID3D11UnorderedAccessViewPtr* uav_;
+		ID3D11UnorderedAccessView** uav_;
 		RenderEffectParameterPtr param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferUAV
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessViewPtr& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -156,7 +158,7 @@ namespace
 			if (buf)
 			{
 				*uavsrc_ = buf.get();
-				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
 			}
 			else
 			{
@@ -166,7 +168,7 @@ namespace
 
 	private:
 		void** uavsrc_;
-		ID3D11UnorderedAccessViewPtr* uav_;
+		ID3D11UnorderedAccessView** uav_;
 		RenderEffectParameterPtr param_;
 	};
 }
@@ -279,7 +281,8 @@ namespace KlayGE
 				std::memcpy(&((*code_blob)[0]), nsbp, blob_size);
 				nsbp += blob_size;
 
-				D3D11ShaderDesc& sd = shader_desc_[type];
+				shader_desc_[type] = MakeSharedPtr<D3D11ShaderDesc>();
+				D3D11ShaderDesc& sd = *shader_desc_[type];
 
 				uint16_t cb_desc_size;
 				std::memcpy(&cb_desc_size, nsbp, sizeof(cb_desc_size));
@@ -426,7 +429,7 @@ namespace KlayGE
 			oss.write(reinterpret_cast<char const *>(&blob_size), sizeof(blob_size));
 			oss.write(reinterpret_cast<char const *>(&((*code_blob)[0])), code_blob->size());
 
-			D3D11ShaderDesc const & sd = shader_desc_[type];
+			D3D11ShaderDesc const & sd = *shader_desc_[type];
 
 			uint16_t cb_desc_size = Native2LE(static_cast<uint16_t>(sd.cb_desc.size()));
 			oss.write(reinterpret_cast<char const *>(&cb_desc_size), sizeof(cb_desc_size));
@@ -628,6 +631,11 @@ namespace KlayGE
 				this->ReflectDXBC(*code, reinterpret_cast<void**>(&reflection));
 				if (reflection != nullptr)
 				{
+					if (!shader_desc_[type])
+					{
+						shader_desc_[type] = MakeSharedPtr<D3D11ShaderDesc>();
+					}
+
 					D3D11_SHADER_DESC desc;
 					reflection->GetDesc(&desc);
 
@@ -664,7 +672,7 @@ namespace KlayGE
 								cb_desc.var_desc.push_back(vd);
 							}
 
-							shader_desc_[type].cb_desc.push_back(cb_desc);
+							shader_desc_[type]->cb_desc.push_back(cb_desc);
 						}
 					}
 
@@ -702,9 +710,9 @@ namespace KlayGE
 						}
 					}
 
-					shader_desc_[type].num_samplers = static_cast<uint16_t>(num_samplers + 1);
-					shader_desc_[type].num_srvs = static_cast<uint16_t>(num_srvs + 1);
-					shader_desc_[type].num_uavs = static_cast<uint16_t>(num_uavs + 1);
+					shader_desc_[type]->num_samplers = static_cast<uint16_t>(num_samplers + 1);
+					shader_desc_[type]->num_srvs = static_cast<uint16_t>(num_srvs + 1);
+					shader_desc_[type]->num_uavs = static_cast<uint16_t>(num_uavs + 1);
 
 					for (uint32_t i = 0; i < desc.BoundResources; ++ i)
 					{
@@ -729,7 +737,7 @@ namespace KlayGE
 								brd.name = si_desc.Name;
 								brd.type = static_cast<uint8_t>(si_desc.Type);
 								brd.bind_point = static_cast<uint16_t>(si_desc.BindPoint);
-								shader_desc_[type].res_desc.push_back(brd);
+								shader_desc_[type]->res_desc.push_back(brd);
 							}
 							break;
 
@@ -1029,41 +1037,44 @@ namespace KlayGE
 			}
 
 			// Shader reflection
-			cbuff_indices_[type].resize(shader_desc_[type].cb_desc.size());
-			d3d11_cbuffs_[type].resize(shader_desc_[type].cb_desc.size());
-			for (size_t c = 0; c < shader_desc_[type].cb_desc.size(); ++ c)
+			if (!shader_desc_[type]->cb_desc.empty())
+			{
+				cbuff_indices_[type] = MakeSharedPtr<std::vector<uint8_t>>(shader_desc_[type]->cb_desc.size());
+			}
+			d3d11_cbuffs_[type].resize(shader_desc_[type]->cb_desc.size());
+			for (size_t c = 0; c < shader_desc_[type]->cb_desc.size(); ++ c)
 			{
 				uint32_t i = 0;
 				for (; i < effect.NumCBuffers(); ++ i)
 				{
-					if (effect.CBufferByIndex(i)->NameHash() == shader_desc_[type].cb_desc[c].name_hash)
+					if (effect.CBufferByIndex(i)->NameHash() == shader_desc_[type]->cb_desc[c].name_hash)
 					{
-						cbuff_indices_[type][c] = static_cast<uint8_t>(i);
+						(*cbuff_indices_[type])[c] = static_cast<uint8_t>(i);
 						break;
 					}
 				}
 				BOOST_ASSERT(i < effect.NumCBuffers());
 			}
 
-			samplers_[type].resize(shader_desc_[type].num_samplers);
-			srvsrcs_[type].resize(shader_desc_[type].num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
-			srvs_[type].resize(shader_desc_[type].num_srvs);
-			uavsrcs_[type].resize(shader_desc_[type].num_uavs, nullptr);
-			uavs_[type].resize(shader_desc_[type].num_uavs);
+			samplers_[type].resize(shader_desc_[type]->num_samplers);
+			srvsrcs_[type].resize(shader_desc_[type]->num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
+			srvs_[type].resize(shader_desc_[type]->num_srvs);
+			uavsrcs_[type].resize(shader_desc_[type]->num_uavs, nullptr);
+			uavs_[type].resize(shader_desc_[type]->num_uavs);
 
-			for (size_t i = 0; i < shader_desc_[type].res_desc.size(); ++ i)
+			for (size_t i = 0; i < shader_desc_[type]->res_desc.size(); ++ i)
 			{
-				RenderEffectParameterPtr const & p = effect.ParameterByName(shader_desc_[type].res_desc[i].name);
+				RenderEffectParameterPtr const & p = effect.ParameterByName(shader_desc_[type]->res_desc[i].name);
 				BOOST_ASSERT(p);
 
 				D3D11ShaderParameterHandle p_handle;
 				p_handle.shader_type = static_cast<uint8_t>(type);
 				p_handle.cbuff = 0;
-				p_handle.offset = shader_desc_[type].res_desc[i].bind_point;
+				p_handle.offset = shader_desc_[type]->res_desc[i].bind_point;
 				p_handle.elements = 1;
 				p_handle.rows = 0;
 				p_handle.columns = 1;
-				if (D3D_SIT_SAMPLER == shader_desc_[type].res_desc[i].type)
+				if (D3D_SIT_SAMPLER == shader_desc_[type]->res_desc[i].type)
 				{
 					p_handle.param_type = D3D_SVT_SAMPLER;
 
@@ -1072,12 +1083,12 @@ namespace KlayGE
 					if (sampler)
 					{
 						samplers_[p_handle.shader_type][p_handle.offset]
-							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
+							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState().get();
 					}
 				}
 				else
 				{
-					if (D3D_SRV_DIMENSION_BUFFER == shader_desc_[type].res_desc[i].dimension)
+					if (D3D_SRV_DIMENSION_BUFFER == shader_desc_[type]->res_desc[i].dimension)
 					{
 						p_handle.param_type = D3D_SVT_BUFFER;
 					}
@@ -1183,43 +1194,46 @@ namespace KlayGE
 		{
 			is_validate_ &= is_shader_validate_[type];
 
-			all_cbuff_indices.insert(all_cbuff_indices.end(),
-				cbuff_indices_[type].begin(), cbuff_indices_[type].end());
-			for (size_t i = 0; i < cbuff_indices_[type].size(); ++ i)
+			if (cbuff_indices_[type] && !cbuff_indices_[type]->empty())
 			{
-				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(cbuff_indices_[type][i]);
-				cbuff->Resize(shader_desc_[type].cb_desc[i].size);
-				BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type].cb_desc[i].var_desc.size());
-				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
+				all_cbuff_indices.insert(all_cbuff_indices.end(),
+					cbuff_indices_[type]->begin(), cbuff_indices_[type]->end());
+				for (size_t i = 0; i < cbuff_indices_[type]->size(); ++ i)
 				{
-					RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
-					uint32_t stride;
-					if (shader_desc_[type].cb_desc[i].var_desc[j].elements > 0)
+					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[type])[i]);
+					cbuff->Resize(shader_desc_[type]->cb_desc[i].size);
+					BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type]->cb_desc[i].var_desc.size());
+					for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 					{
-						if (param->Type() != REDT_float4x4)
+						RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
+						uint32_t stride;
+						if (shader_desc_[type]->cb_desc[i].var_desc[j].elements > 0)
 						{
-							stride = 16;
+							if (param->Type() != REDT_float4x4)
+							{
+								stride = 16;
+							}
+							else
+							{
+								stride = 64;
+							}
 						}
 						else
 						{
-							stride = 64;
+							if (param->Type() != REDT_float4x4)
+							{
+								stride = 4;
+							}
+							else
+							{
+								stride = 16;
+							}
 						}
+						param->BindToCBuffer(cbuff, shader_desc_[type]->cb_desc[i].var_desc[j].start_offset, stride);
 					}
-					else
-					{
-						if (param->Type() != REDT_float4x4)
-						{
-							stride = 4;
-						}
-						else
-						{
-							stride = 16;
-						}
-					}
-					param->BindToCBuffer(cbuff, shader_desc_[type].cb_desc[i].var_desc[j].start_offset, stride);
-				}
 
-				d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
+					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+				}
 			}
 		}
 
@@ -1264,12 +1278,15 @@ namespace KlayGE
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			ret->cbuff_indices_[i] = cbuff_indices_[i];
-			ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_[i].size());
-			all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i].begin(), cbuff_indices_[i].end());
-			for (size_t j = 0; j < cbuff_indices_[i].size(); ++ j)
+			if (cbuff_indices_[i] && !cbuff_indices_[i]->empty())
 			{
-				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex(cbuff_indices_[i][j]);
-				ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
+				ret->d3d11_cbuffs_[i].resize(d3d11_cbuffs_[i].size());
+				all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i]->begin(), cbuff_indices_[i]->end());
+				for (size_t j = 0; j < cbuff_indices_[i]->size(); ++ j)
+				{
+					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[i])[j]);
+					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+				}
 			}
 
 			ret->param_binds_[i].reserve(param_binds_[i].size());
@@ -1410,7 +1427,7 @@ namespace KlayGE
 					re.DetachSRV(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
 
-				uavs_ptr[i] = uavs_[ST_ComputeShader][i].get();
+				uavs_ptr[i] = uavs_[ST_ComputeShader][i];
 			}
 
 			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_ptr[0],

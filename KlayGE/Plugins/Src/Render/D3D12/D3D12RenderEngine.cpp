@@ -776,7 +776,7 @@ namespace KlayGE
 			{
 				for (uint32_t j = 0; j < so->CBuffers(st).size(); ++ j)
 				{
-					ID3D12ResourcePtr buff = checked_pointer_cast<D3D12GraphicsBuffer>(so->CBuffers(st)[j])->D3DBuffer();
+					ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DBuffer();
 					if (buff)
 					{
 						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
@@ -940,7 +940,7 @@ namespace KlayGE
 		{
 			for (uint32_t j = 0; j < so->CBuffers(st).size(); ++ j)
 			{
-				ID3D12ResourcePtr buff = checked_pointer_cast<D3D12GraphicsBuffer>(so->CBuffers(st)[j])->D3DBuffer();
+				ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DBuffer();
 				if (buff)
 				{
 					d3d_compute_cmd_list_->SetComputeRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());

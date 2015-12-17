@@ -1616,7 +1616,7 @@ namespace KlayGE
 
 	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st,
 			std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs,
-			std::vector<ID3D11ShaderResourceViewPtr> const & srvs)
+			std::vector<ID3D11ShaderResourceView*> const & srvs)
 	{
 		if (shader_srv_cache_[st] != srvs)
 		{
@@ -1631,7 +1631,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < srvs.size(); ++ i)
 			{
-				shader_srv_ptr_cache_[st][i] = srvs[i].get();
+				shader_srv_ptr_cache_[st][i] = srvs[i];
 			}
 
 			ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
@@ -1642,7 +1642,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerStatePtr> const & samplers)
+	void D3D11RenderEngine::SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers)
 	{
 		if (shader_sampler_cache_[st] != samplers)
 		{
@@ -1657,7 +1657,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < samplers.size(); ++ i)
 			{
-				shader_sampler_ptr_cache_[st][i] = samplers[i].get();
+				shader_sampler_ptr_cache_[st][i] = samplers[i];
 			}
 
 			ShaderSetSamplers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_sampler_ptr_cache_[st].size()), &shader_sampler_ptr_cache_[st][0]);
@@ -1667,7 +1667,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11BufferPtr> const & cbs)
+	void D3D11RenderEngine::SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs)
 	{
 		if (shader_cb_cache_[st] != cbs)
 		{
@@ -1682,7 +1682,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < cbs.size(); ++ i)
 			{
-				shader_cb_ptr_cache_[st][i] = cbs[i].get();
+				shader_cb_ptr_cache_[st][i] = cbs[i];
 			}
 
 			ShaderSetConstantBuffers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_cb_ptr_cache_[st].size()), &shader_cb_ptr_cache_[st][0]);
@@ -1712,7 +1712,7 @@ namespace KlayGE
 							|| ((rt_first >= first) && (rt_first < last))
 							|| ((rt_last >= first) && (rt_last < last)))
 						{
-							shader_srv_cache_[st][i].reset();
+							shader_srv_cache_[st][i] = nullptr;
 							shader_srv_ptr_cache_[st][i] = nullptr;
 							cleared = true;
 						}

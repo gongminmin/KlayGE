@@ -149,7 +149,7 @@ namespace KlayGE
 			return srvsrcs_[type];
 		}
 
-		std::vector<D3D12ShaderResourceViewSimulationPtr> const & SRVs(ShaderType type) const
+		std::vector<D3D12ShaderResourceViewSimulation*> const & SRVs(ShaderType type) const
 		{
 			return srvs_[type];
 		}
@@ -159,12 +159,12 @@ namespace KlayGE
 			return uavsrcs_[type];
 		}
 
-		std::vector<D3D12UnorderedAccessViewSimulationPtr> const & UAVs(ShaderType type) const
+		std::vector<D3D12UnorderedAccessViewSimulation*> const & UAVs(ShaderType type) const
 		{
 			return uavs_[type];
 		}
 
-		std::vector<GraphicsBufferPtr> const & CBuffers(ShaderType type) const
+		std::vector<GraphicsBuffer*> const & CBuffers(ShaderType type) const
 		{
 			return d3d_cbuffs_[type];
 		}
@@ -211,15 +211,15 @@ namespace KlayGE
 		std::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
 
 		std::array<std::pair<std::shared_ptr<std::vector<uint8_t>>, std::string>, ST_NumShaderTypes> shader_code_;
-		std::array<D3D12ShaderDesc, ST_NumShaderTypes> shader_desc_;
+		std::array<std::shared_ptr<D3D12ShaderDesc>, ST_NumShaderTypes> shader_desc_;
 
 		std::array<std::vector<D3D12_SAMPLER_DESC>, ST_NumShaderTypes> samplers_;
 		std::array<std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
-		std::array<std::vector<D3D12ShaderResourceViewSimulationPtr>, ST_NumShaderTypes> srvs_;
+		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, ST_NumShaderTypes> srvs_;
 		std::array<std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>>, ST_NumShaderTypes> uavsrcs_;
-		std::array<std::vector<D3D12UnorderedAccessViewSimulationPtr>, ST_NumShaderTypes> uavs_;
-		std::array<std::vector<uint8_t>, ST_NumShaderTypes> cbuff_indices_;
-		std::array<std::vector<GraphicsBufferPtr>, ST_NumShaderTypes> d3d_cbuffs_;
+		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, ST_NumShaderTypes> uavs_;
+		std::array<std::shared_ptr<std::vector<uint8_t>>, ST_NumShaderTypes> cbuff_indices_;
+		std::array<std::vector<GraphicsBuffer*>, ST_NumShaderTypes> d3d_cbuffs_;
 		bool vs_so_;
 		bool ds_so_;
 		std::vector<D3D12_SO_DECLARATION_ENTRY> so_decl_;
