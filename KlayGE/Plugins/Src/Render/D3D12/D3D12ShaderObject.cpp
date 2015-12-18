@@ -1121,7 +1121,7 @@ namespace KlayGE
 				{
 					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[type])[i]);
 					cbuff->Resize(shader_desc_[type]->cb_desc[i].size);
-					BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type].cb_desc[i].var_desc.size());
+					BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type]->cb_desc[i].var_desc.size());
 					for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 					{
 						RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
