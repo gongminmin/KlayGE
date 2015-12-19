@@ -36,9 +36,6 @@ namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable
 	{
-	protected:
-		typedef std::vector<SceneObjectPtr> SceneObjsType;
-
 	public:
 		SceneManager();
 		virtual ~SceneManager();
@@ -97,24 +94,23 @@ namespace KlayGE
 
 		std::vector<CameraPtr>::iterator DelCamera(std::vector<CameraPtr>::iterator iter);
 		std::vector<LightSourcePtr>::iterator DelLight(std::vector<LightSourcePtr>::iterator iter);
-		SceneObjsType::iterator DelSceneObject(SceneObjsType::iterator iter);
-		SceneObjsType::iterator DelSceneObjectLocked(SceneObjsType::iterator iter);
+		std::vector<SceneObjectPtr>::iterator DelSceneObject(std::vector<SceneObjectPtr>::iterator iter);
+		std::vector<SceneObjectPtr>::iterator DelSceneObjectLocked(std::vector<SceneObjectPtr>::iterator iter);
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) = 0;
-		virtual void OnDelSceneObject(SceneObjsType::iterator iter) = 0;
+		virtual void OnDelSceneObject(std::vector<SceneObjectPtr>::iterator iter) = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 		void UpdateThreadFunc();
 
-		BoundOverlap VisibleTestFromParent(SceneObjectPtr const & obj,
-			float3 const & eye_pos, float4x4 const & view_proj);
+		BoundOverlap VisibleTestFromParent(SceneObject* obj, float3 const & eye_pos, float4x4 const & view_proj);
 
 	protected:
 		std::vector<CameraPtr> cameras_;
 		Frustum const * frustum_;
 		std::vector<LightSourcePtr> lights_;
-		SceneObjsType scene_objs_;
-		SceneObjsType overlay_scene_objs_;
+		std::vector<SceneObjectPtr> scene_objs_;
+		std::vector<SceneObjectPtr> overlay_scene_objs_;
 
 		std::unordered_map<size_t, std::shared_ptr<std::vector<BoundOverlap>>> visible_marks_map_;
 

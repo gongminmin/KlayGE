@@ -51,7 +51,7 @@ namespace KlayGE
 
 	private:
 		virtual void OnAddSceneObject(SceneObjectPtr const & obj) KLAYGE_OVERRIDE;
-		virtual void OnDelSceneObject(SceneObjsType::iterator iter) KLAYGE_OVERRIDE;
+		virtual void OnDelSceneObject(std::vector<SceneObjectPtr>::iterator iter) KLAYGE_OVERRIDE;
 		virtual void DoSuspend() KLAYGE_OVERRIDE;
 		virtual void DoResume() KLAYGE_OVERRIDE;
 
@@ -75,7 +75,7 @@ namespace KlayGE
 			int first_child_index;
 			BoundOverlap visible;
 
-			SceneObjsType obj_ptrs;
+			std::vector<SceneObject*> obj_ptrs;
 		};
 
 		std::vector<octree_node_t> octree_;

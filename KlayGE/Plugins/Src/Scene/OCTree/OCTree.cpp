@@ -121,14 +121,14 @@ namespace KlayGE
 			AABBox bb_root(float3(0, 0, 0), float3(0, 0, 0));
 			octree_[0].first_child_index = -1;
 			octree_[0].visible = BO_No;
-			for (SceneObjsType::const_reference obj : scene_objs_)
+			for (auto const & obj : scene_objs_)
 			{
 				uint32_t const attr = obj->Attrib();
 				if ((attr & SceneObject::SOA_Cullable)
 					&& !(attr & SceneObject::SOA_Moveable))
 				{
 					bb_root |= obj->PosBoundWS();
-					octree_[0].obj_ptrs.push_back(obj);
+					octree_[0].obj_ptrs.push_back(obj.get());
 				}
 			}
 			float3 const & center = bb_root.Center();
@@ -171,7 +171,7 @@ namespace KlayGE
 
 		if (camera.OmniDirectionalMode())
 		{
-			for (SceneObjsType::const_reference obj : scene_objs_)
+			for (auto const & obj : scene_objs_)
 			{
 				if (obj->Visible())
 				{
@@ -201,11 +201,11 @@ namespace KlayGE
 				this->MarkNodeObjs(0, false);
 			}
 
-			for (SceneObjsType::const_reference obj : scene_objs_)
+			for (auto const & obj : scene_objs_)
 			{
 				if (obj->Visible())
 				{
-					BoundOverlap visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
+					BoundOverlap visible = this->VisibleTestFromParent(obj.get(), camera.EyePos(), view_proj);
 					if (BO_Partial == visible)
 					{
 						uint32_t const attr = obj->Attrib();
@@ -261,7 +261,7 @@ namespace KlayGE
 		}
 	}
 
-	void OCTree::OnDelSceneObject(SceneObjsType::iterator iter)
+	void OCTree::OnDelSceneObject(std::vector<SceneObjectPtr>::iterator iter)
 	{
 		BOOST_ASSERT(iter != scene_objs_.end());
 
@@ -294,7 +294,7 @@ namespace KlayGE
 			octree_[index].visible = BO_No;
 
 			octree_.resize(this_size + 8);
-			for (SceneObjsType::const_reference so : octree_[index].obj_ptrs)
+			for (auto so : octree_[index].obj_ptrs)
 			{
 				AABBox const & aabb = so->PosBoundWS();
 				int mark[6];
@@ -332,7 +332,7 @@ namespace KlayGE
 				}
 			}
 
-			SceneObjsType empty;
+			std::vector<SceneObject*> empty;
 			octree_[index].obj_ptrs.swap(empty);
 		}
 	}
@@ -405,7 +405,7 @@ namespace KlayGE
 		octree_node_t const & node = octree_[index];
 		if ((node.visible != BO_No) || force)
 		{
-			for (SceneObjsType::const_reference so : node.obj_ptrs)
+			for (auto so : node.obj_ptrs)
 			{
 				if ((BO_No == so->VisibleMark()) && so->Visible())
 				{

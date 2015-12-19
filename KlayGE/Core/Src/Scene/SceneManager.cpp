@@ -125,24 +125,25 @@ namespace KlayGE
 			}
 		}
 
-		for (SceneObjsType::const_reference obj : scene_objs_)
+		for (auto const & obj : scene_objs_)
 		{
+			auto so = obj.get();
 			BoundOverlap visible;
-			uint32_t const attr = obj->Attrib();
-			if (obj->Visible())
+			uint32_t const attr = so->Attrib();
+			if (so->Visible())
 			{
-				visible = this->VisibleTestFromParent(obj, camera.EyePos(), view_proj);
+				visible = this->VisibleTestFromParent(so, camera.EyePos(), view_proj);
 				if (BO_Partial == visible)
 				{
 					if (attr & SceneObject::SOA_Moveable)
 					{
-						obj->UpdateAbsModelMatrix();
+						so->UpdateAbsModelMatrix();
 					}
 
 					if (attr & SceneObject::SOA_Cullable)
 					{
 						visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-							obj->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
+							so->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
 					}
 					else
 					{
@@ -152,7 +153,7 @@ namespace KlayGE
 					if (!camera.OmniDirectionalMode() && (attr & SceneObject::SOA_Cullable)
 						&& (BO_Yes == visible))
 					{
-						visible = this->AABBVisible(obj->PosBoundWS());
+						visible = this->AABBVisible(so->PosBoundWS());
 					}
 				}
 			}
@@ -161,7 +162,7 @@ namespace KlayGE
 				visible = BO_No;
 			}
 
-			obj->VisibleMark(visible);
+			so->VisibleMark(visible);
 		}
 	}
 
@@ -282,13 +283,13 @@ namespace KlayGE
 		}
 	}
 
-	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObject(SceneManager::SceneObjsType::iterator iter)
+	std::vector<SceneObjectPtr>::iterator SceneManager::DelSceneObject(std::vector<SceneObjectPtr>::iterator iter)
 	{
 		std::lock_guard<std::mutex> lock(update_mutex_);
 		return this->DelSceneObjectLocked(iter);
 	}
 
-	SceneManager::SceneObjsType::iterator SceneManager::DelSceneObjectLocked(SceneManager::SceneObjsType::iterator iter)
+	std::vector<SceneObjectPtr>::iterator SceneManager::DelSceneObjectLocked(std::vector<SceneObjectPtr>::iterator iter)
 	{
 		this->OnDelSceneObject(iter);
 		return scene_objs_.erase(iter);
@@ -485,7 +486,7 @@ namespace KlayGE
 		{
 			std::lock_guard<std::mutex> lock(update_mutex_);
 
-			for (SceneObjsType::const_reference scene_obj : scene_objs_)
+			for (auto const & scene_obj : scene_objs_)
 			{
 				if (scene_obj->MainThreadUpdate(app_time, frame_time))
 				{
@@ -506,7 +507,7 @@ namespace KlayGE
 				}
 			}
 		
-			for (SceneObjsType::const_reference scene_obj : added_scene_objs)
+			for (auto const & scene_obj : added_scene_objs)
 			{
 				scene_obj->OnAttachRenderable(true);
 				this->OnAddSceneObject(scene_obj);
@@ -535,9 +536,9 @@ namespace KlayGE
 		num_vertices_rendered_ = 0;
 
 		Camera& camera = app.ActiveCamera();
-		SceneObjsType& scene_objs = (urt & App3DFramework::URV_Overlay) ? overlay_scene_objs_ : scene_objs_;
+		auto const & scene_objs = (urt & App3DFramework::URV_Overlay) ? overlay_scene_objs_ : scene_objs_;
 
-		for (SceneObjsType::const_reference scene_obj : scene_objs)
+		for (auto const & scene_obj : scene_objs)
 		{
 			scene_obj->VisibleMark(BO_No);
 		}
@@ -582,7 +583,7 @@ namespace KlayGE
 		}
 		if (urt & App3DFramework::URV_Overlay)
 		{
-			for (SceneObjsType::const_reference scene_obj : scene_objs)
+			for (auto const & scene_obj : scene_objs)
 			{
 				scene_obj->MainThreadUpdate(app_time, frame_time);
 				scene_obj->VisibleMark(scene_obj->Visible() ? BO_Yes : BO_No);
@@ -592,9 +593,9 @@ namespace KlayGE
 		std::vector<std::pair<Renderable*, std::vector<SceneObject*>>> renderables;
 		{
 			std::map<Renderable*, size_t> renderables_map;
-			for (SceneObjsType::const_reference scene_obj : scene_objs)
+			for (auto const & obj : scene_objs)
 			{
-				auto so = scene_obj.get();
+				auto so = obj.get();
 				if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
 				{
 					auto renderable = so->GetRenderable().get();
@@ -781,11 +782,11 @@ namespace KlayGE
 				{
 					std::lock_guard<std::mutex> lock(update_mutex_);
 
-					for (SceneObjsType::const_reference scene_obj : scene_objs_)
+					for (auto const & scene_obj : scene_objs_)
 					{
 						scene_obj->SubThreadUpdate(app_time, frame_time);
 					}
-					for (SceneObjsType::const_reference scene_obj : overlay_scene_objs_)
+					for (auto const & scene_obj : overlay_scene_objs_)
 					{
 						scene_obj->SubThreadUpdate(app_time, frame_time);
 					}
@@ -799,8 +800,7 @@ namespace KlayGE
 		}
 	}
 
-	BoundOverlap SceneManager::VisibleTestFromParent(SceneObjectPtr const & obj,
-		float3 const & eye_pos, float4x4 const & view_proj)
+	BoundOverlap SceneManager::VisibleTestFromParent(SceneObject* obj, float3 const & eye_pos, float4x4 const & view_proj)
 	{
 		BoundOverlap visible;
 		if (obj->Parent())
