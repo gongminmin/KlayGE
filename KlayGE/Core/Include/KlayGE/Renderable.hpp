@@ -143,7 +143,7 @@ namespace KlayGE
 	float const INV_LOG_8192 = 1 / log(8192.0f);
 
 	// Abstract class defining the interface all renderable objects must implement.
-	class KLAYGE_CORE_API Renderable : public std::enable_shared_from_this<Renderable>
+	class KLAYGE_CORE_API Renderable
 	{
 	public:
 		enum EffectAttribute
@@ -191,15 +191,15 @@ namespace KlayGE
 				this->AddInstance(*iter);
 			}
 		}
-		void AddInstance(SceneObjectPtr const & obj);
+		void AddInstance(SceneObject const * obj);
 
 		uint32_t NumInstances() const
 		{
 			return static_cast<uint32_t>(instances_.size());
 		}
-		SceneObjectPtr GetInstance(uint32_t index) const
+		SceneObject const * GetInstance(uint32_t index) const
 		{
-			return instances_[index].lock();
+			return instances_[index];
 		}
 
 		virtual void ModelMatrix(float4x4 const & mat);
@@ -277,7 +277,7 @@ namespace KlayGE
 		virtual void UpdateTechniques();
 
 	protected:
-		std::vector<std::weak_ptr<SceneObject>> instances_;
+		std::vector<SceneObject const *> instances_;
 
 		RenderTechniquePtr technique_;
 

@@ -60,31 +60,6 @@
 
 #include <KlayGE/SceneManager.hpp>
 
-namespace
-{
-	using namespace KlayGE;
-
-	template <typename T>
-	bool cmp_weight(T const & lhs, T const & rhs)
-	{
-		if (lhs.first)
-		{
-			if (rhs.first)
-			{
-				return lhs.first->Weight() < rhs.first->Weight();
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			return true;
-		}
-	}
-}
-
 namespace KlayGE
 {
 	// 构造函数
@@ -321,7 +296,7 @@ namespace KlayGE
 
 	// 加入渲染队列
 	/////////////////////////////////////////////////////////////////////////////////
-	void SceneManager::AddRenderable(RenderablePtr const & obj)
+	void SceneManager::AddRenderable(Renderable* obj)
 	{
 		if (obj->HWResourceReady())
 		{
@@ -369,7 +344,7 @@ namespace KlayGE
 
 			if (add)
 			{
-				RenderTechniquePtr const & obj_tech = obj->GetRenderTechnique();
+				RenderTechnique const * obj_tech = obj->GetRenderTechnique().get();
 				BOOST_ASSERT(obj_tech);
 				bool found = false;
 				for (auto& items : render_queue_)
@@ -383,7 +358,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					render_queue_.push_back(std::make_pair(obj_tech, RenderItemsType(1, obj)));
+					render_queue_.push_back(std::make_pair(obj_tech, std::vector<Renderable*>(1, obj)));
 				}
 			}
 		}
@@ -614,15 +589,15 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<std::pair<RenderablePtr, std::vector<SceneObjectPtr>>> renderables;
-		std::map<RenderablePtr, size_t> renderables_map;
-		for (SceneObjsType::const_reference so : scene_objs)
+		std::vector<std::pair<Renderable*, std::vector<SceneObject*>>> renderables;
 		{
-			if (so->VisibleMark() != BO_No)
+			std::map<Renderable*, size_t> renderables_map;
+			for (SceneObjsType::const_reference scene_obj : scene_objs)
 			{
-				if (0 == so->NumChildren())
+				auto so = scene_obj.get();
+				if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
 				{
-					RenderablePtr const & renderable = so->GetRenderable();
+					auto renderable = so->GetRenderable().get();
 					if (renderable)
 					{
 						auto iter = renderables_map.lower_bound(renderable);
@@ -633,7 +608,7 @@ namespace KlayGE
 						else
 						{
 							KLAYGE_EMPLACE(renderables_map, renderable, renderables.size());
-							renderables.push_back(std::make_pair(renderable, std::vector<SceneObjectPtr>(1, so)));
+							renderables.push_back(std::make_pair(renderable, std::vector<SceneObject*>(1, so)));
 						}
 
 						++ num_objects_rendered_;
@@ -641,7 +616,6 @@ namespace KlayGE
 				}
 			}
 		}
-		renderables_map.clear();
 		for (auto const & renderable : renderables)
 		{
 			Renderable& ra(*renderable.first);
@@ -649,17 +623,24 @@ namespace KlayGE
 			ra.AddToRenderQueue();
 		}
 
-		std::sort(render_queue_.begin(), render_queue_.end(), cmp_weight<std::pair<RenderTechniquePtr, RenderItemsType>>);
+		std::sort(render_queue_.begin(), render_queue_.end(),
+			[](auto const & lhs, auto const & rhs)
+			{
+				BOOST_ASSERT(lhs.first);
+				BOOST_ASSERT(rhs.first);
+
+				return lhs.first->Weight() < rhs.first->Weight();
+			});
 
 		float4 const & view_mat_z = camera.ViewMatrix().Col(2);
 		for (auto& items : render_queue_)
 		{
 			if (!items.first->Transparent() && !items.first->HasDiscard() && (items.second.size() > 1))
 			{
-				std::vector<std::pair<float, uint32_t>> min_depthes(items.second.size());
-				for (size_t j = 0; j < min_depthes.size(); ++ j)
+				std::vector<std::pair<float, uint32_t>> min_depths(items.second.size());
+				for (size_t j = 0; j < min_depths.size(); ++ j)
 				{
-					RenderablePtr const & renderable = items.second[j];
+					Renderable const * renderable = items.second[j];
 					AABBox const & box = renderable->PosBound();
 					uint32_t const num = renderable->NumInstances();
 					float md = 1e10f;
@@ -676,15 +657,15 @@ namespace KlayGE
 						}
 					}
 
-					min_depthes[j] = std::make_pair(md, static_cast<uint32_t>(j));
+					min_depths[j] = std::make_pair(md, static_cast<uint32_t>(j));
 				}
 
-				std::sort(min_depthes.begin(), min_depthes.end());
+				std::sort(min_depths.begin(), min_depths.end());
 
-				RenderItemsType sorted_items(min_depthes.size());
-				for (size_t j = 0; j < min_depthes.size(); ++ j)
+				std::vector<Renderable*> sorted_items(min_depths.size());
+				for (size_t j = 0; j < min_depths.size(); ++ j)
 				{
-					sorted_items[j] = items.second[min_depthes[j].second];
+					sorted_items[j] = items.second[min_depths[j].second];
 				}
 				items.second.swap(sorted_items);
 			}

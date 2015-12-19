@@ -140,7 +140,7 @@ namespace
 
 		void OnInstanceBegin(uint32_t id)
 		{
-			InstData const * data = static_cast<InstData const *>(instances_[id].lock()->InstanceData());
+			InstData const * data = static_cast<InstData const *>(instances_[id]->InstanceData());
 
 			float4x4 model;
 			model.Col(0, data->mat[0]);

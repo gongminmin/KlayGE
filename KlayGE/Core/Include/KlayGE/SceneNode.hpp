@@ -14,11 +14,11 @@ namespace KlayGE
 		virtual ~SceneNode()
 			{ }
 
-		virtual void AddRenderable(RenderablePtr const & renderable)
+		virtual void AddRenderable(Renderable* renderable)
 			{ renderables_.push_back(renderable); }
 
 	protected:
-		std::vector<RenderablePtr> renderables_;
+		std::vector<Renderable*> renderables_;
 	};
 }
 

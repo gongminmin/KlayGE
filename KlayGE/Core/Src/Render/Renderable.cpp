@@ -184,7 +184,7 @@ namespace KlayGE
 
 	void Renderable::AddToRenderQueue()
 	{
-		Context::Instance().SceneManagerInstance().AddRenderable(this->shared_from_this());
+		Context::Instance().SceneManagerInstance().AddRenderable(this);
 	}
 
 	void Renderable::Render()
@@ -225,16 +225,16 @@ namespace KlayGE
 		}
 	}
 
-	void Renderable::AddInstance(SceneObjectPtr const & obj)
+	void Renderable::AddInstance(SceneObject const * obj)
 	{
-		instances_.push_back(std::weak_ptr<SceneObject>(obj));
+		instances_.push_back(obj);
 	}
 
 	void Renderable::UpdateInstanceStream()
 	{
-		if (!instances_.empty() && !instances_[0].lock()->InstanceFormat().empty())
+		if (!instances_.empty() && !instances_[0]->InstanceFormat().empty())
 		{
-			vertex_elements_type const & vet = instances_[0].lock()->InstanceFormat();
+			vertex_elements_type const & vet = instances_[0]->InstanceFormat();
 			uint32_t size = 0;
 			for (size_t i = 0; i < vet.size(); ++ i)
 			{
@@ -250,7 +250,7 @@ namespace KlayGE
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					BOOST_ASSERT(rl->InstanceStreamFormat() == instances_[i].lock()->InstanceFormat());
+					BOOST_ASSERT(rl->InstanceStreamFormat() == instances_[i]->InstanceFormat());
 				}
 			}
 			else
@@ -265,7 +265,7 @@ namespace KlayGE
 				GraphicsBuffer::Mapper mapper(*inst_stream, BA_Write_Only);
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					uint8_t const * src = static_cast<uint8_t const *>(instances_[i].lock()->InstanceData());
+					uint8_t const * src = static_cast<uint8_t const *>(instances_[i]->InstanceData());
 					std::copy(src, src + size, mapper.Pointer<uint8_t>() + i * size);
 				}
 			}

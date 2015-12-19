@@ -38,8 +38,6 @@ namespace KlayGE
 	{
 	protected:
 		typedef std::vector<SceneObjectPtr> SceneObjsType;
-		typedef std::vector<RenderablePtr> RenderItemsType;
-		typedef std::vector<std::pair<RenderTechniquePtr, RenderItemsType>> RenderQueueType;
 
 	public:
 		SceneManager();
@@ -70,7 +68,7 @@ namespace KlayGE
 		void AddSceneObjectLocked(SceneObjectPtr const & obj);
 		void DelSceneObject(SceneObjectPtr const & obj);
 		void DelSceneObjectLocked(SceneObjectPtr const & obj);
-		void AddRenderable(RenderablePtr const & obj);
+		void AddRenderable(Renderable* obj);
 
 		uint32_t NumSceneObjects() const;
 		SceneObjectPtr& GetSceneObject(uint32_t index);
@@ -129,7 +127,7 @@ namespace KlayGE
 	private:
 		uint32_t urt_;
 
-		RenderQueueType render_queue_;
+		std::vector<std::pair<RenderTechnique const *, std::vector<Renderable*>>> render_queue_;
 
 		uint32_t num_objects_rendered_;
 		uint32_t num_renderables_rendered_;
