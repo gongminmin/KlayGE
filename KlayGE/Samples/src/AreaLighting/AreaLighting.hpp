@@ -33,7 +33,7 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::LightSourcePtr point_light_;
 	KlayGE::SceneObjectPtr point_light_src_;

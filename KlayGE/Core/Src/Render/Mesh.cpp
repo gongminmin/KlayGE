@@ -575,7 +575,7 @@ namespace KlayGE
 			effect_attrs_ |= EA_SpecialShading;
 		}
 
-		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
 			this->UpdateTechniques();

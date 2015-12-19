@@ -818,7 +818,7 @@ namespace KlayGE
 			{
 				if (!deferred_rendering_layer_)
 				{
-					deferred_rendering_layer_ = MakeSharedPtr<DeferredRenderingLayer>();
+					deferred_rendering_layer_ = MakeUniquePtr<DeferredRenderingLayer>();
 				}
 			}
 			else

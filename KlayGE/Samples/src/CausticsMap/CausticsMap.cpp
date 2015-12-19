@@ -1277,7 +1277,8 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	
 		if (pass > sm_start_pass)
 		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f,
+				*light_->SMCamera(0));
 			sm_filter_pps_[pass - sm_start_pass - 1]->Apply();
 		}
 
@@ -1299,7 +1300,8 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	{
 		if (6 == pass - sm_start_pass)
 		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f, light_->SMCamera(0));
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - sm_start_pass - 1])->ESMScaleFactor(8.0f,
+				*light_->SMCamera(0));
 			sm_filter_pps_[pass - sm_start_pass - 1]->Apply();
 		}
 

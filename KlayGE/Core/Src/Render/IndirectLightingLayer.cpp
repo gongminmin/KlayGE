@@ -171,15 +171,15 @@ namespace KlayGE
 		rsm_to_depth_derivate_pp_->SetParam(0, rsm_delta_offset);
 	}
 
-	void MultiResSILLayer::UpdateGBuffer(CameraPtr const & vp_camera)
+	void MultiResSILLayer::UpdateGBuffer(Camera const & vp_camera)
 	{
-		g_buffer_camera_ = vp_camera;
+		g_buffer_camera_ = &vp_camera;
 		multi_res_layer_->UpdateGBuffer(vp_camera);
 	}
 
-	void MultiResSILLayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
+	void MultiResSILLayer::UpdateRSM(Camera const & rsm_camera, LightSource const & light)
 	{
-		rsm_to_depth_derivate_pp_->SetParam(1, float2(rsm_camera->FarPlane(), 1 / rsm_camera->FarPlane()));
+		rsm_to_depth_derivate_pp_->SetParam(1, float2(rsm_camera.FarPlane(), 1 / rsm_camera.FarPlane()));
 		this->ExtractVPLs(rsm_camera, light);
 		this->VPLsLighting(light);
 	}
@@ -195,25 +195,25 @@ namespace KlayGE
 		}
 	}
 
-	void MultiResSILLayer::ExtractVPLs(CameraPtr const & rsm_camera, LightSourcePtr const & light)
+	void MultiResSILLayer::ExtractVPLs(Camera const & rsm_camera, LightSource const & light)
 	{
 		rsm_texs_[0]->BuildMipSubLevels();
 		rsm_texs_[1]->BuildMipSubLevels();
 		
 		rsm_to_depth_derivate_pp_->Apply();
 		
-		float4x4 ls_to_es = rsm_camera->InverseViewMatrix() * g_buffer_camera_->ViewMatrix();
-		float4x4 const & inv_proj = rsm_camera->InverseProjMatrix();
-		LightSource::LightType type = light->Type();
+		float4x4 ls_to_es = rsm_camera.InverseViewMatrix() * g_buffer_camera_->ViewMatrix();
+		float4x4 const & inv_proj = rsm_camera.InverseProjMatrix();
+		LightSource::LightType type = light.Type();
 
 		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
 			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
 
 		rsm_to_vpls_pps_[type]->SetParam(0, ls_to_es);
 		rsm_to_vpls_pps_[type]->SetParam(1, vpl_params);
-		rsm_to_vpls_pps_[type]->SetParam(2, light->Color());
-		rsm_to_vpls_pps_[type]->SetParam(3, light->CosOuterInner());
-		rsm_to_vpls_pps_[type]->SetParam(4, light->Falloff());
+		rsm_to_vpls_pps_[type]->SetParam(2, light.Color());
+		rsm_to_vpls_pps_[type]->SetParam(3, light.CosOuterInner());
+		rsm_to_vpls_pps_[type]->SetParam(4, light.Falloff());
 		rsm_to_vpls_pps_[type]->SetParam(5, g_buffer_camera_->InverseViewMatrix());
 		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), inv_proj);
 		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), inv_proj);
@@ -222,14 +222,14 @@ namespace KlayGE
 		rsm_to_vpls_pps_[type]->SetParam(7, upper_right - upper_left);
 		rsm_to_vpls_pps_[type]->SetParam(8, lower_left - upper_left);
 		rsm_to_vpls_pps_[type]->SetParam(9, int2(1, 0));
-		rsm_to_vpls_pps_[type]->SetParam(10, 0.12f * rsm_camera->FarPlane());
+		rsm_to_vpls_pps_[type]->SetParam(10, 0.12f * rsm_camera.FarPlane());
 		rsm_to_vpls_pps_[type]->SetParam(11, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
-		rsm_to_vpls_pps_[type]->SetParam(12, float2(rsm_camera->FarPlane(), 1 / rsm_camera->FarPlane()));
+		rsm_to_vpls_pps_[type]->SetParam(12, float2(rsm_camera.FarPlane(), 1 / rsm_camera.FarPlane()));
 
 		rsm_to_vpls_pps_[type]->Apply();
 	}
 
-	void MultiResSILLayer::VPLsLighting(LightSourcePtr const & light)
+	void MultiResSILLayer::VPLsLighting(LightSource const & light)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -239,10 +239,10 @@ namespace KlayGE
 		*vpl_depth_near_far_invfar_param_ = float3(g_buffer_camera_->NearPlane(),
 			g_buffer_camera_->FarPlane(), 1 / g_buffer_camera_->FarPlane());
 
-		float3 p = MathLib::transform_coord(light->Position(), g_buffer_camera_->ViewMatrix());
+		float3 p = MathLib::transform_coord(light.Position(), g_buffer_camera_->ViewMatrix());
 		*vpl_light_pos_es_param_ = float4(p.x(), p.y(), p.z(), 1);
-		*vpl_light_color_param_ = light->Color();
-		*vpl_light_falloff_param_ = light->Falloff();
+		*vpl_light_color_param_ = light.Color();
+		*vpl_light_falloff_param_ = light.Falloff();
 
 		*vpl_gbuffer_tex_param_ = g_buffer_rt0_tex_;
 		*vpl_depth_tex_param_ = g_buffer_depth_tex_;
@@ -317,12 +317,12 @@ namespace KlayGE
 		KFL_UNUSED(depth_tex);
 	}
 
-	void SSGILayer::UpdateGBuffer(CameraPtr const & vp_camera)
+	void SSGILayer::UpdateGBuffer(Camera const & vp_camera)
 	{
 		multi_res_layer_->UpdateGBuffer(vp_camera);
 	}
 
-	void SSGILayer::UpdateRSM(CameraPtr const & rsm_camera, LightSourcePtr const & light)
+	void SSGILayer::UpdateRSM(Camera const & rsm_camera, LightSource const & light)
 	{
 		KFL_UNUSED(rsm_camera);
 		KFL_UNUSED(light);

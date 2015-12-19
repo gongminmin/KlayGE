@@ -39,7 +39,7 @@ private:
 	KlayGE::SceneObjectPtr sun_flare_;
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::PostProcessPtr fog_pp_;
 

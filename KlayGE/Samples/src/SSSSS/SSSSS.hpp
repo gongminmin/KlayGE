@@ -38,7 +38,7 @@ private:
 	void TranslucencyHandler(KlayGE::UICheckBox const & sender);
 	void TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sender);
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::FontPtr font_;
 	KlayGE::TrackballCameraController obj_controller_;

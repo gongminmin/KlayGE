@@ -45,7 +45,7 @@ namespace KlayGE
 		void BindBuffers(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex,
 			TexturePtr const & multi_res_tex);
 
-		void UpdateGBuffer(CameraPtr const & vp_camera);
+		void UpdateGBuffer(Camera const & vp_camera);
 		void UpsampleMultiRes();
 
 		FrameBufferPtr const & MultiResFB(uint32_t index) const
@@ -54,9 +54,9 @@ namespace KlayGE
 		}
 
 	private:
-		void CreateDepthDerivativeMipMap(CameraPtr const & vp_camera);
+		void CreateDepthDerivativeMipMap(Camera const & vp_camera);
 		void CreateNormalConeMipMap();
-		void SetSubsplatStencil(CameraPtr const & vp_camera);
+		void SetSubsplatStencil(Camera const & vp_camera);
 
 	private:
 		RenderLayoutPtr rl_quad_;

@@ -36,7 +36,7 @@ namespace KlayGE
 		: select_mode_on_(false),
 			model_mat_(float4x4::Identity()), effect_attrs_(0)
 	{
-		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
 			this->BindDeferredEffect(drl->GBufferEffect());
@@ -59,7 +59,7 @@ namespace KlayGE
 		AABBox const & pos_bb = this->PosBound();
 		AABBox const & tc_bb = this->TexcoordBound();
 
-		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 
 		if (drl)
 		{

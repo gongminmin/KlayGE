@@ -352,7 +352,7 @@ namespace KlayGE
 		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
 		void PostGenerateGBuffer(PerViewport const & pvp);
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
-		void PrepareLightCamera(PerViewport const & pvp, LightSourcePtr const & light,
+		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
@@ -423,7 +423,8 @@ namespace KlayGE
 		AABBox pyramid_aabb_;
 		AABBox box_aabb_;
 
-		std::vector<LightSourcePtr> lights_;
+		LightSourcePtr default_ambient_light_;
+		std::vector<LightSource*> lights_;
 		std::vector<RenderablePtr> decals_;
 
 		std::vector<uint32_t> pass_scaned_;

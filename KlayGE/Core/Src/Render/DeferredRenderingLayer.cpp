@@ -540,6 +540,8 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_SphereArea] = rl_box_;
 		light_volume_rl_[LightSource::LT_TubeArea] = rl_box_;
 
+		default_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
+
 		g_buffer_effect_ = SyncLoadRenderEffect("GBufferNoSkinning.fxml");
 		if (caps.max_shader_model >= ShaderModel(3, 0))
 		{
@@ -1527,29 +1529,29 @@ namespace KlayGE
 					{
 						if (indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI))
 						{
-							pvp.il_layer->UpdateGBuffer(pvp.frame_buffer->GetViewport()->camera);
+							pvp.il_layer->UpdateGBuffer(*pvp.frame_buffer->GetViewport()->camera);
 						}
 
 						if (cascaded_shadow_index_ >= 0)
 						{
-							CameraPtr const & scene_camera = pvp.frame_buffer->GetViewport()->camera;
-							CameraPtr const & light_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
+							Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
+							Camera const & light_camera = *lights_[cascaded_shadow_index_]->SMCamera(0);
 
-							checked_pointer_cast<SunLightSource>(lights_[cascaded_shadow_index_])->UpdateSMCamera(*scene_camera);
+							checked_cast<SunLightSource*>(lights_[cascaded_shadow_index_])->UpdateSMCamera(scene_camera);
 
 							float const BLUR_FACTOR = 0.2f;
-							blur_size_light_space_.x() = BLUR_FACTOR * 0.5f * light_camera->ProjMatrix()(0, 0);
-							blur_size_light_space_.y() = BLUR_FACTOR * 0.5f * light_camera->ProjMatrix()(1, 1);
+							blur_size_light_space_.x() = BLUR_FACTOR * 0.5f * light_camera.ProjMatrix()(0, 0);
+							blur_size_light_space_.y() = BLUR_FACTOR * 0.5f * light_camera.ProjMatrix()(1, 1);
 							
 							float3 cascade_border(blur_size_light_space_.x(), blur_size_light_space_.y(),
-								light_camera->ProjMatrix()(2, 2));
+								light_camera.ProjMatrix()(2, 2));
 							cascaded_shadow_layer_->NumCascades(pvp.num_cascades);
 							if (CSLT_SDSM == cascaded_shadow_layer_->Type())
 							{
 								checked_pointer_cast<SDSMCascadedShadowLayer>(cascaded_shadow_layer_)->DepthTexture(
 									pvp.g_buffer_depth_tex);
 							}
-							cascaded_shadow_layer_->UpdateCascades(*scene_camera, light_camera->ViewProjMatrix(),
+							cascaded_shadow_layer_->UpdateCascades(scene_camera, light_camera.ViewProjMatrix(),
 								cascade_border);
 						}
 					}
@@ -1585,7 +1587,7 @@ namespace KlayGE
 
 		case PC_ShadowMap:
 			{
-				LightSourcePtr const & light = lights_[org_no];
+				auto const & light = *lights_[org_no];
 				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 				if (index_in_pass > 0)
@@ -1593,10 +1595,10 @@ namespace KlayGE
 					this->PostGenerateShadowMap(pvp, org_no, index_in_pass);
 				}
 
-				if ((((LightSource::LT_Point == light->Type()) || (LightSource::LT_SphereArea == light->Type())
-					|| (LightSource::LT_TubeArea == light->Type())) && (6 == index_in_pass))
-					|| ((LightSource::LT_Spot == light->Type()) && (1 == index_in_pass))
-					|| ((LightSource::LT_Sun == light->Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
+				if ((((LightSource::LT_Point == light.Type()) || (LightSource::LT_SphereArea == light.Type())
+					|| (LightSource::LT_TubeArea == light.Type())) && (6 == index_in_pass))
+					|| ((LightSource::LT_Spot == light.Type()) && (1 == index_in_pass))
+					|| ((LightSource::LT_Sun == light.Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
 				{
 					urv = 0;
 				}
@@ -1650,32 +1652,32 @@ namespace KlayGE
 			{
 				depth_to_esm_pp_->Apply();
 			}
-			pvp.il_layer->UpdateRSM(rsm_fb_->GetViewport()->camera, lights_[org_no]);
+			pvp.il_layer->UpdateRSM(*rsm_fb_->GetViewport()->camera, *lights_[org_no]);
 			urv = 0;
 			break;
 
 		case PC_Shadowing:
 			{
-				LightSourcePtr const & light = lights_[org_no];
-				LightSource::LightType type = light->Type();
-				int32_t attr = light->Attrib();
+				auto const & light = *lights_[org_no];
+				LightSource::LightType type = light.Type();
+				int32_t attr = light.Attrib();
 
 				this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 				if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type) 
 					|| (LightSource::LT_TubeArea == type))
 				{
-					*projective_map_cube_tex_param_ = light->ProjectiveTexture();
+					*projective_map_cube_tex_param_ = light.ProjectiveTexture();
 				}
 				else
 				{
-					*projective_map_2d_tex_param_ = light->ProjectiveTexture();
+					*projective_map_2d_tex_param_ = light.ProjectiveTexture();
 				}
 
 				*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
 					(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f,
 					(attr & LightSource::LSA_NoShadow) ? -1.0f : 1.0f,
-					light->ProjectiveTexture() ? 1.0f : -1.0f);
+					light.ProjectiveTexture() ? 1.0f : -1.0f);
 
 				this->UpdateShadowing(pvp, org_no);
 
@@ -1706,23 +1708,23 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 				for (uint32_t li = 0; li < lights_.size(); ++ li)
 				{
-					LightSourcePtr const & light = lights_[li];
-					if (light->Enabled() && pvp.light_visibles[li])
+					auto const & light = *lights_[li];
+					if (light.Enabled() && pvp.light_visibles[li])
 					{
-						LightSource::LightType type = light->Type();
-						int32_t attr = light->Attrib();
+						LightSource::LightType type = light.Type();
+						int32_t attr = light.Attrib();
 
 						this->PrepareLightCamera(pvp, light, index_in_pass, pass_type);
 
 						*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 							attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f,
-							attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light->ProjectiveTexture() ? 1.0f : -1.0f);
-						*light_color_param_ = light->Color();
-						*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
-							light->Falloff().z(), light->Range() * light_scale_);
+							attr & LightSource::LSA_NoShadow ? -1.0f : 1.0f, light.ProjectiveTexture() ? 1.0f : -1.0f);
+						*light_color_param_ = light.Color();
+						*light_falloff_range_param_ = float4(light.Falloff().x(), light.Falloff().y(),
+							light.Falloff().z(), light.Range() * light_scale_);
 
-						float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
-						*light_radius_extend_param_ = float4(light->Radius(), extend_es.x(),
+						float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
+						*light_radius_extend_param_ = float4(light.Radius(), extend_es.x(),
 							extend_es.y(), extend_es.z());
 
 						this->UpdateLighting(pvp, type, li);
@@ -1877,7 +1879,7 @@ namespace KlayGE
 		
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			LightSourcePtr const & light = scene_mgr.GetLight(i);
+			auto light = scene_mgr.GetLight(i).get();
 			if (light->Enabled() && (LightSource::LT_Ambient == light->Type()))
 			{
 				lights_.push_back(light);
@@ -1886,7 +1888,7 @@ namespace KlayGE
 		}
 		if (lights_.empty())
 		{
-			lights_.push_back(MakeSharedPtr<AmbientLightSource>());
+			lights_.push_back(default_ambient_light_.get());
 		}
 		sm_light_indices_.push_back(std::make_pair(-1, 0));
 
@@ -1900,7 +1902,7 @@ namespace KlayGE
 		uint32_t num_sm_cube_lights = 0;
 		for (uint32_t i = 0; i < num_lights; ++ i)
 		{
-			LightSourcePtr const & light = scene_mgr.GetLight(i);
+			auto light = scene_mgr.GetLight(i).get();
 			if (light->Enabled())
 			{
 				if (LightSource::LT_Ambient == light->Type())
@@ -2007,10 +2009,10 @@ namespace KlayGE
 		uint32_t const num_scene_objs = scene_mgr.NumSceneObjects();
 		for (uint32_t i = 0; i < num_scene_objs; ++ i)
 		{
-			SceneObjectPtr const & so = scene_mgr.GetSceneObject(i);
+			SceneObject* so = scene_mgr.GetSceneObject(i).get();
 			if (so->Visible())
 			{
-				visible_scene_objs_.push_back(so.get());
+				visible_scene_objs_.push_back(so);
 
 				has_opaque_objs = true;
 
@@ -2047,8 +2049,8 @@ namespace KlayGE
 #endif
 		for (uint32_t i = 0; i < lights_.size(); ++ i)
 		{
-			LightSourcePtr const & light = lights_[i];
-			if (light->Enabled())
+			auto const & light = *lights_[i];
+			if (light.Enabled())
 			{
 				this->AppendShadowPassScanCode(i);
 			}
@@ -2076,8 +2078,8 @@ namespace KlayGE
 				pvp.light_visibles.resize(lights_.size());
 				for (uint32_t li = 0; li < lights_.size(); ++ li)
 				{
-					LightSourcePtr const & light = lights_[li];
-					if (light->Enabled())
+					auto const & light = *lights_[li];
+					if (light.Enabled())
 					{
 						this->CheckLightVisible(vpi, li);
 					}
@@ -2109,8 +2111,8 @@ namespace KlayGE
 #endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
-							LightSourcePtr const & light = lights_[li];
-							if (light->Enabled() && (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+							auto const & light = *lights_[li];
+							if (light.Enabled() && (0 == (light.Attrib() & LightSource::LSA_NoShadow))
 								&& pvp.light_visibles[li])
 							{
 								this->AppendShadowingPassScanCode(vpi, i, li);
@@ -2126,12 +2128,12 @@ namespace KlayGE
 #endif
 							for (uint32_t li = 0; li < lights_.size(); ++ li)
 							{
-								LightSourcePtr const & light = lights_[li];
-								if (light->Enabled())
+								auto const & light = *lights_[li];
+								if (light.Enabled())
 								{
 									PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
-									if ((LightSource::LT_Spot == light->Type()) && (PTB_Opaque == pass_tb)
-										&& (light->Attrib() & LightSource::LSA_IndirectLighting)
+									if ((LightSource::LT_Spot == light.Type()) && (PTB_Opaque == pass_tb)
+										&& (light.Attrib() & LightSource::LSA_IndirectLighting)
 										&& rsm_fb_ && (illum_ != 1)
 										&& pvp.light_visibles[li])
 									{
@@ -2166,15 +2168,15 @@ namespace KlayGE
 		SceneManager& scene_mgr = Context::Instance().SceneManagerInstance();
 
 		PerViewport& pvp = viewports_[vp_index];
-		LightSourcePtr const & light = lights_[light_index];
+		auto const & light = *lights_[light_index];
 
-		float light_scale = std::min(light->Range() * 0.01f, 1.0f) * light_scale_;
-		switch (light->Type())
+		float light_scale = std::min(light.Range() * 0.01f, 1.0f) * light_scale_;
+		switch (light.Type())
 		{
 		case LightSource::LT_Spot:
 			{
-				float4x4 const & inv_light_view = light->SMCamera(0)->InverseViewMatrix();
-				float const scale = light->CosOuterInner().w();
+				float4x4 const & inv_light_view = light.SMCamera(0)->InverseViewMatrix();
+				float const scale = light.CosOuterInner().w();
 				float4x4 mat = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 				float4x4 light_model = mat * inv_light_view;
 				pvp.light_visibles[light_index] = (scene_mgr.AABBVisible(MathLib::transform_aabb(cone_aabb_, light_model)) != BO_No);
@@ -2185,7 +2187,7 @@ namespace KlayGE
 		case LightSource::LT_SphereArea:
 		case LightSource::LT_TubeArea:
 			{
-				float3 const & p = light->Position();
+				float3 const & p = light.Position();
 				float4x4 light_model = MathLib::scaling(light_scale, light_scale, light_scale)
 					* MathLib::translation(p);
 				pvp.light_visibles[light_index] = (scene_mgr.AABBVisible(MathLib::transform_aabb(box_aabb_, light_model)) != BO_No);
@@ -2270,9 +2272,9 @@ namespace KlayGE
 			shadow_pt = PT_GenShadowMapWODepthTexture;
 		}
 
-		LightSourcePtr const & light = lights_[light_index];
-		LightSource::LightType type = light->Type();
-		int32_t attr = light->Attrib();
+		auto const & light = *lights_[light_index];
+		LightSource::LightType type = light.Type();
+		int32_t attr = light.Attrib();
 		switch (type)
 		{
 		case LightSource::LT_Spot:
@@ -2413,13 +2415,13 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::PreparePVP(PerViewport& pvp)
 	{
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		pvp.inv_view = camera->InverseViewMatrix();
-		pvp.inv_proj = camera->InverseProjMatrix();
+		Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
+		pvp.inv_view = camera.InverseViewMatrix();
+		pvp.inv_proj = camera.InverseProjMatrix();
 		pvp.proj_to_prev = pvp.inv_proj * pvp.inv_view * pvp.view * pvp.proj;
-		pvp.view = camera->ViewMatrix();
-		pvp.proj = camera->ProjMatrix();
-		pvp.depth_near_far_invfar = float3(camera->NearPlane(), camera->FarPlane(), 1 / camera->FarPlane());
+		pvp.view = camera.ViewMatrix();
+		pvp.proj = camera.ProjMatrix();
+		pvp.depth_near_far_invfar = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 	}
 
 	void DeferredRenderingLayer::GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index)
@@ -2536,9 +2538,9 @@ namespace KlayGE
 	}
 
 	void DeferredRenderingLayer::PrepareLightCamera(PerViewport const & pvp,
-		LightSourcePtr const & light, int32_t index_in_pass, PassType pass_type)
+		LightSource const & light, int32_t index_in_pass, PassType pass_type)
 	{
-		LightSource::LightType const type = light->Type();
+		LightSource::LightType const type = light.Type();
 		PassCategory const pass_cat = GetPassCategory(pass_type);
 
 		switch (type)
@@ -2553,20 +2555,20 @@ namespace KlayGE
 				float3 dir_es(0, 0, 0);
 				if (LightSource::LT_Spot == type)
 				{
-					dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
-					sm_camera = light->SMCamera(0);
+					dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
+					sm_camera = light.SMCamera(0);
 				}
 				else if (LightSource::LT_Sun == type)
 				{
-					dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
-					sm_camera = light->SMCamera(0);
+					dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
+					sm_camera = light.SMCamera(0);
 				}
 				else
 				{
 					int32_t face = std::min(index_in_pass, 5);
 					std::pair<float3, float3> ad = CubeMapViewVector<float>(static_cast<Texture::CubeFaces>(face));
-					dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light->Rotation()), pvp.view);
-					sm_camera = light->SMCamera(face);
+					dir_es = MathLib::transform_normal(MathLib::transform_quat(ad.first, light.Rotation()), pvp.view);
+					sm_camera = light.SMCamera(face);
 				}
 				float4 light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
@@ -2598,19 +2600,19 @@ namespace KlayGE
 					depth_to_esm_pp_->SetParam(1, inv_sm_proj);
 				}
 
-				float3 const & p = light->Position();
+				float3 const & p = light.Position();
 				float3 loc_es = MathLib::transform_coord(p, pvp.view);
 				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
-				float light_scale = std::min(light->Range() * 0.01f, 1.0f) * light_scale_;
+				float light_scale = std::min(light.Range() * 0.01f, 1.0f) * light_scale_;
 				switch (type)
 				{
 				case LightSource::LT_Spot:
 					{
-						light_pos_es_actived.w() = light->CosOuterInner().x();
-						light_dir_es_actived.w() = light->CosOuterInner().y();
+						light_pos_es_actived.w() = light.CosOuterInner().x();
+						light_dir_es_actived.w() = light.CosOuterInner().y();
 
-						float const scale = light->CosOuterInner().w();
+						float const scale = light.CosOuterInner().w();
 						float4x4 light_model = MathLib::scaling(scale * light_scale, scale * light_scale, light_scale);
 						*light_volume_mv_param_ = light_model * light_to_view;
 						*light_volume_mvp_param_ = light_model * light_to_proj;
@@ -2623,7 +2625,7 @@ namespace KlayGE
 					if ((PC_Shadowing == pass_cat) || (PC_Shading == pass_cat))
 					{
 						float4x4 const light_model = MathLib::scaling(light_scale, light_scale, light_scale)
-							* MathLib::to_matrix(light->Rotation()) * MathLib::translation(p);
+							* MathLib::to_matrix(light.Rotation()) * MathLib::translation(p);
 						*light_volume_mv_param_ = light_model * pvp.view;
 						*light_volume_mvp_param_ = light_model * pvp.view * pvp.proj;
 						*view_to_light_model_param_ = pvp.inv_view * MathLib::inverse(light_model);
@@ -2652,7 +2654,7 @@ namespace KlayGE
 
 		case LightSource::LT_Directional:
 			{
-				float3 const dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+				float3 const dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 			}
 			*light_volume_mv_param_ = pvp.inv_proj;
@@ -2738,8 +2740,7 @@ namespace KlayGE
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(0))->KernelRadius(kernel_size.x());
 		checked_pointer_cast<SeparableLogGaussianFilterPostProcess>(pp_chain->GetPostProcess(1))->KernelRadius(kernel_size.y());
 
-		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR,
-			sm_fb_->GetViewport()->camera);
+		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *sm_fb_->GetViewport()->camera);
 		pp_chain->Apply();
 
 		if (!caps.pack_to_rgba_required)
@@ -2765,34 +2766,34 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		
-		LightSourcePtr const & light = lights_[org_no];
-		CameraPtr sm_camera;
-		LightSource::LightType type = light->Type();
+		auto const & light = *lights_[org_no];
+		Camera* sm_camera = nullptr;
+		LightSource::LightType type = light.Type();
 
-		BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
+		BOOST_ASSERT(0 == (light.Attrib() & LightSource::LSA_NoShadow));
 
 		int32_t const light_index = sm_light_indices_[org_no].first;
 		int32_t const shadowing_channel = sm_light_indices_[org_no].second;
-		if (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
+		if (((light_index >= 0) && (0 == (light.Attrib() & LightSource::LSA_NoShadow)))
 			|| (LightSource::LT_Sun == type))
 		{
 			switch (type)
 			{
 			case LightSource::LT_Spot:
-				sm_camera = light->SMCamera(0);
+				sm_camera = light.SMCamera(0).get();
 				*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
 				break;
 
 			case LightSource::LT_Point:
 			case LightSource::LT_SphereArea:
 			case LightSource::LT_TubeArea:
-				sm_camera = light->SMCamera(0);
+				sm_camera = light.SMCamera(0).get();
 				*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
 				break;
 
 			case LightSource::LT_Sun:
 				{
-					sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0);
+					sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
 
 					*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
@@ -2857,9 +2858,9 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		LightSourcePtr const & light = lights_[org_no];
+		LightSource const & light = *lights_[org_no];
 		int32_t shadowing_channel;
-		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+		if (0 == (light.Attrib() & LightSource::LSA_NoShadow))
 		{
 			shadowing_channel = sm_light_indices_[org_no].second;
 		}
@@ -2881,12 +2882,12 @@ namespace KlayGE
 
 		if (LightSource::LT_Ambient == type)
 		{
-			if (light->SkylightTexY())
+			if (light.SkylightTexY())
 			{
-				*skylight_y_cube_tex_param_ = light->SkylightTexY();
-				*skylight_c_cube_tex_param_ = light->SkylightTexC();
+				*skylight_y_cube_tex_param_ = light.SkylightTexY();
+				*skylight_c_cube_tex_param_ = light.SkylightTexC();
 
-				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+				uint32_t const mip = light.SkylightTexY()->NumMipMaps();
 				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
 				*skylight_mip_bias_param_ = mip / -2.0f;
 
@@ -2954,18 +2955,18 @@ namespace KlayGE
 	void DeferredRenderingLayer::AddTranslucency(uint32_t org_no,
 			PerViewport const & pvp, uint32_t g_buffer_index)
 	{
-		LightSourcePtr const & light = lights_[org_no];
+		auto & light = lights_[org_no];
 		LightSource::LightType const type = light->Type();
 		int32_t const light_index = sm_light_indices_[org_no].first;
 		if (light->Enabled() && pvp.light_visibles[org_no]
 			&& (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
 				|| (LightSource::LT_Sun == type)))
 		{
-			CameraPtr light_camera;
+			Camera* light_camera = nullptr;
 			switch (type)
 			{
 			case LightSource::LT_Spot:
-				light_camera = light->SMCamera(0);
+				light_camera = light->SMCamera(0).get();
 				translucency_pp_->InputPin(3, unfiltered_sm_2d_texs_[light_index]);
 				break;
 
@@ -2987,7 +2988,7 @@ namespace KlayGE
 				translucency_pp_->OutputPin(0,
 					(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 
-				CameraPtr const & scene_camera = pvp.frame_buffer->GetViewport()->camera;
+				Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
 
 				translucency_pp_->SetParam(0, pvp.inv_view * light_camera->ViewProjMatrix());
 				translucency_pp_->SetParam(1, pvp.inv_view * light_camera->ViewMatrix());
@@ -2995,7 +2996,7 @@ namespace KlayGE
 				translucency_pp_->SetParam(3, MathLib::transform_coord(light->Position(), pvp.view));
 				translucency_pp_->SetParam(4, float3(light->Color()));
 				translucency_pp_->SetParam(5, light->Falloff());
-				translucency_pp_->SetParam(7, scene_camera->FarPlane());
+				translucency_pp_->SetParam(7, scene_camera.FarPlane());
 				translucency_pp_->SetParam(8, light_camera->FarPlane());
 				translucency_pp_->Apply();
 			}
@@ -3044,9 +3045,9 @@ namespace KlayGE
 		{
 			*depth_tex_param_ = pvp.curr_merged_depth_tex;
 
-			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-			float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-			float2 near_q(camera->NearPlane() * q, q);
+			Camera const & camera = *pvp.frame_buffer->GetViewport()->camera;
+			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+			float2 near_q(camera.NearPlane() * q, q);
 			*near_q_param_ = near_q;
 		}
 		App3DFramework& app = Context::Instance().AppInstance();
@@ -3204,10 +3205,10 @@ namespace KlayGE
 		std::vector<uint32_t> tube_area_lights_no_shadow;
 		for (uint32_t li = 0; li < lights_.size(); ++ li)
 		{
-			LightSourcePtr const & light = lights_[li];
-			if (light->Enabled() && pvp.light_visibles[li])
+			auto const & light = *lights_[li];
+			if (light.Enabled() && pvp.light_visibles[li])
 			{
-				LightSource::LightType const type = light->Type();
+				LightSource::LightType const type = light.Type();
 				switch (type)
 				{
 				case LightSource::LT_Ambient:
@@ -3220,7 +3221,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_Point:
-					if (light->Attrib() & LightSource::LSA_NoShadow)
+					if (light.Attrib() & LightSource::LSA_NoShadow)
 					{
 						point_lights_no_shadow.push_back(li);
 					}
@@ -3231,7 +3232,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_Spot:
-					if (light->Attrib() & LightSource::LSA_NoShadow)
+					if (light.Attrib() & LightSource::LSA_NoShadow)
 					{
 						spot_lights_no_shadow.push_back(li);
 					}
@@ -3242,7 +3243,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_SphereArea:
-					if (light->Attrib() & LightSource::LSA_NoShadow)
+					if (light.Attrib() & LightSource::LSA_NoShadow)
 					{
 						sphere_area_lights_no_shadow.push_back(li);
 					}
@@ -3253,7 +3254,7 @@ namespace KlayGE
 					break;
 
 				case LightSource::LT_TubeArea:
-					if (light->Attrib() & LightSource::LSA_NoShadow)
+					if (light.Attrib() & LightSource::LSA_NoShadow)
 					{
 						tube_area_lights_no_shadow.push_back(li);
 					}
@@ -3376,9 +3377,11 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		LightSourcePtr const & light = lights_[org_no];
+		auto const & light = *lights_[org_no];
+		int32_t const attr = light.Attrib();
+		
 		int32_t shadowing_channel;
-		if (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+		if (0 == (attr & LightSource::LSA_NoShadow))
 		{
 			shadowing_channel = sm_light_indices_[org_no].second;
 		}
@@ -3388,18 +3391,17 @@ namespace KlayGE
 		}
 		*shadowing_channel_param_ = shadowing_channel;
 
-		int32_t attr = light->Attrib();
 		*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 			attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
-		*light_color_param_ = light->Color();
-		*light_falloff_range_param_ = float4(light->Falloff().x(), light->Falloff().y(),
-			light->Falloff().z(), 0);
+		*light_color_param_ = light.Color();
+		*light_falloff_range_param_ = float4(light.Falloff().x(), light.Falloff().y(),
+			light.Falloff().z(), 0);
 
 		RenderTechniquePtr tech;
 		if (LightSource::LT_Sun == type)
 		{
-			float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
-			CameraPtr sm_camera = light->SMCamera(0);
+			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
+			CameraPtr sm_camera = light.SMCamera(0);
 			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
 			sm_fb_->GetViewport()->camera = sm_camera;
@@ -3407,7 +3409,7 @@ namespace KlayGE
 			curr_cascade_index_ = -1;
 			*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
-			float3 const & p = light->Position();
+			float3 const & p = light.Position();
 			float3 loc_es = MathLib::transform_coord(p, pvp.view);
 			*light_pos_es_param_ = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
 
@@ -3420,12 +3422,12 @@ namespace KlayGE
 			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
 
-			if (light->SkylightTexY())
+			if (light.SkylightTexY())
 			{
-				*skylight_y_cube_tex_param_ = light->SkylightTexY();
-				*skylight_c_cube_tex_param_ = light->SkylightTexC();
+				*skylight_y_cube_tex_param_ = light.SkylightTexY();
+				*skylight_c_cube_tex_param_ = light.SkylightTexC();
 
-				uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+				uint32_t const mip = light.SkylightTexY()->NumMipMaps();
 				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
 				*skylight_mip_bias_param_ = mip / -2.0f;
 
@@ -3463,13 +3465,13 @@ namespace KlayGE
 		std::vector<float4> lights_attrib;
 		for (auto iter = iter_beg; iter != iter_end; ++ iter)
 		{
-			LightSourcePtr const & light = lights_[*iter];
-			BOOST_ASSERT(LightSource::LT_Directional == light->Type());
-			int32_t attr = light->Attrib();
+			auto const & light = *lights_[*iter];
+			BOOST_ASSERT(LightSource::LT_Directional == light.Type());
+			int32_t attr = light.Attrib();
 
-			lights_color.push_back(light->Color());
+			lights_color.push_back(light.Color());
 
-			float3 dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
@@ -3528,34 +3530,34 @@ namespace KlayGE
 		std::vector<float3> lights_aabb_max;
 		for (auto iter = iter_beg; iter != iter_end; ++ iter)
 		{
-			LightSourcePtr const & light = lights_[*iter];
-			BOOST_ASSERT(type == light->Type());
+			auto const & light = *lights_[*iter];
+			BOOST_ASSERT(type == light.Type());
 
-			int32_t const attr = light->Attrib();
+			int32_t const attr = light.Attrib();
 
-			lights_color.push_back(light->Color());
+			lights_color.push_back(light.Color());
 
-			float3 const & p = light->Position();
+			float3 const & p = light.Position();
 			float3 const loc_es = MathLib::transform_coord(p, pvp.view);
 			lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
 
 			float3 dir_es(0, 0, 0);
 			if (LightSource::LT_Spot == type)
 			{
-				dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+				dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
 			}
 			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
 			if (LightSource::LT_Spot == type)
 			{
-				lights_pos_es.back().w() = light->CosOuterInner().x();
-				lights_dir_es.back().w() = light->CosOuterInner().y();
+				lights_pos_es.back().w() = light.CosOuterInner().x();
+				lights_dir_es.back().w() = light.CosOuterInner().y();
 			}
 
 			int channel = -1;
 			if (with_shadow)
 			{
-				BOOST_ASSERT(0 == (light->Attrib() & LightSource::LSA_NoShadow));
+				BOOST_ASSERT(0 == (light.Attrib() & LightSource::LSA_NoShadow));
 				BOOST_ASSERT(iter - iter_beg < 4);
 				channel = sm_light_indices_[*iter].second;
 			}
@@ -3563,22 +3565,22 @@ namespace KlayGE
 			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, channel + 0.5f, 0));
 
-			float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
-			lights_radius_extend.push_back(float4(light->Radius(), extend_es.x(),
+			float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
+			lights_radius_extend.push_back(float4(light.Radius(), extend_es.x(),
 				extend_es.y(), extend_es.z()));
 
-			float const range = light->Range() * light_scale_;
+			float const range = light.Range() * light_scale_;
 			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 			if (LightSource::LT_Spot == type)
 			{
-				float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
-				float const scale = light->CosOuterInner().w();
+				float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
+				float const scale = light.CosOuterInner().w();
 				float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 				float4x4 light_mv = light_model * light_to_view;
 				aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
 			}
-			lights_falloff_range.push_back(float4(light->Falloff().x(), light->Falloff().y(),
-				light->Falloff().z(), range));
+			lights_falloff_range.push_back(float4(light.Falloff().x(), light.Falloff().y(),
+				light.Falloff().z(), range));
 			lights_aabb_min.push_back(aabb.Min());
 			lights_aabb_max.push_back(aabb.Max());
 		}
@@ -3723,22 +3725,22 @@ namespace KlayGE
 			std::array<std::vector<uint32_t>, 11> available_lights;
 			for (uint32_t batch = 0; (batch < light_batch_) && (li < lights_.size()); ++ li)
 			{
-				LightSourcePtr const & light = lights_[li];
-				if (light->Enabled() && pvp.light_visibles[li])
+				auto const & light = *lights_[li];
+				if (light.Enabled() && pvp.light_visibles[li])
 				{
 					++ batch;
 
-					LightSource::LightType type = light->Type();
+					LightSource::LightType type = light.Type();
 					switch (type)
 					{
 					case LightSource::LT_Ambient:
 						available_lights[0].push_back(li);
-						if (light->SkylightTexY())
+						if (light.SkylightTexY())
 						{
-							*skylight_y_cube_tex_param_ = light->SkylightTexY();
-							*skylight_c_cube_tex_param_ = light->SkylightTexC();
+							*skylight_y_cube_tex_param_ = light.SkylightTexY();
+							*skylight_c_cube_tex_param_ = light.SkylightTexC();
 
-							uint32_t const mip = light->SkylightTexY()->NumMipMaps();
+							uint32_t const mip = light.SkylightTexY()->NumMipMaps();
 							*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
 							*skylight_mip_bias_param_ = mip / -2.0f;
 
@@ -3755,7 +3757,7 @@ namespace KlayGE
 						break;
 
 					case LightSource::LT_Point:
-						if (light->Attrib() & LightSource::LSA_NoShadow)
+						if (light.Attrib() & LightSource::LSA_NoShadow)
 						{
 							available_lights[3].push_back(li);
 						}
@@ -3766,7 +3768,7 @@ namespace KlayGE
 						break;
 
 					case LightSource::LT_Spot:
-						if (light->Attrib() & LightSource::LSA_NoShadow)
+						if (light.Attrib() & LightSource::LSA_NoShadow)
 						{
 							available_lights[5].push_back(li);
 						}
@@ -3777,7 +3779,7 @@ namespace KlayGE
 						break;
 
 					case LightSource::LT_SphereArea:
-						if (light->Attrib() & LightSource::LSA_NoShadow)
+						if (light.Attrib() & LightSource::LSA_NoShadow)
 						{
 							available_lights[7].push_back(li);
 						}
@@ -3788,7 +3790,7 @@ namespace KlayGE
 						break;
 
 					case LightSource::LT_TubeArea:
-						if (light->Attrib() & LightSource::LSA_NoShadow)
+						if (light.Attrib() & LightSource::LSA_NoShadow)
 						{
 							available_lights[9].push_back(li);
 						}
@@ -3832,15 +3834,15 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
 				{
-					LightSourcePtr const & light = lights_[available_lights[t][i]];
-					LightSource::LightType type = light->Type();
-					int32_t attr = light->Attrib();
+					auto const & light = *lights_[available_lights[t][i]];
+					LightSource::LightType type = light.Type();
+					int32_t attr = light.Attrib();
 					uint32_t offset = *reinterpret_cast<uint32_t*>(lights_type + t * lights_type_param_->Stride()) + i;
 
 					*reinterpret_cast<float4*>(lights_color
-						+ offset * lights_color_param_->Stride()) = light->Color();
+						+ offset * lights_color_param_->Stride()) = light.Color();
 
-					float3 const & p = light->Position();
+					float3 const & p = light.Position();
 					float3 loc_es = MathLib::transform_coord(p, pvp.view);
 					*reinterpret_cast<float4*>(lights_pos_es
 						+ offset * lights_pos_es_param_->Stride()) = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
@@ -3854,11 +3856,11 @@ namespace KlayGE
 
 					case LightSource::LT_Sun:
 					case LightSource::LT_Directional:
-						dir_es = MathLib::transform_normal(-light->Direction(), pvp.view);
+						dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 						break;
 
 					case LightSource::LT_Spot:
-						dir_es = MathLib::transform_normal(light->Direction(), pvp.view);
+						dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
 						break;
 
 					default:
@@ -3870,18 +3872,18 @@ namespace KlayGE
 					if (LightSource::LT_Spot == type)
 					{
 						reinterpret_cast<float4*>(lights_pos_es
-							+ offset * lights_pos_es_param_->Stride())->w() = light->CosOuterInner().x();
+							+ offset * lights_pos_es_param_->Stride())->w() = light.CosOuterInner().x();
 						reinterpret_cast<float4*>(lights_dir_es
-							+ offset * lights_dir_es_param_->Stride())->w() = light->CosOuterInner().y();
+							+ offset * lights_dir_es_param_->Stride())->w() = light.CosOuterInner().y();
 					}
 
 					*reinterpret_cast<float4*>(lights_attrib
 						+ offset * lights_attrib_param_->Stride()) = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
 						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
 
-					float3 extend_es = MathLib::transform_normal(light->Extend(), pvp.view);
+					float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
 					*reinterpret_cast<float4*>(lights_radius_extend
-						+ offset * lights_radius_extend_param_->Stride()) = float4(light->Radius(),
+						+ offset * lights_radius_extend_param_->Stride()) = float4(light.Radius(),
 						extend_es.x(), extend_es.y(), extend_es.z());
 
 					if (0 == (attr & LightSource::LSA_NoShadow))
@@ -3908,25 +3910,22 @@ namespace KlayGE
 						}
 					}
 
-					float range = light->Range() * light_scale_;
+					float range = light.Range() * light_scale_;
 					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
 					if (LightSource::LT_Spot == type)
 					{
-						float4x4 light_to_view = light->SMCamera(0)->InverseViewMatrix() * pvp.view;
-						float const scale = light->CosOuterInner().w();
+						float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
+						float const scale = light.CosOuterInner().w();
 						float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
 						float4x4 light_mv = light_model * light_to_view;
 						aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
 					}
-					*reinterpret_cast<float4*>(lights_falloff_range
-						+ offset * lights_falloff_range_param_->Stride()) = float4(light->Falloff().x(),
-						light->Falloff().y(), light->Falloff().z(), range);
-					*reinterpret_cast<float4*>(lights_aabb_min
-						+ offset * lights_aabb_min_param_->Stride()) = float4(aabb.Min().x(), aabb.Min().y(),
-						aabb.Min().z(), 0);
-					*reinterpret_cast<float4*>(lights_aabb_max
-						+ offset * lights_aabb_max_param_->Stride()) = float4(aabb.Max().x(), aabb.Max().y(),
-						aabb.Max().z(), 0);
+					*reinterpret_cast<float4*>(lights_falloff_range + offset * lights_falloff_range_param_->Stride())
+						= float4(light.Falloff().x(), light.Falloff().y(), light.Falloff().z(), range);
+					*reinterpret_cast<float4*>(lights_aabb_min + offset * lights_aabb_min_param_->Stride())
+						= float4(aabb.Min().x(), aabb.Min().y(), aabb.Min().z(), 0);
+					*reinterpret_cast<float4*>(lights_aabb_max + offset * lights_aabb_max_param_->Stride())
+						= float4(aabb.Max().x(), aabb.Max().y(), aabb.Max().z(), 0);
 				}
 			}
 

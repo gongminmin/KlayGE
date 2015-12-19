@@ -1021,12 +1021,13 @@ namespace KlayGE
 			this->BindFrameBuffer(screen_frame_buffer_);
 			if (stereoscopic_pp_)
 			{
-				stereoscopic_pp_->SetParam(0, stereo_separation_);
-				stereoscopic_pp_->SetParam(1, screen_frame_buffer_->GetViewport()->camera->NearPlane());
+				Camera const & camera = *screen_frame_buffer_->GetViewport()->camera;
 
-				CameraPtr const & camera = screen_frame_buffer_->GetViewport()->camera;
-				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-				float2 near_q(camera->NearPlane() * q, q);
+				stereoscopic_pp_->SetParam(0, stereo_separation_);
+				stereoscopic_pp_->SetParam(1, camera.NearPlane());
+
+				float const q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
+				float2 near_q(camera.NearPlane() * q, q);
 				stereoscopic_pp_->SetParam(2, near_q);
 			}
 			if (stereo_method_ != STM_LCDShutter)

@@ -35,7 +35,7 @@ private:
 	KlayGE::TrackballCameraController light_controller_;
 	KlayGE::Camera light_ctrl_camera_;
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::UIDialogPtr dialog_;
 

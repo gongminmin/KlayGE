@@ -440,7 +440,7 @@ namespace KlayGE
 	public:
 		LogGaussianBlurPostProcess(int kernel_radius, bool linear_depth);
 
-		void ESMScaleFactor(float factor, CameraPtr const & camera);
+		void ESMScaleFactor(float factor, Camera const & camera);
 
 		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
 		using PostProcess::InputPin;

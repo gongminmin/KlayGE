@@ -615,7 +615,7 @@ namespace KlayGE
 	{
 		RenderableHelper::OnRenderBegin();
 
-		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		Camera const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
 

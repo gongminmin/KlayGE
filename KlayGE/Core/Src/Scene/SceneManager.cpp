@@ -115,7 +115,7 @@ namespace KlayGE
 		Camera& camera = app.ActiveCamera();
 
 		float4x4 view_proj = camera.ViewProjMatrix();
-		DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
 			int32_t cas_index = drl->CurrCascadeIndex();

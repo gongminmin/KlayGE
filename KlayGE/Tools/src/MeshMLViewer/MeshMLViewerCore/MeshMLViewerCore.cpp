@@ -340,7 +340,6 @@ namespace KlayGE
 		point_light_.reset();
 		selected_bb_.reset();
 
-		deferred_rendering_.reset();
 		font_.reset();
 	}
 

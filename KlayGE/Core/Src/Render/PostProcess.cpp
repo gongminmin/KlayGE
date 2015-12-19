@@ -1603,10 +1603,10 @@ namespace KlayGE
 		this->Append(MakeSharedPtr<SeparableLogGaussianFilterPostProcess>(kernel_radius, linear_depth, false));
 	}
 
-	void LogGaussianBlurPostProcess::ESMScaleFactor(float factor, CameraPtr const & camera)
+	void LogGaussianBlurPostProcess::ESMScaleFactor(float factor, Camera const & camera)
 	{
-		float np = camera->NearPlane();
-		float fp = camera->FarPlane();
+		float const np = camera.NearPlane();
+		float const fp = camera.FarPlane();
 
 		float esm_scale_factor = factor / (fp - np);
 		pp_chain_[0]->SetParam(0, esm_scale_factor);

@@ -87,7 +87,7 @@ namespace KlayGE
 		TrackballCameraController tb_controller_;
 		bool is_fps_camera_;
 
-		DeferredRenderingLayerPtr deferred_rendering_;
+		DeferredRenderingLayer* deferred_rendering_;
 
 		bool skinning_;
 		float curr_frame_;

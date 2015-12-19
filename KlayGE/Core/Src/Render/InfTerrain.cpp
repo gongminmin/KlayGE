@@ -756,16 +756,16 @@ namespace KlayGE
 		KFL_UNUSED(elapsed_time);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		CameraPtr const & camera = re.ScreenFrameBuffer()->GetViewport()->camera;
+		Camera const & camera = *re.ScreenFrameBuffer()->GetViewport()->camera;
 
-		checked_pointer_cast<HQTerrainRenderable>(renderable_)->SetMatrices(*camera);
+		checked_pointer_cast<HQTerrainRenderable>(renderable_)->SetMatrices(camera);
 
-		reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera->EyePos());
+		reset_terrain_ = reset_terrain_ || (last_eye_pos_ != camera.EyePos());
 		if (reset_terrain_)
 		{
 			checked_pointer_cast<HQTerrainRenderable>(renderable_)->FlushTerrainData();
 			reset_terrain_ = false;
-			last_eye_pos_ = camera->EyePos();
+			last_eye_pos_ = camera.EyePos();
 		}
 
 		return false;

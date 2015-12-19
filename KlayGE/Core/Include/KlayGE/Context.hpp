@@ -148,9 +148,9 @@ namespace KlayGE
 		}
 		AudioDataSourceFactory& AudioDataSourceFactoryInstance();
 
-		DeferredRenderingLayerPtr const & DeferredRenderingLayerInstance()
+		DeferredRenderingLayer* DeferredRenderingLayerInstance()
 		{
-			return deferred_rendering_layer_;
+			return deferred_rendering_layer_.get();
 		}
 
 		thread_pool& ThreadPool()
@@ -180,7 +180,7 @@ namespace KlayGE
 		ShowFactoryPtr		show_factory_;
 		ScriptFactoryPtr	script_factory_;
 		AudioDataSourceFactoryPtr audio_data_src_factory_;
-		DeferredRenderingLayerPtr deferred_rendering_layer_;
+		std::unique_ptr<DeferredRenderingLayer> deferred_rendering_layer_;
 
 		DllLoader render_loader_;
 		DllLoader audio_loader_;

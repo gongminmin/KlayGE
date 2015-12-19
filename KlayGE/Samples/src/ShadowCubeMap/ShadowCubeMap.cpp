@@ -872,7 +872,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 	case SMT_Cube:
 		if (pass > 0)
 		{
-			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(pass - 1));
+			checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[pass - 1])->ESMScaleFactor(esm_scale_factor_,
+				*light_->SMCamera(pass - 1));
 			sm_filter_pps_[pass - 1]->Apply();
 		}
 
@@ -946,7 +947,8 @@ uint32_t ShadowCubeMap::DoUpdate(uint32_t pass)
 					{
 						shadow_cube_one_tex_->CopyToSubTexture2D(*shadow_tex_, 0, 0, 0, 0, shadow_tex_->Width(0), shadow_tex_->Height(0), 
 							p, 0, 0, 0, shadow_cube_one_tex_->Width(0), shadow_cube_one_tex_->Height(0));
-						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_, light_->SMCamera(p));
+						checked_pointer_cast<LogGaussianBlurPostProcess>(sm_filter_pps_[p])->ESMScaleFactor(esm_scale_factor_,
+							*light_->SMCamera(p));
 						sm_filter_pps_[p]->Apply();
 					}
 

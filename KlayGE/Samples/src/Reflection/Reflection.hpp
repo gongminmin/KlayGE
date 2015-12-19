@@ -36,7 +36,7 @@ private:
 
 	KlayGE::SceneObjectPtr sky_box_;
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::TexturePtr back_refl_tex_;
 	KlayGE::TexturePtr back_refl_ds_tex_;

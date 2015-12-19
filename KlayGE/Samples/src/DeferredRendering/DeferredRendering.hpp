@@ -38,7 +38,7 @@ private:
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
-	KlayGE::DeferredRenderingLayerPtr deferred_rendering_;
+	KlayGE::DeferredRenderingLayer* deferred_rendering_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int buffer_type_;

@@ -517,7 +517,7 @@ namespace
 			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));
 			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
 
-			DeferredRenderingLayerPtr const & drl = Context::Instance().DeferredRenderingLayerInstance();
+			auto drl = Context::Instance().DeferredRenderingLayerInstance();
 			if (drl)
 			{
 				*(technique_->Effect().ParameterByName("depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
