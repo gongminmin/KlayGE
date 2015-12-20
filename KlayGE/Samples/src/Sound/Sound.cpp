@@ -88,17 +88,21 @@ void SoundApp::OnCreate()
 	music_1_->Open(ResLoader::Instance().Open("Carl_Douglas_-_Kung_Fu_Fighting.ogg"));
 	music_2_ = adsf.MakeAudioDataSource();
 	music_2_->Open(ResLoader::Instance().Open("Metallica_-_Enter_Sandman.ogg"));
+	sound_ = adsf.MakeAudioDataSource();
+	sound_->Open(ResLoader::Instance().Open("Cash_register.ogg"));
 
 	AudioFactory& af = Context::Instance().AudioFactoryInstance();
 	AudioEngine& ae = af.AudioEngineInstance();
 	ae.AddBuffer(1, af.MakeMusicBuffer(music_1_, 3));
 	ae.AddBuffer(2, af.MakeMusicBuffer(music_2_, 3));
+	ae.AddBuffer(3, af.MakeSoundBuffer(sound_));
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Sound.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
 
 	id_music_1_ = dialog_->IDFromName("Music_1");
 	id_music_2_ = dialog_->IDFromName("Music_2");
+	id_sound_ = dialog_->IDFromName("Sound");
 	id_volume_static_ = dialog_->IDFromName("VolumeStatic");
 	id_volume_slider_ = dialog_->IDFromName("VolumeSlider");
 
@@ -107,6 +111,8 @@ void SoundApp::OnCreate()
 
 	dialog_->Control<UICheckBox>(id_music_2_)->OnChangedEvent().connect(std::bind(&SoundApp::Music2Handler, this, std::placeholders::_1));
 	this->Music2Handler(*dialog_->Control<UICheckBox>(id_music_2_));
+
+	dialog_->Control<UIButton>(id_sound_)->OnClickedEvent().connect(std::bind(&SoundApp::SoundHandler, this, std::placeholders::_1));
 
 	dialog_->Control<UISlider>(id_volume_slider_)->OnValueChangedEvent().connect(std::bind(&SoundApp::VolumeChangedHandler, this, std::placeholders::_1));
 	this->VolumeChangedHandler(*dialog_->Control<UISlider>(id_volume_slider_));
@@ -157,12 +163,22 @@ void SoundApp::Music2Handler(UICheckBox const & sender)
 	}
 }
 
+void SoundApp::SoundHandler(UIButton const & sender)
+{
+	KFL_UNUSED(sender);
+
+	AudioFactory& af = Context::Instance().AudioFactoryInstance();
+	AudioEngine& ae = af.AudioEngineInstance();
+	ae.Play(3, false);
+}
+
 void SoundApp::VolumeChangedHandler(UISlider const & sender)
 {
 	volume_ = sender.GetValue() * 0.01f;
 
 	AudioFactory& af = Context::Instance().AudioFactoryInstance();
 	AudioEngine& ae = af.AudioEngineInstance();
+	ae.SoundVolume(volume_);
 	ae.MusicVolume(volume_);	
 
 	std::wostringstream stream;

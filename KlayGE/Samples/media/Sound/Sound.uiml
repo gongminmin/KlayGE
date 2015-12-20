@@ -1,12 +1,14 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="Player" caption="Control" x="-210" y="-110" align_x="center" align_y="middle" width="420" height="220">
+	<dialog id="Player" caption="Control" x="-210" y="-130" align_x="center" align_y="middle" width="420" height="260">
 		<control type="check_box" id="Music_1" caption="Music 1" x="40" y="40" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 		<control type="check_box" id="Music_2" caption="Music 2" x="40" y="80" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 
-		<control type="static" id="VolumeStatic" caption="Volume:" x="40" y="140" width="120" height="24" is_default="0"/>
-		<control type="slider" id="VolumeSlider" x="140" y="135" width="240" height="24" min="0" max="100" value="50" is_default="0"/>
+		<control type="button" id="Sound" caption="Sound" x="40" y="140" width="120" height="24" hotkey="0" is_default="0"/>
+
+		<control type="static" id="VolumeStatic" caption="Volume:" x="40" y="200" width="120" height="24" is_default="0"/>
+		<control type="slider" id="VolumeSlider" x="140" y="195" width="240" height="24" min="0" max="100" value="50" is_default="0"/>
 	</dialog>
 
 	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">

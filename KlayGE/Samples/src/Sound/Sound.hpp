@@ -23,11 +23,13 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void Music1Handler(KlayGE::UICheckBox const & sender);
 	void Music2Handler(KlayGE::UICheckBox const & sender);
+	void SoundHandler(KlayGE::UIButton const & sender);
 	void VolumeChangedHandler(KlayGE::UISlider const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::AudioDataSourcePtr music_1_;
 	KlayGE::AudioDataSourcePtr music_2_;
+	KlayGE::AudioDataSourcePtr sound_;
 
 	float volume_;
 
@@ -35,6 +37,7 @@ private:
 
 	int id_music_1_;
 	int id_music_2_;
+	int id_sound_;
 	int id_volume_static_;
 	int id_volume_slider_;
 };
