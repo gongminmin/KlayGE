@@ -26,18 +26,18 @@
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
-const GUID GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
+GUID const GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
 
 namespace
 {
 	// 检查一个音频缓冲区是否空闲
 	/////////////////////////////////////////////////////////////////////////////////
-	bool IsSourceFree(KlayGE::IDSBufferPtr pDSB)
+	bool IsSourceFree(KlayGE::IDSBufferPtr const & dsb)
 	{
-		if (pDSB)
+		if (dsb)
 		{
 			DWORD status;
-			pDSB->GetStatus(&status);
+			dsb->GetStatus(&status);
 			return (0 == (status & DSBSTATUS_PLAYING));
 		}
 
@@ -71,13 +71,13 @@ namespace KlayGE
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
 		TIF(dsound->CreateSoundBuffer(&dsbd, &temp, nullptr));
-		sources_[0] = IDSBufferPtr(temp);
+		sources_[0] = MakeCOMPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
 		for (auto iter = sources_.begin() + 1; iter != sources_.end(); ++ iter)
 		{
 			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
-			*iter = IDSBufferPtr(temp);
+			*iter = MakeCOMPtr(temp);
 		}
 
 		// 锁定缓冲区
@@ -125,7 +125,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSSoundBuffer::~DSSoundBuffer()
 	{
-		//this->Stop();
+		this->Stop();
 		sources_.clear();
 	}
 

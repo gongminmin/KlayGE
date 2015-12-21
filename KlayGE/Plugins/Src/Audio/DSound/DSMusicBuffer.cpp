@@ -33,7 +33,6 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
 					: MusicBuffer(dataSource),
-						writePos_(0),
 						played_(false), stopped_(true)
 	{
 		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
@@ -98,41 +97,26 @@ namespace KlayGE
 
 		while (!stopped_)
 		{
-			// 锁定缓冲区
-			uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-			DWORD lockedBufferSize;		// 锁定的内存大小
-			TIF(buffer_->Lock(fillSize_ * writePos_, fillSize_,
-				reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
-				nullptr, nullptr, 0));
+			DWORD play_cursor, write_cursor;
+			buffer_->GetCurrentPosition(&play_cursor, &write_cursor);
 
-			std::vector<uint8_t> data(fillSize_);
-			data.resize(dataSource_->Read(&data[0], fillSize_));
-
-			if (data.empty())
+			uint32_t const next_cursor = play_cursor + fillSize_;
+			if (next_cursor >= write_cursor)
 			{
-				if (loop_)
+				if (this->FillData(fillSize_))
 				{
-					stopped_ = false;
-					this->Reset();
-				}
-				else
-				{
-					stopped_ = true;
+					if (loop_)
+					{
+						stopped_ = false;
+						this->DoReset();
+					}
+					else
+					{
+						stopped_ = true;
+						buffer_->Stop();
+					}
 				}
 			}
-			else
-			{
-				std::copy(data.begin(), data.end(), lockedBuffer);
-
-				std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
-			}
-
-			// 缓冲区解锁
-			buffer_->Unlock(lockedBuffer, lockedBufferSize, nullptr, 0);
-
-			// 形成环形缓冲区
-			++ writePos_;
-			writePos_ %= fillCount_;
 
 			Sleep(1000 / PreSecond);
 		}
@@ -142,35 +126,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoReset()
 	{
-		this->writePos_	= 0;
-
 		dataSource_->Reset();
-
-		// 锁定缓冲区
-		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
-		DWORD lockedBufferSize;		// 锁定的内存大小
-		TIF(buffer_->Lock(0, fillSize_ * fillCount_,
-			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize, nullptr, nullptr, 0));
-
-		std::vector<uint8_t> data(fillSize_ * fillCount_);
-		data.resize(dataSource_->Read(&data[0], fillSize_ * fillCount_));
-
-		if (data.empty())
-		{
-			// 如果音频数据空白，用静音填充
-			std::fill_n(lockedBuffer, lockedBufferSize, 0);
-		}
-		else
-		{
-			// 如果数据源比缓冲区小，则用音频数据填充缓冲区
-			std::copy(data.begin(), data.end(), lockedBuffer);
-
-			// 剩下的区域用空白填充
-			std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 0);
-		}
-
-		// 缓冲区解锁
-		buffer_->Unlock(lockedBuffer, lockedBufferSize, nullptr, 0);
 
 		buffer_->SetCurrentPosition(0);
 	}
@@ -204,6 +160,52 @@ namespace KlayGE
 		}
 
 		buffer_->Stop();
+	}
+
+	bool DSMusicBuffer::FillData(uint32_t size)
+	{
+		std::vector<uint8_t> data(size);
+		data.resize(dataSource_->Read(&data[0], size));
+
+		uint8_t* locked_buff[2];
+		DWORD locked_buff_size[2];
+		TIF(buffer_->Lock(0, size,
+			reinterpret_cast<void**>(&locked_buff[0]), &locked_buff_size[0],
+			reinterpret_cast<void**>(&locked_buff[1]), &locked_buff_size[1],
+			DSBLOCK_FROMWRITECURSOR));
+
+		bool ret;
+		if (data.empty())
+		{
+			memset(locked_buff[0], 0, locked_buff_size[0]);
+			if (locked_buff[1] != nullptr)
+			{
+				memset(locked_buff[1], 0, locked_buff_size[1]);
+			}
+
+			ret = true;
+		}
+		else
+		{
+			memcpy(locked_buff[0], &data[0], locked_buff_size[0]);
+			if (locked_buff_size[0] > data.size())
+			{
+				memset(locked_buff[0], 0, locked_buff_size[0] - data.size());
+			}
+			if (locked_buff[1] != nullptr)
+			{
+				memcpy(locked_buff[1], &data[locked_buff_size[0]], locked_buff_size[1]);
+				if (locked_buff_size[1] > data.size() - locked_buff_size[0])
+				{
+					memset(locked_buff[1], 0, locked_buff_size[1] - data.size() + locked_buff_size[0]);
+				}
+			}
+
+			ret = false;
+		}
+
+		buffer_->Unlock(locked_buff[0], locked_buff_size[0], locked_buff[1], locked_buff_size[1]);
+		return ret;
 	}
 
 	// 检查缓冲区是否在播放
