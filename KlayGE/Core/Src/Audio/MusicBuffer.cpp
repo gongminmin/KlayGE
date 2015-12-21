@@ -63,7 +63,10 @@ namespace KlayGE
 	////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Stop()
 	{
-		this->DoStop();
-		dataSource_->Reset();
+		if (this->IsPlaying())
+		{
+			this->DoStop();
+			dataSource_->Reset();
+		}
 	}
 }

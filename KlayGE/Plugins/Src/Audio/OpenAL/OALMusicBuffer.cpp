@@ -113,7 +113,7 @@ namespace KlayGE
 			}
 			else
 			{
-				Sleep(500 / PreSecond);
+				Sleep(1000 / PreSecond);
 			}
 		}
 	}
