@@ -382,34 +382,34 @@ namespace KlayGE
 		DepthStencilStateDesc default_dss_desc;
 		BlendStateDesc default_bs_desc;
 
-		vertex_shader_cache_.reset();
-		pixel_shader_cache_.reset();
-		geometry_shader_cache_.reset();
-		compute_shader_cache_.reset();
-		hull_shader_cache_.reset();
-		domain_shader_cache_.reset();
+		vertex_shader_cache_ = nullptr;
+		pixel_shader_cache_ = nullptr;
+		geometry_shader_cache_ = nullptr;
+		compute_shader_cache_ = nullptr;
+		hull_shader_cache_ = nullptr;
+		domain_shader_cache_ = nullptr;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
 		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 
-		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState();
-		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState();
+		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState().get();
+		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState().get();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState();
+		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState().get();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
-		d3d_imm_ctx_->RSSetState(rasterizer_state_cache_.get());
-		d3d_imm_ctx_->OMSetDepthStencilState(depth_stencil_state_cache_.get(), stencil_ref_cache_);
-		d3d_imm_ctx_->OMSetBlendState(blend_state_cache_.get(), &blend_factor_cache_.r(), sample_mask_cache_);
+		d3d_imm_ctx_->RSSetState(rasterizer_state_cache_);
+		d3d_imm_ctx_->OMSetDepthStencilState(depth_stencil_state_cache_, stencil_ref_cache_);
+		d3d_imm_ctx_->OMSetBlendState(blend_state_cache_, &blend_factor_cache_.r(), sample_mask_cache_);
 
 		topology_type_cache_ = RenderLayout::TT_PointList;
 		d3d_imm_ctx_->IASetPrimitiveTopology(D3D11Mapping::Mapping(topology_type_cache_));
 
-		input_layout_cache_.reset();
-		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_.get());
+		input_layout_cache_ = nullptr;
+		d3d_imm_ctx_->IASetInputLayout(input_layout_cache_);
 
 		memset(&viewport_cache_, 0, sizeof(viewport_cache_));
 
@@ -425,8 +425,8 @@ namespace KlayGE
 			vb_offset_cache_.clear();
 		}
 
-		ib_cache_.reset();
-		d3d_imm_ctx_->IASetIndexBuffer(ib_cache_.get(), DXGI_FORMAT_R16_UINT, 0);
+		ib_cache_ = nullptr;
+		d3d_imm_ctx_->IASetIndexBuffer(ib_cache_, DXGI_FORMAT_R16_UINT, 0);
 
 		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
@@ -552,9 +552,9 @@ namespace KlayGE
 		std::vector<UINT> offsets(all_num_vertex_stream);
 		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
-			GraphicsBufferPtr const & stream = rl.GetVertexStream(i);
+			GraphicsBuffer const * stream = rl.GetVertexStream(i).get();
 
-			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer*>(stream.get());
+			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
 			vbs[i] = d3dvb.D3DBuffer().get();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
@@ -562,9 +562,9 @@ namespace KlayGE
 		if (rl.InstanceStream())
 		{
 			uint32_t number = num_vertex_streams;
-			GraphicsBufferPtr stream = rl.InstanceStream();
+			GraphicsBuffer const * stream = rl.InstanceStream().get();
 
-			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer*>(stream.get());
+			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
 			vbs[number] = d3dvb.D3DBuffer().get();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
@@ -583,10 +583,10 @@ namespace KlayGE
 
 			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
 			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0)->GetShaderObject().get());
-			ID3D11InputLayoutPtr const & layout = d3d_rl.InputLayout(shader.VSSignature(), *shader.VSCode());
+			ID3D11InputLayout* layout = d3d_rl.InputLayout(shader.VSSignature(), *shader.VSCode());
 			if (layout != input_layout_cache_)
 			{
-				d3d_imm_ctx_->IASetInputLayout(layout.get());
+				d3d_imm_ctx_->IASetInputLayout(layout);
 				input_layout_cache_ = layout;
 			}
 		}
@@ -604,8 +604,8 @@ namespace KlayGE
 				vb_offset_cache_.clear();
 			}
 
-			input_layout_cache_.reset();
-			d3d_imm_ctx_->IASetInputLayout(nullptr);
+			input_layout_cache_ = nullptr;
+			d3d_imm_ctx_->IASetInputLayout(input_layout_cache_);
 		}
 
 		uint32_t const vertex_count = static_cast<uint32_t>(rl.UseIndices() ? rl.NumIndices() : rl.NumVertices());
@@ -685,11 +685,11 @@ namespace KlayGE
 
 		if (rl.UseIndices())
 		{
-			D3D11GraphicsBuffer& d3dib = *checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get());
-			if (ib_cache_ != d3dib.D3DBuffer())
+			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer().get();
+			if (ib_cache_ != d3dib)
 			{
-				d3d_imm_ctx_->IASetIndexBuffer(d3dib.D3DBuffer().get(), D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
-				ib_cache_ = d3dib.D3DBuffer();
+				d3d_imm_ctx_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
+				ib_cache_ = d3dib;
 			}
 		}
 		else
@@ -697,23 +697,23 @@ namespace KlayGE
 			if (ib_cache_)
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(nullptr, DXGI_FORMAT_R16_UINT, 0);
-				ib_cache_.reset();
+				ib_cache_ = nullptr;
 			}
 		}
 
 		uint32_t const num_passes = tech.NumPasses();
-		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
+		GraphicsBuffer const * indirect_buff = rl.GetIndirectArgs().get();
 		if (indirect_buff)
 		{
 			if (rl.UseIndices())
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					RenderPass* pass = tech.Pass(i).get();
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -722,11 +722,11 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					RenderPass* pass = tech.Pass(i).get();
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -741,7 +741,7 @@ namespace KlayGE
 					uint32_t const num_indices = rl.NumIndices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						RenderPass* pass = tech.Pass(i).get();
 
 						pass->Bind();
 						d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
@@ -753,7 +753,7 @@ namespace KlayGE
 					uint32_t const num_vertices = rl.NumVertices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						RenderPass* pass = tech.Pass(i).get();
 
 						pass->Bind();
 						d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
@@ -768,7 +768,7 @@ namespace KlayGE
 					uint32_t const num_indices = rl.NumIndices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						RenderPass* pass = tech.Pass(i).get();
 
 						pass->Bind();
 						d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
@@ -780,7 +780,7 @@ namespace KlayGE
 					uint32_t const num_vertices = rl.NumVertices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						RenderPass* pass = tech.Pass(i).get();
 
 						pass->Bind();
 						d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
@@ -798,7 +798,7 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPassPtr const & pass = tech.Pass(i);
+			RenderPass* pass = tech.Pass(i).get();
 
 			pass->Bind();
 			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
@@ -814,7 +814,7 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPassPtr const & pass = tech.Pass(i);
+			RenderPass* pass = tech.Pass(i).get();
 
 			pass->Bind();
 			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
@@ -874,17 +874,17 @@ namespace KlayGE
 	{
 		adapterList_.Destroy();
 
-		rasterizer_state_cache_.reset();
-		depth_stencil_state_cache_.reset();
-		blend_state_cache_.reset();
-		vertex_shader_cache_.reset();
-		pixel_shader_cache_.reset();
-		geometry_shader_cache_.reset();
-		compute_shader_cache_.reset();
-		hull_shader_cache_.reset();
-		domain_shader_cache_.reset();
-		input_layout_cache_.reset();
-		ib_cache_.reset();
+		rasterizer_state_cache_ = nullptr;
+		depth_stencil_state_cache_ = nullptr;
+		blend_state_cache_ = nullptr;
+		vertex_shader_cache_ = nullptr;
+		pixel_shader_cache_ = nullptr;
+		geometry_shader_cache_ = nullptr;
+		compute_shader_cache_ = nullptr;
+		hull_shader_cache_ = nullptr;
+		domain_shader_cache_ = nullptr;
+		input_layout_cache_ = nullptr;
+		ib_cache_ = nullptr;
 
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
@@ -1427,14 +1427,14 @@ namespace KlayGE
 	{
 		uint32_t const width = mono_tex_->Width(0);
 		uint32_t const height = mono_tex_->Height(0);
-		D3D11RenderWindowPtr win = checked_pointer_cast<D3D11RenderWindow>(screen_frame_buffer_);
+		D3D11RenderWindow* win = checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get());
 
 		switch (stereo_method_)
 		{
 		case SM_DXGI:
 			{
-				RenderViewPtr const & view = (0 == eye) ? win->D3DBackBufferRTV() : win->D3DBackBufferRightEyeRTV();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView*>(view.get())->D3DRenderTargetView().get();
+				RenderView const * view = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1469,8 +1469,8 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11ResourcePtr back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource();
-					ID3D11ResourcePtr stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource();
+					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource().get();
+					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource().get();
 
 					D3D11_BOX box;
 					box.left = 0;
@@ -1479,15 +1479,15 @@ namespace KlayGE
 					box.bottom = height;
 					box.front = 0;
 					box.back = 1;
-					d3d_imm_ctx_->CopySubresourceRegion(back.get(), 0, 0, 0, 0, stereo.get(), 0, &box);
+					d3d_imm_ctx_->CopySubresourceRegion(back, 0, 0, 0, 0, stereo, 0, &box);
 				}
 			}
 			break;
 
 		case SM_AMDQuadBuffer:
 			{
-				RenderViewPtr const & view = win->D3DBackBufferRTV();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView*>(view.get())->D3DRenderTargetView().get();
+				RenderView const * view = win->D3DBackBufferRTV().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1509,86 +1509,86 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::RSSetState(ID3D11RasterizerStatePtr const & ras)
+	void D3D11RenderEngine::RSSetState(ID3D11RasterizerState* ras)
 	{
 		if (rasterizer_state_cache_ != ras)
 		{
-			d3d_imm_ctx_->RSSetState(ras.get());
+			d3d_imm_ctx_->RSSetState(ras);
 			rasterizer_state_cache_ = ras;
 		}
 	}
 
-	void D3D11RenderEngine::OMSetDepthStencilState(ID3D11DepthStencilStatePtr const & ds, uint16_t stencil_ref)
+	void D3D11RenderEngine::OMSetDepthStencilState(ID3D11DepthStencilState* ds, uint16_t stencil_ref)
 	{
 		if ((depth_stencil_state_cache_ != ds) || (stencil_ref_cache_ != stencil_ref))
 		{
-			d3d_imm_ctx_->OMSetDepthStencilState(ds.get(), stencil_ref);
+			d3d_imm_ctx_->OMSetDepthStencilState(ds, stencil_ref);
 			depth_stencil_state_cache_ = ds;
 			stencil_ref_cache_ = stencil_ref;
 		}
 	}
 
-	void D3D11RenderEngine::OMSetBlendState(ID3D11BlendStatePtr const & bs, Color const & blend_factor, uint32_t sample_mask)
+	void D3D11RenderEngine::OMSetBlendState(ID3D11BlendState* bs, Color const & blend_factor, uint32_t sample_mask)
 	{
 		if ((blend_state_cache_ != bs) || (blend_factor_cache_ != blend_factor) || (sample_mask_cache_ != sample_mask))
 		{
-			d3d_imm_ctx_->OMSetBlendState(bs.get(), &blend_factor.r(), sample_mask);
+			d3d_imm_ctx_->OMSetBlendState(bs, &blend_factor.r(), sample_mask);
 			blend_state_cache_ = bs;
 			blend_factor_cache_ = blend_factor;
 			sample_mask_cache_ = sample_mask;
 		}
 	}
 
-	void D3D11RenderEngine::VSSetShader(ID3D11VertexShaderPtr const & shader)
+	void D3D11RenderEngine::VSSetShader(ID3D11VertexShader* shader)
 	{
 		if (vertex_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->VSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->VSSetShader(shader, nullptr, 0);
 			vertex_shader_cache_ = shader;
 		}
 	}
 
-	void D3D11RenderEngine::PSSetShader(ID3D11PixelShaderPtr const & shader)
+	void D3D11RenderEngine::PSSetShader(ID3D11PixelShader* shader)
 	{
 		if (pixel_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->PSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->PSSetShader(shader, nullptr, 0);
 			pixel_shader_cache_ = shader;
 		}
 	}
 
-	void D3D11RenderEngine::GSSetShader(ID3D11GeometryShaderPtr const & shader)
+	void D3D11RenderEngine::GSSetShader(ID3D11GeometryShader* shader)
 	{
 		if (geometry_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->GSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->GSSetShader(shader, nullptr, 0);
 			geometry_shader_cache_ = shader;
 		}
 	}
 
-	void D3D11RenderEngine::CSSetShader(ID3D11ComputeShaderPtr const & shader)
+	void D3D11RenderEngine::CSSetShader(ID3D11ComputeShader* shader)
 	{
 		if (compute_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->CSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->CSSetShader(shader, nullptr, 0);
 			compute_shader_cache_ = shader;
 		}
 	}
 
-	void D3D11RenderEngine::HSSetShader(ID3D11HullShaderPtr const & shader)
+	void D3D11RenderEngine::HSSetShader(ID3D11HullShader* shader)
 	{
 		if (hull_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->HSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->HSSetShader(shader, nullptr, 0);
 			hull_shader_cache_ = shader;
 		}
 	}
 
-	void D3D11RenderEngine::DSSetShader(ID3D11DomainShaderPtr const & shader)
+	void D3D11RenderEngine::DSSetShader(ID3D11DomainShader* shader)
 	{
 		if (domain_shader_cache_ != shader)
 		{
-			d3d_imm_ctx_->DSSetShader(shader.get(), nullptr, 0);
+			d3d_imm_ctx_->DSSetShader(shader, nullptr, 0);
 			domain_shader_cache_ = shader;
 		}
 	}

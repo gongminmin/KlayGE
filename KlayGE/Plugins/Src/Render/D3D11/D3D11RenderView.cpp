@@ -138,7 +138,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
 		d3d_imm_ctx_1->DiscardView(rt_view_.get());
 	}
 
@@ -280,7 +280,7 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
 		d3d_imm_ctx_1->DiscardView(ds_view_.get());
 	}
 
@@ -404,7 +404,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
-		ID3D11DeviceContext1Ptr const & d3d_imm_ctx_1 = std::static_pointer_cast<ID3D11DeviceContext1>(d3d_imm_ctx_);
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
 		d3d_imm_ctx_1->DiscardView(ua_view_.get());
 	}
 

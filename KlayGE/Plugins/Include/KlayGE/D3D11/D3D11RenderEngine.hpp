@@ -105,15 +105,15 @@ namespace KlayGE
 			return inv_timestamp_freq_;
 		}
 
-		void RSSetState(ID3D11RasterizerStatePtr const & ras);
-		void OMSetDepthStencilState(ID3D11DepthStencilStatePtr const & ds, uint16_t stencil_ref);
-		void OMSetBlendState(ID3D11BlendStatePtr const & bs, Color const & blend_factor, uint32_t sample_mask);
-		void VSSetShader(ID3D11VertexShaderPtr const & shader);
-		void PSSetShader(ID3D11PixelShaderPtr const & shader);
-		void GSSetShader(ID3D11GeometryShaderPtr const & shader);
-		void CSSetShader(ID3D11ComputeShaderPtr const & shader);
-		void HSSetShader(ID3D11HullShaderPtr const & shader);
-		void DSSetShader(ID3D11DomainShaderPtr const & shader);
+		void RSSetState(ID3D11RasterizerState* ras);
+		void OMSetDepthStencilState(ID3D11DepthStencilState* ds, uint16_t stencil_ref);
+		void OMSetBlendState(ID3D11BlendState* bs, Color const & blend_factor, uint32_t sample_mask);
+		void VSSetShader(ID3D11VertexShader* shader);
+		void PSSetShader(ID3D11PixelShader* shader);
+		void GSSetShader(ID3D11GeometryShader* shader);
+		void CSSetShader(ID3D11ComputeShader* shader);
+		void HSSetShader(ID3D11HullShader* shader);
+		void DSSetShader(ID3D11DomainShader* shader);
 		void SetShaderResources(ShaderObject::ShaderType st, std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs, std::vector<ID3D11ShaderResourceView*> const & srvs);
 		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers);
 		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs);
@@ -181,26 +181,26 @@ namespace KlayGE
 		// Enumerates itself
 		D3D11AdapterList adapterList_;
 
-		ID3D11RasterizerStatePtr rasterizer_state_cache_;
-		ID3D11DepthStencilStatePtr depth_stencil_state_cache_;
+		ID3D11RasterizerState* rasterizer_state_cache_;
+		ID3D11DepthStencilState* depth_stencil_state_cache_;
 		uint16_t stencil_ref_cache_;
-		ID3D11BlendStatePtr blend_state_cache_;
+		ID3D11BlendState* blend_state_cache_;
 		Color blend_factor_cache_;
 		uint32_t sample_mask_cache_;
-		ID3D11VertexShaderPtr vertex_shader_cache_;
-		ID3D11PixelShaderPtr pixel_shader_cache_;
-		ID3D11GeometryShaderPtr geometry_shader_cache_;
-		ID3D11ComputeShaderPtr compute_shader_cache_;
-		ID3D11HullShaderPtr hull_shader_cache_;
-		ID3D11DomainShaderPtr domain_shader_cache_;
+		ID3D11VertexShader* vertex_shader_cache_;
+		ID3D11PixelShader* pixel_shader_cache_;
+		ID3D11GeometryShader* geometry_shader_cache_;
+		ID3D11ComputeShader* compute_shader_cache_;
+		ID3D11HullShader* hull_shader_cache_;
+		ID3D11DomainShader* domain_shader_cache_;
 		RenderLayout::topology_type topology_type_cache_;
-		ID3D11InputLayoutPtr input_layout_cache_;
+		ID3D11InputLayout* input_layout_cache_;
 		D3D11_VIEWPORT viewport_cache_;
 		uint32_t num_so_buffs_;
 		std::vector<ID3D11Buffer*> vb_cache_;
 		std::vector<UINT> vb_stride_cache_;
 		std::vector<UINT> vb_offset_cache_;
-		ID3D11BufferPtr ib_cache_;
+		ID3D11Buffer* ib_cache_;
 
 		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, ShaderObject::ST_NumShaderTypes> shader_srvsrc_cache_;
 		std::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;

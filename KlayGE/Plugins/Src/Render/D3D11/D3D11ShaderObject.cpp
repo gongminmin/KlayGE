@@ -806,7 +806,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
-			ID3D11DevicePtr const & d3d_device = re.D3DDevice();
+			ID3D11Device* d3d_device = re.D3DDevice().get();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
 
 			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1377,14 +1377,14 @@ namespace KlayGE
 	void D3D11ShaderObject::Bind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
 
-		re.VSSetShader(vertex_shader_);
-		re.GSSetShader(geometry_shader_);
-		re.PSSetShader(pixel_shader_);
-		re.CSSetShader(compute_shader_);
-		re.HSSetShader(hull_shader_);
-		re.DSSetShader(domain_shader_);
+		re.VSSetShader(vertex_shader_.get());
+		re.GSSetShader(geometry_shader_.get());
+		re.PSSetShader(pixel_shader_.get());
+		re.CSSetShader(compute_shader_.get());
+		re.HSSetShader(hull_shader_.get());
+		re.DSSetShader(domain_shader_.get());
 
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
@@ -1438,7 +1438,7 @@ namespace KlayGE
 	void D3D11ShaderObject::Unbind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
