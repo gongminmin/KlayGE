@@ -625,7 +625,8 @@ namespace KlayGE
 		}
 
 		std::sort(render_queue_.begin(), render_queue_.end(),
-			[](auto const & lhs, auto const & rhs)
+			[](std::pair<RenderTechnique const *, std::vector<Renderable*>> const & lhs,
+				std::pair<RenderTechnique const *, std::vector<Renderable*>> const & rhs)
 			{
 				BOOST_ASSERT(lhs.first);
 				BOOST_ASSERT(rhs.first);

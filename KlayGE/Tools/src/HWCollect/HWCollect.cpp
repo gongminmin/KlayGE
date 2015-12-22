@@ -216,9 +216,11 @@ void DetectOSInfo(std::ostream& os)
 	case PROCESSOR_ARCHITECTURE_AMD64:
 		os << "x64";
 		break;
+#ifdef PROCESSOR_ARCHITECTURE_ARM64
 	case PROCESSOR_ARCHITECTURE_ARM64:
 		os << "arm64";
 		break;
+#endif
 
 	default:
 		os << "Unknown architecture";
