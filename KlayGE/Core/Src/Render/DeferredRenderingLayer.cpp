@@ -2118,8 +2118,10 @@ namespace KlayGE
 								this->AppendShadowingPassScanCode(vpi, i, li);
 							}
 						}
+#ifndef KLAYGE_SHIP
 						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
 							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 1, true));
+#endif
 						if (!(pvp.attrib & VPAM_NoGI))
 						{
 #ifndef KLAYGE_SHIP
