@@ -34,7 +34,7 @@
 #pragma once
 
 #include <boost/operators.hpp>
-#ifndef KLAYGE_COMPILER_MSVC
+#if !defined(KLAYGE_COMPILER_MSVC) && !defined(KLAYGE_CPU_ARM)
 #include <x86intrin.h>
 #endif
 
