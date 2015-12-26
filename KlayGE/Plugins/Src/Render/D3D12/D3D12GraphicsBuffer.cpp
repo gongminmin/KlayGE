@@ -133,6 +133,7 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+			res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
 			TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
@@ -179,6 +180,7 @@ namespace KlayGE
 
 				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 				res_desc.Width = sizeof(uint32_t);
+				res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 				TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 					&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 					IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));

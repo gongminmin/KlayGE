@@ -248,6 +248,7 @@ namespace KlayGE
 	{
 		d3d_texture_.reset();
 		d3d_texture_upload_heaps_.reset();
+		d3d_texture_readback_heaps_.reset();
 	}
 
 	bool D3D12Texture::HWResourceReady() const
@@ -475,6 +476,19 @@ namespace KlayGE
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture_upload_heaps)));
 		d3d_texture_upload_heaps_ = MakeCOMPtr(d3d_texture_upload_heaps);
 
+		D3D12_HEAP_PROPERTIES readback_heap_prop;
+		readback_heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
+		readback_heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		readback_heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		readback_heap_prop.CreationNodeMask = 0;
+		readback_heap_prop.VisibleNodeMask = 0;
+
+		ID3D12Resource* d3d_texture_readback_heaps;
+		TIF(device->CreateCommittedResource(&readback_heap_prop, D3D12_HEAP_FLAG_NONE, &buff_desc,
+			D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
+			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture_readback_heaps)));
+		d3d_texture_readback_heaps_ = MakeCOMPtr(d3d_texture_readback_heaps);
+
 		if (init_data != nullptr)
 		{
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
@@ -596,7 +610,7 @@ namespace KlayGE
 			src.SubresourceIndex = subres;
 
 			D3D12_TEXTURE_COPY_LOCATION dst;
-			dst.pResource = d3d_texture_upload_heaps_.get();
+			dst.pResource = d3d_texture_readback_heaps_.get();
 			dst.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
 			dst.PlacedFootprint = layout;
 
@@ -622,6 +636,19 @@ namespace KlayGE
 			+ x_offset * NumFormatBytes(format_);
 		row_pitch = layout.Footprint.RowPitch;
 		slice_pitch = layout.Footprint.RowPitch * layout.Footprint.Height;
+
+		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
+		{
+			d3d_texture_readback_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			uint8_t* src_p = p + layout.Offset + (z_offset * layout.Footprint.Height + y_offset) * layout.Footprint.RowPitch
+				+ x_offset * NumFormatBytes(format_);
+			uint8_t* dst_p = static_cast<uint8_t*>(data);
+			for (uint32_t z = 0; z < depth; ++ z)
+			{
+				memcpy(dst_p + z * slice_pitch, src_p + z * slice_pitch, row_pitch * height);
+			}
+			d3d_texture_readback_heaps_->Unmap(0, nullptr);
+		}
 	}
 
 	void D3D12Texture::DoUnmap(uint32_t subres)

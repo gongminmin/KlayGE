@@ -445,13 +445,13 @@ namespace KlayGE
 
 	void D3D12RenderEngine::SyncComputeCmd()
 	{
-		compute_cmd_fence_val_ = compute_cmd_fence_->Signal(Fence::FT_Render);
+		compute_cmd_fence_val_ = compute_cmd_fence_->Signal(Fence::FT_Compute);
 		compute_cmd_fence_->Wait(compute_cmd_fence_val_);
 	}
 
 	void D3D12RenderEngine::SyncCopyCmd()
 	{
-		copy_cmd_fence_val_ = copy_cmd_fence_->Signal(Fence::FT_Render);
+		copy_cmd_fence_val_ = copy_cmd_fence_->Signal(Fence::FT_Copy);
 		copy_cmd_fence_->Wait(copy_cmd_fence_val_);
 	}
 

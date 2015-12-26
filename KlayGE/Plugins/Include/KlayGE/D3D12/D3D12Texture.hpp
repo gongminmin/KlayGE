@@ -132,6 +132,7 @@ namespace KlayGE
 
 		ID3D12ResourcePtr d3d_texture_;
 		ID3D12ResourcePtr d3d_texture_upload_heaps_;
+		ID3D12ResourcePtr d3d_texture_readback_heaps_;
 
 		TextureMapAccess last_tma_;
 
