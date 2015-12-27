@@ -59,6 +59,8 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	print("Deploying OpenAL...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL32.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
+	for fname in glob.iglob("KlayGE/bin/win_%s/wrap_oal.%s" % (compiler_arch, dll_suffix)):
+		copy_to_dst(fname, bin_dst_dir);
 
 	print("Deploying Cg...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/cg.%s" % (compiler_arch, dll_suffix)):
