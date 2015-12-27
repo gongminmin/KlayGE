@@ -25,7 +25,7 @@ SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_
 SET(PACKAGE_COMMIT_ID "f7d36d421d912f072d237e775206c0b0407c239d")
 SET(PACKAGE_FILE_ID "9c35215570a3b9d569794f15b1bb1c87caa18dab")
 
-DOWNLOAD_PACKAGE("wpftoolkit" ${REL_PATH} ${PACKAGE_COMMIT_ID} ${PACKAGE_FILE_ID})
+DOWNLOAD_PACKAGE("wpftoolkit" ${REL_PATH} ${PACKAGE_COMMIT_ID} ${PACKAGE_FILE_ID} "Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock.Themes.Aero/AssemblyVersionInfo.cs")
 
 INCLUDE_EXTERNAL_MSPROJECT(
 	Xceed.Wpf.AvalonDock ${WPFTOOLKIT_PROJECT_DIR}/Main/Source/ExtendedWPFToolkitSolution/Src/Xceed.Wpf.AvalonDock/Xceed.Wpf.AvalonDock.csproj
