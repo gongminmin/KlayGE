@@ -31,6 +31,7 @@
 #include <KFL/KFL.hpp>
 
 #include <limits>
+#include <chrono>
 #ifdef KLAYGE_COMPILER_MSVC
 #include <windows.h>
 #endif

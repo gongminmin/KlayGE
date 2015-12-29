@@ -34,29 +34,9 @@
 #pragma once
 
 #include <boost/assert.hpp>
-#ifdef KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-	#include <thread>
-	#include <condition_variable>
-	#include <mutex>
-#else
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'lk'
-	#endif
-	#include <boost/thread.hpp>
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic pop
-	#endif
-	namespace std
-	{
-		using boost::thread;
-		using boost::condition_variable;
-		using boost::mutex;
-		using boost::unique_lock;
-		using boost::lock_guard;
-		namespace this_thread = boost::this_thread;
-	}
-#endif
+#include <thread>
+#include <condition_variable>
+#include <mutex>
 #ifdef KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 	#include <experimental/optional>
 #else

@@ -48,16 +48,6 @@
 	#define KLAYGE_CONSTEXPR
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-	#include <chrono>
-#else
-	#include <boost/chrono.hpp>
-	namespace std
-	{
-		namespace chrono = boost::chrono;
-	}
-#endif
-
 #if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
 		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
 		|| defined(KLAYGE_COMPILER_MSVC))

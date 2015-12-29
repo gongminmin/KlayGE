@@ -55,6 +55,7 @@
 //   auto-typed variables (N1984)
 //   Extern templates (N1987)
 //   Rvalue references (N2118)
+//   Variadic templates (N2242)
 //   Declared type of an expression (N2343)
 //   Standard Layout Types (N2342)
 //   Strongly-typed enums (N2347)
@@ -63,15 +64,18 @@
 //   Removal of auto as a storage-class specifier (N2546)
 //   Forward declarations for enums (N2764)
 //   New wording for C++11 lambdas (N2927)
+//   Explicit virtual overrides (N2928)
 //   Range-based for (N2930)
 //   <algorithm>
 //   <array>
 //   <atomic>
+//   <chrono>
 //   <cstdint>
 //   <functional>
 //   <memory>
 //   <random>
 //   <system_error>
+//   <thread>
 //   <tuple>
 //   <type_traits>
 //   <unordered_map>
@@ -100,9 +104,7 @@
 			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
 
-		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
@@ -125,11 +127,10 @@
 			#if __GLIBCXX__ < 20130322 // g++ 4.8
 				#error "Unsupported library version. Please install clang++ with g++ 4.8 or up."
 			#endif
-
-			#ifdef _GLIBCXX_HAS_GTHREADS
-				#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
+			#if !defined(_GLIBCXX_HAS_GTHREADS)
+				#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 			#endif
+
 			#if __GLIBCXX__ >= 20140422 // g++ 4.9
 				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 				#if __cplusplus > 201103L
@@ -167,13 +168,12 @@
 	#if !defined(__GXX_EXPERIMENTAL_CXX0X__) && (__cplusplus < 201103L)
 		#error "-std=c++11 or -std=c++0x must be turned on."
 	#endif
+	#if !defined(_GLIBCXX_HAS_GTHREADS)
+		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
+	#endif
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-	#ifdef _GLIBCXX_HAS_GTHREADS
-		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
-	#endif
 	#if KLAYGE_COMPILER_VERSION >= 49
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#if __cplusplus > 201103L
@@ -204,9 +204,7 @@
 		#error "Unsupported compiler version. Please install vc12 or up."
 	#endif
 
-	#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-	#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#if KLAYGE_COMPILER_VERSION >= 140
 		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
