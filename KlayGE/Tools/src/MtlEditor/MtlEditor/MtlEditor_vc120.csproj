@@ -178,8 +178,8 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Build\vc120_win_x64\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">
-      <Project>{db2419b1-8832-4c57-be0e-6fbc3afa51e5}</Project>
+    <ProjectReference Include="..\..\..\..\Build\vc120_win_x64\Tools\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">
+      <Project>{f568ebc5-ef23-3e88-8432-d2e2fe2d0fc0}</Project>
       <Name>MtlEditorCoreWrapper</Name>
     </ProjectReference>
   </ItemGroup>
