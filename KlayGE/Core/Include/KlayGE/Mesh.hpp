@@ -127,7 +127,7 @@ namespace KlayGE
 			mtl_id_ = mid;
 		}
 
-		virtual bool HWResourceReady() const KLAYGE_OVERRIDE
+		virtual bool HWResourceReady() const override
 		{
 			return hw_res_ready_;
 		}
@@ -218,10 +218,10 @@ namespace KlayGE
 		virtual bool Reflection() const;
 		virtual bool SimpleForward() const;
 
-		virtual bool HWResourceReady() const KLAYGE_OVERRIDE;
+		virtual bool HWResourceReady() const override;
 
 	protected:
-		virtual void UpdateBoundBox() KLAYGE_OVERRIDE;
+		virtual void UpdateBoundBox() override;
 		virtual void DoBuildModelInfo()
 		{
 		}

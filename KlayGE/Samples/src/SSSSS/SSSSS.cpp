@@ -43,7 +43,7 @@ namespace
 		{
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			StaticMesh::DoBuildMeshInfo();
 

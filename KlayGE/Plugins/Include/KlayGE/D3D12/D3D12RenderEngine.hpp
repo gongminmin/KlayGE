@@ -77,8 +77,8 @@ namespace KlayGE
 			return true;
 		}
 
-		void BeginFrame() KLAYGE_OVERRIDE;
-		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
+		void BeginFrame() override;
+		void UpdateGPUTimestampsFrequency() override;
 
 		IDXGIFactory4Ptr const & DXGIFactory() const;
 		ID3D12DevicePtr const & D3DDevice() const;
@@ -114,7 +114,7 @@ namespace KlayGE
 		void ForceFlush();
 		void ForceCPUGPUSync();
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE;
+		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
@@ -210,27 +210,27 @@ namespace KlayGE
 		D3D12AdapterList const & D3DAdapters() const;
 		D3D12AdapterPtr const & ActiveAdapter() const;
 
-		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) KLAYGE_OVERRIDE;
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) KLAYGE_OVERRIDE;
-		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) KLAYGE_OVERRIDE;
-		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) KLAYGE_OVERRIDE;
+		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) override;
+		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) override;
+		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) override;
 		virtual void DoDispatchIndirect(RenderTechnique const & tech,
-			GraphicsBufferPtr const & buff_args, uint32_t offset) KLAYGE_OVERRIDE;
-		virtual void DoResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
-		virtual void DoDestroy() KLAYGE_OVERRIDE;
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+			GraphicsBufferPtr const & buff_args, uint32_t offset) override;
+		virtual void DoResize(uint32_t width, uint32_t height) override;
+		virtual void DoDestroy() override;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 
 		void FillRenderDeviceCaps();
 
-		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
+		virtual void StereoscopicForLCDShutter(int32_t eye) override;
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) override;
 
 		void UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl);
 		void UpdateComputePSO(RenderPassPtr const & pass);

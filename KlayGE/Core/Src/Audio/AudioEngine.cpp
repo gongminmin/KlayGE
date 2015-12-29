@@ -53,10 +53,10 @@ namespace KlayGE
 			{ }
 
 	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 		}
 	};
@@ -105,7 +105,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::AddBuffer(size_t id, AudioBufferPtr const & buffer)
 	{
-		KLAYGE_EMPLACE(audioBufs_, id, buffer);
+		audioBufs_.emplace(id, buffer);
 	}
 
 	// 播放id所指定的声音

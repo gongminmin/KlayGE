@@ -379,7 +379,7 @@ namespace KlayGE
 			}
 		}
 
-		void OnRenderBegin() KLAYGE_OVERRIDE
+		void OnRenderBegin() override
 		{
 			PostProcess::OnRenderBegin();
 

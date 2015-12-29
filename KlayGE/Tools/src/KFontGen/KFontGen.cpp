@@ -918,7 +918,7 @@ int main(int argc, char* argv[])
 			unordered_map<int32_t, std::pair<int32_t, uint32_t>> char_index_advance;
 			for (size_t i = 0; i < advance.size(); ++ i)
 			{
-				KLAYGE_EMPLACE(char_index_advance, advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first));
+				char_index_advance.emplace(advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first));
 			}
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{

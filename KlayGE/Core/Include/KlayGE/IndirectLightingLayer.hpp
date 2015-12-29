@@ -67,12 +67,12 @@ namespace KlayGE
 	public:
 		MultiResSILLayer();
 
-		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) KLAYGE_OVERRIDE;
-		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) KLAYGE_OVERRIDE;
+		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) override;
+		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) override;
 
-		virtual void UpdateGBuffer(Camera const & vp_camera) KLAYGE_OVERRIDE;
-		virtual void UpdateRSM(Camera const & rsm_camera, LightSource const & light) KLAYGE_OVERRIDE;
-		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) KLAYGE_OVERRIDE;
+		virtual void UpdateGBuffer(Camera const & vp_camera) override;
+		virtual void UpdateRSM(Camera const & rsm_camera, LightSource const & light) override;
+		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) override;
 
 	private:
 		void ExtractVPLs(Camera const & rsm_camera, LightSource const & light);
@@ -115,12 +115,12 @@ namespace KlayGE
 	public:
 		SSGILayer();
 
-		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) KLAYGE_OVERRIDE;
-		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) KLAYGE_OVERRIDE;
+		virtual void GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) override;
+		virtual void RSM(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex) override;
 
-		virtual void UpdateGBuffer(Camera const & vp_camera) KLAYGE_OVERRIDE;
-		virtual void UpdateRSM(Camera const & rsm_camera, LightSource const & light) KLAYGE_OVERRIDE;
-		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) KLAYGE_OVERRIDE;
+		virtual void UpdateGBuffer(Camera const & vp_camera) override;
+		virtual void UpdateRSM(Camera const & rsm_camera, LightSource const & light) override;
+		virtual void CalcIndirectLighting(TexturePtr const & prev_shading_tex, float4x4 const & proj_to_prev) override;
 
 	private:
 		MultiResLayerPtr multi_res_layer_;

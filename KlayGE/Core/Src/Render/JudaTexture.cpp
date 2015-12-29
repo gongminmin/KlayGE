@@ -668,7 +668,7 @@ namespace KlayGE
 					memset(&(*data)[0], 0, full_tile_bytes);
 				}
 
-				iter = KLAYGE_EMPLACE(decoded_block_cache_, data_index, DecodedBlockInfo(data, decode_tick_)).first;
+				iter = decoded_block_cache_.emplace(data_index, DecodedBlockInfo(data, decode_tick_)).first;
 			}
 
 			return &(*iter->second.data)[0];
@@ -1366,7 +1366,7 @@ namespace KlayGE
 					{
 						if (neighbor_id_map.find(new_tile_id_with_neighbors[j]) == neighbor_id_map.end())
 						{
-							KLAYGE_EMPLACE(neighbor_id_map, new_tile_id_with_neighbors[j], static_cast<uint32_t>(neighbor_ids.size()));
+							neighbor_id_map.emplace(new_tile_id_with_neighbors[j], static_cast<uint32_t>(neighbor_ids.size()));
 							neighbor_ids.push_back(new_tile_id_with_neighbors[j]);
 						}
 					}
@@ -2602,7 +2602,7 @@ namespace KlayGE
 				0, 0, tile_x, tile_y, 1, 1,
 				0, 0, 0, 0, 1, 1);
 
-			KLAYGE_EMPLACE(tim, all_neighbor_ids[i], tile_info);
+			tim.emplace(all_neighbor_ids[i], tile_info);
 		}
 	}
 }

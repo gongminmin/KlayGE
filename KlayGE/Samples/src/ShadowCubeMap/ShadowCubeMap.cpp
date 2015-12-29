@@ -274,7 +274,7 @@ namespace
 			mesh_rl_ = rl_;
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			StaticMesh::DoBuildMeshInfo();
 

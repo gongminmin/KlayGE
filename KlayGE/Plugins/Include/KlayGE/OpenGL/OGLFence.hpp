@@ -46,9 +46,9 @@ namespace KlayGE
 		OGLFence();
 		virtual ~OGLFence();
 
-		virtual uint64_t Signal(FenceType ft) KLAYGE_OVERRIDE;
-		virtual void Wait(uint64_t id) KLAYGE_OVERRIDE;
-		virtual bool Completed(uint64_t id) KLAYGE_OVERRIDE;
+		virtual uint64_t Signal(FenceType ft) override;
+		virtual void Wait(uint64_t id) override;
+		virtual bool Completed(uint64_t id) override;
 
 	private:
 		std::map<uint64_t, GLsync> fences_;

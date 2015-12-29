@@ -33,11 +33,11 @@ namespace KlayGE
 			return MakeSharedPtr<OggVorbisSource>();
 		}
 
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 			// TODO
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 			// TODO
 		}

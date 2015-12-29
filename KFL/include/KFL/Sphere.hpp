@@ -88,9 +88,9 @@ namespace KlayGE
 			return radius_;
 		}
 
-		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT override;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT override;
+		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT override;
 
 		bool Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT;
 		bool Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT;

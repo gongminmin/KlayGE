@@ -210,7 +210,7 @@ namespace
 			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *pp_desc_.pp;
 		}

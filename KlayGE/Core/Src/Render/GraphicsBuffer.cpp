@@ -50,12 +50,12 @@ namespace KlayGE
 		{
 		}
 
-		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE
+		virtual void CreateHWResource(void const * init_data) override
 		{
 			KFL_UNUSED(init_data);
 		}
 
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE
+		virtual void DeleteHWResource() override
 		{
 		}
 	};

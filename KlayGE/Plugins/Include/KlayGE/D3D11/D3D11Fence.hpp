@@ -45,9 +45,9 @@ namespace KlayGE
 	public:
 		D3D11Fence();
 
-		virtual uint64_t Signal(FenceType ft) KLAYGE_OVERRIDE;
-		virtual void Wait(uint64_t id) KLAYGE_OVERRIDE;
-		virtual bool Completed(uint64_t id) KLAYGE_OVERRIDE;
+		virtual uint64_t Signal(FenceType ft) override;
+		virtual void Wait(uint64_t id) override;
+		virtual bool Completed(uint64_t id) override;
 
 	private:
 		std::map<uint64_t, ID3D11QueryPtr> fences_;

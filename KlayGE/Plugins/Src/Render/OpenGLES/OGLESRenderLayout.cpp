@@ -203,8 +203,8 @@ namespace KlayGE
 			{
 				glGenVertexArrays(1, &vao);
 				glBindVertexArray(vao);
-				
-				KLAYGE_EMPLACE(vaos_, so, vao);
+
+				vaos_.emplace(so, vao);
 				this->BindVertexStreams(so);
 			}
 			else

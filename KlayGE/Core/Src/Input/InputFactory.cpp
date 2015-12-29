@@ -35,10 +35,10 @@ namespace KlayGE
 			return InputEngine::NullObject();
 		}
 
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 		}
 	};

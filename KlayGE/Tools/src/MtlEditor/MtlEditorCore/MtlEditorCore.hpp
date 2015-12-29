@@ -24,7 +24,7 @@ namespace KlayGE
 	public:
 		explicit MtlEditorCore(void* native_wnd);
 
-		virtual bool ConfirmDevice() const KLAYGE_OVERRIDE;
+		virtual bool ConfirmDevice() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 
@@ -85,11 +85,11 @@ namespace KlayGE
 		void ClearHistroy();
 
 	private:
-		virtual void OnCreate() KLAYGE_OVERRIDE;
-		virtual void OnDestroy() KLAYGE_OVERRIDE;
-		virtual void OnResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
-		virtual void DoUpdateOverlay() KLAYGE_OVERRIDE;
-		virtual uint32_t DoUpdate(uint32_t pass) KLAYGE_OVERRIDE;
+		virtual void OnCreate() override;
+		virtual void OnDestroy() override;
+		virtual void OnResize(uint32_t width, uint32_t height) override;
+		virtual void DoUpdateOverlay() override;
+		virtual uint32_t DoUpdate(uint32_t pass) override;
 
 		void UpdateSelectedMesh();
 

@@ -79,7 +79,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE
+		virtual TexturePtr const & ScreenDepthStencilTexture() const override
 		{
 			static TexturePtr ret;
 			return ret;
@@ -99,43 +99,43 @@ namespace KlayGE
 		}
 
 	private:
-		virtual void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/) KLAYGE_OVERRIDE
+		virtual void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/) override
 		{
 		}
 
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/) KLAYGE_OVERRIDE
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/) override
 		{
 		}
 
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/) KLAYGE_OVERRIDE
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/) override
 		{
 		}
 
-		virtual void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/) KLAYGE_OVERRIDE
+		virtual void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/) override
 		{
 		}
 
-		virtual void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/) KLAYGE_OVERRIDE
+		virtual void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/) override
 		{
 		}
 
 		virtual void DoDispatchIndirect(RenderTechnique const & /*tech*/,
-			GraphicsBufferPtr const & /*buff_args*/, uint32_t /*offset*/) KLAYGE_OVERRIDE
+			GraphicsBufferPtr const & /*buff_args*/, uint32_t /*offset*/) override
 		{
 		}
 
-		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) KLAYGE_OVERRIDE
+		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) override
 		{
 		}
 
-		virtual void DoDestroy() KLAYGE_OVERRIDE
+		virtual void DoDestroy() override
 		{
 		}
 
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 		}
 	};

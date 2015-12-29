@@ -428,10 +428,10 @@ namespace KlayGE
 	public:
 		BicubicFilteringPostProcess();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
 		using PostProcess::InputPin;
 
-		virtual void SetParam(uint32_t index, float2 const & value) KLAYGE_OVERRIDE;
+		virtual void SetParam(uint32_t index, float2 const & value) override;
 		using PostProcess::SetParam;
 	};
 
@@ -442,7 +442,7 @@ namespace KlayGE
 
 		void ESMScaleFactor(float factor, Camera const & camera);
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
 		using PostProcess::InputPin;
 	};
 }

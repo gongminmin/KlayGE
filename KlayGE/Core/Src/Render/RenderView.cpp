@@ -35,7 +35,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Discard() KLAYGE_OVERRIDE
+		virtual void Discard() override
 		{
 		}
 
@@ -82,7 +82,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Discard() KLAYGE_OVERRIDE
+		virtual void Discard() override
 		{
 		}
 

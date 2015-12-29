@@ -93,7 +93,7 @@ namespace KlayGE
 		void Lambda(float lambda);
 
 		virtual void UpdateCascades(Camera const & camera, float4x4 const & light_view_proj,
-			float3 const & light_space_border) KLAYGE_OVERRIDE;
+			float3 const & light_space_border) override;
 
 	private:
 		float lambda_;
@@ -112,7 +112,7 @@ namespace KlayGE
 		void DepthTexture(TexturePtr const & depth_tex);
 
 		virtual void UpdateCascades(Camera const & camera, float4x4 const & light_view_proj,
-			float3 const & light_space_border) KLAYGE_OVERRIDE;
+			float3 const & light_space_border) override;
 
 	private:
 		TexturePtr depth_tex_;

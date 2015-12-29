@@ -44,7 +44,7 @@ class RenderPolygon : public KlayGE::StaticMesh
 public:
 	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
 
-	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
+	virtual void DoBuildMeshInfo() override;
 
 	virtual void OnRenderBegin();
 };

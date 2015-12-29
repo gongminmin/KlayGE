@@ -78,7 +78,7 @@ namespace KlayGE
 		void Begin();
 		void End();
 
-		double TimeElapsed() KLAYGE_OVERRIDE;
+		double TimeElapsed() override;
 
 	private:
 		ID3D12QueryHeapPtr timestamp_heap_;

@@ -660,7 +660,7 @@ namespace KlayGE
 							0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
 							0, 0, 0, 0, kfont_char_size, kfont_char_size);
 
-						KLAYGE_EMPLACE(cim, ch, charInfo);
+						cim.emplace(ch, charInfo);
 					}
 				}
 			}
@@ -810,7 +810,7 @@ namespace
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *font_desc_.kfont;
 		}

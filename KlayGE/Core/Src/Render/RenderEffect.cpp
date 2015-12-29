@@ -2734,7 +2734,7 @@ namespace KlayGE
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return effect_desc_.effect;
 		}

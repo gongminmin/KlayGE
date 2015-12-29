@@ -44,8 +44,8 @@ namespace KlayGE
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
 
-		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE;
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE;
+		virtual void CreateHWResource(void const * init_data) override;
+		virtual void DeleteHWResource() override;
 
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags);

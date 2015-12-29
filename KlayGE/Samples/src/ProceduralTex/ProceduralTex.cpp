@@ -41,7 +41,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
@@ -144,7 +144,7 @@ namespace
 			}
 		}
 
-		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) KLAYGE_OVERRIDE
+		virtual void SubThreadUpdate(float app_time, float /*elapsed_time*/) override
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)

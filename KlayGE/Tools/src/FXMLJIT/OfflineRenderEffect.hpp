@@ -251,7 +251,7 @@ namespace KlayGE
 				}
 			}
 
-			virtual RenderVariable& operator=(T const & value) KLAYGE_OVERRIDE
+			virtual RenderVariable& operator=(T const & value) override
 			{
 				if (in_cbuff_)
 				{
@@ -268,7 +268,7 @@ namespace KlayGE
 				return *this;
 			}
 
-			virtual void Value(T& val) const KLAYGE_OVERRIDE
+			virtual void Value(T& val) const override
 			{
 				if (in_cbuff_)
 				{
@@ -281,7 +281,7 @@ namespace KlayGE
 			}
 
 			virtual void BindToCBuffer(RenderEffectConstantBuffer* cbuff, uint32_t offset,
-				uint32_t stride) KLAYGE_OVERRIDE
+				uint32_t stride) override
 			{
 				if (!in_cbuff_)
 				{
@@ -296,21 +296,21 @@ namespace KlayGE
 				}
 			}
 
-			virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff) KLAYGE_OVERRIDE
+			virtual void RebindToCBuffer(RenderEffectConstantBuffer* cbuff) override
 			{
 				BOOST_ASSERT(in_cbuff_);
 				data_.cbuff_desc.cbuff = cbuff;
 			}
 
-			virtual bool InCBuffer() const KLAYGE_OVERRIDE
+			virtual bool InCBuffer() const override
 			{
 				return in_cbuff_;
 			}
-			virtual uint32_t CBufferOffset() const KLAYGE_OVERRIDE
+			virtual uint32_t CBufferOffset() const override
 			{
 				return data_.cbuff_desc.offset;
 			}
-			virtual uint32_t Stride() const KLAYGE_OVERRIDE
+			virtual uint32_t Stride() const override
 			{
 				return data_.cbuff_desc.stride;
 			}
@@ -357,8 +357,8 @@ namespace KlayGE
 		class RenderVariableFloat4x4 : public RenderVariableConcrete<float4x4>
 		{
 		public:
-			virtual RenderVariable& operator=(float4x4 const & value) KLAYGE_OVERRIDE;
-			virtual void Value(float4x4& val) const KLAYGE_OVERRIDE;
+			virtual RenderVariable& operator=(float4x4 const & value) override;
+			virtual void Value(float4x4& val) const override;
 		};
 
 		template <typename T>
@@ -370,7 +370,7 @@ namespace KlayGE
 			{
 			}
 
-			virtual RenderVariable& operator=(std::vector<T> const & value) KLAYGE_OVERRIDE
+			virtual RenderVariable& operator=(std::vector<T> const & value) override
 			{
 				if (this->in_cbuff_)
 				{
@@ -389,7 +389,7 @@ namespace KlayGE
 				return *this;
 			}
 
-			virtual void Value(std::vector<T>& val) const KLAYGE_OVERRIDE
+			virtual void Value(std::vector<T>& val) const override
 			{
 				if (this->in_cbuff_)
 				{
@@ -419,8 +419,8 @@ namespace KlayGE
 			{
 			}
 
-			virtual RenderVariable& operator=(std::vector<float4x4> const & value) KLAYGE_OVERRIDE;
-			virtual void Value(std::vector<float4x4>& val) const KLAYGE_OVERRIDE;
+			virtual RenderVariable& operator=(std::vector<float4x4> const & value) override;
+			virtual void Value(std::vector<float4x4>& val) const override;
 
 		private:
 			uint32_t size_;

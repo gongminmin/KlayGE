@@ -136,8 +136,8 @@ namespace KlayGE
 		void SetListenerOri(float3 const & face, float3 const & up);
 
 	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 	};
 }
 

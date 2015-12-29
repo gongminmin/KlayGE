@@ -58,7 +58,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -113,7 +113,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -218,7 +218,7 @@ namespace
 			renderable_ = ra;
 		}
 
-		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) KLAYGE_OVERRIDE
+		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) override
 		{
 			last_mats_.push_back(model_);
 

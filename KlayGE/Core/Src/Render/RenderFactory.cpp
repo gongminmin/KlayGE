@@ -101,7 +101,7 @@ namespace KlayGE
 			return RenderLayout::NullObject();
 		}
 
-		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
+		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) override
 		{
 			KFL_UNUSED(usage);
 			KFL_UNUSED(access_hint);
@@ -109,7 +109,7 @@ namespace KlayGE
 			KFL_UNUSED(fmt);
 			return GraphicsBuffer::NullObject();
 		}
-		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
+		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) override
 		{
 			KFL_UNUSED(usage);
 			KFL_UNUSED(access_hint);
@@ -117,7 +117,7 @@ namespace KlayGE
 			KFL_UNUSED(fmt);
 			return GraphicsBuffer::NullObject();
 		}
-		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
+		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) override
 		{
 			KFL_UNUSED(usage);
 			KFL_UNUSED(access_hint);
@@ -141,7 +141,7 @@ namespace KlayGE
 			return Query::NullObject();
 		}
 
-		virtual FencePtr MakeFence() KLAYGE_OVERRIDE
+		virtual FencePtr MakeFence() override
 		{
 			return Fence::NullObject();
 		}
@@ -283,10 +283,10 @@ namespace KlayGE
 		}
 
 	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 		}
 	};
@@ -409,7 +409,7 @@ namespace KlayGE
 		if (iter == rs_pool_.end())
 		{
 			ret = this->DoMakeRasterizerStateObject(desc);
-			KLAYGE_EMPLACE(rs_pool_, desc, ret);
+			rs_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -427,7 +427,7 @@ namespace KlayGE
 		if (iter == dss_pool_.end())
 		{
 			ret = this->DoMakeDepthStencilStateObject(desc);
-			KLAYGE_EMPLACE(dss_pool_, desc, ret);
+			dss_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -445,7 +445,7 @@ namespace KlayGE
 		if (iter == bs_pool_.end())
 		{
 			ret = this->DoMakeBlendStateObject(desc);
-			KLAYGE_EMPLACE(bs_pool_, desc, ret);
+			bs_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -463,7 +463,7 @@ namespace KlayGE
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);
-			KLAYGE_EMPLACE(ss_pool_, desc, ret);
+			ss_pool_.emplace(desc, ret);
 		}
 		else
 		{

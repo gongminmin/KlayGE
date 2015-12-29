@@ -79,7 +79,7 @@ namespace KlayGE
 		T Width() const KLAYGE_NOEXCEPT;
 		T Height() const KLAYGE_NOEXCEPT;
 		T Depth() const KLAYGE_NOEXCEPT;
-		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT override;
 
 		Vector_T<T, 3> const LeftBottomNear() const KLAYGE_NOEXCEPT;
 		Vector_T<T, 3> const LeftTopNear() const KLAYGE_NOEXCEPT;
@@ -109,8 +109,8 @@ namespace KlayGE
 		Vector_T<T, 3> Center() const KLAYGE_NOEXCEPT;
 		Vector_T<T, 3> HalfSize() const KLAYGE_NOEXCEPT;
 
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT override;
+		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT override;
 
 		bool Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT;
 		bool Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT;

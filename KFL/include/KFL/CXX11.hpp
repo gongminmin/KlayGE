@@ -42,13 +42,6 @@
 	#define KLAYGE_NOEXCEPT_IF(predicate)
 	#define KLAYGE_NOEXCEPT_EXPR(expression) false
 #endif
-#ifdef KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-	#define KLAYGE_OVERRIDE override
-	#define KLAYGE_FINAL final
-#else
-	#define KLAYGE_OVERRIDE
-	#define KLAYGE_FINAL
-#endif
 #ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CONSTEXPR constexpr
 #else
@@ -63,12 +56,6 @@
 	{
 		namespace chrono = boost::chrono;
 	}
-#endif
-
-#ifdef KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
-	#define KLAYGE_EMPLACE(container, key, value) (container).emplace((key), (value))
-#else
-	#define KLAYGE_EMPLACE(container, key, value) (container).insert(std::make_pair((key), (value)))
 #endif
 
 #ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT

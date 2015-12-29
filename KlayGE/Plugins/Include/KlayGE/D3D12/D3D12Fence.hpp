@@ -46,9 +46,9 @@ namespace KlayGE
 		D3D12Fence();
 		virtual ~D3D12Fence();
 
-		virtual uint64_t Signal(FenceType ft) KLAYGE_OVERRIDE;
-		virtual void Wait(uint64_t id) KLAYGE_OVERRIDE;
-		virtual bool Completed(uint64_t id) KLAYGE_OVERRIDE;
+		virtual uint64_t Signal(FenceType ft) override;
+		virtual void Wait(uint64_t id) override;
+		virtual bool Completed(uint64_t id) override;
 
 		ID3D12FencePtr const & D3DFence() const
 		{

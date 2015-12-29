@@ -92,7 +92,7 @@ namespace
 			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1.0f / camera.FarPlane());
 		}
 
-		virtual void Pass(PassType type) KLAYGE_OVERRIDE
+		virtual void Pass(PassType type) override
 		{
 			switch (type)
 			{

@@ -19,7 +19,7 @@ namespace KlayGE
 		ProceduralTerrain();
 
 	protected:
-		virtual void FlushTerrainData() KLAYGE_OVERRIDE;
+		virtual void FlushTerrainData() override;
 
 	private:
 		PostProcessPtr height_pp_;

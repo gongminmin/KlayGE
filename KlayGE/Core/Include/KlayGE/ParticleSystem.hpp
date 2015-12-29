@@ -285,8 +285,8 @@ namespace KlayGE
 			return updaters_[index];
 		}
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void SubThreadUpdate(float app_time, float elapsed_time) override;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		uint32_t NumParticles() const
 		{
@@ -367,10 +367,10 @@ namespace KlayGE
 	public:
 		explicit PointParticleEmitter(SceneObjectPtr const & ps);
 
-		virtual std::string const & Type() const KLAYGE_OVERRIDE;
-		virtual ParticleEmitterPtr Clone() KLAYGE_OVERRIDE;
+		virtual std::string const & Type() const override;
+		virtual ParticleEmitterPtr Clone() override;
 
-		virtual void Emit(Particle& par) KLAYGE_OVERRIDE;
+		virtual void Emit(Particle& par) override;
 
 	private:
 		float RandomGen();
@@ -385,8 +385,8 @@ namespace KlayGE
 	public:
 		explicit PolylineParticleUpdater(SceneObjectPtr const & ps);
 
-		virtual std::string const & Type() const KLAYGE_OVERRIDE;
-		virtual ParticleUpdaterPtr Clone() KLAYGE_OVERRIDE;
+		virtual std::string const & Type() const override;
+		virtual ParticleUpdaterPtr Clone() override;
 
 		void SizeOverLife(std::vector<float2> const & size_over_life)
 		{
@@ -416,7 +416,7 @@ namespace KlayGE
 			return opacity_over_life_;
 		}
 
-		virtual void Update(Particle& par, float elapse_time) KLAYGE_OVERRIDE;
+		virtual void Update(Particle& par, float elapse_time) override;
 
 	private:
 		std::mutex update_mutex_;

@@ -119,8 +119,8 @@ namespace KlayGE
 		virtual ScriptModulePtr CreateModule(std::string const & name);
 
 	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 	};
 }
 

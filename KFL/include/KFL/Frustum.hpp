@@ -53,10 +53,10 @@ namespace KlayGE
 
 		void ClipMatrix(Matrix4_T<T> const & clip, Matrix4_T<T> const & inv_clip) KLAYGE_NOEXCEPT;
 
-		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT override;
 
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual float MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT override;
+		virtual float MaxRadiusSq() const KLAYGE_NOEXCEPT override;
 
 		void FrustumPlane(uint32_t index, Plane_T<T> const & plane) KLAYGE_NOEXCEPT
 		{

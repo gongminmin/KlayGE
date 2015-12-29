@@ -298,7 +298,7 @@ namespace KlayGE
 		}
 
 		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids) KLAYGE_OVERRIDE
+			std::vector<uint32_t> const & shader_desc_ids) override
 		{
 			KFL_UNUSED(res);
 			KFL_UNUSED(type);
@@ -308,7 +308,7 @@ namespace KlayGE
 			return true;
 		}
 
-		virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE
+		virtual void StreamOut(std::ostream& os, ShaderType type) override
 		{
 			KFL_UNUSED(os);
 			KFL_UNUSED(type);

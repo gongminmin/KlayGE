@@ -486,7 +486,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
-			return KLAYGE_EMPLACE(input_layout_bank_, signature, ret).first->second;
+			return input_layout_bank_.emplace(signature, ret).first->second;
 		}
 	}
 

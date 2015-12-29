@@ -129,8 +129,8 @@ namespace KlayGE
 	public:
 		TexCompressionETC1();
 
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
-		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
+		virtual void DecodeBlock(void* output, void const * input) override;
 
 		uint64_t EncodeETC1BlockInternal(ETC1Block& output, ARGBColor32 const * argb, TexCompressionMethod method);
 		void DecodeETCIndividualModeInternal(ARGBColor32* argb, ETC1Block const & etc1) const;
@@ -210,8 +210,8 @@ namespace KlayGE
 	public:
 		TexCompressionETC2RGB8();
 
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
-		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
+		virtual void DecodeBlock(void* output, void const * input) override;
 
 		void DecodeETCTModeInternal(ARGBColor32* argb, ETC2TModeBlock const & etc2, bool alpha);
 		void DecodeETCHModeInternal(ARGBColor32* argb, ETC2HModeBlock const & etc2, bool alpha);
@@ -226,8 +226,8 @@ namespace KlayGE
 	public:
 		TexCompressionETC2RGB8A1();
 
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) KLAYGE_OVERRIDE;
-		virtual void DecodeBlock(void* output, void const * input) KLAYGE_OVERRIDE;
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
+		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
 		TexCompressionETC1Ptr etc1_codec_;

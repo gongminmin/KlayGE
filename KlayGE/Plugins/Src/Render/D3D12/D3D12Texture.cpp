@@ -721,7 +721,7 @@ namespace KlayGE
 			}
 
 			D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(d3d_texture_, desc);
-			return KLAYGE_EMPLACE(d3d_sr_views_, hash_val, sr_view).first->second;
+			return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
 		}
 		else
 		{
@@ -745,7 +745,7 @@ namespace KlayGE
 			}
 
 			D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
-			return KLAYGE_EMPLACE(d3d_ua_views_, hash_val, ua_view).first->second;
+			return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 		}
 		else
 		{
@@ -769,7 +769,7 @@ namespace KlayGE
 			}
 
 			D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
-			return KLAYGE_EMPLACE(d3d_rt_views_, hash_val, rt_view).first->second;
+			return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 		}
 		else
 		{
@@ -793,7 +793,7 @@ namespace KlayGE
 			}
 
 			D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
-			return KLAYGE_EMPLACE(d3d_ds_views_, hash_val, ds_view).first->second;
+			return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 		}
 		else
 		{

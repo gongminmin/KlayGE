@@ -37,7 +37,7 @@ namespace
 			technique_ = special_shading_tech_;
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			StaticMesh::DoBuildMeshInfo();
 
@@ -161,7 +161,7 @@ namespace
 		}
 
 	private:
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			StaticMesh::DoBuildMeshInfo();
 

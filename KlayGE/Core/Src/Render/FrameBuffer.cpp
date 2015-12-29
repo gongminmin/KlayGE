@@ -33,7 +33,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Discard(uint32_t /*flags*/) KLAYGE_OVERRIDE
+		virtual void Discard(uint32_t /*flags*/) override
 		{
 		}
 	};

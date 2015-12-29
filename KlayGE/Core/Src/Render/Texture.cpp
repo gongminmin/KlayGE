@@ -1013,7 +1013,7 @@ namespace
 			return true;
 		}
 
-		virtual std::shared_ptr<void> CreateResource() KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> CreateResource() override
 		{
 			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
 
@@ -1170,7 +1170,7 @@ namespace
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *tex_desc_.tex;
 		}
@@ -2933,14 +2933,14 @@ namespace KlayGE
 		{
 		}
 
-		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE
+		virtual void CreateHWResource(ElementInitData const * init_data) override
 		{
 			KFL_UNUSED(init_data);
 		}
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE
+		virtual void DeleteHWResource() override
 		{
 		}
-		virtual bool HWResourceReady() const KLAYGE_OVERRIDE
+		virtual bool HWResourceReady() const override
 		{
 			return true;
 		}

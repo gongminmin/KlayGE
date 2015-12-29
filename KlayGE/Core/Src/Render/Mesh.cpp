@@ -111,7 +111,7 @@ namespace
 			return false;
 		}
 
-		virtual std::shared_ptr<void> CreateResource() KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> CreateResource() override
 		{
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(L"Model");
 			*model_desc_.model = model;
@@ -270,7 +270,7 @@ namespace
 			return std::static_pointer_cast<void>(model);
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *model_desc_.model;
 		}
@@ -1450,7 +1450,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints.size(); ++ i)
 		{
 			int joint_id = obj.AllocJoint();
-			KLAYGE_EMPLACE(joint_map, i, joint_id);
+			joint_map.emplace(i, joint_id);
 
 			int parent_id = -1;
 			if (joints[i].parent != -1)
@@ -1465,7 +1465,7 @@ namespace KlayGE
 		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
 			int mtl_id = obj.AllocMaterial();
-			KLAYGE_EMPLACE(mtl_map, i, mtl_id);
+			mtl_map.emplace(i, mtl_id);
 
 			float3 ambient = mtls[i]->ambient;
 			float3 diffuse = mtls[i]->diffuse;

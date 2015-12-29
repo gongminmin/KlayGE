@@ -37,15 +37,15 @@ namespace KlayGE
 		}
 
 	private:
-		virtual AudioEnginePtr MakeAudioEngine() KLAYGE_OVERRIDE
+		virtual AudioEnginePtr MakeAudioEngine() override
 		{
 			return AudioEngine::NullObject();
 		}
 
-		virtual void DoSuspend() KLAYGE_OVERRIDE
+		virtual void DoSuspend() override
 		{
 		}
-		virtual void DoResume() KLAYGE_OVERRIDE
+		virtual void DoResume() override
 		{
 		}
 	};

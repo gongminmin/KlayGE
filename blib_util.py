@@ -211,7 +211,7 @@ class build_info:
 				if target_api_level >= 21:
 					toolset = "4.9"
 				else:
-					toolset = "4.6"
+					toolset = "4.8"
 				
 		if "" == archs:
 			archs = cfg_build.arch

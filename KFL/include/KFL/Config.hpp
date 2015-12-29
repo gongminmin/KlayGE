@@ -92,7 +92,6 @@
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-	#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
 	#define KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 
 	#if defined(__APPLE__)
@@ -103,7 +102,6 @@
 		#endif
 
 		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
@@ -126,18 +124,15 @@
 		#endif
 
 		#ifdef __GLIBCXX__
-			#if __GLIBCXX__ < 20080306 // g++ 4.3
-				#error "Unsupported library version. Please install clang++ with g++ 4.3 or up."
+			#if __GLIBCXX__ < 20130322 // g++ 4.8
+				#error "Unsupported library version. Please install clang++ with g++ 4.8 or up."
 			#endif
 
 			#ifdef _GLIBCXX_HAS_GTHREADS
 				#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 				#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 			#endif
-			#if __GLIBCXX__ >= 20130322 // g++ 4.8
-				#define KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
-				#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
-			#endif
+			#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 			#if __GLIBCXX__ >= 20140422 // g++ 4.9
 				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 				#if __cplusplus > 201103L
@@ -166,10 +161,10 @@
 
 	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 
-	#if GCC_VERSION >= 46
+	#if GCC_VERSION >= 48
 		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
-		#error "Unsupported compiler version. Please install g++ 4.6 or up."
+		#error "Unsupported compiler version. Please install g++ 4.8 or up."
 	#endif
 
 	#if !defined(__GXX_EXPERIMENTAL_CXX0X__) && (__cplusplus < 201103L)
@@ -183,13 +178,7 @@
 		#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
 		#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#endif
-	#if KLAYGE_COMPILER_VERSION >= 47
-		#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
-	#endif
-	#if KLAYGE_COMPILER_VERSION >= 48
-		#define KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
-		#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
-	#endif
+	#define KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
 	#if KLAYGE_COMPILER_VERSION >= 49
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#if __cplusplus > 201103L
@@ -222,9 +211,7 @@
 		#error "Unsupported compiler version. Please install vc11 or up."
 	#endif
 
-	#define KLAYGE_CXX11_CORE_OVERRIDE_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_CHRONO_SUPPORT
-	#define KLAYGE_CXX11_LIBRARY_EMPLACE_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#define KLAYGE_CXX11_LIBRARY_THREAD_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT

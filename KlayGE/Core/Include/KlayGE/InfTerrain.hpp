@@ -56,7 +56,7 @@ namespace KlayGE
 		InfTerrainSceneObject();
 		virtual ~InfTerrainSceneObject();
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
 
 	protected:
 		float base_level_;
@@ -167,9 +167,9 @@ namespace KlayGE
 		{
 		}
 
-		virtual void Render() KLAYGE_OVERRIDE;
+		virtual void Render() override;
 
-		virtual void ModelMatrix(float4x4 const & mat) KLAYGE_OVERRIDE;
+		virtual void ModelMatrix(float4x4 const & mat) override;
 
 		void Tessellation(bool tess);
 		void ShowPatches(bool sp);
@@ -184,7 +184,7 @@ namespace KlayGE
 		float GetHeight(float x, float z);
 
 	protected:
-		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect) KLAYGE_OVERRIDE;
+		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect) override;
 		void CreateNonTessIB();
 		void CreateNonTessVIDVB();
 		void CreateTessIB();
@@ -255,7 +255,7 @@ namespace KlayGE
 		explicit HQTerrainSceneObject(RenderablePtr const & renderable);
 		virtual ~HQTerrainSceneObject();
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Tessellation(bool tess);
 		void ShowPatches(bool sp);
