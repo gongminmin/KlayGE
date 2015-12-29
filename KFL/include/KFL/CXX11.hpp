@@ -58,25 +58,6 @@
 	}
 #endif
 
-#ifdef KLAYGE_CXX11_LIBRARY_MEM_FN_SUPPORT
-	#include <functional>
-	namespace KlayGE
-	{
-		using std::mem_fn;
-	}
-#else
-	#if defined(KLAYGE_PLATFORM_WIN32) && defined(KLAYGE_CPU_X86)
-		#ifndef BOOST_MEM_FN_ENABLE_STDCALL
-			#define BOOST_MEM_FN_ENABLE_STDCALL
-		#endif
-	#endif
-	#include <boost/mem_fn.hpp>
-	namespace KlayGE
-	{
-		using boost::mem_fn;
-	}
-#endif
-
 #if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
 		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
 		|| defined(KLAYGE_COMPILER_MSVC))
