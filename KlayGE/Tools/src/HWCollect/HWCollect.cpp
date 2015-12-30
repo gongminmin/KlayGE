@@ -34,6 +34,7 @@
 #include <KFL/CpuInfo.hpp>
 #include <KlayGE/HWDetect.hpp>
 
+#include <KlayGE/SALWrapper.hpp>
 #if defined KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
 	#include <dxgi1_2.h>
