@@ -6,12 +6,8 @@ import os, sys
 from blib_util import *
 
 def build_Boost(build_info, compiler_info):
-	with_atomic = True
-	with_chrono = True
-	with_date_time = True
 	with_filesystem = True
 	with_system = True
-	with_thread = True
 	if compiler_info.is_dev_platform:
 		with_program_options = True
 		with_regex = True
@@ -20,35 +16,13 @@ def build_Boost(build_info, compiler_info):
 		with_program_options = False
 		with_regex = False
 		with_test = False
-	if ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
-		with_atomic = False
-		with_chrono = False
-		with_date_time = False
+	if "vc" == build_info.compiler_name:
 		with_filesystem = False
 		with_regex = False
 		with_system = False
-		with_thread = False
 
 	need_install = False
-	additional_options = " -DWITH_ATOMIC:BOOL="
-	if with_atomic:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_CHRONO:BOOL="
-	if with_chrono:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_DATE_TIME:BOOL="
-	if with_date_time:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_FILESYSTEM:BOOL="
+	additional_options = " -DWITH_FILESYSTEM:BOOL="
 	if with_filesystem:
 		additional_options += "\"ON\""
 		need_install = True
@@ -74,12 +48,6 @@ def build_Boost(build_info, compiler_info):
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_TEST:BOOL="
 	if with_test:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_THREAD:BOOL="
-	if with_thread:
 		additional_options += "\"ON\""
 		need_install = True
 	else:
@@ -167,7 +135,7 @@ def build_external_libs(build_info):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
 
-		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name) and (build_info.compiler_version >= 110):
+		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
 			print("\nSeting up wpftoolkit...\n")
 			setup_wpftoolkit(build_info, compiler_info)
 
