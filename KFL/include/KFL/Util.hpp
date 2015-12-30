@@ -180,15 +180,47 @@ namespace KlayGE
 	void WriteShortString(std::ostream& os, std::string const & str);
 
 	template <typename T, typename... Args>
-	inline std::shared_ptr<T> MakeSharedPtr(Args&& ... args)
+	inline std::shared_ptr<T> MakeSharedPtrHelper(std::false_type, Args&&... args)
 	{
-		return std::shared_ptr<T>(new T(std::forward<Args>(args)...), std::default_delete<T>());
+		return std::shared_ptr<T>(new T(std::forward<Args>(args)...));
 	}
 
 	template <typename T, typename... Args>
-	inline std::unique_ptr<T> MakeUniquePtr(Args&& ... args)
+	inline std::shared_ptr<T> MakeSharedPtrHelper(std::true_type, Args&&... args)
 	{
-		return std::unique_ptr<T>(new T(std::forward<Args>(args)...), std::default_delete<T>());
+		static_assert(0 == std::extent<T>::value,
+			"shared_ptr<T[N]>() is forbidden, please use shared_ptr<T[]>().");
+
+		typedef typename std::remove_extent<T>::type U;
+		return std::shared_ptr<T>(new U[sizeof...(Args)]{std::forward<Args>(args)...});
+	}
+
+	template <typename T, typename... Args>
+	inline std::shared_ptr<T> MakeSharedPtr(Args&&... args)
+	{
+		return MakeSharedPtrHelper<T>(std::is_array<T>(), std::forward<Args>(args)...);
+	}
+
+	template <typename T, typename... Args>
+	inline std::unique_ptr<T> MakeUniquePtrHelper(std::false_type, Args&&... args)
+	{
+		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+	}
+
+	template <typename T, typename... Args>
+	inline std::unique_ptr<T> MakeUniquePtrHelper(std::true_type, Args&&... args)
+	{
+		static_assert(0 == std::extent<T>::value,
+			"make_unique<T[N]>() is forbidden, please use make_unique<T[]>().");
+
+		typedef typename std::remove_extent<T>::type U;
+		return std::unique_ptr<T>(new U[sizeof...(Args)]{std::forward<Args>(args)...});
+	}
+
+	template <typename T, typename... Args>
+	inline std::unique_ptr<T> MakeUniquePtr(Args&&... args)
+	{
+		return MakeUniquePtrHelper<T>(std::is_array<T>(), std::forward<Args>(args)...);
 	}
 
 	#define PRIME_NUM 0x9e3779b9
