@@ -46,7 +46,7 @@
 #define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
 #define KFL_DO_JOIN2(X, Y) X##Y
 
-// KlayGE requires vc 11.0+, g++ 4.6+, clang 3.4+, with C++11 option on.
+// KlayGE requires vc 12.0+, g++ 4.8+, clang 3.4+, with C++11 and C++14 option on.
 
 // All those C++11 features are supported by those compilers. Use them safely without wrapper.
 //   Static assertions (N1720)
@@ -105,6 +105,9 @@
 		#endif
 
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+		#if __cplusplus >= 201402L
+			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
+		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
@@ -136,6 +139,9 @@
 				#if __cplusplus > 201103L
 					#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 				#endif
+				#if __cplusplus >= 201402L
+					#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
+				#endif
 			#endif
 		#endif
 
@@ -165,7 +171,7 @@
 		#error "Unsupported compiler version. Please install g++ 4.8 or up."
 	#endif
 
-	#if !defined(__GXX_EXPERIMENTAL_CXX0X__) && (__cplusplus < 201103L)
+	#if __cplusplus < 201103L
 		#error "-std=c++11 or -std=c++0x must be turned on."
 	#endif
 	#if !defined(_GLIBCXX_HAS_GTHREADS)
@@ -178,6 +184,9 @@
 		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#if __cplusplus > 201103L
 			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+		#endif
+		#if __cplusplus >= 201402L
+			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
 		#endif
 	#endif
 
@@ -206,6 +215,7 @@
 
 	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
+	#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
 	#if KLAYGE_COMPILER_VERSION >= 140
 		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT

@@ -180,41 +180,33 @@ namespace KlayGE
 	void WriteShortString(std::ostream& os, std::string const & str);
 
 	template <typename T, typename... Args>
-	inline std::shared_ptr<T> MakeSharedPtrHelper(std::false_type, Args&&... args)
-	{
-		return std::shared_ptr<T>(new T(std::forward<Args>(args)...));
-	}
-
-	template <typename T, typename... Args>
-	inline std::shared_ptr<T> MakeSharedPtrHelper(std::true_type, Args&&... args)
-	{
-		static_assert(0 == std::extent<T>::value,
-			"shared_ptr<T[N]>() is forbidden, please use shared_ptr<T[]>().");
-
-		typedef typename std::remove_extent<T>::type U;
-		return std::shared_ptr<T>(new U[sizeof...(Args)]{std::forward<Args>(args)...});
-	}
-
-	template <typename T, typename... Args>
 	inline std::shared_ptr<T> MakeSharedPtr(Args&&... args)
 	{
-		return MakeSharedPtrHelper<T>(std::is_array<T>(), std::forward<Args>(args)...);
+		return std::make_shared<T>(std::forward<Args>(args)...);
 	}
 
 	template <typename T, typename... Args>
 	inline std::unique_ptr<T> MakeUniquePtrHelper(std::false_type, Args&&... args)
 	{
+#ifdef KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
+		return std::make_unique<T>(std::forward<Args>(args)...);
+#else
 		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+#endif
 	}
 
 	template <typename T, typename... Args>
-	inline std::unique_ptr<T> MakeUniquePtrHelper(std::true_type, Args&&... args)
+	inline std::unique_ptr<T> MakeUniquePtrHelper(std::true_type, size_t size)
 	{
 		static_assert(0 == std::extent<T>::value,
 			"make_unique<T[N]>() is forbidden, please use make_unique<T[]>().");
 
+#ifdef KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
+		return std::make_unique<T>(size);
+#else
 		typedef typename std::remove_extent<T>::type U;
-		return std::unique_ptr<T>(new U[sizeof...(Args)]{std::forward<Args>(args)...});
+		return std::unique_ptr<T>(new U[size]());
+#endif
 	}
 
 	template <typename T, typename... Args>
