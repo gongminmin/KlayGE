@@ -6,7 +6,14 @@
 #include <KFL/Half.hpp>
 
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
+#endif
 #include <boost/test/unit_test.hpp>
+#ifdef KLAYGE_COMPILER_CLANG
+#pragma clang diagnostic pop
+#endif
 
 #include <vector>
 #include <string>

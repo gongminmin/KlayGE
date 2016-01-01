@@ -127,7 +127,6 @@ namespace KlayGE
 
 		TexturePtr g_buffer_rt0_tex_;
 		TexturePtr g_buffer_depth_tex_;
-		Camera const * g_buffer_camera_;
 
 		PostProcessPtr ssgi_pp_;
 		PostProcessPtr ssgi_blur_pp_;
