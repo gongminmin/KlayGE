@@ -32,8 +32,6 @@ namespace KlayGE
 		{
 		}
 
-		static InputFactoryPtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 		InputEngine& InputEngineInstance();
 

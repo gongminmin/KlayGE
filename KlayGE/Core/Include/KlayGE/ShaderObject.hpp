@@ -98,8 +98,6 @@ namespace KlayGE
 		{
 		}
 
-		static ShaderObjectPtr NullObject();
-
 		virtual bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block) = 0;
 

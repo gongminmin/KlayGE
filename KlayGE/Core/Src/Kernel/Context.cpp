@@ -835,7 +835,7 @@ namespace KlayGE
 
 	void Context::LoadRenderFactory(std::string const & rf_name)
 	{
-		render_factory_ = RenderFactory::NullObject();
+		render_factory_.reset();
 
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		render_loader_.Free();
@@ -864,7 +864,7 @@ namespace KlayGE
 
 	void Context::LoadAudioFactory(std::string const & af_name)
 	{
-		audio_factory_ = AudioFactory::NullObject();
+		audio_factory_.reset();
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
@@ -887,7 +887,7 @@ namespace KlayGE
 
 	void Context::LoadInputFactory(std::string const & if_name)
 	{
-		input_factory_ = InputFactory::NullObject();
+		input_factory_.reset();
 
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		input_loader_.Free();
@@ -916,7 +916,7 @@ namespace KlayGE
 
 	void Context::LoadShowFactory(std::string const & sf_name)
 	{
-		show_factory_ = ShowFactory::NullObject();
+		show_factory_.reset();
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
@@ -939,7 +939,7 @@ namespace KlayGE
 
 	void Context::LoadScriptFactory(std::string const & sf_name)
 	{
-		script_factory_ = ScriptFactory::NullObject();
+		script_factory_.reset();
 		script_loader_.Free();
 
 		std::string script_path = ResLoader::Instance().Locate("Script");
@@ -991,7 +991,7 @@ namespace KlayGE
 
 	void Context::LoadAudioDataSourceFactory(std::string const & adsf_name)
 	{
-		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
+		audio_data_src_factory_.reset();
 		ads_loader_.Free();
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");

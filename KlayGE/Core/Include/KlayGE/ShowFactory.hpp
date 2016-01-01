@@ -29,8 +29,6 @@ namespace KlayGE
 		{
 		}
 
-		static ShowFactoryPtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 		ShowEngine& ShowEngineInstance();
 

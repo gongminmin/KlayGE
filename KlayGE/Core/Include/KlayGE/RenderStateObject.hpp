@@ -321,8 +321,6 @@ namespace KlayGE
 			return desc_;
 		}
 
-		static RasterizerStateObjectPtr NullObject();
-
 		virtual void Active() = 0;
 
 	protected:
@@ -345,8 +343,6 @@ namespace KlayGE
 		{
 			return desc_;
 		}
-
-		static DepthStencilStateObjectPtr NullObject();
 
 		virtual void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref) = 0;
 
@@ -371,8 +367,6 @@ namespace KlayGE
 			return desc_;
 		}
 
-		static BlendStateObjectPtr NullObject();
-
 		virtual void Active(Color const & blend_factor, uint32_t sample_mask) = 0;
 
 	protected:
@@ -395,8 +389,6 @@ namespace KlayGE
 		{
 			return desc_;
 		}
-
-		static SamplerStateObjectPtr NullObject();
 
 	protected:
 		SamplerStateDesc desc_;

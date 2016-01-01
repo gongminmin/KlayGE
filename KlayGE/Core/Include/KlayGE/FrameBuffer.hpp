@@ -63,8 +63,6 @@ namespace KlayGE
 		FrameBuffer();
 		virtual ~FrameBuffer();
 
-		static FrameBufferPtr NullObject();
-
 		virtual std::wstring const & Description() const = 0;
 
 		uint32_t Left() const;

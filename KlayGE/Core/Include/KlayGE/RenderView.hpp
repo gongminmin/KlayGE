@@ -30,8 +30,6 @@ namespace KlayGE
 		{
 		}
 
-		static RenderViewPtr NullObject();
-
 		uint32_t Width() const
 		{
 			return width_;
@@ -74,8 +72,6 @@ namespace KlayGE
 		virtual ~UnorderedAccessView()
 		{
 		}
-
-		static UnorderedAccessViewPtr NullObject();
 
 		uint32_t Width() const
 		{

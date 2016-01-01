@@ -392,8 +392,6 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		static InputEnginePtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void EnumDevices() = 0;

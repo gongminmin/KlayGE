@@ -204,8 +204,6 @@ namespace KlayGE
 		explicit Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
 		virtual ~Texture();
 
-		static TexturePtr NullObject();
-
 		// Gets the name of texture
 		virtual std::wstring const & Name() const = 0;
 

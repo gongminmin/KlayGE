@@ -2839,114 +2839,6 @@ namespace KlayGE
 	}
 
 
-	class NullTexture : public Texture
-	{
-	public:
-		NullTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-			: Texture(type, sample_count, sample_quality, access_hint)
-		{
-		}
-
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Texture");
-			return name;
-		}
-
-		uint32_t Width(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-		uint32_t Height(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-		uint32_t Depth(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-
-		void CopyToTexture(Texture& /*target*/)
-		{
-		}
-
-		void CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
-		{
-		}
-
-		void CopyToSubTexture2D(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-				uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
-		{
-		}
-
-		void CopyToSubTexture3D(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-				uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
-		{
-		}
-
-		void CopyToSubTextureCube(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-				uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
-		{
-		}
-
-		void Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*width*/,
-			void*& /*data*/)
-		{
-		}
-		void Map2D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/)
-		{
-		}
-		void Map3D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
-			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
-		{
-		}
-		void MapCube(uint32_t /*array_index*/, CubeFaces /*level*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/)
-		{
-		}
-
-		void Unmap1D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void Unmap2D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void Unmap3D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void UnmapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/)
-		{
-		}
-
-		void BuildMipSubLevels()
-		{
-		}
-
-		virtual void CreateHWResource(ElementInitData const * init_data) override
-		{
-			KFL_UNUSED(init_data);
-		}
-		virtual void DeleteHWResource() override
-		{
-		}
-		virtual bool HWResourceReady() const override
-		{
-			return true;
-		}
-	};
-
-
 	Texture::Texture(Texture::TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 			: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
 	{
@@ -2954,12 +2846,6 @@ namespace KlayGE
 
 	Texture::~Texture()
 	{
-	}
-
-	TexturePtr Texture::NullObject()
-	{
-		static TexturePtr obj = MakeSharedPtr<NullTexture>(TT_2D, 1, 0, 0);
-		return obj;
 	}
 
 	uint32_t Texture::NumMipMaps() const

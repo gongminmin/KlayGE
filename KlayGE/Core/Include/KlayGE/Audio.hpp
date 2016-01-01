@@ -35,8 +35,6 @@ namespace KlayGE
 		AudioBuffer(AudioDataSourcePtr const & dataSource);
 		virtual ~AudioBuffer();
 
-		static AudioBufferPtr NullObject();
-
 		void Suspend();
 		void Resume();
 
@@ -114,8 +112,6 @@ namespace KlayGE
 
 		void Suspend();
 		void Resume();
-
-		static AudioEnginePtr NullObject();
 
 		virtual std::wstring const & Name() const = 0;
 

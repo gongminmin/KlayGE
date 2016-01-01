@@ -138,8 +138,6 @@ namespace KlayGE
 		RenderLayout();
 		virtual ~RenderLayout() = 0;
 
-		static RenderLayoutPtr NullObject();
-
 		void TopologyType(topology_type type)
 		{
 			topo_type_ = type;

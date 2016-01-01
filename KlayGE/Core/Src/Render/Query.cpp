@@ -16,20 +16,19 @@
 
 namespace KlayGE
 {
-	class NullQuery : public Query
+	Query::~Query()
 	{
-	public:
-		void Begin()
-		{
-		}
-		void End()
-		{
-		}
-	};
+	}
 
-	QueryPtr Query::NullObject()
+	OcclusionQuery::~OcclusionQuery()
 	{
-		static QueryPtr obj = MakeSharedPtr<NullQuery>();
-		return obj;
+	}
+
+	ConditionalRender::~ConditionalRender()
+	{
+	}
+
+	TimerQuery::~TimerQuery()
+	{
 	}
 }

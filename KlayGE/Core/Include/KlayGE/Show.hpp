@@ -39,8 +39,6 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		static ShowEnginePtr NullObject();
-
 		bool CanPlay() const;
 		bool CanStop() const;
 		bool CanPause() const;

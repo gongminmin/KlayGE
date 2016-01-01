@@ -46,8 +46,6 @@ namespace KlayGE
 		virtual ~ScriptFactory()
 			{ }
 
-		static ScriptFactoryPtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 		ScriptEngine& ScriptEngineInstance();
 

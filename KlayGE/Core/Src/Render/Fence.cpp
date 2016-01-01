@@ -34,30 +34,7 @@
 
 namespace KlayGE
 {
-	class NullFence : public Fence
+	Fence::~Fence()
 	{
-	public:
-		virtual uint64_t Signal(FenceType ft) override
-		{
-			KFL_UNUSED(ft);
-			return 0;
-		}
-
-		virtual void Wait(uint64_t id) override
-		{
-			KFL_UNUSED(id);
-		}
-
-		virtual bool Completed(uint64_t id) override
-		{
-			KFL_UNUSED(id);
-			return true;
-		}
-	};
-
-	FencePtr Fence::NullObject()
-	{
-		static FencePtr obj = MakeSharedPtr<NullFence>();
-		return obj;
 	}
 }

@@ -38,35 +38,6 @@
 
 namespace KlayGE
 {
-	class NullScriptFactory : public ScriptFactory
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Script Factory");
-			return name;
-		}
-
-		ScriptEnginePtr MakeScriptEngine()
-		{
-			return ScriptEngine::NullObject();
-		}
-
-	private:
-		virtual void DoSuspend() override
-		{
-		}
-		virtual void DoResume() override
-		{
-		}
-	};
-
-	ScriptFactoryPtr ScriptFactory::NullObject()
-	{
-		static ScriptFactoryPtr obj = MakeSharedPtr<NullScriptFactory>();
-		return obj;
-	}
-
 	ScriptEngine& ScriptFactory::ScriptEngineInstance()
 	{
 		if (!se_)

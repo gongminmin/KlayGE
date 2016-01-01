@@ -61,85 +61,6 @@
 
 namespace KlayGE
 {
-	class NullRenderEngine : public RenderEngine
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Render Engine");
-			return name;
-		}
-
-		bool RequiresFlipping() const
-		{
-			return false;
-		}
-
-		void ForceFlush()
-		{
-		}
-
-		virtual TexturePtr const & ScreenDepthStencilTexture() const override
-		{
-			static TexturePtr ret;
-			return ret;
-		}
-
-		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
-		{
-		}
-
-		bool FullScreen() const
-		{
-			return false;
-		}
-
-		void FullScreen(bool /*fs*/)
-		{
-		}
-
-	private:
-		virtual void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/) override
-		{
-		}
-
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/) override
-		{
-		}
-
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/) override
-		{
-		}
-
-		virtual void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/) override
-		{
-		}
-
-		virtual void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/) override
-		{
-		}
-
-		virtual void DoDispatchIndirect(RenderTechnique const & /*tech*/,
-			GraphicsBufferPtr const & /*buff_args*/, uint32_t /*offset*/) override
-		{
-		}
-
-		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) override
-		{
-		}
-
-		virtual void DoDestroy() override
-		{
-		}
-
-		virtual void DoSuspend() override
-		{
-		}
-		virtual void DoResume() override
-		{
-		}
-	};
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
@@ -172,14 +93,6 @@ namespace KlayGE
 	{
 		// TODO
 		this->DoResume();
-	}
-
-	// 返回空对象
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderEnginePtr RenderEngine::NullObject()
-	{
-		static RenderEnginePtr obj = MakeSharedPtr<NullRenderEngine>();
-		return obj;
 	}
 
 	void RenderEngine::BeginFrame()
