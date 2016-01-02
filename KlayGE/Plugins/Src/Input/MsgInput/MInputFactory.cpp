@@ -35,7 +35,7 @@
 #include <KlayGE/MsgInput/MInput.hpp>
 #include <KlayGE/MsgInput/MInputFactory.hpp>
 
-void MakeInputFactory(KlayGE::InputFactoryPtr& ptr)
+void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteInputFactory<KlayGE::MsgInputEngine>>(L"MsgInput Input Factory");
+	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteInputFactory<KlayGE::MsgInputEngine>>(L"MsgInput Input Factory");
 }

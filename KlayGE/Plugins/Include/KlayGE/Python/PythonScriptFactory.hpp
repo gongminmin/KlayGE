@@ -44,7 +44,7 @@
 
 extern "C"
 {
-	KLAYGE_PYTHON_SCRIPT_API void MakeScriptFactory(KlayGE::ScriptFactoryPtr& ptr);
+	KLAYGE_PYTHON_SCRIPT_API void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr);
 }
 
 #endif  // _PYTHONFACTORY_HPP

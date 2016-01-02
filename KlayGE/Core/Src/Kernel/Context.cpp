@@ -68,13 +68,13 @@ namespace KlayGE
 {
 	std::unique_ptr<Context> Context::context_instance_;
 
-	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
-	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
-	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
-	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr);
-	typedef void (*MakeScriptFactoryFunc)(ScriptFactoryPtr& ptr);
-	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr);
-	typedef void (*MakeAudioDataSourceFactoryFunc)(AudioDataSourceFactoryPtr& ptr);
+	typedef void (*MakeRenderFactoryFunc)(std::unique_ptr<RenderFactory>& ptr);
+	typedef void (*MakeAudioFactoryFunc)(std::unique_ptr<AudioFactory>& ptr);
+	typedef void (*MakeInputFactoryFunc)(std::unique_ptr<InputFactory>& ptr);
+	typedef void (*MakeShowFactoryFunc)(std::unique_ptr<ShowFactory>& ptr);
+	typedef void (*MakeScriptFactoryFunc)(std::unique_ptr<ScriptFactory>& ptr);
+	typedef void (*MakeSceneManagerFunc)(std::unique_ptr<SceneManager>& ptr);
+	typedef void (*MakeAudioDataSourceFactoryFunc)(std::unique_ptr<AudioDataSourceFactory>& ptr);
 
 	Context::Context()
 		: app_(nullptr)

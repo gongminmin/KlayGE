@@ -17,7 +17,7 @@
 #include <KlayGE/DShow/DShow.hpp>
 #include <KlayGE/DShow/DShowFactory.hpp>
 
-void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr)
+void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine>>(L"DirectShow Show Factory");
+	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine>>(L"DirectShow Show Factory");
 }

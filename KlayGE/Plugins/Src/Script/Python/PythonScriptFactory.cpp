@@ -36,7 +36,7 @@
 #include <KlayGE/Python/PythonScriptEngine.hpp>
 #include <KlayGE/Python/PythonScriptFactory.hpp>
 
-void MakeScriptFactory(KlayGE::ScriptFactoryPtr& ptr)
+void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteScriptFactory<KlayGE::PythonEngine>>(L"Python Script Factory");
+	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteScriptFactory<KlayGE::PythonEngine>>(L"Python Script Factory");
 }

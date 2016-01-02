@@ -46,7 +46,6 @@ namespace KlayGE
 	typedef std::shared_ptr<PerfProfiler> PerfProfilerPtr;
 
 	class SceneManager;
-	typedef std::shared_ptr<SceneManager> SceneManagerPtr;
 	class SceneNode;
 	typedef std::shared_ptr<SceneNode> SceneNodePtr;
 	class SceneObject;
@@ -173,7 +172,6 @@ namespace KlayGE
 	struct Viewport;
 	typedef std::shared_ptr<Viewport> ViewportPtr;
 	class RenderFactory;
-	typedef std::shared_ptr<RenderFactory> RenderFactoryPtr;
 	class RenderModel;
 	typedef std::shared_ptr<RenderModel> RenderModelPtr;
 	class StaticMesh;
@@ -274,7 +272,6 @@ namespace KlayGE
 	class LensFlareSceneObject;
 	typedef std::shared_ptr<LensFlareSceneObject> LensFlareSceneObjectPtr;
 	class DeferredRenderingLayer;
-	typedef std::shared_ptr<DeferredRenderingLayer> DeferredRenderingLayerPtr;
 	class MultiResLayer;
 	typedef std::shared_ptr<MultiResLayer> MultiResLayerPtr;
 	class IndirectLightingLayer;
@@ -354,9 +351,7 @@ namespace KlayGE
 	class AudioDataSource;
 	typedef std::shared_ptr<AudioDataSource> AudioDataSourcePtr;
 	class AudioFactory;
-	typedef std::shared_ptr<AudioFactory> AudioFactoryPtr;
 	class AudioDataSourceFactory;
-	typedef std::shared_ptr<AudioDataSourceFactory> AudioDataSourceFactoryPtr;
 
 	class App3DFramework;
 	class Window;
@@ -377,7 +372,6 @@ namespace KlayGE
 	class InputSensor;
 	typedef std::shared_ptr<InputSensor> InputSensorPtr;
 	class InputFactory;
-	typedef std::shared_ptr<InputFactory> InputFactoryPtr;
 	struct InputActionParam;
 	typedef std::shared_ptr<InputActionParam> InputActionParamPtr;
 	struct InputKeyboardActionParam;
@@ -394,12 +388,10 @@ namespace KlayGE
 	class ShowEngine;
 	typedef std::shared_ptr<ShowEngine> ShowEnginePtr;
 	class ShowFactory;
-	typedef std::shared_ptr<ShowFactory> ShowFactoryPtr;
 
 	class ScriptEngine;
 	typedef std::shared_ptr<ScriptEngine> ScriptEnginePtr;
 	class ScriptFactory;
-	typedef std::shared_ptr<ScriptFactory> ScriptFactoryPtr;
 }
 
 #endif			// _KLAYGE_PREDECLARE_HPP

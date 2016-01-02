@@ -28,7 +28,7 @@
 
 extern "C"
 {
-	KLAYGE_DSOUND_AE_API void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr);
+	KLAYGE_DSOUND_AE_API void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr);
 }
 
 #endif			// _DSAUDIOFACTORY_HPP

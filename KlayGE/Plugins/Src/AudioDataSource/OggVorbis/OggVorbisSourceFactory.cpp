@@ -44,7 +44,7 @@ namespace KlayGE
 	};
 }
 
-void MakeAudioDataSourceFactory(KlayGE::AudioDataSourceFactoryPtr& ptr)
+void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::OggVorbisAudioDataSourceFactory>();
+	ptr = KlayGE::MakeUniquePtr<KlayGE::OggVorbisAudioDataSourceFactory>();
 }

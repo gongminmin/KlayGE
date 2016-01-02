@@ -274,7 +274,7 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr)
+void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::OGLRenderFactory>();
+	ptr = KlayGE::MakeUniquePtr<KlayGE::OGLRenderFactory>();
 }

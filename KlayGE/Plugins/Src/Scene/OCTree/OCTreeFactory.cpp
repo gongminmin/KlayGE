@@ -18,7 +18,7 @@
 #include <KlayGE/OCTree/OCTree.hpp>
 #include <KlayGE/OCTree/OCTreeFactory.hpp>
 
-void MakeSceneManager(KlayGE::SceneManagerPtr& ptr)
+void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::OCTree>();
+	ptr = KlayGE::MakeUniquePtr<KlayGE::OCTree>();
 }

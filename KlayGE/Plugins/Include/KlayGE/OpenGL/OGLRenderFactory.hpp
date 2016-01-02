@@ -25,7 +25,7 @@
 
 extern "C"
 {
-	KLAYGE_OGL_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr);
+	KLAYGE_OGL_RE_API void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr);
 }
 
 #endif			// _OGLRENDERFACTORY_HPP
