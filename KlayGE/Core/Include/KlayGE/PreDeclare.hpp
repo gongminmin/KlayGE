@@ -73,7 +73,6 @@ namespace KlayGE
 	class Font;
 	typedef std::shared_ptr<Font> FontPtr;
 	class RenderEngine;
-	typedef std::shared_ptr<RenderEngine> RenderEnginePtr;
 	struct RenderSettings;
 	struct RenderMaterial;
 	typedef std::shared_ptr<RenderMaterial> RenderMaterialPtr;
@@ -343,7 +342,6 @@ namespace KlayGE
 	class Player;
 
 	class AudioEngine;
-	typedef std::shared_ptr<AudioEngine> AudioEnginePtr;
 	class AudioBuffer;
 	typedef std::shared_ptr<AudioBuffer> AudioBufferPtr;
 	class SoundBuffer;
@@ -358,7 +356,6 @@ namespace KlayGE
 	typedef std::shared_ptr<Window> WindowPtr;
 
 	class InputEngine;
-	typedef std::shared_ptr<InputEngine> InputEnginePtr;
 	class InputDevice;
 	typedef std::shared_ptr<InputDevice> InputDevicePtr;
 	class InputKeyboard;
@@ -386,11 +383,9 @@ namespace KlayGE
 	typedef std::shared_ptr<InputSensorActionParam> InputSensorActionParamPtr;
 
 	class ShowEngine;
-	typedef std::shared_ptr<ShowEngine> ShowEnginePtr;
 	class ShowFactory;
 
 	class ScriptEngine;
-	typedef std::shared_ptr<ScriptEngine> ScriptEnginePtr;
 	class ScriptFactory;
 }
 

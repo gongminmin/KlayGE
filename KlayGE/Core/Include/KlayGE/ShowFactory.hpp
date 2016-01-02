@@ -20,6 +20,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 
+#include <KlayGE/Show.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API ShowFactory
@@ -36,12 +38,12 @@ namespace KlayGE
 		void Resume();
 
 	private:
-		virtual ShowEnginePtr MakeShowEngine() = 0;
+		virtual std::unique_ptr<ShowEngine> MakeShowEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	protected:
-		ShowEnginePtr se_;
+		std::unique_ptr<ShowEngine> se_;
 	};
 
 	template <typename ShowEngineType>
@@ -56,9 +58,9 @@ namespace KlayGE
 			{ return name_; }
 
 	private:
-		ShowEnginePtr MakeShowEngine()
+		virtual std::unique_ptr<ShowEngine> MakeShowEngine() override
 		{
-			return MakeSharedPtr<ShowEngineType>();
+			return MakeUniquedPtr<ShowEngineType>();
 		}
 
 		virtual void DoSuspend() override

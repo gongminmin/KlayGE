@@ -23,6 +23,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 
+#include <KlayGE/Audio.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API AudioFactory
@@ -43,12 +45,12 @@ namespace KlayGE
 		virtual AudioBufferPtr MakeMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds = 2) = 0;
 
 	private:
-		virtual AudioEnginePtr MakeAudioEngine() = 0;
+		virtual std::unique_ptr<AudioEngine> MakeAudioEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	private:
-		AudioEnginePtr ae_;
+		std::unique_ptr<AudioEngine> ae_;
 	};
 
 	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
@@ -75,9 +77,9 @@ namespace KlayGE
 		}
 
 	private:
-		AudioEnginePtr MakeAudioEngine()
+		virtual std::unique_ptr<AudioEngine> MakeAudioEngine() override
 		{
-			return MakeSharedPtr<AudioEngineType>();
+			return MakeUniquePtr<AudioEngineType>();
 		}
 
 		virtual void DoSuspend() override

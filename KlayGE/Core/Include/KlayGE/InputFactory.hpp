@@ -23,6 +23,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 
+#include <KlayGE/Input.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API InputFactory
@@ -39,12 +41,12 @@ namespace KlayGE
 		void Resume();
 
 	private:
-		virtual InputEnginePtr DoMakeInputEngine() = 0;
+		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	protected:
-		InputEnginePtr ie_;
+		std::unique_ptr<InputEngine> ie_;
 	};
 
 	template <typename InputEngineType>
@@ -59,9 +61,9 @@ namespace KlayGE
 			{ return name_; }
 
 	private:
-		InputEnginePtr DoMakeInputEngine()
+		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() override
 		{
-			return MakeSharedPtr<InputEngineType>();
+			return MakeUniquePtr<InputEngineType>();
 		}
 
 		virtual void DoSuspend() override

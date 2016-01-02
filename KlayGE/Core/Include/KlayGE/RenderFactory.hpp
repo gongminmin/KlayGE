@@ -30,6 +30,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/RenderStateObject.hpp>
@@ -118,7 +119,7 @@ namespace KlayGE
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	private:
-		virtual RenderEnginePtr DoMakeRenderEngine() = 0;
+		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() = 0;
 
 		virtual RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc) = 0;
 		virtual DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc) = 0;
@@ -129,7 +130,7 @@ namespace KlayGE
 		virtual void DoResume() = 0;
 
 	protected:
-		RenderEnginePtr re_;
+		std::unique_ptr<RenderEngine> re_;
 
 		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
 		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;

@@ -199,8 +199,6 @@ namespace KlayGE
 
 		bool gpu_disjoint_occurred_;
 	};
-
-	typedef std::shared_ptr<OGLESRenderEngine> OGLESRenderEnginePtr;
 }
 
 #endif			// _OGLESRENDERENGINE_HPP

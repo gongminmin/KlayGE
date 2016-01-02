@@ -248,9 +248,9 @@ namespace KlayGE
 		return MakeSharedPtr<OGLESShaderObject>();
 	}
 
-	RenderEnginePtr OGLESRenderFactory::DoMakeRenderEngine()
+	std::unique_ptr<RenderEngine> OGLESRenderFactory::DoMakeRenderEngine()
 	{
-		return MakeSharedPtr<OGLESRenderEngine>();
+		return MakeUniquePtr<OGLESRenderEngine>();
 	}
 
 	RasterizerStateObjectPtr OGLESRenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)

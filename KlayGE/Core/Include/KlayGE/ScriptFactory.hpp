@@ -38,6 +38,8 @@
 #include <string>
 #include <boost/noncopyable.hpp>
 
+#include <KlayGE/Script.hpp>
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API ScriptFactory
@@ -53,12 +55,12 @@ namespace KlayGE
 		void Resume();
 
 	private:
-		virtual ScriptEnginePtr MakeScriptEngine() = 0;
+		virtual std::unique_ptr<ScriptEngine> MakeScriptEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	protected:
-		ScriptEnginePtr se_;
+		std::unique_ptr<ScriptEngine> se_;
 	};
 
 	template <typename ScriptEngineType>
@@ -73,9 +75,9 @@ namespace KlayGE
 			{ return name_; }
 
 	private:
-		ScriptEnginePtr MakeScriptEngine()
+		virtual std::unique_ptr<ScriptEngine> MakeScriptEngine() override
 		{
-			return MakeSharedPtr<ScriptEngineType>();
+			return MakeUniquePtr<ScriptEngineType>();
 		}
 
 		virtual void DoSuspend() override

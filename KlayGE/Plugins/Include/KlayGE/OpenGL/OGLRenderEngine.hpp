@@ -220,8 +220,6 @@ namespace KlayGE
 		bool hack_for_amd_;
 		bool hack_for_intel_;
 	};
-
-	typedef std::shared_ptr<OGLRenderEngine> OGLRenderEnginePtr;
 }
 
 #endif			// _OGLRENDERENGINE_HPP

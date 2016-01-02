@@ -98,7 +98,7 @@ namespace KlayGE
 		ShaderObjectPtr MakeShaderObject();
 
 	private:
-		RenderEnginePtr DoMakeRenderEngine();
+		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
 
 		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);

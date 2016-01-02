@@ -323,8 +323,6 @@ namespace KlayGE
 		RenderEffectPtr blit_effect_;
 		RenderTechniquePtr bilinear_blit_tech_;
 	};
-
-	typedef std::shared_ptr<D3D12RenderEngine> D3D12RenderEnginePtr;
 }
 
 #endif			// _D3D12RENDERENGINE_HPP
