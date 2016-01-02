@@ -305,7 +305,6 @@ namespace KlayGE
 	typedef std::shared_ptr<Fence> FencePtr;
 
 	class UIManager;
-	typedef std::shared_ptr<UIManager> UIManagerPtr;
 	class UIElement;
 	typedef std::shared_ptr<UIElement> UIElementPtr;
 	class UIControl;

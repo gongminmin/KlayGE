@@ -36,7 +36,33 @@
 #include <KlayGE/Python/PythonScriptEngine.hpp>
 #include <KlayGE/Python/PythonScriptFactory.hpp>
 
+namespace KlayGE
+{
+	class PythonScriptFactory : boost::noncopyable, public ScriptFactory
+	{
+	public:
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"Python Script Factory");
+			return name;
+		}
+
+	private:
+		virtual std::unique_ptr<ScriptEngine> MakeScriptEngine() override
+		{
+			return MakeUniquePtr<PythonEngine>();
+		}
+
+		virtual void DoSuspend() override
+		{
+		}
+		virtual void DoResume() override
+		{
+		}
+	};
+}
+
 void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteScriptFactory<KlayGE::PythonEngine>>(L"Python Script Factory");
+	ptr = KlayGE::MakeUniquePtr<KlayGE::PythonScriptFactory>();
 }

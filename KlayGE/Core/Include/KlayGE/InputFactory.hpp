@@ -48,34 +48,6 @@ namespace KlayGE
 	protected:
 		std::unique_ptr<InputEngine> ie_;
 	};
-
-	template <typename InputEngineType>
-	class ConcreteInputFactory : boost::noncopyable, public InputFactory
-	{
-	public:
-		ConcreteInputFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-	private:
-		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() override
-		{
-			return MakeUniquePtr<InputEngineType>();
-		}
-
-		virtual void DoSuspend() override
-		{
-		}
-		virtual void DoResume() override
-		{
-		}
-
-	private:
-		std::wstring const name_;
-	};
 }
 
 #endif			// _INPUTFACTORY_HPP

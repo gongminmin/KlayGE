@@ -45,34 +45,6 @@ namespace KlayGE
 	protected:
 		std::unique_ptr<ShowEngine> se_;
 	};
-
-	template <typename ShowEngineType>
-	class ConcreteShowFactory : boost::noncopyable, public ShowFactory
-	{
-	public:
-		ConcreteShowFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-	private:
-		virtual std::unique_ptr<ShowEngine> MakeShowEngine() override
-		{
-			return MakeUniquedPtr<ShowEngineType>();
-		}
-
-		virtual void DoSuspend() override
-		{
-		}
-		virtual void DoResume() override
-		{
-		}
-
-	private:
-		std::wstring const name_;
-	};
 }
 
 #endif			// _SHOWFACTORY_HPP

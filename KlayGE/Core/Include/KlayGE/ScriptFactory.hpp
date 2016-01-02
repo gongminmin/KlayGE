@@ -62,34 +62,6 @@ namespace KlayGE
 	protected:
 		std::unique_ptr<ScriptEngine> se_;
 	};
-
-	template <typename ScriptEngineType>
-	class ConcreteScriptFactory : boost::noncopyable, public ScriptFactory
-	{
-	public:
-		ConcreteScriptFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-	private:
-		virtual std::unique_ptr<ScriptEngine> MakeScriptEngine() override
-		{
-			return MakeUniquePtr<ScriptEngineType>();
-		}
-
-		virtual void DoSuspend() override
-		{
-		}
-		virtual void DoResume() override
-		{
-		}
-
-	private:
-		std::wstring const name_;
-	};
 }
 
 #endif  // _SCRIPTFACTORY_HPP
