@@ -42,13 +42,13 @@ namespace KlayGE
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;
 
-		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+		input_pins_.emplace_back("src_tex", TexturePtr());
+		input_pins_.emplace_back("depth_tex", TexturePtr());
 
-		output_pins_.push_back(std::make_pair("output", TexturePtr()));
+		output_pins_.emplace_back("output", TexturePtr());
 
-		params_.push_back(std::make_pair("strength", RenderEffectParameterPtr())); 
-		params_.push_back(std::make_pair("correction", RenderEffectParameterPtr()));
+		params_.emplace_back("strength", RenderEffectParameterPtr());
+		params_.emplace_back("correction", RenderEffectParameterPtr());
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSS.fxml");
 		copy_tech_ = effect->TechniqueByName("Copy");

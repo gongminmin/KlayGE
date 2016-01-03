@@ -41,11 +41,11 @@ namespace KlayGE
 	SSGIPostProcess::SSGIPostProcess()
 			: PostProcess(L"SSGI")
 	{
-		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("shading_tex", TexturePtr()));
+		input_pins_.emplace_back("g_buffer_tex", TexturePtr());
+		input_pins_.emplace_back("depth_tex", TexturePtr());
+		input_pins_.emplace_back("shading_tex", TexturePtr());
 
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+		output_pins_.emplace_back("out_tex", TexturePtr());
 
 		this->Technique(SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGI"));
 

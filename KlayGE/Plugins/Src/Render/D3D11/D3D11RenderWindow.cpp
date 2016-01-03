@@ -163,26 +163,26 @@ namespace KlayGE
 			available_create_device_flags.push_back(create_device_flags);
 
 			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *>> dev_type_behaviors;
-			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"));
-			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP"));
-			dev_type_behaviors.push_back(std::make_pair(D3D_DRIVER_TYPE_REFERENCE, L"REF"));
+			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_HARDWARE, L"HW");
+			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_WARP, L"WARP");
+			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_REFERENCE, L"REF");
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
 			if (dxgi_sub_ver_ >= 4)
 			{
-				available_feature_levels.push_back(std::make_pair("12_1", D3D_FEATURE_LEVEL_12_1));
-				available_feature_levels.push_back(std::make_pair("12_0", D3D_FEATURE_LEVEL_12_0));
+				available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
+				available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
 			}
 			if (dxgi_sub_ver_ >= 2)
 			{
-				available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
+				available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
 			}
-			available_feature_levels.push_back(std::make_pair("11_0", D3D_FEATURE_LEVEL_11_0));
-			available_feature_levels.push_back(std::make_pair("10_1", D3D_FEATURE_LEVEL_10_1));
-			available_feature_levels.push_back(std::make_pair("10_0", D3D_FEATURE_LEVEL_10_0));
-			available_feature_levels.push_back(std::make_pair("9_3", D3D_FEATURE_LEVEL_9_3));
-			available_feature_levels.push_back(std::make_pair("9_2", D3D_FEATURE_LEVEL_9_2));
-			available_feature_levels.push_back(std::make_pair("9_1", D3D_FEATURE_LEVEL_9_1));
+			available_feature_levels.emplace_back("11_0", D3D_FEATURE_LEVEL_11_0);
+			available_feature_levels.emplace_back("10_1", D3D_FEATURE_LEVEL_10_1);
+			available_feature_levels.emplace_back("10_0", D3D_FEATURE_LEVEL_10_0);
+			available_feature_levels.emplace_back("9_3", D3D_FEATURE_LEVEL_9_3);
+			available_feature_levels.emplace_back("9_2", D3D_FEATURE_LEVEL_9_2);
+			available_feature_levels.emplace_back("9_1", D3D_FEATURE_LEVEL_9_1);
 
 			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{

@@ -378,13 +378,13 @@ namespace KlayGE
 			if (is_shader_validate_[type])
 			{
 				std::vector<std::pair<char const *, char const *>> macros;
-				macros.push_back(std::make_pair("KLAYGE_D3D11", "1"));
+				macros.emplace_back("KLAYGE_D3D11", "1");
 				if (feature_level <= D3D_FEATURE_LEVEL_9_3)
 				{
-					macros.push_back(std::make_pair("KLAYGE_BC5_AS_AG", "1"));
-					macros.push_back(std::make_pair("KLAYGE_BC4_AS_G", "1"));
+					macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
+					macros.emplace_back("KLAYGE_BC4_AS_G", "1");
 				}
-				macros.push_back(std::make_pair("KLAYGE_FRAG_DEPTH", "1"));
+				macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
 				uint32_t flags = 0;
 #if !defined(KLAYGE_DEBUG)

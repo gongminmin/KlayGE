@@ -31,7 +31,7 @@ namespace KlayGE
 	{
 		if (this->HasAction(key))
 		{
-			actions.push_back(std::make_pair(this->Action(key), param));
+			actions.emplace_back(this->Action(key), param);
 		}
 	}
 

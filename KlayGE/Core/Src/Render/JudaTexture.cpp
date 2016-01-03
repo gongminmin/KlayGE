@@ -1207,7 +1207,7 @@ namespace KlayGE
 			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, nullptr);
 			tex_a_tile_indirect_ = rf.MakeTexture2D(1, 1, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Write, nullptr);
 
-			tile_free_list_.push_back(std::make_pair(0, pages));
+			tile_free_list_.emplace_back(0, pages);
 		}
 	}
 
@@ -1445,7 +1445,7 @@ namespace KlayGE
 						{
 							++ freeiter;
 						}
-						tile_free_list_.insert(freeiter, std::make_pair(id, id + 1));
+						tile_free_list_.emplace(freeiter, id, id + 1);
 
 						tileiter = tim.erase(tileiter);
 					}

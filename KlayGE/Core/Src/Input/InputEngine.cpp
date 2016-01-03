@@ -38,7 +38,7 @@ namespace KlayGE
 	void InputEngine::ActionMap(InputActionMap const & actionMap, action_handler_t handler)
 	{
 		// 保存新的动作格式
-		action_handlers_.push_back(std::make_pair(actionMap, handler));
+		action_handlers_.emplace_back(actionMap, handler);
 
 		if (devices_.empty())
 		{

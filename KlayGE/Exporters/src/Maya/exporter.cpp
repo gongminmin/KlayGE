@@ -172,7 +172,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 
 		if (num_geometries > 0)
 		{
-			skin_clusters_.push_back(std::make_pair(skin_cluster, objs));
+			skin_clusters_.emplace_back(skin_cluster, objs);
 		}
 
 		MDagPathArray influence_paths;

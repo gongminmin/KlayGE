@@ -1136,7 +1136,7 @@ namespace KlayGE
 			{
 				std::string type = ReadShortString(decoded);
 				std::string name = ReadShortString(decoded);
-				mtl->texture_slots.push_back(std::make_pair(type, name));
+				mtl->texture_slots.emplace_back(type, name);
 			}
 		}
 

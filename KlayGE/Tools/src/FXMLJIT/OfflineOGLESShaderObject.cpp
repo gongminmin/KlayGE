@@ -114,8 +114,8 @@ namespace KlayGE
 				{
 					if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
 					{
-						tex_sampler_pairs.push_back(std::make_pair(*std::get<1>(tex_sampler_binds_[i])->Name(),
-							*std::get<2>(tex_sampler_binds_[i])->Name()));
+						tex_sampler_pairs.emplace_back(*std::get<1>(tex_sampler_binds_[i])->Name(),
+							*std::get<2>(tex_sampler_binds_[i])->Name());
 					}
 				}
 
@@ -290,21 +290,21 @@ namespace KlayGE
 				{
 					std::string err_msg;
 					std::vector<std::pair<char const *, char const *>> macros;
-					macros.push_back(std::make_pair("KLAYGE_DXBC2GLSL", "1"));
-					macros.push_back(std::make_pair("KLAYGE_OPENGLES", "1"));
+					macros.emplace_back("KLAYGE_DXBC2GLSL", "1");
+					macros.emplace_back("KLAYGE_OPENGLES", "1");
 					if (!caps.bc5_support)
 					{
-						macros.push_back(std::make_pair("KLAYGE_BC5_AS_AG", "1"));
+						macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
 					}
 					else
 					{
-						macros.push_back(std::make_pair("KLAYGE_BC5_AS_GA", "1"));
+						macros.emplace_back("KLAYGE_BC5_AS_GA", "1");
 					}
 					if (!caps.bc4_support)
 					{
-						macros.push_back(std::make_pair("KLAYGE_BC4_AS_G", "1"));
+						macros.emplace_back("KLAYGE_BC4_AS_G", "1");
 					}
-					macros.push_back(std::make_pair("KLAYGE_FRAG_DEPTH", caps.frag_depth_support ? "1" : "0"));
+					macros.emplace_back("KLAYGE_FRAG_DEPTH", caps.frag_depth_support ? "1" : "0");
 
 					uint32_t const flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 					code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name, shader_profile, flags);

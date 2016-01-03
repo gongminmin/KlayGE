@@ -359,7 +359,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					render_queue_.push_back(std::make_pair(obj_tech, std::vector<Renderable*>(1, obj)));
+					render_queue_.emplace_back(obj_tech, std::vector<Renderable*>(1, obj));
 				}
 			}
 		}
@@ -609,7 +609,7 @@ namespace KlayGE
 						else
 						{
 							renderables_map.emplace(renderable, renderables.size());
-							renderables.push_back(std::make_pair(renderable, std::vector<SceneObject*>(1, so)));
+							renderables.emplace_back(renderable, std::vector<SceneObject*>(1, so));
 						}
 
 						++ num_objects_rendered_;

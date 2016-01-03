@@ -1322,7 +1322,7 @@ namespace KlayGE
 						{
 							if (quality > 0)
 							{
-								rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, quality));
+								rendertarget_format_[fmts[i].first].emplace_back(count, quality);
 								count <<= 1;
 							}
 							else

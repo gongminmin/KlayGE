@@ -149,10 +149,10 @@ namespace KlayGE
 #endif
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
-			available_feature_levels.push_back(std::make_pair("12_1", D3D_FEATURE_LEVEL_12_1));
-			available_feature_levels.push_back(std::make_pair("12_0", D3D_FEATURE_LEVEL_12_0));
-			available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
-			available_feature_levels.push_back(std::make_pair("11_0", D3D_FEATURE_LEVEL_11_0));
+			available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
+			available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
+			available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
+			available_feature_levels.emplace_back("11_0", D3D_FEATURE_LEVEL_11_0);
 
 			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{

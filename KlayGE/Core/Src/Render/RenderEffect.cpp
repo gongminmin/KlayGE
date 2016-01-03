@@ -2958,7 +2958,7 @@ namespace KlayGE
 					}
 					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 					{
-						macros_->push_back(std::make_pair(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true));
+						macros_->emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
 					}
 				}
 
@@ -3107,7 +3107,7 @@ namespace KlayGE
 							{
 								std::string name = ReadShortString(source);
 								std::string value = ReadShortString(source);
-								macros_->push_back(std::make_pair(std::make_pair(name, value), true));
+								macros_->emplace_back(std::make_pair(name, value), true);
 							}
 						}
 
@@ -3807,7 +3807,7 @@ namespace KlayGE
 					}
 					if (!found)
 					{
-						macros_->push_back(std::make_pair(name, value));
+						macros_->emplace_back(name, value);
 					}
 				}
 			}
@@ -4103,7 +4103,7 @@ namespace KlayGE
 					}
 					if (!found)
 					{
-						macros_->push_back(std::make_pair(name, value));
+						macros_->emplace_back(name, value);
 					}
 				}
 			}

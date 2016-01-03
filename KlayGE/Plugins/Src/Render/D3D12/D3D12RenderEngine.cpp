@@ -1728,7 +1728,7 @@ namespace KlayGE
 					{
 						if (msaa_quality_levels.NumQualityLevels > 0)
 						{
-							rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, msaa_quality_levels.NumQualityLevels));
+							rendertarget_format_[fmts[i].first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
 							count <<= 1;
 						}
 						else

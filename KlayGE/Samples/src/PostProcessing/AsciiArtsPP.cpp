@@ -199,7 +199,7 @@ namespace
 					diff_lum = iter->first;
 				}
 
-				diff_lum_to_iter.push_back(std::make_pair(diff_lum, iter));
+				diff_lum_to_iter.emplace_back(diff_lum, iter);
 			}
 			BOOST_ASSERT(diff_lum_to_iter.size() >= output_num_ascii_);
 

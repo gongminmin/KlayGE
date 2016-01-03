@@ -644,7 +644,7 @@ namespace KlayGE
 							parent_node = parent_node->GetParentNode();
 						}
 
-						pos_binds.second.push_back(std::make_pair(parent_node, 1.0f));
+						pos_binds.second.emplace_back(parent_node, 1.0f);
 					}
 
 					Point3 v0 = pos_binds.first * tm;
@@ -927,7 +927,7 @@ namespace KlayGE
 			}
 			if (!repeat && (weight > 0))
 			{
-				binds.push_back(std::make_pair(joint_node, weight));
+				binds.emplace_back(joint_node, weight);
 			}
 		}
 	}

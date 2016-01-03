@@ -780,7 +780,7 @@ namespace KlayGE
 
 	size_t UIManager::AddFont(FontPtr const & font, float font_size)
 	{
-		font_cache_.push_back(std::make_pair(font, font_size));
+		font_cache_.emplace_back(font, font_size);
 		return font_cache_.size() - 1;
 	}
 

@@ -776,7 +776,7 @@ int main(int argc, char* argv[])
 					{
 						BOOST_ASSERT(offset_adv.first == static_cast<int32_t>(char_index.size()));
 
-						char_index.push_back(std::make_pair(ch, offset_adv.first));
+						char_index.emplace_back(ch, offset_adv.first);
 
 						KFont::font_info const & ci = kfont_input.CharInfo(offset_adv.first);
 						char_info[ch].top = ci.top;
@@ -863,7 +863,7 @@ int main(int argc, char* argv[])
 	{
 		if (char_info[i].dist_index != static_cast<uint32_t>(-1))
 		{
-			char_index.push_back(std::make_pair(static_cast<int32_t>(i), header.non_empty_chars));
+			char_index.emplace_back(static_cast<int32_t>(i), header.non_empty_chars);
 			++ header.non_empty_chars;
 		}
 	}
@@ -874,7 +874,7 @@ int main(int argc, char* argv[])
 	{
 		if ((char_info[i].advance_x != 0) || (char_info[i].advance_y != 0))
 		{
-			advance.push_back(std::make_pair(static_cast<int32_t>(i), std::make_pair(char_info[i].advance_x, char_info[i].advance_y)));
+			advance.emplace_back(static_cast<int32_t>(i), std::make_pair(char_info[i].advance_x, char_info[i].advance_y));
 			++ header.validate_chars;
 		}
 	}
