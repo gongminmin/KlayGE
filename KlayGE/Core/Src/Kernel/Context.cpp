@@ -39,6 +39,15 @@
 
 #include <fstream>
 #include <sstream>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#endif
+#include <boost/algorithm/string/split.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
+#include <boost/algorithm/string/trim.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
@@ -239,7 +248,7 @@ namespace KlayGE
 		bool color_grading = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
-		std::string graphics_options;
+		std::vector<std::pair<std::string, std::string>> graphics_options;
 		bool perf_profiler = false;
 		bool location_sensor = false;
 
@@ -537,7 +546,19 @@ namespace KlayGE
 				attr = options_node->Attrib("str");
 				if (attr)
 				{
-					graphics_options = attr->ValueString();
+					std::string const & options_str = attr->ValueString();
+
+					std::vector<std::string> strs;
+					boost::algorithm::split(strs, options_str, boost::is_any_of(","));
+					for (size_t index = 0; index < strs.size(); ++ index)
+					{
+						std::string& opt = strs[index];
+						boost::algorithm::trim(opt);
+						std::string::size_type const loc = opt.find(':');
+						std::string opt_name = opt.substr(0, loc);
+						std::string opt_val = opt.substr(loc + 1);
+						graphics_options.emplace_back(opt_name, opt_val);
+					}
 				}
 			}
 		}

@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <KlayGE/ElementFormat.hpp>
 
 namespace KlayGE
@@ -61,7 +63,7 @@ namespace KlayGE
 		StereoMethod stereo_method;
 		float stereo_separation;
 
-		std::string options;
+		std::vector<std::pair<std::string, std::string>> options;
 	};
 }
 

@@ -184,16 +184,10 @@ namespace KlayGE
 			available_feature_levels.push_back(std::make_pair("9_2", D3D_FEATURE_LEVEL_9_2));
 			available_feature_levels.push_back(std::make_pair("9_1", D3D_FEATURE_LEVEL_9_1));
 
-			std::vector<std::string> strs;
-			boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
-			for (size_t index = 0; index < strs.size(); ++ index)
+			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{
-				std::string& opt = strs[index];
-				boost::algorithm::trim(opt);
-				std::string::size_type loc = opt.find(':');
-				std::string opt_name = opt.substr(0, loc);
-				std::string opt_val = opt.substr(loc + 1);
-
+				std::string const & opt_name = settings.options[index].first;
+				std::string const & opt_val = settings.options[index].second;
 				if (0 == strcmp("level", opt_name.c_str()))
 				{
 					size_t feature_index = 0;

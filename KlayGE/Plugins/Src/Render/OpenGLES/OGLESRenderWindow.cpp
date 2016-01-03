@@ -24,15 +24,6 @@
 
 #include <map>
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
-#endif
-#include <boost/algorithm/string/split.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <glloader/glloader.h>
@@ -152,17 +143,11 @@ namespace KlayGE
 		}
 		available_versions.push_back(std::make_tuple("2.0", EGL_OPENGL_ES2_BIT, 2, 0));
 
-		std::vector<std::string> strs;
-		boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
-		for (size_t index = 0; index < strs.size(); ++ index)
+		for (size_t index = 0; index < settings.options.size(); ++ index)
 		{
-			std::string& opt = strs[index];
-			boost::algorithm::trim(opt);
-			std::string::size_type loc = opt.find(':');
-			std::string opt_name = opt.substr(0, loc);
-			std::string opt_val = opt.substr(loc + 1);
-
-			if ("version" == opt_name)
+			std::string const & opt_name = settings.options[index].first;
+			std::string const & opt_val = settings.options[index].second;
+			if (0 == strcmp("version", opt_name.c_str()))
 			{
 				size_t feature_index = 0;
 				for (size_t i = 0; i < available_versions.size(); ++ i)
