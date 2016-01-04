@@ -50,6 +50,7 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Objects/moduleobject.c
     ${SRC_DIR}/Objects/namespaceobject.c
     ${SRC_DIR}/Objects/object.c
+    ${SRC_DIR}/Objects/odictobject.c
     ${SRC_DIR}/Objects/obmalloc.c
     ${SRC_DIR}/Objects/rangeobject.c
     ${SRC_DIR}/Objects/setobject.c
@@ -103,10 +104,12 @@ set(LIBPYTHON_SOURCES
     ${SRC_DIR}/Python/pyctype.c
     ${SRC_DIR}/Python/pyfpe.c
     ${SRC_DIR}/Python/pyhash.c
+    ${SRC_DIR}/Python/pylifecycle.c
     ${SRC_DIR}/Python/pymath.c
     ${SRC_DIR}/Python/pystate.c
     ${SRC_DIR}/Python/pystrcmp.c
     ${SRC_DIR}/Python/pystrtod.c
+    ${SRC_DIR}/Python/pystrhex.c
     ${SRC_DIR}/Python/Python-ast.c
     ${SRC_DIR}/Python/pythonrun.c
     ${SRC_DIR}/Python/pytime.c
@@ -179,6 +182,7 @@ elseif(WIN32)
     list(APPEND LIBPYTHON_SOURCES
         ${SRC_DIR}/PC/dl_nt.c
         ${SRC_DIR}/PC/getpathp.c
+        ${SRC_DIR}/PC/invalid_parameter_handler.c
         ${SRC_DIR}/Python/dynload_win.c
     )
     string(REPLACE "/" "\\\\" PYTHONHOME_ESCAPED ${PYTHONHOME})
