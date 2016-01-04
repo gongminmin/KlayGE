@@ -784,17 +784,17 @@ namespace KlayGE
 
 		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
-		RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
+		RenderLayout& rl = renderable_->GetRenderLayout();
 		if (!active_particles_.empty())
 		{
 			GraphicsBufferPtr instance_gb;
 			if (gs_support_)
 			{
-				instance_gb = rl->GetVertexStream(0);
+				instance_gb = rl.GetVertexStream(0);
 			}
 			else
 			{
-				instance_gb = rl->InstanceStream();
+				instance_gb = rl.InstanceStream();
 			}
 
 			uint32_t const new_instance_size = num_active_particles * sizeof(ParticleInstance);
@@ -806,23 +806,23 @@ namespace KlayGE
 
 				if (gs_support_)
 				{
-					rl->SetVertexStream(0, instance_gb);
+					rl.SetVertexStream(0, instance_gb);
 				}
 				else
 				{
-					rl->InstanceStream(instance_gb);
+					rl.InstanceStream(instance_gb);
 				}
 			}
 
 			if (gs_support_)
 			{
-				rl->NumVertices(num_active_particles);
+				rl.NumVertices(num_active_particles);
 			}
 			else
 			{
-				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+				for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 				{
-					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
+					rl.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
 				}
 			}
 

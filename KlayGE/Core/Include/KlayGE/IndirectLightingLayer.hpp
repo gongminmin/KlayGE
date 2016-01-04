@@ -104,7 +104,7 @@ namespace KlayGE
 		RenderEffectParameterPtr vpl_gbuffer_tex_param_;
 		RenderEffectParameterPtr vpl_depth_tex_param_;
 
-		RenderLayoutPtr rl_vpl_;
+		RenderablePtr vpl_renderable_;
 
 		TexturePtr rsm_depth_derivative_tex_;
 		PostProcessPtr rsm_to_depth_derivate_pp_;

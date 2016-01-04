@@ -54,7 +54,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderLayoutPtr rl = this->Subrenderable(0)->GetRenderLayout();
+			RenderLayout& rl = this->Subrenderable(0)->GetRenderLayout();
 
 			AABBox const & pos_bb = this->PosBound();
 			AABBox const & tc_bb = this->TexcoordBound();
@@ -63,12 +63,12 @@ namespace
 			float3 const tc_center = tc_bb.Center();
 			float3 const tc_extent = tc_bb.HalfSize();
 
-			std::vector<float3> positions(rl->NumVertices());
-			std::vector<float2> texs(rl->NumVertices());
-			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+			std::vector<float3> positions(rl.NumVertices());
+			std::vector<float2> texs(rl.NumVertices());
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				GraphicsBufferPtr const & vb = rl->GetVertexStream(i);
-				switch (rl->VertexStreamFormat(i)[0].usage)
+				GraphicsBufferPtr const & vb = rl.GetVertexStream(i);
+				switch (rl.VertexStreamFormat(i)[0].usage)
 				{
 				case VEU_Position:
 					{
@@ -77,7 +77,7 @@ namespace
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 						int16_t const * p_16 = mapper.Pointer<int16_t>();
-						for (uint32_t j = 0; j < rl->NumVertices(); ++ j)
+						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
 						{
 							positions[j].x() = ((p_16[j * 4 + 0] + 32768) / 65535.0f * 2 - 1) * pos_extent.x() + pos_center.x();
 							positions[j].y() = ((p_16[j * 4 + 1] + 32768) / 65535.0f * 2 - 1) * pos_extent.y() + pos_center.y();
@@ -87,14 +87,14 @@ namespace
 					break;
 
 				case VEU_TextureCoord:
-					if (0 == rl->VertexStreamFormat(i)[0].usage_index)
+					if (0 == rl.VertexStreamFormat(i)[0].usage_index)
 					{
 						GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
 						vb->CopyToBuffer(*vb_cpu);
 
 						GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 						int16_t const * t_16 = mapper.Pointer<int16_t>();
-						for (uint32_t j = 0; j < rl->NumVertices(); ++ j)
+						for (uint32_t j = 0; j < rl.NumVertices(); ++ j)
 						{
 							texs[j].x() = ((t_16[j * 2 + 0] + 32768) / 65535.0f * 2 - 1) * tc_extent.x() + tc_center.x();
 							texs[j].y() = ((t_16[j * 2 + 1] + 32768) / 65535.0f * 2 - 1) * tc_extent.y() + tc_center.y();
@@ -107,14 +107,14 @@ namespace
 				}
 			}
 
-			std::vector<uint32_t> indices(rl->NumIndices());
+			std::vector<uint32_t> indices(rl.NumIndices());
 			{
-				GraphicsBufferPtr ib = rl->GetIndexStream();
+				GraphicsBufferPtr ib = rl.GetIndexStream();
 				GraphicsBufferPtr ib_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
 				ib->CopyToBuffer(*ib_cpu);
 
 				GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-				if (EF_R16UI == rl->IndexStreamFormat())
+				if (EF_R16UI == rl.IndexStreamFormat())
 				{
 					uint16_t* p = mapper.Pointer<uint16_t>();
 					std::copy(p, p + indices.size(), indices.begin());
@@ -126,8 +126,8 @@ namespace
 				}
 			}
 
-			std::vector<float> distortions(rl->NumVertices(), 0);
-			std::vector<uint32_t> vert_times(rl->NumVertices(), 0);
+			std::vector<float> distortions(rl.NumVertices(), 0);
+			std::vector<uint32_t> vert_times(rl.NumVertices(), 0);
 			for (size_t i = 0; i < indices.size(); i += 3)
 			{
 				uint32_t i0 = indices[i + 0];
@@ -154,7 +154,7 @@ namespace
 
 			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(distortions.size() * sizeof(distortions[0])), &distortions[0]);
-			rl->BindVertexStream(distortion_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
+			rl.BindVertexStream(distortion_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
 		}
 	};
 

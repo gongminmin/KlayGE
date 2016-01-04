@@ -205,7 +205,7 @@ namespace
 
 			if (rhs_model->NumSubrenderables() > 0)
 			{
-				RenderLayoutPtr rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
+				RenderLayout const & rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
 			
 				std::vector<StaticMeshPtr> meshes(rhs_model->NumSubrenderables());
 				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumSubrenderables(); ++ mesh_index)
@@ -219,12 +219,12 @@ namespace
 					mesh->PosBound(rhs_mesh->PosBound());
 					mesh->TexcoordBound(rhs_mesh->TexcoordBound());
 
-					for (uint32_t ve_index = 0; ve_index < rhs_rl->NumVertexStreams(); ++ ve_index)
+					for (uint32_t ve_index = 0; ve_index < rhs_rl.NumVertexStreams(); ++ ve_index)
 					{
-						mesh->AddVertexStream(rhs_rl->GetVertexStream(ve_index),
-							rhs_rl->VertexStreamFormat(ve_index)[0]);
+						mesh->AddVertexStream(rhs_rl.GetVertexStream(ve_index),
+							rhs_rl.VertexStreamFormat(ve_index)[0]);
 					}
-					mesh->AddIndexStream(rhs_rl->GetIndexStream(), rhs_rl->IndexStreamFormat());
+					mesh->AddIndexStream(rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
 
 					mesh->NumVertices(rhs_mesh->NumVertices());
 					mesh->NumTriangles(rhs_mesh->NumTriangles());
@@ -1786,17 +1786,17 @@ namespace KlayGE
 			{
 				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Subrenderable(0));
 
-				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
-				merged_ves.resize(rl->NumVertexStreams());
-				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				RenderLayout const & rl = mesh.GetRenderLayout();
+				merged_ves.resize(rl.NumVertexStreams());
+				for (uint32_t j = 0; j < rl.NumVertexStreams(); ++ j)
 				{
-					merged_ves[j] = rl->VertexStreamFormat(j)[0];
+					merged_ves[j] = rl.VertexStreamFormat(j)[0];
 				}
 
 				merged_buffs.resize(merged_ves.size());
-				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				for (uint32_t j = 0; j < rl.NumVertexStreams(); ++ j)
 				{
-					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
+					GraphicsBufferPtr const & vb = rl.GetVertexStream(j);
 					uint32_t size = vb->Size();
 					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					vb->CopyToBuffer(*vb_cpu);
@@ -1807,18 +1807,18 @@ namespace KlayGE
 					std::memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), size);
 				}
 
-				if (EF_R16UI == rl->IndexStreamFormat())
+				if (EF_R16UI == rl.IndexStreamFormat())
 				{
 					all_is_index_16_bit = true;
 				}
 				else
 				{
-					BOOST_ASSERT(EF_R32UI == rl->IndexStreamFormat());
+					BOOST_ASSERT(EF_R32UI == rl.IndexStreamFormat());
 					all_is_index_16_bit = false;
 				}
 
 				{
-					GraphicsBufferPtr ib = rl->GetIndexStream();
+					GraphicsBufferPtr ib = rl.GetIndexStream();
 					uint32_t size = ib->Size();
 					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					ib->CopyToBuffer(*ib_cpu);

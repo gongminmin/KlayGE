@@ -78,11 +78,11 @@ namespace KlayGE
 		*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
 		*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
-		rl_vpl_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0)->GetRenderLayout();
+		vpl_renderable_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
+			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0);
 		if (caps.instance_id_support)
 		{
-			rl_vpl_->NumInstances(VPL_COUNT);
+			vpl_renderable_->GetRenderLayout().NumInstances(VPL_COUNT);
 		}
 	}
 
@@ -247,20 +247,21 @@ namespace KlayGE
 		*vpl_gbuffer_tex_param_ = g_buffer_rt0_tex_;
 		*vpl_depth_tex_param_ = g_buffer_depth_tex_;
 		
+		RenderLayout const & rl_vpl = vpl_renderable_->GetRenderLayout();
 		for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 		{
 			re.BindFrameBuffer(multi_res_layer_->MultiResFB(i));
 
 			if (caps.instance_id_support)
 			{
-				re.Render(*vpls_lighting_instance_id_tech_, *rl_vpl_);
+				re.Render(*vpls_lighting_instance_id_tech_, rl_vpl);
 			}
 			else
 			{
 				for (int j = 0; j < VPL_COUNT; ++ j)
 				{
 					*vpl_x_coord_param_ = (j + 0.5f) / VPL_COUNT;
-					re.Render(*vpls_lighting_no_instance_id_tech_, *rl_vpl_);
+					re.Render(*vpls_lighting_no_instance_id_tech_, rl_vpl);
 				}
 			}
 		}

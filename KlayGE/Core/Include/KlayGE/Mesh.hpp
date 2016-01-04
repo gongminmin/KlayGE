@@ -56,9 +56,9 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		RenderLayoutPtr const & GetRenderLayout() const
+		virtual RenderLayout& GetRenderLayout() const override
 		{
-			return rl_;
+			return *rl_;
 		}
 
 		virtual AABBox const & PosBound() const;
@@ -175,9 +175,9 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		RenderLayoutPtr const & GetRenderLayout() const
+		virtual RenderLayout& GetRenderLayout() const override
 		{
-			return rl_;
+			return *rl_;
 		}
 
 		void OnRenderBegin();

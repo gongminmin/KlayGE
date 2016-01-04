@@ -549,24 +549,24 @@ namespace KlayGE
 
 	uint32_t MeshMLViewerCore::NumVertexStreams(uint32_t mesh_id) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return rl->NumVertexStreams();
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return rl.NumVertexStreams();
 	}
 
 	uint32_t MeshMLViewerCore::NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return static_cast<uint32_t>(rl->VertexStreamFormat(stream_index).size());
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return static_cast<uint32_t>(rl.VertexStreamFormat(stream_index).size());
 	}
 
 	uint32_t MeshMLViewerCore::VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return (rl->VertexStreamFormat(stream_index)[usage_index].usage << 16)
-			| (rl->VertexStreamFormat(stream_index)[usage_index].usage_index);
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return (rl.VertexStreamFormat(stream_index)[usage_index].usage << 16)
+			| (rl.VertexStreamFormat(stream_index)[usage_index].usage_index);
 	}
 
 	uint32_t MeshMLViewerCore::MaterialID(uint32_t mesh_id) const
