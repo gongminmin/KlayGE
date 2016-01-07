@@ -18,7 +18,6 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>
-#include <boost/noncopyable.hpp>
 
 #include <KlayGE/Show.hpp>
 

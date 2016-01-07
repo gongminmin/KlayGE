@@ -19,8 +19,6 @@
 #include <KlayGE/RenderView.hpp>
 #include <KlayGE/Texture.hpp>
 
-#include <boost/noncopyable.hpp>
-
 #include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
 namespace KlayGE

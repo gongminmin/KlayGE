@@ -21,9 +21,6 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Camera.hpp>
 
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
-
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
