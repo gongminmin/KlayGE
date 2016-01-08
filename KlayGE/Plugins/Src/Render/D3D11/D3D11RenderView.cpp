@@ -81,15 +81,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
 
-		D3D11_RENDER_TARGET_VIEW_DESC desc;
-		desc.Format = D3D11Mapping::MappingFormat(pf);
-		desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
-		desc.Buffer.ElementOffset = 0;
-		desc.Buffer.ElementWidth = std::min(width * height, gb.Size() / NumFormatBytes(pf));
-
-		ID3D11RenderTargetView* rt_view;
-		TIF(d3d_device_->CreateRenderTargetView(checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DBuffer().get(), &desc, &rt_view));
-		rt_view_ = MakeCOMPtr(rt_view);
+		rt_view_ = checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DRenderTargetView();
 
 		width_ = width * height;
 		height_ = 1;
@@ -100,7 +92,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::ClearColor(Color const & clr)
 	{
-		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), &clr.r());
+		d3d_imm_ctx_->ClearRenderTargetView(rt_view_, &clr.r());
 	}
 
 	void D3D11RenderTargetRenderView::ClearDepth(float /*depth*/)
@@ -138,14 +130,14 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
-		d3d_imm_ctx_1->DiscardView(rt_view_.get());
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(rt_view_);
 	}
 
 	void D3D11RenderTargetRenderView::FackDiscard()
 	{
 		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearRenderTargetView(rt_view_.get(), clr);
+		d3d_imm_ctx_->ClearRenderTargetView(rt_view_, clr);
 	}
 
 	void D3D11RenderTargetRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
@@ -199,45 +191,24 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
-		D3D11_TEXTURE2D_DESC tex_desc;
-		tex_desc.Width = width;
-		tex_desc.Height = height;
-		tex_desc.MipLevels = 1;
-		tex_desc.ArraySize = 1;
-		tex_desc.Format = D3D11Mapping::MappingFormat(pf);
-		tex_desc.SampleDesc.Count = sample_count;
-		tex_desc.SampleDesc.Quality = sample_quality;
-		tex_desc.Usage = D3D11_USAGE_DEFAULT;
-		tex_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-		tex_desc.CPUAccessFlags = 0;
-		tex_desc.MiscFlags = 0;
-		ID3D11Texture2D* depth_tex;
-		TIF(d3d_device_->CreateTexture2D(&tex_desc, nullptr, &depth_tex));
-
-		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = tex_desc.Format;
-		if (sample_count > 1)
-		{
-			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-		}
-		else
-		{
-			desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-		}
-		desc.Flags = 0;
-		desc.Texture2D.MipSlice = 0;
-
-		ID3D11DepthStencilView* ds_view;
-		TIF(d3d_device_->CreateDepthStencilView(depth_tex, &desc, &ds_view));
-		ds_view_ = MakeCOMPtr(ds_view);
-
-		depth_tex->Release();
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write, nullptr);
+		ds_view_ = checked_cast<D3D11Texture*>(ds_tex.get())->RetriveD3DDepthStencilView(0, 1, 0);
+		ds_view_->AddRef();
 
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
 
 		this->BindDiscardFunc();
+	}
+
+	D3D11DepthStencilRenderView::~D3D11DepthStencilRenderView()
+	{
+		if (nullptr == rt_src_)
+		{
+			ds_view_->Release();
+		}
 	}
 
 	void D3D11DepthStencilRenderView::ClearColor(Color const & /*clr*/)
@@ -247,17 +218,17 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::ClearDepth(float depth)
 	{
-		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH, depth, 0);
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_, D3D11_CLEAR_DEPTH, depth, 0);
 	}
 
 	void D3D11DepthStencilRenderView::ClearStencil(int32_t stencil)
 	{
-		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_STENCIL, 1, static_cast<uint8_t>(stencil));
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_, D3D11_CLEAR_STENCIL, 1, static_cast<uint8_t>(stencil));
 	}
 
 	void D3D11DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
-		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, static_cast<uint8_t>(stencil));
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, depth, static_cast<uint8_t>(stencil));
 	}
 
 	void D3D11DepthStencilRenderView::Discard()
@@ -280,13 +251,13 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
-		d3d_imm_ctx_1->DiscardView(ds_view_.get());
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(ds_view_);
 	}
 
 	void D3D11DepthStencilRenderView::FackDiscard()
 	{
-		d3d_imm_ctx_->ClearDepthStencilView(ds_view_.get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+		d3d_imm_ctx_->ClearDepthStencilView(ds_view_, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 	}
 
 	void D3D11DepthStencilRenderView::OnAttached(FrameBuffer& /*fb*/, uint32_t att)
@@ -376,12 +347,12 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::Clear(float4 const & val)
 	{
-		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_.get(), &val.x());
+		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_, &val.x());
 	}
 
 	void D3D11UnorderedAccessView::Clear(uint4 const & val)
 	{
-		d3d_imm_ctx_->ClearUnorderedAccessViewUint(ua_view_.get(), &val.x());
+		d3d_imm_ctx_->ClearUnorderedAccessViewUint(ua_view_, &val.x());
 	}
 
 	void D3D11UnorderedAccessView::Discard()
@@ -404,14 +375,14 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_.get());
-		d3d_imm_ctx_1->DiscardView(ua_view_.get());
+		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
+		d3d_imm_ctx_1->DiscardView(ua_view_);
 	}
 
 	void D3D11UnorderedAccessView::FackDiscard()
 	{
 		float clr[] = { 0, 0, 0, 0 };
-		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_.get(), clr);
+		d3d_imm_ctx_->ClearUnorderedAccessViewFloat(ua_view_, clr);
 	}
 
 	void D3D11UnorderedAccessView::OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)

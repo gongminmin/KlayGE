@@ -57,12 +57,12 @@ namespace KlayGE
 		void EndFrame() override;
 		void UpdateGPUTimestampsFrequency() override;
 
-		IDXGIFactory1Ptr const & DXGIFactory() const;
-		ID3D11DevicePtr const & D3DDevice() const;
-		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
+		IDXGIFactory1* DXGIFactory() const;
+		ID3D11Device* D3DDevice() const;
+		ID3D11DeviceContext* D3DDeviceImmContext() const;
 		uint8_t D3D11RuntimeSubVer() const;
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
-		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
+		void D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
 		void ForceFlush();
 
@@ -143,7 +143,7 @@ namespace KlayGE
 		virtual void DoResume() override;
 
 		void FillRenderDeviceCaps();
-		void DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
+		void DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx);
 
 		virtual void StereoscopicForLCDShutter(int32_t eye) override;
 

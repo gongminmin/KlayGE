@@ -36,10 +36,9 @@ namespace KlayGE
 		virtual ~D3D11RenderView();
 
 	protected:
-		ID3D11DevicePtr d3d_device_;
-		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		ID3D11Device* d3d_device_;
+		ID3D11DeviceContext* d3d_imm_ctx_;
 	};
-	typedef std::shared_ptr<D3D11RenderView> D3D11RenderViewPtr;
 
 	class D3D11RenderTargetRenderView : public D3D11RenderView
 	{
@@ -59,7 +58,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
-		ID3D11RenderTargetViewPtr const & D3DRenderTargetView() const
+		ID3D11RenderTargetView* D3DRenderTargetView() const
 		{
 			return rt_view_;
 		}
@@ -83,14 +82,13 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11RenderTargetViewPtr rt_view_;
+		ID3D11RenderTargetView* rt_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 
 		std::function<void()> discard_func_;
 	};
-	typedef std::shared_ptr<D3D11RenderTargetRenderView> D3D11RenderTargetRenderViewPtr;
 
 	class D3D11DepthStencilRenderView : public D3D11RenderView
 	{
@@ -99,6 +97,7 @@ namespace KlayGE
 		D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
 		D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 		D3D11DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
+		~D3D11DepthStencilRenderView();
 
 		void ClearColor(Color const & clr);
 		void ClearDepth(float depth);
@@ -110,7 +109,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
-		ID3D11DepthStencilViewPtr const & D3DDepthStencilView() const
+		ID3D11DepthStencilView* D3DDepthStencilView() const
 		{
 			return ds_view_;
 		}
@@ -134,14 +133,13 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11DepthStencilViewPtr ds_view_;
+		ID3D11DepthStencilView* ds_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 
 		std::function<void()> discard_func_;
 	};
-	typedef std::shared_ptr<D3D11DepthStencilRenderView> D3D11DepthStencilRenderViewPtr;
 
 
 	class D3D11UnorderedAccessView : public UnorderedAccessView
@@ -161,7 +159,7 @@ namespace KlayGE
 		void OnAttached(FrameBuffer& fb, uint32_t att);
 		void OnDetached(FrameBuffer& fb, uint32_t att);
 
-		ID3D11UnorderedAccessViewPtr const & D3DUnorderedAccessView() const
+		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
 		{
 			return ua_view_;
 		}
@@ -185,17 +183,16 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11DevicePtr d3d_device_;
-		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		ID3D11Device* d3d_device_;
+		ID3D11DeviceContext* d3d_imm_ctx_;
 
-		ID3D11UnorderedAccessViewPtr ua_view_;
+		ID3D11UnorderedAccessView* ua_view_;
 		void* ua_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
 
 		std::function<void()> discard_func_;
 	};
-	typedef std::shared_ptr<D3D11UnorderedAccessView> D3D11UnorderedAccessViewPtr;
 }
 
 #endif			// _D3D11RENDERVIEW_HPP

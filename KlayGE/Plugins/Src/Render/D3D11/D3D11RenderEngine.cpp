@@ -172,23 +172,23 @@ namespace KlayGE
 
 	// 获取D3D接口
 	/////////////////////////////////////////////////////////////////////////////////
-	IDXGIFactory1Ptr const & D3D11RenderEngine::DXGIFactory() const
+	IDXGIFactory1* D3D11RenderEngine::DXGIFactory() const
 	{
-		return gi_factory_;
+		return gi_factory_.get();
 	}
 
 	// 获取D3D Device接口
 	/////////////////////////////////////////////////////////////////////////////////
-	ID3D11DevicePtr const & D3D11RenderEngine::D3DDevice() const
+	ID3D11Device* D3D11RenderEngine::D3DDevice() const
 	{
-		return d3d_device_;
+		return d3d_device_.get();
 	}
 
 	// 获取D3D Device Context接口
 	/////////////////////////////////////////////////////////////////////////////////
-	ID3D11DeviceContextPtr const & D3D11RenderEngine::D3DDeviceImmContext() const
+	ID3D11DeviceContext* D3D11RenderEngine::D3DDeviceImmContext() const
 	{
-		return d3d_imm_ctx_;
+		return d3d_imm_ctx_.get();
 	}
 
 	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const
@@ -366,7 +366,7 @@ namespace KlayGE
 #endif
 	}
 
-	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
+	void D3D11RenderEngine::D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
 		this->DetectD3D11Runtime(device, imm_ctx);
 
@@ -394,10 +394,10 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
 		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 
-		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState().get();
-		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState().get();
+		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState();
+		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState().get();
+		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
@@ -515,7 +515,7 @@ namespace KlayGE
 				D3D11GraphicsBuffer* d3d11_buf = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get());
 
 				so_src[i] = d3d11_buf;
-				d3d11_buffs[i] = d3d11_buf->D3DBuffer().get();
+				d3d11_buffs[i] = d3d11_buf->D3DBuffer();
 			}
 
 			for (uint32_t i = 0; i < num_buffs; ++ i)
@@ -555,7 +555,7 @@ namespace KlayGE
 			GraphicsBuffer const * stream = rl.GetVertexStream(i).get();
 
 			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[i] = d3dvb.D3DBuffer().get();
+			vbs[i] = d3dvb.D3DBuffer();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
 		}
@@ -565,7 +565,7 @@ namespace KlayGE
 			GraphicsBuffer const * stream = rl.InstanceStream().get();
 
 			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[number] = d3dvb.D3DBuffer().get();
+			vbs[number] = d3dvb.D3DBuffer();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
 		}
@@ -685,7 +685,7 @@ namespace KlayGE
 
 		if (rl.UseIndices())
 		{
-			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer().get();
+			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer();
 			if (ib_cache_ != d3dib)
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
@@ -713,7 +713,7 @@ namespace KlayGE
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -726,7 +726,7 @@ namespace KlayGE
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -817,8 +817,7 @@ namespace KlayGE
 			RenderPass* pass = tech.Pass(i).get();
 
 			pass->Bind();
-			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
-				offset);
+			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer(), offset);
 			pass->Unbind();
 		}
 
@@ -1353,10 +1352,10 @@ namespace KlayGE
 			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
 	}
 
-	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)
 	{
-		d3d_device_ = device;
-		d3d_imm_ctx_ = imm_ctx;
+		d3d_device_ = MakeCOMPtr(device);
+		d3d_imm_ctx_ = MakeCOMPtr(imm_ctx);
 		d3d_11_runtime_sub_ver_ = 0;
 
 		ID3D11Device3* d3d_device_3 = nullptr;
@@ -1434,7 +1433,7 @@ namespace KlayGE
 		case SM_DXGI:
 			{
 				RenderView const * view = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1469,8 +1468,8 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource().get();
-					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource().get();
+					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource();
+					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource();
 
 					D3D11_BOX box;
 					box.left = 0;
@@ -1487,7 +1486,7 @@ namespace KlayGE
 		case SM_AMDQuadBuffer:
 			{
 				RenderView const * view = win->D3DBackBufferRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;

@@ -135,8 +135,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D11DevicePtr d3d_device = d3d11_re.D3DDevice();
-		ID3D11DeviceContextPtr d3d_imm_ctx;
+		ID3D11Device* d3d_device = d3d11_re.D3DDevice();
+		ID3D11DeviceContext* d3d_imm_ctx = nullptr;
 
 		if (d3d_device)
 		{
@@ -207,8 +207,8 @@ namespace KlayGE
 
 			for (auto const & dev_type_beh : dev_type_behaviors)
 			{
-				ID3D11Device* device = nullptr;
-				ID3D11DeviceContext* imm_ctx = nullptr;
+				d3d_device = nullptr;
+				d3d_imm_ctx = nullptr;
 				IDXGIAdapter* dx_adapter = nullptr;
 				D3D_DRIVER_TYPE dev_type = dev_type_beh.first;
 				if (D3D_DRIVER_TYPE_HARDWARE == dev_type)
@@ -228,16 +228,14 @@ namespace KlayGE
 						&this_out_feature_level, &this_imm_ctx);
 					if (SUCCEEDED(hr))
 					{
-						device = this_device;
-						imm_ctx = this_imm_ctx;
+						d3d_device = this_device;
+						d3d_imm_ctx = this_imm_ctx;
 						out_feature_level = this_out_feature_level;
 						break;
 					}
 				}
 				if (SUCCEEDED(hr))
 				{
-					d3d_device = MakeCOMPtr(device);
-					d3d_imm_ctx = MakeCOMPtr(imm_ctx);
 					d3d11_re.D3DDevice(d3d_device, d3d_imm_ctx, out_feature_level);
 
 					if (Context::Instance().AppInstance().ConfirmDevice())
@@ -317,8 +315,11 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_device.reset();
-						d3d_imm_ctx.reset();
+						d3d_device->Release();
+						d3d_device = nullptr;
+
+						d3d_imm_ctx->Release();
+						d3d_imm_ctx = nullptr;
 					}
 				}
 			}
@@ -464,7 +465,7 @@ namespace KlayGE
 					if (AmdDxExtCreate11 != nullptr)
 					{
 						IAmdDxExt* amd_dx_ext;
-						HRESULT hr = AmdDxExtCreate11(d3d_device.get(), &amd_dx_ext);
+						HRESULT hr = AmdDxExtCreate11(d3d_device, &amd_dx_ext);
 						if (SUCCEEDED(hr))
 						{
 							AmdDxExtVersion ext_version;
@@ -489,14 +490,14 @@ namespace KlayGE
 		if (dxgi_sub_ver_ >= 2)
 		{
 			IDXGISwapChain1* sc = nullptr;
-			gi_factory_2_->CreateSwapChainForHwnd(d3d_device.get(), hWnd_,
+			gi_factory_2_->CreateSwapChainForHwnd(d3d_device, hWnd_,
 				&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
 			swap_chain_ = MakeCOMPtr(sc);
 		}
 		else
 		{
 			IDXGISwapChain* sc = nullptr;
-			gi_factory->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
+			gi_factory->CreateSwapChain(d3d_device, &sc_desc_, &sc);
 			swap_chain_ = MakeCOMPtr(sc);
 		}
 
@@ -540,7 +541,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
+		ID3D11DeviceContext* d3d_imm_ctx = d3d11_re.D3DDeviceImmContext();
 		if (d3d_imm_ctx)
 		{
 			d3d_imm_ctx->ClearState();
@@ -596,27 +597,27 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D11DevicePtr const & d3d_device = d3d11_re.D3DDevice();
+			ID3D11Device* d3d_device = d3d11_re.D3DDevice();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			if (dxgi_sub_ver_ >= 2)
 			{
 				IDXGISwapChain1* sc = nullptr;
-				gi_factory_2_->CreateSwapChainForHwnd(d3d_device.get(), hWnd_,
+				gi_factory_2_->CreateSwapChainForHwnd(d3d_device, hWnd_,
 					&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
 				swap_chain_ = MakeCOMPtr(sc);
 			}
 			else
 			{
 				IDXGISwapChain* sc = nullptr;
-				gi_factory_1_->CreateSwapChain(d3d_device.get(), &sc_desc_, &sc);
+				gi_factory_1_->CreateSwapChain(d3d_device, &sc_desc_, &sc);
 				swap_chain_ = MakeCOMPtr(sc);
 			}
 
 			swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #else
 			IDXGISwapChain1* sc = nullptr;
-			gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device.get(),
+			gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device,
 				static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
 			swap_chain_ = MakeCOMPtr(sc);
 #endif

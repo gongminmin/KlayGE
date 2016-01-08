@@ -50,8 +50,8 @@ namespace KlayGE
 		KFL_UNUSED(ft);
 
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice().get();
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11Device* d3d_device = re.D3DDevice();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_EVENT;
@@ -75,7 +75,7 @@ namespace KlayGE
 		if (iter != fences_.end())
 		{
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			uint32_t ret;
 			while (S_OK != d3d_imm_ctx->GetData(iter->second.get(), &ret, sizeof(ret), 0));
@@ -93,7 +93,7 @@ namespace KlayGE
 		else
 		{
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			uint32_t ret;
 			HRESULT hr = d3d_imm_ctx->GetData(iter->second.get(), &ret, sizeof(ret), 0);

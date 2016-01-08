@@ -69,7 +69,7 @@ namespace
 					tex_subres.num_items * tex_subres.num_levels);
 				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
 					tex_subres.first_array_index, tex_subres.num_items,
-					tex_subres.first_level, tex_subres.num_levels).get();
+					tex_subres.first_level, tex_subres.num_levels);
 			}
 			else
 			{
@@ -99,7 +99,7 @@ namespace
 			if (buf)
 			{
 				*srvsrc_ = std::make_tuple(buf.get(), 0, 1);
-				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
+				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
 			}
 			else
 			{
@@ -129,7 +129,7 @@ namespace
 			{
 				*uavsrc_ = tex_subres.tex.get();
 				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
-					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
+					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level);
 			}
 			else
 			{
@@ -158,7 +158,7 @@ namespace
 			if (buf)
 			{
 				*uavsrc_ = buf.get();
-				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
+				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView();
 			}
 			else
 			{
@@ -806,7 +806,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice().get();
+			ID3D11Device* d3d_device = re.D3DDevice();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
 
 			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1083,7 +1083,7 @@ namespace KlayGE
 					if (sampler)
 					{
 						samplers_[p_handle.shader_type][p_handle.offset]
-							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState().get();
+							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
 					}
 				}
 				else
@@ -1232,7 +1232,7 @@ namespace KlayGE
 						param->BindToCBuffer(cbuff, shader_desc_[type]->cb_desc[i].var_desc[j].start_offset, stride);
 					}
 
-					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 				}
 			}
 		}
@@ -1285,7 +1285,7 @@ namespace KlayGE
 				for (size_t j = 0; j < cbuff_indices_[i]->size(); ++ j)
 				{
 					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[i])[j]);
-					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 				}
 			}
 
@@ -1377,7 +1377,7 @@ namespace KlayGE
 	void D3D11ShaderObject::Bind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		re.VSSetShader(vertex_shader_.get());
 		re.GSSetShader(geometry_shader_.get());
@@ -1438,7 +1438,7 @@ namespace KlayGE
 	void D3D11ShaderObject::Unbind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{

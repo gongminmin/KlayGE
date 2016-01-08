@@ -46,23 +46,28 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		ID3D11ResourcePtr const & D3DResource()
+		ID3D11Resource* D3DResource() const
 		{
-			return d3d_texture_;
+			return d3d_texture_.get();
 		}
 
-		virtual ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
+		virtual ID3D11ShaderResourceView* RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels);
 
-		virtual ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
-		virtual ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
-		virtual ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, CubeFaces first_face, uint32_t num_faces, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			CubeFaces first_face, uint32_t num_faces, uint32_t level);
 
-		virtual ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		virtual ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
-		virtual ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face, uint32_t level);
-		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
-		virtual ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face, uint32_t level);
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level);
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
 
 		virtual void DeleteHWResource() override;
 		virtual bool HWResourceReady() const override;
@@ -70,10 +75,10 @@ namespace KlayGE
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc);
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc);
-		ID3D11RenderTargetViewPtr const & RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc);
+		ID3D11ShaderResourceView* RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc);
+		ID3D11UnorderedAccessView* RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc);
+		ID3D11RenderTargetView* RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc);
+		ID3D11DepthStencilView* RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc);
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -96,8 +101,8 @@ namespace KlayGE
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level);
 
 	protected:
-		ID3D11DevicePtr				d3d_device_;
-		ID3D11DeviceContextPtr		d3d_imm_ctx_;
+		ID3D11Device*				d3d_device_;
+		ID3D11DeviceContext*		d3d_imm_ctx_;
 
 		DXGI_FORMAT dxgi_fmt_;
 
@@ -107,8 +112,6 @@ namespace KlayGE
 		std::unordered_map<size_t, ID3D11RenderTargetViewPtr> d3d_rt_views_;
 		std::unordered_map<size_t, ID3D11DepthStencilViewPtr> d3d_ds_views_;
 	};
-
-	typedef std::shared_ptr<D3D11Texture> D3D11TexturePtr;
 
 
 	class D3D11Texture1D : public D3D11Texture
@@ -123,12 +126,16 @@ namespace KlayGE
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width);
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
+		virtual ID3D11ShaderResourceView* RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels) override;
 
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level) override;
 
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
 
 		void BuildMipSubLevels();
 
@@ -161,12 +168,16 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
+		virtual ID3D11ShaderResourceView* RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels) override;
 
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level) override;
 
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
 
 		void BuildMipSubLevels();
 
@@ -197,13 +208,18 @@ namespace KlayGE
 			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
 			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth);
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
+		virtual ID3D11ShaderResourceView* RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels) override;
 
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level) override;
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level) override;
 
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level) override;
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level) override;
 
 		void BuildMipSubLevels();
 
@@ -239,15 +255,20 @@ namespace KlayGE
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
 
-		ID3D11ShaderResourceViewPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels);
+		virtual ID3D11ShaderResourceView* RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels) override;
 
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level);
-		ID3D11UnorderedAccessViewPtr const & RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, CubeFaces first_face, uint32_t num_faces, uint32_t level);
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level) override;
+		virtual ID3D11UnorderedAccessView* RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			CubeFaces first_face, uint32_t num_faces, uint32_t level) override;
 
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11RenderTargetViewPtr const & RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level);
-		ID3D11DepthStencilViewPtr const & RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level);
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
+		virtual ID3D11RenderTargetView* RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face, uint32_t level) override;
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
+			uint32_t level) override;
+		virtual ID3D11DepthStencilView* RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level) override;
 
 		void BuildMipSubLevels();
 

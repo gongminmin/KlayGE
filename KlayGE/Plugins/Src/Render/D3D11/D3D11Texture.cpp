@@ -106,75 +106,65 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DShaderResourceView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*first_level*/, uint32_t /*num_levels*/)
+	ID3D11ShaderResourceView* D3D11Texture::RetriveD3DShaderResourceView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*first_level*/, uint32_t /*num_levels*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11ShaderResourceViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*level*/)
+	ID3D11UnorderedAccessView* D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	ID3D11UnorderedAccessView* D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, CubeFaces /*first_face*/, uint32_t /*num_faces*/,
+	ID3D11UnorderedAccessView* D3D11Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, CubeFaces /*first_face*/, uint32_t /*num_faces*/,
 		uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11UnorderedAccessViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
+	ID3D11RenderTargetView* D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	ID3D11RenderTargetView* D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
+	ID3D11RenderTargetView* D3D11Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11RenderTargetViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
+	ID3D11DepthStencilView* D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	ID3D11DepthStencilView* D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
+	ID3D11DepthStencilView* D3D11Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
 	{
 		BOOST_ASSERT(false);
-		static ID3D11DepthStencilViewPtr const ret;
-		return ret;
+		return nullptr;
 	}
 
 	void D3D11Texture::GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags)
@@ -258,7 +248,7 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11Texture::RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc)
+	ID3D11ShaderResourceView* D3D11Texture::RetriveD3DSRV(D3D11_SHADER_RESOURCE_VIEW_DESC const & desc)
 	{
 		if (this->HWResourceReady())
 		{
@@ -269,21 +259,20 @@ namespace KlayGE
 			auto iter = d3d_sr_views_.find(hash_val);
 			if (iter != d3d_sr_views_.end())
 			{
-				return iter->second;
+				return iter->second.get();
 			}
 
 			ID3D11ShaderResourceView* d3d_sr_view;
-			d3d_device_->CreateShaderResourceView(this->D3DResource().get(), &desc, &d3d_sr_view);
-			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second;
+			d3d_device_->CreateShaderResourceView(this->D3DResource(), &desc, &d3d_sr_view);
+			return d3d_sr_views_.emplace(hash_val, MakeCOMPtr(d3d_sr_view)).first->second.get();
 		}
 		else
 		{
-			static ID3D11ShaderResourceViewPtr view;
-			return view;
+			return nullptr;
 		}
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture::RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc)
+	ID3D11UnorderedAccessView* D3D11Texture::RetriveD3DUAV(D3D11_UNORDERED_ACCESS_VIEW_DESC const & desc)
 	{
 		if (this->HWResourceReady())
 		{
@@ -294,21 +283,20 @@ namespace KlayGE
 			auto iter = d3d_ua_views_.find(hash_val);
 			if (iter != d3d_ua_views_.end())
 			{
-				return iter->second;
+				return iter->second.get();
 			}
 
 			ID3D11UnorderedAccessView* d3d_ua_view;
-			d3d_device_->CreateUnorderedAccessView(this->D3DResource().get(), &desc, &d3d_ua_view);
-			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second;
+			d3d_device_->CreateUnorderedAccessView(this->D3DResource(), &desc, &d3d_ua_view);
+			return d3d_ua_views_.emplace(hash_val, MakeCOMPtr(d3d_ua_view)).first->second.get();
 		}
 		else
 		{
-			static ID3D11UnorderedAccessViewPtr view;
-			return view;
+			return nullptr;
 		}
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture::RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc)
+	ID3D11RenderTargetView* D3D11Texture::RetriveD3DRTV(D3D11_RENDER_TARGET_VIEW_DESC const & desc)
 	{
 		if (this->HWResourceReady())
 		{
@@ -319,21 +307,20 @@ namespace KlayGE
 			auto iter = d3d_rt_views_.find(hash_val);
 			if (iter != d3d_rt_views_.end())
 			{
-				return iter->second;
+				return iter->second.get();
 			}
 
 			ID3D11RenderTargetView* rt_view;
-			d3d_device_->CreateRenderTargetView(this->D3DResource().get(), &desc, &rt_view);
-			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view)).first->second;
+			d3d_device_->CreateRenderTargetView(this->D3DResource(), &desc, &rt_view);
+			return d3d_rt_views_.emplace(hash_val, MakeCOMPtr(rt_view)).first->second.get();
 		}
 		else
 		{
-			static ID3D11RenderTargetViewPtr view;
-			return view;
+			return nullptr;
 		}
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture::RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc)
+	ID3D11DepthStencilView* D3D11Texture::RetriveD3DDSV(D3D11_DEPTH_STENCIL_VIEW_DESC const & desc)
 	{
 		if (this->HWResourceReady())
 		{
@@ -344,17 +331,16 @@ namespace KlayGE
 			auto iter = d3d_ds_views_.find(hash_val);
 			if (iter != d3d_ds_views_.end())
 			{
-				return iter->second;
+				return iter->second.get();
 			}
 
 			ID3D11DepthStencilView* ds_view;
-			d3d_device_->CreateDepthStencilView(this->D3DResource().get(), &desc, &ds_view);
-			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view)).first->second;
+			d3d_device_->CreateDepthStencilView(this->D3DResource(), &desc, &ds_view);
+			return d3d_ds_views_.emplace(hash_val, MakeCOMPtr(ds_view)).first->second.get();
 		}
 		else
 		{
-			static ID3D11DepthStencilViewPtr view;
-			return view;
+			return nullptr;
 		}
 	}
 

@@ -27,19 +27,19 @@ namespace KlayGE
 		D3D11GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t bind_flags,
 			uint32_t size_in_byte, ElementFormat fmt);
 
-		ID3D11BufferPtr const & D3DBuffer() const
+		ID3D11Buffer* D3DBuffer() const
 		{
-			return buffer_;
+			return buffer_.get();
 		}
 
-		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
+		ID3D11ShaderResourceView* D3DShaderResourceView() const
 		{
-			return d3d_sr_view_;
+			return d3d_sr_view_.get();
 		}
-
-		ID3D11UnorderedAccessViewPtr const & D3DUnorderedAccessView() const
+		ID3D11RenderTargetView* D3DRenderTargetView() const;
+		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
 		{
-			return d3d_ua_view_;
+			return d3d_ua_view_.get();
 		}
 
 		void CopyToBuffer(GraphicsBuffer& rhs);
@@ -55,16 +55,16 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D11DevicePtr d3d_device_;
-		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		ID3D11Device* d3d_device_;
+		ID3D11DeviceContext* d3d_imm_ctx_;
 		ID3D11BufferPtr buffer_;
 		ID3D11ShaderResourceViewPtr d3d_sr_view_;
+		mutable ID3D11RenderTargetViewPtr d3d_rt_view_;
 		ID3D11UnorderedAccessViewPtr d3d_ua_view_;
 
 		uint32_t bind_flags_;
 		ElementFormat fmt_as_shader_res_;
 	};
-	typedef std::shared_ptr<D3D11GraphicsBuffer> D3D11GraphicsBufferPtr;
 }
 
 #endif			// _D3D11GRAPHICSBUFFER_HPP
