@@ -1139,8 +1139,8 @@ namespace KlayGE
 
 			is_shader_validate_[type] = true;
 
-			std::string shader_profile = sd.profile;
-			size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
+			char const * shader_profile = sd.profile.c_str();
+			size_t const shader_profile_hash = RT_HASH(shader_profile);
 			switch (type)
 			{
 			case ST_VertexShader:
@@ -1240,7 +1240,7 @@ namespace KlayGE
 				macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
 				uint32_t const flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
-				code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name, shader_profile, flags);
+				code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
 				if (code.empty())
 				{
 					is_shader_validate_[type] = false;

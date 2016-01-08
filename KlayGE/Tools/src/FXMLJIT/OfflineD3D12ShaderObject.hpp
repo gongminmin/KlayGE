@@ -147,7 +147,12 @@ namespace KlayGE
 
 			uint32_t vs_signature_;
 
-			std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+			char const * vs_profile_;
+			char const * ps_profile_;
+			char const * gs_profile_;
+			char const * cs_profile_;
+			char const * hs_profile_;
+			char const * ds_profile_;
 
 			D3D_FEATURE_LEVEL feature_level_;
 		};

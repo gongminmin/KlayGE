@@ -75,27 +75,27 @@ namespace KlayGE
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		std::string const & VertexShaderProfile() const
+		char const * VertexShaderProfile() const
 		{
 			return vs_profile_;
 		}
-		std::string const & PixelShaderProfile() const
+		char const * PixelShaderProfile() const
 		{
 			return ps_profile_;
 		}
-		std::string const & GeometryShaderProfile() const
+		char const * GeometryShaderProfile() const
 		{
 			return gs_profile_;
 		}
-		std::string const & ComputeShaderProfile() const
+		char const * ComputeShaderProfile() const
 		{
 			return cs_profile_;
 		}
-		std::string const & HullShaderProfile() const
+		char const * HullShaderProfile() const
 		{
 			return hs_profile_;
 		}
-		std::string const & DomainShaderProfile() const
+		char const * DomainShaderProfile() const
 		{
 			return ds_profile_;
 		}
@@ -212,7 +212,12 @@ namespace KlayGE
 
 		std::unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 
-		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+		char const * vs_profile_;
+		char const * ps_profile_;
+		char const * gs_profile_;
+		char const * cs_profile_;
+		char const * hs_profile_;
+		char const * ds_profile_;
 
 		enum StereoMethod
 		{
