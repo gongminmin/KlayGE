@@ -505,7 +505,7 @@ namespace KlayGE
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #else
 		IDXGISwapChain1* sc = nullptr;
-		gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device.get(),
+		gi_factory_2_->CreateSwapChainForCoreWindow(d3d_device,
 			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
 		swap_chain_ = MakeCOMPtr(sc);
 #endif
