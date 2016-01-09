@@ -48,8 +48,7 @@ namespace KlayGE
 	class D3D11RenderWindow : public D3D11FrameBuffer
 	{
 	public:
-		D3D11RenderWindow(IDXGIFactory1Ptr const & gi_factory, D3D11AdapterPtr const & adapter,
-			std::string const & name, RenderSettings const & settings);
+		D3D11RenderWindow(D3D11AdapterPtr const & adapter, std::string const & name, RenderSettings const & settings);
 		~D3D11RenderWindow();
 
 		void Destroy();
@@ -122,12 +121,6 @@ namespace KlayGE
 		uint32_t sync_interval_;
 
 		D3D11AdapterPtr			adapter_;
-
-		uint8_t dxgi_sub_ver_;
-		IDXGIFactory1Ptr gi_factory_1_;
-		IDXGIFactory2Ptr gi_factory_2_;
-		IDXGIFactory3Ptr gi_factory_3_;
-		IDXGIFactory4Ptr gi_factory_4_;
 		bool dxgi_stereo_support_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP

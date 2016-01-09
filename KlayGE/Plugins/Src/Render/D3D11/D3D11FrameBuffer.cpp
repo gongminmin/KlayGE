@@ -47,8 +47,7 @@ namespace KlayGE
 		{
 			if (clr_views_[n])
 			{
-				D3D11RenderTargetRenderView const & d3d_view(*checked_pointer_cast<D3D11RenderTargetRenderView>(clr_views_[n]));
-				return d3d_view.D3DRenderTargetView();
+				return checked_cast<D3D11RenderTargetRenderView*>(clr_views_[n].get())->D3DRenderTargetView();
 			}
 		}
 
@@ -59,8 +58,7 @@ namespace KlayGE
 	{
 		if (rs_view_)
 		{
-			D3D11DepthStencilRenderView const & d3d_view(*checked_pointer_cast<D3D11DepthStencilRenderView>(rs_view_));
-			return d3d_view.D3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilRenderView*>(rs_view_.get())->D3DDepthStencilView();
 		}
 
 		return nullptr;
@@ -72,8 +70,7 @@ namespace KlayGE
 		{
 			if (ua_views_[n])
 			{
-				D3D11UnorderedAccessView const & d3d_view(*checked_pointer_cast<D3D11UnorderedAccessView>(ua_views_[n]));
-				return d3d_view.D3DUnorderedAccessView();
+				return checked_cast<D3D11UnorderedAccessView*>(ua_views_[n].get())->D3DUnorderedAccessView();
 			}
 		}
 

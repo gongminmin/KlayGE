@@ -46,7 +46,7 @@ namespace KlayGE
 
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1* d3d_device_1 = static_cast<ID3D11Device1*>(d3d_device);
+			ID3D11Device1* d3d_device_1 = re.D3DDevice1();
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
 			d3d_desc1.FillMode = d3d_desc.FillMode;
 			d3d_desc1.CullMode = d3d_desc.CullMode;
@@ -137,7 +137,7 @@ namespace KlayGE
 
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1* d3d_device_1 = static_cast<ID3D11Device1*>(d3d_device);
+			ID3D11Device1* d3d_device_1 = re.D3DDevice1();
 			D3D11_BLEND_DESC1 d3d_desc1;
 			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;
 			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;

@@ -57,11 +57,24 @@ namespace KlayGE
 		void EndFrame() override;
 		void UpdateGPUTimestampsFrequency() override;
 
-		IDXGIFactory1* DXGIFactory() const;
+		IDXGIFactory1* DXGIFactory1() const;
+		IDXGIFactory2* DXGIFactory2() const;
+		IDXGIFactory3* DXGIFactory3() const;
+		IDXGIFactory4* DXGIFactory4() const;
+		uint8_t DXGISubVer() const;
+
 		ID3D11Device* D3DDevice() const;
+		ID3D11Device1* D3DDevice1() const;
+		ID3D11Device2* D3DDevice2() const;
+		ID3D11Device3* D3DDevice3() const;
 		ID3D11DeviceContext* D3DDeviceImmContext() const;
+		ID3D11DeviceContext1* D3DDeviceImmContext1() const;
+		ID3D11DeviceContext2* D3DDeviceImmContext2() const;
+		ID3D11DeviceContext3* D3DDeviceImmContext3() const;
 		uint8_t D3D11RuntimeSubVer() const;
+
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
+
 		void D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
 		void ForceFlush();
@@ -169,12 +182,22 @@ namespace KlayGE
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
 
-		// Direct3D rendering device
-		// Only created after top-level window created
-		IDXGIFactory1Ptr	gi_factory_;
-		ID3D11DevicePtr		d3d_device_;
-		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		IDXGIFactory1Ptr gi_factory_1_;
+		IDXGIFactory2Ptr gi_factory_2_;
+		IDXGIFactory3Ptr gi_factory_3_;
+		IDXGIFactory4Ptr gi_factory_4_;
+		uint8_t dxgi_sub_ver_;
+		
+		ID3D11DevicePtr  d3d_device_;
+		ID3D11Device1Ptr d3d_device_1_;
+		ID3D11Device2Ptr d3d_device_2_;
+		ID3D11Device3Ptr d3d_device_3_;
+		ID3D11DeviceContextPtr  d3d_imm_ctx_;
+		ID3D11DeviceContext1Ptr d3d_imm_ctx_1_;
+		ID3D11DeviceContext2Ptr d3d_imm_ctx_2_;
+		ID3D11DeviceContext3Ptr d3d_imm_ctx_3_;
 		uint8_t d3d_11_runtime_sub_ver_;
+
 		D3D_FEATURE_LEVEL d3d_feature_level_;
 
 		// List of D3D drivers installed (video cards)
