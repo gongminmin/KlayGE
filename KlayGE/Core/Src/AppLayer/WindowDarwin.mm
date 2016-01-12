@@ -97,7 +97,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1)
 	{
 		RegisterApp();
 
@@ -128,7 +128,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1)
 	{
 		KFL_UNUSED(name);
 		KFL_UNUSED(settings);

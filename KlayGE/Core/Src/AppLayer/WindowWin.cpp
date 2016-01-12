@@ -37,6 +37,10 @@
 
 #include <KlayGE/Window.hpp>
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#include <VersionHelpers.h>
+#include <ShellScalingAPI.h>
+#endif
 #include <windowsx.h>
 
 #ifndef GET_KEYSTATE_WPARAM
@@ -65,9 +69,40 @@ namespace KlayGE
 		}
 	}
 
-	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+	BOOL Window::EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam)
 	{
+		KFL_UNUSED(dc_mon);
+		KFL_UNUSED(rc_mon);
+
+		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
+		if (shcore)
+		{
+			typedef HRESULT (CALLBACK *GetDpiForMonitorFunc)(HMONITOR mon, MONITOR_DPI_TYPE dpi_type, UINT* dpi_x, UINT* dpi_y);
+			GetDpiForMonitorFunc DynamicGetDpiForMonitor
+				= reinterpret_cast<GetDpiForMonitorFunc>(::GetProcAddress(shcore, "GetDpiForMonitor"));
+			if (DynamicGetDpiForMonitor)
+			{
+				UINT dpi_x, dpi_y;
+				if (S_OK == DynamicGetDpiForMonitor(mon, MDT_DEFAULT, &dpi_x, &dpi_y))
+				{
+					Window* win = reinterpret_cast<Window*>(lparam);
+					win->dpi_scale_ = std::max(win->dpi_scale_, static_cast<float>(std::max(dpi_x, dpi_y)) / USER_DEFAULT_SCREEN_DPI);
+				}
+			}
+
+			::FreeLibrary(shcore);
+		}
+
+		return TRUE;
+	}
+#endif
+
+	Window::Window(std::string const & name, RenderSettings const & settings)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1), hide_(settings.hide_win)
+	{
+		this->DetectsDPI();
+
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
 		// Register the window class
@@ -110,10 +145,10 @@ namespace KlayGE
 		external_wnd_ = false;
 
 		::GetClientRect(wnd_, &rc);
-		left_ = settings.left;
-		top_ = settings.top;
-		width_ = rc.right - rc.left;
-		height_ = rc.bottom - rc.top;
+		left_ = static_cast<int32_t>(settings.left * dpi_scale_ + 0.5f);
+		top_ = static_cast<int32_t>(settings.top * dpi_scale_ + 0.5f);
+		width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5f);
+		height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -129,8 +164,10 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), hide_(settings.hide_win)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1), hide_(settings.hide_win)
 	{
+		this->DetectsDPI();
+
 		Convert(wname_, name);
 
 		wnd_ = static_cast<HWND>(native_wnd);
@@ -140,10 +177,10 @@ namespace KlayGE
 
 		RECT rc;
 		::GetClientRect(wnd_, &rc);
-		left_ = settings.left;
-		top_ = settings.top;
-		width_ = rc.right - rc.left;
-		height_ = rc.bottom - rc.top;
+		left_ = static_cast<int32_t>(settings.left * dpi_scale_ + 0.5f);
+		top_ = static_cast<int32_t>(settings.top * dpi_scale_ + 0.5f);
+		width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5f);
+		height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -182,6 +219,8 @@ namespace KlayGE
 	{
 		if (!external_wnd_)
 		{
+			this->DetectsDPI();
+
 			HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
 			uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
@@ -195,8 +234,8 @@ namespace KlayGE
 				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 
 			::GetClientRect(wnd_, &rc);
-			width_ = rc.right - rc.left;
-			height_ = rc.bottom - rc.top;
+			width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5);
+			height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -307,6 +346,13 @@ namespace KlayGE
 			}
 			break;
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		case WM_DPICHANGED:
+			dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+			this->OnSize()(*this, true);
+			break;
+#endif
+
 #elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		case WM_TOUCH:
 			this->OnTouch()(*this, reinterpret_cast<HTOUCHINPUT>(lParam), LOWORD(wParam));
@@ -323,6 +369,28 @@ namespace KlayGE
 		}
 
 		return default_wnd_proc_(hWnd, uMsg, wParam, lParam);
+	}
+
+	void Window::DetectsDPI()
+	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		typedef NTSTATUS(WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
+		HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
+		RtlGetVersionFunc DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
+		if (DynamicRtlGetVersion)
+		{
+			OSVERSIONINFOEXW os_ver_info;
+			os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
+			DynamicRtlGetVersion(&os_ver_info);
+
+			if ((os_ver_info.dwMajorVersion > 6) || ((6 == os_ver_info.dwMajorVersion) && (os_ver_info.dwMinorVersion >= 3)))
+			{
+				HDC desktop_dc = ::GetDC(nullptr);
+				::EnumDisplayMonitors(desktop_dc, nullptr, EnumMonProc, reinterpret_cast<LPARAM>(this));
+				::ReleaseDC(nullptr, desktop_dc);
+			}
+		}
+#endif
 	}
 }
 

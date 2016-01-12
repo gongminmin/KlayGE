@@ -95,10 +95,7 @@ namespace KlayGE
 			return wnd_;
 		}
 
-		float DPIScale() const
-		{
-			return dpi_scale_;
-		}
+		void DetectsDPI();
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -178,6 +175,11 @@ namespace KlayGE
 		void Closed(bool closed)
 		{
 			closed_ = closed;
+		}
+
+		float DPIScale() const
+		{
+			return dpi_scale_;
 		}
 
 	public:
@@ -367,10 +369,14 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
-		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg,
-			WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		static BOOL CALLBACK EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam);
+#endif
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
+		void DetectsDPI();
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
 		void MsgProc(XEvent const & event);
@@ -390,6 +396,8 @@ namespace KlayGE
 		bool ready_;
 		bool closed_;
 
+		float dpi_scale_;
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 		bool hide_;
 		bool external_wnd_;
@@ -400,7 +408,6 @@ namespace KlayGE
 		WNDPROC default_wnd_proc_;
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
-		float dpi_scale_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;

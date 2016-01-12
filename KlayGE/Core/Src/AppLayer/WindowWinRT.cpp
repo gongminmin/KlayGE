@@ -73,6 +73,17 @@ namespace KlayGE
 
 		left_ = 0;
 		top_ = 0;
+		
+		this->DetectsDPI();
+
+		ABI::Windows::Foundation::Rect rc;
+		wnd_->get_Bounds(&rc);
+		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_);
+		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_);
+	}
+
+	void Window::DetectsDPI()
+	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
@@ -93,11 +104,6 @@ namespace KlayGE
 #endif
 
 		dpi_scale_ = dpi / 96;
-
-		ABI::Windows::Foundation::Rect rc;
-		wnd_->get_Bounds(&rc);
-		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_);
-		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_);
 	}
 }
 
