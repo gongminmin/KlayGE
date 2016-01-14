@@ -38,6 +38,7 @@ namespace KlayGE
 	protected:
 		ID3D11Device* d3d_device_;
 		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11DeviceContext1* d3d_imm_ctx_1_;
 	};
 
 	class D3D11RenderTargetRenderView : public D3D11RenderView
@@ -184,6 +185,7 @@ namespace KlayGE
 	private:
 		ID3D11Device* d3d_device_;
 		ID3D11DeviceContext* d3d_imm_ctx_;
+		ID3D11DeviceContext1* d3d_imm_ctx_1_;
 
 		ID3D11UnorderedAccessViewPtr ua_view_;
 		void* ua_src_;

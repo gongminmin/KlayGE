@@ -33,6 +33,7 @@ namespace KlayGE
 		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		d3d_imm_ctx_1_ = renderEngine.D3DDeviceImmContext1();
 	}
 
 	D3D11RenderView::~D3D11RenderView()
@@ -130,8 +131,7 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
-		d3d_imm_ctx_1->DiscardView(rt_view_.get());
+		d3d_imm_ctx_1_->DiscardView(rt_view_.get());
 	}
 
 	void D3D11RenderTargetRenderView::FackDiscard()
@@ -242,8 +242,7 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
-		d3d_imm_ctx_1->DiscardView(ds_view_.get());
+		d3d_imm_ctx_1_->DiscardView(ds_view_.get());
 	}
 
 	void D3D11DepthStencilRenderView::FackDiscard()
@@ -322,6 +321,7 @@ namespace KlayGE
 		D3D11RenderEngine& renderEngine(*checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance()));
 		d3d_device_ = renderEngine.D3DDevice();
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
+		d3d_imm_ctx_1_ = renderEngine.D3DDeviceImmContext1();
 
 		ua_view_ = checked_cast<D3D11GraphicsBuffer*>(&gb)->D3DUnorderedAccessView();
 
@@ -366,8 +366,7 @@ namespace KlayGE
 
 	void D3D11UnorderedAccessView::HWDiscard()
 	{
-		ID3D11DeviceContext1* d3d_imm_ctx_1 = static_cast<ID3D11DeviceContext1*>(d3d_imm_ctx_);
-		d3d_imm_ctx_1->DiscardView(ua_view_.get());
+		d3d_imm_ctx_1_->DiscardView(ua_view_.get());
 	}
 
 	void D3D11UnorderedAccessView::FackDiscard()
