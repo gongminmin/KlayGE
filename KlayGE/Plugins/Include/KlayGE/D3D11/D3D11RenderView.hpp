@@ -60,7 +60,7 @@ namespace KlayGE
 
 		ID3D11RenderTargetView* D3DRenderTargetView() const
 		{
-			return rt_view_;
+			return rt_view_.get();
 		}
 
 		void* RTSrc() const
@@ -82,7 +82,7 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11RenderTargetView* rt_view_;
+		ID3D11RenderTargetViewPtr rt_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
@@ -97,7 +97,6 @@ namespace KlayGE
 		D3D11DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level);
 		D3D11DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
 		D3D11DepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		~D3D11DepthStencilRenderView();
 
 		void ClearColor(Color const & clr);
 		void ClearDepth(float depth);
@@ -111,7 +110,7 @@ namespace KlayGE
 
 		ID3D11DepthStencilView* D3DDepthStencilView() const
 		{
-			return ds_view_;
+			return ds_view_.get();
 		}
 
 		void* RTSrc() const
@@ -133,7 +132,7 @@ namespace KlayGE
 		void FackDiscard();
 
 	private:
-		ID3D11DepthStencilView* ds_view_;
+		ID3D11DepthStencilViewPtr ds_view_;
 		void* rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
@@ -161,7 +160,7 @@ namespace KlayGE
 
 		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
 		{
-			return ua_view_;
+			return ua_view_.get();
 		}
 
 		void* UASrc() const
@@ -186,7 +185,7 @@ namespace KlayGE
 		ID3D11Device* d3d_device_;
 		ID3D11DeviceContext* d3d_imm_ctx_;
 
-		ID3D11UnorderedAccessView* ua_view_;
+		ID3D11UnorderedAccessViewPtr ua_view_;
 		void* ua_src_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;

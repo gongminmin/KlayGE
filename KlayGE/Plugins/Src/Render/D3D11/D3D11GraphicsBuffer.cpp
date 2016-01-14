@@ -43,7 +43,7 @@ namespace KlayGE
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 	}
 
-	ID3D11RenderTargetView* D3D11GraphicsBuffer::D3DRenderTargetView() const
+	ID3D11RenderTargetViewPtr const & D3D11GraphicsBuffer::D3DRenderTargetView() const
 	{
 		if (buffer_ && !d3d_rt_view_)
 		{
@@ -57,7 +57,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateRenderTargetView(buffer_.get(), &desc, &rt_view));
 			d3d_rt_view_ = MakeCOMPtr(rt_view);
 		}
-		return d3d_rt_view_.get();
+		return d3d_rt_view_;
 	}
 
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)

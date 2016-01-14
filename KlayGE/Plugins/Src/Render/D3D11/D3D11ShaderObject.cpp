@@ -69,7 +69,7 @@ namespace
 					tex_subres.num_items * tex_subres.num_levels);
 				*srv_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
 					tex_subres.first_array_index, tex_subres.num_items,
-					tex_subres.first_level, tex_subres.num_levels);
+					tex_subres.first_level, tex_subres.num_levels).get();
 			}
 			else
 			{
@@ -99,7 +99,7 @@ namespace
 			if (buf)
 			{
 				*srvsrc_ = std::make_tuple(buf.get(), 0, 1);
-				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView();
+				*srv_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
 			}
 			else
 			{
@@ -129,7 +129,7 @@ namespace
 			{
 				*uavsrc_ = tex_subres.tex.get();
 				*uav_ = checked_cast<D3D11Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
-					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level);
+					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
 			}
 			else
 			{
@@ -158,7 +158,7 @@ namespace
 			if (buf)
 			{
 				*uavsrc_ = buf.get();
-				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView();
+				*uav_ = checked_cast<D3D11GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
 			}
 			else
 			{

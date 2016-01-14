@@ -32,14 +32,14 @@ namespace KlayGE
 			return buffer_.get();
 		}
 
-		ID3D11ShaderResourceView* D3DShaderResourceView() const
+		ID3D11ShaderResourceViewPtr const & D3DShaderResourceView() const
 		{
-			return d3d_sr_view_.get();
+			return d3d_sr_view_;
 		}
-		ID3D11RenderTargetView* D3DRenderTargetView() const;
-		ID3D11UnorderedAccessView* D3DUnorderedAccessView() const
+		ID3D11RenderTargetViewPtr const & D3DRenderTargetView() const;
+		ID3D11UnorderedAccessViewPtr const & D3DUnorderedAccessView() const
 		{
-			return d3d_ua_view_.get();
+			return d3d_ua_view_;
 		}
 
 		void CopyToBuffer(GraphicsBuffer& rhs);

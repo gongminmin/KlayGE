@@ -125,7 +125,7 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11ShaderResourceView* D3D11Texture1D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+	ID3D11ShaderResourceViewPtr const & D3D11Texture1D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
 			uint32_t first_level, uint32_t num_levels)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
@@ -168,7 +168,7 @@ namespace KlayGE
 		return this->RetriveD3DSRV(desc);
 	}
 
-	ID3D11UnorderedAccessView* D3D11Texture1D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture1D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
 			uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
@@ -191,7 +191,7 @@ namespace KlayGE
 		return this->RetriveD3DUAV(desc);
 	}
 
-	ID3D11RenderTargetView* D3D11Texture1D::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
+	ID3D11RenderTargetViewPtr const & D3D11Texture1D::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
@@ -215,7 +215,7 @@ namespace KlayGE
 		return this->RetriveD3DRTV(desc);
 	}
 
-	ID3D11DepthStencilView* D3D11Texture1D::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture1D::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size, uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(first_array_index < this->ArraySize());
