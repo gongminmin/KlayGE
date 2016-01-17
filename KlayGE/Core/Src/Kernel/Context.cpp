@@ -350,7 +350,7 @@ namespace KlayGE
 			attr = frame_node->Attrib("fullscreen");
 			if (attr)
 			{
-				std::string fs_str = attr->ValueString();
+				std::string const & fs_str = attr->ValueString();
 				if (("1" == fs_str) || ("true" == fs_str))
 				{
 					full_screen = true;
@@ -423,7 +423,7 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string hdr_str = attr->ValueString();
+				std::string const & hdr_str = attr->ValueString();
 				if (("1" == hdr_str) || ("true" == hdr_str))
 				{
 					hdr = true;
@@ -438,7 +438,7 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string ppaa_str = attr->ValueString();
+				std::string const & ppaa_str = attr->ValueString();
 				if (("1" == ppaa_str) || ("true" == ppaa_str))
 				{
 					ppaa = true;
@@ -453,7 +453,7 @@ namespace KlayGE
 			attr = gamma_node->Attrib("value");
 			if (attr)
 			{
-				std::string gamma_str = attr->ValueString();
+				std::string const & gamma_str = attr->ValueString();
 				if (("1" == gamma_str) || ("true" == gamma_str))
 				{
 					gamma = true;
@@ -468,7 +468,7 @@ namespace KlayGE
 			attr = color_grading_node->Attrib("value");
 			if (attr)
 			{
-				std::string color_grading_str = attr->ValueString();
+				std::string const & color_grading_str = attr->ValueString();
 				if (("1" == color_grading_str) || ("true" == color_grading_str))
 				{
 					color_grading = true;
@@ -483,7 +483,7 @@ namespace KlayGE
 			attr = stereo_node->Attrib("method");
 			if (attr)
 			{
-				std::string method_str = attr->ValueString();
+				std::string const & method_str = attr->ValueString();
 				size_t const method_str_hash = RT_HASH(method_str.c_str());
 				if (CT_HASH("none") == method_str_hash)
 				{
@@ -606,13 +606,13 @@ namespace KlayGE
 		af_name = "OpenAL";
 #endif
 
-		cfg_.render_factory_name = rf_name;
-		cfg_.audio_factory_name = af_name;
-		cfg_.input_factory_name = if_name;
-		cfg_.show_factory_name = sf_name;
-		cfg_.script_factory_name = scf_name;
-		cfg_.scene_manager_name = sm_name;
-		cfg_.audio_data_source_factory_name = adsf_name;
+		cfg_.render_factory_name = std::move(rf_name);
+		cfg_.audio_factory_name = std::move(af_name);
+		cfg_.input_factory_name = std::move(if_name);
+		cfg_.show_factory_name = std::move(sf_name);
+		cfg_.script_factory_name = std::move(scf_name);
+		cfg_.scene_manager_name = std::move(sm_name);
+		cfg_.audio_data_source_factory_name = std::move(adsf_name);
 
 		cfg_.graphics_cfg.left = cfg_.graphics_cfg.top = 0;
 		cfg_.graphics_cfg.width = width;
@@ -630,7 +630,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
-		cfg_.graphics_cfg.options = graphics_options;
+		cfg_.graphics_cfg.options = std::move(graphics_options);
 
 		cfg_.deferred_rendering = false;
 		cfg_.perf_profiler = perf_profiler;

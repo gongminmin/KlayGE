@@ -332,8 +332,8 @@ namespace KlayGE
 				}
 			}
 
-			std::vector<SceneObject*> empty;
-			octree_[index].obj_ptrs.swap(empty);
+			octree_[index].obj_ptrs.clear();
+			octree_[index].obj_ptrs.shrink_to_fit();
 		}
 	}
 
