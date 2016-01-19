@@ -36,6 +36,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
+#include <KlayGE/TexCompressionETC.hpp>
 #include <KFL/Half.hpp>
 
 #include <cstring>
@@ -848,6 +849,38 @@ namespace
 			codec = MakeSharedPtr<TexCompressionBC5>();
 			break;
 
+		case EF_ETC1:
+			codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -876,20 +909,27 @@ namespace
 		case EF_BC1:
 		case EF_BC2:
 		case EF_BC3:
+		case EF_ETC1:
+		case EF_ETC2_BGR8:
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_ABGR8:
 			dst_format = EF_ARGB8;
 			break;
 				
 		case EF_BC4:
+		case EF_ETC2_R11:
 			dst_format = EF_R8;
 			break;
 
 		case EF_BC5:
+		case EF_ETC2_GR11:
 			dst_format = EF_GR8;
 			break;
 
 		case EF_SIGNED_BC1:
 		case EF_SIGNED_BC2:
 		case EF_SIGNED_BC3:
+		case EF_SIGNED_ETC2_R11:
 			dst_format = EF_SIGNED_ABGR8;
 			break;
 
@@ -906,6 +946,9 @@ namespace
 		case EF_BC3_SRGB:
 		case EF_BC4_SRGB:
 		case EF_BC5_SRGB:
+		case EF_ETC2_BGR8_SRGB:
+		case EF_ETC2_A1BGR8_SRGB:
+		case EF_ETC2_ABGR8_SRGB:
 			dst_format = EF_ARGB8_SRGB;
 			break;
 
@@ -946,6 +989,38 @@ namespace
 		case EF_BC5_SRGB:
 		case EF_SIGNED_BC5:
 			codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		case EF_ETC1:
+			codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
 			break;
 
 		default:
@@ -3228,14 +3303,20 @@ namespace KlayGE
 			case EF_BC1:
 			case EF_BC2:
 			case EF_BC3:
+			case EF_ETC1:
+			case EF_ETC2_BGR8:
+			case EF_ETC2_A1BGR8:
+			case EF_ETC2_ABGR8:
 				dst_cpu_format = EF_ARGB8;
 				break;
 				
 			case EF_BC4:
+			case EF_ETC2_R11:
 				dst_cpu_format = EF_R8;
 				break;
 
 			case EF_BC5:
+			case EF_ETC2_GR11:
 				dst_cpu_format = EF_GR8;
 				break;
 
@@ -3246,6 +3327,7 @@ namespace KlayGE
 				break;
 
 			case EF_SIGNED_BC4:
+			case EF_SIGNED_ETC2_R11:
 				dst_cpu_format = EF_SIGNED_R8;
 				break;
 
@@ -3258,6 +3340,9 @@ namespace KlayGE
 			case EF_BC3_SRGB:
 			case EF_BC4_SRGB:
 			case EF_BC5_SRGB:
+			case EF_ETC2_BGR8_SRGB:
+			case EF_ETC2_A1BGR8_SRGB:
+			case EF_ETC2_ABGR8_SRGB:
 				dst_cpu_format = EF_ARGB8_SRGB;
 				break;
 
