@@ -1091,6 +1091,155 @@ namespace KlayGE
 			}
 			break;
 
+		case EF_ETC1:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_RGB8_ETC2;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else if (glloader_GLES_OES_compressed_ETC1_RGB8_texture())
+			{
+				internalFormat = GL_ETC1_RGB8_OES;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_R11:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_R11_EAC;
+				glformat = GL_RED;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_SIGNED_ETC2_R11:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
+				glformat = GL_RED;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_GR11:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_RG11_EAC;
+				glformat = GL_RG;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_SIGNED_ETC2_GR11:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
+				glformat = GL_RG;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_BGR8:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_RGB8_ETC2;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_BGR8_SRGB:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_SRGB8_ETC2;
+				glformat = GL_RGB;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_A1BGR8:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_A1BGR8_SRGB:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_ABGR8:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
+		case EF_ETC2_ABGR8_SRGB:
+			if (glloader_GLES_VERSION_3_0())
+			{
+				internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
+				glformat = GL_RGBA;
+				gltype = GL_UNSIGNED_BYTE;
+			}
+			else
+			{
+				THR(errc::function_not_supported);
+			}
+			break;
+
 		default:
 			THR(errc::function_not_supported);
 		}

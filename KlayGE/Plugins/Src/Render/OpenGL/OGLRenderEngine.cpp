@@ -1950,6 +1950,20 @@ namespace KlayGE
 			texture_format_.insert(EF_BC4_SRGB);
 			texture_format_.insert(EF_BC5_SRGB);
 		}
+		if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
+		{
+			texture_format_.insert(EF_ETC1);
+			texture_format_.insert(EF_ETC2_R11);
+			texture_format_.insert(EF_SIGNED_ETC2_R11);
+			texture_format_.insert(EF_ETC2_GR11);
+			texture_format_.insert(EF_SIGNED_ETC2_GR11);
+			texture_format_.insert(EF_ETC2_BGR8);
+			texture_format_.insert(EF_ETC2_BGR8_SRGB);
+			texture_format_.insert(EF_ETC2_A1BGR8);
+			texture_format_.insert(EF_ETC2_A1BGR8_SRGB);
+			texture_format_.insert(EF_ETC2_ABGR8);
+			texture_format_.insert(EF_ETC2_ABGR8_SRGB);
+		}
 
 		GLint max_samples;
 		glGetIntegerv(GL_MAX_SAMPLES_EXT, &max_samples);

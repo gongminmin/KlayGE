@@ -1859,6 +1859,24 @@ namespace KlayGE
 		{
 			texture_format_.insert(EF_ABGR8_SRGB);
 		}
+		if (glloader_GLES_VERSION_3_0())
+		{
+			texture_format_.insert(EF_ETC1);
+			texture_format_.insert(EF_ETC2_R11);
+			texture_format_.insert(EF_SIGNED_ETC2_R11);
+			texture_format_.insert(EF_ETC2_GR11);
+			texture_format_.insert(EF_SIGNED_ETC2_GR11);
+			texture_format_.insert(EF_ETC2_BGR8);
+			texture_format_.insert(EF_ETC2_BGR8_SRGB);
+			texture_format_.insert(EF_ETC2_A1BGR8);
+			texture_format_.insert(EF_ETC2_A1BGR8_SRGB);
+			texture_format_.insert(EF_ETC2_ABGR8);
+			texture_format_.insert(EF_ETC2_ABGR8_SRGB);
+		}
+		else if (glloader_GLES_OES_compressed_ETC1_RGB8_texture())
+		{
+			texture_format_.insert(EF_ETC1);
+		}
 
 		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{
