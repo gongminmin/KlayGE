@@ -695,6 +695,7 @@ namespace
 	};
 	std::unique_ptr<logic_operation_define> logic_operation_define::instance_;
 
+#if KLAYGE_IS_DEV_PLATFORM
 	bool bool_from_str(std::string const & name)
 	{
 		if (("true" == name) || ("1" == name))
@@ -737,8 +738,6 @@ namespace
 		return value.substr(0, value.find("("));
 	}
 
-
-#if KLAYGE_IS_DEV_PLATFORM
 	RenderVariablePtr read_var(XMLNodePtr const & node, uint32_t type, uint32_t array_size)
 	{
 		RenderVariablePtr var;
