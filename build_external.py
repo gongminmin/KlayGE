@@ -96,6 +96,9 @@ def setup_wpftoolkit(build_info, compiler_info):
 def setup_android_native_app_glue(build_info, compiler_info):
 	build_a_project("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
 
+def build_assimp(build_info, compiler_info):
+	build_a_project("assimp", "External/assimp", build_info, compiler_info)
+
 def build_external_libs(build_info):
 	for compiler_info in build_info.compilers:
 		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
@@ -134,6 +137,9 @@ def build_external_libs(build_info):
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
 				setup_OpenALSDK(build_info, compiler_info)
+
+			print("\nBuilding assimp...\n")
+			build_assimp(build_info, compiler_info)
 
 		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
 			print("\nSeting up wpftoolkit...\n")

@@ -66,6 +66,7 @@ KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
 External/7z
 External/android_native_app_glue
+External/assimp
 External/boost
 External/Downloads
 External/DXSDK
