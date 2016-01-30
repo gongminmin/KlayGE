@@ -158,7 +158,7 @@ namespace
 		}
 	}
 
-	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool flip_faces)
+	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool flip_faces, bool inverse_v)
 	{
 		aiScene const * scene = aiImportFile(in_name.c_str(), 0);
 
@@ -220,6 +220,76 @@ namespace
 			}
 
 			meshml_obj.SetMaterial(mtl_id, ambient, diffuse, specular, emit, opacity, shininess);
+
+			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Diffuse Color", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_SPECULAR);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_SPECULAR, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Specular Color", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Glossiness", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Bump Map", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Height Map", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_EMISSIVE);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Self-Illumination", str.C_Str());
+			}
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_OPACITY);
+			if (count > 0)
+			{
+				aiString str;
+				aiGetMaterialTexture(mtl, aiTextureType_OPACITY, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
+			}
 		}
 
 		std::vector<Mesh> meshes(scene->mNumMeshes);
@@ -329,6 +399,10 @@ namespace
 					if (has_texcoord[tci])
 					{
 						texcoords[tci][vi] = float3(&mesh->mTextureCoords[tci][vi].x);
+						if (inverse_v)
+						{
+							texcoords[tci][vi].y() = 1 - texcoords[tci][vi].y();
+						}
 					}
 				}
 			}
@@ -358,10 +432,6 @@ namespace
 			meshes[mi].has_normal = has_normal;
 			meshes[mi].has_tangent_frame = has_tangent || has_binormal;
 
-			if (has_normal)
-			{
-				vertex_export_settings |= MeshMLObj::VES_Normal;
-			}
 			if (has_tangent || has_binormal)
 			{
 				vertex_export_settings |= MeshMLObj::VES_TangentQuat;
@@ -388,6 +458,7 @@ int main(int argc, char* argv[])
 	std::string platform;
 	float scale = 1;
 	bool flip_faces = false;
+	bool inverse_v = false;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -397,6 +468,7 @@ int main(int argc, char* argv[])
 		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
 		("scale,S", boost::program_options::value<float>(), "Scale.")
 		("flip-faces,F", "Flip faces.")
+		("inverse-v,V", "Inverse texture's V axis.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -435,6 +507,10 @@ int main(int argc, char* argv[])
 	{
 		flip_faces = true;
 	}
+	if (vm.count("inverse-v") > 0)
+	{
+		inverse_v = true;
+	}
 	if (vm.count("quiet") > 0)
 	{
 		quiet = vm["quiet"].as<bool>();
@@ -460,7 +536,7 @@ int main(int argc, char* argv[])
 
 	std::string output_name = (target_folder / base_name).string() + ".meshml";
 
-	ConvertMesh(file_name, output_name, scale, flip_faces);
+	ConvertMesh(file_name, output_name, scale, flip_faces, inverse_v);
 
 	if (!quiet)
 	{
