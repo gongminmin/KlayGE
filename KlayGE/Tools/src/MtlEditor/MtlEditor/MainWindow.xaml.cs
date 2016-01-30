@@ -225,6 +225,9 @@ namespace MtlEditor
 				}
 				visualize.IsEnabled = true;
 				properties.IsEnabled = true;
+				// Workround for.NET 4.6.1
+				visualize_gallery.Command = ApplicationCommands.Print;
+				visualize_gallery.Command = null;
 
 				frame_ = 0;
 
