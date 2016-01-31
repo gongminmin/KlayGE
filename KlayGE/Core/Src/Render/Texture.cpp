@@ -849,6 +849,19 @@ namespace
 			codec = MakeSharedPtr<TexCompressionBC5>();
 			break;
 
+		case EF_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			codec = MakeSharedPtr<TexCompressionBC7>();
+			break;
+
 		case EF_ETC1:
 			codec = MakeSharedPtr<TexCompressionETC1>();
 			break;
@@ -909,6 +922,7 @@ namespace
 		case EF_BC1:
 		case EF_BC2:
 		case EF_BC3:
+		case EF_BC7:
 		case EF_ETC1:
 		case EF_ETC2_BGR8:
 		case EF_ETC2_A1BGR8:
@@ -946,10 +960,16 @@ namespace
 		case EF_BC3_SRGB:
 		case EF_BC4_SRGB:
 		case EF_BC5_SRGB:
+		case EF_BC7_SRGB:
 		case EF_ETC2_BGR8_SRGB:
 		case EF_ETC2_A1BGR8_SRGB:
 		case EF_ETC2_ABGR8_SRGB:
 			dst_format = EF_ARGB8_SRGB;
+			break;
+
+		case EF_BC6:
+		case EF_SIGNED_BC6:
+			dst_format = EF_ABGR16F;
 			break;
 
 		default:
@@ -989,6 +1009,19 @@ namespace
 		case EF_BC5_SRGB:
 		case EF_SIGNED_BC5:
 			codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		case EF_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			codec = MakeSharedPtr<TexCompressionBC7>();
 			break;
 
 		case EF_ETC1:
@@ -1156,6 +1189,10 @@ namespace
 				{ EF_BC5, EF_GR8 },
 				{ EF_BC5_SRGB, EF_GR8 },
 				{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
+				{ EF_BC6, EF_ABGR16F },
+				{ EF_SIGNED_BC6, EF_ABGR16F },
+				{ EF_BC7, EF_ARGB8 },
+				{ EF_BC7_SRGB, EF_ARGB8 },
 				{ EF_ETC1, EF_ARGB8 },
 				{ EF_ETC2_BGR8, EF_ARGB8 },
 				{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
@@ -1340,6 +1377,10 @@ namespace
 				{ EF_BC5, EF_GR8 },
 				{ EF_BC5_SRGB, EF_GR8 },
 				{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
+				{ EF_BC6, EF_ABGR16F },
+				{ EF_SIGNED_BC6, EF_ABGR16F },
+				{ EF_BC7, EF_ARGB8 },
+				{ EF_BC7_SRGB, EF_ARGB8 },
 				{ EF_ETC1, EF_ARGB8 },
 				{ EF_ETC2_BGR8, EF_ARGB8 },
 				{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
@@ -3303,6 +3344,7 @@ namespace KlayGE
 			case EF_BC1:
 			case EF_BC2:
 			case EF_BC3:
+			case EF_BC7:
 			case EF_ETC1:
 			case EF_ETC2_BGR8:
 			case EF_ETC2_A1BGR8:
@@ -3340,10 +3382,16 @@ namespace KlayGE
 			case EF_BC3_SRGB:
 			case EF_BC4_SRGB:
 			case EF_BC5_SRGB:
+			case EF_BC7_SRGB:
 			case EF_ETC2_BGR8_SRGB:
 			case EF_ETC2_A1BGR8_SRGB:
 			case EF_ETC2_ABGR8_SRGB:
 				dst_cpu_format = EF_ARGB8_SRGB;
+				break;
+
+			case EF_BC6:
+			case EF_SIGNED_BC6:
+				dst_cpu_format = EF_ABGR16F;
 				break;
 
 			default:
