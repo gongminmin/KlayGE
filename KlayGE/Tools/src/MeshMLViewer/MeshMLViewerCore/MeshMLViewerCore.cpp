@@ -192,17 +192,12 @@ namespace
 		}
 	};
 
-	class PointLightSourceUpdate
+	class LightSourceUpdate
 	{
 	public:
-		PointLightSourceUpdate()
-		{
-		}
-
 		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
-			float4x4 inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
-			light.Position(MathLib::transform_coord(float3(0, 2.0f, 0), inv_view));
+			light.Direction(Context::Instance().AppInstance().ActiveCamera().ForwardVec());
 		}
 	};
 }
@@ -261,13 +256,11 @@ namespace KlayGE
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 		deferred_rendering_->SSVOEnabled(0, false);
 
-		point_light_ = MakeSharedPtr<PointLightSource>();
-		point_light_->Attrib(LightSource::LSA_NoShadow);
-		point_light_->Color(float3(1.0f, 1.0f, 1.0f));
-		point_light_->Position(float3(0, 2.0f, 0));
-		point_light_->Falloff(float3(1, 0, 0));
-		point_light_->BindUpdateFunc(PointLightSourceUpdate());
-		point_light_->AddToSceneManager();
+		light_ = MakeSharedPtr<DirectionalLightSource>();
+		light_->Attrib(LightSource::LSA_NoShadow);
+		light_->Color(float3(1.0f, 1.0f, 1.0f));
+		light_->BindUpdateFunc(LightSourceUpdate());
+		light_->AddToSceneManager();
 
 		axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
@@ -337,7 +330,7 @@ namespace KlayGE
 		sky_box_.reset();
 		grid_.reset();
 		axis_.reset();
-		point_light_.reset();
+		light_.reset();
 		selected_bb_.reset();
 
 		font_.reset();

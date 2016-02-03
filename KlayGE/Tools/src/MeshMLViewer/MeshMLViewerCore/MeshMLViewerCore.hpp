@@ -76,7 +76,7 @@ namespace KlayGE
 	private:
 		FontPtr font_;
 
-		PointLightSourcePtr point_light_;
+		LightSourcePtr light_;
 
 		SceneObjectPtr model_;
 		SceneObjectPtr axis_;
