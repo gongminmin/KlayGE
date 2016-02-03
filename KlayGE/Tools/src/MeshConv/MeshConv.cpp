@@ -61,6 +61,8 @@
 #endif
 
 #include <assimp/cimport.h>
+#include <assimp/postprocess.h>
+#include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 
 #include <MeshMLLib/MeshMLLib.hpp>
@@ -158,9 +160,28 @@ namespace
 		}
 	}
 
-	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool flip_faces, bool inverse_v)
+	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz)
 	{
-		aiScene const * scene = aiImportFile(in_name.c_str(), 0);
+		aiPropertyStore* props = aiCreatePropertyStore();
+		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
+		aiSetImportPropertyFloat(props, AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
+		aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, 0);
+
+		aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
+
+		unsigned int ppsteps = aiProcess_JoinIdenticalVertices // join identical vertices/ optimize indexing
+			| aiProcess_ValidateDataStructure // perform a full validation of the loader's output
+			| aiProcess_RemoveRedundantMaterials // remove redundant materials
+			| aiProcess_FindInstances; // search for instanced meshes and remove them by references to one master
+
+		aiScene const * scene = aiImportFileExWithProperties(in_name.c_str(),
+			ppsteps // configurable pp steps
+			| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
+			| aiProcess_Triangulate // triangulate polygons with more than 3 edges
+			| aiProcess_ConvertToLeftHanded, // convert everything to D3D left handed space
+			nullptr, props);
+
+		aiReleasePropertyStore(props);
 
 		MeshMLObj meshml_obj(scale);
 
@@ -305,52 +326,11 @@ namespace
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
-				switch (mesh->mFaces[fi].mNumIndices)
-				{
-				case 3:
-					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					if (flip_faces)
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[2]);
-						indices.push_back(mesh->mFaces[fi].mIndices[1]);
-					}
-					else
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[1]);
-						indices.push_back(mesh->mFaces[fi].mIndices[2]);
-					}
-					break;
+				BOOST_ASSERT(3 == mesh->mFaces[fi].mNumIndices);
 
-				case 4:
-					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					if (flip_faces)
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[2]);
-						indices.push_back(mesh->mFaces[fi].mIndices[1]);
-					}
-					else
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[1]);
-						indices.push_back(mesh->mFaces[fi].mIndices[2]);
-					}
-
-					indices.push_back(mesh->mFaces[fi].mIndices[2]);
-					if (flip_faces)
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[0]);
-						indices.push_back(mesh->mFaces[fi].mIndices[3]);
-					}
-					else
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[3]);
-						indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					}
-					break;
-
-				default:
-					LogError("Couldn't handle faces with more than 4 vertices.");
-					break;
-				}
+				indices.push_back(mesh->mFaces[fi].mIndices[0]);
+				indices.push_back(mesh->mFaces[fi].mIndices[1]);
+				indices.push_back(mesh->mFaces[fi].mIndices[2]);
 			}
 
 			bool has_normal = (mesh->mNormals != nullptr);
@@ -381,17 +361,34 @@ namespace
 			for (unsigned int vi = 0; vi < mesh->mNumVertices; ++ vi)
 			{
 				positions[vi] = float3(&mesh->mVertices[vi].x);
+				if (swap_yz)
+				{
+					std::swap(positions[vi].y(), positions[vi].z());
+				}
+
 				if (has_normal)
 				{
 					normals[vi] = float3(&mesh->mNormals[vi].x);
+					if (swap_yz)
+					{
+						std::swap(normals[vi].y(), normals[vi].z());
+					}
 				}
 				if (has_tangent)
 				{
 					tangents[vi] = float3(&mesh->mTangents[vi].x);
+					if (swap_yz)
+					{
+						std::swap(tangents[vi].y(), tangents[vi].z());
+					}
 				}
 				if (has_binormal)
 				{
 					binormals[vi] = float3(&mesh->mBitangents[vi].x);
+					if (swap_yz)
+					{
+						std::swap(binormals[vi].y(), binormals[vi].z());
+					}
 				}
 
 				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
@@ -399,10 +396,6 @@ namespace
 					if (has_texcoord[tci])
 					{
 						texcoords[tci][vi] = float3(&mesh->mTextureCoords[tci][vi].x);
-						if (inverse_v)
-						{
-							texcoords[tci][vi].y() = 1 - texcoords[tci][vi].y();
-						}
 					}
 				}
 			}
@@ -457,8 +450,7 @@ int main(int argc, char* argv[])
 	filesystem::path target_folder;
 	std::string platform;
 	float scale = 1;
-	bool flip_faces = false;
-	bool inverse_v = false;
+	bool swap_yz = false;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -467,8 +459,7 @@ int main(int argc, char* argv[])
 		("input-path,I", boost::program_options::value<std::string>(), "Input mesh path.")
 		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
 		("scale,S", boost::program_options::value<float>(), "Scale.")
-		("flip-faces,F", "Flip faces.")
-		("inverse-v,V", "Inverse texture's V axis.")
+		("swap-yz,W", "Swap Y and Z axis.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -503,13 +494,9 @@ int main(int argc, char* argv[])
 	{
 		scale = vm["scale"].as<float>();
 	}
-	if (vm.count("flip-faces") > 0)
+	if (vm.count("swap-yz") > 0)
 	{
-		flip_faces = true;
-	}
-	if (vm.count("inverse-v") > 0)
-	{
-		inverse_v = true;
+		swap_yz = true;
 	}
 	if (vm.count("quiet") > 0)
 	{
@@ -524,11 +511,7 @@ int main(int argc, char* argv[])
 	}
 
 	filesystem::path input_path(file_name);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	std::string base_name = input_path.stem();
-#else
-	std::string base_name = input_path.stem().string();
-#endif
+	filesystem::path base_name = input_path.stem();
 	if (target_folder.empty())
 	{
 		target_folder = input_path.parent_path();
@@ -536,7 +519,7 @@ int main(int argc, char* argv[])
 
 	std::string output_name = (target_folder / base_name).string() + ".meshml";
 
-	ConvertMesh(file_name, output_name, scale, flip_faces, inverse_v);
+	ConvertMesh(file_name, output_name, scale, swap_yz);
 
 	if (!quiet)
 	{
