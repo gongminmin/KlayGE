@@ -223,7 +223,7 @@ namespace
 			}
 
 			unsigned int max = 1;
-			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_COLOR_TRANSPARENT, &ai_opacity, &max))
+			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_OPACITY, &ai_opacity, &max))
 			{
 				opacity = ai_opacity;
 			}
@@ -463,6 +463,18 @@ namespace
 			if (first_texcoord != AI_MAX_NUMBER_OF_TEXTURECOORDS)
 			{
 				vertex_export_settings |= MeshMLObj::VES_Texcoord;
+			}
+		}
+
+		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
+		{
+			if ((vertex_export_settings & MeshMLObj::VES_TangentQuat) && !meshes[mi].has_tangent_frame)
+			{
+				meshes[mi].has_tangent_frame = true;
+			}
+			if ((vertex_export_settings & MeshMLObj::VES_Texcoord) && !meshes[mi].has_texcoord[0])
+			{
+				meshes[mi].has_texcoord[0] = true;
 			}
 		}
 
