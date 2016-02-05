@@ -160,7 +160,7 @@ namespace
 		}
 	}
 
-	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz)
+	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz, bool inverse_z)
 	{
 		aiPropertyStore* props = aiCreatePropertyStore();
 		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
@@ -178,7 +178,8 @@ namespace
 			ppsteps // configurable pp steps
 			| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
 			| aiProcess_Triangulate // triangulate polygons with more than 3 edges
-			| aiProcess_ConvertToLeftHanded, // convert everything to D3D left handed space
+			| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
+			| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
 			nullptr, props);
 
 		aiReleasePropertyStore(props);
@@ -323,6 +324,13 @@ namespace
 			meshes[mi].mtl_id = mesh->mMaterialIndex;
 			meshes[mi].name = mesh->mName.C_Str();
 
+			unsigned int max = 1;
+			int two_sided = 0;
+			if (aiGetMaterialIntegerArray(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_TWOSIDED, &two_sided, &max) != AI_SUCCESS)
+			{
+				two_sided = 0;
+			}
+
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
@@ -331,6 +339,13 @@ namespace
 				indices.push_back(mesh->mFaces[fi].mIndices[0]);
 				indices.push_back(mesh->mFaces[fi].mIndices[1]);
 				indices.push_back(mesh->mFaces[fi].mIndices[2]);
+
+				if (two_sided)
+				{
+					indices.push_back(mesh->mFaces[fi].mIndices[0]);
+					indices.push_back(mesh->mFaces[fi].mIndices[2]);
+					indices.push_back(mesh->mFaces[fi].mIndices[1]);
+				}
 			}
 
 			bool has_normal = (mesh->mNormals != nullptr);
@@ -361,6 +376,10 @@ namespace
 			for (unsigned int vi = 0; vi < mesh->mNumVertices; ++ vi)
 			{
 				positions[vi] = float3(&mesh->mVertices[vi].x);
+				if (inverse_z)
+				{
+					positions[vi].z() = -positions[vi].z();
+				}
 				if (swap_yz)
 				{
 					std::swap(positions[vi].y(), positions[vi].z());
@@ -369,6 +388,10 @@ namespace
 				if (has_normal)
 				{
 					normals[vi] = float3(&mesh->mNormals[vi].x);
+					if (inverse_z)
+					{
+						normals[vi].z() = -normals[vi].z();
+					}
 					if (swap_yz)
 					{
 						std::swap(normals[vi].y(), normals[vi].z());
@@ -377,6 +400,10 @@ namespace
 				if (has_tangent)
 				{
 					tangents[vi] = float3(&mesh->mTangents[vi].x);
+					if (inverse_z)
+					{
+						tangents[vi].z() = -tangents[vi].z();
+					}
 					if (swap_yz)
 					{
 						std::swap(tangents[vi].y(), tangents[vi].z());
@@ -385,6 +412,10 @@ namespace
 				if (has_binormal)
 				{
 					binormals[vi] = float3(&mesh->mBitangents[vi].x);
+					if (inverse_z)
+					{
+						binormals[vi].z() = -binormals[vi].z();
+					}
 					if (swap_yz)
 					{
 						std::swap(binormals[vi].y(), binormals[vi].z());
@@ -451,6 +482,7 @@ int main(int argc, char* argv[])
 	std::string platform;
 	float scale = 1;
 	bool swap_yz = false;
+	bool inverse_z = false;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -460,6 +492,7 @@ int main(int argc, char* argv[])
 		("target-folder,T", boost::program_options::value<std::string>(), "Target folder.")
 		("scale,S", boost::program_options::value<float>(), "Scale.")
 		("swap-yz,W", "Swap Y and Z axis.")
+		("inverse-z,Z", "Inverse Z axis.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -498,6 +531,10 @@ int main(int argc, char* argv[])
 	{
 		swap_yz = true;
 	}
+	if (vm.count("inverse-z") > 0)
+	{
+		inverse_z = true;
+	}
 	if (vm.count("quiet") > 0)
 	{
 		quiet = vm["quiet"].as<bool>();
@@ -519,7 +556,7 @@ int main(int argc, char* argv[])
 
 	std::string output_name = (target_folder / base_name).string() + ".meshml";
 
-	ConvertMesh(file_name, output_name, scale, swap_yz);
+	ConvertMesh(file_name, output_name, scale, swap_yz, inverse_z);
 
 	if (!quiet)
 	{
