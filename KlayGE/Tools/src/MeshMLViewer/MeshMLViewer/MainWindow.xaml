@@ -21,13 +21,13 @@
                     <RibbonButton LargeImageSource="Images\Save.png" x:Name="save" Label="Save as" Click="SaveClick"/>
                 </RibbonGroup>
                 <RibbonGroup>
-                    <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" Checked="SkinningChecked" Unchecked="SkinningUnchecked"/>
-                    <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation"/>
-                    <RibbonToggleButton LargeImageSource="Images\Smooth.png" x:Name="smooth" Label="Smooth Mesh" Checked="SmoothMeshChecked" Unchecked="SmoothMeshUnchecked"/>
+                    <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" IsChecked="{Binding SkinningValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation" IsChecked="{Binding PlayValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\Smooth.png" x:Name="smooth" Label="Smooth Mesh" IsChecked="{Binding SmoothMeshValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
-                    <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" Checked="FPSCameraChecked" Unchecked="FPSCameraUnchecked"/>
-                    <RibbonToggleButton LargeImageSource="Images\LineMode.png" x:Name="line_mode" Label="Line Mode" Checked="LineModeChecked" Unchecked="LineModeUnchecked"/>
+                    <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" IsChecked="{Binding FPSCameraValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\LineMode.png" x:Name="line_mode" Label="Line Mode" IsChecked="{Binding LineModeValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <Grid>
@@ -59,7 +59,7 @@
                             </RibbonGallery>
                         </RibbonComboBox>
                         <Label Name="frame_text" Content="Frame 0" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Row="1"/>
-                        <Slider Name="frame_slider" Margin="60,10,0,0" Width="700" Grid.Row="1" ValueChanged="FrameSliderValueChanged"/>
+                        <Slider Name="frame_slider" Margin="60,10,0,0" Width="700" Grid.Row="1" Value="{Binding FrameSliderValue}"/>
                     </Grid>
                 </RibbonGroup>
             </RibbonTab>
@@ -75,7 +75,7 @@
                         <xcad:LayoutDocumentPane>
                             <xcad:LayoutDocument ContentId="document1" x:Name="doc1"
                                             Title="Viewer" CanClose="False">
-                                <Label Name="viewer_bg" SizeChanged="ViewerWindowSizeChanged" Padding="0">
+                                <Label Name="viewer_bg" SizeChanged="ViewerWindowSizeChanged" Padding="0" AllowDrop="True" DragEnter="ViewerBGDragEnter" Drop="ViewerBGDrop">
                                     <WindowsFormsHost Name="viewer_frame">
                                         <wf:Panel x:Name="viewer_wnd" MouseDown="ViewerMouseDown" MouseUp="ViewerMouseUp" MouseMove="ViewerMouseMove" KeyPress="ViewerKeyPress"/>
                                     </WindowsFormsHost>

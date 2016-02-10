@@ -484,7 +484,7 @@ float2 ScreenCoord(float3 pos)
 
 float3 OrientationFactor(float3 orientation)
 {
-	const float ORIENTATION_THRESHOLD = 0.25f;
+	const float ORIENTATION_THRESHOLD = 0.05f;
 
 	float3 f = 1 - abs(orientation);
 	return (f - ORIENTATION_THRESHOLD) / (1 - ORIENTATION_THRESHOLD);
