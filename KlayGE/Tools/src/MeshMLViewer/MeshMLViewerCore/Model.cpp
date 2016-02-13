@@ -264,6 +264,8 @@ void DetailedSkinnedMesh::UpdateTechniques()
 	special_shading_tech_ = model->special_shading_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_][smooth_mesh_];
+
+	select_mode_tech_ = model->select_mode_tech_;
 }
 
 void DetailedSkinnedMesh::Render()
@@ -776,6 +778,8 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			}
 		}
 	}
+
+	select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 
 	is_skinned_ = has_skinned;
 }
