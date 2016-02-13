@@ -598,7 +598,10 @@ namespace KlayGE
 	void App3DFramework::Destroy()
 	{
 		this->OnDestroy();
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().DestroyRenderWindow();
+		if (Context::Instance().RenderFactoryValid())
+		{
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DestroyRenderWindow();
+		}
 
 		main_wnd_.reset();
 
