@@ -121,6 +121,11 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
 		}
 
+		virtual ~ModelObject()
+		{
+			ResLoader::Instance().Unload(renderable_);
+		}
+
 		uint32_t NumFrames() const
 		{
 			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumFrames();
@@ -350,6 +355,7 @@ namespace KlayGE
 		{
 			model_->DelFromSceneManager();
 		}
+
 		model_ = MakeSharedPtr<ModelObject>(name);
 		model_->AddToSceneManager();
 		for (size_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
