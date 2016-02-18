@@ -158,7 +158,7 @@ namespace KlayGE
 			{
 				throw std::bad_exception();
 			}
-			return const_result_type_ref(result_->get());
+			return const_result_type_ref(*result_);
 		}
 
 		void detach()
