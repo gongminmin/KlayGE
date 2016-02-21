@@ -82,16 +82,6 @@ namespace
 		return v;
 	}
 
-	float4 Color4ToFloat4(aiColor4D const & c)
-	{
-		float4 v;
-		v.x() = c.r;
-		v.y() = c.g;
-		v.z() = c.b;
-		v.w() = c.a;
-		return v;
-	}
-
 	struct Mesh
 	{
 		int mtl_id;
