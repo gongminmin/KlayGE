@@ -203,6 +203,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SAT.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Tessellation.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TileBasedDeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/util.fxml
