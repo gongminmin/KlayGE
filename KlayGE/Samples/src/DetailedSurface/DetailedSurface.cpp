@@ -39,7 +39,8 @@ namespace
 		DT_Bump,
 		DT_Parallax,
 		DT_ParallaxOcclusion,
-		DT_Tessellation
+		DT_FlatTessellation,
+		DT_SmoothTessellation,
 	};
 
 	class RenderDetailedModel : public RenderModel
@@ -197,8 +198,14 @@ namespace
 			float4x4 const & model = float4x4::Identity();
 
 			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
+			*(technique_->Effect().ParameterByName("model_view")) = model * camera.ViewMatrix();
 			*(technique_->Effect().ParameterByName("world")) = model;
 			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+			*(technique_->Effect().ParameterByName("view_vec")) = camera.ForwardVec();
+
+			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+			FrameBufferPtr const & fb = re.CurFrameBuffer();
+			*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
 		}
 
 		void LightPos(float3 const & light_pos)
@@ -283,8 +290,12 @@ namespace
 				tech_name = "ParallaxOcclusion";
 				break;
 
-			case DT_Tessellation:
-				tech_name = "Tessellation";
+			case DT_FlatTessellation:
+				tech_name = "FlatTessellation";
+				break;
+
+			case DT_SmoothTessellation:
+				tech_name = "SmoothTessellation";
 				break;
 
 			default:
@@ -299,7 +310,7 @@ namespace
 
 			technique_ = technique_->Effect().TechniqueByName(tech_name);
 
-			if (DT_Tessellation == detail_type_)
+			if ((DT_FlatTessellation == detail_type_) || (DT_SmoothTessellation == detail_type_))
 			{
 				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 			}

@@ -11,7 +11,8 @@
 			<item name="Bump"/>
 			<item name="Parallax"/>
 			<item name="Parallax Occlusion"/>
-			<item name="Tessellation"/>
+			<item name="Flat Tessellation"/>
+			<item name="Smooth Tessellation"/>
 		</control>
 
 		<control type="check_box" id="NaLength" caption="Na Length" x="20" y="154" width="350" height="24" checked="1" hotkey="0" is_default="0"/>

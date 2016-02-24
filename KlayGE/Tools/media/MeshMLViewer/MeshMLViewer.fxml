@@ -530,11 +530,7 @@ HS_CONSTANT_DATA_OUTPUT SmoothConstantsHS(InputPatch<CONTROL_POINT, 3> ip)
 CONTROL_POINT SmoothHS(InputPatch<CONTROL_POINT, 3> p, 
 								uint i : SV_OutputControlPointID)
 {
-	CONTROL_POINT output;
-	output.Pos = p[i].Pos;
-	output.Texcoord0 = p[i].Texcoord0;
-	output.TangentQuat = p[i].TangentQuat;
-	return output;
+	return p[i];
 }
 
 [domain("tri")]
@@ -553,16 +549,16 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
-	float3x3 obj_to_ts;
 	float4 tangent_quat;
 	InterpolatePhongAttrs(bc_coords,
 				patch[0].Pos, patch[1].Pos, patch[2].Pos,
 				patch[0].Texcoord0, patch[1].Texcoord0, patch[2].Texcoord0,
 				patch[0].TangentQuat, patch[1].TangentQuat, patch[2].TangentQuat,
-				
+
 				pos, oTexCoord_2xy.xy,
 				tangent_quat);
 
+	float3x3 obj_to_ts;
 	RestoreTBN(tangent_quat, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2]);
 
 	CalcPosLH(pos, obj_to_ts,
