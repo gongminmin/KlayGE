@@ -173,6 +173,8 @@ endif(UNIX AND NOT APPLE)
 # Clear PythonTargets.cmake
 file(WRITE ${CONFIG_BUILD_DIR}/PythonTargets.cmake "")
 
+add_definitions(-DPy_BUILD_CORE)
+
 # Add extension modules
 set(builtin_extensions "" CACHE INTERNAL "" FORCE)
 set(builtin_source "" CACHE INTERNAL "" FORCE)

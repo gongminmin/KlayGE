@@ -1,4 +1,3 @@
-add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
 if(WINDOWS_STORE OR WINDOWS_PHONE)
   add_definitions(-D_WIN32_WINNT=0x0602)
@@ -146,6 +145,11 @@ endif(UNIX OR MINGW)
 
 # Platform-specific source files
 if(UNIX)
+    if(APPLE)
+        add_definitions(-DSOABI="cpython-35-darwin")
+    else(APPLE)
+        add_definitions(-DSOABI="cpython-35-linux")
+    endif(APPLE)
     list(APPEND LIBPYTHON_SOURCES
         ${SRC_DIR}/Python/dynload_shlib.c
         ${SRC_DIR}/Modules/getpath.c
