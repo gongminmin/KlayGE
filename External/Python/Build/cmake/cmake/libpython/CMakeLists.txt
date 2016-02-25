@@ -1,3 +1,4 @@
+add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
 if(WINDOWS_STORE OR WINDOWS_PHONE)
   add_definitions(-D_WIN32_WINNT=0x0602)
