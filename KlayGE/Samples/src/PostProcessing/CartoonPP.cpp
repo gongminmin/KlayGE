@@ -11,9 +11,9 @@ using namespace KlayGE;
 CartoonPostProcess::CartoonPostProcess()
 		: PostProcess(L"Cartoon")
 {
-	input_pins_.push_back(std::make_pair("normal_tex", TexturePtr()));
-	input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-	input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
+	input_pins_.emplace_back("normal_tex", TexturePtr());
+	input_pins_.emplace_back("depth_tex", TexturePtr());
+	input_pins_.emplace_back("color_tex", TexturePtr());
 
 	this->Technique(SyncLoadRenderEffect("CartoonPP.fxml")->TechniqueByName("Cartoon"));
 }

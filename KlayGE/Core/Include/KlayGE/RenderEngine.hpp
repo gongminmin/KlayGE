@@ -91,8 +91,6 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		static RenderEnginePtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 
 		virtual bool RequiresFlipping() const = 0;

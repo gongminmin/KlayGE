@@ -20,24 +20,6 @@
 
 namespace KlayGE
 {
-	class NullFrameBuffer : public FrameBuffer
-	{
-	public:
-		std::wstring const & Description() const
-		{
-			static std::wstring const desc(L"Null Frame Buffer");
-			return desc;
-		}
-
-		void Clear(uint32_t /*flags*/, Color const & /*clr*/, float /*depth*/, int32_t /*stencil*/)
-		{
-		}
-
-		virtual void Discard(uint32_t /*flags*/) KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	FrameBuffer::FrameBuffer()
 					: left_(0), top_(0), width_(0), height_(0),
 						viewport_(MakeSharedPtr<Viewport>())
@@ -46,12 +28,6 @@ namespace KlayGE
 
 	FrameBuffer::~FrameBuffer()
 	{
-	}
-
-	FrameBufferPtr FrameBuffer::NullObject()
-	{
-		static FrameBufferPtr obj = MakeSharedPtr<NullFrameBuffer>();
-		return obj;
 	}
 
 	// 渲染目标的左坐标

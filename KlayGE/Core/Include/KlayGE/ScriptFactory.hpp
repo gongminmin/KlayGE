@@ -36,7 +36,8 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>
-#include <boost/noncopyable.hpp>
+
+#include <KlayGE/Script.hpp>
 
 namespace KlayGE
 {
@@ -46,8 +47,6 @@ namespace KlayGE
 		virtual ~ScriptFactory()
 			{ }
 
-		static ScriptFactoryPtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 		ScriptEngine& ScriptEngineInstance();
 
@@ -55,40 +54,12 @@ namespace KlayGE
 		void Resume();
 
 	private:
-		virtual ScriptEnginePtr MakeScriptEngine() = 0;
+		virtual std::unique_ptr<ScriptEngine> MakeScriptEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	protected:
-		ScriptEnginePtr se_;
-	};
-
-	template <typename ScriptEngineType>
-	class ConcreteScriptFactory : boost::noncopyable, public ScriptFactory
-	{
-	public:
-		ConcreteScriptFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-	private:
-		ScriptEnginePtr MakeScriptEngine()
-		{
-			return MakeSharedPtr<ScriptEngineType>();
-		}
-
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-
-	private:
-		std::wstring const name_;
+		std::unique_ptr<ScriptEngine> se_;
 	};
 }
 

@@ -523,8 +523,8 @@ namespace KlayGE
 
 		is_shader_validate_[type] = true;
 
-		std::string shader_profile = sd.profile;
-		size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
+		char const * shader_profile = sd.profile.c_str();
+		size_t const shader_profile_hash = RT_HASH(shader_profile);
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -611,19 +611,19 @@ namespace KlayGE
 		if (is_shader_validate_[type])
 		{
 			std::vector<std::pair<char const *, char const *>> macros;
-			macros.push_back(std::make_pair("KLAYGE_D3D11", "1"));
+			macros.emplace_back("KLAYGE_D3D11", "1");
 			if (feature_level <= D3D_FEATURE_LEVEL_9_3)
 			{
-				macros.push_back(std::make_pair("KLAYGE_BC5_AS_AG", "1"));
-				macros.push_back(std::make_pair("KLAYGE_BC4_AS_G", "1"));
+				macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
+				macros.emplace_back("KLAYGE_BC4_AS_G", "1");
 			}
-			macros.push_back(std::make_pair("KLAYGE_FRAG_DEPTH", "1"));
+			macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
 			uint32_t flags = 0;
 #if !defined(KLAYGE_DEBUG)
 			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-			*code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name, shader_profile, flags);
+			*code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
 
 			if (!code->empty())
 			{
@@ -806,7 +806,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
-			ID3D11Device* d3d_device = re.D3DDevice().get();
+			ID3D11Device* d3d_device = re.D3DDevice();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
 
 			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1083,7 +1083,7 @@ namespace KlayGE
 					if (sampler)
 					{
 						samplers_[p_handle.shader_type][p_handle.offset]
-							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState().get();
+							= checked_cast<D3D11SamplerStateObject*>(sampler.get())->D3DSamplerState();
 					}
 				}
 				else
@@ -1232,7 +1232,7 @@ namespace KlayGE
 						param->BindToCBuffer(cbuff, shader_desc_[type]->cb_desc[i].var_desc[j].start_offset, stride);
 					}
 
-					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 				}
 			}
 		}
@@ -1285,7 +1285,7 @@ namespace KlayGE
 				for (size_t j = 0; j < cbuff_indices_[i]->size(); ++ j)
 				{
 					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[i])[j]);
-					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer().get();
+					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 				}
 			}
 
@@ -1377,7 +1377,7 @@ namespace KlayGE
 	void D3D11ShaderObject::Bind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		re.VSSetShader(vertex_shader_.get());
 		re.GSSetShader(geometry_shader_.get());
@@ -1438,7 +1438,7 @@ namespace KlayGE
 	void D3D11ShaderObject::Unbind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{

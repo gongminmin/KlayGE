@@ -56,9 +56,9 @@ namespace KlayGE
 		return technique_;
 	}
 
-	RenderLayoutPtr const & RenderableHelper::GetRenderLayout() const
+	RenderLayout& RenderableHelper::GetRenderLayout() const
 	{
-		return rl_;
+		return *rl_;
 	}
 
 	AABBox const & RenderableHelper::PosBound() const

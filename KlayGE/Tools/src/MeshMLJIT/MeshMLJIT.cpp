@@ -52,17 +52,12 @@
 		}
 	}
 #endif
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4512) // boost::program_options::options_description doesn't have assignment operator
-#elif defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
 #endif
 #include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#elif defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 
@@ -232,8 +227,8 @@ namespace
 			{
 				for (; tex_node; tex_node = tex_node->NextSibling("texture"))
 				{
-					mtl.texture_slots.push_back(std::make_pair(tex_node->Attrib("type")->ValueString(), 
-						tex_node->Attrib("name")->ValueString()));
+					mtl.texture_slots.emplace_back(tex_node->Attrib("type")->ValueString(),
+						tex_node->Attrib("name")->ValueString());
 				}
 			}
 
@@ -1700,7 +1695,7 @@ namespace
 		{
 			for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
 			{
-				all_texture_slots[filesystem::path(mtls[i].texture_slots[j].second)].push_back(std::make_pair(i, j));
+				all_texture_slots[filesystem::path(mtls[i].texture_slots[j].second)].emplace_back(i, j);
 			}
 		}
 
@@ -1722,8 +1717,8 @@ namespace
 #else
 				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
 #endif
-				deploy_files.push_back(std::make_pair(filesystem::path(tex_base + ".dds"),
-					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first));
+				deploy_files.emplace_back(filesystem::path(tex_base + ".dds"),
+					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first);
 			}
 		}
 
@@ -1759,8 +1754,8 @@ namespace
 
 					if (augmented_texture_slots.find(new_name) == augmented_texture_slots.end())
 					{
-						dup_files.push_back(std::make_pair(filesystem::path(tex_base + ".dds"), new_name));
-						deploy_files.push_back(std::make_pair(new_name, type));
+						dup_files.emplace_back(filesystem::path(tex_base + ".dds"), new_name);
+						deploy_files.emplace_back(new_name, type);
 					}
 					augmented_texture_slots[new_name].push_back(slot_index);
 				}

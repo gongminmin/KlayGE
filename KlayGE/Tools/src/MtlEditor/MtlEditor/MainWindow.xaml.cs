@@ -117,6 +117,8 @@ namespace MtlEditor
 		{
 			InitializeComponent();
 
+			DataContext = this;
+
 			MeshItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
 
 			properties_obj_ = new ModelPropertyTypes();
@@ -138,9 +140,6 @@ namespace MtlEditor
 			properties.IsEnabled = false;
 
 			last_time_ = DateTime.Now;
-
-			selected_mesh_id_ = 0;
-			opened_file_ = "";
 
 			Uri iconUri = new Uri("pack://application:,,,/Images/klayge_logo.ico", UriKind.RelativeOrAbsolute);
 			this.Icon = BitmapFrame.Create(iconUri);
@@ -165,7 +164,7 @@ namespace MtlEditor
 		{
 			core_.Refresh();
 
-			if (true == play.IsChecked)
+			if (play_)
 			{
 				DateTime this_time = DateTime.Now;
 				if (this_time.Subtract(last_time_).TotalSeconds > 0.02)
@@ -176,15 +175,74 @@ namespace MtlEditor
 					last_time_ = this_time;
 				}
 
-				frame_slider.Value = (int)(frame_ * 10 + 0.5f);
+				frame_slider.Value = frame_;
 			}
 		}
+
 		private void EditorWindowSizeChanged(object sender, SizeChangedEventArgs e)
 		{
 			editor_frame.Width = editor_bg.ActualWidth;
 			editor_frame.Height = editor_bg.ActualHeight;
 
 			core_.Resize((uint)editor_frame.Width, (uint)editor_frame.Height);
+		}
+
+		private void OpenModel(string file_name)
+		{
+			string ext_name = System.IO.Path.GetExtension(file_name);
+			if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
+			{
+				return;
+			}
+
+			core_.OpenModel(file_name);
+			this.FileNameChanged(file_name);
+
+			core_.ClearHistroy();
+			this.UpdateHistroy();
+
+			save.IsEnabled = true;
+			save_as.IsEnabled = true;
+			if (core_.NumFrames() != 0)
+			{
+				skinning.IsEnabled = true;
+				skinning.IsChecked = true;
+				play.IsEnabled = true;
+				frame_text.IsEnabled = true;
+				frame_slider.IsEnabled = true;
+				frame_slider.Maximum = core_.NumFrames() - 1;
+			}
+			else
+			{
+				skinning.IsEnabled = false;
+				skinning.IsChecked = false;
+				play.IsEnabled = false;
+				frame_text.IsEnabled = false;
+				frame_slider.IsEnabled = false;
+				frame_slider.Maximum = 1;
+			}
+			visualize.IsEnabled = true;
+			properties.IsEnabled = true;
+			// Workround for.NET 4.6.1
+			visualize_gallery.Command = ApplicationCommands.Print;
+			visualize_gallery.Command = null;
+
+			frame_ = 0;
+
+			properties.SelectedObject = null;
+
+			MeshItemsSource.items.Clear();
+			MeshItemsSource.items.Add("");
+			uint num_meshes = core_.NumMeshes();
+			for (uint i = 0; i < num_meshes; ++i)
+			{
+				MeshItemsSource.items.Add(core_.MeshName(i));
+			}
+
+			properties_obj_.meshes = "";
+			this.UpdateMeshProperties(0);
+
+			properties.SelectedObject = properties_obj_;
 		}
 
 		private void OpenClick(object sender, RoutedEventArgs e)
@@ -197,51 +255,7 @@ namespace MtlEditor
 			dlg.CheckFileExists = true;
 			if (true == dlg.ShowDialog())
 			{
-				core_.OpenModel(dlg.FileName);
-				this.FileNameChanged(dlg.FileName);
-
-				core_.ClearHistroy();
-				this.UpdateHistroy();
-
-				save.IsEnabled = true;
-				save_as.IsEnabled = true;
-				if (core_.NumFrames() != 0)
-				{
-					skinning.IsEnabled = true;
-					skinning.IsChecked = true;
-					play.IsEnabled = true;
-					frame_text.IsEnabled = true;
-					frame_slider.IsEnabled = true;
-					frame_slider.Maximum = core_.NumFrames() * 10 - 1;
-				}
-				else
-				{
-					skinning.IsEnabled = false;
-					skinning.IsChecked = false;
-					play.IsEnabled = false;
-					frame_text.IsEnabled = false;
-					frame_slider.IsEnabled = false;
-					frame_slider.Maximum = 1;
-				}
-				visualize.IsEnabled = true;
-				properties.IsEnabled = true;
-
-				frame_ = 0;
-
-				properties.SelectedObject = null;
-
-				MeshItemsSource.items.Clear();
-				MeshItemsSource.items.Add("");
-				uint num_meshes = core_.NumMeshes();
-				for (uint i = 0; i < num_meshes; ++ i)
-				{
-					MeshItemsSource.items.Add(core_.MeshName(i));
-				}
-
-				properties_obj_.meshes = "";
-				this.UpdateMeshProperties(0);
-
-				properties.SelectedObject = properties_obj_;
+				this.OpenModel(dlg.FileName);
 			}
 		}
 
@@ -282,33 +296,59 @@ namespace MtlEditor
 			this.UpdateHistroy();
 		}
 
-		private void SkinningChecked(object sender, RoutedEventArgs e)
+		public bool SkinningValue
 		{
-			core_.SkinningOn(1);
-			play.IsEnabled = true;
-		}
-		private void SkinningUnchecked(object sender, RoutedEventArgs e)
-		{
-			core_.SkinningOn(0);
-			play.IsEnabled = false;
-		}
-
-		private void FPSCameraChecked(object sender, RoutedEventArgs e)
-		{
-			core_.FPSCameraOn(1);
-		}
-		private void FPSCameraUnchecked(object sender, RoutedEventArgs e)
-		{
-			core_.FPSCameraOn(0);
+			get
+			{
+				return skinning_;
+			}
+			set
+			{
+				skinning_ = value;
+				core_.SkinningOn(skinning_ ? 1 : 0);
+				play.IsEnabled = skinning_;
+			}
 		}
 
-		private void FrameSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+		public bool PlayValue
 		{
-			frame_ = frame_slider.Value * 0.1;
-			core_.CurrFrame((float)frame_);
-			frame_text.Content = "Frame " + (int)(frame_ + 0.5f);
+			get
+			{
+				return play_;
+			}
+			set
+			{
+				play_ = value;
+			}
+		}
 
-			this.UpdateHistroy();
+		public bool FPSCameraValue
+		{
+			get
+			{
+				return fps_camera_;
+			}
+			set
+			{
+				fps_camera_ = value;
+				core_.FPSCameraOn(fps_camera_ ? 1 : 0);
+			}
+		}
+
+		public double FrameSliderValue
+		{
+			get
+			{
+				return frame_;
+			}
+			set
+			{
+				frame_ = value;
+				core_.CurrFrame((float)frame_);
+				frame_text.Content = "Frame " + (int)(frame_ + 0.5f);
+
+				this.UpdateHistroy();
+			}
 		}
 
 		private void VisualizeSelectionChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -612,12 +652,33 @@ namespace MtlEditor
 			redo.IsEnabled = (core_.EndCmdIndex() < core_.NumHistroyCmds());
 		}
 
+		private void EditorBGDragEnter(object sender, System.Windows.DragEventArgs e)
+		{
+			if (!e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop) || (sender == e.Source))
+			{
+				e.Effects = System.Windows.DragDropEffects.None;
+			}
+		}
+
+		private void EditorBGDrop(object sender, System.Windows.DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
+			{
+				string[] files = (string[])e.Data.GetData(System.Windows.DataFormats.FileDrop);
+				this.OpenModel(files[0]);
+			}
+		}
+
 		private KlayGE.MtlEditorCoreWrapper core_;
 		private DateTime last_time_;
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
-		private uint selected_mesh_id_;
-		private string opened_file_;
+		private uint selected_mesh_id_ = 0;
+		private string opened_file_ = "";
+
+		private bool skinning_ = false;
+		private bool fps_camera_ = false;
+		private bool play_ = false;
 	}
 
 	public class MeshItemsSource : IItemsSource

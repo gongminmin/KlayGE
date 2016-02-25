@@ -115,8 +115,8 @@ namespace KlayGE
 			src_box.bottom = 1;
 			src_box.back = 1;
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource().get(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
-				dst_x_offset, 0, 0, this->D3DResource().get(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
+				dst_x_offset, 0, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -125,7 +125,8 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11Texture1D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels)
+	ID3D11ShaderResourceViewPtr const & D3D11Texture1D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 
@@ -167,7 +168,8 @@ namespace KlayGE
 		return this->RetriveD3DSRV(desc);
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture1D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level)
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture1D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 

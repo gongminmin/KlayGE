@@ -39,7 +39,7 @@ namespace
 			technique_ = effect->TechniqueByName("PlanetTech");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 		}
 
@@ -86,7 +86,7 @@ namespace
 			technique_ = effect->TechniqueByName("AtmosphereTech");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			pos_aabb_.Min() *= 1.2f;
 			pos_aabb_.Max() *= 1.2f;

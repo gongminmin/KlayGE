@@ -46,10 +46,10 @@ namespace KlayGE
 	public:
 		SSSBlurPP();
 
-		virtual void InputPin(uint32_t index, TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
 		using PostProcess::InputPin;
 
-		virtual void Apply() KLAYGE_OVERRIDE;
+		virtual void Apply() override;
 
 	private:
 		bool mrt_blend_support_;

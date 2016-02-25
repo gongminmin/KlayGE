@@ -99,8 +99,6 @@ namespace KlayGE
 		GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte);
 		virtual ~GraphicsBuffer();
 
-		static GraphicsBufferPtr NullObject();
-
 		uint32_t Size() const
 		{
 			return size_in_byte_;

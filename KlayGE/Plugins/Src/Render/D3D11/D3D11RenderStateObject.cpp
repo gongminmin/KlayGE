@@ -30,7 +30,7 @@ namespace KlayGE
 		: RasterizerStateObject(desc)
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice().get();
+		ID3D11Device* d3d_device = re.D3DDevice();
 
 		D3D11_RASTERIZER_DESC d3d_desc;
 		d3d_desc.FillMode = D3D11Mapping::Mapping(desc.polygon_mode);
@@ -46,7 +46,7 @@ namespace KlayGE
 
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1* d3d_device_1 = static_cast<ID3D11Device1*>(d3d_device);
+			ID3D11Device1* d3d_device_1 = re.D3DDevice1();
 			D3D11_RASTERIZER_DESC1 d3d_desc1;
 			d3d_desc1.FillMode = d3d_desc.FillMode;
 			d3d_desc1.CullMode = d3d_desc.CullMode;
@@ -97,7 +97,7 @@ namespace KlayGE
 		d3d_desc.BackFace.StencilPassOp = D3D11Mapping::Mapping(desc.back_stencil_pass);
 		d3d_desc.BackFace.StencilFunc = D3D11Mapping::Mapping(desc.back_stencil_func);
 
-		ID3D11Device* d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice().get();
+		ID3D11Device* d3d_device = checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance())->D3DDevice();
 
 		ID3D11DepthStencilState* ds_state;
 		TIF(d3d_device->CreateDepthStencilState(&d3d_desc, &ds_state));
@@ -133,11 +133,11 @@ namespace KlayGE
 			d3d_desc.RenderTarget[i].RenderTargetWriteMask = static_cast<UINT8>(D3D11Mapping::MappingColorMask(desc.color_write_mask[rt_index]));
 		}
 
-		ID3D11Device* d3d_device = re.D3DDevice().get();
+		ID3D11Device* d3d_device = re.D3DDevice();
 
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			ID3D11Device1* d3d_device_1 = static_cast<ID3D11Device1*>(d3d_device);
+			ID3D11Device1* d3d_device_1 = re.D3DDevice1();
 			D3D11_BLEND_DESC1 d3d_desc1;
 			d3d_desc1.AlphaToCoverageEnable = d3d_desc.AlphaToCoverageEnable;
 			d3d_desc1.IndependentBlendEnable = d3d_desc.IndependentBlendEnable;
@@ -180,7 +180,7 @@ namespace KlayGE
 		: SamplerStateObject(desc)
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = render_eng.D3DDevice().get();
+		ID3D11Device* d3d_device = render_eng.D3DDevice();
 		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 
 		D3D11_SAMPLER_DESC d3d_desc;

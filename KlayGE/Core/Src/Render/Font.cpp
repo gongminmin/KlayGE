@@ -95,7 +95,7 @@ namespace KlayGE
 			dist_texture_ = rf.MakeTexture2D(size, size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, nullptr);
 			a_char_texture_ = rf.MakeTexture2D(kfont_char_size, kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, nullptr);
 
-			char_free_list_.push_back(std::make_pair(0, size * size / kfont_char_size / kfont_char_size));
+			char_free_list_.emplace_back(0, size * size / kfont_char_size / kfont_char_size);
 
 			effect_ = SyncLoadRenderEffect("Font.fxml");
 			*(effect_->ParameterByName("distance_tex")) = dist_texture_;
@@ -278,7 +278,7 @@ namespace KlayGE
 				}
 				else
 				{
-					lines.push_back(std::make_pair(0.0f, L""));
+					lines.emplace_back(0.0f, L"");
 				}
 			}
 
@@ -616,7 +616,7 @@ namespace KlayGE
 									{
 										++ freeiter;
 									}
-									char_free_list_.insert(freeiter, std::make_pair(id, id + 1));
+									char_free_list_.emplace(freeiter, id, id + 1);
 
 									cim.erase(chiter);
 									break;
@@ -660,7 +660,7 @@ namespace KlayGE
 							0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
 							0, 0, 0, 0, kfont_char_size, kfont_char_size);
 
-						KLAYGE_EMPLACE(cim, ch, charInfo);
+						cim.emplace(ch, charInfo);
 					}
 				}
 			}
@@ -810,7 +810,7 @@ namespace
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *font_desc_.kfont;
 		}

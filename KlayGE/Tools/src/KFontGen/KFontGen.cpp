@@ -16,17 +16,12 @@
 #include <cstring>
 #include <atomic>
 
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(push)
-#pragma warning(disable: 4512) // boost::program_options::options_description doesn't have assignment operator
-#elif defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
 #endif
 #include <boost/program_options.hpp>
-#if defined(KLAYGE_COMPILER_MSVC)
-#pragma warning(pop)
-#elif defined(KLAYGE_COMPILER_GCC)
+#if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
 
@@ -781,7 +776,7 @@ int main(int argc, char* argv[])
 					{
 						BOOST_ASSERT(offset_adv.first == static_cast<int32_t>(char_index.size()));
 
-						char_index.push_back(std::make_pair(ch, offset_adv.first));
+						char_index.emplace_back(ch, offset_adv.first);
 
 						KFont::font_info const & ci = kfont_input.CharInfo(offset_adv.first);
 						char_info[ch].top = ci.top;
@@ -868,7 +863,7 @@ int main(int argc, char* argv[])
 	{
 		if (char_info[i].dist_index != static_cast<uint32_t>(-1))
 		{
-			char_index.push_back(std::make_pair(static_cast<int32_t>(i), header.non_empty_chars));
+			char_index.emplace_back(static_cast<int32_t>(i), header.non_empty_chars);
 			++ header.non_empty_chars;
 		}
 	}
@@ -879,7 +874,7 @@ int main(int argc, char* argv[])
 	{
 		if ((char_info[i].advance_x != 0) || (char_info[i].advance_y != 0))
 		{
-			advance.push_back(std::make_pair(static_cast<int32_t>(i), std::make_pair(char_info[i].advance_x, char_info[i].advance_y)));
+			advance.emplace_back(static_cast<int32_t>(i), std::make_pair(char_info[i].advance_x, char_info[i].advance_y));
 			++ header.validate_chars;
 		}
 	}
@@ -918,7 +913,7 @@ int main(int argc, char* argv[])
 			unordered_map<int32_t, std::pair<int32_t, uint32_t>> char_index_advance;
 			for (size_t i = 0; i < advance.size(); ++ i)
 			{
-				KLAYGE_EMPLACE(char_index_advance, advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first));
+				char_index_advance.emplace(advance[i].first, std::make_pair(-1, (advance[i].second.second << 16) + advance[i].second.first));
 			}
 			for (size_t i = 0; i < char_index.size(); ++ i)
 			{

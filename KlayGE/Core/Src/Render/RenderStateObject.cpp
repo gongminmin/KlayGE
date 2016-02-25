@@ -109,29 +109,4 @@ namespace KlayGE
 	{
 		return std::memcmp(&lhs, &rhs, sizeof(lhs)) < 0;
 	}
-
-
-	RasterizerStateObjectPtr RasterizerStateObject::NullObject()
-	{
-		static RasterizerStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(RasterizerStateDesc()));
-		return obj;
-	}
-
-	DepthStencilStateObjectPtr DepthStencilStateObject::NullObject()
-	{
-		static DepthStencilStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeDepthStencilStateObject(DepthStencilStateDesc()));
-		return obj;
-	}
-
-	BlendStateObjectPtr BlendStateObject::NullObject()
-	{
-		static BlendStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeBlendStateObject(BlendStateDesc()));
-		return obj;
-	}
-
-	SamplerStateObjectPtr SamplerStateObject::NullObject()
-	{
-		static SamplerStateObjectPtr obj(Context::Instance().RenderFactoryInstance().MakeSamplerStateObject(SamplerStateDesc()));
-		return obj;
-	}
 }

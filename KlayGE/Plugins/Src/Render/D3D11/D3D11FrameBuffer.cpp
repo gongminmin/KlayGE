@@ -41,46 +41,40 @@ namespace KlayGE
 	{
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11FrameBuffer::D3DRTView(uint32_t n) const
+	ID3D11RenderTargetView* D3D11FrameBuffer::D3DRTView(uint32_t n) const
 	{
 		if (n < clr_views_.size())
 		{
 			if (clr_views_[n])
 			{
-				D3D11RenderTargetRenderView const & d3d_view(*checked_pointer_cast<D3D11RenderTargetRenderView>(clr_views_[n]));
-				return d3d_view.D3DRenderTargetView();
+				return checked_cast<D3D11RenderTargetRenderView*>(clr_views_[n].get())->D3DRenderTargetView();
 			}
 		}
 
-		static ID3D11RenderTargetViewPtr const null_rtv;
-		return null_rtv;
+		return nullptr;
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11FrameBuffer::D3DDSView() const
+	ID3D11DepthStencilView* D3D11FrameBuffer::D3DDSView() const
 	{
 		if (rs_view_)
 		{
-			D3D11DepthStencilRenderView const & d3d_view(*checked_pointer_cast<D3D11DepthStencilRenderView>(rs_view_));
-			return d3d_view.D3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilRenderView*>(rs_view_.get())->D3DDepthStencilView();
 		}
 
-		static ID3D11DepthStencilViewPtr const null_dsv;
-		return null_dsv;
+		return nullptr;
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11FrameBuffer::D3DUAView(uint32_t n) const
+	ID3D11UnorderedAccessView* D3D11FrameBuffer::D3DUAView(uint32_t n) const
 	{
 		if (n < ua_views_.size())
 		{
 			if (ua_views_[n])
 			{
-				D3D11UnorderedAccessView const & d3d_view(*checked_pointer_cast<D3D11UnorderedAccessView>(ua_views_[n]));
-				return d3d_view.D3DUnorderedAccessView();
+				return checked_cast<D3D11UnorderedAccessView*>(ua_views_[n].get())->D3DUnorderedAccessView();
 			}
 		}
 
-		static ID3D11UnorderedAccessViewPtr const null_uav;
-		return null_uav;
+		return nullptr;
 	}
 
 	std::wstring const & D3D11FrameBuffer::Description() const
@@ -92,7 +86,7 @@ namespace KlayGE
 	void D3D11FrameBuffer::OnBind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContextPtr const & d3d_imm_ctx = re.D3DDeviceImmContext();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		std::vector<void*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
@@ -106,7 +100,7 @@ namespace KlayGE
 				rt_src.push_back(p->RTSrc());
 				rt_first_subres.push_back(p->RTFirstSubRes());
 				rt_num_subres.push_back(p->RTNumSubRes());
-				rt_view[i] = this->D3DRTView(i).get();
+				rt_view[i] = this->D3DRTView(i);
 			}
 			else
 			{
@@ -130,7 +124,7 @@ namespace KlayGE
 				rt_src.push_back(p->UASrc());
 				rt_first_subres.push_back(p->UAFirstSubRes());
 				rt_num_subres.push_back(p->UANumSubRes());
-				ua_view[i] = this->D3DUAView(i).get();
+				ua_view[i] = this->D3DUAView(i);
 				ua_init_count[i] = ua_views_[i]->InitCount();
 			}
 			else
@@ -147,12 +141,12 @@ namespace KlayGE
 
 		if (ua_views_.empty())
 		{
-			d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView().get());
+			d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView());
 		}
 		else
 		{
 			ID3D11RenderTargetView** rts = rt_view.empty() ? nullptr : &rt_view[0];
-			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView().get(),
+			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView(),
 				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
 		}
 	

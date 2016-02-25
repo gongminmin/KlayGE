@@ -37,7 +37,7 @@ namespace KlayGE
 		{
 		}
 
-		virtual void OnAttachRenderable(bool add_to_scene) KLAYGE_OVERRIDE;
+		virtual void OnAttachRenderable(bool add_to_scene) override;
 	};
 
 	class KLAYGE_CORE_API SceneObjectSkyBox : public SceneObjectHelper
@@ -61,7 +61,7 @@ namespace KlayGE
 		SceneObjectLightSourceProxy(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);
@@ -85,7 +85,7 @@ namespace KlayGE
 		SceneObjectCameraProxy(CameraPtr const & camera,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
-		virtual void SubThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE;
+		virtual void SubThreadUpdate(float app_time, float elapsed_time) override;
 
 		void Scaling(float x, float y, float z);
 		void Scaling(float3 const & s);

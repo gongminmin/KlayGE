@@ -780,7 +780,7 @@ namespace KlayGE
 
 	size_t UIManager::AddFont(FontPtr const & font, float font_size)
 	{
-		font_cache_.push_back(std::make_pair(font, font_size));
+		font_cache_.emplace_back(font, font_size);
 		return font_cache_.size() - 1;
 	}
 
@@ -1871,7 +1871,7 @@ namespace KlayGE
 
 	void UIDialog::AddIDName(std::string const & name, int id)
 	{
-		KLAYGE_EMPLACE(id_name_, name, id);
+		id_name_.emplace(name, id);
 	}
 
 	int UIDialog::IDFromName(std::string const & name)
@@ -1881,7 +1881,7 @@ namespace KlayGE
 
 	void UIDialog::CtrlLocation(int id, UIDialog::ControlLocation const & loc)
 	{
-		KLAYGE_EMPLACE(id_location_, id, loc);
+		id_location_.emplace(id, loc);
 	}
 
 	UIDialog::ControlLocation const & UIDialog::CtrlLocation(int id)

@@ -28,30 +28,30 @@ namespace KlayGE
 		std::wstring const & Name() const;
 
 		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) KLAYGE_OVERRIDE;
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 		virtual TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) KLAYGE_OVERRIDE;
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 		virtual TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-				uint32_t num_mip_maps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) KLAYGE_OVERRIDE;
+				uint32_t num_mip_maps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
-				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) KLAYGE_OVERRIDE;
+				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 
 		FrameBufferPtr MakeFrameBuffer();
 
 		RenderLayoutPtr MakeRenderLayout();
 
 		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) KLAYGE_OVERRIDE;
+			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
 		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) KLAYGE_OVERRIDE;
+			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
 		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
-			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) KLAYGE_OVERRIDE;
+			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
 
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();
 		QueryPtr MakeTimerQuery();
 
-		virtual FencePtr MakeFence() KLAYGE_OVERRIDE;
+		virtual FencePtr MakeFence() override;
 
 		RenderViewPtr Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level);
 		RenderViewPtr Make2DRenderView(Texture& texture, int first_array_index, int array_size, int level);
@@ -80,15 +80,15 @@ namespace KlayGE
 		ShaderObjectPtr MakeShaderObject();
 
 	private:
-		RenderEnginePtr DoMakeRenderEngine();
+		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
 
 		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
 		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
 		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
 
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 
 	private:
 		OGLRenderFactory(OGLRenderFactory const &);

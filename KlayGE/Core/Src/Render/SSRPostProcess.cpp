@@ -41,14 +41,14 @@ namespace KlayGE
 	SSRPostProcess::SSRPostProcess()
 			: PostProcess(L"ScreenSpaceReflection")
 	{
-		input_pins_.push_back(std::make_pair("g_buffer_0_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("g_buffer_1_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("front_side_depth_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("front_side_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("foreground_depth_tex", TexturePtr()));
+		input_pins_.emplace_back("g_buffer_0_tex", TexturePtr());
+		input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());
+		input_pins_.emplace_back("front_side_depth_tex", TexturePtr());
+		input_pins_.emplace_back("front_side_tex", TexturePtr());
+		input_pins_.emplace_back("foreground_depth_tex", TexturePtr());
 
-		params_.push_back(std::make_pair("min_samples", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("max_samples", RenderEffectParameterPtr()));
+		params_.emplace_back("min_samples", RenderEffectParameterPtr());
+		params_.emplace_back("max_samples", RenderEffectParameterPtr());
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
 		this->Technique(effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));

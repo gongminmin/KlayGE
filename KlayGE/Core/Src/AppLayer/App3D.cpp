@@ -54,6 +54,7 @@
 
 #include <Windows.ApplicationModel.h>
 #include <Windows.ApplicationModel.core.h>
+#include <windows.graphics.display.h>
 
 #include <ppl.h>
 #include <ppltasks.h>
@@ -62,6 +63,7 @@ using namespace ABI::Windows::Foundation;
 using namespace ABI::Windows::ApplicationModel;
 using namespace ABI::Windows::ApplicationModel::Activation;
 using namespace ABI::Windows::ApplicationModel::Core;
+using namespace ABI::Windows::Graphics::Display;
 using namespace ABI::Windows::UI::Core;
 using namespace ABI::Windows::UI::Input;
 using namespace Microsoft::WRL;
@@ -94,7 +96,6 @@ namespace KlayGE
 		HRESULT OnSuspending(IInspectable* sender, ABI::Windows::ApplicationModel::ISuspendingEventArgs* args);
 		HRESULT OnResuming(IInspectable* sender, IInspectable* args);
 
-		HRESULT OnLogicalDpiChanged(IInspectable* sender);
 		HRESULT OnWindowSizeChanged(ABI::Windows::UI::Core::ICoreWindow* sender,
 			ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
 		HRESULT OnWindowClosed(ABI::Windows::UI::Core::ICoreWindow* sender,
@@ -109,6 +110,11 @@ namespace KlayGE
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
 		HRESULT OnPointerWheelChanged(ABI::Windows::UI::Core::ICoreWindow* sender,
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		HRESULT OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
+#else
+		HRESULT OnDpiChanged(IInspectable* sender);
+#endif
 
 	private:
 		App3DFramework* app_;
@@ -124,6 +130,7 @@ namespace KlayGE
 		EventRegistrationToken win_size_changed_token_;
 		EventRegistrationToken visibility_changed_token_;
 		EventRegistrationToken win_closed_token_;
+		EventRegistrationToken dpi_changed_token_;
 		EventRegistrationToken pointer_pressed_token_;
 		EventRegistrationToken pointer_released_token_;
 		EventRegistrationToken pointer_moved_token_;
@@ -213,6 +220,27 @@ namespace KlayGE
 		window_->add_PointerWheelChanged(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
 			std::bind(&MetroFramework::OnPointerWheelChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
 			&pointer_wheel_changed_token_);
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat);
+
+		ComPtr<IDisplayInformation> disp_info;
+		disp_info_stat->GetForCurrentView(&disp_info);
+
+		disp_info->add_DpiChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
+			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			&dpi_changed_token_);
+#else
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop);
+
+		disp_prop->add_LogicalDpiChanged(Callback<IDisplayPropertiesEventHandler>(
+			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1)).Get(),
+			&dpi_changed_token_);
+#endif
 
 		app_->MainWnd()->SetWindow(window_);
 		app_->MetroCreate();
@@ -472,6 +500,24 @@ namespace KlayGE
 		return S_OK;
 	}
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+	HRESULT MetroFramework::OnDpiChanged(IDisplayInformation* sender, IInspectable* args)
+#else
+	HRESULT MetroFramework::OnDpiChanged(IInspectable* sender)
+#endif
+	{
+		KFL_UNUSED(sender);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		KFL_UNUSED(args);
+#endif
+
+		WindowPtr const & win = app_->MainWnd();
+		win->DetectsDPI();
+		win->OnSize()(*win, true);
+
+		return S_OK;
+	}
+
 	HRESULT MetroFrameworkSource::RuntimeClassInitialize(App3DFramework* app)
 	{
 		app_ = app;
@@ -552,7 +598,10 @@ namespace KlayGE
 	void App3DFramework::Destroy()
 	{
 		this->OnDestroy();
-		Context::Instance().RenderFactoryInstance().RenderEngineInstance().DestroyRenderWindow();
+		if (Context::Instance().RenderFactoryValid())
+		{
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().DestroyRenderWindow();
+		}
 
 		main_wnd_.reset();
 

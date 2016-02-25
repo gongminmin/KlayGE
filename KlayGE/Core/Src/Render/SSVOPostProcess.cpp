@@ -41,10 +41,10 @@ namespace KlayGE
 	SSVOPostProcess::SSVOPostProcess()
 			: PostProcess(L"SSVO")
 	{
-		input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+		input_pins_.emplace_back("g_buffer_tex", TexturePtr());
+		input_pins_.emplace_back("depth_tex", TexturePtr());
 
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+		output_pins_.emplace_back("out_tex", TexturePtr());
 
 		this->Technique(SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVO"));
 

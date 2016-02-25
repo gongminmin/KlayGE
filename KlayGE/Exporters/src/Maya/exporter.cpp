@@ -172,7 +172,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 
 		if (num_geometries > 0)
 		{
-			skin_clusters_.push_back(std::make_pair(skin_cluster, objs));
+			skin_clusters_.emplace_back(skin_cluster, objs);
 		}
 
 		MDagPathArray influence_paths;
@@ -294,7 +294,7 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 			int kfs_id = meshml_obj_.AllocKeyframes();
 			meshml_obj_.SetKeyframes(kfs_id, joint.second);
 
-			KLAYGE_EMPLACE(joint_id_to_kfs_id, joint.second, kfs_id);
+			joint_id_to_kfs_id.emplace(joint.second, kfs_id);
 		}
 
 		for (int i = 0; i < num_frames; ++ i)
@@ -686,8 +686,8 @@ void MayaMeshExporter::ExportJoint(MDagPath const * parent_path, MFnIkJoint& fn_
 
 		parent_id = iter->second;
 	}
-	KLAYGE_EMPLACE(joint_to_id_, dag_path.fullPathName().asChar(), joint_id);
-	KLAYGE_EMPLACE(joint_id_to_path_, joint_id, dag_path);
+	joint_to_id_.emplace(dag_path.fullPathName().asChar(), joint_id);
+	joint_id_to_path_.emplace(joint_id, dag_path);
 
 	meshml_obj_.SetJoint(joint_id, joint_name, parent_id,
 		float4x4(bind_mat(0, 0), bind_mat(0, 1), bind_mat(0, 2), bind_mat(0, 3),

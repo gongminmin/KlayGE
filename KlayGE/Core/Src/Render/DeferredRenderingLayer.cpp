@@ -315,13 +315,13 @@ namespace KlayGE
 		DeferredRenderingDebugPostProcess()
 			: PostProcess(L"DeferredRenderingDebug")
 		{
-			input_pins_.push_back(std::make_pair("g_buffer_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("g_buffer_1_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("lighting_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("ssvo_tex", TexturePtr()));
+			input_pins_.emplace_back("g_buffer_tex", TexturePtr());
+			input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());
+			input_pins_.emplace_back("depth_tex", TexturePtr());
+			input_pins_.emplace_back("lighting_tex", TexturePtr());
+			input_pins_.emplace_back("ssvo_tex", TexturePtr());
 
-			output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+			output_pins_.emplace_back("out_tex", TexturePtr());
 
 			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
 		}
@@ -379,7 +379,7 @@ namespace KlayGE
 			}
 		}
 
-		void OnRenderBegin() KLAYGE_OVERRIDE
+		void OnRenderBegin() override
 		{
 			PostProcess::OnRenderBegin();
 
@@ -1890,7 +1890,7 @@ namespace KlayGE
 		{
 			lights_.push_back(default_ambient_light_.get());
 		}
-		sm_light_indices_.push_back(std::make_pair(-1, 0));
+		sm_light_indices_.emplace_back(-1, 0);
 
 		uint32_t num_ambient_lights = 0;
 		float3 ambient_clr(0, 0, 0);
@@ -1920,7 +1920,7 @@ namespace KlayGE
 						switch (light->Type())
 						{
 						case LightSource::LT_Sun:
-							sm_light_indices_.push_back(std::make_pair(0, num_sm_lights));
+							sm_light_indices_.emplace_back(0, num_sm_lights);
 							++ num_sm_lights;
 							cascaded_shadow_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
 							break;
@@ -1929,18 +1929,18 @@ namespace KlayGE
 							if ((projective_light_index_ < 0) && light->ProjectiveTexture())
 							{
 								projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-								sm_light_indices_.push_back(std::make_pair(0, 4));
+								sm_light_indices_.emplace_back(0, 4);
 							}
 							else if ((num_sm_2d_lights < MAX_NUM_SHADOWED_SPOT_LIGHTS)
 								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
-								sm_light_indices_.push_back(std::make_pair(num_sm_2d_lights, num_sm_lights));
+								sm_light_indices_.emplace_back(num_sm_2d_lights, num_sm_lights);
 								++ num_sm_2d_lights;
 								++ num_sm_lights;
 							}
 							else
 							{
-								sm_light_indices_.push_back(std::make_pair(-1, 0));
+								sm_light_indices_.emplace_back(-1, 0);
 							}
 							break;
 
@@ -1950,29 +1950,29 @@ namespace KlayGE
 							if ((projective_light_index_ < 0) && light->ProjectiveTexture())
 							{
 								projective_light_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
-								sm_light_indices_.push_back(std::make_pair(0, 4));
+								sm_light_indices_.emplace_back(0, 4);
 							}
 							else if ((num_sm_cube_lights < MAX_NUM_SHADOWED_POINT_LIGHTS)
 								&& (num_sm_lights < MAX_NUM_SHADOWED_LIGHTS))
 							{
-								sm_light_indices_.push_back(std::make_pair(num_sm_cube_lights, num_sm_lights));
+								sm_light_indices_.emplace_back(num_sm_cube_lights, num_sm_lights);
 								++ num_sm_cube_lights;
 								++ num_sm_lights;
 							}
 							else
 							{
-								sm_light_indices_.push_back(std::make_pair(-1, 0));
+								sm_light_indices_.emplace_back(-1, 0);
 							}
 							break;
 
 						default:
-							sm_light_indices_.push_back(std::make_pair(-1, 0));
+							sm_light_indices_.emplace_back(-1, 0);
 							break;
 						}
 					}
 					else
 					{
-						sm_light_indices_.push_back(std::make_pair(-1, 0));
+						sm_light_indices_.emplace_back(-1, 0);
 					}
 				}
 			}

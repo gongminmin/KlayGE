@@ -17,9 +17,9 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 public:
 	explicit DetailedSkinnedModel(std::wstring const & name);
 
-	virtual void DoBuildModelInfo() KLAYGE_OVERRIDE;
+	virtual void DoBuildModelInfo() override;
 
-	virtual bool IsSkinned() const KLAYGE_OVERRIDE
+	virtual bool IsSkinned() const override
 	{
 		return is_skinned_;
 	}
@@ -69,7 +69,7 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
 
-	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
+	virtual void DoBuildMeshInfo() override;
 
 	void OnRenderBegin();
 	void Render();
@@ -82,7 +82,7 @@ public:
 	void SetTessFactor(KlayGE::int32_t tess_factor);
 
 private:
-	virtual void UpdateTechniques() KLAYGE_OVERRIDE;
+	virtual void UpdateTechniques() override;
 
 private:
 	float tess_factor_;

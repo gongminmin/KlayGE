@@ -20,35 +20,6 @@
 
 namespace KlayGE
 {
-	class NullShowFactory : public ShowFactory
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Show Factory");
-			return name;
-		}
-
-	private:
-		ShowEnginePtr MakeShowEngine()
-		{
-			return ShowEngine::NullObject();
-		}
-
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
-	ShowFactoryPtr ShowFactory::NullObject()
-	{
-		static ShowFactoryPtr obj = MakeSharedPtr<NullShowFactory>();
-		return obj;
-	}
-
 	ShowEngine& ShowFactory::ShowEngineInstance()
 	{
 		if (!se_)

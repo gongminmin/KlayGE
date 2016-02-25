@@ -211,11 +211,11 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("lum_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("bloom_tex", TexturePtr()));
+		input_pins_.emplace_back("src_tex", TexturePtr());
+		input_pins_.emplace_back("lum_tex", TexturePtr());
+		input_pins_.emplace_back("bloom_tex", TexturePtr());
 
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+		output_pins_.emplace_back("out_tex", TexturePtr());
 		
 		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
 		RenderTechniquePtr tech;

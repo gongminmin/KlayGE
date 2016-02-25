@@ -27,40 +27,10 @@
 
 namespace KlayGE
 {
-	class NullInputEngine : public InputEngine
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring name(L"Null Input Engine");
-			return name;
-		}
-
-		void EnumDevices()
-		{
-		}
-
-	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	// 析构函数
 	//////////////////////////////////////////////////////////////////////////////////
 	InputEngine::~InputEngine()
 	{
-	}
-
-	// 返回空对象
-	//////////////////////////////////////////////////////////////////////////////////
-	InputEnginePtr InputEngine::NullObject()
-	{
-		static InputEnginePtr obj = MakeSharedPtr<NullInputEngine>();
-		return obj;
 	}
 
 	// 设置动作格式
@@ -68,7 +38,7 @@ namespace KlayGE
 	void InputEngine::ActionMap(InputActionMap const & actionMap, action_handler_t handler)
 	{
 		// 保存新的动作格式
-		action_handlers_.push_back(std::make_pair(actionMap, handler));
+		action_handlers_.emplace_back(actionMap, handler);
 
 		if (devices_.empty())
 		{

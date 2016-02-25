@@ -92,16 +92,16 @@ namespace
 		}
 
 		HRESULT D3DCompile(std::string const & src_data,
-			D3D_SHADER_MACRO const * defines, std::string const & entry_point,
-			std::string const & target, uint32_t flags1, uint32_t flags2,
+			D3D_SHADER_MACRO const * defines, char const * entry_point,
+			char const * target, uint32_t flags1, uint32_t flags2,
 			std::vector<uint8_t>& code, std::string& error_msgs) const
 		{
 #ifdef CALL_D3DCOMPILER_DIRECTLY
 			ID3DBlob* code_blob = nullptr;
 			ID3DBlob* error_msgs_blob = nullptr;
 			HRESULT hr = DynamicD3DCompile_(src_data.c_str(), static_cast<UINT>(src_data.size()),
-				nullptr, defines, nullptr, entry_point.c_str(),
-				target.c_str(), flags1, flags2, &code_blob, &error_msgs_blob);
+				nullptr, defines, nullptr, entry_point,
+				target, flags1, flags2, &code_blob, &error_msgs_blob);
 			if (code_blob)
 			{
 				uint8_t const * p = static_cast<uint8_t const *>(code_blob->GetBufferPointer());
@@ -287,70 +287,6 @@ namespace
 
 namespace KlayGE
 {
-	class NullShaderObject : public ShaderObject
-	{
-	public:
-		bool AttachNativeShader(ShaderType /*type*/, RenderEffect const & /*effect*/, std::vector<uint32_t> const & /*shader_desc_ids*/,
-			std::vector<uint8_t> const & /*native_shader_block*/)
-		{
-			is_validate_ = true;
-			return true;
-		}
-
-		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(res);
-			KFL_UNUSED(type);
-			KFL_UNUSED(effect);
-			KFL_UNUSED(shader_desc_ids);
-
-			return true;
-		}
-
-		virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(os);
-			KFL_UNUSED(type);
-		}
-
-		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,
-			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, std::vector<uint32_t> const & /*shader_desc_ids*/)
-		{
-			is_validate_ = true;
-		}
-
-		void AttachShader(ShaderType /*type*/, RenderEffect const & /*effect*/,
-			RenderTechnique const & /*tech*/, RenderPass const & /*pass*/, ShaderObjectPtr const & /*shared_so*/)
-		{
-			is_validate_ = true;
-		}
-
-		void LinkShaders(RenderEffect const & /*effect*/)
-		{
-			is_validate_ = true;
-		}
-
-		ShaderObjectPtr Clone(RenderEffect const & /*effect*/)
-		{
-			return ShaderObject::NullObject();
-		}
-
-		void Bind()
-		{
-		}
-
-		void Unbind()
-		{
-		}
-	};
-
-	ShaderObjectPtr ShaderObject::NullObject()
-	{
-		static ShaderObjectPtr obj = MakeSharedPtr<NullShaderObject>();
-		return obj;
-	}
-
 	ShaderObject::ShaderObject()
 		: has_discard_(false), has_tessellation_(false),
 			cs_block_size_x_(0), cs_block_size_y_(0), cs_block_size_z_(0)
@@ -361,7 +297,7 @@ namespace KlayGE
 	std::vector<uint8_t> ShaderObject::CompileToDXBC(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass,
 			std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-			std::string const & func_name, std::string const & shader_profile, uint32_t flags)
+			char const * func_name, char const * shader_profile, uint32_t flags)
 	{
 		RenderEngine const & re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -484,7 +420,7 @@ namespace KlayGE
 			flags, 0, code, err_msg);
 		if (!err_msg.empty())
 		{
-			LogError("Error when compiling %s:", func_name.c_str());
+			LogError("Error when compiling %s:", func_name);
 
 			std::map<int, std::vector<std::string>> err_lines;
 			{

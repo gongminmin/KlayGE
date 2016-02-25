@@ -25,7 +25,7 @@
 
 extern "C"
 {
-	KLAYGE_DSHOW_SE_API void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr);
+	KLAYGE_DSHOW_SE_API void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr);
 }
 
 #endif			// _DSHOWFACTORY_HPP

@@ -245,9 +245,9 @@ namespace KlayGE
 		return MakeSharedPtr<D3D12ShaderObject>();
 	}
 
-	RenderEnginePtr D3D12RenderFactory::DoMakeRenderEngine()
+	std::unique_ptr<RenderEngine> D3D12RenderFactory::DoMakeRenderEngine()
 	{
-		return MakeSharedPtr<D3D12RenderEngine>();
+		return MakeUniquePtr<D3D12RenderEngine>();
 	}
 
 	RasterizerStateObjectPtr D3D12RenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
@@ -281,7 +281,7 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr)
+void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::D3D12RenderFactory>();
+	ptr = KlayGE::MakeUniquePtr<KlayGE::D3D12RenderFactory>();
 }

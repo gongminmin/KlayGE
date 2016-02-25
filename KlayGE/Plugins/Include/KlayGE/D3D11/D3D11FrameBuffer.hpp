@@ -26,9 +26,9 @@ namespace KlayGE
 		D3D11FrameBuffer();
 		virtual ~D3D11FrameBuffer();
 
-		ID3D11RenderTargetViewPtr const & D3DRTView(uint32_t n) const;
-		ID3D11DepthStencilViewPtr const & D3DDSView() const;
-		ID3D11UnorderedAccessViewPtr const & D3DUAView(uint32_t n) const;
+		ID3D11RenderTargetView* D3DRTView(uint32_t n) const;
+		ID3D11DepthStencilView* D3DDSView() const;
+		ID3D11UnorderedAccessView* D3DUAView(uint32_t n) const;
 
 		virtual std::wstring const & Description() const;
 
@@ -36,13 +36,11 @@ namespace KlayGE
 		virtual void OnUnbind();
 
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
-		virtual void Discard(uint32_t flags) KLAYGE_OVERRIDE;
+		virtual void Discard(uint32_t flags) override;
 
 	private:
 		D3D11_VIEWPORT d3d_viewport_;
 	};
-
-	typedef std::shared_ptr<D3D11FrameBuffer> D3D11FrameBufferPtr;
 }
 
 #endif			// _D3D11FRAMEBUFFER_HPP

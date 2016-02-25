@@ -43,6 +43,23 @@ namespace KlayGE
 		d3d_imm_ctx_ = renderEngine.D3DDeviceImmContext();
 	}
 
+	ID3D11RenderTargetViewPtr const & D3D11GraphicsBuffer::D3DRenderTargetView() const
+	{
+		if (buffer_ && !d3d_rt_view_)
+		{
+			D3D11_RENDER_TARGET_VIEW_DESC desc;
+			desc.Format = D3D11Mapping::MappingFormat(fmt_as_shader_res_);
+			desc.ViewDimension = D3D11_RTV_DIMENSION_BUFFER;
+			desc.Buffer.ElementOffset = 0;
+			desc.Buffer.ElementWidth = this->Size() / NumFormatBytes(fmt_as_shader_res_);
+
+			ID3D11RenderTargetView* rt_view;
+			TIF(d3d_device_->CreateRenderTargetView(buffer_.get(), &desc, &rt_view));
+			d3d_rt_view_ = MakeCOMPtr(rt_view);
+		}
+		return d3d_rt_view_;
+	}
+
 	void D3D11GraphicsBuffer::GetD3DFlags(D3D11_USAGE& usage, UINT& cpu_access_flags, UINT& bind_flags, UINT& misc_flags)
 	{
 		if (access_hint_ & EAH_Immutable)
@@ -253,7 +270,7 @@ namespace KlayGE
 		D3D11GraphicsBuffer& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&rhs);
 		if (this->Size() == rhs.Size())
 		{
-			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer().get(), buffer_.get());
+			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer(), buffer_.get());
 		}
 		else
 		{
@@ -264,7 +281,7 @@ namespace KlayGE
 			box.bottom = 1;
 			box.front = 0;
 			box.back = 1;
-			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer().get(), 0, 0, 0, 0, buffer_.get(), 0, &box);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, 0, 0, 0, buffer_.get(), 0, &box);
 		}
 	}
 }

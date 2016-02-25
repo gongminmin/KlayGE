@@ -26,7 +26,7 @@ namespace KlayGE
 	D3D11OcclusionQuery::D3D11OcclusionQuery()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice().get();
+		ID3D11Device* d3d_device = re.D3DDevice();
 
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_OCCLUSION;
@@ -40,7 +40,7 @@ namespace KlayGE
 	void D3D11OcclusionQuery::Begin()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->Begin(query_.get());
 	}
@@ -48,7 +48,7 @@ namespace KlayGE
 	void D3D11OcclusionQuery::End()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(query_.get());
 	}
@@ -56,7 +56,7 @@ namespace KlayGE
 	uint64_t D3D11OcclusionQuery::SamplesPassed()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		uint64_t ret;
 		while (S_OK != d3d_imm_ctx->GetData(query_.get(), &ret, sizeof(ret), 0));
@@ -67,7 +67,7 @@ namespace KlayGE
 	D3D11ConditionalRender::D3D11ConditionalRender()
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = render_eng.D3DDevice().get();
+		ID3D11Device* d3d_device = render_eng.D3DDevice();
 
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_OCCLUSION_PREDICATE;
@@ -81,7 +81,7 @@ namespace KlayGE
 	void D3D11ConditionalRender::Begin()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->Begin(predicate_.get());
 	}
@@ -89,7 +89,7 @@ namespace KlayGE
 	void D3D11ConditionalRender::End()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(predicate_.get());
 	}
@@ -97,7 +97,7 @@ namespace KlayGE
 	void D3D11ConditionalRender::BeginConditionalRender()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->SetPredication(predicate_.get(), false);
 	}
@@ -105,7 +105,7 @@ namespace KlayGE
 	void D3D11ConditionalRender::EndConditionalRender()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->SetPredication(nullptr, false);
 	}
@@ -113,7 +113,7 @@ namespace KlayGE
 	bool D3D11ConditionalRender::AnySamplesPassed()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		BOOL ret;
 		while (S_OK != d3d_imm_ctx->GetData(predicate_.get(), &ret, sizeof(ret), 0));
@@ -124,7 +124,7 @@ namespace KlayGE
 	D3D11TimerQuery::D3D11TimerQuery()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11Device* d3d_device = re.D3DDevice().get();
+		ID3D11Device* d3d_device = re.D3DDevice();
 
 		D3D11_QUERY_DESC desc;
 		desc.Query = D3D11_QUERY_TIMESTAMP;
@@ -142,7 +142,7 @@ namespace KlayGE
 	void D3D11TimerQuery::Begin()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(timestamp_start_query_.get());
 	}
@@ -150,7 +150,7 @@ namespace KlayGE
 	void D3D11TimerQuery::End()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(timestamp_end_query_.get());
 	}
@@ -160,7 +160,7 @@ namespace KlayGE
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.InvTimestampFreq() > 0)
 		{
-			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext().get();
+			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 			uint64_t start_timestamp, end_timestamp;
 			while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));

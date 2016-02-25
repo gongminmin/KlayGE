@@ -172,14 +172,14 @@ namespace KlayGE
 
 		App3DFramework*		app_;
 
-		SceneManagerPtr		scene_mgr_;
+		std::unique_ptr<SceneManager> scene_mgr_;
 
-		RenderFactoryPtr	render_factory_;
-		AudioFactoryPtr		audio_factory_;
-		InputFactoryPtr		input_factory_;
-		ShowFactoryPtr		show_factory_;
-		ScriptFactoryPtr	script_factory_;
-		AudioDataSourceFactoryPtr audio_data_src_factory_;
+		std::unique_ptr<RenderFactory> render_factory_;
+		std::unique_ptr<AudioFactory> audio_factory_;
+		std::unique_ptr<InputFactory> input_factory_;
+		std::unique_ptr<ShowFactory> show_factory_;
+		std::unique_ptr<ScriptFactory> script_factory_;
+		std::unique_ptr<AudioDataSourceFactory> audio_data_src_factory_;
 		std::unique_ptr<DeferredRenderingLayer> deferred_rendering_layer_;
 
 		DllLoader render_loader_;

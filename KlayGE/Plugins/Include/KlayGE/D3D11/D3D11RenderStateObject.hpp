@@ -27,9 +27,9 @@ namespace KlayGE
 
 		void Active();
 
-		ID3D11RasterizerStatePtr const & D3DRasterizerState() const
+		ID3D11RasterizerState* D3DRasterizerState() const
 		{
-			return rasterizer_state_;
+			return rasterizer_state_.get();
 		}
 
 	private:
@@ -43,9 +43,9 @@ namespace KlayGE
 
 		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
 
-		ID3D11DepthStencilStatePtr const & D3DDepthStencilState() const
+		ID3D11DepthStencilState* D3DDepthStencilState() const
 		{
-			return depth_stencil_state_;
+			return depth_stencil_state_.get();
 		}
 
 	private:
@@ -59,9 +59,9 @@ namespace KlayGE
 
 		void Active(Color const & blend_factor, uint32_t sample_mask);
 
-		ID3D11BlendStatePtr const & D3DBlendState() const
+		ID3D11BlendState* D3DBlendState() const
 		{
-			return blend_state_;
+			return blend_state_.get();
 		}
 
 	private:
@@ -73,9 +73,9 @@ namespace KlayGE
 	public:
 		explicit D3D11SamplerStateObject(SamplerStateDesc const & desc);
 
-		ID3D11SamplerStatePtr const & D3DSamplerState() const
+		ID3D11SamplerState* D3DSamplerState() const
 		{
-			return sampler_state_;
+			return sampler_state_.get();
 		}
 
 	private:

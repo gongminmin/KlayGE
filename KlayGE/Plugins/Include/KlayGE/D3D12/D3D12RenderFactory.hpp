@@ -43,7 +43,7 @@
 
 extern "C"
 {
-	KLAYGE_D3D12_RE_API void MakeRenderFactory(KlayGE::RenderFactoryPtr& ptr);
+	KLAYGE_D3D12_RE_API void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr);
 }
 
 #endif			// _D3D12RENDERFACTORY_HPP

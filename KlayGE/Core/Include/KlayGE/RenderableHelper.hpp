@@ -45,7 +45,7 @@ namespace KlayGE
 		}
 
 		virtual RenderTechniquePtr const & GetRenderTechnique() const;
-		virtual RenderLayoutPtr const & GetRenderLayout() const;
+		virtual RenderLayout& GetRenderLayout() const;
 
 		virtual AABBox const & PosBound() const;
 		virtual AABBox const & TexcoordBound() const;

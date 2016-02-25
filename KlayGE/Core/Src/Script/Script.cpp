@@ -38,24 +38,6 @@
 
 namespace KlayGE
 {
-	class NullScriptEngine : public ScriptEngine
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring name(L"Null Script Engine");
-			return name;
-		}
-
-	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	ScriptModule::ScriptModule()
 	{
 	}
@@ -99,14 +81,6 @@ namespace KlayGE
 	void ScriptEngine::Resume()
 	{
 		this->DoResume();
-	}
-
-	// ·µ»Ø¿Õ¶ÔÏó
-	//////////////////////////////////////////////////////////////////////////////////
-	ScriptEnginePtr ScriptEngine::NullObject()
-	{
-		static ScriptEnginePtr obj = MakeSharedPtr<NullScriptEngine>();
-		return obj;
 	}
 
 	ScriptModulePtr ScriptEngine::CreateModule(std::string const & /*name*/)

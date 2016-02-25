@@ -44,7 +44,7 @@ class RenderPolygon : public KlayGE::StaticMesh
 public:
 	RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring const& name);
 
-	virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE;
+	virtual void DoBuildMeshInfo() override;
 
 	virtual void OnRenderBegin();
 };
@@ -108,7 +108,7 @@ void TutorFramework::OnCreate()
 	meshes[0]->AddIndexStream(&indices1[0], static_cast<KlayGE::uint32_t>(sizeof(indices1[0]) * indices1.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
 
-	meshes[0]->GetRenderLayout()->TopologyType(KlayGE::RenderLayout::TT_TriangleStrip);
+	meshes[0]->GetRenderLayout().TopologyType(KlayGE::RenderLayout::TT_TriangleStrip);
 
 	meshes[0]->PosBound(KlayGE::AABBox(KlayGE::float3(-1, -1, -1), KlayGE::float3(1, 1, 1)));
 
@@ -123,7 +123,7 @@ void TutorFramework::OnCreate()
 		KlayGE::vertex_element(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
 	meshes[1]->AddIndexStream(&indices2[0], static_cast<KlayGE::uint32_t>(sizeof(indices2[0]) * indices2.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
-	meshes[1]->GetRenderLayout()->TopologyType(KlayGE::RenderLayout::TT_TriangleList);
+	meshes[1]->GetRenderLayout().TopologyType(KlayGE::RenderLayout::TT_TriangleList);
 	meshes[1]->PosBound(KlayGE::AABBox(KlayGE::float3(-1, -1, -1), KlayGE::float3(1, 1, 1)));
 
 	for (size_t i = 0; i < meshes.size(); ++ i)

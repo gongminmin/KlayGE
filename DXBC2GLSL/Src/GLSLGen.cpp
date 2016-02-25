@@ -377,7 +377,7 @@ void GLSLGen::ToGLSL(std::ostream& out)
 
 	if (ST_HS == shader_type_)
 	{
-		out << "layout(vertices = " << program_->hs_output_control_point_count <<") out;\n\n";
+		out << "layout(vertices = " << program_->hs_output_control_point_count << ") out;\n\n";
 	}
 
 	if (ST_DS == shader_type_)
@@ -769,7 +769,7 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 				}
 				if (ST_HS == shader_type_)
 				{
-					out << "In[gl_MaxPatchVertices]";
+					out << "In[" << program_->hs_output_control_point_count << "]";
 				}
 				if (ST_DS == shader_type_ && has_gs_)
 				{
@@ -7976,7 +7976,11 @@ void GLSLGen::ToDclInterShaderPatchConstantRecords(std::ostream& out)
 				out << "vec" << num_comps;
 			}
 			out << " v_" << sig_desc.semantic_name << sig_desc.semantic_index;
-			if ((ST_HS == shader_type_) || (ST_DS == shader_type_))
+			if (ST_HS == shader_type_)
+			{
+				out << "In[" << program_->hs_output_control_point_count << "]";
+			}
+			else if (ST_DS == shader_type_)
 			{
 				out << "In[gl_MaxPatchVertices]";
 			}

@@ -36,6 +36,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
+#include <KlayGE/TexCompressionETC.hpp>
 #include <KFL/Half.hpp>
 
 #include <cstring>
@@ -848,6 +849,51 @@ namespace
 			codec = MakeSharedPtr<TexCompressionBC5>();
 			break;
 
+		case EF_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			codec = MakeSharedPtr<TexCompressionBC7>();
+			break;
+
+		case EF_ETC1:
+			codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
 		default:
 			BOOST_ASSERT(false);
 			break;
@@ -876,20 +922,28 @@ namespace
 		case EF_BC1:
 		case EF_BC2:
 		case EF_BC3:
+		case EF_BC7:
+		case EF_ETC1:
+		case EF_ETC2_BGR8:
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_ABGR8:
 			dst_format = EF_ARGB8;
 			break;
 				
 		case EF_BC4:
+		case EF_ETC2_R11:
 			dst_format = EF_R8;
 			break;
 
 		case EF_BC5:
+		case EF_ETC2_GR11:
 			dst_format = EF_GR8;
 			break;
 
 		case EF_SIGNED_BC1:
 		case EF_SIGNED_BC2:
 		case EF_SIGNED_BC3:
+		case EF_SIGNED_ETC2_R11:
 			dst_format = EF_SIGNED_ABGR8;
 			break;
 
@@ -906,7 +960,16 @@ namespace
 		case EF_BC3_SRGB:
 		case EF_BC4_SRGB:
 		case EF_BC5_SRGB:
+		case EF_BC7_SRGB:
+		case EF_ETC2_BGR8_SRGB:
+		case EF_ETC2_A1BGR8_SRGB:
+		case EF_ETC2_ABGR8_SRGB:
 			dst_format = EF_ARGB8_SRGB;
+			break;
+
+		case EF_BC6:
+		case EF_SIGNED_BC6:
+			dst_format = EF_ABGR16F;
 			break;
 
 		default:
@@ -946,6 +1009,51 @@ namespace
 		case EF_BC5_SRGB:
 		case EF_SIGNED_BC5:
 			codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		case EF_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			codec = MakeSharedPtr<TexCompressionBC7>();
+			break;
+
+		case EF_ETC1:
+			codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
 			break;
 
 		default:
@@ -1013,7 +1121,7 @@ namespace
 			return true;
 		}
 
-		virtual std::shared_ptr<void> CreateResource() KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> CreateResource() override
 		{
 			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
 
@@ -1081,6 +1189,10 @@ namespace
 				{ EF_BC5, EF_GR8 },
 				{ EF_BC5_SRGB, EF_GR8 },
 				{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
+				{ EF_BC6, EF_ABGR16F },
+				{ EF_SIGNED_BC6, EF_ABGR16F },
+				{ EF_BC7, EF_ARGB8 },
+				{ EF_BC7_SRGB, EF_ARGB8 },
 				{ EF_ETC1, EF_ARGB8 },
 				{ EF_ETC2_BGR8, EF_ARGB8 },
 				{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
@@ -1170,7 +1282,7 @@ namespace
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *tex_desc_.tex;
 		}
@@ -1265,6 +1377,10 @@ namespace
 				{ EF_BC5, EF_GR8 },
 				{ EF_BC5_SRGB, EF_GR8 },
 				{ EF_SIGNED_BC5, EF_SIGNED_GR8 },
+				{ EF_BC6, EF_ABGR16F },
+				{ EF_SIGNED_BC6, EF_ABGR16F },
+				{ EF_BC7, EF_ARGB8 },
+				{ EF_BC7_SRGB, EF_ARGB8 },
 				{ EF_ETC1, EF_ARGB8 },
 				{ EF_ETC2_BGR8, EF_ARGB8 },
 				{ EF_ETC2_BGR8_SRGB, EF_ARGB8_SRGB },
@@ -2839,114 +2955,6 @@ namespace KlayGE
 	}
 
 
-	class NullTexture : public Texture
-	{
-	public:
-		NullTexture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-			: Texture(type, sample_count, sample_quality, access_hint)
-		{
-		}
-
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Texture");
-			return name;
-		}
-
-		uint32_t Width(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-		uint32_t Height(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-		uint32_t Depth(uint32_t /*level*/) const
-		{
-			return 0;
-		}
-
-		void CopyToTexture(Texture& /*target*/)
-		{
-		}
-
-		void CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
-		{
-		}
-
-		void CopyToSubTexture2D(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-				uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
-		{
-		}
-
-		void CopyToSubTexture3D(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-				uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
-		{
-		}
-
-		void CopyToSubTextureCube(Texture& /*target*/,
-				uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-				uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
-		{
-		}
-
-		void Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*width*/,
-			void*& /*data*/)
-		{
-		}
-		void Map2D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/)
-		{
-		}
-		void Map3D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
-			uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
-		{
-		}
-		void MapCube(uint32_t /*array_index*/, CubeFaces /*level*/, uint32_t /*level*/, TextureMapAccess /*level*/,
-			uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
-			void*& /*data*/, uint32_t& /*row_pitch*/)
-		{
-		}
-
-		void Unmap1D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void Unmap2D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void Unmap3D(uint32_t /*array_index*/, uint32_t /*level*/)
-		{
-		}
-		void UnmapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/)
-		{
-		}
-
-		void BuildMipSubLevels()
-		{
-		}
-
-		virtual void CreateHWResource(ElementInitData const * init_data) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(init_data);
-		}
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE
-		{
-		}
-		virtual bool HWResourceReady() const KLAYGE_OVERRIDE
-		{
-			return true;
-		}
-	};
-
-
 	Texture::Texture(Texture::TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 			: type_(type), sample_count_(sample_count), sample_quality_(sample_quality), access_hint_(access_hint)
 	{
@@ -2954,12 +2962,6 @@ namespace KlayGE
 
 	Texture::~Texture()
 	{
-	}
-
-	TexturePtr Texture::NullObject()
-	{
-		static TexturePtr obj = MakeSharedPtr<NullTexture>(TT_2D, 1, 0, 0);
-		return obj;
 	}
 
 	uint32_t Texture::NumMipMaps() const
@@ -3342,14 +3344,21 @@ namespace KlayGE
 			case EF_BC1:
 			case EF_BC2:
 			case EF_BC3:
+			case EF_BC7:
+			case EF_ETC1:
+			case EF_ETC2_BGR8:
+			case EF_ETC2_A1BGR8:
+			case EF_ETC2_ABGR8:
 				dst_cpu_format = EF_ARGB8;
 				break;
 				
 			case EF_BC4:
+			case EF_ETC2_R11:
 				dst_cpu_format = EF_R8;
 				break;
 
 			case EF_BC5:
+			case EF_ETC2_GR11:
 				dst_cpu_format = EF_GR8;
 				break;
 
@@ -3360,6 +3369,7 @@ namespace KlayGE
 				break;
 
 			case EF_SIGNED_BC4:
+			case EF_SIGNED_ETC2_R11:
 				dst_cpu_format = EF_SIGNED_R8;
 				break;
 
@@ -3372,7 +3382,16 @@ namespace KlayGE
 			case EF_BC3_SRGB:
 			case EF_BC4_SRGB:
 			case EF_BC5_SRGB:
+			case EF_BC7_SRGB:
+			case EF_ETC2_BGR8_SRGB:
+			case EF_ETC2_A1BGR8_SRGB:
+			case EF_ETC2_ABGR8_SRGB:
 				dst_cpu_format = EF_ARGB8_SRGB;
+				break;
+
+			case EF_BC6:
+			case EF_SIGNED_BC6:
+				dst_cpu_format = EF_ABGR16F;
 				break;
 
 			default:

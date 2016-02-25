@@ -20,8 +20,8 @@
 #include <KlayGE/OpenAL/OALAudio.hpp>
 #include <KlayGE/OpenAL/OALAudioFactory.hpp>
 
-void MakeAudioFactory(KlayGE::AudioFactoryPtr& ptr)
+void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
+	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
 		KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer>>(L"OpenAL Audio Factory");
 }

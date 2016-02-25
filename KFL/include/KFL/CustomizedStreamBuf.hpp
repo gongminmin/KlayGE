@@ -44,16 +44,16 @@ namespace KlayGE
 		MemStreamBuf(void const * begin, void const * end);
 
 	protected:
-		virtual int_type uflow() KLAYGE_OVERRIDE;
-		virtual int_type underflow() KLAYGE_OVERRIDE;
+		virtual int_type uflow() override;
+		virtual int_type underflow() override;
 
-		virtual std::streamsize xsgetn(char_type* s, std::streamsize count) KLAYGE_OVERRIDE;
+		virtual std::streamsize xsgetn(char_type* s, std::streamsize count) override;
 
-		virtual int_type pbackfail(int_type ch) KLAYGE_OVERRIDE;
-		virtual std::streamsize showmanyc() KLAYGE_OVERRIDE;
+		virtual int_type pbackfail(int_type ch) override;
+		virtual std::streamsize showmanyc() override;
 
-		virtual pos_type seekoff(off_type off, std::ios_base::seekdir way, std::ios_base::openmode which) KLAYGE_OVERRIDE;
-		virtual pos_type seekpos(pos_type sp, std::ios_base::openmode which) KLAYGE_OVERRIDE;
+		virtual pos_type seekoff(off_type off, std::ios_base::seekdir way, std::ios_base::openmode which) override;
+		virtual pos_type seekpos(pos_type sp, std::ios_base::openmode which) override;
 
 	private:
 		char_type const * const begin_;

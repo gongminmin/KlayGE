@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="GBuffer.fxml"/>
+	<include name="Tessellation.fxml"/>
 
 	<cbuffer name="less_freq">
 		<parameter type="int" name="vertex_usage"/>
@@ -29,6 +30,14 @@
 
 	<shader>
 		<![CDATA[
+void RestoreTBN(float4 tangent_quat,
+		out float3 oTangent, out float3 oBinormal, out float3 oNormal)
+{
+	oTangent = transform_quat(float3(1, 0, 0), tangent_quat);
+	oBinormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	oNormal = transform_quat(float3(0, 0, 1), tangent_quat);
+}
+
 void CalcPosLH(float3 pos,
 				float3x3 obj_to_ts,
 				out float4 oPos,
@@ -378,51 +387,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 	<parameter type="int2" name="frame_size"/>
 	<parameter type="float3" name="view_vec"/>
 
-	<shader>
-		<![CDATA[
-float3 PhongProject(float3 p, float3 c, float3 n)
-{
-	return p - dot(p - c, n) * n;
-}
-
-void InterpolatePhongAttrs(float3 bc_coords,
-				float3 pos0, float3 pos1, float3 pos2,
-				float2 tex0, float2 tex1, float2 tex2,
-				float4 tangent_quat0, float4 tangent_quat1, float4 tangent_quat2,
-				
-				out float3 oPos, out float2 oTex,
-				out float3 oNormal, out float3 oTangent, out float3 oBinormal)
-{
-	// The barycentric coordinates
-	float u = bc_coords.x;
-	float v = bc_coords.y;
-	float w = bc_coords.z;
-	
-	float alpha = 0.75f;
-	
-	float3 normal0 = transform_quat(float3(0, 0, 1), tangent_quat0);
-	float3 normal1 = transform_quat(float3(0, 0, 1), tangent_quat1);
-	float3 normal2 = transform_quat(float3(0, 0, 1), tangent_quat2);
-
-	float3 p = w * pos0 + u * pos1 + v * pos2;
-	float3 c0 = PhongProject(p, pos0, normal0);
-	float3 c1 = PhongProject(p, pos1, normal1);
-	float3 c2 = PhongProject(p, pos2, normal2);
-	float3 q = w * c0 + u * c1 + v * c2;
-	oPos = lerp(p, q, alpha);
-	
-	float4 tangent_quat = normalize(bary_centric_quat(tangent_quat0, tangent_quat1, tangent_quat2, u, v));
-	
-	oTangent = transform_quat(float3(1, 0, 0), tangent_quat);
-	oBinormal = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
-	oNormal = normal0 * w + normal1 * u + normal2 * v;
-
-	// Linearly interpolate the texture coords
-	oTex = tex0 * w + tex1 * u + tex2 * v;
-}
-		]]>
-	</shader>
-
 	<shader version="5">
 		<![CDATA[
 struct CONTROL_POINT
@@ -484,7 +448,7 @@ float2 ScreenCoord(float3 pos)
 
 float3 OrientationFactor(float3 orientation)
 {
-	const float ORIENTATION_THRESHOLD = 0.25f;
+	const float ORIENTATION_THRESHOLD = 0.05f;
 
 	float3 f = 1 - abs(orientation);
 	return (f - ORIENTATION_THRESHOLD) / (1 - ORIENTATION_THRESHOLD);
@@ -566,11 +530,7 @@ HS_CONSTANT_DATA_OUTPUT SmoothConstantsHS(InputPatch<CONTROL_POINT, 3> ip)
 CONTROL_POINT SmoothHS(InputPatch<CONTROL_POINT, 3> p, 
 								uint i : SV_OutputControlPointID)
 {
-	CONTROL_POINT output;
-	output.Pos = p[i].Pos;
-	output.Texcoord0 = p[i].Texcoord0;
-	output.TangentQuat = p[i].TangentQuat;
-	return output;
+	return p[i];
 }
 
 [domain("tri")]
@@ -589,14 +549,17 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
-	float3x3 obj_to_ts;
+	float4 tangent_quat;
 	InterpolatePhongAttrs(bc_coords,
 				patch[0].Pos, patch[1].Pos, patch[2].Pos,
 				patch[0].Texcoord0, patch[1].Texcoord0, patch[2].Texcoord0,
 				patch[0].TangentQuat, patch[1].TangentQuat, patch[2].TangentQuat,
-				
+
 				pos, oTexCoord_2xy.xy,
-				obj_to_ts[2], obj_to_ts[0], obj_to_ts[1]);
+				tangent_quat);
+
+	float3x3 obj_to_ts;
+	RestoreTBN(tangent_quat, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2]);
 
 	CalcPosLH(pos, obj_to_ts,
 				oPos, oTexCoord_2xy.zw, oTsToView0_2z, oTsToView1_Depth,
@@ -882,13 +845,14 @@ void CalcInstTessSmooth(float2 barycentric,
 	float2 tex2 = skinned_tex_buf.Load(index2).xy;
 	float4 tangent_quat2 = skinned_tangent_buf.Load(index2) * 2 - 1;
 
+	float4 oTangentQuat;
 	InterpolatePhongAttrs(float3(barycentric, 1 - barycentric.x - barycentric.y),
 				pos_os0, pos_os1, pos_os2,
 				tex0, tex1, tex2,
 				tangent_quat0, tangent_quat1, tangent_quat2,
 				
-				oPos, oTex0,
-				oNormal, oTangent, oBinormal);
+				oPos, oTex0, oTangentQuat);
+	RestoreTBN(oTangentQuat, oTangent, oBinormal, oNormal);
 }
 
 void InstTessSmoothVS(float2 barycentric : TEXCOORD1,

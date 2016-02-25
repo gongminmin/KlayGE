@@ -1,0 +1,62 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+void InterpolateFlatAttrs(float3 bc_coords,
+				float3 pos0, float3 pos1, float3 pos2,
+				float2 tex0, float2 tex1, float2 tex2,
+				float4 tangent_quat0, float4 tangent_quat1, float4 tangent_quat2,
+
+				out float3 oPos, out float2 oTex,
+				out float4 oTangentQuat)
+{
+	// The barycentric coordinates
+	float u = bc_coords.x;
+	float v = bc_coords.y;
+	float w = bc_coords.z;
+
+	oPos = pos0 * w + pos1 * u + pos2 * v;
+	oTex = tex0 * w + tex1 * u + tex2 * v;
+
+	oTangentQuat = normalize(bary_centric_quat(tangent_quat0, tangent_quat1, tangent_quat2, u, v));
+}
+
+float3 PhongProject(float3 p, float3 c, float3 n)
+{
+	return p - dot(p - c, n) * n;
+}
+
+void InterpolatePhongAttrs(float3 bc_coords,
+				float3 pos0, float3 pos1, float3 pos2,
+				float2 tex0, float2 tex1, float2 tex2,
+				float4 tangent_quat0, float4 tangent_quat1, float4 tangent_quat2,
+
+				out float3 oPos, out float2 oTex,
+				out float4 oTangentQuat)
+{
+	// The barycentric coordinates
+	float u = bc_coords.x;
+	float v = bc_coords.y;
+	float w = bc_coords.z;
+
+	float alpha = 0.75f;
+
+	float3 normal0 = transform_quat(float3(0, 0, 1), tangent_quat0);
+	float3 normal1 = transform_quat(float3(0, 0, 1), tangent_quat1);
+	float3 normal2 = transform_quat(float3(0, 0, 1), tangent_quat2);
+
+	float3 p = pos0 * w + pos1 * u + pos2 * v;
+	float3 c0 = PhongProject(p, pos0, normal0);
+	float3 c1 = PhongProject(p, pos1, normal1);
+	float3 c2 = PhongProject(p, pos2, normal2);
+	float3 q = w * c0 + u * c1 + v * c2;
+	oPos = lerp(p, q, alpha);
+
+	oTex = tex0 * w + tex1 * u + tex2 * v;
+
+	oTangentQuat = normalize(bary_centric_quat(tangent_quat0, tangent_quat1, tangent_quat2, u, v));
+}
+		]]>
+	</shader>
+</effect>

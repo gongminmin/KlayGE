@@ -35,8 +35,6 @@ namespace KlayGE
 	class KLAYGE_CORE_API AudioDataSource
 	{
 	public:
-		static AudioDataSourcePtr NullObject();
-
 		virtual void Open(ResIdentifierPtr const & file) = 0;
 		virtual void Close() = 0;
 
@@ -61,8 +59,6 @@ namespace KlayGE
 		virtual ~AudioDataSourceFactory()
 		{
 		}
-
-		static AudioDataSourceFactoryPtr NullObject();
 
 		void Suspend();
 		void Resume();

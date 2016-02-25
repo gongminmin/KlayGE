@@ -21,46 +21,6 @@
 
 namespace KlayGE
 {
-	class NullAudioEngine : public AudioEngine
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Audio Engine");
-			return name;
-		}
-
-		void AddBuffer(size_t /*id*/, AudioBufferPtr const & /*buffer*/)
-			{ }
-
-		AudioBufferPtr Buffer(size_t /*bufID*/) const
-			{ return AudioBuffer::NullObject(); }
-
-		float3 GetListenerPos() const
-			{ return float3::Zero(); }
-		void SetListenerPos(float3 const & /*v*/)
-			{ }
-		float3 GetListenerVel() const
-			{ return float3::Zero(); }
-		void SetListenerVel(float3 const & /*v*/)
-			{ }
-		void GetListenerOri(float3& face, float3& up) const
-		{
-			face = float3::Zero();
-			up = float3::Zero();
-		}
-		void SetListenerOri(float3 const & /*face*/, float3 const & /*up*/)
-			{ }
-
-	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	AudioEngine::AudioEngine()
@@ -93,19 +53,11 @@ namespace KlayGE
 		}
 	}
 
-	// 获取空对象
-	/////////////////////////////////////////////////////////////////////////////////
-	AudioEnginePtr AudioEngine::NullObject()
-	{
-		static AudioEnginePtr obj = MakeSharedPtr<NullAudioEngine>();
-		return obj;
-	}
-
 	// 往列表里添加一个音频缓冲区
 	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::AddBuffer(size_t id, AudioBufferPtr const & buffer)
 	{
-		KLAYGE_EMPLACE(audioBufs_, id, buffer);
+		audioBufs_.emplace(id, buffer);
 	}
 
 	// 播放id所指定的声音

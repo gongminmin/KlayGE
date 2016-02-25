@@ -43,7 +43,7 @@
 
 extern "C"
 {
-	KLAYGE_MINPUT_IE_API void MakeInputFactory(KlayGE::InputFactoryPtr& ptr);
+	KLAYGE_MINPUT_IE_API void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr);
 }
 
 #endif			// _MINPUTFACTORY_HPP

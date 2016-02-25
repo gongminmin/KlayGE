@@ -66,7 +66,7 @@ namespace
 			}
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();

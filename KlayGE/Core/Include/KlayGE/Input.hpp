@@ -392,8 +392,6 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		static InputEnginePtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void EnumDevices() = 0;
@@ -442,7 +440,7 @@ namespace KlayGE
 		InputKeyboard();
 		virtual ~InputKeyboard();
 
-		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		virtual InputEngine::InputDeviceType Type() const override
 		{
 			return InputEngine::IDT_Keyboard;
 		}
@@ -454,8 +452,8 @@ namespace KlayGE
 		bool KeyDown(size_t n) const;
 		bool KeyUp(size_t n) const;
 
-		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+		virtual InputActionsType UpdateActionMap(uint32_t id) override;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
 		std::array<std::array<bool, 256>, 2> keys_;
@@ -470,7 +468,7 @@ namespace KlayGE
 		InputMouse();
 		virtual ~InputMouse();
 
-		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		virtual InputEngine::InputDeviceType Type() const override
 		{
 			return InputEngine::IDT_Mouse;
 		}
@@ -491,8 +489,8 @@ namespace KlayGE
 		bool ButtonDown(size_t n) const;
 		bool ButtonUp(size_t n) const;
 
-		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+		virtual InputActionsType UpdateActionMap(uint32_t id) override;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
 		int2 abs_pos_;
@@ -513,7 +511,7 @@ namespace KlayGE
 		InputJoystick();
 		virtual ~InputJoystick();
 
-		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		virtual InputEngine::InputDeviceType Type() const override
 		{
 			return InputEngine::IDT_Joystick;
 		}
@@ -534,8 +532,8 @@ namespace KlayGE
 		bool ButtonDown(size_t n) const;
 		bool ButtonUp(size_t n) const;
 
-		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+		virtual InputActionsType UpdateActionMap(uint32_t id) override;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
 		int3 pos_;		// x, y, z axis position
@@ -556,15 +554,15 @@ namespace KlayGE
 		InputTouch();
 		virtual ~InputTouch();
 
-		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		virtual InputEngine::InputDeviceType Type() const override
 		{
 			return InputEngine::IDT_Touch;
 		}
 
 		TouchSemantic Gesture() const;
 		
-		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+		virtual InputActionsType UpdateActionMap(uint32_t id) override;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
 		enum GestureState
@@ -620,7 +618,7 @@ namespace KlayGE
 		InputSensor();
 		virtual ~InputSensor();
 
-		virtual InputEngine::InputDeviceType Type() const KLAYGE_OVERRIDE
+		virtual InputEngine::InputDeviceType Type() const override
 		{
 			return InputEngine::IDT_Sensor;
 		}
@@ -638,8 +636,8 @@ namespace KlayGE
 		Quaternion const & OrientationQuat() const;
 		int32_t MagnetometerAccuracy() const;
 
-		virtual InputActionsType UpdateActionMap(uint32_t id) KLAYGE_OVERRIDE;
-		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) KLAYGE_OVERRIDE;
+		virtual InputActionsType UpdateActionMap(uint32_t id) override;
+		virtual void ActionMap(uint32_t id, InputActionMap const & actionMap) override;
 
 	protected:
 		float latitude_;

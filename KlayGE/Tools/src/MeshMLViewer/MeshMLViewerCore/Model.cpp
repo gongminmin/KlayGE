@@ -264,6 +264,8 @@ void DetailedSkinnedMesh::UpdateTechniques()
 	special_shading_tech_ = model->special_shading_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_][smooth_mesh_];
 	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_][smooth_mesh_];
+
+	select_mode_tech_ = model->select_mode_tech_;
 }
 
 void DetailedSkinnedMesh::Render()
@@ -312,10 +314,10 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	bool has_normal = false;
 	bool has_tangent_quat = false;
 	bool has_skinned = false;
-	RenderLayoutPtr const & rl = subrenderables_[0]->GetRenderLayout();
-	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+	RenderLayout const & rl = subrenderables_[0]->GetRenderLayout();
+	for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 	{
-		switch (rl->VertexStreamFormat(i)[0].usage)
+		switch (rl.VertexStreamFormat(i)[0].usage)
 		{
 		case VEU_TextureCoord:
 			has_tc = true;
@@ -361,10 +363,10 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	std::vector<float2> texcoords(total_num_vertices);
 	std::vector<float3> normals(total_num_vertices);
 	std::vector<Quaternion> tangent_quats(total_num_vertices);
-	for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+	for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 	{
-		GraphicsBufferPtr const & vb = rl->GetVertexStream(i);
-		switch (rl->VertexStreamFormat(i)[0].usage)
+		GraphicsBufferPtr const & vb = rl.GetVertexStream(i);
+		switch (rl.VertexStreamFormat(i)[0].usage)
 		{
 		case VEU_Position:
 			{
@@ -404,7 +406,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 				uint32_t const * n_32 = mapper.Pointer<uint32_t>();
-				if (EF_A2BGR10 == rl->VertexStreamFormat(i)[0].format)
+				if (EF_A2BGR10 == rl.VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
@@ -413,7 +415,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 						normals[j].z() = ((n_32[j] >> 20) & 0x3FF) / 1023.0f * 2 - 1;
 					}
 				}
-				else if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
+				else if (EF_ABGR8 == rl.VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
@@ -424,7 +426,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 				}
 				else
 				{
-					BOOST_ASSERT(EF_ARGB8 == rl->VertexStreamFormat(i)[0].format);
+					BOOST_ASSERT(EF_ARGB8 == rl.VertexStreamFormat(i)[0].format);
 
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
@@ -444,7 +446,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 				GraphicsBuffer::Mapper mapper(*vb_cpu, BA_Read_Only);
 				uint32_t const * t_32 = mapper.Pointer<uint32_t>();
-				if (EF_ABGR8 == rl->VertexStreamFormat(i)[0].format)
+				if (EF_ABGR8 == rl.VertexStreamFormat(i)[0].format)
 				{
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
@@ -456,7 +458,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 				}
 				else
 				{
-					BOOST_ASSERT(EF_ARGB8 == rl->VertexStreamFormat(i)[0].format);
+					BOOST_ASSERT(EF_ARGB8 == rl.VertexStreamFormat(i)[0].format);
 
 					for (uint32_t j = 0; j < total_num_vertices; ++ j)
 					{
@@ -475,18 +477,18 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	}
 	std::vector<uint32_t> indices(total_num_indices);
 	{
-		GraphicsBufferPtr ib = rl->GetIndexStream();
+		GraphicsBufferPtr ib = rl.GetIndexStream();
 		GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, ib->Size(), nullptr);
 		ib->CopyToBuffer(*ib_cpu);
 
 		GraphicsBuffer::Mapper mapper(*ib_cpu, BA_Read_Only);
-		if (EF_R16UI == rl->IndexStreamFormat())
+		if (EF_R16UI == rl.IndexStreamFormat())
 		{
 			std::copy(mapper.Pointer<uint16_t>(), mapper.Pointer<uint16_t>() + indices.size(), indices.begin());
 		}
 		else
 		{
-			BOOST_ASSERT(EF_R32UI == rl->IndexStreamFormat());
+			BOOST_ASSERT(EF_R32UI == rl.IndexStreamFormat());
 			std::copy(mapper.Pointer<uint32_t>(), mapper.Pointer<uint32_t>() + indices.size(), indices.begin());
 		}
 	}
@@ -776,6 +778,8 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			}
 		}
 	}
+
+	select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 
 	is_skinned_ = has_skinned;
 }

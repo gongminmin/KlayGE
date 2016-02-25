@@ -31,7 +31,7 @@ namespace KlayGE
 		void OnBind();
 
 		void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil);
-		virtual void Discard(uint32_t flags) KLAYGE_OVERRIDE;
+		virtual void Discard(uint32_t flags) override;
 
 		GLuint OGLFbo() const
 		{

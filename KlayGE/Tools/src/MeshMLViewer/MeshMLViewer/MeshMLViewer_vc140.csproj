@@ -157,8 +157,8 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Build\vc140_win_x64\MeshMLViewer\MeshMLViewerCoreWrapper\MeshMLViewerCoreWrapper.vcxproj">
-      <Project>{c18d7993-43cf-47be-b002-d7315f2ac8eb}</Project>
+    <ProjectReference Include="..\..\..\..\Build\vc140_win_x64\Tools\MeshMLViewer\MeshMLViewerCoreWrapper\MeshMLViewerCoreWrapper.vcxproj">
+      <Project>{a08dc61b-a9fe-308a-bf33-59dfa6e0bdcb}</Project>
       <Name>MeshMLViewerCoreWrapper</Name>
     </ProjectReference>
   </ItemGroup>

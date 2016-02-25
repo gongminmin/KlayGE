@@ -27,15 +27,15 @@ namespace KlayGE
 	LightShaftPostProcess::LightShaftPostProcess()
 		: PostProcess(L"LightShaft")
 	{
-		input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+		input_pins_.emplace_back("color_tex", TexturePtr());
+		input_pins_.emplace_back("depth_tex", TexturePtr());
 
-		params_.push_back(std::make_pair("light_pos", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("light_shaft_clr", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("light_intensity", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("shadow_intensity", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("depth_clip", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("cutoff_decay_weight", RenderEffectParameterPtr()));
+		params_.emplace_back("light_pos", RenderEffectParameterPtr());
+		params_.emplace_back("light_shaft_clr", RenderEffectParameterPtr());
+		params_.emplace_back("light_intensity", RenderEffectParameterPtr());
+		params_.emplace_back("shadow_intensity", RenderEffectParameterPtr());
+		params_.emplace_back("depth_clip", RenderEffectParameterPtr());
+		params_.emplace_back("cutoff_decay_weight", RenderEffectParameterPtr());
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
 		this->Technique(effect->TechniqueByName("ApplyLightShaft"));

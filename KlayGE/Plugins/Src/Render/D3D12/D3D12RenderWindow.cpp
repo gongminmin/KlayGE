@@ -42,15 +42,6 @@
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
-#endif
-#include <boost/algorithm/string/split.hpp>
-#if defined(KLAYGE_COMPILER_GCC)
-#pragma GCC diagnostic pop
-#endif
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
@@ -158,21 +149,15 @@ namespace KlayGE
 #endif
 
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
-			available_feature_levels.push_back(std::make_pair("12_1", D3D_FEATURE_LEVEL_12_1));
-			available_feature_levels.push_back(std::make_pair("12_0", D3D_FEATURE_LEVEL_12_0));
-			available_feature_levels.push_back(std::make_pair("11_1", D3D_FEATURE_LEVEL_11_1));
-			available_feature_levels.push_back(std::make_pair("11_0", D3D_FEATURE_LEVEL_11_0));
+			available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
+			available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
+			available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
+			available_feature_levels.emplace_back("11_0", D3D_FEATURE_LEVEL_11_0);
 
-			std::vector<std::string> strs;
-			boost::algorithm::split(strs, settings.options, boost::is_any_of(","));
-			for (size_t index = 0; index < strs.size(); ++ index)
+			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{
-				std::string& opt = strs[index];
-				boost::algorithm::trim(opt);
-				std::string::size_type loc = opt.find(':');
-				std::string opt_name = opt.substr(0, loc);
-				std::string opt_val = opt.substr(loc + 1);
-
+				std::string const & opt_name = settings.options[index].first;
+				std::string const & opt_val = settings.options[index].second;
 				if (0 == strcmp("level", opt_name.c_str()))
 				{
 					size_t feature_index = 0;
@@ -514,23 +499,25 @@ namespace KlayGE
 
 	void D3D12RenderWindow::WindowMovedOrResized()
 	{
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		float const dpi_scale = main_wnd->DPIScale();
+
 		::RECT rect;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		float const dpi_scale = main_wnd->DPIScale();
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
-		rc.X *= dpi_scale;
-		rc.Y *= dpi_scale;
-		rc.Width *= dpi_scale;
-		rc.Height *= dpi_scale;
 		rect.left = static_cast<LONG>(rc.X);
 		rect.right = static_cast<LONG>(rc.X + rc.Width);
 		rect.top = static_cast<LONG>(rc.Y);
 		rect.bottom = static_cast<LONG>(rc.Y + rc.Height);
 #endif
+
+		rect.left = static_cast<int32_t>(rect.left * dpi_scale + 0.5f);
+		rect.top = static_cast<int32_t>(rect.top * dpi_scale + 0.5f);
+		rect.right = static_cast<int32_t>(rect.right * dpi_scale + 0.5f);
+		rect.bottom = static_cast<int32_t>(rect.bottom * dpi_scale + 0.5f);
 
 		uint32_t new_left = rect.left;
 		uint32_t new_top = rect.top;

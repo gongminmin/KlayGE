@@ -386,7 +386,7 @@ namespace
 			return ocean_plane_;
 		}
 
-		virtual bool MainThreadUpdate(float app_time, float elapsed_time) KLAYGE_OVERRIDE
+		virtual bool MainThreadUpdate(float app_time, float elapsed_time) override
 		{
 			if (dirty_)
 			{

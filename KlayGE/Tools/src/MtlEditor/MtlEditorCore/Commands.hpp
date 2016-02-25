@@ -59,11 +59,11 @@ namespace KlayGE
 		{
 		}
 
-		virtual char const * Name() const KLAYGE_OVERRIDE
+		virtual char const * Name() const override
 		{
 			return editor_command_name[code];
 		}
-		virtual MtlEditorCommandCode Code() const KLAYGE_OVERRIDE
+		virtual MtlEditorCommandCode Code() const override
 		{
 			return code;
 		}
@@ -74,8 +74,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetCurrFrame(MtlEditorCore* core, float frame);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		float frame_;
@@ -87,8 +87,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSelectMesh(MtlEditorCore* core, uint32_t mesh_id);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mesh_id_;
@@ -100,8 +100,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetAmbientMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -114,8 +114,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetDiffuseMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -128,8 +128,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetSpecularMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -142,8 +142,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetShininessMaterial(MtlEditorCore* core, uint32_t mtl_id, float value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -156,8 +156,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetEmitMaterial(MtlEditorCore* core, uint32_t mtl_id, float* value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -170,8 +170,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetOpacityMaterial(MtlEditorCore* core, uint32_t mtl_id, float value);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -184,8 +184,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -198,8 +198,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -212,8 +212,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetShininessTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -226,8 +226,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetNormalTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -240,8 +240,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetHeightTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -254,8 +254,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetEmitTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;
@@ -268,8 +268,8 @@ namespace KlayGE
 	public:
 		MtlEditorCommandSetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
 
-		virtual void Execute() KLAYGE_OVERRIDE;
-		virtual void Revoke() KLAYGE_OVERRIDE;
+		virtual void Execute() override;
+		virtual void Revoke() override;
 
 	private:
 		uint32_t mtl_id_;

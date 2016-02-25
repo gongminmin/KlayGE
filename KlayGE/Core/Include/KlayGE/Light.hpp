@@ -126,13 +126,13 @@ namespace KlayGE
 		virtual ~AmbientLightSource();
 
 		using LightSource::Attrib;
-		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
+		virtual void Attrib(int32_t attrib) override;
 
-		virtual TexturePtr const & SkylightTexY() const KLAYGE_OVERRIDE;
-		virtual TexturePtr const & SkylightTexC() const KLAYGE_OVERRIDE;
-		virtual TexturePtr const & SkylightTex() const KLAYGE_OVERRIDE;
-		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c) KLAYGE_OVERRIDE;
-		virtual void SkylightTex(TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual TexturePtr const & SkylightTexY() const override;
+		virtual TexturePtr const & SkylightTexC() const override;
+		virtual TexturePtr const & SkylightTex() const override;
+		virtual void SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c) override;
+		virtual void SkylightTex(TexturePtr const & tex) override;
 
 	private:
 		mutable TexturePtr sky_tex_y_;
@@ -146,18 +146,18 @@ namespace KlayGE
 		virtual ~PointLightSource();
 
 		using LightSource::Position;
-		virtual void Position(float3 const & pos) KLAYGE_OVERRIDE;
+		virtual void Position(float3 const & pos) override;
 		using LightSource::Direction;
-		virtual void Direction(float3 const & dir) KLAYGE_OVERRIDE;
+		virtual void Direction(float3 const & dir) override;
 		using LightSource::Rotation;
-		virtual void Rotation(Quaternion const & quat) KLAYGE_OVERRIDE;
+		virtual void Rotation(Quaternion const & quat) override;
 		void ModelMatrix(float4x4 const & model);
 
-		virtual TexturePtr const & ProjectiveTexture() const KLAYGE_OVERRIDE;
-		virtual void ProjectiveTexture(TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual TexturePtr const & ProjectiveTexture() const override;
+		virtual void ProjectiveTexture(TexturePtr const & tex) override;
 
-		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const KLAYGE_OVERRIDE;
-		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
+		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const override;
+		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
 	protected:
 		void UpdateCameras();
@@ -176,26 +176,26 @@ namespace KlayGE
 		virtual ~SpotLightSource();
 
 		using LightSource::Position;
-		virtual void Position(float3 const & pos) KLAYGE_OVERRIDE;
+		virtual void Position(float3 const & pos) override;
 		using LightSource::Direction;
-		virtual void Direction(float3 const & dir) KLAYGE_OVERRIDE;
+		virtual void Direction(float3 const & dir) override;
 		using LightSource::Rotation;
-		virtual void Rotation(Quaternion const & quat) KLAYGE_OVERRIDE;
-		virtual void ModelMatrix(float4x4 const & model) KLAYGE_OVERRIDE;
+		virtual void Rotation(Quaternion const & quat) override;
+		virtual void ModelMatrix(float4x4 const & model) override;
 
-		virtual float CosInnerAngle() const KLAYGE_OVERRIDE;
-		virtual void InnerAngle(float angle) KLAYGE_OVERRIDE;
+		virtual float CosInnerAngle() const override;
+		virtual void InnerAngle(float angle) override;
 
-		virtual float CosOuterAngle() const KLAYGE_OVERRIDE;
-		virtual void OuterAngle(float angle) KLAYGE_OVERRIDE;
+		virtual float CosOuterAngle() const override;
+		virtual void OuterAngle(float angle) override;
 
-		virtual float4 const & CosOuterInner() const KLAYGE_OVERRIDE;
+		virtual float4 const & CosOuterInner() const override;
 
-		virtual TexturePtr const & ProjectiveTexture() const KLAYGE_OVERRIDE;
-		virtual void ProjectiveTexture(TexturePtr const & tex) KLAYGE_OVERRIDE;
+		virtual TexturePtr const & ProjectiveTexture() const override;
+		virtual void ProjectiveTexture(TexturePtr const & tex) override;
 
-		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const KLAYGE_OVERRIDE;
-		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
+		virtual ConditionalRenderPtr const & ConditionalRenderQuery(uint32_t index) const override;
+		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
 	protected:
 		void UpdateCamera();
@@ -216,7 +216,7 @@ namespace KlayGE
 		virtual ~DirectionalLightSource();
 
 		using LightSource::Attrib;
-		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
+		virtual void Attrib(int32_t attrib) override;
 	};
 
 	class KLAYGE_CORE_API SunLightSource : public LightSource
@@ -226,9 +226,9 @@ namespace KlayGE
 		virtual ~SunLightSource();
 
 		using LightSource::Attrib;
-		virtual void Attrib(int32_t attrib) KLAYGE_OVERRIDE;
+		virtual void Attrib(int32_t attrib) override;
 
-		virtual CameraPtr const & SMCamera(uint32_t index) const KLAYGE_OVERRIDE;
+		virtual CameraPtr const & SMCamera(uint32_t index) const override;
 
 		void UpdateSMCamera(Camera const & scene_camera);
 
@@ -242,8 +242,8 @@ namespace KlayGE
 		SphereAreaLightSource();
 		virtual ~SphereAreaLightSource();
 
-		virtual float Radius() const KLAYGE_OVERRIDE;
-		virtual void Radius(float radius) KLAYGE_OVERRIDE;
+		virtual float Radius() const override;
+		virtual void Radius(float radius) override;
 
 	protected:
 		float radius_;
@@ -257,8 +257,8 @@ namespace KlayGE
 
 		using LightSource::Falloff;
 		virtual void Falloff(float3 const & fall_off);
-		virtual float3 const & Extend() const KLAYGE_OVERRIDE;
-		virtual void Extend(float3 const & extend) KLAYGE_OVERRIDE;
+		virtual float3 const & Extend() const override;
+		virtual void Extend(float3 const & extend) override;
 
 	protected:
 		float3 extend_;

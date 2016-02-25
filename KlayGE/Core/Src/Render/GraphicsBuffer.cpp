@@ -29,37 +29,6 @@
 
 namespace KlayGE
 {
-	class NullGraphicsBuffer : public GraphicsBuffer
-	{
-	public:
-		NullGraphicsBuffer()
-			: GraphicsBuffer(BU_Static, 0, 0)
-		{
-		}
-
-		void* Map(BufferAccess /*ba*/)
-		{
-			return nullptr;
-		}
-
-		void Unmap()
-		{
-		}
-
-		void CopyToBuffer(GraphicsBuffer& /*rhs*/)
-		{
-		}
-
-		virtual void CreateHWResource(void const * init_data) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(init_data);
-		}
-
-		virtual void DeleteHWResource() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	GraphicsBuffer::GraphicsBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_byte)
 			: usage_(usage), access_hint_(access_hint), size_in_byte_(size_in_byte)
 	{
@@ -67,11 +36,5 @@ namespace KlayGE
 
 	GraphicsBuffer::~GraphicsBuffer()
 	{
-	}
-
-	GraphicsBufferPtr GraphicsBuffer::NullObject()
-	{
-		static GraphicsBufferPtr obj = MakeSharedPtr<NullGraphicsBuffer>();
-		return obj;
 	}
 }

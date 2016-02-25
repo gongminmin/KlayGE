@@ -53,12 +53,12 @@ namespace KlayGE
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> const & D3D12RenderLayout::InputElementDesc() const
 	{
-		if (vertex_elems_12_.empty())
+		if (vertex_elems_.empty())
 		{
 			std::vector<D3D12_INPUT_ELEMENT_DESC> elems;
 			elems.reserve(vertex_streams_.size());
 
-			for (uint32_t i = 0; i < this->NumVertexStreams(); ++i)
+			for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 			{
 				std::vector<D3D12_INPUT_ELEMENT_DESC> stream_elems;
 				D3D12Mapping::Mapping(stream_elems, i, this->VertexStreamFormat(i), vertex_streams_[i].type, vertex_streams_[i].freq);
@@ -71,10 +71,10 @@ namespace KlayGE
 				elems.insert(elems.end(), stream_elems.begin(), stream_elems.end());
 			}
 
-			vertex_elems_12_.swap(elems);
+			vertex_elems_.swap(elems);
 		}
 
-		return vertex_elems_12_;
+		return vertex_elems_;
 	}
 
 	void D3D12RenderLayout::Active() const

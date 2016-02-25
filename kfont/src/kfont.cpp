@@ -157,7 +157,7 @@ namespace KlayGE
 					ci.first = LE2Native(ci.first);
 					ci.second = LE2Native(ci.second);
 
-					KLAYGE_EMPLACE(char_index_advance_, ci.first, std::make_pair(ci.second, 0));
+					char_index_advance_.emplace(ci.first, std::make_pair(ci.second, 0));
 				}
 				for (auto& ca : temp_char_advance)
 				{
@@ -431,7 +431,7 @@ namespace KlayGE
 		{
 			ci = -1;
 		}
-		KLAYGE_EMPLACE(char_index_advance_, ch, std::make_pair(ci, adv));
+		char_index_advance_.emplace(ch, std::make_pair(ci, adv));
 	}
 
 	void KFont::Compact()
@@ -468,7 +468,7 @@ namespace KlayGE
 			{
 				new_ci = -1;
 			}
-			KLAYGE_EMPLACE(new_char_index_advance, ch, std::make_pair(new_ci, ci.second));
+			new_char_index_advance.emplace(ch, std::make_pair(new_ci, ci.second));
 		}
 		new_distances_addr.push_back(new_distances_lzma.size());
 

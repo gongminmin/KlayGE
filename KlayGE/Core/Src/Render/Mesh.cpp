@@ -111,7 +111,7 @@ namespace
 			return false;
 		}
 
-		virtual std::shared_ptr<void> CreateResource() KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> CreateResource() override
 		{
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(L"Model");
 			*model_desc_.model = model;
@@ -205,7 +205,7 @@ namespace
 
 			if (rhs_model->NumSubrenderables() > 0)
 			{
-				RenderLayoutPtr rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
+				RenderLayout const & rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
 			
 				std::vector<StaticMeshPtr> meshes(rhs_model->NumSubrenderables());
 				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumSubrenderables(); ++ mesh_index)
@@ -219,12 +219,12 @@ namespace
 					mesh->PosBound(rhs_mesh->PosBound());
 					mesh->TexcoordBound(rhs_mesh->TexcoordBound());
 
-					for (uint32_t ve_index = 0; ve_index < rhs_rl->NumVertexStreams(); ++ ve_index)
+					for (uint32_t ve_index = 0; ve_index < rhs_rl.NumVertexStreams(); ++ ve_index)
 					{
-						mesh->AddVertexStream(rhs_rl->GetVertexStream(ve_index),
-							rhs_rl->VertexStreamFormat(ve_index)[0]);
+						mesh->AddVertexStream(rhs_rl.GetVertexStream(ve_index),
+							rhs_rl.VertexStreamFormat(ve_index)[0]);
 					}
-					mesh->AddIndexStream(rhs_rl->GetIndexStream(), rhs_rl->IndexStreamFormat());
+					mesh->AddIndexStream(rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
 
 					mesh->NumVertices(rhs_mesh->NumVertices());
 					mesh->NumTriangles(rhs_mesh->NumTriangles());
@@ -270,7 +270,7 @@ namespace
 			return std::static_pointer_cast<void>(model);
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *model_desc_.model;
 		}
@@ -1136,7 +1136,7 @@ namespace KlayGE
 			{
 				std::string type = ReadShortString(decoded);
 				std::string name = ReadShortString(decoded);
-				mtl->texture_slots.push_back(std::make_pair(type, name));
+				mtl->texture_slots.emplace_back(type, name);
 			}
 		}
 
@@ -1450,7 +1450,7 @@ namespace KlayGE
 		for (size_t i = 0; i < joints.size(); ++ i)
 		{
 			int joint_id = obj.AllocJoint();
-			KLAYGE_EMPLACE(joint_map, i, joint_id);
+			joint_map.emplace(i, joint_id);
 
 			int parent_id = -1;
 			if (joints[i].parent != -1)
@@ -1465,7 +1465,7 @@ namespace KlayGE
 		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
 			int mtl_id = obj.AllocMaterial();
-			KLAYGE_EMPLACE(mtl_map, i, mtl_id);
+			mtl_map.emplace(i, mtl_id);
 
 			float3 ambient = mtls[i]->ambient;
 			float3 diffuse = mtls[i]->diffuse;
@@ -1786,17 +1786,17 @@ namespace KlayGE
 			{
 				StaticMesh const & mesh = *checked_pointer_cast<StaticMesh>(model->Subrenderable(0));
 
-				RenderLayoutPtr const & rl = mesh.GetRenderLayout();
-				merged_ves.resize(rl->NumVertexStreams());
-				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				RenderLayout const & rl = mesh.GetRenderLayout();
+				merged_ves.resize(rl.NumVertexStreams());
+				for (uint32_t j = 0; j < rl.NumVertexStreams(); ++ j)
 				{
-					merged_ves[j] = rl->VertexStreamFormat(j)[0];
+					merged_ves[j] = rl.VertexStreamFormat(j)[0];
 				}
 
 				merged_buffs.resize(merged_ves.size());
-				for (uint32_t j = 0; j < rl->NumVertexStreams(); ++ j)
+				for (uint32_t j = 0; j < rl.NumVertexStreams(); ++ j)
 				{
-					GraphicsBufferPtr const & vb = rl->GetVertexStream(j);
+					GraphicsBufferPtr const & vb = rl.GetVertexStream(j);
 					uint32_t size = vb->Size();
 					GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					vb->CopyToBuffer(*vb_cpu);
@@ -1807,18 +1807,18 @@ namespace KlayGE
 					std::memcpy(&merged_buffs[j][0], mapper.Pointer<uint8_t>(), size);
 				}
 
-				if (EF_R16UI == rl->IndexStreamFormat())
+				if (EF_R16UI == rl.IndexStreamFormat())
 				{
 					all_is_index_16_bit = true;
 				}
 				else
 				{
-					BOOST_ASSERT(EF_R32UI == rl->IndexStreamFormat());
+					BOOST_ASSERT(EF_R32UI == rl.IndexStreamFormat());
 					all_is_index_16_bit = false;
 				}
 
 				{
-					GraphicsBufferPtr ib = rl->GetIndexStream();
+					GraphicsBufferPtr ib = rl.GetIndexStream();
 					uint32_t size = ib->Size();
 					GraphicsBufferPtr ib_cpu = rf.MakeIndexBuffer(BU_Static, EAH_CPU_Read, size, nullptr);
 					ib->CopyToBuffer(*ib_cpu);

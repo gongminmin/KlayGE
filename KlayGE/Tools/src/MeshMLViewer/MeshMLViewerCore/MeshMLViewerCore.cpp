@@ -121,6 +121,11 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTime(0);
 		}
 
+		virtual ~ModelObject()
+		{
+			ResLoader::Instance().Unload(renderable_);
+		}
+
 		uint32_t NumFrames() const
 		{
 			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumFrames();
@@ -192,17 +197,12 @@ namespace
 		}
 	};
 
-	class PointLightSourceUpdate
+	class LightSourceUpdate
 	{
 	public:
-		PointLightSourceUpdate()
-		{
-		}
-
 		void operator()(LightSource& light, float /*app_time*/, float /*elapsed_time*/)
 		{
-			float4x4 inv_view = Context::Instance().AppInstance().ActiveCamera().InverseViewMatrix();
-			light.Position(MathLib::transform_coord(float3(0, 2.0f, 0), inv_view));
+			light.Direction(Context::Instance().AppInstance().ActiveCamera().ForwardVec());
 		}
 	};
 }
@@ -261,13 +261,11 @@ namespace KlayGE
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 		deferred_rendering_->SSVOEnabled(0, false);
 
-		point_light_ = MakeSharedPtr<PointLightSource>();
-		point_light_->Attrib(LightSource::LSA_NoShadow);
-		point_light_->Color(float3(1.0f, 1.0f, 1.0f));
-		point_light_->Position(float3(0, 2.0f, 0));
-		point_light_->Falloff(float3(1, 0, 0));
-		point_light_->BindUpdateFunc(PointLightSourceUpdate());
-		point_light_->AddToSceneManager();
+		light_ = MakeSharedPtr<DirectionalLightSource>();
+		light_->Attrib(LightSource::LSA_NoShadow);
+		light_->Color(float3(1.0f, 1.0f, 1.0f));
+		light_->BindUpdateFunc(LightSourceUpdate());
+		light_->AddToSceneManager();
 
 		axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
@@ -337,7 +335,7 @@ namespace KlayGE
 		sky_box_.reset();
 		grid_.reset();
 		axis_.reset();
-		point_light_.reset();
+		light_.reset();
 		selected_bb_.reset();
 
 		font_.reset();
@@ -549,24 +547,24 @@ namespace KlayGE
 
 	uint32_t MeshMLViewerCore::NumVertexStreams(uint32_t mesh_id) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return rl->NumVertexStreams();
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return rl.NumVertexStreams();
 	}
 
 	uint32_t MeshMLViewerCore::NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return static_cast<uint32_t>(rl->VertexStreamFormat(stream_index).size());
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return static_cast<uint32_t>(rl.VertexStreamFormat(stream_index).size());
 	}
 
 	uint32_t MeshMLViewerCore::VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const
 	{
-		RenderablePtr mesh = model_->GetRenderable()->Subrenderable(mesh_id);
-		RenderLayoutPtr const & rl = mesh->GetRenderLayout();
-		return (rl->VertexStreamFormat(stream_index)[usage_index].usage << 16)
-			| (rl->VertexStreamFormat(stream_index)[usage_index].usage_index);
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return (rl.VertexStreamFormat(stream_index)[usage_index].usage << 16)
+			| (rl.VertexStreamFormat(stream_index)[usage_index].usage_index);
 	}
 
 	uint32_t MeshMLViewerCore::MaterialID(uint32_t mesh_id) const

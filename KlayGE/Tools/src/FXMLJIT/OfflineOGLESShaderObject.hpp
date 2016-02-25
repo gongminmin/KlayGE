@@ -45,7 +45,7 @@ namespace KlayGE
 		public:
 			explicit OGLESShaderObject(OfflineRenderDeviceCaps const & caps);
 
-			virtual void StreamOut(std::ostream& os, ShaderType type) KLAYGE_OVERRIDE;
+			virtual void StreamOut(std::ostream& os, ShaderType type) override;
 
 			void AttachShader(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);

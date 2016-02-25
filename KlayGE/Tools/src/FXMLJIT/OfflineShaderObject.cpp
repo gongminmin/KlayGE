@@ -309,7 +309,7 @@ namespace KlayGE
 		std::vector<uint8_t> ShaderObject::CompileToDXBC(ShaderType type, RenderEffect const & effect,
 				RenderTechnique const & tech, RenderPass const & pass,
 				std::vector<std::pair<char const *, char const *>> const & api_special_macros,
-				std::string const & func_name, std::string const & shader_profile, uint32_t flags)
+				char const * func_name, char const * shader_profile, uint32_t flags)
 		{
 			OfflineRenderDeviceCaps const & caps = caps_;
 
@@ -431,7 +431,7 @@ namespace KlayGE
 				flags, 0, code, err_msg);
 			if (!err_msg.empty())
 			{
-				LogError("Error when compiling %s:", func_name.c_str());
+				LogError("Error when compiling %s:", func_name);
 
 				std::map<int, std::vector<std::string>> err_lines;
 				{

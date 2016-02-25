@@ -1020,8 +1020,8 @@ namespace KlayGE
 			{
 				if (std::get<3>(tex_sampler_binds_[i]) | (1UL << type))
 				{
-					tex_sampler_pairs.push_back(std::make_pair(std::get<1>(tex_sampler_binds_[i])->Name(),
-						std::get<2>(tex_sampler_binds_[i])->Name()));
+					tex_sampler_pairs.emplace_back(std::get<1>(tex_sampler_binds_[i])->Name(),
+						std::get<2>(tex_sampler_binds_[i])->Name());
 				}
 			}
 
@@ -1110,8 +1110,8 @@ namespace KlayGE
 
 			is_shader_validate_[type] = true;
 
-			std::string shader_profile = sd.profile;
-			size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
+			char const * shader_profile = sd.profile.c_str();
+			size_t const shader_profile_hash = RT_HASH(shader_profile);
 			switch (type)
 			{
 			case ST_VertexShader:
@@ -1198,24 +1198,24 @@ namespace KlayGE
 			{
 				std::string err_msg;
 				std::vector<std::pair<char const *, char const *>> macros;
-				macros.push_back(std::make_pair("KLAYGE_DXBC2GLSL", "1"));
-				macros.push_back(std::make_pair("KLAYGE_OPENGLES", "1"));
+				macros.emplace_back("KLAYGE_DXBC2GLSL", "1");
+				macros.emplace_back("KLAYGE_OPENGLES", "1");
 				if (!caps.texture_format_support(EF_BC5) || !caps.texture_format_support(EF_BC5_SRGB))
 				{
-					macros.push_back(std::make_pair("KLAYGE_BC5_AS_AG", "1"));
+					macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
 				}
 				else
 				{
-					macros.push_back(std::make_pair("KLAYGE_BC5_AS_GA", "1"));
+					macros.emplace_back("KLAYGE_BC5_AS_GA", "1");
 				}
 				if (!caps.texture_format_support(EF_BC4) || !caps.texture_format_support(EF_BC4_SRGB))
 				{
-					macros.push_back(std::make_pair("KLAYGE_BC4_AS_G", "1"));
+					macros.emplace_back("KLAYGE_BC4_AS_G", "1");
 				}
-				macros.push_back(std::make_pair("KLAYGE_FRAG_DEPTH", glloader_GLES_EXT_frag_depth() ? "1" : "0"));
+				macros.emplace_back("KLAYGE_FRAG_DEPTH", glloader_GLES_EXT_frag_depth() ? "1" : "0");
 
 				uint32_t const flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
-				code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name, shader_profile, flags);
+				code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
 				if (code.empty())
 				{
 					is_shader_validate_[type] = false;
@@ -1586,7 +1586,7 @@ namespace KlayGE
 				{
 					for (size_t pi = 0; pi < glsl_vs_attrib_names_->size(); ++ pi)
 					{
-						KLAYGE_EMPLACE(attrib_locs_, std::make_pair((*vs_usages_)[pi], (*vs_usage_indices_)[pi]),
+						attrib_locs_.emplace(std::make_pair((*vs_usages_)[pi], (*vs_usage_indices_)[pi]),
 								glGetAttribLocation(glsl_program_, (*glsl_vs_attrib_names_)[pi].c_str()));
 					}
 				}

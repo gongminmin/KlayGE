@@ -359,7 +359,7 @@ namespace KlayGE
 				}
 				if (!found)
 				{
-					render_queue_.push_back(std::make_pair(obj_tech, std::vector<Renderable*>(1, obj)));
+					render_queue_.emplace_back(obj_tech, std::vector<Renderable*>(1, obj));
 				}
 			}
 		}
@@ -571,7 +571,7 @@ namespace KlayGE
 					(*visible_marks)[i] = scene_objs[i]->VisibleMark();
 				}
 
-				KLAYGE_EMPLACE(visible_marks_map_, seed, visible_marks);
+				visible_marks_map_.emplace(seed, visible_marks);
 			}
 			else
 			{
@@ -608,8 +608,8 @@ namespace KlayGE
 						}
 						else
 						{
-							KLAYGE_EMPLACE(renderables_map, renderable, renderables.size());
-							renderables.push_back(std::make_pair(renderable, std::vector<SceneObject*>(1, so)));
+							renderables_map.emplace(renderable, renderables.size());
+							renderables.emplace_back(renderable, std::vector<SceneObject*>(1, so));
 						}
 
 						++ num_objects_rendered_;

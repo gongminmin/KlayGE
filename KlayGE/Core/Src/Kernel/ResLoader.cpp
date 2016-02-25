@@ -561,7 +561,7 @@ namespace KlayGE
 				if (!res_desc->StateLess())
 				{
 					std::lock_guard<std::mutex> lock(loading_mutex_);
-					loading_res_.push_back(std::make_pair(res_desc, async_is_done));
+					loading_res_.emplace_back(res_desc, async_is_done);
 				}
 			}
 			else
@@ -574,7 +574,7 @@ namespace KlayGE
 
 					{
 						std::lock_guard<std::mutex> lock(loading_mutex_);
-						loading_res_.push_back(std::make_pair(res_desc, async_is_done));
+						loading_res_.emplace_back(res_desc, async_is_done);
 					}
 					loading_res_queue_.push(std::make_pair(res_desc, async_is_done));
 				}
@@ -618,7 +618,7 @@ namespace KlayGE
 		}
 		if (!found)
 		{
-			loaded_res_.push_back(std::make_pair(res_desc, std::weak_ptr<void>(res)));
+			loaded_res_.emplace_back(res_desc, std::weak_ptr<void>(res));
 		}
 	}
 

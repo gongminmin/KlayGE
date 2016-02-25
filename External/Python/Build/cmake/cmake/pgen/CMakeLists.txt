@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
 
-add_definitions(-DPy_BUILD_CORE)
 add_definitions(-DNDEBUG)
 
 set(PGEN_SOURCES

@@ -475,11 +475,11 @@ public:
 		ResLoader::Instance().AddPath("../../Tools/media/PrefilterCube");
 	}
 
-	virtual void DoUpdateOverlay() KLAYGE_OVERRIDE
+	virtual void DoUpdateOverlay() override
 	{
 	}
 
-	virtual uint32_t DoUpdate(uint32_t /*pass*/) KLAYGE_OVERRIDE
+	virtual uint32_t DoUpdate(uint32_t /*pass*/) override
 	{
 		return URV_Finished;
 	}

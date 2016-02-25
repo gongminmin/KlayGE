@@ -210,7 +210,7 @@ namespace
 			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *pp_desc_.pp;
 		}
@@ -1389,10 +1389,10 @@ namespace KlayGE
 		: PostProcess(L"SeparableBilateral"),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
-		input_pins_.push_back(std::make_pair("src1_tex", TexturePtr()));
-		input_pins_.push_back(std::make_pair("src2_tex", TexturePtr()));
+		input_pins_.emplace_back("src1_tex", TexturePtr());
+		input_pins_.emplace_back("src2_tex", TexturePtr());
 
-		output_pins_.push_back(std::make_pair("out_tex", TexturePtr()));
+		output_pins_.emplace_back("out_tex", TexturePtr());
 
 		this->Technique(tech ? tech : SyncLoadRenderEffect("BilateralBlur.fxml")->TechniqueByName(x_dir ? "BlurX4" : "BlurY4"));
 
@@ -1462,10 +1462,10 @@ namespace KlayGE
 			kernel_radius_ = std::min(kernel_radius_, 2);
 		}
 
-		params_.push_back(std::make_pair("esm_scale_factor", RenderEffectParameterPtr()));
-		params_.push_back(std::make_pair("near_q_far", RenderEffectParameterPtr()));
-		input_pins_.push_back(std::make_pair("src_tex", TexturePtr()));
-		output_pins_.push_back(std::make_pair("output", TexturePtr()));
+		params_.emplace_back("esm_scale_factor", RenderEffectParameterPtr());
+		params_.emplace_back("near_q_far", RenderEffectParameterPtr());
+		input_pins_.emplace_back("src_tex", TexturePtr());
+		output_pins_.emplace_back("output", TexturePtr());
 		this->Technique(SyncLoadRenderEffect("Blur.fxml")->TechniqueByName(x_dir ? (linear_depth ? "LogBlurX" : "LogBlurXNLD") : "LogBlurY"));
 
 		color_weight_ep_ = technique_->Effect().ParameterByName("color_weight");

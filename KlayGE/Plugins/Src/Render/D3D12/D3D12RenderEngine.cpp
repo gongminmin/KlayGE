@@ -748,7 +748,7 @@ namespace KlayGE
 			if (iter == cbv_srv_uav_heaps_.end())
 			{
 				cbv_srv_uav_heap = this->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<uint32_t>(num_handle));
-				KLAYGE_EMPLACE(cbv_srv_uav_heaps_, hash_val, cbv_srv_uav_heap);
+				cbv_srv_uav_heaps_.emplace(hash_val, cbv_srv_uav_heap);
 			}
 			else
 			{
@@ -915,7 +915,7 @@ namespace KlayGE
 			if (iter == cbv_srv_uav_heaps_.end())
 			{
 				cbv_srv_uav_heap = this->CreateDynamicCBVSRVUAVDescriptorHeap(static_cast<uint32_t>(num_handle));
-				KLAYGE_EMPLACE(cbv_srv_uav_heaps_, hash_val, cbv_srv_uav_heap);
+				cbv_srv_uav_heaps_.emplace(hash_val, cbv_srv_uav_heap);
 			}
 			else
 			{
@@ -1728,7 +1728,7 @@ namespace KlayGE
 					{
 						if (msaa_quality_levels.NumQualityLevels > 0)
 						{
-							rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, msaa_quality_levels.NumQualityLevels));
+							rendertarget_format_[fmts[i].first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
 							count <<= 1;
 						}
 						else
@@ -2112,7 +2112,7 @@ namespace KlayGE
 				error->Release();
 			}
 			
-			return KLAYGE_EMPLACE(root_signatures_, hash_val, MakeCOMPtr(rs)).first->second;
+			return root_signatures_.emplace(hash_val, MakeCOMPtr(rs)).first->second;
 		}
 		else
 		{
@@ -2131,7 +2131,7 @@ namespace KlayGE
 		{
 			ID3D12PipelineState* d3d_pso;
 			TIF(d3d_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			return KLAYGE_EMPLACE(graphics_psos_, hash_val, MakeCOMPtr(d3d_pso)).first->second;
+			return graphics_psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
 		{
@@ -2150,7 +2150,7 @@ namespace KlayGE
 		{
 			ID3D12PipelineState* d3d_pso;
 			TIF(d3d_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			return KLAYGE_EMPLACE(compute_psos_, hash_val, MakeCOMPtr(d3d_pso)).first->second;
+			return compute_psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
 		{

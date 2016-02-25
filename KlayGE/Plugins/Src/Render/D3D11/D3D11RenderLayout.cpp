@@ -61,7 +61,7 @@ namespace KlayGE
 
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11InputLayoutPtr const & ret = re.CreateD3D11InputLayout(elems, signature, vs_code);
-		input_layouts_.push_back(std::make_pair(signature, ret));
+		input_layouts_.emplace_back(signature, ret);
 
 		return input_layouts_.back().second.get();
 	}

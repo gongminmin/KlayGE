@@ -21,7 +21,8 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>
-#include <boost/noncopyable.hpp>
+
+#include <KlayGE/Input.hpp>
 
 namespace KlayGE
 {
@@ -32,8 +33,6 @@ namespace KlayGE
 		{
 		}
 
-		static InputFactoryPtr NullObject();
-
 		virtual std::wstring const & Name() const = 0;
 		InputEngine& InputEngineInstance();
 
@@ -41,40 +40,12 @@ namespace KlayGE
 		void Resume();
 
 	private:
-		virtual InputEnginePtr DoMakeInputEngine() = 0;
+		virtual std::unique_ptr<InputEngine> DoMakeInputEngine() = 0;
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
 	protected:
-		InputEnginePtr ie_;
-	};
-
-	template <typename InputEngineType>
-	class ConcreteInputFactory : boost::noncopyable, public InputFactory
-	{
-	public:
-		ConcreteInputFactory(std::wstring const & name)
-				: name_(name)
-			{ }
-
-		std::wstring const & Name() const
-			{ return name_; }
-
-	private:
-		InputEnginePtr DoMakeInputEngine()
-		{
-			return MakeSharedPtr<InputEngineType>();
-		}
-
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-
-	private:
-		std::wstring const name_;
+		std::unique_ptr<InputEngine> ie_;
 	};
 }
 

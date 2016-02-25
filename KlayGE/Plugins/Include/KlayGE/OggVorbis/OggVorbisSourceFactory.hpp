@@ -25,7 +25,7 @@
 
 extern "C"
 {
-	KLAYGE_OV_ADS_API void MakeAudioDataSourceFactory(KlayGE::AudioDataSourceFactoryPtr& ptr);
+	KLAYGE_OV_ADS_API void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr);
 }
 
 #endif			// _OGGVORBISSOURCEFACTORY_HPP

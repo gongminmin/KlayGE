@@ -74,9 +74,9 @@ namespace KlayGE
 		OBBox_T<T> const operator+() const KLAYGE_NOEXCEPT;
 		OBBox_T<T> const operator-() const KLAYGE_NOEXCEPT;
 
-		virtual bool IsEmpty() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
-		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT KLAYGE_OVERRIDE;
+		virtual bool IsEmpty() const KLAYGE_NOEXCEPT override;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT override;
+		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT override;
 
 		Vector_T<T, 3> const & Center() const KLAYGE_NOEXCEPT
 		{

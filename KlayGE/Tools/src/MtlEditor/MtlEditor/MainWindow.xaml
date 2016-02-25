@@ -26,11 +26,11 @@
                     <RibbonButton LargeImageSource="Images\Redo.png" x:Name="redo" Label="Redo" Click="RedoClick"/>
                 </RibbonGroup>
                 <RibbonGroup>
-                    <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" Checked="SkinningChecked" Unchecked="SkinningUnchecked"/>
-                    <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation"/>
+                    <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" IsChecked="{Binding SkinningValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation" IsChecked="{Binding PlayValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
-                    <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" Checked="FPSCameraChecked" Unchecked="FPSCameraUnchecked"/>
+                    <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" IsChecked="{Binding FPSCameraValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <Grid>
@@ -62,7 +62,7 @@
                             </RibbonGallery>
                         </RibbonComboBox>
                         <Label Name="frame_text" Content="Frame 0" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Row="1"/>
-                        <Slider Name="frame_slider" Margin="60,10,0,0" Width="700" Grid.Row="1" ValueChanged="FrameSliderValueChanged"/>
+                        <Slider Name="frame_slider" Margin="60,10,0,0" Width="700" Grid.Row="1" Value="{Binding FrameSliderValue}"/>
                     </Grid>
                 </RibbonGroup>
             </RibbonTab>
@@ -78,7 +78,7 @@
                         <xcad:LayoutDocumentPane>
                             <xcad:LayoutDocument ContentId="document1" x:Name="doc1"
                                             Title="Editor" CanClose="False">
-                                <Label Name="editor_bg" SizeChanged="EditorWindowSizeChanged" Padding="0">
+                                <Label Name="editor_bg" SizeChanged="EditorWindowSizeChanged" Padding="0" AllowDrop="True" DragEnter="EditorBGDragEnter" Drop="EditorBGDrop">
                                     <WindowsFormsHost Name="editor_frame">
                                         <wf:Panel x:Name="editor_wnd" MouseDown="EditorMouseDown" MouseUp="EditorMouseUp" MouseMove="EditorMouseMove" KeyPress="EditorKeyPress"/>
                                     </WindowsFormsHost>

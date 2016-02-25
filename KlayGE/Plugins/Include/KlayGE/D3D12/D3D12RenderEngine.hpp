@@ -77,8 +77,8 @@ namespace KlayGE
 			return true;
 		}
 
-		void BeginFrame() KLAYGE_OVERRIDE;
-		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
+		void BeginFrame() override;
+		void UpdateGPUTimestampsFrequency() override;
 
 		IDXGIFactory4Ptr const & DXGIFactory() const;
 		ID3D12DevicePtr const & D3DDevice() const;
@@ -114,34 +114,34 @@ namespace KlayGE
 		void ForceFlush();
 		void ForceCPUGPUSync();
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE;
+		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		std::string const & VertexShaderProfile() const
+		char const * VertexShaderProfile() const
 		{
 			return vs_profile_;
 		}
-		std::string const & PixelShaderProfile() const
+		char const * PixelShaderProfile() const
 		{
 			return ps_profile_;
 		}
-		std::string const & GeometryShaderProfile() const
+		char const * GeometryShaderProfile() const
 		{
 			return gs_profile_;
 		}
-		std::string const & ComputeShaderProfile() const
+		char const * ComputeShaderProfile() const
 		{
 			return cs_profile_;
 		}
-		std::string const & HullShaderProfile() const
+		char const * HullShaderProfile() const
 		{
 			return hs_profile_;
 		}
-		std::string const & DomainShaderProfile() const
+		char const * DomainShaderProfile() const
 		{
 			return ds_profile_;
 		}
@@ -210,27 +210,27 @@ namespace KlayGE
 		D3D12AdapterList const & D3DAdapters() const;
 		D3D12AdapterPtr const & ActiveAdapter() const;
 
-		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) KLAYGE_OVERRIDE;
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) KLAYGE_OVERRIDE;
-		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) KLAYGE_OVERRIDE;
-		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) KLAYGE_OVERRIDE;
+		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) override;
+		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) override;
+		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) override;
 		virtual void DoDispatchIndirect(RenderTechnique const & tech,
-			GraphicsBufferPtr const & buff_args, uint32_t offset) KLAYGE_OVERRIDE;
-		virtual void DoResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
-		virtual void DoDestroy() KLAYGE_OVERRIDE;
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+			GraphicsBufferPtr const & buff_args, uint32_t offset) override;
+		virtual void DoResize(uint32_t width, uint32_t height) override;
+		virtual void DoDestroy() override;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 
 		void FillRenderDeviceCaps();
 
-		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
+		virtual void StereoscopicForLCDShutter(int32_t eye) override;
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) override;
 
 		void UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl);
 		void UpdateComputePSO(RenderPassPtr const & pass);
@@ -294,7 +294,12 @@ namespace KlayGE
 		D3D12_CPU_DESCRIPTOR_HANDLE null_srv_handle_;
 		D3D12_CPU_DESCRIPTOR_HANDLE null_uav_handle_;
 
-		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+		char const * vs_profile_;
+		char const * ps_profile_;
+		char const * gs_profile_;
+		char const * cs_profile_;
+		char const * hs_profile_;
+		char const * ds_profile_;
 
 		enum StereoMethod
 		{
@@ -323,8 +328,6 @@ namespace KlayGE
 		RenderEffectPtr blit_effect_;
 		RenderTechniquePtr bilinear_blit_tech_;
 	};
-
-	typedef std::shared_ptr<D3D12RenderEngine> D3D12RenderEnginePtr;
 }
 
 #endif			// _D3D12RENDERENGINE_HPP

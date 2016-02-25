@@ -10,7 +10,7 @@ extern PyObject* PyInit__codecs(void);
 extern PyObject* PyInit_errno(void);
 extern PyObject* PyInit_gc(void);
 extern PyObject* PyInit_imp(void);
-extern PyObject* PyInit_signal(void);
+extern PyObject* PyInit__signal(void);
 extern PyObject* PyInit__sre(void);
 extern PyObject* PyInit__symtable(void);
 extern PyObject* PyInit__thread(void);
@@ -38,7 +38,7 @@ struct _inittab _PyImport_Inittab[] = {
     {"imp", PyInit_imp},
     {"__main__", NULL},
     {"marshal", PyMarshal_Init},
-    {"signal", PyInit_signal},
+    {"_signal", PyInit__signal},
     {"_sre", PyInit__sre},
     {"_symtable", PyInit__symtable},
     {"sys", NULL},

@@ -392,7 +392,7 @@ namespace
 			return std::static_pointer_cast<void>(rhs_pp->Clone());
 		}
 
-		virtual std::shared_ptr<void> Resource() const KLAYGE_OVERRIDE
+		virtual std::shared_ptr<void> Resource() const override
 		{
 			return *ps_desc_.ps;
 		}
@@ -757,7 +757,7 @@ namespace KlayGE
 				float p_to_v = (pos.x() * view_mat(0, 2) + pos.y() * view_mat(1, 2) + pos.z() * view_mat(2, 2) + view_mat(3, 2))
 					/ (pos.x() * view_mat(0, 3) + pos.y() * view_mat(1, 3) + pos.z() * view_mat(2, 3) + view_mat(3, 3));
 
-				active_particles.push_back(std::make_pair(i, p_to_v));
+				active_particles.emplace_back(i, p_to_v);
 
 				min_bb = MathLib::minimize(min_bb, pos);
 				max_bb = MathLib::maximize(min_bb, pos);
@@ -784,17 +784,17 @@ namespace KlayGE
 
 		uint32_t const num_active_particles = static_cast<uint32_t>(active_particles_.size());
 
-		RenderLayoutPtr const & rl = renderable_->GetRenderLayout();
+		RenderLayout& rl = renderable_->GetRenderLayout();
 		if (!active_particles_.empty())
 		{
 			GraphicsBufferPtr instance_gb;
 			if (gs_support_)
 			{
-				instance_gb = rl->GetVertexStream(0);
+				instance_gb = rl.GetVertexStream(0);
 			}
 			else
 			{
-				instance_gb = rl->InstanceStream();
+				instance_gb = rl.InstanceStream();
 			}
 
 			uint32_t const new_instance_size = num_active_particles * sizeof(ParticleInstance);
@@ -806,23 +806,23 @@ namespace KlayGE
 
 				if (gs_support_)
 				{
-					rl->SetVertexStream(0, instance_gb);
+					rl.SetVertexStream(0, instance_gb);
 				}
 				else
 				{
-					rl->InstanceStream(instance_gb);
+					rl.InstanceStream(instance_gb);
 				}
 			}
 
 			if (gs_support_)
 			{
-				rl->NumVertices(num_active_particles);
+				rl.NumVertices(num_active_particles);
 			}
 			else
 			{
-				for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+				for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 				{
-					rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
+					rl.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, num_active_particles);
 				}
 			}
 

@@ -177,8 +177,6 @@ class build_info:
 						compiler = "vc140"
 					elif "VS120COMNTOOLS" in env:
 						compiler = "vc120"
-					elif "VS110COMNTOOLS" in env:
-						compiler = "vc110"
 					elif 0 == os.system("where clang++"):
 						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
@@ -205,13 +203,11 @@ class build_info:
 					toolset = "v140"
 				elif "vc120" == compiler:
 					toolset = "v120"
-				elif "vc110" == compiler:
-					toolset = "v110"
 			elif "android" == target_platform:
 				if target_api_level >= 21:
 					toolset = "4.9"
 				else:
-					toolset = "4.6"
+					toolset = "4.8"
 				
 		if "" == archs:
 			archs = cfg_build.arch
@@ -248,18 +244,6 @@ class build_info:
 					gen_name = "Visual Studio 12 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 12 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
-		elif "vc110" == compiler:
-			compiler_name = "vc"
-			compiler_version = 110
-			multi_config = True
-			for arch in archs:
-				if "x86" == arch:
-					gen_name = "Visual Studio 11"
-				elif "arm" == arch:
-					gen_name = "Visual Studio 11 ARM"
-				elif "x64" == arch:
-					gen_name = "Visual Studio 11 Win64"
 				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
 		elif "clang" == compiler:
 			compiler_name = "clang"

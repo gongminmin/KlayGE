@@ -58,7 +58,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -113,7 +113,7 @@ namespace
 			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
 		}
 
-		virtual void DoBuildMeshInfo() KLAYGE_OVERRIDE
+		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
 			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
@@ -218,7 +218,7 @@ namespace
 			renderable_ = ra;
 		}
 
-		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) KLAYGE_OVERRIDE
+		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) override
 		{
 			last_mats_.push_back(model_);
 
@@ -254,10 +254,10 @@ namespace
 			: PostProcess(L"DepthOfField"),
 				max_radius_(8), show_blur_factor_(false)
 		{
-			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+			input_pins_.emplace_back("color_tex", TexturePtr());
+			input_pins_.emplace_back("depth_tex", TexturePtr());
 
-			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+			output_pins_.emplace_back("output", TexturePtr());
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
@@ -426,10 +426,10 @@ namespace
 			: PostProcess(L"BokehFilter"),
 				max_radius_(8)
 		{
-			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
+			input_pins_.emplace_back("color_tex", TexturePtr());
+			input_pins_.emplace_back("depth_tex", TexturePtr());
 
-			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+			output_pins_.emplace_back("output", TexturePtr());
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			gs_support_ = (caps.max_shader_model >= ShaderModel(4, 0));
@@ -637,11 +637,11 @@ namespace
 			: PostProcess(L"MotionBlur"),
 				show_motion_vec_(false)
 		{
-			input_pins_.push_back(std::make_pair("color_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("depth_tex", TexturePtr()));
-			input_pins_.push_back(std::make_pair("motion_vec_tex", TexturePtr()));
+			input_pins_.emplace_back("color_tex", TexturePtr());
+			input_pins_.emplace_back("depth_tex", TexturePtr());
+			input_pins_.emplace_back("motion_vec_tex", TexturePtr());
 
-			output_pins_.push_back(std::make_pair("output", TexturePtr()));
+			output_pins_.emplace_back("output", TexturePtr());
 
 			this->Technique(SyncLoadRenderEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
 		}

@@ -13,6 +13,7 @@
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mv"/>
 		<parameter type="float2" name="far_plane"/>
+		<parameter type="float" name="height_scale" value="0.06"/>
 	</cbuffer>
 
 	<cbuffer name="per_model">
@@ -240,6 +241,19 @@ float4 DepthAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z 
 	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
 }
 
+float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
+{
+	float2 uv = texcoord_2xy.xy;
+	if (height_map_enabled)
+	{
+		float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
+
+		float height = (height_tex.Sample(trilinear_sampler, uv).r - 0.5f) * height_scale;
+		uv += view.xy * height;
+	}
+	return uv;
+}
+
 float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
@@ -336,11 +350,13 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 
 float4 GBufferRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
 
 float4 GBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
@@ -357,17 +373,20 @@ float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
 	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
 
 float4 GBufferRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
 
 float4 GBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 }
@@ -384,6 +403,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
 	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 }
@@ -391,12 +411,14 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
 void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
@@ -413,6 +435,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
 #endif
 
+	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
 }

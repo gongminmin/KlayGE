@@ -112,7 +112,7 @@ namespace KlayGE
 	int MeshMLObj::AllocJoint()
 	{
 		int id = static_cast<int>(joints_.size());
-		KLAYGE_EMPLACE(joints_, id, Joint());
+		joints_.emplace(id, Joint());
 		return id;
 	}
 
@@ -390,7 +390,7 @@ namespace KlayGE
 
 			for (int i = 0; i < static_cast<int>(joint_index_to_id.size()); ++ i)
 			{
-				KLAYGE_EMPLACE(joint_id_to_index, joint_index_to_id[i], i);
+				joint_id_to_index.emplace(joint_index_to_id[i], i);
 			}
 
 			// Replace parent_id
@@ -689,7 +689,7 @@ namespace KlayGE
 		std::map<int, int> joint_index_to_kf;
 		for (size_t i = 0; i < keyframes_.size(); ++ i)
 		{
-			KLAYGE_EMPLACE(joint_index_to_kf, keyframes_[i].joint_id, static_cast<int>(i));
+			joint_index_to_kf.emplace(keyframes_[i].joint_id, static_cast<int>(i));
 		}
 
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_

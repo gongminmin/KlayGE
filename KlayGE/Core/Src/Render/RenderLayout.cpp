@@ -20,14 +20,6 @@
 
 namespace KlayGE
 {
-	class NullRenderLayout : public RenderLayout
-	{
-	public:
-		NullRenderLayout()
-		{
-		}
-	};
-
 	RenderLayout::RenderLayout()
 			: topo_type_(TT_PointList),
 				index_format_(EF_Unknown),
@@ -45,12 +37,6 @@ namespace KlayGE
 
 	RenderLayout::~RenderLayout()
 	{
-	}
-
-	RenderLayoutPtr RenderLayout::NullObject()
-	{
-		static RenderLayoutPtr obj = MakeSharedPtr<NullRenderLayout>();
-		return obj;
 	}
 
 	void RenderLayout::NumVertices(uint32_t n)

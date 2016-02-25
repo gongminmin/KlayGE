@@ -155,8 +155,8 @@ namespace KlayGE
 			src_box.bottom = src_y_offset + src_height;
 			src_box.back = src_z_offset + src_depth;
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource().get(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, this->D3DResource().get(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
+				dst_x_offset, dst_y_offset, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
 		}
 		else
 		{
@@ -165,7 +165,8 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11ShaderResourceViewPtr const & D3D11Texture3D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items, uint32_t first_level, uint32_t num_levels)
+	ID3D11ShaderResourceViewPtr const & D3D11Texture3D::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t first_level, uint32_t num_levels)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
 		BOOST_ASSERT(0 == first_array_index);
@@ -200,7 +201,8 @@ namespace KlayGE
 		return this->RetriveD3DSRV(desc);
 	}
 
-	ID3D11UnorderedAccessViewPtr const & D3D11Texture3D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items, uint32_t level)
+	ID3D11UnorderedAccessViewPtr const & D3D11Texture3D::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+			uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
 		BOOST_ASSERT(0 == first_array_index);
@@ -233,7 +235,8 @@ namespace KlayGE
 		return this->RetriveD3DUAV(desc);
 	}
 
-	ID3D11RenderTargetViewPtr const & D3D11Texture3D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
+	ID3D11RenderTargetViewPtr const & D3D11Texture3D::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);
@@ -249,7 +252,8 @@ namespace KlayGE
 		return this->RetriveD3DRTV(desc);
 	}
 
-	ID3D11DepthStencilViewPtr const & D3D11Texture3D::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices, uint32_t level)
+	ID3D11DepthStencilViewPtr const & D3D11Texture3D::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+			uint32_t level)
 	{
 		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
 		BOOST_ASSERT(0 == array_index);

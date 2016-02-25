@@ -309,8 +309,8 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
@@ -343,7 +343,7 @@ namespace KlayGE
 	public:
 		MsgInputKeyboard();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
@@ -352,7 +352,7 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 		std::array<bool, 256> keys_state_;
@@ -367,7 +367,7 @@ namespace KlayGE
 		MsgInputMouse();
 #endif
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -378,7 +378,7 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -401,7 +401,7 @@ namespace KlayGE
 		MsgInputJoystick();
 #endif
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -410,7 +410,7 @@ namespace KlayGE
 #endif
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -429,12 +429,12 @@ namespace KlayGE
 		MsgInputOVR();
 		virtual ~MsgInputOVR();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 
-		virtual void OnMessage(OVR::Message const & msg) KLAYGE_OVERRIDE;
+		virtual void OnMessage(OVR::Message const & msg) override;
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 		OVR::Ptr<OVR::DeviceManager> manager_;
@@ -452,7 +452,7 @@ namespace KlayGE
 	public:
 		MsgInputTouch();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
@@ -462,7 +462,7 @@ namespace KlayGE
 		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 		int2 AdjustPoint(int2 const & pt) const;
 
 		Timer timer_;
@@ -478,14 +478,14 @@ namespace KlayGE
 		MsgInputSensor();
 		virtual ~MsgInputSensor();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 
 		void OnLocationChanged(REFIID report_type, ILocationReport* location_report);
 		void OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 		void OnOrientationDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 		std::shared_ptr<ILocation> locator_;
@@ -502,7 +502,7 @@ namespace KlayGE
 		MsgInputSensor();
 		virtual ~MsgInputSensor();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 
 		HRESULT OnPositionChanged(ABI::Windows::Devices::Geolocation::IGeolocator* sender,
 			ABI::Windows::Devices::Geolocation::IPositionChangedEventArgs* e);
@@ -518,7 +518,7 @@ namespace KlayGE
 			ABI::Windows::Devices::Sensors::IOrientationSensorReadingChangedEventArgs* e);
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 	private:
 		std::shared_ptr<ABI::Windows::Devices::Geolocation::IGeolocator> locator_;
@@ -546,10 +546,10 @@ namespace KlayGE
 		MsgInputSensor();
 		virtual ~MsgInputSensor();
 
-		virtual std::wstring const & Name() const KLAYGE_OVERRIDE;
+		virtual std::wstring const & Name() const override;
 
 	private:
-		virtual void UpdateInputs() KLAYGE_OVERRIDE;
+		virtual void UpdateInputs() override;
 
 		static int SensorCallback(int fd, int events, void* data);
 

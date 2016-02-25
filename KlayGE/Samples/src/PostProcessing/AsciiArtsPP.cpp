@@ -170,7 +170,7 @@ namespace
 				float char_lum = *iter / max_lum * output_num_ascii_;
 				if (ret.find(char_lum) == ret.end())
 				{
-					KLAYGE_EMPLACE(ret, char_lum, static_cast<uint8_t>(iter - lums.begin()));
+					ret.emplace(char_lum, static_cast<uint8_t>(iter - lums.begin()));
 				}
 			}
 			BOOST_ASSERT(ret.size() >= output_num_ascii_);
@@ -199,7 +199,7 @@ namespace
 					diff_lum = iter->first;
 				}
 
-				diff_lum_to_iter.push_back(std::make_pair(diff_lum, iter));
+				diff_lum_to_iter.emplace_back(diff_lum, iter);
 			}
 			BOOST_ASSERT(diff_lum_to_iter.size() >= output_num_ascii_);
 

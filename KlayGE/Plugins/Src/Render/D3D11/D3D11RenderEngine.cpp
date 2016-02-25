@@ -52,32 +52,32 @@ namespace
 
 	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
 	{
-		mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
-		mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
-		mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
-		mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
-		mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
-		mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
+		std::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext::GSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext::CSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
+		std::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
 	
 	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
 	{
-		mem_fn(&ID3D11DeviceContext::VSSetSamplers),
-		mem_fn(&ID3D11DeviceContext::PSSetSamplers),
-		mem_fn(&ID3D11DeviceContext::GSSetSamplers),
-		mem_fn(&ID3D11DeviceContext::CSSetSamplers),
-		mem_fn(&ID3D11DeviceContext::HSSetSamplers),
-		mem_fn(&ID3D11DeviceContext::DSSetSamplers)
+		std::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext::GSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext::CSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
+		std::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
 
 	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
 	{
-		mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
-		mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
-		mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
-		mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
-		mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
-		mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
+		std::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext::GSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext::CSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
+		std::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
 	};
 }
 
@@ -120,9 +120,33 @@ namespace KlayGE
 
 		IDXGIFactory1* gi_factory;
 		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
-		gi_factory_ = MakeCOMPtr(gi_factory);
+		gi_factory_1_ = MakeCOMPtr(gi_factory);
 
-		adapterList_.Enumerate(gi_factory_);
+		IDXGIFactory2* gi_factory2;
+		gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory2));
+		if (gi_factory2 != nullptr)
+		{
+			gi_factory_2_ = MakeCOMPtr(gi_factory2);
+			dxgi_sub_ver_ = 2;
+
+			IDXGIFactory3* gi_factory3;
+			gi_factory->QueryInterface(IID_IDXGIFactory3, reinterpret_cast<void**>(&gi_factory3));
+			if (gi_factory3 != nullptr)
+			{
+				gi_factory_3_ = MakeCOMPtr(gi_factory3);
+				dxgi_sub_ver_ = 3;
+
+				IDXGIFactory4* gi_factory4;
+				gi_factory->QueryInterface(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory4));
+				if (gi_factory4 != nullptr)
+				{
+					gi_factory_4_ = MakeCOMPtr(gi_factory4);
+					dxgi_sub_ver_ = 4;
+				}
+			}
+		}
+
+		adapterList_.Enumerate(gi_factory_1_);
 	}
 
 	// 析构函数
@@ -170,25 +194,69 @@ namespace KlayGE
 		}
 	}
 
-	// 获取D3D接口
-	/////////////////////////////////////////////////////////////////////////////////
-	IDXGIFactory1Ptr const & D3D11RenderEngine::DXGIFactory() const
+	IDXGIFactory1* D3D11RenderEngine::DXGIFactory1() const
 	{
-		return gi_factory_;
+		return gi_factory_1_.get();
+	}
+	
+	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const
+	{
+		return gi_factory_2_.get();
+	}
+	
+	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const
+	{
+		return gi_factory_3_.get();
+	}
+	
+	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const
+	{
+		return gi_factory_4_.get();
 	}
 
-	// 获取D3D Device接口
-	/////////////////////////////////////////////////////////////////////////////////
-	ID3D11DevicePtr const & D3D11RenderEngine::D3DDevice() const
+	uint8_t D3D11RenderEngine::DXGISubVer() const
 	{
-		return d3d_device_;
+		return dxgi_sub_ver_;
 	}
 
-	// 获取D3D Device Context接口
-	/////////////////////////////////////////////////////////////////////////////////
-	ID3D11DeviceContextPtr const & D3D11RenderEngine::D3DDeviceImmContext() const
+	ID3D11Device* D3D11RenderEngine::D3DDevice() const
 	{
-		return d3d_imm_ctx_;
+		return d3d_device_.get();
+	}
+
+	ID3D11Device1* D3D11RenderEngine::D3DDevice1() const
+	{
+		return d3d_device_1_.get();
+	}
+
+	ID3D11Device2* D3D11RenderEngine::D3DDevice2() const
+	{
+		return d3d_device_2_.get();
+	}
+
+	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const
+	{
+		return d3d_device_3_.get();
+	}
+
+	ID3D11DeviceContext* D3D11RenderEngine::D3DDeviceImmContext() const
+	{
+		return d3d_imm_ctx_.get();
+	}
+
+	ID3D11DeviceContext1* D3D11RenderEngine::D3DDeviceImmContext1() const
+	{
+		return d3d_imm_ctx_1_.get();
+	}
+
+	ID3D11DeviceContext2* D3D11RenderEngine::D3DDeviceImmContext2() const
+	{
+		return d3d_imm_ctx_2_.get();
+	}
+
+	ID3D11DeviceContext3* D3D11RenderEngine::D3DDeviceImmContext3() const
+	{
+		return d3d_imm_ctx_3_.get();
 	}
 
 	uint8_t D3D11RenderEngine::D3D11RuntimeSubVer() const
@@ -222,7 +290,7 @@ namespace KlayGE
 	{
 		motion_frames_ = settings.motion_frames;
 
-		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(gi_factory_, this->ActiveAdapter(),
+		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(this->ActiveAdapter(),
 			name, settings);
 
 		switch (static_cast<uint32_t>(d3d_feature_level_))
@@ -283,15 +351,9 @@ namespace KlayGE
 		{
 			stereo_method_ = SM_None;
 
-			IDXGIFactory2* factory;
-			gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
-			if (factory != nullptr)
+			if ((dxgi_sub_ver_ >= 2) && gi_factory_2_->IsWindowedStereoEnabled())
 			{
-				if (factory->IsWindowedStereoEnabled())
-				{
-					stereo_method_ = SM_DXGI;
-				}
-				factory->Release();
+				stereo_method_ = SM_DXGI;
 			}
 
 			if (SM_None == stereo_method_)
@@ -366,12 +428,12 @@ namespace KlayGE
 #endif
 	}
 
-	void D3D11RenderEngine::D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level)
+	void D3D11RenderEngine::D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level)
 	{
 		this->DetectD3D11Runtime(device, imm_ctx);
 
 		d3d_feature_level_ = feature_level;
-		Verify(!!d3d_device_);
+		Verify(device != nullptr);
 
 		this->FillRenderDeviceCaps();
 	}
@@ -394,10 +456,10 @@ namespace KlayGE
 		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
 		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
 
-		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState().get();
-		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState().get();
+		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState();
+		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState().get();
+		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 
@@ -486,7 +548,7 @@ namespace KlayGE
 			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
 
-			return KLAYGE_EMPLACE(input_layout_bank_, signature, ret).first->second;
+			return input_layout_bank_.emplace(signature, ret).first->second;
 		}
 	}
 
@@ -515,7 +577,7 @@ namespace KlayGE
 				D3D11GraphicsBuffer* d3d11_buf = checked_cast<D3D11GraphicsBuffer*>(rl->GetVertexStream(i).get());
 
 				so_src[i] = d3d11_buf;
-				d3d11_buffs[i] = d3d11_buf->D3DBuffer().get();
+				d3d11_buffs[i] = d3d11_buf->D3DBuffer();
 			}
 
 			for (uint32_t i = 0; i < num_buffs; ++ i)
@@ -555,7 +617,7 @@ namespace KlayGE
 			GraphicsBuffer const * stream = rl.GetVertexStream(i).get();
 
 			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[i] = d3dvb.D3DBuffer().get();
+			vbs[i] = d3dvb.D3DBuffer();
 			strides[i] = rl.VertexSize(i);
 			offsets[i] = 0;
 		}
@@ -565,7 +627,7 @@ namespace KlayGE
 			GraphicsBuffer const * stream = rl.InstanceStream().get();
 
 			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[number] = d3dvb.D3DBuffer().get();
+			vbs[number] = d3dvb.D3DBuffer();
 			strides[number] = rl.InstanceSize();
 			offsets[number] = 0;
 		}
@@ -685,7 +747,7 @@ namespace KlayGE
 
 		if (rl.UseIndices())
 		{
-			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer().get();
+			ID3D11Buffer* d3dib = checked_cast<D3D11GraphicsBuffer*>(rl.GetIndexStream().get())->D3DBuffer();
 			if (ib_cache_ != d3dib)
 			{
 				d3d_imm_ctx_->IASetIndexBuffer(d3dib, D3D11Mapping::MappingFormat(rl.IndexStreamFormat()), 0);
@@ -713,7 +775,7 @@ namespace KlayGE
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -726,7 +788,7 @@ namespace KlayGE
 
 					pass->Bind();
 					d3d_imm_ctx_->DrawInstancedIndirect(
-						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer().get(),
+						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
 					pass->Unbind();
 				}
@@ -817,8 +879,7 @@ namespace KlayGE
 			RenderPass* pass = tech.Pass(i).get();
 
 			pass->Bind();
-			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
-				offset);
+			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer(), offset);
 			pass->Unbind();
 		}
 
@@ -861,7 +922,7 @@ namespace KlayGE
 		}
 		else if (CT_HASH("DXGI_FACTORY") == name_hash)
 		{
-			*static_cast<IDXGIFactory1**>(value) = gi_factory_.get();
+			*static_cast<IDXGIFactory1**>(value) = gi_factory_1_.get();
 		}
 	}
 
@@ -902,9 +963,19 @@ namespace KlayGE
 
 		d3d_imm_ctx_->ClearState();
 		d3d_imm_ctx_->Flush();
+
 		d3d_imm_ctx_.reset();
+		d3d_imm_ctx_1_.reset();
+		d3d_imm_ctx_2_.reset();
+		d3d_imm_ctx_3_.reset();
 		d3d_device_.reset();
-		gi_factory_.reset();
+		d3d_device_1_.reset();
+		d3d_device_2_.reset();
+		d3d_device_3_.reset();
+		gi_factory_1_.reset();
+		gi_factory_2_.reset();
+		gi_factory_3_.reset();
+		gi_factory_4_.reset();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_d3d11_);
@@ -1163,14 +1234,7 @@ namespace KlayGE
 		caps_.hs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.ds_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 
-		bool check_16bpp_fmts = false;
-		IDXGIFactory2* factory;
-		gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
-		if (factory != nullptr)
-		{
-			check_16bpp_fmts = true;
-			factory->Release();
-		}
+		bool check_16bpp_fmts = (dxgi_sub_ver_ >= 2);
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
@@ -1322,7 +1386,7 @@ namespace KlayGE
 						{
 							if (quality > 0)
 							{
-								rendertarget_format_[fmts[i].first].push_back(std::make_pair(count, quality));
+								rendertarget_format_[fmts[i].first].emplace_back(count, quality);
 								count <<= 1;
 							}
 							else
@@ -1353,72 +1417,66 @@ namespace KlayGE
 			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
 	}
 
-	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx)
+	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)
 	{
-		d3d_device_ = device;
-		d3d_imm_ctx_ = imm_ctx;
+		d3d_device_ = MakeCOMPtr(device);
+		d3d_imm_ctx_ = MakeCOMPtr(imm_ctx);
 		d3d_11_runtime_sub_ver_ = 0;
 
-		ID3D11Device3* d3d_device_3 = nullptr;
-		device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
-		if (d3d_device_3)
+		ID3D11Device1* d3d_device_1 = nullptr;
+		device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
+		if (d3d_device_1)
 		{
-			ID3D11DeviceContext3* d3d_imm_ctx_3 = nullptr;
-			imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
-			if (d3d_imm_ctx_3)
+			ID3D11DeviceContext1* d3d_imm_ctx_1 = nullptr;
+			imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
+			if (d3d_imm_ctx_1)
 			{
-				d3d_device_ = MakeCOMPtr(d3d_device_3);
-				d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_3);
-				d3d_11_runtime_sub_ver_ = 3;
-			}
-			else
-			{
-				d3d_device_3->Release();
-				d3d_device_3 = nullptr;
-			}
-		}
+				d3d_device_1_ = MakeCOMPtr(d3d_device_1);
+				d3d_imm_ctx_1_ = MakeCOMPtr(d3d_imm_ctx_1);
+				d3d_11_runtime_sub_ver_ = 1;
 
-		if (!d3d_device_3)
-		{
-			ID3D11Device2* d3d_device_2 = nullptr;
-			device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
-			if (d3d_device_2)
-			{
-				ID3D11DeviceContext2* d3d_imm_ctx_2 = nullptr;
-				imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
-				if (d3d_imm_ctx_2)
+				ID3D11Device2* d3d_device_2 = nullptr;
+				device->QueryInterface(IID_ID3D11Device2, reinterpret_cast<void**>(&d3d_device_2));
+				if (d3d_device_2)
 				{
-					d3d_device_ = MakeCOMPtr(d3d_device_2);
-					d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_2);
-					d3d_11_runtime_sub_ver_ = 2;
-				}
-				else
-				{
-					d3d_device_2->Release();
-					d3d_device_2 = nullptr;
-				}
-			}
-
-			if (!d3d_device_2)
-			{
-				ID3D11Device1* d3d_device_1 = nullptr;
-				device->QueryInterface(IID_ID3D11Device1, reinterpret_cast<void**>(&d3d_device_1));
-				if (d3d_device_1)
-				{
-					ID3D11DeviceContext1* d3d_imm_ctx_1 = nullptr;
-					imm_ctx->QueryInterface(IID_ID3D11DeviceContext1, reinterpret_cast<void**>(&d3d_imm_ctx_1));
-					if (d3d_imm_ctx_1)
+					ID3D11DeviceContext2* d3d_imm_ctx_2 = nullptr;
+					imm_ctx->QueryInterface(IID_ID3D11DeviceContext2, reinterpret_cast<void**>(&d3d_imm_ctx_2));
+					if (d3d_imm_ctx_2)
 					{
-						d3d_device_ = MakeCOMPtr(d3d_device_1);
-						d3d_imm_ctx_ = MakeCOMPtr(d3d_imm_ctx_1);
-						d3d_11_runtime_sub_ver_ = 1;
+						d3d_device_2_ = MakeCOMPtr(d3d_device_2);
+						d3d_imm_ctx_2_ = MakeCOMPtr(d3d_imm_ctx_2);
+						d3d_11_runtime_sub_ver_ = 2;
+
+						ID3D11Device3* d3d_device_3 = nullptr;
+						device->QueryInterface(IID_ID3D11Device3, reinterpret_cast<void**>(&d3d_device_3));
+						if (d3d_device_3)
+						{
+							ID3D11DeviceContext3* d3d_imm_ctx_3 = nullptr;
+							imm_ctx->QueryInterface(IID_ID3D11DeviceContext3, reinterpret_cast<void**>(&d3d_imm_ctx_3));
+							if (d3d_imm_ctx_3)
+							{
+								d3d_device_3_ = MakeCOMPtr(d3d_device_3);
+								d3d_imm_ctx_3_ = MakeCOMPtr(d3d_imm_ctx_3);
+								d3d_11_runtime_sub_ver_ = 3;
+							}
+							else
+							{
+								d3d_device_3->Release();
+								d3d_device_3 = nullptr;
+							}
+						}
 					}
 					else
 					{
-						d3d_device_1->Release();
-						d3d_device_1  = nullptr;
+						d3d_device_2->Release();
+						d3d_device_2 = nullptr;
 					}
 				}
+			}
+			else
+			{
+				d3d_device_1->Release();
+				d3d_device_1 = nullptr;
 			}
 		}
 	}
@@ -1434,7 +1492,7 @@ namespace KlayGE
 		case SM_DXGI:
 			{
 				RenderView const * view = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
@@ -1469,8 +1527,8 @@ namespace KlayGE
 		
 				if (0 == eye)
 				{
-					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource().get();
-					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource().get();
+					ID3D11Resource* back = checked_cast<D3D11Texture2D*>(win->D3DBackBuffer().get())->D3DResource();
+					ID3D11Resource* stereo = checked_cast<D3D11Texture2D*>(stereo_nv_3d_vision_tex_.get())->D3DResource();
 
 					D3D11_BOX box;
 					box.left = 0;
@@ -1487,7 +1545,7 @@ namespace KlayGE
 		case SM_AMDQuadBuffer:
 			{
 				RenderView const * view = win->D3DBackBufferRTV().get();
-				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView().get();
+				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
 				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;

@@ -39,6 +39,15 @@
 
 #include <fstream>
 #include <sstream>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#endif
+#include <boost/algorithm/string/split.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
+#include <boost/algorithm/string/trim.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
@@ -68,13 +77,13 @@ namespace KlayGE
 {
 	std::unique_ptr<Context> Context::context_instance_;
 
-	typedef void (*MakeRenderFactoryFunc)(RenderFactoryPtr& ptr);
-	typedef void (*MakeAudioFactoryFunc)(AudioFactoryPtr& ptr);
-	typedef void (*MakeInputFactoryFunc)(InputFactoryPtr& ptr);
-	typedef void (*MakeShowFactoryFunc)(ShowFactoryPtr& ptr);
-	typedef void (*MakeScriptFactoryFunc)(ScriptFactoryPtr& ptr);
-	typedef void (*MakeSceneManagerFunc)(SceneManagerPtr& ptr);
-	typedef void (*MakeAudioDataSourceFactoryFunc)(AudioDataSourceFactoryPtr& ptr);
+	typedef void (*MakeRenderFactoryFunc)(std::unique_ptr<RenderFactory>& ptr);
+	typedef void (*MakeAudioFactoryFunc)(std::unique_ptr<AudioFactory>& ptr);
+	typedef void (*MakeInputFactoryFunc)(std::unique_ptr<InputFactory>& ptr);
+	typedef void (*MakeShowFactoryFunc)(std::unique_ptr<ShowFactory>& ptr);
+	typedef void (*MakeScriptFactoryFunc)(std::unique_ptr<ScriptFactory>& ptr);
+	typedef void (*MakeSceneManagerFunc)(std::unique_ptr<SceneManager>& ptr);
+	typedef void (*MakeAudioDataSourceFactoryFunc)(std::unique_ptr<AudioDataSourceFactory>& ptr);
 
 	Context::Context()
 		: app_(nullptr)
@@ -239,7 +248,7 @@ namespace KlayGE
 		bool color_grading = false;
 		int stereo_method = 0;
 		float stereo_separation = 0;
-		std::string graphics_options;
+		std::vector<std::pair<std::string, std::string>> graphics_options;
 		bool perf_profiler = false;
 		bool location_sensor = false;
 
@@ -341,7 +350,7 @@ namespace KlayGE
 			attr = frame_node->Attrib("fullscreen");
 			if (attr)
 			{
-				std::string fs_str = attr->ValueString();
+				std::string const & fs_str = attr->ValueString();
 				if (("1" == fs_str) || ("true" == fs_str))
 				{
 					full_screen = true;
@@ -414,7 +423,7 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string hdr_str = attr->ValueString();
+				std::string const & hdr_str = attr->ValueString();
 				if (("1" == hdr_str) || ("true" == hdr_str))
 				{
 					hdr = true;
@@ -429,7 +438,7 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string ppaa_str = attr->ValueString();
+				std::string const & ppaa_str = attr->ValueString();
 				if (("1" == ppaa_str) || ("true" == ppaa_str))
 				{
 					ppaa = true;
@@ -444,7 +453,7 @@ namespace KlayGE
 			attr = gamma_node->Attrib("value");
 			if (attr)
 			{
-				std::string gamma_str = attr->ValueString();
+				std::string const & gamma_str = attr->ValueString();
 				if (("1" == gamma_str) || ("true" == gamma_str))
 				{
 					gamma = true;
@@ -459,7 +468,7 @@ namespace KlayGE
 			attr = color_grading_node->Attrib("value");
 			if (attr)
 			{
-				std::string color_grading_str = attr->ValueString();
+				std::string const & color_grading_str = attr->ValueString();
 				if (("1" == color_grading_str) || ("true" == color_grading_str))
 				{
 					color_grading = true;
@@ -474,7 +483,7 @@ namespace KlayGE
 			attr = stereo_node->Attrib("method");
 			if (attr)
 			{
-				std::string method_str = attr->ValueString();
+				std::string const & method_str = attr->ValueString();
 				size_t const method_str_hash = RT_HASH(method_str.c_str());
 				if (CT_HASH("none") == method_str_hash)
 				{
@@ -537,7 +546,19 @@ namespace KlayGE
 				attr = options_node->Attrib("str");
 				if (attr)
 				{
-					graphics_options = attr->ValueString();
+					std::string const & options_str = attr->ValueString();
+
+					std::vector<std::string> strs;
+					boost::algorithm::split(strs, options_str, boost::is_any_of(","));
+					for (size_t index = 0; index < strs.size(); ++ index)
+					{
+						std::string& opt = strs[index];
+						boost::algorithm::trim(opt);
+						std::string::size_type const loc = opt.find(':');
+						std::string opt_name = opt.substr(0, loc);
+						std::string opt_val = opt.substr(loc + 1);
+						graphics_options.emplace_back(opt_name, opt_val);
+					}
 				}
 			}
 		}
@@ -585,13 +606,13 @@ namespace KlayGE
 		af_name = "OpenAL";
 #endif
 
-		cfg_.render_factory_name = rf_name;
-		cfg_.audio_factory_name = af_name;
-		cfg_.input_factory_name = if_name;
-		cfg_.show_factory_name = sf_name;
-		cfg_.script_factory_name = scf_name;
-		cfg_.scene_manager_name = sm_name;
-		cfg_.audio_data_source_factory_name = adsf_name;
+		cfg_.render_factory_name = std::move(rf_name);
+		cfg_.audio_factory_name = std::move(af_name);
+		cfg_.input_factory_name = std::move(if_name);
+		cfg_.show_factory_name = std::move(sf_name);
+		cfg_.script_factory_name = std::move(scf_name);
+		cfg_.scene_manager_name = std::move(sm_name);
+		cfg_.audio_data_source_factory_name = std::move(adsf_name);
 
 		cfg_.graphics_cfg.left = cfg_.graphics_cfg.top = 0;
 		cfg_.graphics_cfg.width = width;
@@ -609,7 +630,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
-		cfg_.graphics_cfg.options = graphics_options;
+		cfg_.graphics_cfg.options = std::move(graphics_options);
 
 		cfg_.deferred_rendering = false;
 		cfg_.perf_profiler = perf_profiler;
@@ -835,7 +856,7 @@ namespace KlayGE
 
 	void Context::LoadRenderFactory(std::string const & rf_name)
 	{
-		render_factory_ = RenderFactory::NullObject();
+		render_factory_.reset();
 
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		render_loader_.Free();
@@ -864,7 +885,7 @@ namespace KlayGE
 
 	void Context::LoadAudioFactory(std::string const & af_name)
 	{
-		audio_factory_ = AudioFactory::NullObject();
+		audio_factory_.reset();
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
@@ -887,7 +908,7 @@ namespace KlayGE
 
 	void Context::LoadInputFactory(std::string const & if_name)
 	{
-		input_factory_ = InputFactory::NullObject();
+		input_factory_.reset();
 
 #if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
 		input_loader_.Free();
@@ -916,7 +937,7 @@ namespace KlayGE
 
 	void Context::LoadShowFactory(std::string const & sf_name)
 	{
-		show_factory_ = ShowFactory::NullObject();
+		show_factory_.reset();
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
@@ -939,7 +960,7 @@ namespace KlayGE
 
 	void Context::LoadScriptFactory(std::string const & sf_name)
 	{
-		script_factory_ = ScriptFactory::NullObject();
+		script_factory_.reset();
 		script_loader_.Free();
 
 		std::string script_path = ResLoader::Instance().Locate("Script");
@@ -991,7 +1012,7 @@ namespace KlayGE
 
 	void Context::LoadAudioDataSourceFactory(std::string const & adsf_name)
 	{
-		audio_data_src_factory_ = AudioDataSourceFactory::NullObject();
+		audio_data_src_factory_.reset();
 		ads_loader_.Free();
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");

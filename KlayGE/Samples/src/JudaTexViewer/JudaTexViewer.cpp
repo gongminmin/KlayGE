@@ -521,16 +521,16 @@ uint32_t JudaTexViewer::DoUpdate(uint32_t /*pass*/)
 	checked_pointer_cast<TileObject>(tile_)->SetPosBuffer(tile_pos_vb_);
 	checked_pointer_cast<GridBorderObject>(grid_border_)->SetPosBuffer(tile_pos_vb_);
 
-	RenderLayoutPtr const & rl_tile = tile_->GetRenderable()->GetRenderLayout();
-	for (uint32_t i = 0; i < rl_tile->NumVertexStreams(); ++ i)
+	RenderLayout& rl_tile = tile_->GetRenderable()->GetRenderLayout();
+	for (uint32_t i = 0; i < rl_tile.NumVertexStreams(); ++ i)
 	{
-		rl_tile->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
+		rl_tile.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
 	}
 
-	RenderLayoutPtr const & rl_border = grid_border_->GetRenderable()->GetRenderLayout();
-	for (uint32_t i = 0; i < rl_border->NumVertexStreams(); ++ i)
+	RenderLayout& rl_border = grid_border_->GetRenderable()->GetRenderLayout();
+	for (uint32_t i = 0; i < rl_border.NumVertexStreams(); ++ i)
 	{
-		rl_border->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
+		rl_border.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, nx * ny);
 	}
 
 	juda_tex_->UpdateCache(tile_ids);

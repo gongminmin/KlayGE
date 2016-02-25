@@ -53,49 +53,62 @@ namespace KlayGE
 			return true;
 		}
 
-		void BeginFrame() KLAYGE_OVERRIDE;
-		void EndFrame() KLAYGE_OVERRIDE;
-		void UpdateGPUTimestampsFrequency() KLAYGE_OVERRIDE;
+		void BeginFrame() override;
+		void EndFrame() override;
+		void UpdateGPUTimestampsFrequency() override;
 
-		IDXGIFactory1Ptr const & DXGIFactory() const;
-		ID3D11DevicePtr const & D3DDevice() const;
-		ID3D11DeviceContextPtr const & D3DDeviceImmContext() const;
+		IDXGIFactory1* DXGIFactory1() const;
+		IDXGIFactory2* DXGIFactory2() const;
+		IDXGIFactory3* DXGIFactory3() const;
+		IDXGIFactory4* DXGIFactory4() const;
+		uint8_t DXGISubVer() const;
+
+		ID3D11Device* D3DDevice() const;
+		ID3D11Device1* D3DDevice1() const;
+		ID3D11Device2* D3DDevice2() const;
+		ID3D11Device3* D3DDevice3() const;
+		ID3D11DeviceContext* D3DDeviceImmContext() const;
+		ID3D11DeviceContext1* D3DDeviceImmContext1() const;
+		ID3D11DeviceContext2* D3DDeviceImmContext2() const;
+		ID3D11DeviceContext3* D3DDeviceImmContext3() const;
 		uint8_t D3D11RuntimeSubVer() const;
+
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
-		void D3DDevice(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx, D3D_FEATURE_LEVEL feature_level);
+
+		void D3DDevice(ID3D11Device* device, ID3D11DeviceContext* imm_ctx, D3D_FEATURE_LEVEL feature_level);
 
 		void ForceFlush();
 
-		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE;
+		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
 
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
-		virtual void GetCustomAttrib(std::string const & name, void* value) KLAYGE_OVERRIDE;
+		virtual void GetCustomAttrib(std::string const & name, void* value) override;
 
 		bool FullScreen() const;
 		void FullScreen(bool fs);
 
-		std::string const & VertexShaderProfile() const
+		char const * VertexShaderProfile() const
 		{
 			return vs_profile_;
 		}
-		std::string const & PixelShaderProfile() const
+		char const * PixelShaderProfile() const
 		{
 			return ps_profile_;
 		}
-		std::string const & GeometryShaderProfile() const
+		char const * GeometryShaderProfile() const
 		{
 			return gs_profile_;
 		}
-		std::string const & ComputeShaderProfile() const
+		char const * ComputeShaderProfile() const
 		{
 			return cs_profile_;
 		}
-		std::string const & HullShaderProfile() const
+		char const * HullShaderProfile() const
 		{
 			return hs_profile_;
 		}
-		std::string const & DomainShaderProfile() const
+		char const * DomainShaderProfile() const
 		{
 			return ds_profile_;
 		}
@@ -130,28 +143,28 @@ namespace KlayGE
 								ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext) const;
 
 	private:
-		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) KLAYGE_OVERRIDE;
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) KLAYGE_OVERRIDE;
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) KLAYGE_OVERRIDE;
-		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) KLAYGE_OVERRIDE;
-		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) KLAYGE_OVERRIDE;
+		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
+		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
+		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) override;
+		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) override;
+		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) override;
 		virtual void DoDispatchIndirect(RenderTechnique const & tech,
-			GraphicsBufferPtr const & buff_args, uint32_t offset) KLAYGE_OVERRIDE;
-		virtual void DoResize(uint32_t width, uint32_t height) KLAYGE_OVERRIDE;
-		virtual void DoDestroy() KLAYGE_OVERRIDE;
-		virtual void DoSuspend() KLAYGE_OVERRIDE;
-		virtual void DoResume() KLAYGE_OVERRIDE;
+			GraphicsBufferPtr const & buff_args, uint32_t offset) override;
+		virtual void DoResize(uint32_t width, uint32_t height) override;
+		virtual void DoDestroy() override;
+		virtual void DoSuspend() override;
+		virtual void DoResume() override;
 
 		void FillRenderDeviceCaps();
-		void DetectD3D11Runtime(ID3D11DevicePtr const & device, ID3D11DeviceContextPtr const & imm_ctx);
+		void DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx);
 
-		virtual void StereoscopicForLCDShutter(int32_t eye) KLAYGE_OVERRIDE;
+		virtual void StereoscopicForLCDShutter(int32_t eye) override;
 
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
 
-		virtual void CheckConfig(RenderSettings& settings) KLAYGE_OVERRIDE;
+		virtual void CheckConfig(RenderSettings& settings) override;
 
 	private:
 		D3D11AdapterList const & D3DAdapters() const;
@@ -169,12 +182,22 @@ namespace KlayGE
 		HMODULE mod_dxgi_;
 		HMODULE mod_d3d11_;
 
-		// Direct3D rendering device
-		// Only created after top-level window created
-		IDXGIFactory1Ptr	gi_factory_;
-		ID3D11DevicePtr		d3d_device_;
-		ID3D11DeviceContextPtr d3d_imm_ctx_;
+		IDXGIFactory1Ptr gi_factory_1_;
+		IDXGIFactory2Ptr gi_factory_2_;
+		IDXGIFactory3Ptr gi_factory_3_;
+		IDXGIFactory4Ptr gi_factory_4_;
+		uint8_t dxgi_sub_ver_;
+		
+		ID3D11DevicePtr  d3d_device_;
+		ID3D11Device1Ptr d3d_device_1_;
+		ID3D11Device2Ptr d3d_device_2_;
+		ID3D11Device3Ptr d3d_device_3_;
+		ID3D11DeviceContextPtr  d3d_imm_ctx_;
+		ID3D11DeviceContext1Ptr d3d_imm_ctx_1_;
+		ID3D11DeviceContext2Ptr d3d_imm_ctx_2_;
+		ID3D11DeviceContext3Ptr d3d_imm_ctx_3_;
 		uint8_t d3d_11_runtime_sub_ver_;
+
 		D3D_FEATURE_LEVEL d3d_feature_level_;
 
 		// List of D3D drivers installed (video cards)
@@ -212,7 +235,12 @@ namespace KlayGE
 
 		std::unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 
-		std::string vs_profile_, ps_profile_, gs_profile_, cs_profile_, hs_profile_, ds_profile_;
+		char const * vs_profile_;
+		char const * ps_profile_;
+		char const * gs_profile_;
+		char const * cs_profile_;
+		char const * hs_profile_;
+		char const * ds_profile_;
 
 		enum StereoMethod
 		{
@@ -233,8 +261,6 @@ namespace KlayGE
 		ID3D11QueryPtr timestamp_disjoint_query_;
 		double inv_timestamp_freq_;
 	};
-
-	typedef std::shared_ptr<D3D11RenderEngine> D3D11RenderEnginePtr;
 }
 
 #endif			// _D3D11RENDERENGINE_HPP

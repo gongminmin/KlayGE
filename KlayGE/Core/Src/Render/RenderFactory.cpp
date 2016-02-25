@@ -32,266 +32,6 @@
 
 namespace KlayGE
 {
-	class NullRenderFactory : public RenderFactory
-	{
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Render Factory");
-			return name;
-		}
-
-		TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-		{
-			KFL_UNUSED(width);
-			KFL_UNUSED(num_mip_maps);
-			KFL_UNUSED(array_size);
-			KFL_UNUSED(format);
-			KFL_UNUSED(sample_count);
-			KFL_UNUSED(sample_quality);
-			KFL_UNUSED(access_hint);
-			return Texture::NullObject();
-		}
-		TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-		{
-			KFL_UNUSED(width);
-			KFL_UNUSED(height);
-			KFL_UNUSED(num_mip_maps);
-			KFL_UNUSED(array_size);
-			KFL_UNUSED(format);
-			KFL_UNUSED(sample_count);
-			KFL_UNUSED(sample_quality);
-			KFL_UNUSED(access_hint);
-			return Texture::NullObject();
-		}
-		TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-		{
-			KFL_UNUSED(width);
-			KFL_UNUSED(height);
-			KFL_UNUSED(depth);
-			KFL_UNUSED(num_mip_maps);
-			KFL_UNUSED(array_size);
-			KFL_UNUSED(format);
-			KFL_UNUSED(sample_count);
-			KFL_UNUSED(sample_quality);
-			KFL_UNUSED(access_hint);
-			return Texture::NullObject();
-		}
-		TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
-			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
-		{
-			KFL_UNUSED(size);
-			KFL_UNUSED(num_mip_maps);
-			KFL_UNUSED(array_size);
-			KFL_UNUSED(format);
-			KFL_UNUSED(sample_count);
-			KFL_UNUSED(sample_quality);
-			KFL_UNUSED(access_hint);
-			return Texture::NullObject();
-		}
-		FrameBufferPtr MakeFrameBuffer()
-		{
-			return FrameBuffer::NullObject();
-		}
-
-		RenderLayoutPtr MakeRenderLayout()
-		{
-			return RenderLayout::NullObject();
-		}
-
-		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(usage);
-			KFL_UNUSED(access_hint);
-			KFL_UNUSED(size_in_bytes);
-			KFL_UNUSED(fmt);
-			return GraphicsBuffer::NullObject();
-		}
-		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(usage);
-			KFL_UNUSED(access_hint);
-			KFL_UNUSED(size_in_bytes);
-			KFL_UNUSED(fmt);
-			return GraphicsBuffer::NullObject();
-		}
-		virtual GraphicsBufferPtr MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint, uint32_t size_in_bytes, ElementFormat fmt) KLAYGE_OVERRIDE
-		{
-			KFL_UNUSED(usage);
-			KFL_UNUSED(access_hint);
-			KFL_UNUSED(size_in_bytes);
-			KFL_UNUSED(fmt);
-			return GraphicsBuffer::NullObject();
-		}
-
-		QueryPtr MakeOcclusionQuery()
-		{
-			return Query::NullObject();
-		}
-
-		QueryPtr MakeConditionalRender()
-		{
-			return Query::NullObject();
-		}
-
-		QueryPtr MakeTimerQuery()
-		{
-			return Query::NullObject();
-		}
-
-		virtual FencePtr MakeFence() KLAYGE_OVERRIDE
-		{
-			return Fence::NullObject();
-		}
-
-		RenderViewPtr Make1DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr MakeCubeRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make3DRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr MakeGraphicsBufferRenderView(GraphicsBuffer& /*gbuffer*/, uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DDepthStencilRenderView(uint32_t /*width*/, uint32_t /*height*/, ElementFormat /*pf*/,
-			uint32_t /*sample_count*/, uint32_t /*sample_quality*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make1DDepthStencilRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make2DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr MakeCubeDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		RenderViewPtr Make3DDepthStencilRenderView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
-		{
-			return RenderView::NullObject();
-		}
-
-		UnorderedAccessViewPtr Make1DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*first_array_index*/, int /*array_size*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, Texture::CubeFaces /*face*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr Make2DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*slice*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr MakeCubeUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr Make3DUnorderedAccessView(Texture& /*texture*/, int /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, int /*level*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& /*gbuffer*/, ElementFormat /*pf*/)
-		{
-			return UnorderedAccessView::NullObject();
-		}
-
-		ShaderObjectPtr MakeShaderObject()
-		{
-			return ShaderObject::NullObject();
-		}
-
-		RenderEnginePtr DoMakeRenderEngine()
-		{
-			return RenderEngine::NullObject();
-		}
-
-		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & /*desc*/)
-		{
-			return RasterizerStateObject::NullObject();
-		}
-
-		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & /*desc*/)
-		{
-			return DepthStencilStateObject::NullObject();
-		}
-
-		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & /*desc*/)
-		{
-			return BlendStateObject::NullObject();
-		}
-
-		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & /*desc*/)
-		{
-			return SamplerStateObject::NullObject();
-		}
-
-	private:
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
-
 	RenderFactory::~RenderFactory()
 	{
 		for (auto& rs : rs_pool_)
@@ -312,12 +52,6 @@ namespace KlayGE
 		}
 
 		re_.reset();
-	}
-
-	RenderFactoryPtr RenderFactory::NullObject()
-	{
-		static RenderFactoryPtr obj = MakeSharedPtr<NullRenderFactory>();
-		return obj;
 	}
 
 	RenderEngine& RenderFactory::RenderEngineInstance()
@@ -409,7 +143,7 @@ namespace KlayGE
 		if (iter == rs_pool_.end())
 		{
 			ret = this->DoMakeRasterizerStateObject(desc);
-			KLAYGE_EMPLACE(rs_pool_, desc, ret);
+			rs_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -427,7 +161,7 @@ namespace KlayGE
 		if (iter == dss_pool_.end())
 		{
 			ret = this->DoMakeDepthStencilStateObject(desc);
-			KLAYGE_EMPLACE(dss_pool_, desc, ret);
+			dss_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -445,7 +179,7 @@ namespace KlayGE
 		if (iter == bs_pool_.end())
 		{
 			ret = this->DoMakeBlendStateObject(desc);
-			KLAYGE_EMPLACE(bs_pool_, desc, ret);
+			bs_pool_.emplace(desc, ret);
 		}
 		else
 		{
@@ -463,7 +197,7 @@ namespace KlayGE
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);
-			KLAYGE_EMPLACE(ss_pool_, desc, ret);
+			ss_pool_.emplace(desc, ret);
 		}
 		else
 		{

@@ -193,15 +193,15 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		RenderLayoutPtr const & layout = this->GetRenderLayout();
-		GraphicsBufferPtr const & inst_stream = layout->InstanceStream();
-		RenderTechniquePtr const & tech = this->GetRenderTechnique();
+		RenderLayout const & layout = this->GetRenderLayout();
+		GraphicsBufferPtr const & inst_stream = layout.InstanceStream();
+		RenderTechnique const & tech = *this->GetRenderTechnique();
 		if (inst_stream)
 		{
-			if (layout->NumInstances() > 0)
+			if (layout.NumInstances() > 0)
 			{
 				this->OnRenderBegin();
-				re.Render(*tech, *layout);
+				re.Render(tech, layout);
 				this->OnRenderEnd();
 			}
 		}
@@ -210,14 +210,14 @@ namespace KlayGE
 			this->OnRenderBegin();
 			if (instances_.empty())
 			{
-				re.Render(*tech, *layout);
+				re.Render(tech, layout);
 			}
 			else
 			{
 				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
-					re.Render(*tech, *layout);
+					re.Render(tech, layout);
 					this->OnInstanceEnd(i);
 				}
 			}
@@ -243,22 +243,22 @@ namespace KlayGE
 
 			uint32_t const inst_size = static_cast<uint32_t>(size * instances_.size());
 
-			RenderLayoutPtr const & rl = this->GetRenderLayout();
+			RenderLayout& rl = this->GetRenderLayout();
 
-			GraphicsBufferPtr inst_stream = rl->InstanceStream();
+			GraphicsBufferPtr inst_stream = rl.InstanceStream();
 			if (inst_stream && (inst_stream->Size() >= inst_size))
 			{
 				for (size_t i = 0; i < instances_.size(); ++ i)
 				{
-					BOOST_ASSERT(rl->InstanceStreamFormat() == instances_[i]->InstanceFormat());
+					BOOST_ASSERT(rl.InstanceStreamFormat() == instances_[i]->InstanceFormat());
 				}
 			}
 			else
 			{
 				RenderFactory& rf(Context::Instance().RenderFactoryInstance());
 				inst_stream = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read, inst_size, nullptr);
-				rl->BindVertexStream(inst_stream, vet, RenderLayout::ST_Instance, 1);
-				rl->InstanceStream(inst_stream);
+				rl.BindVertexStream(inst_stream, vet, RenderLayout::ST_Instance, 1);
+				rl.InstanceStream(inst_stream);
 			}
 
 			{
@@ -270,9 +270,9 @@ namespace KlayGE
 				}
 			}
 
-			for (uint32_t i = 0; i < rl->NumVertexStreams(); ++ i)
+			for (uint32_t i = 0; i < rl.NumVertexStreams(); ++ i)
 			{
-				rl->VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, static_cast<uint32_t>(instances_.size()));
+				rl.VertexStreamFrequencyDivider(i, RenderLayout::ST_Geometry, static_cast<uint32_t>(instances_.size()));
 			}
 		}
 	}

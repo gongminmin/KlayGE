@@ -17,7 +17,33 @@
 #include <KlayGE/DShow/DShow.hpp>
 #include <KlayGE/DShow/DShowFactory.hpp>
 
-void MakeShowFactory(KlayGE::ShowFactoryPtr& ptr)
+namespace KlayGE
 {
-	ptr = KlayGE::MakeSharedPtr<KlayGE::ConcreteShowFactory<KlayGE::DShowEngine>>(L"DirectShow Show Factory");
+	class DShowFactory : boost::noncopyable, public ShowFactory
+	{
+	public:
+		std::wstring const & Name() const
+		{
+			static std::wstring const name(L"DirectShow Show Factory");
+			return name;
+		}
+
+	private:
+		virtual std::unique_ptr<ShowEngine> MakeShowEngine() override
+		{
+			return MakeUniquePtr<DShowEngine>();
+		}
+
+		virtual void DoSuspend() override
+		{
+		}
+		virtual void DoResume() override
+		{
+		}
+	};
+}
+
+void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
+{
+	ptr = KlayGE::MakeUniquePtr<KlayGE::DShowFactory>();
 }

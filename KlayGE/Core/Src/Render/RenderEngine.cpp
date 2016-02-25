@@ -61,85 +61,6 @@
 
 namespace KlayGE
 {
-	class NullRenderEngine : public RenderEngine
-	{
-	public:
-		std::wstring const & Name() const
-		{
-			static std::wstring const name(L"Null Render Engine");
-			return name;
-		}
-
-		bool RequiresFlipping() const
-		{
-			return false;
-		}
-
-		void ForceFlush()
-		{
-		}
-
-		virtual TexturePtr const & ScreenDepthStencilTexture() const KLAYGE_OVERRIDE
-		{
-			static TexturePtr ret;
-			return ret;
-		}
-
-		void ScissorRect(uint32_t /*x*/, uint32_t /*y*/, uint32_t /*width*/, uint32_t /*height*/)
-		{
-		}
-
-		bool FullScreen() const
-		{
-			return false;
-		}
-
-		void FullScreen(bool /*fs*/)
-		{
-		}
-
-	private:
-		virtual void DoCreateRenderWindow(std::string const & /*name*/, RenderSettings const & /*settings*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoBindFrameBuffer(FrameBufferPtr const & /*fb*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoBindSOBuffers(RenderLayoutPtr const & /*rl*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoRender(RenderTechnique const & /*tech*/, RenderLayout const & /*rl*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoDispatchIndirect(RenderTechnique const & /*tech*/,
-			GraphicsBufferPtr const & /*buff_args*/, uint32_t /*offset*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoResize(uint32_t /*width*/, uint32_t /*height*/) KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoDestroy() KLAYGE_OVERRIDE
-		{
-		}
-
-		virtual void DoSuspend() KLAYGE_OVERRIDE
-		{
-		}
-		virtual void DoResume() KLAYGE_OVERRIDE
-		{
-		}
-	};
-
 	// 构造函数
 	/////////////////////////////////////////////////////////////////////////////////
 	RenderEngine::RenderEngine()
@@ -172,14 +93,6 @@ namespace KlayGE
 	{
 		// TODO
 		this->DoResume();
-	}
-
-	// 返回空对象
-	/////////////////////////////////////////////////////////////////////////////////
-	RenderEnginePtr RenderEngine::NullObject()
-	{
-		static RenderEnginePtr obj = MakeSharedPtr<NullRenderEngine>();
-		return obj;
 	}
 
 	void RenderEngine::BeginFrame()

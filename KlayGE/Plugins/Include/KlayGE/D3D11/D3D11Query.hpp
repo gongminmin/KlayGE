@@ -58,7 +58,7 @@ namespace KlayGE
 		void Begin();
 		void End();
 
-		double TimeElapsed() KLAYGE_OVERRIDE;
+		double TimeElapsed() override;
 
 	private:
 		ID3D11QueryPtr timestamp_start_query_;

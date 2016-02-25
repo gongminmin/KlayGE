@@ -138,20 +138,12 @@ namespace KlayGE
 			return p;
 		}
 
-#ifdef KLAYGE_CXX11_CORE_VARIADIC_TEMPLATES
 		template<typename U, typename... Args>
 		void construct(U* p, Args&&... args)
 		{
 			void* vp = p;
 			::new (vp) U(std::forward<Args>(args)...);
 		}
-#else
-		void construct(pointer p, T const & val)
-		{
-			void* vp = p;
-			::new (vp) T(val);
-		}
-#endif
 
 		template <typename U>
 		void destroy(U* p)

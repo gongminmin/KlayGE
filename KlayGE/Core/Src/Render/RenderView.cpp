@@ -16,52 +16,6 @@
 
 namespace KlayGE
 {
-	class NullRenderView : public RenderView
-	{
-	public:
-		void ClearColor(Color const & /*clr*/)
-		{
-		}
-
-		void ClearDepth(float /*depth*/)
-		{
-		}
-		
-		void ClearStencil(int32_t /*stencil*/)
-		{
-		}
-
-		void ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
-		{
-		}
-
-		virtual void Discard() KLAYGE_OVERRIDE
-		{
-		}
-
-		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-	};
-
-	RenderViewPtr RenderView::NullObject()
-	{
-		static RenderViewPtr obj = MakeSharedPtr<NullRenderView>();
-		return obj;
-	}
-
 	void RenderView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{
 	}
@@ -70,44 +24,6 @@ namespace KlayGE
 	{
 	}
 
-
-	class NullUnorderedAccessView : public UnorderedAccessView
-	{
-	public:
-		void Clear(float4 const & /*val*/)
-		{
-		}
-
-		void Clear(uint4 const & /*val*/)
-		{
-		}
-
-		virtual void Discard() KLAYGE_OVERRIDE
-		{
-		}
-
-		void OnAttached(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnDetached(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-
-		void OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
-		{
-		}
-	};
-
-	UnorderedAccessViewPtr UnorderedAccessView::NullObject()
-	{
-		static UnorderedAccessViewPtr obj = MakeSharedPtr<NullUnorderedAccessView>();
-		return obj;
-	}
 
 	void UnorderedAccessView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
 	{

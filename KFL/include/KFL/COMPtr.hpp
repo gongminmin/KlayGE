@@ -40,7 +40,7 @@ namespace KlayGE
 	inline std::shared_ptr<T>
 	MakeCOMPtr(T* p)
 	{
-		return p ? std::shared_ptr<T>(p, mem_fn(&T::Release)) : std::shared_ptr<T>();
+		return p ? std::shared_ptr<T>(p, std::mem_fn(&T::Release)) : std::shared_ptr<T>();
 	}
 }
 
