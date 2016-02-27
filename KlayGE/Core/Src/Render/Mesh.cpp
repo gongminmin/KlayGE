@@ -46,7 +46,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 9;
+	uint32_t const MODEL_BIN_VERSION = 10;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -1138,6 +1138,27 @@ namespace KlayGE
 				std::string name = ReadShortString(decoded);
 				mtl->texture_slots.emplace_back(type, name);
 			}
+
+			uint8_t detail_mode;
+			decoded->read(&detail_mode, sizeof(detail_mode));
+			mtl->detail_mode = static_cast<RenderMaterial::SurfaceDetailMode>(detail_mode);
+
+			float height_offset;
+			decoded->read(&height_offset, sizeof(height_offset));
+			mtl->height_offset_scale.x() = LE2Native(height_offset);
+			float height_scale;
+			decoded->read(&height_scale, sizeof(height_scale));
+			mtl->height_offset_scale.y() = LE2Native(height_scale);
+
+			float tess_factor;
+			decoded->read(&tess_factor, sizeof(tess_factor));
+			mtl->tess_factors.x() = LE2Native(tess_factor);
+			decoded->read(&tess_factor, sizeof(tess_factor));
+			mtl->tess_factors.y() = LE2Native(tess_factor);
+			decoded->read(&tess_factor, sizeof(tess_factor));
+			mtl->tess_factors.z() = LE2Native(tess_factor);
+			decoded->read(&tess_factor, sizeof(tess_factor));
+			mtl->tess_factors.w() = LE2Native(tess_factor);
 		}
 
 		uint32_t num_merged_ves;

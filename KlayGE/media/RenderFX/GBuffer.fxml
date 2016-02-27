@@ -16,8 +16,8 @@
 		<parameter type="float2" name="far_plane"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
-		<parameter type="float" name="height_scale" value="0.06"/>
-		<parameter type="float4" name="tess_factors" x="5" y="5" z="1" w="9"/>
+		<parameter type="float2" name="height_offset_scale"/>
+		<parameter type="float4" name="tess_factors"/>
 	</cbuffer>
 
 	<cbuffer name="per_model">
@@ -252,7 +252,7 @@ float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, flo
 	{
 		float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
 
-		float height = (height_tex.Sample(trilinear_sampler, uv).r - 0.5f) * height_scale;
+		float height = (height_tex.Sample(trilinear_sampler, uv).r + height_offset_scale.x) * height_offset_scale.y;
 		uv += view.xy * height;
 	}
 	return uv;
@@ -1123,7 +1123,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 
 	if (height_map_enabled)
 	{
-		float height = height_tex.SampleLevel(bilinear_sampler, uv, 0).r * height_scale;
+		float height = (height_tex.SampleLevel(bilinear_sampler, uv, 0).r + height_offset_scale.x) * 0.1f * height_offset_scale.y;
 		pos += height * obj_to_tangent[2];
 	}
 

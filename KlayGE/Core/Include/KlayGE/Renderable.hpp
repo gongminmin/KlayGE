@@ -130,6 +130,20 @@ namespace KlayGE
 	typedef std::vector<std::pair<std::string, std::string>> TextureSlotsType;
 	struct KLAYGE_CORE_API RenderMaterial
 	{
+		enum SurfaceDetailMode
+		{
+			SDM_Parallax = 0,
+			SDM_FlatTessellation,
+			SDM_SmoothTessellation
+		};
+
+		RenderMaterial()
+			: detail_mode(SDM_Parallax),
+				height_offset_scale(-0.5f, 0.06f),
+				tess_factors(5, 5, 1, 9)
+		{
+		}
+
 		float3 ambient;
 		float3 diffuse;
 		float3 specular;
@@ -138,6 +152,10 @@ namespace KlayGE
 		float shininess;
 
 		TextureSlotsType texture_slots;
+
+		SurfaceDetailMode detail_mode;
+		float2 height_offset_scale;
+		float4 tess_factors;
 	};
 
 	float const INV_LOG_8192 = 1 / log(8192.0f);
@@ -155,13 +173,6 @@ namespace KlayGE
 			EA_Reflection = 1UL << 4,
 			EA_SimpleForward = 1UL << 5,
 			EA_SSS = 1UL << 6
-		};
-
-		enum SurfaceDetailMode
-		{
-			SDM_Parallax,
-			SDM_FlatTessellation,
-			SDM_SmoothTessellation
 		};
 
 	public:
@@ -242,12 +253,6 @@ namespace KlayGE
 		}
 
 		// For deferred only
-
-		void DetailMode(SurfaceDetailMode mode);
-		SurfaceDetailMode DetailMode()
-		{
-			return detail_mode_;
-		}
 
 		virtual void Pass(PassType type);
 
@@ -334,7 +339,6 @@ namespace KlayGE
 		PassType type_;
 		bool opacity_map_enabled_;
 		uint32_t effect_attrs_;
-		SurfaceDetailMode detail_mode_;
 
 		RenderMaterialPtr mtl_;
 
@@ -343,6 +347,8 @@ namespace KlayGE
 		RenderEffectParameterPtr far_plane_param_;
 		RenderEffectParameterPtr forward_vec_param_;
 		RenderEffectParameterPtr frame_size_param_;
+		RenderEffectParameterPtr height_offset_scale_param_;
+		RenderEffectParameterPtr tess_factors_param_;
 		RenderEffectParameterPtr pos_center_param_;
 		RenderEffectParameterPtr pos_extent_param_;
 		RenderEffectParameterPtr tc_center_param_;
