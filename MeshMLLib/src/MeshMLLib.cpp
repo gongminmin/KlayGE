@@ -56,7 +56,10 @@ namespace KlayGE
 		bool same = (ambient == rhs.ambient) && (diffuse == rhs.diffuse)
 			&& (specular == rhs.specular) && (emit == rhs.emit)
 			&& (opacity == rhs.opacity) && (shininess == rhs.shininess)
-			&& (texture_slots.size() == rhs.texture_slots.size());
+			&& (texture_slots.size() == rhs.texture_slots.size()
+			&& (detail_mode == rhs.detail_mode)
+			&& (height_offset_scale == rhs.height_offset_scale)
+			&& (tess_factors == rhs.tess_factors));
 		if (same)
 		{
 			for (size_t i = 0; i < texture_slots.size(); ++ i)
@@ -167,6 +170,17 @@ namespace KlayGE
 		mtl.emit = emit;
 		mtl.opacity = opacity;
 		mtl.shininess = shininess;
+	}
+
+	void MeshMLObj::SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
+			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess)
+	{
+		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
+
+		Material& mtl = materials_[mtl_id];
+		mtl.detail_mode = detail_mode;
+		mtl.height_offset_scale = float2(height_offset, height_scale);
+		mtl.tess_factors = float4(edge_tess_hint, inside_tess_hint, min_tess, max_tess);
 	}
 
 	int MeshMLObj::AllocTextureSlot(int mtl_id)
@@ -524,6 +538,38 @@ namespace KlayGE
 				{
 					os << "\t\t\t<texture type=\"" << RemoveQuote(tl.first)
 						<< "\" name=\"" << RemoveQuote(tl.second) << "\"/>" << std::endl;
+				}
+
+				if ((mtl.detail_mode != Material::SDM_Parallax)
+					|| (mtl.height_offset_scale.x() != -0.5f)
+					|| (mtl.height_offset_scale.y() != 0.06f)
+					|| (mtl.tess_factors.x() != 5)
+					|| (mtl.tess_factors.y() != 5)
+					|| (mtl.tess_factors.z() != 1)
+					|| (mtl.tess_factors.w() != 9))
+				{
+					os << "\t\t\t<detail mode=\"";
+					switch (mtl.detail_mode)
+					{
+					case Material::SDM_FlatTessellation:
+						os << "Flat Tessellation";
+						break;
+
+					case Material::SDM_SmoothTessellation:
+						os << "Smooth Tessellation";
+						break;
+
+					default:
+						os << "Parallax";
+						break;
+					}
+					os << "\" height_offset=\"" << mtl.height_offset_scale.x()
+						<< "\" height_scale=\"" << mtl.height_offset_scale.y()
+						<< "\" edge_tess_hint=\"" << mtl.tess_factors.x()
+						<< "\" inside_tess_hint=\"" << mtl.tess_factors.y()
+						<< "\" min_tess=\"" << mtl.tess_factors.z()
+						<< "\" max_tess=\"" << mtl.tess_factors.w()
+						<< "\"/>" << std::endl;
 				}
 
 				os << "\t\t</material>" << std::endl;
