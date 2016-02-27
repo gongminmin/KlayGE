@@ -1508,6 +1508,10 @@ namespace KlayGE
 				int slot_id = obj.AllocTextureSlot(mtl_id);
 				obj.SetTextureSlot(mtl_id, slot_id, mtls[i]->texture_slots[ts].first, mtls[i]->texture_slots[ts].second);
 			}
+
+			obj.SetDetailMaterial(mtl_id, static_cast<MeshMLObj::Material::SurfaceDetailMode>(mtls[i]->detail_mode),
+				mtls[i]->height_offset_scale.x(), mtls[i]->height_offset_scale.y(),
+				mtls[i]->tess_factors.x(), mtls[i]->tess_factors.y(), mtls[i]->tess_factors.z(), mtls[i]->tess_factors.w());
 		}
 
 		for (size_t i = 0; i < mesh_names.size(); ++ i)

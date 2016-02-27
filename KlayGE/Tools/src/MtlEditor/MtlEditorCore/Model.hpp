@@ -32,6 +32,7 @@ public:
 
 	void UpdateEffectAttrib(KlayGE::uint32_t mtl_index);
 	void UpdateMaterial(KlayGE::uint32_t mtl_index);
+	void UpdateTechniques(KlayGE::uint32_t mtl_index);
 
 	KlayGE::RenderEffectPtr const & Effect() const
 	{
@@ -41,25 +42,10 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechniquePtr depth_techs_[3];	
-	KlayGE::RenderTechniquePtr depth_alpha_test_techs_[3];	
-	KlayGE::RenderTechniquePtr depth_alpha_blend_back_techs_[3];	
-	KlayGE::RenderTechniquePtr depth_alpha_blend_front_techs_[3];	
-	KlayGE::RenderTechniquePtr gbuffer_rt0_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_test_rt0_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_rt0_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_rt0_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_rt1_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_test_rt1_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_rt1_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_rt1_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_mrt_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_test_mrt_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_mrt_techs_[3];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_mrt_techs_[3];
-	KlayGE::RenderTechniquePtr special_shading_techs_[3];
-	KlayGE::RenderTechniquePtr special_shading_alpha_blend_back_techs_[3];
-	KlayGE::RenderTechniquePtr special_shading_alpha_blend_front_techs_[3];
+	KlayGE::RenderTechniquePtr gbuffer_mrt_techs_[2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_test_mrt_techs_[2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_mrt_techs_[2];
+	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_mrt_techs_[2];
 
 	bool is_skinned_;
 };
@@ -79,8 +65,6 @@ public:
 
 	void UpdateEffectAttrib();
 	void UpdateMaterial();
-
-private:
 	virtual void UpdateTechniques() override;
 
 private:

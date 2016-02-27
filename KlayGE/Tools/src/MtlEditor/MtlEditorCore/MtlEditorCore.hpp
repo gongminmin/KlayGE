@@ -51,6 +51,13 @@ namespace KlayGE
 		std::string const & HeightTexture(uint32_t mtl_id) const;
 		std::string const & EmitTexture(uint32_t mtl_id) const;
 		std::string const & OpacityTexture(uint32_t mtl_id) const;
+		uint32_t DetailMode(uint32_t mtl_id) const;
+		float HeightOffset(uint32_t mtl_id) const;
+		float HeightScale(uint32_t mtl_id) const;
+		float EdgeTessHint(uint32_t mtl_id) const;
+		float InsideTessHint(uint32_t mtl_id) const;
+		float MinTess(uint32_t mtl_id) const;
+		float MaxTess(uint32_t mtl_id) const;
 		uint32_t NumHistroyCmds() const;
 		char const * HistroyCmdName(uint32_t index) const;
 		uint32_t EndCmdIndex() const;
@@ -70,6 +77,13 @@ namespace KlayGE
 		void HeightTexture(uint32_t mtl_id, std::string const & name);
 		void EmitTexture(uint32_t mtl_id, std::string const & name);
 		void OpacityTexture(uint32_t mtl_id, std::string const & name);
+		void DetailMode(uint32_t mtl_id, uint32_t value);
+		void HeightOffset(uint32_t mtl_id, float value);
+		void HeightScale(uint32_t mtl_id, float value);
+		void EdgeTessHint(uint32_t mtl_id, float value);
+		void InsideTessHint(uint32_t mtl_id, float value);
+		void MinTess(uint32_t mtl_id, float value);
+		void MaxTess(uint32_t mtl_id, float value);
 
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);

@@ -211,6 +211,11 @@ namespace KlayGE
 
 	bool MtlEditorCore::ConfirmDevice() const
 	{
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.max_simultaneous_rts < 2)
+		{
+			return false;
+		}
 		return true;
 	}
 
@@ -690,6 +695,48 @@ namespace KlayGE
 		return empty;
 	}
 
+	uint32_t MtlEditorCore::DetailMode(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->detail_mode;
+	}
+
+	float MtlEditorCore::HeightOffset(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->height_offset_scale.x();
+	}
+
+	float MtlEditorCore::HeightScale(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->height_offset_scale.y();
+	}
+
+	float MtlEditorCore::EdgeTessHint(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->tess_factors.x();
+	}
+
+	float MtlEditorCore::InsideTessHint(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->tess_factors.y();
+	}
+
+	float MtlEditorCore::MinTess(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->tess_factors.z();
+	}
+
+	float MtlEditorCore::MaxTess(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->tess_factors.w();
+	}
+
 	void MtlEditorCore::AmbientMaterial(uint32_t mtl_id, float3 const & value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
@@ -995,6 +1042,56 @@ namespace KlayGE
 		}
 
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
+	}
+
+	void MtlEditorCore::DetailMode(uint32_t mtl_id, uint32_t value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->detail_mode = static_cast<RenderMaterial::SurfaceDetailMode>(value);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateTechniques(mtl_id);
+	}
+
+	void MtlEditorCore::HeightOffset(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->height_offset_scale.x() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::HeightScale(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->height_offset_scale.y() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::EdgeTessHint(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->tess_factors.x() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::InsideTessHint(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->tess_factors.y() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::MinTess(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->tess_factors.z() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::MaxTess(uint32_t mtl_id, float value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->tess_factors.w() = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
 	}
 
 	uint32_t MtlEditorCore::SelectedMesh() const

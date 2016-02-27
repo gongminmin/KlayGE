@@ -24,7 +24,14 @@ namespace KlayGE
 		"Set normal texture",
 		"Set height texture",
 		"Set emit texture",
-		"Set opacity texture"
+		"Set opacity texture",
+		"Set detail mode",
+		"Set height offset",
+		"Set height scale",
+		"Set edge tessellation hint",
+		"Set inside tessellation hint",
+		"Set min tessellation",
+		"Set max tessellation",
 	};
 
 
@@ -312,5 +319,138 @@ namespace KlayGE
 	void MtlEditorCommandSetOpacityTexture::Revoke()
 	{
 		core_->OpacityTexture(mtl_id_, old_name_.c_str());
+	}
+
+
+	MtlEditorCommandSetDetailMode::MtlEditorCommandSetDetailMode(MtlEditorCore* core,
+			uint32_t mtl_id, uint32_t value)
+		: MtlEditorCommandConcrete<ECC_SetDetailMode>(core),
+			mtl_id_(mtl_id), mode_(value)
+	{
+	}
+
+	void MtlEditorCommandSetDetailMode::Execute()
+	{
+		old_mode_ = core_->DetailMode(mtl_id_);
+		core_->DetailMode(mtl_id_, mode_);
+	}
+
+	void MtlEditorCommandSetDetailMode::Revoke()
+	{
+		core_->DetailMode(mtl_id_, old_mode_);
+	}
+
+
+	MtlEditorCommandSetHeightOffset::MtlEditorCommandSetHeightOffset(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetHeightOffset>(core),
+			mtl_id_(mtl_id), offset_(value)
+	{
+	}
+
+	void MtlEditorCommandSetHeightOffset::Execute()
+	{
+		old_offset_ = core_->HeightOffset(mtl_id_);
+		core_->HeightOffset(mtl_id_, offset_);
+	}
+
+	void MtlEditorCommandSetHeightOffset::Revoke()
+	{
+		core_->HeightOffset(mtl_id_, old_offset_);
+	}
+
+
+	MtlEditorCommandSetHeightScale::MtlEditorCommandSetHeightScale(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetHeightScale>(core),
+			mtl_id_(mtl_id), scale_(value)
+	{
+	}
+
+	void MtlEditorCommandSetHeightScale::Execute()
+	{
+		old_scale_ = core_->HeightScale(mtl_id_);
+		core_->HeightScale(mtl_id_, scale_);
+	}
+
+	void MtlEditorCommandSetHeightScale::Revoke()
+	{
+		core_->HeightScale(mtl_id_, old_scale_);
+	}
+
+
+	MtlEditorCommandSetEdgeTessHint::MtlEditorCommandSetEdgeTessHint(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetEdgeTessHint>(core),
+			mtl_id_(mtl_id), edge_(value)
+	{
+	}
+
+	void MtlEditorCommandSetEdgeTessHint::Execute()
+	{
+		old_edge_ = core_->EdgeTessHint(mtl_id_);
+		core_->EdgeTessHint(mtl_id_, edge_);
+	}
+
+	void MtlEditorCommandSetEdgeTessHint::Revoke()
+	{
+		core_->EdgeTessHint(mtl_id_, old_edge_);
+	}
+
+
+	MtlEditorCommandSetInsideTessHint::MtlEditorCommandSetInsideTessHint(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetInsideTessHint>(core),
+			mtl_id_(mtl_id), inside_(value)
+	{
+	}
+
+	void MtlEditorCommandSetInsideTessHint::Execute()
+	{
+		old_inside_ = core_->InsideTessHint(mtl_id_);
+		core_->InsideTessHint(mtl_id_, inside_);
+	}
+
+	void MtlEditorCommandSetInsideTessHint::Revoke()
+	{
+		core_->InsideTessHint(mtl_id_, old_inside_);
+	}
+
+
+	MtlEditorCommandSetMinTess::MtlEditorCommandSetMinTess(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetMinTess>(core),
+			mtl_id_(mtl_id), min_(value)
+	{
+	}
+
+	void MtlEditorCommandSetMinTess::Execute()
+	{
+		old_min_ = core_->MinTess(mtl_id_);
+		core_->MinTess(mtl_id_, min_);
+	}
+
+	void MtlEditorCommandSetMinTess::Revoke()
+	{
+		core_->MinTess(mtl_id_, old_min_);
+	}
+
+
+	MtlEditorCommandSetMaxTess::MtlEditorCommandSetMaxTess(MtlEditorCore* core,
+			uint32_t mtl_id, float value)
+		: MtlEditorCommandConcrete<ECC_SetMaxTess>(core),
+			mtl_id_(mtl_id), max_(value)
+	{
+	}
+
+	void MtlEditorCommandSetMaxTess::Execute()
+	{
+		old_max_ = core_->MaxTess(mtl_id_);
+		core_->MaxTess(mtl_id_, max_);
+	}
+
+	void MtlEditorCommandSetMaxTess::Revoke()
+	{
+		core_->MaxTess(mtl_id_, old_max_);
 	}
 }

@@ -24,6 +24,13 @@ namespace KlayGE
 		ECC_SetHeightTexture,
 		ECC_SetEmitTexture,
 		ECC_SetOpacityTexture,
+		ECC_SetDetailMode,
+		ECC_SetHeightOffset,
+		ECC_SetHeightScale,
+		ECC_SetEdgeTessHint,
+		ECC_SetInsideTessHint,
+		ECC_SetMinTess,
+		ECC_SetMaxTess,
 
 		ECC_NumCommands
 	};
@@ -275,6 +282,104 @@ namespace KlayGE
 		uint32_t mtl_id_;
 		std::string name_;
 		std::string old_name_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetDetailMode : public MtlEditorCommandConcrete<ECC_SetDetailMode>
+	{
+	public:
+		MtlEditorCommandSetDetailMode(MtlEditorCore* core, uint32_t mtl_id, uint32_t value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		uint32_t mode_;
+		uint32_t old_mode_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetHeightOffset : public MtlEditorCommandConcrete<ECC_SetHeightOffset>
+	{
+	public:
+		MtlEditorCommandSetHeightOffset(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float offset_;
+		float old_offset_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetHeightScale : public MtlEditorCommandConcrete<ECC_SetHeightScale>
+	{
+	public:
+		MtlEditorCommandSetHeightScale(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float scale_;
+		float old_scale_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetEdgeTessHint : public MtlEditorCommandConcrete<ECC_SetEdgeTessHint>
+	{
+	public:
+		MtlEditorCommandSetEdgeTessHint(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float edge_;
+		float old_edge_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetInsideTessHint : public MtlEditorCommandConcrete<ECC_SetInsideTessHint>
+	{
+	public:
+		MtlEditorCommandSetInsideTessHint(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float inside_;
+		float old_inside_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetMinTess : public MtlEditorCommandConcrete<ECC_SetMinTess>
+	{
+	public:
+		MtlEditorCommandSetMinTess(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float min_;
+		float old_min_;
+	};
+
+	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetMaxTess : public MtlEditorCommandConcrete<ECC_SetMaxTess>
+	{
+	public:
+		MtlEditorCommandSetMaxTess(MtlEditorCore* core, uint32_t mtl_id, float value);
+
+		virtual void Execute() override;
+		virtual void Revoke() override;
+
+	private:
+		uint32_t mtl_id_;
+		float max_;
+		float old_max_;
 	};
 }
 

@@ -254,6 +254,41 @@ namespace KlayGE
 		return StdToString(core_->OpacityTexture(mtl_id));
 	}
 
+	uint32_t MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id)
+	{
+		return core_->DetailMode(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::HeightOffset(uint32_t mtl_id)
+	{
+		return core_->HeightOffset(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::HeightScale(uint32_t mtl_id)
+	{
+		return core_->HeightScale(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::EdgeTessHint(uint32_t mtl_id)
+	{
+		return core_->EdgeTessHint(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::InsideTessHint(uint32_t mtl_id)
+	{
+		return core_->InsideTessHint(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::MinTess(uint32_t mtl_id)
+	{
+		return core_->MinTess(mtl_id);
+	}
+
+	float MtlEditorCoreWrapper::MaxTess(uint32_t mtl_id)
+	{
+		return core_->MaxTess(mtl_id);
+	}
+
 	uint32_t MtlEditorCoreWrapper::NumHistroyCmds()
 	{
 		return core_->NumHistroyCmds();
@@ -340,6 +375,41 @@ namespace KlayGE
 	void MtlEditorCoreWrapper::OpacityTexture(uint32_t mtl_id, String^ name)
 	{
 		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetOpacityTexture(core_, mtl_id, StringToStd(name).c_str())));
+	}
+
+	void MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id, uint32_t value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetDetailMode(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::HeightOffset(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetHeightOffset(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::HeightScale(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetHeightScale(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::EdgeTessHint(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetEdgeTessHint(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::InsideTessHint(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetInsideTessHint(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::MinTess(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetMinTess(core_, mtl_id, value)));
+	}
+
+	void MtlEditorCoreWrapper::MaxTess(uint32_t mtl_id, float value)
+	{
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetMaxTess(core_, mtl_id, value)));
 	}
 
 	uint32_t MtlEditorCoreWrapper::SelectedMesh()

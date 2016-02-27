@@ -24,20 +24,30 @@ namespace MtlEditor
 	/// </summary>
 	public partial class MainWindow : RibbonWindow
 	{
-		const int MESHES_ORDER = 0;
-		const int AMBIENT_ORDER = 1;
-		const int DIFFUSE_ORDER = 2;
-		const int SPECULAR_ORDER = 3;
-		const int SHININESS_ORDER = 4;
-		const int EMIT_ORDER = 5;
-		const int OPACITY_ORDER = 6;
-		const int DIFFUSE_TEX_ORDER = 7;
-		const int SPECULAR_TEX_ORDER = 8;
-		const int SHININESS_TEX_ORDER = 9;
-		const int NORMAL_TEX_ORDER = 10;
-		const int HEIGHT_TEX_ORDER = 11;
-		const int EMIT_TEX_ORDER = 12;
-		const int OPACITY_TEX_ORDER = 13;
+		enum PropertyOrders
+		{
+			PO_Meshes = 0,
+			PO_Ambient,
+			PO_Diffuse,
+			PO_Specular,
+			PO_Shininess,
+			PO_Emit,
+			PO_Opacity,
+			PO_DiffuseTex,
+			PO_SpecularTex,
+			PO_ShininessTex,
+			PO_NormalTex,
+			PO_HeightTex,
+			PO_EmitTex,
+			PO_OpacityTex,
+			PO_DetailMode,
+			PO_HeightOffset,
+			PO_HeightScale,
+			PO_EdgeTessHint,
+			PO_InsideTessHint,
+			PO_MinTess,
+			PO_MaxTess
+		};
 
 		[CategoryOrder("Meshes", 0)]
 		[CategoryOrder("Material", 1)]
@@ -47,70 +57,100 @@ namespace MtlEditor
 			[Category("Meshes")]
 			[DisplayName("Meshes")]
 			[ItemsSource(typeof(MeshItemsSource))]
-			[PropertyOrder(MESHES_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Meshes)]
 			public string meshes { get; set; }
 
 			[Category("Material")]
 			[DisplayName("Ambient")]
-			[PropertyOrder(AMBIENT_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Ambient)]
 			public Color ambient { get; set; }
 			[Category("Material")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(DIFFUSE_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Diffuse)]
 			public Color diffuse { get; set; }
 			[Category("Material")]
 			[DisplayName("Specular")]
-			[PropertyOrder(SPECULAR_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Specular)]
 			public Color specular { get; set; }
 			[Category("Material")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(SHININESS_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Shininess)]
 			public float shininess { get; set; }
 			[Category("Material")]
 			[DisplayName("Emit")]
-			[PropertyOrder(EMIT_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Emit)]
 			public Color emit { get; set; }
 			[Category("Material")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(OPACITY_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_Opacity)]
 			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
 			[DisplayName("Diffuse")]
-			[PropertyOrder(DIFFUSE_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_DiffuseTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string diffuse_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Specular")]
-			[PropertyOrder(SPECULAR_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_SpecularTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string specular_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Shininess")]
-			[PropertyOrder(SHININESS_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_ShininessTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string shininess_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Normal")]
-			[PropertyOrder(NORMAL_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_NormalTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string normal_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
-			[PropertyOrder(HEIGHT_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_HeightTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string height_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emit")]
-			[PropertyOrder(EMIT_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_EmitTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string emit_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Opacity")]
-			[PropertyOrder(OPACITY_TEX_ORDER)]
+			[PropertyOrder((int)PropertyOrders.PO_OpacityTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string opacity_tex { get; set; }
+
+			[Category("Detail")]
+			[DisplayName("Mode")]
+			[ItemsSource(typeof(DetailModeItemsSource))]
+			[PropertyOrder((int)PropertyOrders.PO_DetailMode)]
+			public string detail_mode { get; set; }
+			[Category("Detail")]
+			[DisplayName("Height Offset")]
+			[PropertyOrder((int)PropertyOrders.PO_HeightOffset)]
+			public float height_offset { get; set; }
+			[Category("Detail")]
+			[DisplayName("Height Scale")]
+			[PropertyOrder((int)PropertyOrders.PO_HeightScale)]
+			public float height_scale { get; set; }
+			[Category("Detail")]
+			[DisplayName("Edge Tessellation Hint")]
+			[PropertyOrder((int)PropertyOrders.PO_EdgeTessHint)]
+			public float edge_tess_hint { get; set; }
+			[Category("Detail")]
+			[DisplayName("Inside Tessellation Hint")]
+			[PropertyOrder((int)PropertyOrders.PO_InsideTessHint)]
+			public float inside_tess_hint { get; set; }
+			[Category("Detail")]
+			[DisplayName("Min Tessellation")]
+			[PropertyOrder((int)PropertyOrders.PO_MinTess)]
+			public float min_tess { get; set; }
+			[Category("Detail")]
+			[DisplayName("Max Tessellation")]
+			[PropertyOrder((int)PropertyOrders.PO_MaxTess)]
+			public float max_tess { get; set; }
 		}
 
 		public MainWindow()
@@ -120,6 +160,12 @@ namespace MtlEditor
 			DataContext = this;
 
 			MeshItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
+
+			DetailModeItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
+			DetailModeItemsSource.items.Clear();
+			DetailModeItemsSource.items.Add("Parallax");
+			DetailModeItemsSource.items.Add("Flat Tessellation");
+			DetailModeItemsSource.items.Add("Smooth Tessellation");
 
 			properties_obj_ = new ModelPropertyTypes();
 			properties.SelectedObject = properties_obj_;
@@ -452,6 +498,14 @@ namespace MtlEditor
 				properties_obj_.height_tex = core_.HeightTexture(mtl_id);
 				properties_obj_.emit_tex = core_.EmitTexture(mtl_id);
 				properties_obj_.opacity_tex = core_.OpacityTexture(mtl_id);
+
+				properties_obj_.detail_mode = DetailModeItemsSource.items[(int)core_.DetailMode(mtl_id)].DisplayName;
+				properties_obj_.height_offset = core_.HeightOffset(mtl_id);
+				properties_obj_.height_scale = core_.HeightScale(mtl_id);
+				properties_obj_.edge_tess_hint = core_.EdgeTessHint(mtl_id);
+				properties_obj_.inside_tess_hint = core_.InsideTessHint(mtl_id);
+				properties_obj_.min_tess = core_.MinTess(mtl_id);
+				properties_obj_.max_tess = core_.MaxTess(mtl_id);
 			}
 			else
 			{
@@ -469,6 +523,14 @@ namespace MtlEditor
 				properties_obj_.height_tex = "";
 				properties_obj_.emit_tex = "";
 				properties_obj_.opacity_tex = "";
+
+				properties_obj_.detail_mode = "Parallax";
+				properties_obj_.height_offset = -0.5f;
+				properties_obj_.height_scale = 0.06f;
+				properties_obj_.edge_tess_hint = 5;
+				properties_obj_.inside_tess_hint = 5;
+				properties_obj_.min_tess = 1;
+				properties_obj_.max_tess = 9;
 			}
 
 			properties.SelectedObject = properties_obj_;
@@ -477,9 +539,9 @@ namespace MtlEditor
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
 		{
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
-			switch (item.PropertyOrder)
+			switch ((PropertyOrders)item.PropertyOrder)
 			{
-			case MESHES_ORDER:
+			case PropertyOrders.PO_Meshes:
 				{
 					uint mesh_id = 0;
 					for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
@@ -497,7 +559,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case AMBIENT_ORDER:
+			case PropertyOrders.PO_Ambient:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -506,7 +568,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case DIFFUSE_ORDER:
+			case PropertyOrders.PO_Diffuse:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -515,7 +577,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case SPECULAR_ORDER:
+			case PropertyOrders.PO_Specular:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -524,7 +586,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case SHININESS_ORDER:
+			case PropertyOrders.PO_Shininess:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -533,7 +595,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case EMIT_ORDER:
+			case PropertyOrders.PO_Emit:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -542,7 +604,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case OPACITY_ORDER:
+			case PropertyOrders.PO_Opacity:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -551,7 +613,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case DIFFUSE_TEX_ORDER:
+			case PropertyOrders.PO_DiffuseTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -560,7 +622,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case SPECULAR_TEX_ORDER:
+			case PropertyOrders.PO_SpecularTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -569,7 +631,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case SHININESS_TEX_ORDER:
+			case PropertyOrders.PO_ShininessTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -578,7 +640,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case NORMAL_TEX_ORDER:
+			case PropertyOrders.PO_NormalTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -587,7 +649,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case HEIGHT_TEX_ORDER:
+			case PropertyOrders.PO_HeightTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -596,7 +658,7 @@ namespace MtlEditor
 				}
 				break;
 
-			case EMIT_TEX_ORDER:
+			case PropertyOrders.PO_EmitTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
@@ -605,11 +667,83 @@ namespace MtlEditor
 				}
 				break;
 
-			case OPACITY_TEX_ORDER:
+			case PropertyOrders.PO_OpacityTex:
 				if (selected_mesh_id_ > 0)
 				{
 					uint mtl_id = core_.MaterialID(selected_mesh_id_);
 					core_.OpacityTexture(mtl_id, this.RelativePath(properties_obj_.opacity_tex));
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_DetailMode:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mode = 0;
+					for (; mode < DetailModeItemsSource.items.Count; ++ mode)
+					{
+						if (DetailModeItemsSource.items[(int)mode].DisplayName == (e.NewValue as string))
+						{
+							break;
+						}
+					}
+
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.DetailMode(mtl_id, mode);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_HeightOffset:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.HeightOffset(mtl_id, properties_obj_.height_offset);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_HeightScale:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.HeightScale(mtl_id, properties_obj_.height_scale);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_EdgeTessHint:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.EdgeTessHint(mtl_id, properties_obj_.edge_tess_hint);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_InsideTessHint:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.InsideTessHint(mtl_id, properties_obj_.inside_tess_hint);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_MinTess:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.MinTess(mtl_id, properties_obj_.min_tess);
+					this.UpdateHistroy();
+				}
+				break;
+
+			case PropertyOrders.PO_MaxTess:
+				if (selected_mesh_id_ > 0)
+				{
+					uint mtl_id = core_.MaterialID(selected_mesh_id_);
+					core_.MaxTess(mtl_id, properties_obj_.max_tess);
 					this.UpdateHistroy();
 				}
 				break;
@@ -682,6 +816,16 @@ namespace MtlEditor
 	}
 
 	public class MeshItemsSource : IItemsSource
+	{
+		static public Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection items;
+
+		public Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection GetValues()
+		{
+			return items;
+		}
+	}
+
+	public class DetailModeItemsSource : IItemsSource
 	{
 		static public Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection items;
 

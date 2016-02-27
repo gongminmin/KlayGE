@@ -19,7 +19,7 @@ using namespace KlayGE;
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-			visualize_(0)
+			visualize_(-1)
 {
 }
 
@@ -44,7 +44,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 
 void DetailedSkinnedMesh::VisualizeLighting()
 {
-	visualize_ = 0;
+	visualize_ = -1;
 	this->UpdateTechniques();
 }
 
@@ -52,14 +52,14 @@ void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usag
 {
 	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
 	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
-	visualize_ = 1;
+	visualize_ = 0;
 	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
 	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
-	visualize_ = 2;
+	visualize_ = 1;
 	this->UpdateTechniques();
 }
 
@@ -96,36 +96,28 @@ void DetailedSkinnedMesh::UpdateMaterial()
 
 void DetailedSkinnedMesh::UpdateTechniques()
 {
-	std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
-
-	if (this->AlphaTest())
+	if (visualize_ >= 0)
 	{
-		depth_tech_ = model->depth_alpha_test_techs_[visualize_];
-		gbuffer_rt0_tech_ = model->gbuffer_alpha_test_rt0_techs_[visualize_];
-		gbuffer_rt1_tech_ = model->gbuffer_alpha_test_rt1_techs_[visualize_];
-		gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_];
+		std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
+
+		if (this->AlphaTest())
+		{
+			gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_];
+		}
+		else
+		{
+			gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_];
+		}
+
+		gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_];
+		gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_];
+
+		select_mode_tech_ = model->select_mode_tech_;
 	}
 	else
 	{
-		depth_tech_ = model->depth_techs_[visualize_];
-		gbuffer_rt0_tech_ = model->gbuffer_rt0_techs_[visualize_];
-		gbuffer_rt1_tech_ = model->gbuffer_rt1_techs_[visualize_];
-		gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_];
+		SkinnedMesh::UpdateTechniques();
 	}
-
-	depth_alpha_blend_back_tech_ = model->depth_alpha_blend_back_techs_[visualize_];
-	depth_alpha_blend_front_tech_ = model->depth_alpha_blend_front_techs_[visualize_];
-	gbuffer_alpha_blend_back_rt0_tech_ = model->gbuffer_alpha_blend_back_rt0_techs_[visualize_];
-	gbuffer_alpha_blend_front_rt0_tech_ = model->gbuffer_alpha_blend_front_rt0_techs_[visualize_];
-	gbuffer_alpha_blend_back_rt1_tech_ = model->gbuffer_alpha_blend_back_rt1_techs_[visualize_];
-	gbuffer_alpha_blend_front_rt1_tech_ = model->gbuffer_alpha_blend_front_rt1_techs_[visualize_];
-	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_];
-	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_];
-	special_shading_tech_ = model->special_shading_techs_[visualize_];
-	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_];
-	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_];
-
-	select_mode_tech_ = model->select_mode_tech_;
 }
 
 
@@ -459,102 +451,35 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		effect_ = SyncLoadRenderEffect("MtlEditorNoSkinning.fxml");
 	}
 
-	std::string depth_tech_str;
-	std::string depth_alpha_test_tech_str;
-	std::string depth_alpha_blend_back_tech_str;
-	std::string depth_alpha_blend_front_tech_str;
-	std::string g_buffer_tech_str;
-	std::string g_buffer_alpha_test_tech_str;
-	std::string g_buffer_alpha_blend_back_tech_str;
-	std::string g_buffer_alpha_blend_front_tech_str;
 	std::string g_buffer_mrt_tech_str;
 	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
 	std::string g_buffer_alpha_blend_front_mrt_tech_str;
-	std::string special_shading_tech_str;
-	std::string special_shading_alpha_blend_back_tech_str;
-	std::string special_shading_alpha_blend_front_tech_str;
-	for (int vis = 0; vis < 3; ++ vis)
+	for (int vis = 0; vis < 2; ++ vis)
 	{
-		switch (vis)
+		if (0 == vis)
 		{
-		case 0:
-			depth_tech_str = "Depth";
-			g_buffer_tech_str = "GBuffer";
-			special_shading_tech_str = "SpecialShading";
-			break;
-
-		case 1:
-			g_buffer_tech_str = "VisualizeVertex";
-			break;
-
-		default:
-			g_buffer_tech_str = "VisualizeTexture";
-			break;
+			g_buffer_mrt_tech_str = "VisualizeVertex";
+		}
+		else
+		{
+			g_buffer_mrt_tech_str = "VisualizeTexture";
 		}
 
-		depth_alpha_test_tech_str = depth_tech_str;
-		depth_alpha_blend_back_tech_str = depth_tech_str;
-		depth_alpha_blend_front_tech_str = depth_tech_str;
-		g_buffer_alpha_test_tech_str = g_buffer_tech_str;
-		g_buffer_alpha_blend_back_tech_str = g_buffer_tech_str;
-		g_buffer_alpha_blend_front_tech_str = g_buffer_tech_str;
-		g_buffer_mrt_tech_str = g_buffer_tech_str;
 		g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
 		g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
 		g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
-		special_shading_alpha_blend_back_tech_str = special_shading_tech_str;
-		special_shading_alpha_blend_front_tech_str = special_shading_tech_str;
 		if (0 == vis)
 		{
-			depth_alpha_test_tech_str += "AlphaTest";
-			depth_alpha_blend_back_tech_str += "AlphaBlendBack";
-			depth_alpha_blend_front_tech_str += "AlphaBlendFront";
-
-			g_buffer_alpha_test_tech_str += "AlphaTest";
-			g_buffer_alpha_blend_back_tech_str += "AlphaBlendBack";
-			g_buffer_alpha_blend_front_tech_str += "AlphaBlendFront";
-
 			g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
 			g_buffer_alpha_blend_back_mrt_tech_str += "AlphaBlendBack";
 			g_buffer_alpha_blend_front_mrt_tech_str += "AlphaBlendFront";
-
-			special_shading_alpha_blend_back_tech_str += "AlphaBlendBack";
-			special_shading_alpha_blend_front_tech_str += "AlphaBlendFront";
 		}
-
-		depth_techs_[vis] = effect_->TechniqueByName(depth_tech_str + "Tech");
-		depth_alpha_test_techs_[vis] = effect_->TechniqueByName(depth_alpha_test_tech_str + "Tech");
-		depth_alpha_blend_back_techs_[vis] = effect_->TechniqueByName(depth_alpha_blend_back_tech_str + "Tech");
-		depth_alpha_blend_front_techs_[vis] = effect_->TechniqueByName(depth_alpha_blend_front_tech_str + "Tech");
-
-		gbuffer_rt0_techs_[vis] = effect_->TechniqueByName(g_buffer_tech_str + "RT0Tech");
-		gbuffer_alpha_test_rt0_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_test_tech_str + "RT0Tech");
-		gbuffer_alpha_blend_back_rt0_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_back_tech_str + "RT0Tech");
-		gbuffer_alpha_blend_front_rt0_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_front_tech_str + "RT0Tech");
-
-		gbuffer_rt1_techs_[vis] = effect_->TechniqueByName(g_buffer_tech_str + "RT1Tech");
-		gbuffer_alpha_test_rt1_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_test_tech_str + "RT1Tech");
-		gbuffer_alpha_blend_back_rt1_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_back_tech_str + "RT1Tech");
-		gbuffer_alpha_blend_front_rt1_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_front_tech_str + "RT1Tech");
 
 		gbuffer_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
 		gbuffer_alpha_test_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
 		gbuffer_alpha_blend_back_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
 		gbuffer_alpha_blend_front_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
-
-		if (0 == vis)
-		{
-			special_shading_techs_[vis] = effect_->TechniqueByName(special_shading_tech_str + "Tech");
-			special_shading_alpha_blend_back_techs_[vis] = effect_->TechniqueByName(special_shading_alpha_blend_back_tech_str + "Tech");
-			special_shading_alpha_blend_front_techs_[vis] = effect_->TechniqueByName(special_shading_alpha_blend_front_tech_str + "Tech");
-		}
-		else
-		{
-			special_shading_techs_[vis] = effect_->TechniqueByName("SpecialShadingTech");
-			special_shading_alpha_blend_back_techs_[vis] = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-			special_shading_alpha_blend_front_techs_[vis] = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
-		}
 	}
 
 	select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
@@ -602,6 +527,18 @@ void DetailedSkinnedModel::UpdateEffectAttrib(KlayGE::uint32_t mtl_index)
 		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
 		{
 			mesh->UpdateEffectAttrib();
+		}
+	}
+}
+
+void DetailedSkinnedModel::UpdateTechniques(KlayGE::uint32_t mtl_index)
+{
+	for (auto const & renderable : subrenderables_)
+	{
+		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
+		if (mesh->MaterialID() == static_cast<int32_t>(mtl_index))
+		{
+			mesh->UpdateTechniques();
 		}
 	}
 }

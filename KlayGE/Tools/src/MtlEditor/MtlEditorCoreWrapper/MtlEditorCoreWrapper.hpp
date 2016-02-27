@@ -47,6 +47,13 @@ namespace KlayGE
 		System::String^ HeightTexture(uint32_t mtl_id);
 		System::String^ EmitTexture(uint32_t mtl_id);
 		System::String^ OpacityTexture(uint32_t mtl_id);
+		uint32_t DetailMode(uint32_t mtl_id);
+		float HeightOffset(uint32_t mtl_id);
+		float HeightScale(uint32_t mtl_id);
+		float EdgeTessHint(uint32_t mtl_id);
+		float InsideTessHint(uint32_t mtl_id);
+		float MinTess(uint32_t mtl_id);
+		float MaxTess(uint32_t mtl_id);
 
 		uint32_t NumHistroyCmds();
 		System::String^ HistroyCmdName(uint32_t index);
@@ -65,6 +72,13 @@ namespace KlayGE
 		void HeightTexture(uint32_t mtl_id, System::String^ name);
 		void EmitTexture(uint32_t mtl_id, System::String^ name);
 		void OpacityTexture(uint32_t mtl_id, System::String^ name);
+		void DetailMode(uint32_t mtl_id, uint32_t value);
+		void HeightOffset(uint32_t mtl_id, float value);
+		void HeightScale(uint32_t mtl_id, float value);
+		void EdgeTessHint(uint32_t mtl_id, float value);
+		void InsideTessHint(uint32_t mtl_id, float value);
+		void MinTess(uint32_t mtl_id, float value);
+		void MaxTess(uint32_t mtl_id, float value);
 
 		uint32_t SelectedMesh();
 		void SelectMesh(uint32_t mesh_id);
