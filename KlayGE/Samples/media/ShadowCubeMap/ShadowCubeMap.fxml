@@ -237,51 +237,13 @@ void HWTessGenDPShadowMapDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="GenDPShadowMapTess5Tech">
+	<technique name="GenDPShadowMapTessTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
 			<state name="vertex_shader" value="HWTessGenDPShadowMapVS()"/>
 			<state name="hull_shader" value="HWTessGenDPShadowMapHS()"/>
 			<state name="domain_shader" value="HWTessGenDPShadowMapDS()"/>
-			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
-		</pass>
-	</technique>
-
-
-	<parameter type="buffer" elem_type="float4" name="skinned_pos_buf"/>
-	<parameter type="buffer" elem_type="uint" name="index_buf"/>
-
-	<shader type="vertex_shader" version="4">
-		<![CDATA[
-void InstTessGenDPShadowMapVS(float2 barycentric : TEXCOORD1,
-
-					uint instance_id : SV_InstanceID,
-					
-					out float2 oDist : TEXCOORD0,
-					out float4 oPos : SV_Position)
-{
-	uint index0 = index_buf.Load(instance_id * 3 + 0);
-	float3 pos_os0 = skinned_pos_buf.Load(index0).xyz;
-	uint index1 = index_buf.Load(instance_id * 3 + 1);
-	float3 pos_os1 = skinned_pos_buf.Load(index1).xyz;
-	uint index2 = index_buf.Load(instance_id * 3 + 2);
-	float3 pos_os2 = skinned_pos_buf.Load(index2).xyz;
-
-	float4 Position = float4(0, 0, 0, 1);
-	InterpolateFlatAttrs(float3(barycentric, 1 - barycentric.x - barycentric.y),
-				pos_os0, pos_os1, pos_os2, Position.xyz);
-
-	CalcDPSM(Position, oDist, oPos);
-}
-		]]>
-	</shader>
-
-	<technique name="GenDPShadowMapTess4Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="InstTessGenDPShadowMapVS()"/>
 			<state name="pixel_shader" value="GenDPShadowMapPS()"/>
 		</pass>
 	</technique>

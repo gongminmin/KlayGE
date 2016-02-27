@@ -25,7 +25,6 @@ namespace KlayGE
 	enum TessellationMethod
 	{
 		TM_Hardware,
-		TM_Instanced,
 		TM_No
 	};
 

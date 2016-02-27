@@ -72,7 +72,6 @@ public:
 	virtual void DoBuildMeshInfo() override;
 
 	void OnRenderBegin();
-	void Render();
 
 	void VisualizeLighting();
 	void VisualizeVertex(KlayGE::VertexElementUsage usage, KlayGE::uint8_t usage_index);
@@ -88,15 +87,6 @@ private:
 	float tess_factor_;
 	int visualize_;
 	bool smooth_mesh_;
-
-	KlayGE::RenderLayoutPtr mesh_rl_;
-	KlayGE::RenderLayoutPtr point_rl_;
-	KlayGE::RenderLayoutPtr skinned_rl_;
-	KlayGE::RenderLayoutPtr tess_pattern_rl_;
-	KlayGE::GraphicsBufferPtr skinned_pos_vb_;
-	KlayGE::GraphicsBufferPtr skinned_tex_vb_;
-	KlayGE::GraphicsBufferPtr skinned_tangent_vb_;
-	KlayGE::GraphicsBufferPtr bindable_ib_;
 };
 
 #endif		// _MODEL_HPP

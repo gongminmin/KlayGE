@@ -34,76 +34,7 @@ using namespace std;
 using namespace KlayGE;
 
 namespace
-{	
-	std::vector<GraphicsBufferPtr> tess_pattern_vbs;
-	std::vector<GraphicsBufferPtr> tess_pattern_ibs;
-
-	void InitInstancedTessBuffs()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		tess_pattern_vbs.resize(32);
-		tess_pattern_ibs.resize(tess_pattern_vbs.size());
-
-		std::vector<float2> vert;
-		vert.push_back(float2(0, 0));
-		vert.push_back(float2(1, 0));
-		vert.push_back(float2(0, 1));
-		tess_pattern_vbs[0] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
-
-		std::vector<uint16_t> index;
-		index.push_back(0);
-		index.push_back(1);
-		index.push_back(2);
-		tess_pattern_ibs[0] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-			static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
-
-		for (size_t i = 1; i < tess_pattern_vbs.size(); ++ i)
-		{
-			for (size_t j = 0; j < vert.size(); ++ j)
-			{
-				float f = i / (i + 1.0f);
-				vert[j] *= f;
-			}
-
-			for (size_t j = 0; j < i + 1; ++ j)
-			{
-				vert.push_back(float2(1 - j / (i + 1.0f), j / (i + 1.0f)));
-			}
-			vert.push_back(float2(0, 1));
-
-			uint16_t last_1_row = static_cast<uint16_t>(vert.size() - (i + 2));
-			uint16_t last_2_row = static_cast<uint16_t>(last_1_row - (i + 1));
-
-			for (size_t j = 0; j < i; ++ j)
-			{
-				index.push_back(static_cast<uint16_t>(last_2_row + j));
-				index.push_back(static_cast<uint16_t>(last_1_row + j));
-				index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
-
-				index.push_back(static_cast<uint16_t>(last_2_row + j));
-				index.push_back(static_cast<uint16_t>(last_1_row + j + 1));
-				index.push_back(static_cast<uint16_t>(last_2_row + j + 1));
-			}
-			index.push_back(static_cast<uint16_t>(last_2_row + i));
-			index.push_back(static_cast<uint16_t>(last_1_row + i));
-			index.push_back(static_cast<uint16_t>(last_1_row + i + 1));
-
-			tess_pattern_vbs[i] = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-				static_cast<uint32_t>(vert.size() * sizeof(vert[0])), &vert[0]);
-			tess_pattern_ibs[i] = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-				static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]);
-		}
-	}
-
-	void DeinitInstancedTessBuffs()
-	{
-		tess_pattern_vbs.clear();
-		tess_pattern_ibs.clear();
-	}
-
-
+{
 	uint32_t const SHADOW_MAP_SIZE = 512;
 
 	class ShadowMapped
@@ -262,16 +193,6 @@ namespace
 				smooth_mesh_(false), tess_factor_(5)
 		{
 			effect_ = SyncLoadRenderEffect("ShadowCubeMap.fxml");
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			if (TM_Instanced == caps.tess_method)
-			{
-				tess_pattern_rl_ = rf.MakeRenderLayout();
-				tess_pattern_rl_->TopologyType(RenderLayout::TT_TriangleList);
-			}
-
-			mesh_rl_ = rl_;
 		}
 
 		virtual void DoBuildMeshInfo() override
@@ -288,77 +209,6 @@ namespace
 			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
 			*(effect_->ParameterByName("shininess_clr")) = float2(MathLib::clamp(mtl_->shininess, 1e-6f, 0.999f), !!shininess_tex_);
 			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), !!emit_tex_);
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			if (TM_Instanced == caps.tess_method)
-			{
-				{
-					float3 const pos_center = pos_aabb_.Center();
-					float3 const pos_extent = pos_aabb_.HalfSize();
-
-					GraphicsBufferPtr vb_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read,
-						rl_->GetVertexStream(0)->Size(), nullptr);
-					rl_->GetVertexStream(0)->CopyToBuffer(*vb_sysmem);
-
-					GraphicsBuffer::Mapper mapper(*vb_sysmem, BA_Read_Only);
-					std::vector<float4> dst(this->NumVertices());
-					switch (rl_->VertexStreamFormat(0)[0].format)
-					{
-					case EF_BGR32F:
-						{
-							float3 const * src = mapper.Pointer<float3>() + this->StartVertexLocation();
-							for (size_t i = 0; i < dst.size(); ++ i)
-							{
-								dst[i] = float4(src[i].x(), src[i].y(), src[i].z(), 1);
-							}
-						}
-						break;
-
-					case EF_ABGR32F:
-						{
-							float4 const * src = mapper.Pointer<float4>() + this->StartVertexLocation();
-							memcpy(&dst[0], src, this->NumVertices() * sizeof(float4));
-						}
-						break;
-
-					case EF_SIGNED_ABGR16:
-						{
-							int16_t const * src = mapper.Pointer<int16_t>() + this->StartVertexLocation() * 4;
-							for (size_t i = 0; i < dst.size(); ++ i)
-							{
-								dst[i].x() = (((src[i * 4 + 0] + 32768) / 65536.0f) * 2 - 1) * pos_extent.x() + pos_center.x();
-								dst[i].y() = (((src[i * 4 + 1] + 32768) / 65536.0f) * 2 - 1) * pos_extent.y() + pos_center.y();
-								dst[i].z() = (((src[i * 4 + 2] + 32768) / 65536.0f) * 2 - 1) * pos_extent.z() + pos_center.z();
-								dst[i].w() = 1;
-							}
-						}
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						break;
-					}
-				
-					skinned_pos_vb_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-						this->NumVertices() * sizeof(float4), &dst[0], EF_ABGR32F);
-				}
-				{
-					uint32_t const index_size = (EF_R16UI == rl_->IndexStreamFormat()) ? 2 : 4;
-
-					GraphicsBufferPtr ib_sysmem = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read,
-						rl_->GetIndexStream()->Size(), nullptr);
-					rl_->GetIndexStream()->CopyToBuffer(*ib_sysmem);
-				
-					GraphicsBuffer::Mapper mapper(*ib_sysmem, BA_Read_Only);
-					bindable_ib_ = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-						this->NumTriangles() * 3 * index_size,
-						mapper.Pointer<uint8_t>() + this->StartIndexLocation() * index_size,
-						rl_->IndexStreamFormat());
-				}
-
-				this->SetTessFactor(static_cast<int32_t>(tess_factor_));
-			}
 
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
@@ -378,7 +228,7 @@ namespace
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
-			mesh_rl_->TopologyType(RenderLayout::TT_TriangleList);
+			rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 			if (gen_sm)
 			{
@@ -387,17 +237,10 @@ namespace
 				case SMT_DP:
 					{
 						RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-						if (caps.tess_method != TM_No)
+						if (TM_Hardware == caps.tess_method)
 						{
-							if (TM_Hardware == caps.tess_method)
-							{
-								technique_ = effect_->TechniqueByName("GenDPShadowMapTess5Tech");
-								mesh_rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-							}
-							else
-							{
-								technique_ = effect_->TechniqueByName("GenDPShadowMapTess4Tech");
-							}
+							technique_ = effect_->TechniqueByName("GenDPShadowMapTessTech");
+							rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
 							smooth_mesh_ = true;
 						}
 						else
@@ -406,31 +249,31 @@ namespace
 							smooth_mesh_ = false;
 						}
 					}
-					mesh_rl_->NumInstances(1);
+					rl_->NumInstances(1);
 					break;
 				
 				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
 					smooth_mesh_ = false;
-					mesh_rl_->NumInstances(1);
+					rl_->NumInstances(1);
 					break;
 
 				case SMT_CubeOne:
 					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
 					smooth_mesh_ = false;
-					mesh_rl_->NumInstances(1);
+					rl_->NumInstances(1);
 					break;
 
 				case SMT_CubeOneInstance:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
 					smooth_mesh_ = false;
-					mesh_rl_->NumInstances(6);
+					rl_->NumInstances(6);
 					break;
 
 				default:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
 					smooth_mesh_ = false;
-					mesh_rl_->NumInstances(1);
+					rl_->NumInstances(1);
 					break;
 				}
 			}
@@ -445,7 +288,7 @@ namespace
 					technique_ = effect_->TechniqueByName("RenderScene");
 				}
 				smooth_mesh_ = false;
-				mesh_rl_->NumInstances(1);
+				rl_->NumInstances(1);
 			}
 		}
 
@@ -460,49 +303,13 @@ namespace
 				{
 					*(effect_->ParameterByName("adaptive_tess")) = true;
 					*(effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 32.0f);
-
-					if (TM_Instanced == caps.tess_method)
-					{
-						*(effect_->ParameterByName("skinned_pos_buf")) = skinned_pos_vb_;
-						*(effect_->ParameterByName("index_buf")) = bindable_ib_;
-					}
 				}
 			}
 		}
 		
 		void SetTessFactor(int32_t tess_factor)
 		{
-			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			if (TM_Instanced == caps.tess_method)
-			{
-				if (tess_pattern_vbs.empty())
-				{
-					InitInstancedTessBuffs();
-				}
-
-				tess_factor = std::min(tess_factor, static_cast<int32_t>(tess_pattern_vbs.size()));
-
-				tess_pattern_rl_->BindIndexStream(tess_pattern_ibs[tess_factor - 1], EF_R16UI);
-				tess_pattern_rl_->BindVertexStream(tess_pattern_vbs[tess_factor - 1], std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_GR32F)),
-					RenderLayout::ST_Geometry, mesh_rl_->NumIndices() * 3);
-			}
-
 			tess_factor_ = static_cast<float>(tess_factor);
-		}
-
-		void Render()
-		{
-			rl_ = mesh_rl_;
-			if (smooth_mesh_)
-			{
-				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				if (TM_Instanced == caps.tess_method)
-				{
-					rl_ = tess_pattern_rl_;
-				}
-			}
-
-			StaticMesh::Render();
 		}
 
 	private:	
@@ -510,11 +317,6 @@ namespace
 
 		bool smooth_mesh_;
 		float tess_factor_;
-
-		RenderLayoutPtr mesh_rl_;
-		RenderLayoutPtr tess_pattern_rl_;
-		GraphicsBufferPtr skinned_pos_vb_;
-		GraphicsBufferPtr bindable_ib_;
 	};
 
 	class OccluderObjectUpdate
@@ -556,8 +358,6 @@ int SampleMain()
 	ShadowCubeMap app;
 	app.Create();
 	app.Run();
-
-	DeinitInstancedTessBuffs();
 
 	return 0;
 }
