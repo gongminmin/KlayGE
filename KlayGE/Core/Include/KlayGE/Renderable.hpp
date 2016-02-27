@@ -157,6 +157,13 @@ namespace KlayGE
 			EA_SSS = 1UL << 6
 		};
 
+		enum SurfaceDetailMode
+		{
+			SDM_Parallax,
+			SDM_FlatTessellation,
+			SDM_SmoothTessellation
+		};
+
 	public:
 		Renderable();
 		virtual ~Renderable();
@@ -235,6 +242,12 @@ namespace KlayGE
 		}
 
 		// For deferred only
+
+		void DetailMode(SurfaceDetailMode mode);
+		SurfaceDetailMode DetailMode()
+		{
+			return detail_mode_;
+		}
 
 		virtual void Pass(PassType type);
 
@@ -321,12 +334,15 @@ namespace KlayGE
 		PassType type_;
 		bool opacity_map_enabled_;
 		uint32_t effect_attrs_;
+		SurfaceDetailMode detail_mode_;
 
 		RenderMaterialPtr mtl_;
 
 		RenderEffectParameterPtr mvp_param_;
 		RenderEffectParameterPtr model_view_param_;
 		RenderEffectParameterPtr far_plane_param_;
+		RenderEffectParameterPtr forward_vec_param_;
+		RenderEffectParameterPtr frame_size_param_;
 		RenderEffectParameterPtr pos_center_param_;
 		RenderEffectParameterPtr pos_extent_param_;
 		RenderEffectParameterPtr tc_center_param_;

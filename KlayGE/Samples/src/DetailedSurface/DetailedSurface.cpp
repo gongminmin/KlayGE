@@ -201,7 +201,7 @@ namespace
 			*(technique_->Effect().ParameterByName("model_view")) = model * camera.ViewMatrix();
 			*(technique_->Effect().ParameterByName("world")) = model;
 			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
-			*(technique_->Effect().ParameterByName("view_vec")) = camera.ForwardVec();
+			*(technique_->Effect().ParameterByName("forward_vec")) = camera.ForwardVec();
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			FrameBufferPtr const & fb = re.CurFrameBuffer();

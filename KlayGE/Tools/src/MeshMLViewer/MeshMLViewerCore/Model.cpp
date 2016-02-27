@@ -46,14 +46,13 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		if (caps.tess_method != TM_No)
 		{
-			*(deferred_effect_->ParameterByName("adaptive_tess")) = true;
 			*(deferred_effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			FrameBufferPtr const & fb = re.CurFrameBuffer();
 			*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
 
-			*(technique_->Effect().ParameterByName("view_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
+			*(technique_->Effect().ParameterByName("forward_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
 		}
 	}
 }
@@ -443,14 +442,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		effect_ = SyncLoadRenderEffect("MeshMLViewerNoSkinning.fxml");
 	}
 
-	std::string depth_tech_str;
-	std::string depth_alpha_test_tech_str;
-	std::string depth_alpha_blend_back_tech_str;
-	std::string depth_alpha_blend_front_tech_str;
-	std::string g_buffer_tech_str;
-	std::string g_buffer_alpha_test_tech_str;
-	std::string g_buffer_alpha_blend_back_tech_str;
-	std::string g_buffer_alpha_blend_front_tech_str;
 	std::string g_buffer_mrt_tech_str;
 	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
@@ -465,27 +456,19 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			switch (vis)
 			{
 			case 0:
-				depth_tech_str = "Depth";
-				g_buffer_tech_str = "GBuffer";
+				g_buffer_mrt_tech_str = "GBuffer";
 				special_shading_tech_str = "SpecialShading";
 				break;
 
 			case 1:
-				g_buffer_tech_str = "VisualizeVertex";
+				g_buffer_mrt_tech_str = "VisualizeVertex";
 				break;
 
 			default:
-				g_buffer_tech_str = "VisualizeTexture";
+				g_buffer_mrt_tech_str = "VisualizeTexture";
 				break;
 			}
 
-			depth_alpha_test_tech_str = depth_tech_str;
-			depth_alpha_blend_back_tech_str = depth_tech_str;
-			depth_alpha_blend_front_tech_str = depth_tech_str;
-			g_buffer_alpha_test_tech_str = g_buffer_tech_str;
-			g_buffer_alpha_blend_back_tech_str = g_buffer_tech_str;
-			g_buffer_alpha_blend_front_tech_str = g_buffer_tech_str;
-			g_buffer_mrt_tech_str = g_buffer_tech_str;
 			g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
 			g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
 			g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
@@ -493,14 +476,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			special_shading_alpha_blend_front_tech_str = special_shading_tech_str;
 			if (0 == vis)
 			{
-				depth_alpha_test_tech_str += "AlphaTest";
-				depth_alpha_blend_back_tech_str += "AlphaBlendBack";
-				depth_alpha_blend_front_tech_str += "AlphaBlendFront";
-
-				g_buffer_alpha_test_tech_str += "AlphaTest";
-				g_buffer_alpha_blend_back_tech_str += "AlphaBlendBack";
-				g_buffer_alpha_blend_front_tech_str += "AlphaBlendFront";
-
 				g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
 				g_buffer_alpha_blend_back_mrt_tech_str += "AlphaBlendBack";
 				g_buffer_alpha_blend_front_mrt_tech_str += "AlphaBlendFront";
@@ -515,14 +490,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 				switch (caps.tess_method)
 				{
 				case TM_Hardware:
-					depth_tech_str += "Smooth";
-					depth_alpha_test_tech_str += "Smooth";
-					depth_alpha_blend_back_tech_str += "Smooth";
-					depth_alpha_blend_front_tech_str += "Smooth";
-					g_buffer_tech_str += "Smooth";
-					g_buffer_alpha_test_tech_str += "Smooth";
-					g_buffer_alpha_blend_back_tech_str += "Smooth";
-					g_buffer_alpha_blend_front_tech_str += "Smooth";
 					g_buffer_mrt_tech_str += "Smooth";
 					g_buffer_alpha_test_mrt_tech_str += "Smooth";
 					g_buffer_alpha_blend_back_mrt_tech_str += "Smooth";
@@ -536,21 +503,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 					break;
 				}
 			}
-
-			depth_techs_[vis][smooth] = effect_->TechniqueByName(depth_tech_str + "Tech");
-			depth_alpha_test_techs_[vis][smooth] = effect_->TechniqueByName(depth_alpha_test_tech_str + "Tech");
-			depth_alpha_blend_back_techs_[vis][smooth] = effect_->TechniqueByName(depth_alpha_blend_back_tech_str + "Tech");
-			depth_alpha_blend_front_techs_[vis][smooth] = effect_->TechniqueByName(depth_alpha_blend_front_tech_str + "Tech");
-
-			gbuffer_rt0_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_tech_str + "RT0Tech");
-			gbuffer_alpha_test_rt0_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_test_tech_str + "RT0Tech");
-			gbuffer_alpha_blend_back_rt0_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_back_tech_str + "RT0Tech");
-			gbuffer_alpha_blend_front_rt0_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_front_tech_str + "RT0Tech");
-
-			gbuffer_rt1_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_tech_str + "RT1Tech");
-			gbuffer_alpha_test_rt1_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_test_tech_str + "RT1Tech");
-			gbuffer_alpha_blend_back_rt1_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_back_tech_str + "RT1Tech");
-			gbuffer_alpha_blend_front_rt1_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_front_tech_str + "RT1Tech");
 
 			gbuffer_mrt_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
 			gbuffer_alpha_test_mrt_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");

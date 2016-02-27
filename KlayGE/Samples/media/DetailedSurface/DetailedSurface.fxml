@@ -16,7 +16,7 @@
 		<parameter type="float2" name="tc_center"/>
 		<parameter type="float2" name="tc_extent"/>
 		<parameter type="float3" name="eye_pos"/>
-		<parameter type="float3" name="view_vec"/>
+		<parameter type="float3" name="forward_vec"/>
 		<parameter type="float3" name="light_pos"/>
 		<parameter type="float3" name="light_color"/>
 		<parameter type="float3" name="light_falloff"/>
@@ -388,9 +388,9 @@ HS_CONSTANT_DATA_OUTPUT TessellationConstantsHS(InputPatch<VS_CONTROL_POINT_OUTP
 	float3 edge2_normal = (normal1 + normal2) * 0.5f;
 
 	float3 orientation;
-	orientation.x = dot(edge0_normal, view_vec);
-	orientation.y = dot(edge1_normal, view_vec);
-	orientation.z = dot(edge2_normal, view_vec);
+	orientation.x = dot(edge0_normal, forward_vec);
+	orientation.y = dot(edge1_normal, forward_vec);
+	orientation.z = dot(edge2_normal, forward_vec);
 		
 	if (all(orientation > BACK_FACE_THRESHOLD))
 	{
