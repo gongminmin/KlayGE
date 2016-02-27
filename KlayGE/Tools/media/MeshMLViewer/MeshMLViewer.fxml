@@ -237,31 +237,11 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	oClr = VisualizeVertex(result_pos, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2], blend_weights, blend_indices, oTex);
 }
 
-float4 VisualizeVertexRT0PS() : SV_Target
-{
-	return 0;
-}
-
-float4 VisualizeVertexRT1PS(float4 clr : COLOR) : SV_Target
-{
-	return clr;
-}
-
 void VisualizeVertexMRTPS(float4 clr : COLOR,
 				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	mrt_0 = 0;
 	mrt_1 = clr;
-}
-
-float4 VisualizeTextureRT0PS() : SV_Target
-{
-	return 0;
-}
-
-float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
-{
-	return VisualizeTexture(tex0);
 }
 
 void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
@@ -272,42 +252,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 }
 		]]>
 	</shader>
-
-	<technique name="VisualizeVertexRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexRT1PS()"/>
-		</pass>
-	</technique>
 
 	<technique name="VisualizeVertexMRTTech">
 		<pass name="p0">
@@ -324,42 +268,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 
 			<state name="vertex_shader" value="VisualizeVertexVS()"/>
 			<state name="pixel_shader" value="VisualizeVertexMRTPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureRT1PS()"/>
 		</pass>
 	</technique>
 
@@ -568,111 +476,6 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		]]>
 	</shader>
 
-	<technique name="DepthSmoothTech" inherit="DepthTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="DepthAlphaTestSmoothTech" inherit="DepthAlphaTestTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="DepthAlphaBlendBackSmoothTech" inherit="DepthAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="DepthAlphaBlendFrontSmoothTech" inherit="DepthAlphaBlendFrontTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferSmoothRT0Tech" inherit="GBufferRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaTestSmoothRT0Tech" inherit="GBufferAlphaTestRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaBlendBackSmoothRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendFrontSmoothRT0Tech" inherit="GBufferAlphaBlendFrontRT0Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferSmoothRT1Tech" inherit="GBufferRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaTestSmoothRT1Tech" inherit="GBufferAlphaTestRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaBlendBackSmoothRT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendFrontSmoothRT1Tech" inherit="GBufferAlphaBlendFrontRT1Tech">
-		<pass name="p0">
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
 	<technique name="GBufferSmoothMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -708,38 +511,8 @@ void SmoothDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
-	<technique name="VisualizeVertexSmoothRT0Tech" inherit="VisualizeVertexRT0Tech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSmoothRT1Tech" inherit="VisualizeVertexRT1Tech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
 	<technique name="VisualizeVertexSmoothMRTTech" inherit="VisualizeVertexMRTTech">
 		<pass name="p0">
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSmoothRT0Tech" inherit="VisualizeTextureRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureSmoothRT1Tech" inherit="VisualizeTextureRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="SmoothVS()"/>
-			<state name="hull_shader" value="SmoothHS()"/>
-			<state name="domain_shader" value="SmoothDS()"/>
 		</pass>
 	</technique>
 

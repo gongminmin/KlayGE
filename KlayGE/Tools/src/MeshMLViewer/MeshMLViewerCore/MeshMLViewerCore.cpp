@@ -220,6 +220,11 @@ namespace KlayGE
 
 	bool MeshMLViewerCore::ConfirmDevice() const
 	{
+		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+		if (caps.max_simultaneous_rts < 2)
+		{
+			return false;
+		}
 		return true;
 	}
 
