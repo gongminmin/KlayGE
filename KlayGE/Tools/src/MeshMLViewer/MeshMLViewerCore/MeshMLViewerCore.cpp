@@ -186,11 +186,6 @@ namespace
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->VisualizeTexture(slot);
 		}
 
-		void SmoothMesh(bool smooth)
-		{
-			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SmoothMesh(smooth);
-		}
-
 		void SetTessFactor(int32_t tess_factor)
 		{
 			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->SetTessFactor(tess_factor);
@@ -742,11 +737,6 @@ namespace KlayGE
 		{
 			checked_pointer_cast<ModelObject>(model_)->UnbindJoints();
 		}
-	}
-
-	void MeshMLViewerCore::SmoothMeshOn(bool on)
-	{
-		checked_pointer_cast<ModelObject>(model_)->SmoothMesh(on);
 	}
 
 	void MeshMLViewerCore::FPSCameraOn(bool on)

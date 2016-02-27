@@ -55,7 +55,6 @@ namespace KlayGE
 		void SelectMesh(uint32_t mesh_id);
 
 		void SkinningOn(bool on);
-		void SmoothMeshOn(bool on);
 		void FPSCameraOn(bool on);
 		void LineModeOn(bool on);
 		void Visualize(int index);

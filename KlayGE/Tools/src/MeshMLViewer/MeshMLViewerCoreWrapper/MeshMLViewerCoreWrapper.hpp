@@ -22,7 +22,6 @@ namespace KlayGE
 		float ModelFrameRate();
 
 		void SkinningOn(int on);
-		void SmoothMeshOn(int on);
 		void FPSCameraOn(int on);
 		void LineModeOn(int on);
 		void Visualize(int index);

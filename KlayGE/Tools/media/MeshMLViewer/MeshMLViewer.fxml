@@ -247,56 +247,12 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="pixel_shader" value="VisualizeTextureMRTPS()"/>
 		</pass>
 	</technique>
-	
-
-	<technique name="GBufferSmoothMRTTech" inherit="GBufferSmoothTessMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaTestSmoothMRTTech" inherit="GBufferSmoothTessAlphaTestMRTTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferAlphaBlendBackSmoothMRTTech" inherit="GBufferSmoothTessAlphaBlendBackMRTTech">
-		<pass name="p0">
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendFrontSmoothMRTTech" inherit="GBufferSmoothTessAlphaBlendFrontMRTTech">
-		<pass name="p0">
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexSmoothMRTTech" inherit="VisualizeVertexMRTTech">
-		<pass name="p0">
-		</pass>
-	</technique>
 
 	<technique name="VisualizeTextureSmoothMRTTech" inherit="VisualizeTextureMRTTech">
 		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
-		</pass>
-	</technique>
-	
-
-	<technique name="SpecialShadingSmoothTech" inherit="SpecialShadingSmoothTessTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-		</pass>
-	</technique>
-	<technique name="SpecialShadingAlphaBlendBackSmoothTech" inherit="SpecialShadingSmoothTessAlphaBlendBackTech">
-		<pass name="p0">
-		</pass>
-	</technique>
-	<technique name="SpecialShadingAlphaBlendFrontSmoothTech" inherit="SpecialShadingSmoothTessAlphaBlendFrontTech">
-		<pass name="p0">
 		</pass>
 	</technique>
 </effect>

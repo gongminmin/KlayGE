@@ -119,11 +119,6 @@ namespace KlayGE
 		core_->SkinningOn(on ? true : false);
 	}
 
-	void MeshMLViewerCoreWrapper::SmoothMeshOn(int on)
-	{
-		core_->SmoothMeshOn(on ? true : false);
-	}
-
 	void MeshMLViewerCoreWrapper::FPSCameraOn(int on)
 	{
 		core_->FPSCameraOn(on ? true : false);

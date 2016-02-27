@@ -152,9 +152,6 @@
     <Resource Include="Images\Skinning.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\Smooth.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Build\vc140_win_x64\Tools\MeshMLViewer\MeshMLViewerCoreWrapper\MeshMLViewerCoreWrapper.vcxproj">

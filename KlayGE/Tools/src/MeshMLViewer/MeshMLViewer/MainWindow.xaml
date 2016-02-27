@@ -23,7 +23,6 @@
                 <RibbonGroup>
                     <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" IsChecked="{Binding SkinningValue}"/>
                     <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation" IsChecked="{Binding PlayValue}"/>
-                    <RibbonToggleButton LargeImageSource="Images\Smooth.png" x:Name="smooth" Label="Smooth Mesh" IsChecked="{Binding SmoothMeshValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" IsChecked="{Binding FPSCameraValue}"/>

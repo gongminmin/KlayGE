@@ -19,7 +19,7 @@ using namespace KlayGE;
 
 DetailedSkinnedMesh::DetailedSkinnedMesh(RenderModelPtr const & model, std::wstring const & name)
 	: SkinnedMesh(model, name),
-			tess_factor_(5), visualize_(0), smooth_mesh_(false)
+			visualize_(-1)
 {
 }
 
@@ -40,26 +40,11 @@ void DetailedSkinnedMesh::OnRenderBegin()
 		*(deferred_effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
 		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
 	}
-
-	if (!this->select_mode_on_)
-	{
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.tess_method != TM_No)
-		{
-			*(deferred_effect_->ParameterByName("tess_factors")) = float4(tess_factor_, tess_factor_, 1.0f, 9.0f);
-
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			FrameBufferPtr const & fb = re.CurFrameBuffer();
-			*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
-
-			*(technique_->Effect().ParameterByName("forward_vec")) = Context::Instance().AppInstance().ActiveCamera().ForwardVec();
-		}
-	}
 }
 
 void DetailedSkinnedMesh::VisualizeLighting()
 {
-	visualize_ = 0;
+	visualize_ = -1;
 	this->UpdateTechniques();
 }
 
@@ -67,48 +52,48 @@ void DetailedSkinnedMesh::VisualizeVertex(VertexElementUsage usage, uint8_t usag
 {
 	*(deferred_effect_->ParameterByName("vertex_usage")) = static_cast<int32_t>(usage);
 	*(deferred_effect_->ParameterByName("vertex_usage_index")) = static_cast<int32_t>(usage_index);
-	visualize_ = 1;
+	visualize_ = 0;
 	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::VisualizeTexture(int slot)
 {
 	*(deferred_effect_->ParameterByName("texture_slot")) = static_cast<int32_t>(slot);
-	visualize_ = 2;
-	this->UpdateTechniques();
-}
-
-void DetailedSkinnedMesh::SmoothMesh(bool smooth)
-{
-	smooth_mesh_ = smooth;
+	visualize_ = 1;
 	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::SetTessFactor(int32_t tess_factor)
 {
-	tess_factor_ = static_cast<float>(tess_factor);
+	mtl_->tess_factors.x() = mtl_->tess_factors.y() = static_cast<float>(tess_factor);
 }
 
 void DetailedSkinnedMesh::UpdateTechniques()
 {
 	std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
-	if (this->AlphaTest())
+	if (visualize_ >= 0)
 	{
-		gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][smooth_mesh_];
+		bool const smooth_mesh = (mtl_->detail_mode != RenderMaterial::SDM_Parallax);
+
+		if (this->AlphaTest())
+		{
+			gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_][smooth_mesh];
+		}
+		else
+		{
+			gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][smooth_mesh];
+		}
+
+		gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][smooth_mesh];
+		gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][smooth_mesh];
+
+		select_mode_tech_ = model->select_mode_tech_;
 	}
 	else
 	{
-		gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_][smooth_mesh_];
+		SkinnedMesh::UpdateTechniques();
 	}
-
-	gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_][smooth_mesh_];
-	gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_][smooth_mesh_];
-	special_shading_tech_ = model->special_shading_techs_[visualize_][smooth_mesh_];
-	special_shading_alpha_blend_back_tech_ = model->special_shading_alpha_blend_back_techs_[visualize_][smooth_mesh_];
-	special_shading_alpha_blend_front_tech_ = model->special_shading_alpha_blend_front_techs_[visualize_][smooth_mesh_];
-
-	select_mode_tech_ = model->select_mode_tech_;
 }
 
 
@@ -446,45 +431,30 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	std::string g_buffer_alpha_test_mrt_tech_str;
 	std::string g_buffer_alpha_blend_back_mrt_tech_str;
 	std::string g_buffer_alpha_blend_front_mrt_tech_str;
-	std::string special_shading_tech_str;
-	std::string special_shading_alpha_blend_back_tech_str;
-	std::string special_shading_alpha_blend_front_tech_str;
-	for (int vis = 0; vis < 3; ++ vis)
+	for (int vis = 0; vis < 2; ++ vis)
 	{
 		for (int smooth = 0; smooth < 2; ++ smooth)
 		{
-			switch (vis)
+			if (0 == vis)
 			{
-			case 0:
-				g_buffer_mrt_tech_str = "GBuffer";
-				special_shading_tech_str = "SpecialShading";
-				break;
-
-			case 1:
 				g_buffer_mrt_tech_str = "VisualizeVertex";
-				break;
-
-			default:
+			}
+			else
+			{
 				g_buffer_mrt_tech_str = "VisualizeTexture";
-				break;
 			}
 
 			g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
 			g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
 			g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
-			special_shading_alpha_blend_back_tech_str = special_shading_tech_str;
-			special_shading_alpha_blend_front_tech_str = special_shading_tech_str;
 			if (0 == vis)
 			{
 				g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
 				g_buffer_alpha_blend_back_mrt_tech_str += "AlphaBlendBack";
 				g_buffer_alpha_blend_front_mrt_tech_str += "AlphaBlendFront";
-
-				special_shading_alpha_blend_back_tech_str += "AlphaBlendBack";
-				special_shading_alpha_blend_front_tech_str += "AlphaBlendFront";
 			}
 
-			if (1 == smooth)
+			if ((vis > 0) && (1 == smooth))
 			{
 				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 				switch (caps.tess_method)
@@ -494,9 +464,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 					g_buffer_alpha_test_mrt_tech_str += "Smooth";
 					g_buffer_alpha_blend_back_mrt_tech_str += "Smooth";
 					g_buffer_alpha_blend_front_mrt_tech_str += "Smooth";
-					special_shading_tech_str += "Smooth";
-					special_shading_alpha_blend_back_tech_str += "Smooth";
-					special_shading_alpha_blend_front_tech_str += "Smooth";
 					break;
 
 				case TM_No:
@@ -508,19 +475,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			gbuffer_alpha_test_mrt_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
 			gbuffer_alpha_blend_back_mrt_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
 			gbuffer_alpha_blend_front_mrt_techs_[vis][smooth] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
-
-			if (0 == vis)
-			{
-				special_shading_techs_[vis][smooth] = effect_->TechniqueByName(special_shading_tech_str + "Tech");
-				special_shading_alpha_blend_back_techs_[vis][smooth] = effect_->TechniqueByName(special_shading_alpha_blend_back_tech_str + "Tech");
-				special_shading_alpha_blend_front_techs_[vis][smooth] = effect_->TechniqueByName(special_shading_alpha_blend_front_tech_str + "Tech");
-			}
-			else
-			{
-				special_shading_techs_[vis][smooth] = effect_->TechniqueByName("SpecialShadingTech");
-				special_shading_alpha_blend_back_techs_[vis][smooth] = effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-				special_shading_alpha_blend_front_techs_[vis][smooth] = effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
-			}
 		}
 	}
 
@@ -558,15 +512,6 @@ void DetailedSkinnedModel::VisualizeTexture(int slot)
 	{
 		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
 		mesh->VisualizeTexture(slot);
-	}
-}
-
-void DetailedSkinnedModel::SmoothMesh(bool smooth)
-{
-	for (auto const & renderable : subrenderables_)
-	{
-		DetailedSkinnedMesh* mesh = checked_cast<DetailedSkinnedMesh*>(renderable.get());
-		mesh->SmoothMesh(smooth);
 	}
 }
 

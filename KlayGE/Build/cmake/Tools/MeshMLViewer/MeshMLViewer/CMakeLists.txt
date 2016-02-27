@@ -5,7 +5,6 @@ DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Open.png" "cbda
 DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Play.png" "cbda47a1678ce70b6720856736100979d469e159" "d6315bff786f86662874c6782b03d7332b1f3086")
 DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Save.png" "cbda47a1678ce70b6720856736100979d469e159" "b9917c99f682ee02d293ab9c86a80bada6e56cb7")
 DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Skinning.png" "cbda47a1678ce70b6720856736100979d469e159" "19dd2371bf2b11742dcc2fd45b2d06d0b0a6427e")
-DOWNLOAD_FILE("KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images/Smooth.png" "cbda47a1678ce70b6720856736100979d469e159" "37df06035064e99ce58405928ea3d6d36285f103")
 
 INCLUDE_EXTERNAL_MSPROJECT(
 	MeshMLViewer ${KLAYGE_PROJECT_DIR}/Tools/src/MeshMLViewer/MeshMLViewer/MeshMLViewer${KLAYGE_OUTPUT_SUFFIX}.csproj

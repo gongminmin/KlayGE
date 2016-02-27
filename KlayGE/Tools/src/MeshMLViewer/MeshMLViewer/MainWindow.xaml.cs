@@ -126,7 +126,6 @@ namespace MeshMLViewer
 
 			skinning.IsEnabled = false;
 			play.IsEnabled = false;
-			smooth.IsEnabled = false;
 			line_mode.IsEnabled = false;
 			visualize.IsEnabled = false;
 			frame_text.IsEnabled = false;
@@ -213,7 +212,6 @@ namespace MeshMLViewer
 				frame_slider.IsEnabled = false;
 				frame_slider.Maximum = 1;
 			}
-			smooth.IsEnabled = true;
 			line_mode.IsEnabled = true;
 			visualize.IsEnabled = true;
 			properties.IsEnabled = true;
@@ -289,19 +287,6 @@ namespace MeshMLViewer
 			set
 			{
 				play_ = value;
-			}
-		}
-
-		public bool SmoothMeshValue
-		{
-			get
-			{
-				return smooth_mesh_;
-			}
-			set
-			{
-				smooth_mesh_ = value;
-				core_.SmoothMeshOn(smooth_mesh_ ? 1 : 0);
 			}
 		}
 
@@ -562,7 +547,6 @@ namespace MeshMLViewer
 		private uint selected_mesh_id_ = 0;
 
 		private bool skinning_ = false;
-		private bool smooth_mesh_ = false;
 		private bool fps_camera_ = false;
 		private bool line_mode_ = false;
 		private bool play_ = false;
