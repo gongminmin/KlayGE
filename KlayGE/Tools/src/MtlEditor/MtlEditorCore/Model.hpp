@@ -42,10 +42,7 @@ public:
 private:
 	KlayGE::RenderEffectPtr effect_;
 
-	KlayGE::RenderTechniquePtr gbuffer_mrt_techs_[2];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_test_mrt_techs_[2];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_back_mrt_techs_[2];
-	KlayGE::RenderTechniquePtr gbuffer_alpha_blend_front_mrt_techs_[2];
+	KlayGE::RenderTechniquePtr visualize_gbuffer_mrt_techs_[2];
 
 	bool is_skinned_;
 };

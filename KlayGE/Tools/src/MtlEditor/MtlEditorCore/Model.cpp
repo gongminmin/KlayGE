@@ -96,27 +96,15 @@ void DetailedSkinnedMesh::UpdateMaterial()
 
 void DetailedSkinnedMesh::UpdateTechniques()
 {
+	SkinnedMesh::UpdateTechniques();
+
 	if (visualize_ >= 0)
 	{
 		std::shared_ptr<DetailedSkinnedModel> model = checked_pointer_cast<DetailedSkinnedModel>(model_.lock());
 
-		if (this->AlphaTest())
-		{
-			gbuffer_mrt_tech_ = model->gbuffer_alpha_test_mrt_techs_[visualize_];
-		}
-		else
-		{
-			gbuffer_mrt_tech_ = model->gbuffer_mrt_techs_[visualize_];
-		}
-
-		gbuffer_alpha_blend_back_mrt_tech_ = model->gbuffer_alpha_blend_back_mrt_techs_[visualize_];
-		gbuffer_alpha_blend_front_mrt_tech_ = model->gbuffer_alpha_blend_front_mrt_techs_[visualize_];
-
-		select_mode_tech_ = model->select_mode_tech_;
-	}
-	else
-	{
-		SkinnedMesh::UpdateTechniques();
+		gbuffer_mrt_tech_ = model->visualize_gbuffer_mrt_techs_[visualize_];
+		gbuffer_alpha_blend_back_mrt_tech_ = gbuffer_mrt_tech_;
+		gbuffer_alpha_blend_front_mrt_tech_ = gbuffer_mrt_tech_;
 	}
 }
 
@@ -314,80 +302,42 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	if (!has_tc)
 	{
+		std::vector<int16_t> tcs16(total_num_vertices);
 		texcoords.resize(total_num_vertices);
 		for (size_t i = 0; i < texcoords.size(); ++ i)
 		{
 			texcoords[i] = float2(positions[i].x(), positions[i].y());
+
+			float3 tc16 = float3(texcoords[i].x(), texcoords[i].y(), 0.0f);
+			tc16 = (tc16 - tc_center) / tc_extent * 0.5f + 0.5f;
+			tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.x() * 65535 - 32768), -32768, 32767));
+			tcs16[i] = static_cast<int16_t>(MathLib::clamp<int32_t>(static_cast<int32_t>(tc16.y() * 65535 - 32768), -32768, 32767));
 		}
 
 		for (auto const & renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(texcoords[0]) * texcoords.size()),
-				vertex_element(VEU_TextureCoord, 0, EF_GR32F), EAH_GPU_Read);
+			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(tcs16[0]) * tcs16.size()),
+				vertex_element(VEU_TextureCoord, 0, EF_GR16), EAH_GPU_Read);
 		}
 	}
 
-	if (!has_normal && !has_tc)
+	if (!has_tangent_quat)
 	{
-		for (auto const & renderable : subrenderables_)
+		if (!has_normal)
 		{
-			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
-				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
-				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
-		}
-
-		std::vector<uint32_t> compacted(total_num_vertices);
-		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
-		{	
-			fmt = EF_A2BGR10;
-			for (size_t j = 0; j < compacted.size(); ++ j)
+			for (auto const & renderable : subrenderables_)
 			{
-				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
-				compacted[j] = MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 1023), 0, 1023)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 1023), 0, 1023) << 10)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 1023), 0, 1023) << 20);
-			}
-		}
-		else if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
-		{
-			fmt = EF_ABGR8;
-			for (size_t j = 0; j < compacted.size(); ++ j)
-			{
-				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
-				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 0)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 16);
-			}
-		}
-		else
-		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
-
-			fmt = EF_ARGB8;
-			for (size_t j = 0; j < compacted.size(); ++ j)
-			{
-				float3 n = MathLib::normalize(normals[j]) * 0.5f + 0.5f;
-				compacted[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.x() * 255), 0, 255) << 16)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.y() * 255), 0, 255) << 8)
-					| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(n.z() * 255), 0, 255) << 0);
+				StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
+				MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
+					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+					positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
 			}
 		}
 
-		for (auto const & renderable : subrenderables_)
-		{
-			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
-				vertex_element(VEU_Normal, 0, fmt), EAH_GPU_Read);
-		}
-	}
-	else if (!has_tangent_quat)
-	{
 		std::vector<float3> tangents(total_num_vertices);
 		std::vector<float3> binormals(total_num_vertices);
-		
+
 		// Compute TBN
 		for (auto const & renderable : subrenderables_)
 		{
@@ -452,37 +402,18 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	}
 
 	std::string g_buffer_mrt_tech_str;
-	std::string g_buffer_alpha_test_mrt_tech_str;
-	std::string g_buffer_alpha_blend_back_mrt_tech_str;
-	std::string g_buffer_alpha_blend_front_mrt_tech_str;
 	for (int vis = 0; vis < 2; ++ vis)
 	{
 		if (0 == vis)
 		{
-			g_buffer_mrt_tech_str = "VisualizeVertex";
+			g_buffer_mrt_tech_str = "VisualizeVertexMRTTech";
 		}
 		else
 		{
-			g_buffer_mrt_tech_str = "VisualizeTexture";
+			g_buffer_mrt_tech_str = "VisualizeTextureMRTTech";
 		}
-
-		g_buffer_alpha_test_mrt_tech_str = g_buffer_mrt_tech_str;
-		g_buffer_alpha_blend_back_mrt_tech_str = g_buffer_mrt_tech_str;
-		g_buffer_alpha_blend_front_mrt_tech_str = g_buffer_mrt_tech_str;
-		if (0 == vis)
-		{
-			g_buffer_alpha_test_mrt_tech_str += "AlphaTest";
-			g_buffer_alpha_blend_back_mrt_tech_str += "AlphaBlendBack";
-			g_buffer_alpha_blend_front_mrt_tech_str += "AlphaBlendFront";
-		}
-
-		gbuffer_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_mrt_tech_str + "MRTTech");
-		gbuffer_alpha_test_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_test_mrt_tech_str + "MRTTech");
-		gbuffer_alpha_blend_back_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_back_mrt_tech_str + "MRTTech");
-		gbuffer_alpha_blend_front_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_alpha_blend_front_mrt_tech_str + "MRTTech");
+		visualize_gbuffer_mrt_techs_[vis] = effect_->TechniqueByName(g_buffer_mrt_tech_str);
 	}
-
-	select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 
 	is_skinned_ = has_skinned;
 }
