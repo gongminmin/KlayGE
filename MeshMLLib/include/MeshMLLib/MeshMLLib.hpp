@@ -79,6 +79,13 @@ namespace KlayGE
 				SDM_FlatTessellation,
 				SDM_SmoothTessellation
 			};
+			
+			Material()
+				: detail_mode(SDM_Parallax),
+					height_offset_scale(-0.5f, 0.06f),
+					tess_factors(5, 5, 1, 9)
+			{
+			}
 
 			float3 ambient;
 			float3 diffuse;
