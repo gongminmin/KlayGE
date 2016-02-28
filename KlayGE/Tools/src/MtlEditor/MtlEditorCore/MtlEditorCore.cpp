@@ -547,6 +547,28 @@ namespace KlayGE
 		return model_->GetRenderable()->Subrenderable(index)->Name();
 	}
 
+	uint32_t MtlEditorCore::NumVertexStreams(uint32_t mesh_id) const
+	{
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return rl.NumVertexStreams();
+	}
+
+	uint32_t MtlEditorCore::NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const
+	{
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return static_cast<uint32_t>(rl.VertexStreamFormat(stream_index).size());
+	}
+
+	uint32_t MtlEditorCore::VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const
+	{
+		Renderable const & mesh = *model_->GetRenderable()->Subrenderable(mesh_id);
+		RenderLayout const & rl = mesh.GetRenderLayout();
+		return (rl.VertexStreamFormat(stream_index)[usage_index].usage << 16)
+			| (rl.VertexStreamFormat(stream_index)[usage_index].usage_index);
+	}
+
 	uint32_t MtlEditorCore::MaterialID(uint32_t mesh_id) const
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model_->GetRenderable()->Subrenderable(mesh_id - 1));
@@ -1131,6 +1153,11 @@ namespace KlayGE
 			fps_controller_.DetachCamera();
 			tb_controller_.AttachCamera(this->ActiveCamera());
 		}
+	}
+
+	void MtlEditorCore::LineModeOn(bool on)
+	{
+		deferred_rendering_->ForceLineMode(on);
 	}
 
 	void MtlEditorCore::Visualize(int index)

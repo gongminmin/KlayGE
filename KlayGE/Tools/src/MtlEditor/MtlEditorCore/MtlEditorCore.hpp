@@ -36,6 +36,9 @@ namespace KlayGE
 		float ModelFrameRate() const;
 		uint32_t NumMeshes() const;
 		std::wstring const & MeshName(uint32_t index) const;
+		uint32_t NumVertexStreams(uint32_t mesh_id) const;
+		uint32_t NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const;
+		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const;
 		uint32_t SelectedMesh() const;
 		uint32_t MaterialID(uint32_t mesh_id) const;
 		float3 const & AmbientMaterial(uint32_t mtl_id) const;
@@ -87,6 +90,7 @@ namespace KlayGE
 
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);
+		void LineModeOn(bool on);
 		void Visualize(int index);
 		void MouseMove(int x, int y, uint32_t button);
 		void MouseUp(int x, int y, uint32_t button);

@@ -27,6 +27,7 @@ namespace MtlEditor
 		enum PropertyOrders
 		{
 			PO_Meshes = 0,
+			PO_VertexStreams,
 			PO_Ambient,
 			PO_Diffuse,
 			PO_Specular,
@@ -50,8 +51,9 @@ namespace MtlEditor
 		};
 
 		[CategoryOrder("Meshes", 0)]
-		[CategoryOrder("Material", 1)]
-		[CategoryOrder("Textures", 2)]
+		[CategoryOrder("Vertex Streams", 1)]
+		[CategoryOrder("Material", 2)]
+		[CategoryOrder("Textures", 3)]
 		public class ModelPropertyTypes
 		{
 			[Category("Meshes")]
@@ -59,6 +61,11 @@ namespace MtlEditor
 			[ItemsSource(typeof(MeshItemsSource))]
 			[PropertyOrder((int)PropertyOrders.PO_Meshes)]
 			public string meshes { get; set; }
+
+			[Category("Vertex Streams")]
+			[DisplayName("Vertex Streams")]
+			[PropertyOrder((int)PropertyOrders.PO_VertexStreams)]
+			public List<string> vertex_streams { get; set; }
 
 			[Category("Material")]
 			[DisplayName("Ambient")]
@@ -168,6 +175,7 @@ namespace MtlEditor
 			DetailModeItemsSource.items.Add("Smooth Tessellation");
 
 			properties_obj_ = new ModelPropertyTypes();
+			properties_obj_.vertex_streams = new List<string>();
 			properties.SelectedObject = properties_obj_;
 
 			save.IsEnabled = false;
@@ -381,6 +389,19 @@ namespace MtlEditor
 			}
 		}
 
+		public bool LineModeValue
+		{
+			get
+			{
+				return line_mode_;
+			}
+			set
+			{
+				line_mode_ = value;
+				core_.LineModeOn(line_mode_ ? 1 : 0);
+			}
+		}
+
 		public double FrameSliderValue
 		{
 			get
@@ -480,8 +501,60 @@ namespace MtlEditor
 
 			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_id].DisplayName;
 
+			properties_obj_.vertex_streams.Clear();
+
 			if (mesh_id > 0)
 			{
+				uint num_vss = core_.NumVertexStreams(mesh_id - 1);
+				for (uint stream_index = 0; stream_index < num_vss; ++stream_index)
+				{
+					string stream_name = "";
+					uint num_usages = core_.NumVertexStreamUsages(mesh_id - 1, stream_index);
+					for (uint usage_index = 0; usage_index < num_usages; ++usage_index)
+					{
+						uint usage = core_.VertexStreamUsage(mesh_id - 1, stream_index, usage_index);
+						string usage_name;
+						switch (usage >> 16)
+						{
+							case 0:
+								usage_name = "Position";
+								break;
+							case 1:
+								usage_name = "Normal";
+								break;
+							case 2:
+								usage_name = "Diffuse";
+								break;
+							case 3:
+								usage_name = "Specular";
+								break;
+							case 4:
+								usage_name = "Blend Weight";
+								break;
+							case 5:
+								usage_name = "Blend Index";
+								break;
+							case 6:
+								usage_name = "TexCoord";
+								break;
+							case 7:
+								usage_name = "Tangent";
+								break;
+							case 8:
+							default:
+								usage_name = "Binormal";
+								break;
+						}
+						stream_name += usage_name + ' ' + (usage & 0xFFFF).ToString();
+						if (usage_index != num_usages - 1)
+						{
+							stream_name += " | ";
+						}
+					}
+
+					properties_obj_.vertex_streams.Add(stream_name);
+				}
+
 				uint mtl_id = core_.MaterialID(mesh_id);
 
 				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
@@ -812,6 +885,7 @@ namespace MtlEditor
 
 		private bool skinning_ = false;
 		private bool fps_camera_ = false;
+		private bool line_mode_ = false;
 		private bool play_ = false;
 	}
 

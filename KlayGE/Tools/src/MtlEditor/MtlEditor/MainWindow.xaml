@@ -31,6 +31,7 @@
                 </RibbonGroup>
                 <RibbonGroup>
                     <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" IsChecked="{Binding FPSCameraValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\LineMode.png" x:Name="line_mode" Label="Line Mode" IsChecked="{Binding LineModeValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <Grid>

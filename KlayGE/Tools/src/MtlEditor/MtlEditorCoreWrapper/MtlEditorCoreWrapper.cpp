@@ -149,6 +149,11 @@ namespace KlayGE
 		core_->FPSCameraOn(on ? true : false);
 	}
 
+	void MtlEditorCoreWrapper::LineModeOn(int on)
+	{
+		core_->LineModeOn(on ? true : false);
+	}
+
 	void MtlEditorCoreWrapper::Visualize(int index)
 	{
 		core_->Visualize(index);
@@ -182,6 +187,21 @@ namespace KlayGE
 	String^ MtlEditorCoreWrapper::MeshName(uint32_t index)
 	{
 		return WStdToString(core_->MeshName(index));
+	}
+
+	uint32_t MtlEditorCoreWrapper::NumVertexStreams(uint32_t mesh_id)
+	{
+		return core_->NumVertexStreams(mesh_id);
+	}
+
+	uint32_t MtlEditorCoreWrapper::NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index)
+	{
+		return core_->NumVertexStreamUsages(mesh_id, stream_index);
+	}
+
+	uint32_t MtlEditorCoreWrapper::VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index)
+	{
+		return core_->VertexStreamUsage(mesh_id, stream_index, usage_index);
 	}
 
 	uint32_t MtlEditorCoreWrapper::MaterialID(uint32_t mesh_id)

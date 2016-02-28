@@ -23,6 +23,7 @@ namespace KlayGE
 
 		void SkinningOn(int on);
 		void FPSCameraOn(int on);
+		void LineModeOn(int on);
 		void Visualize(int index);
 
 		void MouseMove(int x, int y, uint32_t button);
@@ -32,6 +33,10 @@ namespace KlayGE
 
 		uint32_t NumMeshes();
 		System::String^ MeshName(uint32_t index);
+
+		uint32_t NumVertexStreams(uint32_t mesh_id);
+		uint32_t NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index);
+		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index);
 
 		uint32_t MaterialID(uint32_t mesh_id);
 		System::Windows::Media::Color AmbientMaterial(uint32_t mtl_id);

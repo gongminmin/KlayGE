@@ -29,39 +29,6 @@
 
 	<shader>
 		<![CDATA[
-void CalcPosLH(float3 pos,
-				float3x3 obj_to_ts,
-				out float4 oPos,
-				out float2 oTsToView0_2xy,
-				out float4 oTsToView0_2z,
-				out float4 oTsToView1_Depth,
-#ifdef NOPERSPECTIVE_SUPPORT
-				out noperspective float2 oScreenTc
-#else
-				out float3 oScreenTc
-#endif
-				)
-{
-	oPos = mul(float4(pos, 1), mvp);
-
-	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
-	oTsToView0_2z.xyz = ts_to_view[0];
-	oTsToView1_Depth.xyz = ts_to_view[1];
-	oTsToView0_2xy.xy = ts_to_view[2].xy;
-	oTsToView0_2z.w = ts_to_view[2].z;
-	
-	oTsToView1_Depth.w = oPos.w;
-	
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-	
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
-}
-
 float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 normal,
 						float4 blend_weights, int4 blend_indices, float2 tex)
 {
@@ -228,31 +195,11 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	oClr = VisualizeVertex(result_pos, obj_to_ts[0], obj_to_ts[1], obj_to_ts[2], blend_weights, blend_indices, oTex);
 }
 
-float4 VisualizeVertexRT0PS() : SV_Target
-{
-	return 0;
-}
-
-float4 VisualizeVertexRT1PS(float4 clr : COLOR) : SV_Target
-{
-	return clr;
-}
-
 void VisualizeVertexMRTPS(float4 clr : COLOR,
 				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	mrt_0 = 0;
 	mrt_1 = clr;
-}
-
-float4 VisualizeTextureRT0PS() : SV_Target
-{
-	return 0;
-}
-
-float4 VisualizeTextureRT1PS(float2 tex0 : TEXCOORD0) : SV_Target
-{
-	return VisualizeTexture(tex0);
 }
 
 void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
@@ -263,42 +210,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 }
 		]]>
 	</shader>
-
-	<technique name="VisualizeVertexRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeVertexRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="VisualizeVertexVS()"/>
-			<state name="pixel_shader" value="VisualizeVertexRT1PS()"/>
-		</pass>
-	</technique>
 
 	<technique name="VisualizeVertexMRTTech">
 		<pass name="p0">
@@ -315,42 +226,6 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 
 			<state name="vertex_shader" value="VisualizeVertexVS()"/>
 			<state name="pixel_shader" value="VisualizeVertexMRTPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VisualizeTextureRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="VisualizeTextureRT1PS()"/>
 		</pass>
 	</technique>
 
