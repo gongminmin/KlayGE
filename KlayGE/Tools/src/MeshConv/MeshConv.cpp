@@ -99,9 +99,10 @@ namespace
 		std::array<bool, AI_MAX_NUMBER_OF_TEXTURECOORDS> has_texcoord;
 	};
 
-	void RecursiveTransformMesh(MeshMLObj& meshml_obj, aiNode const * node, std::vector<Mesh> const & meshes)
+	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
 	{
-		auto const mat = MathLib::transpose(float4x4(&node->mTransformation.a1));
+		auto const trans_mat = parent_mat * MathLib::transpose(float4x4(&node->mTransformation.a1));
+		auto const trans_quat = MathLib::to_quaternion(trans_mat);
 
 		for (unsigned int n = 0; n < node->mNumMeshes; ++ n)
 		{
@@ -130,15 +131,15 @@ namespace
 					}
 				}
 
-				auto const pos = MathLib::transform_coord(mesh.positions[vi], mat);
+				auto const pos = MathLib::transform_coord(mesh.positions[vi], trans_mat);
 				if (mesh.has_tangent_frame)
 				{
-					auto const quat = mesh.tangent_quats[vi] * MathLib::to_quaternion(mat);
+					auto const quat = mesh.tangent_quats[vi] * trans_quat;
 					meshml_obj.SetVertex(mesh_id, vertex_id, pos, quat, 2, texcoords);
 				}
 				else
 				{
-					auto const normal = MathLib::transform_normal(mesh.normals[vi], mat);
+					auto const normal = MathLib::transform_normal(mesh.normals[vi], trans_mat);
 					meshml_obj.SetVertex(mesh_id, vertex_id, pos, normal, 2, texcoords);
 				}
 			}
@@ -146,7 +147,7 @@ namespace
 
 		for (unsigned int i = 0; i < node->mNumChildren; ++ i)
 		{
-			RecursiveTransformMesh(meshml_obj, node->mChildren[i], meshes);
+			RecursiveTransformMesh(meshml_obj, trans_mat, node->mChildren[i], meshes);
 		}
 	}
 
@@ -324,17 +325,18 @@ namespace
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
-				BOOST_ASSERT(3 == mesh->mFaces[fi].mNumIndices);
-
-				indices.push_back(mesh->mFaces[fi].mIndices[0]);
-				indices.push_back(mesh->mFaces[fi].mIndices[1]);
-				indices.push_back(mesh->mFaces[fi].mIndices[2]);
-
-				if (two_sided)
+				if (3 == mesh->mFaces[fi].mNumIndices)
 				{
 					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					indices.push_back(mesh->mFaces[fi].mIndices[2]);
 					indices.push_back(mesh->mFaces[fi].mIndices[1]);
+					indices.push_back(mesh->mFaces[fi].mIndices[2]);
+
+					if (two_sided)
+					{
+						indices.push_back(mesh->mFaces[fi].mIndices[0]);
+						indices.push_back(mesh->mFaces[fi].mIndices[2]);
+						indices.push_back(mesh->mFaces[fi].mIndices[1]);
+					}
 				}
 			}
 
@@ -468,7 +470,7 @@ namespace
 			}
 		}
 
-		RecursiveTransformMesh(meshml_obj, scene->mRootNode, meshes);
+		RecursiveTransformMesh(meshml_obj, float4x4::Identity(), scene->mRootNode, meshes);
 
 		std::ofstream ofs(out_name.c_str());
 		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
@@ -546,6 +548,7 @@ int main(int argc, char* argv[])
 	if (file_name.empty())
 	{
 		cout << "Could NOT find " << input_name << endl;
+		Context::Destroy();
 		return 1;
 	}
 
