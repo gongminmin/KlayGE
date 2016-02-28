@@ -40,7 +40,7 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("Tessellation.fxml");
+			RenderEffectPtr effect = SyncLoadRenderEffect("TessellationApp.fxml");
 
 			technique_ = effect->TechniqueByName("NoTessellation");
 			tess_factors_param_ = effect->ParameterByName("tess_factors");

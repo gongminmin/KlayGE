@@ -7,7 +7,7 @@ SET(HEADER_FILES
 )
 
 SET(EFFECT_FILES
-	${KLAYGE_PROJECT_DIR}/Tutorials/media/Tessellation/Tessellation.fxml
+	${KLAYGE_PROJECT_DIR}/Tutorials/media/Tessellation/TessellationApp.fxml
 )
 
 SET(UI_FILES
@@ -33,7 +33,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
-	${KLAYGE_PROJECT_DIR}/Tutorials/media/Tessellation/Tessellation.kfx
+	${KLAYGE_PROJECT_DIR}/Tutorials/media/Tessellation/TessellationApp.kfx
 )
 
 IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
