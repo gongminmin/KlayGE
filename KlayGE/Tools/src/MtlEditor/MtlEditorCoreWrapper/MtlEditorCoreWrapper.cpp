@@ -25,16 +25,6 @@ namespace KlayGE
 		return std_str;
 	}
 
-	String^ StdToString(std::string const & str)
-	{
-		return gcnew String(str.c_str());
-	}
-
-	String^ WStdToString(std::wstring const & str)
-	{
-		return gcnew String(str.c_str());
-	}
-
 	float LinearToSRGB(float linear)
 	{
 		if (linear < 0.0031308f)
@@ -186,7 +176,7 @@ namespace KlayGE
 
 	String^ MtlEditorCoreWrapper::MeshName(uint32_t index)
 	{
-		return WStdToString(core_->MeshName(index));
+		return gcnew String(core_->MeshName(index));
 	}
 
 	uint32_t MtlEditorCoreWrapper::NumVertexStreams(uint32_t mesh_id)
@@ -241,37 +231,37 @@ namespace KlayGE
 
 	String^ MtlEditorCoreWrapper::DiffuseTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->DiffuseTexture(mtl_id));
+		return gcnew String(core_->DiffuseTexture(mtl_id));
 	}
 
 	String^MtlEditorCoreWrapper::SpecularTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->SpecularTexture(mtl_id));
+		return gcnew String(core_->SpecularTexture(mtl_id));
 	}
 
 	String^ MtlEditorCoreWrapper::ShininessTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->ShininessTexture(mtl_id));
+		return gcnew String(core_->ShininessTexture(mtl_id));
 	}
 
 	String^ MtlEditorCoreWrapper::NormalTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->NormalTexture(mtl_id));
+		return gcnew String(core_->NormalTexture(mtl_id));
 	}
 
 	String^ MtlEditorCoreWrapper::HeightTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->HeightTexture(mtl_id));
+		return gcnew String(core_->HeightTexture(mtl_id));
 	}
 
 	String^ MtlEditorCoreWrapper::EmitTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->EmitTexture(mtl_id));
+		return gcnew String(core_->EmitTexture(mtl_id));
 	}
 
 	String^ MtlEditorCoreWrapper::OpacityTexture(uint32_t mtl_id)
 	{
-		return StdToString(core_->OpacityTexture(mtl_id));
+		return gcnew String(core_->OpacityTexture(mtl_id));
 	}
 
 	uint32_t MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id)
@@ -316,7 +306,7 @@ namespace KlayGE
 
 	System::String^ MtlEditorCoreWrapper::HistroyCmdName(uint32_t index)
 	{
-		return StdToString(core_->HistroyCmdName(index));
+		return gcnew String(core_->HistroyCmdName(index));
 	}
 
 	uint32_t MtlEditorCoreWrapper::EndCmdIndex()
@@ -364,37 +354,37 @@ namespace KlayGE
 
 	void MtlEditorCoreWrapper::DiffuseTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetDiffuseTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetDiffuseTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::SpecularTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetSpecularTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetSpecularTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::ShininessTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetShininessTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetShininessTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::NormalTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetNormalTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetNormalTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::HeightTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetHeightTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetHeightTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::EmitTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetEmitTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetEmitTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::OpacityTexture(uint32_t mtl_id, String^ name)
 	{
-		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetOpacityTexture(core_, mtl_id, StringToStd(name).c_str())));
+		core_->ExecuteCommand(MtlEditorCommandPtr(new MtlEditorCommandSetOpacityTexture(core_, mtl_id, StringToStd(name))));
 	}
 
 	void MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id, uint32_t value)

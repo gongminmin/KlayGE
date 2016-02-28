@@ -189,7 +189,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetDiffuseTexture : public MtlEditorCommandConcrete<ECC_SetDiffuseTexture>
 	{
 	public:
-		MtlEditorCommandSetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetDiffuseTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -203,7 +203,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetSpecularTexture : public MtlEditorCommandConcrete<ECC_SetSpecularTexture>
 	{
 	public:
-		MtlEditorCommandSetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetSpecularTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -217,7 +217,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetShininessTexture : public MtlEditorCommandConcrete<ECC_SetShininessTexture>
 	{
 	public:
-		MtlEditorCommandSetShininessTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetShininessTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -231,7 +231,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetNormalTexture : public MtlEditorCommandConcrete<ECC_SetNormalTexture>
 	{
 	public:
-		MtlEditorCommandSetNormalTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetNormalTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -245,7 +245,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetHeightTexture : public MtlEditorCommandConcrete<ECC_SetHeightTexture>
 	{
 	public:
-		MtlEditorCommandSetHeightTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetHeightTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -259,7 +259,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetEmitTexture : public MtlEditorCommandConcrete<ECC_SetEmitTexture>
 	{
 	public:
-		MtlEditorCommandSetEmitTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetEmitTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;
@@ -273,7 +273,7 @@ namespace KlayGE
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCommandSetOpacityTexture : public MtlEditorCommandConcrete<ECC_SetOpacityTexture>
 	{
 	public:
-		MtlEditorCommandSetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id, char const * name);
+		MtlEditorCommandSetOpacityTexture(MtlEditorCore* core, uint32_t mtl_id, std::string const & name);
 
 		virtual void Execute() override;
 		virtual void Revoke() override;

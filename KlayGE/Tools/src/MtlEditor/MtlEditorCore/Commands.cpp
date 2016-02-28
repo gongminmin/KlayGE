@@ -190,7 +190,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetDiffuseTexture::MtlEditorCommandSetDiffuseTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetDiffuseTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -209,7 +209,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetSpecularTexture::MtlEditorCommandSetSpecularTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetSpecularTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -228,7 +228,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetShininessTexture::MtlEditorCommandSetShininessTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetShininessTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -247,7 +247,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetNormalTexture::MtlEditorCommandSetNormalTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetNormalTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -266,7 +266,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetHeightTexture::MtlEditorCommandSetHeightTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetHeightTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -285,7 +285,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetEmitTexture::MtlEditorCommandSetEmitTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetEmitTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{
@@ -304,7 +304,7 @@ namespace KlayGE
 
 
 	MtlEditorCommandSetOpacityTexture::MtlEditorCommandSetOpacityTexture(MtlEditorCore* core,
-			uint32_t mtl_id, char const * name)
+			uint32_t mtl_id, std::string const & name)
 		: MtlEditorCommandConcrete<ECC_SetOpacityTexture>(core),
 			mtl_id_(mtl_id), name_(name)
 	{

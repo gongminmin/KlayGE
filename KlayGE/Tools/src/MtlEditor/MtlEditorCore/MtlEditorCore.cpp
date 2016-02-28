@@ -542,9 +542,9 @@ namespace KlayGE
 		return model_->GetRenderable()->NumSubrenderables();
 	}
 
-	std::wstring const & MtlEditorCore::MeshName(uint32_t index) const
+	wchar_t const * MtlEditorCore::MeshName(uint32_t index) const
 	{
-		return model_->GetRenderable()->Subrenderable(index)->Name();
+		return model_->GetRenderable()->Subrenderable(index)->Name().c_str();
 	}
 
 	uint32_t MtlEditorCore::NumVertexStreams(uint32_t mesh_id) const
@@ -611,7 +611,7 @@ namespace KlayGE
 		return model->GetMaterial(mtl_id)->opacity;
 	}
 
-	std::string const & MtlEditorCore::DiffuseTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::DiffuseTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -620,14 +620,13 @@ namespace KlayGE
 			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
 				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::SpecularTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::SpecularTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -635,14 +634,13 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Specular Level") == slot_type_hash) || (CT_HASH("Specular Color") == slot_type_hash))
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::ShininessTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::ShininessTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -650,14 +648,13 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Glossiness") == slot_type_hash) || (CT_HASH("Reflection Glossiness Map") == slot_type_hash))
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::NormalTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::NormalTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -665,14 +662,13 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Bump") == slot_type_hash) || (CT_HASH("Bump Map") == slot_type_hash))
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::HeightTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::HeightTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -680,14 +676,13 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if ((CT_HASH("Height") == slot_type_hash) || (CT_HASH("Height Map") == slot_type_hash))
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::EmitTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::EmitTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -695,14 +690,13 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if (CT_HASH("Self-Illumination") == slot_type_hash)
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
-	std::string const & MtlEditorCore::OpacityTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::OpacityTexture(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		for (auto const & slot : model->GetMaterial(mtl_id)->texture_slots)
@@ -710,11 +704,10 @@ namespace KlayGE
 			size_t const slot_type_hash = RT_HASH(slot.first.c_str());
 			if (CT_HASH("Opacity") == slot_type_hash)
 			{
-				return slot.second;
+				return slot.second.c_str();
 			}
 		}
-		static std::string const empty;
-		return empty;
+		return nullptr;
 	}
 
 	uint32_t MtlEditorCore::DetailMode(uint32_t mtl_id) const
