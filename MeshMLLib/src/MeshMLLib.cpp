@@ -319,7 +319,7 @@ namespace KlayGE
 
 	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_quat, float3 const & bind_pos)
 	{
-		this->SetKeyframe(kfs_id, kf_id, frame_id, bind_quat, MathLib::quat_trans_to_udq(bind_quat, bind_pos));
+		this->SetKeyframe(kfs_id, kf_id, frame_id, bind_quat, MathLib::quat_trans_to_udq(bind_quat, bind_pos * unit_scale_));
 	}
 
 	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual)

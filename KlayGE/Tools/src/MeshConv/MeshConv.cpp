@@ -1,4 +1,4 @@
-#include <KlayGE/KlayGE.hpp>
+﻿#include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/XMLDom.hpp>
@@ -55,6 +55,23 @@ namespace
 		return v;
 	}
 
+	float3 AiVectorToFloat3(aiVector3D const& v)
+	{
+		return float3(v.x, v.y, v.z);
+	}
+
+	Quaternion AiQuatToQuat(aiQuaternion const& v)
+	{
+		return Quaternion(v.x, v.y, v.z, v.w);
+	}
+	
+	struct JointBinding
+	{
+		int joint_id;
+		int vertex_id;
+		float weight;
+	};
+
 	struct Mesh
 	{
 		int mtl_id;
@@ -64,6 +81,7 @@ namespace
 		std::vector<float3> normals;
 		std::vector<Quaternion> tangent_quats;
 		std::array<std::vector<float3>, AI_MAX_NUMBER_OF_TEXTURECOORDS> texcoords;
+		std::vector<JointBinding> joint_binding;
 
 		std::vector<uint32_t> indices;
 
@@ -72,9 +90,25 @@ namespace
 		std::array<bool, AI_MAX_NUMBER_OF_TEXTURECOORDS> has_texcoord;
 	};
 
+	struct Joint
+	{
+		int id;
+		int parent_id;
+		std::string name;
+
+		float4x4 bone_to_mesh;
+		float4x4 local_matrix;	  // local to parent
+	};
+
+	
+	typedef std::map<std::string, Joint> JointsMap;
+
 	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
 	{
-		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+//		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+//		auto const trans_quat = MathLib::to_quaternion(trans_mat);
+		(void)parent_mat;
+		auto const trans_mat =float4x4::Identity();
 		auto const trans_quat = MathLib::to_quaternion(trans_mat);
 
 		for (unsigned int n = 0; n < node->mNumMeshes; ++ n)
@@ -116,6 +150,13 @@ namespace
 					meshml_obj.SetVertex(mesh_id, vertex_id, pos, normal, 2, texcoords);
 				}
 			}
+
+			for (unsigned int wi = 0; wi < mesh.joint_binding.size(); ++wi)
+			{
+				auto binding = mesh.joint_binding[wi];
+				int bind_id = meshml_obj.AllocJointBinding(mesh_id, binding.vertex_id);
+				meshml_obj.SetJointBinding(mesh_id, binding.vertex_id, bind_id, binding.joint_id, binding.weight);
+			}
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; ++ i)
@@ -124,32 +165,8 @@ namespace
 		}
 	}
 
-	void ConvertMesh(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz, bool inverse_z)
+	void ConvertMaterials(MeshMLObj& meshml_obj, aiScene const * scene)
 	{
-		aiPropertyStore* props = aiCreatePropertyStore();
-		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
-		aiSetImportPropertyFloat(props, AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
-		aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, 0);
-
-		aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
-
-		unsigned int ppsteps = aiProcess_JoinIdenticalVertices // join identical vertices/ optimize indexing
-			| aiProcess_ValidateDataStructure // perform a full validation of the loader's output
-			| aiProcess_RemoveRedundantMaterials // remove redundant materials
-			| aiProcess_FindInstances; // search for instanced meshes and remove them by references to one master
-
-		aiScene const * scene = aiImportFileExWithProperties(in_name.c_str(),
-			ppsteps // configurable pp steps
-			| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
-			| aiProcess_Triangulate // triangulate polygons with more than 3 edges
-			| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
-			| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
-			nullptr, props);
-
-		aiReleasePropertyStore(props);
-
-		MeshMLObj meshml_obj(scale);
-
 		for (unsigned int mi = 0; mi < scene->mNumMaterials; ++ mi)
 		{
 			int mtl_id = meshml_obj.AllocMaterial();
@@ -258,10 +275,11 @@ namespace
 				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Height, str.C_Str());
 			}
 		}
+	}
 
-		std::vector<Mesh> meshes(scene->mNumMeshes);
-
-		int vertex_export_settings = MeshMLObj::VES_None;
+	void BuildMeshData(std::vector<Mesh>& meshes, int& vertex_export_settings, JointsMap const& joint_nodes, aiScene const * scene, bool swap_yz, bool inverse_z)
+	{
+		vertex_export_settings = MeshMLObj::VES_None;
 		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
 		{
 			aiMesh const * mesh = scene->mMeshes[mi];
@@ -279,18 +297,17 @@ namespace
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
-				if (3 == mesh->mFaces[fi].mNumIndices)
+				BOOST_ASSERT(3 == mesh->mFaces[fi].mNumIndices);
+
+				indices.push_back(mesh->mFaces[fi].mIndices[0]);
+				indices.push_back(mesh->mFaces[fi].mIndices[1]);
+				indices.push_back(mesh->mFaces[fi].mIndices[2]);
+
+				if (two_sided)
 				{
 					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					indices.push_back(mesh->mFaces[fi].mIndices[1]);
 					indices.push_back(mesh->mFaces[fi].mIndices[2]);
-
-					if (two_sided)
-					{
-						indices.push_back(mesh->mFaces[fi].mIndices[0]);
-						indices.push_back(mesh->mFaces[fi].mIndices[2]);
-						indices.push_back(mesh->mFaces[fi].mIndices[1]);
-					}
+					indices.push_back(mesh->mFaces[fi].mIndices[1]);
 				}
 			}
 
@@ -413,6 +430,25 @@ namespace
 			{
 				vertex_export_settings |= MeshMLObj::VES_Texcoord;
 			}
+
+			for (unsigned int bi = 0; bi < mesh->mNumBones; ++bi)
+			{
+				aiBone* bone = mesh->mBones[bi];
+				auto iter = joint_nodes.find(bone->mName.C_Str());
+				if (iter == joint_nodes.end())
+				{
+					BOOST_ASSERT_MSG(0, "Joint not found!");// should not happen
+					continue;
+				}
+
+				int joint_id = iter->second.id;
+				for (unsigned int wi = 0; wi < bone->mNumWeights; ++wi)
+				{
+					int vertex_id = bone->mWeights[wi].mVertexId;
+					float weight = bone->mWeights[wi].mWeight;
+					meshes[mi].joint_binding.push_back({joint_id, vertex_id, weight});
+				}
+			}
 		}
 
 		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
@@ -426,13 +462,365 @@ namespace
 				meshes[mi].has_texcoord[0] = true;
 			}
 		}
+	}
 
+	void PrintMat(std::string const& name, float4x4 const& matrix)
+	{
+		auto & os = std::cout;
+		os.precision(4);
+		os << name << ": \n";
+		for (int i = 0; i < 4; ++i)
+		{
+			os
+			<< matrix(i, 0) << ", "
+			<< matrix(i, 1) << ", "
+			<< matrix(i, 2) << ", "
+			<< matrix(i, 3) << "\n";
+		}
+		os << '\n';
+	}
+	
+	void BuildJoints(MeshMLObj& meshml_obj, JointsMap& joint_nodes, aiScene const * scene)
+	{
+		std::function<void(aiNode const*,float4x4 const&)> build_bind_matrix = [&build_bind_matrix,&joint_nodes, scene]
+		(aiNode const* meshNode,float4x4 const& parent_mat)
+		{
+			(void)parent_mat;
+			float4x4 mesh_trans = MathLib::transpose(float4x4(&meshNode->mTransformation.a1));
+			for (unsigned int i = 0; i < meshNode->mNumMeshes; ++i)
+			{
+				aiMesh const * mesh = scene->mMeshes[meshNode->mMeshes[i]];
+				for (unsigned int ibone = 0; ibone < mesh->mNumBones; ++ibone)
+				{
+					aiBone const * bone = mesh->mBones[ibone];
+					Joint joint;
+					joint.name = bone->mName.C_Str();
+					float4x4 temp = MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1));
+					joint.bone_to_mesh = MathLib::inverse(temp) * mesh_trans;
+					joint_nodes[joint.name] = joint;
+					PrintMat(joint.name, temp);
+					
+				}
+			}
+			
+			for (unsigned int i = 0; i < meshNode->mNumChildren; ++i)
+				build_bind_matrix(meshNode->mChildren[i], mesh_trans);
+		};
+		
+		// 根据assimp文档，aiBone表示带蒙皮的点。所以aiBone对应的aiNode及其所有祖先都需要导入skeleton。
+		// 分两次遍历aiNode，第一次判断是应该导出为bone并填充bind_matrix。第二遍分配id。
+		// 多遍历一遍场景树，以保证父亲的joint_id在孩子的前面
+		std::function<bool(aiNode const*const)> mark_joint_nodes = [&mark_joint_nodes, &joint_nodes](aiNode const* const root)
+		{
+			std::string name = root->mName.C_Str();
+			
+			auto iter = joint_nodes.find(name);
+			bool child_has_bone = false;
+			if (iter != joint_nodes.end())
+			{
+				child_has_bone = true;
+			}
+
+			for (unsigned int i = 0; i < root->mNumChildren; ++i)
+				child_has_bone = mark_joint_nodes(root->mChildren[i]) || child_has_bone;
+
+			if (child_has_bone && iter == joint_nodes.end())
+			{
+				Joint joint;
+				joint.name = name;
+				joint.bone_to_mesh = float4x4::Identity();
+				joint_nodes[name] = joint;
+			}
+
+			return child_has_bone;
+		};
+
+		std::function<void(aiNode* const, int)> alloc_joints =
+			[&meshml_obj, &joint_nodes, &alloc_joints](aiNode* const root, int parent_id)
+		{
+			std::string name = root->mName.C_Str();
+			int joint_id = -1;
+			auto iter = joint_nodes.find(name);
+			if (iter != joint_nodes.end())
+			{
+				joint_id = meshml_obj.AllocJoint();
+				iter->second.id = joint_id;
+				iter->second.local_matrix = MathLib::transpose(float4x4(&root->mTransformation.a1));
+
+				meshml_obj.SetJoint(joint_id, name, parent_id, (iter->second.bone_to_mesh));
+			}
+
+			for (unsigned int i = 0; i < root->mNumChildren; ++i)
+				alloc_joints(root->mChildren[i], joint_id);
+		};
+
+		build_bind_matrix(scene->mRootNode, float4x4::Identity());
+		mark_joint_nodes(scene->mRootNode);
+		alloc_joints(scene->mRootNode, -1);
+	}
+
+	struct ResampledTransform
+	{
+		int frame;
+		float3 pos;
+		Quaternion quat;
+		float scale;
+	};
+	
+	typedef std::vector<ResampledTransform>  JointResampledKeyframe;
+	
+	struct JointKeyframe
+	{
+		std::vector<std::pair<float,float3>> pos;
+		std::vector<std::pair<float,Quaternion>> quats;
+		std::vector<std::pair<float,float3>> scale;
+	};
+	
+	struct Animation
+	{
+		std::string name;
+		int frame_num;
+		std::map<int/*joint_id*/, JointKeyframe> origFrames;
+		std::map<int/*joint_id*/, JointResampledKeyframe> resampledFrames;
+	};
+	
+	template <class T>
+	float GetInterpTime(std::vector<T> const& vec, float time, size_t& itime_lower, size_t& itime_upper)
+	{
+		assert(vec.size() > 0);
+		if (vec.size() == 1)
+		{
+			itime_lower = 0;
+			itime_upper = 0;
+			return 0;
+		}
+		
+		// use @itime_upper as a hint to speed up find
+		size_t vec_size = vec.size();
+		size_t i = 0;
+		for (i = itime_upper; i < vec_size; ++i)
+		{
+			if (vec[i].first >= time)
+				break;
+		}
+		
+		if (i == 0)
+		{
+			itime_lower = 0;
+			itime_upper = 1;
+		}
+		else if (i >= vec.size() - 1)
+		{
+			itime_lower = vec_size - 2;
+			itime_upper = vec_size - 1;
+		}
+		else
+		{
+			itime_lower = i -1;
+			itime_upper = i;
+		}
+		
+		float fraction = 1.0f;
+		float diff = (vec[itime_upper].first - vec[itime_lower].first);
+		fraction = MathLib::clamp(diff == 0 ? 0 : (time - vec[itime_lower].first) / diff, 0.0f, 1.0f);
+		return fraction;
+	}
+
+	void ResampleJointTransform(int start_frame, int end_frame, float fps_scale, JointKeyframe const& okf, JointResampledKeyframe& rkf)
+	{
+		size_t i_pos = 0;
+		size_t i_rot = 0;
+		size_t i_scale = 0;
+		for (int i = start_frame; i <= end_frame; ++i)
+		{
+			float time = i * fps_scale;
+			size_t prev_i = 0;
+			float fraction= 0.0f;
+			float3 pos_resampled(0, 0, 0);
+			float3 scale_resampled(1, 1, 1);
+			Quaternion quat_resampled(0, 0, 0, 1);
+			
+			if (okf.pos.size() > 0)
+			{
+				fraction = GetInterpTime(okf.pos, time, prev_i, i_pos);
+				pos_resampled = MathLib::lerp(okf.pos[prev_i].second, okf.pos[i_pos].second, fraction);
+			}
+			
+			if (okf.scale.size() > 0)
+			{
+				fraction = GetInterpTime(okf.scale, time, prev_i, i_scale);
+				scale_resampled = MathLib::lerp(okf.scale[prev_i].second, okf.scale[i_scale].second, fraction);
+			}
+			
+			if (okf.quats.size() > 0)
+			{
+				fraction = GetInterpTime(okf.quats, time, prev_i, i_rot);
+				quat_resampled = MathLib::slerp(okf.quats[prev_i].second, okf.quats[i_rot].second, fraction);
+			}
+			
+			rkf.push_back({i, pos_resampled, quat_resampled, scale_resampled.x()});
+		}
+	}
+	
+	
+	void BuildActions(MeshMLObj& meshml_obj, JointsMap const& joint_nodes, aiScene const * scene)
+	{
+		std::vector<Animation> animations;
+		
+		const int resample_fps = 25;
+		// for actions
+		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ianim)
+		{
+			const aiAnimation* cur_anim = scene->mAnimations[ianim];
+			float duration = float(cur_anim->mDuration / cur_anim->mTicksPerSecond);
+			Animation anim;
+			anim.name = cur_anim->mName.C_Str();
+			anim.frame_num = int(ceilf(duration * resample_fps));
+			if (anim.frame_num == 0) anim.frame_num = 1;
+			
+			// import joints animation
+			for (unsigned int ichannel = 0; ichannel < cur_anim->mNumChannels; ++ichannel)
+			{
+				const aiNodeAnim* cur_joint = cur_anim->mChannels[ichannel];
+				int joint_id = -1;
+				auto iter  = joint_nodes.find(cur_joint->mNodeName.C_Str()
+											  );
+				if (iter != joint_nodes.end())
+					joint_id = iter->second.id;
+				
+				// NOTE: ignore animation if node is not joint
+				if (joint_id > 0)
+				{
+					JointKeyframe kf;
+					for (unsigned int i = 0; i < cur_joint->mNumPositionKeys; ++i)
+					{
+						auto& p = cur_joint->mPositionKeys[i];
+						kf.pos.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
+					}
+					
+					for (unsigned int i = 0; i < cur_joint->mNumRotationKeys; ++i)
+					{
+						auto& p = cur_joint->mRotationKeys[i];
+						kf.quats.push_back(std::make_pair(static_cast<float>(p.mTime), AiQuatToQuat(p.mValue)));
+					}
+					
+					for (unsigned int i = 0; i < cur_joint->mNumScalingKeys; ++i)
+					{
+						auto& p = cur_joint->mScalingKeys[i];
+						kf.scale.push_back(std::make_pair(static_cast<float>(p.mTime), AiVectorToFloat3(p.mValue)));
+					}
+					
+					// resample
+					JointResampledKeyframe resampled_kf;
+					ResampleJointTransform(0, anim.frame_num - 1, static_cast<float>(cur_anim->mTicksPerSecond / resample_fps), kf, resampled_kf);
+					
+					anim.origFrames[joint_id] = kf;
+					anim.resampledFrames[joint_id] = resampled_kf;
+				}
+			}
+			
+			// NOTE: 由于KlageGE播放时需要每个joint都有kf，将joint的transform填充为默认。
+			for (auto iter = joint_nodes.begin(); iter != joint_nodes.end(); ++iter)
+			{
+				int joint_id = iter->second.id;
+				if (anim.resampledFrames.find(joint_id) == anim.resampledFrames.end())
+				{
+					ResampledTransform defaultTF{0, float3(0, 0, 0), Quaternion::Identity(), 1.0f};
+					float3 scale;
+					MathLib::decompose(scale, defaultTF.quat, defaultTF.pos, iter->second.local_matrix);
+					defaultTF.scale = scale.x();
+					anim.resampledFrames[joint_id] = JointResampledKeyframe{defaultTF};
+				}
+			}
+			
+			animations.push_back(anim);
+		}
+		
+		int action_frame_offset = 0;
+		for (size_t ianim = 0; ianim < animations.size(); ++ianim)
+		{
+			Animation& anim = animations[ianim];
+			
+			int action_id = meshml_obj.AllocAction();
+			meshml_obj.SetAction(action_id, anim.name, action_frame_offset, action_frame_offset + anim.frame_num - 1);
+			
+			const auto& resampledFrames = anim.resampledFrames;
+			for (auto iter:resampledFrames)
+			{
+				int joint_id = iter.first;
+				int kfs_id = meshml_obj.AllocKeyframes();
+				meshml_obj.SetKeyframes(kfs_id, joint_id);
+				
+				for (size_t iframe = 0; iframe < iter.second.size(); ++iframe)
+				{
+					int shifted_frame = iter.second[iframe].frame + action_frame_offset;
+					int kf_id = meshml_obj.AllocKeyframe(kfs_id);
+					float4x4 mat = MathLib::to_matrix(iter.second[iframe].quat) * iter.second[iframe].scale;
+					float3 pos = iter.second[iframe].pos;
+					mat(3, 0) = pos.x();
+					mat(3, 1) = pos.y();
+					mat(3, 2) = pos.z();
+					//mat(3, 3) = 1.0f;
+					
+					meshml_obj.SetKeyframe(kfs_id, kf_id, shifted_frame, mat);
+				}
+			}
+			
+			action_frame_offset = action_frame_offset + anim.frame_num;
+		}
+		
+		meshml_obj.FrameRate(resample_fps);
+		meshml_obj.NumFrames(action_frame_offset);
+	}
+
+	bool ConvertScene(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz, bool inverse_z)
+	{
+		aiPropertyStore* props = aiCreatePropertyStore();
+		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
+		aiSetImportPropertyFloat(props, AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
+		aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, 0);
+
+		aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
+
+		unsigned int ppsteps = aiProcess_JoinIdenticalVertices // join identical vertices/ optimize indexing
+			| aiProcess_ValidateDataStructure // perform a full validation of the loader's output
+			| aiProcess_RemoveRedundantMaterials // remove redundant materials
+			| aiProcess_FindInstances; // search for instanced meshes and remove them by references to one master
+
+		aiScene const * scene = aiImportFileExWithProperties(in_name.c_str(),
+			ppsteps // configurable pp steps
+			| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
+			| aiProcess_Triangulate // triangulate polygons with more than 3 edges
+			| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
+			| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
+			nullptr, props);
+
+		aiReleasePropertyStore(props);
+
+		if (!scene)
+		{
+			cout << "Assimp: Import file error: " << aiGetErrorString() << '\n';
+			return false;
+		}
+
+		MeshMLObj meshml_obj(scale);
+		ConvertMaterials(meshml_obj, scene);
+
+		std::vector<Mesh> meshes(scene->mNumMeshes);
+		JointsMap joint_nodes;
+		
+		int vertex_export_settings;
+		BuildJoints(meshml_obj, joint_nodes, scene);
+		BuildMeshData(meshes, vertex_export_settings, joint_nodes, scene, swap_yz, inverse_z);
 		RecursiveTransformMesh(meshml_obj, float4x4::Identity(), scene->mRootNode, meshes);
+		BuildActions(meshml_obj, joint_nodes, scene);
 
 		std::ofstream ofs(out_name.c_str());
 		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
 
 		aiReleaseImport(scene);
+
+		return true;
 	}
 }
 
@@ -518,9 +906,9 @@ int main(int argc, char* argv[])
 
 	std::string output_name = (target_folder / base_name).string() + ".meshml";
 
-	ConvertMesh(file_name, output_name, scale, swap_yz, inverse_z);
+	bool bSucc = ConvertScene(file_name, output_name, scale, swap_yz, inverse_z);
 
-	if (!quiet)
+	if (bSucc && !quiet)
 	{
 		cout << "MeshML has been saved to " << output_name << "." << endl;
 	}
