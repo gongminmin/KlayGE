@@ -159,7 +159,7 @@ namespace KlayGE
 	}
 
 	void MeshMLObj::SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
-			float3 const & specular, float3 const & emit, float opacity, float shininess)
+			float3 const & specular, float3 const & emit, float opacity, float shininess, bool sss)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
@@ -170,6 +170,7 @@ namespace KlayGE
 		mtl.emit = emit;
 		mtl.opacity = opacity;
 		mtl.shininess = shininess;
+		mtl.sss = sss;
 	}
 
 	void MeshMLObj::SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
@@ -524,7 +525,8 @@ namespace KlayGE
 				<< " " << mtl.emit[1]
 				<< " " << mtl.emit[2]
 				<< "\" opacity=\"" << mtl.opacity
-				<< "\" shininess=\"" << mtl.shininess << "\"";
+				<< "\" shininess=\"" << mtl.shininess
+				<< "\" sss=\"" << (mtl.sss ? 1 : 0) << "\"";
 
 			if (mtl.texture_slots.empty())
 			{

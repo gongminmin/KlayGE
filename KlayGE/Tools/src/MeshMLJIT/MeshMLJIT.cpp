@@ -101,7 +101,7 @@ namespace
 	}
 
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 10;
+	uint32_t const MODEL_BIN_VERSION = 11;
 
 	struct KeyFrames
 	{
@@ -213,6 +213,15 @@ namespace
 				mtl.specular *= attr->ValueFloat();
 			}
 			mtl.shininess = mtl_node->Attrib("shininess")->ValueFloat();
+			attr = mtl_node->Attrib("sss");
+			if (attr)
+			{
+				mtl.sss = attr->ValueInt() ? true : false;
+			}
+			else
+			{
+				mtl.sss = false;
+			}
 
 			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
 			if (!tex_node)
@@ -1578,6 +1587,9 @@ namespace
 
 			mtl.shininess = Native2LE(mtl.shininess);
 			os.write(reinterpret_cast<char*>(&mtl.shininess), sizeof(mtl.shininess));
+
+			uint8_t sss = mtl.sss;
+			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
 
 			uint32_t num_texs = Native2LE(static_cast<uint32_t>(mtl.texture_slots.size()));
 			os.write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));

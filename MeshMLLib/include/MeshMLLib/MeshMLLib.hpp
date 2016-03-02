@@ -81,7 +81,8 @@ namespace KlayGE
 			};
 			
 			Material()
-				: detail_mode(SDM_Parallax),
+				: sss(false),
+					detail_mode(SDM_Parallax),
 					height_offset_scale(-0.5f, 0.06f),
 					tess_factors(5, 5, 1, 9)
 			{
@@ -93,6 +94,7 @@ namespace KlayGE
 			float3 emit;
 			float opacity;
 			float shininess;
+			bool sss;
 
 			std::vector<TextureSlot> texture_slots;
 
@@ -134,7 +136,7 @@ namespace KlayGE
 
 		int AllocMaterial();
 		void SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
-			float3 const & specular, float3 const & emit, float opacity, float shininess);
+			float3 const & specular, float3 const & emit, float opacity, float shininess, bool sss);
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
 		int AllocTextureSlot(int mtl_id);

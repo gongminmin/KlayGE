@@ -138,7 +138,8 @@ namespace KlayGE
 		};
 
 		RenderMaterial()
-			: detail_mode(SDM_Parallax),
+			: sss(false),
+				detail_mode(SDM_Parallax),
 				height_offset_scale(-0.5f, 0.06f),
 				tess_factors(5, 5, 1, 9)
 		{
@@ -150,6 +151,7 @@ namespace KlayGE
 		float3 emit;
 		float opacity;
 		float shininess;
+		bool sss;
 
 		TextureSlotsType texture_slots;
 

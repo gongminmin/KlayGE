@@ -232,7 +232,7 @@ namespace
 				}
 			}
 
-			meshml_obj.SetMaterial(mtl_id, ambient, diffuse, specular, emit, opacity, shininess);
+			meshml_obj.SetMaterial(mtl_id, ambient, diffuse, specular, emit, opacity, shininess, false);
 
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)

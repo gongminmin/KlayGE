@@ -769,7 +769,8 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 
 				mtl_id = meshml_obj_.AllocMaterial();
 				meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(ac.r, ac.g, ac.b), dcoeff * KlayGE::float3(dc.r, dc.g, dc.b),
-					KlayGE::float3(spec.r, spec.g, spec.b), KlayGE::float3(ec.r, ec.g, ec.b), 1.0f - ((tr.r + tr.g + tr.b) / 3.0f), shininess);
+					KlayGE::float3(spec.r, spec.g, spec.b), KlayGE::float3(ec.r, ec.g, ec.b), 1.0f - ((tr.r + tr.g + tr.b) / 3.0f),
+					shininess, false);
 			}
 			else
 			{
@@ -840,7 +841,7 @@ int MayaMeshExporter::AddDefaultMaterial()
 {
 	int mtl_id = meshml_obj_.AllocMaterial();
 	meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(0, 0, 0), KlayGE::float3(0, 0, 0),
-		KlayGE::float3(0.9f, 0.9f, 0.9f), KlayGE::float3(0, 0, 0), 1, 32);
+		KlayGE::float3(0.9f, 0.9f, 0.9f), KlayGE::float3(0, 0, 0), 1, 32, false);
 	return mtl_id;
 }
 

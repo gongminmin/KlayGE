@@ -351,83 +351,157 @@ namespace KlayGE
 
 	void Renderable::UpdateTechniques()
 	{
-		if (!mtl_ || (RenderMaterial::SDM_Parallax == mtl_->detail_mode))
+		bool sss;
+		RenderMaterial::SurfaceDetailMode sdm;
+		if (mtl_)
 		{
+			sss = mtl_->sss;
+			sdm = mtl_->detail_mode;
+		}
+		else
+		{
+			sss = false;
+			sdm = RenderMaterial::SDM_Parallax;
+		}
+
+		switch (sdm)
+		{
+		case RenderMaterial::SDM_Parallax:
 			if (this->AlphaTest())
 			{
-				gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestMRTTech");
+				}
+				else
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+				}
 			}
 			else
 			{
-				gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferMRTTech");
+				}
+				else
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+				}
 			}
 			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
 			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
 			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
 			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
-		}
-		else
-		{
-			switch (mtl_->detail_mode)
+			break;
+		
+		case RenderMaterial::SDM_FlatTessellation:
+			if (this->AlphaTest())
 			{
-			case RenderMaterial::SDM_FlatTessellation:
-				if (this->AlphaTest())
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessAlphaTestMRTTech");
+				}
+				else
 				{
 					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaTestMRTTech");
+				}
+			}
+			else
+			{
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessMRTTech");
 				}
 				else
 				{
 					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessMRTTech");
 				}
-				gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendBackMRTTech");
-				gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendFrontMRTTech");
-				special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessTech");
-				special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendBackTech");
-				special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendFrontTech");
-				break;
+			}
+			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendBackMRTTech");
+			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendFrontMRTTech");
+			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessTech");
+			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendBackTech");
+			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendFrontTech");
+			break;
 
-			case RenderMaterial::SDM_SmoothTessellation:
-				if (this->AlphaTest())
+		case RenderMaterial::SDM_SmoothTessellation:
+			if (this->AlphaTest())
+			{
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessAlphaTestMRTTech");
+				}
+				else
 				{
 					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaTestMRTTech");
+				}
+			}
+			else
+			{
+				if (sss)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessMRTTech");
 				}
 				else
 				{
 					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessMRTTech");
 				}
-				gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendBackMRTTech");
-				gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendFrontMRTTech");
-				special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessTech");
-				special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendBackTech");
-				special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendFrontTech");
-				break;
-
-			default:
-				BOOST_ASSERT(false);
-				break;
 			}
+			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendBackMRTTech");
+			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendFrontMRTTech");
+			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessTech");
+			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendBackTech");
+			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendFrontTech");
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 
 		if (this->AlphaTest())
 		{
-			depth_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
-			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT0Tech");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT1Tech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
-			gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
+			if (sss)
+			{
+				depth_tech_ = deferred_effect_->TechniqueByName("SSSDepthAlphaTestTech");
+				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestRT0Tech");
+				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestRT1Tech");
+				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapAlphaTestTech");
+				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapWODepthTextureAlphaTestTech");
+			}
+			else
+			{
+				depth_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
+				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT0Tech");
+				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT1Tech");
+				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
+				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
+				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
+			}
 		}
 		else
 		{
-			depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
-			gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferRT0Tech");
-			gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferRT1Tech");
-			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
-			gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
+			if (sss)
+			{
+				depth_tech_ = deferred_effect_->TechniqueByName("SSSDepthTech");
+				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("SSSGBufferRT0Tech");
+				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("SSSGBufferRT1Tech");
+				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapTech");
+				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapWODepthTextureTech");
+			}
+			else
+			{
+				depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
+				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferRT0Tech");
+				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferRT1Tech");
+				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
+				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
+				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
+			}
 		}
 		depth_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendBackTech");
 		depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendFrontTech");

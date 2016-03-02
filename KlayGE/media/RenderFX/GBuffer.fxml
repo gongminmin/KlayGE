@@ -1259,6 +1259,35 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="SSSGBufferFlatTessMRTTech" inherit="SSSGBufferMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferFlatTessAlphaTestMRTTech" inherit="SSSGBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferFlatTessAlphaBlendBackMRTTech" inherit="SSSGBufferAlphaBlendBackMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferFlatTessAlphaBlendFrontMRTTech" inherit="SSSGBufferAlphaBlendFrontMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+
 	<technique name="GBufferSmoothTessMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
@@ -1303,6 +1332,35 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	</technique>
 	<technique name="SpecialShadingSmoothTessAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
 		<pass name="p0">			
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSSGBufferSmoothTessMRTTech" inherit="SSSGBufferMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferSmoothTessAlphaTestMRTTech" inherit="SSSGBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferSmoothTessAlphaBlendBackMRTTech" inherit="SSSGBufferAlphaBlendBackMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SSSGBufferSmoothTessAlphaBlendFrontMRTTech" inherit="SSSGBufferAlphaBlendFrontMRTTech">
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>

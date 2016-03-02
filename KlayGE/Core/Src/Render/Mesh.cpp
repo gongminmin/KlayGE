@@ -46,7 +46,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 10;
+	uint32_t const MODEL_BIN_VERSION = 11;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -573,6 +573,11 @@ namespace KlayGE
 			|| (effect_attrs_ & EA_Reflection))
 		{
 			effect_attrs_ |= EA_SpecialShading;
+		}
+
+		if (mtl_->sss)
+		{
+			effect_attrs_ |= EA_SSS;
 		}
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
@@ -1118,6 +1123,10 @@ namespace KlayGE
 			decoded->read(&mtl->shininess, sizeof(float));
 			mtl->shininess = LE2Native(mtl->shininess);
 
+			uint8_t sss;
+			decoded->read(&sss, sizeof(sss));
+			mtl->sss = sss ? true : false;
+
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
 				mtl->ambient.x() = MathLib::srgb_to_linear(mtl->ambient.x());
@@ -1501,7 +1510,7 @@ namespace KlayGE
 			}
 
 			obj.SetMaterial(mtl_id, ambient, diffuse, mtls[i]->specular, mtls[i]->emit,
-				mtls[i]->opacity, mtls[i]->shininess);
+				mtls[i]->opacity, mtls[i]->shininess, mtls[i]->sss);
 
 			for (size_t ts = 0; ts < mtls[i]->texture_slots.size(); ++ ts)
 			{
