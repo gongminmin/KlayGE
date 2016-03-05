@@ -361,7 +361,8 @@ namespace KlayGE
 		RenderEffectParameterPtr specular_clr_param_;
 		RenderEffectParameterPtr normal_map_enabled_param_;
 		RenderEffectParameterPtr normal_tex_param_;
-		RenderEffectParameterPtr height_map_enabled_param_;
+		RenderEffectParameterPtr height_map_parallax_enabled_param_;
+		RenderEffectParameterPtr height_map_tess_enabled_param_;
 		RenderEffectParameterPtr height_tex_param_;
 		RenderEffectParameterPtr diffuse_tex_param_;
 		RenderEffectParameterPtr diffuse_clr_param_;

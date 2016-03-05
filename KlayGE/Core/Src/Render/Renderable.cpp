@@ -119,7 +119,14 @@ namespace KlayGE
 				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
 				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
 				*normal_tex_param_ = normal_tex_;
-				*height_map_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+				if (!mtl_ || (RenderMaterial::SDM_Parallax == mtl_->detail_mode))
+				{
+					*height_map_parallax_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+				}
+				else
+				{
+					*height_map_tess_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+				}
 				*height_tex_param_ = height_tex_;
 				*specular_tex_param_ = specular_tex_;
 				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
@@ -335,7 +342,8 @@ namespace KlayGE
 		shininess_tex_param_ = deferred_effect_->ParameterByName("shininess_tex");
 		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
 		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
-		height_map_enabled_param_ = deferred_effect_->ParameterByName("height_map_enabled");
+		height_map_parallax_enabled_param_ = deferred_effect_->ParameterByName("height_map_parallax_enabled");
+		height_map_tess_enabled_param_ = deferred_effect_->ParameterByName("height_map_tess_enabled");
 		height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
 		diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
 		diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");

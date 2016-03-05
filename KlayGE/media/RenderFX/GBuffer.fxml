@@ -31,7 +31,8 @@
 		<parameter type="float4" name="emit_clr"/>
 		<parameter type="float" name="opacity_clr"/>
 		<parameter type="int" name="normal_map_enabled"/>
-		<parameter type="int" name="height_map_enabled"/>
+		<parameter type="int" name="height_map_parallax_enabled"/>
+		<parameter type="int" name="height_map_tess_enabled"/>
 		<parameter type="int" name="opacity_map_enabled"/>
 		<parameter type="float4" name="object_id"/>
 	</cbuffer>
@@ -248,7 +249,7 @@ float4 DepthAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z 
 float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float2 uv = texcoord_2xy.xy;
-	if (height_map_enabled)
+	if (height_map_parallax_enabled)
 	{
 		float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
 
@@ -1121,7 +1122,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
 	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 
-	if (height_map_enabled)
+	if (height_map_tess_enabled)
 	{
 		float height = (height_tex.SampleLevel(bilinear_sampler, uv, 0).r + height_offset_scale.x) * 0.1f * height_offset_scale.y;
 		pos += height * obj_to_tangent[2];

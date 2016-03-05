@@ -123,7 +123,8 @@ namespace
 			case PT_TransparencyFrontGBufferMRT:
 				*diffuse_clr_param_ = float4(0.07f, 0.15f, 0.2f, 0);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
-				*height_map_enabled_param_ = static_cast<int32_t>(0);
+				*height_map_parallax_enabled_param_ = static_cast<int32_t>(0);
+				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
 				*specular_clr_param_ = float4(5, 5, 5, 0);
 				*shininess_clr_param_ = float2(0.5f, 0);
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
