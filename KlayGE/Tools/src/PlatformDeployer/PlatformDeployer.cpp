@@ -201,14 +201,15 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 {
 	std::ofstream ofs("convert.bat");
 
-	ofs << "@echo off" << std::endl << std::endl;
-	
 	if (("diffuse" == res_type)
 		|| ("specular" == res_type)
 		|| ("emit" == res_type))
 	{
 		for (size_t i = 0; i < res_names.size(); ++i)
 		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			if (caps.srgb_support)
 			{
 				ofs << "ForceTexSRGB \"" << res_names[i] << "\" temp.dds" << std::endl;
@@ -235,12 +236,16 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			ofs << "del temp.dds" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 	else if ("normal" == res_type)
 	{
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
 			if (caps.bc5_support)
 			{
@@ -255,12 +260,16 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			ofs << "del temp.dds" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 	else if ("bump" == res_type)
 	{
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "Bump2Normal \"" << res_names[i] << "\" temp.dds 0.4" << std::endl;
 			ofs << "Mipmapper temp.dds" << std::endl; 
 			if (caps.bc5_support)
@@ -276,6 +285,31 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			ofs << "del temp.dds" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
+		}
+	}
+	else if ("height" == res_type)
+	{
+		for (size_t i = 0; i < res_names.size(); ++i)
+		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
+			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
+			if (caps.bc5_support)
+			{
+				ofs << "TexCompressor BC4 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.bc1_support)
+			{
+				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else
+			{
+				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			ofs << "del temp.dds" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 	else if ("cubemap" == res_type)
@@ -301,22 +335,33 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
-			
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "HDRCompressor \"" << res_names[i] << "\" " << y_fmt << ' ' << c_fmt << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 	else if ("model" == res_type)
 	{
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "MeshMLJIT -I \"" << res_names[i] << "\" -P " << caps.platform << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 	else if ("effect" == res_type)
 	{
 		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
 		}
 	}
 
