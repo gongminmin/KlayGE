@@ -3,6 +3,9 @@
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KlayGE/TexCompression.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
+#include <KlayGE/TexCompressionETC.hpp>
 
 #include <boost/algorithm/string/case_conv.hpp>
 
@@ -26,19 +29,6 @@ namespace
 		std::vector<uint8_t> in_data_block;
 		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
 
-		if (IsCompressedFormat(in_format))
-		{
-			cout << "This texture is already in compressed format." << endl;
-			if (in_file != out_file)
-			{
-				SaveTexture(out_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data);
-			}
-			return;
-		}
-
-		uint32_t out_width = (in_width + 3) & ~3;
-		uint32_t out_height = (in_height + 3) & ~3;
-
 		if (IsSigned(in_format))
 		{
 			fmt = MakeSigned(fmt);
@@ -48,10 +38,183 @@ namespace
 			fmt = MakeSRGB(fmt);
 		}
 
+		TexCompressionPtr in_codec;
+		if (IsCompressedFormat(in_format))
+		{
+			switch (in_format)
+			{
+			case EF_BC1:
+			case EF_BC1_SRGB:
+			case EF_SIGNED_BC1:
+				in_codec = MakeSharedPtr<TexCompressionBC1>();
+				break;
+
+			case EF_BC2:
+			case EF_BC2_SRGB:
+			case EF_SIGNED_BC2:
+				in_codec = MakeSharedPtr<TexCompressionBC2>();
+				break;
+
+			case EF_BC3:
+			case EF_BC3_SRGB:
+			case EF_SIGNED_BC3:
+				in_codec = MakeSharedPtr<TexCompressionBC3>();
+				break;
+
+			case EF_BC4:
+			case EF_BC4_SRGB:
+			case EF_SIGNED_BC4:
+				in_codec = MakeSharedPtr<TexCompressionBC4>();
+				break;
+
+			case EF_BC5:
+			case EF_BC5_SRGB:
+			case EF_SIGNED_BC5:
+				in_codec = MakeSharedPtr<TexCompressionBC5>();
+				break;
+
+			case EF_BC6:
+				in_codec = MakeSharedPtr<TexCompressionBC6U>();
+				break;
+
+			case EF_SIGNED_BC6:
+				in_codec = MakeSharedPtr<TexCompressionBC6S>();
+				break;
+
+			case EF_BC7:
+			case EF_BC7_SRGB:
+				in_codec = MakeSharedPtr<TexCompressionBC7>();
+				break;
+
+			case EF_ETC1:
+				in_codec = MakeSharedPtr<TexCompressionETC1>();
+				break;
+
+			case EF_ETC2_BGR8:
+			case EF_ETC2_BGR8_SRGB:
+				in_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+				break;
+
+			case EF_ETC2_A1BGR8:
+			case EF_ETC2_A1BGR8_SRGB:
+				in_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+				break;
+
+			case EF_ETC2_ABGR8:
+			case EF_ETC2_ABGR8_SRGB:
+				// TODO
+				BOOST_ASSERT(false);
+				break;
+
+			case EF_ETC2_R11:
+			case EF_SIGNED_ETC2_R11:
+				// TODO
+				BOOST_ASSERT(false);
+				break;
+
+			case EF_ETC2_GR11:
+			case EF_SIGNED_ETC2_GR11:
+				// TODO
+				BOOST_ASSERT(false);
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+		}
+
+		TexCompressionPtr out_codec;
+		switch (fmt)
+		{
+		case EF_BC1:
+		case EF_BC1_SRGB:
+		case EF_SIGNED_BC1:
+			out_codec = MakeSharedPtr<TexCompressionBC1>();
+			break;
+
+		case EF_BC2:
+		case EF_BC2_SRGB:
+		case EF_SIGNED_BC2:
+			out_codec = MakeSharedPtr<TexCompressionBC2>();
+			break;
+
+		case EF_BC3:
+		case EF_BC3_SRGB:
+		case EF_SIGNED_BC3:
+			out_codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
+
+		case EF_BC4:
+		case EF_BC4_SRGB:
+		case EF_SIGNED_BC4:
+			out_codec = MakeSharedPtr<TexCompressionBC4>();
+			break;
+
+		case EF_BC5:
+		case EF_BC5_SRGB:
+		case EF_SIGNED_BC5:
+			out_codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
+
+		case EF_BC6:
+			out_codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			out_codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionBC7>();
+			break;
+
+		case EF_ETC1:
+			out_codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
+
+		uint32_t out_width = (in_width + out_codec->BlockWidth()) & ~out_codec->BlockWidth();
+		uint32_t out_height = (in_height + out_codec->BlockHeight()) & ~out_codec->BlockHeight();
+
 		std::vector<ElementInitData> new_data(in_data.size());
 		std::vector<std::vector<uint8_t>> new_data_block(in_data.size());
 
-		for (size_t sub_res = 0; sub_res < in_array_size; ++ sub_res)
+		std::vector<std::tuple<uint32_t, uint32_t, uint32_t>> block_addrs;
+		for (uint32_t array_index = 0; array_index < in_array_size; ++ array_index)
 		{
 			uint32_t src_width = in_width;
 			uint32_t src_height = in_height;
@@ -61,24 +224,24 @@ namespace
 
 			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
-				ElementInitData& src_data = in_data[sub_res * in_num_mipmaps + mip];
-				ElementInitData& dst_data = new_data[sub_res * in_num_mipmaps + mip];
+				uint32_t const sub_res = array_index * in_num_mipmaps + mip;
+				uint32_t const block_size = out_codec->BlockBytes();
 
-				uint32_t const block_size = NumFormatBytes(fmt) * 4;
+				ElementInitData& dst_data = new_data[sub_res];
 
-				dst_data.row_pitch = ((dst_width + 3) / 4) * block_size;
-				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + 3) / 4);
+				dst_data.row_pitch = ((dst_width + out_codec->BlockWidth() - 1) / out_codec->BlockWidth()) * block_size;
+				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + out_codec->BlockHeight() - 1) / out_codec->BlockHeight());
 
-				new_data_block[sub_res * in_num_mipmaps + mip].resize(dst_data.slice_pitch);
+				new_data_block[sub_res].resize(dst_data.slice_pitch);
+				dst_data.data = &new_data_block[sub_res][0];
 
-				dst_data.data = &new_data_block[sub_res * in_num_mipmaps + mip][0];
-
-				ResizeTexture(&new_data_block[sub_res * in_num_mipmaps + mip][0],
-					dst_data.row_pitch, dst_data.slice_pitch,
-					fmt, dst_width, dst_height, 1,
-					src_data.data, src_data.row_pitch, src_data.slice_pitch,
-					in_format, src_width, src_height, 1,
-					false);
+				for (uint32_t y = 0; y < src_height; y += out_codec->BlockHeight())
+				{
+					for (uint32_t x = 0; x < src_width; x += out_codec->BlockWidth())
+					{
+						block_addrs.push_back(std::make_tuple(sub_res, x, y));
+					}
+				}
 
 				src_width = std::max(src_width / 2, 1U);
 				src_height = std::max(src_height / 2, 1U);
@@ -88,7 +251,63 @@ namespace
 			}
 		}
 
+		size_t last_disp_num_blocks = 0;
+		for (size_t i = 0; i < block_addrs.size(); ++ i)
+		{
+			if ((0 == last_disp_num_blocks) || (i == block_addrs.size() - 1) || (i - last_disp_num_blocks > 500))
+			{
+				cout.precision(2);
+				cout << fixed << i * 100.0f / (block_addrs.size() - 1) << " %        \r";
+				last_disp_num_blocks = i;
+			}
+
+			uint32_t const sub_res = std::get<0>(block_addrs[i]);
+			uint32_t const x = std::get<1>(block_addrs[i]);
+			uint32_t const y = std::get<2>(block_addrs[i]);
+			uint32_t const array_index = sub_res / in_num_mipmaps;
+			uint32_t const mip = sub_res - array_index * in_num_mipmaps;
+
+			ElementInitData& sub_res_data = in_data[std::get<0>(block_addrs[i])];
+			uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
+			std::vector<uint8_t> block_in_data;
+			if (in_codec)
+			{
+				BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
+				BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
+
+				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * NumFormatBytes(in_codec->DecodedFormat()));
+				in_codec->DecodeBlock(&block_in_data[0], src_data
+					+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
+			}
+			else
+			{
+				uint32_t elem_size = NumFormatBytes(in_format);
+				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * elem_size);
+				for (uint32_t dy = 0; dy < out_codec->BlockHeight(); ++ dy)
+				{
+					if (y + dy < std::max(1U, in_height >> mip))
+					{
+						for (uint32_t dx = 0; dx < out_codec->BlockWidth(); ++ dx)
+						{
+							if (x + dx < std::max(1U, in_width >> mip))
+							{
+								memcpy(&block_in_data[(dy * out_codec->BlockWidth() + dx) * elem_size],
+									src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
+							}
+						}
+					}
+				}
+			}
+
+			ElementInitData& dst_data = new_data[sub_res];
+			uint32_t const offset = y / out_codec->BlockHeight() * dst_data.row_pitch
+				+ (x / out_codec->BlockWidth()) * out_codec->BlockBytes();
+			out_codec->EncodeBlock(&new_data_block[sub_res][offset], &block_in_data[0], TCM_Quality);
+		}
+
 		SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, fmt, new_data);
+
+		cout << endl;
 	}
 
 	void PrintSupportedFormats()
