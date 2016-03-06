@@ -948,7 +948,7 @@ namespace KlayGE
 			}
 		}
 
-		this->EncodeBC1Internal(bc1, argb, alpha, method);
+		this->EncodeBC1Internal(bc1, &tmp_argb[0], alpha, method);
 	}
 
 	void TexCompressionBC1::DecodeBlock(void* output, void const * input)
