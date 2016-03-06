@@ -18,6 +18,77 @@ using namespace KlayGE;
 
 namespace
 {
+	void CompressABlock(TexCompressionPtr const & in_codec, TexCompressionPtr const & out_codec,
+		std::tuple<uint32_t, uint32_t, uint32_t> const & block_addr, uint32_t in_num_mipmaps,
+		uint32_t in_width, uint32_t in_height, ElementFormat in_format, std::vector<ElementInitData> const & in_data,
+		std::vector<ElementInitData> const & out_data)
+	{
+		uint32_t const sub_res = std::get<0>(block_addr);
+		uint32_t const x = std::get<1>(block_addr);
+		uint32_t const y = std::get<2>(block_addr);
+		uint32_t const array_index = sub_res / in_num_mipmaps;
+		uint32_t const mip = sub_res - array_index * in_num_mipmaps;
+		uint32_t const mip_width = std::max(1U, in_width >> mip);
+		uint32_t const mip_height = std::max(1U, in_height >> mip);
+
+		ElementInitData const & sub_res_data = in_data[std::get<0>(block_addr)];
+		uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
+		std::vector<uint8_t> block_in_data;
+		ElementFormat block_in_fmt;
+		if (in_codec)
+		{
+			BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
+			BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
+
+			block_in_fmt = in_codec->DecodedFormat();
+			block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * NumFormatBytes(block_in_fmt));
+			in_codec->DecodeBlock(&block_in_data[0], src_data
+				+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
+		}
+		else
+		{
+			block_in_fmt = in_format;
+			uint32_t elem_size = NumFormatBytes(in_format);
+			block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * elem_size, 0);
+			for (uint32_t dy = 0; dy < out_codec->BlockHeight(); ++dy)
+			{
+				if (y + dy < mip_height)
+				{
+					for (uint32_t dx = 0; dx < out_codec->BlockWidth(); ++dx)
+					{
+						if (x + dx < mip_width)
+						{
+							memcpy(&block_in_data[(dy * out_codec->BlockWidth() + dx) * elem_size],
+								src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
+						}
+						else
+						{
+							break;
+						}
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+
+		if (block_in_fmt != out_codec->DecodedFormat())
+		{
+			uint32_t const num_texels = out_codec->BlockWidth() * out_codec->BlockHeight();
+			std::vector<Color> block_in_data_f32(num_texels);
+			ConvertToABGR32F(block_in_fmt, &block_in_data[0], num_texels, &block_in_data_f32[0]);
+			block_in_data.resize(num_texels * NumFormatBytes(out_codec->DecodedFormat()));
+			ConvertFromABGR32F(out_codec->DecodedFormat(), &block_in_data_f32[0], num_texels, &block_in_data[0]);
+		}
+
+		uint32_t const offset = y / out_codec->BlockHeight() * out_data[sub_res].row_pitch
+			+ (x / out_codec->BlockWidth()) * out_codec->BlockBytes();
+		uint8_t* dst = static_cast<uint8_t*>(const_cast<void*>(out_data[sub_res].data));
+		out_codec->EncodeBlock(dst + offset, &block_in_data[0], TCM_Quality);
+	}
+
 	void CompressTex(std::string const & in_file, std::string const & out_file, ElementFormat fmt)
 	{
 		Texture::TextureType in_type;
@@ -261,48 +332,8 @@ namespace
 				last_disp_num_blocks = i;
 			}
 
-			uint32_t const sub_res = std::get<0>(block_addrs[i]);
-			uint32_t const x = std::get<1>(block_addrs[i]);
-			uint32_t const y = std::get<2>(block_addrs[i]);
-			uint32_t const array_index = sub_res / in_num_mipmaps;
-			uint32_t const mip = sub_res - array_index * in_num_mipmaps;
-
-			ElementInitData& sub_res_data = in_data[std::get<0>(block_addrs[i])];
-			uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
-			std::vector<uint8_t> block_in_data;
-			if (in_codec)
-			{
-				BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
-				BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
-
-				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * NumFormatBytes(in_codec->DecodedFormat()));
-				in_codec->DecodeBlock(&block_in_data[0], src_data
-					+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
-			}
-			else
-			{
-				uint32_t elem_size = NumFormatBytes(in_format);
-				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * elem_size);
-				for (uint32_t dy = 0; dy < out_codec->BlockHeight(); ++ dy)
-				{
-					if (y + dy < std::max(1U, in_height >> mip))
-					{
-						for (uint32_t dx = 0; dx < out_codec->BlockWidth(); ++ dx)
-						{
-							if (x + dx < std::max(1U, in_width >> mip))
-							{
-								memcpy(&block_in_data[(dy * out_codec->BlockWidth() + dx) * elem_size],
-									src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
-							}
-						}
-					}
-				}
-			}
-
-			ElementInitData& dst_data = new_data[sub_res];
-			uint32_t const offset = y / out_codec->BlockHeight() * dst_data.row_pitch
-				+ (x / out_codec->BlockWidth()) * out_codec->BlockBytes();
-			out_codec->EncodeBlock(&new_data_block[sub_res][offset], &block_in_data[0], TCM_Quality);
+			CompressABlock(in_codec, out_codec, block_addrs[i], in_num_mipmaps,
+				in_width, in_height, in_format, in_data, new_data);
 		}
 
 		SaveTexture(out_file, in_type, out_width, out_height, in_depth, in_num_mipmaps, in_array_size, fmt, new_data);
