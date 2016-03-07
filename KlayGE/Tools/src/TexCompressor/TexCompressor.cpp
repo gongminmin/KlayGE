@@ -19,160 +19,71 @@ using namespace KlayGE;
 
 namespace
 {
-	class CompressABlock
-	{
-	public:
-		CompressABlock(std::atomic<int32_t>& block_index, std::vector<std::tuple<uint32_t, uint32_t, uint32_t>> const & block_addrs,
+	void CompressABlock(std::atomic<int32_t>& block_index, std::vector<std::tuple<uint32_t, uint32_t, uint32_t>> const & block_addrs,
 				uint32_t in_num_mipmaps, uint32_t in_width, uint32_t in_height, ElementFormat in_format,
 				std::vector<ElementInitData> const & in_data,
 				std::vector<ElementInitData> const & out_data, ElementFormat out_format)
-			: block_index_(block_index),
-				block_addrs_(block_addrs), in_num_mipmaps_(in_num_mipmaps),
-				in_width_(in_width), in_height_(in_height), in_format_(in_format), in_data_(in_data),
-				out_data_(out_data)
+	{
+		TexCompressionPtr in_codec;
+		if (IsCompressedFormat(in_format))
 		{
-			if (IsCompressedFormat(in_format))
-			{
-				switch (in_format)
-				{
-				case EF_BC1:
-				case EF_BC1_SRGB:
-				case EF_SIGNED_BC1:
-					in_codec_ = MakeSharedPtr<TexCompressionBC1>();
-					break;
-
-				case EF_BC2:
-				case EF_BC2_SRGB:
-				case EF_SIGNED_BC2:
-					in_codec_ = MakeSharedPtr<TexCompressionBC2>();
-					break;
-
-				case EF_BC3:
-				case EF_BC3_SRGB:
-				case EF_SIGNED_BC3:
-					in_codec_ = MakeSharedPtr<TexCompressionBC3>();
-					break;
-
-				case EF_BC4:
-				case EF_BC4_SRGB:
-				case EF_SIGNED_BC4:
-					in_codec_ = MakeSharedPtr<TexCompressionBC4>();
-					break;
-
-				case EF_BC5:
-				case EF_BC5_SRGB:
-				case EF_SIGNED_BC5:
-					in_codec_ = MakeSharedPtr<TexCompressionBC5>();
-					break;
-
-				case EF_BC6:
-					in_codec_ = MakeSharedPtr<TexCompressionBC6U>();
-					break;
-
-				case EF_SIGNED_BC6:
-					in_codec_ = MakeSharedPtr<TexCompressionBC6S>();
-					break;
-
-				case EF_BC7:
-				case EF_BC7_SRGB:
-					in_codec_ = MakeSharedPtr<TexCompressionBC7>();
-					break;
-
-				case EF_ETC1:
-					in_codec_ = MakeSharedPtr<TexCompressionETC1>();
-					break;
-
-				case EF_ETC2_BGR8:
-				case EF_ETC2_BGR8_SRGB:
-					in_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();
-					break;
-
-				case EF_ETC2_A1BGR8:
-				case EF_ETC2_A1BGR8_SRGB:
-					in_codec_ = MakeSharedPtr<TexCompressionETC2RGB8A1>();
-					break;
-
-				case EF_ETC2_ABGR8:
-				case EF_ETC2_ABGR8_SRGB:
-					// TODO
-					BOOST_ASSERT(false);
-					break;
-
-				case EF_ETC2_R11:
-				case EF_SIGNED_ETC2_R11:
-					// TODO
-					BOOST_ASSERT(false);
-					break;
-
-				case EF_ETC2_GR11:
-				case EF_SIGNED_ETC2_GR11:
-					// TODO
-					BOOST_ASSERT(false);
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					break;
-				}
-			}
-
-			switch (out_format)
+			switch (in_format)
 			{
 			case EF_BC1:
 			case EF_BC1_SRGB:
 			case EF_SIGNED_BC1:
-				out_codec_ = MakeSharedPtr<TexCompressionBC1>();
+				in_codec = MakeSharedPtr<TexCompressionBC1>();
 				break;
 
 			case EF_BC2:
 			case EF_BC2_SRGB:
 			case EF_SIGNED_BC2:
-				out_codec_ = MakeSharedPtr<TexCompressionBC2>();
+				in_codec = MakeSharedPtr<TexCompressionBC2>();
 				break;
 
 			case EF_BC3:
 			case EF_BC3_SRGB:
 			case EF_SIGNED_BC3:
-				out_codec_ = MakeSharedPtr<TexCompressionBC3>();
+				in_codec = MakeSharedPtr<TexCompressionBC3>();
 				break;
 
 			case EF_BC4:
 			case EF_BC4_SRGB:
 			case EF_SIGNED_BC4:
-				out_codec_ = MakeSharedPtr<TexCompressionBC4>();
+				in_codec = MakeSharedPtr<TexCompressionBC4>();
 				break;
 
 			case EF_BC5:
 			case EF_BC5_SRGB:
 			case EF_SIGNED_BC5:
-				out_codec_ = MakeSharedPtr<TexCompressionBC5>();
+				in_codec = MakeSharedPtr<TexCompressionBC5>();
 				break;
 
 			case EF_BC6:
-				out_codec_ = MakeSharedPtr<TexCompressionBC6U>();
+				in_codec = MakeSharedPtr<TexCompressionBC6U>();
 				break;
 
 			case EF_SIGNED_BC6:
-				out_codec_ = MakeSharedPtr<TexCompressionBC6S>();
+				in_codec = MakeSharedPtr<TexCompressionBC6S>();
 				break;
 
 			case EF_BC7:
 			case EF_BC7_SRGB:
-				out_codec_ = MakeSharedPtr<TexCompressionBC7>();
+				in_codec = MakeSharedPtr<TexCompressionBC7>();
 				break;
 
 			case EF_ETC1:
-				out_codec_ = MakeSharedPtr<TexCompressionETC1>();
+				in_codec = MakeSharedPtr<TexCompressionETC1>();
 				break;
 
 			case EF_ETC2_BGR8:
 			case EF_ETC2_BGR8_SRGB:
-				out_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();
+				in_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
 				break;
 
 			case EF_ETC2_A1BGR8:
 			case EF_ETC2_A1BGR8_SRGB:
-				out_codec_ = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+				in_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
 				break;
 
 			case EF_ETC2_ABGR8:
@@ -199,96 +110,164 @@ namespace
 			}
 		}
 
-		void operator()()
+		TexCompressionPtr out_codec;
+		switch (out_format)
 		{
-			while (block_index_ < block_addrs_.size())
-			{
-				uint32_t index = block_index_ ++;
-				if (index >= block_addrs_.size() - 1)
-				{
-					break;
-				}
+		case EF_BC1:
+		case EF_BC1_SRGB:
+		case EF_SIGNED_BC1:
+			out_codec = MakeSharedPtr<TexCompressionBC1>();
+			break;
 
-				auto const & block_addr = block_addrs_[index];
-				uint32_t const sub_res = std::get<0>(block_addr);
-				uint32_t const x = std::get<1>(block_addr);
-				uint32_t const y = std::get<2>(block_addr);
-				uint32_t const array_index = sub_res / in_num_mipmaps_;
-				uint32_t const mip = sub_res - array_index * in_num_mipmaps_;
-				uint32_t const mip_width = std::max(1U, in_width_ >> mip);
-				uint32_t const mip_height = std::max(1U, in_height_ >> mip);
+		case EF_BC2:
+		case EF_BC2_SRGB:
+		case EF_SIGNED_BC2:
+			out_codec = MakeSharedPtr<TexCompressionBC2>();
+			break;
 
-				ElementInitData const & sub_res_data = in_data_[std::get<0>(block_addr)];
-				uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
-				std::vector<uint8_t> block_in_data;
-				ElementFormat block_in_fmt;
-				if (in_codec_)
-				{
-					BOOST_ASSERT(in_codec_->BlockWidth() == out_codec_->BlockWidth());
-					BOOST_ASSERT(in_codec_->BlockHeight() == out_codec_->BlockHeight());
+		case EF_BC3:
+		case EF_BC3_SRGB:
+		case EF_SIGNED_BC3:
+			out_codec = MakeSharedPtr<TexCompressionBC3>();
+			break;
 
-					block_in_fmt = in_codec_->DecodedFormat();
-					block_in_data.resize(out_codec_->BlockWidth() * out_codec_->BlockHeight() * NumFormatBytes(block_in_fmt));
-					in_codec_->DecodeBlock(&block_in_data[0], src_data
-						+ (y / in_codec_->BlockHeight()) * sub_res_data.row_pitch + x / in_codec_->BlockWidth() * in_codec_->BlockBytes());
-				}
-				else
-				{
-					block_in_fmt = in_format_;
-					uint32_t elem_size = NumFormatBytes(in_format_);
-					block_in_data.resize(out_codec_->BlockWidth() * out_codec_->BlockHeight() * elem_size, 0);
-					for (uint32_t dy = 0; dy < out_codec_->BlockHeight(); ++ dy)
-					{
-						if (y + dy < mip_height)
-						{
-							for (uint32_t dx = 0; dx < out_codec_->BlockWidth(); ++ dx)
-							{
-								if (x + dx < mip_width)
-								{
-									memcpy(&block_in_data[(dy * out_codec_->BlockWidth() + dx) * elem_size],
-										src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
-								}
-								else
-								{
-									break;
-								}
-							}
-						}
-						else
-						{
-							break;
-						}
-					}
-				}
+		case EF_BC4:
+		case EF_BC4_SRGB:
+		case EF_SIGNED_BC4:
+			out_codec = MakeSharedPtr<TexCompressionBC4>();
+			break;
 
-				if (block_in_fmt != out_codec_->DecodedFormat())
-				{
-					uint32_t const num_texels = out_codec_->BlockWidth() * out_codec_->BlockHeight();
-					std::vector<Color> block_in_data_f32(num_texels);
-					ConvertToABGR32F(block_in_fmt, &block_in_data[0], num_texels, &block_in_data_f32[0]);
-					block_in_data.resize(num_texels * NumFormatBytes(out_codec_->DecodedFormat()));
-					ConvertFromABGR32F(out_codec_->DecodedFormat(), &block_in_data_f32[0], num_texels, &block_in_data[0]);
-				}
+		case EF_BC5:
+		case EF_BC5_SRGB:
+		case EF_SIGNED_BC5:
+			out_codec = MakeSharedPtr<TexCompressionBC5>();
+			break;
 
-				uint32_t const offset = y / out_codec_->BlockHeight() * out_data_[sub_res].row_pitch
-					+ (x / out_codec_->BlockWidth()) * out_codec_->BlockBytes();
-				uint8_t* dst = static_cast<uint8_t*>(const_cast<void*>(out_data_[sub_res].data));
-				out_codec_->EncodeBlock(dst + offset, &block_in_data[0], TCM_Quality);
-			}
+		case EF_BC6:
+			out_codec = MakeSharedPtr<TexCompressionBC6U>();
+			break;
+
+		case EF_SIGNED_BC6:
+			out_codec = MakeSharedPtr<TexCompressionBC6S>();
+			break;
+
+		case EF_BC7:
+		case EF_BC7_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionBC7>();
+			break;
+
+		case EF_ETC1:
+			out_codec = MakeSharedPtr<TexCompressionETC1>();
+			break;
+
+		case EF_ETC2_BGR8:
+		case EF_ETC2_BGR8_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			break;
+
+		case EF_ETC2_A1BGR8:
+		case EF_ETC2_A1BGR8_SRGB:
+			out_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			break;
+
+		case EF_ETC2_ABGR8:
+		case EF_ETC2_ABGR8_SRGB:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_R11:
+		case EF_SIGNED_ETC2_R11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		case EF_ETC2_GR11:
+		case EF_SIGNED_ETC2_GR11:
+			// TODO
+			BOOST_ASSERT(false);
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
 		}
 
-	private:
-		TexCompressionPtr in_codec_;
-		TexCompressionPtr out_codec_;
-		std::atomic<int32_t>& block_index_;
-		std::vector<std::tuple<uint32_t, uint32_t, uint32_t>> const & block_addrs_;
-		uint32_t in_num_mipmaps_;
-		uint32_t in_width_;
-		uint32_t in_height_;
-		ElementFormat in_format_;
-		std::vector<ElementInitData> const & in_data_;
-		std::vector<ElementInitData> const & out_data_;
-	};
+		while (block_index < block_addrs.size())
+		{
+			uint32_t index = block_index ++;
+			if (index >= block_addrs.size() - 1)
+			{
+				break;
+			}
+
+			auto const & block_addr = block_addrs[index];
+			uint32_t const sub_res = std::get<0>(block_addr);
+			uint32_t const x = std::get<1>(block_addr);
+			uint32_t const y = std::get<2>(block_addr);
+			uint32_t const array_index = sub_res / in_num_mipmaps;
+			uint32_t const mip = sub_res - array_index * in_num_mipmaps;
+			uint32_t const mip_width = std::max(1U, in_width >> mip);
+			uint32_t const mip_height = std::max(1U, in_height >> mip);
+
+			ElementInitData const & sub_res_data = in_data[std::get<0>(block_addr)];
+			uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
+			std::vector<uint8_t> block_in_data;
+			ElementFormat block_in_fmt;
+			if (in_codec)
+			{
+				BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
+				BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
+
+				block_in_fmt = in_codec->DecodedFormat();
+				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * NumFormatBytes(block_in_fmt));
+				in_codec->DecodeBlock(&block_in_data[0], src_data
+					+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
+			}
+			else
+			{
+				block_in_fmt = in_format;
+				uint32_t const elem_size = NumFormatBytes(in_format);
+				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * elem_size, 0);
+				for (uint32_t dy = 0; dy < out_codec->BlockHeight(); ++ dy)
+				{
+					if (y + dy < mip_height)
+					{
+						for (uint32_t dx = 0; dx < out_codec->BlockWidth(); ++ dx)
+						{
+							if (x + dx < mip_width)
+							{
+								memcpy(&block_in_data[(dy * out_codec->BlockWidth() + dx) * elem_size],
+									src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
+							}
+							else
+							{
+								break;
+							}
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+
+			if (block_in_fmt != out_codec->DecodedFormat())
+			{
+				uint32_t const num_texels = out_codec->BlockWidth() * out_codec->BlockHeight();
+				std::vector<Color> block_in_data_f32(num_texels);
+				ConvertToABGR32F(block_in_fmt, &block_in_data[0], num_texels, &block_in_data_f32[0]);
+				block_in_data.resize(num_texels * NumFormatBytes(out_codec->DecodedFormat()));
+				ConvertFromABGR32F(out_codec->DecodedFormat(), &block_in_data_f32[0], num_texels, &block_in_data[0]);
+			}
+
+			uint32_t const offset = y / out_codec->BlockHeight() * out_data[sub_res].row_pitch
+				+ (x / out_codec->BlockWidth()) * out_codec->BlockBytes();
+			uint8_t* dst = static_cast<uint8_t*>(const_cast<void*>(out_data[sub_res].data));
+			out_codec->EncodeBlock(dst + offset, &block_in_data[0], TCM_Quality);
+		}
+	}
 
 	void CompressTex(std::string const & in_file, std::string const & out_file, ElementFormat fmt)
 	{
@@ -444,7 +423,7 @@ namespace
 		std::atomic<int> block_index = 0;
 		for (uint32_t i = 0; i < num_threads; ++ i)
 		{
-			joiners[i] = tp(CompressABlock(std::ref(block_index), std::cref(block_addrs), in_num_mipmaps,
+			joiners[i] = tp(std::bind(CompressABlock, std::ref(block_index), std::cref(block_addrs), in_num_mipmaps,
 				in_width, in_height, in_format, std::cref(in_data), std::cref(new_data), fmt));
 		}
 
