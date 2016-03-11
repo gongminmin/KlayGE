@@ -101,7 +101,7 @@ namespace
 
 	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
 	{
-		auto const trans_mat = parent_mat * MathLib::transpose(float4x4(&node->mTransformation.a1));
+		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
 		auto const trans_quat = MathLib::to_quaternion(trans_mat);
 
 		for (unsigned int n = 0; n < node->mNumMeshes; ++ n)
