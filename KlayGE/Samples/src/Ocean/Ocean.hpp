@@ -69,4 +69,4 @@ private:
 	KlayGE::DirectionalLightSourcePtr sun_light_;
 };
 
-#endif		// _DEFERREDRENDERING_HPP
+#endif		// _OCEAN_HPP

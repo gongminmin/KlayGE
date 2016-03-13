@@ -667,8 +667,8 @@ namespace KlayGE
 		*height_map_param_ = height_map_tex_;
 		*gradient_map_param_ = gradient_map_tex_;
 		*mask_map_param_ = mask_map_tex_;
-		*frame_size_param_ = float2(static_cast<float>(re.CurFrameBuffer()->Width()),
-			static_cast<float>(re.CurFrameBuffer()->Height()));
+		*frame_size_param_ = int2(static_cast<int>(re.CurFrameBuffer()->Width()),
+			static_cast<int>(re.CurFrameBuffer()->Height()));
 
 		bool need_tess = false;
 		if (hw_tessellation_)

@@ -57,7 +57,6 @@ float4 GetInfTerrainPosOS(float2 pos, float strength)
 
 	<parameter type="bool" name="show_patches" value="false"/>
 	<parameter type="bool" name="show_tiles" value="false"/>
-	<parameter type="float2" name="frame_size"/>
 	<parameter type="int" name="tri_size" value="10"/>
 	<parameter type="float" name="tile_size" value="1"/>
 
@@ -219,7 +218,7 @@ void GBufferNoTessTerrainVS(float2 position : TEXCOORD0,
 
 	<shader version="5">
 		<![CDATA[
-struct VS_CONTROL_POINT_OUTPUT
+struct TERRAIN_VS_CONTROL_POINT_OUTPUT
 {
 	float3 position         : POSITION;
 	float2 world_xz         : TEXCOORD0;
@@ -227,11 +226,11 @@ struct VS_CONTROL_POINT_OUTPUT
 	float4 neighbor_minus_plus_xy	: TEXCOORD1;
 };
 
-VS_CONTROL_POINT_OUTPUT GBufferTessTerrainVS(float2 position  : TEXCOORD0,
+TERRAIN_VS_CONTROL_POINT_OUTPUT GBufferTessTerrainVS(float2 position  : TEXCOORD0,
 							float4 neighbor_minus_plus_xy : TEXCOORD1,
 							uint vertex_id    : SV_VertexID)
 {
-	VS_CONTROL_POINT_OUTPUT output;
+	TERRAIN_VS_CONTROL_POINT_OUTPUT output;
 	int2 int_uv;
 	ReconstructPosition(position, vertex_id, output.position, int_uv);
 
@@ -243,14 +242,14 @@ VS_CONTROL_POINT_OUTPUT GBufferTessTerrainVS(float2 position  : TEXCOORD0,
 	return output;
 }
 
-struct HS_CONSTANT_DATA_OUTPUT
+struct TERRAIN_HS_CONSTANT_DATA_OUTPUT
 {
 	float edges[4]        : SV_TessFactor;
 	float inside[2]       : SV_InsideTessFactor;
 	float2 world_xz[4]    : TEXCOORD0;
 };
 
-struct HS_OUTPUT
+struct TERRAIN_HS_OUTPUT
 {
 	float2 world_xz : POSITION;
 };
@@ -347,9 +346,9 @@ float LargerNeighbourAdjacencyFix(float3 p0, float3 p1, uint patch_idx, float di
 }	
 
 // This constant hull shader is executed once per patch.
-HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 4> ip, uint patch_id : SV_PrimitiveID)
+TERRAIN_HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<TERRAIN_VS_CONTROL_POINT_OUTPUT, 4> ip, uint patch_id : SV_PrimitiveID)
 {
-	HS_CONSTANT_DATA_OUTPUT output;
+	TERRAIN_HS_CONSTANT_DATA_OUTPUT output;
 
 	float3 center = (ip[0].position + ip[1].position + ip[2].position + ip[3].position) * 0.25f;
 	float side_len = max(abs(ip[1].position.x - ip[0].position.x), abs(ip[1].position.x - ip[2].position.x));		// assume square & uniform
@@ -423,17 +422,17 @@ HS_CONSTANT_DATA_OUTPUT TerrainScreenspaceLODConstantsHS(InputPatch<VS_CONTROL_P
 [outputtopology("triangle_ccw")]
 [outputcontrolpoints(4)]
 [patchconstantfunc("TerrainScreenspaceLODConstantsHS")]
-HS_OUTPUT GBufferTessTerrainHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 4> p, uint i : SV_OutputControlPointID)
+TERRAIN_HS_OUTPUT GBufferTessTerrainHS(InputPatch<TERRAIN_VS_CONTROL_POINT_OUTPUT, 4> p, uint i : SV_OutputControlPointID)
 {
-	HS_OUTPUT output;
+	TERRAIN_HS_OUTPUT output;
 	output.world_xz = p[i].position.xz;
 	return output;
 }
 
 [domain("quad")]
-void GBufferTessTerrainDS(HS_CONSTANT_DATA_OUTPUT input, 
+void GBufferTessTerrainDS(TERRAIN_HS_CONSTANT_DATA_OUTPUT input, 
 					float2 uv : SV_DomainLocation,
-					OutputPatch<HS_OUTPUT, 4> terrain_quad,
+					OutputPatch<TERRAIN_HS_OUTPUT, 4> terrain_quad,
 					uint patch_id : SV_PrimitiveID,
 					out float3 oWorldPos        : TEXCOORD0,
 					out float oDebugPatch       : TEXCOORD1,
