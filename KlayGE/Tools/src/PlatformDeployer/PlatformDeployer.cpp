@@ -397,11 +397,13 @@ int main(int argc, char* argv[])
 	if ((argc <= 1) || (vm.count("help") > 0))
 	{
 		cout << desc << endl;
+		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("version") > 0)
 	{
 		cout << "KlayGE PlatformDeployer, Version 1.0.0" << endl;
+		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("input-name") > 0)
@@ -444,6 +446,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		cout << "Need input resources names." << endl;
+		Context::Destroy();
 		return 1;
 	}
 	if (vm.count("type") > 0)
@@ -468,6 +471,7 @@ int main(int argc, char* argv[])
 		else
 		{
 			cout << "Need resource type name." << endl;
+			Context::Destroy();
 			return 1;
 		}
 	}
