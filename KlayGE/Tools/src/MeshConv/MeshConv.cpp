@@ -82,13 +82,23 @@ namespace
 		return v;
 	}
 
+	float3 AiVectorToFloat3(aiVector3D const& v)
+	{
+		return float3(v.x, v.y, v.z);
+	}
+
+	Quaternion AiQuatToQuat(aiQuaternion const& v)
+	{
+		return Quaternion(v.x, v.y, v.z, v.w);
+	}
+	
 	struct JointBinding
 	{
 		int joint_id;
 		int vertex_id;
 		float weight;
 	};
-	
+
 	struct Mesh
 	{
 		int mtl_id;
@@ -112,16 +122,16 @@ namespace
 		int id;
 		int parent_id;
 		std::string name;
-		
+
 		float4x4 mesh_to_bone;
 		float4x4 local_matrix;	  // local to parent
 	};
-	
+
 	std::map<std::string, Joint> joint_nodes;
-	
+
 	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
 	{
-		auto const trans_mat = parent_mat * MathLib::transpose(float4x4(&node->mTransformation.a1));
+		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
 		auto const trans_quat = MathLib::to_quaternion(trans_mat);
 
 		for (unsigned int n = 0; n < node->mNumMeshes; ++ n)
@@ -163,7 +173,7 @@ namespace
 					meshml_obj.SetVertex(mesh_id, vertex_id, pos, normal, 2, texcoords);
 				}
 			}
-			
+
 			for (unsigned int wi = 0; wi < mesh.joint_binding.size(); ++wi)
 			{
 				auto binding = mesh.joint_binding[wi];
@@ -183,21 +193,21 @@ namespace
 		for (unsigned int mi = 0; mi < scene->mNumMaterials; ++ mi)
 		{
 			int mtl_id = meshml_obj.AllocMaterial();
-			
+
 			float3 ambient(0, 0, 0);
 			float3 diffuse(0, 0, 0);
 			float3 specular(0, 0, 0);
 			float3 emit(0, 0, 0);
 			float opacity = 1;
 			float shininess = 1;
-			
+
 			aiColor4D ai_ambient;
 			aiColor4D ai_diffuse;
 			aiColor4D ai_specular;
 			aiColor4D ai_emit;
 			float ai_opacity;
 			float ai_shininess;
-			
+
 			auto mtl = scene->mMaterials[mi];
 			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ai_ambient))
 			{
@@ -215,18 +225,18 @@ namespace
 			{
 				emit = Color4ToFloat3(ai_emit);
 			}
-			
+
 			unsigned int max = 1;
 			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_OPACITY, &ai_opacity, &max))
 			{
 				opacity = ai_opacity;
 			}
-			
+
 			max = 1;
 			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &ai_shininess, &max))
 			{
 				shininess = ai_shininess;
-				
+
 				max = 1;
 				float strength;
 				if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max))
@@ -234,88 +244,88 @@ namespace
 					shininess *= strength;
 				}
 			}
-			
+
 			meshml_obj.SetMaterial(mtl_id, ambient, diffuse, specular, emit, opacity, shininess);
-			
+
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Diffuse Color", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_SPECULAR);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_SPECULAR, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Specular Color", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Glossiness", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Bump Map", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Height Map", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_EMISSIVE);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Self-Illumination", str.C_Str());
 			}
-			
+
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_OPACITY);
 			if (count > 0)
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_OPACITY, 0, &str, 0, 0, 0, 0, 0, 0);
-				
+
 				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
 				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
 			}
 		}
 	}
-	
+
 	void BuildMeshData(std::vector<Mesh>& meshes, int& vertex_export_settings, aiScene const * scene, bool swap_yz, bool inverse_z)
 	{
 		vertex_export_settings = MeshMLObj::VES_None;
 		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
 		{
 			aiMesh const * mesh = scene->mMeshes[mi];
-			
+
 			meshes[mi].mtl_id = mesh->mMaterialIndex;
 			meshes[mi].name = mesh->mName.C_Str();
 
@@ -325,16 +335,16 @@ namespace
 			{
 				two_sided = 0;
 			}
-			
+
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
 				BOOST_ASSERT(3 == mesh->mFaces[fi].mNumIndices);
-				
+
 				indices.push_back(mesh->mFaces[fi].mIndices[0]);
 				indices.push_back(mesh->mFaces[fi].mIndices[1]);
 				indices.push_back(mesh->mFaces[fi].mIndices[2]);
-				
+
 				if (two_sided)
 				{
 					indices.push_back(mesh->mFaces[fi].mIndices[0]);
@@ -342,7 +352,7 @@ namespace
 					indices.push_back(mesh->mFaces[fi].mIndices[1]);
 				}
 			}
-			
+
 			bool has_normal = (mesh->mNormals != nullptr);
 			bool has_tangent = (mesh->mTangents != nullptr);
 			bool has_binormal = (mesh->mBitangents != nullptr);
@@ -356,7 +366,7 @@ namespace
 					first_texcoord = tci;
 				}
 			}
-			
+
 			auto& positions = meshes[mi].positions;
 			auto& normals = meshes[mi].normals;
 			std::vector<float3> tangents(mesh->mNumVertices);
@@ -379,7 +389,7 @@ namespace
 				{
 					std::swap(positions[vi].y(), positions[vi].z());
 				}
-				
+
 				if (has_normal)
 				{
 					normals[vi] = float3(&mesh->mNormals[vi].x);
@@ -416,7 +426,7 @@ namespace
 						std::swap(binormals[vi].y(), binormals[vi].z());
 					}
 				}
-				
+
 				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
 				{
 					if (has_texcoord[tci])
@@ -425,32 +435,32 @@ namespace
 					}
 				}
 			}
-			
+
 			if (!has_normal)
 			{
 				MathLib::compute_normal(normals.begin(), indices.begin(), indices.end(), positions.begin(), positions.end());
-				
+
 				has_normal = true;
 			}
-			
+
 			auto& tangent_quats = meshes[mi].tangent_quats;
 			tangent_quats.resize(mesh->mNumVertices);
 			if ((!has_tangent || !has_binormal) && (first_texcoord != AI_MAX_NUMBER_OF_TEXTURECOORDS))
 			{
 				MathLib::compute_tangent(tangents.begin(), binormals.begin(), indices.begin(), indices.end(),
 										 positions.begin(), positions.end(), texcoords[first_texcoord].begin(), normals.begin());
-				
+
 				for (size_t i = 0; i < positions.size(); ++ i)
 				{
 					tangent_quats[i] = MathLib::to_quaternion(tangents[i], binormals[i], normals[i], 8);
 				}
-				
+
 				has_tangent = true;
 			}
-			
+
 			meshes[mi].has_normal = has_normal;
 			meshes[mi].has_tangent_frame = has_tangent || has_binormal;
-			
+
 			if (has_tangent || has_binormal)
 			{
 				vertex_export_settings |= MeshMLObj::VES_TangentQuat;
@@ -459,14 +469,14 @@ namespace
 			{
 				vertex_export_settings |= MeshMLObj::VES_Texcoord;
 			}
-			
+
 			for (unsigned int bi = 0; bi < mesh->mNumBones; ++bi)
 			{
 				aiBone* bone = mesh->mBones[bi];
 				auto iter = joint_nodes.find(bone->mName.C_Str());
 				if (iter == joint_nodes.end())
-					continue;
-				
+					continue;	// should not happen
+
 				int joint_id = iter->second.id;
 				for (unsigned int wi = 0; wi < bone->mNumWeights; ++wi)
 				{
@@ -476,7 +486,7 @@ namespace
 				}
 			}
 		}
-		
+
 		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
 		{
 			if ((vertex_export_settings & MeshMLObj::VES_TangentQuat) && !meshes[mi].has_tangent_frame)
@@ -490,7 +500,7 @@ namespace
 		}
 
 	}
-	
+
 	void BuildJoints(MeshMLObj& meshml_obj, aiScene const * scene)
 	{
 		for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
@@ -505,10 +515,13 @@ namespace
 				joint_nodes[joint.name] = joint;
 			}
 		}
+		
 
-		// 根据assimp文档，和joint一样的aiNode及其所有祖先都需要导入skeleton
-		// 所以分两次遍历树，第一次判断是否为joint并填充bind_matrix
+		// 根据assimp文档，aiBone表示带蒙皮的点。和aiBone名字一样的aiNode及其所有祖先都需要导入skeleton。
+		// 所以分两次遍历aiNode，第一次判断是否为aiBone对应界点并填充bind_matrix
 		// 第二遍分配id。多遍历一遍场景树，以保证父亲的joint_id在孩子的前面
+		// ps:不能只导入所有在aiBone里的Node，aiBone只包括带蒙皮的节点
+		// 一些节点没蒙皮，但是他的变换会影响子节点，都需要导入到skeleton的hierarchy中
 		std::function<bool(aiNode*const)> mark_joint_nodes = [&mark_joint_nodes](aiNode * const root)
 		{
 			std::string name = root->mName.C_Str();
@@ -520,10 +533,10 @@ namespace
 				iter->second.local_matrix = float4x4(&root->mTransformation.a1);
 				child_has_bone = true;
 			}
-			
+
 			for (unsigned int i = 0; i < root->mNumChildren; ++i)
 				child_has_bone = mark_joint_nodes(root->mChildren[i]) || child_has_bone;
-			
+
 			if (child_has_bone && iter == joint_nodes.end())
 			{
 				Joint joint;
@@ -532,10 +545,10 @@ namespace
 				joint.local_matrix = float4x4::Identity();
 				joint_nodes[name] = joint;
 			}
-			
+
 			return child_has_bone;
 		};
-		
+
 		std::function<void(aiNode* const, int)> alloc_joints =
 			[&meshml_obj, &alloc_joints](aiNode* const root, int parent_id)
 		{
@@ -546,25 +559,235 @@ namespace
 			{
 				joint_id = meshml_obj.AllocJoint();
 				iter->second.id = joint_id;
-				
+
 				meshml_obj.SetJoint(joint_id, name, parent_id, iter->second.mesh_to_bone);
 			}
-			
+
 			for (unsigned int i = 0; i < root->mNumChildren; ++i)
 				alloc_joints(root->mChildren[i], joint_id);
 		};
-		
+
 		mark_joint_nodes(scene->mRootNode);
 		alloc_joints(scene->mRootNode, -1);
 	}
+
+	struct ResampledTransform
+	{
+		int frame;
+		Quaternion quat;
+		float3 pos;
+		float scale;
+	};
+	
+	typedef std::vector<ResampledTransform>  JointResampledKeyframe;
+	
+	struct JointKeyframe
+	{
+		std::vector<std::pair<float,float3>> pos;
+		std::vector<std::pair<float,Quaternion>> quats;
+		std::vector<std::pair<float,float3>> scale;
+	};
+	
+	struct Animation
+	{
+		std::string name;
+		int frame_num;
+		std::map<int/*joint_id*/, JointKeyframe> origFrames;
+		std::map<int/*joint_id*/, JointResampledKeyframe> resampledFrames;
+	};
+	
+	template <class T>
+	float GetInterpTime(std::vector<T> const& vec, float time, int& itime_lower, int& itime_upper)
+	{
+		assert(vec.size() > 0);
+		if (vec.size() == 1)
+		{
+			itime_lower = 0;
+			itime_upper = 0;
+			return 0;
+		}
+		
+		// use @itime_upper as a hint to speed up find
+		size_t i = 0;
+		for (i = itime_upper; i < vec.size(); ++i)
+		{
+			if (vec[i].first >= time)
+				break;
+		}
+		
+		if (i == 0)
+		{
+			itime_lower = 0;
+			itime_upper = 1;
+		}
+		else if (i >= vec.size() - 1)
+		{
+			itime_lower = vec.size() - 2;
+			itime_upper = vec.size() - 1;
+		}
+		else
+		{
+			itime_lower = i -1;
+			itime_upper = i;
+		}
+		
+		float fraction = 1.0f;
+		float diff = (vec[itime_upper].first - vec[itime_lower].first);
+		fraction = MathLib::clamp(diff == 0 ? 0 : (time - vec[itime_lower].first) / diff, 0.0f, 1.0f);
+		return fraction;
+	}
+
+	void ResampleJointTransform(int start_frame, int end_frame, int fps, JointKeyframe const& okf, JointResampledKeyframe& rkf)
+	{
+		float frame_time = 1.0f / fps;
+		int i_pos = 0;
+		int i_rot = 0;
+		int i_scale = 0;
+		for (int i = start_frame; i <= end_frame; ++i)
+		{
+			float time = i * frame_time;
+			int prev_i = 0;
+			float fraction= 0.0f;
+			float3 pos_resampled(0, 0, 0);
+			float3 scale_resampled(1, 1, 1);
+			Quaternion quat_resampled(0, 0, 0, 1);
+			
+			if (okf.pos.size() > 0)
+			{
+				fraction = GetInterpTime(okf.pos, time, prev_i, i_pos);
+				pos_resampled = MathLib::lerp(okf.pos[prev_i].second, okf.pos[i_pos].second, fraction);
+			}
+			
+			if (okf.scale.size() > 0)
+			{
+				fraction = GetInterpTime(okf.scale, time, prev_i, i_scale);
+				scale_resampled = MathLib::lerp(okf.scale[prev_i].second, okf.scale[i_scale].second, fraction);
+			}
+			
+			if (okf.quats.size() > 0)
+			{
+				fraction = GetInterpTime(okf.quats, time, prev_i, i_rot);
+				quat_resampled = MathLib::slerp(okf.quats[prev_i].second, okf.quats[i_rot].second, fraction);
+			}
+			
+			rkf.push_back({i, quat_resampled, pos_resampled, scale_resampled.x()});
+		}
+	}
 	
 	
+	void BuildActions(MeshMLObj& meshml_obj, aiScene const * scene)
+	{
+		std::vector<Animation> animations;
+		
+		const int fps = 25;
+		// for actions
+		for (unsigned int ianim = 0; ianim < scene->mNumAnimations; ++ianim)
+		{
+			const aiAnimation* cur_anim = scene->mAnimations[ianim];
+			float duration = cur_anim->mDuration / cur_anim->mTicksPerSecond;
+			Animation anim;
+			anim.name = cur_anim->mName.C_Str();
+			anim.frame_num = int(ceilf(duration * fps));
+			if (anim.frame_num == 0) anim.frame_num = 1;
+			
+			// import joints animation
+			for (unsigned int ichannel = 0; ichannel < cur_anim->mNumChannels; ++ichannel)
+			{
+				const aiNodeAnim* cur_joint = cur_anim->mChannels[ichannel];
+				int joint_id = -1;
+				auto iter  = joint_nodes.find(cur_joint->mNodeName.C_Str()
+											  );
+				if (iter != joint_nodes.end())
+					joint_id = iter->second.id;
+				
+				// NOTE: ignore animation if node is not joint
+				if (joint_id > 0)
+				{
+					JointKeyframe kf;
+					for (unsigned int i = 0; i < cur_joint->mNumPositionKeys; ++i)
+					{
+						auto& p = cur_joint->mPositionKeys[i];
+						kf.pos.push_back(std::make_pair(p.mTime, AiVectorToFloat3(p.mValue)));
+					}
+					
+					for (unsigned int i = 0; i < cur_joint->mNumRotationKeys; ++i)
+					{
+						auto& p = cur_joint->mRotationKeys[i];
+						kf.quats.push_back(std::make_pair(p.mTime, AiQuatToQuat(p.mValue)));
+					}
+					
+					for (unsigned int i = 0; i < cur_joint->mNumScalingKeys; ++i)
+					{
+						auto& p = cur_joint->mScalingKeys[i];
+						kf.scale.push_back(std::make_pair(p.mTime, AiVectorToFloat3(p.mValue)));
+					}
+					
+					// resample
+					JointResampledKeyframe resampled_kf;
+					ResampleJointTransform(0, anim.frame_num - 1, fps, kf, resampled_kf);
+					
+					anim.origFrames[joint_id] = kf;
+					anim.resampledFrames[joint_id] = resampled_kf;
+				}
+			}
+			
+			// NOTE: 由于KlageGE播放时需要每个joint都有kf，将joint的transform填充为默认。
+			for (auto iter = joint_nodes.begin(); iter != joint_nodes.end(); ++iter)
+			{
+				int joint_id = iter->second.id;
+				if (anim.resampledFrames.find(joint_id) == anim.resampledFrames.end())
+				{
+					ResampledTransform defaultTF{0, Quaternion::Identity(), float3(0, 0, 0), 1.0f};
+					float3 scale;
+					MathLib::decompose(scale, defaultTF.quat, defaultTF.pos, iter->second.local_matrix);
+					defaultTF.scale = scale.x();
+					anim.resampledFrames[joint_id] = JointResampledKeyframe{defaultTF};
+				}
+			}
+			
+			animations.push_back(anim);
+		}
+		
+		int action_frame_offset = 0;
+		for (size_t ianim = 0; ianim < animations.size(); ++ianim)
+		{
+			Animation& anim = animations[ianim];
+			
+			int action_id = meshml_obj.AllocAction();
+			meshml_obj.SetAction(action_id, anim.name, action_frame_offset, action_frame_offset + anim.frame_num - 1);
+			
+			const auto& resampledFrames = anim.resampledFrames;
+			for (auto iter:resampledFrames)
+			{
+				int joint_id = iter.first;
+				int kfs_id = meshml_obj.AllocKeyframes();
+				meshml_obj.SetKeyframes(kfs_id, joint_id);
+				
+				for (size_t iframe = 0; iframe < iter.second.size(); ++iframe)
+				{
+					float3 pos = iter.second[iframe].pos;
+					Quaternion quat_scale = iter.second[iframe].quat * iter.second[iframe].scale;
+					int shifted_frame = iter.second[iframe].frame + action_frame_offset;
+					int kf_id = meshml_obj.AllocKeyframe(kfs_id);
+
+					meshml_obj.SetKeyframe(kfs_id, kf_id, shifted_frame, quat_scale, pos);
+				}
+			}
+			
+			action_frame_offset = action_frame_offset + anim.frame_num;
+		}
+		
+		meshml_obj.FrameRate(fps);
+		meshml_obj.NumFrames(action_frame_offset);
+	}
+
 	bool ConvertScene(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz, bool inverse_z)
 	{
 		aiPropertyStore* props = aiCreatePropertyStore();
 		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
 		aiSetImportPropertyFloat(props, AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
 		aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, 0);
+		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, 0);
 
 		aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
 
@@ -585,25 +808,26 @@ namespace
 
 		if (!scene)
 		{
-			cout << "Import file error: " << aiGetErrorString() << '\n';
+			cout << "Assimp: Import file error: " << aiGetErrorString() << '\n';
 			return false;
 		}
-		
+
 		MeshMLObj meshml_obj(scale);
 		ConvertMaterials(meshml_obj, scene);
 
 		std::vector<Mesh> meshes(scene->mNumMeshes);
-		
+
 		int vertex_export_settings;
 		BuildJoints(meshml_obj, scene);
 		BuildMeshData(meshes, vertex_export_settings, scene, swap_yz, inverse_z);
 		RecursiveTransformMesh(meshml_obj, float4x4::Identity(), scene->mRootNode, meshes);
+		BuildActions(meshml_obj, scene);
 
 		std::ofstream ofs(out_name.c_str());
 		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
 
 		aiReleaseImport(scene);
-		
+
 		return true;
 	}
 }

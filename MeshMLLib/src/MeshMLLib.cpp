@@ -99,7 +99,7 @@ namespace KlayGE
 		int index1 = index % frame_ids.size();
 		int frame0 = frame_ids[index0];
 		int frame1 = frame_ids[index1];
-		float factor = (frame - frame0) / (frame1 - frame0);
+		float factor = MathLib::clamp((frame - frame0) / (frame1 - frame0), 0.0f, 1.0f);
 		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
 		ret.first = MathLib::sclerp(bind_reals[index0], bind_duals[index0], bind_reals[index1], bind_duals[index1], factor);
 		ret.second = MathLib::lerp(bind_scales[index0], bind_scales[index1], factor);
