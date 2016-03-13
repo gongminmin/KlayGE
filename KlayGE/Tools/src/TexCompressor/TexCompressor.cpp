@@ -193,6 +193,12 @@ namespace
 			break;
 		}
 
+		ElementFormat const block_in_fmt = in_codec ? in_codec->DecodedFormat() : in_format;
+		bool const color_conversion = (MakeNonSRGB(block_in_fmt) != out_codec->DecodedFormat());
+		uint32_t const num_texels = out_codec->BlockWidth() * out_codec->BlockHeight();
+		std::vector<uint8_t> block_in_data;
+		std::vector<Color> block_in_data_f32;
+
 		while (block_index < block_addrs.size())
 		{
 			uint32_t index = block_index ++;
@@ -212,51 +218,30 @@ namespace
 
 			ElementInitData const & sub_res_data = in_data[std::get<0>(block_addr)];
 			uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
-			std::vector<uint8_t> block_in_data;
-			ElementFormat block_in_fmt;
 			if (in_codec)
 			{
 				BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
 				BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
 
-				block_in_fmt = in_codec->DecodedFormat();
-				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * NumFormatBytes(block_in_fmt));
+				block_in_data.resize(num_texels * NumFormatBytes(block_in_fmt));
 				in_codec->DecodeBlock(&block_in_data[0], src_data
 					+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
 			}
 			else
 			{
-				block_in_fmt = in_format;
 				uint32_t const elem_size = NumFormatBytes(in_format);
-				block_in_data.resize(out_codec->BlockWidth() * out_codec->BlockHeight() * elem_size, 0);
-				for (uint32_t dy = 0; dy < out_codec->BlockHeight(); ++ dy)
+				block_in_data.resize(num_texels * elem_size, 0);
+				for (uint32_t dy = 0; (dy < out_codec->BlockHeight()) && (y + dy < mip_height); ++ dy)
 				{
-					if (y + dy < mip_height)
-					{
-						for (uint32_t dx = 0; dx < out_codec->BlockWidth(); ++ dx)
-						{
-							if (x + dx < mip_width)
-							{
-								memcpy(&block_in_data[(dy * out_codec->BlockWidth() + dx) * elem_size],
-									src_data + (y + dy) * sub_res_data.row_pitch + (x + dx) * elem_size, elem_size);
-							}
-							else
-							{
-								break;
-							}
-						}
-					}
-					else
-					{
-						break;
-					}
+					memcpy(&block_in_data[dy * out_codec->BlockWidth() * elem_size],
+						src_data + (y + dy) * sub_res_data.row_pitch + x * elem_size,
+						std::min(out_codec->BlockWidth(), mip_width - x) * elem_size);
 				}
 			}
 
-			if (block_in_fmt != out_codec->DecodedFormat())
+			if (color_conversion)
 			{
-				uint32_t const num_texels = out_codec->BlockWidth() * out_codec->BlockHeight();
-				std::vector<Color> block_in_data_f32(num_texels);
+				block_in_data_f32.resize(num_texels);
 				ConvertToABGR32F(block_in_fmt, &block_in_data[0], num_texels, &block_in_data_f32[0]);
 				block_in_data.resize(num_texels * NumFormatBytes(out_codec->DecodedFormat()));
 				ConvertFromABGR32F(out_codec->DecodedFormat(), &block_in_data_f32[0], num_texels, &block_in_data[0]);

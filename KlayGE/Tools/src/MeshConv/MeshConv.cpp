@@ -307,9 +307,11 @@ namespace
 			{
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
+				if (str.length > 0)
+				{
+					int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
+					meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
+				}
 			}
 		}
 
