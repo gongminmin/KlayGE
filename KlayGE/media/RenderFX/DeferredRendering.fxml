@@ -825,7 +825,7 @@ float4 SkylightShading(float shininess, float4 mrt1, float3 normal, float3 view)
 
 		float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skylight_y_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0).r,
 			TexCubeSampleLevel(skylight_c_cube_tex, skylight_sampler, normal, skylight_diff_spec_mip.x, 0)).xyz;
-		shading.xyz + CalcEnvDiffuse(prefiltered_clr, c_diff);
+		shading.xyz += CalcEnvDiffuse(prefiltered_clr, c_diff);
 		
 		shininess = log2(shininess) / 13; // log2(8192) == 13
 	
