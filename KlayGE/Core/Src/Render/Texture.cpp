@@ -1902,7 +1902,7 @@ namespace KlayGE
 				row_pitch = desc.width * NumFormatBytes(format);
 			}
 		}
-		slice_pitch = row_pitch * height;
+		slice_pitch = row_pitch * desc.height;
 
 		if (desc.reserved1[0] != 0)
 		{

@@ -124,7 +124,7 @@ float2 SampleDetailGradOctaves(float2 uv)
 
 float2 WorldXZToHeightUV(float2 world_xz)
 {
-	return world_xz / world_uv_repeats.x * 0.5f + 0.5f;
+	return world_xz * world_uv_repeats.y * 0.5f + 0.5f;
 }
 
 float2 HeightUVToWorldXZ(float2 uv)

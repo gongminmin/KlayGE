@@ -709,8 +709,8 @@ namespace KlayGE
 
 	float HQTerrainRenderable::GetHeight(float x, float z)
 	{
-		uint32_t width = height_map_cpu_tex_->Width(0);
-		uint32_t height = height_map_cpu_tex_->Height(0);
+		uint32_t const width = height_map_cpu_tex_->Width(0);
+		uint32_t const height = height_map_cpu_tex_->Height(0);
 
 		float2 uv((x - snapped_x_) / world_scale_ / (world_uv_repeats_ * 2) + 0.5f,
 			(z - snapped_z_) / world_scale_ / (world_uv_repeats_ * 2) + 0.5f);
@@ -720,17 +720,17 @@ namespace KlayGE
 		float fu = uv.x() * width;
 		float fv = uv.y() * height;
 		uint32_t iu0 = MathLib::clamp(static_cast<uint32_t>(fu), 0U, width - 1);
-		uint32_t iv0 = MathLib::clamp(static_cast<uint32_t>(fv), 0U, width - 1);
+		uint32_t iv0 = MathLib::clamp(static_cast<uint32_t>(fv), 0U, height - 1);
 		uint32_t iu1 = MathLib::clamp(iu0 + 1, 0U, width - 1);
-		uint32_t iv1 = MathLib::clamp(iv0 + 1, 0U, width - 1);
+		uint32_t iv1 = MathLib::clamp(iv0 + 1, 0U, height - 1);
 		float wu = fu - iu0;
 		float wv = fv - iv0;
 		Texture::Mapper mapper(*height_map_cpu_tex_, 0, 0, TMA_Read_Only, 0, 0, width, height);
 		half const * src = mapper.Pointer<half>();
-		float t0 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half)+ iu0]);
-		float t1 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half)+ iu1]);
-		float t2 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu0]);
-		float t3 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half)+ iu1]);
+		float t0 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half) + iu0]);
+		float t1 = static_cast<float>(src[iv0 * mapper.RowPitch() / sizeof(half) + iu1]);
+		float t2 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half) + iu0]);
+		float t3 = static_cast<float>(src[iv1 * mapper.RowPitch() / sizeof(half) + iu1]);
 		return MathLib::lerp(MathLib::lerp(t0, t1, wu), MathLib::lerp(t2, t3, wu), wv) * world_scale_ * vertical_scale_;
 	}
 
