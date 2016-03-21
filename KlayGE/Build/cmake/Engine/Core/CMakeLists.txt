@@ -19,7 +19,7 @@ DOWNLOAD_FILE("KlayGE/media/Textures/2D/noise_grad4_perm.dds" "cbda47a1678ce70b6
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/noise_simplex.dds" "cbda47a1678ce70b6720856736100979d469e159" "83b8b76f165a00e998ff13e39c40c27393d3e271")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/powered_by_klayge.dds" "cbda47a1678ce70b6720856736100979d469e159" "21346648b14a0366de7abd628393e6de0253317d")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/ui.dds" "cbda47a1678ce70b6720856736100979d469e159" "7bdafaf02f9f5f2fef748d38c12c84212004cda6")
-DOWNLOAD_FILE("KlayGE/media/Textures/2D/white_noise_tex.dds" "cbda47a1678ce70b6720856736100979d469e159" "344bbd254a537fbd437f6b6ef0458448f81dad81")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/white_noise_tex.dds" "0cd916b426c9892dfe05743199f481a13489217c" "5739284048778c68fb862d957f0d956430b5c279")
 DOWNLOAD_FILE("KlayGE/media/Textures/3D/color_grading.dds" "cbda47a1678ce70b6720856736100979d469e159" "44bee46635485aef2068095a45cab5a9fbc6d838")
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_filtered_c.dds" "cbda47a1678ce70b6720856736100979d469e159" "579143e79a6361d26926d967b6c4511127c0137b")
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/Lake_CraterLake03_filtered_y.dds" "cbda47a1678ce70b6720856736100979d469e159" "4978e7b023d80d42111afea10d3f10be37980e25")

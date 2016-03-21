@@ -62,7 +62,7 @@ float4 GradientPS(float2 texcoord : TEXCOORD0) : SV_Target
 
 float4 ProceduralMask(float2 texcoord, float height, float3 normal)
 {
-	float random = noise_tex.Sample(linear_wrap_sampler, texcoord * 31 / 256).x;
+	float random = noise_tex.Sample(linear_wrap_sampler, texcoord * 31 / 256).x * 0.5f + 0.5f;
 		
 	float weight0 = saturate(random / 0.7f);
 	float weight1 = smoothstep(0.2f, 0.8f, normal.y * normal.y * random * 12);
