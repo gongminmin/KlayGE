@@ -1023,55 +1023,66 @@ namespace KlayGE
 				break;
 			}
 
+			so_buffer_mode_ = GL_SEPARATE_ATTRIBS;
+
 			so_vars_.resize(0);
 			for (uint32_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
 			{
 				so_buffs_.push_back(checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->GLvbo());
 
-				vertex_element const & ve = so_rl_->VertexStreamFormat(i)[0];
-				switch (ve.usage)
+				auto const & streams = so_rl_->VertexStreamFormat(i);
+				for (size_t j = 0; j < streams.size(); ++ j)
 				{
-				case VEU_Position:
-					so_vars_.push_back("gl_Position");
-					break;
+					vertex_element const & ve = streams[j];
+					switch (ve.usage)
+					{
+					case VEU_Position:
+						so_vars_.push_back("gl_Position");
+						break;
 
-				case VEU_Normal:
-					so_vars_.push_back("gl_Normal");
-					break;
+					case VEU_Normal:
+						so_vars_.push_back("gl_Normal");
+						break;
 
-				case VEU_Diffuse:
-					so_vars_.push_back("gl_FrontColor");
-					break;
+					case VEU_Diffuse:
+						so_vars_.push_back("gl_FrontColor");
+						break;
 
-				case VEU_Specular:
-					so_vars_.push_back("gl_FrontSecondaryColor");
-					break;
+					case VEU_Specular:
+						so_vars_.push_back("gl_FrontSecondaryColor");
+						break;
 
-				case VEU_BlendWeight:
-					so_vars_.push_back("_BLENDWEIGHT");
-					break;
-					
-				case VEU_BlendIndex:
-					so_vars_.push_back("_BLENDINDEX");
-					break;
+					case VEU_BlendWeight:
+						so_vars_.push_back("_BLENDWEIGHT");
+						break;
 
-				case VEU_TextureCoord:
-					so_vars_.push_back("glTexCoord["
-						+ boost::lexical_cast<std::string>(static_cast<int>(ve.usage_index)) + "]");
-					break;
+					case VEU_BlendIndex:
+						so_vars_.push_back("_BLENDINDEX");
+						break;
 
-				case VEU_Tangent:
-					so_vars_.push_back("_TANGENT");
-					break;
-					
-				case VEU_Binormal:
-					so_vars_.push_back("_BINORMAL");
-					break;
+					case VEU_TextureCoord:
+						so_vars_.push_back("glTexCoord["
+							+ boost::lexical_cast<std::string>(static_cast<int>(ve.usage_index)) + "]");
+						break;
+
+					case VEU_Tangent:
+						so_vars_.push_back("_TANGENT");
+						break;
+
+					case VEU_Binormal:
+						so_vars_.push_back("_BINORMAL");
+						break;
+					}
+				}
+
+				if (streams.size() > 1)
+				{
+					so_buffer_mode_ = GL_INTERLEAVED_ATTRIBS;
 				}
 			}
 
 			so_vars_ptrs_.resize(so_vars_.size());
-			for (size_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
+			for (size_t i = 0; i < so_vars_.size(); ++ i)
 			{
 				so_vars_ptrs_[i] = so_vars_[i].c_str();
 			}
@@ -1152,7 +1163,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
@@ -1174,7 +1185,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
@@ -1211,7 +1222,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
@@ -1242,7 +1253,7 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
@@ -1361,7 +1372,7 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
 								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
@@ -1384,7 +1395,7 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass->GetShaderObject());
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], GL_SEPARATE_ATTRIBS);
+							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
 								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);

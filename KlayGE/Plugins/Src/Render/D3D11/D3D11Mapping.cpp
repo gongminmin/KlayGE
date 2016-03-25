@@ -631,7 +631,7 @@ namespace KlayGE
 		}
 	}
 
-	D3D11_SO_DECLARATION_ENTRY D3D11Mapping::Mapping(ShaderDesc::StreamOutputDecl const & decl, uint8_t slot)
+	D3D11_SO_DECLARATION_ENTRY D3D11Mapping::Mapping(ShaderDesc::StreamOutputDecl const & decl)
 	{
 		D3D11_SO_DECLARATION_ENTRY ret;
 
@@ -639,7 +639,7 @@ namespace KlayGE
 		ret.SemanticIndex = decl.usage_index;
 		ret.StartComponent = decl.start_component;
 		ret.ComponentCount = decl.component_count;
-		ret.OutputSlot = slot;
+		ret.OutputSlot = decl.slot;
 		switch (decl.usage)
 		{
 		// Vertex xyzs

@@ -467,8 +467,8 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 
 			<state name="vertex_shader" value="UpdateSOVS()">
 				<stream_output>
-					<slot usage="SV_Position" component="xyzw"/>
-					<slot usage="TEXCOORD" usage_index="0" component="xyzw"/>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+					<entry usage="TEXCOORD" usage_index="0" component="xyzw" slot="1"/>
 				</stream_output>
 			</state>
 		</pass>

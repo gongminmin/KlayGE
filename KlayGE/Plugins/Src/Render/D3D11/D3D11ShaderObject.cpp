@@ -839,7 +839,7 @@ namespace KlayGE
 									std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
 									for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 									{
-										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
 									}
 
 									UINT rasterized_stream = 0;
@@ -906,7 +906,7 @@ namespace KlayGE
 							std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
 							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 							{
-								d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+								d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
 							}
 
 							UINT rasterized_stream = 0;
@@ -994,7 +994,7 @@ namespace KlayGE
 									std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
 									for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 									{
-										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
 									}
 
 									UINT rasterized_stream = 0;

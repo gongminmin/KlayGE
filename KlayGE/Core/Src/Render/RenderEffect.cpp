@@ -75,7 +75,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0107;
+	uint32_t const KFX_VERSION = 0x0108;
 
 	std::mutex singleton_mutex;
 
@@ -4433,13 +4433,13 @@ namespace KlayGE
 					XMLNodePtr so_node = state_node->FirstNode("stream_output");
 					if (so_node)
 					{
-						for (XMLNodePtr slot_node = so_node->FirstNode("slot"); slot_node; slot_node = slot_node->NextSibling("slot"))
+						for (XMLNodePtr entry_node = so_node->FirstNode("entry"); entry_node; entry_node = entry_node->NextSibling("entry"))
 						{
 							ShaderDesc::StreamOutputDecl decl;
 
-							std::string usage_str = slot_node->Attrib("usage")->ValueString();
+							std::string usage_str = entry_node->Attrib("usage")->ValueString();
 							size_t const usage_str_hash = RT_HASH(usage_str.c_str());
-							XMLAttributePtr attr = slot_node->Attrib("usage_index");
+							XMLAttributePtr attr = entry_node->Attrib("usage_index");
 							if (attr)
 							{
 								decl.usage_index = static_cast<uint8_t>(attr->ValueInt());
@@ -4489,11 +4489,11 @@ namespace KlayGE
 								decl.usage = VEU_Binormal;
 							}
 
-							attr = slot_node->Attrib("component");
+							attr = entry_node->Attrib("component");
 							std::string component_str;
 							if (attr)
 							{
-								component_str = slot_node->Attrib("component")->ValueString();
+								component_str = entry_node->Attrib("component")->ValueString();
 							}
 							else
 							{
@@ -4501,6 +4501,16 @@ namespace KlayGE
 							}
 							decl.start_component = static_cast<uint8_t>(component_str[0] - 'x');
 							decl.component_count = static_cast<uint8_t>(std::min(static_cast<size_t>(4), component_str.size()));
+
+							attr = entry_node->Attrib("slot");
+							if (attr)
+							{
+								decl.slot = static_cast<uint8_t>(entry_node->Attrib("slot")->ValueInt());
+							}
+							else
+							{
+								decl.slot = 0;
+							}
 
 							sd.so_decl.push_back(decl);
 						}

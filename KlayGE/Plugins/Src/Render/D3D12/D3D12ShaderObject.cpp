@@ -841,7 +841,7 @@ namespace KlayGE
 						so_decl_.resize(sd.so_decl.size());
 						for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 						{
-							so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+							so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i]);
 						}
 
 						rasterized_stream_ = 0;
@@ -867,7 +867,7 @@ namespace KlayGE
 						so_decl_.resize(sd.so_decl.size());
 						for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 						{
-							so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+							so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i]);
 						}
 
 						rasterized_stream_ = 0;
@@ -911,7 +911,7 @@ namespace KlayGE
 								so_decl_.resize(sd.so_decl.size());
 								for (size_t i = 0; i < sd.so_decl.size(); ++ i)
 								{
-									so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i], static_cast<uint8_t>(i));
+									so_decl_[i] = D3D12Mapping::Mapping(sd.so_decl[i]);
 								}
 
 								rasterized_stream_ = 0;

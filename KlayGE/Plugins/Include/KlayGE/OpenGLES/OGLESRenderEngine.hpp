@@ -175,6 +175,7 @@ namespace KlayGE
 		std::vector<std::string> so_vars_;
 		std::vector<char const *> so_vars_ptrs_;
 		std::vector<GLuint> so_buffs_;
+		GLenum so_buffer_mode_;
 
 		GLenum active_tex_unit_;
 		std::vector<GLuint> binded_targets_;
