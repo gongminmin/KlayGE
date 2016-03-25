@@ -81,6 +81,8 @@ namespace KlayGE
 
 		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
 
+		uint32_t SONumPrimitiveWritten() override;
+
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 		virtual void GetCustomAttrib(std::string const & name, void* value) override;
@@ -260,6 +262,8 @@ namespace KlayGE
 
 		ID3D11QueryPtr timestamp_disjoint_query_;
 		double inv_timestamp_freq_;
+
+		ID3D11QueryPtr so_statistics_query_;
 	};
 }
 

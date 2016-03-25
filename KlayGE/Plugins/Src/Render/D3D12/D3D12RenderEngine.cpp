@@ -1334,6 +1334,12 @@ namespace KlayGE
 		return checked_cast<D3D12RenderWindow*>(screen_frame_buffer_.get())->D3DDepthStencilBuffer();
 	}
 
+	uint32_t D3D12RenderEngine::SONumPrimitiveWritten()
+	{
+		// TODO
+		return 0;
+	}
+
 	// ÉèÖÃ¼ô³ı¾ØÕó
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12RenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

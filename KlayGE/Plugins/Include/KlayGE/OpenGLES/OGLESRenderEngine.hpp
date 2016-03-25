@@ -50,6 +50,8 @@ namespace KlayGE
 
 		virtual TexturePtr const & ScreenDepthStencilTexture() const override;
 
+		uint32_t SONumPrimitiveWritten() override;
+
 		void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 		void GetCustomAttrib(std::string const & name, void* value);
