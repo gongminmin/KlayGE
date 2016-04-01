@@ -244,6 +244,7 @@ namespace KlayGE
 		{
 			return true;
 		}
+		bool AllHWResourceReady() const;
 
 		// For select mode
 

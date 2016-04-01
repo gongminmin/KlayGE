@@ -300,6 +300,36 @@ namespace KlayGE
 	{
 	}
 
+	bool Renderable::AllHWResourceReady() const
+	{
+		bool ready = this->HWResourceReady();
+		if (ready && diffuse_tex_)
+		{
+			ready = diffuse_tex_->HWResourceReady();
+		}
+		if (ready && specular_tex_)
+		{
+			ready = specular_tex_->HWResourceReady();
+		}
+		if (ready && shininess_tex_)
+		{
+			ready = shininess_tex_->HWResourceReady();
+		}
+		if (ready && normal_tex_)
+		{
+			ready = normal_tex_->HWResourceReady();
+		}
+		if (ready && height_tex_)
+		{
+			ready = height_tex_->HWResourceReady();
+		}
+		if (ready && emit_tex_)
+		{
+			ready = emit_tex_->HWResourceReady();
+		}
+		return ready;
+	}
+
 	void Renderable::ObjectID(uint32_t id)
 	{
 		select_mode_object_id_ = float4(((id & 0xFF) + 0.5f) / 255.0f,
