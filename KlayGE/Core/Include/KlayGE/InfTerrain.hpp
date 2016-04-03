@@ -162,7 +162,8 @@ namespace KlayGE
 		};
 
 	public:
-		explicit HQTerrainRenderable(RenderEffectPtr const & effect);
+		explicit HQTerrainRenderable(RenderEffectPtr const & effect,
+			float world_scale = 800, float vertical_scale = 2.5f, int world_uv_repeats = 8);
 		virtual ~HQTerrainRenderable()
 		{
 		}

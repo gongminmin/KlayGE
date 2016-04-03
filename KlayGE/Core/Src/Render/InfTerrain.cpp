@@ -355,9 +355,10 @@ namespace KlayGE
 	}
 
 
-	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect)
+	HQTerrainRenderable::HQTerrainRenderable(RenderEffectPtr const & effect,
+			float world_scale, float vertical_scale, int world_uv_repeats)
 		: RenderableHelper(L"HQTerrain"),
-			world_scale_(800), vertical_scale_(2.5f), world_uv_repeats_(8),
+			world_scale_(world_scale), vertical_scale_(vertical_scale), world_uv_repeats_(world_uv_repeats),
 			ridge_octaves_(3), fBm_octaves_(3), tex_twist_octaves_(1), detail_noise_scale_(0.02f),
 			tessellated_tri_size_(6), wireframe_(false), show_patches_(false), show_tiles_(false)
 	{
