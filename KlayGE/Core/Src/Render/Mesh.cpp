@@ -152,6 +152,8 @@ namespace
 				}
 				model_desc_.model_data->merged_ib->CreateHWResource(&model_desc_.model_data->merged_indices[0]);
 
+				this->AddsSubPath();
+
 				model->BuildModelInfo();
 				for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 				{
@@ -261,6 +263,8 @@ namespace
 				model->AssignSubrenderables(meshes.begin(), meshes.end());
 			}
 
+			this->AddsSubPath();
+
 			model->BuildModelInfo();
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
@@ -343,6 +347,20 @@ namespace
 			}
 
 			model->AssignSubrenderables(meshes.begin(), meshes.end());
+		}
+
+		void AddsSubPath()
+		{
+			std::string sub_path;
+			auto sub_path_loc = model_desc_.res_name.find_last_of('/');
+			if (sub_path_loc != std::string::npos)
+			{
+				sub_path = ResLoader::Instance().Locate(model_desc_.res_name.substr(0, sub_path_loc));
+				if (!sub_path.empty())
+				{
+					ResLoader::Instance().AddPath(sub_path);
+				}
+			}
 		}
 
 	private:
