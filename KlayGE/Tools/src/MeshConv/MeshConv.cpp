@@ -123,15 +123,19 @@ namespace
 		int parent_id;
 		std::string name;
 
-		float4x4 mesh_to_bone;
+		float4x4 bone_to_mesh;
 		float4x4 local_matrix;	  // local to parent
 	};
 
-	std::map<std::string, Joint> joint_nodes;
+	
+	typedef std::map<std::string, Joint> JointsMap;
 
 	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
 	{
-		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+//		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
+//		auto const trans_quat = MathLib::to_quaternion(trans_mat);
+		(void)parent_mat;
+		auto const trans_mat =float4x4::Identity();
 		auto const trans_quat = MathLib::to_quaternion(trans_mat);
 
 		for (unsigned int n = 0; n < node->mNumMeshes; ++ n)
@@ -229,7 +233,7 @@ namespace
 			unsigned int max = 1;
 			if (AI_SUCCESS == aiGetMaterialFloatArray(mtl, AI_MATKEY_OPACITY, &ai_opacity, &max))
 			{
-				opacity = ai_opacity;
+				opacity = 1;
 			}
 
 			max = 1;
@@ -319,7 +323,7 @@ namespace
 		}
 	}
 
-	void BuildMeshData(std::vector<Mesh>& meshes, int& vertex_export_settings, aiScene const * scene, bool swap_yz, bool inverse_z)
+	void BuildMeshData(std::vector<Mesh>& meshes, int& vertex_export_settings, JointsMap const& joint_nodes, aiScene const * scene, bool swap_yz, bool inverse_z)
 	{
 		vertex_export_settings = MeshMLObj::VES_None;
 		for (unsigned int mi = 0; mi < scene->mNumMeshes; ++ mi)
@@ -475,7 +479,10 @@ namespace
 				aiBone* bone = mesh->mBones[bi];
 				auto iter = joint_nodes.find(bone->mName.C_Str());
 				if (iter == joint_nodes.end())
-					continue;	// should not happen
+				{
+					BOOST_ASSERT_MSG(0, "Joint not found!");// should not happen
+					continue;
+				}
 
 				int joint_id = iter->second.id;
 				for (unsigned int wi = 0; wi < bone->mNumWeights; ++wi)
@@ -501,36 +508,60 @@ namespace
 
 	}
 
-	void BuildJoints(MeshMLObj& meshml_obj, aiScene const * scene)
+	void PrintMat(std::string const& name, float4x4 const& matrix)
 	{
-		for (unsigned int i = 0; i < scene->mNumMeshes; ++i)
+		auto & os = std::cout;
+		os.precision(4);
+		os << name << ": \n";
+		for (int i = 0; i < 4; ++i)
 		{
-			aiMesh const * mesh = scene->mMeshes[i];
-			for (unsigned int ibone = 0; ibone < mesh->mNumBones; ++ibone)
-			{
-				aiBone const * bone = mesh->mBones[ibone];
-				Joint joint;
-				joint.name = bone->mName.C_Str();
-				joint.mesh_to_bone = float4x4(&bone->mOffsetMatrix.a1);
-				joint_nodes[joint.name] = joint;
-			}
+			os
+			<< matrix(i, 0) << ", "
+			<< matrix(i, 1) << ", "
+			<< matrix(i, 2) << ", "
+			<< matrix(i, 3) << "\n";
 		}
+		os << '\n';
+	}
+	
+	void BuildJoints(MeshMLObj& meshml_obj, JointsMap& joint_nodes, aiScene const * scene)
+	{
+		std::function<void(aiNode const*,float4x4 const&)> build_bind_matrix = [&build_bind_matrix,&joint_nodes, scene]
+		(aiNode const* meshNode,float4x4 const& parent_mat)
+		{
+			(void)parent_mat;
+			float4x4 mesh_trans = MathLib::transpose(float4x4(&meshNode->mTransformation.a1));
+			for (unsigned int i = 0; i < meshNode->mNumMeshes; ++i)
+			{
+				aiMesh const * mesh = scene->mMeshes[meshNode->mMeshes[i]];
+				for (unsigned int ibone = 0; ibone < mesh->mNumBones; ++ibone)
+				{
+					aiBone const * bone = mesh->mBones[ibone];
+					Joint joint;
+					joint.name = bone->mName.C_Str();
+					float4x4 temp = MathLib::transpose(float4x4(&bone->mOffsetMatrix.a1));
+					joint.bone_to_mesh = MathLib::inverse(temp) * mesh_trans;
+					joint_nodes[joint.name] = joint;
+					PrintMat(joint.name, temp);
+					
+				}
+			}
+			
+			for (unsigned int i = 0; i < meshNode->mNumChildren; ++i)
+				build_bind_matrix(meshNode->mChildren[i], mesh_trans);
+		};
 		
-
-		// 根据assimp文档，aiBone表示带蒙皮的点。和aiBone名字一样的aiNode及其所有祖先都需要导入skeleton。
-		// 所以分两次遍历aiNode，第一次判断是否为aiBone对应界点并填充bind_matrix
-		// 第二遍分配id。多遍历一遍场景树，以保证父亲的joint_id在孩子的前面
-		// ps:不能只导入所有在aiBone里的Node，aiBone只包括带蒙皮的节点
-		// 一些节点没蒙皮，但是他的变换会影响子节点，都需要导入到skeleton的hierarchy中
-		std::function<bool(aiNode*const)> mark_joint_nodes = [&mark_joint_nodes](aiNode * const root)
+		// 根据assimp文档，aiBone表示带蒙皮的点。所以aiBone对应的aiNode及其所有祖先都需要导入skeleton。
+		// 分两次遍历aiNode，第一次判断是应该导出为bone并填充bind_matrix。第二遍分配id。
+		// 多遍历一遍场景树，以保证父亲的joint_id在孩子的前面
+		std::function<bool(aiNode const*const)> mark_joint_nodes = [&mark_joint_nodes, &joint_nodes](aiNode const* const root)
 		{
 			std::string name = root->mName.C_Str();
-
+			
 			auto iter = joint_nodes.find(name);
 			bool child_has_bone = false;
 			if (iter != joint_nodes.end())
 			{
-				iter->second.local_matrix = float4x4(&root->mTransformation.a1);
 				child_has_bone = true;
 			}
 
@@ -541,8 +572,7 @@ namespace
 			{
 				Joint joint;
 				joint.name = name;
-				joint.mesh_to_bone = float4x4::Identity();
-				joint.local_matrix = float4x4::Identity();
+				joint.bone_to_mesh = float4x4::Identity();
 				joint_nodes[name] = joint;
 			}
 
@@ -550,7 +580,7 @@ namespace
 		};
 
 		std::function<void(aiNode* const, int)> alloc_joints =
-			[&meshml_obj, &alloc_joints](aiNode* const root, int parent_id)
+			[&meshml_obj, &joint_nodes, &alloc_joints](aiNode* const root, int parent_id)
 		{
 			std::string name = root->mName.C_Str();
 			int joint_id = -1;
@@ -559,14 +589,16 @@ namespace
 			{
 				joint_id = meshml_obj.AllocJoint();
 				iter->second.id = joint_id;
+				iter->second.local_matrix = MathLib::transpose(float4x4(&root->mTransformation.a1));
 
-				meshml_obj.SetJoint(joint_id, name, parent_id, iter->second.mesh_to_bone);
+				meshml_obj.SetJoint(joint_id, name, parent_id, (iter->second.bone_to_mesh));
 			}
 
 			for (unsigned int i = 0; i < root->mNumChildren; ++i)
 				alloc_joints(root->mChildren[i], joint_id);
 		};
 
+		build_bind_matrix(scene->mRootNode, float4x4::Identity());
 		mark_joint_nodes(scene->mRootNode);
 		alloc_joints(scene->mRootNode, -1);
 	}
@@ -574,8 +606,8 @@ namespace
 	struct ResampledTransform
 	{
 		int frame;
-		Quaternion quat;
 		float3 pos;
+		Quaternion quat;
 		float scale;
 	};
 	
@@ -670,12 +702,12 @@ namespace
 				quat_resampled = MathLib::slerp(okf.quats[prev_i].second, okf.quats[i_rot].second, fraction);
 			}
 			
-			rkf.push_back({i, quat_resampled, pos_resampled, scale_resampled.x()});
+			rkf.push_back({i, pos_resampled, quat_resampled, scale_resampled.x()});
 		}
 	}
 	
 	
-	void BuildActions(MeshMLObj& meshml_obj, aiScene const * scene)
+	void BuildActions(MeshMLObj& meshml_obj, JointsMap const& joint_nodes, aiScene const * scene)
 	{
 		std::vector<Animation> animations;
 		
@@ -737,7 +769,7 @@ namespace
 				int joint_id = iter->second.id;
 				if (anim.resampledFrames.find(joint_id) == anim.resampledFrames.end())
 				{
-					ResampledTransform defaultTF{0, Quaternion::Identity(), float3(0, 0, 0), 1.0f};
+					ResampledTransform defaultTF{0, float3(0, 0, 0), Quaternion::Identity(), 1.0f};
 					float3 scale;
 					MathLib::decompose(scale, defaultTF.quat, defaultTF.pos, iter->second.local_matrix);
 					defaultTF.scale = scale.x();
@@ -765,12 +797,16 @@ namespace
 				
 				for (size_t iframe = 0; iframe < iter.second.size(); ++iframe)
 				{
-					float3 pos = iter.second[iframe].pos;
-					Quaternion quat_scale = iter.second[iframe].quat * iter.second[iframe].scale;
 					int shifted_frame = iter.second[iframe].frame + action_frame_offset;
 					int kf_id = meshml_obj.AllocKeyframe(kfs_id);
-
-					meshml_obj.SetKeyframe(kfs_id, kf_id, shifted_frame, quat_scale, pos);
+					float4x4 mat = MathLib::to_matrix(iter.second[iframe].quat) * iter.second[iframe].scale;
+					float3 pos = iter.second[iframe].pos;
+					mat(3, 0) = pos.x();
+					mat(3, 1) = pos.y();
+					mat(3, 2) = pos.z();
+					//mat(3, 3) = 1.0f;
+					
+					meshml_obj.SetKeyframe(kfs_id, kf_id, shifted_frame, mat);
 				}
 			}
 			
@@ -787,7 +823,6 @@ namespace
 		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
 		aiSetImportPropertyFloat(props, AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
 		aiSetImportPropertyInteger(props, AI_CONFIG_PP_SBP_REMOVE, 0);
-		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_FBX_PRESERVE_PIVOTS, 0);
 
 		aiSetImportPropertyInteger(props, AI_CONFIG_GLOB_MEASURE_TIME, 1);
 
@@ -816,12 +851,13 @@ namespace
 		ConvertMaterials(meshml_obj, scene);
 
 		std::vector<Mesh> meshes(scene->mNumMeshes);
-
+		JointsMap joint_nodes;
+		
 		int vertex_export_settings;
-		BuildJoints(meshml_obj, scene);
-		BuildMeshData(meshes, vertex_export_settings, scene, swap_yz, inverse_z);
+		BuildJoints(meshml_obj, joint_nodes, scene);
+		BuildMeshData(meshes, vertex_export_settings, joint_nodes, scene, swap_yz, inverse_z);
 		RecursiveTransformMesh(meshml_obj, float4x4::Identity(), scene->mRootNode, meshes);
-		BuildActions(meshml_obj, scene);
+		BuildActions(meshml_obj, joint_nodes, scene);
 
 		std::ofstream ofs(out_name.c_str());
 		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
