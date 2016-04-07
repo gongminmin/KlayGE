@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Parameters" caption="Parameters" x="-160" y="450" align_x="right" width="220" height="160">
+		<control type="check_box" id="LightShaft" caption="Light shaft" x="20" y="40" width="120" height="24" checked="1" hotkey="0" is_default="0"/>		
+		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="80" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="0" y="-128" align_x="left" align_y="bottom" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

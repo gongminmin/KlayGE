@@ -1,0 +1,246 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Noise.fxml"/>
+	<include name="PostProcess.fxml"/>
+	<include name="InfTerrain.fxml"/>
+
+	<parameter type="int3" name="fractal_octaves"/>
+	
+	<parameter type="float2" name="inv_width_height"/>
+	<parameter type="texture2D" name="gradient_tex"/>
+	<parameter type="texture2D" name="noise_tex">
+		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
+	</parameter>
+
+	<parameter type="sampler" name="point_clamp_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float HybridTerrain(float2 x, int3 octaves)
+{
+	x /= 4.5f;
+
+	float2 x_offset = float2(fBm(0.2f * x, octaves.z), fBm(0.2f * (x + 1), octaves.z));
+	float2 x_twisted = x + 0.01f * x_offset;
+
+	float h = ridge(0.3f + 0.5f * fBm(x_twisted, octaves.x), 1);
+	
+	float uv_scale  = pow(2.0f, octaves.x);
+	float amp_scale = pow(0.5f, octaves.x);
+	float f = fBm(x * uv_scale, octaves.y) * amp_scale;
+	
+	if (octaves.x > 0)
+	{
+		return h + f * saturate(h);
+	}
+	else
+	{
+		return f;
+	}
+}
+
+float4 HeightPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	texcoord.y = 1 - texcoord.y;
+	float2 uv = texcoord * world_uv_repeats.x + float2(texture_world_offset.x, -texture_world_offset.z);
+	return WriteAFloat(HybridTerrain(uv, fractal_octaves) - 0.5f, 1, 0.5f);
+}
+
+float4 GradientPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float x0 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(+inv_width_height.x, 0)), 1, -0.5f);
+	float x1 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(-inv_width_height.x, 0)), 1, -0.5f);
+	float y0 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(0, +inv_width_height.y)), 1, -0.5f);
+	float y1 = ReadAFloat(height_tex.Sample(point_clamp_sampler, texcoord + float2(0, -inv_width_height.y)), 1, -0.5f);
+	return WriteTwoHalf(float2(x1 - x0, y1 - y0), 0.5f, 0.5f);
+}
+
+float4 ProceduralMask(float2 texcoord, float height, float3 normal)
+{
+	float random = noise_tex.Sample(linear_wrap_sampler, texcoord * 31 / 256).x * 0.5f + 0.5f;
+		
+	float weight0 = saturate(random / 0.7f);
+	float weight1 = smoothstep(0.2f, 0.8f, normal.y * normal.y * random * 12);
+	float weight2 = smoothstep(0.2f, 1.2f, (height * 2 - 0.5f) * random);
+
+	float weight_layer_0 = (1 - weight0) * (1 - weight2);
+	float weight_layer_2 = weight0 * (1 - weight2);
+	float weight_layer_3 = (1 - weight1) * weight2;
+	float weight_layer_1 = weight1 * weight2;
+	
+	return float4(weight_layer_0, weight_layer_1, weight_layer_2, weight_layer_3);
+}
+
+float4 MaskPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float height = vertical_scale.x * ReadAFloat(height_tex.Sample(linear_clamp_sampler, texcoord), 1, -0.5f);
+
+	float ARBITRARY_FUDGE = 2;
+	float2 grad = ReadTwoHalf(gradient_tex.Sample(linear_clamp_sampler, texcoord), 2, -1);
+	float scale = ARBITRARY_FUDGE * vertical_scale.y;
+	float3 normal = normalize(float3(scale * grad.x, coarse_sample_spacing, scale * grad.y));
+
+	float2 tex_uv = HeightUVToWorldXZ(texcoord) + 2 * texture_world_offset.xz;
+	
+	return ProceduralMask(tex_uv, height, normal);
+}
+		]]>
+	</shader>
+
+	<technique name="HeightTech">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="HeightPS()"/>
+		</pass>
+	</technique>
+	<technique name="GradientTech">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="GradientPS()"/>
+		</pass>
+	</technique>
+	<technique name="MaskTech">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MaskPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="float4x4" name="model_mat"/>
+	<parameter type="float2" name="eye_pos_xz"/>
+
+	<shader>
+		<![CDATA[
+void CalcProceduralTerrainNormalColor(float3 world_pos, float debug_patch,
+		out float3 normal, out float3 color)
+{
+	normal = CalcTerrainNormal(world_pos);
+
+	float2 tex_uv = world_pos.xz + 2 * texture_world_offset.xz;
+	float4 mask = ProceduralMask(tex_uv, world_pos.y, normal);
+	//float4 mask = coarse_mask_map.Sample(linear_wrap_sampler, WorldXZToHeightUV(world_pos.xz));
+
+	float2 dist = mul(float4(world_pos, 1), model_mat).xz - eye_pos_xz;
+	float factor = saturate(dot(dist, dist) / 100000);
+	mask.w += (1 - factor) * mask.z;
+	mask.z *= factor;
+
+	color = CalcTerrainColor(world_pos, debug_patch, mask);
+
+	normal = normalize(mul(normal, (float3x3)model_view));
+}
+
+float4 GBufferProceduralTerrainRT0PS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1) : SV_Target
+{
+	float3 normal, color;
+	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
+
+	return StoreGBufferRT0(normal, 0);
+}
+
+float4 GBufferProceduralTerrainRT1PS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1) : SV_Target
+{
+	float3 normal, color;
+	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
+
+	return StoreGBufferRT1(color, 0);
+}
+
+void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1,
+				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	float3 normal, color;
+	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
+
+	StoreGBufferMRT(normal, 0, 0, color,
+		mrt_0, mrt_1);
+}
+		]]>
+	</shader>
+	
+	<technique name="GBufferTessTerrainFillRT0Tech" inherit="DepthTessTerrainTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferProceduralTerrainRT0PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainLineRT0Tech" inherit="GBufferTessTerrainFillRT0Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainFillRT0Tech" inherit="DepthNoTessTerrainTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferProceduralTerrainRT0PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainLineRT0Tech" inherit="GBufferNoTessTerrainFillRT0Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainFillRT1Tech" inherit="DepthTessTerrainTech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			
+			<state name="pixel_shader" value="GBufferProceduralTerrainRT1PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainLineRT1Tech" inherit="GBufferTessTerrainFillRT1Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainFillRT1Tech" inherit="DepthNoTessTerrainTech">
+		<pass name="p0">
+			<state name="depth_func" value="equal"/>
+			
+			<state name="pixel_shader" value="GBufferProceduralTerrainRT1PS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainLineRT1Tech" inherit="GBufferNoTessTerrainFillRT1Tech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainFillMRTTech" inherit="DepthTessTerrainTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferProceduralTerrainMRTPS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferTessTerrainLineMRTTech" inherit="GBufferTessTerrainFillMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainFillMRTTech" inherit="DepthNoTessTerrainTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GBufferProceduralTerrainMRTPS()"/>
+		</pass>
+	</technique>
+	<technique name="GBufferNoTessTerrainLineMRTTech" inherit="GBufferNoTessTerrainFillMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GenNoTessTerrainReflectiveShadowMapTech" inherit="GBufferNoTessTerrainFillMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+</effect>

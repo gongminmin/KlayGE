@@ -1,0 +1,76 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="GBufferNoSkinning.fxml"/>
+	<include name="SkyBox.fxml"/>
+
+	<parameter type="float3" name="fog_color"/>
+
+	<parameter type="float2" name="scale_bias" x="4.2" y="-0.2"/>
+
+	<shader>
+		<![CDATA[
+void FoggySkyBoxVS(float4 pos : POSITION,
+			out float3 texcoord0 : TEXCOORD0,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+	texcoord0 = mul(pos, inv_mvp).xyz;
+}
+
+float4 GBufferFoggySkyBoxRT0PS() : SV_Target
+{
+	return 0;
+}
+
+float4 GBufferFoggySkyBoxRT1PS() : SV_Target
+{
+	return 0;
+}
+
+void GBufferFoggySkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	mrt_0 = mrt_1 = 0;
+}
+
+float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
+{
+	float fog = saturate(normalize(texCoord0).y * scale_bias.x + scale_bias.y);
+	fog *= fog * (3 - 2 * fog);
+
+	float3 sky = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, texCoord0).r,
+			skybox_C_tex.Sample(skybox_sampler, texCoord0)).rgb;
+
+	return float4(lerp(fog_color, sky, fog), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="GBufferFoggySkyBoxRT0" inherit="GBufferSkyBoxRT0Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferFoggySkyBoxRT0PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFoggySkyBoxRT1" inherit="GBufferSkyBoxRT1Tech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferFoggySkyBoxRT1PS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GBufferFoggySkyBoxMRT" inherit="GBufferSkyBoxMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
+			<state name="pixel_shader" value="GBufferFoggySkyBoxMRTPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SpecialShadingFoggySkyBox" inherit="SkyBoxTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
+			<state name="pixel_shader" value="SpecialShadingFoggySkyBoxPS()"/>
+		</pass>
+	</technique>
+</effect>

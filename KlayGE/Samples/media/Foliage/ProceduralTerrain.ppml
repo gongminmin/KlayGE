@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="height">
+		<params>
+			<param name="fractal_octaves"/>
+			<param name="texture_world_offset"/>
+			<param name="world_uv_repeats"/>
+		</params>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="ProceduralTerrain.fxml" tech="HeightTech"/>
+	</post_processor>
+
+	<post_processor name="gradient">
+		<input>
+			<pin name="height_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="ProceduralTerrain.fxml" tech="GradientTech"/>
+	</post_processor>
+
+	<post_processor name="mask">
+		<params>
+			<param name="texture_world_offset"/>
+			<param name="coarse_sample_spacing"/>
+			<param name="world_uv_repeats"/>
+			<param name="vertical_scale"/>
+		</params>
+		<input>
+			<pin name="height_tex"/>
+			<pin name="gradient_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="ProceduralTerrain.fxml" tech="MaskTech"/>
+	</post_processor>
+</post_processors>
