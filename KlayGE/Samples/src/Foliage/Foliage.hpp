@@ -40,6 +40,8 @@ private:
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_light_shaft_;
 	int id_fps_camera_;
+
+	KlayGE::LightSourcePtr sun_light_;
 };
 
 #endif		// _FOLIAGE_HPP

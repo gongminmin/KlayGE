@@ -876,7 +876,6 @@ void OceanApp::OnCreate()
 	deferred_rendering_->AtmosphericPostProcess(fog_pp_);
 
 	light_shaft_pp_ = MakeSharedPtr<LightShaftPostProcess>();
-	light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f);
 	light_shaft_pp_->SetParam(1, sun_light_->Color());
 
 	fpcController_.Scalers(0.05f, 1.0f);
@@ -1090,6 +1089,7 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 	{
 		if (light_shaft_on_)
 		{
+			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
 			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(0));
 			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(0));
 			light_shaft_pp_->Apply();
