@@ -2006,8 +2006,7 @@ namespace KlayGE
 
 			for (int i0 = 0; i0 < 3; ++ i0)
 			{
-				int i1;
-				for (i1 = 0; i1 < nIterPower; ++ i1)
+				for (int i1 = 0; i1 < nIterPower; ++ i1)
 				{
 					int i2;
 					for (i2 = i0; i2 <= 3 - 2; ++ i2)
@@ -2078,13 +2077,12 @@ namespace KlayGE
 			// IncreasingSort
 
 			// Sort the eigenvalues in increasing order, e[0] <= ... <= e[mSize-1]
-			for (int i0 = 0, i1; i0 <= 3 - 2; ++ i0)
+			for (int i0 = 0; i0 <= 3 - 2; ++ i0)
 			{ 
 				// Locate the minimum eigenvalue.
-				i1 = i0;
+				int i1 = i0;
 				float min_value = diagonal[i1];
-				int i2;
-				for (i2 = i0 + 1; i2 < 3; ++ i2)
+				for (int i2 = i0 + 1; i2 < 3; ++ i2)
 				{
 					if (diagonal[i2] < min_value)
 					{
@@ -2100,7 +2098,7 @@ namespace KlayGE
 					diagonal[i0] = min_value;
 
 					// Swap the eigenvectors corresponding to the eigenvalues.
-					for (i2 = 0; i2 < 3; ++ i2)
+					for (int i2 = 0; i2 < 3; ++ i2)
 					{
 						value_type tmp = matrix[i2][i0];
 						matrix[i2][i0] = matrix[i2][i1];

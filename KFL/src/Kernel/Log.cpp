@@ -61,12 +61,12 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_INFO, "KlayGE", fmt, args);
 #else
-		char buffer[1024];
-		vsprintf(buffer, fmt, args);
+		std::array<char, 1024> buffer;
+		vsprintf(&buffer[0], fmt, args);
 
-		std::clog << "(INFO) KlayGE: " << buffer << std::endl;
+		std::clog << "(INFO) KlayGE: " << &buffer[0] << std::endl;
 #ifdef KLAYGE_DEBUG
-		log_file << "(INFO) KlayGE: " << buffer << std::endl;
+		log_file << "(INFO) KlayGE: " << &buffer[0] << std::endl;
 #endif
 #endif
 
@@ -81,12 +81,12 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_WARN, "KlayGE", fmt, args);
 #else
-		char buffer[1024];
-		vsprintf(buffer, fmt, args);
+		std::array<char, 1024> buffer;
+		vsprintf(&buffer[0], fmt, args);
 
-		std::clog << "(WARN) KlayGE: " << buffer << std::endl;
+		std::clog << "(WARN) KlayGE: " << &buffer[0] << std::endl;
 #ifdef KLAYGE_DEBUG
-		log_file << "(WARN) KlayGE: " << buffer << std::endl;
+		log_file << "(WARN) KlayGE: " << &buffer[0] << std::endl;
 #endif
 #endif
 
@@ -101,12 +101,12 @@ namespace KlayGE
 #ifdef KLAYGE_PLATFORM_ANDROID
 		__android_log_vprint(ANDROID_LOG_ERROR, "KlayGE", fmt, args);
 #else
-		char buffer[1024];
-		vsprintf(buffer, fmt, args);
+		std::array<char, 1024> buffer;
+		vsprintf(&buffer[0], fmt, args);
 
-		std::clog << "(ERROR) KlayGE: " << buffer << std::endl;
+		std::clog << "(ERROR) KlayGE: " << &buffer[0] << std::endl;
 #ifdef KLAYGE_DEBUG
-		log_file << "(ERROR) KlayGE: " << buffer << std::endl;
+		log_file << "(ERROR) KlayGE: " << &buffer[0] << std::endl;
 #endif
 #endif
 

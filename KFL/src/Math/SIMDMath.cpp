@@ -1902,8 +1902,8 @@ namespace KlayGE
 		SIMDVectorF4 ToQuaternion(SIMDMatrixF4 const & mat)
 		{
 			SIMDVectorF4 quat;
-			float s;
-			float s2;
+			float s = 0;
+			float s2 = 0;
 			float const tr = mat(0, 0) + mat(1, 1) + mat(2, 2) + 1;
 
 			// check the diagonal
@@ -1997,7 +1997,8 @@ namespace KlayGE
 
 		SIMDVectorF4 Slerp(SIMDVectorF4 const & lhs, SIMDVectorF4 const & rhs, float s)
 		{
-			float scale0, scale1;
+			float scale0 = 0;
+			float scale1 = 0;
 
 			// DOT the quats to get the cosine of the angle between them
 			float cosom = GetX(DotVector4(lhs, rhs));

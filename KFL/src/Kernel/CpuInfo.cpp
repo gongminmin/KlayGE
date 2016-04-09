@@ -56,12 +56,12 @@ namespace
 	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #if defined(KLAYGE_COMPILER_MSVC)
-		int CPUInfo[4];
-		__cpuidex(CPUInfo, *peax, *pecx);
-		*peax = CPUInfo[0];
-		*pebx = CPUInfo[1];
-		*pecx = CPUInfo[2];
-		*pedx = CPUInfo[3];
+		std::array<int, 4> id;
+		__cpuidex(&id[0], *peax, *pecx);
+		*peax = id[0];
+		*pebx = id[1];
+		*pecx = id[2];
+		*pedx = id[3];
 #elif (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG))
 	#ifdef KLAYGE_CPU_X64
 		__asm__
@@ -193,9 +193,16 @@ namespace
 	class ApicExtractor
 	{
 	public:
-		ApicExtractor(uint8_t log_procs_per_pkg = 1, uint8_t cores_per_pkg = 1)
+		ApicExtractor(uint8_t log_procs_per_pkg, uint8_t cores_per_pkg)
+			: log_procs_per_pkg_(log_procs_per_pkg), cores_per_pkg_(cores_per_pkg)
 		{
-			this->SetPackageTopology(log_procs_per_pkg, cores_per_pkg);
+			smt_id_mask_.width = this->GetMaskWidth(log_procs_per_pkg_ / cores_per_pkg_);
+			core_id_mask_.width = this->GetMaskWidth(cores_per_pkg_);
+			pkg_id_mask_.width = 8 - (smt_id_mask_.width + core_id_mask_.width);
+
+			pkg_id_mask_.mask = static_cast<uint8_t>(0xFF << (smt_id_mask_.width + core_id_mask_.width));
+			core_id_mask_.mask = static_cast<uint8_t>((0xFF << smt_id_mask_.width) ^ pkg_id_mask_.mask);
+			smt_id_mask_.mask = static_cast<uint8_t>(~(0xFF << smt_id_mask_.width));
 		}
 
 		uint8_t SmtId(uint8_t apic_id) const
@@ -226,20 +233,6 @@ namespace
 		uint8_t CoresPerPkg() const
 		{
 			return cores_per_pkg_;
-		}
-
-		void SetPackageTopology(uint8_t log_procs_per_pkg, uint8_t cores_per_pkg)
-		{
-			log_procs_per_pkg_	= log_procs_per_pkg;
-			cores_per_pkg_		= cores_per_pkg;
-
-			smt_id_mask_.width	= this->GetMaskWidth(log_procs_per_pkg_ / cores_per_pkg_);
-			core_id_mask_.width	= this->GetMaskWidth(cores_per_pkg_);
-			pkg_id_mask_.width	= 8 - (smt_id_mask_.width + core_id_mask_.width);
-
-			pkg_id_mask_.mask	= static_cast<uint8_t>(0xFF << (smt_id_mask_.width + core_id_mask_.width));
-			core_id_mask_.mask	= static_cast<uint8_t>((0xFF << smt_id_mask_.width) ^ pkg_id_mask_.mask);
-			smt_id_mask_.mask	= static_cast<uint8_t>(~(0xFF << smt_id_mask_.width));
 		}
 
 	private:
@@ -331,9 +324,15 @@ namespace KlayGE
 		uint32_t max_std_fn = cpuid.Eax();
 
 		cpu_string_.resize(12);
-		*reinterpret_cast<uint32_t*>(&cpu_string_[0]) = cpuid.Ebx();
-		*reinterpret_cast<uint32_t*>(&cpu_string_[4]) = cpuid.Edx();
-		*reinterpret_cast<uint32_t*>(&cpu_string_[8]) = cpuid.Ecx();
+		uint32_t temp = cpuid.Ebx();
+		memcpy(&cpu_string_[0], &temp, sizeof(temp));
+		temp = cpuid.Edx();
+		memcpy(&cpu_string_[4], &temp, sizeof(temp));
+		temp = cpuid.Ecx();
+		memcpy(&cpu_string_[8], &temp, sizeof(temp));
+
+		bool is_intel = (&GenuineIntel[0] == cpu_string_);
+		bool is_amd = (&AuthenticAMD[0] == cpu_string_);
 
 		if (max_std_fn >= 1)
 		{
@@ -369,7 +368,7 @@ namespace KlayGE
 			if (max_ext_fn >= 0x80000001)
 			{
 				cpuid.Call(0x80000001);
-				if (AuthenticAMD == cpu_string_)
+				if (is_amd)
 				{
 					feature_mask_ |= cpuid.Ecx() & CFM_LZCNT_AMD ? CF_LZCNT : 0;
 					feature_mask_ |= cpuid.Ecx() & CFM_SSE4A_AMD ? CF_SSE4A : 0;
@@ -384,22 +383,34 @@ namespace KlayGE
 				cpu_brand_string_.resize(48);
 
 				cpuid.Call(0x80000002);
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[0]) = cpuid.Eax();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[4]) = cpuid.Ebx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[8]) = cpuid.Ecx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[12]) = cpuid.Edx();
+				temp = cpuid.Eax();
+				memcpy(&cpu_brand_string_[0], &temp, sizeof(temp));
+				temp = cpuid.Ebx();
+				memcpy(&cpu_brand_string_[4], &temp, sizeof(temp));
+				temp = cpuid.Ecx();
+				memcpy(&cpu_brand_string_[8], &temp, sizeof(temp));
+				temp = cpuid.Edx();
+				memcpy(&cpu_brand_string_[12], &temp, sizeof(temp));
 
 				cpuid.Call(0x80000003);
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[16]) = cpuid.Eax();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[20]) = cpuid.Ebx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[24]) = cpuid.Ecx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[28]) = cpuid.Edx();
+				temp = cpuid.Eax();
+				memcpy(&cpu_brand_string_[16], &temp, sizeof(temp));
+				temp = cpuid.Ebx();
+				memcpy(&cpu_brand_string_[20], &temp, sizeof(temp));
+				temp = cpuid.Ecx();
+				memcpy(&cpu_brand_string_[24], &temp, sizeof(temp));
+				temp = cpuid.Edx();
+				memcpy(&cpu_brand_string_[28], &temp, sizeof(temp));
 
 				cpuid.Call(0x80000004);
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[32]) = cpuid.Eax();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[36]) = cpuid.Ebx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[40]) = cpuid.Ecx();
-				*reinterpret_cast<uint32_t*>(&cpu_brand_string_[44]) = cpuid.Edx();
+				temp = cpuid.Eax();
+				memcpy(&cpu_brand_string_[32], &temp, sizeof(temp));
+				temp = cpuid.Ebx();
+				memcpy(&cpu_brand_string_[36], &temp, sizeof(temp));
+				temp = cpuid.Ecx();
+				memcpy(&cpu_brand_string_[40], &temp, sizeof(temp));
+				temp = cpuid.Edx();
+				memcpy(&cpu_brand_string_[44], &temp, sizeof(temp));
 			}
 		}
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -474,11 +485,12 @@ namespace KlayGE
 			// also not supported if thread affinity cannot be set on systems with
 			// more than 1 logical processor.
 
-			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
+			bool supported = is_intel || is_amd;
 
 			if (supported)
 			{
-				DWORD_PTR process_affinity, system_affinity;
+				DWORD_PTR process_affinity = 0;
+				DWORD_PTR system_affinity = 0;
 				HANDLE process_handle = ::GetCurrentProcess();
 
 				// Query process affinity mask
@@ -520,7 +532,7 @@ namespace KlayGE
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
-			bool supported = (GenuineIntel == cpu_string_) || (AuthenticAMD == cpu_string_);
+			bool supported = is_intel || is_amd;
 #elif defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS)
 		{
 			bool supported = false;
@@ -541,7 +553,7 @@ namespace KlayGE
 
 					// Determine the total number of cores per package.  This info
 					// is extracted differently dependending on the cpu vendor.
-					if (GenuineIntel == cpu_string_)
+					if (is_intel)
 					{
 						if (max_std_fn >= 4)
 						{
@@ -551,7 +563,7 @@ namespace KlayGE
 					}
 					else
 					{
-						BOOST_ASSERT(AuthenticAMD == cpu_string_);
+						BOOST_ASSERT(is_amd);
 
 						if (max_ext_fn >= 0x80000008)
 						{
@@ -587,12 +599,12 @@ namespace KlayGE
 
 				// Configure the APIC extractor object with the information it needs to
 				// be able to decode the APIC.
-				ApicExtractor apic_extractor;
-				apic_extractor.SetPackageTopology(log_procs_per_pkg, cores_per_pkg);
+				ApicExtractor apic_extractor(log_procs_per_pkg, cores_per_pkg);
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-				DWORD_PTR process_affinity, system_affinity;
+				DWORD_PTR process_affinity = 0;
+				DWORD_PTR system_affinity = 0;
 				HANDLE process_handle = ::GetCurrentProcess();
 				HANDLE thread_handle = ::GetCurrentThread();
 				::GetProcessAffinityMask(process_handle, &process_affinity, &system_affinity);
