@@ -417,9 +417,9 @@ namespace
 		{
 			uint32_t index = block_index;
 			cout.precision(2);
-			cout << fixed << index * 100.0f / block_addrs.size() << " %        \r";
+			cout << fixed << index * 100.0f / total_blocks << " %        \r";
 
-			if (index == total_blocks)
+			if (index >= total_blocks)
 			{
 				break;
 			}
