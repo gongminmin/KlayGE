@@ -77,7 +77,7 @@ namespace KlayGE
 			*pos_extent_param_ = pos_bb.HalfSize();
 			*select_mode_object_id_param_ = select_mode_object_id_;
 		}
-		else if (deferred_effect_)
+		else if (drl)
 		{
 			*mvp_param_ = mvp;
 			*model_view_param_ = mv;

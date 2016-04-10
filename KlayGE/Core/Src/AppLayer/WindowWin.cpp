@@ -376,6 +376,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		typedef NTSTATUS(WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
 		HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
+		KLAYGE_ASSUME(ntdll != nullptr);
 		RtlGetVersionFunc DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
 		if (DynamicRtlGetVersion)
 		{

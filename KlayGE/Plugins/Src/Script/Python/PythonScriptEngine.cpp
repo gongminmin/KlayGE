@@ -52,8 +52,13 @@ namespace KlayGE
 		KFL_UNUSED(self);
 		KFL_UNUSED(args);
 
-		char* data;
+		char* data = nullptr;
 		if (!PyArg_ParseTuple(args, "s", &data))
+		{
+			return 0;
+		}
+
+		if (nullptr == data)
 		{
 			return 0;
 		}

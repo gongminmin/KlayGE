@@ -1203,6 +1203,7 @@ namespace KlayGE
 
 					pass->Bind();
 					this->UpdateRenderPSO(tech, pass, rl);
+					// TODO: ExecuteIndirect's first 2 parameters can't be right
 					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
 						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);

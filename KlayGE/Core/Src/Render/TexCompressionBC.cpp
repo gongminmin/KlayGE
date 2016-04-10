@@ -1666,8 +1666,8 @@ namespace KlayGE
 		BC5Block& bc5 = *static_cast<BC5Block*>(output);
 		uint16_t const * gr = static_cast<uint16_t const *>(input);
 
-		std::array<uint8_t, 16> r;
-		std::array<uint8_t, 16> g;
+		std::array<uint8_t, 16> r{};
+		std::array<uint8_t, 16> g{};
 		for (size_t i = 0; i < r.size(); ++ i)
 		{
 			r[i] = gr[i] & 0xFF;

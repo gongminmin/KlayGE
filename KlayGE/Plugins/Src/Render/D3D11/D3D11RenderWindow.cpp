@@ -301,6 +301,8 @@ namespace KlayGE
 
 		Verify(!!d3d_device);
 		Verify(!!d3d_imm_ctx);
+		KLAYGE_ASSUME(!!d3d_device);
+		KLAYGE_ASSUME(!!d3d_imm_ctx);
 
 		depth_stencil_fmt_ = settings.depth_stencil_fmt;
 		if (IsDepthFormat(depth_stencil_fmt_))

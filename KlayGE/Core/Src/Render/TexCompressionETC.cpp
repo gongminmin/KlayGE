@@ -345,7 +345,7 @@ namespace
 
 		uint32_t hist[256 * 4];
 
-		memset(hist, 0, sizeof(hist[0]) * 256 * key_size);
+		memset(hist, 0, sizeof(hist));
 
 #define IRS_GET_KEY(p) (*reinterpret_cast<uint32_t const *>(reinterpret_cast<uint8_t const *>(keys + *(p)) + key_ofs))
 #define IRS_GET_KEY_FROM_INDEX(i) (*reinterpret_cast<uint32_t const *>(reinterpret_cast<uint8_t const *>(keys + (i)) + key_ofs))
@@ -1216,7 +1216,10 @@ namespace KlayGE
 					}
 #endif
 
-					uint16_t const * inverse_table = etc1_inverse_lookup_[x & 0xFF];
+					uint32_t const row = x & 0xFF;
+					BOOST_ASSERT(row < 64);
+					KLAYGE_ASSUME(row < 64);
+					uint16_t const * inverse_table = etc1_inverse_lookup_[row];
 					uint16_t p1 = inverse_table[c1];
 					uint16_t p2 = inverse_table[c2];
 					uint32_t const trial_err = MathLib::sqr(c_plus_delta - color[i])
@@ -1339,8 +1342,10 @@ namespace KlayGE
 					}
 #endif
 
-					BOOST_ASSERT((x & 0xFF) < 64);
-					uint16_t const * inverse_table = etc1_inverse_lookup_[x & 0xFF];
+					uint32_t const row = x & 0xFF;
+					BOOST_ASSERT(row < 64);
+					KLAYGE_ASSUME(row < 64);
+					uint16_t const * inverse_table = etc1_inverse_lookup_[row];
 					uint16_t p1 = inverse_table[c1];
 					uint16_t p2 = inverse_table[c2];
 
