@@ -407,13 +407,6 @@ namespace KlayGE
 			ID3D11Query* disjoint_query;
 			d3d_device_->CreateQuery(&desc, &disjoint_query);
 			timestamp_disjoint_query_ = MakeCOMPtr(disjoint_query);
-
-			desc.Query = D3D11_QUERY_SO_STATISTICS;
-			desc.MiscFlags = 0;
-
-			ID3D11Query* so_statistics_query;
-			d3d_device_->CreateQuery(&desc, &so_statistics_query);
-			so_statistics_query_ = MakeCOMPtr(so_statistics_query);
 		}
 	}
 
@@ -770,11 +763,6 @@ namespace KlayGE
 			}
 		}
 
-		if ((d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0) && (num_so_buffs_ > 0))
-		{
-			d3d_imm_ctx_->Begin(so_statistics_query_.get());
-		}
-
 		uint32_t const num_passes = tech.NumPasses();
 		GraphicsBuffer const * indirect_buff = rl.GetIndirectArgs().get();
 		if (indirect_buff)
@@ -865,11 +853,6 @@ namespace KlayGE
 		}
 
 		num_draws_just_called_ += num_passes;
-
-		if ((d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0) && (num_so_buffs_ > 0))
-		{
-			d3d_imm_ctx_->End(so_statistics_query_.get());
-		}
 	}
 
 	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
@@ -911,20 +894,6 @@ namespace KlayGE
 	TexturePtr const & D3D11RenderEngine::ScreenDepthStencilTexture() const
 	{
 		return checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->D3DDepthStencilBuffer();
-	}
-
-	uint32_t D3D11RenderEngine::SONumPrimitiveWritten()
-	{
-		uint32_t ret = 0;
-		if (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0)
-		{
-			D3D11_QUERY_DATA_SO_STATISTICS data;
-			while (S_OK != d3d_imm_ctx_->GetData(so_statistics_query_.get(), &data, sizeof(data), 0));
-
-			ret = static_cast<uint32_t>(data.NumPrimitivesWritten);
-		}
-
-		return ret;
 	}
 
 	// ÉèÖÃ¼ô³ý¾ØÕó
@@ -991,7 +960,6 @@ namespace KlayGE
 		stereo_nv_3d_vision_tex_.reset();
 
 		timestamp_disjoint_query_.reset();
-		so_statistics_query_.reset();
 
 		d3d_imm_ctx_->ClearState();
 		d3d_imm_ctx_->Flush();

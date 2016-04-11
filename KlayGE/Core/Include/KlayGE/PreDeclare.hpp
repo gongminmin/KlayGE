@@ -206,6 +206,10 @@ namespace KlayGE
 	typedef std::shared_ptr<OcclusionQuery> OcclusionQueryPtr;
 	class ConditionalRender;
 	typedef std::shared_ptr<ConditionalRender> ConditionalRenderPtr;
+	class TimerQuery;
+	typedef std::shared_ptr<TimerQuery> TimerQueryPtr;
+	class SOStatisticsQuery;
+	typedef std::shared_ptr<SOStatisticsQuery> SOStatisticsQueryPtr;
 	class PostProcess;
 	typedef std::shared_ptr<PostProcess> PostProcessPtr;
 	class PostProcessChain;

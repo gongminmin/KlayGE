@@ -173,4 +173,55 @@ namespace KlayGE
 			return -1;
 		}
 	}
+
+
+	D3D11SOStatisticsQuery::D3D11SOStatisticsQuery()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11Device* d3d_device = re.D3DDevice();
+
+		D3D11_QUERY_DESC desc;
+		desc.Query = D3D11_QUERY_SO_STATISTICS;
+		desc.MiscFlags = 0;
+
+		ID3D11Query* start_query;
+		d3d_device->CreateQuery(&desc, &start_query);
+		so_stat_query_ = MakeCOMPtr(start_query);
+	}
+
+	void D3D11SOStatisticsQuery::Begin()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		d3d_imm_ctx->Begin(so_stat_query_.get());
+	}
+
+	void D3D11SOStatisticsQuery::End()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		d3d_imm_ctx->End(so_stat_query_.get());
+	}
+
+	uint64_t D3D11SOStatisticsQuery::NumPrimitivesWritten()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		D3D11_QUERY_DATA_SO_STATISTICS data;
+		while (S_OK != d3d_imm_ctx->GetData(so_stat_query_.get(), &data, sizeof(data), 0));
+		return data.NumPrimitivesWritten;
+	}
+
+	uint64_t D3D11SOStatisticsQuery::PrimitivesGenerated()
+	{
+		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		D3D11_QUERY_DATA_SO_STATISTICS data;
+		while (S_OK != d3d_imm_ctx->GetData(so_stat_query_.get(), &data, sizeof(data), 0));
+		return data.PrimitivesStorageNeeded;
+	}
 }

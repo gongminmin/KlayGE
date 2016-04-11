@@ -63,6 +63,29 @@ namespace KlayGE
 		static glEndQueryFUNC glEndQuery_;
 		static glGetQueryObjectuivFUNC glGetQueryObjectuiv_;
 	};
+
+	class OGLESSOStatisticsQuery : public SOStatisticsQuery
+	{
+	public:
+		OGLESSOStatisticsQuery();
+		~OGLESSOStatisticsQuery();
+
+		void Begin();
+		void End();
+
+		uint64_t NumPrimitivesWritten() override;
+		uint64_t PrimitivesGenerated() override;
+
+	private:
+		GLuint primitive_written_query_;
+		GLuint primitive_generated_query_;
+
+		static glGenQueriesFUNC glGenQueries_;
+		static glDeleteQueriesFUNC glDeleteQueries_;
+		static glBeginQueryFUNC glBeginQuery_;
+		static glEndQueryFUNC glEndQuery_;
+		static glGetQueryObjectuivFUNC glGetQueryObjectuiv_;
+	};
 }
 
 #endif		// _OGLQUERY_HPP

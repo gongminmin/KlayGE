@@ -2,10 +2,10 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
-#include <KFL/Half.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneManager.hpp>
+#include <KlayGE/Query.hpp>
 
 #include "FoliageTerrain.hpp"
 
@@ -266,6 +266,8 @@ namespace KlayGE
 		plant_impostor_instance_rls_.resize(plant_meshes_.size());
 		num_tile_plants_.resize(plant_meshes_.size());
 		tile_addr_offset_width_.resize(plant_meshes_.size());
+		plant_primitive_written_query_.resize(plant_meshes_.size());
+		plant_impostor_primitive_written_query_.resize(plant_meshes_.size());
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			plant_meshes_[plant_type] = SyncLoadModel(plant_parameters[plant_type].mesh_name, EAH_GPU_Read | EAH_Immutable,
@@ -328,6 +330,9 @@ namespace KlayGE
 			plant_impostor_instance_rls_[plant_type] = rf.MakeRenderLayout();
 			plant_impostor_instance_rls_[plant_type]->BindVertexStream(plant_impostor_instance_buffers_[plant_type],
 				std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F), vertex_element(VEU_TextureCoord, 2, EF_GR32F)));
+
+			plant_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
+			plant_impostor_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
 		}
 
 		*(foliage_dist_effect_->ParameterByName("tile_size")) = tile_size;
@@ -385,7 +390,6 @@ namespace KlayGE
 		*(foliage_dist_effect_->ParameterByName("view_frustum_planes")) = view_frustum_planes;
 		*(foliage_dist_effect_->ParameterByName("texture_world_offset")) = texture_world_offset_;
 
-		num_3d_plants_ = 0;
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			*(foliage_dist_effect_->ParameterByName("num_tile_plants")) = num_tile_plants_[plant_type];
@@ -407,19 +411,11 @@ namespace KlayGE
 			uint32_t const num_vertices = plant_instance_buffers_[plant_type]->Size() / sizeof(PlantInstanceData);
 			foliage_dist_rl_->NumVertices(num_vertices);
 			re.BindSOBuffers(plant_instance_rls_[plant_type]);
+			plant_primitive_written_query_[plant_type]->Begin();
 			re.Render(*foliage_dist_tech_, *foliage_dist_rl_);
-			re.BindSOBuffers(RenderLayoutPtr());
-
-			uint32_t instance_index = re.SONumPrimitiveWritten();
-			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
-			{
-				auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
-				mesh->ForceNumInstances(instance_index);
-			}
-			num_3d_plants_ += instance_index;
+			plant_primitive_written_query_[plant_type]->End();
 		}
 
-		num_impostor_plants_ = 0;
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			*(foliage_dist_effect_->ParameterByName("num_tile_plants")) = num_tile_plants_[plant_type];
@@ -445,10 +441,30 @@ namespace KlayGE
 			uint32_t const num_vertices = plant_impostor_instance_buffers_[plant_type]->Size() / sizeof(PlantInstanceData);
 			foliage_dist_rl_->NumVertices(num_vertices);
 			re.BindSOBuffers(plant_impostor_instance_rls_[plant_type]);
+			plant_impostor_primitive_written_query_[plant_type]->Begin();
 			re.Render(*foliage_impostor_dist_tech_, *foliage_dist_rl_);
-			re.BindSOBuffers(RenderLayoutPtr());
+			plant_impostor_primitive_written_query_[plant_type]->End();
+		}
+		re.BindSOBuffers(RenderLayoutPtr());
 
-			uint32_t instance_index = re.SONumPrimitiveWritten();
+		num_3d_plants_ = 0;
+		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+		{
+			uint32_t instance_index = static_cast<uint32_t>(
+				checked_pointer_cast<SOStatisticsQuery>(plant_primitive_written_query_[plant_type])->NumPrimitivesWritten());
+			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+			{
+				auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+				mesh->ForceNumInstances(instance_index);
+			}
+			num_3d_plants_ += instance_index;
+		}
+
+		num_impostor_plants_ = 0;
+		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+		{
+			uint32_t instance_index = static_cast<uint32_t>(
+				checked_pointer_cast<SOStatisticsQuery>(plant_impostor_primitive_written_query_[plant_type])->NumPrimitivesWritten());
 			{
 				auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
 				mesh->ForceNumInstances(instance_index);

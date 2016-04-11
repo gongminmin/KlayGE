@@ -120,6 +120,19 @@ namespace KlayGE
 		}
 	}
 
+	QueryPtr D3D11RenderFactory::MakeSOStatisticsQuery()
+	{
+		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0)
+		{
+			return MakeSharedPtr<D3D11SOStatisticsQuery>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
+	}
+
 	FencePtr D3D11RenderFactory::MakeFence()
 	{
 		return MakeSharedPtr<D3D11Fence>();

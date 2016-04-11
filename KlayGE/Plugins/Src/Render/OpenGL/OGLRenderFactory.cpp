@@ -114,6 +114,18 @@ namespace KlayGE
 		return MakeSharedPtr<OGLTimerQuery>();
 	}
 
+	QueryPtr OGLRenderFactory::MakeSOStatisticsQuery()
+	{
+		if (glloader_GL_VERSION_3_0())
+		{
+			return MakeSharedPtr<OGLSOStatisticsQuery>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
+	}
+
 	FencePtr OGLRenderFactory::MakeFence()
 	{
 		FencePtr ret;

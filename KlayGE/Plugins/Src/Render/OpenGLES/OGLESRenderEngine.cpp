@@ -1360,12 +1360,6 @@ namespace KlayGE
 		return ret;
 	}
 
-	uint32_t OGLESRenderEngine::SONumPrimitiveWritten()
-	{
-		// TODO
-		return 0;
-	}
-
 	// …Ë÷√ºÙ≥˝æÿ’Û
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height)

@@ -85,6 +85,7 @@ namespace KlayGE
 		virtual QueryPtr MakeOcclusionQuery() = 0;
 		virtual QueryPtr MakeConditionalRender() = 0;
 		virtual QueryPtr MakeTimerQuery() = 0;
+		virtual QueryPtr MakeSOStatisticsQuery() = 0;
 
 		virtual FencePtr MakeFence() = 0;
 

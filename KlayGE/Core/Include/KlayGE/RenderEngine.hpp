@@ -128,7 +128,6 @@ namespace KlayGE
 		virtual TexturePtr const & ScreenDepthStencilTexture() const = 0;
 
 		void BindSOBuffers(RenderLayoutPtr const & rl);
-		virtual uint32_t SONumPrimitiveWritten() = 0;
 
 		// Get render device capabilities
 		RenderDeviceCaps const & DeviceCaps() const;

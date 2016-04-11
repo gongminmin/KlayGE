@@ -50,6 +50,7 @@ namespace KlayGE
 		QueryPtr MakeOcclusionQuery();
 		QueryPtr MakeConditionalRender();
 		QueryPtr MakeTimerQuery();
+		QueryPtr MakeSOStatisticsQuery() override;
 
 		virtual FencePtr MakeFence() override;
 

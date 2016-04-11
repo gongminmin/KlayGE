@@ -128,6 +128,18 @@ namespace KlayGE
 		}
 	}
 
+	QueryPtr OGLESRenderFactory::MakeSOStatisticsQuery()
+	{
+		if (glloader_GLES_VERSION_3_0())
+		{
+			return MakeSharedPtr<OGLESSOStatisticsQuery>();
+		}
+		else
+		{
+			return QueryPtr();
+		}
+	}
+
 	FencePtr OGLESRenderFactory::MakeFence()
 	{
 		FencePtr ret;

@@ -66,6 +66,23 @@ namespace KlayGE
 	private:
 		GLuint query_;
 	};
+
+	class OGLSOStatisticsQuery : public SOStatisticsQuery
+	{
+	public:
+		OGLSOStatisticsQuery();
+		~OGLSOStatisticsQuery();
+
+		void Begin();
+		void End();
+
+		uint64_t NumPrimitivesWritten() override;
+		uint64_t PrimitivesGenerated() override;
+
+	private:
+		GLuint primitive_written_query_;
+		GLuint primitive_generated_query_;
+	};
 }
 
 #endif		// _OGLQUERY_HPP

@@ -31,4 +31,8 @@ namespace KlayGE
 	TimerQuery::~TimerQuery()
 	{
 	}
+
+	SOStatisticsQuery::~SOStatisticsQuery()
+	{
+	}
 }

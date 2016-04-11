@@ -70,6 +70,9 @@ namespace KlayGE
 
 		uint32_t num_3d_plants_;
 		uint32_t num_impostor_plants_;
+
+		std::vector<QueryPtr> plant_primitive_written_query_;
+		std::vector<QueryPtr> plant_impostor_primitive_written_query_;
 	};
 }
 

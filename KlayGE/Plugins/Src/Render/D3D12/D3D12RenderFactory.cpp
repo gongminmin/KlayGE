@@ -125,6 +125,11 @@ namespace KlayGE
 		return MakeSharedPtr<D3D12TimerQuery>();
 	}
 
+	QueryPtr D3D12RenderFactory::MakeSOStatisticsQuery()
+	{
+		return MakeSharedPtr<D3D12SOStatisticsQuery>();
+	}
+
 	FencePtr D3D12RenderFactory::MakeFence()
 	{
 		return MakeSharedPtr<D3D12Fence>();

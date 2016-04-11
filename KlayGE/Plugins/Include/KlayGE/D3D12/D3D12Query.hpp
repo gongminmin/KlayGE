@@ -84,6 +84,22 @@ namespace KlayGE
 		ID3D12QueryHeapPtr timestamp_heap_;
 		ID3D12ResourcePtr timestamp_result_;
 	};
+
+	class D3D12SOStatisticsQuery : public SOStatisticsQuery
+	{
+	public:
+		D3D12SOStatisticsQuery();
+
+		void Begin();
+		void End();
+
+		uint64_t NumPrimitivesWritten() override;
+		uint64_t PrimitivesGenerated() override;
+
+	private:
+		ID3D12QueryHeapPtr so_stat_query_heap_;
+		ID3D12ResourcePtr so_stat_query_result_;
+	};
 }
 
 #endif		// _D3D12QUERY_HPP

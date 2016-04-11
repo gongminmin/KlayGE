@@ -38,6 +38,12 @@ namespace KlayGE
 	glEndQueryFUNC OGLESTimerQuery::glEndQuery_ = nullptr;
 	glGetQueryObjectuivFUNC OGLESTimerQuery::glGetQueryObjectuiv_ = nullptr;
 
+	glGenQueriesFUNC OGLESSOStatisticsQuery::glGenQueries_ = nullptr;
+	glDeleteQueriesFUNC OGLESSOStatisticsQuery::glDeleteQueries_ = nullptr;
+	glBeginQueryFUNC OGLESSOStatisticsQuery::glBeginQuery_ = nullptr;
+	glEndQueryFUNC OGLESSOStatisticsQuery::glEndQuery_ = nullptr;
+	glGetQueryObjectuivFUNC OGLESSOStatisticsQuery::glGetQueryObjectuiv_ = nullptr;
+
 	OGLESConditionalRender::OGLESConditionalRender()
 	{
 		BOOST_ASSERT(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_occlusion_query_boolean());
@@ -165,5 +171,91 @@ namespace KlayGE
 			glGetQueryObjectui64vEXT(query_, GL_QUERY_RESULT_EXT, &ret);
 			return static_cast<uint64_t>(ret) * 1e-9;
 		}
+	}
+
+
+	OGLESSOStatisticsQuery::OGLESSOStatisticsQuery()
+	{
+		BOOST_ASSERT(glloader_GLES_VERSION_3_0());
+
+		// TODO: No thread safety here
+		if (!glGenQueries_)
+		{
+			glGenQueries_ = glGenQueries;
+			glDeleteQueries_ = glDeleteQueries;
+			glBeginQuery_ = glBeginQuery;
+			glEndQuery_ = glEndQuery;
+			glGetQueryObjectuiv_ = glGetQueryObjectuiv;
+		}
+
+		glGenQueries_(1, &primitive_written_query_);
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_geometry_shader())
+		{
+			glGenQueries_(1, &primitive_generated_query_);
+		}
+		else
+		{
+			primitive_generated_query_ = 0;
+		}
+	}
+
+	OGLESSOStatisticsQuery::~OGLESSOStatisticsQuery()
+	{
+		glDeleteQueries_(1, &primitive_written_query_);
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_geometry_shader())
+		{
+			glDeleteQueries_(1, &primitive_generated_query_);
+		}
+	}
+
+	void OGLESSOStatisticsQuery::Begin()
+	{
+		glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, primitive_written_query_);
+		if (primitive_generated_query_ != 0)
+		{
+			glBeginQuery(GL_PRIMITIVES_GENERATED, primitive_generated_query_);
+		}
+	}
+
+	void OGLESSOStatisticsQuery::End()
+	{
+		glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+		if (primitive_generated_query_ != 0)
+		{
+			glEndQuery(GL_PRIMITIVES_GENERATED);
+		}
+	}
+
+	uint64_t OGLESSOStatisticsQuery::NumPrimitivesWritten()
+	{
+		GLuint available = 0;
+		while (!available)
+		{
+			glGetQueryObjectuiv(primitive_written_query_, GL_QUERY_RESULT_AVAILABLE, &available);
+		}
+
+		GLuint ret;
+		glGetQueryObjectuiv(primitive_written_query_, GL_QUERY_RESULT, &ret);
+		return ret;
+	}
+
+	uint64_t OGLESSOStatisticsQuery::PrimitivesGenerated()
+	{
+		GLuint ret;
+		if (primitive_generated_query_ != 0)
+		{
+			GLuint available = 0;
+			while (!available)
+			{
+				glGetQueryObjectuiv(primitive_generated_query_, GL_QUERY_RESULT_AVAILABLE, &available);
+			}
+
+			glGetQueryObjectuiv(primitive_generated_query_, GL_QUERY_RESULT, &ret);
+		}
+		else
+		{
+			ret = 0;
+		}
+		return ret;
 	}
 }

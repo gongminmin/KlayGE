@@ -60,6 +60,15 @@ namespace KlayGE
 
 		virtual double TimeElapsed() = 0; // In second.
 	};
+
+	class KLAYGE_CORE_API SOStatisticsQuery : public Query
+	{
+	public:
+		virtual ~SOStatisticsQuery();
+
+		virtual uint64_t NumPrimitivesWritten() = 0;
+		virtual uint64_t PrimitivesGenerated() = 0;
+	};
 }
 
 #endif		// _QUERY_HPP
