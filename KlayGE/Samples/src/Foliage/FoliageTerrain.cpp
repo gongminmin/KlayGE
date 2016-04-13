@@ -256,7 +256,6 @@ namespace KlayGE
 		float const total_size = tile_rings_.back()->TileSize() * tile_rings_.back()->OuterWidth();
 		float const tile_size = tile_rings_[0]->TileSize();
 		num_tiles_edge_ = static_cast<uint32_t>(total_size / tile_size + 0.5f);
-		uint32_t const num_tiles = num_tiles_edge_ * num_tiles_edge_;
 
 		plant_meshes_.resize(sizeof(plant_parameters) / sizeof(plant_parameters[0]));
 		plant_impostor_meshes_.resize(plant_meshes_.size());
