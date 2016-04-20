@@ -81,7 +81,7 @@ namespace MtlEditor
 			Binding binding = new Binding("Value");
 			binding.Source = property_item;
 			binding.Mode = property_item.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay;
-			BindingOperations.SetBinding(this, OpenTexUserControlEditor.ValueProperty, binding);
+			BindingOperations.SetBinding(this, SliderUserControlEditor.ValueProperty, binding);
 			return this;
 		}
 	}

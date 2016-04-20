@@ -587,7 +587,7 @@ namespace MtlEditor
 				properties_obj_.specular = Color.FromArgb(0, 0, 0, 0);
 				properties_obj_.emit = Color.FromArgb(0, 0, 0, 0);
 				properties_obj_.shininess = 0;
-				properties_obj_.opacity = 0;
+				properties_obj_.opacity = 1;
 
 				properties_obj_.diffuse_tex = "";
 				properties_obj_.specular_tex = "";
