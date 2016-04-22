@@ -199,7 +199,7 @@ namespace
 		std::vector<uint8_t> block_in_data;
 		std::vector<Color> block_in_data_f32;
 
-		while (block_index < block_addrs.size())
+		while (block_index < static_cast<int>(block_addrs.size()))
 		{
 			uint32_t index = block_index ++;
 			if (index >= block_addrs.size() - 1)
@@ -405,7 +405,7 @@ namespace
 		uint32_t const num_threads = cpu.NumHWThreads();
 		thread_pool tp(1, num_threads);
 		std::vector<joiner<void>> joiners(num_threads);
-		std::atomic<int> block_index = 0;
+		std::atomic<int> block_index(0);
 		for (uint32_t i = 0; i < num_threads; ++ i)
 		{
 			joiners[i] = tp(std::bind(CompressABlock, std::ref(block_index), std::cref(block_addrs), in_num_mipmaps,

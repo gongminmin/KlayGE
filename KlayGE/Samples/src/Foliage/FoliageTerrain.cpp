@@ -31,10 +31,10 @@ namespace KlayGE
 
 	FoliagePlantParameters plant_parameters[] = 
 	{
-		{ "Grass1/grass.meshml", 0, 1.5f, 1.5f, 150, 600 },
-		{ "Grass2/WC_Euphorbia-larica_2.meshml", 0, 2, 2, 150, 600 },
-		{ "Tree2/tree2a_lod0.meshml", 1, 11, 11, 300, -1 },
-		{ "Tree1/tree1a_lod0.meshml", 1, 7, 7, 300, -1 },
+		{ "Grass1/grass.meshml", 0, 1.5f, 1.5f, 150, 600, 0, 0 },
+		{ "Grass2/WC_Euphorbia-larica_2.meshml", 0, 2, 2, 150, 600, 0, 0 },
+		{ "Tree2/tree2a_lod0.meshml", 1, 11, 11, 300, -1, 0, 0 },
+		{ "Tree1/tree1a_lod0.meshml", 1, 7, 7, 300, -1, 0, 0 },
 	};
 
 	class FoliageMesh : public StaticMesh
