@@ -474,6 +474,11 @@ namespace KlayGE
 
 		virtual void AttachLightSrc(LightSourcePtr const & light);
 
+	protected:
+		void DoBuildMeshInfo() override
+		{
+		}
+
 	private:
 		LightSourcePtr light_;
 
@@ -491,6 +496,11 @@ namespace KlayGE
 		virtual void Technique(RenderTechniquePtr const & tech);
 
 		virtual void AttachCamera(CameraPtr const & camera);
+
+	protected:
+		void DoBuildMeshInfo() override
+		{
+		}
 
 	private:
 		CameraPtr camera_;

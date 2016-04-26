@@ -1984,6 +1984,9 @@ namespace KlayGE
 			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
 			projective_map_2d_tex_param_ = technique_->Effect().ParameterByName("projective_map_2d_tex");
 			projective_map_cube_tex_param_ = technique_->Effect().ParameterByName("projective_map_cube_tex");
+
+			select_mode_object_id_param_ = technique_->Effect().ParameterByName("object_id");
+			select_mode_tech_ = technique_->Effect().TechniqueByName("SelectModeTech");
 		}
 	}
 
@@ -2059,6 +2062,9 @@ namespace KlayGE
 			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
 			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
 			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
+
+			select_mode_object_id_param_ = technique_->Effect().ParameterByName("object_id");
+			select_mode_tech_ = technique_->Effect().TechniqueByName("SelectModeTech");
 		}
 	}
 
