@@ -51,11 +51,6 @@ namespace KlayGE
 	{
 	}
 
-	RenderTechniquePtr const & RenderableHelper::GetRenderTechnique() const
-	{
-		return technique_;
-	}
-
 	RenderLayout& RenderableHelper::GetRenderLayout() const
 	{
 		return *rl_;
