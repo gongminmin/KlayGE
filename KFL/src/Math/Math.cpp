@@ -580,7 +580,10 @@ namespace KlayGE
 			Vector_T<T, 4> temp(transform(vec, world));
 			temp = transform(temp, view);
 			temp = transform(temp, proj);
-			temp /= temp.w();
+			if (!MathLib::equal(temp.w(), T(0)))
+			{
+				temp /= temp.w();
+			}
 
 			Vector_T<T, 3> ret;
 			ret.x() = (temp.x() + 1) * viewport[2] / 2 + viewport[0];
