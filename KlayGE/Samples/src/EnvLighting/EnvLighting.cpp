@@ -41,12 +41,12 @@ namespace
 		SphereRenderable(RenderModelPtr const & model, std::wstring const & /*name*/)
 			: StaticMesh(model, L"Sphere")
 		{
-			RenderEffectPtr effect = SyncLoadRenderEffect("EnvLighting.fxml");
-			techs_[0] = effect->TechniqueByName("PBFittingPrefiltered"); 
-			techs_[1] = effect->TechniqueByName("PBPrefiltered");
-			techs_[2] = effect->TechniqueByName("Prefiltered");
-			techs_[3] = effect->TechniqueByName("Approximate");
-			techs_[4] = effect->TechniqueByName("GroundTruth");
+			effect_ = SyncLoadRenderEffect("EnvLighting.fxml");
+			techs_[0] = effect_->TechniqueByName("PBFittingPrefiltered");
+			techs_[1] = effect_->TechniqueByName("PBPrefiltered");
+			techs_[2] = effect_->TechniqueByName("Prefiltered");
+			techs_[3] = effect_->TechniqueByName("Approximate");
+			techs_[4] = effect_->TechniqueByName("GroundTruth");
 			this->RenderingType(0);
 
 			SceneManager& sm = Context::Instance().SceneManagerInstance();
@@ -55,12 +55,12 @@ namespace
 				LightSourcePtr const & light = sm.GetLight(i);
 				if (LightSource::LT_Ambient == light->Type())
 				{
-					*(technique_->Effect().ParameterByName("skybox_Ycube_tex")) = light->SkylightTexY();
-					*(technique_->Effect().ParameterByName("skybox_Ccube_tex")) = light->SkylightTexC();
+					*(effect_->ParameterByName("skybox_Ycube_tex")) = light->SkylightTexY();
+					*(effect_->ParameterByName("skybox_Ccube_tex")) = light->SkylightTexC();
 
 					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
-					*(technique_->Effect().ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
-					*(technique_->Effect().ParameterByName("mip_bias")) = mip / -2.0f;
+					*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
+					*(effect_->ParameterByName("mip_bias")) = mip / -2.0f;
 					break;
 				}
 			}
@@ -69,18 +69,18 @@ namespace
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			AABBox const & tc_bb = this->TexcoordBound();
-			*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void Material(float4 const &  diff_spec, float roughness)
 		{
-			*(technique_->Effect().ParameterByName("diff_spec")) = diff_spec;
-			*(technique_->Effect().ParameterByName("roughness")) = roughness;
+			*(effect_->ParameterByName("diff_spec")) = diff_spec;
+			*(effect_->ParameterByName("roughness")) = roughness;
 		}
 
 		void RenderingType(int type)
@@ -90,7 +90,7 @@ namespace
 
 		void IntegrateBRDFTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("integrated_brdf_tex")) = tex;
+			*(effect_->ParameterByName("integrated_brdf_tex")) = tex;
 		}
 
 		void OnRenderBegin()
@@ -100,13 +100,13 @@ namespace
 
 			float4x4 const mvp = model_mat_ * camera.ViewProjMatrix();
 
-			*(technique_->Effect().ParameterByName("model")) = model_mat_;
-			*(technique_->Effect().ParameterByName("mvp")) = mvp;
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+			*(effect_->ParameterByName("model")) = model_mat_;
+			*(effect_->ParameterByName("mvp")) = mvp;
+			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
 	private:
-		array<RenderTechniquePtr, 5> techs_;
+		array<RenderTechnique*, 5> techs_;
 	};
 
 	class SphereObject : public SceneObjectHelper

@@ -536,11 +536,12 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl)
+	void D3D12RenderEngine::UpdateRenderPSO(RenderEffect const & effect, RenderTechnique const & tech,
+		RenderPass const & pass, RenderLayout const & rl)
 	{
 		D3D12RenderLayout const & d3d12_rl = *checked_cast<D3D12RenderLayout const *>(&rl);
 
-		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass->GetShaderObject());
+		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
 
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
 		pso_desc.pRootSignature = so->RootSignature().get();
@@ -622,10 +623,10 @@ namespace KlayGE
 		pso_desc.StreamOutput.NumStrides = static_cast<UINT>(so_strides.size());
 		pso_desc.StreamOutput.RasterizedStream = so->RasterizedStream();
 
-		pso_desc.BlendState = checked_pointer_cast<D3D12BlendStateObject>(pass->GetBlendStateObject())->D3DDesc();
+		pso_desc.BlendState = checked_pointer_cast<D3D12BlendStateObject>(pass.GetBlendStateObject())->D3DDesc();
 		pso_desc.SampleMask = sample_mask_cache_;
-		pso_desc.RasterizerState = checked_pointer_cast<D3D12RasterizerStateObject>(pass->GetRasterizerStateObject())->D3DDesc();
-		pso_desc.DepthStencilState = checked_pointer_cast<D3D12DepthStencilStateObject>(pass->GetDepthStencilStateObject())->D3DDesc();
+		pso_desc.RasterizerState = checked_pointer_cast<D3D12RasterizerStateObject>(pass.GetRasterizerStateObject())->D3DDesc();
+		pso_desc.DepthStencilState = checked_pointer_cast<D3D12DepthStencilStateObject>(pass.GetDepthStencilStateObject())->D3DDesc();
 		pso_desc.InputLayout.pInputElementDescs = d3d12_rl.InputElementDesc().empty() ? nullptr : &d3d12_rl.InputElementDesc()[0];
 		pso_desc.InputLayout.NumElements = static_cast<UINT>(d3d12_rl.InputElementDesc().size());
 		pso_desc.IBStripCutValue = (EF_R16UI == rl.IndexStreamFormat())
@@ -693,7 +694,7 @@ namespace KlayGE
 		d3d_render_cmd_list_->SetPipelineState(pso.get());
 		d3d_render_cmd_list_->SetGraphicsRootSignature(so->RootSignature().get());
 
-		if (pass->GetRasterizerStateObject()->GetDesc().scissor_enable)
+		if (pass.GetRasterizerStateObject()->GetDesc().scissor_enable)
 		{
 			d3d_render_cmd_list_->RSSetScissorRects(1, &scissor_rc_cache_);
 		}
@@ -858,9 +859,9 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::UpdateComputePSO(RenderPassPtr const & pass)
+	void D3D12RenderEngine::UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass)
 	{
-		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass->GetShaderObject());
+		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
 
 		D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
 		pso_desc.pRootSignature = so->RootSignature().get();
@@ -1011,7 +1012,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D12RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
+	void D3D12RenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		if (last_engine_type_ != ET_Render)
 		{
@@ -1185,29 +1186,29 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
-					this->UpdateRenderPSO(tech, pass, rl);
+					pass.Bind(effect);
+					this->UpdateRenderPSO(effect, tech, pass, rl);
 					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
 						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 			else
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
-					this->UpdateRenderPSO(tech, pass, rl);
+					pass.Bind(effect);
+					this->UpdateRenderPSO(effect, tech, pass, rl);
 					// TODO: ExecuteIndirect's first 2 parameters can't be right
 					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
 						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 		}
@@ -1218,13 +1219,13 @@ namespace KlayGE
 				uint32_t const num_indices = rl.NumIndices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
-					this->UpdateRenderPSO(tech, pass, rl);
+					pass.Bind(effect);
+					this->UpdateRenderPSO(effect, tech, pass, rl);
 					d3d_render_cmd_list_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(),
 						rl.StartVertexLocation(), rl.StartInstanceLocation());
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 			else
@@ -1232,13 +1233,13 @@ namespace KlayGE
 				uint32_t const num_vertices = rl.NumVertices();
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
-					this->UpdateRenderPSO(tech, pass, rl);
+					pass.Bind(effect);
+					this->UpdateRenderPSO(effect, tech, pass, rl);
 					d3d_render_cmd_list_->DrawInstanced(num_vertices, num_instances,
 						rl.StartVertexLocation(), rl.StartInstanceLocation());
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 		}
@@ -1250,7 +1251,8 @@ namespace KlayGE
 		last_engine_type_ = ET_Render;
 	}
 
-	void D3D12RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void D3D12RenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech,
+		uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
 		if (last_engine_type_ != ET_Compute)
 		{
@@ -1260,20 +1262,20 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPassPtr const & pass = tech.Pass(i);
+			auto& pass = tech.Pass(i);
 
-			pass->Bind();
-			this->UpdateComputePSO(pass);
+			pass.Bind(effect);
+			this->UpdateComputePSO(effect, pass);
 			d3d_compute_cmd_list_->Dispatch(tgx, tgy, tgz);
-			pass->Unbind();
+			pass.Unbind(effect);
 		}
 
 		num_dispatches_just_called_ += num_passes;
 		last_engine_type_ = ET_Compute;
 	}
 
-	void D3D12RenderEngine::DoDispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args,
-			uint32_t offset)
+	void D3D12RenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
+		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
 		if (last_engine_type_ != ET_Compute)
 		{
@@ -1283,14 +1285,14 @@ namespace KlayGE
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPassPtr const & pass = tech.Pass(i);
+			auto& pass = tech.Pass(i);
 
-			pass->Bind();
-			this->UpdateComputePSO(pass);
+			pass.Bind(effect);
+			this->UpdateComputePSO(effect, pass);
 			// TODO: ExecuteIndirect's first 2 parameters can't be right
 			d3d_compute_cmd_list_->ExecuteIndirect(nullptr, 0, checked_cast<D3D12GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
 				offset, nullptr, 0);
-			pass->Unbind();
+			pass.Unbind(effect);
 		}
 
 		num_dispatches_just_called_ += num_passes;
@@ -1366,7 +1368,7 @@ namespace KlayGE
 		graphics_psos_.clear();
 		root_signatures_.clear();
 
-		bilinear_blit_tech_.reset();
+		bilinear_blit_tech_ = nullptr;
 		blit_effect_.reset();
 
 		cbv_srv_uav_desc_heap_.reset();

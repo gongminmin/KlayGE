@@ -118,7 +118,7 @@ namespace KlayGE
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
-		RenderTechniquePtr const & GetRenderTechnique() const
+		RenderTechnique* GetRenderTechnique() const override
 		{
 			if (three_dim_)
 			{
@@ -186,7 +186,7 @@ namespace KlayGE
 				rl_->StartIndexLocation(ind_offset / sizeof(uint16_t));
 				rl_->NumIndices(ind_length / sizeof(uint16_t));
 
-				re.Render(*this->GetRenderTechnique(), *rl_);
+				re.Render(*this->GetRenderEffect(), *this->GetRenderTechnique(), *rl_);
 			}
 
 			for (size_t i = 0; i < tb_vb_sub_allocs_.size(); ++ i)
@@ -708,10 +708,9 @@ namespace KlayGE
 
 		TexturePtr		dist_texture_;
 		TexturePtr		a_char_texture_;
-		RenderEffectPtr	effect_;
 
-		RenderEffectParameterPtr half_width_height_ep_;
-		RenderEffectParameterPtr mvp_ep_;
+		RenderEffectParameter* half_width_height_ep_;
+		RenderEffectParameter* mvp_ep_;
 
 		std::shared_ptr<KFont> kfont_loader_;
 

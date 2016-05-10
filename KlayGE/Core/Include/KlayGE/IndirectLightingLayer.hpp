@@ -91,18 +91,19 @@ namespace KlayGE
 		std::array<PostProcessPtr, LightSource::LT_NumLightTypes> rsm_to_vpls_pps_;
 		TexturePtr vpl_tex_;
 
-		RenderTechniquePtr vpls_lighting_instance_id_tech_;
-		RenderTechniquePtr vpls_lighting_no_instance_id_tech_;
+		RenderEffectPtr vpls_lighting_effect_;
+		RenderTechnique* vpls_lighting_instance_id_tech_;
+		RenderTechnique* vpls_lighting_no_instance_id_tech_;
 
-		RenderEffectParameterPtr vpl_view_param_;
-		RenderEffectParameterPtr vpl_proj_param_;
-		RenderEffectParameterPtr vpl_depth_near_far_invfar_param_;
-		RenderEffectParameterPtr vpl_light_pos_es_param_;
-		RenderEffectParameterPtr vpl_light_color_param_;
-		RenderEffectParameterPtr vpl_light_falloff_param_;
-		RenderEffectParameterPtr vpl_x_coord_param_;
-		RenderEffectParameterPtr vpl_gbuffer_tex_param_;
-		RenderEffectParameterPtr vpl_depth_tex_param_;
+		RenderEffectParameter* vpl_view_param_;
+		RenderEffectParameter* vpl_proj_param_;
+		RenderEffectParameter* vpl_depth_near_far_invfar_param_;
+		RenderEffectParameter* vpl_light_pos_es_param_;
+		RenderEffectParameter* vpl_light_color_param_;
+		RenderEffectParameter* vpl_light_falloff_param_;
+		RenderEffectParameter* vpl_x_coord_param_;
+		RenderEffectParameter* vpl_gbuffer_tex_param_;
+		RenderEffectParameter* vpl_depth_tex_param_;
 
 		RenderablePtr vpl_renderable_;
 

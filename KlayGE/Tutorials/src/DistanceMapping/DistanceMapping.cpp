@@ -40,17 +40,17 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("DistanceMapping.fxml");
+			effect_ = SyncLoadRenderEffect("DistanceMapping.fxml");
 
-			technique_ = effect->TechniqueByName("DistanceMapping2a");
+			technique_ = effect_->TechniqueByName("DistanceMapping2a");
 			if (!technique_->Validate())
 			{
-				technique_ = effect->TechniqueByName("DistanceMapping20");
+				technique_ = effect_->TechniqueByName("DistanceMapping20");
 			}
 
-			*(technique_->Effect().ParameterByName("diffuse_tex")) = ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable);
-			*(technique_->Effect().ParameterByName("normal_tex")) = ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable);
-			*(technique_->Effect().ParameterByName("distance_tex")) = ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable);
+			*(effect_->ParameterByName("diffuse_tex")) = ASyncLoadTexture("diffuse.dds", EAH_GPU_Read | EAH_Immutable);
+			*(effect_->ParameterByName("normal_tex")) = ASyncLoadTexture("normal.dds", EAH_GPU_Read | EAH_Immutable);
+			*(effect_->ParameterByName("distance_tex")) = ASyncLoadTexture("distance.dds", EAH_GPU_Read | EAH_Immutable);
 
 			float3 xyzs[] =
 			{
@@ -152,25 +152,25 @@ namespace
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_model_mat_);
+			*(effect_->ParameterByName("light_pos")) = MathLib::transform_coord(light_pos, inv_model_mat_);
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			*(technique_->Effect().ParameterByName("light_color")) = light_color;			
+			*(effect_->ParameterByName("light_color")) = light_color;			
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;			
+			*(effect_->ParameterByName("light_falloff")) = light_falloff;			
 		}
 
 		void OnRenderBegin()
 		{
 			App3DFramework const & app = Context::Instance().AppInstance();
 
-			*(technique_->Effect().ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
+			*(effect_->ParameterByName("worldviewproj")) = model_mat_ * app.ActiveCamera().ViewProjMatrix();
+			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(app.ActiveCamera().EyePos(), inv_model_mat_);
 		}
 
 	private:

@@ -52,7 +52,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = SyncLoadRenderEffect("JudaTexViewer.fxml")->TechniqueByName("Render");
+			effect_ = SyncLoadRenderEffect("JudaTexViewer.fxml");
+			technique_ = effect_->TechniqueByName("Render");
 
 			float2 texs[] =
 			{
@@ -92,7 +93,7 @@ namespace
 		void OnRenderBegin()
 		{
 			FrameBufferPtr const & fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-			*(technique_->Effect().ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
+			*(effect_->ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
 		}
 
 	private:
@@ -151,7 +152,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = SyncLoadRenderEffect("JudaTexViewer.fxml")->TechniqueByName("GridBorder");
+			effect_ = SyncLoadRenderEffect("JudaTexViewer.fxml");
+			technique_ = effect_->TechniqueByName("GridBorder");
 
 			float2 texs[] =
 			{
@@ -191,7 +193,7 @@ namespace
 		void OnRenderBegin()
 		{
 			FrameBufferPtr const & fb = Context::Instance().RenderFactoryInstance().RenderEngineInstance().CurFrameBuffer();
-			*(technique_->Effect().ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
+			*(effect_->ParameterByName("world_mat")) = model_ * MathLib::scaling(2.0f / fb->Width(), 2.0f / fb->Height(), 1.0f);
 		}
 
 	private:
@@ -402,7 +404,7 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 	position_ = float2(0, 0);
 	scale_ = 1;
 
-	juda_tex_->SetParams(tile_->GetRenderable()->GetRenderTechnique());
+	juda_tex_->SetParams(*tile_->GetRenderable()->GetRenderEffect());
 
 	checked_pointer_cast<TileObject>(tile_)->TileSize(tile_size_);
 	checked_pointer_cast<TileObject>(tile_)->Position(position_);

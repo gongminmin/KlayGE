@@ -113,6 +113,7 @@ namespace KlayGE
 												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
 			rl_->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 
+			effect_ = effect;
 			if (texture)
 			{
 				technique_ = effect->TechniqueByName("UITec");
@@ -122,8 +123,8 @@ namespace KlayGE
 				technique_ = effect->TechniqueByName("UITecNoTex");
 			}
 
-			ui_tex_ep_ = technique_->Effect().ParameterByName("ui_tex");
-			half_width_height_ep_ = technique_->Effect().ParameterByName("half_width_height");
+			ui_tex_ep_ = effect->ParameterByName("ui_tex");
+			half_width_height_ep_ = effect->ParameterByName("half_width_height");
 		}
 
 		bool Empty() const
@@ -186,7 +187,7 @@ namespace KlayGE
 				rl_->StartIndexLocation(ind_offset / sizeof(uint16_t));
 				rl_->NumIndices(ind_length / sizeof(uint16_t));
 
-				re.Render(*this->GetRenderTechnique(), *rl_);
+				re.Render(*this->GetRenderEffect(), *this->GetRenderTechnique(), *rl_);
 			}
 
 			for (size_t i = 0; i < tb_vb_sub_allocs_.size(); ++ i)
@@ -228,8 +229,8 @@ namespace KlayGE
 	private:
 		bool restart_;
 
-		RenderEffectParameterPtr ui_tex_ep_;
-		RenderEffectParameterPtr half_width_height_ep_;
+		RenderEffectParameter* ui_tex_ep_;
+		RenderEffectParameter* half_width_height_ep_;
 
 		TexturePtr texture_;
 

@@ -343,7 +343,7 @@ namespace KlayGE
 
 		re.BindFrameBuffer(tex_fb_);
 
-		re.Render(*buf2tex_tech_, *quad_layout_);
+		re.Render(*effect_, *buf2tex_tech_, *quad_layout_);
 
 		re.BindFrameBuffer(old_fb);
 	}
@@ -365,17 +365,17 @@ namespace KlayGE
 		// Shader
 		if (first)
 		{
-			re.Dispatch(*radix008a_first_tech_, grid, 1, 1);
+			re.Dispatch(*effect_, *radix008a_first_tech_, grid, 1, 1);
 		}
 		else
 		{
 			if (istride > 1)
 			{
-				re.Dispatch(*radix008a_tech_, grid, 1, 1);
+				re.Dispatch(*effect_, *radix008a_tech_, grid, 1, 1);
 			}
 			else
 			{
-				re.Dispatch(*radix008a_final_tech_, grid, 1, 1);
+				re.Dispatch(*effect_, *radix008a_final_tech_, grid, 1, 1);
 			}
 		}
 	}
@@ -505,7 +505,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		// Shader
-		RenderTechniquePtr tech;
+		RenderTechnique* tech;
 		if (final_pass_x)
 		{
 			tech = radix008a_final_x_tech_;
@@ -521,6 +521,6 @@ namespace KlayGE
 				tech = radix008a_tech_;
 			}
 		}
-		re.Dispatch(*tech, grid_x, grid_y, 1);
+		re.Dispatch(*effect_, *tech, grid_x, grid_y, 1);
 	}
 }

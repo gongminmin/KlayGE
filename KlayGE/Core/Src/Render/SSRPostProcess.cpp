@@ -47,11 +47,11 @@ namespace KlayGE
 		input_pins_.emplace_back("front_side_tex", TexturePtr());
 		input_pins_.emplace_back("foreground_depth_tex", TexturePtr());
 
-		params_.emplace_back("min_samples", RenderEffectParameterPtr());
-		params_.emplace_back("max_samples", RenderEffectParameterPtr());
+		params_.emplace_back("min_samples", nullptr);
+		params_.emplace_back("max_samples", nullptr);
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
-		this->Technique(effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
+		this->Technique(effect, effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
 
 		if (technique_ && technique_->Validate())
 		{

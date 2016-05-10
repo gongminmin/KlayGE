@@ -53,7 +53,7 @@ namespace
 	{
 	public:
 		SetD3D11ShaderParameterTextureSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
-				ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+				ID3D11ShaderResourceView*& srv, RenderEffectParameter* param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -80,14 +80,14 @@ namespace
 	private:
 		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceView** srv_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferSRV
 	{
 	public:
 		SetD3D11ShaderParameterGraphicsBufferSRV(std::tuple<void*, uint32_t, uint32_t>& srvsrc,
-				ID3D11ShaderResourceView*& srv, RenderEffectParameterPtr const & param)
+				ID3D11ShaderResourceView*& srv, RenderEffectParameter* param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
 		}
@@ -110,13 +110,13 @@ namespace
 	private:
 		std::tuple<void*, uint32_t, uint32_t>* srvsrc_;
 		ID3D11ShaderResourceView** srv_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	class SetD3D11ShaderParameterTextureUAV
 	{
 	public:
-		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterTextureUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameter* param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -140,13 +140,13 @@ namespace
 	private:
 		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	class SetD3D11ShaderParameterGraphicsBufferUAV
 	{
 	public:
-		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameterPtr const & param)
+		SetD3D11ShaderParameterGraphicsBufferUAV(void*& uavsrc, ID3D11UnorderedAccessView*& uav, RenderEffectParameter* param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
 		}
@@ -169,7 +169,7 @@ namespace
 	private:
 		void** uavsrc_;
 		ID3D11UnorderedAccessView** uav_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 }
 
@@ -252,7 +252,7 @@ namespace KlayGE
 		return shader_profile;
 	}
 
-	bool D3D11ShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
+	bool D3D11ShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids,
 		std::vector<uint8_t> const & native_shader_block)
 	{
 		bool ret = false;
@@ -396,7 +396,7 @@ namespace KlayGE
 	}
 
 	bool D3D11ShaderObject::StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-		std::vector<uint32_t> const & shader_desc_ids)
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
 		uint32_t len;
 		res->read(&len, sizeof(len));
@@ -512,7 +512,7 @@ namespace KlayGE
 	}
 
 	std::shared_ptr<std::vector<uint8_t>> D3D11ShaderObject::CompiteToBytecode(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
+			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -800,7 +800,7 @@ namespace KlayGE
 	}
 
 	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
-		std::vector<uint32_t> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob)
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob)
 	{
 		if (code_blob)
 		{
@@ -1064,7 +1064,7 @@ namespace KlayGE
 
 			for (size_t i = 0; i < shader_desc_[type]->res_desc.size(); ++ i)
 			{
-				RenderEffectParameterPtr const & p = effect.ParameterByName(shader_desc_[type]->res_desc[i].name);
+				RenderEffectParameter* p = effect.ParameterByName(shader_desc_[type]->res_desc[i].name);
 				BOOST_ASSERT(p);
 
 				D3D11ShaderParameterHandle p_handle;
@@ -1108,7 +1108,7 @@ namespace KlayGE
 	}
 
 	void D3D11ShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
+			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
 		std::shared_ptr<std::vector<uint8_t>> code_blob = this->CompiteToBytecode(type, effect, tech, pass, shader_desc_ids);
 		this->AttachShaderBytecode(type, effect, shader_desc_ids, code_blob);
@@ -1200,12 +1200,12 @@ namespace KlayGE
 					cbuff_indices_[type]->begin(), cbuff_indices_[type]->end());
 				for (size_t i = 0; i < cbuff_indices_[type]->size(); ++ i)
 				{
-					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[type])[i]);
+					auto cbuff = effect.CBufferByIndex((*cbuff_indices_[type])[i]);
 					cbuff->Resize(shader_desc_[type]->cb_desc[i].size);
 					BOOST_ASSERT(cbuff->NumParameters() == shader_desc_[type]->cb_desc[i].var_desc.size());
 					for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 					{
-						RenderEffectParameterPtr const & param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
+						RenderEffectParameter* param = effect.ParameterByIndex(cbuff->ParameterIndex(j));
 						uint32_t stride;
 						if (shader_desc_[type]->cb_desc[i].var_desc[j].elements > 0)
 						{
@@ -1229,7 +1229,7 @@ namespace KlayGE
 								stride = 16;
 							}
 						}
-						param->BindToCBuffer(cbuff, shader_desc_[type]->cb_desc[i].var_desc[j].start_offset, stride);
+						param->BindToCBuffer(*cbuff, shader_desc_[type]->cb_desc[i].var_desc[j].start_offset, stride);
 					}
 
 					d3d11_cbuffs_[type][i] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
@@ -1284,7 +1284,7 @@ namespace KlayGE
 				all_cbuff_indices.insert(all_cbuff_indices.end(), cbuff_indices_[i]->begin(), cbuff_indices_[i]->end());
 				for (size_t j = 0; j < cbuff_indices_[i]->size(); ++ j)
 				{
-					RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByIndex((*cbuff_indices_[i])[j]);
+					auto cbuff = effect.CBufferByIndex((*cbuff_indices_[i])[j]);
 					ret->d3d11_cbuffs_[i][j] = checked_cast<D3D11GraphicsBuffer*>(cbuff->HWBuff().get())->D3DBuffer();
 				}
 			}
@@ -1308,7 +1308,8 @@ namespace KlayGE
 		return ret;
 	}
 
-	D3D11ShaderObject::parameter_bind_t D3D11ShaderObject::GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameterPtr const & param)
+	D3D11ShaderObject::parameter_bind_t D3D11ShaderObject::GetBindFunc(D3D11ShaderParameterHandle const & p_handle,
+		RenderEffectParameter* param)
 	{
 		parameter_bind_t ret;
 		ret.param = param;

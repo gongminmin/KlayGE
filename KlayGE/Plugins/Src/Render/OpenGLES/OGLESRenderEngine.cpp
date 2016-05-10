@@ -1023,12 +1023,12 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void OGLESRenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
+	void OGLESRenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		uint32_t const num_instances = rl.NumInstances();
 		BOOST_ASSERT(num_instances != 0);
 
-		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0)->GetShaderObject());
+		OGLESShaderObjectPtr cur_shader = checked_pointer_cast<OGLESShaderObject>(tech.Pass(0).GetShaderObject(effect));
 		checked_cast<OGLESRenderLayout const *>(&rl)->Active(cur_shader);
 
 		uint32_t const vertex_count = rl.UseIndices() ? rl.NumIndices() : rl.NumVertices();
@@ -1070,13 +1070,13 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 
 					if (so_rl_)
 					{
-						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
@@ -1085,20 +1085,20 @@ namespace KlayGE
 					}
 
 					glDrawElementsIndirect(mode, index_type, args_offset);
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 			else
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 
 					if (so_rl_)
 					{
-						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
@@ -1107,7 +1107,7 @@ namespace KlayGE
 					}
 
 					glDrawArraysIndirect(mode, args_offset);
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 
@@ -1129,13 +1129,13 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 
 					if (so_rl_)
 					{
-						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
@@ -1153,20 +1153,20 @@ namespace KlayGE
 						glDrawElementsInstancedEXT(mode, static_cast<GLsizei>(rl.NumIndices()),
 							index_type, index_offset, num_instances);
 					}
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 			else
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPassPtr const & pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 
 					if (so_rl_)
 					{
-						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+						OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
@@ -1182,7 +1182,7 @@ namespace KlayGE
 					{
 						glDrawArraysInstancedEXT(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
 					}
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 
@@ -1280,13 +1280,13 @@ namespace KlayGE
 				{
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 
 						if (so_rl_)
 						{
-							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
@@ -1296,20 +1296,20 @@ namespace KlayGE
 
 						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
 							index_type, index_offset);
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 				else
 				{
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPassPtr const & pass = tech.Pass(i);
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 
 						if (so_rl_)
 						{
-							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass->GetShaderObject());
+							OGLESShaderObjectPtr shader = checked_pointer_cast<OGLESShaderObject>(pass.GetShaderObject(effect));
 							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
@@ -1318,7 +1318,7 @@ namespace KlayGE
 						}
 
 						glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 
@@ -1334,16 +1334,24 @@ namespace KlayGE
 		checked_cast<OGLESRenderLayout const *>(&rl)->Deactive(cur_shader);
 	}
 
-	void OGLESRenderEngine::DoDispatch(RenderTechnique const & /*tech*/, uint32_t /*tgx*/, uint32_t /*tgy*/, uint32_t /*tgz*/)
+	void OGLESRenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech,
+		uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
 		BOOST_ASSERT(false);
+
+		KFL_UNUSED(effect);
+		KFL_UNUSED(tech);
+		KFL_UNUSED(tgx);
+		KFL_UNUSED(tgy);
+		KFL_UNUSED(tgz);
 	}
 
-	void OGLESRenderEngine::DoDispatchIndirect(RenderTechnique const & tech,
+	void OGLESRenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
 		BOOST_ASSERT(false);
 
+		KFL_UNUSED(effect);
 		KFL_UNUSED(tech);
 		KFL_UNUSED(buff_args);
 		KFL_UNUSED(offset);

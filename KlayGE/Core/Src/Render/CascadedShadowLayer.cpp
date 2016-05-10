@@ -211,33 +211,33 @@ namespace KlayGE
 					bias_buff_->Size(), nullptr);
 			}
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("CascadedShadow.fxml");
+			effect_ = SyncLoadRenderEffect("CascadedShadow.fxml");
 
-			clear_z_bounds_tech_ = effect->TechniqueByName("ClearZBounds");
-			reduce_z_bounds_from_depth_tech_ = effect->TechniqueByName("ReduceZBoundsFromDepth");
-			compute_log_cascades_from_z_bounds_tech_ = effect->TechniqueByName("ComputeLogCascadesFromZBounds");
-			clear_cascade_bounds_tech_ = effect->TechniqueByName("ClearCascadeBounds");
-			reduce_bounds_from_depth_tech_ = effect->TechniqueByName("ReduceBoundsFromDepth");
-			compute_custom_cascades_tech_ = effect->TechniqueByName("ComputeCustomCascades");
+			clear_z_bounds_tech_ = effect_->TechniqueByName("ClearZBounds");
+			reduce_z_bounds_from_depth_tech_ = effect_->TechniqueByName("ReduceZBoundsFromDepth");
+			compute_log_cascades_from_z_bounds_tech_ = effect_->TechniqueByName("ComputeLogCascadesFromZBounds");
+			clear_cascade_bounds_tech_ = effect_->TechniqueByName("ClearCascadeBounds");
+			reduce_bounds_from_depth_tech_ = effect_->TechniqueByName("ReduceBoundsFromDepth");
+			compute_custom_cascades_tech_ = effect_->TechniqueByName("ComputeCustomCascades");
 
-			interval_buff_param_ = effect->ParameterByName("interval_buff");
-			interval_buff_uint_param_ = effect->ParameterByName("interval_buff_uint");
-			interval_buff_read_param_ = effect->ParameterByName("interval_buff_read");
-			scale_buff_param_ = effect->ParameterByName("scale_buff");
-			bias_buff_param_ = effect->ParameterByName("bias_buff");
-			cascade_min_buff_uint_param_ = effect->ParameterByName("cascade_min_buff_uint");
-			cascade_max_buff_uint_param_ = effect->ParameterByName("cascade_max_buff_uint");
-			cascade_min_buff_read_param_ = effect->ParameterByName("cascade_min_buff_read");
-			cascade_max_buff_read_param_ = effect->ParameterByName("cascade_max_buff_read");
-			depth_tex_param_ = effect->ParameterByName("depth_tex");
-			num_cascades_param_ = effect->ParameterByName("num_cascades");
-			inv_depth_width_height_param_ = effect->ParameterByName("inv_depth_width_height");
-			near_far_param_ = effect->ParameterByName("near_far");
-			upper_left_param_ = effect->ParameterByName("upper_left");
-			xy_dir_param_ = effect->ParameterByName("xy_dir");
-			view_to_light_view_proj_param_ = effect->ParameterByName("view_to_light_view_proj");
-			light_space_border_param_ = effect->ParameterByName("light_space_border");
-			max_cascade_scale_param_ = effect->ParameterByName("max_cascade_scale");
+			interval_buff_param_ = effect_->ParameterByName("interval_buff");
+			interval_buff_uint_param_ = effect_->ParameterByName("interval_buff_uint");
+			interval_buff_read_param_ = effect_->ParameterByName("interval_buff_read");
+			scale_buff_param_ = effect_->ParameterByName("scale_buff");
+			bias_buff_param_ = effect_->ParameterByName("bias_buff");
+			cascade_min_buff_uint_param_ = effect_->ParameterByName("cascade_min_buff_uint");
+			cascade_max_buff_uint_param_ = effect_->ParameterByName("cascade_max_buff_uint");
+			cascade_min_buff_read_param_ = effect_->ParameterByName("cascade_min_buff_read");
+			cascade_max_buff_read_param_ = effect_->ParameterByName("cascade_max_buff_read");
+			depth_tex_param_ = effect_->ParameterByName("depth_tex");
+			num_cascades_param_ = effect_->ParameterByName("num_cascades");
+			inv_depth_width_height_param_ = effect_->ParameterByName("inv_depth_width_height");
+			near_far_param_ = effect_->ParameterByName("near_far");
+			upper_left_param_ = effect_->ParameterByName("upper_left");
+			xy_dir_param_ = effect_->ParameterByName("xy_dir");
+			view_to_light_view_proj_param_ = effect_->ParameterByName("view_to_light_view_proj");
+			light_space_border_param_ = effect_->ParameterByName("light_space_border");
+			max_cascade_scale_param_ = effect_->ParameterByName("max_cascade_scale");
 		}
 		else
 		{
@@ -326,12 +326,12 @@ namespace KlayGE
 			*light_space_border_param_ = light_space_border;
 			*max_cascade_scale_param_ = max_cascade_scale;
 
-			re.Dispatch(*clear_z_bounds_tech_, 1, 1, 1);
-			re.Dispatch(*reduce_z_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
-			re.Dispatch(*compute_log_cascades_from_z_bounds_tech_, 1, 1, 1);
-			re.Dispatch(*clear_cascade_bounds_tech_, 1, 1, 1);
-			re.Dispatch(*reduce_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
-			re.Dispatch(*compute_custom_cascades_tech_, 1, 1, 1);
+			re.Dispatch(*effect_, *clear_z_bounds_tech_, 1, 1, 1);
+			re.Dispatch(*effect_, *reduce_z_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
+			re.Dispatch(*effect_, *compute_log_cascades_from_z_bounds_tech_, 1, 1, 1);
+			re.Dispatch(*effect_, *clear_cascade_bounds_tech_, 1, 1, 1);
+			re.Dispatch(*effect_, *reduce_bounds_from_depth_tech_, dispatch_x, dispatch_y, 1);
+			re.Dispatch(*effect_, *compute_custom_cascades_tech_, 1, 1, 1);
 
 			interval_buff_->CopyToBuffer(*interval_cpu_buffs_[copy_index]);
 			scale_buff_->CopyToBuffer(*scale_cpu_buffs_[copy_index]);

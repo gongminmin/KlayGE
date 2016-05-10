@@ -34,9 +34,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("MVUtil.fxml");
-			simple_forward_tech_ = effect->TechniqueByName("AxisTech");
-			mvp_param_ = effect->ParameterByName("mvp");
+			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
+			simple_forward_tech_ = effect_->TechniqueByName("AxisTech");
+			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float4 xyzs[] =
 			{
@@ -76,9 +76,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("MVUtil.fxml");
-			simple_forward_tech_ = effect->TechniqueByName("GridTech");
-			mvp_param_ = effect->ParameterByName("mvp");
+			effect_ = SyncLoadRenderEffect("MVUtil.fxml");
+			simple_forward_tech_ = effect_->TechniqueByName("GridTech");
+			mvp_param_ = effect_->ParameterByName("mvp");
 
 			float3 xyzs[(21 + 21) * 2];
 			for (int i = 0; i < 21; ++ i)

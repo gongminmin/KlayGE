@@ -35,8 +35,8 @@ namespace
 		PlanetMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderEffectPtr effect = SyncLoadRenderEffect("AtmosphericScattering.fxml");
-			technique_ = effect->TechniqueByName("PlanetTech");
+			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
+			technique_ = effect_->TechniqueByName("PlanetTech");
 		}
 
 		virtual void DoBuildMeshInfo() override
@@ -45,22 +45,22 @@ namespace
 
 		void LightDir(float3 const & dir)
 		{
-			*(technique_->Effect().ParameterByName("light_dir")) = dir;
+			*(effect_->ParameterByName("light_dir")) = dir;
 		}
 
 		void Density(float density)
 		{
-			*(technique_->Effect().ParameterByName("density")) = density;
+			*(effect_->ParameterByName("density")) = density;
 		}
 
 		void Beta(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
 		}
 
 		void Absorb(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
 		
 		void OnRenderBegin()
@@ -68,11 +68,11 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
+			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
 
 			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(technique_->Effect().ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
+			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
+			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}
 	};
 
@@ -82,8 +82,8 @@ namespace
 		AtmosphereMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			RenderEffectPtr effect = SyncLoadRenderEffect("AtmosphericScattering.fxml");
-			technique_ = effect->TechniqueByName("AtmosphereTech");
+			effect_ = SyncLoadRenderEffect("AtmosphericScattering.fxml");
+			technique_ = effect_->TechniqueByName("AtmosphereTech");
 		}
 
 		virtual void DoBuildMeshInfo() override
@@ -94,27 +94,27 @@ namespace
 
 		void AtmosphereTop(float top)
 		{
-			*(technique_->Effect().ParameterByName("atmosphere_top")) = top;
+			*(effect_->ParameterByName("atmosphere_top")) = top;
 		}
 
 		void LightDir(float3 const & dir)
 		{
-			*(technique_->Effect().ParameterByName("light_dir")) = dir;
+			*(effect_->ParameterByName("light_dir")) = dir;
 		}
 
 		void Density(float density)
 		{
-			*(technique_->Effect().ParameterByName("density")) = density;
+			*(effect_->ParameterByName("density")) = density;
 		}
 
 		void Beta(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("beta")) = float3(clr.r(), clr.g(), clr.b());
 		}
 
 		void Absorb(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("absorb")) = float3(clr.r(), clr.g(), clr.b());
 		}
 		
 		void OnRenderBegin()
@@ -122,11 +122,11 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
+			*(effect_->ParameterByName("mvp")) = model_mat_ * camera.ViewProjMatrix();
 
 			float4x4 inv_mv = MathLib::inverse(model_mat_ * camera.ViewMatrix());
-			*(technique_->Effect().ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
-			*(technique_->Effect().ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
+			*(effect_->ParameterByName("eye_pos")) = MathLib::transform_coord(float3(0, 0, 0), inv_mv);
+			*(effect_->ParameterByName("look_at_vec")) = MathLib::transform_normal(float3(0, 0, 1), inv_mv);
 		}
 	};
 

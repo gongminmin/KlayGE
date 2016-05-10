@@ -39,21 +39,22 @@ namespace
 		FlagRenderable(int length_segs, int width_segs)
 			: RenderablePlane(static_cast<float>(LENGTH), static_cast<float>(WIDTH), length_segs, width_segs, true, false)
 		{
-			technique_ = SyncLoadRenderEffect("VertexDisplacement.fxml")->TechniqueByName("VertexDisplacement");
+			effect_ = SyncLoadRenderEffect("VertexDisplacement.fxml");
+			technique_ = effect_->TechniqueByName("VertexDisplacement");
 
-			*(technique_->Effect().ParameterByName("flag_tex")) = ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable);
-			*(technique_->Effect().ParameterByName("half_length")) = LENGTH / 2.0f;
-			*(technique_->Effect().ParameterByName("half_width")) = WIDTH / 2.0f;
-			*(technique_->Effect().ParameterByName("lightDir")) = float3(1, 0, -1);
+			*(effect_->ParameterByName("flag_tex")) = ASyncLoadTexture("powered_by_klayge.dds", EAH_GPU_Read | EAH_Immutable);
+			*(effect_->ParameterByName("half_length")) = LENGTH / 2.0f;
+			*(effect_->ParameterByName("half_width")) = WIDTH / 2.0f;
+			*(effect_->ParameterByName("lightDir")) = float3(1, 0, -1);
 
 			AABBox const & pos_bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void SetAngle(float angle)
 		{
-			*(technique_->Effect().ParameterByName("currentAngle")) = angle;
+			*(effect_->ParameterByName("currentAngle")) = angle;
 		}
 
 		void OnRenderBegin()
@@ -61,9 +62,9 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("modelview")) = camera.ViewMatrix();
-			*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
-			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
+			*(effect_->ParameterByName("modelview")) = camera.ViewMatrix();
+			*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
+			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
 		}
 	};
 

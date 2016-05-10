@@ -77,9 +77,9 @@ namespace KlayGE
 	{
 	}
 
-	void SceneObjectSkyBox::Technique(RenderTechniquePtr const & tech)
+	void SceneObjectSkyBox::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 	{
-		checked_pointer_cast<RenderableSkyBox>(renderable_)->Technique(tech);
+		checked_pointer_cast<RenderableSkyBox>(renderable_)->Technique(effect, tech);
 	}
 
 	void SceneObjectSkyBox::CubeMap(TexturePtr const & cube)

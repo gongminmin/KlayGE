@@ -158,15 +158,15 @@ namespace
 
 			rl_ = rf.MakeRenderLayout();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
-			*(effect->ParameterByName("particle_tex")) = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
+			effect_ = SyncLoadRenderEffect("GPUParticleSystem.fxml");
+			*(effect_->ParameterByName("particle_tex")) = ASyncLoadTexture("particle.dds", EAH_GPU_Read | EAH_Immutable);
 			if (use_gs)
 			{
 				rl_->TopologyType(RenderLayout::TT_PointList);
 
 				if (use_so || use_cs)
 				{
-					technique_ = effect->TechniqueByName("ParticlesWithGSSO");
+					technique_ = effect_->TechniqueByName("ParticlesWithGSSO");
 					rl_->NumVertices(max_num_particles);
 				}
 				else
@@ -181,7 +181,7 @@ namespace
 						max_num_particles * sizeof(float2), &p_in_tex[0]);
 
 					rl_->BindVertexStream(pos, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
-					technique_ = effect->TechniqueByName("ParticlesWithGS");
+					technique_ = effect_->TechniqueByName("ParticlesWithGS");
 				}
 			}
 			else
@@ -208,19 +208,19 @@ namespace
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				technique_ = effect->TechniqueByName("Particles");
+				technique_ = effect_->TechniqueByName("Particles");
 			}
 
 			noise_vol_tex_ = CreateNoiseVolume(32);
-			*(technique_->Effect().ParameterByName("noise_vol_tex")) = noise_vol_tex_;
+			*(effect_->ParameterByName("noise_vol_tex")) = noise_vol_tex_;
 
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.1f;
-			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
+			*(effect_->ParameterByName("point_radius")) = 0.1f;
+			*(effect_->ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
 		}
 
 		void SceneTexture(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("scene_tex")) = tex;
+			*(effect_->ParameterByName("scene_tex")) = tex;
 		}
 
 		void OnRenderBegin()
@@ -228,22 +228,22 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("View")) = camera.ViewMatrix();
-			*(technique_->Effect().ParameterByName("Proj")) = camera.ProjMatrix();
-			*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
-			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+			*(effect_->ParameterByName("View")) = camera.ViewMatrix();
+			*(effect_->ParameterByName("Proj")) = camera.ProjMatrix();
+			*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
+			*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 
-			*(technique_->Effect().ParameterByName("far_plane")) = app.ActiveCamera().FarPlane();
+			*(effect_->ParameterByName("far_plane")) = app.ActiveCamera().FarPlane();
 		}
 
 		void PosTexture(TexturePtr const & particle_pos_tex)
 		{
-			*(technique_->Effect().ParameterByName("particle_pos_tex")) = particle_pos_tex;
+			*(effect_->ParameterByName("particle_pos_tex")) = particle_pos_tex;
 		}
 
 		void PosVB(GraphicsBufferPtr const & particle_pos_vb)
 		{
-			*(technique_->Effect().ParameterByName("particle_pos_buff")) = particle_pos_vb;
+			*(effect_->ParameterByName("particle_pos_buff")) = particle_pos_vb;
 		}
 
 	private:
@@ -285,10 +285,10 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderEngine& re = rf.RenderEngineInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("GPUParticleSystem.fxml");
+			effect_ = SyncLoadRenderEffect("GPUParticleSystem.fxml");
 			if (use_cs)
 			{
-				update_cs_tech_ = effect->TechniqueByName("UpdateCS");
+				update_cs_tech_ = effect_->TechniqueByName("UpdateCS");
 				technique_ = update_cs_tech_;
 
 				std::vector<float4> p(max_num_particles_);
@@ -304,8 +304,8 @@ namespace
 					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
 
-				*(technique_->Effect().ParameterByName("particle_pos_stru_buff")) = particle_pos_vb_[0];
-				*(technique_->Effect().ParameterByName("particle_vel_stru_buff")) = particle_vel_vb_[0];
+				*(effect_->ParameterByName("particle_pos_stru_buff")) = particle_pos_vb_[0];
+				*(effect_->ParameterByName("particle_vel_stru_buff")) = particle_vel_vb_[0];
 
 				for (int i = 0; i < max_num_particles_; ++i)
 				{
@@ -317,7 +317,7 @@ namespace
 
 				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
+				*(effect_->ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
 			}
 			else if (use_so)
 			{
@@ -325,7 +325,7 @@ namespace
 				rl_->TopologyType(RenderLayout::TT_PointList);
 				rl_->NumVertices(max_num_particles);
 
-				update_so_tech_ = effect->TechniqueByName("UpdateSO");
+				update_so_tech_ = effect_->TechniqueByName("UpdateSO");
 				technique_ = update_so_tech_;
 
 				std::vector<float4> p(max_num_particles_);
@@ -361,10 +361,10 @@ namespace
 
 				GraphicsBufferPtr particle_init_vel_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
-				*(technique_->Effect().ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
+				*(effect_->ParameterByName("particle_init_vel_buff")) = particle_init_vel_buff;
 
-				particle_pos_buff_param_ = technique_->Effect().ParameterByName("particle_pos_buff");
-				particle_vel_buff_param_ = technique_->Effect().ParameterByName("particle_vel_buff");
+				particle_pos_buff_param_ = effect_->ParameterByName("particle_pos_buff");
+				particle_vel_buff_param_ = effect_->ParameterByName("particle_vel_buff");
 			}
 			else
 			{
@@ -403,13 +403,13 @@ namespace
 
 				if (use_mrt)
 				{
-					update_mrt_tech_ = effect->TechniqueByName("Update");
+					update_mrt_tech_ = effect_->TechniqueByName("Update");
 					technique_ = update_mrt_tech_;
 				}
 				else
 				{
-					update_pos_tech_ = effect->TechniqueByName("UpdatePos");
-					update_vel_tech_ = effect->TechniqueByName("UpdateVel");
+					update_pos_tech_ = effect_->TechniqueByName("UpdatePos");
+					update_vel_tech_ = effect_->TechniqueByName("UpdateVel");
 					technique_ = update_pos_tech_;
 				}
 
@@ -480,24 +480,24 @@ namespace
 				vel_init.slice_pitch = 0;
 
 				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
-				*(technique_->Effect().ParameterByName("particle_init_vel_tex")) = particle_init_vel;
+				*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
-				particle_pos_tex_param_ = technique_->Effect().ParameterByName("particle_pos_tex");
-				particle_vel_tex_param_ = technique_->Effect().ParameterByName("particle_vel_tex");
+				particle_pos_tex_param_ = effect_->ParameterByName("particle_pos_tex");
+				particle_vel_tex_param_ = effect_->ParameterByName("particle_vel_tex");
 			}
 
-			accumulate_time_param_ = technique_->Effect().ParameterByName("accumulate_time");
-			elapse_time_param_ = technique_->Effect().ParameterByName("elapse_time");
+			accumulate_time_param_ = effect_->ParameterByName("accumulate_time");
+			elapse_time_param_ = effect_->ParameterByName("elapse_time");
 
-			*(technique_->Effect().ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
-			*(technique_->Effect().ParameterByName("height_map_tex")) = terrain_height_map;
-			*(technique_->Effect().ParameterByName("normal_map_tex")) = terrain_normal_map;
+			*(effect_->ParameterByName("init_pos_life")) = float4(0, 0, 0, 8);
+			*(effect_->ParameterByName("height_map_tex")) = terrain_height_map;
+			*(effect_->ParameterByName("normal_map_tex")) = terrain_normal_map;
 		}
 
 		void ModelMatrix(float4x4 const & model)
 		{
 			model_mat_ = model;
-			*(technique_->Effect().ParameterByName("ps_model_mat")) = model;
+			*(effect_->ParameterByName("ps_model_mat")) = model;
 		}
 
 		float4x4 const & ModelMatrix() const
@@ -523,7 +523,7 @@ namespace
 			{
 				GraphicsBufferPtr particle_birth_time_buff = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					max_num_particles_ * sizeof(half), &time_v[0], EF_R16F);
-				*(technique_->Effect().ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
+				*(effect_->ParameterByName("particle_birth_time_buff")) = particle_birth_time_buff;
 			}
 			else
 			{
@@ -533,7 +533,7 @@ namespace
 				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
 				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
-				*(technique_->Effect().ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
+				*(effect_->ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
 
@@ -585,7 +585,7 @@ namespace
 				re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color);
 
 				this->OnRenderBegin();
-				re.Dispatch(*technique_, (max_num_particles_ + 255) / 256, 1, 1);
+				re.Dispatch(*effect_, *technique_, (max_num_particles_ + 255) / 256, 1, 1);
 				this->OnRenderEnd();
 			}
 			else
@@ -660,18 +660,18 @@ namespace
 		ranlux24_base gen_;
 		uniform_int_distribution<> random_dis_;
 
-		RenderTechniquePtr update_so_tech_;
-		RenderTechniquePtr update_mrt_tech_;
-		RenderTechniquePtr update_pos_tech_;
-		RenderTechniquePtr update_vel_tech_;
-		RenderTechniquePtr update_cs_tech_;
-		RenderEffectParameterPtr vel_offset_param_;
-		RenderEffectParameterPtr particle_pos_tex_param_;
-		RenderEffectParameterPtr particle_vel_tex_param_;
-		RenderEffectParameterPtr particle_pos_buff_param_;
-		RenderEffectParameterPtr particle_vel_buff_param_;
-		RenderEffectParameterPtr accumulate_time_param_;
-		RenderEffectParameterPtr elapse_time_param_;
+		RenderTechnique* update_so_tech_;
+		RenderTechnique* update_mrt_tech_;
+		RenderTechnique* update_pos_tech_;
+		RenderTechnique* update_vel_tech_;
+		RenderTechnique* update_cs_tech_;
+		RenderEffectParameter* vel_offset_param_;
+		RenderEffectParameter* particle_pos_tex_param_;
+		RenderEffectParameter* particle_vel_tex_param_;
+		RenderEffectParameter* particle_pos_buff_param_;
+		RenderEffectParameter* particle_vel_buff_param_;
+		RenderEffectParameter* accumulate_time_param_;
+		RenderEffectParameter* elapse_time_param_;
 	};
 
 	class TerrainRenderable : public RenderablePlane
@@ -682,8 +682,9 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = SyncLoadRenderEffect("Terrain.fxml")->TechniqueByName("Terrain");
-			*(technique_->Effect().ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
+			effect_ = SyncLoadRenderEffect("Terrain.fxml");
+			technique_ = effect_->TechniqueByName("Terrain");
+			*(effect_->ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
 
 			RenderEngine& re = rf.RenderEngineInstance();
 			RenderDeviceCaps const & caps = re.DeviceCaps();
@@ -693,19 +694,19 @@ namespace
 				{
 					TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, nullptr);
 					height_map->CopyToTexture(*height_32f);
-					*(technique_->Effect().ParameterByName("height_map_tex")) = height_32f;
+					*(effect_->ParameterByName("height_map_tex")) = height_32f;
 				}
 				else
 				{
-					*(technique_->Effect().ParameterByName("height_map_tex")) = height_map;
+					*(effect_->ParameterByName("height_map_tex")) = height_map;
 				}
 			}
 			else
 			{
-				*(technique_->Effect().ParameterByName("height_map_tex")) = height_map;
+				*(effect_->ParameterByName("height_map_tex")) = height_map;
 			}
 
-			*(technique_->Effect().ParameterByName("normal_map_tex")) = normal_map;
+			*(effect_->ParameterByName("normal_map_tex")) = normal_map;
 		}
 
 		void OnRenderBegin()
@@ -713,11 +714,11 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
-			*(technique_->Effect().ParameterByName("inv_far")) = 1 / camera.FarPlane();
+			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
+			*(effect_->ParameterByName("inv_far")) = 1 / camera.FarPlane();
 
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_aabb_.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_aabb_.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_aabb_.HalfSize();
 		}
 	};
 

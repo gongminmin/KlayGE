@@ -1964,29 +1964,32 @@ namespace KlayGE
 	RenderableLightSourceProxy::RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		this->Technique(SyncLoadRenderEffect("LightSourceProxy.fxml")->TechniqueByName("LightSourceProxy"));
+		auto effect = SyncLoadRenderEffect("LightSourceProxy.fxml");
+		this->Technique(effect, effect->TechniqueByName("LightSourceProxy"));
 		effect_attrs_ |= EA_SimpleForward;
 	}
 
-	void RenderableLightSourceProxy::Technique(RenderTechniquePtr const & tech)
+	void RenderableLightSourceProxy::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 	{
-		technique_ = simple_forward_tech_ = tech;
+		StaticMesh::Technique(effect, tech);
+
+		simple_forward_tech_ = tech;
 		if (tech)
 		{
-			mvp_param_ = technique_->Effect().ParameterByName("mvp");
-			model_param_ = technique_->Effect().ParameterByName("model");
-			pos_center_param_ = technique_->Effect().ParameterByName("pos_center");
-			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
-			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
-			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
+			mvp_param_ = effect_->ParameterByName("mvp");
+			model_param_ = effect_->ParameterByName("model");
+			pos_center_param_ = effect_->ParameterByName("pos_center");
+			pos_extent_param_ = effect_->ParameterByName("pos_extent");
+			tc_center_param_ = effect_->ParameterByName("tc_center");
+			tc_extent_param_ = effect_->ParameterByName("tc_extent");
 
-			light_color_param_ = technique_->Effect().ParameterByName("light_color");
-			light_is_projective_param_ = technique_->Effect().ParameterByName("light_is_projective");
-			projective_map_2d_tex_param_ = technique_->Effect().ParameterByName("projective_map_2d_tex");
-			projective_map_cube_tex_param_ = technique_->Effect().ParameterByName("projective_map_cube_tex");
+			light_color_param_ = effect_->ParameterByName("light_color");
+			light_is_projective_param_ = effect_->ParameterByName("light_is_projective");
+			projective_map_2d_tex_param_ = effect_->ParameterByName("projective_map_2d_tex");
+			projective_map_cube_tex_param_ = effect_->ParameterByName("projective_map_cube_tex");
 
-			select_mode_object_id_param_ = technique_->Effect().ParameterByName("object_id");
-			select_mode_tech_ = technique_->Effect().TechniqueByName("SelectModeTech");
+			select_mode_object_id_param_ = effect_->ParameterByName("object_id");
+			select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 		}
 	}
 
@@ -2048,23 +2051,26 @@ namespace KlayGE
 	RenderableCameraProxy::RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 	{
-		this->Technique(SyncLoadRenderEffect("CameraProxy.fxml")->TechniqueByName("CameraProxy"));
+		auto effect = SyncLoadRenderEffect("CameraProxy.fxml");
+		this->Technique(effect, effect->TechniqueByName("CameraProxy"));
 		effect_attrs_ |= EA_SimpleForward;
 	}
 
-	void RenderableCameraProxy::Technique(RenderTechniquePtr const & tech)
+	void RenderableCameraProxy::Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 	{
-		technique_ = simple_forward_tech_ = tech;
+		StaticMesh::Technique(effect, tech);
+
+		simple_forward_tech_ = tech;
 		if (tech)
 		{
-			mvp_param_ = technique_->Effect().ParameterByName("mvp");
-			pos_center_param_ = technique_->Effect().ParameterByName("pos_center");
-			pos_extent_param_ = technique_->Effect().ParameterByName("pos_extent");
-			tc_center_param_ = technique_->Effect().ParameterByName("tc_center");
-			tc_extent_param_ = technique_->Effect().ParameterByName("tc_extent");
+			mvp_param_ = effect_->ParameterByName("mvp");
+			pos_center_param_ = effect_->ParameterByName("pos_center");
+			pos_extent_param_ = effect_->ParameterByName("pos_extent");
+			tc_center_param_ = effect_->ParameterByName("tc_center");
+			tc_extent_param_ = effect_->ParameterByName("tc_extent");
 
-			select_mode_object_id_param_ = technique_->Effect().ParameterByName("object_id");
-			select_mode_tech_ = technique_->Effect().TechniqueByName("SelectModeTech");
+			select_mode_object_id_param_ = effect_->ParameterByName("object_id");
+			select_mode_tech_ = effect_->TechniqueByName("SelectModeTech");
 		}
 	}
 

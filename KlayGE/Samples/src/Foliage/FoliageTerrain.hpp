@@ -64,8 +64,8 @@ namespace KlayGE
 		std::vector<uint4> tile_addr_offset_width_;
 
 		RenderEffectPtr foliage_dist_effect_;
-		RenderTechniquePtr foliage_dist_tech_;
-		RenderTechniquePtr foliage_impostor_dist_tech_;
+		RenderTechnique* foliage_dist_tech_;
+		RenderTechnique* foliage_impostor_dist_tech_;
 		RenderLayoutPtr foliage_dist_rl_;
 
 		uint32_t num_3d_plants_;

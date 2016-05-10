@@ -47,11 +47,12 @@ namespace KlayGE
 
 		output_pins_.emplace_back("out_tex", TexturePtr());
 
-		this->Technique(SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGI"));
+		auto effect = SyncLoadRenderEffect("SSGI.fxml");
+		this->Technique(effect, effect->TechniqueByName("SSGI"));
 
-		proj_param_ = technique_->Effect().ParameterByName("proj");
-		inv_proj_param_ = technique_->Effect().ParameterByName("inv_proj");
-		far_plane_param_ = technique_->Effect().ParameterByName("far_plane");
+		proj_param_ = effect->ParameterByName("proj");
+		inv_proj_param_ = effect->ParameterByName("inv_proj");
+		far_plane_param_ = effect->ParameterByName("far_plane");
 	}
 
 	void SSGIPostProcess::OnRenderBegin()

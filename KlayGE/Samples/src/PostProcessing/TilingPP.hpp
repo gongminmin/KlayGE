@@ -18,7 +18,7 @@ private:
 	KlayGE::PostProcessPtr downsampler_;
 	KlayGE::TexturePtr downsample_tex_;
 
-	KlayGE::RenderEffectParameterPtr tile_per_row_line_ep_;
+	KlayGE::RenderEffectParameter* tile_per_row_line_ep_;
 };
 
 #endif		// _TILINGPP_HPP

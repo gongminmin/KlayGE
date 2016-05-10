@@ -31,7 +31,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SumLumPostProcess : public PostProcess
 	{
 	public:
-		explicit SumLumPostProcess(RenderTechniquePtr const & tech);
+		SumLumPostProcess();
 		virtual ~SumLumPostProcess();
 
 		void InputPin(uint32_t index, TexturePtr const & tex);
@@ -42,8 +42,6 @@ namespace KlayGE
 
 	protected:
 		std::vector<float4> tex_coord_offset_;
-
-		RenderEffectParameterPtr tex_coord_offset_ep_;
 	};
 
 	class KLAYGE_CORE_API SumLumLogPostProcess : public SumLumPostProcess
@@ -77,8 +75,8 @@ namespace KlayGE
 		TexturePtr adapted_textures_[2];
 		bool last_index_;
 
-		RenderEffectParameterPtr last_lum_tex_ep_;
-		RenderEffectParameterPtr frame_delta_ep_;
+		RenderEffectParameter* last_lum_tex_ep_;
+		RenderEffectParameter* frame_delta_ep_;
 	};
 
 	class KLAYGE_CORE_API AdaptedLumPostProcessCS : public PostProcess
@@ -90,7 +88,7 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		RenderEffectParameterPtr frame_delta_ep_;
+		RenderEffectParameter* frame_delta_ep_;
 	};
 
 	class KLAYGE_CORE_API ImageStatPostProcess : public PostProcess

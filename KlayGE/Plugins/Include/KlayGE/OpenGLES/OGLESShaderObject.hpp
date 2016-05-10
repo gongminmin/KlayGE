@@ -27,19 +27,20 @@ namespace KlayGE
 		OGLESShaderObject();
 		~OGLESShaderObject();
 
-		bool AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
-			std::vector<uint8_t> const & native_shader_block);
+		bool AttachNativeShader(ShaderType type, RenderEffect const & effect,
+			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::vector<uint8_t> const & native_shader_block) override;
 
-		virtual bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-			std::vector<uint32_t> const & shader_desc_ids) override;
-		virtual void StreamOut(std::ostream& os, ShaderType type) override;
+		bool StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
+			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids) override;
+		void StreamOut(std::ostream& os, ShaderType type) override;
 
 		void AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids);
+			RenderTechnique const & tech, RenderPass const & pass,
+			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids) override;
 		void AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so);
-		void LinkShaders(RenderEffect const & effect);
-		ShaderObjectPtr Clone(RenderEffect const & effect);
+			RenderTechnique const & tech, RenderPass const & pass, ShaderObjectPtr const & shared_so) override;
+		void LinkShaders(RenderEffect const & effect) override;
+		ShaderObjectPtr Clone(RenderEffect const & effect) override;
 
 		void Bind();
 		void Unbind();
@@ -55,7 +56,7 @@ namespace KlayGE
 		struct parameter_bind_t
 		{
 			std::string combined_sampler_name;
-			RenderEffectParameterPtr param;
+			RenderEffectParameter* param;
 			int location;
 			int shader_type;
 			int tex_sampler_bind_index;
@@ -63,7 +64,7 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameterPtr const & param);
+		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameter* param);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);
@@ -92,11 +93,11 @@ namespace KlayGE
 		std::vector<GLuint> gl_bind_textures_;
 		std::vector<GLuint> gl_bind_cbuffs_;
 
-		std::vector<std::tuple<std::string, RenderEffectParameterPtr, RenderEffectParameterPtr, uint32_t>> tex_sampler_binds_;
+		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> tex_sampler_binds_;
 
 		std::map<std::pair<VertexElementUsage, uint8_t>, GLint> attrib_locs_;
 
-		std::vector<RenderEffectConstantBufferPtr> all_cbuffs_;
+		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
 	};
 
 	typedef std::shared_ptr<OGLESShaderObject> OGLESShaderObjectPtr;

@@ -108,11 +108,11 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect->TechniqueByName("PointTec");
-		v0_ep_ = effect->ParameterByName("v0");
-		color_ep_ = effect->ParameterByName("color");
-		mvp_param_ = effect->ParameterByName("mvp");
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("PointTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
 
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_PointList);
@@ -123,8 +123,8 @@ namespace KlayGE
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
-		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -172,12 +172,12 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
-		v0_ep_ = effect->ParameterByName("v0");
-		v1_ep_ = effect->ParameterByName("v1");
-		color_ep_ = effect->ParameterByName("color");
-		mvp_param_ = effect->ParameterByName("mvp");
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		v1_ep_ = effect_->ParameterByName("v1");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -192,8 +192,8 @@ namespace KlayGE
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
-		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -242,13 +242,13 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
-		v0_ep_ = effect->ParameterByName("v0");
-		v1_ep_ = effect->ParameterByName("v1");
-		v2_ep_ = effect->ParameterByName("v2");
-		color_ep_ = effect->ParameterByName("color");
-		mvp_param_ = effect->ParameterByName("mvp");
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		v1_ep_ = effect_->ParameterByName("v1");
+		v2_ep_ = effect_->ParameterByName("v2");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -263,8 +263,8 @@ namespace KlayGE
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
-		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -314,18 +314,18 @@ namespace KlayGE
 	{		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
-		v0_ep_ = effect->ParameterByName("v0");
-		v1_ep_ = effect->ParameterByName("v1");
-		v2_ep_ = effect->ParameterByName("v2");
-		v3_ep_ = effect->ParameterByName("v3");
-		v4_ep_ = effect->ParameterByName("v4");
-		v5_ep_ = effect->ParameterByName("v5");
-		v6_ep_ = effect->ParameterByName("v6");
-		v7_ep_ = effect->ParameterByName("v7");
-		color_ep_ = effect->ParameterByName("color");
-		mvp_param_ = effect->ParameterByName("mvp");
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		v1_ep_ = effect_->ParameterByName("v1");
+		v2_ep_ = effect_->ParameterByName("v2");
+		v3_ep_ = effect_->ParameterByName("v3");
+		v4_ep_ = effect_->ParameterByName("v4");
+		v5_ep_ = effect_->ParameterByName("v5");
+		v6_ep_ = effect_->ParameterByName("v6");
+		v7_ep_ = effect_->ParameterByName("v7");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -353,8 +353,8 @@ namespace KlayGE
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
-		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -404,18 +404,18 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		RenderEffectPtr effect = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect->TechniqueByName("LineTec");
-		v0_ep_ = effect->ParameterByName("v0");
-		v1_ep_ = effect->ParameterByName("v1");
-		v2_ep_ = effect->ParameterByName("v2");
-		v3_ep_ = effect->ParameterByName("v3");
-		v4_ep_ = effect->ParameterByName("v4");
-		v5_ep_ = effect->ParameterByName("v5");
-		v6_ep_ = effect->ParameterByName("v6");
-		v7_ep_ = effect->ParameterByName("v7");
-		color_ep_ = effect->ParameterByName("color");
-		mvp_param_ = effect->ParameterByName("mvp");
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		v1_ep_ = effect_->ParameterByName("v1");
+		v2_ep_ = effect_->ParameterByName("v2");
+		v3_ep_ = effect_->ParameterByName("v3");
+		v4_ep_ = effect_->ParameterByName("v4");
+		v5_ep_ = effect_->ParameterByName("v5");
+		v6_ep_ = effect_->ParameterByName("v6");
+		v7_ep_ = effect_->ParameterByName("v7");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
@@ -440,8 +440,8 @@ namespace KlayGE
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
-		*(effect->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect->ParameterByName("pos_extent")) = float3(1, 1, 1);
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
@@ -595,8 +595,8 @@ namespace KlayGE
 		model_mat_ = float4x4::Identity();
 		effect_attrs_ |= EA_AlphaTest;
 
-		inv_mv_ep_ = technique_->Effect().ParameterByName("inv_mv");
-		g_buffer_rt0_tex_param_ = deferred_effect_->ParameterByName("g_buffer_rt0_tex");
+		inv_mv_ep_ = effect_->ParameterByName("inv_mv");
+		g_buffer_rt0_tex_param_ = effect_->ParameterByName("g_buffer_rt0_tex");
 
 		normal_tex_ = normal_tex;
 		diffuse_tex_ = diffuse_tex;

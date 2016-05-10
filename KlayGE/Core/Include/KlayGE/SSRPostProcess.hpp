@@ -46,10 +46,10 @@ namespace KlayGE
 		void Apply();
 
 	private:
-		RenderEffectParameterPtr proj_param_;
-		RenderEffectParameterPtr inv_proj_param_;
-		RenderEffectParameterPtr near_q_far_param_;
-		RenderEffectParameterPtr ray_length_param_;
+		RenderEffectParameter* proj_param_;
+		RenderEffectParameter* inv_proj_param_;
+		RenderEffectParameter* near_q_far_param_;
+		RenderEffectParameter* ray_length_param_;
 	};
 }
 

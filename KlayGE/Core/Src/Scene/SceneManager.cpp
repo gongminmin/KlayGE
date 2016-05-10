@@ -345,12 +345,12 @@ namespace KlayGE
 
 			if (add)
 			{
-				RenderTechnique const * obj_tech = obj->GetRenderTechnique().get();
+				RenderTechnique const * obj_tech = obj->GetRenderTechnique();
 				BOOST_ASSERT(obj_tech);
 				bool found = false;
 				for (auto& items : render_queue_)
 				{
-					if (items.first->TechHash() == obj_tech->TechHash())
+					if (items.first == obj_tech)
 					{
 						items.second.push_back(obj);
 						found = true;

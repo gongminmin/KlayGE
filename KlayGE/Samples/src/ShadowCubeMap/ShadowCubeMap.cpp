@@ -313,8 +313,6 @@ namespace
 		}
 
 	private:	
-		RenderEffectPtr effect_;
-
 		bool smooth_mesh_;
 		float tess_factor_;
 	};

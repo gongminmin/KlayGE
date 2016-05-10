@@ -241,14 +241,17 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),
-			SyncLoadRenderEffect("AsciiArtsPP.fxml")->TechniqueByName("AsciiArts"))
+			RenderEffectPtr(), nullptr)
 {
+	auto effect = SyncLoadRenderEffect("AsciiArtsPP.fxml");
+	this->Technique(effect, effect->TechniqueByName("AsciiArts"));
+
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 
 	downsampler_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
 
-	cell_per_row_line_ep_ = technique_->Effect().ParameterByName("cell_per_row_line");
-	*(technique_->Effect().ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromKFont("gkai00mp.kfont")));
+	cell_per_row_line_ep_ = effect->ParameterByName("cell_per_row_line");
+	*(effect->ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromKFont("gkai00mp.kfont")));
 }
 
 void AsciiArtsPostProcess::InputPin(uint32_t index, TexturePtr const & tex)

@@ -108,17 +108,17 @@ namespace KlayGE
 
 	void InfTerrainRenderable::SetStretch(float stretch)
 	{
-		*(technique_->Effect().ParameterByName("stretch")) = stretch;
+		*(effect_->ParameterByName("stretch")) = stretch;
 	}
 
 	void InfTerrainRenderable::SetBaseLevel(float base_level)
 	{
-		*(technique_->Effect().ParameterByName("base_level")) = base_level;
+		*(effect_->ParameterByName("base_level")) = base_level;
 	}
 
 	void InfTerrainRenderable::OffsetY(float y)
 	{
-		*(technique_->Effect().ParameterByName("offset_y")) = y;
+		*(effect_->ParameterByName("offset_y")) = y;
 	}
 
 	void InfTerrainRenderable::OnRenderBegin()
@@ -132,7 +132,7 @@ namespace KlayGE
 		}
 		else
 		{
-			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
+			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
 		}
 
 		float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
@@ -143,8 +143,8 @@ namespace KlayGE
 		float4x4 virtual_view = MathLib::look_at_lh(camera.EyePos(), camera.EyePos() + look_at_vec);
 		float4x4 inv_virtual_view = MathLib::inverse(virtual_view);
 
-		*(technique_->Effect().ParameterByName("inv_virtual_view")) = inv_virtual_view;
-		*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+		*(effect_->ParameterByName("inv_virtual_view")) = inv_virtual_view;
+		*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 	}
 
 
@@ -704,7 +704,7 @@ namespace KlayGE
 			}
 
 			*tile_size_param_ = ring->TileSize();
-			re.Render(*technique_, *rl_);
+			re.Render(*effect_, *technique_, *rl_);
 		}
 	}
 

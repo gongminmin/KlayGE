@@ -97,9 +97,10 @@ namespace KlayGE
 
 		virtual void BeginFrame();
 		virtual void BeginPass();
-		void Render(RenderTechnique const & tech, RenderLayout const & rl);
-		void Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
-		void DispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args, uint32_t offset);
+		void Render(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl);
+		void Dispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz);
+		void DispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
+			GraphicsBufferPtr const & buff_args, uint32_t offset);
 		virtual void EndPass();
 		virtual void EndFrame();
 		virtual void UpdateGPUTimestampsFrequency();
@@ -272,9 +273,9 @@ namespace KlayGE
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) = 0;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) = 0;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) = 0;
-		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) = 0;
-		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
-		virtual void DoDispatchIndirect(RenderTechnique const & tech,
+		virtual void DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl) = 0;
+		virtual void DoDispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) = 0;
+		virtual void DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 			GraphicsBufferPtr const & buff_args, uint32_t offset) = 0;
 		virtual void DoResize(uint32_t width, uint32_t height) = 0;
 		virtual void DoDestroy() = 0;

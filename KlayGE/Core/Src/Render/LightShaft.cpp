@@ -30,15 +30,15 @@ namespace KlayGE
 		input_pins_.emplace_back("color_tex", TexturePtr());
 		input_pins_.emplace_back("depth_tex", TexturePtr());
 
-		params_.emplace_back("light_pos", RenderEffectParameterPtr());
-		params_.emplace_back("light_shaft_clr", RenderEffectParameterPtr());
-		params_.emplace_back("light_intensity", RenderEffectParameterPtr());
-		params_.emplace_back("shadow_intensity", RenderEffectParameterPtr());
-		params_.emplace_back("depth_clip", RenderEffectParameterPtr());
-		params_.emplace_back("cutoff_decay_weight", RenderEffectParameterPtr());
+		params_.emplace_back("light_pos", nullptr);
+		params_.emplace_back("light_shaft_clr", nullptr);
+		params_.emplace_back("light_intensity", nullptr);
+		params_.emplace_back("shadow_intensity", nullptr);
+		params_.emplace_back("depth_clip", nullptr);
+		params_.emplace_back("cutoff_decay_weight", nullptr);
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
-		this->Technique(effect->TechniqueByName("ApplyLightShaft"));
+		this->Technique(effect, effect->TechniqueByName("ApplyLightShaft"));
 
 		for (uint32_t i = 0; i < BLUR_ITERATE_NUM; ++ i)
 		{

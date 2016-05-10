@@ -62,21 +62,21 @@ namespace KlayGE
 
 		vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);	
 
-		RenderEffectPtr vpls_lighting_effect = SyncLoadRenderEffect("VPLsLighting.fxml");
-		vpls_lighting_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingInstanceID");
-		vpls_lighting_no_instance_id_tech_ = vpls_lighting_effect->TechniqueByName("VPLsLightingNoInstanceID");
+		vpls_lighting_effect_ = SyncLoadRenderEffect("VPLsLighting.fxml");
+		vpls_lighting_instance_id_tech_ = vpls_lighting_effect_->TechniqueByName("VPLsLightingInstanceID");
+		vpls_lighting_no_instance_id_tech_ = vpls_lighting_effect_->TechniqueByName("VPLsLightingNoInstanceID");
 
-		vpl_view_param_ = vpls_lighting_effect->ParameterByName("view");
-		vpl_proj_param_ = vpls_lighting_effect->ParameterByName("proj");
-		vpl_depth_near_far_invfar_param_ = vpls_lighting_effect->ParameterByName("depth_near_far_invfar");
-		vpl_light_pos_es_param_ = vpls_lighting_effect->ParameterByName("light_pos_es");
-		vpl_light_color_param_ = vpls_lighting_effect->ParameterByName("light_color");
-		vpl_light_falloff_param_ = vpls_lighting_effect->ParameterByName("light_falloff");
-		vpl_x_coord_param_ = vpls_lighting_effect->ParameterByName("x_coord");
-		vpl_gbuffer_tex_param_ = vpls_lighting_effect->ParameterByName("gbuffer_tex");
-		vpl_depth_tex_param_ = vpls_lighting_effect->ParameterByName("depth_tex");
-		*(vpls_lighting_effect->ParameterByName("vpls_tex")) = vpl_tex_;
-		*(vpls_lighting_effect->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
+		vpl_view_param_ = vpls_lighting_effect_->ParameterByName("view");
+		vpl_proj_param_ = vpls_lighting_effect_->ParameterByName("proj");
+		vpl_depth_near_far_invfar_param_ = vpls_lighting_effect_->ParameterByName("depth_near_far_invfar");
+		vpl_light_pos_es_param_ = vpls_lighting_effect_->ParameterByName("light_pos_es");
+		vpl_light_color_param_ = vpls_lighting_effect_->ParameterByName("light_color");
+		vpl_light_falloff_param_ = vpls_lighting_effect_->ParameterByName("light_falloff");
+		vpl_x_coord_param_ = vpls_lighting_effect_->ParameterByName("x_coord");
+		vpl_gbuffer_tex_param_ = vpls_lighting_effect_->ParameterByName("gbuffer_tex");
+		vpl_depth_tex_param_ = vpls_lighting_effect_->ParameterByName("depth_tex");
+		*(vpls_lighting_effect_->ParameterByName("vpls_tex")) = vpl_tex_;
+		*(vpls_lighting_effect_->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
 		vpl_renderable_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
 			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0);
@@ -207,7 +207,7 @@ namespace KlayGE
 		LightSource::LightType type = light.Type();
 
 		float4 vpl_params(static_cast<float>(VPL_COUNT), 2.0f, 
-			              static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
+						static_cast<float>(MIN_RSM_MIPMAP_SIZE), static_cast<float>(MIN_RSM_MIPMAP_SIZE * MIN_RSM_MIPMAP_SIZE));
 
 		rsm_to_vpls_pps_[type]->SetParam(0, ls_to_es);
 		rsm_to_vpls_pps_[type]->SetParam(1, vpl_params);
@@ -254,14 +254,14 @@ namespace KlayGE
 
 			if (caps.instance_id_support)
 			{
-				re.Render(*vpls_lighting_instance_id_tech_, rl_vpl);
+				re.Render(*vpls_lighting_effect_, *vpls_lighting_instance_id_tech_, rl_vpl);
 			}
 			else
 			{
 				for (int j = 0; j < VPL_COUNT; ++ j)
 				{
 					*vpl_x_coord_param_ = (j + 0.5f) / VPL_COUNT;
-					re.Render(*vpls_lighting_no_instance_id_tech_, rl_vpl);
+					re.Render(*vpls_lighting_effect_, *vpls_lighting_no_instance_id_tech_, rl_vpl);
 				}
 			}
 		}
@@ -273,9 +273,12 @@ namespace KlayGE
 		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
 
 		ssgi_pp_ = MakeSharedPtr<SSGIPostProcess>();
+
+		auto effect_x = SyncLoadRenderEffect("SSGI.fxml");
+		auto effect_y = effect_x->Clone();
 		ssgi_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(4, 1.0f,
-			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurX"),
-			SyncLoadRenderEffect("SSGI.fxml")->TechniqueByName("SSGIBlurY"));
+			effect_x, effect_x->TechniqueByName("SSGIBlurX"),
+			effect_y, effect_y->TechniqueByName("SSGIBlurY"));
 	}
 
 	void SSGILayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)

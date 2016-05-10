@@ -71,15 +71,15 @@ namespace KlayGE
 		gbuffer_to_normal_cone_pp_ =  SyncLoadPostProcess("MultiRes.ppml", "GBuffer2NormalCone");
 		normal_cone_mipmap_pp_ =  SyncLoadPostProcess("MultiRes.ppml", "NormalConeMipMap");
 
-		RenderEffectPtr subsplat_stencil_effect = SyncLoadRenderEffect("MultiRes.fxml");
-		subsplat_stencil_tech_ = subsplat_stencil_effect->TechniqueByName("SetSubsplatStencil");
+		subsplat_stencil_effect_ = SyncLoadRenderEffect("MultiRes.fxml");
+		subsplat_stencil_tech_ = subsplat_stencil_effect_->TechniqueByName("SetSubsplatStencil");
 
-		subsplat_cur_lower_level_param_ = subsplat_stencil_effect->ParameterByName("cur_lower_level");
-		subsplat_is_not_first_last_level_param_ = subsplat_stencil_effect->ParameterByName("is_not_first_last_level");
-		subsplat_depth_deriv_tex_param_ = subsplat_stencil_effect->ParameterByName("depth_deriv_tex");
-		subsplat_normal_cone_tex_param_ = subsplat_stencil_effect->ParameterByName("normal_cone_tex");
-		subsplat_depth_normal_threshold_param_ = subsplat_stencil_effect->ParameterByName("depth_normal_threshold");
-		subsplat_far_plane_param_ = subsplat_stencil_effect->ParameterByName("far_plane");
+		subsplat_cur_lower_level_param_ = subsplat_stencil_effect_->ParameterByName("cur_lower_level");
+		subsplat_is_not_first_last_level_param_ = subsplat_stencil_effect_->ParameterByName("is_not_first_last_level");
+		subsplat_depth_deriv_tex_param_ = subsplat_stencil_effect_->ParameterByName("depth_deriv_tex");
+		subsplat_normal_cone_tex_param_ = subsplat_stencil_effect_->ParameterByName("normal_cone_tex");
+		subsplat_depth_normal_threshold_param_ = subsplat_stencil_effect_->ParameterByName("depth_normal_threshold");
+		subsplat_far_plane_param_ = subsplat_stencil_effect_->ParameterByName("far_plane");
 
 		upsampling_pp_ = SyncLoadPostProcess("MultiRes.ppml", "Upsampling");
 	}
@@ -261,7 +261,7 @@ namespace KlayGE
 			*subsplat_cur_lower_level_param_ = int2(static_cast<int>(i), static_cast<int>(i + 1));
 			*subsplat_is_not_first_last_level_param_ = int2(i > 0, i < multi_res_fbs_.size() - 1);
 
-			re.Render(*subsplat_stencil_tech_, *rl_quad_);
+			re.Render(*subsplat_stencil_effect_, *subsplat_stencil_tech_, *rl_quad_);
 		}
 	}
 

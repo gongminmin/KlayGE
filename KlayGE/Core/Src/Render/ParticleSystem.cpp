@@ -425,6 +425,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
+			effect_ = SyncLoadRenderEffect("Particle.fxml");
+
 			rl_ = rf.MakeRenderLayout();
 			if (gs_support)
 			{
@@ -435,7 +437,7 @@ namespace
 				rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
-				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("ParticleWithGS");
+				simple_forward_tech_ = effect_->TechniqueByName("ParticleWithGS");
 			}
 			else
 			{
@@ -470,7 +472,7 @@ namespace
 					sizeof(indices), indices);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
-				simple_forward_tech_ = SyncLoadRenderEffect("Particle.fxml")->TechniqueByName("Particle");
+				simple_forward_tech_ = effect_->TechniqueByName("Particle");
 			}
 			technique_ = simple_forward_tech_;
 
@@ -479,27 +481,27 @@ namespace
 
 		void SceneDepthTexture(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("depth_tex")) = tex;
+			*(effect_->ParameterByName("depth_tex")) = tex;
 		}
 
 		void ParticleColorFrom(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("particle_color_from")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("particle_color_from")) = float3(clr.r(), clr.g(), clr.b());
 		}
 
 		void ParticleColorTo(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("particle_color_to")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("particle_color_to")) = float3(clr.r(), clr.g(), clr.b());
 		}
 
 		void ParticleAlphaFrom(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("particle_alpha_from_tex")) = tex;
+			*(effect_->ParameterByName("particle_alpha_from_tex")) = tex;
 		}
 
 		void ParticleAlphaTo(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("particle_alpha_to_tex")) = tex;
+			*(effect_->ParameterByName("particle_alpha_to_tex")) = tex;
 		}
 
 		void OnRenderBegin()
@@ -509,18 +511,18 @@ namespace
 			float4x4 const & view = camera.ViewMatrix();
 			float4x4 const & proj = camera.ProjMatrix();
 
-			*(technique_->Effect().ParameterByName("model_view")) = model_mat_ * view;
-			*(technique_->Effect().ParameterByName("proj")) = proj;
-			*(technique_->Effect().ParameterByName("far_plane")) = camera.FarPlane();
+			*(effect_->ParameterByName("model_view")) = model_mat_ * view;
+			*(effect_->ParameterByName("proj")) = proj;
+			*(effect_->ParameterByName("far_plane")) = camera.FarPlane();
 
 			float scale_x = sqrt(model_mat_(0, 0) * model_mat_(0, 0) + model_mat_(0, 1) * model_mat_(0, 1) + model_mat_(0, 2) * model_mat_(0, 2));
 			float scale_y = sqrt(model_mat_(1, 0) * model_mat_(1, 0) + model_mat_(1, 1) * model_mat_(1, 1) + model_mat_(1, 2) * model_mat_(1, 2));
-			*(technique_->Effect().ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
+			*(effect_->ParameterByName("point_radius")) = 0.08f * std::max(scale_x, scale_y);
 
 			auto drl = Context::Instance().DeferredRenderingLayerInstance();
 			if (drl)
 			{
-				*(technique_->Effect().ParameterByName("depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
 			}
 		}
 

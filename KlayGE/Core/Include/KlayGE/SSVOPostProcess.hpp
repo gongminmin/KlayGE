@@ -46,9 +46,9 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		RenderEffectParameterPtr proj_param_;
-		RenderEffectParameterPtr inv_proj_param_;
-		RenderEffectParameterPtr far_plane_param_;
+		RenderEffectParameter* proj_param_;
+		RenderEffectParameter* inv_proj_param_;
+		RenderEffectParameter* far_plane_param_;
 	};
 }
 

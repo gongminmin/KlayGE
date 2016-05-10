@@ -604,7 +604,7 @@ namespace KlayGE
 
 	// ‰÷»æ
 	/////////////////////////////////////////////////////////////////////////////////
-	void D3D11RenderEngine::DoRender(RenderTechnique const & tech, RenderLayout const & rl)
+	void D3D11RenderEngine::DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
@@ -644,7 +644,7 @@ namespace KlayGE
 			}
 
 			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
-			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0)->GetShaderObject().get());
+			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0).GetShaderObject(effect).get());
 			ID3D11InputLayout* layout = d3d_rl.InputLayout(shader.VSSignature(), *shader.VSCode());
 			if (layout != input_layout_cache_)
 			{
@@ -771,26 +771,26 @@ namespace KlayGE
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPass* pass = tech.Pass(i).get();
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 					d3d_imm_ctx_->DrawIndexedInstancedIndirect(
 						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 			else
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					RenderPass* pass = tech.Pass(i).get();
+					auto& pass = tech.Pass(i);
 
-					pass->Bind();
+					pass.Bind(effect);
 					d3d_imm_ctx_->DrawInstancedIndirect(
 						checked_cast<D3D11GraphicsBuffer const *>(indirect_buff)->D3DBuffer(),
 						rl.IndirectArgsOffset());
-					pass->Unbind();
+					pass.Unbind(effect);
 				}
 			}
 		}
@@ -803,11 +803,11 @@ namespace KlayGE
 					uint32_t const num_indices = rl.NumIndices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPass* pass = tech.Pass(i).get();
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 						d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 				else
@@ -815,11 +815,11 @@ namespace KlayGE
 					uint32_t const num_vertices = rl.NumVertices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPass* pass = tech.Pass(i).get();
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 						d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 			}
@@ -830,11 +830,11 @@ namespace KlayGE
 					uint32_t const num_indices = rl.NumIndices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPass* pass = tech.Pass(i).get();
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 						d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 				else
@@ -842,11 +842,11 @@ namespace KlayGE
 					uint32_t const num_vertices = rl.NumVertices();
 					for (uint32_t i = 0; i < num_passes; ++ i)
 					{
-						RenderPass* pass = tech.Pass(i).get();
+						auto& pass = tech.Pass(i);
 
-						pass->Bind();
+						pass.Bind(effect);
 						d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
-						pass->Unbind();
+						pass.Unbind(effect);
 					}
 				}
 			}
@@ -855,32 +855,32 @@ namespace KlayGE
 		num_draws_just_called_ += num_passes;
 	}
 
-	void D3D11RenderEngine::DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void D3D11RenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPass* pass = tech.Pass(i).get();
+			auto& pass = tech.Pass(i);
 
-			pass->Bind();
+			pass.Bind(effect);
 			d3d_imm_ctx_->Dispatch(tgx, tgy, tgz);
-			pass->Unbind();
+			pass.Unbind(effect);
 		}
 
 		num_dispatches_just_called_ += num_passes;
 	}
 
-	void D3D11RenderEngine::DoDispatchIndirect(RenderTechnique const & tech, GraphicsBufferPtr const & buff_args,
-			uint32_t offset)
+	void D3D11RenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
+		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
-			RenderPass* pass = tech.Pass(i).get();
+			auto& pass = tech.Pass(i);
 
-			pass->Bind();
+			pass.Bind(effect);
 			d3d_imm_ctx_->DispatchIndirect(checked_cast<D3D11GraphicsBuffer*>(buff_args.get())->D3DBuffer(), offset);
-			pass->Unbind();
+			pass.Unbind(effect);
 		}
 
 		num_dispatches_just_called_ += num_passes;

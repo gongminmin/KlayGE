@@ -210,12 +210,13 @@ namespace KlayGE
 		RenderLayout const & layout = this->GetRenderLayout();
 		GraphicsBufferPtr const & inst_stream = layout.InstanceStream();
 		RenderTechnique const & tech = *this->GetRenderTechnique();
+		auto const & effect = *this->GetRenderEffect();
 		if (inst_stream)
 		{
 			if (layout.NumInstances() > 0)
 			{
 				this->OnRenderBegin();
-				re.Render(tech, layout);
+				re.Render(effect, tech, layout);
 				this->OnRenderEnd();
 			}
 		}
@@ -224,14 +225,14 @@ namespace KlayGE
 			this->OnRenderBegin();
 			if (instances_.empty())
 			{
-				re.Render(tech, layout);
+				re.Render(effect, tech, layout);
 			}
 			else
 			{
 				for (uint32_t i = 0; i < instances_.size(); ++ i)
 				{
 					this->OnInstanceBegin(i);
-					re.Render(tech, layout);
+					re.Render(effect, tech, layout);
 					this->OnInstanceEnd(i);
 				}
 			}
@@ -354,6 +355,7 @@ namespace KlayGE
 	void Renderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
 	{
 		deferred_effect_ = deferred_effect;
+		effect_ = deferred_effect;
 
 		this->UpdateTechniques();
 
@@ -550,7 +552,7 @@ namespace KlayGE
 		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
 	}
 
-	RenderTechniquePtr const & Renderable::PassTech(PassType type) const
+	RenderTechnique* Renderable::PassTech(PassType type) const
 	{
 		switch (type)
 		{

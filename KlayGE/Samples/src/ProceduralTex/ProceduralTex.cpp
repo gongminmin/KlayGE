@@ -38,19 +38,20 @@ namespace
 		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			technique_ = SyncLoadRenderEffect("ProceduralTex.fxml")->TechniqueByName("ProceduralMarbleTex");
+			effect_ = SyncLoadRenderEffect("ProceduralTex.fxml");
+			technique_ = effect_->TechniqueByName("ProceduralMarbleTex");
 		}
 
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 		}
 
 		void AppTime(float app_time)
 		{
-			*(technique_->Effect().ParameterByName("t")) = app_time / 2.0f;
+			*(effect_->ParameterByName("t")) = app_time / 2.0f;
 		}
 
 		void OnRenderBegin()
@@ -60,33 +61,33 @@ namespace
 
 			float4x4 const & model = float4x4::Identity();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+			*(effect_->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
+			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(effect_->ParameterByName("light_pos")) = light_pos;
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			*(technique_->Effect().ParameterByName("light_color")) = light_color;
+			*(effect_->ParameterByName("light_color")) = light_color;
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
+			*(effect_->ParameterByName("light_falloff")) = light_falloff;
 		}
 
 		void ProceduralType(int type)
 		{
-			technique_ = technique_->Effect().TechniqueByIndex(type);
+			technique_ = effect_->TechniqueByIndex(type);
 		}
 
 		void ProceduralFreq(float freq)
 		{
-			*(technique_->Effect().ParameterByName("freq")) = freq;
+			*(effect_->ParameterByName("freq")) = freq;
 		}
 	};
 

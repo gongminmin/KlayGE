@@ -411,7 +411,7 @@ namespace KlayGE
 			foliage_dist_rl_->NumVertices(num_vertices);
 			re.BindSOBuffers(plant_instance_rls_[plant_type]);
 			plant_primitive_written_query_[plant_type]->Begin();
-			re.Render(*foliage_dist_tech_, *foliage_dist_rl_);
+			re.Render(*foliage_dist_effect_, *foliage_dist_tech_, *foliage_dist_rl_);
 			plant_primitive_written_query_[plant_type]->End();
 		}
 
@@ -441,7 +441,7 @@ namespace KlayGE
 			foliage_dist_rl_->NumVertices(num_vertices);
 			re.BindSOBuffers(plant_impostor_instance_rls_[plant_type]);
 			plant_impostor_primitive_written_query_[plant_type]->Begin();
-			re.Render(*foliage_impostor_dist_tech_, *foliage_dist_rl_);
+			re.Render(*foliage_dist_effect_, *foliage_impostor_dist_tech_, *foliage_dist_rl_);
 			plant_impostor_primitive_written_query_[plant_type]->End();
 		}
 		re.BindSOBuffers(RenderLayoutPtr());
@@ -480,8 +480,8 @@ namespace KlayGE
 		Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
 		float2 eye_pos_xz(camera->EyePos().x(), camera->EyePos().z());
 
-		*(technique_->Effect().ParameterByName("model_mat")) = model_mat_;
-		*(technique_->Effect().ParameterByName("eye_pos_xz")) = eye_pos_xz;
+		*(effect_->ParameterByName("model_mat")) = model_mat_;
+		*(effect_->ParameterByName("eye_pos_xz")) = eye_pos_xz;
 
 		HQTerrainRenderable::Render();
 

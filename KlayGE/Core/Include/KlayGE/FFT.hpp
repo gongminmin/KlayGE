@@ -80,12 +80,12 @@ namespace KlayGE
 		GraphicsBufferPtr tmp_buffer_;
 		
 		RenderEffectPtr effect_;
-		RenderTechniquePtr radix008a_tech_;
-		RenderTechniquePtr radix008a_first_tech_;
-		RenderTechniquePtr radix008a_final_tech_;
-		RenderTechniquePtr buf2tex_tech_;
-		RenderEffectParameterPtr real_tex_ep_;
-		RenderEffectParameterPtr imag_tex_ep_;
+		RenderTechnique* radix008a_tech_;
+		RenderTechnique* radix008a_first_tech_;
+		RenderTechnique* radix008a_final_tech_;
+		RenderTechnique* buf2tex_tech_;
+		RenderEffectParameter* real_tex_ep_;
+		RenderEffectParameter* imag_tex_ep_;
 
 		uint32_t width_, height_;
 		bool forward_;
@@ -109,9 +109,9 @@ namespace KlayGE
 		TexturePtr tmp_imag_tex_[2];
 		
 		RenderEffectPtr effect_;
-		RenderTechniquePtr radix008a_tech_;
-		RenderTechniquePtr radix008a_final_x_tech_;
-		RenderTechniquePtr radix008a_final_y_tech_;
+		RenderTechnique* radix008a_tech_;
+		RenderTechnique* radix008a_final_x_tech_;
+		RenderTechnique* radix008a_final_y_tech_;
 
 		uint32_t width_, height_;
 		bool forward_;

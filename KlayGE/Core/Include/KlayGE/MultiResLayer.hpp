@@ -73,7 +73,8 @@ namespace KlayGE
 		TexturePtr multi_res_pingpong_tex_;
 		std::vector<FrameBufferPtr> multi_res_fbs_;
 
-		RenderTechniquePtr subsplat_stencil_tech_;
+		RenderEffectPtr subsplat_stencil_effect_;
+		RenderTechnique* subsplat_stencil_tech_;
 
 		PostProcessPtr gbuffer_to_depth_derivate_pp_;
 		PostProcessPtr depth_derivate_mipmap_pp_;
@@ -82,12 +83,12 @@ namespace KlayGE
 
 		PostProcessPtr upsampling_pp_;
 
-		RenderEffectParameterPtr subsplat_cur_lower_level_param_;
-		RenderEffectParameterPtr subsplat_is_not_first_last_level_param_;
-		RenderEffectParameterPtr subsplat_depth_deriv_tex_param_;
-		RenderEffectParameterPtr subsplat_normal_cone_tex_param_;
-		RenderEffectParameterPtr subsplat_depth_normal_threshold_param_;
-		RenderEffectParameterPtr subsplat_far_plane_param_;
+		RenderEffectParameter* subsplat_cur_lower_level_param_;
+		RenderEffectParameter* subsplat_is_not_first_last_level_param_;
+		RenderEffectParameter* subsplat_depth_deriv_tex_param_;
+		RenderEffectParameter* subsplat_normal_cone_tex_param_;
+		RenderEffectParameter* subsplat_depth_normal_threshold_param_;
+		RenderEffectParameter* subsplat_far_plane_param_;
 	};
 }
 

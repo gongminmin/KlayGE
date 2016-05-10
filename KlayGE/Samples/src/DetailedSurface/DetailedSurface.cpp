@@ -166,28 +166,29 @@ namespace
 			: StaticMesh(model, name),
 				detail_type_(DT_Parallax), wireframe_(false)
 		{
-			technique_ = SyncLoadRenderEffect("DetailedSurface.fxml")->TechniqueByName("Parallax");
+			effect_ = SyncLoadRenderEffect("DetailedSurface.fxml");
+			technique_ = effect_->TechniqueByName("Parallax");
 
 			tile_bb_[0] = int4(0, 0, 4, 4);
 			tile_bb_[1] = int4(4, 0, 4, 4);
 			tile_bb_[2] = int4(0, 4, 4, 4);
 
-			*(technique_->Effect().ParameterByName("diffuse_tex_bb")) = tile_bb_[0];
-			*(technique_->Effect().ParameterByName("normal_tex_bb")) = tile_bb_[1];
-			*(technique_->Effect().ParameterByName("height_tex_bb")) = tile_bb_[2];
-			*(technique_->Effect().ParameterByName("tex_size")) = int2(512, 512);
-			*(technique_->Effect().ParameterByName("na_length_tex")) = ASyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
+			*(effect_->ParameterByName("diffuse_tex_bb")) = tile_bb_[0];
+			*(effect_->ParameterByName("normal_tex_bb")) = tile_bb_[1];
+			*(effect_->ParameterByName("height_tex_bb")) = tile_bb_[2];
+			*(effect_->ParameterByName("tex_size")) = int2(512, 512);
+			*(effect_->ParameterByName("na_length_tex")) = ASyncLoadTexture("na_length.dds", EAH_GPU_Read | EAH_Immutable);
 		}
 
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			AABBox const & tc_bb = this->TexcoordBound();
-			*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void OnRenderBegin()
@@ -197,40 +198,40 @@ namespace
 
 			float4x4 const & model = float4x4::Identity();
 
-			*(technique_->Effect().ParameterByName("mvp")) = model * camera.ViewProjMatrix();
-			*(technique_->Effect().ParameterByName("model_view")) = model * camera.ViewMatrix();
-			*(technique_->Effect().ParameterByName("world")) = model;
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
-			*(technique_->Effect().ParameterByName("forward_vec")) = camera.ForwardVec();
+			*(effect_->ParameterByName("mvp")) = model * camera.ViewProjMatrix();
+			*(effect_->ParameterByName("model_view")) = model * camera.ViewMatrix();
+			*(effect_->ParameterByName("world")) = model;
+			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
+			*(effect_->ParameterByName("forward_vec")) = camera.ForwardVec();
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 			FrameBufferPtr const & fb = re.CurFrameBuffer();
-			*(technique_->Effect().ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
+			*(effect_->ParameterByName("frame_size")) = int2(fb->Width(), fb->Height());
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(effect_->ParameterByName("light_pos")) = light_pos;
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			*(technique_->Effect().ParameterByName("light_color")) = light_color;
+			*(effect_->ParameterByName("light_color")) = light_color;
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
+			*(effect_->ParameterByName("light_falloff")) = light_falloff;
 		}
 
 		void HeightScale(float scale)
 		{
-			*(technique_->Effect().ParameterByName("height_scale")) = scale;
+			*(effect_->ParameterByName("height_scale")) = scale;
 		}
 
 		void BindJudaTexture(JudaTexturePtr const & juda_tex)
 		{
-			juda_tex->SetParams(technique_);
+			juda_tex->SetParams(*effect_);
 
 			tile_ids_.clear();
 			uint32_t level = juda_tex->TreeLevels() - 1;
@@ -259,7 +260,7 @@ namespace
 
 		void NaLength(bool len)
 		{
-			*(technique_->Effect().ParameterByName("use_na_length")) = len;
+			*(effect_->ParameterByName("use_na_length")) = len;
 		}
 
 		void Wireframe(bool wf)
@@ -308,7 +309,7 @@ namespace
 				tech_name += "Wireframe";
 			}
 
-			technique_ = technique_->Effect().TechniqueByName(tech_name);
+			technique_ = effect_->TechniqueByName(tech_name);
 
 			if ((DT_FlatTessellation == detail_type_) || (DT_SmoothTessellation == detail_type_))
 			{

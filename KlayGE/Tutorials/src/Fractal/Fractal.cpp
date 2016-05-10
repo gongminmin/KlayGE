@@ -39,7 +39,8 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			technique_ = SyncLoadRenderEffect("Fractal.fxml")->TechniqueByName("Mandelbrot");
+			effect_ = SyncLoadRenderEffect("Fractal.fxml");
+			technique_ = effect_->TechniqueByName("Mandelbrot");
 
 			float2 pos[] =
 			{
@@ -69,8 +70,8 @@ namespace
 				clr1.z() = MathLib::srgb_to_linear(clr1.z());
 			}
 
-			*(technique_->Effect().ParameterByName("clr0")) = clr0;
-			*(technique_->Effect().ParameterByName("clr1")) = clr1;
+			*(effect_->ParameterByName("clr0")) = clr0;
+			*(effect_->ParameterByName("clr1")) = clr1;
 		}
 	};
 

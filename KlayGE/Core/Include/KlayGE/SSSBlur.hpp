@@ -58,13 +58,13 @@ namespace KlayGE
 		FrameBufferPtr blur_y_fb_;
 		TexturePtr blur_x_tex_;
 		TexturePtr blur_y_tex_;
-		RenderTechniquePtr copy_tech_;
-		RenderTechniquePtr blur_x_tech_;
-		RenderTechniquePtr blur_y_techs_[3];
-		RenderTechniquePtr accum_techs_[3];
-		RenderEffectParameterPtr src_tex_param_;
-		RenderEffectParameterPtr step_param_;
-		RenderEffectParameterPtr far_plane_param_;
+		RenderTechnique* copy_tech_;
+		RenderTechnique* blur_x_tech_;
+		RenderTechnique* blur_y_techs_[3];
+		RenderTechnique* accum_techs_[3];
+		RenderEffectParameter* src_tex_param_;
+		RenderEffectParameter* step_param_;
+		RenderEffectParameter* far_plane_param_;
 	};
 }
 

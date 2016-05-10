@@ -98,16 +98,14 @@ namespace KlayGE
 	typedef std::shared_ptr<RenderDecal> RenderDecalPtr;
 	class RenderEffect;
 	typedef std::shared_ptr<RenderEffect> RenderEffectPtr;
+	class RenderEffectTemplate;
+	typedef std::shared_ptr<RenderEffectTemplate> RenderEffectTemplatePtr;
 	class RenderTechnique;
-	typedef std::shared_ptr<RenderTechnique> RenderTechniquePtr;
 	class RenderPass;
 	typedef std::shared_ptr<RenderPass> RenderPassPtr;
 	class RenderEffectConstantBuffer;
-	typedef std::shared_ptr<RenderEffectConstantBuffer> RenderEffectConstantBufferPtr;
 	class RenderEffectParameter;
-	typedef std::shared_ptr<RenderEffectParameter> RenderEffectParameterPtr;
 	class RenderVariable;
-	typedef std::shared_ptr<RenderVariable> RenderVariablePtr;
 	class RenderEffectAnnotation;
 	typedef std::shared_ptr<RenderEffectAnnotation> RenderEffectAnnotationPtr;
 	struct RasterizerStateDesc;

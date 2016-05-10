@@ -18,7 +18,7 @@ private:
 	KlayGE::PostProcessPtr downsampler_;
 	KlayGE::TexturePtr downsample_tex_;
 
-	KlayGE::RenderEffectParameterPtr cell_per_row_line_ep_;
+	KlayGE::RenderEffectParameter* cell_per_row_line_ep_;
 };
 
 #endif		// _ASCIIARTSPP_HPP

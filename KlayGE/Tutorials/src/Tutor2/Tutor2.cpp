@@ -175,7 +175,7 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 {
 	KlayGE::RenderEffectPtr effect = KlayGE::SyncLoadRenderEffect("RenderableHelper.fxml");
 
-	this->SetRenderTechnique(effect->TechniqueByName("HelperTec"));
+	this->Technique(effect, effect->TechniqueByName("HelperTec"));
 
 	*(effect->ParameterByName("color")) = KlayGE::float4(1.0f, 0.0f, 0.0f, 1.0f);
 }
@@ -183,8 +183,8 @@ RenderPolygon::RenderPolygon(KlayGE::RenderModelPtr const & model, std::wstring 
 void RenderPolygon::DoBuildMeshInfo()
 {
 	KlayGE::AABBox const & pos_bb = this->PosBound();
-	*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-	*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+	*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+	*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 }
 
 void RenderPolygon::OnRenderBegin()
@@ -192,5 +192,5 @@ void RenderPolygon::OnRenderBegin()
 	KlayGE::App3DFramework const & app = KlayGE::Context::Instance().AppInstance();
 
 	KlayGE::float4x4 view_proj = model_mat_ * app.ActiveCamera().ViewProjMatrix();
-	*(technique_->Effect().ParameterByName("mvp")) = view_proj;
+	*(effect_->ParameterByName("mvp")) = view_proj;
 }

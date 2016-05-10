@@ -45,12 +45,12 @@ namespace
 			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
-			this->Technique(gbuffer_mrt_tech_);
+			this->Technique(effect, gbuffer_mrt_tech_);
 		}
 		
 		void FogColor(Color const & clr)
 		{
-			*(technique_->Effect().ParameterByName("fog_color")) = float3(clr.r(), clr.g(), clr.b());
+			*(effect_->ParameterByName("fog_color")) = float3(clr.r(), clr.g(), clr.b());
 		}
 	};
 

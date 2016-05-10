@@ -372,10 +372,11 @@ namespace KlayGE
 			ID3D12DevicePtr const & device = re.D3DDevice();
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
-			RenderTechniquePtr tech = re.BilinearBlitTech();
-			RenderPassPtr pass = tech->Pass(0);
-			pass->Bind();
-			D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass->GetShaderObject());
+			auto const & effect = *re.BlitEffect();
+			auto const & tech = *re.BilinearBlitTech();
+			auto& pass = tech.Pass(0);
+			pass.Bind(effect);
+			D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
 
 			D3D12RenderLayout& rl = *checked_pointer_cast<D3D12RenderLayout>(re.PostProcessRenderLayout());
 
@@ -426,10 +427,10 @@ namespace KlayGE
 			pso_desc.StreamOutput.NumStrides = 0;
 			pso_desc.StreamOutput.RasterizedStream = 0;
 
-			pso_desc.BlendState = checked_pointer_cast<D3D12BlendStateObject>(pass->GetBlendStateObject())->D3DDesc();
+			pso_desc.BlendState = checked_pointer_cast<D3D12BlendStateObject>(pass.GetBlendStateObject())->D3DDesc();
 			pso_desc.SampleMask = 0xFFFFFFFF;
-			pso_desc.RasterizerState = checked_pointer_cast<D3D12RasterizerStateObject>(pass->GetRasterizerStateObject())->D3DDesc();
-			pso_desc.DepthStencilState = checked_pointer_cast<D3D12DepthStencilStateObject>(pass->GetDepthStencilStateObject())->D3DDesc();
+			pso_desc.RasterizerState = checked_pointer_cast<D3D12RasterizerStateObject>(pass.GetRasterizerStateObject())->D3DDesc();
+			pso_desc.DepthStencilState = checked_pointer_cast<D3D12DepthStencilStateObject>(pass.GetDepthStencilStateObject())->D3DDesc();
 			pso_desc.InputLayout.pInputElementDescs = &rl.InputElementDesc()[0];
 			pso_desc.InputLayout.NumElements = static_cast<UINT>(rl.InputElementDesc().size());
 			pso_desc.IBStripCutValue = (EF_R16UI == rl.IndexStreamFormat())
@@ -556,7 +557,7 @@ namespace KlayGE
 				}
 			}
 
-			pass->Unbind();
+			pass.Unbind(effect);
 		}
 	}
 

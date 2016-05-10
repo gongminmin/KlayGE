@@ -15,8 +15,10 @@ NightVisionPostProcess::NightVisionPostProcess()
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),
-			SyncLoadRenderEffect("NightVisionPP.fxml")->TechniqueByName("NightVision"))
+			RenderEffectPtr(), nullptr)
 {
+	auto effect = SyncLoadRenderEffect("NightVisionPP.fxml");
+	this->Technique(effect, effect->TechniqueByName("NightVision"));
 }
 
 void NightVisionPostProcess::OnRenderBegin()
@@ -27,5 +29,5 @@ void NightVisionPostProcess::OnRenderBegin()
 
 	float2 sc;
 	MathLib::sincos(elapsed_time * 50000.0f, sc.x(), sc.y());
-	*(technique_->Effect().ParameterByName("noise_offset")) = 0.2f * sc;
+	*(effect_->ParameterByName("noise_offset")) = 0.2f * sc;
 }

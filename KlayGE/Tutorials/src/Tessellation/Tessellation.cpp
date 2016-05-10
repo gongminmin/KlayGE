@@ -40,10 +40,10 @@ namespace
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-			RenderEffectPtr effect = SyncLoadRenderEffect("TessellationApp.fxml");
+			effect_ = SyncLoadRenderEffect("TessellationApp.fxml");
 
-			technique_ = effect->TechniqueByName("NoTessellation");
-			tess_factors_param_ = effect->ParameterByName("tess_factors");
+			technique_ = effect_->TechniqueByName("NoTessellation");
+			tess_factors_param_ = effect_->ParameterByName("tess_factors");
 
 			float3 xyzs[] =
 			{
@@ -66,12 +66,12 @@ namespace
 			if (enabled)
 			{
 				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
-				technique_ = technique_->Effect().TechniqueByName("Tessellation");
+				technique_ = effect_->TechniqueByName("Tessellation");
 			}
 			else
 			{
 				rl_->TopologyType(RenderLayout::TT_TriangleList);
-				technique_ = technique_->Effect().TechniqueByName("NoTessellation");
+				technique_ = effect_->TechniqueByName("NoTessellation");
 			}
 		}
 
@@ -81,7 +81,7 @@ namespace
 		}
 
 	private:
-		RenderEffectParameterPtr tess_factors_param_;
+		RenderEffectParameter* tess_factors_param_;
 	};
 
 	class TriangleObject : public SceneObjectHelper

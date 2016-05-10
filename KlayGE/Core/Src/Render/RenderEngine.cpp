@@ -580,20 +580,20 @@ namespace KlayGE
 
 	// 渲染一个vb
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::Render(RenderTechnique const & tech, RenderLayout const & rl)
+	void RenderEngine::Render(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl)
 	{
-		this->DoRender(tech, rl);
+		this->DoRender(effect, tech, rl);
 	}
 
-	void RenderEngine::Dispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
+	void RenderEngine::Dispatch(RenderEffect const & effect, RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		this->DoDispatch(tech, tgx, tgy, tgz);
+		this->DoDispatch(effect, tech, tgx, tgy, tgz);
 	}
 
-	void RenderEngine::DispatchIndirect(RenderTechnique const & tech,
+	void RenderEngine::DispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
-		this->DoDispatchIndirect(tech, buff_args, offset);
+		this->DoDispatchIndirect(effect, tech, buff_args, offset);
 	}
 
 	// 上次Render()所渲染的图元数

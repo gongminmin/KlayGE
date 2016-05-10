@@ -189,7 +189,11 @@ namespace KlayGE
 		void DeallocDSV(uint32_t offset);
 		void DeallocCBVSRVUAV(uint32_t offset);
 
-		RenderTechniquePtr BilinearBlitTech() const
+		RenderEffectPtr const & BlitEffect() const
+		{
+			return blit_effect_;
+		}
+		RenderTechnique* BilinearBlitTech() const
 		{
 			return bilinear_blit_tech_;
 		}
@@ -213,9 +217,10 @@ namespace KlayGE
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;
 		virtual void DoBindSOBuffers(RenderLayoutPtr const & rl) override;
-		virtual void DoRender(RenderTechnique const & tech, RenderLayout const & rl) override;
-		virtual void DoDispatch(RenderTechnique const & tech, uint32_t tgx, uint32_t tgy, uint32_t tgz) override;
-		virtual void DoDispatchIndirect(RenderTechnique const & tech,
+		virtual void DoRender(RenderEffect const & effect, RenderTechnique const & tech, RenderLayout const & rl) override;
+		virtual void DoDispatch(RenderEffect const & effect, RenderTechnique const & tech,
+			uint32_t tgx, uint32_t tgy, uint32_t tgz) override;
+		virtual void DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 			GraphicsBufferPtr const & buff_args, uint32_t offset) override;
 		virtual void DoResize(uint32_t width, uint32_t height) override;
 		virtual void DoDestroy() override;
@@ -232,8 +237,9 @@ namespace KlayGE
 
 		virtual void CheckConfig(RenderSettings& settings) override;
 
-		void UpdateRenderPSO(RenderTechnique const & tech, RenderPassPtr const & pass, RenderLayout const & rl);
-		void UpdateComputePSO(RenderPassPtr const & pass);
+		void UpdateRenderPSO(RenderEffect const & effect, RenderTechnique const & tech,
+			RenderPass const & pass, RenderLayout const & rl);
+		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
 
 	private:
 		enum EngineType
@@ -326,7 +332,7 @@ namespace KlayGE
 		uint64_t res_cmd_fence_val_;
 
 		RenderEffectPtr blit_effect_;
-		RenderTechniquePtr bilinear_blit_tech_;
+		RenderTechnique* bilinear_blit_tech_;
 	};
 }
 

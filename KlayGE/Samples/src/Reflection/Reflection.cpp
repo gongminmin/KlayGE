@@ -47,15 +47,15 @@ namespace
 
 			effect_attrs_ |= EA_Reflection;
 
-			reflection_tech_ = technique_->Effect().TechniqueByName("ReflectReflectionTech");
+			reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
 			reflection_alpha_blend_back_tech_ = reflection_tech_;
 			reflection_alpha_blend_front_tech_ = reflection_tech_;
 
-			special_shading_tech_ = technique_->Effect().TechniqueByName("ReflectSpecialShadingTech");
+			special_shading_tech_ = effect_->TechniqueByName("ReflectSpecialShadingTech");
 			special_shading_alpha_blend_back_tech_ = special_shading_tech_;
 			special_shading_alpha_blend_front_tech_ = special_shading_tech_;
 
-			reflection_tex_param_ = technique_->Effect().ParameterByName("reflection_tex");
+			reflection_tex_param_ = effect_->ParameterByName("reflection_tex");
 		}
 
 		void OnRenderBegin()
@@ -70,13 +70,13 @@ namespace
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
-					*(technique_->Effect().ParameterByName("proj")) = camera.ProjMatrix();
-					*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+					*(effect_->ParameterByName("proj")) = camera.ProjMatrix();
+					*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
 					float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
 					float3 near_q_far(camera.NearPlane() * q, q, camera.FarPlane());
-					*(technique_->Effect().ParameterByName("near_q_far")) = near_q_far;
-					*(technique_->Effect().ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
-					*(technique_->Effect().ParameterByName("inv_view")) = camera.InverseViewMatrix();
+					*(effect_->ParameterByName("near_q_far")) = near_q_far;
+					*(effect_->ParameterByName("ray_length")) = camera.FarPlane() - camera.NearPlane();
+					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
 				break;
 
@@ -87,20 +87,20 @@ namespace
 
 		void FrontReflectionTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("front_side_tex")) = tex;
+			*(effect_->ParameterByName("front_side_tex")) = tex;
 		}
 		void FrontReflectionDepthTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("front_side_depth_tex")) = tex;
+			*(effect_->ParameterByName("front_side_depth_tex")) = tex;
 		}
 
 		void BackReflectionTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("back_side_tex")) = tex;
+			*(effect_->ParameterByName("back_side_tex")) = tex;
 		}
 		void BackReflectionDepthTex(TexturePtr const & tex)
 		{
-			*(technique_->Effect().ParameterByName("back_side_depth_tex")) = tex;
+			*(effect_->ParameterByName("back_side_depth_tex")) = tex;
 		}
 
 		void BackCamera(CameraPtr const & camera)
@@ -110,21 +110,21 @@ namespace
 
 			float4x4 const mv = model_mat_ * view;
 
-			*(technique_->Effect().ParameterByName("back_model_view")) = mv;
-			*(technique_->Effect().ParameterByName("back_mvp")) = mv * proj;
+			*(effect_->ParameterByName("back_model_view")) = mv;
+			*(effect_->ParameterByName("back_mvp")) = mv * proj;
 
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & scene_camera = app.ActiveCamera();
-			*(technique_->Effect().ParameterByName("eye_in_back_camera")) = MathLib::transform_coord(scene_camera.EyePos(), view);
+			*(effect_->ParameterByName("eye_in_back_camera")) = MathLib::transform_coord(scene_camera.EyePos(), view);
 		}
 
 		void MinSamples(int32_t samples)
 		{
-			*(technique_->Effect().ParameterByName("min_samples")) = samples;
+			*(effect_->ParameterByName("min_samples")) = samples;
 		}
 		void MaxSamples(int32_t samples)
 		{
-			*(technique_->Effect().ParameterByName("max_samples")) = samples;
+			*(effect_->ParameterByName("max_samples")) = samples;
 		}
 
 		void EnbleReflection(bool enable)
@@ -141,8 +141,8 @@ namespace
 
 		void SkyBox(TexturePtr const & y_cube, TexturePtr const & c_cube)
 		{
-			*(technique_->Effect().ParameterByName("skybox_tex")) = y_cube;
-			*(technique_->Effect().ParameterByName("skybox_C_tex")) = c_cube;
+			*(effect_->ParameterByName("skybox_tex")) = y_cube;
+			*(effect_->ParameterByName("skybox_C_tex")) = c_cube;
 		}
 
 	private:

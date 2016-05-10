@@ -51,8 +51,9 @@ namespace KlayGE
 			hw_res_ready_ = true;
 		}
 
-		void SetRenderTechnique(RenderTechniquePtr const & tech)
+		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 		{
+			effect_ = effect;
 			technique_ = tech;
 		}
 
@@ -170,8 +171,9 @@ namespace KlayGE
 			return false;
 		}
 
-		void SetRenderTechnique(RenderTechniquePtr const & tech)
+		virtual void Technique(RenderEffectPtr const & effect, RenderTechnique* tech)
 		{
+			effect_ = effect;
 			technique_ = tech;
 		}
 
@@ -466,7 +468,7 @@ namespace KlayGE
 	{
 	public:
 		RenderableLightSourceProxy(RenderModelPtr const & model, std::wstring const & name);
-		virtual void Technique(RenderTechniquePtr const & tech);
+		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
 		virtual void Update();
 
@@ -482,18 +484,18 @@ namespace KlayGE
 	private:
 		LightSourcePtr light_;
 
-		RenderEffectParameterPtr model_param_;
-		RenderEffectParameterPtr light_color_param_;
-		RenderEffectParameterPtr light_is_projective_param_;
-		RenderEffectParameterPtr projective_map_2d_tex_param_;
-		RenderEffectParameterPtr projective_map_cube_tex_param_;
+		RenderEffectParameter* model_param_;
+		RenderEffectParameter* light_color_param_;
+		RenderEffectParameter* light_is_projective_param_;
+		RenderEffectParameter* projective_map_2d_tex_param_;
+		RenderEffectParameter* projective_map_cube_tex_param_;
 	};
 
 	class KLAYGE_CORE_API RenderableCameraProxy : public StaticMesh
 	{
 	public:
 		RenderableCameraProxy(RenderModelPtr const & model, std::wstring const & name);
-		virtual void Technique(RenderTechniquePtr const & tech);
+		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech) override;
 
 		virtual void AttachCamera(CameraPtr const & camera);
 

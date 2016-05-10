@@ -323,7 +323,8 @@ namespace KlayGE
 
 			output_pins_.emplace_back("out_tex", TexturePtr());
 
-			this->Technique(SyncLoadRenderEffect("DeferredRenderingDebug.fxml")->TechniqueByName("ShowPosition"));
+			auto effect = SyncLoadRenderEffect("DeferredRenderingDebug.fxml");
+			this->Technique(effect, effect->TechniqueByName("ShowPosition"));
 		}
 
 		void Display(DeferredRenderingLayer::DisplayType display_type)
@@ -334,43 +335,43 @@ namespace KlayGE
 				break;
 
 			case DeferredRenderingLayer::DT_Position:
-				technique_ = technique_->Effect().TechniqueByName("ShowPosition");
+				technique_ = effect_->TechniqueByName("ShowPosition");
 				break;
 
 			case DeferredRenderingLayer::DT_Normal:
-				technique_ = technique_->Effect().TechniqueByName("ShowNormal");
+				technique_ = effect_->TechniqueByName("ShowNormal");
 				break;
 
 			case DeferredRenderingLayer::DT_Depth:
-				technique_ = technique_->Effect().TechniqueByName("ShowDepth");
+				technique_ = effect_->TechniqueByName("ShowDepth");
 				break;
 
 			case DeferredRenderingLayer::DT_Diffuse:
-				technique_ = technique_->Effect().TechniqueByName("ShowDiffuse");
+				technique_ = effect_->TechniqueByName("ShowDiffuse");
 				break;
 
 			case DeferredRenderingLayer::DT_Specular:
-				technique_ = technique_->Effect().TechniqueByName("ShowSpecular");
+				technique_ = effect_->TechniqueByName("ShowSpecular");
 				break;
 
 			case DeferredRenderingLayer::DT_Shininess:
-				technique_ = technique_->Effect().TechniqueByName("ShowShininess");
+				technique_ = effect_->TechniqueByName("ShowShininess");
 				break;
 
 			case DeferredRenderingLayer::DT_Edge:
 				break;
 
 			case DeferredRenderingLayer::DT_SSVO:
-				technique_ = technique_->Effect().TechniqueByName("ShowSSVO");
+				technique_ = effect_->TechniqueByName("ShowSSVO");
 				break;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 			case DeferredRenderingLayer::DT_DiffuseLighting:
-				technique_ = technique_->Effect().TechniqueByName("ShowDiffuseLighting");
+				technique_ = effect_->TechniqueByName("ShowDiffuseLighting");
 				break;
 
 			case DeferredRenderingLayer::DT_SpecularLighting:
-				technique_ = technique_->Effect().TechniqueByName("ShowSpecularLighting");
+				technique_ = effect_->TechniqueByName("ShowSpecularLighting");
 				break;
 #endif
 
@@ -384,8 +385,8 @@ namespace KlayGE
 			PostProcess::OnRenderBegin();
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-			*(technique_->Effect().ParameterByName("inv_proj")) = camera.InverseProjMatrix();
-			*(technique_->Effect().ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
+			*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+			*(effect_->ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};
 
@@ -698,9 +699,11 @@ namespace KlayGE
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
+		auto effect_x = SyncLoadRenderEffect("SSVO.fxml");
+		auto effect_y = effect_x->Clone();
 		ssvo_blur_pp_ = MakeSharedPtr<BlurPostProcess<SeparableBilateralFilterPostProcess>>(8, 1.0f,
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurX"),
-			SyncLoadRenderEffect("SSVO.fxml")->TechniqueByName("SSVOBlurY"));
+			effect_x, effect_x->TechniqueByName("SSVOBlurX"),
+			effect_y, effect_y->TechniqueByName("SSVOBlurY"));
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
 		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
@@ -1694,7 +1697,7 @@ namespace KlayGE
 					*light_volume_mv_param_ = pvp.inv_proj;
 
 					re.BindFrameBuffer(pvp.curr_merged_shading_fb);
-					re.Render(*technique_no_lighting_, *rl_quad_);
+					re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
 				}
 
 				if (cs_tbdr_)
@@ -2852,7 +2855,7 @@ namespace KlayGE
 			*sm_far_plane_param_ = sm_camera->FarPlane();
 		}
 
-		re.Render(*technique_shadows_[type][shadowing_channel], *light_volume_rl_[type]);
+		re.Render(*dr_effect_, *technique_shadows_[type][shadowing_channel], *light_volume_rl_[type]);
 	}
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -3058,12 +3061,12 @@ namespace KlayGE
 			taa_pp_->InputPin(0, pvp.curr_merged_shading_tex);
 			taa_pp_->InputPin(1, pvp.prev_merged_shading_tex);
 			taa_pp_->Render();
-			re.Render(*technique_copy_depth_, *rl_quad_);
+			re.Render(*dr_effect_, *technique_copy_depth_, *rl_quad_);
 		}
 		else
 		{
 			*shading_tex_param_ = pvp.curr_merged_shading_tex;
-			re.Render(*technique_copy_shading_depth_, *rl_quad_);
+			re.Render(*dr_effect_, *technique_copy_shading_depth_, *rl_quad_);
 		}
 	}
 
@@ -3075,12 +3078,12 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
 			*shading_tex_param_ = pvp.shading_tex;
-			re.Render(*technique_merge_shadings_[g_buffer_index != 0], *rl_quad_);
+			re.Render(*dr_effect_, *technique_merge_shadings_[g_buffer_index != 0], *rl_quad_);
 		}
 
 		re.BindFrameBuffer(pvp.curr_merged_depth_fb);
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		re.Render(*technique_merge_depths_[g_buffer_index != 0], *rl_quad_);
+		re.Render(*dr_effect_, *technique_merge_depths_[g_buffer_index != 0], *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::SetupViewportGI(uint32_t vp, bool ssgi_enable)
@@ -3399,7 +3402,7 @@ namespace KlayGE
 		*light_falloff_range_param_ = float4(light.Falloff().x(), light.Falloff().y(),
 			light.Falloff().z(), 0);
 
-		RenderTechniquePtr tech;
+		RenderTechnique* tech;
 		if (LightSource::LT_Sun == type)
 		{
 			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
@@ -3456,7 +3459,7 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(pvp.shading_fb);
 		}
-		re.Render(*tech, *rl_quad_);
+		re.Render(*dr_effect_, *tech, *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingDirectional(PerViewport const & pvp,
@@ -3494,7 +3497,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer(
 			(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_fb : pvp.shading_fb);
-		re.Render(*technique_lidr_directional_, *rl_quad_);
+		re.Render(*dr_effect_, *technique_lidr_directional_, *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, uint32_t g_buffer_index,
@@ -3610,7 +3613,7 @@ namespace KlayGE
 		*lights_aabb_min_param_ = lights_aabb_min;
 		*lights_aabb_max_param_ = lights_aabb_max;
 
-		RenderTechniquePtr tech;
+		RenderTechnique* tech;
 		if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
 			|| (LightSource::LT_TubeArea == type))
 		{
@@ -3620,7 +3623,7 @@ namespace KlayGE
 		{
 			tech = technique_draw_light_index_spot_;
 		}
-		re.Render(*tech, *rl_quad_);
+		re.Render(*dr_effect_, *tech, *rl_quad_);
 
 		*light_index_tex_param_ = pvp.light_index_tex;
 		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
@@ -3658,7 +3661,7 @@ namespace KlayGE
 			BOOST_ASSERT(false);
 			break;
 		}
-		re.Render(*tech, *rl_quad_);
+		re.Render(*dr_effect_, *tech, *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::CreateDepthMinMaxMap(PerViewport const & pvp)
@@ -3692,7 +3695,7 @@ namespace KlayGE
 
 		re.BindFrameBuffer(pvp.lighting_mask_fb);
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-		re.Render(*technique_tbdr_lighting_mask_, *rl_quad_);
+		re.Render(*dr_effect_, *technique_tbdr_lighting_mask_, *rl_quad_);
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
 
@@ -3937,15 +3940,15 @@ namespace KlayGE
 					+ i * lights_attrib_param_->Stride())->z() = lights_shadowing_channel[i] + 0.5f;
 			}
 
-			lights_type_param_->CBuffer()->Dirty(true);
-			lights_color_param_->CBuffer()->Dirty(true);
-			lights_pos_es_param_->CBuffer()->Dirty(true);
-			lights_dir_es_param_->CBuffer()->Dirty(true);
-			lights_falloff_range_param_->CBuffer()->Dirty(true);
-			lights_attrib_param_->CBuffer()->Dirty(true);
-			lights_radius_extend_param_->CBuffer()->Dirty(true);
-			lights_aabb_min_param_->CBuffer()->Dirty(true);
-			lights_aabb_max_param_->CBuffer()->Dirty(true);
+			lights_type_param_->CBuffer().Dirty(true);
+			lights_color_param_->CBuffer().Dirty(true);
+			lights_pos_es_param_->CBuffer().Dirty(true);
+			lights_dir_es_param_->CBuffer().Dirty(true);
+			lights_falloff_range_param_->CBuffer().Dirty(true);
+			lights_attrib_param_->CBuffer().Dirty(true);
+			lights_radius_extend_param_->CBuffer().Dirty(true);
+			lights_aabb_min_param_->CBuffer().Dirty(true);
+			lights_aabb_max_param_->CBuffer().Dirty(true);
 
 			if (available_lights[0].empty())
 			{
@@ -3959,7 +3962,7 @@ namespace KlayGE
 				*shading_rw_tex_param_ = (Opaque_GBuffer == g_buffer_index)
 					? pvp.curr_merged_shading_tex : pvp.shading_tex;
 			}
-			re.Dispatch(*technique_tbdr_unified_,
+			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
 
 			if (available_lights[0].empty())
@@ -3984,7 +3987,7 @@ namespace KlayGE
 		*depth_to_tiled_depth_in_tex_param_ = in_tex;
 		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
 
-		re.Dispatch(*technique_depth_to_tiled_min_max_, out_tex->Width(0), out_tex->Height(0), 1);
+		re.Dispatch(*dr_effect_, *technique_depth_to_tiled_min_max_, out_tex->Width(0), out_tex->Height(0), 1);
 	}
 #endif
 

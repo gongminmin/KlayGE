@@ -41,18 +41,19 @@ namespace
 		RenderTeapot(RenderModelPtr model, std::wstring const & /*name*/)
 			: StaticMesh(model, L"Teapot")
 		{
-			technique_ = SyncLoadRenderEffect("VideoTexture.fxml")->TechniqueByName("Object");
+			effect_ = SyncLoadRenderEffect("VideoTexture.fxml");
+			technique_ = effect_->TechniqueByName("Object");
 		}
 
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & pos_bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = pos_bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 
 			AABBox const & tc_bb = this->TexcoordBound();
-			*(technique_->Effect().ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
-			*(technique_->Effect().ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
 		void OnRenderBegin()
@@ -60,29 +61,29 @@ namespace
 			App3DFramework const & app = Context::Instance().AppInstance();
 			Camera const & camera = app.ActiveCamera();
 
-			*(technique_->Effect().ParameterByName("mvp")) = camera.ViewProjMatrix();
-			*(technique_->Effect().ParameterByName("mv")) = camera.ViewMatrix();
-			*(technique_->Effect().ParameterByName("eye_pos")) = camera.EyePos();
+			*(effect_->ParameterByName("mvp")) = camera.ViewProjMatrix();
+			*(effect_->ParameterByName("mv")) = camera.ViewMatrix();
+			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
 
 		void VideoTexture(TexturePtr const & video_tex)
 		{
-			*(technique_->Effect().ParameterByName("video_tex")) = video_tex;
+			*(effect_->ParameterByName("video_tex")) = video_tex;
 		}
 
 		void LightPos(float3 const & light_pos)
 		{
-			*(technique_->Effect().ParameterByName("light_pos")) = light_pos;
+			*(effect_->ParameterByName("light_pos")) = light_pos;
 		}
 
 		void LightColor(float3 const & light_color)
 		{
-			*(technique_->Effect().ParameterByName("light_color")) = light_color;
+			*(effect_->ParameterByName("light_color")) = light_color;
 		}
 
 		void LightFalloff(float3 const & light_falloff)
 		{
-			*(technique_->Effect().ParameterByName("light_falloff")) = light_falloff;
+			*(effect_->ParameterByName("light_falloff")) = light_falloff;
 		}
 	};
 

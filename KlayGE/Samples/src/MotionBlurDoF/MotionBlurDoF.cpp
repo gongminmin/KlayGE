@@ -55,14 +55,15 @@ namespace
 		RenderInstanceMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
 			: MotionBlurRenderMesh(model, L"InstancedMesh")
 		{
-			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthInstanced");
+			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
+			technique_ = effect_->TechniqueByName("ColorDepthInstanced");
 		}
 
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
 		}
 
 		void OnRenderBegin()
@@ -75,23 +76,23 @@ namespace
 			float4x4 const & prev_view = camera.PrevViewMatrix();
 			float4x4 const & prev_proj = camera.PrevProjMatrix();
 
-			*(technique_->Effect().ParameterByName("eye_in_world")) = camera.EyePos();
-			*(technique_->Effect().ParameterByName("view")) = curr_view;
-			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
-			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
-			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
-			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
+			*(effect_->ParameterByName("eye_in_world")) = camera.EyePos();
+			*(effect_->ParameterByName("view")) = curr_view;
+			*(effect_->ParameterByName("proj")) = curr_proj;
+			*(effect_->ParameterByName("prev_view")) = prev_view;
+			*(effect_->ParameterByName("prev_proj")) = prev_proj;
+			*(effect_->ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void MotionVecPass(bool motion_vec)
 		{
 			if (motion_vec)
 			{
-				technique_ = technique_->Effect().TechniqueByName("MotionVectorInstanced");
+				technique_ = effect_->TechniqueByName("MotionVectorInstanced");
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("ColorDepthInstanced");
+				technique_ = effect_->TechniqueByName("ColorDepthInstanced");
 			}
 		}
 	};
@@ -110,14 +111,15 @@ namespace
 		RenderNonInstancedMesh(RenderModelPtr const & model, std::wstring const & /*name*/)
 			: MotionBlurRenderMesh(model, L"NonInstancedMesh")
 		{
-			technique_ = SyncLoadRenderEffect("MotionBlurDoF.fxml")->TechniqueByName("ColorDepthNonInstanced");
+			effect_ = SyncLoadRenderEffect("MotionBlurDoF.fxml");
+			technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");
 		}
 
 		virtual void DoBuildMeshInfo() override
 		{
 			AABBox const & bb = this->PosBound();
-			*(technique_->Effect().ParameterByName("pos_center")) = bb.Center();
-			*(technique_->Effect().ParameterByName("pos_extent")) = bb.HalfSize();
+			*(effect_->ParameterByName("pos_center")) = bb.Center();
+			*(effect_->ParameterByName("pos_extent")) = bb.HalfSize();
 		}
 
 		void OnRenderBegin()
@@ -130,12 +132,12 @@ namespace
 			float4x4 const & prev_view = camera.PrevViewMatrix();
 			float4x4 const & prev_proj = camera.PrevProjMatrix();
 
-			*(technique_->Effect().ParameterByName("eye_in_world")) = camera.EyePos();
-			*(technique_->Effect().ParameterByName("view")) = curr_view;
-			*(technique_->Effect().ParameterByName("proj")) = curr_proj;
-			*(technique_->Effect().ParameterByName("prev_view")) = prev_view;
-			*(technique_->Effect().ParameterByName("prev_proj")) = prev_proj;
-			*(technique_->Effect().ParameterByName("elapsed_time")) = app.FrameTime();
+			*(effect_->ParameterByName("eye_in_world")) = camera.EyePos();
+			*(effect_->ParameterByName("view")) = curr_view;
+			*(effect_->ParameterByName("proj")) = curr_proj;
+			*(effect_->ParameterByName("prev_view")) = prev_view;
+			*(effect_->ParameterByName("prev_proj")) = prev_proj;
+			*(effect_->ParameterByName("elapsed_time")) = app.FrameTime();
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -154,21 +156,21 @@ namespace
 			last_model.Col(2, data->last_mat[2]);
 			last_model.Col(3, float4(0, 0, 0, 1));
 
-			*(technique_->Effect().ParameterByName("modelmat")) = model;
-			*(technique_->Effect().ParameterByName("last_modelmat")) = last_model;
+			*(effect_->ParameterByName("modelmat")) = model;
+			*(effect_->ParameterByName("last_modelmat")) = last_model;
 			Color clr(data->clr);
-			*(technique_->Effect().ParameterByName("color")) = float4(clr.b(), clr.g(), clr.r(), clr.a());	// swap b and r
+			*(effect_->ParameterByName("color")) = float4(clr.b(), clr.g(), clr.r(), clr.a());	// swap b and r
 		}
 
 		void MotionVecPass(bool motion_vec)
 		{
 			if (motion_vec)
 			{
-				technique_ = technique_->Effect().TechniqueByName("MotionVectorNonInstanced");
+				technique_ = effect_->TechniqueByName("MotionVectorNonInstanced");
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("ColorDepthNonInstanced");
+				technique_ = effect_->TechniqueByName("ColorDepthNonInstanced");
 			}
 		}
 
@@ -263,7 +265,7 @@ namespace
 			cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
-			this->Technique(effect->TechniqueByName("DepthOfFieldNormalization"));
+			this->Technique(effect, effect->TechniqueByName("DepthOfFieldNormalization"));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			spread_fb_ = rf.MakeFrameBuffer();
@@ -314,11 +316,11 @@ namespace
 			show_blur_factor_ = show;
 			if (show_blur_factor_)
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldBlurFactor");
+				technique_ = effect_->TechniqueByName("DepthOfFieldBlurFactor");
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("DepthOfFieldNormalization");
+				technique_ = effect_->TechniqueByName("DepthOfFieldNormalization");
 			}
 		}
 		bool ShowBlurFactor() const
@@ -379,8 +381,8 @@ namespace
 		{
 			if (show_blur_factor_)
 			{
-				*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
-				*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
+				*(effect_->ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+				*(effect_->ParameterByName("depth_tex")) = this->InputPin(1);
 				PostProcess::Apply();
 			}
 			else
@@ -393,10 +395,10 @@ namespace
 
 				sat_pp_->Apply();
 
-				*(technique_->Effect().ParameterByName("src_tex")) = spread_tex_;
+				*(effect_->ParameterByName("src_tex")) = spread_tex_;
 
 				re.BindFrameBuffer(frame_buffer_);
-				re.Render(*technique_, *normalization_rl_);
+				re.Render(*effect_, *technique_, *normalization_rl_);
 			}
 		}
 
@@ -437,14 +439,14 @@ namespace
 			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			if (gs_support_)
 			{
-				this->Technique(effect->TechniqueByName("SeparateBokeh4"));
+				this->Technique(effect, effect->TechniqueByName("SeparateBokeh4"));
 			}
 			else
 			{
-				this->Technique(effect->TechniqueByName("SeparateBokeh"));
+				this->Technique(effect, effect->TechniqueByName("SeparateBokeh"));
 			}
 
-			*(technique_->Effect().ParameterByName("max_radius")) = static_cast<float>(max_radius_);
+			*(effect->ParameterByName("max_radius")) = static_cast<float>(max_radius_);
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			bokeh_fb_ = rf.MakeFrameBuffer();
@@ -484,11 +486,11 @@ namespace
 				uint32_t const out_width = in_width * 2 + max_radius_ * 4;
 				uint32_t const out_height = in_height;
 
-				*(technique_->Effect().ParameterByName("in_width_height")) = float4(static_cast<float>(in_width),
+				*(effect_->ParameterByName("in_width_height")) = float4(static_cast<float>(in_width),
 					static_cast<float>(in_height), 1.0f / in_width, 1.0f / in_height);
-				*(technique_->Effect().ParameterByName("bokeh_width_height")) = float4(static_cast<float>(out_width),
+				*(effect_->ParameterByName("bokeh_width_height")) = float4(static_cast<float>(out_width),
 					static_cast<float>(out_height), 1.0f / out_width, 1.0f / out_height);
-				*(technique_->Effect().ParameterByName("background_offset")) = static_cast<float>(in_width + max_radius_ * 4);
+				*(effect_->ParameterByName("background_offset")) = static_cast<float>(in_width + max_radius_ * 4);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -601,14 +603,14 @@ namespace
 		void Apply()
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(technique_->Effect().ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
-			*(technique_->Effect().ParameterByName("focus_plane")) = focus_plane_;
-			*(technique_->Effect().ParameterByName("color_tex")) = this->InputPin(0);
-			*(technique_->Effect().ParameterByName("depth_tex")) = this->InputPin(1);
+			*(effect_->ParameterByName("focus_plane_inv_range")) = float2(-focus_plane_ / focus_range_, 1.0f / focus_range_);
+			*(effect_->ParameterByName("focus_plane")) = focus_plane_;
+			*(effect_->ParameterByName("color_tex")) = this->InputPin(0);
+			*(effect_->ParameterByName("depth_tex")) = this->InputPin(1);
 
 			re.BindFrameBuffer(bokeh_fb_);
 			bokeh_fb_->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 1, 0);
-			re.Render(*technique_, *bokeh_rl_);
+			re.Render(*effect_, *technique_, *bokeh_rl_);
 
 			merge_bokeh_pp_->SetParam(3, float2(-focus_plane_ / focus_range_, 1.0f / focus_range_));
 			merge_bokeh_pp_->SetParam(4, focus_plane_);
@@ -643,7 +645,8 @@ namespace
 
 			output_pins_.emplace_back("output", TexturePtr());
 
-			this->Technique(SyncLoadRenderEffect("MotionBlurPP.fxml")->TechniqueByName("MotionBlur"));
+			auto effect = SyncLoadRenderEffect("MotionBlurPP.fxml");
+			this->Technique(effect, effect->TechniqueByName("MotionBlur"));
 		}
 
 		void ShowMotionVector(bool show)
@@ -651,11 +654,11 @@ namespace
 			show_motion_vec_ = show;
 			if (show_motion_vec_)
 			{
-				technique_ = technique_->Effect().TechniqueByName("MotionBlurMotionVec");
+				technique_ = effect_->TechniqueByName("MotionBlurMotionVec");
 			}
 			else
 			{
-				technique_ = technique_->Effect().TechniqueByName("MotionBlur");
+				technique_ = effect_->TechniqueByName("MotionBlur");
 			}
 		}
 		bool ShowMotionVector() const

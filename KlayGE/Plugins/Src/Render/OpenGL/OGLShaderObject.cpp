@@ -71,7 +71,7 @@ namespace
 	class SetOGLShaderParameter<bool>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -87,14 +87,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint32_t>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -110,14 +110,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int32_t>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -133,14 +133,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -156,14 +156,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint2>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -179,14 +179,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint3>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -202,14 +202,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint4>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -225,14 +225,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int2>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -248,14 +248,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int3>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -271,14 +271,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int4>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -294,14 +294,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float2>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -317,14 +317,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float3>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -340,14 +340,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float4>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -363,14 +363,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float4x4>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -386,14 +386,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<bool*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -413,14 +413,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint32_t*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -439,14 +439,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int32_t*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -465,14 +465,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -491,14 +491,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint2*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -517,14 +517,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint3*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -543,14 +543,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<uint4*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -569,14 +569,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int2*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -595,14 +595,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int3*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -621,14 +621,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<int4*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -647,14 +647,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float2*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -673,14 +673,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float3*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -699,14 +699,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float4*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -725,14 +725,14 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
 	class SetOGLShaderParameter<float4x4*>
 	{
 	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameterPtr const & param)
+		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
 			: location_(location), param_(param)
 		{
 		}
@@ -751,7 +751,7 @@ namespace
 
 	private:
 		GLint location_;
-		RenderEffectParameterPtr param_;
+		RenderEffectParameter* param_;
 	};
 
 	template <>
@@ -761,7 +761,7 @@ namespace
 		SetOGLShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>>& samplers,
 					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures,
 					GLint location, GLuint stage,
-					RenderEffectParameterPtr const & tex_param, RenderEffectParameterPtr const & sampler_param)
+					RenderEffectParameter* tex_param, RenderEffectParameter* sampler_param)
 			: samplers_(&samplers), gl_bind_targets_(&gl_bind_targets), gl_bind_textures_(&gl_bind_textures),
 				location_(location), stage_(stage), tex_param_(tex_param), sampler_param_(sampler_param)
 		{
@@ -794,8 +794,8 @@ namespace
 		std::vector<GLuint>* gl_bind_textures_;
 		GLint location_;
 		GLuint stage_;
-		RenderEffectParameterPtr tex_param_;
-		RenderEffectParameterPtr sampler_param_;
+		RenderEffectParameter* tex_param_;
+		RenderEffectParameter* sampler_param_;
 	};
 }
 
@@ -827,7 +827,7 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::vector<uint32_t> const & shader_desc_ids,
+	bool OGLShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids,
 			std::vector<uint8_t> const & native_shader_block)
 	{
 		bool ret = false;
@@ -983,7 +983,7 @@ namespace KlayGE
 	}
 
 	bool OGLShaderObject::StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
-		std::vector<uint32_t> const & shader_desc_ids)
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
 		uint32_t len;
 		res->read(&len, sizeof(len));
@@ -1105,7 +1105,7 @@ namespace KlayGE
 	}
 
 	void OGLShaderObject::AttachShader(ShaderType type, RenderEffect const & effect,
-			RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
+			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
@@ -1337,7 +1337,7 @@ namespace KlayGE
 
 						for (size_t i = 0; i < tex_names.size(); ++ i)
 						{
-							RenderEffectParameterPtr const & param = effect.ParameterByName(tex_names[i]);
+							RenderEffectParameter* param = effect.ParameterByName(tex_names[i]);
 							for (size_t j = 0; j < sampler_names.size(); ++ j)
 							{
 								std::string combined_sampler_name = std::string(tex_names[i]) + "_" + sampler_names[j];
@@ -1623,7 +1623,7 @@ namespace KlayGE
 						GLint location = glGetUniformLocation(glsl_program_, (*(*glsl_res_names_)[type])[pi].c_str());
 						if (location != -1)
 						{
-							RenderEffectParameterPtr const & p = effect.ParameterByName((*(*pnames_)[type])[pi]);
+							RenderEffectParameter* p = effect.ParameterByName((*(*pnames_)[type])[pi]);
 							if (p)
 							{
 								param_binds_.push_back(this->GetBindFunc(location, p));
@@ -1768,7 +1768,7 @@ namespace KlayGE
 			{
 				if (pb.param)
 				{
-					RenderEffectParameterPtr const & p = effect.ParameterByName(pb.param->Name());
+					RenderEffectParameter* p = effect.ParameterByName(pb.param->Name());
 					ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
 				}
 				else
@@ -1820,7 +1820,7 @@ namespace KlayGE
 		}
 	}
 
-	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(GLint location, RenderEffectParameterPtr const & param)
+	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(GLint location, RenderEffectParameter* param)
 	{
 		parameter_bind_t ret;
 		ret.param = param;
@@ -2164,7 +2164,7 @@ namespace KlayGE
 				std::vector<GLchar> ubo_name(length, '\0');
 				glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
 
-				RenderEffectConstantBufferPtr const & cbuff = effect.CBufferByName(&ubo_name[0]);
+				auto cbuff = effect.CBufferByName(&ubo_name[0]);
 				BOOST_ASSERT(cbuff);
 				all_cbuffs_[i] = cbuff;
 
@@ -2212,7 +2212,7 @@ namespace KlayGE
 						*iter = '\0';
 					}
 
-					RenderEffectParameterPtr const & param = effect.ParameterByName(&uniform_name[0]);
+					RenderEffectParameter* param = effect.ParameterByName(&uniform_name[0]);
 					GLint stride;
 					if (param->ArraySize())
 					{
@@ -2229,7 +2229,7 @@ namespace KlayGE
 							stride = uniform_matrix_strides[j];
 						}
 					}
-					param->BindToCBuffer(cbuff, uniform_offsets[j], stride);
+					param->BindToCBuffer(*cbuff, uniform_offsets[j], stride);
 				}
 			}
 		}
