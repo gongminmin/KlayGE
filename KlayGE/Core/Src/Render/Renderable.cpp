@@ -386,6 +386,7 @@ namespace KlayGE
 		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
 		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
 		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");
+		reflection_tex_param_ = nullptr;
 		select_mode_object_id_param_ = deferred_effect_->ParameterByName("object_id");
 	}
 
