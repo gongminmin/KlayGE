@@ -2074,9 +2074,10 @@ namespace KlayGE
 				no_viewport = false;
 #endif
 
-				pvp.g_buffer_enables[Opaque_GBuffer] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
-				pvp.g_buffer_enables[TransparencyBack_GBuffer] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
-				pvp.g_buffer_enables[TransparencyFront_GBuffer] = (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
+				pvp.g_buffer_enables[PTB_Opaque] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
+				pvp.g_buffer_enables[PTB_TransparencyBack] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
+				pvp.g_buffer_enables[PTB_TransparencyFront]
+					= (pvp.attrib & VPAM_NoTransparencyFront) ? false : has_transparency_front_objs;
 
 				pvp.light_visibles.resize(lights_.size());
 				for (uint32_t li = 0; li < lights_.size(); ++ li)
@@ -2092,13 +2093,15 @@ namespace KlayGE
 					}
 				}
 
-				for (uint32_t i = 0; i < Num_GBuffers; ++ i)
+				for (uint32_t i = PTB_Opaque; i < PTB_None; ++ i)
 				{
+					PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
+
 					if (pvp.g_buffer_enables[i])
 					{
-						this->AppendGBufferPassScanCode(vpi, i);
+						this->AppendGBufferPassScanCode(vpi, pass_tb);
 					}
-					if (0 == i)
+					if (PTB_Opaque == i)
 					{
 						if (cascaded_shadow_index_ >= 0)
 						{
@@ -2110,7 +2113,7 @@ namespace KlayGE
 					{
 #ifndef KLAYGE_SHIP
 						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 0, true));
+							ComposePassType(PRT_None, pass_tb, PC_Shadowing), 0, 0, true));
 #endif
 						for (uint32_t li = 0; li < lights_.size(); ++ li)
 						{
@@ -2118,25 +2121,24 @@ namespace KlayGE
 							if (light.Enabled() && (0 == (light.Attrib() & LightSource::LSA_NoShadow))
 								&& pvp.light_visibles[li])
 							{
-								this->AppendShadowingPassScanCode(vpi, i, li);
+								this->AppendShadowingPassScanCode(vpi, pass_tb, li);
 							}
 						}
 #ifndef KLAYGE_SHIP
 						pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-							ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_Shadowing), 0, 1, true));
+							ComposePassType(PRT_None, pass_tb, PC_Shadowing), 0, 1, true));
 #endif
 						if (!(pvp.attrib & VPAM_NoGI))
 						{
 #ifndef KLAYGE_SHIP
 							pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-								ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 0, true));
+								ComposePassType(PRT_None, pass_tb, PC_IndirectLighting), 0, 0, true));
 #endif
 							for (uint32_t li = 0; li < lights_.size(); ++ li)
 							{
 								auto const & light = *lights_[li];
 								if (light.Enabled())
 								{
-									PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(i);
 									if ((LightSource::LT_Spot == light.Type()) && (PTB_Opaque == pass_tb)
 										&& (light.Attrib() & LightSource::LSA_IndirectLighting)
 										&& rsm_fb_ && (illum_ != 1)
@@ -2148,11 +2150,11 @@ namespace KlayGE
 							}
 #ifndef KLAYGE_SHIP
 							pass_scaned_.push_back(this->ComposePassScanCode(vpi,
-								ComposePassType(PRT_None, static_cast<PassTargetBuffer>(i), PC_IndirectLighting), 0, 1, true));
+								ComposePassType(PRT_None, pass_tb, PC_IndirectLighting), 0, 1, true));
 #endif
 						}
 
-						this->AppendShadingPassScanCode(vpi, i);
+						this->AppendShadingPassScanCode(vpi, pass_tb);
 					}
 				}
 
@@ -2205,62 +2207,45 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::AppendGBufferPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
-		PassTargetBuffer ptb = static_cast<PassTargetBuffer>(g_buffer_index);
-
 		if (!depth_texture_support_)
 		{
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, ptb, PC_Depth), 0, 0, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Depth), 0, 0, true));
 #endif
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, ptb, PC_Depth), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Depth), 0, 0, false));
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, ptb, PC_Depth), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Depth), 0, 1, true));
 #endif
 		}
 
 		if (mrt_g_buffer_support_)
 		{
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 0, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_MRT, pass_tb, PC_GBuffer), 0, 0, true));
 #endif
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 0, false));
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 1, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_MRT, pass_tb, PC_GBuffer), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_MRT, pass_tb, PC_GBuffer), 0, 1, false));
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_MRT, ptb, PC_GBuffer), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_MRT, pass_tb, PC_GBuffer), 0, 1, true));
 #endif
 		}
 		else
 		{
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 0, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT0, pass_tb, PC_GBuffer), 0, 0, true));
 #endif
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 0, false));
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 1, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT0, pass_tb, PC_GBuffer), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT0, pass_tb, PC_GBuffer), 0, 1, false));
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT0, ptb, PC_GBuffer), 0, 1, true));
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 0, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT0, pass_tb, PC_GBuffer), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT1, pass_tb, PC_GBuffer), 0, 0, true));
 #endif
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 0, false));
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 1, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT1, pass_tb, PC_GBuffer), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT1, pass_tb, PC_GBuffer), 0, 1, false));
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_RT1, ptb, PC_GBuffer), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_RT1, pass_tb, PC_GBuffer), 0, 1, true));
 #endif
 		}
 	}
@@ -2363,9 +2348,8 @@ namespace KlayGE
 #endif
 	}
 
-	void DeferredRenderingLayer::AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index)
+	void DeferredRenderingLayer::AppendShadowingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb, uint32_t light_index)
 	{
-		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
 			ComposePassType(PRT_None, pass_tb, PC_Shadowing), light_index, 0, false));
 	}
@@ -2375,46 +2359,34 @@ namespace KlayGE
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_IndirectLighting, light_index, 0, false));
 	}
 
-	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
-		PassTargetBuffer const pass_tb = static_cast<PassTargetBuffer>(g_buffer_index);
-
 #ifndef KLAYGE_SHIP
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, true));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, true));
 #endif
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, 
-			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, false));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 0, false));
 #ifndef KLAYGE_SHIP
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 1, true));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Shading), 0, 1, true));
 #endif
 
 		if (has_reflective_objs_)
 		{
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, true));
 #endif
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, false));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 0, false));
 #ifndef KLAYGE_SHIP
-			pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-				ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 1, true));
+			pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_Reflection), 0, 1, true));
 #endif
 		}
 
 #ifndef KLAYGE_SHIP
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, true));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, true));
 #endif
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, false));
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, false));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 0, false));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, false));
 #ifndef KLAYGE_SHIP
-		pass_scaned_.push_back(this->ComposePassScanCode(vp_index,
-			ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, true));
+		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, ComposePassType(PRT_None, pass_tb, PC_SpecialShading), 0, 1, true));
 #endif
 	}
 
@@ -2429,7 +2401,7 @@ namespace KlayGE
 		pvp.depth_near_far_invfar = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 	}
 
-	void DeferredRenderingLayer::GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::GenerateDepthBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -2438,17 +2410,17 @@ namespace KlayGE
 
 		re.BindFrameBuffer(pvp.pre_depth_fb);
 
-		float depth = (TransparencyBack_GBuffer == g_buffer_index) ? 0.0f : 1.0f;
-		int32_t stencil = (Opaque_GBuffer == g_buffer_index) ? 0 : 128;
+		float depth = (PTB_TransparencyBack == pass_tb) ? 0.0f : 1.0f;
+		int32_t stencil = (PTB_Opaque == pass_tb) ? 0 : 128;
 		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0, 0, 0, 0), depth, stencil);
 	}
 
-	void DeferredRenderingLayer::GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::GenerateGBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		if (Opaque_GBuffer == g_buffer_index)
+		if (PTB_Opaque == pass_tb)
 		{
 			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 			pvp.g_buffer->GetViewport()->camera = camera;
@@ -2468,8 +2440,8 @@ namespace KlayGE
 
 		re.BindFrameBuffer(pvp.g_buffer);
 
-		float depth = (TransparencyBack_GBuffer == g_buffer_index) ? 0.0f : 1.0f;
-		int32_t stencil = (Opaque_GBuffer == g_buffer_index) ? 0 : 128;
+		float depth = (PTB_TransparencyBack == pass_tb) ? 0.0f : 1.0f;
+		int32_t stencil = (PTB_Opaque == pass_tb) ? 0 : 128;
 		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0, 0, 0, 0), depth, stencil);
 	}
@@ -2908,7 +2880,7 @@ namespace KlayGE
 		re.Render(*technique_lights_[type], *rl);
 	}
 
-	void DeferredRenderingLayer::UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::UpdateShading(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -2918,7 +2890,7 @@ namespace KlayGE
 		*lighting_tex_param_ = pvp.lighting_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
-		if (Opaque_GBuffer == g_buffer_index)
+		if (PTB_Opaque == pass_tb)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
 			re.Render(*technique_no_lighting_, *rl_quad_);
@@ -2932,16 +2904,16 @@ namespace KlayGE
 	}
 #endif
 
-	void DeferredRenderingLayer::MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::MergeIndirectLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		if ((indirect_lighting_enabled_ && !(pvp.attrib & VPAM_NoGI)) && (illum_ != 1))
 		{
 			pvp.il_layer->CalcIndirectLighting(pvp.prev_merged_shading_tex, pvp.proj_to_prev);
-			this->AccumulateToLightingTex(pvp, g_buffer_index);
+			this->AccumulateToLightingTex(pvp, pass_tb);
 		}
 	}
 
-	void DeferredRenderingLayer::MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::MergeSSVO(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		if (pvp.ssvo_enabled && !(pvp.attrib & VPAM_NoSSVO))
 		{
@@ -2952,13 +2924,12 @@ namespace KlayGE
 
 			ssvo_blur_pp_->InputPin(0, pvp.small_ssvo_tex);
 			ssvo_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
-			ssvo_blur_pp_->OutputPin(0, (Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+			ssvo_blur_pp_->OutputPin(0, (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 			ssvo_blur_pp_->Apply();
 		}
 	}
 
-	void DeferredRenderingLayer::AddTranslucency(uint32_t org_no,
-			PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::AddTranslucency(uint32_t org_no, PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		auto & light = lights_[org_no];
 		LightSource::LightType const type = light->Type();
@@ -2990,8 +2961,7 @@ namespace KlayGE
 				translucency_pp_->InputPin(0, pvp.g_buffer_rt0_tex);
 				translucency_pp_->InputPin(1, pvp.g_buffer_rt1_tex);
 				translucency_pp_->InputPin(2, pvp.g_buffer_depth_tex);
-				translucency_pp_->OutputPin(0,
-					(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+				translucency_pp_->OutputPin(0, (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 
 				Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
 
@@ -3070,20 +3040,20 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::MergeShadingAndDepth(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		if (g_buffer_index != 0)
+		if (pass_tb != PTB_Opaque)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
 			*shading_tex_param_ = pvp.shading_tex;
-			re.Render(*dr_effect_, *technique_merge_shadings_[g_buffer_index != 0], *rl_quad_);
+			re.Render(*dr_effect_, *technique_merge_shadings_[pass_tb != PTB_Opaque], *rl_quad_);
 		}
 
 		re.BindFrameBuffer(pvp.curr_merged_depth_fb);
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		re.Render(*dr_effect_, *technique_merge_depths_[g_buffer_index != 0], *rl_quad_);
+		re.Render(*dr_effect_, *technique_merge_depths_[pass_tb != PTB_Opaque], *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::SetupViewportGI(uint32_t vp, bool ssgi_enable)
@@ -3153,7 +3123,7 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::AccumulateToLightingTex(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		PostProcessPtr const & copy_to_light_buffer_pp = (0 == illum_) ? copy_to_light_buffer_pp_ : copy_to_light_buffer_i_pp_;
 		copy_to_light_buffer_pp->SetParam(0, indirect_scale_ * 256 / VPL_COUNT);
@@ -3164,8 +3134,7 @@ namespace KlayGE
 		copy_to_light_buffer_pp->InputPin(1, pvp.g_buffer_rt0_tex);
 		copy_to_light_buffer_pp->InputPin(2, pvp.g_buffer_rt1_tex);
 		copy_to_light_buffer_pp->InputPin(3, pvp.g_buffer_depth_tex);
-		copy_to_light_buffer_pp->OutputPin(0,
-			(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+		copy_to_light_buffer_pp->OutputPin(0, (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 		copy_to_light_buffer_pp->Apply();
 	}
 
@@ -3197,7 +3166,7 @@ namespace KlayGE
 	}
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		std::vector<uint32_t> directional_lights;
 		std::vector<uint32_t> point_lights_shadow;
@@ -3218,7 +3187,7 @@ namespace KlayGE
 				{
 				case LightSource::LT_Ambient:
 				case LightSource::LT_Sun:
-					this->UpdateLightIndexedLightingAmbientSun(pvp, type, li, g_buffer_index);
+					this->UpdateLightIndexedLightingAmbientSun(pvp, type, li, pass_tb);
 					break;
 
 				case LightSource::LT_Directional:
@@ -3283,7 +3252,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
 				auto iter_beg = directional_lights.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingDirectional(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3294,7 +3263,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
 				auto iter_beg = point_lights_no_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3305,7 +3274,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
 				auto iter_beg = point_lights_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3316,7 +3285,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
 				auto iter_beg = spot_lights_no_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3327,7 +3296,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
 				auto iter_beg = spot_lights_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3338,7 +3307,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_no_shadow.size() - li));
 				auto iter_beg = sphere_area_lights_no_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3349,7 +3318,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_shadow.size() - li));
 				auto iter_beg = sphere_area_lights_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3360,7 +3329,7 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_no_shadow.size() - li));
 				auto iter_beg = tube_area_lights_no_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
@@ -3371,14 +3340,14 @@ namespace KlayGE
 				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_shadow.size() - li));
 				auto iter_beg = tube_area_lights_shadow.begin() + li;
 				auto iter_end = iter_beg + nl;
-				this->UpdateLightIndexedLightingPointSpotArea(pvp, g_buffer_index, iter_beg, iter_end);
+				this->UpdateLightIndexedLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
 				li += nl;
 			}
 		}
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-		int32_t org_no, uint32_t g_buffer_index)
+		int32_t org_no, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -3451,7 +3420,7 @@ namespace KlayGE
 		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
-		if (Opaque_GBuffer == g_buffer_index)
+		if (PTB_Opaque == pass_tb)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
 		}
@@ -3463,7 +3432,7 @@ namespace KlayGE
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingDirectional(PerViewport const & pvp,
-		uint32_t g_buffer_index, std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
+		PassTargetBuffer pass_tb, std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
 	{
 		std::vector<float4> lights_color;
 		std::vector<float4> lights_dir_es;
@@ -3495,12 +3464,11 @@ namespace KlayGE
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(
-			(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_fb : pvp.shading_fb);
+		re.BindFrameBuffer((PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_fb : pvp.shading_fb);
 		re.Render(*dr_effect_, *technique_lidr_directional_, *rl_quad_);
 	}
 
-	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, uint32_t g_buffer_index,
+	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
 		std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -3631,7 +3599,7 @@ namespace KlayGE
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
-		if (Opaque_GBuffer == g_buffer_index)
+		if (PTB_Opaque == pass_tb)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
 		}
@@ -3689,7 +3657,7 @@ namespace KlayGE
 	}
 
 
-	void DeferredRenderingLayer::UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index)
+	void DeferredRenderingLayer::UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
@@ -3952,15 +3920,13 @@ namespace KlayGE
 
 			if (available_lights[0].empty())
 			{
-				*shading_in_tex_param_ = (Opaque_GBuffer == g_buffer_index)
-					? pvp.curr_merged_shading_tex : pvp.shading_tex;
+				*shading_in_tex_param_ = (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex;
 				*shading_rw_tex_param_ = pvp.temp_shading_tex;
 			}
 			else
 			{
 				*shading_in_tex_param_ = TexturePtr();
-				*shading_rw_tex_param_ = (Opaque_GBuffer == g_buffer_index)
-					? pvp.curr_merged_shading_tex : pvp.shading_tex;
+				*shading_rw_tex_param_ = (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex;
 			}
 			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
@@ -3968,8 +3934,7 @@ namespace KlayGE
 			if (available_lights[0].empty())
 			{
 				copy_pp_->InputPin(0, pvp.temp_shading_tex);
-				copy_pp_->OutputPin(0,
-					(Opaque_GBuffer == g_buffer_index) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
+				copy_pp_->OutputPin(0, (PTB_Opaque == pass_tb) ? pvp.curr_merged_shading_tex : pvp.shading_tex);
 				copy_pp_->Apply();
 			}
 		}
