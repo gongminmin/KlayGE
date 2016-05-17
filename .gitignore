@@ -60,9 +60,10 @@ KlayGE/Samples/media/*/MakePyZip.py
 KlayGE/Samples/media/*/*Py.zip
 KlayGE/Tests/media/*
 KlayGE/Tools/media/*/MakePyZip.py
+KlayGE/Tools/media/*/*.dds
 KlayGE/Tools/media/*/*Py.zip
 KlayGE/Tools/src/*/*/obj
-KlayGE/Tools/src/MeshMLViewer/MeshMLViewer/Images
+KlayGE/Tools/src/KGEditor/KGEditor/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png

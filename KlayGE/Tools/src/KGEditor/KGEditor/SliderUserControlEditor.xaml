@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="KGEditor.SliderUserControlEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="32"/>
+        </Grid.ColumnDefinitions>
+        <Slider Name="sl" Minimum="0" Maximum="1" ValueChanged="SliderValueChanged" Grid.Column="0"/>
+        <TextBox Name="tb" Text="{Binding Value}" TextChanged="TextBoxTextChanged" Grid.Column="1"/>
+    </Grid>
+</UserControl>

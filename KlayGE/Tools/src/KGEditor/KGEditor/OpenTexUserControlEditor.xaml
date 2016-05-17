@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="KGEditor.OpenTexUserControlEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="24"/>
+        </Grid.ColumnDefinitions>
+        <TextBox Text="{Binding Value}" Grid.Column="0"/>
+        <Button Click="OpenTexClick" Grid.Column="1">...</Button>
+    </Grid>
+</UserControl>
