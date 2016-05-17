@@ -47,14 +47,6 @@
 
 namespace KlayGE
 {
-	enum
-	{
-		Opaque_GBuffer = 0,
-		TransparencyBack_GBuffer,
-		TransparencyFront_GBuffer,
-		Num_GBuffers
-	};
-
 	enum VPAttribMask
 	{		
 		VPAM_Enabled = 1UL << 0,
@@ -77,7 +69,7 @@ namespace KlayGE
 
 		FrameBufferPtr frame_buffer;
 
-		std::array<bool, Num_GBuffers> g_buffer_enables;
+		std::array<bool, PTB_None> g_buffer_enables;
 
 		FrameBufferPtr pre_depth_fb;
 
@@ -330,7 +322,7 @@ namespace KlayGE
 
 	private:
 		void SetupViewportGI(uint32_t vp, bool ssgi_enable);
-		void AccumulateToLightingTex(PerViewport const & pvp, uint32_t g_buffer_index);
+		void AccumulateToLightingTex(PerViewport const & pvp, PassTargetBuffer pass_tb);
 
 		uint32_t ComposePassScanCode(uint32_t vp_index, PassType pass_type,
 			int32_t org_no, int32_t index_in_pass, bool is_profile) const;
@@ -341,25 +333,25 @@ namespace KlayGE
 		void BuildVisibleSceneObjList(bool& has_opaque_objs, bool& has_transparency_back_objs, bool& has_transparency_front_objs);
 		void BuildPassScanList(bool has_opaque_objs, bool has_transparency_back_objs, bool has_transparency_front_objs);
 		void CheckLightVisible(uint32_t vp_index, uint32_t light_index);
-		void AppendGBufferPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
+		void AppendGBufferPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb);
 		void AppendShadowPassScanCode(uint32_t light_index);
 		void AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index);
-		void AppendShadowingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index, uint32_t light_index);
+		void AppendShadowingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb, uint32_t light_index);
 		void AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
-		void AppendShadingPassScanCode(uint32_t vp_index, uint32_t g_buffer_index);
+		void AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb);
 		void PreparePVP(PerViewport& pvp);
-		void GenerateDepthBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
-		void GenerateGBuffer(PerViewport const & pvp, uint32_t g_buffer_index);
+		void GenerateDepthBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
+		void GenerateGBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void PostGenerateGBuffer(PerViewport const & pvp);
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
-		void MergeIndirectLighting(PerViewport const & pvp, uint32_t g_buffer_index);
-		void MergeSSVO(PerViewport const & pvp, uint32_t g_buffer_index);
-		void MergeShadingAndDepth(PerViewport const & pvp, uint32_t g_buffer_index);
-		void AddTranslucency(uint32_t light_index, PerViewport const & pvp, uint32_t g_buffer_index);
+		void MergeIndirectLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
+		void MergeSSVO(PerViewport const & pvp, PassTargetBuffer pass_tb);
+		void MergeShadingAndDepth(PerViewport const & pvp, PassTargetBuffer pass_tb);
+		void AddTranslucency(uint32_t light_index, PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void AddSSS(PerViewport const & pvp);
 		void AddSSR(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
@@ -367,18 +359,18 @@ namespace KlayGE
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		void UpdateLighting(PerViewport const & pvp, LightSource::LightType type, int32_t org_no);
-		void UpdateShading(PerViewport const & pvp, uint32_t g_buffer_index);
+		void UpdateShading(PerViewport const & pvp, PassTargetBuffer pass_tb);
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		void UpdateLightIndexedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
+		void UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void UpdateLightIndexedLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, uint32_t g_buffer_index);
-		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, uint32_t g_buffer_index,
+			int32_t org_no, PassTargetBuffer pass_tb);
+		void UpdateLightIndexedLightingDirectional(PerViewport const & pvp, PassTargetBuffer pass_tb,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, uint32_t g_buffer_index,
+		void UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
-		void UpdateTileBasedLighting(PerViewport const & pvp, uint32_t g_buffer_index);
+		void UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 
