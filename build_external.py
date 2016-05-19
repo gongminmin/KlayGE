@@ -81,8 +81,8 @@ def build_freetype(build_info, compiler_info):
 def build_7z(build_info, compiler_info):
 	build_a_project("7z", "External/7z", build_info, compiler_info, compiler_info.is_windows)
 
-def setup_DXSDK(build_info, compiler_info):
-	build_a_project("DXSDK", "External/DXSDK", build_info, compiler_info)
+def setup_UniversalDXSDK(build_info, compiler_info):
+	build_a_project("UniversalDXSDK", "External/UniversalDXSDK", build_info, compiler_info)
 
 def setup_OpenALSDK(build_info, compiler_info):
 	build_a_project("OpenALSDK", "External/OpenALSDK", build_info, compiler_info)
@@ -131,8 +131,8 @@ def build_external_libs(build_info):
 			print("\nBuilding freetype...\n")
 			build_freetype(build_info, compiler_info)
 			
-			print("\nSeting up DXSDK...\n")
-			setup_DXSDK(build_info, compiler_info)
+			print("\nSeting up UniversalDXSDK...\n")
+			setup_UniversalDXSDK(build_info, compiler_info)
 
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				print("\nSeting up OpenAL SDK...\n")
