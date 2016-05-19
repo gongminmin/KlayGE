@@ -1505,8 +1505,6 @@ namespace KlayGE
 
 		int vp[4] = { 0, 0, static_cast<int>(width), static_cast<int>(height) };
 
-		float4x4 model_mat = MathLib::transformation<float>(&ei.trf_pivot, nullptr, &ei.trf_scale,
-			&ei.trf_pivot, &ei.trf_rotate, &ei.trf_pos);
 		float4x4 model_mat_wo_scale = MathLib::transformation<float>(&ei.trf_pivot, nullptr, nullptr,
 			&ei.trf_pivot, &ei.trf_rotate, &ei.trf_pos);
 
