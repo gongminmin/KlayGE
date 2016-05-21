@@ -203,8 +203,7 @@ namespace KlayGE
 				: App3DFramework("MtlEditor", native_wnd),
 					fps_controller_(false), tb_controller_(false), is_fps_camera_(false),
 					skinning_(true), curr_frame_(0), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
-					update_selective_buffer_(false), selected_obj_(0),
-					end_command_index_(0)
+					update_selective_buffer_(false), selected_obj_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/MtlEditor");
 	}
@@ -1271,8 +1270,7 @@ namespace KlayGE
 						entity_id = 0;
 					}
 
-					this->ExecuteCommand(MakeSharedPtr<MtlEditorCommandSelectMesh>(this, entity_id));
-					this->UpdateSelectedMesh();
+					update_select_entity_event_(entity_id);
 				}
 			}
 		}
@@ -1347,50 +1345,5 @@ namespace KlayGE
 		{
 			selected_bb_->Visible(false);
 		}
-	}
-
-	uint32_t MtlEditorCore::NumHistroyCmds() const
-	{
-		return static_cast<uint32_t>(command_history_.size());
-	}
-
-	char const * MtlEditorCore::HistroyCmdName(uint32_t index) const
-	{
-		return command_history_[index]->Name();
-	}
-
-	uint32_t MtlEditorCore::EndCmdIndex() const
-	{
-		return end_command_index_;
-	}
-
-	void MtlEditorCore::ExecuteCommand(MtlEditorCommandPtr const & cmd)
-	{
-		cmd->Execute();
-		++ end_command_index_;
-		command_history_.resize(end_command_index_);
-		command_history_.back() = cmd;
-	}
-
-	void MtlEditorCore::Undo()
-	{
-		BOOST_ASSERT(end_command_index_ != 0);
-
-		-- end_command_index_;
-		command_history_[end_command_index_]->Revoke();
-	}
-
-	void MtlEditorCore::Redo()
-	{
-		BOOST_ASSERT(end_command_index_ != command_history_.size());
-
-		command_history_[end_command_index_]->Execute();
-		++ end_command_index_;
-	}
-
-	void MtlEditorCore::ClearHistroy()
-	{
-		command_history_.clear();
-		end_command_index_ = 0;
 	}
 }

@@ -204,6 +204,8 @@ namespace MtlEditor
 			IntPtr wnd = editor_wnd.Handle;
 			core_ = new KlayGE.MtlEditorCoreWrapper(wnd);
 
+			core_.UpdateSelectEntityCallback(this.UpdateSelectEntity);
+
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
 
@@ -252,7 +254,7 @@ namespace MtlEditor
 			core_.OpenModel(file_name);
 			this.FileNameChanged(file_name);
 
-			core_.ClearHistroy();
+			this.ClearHistroy();
 			this.UpdateHistroy();
 
 			save.IsEnabled = true;
@@ -283,8 +285,6 @@ namespace MtlEditor
 
 			frame_ = 0;
 
-			properties.SelectedObject = null;
-
 			MeshItemsSource.items.Clear();
 			MeshItemsSource.items.Add("");
 			uint num_meshes = core_.NumMeshes();
@@ -296,6 +296,7 @@ namespace MtlEditor
 			properties_obj_.meshes = "";
 			this.UpdateMeshProperties(0);
 
+			properties.SelectedObject = null;
 			properties.SelectedObject = properties_obj_;
 		}
 
@@ -334,7 +335,7 @@ namespace MtlEditor
 
 		private void UndoClick(object sender, RoutedEventArgs e)
 		{
-			core_.Undo();
+			this.Undo();
 
 			selected_mesh_id_ = core_.SelectedMesh();
 			this.UpdateMeshProperties(selected_mesh_id_);
@@ -343,7 +344,7 @@ namespace MtlEditor
 
 		private void RedoClick(object sender, RoutedEventArgs e)
 		{
-			core_.Redo();
+			this.Redo();
 
 			selected_mesh_id_ = core_.SelectedMesh();
 			this.UpdateMeshProperties(selected_mesh_id_);
@@ -444,6 +445,7 @@ namespace MtlEditor
 			}
 			core_.MouseDown(e.X, e.Y, buttons);
 		}
+
 		private void EditorMouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
 			uint buttons = 0;
@@ -471,6 +473,7 @@ namespace MtlEditor
 				}
 			}
 		}
+
 		private void EditorMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
 			uint buttons = 0;
@@ -488,9 +491,15 @@ namespace MtlEditor
 			}
 			core_.MouseMove(e.X, e.Y, buttons);
 		}
+
 		private void EditorKeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
 		{
 			core_.KeyPress(e.KeyChar);
+		}
+
+		private void UpdateSelectEntity(uint mesh_id)
+		{
+			this.ExecuteCommand(new MtlEditorCommandSelectMesh(core_, mesh_id));
 		}
 
 		private void UpdateMeshProperties(uint mesh_id)
@@ -557,10 +566,10 @@ namespace MtlEditor
 
 				uint mtl_id = core_.MaterialID(mesh_id);
 
-				properties_obj_.ambient = core_.AmbientMaterial(mtl_id);
-				properties_obj_.diffuse = core_.DiffuseMaterial(mtl_id);
-				properties_obj_.specular = core_.SpecularMaterial(mtl_id);
-				properties_obj_.emit = core_.EmitMaterial(mtl_id);
+				properties_obj_.ambient = FloatPtrToColor(core_.AmbientMaterial(mtl_id));
+				properties_obj_.diffuse = FloatPtrToColor(core_.DiffuseMaterial(mtl_id));
+				properties_obj_.specular = FloatPtrToColor(core_.SpecularMaterial(mtl_id));
+				properties_obj_.emit = FloatPtrToColor(core_.EmitMaterial(mtl_id));
 				properties_obj_.shininess = core_.ShininessMaterial(mtl_id);
 				properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
@@ -614,215 +623,275 @@ namespace MtlEditor
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
 			switch ((PropertyOrders)item.PropertyOrder)
 			{
-			case PropertyOrders.PO_Meshes:
-				{
-					uint mesh_id = 0;
-					for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
+				case PropertyOrders.PO_Meshes:
 					{
-						if (MeshItemsSource.items[(int)mesh_id].DisplayName == (e.NewValue as string))
+						uint mesh_id = 0;
+						for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
 						{
-							break;
+							if (MeshItemsSource.items[(int)mesh_id].DisplayName == (e.NewValue as string))
+							{
+								break;
+							}
+						}
+
+						if (core_.SelectedMesh() != mesh_id)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSelectMesh(core_, mesh_id));
+							this.UpdateMeshProperties(mesh_id);
 						}
 					}
+					break;
 
-					this.UpdateMeshProperties(mesh_id);
-
-					core_.SelectMesh(mesh_id);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Ambient:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.AmbientMaterial(mtl_id, properties_obj_.ambient);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Diffuse:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.DiffuseMaterial(mtl_id, properties_obj_.diffuse);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Specular:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.SpecularMaterial(mtl_id, properties_obj_.specular);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Shininess:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.ShininessMaterial(mtl_id, properties_obj_.shininess);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Emit:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.EmitMaterial(mtl_id, properties_obj_.emit);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_Opacity:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.OpacityMaterial(mtl_id, properties_obj_.opacity);
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_DiffuseTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.DiffuseTexture(mtl_id, this.RelativePath(properties_obj_.diffuse_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_SpecularTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.SpecularTexture(mtl_id, this.RelativePath(properties_obj_.specular_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_ShininessTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.ShininessTexture(mtl_id, this.RelativePath(properties_obj_.shininess_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_NormalTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.NormalTexture(mtl_id, this.RelativePath(properties_obj_.normal_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_HeightTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.HeightTexture(mtl_id, this.RelativePath(properties_obj_.height_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_EmitTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.EmitTexture(mtl_id, this.RelativePath(properties_obj_.emit_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_OpacityTex:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.OpacityTexture(mtl_id, this.RelativePath(properties_obj_.opacity_tex));
-					this.UpdateHistroy();
-				}
-				break;
-
-			case PropertyOrders.PO_DetailMode:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mode = 0;
-					for (; mode < DetailModeItemsSource.items.Count; ++ mode)
+				case PropertyOrders.PO_Ambient:
+					if (selected_mesh_id_ > 0)
 					{
-						if (DetailModeItemsSource.items[(int)mode].DisplayName == (e.NewValue as string))
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						float[] ambient = ColorToFloatPtr(properties_obj_.ambient);
+						float[] old_ambient = core_.AmbientMaterial(mtl_id);
+						if (!this.FloatEqual(old_ambient[0], ambient[0]) || !this.FloatEqual(old_ambient[1], ambient[1])
+							|| !this.FloatEqual(old_ambient[2], ambient[2]))
 						{
-							break;
+							this.ExecuteCommand(new MtlEditorCommandSetAmbientMaterial(core_, mtl_id, ambient));
 						}
 					}
+					break;
 
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.DetailMode(mtl_id, mode);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_Diffuse:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						float[] diffuse = ColorToFloatPtr(properties_obj_.diffuse);
+						float[] old_diffuse = core_.DiffuseMaterial(mtl_id);
+						if (!this.FloatEqual(old_diffuse[0], diffuse[0]) || !this.FloatEqual(old_diffuse[1], diffuse[1])
+							|| !this.FloatEqual(old_diffuse[2], diffuse[2]))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetDiffuseMaterial(core_, mtl_id, diffuse));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_HeightOffset:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.HeightOffset(mtl_id, properties_obj_.height_offset);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_Specular:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						float[] specular = ColorToFloatPtr(properties_obj_.specular);
+						float[] old_specular = core_.SpecularMaterial(mtl_id);
+						if (!this.FloatEqual(old_specular[0], specular[0]) || !this.FloatEqual(old_specular[1], specular[1])
+							|| !this.FloatEqual(old_specular[2], specular[2]))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetSpecularMaterial(core_, mtl_id, specular));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_HeightScale:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.HeightScale(mtl_id, properties_obj_.height_scale);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_Shininess:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (core_.ShininessMaterial(mtl_id) != properties_obj_.shininess)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetShininessMaterial(core_, mtl_id, properties_obj_.shininess));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_EdgeTessHint:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.EdgeTessHint(mtl_id, properties_obj_.edge_tess_hint);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_Emit:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						float[] emit = ColorToFloatPtr(properties_obj_.emit);
+						float[] old_emit = core_.EmitMaterial(mtl_id);
+						if (!this.FloatEqual(old_emit[0], emit[0]) || !this.FloatEqual(old_emit[1], emit[1])
+							|| !this.FloatEqual(old_emit[2], emit[2]))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetEmitMaterial(core_, mtl_id, emit));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_InsideTessHint:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.InsideTessHint(mtl_id, properties_obj_.inside_tess_hint);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_Opacity:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.OpacityMaterial(mtl_id), properties_obj_.opacity))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetOpacityMaterial(core_, mtl_id, properties_obj_.opacity));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_MinTess:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.MinTess(mtl_id, properties_obj_.min_tess);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_DiffuseTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string diffuse_tex = RelativePath(properties_obj_.diffuse_tex);
+						if (core_.DiffuseTexture(mtl_id) != diffuse_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetDiffuseTexture(core_, mtl_id, diffuse_tex));
+						}
+					}
+					break;
 
-			case PropertyOrders.PO_MaxTess:
-				if (selected_mesh_id_ > 0)
-				{
-					uint mtl_id = core_.MaterialID(selected_mesh_id_);
-					core_.MaxTess(mtl_id, properties_obj_.max_tess);
-					this.UpdateHistroy();
-				}
-				break;
+				case PropertyOrders.PO_SpecularTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string specular_tex = RelativePath(properties_obj_.specular_tex);
+						if (core_.SpecularTexture(mtl_id) != specular_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetSpecularTexture(core_, mtl_id, specular_tex));
+						}
+					}
+					break;
 
-			default:
-				break;
+				case PropertyOrders.PO_ShininessTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string shininess_tex = RelativePath(properties_obj_.shininess_tex);
+						if (core_.ShininessTexture(mtl_id) != shininess_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetShininessTexture(core_, mtl_id, shininess_tex));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_NormalTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string normal_tex = RelativePath(properties_obj_.normal_tex);
+						if (core_.NormalTexture(mtl_id) != normal_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetNormalTexture(core_, mtl_id, normal_tex));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_HeightTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string height_tex = RelativePath(properties_obj_.height_tex);
+						if (core_.HeightTexture(mtl_id) != height_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetHeightTexture(core_, mtl_id, height_tex));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_EmitTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string emit_tex = RelativePath(properties_obj_.emit_tex);
+						if (core_.EmitTexture(mtl_id) != emit_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetEmitTexture(core_, mtl_id, emit_tex));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_OpacityTex:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						string opacity_tex = RelativePath(properties_obj_.opacity_tex);
+						if (core_.OpacityTexture(mtl_id) != opacity_tex)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetOpacityTexture(core_, mtl_id, opacity_tex));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_DetailMode:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mode = 0;
+						for (; mode < DetailModeItemsSource.items.Count; ++ mode)
+						{
+							if (DetailModeItemsSource.items[(int)mode].DisplayName == (e.NewValue as string))
+							{
+								break;
+							}
+						}
+
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (core_.DetailMode(mtl_id) != mode)
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetDetailMode(core_, mtl_id, mode));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_HeightOffset:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.HeightOffset(mtl_id), properties_obj_.height_offset))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetHeightOffset(core_, mtl_id, properties_obj_.height_offset));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_HeightScale:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.HeightScale(mtl_id), properties_obj_.height_scale))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetHeightScale(core_, mtl_id, properties_obj_.height_scale));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_EdgeTessHint:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.EdgeTessHint(mtl_id), properties_obj_.edge_tess_hint))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetEdgeTessHint(core_, mtl_id, properties_obj_.edge_tess_hint));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_InsideTessHint:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.InsideTessHint(mtl_id), properties_obj_.inside_tess_hint))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetInsideTessHint(core_, mtl_id, properties_obj_.inside_tess_hint));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_MinTess:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.MinTess(mtl_id), properties_obj_.min_tess))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetMinTess(core_, mtl_id, properties_obj_.min_tess));
+						}
+					}
+					break;
+
+				case PropertyOrders.PO_MaxTess:
+					if (selected_mesh_id_ > 0)
+					{
+						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						if (!this.FloatEqual(core_.MaxTess(mtl_id), properties_obj_.max_tess))
+						{
+							this.ExecuteCommand(new MtlEditorCommandSetMaxTess(core_, mtl_id, properties_obj_.max_tess));
+						}
+					}
+					break;
+
+				default:
+					break;
 			}
 		}
 
@@ -855,8 +924,51 @@ namespace MtlEditor
 
 		private void UpdateHistroy()
 		{
-			undo.IsEnabled = (core_.EndCmdIndex() > 0);
-			redo.IsEnabled = (core_.EndCmdIndex() < core_.NumHistroyCmds());
+			undo.IsEnabled = (end_command_index_ > 0);
+			redo.IsEnabled = (end_command_index_ < command_history_.Count);
+		}
+
+		string HistroyCmdName(int index)
+		{
+			return command_history_[index].Name();
+		}
+
+		private object ExecuteCommand(MtlEditorCommand cmd)
+		{
+			object ret = cmd.Execute();
+			int count = command_history_.Count - end_command_index_;
+			if (count > 0)
+			{
+				command_history_.RemoveRange(end_command_index_, count);
+			}
+			++ end_command_index_;
+			command_history_.Add(cmd);
+
+			this.UpdateHistroy();
+
+			return ret;
+		}
+
+		private void Undo()
+		{
+			//Assert(end_command_index_ != 0);
+
+			-- end_command_index_;
+			command_history_[end_command_index_].Revoke();
+		}
+
+		private void Redo()
+		{
+			//Assert(end_command_index_ != command_history_.Count);
+
+			command_history_[end_command_index_].Execute();
+			++ end_command_index_;
+		}
+
+		private void ClearHistroy()
+		{
+			command_history_.Clear();
+			end_command_index_ = 0;
 		}
 
 		private void EditorBGDragEnter(object sender, System.Windows.DragEventArgs e)
@@ -876,6 +988,63 @@ namespace MtlEditor
 			}
 		}
 
+		float LinearToSRGB(float linear)
+		{
+			if (linear < 0.0031308f)
+			{
+				return 12.92f * linear;
+			}
+			else
+			{
+				const float ALPHA = 0.055f;
+				return (1 + ALPHA) * (float)Math.Pow(linear, 1 / 2.4f) - ALPHA;
+			}
+		}
+
+		float SRGBToLinear(float srgb)
+		{
+			if (srgb < 0.04045f)
+			{
+				return srgb / 12.92f;
+			}
+			else
+			{
+				const float ALPHA = 0.055f;
+				return (float)Math.Pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
+			}
+		}
+
+		private Color FloatPtrToColor(float[] clr)
+		{
+			float[] temp = new float[3];
+			for (int i = 0; i < 3; ++i)
+			{
+				temp[i] = LinearToSRGB(clr[i]);
+			}
+			return Color.FromArgb(255,
+				(byte)(Math.Max(Math.Min((int)(temp[0] * 255 + 0.5f), 255), 0)),
+				(byte)(Math.Max(Math.Min((int)(temp[1] * 255 + 0.5f), 255), 0)),
+				(byte)(Math.Max(Math.Min((int)(temp[2] * 255 + 0.5f), 255), 0)));
+		}
+
+		private float[] ColorToFloatPtr(Color clr)
+		{
+			float[] ret = new float[3];
+			ret[0] = clr.R / 255.0f;
+			ret[1] = clr.G / 255.0f;
+			ret[2] = clr.B / 255.0f;
+			for (int i = 0; i < 3; ++i)
+			{
+				ret[i] = SRGBToLinear(ret[i]);
+			}
+			return ret;
+		}
+
+		private bool FloatEqual(float a, float b)
+		{
+			return Math.Abs(a - b) < 1e-6f;
+		}
+
 		private KlayGE.MtlEditorCoreWrapper core_;
 		private DateTime last_time_;
 		private double frame_;
@@ -887,6 +1056,9 @@ namespace MtlEditor
 		private bool fps_camera_ = false;
 		private bool line_mode_ = false;
 		private bool play_ = false;
+
+		private List<MtlEditorCommand> command_history_ = new List<MtlEditorCommand>();
+		private int end_command_index_ = 0;
 	}
 
 	public class MeshItemsSource : IItemsSource

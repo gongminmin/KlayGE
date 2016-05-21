@@ -18,6 +18,7 @@ namespace KlayGE
 		void SaveModel(System::String^ name);
 
 		unsigned int NumFrames();
+		float CurrFrame();
 		void CurrFrame(float frame);
 		float ModelFrameRate();
 
@@ -39,11 +40,11 @@ namespace KlayGE
 		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index);
 
 		uint32_t MaterialID(uint32_t mesh_id);
-		System::Windows::Media::Color AmbientMaterial(uint32_t mtl_id);
-		System::Windows::Media::Color DiffuseMaterial(uint32_t mtl_id);
-		System::Windows::Media::Color SpecularMaterial(uint32_t mtl_id);
+		array<float>^ AmbientMaterial(uint32_t mtl_id);
+		array<float>^ DiffuseMaterial(uint32_t mtl_id);
+		array<float>^ SpecularMaterial(uint32_t mtl_id);
 		float ShininessMaterial(uint32_t mtl_id);
-		System::Windows::Media::Color EmitMaterial(uint32_t mtl_id);
+		array<float>^ EmitMaterial(uint32_t mtl_id);
 		float OpacityMaterial(uint32_t mtl_id);
 		System::String^ DiffuseTexture(uint32_t mtl_id);
 		System::String^ SpecularTexture(uint32_t mtl_id);
@@ -60,15 +61,11 @@ namespace KlayGE
 		float MinTess(uint32_t mtl_id);
 		float MaxTess(uint32_t mtl_id);
 
-		uint32_t NumHistroyCmds();
-		System::String^ HistroyCmdName(uint32_t index);
-		uint32_t EndCmdIndex();
-
-		void AmbientMaterial(uint32_t mtl_id, System::Windows::Media::Color value);
-		void DiffuseMaterial(uint32_t mtl_id, System::Windows::Media::Color value);
-		void SpecularMaterial(uint32_t mtl_id, System::Windows::Media::Color value);
+		void AmbientMaterial(uint32_t mtl_id, array<float>^ value);
+		void DiffuseMaterial(uint32_t mtl_id, array<float>^ value);
+		void SpecularMaterial(uint32_t mtl_id, array<float>^ value);
 		void ShininessMaterial(uint32_t mtl_id, float value);
-		void EmitMaterial(uint32_t mtl_id, System::Windows::Media::Color value);
+		void EmitMaterial(uint32_t mtl_id, array<float>^ value);
 		void OpacityMaterial(uint32_t mtl_id, float value);
 		void DiffuseTexture(uint32_t mtl_id, System::String^ name);
 		void SpecularTexture(uint32_t mtl_id, System::String^ name);
@@ -88,12 +85,15 @@ namespace KlayGE
 		uint32_t SelectedMesh();
 		void SelectMesh(uint32_t mesh_id);
 
-		void Undo();
-		void Redo();
-		void ClearHistroy();
+	public:
+		delegate void UpdateSelectEntityDelegate(uint32_t obj_id);
+
+		void UpdateSelectEntityCallback(UpdateSelectEntityDelegate^ callback);
 
 	private:
 		MtlEditorCore* core_;
+
+		UpdateSelectEntityDelegate^ update_select_entity_delegate_;
 	};
 }
 

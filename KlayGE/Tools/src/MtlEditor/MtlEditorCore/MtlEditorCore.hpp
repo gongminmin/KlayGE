@@ -15,8 +15,6 @@
 #define KLAYGE_MTL_EDITOR_CORE_API KLAYGE_SYMBOL_IMPORT
 #endif
 
-#include "Commands.hpp"
-
 namespace KlayGE
 {
 	class KLAYGE_MTL_EDITOR_CORE_API MtlEditorCore : public App3DFramework
@@ -61,9 +59,6 @@ namespace KlayGE
 		float InsideTessHint(uint32_t mtl_id) const;
 		float MinTess(uint32_t mtl_id) const;
 		float MaxTess(uint32_t mtl_id) const;
-		uint32_t NumHistroyCmds() const;
-		char const * HistroyCmdName(uint32_t index) const;
-		uint32_t EndCmdIndex() const;
 
 		void CurrFrame(float frame);
 		void SelectMesh(uint32_t mesh_id);
@@ -97,10 +92,14 @@ namespace KlayGE
 		void MouseDown(int x, int y, uint32_t button);
 		void KeyPress(int key);
 
-		void ExecuteCommand(MtlEditorCommandPtr const & cmd);
-		void Undo();
-		void Redo();
-		void ClearHistroy();
+	// Callbacks
+	public:
+		typedef void(__stdcall *UpdateSelectEntityEvent)(uint32_t obj_id);
+
+		void UpdateSelectEntityCallback(UpdateSelectEntityEvent callback)
+		{
+			update_select_entity_event_ = callback;
+		}
 
 	private:
 		virtual void OnCreate() override;
@@ -143,8 +142,7 @@ namespace KlayGE
 		uint32_t selected_obj_;
 		SceneObjectPtr selected_bb_;
 
-		std::vector<MtlEditorCommandPtr> command_history_;
-		uint32_t end_command_index_;
+		UpdateSelectEntityEvent update_select_entity_event_;
 	};
 }
 

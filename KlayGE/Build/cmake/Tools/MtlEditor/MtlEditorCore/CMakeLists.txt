@@ -1,11 +1,9 @@
 SET(SOURCE_FILES 
-	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Commands.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/MtlEditorCore.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Model.cpp
 )
 
 SET(HEADER_FILES 
-	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Commands.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/MtlEditorCore.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditorCore/Model.hpp
 )
