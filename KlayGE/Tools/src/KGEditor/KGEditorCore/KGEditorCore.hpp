@@ -225,9 +225,6 @@ namespace KlayGE
 
 		AABBox scene_aabb_;
 
-		std::vector<KGEditorCommandPtr> command_history_;
-		uint32_t end_command_index_;
-
 		UpdatePropertyEvent update_property_event_;
 		UpdateSelectEntityEvent update_select_entity_event_;
 		UpdateAddEntityEvent update_add_entity_event_;

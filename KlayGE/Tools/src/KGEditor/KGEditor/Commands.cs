@@ -43,6 +43,7 @@ namespace KGEditor
 		{
 			core_ = core;
 			code_ = code;
+			cmd_name_ = cmd_name;
 		}
 
 		public string Name()

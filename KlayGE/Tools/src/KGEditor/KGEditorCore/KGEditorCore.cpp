@@ -526,7 +526,7 @@ namespace KlayGE
 					ctrl_mode_(CM_EntitySelection), selected_axis_(SA_None),
 					mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
 					tb_controller_(false), update_selective_buffer_(false),
-					last_entity_id_(0), last_backup_entity_id_(0), end_command_index_(0)
+					last_entity_id_(0), last_backup_entity_id_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/KGEditor");
 	}
@@ -648,9 +648,6 @@ namespace KlayGE
 		selective_fb_.reset();
 		selective_tex_.reset();
 		selective_cpu_tex_.reset();
-
-		command_history_.clear();
-		end_command_index_ = 0;
 	}
 
 	void KGEditorCore::OnResize(uint32_t width, uint32_t height)
