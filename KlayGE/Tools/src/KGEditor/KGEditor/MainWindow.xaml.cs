@@ -735,16 +735,6 @@ namespace KGEditor
 				buttons |= 4;
 			}
 			core_.MouseUp(e.X, e.Y, buttons);
-
-			if (MouseButtons.Left == e.Button)
-			{
-				uint selected_entity = core_.SelectedEntity();
-				if (selected_entity != selected_entity_id_)
-				{
-					this.UpdateEntityProperties(selected_entity);
-					this.UpdateHistroy();
-				}
-			}
 		}
 
 		private void EditorMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -797,10 +787,8 @@ namespace KGEditor
 
 		public void SelectEntity(uint entity_id)
 		{
-			core_.SelectEntity(entity_id);
-
+			this.ExecuteCommand(new KGEditorCommandSelectEntity(core_, entity_id));
 			this.UpdateEntityProperties(entity_id);
-			this.UpdateHistroy();
 		}
 
 		public void RemoveEntity(uint entity_id)
@@ -1021,6 +1009,10 @@ namespace KGEditor
 					}
 				}
 			}
+			else
+			{
+				this.SelectEntity(entity_id);
+			}
 		}
 
 		private void UpdateAddEntity(uint entity_id)
@@ -1033,7 +1025,7 @@ namespace KGEditor
 				entity.Type = core_.GetEntityType(entity_id);
 				int type = (int)core_.GetEntityType(entity_id);
 				scene_entity_category_[type].Children.Add(new SceneEntityViewModel(this, entity));
-				scene_entity_category_[type].Children.Last().IsSelected = true;
+				scene_entity_category_[type].Children.Last().SelectedInternal(true);
 			}
 		}
 

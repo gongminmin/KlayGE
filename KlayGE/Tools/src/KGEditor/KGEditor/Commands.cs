@@ -145,17 +145,21 @@ namespace KGEditor
 
 		public override object Execute()
 		{
+			old_selected_entity_id_ = core_.SelectedEntity();
 			entity_id_ = core_.AddModel(name_);
+			core_.SelectEntity(entity_id_);
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
 			core_.RemoveEntity(entity_id_);
+			core_.SelectEntity(old_selected_entity_id_);
 		}
 
 		private string name_;
 		private uint entity_id_;
+		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandAddLight : KGEditorCommand
@@ -169,18 +173,22 @@ namespace KGEditor
 
 		public override object Execute()
 		{
+			old_selected_entity_id_ = core_.SelectedEntity();
 			entity_id_ = core_.AddLight(type_, name_);
+			core_.SelectEntity(entity_id_);
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
 			core_.RemoveEntity(entity_id_);
+			core_.SelectEntity(old_selected_entity_id_);
 		}
 
 		private KGEditorCoreWrapper.LightType type_;
 		private string name_;
 		private uint entity_id_;
+		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandAddCamera : KGEditorCommand
@@ -193,17 +201,21 @@ namespace KGEditor
 
 		public override object Execute()
 		{
+			old_selected_entity_id_ = core_.SelectedEntity();
 			entity_id_ = core_.AddCamera(name_);
+			core_.SelectEntity(entity_id_);
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
 			core_.RemoveEntity(entity_id_);
+			core_.SelectEntity(old_selected_entity_id_);
 		}
 
 		private string name_;
 		private uint entity_id_;
+		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandRemoveEntity : KGEditorCommand
@@ -218,6 +230,12 @@ namespace KGEditor
 
 		public override object Execute()
 		{
+			old_selected_entity_id_ = core_.SelectedEntity();
+			if (old_selected_entity_id_ == entity_id_)
+			{
+				core_.SelectEntity(0);
+			}
+
 			backup_entity_id_ = core_.BackupEntityInfo(entity_id_);
 			return null;
 		}
@@ -225,10 +243,12 @@ namespace KGEditor
 		public override void Revoke()
 		{
 			core_.RestoreEntityInfo(entity_id_, backup_entity_id_);
+			core_.SelectEntity(old_selected_entity_id_);
 		}
 
 		private uint entity_id_;
 		private uint backup_entity_id_;
+		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandClearEntities : KGEditorCommand

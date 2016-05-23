@@ -906,13 +906,10 @@ namespace KlayGE
 		mi.scene_obj = scene_obj;
 		entities_.insert(std::make_pair(entity_id, mi));
 
-		this->SelectEntity(entity_id);
-
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
 
 		update_add_entity_event_(entity_id);
-		update_property_event_();
 
 		return entity_id;
 	}
@@ -992,13 +989,10 @@ namespace KlayGE
 		li.scene_obj = light_proxy;
 		entities_.insert(std::make_pair(entity_id, li));
 
-		this->SelectEntity(entity_id);
-
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
 
 		update_add_entity_event_(entity_id);
-		update_property_event_();
 
 		return entity_id;
 	}
@@ -1052,13 +1046,10 @@ namespace KlayGE
 		ci.scene_obj = camera_proxy;
 		entities_.insert(std::make_pair(entity_id, ci));
 
-		this->SelectEntity(entity_id);
-
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
 
 		update_add_entity_event_(entity_id);
-		update_property_event_();
 
 		return entity_id;
 	}
@@ -1106,11 +1097,6 @@ namespace KlayGE
 		auto iter = entities_.find(entity_id);
 		if (iter != entities_.end())
 		{
-			if (selected_entity_ == entity_id)
-			{
-				this->SelectEntity(0);
-			}
-
 			iter->second.scene_obj->DelFromSceneManager();
 
 			switch (iter->second.type)
@@ -1303,11 +1289,6 @@ namespace KlayGE
 		BOOST_ASSERT(iter != entities_.end());
 
 		backup_entities_.emplace(backup_entity_id, iter->second);
-
-		if (selected_entity_ == id)
-		{
-			this->SelectEntity(0);
-		}
 
 		iter->second.scene_obj->DelFromSceneManager();
 		switch (iter->second.type)
@@ -1883,7 +1864,6 @@ namespace KlayGE
 						{
 							entity_id = 0;
 						}
-						this->SelectEntity(entity_id);
 
 						update_select_entity_event_(entity_id);
 					}

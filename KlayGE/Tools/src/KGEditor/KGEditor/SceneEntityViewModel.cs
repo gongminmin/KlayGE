@@ -84,8 +84,7 @@ namespace KGEditor
 			{
 				if (is_selected_ != value)
 				{
-					is_selected_ = value;
-					this.OnPropertyChanged("IsSelected");
+					this.SelectedInternal(value);
 
 					if (is_selected_)
 					{
@@ -93,6 +92,12 @@ namespace KGEditor
 					}
 				}
 			}
+		}
+
+		public void SelectedInternal(bool value)
+		{
+			is_selected_ = value;
+			this.OnPropertyChanged("IsSelected");
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
