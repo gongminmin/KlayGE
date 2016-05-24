@@ -452,6 +452,8 @@ namespace KlayGE
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_POINT_LIGHTS = 1;
+		static uint32_t const MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS = 1;
+		static uint32_t const MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS = 1;
 
 		int32_t projective_light_index_;
 		std::vector<std::pair<int32_t, uint32_t>> sm_light_indices_;
@@ -460,9 +462,9 @@ namespace KlayGE
 		TexturePtr sm_depth_tex_;
 		FrameBufferPtr csm_fb_;
 		TexturePtr csm_tex_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> unfiltered_sm_2d_texs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + 1> filtered_sm_2d_texs_;
-		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + 1> filtered_sm_cube_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> unfiltered_sm_2d_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_SPOT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_SPOT_LIGHTS> filtered_sm_2d_texs_;
+		std::array<TexturePtr, MAX_NUM_SHADOWED_POINT_LIGHTS + MAX_NUM_PROJECTIVE_SHADOWED_POINT_LIGHTS> filtered_sm_cube_texs_;
 
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr csm_filter_pp_;
@@ -488,6 +490,8 @@ namespace KlayGE
 		RenderEffectParameter* projective_map_2d_tex_param_;
 		RenderEffectParameter* projective_map_cube_tex_param_;
 		RenderEffectParameter* filtered_sm_2d_tex_param_;
+		RenderEffectParameter* filtered_sm_2d_tex_array_param_;
+		RenderEffectParameter* filtered_sm_2d_light_index_param_;
 		RenderEffectParameter* filtered_sm_cube_tex_param_;
 		RenderEffectParameter* inv_width_height_param_;
 		RenderEffectParameter* shadowing_tex_param_;

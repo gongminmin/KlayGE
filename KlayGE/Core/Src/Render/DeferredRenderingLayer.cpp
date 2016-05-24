@@ -690,8 +690,21 @@ namespace KlayGE
 
 		for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
 		{
-			unfiltered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			unfiltered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		}
+		if (tex_array_support_)
+		{
+			filtered_sm_2d_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint32_t>(filtered_sm_2d_texs_.size()),
+				sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		}
+		else
+		{
+			for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
+			{
+				filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			}
 		}
 		for (uint32_t i = 0; i < filtered_sm_cube_texs_.size(); ++ i)
 		{
@@ -776,6 +789,8 @@ namespace KlayGE
 		projective_map_2d_tex_param_ = dr_effect_->ParameterByName("projective_map_2d_tex");
 		projective_map_cube_tex_param_ = dr_effect_->ParameterByName("projective_map_cube_tex");
 		filtered_sm_2d_tex_param_ = dr_effect_->ParameterByName("filtered_sm_2d_tex");
+		filtered_sm_2d_tex_array_param_ = dr_effect_->ParameterByName("filtered_sm_2d_tex_array");
+		filtered_sm_2d_light_index_param_ = dr_effect_->ParameterByName("filtered_sm_2d_light_index");
 		filtered_sm_cube_tex_param_ = dr_effect_->ParameterByName("filtered_sm_cube_tex");
 		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
 		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
@@ -2693,7 +2708,14 @@ namespace KlayGE
 			}
 			else 
 			{
-				pp_chain->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
+				if (tex_array_support_)
+				{
+					pp_chain->OutputPin(0, filtered_sm_2d_texs_[0], 0, sm_light_indices_[org_no].first);
+				}
+				else
+				{
+					pp_chain->OutputPin(0, filtered_sm_2d_texs_[sm_light_indices_[org_no].first]);
+				}
 				if (has_sss_objs_ && translucency_enabled_)
 				{
 					sm_tex_->CopyToTexture(*unfiltered_sm_2d_texs_[sm_light_indices_[org_no].first]);
@@ -2758,7 +2780,15 @@ namespace KlayGE
 			{
 			case LightSource::LT_Spot:
 				sm_camera = light.SMCamera(0).get();
-				*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
+				if (tex_array_support_)
+				{
+					*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_texs_[0];
+					*filtered_sm_2d_light_index_param_ = light_index;
+				}
+				else
+				{
+					*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
+				}
 				break;
 
 			case LightSource::LT_Point:

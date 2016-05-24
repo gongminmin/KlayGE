@@ -33,6 +33,8 @@
 	</cbuffer>
 
 	<parameter type="texture2D" name="filtered_sm_2d_tex"/>
+	<parameter type="texture2DArray" name="filtered_sm_2d_tex_array"/>
+	<parameter type="int" name="filtered_sm_2d_light_index"/>
 	<parameter type="textureCUBE" name="filtered_sm_cube_tex"/>
 	<parameter type="texture2DArray" name="filtered_csm_tex_array"/>
 	<parameter type="texture2D" name="filtered_csm_0_tex"/>
@@ -127,7 +129,13 @@ float4 ESM_Directional(float3 pos_es, float len)
 	float shadow = 1;
 	if (light_attrib.z > 0)
 	{
-		float occluder = ReadAFloat(filtered_sm_2d_tex.Sample(linear_sampler, light_proj_pos.xy), sm_far_plane * esm_scale_factor);
+#if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
+		float occluder = ReadAFloat(Tex2DArraySampleLevel(filtered_sm_2d_tex_array, linear_sampler,
+			float3(light_proj_pos.xy, filtered_sm_2d_light_index), 0, 0), sm_far_plane * esm_scale_factor);
+#else
+		float occluder = ReadAFloat(Tex2DSampleLevel(filtered_sm_2d_tex, linear_sampler, light_proj_pos.xy, 0, 0),
+			sm_far_plane * esm_scale_factor);
+#endif
 		shadow = Calc_ESM(occluder, len);
 	}
 	
