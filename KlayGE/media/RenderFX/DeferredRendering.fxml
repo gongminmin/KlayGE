@@ -93,72 +93,59 @@ float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow, float4 l
 	return ds.xxxy * light_color * float4(shadow, dot(shadow, 1) / 3);
 }
 
-float Calc_ESM(float occluder, float len)
+float CalcESM(float occluder, float len, float esm_scale_factor)
 {
 	// Exponential shadow mapping
 	return saturate(exp(occluder - esm_scale_factor * len));
 }
 
-float4 ESM_Omnidirectional(float3 dir_ls, float len)
+float4 ESMOmnidirectional(float3 dir_ls, float len, bool has_shadow, bool has_projective, float esm_scale_factor, float sm_far_plane)
 {
 	dir_ls.y *= -KLAYGE_FLIPPING;
 	
 	float shadow = 1;
-	if (light_attrib.z > 0)
+	if (has_shadow)
 	{
-		float occluder = ReadAFloat(filtered_sm_cube_tex.Sample(linear_sampler, dir_ls), sm_far_plane * esm_scale_factor);
-		shadow = Calc_ESM(occluder, len);
+		float occluder = ReadAFloat(TexCubeSampleLevel(filtered_sm_cube_tex, linear_sampler, dir_ls, 0, 0), sm_far_plane * esm_scale_factor);
+		shadow = CalcESM(occluder, len, esm_scale_factor);
 	}
 
 	float4 projective = 1;
-	if (light_attrib.w > 0)
+	if (has_projective)
 	{
-		projective = projective_map_cube_tex.Sample(linear_sampler, dir_ls);
+		projective = TexCubeSampleLevel(projective_map_cube_tex, linear_sampler, dir_ls, 0, 0);
 	}
 	
 	return projective * shadow;
 }
 
-float4 ESM_Directional(float3 pos_es, float len)
-{
-	float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
-	light_proj_pos /= light_proj_pos.w;
-	light_proj_pos.y *= KLAYGE_FLIPPING;
-	light_proj_pos.xy = light_proj_pos.xy / 2 + 0.5f;
-		
+float4 ESMDirectional(float3 pos_es, float2 light_proj_pos, float len, bool has_shadow, bool has_projective, int sm_index,
+	float esm_scale_factor, float sm_far_plane)
+{		
 	float shadow = 1;
-	if (light_attrib.z > 0)
+	if (has_shadow)
 	{
 #if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
 		float occluder = ReadAFloat(Tex2DArraySampleLevel(filtered_sm_2d_tex_array, linear_sampler,
-			float3(light_proj_pos.xy, filtered_sm_2d_light_index), 0, 0), sm_far_plane * esm_scale_factor);
+			float3(light_proj_pos, sm_index), 0, 0), sm_far_plane * esm_scale_factor);
 #else
-		float occluder = ReadAFloat(Tex2DSampleLevel(filtered_sm_2d_tex, linear_sampler, light_proj_pos.xy, 0, 0),
+		float occluder = ReadAFloat(Tex2DSampleLevel(filtered_sm_2d_tex, linear_sampler, light_proj_pos, 0, 0),
 			sm_far_plane * esm_scale_factor);
 #endif
-		shadow = Calc_ESM(occluder, len);
+		shadow = CalcESM(occluder, len, esm_scale_factor);
 	}
 	
 	float4 projective = 1;
-	if (light_attrib.w > 0)
+	if (has_projective)
 	{
-		projective = projective_map_2d_tex.Sample(linear_sampler, light_proj_pos.xy);
+		projective = Tex2DSampleLevel(projective_map_2d_tex, linear_sampler, light_proj_pos, 0, 0);
 	}
 	
 	return projective * shadow;
 }
 
-float4 ESM_Sun(float3 pos_es, float len)
-{
-	float2 light_proj_pos = mul(float4(pos_es, 1), light_view_proj).xy;
-	light_proj_pos.y *= -1;
-	light_proj_pos = light_proj_pos * 0.5f + 0.5f;
-#if KLAYGE_DERIVATIVES
-	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos));
-#else
-	float4 tc_ddx_ddy = 0;
-#endif
-	
+float4 ESMSun(float3 pos_es, float2 light_proj_pos, float4 tc_ddx_ddy, float len, float esm_scale_factor, float sm_far_plane)
+{	
 	float shadow = 0;
 	if ((pos_es.z >= cascade_intervals[0].x) && (pos_es.z < cascade_intervals[num_cascades - 1].y))
 	{
@@ -197,7 +184,7 @@ float4 ESM_Sun(float3 pos_es, float len)
 						shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 				}
 #endif
-				shadow += Calc_ESM(occluder, len);
+				shadow += CalcESM(occluder, len, esm_scale_factor);
 			}
 		}
 	}
@@ -549,7 +536,7 @@ float4 DeferredShadowingPointPS(
 	float3 dir = light_pos_es.xyz - pos_es;
 	float len = length(dir);
 	float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
-	return ESM_Omnidirectional(dir_ls, len);
+	return ESMOmnidirectional(dir_ls, len, light_attrib.z > 0, light_attrib.w > 0, esm_scale_factor, sm_far_plane);
 }
 
 float4 DeferredShadowingSpotPS(
@@ -565,9 +552,14 @@ float4 DeferredShadowingSpotPS(
 #endif
 
 	view_dir = normalize(view_dir);
-	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float len = length(light_pos_es.xyz - pos_es);
-	return ESM_Directional(pos_es, len);
+	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);	
+	float4 light_proj_pos = mul(float4(pos_es, 1), light_view_proj);
+	light_proj_pos /= light_proj_pos.w;
+	light_proj_pos.y *= KLAYGE_FLIPPING;
+	light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
+	float len = length(light_pos_es.xyz - pos_es);	
+	return ESMDirectional(pos_es, light_proj_pos.xy, len, light_attrib.z > 0, light_attrib.w > 0, filtered_sm_2d_light_index,
+		esm_scale_factor, sm_far_plane);
 }
 
 float4 DeferredShadowingSunPS(
@@ -584,8 +576,16 @@ float4 DeferredShadowingSunPS(
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
+	float2 light_proj_pos = mul(float4(pos_es, 1), light_view_proj).xy;
+	light_proj_pos.y *= -1;
+	light_proj_pos = light_proj_pos * 0.5f + 0.5f;
+#if KLAYGE_DERIVATIVES
+	float4 tc_ddx_ddy = float4(ddx(light_proj_pos), ddy(light_proj_pos));
+#else
+	float4 tc_ddx_ddy = 0;
+#endif
 	float len = dot(float4(pos_es, 1), view_z_to_light_view);
-	return ESM_Sun(pos_es, len);
+	return ESMSun(pos_es, light_proj_pos, tc_ddx_ddy, len, esm_scale_factor, sm_far_plane);
 }
 		]]>
 	</shader>

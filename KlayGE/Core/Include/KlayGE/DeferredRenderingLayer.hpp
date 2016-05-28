@@ -336,18 +336,21 @@ namespace KlayGE
 		void AppendGBufferPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb);
 		void AppendShadowPassScanCode(uint32_t light_index);
 		void AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index);
-		void AppendShadowingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb, uint32_t light_index);
 		void AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb);
 		void PreparePVP(PerViewport& pvp);
 		void GenerateDepthBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void GenerateGBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void PostGenerateGBuffer(PerViewport const & pvp);
+		void BuildLinearDepthMipmap(PerViewport const & pvp);
 		void RenderDecals(PerViewport const & pvp, PassType pass_type);
 		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
-		void UpdateShadowing(PerViewport const & pvp, int32_t org_no);
+		void UpdateShadowing(PerViewport const & pvp, int32_t index_in_pass);
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		void UpdateShadowingCS(PerViewport const & pvp, int32_t index_in_pass);
+#endif
 		void MergeIndirectLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void MergeSSVO(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void MergeShadingAndDepth(PerViewport const & pvp, PassTargetBuffer pass_tb);
@@ -447,6 +450,7 @@ namespace KlayGE
 		RenderTechnique* technique_lidr_tube_area_shadow_;
 		RenderTechnique* technique_lidr_tube_area_no_shadow_;
 
+		RenderTechnique* technique_tbdr_shadowing_unified_;
 		RenderTechnique* technique_tbdr_unified_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
@@ -523,14 +527,24 @@ namespace KlayGE
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
 
+		RenderEffectParameter* projective_shadowing_rw_tex_param_;
+		RenderEffectParameter* shadowing_rw_tex_param_;
+		RenderEffectParameter* lights_view_proj_param_;
+		RenderEffectParameter* filtered_sms_2d_light_index_param_;
+		RenderEffectParameter* esms_scale_factor_param_;
+		RenderEffectParameter* sms_far_plane_param_;
+
 		RenderTechnique* technique_depth_to_tiled_min_max_;
 		RenderTechnique* technique_tbdr_lighting_mask_;
+		RenderEffectParameter* near_q_far_param_;
 		RenderEffectParameter* width_height_param_;
 		RenderEffectParameter* depth_to_tiled_depth_in_tex_param_;
 		RenderEffectParameter* depth_to_tiled_min_max_depth_rw_tex_param_;
+		RenderEffectParameter* linear_depth_rw_tex_param_;
 		RenderEffectParameter* upper_left_param_;
 		RenderEffectParameter* x_dir_param_;
 		RenderEffectParameter* y_dir_param_;
+		RenderEffectParameter* read_no_lighting_param_;
 		RenderEffectParameter* lighting_mask_tex_param_;
 		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
