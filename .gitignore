@@ -65,6 +65,7 @@ KlayGE/Tools/media/*/*Py.zip
 KlayGE/Tools/src/*/*/obj
 KlayGE/Tools/src/KGEditor/KGEditor/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
+KlayGE/Tools/src/TexViewer/TexViewer/Images
 KlayGE/Tutorials/media/*/*.dds
 KlayGE/klayge_logo.png
 External/7z

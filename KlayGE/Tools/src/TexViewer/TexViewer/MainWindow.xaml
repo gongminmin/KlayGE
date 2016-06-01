@@ -1,0 +1,86 @@
+﻿<RibbonWindow x:Class="TexViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:s="clr-namespace:System;assembly=mscorlib"
+        xmlns:rw="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Ribbon"
+        xmlns:xcad="http://schemas.xceed.com/wpf/xaml/avalondock"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+        Title="TexViewer" Width="1280" Height="800" WindowState="Maximized"
+        Loaded="MainWindowLoaded" Unloaded="MainWindowUnloaded">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Ribbon Grid.Row="0">
+            <RibbonTab Header="Texture">
+                <RibbonGroup>
+                    <RibbonButton LargeImageSource="Images\Open.png" x:Name="open" Label="Open" Click="OpenClick"/>
+                    <RibbonButton LargeImageSource="Images\Save.png" x:Name="save" Label="Save" Click="SaveClick"/>
+                    <RibbonButton LargeImageSource="Images\SaveAs.png" x:Name="save_as" Label="Save as" Click="SaveAsClick"/>
+                </RibbonGroup>
+                <RibbonGroup>
+                    <RibbonToggleButton LargeImageSource="Images\R.png" x:Name="r_channel" Label="R" IsChecked="{Binding RValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\G.png" x:Name="g_channel" Label="G" IsChecked="{Binding GValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\B.png" x:Name="b_channel" Label="B" IsChecked="{Binding BValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\A.png" x:Name="a_channel" Label="A" IsChecked="{Binding AValue}"/>
+                </RibbonGroup>
+            </RibbonTab>
+        </Ribbon>
+        
+        <Border Grid.Row="1">
+            <xcad:DockingManager x:Name="_dockingManager"
+                              AllowMixedOrientation="True"
+                              BorderBrush="Black"
+                              BorderThickness="1">
+                <xcad:LayoutRoot x:Name="_layoutRoot">
+                    <xcad:LayoutPanel Orientation="Horizontal">
+                        <xcad:LayoutDocumentPane>
+                            <xcad:LayoutDocument ContentId="document1" x:Name="doc1"
+                                            Title="Editor" CanClose="False">
+                                <Label Name="editor_bg" SizeChanged="EditorWindowSizeChanged" Padding="0" AllowDrop="True" DragEnter="EditorBGDragEnter" Drop="EditorBGDrop">
+                                    <WindowsFormsHost Name="editor_frame" KeyUp="EditorKeyUp">
+                                        <wf:Panel x:Name="editor_wnd" MouseDown="EditorMouseDown" MouseUp="EditorMouseUp" MouseMove="EditorMouseMove" MouseWheel="EditorMouseWheel"/>
+                                    </WindowsFormsHost>
+                                </Label>
+                            </xcad:LayoutDocument>
+                        </xcad:LayoutDocumentPane>
+                        <xcad:LayoutAnchorablePane DockWidth="300">
+                            <xcad:LayoutAnchorable ContentId="properties"
+                                            Title="Properties"
+                                            CanHide="False"
+                                            CanClose="False"
+                                            AutoHideWidth="300">
+                                <xctk:PropertyGrid x:Name="properties" NameColumnWidth="110"
+                                           PropertyValueChanged="PropertyGridValueChanged"/>
+                            </xcad:LayoutAnchorable>
+                        </xcad:LayoutAnchorablePane>
+                    </xcad:LayoutPanel>
+                </xcad:LayoutRoot>
+            </xcad:DockingManager>
+        </Border>
+
+        <StatusBar HorizontalAlignment="Stretch" Height="30" Margin="0,0,0,0" Grid.Row="2" VerticalAlignment="Bottom" Width="auto">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0">
+                <TextBlock Name="pixel_info" Text="Pixel: - -"/>
+            </StatusBarItem>
+            <Separator Grid.Column="1"/>
+            <StatusBarItem Grid.Column="2">
+                <TextBlock Name="color_info" Text="Color: - - - -"/>
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</RibbonWindow>

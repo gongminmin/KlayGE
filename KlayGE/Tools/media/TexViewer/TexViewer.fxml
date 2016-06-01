@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<effect>
+	<parameter type="texture2D" name="texture_2d"/>
+	<parameter type="float4x4" name="mvp"/>
+	<parameter type="float" name="zoom"/>
+	<parameter type="float" name="rgb_scale"/>
+	<parameter type="float4" name="color_mask"/>
+	<parameter type="int2" name="width_height"/>
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void TexViewerVS(float2 pos : POSITION,
+				out float2 oTex : TEXCOORD0,
+				out float4 oPos : SV_Position)
+{
+	oPos = float4(mul(float4(pos, 0, 1), mvp).xy, 0.5f, 1);
+	oPos.y = -oPos.y;
+	oTex = pos;
+}
+
+float4 TexViewerPS(float2 tex : TEXCOORD0) : SV_Target
+{
+	int2 mosaic_index = (int2(tex * width_height * zoom) / 8) & 1;
+	float4 mosaic = float4(((mosaic_index.x == mosaic_index.y) ? 1 : 0.5f).xxx, 1);
+
+	float4 tex_color = texture_2d.Sample(point_sampler, tex);
+
+	float4 color = float4(tex_color.rgb * rgb_scale * color_mask.rgb, (color_mask.a < 0.5f) ? 1.0f : tex_color.a);
+	return lerp(mosaic, color, color.a);
+}
+		]]>
+	</shader>
+
+	<technique name="TexViewerTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="TexViewerVS()"/>
+			<state name="pixel_shader" value="TexViewerPS()"/>
+		</pass>
+	</technique>
+</effect>
