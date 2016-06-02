@@ -106,8 +106,8 @@ namespace KlayGE
 		}
 		else
 		{
-			top_ = settings.top;
-			left_ = settings.left;
+			left_ = main_wnd->Left();
+			top_ = main_wnd->Top();
 			width_ = main_wnd->Width();
 			height_ = main_wnd->Height();
 		}

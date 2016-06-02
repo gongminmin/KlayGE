@@ -121,8 +121,8 @@ namespace KlayGE
 		else
 		{
 			// Get colour depth from display
-			top_ = settings.top;
-			left_ = settings.left;
+			left_ = main_wnd->Left();
+			top_ = main_wnd->Top();
 
 			style = WS_OVERLAPPEDWINDOW;
 		}
@@ -254,8 +254,8 @@ namespace KlayGE
 		}
 		else
 		{
-			top_ = settings.top;
-			left_ = settings.left;
+			left_ = main_wnd->Left();
+			top_ = main_wnd->Top();
 		}
 
 		x_display_ = main_wnd->XDisplay();
@@ -296,7 +296,7 @@ namespace KlayGE
 				}
 			}
 		}
-#elif defined KLAYGE_PLATFORM_DARWIN	
+#elif defined KLAYGE_PLATFORM_DARWIN
 		if (isFullScreen_)
 		{
 			left_ = 0;
@@ -304,8 +304,8 @@ namespace KlayGE
 		}
 		else
 		{
-			left_ = settings.left;
-			top_ = settings.top;
+			left_ = main_wnd->Left();
+			top_ = main_wnd->Top();
 		}
 		
 		main_wnd->CreateGLView(settings);
