@@ -709,9 +709,31 @@ namespace KlayGE
 				bool need_resize = ((new_render_width != new_screen_width) || (new_render_height != new_screen_height));
 				if (need_resize)
 				{
+					if (!resize_frame_buffer_)
+					{
+						resize_frame_buffer_ = rf.MakeFrameBuffer();
+						resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;					
+
+						default_frame_buffers_[2] = resize_frame_buffer_;
+					}
+
 					ElementFormat fmt = resize_tex_->Format();
 					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 					resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
+
+					ElementFormat ds_fmt;
+					if ((settings.depth_stencil_fmt != EF_Unknown) && caps.rendertarget_format_support(settings.depth_stencil_fmt, 1, 0))
+					{
+						ds_fmt = settings.depth_stencil_fmt;
+					}
+					else
+					{
+						BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+
+						ds_fmt = EF_D16;
+					}
+					resize_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil,
+						rf.Make2DDepthStencilRenderView(new_render_width, new_render_height, ds_fmt, 1, 0));
 
 					float const scale_x = static_cast<float>(new_screen_width) / new_render_width;
 					float const scale_y = static_cast<float>(new_screen_height) / new_render_height;
@@ -732,6 +754,11 @@ namespace KlayGE
 					{
 						resize_pps_[i]->SetParam(0, pos_scale);
 					}
+				}
+				else if (default_frame_buffers_[2] == resize_frame_buffer_)
+				{
+					resize_frame_buffer_.reset();
+					default_frame_buffers_[2] = screen_frame_buffer_;
 				}
 			}
 			if (ldr_pp_)
