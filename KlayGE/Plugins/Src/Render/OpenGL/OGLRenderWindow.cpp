@@ -395,9 +395,6 @@ namespace KlayGE
 		// Notify viewports of resize
 		viewport_->width = width;
 		viewport_->height = height;
-
-		App3DFramework& app = Context::Instance().AppInstance();
-		app.OnResize(width, height);
 	}
 
 	// 改变窗口位置
@@ -465,15 +462,12 @@ namespace KlayGE
 
 	void OGLRenderWindow::WindowMovedOrResized()
 	{
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		float const dpi_scale = main_wnd->DPIScale();
-
 #if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
 
-		uint32_t new_left = static_cast<uint32_t>(rect.left * dpi_scale + 0.5);
-		uint32_t new_top = static_cast<uint32_t>(rect.top * dpi_scale + 0.5f);
+		uint32_t new_left = rect.left;
+		uint32_t new_top = rect.top;
 		if ((new_left != left_) || (new_top != top_))
 		{
 			this->Reposition(new_left, new_top);
@@ -490,9 +484,6 @@ namespace KlayGE
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #endif
-
-		new_width = static_cast<uint32_t>(new_width * dpi_scale + 0.5f);
-		new_height = static_cast<uint32_t>(new_height * dpi_scale + 0.5f);
 
 		if ((new_width != width_) || (new_height != height_))
 		{

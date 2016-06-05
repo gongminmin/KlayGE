@@ -44,23 +44,48 @@
 
 using namespace ABI::Windows::Foundation;
 using namespace ABI::Windows::Graphics::Display;
+using namespace ABI::Windows::UI::Core;
+using namespace ABI::Windows::UI::Input;
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+using namespace ABI::Windows::UI::ViewManagement;
+#endif
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
 namespace KlayGE
 {
-	Window::Window(std::string const & name, RenderSettings const & /*settings*/)
+	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false),
 			dpi_scale_(1)
 	{
 		Convert(wname_, name);
+
+		pointer_id_map_.fill(0);
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		width_ = settings.width;
+		height_ = settings.height;
+#else
+		KFL_UNUSED(settings);
+#endif
 	}
 
-	Window::Window(std::string const & name, RenderSettings const & /*settings*/, void* /*native_wnd*/)
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false),
 			dpi_scale_(1)
 	{
+		KFL_UNUSED(native_wnd);
+
 		Convert(wname_, name);
+
+		pointer_id_map_.fill(0);
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		width_ = settings.width;
+		height_ = settings.height;
+#else
+		KFL_UNUSED(settings);
+#endif
 	}
 
 	Window::~Window()
@@ -76,10 +101,34 @@ namespace KlayGE
 		
 		this->DetectsDPI();
 
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		ComPtr<IApplicationViewStatics> app_view_stat;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
+
+		ComPtr<IApplicationViewStatics2> app_view_stat2;
+		app_view_stat.As(&app_view_stat2);
+
+		ComPtr<IApplicationView> app_view;
+		app_view_stat2->GetForCurrentView(&app_view);
+
+		app_view->put_Title(HStringReference(wname_.c_str()).Get());
+
+		ComPtr<IApplicationViewStatics3> app_view_stat3;
+		app_view_stat.As(&app_view_stat3);
+
+		ABI::Windows::Foundation::Size size;
+		size.Width = static_cast<float>(width_ / dpi_scale_);
+		size.Height = static_cast<float>(height_ / dpi_scale_);
+		app_view_stat3->put_PreferredLaunchViewSize(size);
+		app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
+#else
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
-		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_);
-		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_);
+		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_ + 0.5f);
+		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_ + 0.5f);
+#endif
+
+		ready_ = true;
 	}
 
 	void Window::DetectsDPI()
@@ -104,6 +153,148 @@ namespace KlayGE
 #endif
 
 		dpi_scale_ = dpi / 96;
+	}
+
+	void Window::OnSizeChanged(IWindowSizeChangedEventArgs* args)
+	{
+		ABI::Windows::Foundation::Size size;
+		args->get_Size(&size);
+
+		active_ = true;
+
+		width_ = static_cast<uint32_t>(size.Width * dpi_scale_ + 0.5f);
+		height_ = static_cast<uint32_t>(size.Height * dpi_scale_ + 0.5f);
+
+		this->OnSize()(*this, true);
+	}
+
+	void Window::OnVisibilityChanged(IVisibilityChangedEventArgs* args)
+	{
+		boolean vis;
+		TIF(args->get_Visible(&vis));
+
+		active_ = vis ? true : false;
+		this->OnActive()(*this, active_);
+	}
+
+	void Window::OnClosed()
+	{
+		this->OnClose()(*this);
+
+		active_ = false;
+		ready_ = false;
+		closed_ = true;
+	}
+
+	void Window::OnPointerPressed(IPointerEventArgs* args)
+	{
+		ComPtr<IPointerPoint> point;
+		TIF(args->get_CurrentPoint(&point));
+
+		UINT32 pid;
+		TIF(point->get_PointerId(&pid));
+
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
+		{
+			if (0 == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				pointer_id_map_[i] = pid;
+				break;
+			}
+		}
+
+		Point position;
+		TIF(point->get_Position(&position));
+
+		this->OnPointerDown()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
+	}
+
+	void Window::OnPointerReleased(IPointerEventArgs* args)
+	{
+		ComPtr<IPointerPoint> point;
+		TIF(args->get_CurrentPoint(&point));
+
+		UINT32 pid;
+		TIF(point->get_PointerId(&pid));
+
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
+		{
+			if (pid == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				pointer_id_map_[i] = 0;
+				break;
+			}
+		}
+
+		Point position;
+		TIF(point->get_Position(&position));
+
+		this->OnPointerUp()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
+	}
+
+	void Window::OnPointerMoved(IPointerEventArgs* args)
+	{
+		ComPtr<IPointerPoint> point;
+		TIF(args->get_CurrentPoint(&point));
+
+		UINT32 pid;
+		TIF(point->get_PointerId(&pid));
+
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
+		{
+			if (pid == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				break;
+			}
+		}
+
+		Point position;
+		TIF(point->get_Position(&position));
+		boolean contact;
+		TIF(point->get_IsInContact(&contact));
+
+		this->OnPointerUpdate()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
+			conv_id, contact ? true : false);
+	}
+
+	void Window::OnPointerWheelChanged(IPointerEventArgs* args)
+	{
+		ComPtr<IPointerPoint> point;
+		TIF(args->get_CurrentPoint(&point));
+
+		UINT32 pid;
+		TIF(point->get_PointerId(&pid));
+
+		uint32_t conv_id = 0;
+		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
+		{
+			if (pid == pointer_id_map_[i])
+			{
+				conv_id = static_cast<uint32_t>(i + 1);
+				break;
+			}
+		}
+
+		Point position;
+		TIF(point->get_Position(&position));
+		ComPtr<IPointerPointProperties> properties;
+		TIF(point->get_Properties(&properties));
+		INT32 wheel;
+		TIF(properties->get_MouseWheelDelta(&wheel));
+
+		this->OnPointerWheel()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
+			conv_id, wheel);
+	}
+
+	void Window::OnDpiChanged()
+	{
+		this->DetectsDPI();
 	}
 }
 

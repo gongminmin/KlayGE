@@ -121,8 +121,6 @@ namespace KlayGE
 		std::shared_ptr<ABI::Windows::ApplicationModel::Core::ICoreApplicationView> app_view_;
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> window_;
 
-		std::array<uint32_t, 16> pointer_id_map_;
-
 		EventRegistrationToken app_activated_token_;
 		EventRegistrationToken app_suspending_token_;
 		EventRegistrationToken app_resuming_token_;
@@ -156,7 +154,6 @@ namespace KlayGE
 	HRESULT MetroFramework::RuntimeClassInitialize(App3DFramework* app)
 	{
 		app_ = app;
-		pointer_id_map_.fill(0);
 
 		return S_OK;
 	}
@@ -264,6 +261,23 @@ namespace KlayGE
 
 	IFACEMETHODIMP MetroFramework::Uninitialize()
 	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat);
+
+		ComPtr<IDisplayInformation> disp_info;
+		disp_info_stat->GetForCurrentView(&disp_info);
+
+		disp_info->remove_DpiChanged(dpi_changed_token_);
+#else
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop);
+
+		disp_prop->add_LogicalDpiChanged(dpi_changed_token_);
+#endif
+
 		window_->remove_PointerWheelChanged(pointer_wheel_changed_token_);
 		window_->remove_PointerMoved(pointer_moved_token_);
 		window_->remove_PointerReleased(pointer_released_token_);
@@ -333,12 +347,9 @@ namespace KlayGE
 	HRESULT MetroFramework::OnWindowSizeChanged(ICoreWindow* sender, IWindowSizeChangedEventArgs* args)
 	{
 		KFL_UNUSED(sender);
-		KFL_UNUSED(args);
 
 		WindowPtr const & win = app_->MainWnd();
-		win->Active(true);
-		win->Ready(true);
-		win->OnSize()(*win, true);
+		win->OnSizeChanged(args);
 
 		return S_OK;
 	}
@@ -347,13 +358,8 @@ namespace KlayGE
 	{
 		KFL_UNUSED(sender);
 
-		boolean vis;
-		TIF(args->get_Visible(&vis));
-
-		bool const bvis = vis ? true : false;
 		WindowPtr const & win = app_->MainWnd();
-		win->Active(bvis);
-		win->OnActive()(*win, bvis);
+		win->OnVisibilityChanged(args);
 
 		return S_OK;
 	}
@@ -364,10 +370,7 @@ namespace KlayGE
 		KFL_UNUSED(args);
 
 		WindowPtr const & win = app_->MainWnd();
-		win->OnClose()(*win);
-		win->Active(false);
-		win->Ready(false);
-		win->Closed(true);
+		win->OnClosed();
 
 		return S_OK;
 	}
@@ -376,29 +379,8 @@ namespace KlayGE
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
-
-		uint32_t conv_id = 0;
-		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
-		{
-			if (0 == pointer_id_map_[i])
-			{
-				conv_id = static_cast<uint32_t>(i + 1);
-				pointer_id_map_[i] = pid;
-				break;
-			}
-		}
-
-		Point position;
-		TIF(point->get_Position(&position));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerDown()(*win,
-			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
-			conv_id);
+		win->OnPointerPressed(args);
 
 		return S_OK;
 	}
@@ -407,29 +389,8 @@ namespace KlayGE
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
-
-		uint32_t conv_id = 0;
-		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
-		{
-			if (pid == pointer_id_map_[i])
-			{
-				conv_id = static_cast<uint32_t>(i + 1);
-				pointer_id_map_[i] = 0;
-				break;
-			}
-		}
-
-		Point position;
-		TIF(point->get_Position(&position));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerUp()(*win,
-			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
-			conv_id);
+		win->OnPointerReleased(args);
 
 		return S_OK;
 	}
@@ -438,30 +399,8 @@ namespace KlayGE
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
-
-		uint32_t conv_id = 0;
-		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
-		{
-			if (pid == pointer_id_map_[i])
-			{
-				conv_id = static_cast<uint32_t>(i + 1);
-				break;
-			}
-		}
-
-		Point position;
-		TIF(point->get_Position(&position));
-		boolean contact;
-		TIF(point->get_IsInContact(&contact));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerUpdate()(*win,
-			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
-			conv_id, contact ? true : false);
+		win->OnPointerMoved(args);
 
 		return S_OK;
 	}
@@ -470,32 +409,8 @@ namespace KlayGE
 	{
 		KFL_UNUSED(sender);
 
-		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
-
-		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
-
-		uint32_t conv_id = 0;
-		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
-		{
-			if (pid == pointer_id_map_[i])
-			{
-				conv_id = static_cast<uint32_t>(i + 1);
-				break;
-			}
-		}
-
-		Point position;
-		TIF(point->get_Position(&position));
-		ComPtr<IPointerPointProperties> properties;
-		TIF(point->get_Properties(&properties));
-		INT32 wheel;
-		TIF(properties->get_MouseWheelDelta(&wheel));
 		WindowPtr const & win = app_->MainWnd();
-		win->OnPointerWheel()(*win,
-			int2(static_cast<int>(position.X * win->DPIScale()), static_cast<int>(position.Y * win->DPIScale())),
-			conv_id, wheel);
+		win->OnPointerWheelChanged(args);
 
 		return S_OK;
 	}
@@ -512,8 +427,7 @@ namespace KlayGE
 #endif
 
 		WindowPtr const & win = app_->MainWnd();
-		win->DetectsDPI();
-		win->OnSize()(*win, true);
+		win->OnDpiChanged();
 
 		return S_OK;
 	}

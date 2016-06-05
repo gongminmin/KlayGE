@@ -96,6 +96,15 @@ namespace KlayGE
 		}
 
 		void DetectsDPI();
+
+		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
+		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
+		void OnClosed();
+		void OnPointerPressed(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnPointerReleased(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnPointerMoved(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnPointerWheelChanged(ABI::Windows::UI::Core::IPointerEventArgs* args);
+		void OnDpiChanged();
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -408,6 +417,7 @@ namespace KlayGE
 		WNDPROC default_wnd_proc_;
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
+		std::array<uint32_t, 16> pointer_id_map_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;

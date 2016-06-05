@@ -421,9 +421,6 @@ namespace KlayGE
 		re.ResetRenderStates();
 
 		this->OnBind();
-
-		App3DFramework& app = Context::Instance().AppInstance();
-		app.OnResize(width, height);
 	}
 
 	// 改变窗口位置
@@ -499,25 +496,20 @@ namespace KlayGE
 
 	void D3D12RenderWindow::WindowMovedOrResized()
 	{
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-		float const dpi_scale = main_wnd->DPIScale();
-
 		::RECT rect;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::GetClientRect(hWnd_, &rect);
 #else
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		float const dpi_scale = main_wnd->DPIScale();
+
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
-		rect.left = static_cast<LONG>(rc.X);
-		rect.right = static_cast<LONG>(rc.X + rc.Width);
-		rect.top = static_cast<LONG>(rc.Y);
-		rect.bottom = static_cast<LONG>(rc.Y + rc.Height);
+		rect.left = static_cast<LONG>(rc.X * dpi_scale + 0.5f);
+		rect.right = static_cast<LONG>((rc.X + rc.Width) * dpi_scale + 0.5f);
+		rect.top = static_cast<LONG>(rc.Y * dpi_scale + 0.5f);
+		rect.bottom = static_cast<LONG>((rc.Y + rc.Height) * dpi_scale + 0.5f);
 #endif
-
-		rect.left = static_cast<int32_t>(rect.left * dpi_scale + 0.5f);
-		rect.top = static_cast<int32_t>(rect.top * dpi_scale + 0.5f);
-		rect.right = static_cast<int32_t>(rect.right * dpi_scale + 0.5f);
-		rect.bottom = static_cast<int32_t>(rect.bottom * dpi_scale + 0.5f);
 
 		uint32_t new_left = rect.left;
 		uint32_t new_top = rect.top;

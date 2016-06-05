@@ -647,14 +647,10 @@ namespace KlayGE
 	{
 		uint32_t const old_screen_width = default_frame_buffers_[3]->Width();
 		uint32_t const old_screen_height = default_frame_buffers_[3]->Height();
-		uint32_t const old_render_width = default_frame_buffers_[0]->Width();
-		uint32_t const old_render_height = default_frame_buffers_[0]->Height();
-		float const old_scale = std::min(static_cast<float>(old_screen_width) / old_render_width,
-			static_cast<float>(old_screen_height) / old_render_height);
 		uint32_t const new_screen_width = width;
 		uint32_t const new_screen_height = height;
-		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * old_scale + 0.5f);
-		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * old_scale + 0.5f);
+		uint32_t const new_render_width = static_cast<uint32_t>(new_screen_width * default_render_height_scale_ + 0.5f);
+		uint32_t const new_render_height = static_cast<uint32_t>(new_screen_height * default_render_height_scale_ + 0.5f);
 		if ((old_screen_width != new_screen_width) || (old_screen_height != new_screen_height))
 		{
 			this->DoResize(new_screen_width, new_screen_height);
@@ -800,6 +796,9 @@ namespace KlayGE
 		{
 			this->DoResize(old_screen_width, old_screen_height);
 		}
+
+		App3DFramework& app = Context::Instance().AppInstance();
+		app.OnResize(width, height);
 	}
 
 	void RenderEngine::PostProcess(bool skip)

@@ -145,10 +145,10 @@ namespace KlayGE
 		external_wnd_ = false;
 
 		::GetClientRect(wnd_, &rc);
-		left_ = static_cast<int32_t>(settings.left * dpi_scale_ + 0.5f);
-		top_ = static_cast<int32_t>(settings.top * dpi_scale_ + 0.5f);
-		width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5f);
-		height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
+		left_ = rc.left;
+		top_ = rc.top;
+		width_ = rc.right - rc.left;
+		height_ = rc.bottom - rc.top;
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -161,6 +161,8 @@ namespace KlayGE
 
 		::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
+
+		ready_ = true;
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
@@ -177,10 +179,10 @@ namespace KlayGE
 
 		RECT rc;
 		::GetClientRect(wnd_, &rc);
-		left_ = static_cast<int32_t>(settings.left * dpi_scale_ + 0.5f);
-		top_ = static_cast<int32_t>(settings.top * dpi_scale_ + 0.5f);
-		width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5f);
-		height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
+		left_ = rc.left;
+		top_ = rc.top;
+		width_ = rc.right - rc.left;
+		height_ = rc.bottom - rc.top;
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -219,6 +221,8 @@ namespace KlayGE
 	{
 		if (!external_wnd_)
 		{
+			ready_ = false;
+
 			this->DetectsDPI();
 
 			HINSTANCE hInst = ::GetModuleHandle(nullptr);
@@ -234,8 +238,10 @@ namespace KlayGE
 				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 
 			::GetClientRect(wnd_, &rc);
-			width_ = static_cast<uint32_t>((rc.right - rc.left) * dpi_scale_ + 0.5);
-			height_ = static_cast<uint32_t>((rc.bottom - rc.top) * dpi_scale_ + 0.5f);
+			left_ = rc.left;
+			top_ = rc.top;
+			width_ = rc.right - rc.left;
+			height_ = rc.bottom - rc.top;
 
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(push)
@@ -248,6 +254,8 @@ namespace KlayGE
 
 			::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 			::UpdateWindow(wnd_);
+
+			ready_ = true;
 		}
 	}
 
@@ -279,17 +287,25 @@ namespace KlayGE
 			break;
 
 		case WM_SIZE:
-			// Check to see if we are losing or gaining our window.  Set the
-			// active flag to match
-			if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
 			{
-				active_ = false;
-				this->OnSize()(*this, false);
-			}
-			else
-			{
-				active_ = true;
-				this->OnSize()(*this, true);
+				RECT rc;
+				::GetClientRect(wnd_, &rc);
+				left_ = rc.left;
+				top_ = rc.top;
+				width_ = rc.right - rc.left;
+				height_ = rc.bottom - rc.top;
+
+				// Check to see if we are losing or gaining our window.  Set the
+				// active flag to match
+				if ((SIZE_MAXHIDE == wParam) || (SIZE_MINIMIZED == wParam))
+				{
+					active_ = false;
+					this->OnSize()(*this, false);
+				}
+				else
+				{
+					this->OnSize()(*this, true);
+				}
 			}
 			break;
 
@@ -349,7 +365,6 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		case WM_DPICHANGED:
 			dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
-			this->OnSize()(*this, true);
 			break;
 #endif
 
@@ -374,7 +389,19 @@ namespace KlayGE
 	void Window::DetectsDPI()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		typedef NTSTATUS(WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
+		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
+		if (shcore)
+		{
+			typedef HRESULT (WINAPI *SetProcessDpiAwarenessFunc)(PROCESS_DPI_AWARENESS value);
+			SetProcessDpiAwarenessFunc DynamicSetProcessDpiAwareness
+				= reinterpret_cast<SetProcessDpiAwarenessFunc>(::GetProcAddress(shcore, "SetProcessDpiAwareness"));
+
+			DynamicSetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+
+			::FreeLibrary(shcore);
+		}
+
+		typedef NTSTATUS (WINAPI *RtlGetVersionFunc)(OSVERSIONINFOEXW* pVersionInformation);
 		HMODULE ntdll = ::GetModuleHandleW(L"ntdll.dll");
 		KLAYGE_ASSUME(ntdll != nullptr);
 		RtlGetVersionFunc DynamicRtlGetVersion = reinterpret_cast<RtlGetVersionFunc>(::GetProcAddress(ntdll, "RtlGetVersion"));
