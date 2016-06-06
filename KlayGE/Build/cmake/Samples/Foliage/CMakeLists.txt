@@ -105,6 +105,19 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/grass.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass1/Grass4.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a_lod0.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1_nmp.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/leafs1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a_lod0.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2_nmp.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/leafs2.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoggySkyBox.kfx
