@@ -419,8 +419,6 @@ namespace KlayGE
 		this->UpdateSurfacesPtrs();
 
 		re.ResetRenderStates();
-
-		this->OnBind();
 	}
 
 	// 改变窗口位置

@@ -339,6 +339,12 @@ namespace KlayGE
 			}
 		}
 
+		Window::WindowRotation const rotation = main_wnd->Rotation();
+		if ((Window::WR_Rotate90 == rotation) || (Window::WR_Rotate270 == rotation))
+		{
+			std::swap(width_, height_);
+		}
+
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
@@ -509,9 +515,16 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		Window::WindowRotation const rotation = main_wnd->Rotation();
+		if ((Window::WR_Rotate90 == rotation) || (Window::WR_Rotate270 == rotation))
+		{
+			std::swap(width_, height_);
+		}
+
 		// Notify viewports of resize
-		viewport_->width = width;
-		viewport_->height = height;
+		viewport_->width = width_;
+		viewport_->height = height_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
@@ -567,7 +580,7 @@ namespace KlayGE
 
 		if (!!swap_chain_)
 		{
-			swap_chain_->ResizeBuffers(2, width, height, back_buffer_format_, flags);
+			swap_chain_->ResizeBuffers(2, width_, height_, back_buffer_format_, flags);
 		}
 		else
 		{
@@ -602,8 +615,6 @@ namespace KlayGE
 		this->UpdateSurfacesPtrs();
 
 		d3d11_re.ResetRenderStates();
-
-		this->OnBind();
 	}
 
 	// 改变窗口位置
@@ -773,6 +784,47 @@ namespace KlayGE
 	void D3D11RenderWindow::UpdateSurfacesPtrs()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+		if (d3d11_re.DXGISubVer() >= 2)
+		{
+			IDXGISwapChain1* sc1 = nullptr;
+			if (SUCCEEDED(swap_chain_->QueryInterface(&sc1)))
+			{
+				IDXGISwapChain1Ptr swap_chain1 = MakeCOMPtr(sc1);
+
+				WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+				Window::WindowRotation const rotation = main_wnd->Rotation();
+
+				DXGI_MODE_ROTATION dxgi_rotation;
+				switch (rotation)
+				{
+				case Window::WR_Identity:
+					dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
+					break;
+
+				case Window::WR_Rotate90:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
+					break;
+
+				case Window::WR_Rotate180:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
+					break;
+
+				case Window::WR_Rotate270:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
+					break;
+				}
+
+				TIF(swap_chain1->SetRotation(dxgi_rotation));
+			}
+		}
+#endif
 
 		ID3D11Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));

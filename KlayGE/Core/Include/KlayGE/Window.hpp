@@ -76,6 +76,16 @@ namespace KlayGE
 	class KLAYGE_CORE_API Window
 	{
 	public:
+		enum WindowRotation
+		{
+			WR_Unspecified,
+			WR_Identity,
+			WR_Rotate90,
+			WR_Rotate180,
+			WR_Rotate270
+		};
+
+	public:
 		Window(std::string const & name, RenderSettings const & settings);
 		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		~Window();
@@ -95,8 +105,6 @@ namespace KlayGE
 			return wnd_;
 		}
 
-		void DetectsDPI();
-
 		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
 		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
 		void OnClosed();
@@ -105,6 +113,8 @@ namespace KlayGE
 		void OnPointerMoved(ABI::Windows::UI::Core::IPointerEventArgs* args);
 		void OnPointerWheelChanged(ABI::Windows::UI::Core::IPointerEventArgs* args);
 		void OnDpiChanged();
+		void OnOrientationChanged();
+		void OnDisplayContentsInvalidated();
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -189,6 +199,11 @@ namespace KlayGE
 		float DPIScale() const
 		{
 			return dpi_scale_;
+		}
+
+		WindowRotation Rotation() const
+		{
+			return win_rotation_;
 		}
 
 	public:
@@ -376,6 +391,7 @@ namespace KlayGE
 #endif
 		CloseEvent close_event_;
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -384,6 +400,9 @@ namespace KlayGE
 #endif
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+#else
+		void DetectsOrientation();
+#endif
 
 		void DetectsDPI();
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -406,6 +425,7 @@ namespace KlayGE
 		bool closed_;
 
 		float dpi_scale_;
+		WindowRotation win_rotation_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		bool hide_;

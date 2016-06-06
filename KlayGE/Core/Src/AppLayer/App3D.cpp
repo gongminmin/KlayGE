@@ -112,8 +112,10 @@ namespace KlayGE
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		HRESULT OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
+		HRESULT OnOrientationChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
 #else
 		HRESULT OnDpiChanged(IInspectable* sender);
+		HRESULT OnOrientationChanged(IInspectable* sender);
 #endif
 
 	private:
@@ -129,6 +131,7 @@ namespace KlayGE
 		EventRegistrationToken visibility_changed_token_;
 		EventRegistrationToken win_closed_token_;
 		EventRegistrationToken dpi_changed_token_;
+		EventRegistrationToken orientation_changed_token_;
 		EventRegistrationToken pointer_pressed_token_;
 		EventRegistrationToken pointer_released_token_;
 		EventRegistrationToken pointer_moved_token_;
@@ -229,6 +232,10 @@ namespace KlayGE
 		disp_info->add_DpiChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
 			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
 			&dpi_changed_token_);
+
+		disp_info->add_OrientationChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
+			std::bind(&MetroFramework::OnOrientationChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			&orientation_changed_token_);
 #else
 		ComPtr<IDisplayPropertiesStatics> disp_prop;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
@@ -237,6 +244,10 @@ namespace KlayGE
 		disp_prop->add_LogicalDpiChanged(Callback<IDisplayPropertiesEventHandler>(
 			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1)).Get(),
 			&dpi_changed_token_);
+
+		disp_prop->add_OrientationChanged(Callback<IDisplayPropertiesEventHandler>(
+			std::bind(&MetroFramework::OnOrientationChanged, this, std::placeholders::_1)).Get(),
+			&orientation_changed_token_);
 #endif
 
 		app_->MainWnd()->SetWindow(window_);
@@ -270,12 +281,14 @@ namespace KlayGE
 		disp_info_stat->GetForCurrentView(&disp_info);
 
 		disp_info->remove_DpiChanged(dpi_changed_token_);
+		disp_info->remove_OrientationChanged(orientation_changed_token_);
 #else
 		ComPtr<IDisplayPropertiesStatics> disp_prop;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
 			&disp_prop);
 
-		disp_prop->add_LogicalDpiChanged(dpi_changed_token_);
+		disp_prop->remove_LogicalDpiChanged(dpi_changed_token_);
+		disp_prop->remove_OrientationChanged(orientation_changed_token_);
 #endif
 
 		window_->remove_PointerWheelChanged(pointer_wheel_changed_token_);
@@ -428,6 +441,23 @@ namespace KlayGE
 
 		WindowPtr const & win = app_->MainWnd();
 		win->OnDpiChanged();
+
+		return S_OK;
+	}
+
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+	HRESULT MetroFramework::OnOrientationChanged(IDisplayInformation* sender, IInspectable* args)
+#else
+	HRESULT MetroFramework::OnOrientationChanged(IInspectable* sender)
+#endif
+	{
+		KFL_UNUSED(sender);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		KFL_UNUSED(args);
+#endif
+
+		WindowPtr const & win = app_->MainWnd();
+		win->OnOrientationChanged();
 
 		return S_OK;
 	}

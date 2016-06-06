@@ -694,11 +694,16 @@ namespace KlayGE
 				}
 			}
 
+			default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = default_frame_buffers_[3]
+				= screen_frame_buffer_;
+
 			if (stereo_method_ != STM_None)
 			{
 				ElementFormat fmt = mono_tex_->Format();
 				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
+
+				default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = mono_frame_buffer_;
 			}
 			else
 			{
@@ -709,8 +714,6 @@ namespace KlayGE
 					{
 						resize_frame_buffer_ = rf.MakeFrameBuffer();
 						resize_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
-
-						default_frame_buffers_[2] = resize_frame_buffer_;
 					}
 
 					ElementFormat fmt;
@@ -768,11 +771,8 @@ namespace KlayGE
 					{
 						resize_pps_[i]->SetParam(0, pos_scale);
 					}
-				}
-				else if (default_frame_buffers_[2] == resize_frame_buffer_)
-				{
-					resize_frame_buffer_.reset();
-					default_frame_buffers_[2] = screen_frame_buffer_;
+
+					default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = resize_frame_buffer_;
 				}
 			}
 			if (ldr_pp_)
@@ -781,6 +781,8 @@ namespace KlayGE
 				ldr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 				ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
 				ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+				default_frame_buffers_[0] = default_frame_buffers_[1] = ldr_frame_buffer_;
 			}
 			if (hdr_pp_)
 			{
@@ -788,6 +790,8 @@ namespace KlayGE
 				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
 				hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 				hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+				default_frame_buffers_[0] = hdr_frame_buffer_;
 			}
 
 			pp_chain_dirty_ = true;
@@ -796,6 +800,8 @@ namespace KlayGE
 		{
 			this->DoResize(old_screen_width, old_screen_height);
 		}
+
+		this->BindFrameBuffer(default_frame_buffers_[0]);
 
 		App3DFramework& app = Context::Instance().AppInstance();
 		app.OnResize(width, height);

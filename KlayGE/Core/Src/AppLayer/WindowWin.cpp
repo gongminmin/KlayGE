@@ -99,7 +99,7 @@ namespace KlayGE
 #endif
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), hide_(settings.hide_win)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
 		this->DetectsDPI();
 
@@ -166,7 +166,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), hide_(settings.hide_win)
+		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
 		this->DetectsDPI();
 

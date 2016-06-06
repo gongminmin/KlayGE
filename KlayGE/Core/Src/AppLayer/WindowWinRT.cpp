@@ -56,7 +56,7 @@ namespace KlayGE
 {
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false),
-			dpi_scale_(1)
+			dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		Convert(wname_, name);
 
@@ -72,7 +72,7 @@ namespace KlayGE
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false),
-			dpi_scale_(1)
+			dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		KFL_UNUSED(native_wnd);
 
@@ -100,6 +100,7 @@ namespace KlayGE
 		top_ = 0;
 		
 		this->DetectsDPI();
+		this->DetectsOrientation();
 
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		ComPtr<IApplicationViewStatics> app_view_stat;
@@ -121,12 +122,12 @@ namespace KlayGE
 		size.Height = static_cast<float>(height_ / dpi_scale_);
 		app_view_stat3->put_PreferredLaunchViewSize(size);
 		app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
-#else
+#endif
+
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
 		width_ = static_cast<uint32_t>(rc.Width * dpi_scale_ + 0.5f);
 		height_ = static_cast<uint32_t>(rc.Height * dpi_scale_ + 0.5f);
-#endif
 
 		ready_ = true;
 	}
@@ -153,6 +154,90 @@ namespace KlayGE
 #endif
 
 		dpi_scale_ = dpi / 96;
+	}
+
+	void Window::DetectsOrientation()
+	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+		ComPtr<IDisplayInformationStatics> disp_info_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+			&disp_info_stat));
+
+		ComPtr<IDisplayInformation> disp_info;
+		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+
+		DisplayOrientations native_orientation;
+		TIF(disp_info->get_NativeOrientation(&native_orientation));
+
+		DisplayOrientations curr_orientation;
+		TIF(disp_info->get_CurrentOrientation(&curr_orientation));
+#else
+		ComPtr<IDisplayPropertiesStatics> disp_prop;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
+			&disp_prop));
+
+		DisplayOrientations orientation;
+		TIF(disp_prop->get_CurrentOrientation(&orientation));
+#endif
+
+		win_rotation_ = WR_Unspecified;
+
+		switch (native_orientation)
+		{
+		case DisplayOrientations_Landscape:
+			switch (curr_orientation)
+			{
+			case DisplayOrientations_Landscape:
+				win_rotation_ = WR_Identity;
+				break;
+
+			case DisplayOrientations_Portrait:
+				win_rotation_ = WR_Rotate270;
+				break;
+
+			case DisplayOrientations_LandscapeFlipped:
+				win_rotation_ = WR_Rotate180;
+				break;
+
+			case DisplayOrientations_PortraitFlipped:
+				win_rotation_ = WR_Rotate90;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			break;
+
+		case DisplayOrientations_Portrait:
+			switch (curr_orientation)
+			{
+			case DisplayOrientations_Landscape:
+				win_rotation_ = WR_Rotate90;
+				break;
+
+			case DisplayOrientations_Portrait:
+				win_rotation_ = WR_Identity;
+				break;
+
+			case DisplayOrientations_LandscapeFlipped:
+				win_rotation_ = WR_Rotate270;
+				break;
+
+			case DisplayOrientations_PortraitFlipped:
+				win_rotation_ = WR_Rotate180;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			break;
+		}
 	}
 
 	void Window::OnSizeChanged(IWindowSizeChangedEventArgs* args)
@@ -295,6 +380,18 @@ namespace KlayGE
 	void Window::OnDpiChanged()
 	{
 		this->DetectsDPI();
+	}
+
+	void Window::OnOrientationChanged()
+	{
+		this->DetectsOrientation();
+
+		this->OnSize()(*this, true);
+	}
+
+	void Window::OnDisplayContentsInvalidated()
+	{
+		// TODO
 	}
 }
 
