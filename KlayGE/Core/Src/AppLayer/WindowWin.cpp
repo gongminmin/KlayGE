@@ -194,6 +194,8 @@ namespace KlayGE
 #endif
 
 		::UpdateWindow(wnd_);
+
+		ready_ = true;
 	}
 
 	Window::~Window()
@@ -304,6 +306,7 @@ namespace KlayGE
 				}
 				else
 				{
+					active_ = true;
 					this->OnSize()(*this, true);
 				}
 			}
