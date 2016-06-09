@@ -121,6 +121,7 @@ namespace KlayGE
 		IDXGIFactory1* gi_factory;
 		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_1_ = MakeCOMPtr(gi_factory);
+		dxgi_sub_ver_ = 1;
 
 		IDXGIFactory2* gi_factory2;
 		gi_factory->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&gi_factory2));
@@ -142,6 +143,14 @@ namespace KlayGE
 				{
 					gi_factory_4_ = MakeCOMPtr(gi_factory4);
 					dxgi_sub_ver_ = 4;
+
+					IDXGIFactory5* gi_factory5;
+					gi_factory->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory5));
+					if (gi_factory5 != nullptr)
+					{
+						gi_factory_5_ = MakeCOMPtr(gi_factory5);
+						dxgi_sub_ver_ = 5;
+					}
 				}
 			}
 		}
@@ -198,20 +207,25 @@ namespace KlayGE
 	{
 		return gi_factory_1_.get();
 	}
-	
+
 	IDXGIFactory2* D3D11RenderEngine::DXGIFactory2() const
 	{
 		return gi_factory_2_.get();
 	}
-	
+
 	IDXGIFactory3* D3D11RenderEngine::DXGIFactory3() const
 	{
 		return gi_factory_3_.get();
 	}
-	
+
 	IDXGIFactory4* D3D11RenderEngine::DXGIFactory4() const
 	{
 		return gi_factory_4_.get();
+	}
+
+	IDXGIFactory5* D3D11RenderEngine::DXGIFactory5() const
+	{
+		return gi_factory_5_.get();
 	}
 
 	uint8_t D3D11RenderEngine::DXGISubVer() const
@@ -976,6 +990,7 @@ namespace KlayGE
 		gi_factory_2_.reset();
 		gi_factory_3_.reset();
 		gi_factory_4_.reset();
+		gi_factory_5_.reset();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_d3d11_);

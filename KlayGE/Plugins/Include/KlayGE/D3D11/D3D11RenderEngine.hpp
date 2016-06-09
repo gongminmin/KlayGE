@@ -61,6 +61,7 @@ namespace KlayGE
 		IDXGIFactory2* DXGIFactory2() const;
 		IDXGIFactory3* DXGIFactory3() const;
 		IDXGIFactory4* DXGIFactory4() const;
+		IDXGIFactory5* DXGIFactory5() const;
 		uint8_t DXGISubVer() const;
 
 		ID3D11Device* D3DDevice() const;
@@ -187,6 +188,7 @@ namespace KlayGE
 		IDXGIFactory2Ptr gi_factory_2_;
 		IDXGIFactory3Ptr gi_factory_3_;
 		IDXGIFactory4Ptr gi_factory_4_;
+		IDXGIFactory5Ptr gi_factory_5_;
 		uint8_t dxgi_sub_ver_;
 		
 		ID3D11DevicePtr  d3d_device_;

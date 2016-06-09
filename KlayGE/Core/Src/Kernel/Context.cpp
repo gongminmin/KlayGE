@@ -575,7 +575,7 @@ namespace KlayGE
 		if (os_ver_info.dwMajorVersion < 6)
 #endif
 		{
-			if ("D3D11" == rf_name)
+			if (("D3D11" == rf_name) || ("D3D12" == rf_name))
 			{
 				rf_name = "OpenGL";
 			}
@@ -584,7 +584,7 @@ namespace KlayGE
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		rf_name = "D3D11";
 #elif defined(KLAYGE_PLATFORM_LINUX)
-		if ("D3D11" == rf_name)
+		if (("D3D11" == rf_name) || ("D3D12" == rf_name))
 		{
 			rf_name = "OpenGL";
 		}
@@ -599,7 +599,7 @@ namespace KlayGE
 		rf_name = "OpenGLES";
 		af_name = "OpenAL";
 #elif defined(KLAYGE_PLATFORM_DARWIN)
-		if ("D3D11" == rf_name)
+		if (("D3D11" == rf_name) || ("D3D12" == rf_name))
 		{
 			rf_name = "OpenGL";
 		}

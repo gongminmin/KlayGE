@@ -61,9 +61,6 @@ namespace KlayGE
 		name_				= name;
 		isFullScreen_		= settings.full_screen;
 		sync_interval_		= settings.sync_interval;
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		sync_interval_ = std::max(1U, sync_interval_);
-#endif
 
 		ElementFormat format = settings.color_fmt;
 
@@ -108,6 +105,23 @@ namespace KlayGE
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
 			dxgi_stereo_support_ = d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false;
+		}
+		else
+		{
+			dxgi_stereo_support_ = false;
+		}
+		if (d3d11_re.DXGISubVer() >= 5)
+		{
+			BOOL allow_tearing = FALSE;
+			if (SUCCEEDED(d3d11_re.DXGIFactory5()->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+				&allow_tearing, sizeof(allow_tearing))))
+			{
+				dxgi_allow_tearing_ = allow_tearing ? true : false;
+			}
+		}
+		else
+		{
+			dxgi_allow_tearing_ = false;
 		}
 
 		if (d3d_device)
@@ -356,14 +370,35 @@ namespace KlayGE
 			sc_desc1_.Height = this->Height();
 			sc_desc1_.Format = back_buffer_format_;
 			sc_desc1_.Stereo = stereo;
-			sc_desc1_.SampleDesc.Count = stereo ? 1 : std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
-			sc_desc1_.SampleDesc.Quality = stereo ? 0 : settings.sample_quality;
 			sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 			sc_desc1_.BufferCount = 2;
-			sc_desc1_.Scaling = stereo ? DXGI_SCALING_NONE : DXGI_SCALING_STRETCH;
-			sc_desc1_.SwapEffect = stereo ? DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL : DXGI_SWAP_EFFECT_DISCARD;
 			sc_desc1_.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 			sc_desc1_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+			if (stereo)
+			{
+				sc_desc1_.SampleDesc.Count = 1;
+				sc_desc1_.SampleDesc.Quality = 0;
+				sc_desc1_.Scaling = DXGI_SCALING_NONE;
+				sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+			}
+			else
+			{
+				sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
+				sc_desc1_.SampleDesc.Quality = settings.sample_quality;
+				sc_desc1_.Scaling = DXGI_SCALING_STRETCH;
+				if (dxgi_allow_tearing_)
+				{
+					sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+				}
+				else
+				{
+					sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+				}
+			}
+			if (dxgi_allow_tearing_)
+			{
+				sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+			}
 
 			sc_fs_desc_.RefreshRate.Numerator = 60;
 			sc_fs_desc_.RefreshRate.Denominator = 1;
@@ -418,14 +453,32 @@ namespace KlayGE
 		sc_desc1_.Height = this->Height();
 		sc_desc1_.Format = back_buffer_format_;
 		sc_desc1_.Stereo = stereo;
-		sc_desc1_.SampleDesc.Count = stereo ? 1 : std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
-		sc_desc1_.SampleDesc.Quality = stereo ? 0 : settings.sample_quality;
 		sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		sc_desc1_.BufferCount = 2;
 		sc_desc1_.Scaling = DXGI_SCALING_NONE;
-		sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 		sc_desc1_.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		sc_desc1_.Flags = 0;
+		if (stereo)
+		{
+			sc_desc1_.SampleDesc.Count = 1;
+			sc_desc1_.SampleDesc.Quality = 0;
+		}
+		else
+		{
+			sc_desc1_.SampleDesc.Count = std::min(static_cast<uint32_t>(D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT), settings.sample_count);
+			sc_desc1_.SampleDesc.Quality = settings.sample_quality;
+		}
+		if (dxgi_allow_tearing_)
+		{
+			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
+		else
+		{
+			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
+
+			sync_interval_ = std::max(1U, sync_interval_);
+		}
 #endif
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -784,47 +837,50 @@ namespace KlayGE
 	void D3D11RenderWindow::UpdateSurfacesPtrs()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
-		if (d3d11_re.DXGISubVer() >= 2)
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		if (dxgi_allow_tearing_)
+#endif
 		{
-			IDXGISwapChain1* sc1 = nullptr;
-			if (SUCCEEDED(swap_chain_->QueryInterface(&sc1)))
+			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+			if (d3d11_re.DXGISubVer() >= 2)
 			{
-				IDXGISwapChain1Ptr swap_chain1 = MakeCOMPtr(sc1);
-
-				WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-				Window::WindowRotation const rotation = main_wnd->Rotation();
-
-				DXGI_MODE_ROTATION dxgi_rotation;
-				switch (rotation)
+				IDXGISwapChain1* sc1 = nullptr;
+				if (SUCCEEDED(swap_chain_->QueryInterface(&sc1)))
 				{
-				case Window::WR_Identity:
-					dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
-					break;
+					IDXGISwapChain1Ptr swap_chain1 = MakeCOMPtr(sc1);
 
-				case Window::WR_Rotate90:
-					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
-					break;
+					WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+					Window::WindowRotation const rotation = main_wnd->Rotation();
 
-				case Window::WR_Rotate180:
-					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
-					break;
+					DXGI_MODE_ROTATION dxgi_rotation;
+					switch (rotation)
+					{
+					case Window::WR_Identity:
+						dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
+						break;
 
-				case Window::WR_Rotate270:
-					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
-					break;
+					case Window::WR_Rotate90:
+						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
+						break;
 
-				default:
-					BOOST_ASSERT(false);
-					dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
-					break;
+					case Window::WR_Rotate180:
+						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
+						break;
+
+					case Window::WR_Rotate270:
+						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
+						break;
+
+					default:
+						BOOST_ASSERT(false);
+						dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
+						break;
+					}
+
+					TIF(swap_chain1->SetRotation(dxgi_rotation));
 				}
-
-				TIF(swap_chain1->SetRotation(dxgi_rotation));
 			}
 		}
-#endif
 
 		ID3D11Texture2D* back_buffer;
 		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
@@ -869,7 +925,8 @@ namespace KlayGE
 	{
 		if (swap_chain_)
 		{
-			TIF(swap_chain_->Present(sync_interval_, 0));
+			UINT const present_flags = (dxgi_allow_tearing_ && !isFullScreen_) ? DXGI_PRESENT_ALLOW_TEARING : 0;
+			TIF(swap_chain_->Present(sync_interval_, present_flags));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());

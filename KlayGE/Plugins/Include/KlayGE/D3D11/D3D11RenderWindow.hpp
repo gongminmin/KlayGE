@@ -122,6 +122,7 @@ namespace KlayGE
 
 		D3D11AdapterPtr			adapter_;
 		bool dxgi_stereo_support_;
+		bool dxgi_allow_tearing_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;

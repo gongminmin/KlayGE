@@ -80,7 +80,10 @@ namespace KlayGE
 		void BeginFrame() override;
 		void UpdateGPUTimestampsFrequency() override;
 
-		IDXGIFactory4Ptr const & DXGIFactory() const;
+		IDXGIFactory4* DXGIFactory4() const;
+		IDXGIFactory5* DXGIFactory5() const;
+		uint8_t DXGISubVer() const;
+
 		ID3D12DevicePtr const & D3DDevice() const;
 		ID3D12CommandQueuePtr const & D3DRenderCmdQueue() const;
 		ID3D12CommandAllocatorPtr const & D3DRenderCmdAllocator() const;
@@ -251,7 +254,10 @@ namespace KlayGE
 
 		// Direct3D rendering device
 		// Only created after top-level window created
-		IDXGIFactory4Ptr gi_factory_;
+		IDXGIFactory4Ptr gi_factory_4_;
+		IDXGIFactory5Ptr gi_factory_5_;
+		uint8_t dxgi_sub_ver_;
+
 		ID3D12DevicePtr d3d_device_;
 		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
 		ID3D12CommandAllocatorPtr d3d_render_cmd_allocator_;

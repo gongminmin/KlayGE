@@ -77,9 +77,18 @@ namespace KlayGE
 
 		IDXGIFactory4* gi_factory;
 		TIF(D3D12InterfaceLoader::Instance().CreateDXGIFactory1(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory)));
-		gi_factory_ = MakeCOMPtr(gi_factory);
+		gi_factory_4_ = MakeCOMPtr(gi_factory);
+		dxgi_sub_ver_ = 4;
 
-		adapterList_.Enumerate(gi_factory_);
+		IDXGIFactory5* gi_factory5;
+		gi_factory->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory5));
+		if (gi_factory5 != nullptr)
+		{
+			gi_factory_5_ = MakeCOMPtr(gi_factory5);
+			dxgi_sub_ver_ = 5;
+		}
+
+		adapterList_.Enumerate(gi_factory_4_);
 	}
 
 	// 析构函数
@@ -117,11 +126,19 @@ namespace KlayGE
 		}
 	}
 
-	// 获取D3D接口
-	/////////////////////////////////////////////////////////////////////////////////
-	IDXGIFactory4Ptr const & D3D12RenderEngine::DXGIFactory() const
+	IDXGIFactory4* D3D12RenderEngine::DXGIFactory4() const
 	{
-		return gi_factory_;
+		return gi_factory_4_.get();
+	}
+
+	IDXGIFactory5* D3D12RenderEngine::DXGIFactory5() const
+	{
+		return gi_factory_5_.get();
+	}
+
+	uint8_t D3D12RenderEngine::DXGISubVer() const
+	{
+		return dxgi_sub_ver_;
 	}
 
 	ID3D12DevicePtr const & D3D12RenderEngine::D3DDevice() const
@@ -210,8 +227,7 @@ namespace KlayGE
 	{
 		motion_frames_ = settings.motion_frames;
 
-		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(gi_factory_, this->ActiveAdapter(),
-			name, settings);
+		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(this->ActiveAdapter(), name, settings);
 
 		switch (d3d_feature_level_)
 		{
@@ -239,15 +255,9 @@ namespace KlayGE
 		{
 			stereo_method_ = SM_None;
 
-			IDXGIFactory2* factory;
-			gi_factory_->QueryInterface(IID_IDXGIFactory2, reinterpret_cast<void**>(&factory));
-			if (factory != nullptr)
+			if (gi_factory_4_->IsWindowedStereoEnabled())
 			{
-				if (factory->IsWindowedStereoEnabled())
-				{
-					stereo_method_ = SM_DXGI;
-				}
-				factory->Release();
+				stereo_method_ = SM_DXGI;
 			}
 		}
 
@@ -1388,7 +1398,8 @@ namespace KlayGE
 		d3d_copy_cmd_queue_.reset();
 		d3d_device_.reset();
 
-		gi_factory_.reset();
+		gi_factory_4_.reset();
+		gi_factory_5_.reset();
 	}
 
 	void D3D12RenderEngine::DoSuspend()
