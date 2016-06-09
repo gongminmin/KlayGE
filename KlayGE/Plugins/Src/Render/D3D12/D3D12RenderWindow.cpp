@@ -261,6 +261,12 @@ namespace KlayGE
 
 		depth_stencil_fmt_ = settings.depth_stencil_fmt;
 
+		Window::WindowRotation const rotation = main_wnd->Rotation();
+		if ((Window::WR_Rotate90 == rotation) || (Window::WR_Rotate270 == rotation))
+		{
+			std::swap(width_, height_);
+		}
+
 		bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -347,9 +353,16 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		Window::WindowRotation const rotation = main_wnd->Rotation();
+		if ((Window::WR_Rotate90 == rotation) || (Window::WR_Rotate270 == rotation))
+		{
+			std::swap(width_, height_);
+		}
+
 		// Notify viewports of resize
-		viewport_->width = width;
-		viewport_->height = height;
+		viewport_->width = width_;
+		viewport_->height = height_;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
@@ -389,7 +402,7 @@ namespace KlayGE
 
 		if (!!swap_chain_)
 		{
-			swap_chain_->ResizeBuffers(2, width, height, back_buffer_format_, flags);
+			swap_chain_->ResizeBuffers(2, width_, height_, back_buffer_format_, flags);
 		}
 		else
 		{
@@ -562,6 +575,37 @@ namespace KlayGE
 	void D3D12RenderWindow::UpdateSurfacesPtrs()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		Window::WindowRotation const rotation = main_wnd->Rotation();
+
+		DXGI_MODE_ROTATION dxgi_rotation;
+		switch (rotation)
+		{
+		case Window::WR_Identity:
+			dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
+			break;
+
+		case Window::WR_Rotate90:
+			dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
+			break;
+
+		case Window::WR_Rotate180:
+			dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
+			break;
+
+		case Window::WR_Rotate270:
+			dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
+			break;
+
+		default:
+			BOOST_ASSERT(false);
+			dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
+			break;
+		}
+
+		TIF(swap_chain_->SetRotation(dxgi_rotation));
+#endif
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
