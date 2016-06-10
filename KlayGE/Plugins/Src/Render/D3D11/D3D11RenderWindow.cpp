@@ -606,6 +606,10 @@ namespace KlayGE
 		{
 			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
 		}
+		if (dxgi_allow_tearing_)
+		{
+			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
 
 		this->OnUnbind();
 
