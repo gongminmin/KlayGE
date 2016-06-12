@@ -55,7 +55,7 @@ namespace KlayGE
 #else
 						:
 #endif
-							adapter_(adapter)
+							adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false)
 	{
 		// Store info
 		name_				= name;
@@ -106,10 +106,6 @@ namespace KlayGE
 		{
 			dxgi_stereo_support_ = d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false;
 		}
-		else
-		{
-			dxgi_stereo_support_ = false;
-		}
 		if (d3d11_re.DXGISubVer() >= 5)
 		{
 			BOOL allow_tearing = FALSE;
@@ -118,10 +114,6 @@ namespace KlayGE
 			{
 				dxgi_allow_tearing_ = allow_tearing ? true : false;
 			}
-		}
-		else
-		{
-			dxgi_allow_tearing_ = false;
 		}
 
 		if (d3d_device)

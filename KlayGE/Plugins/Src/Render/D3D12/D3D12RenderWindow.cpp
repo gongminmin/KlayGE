@@ -72,7 +72,7 @@ namespace KlayGE
 #else
 						:
 #endif
-							adapter_(adapter)
+							adapter_(adapter), dxgi_allow_tearing_(false)
 	{
 		// Store info
 		name_				= name;
@@ -121,10 +121,6 @@ namespace KlayGE
 			{
 				dxgi_allow_tearing_ = allow_tearing ? true : false;
 			}
-		}
-		else
-		{
-			dxgi_allow_tearing_ = false;
 		}
 
 		viewport_->left		= 0;
