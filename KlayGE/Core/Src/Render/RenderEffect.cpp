@@ -3019,9 +3019,11 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 			if (source)
 			{
-				macros_.reset();
 				effect.params_.clear();
 				effect.cbuffers_.clear();
+				effect.shader_objs_.clear();
+
+				macros_.reset();
 				shader_frags_.clear();
 				hlsl_shader_.clear();
 				techniques_.clear();
