@@ -781,7 +781,7 @@ void GPUParticleSystemApp::OnCreate()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
 	use_gs = caps.gs_support;
-	use_cs = caps.cs_support;
+	use_cs = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 	if (!use_cs)
 	{
 		use_so = caps.stream_output_support;
