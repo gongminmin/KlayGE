@@ -157,6 +157,7 @@ namespace KlayGE
 
 		std::string exe_path_;
 		std::vector<std::string> paths_;
+		std::mutex paths_mutex_;
 
 		std::mutex loaded_mutex_;
 		std::mutex loading_mutex_;

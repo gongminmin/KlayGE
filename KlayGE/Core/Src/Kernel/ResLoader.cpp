@@ -317,6 +317,8 @@ namespace KlayGE
 
 	void ResLoader::AddPath(std::string const & path)
 	{
+		std::lock_guard<std::mutex> lock(paths_mutex_);
+
 		std::string real_path = this->RealPath(path);
 		if (!real_path.empty())
 		{
@@ -326,6 +328,8 @@ namespace KlayGE
 
 	void ResLoader::DelPath(std::string const & path)
 	{
+		std::lock_guard<std::mutex> lock(paths_mutex_);
+
 		std::string real_path = this->RealPath(path);
 		if (!real_path.empty())
 		{
@@ -351,29 +355,31 @@ namespace KlayGE
 #else
 		using namespace std::experimental;
 
-		for (auto const & path : paths_)
 		{
-			std::string const res_name(path + name);
+			std::lock_guard<std::mutex> lock(paths_mutex_);
+			for (auto const & path : paths_)
+			{
+				std::string const res_name(path + name);
 
-			if (filesystem::exists(filesystem::path(res_name)))
-			{
-				return res_name;
-			}
-			else
-			{
-				std::string password;
-				std::string internal_name;
-				ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
-				if (pkt_file && *pkt_file)
+				if (filesystem::exists(filesystem::path(res_name)))
 				{
-					if (Find7z(pkt_file, password, internal_name) != 0xFFFFFFFF)
+					return res_name;
+				}
+				else
+				{
+					std::string password;
+					std::string internal_name;
+					ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
+					if (pkt_file && *pkt_file)
 					{
-						return res_name;
+						if (Find7z(pkt_file, password, internal_name) != 0xFFFFFFFF)
+						{
+							return res_name;
+						}
 					}
 				}
 			}
 		}
-
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		std::string const & res_name = LocateFileWinRT(name);
 		if (!res_name.empty())
@@ -412,35 +418,37 @@ namespace KlayGE
 				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 		}
 #else
-		for (auto const & path : paths_)
 		{
-			std::string const res_name(path + name);
+			std::lock_guard<std::mutex> lock(paths_mutex_);
+			for (auto const & path : paths_)
+			{
+				std::string const res_name(path + name);
 
-			filesystem::path res_path(res_name);
-			if (filesystem::exists(res_path))
-			{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
-				uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
-#else
-				uint64_t timestamp = filesystem::last_write_time(res_path);
-#endif
-				return MakeSharedPtr<ResIdentifier>(name, timestamp,
-					MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
-			}
-			else
-			{
-				std::string password;
-				std::string internal_name;
-				ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
-				if (pkt_file && *pkt_file)
+				filesystem::path res_path(res_name);
+				if (filesystem::exists(res_path))
 				{
-					std::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
-					Extract7z(pkt_file, password, internal_name, packet_file);
-					return MakeSharedPtr<ResIdentifier>(name, pkt_file->Timestamp(), packet_file);
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+					uint64_t timestamp = filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
+					uint64_t timestamp = filesystem::last_write_time(res_path);
+#endif
+					return MakeSharedPtr<ResIdentifier>(name, timestamp,
+						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+				}
+				else
+				{
+					std::string password;
+					std::string internal_name;
+					ResIdentifierPtr pkt_file = LocatePkt(name, res_name, password, internal_name);
+					if (pkt_file && *pkt_file)
+					{
+						std::shared_ptr<std::iostream> packet_file = MakeSharedPtr<std::stringstream>();
+						Extract7z(pkt_file, password, internal_name, packet_file);
+						return MakeSharedPtr<ResIdentifier>(name, pkt_file->Timestamp(), packet_file);
+					}
 				}
 			}
 		}
-
 #if defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		std::string const & res_name = LocateFileWinRT(name);
 		if (!res_name.empty())
