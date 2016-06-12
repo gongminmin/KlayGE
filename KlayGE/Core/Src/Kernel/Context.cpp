@@ -435,7 +435,7 @@ namespace KlayGE
 			}
 
 			XMLNodePtr ppaa_node = graphics_node->FirstNode("ppaa");
-			attr = hdr_node->Attrib("value");
+			attr = ppaa_node->Attrib("value");
 			if (attr)
 			{
 				std::string const & ppaa_str = attr->ValueString();

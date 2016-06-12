@@ -23,7 +23,9 @@ float3 DebugFxaaPixelShader(float2 pos)
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	[branch]
+#endif
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
 		return lumaM / (1 + (0.587f / 0.299f));
@@ -91,7 +93,9 @@ float3 FxaaPixelShader(float2 pos)
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
+#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	[branch]
+#endif
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
 		return rgbyM.xyz;
