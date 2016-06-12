@@ -106,7 +106,7 @@ namespace KlayGE
 
 	private:
 		void UpdateSurfacesPtrs();
-		void ResetDevice();
+		void CreateSwapChain(ID3D11Device* d3d_device);
 
 	private:
 		std::string	name_;
@@ -133,12 +133,13 @@ namespace KlayGE
 		DXGI_SWAP_CHAIN_DESC1 sc_desc1_;
 #endif
 		IDXGISwapChainPtr		swap_chain_;
+		IDXGISwapChain1Ptr		swap_chain_1_;
 		bool					main_wnd_;
 
 		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
 		uint32_t stereo_amd_right_eye_height_;
 
-		TexturePtr			        back_buffer_;
+		TexturePtr					back_buffer_;
 		TexturePtr					depth_stencil_;
 		RenderViewPtr				render_target_view_;
 		RenderViewPtr				depth_stencil_view_;

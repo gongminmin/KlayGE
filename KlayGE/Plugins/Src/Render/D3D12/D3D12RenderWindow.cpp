@@ -336,26 +336,13 @@ namespace KlayGE
 		sc_fs_desc_.Windowed = !this->FullScreen();
 #endif
 
-		IDXGISwapChain1* sc = nullptr;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		d3d12_re.DXGIFactory4()->CreateSwapChainForHwnd(d3d_cmd_queue.get(), hWnd_,
-			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
-#else
-		d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(d3d_cmd_queue.get(),
-			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
-#endif
-
-		IDXGISwapChain3* sc3 = nullptr;
-		sc->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3));
-		swap_chain_ = MakeCOMPtr(sc3);
-		sc->Release();
+		this->CreateSwapChain(d3d_cmd_queue.get());
+		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		d3d12_re.DXGIFactory4()->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
-
-		Verify(!!swap_chain_);
 
 		curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 
@@ -443,25 +430,12 @@ namespace KlayGE
 		{
 			ID3D12CommandQueuePtr const & cmd_queue = d3d12_re.D3DRenderCmdQueue();
 
-			IDXGISwapChain1* sc = nullptr;
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			d3d12_re.DXGIFactory4()->CreateSwapChainForHwnd(cmd_queue.get(), hWnd_,
-				&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
-#else
-			d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(cmd_queue.get(),
-				static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
-#endif
-
-			IDXGISwapChain3* sc3 = nullptr;
-			sc->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3));
-			swap_chain_ = MakeCOMPtr(sc3);
-			sc->Release();
+			this->CreateSwapChain(cmd_queue.get());
+			Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
-
-			Verify(!!swap_chain_);
 		}
 
 		this->UpdateSurfacesPtrs();
@@ -679,6 +653,26 @@ namespace KlayGE
 				this->Attach(ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*depth_stencil_, 1, 1, 0));
 			}
 		}
+	}
+
+	void D3D12RenderWindow::CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+
+		IDXGISwapChain1* sc = nullptr;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		d3d12_re.DXGIFactory4()->CreateSwapChainForHwnd(d3d_cmd_queue, hWnd_,
+			&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
+#else
+		d3d12_re.DXGIFactory4()->CreateSwapChainForCoreWindow(d3d_cmd_queue,
+			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
+#endif
+
+		IDXGISwapChain3* sc3 = nullptr;
+		sc->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3));
+		swap_chain_ = MakeCOMPtr(sc3);
+		sc->Release();
 	}
 
 	void D3D12RenderWindow::SwapBuffers()

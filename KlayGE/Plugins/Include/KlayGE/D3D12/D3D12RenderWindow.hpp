@@ -117,7 +117,7 @@ namespace KlayGE
 
 	private:
 		void UpdateSurfacesPtrs();
-		void ResetDevice();
+		void CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue);
 		void WaitForGPU();
 
 	private:

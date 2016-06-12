@@ -519,31 +519,15 @@ namespace KlayGE
 				}
 			}
 		}
-
-		if (d3d11_re.DXGISubVer() >= 2)
-		{
-			IDXGISwapChain1* sc = nullptr;
-			d3d11_re.DXGIFactory2()->CreateSwapChainForHwnd(d3d_device, hWnd_,
-				&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
-		}
-		else
-		{
-			IDXGISwapChain* sc = nullptr;
-			d3d11_re.DXGIFactory1()->CreateSwapChain(d3d_device, &sc_desc_, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
-		}
-
-		d3d11_re.DXGIFactory1()->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
-		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
-#else
-		IDXGISwapChain1* sc = nullptr;
-		d3d11_re.DXGIFactory2()->CreateSwapChainForCoreWindow(d3d_device,
-			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
-		swap_chain_ = MakeCOMPtr(sc);
 #endif
 
+		this->CreateSwapChain(d3d_device);
 		Verify(!!swap_chain_);
+
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		d3d11_re.DXGIFactory1()->MakeWindowAssociation(hWnd_, DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER);
+		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
+#endif
 
 		this->UpdateSurfacesPtrs();
 	}
@@ -624,6 +608,8 @@ namespace KlayGE
 		}
 		else
 		{
+			dxgi_stereo_support_ = false;
+
 			sc_desc_.BufferDesc.Width = width_;
 			sc_desc_.BufferDesc.Height = height_;
 		}
@@ -642,31 +628,12 @@ namespace KlayGE
 		else
 		{
 			ID3D11Device* d3d_device = d3d11_re.D3DDevice();
+			this->CreateSwapChain(d3d_device);
+			Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			if (d3d11_re.DXGISubVer() >= 2)
-			{
-				IDXGISwapChain1* sc = nullptr;
-				d3d11_re.DXGIFactory2()->CreateSwapChainForHwnd(d3d_device, hWnd_,
-					&sc_desc1_, &sc_fs_desc_, nullptr, &sc);
-				swap_chain_ = MakeCOMPtr(sc);
-			}
-			else
-			{
-				IDXGISwapChain* sc = nullptr;
-				d3d11_re.DXGIFactory1()->CreateSwapChain(d3d_device, &sc_desc_, &sc);
-				swap_chain_ = MakeCOMPtr(sc);
-			}
-
 			swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
-#else
-			IDXGISwapChain1* sc = nullptr;
-			d3d11_re.DXGIFactory2()->CreateSwapChainForCoreWindow(d3d_device,
-				static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc);
-			swap_chain_ = MakeCOMPtr(sc);
 #endif
-
-			Verify(!!swap_chain_);
 		}
 
 		this->UpdateSurfacesPtrs();
@@ -848,41 +815,37 @@ namespace KlayGE
 			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
 			if (d3d11_re.DXGISubVer() >= 2)
 			{
-				IDXGISwapChain1* sc1 = nullptr;
-				if (SUCCEEDED(swap_chain_->QueryInterface(&sc1)))
+				BOOST_ASSERT(swap_chain_1_);
+
+				WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+				Window::WindowRotation const rotation = main_wnd->Rotation();
+
+				DXGI_MODE_ROTATION dxgi_rotation;
+				switch (rotation)
 				{
-					IDXGISwapChain1Ptr swap_chain1 = MakeCOMPtr(sc1);
+				case Window::WR_Identity:
+					dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
+					break;
 
-					WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
-					Window::WindowRotation const rotation = main_wnd->Rotation();
+				case Window::WR_Rotate90:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
+					break;
 
-					DXGI_MODE_ROTATION dxgi_rotation;
-					switch (rotation)
-					{
-					case Window::WR_Identity:
-						dxgi_rotation = DXGI_MODE_ROTATION_IDENTITY;
-						break;
+				case Window::WR_Rotate180:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
+					break;
 
-					case Window::WR_Rotate90:
-						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE90;
-						break;
+				case Window::WR_Rotate270:
+					dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
+					break;
 
-					case Window::WR_Rotate180:
-						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE180;
-						break;
-
-					case Window::WR_Rotate270:
-						dxgi_rotation = DXGI_MODE_ROTATION_ROTATE270;
-						break;
-
-					default:
-						BOOST_ASSERT(false);
-						dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
-						break;
-					}
-
-					TIF(swap_chain1->SetRotation(dxgi_rotation));
+				default:
+					BOOST_ASSERT(false);
+					dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
+					break;
 				}
+
+				TIF(swap_chain_1_->SetRotation(dxgi_rotation));
 			}
 		}
 
@@ -923,6 +886,47 @@ namespace KlayGE
 		{
 			this->Attach(ATT_DepthStencil, depth_stencil_view_);
 		}
+	}
+
+	void D3D11RenderWindow::CreateSwapChain(ID3D11Device* d3d_device)
+	{
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
+
+#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		if (d3d11_re.DXGISubVer() >= 2)
+		{
+			IDXGISwapChain1* sc1 = nullptr;
+			d3d11_re.DXGIFactory2()->CreateSwapChainForHwnd(d3d_device, hWnd_,
+				&sc_desc1_, &sc_fs_desc_, nullptr, &sc1);
+			swap_chain_1_ = MakeCOMPtr(sc1);
+
+			IDXGISwapChain* sc;
+			swap_chain_1_->QueryInterface(IID_IDXGISwapChain, reinterpret_cast<void**>(&sc));
+			swap_chain_ = MakeCOMPtr(sc);
+		}
+		else
+		{
+			IDXGISwapChain* sc = nullptr;
+			d3d11_re.DXGIFactory1()->CreateSwapChain(d3d_device, &sc_desc_, &sc);
+			swap_chain_ = MakeCOMPtr(sc);
+
+			IDXGISwapChain1* sc1;
+			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain1, reinterpret_cast<void**>(&sc1))))
+			{
+				swap_chain_1_ = MakeCOMPtr(sc1);
+			}
+		}
+#else
+		IDXGISwapChain1* sc1 = nullptr;
+		d3d11_re.DXGIFactory2()->CreateSwapChainForCoreWindow(d3d_device,
+			static_cast<IUnknown*>(wnd_.get()), &sc_desc1_, nullptr, &sc1);
+		swap_chain_1_ = MakeCOMPtr(sc1);
+
+		IDXGISwapChain* sc;
+		swap_chain_1_->QueryInterface(IID_IDXGISwapChain, reinterpret_cast<void**>(&sc));
+		swap_chain_ = MakeCOMPtr(sc);
+#endif
 	}
 
 	void D3D11RenderWindow::SwapBuffers()
