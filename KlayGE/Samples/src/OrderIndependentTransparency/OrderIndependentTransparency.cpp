@@ -37,7 +37,12 @@ namespace
 	{
 	public:
 		RenderPolygon(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+			: StaticMesh(model, name),
+				no_oit_tech_(nullptr),
+				dp_1st_tech_(nullptr), dp_nth_tech_(nullptr), dp_1st_depth_tech_(nullptr), dp_nth_depth_tech_(nullptr),
+				gen_ppll_tech_(nullptr),
+				ppll_render_tech_(nullptr),
+				at_render_tech_(nullptr)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
