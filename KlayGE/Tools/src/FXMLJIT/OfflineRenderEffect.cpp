@@ -61,7 +61,7 @@ namespace
 	using namespace KlayGE;
 	using namespace KlayGE::Offline;
 
-	uint32_t const KFX_VERSION = 0x0108;
+	uint32_t const KFX_VERSION = 0x0109;
 
 	std::mutex singleton_mutex;
 
@@ -2391,6 +2391,10 @@ namespace KlayGE
 
 			uint32_t shader_ver = Native2LE(caps_.native_shader_version);
 			os.write(reinterpret_cast<char const *>(&shader_ver), sizeof(shader_ver));
+
+			uint8_t shader_platform_name_len = static_cast<uint8_t>(caps_.platform.size());
+			os.write(reinterpret_cast<char const *>(&shader_platform_name_len), sizeof(shader_platform_name_len));
+			os.write(&caps_.platform[0], shader_platform_name_len);
 
 			uint64_t timestamp = Native2LE(timestamp_);
 			os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));

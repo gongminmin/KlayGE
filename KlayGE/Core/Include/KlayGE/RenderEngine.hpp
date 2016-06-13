@@ -151,6 +151,10 @@ namespace KlayGE
 		{
 			return native_shader_version_;
 		}
+		std::string NativeShaderPlatformName() const
+		{
+			return native_shader_platform_name_;
+		}
 
 		void PostProcess(bool skip);
 
@@ -352,6 +356,7 @@ namespace KlayGE
 
 		uint32_t native_shader_fourcc_;
 		uint32_t native_shader_version_;
+		std::string native_shader_platform_name_;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;

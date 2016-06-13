@@ -217,6 +217,23 @@ namespace KlayGE
 
 		FrameBufferPtr win = MakeSharedPtr<OGLESRenderWindow>(name, settings);
 
+		if (glloader_GLES_VERSION_3_2())
+		{
+			native_shader_platform_name_ = "gles_3_2";
+		}
+		else if (glloader_GLES_VERSION_3_1())
+		{
+			native_shader_platform_name_ = "gles_3_1";
+		}
+		else if (glloader_GLES_VERSION_3_0())
+		{
+			native_shader_platform_name_ = "gles_3_0";
+		}
+		else if (glloader_GLES_VERSION_2_0())
+		{
+			native_shader_platform_name_ = "gles_2_0";
+		}
+
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
 

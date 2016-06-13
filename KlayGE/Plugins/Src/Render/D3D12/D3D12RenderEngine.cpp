@@ -1489,6 +1489,29 @@ namespace KlayGE
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
+			native_shader_platform_name_ = "d3d_12_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_12_0:
+			native_shader_platform_name_ = "d3d_12_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_11_1:
+			native_shader_platform_name_ = "d3d_11_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_11_0:
+			native_shader_platform_name_ = "d3d_11_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_9_1:
+			BOOST_ASSERT(false);
+			break;
+		}
+
+		switch (d3d_feature_level_)
+		{
+		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:

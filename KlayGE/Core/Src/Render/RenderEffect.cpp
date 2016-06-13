@@ -75,7 +75,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0108;
+	uint32_t const KFX_VERSION = 0x0109;
 
 	std::mutex singleton_mutex;
 
@@ -3220,7 +3220,13 @@ namespace KlayGE
 				source->read(&shader_ver, sizeof(shader_ver));
 				shader_ver = LE2Native(shader_ver);
 
-				if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver))
+				uint8_t shader_platform_name_len;
+				source->read(&shader_platform_name_len, sizeof(shader_platform_name_len));
+				std::string shader_platform_name(shader_platform_name_len, 0);
+				source->read(&shader_platform_name[0], shader_platform_name_len);
+
+				if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver)
+					&& (re.NativeShaderPlatformName() == shader_platform_name))
 				{
 					uint64_t timestamp;
 					source->read(&timestamp, sizeof(timestamp));
@@ -3350,6 +3356,10 @@ namespace KlayGE
 
 		uint32_t shader_ver = Native2LE(re.NativeShaderVersion());
 		os.write(reinterpret_cast<char const *>(&shader_ver), sizeof(shader_ver));
+
+		uint8_t shader_platform_name_len = static_cast<uint8_t>(re.NativeShaderPlatformName().size());
+		os.write(reinterpret_cast<char const *>(&shader_platform_name_len), sizeof(shader_platform_name_len));
+		os.write(&re.NativeShaderPlatformName()[0], shader_platform_name_len);
 
 		uint64_t timestamp = Native2LE(timestamp_);
 		os.write(reinterpret_cast<char const *>(&timestamp), sizeof(timestamp));

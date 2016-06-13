@@ -307,7 +307,7 @@ namespace KlayGE
 		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(this->ActiveAdapter(),
 			name, settings);
 
-		switch (static_cast<uint32_t>(d3d_feature_level_))
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -355,6 +355,46 @@ namespace KlayGE
 			cs_profile_ = "";
 			hs_profile_ = "";
 			ds_profile_ = "";
+			break;
+		}
+
+		switch (d3d_feature_level_)
+		{
+		case D3D_FEATURE_LEVEL_12_1:
+			native_shader_platform_name_ = "d3d_12_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_12_0:
+			native_shader_platform_name_ = "d3d_12_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_11_1:
+			native_shader_platform_name_ = "d3d_11_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_11_0:
+			native_shader_platform_name_ = "d3d_11_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_10_1:
+			native_shader_platform_name_ = "d3d_10_1";
+			break;
+
+		case D3D_FEATURE_LEVEL_10_0:
+			native_shader_platform_name_ = "d3d_10_0";
+			break;
+
+		case D3D_FEATURE_LEVEL_9_3:
+			native_shader_platform_name_ = "d3d_9_3";
+			break;
+
+		case D3D_FEATURE_LEVEL_9_2:
+			native_shader_platform_name_ = "d3d_9_2";
+			break;
+
+		case D3D_FEATURE_LEVEL_9_1:
+		default:
+			native_shader_platform_name_ = "d3d_9_1";
 			break;
 		}
 
@@ -1059,7 +1099,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_device_);
 
-		switch (static_cast<uint32_t>(d3d_feature_level_))
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -1140,7 +1180,7 @@ namespace KlayGE
 			break;
 		}
 
-		switch (static_cast<uint32_t>(d3d_feature_level_))
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
@@ -1164,7 +1204,7 @@ namespace KlayGE
 			caps_.max_vertex_streams = 16;
 			break;
 		}
-		switch (static_cast<uint32_t>(d3d_feature_level_))
+		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:

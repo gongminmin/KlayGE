@@ -243,6 +243,51 @@ namespace KlayGE
 
 		FrameBufferPtr win = MakeSharedPtr<OGLRenderWindow>(name, settings);
 
+		if (glloader_GL_VERSION_4_5())
+		{
+			native_shader_platform_name_ = "gl_4_5";
+		}
+		else if (glloader_GL_VERSION_4_4())
+		{
+			native_shader_platform_name_ = "gl_4_4";
+		}
+		else if (glloader_GL_VERSION_4_3())
+		{
+			native_shader_platform_name_ = "gl_4_3";
+		}
+		else if (glloader_GL_VERSION_4_2())
+		{
+			native_shader_platform_name_ = "gl_4_2";
+		}
+		else if (glloader_GL_VERSION_4_1())
+		{
+			native_shader_platform_name_ = "gl_4_1";
+		}
+		else if (glloader_GL_VERSION_4_0())
+		{
+			native_shader_platform_name_ = "gl_4_0";
+		}
+		else if (glloader_GL_VERSION_3_3())
+		{
+			native_shader_platform_name_ = "gl_3_3";
+		}
+		else if (glloader_GL_VERSION_3_2())
+		{
+			native_shader_platform_name_ = "gl_3_2";
+		}
+		else if (glloader_GL_VERSION_3_1())
+		{
+			native_shader_platform_name_ = "gl_3_1";
+		}
+		else if (glloader_GL_VERSION_3_0())
+		{
+			native_shader_platform_name_ = "gl_3_0";
+		}
+		else //if (glloader_GL_VERSION_2_1())
+		{
+			native_shader_platform_name_ = "gl_2_1";
+		}
+
 		this->FillRenderDeviceCaps();
 		this->InitRenderStates();
 
