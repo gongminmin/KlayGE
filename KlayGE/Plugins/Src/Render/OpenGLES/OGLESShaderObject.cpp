@@ -1559,6 +1559,7 @@ namespace KlayGE
 									{
 										parameter_bind_t pb;
 										pb.combined_sampler_name = std::get<0>(tex_sampler_binds_[i]);
+										pb.param = nullptr;
 										pb.location = location;
 										pb.shader_type = type;
 										pb.tex_sampler_bind_index = static_cast<int>(i);
@@ -1710,6 +1711,7 @@ namespace KlayGE
 						{
 							parameter_bind_t new_pb;
 							new_pb.combined_sampler_name = pname;
+							new_pb.param = nullptr;
 							new_pb.location = pb.location;
 							new_pb.shader_type = pb.shader_type;
 							new_pb.tex_sampler_bind_index = pb.tex_sampler_bind_index;
