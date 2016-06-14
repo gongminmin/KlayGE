@@ -313,6 +313,7 @@ namespace KlayGE
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
+			native_shader_platform_name_ = "d3d_11_0";
 			vs_profile_ = "vs_5_0";
 			ps_profile_ = "ps_5_0";
 			gs_profile_ = "gs_5_0";
@@ -322,6 +323,7 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_10_1:
+			native_shader_platform_name_ = "d3d_10_1";
 			vs_profile_ = "vs_4_1";
 			ps_profile_ = "ps_4_1";
 			gs_profile_ = "gs_4_1";
@@ -331,6 +333,7 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_10_0:
+			native_shader_platform_name_ = "d3d_10_0";
 			vs_profile_ = "vs_4_0";
 			ps_profile_ = "ps_4_0";
 			gs_profile_ = "gs_4_0";
@@ -340,6 +343,7 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
+			native_shader_platform_name_ = "d3d_9_3";
 			vs_profile_ = "vs_4_0_level_9_3";
 			ps_profile_ = "ps_4_0_level_9_3";
 			gs_profile_ = "";
@@ -349,52 +353,13 @@ namespace KlayGE
 			break;
 
 		default:
+			native_shader_platform_name_ = "d3d_9_1";
 			vs_profile_ = "vs_4_0_level_9_1";
 			ps_profile_ = "ps_4_0_level_9_1";
 			gs_profile_ = "";
 			cs_profile_ = "";
 			hs_profile_ = "";
 			ds_profile_ = "";
-			break;
-		}
-
-		switch (d3d_feature_level_)
-		{
-		case D3D_FEATURE_LEVEL_12_1:
-			native_shader_platform_name_ = "d3d_12_1";
-			break;
-
-		case D3D_FEATURE_LEVEL_12_0:
-			native_shader_platform_name_ = "d3d_12_0";
-			break;
-
-		case D3D_FEATURE_LEVEL_11_1:
-			native_shader_platform_name_ = "d3d_11_1";
-			break;
-
-		case D3D_FEATURE_LEVEL_11_0:
-			native_shader_platform_name_ = "d3d_11_0";
-			break;
-
-		case D3D_FEATURE_LEVEL_10_1:
-			native_shader_platform_name_ = "d3d_10_1";
-			break;
-
-		case D3D_FEATURE_LEVEL_10_0:
-			native_shader_platform_name_ = "d3d_10_0";
-			break;
-
-		case D3D_FEATURE_LEVEL_9_3:
-			native_shader_platform_name_ = "d3d_9_3";
-			break;
-
-		case D3D_FEATURE_LEVEL_9_2:
-			native_shader_platform_name_ = "d3d_9_2";
-			break;
-
-		case D3D_FEATURE_LEVEL_9_1:
-		default:
-			native_shader_platform_name_ = "d3d_9_1";
 			break;
 		}
 
