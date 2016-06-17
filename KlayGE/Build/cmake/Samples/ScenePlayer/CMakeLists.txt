@@ -13,9 +13,9 @@ CONFIGURE_FILE(
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/ScenePlayer/ScenePlayer.cpp
 	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayer.py
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/DeferredRendering.scene
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/GlobalIllumination.scene
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ShadowCubeMap.scene
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/DeferredRendering.kges
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/GlobalIllumination.kges
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ShadowCubeMap.kges
 )
 
 SET(HEADER_FILES

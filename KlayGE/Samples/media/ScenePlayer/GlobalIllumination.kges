@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<scene version="1" name="Global Illumination" skybox="Lake_CraterLake03_filtered">
+	<light type="spot">
+		<attr value="indirect"/>
+		<pos v="0 12 -4.8"/>
+		<dir v="0 0 1"/>
+		<color v="6.0 5.88 4.38"/>
+		<fall_off v="1 0.1 0"/>
+		<angle outer="0.785398" inner="0.523599"/>
+		<scale v="0.1 0.1 0.1"/>
+	</light>
+
+	<model name="sponza" meshml="sponza_crytek.7z//sponza_crytek.meshml"/>
+
+	<camera>
+		<eye_pos v="-14.5 18 -3"/>
+		<look_at v="-13.6 17.55 -2.8"/>
+		<near_plane s="0.1"/>
+		<far_plane s="500"/>
+	</camera>
+</scene>

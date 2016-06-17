@@ -1,11 +1,11 @@
 <?xml version='1.0'?>
 
-<scene name="Shadow cubemap">
+<scene name="Shadow cubemap" skybox="0.029 0.133 0.325">
 	<light type="point" name="point">
-		<position x="2" y="12" z="4"/>
-		<color x="64" y="64" z="64"/>
-		<fall_off x="1" y="0" z="1"/>
-		<proxy scale="0.5"/>
+		<pos v="2 12 4"/>
+		<color v="64 64 64"/>
+		<fall_off v="1 0 1"/>
+		<scale v="0.5 0.5 0.5"/>
 		<projective name="../ShadowCubeMap/lamp.dds"/>
 		<update>
 			<![CDATA[
@@ -15,9 +15,9 @@ def update(app_time, elapsed_time):
 		</update>
 	</light>
 
-	<model name="ScifiRoom.7z//ScifiRoom.meshml"/>
-	<model name="teapot.meshml">
-		<attribute value="moveable"/>
+	<model name="room" meshml="ScifiRoom.7z//ScifiRoom.meshml"/>
+	<model name="teapot" meshml="teapot.meshml">
+		<attr value="moveable"/>
 		<update>
 			<![CDATA[
 def update(app_time, elapsed_time):
@@ -25,8 +25,6 @@ def update(app_time, elapsed_time):
 			]]>
 		</update>
 	</model>
-
-	<skybox r="0.029" g="0.133" b="0.325"/>
 
 	<camera x="0" y="10" z="-25">
 		<look_at x="0" y="10" z="0"/>

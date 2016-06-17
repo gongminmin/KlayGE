@@ -1890,7 +1890,13 @@ namespace KlayGE
 			XMLDocument kges_doc;
 			XMLNodePtr kges_root = kges_doc.Parse(file);
 			this->SceneName(kges_root->Attrib("name")->ValueString());
-			this->SkyboxName(kges_root->Attrib("skybox")->ValueString());
+			{
+				XMLAttributePtr attr = kges_root->Attrib("skybox");
+				if (attr)
+				{
+					this->SkyboxName(attr->ValueString());
+				}
+			}
 
 			for (XMLNodePtr node = kges_root->FirstNode(); node; node = node->NextSibling())
 			{
@@ -1933,70 +1939,101 @@ namespace KlayGE
 
 					oi.name = node->Attrib("name")->ValueString();
 
-					int32_t attr = 0;
+					int32_t light_attr = 0;
 					XMLNodePtr attr_node = node->FirstNode("attr");
-					if (!!attr_node)
+					if (attr_node)
 					{
-						std::string attr_str = attr_node->Attrib("value")->ValueString();
-						std::vector<std::string> strs;
-						boost::algorithm::split(strs, attr_str, boost::is_any_of(" "));
-						for (size_t index = 0; index < attr_str.size(); ++ index)
+						std::vector<std::string> tokens;
+						boost::algorithm::split(tokens, attr_node->Attrib("value")->ValueString(), boost::is_any_of(" \t|"));
+						for (auto& token : tokens)
 						{
-							boost::algorithm::trim(strs[index]);
+							boost::algorithm::trim(token);
 
-							if ("no_shadow" == strs[index])
+							if ("no_shadow" == token)
 							{
-								attr |= LightSource::LSA_NoShadow;
+								light_attr |= LightSource::LSA_NoShadow;
 							}
-							else if ("no_diffuse" == strs[index])
+							else if ("no_diffuse" == token)
 							{
-								attr |= LightSource::LSA_NoDiffuse;
+								light_attr |= LightSource::LSA_NoDiffuse;
 							}
-							else if ("no_specular" == strs[index])
+							else if ("no_specular" == token)
 							{
-								attr |= LightSource::LSA_NoSpecular;
+								light_attr |= LightSource::LSA_NoSpecular;
 							}
-							else if ("indirect" == strs[index])
+							else if ("indirect" == token)
 							{
-								attr |= LightSource::LSA_IndirectLighting;
+								light_attr |= LightSource::LSA_IndirectLighting;
 							}
 						}
 					}
-					light->Attrib(attr);
+					light->Attrib(light_attr);
 
-					{
-						XMLNodePtr pos_node = node->FirstNode("pos");
-						std::istringstream attr_ss(pos_node->Attrib("v")->ValueString());
-						float3 pos;
-						attr_ss >> pos.x() >> pos.y() >> pos.z();
-						light->Position(pos);
-					}
-					{
-						XMLNodePtr dir_node = node->FirstNode("dir");
-						std::istringstream attr_ss(dir_node->Attrib("v")->ValueString());
-						float3 dir;
-						attr_ss >> dir.x() >> dir.y() >> dir.z();
-						light->Direction(dir);
-					}
-					{
-						XMLNodePtr color_node = node->FirstNode("color");
+					XMLNodePtr color_node = node->FirstNode("color");
+					if (color_node)
+					{	
 						std::istringstream attr_ss(color_node->Attrib("v")->ValueString());
 						float3 color;
 						attr_ss >> color.x() >> color.y() >> color.z();
 						light->Color(color);
 					}
+					if (light->Type() != LightSource::LT_Ambient)
 					{
-						XMLNodePtr fall_off_node = node->FirstNode("fall_off");
-						std::istringstream attr_ss(fall_off_node->Attrib("v")->ValueString());
-						float3 fall_off;
-						attr_ss >> fall_off.x() >> fall_off.y() >> fall_off.z();
-						light->Falloff(fall_off);
+						XMLNodePtr dir_node = node->FirstNode("dir");
+						if (dir_node)
+						{
+							std::istringstream attr_ss(dir_node->Attrib("v")->ValueString());
+							float3 dir;
+							attr_ss >> dir.x() >> dir.y() >> dir.z();
+							light->Direction(dir);
+						}
 					}
-					if (LightSource::LT_Spot == light->Type())
+					if ((LightSource::LT_Point == light->Type()) || (LightSource::LT_Spot == light->Type())
+						|| (LightSource::LT_SphereArea == light->Type()) || (LightSource::LT_TubeArea == light->Type()))
 					{
-						XMLNodePtr angle_node = node->FirstNode("angle");
-						light->OuterAngle(angle_node->Attrib("outer")->ValueFloat());
-						light->InnerAngle(angle_node->Attrib("inner")->ValueFloat());
+						XMLNodePtr pos_node = node->FirstNode("pos");
+						if (pos_node)
+						{
+							std::istringstream attr_ss(pos_node->Attrib("v")->ValueString());
+							float3 pos;
+							attr_ss >> pos.x() >> pos.y() >> pos.z();
+							light->Position(pos);
+						}
+
+						XMLNodePtr fall_off_node = node->FirstNode("fall_off");
+						if (fall_off_node)
+						{
+							std::istringstream attr_ss(fall_off_node->Attrib("v")->ValueString());
+							float3 fall_off;
+							attr_ss >> fall_off.x() >> fall_off.y() >> fall_off.z();
+							light->Falloff(fall_off);
+						}
+
+						if ((LightSource::LT_Point == light->Type()) || (LightSource::LT_Spot == light->Type()))
+						{
+							XMLNodePtr projective_node = node->FirstNode("projective");
+							if (projective_node)
+							{
+								XMLAttributePtr attr = projective_node->Attrib("name");
+								if (attr)
+								{
+									TexturePtr projective = ASyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+									light->ProjectiveTexture(projective);
+								}
+							}
+
+							if (LightSource::LT_Spot == light->Type())
+							{
+								XMLNodePtr angle_node = node->FirstNode("angle");
+								if (angle_node)
+								{
+									light->InnerAngle(angle_node->Attrib("inner")->ValueFloat());
+									light->OuterAngle(angle_node->Attrib("outer")->ValueFloat());
+								}
+							}
+						}
+
+						// TODO: sphere area light and tube area light
 					}
 
 					this->LoadTransformNodes(node, oi);
@@ -2012,38 +2049,52 @@ namespace KlayGE
 
 					oi.name = node->Attrib("name")->ValueString();
 
-					float3 eye_pos, look_at, up;
+					float3 eye_pos(0, 0, -1);
+					float3 look_at(0, 0, 0);
+					float3 up(0, 1, 0);
+
 					XMLNodePtr eye_pos_node = node->FirstNode("eye_pos");
+					if (eye_pos_node)
 					{
 						std::istringstream attr_ss(eye_pos_node->Attrib("v")->ValueString());
 						attr_ss >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
 					}
 					XMLNodePtr look_at_node = node->FirstNode("look_at");
+					if (look_at_node)
 					{
 						std::istringstream attr_ss(look_at_node->Attrib("v")->ValueString());
 						attr_ss >> look_at.x() >> look_at.y() >> look_at.z();
 					}
 					XMLNodePtr up_node = node->FirstNode("up");
+					if (up_node)
 					{
 						std::istringstream attr_ss(up_node->Attrib("v")->ValueString());
 						attr_ss >> up.x() >> up.y() >> up.z();
 					}
 					camera->ViewParams(eye_pos, look_at, up);
 
-					float fov, aspect, near_plane, far_plane;
+					float fov = PI / 4;
+					float aspect = 1;
+					float near_plane = 1;
+					float far_plane = 1000;
+
 					XMLNodePtr fov_node = node->FirstNode("fov");
+					if (fov_node)
 					{
 						fov = fov_node->Attrib("s")->ValueFloat();
 					}
 					XMLNodePtr aspect_node = node->FirstNode("aspect");
+					if (aspect_node)
 					{
 						aspect = aspect_node->Attrib("s")->ValueFloat();
 					}
 					XMLNodePtr near_plane_node = node->FirstNode("near");
+					if (near_plane_node)
 					{
 						near_plane = near_plane_node->Attrib("s")->ValueFloat();
 					}
 					XMLNodePtr far_plane_node = node->FirstNode("far");
+					if (far_plane_node)
 					{
 						far_plane = far_plane_node->Attrib("s")->ValueFloat();
 					}
