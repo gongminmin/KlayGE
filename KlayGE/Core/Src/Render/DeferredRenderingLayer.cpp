@@ -3134,7 +3134,7 @@ namespace KlayGE
 		if ((LightSource::LT_Point == type) || (LightSource::LT_Spot == type)
 			|| (LightSource::LT_SphereArea == type) || (LightSource::LT_TubeArea == type))
 		{
-			re.Render(*technique_light_stencil_, *rl);
+			re.Render(*dr_effect_, *technique_light_stencil_, *rl);
 		}
 
 		if (LightSource::LT_Ambient == type)
@@ -3157,7 +3157,7 @@ namespace KlayGE
 			}
 		}
 
-		re.Render(*technique_lights_[type], *rl);
+		re.Render(*dr_effect_, *technique_lights_[type], *rl);
 	}
 
 	void DeferredRenderingLayer::UpdateShading(PerViewport const & pvp, PassTargetBuffer pass_tb)
@@ -3173,14 +3173,14 @@ namespace KlayGE
 		if (PTB_Opaque == pass_tb)
 		{
 			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
-			re.Render(*technique_no_lighting_, *rl_quad_);
+			re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
 		}
 		else
 		{
 			re.BindFrameBuffer(pvp.shading_fb);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();
 		}
-		re.Render(*technique_shading_, *rl_quad_);
+		re.Render(*dr_effect_, *technique_shading_, *rl_quad_);
 	}
 #endif
 
