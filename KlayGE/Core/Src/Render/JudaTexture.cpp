@@ -1471,7 +1471,7 @@ namespace KlayGE
 				}
 			}
 
-			std::array<uint32_t, 9> index_with_neighbors{};
+			std::array<uint32_t, 9> index_with_neighbors = { 0 };
 			for (size_t j = 0; j < index_with_neighbors.size(); ++ j)
 			{
 				if (all_neighbor_ids[i + j] != 0xFFFFFFFF)
@@ -1492,7 +1492,11 @@ namespace KlayGE
 			uint32_t mip_border_size = cache_tile_border_size_;
 			for (uint32_t l = 0; l < mipmaps; ++ l)
 			{
+#if defined(KLAYGE_COMPILER_MSVC)
 				std::array<uint8_t const *, 9> neighbor_data_ptr{};
+#else
+				std::array<uint8_t const *, 9> neighbor_data_ptr;
+#endif
 				for (uint32_t j = 0; j < neighbor_data_ptr.size(); ++ j)
 				{
 					if (index_with_neighbors[j] != 0xFFFFFFFF)
