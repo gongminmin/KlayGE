@@ -132,9 +132,9 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_ddn.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/sponza_crytek/vase_round_spec.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/DeferredRendering.scene
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/GlobalIllumination.scene
-	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ShadowCubeMap.scene
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/DeferredRendering.kges
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/GlobalIllumination.kges
+	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ShadowCubeMap.kges
 	${KLAYGE_PROJECT_DIR}/Samples/media/ScenePlayer/ScenePlayerPy.zip
 	${KLAYGE_PROJECT_DIR}/Samples/media/ShadowCubeMap/lamp.dds
 )
