@@ -85,6 +85,10 @@ class build_info:
 			cfg_build.target
 		except:
 			cfg_build.target = "auto"
+		try:
+			cfg_build.shader_platform_name
+		except:
+			cfg_build.shader_platform_name = "auto"
 			
 		env = os.environ
 		
@@ -166,8 +170,13 @@ class build_info:
 		else:
 			prefer_static = False
 
+		shader_platform_name = cfg_build.shader_platform_name
+		if 0 == len(shader_platform_name):
+			shader_platform_name = "auto"
+
 		self.host_platform = host_platform
 		self.target_platform = target_platform
+		self.shader_platform_name = shader_platform_name
 		self.prefer_static = prefer_static
 
 		if "" == compiler:

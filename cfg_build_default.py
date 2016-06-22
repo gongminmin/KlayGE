@@ -37,3 +37,6 @@ config			= ("Debug", "RelWithDebInfo")
 
 # Target platform for cross compiling. Could be "android" plus version number, "win_store", "win_phone" plus version number, "ios", or "auto".
 target			= "auto"
+
+# A name for offline FXML compiling. Could be one of "d3d_11_0", "d3d_10_1", "d3d_10_0", "d3d_9_3", "d3d_9_1", "gles_2_0", "gles_3_0", "gles_3_1", "gles_3_2", or "auto".
+shader_platform_name	= "auto"
