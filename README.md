@@ -25,7 +25,7 @@ As an open source project, KlayGE benefits greatly from both the volunteer work 
 
 ## Bug Reports & Feature Requests
 
-If you've noticed a bug or have an idea that you'd like to see come real, why not work on it? Bug reports and feature requests are typically submitted to the issue tracker on our Trac system http://www.klayge.org/trac.
+If you've noticed a bug or have an idea that you'd like to see come real, why not work on it? Bug reports and feature requests are typically submitted to the issue tracker https://github.com/gongminmin/KlayGE/issues.
 
 ## Engineering Workflow
 
@@ -34,4 +34,3 @@ If you want contribute some code, please check http://www.klayge.org/wiki/index.
 # Links
 Website: http://www.klayge.org
 Wiki: http://www.klayge.org/wiki
-Roadmap: http://www.klayge.org/trac
