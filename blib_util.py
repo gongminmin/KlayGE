@@ -353,7 +353,10 @@ class batch_command:
 
 def log_error(message):
 	print("[E] %s" % message)
-	os.system("pause")
+	if 0 == sys.platform.find("win"):
+		os.system("pause")
+	else:
+		os.system("read")
 	sys.exit(1)
 
 def log_info(message):

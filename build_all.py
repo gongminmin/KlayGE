@@ -36,18 +36,3 @@ if __name__ == "__main__":
 
 	print("Building KlayGE...")
 	build_KlayGE(bi)
-
-	print("Building KlayGE Tests...")
-	build_Tests(bi)
-
-	print("Building KlayGE Samples...")
-	build_Samples(bi)
-
-	print("Building KlayGE Tools...")
-	build_Tools(bi)
-
-	print("Building KlayGE Tutorials...")
-	build_Tutorials(bi)
-
-	print("Building KlayGE Exporters...")
-	build_Exporters(bi)
