@@ -665,7 +665,6 @@ namespace
 		RenderTechnique* update_pos_tech_;
 		RenderTechnique* update_vel_tech_;
 		RenderTechnique* update_cs_tech_;
-		RenderEffectParameter* vel_offset_param_;
 		RenderEffectParameter* particle_pos_tex_param_;
 		RenderEffectParameter* particle_vel_tex_param_;
 		RenderEffectParameter* particle_pos_buff_param_;

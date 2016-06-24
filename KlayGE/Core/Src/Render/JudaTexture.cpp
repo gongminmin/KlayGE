@@ -1471,7 +1471,7 @@ namespace KlayGE
 				}
 			}
 
-			std::array<uint32_t, 9> index_with_neighbors = { 0 };
+			std::array<uint32_t, 9> index_with_neighbors = { { 0 } };
 			for (size_t j = 0; j < index_with_neighbors.size(); ++ j)
 			{
 				if (all_neighbor_ids[i + j] != 0xFFFFFFFF)

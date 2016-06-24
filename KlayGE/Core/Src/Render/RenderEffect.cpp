@@ -2139,7 +2139,7 @@ namespace
 			break;
 		}
 
-		return std::move(var);
+		return var;
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -3184,7 +3184,7 @@ namespace KlayGE
 				uint32_t index = 0;
 				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
 				{
-					techniques_.push_back(std::move(MakeUniquePtr<RenderTechnique>()));
+					techniques_.push_back(MakeUniquePtr<RenderTechnique>());
 					techniques_.back()->Load(effect, node, index);
 				}
 			}
@@ -3328,7 +3328,7 @@ namespace KlayGE
 							techniques_.resize(num_techs);
 							for (uint32_t i = 0; i < num_techs; ++ i)
 							{
-								techniques_[i] = std::move(MakeUniquePtr<RenderTechnique>());
+								techniques_[i] = MakeUniquePtr<RenderTechnique>();
 								ret &= techniques_[i]->StreamIn(effect, source, i);
 							}
 						}
@@ -4967,7 +4967,7 @@ namespace KlayGE
 			}
 		}
 
-		return std::move(ret);
+		return ret;
 	}
 
 	void RenderEffectConstantBuffer::AddParameter(uint32_t index)
@@ -5230,7 +5230,7 @@ namespace KlayGE
 
 		ret->annotations_ = annotations_;
 
-		return std::move(ret);
+		return ret;
 	}
 
 	std::string const & RenderEffectParameter::Semantic() const
