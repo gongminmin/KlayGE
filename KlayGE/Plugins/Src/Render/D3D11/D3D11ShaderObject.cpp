@@ -1378,7 +1378,6 @@ namespace KlayGE
 	void D3D11ShaderObject::Bind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		re.VSSetShader(vertex_shader_.get());
 		re.GSSetShader(geometry_shader_.get());
@@ -1420,32 +1419,29 @@ namespace KlayGE
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
-			std::vector<ID3D11UnorderedAccessView*> uavs_ptr(uavs_[ST_ComputeShader].size());
 			for (uint32_t i = 0; i < uavs_[ST_ComputeShader].size(); ++ i)
 			{
 				if (uavsrcs_[ST_ComputeShader][i] != nullptr)
 				{
 					re.DetachSRV(uavsrcs_[ST_ComputeShader][i], 0, 1);
 				}
-
-				uavs_ptr[i] = uavs_[ST_ComputeShader][i];
 			}
 
-			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_ptr[0],
-				reinterpret_cast<UINT*>(&uavs_ptr[0]));
+			std::vector<UINT> uav_init_counts(uavs_[ST_ComputeShader].size(), 0);
+			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs_[ST_ComputeShader][0],
+				&uav_init_counts[0]);
 		}
 	}
 
 	void D3D11ShaderObject::Unbind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		if (!uavs_[ST_ComputeShader].empty())
 		{
 			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_[ST_ComputeShader].size(), nullptr);
-			d3d_imm_ctx->CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs[0],
-				reinterpret_cast<UINT*>(&uavs[0]));
+			std::vector<UINT> uav_init_counts(uavs_[ST_ComputeShader].size(), 0);
+			re.CSSetUnorderedAccessViews(0, static_cast<UINT>(uavs_[ST_ComputeShader].size()), &uavs[0], &uav_init_counts[0]);
 		}
 	}
 }

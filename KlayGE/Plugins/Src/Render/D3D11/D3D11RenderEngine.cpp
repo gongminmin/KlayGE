@@ -87,6 +87,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	D3D11RenderEngine::D3D11RenderEngine()
 		: num_so_buffs_(0),
+			dsv_ptr_cache_(nullptr),
 			inv_timestamp_freq_(0)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
@@ -1513,7 +1514,7 @@ namespace KlayGE
 			{
 				RenderView const * view = (0 == eye) ? win->D3DBackBufferRTV().get() : win->D3DBackBufferRightEyeRTV().get();
 				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
-				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
+				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
 				vp.TopLeftX = 0;
@@ -1523,7 +1524,7 @@ namespace KlayGE
 				vp.MinDepth = 0;
 				vp.MaxDepth = 1;
 
-				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				this->RSSetViewports(1, &vp);
 				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 			}
@@ -1541,7 +1542,7 @@ namespace KlayGE
 				vp.MaxDepth = 1;
 				vp.TopLeftX = (0 == eye) ? 0 : vp.Width;
 
-				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				this->RSSetViewports(1, &vp);
 				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 		
@@ -1566,7 +1567,7 @@ namespace KlayGE
 			{
 				RenderView const * view = win->D3DBackBufferRTV().get();
 				ID3D11RenderTargetView* rtv = checked_cast<D3D11RenderTargetRenderView const *>(view)->D3DRenderTargetView();
-				d3d_imm_ctx_->OMSetRenderTargets(1, &rtv, nullptr);
+				this->OMSetRenderTargets(1, &rtv, nullptr);
 
 				D3D11_VIEWPORT vp;
 				vp.TopLeftX = 0;
@@ -1576,7 +1577,7 @@ namespace KlayGE
 				vp.MinDepth = 0;
 				vp.MaxDepth = 1;
 
-				d3d_imm_ctx_->RSSetViewports(1, &vp);
+				this->RSSetViewports(1, &vp);
 				stereoscopic_pp_->SetParam(3, eye);
 				stereoscopic_pp_->Render();
 			}
@@ -1689,6 +1690,63 @@ namespace KlayGE
 				viewport_cache_ = *pViewports;
 				d3d_imm_ctx_->RSSetViewports(NumViewports, pViewports);
 			}
+		}
+	}
+
+	void D3D11RenderEngine::OMSetRenderTargets(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs, ID3D11DepthStencilView* dsv)
+	{
+		if ((rtv_ptr_cache_.size() != num_rtvs) || (dsv_ptr_cache_ != dsv)
+			|| (memcmp(&rtv_ptr_cache_[0], rtvs, num_rtvs * sizeof(rtvs[0])) != 0))
+		{
+			d3d_imm_ctx_->OMSetRenderTargets(num_rtvs, rtvs, dsv);
+
+			rtv_ptr_cache_.assign(rtvs, rtvs + num_rtvs);
+			dsv_ptr_cache_ = dsv;
+		}
+	}
+
+	void D3D11RenderEngine::OMSetRenderTargetsAndUnorderedAccessViews(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs,
+		ID3D11DepthStencilView* dsv,
+		UINT uav_start_slot, UINT num_uavs, ID3D11UnorderedAccessView* const * uavs, UINT const * uav_init_counts)
+	{
+		if ((rtv_ptr_cache_.size() != num_rtvs) || (dsv_ptr_cache_ != dsv)
+			|| (render_uav_ptr_cache_.size() < uav_start_slot + num_uavs)
+			|| (memcmp(&rtv_ptr_cache_[0], rtvs, num_rtvs * sizeof(rtvs[0])) != 0)
+			|| (memcmp(&render_uav_ptr_cache_[uav_start_slot], uavs, num_uavs * sizeof(uavs[0])) != 0)
+			|| (memcmp(&render_uav_init_count_cache_[uav_start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0])) != 0))
+		{
+			d3d_imm_ctx_->OMSetRenderTargetsAndUnorderedAccessViews(num_rtvs, rtvs, dsv,
+				uav_start_slot, num_uavs, uavs, uav_init_counts);
+
+			rtv_ptr_cache_.assign(rtvs, rtvs + num_rtvs);
+			dsv_ptr_cache_ = dsv;
+
+			if (render_uav_ptr_cache_.size() < uav_start_slot + num_uavs)
+			{
+				render_uav_ptr_cache_.resize(uav_start_slot + num_uavs);
+				render_uav_init_count_cache_.resize(render_uav_ptr_cache_.size());
+			}
+			memcpy(&render_uav_ptr_cache_[uav_start_slot], uavs, num_uavs * sizeof(uavs[0]));
+			memcpy(&render_uav_init_count_cache_[uav_start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0]));
+		}
+	}
+
+	void D3D11RenderEngine::CSSetUnorderedAccessViews(UINT start_slot, UINT num_uavs, ID3D11UnorderedAccessView* const * uavs,
+		UINT const * uav_init_counts)
+	{
+		if ((compute_uav_ptr_cache_.size() < start_slot + num_uavs)
+			|| (memcmp(&compute_uav_ptr_cache_[start_slot], uavs, num_uavs * sizeof(uavs[0])) != 0)
+			|| (memcmp(&compute_uav_init_count_cache_[start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0])) != 0))
+		{
+			d3d_imm_ctx_->CSSetUnorderedAccessViews(start_slot, num_uavs, uavs, uav_init_counts);
+
+			if (compute_uav_ptr_cache_.size() < start_slot + num_uavs)
+			{
+				compute_uav_ptr_cache_.resize(start_slot + num_uavs);
+				compute_uav_init_count_cache_.resize(compute_uav_ptr_cache_.size());
+			}
+			memcpy(&compute_uav_ptr_cache_[start_slot], uavs, num_uavs * sizeof(uavs[0]));
+			memcpy(&compute_uav_init_count_cache_[start_slot], uav_init_counts, num_uavs * sizeof(uav_init_counts[0]));
 		}
 	}
 

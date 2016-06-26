@@ -132,6 +132,12 @@ namespace KlayGE
 		void SetSamplers(ShaderObject::ShaderType st, std::vector<ID3D11SamplerState*> const & samplers);
 		void SetConstantBuffers(ShaderObject::ShaderType st, std::vector<ID3D11Buffer*> const & cbs);
 		void RSSetViewports(UINT NumViewports, D3D11_VIEWPORT const * pViewports);
+		void OMSetRenderTargets(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs, ID3D11DepthStencilView* dsv);
+		void OMSetRenderTargetsAndUnorderedAccessViews(UINT num_rtvs, ID3D11RenderTargetView* const * rtvs,
+			ID3D11DepthStencilView* dsv, 
+			UINT uav_start_slot, UINT num_uavs, ID3D11UnorderedAccessView* const * uavs, UINT const * uav_init_counts);
+		void CSSetUnorderedAccessViews(UINT start_slot, UINT num_uavs, ID3D11UnorderedAccessView* const * uavs,
+			UINT const * uav_init_counts);
 		
 		void ResetRenderStates();
 		void DetachSRV(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres);
@@ -235,6 +241,12 @@ namespace KlayGE
 		std::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
 		std::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
 		std::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
+		std::vector<ID3D11UnorderedAccessView*> render_uav_ptr_cache_;
+		std::vector<uint32_t> render_uav_init_count_cache_;
+		std::vector<ID3D11UnorderedAccessView*> compute_uav_ptr_cache_;
+		std::vector<uint32_t> compute_uav_init_count_cache_;
+		std::vector<ID3D11RenderTargetView*> rtv_ptr_cache_;
+		ID3D11DepthStencilView* dsv_ptr_cache_;
 
 		std::unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 

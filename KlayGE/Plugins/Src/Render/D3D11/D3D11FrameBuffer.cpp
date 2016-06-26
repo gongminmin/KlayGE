@@ -86,7 +86,6 @@ namespace KlayGE
 	void D3D11FrameBuffer::OnBind()
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		std::vector<void*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
@@ -141,12 +140,12 @@ namespace KlayGE
 
 		if (ua_views_.empty())
 		{
-			d3d_imm_ctx->OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView());
+			re.OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView());
 		}
 		else
 		{
 			ID3D11RenderTargetView** rts = rt_view.empty() ? nullptr : &rt_view[0];
-			d3d_imm_ctx->OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView(),
+			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView(),
 				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
 		}
 	
