@@ -238,9 +238,6 @@ namespace KlayGE
 		std::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_ptr_cache_;
 		std::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_ptr_cache_;
 		std::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_ptr_cache_;
-		std::array<std::vector<ID3D11ShaderResourceView*>, ShaderObject::ST_NumShaderTypes> shader_srv_cache_;
-		std::array<std::vector<ID3D11SamplerState*>, ShaderObject::ST_NumShaderTypes> shader_sampler_cache_;
-		std::array<std::vector<ID3D11Buffer*>, ShaderObject::ST_NumShaderTypes> shader_cb_cache_;
 		std::vector<ID3D11UnorderedAccessView*> render_uav_ptr_cache_;
 		std::vector<uint32_t> render_uav_init_count_cache_;
 		std::vector<ID3D11UnorderedAccessView*> compute_uav_ptr_cache_;
