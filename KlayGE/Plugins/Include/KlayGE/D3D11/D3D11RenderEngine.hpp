@@ -141,6 +141,7 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 		void DetachSRV(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres);
+		void InvalidRTVCache();
 
 		ID3D11InputLayoutPtr const & CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code);
 

@@ -946,6 +946,11 @@ namespace KlayGE
 					depth_stencil_view_right_eye_->Discard();
 				}
 			}
+
+			if (DXGI_PRESENT_ALLOW_TEARING == present_flags)
+			{
+				d3d11_re.InvalidRTVCache();
+			}
 		}
 	}
 
