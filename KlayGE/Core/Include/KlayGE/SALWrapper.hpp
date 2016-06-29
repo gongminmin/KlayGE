@@ -70,6 +70,7 @@
 	#define _Out_writes_bytes_to_(size, count)
 	#define _Out_writes_bytes_opt_(size)
 	#define _Out_writes_to_opt_(size, count)
+	#define _Out_writes_all_(size)
 	#define _Out_writes_all_opt_(size)
 	#define _Inout_
 	#define _Inout_opt_
