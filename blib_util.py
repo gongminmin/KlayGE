@@ -453,9 +453,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			if build_cmd.execute() != 0:
 				log_error("Build %s failed." % name)
 
-		os.chdir(curdir)
+			os.chdir(curdir)
 
-		print("")
+			print("")
 	else:
 		if "win" == build_info.host_platform:
 			if build_info.target_platform != "android":
