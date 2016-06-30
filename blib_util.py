@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os, sys, multiprocessing, subprocess
+import os, sys, multiprocessing, subprocess, shutil
 try:
 	import cfg_build
 except:
 	print("Generating cfg_build.py ...")
-	import shutil
 	shutil.copyfile("cfg_build_default.py", "cfg_build.py")
 	import cfg_build
 
@@ -178,8 +177,9 @@ class build_info:
 		self.target_platform = target_platform
 		self.shader_platform_name = shader_platform_name
 		self.prefer_static = prefer_static
+		self.is_clean = ("clean" == compiler)
 
-		if "" == compiler:
+		if ("" == compiler) or self.is_clean:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
 					if "VS140COMNTOOLS" in env:
@@ -420,32 +420,42 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
 
 		build_dir = "%s/Build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
-		if not os.path.exists(build_dir):
-			os.makedirs(build_dir)
+		if build_info.is_clean:
+			print("Cleaning %s..." % name)
 
-		os.chdir(build_dir)
+			if os.path.isdir(build_dir):
+				shutil.rmtree(build_dir)
+		else:
+			print("Building %s..." % name)
 
-		cmake_cmd = batch_command(build_info.host_platform)
-		cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, toolset_name, additional_options, "../cmake"))
-		if cmake_cmd.execute() != 0:
-			log_error("Config %s failed." % name)
+			if not os.path.exists(build_dir):
+				os.makedirs(build_dir)
 
-		build_cmd = batch_command(build_info.host_platform)
-		if "vc" == build_info.compiler_name:
-			build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
-		for config in build_info.cfg:
+			os.chdir(build_dir)
+
+			cmake_cmd = batch_command(build_info.host_platform)
+			cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, toolset_name, additional_options, "../cmake"))
+			if cmake_cmd.execute() != 0:
+				log_error("Config %s failed." % name)
+
+			build_cmd = batch_command(build_info.host_platform)
 			if "vc" == build_info.compiler_name:
-				build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
-				if need_install:
-					build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
-			elif "clang" == build_info.compiler_name:
-				build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
-				if need_install and (not build_info.prefer_static):
-					build_info.xcodebuild_add_build_command(build_cmd, "install", config)
-		if build_cmd.execute() != 0:
-			log_error("Build %s failed." % name)
+				build_cmd.add_command('@CALL "%%VS%dCOMNTOOLS%%..\\..\\VC\\vcvarsall.bat" %s' % (build_info.compiler_version, vc_option))
+			for config in build_info.cfg:
+				if "vc" == build_info.compiler_name:
+					build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
+					if need_install:
+						build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+				elif "clang" == build_info.compiler_name:
+					build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
+					if need_install and (not build_info.prefer_static):
+						build_info.xcodebuild_add_build_command(build_cmd, "install", config)
+			if build_cmd.execute() != 0:
+				log_error("Build %s failed." % name)
 
 		os.chdir(curdir)
+
+		print("")
 	else:
 		if "win" == build_info.host_platform:
 			if build_info.target_platform != "android":
@@ -456,41 +466,51 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 		for config in build_info.cfg:
 			build_dir = "%s/Build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
-			if not os.path.exists(build_dir):
-				os.makedirs(build_dir)
-				if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
-					additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+			if build_info.is_clean:
+				print("Cleaning %s %s..." % (name, config))
 
-			os.chdir(build_dir)
-			
-			config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
-			if "android" == build_info.target_platform:
-				config_options += " -DANDROID_ABI=%s" % compiler_info.arch
-				if "x86" == compiler_info.arch:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_info.toolset
-				elif "x86_64" == compiler_info.arch:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_info.toolset
-				elif "arm64-v8a" == compiler_info.arch:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_info.toolset
-				else:
-					config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_info.toolset
-			
-			cmake_cmd = batch_command(build_info.host_platform)
-			cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_info.generator, toolset_name, additional_options, config_options, "../cmake"))
-			if cmake_cmd.execute() != 0:
-				log_error("Config %s failed." % name)		
-
-			install_str = ""
-			if need_install and (not build_info.prefer_static):
-				install_str = "install"
-			build_cmd = batch_command(build_info.host_platform)
-			if "win" == build_info.host_platform:
-				build_cmd.add_command("@%s %s" % (make_name, install_str))
-				build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+				if os.path.isdir(build_dir):
+					shutil.rmtree(build_dir)
 			else:
-				build_cmd.add_command("%s %s" % (make_name, install_str))
-				build_cmd.add_command('if [ $? -ne 0 ]; then exit 1; fi')
-			if build_cmd.execute() != 0:
-				log_error("Build %s failed." % name)
+				print("Building %s %s..." % (name, config))
 
-			os.chdir(curdir)
+				if not os.path.exists(build_dir):
+					os.makedirs(build_dir)
+					if ("clang" == build_info.compiler_name) and (build_info.target_platform != "android"):
+						additional_options += " -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++"
+
+				os.chdir(build_dir)
+
+				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+				if "android" == build_info.target_platform:
+					config_options += " -DANDROID_ABI=%s" % compiler_info.arch
+					if "x86" == compiler_info.arch:
+						config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_info.toolset
+					elif "x86_64" == compiler_info.arch:
+						config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_info.toolset
+					elif "arm64-v8a" == compiler_info.arch:
+						config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_info.toolset
+					else:
+						config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_info.toolset
+				
+				cmake_cmd = batch_command(build_info.host_platform)
+				cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_info.generator, toolset_name, additional_options, config_options, "../cmake"))
+				if cmake_cmd.execute() != 0:
+					log_error("Config %s failed." % name)		
+
+				install_str = ""
+				if need_install and (not build_info.prefer_static):
+					install_str = "install"
+				build_cmd = batch_command(build_info.host_platform)
+				if "win" == build_info.host_platform:
+					build_cmd.add_command("@%s %s" % (make_name, install_str))
+					build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+				else:
+					build_cmd.add_command("%s %s" % (make_name, install_str))
+					build_cmd.add_command('if [ $? -ne 0 ]; then exit 1; fi')
+				if build_cmd.execute() != 0:
+					log_error("Build %s failed." % name)
+
+				os.chdir(curdir)
+
+				print("")

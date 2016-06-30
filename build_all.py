@@ -16,23 +16,10 @@ if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
 	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
-	print("Building external libs...")
 	build_external_libs(bi)
-
-	print("Building KFL...")
 	build_KFL(bi)
-
-	print("Building glloader...")
 	build_glloader(bi)
-
-	print("Building DXBC2GLSL...")
 	build_DXBC2GLSL(bi)
-
-	print("Building kfont...")
 	build_kfont(bi)
-
-	print("Building MeshMLLib...")
 	build_MeshMLLib(bi)
-
-	print("Building KlayGE...")
 	build_KlayGE(bi)

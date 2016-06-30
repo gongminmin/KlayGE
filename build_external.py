@@ -81,19 +81,19 @@ def build_freetype(build_info, compiler_info):
 def build_7z(build_info, compiler_info):
 	build_a_project("7z", "External/7z", build_info, compiler_info, compiler_info.is_windows)
 
-def setup_UniversalDXSDK(build_info, compiler_info):
+def build_UniversalDXSDK(build_info, compiler_info):
 	build_a_project("UniversalDXSDK", "External/UniversalDXSDK", build_info, compiler_info)
 
-def setup_OpenALSDK(build_info, compiler_info):
+def build_OpenALSDK(build_info, compiler_info):
 	build_a_project("OpenALSDK", "External/OpenALSDK", build_info, compiler_info)
 
-def setup_rapidxml(build_info, compiler_info):
+def build_rapidxml(build_info, compiler_info):
 	build_a_project("rapidxml", "External/rapidxml", build_info, compiler_info)
 
-def setup_wpftoolkit(build_info, compiler_info):
+def build_wpftoolkit(build_info, compiler_info):
 	build_a_project("wpftoolkit", "External/wpftoolkit", build_info, compiler_info)
 
-def setup_android_native_app_glue(build_info, compiler_info):
+def build_android_native_app_glue(build_info, compiler_info):
 	build_a_project("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
 
 def build_assimp(build_info, compiler_info):
@@ -104,46 +104,27 @@ def build_external_libs(build_info):
 		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
 		dst_dir = "KlayGE/bin/%s/" % platform_dir
 
-		print("\nBuilding boost...\n")
 		build_Boost(build_info, compiler_info)
-
-		print("\nBuilding Python...\n")
 		build_Python(build_info, compiler_info)
-
-		print("\nBuilding 7z...\n")
 		build_7z(build_info, compiler_info)
-
-		print("\nSeting up rapidxml...\n")
-		setup_rapidxml(build_info, compiler_info)
-
-		print("\nSeting up android_native_app_glue...\n")
-		setup_android_native_app_glue(build_info, compiler_info)
+		build_rapidxml(build_info, compiler_info)
+		build_android_native_app_glue(build_info, compiler_info)
 
 		if not compiler_info.is_windows_runtime:
-			print("\nBuilding libogg...\n")
 			build_libogg(build_info, compiler_info)
-
-		if not compiler_info.is_windows_runtime:
-			print("\nBuilding libvorbis...\n")
 			build_libvorbis(build_info, compiler_info)
 
 		if compiler_info.is_dev_platform:
-			print("\nBuilding freetype...\n")
-			build_freetype(build_info, compiler_info)
-			
-			print("\nSeting up UniversalDXSDK...\n")
-			setup_UniversalDXSDK(build_info, compiler_info)
+			build_freetype(build_info, compiler_info)			
+			build_UniversalDXSDK(build_info, compiler_info)
 
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
-				print("\nSeting up OpenAL SDK...\n")
-				setup_OpenALSDK(build_info, compiler_info)
+				build_OpenALSDK(build_info, compiler_info)
 
-			print("\nBuilding assimp...\n")
 			build_assimp(build_info, compiler_info)
 
 		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
-			print("\nSeting up wpftoolkit...\n")
-			setup_wpftoolkit(build_info, compiler_info)
+			build_wpftoolkit(build_info, compiler_info)
 
 if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)

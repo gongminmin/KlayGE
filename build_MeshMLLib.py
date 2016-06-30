@@ -13,5 +13,4 @@ if __name__ == "__main__":
 	cfg = cfg_from_argv(sys.argv)
 	bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
 
-	print("Building MeshMLLib...")
 	build_MeshMLLib(bi)
