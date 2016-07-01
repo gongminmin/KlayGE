@@ -8,7 +8,7 @@ from blib_util import *
 def build_Boost(build_info, compiler_info):
 	with_filesystem = True
 	with_system = True
-	if compiler_info.is_dev_platform:
+	if build_info.is_dev_platform:
 		with_program_options = True
 		with_regex = True
 		with_test = True
@@ -52,7 +52,7 @@ def build_Boost(build_info, compiler_info):
 		need_install = True
 	else:
 		additional_options += "\"OFF\""
-	build_a_project("boost", "External/boost", build_info, compiler_info, compiler_info.is_windows and need_install, additional_options)
+	build_a_project("boost", "External/boost", build_info, compiler_info, build_info.is_windows and need_install, additional_options)
 
 def build_Python(build_info, compiler_info):
 	additional_options = "-D BUILTIN_COLLECTIONS:BOOL=\"ON\" -D BUILTIN_FUNCTOOLS:BOOL=\"ON\" -D BUILTIN_IO:BOOL=\"ON\" \
@@ -79,7 +79,7 @@ def build_freetype(build_info, compiler_info):
 	build_a_project("freetype", "External/freetype", build_info, compiler_info)
 
 def build_7z(build_info, compiler_info):
-	build_a_project("7z", "External/7z", build_info, compiler_info, compiler_info.is_windows)
+	build_a_project("7z", "External/7z", build_info, compiler_info, build_info.is_windows)
 
 def build_UniversalDXSDK(build_info, compiler_info):
 	build_a_project("UniversalDXSDK", "External/UniversalDXSDK", build_info, compiler_info)
@@ -110,11 +110,11 @@ def build_external_libs(build_info):
 		build_rapidxml(build_info, compiler_info)
 		build_android_native_app_glue(build_info, compiler_info)
 
-		if not compiler_info.is_windows_runtime:
+		if not build_info.is_windows_runtime:
 			build_libogg(build_info, compiler_info)
 			build_libvorbis(build_info, compiler_info)
 
-		if compiler_info.is_dev_platform:
+		if build_info.is_dev_platform:
 			build_freetype(build_info, compiler_info)			
 			build_UniversalDXSDK(build_info, compiler_info)
 
@@ -123,7 +123,7 @@ def build_external_libs(build_info):
 
 			build_assimp(build_info, compiler_info)
 
-		if compiler_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
+		if build_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
 			build_wpftoolkit(build_info, compiler_info)
 
 if __name__ == "__main__":

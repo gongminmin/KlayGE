@@ -25,42 +25,10 @@ class cfg_from_argv:
 			self.cfg = ""
 
 class compiler_info:
-	def __init__(self, arch, gen_name, toolset, target_platform):
+	def __init__(self, arch, gen_name, toolset):
 		self.arch = arch
 		self.generator = gen_name
 		self.toolset = toolset
-
-		self.is_windows_desktop = False
-		self.is_windows_store = False
-		self.is_windows_phone = False
-		self.is_windows_runtime = False
-		self.is_windows = False
-		self.is_android = False
-		self.is_linux = False
-		self.is_darwin = False
-		self.is_ios = False
-
-		if "win" == target_platform:
-			self.is_windows = True
-			self.is_windows_desktop = True
-		elif "win_store" == target_platform:
-			self.is_windows = True
-			self.is_windows_store = True
-			self.is_windows_runtime = True
-		elif "win_phone" == target_platform:
-			self.is_windows = True
-			self.is_windows_phone = True
-			self.is_windows_runtime = True
-		elif "android" == target_platform:
-			self.is_android = True
-		elif "linux" == target_platform:
-			self.is_linux = True
-		elif "darwin" == target_platform:
-			self.is_darwin = True
-		elif "ios" == target_platform:
-			self.is_ios = True
-
-		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
@@ -179,6 +147,38 @@ class build_info:
 		self.prefer_static = prefer_static
 		self.is_clean = ("clean" == compiler)
 
+		self.is_windows_desktop = False
+		self.is_windows_store = False
+		self.is_windows_phone = False
+		self.is_windows_runtime = False
+		self.is_windows = False
+		self.is_android = False
+		self.is_linux = False
+		self.is_darwin = False
+		self.is_ios = False
+
+		if "win" == target_platform:
+			self.is_windows = True
+			self.is_windows_desktop = True
+		elif "win_store" == target_platform:
+			self.is_windows = True
+			self.is_windows_store = True
+			self.is_windows_runtime = True
+		elif "win_phone" == target_platform:
+			self.is_windows = True
+			self.is_windows_phone = True
+			self.is_windows_runtime = True
+		elif "android" == target_platform:
+			self.is_android = True
+		elif "linux" == target_platform:
+			self.is_linux = True
+		elif "darwin" == target_platform:
+			self.is_darwin = True
+		elif "ios" == target_platform:
+			self.is_ios = True
+
+		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
+
 		if ("" == compiler) or self.is_clean:
 			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
@@ -241,7 +241,7 @@ class build_info:
 					gen_name = "Visual Studio 14 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 14 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
+				compilers.append(compiler_info(arch, gen_name, toolset))
 		elif "vc120" == compiler:
 			compiler_name = "vc"
 			compiler_version = 120
@@ -253,7 +253,7 @@ class build_info:
 					gen_name = "Visual Studio 12 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 12 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
+				compilers.append(compiler_info(arch, gen_name, toolset))
 		elif "clang" == compiler:
 			compiler_name = "clang"
 			compiler_version = self.retrive_clang_version()
@@ -265,12 +265,12 @@ class build_info:
 			else:
 				gen_name = "Unix Makefiles"
 			for arch in archs:
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
+				compilers.append(compiler_info(arch, gen_name, toolset))
 		elif "mingw" == compiler:
 			compiler_name = "mgw"
 			compiler_version = self.retrive_gcc_version()
 			for arch in archs:
-				compilers.append(compiler_info(arch, "MinGW Makefiles", toolset, target_platform))
+				compilers.append(compiler_info(arch, "MinGW Makefiles", toolset))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
 			self.toolset = toolset
@@ -280,7 +280,7 @@ class build_info:
 			else:
 				gen_name = "Unix Makefiles"
 			for arch in archs:
-				compilers.append(compiler_info(arch, gen_name, toolset, target_platform))
+				compilers.append(compiler_info(arch, gen_name, toolset))
 		else:
 			compiler_name = ""
 			compiler_version = 0
@@ -369,7 +369,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == build_info.compiler_name) and (not compiler_info.is_windows_runtime):
+	if ("vc" == build_info.compiler_name) and (not build_info.is_windows_runtime):
 		toolset_name = "-T %s" % compiler_info.toolset
 
 	if build_info.compiler_name != "vc":
@@ -412,10 +412,10 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				vc_option = "x86_arm"
 				vc_arch = "ARM"
 
-		if compiler_info.is_windows_runtime:
-			if compiler_info.is_windows_store:
+		if build_info.is_windows_runtime:
+			if build_info.is_windows_store:
 				system_name = "WindowsStore"
-			elif compiler_info.is_windows_phone:
+			elif build_info.is_windows_phone:
 				system_name = "WindowsPhone"
 			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
 
