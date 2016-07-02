@@ -40,17 +40,7 @@
 		}
 	}
 #endif
-#ifdef KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-	#include <regex>
-#else
-	#include <boost/regex.hpp>
-	namespace std
-	{
-		using boost::regex;
-		using boost::regex_match;
-		using boost::smatch;
-	}
-#endif
+#include <regex>
 
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push

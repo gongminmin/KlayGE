@@ -48,19 +48,4 @@
 	#define KLAYGE_CONSTEXPR
 #endif
 
-#if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
-		|| (defined(KLAYGE_COMPILER_CLANG) && defined(KLAYGE_PLATFORM_ANDROID)) \
-		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
-		|| defined(KLAYGE_COMPILER_MSVC))
-#include <type_traits>
-namespace std
-{
-	template <typename T>
-	struct is_trivially_destructible
-	{
-		static const bool value = std::has_trivial_destructor<T>::value;
-	};
-}
-#endif
-
 #endif		// _KFL_CXX11_HPP

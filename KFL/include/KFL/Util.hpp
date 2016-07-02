@@ -188,11 +188,7 @@ namespace KlayGE
 	template <typename T, typename... Args>
 	inline std::unique_ptr<T> MakeUniquePtrHelper(std::false_type, Args&&... args)
 	{
-#ifdef KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
 		return std::make_unique<T>(std::forward<Args>(args)...);
-#else
-		return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-#endif
 	}
 
 	template <typename T, typename... Args>
@@ -201,12 +197,7 @@ namespace KlayGE
 		static_assert(0 == std::extent<T>::value,
 			"make_unique<T[N]>() is forbidden, please use make_unique<T[]>().");
 
-#ifdef KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
 		return std::make_unique<T>(size);
-#else
-		typedef typename std::remove_extent<T>::type U;
-		return std::unique_ptr<T>(new U[size]());
-#endif
 	}
 
 	template <typename T, typename... Args>

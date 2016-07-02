@@ -55,6 +55,11 @@
 	#define __deref_out_bcount(size)
 	#define __deref_opt_out_bcount(size)
 
+	#define _Out_writes_bytes_opt_(size)
+	#define _Inout_opt_bytecount_(size)
+	#define _Pre_null_
+
+#if (defined(__GLIBCXX__) && (__GLIBCXX__ < 20150716))
 	#define _In_
 	#define _In_z_
 	#define _In_reads_(size)
@@ -68,14 +73,12 @@
 	#define _Out_writes_opt_(size)
 	#define _Out_writes_bytes_(size)
 	#define _Out_writes_bytes_to_(size, count)
-	#define _Out_writes_bytes_opt_(size)
 	#define _Out_writes_to_opt_(size, count)
 	#define _Out_writes_all_(size)
 	#define _Out_writes_all_opt_(size)
 	#define _Inout_
 	#define _Inout_opt_
 	#define _Inout_updates_bytes_(size)
-	#define _Inout_opt_bytecount_(size)
 	#define _Outptr_
 	#define _Outptr_result_bytebuffer_(size)
 	#define _Outptr_result_maybenull_
@@ -83,7 +86,6 @@
 	#define _Outptr_opt_result_maybenull_
 	#define _Outptr_opt_result_bytebuffer_(size)
 	#define _Check_return_
-	#define _Pre_null_
 	#define _Always_(annos)
 	#define _COM_Outptr_
 	#define _COM_Outptr_opt_
@@ -92,6 +94,7 @@
 	#define _Field_size_opt_(size)
 	#define _Field_size_full_(size)
 	#define _Field_size_bytes_full_(size)
+#endif
 #endif
 
 #endif			// _SALWRAPPER_HPP

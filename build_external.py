@@ -10,15 +10,12 @@ def build_Boost(build_info, compiler_info):
 	with_system = True
 	if build_info.is_dev_platform:
 		with_program_options = True
-		with_regex = True
 		with_test = True
 	else:
 		with_program_options = False
-		with_regex = False
 		with_test = False
 	if "vc" == build_info.compiler_name:
 		with_filesystem = False
-		with_regex = False
 		with_system = False
 
 	need_install = False
@@ -30,12 +27,6 @@ def build_Boost(build_info, compiler_info):
 		additional_options += "\"OFF\""
 	additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL="
 	if with_program_options:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_REGEX:BOOL="
-	if with_regex:
 		additional_options += "\"ON\""
 		need_install = True
 	else:

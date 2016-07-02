@@ -216,13 +216,7 @@ class build_info:
 				elif "vc120" == compiler:
 					toolset = "v120"
 			elif "android" == target_platform:
-				if "gcc" == compiler:
-					if target_api_level >= 21:
-						toolset = "4.9"
-					else:
-						toolset = "4.8"
-				else:
-					toolset = "3.6"
+				toolset = "3.6"
 
 		if "" == archs:
 			archs = cfg_build.arch
@@ -280,7 +274,6 @@ class build_info:
 				compilers.append(compiler_info(arch, "MinGW Makefiles", toolset))
 		elif "gcc" == compiler:
 			compiler_name = "gcc"
-			self.toolset = toolset
 			compiler_version = self.retrive_gcc_version()
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
@@ -321,10 +314,7 @@ class build_info:
 		batch_cmd.add_command('if (($? != 0)); then exit 1; fi')
 		
 	def retrive_gcc_version(self):
-		if ("android" == self.target_platform):
-			gcc_ver = self.toolset
-		else:
-			gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
+		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
@@ -515,6 +505,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 				if "android" == build_info.target_platform:
 					config_options += " -DANDROID_ABI=%s" % compiler_info.arch
+
 					if "x86" == compiler_info.arch:
 						config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % toolset_name
 					elif "x86_64" == compiler_info.arch:

@@ -74,6 +74,7 @@
 //   <functional>
 //   <memory>
 //   <random>
+//   <regex>
 //   <system_error>
 //   <thread>
 //   <tuple>
@@ -85,8 +86,8 @@
 #if defined(__clang__)
 	// Clang++
 
-	#if __cplusplus < 201103L
-		#error "-std=c++11 must be turned on."
+	#if __cplusplus < 201402L
+		#error "-std=c++14 must be turned on."
 	#endif
 
 	#define KLAYGE_COMPILER_CLANG
@@ -104,18 +105,13 @@
 			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
 		#endif
 
-		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-		#if __cplusplus >= 201402L
-			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
-		#endif
-
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
 	#elif defined(__MINGW32__)
-		#if CLANG_VERSION >= 34
+		#if CLANG_VERSION >= 36
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install clang++ 3.4 or up."
+			#error "Unsupported compiler version. Please install clang++ 3.6 or up."
 		#endif
 			
 		#include <bits/c++config.h>
@@ -127,38 +123,27 @@
 		#endif
 
 		#ifdef __GLIBCXX__
-			#if __GLIBCXX__ < 20130322 // g++ 4.8
-				#error "Unsupported library version. Please install clang++ with g++ 4.8 or up."
+			#if __GLIBCXX__ < 20150422 // g++ 5.1
+				#error "Unsupported library version. Please install clang++ with g++ 5.1 or up."
 			#endif
 			#if !defined(_GLIBCXX_HAS_GTHREADS)
 				#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 			#endif
 
-			#if __GLIBCXX__ >= 20140422 // g++ 4.9
-				#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-				#if __cplusplus > 201103L
-					#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-				#endif
-				#if __cplusplus >= 201402L
-					#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
-				#endif
-			#endif
+			#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
+			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
 		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 	#elif defined(__ANDROID__)
-		#if CLANG_VERSION >= 34
+		#if CLANG_VERSION >= 36
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install clang++ 3.4 or up."
+			#error "Unsupported compiler version. Please install clang++ 3.6 or up."
 		#endif
 
-		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
 		#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-		#if __cplusplus >= 201402L
-			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
-		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
@@ -180,14 +165,14 @@
 
 	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 
-	#if GCC_VERSION >= 48
+	#if GCC_VERSION >= 51
 		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
-		#error "Unsupported compiler version. Please install g++ 4.8 or up."
+		#error "Unsupported compiler version. Please install g++ 5.1 or up."
 	#endif
 
-	#if __cplusplus < 201103L
-		#error "-std=c++11 or -std=c++0x must be turned on."
+	#if __cplusplus < 201402L
+		#error "-std=c++14 must be turned on."
 	#endif
 	#if !defined(_GLIBCXX_HAS_GTHREADS)
 		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
@@ -195,15 +180,8 @@
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-	#if KLAYGE_COMPILER_VERSION >= 49
-		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-		#if __cplusplus > 201103L
-			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-		#endif
-		#if __cplusplus >= 201402L
-			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
-		#endif
-	#endif
+	#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
+	#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__dllexport__))
@@ -228,14 +206,12 @@
 		#error "Unsupported compiler version. Please install vc12 or up."
 	#endif
 
-	#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
-	#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
 	#if KLAYGE_COMPILER_VERSION >= 140
 		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-		#undef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+	#else
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 	#endif
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.
