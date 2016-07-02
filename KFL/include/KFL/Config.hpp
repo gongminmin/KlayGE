@@ -147,6 +147,21 @@
 
 		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
 		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
+	#elif defined(__ANDROID__)
+		#if CLANG_VERSION >= 34
+			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+		#else
+			#error "Unsupported compiler version. Please install clang++ 3.4 or up."
+		#endif
+
+		#define KLAYGE_CXX11_LIBRARY_REGEX_SUPPORT
+		#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+		#if __cplusplus >= 201402L
+			#define KLAYGE_CXX14_LIBRARY_MAKE_UNIQUE
+		#endif
+
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT
 	#else
 		#error "Clang++ on an unknown platform. Only Apple and Windows are supported."
 	#endif
@@ -318,13 +333,10 @@
 	#endif
 #elif defined(__ANDROID__)
 	#define KLAYGE_PLATFORM_ANDROID
-	#define KLAYGE_COMPILER_NAME gcc
 #elif defined(__CYGWIN__)
 	#define KLAYGE_PLATFORM_CYGWIN
-	#define KLAYGE_COMPILER_NAME cyg
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 	#define KLAYGE_PLATFORM_LINUX
-	#define KLAYGE_COMPILER_NAME gcc
 #elif defined(__APPLE__)
 	#include <TargetConditionals.h>
 	#if TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR

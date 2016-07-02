@@ -2024,7 +2024,7 @@ namespace KlayGE
 	{
 		if (glloader_GLES_VERSION_3_0())
 		{
-			GLint active_ubos;
+			GLint active_ubos = 0;
 			glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
 			all_cbuffs_.resize(active_ubos);
 			gl_bind_cbuffs_.resize(active_ubos);

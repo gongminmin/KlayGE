@@ -58,7 +58,7 @@ class build_info:
 			cfg_build.shader_platform_name = "auto"
 			
 		env = os.environ
-		
+
 		host_platform = sys.platform
 		if 0 == host_platform.find("win"):
 			host_platform = "win"
@@ -71,6 +71,9 @@ class build_info:
 		else:
 			target_platform = cfg_build.target
 			if 0 == target_platform.find("android"):
+				if not "ANDROID_NDK" in env:
+					log_error("You must define a ANDROID_NDK environ variable to your location of NDK.\n")
+
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
@@ -213,11 +216,14 @@ class build_info:
 				elif "vc120" == compiler:
 					toolset = "v120"
 			elif "android" == target_platform:
-				if target_api_level >= 21:
-					toolset = "4.9"
+				if "gcc" == compiler:
+					if target_api_level >= 21:
+						toolset = "4.9"
+					else:
+						toolset = "4.8"
 				else:
-					toolset = "4.8"
-				
+					toolset = "3.6"
+
 		if "" == archs:
 			archs = cfg_build.arch
 			if "" == archs:
@@ -256,10 +262,11 @@ class build_info:
 				compilers.append(compiler_info(arch, gen_name, toolset))
 		elif "clang" == compiler:
 			compiler_name = "clang"
+			self.toolset = toolset
 			compiler_version = self.retrive_clang_version()
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
-			elif ("darwin" == host_platform) or ("ios" == host_platform):
+			elif ("darwin" == host_platform) or ("ios" == target_platform):
 				gen_name = "Xcode"
 				multi_config = True
 			else:
@@ -275,7 +282,7 @@ class build_info:
 			compiler_name = "gcc"
 			self.toolset = toolset
 			compiler_version = self.retrive_gcc_version()
-			if ("android" == target_platform) and ("win" == host_platform):
+			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
 			else:
 				gen_name = "Unix Makefiles"
@@ -317,13 +324,27 @@ class build_info:
 		if ("android" == self.target_platform):
 			gcc_ver = self.toolset
 		else:
-			gcc_ver = subprocess.check_output(["gcc", "-dumpversion"])
+			gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
 	def retrive_clang_version(self):
-		clang_ver = subprocess.check_output(["clang", "--version"])
-		clang_ver_components = clang_ver.split()[("darwin" == self.host_platform) and 3 or 2].split(".")
+		if ("android" == self.target_platform):
+			android_ndk_path = os.environ["ANDROID_NDK"]
+			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm-%s" % self.toolset
+			if not os.path.isdir(prebuilt_llvm_path):
+				prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
+			prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows\\bin"
+			if not os.path.isdir(prebuilt_clang_path):
+				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
+			clang_ver = subprocess.check_output([prebuilt_clang_path + "\\clang", "--version"]).decode()
+		else:
+			clang_ver = subprocess.check_output(["clang", "--version"]).decode()
+		clang_ver_tokens = clang_ver.split()
+		for i in range(0, len(clang_ver_tokens)):
+			if "version" == clang_ver_tokens[i]:
+				clang_ver_components = clang_ver_tokens[i + 1].split(".")
+				break
 		return int(clang_ver_components[0] + clang_ver_components[1])
 
 class batch_command:
@@ -371,6 +392,16 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	toolset_name = ""
 	if ("vc" == build_info.compiler_name) and (not build_info.is_windows_runtime):
 		toolset_name = "-T %s" % compiler_info.toolset
+	elif ("android" == build_info.target_platform):
+		if ("clang" == build_info.compiler_name):
+			android_ndk_path = os.environ["ANDROID_NDK"]
+			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
+			if os.path.isdir(prebuilt_llvm_path):
+				toolset_name = "clang"
+			else:
+				toolset_name = "clang%s" % compiler_info.toolset
+		else:
+			toolset_name = compiler_info.toolset
 
 	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
@@ -485,16 +516,19 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				if "android" == build_info.target_platform:
 					config_options += " -DANDROID_ABI=%s" % compiler_info.arch
 					if "x86" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % compiler_info.toolset
+						config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % toolset_name
 					elif "x86_64" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % compiler_info.toolset
+						config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % toolset_name
 					elif "arm64-v8a" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % compiler_info.toolset
+						config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % toolset_name
 					else:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % compiler_info.toolset
-				
+						config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % toolset_name
+
+					if "clang" == build_info.compiler_name:
+						config_options += " -DANDROID_STL=c++_static"
+
 				cmake_cmd = batch_command(build_info.host_platform)
-				cmake_cmd.add_command('cmake -G "%s" %s %s %s %s' % (compiler_info.generator, toolset_name, additional_options, config_options, "../cmake"))
+				cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, additional_options, config_options, "../cmake"))
 				if cmake_cmd.execute() != 0:
 					log_error("Config %s failed." % name)		
 

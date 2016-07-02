@@ -49,6 +49,7 @@
 #endif
 
 #if !(((defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && (__GLIBCXX__ >= 20130531)) \
+		|| (defined(KLAYGE_COMPILER_CLANG) && defined(KLAYGE_PLATFORM_ANDROID)) \
 		|| defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS) \
 		|| defined(KLAYGE_COMPILER_MSVC))
 #include <type_traits>
