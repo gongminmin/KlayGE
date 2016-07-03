@@ -54,6 +54,9 @@
 #ifndef D3DCOMPILE_PREFER_FLOW_CONTROL
 #define D3DCOMPILE_PREFER_FLOW_CONTROL 0x00000400
 #endif
+#ifndef D3DCOMPILE_ENABLE_STRICTNESS
+#define D3DCOMPILE_ENABLE_STRICTNESS 0x00000800
+#endif
 
 #include "OfflineRenderEffect.hpp"
 #include "OfflineOGLShaderObject.hpp"
@@ -321,7 +324,7 @@ namespace KlayGE
 					}
 					macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
-					uint32_t const flags = D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
+					uint32_t const flags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_PREFER_FLOW_CONTROL | D3DCOMPILE_SKIP_OPTIMIZATION;
 					code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
 					if (code.empty())
 					{

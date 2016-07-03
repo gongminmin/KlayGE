@@ -319,13 +319,13 @@ namespace KlayGE
 				macros.emplace_back("KLAYGE_D3D12", "1");
 				macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
-				uint32_t flags = 0;
+				uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if !defined(KLAYGE_DEBUG)
 				flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
-			*code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
+				*code = this->CompileToDXBC(type, effect, tech, pass, macros, sd.func_name.c_str(), shader_profile, flags);
 
-			if (!code->empty())
+				if (!code->empty())
 				{
 					ID3D12ShaderReflection* reflection;
 					this->ReflectDXBC(*code, reinterpret_cast<void**>(&reflection));

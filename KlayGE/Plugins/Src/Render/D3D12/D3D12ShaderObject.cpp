@@ -632,7 +632,7 @@ namespace KlayGE
 			macros.emplace_back("KLAYGE_D3D12", "1");
 			macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
-			uint32_t flags = 0;
+			uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if !defined(KLAYGE_DEBUG)
 			flags |= D3DCOMPILE_OPTIMIZATION_LEVEL3;
 #endif
