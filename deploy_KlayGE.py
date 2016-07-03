@@ -22,7 +22,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		dll_suffix = "so"
 	output_suffix = "_%s%d*" % (build_info.compiler_name, build_info.compiler_version)
 	lib_suffix = "%s.%s" % (output_suffix, dll_suffix)
-		
+
 	if not os.path.exists("%s/bin" % target_dir):
 		os.mkdir("%s/bin" % target_dir);
 	if not os.path.exists(bin_dst_dir):
@@ -51,21 +51,17 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		copy_to_dst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/LZMA*.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
-	
+
 	print("Deploying DXSDK...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/d3dcompiler_47.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
-	
+
 	print("Deploying OpenAL...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL32.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/wrap_oal.%s" % (compiler_arch, dll_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
 
-	print("Deploying Cg...\n")
-	for fname in glob.iglob("KlayGE/bin/win_%s/cg.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
-		
 	print("Deploying glloader...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/glloader%s" % (compiler_arch, lib_suffix)):
 		copy_to_dst(fname, bin_dst_dir);
@@ -114,7 +110,7 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 		os.mkdir("%s/media/Textures/Cube" % target_dir);
 	if not os.path.exists("%s/media/Textures/Juda" % target_dir):
 		os.mkdir("%s/media/Textures/Juda" % target_dir);
-	
+
 	copy_to_dst("KlayGE/media/Fonts/gkai00mp.kfont", "%s/media/Fonts/" % target_dir);
 	copy_to_dst("KlayGE/media/Models/ambient_light_proxy.meshml", "%s/media/Models/" % target_dir);
 	copy_to_dst("KlayGE/media/Models/directional_light_proxy.meshml", "%s/media/Models/" % target_dir);
