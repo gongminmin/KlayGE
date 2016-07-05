@@ -25,11 +25,16 @@
 # BUILTIN:     if this is set the module will be compiled statically into
 #              libpython by default.  The user can still override by setting
 #              BUILTIN_[extension_name]=OFF.
+# ALWAYS_BUILTIN: if this is set the module will always be compiled statically into
+#                 libpython.
+# NO_INSTALL:   do not install or package the extension.
 #
 # Two user-settable options are created for each extension added:
 # ENABLE_[extension_name]   defaults to ON.  If set to OFF the extension will
 #                           not be added at all.
-# BUILTIN_[extension_name]  defaults to OFF unless BUILTIN is set when calling
+# BUILTIN_[extension_name]  defaults to the value of
+#                           BUILD_EXTENSIONS_AS_BUILTIN, which defaults to OFF,
+#                           unless BUILTIN is set when calling
 #                           add_python_extension.  Adds the extension source
 #                           files to libpython instead of compiling a separate
 #                           library.
@@ -38,7 +43,7 @@
 # options ENABLE_FOO and BUILTIN_FOO.
 
 function(add_python_extension name)
-    set(options BUILTIN)
+    set(options BUILTIN ALWAYS_BUILTIN NO_INSTALL)
     set(oneValueArgs)
     set(multiValueArgs REQUIRES SOURCES DEFINITIONS LIBRARIES INCLUDEDIRS)
     cmake_parse_arguments(ADD_PYTHON_EXTENSION
@@ -64,18 +69,52 @@ function(add_python_extension name)
            "Controls whether the \"${name}\" extension will be built"
            ON
     )
-    option(BUILTIN_${upper_name}
-           "If this is set the \"${name}\" extension will be compiled in to libpython"
-           ${ADD_PYTHON_EXTENSION_BUILTIN}
-    )
+    if(ENABLE_${upper_name})
+        mark_as_advanced(FORCE ENABLE_${upper_name})
+    else()
+        mark_as_advanced(CLEAR ENABLE_${upper_name})
+    endif()
 
     # Check all the things we require are found.
     set(missing_deps "")
     foreach(dep ${ADD_PYTHON_EXTENSION_REQUIRES} ENABLE_${upper_name})
-        if(NOT ${dep})
+        string(REPLACE " " ";" list_dep ${dep})
+        if(NOT (${list_dep}))
             set(missing_deps "${missing_deps}${dep} ")
-        endif(NOT ${dep})
-    endforeach(dep)
+        endif()
+    endforeach()
+
+    if(NOT ADD_PYTHON_EXTENSION_ALWAYS_BUILTIN)
+        # Add options that the extention is either external to libpython or
+        # builtin.  These will be marked as advanced unless different from default
+        # values
+        if(NOT ADD_PYTHON_EXTENSION_BUILTIN)
+            set(ADD_PYTHON_EXTENSION_BUILTIN ${BUILD_EXTENSIONS_AS_BUILTIN})
+        endif()
+        cmake_dependent_option(
+            BUILTIN_${upper_name}
+            "If this is set the \"${name}\" extension will be compiled in to libpython"
+            ${ADD_PYTHON_EXTENSION_BUILTIN}
+            "NOT missing_deps"
+            OFF
+        )
+        if(NOT missing_deps)
+            if((BUILTIN_${upper_name} AND BUILD_EXTENSIONS_AS_BUILTIN)
+                OR (NOT BUILTIN_${upper_name} AND NOT BUILD_EXTENSIONS_AS_BUILTIN))
+                mark_as_advanced(FORCE BUILTIN_${upper_name})
+            else()
+                mark_as_advanced(CLEAR BUILTIN_${upper_name})
+            endif()
+        endif()
+
+        # XXX _ctypes_test and _testcapi should always be shared
+        if(${name} STREQUAL "_ctypes_test" OR ${name} STREQUAL "_testcapi")
+            unset(BUILTIN_${upper_name} CACHE)
+            set(BUILTIN_${upper_name} 0)
+        endif()
+    else()
+        set(BUILTIN_${upper_name} 1)
+    endif()
 
     # If any dependencies were missing don't include this extension.
     if(missing_deps)
@@ -83,9 +122,9 @@ function(add_python_extension name)
         set(extensions_disabled "${extensions_disabled}${name} (not set: ${missing_deps});"
              CACHE INTERNAL "" FORCE)
         return()
-    else(missing_deps)
+    else()
         set(extensions_enabled "${extensions_enabled}${name};" CACHE INTERNAL "" FORCE)
-    endif(missing_deps)
+    endif()
 
     # Callers to this function provide source files relative to the Modules/
     # directory.  We need to get absolute paths for them all.
@@ -94,50 +133,74 @@ function(add_python_extension name)
         get_filename_component(ext ${source} EXT)
 
         # Treat assembler sources differently
-        if(${ext} STREQUAL ".S")
-            add_assembler(absolute_sources Modules/${source} ${ADD_PYTHON_EXTENSION_INCLUDEDIRS})
-        else(${ext} STREQUAL ".S")
-            set(absolute_src ${source})
-            if(NOT IS_ABSOLUTE ${source})
-                set(absolute_src ${SRC_DIR}/Modules/${source})
-            endif(NOT IS_ABSOLUTE ${source})
-            list(APPEND absolute_sources ${absolute_src})
-        endif(${ext} STREQUAL ".S")
-    endforeach(source)
+        if(ext STREQUAL ".S")
+            set_source_files_properties(Modules/${source} PROPERTIES LANGUAGE ASM)
+        endif()
+        set(absolute_src ${source})
+        if(NOT IS_ABSOLUTE ${source})
+            set(absolute_src ${SRC_DIR}/Modules/${source})
+        endif()
+        list(APPEND absolute_sources ${absolute_src})
+    endforeach()
 
     if(BUILTIN_${upper_name})
         # This will be compiled into libpython instead of as a separate library
-        set(builtin_extensions "${builtin_extensions}${name};" CACHE INTERNAL "" FORCE)
-        set(builtin_source "${builtin_source}${absolute_sources};" CACHE INTERNAL "" FORCE)
-        set(builtin_link_libraries "${builtin_link_libraries}${ADD_PYTHON_EXTENSION_LIBRARIES};" CACHE INTERNAL "" FORCE)
-        set(builtin_includedirs "${builtin_includedirs}${ADD_PYTHON_EXTENSION_INCLUDEDIRS};" CACHE INTERNAL "" FORCE)
-        set(builtin_definitions "${builtin_definitions}${ADD_PYTHON_EXTENSION_DEFINITIONS};" CACHE INTERNAL "" FORCE)
+        set_property(GLOBAL APPEND PROPERTY builtin_extensions ${name})
+        set_property(GLOBAL APPEND PROPERTY extension_${name}_sources ${absolute_sources})
+        set_property(GLOBAL APPEND PROPERTY extension_${name}_link_libraries ${ADD_PYTHON_EXTENSION_LIBRARIES})
+        set_property(GLOBAL APPEND PROPERTY extension_${name}_includedirs ${ADD_PYTHON_EXTENSION_INCLUDEDIRS})
+        set_property(GLOBAL APPEND PROPERTY extension_${name}_definitions ${ADD_PYTHON_EXTENSION_DEFINITIONS})
     elseif(WIN32 AND NOT BUILD_SHARED)
         # Extensions cannot be built against a static libpython on windows
-    else(BUILTIN_${upper_name})
-        add_library(${target_name} SHARED ${absolute_sources})
-        include_directories(${ADD_PYTHON_EXTENSION_INCLUDEDIRS})
-        target_link_libraries(${target_name} ${ADD_PYTHON_EXTENSION_LIBRARIES})
+    else()
+
+        # XXX Uncomment when CMake >= 2.8.8 is required
+        #add_library(${target_name} SHARED ${absolute_sources})
+        #set_target_properties(${target_name} PROPERTIES
+        #    INCLUDE_DIRECTORIES ${ADD_PYTHON_EXTENSION_INCLUDEDIRS})
+
+        if(WIN32)
+            string(REGEX MATCH "Py_LIMITED_API" require_limited_api "${ADD_PYTHON_EXTENSION_DEFINITIONS}")
+            if(require_limited_api STREQUAL "")
+              list(APPEND ADD_PYTHON_EXTENSION_LIBRARIES libpython-shared)
+            else()
+              list(APPEND ADD_PYTHON_EXTENSION_LIBRARIES libpython3-shared)
+            endif()
+        endif()
+
+        # XXX When CMake >= 2.8.8 is required, remove the section below
+        #     configuring and using 'add_python_extension_CMakeLists.txt.in'.
+        file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${target_name}-src)
+        configure_file(
+            ${CMAKE_SOURCE_DIR}/cmake/add_python_extension_CMakeLists.txt.in
+            ${CMAKE_CURRENT_BINARY_DIR}/${target_name}-src/CMakeLists.txt
+        )
+        add_subdirectory(
+            ${CMAKE_CURRENT_BINARY_DIR}/${target_name}-src
+            ${CMAKE_CURRENT_BINARY_DIR}/${target_name}
+        )
+
+        # XXX Uncomment when CMake >= 2.8.8 is required
+        #target_link_libraries(${target_name} ${ADD_PYTHON_EXTENSION_LIBRARIES})
 
         if(WIN32)
             #list(APPEND ADD_PYTHON_EXTENSION_DEFINITIONS Py_NO_ENABLE_SHARED)
-            target_link_libraries(${target_name} libpython-shared)
             if(MINGW)
                 set_target_properties(${target_name} PROPERTIES
                     LINK_FLAGS -Wl,--enable-auto-import
                 )
-            endif(MINGW)
+            endif()
             set_target_properties(${target_name} PROPERTIES
                 SUFFIX .pyd
             )
-        endif(WIN32)
+        endif()
         
         if(APPLE)
             set_target_properties(${target_name} PROPERTIES
                 LINK_FLAGS -Wl,-undefined,dynamic_lookup
                 SUFFIX .so
             )
-        endif(APPLE)
+        endif()
 
         # Turn off the "lib" prefix and add any compiler definitions
         set_target_properties(${target_name} PROPERTIES
@@ -147,18 +210,26 @@ function(add_python_extension name)
             OUTPUT_NAME "${name}"
             PREFIX ""
         )
+        if(HAVE_POSITION_INDEPENDENT_CODE)
+            set_target_properties(${target_name} PROPERTIES
+                POSITION_INDEPENDENT_CODE ON
+            )
+        endif()
 
         if(ADD_PYTHON_EXTENSION_DEFINITIONS)
             set_target_properties(${target_name} PROPERTIES
                 COMPILE_DEFINITIONS "${ADD_PYTHON_EXTENSION_DEFINITIONS}")
-        endif(ADD_PYTHON_EXTENSION_DEFINITIONS)
+        endif()
 
-        install(TARGETS ${target_name}
-                ARCHIVE DESTINATION ${ARCHIVEDIR}
-                LIBRARY DESTINATION ${EXTENSION_INSTALL_DIR}
-                RUNTIME DESTINATION ${EXTENSION_INSTALL_DIR})
-    endif(BUILTIN_${upper_name})
-endfunction(add_python_extension)
+        # XXX Uncomment when CMake >= 2.8.8 is required
+        #if(NOT ADD_PYTHON_EXTENSION_NO_INSTALL)
+        #    install(TARGETS ${target_name}
+        #            ARCHIVE DESTINATION ${ARCHIVEDIR}
+        #            LIBRARY DESTINATION ${EXTENSION_INSTALL_DIR}
+        #            RUNTIME DESTINATION ${EXTENSION_INSTALL_DIR})
+        #endif()
+    endif()
+endfunction()
 
 
 function(show_extension_summary)
@@ -168,7 +239,7 @@ function(show_extension_summary)
         message(STATUS "")
         foreach(line ${extensions_disabled})
             message(STATUS "    ${line}")
-        endforeach(line)
+        endforeach()
         message(STATUS "")
-    endif(extensions_disabled)
-endfunction(show_extension_summary)
+    endif()
+endfunction()

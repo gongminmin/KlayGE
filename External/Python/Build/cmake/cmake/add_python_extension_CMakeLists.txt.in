@@ -1,0 +1,11 @@
+add_library(${target_name} SHARED ${absolute_sources})
+include_directories(${ADD_PYTHON_EXTENSION_INCLUDEDIRS})
+
+target_link_libraries(${target_name} ${ADD_PYTHON_EXTENSION_LIBRARIES})
+
+if(NOT ADD_PYTHON_EXTENSION_NO_INSTALL)
+  install(TARGETS ${target_name}
+          ARCHIVE DESTINATION ${ARCHIVEDIR}
+          LIBRARY DESTINATION ${EXTENSION_INSTALL_DIR}
+          RUNTIME DESTINATION ${EXTENSION_INSTALL_DIR})
+endif()

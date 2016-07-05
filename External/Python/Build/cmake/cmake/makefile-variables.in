@@ -14,6 +14,8 @@ MAINCC=		$(CC)
 LINKCC=		$(PURIFY) $(MAINCC)
 AR=		@CMAKE_AR@
 RANLIB=		@CMAKE_RANLIB@
+SOABI=		@SOABI@
+LDVERSION=	$(VERSION)$(ABIFLAGS)
 SVNVERSION=	svnversion $(srcdir)
 HGVERSION=
 HGTAG=
@@ -41,7 +43,7 @@ MAKESETUP=      $(srcdir)/Modules/makesetup
 
 # Compiler options
 OPT=            @CMAKE_C_FLAGS@ -DNDEBUG
-BASECFLAGS=	 -fno-strict-aliasing
+BASECFLAGS=	 -Wno-unused-result -Wsign-compare -Wunreachable-code
 CFLAGS=         @CMAKE_C_FLAGS@
 # Both CPPFLAGS and LDFLAGS need to contain the shell's value for setup.py to
 # be able to build extension modules using the directories specified in the
@@ -78,15 +80,18 @@ MANDIR=		${datarootdir}/man
 INCLUDEDIR=	${prefix}/include
 CONFINCLUDEDIR=	$(exec_prefix)/include
 SCRIPTDIR=	$(prefix)/lib
+ABIFLAGS=	@ABIFLAGS@
 
 # Detailed destination directories
 BINLIBDEST=	$(LIBDIR)/python$(VERSION)
 LIBDEST=	$(SCRIPTDIR)/python$(VERSION)
-INCLUDEPY=	$(INCLUDEDIR)/python$(VERSION)
-CONFINCLUDEPY=	$(CONFINCLUDEDIR)/python$(VERSION)
+INCLUDEPY=	$(INCLUDEDIR)/python$(LDVERSION)
+CONFINCLUDEPY=	$(CONFINCLUDEDIR)/python$(LDVERSION)
 LIBP=		$(LIBDIR)/python$(VERSION)
 
 # Symbols used for using shared libraries
+SHLIB_SUFFIX=	.so
+EXT_SUFFIX=	.$(SOABI).so
 SO=		.so
 LDSHARED=	$(CC) @MAKEFILE_LDSHARED_FLAGS@ $(LDFLAGS)
 BLDSHARED=	$(CC) @MAKEFILE_LDSHARED_FLAGS@ $(LDFLAGS)
@@ -108,9 +113,6 @@ PYTHONFRAMEWORKINSTALLDIR=
 # deployment target is active during build.
 MACOSX_DEPLOYMENT_TARGET=@CMAKE_OSX_DEPLOYMENT_TARGET@
 #export MACOSX_DEPLOYMENT_TARGET
-
-# Options to enable prebinding (for fast startup prior to Mac OS X 10.3)
-OTHER_LIBTOOL_OPT=
 
 # Environment to run shared python without installed libraries
 RUNSHARED=
@@ -136,8 +138,8 @@ DISTFILES=	README ChangeLog $(CONFIGFILES)
 DISTDIRS=	$(SUBDIRS) $(SUBDIRSTOO) Ext-dummy
 DIST=		$(DISTFILES) $(DISTDIRS)
 
-LIBRARY=	libpython$(VERSION).a
-LDLIBRARY=      libpython$(VERSION).a
+LIBRARY=	libpython$(VERSION)$(ABIFLAGS).a
+LDLIBRARY=      libpython$(VERSION)$(ABIFLAGS).a
 BLDLIBRARY=     $(LDLIBRARY)
 DLLLIBRARY=
 LDLIBRARYDIR=
@@ -153,6 +155,10 @@ SHLIBS=		$(LIBS)
 PYTHON=		python$(EXE)
 BUILDPYTHON=	python$(BUILDEXE)
 
+PYTHON_FOR_BUILD=./$(BUILDPYTHON) -E
+_PYTHON_HOST_PLATFORM=
+BUILD_GNU_TYPE=	x86_64-unknown-linux-gnu
+HOST_GNU_TYPE=	x86_64-unknown-linux-gnu
 
 # === Definitions added by makesetup ===
 
