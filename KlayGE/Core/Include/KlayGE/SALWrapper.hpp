@@ -34,6 +34,11 @@
 #pragma once
 
 #if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+
+#if defined(KLAYGE_COMPILER_GCC) || defined(__MINGW32__)
+	#include <bits/c++config.h> // For __GLIBCXX__
+#endif
+
 	#define __bcount(size)
 	#define __in
 	#define __in_bcount(size)
@@ -59,7 +64,7 @@
 	#define _Inout_opt_bytecount_(size)
 	#define _Pre_null_
 
-#if (defined(__GLIBCXX__) && (__GLIBCXX__ < 20150716))
+#if (defined(__GLIBCXX__) && (__GLIBCXX__ < 20150716)) // g++ 5.3
 	#define _In_
 	#define _In_z_
 	#define _In_reads_(size)
