@@ -1,0 +1,125 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
+
+	<parameter type="texture2D" name="noise_tex">
+		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_clamp_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_wrap_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<parameter type="texture2D" name="src_tex"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="view_proj"/>
+		<parameter type="float3" name="eye_pos"/>
+		<parameter type="float3" name="upper_left"/>
+		<parameter type="float3" name="x_dir"/>
+		<parameter type="float3" name="y_dir"/>
+		<parameter type="float" name="time"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+// Modified from https://www.shadertoy.com/view/llSGRG by Harha
+
+float SDFSphere(float3 p, float s)
+{
+	return length(p) - s;
+}
+
+float SDFTorus(float3 p, float2 t)
+{
+	float2 q = float2(length(p.xz) - t.x, p.y);
+	return length(q) - t.y;
+}
+
+float3 TexcoordToView(float2 tex)
+{
+	return upper_left + x_dir * tex.x + y_dir * tex.y;
+}
+
+float4 BlackHolePS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	const float G = 1;
+	const float PHOTON_MASS = 0.001f;
+	const int STEPS = 200;
+	const float LENGTH = 5.0f;
+
+	float3 ray = normalize(TexcoordToView(tex_coord0));
+
+	float3 bh_center = float3(0, 0, -0.5f);
+	float bh_r = 0.05f;
+	float bh_mass = 5;	
+	float part_f = bh_mass * PHOTON_MASS * G;
+
+	float3 pos = eye_pos;
+	float3 pv = ray;
+	float dt = LENGTH / STEPS;
+
+	float3 clr = 0;
+
+	float noncaptured = 1;
+
+	float3 c1 = float3(0.5f, 0.46f, 0.4f);
+	float3 c2 = float3(1.0f, 0.8f, 0.6f);
+
+	for (int i = 0; i < STEPS; ++ i)
+	{
+		pos += pv * dt * noncaptured;
+		
+		// Gravity
+		float3 bh_v = bh_center - pos;
+		float inv_r2 = 1 / dot(bh_v, bh_v);
+		pv += part_f * inv_r2 * normalize(bh_v);
+		
+		noncaptured = smoothstep(0, 0.666f, SDFSphere(pos - bh_center, bh_r));
+
+		// Texture for the accretion disc
+		float dr = length(bh_v.xz);
+		float da = atan2(bh_v.x, bh_v.z);
+		float2 ra = float2(dr, da * (0.01f + (dr - bh_r) * 0.002f) + time * 0.02f);
+		
+		float3 dclr = lerp(c2, c1, pow(length(bh_v) - bh_r, 2)) * (noise_tex.Sample(bilinear_wrap_sampler, ra * 0.2f).r + 0.05f)
+			* (4 / (0.001f + (length(bh_v) - bh_r) * 50));
+		
+		dclr = max(0, dclr * smoothstep(0, 1, -SDFTorus((pos * float3(1, 25, 1)) - bh_center, float2(0.8f, 0.99f))));
+
+		// Glow
+		dclr += float3(1, 0.9f, 0.85f) * inv_r2 * 0.0033f;
+
+		clr += dclr * noncaptured;
+	}
+
+	float4 pos_ss = mul(float4(pos, 1), view_proj);
+	pos_ss.xy /= pos_ss.w;
+	pos_ss.y *= KLAYGE_FLIPPING;
+	pos_ss.xy = pos_ss.xy * 0.5f + 0.5f;
+	float3 bg_clr = src_tex.Sample(bilinear_clamp_sampler, pos_ss.xy).xyz;
+	clr += bg_clr * noncaptured;
+
+	return float4(clr, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="BlackHole">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="BlackHolePS()"/>
+		</pass>
+	</technique>
+</effect>

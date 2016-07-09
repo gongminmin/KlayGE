@@ -147,6 +147,7 @@ void PostProcessingApp::OnCreate()
 	sepia_ = SyncLoadPostProcess("Sepia.ppml", "sepia");
 	cross_stitching_ = SyncLoadPostProcess("CrossStitching.ppml", "cross_stitching");
 	frosted_glass_ = SyncLoadPostProcess("FrostedGlass.ppml", "frosted_glass");
+	black_hole_ = SyncLoadPostProcess("BlackHole.ppml", "black_hole");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("PostProcessing.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];
@@ -161,6 +162,7 @@ void PostProcessingApp::OnCreate()
 	id_old_fashion_ = dialog_->IDFromName("SepiaPP");
 	id_cross_stitching_ = dialog_->IDFromName("CrossStitchingPP");
 	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
+	id_black_hole_ = dialog_->IDFromName("BlackHolePP");
 
 	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FPSCameraHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CopyHandler, this, std::placeholders::_1));
@@ -172,6 +174,7 @@ void PostProcessingApp::OnCreate()
 	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::SepiaHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CrossStitchingHandler, this, std::placeholders::_1));
 	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FrostedGlassHandler, this, std::placeholders::_1));
+	dialog_->Control<UIRadioButton>(id_black_hole_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::BlackHoleHandler, this, std::placeholders::_1));
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
@@ -227,6 +230,8 @@ void PostProcessingApp::OnResize(uint32_t width, uint32_t height)
 	cross_stitching_->InputPin(0, color_tex_);
 
 	frosted_glass_->InputPin(0, color_tex_);
+
+	black_hole_->InputPin(0, color_tex_);
 
 	UIManager::Instance().SettleCtrls();
 }
@@ -325,6 +330,14 @@ void PostProcessingApp::FrostedGlassHandler(UIRadioButton const & sender)
 	}
 }
 
+void PostProcessingApp::BlackHoleHandler(UIRadioButton const & sender)
+{
+	if (sender.GetChecked())
+	{
+		active_pp_ = black_hole_;
+	}
+}
+
 void PostProcessingApp::DoUpdateOverlay()
 {
 	RenderEngine& renderEngine(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -347,6 +360,22 @@ uint32_t PostProcessingApp::DoUpdate(uint32_t pass)
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
+		if (active_pp_ == black_hole_)
+		{
+			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+
+			float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), camera.InverseViewProjMatrix());
+			float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), camera.InverseViewProjMatrix());
+			float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), camera.InverseViewProjMatrix());
+
+			black_hole_->SetParam(0, camera.ViewProjMatrix());
+			black_hole_->SetParam(1, camera.EyePos());
+			black_hole_->SetParam(2, upper_left);
+			black_hole_->SetParam(3, upper_right - upper_left);
+			black_hole_->SetParam(4, lower_left - upper_left);
+			black_hole_->SetParam(5, this->AppTime());
+		}
+
 		color_tex_->BuildMipSubLevels();
 		re.BindFrameBuffer(FrameBufferPtr());
 		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->Discard();

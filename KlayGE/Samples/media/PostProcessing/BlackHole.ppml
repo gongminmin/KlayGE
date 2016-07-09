@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="black_hole">
+		<params>
+			<param name="view_proj"/>
+			<param name="eye_pos"/>
+			<param name="upper_left"/>
+			<param name="x_dir"/>
+			<param name="y_dir"/>
+			<param name="time"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="BlackHolePP.fxml" tech="BlackHole"/>
+	</post_processor>
+</post_processors>

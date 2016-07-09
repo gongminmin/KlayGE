@@ -32,6 +32,7 @@ private:
 	void SepiaHandler(KlayGE::UIRadioButton const & sender);
 	void CrossStitchingHandler(KlayGE::UIRadioButton const & sender);
 	void FrostedGlassHandler(KlayGE::UIRadioButton const & sender);
+	void BlackHoleHandler(KlayGE::UIRadioButton const & sender);
 
 	KlayGE::FontPtr font_;
 	KlayGE::SceneObjectPtr sky_box_;
@@ -52,6 +53,7 @@ private:
 	KlayGE::PostProcessPtr sepia_;
 	KlayGE::PostProcessPtr cross_stitching_;
 	KlayGE::PostProcessPtr frosted_glass_;
+	KlayGE::PostProcessPtr black_hole_;
 
 	KlayGE::UIDialogPtr dialog_;
 	int id_fps_camera_;
@@ -64,6 +66,7 @@ private:
 	int id_old_fashion_;
 	int id_cross_stitching_;
 	int id_frosted_glass_;
+	int id_black_hole_;
 
 	KlayGE::PointLightSourcePtr point_light_;
 };

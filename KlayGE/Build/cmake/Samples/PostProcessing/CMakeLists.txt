@@ -18,6 +18,7 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/BlackHolePP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.fxml
@@ -27,6 +28,7 @@ SET(EFFECT_FILES
 )
 
 SET(POST_PROCESSORS
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/BlackHole.ppml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.ppml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.ppml
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/Sepia.ppml
@@ -90,6 +92,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/rnl_cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/AsciiArtsPP.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/BlackHolePP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CartoonPP.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/CrossStitching.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/PostProcessing/FrostedGlass.kfx

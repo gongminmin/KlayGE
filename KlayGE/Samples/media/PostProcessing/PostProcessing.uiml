@@ -11,6 +11,7 @@
 		<control type="radio_button" id="SepiaPP" caption="Sepia" x="20" y="170" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="CrossStitchingPP" caption="Cross Stitchint" x="20" y="195" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 		<control type="radio_button" id="FrostedGlassPP" caption="Frosted Glass" x="20" y="220" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
+		<control type="radio_button" id="BlackHolePP" caption="Black Hole" x="20" y="245" width="100" height="24" button_group="0" checked="0" hotkey="0" is_default="0"/>
 
 		<control type="check_box" id="FPSCamera" caption="FPS camera" x="20" y="460" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
