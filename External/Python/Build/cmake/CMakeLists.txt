@@ -41,6 +41,8 @@ SET(PACKAGE_FILE_ID "e177c0003738ff259e687ae13cbebd34faadadaf")
 
 DOWNLOAD_PACKAGE("Python" ${REL_PATH} ${PACKAGE_COMMIT_ID} ${PACKAGE_FILE_ID} "README")
 
+SET(SRC_DIR ${PYTHON_PROJECT_DIR})
+
 IF(MSVC)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3 /WX- /wd4273 /we4013 /we4133")
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3 /WX- /wd4273 /we4013 /we4133")
@@ -53,9 +55,17 @@ ELSE()
 ENDIF()
 
 if(ANDROID OR IOS)
-    set(UNIX OFF)
-    set(LINUX OFF)
-    set(HAVE_WORDS_BIGENDIAN ON)
+  set(UNIX OFF)
+  set(LINUX OFF)
+  set(BUILD_PYTHON_EXECUTABLE OFF)
+  set(BUILD_PYTHON_DEVELOPMENT OFF)
+  set(BUILD_FREEZE_IMPORTLIB OFF)
+  set(BUILD_PGEN OFF)
+else()
+  option(BUILD_PYTHON_EXECUTABLE "Build 'python' executable" ON)
+  option(BUILD_PYTHON_DEVELOPMENT "Build files required to develop C extensions" ON)
+  option(BUILD_FREEZE_IMPORTLIB "Build '_freeze_importlib' executable" ON)
+  option(BUILD_PGEN "Build 'pgen' executable" ON)
 endif()
 
 if(CMAKE_CROSSCOMPILING)
@@ -67,7 +77,9 @@ include(cmake/CMakeChecks.cmake)
 include(cmake/Extensions.cmake)
 include(CMakeDependentOption)
 include(CMakeParseArguments)
-#include(CTest)
+if(BUILD_PYTHON_EXECUTABLE)
+  include(CTest)
+endif()
 
 # Options
 option(DOWNLOAD_SOURCES "Automatically download the Python sources" ON)
@@ -93,10 +105,6 @@ if(DEFINED BUILD_SHARED OR DEFINED BUILD_STATIC)
 endif()
 
 option(BUILD_LIBPYTHON_SHARED ${_build_libpython_shared_desc} ${_build_libpython_shared_default})
-option(BUILD_PYTHON_EXECUTABLE "Build 'python' executable" ON)
-option(BUILD_PYTHON_DEVELOPMENT "Build files required to develop C extensions" ON)
-option(BUILD_FREEZE_IMPORTLIB "Build '_freeze_importlib' executable" ON)
-option(BUILD_PGEN "Build 'pgen' executable" ON)
 option(BUILD_EXTENSIONS_AS_BUILTIN "Default all modules as builtin to libpython" OFF)
 option(USE_LIB64 "Search for dependencies and install to prefix/lib64 instead of prefix/lib" OFF)
 if(WIN32)
@@ -195,7 +203,6 @@ endif()
 
 # Detect source directory
 set(_landmark "pyconfig.h.in") # CMake will look for this file.
-set(SRC_DIR ${PYTHON_PROJECT_DIR})
 if(NOT (SRC_DIR AND EXISTS ${SRC_DIR}/${_landmark}))
     foreach(dirname
         ${CMAKE_CURRENT_SOURCE_DIR}
