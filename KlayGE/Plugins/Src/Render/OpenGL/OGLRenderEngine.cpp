@@ -1068,69 +1068,15 @@ namespace KlayGE
 				break;
 			}
 
-			so_buffer_mode_ = GL_SEPARATE_ATTRIBS;
-
-			so_vars_.resize(0);
+			so_buffs_.resize(so_rl_->NumVertexStreams());
 			for (uint32_t i = 0; i < so_rl_->NumVertexStreams(); ++ i)
 			{
-				so_buffs_.push_back(checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->GLvbo());
-
-				auto const & streams = so_rl_->VertexStreamFormat(i);
-				for (size_t j = 0; j < streams.size(); ++ j)
-				{
-					vertex_element const & ve = streams[j];
-					switch (ve.usage)
-					{
-					case VEU_Position:
-						so_vars_.push_back("gl_Position");
-						break;
-
-					case VEU_Normal:
-						so_vars_.push_back("gl_Normal");
-						break;
-
-					case VEU_Diffuse:
-						so_vars_.push_back("gl_FrontColor");
-						break;
-
-					case VEU_Specular:
-						so_vars_.push_back("gl_FrontSecondaryColor");
-						break;
-
-					case VEU_BlendWeight:
-						so_vars_.push_back("_BLENDWEIGHT");
-						break;
-
-					case VEU_BlendIndex:
-						so_vars_.push_back("_BLENDINDEX");
-						break;
-
-					case VEU_TextureCoord:
-						so_vars_.push_back("glTexCoord["
-							+ boost::lexical_cast<std::string>(static_cast<int>(ve.usage_index)) + "]");
-						break;
-
-					case VEU_Tangent:
-						so_vars_.push_back("_TANGENT");
-						break;
-
-					case VEU_Binormal:
-						so_vars_.push_back("_BINORMAL");
-						break;
-					}
-				}
-
-				if (streams.size() > 1)
-				{
-					so_buffer_mode_ = GL_INTERLEAVED_ATTRIBS;
-				}
+				so_buffs_[i] = checked_pointer_cast<OGLGraphicsBuffer>(so_rl_->GetVertexStream(i))->GLvbo();
 			}
-
-			so_vars_ptrs_.resize(so_vars_.size());
-			for (size_t i = 0; i < so_vars_.size(); ++ i)
-			{
-				so_vars_ptrs_[i] = so_vars_[i].c_str();
-			}
+		}
+		else
+		{
+			so_buffs_.clear();
 		}
 	}
 
@@ -1190,11 +1136,6 @@ namespace KlayGE
 		GraphicsBufferPtr const & buff_args = rl.GetIndirectArgs();
 		if ((glloader_GL_VERSION_4_0() || glloader_GL_ARB_draw_indirect()) && buff_args)
 		{
-			if (so_rl_)
-			{
-				glBeginTransformFeedback(so_primitive_mode_);
-			}
-
 			this->BindBuffer(GL_DRAW_INDIRECT_BUFFER, checked_pointer_cast<OGLGraphicsBuffer>(buff_args)->GLvbo());
 			GLvoid* args_offset = reinterpret_cast<GLvoid*>(static_cast<GLintptr>(rl.IndirectArgsOffset()));
 			if (rl.UseIndices())
@@ -1208,14 +1149,21 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
+
+						glBeginTransformFeedback(so_primitive_mode_);
 					}
 
 					glDrawElementsIndirect(mode, index_type, args_offset);
+
+					if (so_rl_)
+					{
+						glEndTransformFeedback();
+					}
+
 					pass.Unbind(effect);
 				}
 			}
@@ -1230,32 +1178,29 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
+
+						glBeginTransformFeedback(so_primitive_mode_);
 					}
 
 					glDrawArraysIndirect(mode, args_offset);
+
+					if (so_rl_)
+					{
+						glEndTransformFeedback();
+					}
+
 					pass.Unbind(effect);
 				}
-			}
-
-			if (so_rl_)
-			{
-				glEndTransformFeedback();
 			}
 
 			num_draws_just_called_ += num_passes;
 		}
 		else if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && (rl.NumInstances() > 1))
 		{
-			if (so_rl_)
-			{
-				glBeginTransformFeedback(so_primitive_mode_);
-			}
-
 			if (rl.UseIndices())
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -1267,23 +1212,21 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
+
+						glBeginTransformFeedback(so_primitive_mode_);
 					}
 
-					if (glloader_GL_VERSION_3_3())
+					glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()), index_type, index_offset, num_instances);
+
+					if (so_rl_)
 					{
-						glDrawElementsInstanced(mode, static_cast<GLsizei>(rl.NumIndices()),
-							index_type, index_offset, num_instances);
+						glEndTransformFeedback();
 					}
-					else
-					{
-						glDrawElementsInstancedARB(mode, static_cast<GLsizei>(rl.NumIndices()),
-							index_type, index_offset, num_instances);
-					}
+
 					pass.Unbind(effect);
 				}
 			}
@@ -1298,28 +1241,23 @@ namespace KlayGE
 					if (so_rl_)
 					{
 						OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-						glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 						for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 						{
 							glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 						}
+
+						glBeginTransformFeedback(so_primitive_mode_);
 					}
 
-					if (glloader_GL_VERSION_3_3())
+					glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+
+					if (so_rl_)
 					{
-						glDrawArraysInstanced(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
+						glEndTransformFeedback();
 					}
-					else
-					{
-						glDrawArraysInstancedARB(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()), num_instances);
-					}
+
 					pass.Unbind(effect);
 				}
-			}
-
-			if (so_rl_)
-			{
-				glEndTransformFeedback();
 			}
 
 			num_draws_just_called_ += num_passes;
@@ -1401,11 +1339,6 @@ namespace KlayGE
 					}
 				}
 
-				if (so_rl_)
-				{
-					glBeginTransformFeedback(so_primitive_mode_);
-				}
-
 				if (rl.UseIndices())
 				{
 					for (uint32_t i = 0; i < num_passes; ++ i)
@@ -1417,15 +1350,21 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
 								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 							}
+
+							glBeginTransformFeedback(so_primitive_mode_);
 						}
 
-						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()),
-							index_type, index_offset);
+						glDrawElements(mode, static_cast<GLsizei>(rl.NumIndices()), index_type, index_offset);
+
+						if (so_rl_)
+						{
+							glEndTransformFeedback();
+						}
+
 						pass.Unbind(effect);
 					}
 				}
@@ -1440,21 +1379,23 @@ namespace KlayGE
 						if (so_rl_)
 						{
 							OGLShaderObjectPtr shader = checked_pointer_cast<OGLShaderObject>(pass.GetShaderObject(effect));
-							glTransformFeedbackVaryings(shader->GLSLProgram(), static_cast<GLsizei>(so_vars_ptrs_.size()), &so_vars_ptrs_[0], so_buffer_mode_);
 							for (uint32_t j = 0; j < so_buffs_.size(); ++ j)
 							{
 								glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, j, so_buffs_[j]);
 							}
+
+							glBeginTransformFeedback(so_primitive_mode_);
 						}
 
 						glDrawArrays(mode, rl.StartVertexLocation(), static_cast<GLsizei>(rl.NumVertices()));
+
+						if (so_rl_)
+						{
+							glEndTransformFeedback();
+						}
+
 						pass.Unbind(effect);
 					}
-				}
-
-				if (so_rl_)
-				{
-					glEndTransformFeedback();
 				}
 			}
 
@@ -1745,7 +1686,14 @@ namespace KlayGE
 
 		caps_.hw_instancing_support = true;
 		caps_.instance_id_support = glloader_GL_VERSION_3_1() || glloader_GL_ARB_draw_instanced();
-		caps_.stream_output_support = false;
+		if (glloader_GL_VERSION_3_3())
+		{
+			caps_.stream_output_support = true;
+		}
+		else
+		{
+			caps_.stream_output_support = false;
+		}
 		caps_.alpha_to_coverage_support = true;
 		if (glloader_GL_VERSION_3_1() || glloader_GL_NV_primitive_restart())
 		{

@@ -33,14 +33,15 @@
 #include <algorithm>
 
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
+#include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLGraphicsBuffer.hpp>
 
 namespace KlayGE
 {
 	OGLGraphicsBuffer::OGLGraphicsBuffer(BufferUsage usage, uint32_t access_hint, GLenum target,
-					uint32_t size_in_byte)
+					uint32_t size_in_byte, ElementFormat fmt)
 			: GraphicsBuffer(usage, access_hint, size_in_byte),
-				vb_(0), target_(target)
+				vb_(0), tex_(0), target_(target), fmt_as_shader_res_(fmt)
 	{
 		BOOST_ASSERT((GL_ARRAY_BUFFER == target) || (GL_ELEMENT_ARRAY_BUFFER == target)
 			|| (GL_UNIFORM_BUFFER == target));
@@ -70,10 +71,40 @@ namespace KlayGE
 				static_cast<GLsizeiptr>(size_in_byte_), data,
 				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
 		}
+
+		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
+		{
+			GLint internal_fmt;
+			GLenum gl_fmt;
+			GLenum gl_type;
+			OGLMapping::MappingFormat(internal_fmt, gl_fmt, gl_type, fmt_as_shader_res_);
+
+			glGenTextures(1, &tex_);
+			// TODO: It could affect the texture binding cache in OGLRenderEngine
+			if (glloader_GL_VERSION_3_1())
+			{
+				glBindTexture(GL_TEXTURE_BUFFER, tex_);
+				glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
+				glBindTexture(GL_TEXTURE_BUFFER, 0);
+			}
+			else if (glloader_GL_EXT_texture_buffer_object())
+			{
+				glBindTexture(GL_TEXTURE_BUFFER_EXT, tex_);
+				glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, internal_fmt, vb_);
+				glBindTexture(GL_TEXTURE_BUFFER_EXT, 0);
+			}
+		}
 	}
 
 	void OGLGraphicsBuffer::DeleteHWResource()
 	{
+		if (tex_ != 0)
+		{
+			glDeleteTextures(1, &tex_);
+
+			tex_ = 0;
+		}
+
 		if (vb_ != 0)
 		{
 			if (Context::Instance().RenderFactoryValid())

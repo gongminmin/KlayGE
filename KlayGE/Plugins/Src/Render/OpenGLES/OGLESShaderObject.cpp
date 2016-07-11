@@ -759,10 +759,51 @@ namespace
 	};
 
 	template <>
-	class SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>
+	class SetOGLESShaderParameter<GraphicsBufferPtr>
 	{
 	public:
-		SetOGLESShaderParameter(std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>>& samplers,
+		SetOGLESShaderParameter(std::vector<TextureBind>& buffers,
+					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures,
+					GLint location, GLuint stage,
+					RenderEffectParameter* buff_param)
+			: buffers_(&buffers), gl_bind_targets_(&gl_bind_targets), gl_bind_textures_(&gl_bind_textures),
+				location_(location), stage_(stage), buff_param_(buff_param)
+		{
+		}
+
+		void operator()()
+		{
+			buff_param_->Value((*buffers_)[stage_].tex_buff);
+
+			if ((*buffers_)[stage_].tex_buff)
+			{
+				(*gl_bind_targets_)[stage_] = GL_TEXTURE_BUFFER_OES;
+				(*gl_bind_textures_)[stage_] = checked_pointer_cast<OGLESGraphicsBuffer>((*buffers_)[stage_].tex_buff)->GLtex();
+			}
+			else
+			{
+				(*gl_bind_targets_)[stage_] = GL_TEXTURE_BUFFER_OES;
+				(*gl_bind_textures_)[stage_] = 0;
+			}
+
+			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.Uniform1i(location_, stage_);
+		}
+
+	private:
+		std::vector<TextureBind>* buffers_;
+		std::vector<GLuint>* gl_bind_targets_;
+		std::vector<GLuint>* gl_bind_textures_;
+		GLint location_;
+		GLuint stage_;
+		RenderEffectParameter* buff_param_;
+	};
+
+	template <>
+	class SetOGLESShaderParameter<TexturePtr>
+	{
+	public:
+		SetOGLESShaderParameter(std::vector<TextureBind>& samplers,
 					std::vector<GLuint>& gl_bind_targets, std::vector<GLuint>& gl_bind_textures,
 					GLint location, GLuint stage,
 					RenderEffectParameter* tex_param, RenderEffectParameter* sampler_param)
@@ -773,14 +814,14 @@ namespace
 
 		void operator()()
 		{
-			tex_param_->Value((*samplers_)[stage_].first);
-			sampler_param_->Value((*samplers_)[stage_].second);
+			tex_param_->Value((*samplers_)[stage_].tex);
+			sampler_param_->Value((*samplers_)[stage_].sampler);
 
-			if ((*samplers_)[stage_].first)
+			if ((*samplers_)[stage_].tex)
 			{
-				checked_pointer_cast<OGLESSamplerStateObject>((*samplers_)[stage_].second)->Active((*samplers_)[stage_].first);
-				(*gl_bind_targets_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLType();
-				(*gl_bind_textures_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].first)->GLTexture();
+				checked_pointer_cast<OGLESSamplerStateObject>((*samplers_)[stage_].sampler)->Active((*samplers_)[stage_].tex);
+				(*gl_bind_targets_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].tex)->GLType();
+				(*gl_bind_textures_)[stage_] = checked_pointer_cast<OGLESTexture>((*samplers_)[stage_].tex)->GLTexture();
 			}
 			else
 			{
@@ -793,7 +834,7 @@ namespace
 		}
 
 	private:
-		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>>* samplers_;
+		std::vector<TextureBind>* samplers_;
 		std::vector<GLuint>* gl_bind_targets_;
 		std::vector<GLuint>* gl_bind_textures_;
 		GLint location_;
@@ -832,12 +873,14 @@ namespace KlayGE
 		glDeleteProgram(glsl_program_);
 	}
 
-	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids,
-			std::vector<uint8_t> const & native_shader_block)
+	bool OGLESShaderObject::AttachNativeShader(ShaderType type, RenderEffect const & effect,
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::vector<uint8_t> const & native_shader_block)
 	{
 		bool ret = false;
 
-		(*shader_func_names_)[type] = effect.GetShaderDesc(shader_desc_ids[type]).func_name;
+		auto const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
+
+		(*shader_func_names_)[type] = sd.func_name;
 
 		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
@@ -965,6 +1008,7 @@ namespace KlayGE
 				}
 			}
 
+			this->FillTFBVaryings(sd);
 			this->AttachGLSL(type);
 
 			ret = is_shader_validate_[type];
@@ -1295,13 +1339,23 @@ namespace KlayGE
 						{
 							if (dxbc2glsl.ResourceUsed(i))
 							{
+								char const * res_name = dxbc2glsl.ResourceName(i);
+
 								if (SIT_TEXTURE == dxbc2glsl.ResourceType(i))
 								{
-									tex_names.push_back(dxbc2glsl.ResourceName(i));
+									if (SSD_BUFFER == dxbc2glsl.ResourceDimension(i))
+									{
+										(*pnames_)[type]->push_back(res_name);
+										(*glsl_res_names_)[type]->push_back(res_name);
+									}
+									else
+									{
+										tex_names.push_back(res_name);
+									}
 								}
 								else if (SIT_SAMPLER == dxbc2glsl.ResourceType(i))
 								{
-									sampler_names.push_back(dxbc2glsl.ResourceName(i));
+									sampler_names.push_back(res_name);
 								}
 							}
 						}
@@ -1436,6 +1490,7 @@ namespace KlayGE
 
 		if (is_shader_validate_[type])
 		{
+			this->FillTFBVaryings(sd);
 			this->AttachGLSL(type);
 		}
 	}
@@ -1459,6 +1514,7 @@ namespace KlayGE
 				*vs_usages_ = *so->vs_usages_;
 				*vs_usage_indices_ = *so->vs_usage_indices_;
 				*glsl_vs_attrib_names_ = *so->glsl_vs_attrib_names_;
+				glsl_tfb_varyings_ = so->glsl_tfb_varyings_;
 			}
 			else if (ST_PixelShader == type)
 			{
@@ -1552,7 +1608,26 @@ namespace KlayGE
 							RenderEffectParameter* p = effect.ParameterByName((*(*pnames_)[type])[pi]);
 							if (p)
 							{
-								param_binds_.push_back(this->GetBindFunc(location, p));
+								if (REDT_buffer == p->Type())
+								{
+									parameter_bind_t pb;
+									pb.param = p;
+									pb.location = location;
+
+									uint32_t index = static_cast<uint32_t>(textures_.size());
+									textures_.resize(index + 1);
+									gl_bind_targets_.resize(index + 1);
+									gl_bind_textures_.resize(index + 1);
+
+									pb.func = SetOGLESShaderParameter<GraphicsBufferPtr>(textures_,
+										gl_bind_targets_, gl_bind_textures_, location, index, p);
+
+									param_binds_.push_back(pb);
+								}
+								else
+								{
+									param_binds_.push_back(this->GetBindFunc(location, p));
+								}
 							}
 							else
 							{
@@ -1567,12 +1642,12 @@ namespace KlayGE
 										pb.shader_type = type;
 										pb.tex_sampler_bind_index = static_cast<int>(i);
 
-										uint32_t index = static_cast<uint32_t>(samplers_.size());
-										samplers_.resize(index + 1);
+										uint32_t index = static_cast<uint32_t>(textures_.size());
+										textures_.resize(index + 1);
 										gl_bind_targets_.resize(index + 1);
 										gl_bind_textures_.resize(index + 1);
 
-										pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>(samplers_,
+										pb.func = SetOGLESShaderParameter<TexturePtr>(textures_,
 											gl_bind_targets_, gl_bind_textures_,
 											location, index, std::get<1>(tex_sampler_binds_[i]), std::get<2>(tex_sampler_binds_[i]));
 
@@ -1613,6 +1688,7 @@ namespace KlayGE
 		ret->vs_usages_ = vs_usages_;
 		ret->vs_usage_indices_ = vs_usage_indices_;
 		ret->glsl_vs_attrib_names_ = glsl_vs_attrib_names_;
+		ret->glsl_tfb_varyings_ = glsl_tfb_varyings_;
 #if KLAYGE_IS_DEV_PLATFORM
 		ret->ds_partitioning_ = ds_partitioning_;
 		ret->ds_output_primitive_ = ds_output_primitive_;
@@ -1703,7 +1779,27 @@ namespace KlayGE
 				if (pb.param)
 				{
 					RenderEffectParameter* p = effect.ParameterByName(pb.param->Name());
-					ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
+					if (REDT_buffer == p->Type())
+					{
+						parameter_bind_t new_pb;
+						new_pb.param = p;
+						new_pb.location = pb.location;
+
+						uint32_t index = static_cast<uint32_t>(ret->textures_.size());
+						ret->textures_.resize(index + 1);
+						ret->gl_bind_targets_.resize(index + 1);
+						ret->gl_bind_textures_.resize(index + 1);
+
+						new_pb.func = SetOGLESShaderParameter<GraphicsBufferPtr>(ret->textures_,
+							ret->gl_bind_targets_, ret->gl_bind_textures_,
+							new_pb.location, index, p);
+
+						ret->param_binds_.push_back(new_pb);
+					}
+					else
+					{
+						ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
+					}
 				}
 				else
 				{
@@ -1719,12 +1815,12 @@ namespace KlayGE
 							new_pb.shader_type = pb.shader_type;
 							new_pb.tex_sampler_bind_index = pb.tex_sampler_bind_index;
 
-							uint32_t index = static_cast<uint32_t>(ret->samplers_.size());
-							ret->samplers_.resize(index + 1);
+							uint32_t index = static_cast<uint32_t>(ret->textures_.size());
+							ret->textures_.resize(index + 1);
 							ret->gl_bind_targets_.resize(index + 1);
 							ret->gl_bind_textures_.resize(index + 1);
 
-							new_pb.func = SetOGLESShaderParameter<std::pair<TexturePtr, SamplerStateObjectPtr>>(ret->samplers_,
+							new_pb.func = SetOGLESShaderParameter<TexturePtr>(ret->textures_,
 								ret->gl_bind_targets_, ret->gl_bind_textures_,
 								new_pb.location, index,
 								std::get<1>(ret->tex_sampler_binds_[new_pb.tex_sampler_bind_index]),
@@ -1988,6 +2084,18 @@ namespace KlayGE
 
 	void OGLESShaderObject::LinkGLSL()
 	{
+		if (glloader_GLES_VERSION_3_0() && glsl_tfb_varyings_ && !glsl_tfb_varyings_->empty())
+		{
+			std::vector<GLchar const *> names(glsl_tfb_varyings_->size());
+			for (size_t i = 0; i < glsl_tfb_varyings_->size(); ++i)
+			{
+				names[i] = (*glsl_tfb_varyings_)[i].c_str();
+			}
+
+			glTransformFeedbackVaryings(glsl_program_, static_cast<GLsizei>(glsl_tfb_varyings_->size()), &names[0],
+				GL_SEPARATE_ATTRIBS);
+		}
+
 		glLinkProgram(glsl_program_);
 
 		GLint linked = false;
@@ -2113,9 +2221,76 @@ namespace KlayGE
 			}
 		}
 	}
+	
+	void OGLESShaderObject::FillTFBVaryings(ShaderDesc const & sd)
+	{
+		if (glloader_GLES_VERSION_3_0())
+		{
+			if (!sd.so_decl.empty())
+			{
+				glsl_tfb_varyings_ = MakeSharedPtr<std::vector<std::string>>();
+			}
+
+			for (auto const & decl : sd.so_decl)
+			{
+				std::string glsl_param_name;
+				switch (decl.usage)
+				{
+				case VEU_Position:
+					glsl_param_name = "gl_Position";
+					break;
+
+				case VEU_Normal:
+					glsl_param_name = "v_NORMAL0";
+					break;
+
+				case VEU_Diffuse:
+					glsl_param_name = "v_COLOR0";
+					break;
+
+				case VEU_Specular:
+					glsl_param_name = "v_COLOR1";
+					break;
+
+				case VEU_BlendWeight:
+					glsl_param_name = "v_BLENDWEIGHT0";
+					break;
+
+				case VEU_BlendIndex:
+					glsl_param_name = "v_BLENDINDICES0";
+					break;
+
+				case VEU_TextureCoord:
+					glsl_param_name = "v_TEXCOORD" + boost::lexical_cast<std::string>(static_cast<int>(decl.usage_index));
+					break;
+
+				case VEU_Tangent:
+					glsl_param_name = "v_TANGENT0";
+					break;
+
+				case VEU_Binormal:
+					glsl_param_name = "v_BINORMAL0";
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					glsl_param_name = "gl_Position";
+					break;
+				}
+
+				glsl_tfb_varyings_->push_back(glsl_param_name);
+			}
+		}
+	}
 
 	void OGLESShaderObject::Bind()
 	{
+		if (glloader_GLES_VERSION_3_0()
+			&& (*glsl_srcs_)[ShaderObject::ST_PixelShader] && (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+		{
+			glEnable(GL_RASTERIZER_DISCARD);
+		}
+
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.UseProgram(glsl_program_);
 
@@ -2160,6 +2335,12 @@ namespace KlayGE
 
 	void OGLESShaderObject::Unbind()
 	{
+		if (glloader_GLES_VERSION_3_0()
+			&& (*glsl_srcs_)[ShaderObject::ST_PixelShader] && (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+		{
+			glDisable(GL_RASTERIZER_DISCARD);
+		}
+
 		//glUseProgram(0);
 	}
 

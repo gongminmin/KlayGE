@@ -21,6 +21,14 @@
 
 namespace KlayGE
 {
+	struct TextureBind
+	{
+		GraphicsBufferPtr tex_buff;
+
+		TexturePtr tex;
+		SamplerStateObjectPtr sampler;
+	};
+
 	class OGLESShaderObject : public ShaderObject
 	{
 	public:
@@ -68,6 +76,7 @@ namespace KlayGE
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);
+		void FillTFBVaryings(ShaderDesc const & sd);
 		void PrintGLSLError(ShaderType type, char const * info);
 		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
@@ -82,13 +91,14 @@ namespace KlayGE
 		std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
 		std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
 		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
+		std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
 #if KLAYGE_IS_DEV_PLATFORM
 		uint32_t ds_partitioning_, ds_output_primitive_;
 #endif
 
 		parameter_binds_t param_binds_;
 
-		std::vector<std::pair<TexturePtr, SamplerStateObjectPtr>> samplers_;
+		std::vector<TextureBind> textures_;
 		std::vector<GLuint> gl_bind_targets_;
 		std::vector<GLuint> gl_bind_textures_;
 		std::vector<GLuint> gl_bind_cbuffs_;
