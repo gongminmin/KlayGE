@@ -6297,7 +6297,7 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 	else if (SOT_RESOURCE == op.type)
 	{
 		ShaderInputType type = SIT_TEXTURE;
-		if(SIT_UNDEFINED != sit)
+		if (SIT_UNDEFINED != sit)
 		{
 			type = sit;
 		}

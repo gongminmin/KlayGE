@@ -75,6 +75,7 @@ namespace DXBC2GLSL
 		char const * ResourceName(uint32_t index) const;
 		uint32_t ResourceBindPoint(uint32_t index) const;
 		ShaderInputType ResourceType(uint32_t index) const;
+		ShaderSRVDimension ResourceDimension(uint32_t index) const;
 		bool ResourceUsed(uint32_t index) const;
 
 		ShaderPrimitive GSInputPrimitive() const;

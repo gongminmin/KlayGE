@@ -144,6 +144,12 @@ namespace DXBC2GLSL
 		return shader_->resource_bindings[index].type;
 	}
 
+	ShaderSRVDimension DXBC2GLSL::ResourceDimension(uint32_t index) const
+	{
+		BOOST_ASSERT(index < shader_->resource_bindings.size());
+		return shader_->resource_bindings[index].dimension;
+	}
+
 	bool DXBC2GLSL::ResourceUsed(uint32_t index) const
 	{
 		BOOST_ASSERT(index < shader_->resource_bindings.size());
@@ -169,6 +175,11 @@ namespace DXBC2GLSL
 	uint32_t DXBC2GLSL::MaxGSOutputVertex() const
 	{
 		return shader_->max_gs_output_vertex;
+	}
+
+	uint32_t DXBC2GLSL::GSInstanceCount() const
+	{
+		return shader_->gs_instance_count;
 	}
 
 	ShaderTessellatorPartitioning DXBC2GLSL::DSPartitioning() const
