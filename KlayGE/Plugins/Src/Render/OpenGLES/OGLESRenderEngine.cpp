@@ -1607,20 +1607,13 @@ namespace KlayGE
 
 		caps_.hw_instancing_support = true;
 		caps_.instance_id_support = false;
-		if (hack_for_angle_)
+		if (glloader_GLES_VERSION_3_0())
 		{
-			caps_.stream_output_support = false;
+			caps_.stream_output_support = true;
 		}
 		else
 		{
-			if (glloader_GLES_VERSION_3_0())
-			{
-				caps_.stream_output_support = true;
-			}
-			else
-			{
-				caps_.stream_output_support = false;
-			}
+			caps_.stream_output_support = false;
 		}
 		caps_.alpha_to_coverage_support = true;
 		if (glloader_GLES_VERSION_3_0() && !this->HackForAdreno())
@@ -1682,6 +1675,14 @@ namespace KlayGE
 			caps_.render_to_texture_array_support = false;
 		}*/
 		caps_.render_to_texture_array_support = false;
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_texture_buffer() || glloader_GLES_EXT_texture_buffer())
+		{
+			caps_.load_from_buffer_support = true;
+		}
+		else
+		{
+			caps_.load_from_buffer_support = false;
+		}
 
 		caps_.gs_support = false;
 		caps_.cs_support = false;

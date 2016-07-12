@@ -1264,6 +1264,7 @@ namespace KlayGE
 			caps_.full_npot_texture_support = false;
 		}
 		caps_.render_to_texture_array_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
+		caps_.load_from_buffer_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.gs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_10_0);
 		caps_.hs_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);
 		caps_.ds_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_0);

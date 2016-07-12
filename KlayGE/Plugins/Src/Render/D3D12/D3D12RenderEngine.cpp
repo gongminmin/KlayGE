@@ -1536,6 +1536,7 @@ namespace KlayGE
 		caps_.no_overwrite_support = true;
 		caps_.full_npot_texture_support = true;
 		caps_.render_to_texture_array_support = true;
+		caps_.load_from_buffer_support = true;
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

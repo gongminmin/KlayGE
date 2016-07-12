@@ -1686,7 +1686,7 @@ namespace KlayGE
 
 		caps_.hw_instancing_support = true;
 		caps_.instance_id_support = glloader_GL_VERSION_3_1() || glloader_GL_ARB_draw_instanced();
-		if (glloader_GL_VERSION_3_3())
+		if (glloader_GL_VERSION_3_1())
 		{
 			caps_.stream_output_support = true;
 		}
@@ -1746,6 +1746,14 @@ namespace KlayGE
 			caps_.render_to_texture_array_support = false;
 		}*/
 		caps_.render_to_texture_array_support = false;
+		if (glloader_GL_VERSION_3_1() || glloader_GL_EXT_texture_buffer_object())
+		{
+			caps_.load_from_buffer_support = true;
+		}
+		else
+		{
+			caps_.load_from_buffer_support = false;
+		}
 
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
 		{

@@ -783,7 +783,7 @@ void GPUParticleSystemApp::OnCreate()
 	use_cs = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 	if (!use_cs)
 	{
-		use_so = caps.stream_output_support;
+		use_so = caps.stream_output_support && caps.load_from_buffer_support;
 	}
 	use_mrt = caps.max_simultaneous_rts > 1;
 
