@@ -167,7 +167,6 @@ namespace
 				if (use_so || use_cs)
 				{
 					technique_ = effect_->TechniqueByName("ParticlesWithGSSO");
-					rl_->NumVertices(max_num_particles);
 				}
 				else
 				{
@@ -243,7 +242,10 @@ namespace
 
 		void PosVB(GraphicsBufferPtr const & particle_pos_vb)
 		{
-			*(effect_->ParameterByName("particle_pos_buff")) = particle_pos_vb;
+			if (use_gs && (use_so || use_cs))
+			{
+				rl_->BindVertexStream(particle_pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+			}
 		}
 
 	private:
@@ -297,15 +299,15 @@ namespace
 					p[i] = float4(0, 0, 0, -1);
 				}
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
 					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
 				particle_pos_vb_[1] = particle_pos_vb_[0];
-				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured,
+				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
 					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
 
-				*(effect_->ParameterByName("particle_pos_stru_buff")) = particle_pos_vb_[0];
-				*(effect_->ParameterByName("particle_vel_stru_buff")) = particle_vel_vb_[0];
+				*(effect_->ParameterByName("particle_pos_rw_buff")) = particle_pos_vb_[0];
+				*(effect_->ParameterByName("particle_vel_rw_buff")) = particle_vel_vb_[0];
 
 				for (int i = 0; i < max_num_particles_; ++i)
 				{
@@ -413,23 +415,52 @@ namespace
 					technique_ = update_pos_tech_;
 				}
 
-				std::vector<half> p(tex_width_ * tex_height_ * 4);
-				for (size_t i = 0; i < p.size(); i += 4)
 				{
-					p[i + 0] = half(0.0f);
-					p[i + 1] = half(0.0f);
-					p[i + 2] = half(0.0f);
-					p[i + 3] = half(-1.0f);
-				}
-				ElementInitData pos_init;
-				pos_init.data = &p[0];
-				pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
-				pos_init.slice_pitch = 0;
+					RenderDeviceCaps const & caps = re.DeviceCaps();
+					ElementFormat fmt;
+					std::vector<uint8_t> pos;
+					ElementInitData pos_init;
+					if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
+					{
+						fmt = EF_ABGR32F;
 
-				particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-				particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-				particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+						pos.resize(tex_width_ * tex_height_ * sizeof(float) * 4);
+						float* p = reinterpret_cast<float*>(&pos[0]);
+						for (size_t i = 0; i < tex_width_ * tex_height_; ++ i)
+						{
+							p[i * 4 + 0] = 0.0f;
+							p[i * 4 + 1] = 0.0f;
+							p[i * 4 + 2] = 0.0f;
+							p[i * 4 + 3] = -1.0f;
+						}
+
+						pos_init.data = &p[0];
+						pos_init.row_pitch = tex_width_ * sizeof(float) * 4;
+						pos_init.slice_pitch = 0;
+					}
+					else
+					{
+						fmt = EF_ABGR16F;
+
+						pos.resize(tex_width_ * tex_height_ * sizeof(half) * 4);
+						half* p = reinterpret_cast<half*>(&pos[0]);
+						for (size_t i = 0; i < tex_width_ * tex_height_; ++ i)
+						{
+							p[i * 4 + 0] = half(0.0f);
+							p[i * 4 + 1] = half(0.0f);
+							p[i * 4 + 2] = half(0.0f);
+							p[i * 4 + 3] = half(-1.0f);
+						}
+
+						pos_init.data = &p[0];
+						pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
+						pos_init.slice_pitch = 0;
+					}
+					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
+					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				}
 
 				FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
 				if (use_mrt)
@@ -463,24 +494,27 @@ namespace
 						= vel_rt_buffer_[0]->GetViewport()->camera = vel_rt_buffer_[1]->GetViewport()->camera
 						= screen_buffer->GetViewport()->camera;
 				}
-			
-				for (int i = 0; i < tex_width_ * tex_height_; ++ i)
+
 				{
-					float const angel = this->RandomGen() / 0.05f * PI;
-					float const r = this->RandomGen() * 3;
+					std::vector<half> p(tex_width_ * tex_height_ * 4);
+					for (int i = 0; i < p.size(); i += 4)
+					{
+						float const angel = this->RandomGen() / 0.05f * PI;
+						float const r = this->RandomGen() * 3;
 
-					p[i * 4 + 0] = half(r * cos(angel));
-					p[i * 4 + 1] = half(0.2f + abs(this->RandomGen()) * 3);
-					p[i * 4 + 2] = half(r * sin(angel));
-					p[i * 4 + 3] = half(0.0f);
+						p[i + 0] = half(r * cos(angel));
+						p[i + 1] = half(0.2f + abs(this->RandomGen()) * 3);
+						p[i + 2] = half(r * sin(angel));
+						p[i + 3] = half(0.0f);
+					}
+					ElementInitData vel_init;
+					vel_init.data = &p[0];
+					vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
+					vel_init.slice_pitch = 0;
+
+					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
+					*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 				}
-				ElementInitData vel_init;
-				vel_init.data = &p[0];
-				vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
-				vel_init.slice_pitch = 0;
-
-				TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
-				*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 
 				particle_pos_tex_param_ = effect_->ParameterByName("particle_pos_tex");
 				particle_vel_tex_param_ = effect_->ParameterByName("particle_vel_tex");

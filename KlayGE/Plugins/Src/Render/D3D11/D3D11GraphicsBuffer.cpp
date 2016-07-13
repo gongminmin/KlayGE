@@ -33,8 +33,9 @@ namespace KlayGE
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
 							bind_flags_(bind_flags), fmt_as_shader_res_(fmt)
 	{
-		if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown))
+		if ((access_hint_ & EAH_GPU_Structured) && (fmt_as_shader_res_ != EF_Unknown))
 		{
+			// Structured buffer can't be vb or ib at the same time.
 			bind_flags_ = 0;
 		}
 

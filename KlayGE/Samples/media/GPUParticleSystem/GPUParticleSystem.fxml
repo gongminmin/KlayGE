@@ -326,15 +326,11 @@ void ParticlesVS2(float2 tex_pos : POSITION,
 	</shader>
 
 
-	<parameter type="buffer" elem_type="float4" name="particle_pos_buff"/>
-
-	<shader type="vertex_shader" version="4">
+	<shader type="vertex_shader">
 		<![CDATA[
-void ParticlesVS3(uint vid : SV_VertexID,
+void ParticlesVS3(float4 pos : POSITION,
 					out float4 CenterView_Life : SV_Position)
 {
-	float4 pos = particle_pos_buff.Load(vid);
-	
 	CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
 		]]>
@@ -409,6 +405,7 @@ void ParticlesGS(point float4 input[1] : SV_Position, inout TriangleStream<PS_IN
 		</pass>
 	</technique>
 
+	<parameter type="buffer" elem_type="float4" name="particle_pos_buff"/>
 	<parameter type="buffer" elem_type="float4" name="particle_vel_buff"/>
 
 	<shader type="vertex_shader" version="4">
@@ -474,8 +471,8 @@ void UpdateSOVS(uint vid			: SV_VertexID,
 		</pass>
 	</technique>
 
-	<parameter type="rw_structured_buffer" elem_type="float4" name="particle_pos_stru_buff"/>
-	<parameter type="rw_structured_buffer" elem_type="float4" name="particle_vel_stru_buff"/>
+	<parameter type="rw_buffer" elem_type="float4" name="particle_pos_rw_buff"/>
+	<parameter type="rw_buffer" elem_type="float4" name="particle_vel_rw_buff"/>
 
 	<shader type="compute_shader" version="5">
 		<![CDATA[
@@ -487,10 +484,10 @@ void UpdateCS(uint3 dtid : SV_DispatchThreadID)
 
 	uint id = dtid.x;
 
-	float4 cur_pos = particle_pos_stru_buff[id];
+	float4 cur_pos = particle_pos_rw_buff[id];
 	if (cur_pos.w > 0)
 	{
-		float3 cur_vel = particle_vel_stru_buff[id].xyz;
+		float3 cur_vel = particle_vel_rw_buff[id].xyz;
 		cur_vel += float3(0, -0.1f, 0) * elapse_time;
 		cur_pos.xyz += cur_vel * elapse_time;
 		cur_pos.w -= elapse_time;
@@ -527,8 +524,8 @@ void UpdateCS(uint3 dtid : SV_DispatchThreadID)
 		}
 	}
 
-	particle_pos_stru_buff[id] = out_pos;
-	particle_vel_stru_buff[id] = out_vel;
+	particle_pos_rw_buff[id] = out_pos;
+	particle_vel_rw_buff[id] = out_vel;
 }
 		]]>
 	</shader>
