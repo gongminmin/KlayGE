@@ -33,9 +33,9 @@
 		<![CDATA[
 // Modified from https://www.shadertoy.com/view/llSGRG by Harha
 
-float SDFSphere(float3 p, float s)
+float SDFSphere(float3 p, float r)
 {
-	return length(p) - s;
+	return length(p) - r;
 }
 
 float SDFTorus(float3 p, float2 t)
@@ -88,11 +88,11 @@ float4 BlackHolePS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 		// Texture for the accretion disc
 		float dr = length(bh_v.xz);
 		float da = atan2(bh_v.x, bh_v.z);
-		float2 ra = float2(dr, da * (0.01f + (dr - bh_r) * 0.002f) + time * 0.02f);
-		
-		float3 dclr = lerp(c2, c1, pow(length(bh_v) - bh_r, 2)) * (noise_tex.Sample(bilinear_wrap_sampler, ra * 0.2f).r + 0.05f)
+		float2 ra = float2(dr, da * (0.01f + (dr - bh_r) * 0.002f) + time * 0.04f);
+
+		float3 dclr = lerp(c2, c1, pow(length(bh_v) - bh_r, 2)) * (noise_tex.Sample(bilinear_wrap_sampler, ra * 0.1f).r + 0.05f)
 			* (4 / (0.001f + (length(bh_v) - bh_r) * 50));
-		
+
 		dclr = max(0, dclr * smoothstep(0, 1, -SDFTorus((pos * float3(1, 25, 1)) - bh_center, float2(0.8f, 0.99f))));
 
 		// Glow
