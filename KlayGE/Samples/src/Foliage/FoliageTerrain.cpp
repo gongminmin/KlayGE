@@ -6,18 +6,18 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Query.hpp>
+#include <KlayGE/Imposter.hpp>
 
 #include "FoliageTerrain.hpp"
 
 namespace KlayGE
 {
 	uint32_t const COARSE_HEIGHT_MAP_SIZE = 1024;
-	uint32_t const NUM_IMPOSTOR_ANGLES = 6;
-	uint32_t const IMPOSTOR_SIZE = 256;
 
 	struct FoliagePlantParameters
 	{
 		std::string mesh_name;
+		std::string imposter_name;
 
 		uint32_t probability_channel;
 		float plant_spacing_width;
@@ -31,10 +31,10 @@ namespace KlayGE
 
 	FoliagePlantParameters plant_parameters[] = 
 	{
-		{ "Grass1/grass.meshml", 0, 1.5f, 1.5f, 150, 600, 0, 0 },
-		{ "Grass2/WC_Euphorbia-larica_2.meshml", 0, 2, 2, 150, 600, 0, 0 },
-		{ "Tree2/tree2a_lod0.meshml", 1, 11, 11, 300, -1, 0, 0 },
-		{ "Tree1/tree1a_lod0.meshml", 1, 7, 7, 300, -1, 0, 0 },
+		{ "Grass1/grass.meshml", "Grass1/grass.impml", 0, 1.5f, 1.5f, 150, 600, 0, 0 },
+		{ "Grass2/WC_Euphorbia-larica_2.meshml", "Grass2/WC_Euphorbia-larica_2.impml", 0, 2, 2, 150, 600, 0, 0 },
+		{ "Tree2/tree2a_lod0.meshml", "Tree2/tree2a_lod0.impml", 1, 11, 11, 300, -1, 0, 0 },
+		{ "Tree1/tree1a_lod0.meshml", "Tree1/tree1a_lod0.impml", 1, 7, 7, 300, -1, 0, 0 },
 	};
 
 	class FoliageMesh : public StaticMesh
@@ -259,6 +259,7 @@ namespace KlayGE
 
 		plant_meshes_.resize(sizeof(plant_parameters) / sizeof(plant_parameters[0]));
 		plant_impostor_meshes_.resize(plant_meshes_.size());
+		plant_imposters_.resize(plant_meshes_.size());
 		plant_instance_buffers_.resize(plant_meshes_.size());
 		plant_instance_rls_.resize(plant_meshes_.size());
 		plant_impostor_instance_buffers_.resize(plant_meshes_.size());
@@ -272,6 +273,11 @@ namespace KlayGE
 			plant_meshes_[plant_type] = SyncLoadModel(plant_parameters[plant_type].mesh_name, EAH_GPU_Read | EAH_Immutable,
 				CreateModelFactory<RenderModel>(), CreateMeshFactory<FoliageMesh>());
 			plant_impostor_meshes_[plant_type] = MakeSharedPtr<FoliageImpostorMesh>(plant_meshes_[plant_type]->PosBound());
+
+			plant_imposters_[plant_type] = SyncLoadImposter(plant_parameters[plant_type].imposter_name);
+			checked_pointer_cast<FoliageImpostorMesh>(plant_impostor_meshes_[plant_type])->ImpostorTexture(
+				plant_imposters_[plant_type]->RT0Texture(), plant_imposters_[plant_type]->RT1Texture(),
+				float2(0.5f / plant_imposters_[plant_type]->NumAzimuth(), 0.5f));
 
 			uint32_t const num_x
 				= static_cast<uint32_t>(tile_size * world_scale_ / plant_parameters[plant_type].plant_spacing_width + 0.5f);
@@ -368,13 +374,6 @@ namespace KlayGE
 
 		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
 
-		if (!plant_impostors_g_buffer_rt0_)
-		{
-			BOOST_ASSERT(!plant_impostors_g_buffer_rt1_);
-
-			this->GeneratesImposters();
-		}
-
 		Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
 		float2 eye_pos_xz(camera->EyePos().x(), camera->EyePos().z());
 		
@@ -433,9 +432,8 @@ namespace KlayGE
 			*(foliage_dist_effect_->ParameterByName("impostor_dist"))
 				= float2(plant_parameters[plant_type].impostor_distance_sq, plant_parameters[plant_type].fade_out_distance_sq);
 			*(foliage_dist_effect_->ParameterByName("center_tc_angles_step"))
-				= float4(plant_imposters_center_tc_[plant_type * NUM_IMPOSTOR_ANGLES].x(),
-					plant_imposters_center_tc_[plant_type * NUM_IMPOSTOR_ANGLES].y(), 
-					NUM_IMPOSTOR_ANGLES / PI, 1.0f / NUM_IMPOSTOR_ANGLES);
+				= float4(0.5f / plant_imposters_[plant_type]->NumAzimuth(), 0.5f,
+					1.0f / plant_imposters_[plant_type]->AzimuthAngleStep(), 1.0f / plant_imposters_[plant_type]->NumAzimuth());
 
 			uint32_t const num_vertices = plant_impostor_instance_buffers_[plant_type]->Size() / sizeof(PlantInstanceData);
 			foliage_dist_rl_->NumVertices(num_vertices);
@@ -500,100 +498,6 @@ namespace KlayGE
 			auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
 			mesh->Pass(type_);
 			mesh->Render();
-		}
-	}
-
-	void ProceduralTerrain::GeneratesImposters()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-
-		FrameBufferPtr old_fb = re.CurFrameBuffer();
-
-		plant_imposters_center_tc_.resize(plant_meshes_.size() * NUM_IMPOSTOR_ANGLES);
-
-		plant_impostors_g_buffer_rt0_ = rf.MakeTexture2D(static_cast<uint32_t>(IMPOSTOR_SIZE * plant_meshes_.size()),
-			IMPOSTOR_SIZE * NUM_IMPOSTOR_ANGLES, 0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
-		plant_impostors_g_buffer_rt1_ = rf.MakeTexture2D(static_cast<uint32_t>(IMPOSTOR_SIZE * plant_meshes_.size()),
-			IMPOSTOR_SIZE * NUM_IMPOSTOR_ANGLES, 0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
-
-		FrameBufferPtr imposter_fb = rf.MakeFrameBuffer();
-		imposter_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*plant_impostors_g_buffer_rt0_, 0, 1, 0));
-		imposter_fb->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*plant_impostors_g_buffer_rt1_, 0, 1, 0));
-		imposter_fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(
-			static_cast<uint32_t>(IMPOSTOR_SIZE * plant_meshes_.size()), IMPOSTOR_SIZE * NUM_IMPOSTOR_ANGLES, EF_D24S8, 1, 0));
-		auto const & imposter_camera = imposter_fb->GetViewport()->camera;
-		imposter_fb->GetViewport()->width = IMPOSTOR_SIZE;
-		imposter_fb->GetViewport()->height = IMPOSTOR_SIZE;
-
-		imposter_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
-			Color(0, 0, 0, 0), 1, 0);
-
-		GraphicsBufferPtr imposter_instance_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_CPU_Write | EAH_GPU_Read,
-			sizeof(PlantInstanceData), nullptr);
-
-		float const angle_step = PI * 2 / NUM_IMPOSTOR_ANGLES;
-		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
-		{
-			auto const & aabbox = plant_meshes_[plant_type]->PosBound();
-			float3 const dimensions = aabbox.Max() - aabbox.Min();
-			float3 imposter_eye_pos = aabbox.Center();
-			imposter_eye_pos.z() = aabbox.Min().z();
-			imposter_camera->ViewParams(imposter_eye_pos, aabbox.Center());
-			imposter_camera->ProjOrthoParams(dimensions.x(), dimensions.y(), 0, dimensions.z());
-
-			imposter_fb->GetViewport()->left = static_cast<int>(plant_type * IMPOSTOR_SIZE);
-
-			for (size_t impostor_index = 0; impostor_index < NUM_IMPOSTOR_ANGLES; ++ impostor_index)
-			{
-				plant_imposters_center_tc_[plant_type * NUM_IMPOSTOR_ANGLES + impostor_index]
-					= float2((plant_type + 0.5f) / plant_meshes_.size(), (impostor_index + 0.5f) / NUM_IMPOSTOR_ANGLES);
-
-				float const angle = impostor_index * angle_step;
-				Quaternion rot_quat = MathLib::rotation_axis(float3(0, 1, 0), -angle);
-
-				{
-					GraphicsBuffer::Mapper mapper(*imposter_instance_vb, BA_Write_Only);
-					auto p = mapper.Pointer<PlantInstanceData>();
-					p->pos = float3(0, 0, 0);
-					p->scale = 1;
-					p->rotation.x() = rot_quat.y();
-					p->rotation.y() = rot_quat.w();
-				}
-
-				imposter_fb->GetViewport()->top = static_cast<int>(impostor_index * IMPOSTOR_SIZE);
-				re.BindFrameBuffer(imposter_fb);
-
-				for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
-				{
-					auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
-					while (!mesh->AllHWResourceReady());
-					mesh->InstanceBuffer(imposter_instance_vb);
-					mesh->Pass(PT_OpaqueGBufferMRT);
-					mesh->ForceNumInstances(1);
-					mesh->Render();
-				}
-			}
-
-			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
-			{
-				auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
-				mesh->InstanceBuffer(plant_instance_buffers_[plant_type]);
-			}
-		}
-
-		plant_impostors_g_buffer_rt0_->BuildMipSubLevels();
-		plant_impostors_g_buffer_rt1_->BuildMipSubLevels();
-
-		//SaveTexture(plant_impostors_g_buffer_rt0_, "plant_imposter_rt0.dds");
-		//SaveTexture(plant_impostors_g_buffer_rt1_, "plant_imposter_rt1.dds");
-
-		re.BindFrameBuffer(old_fb);
-
-		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
-		{
-			checked_pointer_cast<FoliageImpostorMesh>(plant_impostor_meshes_[plant_type])->ImpostorTexture(plant_impostors_g_buffer_rt0_,
-				plant_impostors_g_buffer_rt1_, float2(0.5f / plant_meshes_.size(), 0.5f / NUM_IMPOSTOR_ANGLES));
 		}
 	}
 }

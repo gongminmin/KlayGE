@@ -403,6 +403,19 @@ namespace MtlEditor
 			}
 		}
 
+		public bool ImposterModeValue
+		{
+			get
+			{
+				return imposter_mode_;
+			}
+			set
+			{
+				imposter_mode_ = value;
+				core_.ImposterModeOn(imposter_mode_ ? 1 : 0);
+			}
+		}
+
 		public double FrameSliderValue
 		{
 			get
@@ -1055,6 +1068,7 @@ namespace MtlEditor
 		private bool skinning_ = false;
 		private bool fps_camera_ = false;
 		private bool line_mode_ = false;
+		private bool imposter_mode_ = false;
 		private bool play_ = false;
 
 		private List<MtlEditorCommand> command_history_ = new List<MtlEditorCommand>();

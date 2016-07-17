@@ -305,6 +305,8 @@ namespace KlayGE
 	typedef std::shared_ptr<TransientBuffer> TransientBufferPtr;
 	class Fence;
 	typedef std::shared_ptr<Fence> FencePtr;
+	class Imposter;
+	typedef std::shared_ptr<Imposter> ImposterPtr;
 
 	class UIManager;
 	class UIElement;

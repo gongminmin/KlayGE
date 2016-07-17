@@ -49,6 +49,7 @@ KlayGE/Samples/media/Common/Assets/*.png
 KlayGE/Samples/media/Common/*.pfx
 KlayGE/Samples/media/Common/*/*.dds
 KlayGE/Samples/media/*/*/*.dds
+KlayGE/Samples/media/*/*/*.impml
 KlayGE/Samples/media/*/*/*.meshml
 KlayGE/Samples/media/*/*.dds
 KlayGE/Samples/media/*/*.meshml

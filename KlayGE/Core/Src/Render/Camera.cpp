@@ -104,6 +104,24 @@ namespace KlayGE
 		frustum_dirty_ = true;
 	}
 
+	void Camera::ProjOrthoOffCenterParams(float left, float top, float right, float bottom, float near_plane, float far_plane)
+	{
+		fov_ = 0;
+		aspect_ = (right - left) / (top - bottom);
+		near_plane_ = near_plane;
+		far_plane_ = far_plane;
+
+		proj_mat_ = MathLib::ortho_off_center_lh(left, right, bottom, top, near_plane, far_plane);
+		proj_mat_wo_adjust_ = proj_mat_;
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		re.AdjustProjectionMatrix(proj_mat_);
+		inv_proj_mat_ = MathLib::inverse(proj_mat_);
+		inv_proj_mat_wo_adjust_ = MathLib::inverse(proj_mat_wo_adjust_);
+		view_proj_mat_dirty_ = true;
+		view_proj_mat_wo_adjust_dirty_ = true;
+		frustum_dirty_ = true;
+	}
+
 	void Camera::BindUpdateFunc(std::function<void(Camera&, float, float)> const & update_func)
 	{
 		update_func_ = update_func;

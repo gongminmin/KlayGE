@@ -42,18 +42,13 @@ namespace KlayGE
 		void FlushTerrainData() override;
 
 	private:
-		void GeneratesImposters();
-
-	private:
 		PostProcessPtr height_pp_;
 		PostProcessPtr gradient_pp_;
 		PostProcessPtr mask_pp_;
 
 		std::vector<RenderablePtr> plant_meshes_;
 		std::vector<RenderablePtr> plant_impostor_meshes_;
-		TexturePtr plant_impostors_g_buffer_rt0_;
-		TexturePtr plant_impostors_g_buffer_rt1_;
-		std::vector<float2> plant_imposters_center_tc_;
+		std::vector<ImposterPtr> plant_imposters_;
 
 		std::vector<GraphicsBufferPtr> plant_instance_buffers_;
 		std::vector<RenderLayoutPtr> plant_instance_rls_;

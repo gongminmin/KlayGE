@@ -11,6 +11,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
 #include <KlayGE/Mesh.hpp>
+#include <KlayGE/Imposter.hpp>
 #include <KlayGE/Window.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Input.hpp>
@@ -20,6 +21,35 @@
 #include <fstream>
 
 #include "MtlEditorCore.hpp"
+
+#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
+	#include <filesystem>
+	namespace std
+	{
+		namespace experimental
+		{
+			namespace filesystem = std::tr2::sys;
+		}
+	}
+#else
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+	#endif
+	#include <boost/filesystem.hpp>
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic pop
+	#endif
+	namespace std
+	{
+		namespace experimental
+		{
+			namespace filesystem = boost::filesystem;
+		}
+	}
+#endif
 
 using namespace std;
 using namespace KlayGE;
@@ -187,6 +217,78 @@ namespace
 		}
 	};
 
+	class RenderImpostor : public RenderableHelper
+	{
+	public:
+		RenderImpostor(std::string const & name, AABBox const & aabbox)
+			: RenderableHelper(L"RenderImpostor")
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+			rl_ = rf.MakeRenderLayout();
+			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
+
+			float2 pos[] =
+			{
+				float2(-1, +1),
+				float2(+1, +1),
+				float2(-1, -1),
+				float2(+1, -1)
+			};
+			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
+			rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+			this->BindDeferredEffect(SyncLoadRenderEffect("Imposter.fxml"));
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("ImpostorGBufferAlphaTestMRT");
+			technique_ = gbuffer_mrt_tech_;
+
+			pos_aabb_ = aabbox;
+
+			imposter_ = SyncLoadImposter(name);
+			this->ImpostorTexture(imposter_->RT0Texture(), imposter_->RT1Texture(), imposter_->ImposterSize() * 0.5f);
+		}
+
+		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
+		{
+			normal_tex_ = rt0_tex;
+			diffuse_tex_ = rt1_tex;
+
+			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
+			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);
+		}
+
+		void OnRenderBegin() override
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			RenderEngine& re = rf.RenderEngineInstance();
+			Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+
+			float4x4 billboard_mat = camera->InverseViewMatrix();
+			billboard_mat(3, 0) = 0;
+			billboard_mat(3, 1) = 0;
+			billboard_mat(3, 2) = 0;
+			*(deferred_effect_->ParameterByName("billboard_mat")) = billboard_mat;
+
+			float2 start_tc = imposter_->StartTexCoord(camera->EyePos() - pos_aabb_.Center());
+			*(deferred_effect_->ParameterByName("start_tc")) = start_tc;
+
+			RenderableHelper::OnRenderBegin();
+		}
+
+	private:
+		ImposterPtr imposter_;
+	};
+
+	class ImposterObject : public SceneObjectHelper
+	{
+	public:
+		ImposterObject(std::string const & name, AABBox const & aabbox)
+			: SceneObjectHelper(0)
+		{
+			renderable_ = MakeSharedPtr<RenderImpostor>(name, aabbox);
+		}
+	};
+
 	class LightSourceUpdate
 	{
 	public:
@@ -202,7 +304,7 @@ namespace KlayGE
 	MtlEditorCore::MtlEditorCore(void* native_wnd)
 				: App3DFramework("MtlEditor", native_wnd),
 					fps_controller_(false), tb_controller_(false), is_fps_camera_(false),
-					skinning_(true), curr_frame_(0), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
+					skinning_(true), curr_frame_(0), imposter_mode_(false), mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
 					update_selective_buffer_(false), selected_obj_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/MtlEditor");
@@ -351,13 +453,28 @@ namespace KlayGE
 			ResLoader::Instance().DelPath(last_file_path_);
 		}
 
-		std::string file_name = name;
-		last_file_path_ = file_name.substr(0, file_name.find_last_of('\\'));
+		std::experimental::filesystem::path mesh_path = name;
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
+		last_file_path_ = mesh_path.parent_path();
+#else
+		last_file_path_ = mesh_path.parent_path().string();
+#endif
 		ResLoader::Instance().AddPath(last_file_path_);
+
+#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
+		std::string base_name = mesh_path.stem();
+#else
+		std::string base_name = mesh_path.stem().string();
+#endif
+		std::string imposter_name = last_file_path_ + "/" + base_name + ".impml";
 
 		if (model_)
 		{
 			model_->DelFromSceneManager();
+		}
+		if (imposter_)
+		{
+			imposter_->DelFromSceneManager();
 		}
 
 		model_ = MakeSharedPtr<ModelObject>(name);
@@ -367,7 +484,14 @@ namespace KlayGE
 			model_->GetRenderable()->Subrenderable(i)->ObjectID(static_cast<uint32_t>(i + 1));
 		}
 
-		shared_ptr<ModelObject> model = checked_pointer_cast<ModelObject>(model_);
+		if (!ResLoader::Instance().Locate(imposter_name).empty())
+		{
+			imposter_ = MakeSharedPtr<ImposterObject>(imposter_name, model_->GetRenderable()->PosBound());
+			imposter_->AddToSceneManager();
+			imposter_->Visible(false);
+		}
+
+		imposter_mode_ = false;
 
 		AABBox const & bb = model_->GetRenderable()->PosBound();
 		float3 center = bb.Center();
@@ -453,6 +577,10 @@ namespace KlayGE
 				grid_->Visible(false);
 				sky_box_->Visible(false);
 				selected_bb_->Visible(false);
+				if (imposter_)
+				{
+					imposter_->Visible(false);
+				}
 				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
 				{
 					model_->GetRenderable()->Subrenderable(i)->SelectMode(true);
@@ -469,6 +597,10 @@ namespace KlayGE
 				grid_->Visible(true);
 				sky_box_->Visible(true);
 				selected_bb_->Visible(selected_obj_ > 0);
+				if (imposter_)
+				{
+					imposter_->Visible(imposter_mode_);
+				}
 				for (uint32_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)
 				{
 					model_->GetRenderable()->Subrenderable(i)->SelectMode(false);
@@ -1150,6 +1282,21 @@ namespace KlayGE
 	void MtlEditorCore::LineModeOn(bool on)
 	{
 		deferred_rendering_->ForceLineMode(on);
+	}
+
+	void MtlEditorCore::ImposterModeOn(bool on)
+	{
+		if (imposter_)
+		{
+			imposter_->Visible(on);
+			model_->Visible(!on);
+
+			imposter_mode_ = on;
+		}
+		else
+		{
+			imposter_mode_ = false;
+		}
 	}
 
 	void MtlEditorCore::Visualize(int index)

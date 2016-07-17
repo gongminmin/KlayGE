@@ -320,7 +320,7 @@ void FoliageDistribution(uint vid, bool is_impostor,
 			if (is_impostor)
 			{
 				out_rotation = center_tc_angles_step.xy;
-				out_rotation.y += floor(angle * center_tc_angles_step.z + 0.5f) * center_tc_angles_step.w;
+				out_rotation.x += floor(angle * center_tc_angles_step.z + 0.5f) * center_tc_angles_step.w;
 			}
 			else
 			{

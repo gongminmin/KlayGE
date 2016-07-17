@@ -99,6 +99,11 @@ namespace KlayGE
 		core_->LineModeOn(on ? true : false);
 	}
 
+	void MtlEditorCoreWrapper::ImposterModeOn(int on)
+	{
+		core_->ImposterModeOn(on ? true : false);
+	}
+
 	void MtlEditorCoreWrapper::Visualize(int index)
 	{
 		core_->Visualize(index);

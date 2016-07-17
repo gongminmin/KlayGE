@@ -66,6 +66,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/GraphicsBuffer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HDRPostProcess.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/HeightMap.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Imposter.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/IndirectLightingLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/InfTerrain.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/JudaTexture.cpp
@@ -113,6 +114,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/GraphicsBuffer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HDRPostProcess.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/HeightMap.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Imposter.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/IndirectLightingLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/InfTerrain.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/JudaTexture.hpp
@@ -174,6 +176,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning64.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning128.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Imposter.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/JudaTexture.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml

@@ -86,6 +86,7 @@ namespace KlayGE
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);
 		void LineModeOn(bool on);
+		void ImposterModeOn(bool on);
 		void Visualize(int index);
 		void MouseMove(int x, int y, uint32_t button);
 		void MouseUp(int x, int y, uint32_t button);
@@ -116,6 +117,7 @@ namespace KlayGE
 		LightSourcePtr light_;
 
 		SceneObjectPtr model_;
+		SceneObjectPtr imposter_;
 		SceneObjectPtr axis_;
 		SceneObjectPtr grid_;
 		SceneObjectPtr sky_box_;
@@ -128,6 +130,8 @@ namespace KlayGE
 
 		bool skinning_;
 		float curr_frame_;
+
+		bool imposter_mode_;
 
 		std::string last_file_path_;
 

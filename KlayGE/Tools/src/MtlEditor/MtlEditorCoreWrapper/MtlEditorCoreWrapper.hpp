@@ -25,6 +25,7 @@ namespace KlayGE
 		void SkinningOn(int on);
 		void FPSCameraOn(int on);
 		void LineModeOn(int on);
+		void ImposterModeOn(int on);
 		void Visualize(int index);
 
 		void MouseMove(int x, int y, uint32_t button);
