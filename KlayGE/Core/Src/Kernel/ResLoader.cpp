@@ -359,7 +359,10 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(paths_mutex_);
 			for (auto const & path : paths_)
 			{
-				std::string const res_name(path + name);
+				std::string res_name(path + name);
+#if defined KLAYGE_PLATFORM_WINDOWS
+				std::replace(res_name.begin(), res_name.end(), '\\', '/');
+#endif
 
 				if (filesystem::exists(filesystem::path(res_name)))
 				{
@@ -422,7 +425,10 @@ namespace KlayGE
 			std::lock_guard<std::mutex> lock(paths_mutex_);
 			for (auto const & path : paths_)
 			{
-				std::string const res_name(path + name);
+				std::string res_name(path + name);
+#if defined KLAYGE_PLATFORM_WINDOWS
+				std::replace(res_name.begin(), res_name.end(), '\\', '/');
+#endif
 
 				filesystem::path res_path(res_name);
 				if (filesystem::exists(res_path))
