@@ -426,7 +426,7 @@ namespace
 
 						pos.resize(tex_width_ * tex_height_ * sizeof(float) * 4);
 						float* p = reinterpret_cast<float*>(&pos[0]);
-						for (size_t i = 0; i < tex_width_ * tex_height_; ++ i)
+						for (int i = 0; i < tex_width_ * tex_height_; ++ i)
 						{
 							p[i * 4 + 0] = 0.0f;
 							p[i * 4 + 1] = 0.0f;
@@ -444,7 +444,7 @@ namespace
 
 						pos.resize(tex_width_ * tex_height_ * sizeof(half) * 4);
 						half* p = reinterpret_cast<half*>(&pos[0]);
-						for (size_t i = 0; i < tex_width_ * tex_height_; ++ i)
+						for (int i = 0; i < tex_width_ * tex_height_; ++ i)
 						{
 							p[i * 4 + 0] = half(0.0f);
 							p[i * 4 + 1] = half(0.0f);
@@ -497,7 +497,7 @@ namespace
 
 				{
 					std::vector<half> p(tex_width_ * tex_height_ * 4);
-					for (int i = 0; i < p.size(); i += 4)
+					for (size_t i = 0; i < p.size(); i += 4)
 					{
 						float const angel = this->RandomGen() / 0.05f * PI;
 						float const r = this->RandomGen() * 3;
