@@ -1770,10 +1770,18 @@ namespace KlayGE
 	{
 		if (shader_srv_ptr_cache_[st] != srvs)
 		{
-			ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(srvs.size()), &srvs[0]);
+			size_t const old_size = shader_srv_ptr_cache_[st].size();
+			shader_srv_ptr_cache_[st] = srvs;
+			if (old_size > srvs.size())
+			{
+				shader_srv_ptr_cache_[st].resize(old_size, nullptr);
+			}
+
+			ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0,
+				static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
 
 			shader_srvsrc_cache_[st] = srvsrcs;
-			shader_srv_ptr_cache_[st] = srvs;
+			shader_srv_ptr_cache_[st].resize(srvs.size());
 		}
 	}
 
