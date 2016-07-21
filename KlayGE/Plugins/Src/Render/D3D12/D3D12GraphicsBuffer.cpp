@@ -94,13 +94,13 @@ namespace KlayGE
 		if ((access_hint_ & EAH_GPU_Write)
 			&& !((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
 		{
-			total_size = ((size_in_byte_ + 4 - 1) & ~(4 - 1)) + sizeof(uint32_t);
+			total_size = ((size_in_byte_ + 4 - 1) & ~(4 - 1)) + sizeof(uint64_t);
 		}
 		else if ((access_hint_ & EAH_GPU_Unordered) && (fmt_as_shader_res_ != EF_Unknown)
 			&& ((access_hint_ & EAH_Append) || (access_hint_ & EAH_Counter)))
 		{
 			total_size = ((size_in_byte_ + D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1) & ~(D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1))
-				+ sizeof(uint32_t);
+				+ sizeof(uint64_t);
 		}
 
 		D3D12_RESOURCE_DESC res_desc;
@@ -179,7 +179,7 @@ namespace KlayGE
 					& ~(D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT - 1);
 
 				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
-				res_desc.Width = sizeof(uint32_t);
+				res_desc.Width = sizeof(uint64_t);
 				res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 				TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 					&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
