@@ -37,12 +37,12 @@ float specular_normalize_factor(float roughness)
 
 float3 roughness_term(float3 halfway_vec, float3 normal, float roughness)
 {
-	return pow(max(dot(halfway_vec, normal), 0.0f), roughness);
+	return exp((roughness + 0.775f) * (max(dot(halfway_vec, normal), 0.0f) - 1));
 }
 
 float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
 {
-	return pow(max(dot(halfway_vec, normal), 0.0f), roughness) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
+	return roughness_term(halfway_vec, normal, roughness) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
 }
 
 float3 specular_term(float3 halfway_vec, float3 normal, float roughness)
