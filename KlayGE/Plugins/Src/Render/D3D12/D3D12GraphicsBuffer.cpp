@@ -205,7 +205,7 @@ namespace KlayGE
 			else
 			{
 				d3d_ua_view.Format = D3D12Mapping::MappingFormat(fmt_as_shader_res_);
-				d3d_ua_view.Buffer.StructureByteStride = structure_byte_stride;
+				d3d_ua_view.Buffer.StructureByteStride = 0;
 			}
 			d3d_ua_view.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
 			d3d_ua_view.Buffer.FirstElement = 0;
