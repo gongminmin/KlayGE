@@ -390,6 +390,8 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12DevicePtr const & device = re.D3DDevice();
 
+		D3D12_CLEAR_VALUE clear_value;
+
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = dim;
 		tex_desc.Alignment = 0;
@@ -422,10 +424,35 @@ namespace KlayGE
 			if (IsDepthFormat(format_))
 			{
 				tex_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+				switch (format_)
+				{
+				case EF_D16:
+					clear_value.Format = DXGI_FORMAT_D16_UNORM;
+					break;
+
+				case EF_D24S8:
+					clear_value.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+					break;
+
+				case EF_D32F:
+					clear_value.Format = DXGI_FORMAT_D32_FLOAT;
+					break;
+
+				default:
+					BOOST_ASSERT(false);
+					clear_value.Format = dxgi_fmt_;
+					break;
+				}
+				clear_value.DepthStencil.Depth = 1.0f;
+				clear_value.DepthStencil.Stencil = 0;
 			}
 			else
 			{
 				tex_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+				clear_value.Format = dxgi_fmt_;
+				clear_value.Color[0] = clear_value.Color[1] = clear_value.Color[2] = clear_value.Color[3] = 0;
 			}
 		}
 		if (access_hint_ & EAH_GPU_Unordered)
@@ -442,7 +469,7 @@ namespace KlayGE
 
 		ID3D12Resource* d3d_texture;
 		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
+			&tex_desc, D3D12_RESOURCE_STATE_COMMON, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture)));
 		d3d_texture_ = MakeCOMPtr(d3d_texture);
 
