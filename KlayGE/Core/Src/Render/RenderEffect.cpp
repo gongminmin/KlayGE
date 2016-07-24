@@ -4983,7 +4983,7 @@ namespace KlayGE
 			if (!hw_buff_ || (size > hw_buff_->Size()))
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				hw_buff_ = rf.MakeConstantBuffer(BU_Dynamic, EAH_CPU_Write, size, nullptr);
+				hw_buff_ = rf.MakeConstantBuffer(BU_Dynamic, 0, size, nullptr);
 			}
 		}
 
@@ -4994,8 +4994,7 @@ namespace KlayGE
 	{
 		if (dirty_)
 		{
-			GraphicsBuffer::Mapper mapper(*hw_buff_, BA_Write_Only);
-			std::memcpy(mapper.Pointer<uint8_t>(), &buff_[0], buff_.size());
+			hw_buff_->UpdateSubresource(0, static_cast<uint32_t>(buff_.size()), &buff_[0]);
 
 			dirty_ = false;
 		}

@@ -364,4 +364,54 @@ namespace KlayGE
 
 		hw_res_ready_ = true;
 	}
+
+	void OGLESTextureCube::UpdateSubresourceCube(uint32_t array_index, Texture::CubeFaces face, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		re.BindTexture(0, target_type_, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			GLsizei const image_size = row_pitch * ((height + 3) / 4);
+
+			if (array_size_ > 1)
+			{
+				glCompressedTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset, array_index,
+					width, height, 1, gl_format, image_size, data);
+			}
+			else
+			{
+				glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset,
+					width, height, gl_format, image_size, data);
+			}
+		}
+		else
+		{
+			uint8_t const * p = static_cast<uint8_t const *>(data);
+			if (array_size_ > 1)
+			{
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset + y, array_index, width, height, 1,
+						gl_format, gl_type, p + y * row_pitch);
+				}
+			}
+			else
+			{
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset + y, width, height,
+						gl_format, gl_type, p + y * row_pitch);
+				}
+			}
+		}
+	}
 }

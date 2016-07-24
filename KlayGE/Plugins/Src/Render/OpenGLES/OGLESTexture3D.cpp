@@ -349,4 +349,44 @@ namespace KlayGE
 
 		hw_res_ready_ = true;
 	}
+
+	void OGLESTexture3D::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
+	{
+		BOOST_ASSERT(0 == array_index);
+		KFL_UNUSED(array_index);
+
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		re.BindTexture(0, target_type_, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			uint32_t const block_size = NumFormatBytes(format_) * 4;
+			GLsizei const image_size = slice_pitch * depth;
+
+			glCompressedTexSubImage3D(target_type_, level, x_offset, y_offset, z_offset,
+				width, height, depth, gl_format, image_size,
+				data);
+		}
+		else
+		{
+			uint8_t const * p = static_cast<uint8_t const *>(data);
+			for (uint32_t z = 0; z < depth; ++ z)
+			{
+				for (uint32_t y = 0; y < height; ++ y)
+				{
+					glTexSubImage3D(target_type_, level, x_offset, y_offset + y, z_offset + z, width, height, depth,
+						gl_format, gl_type, p + z * slice_pitch + y * row_pitch);
+				}
+			}
+		}
+	}
 }

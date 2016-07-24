@@ -828,4 +828,79 @@ namespace KlayGE
 			return view;
 		}
 	}
+	
+	void D3D12Texture::UpdateSubresource1D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t width,
+		void const * data)
+	{
+		uint32_t const texel_size = NumFormatBytes(format_);
+
+		void* p;
+		this->Map1D(array_index, level, TMA_Write_Only, x_offset, width, p);
+		memcpy(p, data, width * texel_size);
+		this->Unmap1D(array_index, level);
+	}
+
+	void D3D12Texture::UpdateSubresource2D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		uint32_t const texel_size = NumFormatBytes(format_);
+		uint32_t const row_size = width * texel_size;
+
+		void* p;
+		uint32_t dst_row_pitch;
+		this->Map2D(array_index, level, TMA_Write_Only, x_offset, y_offset, width, height, p, dst_row_pitch);
+		uint8_t const * src = static_cast<uint8_t const *>(data);
+		uint8_t* dst = static_cast<uint8_t*>(p);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			memcpy(dst + y * dst_row_pitch, src + y * row_pitch, row_size);
+		}
+		this->Unmap2D(array_index, level);
+	}
+
+	void D3D12Texture::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
+	{
+		uint32_t const texel_size = NumFormatBytes(format_);
+		uint32_t const row_size = width * texel_size;
+
+		void* p;
+		uint32_t dst_row_pitch;
+		uint32_t dst_slice_pitch;
+		this->Map3D(array_index, level, TMA_Write_Only, x_offset, y_offset, z_offset, width, height, depth,
+			p, dst_row_pitch, dst_slice_pitch);
+		for (uint32_t z = 0; z < depth; ++ z)
+		{
+			uint8_t const * src = static_cast<uint8_t const *>(data) + z * slice_pitch;
+			uint8_t* dst = static_cast<uint8_t*>(p) + z * dst_slice_pitch;
+			for (uint32_t y = 0; y < height; ++ y)
+			{
+				memcpy(dst + y * dst_row_pitch, src + y * row_pitch, row_size);
+			}
+		}
+		this->Unmap2D(array_index, level);
+	}
+
+	void D3D12Texture::UpdateSubresourceCube(uint32_t array_index, Texture::CubeFaces face, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		uint32_t const texel_size = NumFormatBytes(format_);
+		uint32_t const row_size = width * texel_size;
+
+		void* p;
+		uint32_t dst_row_pitch;
+		this->MapCube(array_index, face, level, TMA_Write_Only, x_offset, y_offset, width, height, p, dst_row_pitch);
+		uint8_t const * src = static_cast<uint8_t const *>(data);
+		uint8_t* dst = static_cast<uint8_t*>(p);
+		for (uint32_t y = 0; y < height; ++ y)
+		{
+			memcpy(dst + y * dst_row_pitch, src + y * row_pitch, row_size);
+		}
+		this->Unmap2D(array_index, level);
+	}
 }

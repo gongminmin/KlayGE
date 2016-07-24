@@ -34,6 +34,8 @@ namespace KlayGE
 		virtual void CreateHWResource(void const * init_data) override;
 		virtual void DeleteHWResource() override;
 
+		void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) override;
+
 		void Active(bool force);
 
 		GLuint GLvbo() const

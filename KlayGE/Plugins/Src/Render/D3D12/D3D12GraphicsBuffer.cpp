@@ -75,7 +75,7 @@ namespace KlayGE
 			init_state = D3D12_RESOURCE_STATE_COPY_DEST;
 			heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
 		}
-		else if ((access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
+		else if ((0 == access_hint_) || (access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
 		{
 			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -246,7 +246,7 @@ namespace KlayGE
 			break;
 
 		case BA_Write_Only:
-			if ((EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
+			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
 				re.AddResourceForRemovingAfterSync(buffer_);
 				this->CreateHWResource(nullptr);
@@ -374,6 +374,13 @@ namespace KlayGE
 		{
 			cmd_list->ResourceBarrier(n, &barrier_after[0]);
 		}
+	}
+
+	void D3D12GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
+	{
+		uint8_t* p = static_cast<uint8_t*>(this->Map(BA_Write_Only));
+		std::memcpy(p + offset, data, size);
+		this->Unmap();
 	}
 
 	bool D3D12GraphicsBuffer::UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state)

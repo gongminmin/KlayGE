@@ -72,6 +72,20 @@ namespace KlayGE
 		virtual void DeleteHWResource() override;
 		virtual bool HWResourceReady() const override;
 
+		void UpdateSubresource1D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t width,
+			void const * data) override;
+		void UpdateSubresource2D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void const * data, uint32_t row_pitch) override;
+		void UpdateSubresource3D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth,
+			void const * data, uint32_t row_pitch, uint32_t slice_pitch) override;
+		void UpdateSubresourceCube(uint32_t array_index, CubeFaces face, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void const * data, uint32_t row_pitch) override;
+
 	protected:
 		void GetD3DFlags(D3D11_USAGE& usage, UINT& bind_flags, UINT& cpu_access_flags, UINT& misc_flags);
 

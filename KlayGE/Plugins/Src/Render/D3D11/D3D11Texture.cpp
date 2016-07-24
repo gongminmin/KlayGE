@@ -420,4 +420,69 @@ namespace KlayGE
 	{
 		return d3d_texture_.get() ? true : false;
 	}
+
+	void D3D11Texture::UpdateSubresource1D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t width,
+		void const * data)
+	{
+		D3D11_BOX box;
+		box.left = x_offset;
+		box.top = 0;
+		box.front = 0;
+		box.right = x_offset + width;
+		box.bottom = 1;
+		box.back = 1;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+			data, width * texel_size, width * texel_size);
+	}
+
+	void D3D11Texture::UpdateSubresource2D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		D3D11_BOX box;
+		box.left = x_offset;
+		box.top = y_offset;
+		box.front = 0;
+		box.right = x_offset + width;
+		box.bottom = y_offset + height;
+		box.back = 1;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+			data, row_pitch, row_pitch);
+	}
+
+	void D3D11Texture::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
+	{
+		D3D11_BOX box;
+		box.left = x_offset;
+		box.top = y_offset;
+		box.front = z_offset;
+		box.right = x_offset + width;
+		box.bottom = y_offset + height;
+		box.back = z_offset + depth;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+			data, row_pitch, slice_pitch);
+	}
+
+	void D3D11Texture::UpdateSubresourceCube(uint32_t array_index, Texture::CubeFaces face, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		D3D11_BOX box;
+		box.left = x_offset;
+		box.top = y_offset;
+		box.front = 0;
+		box.right = x_offset + width;
+		box.bottom = y_offset + height;
+		box.back = 1;
+		uint32_t const texel_size = NumFormatBytes(format_);
+		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), (array_index * 6 + face) * num_mip_maps_ + level, &box,
+			data, row_pitch, row_pitch);
+	}
 }

@@ -191,4 +191,16 @@ namespace KlayGE
 		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
 			rhs_mapper.Pointer<uint8_t>());
 	}
+
+	void OGLESGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
+	{
+		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_mapbuffer())
+		{
+			memcpy(&buf_data_[offset], data, size);
+		}
+
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(target_, vb_);
+		glBufferSubData(target_, offset, size, data);
+	}
 }

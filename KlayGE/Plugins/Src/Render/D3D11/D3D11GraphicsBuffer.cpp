@@ -278,11 +278,28 @@ namespace KlayGE
 			D3D11_BOX box;
 			box.left = 0;
 			box.right = this->Size();
+			box.front = 0;
 			box.top = 0;
 			box.bottom = 1;
-			box.front = 0;
 			box.back = 1;
 			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, 0, 0, 0, buffer_.get(), 0, &box);
 		}
+	}
+
+	void D3D11GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
+	{
+		D3D11_BOX* p = nullptr;
+		D3D11_BOX box;
+		if (!(bind_flags_ & D3D11_BIND_CONSTANT_BUFFER))
+		{
+			p = &box;
+			box.left = offset;
+			box.top = 0;
+			box.front = 0;
+			box.right = offset + size;
+			box.bottom = 1;
+			box.back = 1;
+		}
+		d3d_imm_ctx_->UpdateSubresource(buffer_.get(), 0, p, data, size, size);
 	}
 }

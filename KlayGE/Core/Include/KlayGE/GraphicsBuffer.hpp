@@ -119,6 +119,8 @@ namespace KlayGE
 		virtual void CreateHWResource(void const * init_data) = 0;
 		virtual void DeleteHWResource() = 0;
 
+		virtual void UpdateSubresource(uint32_t offset, uint32_t size, void const * data) = 0;
+
 	private:
 		virtual void* Map(BufferAccess ba) = 0;
 		virtual void Unmap() = 0;

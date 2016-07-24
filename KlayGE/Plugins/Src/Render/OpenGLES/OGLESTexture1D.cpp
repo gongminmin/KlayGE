@@ -376,4 +376,48 @@ namespace KlayGE
 
 		hw_res_ready_ = true;
 	}
+
+	void OGLESTexture1D::UpdateSubresource1D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t width,
+		void const * data)
+	{
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		GLint gl_internalFormat;
+		GLenum gl_format;
+		GLenum gl_type;
+		OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
+
+		re.BindTexture(0, target_type_, texture_);
+
+		if (IsCompressedFormat(format_))
+		{
+			uint32_t const block_size = NumFormatBytes(format_) * 4;
+			GLsizei const image_size = ((width + 3) / 4) * block_size;
+
+			if (array_size_ > 1)
+			{
+				glCompressedTexSubImage3D(target_type_, level, x_offset, 0, array_index,
+					width, 1, 1, gl_format, image_size, data);
+			}
+			else
+			{
+				glCompressedTexSubImage2D(target_type_, level, x_offset, 0,
+					width, 1, gl_format, image_size, data);
+			}
+		}
+		else
+		{
+			if (array_size_ > 1)
+			{
+				glTexSubImage3D(target_type_, level, x_offset, 0, array_index, width, 1, 1,
+					gl_format, gl_type, data);
+			}
+			else
+			{
+				glTexSubImage2D(target_type_, level, x_offset, 0, width, 1,
+					gl_format, gl_type, data);
+			}
+		}
+	}
 }

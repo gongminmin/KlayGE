@@ -214,4 +214,18 @@ namespace KlayGE
 				rhs_mapper.Pointer<uint8_t>());
 		}
 	}
+
+	void OGLGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
+	{
+		if (glloader_GL_EXT_direct_state_access())
+		{
+			glNamedBufferSubDataEXT(vb_, offset, size, data);
+		}
+		else
+		{
+			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.BindBuffer(target_, vb_);
+			glBufferSubData(target_, offset, size, data);
+		}
+	}
 }

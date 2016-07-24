@@ -340,4 +340,70 @@ namespace KlayGE
 	{
 		return hw_res_ready_;
 	}
+
+	void OGLTexture::UpdateSubresource1D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t width,
+		void const * data)
+	{
+		BOOST_ASSERT(false);
+
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(data);
+	}
+
+	void OGLTexture::UpdateSubresource2D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		BOOST_ASSERT(false);
+
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+	}
+
+	void OGLTexture::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
+	{
+		BOOST_ASSERT(false);
+
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(z_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(depth);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+		KFL_UNUSED(slice_pitch);
+	}
+
+	void OGLTexture::UpdateSubresourceCube(uint32_t array_index, Texture::CubeFaces face, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		BOOST_ASSERT(false);
+
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+	}
 }
