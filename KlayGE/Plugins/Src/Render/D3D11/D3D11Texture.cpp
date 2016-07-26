@@ -448,7 +448,6 @@ namespace KlayGE
 		box.right = x_offset + width;
 		box.bottom = y_offset + height;
 		box.back = 1;
-		uint32_t const texel_size = NumFormatBytes(format_);
 		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
 			data, row_pitch, row_pitch);
 	}
@@ -465,7 +464,6 @@ namespace KlayGE
 		box.right = x_offset + width;
 		box.bottom = y_offset + height;
 		box.back = z_offset + depth;
-		uint32_t const texel_size = NumFormatBytes(format_);
 		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
 			data, row_pitch, slice_pitch);
 	}
@@ -481,7 +479,6 @@ namespace KlayGE
 		box.right = x_offset + width;
 		box.bottom = y_offset + height;
 		box.back = 1;
-		uint32_t const texel_size = NumFormatBytes(format_);
 		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), (array_index * 6 + face) * num_mip_maps_ + level, &box,
 			data, row_pitch, row_pitch);
 	}

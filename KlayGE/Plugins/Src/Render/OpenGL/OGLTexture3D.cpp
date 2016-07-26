@@ -392,7 +392,6 @@ namespace KlayGE
 
 		if (IsCompressedFormat(format_))
 		{
-			uint32_t const block_size = NumFormatBytes(format_) * 4;
 			GLsizei const image_size = slice_pitch * depth;
 
 			glCompressedTexSubImage3D(target_type_, level, x_offset, y_offset, z_offset,

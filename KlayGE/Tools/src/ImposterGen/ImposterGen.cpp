@@ -290,9 +290,9 @@ int main(int argc, char* argv[])
 		target_folder = meshml_path.parent_path();
 	}
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	file_name = meshml_path.filename().stem();
+	file_name = meshml_path.stem();
 #else
-	file_name = meshml_path.filename().stem().string();
+	file_name = meshml_path.stem().string();
 #endif
 
 	GeneratesImposters(meshml_name, target_folder.string(), file_name, azimuth, elevation, size);
