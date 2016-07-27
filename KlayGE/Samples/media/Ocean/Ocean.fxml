@@ -121,54 +121,6 @@ float4 OceanDepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
 	return texcoord_depth.z;
 }
 
-float4 OceanGBufferAlphaBlendRT0PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD2
-#else
-					float3 screen_tc_w : TEXCOORD2
-#endif
-					) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
-
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), near_q_far.z) - texcoord_depth.z);
-
-#if KLAYGE_MAX_TEX_ARRAY_LEN > 1
-	float2 gradient0 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy, frames.x)).xy;
-	float2 gradient1 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy * 6.4f, frames.x)).xy;
-	float2 gradient2 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy, frames.y)).xy;
-	float2 gradient3 = gradient_tex_array.Sample(linear_wrap_sampler, float3(texcoord_depth.xy * 6.4f, frames.y)).xy;
-#else
-	float2 gradient0 = gradient_tex_0.Sample(linear_wrap_sampler, texcoord_depth.xy).xy;
-	float2 gradient1 = gradient_tex_0.Sample(linear_wrap_sampler, texcoord_depth.xy * 6.4f).xy;
-	float2 gradient2 = gradient_tex_1.Sample(linear_wrap_sampler, texcoord_depth.xy).xy;
-	float2 gradient3 = gradient_tex_1.Sample(linear_wrap_sampler, texcoord_depth.xy * 6.4f).xy;
-#endif
-
-	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
-	gradient = lerp(noise_grad, gradient, BLEND_FACTOR);
-	
-	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
-
-	return StoreGBufferRT0(normal, shininess_clr.x);
-}
-
-float4 OceanGBufferAlphaBlendRT1PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD2
-#else
-					float3 screen_tc_w : TEXCOORD2
-#endif
-					) : SV_Target
-{
-	float3 diffuse = waterbody_color;
-	float specular = waterbody_specular_color.x;
-	
-	return StoreGBufferRT1(diffuse, specular);
-}
-
 void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
 #ifdef NOPERSPECTIVE_SUPPORT
 					noperspective float2 screen_tc : TEXCOORD2,
@@ -205,6 +157,44 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 	
 	StoreGBufferMRT(normal, specular, shininess_clr.x, diffuse,
 		mrt_0, mrt_1);
+}
+
+float4 OceanGBufferAlphaBlendRT0PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD2
+#else
+					float3 screen_tc_w : TEXCOORD2
+#endif
+					) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	OceanGBufferAlphaBlendMRTPS(texcoord_depth, noise_grad,
+#ifdef NOPERSPECTIVE_SUPPORT
+		screen_tc,
+#else
+		screen_tc_w,
+#endif
+		mrt_0, mrt_1);
+	return mrt_0;
+}
+
+float4 OceanGBufferAlphaBlendRT1PS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD2
+#else
+					float3 screen_tc_w : TEXCOORD2
+#endif
+					) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	OceanGBufferAlphaBlendMRTPS(texcoord_depth, noise_grad,
+#ifdef NOPERSPECTIVE_SUPPORT
+		screen_tc,
+#else
+		screen_tc_w,
+#endif
+		mrt_0, mrt_1);
+	return mrt_1;
 }
 
 void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
@@ -421,19 +411,23 @@ void FoggySkyBoxVS(float4 pos : POSITION,
 	texcoord0 = mul(pos, inv_mvp).xyz;
 }
 
+void GBufferFoggySkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+{
+	mrt_0 = mrt_1 = 0;
+}
+
 float4 GBufferFoggySkyBoxRT0PS() : SV_Target
 {
-	return 0;
+	float4 mrt_0, mrt_1;
+	GBufferFoggySkyBoxMRTPS(mrt_0, mrt_1);
+	return mrt_0;
 }
 
 float4 GBufferFoggySkyBoxRT1PS() : SV_Target
 {
-	return 0;
-}
-
-void GBufferFoggySkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
-{
-	mrt_0 = mrt_1 = 0;
+	float4 mrt_0, mrt_1;
+	GBufferFoggySkyBoxMRTPS(mrt_0, mrt_1);
+	return mrt_1;
 }
 
 float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target

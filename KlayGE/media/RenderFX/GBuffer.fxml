@@ -7,7 +7,6 @@
 	<include name="Tessellation.fxml"/>
 
 	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
-	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -274,46 +273,6 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	return normal;
 }
 
-float4 ConstructGBufferRT0(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
-{
-	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	float shininess;
-	if (shininess_clr.y > 0.5f)
-	{
-		shininess = shininess_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
-	}
-	else
-	{
-		shininess = shininess_clr.r;
-	}
-	return StoreGBufferRT0(normal, shininess);
-}
-
-float4 ConstructGBufferRT1(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
-{
-	float3 diffuse;
-	if (diffuse_clr.w > 0.5f)
-	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
-	}
-	else
-	{
-		diffuse = diffuse_clr.rgb;
-	}
-	
-	float3 specular;
-	if (specular_clr.w > 0.5f)
-	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
-	}
-	else
-	{
-		specular = specular_clr.rgb;
-	}
-
-	return StoreGBufferRT1(diffuse, specular);
-}
-
 void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 					out float4 mrt_0, out float4 mrt_1)
 {
@@ -353,66 +312,6 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 		mrt_0, mrt_1);
 }
 
-float4 GBufferRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-}
-
-float4 GBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
-	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-}
-
-float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3
-#else
-					float3 screen_tc_w : TEXCOORD3
-#endif
-			) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
-
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
-	return ConstructGBufferRT0(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
-}
-
-float4 GBufferRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-}
-
-float4 GBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
-	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-}
-
-float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3
-#else
-					float3 screen_tc_w : TEXCOORD3
-#endif
-			) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
-
-	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
-	return ConstructGBufferRT1(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
-}
-
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
@@ -443,6 +342,76 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
+}
+
+float4 GBufferRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+		mrt_0, mrt_1);
+	return mrt_0;
+}
+
+float4 GBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferAlphaTestMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+		mrt_0, mrt_1);
+	return mrt_0;
+}
+
+float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3
+#else
+					float3 screen_tc_w : TEXCOORD3
+#endif
+			) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferAlphaBlendMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth,
+#ifdef NOPERSPECTIVE_SUPPORT
+		screen_tc,
+#else
+		screen_tc_w,
+#endif
+		mrt_0, mrt_1);
+	return mrt_0;
+}
+
+float4 GBufferRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+		mrt_0, mrt_1);
+	return mrt_1;
+}
+
+float4 GBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferAlphaTestMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
+		mrt_0, mrt_1);
+	return mrt_1;
+}
+
+float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
+#ifdef NOPERSPECTIVE_SUPPORT
+					noperspective float2 screen_tc : TEXCOORD3
+#else
+					float3 screen_tc_w : TEXCOORD3
+#endif
+			) : SV_Target
+{
+	float4 mrt_0, mrt_1;
+	GBufferAlphaBlendMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth,
+#ifdef NOPERSPECTIVE_SUPPORT
+		screen_tc,
+#else
+		screen_tc_w,
+#endif
+		mrt_0, mrt_1);
+	return mrt_1;
 }
 		]]>
 	</shader>
@@ -955,15 +924,8 @@ float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 
 float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float3 emit;
-	if (emit_clr.w > 0.5f)
-	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb * 16;
-	}
-	else
-	{
-		emit = emit_clr.rgb;
-	}
+	float4 shading = SpecialShadingPS(texcoord);
+	
 	float opacity;
 	if (opacity_map_enabled)
 	{
@@ -973,7 +935,7 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 	{
 		opacity = opacity_clr;
 	}
-	return float4(max(emit, 0), opacity);
+	return float4(shading.xyz, opacity);
 }
 		]]>
 	</shader>
