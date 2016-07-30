@@ -245,7 +245,7 @@ namespace MtlEditor
 
 		private void OpenModel(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name);
+			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
 			if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
 			{
 				return;

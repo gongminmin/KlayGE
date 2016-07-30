@@ -72,9 +72,9 @@ namespace KGEditor
 
 		private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
 		{
-			Value = tb.Text;
-			if ((Value != null) && (Value != ""))
+			if (tb.Text != "")
 			{
+				Value = tb.Text;
 				sl.Value = Double.Parse(Value);
 			}
 		}

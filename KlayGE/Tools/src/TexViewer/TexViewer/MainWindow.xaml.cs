@@ -172,7 +172,7 @@ namespace TexViewer
 
 		private void OpenTexture(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name);
+			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
 			if (ext_name != ".dds")
 			{
 				return;

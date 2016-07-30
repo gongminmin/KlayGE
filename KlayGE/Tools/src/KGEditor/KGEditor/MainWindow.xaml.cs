@@ -463,7 +463,7 @@ namespace KGEditor
 
 		private void LoadScene(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name);
+			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
 			if (ext_name != ".kges")
 			{
 				return;

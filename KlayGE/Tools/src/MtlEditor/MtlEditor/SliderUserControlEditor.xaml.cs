@@ -69,9 +69,9 @@ namespace MtlEditor
 
 		private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
 		{
-			Value = _tb.Text;
-			if ((Value != null) && (Value != ""))
+			if (_tb.Text != "")
 			{
+				Value = _tb.Text;
 				_sl.Value = Double.Parse(Value);
 			}
 		}
