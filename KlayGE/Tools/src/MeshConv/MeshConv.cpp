@@ -6,6 +6,7 @@
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/Mesh.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -181,36 +182,26 @@ namespace
 		{
 			int mtl_id = meshml_obj.AllocMaterial();
 
-			float3 ambient(0, 0, 0);
-			float3 diffuse(0, 0, 0);
-			float3 specular(0, 0, 0);
-			float3 emit(0, 0, 0);
-			float opacity = 1;
+			float3 albedo(0, 0, 0);
+			float metalness = 0;
 			float shininess = 1;
+			float3 emissive(0, 0, 0);
+			float opacity = 1;
+			bool transparent = false;
 
-			aiColor4D ai_ambient;
-			aiColor4D ai_diffuse;
-			aiColor4D ai_specular;
-			aiColor4D ai_emit;
+			aiColor4D ai_albedo;
 			float ai_opacity;
 			float ai_shininess;
+			aiColor4D ai_emissive;
 
 			auto mtl = scene->mMaterials[mi];
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ai_ambient))
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &ai_albedo))
 			{
-				ambient = Color4ToFloat3(ai_ambient);
+				albedo = Color4ToFloat3(ai_albedo);
 			}
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &ai_diffuse))
+			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &ai_emissive))
 			{
-				diffuse = Color4ToFloat3(ai_diffuse);
-			}
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &ai_specular))
-			{
-				specular = Color4ToFloat3(ai_specular);
-			}
-			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &ai_emit))
-			{
-				emit = Color4ToFloat3(ai_emit);
+				emissive = Color4ToFloat3(ai_emissive);
 			}
 
 			unsigned int max = 1;
@@ -231,8 +222,16 @@ namespace
 					shininess *= strength;
 				}
 			}
+			shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
 
-			meshml_obj.SetMaterial(mtl_id, ambient, diffuse, specular, emit, opacity, shininess, false);
+			if ((opacity < 1) || (aiGetMaterialTextureCount(mtl, aiTextureType_OPACITY) > 0))
+			{
+				transparent = true;
+			}
+
+			meshml_obj.SetMaterial(mtl_id, float4(albedo.x(), albedo.y(), albedo.z(), opacity),
+				metalness, Shininess2Glossiness(shininess),
+				emissive, transparent, 0, false);
 
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)
@@ -240,18 +239,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Diffuse Color", str.C_Str());
-			}
-
-			count = aiGetMaterialTextureCount(mtl, aiTextureType_SPECULAR);
-			if (count > 0)
-			{
-				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_SPECULAR, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Specular Color", str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Albedo, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
@@ -260,28 +248,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Glossiness", str.C_Str());
-			}
-
-			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
-			if (count > 0)
-			{
-				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Bump Map", str.C_Str());
-			}
-
-			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
-			if (count > 0)
-			{
-				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
-
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Height Map", str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Glossiness, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_EMISSIVE);
@@ -290,28 +257,25 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Self-Illumination", str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Emissive, str.C_Str());
 			}
 
-			count = aiGetMaterialTextureCount(mtl, aiTextureType_OPACITY);
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
 			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_OPACITY, 0, &str, 0, 0, 0, 0, 0, 0);
+				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-				meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Normal, str.C_Str());
 			}
-			else if (opacity < 1)
+
+			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
+			if (count > 0)
 			{
 				aiString str;
-				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
-				if (str.length > 0)
-				{
-					int slot_id = meshml_obj.AllocTextureSlot(mtl_id);
-					meshml_obj.SetTextureSlot(mtl_id, slot_id, "Opacity", str.C_Str());
-				}
+				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
+
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Height, str.C_Str());
 			}
 		}
 

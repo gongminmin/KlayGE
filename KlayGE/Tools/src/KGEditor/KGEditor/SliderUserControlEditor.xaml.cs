@@ -92,7 +92,7 @@ namespace KGEditor
 	public partial class MultiplierSliderUserControlEditor : SliderUserControlEditor
 	{
 		public MultiplierSliderUserControlEditor()
-			: base(0, 64)
+			: base(1, 64)
 		{
 			InitializeComponent();
 		}

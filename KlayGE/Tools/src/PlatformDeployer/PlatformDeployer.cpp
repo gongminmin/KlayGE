@@ -191,9 +191,8 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 {
 	std::ofstream ofs("convert.bat");
 
-	if (("diffuse" == res_type)
-		|| ("specular" == res_type)
-		|| ("emit" == res_type))
+	if (("albedo" == res_type)
+		|| ("emissive" == res_type))
 	{
 		for (size_t i = 0; i < res_names.size(); ++i)
 		{
@@ -452,7 +451,7 @@ int main(int argc, char* argv[])
 #endif
 		if (".dds" == ext_name)
 		{
-			res_type = "diffuse";
+			res_type = "albedo";
 		}
 		else if (".meshml" == ext_name)
 		{

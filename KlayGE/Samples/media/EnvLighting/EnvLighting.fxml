@@ -20,7 +20,7 @@
 		<parameter type="float" name="mip_bias"/>
 		<parameter type="float3" name="diffuse"/>
 		<parameter type="float3" name="specular"/>
-		<parameter type="float" name="shininess"/>
+		<parameter type="float" name="glossiness"/>
 	</cbuffer>
 
 	<parameter type="textureCUBE" name="skybox_Ycube_tex"/>
@@ -49,34 +49,34 @@ float3 PrefilteredDiffuseIBL(float3 c_diff, float3 normal)
 	return CalcEnvDiffuse(prefiltered_clr, c_diff);
 }
 
-float3 PrefilteredSpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 PrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	float mip = CalcPrefilteredEnvMip(shininess, diff_spec_mip.y);
-	shininess = pow(8192.0f, shininess);
+	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
+	float shininess = Glossiness2Shininess(glossiness);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
 	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
 		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
 	return prefiltered_clr * saturate(calc_brdf(0, specular, shininess, r, normal, normal));
 }
 
-float3 PBPrefilteredSpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 PBPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	float mip = CalcPrefilteredEnvMip(shininess, diff_spec_mip.y);
+	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = CalcPrefilteredEnvVec(normal, view);	
 	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
 		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
-	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, shininess)).xy;
+	float2 env_brdf = integrated_brdf_tex.Sample(bilinear_sampler, float2(n_dot_v, glossiness)).xy;
 	return prefiltered_clr * (c_spec * env_brdf.x + env_brdf.y / 100);
 }
 
-float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	float mip = CalcPrefilteredEnvMip(shininess, diff_spec_mip.y);
+	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
 	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
 		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
-	return CalcEnvSpecular(prefiltered_clr, c_spec, shininess, normal, view);
+	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 
 void GroundTruthVS(float4 pos		: POSITION,
@@ -99,7 +99,7 @@ float4 PrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	incident = normalize(incident);
 
 	return float4(PrefilteredDiffuseIBL(diffuse, normal)
-		+ PrefilteredSpecularIBL(specular, shininess, normal, incident), 1);
+		+ PrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
 }
 
 float4 PBPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -108,7 +108,7 @@ float4 PBPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) :
 	incident = normalize(incident);
 
 	return float4(PrefilteredDiffuseIBL(diffuse, normal)
-		+ PBPrefilteredSpecularIBL(specular, shininess, normal, incident), 1);
+		+ PBPrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
 }
 
 float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -117,7 +117,7 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 	incident = normalize(incident);
 
 	return float4(PrefilteredDiffuseIBL(diffuse, normal)
-		+ PBFittingPrefilteredSpecularIBL(specular, shininess, normal, incident), 1);
+		+ PBFittingPrefilteredSpecularIBL(specular, glossiness, normal, incident), 1);
 }
 		]]>
 	</shader>
@@ -205,9 +205,9 @@ float3 DiffuseIBL(float3 c_diff, float3 normal)
 	return c_diff * prefiltered_clr / NUM_SAMPLES;
 }
 
-float3 SpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 SpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	shininess = pow(8192.0f, shininess);
+	float shininess = Glossiness2Shininess(glossiness);
 
 	float3 specular = 0;
 	
@@ -286,9 +286,9 @@ float2 IntegrateBRDF(float shininess, float n_dot_v)
 	return rg / NUM_SAMPLES;
 }
 
-float3 ApproximateSpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 ApproximateSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	shininess = pow(8192.0f, shininess);
+	float shininess = Glossiness2Shininess(glossiness);
 
 	float n_dot_v = saturate(dot(normal, view));
 	float3 r = -reflect(view, normal);
@@ -303,7 +303,7 @@ float4 GroundTruthPS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	incident = normalize(incident);
 
 	return float4(DiffuseIBL(diffuse, normal)
-		+ SpecularIBL(specular, shininess, normal, incident), 1);
+		+ SpecularIBL(specular, glossiness, normal, incident), 1);
 }
 
 float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : SV_Target
@@ -312,7 +312,7 @@ float4 ApproximatePS(float3 normal : TEXCOORD0, float3 incident : TEXCOORD1) : S
 	incident = normalize(incident);
 
 	return float4(DiffuseIBL(diffuse, normal)
-		+ ApproximateSpecularIBL(specular, shininess, normal, incident), 1);
+		+ ApproximateSpecularIBL(specular, glossiness, normal, incident), 1);
 }
 		]]>
 	</shader>

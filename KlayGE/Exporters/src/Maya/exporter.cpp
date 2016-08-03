@@ -746,31 +746,29 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 			if (surface_shader.hasFn(MFn::kLambert))
 			{
 				MFnLambertShader lambert(surface_shader);
-				MColor ac = lambert.ambientColor();
 				MColor dc = lambert.color();
 				MColor ec = lambert.incandescence();
 				MColor tr = lambert.transparency();
 				float dcoeff = lambert.diffuseCoeff();
 
-				MColor spec(1.0f, 1.0f, 1.0f, 1.0f);
 				float shininess = 32.0f;
 				if (surface_shader.hasFn(MFn::kPhong))
 				{
 					MFnPhongShader phong(surface_shader);
-					spec = phong.specularColor();
 					shininess = phong.cosPower();
 				}
 				else if (surface_shader.hasFn(MFn::kBlinn))
 				{
 					MFnBlinnShader blinn(surface_shader);
-					spec = blinn.specularColor();
 					shininess = blinn.specularRollOff();
 				}
 
+				float opacity = 1.0f - (tr.r + tr.g + tr.b) / 3.0f;
+				float glossiness = log(shininess) / log(8192.0f);
+
 				mtl_id = meshml_obj_.AllocMaterial();
-				meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(ac.r, ac.g, ac.b), dcoeff * KlayGE::float3(dc.r, dc.g, dc.b),
-					KlayGE::float3(spec.r, spec.g, spec.b), KlayGE::float3(ec.r, ec.g, ec.b), 1.0f - ((tr.r + tr.g + tr.b) / 3.0f),
-					shininess, false);
+				meshml_obj_.SetMaterial(mtl_id, KlayGE::float4(dcoeff * dc.r, dcoeff * dc.g, dcoeff * dc.b, opacity), 0.0f, glossiness,
+					KlayGE::float3(ec.r, ec.g, ec.b), opacity < 1, 0, false);
 			}
 			else
 			{
@@ -790,13 +788,10 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 
 	// Setup texture types and corresponding names in Maya
 	// FIXME: how to handle other types: NormalMap, OpacityMap, etc.
-	std::map<std::string, std::string> texture_type_map;
-	texture_type_map["DiffuseMap"] = "color";
-	texture_type_map["AmbientMap"] = "ambientColor";
-	texture_type_map["SpecularMap"] = "specularColor";
-	texture_type_map["EmitMap"] = "incandescence";
-	texture_type_map["TransparencyMap"] = "transparency";
-	texture_type_map["BumpMap"] = "bumpValue";
+	std::map<MeshMLObj::TextureType, std::string> texture_type_map;
+	texture_type_map.emplace(MeshMLObj::TT_Albedo, "color");
+	texture_type_map.emplace(MeshMLObj::TT_Emissive, "incandescence");
+	texture_type_map.emplace(MeshMLObj::TT_Bump, "bumpValue");
 
 	// Record all texture types that are binded to this material
 	if (has_surface_shader)
@@ -823,8 +818,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 					MString texture_name;
 					plug.getValue(texture_name);
 
-					int slot_id = meshml_obj_.AllocTextureSlot(mtl_id);
-					meshml_obj_.SetTextureSlot(mtl_id, slot_id, tex.first, texture_name.asChar());
+					meshml_obj_.SetTextureSlot(mtl_id, tex.first, texture_name.asChar());
 				}
 				else
 				{
@@ -840,8 +834,8 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 int MayaMeshExporter::AddDefaultMaterial()
 {
 	int mtl_id = meshml_obj_.AllocMaterial();
-	meshml_obj_.SetMaterial(mtl_id, KlayGE::float3(0, 0, 0), KlayGE::float3(0, 0, 0),
-		KlayGE::float3(0.9f, 0.9f, 0.9f), KlayGE::float3(0, 0, 0), 1, 32, false);
+	meshml_obj_.SetMaterial(mtl_id, KlayGE::float4(0, 0, 0, 1), 0, log(32.0f) / log(8192.0f), KlayGE::float3(0, 0, 0),
+		false, 0, false);
 	return mtl_id;
 }
 

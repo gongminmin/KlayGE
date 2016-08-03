@@ -55,9 +55,9 @@ void CalcVPLsLightingShape(float4 pos,
 {
 	oViewDir.w = vpl_x_coord;
 
-	float4 albedo = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 0.5f / 4), 0);
+	float4 albedo_atten = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 0.5f / 4), 0);
   
-	if (albedo.x < 0)
+	if (albedo_atten.x < 0)
 	{
 		oVPLColor = -1;
 		oPos = float4(-1, -1, -1, 0);
@@ -66,20 +66,30 @@ void CalcVPLsLightingShape(float4 pos,
 	}
 	else
 	{
-		float4 normal = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 1.5f / 4), 0);
-		float4 offset = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0);
+		float4 normal_metalness = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 1.5f / 4), 0);
+		float4 offset_shininess = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 2.5f / 4), 0);
 		float4 rotation = vpls_tex.SampleLevel(point_sampler, float2(oViewDir.w, 3.5f / 4), 0);
+		
+		float3 albedo = albedo_atten.xyz;
+		float atten = albedo_atten.w;
+		float3 normal = normal_metalness.xyz;
+		float metalness = normal_metalness.w;
+		float3 offset = offset_shininess.xyz;
+		float shininess = offset_shininess.w;
 
 		float3 rot_pos = mul(transform_quat(pos.xyz, rotation), (float3x3)view);
 
-		float3 light_vec = normalize(light_pos_es.xyz - offset.xyz);
+		float3 c_diff = DiffuseColor(albedo, metalness);
+		float3 c_spec = SpecularColor(albedo, metalness);
+
+		float3 light_vec = normalize(light_pos_es.xyz - offset);
 		float3 view_vec = normalize(rot_pos);
 		float3 halfway = normalize(light_vec + view_vec);
 
-		oVPLColor = albedo.w * light_color.xyz * (albedo.xyz + specular_term(normal.w, light_vec, halfway, normal.xyz, offset.w));
+		oVPLColor = atten * light_color.xyz * (c_diff + specular_term(c_spec, light_vec, halfway, normal, shininess));
 
 		float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
-		oViewDir.xyz = rot_pos * scale + offset.xyz;
+		oViewDir.xyz = rot_pos * scale + offset;
 		oPos = mul(float4(oViewDir.xyz, 1), proj);
 
 		oTc.xy = oPos.xy / oPos.w * 0.5f;

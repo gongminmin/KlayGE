@@ -459,7 +459,8 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 					float4 mrt0 = g_buffer_tex.Load(coord);
 					float3 view_dir = normalize(texcoord_to_view(tc));
 					float3 normal = GetNormal(mrt0);
-					float shininess = GetShininess(mrt0);
+					float glossiness = GetGlossiness(mrt0);
+					float shininess = Glossiness2Shininess(glossiness);
 					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(coord), depth_near_far_invfar.y) / view_dir.z);
 
 					float4 lighting = 0;
@@ -547,7 +548,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 					}
 					else
 					{
-						shading += SkylightShading(shininess, mrt1, normal, -view_dir);
+						shading += SkylightShading(glossiness, mrt1, normal, -view_dir);
 					}
 				}
 				else

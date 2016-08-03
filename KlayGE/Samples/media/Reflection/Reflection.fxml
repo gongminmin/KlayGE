@@ -188,15 +188,18 @@ float4 ReflectSpecialShadingPS(
 	float3 normal = normal_os + bump * 0.01f;
 	float3 normal_es = normalize(mul(normal, (float3x3)model_view));
 
-	float3 specular;
-	if (specular_clr.w > 0.5f)
+	float3 albedo = albedo_clr.rgb;
+	if (albedo_map_enabled)
 	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord).rgb;
+		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
-	else
+	float metalness = metalness_clr.r;
+	if (metalness_clr.y)
 	{
-		specular = specular_clr.rgb;
+		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
 	}
+	
+	float3 specular = SpecularColor(albedo, metalness);
 	
 	float fresnel = fresnel_term_schlick(-normalize(pos_es), normal_es, specular).x;
 	return float4(reflection_tex.Sample(reflection_sampler, tc).xyz, fresnel);

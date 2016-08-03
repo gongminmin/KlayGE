@@ -20,7 +20,7 @@
 		<parameter type="float" name="mip_bias"/>
 		<parameter type="float3" name="albedo"/>
 		<parameter type="float" name="metalness"/>
-		<parameter type="float" name="shininess"/>
+		<parameter type="float" name="glossiness"/>
 	</cbuffer>
 
 	<parameter type="textureCUBE" name="skybox_Ycube_tex"/>
@@ -41,13 +41,13 @@ float3 PrefilteredDiffuseIBL(float3 c_diff, float3 normal)
 	return CalcEnvDiffuse(prefiltered_clr, c_diff);
 }
 
-float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float shininess, float3 normal, float3 view)
+float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)
 {
-	float mip = CalcPrefilteredEnvMip(shininess, diff_spec_mip.y);
+	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
 	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
 		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
-	return CalcEnvSpecular(prefiltered_clr, c_spec, shininess, normal, view);
+	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 
 void PBFittingPrefilteredVS(float4 pos		: POSITION,
@@ -73,7 +73,7 @@ float4 PBFittingPrefilteredPS(float3 normal : TEXCOORD0, float3 incident : TEXCO
 	float3 specular_clr = lerp(0.04f, albedo, metalness);
 
 	return float4(PrefilteredDiffuseIBL(diffuse_clr, normal)
-		+ PBFittingPrefilteredSpecularIBL(specular_clr, shininess, normal, incident), 1);
+		+ PBFittingPrefilteredSpecularIBL(specular_clr, glossiness, normal, incident), 1);
 }
 		]]>
 	</shader>

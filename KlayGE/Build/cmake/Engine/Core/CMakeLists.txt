@@ -133,6 +133,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderEngine.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderLayout.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderMaterial.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderSettings.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/RenderView.hpp

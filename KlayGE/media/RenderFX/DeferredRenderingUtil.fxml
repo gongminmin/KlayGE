@@ -1,27 +1,29 @@
 <?xml version='1.0'?>
 
 <effect>
+	<include name="Lighting.fxml"/>
+
 	<shader>
 		<![CDATA[
-float4 StoreGBufferRT0(float3 normal, float shininess)
+float4 StoreGBufferRT0(float3 normal, float glossiness)
 {
 	float p = sqrt(-normal.z * 8 + 8);
 	float2 enc = normal.xy / p + 0.5f;
 	float2 enc255 = enc * 255;
 	float2 residual = floor(frac(enc255) * 16);
-	return float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, shininess);
+	return float4(float3(floor(enc255), residual.x * 16 + residual.y) / 255, glossiness);
 }
 
-float4 StoreGBufferRT1(float3 diffuse, float3 specular)
+float4 StoreGBufferRT1(float3 albedo, float metalness)
 {
-	return float4(diffuse, dot(specular, float3(0.2126f, 0.7152f, 0.0722f)));
+	return float4(albedo, metalness);
 }
 
-void StoreGBufferMRT(float3 normal, float3 specular, float shininess, float3 diffuse,
+void StoreGBufferMRT(float3 normal, float glossiness, float3 albedo, float metalness,
 			out float4 mrt_0, out float4 mrt_1)
 {
-	mrt_0 = StoreGBufferRT0(normal, shininess);
-	mrt_1 = StoreGBufferRT1(diffuse, specular);
+	mrt_0 = StoreGBufferRT0(normal, glossiness);
+	mrt_1 = StoreGBufferRT1(albedo, metalness);
 }
 
 float3 GetNormal(float4 mrt0)
@@ -37,19 +39,19 @@ float3 GetNormal(float4 mrt0)
 	return normal;
 }
 
-float GetShininess(float4 mrt0)
+float GetGlossiness(float4 mrt0)
 {
-	return pow(8192.0f, mrt0.w);
+	return mrt0.w;
 }
 
 float3 GetDiffuse(float4 mrt1)
 {
-	return mrt1.xyz;
+	return DiffuseColor(mrt1.xyz, mrt1.w);
 }
 
-float GetSpecular(float4 mrt1)
+float3 GetSpecular(float4 mrt1)
 {
-	return mrt1.w;
+	return SpecularColor(mrt1.xyz, mrt1.w);
 }
 
 

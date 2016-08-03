@@ -5,8 +5,7 @@
 	<include name="Quaternion.fxml"/>
 	<include name="util.fxml"/>
 	<include name="Tessellation.fxml"/>
-
-	<macro name="ALPHA_TEST_THRESHOLD" value="0.2"/>
+	<include name="Lighting.fxml"/>
 	
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
@@ -15,8 +14,6 @@
 		<parameter type="float2" name="far_plane"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
-		<parameter type="float2" name="height_offset_scale"/>
-		<parameter type="float4" name="tess_factors"/>
 	</cbuffer>
 
 	<cbuffer name="per_model">
@@ -24,15 +21,17 @@
 		<parameter type="float3" name="pos_extent"/>
 		<parameter type="float2" name="tc_center"/>
 		<parameter type="float2" name="tc_extent"/>
-		<parameter type="float4" name="diffuse_clr"/>
-		<parameter type="float4" name="specular_clr"/>
-		<parameter type="float2" name="shininess_clr"/>
-		<parameter type="float4" name="emit_clr"/>
-		<parameter type="float" name="opacity_clr"/>
+		<parameter type="float4" name="albedo_clr"/>
+		<parameter type="float2" name="metalness_clr"/>
+		<parameter type="float2" name="glossiness_clr"/>
+		<parameter type="float4" name="emissive_clr"/>
+		<parameter type="int" name="albedo_map_enabled"/>
 		<parameter type="int" name="normal_map_enabled"/>
 		<parameter type="int" name="height_map_parallax_enabled"/>
 		<parameter type="int" name="height_map_tess_enabled"/>
-		<parameter type="int" name="opacity_map_enabled"/>
+		<parameter type="float" name="alpha_test_threshold"/>
+		<parameter type="float2" name="height_offset_scale"/>
+		<parameter type="float4" name="tess_factors"/>
 		<parameter type="float4" name="object_id"/>
 	</cbuffer>
 
@@ -41,10 +40,10 @@
 		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="texture2D" name="specular_tex"/>
-	<parameter type="texture2D" name="shininess_tex"/>
-	<parameter type="texture2D" name="emit_tex"/>
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="metalness_tex"/>
+	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="emissive_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="height_tex"/>
 
@@ -225,7 +224,12 @@ float4 DepthPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD
 
 float4 DepthAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
+	}
+	clip(opacity - alpha_test_threshold);
 	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
 }
 
@@ -278,37 +282,24 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 
-	float3 diffuse;
-	if (diffuse_clr.w > 0.5f)
+	float3 albedo = albedo_clr.rgb;
+	if (albedo_map_enabled)
 	{
-		diffuse = diffuse_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
+		albedo *= albedo_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
 	}
-	else
+	float metalness = metalness_clr.r;
+	if (metalness_clr.y > 0.5f)
 	{
-		diffuse = diffuse_clr.rgb;
+		metalness *= metalness_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
 	}
-	
-	float3 specular;
-	if (specular_clr.w > 0.5f)
+
+	float glossiness = glossiness_clr.r;
+	if (glossiness_clr.y > 0.5f)
 	{
-		specular = specular_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
-	}
-	else
-	{
-		specular = specular_clr.rgb;
+		glossiness *= glossiness_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
 	}
 	
-	float shininess;
-	if (shininess_clr.y > 0.5f)
-	{
-		shininess = shininess_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
-	}
-	else
-	{
-		shininess = shininess_clr.r;
-	}
-	
-	StoreGBufferMRT(normal, specular, shininess, diffuse,
+	StoreGBufferMRT(normal, glossiness, albedo, metalness,
 		mrt_0, mrt_1);
 }
 
@@ -323,7 +314,12 @@ void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	clip(diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a - ALPHA_TEST_THRESHOLD);
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
+	}
+	clip(opacity - alpha_test_threshold);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
@@ -482,9 +478,9 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	<technique name="GBufferAlphaBlendBackRT0Tech">
 		<pass name="p0">
 			<state name="depth_func" value="greater"/>
-			
+
 			<state name="cull_mode" value="front"/>
-			
+
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
 			<state name="front_stencil_ref" value="0"/>
@@ -501,7 +497,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	<technique name="GBufferAlphaBlendFrontRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
-			
+
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
@@ -544,7 +540,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 			<state name="depth_func" value="equal"/>
 
 			<state name="cull_mode" value="front"/>
-			
+
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="not_equal"/>
 			<state name="front_stencil_ref" value="128"/>
@@ -601,7 +597,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	<technique name="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="depth_func" value="greater"/>
-			
+
 			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
@@ -620,7 +616,7 @@ float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view
 	<technique name="GBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="depth_func" value="less"/>
-			
+
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
@@ -734,7 +730,12 @@ float4 GenShadowMapPS() : SV_Target
 
 float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
+	}
+	clip(opacity - alpha_test_threshold);
 	return 0;
 }
 
@@ -788,7 +789,12 @@ float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEX
 
 float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);	
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
+	}
+	clip(opacity - alpha_test_threshold);
 	return WriteAFloat(length(view_dir), far_plane.y);
 }
 
@@ -837,17 +843,22 @@ float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : 
 
 float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
-	clip(diffuse_tex.Sample(bilinear_sampler, tc).a - ALPHA_TEST_THRESHOLD);
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
+	}
+	clip(opacity - alpha_test_threshold);
 	return WriteAFloat(depth, far_plane.y);
 }
 		]]>
 	</shader>
 
 	<technique name="GenShadowMapTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			<state name="color_write_mask" value="0"/>
-			
+
 			<state name="vertex_shader" value="GenShadowMapVS()"/>
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>
@@ -866,7 +877,7 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
 		</pass>
 	</technique>
-	
+
 	<technique name="GenShadowMapWODepthTextureTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -910,30 +921,22 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		<![CDATA[
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float3 emit;
-	if (emit_clr.w > 0.5f)
+	float3 emissive = emissive_clr.rgb;
+	if (emissive_clr.w > 0.5f)
 	{
-		emit = emit_tex.Sample(aniso_sampler, texcoord).rgb * 16;
+		emissive *= emissive_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
-	else
-	{
-		emit = emit_clr.rgb;
-	}
-	return float4(max(emit, 0), 1);
+	return float4(max(emissive, 0), 1);
 }
 
 float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 shading = SpecialShadingPS(texcoord);
 	
-	float opacity;
-	if (opacity_map_enabled)
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
 	{
-		opacity = diffuse_tex.Sample(aniso_sampler, texcoord).a;
-	}
-	else
-	{
-		opacity = opacity_clr;
+		opacity *= albedo_tex.Sample(aniso_sampler, texcoord).a;
 	}
 	return float4(shading.xyz, opacity);
 }

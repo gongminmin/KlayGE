@@ -48,12 +48,10 @@ float3 texcoord_to_view(float2 tex)
 
 float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 {
-	float4 albedo_spec = albedo_tex.SampleLevel(point_sampler, rsm_tc, level);
-	float3 albedo = GetDiffuse(albedo_spec);
-	float specular_level = GetSpecular(albedo_spec);
-	float4 normal_shininess = normal_es_tex.SampleLevel(point_sampler, rsm_tc, level);
-	float3 normal_ls = GetNormal(normal_shininess);
-	float shininess = GetShininess(normal_shininess);
+	float4 albedo_metalness = albedo_tex.SampleLevel(point_sampler, rsm_tc, level);
+	float4 normal_glossiness = normal_es_tex.SampleLevel(point_sampler, rsm_tc, level);
+	float3 normal_ls = GetNormal(normal_glossiness);
+	float glossiness = GetGlossiness(normal_glossiness);
 	float3 normal_es = mul(float4(normal_ls, 0), ls_to_es).xyz;
 	float depth_ls = ReadAFloat(depth_tex.Sample(point_sampler, rsm_tc), far_plane.x);
 
@@ -70,7 +68,7 @@ float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 			if (n_dot_l > 0)
 			{
 				float atten = n_dot_l * spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
-				light = float4(albedo * factor, atten);
+				light = float4(albedo_metalness.xyz * factor, atten);
 			}
 		}
 
@@ -78,13 +76,13 @@ float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 	}
 	else if (tc.y < 2 / 4.0f)
 	{
-		return float4(normal_es, specular_level);
+		return float4(normal_es, albedo_metalness.w);
 	}
 	else if (tc.y < 3 / 4.0f)
 	{
 		float4 pos_es = mul(float4(pos_ls, 1), ls_to_es);
 		pos_es /= pos_es.w;
-		return float4(pos_es.xyz, shininess);
+		return float4(pos_es.xyz, Glossiness2Shininess(glossiness));
 	}
 	else
 	{

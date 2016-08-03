@@ -151,7 +151,7 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	mrt_0 = normal_tex.Sample(bilinear_sampler, texcoord_2xy.xy);
-	mrt_1 = diffuse_tex.Sample(bilinear_sampler, texcoord_2xy.xy);
+	mrt_1 = albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy);
 	clip(dot(mrt_1, mrt_1) - 1.0f / 255);
 }
 		]]>

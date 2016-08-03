@@ -5,6 +5,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/LZMACodec.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/Mesh.hpp>
 
@@ -67,6 +68,12 @@ using namespace std::experimental;
 
 namespace
 {
+	struct OfflineRenderMaterial
+	{
+		RenderMaterial material;
+		std::vector<std::pair<std::string, std::string>> texture_slots;
+	};
+
 	// Return path when appended to a_From will resolve to same as a_To
 	filesystem::path make_relative(filesystem::path from_path, filesystem::path to_path)
 	{
@@ -101,7 +108,7 @@ namespace
 	}
 
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 11;
+	uint32_t const MODEL_BIN_VERSION = 12;
 
 	struct KeyFrames
 	{
@@ -155,72 +162,302 @@ namespace
 		}
 	}
 
-	void CompileMaterialsChunk(XMLNodePtr const & materials_chunk, std::vector<RenderMaterial>& mtls)
+	void CompileMaterialsChunk(XMLNodePtr const & materials_chunk, std::vector<OfflineRenderMaterial>& mtls)
 	{
 		uint32_t mtl_index = 0;
 		for (XMLNodePtr mtl_node = materials_chunk->FirstNode("material"); mtl_node; mtl_node = mtl_node->NextSibling("material"), ++ mtl_index)
 		{
-			RenderMaterial mtl;
+			OfflineRenderMaterial offline_mtl;
+			auto& mtl = offline_mtl.material;
 
-			XMLAttributePtr attr = mtl_node->Attrib("ambient");
-			if (attr)
+			mtl.albedo = float4(0, 0, 0, 1);
+			mtl.metalness = 0;
+			mtl.glossiness = Shininess2Glossiness(16);
+			mtl.emissive = float3(0, 0, 0);
+			mtl.transparent = false;
+			mtl.alpha_test = 0;
+			mtl.sss = false;
+
+			mtl.detail_mode = RenderMaterial::SDM_Parallax;
+			mtl.height_offset_scale = float2(-0.5f, 0.06f);
+			mtl.tess_factors = float4(5, 5, 1, 9);
+
+			XMLNodePtr albedo_node = mtl_node->FirstNode("albedo");
+			if (albedo_node)
 			{
-				ExtractFVector<3>(attr->ValueString(), &mtl.ambient[0]);
+				XMLAttributePtr attr = albedo_node->Attrib("color");
+				if (attr)
+				{
+					ExtractFVector<4>(attr->ValueString(), &mtl.albedo[0]);
+				}
+				attr = albedo_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Albedo", attr->ValueString());
+				}
 			}
 			else
 			{
-				mtl.ambient.x() = mtl_node->Attrib("ambient_r")->ValueFloat();
-				mtl.ambient.y() = mtl_node->Attrib("ambient_g")->ValueFloat();
-				mtl.ambient.z() = mtl_node->Attrib("ambient_b")->ValueFloat();
+				XMLAttributePtr attr = mtl_node->Attrib("diffuse");
+				if (attr)
+				{
+					ExtractFVector<3>(attr->ValueString(), &mtl.albedo[0]);
+				}
+				else
+				{
+					attr = mtl_node->Attrib("diffuse_r");
+					if (attr)
+					{
+						mtl.albedo.x() = attr->ValueFloat();
+					}
+					attr = mtl_node->Attrib("diffuse_g");
+					if (attr)
+					{
+						mtl.albedo.y() = attr->ValueFloat();
+					}
+					attr = mtl_node->Attrib("diffuse_b");
+					if (attr)
+					{
+						mtl.albedo.z() = attr->ValueFloat();
+					}
+				}
+
+				attr = mtl_node->Attrib("opacity");
+				if (attr)
+				{
+					mtl.albedo.w() = mtl_node->Attrib("opacity")->ValueFloat();
+				}
 			}
-			attr = mtl_node->Attrib("diffuse");
-			if (attr)
+
+			XMLNodePtr metalness_node = mtl_node->FirstNode("metalness");
+			if (metalness_node)
 			{
-				ExtractFVector<3>(attr->ValueString(), &mtl.diffuse[0]);
+				XMLAttributePtr attr = metalness_node->Attrib("value");
+				if (attr)
+				{
+					mtl.metalness = attr->ValueFloat();
+				}
+				attr = metalness_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Metalness", attr->ValueString());
+				}
+			}
+
+			XMLNodePtr glossiness_node = mtl_node->FirstNode("glossiness");
+			if (glossiness_node)
+			{
+				XMLAttributePtr attr = glossiness_node->Attrib("value");
+				if (attr)
+				{
+					mtl.glossiness = attr->ValueFloat();
+				}
+				attr = metalness_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Glossiness", attr->ValueString());
+				}
 			}
 			else
 			{
-				mtl.diffuse.x() = mtl_node->Attrib("diffuse_r")->ValueFloat();
-				mtl.diffuse.y() = mtl_node->Attrib("diffuse_g")->ValueFloat();
-				mtl.diffuse.z() = mtl_node->Attrib("diffuse_b")->ValueFloat();
+				XMLAttributePtr attr = mtl_node->Attrib("shininess");
+				if (attr)
+				{
+					float shininess = mtl_node->Attrib("shininess")->ValueFloat();
+					shininess = MathLib::clamp(shininess, 1.0f, MAX_SHININESS);
+					mtl.glossiness = Shininess2Glossiness(shininess);
+				}
 			}
-			attr = mtl_node->Attrib("specular");
-			if (attr)
+
+			XMLNodePtr emissive_node = mtl_node->FirstNode("emissive");
+			if (emissive_node)
 			{
-				ExtractFVector<3>(attr->ValueString(), &mtl.specular[0]);
-			}
-			else
-			{
-				mtl.specular.x() = mtl_node->Attrib("specular_r")->ValueFloat();
-				mtl.specular.y() = mtl_node->Attrib("specular_g")->ValueFloat();
-				mtl.specular.z() = mtl_node->Attrib("specular_b")->ValueFloat();
-			}
-			attr = mtl_node->Attrib("emit");
-			if (attr)
-			{
-				ExtractFVector<3>(attr->ValueString(), &mtl.emit[0]);
-			}
-			else
-			{
-				mtl.emit.x() = mtl_node->Attrib("emit_r")->ValueFloat();
-				mtl.emit.y() = mtl_node->Attrib("emit_g")->ValueFloat();
-				mtl.emit.z() = mtl_node->Attrib("emit_b")->ValueFloat();
-			}
-			mtl.opacity = mtl_node->Attrib("opacity")->ValueFloat();
-			attr = mtl_node->Attrib("specular_level");
-			if (attr)
-			{
-				mtl.specular *= attr->ValueFloat();
-			}
-			mtl.shininess = mtl_node->Attrib("shininess")->ValueFloat();
-			attr = mtl_node->Attrib("sss");
-			if (attr)
-			{
-				mtl.sss = attr->ValueInt() ? true : false;
+				XMLAttributePtr attr = emissive_node->Attrib("color");
+				if (attr)
+				{
+					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+				}
+				attr = emissive_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Emissive", attr->ValueString());
+				}
 			}
 			else
 			{
-				mtl.sss = false;
+				XMLAttributePtr attr = mtl_node->Attrib("emit");
+				if (attr)
+				{
+					ExtractFVector<3>(attr->ValueString(), &mtl.emissive[0]);
+				}
+				else
+				{
+					attr = mtl_node->Attrib("emit_r");
+					if (attr)
+					{
+						mtl.emissive.x() = attr->ValueFloat();
+					}
+					attr = mtl_node->Attrib("emit_g");
+					if (attr)
+					{
+						mtl.emissive.y() = attr->ValueFloat();
+					}
+					attr = mtl_node->Attrib("emit_b");
+					if (attr)
+					{
+						mtl.emissive.z() = attr->ValueFloat();
+					}
+				}
+			}
+
+			XMLNodePtr bump_node = mtl_node->FirstNode("bump");
+			if (bump_node)
+			{
+				XMLAttributePtr attr = bump_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Bump", attr->ValueString());
+				}
+			}
+			
+			XMLNodePtr normal_node = mtl_node->FirstNode("normal");
+			if (normal_node)
+			{
+				XMLAttributePtr attr = normal_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Normal", attr->ValueString());
+				}
+			}
+
+			XMLNodePtr height_node = mtl_node->FirstNode("height");
+			if (height_node)
+			{
+				XMLAttributePtr attr = height_node->Attrib("texture");
+				if (attr)
+				{
+					offline_mtl.texture_slots.emplace_back("Height", attr->ValueString());
+				}
+				attr = height_node->Attrib("offset");
+				if (attr)
+				{
+					mtl.height_offset_scale.x() = attr->ValueFloat();
+				}
+
+				attr = height_node->Attrib("scale");
+				if (attr)
+				{
+					mtl.height_offset_scale.y() = attr->ValueFloat();
+				}
+			}
+
+			XMLNodePtr detail_node = mtl_node->FirstNode("detail");
+			if (detail_node)
+			{
+				XMLAttributePtr attr = detail_node->Attrib("mode");
+				if (attr)
+				{
+					std::string const & mode_str = attr->ValueString();
+					size_t const mode_hash = RT_HASH(mode_str.c_str());
+					if (CT_HASH("Flat Tessellation") == mode_hash)
+					{
+						mtl.detail_mode = RenderMaterial::SDM_FlatTessellation;
+					}
+					else if (CT_HASH("Smooth Tessellation") == mode_hash)
+					{
+						mtl.detail_mode = RenderMaterial::SDM_SmoothTessellation;
+					}
+				}
+
+				attr = detail_node->Attrib("height_offset");
+				if (attr)
+				{
+					mtl.height_offset_scale.x() = attr->ValueFloat();
+				}
+
+				attr = detail_node->Attrib("height_scale");
+				if (attr)
+				{
+					mtl.height_offset_scale.y() = attr->ValueFloat();
+				}
+
+				XMLNodePtr tess_node = detail_node->FirstNode("tess");
+				if (tess_node)
+				{
+					attr = tess_node->Attrib("edge_hint");
+					if (attr)
+					{
+						mtl.tess_factors.x() = attr->ValueFloat();
+					}
+					attr = tess_node->Attrib("inside_hint");
+					if (attr)
+					{
+						mtl.tess_factors.y() = attr->ValueFloat();
+					}
+					attr = tess_node->Attrib("min");
+					if (attr)
+					{
+						mtl.tess_factors.z() = attr->ValueFloat();
+					}
+					attr = tess_node->Attrib("max");
+					if (attr)
+					{
+						mtl.tess_factors.w() = attr->ValueFloat();
+					}
+				}
+				else
+				{
+					attr = detail_node->Attrib("edge_tess_hint");
+					if (attr)
+					{
+						mtl.tess_factors.x() = attr->ValueFloat();
+					}
+					attr = detail_node->Attrib("inside_tess_hint");
+					if (attr)
+					{
+						mtl.tess_factors.y() = attr->ValueFloat();
+					}
+					attr = detail_node->Attrib("min_tess");
+					if (attr)
+					{
+						mtl.tess_factors.z() = attr->ValueFloat();
+					}
+					attr = detail_node->Attrib("max_tess");
+					if (attr)
+					{
+						mtl.tess_factors.w() = attr->ValueFloat();
+					}
+				}
+			}
+
+			XMLNodePtr transparent_node = mtl_node->FirstNode("transparent");
+			if (transparent_node)
+			{
+				XMLAttributePtr attr = transparent_node->Attrib("value");
+				if (attr)
+				{
+					mtl.transparent = attr->ValueInt() ? true : false;
+				}
+			}
+
+			XMLNodePtr alpha_test_node = mtl_node->FirstNode("alpha_test");
+			if (alpha_test_node)
+			{
+				XMLAttributePtr attr = alpha_test_node->Attrib("value");
+				if (attr)
+				{
+					mtl.alpha_test = attr->ValueFloat();
+				}
+			}
+
+			XMLNodePtr sss_node = mtl_node->FirstNode("sss");
+			if (sss_node)
+			{
+				XMLAttributePtr attr = sss_node->Attrib("value");
+				if (attr)
+				{
+					mtl.sss = attr->ValueInt() ? true : false;
+				}
 			}
 
 			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
@@ -236,84 +473,12 @@ namespace
 			{
 				for (; tex_node; tex_node = tex_node->NextSibling("texture"))
 				{
-					mtl.texture_slots.emplace_back(tex_node->Attrib("type")->ValueString(),
+					offline_mtl.texture_slots.emplace_back(tex_node->Attrib("type")->ValueString(),
 						tex_node->Attrib("name")->ValueString());
 				}
 			}
 
-			XMLNodePtr detail_node = mtl_node->FirstNode("detail");
-			if (detail_node)
-			{
-				attr = detail_node->Attrib("mode");
-				if (attr)
-				{
-					std::string const & mode_str = attr->ValueString();
-					size_t const mode_hash = RT_HASH(mode_str.c_str());
-					if (CT_HASH("Flat Tessellation") == mode_hash)
-					{
-						mtl.detail_mode = RenderMaterial::SDM_FlatTessellation;
-					}
-					else if (CT_HASH("Smooth Tessellation") == mode_hash)
-					{
-						mtl.detail_mode = RenderMaterial::SDM_SmoothTessellation;
-					}
-					else
-					{
-						mtl.detail_mode = RenderMaterial::SDM_Parallax;
-					}
-				}
-				else
-				{
-					mtl.detail_mode = RenderMaterial::SDM_Parallax;
-				}
-
-				mtl.height_offset_scale = float2(-0.5f, 0.06f);
-
-				attr = detail_node->Attrib("height_offset");
-				if (attr)
-				{
-					mtl.height_offset_scale.x() = attr->ValueFloat();
-				}
-				else
-				{
-					mtl.height_offset_scale.x() = -0.5f;
-				}
-
-				attr = detail_node->Attrib("height_scale");
-				if (attr)
-				{
-					mtl.height_offset_scale.y() = attr->ValueFloat();
-				}
-				else
-				{
-					mtl.height_offset_scale.y() = 0.06f;
-				}
-
-				mtl.tess_factors = float4(5, 5, 1, 9);
-
-				attr = detail_node->Attrib("edge_tess_hint");
-				if (attr)
-				{
-					mtl.tess_factors.x() = attr->ValueFloat();
-				}
-				attr = detail_node->Attrib("inside_tess_hint");
-				if (attr)
-				{
-					mtl.tess_factors.y() = attr->ValueFloat();
-				}
-				attr = detail_node->Attrib("min_tess");
-				if (attr)
-				{
-					mtl.tess_factors.z() = attr->ValueFloat();
-				}
-				attr = detail_node->Attrib("max_tess");
-				if (attr)
-				{
-					mtl.tess_factors.w() = attr->ValueFloat();
-				}
-			}
-
-			mtls.push_back(mtl);
+			mtls.push_back(offline_mtl);
 		}
 	}
 
@@ -1547,78 +1712,67 @@ namespace
 		}
 	}
 
-	void WriteMaterialsChunk(std::vector<RenderMaterial> const & mtls, std::ostream& os)
+	void WriteMaterialsChunk(std::vector<OfflineRenderMaterial> const & mtls, std::ostream& os)
 	{
 		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
-			RenderMaterial mtl = mtls[i];
+			auto& offline_mtl = mtls[i];
+			auto& mtl = offline_mtl.material;
 
-			uint8_t rgb[3];
+			for (uint32_t j = 0; j < 4; ++ j)
+			{
+				float const value = Native2LE(mtl.albedo[j]);
+				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
+			}
+
+			float metalness = Native2LE(mtl.metalness);
+			os.write(reinterpret_cast<char*>(&metalness), sizeof(metalness));
+
+			float glossiness = Native2LE(mtl.glossiness);
+			os.write(reinterpret_cast<char*>(&glossiness), sizeof(glossiness));
 
 			for (uint32_t j = 0; j < 3; ++ j)
 			{
-				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.ambient[j] * 255.0f + 0.5f), 0, 255));
+				float const value = Native2LE(mtl.emissive[j]);
+				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
 			}
-			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
 
-			for (uint32_t j = 0; j < 3; ++ j)
-			{
-				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.diffuse[j] * 255.0f + 0.5f), 0, 255));
-			}
-			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
+			uint8_t transparent = mtl.transparent;
+			os.write(reinterpret_cast<char*>(&transparent), sizeof(transparent));
 
-			float specular_level = std::max(std::max(mtl.specular.x(), mtl.specular.y()), mtl.specular.z());
-			for (uint32_t j = 0; j < 3; ++ j)
-			{
-				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.specular[j] / specular_level * 255.0f + 0.5f), 0, 255));
-			}
-			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
-			specular_level = Native2LE(specular_level);
-			os.write(reinterpret_cast<char*>(&specular_level), sizeof(specular_level));
-
-			for (uint32_t j = 0; j < 3; ++ j)
-			{
-				rgb[j] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.emit[j] * 255.0f + 0.5f), 0, 255));
-			}
-			os.write(reinterpret_cast<char*>(rgb), sizeof(rgb));
-			
-			mtl.opacity = Native2LE(mtl.opacity);
-			os.write(reinterpret_cast<char*>(&mtl.opacity), sizeof(mtl.opacity));
-
-			mtl.shininess = Native2LE(mtl.shininess);
-			os.write(reinterpret_cast<char*>(&mtl.shininess), sizeof(mtl.shininess));
+			uint8_t alpha_test = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.alpha_test * 255.0f + 0.5f), 0, 255));
+			os.write(reinterpret_cast<char*>(&alpha_test), sizeof(alpha_test));
 
 			uint8_t sss = mtl.sss;
 			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
 
-			uint32_t num_texs = Native2LE(static_cast<uint32_t>(mtl.texture_slots.size()));
-			os.write(reinterpret_cast<char*>(&num_texs), sizeof(num_texs));
-
-			if (!mtl.texture_slots.empty())
+			WriteShortString(os, mtl.albedo_tex_name);
+			WriteShortString(os, mtl.metalness_tex_name);
+			WriteShortString(os, mtl.glossiness_tex_name);
+			WriteShortString(os, mtl.emissive_tex_name);
+			WriteShortString(os, mtl.normal_tex_name);
+			WriteShortString(os, mtl.height_tex_name);
+			if (!mtl.height_tex_name.empty())
 			{
-				for (size_t j = 0; j < mtl.texture_slots.size(); ++ j)
-				{
-					WriteShortString(os, mtl.texture_slots[j].first);
-					WriteShortString(os, mtl.texture_slots[j].second);
-				}
+				float height_offset = Native2LE(mtl.height_offset_scale.x());
+				os.write(reinterpret_cast<char*>(&height_offset), sizeof(height_offset));
+				float height_scale = Native2LE(mtl.height_offset_scale.y());
+				os.write(reinterpret_cast<char*>(&height_scale), sizeof(height_scale));
 			}
 
 			uint8_t detail_mode = static_cast<uint8_t>(mtl.detail_mode);
 			os.write(reinterpret_cast<char*>(&detail_mode), sizeof(detail_mode));
-
-			float height_offset = Native2LE(mtl.height_offset_scale.x());
-			os.write(reinterpret_cast<char*>(&height_offset), sizeof(height_offset));
-			float height_scale = Native2LE(mtl.height_offset_scale.y());
-			os.write(reinterpret_cast<char*>(&height_scale), sizeof(height_scale));
-
-			float tess_factor = Native2LE(mtl.tess_factors.x());
-			os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-			tess_factor = Native2LE(mtl.tess_factors.y());
-			os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-			tess_factor = Native2LE(mtl.tess_factors.z());
-			os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
-			tess_factor = Native2LE(mtl.tess_factors.w());
-			os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+			if (mtl.detail_mode != RenderMaterial::SDM_Parallax)
+			{
+				float tess_factor = Native2LE(mtl.tess_factors.x());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.y());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.z());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.w());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+			}
 		}
 	}
 
@@ -1789,7 +1943,7 @@ namespace
 		}
 	}
 
-	void ConvertTextures(std::string const & output_name, std::vector<RenderMaterial>& mtls, std::string const & platform)
+	void ConvertTextures(std::string const & output_name, std::vector<OfflineRenderMaterial>& mtls, std::string const & platform)
 	{
 		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> all_texture_slots;
 		for (size_t i = 0; i < mtls.size(); ++ i)
@@ -1873,29 +2027,34 @@ namespace
 			std::string deploy_type;
 			size_t const type_hash = RT_HASH(df.second.c_str());
 			if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
-				|| (CT_HASH("Diffuse Color Map") == type_hash))
+				|| (CT_HASH("Diffuse Color Map") == type_hash)
+				|| (CT_HASH("Albedo") == type_hash))
 			{
-				deploy_type = "diffuse";
+				deploy_type = "albedo";
 			}
-			else if ((CT_HASH("Specular Level") == type_hash) || (CT_HASH("Specular Color") == type_hash))
+			else if (CT_HASH("Metalness") == type_hash)
 			{
-				deploy_type = "specular";
+				deploy_type = "metalness";
 			}
 			else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 			{
-				deploy_type = "shininess";
+				deploy_type = "glossiness";
+			}
+			else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
+			{
+				deploy_type = "emissive";
 			}
 			else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash))
 			{
 				deploy_type = "bump";
 			}
+			else if ((CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
+			{
+				deploy_type = "normal";
+			}
 			else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 			{
 				deploy_type = "height";
-			}
-			else if (CT_HASH("Self-Illumination") == type_hash)
-			{
-				deploy_type = "emit";
 			}
 			else
 			{
@@ -1932,13 +2091,48 @@ namespace
 		BOOST_ASSERT(root->Attrib("version") && (root->Attrib("version")->ValueInt() >= 1));
 
 		XMLNodePtr materials_chunk = root->FirstNode("materials_chunk");
-		std::vector<RenderMaterial> mtls;
+		std::vector<OfflineRenderMaterial> mtls;
 		if (materials_chunk)
 		{
 			CompileMaterialsChunk(materials_chunk, mtls);
 			if (!platform.empty())
 			{
 				ConvertTextures(output_name, mtls, platform);
+			}
+
+			for (size_t i = 0; i < mtls.size(); ++ i)
+			{
+				for (size_t j = 0; j < mtls[i].texture_slots.size(); ++ j)
+				{
+					size_t const type_hash = RT_HASH(mtls[i].texture_slots[j].first.c_str());
+					if ((CT_HASH("Color") == type_hash) || (CT_HASH("Diffuse Color") == type_hash)
+						|| (CT_HASH("Diffuse Color Map") == type_hash)
+						|| (CT_HASH("Albedo") == type_hash))
+					{
+						mtls[i].material.albedo_tex_name = mtls[i].texture_slots[j].second;
+					}
+					else if (CT_HASH("Metalness") == type_hash)
+					{
+						mtls[i].material.metalness_tex_name = mtls[i].texture_slots[j].second;
+					}
+					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
+					{
+						mtls[i].material.glossiness_tex_name = mtls[i].texture_slots[j].second;
+					}
+					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
+					{
+						mtls[i].material.emissive_tex_name = mtls[i].texture_slots[j].second;
+					}
+					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
+						|| (CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
+					{
+						mtls[i].material.normal_tex_name = mtls[i].texture_slots[j].second;
+					}
+					else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
+					{
+						mtls[i].material.height_tex_name = mtls[i].texture_slots[j].second;
+					}
+				}
 			}
 		}
 		{

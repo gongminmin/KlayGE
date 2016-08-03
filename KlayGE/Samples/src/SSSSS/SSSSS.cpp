@@ -196,7 +196,7 @@ void SSSSSApp::SSSStrengthChangedHandler(KlayGE::UISlider const & sender)
 	deferred_rendering_->SSSStrength(strength);
 
 	std::wostringstream stream;
-	stream << L"SSS strength: " << strength;
+	stream << L"SSS Strength: " << strength;
 	dialog_params_->Control<UIStatic>(id_sss_strength_static_)->SetText(stream.str());
 }
 
@@ -221,7 +221,7 @@ void SSSSSApp::TranslucencyStrengthChangedHandler(KlayGE::UISlider const & sende
 	deferred_rendering_->TranslucencyStrength(strength);
 
 	std::wostringstream stream;
-	stream << L"Translucency strength: " << strength;
+	stream << L"Translucency Strength: " << strength;
 	dialog_params_->Control<UIStatic>(id_translucency_strength_static_)->SetText(stream.str());
 }
 

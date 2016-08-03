@@ -37,6 +37,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
@@ -552,8 +553,8 @@ namespace KlayGE
 	}
 
 
-	RenderDecal::RenderDecal(TexturePtr const & normal_tex, TexturePtr const & diffuse_tex, float3 const & diffuse_clr,
-			TexturePtr const & specular_tex, float3 const & specular_level, float shininess)
+	RenderDecal::RenderDecal(TexturePtr const & normal_tex, TexturePtr const & albedo_tex,
+			float3 const & albedo_clr, float metalness, float glossiness)
 		: RenderableHelper(L"Decal")
 	{
 		this->BindDeferredEffect(SyncLoadRenderEffect("Decal.fxml"));
@@ -599,11 +600,10 @@ namespace KlayGE
 		g_buffer_rt0_tex_param_ = effect_->ParameterByName("g_buffer_rt0_tex");
 
 		normal_tex_ = normal_tex;
-		diffuse_tex_ = diffuse_tex;
-		diffuse_clr_ = diffuse_clr;
-		specular_tex_ = specular_tex;
-		specular_level_ = specular_level.x();
-		shininess_ = shininess;
+		albedo_tex_ = albedo_tex;
+		albedo_clr_ = albedo_clr;
+		metalness_ = metalness;
+		glossiness_ = glossiness;
 	}
 
 	void RenderDecal::OnRenderBegin()
@@ -627,10 +627,10 @@ namespace KlayGE
 		case PT_OpaqueGBufferMRT:
 		case PT_TransparencyBackGBufferMRT:
 		case PT_TransparencyFrontGBufferMRT:
-			*diffuse_clr_param_ = float4(diffuse_clr_.x(), diffuse_clr_.y(), diffuse_clr_.z(), static_cast<float>(!!diffuse_tex_));
-			*specular_clr_param_ = float4(specular_level_, specular_level_, specular_level_, static_cast<float>(!!specular_tex_));
-			*shininess_clr_param_ = float2(MathLib::clamp(static_cast<float>(log(shininess_) * INV_LOG_8192), 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
-			*shininess_tex_param_ = shininess_tex_;
+			*albedo_clr_param_ = float4(albedo_clr_.x(), albedo_clr_.y(), albedo_clr_.z(), 1);
+			*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+			*metalness_clr_param_ = float2(metalness_, static_cast<float>(!!metalness_tex_));
+			*glossiness_clr_param_ = float2(MathLib::clamp(glossiness_, 1e-6f, 0.999f), static_cast<float>(!!glossiness_tex_));
 			*inv_mv_ep_ = view_to_decal;
 			*opaque_depth_tex_param_ = drl->DepthTex(drl->ActiveViewport());
 			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());

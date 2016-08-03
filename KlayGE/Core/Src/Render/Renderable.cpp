@@ -26,6 +26,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <KlayGE/Renderable.hpp>
@@ -40,7 +41,6 @@ namespace KlayGE
 		if (drl)
 		{
 			this->BindDeferredEffect(drl->GBufferEffect());
-			opacity_map_enabled_ = false;
 		}
 	}
 
@@ -100,8 +100,10 @@ namespace KlayGE
 			case PT_OpaqueDepth:
 			case PT_TransparencyBackDepth:
 			case PT_TransparencyFrontDepth:
-				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
@@ -115,8 +117,12 @@ namespace KlayGE
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
 			case PT_GenReflectiveShadowMap:
-				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!metalness_tex_));
+				*metalness_tex_param_ = metalness_tex_;
+				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
 				*normal_tex_param_ = normal_tex_;
 				if (!mtl_ || (RenderMaterial::SDM_Parallax == mtl_->detail_mode))
@@ -128,50 +134,58 @@ namespace KlayGE
 					*height_map_tess_enabled_param_ = static_cast<int32_t>(!!height_tex_);
 				}
 				*height_tex_param_ = height_tex_;
-				*specular_tex_param_ = specular_tex_;
-				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
-				*shininess_clr_param_ = float2(MathLib::clamp(static_cast<float>(mtl_ ? log(mtl_->shininess) * INV_LOG_8192 : 0), 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
-				*shininess_tex_param_ = shininess_tex_;
-				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
+				*glossiness_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
+					static_cast<float>(!!glossiness_tex_));
+				*glossiness_tex_param_ = glossiness_tex_;
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_GenShadowMap:
 			case PT_GenCascadedShadowMap:
 			case PT_GenShadowMapWODepthTexture:
-				*diffuse_tex_param_ = diffuse_tex_;
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				break;
 
 			case PT_OpaqueShading:
 			case PT_TransparencyBackShading:
 			case PT_TransparencyFrontShading:
-				*shininess_clr_param_ = float2(MathLib::clamp(static_cast<float>(mtl_ ? log(mtl_->shininess) * INV_LOG_8192 : 0), 1e-6f, 0.999f), static_cast<float>(!!shininess_tex_));
-				*shininess_tex_param_ = shininess_tex_;
-				*diffuse_tex_param_ = diffuse_tex_;
-				*diffuse_clr_param_ = float4(mtl_ ? mtl_->diffuse.x() : 0, mtl_ ? mtl_->diffuse.y() : 0, mtl_ ? mtl_->diffuse.z() : 0, static_cast<float>(!!diffuse_tex_));
-				*specular_tex_param_ = specular_tex_;
-				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
-				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
-				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1.0f;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
+				*glossiness_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
+					static_cast<float>(!!glossiness_tex_));
+				*glossiness_tex_param_ = glossiness_tex_;
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!metalness_tex_));
+				*metalness_tex_param_ = metalness_tex_;
+				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
+				*emissive_tex_param_ = emissive_tex_;
+				*emissive_clr_param_ = float4(
+					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
+					static_cast<float>(!!emissive_tex_));
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*specular_tex_param_ = specular_tex_;
-				*specular_clr_param_ = float4(mtl_ ? mtl_->specular.x() : 0, mtl_ ? mtl_->specular.y() : 0, mtl_ ? mtl_->specular.z() : 0, static_cast<float>(!!specular_tex_));
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
 				break;
 
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*diffuse_tex_param_ = diffuse_tex_;
-				*emit_tex_param_ = emit_tex_;
-				*emit_clr_param_ = float4(mtl_ ? mtl_->emit.x() : 0, mtl_ ? mtl_->emit.y() : 0, mtl_ ? mtl_->emit.z() : 0, static_cast<float>(!!emit_tex_));
-				*opacity_clr_param_ = mtl_ ? mtl_->opacity : 1;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(opacity_map_enabled_);
+				*albedo_tex_param_ = albedo_tex_;
+				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
+				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
+				*emissive_tex_param_ = emissive_tex_;
+				*emissive_clr_param_ = float4(
+					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
+					static_cast<float>(!!emissive_tex_));
 				if (reflection_tex_param_)
 				{
 					*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
@@ -304,17 +318,21 @@ namespace KlayGE
 	bool Renderable::AllHWResourceReady() const
 	{
 		bool ready = this->HWResourceReady();
-		if (ready && diffuse_tex_)
+		if (ready && albedo_tex_)
 		{
-			ready = diffuse_tex_->HWResourceReady();
+			ready = albedo_tex_->HWResourceReady();
 		}
-		if (ready && specular_tex_)
+		if (ready && metalness_tex_)
 		{
-			ready = specular_tex_->HWResourceReady();
+			ready = metalness_tex_->HWResourceReady();
 		}
-		if (ready && shininess_tex_)
+		if (ready && glossiness_tex_)
 		{
-			ready = shininess_tex_->HWResourceReady();
+			ready = glossiness_tex_->HWResourceReady();
+		}
+		if (ready && emissive_tex_)
+		{
+			ready = emissive_tex_->HWResourceReady();
 		}
 		if (ready && normal_tex_)
 		{
@@ -323,10 +341,6 @@ namespace KlayGE
 		if (ready && height_tex_)
 		{
 			ready = height_tex_->HWResourceReady();
-		}
-		if (ready && emit_tex_)
-		{
-			ready = emit_tex_->HWResourceReady();
 		}
 		return ready;
 	}
@@ -370,23 +384,23 @@ namespace KlayGE
 		pos_extent_param_ = deferred_effect_->ParameterByName("pos_extent");
 		tc_center_param_ = deferred_effect_->ParameterByName("tc_center");
 		tc_extent_param_ = deferred_effect_->ParameterByName("tc_extent");
-		shininess_clr_param_ = deferred_effect_->ParameterByName("shininess_clr");
-		shininess_tex_param_ = deferred_effect_->ParameterByName("shininess_tex");
+		albedo_map_enabled_param_ = deferred_effect_->ParameterByName("albedo_map_enabled");
+		albedo_tex_param_ = deferred_effect_->ParameterByName("albedo_tex");
+		albedo_clr_param_ = deferred_effect_->ParameterByName("albedo_clr");
+		metalness_clr_param_ = deferred_effect_->ParameterByName("metalness_clr");
+		metalness_tex_param_ = deferred_effect_->ParameterByName("metalness_tex");
+		glossiness_clr_param_ = deferred_effect_->ParameterByName("glossiness_clr");
+		glossiness_tex_param_ = deferred_effect_->ParameterByName("glossiness_tex");
+		emissive_tex_param_ = deferred_effect_->ParameterByName("emissive_tex");
+		emissive_clr_param_ = deferred_effect_->ParameterByName("emissive_clr");
 		normal_map_enabled_param_ = deferred_effect_->ParameterByName("normal_map_enabled");
 		normal_tex_param_ = deferred_effect_->ParameterByName("normal_tex");
 		height_map_parallax_enabled_param_ = deferred_effect_->ParameterByName("height_map_parallax_enabled");
 		height_map_tess_enabled_param_ = deferred_effect_->ParameterByName("height_map_tess_enabled");
 		height_tex_param_ = deferred_effect_->ParameterByName("height_tex");
-		diffuse_tex_param_ = deferred_effect_->ParameterByName("diffuse_tex");
-		diffuse_clr_param_ = deferred_effect_->ParameterByName("diffuse_clr");
-		specular_tex_param_ = deferred_effect_->ParameterByName("specular_tex");
-		specular_clr_param_ = deferred_effect_->ParameterByName("specular_clr");
-		emit_tex_param_ = deferred_effect_->ParameterByName("emit_tex");
-		emit_clr_param_ = deferred_effect_->ParameterByName("emit_clr");
-		opacity_clr_param_ = deferred_effect_->ParameterByName("opacity_clr");
-		opacity_map_enabled_param_ = deferred_effect_->ParameterByName("opacity_map_enabled");
 		opaque_depth_tex_param_ = deferred_effect_->ParameterByName("opaque_depth_tex");
 		reflection_tex_param_ = nullptr;
+		alpha_test_threshold_param_ = deferred_effect_->ParameterByName("alpha_test_threshold");
 		select_mode_object_id_param_ = deferred_effect_->ParameterByName("object_id");
 	}
 

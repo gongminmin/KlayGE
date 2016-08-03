@@ -168,7 +168,7 @@ void DeferredRenderingApp::OnCreate()
 
 	spot_light_[2] = MakeSharedPtr<SpotLightSource>();
 	spot_light_[2]->Attrib(LightSource::LSA_IndirectLighting);
-	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f) * 2.0f);
+	spot_light_[2]->Color(float3(6.0f, 5.88f, 4.38f) * 10.0f);
 	spot_light_[2]->Position(float3(0.0f, 43.2f, -5.9f));
 	spot_light_[2]->Direction(float3(0.0f, -1, 0.1f));
 	spot_light_[2]->Falloff(float3(1, 0.1f, 0));

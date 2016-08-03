@@ -53,13 +53,13 @@
                                     <RibbonGalleryItem Content="Vertex Texcoord" DataContext="7"/>
                                     <RibbonGalleryItem Content="Vertex Tangent" DataContext="8"/>
                                     <RibbonGalleryItem Content="Vertex Binormal" DataContext="9"/>
-                                    <RibbonGalleryItem Content="Texture Diffuse" DataContext="10"/>
-                                    <RibbonGalleryItem Content="Texture Specular" DataContext="11"/>
-                                    <RibbonGalleryItem Content="Texture Shininess" DataContext="12"/>
-                                    <RibbonGalleryItem Content="Texture Normal" DataContext="13"/>
-                                    <RibbonGalleryItem Content="Texture Height" DataContext="14"/>
-                                    <RibbonGalleryItem Content="Texture Emit" DataContext="15"/>
-                                    <RibbonGalleryItem Content="Texture Opacity" DataContext="16"/>
+                                    <RibbonGalleryItem Content="Texture Albedo" DataContext="10"/>
+                                    <RibbonGalleryItem Content="Texture Metalness" DataContext="11"/>
+                                    <RibbonGalleryItem Content="Texture Glossiness" DataContext="12"/>
+                                    <RibbonGalleryItem Content="Texture Emissive" DataContext="13"/>
+                                    <RibbonGalleryItem Content="Texture Opacity" DataContext="14"/>
+                                    <RibbonGalleryItem Content="Texture Normal" DataContext="15"/>
+                                    <RibbonGalleryItem Content="Texture Height" DataContext="16"/>
                                 </RibbonGalleryCategory>
                             </RibbonGallery>
                         </RibbonComboBox>

@@ -167,7 +167,7 @@ void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_pat
 	float3 normal, color;
 	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
 
-	StoreGBufferMRT(normal, 0, 0, color,
+	StoreGBufferMRT(normal, 0, color, 0,
 		mrt_0, mrt_1);
 }
 		]]>

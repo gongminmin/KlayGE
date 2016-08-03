@@ -5,7 +5,7 @@
 
 	<cbuffer name="per_frame">
 		<parameter type="int" name="face"/>
-		<parameter type="float" name="roughness"/>
+		<parameter type="float" name="shininess"/>
 	</cbuffer>
 
 	<parameter type="textureCUBE" name="skybox_cube_tex"/>
@@ -98,19 +98,19 @@ float3 ImportanceSampleLambert(float2 xi, float3 normal)
 	return tangent * h.x + binormal * h.y + normal * h.z;
 }
 
-float3 ImportanceSampleBP(float2 xi, float roughness)
+float3 ImportanceSampleBP(float2 xi, float shininess)
 {
 	const float PI = 3.1415926f;
 
 	float phi = 2 * PI * xi.x;
-	float cos_theta = pow(1 - xi.y * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
+	float cos_theta = pow(1 - xi.y * (shininess + 1) / (shininess + 2), 1 / (shininess + 1));
 	float sin_theta = sqrt(1 - cos_theta * cos_theta);
 	return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 }
 
-float3 ImportanceSampleBP(float2 xi, float roughness, float3 normal)
+float3 ImportanceSampleBP(float2 xi, float shininess, float3 normal)
 {
-	float3 h = ImportanceSampleBP(xi, roughness);
+	float3 h = ImportanceSampleBP(xi, shininess);
 	
 	float3 up_vec = abs(normal.z) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
 	float3 tangent = normalize(cross(up_vec, normal));
@@ -148,7 +148,7 @@ float4 PrefilterCubeSpecularPS(float2 tex : TEXCOORD0) : SV_Target
 	for (uint i = 0; i < NUM_SAMPLES; ++ i)
 	{
 		float2 xi = Hammersley2D(i, NUM_SAMPLES);
-		float3 h = ImportanceSampleBP(xi, roughness, normal);
+		float3 h = ImportanceSampleBP(xi, shininess, normal);
 		float3 l = -reflect(view, h);
 		float n_dot_l = saturate(dot(normal, l));
 		if (n_dot_l > 0)

@@ -240,13 +240,14 @@ float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 normal = GetNormal(ndc);
-	float shininess = GetShininess(ndc);
+	float glossiness = GetGlossiness(ndc);
+	float shininess = Glossiness2Shininess(glossiness);
 
 	float4 lighting = CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 	
 	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
 	float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
-	shading += SkylightShading(shininess, mrt1, normal, -view_dir);
+	shading += SkylightShading(glossiness, mrt1, normal, -view_dir);
 	return shading;
 }
 
@@ -259,7 +260,7 @@ float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float2 tc_ddx = 0;
 	float2 tc_ddy = 0;
 #endif
-	
+
 	float4 shading = 0;
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
@@ -271,7 +272,9 @@ float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	{
 		view_dir = normalize(view_dir);
 
-		float spec = roughness_term(normalize(dir - view_dir), normal, GetShininess(ndc)).x;
+		float shininess = Glossiness2Shininess(GetGlossiness(ndc))
+
+		float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
@@ -279,7 +282,6 @@ float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 		}
 		float4 lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
 
-		float shininess = GetShininess(ndc);
 		float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
 		shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), -view_dir, normal), 1);
 	}
@@ -295,7 +297,7 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 	float3 normal = GetNormal(ndc);
-	float shininess = GetShininess(ndc);
+	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 	
 	int num_lights = int(lights_attrib[0].w);
 
@@ -411,7 +413,7 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
+		float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 
 #if INTEGER_SUPPORT
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -496,7 +498,7 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
+		float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 
 #if INTEGER_SUPPORT
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -581,7 +583,7 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
+		float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 
 #if INTEGER_SUPPORT
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -667,7 +669,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
 		float3 normal = GetNormal(ndc);
-		float shininess = GetShininess(ndc);
+		float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 
 #if INTEGER_SUPPORT
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);

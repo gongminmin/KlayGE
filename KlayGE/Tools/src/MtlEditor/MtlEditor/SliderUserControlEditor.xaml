@@ -6,7 +6,7 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="32"/>
         </Grid.ColumnDefinitions>
-        <Slider Name="_sl" Minimum="0" Maximum="1" ValueChanged="SliderValueChanged" Grid.Column="0"/>
-        <TextBox Name="_tb" Text="{Binding Value}" TextChanged="TextBoxTextChanged" Grid.Column="1"/>
+        <Slider Name="sl" Minimum="0" Maximum="1" ValueChanged="SliderValueChanged" Grid.Column="0"/>
+        <TextBox Name="tb" Text="{Binding Value}" TextChanged="TextBoxTextChanged" Grid.Column="1"/>
     </Grid>
 </UserControl>

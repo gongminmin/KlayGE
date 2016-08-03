@@ -1,6 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
+	<macro name="MAX_SHININESS" value="8192.0f"/>
+
 	<shader>
 		<![CDATA[
 float directional_lighting(float3 light_dir, float3 normal)
@@ -30,29 +32,29 @@ float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
 	return c_spec > 0 ? c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n) : 0;
 }
 
-float specular_normalize_factor(float roughness)
+float specular_normalize_factor(float shininess)
 {
-	return (roughness + 2) / 8;
+	return (shininess + 2) / 8;
 }
 
-float3 roughness_term(float3 halfway_vec, float3 normal, float roughness)
+float3 roughness_term(float3 halfway_vec, float3 normal, float shininess)
 {
-	return exp((roughness + 0.775f) * (max(dot(halfway_vec, normal), 0.0f) - 1));
+	return exp((shininess + 0.775f) * (max(dot(halfway_vec, normal), 0.0f) - 1));
 }
 
-float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
+float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float shininess)
 {
-	return roughness_term(halfway_vec, normal, roughness) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
+	return roughness_term(halfway_vec, normal, shininess) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
 }
 
-float3 specular_term(float3 halfway_vec, float3 normal, float roughness)
+float3 specular_term(float3 halfway_vec, float3 normal, float shininess)
 {
-	return specular_normalize_factor(roughness) * roughness_term(halfway_vec, normal, roughness);
+	return specular_normalize_factor(shininess) * roughness_term(halfway_vec, normal, shininess);
 }
 
-float3 specular_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float roughness)
+float3 specular_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float shininess)
 {
-	return specular_normalize_factor(roughness) * roughness_term(c_spec, light_vec, halfway_vec, normal, roughness);
+	return specular_normalize_factor(shininess) * roughness_term(c_spec, light_vec, halfway_vec, normal, shininess);
 }
 
 
@@ -62,9 +64,9 @@ float3 calc_brdf(float3 c_diff, float3 l, float3 n)
 	return max(c_diff * dot(n, l), 0);
 }
 // diffuse + specular
-float3 calc_brdf(float3 c_diff, float3 c_spec, float roughness, float3 l, float3 h, float3 n)
+float3 calc_brdf(float3 c_diff, float3 c_spec, float shininess, float3 l, float3 h, float3 n)
 {
-	return max((c_diff + specular_term(c_spec, l, h, n, roughness)) * dot(n, l), 0);
+	return max((c_diff + specular_term(c_spec, l, h, n, shininess)) * dot(n, l), 0);
 }
 
 
@@ -97,9 +99,9 @@ float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular
 
 // Environment BRDF
 
-float CalcPrefilteredEnvMip(float roughness, int num_mip)
+float CalcPrefilteredEnvMip(float glossiness, int num_mip)
 {
-	return num_mip - roughness * num_mip;
+	return num_mip - glossiness * num_mip;
 }
 
 float3 CalcPrefilteredEnvVec(float3 normal, float3 view)
@@ -112,19 +114,19 @@ float3 CalcEnvDiffuse(float3 prefiltered_env, float3 c_diff)
 	return prefiltered_env * c_diff;
 }
 
-float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float roughness, float3 normal, float3 view)
+float3 CalcEnvSpecular(float3 prefiltered_env, float3 c_spec, float glossiness, float3 normal, float3 view)
 {
 	float n_dot_v = saturate(dot(normal, view));
-	roughness = max(0.5f / 16, roughness);
+	glossiness = max(0.5f / 16, glossiness);
 	float2 env_brdf;
-	float4 tmp = ((float4(-4.996914762f, 7.253111161f, -1.963867075f, -0.170416225f) * roughness
-		+ float4(8.993475061f, -15.42473953f, 4.712593001f, 0.448102365f)) * roughness
-		+ float4(-4.928234727f, 10.95286522f, -3.852980973f, -0.389332014f)) * roughness
+	float4 tmp = ((float4(-4.996914762f, 7.253111161f, -1.963867075f, -0.170416225f) * glossiness
+		+ float4(8.993475061f, -15.42473953f, 4.712593001f, 0.448102365f)) * glossiness
+		+ float4(-4.928234727f, 10.95286522f, -3.852980973f, -0.389332014f)) * glossiness
 		+ float4(0.846124834f, -1.596815751f, 1.005729748f, 0.113484128f);
 	env_brdf.x = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
-	tmp = ((float4(-0.684077741f, 1.316163916f, -0.70869252f, 0.073264505f) * roughness
-		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * roughness
-		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * roughness
+	tmp = ((float4(-0.684077741f, 1.316163916f, -0.70869252f, 0.073264505f) * glossiness
+		+ float4(0.719315865f, -1.384932814f, 0.775880046f, -0.105818706f)) * glossiness
+		+ float4(-0.101034049f, 0.18680998f, -0.117919199f, 0.030727381f)) * glossiness
 		+ float4(0.001922126f, 0.006697305f, -0.015741592f, 0.007229544f);
 	env_brdf.y = (((tmp.x * n_dot_v + tmp.y) * n_dot_v + tmp.z) * n_dot_v) + tmp.w;
 	env_brdf = saturate(env_brdf);
@@ -163,6 +165,30 @@ float2 TubeAreaLightAttenuationIrradianceFixup(float3 l0, float3 l1, float3 norm
 	float len_l1 = length(l1);
 	return float2(1.0f / (len_l0 * len_l1 + dot(l0, l1)),
 		dot(normal, l0) / len_l0 + dot(normal, l1) / len_l1);
+}
+
+// Metalness
+
+float3 DiffuseColor(float3 albedo, float metalness)
+{
+	return albedo * (1 - metalness);
+}
+
+float3 SpecularColor(float3 albedo, float metalness)
+{
+	return lerp(0.04, albedo, metalness);
+}
+
+// Glossiness
+
+float Shininess2Glossiness(float shininess)
+{
+	return log2(shininess) / log2(MAX_SHININESS);
+}
+
+float Glossiness2Shininess(float glossiness)
+{
+	return pow(MAX_SHININESS, glossiness);
 }
 		]]>
 	</shader>

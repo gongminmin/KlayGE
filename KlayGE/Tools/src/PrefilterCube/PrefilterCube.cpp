@@ -8,6 +8,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -200,17 +201,17 @@ namespace
 		return tangent * h.x() + binormal * h.y() + normal * h.z();
 	}
 
-	float3 ImportanceSampleBP(float2 const & xi, float roughness)
+	float3 ImportanceSampleBP(float2 const & xi, float shininess)
 	{
 		float phi = 2 * PI * xi.x();
-		float cos_theta = pow(1 - xi.y() * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
+		float cos_theta = pow(1 - xi.y() * (shininess + 1) / (shininess + 2), 1 / (shininess + 1));
 		float sin_theta = sqrt(1 - cos_theta * cos_theta);
 		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 	}
 
-	float3 ImportanceSampleBP(float2 const & xi, float roughness, float3 const & normal)
+	float3 ImportanceSampleBP(float2 const & xi, float shininess, float3 const & normal)
 	{
-		float3 h = ImportanceSampleBP(xi, roughness);
+		float3 h = ImportanceSampleBP(xi, shininess);
 
 		float3 up_vec = abs(normal.z()) < 0.999f ? float3(0, 0, 1) : float3(1, 0, 0);
 		float3 tangent = MathLib::normalize(MathLib::cross(up_vec, normal));
@@ -235,7 +236,7 @@ namespace
 		return prefiltered_clr / static_cast<float>(NUM_SAMPLES);
 	}
 
-	Color PrefilterEnvMapSpecular(float roughness, float3 const & r, Color* env_map[6], uint32_t size)
+	Color PrefilterEnvMapSpecular(float shininess, float3 const & r, Color* env_map[6], uint32_t size)
 	{
 		float3 normal = r;
 		float3 view = r;
@@ -246,7 +247,7 @@ namespace
 		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
-			float3 h = ImportanceSampleBP(xi, roughness, normal);
+			float3 h = ImportanceSampleBP(xi, shininess, normal);
 			float3 l = -MathLib::reflect(view, h);
 			float n_dot_l = MathLib::clamp(MathLib::dot(normal, l), 0.0f, 1.0f);
 			if (n_dot_l > 0)
@@ -291,15 +292,14 @@ namespace
 		for (uint32_t mip = 1; mip < num_mipmaps - 1; ++ mip)
 		{
 			prefilted_data[face * num_mipmaps + mip].resize(w * w);
-			float roughness = static_cast<float>(num_mipmaps - 2 - mip) / (num_mipmaps - 2);
-			roughness = pow(8192.0f, roughness);
+			float shininess = Glossiness2Shininess(static_cast<float>(num_mipmaps - 2 - mip) / (num_mipmaps - 2));
 
 			for (uint32_t y = 0; y < w; ++ y)
 			{
 				for (uint32_t x = 0; x < w; ++ x)
 				{
 					prefilted_data[face * num_mipmaps + mip][y * w + x]
-						= PrefilterEnvMapSpecular(roughness, ToDir(face, x, y, w), env_map, width);
+						= PrefilterEnvMapSpecular(shininess, ToDir(face, x, y, w), env_map, width);
 					++ processed_texels;
 				}
 			}
@@ -446,12 +446,11 @@ namespace
 
 			for (uint32_t level = 1; level < out_num_mipmaps - 1; ++ level)
 			{
-				float roughness = static_cast<float>(out_num_mipmaps - 2 - level) / (out_num_mipmaps - 2);
-				roughness = pow(8192.0f, roughness);
+				float shininess = Glossiness2Shininess(static_cast<float>(out_num_mipmaps - 2 - level) / (out_num_mipmaps - 2));
 
 				spec_pp->OutputPin(0, out_tex, level, 0, face);
 				spec_pp->SetParam(0, face);
-				spec_pp->SetParam(1, roughness);
+				spec_pp->SetParam(1, shininess);
 				spec_pp->Apply();
 			}
 

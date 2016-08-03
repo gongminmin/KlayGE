@@ -72,11 +72,11 @@ namespace
 			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
-		void Material(float3 const & albedo, float metalness, float shininess)
+		void Material(float3 const & albedo, float metalness, float glossiness)
 		{
 			*(effect_->ParameterByName("albedo")) = albedo;
 			*(effect_->ParameterByName("metalness")) = metalness;
-			*(effect_->ParameterByName("shininess")) = shininess;
+			*(effect_->ParameterByName("glossiness")) = glossiness;
 		}
 
 		void OnRenderBegin()
@@ -105,11 +105,11 @@ namespace
 				CreateModelFactory<RenderModel>(), CreateMeshFactory<MetalRenderable>());
 		}
 
-		void Material(float3 const & albedo, float metalness, float shininess)
+		void Material(float3 const & albedo, float metalness, float glossiness)
 		{
 			for (uint32_t i = 0; i < renderable_->NumSubrenderables(); ++ i)
 			{
-				checked_pointer_cast<MetalRenderable>(renderable_->Subrenderable(i))->Material(albedo, metalness, shininess);
+				checked_pointer_cast<MetalRenderable>(renderable_->Subrenderable(i))->Material(albedo, metalness, glossiness);
 			}
 		}
 	};
@@ -178,9 +178,9 @@ void MetalnessApp::OnCreate()
 		}
 	}
 
-	single_sphere_ = MakeSharedPtr<MetalObject>("helmet_armet_2.meshml");
-	single_sphere_->ModelMatrix(MathLib::scaling(2.0f, 2.0f, 2.0f));
-	single_sphere_->AddToSceneManager();
+	single_object_ = MakeSharedPtr<MetalObject>("helmet_armet_2.meshml");
+	single_object_->ModelMatrix(MathLib::scaling(2.0f, 2.0f, 2.0f));
+	single_object_->AddToSceneManager();
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>(0);
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map, c_cube_map);
@@ -203,18 +203,18 @@ void MetalnessApp::OnCreate()
 	UIManager::Instance().Load(ResLoader::Instance().Open("Metalness.uiml"));
 
 	dialog_ = UIManager::Instance().GetDialog("Parameters");
-	id_single_sphere_ = dialog_->IDFromName("SingleSphere");
-	id_shininess_static_ = dialog_->IDFromName("ShininessStatic");
-	id_shininess_ = dialog_->IDFromName("ShininessSlider");
+	id_single_object_ = dialog_->IDFromName("SingleObject");
+	id_glossiness_static_ = dialog_->IDFromName("GlossinessStatic");
+	id_glossiness_ = dialog_->IDFromName("GlossinessSlider");
 	id_metalness_static_ = dialog_->IDFromName("MetalnessStatic");
 	id_metalness_ = dialog_->IDFromName("MetalnessSlider");
 
-	dialog_->Control<UICheckBox>(id_single_sphere_)->OnChangedEvent().connect(
-		std::bind(&MetalnessApp::SingleSphereHandler, this, std::placeholders::_1));
-	this->SingleSphereHandler(*dialog_->Control<UICheckBox>(id_single_sphere_));
-	dialog_->Control<UISlider>(id_shininess_)->OnValueChangedEvent().connect(
-		std::bind(&MetalnessApp::ShininessChangedHandler, this, std::placeholders::_1));
-	this->ShininessChangedHandler(*dialog_->Control<UISlider>(id_shininess_));
+	dialog_->Control<UICheckBox>(id_single_object_)->OnChangedEvent().connect(
+		std::bind(&MetalnessApp::SingleObjectHandler, this, std::placeholders::_1));
+	this->SingleObjectHandler(*dialog_->Control<UICheckBox>(id_single_object_));
+	dialog_->Control<UISlider>(id_glossiness_)->OnValueChangedEvent().connect(
+		std::bind(&MetalnessApp::GlossinessChangedHandler, this, std::placeholders::_1));
+	this->GlossinessChangedHandler(*dialog_->Control<UISlider>(id_glossiness_));
 	dialog_->Control<UISlider>(id_metalness_)->OnValueChangedEvent().connect(
 		std::bind(&MetalnessApp::MetalnessChangedHandler, this, std::placeholders::_1));
 	this->MetalnessChangedHandler(*dialog_->Control<UISlider>(id_metalness_));
@@ -237,28 +237,28 @@ void MetalnessApp::InputHandler(InputEngine const & /*sender*/, InputAction cons
 	}
 }
 
-void MetalnessApp::SingleSphereHandler(UICheckBox const & sender)
+void MetalnessApp::SingleObjectHandler(UICheckBox const & sender)
 {
 	bool single_sphere_mode = sender.GetChecked();
-	dialog_->Control<UISlider>(id_shininess_)->SetEnabled(single_sphere_mode);
+	dialog_->Control<UISlider>(id_glossiness_)->SetEnabled(single_sphere_mode);
 	dialog_->Control<UISlider>(id_metalness_)->SetEnabled(single_sphere_mode);
 
 	for (size_t i = 0; i < spheres_.size(); ++ i)
 	{
 		spheres_[i]->Visible(!single_sphere_mode);
 	}
-	single_sphere_->Visible(single_sphere_mode);
+	single_object_->Visible(single_sphere_mode);
 }
 
-void MetalnessApp::ShininessChangedHandler(UISlider const & sender)
+void MetalnessApp::GlossinessChangedHandler(UISlider const & sender)
 {
-	shininess_ = sender.GetValue() * 0.01f;
+	glossiness_ = sender.GetValue() * 0.01f;
 	
 	std::wostringstream stream;
-	stream << L"Shininess: " << shininess_;
-	dialog_->Control<UIStatic>(id_shininess_static_)->SetText(stream.str());
+	stream << L"Glossiness: " << glossiness_;
+	dialog_->Control<UIStatic>(id_glossiness_static_)->SetText(stream.str());
 
-	checked_pointer_cast<MetalObject>(single_sphere_)->Material(albedo_, metalness_, shininess_);
+	checked_pointer_cast<MetalObject>(single_object_)->Material(albedo_, metalness_, glossiness_);
 }
 
 void MetalnessApp::MetalnessChangedHandler(UISlider const & sender)
@@ -269,7 +269,7 @@ void MetalnessApp::MetalnessChangedHandler(UISlider const & sender)
 	stream << L"Metalness: " << metalness_;
 	dialog_->Control<UIStatic>(id_metalness_static_)->SetText(stream.str());
 
-	checked_pointer_cast<MetalObject>(single_sphere_)->Material(albedo_, metalness_, shininess_);
+	checked_pointer_cast<MetalObject>(single_object_)->Material(albedo_, metalness_, glossiness_);
 }
 
 void MetalnessApp::DoUpdateOverlay()

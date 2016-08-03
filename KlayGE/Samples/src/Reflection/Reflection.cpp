@@ -14,6 +14,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/UI.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 
 #include <KlayGE/SSRPostProcess.hpp>
@@ -41,9 +42,9 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			mtl_->diffuse = float3(0.2f, 0.2f, 0.2f);
-			mtl_->shininess = 128;
-			mtl_->specular = float3(0.6f, 0.6f, 0.6f);
+			mtl_->albedo = float4(0.6f, 0.6f, 0.6f, 1);
+			mtl_->metalness = 1;
+			mtl_->glossiness = Shininess2Glossiness(128);
 
 			effect_attrs_ |= EA_Reflection;
 
@@ -165,15 +166,15 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			mtl_->diffuse = float3(0.73f, 1, 0.46f);
+			mtl_->albedo = float4(0.73f, 1, 0.46f, 1);
 			if (Context::Instance().Config().graphics_cfg.gamma)
 			{
-				mtl_->diffuse.x() = MathLib::srgb_to_linear(mtl_->diffuse.x());
-				mtl_->diffuse.y() = MathLib::srgb_to_linear(mtl_->diffuse.y());
-				mtl_->diffuse.z() = MathLib::srgb_to_linear(mtl_->diffuse.z());
+				mtl_->albedo.x() = MathLib::srgb_to_linear(mtl_->albedo.x());
+				mtl_->albedo.y() = MathLib::srgb_to_linear(mtl_->albedo.y());
+				mtl_->albedo.z() = MathLib::srgb_to_linear(mtl_->albedo.z());
 			}
-			mtl_->shininess = 64;
-			mtl_->specular = float3(0.8f, 0.8f, 0.8f);
+			mtl_->metalness = 0.2f;
+			mtl_->glossiness = Shininess2Glossiness(64);
 		}
 	};
 

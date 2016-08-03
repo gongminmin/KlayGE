@@ -126,42 +126,6 @@ namespace KlayGE
 		return static_cast<PassType>((rt << 0) | (tb << 4) | (cat << 6));
 	}
 
-
-	typedef std::vector<std::pair<std::string, std::string>> TextureSlotsType;
-	struct KLAYGE_CORE_API RenderMaterial
-	{
-		enum SurfaceDetailMode
-		{
-			SDM_Parallax = 0,
-			SDM_FlatTessellation,
-			SDM_SmoothTessellation
-		};
-
-		RenderMaterial()
-			: sss(false),
-				detail_mode(SDM_Parallax),
-				height_offset_scale(-0.5f, 0.06f),
-				tess_factors(5, 5, 1, 9)
-		{
-		}
-
-		float3 ambient;
-		float3 diffuse;
-		float3 specular;
-		float3 emit;
-		float opacity;
-		float shininess;
-		bool sss;
-
-		TextureSlotsType texture_slots;
-
-		SurfaceDetailMode detail_mode;
-		float2 height_offset_scale;
-		float4 tess_factors;
-	};
-
-	float const INV_LOG_8192 = 1 / log(8192.0f);
-
 	// Abstract class defining the interface all renderable objects must implement.
 	class KLAYGE_CORE_API Renderable
 	{
@@ -345,7 +309,6 @@ namespace KlayGE
 		float4x4 model_mat_;
 
 		PassType type_;
-		bool opacity_map_enabled_;
 		uint32_t effect_attrs_;
 
 		RenderMaterialPtr mtl_;
@@ -361,30 +324,30 @@ namespace KlayGE
 		RenderEffectParameter* pos_extent_param_;
 		RenderEffectParameter* tc_center_param_;
 		RenderEffectParameter* tc_extent_param_;
-		RenderEffectParameter* shininess_tex_param_;
-		RenderEffectParameter* shininess_clr_param_;
-		RenderEffectParameter* specular_tex_param_;
-		RenderEffectParameter* specular_clr_param_;
+		RenderEffectParameter* albedo_map_enabled_param_;
+		RenderEffectParameter* albedo_tex_param_;
+		RenderEffectParameter* albedo_clr_param_;
+		RenderEffectParameter* metalness_tex_param_;
+		RenderEffectParameter* metalness_clr_param_;
+		RenderEffectParameter* glossiness_tex_param_;
+		RenderEffectParameter* glossiness_clr_param_;
+		RenderEffectParameter* emissive_tex_param_;
+		RenderEffectParameter* emissive_clr_param_;
 		RenderEffectParameter* normal_map_enabled_param_;
 		RenderEffectParameter* normal_tex_param_;
 		RenderEffectParameter* height_map_parallax_enabled_param_;
 		RenderEffectParameter* height_map_tess_enabled_param_;
 		RenderEffectParameter* height_tex_param_;
-		RenderEffectParameter* diffuse_tex_param_;
-		RenderEffectParameter* diffuse_clr_param_;
-		RenderEffectParameter* emit_tex_param_;
-		RenderEffectParameter* emit_clr_param_;
-		RenderEffectParameter* opacity_clr_param_;
-		RenderEffectParameter* opacity_map_enabled_param_;
 		RenderEffectParameter* opaque_depth_tex_param_;
 		RenderEffectParameter* reflection_tex_param_;
+		RenderEffectParameter* alpha_test_threshold_param_;
 
-		TexturePtr diffuse_tex_;
-		TexturePtr specular_tex_;
-		TexturePtr shininess_tex_;
+		TexturePtr albedo_tex_;
+		TexturePtr metalness_tex_;
+		TexturePtr glossiness_tex_;
+		TexturePtr emissive_tex_;
 		TexturePtr normal_tex_;
 		TexturePtr height_tex_;
-		TexturePtr emit_tex_;
 
 		std::vector<RenderablePtr> subrenderables_;
 	};

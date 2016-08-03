@@ -63,7 +63,7 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) :
 {
 	view_dir = normalize(view_dir);
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float shininess = GetShininess(ndc);
+	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 	float3 normal = GetNormal(ndc);
 	
 	float detail_factor = dot(view_dir, normal) * 0.5f + 0.5f;

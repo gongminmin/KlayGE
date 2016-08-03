@@ -16,7 +16,7 @@
 	<post_processor name="PrefilterCubeSpecular">
 		<params>
 			<param name="face"/>
-			<param name="roughness"/>
+			<param name="shininess"/>
 		</params>
 		<input>
 			<pin name="skybox_cube_tex"/>

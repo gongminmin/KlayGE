@@ -4,6 +4,7 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/RenderableHelper.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -199,16 +200,16 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
-			*(effect_->ParameterByName("specular_tex")) = specular_tex_;
-			*(effect_->ParameterByName("shininess_tex")) = shininess_tex_;
-			*(effect_->ParameterByName("emit_tex")) = emit_tex_;
+			*(effect_->ParameterByName("albedo_tex")) = albedo_tex_;
+			*(effect_->ParameterByName("metalness_tex")) = metalness_tex_;
+			*(effect_->ParameterByName("glossiness_tex")) = glossiness_tex_;
+			*(effect_->ParameterByName("emissive_tex")) = emissive_tex_;
 
-			*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x(), mtl_->ambient.y(), mtl_->ambient.z(), 1);
-			*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tex_);
-			*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
-			*(effect_->ParameterByName("shininess_clr")) = float2(MathLib::clamp(mtl_->shininess, 1e-6f, 0.999f), !!shininess_tex_);
-			*(effect_->ParameterByName("emit_clr")) = float4(mtl_->emit.x(), mtl_->emit.y(), mtl_->emit.z(), !!emit_tex_);
+			*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+			*(effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness, !!metalness_tex_);
+			*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!glossiness_tex_);
+			*(effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(), !!emissive_tex_);
+			*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!albedo_tex_);
 
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();

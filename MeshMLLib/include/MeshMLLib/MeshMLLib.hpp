@@ -69,7 +69,16 @@ namespace KlayGE
 			UES_All = 0xFF
 		};
 
-		typedef std::pair<std::string, std::string> TextureSlot;
+		enum TextureType
+		{
+			TT_Albedo,
+			TT_Metalness,
+			TT_Glossiness,
+			TT_Emissive,
+			TT_Bump,
+			TT_Normal,
+			TT_Height
+		};
 
 		struct Material
 		{
@@ -81,22 +90,28 @@ namespace KlayGE
 			};
 			
 			Material()
-				: sss(false),
-					detail_mode(SDM_Parallax),
+				: detail_mode(SDM_Parallax),
 					height_offset_scale(-0.5f, 0.06f),
 					tess_factors(5, 5, 1, 9)
 			{
 			}
 
-			float3 ambient;
-			float3 diffuse;
-			float3 specular;
-			float3 emit;
-			float opacity;
-			float shininess;
+			float4 albedo;
+			float metalness;
+			float glossiness;
+			float3 emissive;
+
+			bool transparent;
+			float alpha_test;
 			bool sss;
 
-			std::vector<TextureSlot> texture_slots;
+			std::string albedo_tex_name;
+			std::string metalness_tex_name;
+			std::string glossiness_tex_name;
+			std::string emissive_tex_name;
+			std::string bump_tex_name;		// Will be converted to normal map
+			std::string normal_tex_name;
+			std::string height_tex_name;
 
 			SurfaceDetailMode detail_mode;
 			float2 height_offset_scale;
@@ -135,12 +150,11 @@ namespace KlayGE
 			Quaternion const & bind_real, Quaternion const & bind_dual);
 
 		int AllocMaterial();
-		void SetMaterial(int mtl_id, float3 const & ambient, float3 const & diffuse,
-			float3 const & specular, float3 const & emit, float opacity, float shininess, bool sss);
+		void SetMaterial(int mtl_id, float4 const & albedo, float metalness, float glossiness, float3 const & emissive,
+			bool transparent, float alpha_test, bool sss);
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
-		int AllocTextureSlot(int mtl_id);
-		void SetTextureSlot(int mtl_id, int slot_id, std::string const & type, std::string const & name);
+		void SetTextureSlot(int mtl_id, TextureType type, std::string const & name);
 
 		int AllocMesh();
 		void SetMesh(int mesh_id, int material_id, std::string const & name);

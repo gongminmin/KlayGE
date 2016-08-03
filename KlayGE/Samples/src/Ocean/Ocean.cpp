@@ -121,23 +121,23 @@ namespace
 			case PT_OpaqueGBufferMRT:
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
-				*diffuse_clr_param_ = float4(0.07f, 0.15f, 0.2f, 0);
+				*albedo_clr_param_ = float4(0.07f, 0.15f, 0.2f, 1);
+				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*normal_map_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_parallax_enabled_param_ = static_cast<int32_t>(0);
 				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
-				*specular_clr_param_ = float4(5, 5, 5, 0);
-				*shininess_clr_param_ = float2(0.5f, 0);
+				*metalness_clr_param_ = float2(1, 0);
+				*glossiness_clr_param_ = float2(0.5f, 0);
 				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*diffuse_tex_param_ = TexturePtr();
-				*emit_tex_param_ = TexturePtr();
-				*emit_clr_param_ = float4(0, 0, 0, 0);
-				*opacity_clr_param_ = 1.0f;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(0);
+				*albedo_tex_param_ = TexturePtr();
+				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
+				*emissive_tex_param_ = TexturePtr();
+				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
@@ -160,11 +160,10 @@ namespace
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*diffuse_tex_param_ = TexturePtr();
-				*emit_tex_param_ = TexturePtr();
-				*emit_clr_param_ = float4(0, 0, 0, 0);
-				*opacity_clr_param_ = 1.0f;
-				*opacity_map_enabled_param_ = static_cast<int32_t>(0);
+				*albedo_tex_param_ = TexturePtr();
+				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
+				*emissive_tex_param_ = TexturePtr();
+				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("opaque_shading_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
 				*(effect_->ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
 				{

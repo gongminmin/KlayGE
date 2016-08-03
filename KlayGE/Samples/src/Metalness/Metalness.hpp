@@ -19,25 +19,25 @@ private:
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);
 
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
-	void SingleSphereHandler(KlayGE::UICheckBox const & sender);
-	void ShininessChangedHandler(KlayGE::UISlider const & sender);
+	void SingleObjectHandler(KlayGE::UICheckBox const & sender);
+	void GlossinessChangedHandler(KlayGE::UISlider const & sender);
 	void MetalnessChangedHandler(KlayGE::UISlider const & sender);
 
 	KlayGE::FontPtr font_;
 	std::vector<KlayGE::SceneObjectPtr> spheres_;
-	KlayGE::SceneObjectPtr single_sphere_;
+	KlayGE::SceneObjectPtr single_object_;
 	KlayGE::SceneObjectPtr sky_box_;
 
 	KlayGE::float3 albedo_;
-	float shininess_;
+	float glossiness_;
 	float metalness_;
 
 	KlayGE::TrackballCameraController obj_controller_;
 
 	KlayGE::UIDialogPtr dialog_;
-	int id_single_sphere_;
-	int id_shininess_static_;
-	int id_shininess_;
+	int id_single_object_;
+	int id_glossiness_static_;
+	int id_glossiness_;
 	int id_metalness_static_;
 	int id_metalness_;
 };

@@ -916,9 +916,8 @@ namespace KGEditor
 								light_properties_obj_.Indirect
 									= (light_attrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_IndirectLighting) != 0;
 								float[] light_color = core_.LightColor(selected_entity_id_);
-								float multiplier = this.FloatPtrToMultipiler(light_color);
-								light_properties_obj_.Color = this.FloatPtrToLDRColor(light_color, multiplier);
-								light_properties_obj_.Multiplier = multiplier;
+								light_properties_obj_.Multiplier = this.FloatPtrToMultipiler(light_color);
+								light_properties_obj_.Color = this.FloatPtrToLDRColor(light_color, light_properties_obj_.Multiplier);
 								float[] light_falloff = core_.LightFalloff(selected_entity_id_);
 								light_properties_obj_.FalloffConstant = light_falloff[0];
 								light_properties_obj_.FalloffLinear = light_falloff[1];
@@ -1534,7 +1533,7 @@ namespace KGEditor
 
 		private float FloatPtrToMultipiler(float[] clr)
 		{
-			return Math.Min(1.0f, Math.Max(Math.Max(clr[0], clr[1]), clr[2]));
+			return Math.Max(Math.Max(Math.Max(clr[0], clr[1]), clr[2]), 1.0f);
 		}
 
 		private Color FloatPtrToLDRColor(float[] clr, float multiplier)

@@ -101,15 +101,15 @@ float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool 
 	float3 light_vec = normalize(L);
 	float3 halfway = normalize(H);
 
-	float roughness = 128;
+	float shininess = 128;
 	if (nl)
 	{
 		float len = get_x_channel(na_length_tex.Sample(linear_sampler, uv));
-		float ft = len / lerp(roughness, 1, len);
-		roughness *= ft;
+		float ft = len / lerp(shininess, 1, len);
+		shininess *= ft;
 	}
 
-	return float4(0.1f * diffuse + shadow * atten * light_color * calc_brdf(diffuse, 0.2f, roughness, light_vec, halfway, normal), 1);
+	return float4(0.1f * diffuse + shadow * atten * light_color * calc_brdf(diffuse, 0.2f, shininess, light_vec, halfway, normal), 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,

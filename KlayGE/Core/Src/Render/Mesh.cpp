@@ -31,6 +31,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -46,7 +47,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 11;
+	uint32_t const MODEL_BIN_VERSION = 12;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -512,90 +513,72 @@ namespace KlayGE
 
 	void StaticMesh::DoBuildMeshInfo()
 	{
-		opacity_map_enabled_ = false;
-
 		RenderModelPtr model = model_.lock();
 
 		mtl_ = model->GetMaterial(this->MaterialID());
-		for (auto const & texture_slot : mtl_->texture_slots)
+
+		if (!mtl_->albedo_tex_name.empty())
 		{
-			TexturePtr tex;
-			if (!ResLoader::Instance().Locate(texture_slot.second).empty())
+			if (!ResLoader::Instance().Locate(mtl_->albedo_tex_name).empty())
 			{
-				tex = ASyncLoadTexture(texture_slot.second, EAH_GPU_Read | EAH_Immutable);
+				albedo_tex_ = ASyncLoadTexture(mtl_->albedo_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
-
-			size_t const slot_type_hash = RT_HASH(texture_slot.first.c_str());
-
-			if ((CT_HASH("Color") == slot_type_hash) || (CT_HASH("Diffuse Color") == slot_type_hash)
-				|| (CT_HASH("Diffuse Color Map") == slot_type_hash))
+		}
+		if (!mtl_->metalness_tex_name.empty())
+		{
+			if (!ResLoader::Instance().Locate(mtl_->metalness_tex_name).empty())
 			{
-				diffuse_tex_ = tex;
+				metalness_tex_ = ASyncLoadTexture(mtl_->metalness_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
-			else if ((CT_HASH("Specular Level") == slot_type_hash) || (CT_HASH("Specular Color") == slot_type_hash))
+		}
+		if (!mtl_->glossiness_tex_name.empty())
+		{
+			if (!ResLoader::Instance().Locate(mtl_->glossiness_tex_name).empty())
 			{
-				specular_tex_ = tex;
+				glossiness_tex_ = ASyncLoadTexture(mtl_->glossiness_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
-			else if ((CT_HASH("Glossiness") == slot_type_hash) || (CT_HASH("Reflection Glossiness Map") == slot_type_hash))
+		}
+		if (!mtl_->emissive_tex_name.empty())
+		{
+			if (!ResLoader::Instance().Locate(mtl_->emissive_tex_name).empty())
 			{
-				shininess_tex_ = tex;
+				emissive_tex_ = ASyncLoadTexture(mtl_->emissive_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
-			else if ((CT_HASH("Bump") == slot_type_hash) || (CT_HASH("Bump Map") == slot_type_hash))
+		}
+		if (!mtl_->normal_tex_name.empty())
+		{
+			if (!ResLoader::Instance().Locate(mtl_->normal_tex_name).empty())
 			{
-				normal_tex_ = tex;
+				normal_tex_ = ASyncLoadTexture(mtl_->normal_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
-			else if ((CT_HASH("Height") == slot_type_hash) || (CT_HASH("Height Map") == slot_type_hash))
+		}
+		if (!mtl_->height_tex_name.empty())
+		{
+			if (!ResLoader::Instance().Locate(mtl_->height_tex_name).empty())
 			{
-				height_tex_ = tex;
-			}
-			else if (CT_HASH("Self-Illumination") == slot_type_hash)
-			{
-				emit_tex_ = tex;
-			}
-			else if (CT_HASH("Opacity") == slot_type_hash)
-			{
-				ResIdentifierPtr tex_file = ResLoader::Instance().Open(texture_slot.second);
-				if (tex_file)
-				{
-					Texture::TextureType type;
-					uint32_t width, height, depth;
-					uint32_t num_mipmaps;
-					uint32_t array_size;
-					ElementFormat format;
-					uint32_t row_pitch, slice_pitch;
-					GetImageInfo(tex_file, type, width, height, depth, num_mipmaps, array_size, format,
-						row_pitch, slice_pitch);
-
-					opacity_map_enabled_ = true;
-
-					if ((EF_BC1 == format) || (EF_BC1_SRGB == format))
-					{
-						effect_attrs_ |= EA_AlphaTest;
-					}
-					else
-					{
-						effect_attrs_ |= EA_TransparencyBack;
-						effect_attrs_ |= EA_TransparencyFront;
-					}
-				}
+				height_tex_ = ASyncLoadTexture(mtl_->height_tex_name, EAH_GPU_Read | EAH_Immutable);
 			}
 		}
 
-		if (!(effect_attrs_ & EA_AlphaTest) && (mtl_->opacity < 1))
+		if (mtl_->transparent)
 		{
 			effect_attrs_ |= EA_TransparencyBack;
 			effect_attrs_ |= EA_TransparencyFront;
 		}
-		if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
+		if (mtl_->alpha_test > 0)
+		{
+			effect_attrs_ |= EA_AlphaTest;
+		}
+		if (mtl_->sss)
+		{
+			effect_attrs_ |= EA_SSS;
+		}
+
+		if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || emissive_tex_
 			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 			|| (effect_attrs_ & EA_Reflection))
 		{
 			effect_attrs_ |= EA_SpecialShading;
-		}
-
-		if (mtl_->sss)
-		{
-			effect_attrs_ |= EA_SSS;
 		}
 
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
@@ -1106,86 +1089,70 @@ namespace KlayGE
 			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 			mtls[mtl_index] = mtl;
 
-			uint8_t rgb[3];
-			float specular_level;
-			decoded->read(&rgb[0], sizeof(uint8_t));
-			decoded->read(&rgb[1], sizeof(uint8_t));
-			decoded->read(&rgb[2], sizeof(uint8_t));
-			mtl->ambient.x() = rgb[0] / 255.0f;
-			mtl->ambient.y() = rgb[1] / 255.0f;
-			mtl->ambient.z() = rgb[2] / 255.0f;
-			decoded->read(&rgb[0], sizeof(uint8_t));
-			decoded->read(&rgb[1], sizeof(uint8_t));
-			decoded->read(&rgb[2], sizeof(uint8_t));
-			mtl->diffuse.x() = rgb[0] / 255.0f;
-			mtl->diffuse.y() = rgb[1] / 255.0f;
-			mtl->diffuse.z() = rgb[2] / 255.0f;
-			decoded->read(&rgb[0], sizeof(uint8_t));
-			decoded->read(&rgb[1], sizeof(uint8_t));
-			decoded->read(&rgb[2], sizeof(uint8_t));
-			decoded->read(&specular_level, sizeof(float));
-			specular_level = LE2Native(specular_level);
-			mtl->specular.x() = rgb[0] / 255.0f * specular_level;
-			mtl->specular.y() = rgb[1] / 255.0f * specular_level;
-			mtl->specular.z() = rgb[2] / 255.0f * specular_level;
-			decoded->read(&rgb[0], sizeof(uint8_t));
-			decoded->read(&rgb[1], sizeof(uint8_t));
-			decoded->read(&rgb[2], sizeof(uint8_t));
-			mtl->emit.x() = rgb[0] / 255.0f;
-			mtl->emit.y() = rgb[1] / 255.0f;
-			mtl->emit.z() = rgb[2] / 255.0f;
+			decoded->read(&mtl->albedo, sizeof(mtl->albedo));
+			mtl->albedo.x() = LE2Native(mtl->albedo.x());
+			mtl->albedo.y() = LE2Native(mtl->albedo.y());
+			mtl->albedo.z() = LE2Native(mtl->albedo.z());
+			mtl->albedo.w() = LE2Native(mtl->albedo.w());
 
-			decoded->read(&mtl->opacity, sizeof(float));
-			mtl->opacity = LE2Native(mtl->opacity);
+			decoded->read(&mtl->metalness, sizeof(float));
+			mtl->metalness = LE2Native(mtl->metalness);
 
-			decoded->read(&mtl->shininess, sizeof(float));
-			mtl->shininess = LE2Native(mtl->shininess);
+			decoded->read(&mtl->glossiness, sizeof(float));
+			mtl->glossiness = LE2Native(mtl->glossiness);
+
+			decoded->read(&mtl->emissive, sizeof(mtl->emissive));
+			mtl->emissive.x() = LE2Native(mtl->emissive.x());
+			mtl->emissive.y() = LE2Native(mtl->emissive.y());
+			mtl->emissive.z() = LE2Native(mtl->emissive.z());
+
+			uint8_t transparent;
+			decoded->read(&transparent, sizeof(transparent));
+			mtl->transparent = transparent ? true : false;
+
+			uint8_t alpha_test;
+			decoded->read(&alpha_test, sizeof(uint8_t));
+			mtl->alpha_test = alpha_test / 255.0f;
 
 			uint8_t sss;
 			decoded->read(&sss, sizeof(sss));
 			mtl->sss = sss ? true : false;
 
-			if (Context::Instance().Config().graphics_cfg.gamma)
+			mtl->albedo_tex_name = ReadShortString(decoded);
+			mtl->metalness_tex_name = ReadShortString(decoded);
+			mtl->glossiness_tex_name = ReadShortString(decoded);
+			mtl->emissive_tex_name = ReadShortString(decoded);
+			mtl->normal_tex_name = ReadShortString(decoded);
+			mtl->height_tex_name = ReadShortString(decoded);
+			if (!mtl->height_tex_name.empty())
 			{
-				mtl->ambient.x() = MathLib::srgb_to_linear(mtl->ambient.x());
-				mtl->ambient.y() = MathLib::srgb_to_linear(mtl->ambient.y());
-				mtl->ambient.z() = MathLib::srgb_to_linear(mtl->ambient.z());
-				mtl->diffuse.x() = MathLib::srgb_to_linear(mtl->diffuse.x());
-				mtl->diffuse.y() = MathLib::srgb_to_linear(mtl->diffuse.y());
-				mtl->diffuse.z() = MathLib::srgb_to_linear(mtl->diffuse.z());
-			}
-
-			uint32_t num_texs;
-			decoded->read(&num_texs, sizeof(num_texs));
-			num_texs = LE2Native(num_texs);
-
-			for (uint32_t tex_index = 0; tex_index < num_texs; ++ tex_index)
-			{
-				std::string type = ReadShortString(decoded);
-				std::string name = ReadShortString(decoded);
-				mtl->texture_slots.emplace_back(type, name);
+				float height_offset;
+				decoded->read(&height_offset, sizeof(height_offset));
+				mtl->height_offset_scale.x() = LE2Native(height_offset);
+				float height_scale;
+				decoded->read(&height_scale, sizeof(height_scale));
+				mtl->height_offset_scale.y() = LE2Native(height_scale);
 			}
 
 			uint8_t detail_mode;
 			decoded->read(&detail_mode, sizeof(detail_mode));
 			mtl->detail_mode = static_cast<RenderMaterial::SurfaceDetailMode>(detail_mode);
-
-			float height_offset;
-			decoded->read(&height_offset, sizeof(height_offset));
-			mtl->height_offset_scale.x() = LE2Native(height_offset);
-			float height_scale;
-			decoded->read(&height_scale, sizeof(height_scale));
-			mtl->height_offset_scale.y() = LE2Native(height_scale);
-
-			float tess_factor;
-			decoded->read(&tess_factor, sizeof(tess_factor));
-			mtl->tess_factors.x() = LE2Native(tess_factor);
-			decoded->read(&tess_factor, sizeof(tess_factor));
-			mtl->tess_factors.y() = LE2Native(tess_factor);
-			decoded->read(&tess_factor, sizeof(tess_factor));
-			mtl->tess_factors.z() = LE2Native(tess_factor);
-			decoded->read(&tess_factor, sizeof(tess_factor));
-			mtl->tess_factors.w() = LE2Native(tess_factor);
+			if (mtl->detail_mode != RenderMaterial::SDM_Parallax)
+			{
+				float tess_factor;
+				decoded->read(&tess_factor, sizeof(tess_factor));
+				mtl->tess_factors.x() = LE2Native(tess_factor);
+				decoded->read(&tess_factor, sizeof(tess_factor));
+				mtl->tess_factors.y() = LE2Native(tess_factor);
+				decoded->read(&tess_factor, sizeof(tess_factor));
+				mtl->tess_factors.z() = LE2Native(tess_factor);
+				decoded->read(&tess_factor, sizeof(tess_factor));
+				mtl->tess_factors.w() = LE2Native(tess_factor);
+			}
+			else
+			{
+				mtl->tess_factors = float4(5, 5, 1, 9);
+			}
 		}
 
 		uint32_t num_merged_ves;
@@ -1515,26 +1482,15 @@ namespace KlayGE
 			int mtl_id = obj.AllocMaterial();
 			mtl_map.emplace(i, mtl_id);
 
-			float3 ambient = mtls[i]->ambient;
-			float3 diffuse = mtls[i]->diffuse;
-			if (Context::Instance().Config().graphics_cfg.gamma)
-			{
-				ambient.x() = MathLib::linear_to_srgb(ambient.x());
-				ambient.y() = MathLib::linear_to_srgb(ambient.y());
-				ambient.z() = MathLib::linear_to_srgb(ambient.z());
-				diffuse.x() = MathLib::linear_to_srgb(diffuse.x());
-				diffuse.y() = MathLib::linear_to_srgb(diffuse.y());
-				diffuse.z() = MathLib::linear_to_srgb(diffuse.z());
-			}
+			obj.SetMaterial(mtl_id, mtls[i]->albedo, mtls[i]->metalness, mtls[i]->glossiness, mtls[i]->emissive,
+				mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss);
 
-			obj.SetMaterial(mtl_id, ambient, diffuse, mtls[i]->specular, mtls[i]->emit,
-				mtls[i]->opacity, mtls[i]->shininess, mtls[i]->sss);
-
-			for (size_t ts = 0; ts < mtls[i]->texture_slots.size(); ++ ts)
-			{
-				int slot_id = obj.AllocTextureSlot(mtl_id);
-				obj.SetTextureSlot(mtl_id, slot_id, mtls[i]->texture_slots[ts].first, mtls[i]->texture_slots[ts].second);
-			}
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Albedo, mtls[i]->albedo_tex_name);
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Metalness, mtls[i]->metalness_tex_name);
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Glossiness, mtls[i]->glossiness_tex_name);
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Emissive, mtls[i]->emissive_tex_name);
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Normal, mtls[i]->normal_tex_name);
+			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Height, mtls[i]->height_tex_name);
 
 			obj.SetDetailMaterial(mtl_id, static_cast<MeshMLObj::Material::SurfaceDetailMode>(mtls[i]->detail_mode),
 				mtls[i]->height_offset_scale.x(), mtls[i]->height_offset_scale.y(),

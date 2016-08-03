@@ -107,22 +107,22 @@ namespace
 			TexturePtr diffuse_tex = ASyncLoadTexture("robot-clean_diffuse.dds", EAH_GPU_Read | EAH_Immutable);
 			TexturePtr specular_tex = ASyncLoadTexture("robot-clean_specular.dds", EAH_GPU_Read | EAH_Immutable);
 			TexturePtr normal_tex = ASyncLoadTexture("robot-clean_normal.dds", EAH_GPU_Read | EAH_Immutable);
-			TexturePtr emit_tex = ASyncLoadTexture("robot-clean_selfillumination.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr emissive_tex = ASyncLoadTexture("robot-clean_selfillumination.dds", EAH_GPU_Read | EAH_Immutable);
 
 			*(no_oit_effect_->ParameterByName("diffuse_tex")) = diffuse_tex;
 			*(no_oit_effect_->ParameterByName("specular_tex")) = specular_tex;
 			*(no_oit_effect_->ParameterByName("normal_tex")) = normal_tex;
-			*(no_oit_effect_->ParameterByName("emit_tex")) = emit_tex;
+			*(no_oit_effect_->ParameterByName("emissive_tex")) = emissive_tex;
 			*(dp_effect_->ParameterByName("diffuse_tex")) = diffuse_tex;
 			*(dp_effect_->ParameterByName("specular_tex")) = specular_tex;
 			*(dp_effect_->ParameterByName("normal_tex")) = normal_tex;
-			*(dp_effect_->ParameterByName("emit_tex")) = emit_tex;
+			*(dp_effect_->ParameterByName("emissive_tex")) = emissive_tex;
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("diffuse_tex")) = diffuse_tex;
 				*(gen_ppll_effect_->ParameterByName("specular_tex")) = specular_tex;
 				*(gen_ppll_effect_->ParameterByName("normal_tex")) = normal_tex;
-				*(gen_ppll_effect_->ParameterByName("emit_tex")) = emit_tex;
+				*(gen_ppll_effect_->ParameterByName("emissive_tex")) = emissive_tex;
 			}
 		}
 

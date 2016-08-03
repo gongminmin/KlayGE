@@ -41,38 +41,40 @@ namespace MtlEditor
 	/// </summary>
 	public partial class SliderUserControlEditor : UserControl, ITypeEditor
 	{
-		public SliderUserControlEditor()
-		{
-			InitializeComponent();
-		}
-
 		public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value",
 			typeof(string), typeof(SliderUserControlEditor),
 			new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+
+		public SliderUserControlEditor()
+			: this(0, 1)
+		{
+		}
+
+		public SliderUserControlEditor(double min, double max)
+		{
+			InitializeComponent();
+
+			sl.Minimum = min;
+			sl.Maximum = max;
+		}
 		public string Value
 		{
-			get
-			{
-				return (string)GetValue(ValueProperty);
-			}
-			set
-			{
-				SetValue(ValueProperty, value);
-			}
+			get { return (string)GetValue(ValueProperty); }
+			set { SetValue(ValueProperty, value); }
 		}
 
 		private void SliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Value = e.NewValue.ToString();
-			_tb.Text = Value;
+			tb.Text = Value;
 		}
 
 		private void TextBoxTextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (_tb.Text != "")
+			if (tb.Text != "")
 			{
-				Value = _tb.Text;
-				_sl.Value = Double.Parse(Value);
+				Value = tb.Text;
+				sl.Value = Double.Parse(Value);
 			}
 		}
 
@@ -83,6 +85,15 @@ namespace MtlEditor
 			binding.Mode = property_item.IsReadOnly ? BindingMode.OneWay : BindingMode.TwoWay;
 			BindingOperations.SetBinding(this, SliderUserControlEditor.ValueProperty, binding);
 			return this;
+		}
+	}
+
+	public partial class MultiplierSliderUserControlEditor : SliderUserControlEditor
+	{
+		public MultiplierSliderUserControlEditor()
+			: base(1, 64)
+		{
+			InitializeComponent();
 		}
 	}
 }

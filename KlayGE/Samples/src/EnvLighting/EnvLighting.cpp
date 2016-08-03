@@ -20,6 +20,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -77,11 +78,11 @@ namespace
 			*(effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 		}
 
-		void Material(float4 const & diffuse, float4 const & specular, float shininess)
+		void Material(float4 const & diffuse, float4 const & specular, float glossiness)
 		{
 			*(effect_->ParameterByName("diffuse")) = float3(diffuse.x(), diffuse.y(), diffuse.z());
 			*(effect_->ParameterByName("specular")) = float3(specular.x(), specular.y(), specular.z());
-			*(effect_->ParameterByName("shininess")) = shininess;
+			*(effect_->ParameterByName("glossiness")) = glossiness;
 		}
 
 		void RenderingType(int type)
@@ -113,11 +114,11 @@ namespace
 	class SphereObject : public SceneObjectHelper
 	{
 	public:
-		SphereObject(float4 const & diff, float4 const & spec, float roughness)
+		SphereObject(float4 const & diff, float4 const & spec, float glossiness)
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
-			checked_pointer_cast<SphereRenderable>(renderable_)->Material(diff, spec, roughness);
+			checked_pointer_cast<SphereRenderable>(renderable_)->Material(diff, spec, glossiness);
 		}
 
 		void RenderingType(int type)
@@ -339,7 +340,7 @@ namespace
 		float4(0.00376f,	0.00389f,	0.00213f,	1)
 	};
 
-	float shininess_parametes[] =
+	float glossiness_parametes[] =
 	{
 		1,
 		1,
@@ -476,10 +477,10 @@ namespace
 		return float2(static_cast<float>(i) / N, RadicalInverseVdC(i));
 	}
 
-	float3 ImportanceSampleBP(float2 const & xi, float roughness)
+	float3 ImportanceSampleBP(float2 const & xi, float shininess)
 	{
 		float phi = 2 * PI * xi.x();
-		float cos_theta = pow(1 - xi.y() * (roughness + 1) / (roughness + 2), 1 / (roughness + 1));
+		float cos_theta = pow(1 - xi.y() * (shininess + 1) / (shininess + 2), 1 / (shininess + 1));
 		float sin_theta = sqrt(1 - cos_theta * cos_theta);
 		return float3(sin_theta * cos(phi), sin_theta * sin(phi), cos_theta);
 	}
@@ -489,7 +490,7 @@ namespace
 		return n_dot_v * n_dot_l;
 	}
 
-	float2 IntegrateBRDFBP(float roughness, float n_dot_v)
+	float2 IntegrateBRDFBP(float shininess, float n_dot_v)
 	{
 		float3 view(sqrt(1.0f - n_dot_v * n_dot_v), 0, n_dot_v);
 		float2 rg(0, 0);
@@ -498,7 +499,7 @@ namespace
 		for (uint32_t i = 0; i < NUM_SAMPLES; ++ i)
 		{
 			float2 xi = Hammersley2D(i, NUM_SAMPLES);
-			float3 h = ImportanceSampleBP(xi, roughness);
+			float3 h = ImportanceSampleBP(xi, shininess);
 			float3 l = -MathLib::reflect(view, h);
 			float n_dot_l = MathLib::clamp(l.z(), 0.0f, 1.0f);
 			float n_dot_h = MathLib::clamp(h.z(), 0.0f, 1.0f);
@@ -523,13 +524,12 @@ namespace
 		std::vector<uint8_t> integrate_brdf_gr(WIDTH * HEIGHT * 2, 0);
 		for (uint32_t y = 0; y < HEIGHT; ++ y)
 		{
-			float roughness = (y + 0.5f) / HEIGHT;
-			roughness = pow(8192.0f, roughness);
+			float shininess = Glossiness2Shininess((y + 0.5f) / HEIGHT);
 			for (uint32_t x = 0; x < WIDTH; ++ x)
 			{
 				float cos_theta = (x + 0.5f) / WIDTH;
 
-				float2 lut = IntegrateBRDFBP(roughness, cos_theta);
+				float2 lut = IntegrateBRDFBP(shininess, cos_theta);
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 0]
 					= static_cast<uint8_t>(MathLib::clamp(static_cast<int>(lut.x() * 255 + 0.5f), 0, 255));
 				integrate_brdf_gr[(y * WIDTH + x) * 2 + 1]
@@ -600,7 +600,7 @@ void EnvLightingApp::OnCreate()
 		for (uint32_t j = 0; j < spheres_column; ++ j)
 		{
 			spheres_[i * spheres_column + j] = MakeSharedPtr<SphereObject>(diff_parametes[i * spheres_column + j],
-				spec_parameters[i * spheres_column + j], shininess_parametes[i * spheres_column + j]);
+				spec_parameters[i * spheres_column + j], glossiness_parametes[i * spheres_column + j]);
 			spheres_[i * spheres_column + j]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)
 				* MathLib::translation((-static_cast<float>(spheres_column / 2) + j + 0.5f) * 0.08f,
 										0.0f, 

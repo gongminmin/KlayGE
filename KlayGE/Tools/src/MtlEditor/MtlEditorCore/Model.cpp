@@ -6,6 +6,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
@@ -67,29 +68,41 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 {
 	effect_attrs_ &= ~EA_TransparencyBack;
 	effect_attrs_ &= ~EA_TransparencyFront;
+	effect_attrs_ &= ~EA_AlphaTest;
+	effect_attrs_ &= ~EA_SSS;
 	effect_attrs_ &= ~EA_SpecialShading;
 
-	if (!(effect_attrs_ & EA_AlphaTest) && (mtl_->opacity < 1))
+	if (mtl_->transparent)
 	{
 		effect_attrs_ |= EA_TransparencyBack;
 		effect_attrs_ |= EA_TransparencyFront;
 	}
-	if ((mtl_->emit.x() > 0) || (mtl_->emit.y() > 0) || (mtl_->emit.z() > 0) || emit_tex_
+	if (mtl_->alpha_test > 0)
+	{
+		effect_attrs_ |= EA_AlphaTest;
+	}
+	if (mtl_->sss)
+	{
+		effect_attrs_ |= EA_SSS;
+	}
+	if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || emissive_tex_
 		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 		|| (effect_attrs_ & EA_Reflection))
 	{
 		effect_attrs_ |= EA_SpecialShading;
 	}
+
+	this->UpdateTechniques();
 }
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	diffuse_tex_.reset();
-	specular_tex_.reset();
-	shininess_tex_.reset();
+	albedo_tex_.reset();
+	metalness_tex_.reset();
+	glossiness_tex_.reset();
+	emissive_tex_.reset();
 	normal_tex_.reset();
 	height_tex_.reset();
-	emit_tex_.reset();
 
 	StaticMesh::BuildMeshInfo();
 }

@@ -6,6 +6,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
@@ -33,15 +34,13 @@ void DetailedMesh::DoBuildMeshInfo()
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	depth_texture_support_ = caps.depth_texture_support;
 
-	*(effect_->ParameterByName("diffuse_tex")) = diffuse_tex_;
+	*(effect_->ParameterByName("albedo_tex")) = albedo_tex_;
 	*(effect_->ParameterByName("bump_tex")) = normal_tex_;
-	*(effect_->ParameterByName("specular_tex")) = specular_tex_;
-	*(effect_->ParameterByName("specular_tex")) = shininess_tex_;
+	*(effect_->ParameterByName("glossiness_tex")) = glossiness_tex_;
 
-	*(effect_->ParameterByName("ambient_clr")) = float4(mtl_->ambient.x() * 0.2f, mtl_->ambient.y() * 0.2f, mtl_->ambient.z() * 0.2f, 1);
-	*(effect_->ParameterByName("diffuse_clr")) = float4(mtl_->diffuse.x(), mtl_->diffuse.y(), mtl_->diffuse.z(), !!diffuse_tex_);
-	*(effect_->ParameterByName("specular_clr")) = float4(mtl_->specular.x(), mtl_->specular.y(), mtl_->specular.z(), !!specular_tex_);
-	*(effect_->ParameterByName("shininess_clr")) = float2(mtl_->shininess, !!shininess_tex_);
+	*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+	*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!albedo_tex_);
+	*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!glossiness_tex_);
 
 	float3 extinction_coefficient(0.2f, 0.8f, 0.12f);
 	if (Context::Instance().Config().graphics_cfg.gamma)

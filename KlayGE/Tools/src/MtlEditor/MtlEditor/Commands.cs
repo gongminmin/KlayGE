@@ -8,19 +8,17 @@ namespace MtlEditor
 	{
 		ECC_SetCurrFrame,
 		ECC_SelectMesh,
-		ECC_SetAmbientMaterial,
-		ECC_SetDiffuseMaterial,
-		ECC_SetSpecularMaterial,
-		ECC_SetShininessMaterial,
-		ECC_SetEmitMaterial,
+		ECC_SetAlbedoMaterial,
+		ECC_SetMetalnessMaterial,
+		ECC_SetGlossinessMaterial,
+		ECC_SetEmissiveMaterial,
 		ECC_SetOpacityMaterial,
-		ECC_SetDiffuseTexture,
-		ECC_SetSpecularTexture,
-		ECC_SetShininessTexture,
+		ECC_SetAlbedoTexture,
+		ECC_SetMetalnessTexture,
+		ECC_SetGlossinessTexture,
+		ECC_SetEmissiveTexture,
 		ECC_SetNormalTexture,
 		ECC_SetHeightTexture,
-		ECC_SetEmitTexture,
-		ECC_SetOpacityTexture,
 		ECC_SetDetailMode,
 		ECC_SetHeightOffset,
 		ECC_SetHeightScale,
@@ -28,6 +26,9 @@ namespace MtlEditor
 		ECC_SetInsideTessHint,
 		ECC_SetMinTess,
 		ECC_SetMaxTess,
+		ECC_SetTransparent,
+		ECC_SetAlphaTest,
+		ECC_SetSSS,
 
 		ECC_NumCommands
 	}
@@ -106,134 +107,108 @@ namespace MtlEditor
 		private uint old_mesh_id_;
 	};
 
-	class MtlEditorCommandSetAmbientMaterial : MtlEditorCommand
+	class MtlEditorCommandSetAlbedoMaterial : MtlEditorCommand
 	{
-		public MtlEditorCommandSetAmbientMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
-			: base(core, MtlEditorCommandCode.ECC_SetAmbientMaterial, "Set ambient")
+		public MtlEditorCommandSetAlbedoMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
+			: base(core, MtlEditorCommandCode.ECC_SetAlbedoMaterial, "Set albedo")
 		{
 			mtl_id_ = mtl_id;
-			ambient_ = value;
+			albedo_ = value;
 		}
 
 		public override object Execute()
 		{
-			old_ambient_ = core_.AmbientMaterial(mtl_id_);
-			core_.AmbientMaterial(mtl_id_, ambient_);
+			old_albedo_ = core_.AlbedoMaterial(mtl_id_);
+			core_.AlbedoMaterial(mtl_id_, albedo_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.AmbientMaterial(mtl_id_, old_ambient_);
+			core_.AlbedoMaterial(mtl_id_, old_albedo_);
 		}
 
 		private uint mtl_id_;
-		private float[] ambient_;
-		private float[] old_ambient_;
+		private float[] albedo_;
+		private float[] old_albedo_;
 	};
 
-	class MtlEditorCommandSetDiffuseMaterial : MtlEditorCommand
+	class MtlEditorCommandSetMetalnessMaterial : MtlEditorCommand
 	{
-		public MtlEditorCommandSetDiffuseMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
-			: base(core, MtlEditorCommandCode.ECC_SetDiffuseMaterial, "Set diffuse")
+		public MtlEditorCommandSetMetalnessMaterial(MtlEditorCoreWrapper core, uint mtl_id, float value)
+			: base(core, MtlEditorCommandCode.ECC_SetMetalnessMaterial, "Set metalness")
 		{
 			mtl_id_ = mtl_id;
-			diffuse_ = value;
+			metalness_ = value;
 		}
 
 		public override object Execute()
 		{
-			old_diffuse_ = core_.DiffuseMaterial(mtl_id_);
-			core_.DiffuseMaterial(mtl_id_, diffuse_);
+			old_metalness_ = core_.MetalnessMaterial(mtl_id_);
+			core_.MetalnessMaterial(mtl_id_, metalness_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.DiffuseMaterial(mtl_id_, old_diffuse_);
+			core_.MetalnessMaterial(mtl_id_, old_metalness_);
 		}
 
 		private uint mtl_id_;
-		private float[] diffuse_;
-		private float[] old_diffuse_;
+		private float metalness_;
+		private float old_metalness_;
 	};
 
-	class MtlEditorCommandSetSpecularMaterial : MtlEditorCommand
+	class MtlEditorCommandSetGlossinessMaterial : MtlEditorCommand
 	{
-		public MtlEditorCommandSetSpecularMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
-			: base(core, MtlEditorCommandCode.ECC_SetSpecularMaterial, "Set specular")
+		public MtlEditorCommandSetGlossinessMaterial(MtlEditorCoreWrapper core, uint mtl_id, float value)
+			: base(core, MtlEditorCommandCode.ECC_SetGlossinessMaterial, "Set glossiness")
 		{
 			mtl_id_ = mtl_id;
-			specular_ = value;
+			glossiness_ = value;
 		}
 
 		public override object Execute()
 		{
-			old_specular_ = core_.SpecularMaterial(mtl_id_);
-			core_.SpecularMaterial(mtl_id_, specular_);
+			old_glossiness_ = core_.GlossinessMaterial(mtl_id_);
+			core_.GlossinessMaterial(mtl_id_, glossiness_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SpecularMaterial(mtl_id_, old_specular_);
+			core_.GlossinessMaterial(mtl_id_, old_glossiness_);
 		}
 
 		private uint mtl_id_;
-		private float[] specular_;
-		private float[] old_specular_;
+		private float glossiness_;
+		private float old_glossiness_;
 	};
 
-	class MtlEditorCommandSetShininessMaterial : MtlEditorCommand
+	class MtlEditorCommandSetEmissiveMaterial : MtlEditorCommand
 	{
-		public MtlEditorCommandSetShininessMaterial(MtlEditorCoreWrapper core, uint mtl_id, float value)
-			: base(core, MtlEditorCommandCode.ECC_SetShininessMaterial, "Set shininess")
+		public MtlEditorCommandSetEmissiveMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
+			: base(core, MtlEditorCommandCode.ECC_SetEmissiveMaterial, "Set emissive")
 		{
 			mtl_id_ = mtl_id;
-			shininess_ = value;
+			emissive_ = value;
 		}
 
 		public override object Execute()
 		{
-			old_shininess_ = core_.ShininessMaterial(mtl_id_);
-			core_.ShininessMaterial(mtl_id_, shininess_);
+			old_emissive_ = core_.EmissiveMaterial(mtl_id_);
+			core_.EmissiveMaterial(mtl_id_, emissive_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.ShininessMaterial(mtl_id_, old_shininess_);
+			core_.EmissiveMaterial(mtl_id_, old_emissive_);
 		}
 
 		private uint mtl_id_;
-		private float shininess_;
-		private float old_shininess_;
-	};
-
-	class MtlEditorCommandSetEmitMaterial : MtlEditorCommand
-	{
-		public MtlEditorCommandSetEmitMaterial(MtlEditorCoreWrapper core, uint mtl_id, float[] value)
-			: base(core, MtlEditorCommandCode.ECC_SetEmitMaterial, "Set emit")
-		{
-			mtl_id_ = mtl_id;
-			emit_ = value;
-		}
-
-		public override object Execute()
-		{
-			old_emit_ = core_.EmitMaterial(mtl_id_);
-			core_.EmitMaterial(mtl_id_, emit_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.EmitMaterial(mtl_id_, old_emit_);
-		}
-
-		private uint mtl_id_;
-		private float[] emit_;
-		private float[] old_emit_;
+		private float[] emissive_;
+		private float[] old_emissive_;
 	};
 
 	class MtlEditorCommandSetOpacityMaterial : MtlEditorCommand
@@ -262,10 +237,10 @@ namespace MtlEditor
 		private float old_opacity_;
 	};
 
-	class MtlEditorCommandSetDiffuseTexture : MtlEditorCommand
+	class MtlEditorCommandSetAlbedoTexture : MtlEditorCommand
 	{
-		public MtlEditorCommandSetDiffuseTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetDiffuseTexture, "Set diffuse texture")
+		public MtlEditorCommandSetAlbedoTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetAlbedoTexture, "Set albedo texture")
 		{
 			mtl_id_ = mtl_id;
 			name_ = name;
@@ -273,14 +248,14 @@ namespace MtlEditor
 
 		public override object Execute()
 		{
-			old_name_ = core_.DiffuseTexture(mtl_id_);
-			core_.DiffuseTexture(mtl_id_, name_);
+			old_name_ = core_.AlbedoTexture(mtl_id_);
+			core_.AlbedoTexture(mtl_id_, name_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.DiffuseTexture(mtl_id_, old_name_);
+			core_.AlbedoTexture(mtl_id_, old_name_);
 		}
 
 		private uint mtl_id_;
@@ -288,10 +263,10 @@ namespace MtlEditor
 		private string old_name_;
 	};
 
-	class MtlEditorCommandSetSpecularTexture : MtlEditorCommand
+	class MtlEditorCommandSetMetalnessTexture : MtlEditorCommand
 	{
-		public MtlEditorCommandSetSpecularTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetSpecularTexture, "Set specular texture")
+		public MtlEditorCommandSetMetalnessTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetMetalnessTexture, "Set metalness texture")
 		{
 			mtl_id_ = mtl_id;
 			name_ = name;
@@ -299,14 +274,14 @@ namespace MtlEditor
 
 		public override object Execute()
 		{
-			old_name_ = core_.SpecularTexture(mtl_id_);
-			core_.SpecularTexture(mtl_id_, name_);
+			old_name_ = core_.MetalnessTexture(mtl_id_);
+			core_.MetalnessTexture(mtl_id_, name_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SpecularTexture(mtl_id_, old_name_);
+			core_.MetalnessTexture(mtl_id_, old_name_);
 		}
 
 		private uint mtl_id_;
@@ -314,10 +289,10 @@ namespace MtlEditor
 		private string old_name_;
 	};
 
-	class MtlEditorCommandSetShininessTexture : MtlEditorCommand
+	class MtlEditorCommandSetGlossinessTexture : MtlEditorCommand
 	{
-		public MtlEditorCommandSetShininessTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetShininessTexture, "Set shininess texture")
+		public MtlEditorCommandSetGlossinessTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetGlossinessTexture, "Set glossiness texture")
 		{
 			mtl_id_ = mtl_id;
 			name_ = name;
@@ -325,14 +300,40 @@ namespace MtlEditor
 
 		public override object Execute()
 		{
-			old_name_ = core_.ShininessTexture(mtl_id_);
-			core_.ShininessTexture(mtl_id_, name_);
+			old_name_ = core_.GlossinessTexture(mtl_id_);
+			core_.GlossinessTexture(mtl_id_, name_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.ShininessTexture(mtl_id_, old_name_);
+			core_.GlossinessTexture(mtl_id_, old_name_);
+		}
+
+		private uint mtl_id_;
+		private string name_;
+		private string old_name_;
+	};
+
+	class MtlEditorCommandSetEmissiveTexture : MtlEditorCommand
+	{
+		public MtlEditorCommandSetEmissiveTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetEmissiveTexture, "Set emissive texture")
+		{
+			mtl_id_ = mtl_id;
+			name_ = name;
+		}
+
+		public override object Execute()
+		{
+			old_name_ = core_.EmissiveTexture(mtl_id_);
+			core_.EmissiveTexture(mtl_id_, name_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.EmissiveTexture(mtl_id_, old_name_);
 		}
 
 		private uint mtl_id_;
@@ -385,58 +386,6 @@ namespace MtlEditor
 		public override void Revoke()
 		{
 			core_.HeightTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetEmitTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetEmitTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetEmitTexture, "Set emit texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.EmitTexture(mtl_id_);
-			core_.EmitTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.EmitTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetOpacityTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetOpacityTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetOpacityTexture, "Set opacity texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.OpacityTexture(mtl_id_);
-			core_.OpacityTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.OpacityTexture(mtl_id_, old_name_);
 		}
 
 		private uint mtl_id_;
@@ -624,5 +573,83 @@ namespace MtlEditor
 		private uint mtl_id_;
 		private float max_;
 		private float old_max_;
+	};
+
+	class MtlEditorCommandSetTransparent : MtlEditorCommand
+	{
+		public MtlEditorCommandSetTransparent(MtlEditorCoreWrapper core, uint mtl_id, bool value)
+			: base(core, MtlEditorCommandCode.ECC_SetTransparent, "Set transparent")
+		{
+			mtl_id_ = mtl_id;
+			transparent_ = value;
+		}
+
+		public override object Execute()
+		{
+			old_transparent_ = core_.TransparentMaterial(mtl_id_);
+			core_.TransparentMaterial(mtl_id_, transparent_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.TransparentMaterial(mtl_id_, old_transparent_);
+		}
+
+		private uint mtl_id_;
+		private bool transparent_;
+		private bool old_transparent_;
+	};
+
+	class MtlEditorCommandSetAlphaTest : MtlEditorCommand
+	{
+		public MtlEditorCommandSetAlphaTest(MtlEditorCoreWrapper core, uint mtl_id, float value)
+			: base(core, MtlEditorCommandCode.ECC_SetAlphaTest, "Set alpha test")
+		{
+			mtl_id_ = mtl_id;
+			alpha_test_ = value;
+		}
+
+		public override object Execute()
+		{
+			old_alpha_test_ = core_.AlphaTestMaterial(mtl_id_);
+			core_.AlphaTestMaterial(mtl_id_, alpha_test_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.AlphaTestMaterial(mtl_id_, old_alpha_test_);
+		}
+
+		private uint mtl_id_;
+		private float alpha_test_;
+		private float old_alpha_test_;
+	};
+
+	class MtlEditorCommandSetSSS : MtlEditorCommand
+	{
+		public MtlEditorCommandSetSSS(MtlEditorCoreWrapper core, uint mtl_id, bool value)
+			: base(core, MtlEditorCommandCode.ECC_SetSSS, "Set SSS")
+		{
+			mtl_id_ = mtl_id;
+			sss_ = value;
+		}
+
+		public override object Execute()
+		{
+			old_sss_ = core_.SSSMaterial(mtl_id_);
+			core_.SSSMaterial(mtl_id_, sss_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.SSSMaterial(mtl_id_, old_sss_);
+		}
+
+		private uint mtl_id_;
+		private bool sss_;
+		private bool old_sss_;
 	};
 }

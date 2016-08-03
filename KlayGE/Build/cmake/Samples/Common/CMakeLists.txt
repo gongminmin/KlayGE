@@ -65,9 +65,9 @@ DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek/vase_round_ddn.dds" "cb
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek/vase_round_spec.dds" "cbda47a1678ce70b6720856736100979d469e159" "7c16bfd6d3fba10e8cc4b68758539210dada3bf4")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/dino50.7z" "e6408c89187baeff44d56d0ad10bec8fe7311238" "8548609ad0fa9824364f8c3ae01ae6664e2269b3")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/KlayGE_TemporaryKey.pfx" "f1e2d4826f7a3729a5f2ea6ff4f8209af303138e" "2d225129e161379646ac508b55dbf1e31b96201b")
-DOWNLOAD_FILE("KlayGE/Samples/media/Common/ScifiRoom.7z" "cbda47a1678ce70b6720856736100979d469e159" "49ab8e4e7904776761bc0d4a273f4955835e11d2")
+DOWNLOAD_FILE("KlayGE/Samples/media/Common/ScifiRoom.7z" "865cc5915685d63fe435cd8ba74b2e8b706afe9a" "d51075c6d775b0850b6e577f3a239605045bc342")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/sphere_high.7z" "cbda47a1678ce70b6720856736100979d469e159" "44d4e8c6297b3d1d8273f34953da0f679138526b")
-DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek.7z" "cbda47a1678ce70b6720856736100979d469e159" "ad0d9190e8955b030dea86929794ad17d1fea76e")
+DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek.7z" "865cc5915685d63fe435cd8ba74b2e8b706afe9a" "dded20da8f16084ff8a417cde6fb6be99677ab75")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/teapot.meshml" "cbda47a1678ce70b6720856736100979d469e159" "cd3ed9076ef1e2d9b1db447bc9fa8f2be73d009a")
 
 SET(LIB_NAME SampleCommon)

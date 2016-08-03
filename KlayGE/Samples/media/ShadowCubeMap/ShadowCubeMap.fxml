@@ -411,16 +411,16 @@ void GenCubeOneInstanceGSShadowMapGS(triangle float4 in_pos[3] : POSITION, trian
 	
 	<parameter type="float3" name="light_pos"/>
 
-	<parameter type="float4" name="ambient_clr"/>
-	<parameter type="float4" name="diffuse_clr"/>
-	<parameter type="float4" name="specular_clr"/>
-	<parameter type="float2" name="shininess_clr"/>
-	<parameter type="float4" name="emit_clr"/>
+	<parameter type="float4" name="albedo_clr"/>
+	<parameter type="float2" name="metalness_clr"/>
+	<parameter type="float2" name="glossiness_clr"/>
+	<parameter type="float4" name="emissive_clr"/>
+	<parameter type="int" name="albedo_map_enabled"/>
 
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="texture2D" name="specular_tex"/>
-	<parameter type="texture2D" name="shininess_tex"/>
-	<parameter type="texture2D" name="emit_tex"/>
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="metalness_tex"/>
+	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="emissive_tex"/>
 
 	<parameter type="textureCUBE" name="light_projective_tex"/>
 	<parameter type="textureCUBE" name="shadow_cube_tex"/>
@@ -464,40 +464,32 @@ void RenderSceneVS(float4 Position : POSITION,
 float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOORD1,
 					float3 LightWorldNormal : TEXCOORD2, float3 LightViewPos : TEXCOORD3) : SV_Target 
 {
-	float3 c_diff, c_spec, emit;
-	float shininess;
-	float opacity;
-	if (diffuse_clr.a > 0.5f)
+	float3 albedo = albedo_clr.rgb;
+	if (albedo_map_enabled)
 	{
-		c_diff = diffuse_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
+		albedo *= albedo_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
-	else
+	
+	float metalness = metalness_clr.r;
+	if (metalness_clr.y > 0.5f)
 	{
-		c_diff = diffuse_clr.rgb;
+		metalness *= metalness_tex.Sample(linear_wrap_sampler, Texcoord).r;
 	}
-	if (specular_clr.a > 0.5f)
+	
+	float3 c_diff = DiffuseColor(albedo, metalness);
+	float3 c_spec = SpecularColor(albedo, metalness);
+	
+	float glossiness = glossiness_clr.r;
+	if (glossiness_clr.y > 0.5f)
 	{
-		c_spec = specular_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
+		glossiness *= glossiness_tex.Sample(linear_wrap_sampler, Texcoord).r;
 	}
-	else
+	float shininess = Glossiness2Shininess(glossiness);
+	
+	float3 emissive = emissive_clr.rgb;
+	if (emissive_clr.a > 0.5f)
 	{
-		c_spec = specular_clr.rgb;
-	}
-	if (shininess_clr.y > 0.5f)
-	{
-		shininess = shininess_tex.Sample(linear_wrap_sampler, Texcoord).r;
-	}
-	else
-	{
-		shininess = shininess_clr.r;
-	}
-	if (emit_clr.a > 0.5f)
-	{
-		emit = emit_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
-	}
-	else
-	{
-		emit = emit_clr.rgb;
+		emissive *= emissive_tex.Sample(linear_wrap_sampler, Texcoord).rgb;
 	}
 	
 	float3 light_vec = normalize(-LightWorldPos);
@@ -532,7 +524,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
 	
-	float3 clr = ambient_clr.rgb * c_diff + emit + lighting * ori_color * atten;	
+	float3 clr = albedo_clr.rgb * c_diff + emissive + lighting * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>

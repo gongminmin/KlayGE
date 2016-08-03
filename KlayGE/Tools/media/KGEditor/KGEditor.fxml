@@ -18,14 +18,14 @@
 	<macro name="VEU_TextureCoord" value="6"/>
 	<macro name="VEU_Tangent" value="7"/>
 	<macro name="VEU_Binormal" value="8"/>
-	
-	<macro name="TS_Diffuse" value="0"/>
-	<macro name="TS_Specular" value="1"/>
-	<macro name="TS_Shininess" value="2"/>
-	<macro name="TS_Normal" value="3"/>
-	<macro name="TS_Height" value="4"/>
-	<macro name="TS_Emit" value="5"/>
-	<macro name="TS_Opacity" value="6"/>
+
+	<macro name="TS_Albedo" value="0"/>
+	<macro name="TS_Metalness" value="1"/>
+	<macro name="TS_Glossiness" value="2"/>
+	<macro name="TS_Emissive" value="3"/>
+	<macro name="TS_Opacity" value="4"/>
+	<macro name="TS_Normal" value="5"/>
+	<macro name="TS_Height" value="6"/>
 
 	<shader>
 		<![CDATA[
@@ -68,37 +68,59 @@ float4 VisualizeVertex(float3 pos, float3 tangent, float3 binormal, float3 norma
 float4 VisualizeTexture(float2 tex0)
 {
 	float4 ret;
-	if (TS_Diffuse == texture_slot)
+	if (TS_Albedo == texture_slot)
 	{
-		if (diffuse_clr.w > 0.5f)
+		if (albedo_map_enabled)
 		{
-			ret = float4(diffuse_tex.Sample(aniso_sampler, tex0).rgb, 1);
+			ret = float4(albedo_tex.Sample(aniso_sampler, tex0).rgb, 1);
 		}
 		else
 		{
-			ret = float4(diffuse_clr.rgb, 1);
+			ret = float4(albedo_clr.rgb, 1);
 		}
 	}
-	else if (TS_Specular == texture_slot)
+	else if (TS_Metalness == texture_slot)
 	{
-		if (specular_clr.w > 0.5f)
+		if (metalness_clr.y > 0.5f)
 		{
-			ret = float4(specular_tex.Sample(aniso_sampler, tex0).rgb, 1);
+			ret = metalness_tex.Sample(aniso_sampler, tex0).r;
 		}
 		else
 		{
-			ret = float4(specular_clr.rgb, 1);
+			ret = metalness_clr.r;
 		}
 	}
-	else if (TS_Shininess == texture_slot)
+	else if (TS_Glossiness == texture_slot)
 	{
-		if (shininess_clr.y > 0.5f)
+		if (glossiness_clr.y > 0.5f)
 		{
-			ret = float4(shininess_tex.Sample(aniso_sampler, tex0).rrr, 1);
+			ret = glossiness_tex.Sample(aniso_sampler, tex0).r;
 		}
 		else
 		{
-			ret = float4(shininess_clr.rrr, 1);
+			ret = glossiness_clr.r;
+		}
+	}
+	else if (TS_Emissive == texture_slot)
+	{
+		if (emissive_clr.w > 0.5f)
+		{
+			ret = float4(emissive_tex.Sample(aniso_sampler, tex0).rgb, 1);
+		}
+		else
+		{
+			ret = float4(emissive_clr.rgb, 1);
+		}
+	}
+	else if (TS_Opacity == texture_slot)
+	{
+		if (albedo_map_enabled)
+		{
+			ret = albedo_tex.Sample(aniso_sampler, tex0).a;
+		}
+		else
+		{
+			ret = albedo_clr.a;
 		}
 	}
 	else if (TS_Normal == texture_slot)
@@ -112,7 +134,7 @@ float4 VisualizeTexture(float2 tex0)
 			ret = float4(0, 0, 1, 1);
 		}
 	}
-	else if (TS_Height == texture_slot)
+	else //if (TS_Height == texture_slot)
 	{
 		if (height_map_parallax_enabled || height_map_tess_enabled)
 		{
@@ -121,28 +143,6 @@ float4 VisualizeTexture(float2 tex0)
 		else
 		{
 			ret = float4(0, 0, 0, 1);
-		}
-	}
-	else if (TS_Emit == texture_slot)
-	{
-		if (emit_clr.w > 0.5f)
-		{
-			ret = float4(emit_tex.Sample(aniso_sampler, tex0).rgb * 16, 1);
-		}
-		else
-		{
-			ret = float4(emit_clr.rgb, 1);
-		}
-	}
-	else //if (TS_Opacity == texture_slot)
-	{
-		if (opacity_map_enabled)
-		{
-			ret = diffuse_tex.Sample(aniso_sampler, tex0).a;
-		}
-		else
-		{
-			ret = opacity_clr;
 		}
 	}
 

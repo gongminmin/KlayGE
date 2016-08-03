@@ -12,7 +12,6 @@
 	<macro name="BLEND_FACTOR" value="0.6"/>
 	
 	<parameter type="float3" name="waterbody_color" x="0.07" y="0.15" z="0.2"/>
-	<parameter type="float3" name="waterbody_specular_color" x="10" y="10" z="10"/>	
 	<parameter type="float" name="patch_length"/>
 	<parameter type="float3" name="fog_color"/>
 
@@ -152,10 +151,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 	
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
-	float3 diffuse = waterbody_color;
-	float specular = waterbody_specular_color.x;
-	
-	StoreGBufferMRT(normal, specular, shininess_clr.x, diffuse,
+	StoreGBufferMRT(normal, glossiness_clr.x, waterbody_color, 0,
 		mrt_0, mrt_1);
 }
 

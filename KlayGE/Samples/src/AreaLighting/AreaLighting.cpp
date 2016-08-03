@@ -19,6 +19,7 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 #include <KlayGE/ParticleSystem.hpp>
 #include <KlayGE/PerfProfiler.hpp>
+#include <KlayGE/RenderMaterial.hpp>
 
 #include <sstream>
 
@@ -99,6 +100,7 @@ void AreaLightingApp::OnCreate()
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
+	deferred_rendering_->SSVOEnabled(0, false);
 
 	AmbientLightSourcePtr ambient_light = MakeSharedPtr<AmbientLightSource>();
 	ambient_light->SkylightTex(y_cube, c_cube);
@@ -152,12 +154,16 @@ void AreaLightingApp::OnCreate()
 
 	for (int i = -5; i < 5; ++ i)
 	{
-		RenderModelPtr sphere_mesh = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
-		sphere_mesh->GetMaterial(0)->specular = float3(0.4f, 0.4f, 0.4f);
-		sphere_mesh->GetMaterial(0)->shininess = (i + 6) * 10.0f;
-		SceneObjectPtr sphere_obj = MakeSharedPtr<SceneObjectHelper>(sphere_mesh, SceneObject::SOA_Cullable);
-		sphere_obj->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f) * MathLib::translation(i + 0.5f, 5.0f, 0.0f));
-		sphere_obj->AddToSceneManager();
+		for (int j = -5; j < 5; ++ j)
+		{
+			RenderModelPtr sphere_mesh = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable);
+			sphere_mesh->GetMaterial(0)->albedo = float4(0.799102738f, 0.496932995f, 0.048171824f, 1);
+			sphere_mesh->GetMaterial(0)->metalness = (4 - i) / 9.0f;
+			sphere_mesh->GetMaterial(0)->glossiness = (4 - j) / 9.0f;
+			SceneObjectPtr sphere_obj = MakeSharedPtr<SceneObjectHelper>(sphere_mesh, SceneObject::SOA_Cullable);
+			sphere_obj->ModelMatrix(MathLib::scaling(10.0f, 10.0f, 10.0f) * MathLib::translation(i * 0.8f + 0.5f, 5.0f, j * 0.8f + 0.5f));
+			sphere_obj->AddToSceneManager();
+		}
 	}
 
 	fpcController_.Scalers(0.05f, 0.5f);

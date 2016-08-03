@@ -197,17 +197,17 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderDecal : public RenderableHelper
 	{
 	public:
-		RenderDecal(TexturePtr const & normal_tex, TexturePtr const & diffuse_tex, float3 const & diffuse_clr,
-				TexturePtr const & specular_tex, float3 const & specular_level, float shininess);
+		RenderDecal(TexturePtr const & normal_tex, TexturePtr const & albedo_tex,
+			float3 const & albedo_clr, float metalness, float glossiness);
 
 		void OnRenderBegin();
 
 	private:
 		RenderEffectParameter* inv_mv_ep_;
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
-		float3 diffuse_clr_;
-		float specular_level_;
-		float shininess_;
+		float3 albedo_clr_;
+		float metalness_;
+		float glossiness_;
 	};
 }
 
