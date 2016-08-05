@@ -191,7 +191,7 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 	float3 pos_es = view_dir * (ReadAFloat(foreground_depth_tex.Sample(ssr_point_sampler, tc), near_q_far.z) / view_dir.z);
 	float3 normal = GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc));
 	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0);
-	float fresnel = fresnel_term_schlick(-view_dir, normal, GetSpecular(g_buffer_1_tex.Sample(ssr_linear_sampler, tc))).x;
+	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(g_buffer_1_tex.Sample(ssr_linear_sampler, tc))).x;
 	return float4(clr.xyz, saturate(clr.w * fresnel));
 }
 		]]>

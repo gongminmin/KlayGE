@@ -61,13 +61,13 @@ float4 RSM2VPLsSpot(float2 tc, float2 rsm_tc, float level, float factor)
 	if (tc.y < 1 / 4.0f)
 	{
 		float4 light = 0;
-		float spot = spot_lighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls);
+		float spot = SpotLighting(float3(0, 0, 0), float3(0, 0, 1), light_cos_out_inner.xy, pos_ls);
 		if (spot > 0)
 		{
 			float n_dot_l = -normal_ls.z;
 			if (n_dot_l > 0)
 			{
-				float atten = n_dot_l * spot * attenuation_term(float3(0, 0, 0), pos_ls, light_falloff);
+				float atten = n_dot_l * spot * AttenuationTerm(float3(0, 0, 0), pos_ls, light_falloff);
 				light = float4(albedo_metalness.xyz * factor, atten);
 			}
 		}

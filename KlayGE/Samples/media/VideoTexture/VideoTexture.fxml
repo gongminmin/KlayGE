@@ -49,13 +49,13 @@ void ObjectVS(float4 Position : POSITION,
 
 float4 ObjectPS(float2 Tex0 : TEXCOORD0, float3 normal : TEXCOORD1, float3 light_vec : TEXCOORD2, float3 half_vec : TEXCOORD3) : SV_Target 
 {
-	float atten = attenuation_term(0, -light_vec.xyz, light_falloff);
+	float atten = AttenuationTerm(0, -light_vec.xyz, light_falloff);
 
 	light_vec = normalize(light_vec);
 	half_vec = normalize(half_vec);
 
 	float3 diffuse = video_tex.Sample(video_sampler, Tex0).rgb;
-	return float4(0.2f * diffuse + atten * light_color * calc_brdf(diffuse, 0.1f, 32, light_vec, half_vec, normal), 1);
+	return float4(0.2f * diffuse + atten * light_color * CalcBRDFShading(diffuse, 0.1f, 32, light_vec, half_vec, normal), 1);
 }
 		]]>
 	</shader>

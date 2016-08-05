@@ -344,7 +344,7 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 
 	float water_depth = clamp(no_water_depth - pos_ss.w, 0, 100.0f);
 
-	float fresnel = fresnel_term_schlick(eye_dir, normal, 0.027f).x;
+	float fresnel = FresnelTerm(eye_dir, normal, 0.027f).x;
 
 	float3 water_color = lerp(refraction * exp(-water_depth * 0.05f) * saturate(10 / pos_ss.w), reflection, fresnel);
 

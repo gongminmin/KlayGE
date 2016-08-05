@@ -495,7 +495,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	float3 light_vec = normalize(-LightWorldPos);
 	float3 normal = normalize(LightWorldNormal);
 	float3 halfway = normalize(light_vec + normal);
-	float3 lighting = calc_brdf(c_diff, c_spec, shininess, light_vec, halfway, normal);
+	float3 shading = CalcBRDFShading(c_diff, c_spec, shininess, light_vec, halfway, normal);
 
 	float3 ori_color = light_projective_tex.Sample(linear_clamp_sampler, LightWorldPos).rgb * light_color;
 	float occluder;
@@ -520,11 +520,11 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	occluder = ReadAFloat(shadow_cube_tex.Sample(linear_clamp_sampler, shadow_dir), far_plane.x * esm_scale_factor);
 #endif
 	
-	float atten = attenuation_term(0, LightWorldPos, light_falloff);
+	float atten = AttenuationTerm(0, LightWorldPos, light_falloff);
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
 	
-	float3 clr = albedo_clr.rgb * c_diff + emissive + lighting * ori_color * atten;	
+	float3 clr = albedo_clr.rgb * c_diff + emissive + shading * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>

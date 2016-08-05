@@ -201,7 +201,7 @@ float4 ReflectSpecialShadingPS(
 	
 	float3 specular = SpecularColor(albedo, metalness);
 	
-	float fresnel = fresnel_term_schlick(-normalize(pos_es), normal_es, specular).x;
+	float fresnel = FresnelTerm(-normalize(pos_es), normal_es, specular).x;
 	return float4(reflection_tex.Sample(reflection_sampler, tc).xyz, fresnel);
 }
 		]]>

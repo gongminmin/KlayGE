@@ -279,7 +279,7 @@ float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 vie
 				shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 			}
 
-			float spec = roughness_term(normalize(dir - view_dir), normal, shininess).x;
+			float spec = DistributionTerm(normalize(dir - view_dir), normal, shininess).x;
 			lighting = CalcColor(n_dot_l, spec, atten, shadow, irrandance_factor * light_color, light_attrib);
 		}
 	}
@@ -307,16 +307,16 @@ float4 DeferredRenderingPointPS(
 	float2 tc_ddy = 0;
 #endif
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float3 normal = GetNormal(ndc);
-	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
+	float3 normal = GetNormal(mrt_0);
+	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
 	
 	return CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 		shininess, tc,
-		attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingSpotPS(
@@ -339,21 +339,21 @@ float4 DeferredRenderingSpotPS(
 	float2 tc_ddy = 0;
 #endif
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float spot = spot_lighting(light_pos_es.xyz, light_dir_es.xyz,
+	float spot = SpotLighting(light_pos_es.xyz, light_dir_es.xyz,
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
 	{
-		float3 normal = GetNormal(ndc);
-		float shininess = Glossiness2Shininess(GetGlossiness(ndc));
+		float3 normal = GetNormal(mrt_0);
+		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
 		
 		lighting = CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 			shininess, tc,
-			spot * attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+			spot * AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 	}
 
 	return lighting;
@@ -379,17 +379,17 @@ float4 DeferredRenderingSunPS(
 	float2 tc_ddy = 0;
 #endif
 	
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 
 	float3 dir = light_dir_es.xyz;
-	float3 normal = GetNormal(ndc);
+	float3 normal = GetNormal(mrt_0);
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(ndc))).x;
+		float spec = DistributionTerm(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(mrt_0))).x;
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
@@ -413,17 +413,17 @@ float4 DeferredRenderingDirectionalPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 	
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 
 	float3 dir = light_dir_es.xyz;
-	float3 normal = GetNormal(ndc);
+	float3 normal = GetNormal(mrt_0);
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = roughness_term(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(ndc))).x;
+		float spec = DistributionTerm(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(mrt_0))).x;
 		lighting = CalcColor(n_dot_l, spec, 1, 1, light_color, light_attrib);
 	}
 
@@ -442,8 +442,8 @@ float4 DeferredRenderingAmbientPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float3 normal = GetNormal(ndc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(mrt_0);
 
 	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 }
@@ -468,19 +468,19 @@ float4 DeferredRenderingSphereAreaPS(
 	float2 tc_ddy = 0;
 #endif
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float3 normal = GetNormal(ndc);
-	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
+	float3 normal = GetNormal(mrt_0);
+	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
 	
 	float3 light_pos = SphereAreaLightPositionFixup(light_pos_es.xyz, light_radius_extend.x, pos_es,
 		normal, view_dir);
 	shininess = AreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius_extend.x, pos_es);
 	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
 		shininess, tc,
-		attenuation_term(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingTubeAreaPS(
@@ -503,12 +503,12 @@ float4 DeferredRenderingTubeAreaPS(
 	float2 tc_ddy = 0;
 #endif
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y) / view_dir.z);
-	float3 normal = GetNormal(ndc);
-	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
+	float3 normal = GetNormal(mrt_0);
+	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
 	
 	float3 l0 = light_pos_es.xyz - light_radius_extend.yzw - pos_es;
 	float3 l1 = light_pos_es.xyz + light_radius_extend.yzw - pos_es;
@@ -819,15 +819,12 @@ float4 DeferredShadowingSunPS(
 
 	<shader>
 		<![CDATA[
-float4 SkylightShading(float glossiness, float4 mrt1, float3 normal, float3 view)
+float4 SkylightShading(float glossiness, float3 c_diff, float3 c_spec, float3 normal, float3 view)
 {
 	float4 shading = 0;
 	
 	if (skylight_diff_spec_mip.z)
 	{
-		float3 c_diff = GetDiffuse(mrt1);
-		float3 c_spec = GetSpecular(mrt1);
-		
 		normal = mul(normal, (float3x3)inv_view);
 		view = mul(view, (float3x3)inv_view);
 
@@ -865,15 +862,17 @@ float4 NoLightingPS(float2 tc : TEXCOORD0) : SV_Target
 
 float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
-	float glossiness = GetGlossiness(ndc);
+	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float glossiness = GetGlossiness(mrt_0);
 	float shininess = Glossiness2Shininess(glossiness);
-	float3 normal = GetNormal(ndc);
+	float3 normal = GetNormal(mrt_0);
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	float4 shading = float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
-	shading += SkylightShading(glossiness, mrt1, normal, view_dir);
+	float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	float3 c_diff = GetDiffuse(mrt_1);
+	float3 c_spec = GetSpecular(mrt_1);
+	float4 shading = float4(Shading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
+	shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
 	return shading;
 }
 

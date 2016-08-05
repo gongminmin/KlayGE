@@ -86,7 +86,7 @@ void CalcVPLsLightingShape(float4 pos,
 		float3 view_vec = normalize(rot_pos);
 		float3 halfway = normalize(light_vec + view_vec);
 
-		oVPLColor = atten * light_color.xyz * (c_diff + specular_term(c_spec, light_vec, halfway, normal, shininess));
+		oVPLColor = atten * light_color.xyz * (c_diff + SpecularTerm(c_spec, light_vec, halfway, normal, shininess));
 
 		float scale = sqrt(oVPLColor.x + oVPLColor.y + oVPLColor.z) * 10;
 		oViewDir.xyz = rot_pos * scale + offset;
@@ -158,7 +158,7 @@ float4 VPLsLightingPS(
 	float cos_iv = dot(norm_i, vij);
 	if (cos_iv > 0)
 	{
-		float atten = attenuation_term(pos_j, pos_i, float3(1, 0, 1));
+		float atten = AttenuationTerm(pos_j, pos_i, float3(1, 0, 1));
 		color_i = cos_iv * atten * vpl_color;
 	}
 

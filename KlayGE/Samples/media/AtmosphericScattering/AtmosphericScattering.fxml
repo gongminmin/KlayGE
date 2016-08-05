@@ -247,7 +247,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	// and mix it with an approximate fresnel factor
 	float3 t, s;
 	AerialPerspective(P, P - reflect(V, N), true, t, s);
-	float fresnel = fresnel_term_schlick(V, N, 0.027f).x;
+	float fresnel = FresnelTerm(V, N, 0.027f).x;
 	float3 ocean_color = lerp(land_color, s, fresnel);
 
 	// we also add the specular reflection of the sun to the ocean
@@ -255,7 +255,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	float3 H = normalize(light_dir + V);
 	float dot_nh = max(0, dot(N, H));
 	float dot_lh = max(0, dot(light_dir, H));
-	ocean_color += light_color * 0.02f * specular_term(H, N, 32) / pow(dot_lh, 3) * dot_nl;
+	ocean_color += light_color * 0.02f * SpecularTerm(1, light_dir, H, N, 32) / pow(dot_lh, 3) * dot_nl;
 
 	// final shaded surface color
 	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, uv).x);

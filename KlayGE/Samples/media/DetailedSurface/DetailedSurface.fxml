@@ -94,7 +94,7 @@ void CalcTBNVS(float4 pos				: POSITION,
 
 float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool nl)
 {
-	float atten = attenuation_term(0, -L.xyz, light_falloff);
+	float atten = AttenuationTerm(0, -L.xyz, light_falloff);
 
 	float3 diffuse = judatex2d_wrap(diffuse_tex_bb, uv).rgb;
 
@@ -109,7 +109,7 @@ float4 Shading(float3 L, float3 H, float2 uv, float3 normal, float shadow, bool 
 		shininess *= ft;
 	}
 
-	return float4(0.1f * diffuse + shadow * atten * light_color * calc_brdf(diffuse, 0.2f, shininess, light_vec, halfway, normal), 1);
+	return float4(0.1f * diffuse + shadow * atten * light_color * CalcBRDFShading(diffuse, 0.2f, shininess, light_vec, halfway, normal), 1);
 }
 
 float4 NonePS(float4 L		: TEXCOORD0,

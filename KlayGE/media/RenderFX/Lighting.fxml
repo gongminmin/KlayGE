@@ -5,17 +5,17 @@
 
 	<shader>
 		<![CDATA[
-float directional_lighting(float3 light_dir, float3 normal)
+float DirectionalLighting(float3 light_dir, float3 normal)
 {
 	return dot(-light_dir, normal);
 }
 
-float point_lighting(float3 light_pos, float3 pos, float3 normal)
+float PointLighting(float3 light_pos, float3 pos, float3 normal)
 {
 	return dot(normalize(light_pos - pos), normal);
 }
 
-float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 pos)
+float SpotLighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 pos)
 {
 	// cos_cone is (cos_outer_cone, cos_inner_cone)
 	
@@ -26,51 +26,42 @@ float spot_lighting(float3 light_pos, float3 light_dir, float2 cos_cone, float3 
 }
 
 
-float3 fresnel_term_schlick(float3 light_vec, float3 halfway_vec, float3 c_spec)
+float3 FresnelTerm(float3 light_vec, float3 halfway_vec, float3 c_spec)
 {
 	float e_n = saturate(dot(light_vec, halfway_vec));
 	return c_spec > 0 ? c_spec + (1 - c_spec) * exp2(-(5.55473f * e_n + 6.98316f) * e_n) : 0;
 }
 
-float specular_normalize_factor(float shininess)
+float SpecularNormalizeFactor(float shininess)
 {
 	return (shininess + 2) / 8;
 }
 
-float3 roughness_term(float3 halfway_vec, float3 normal, float shininess)
+float3 DistributionTerm(float3 halfway_vec, float3 normal, float shininess)
 {
 	return exp((shininess + 0.775f) * (max(dot(halfway_vec, normal), 0.0f) - 1));
 }
 
-float3 roughness_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float shininess)
+float3 SpecularTerm(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float shininess)
 {
-	return roughness_term(halfway_vec, normal, shininess) * fresnel_term_schlick(light_vec, halfway_vec, c_spec);
-}
-
-float3 specular_term(float3 halfway_vec, float3 normal, float shininess)
-{
-	return specular_normalize_factor(shininess) * roughness_term(halfway_vec, normal, shininess);
-}
-
-float3 specular_term(float3 c_spec, float3 light_vec, float3 halfway_vec, float3 normal, float shininess)
-{
-	return specular_normalize_factor(shininess) * roughness_term(c_spec, light_vec, halfway_vec, normal, shininess);
+	return SpecularNormalizeFactor(shininess) * DistributionTerm(halfway_vec, normal, shininess)
+		* FresnelTerm(light_vec, halfway_vec, c_spec);
 }
 
 
 // diffuse only
-float3 calc_brdf(float3 c_diff, float3 l, float3 n)
+float3 CalcBRDFShading(float3 c_diff, float3 l, float3 n)
 {
 	return max(c_diff * dot(n, l), 0);
 }
 // diffuse + specular
-float3 calc_brdf(float3 c_diff, float3 c_spec, float shininess, float3 l, float3 h, float3 n)
+float3 CalcBRDFShading(float3 c_diff, float3 c_spec, float shininess, float3 l, float3 h, float3 n)
 {
-	return max((c_diff + specular_term(c_spec, l, h, n, shininess)) * dot(n, l), 0);
+	return max((c_diff + SpecularTerm(c_spec, l, h, n, shininess)) * dot(n, l), 0);
 }
 
 
-float attenuation_term(float3 light_pos, float3 pos, float3 atten)
+float AttenuationTerm(float3 light_pos, float3 pos, float3 atten)
 {
 	float3 v = light_pos - pos;
 	float d2 = dot(v, v);
@@ -82,8 +73,8 @@ float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
 				float3 diffuse, float3 specular, float3 view_dir, float3 normal)
 {
 	return float3(max(diff_lighting * diffuse
-		+ specular_normalize_factor(shininess) * spec_lighting
-			* fresnel_term_schlick(normalize(view_dir), normal, specular), 0));
+		+ SpecularNormalizeFactor(shininess) * spec_lighting
+			* FresnelTerm(normalize(view_dir), normal, specular), 0));
 }
 
 float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular,

@@ -215,10 +215,10 @@ void DistanceMappingVS(float4 pos		: POSITION,
 
 float4 DistanceMappingShading(float3 L, float3 V, float3 H, float3 diffuse, float3 normal)
 {
-	float atten = attenuation_term(0, -L.xyz, light_falloff);
+	float atten = AttenuationTerm(0, -L.xyz, light_falloff);
 	float3 light_vec = normalize(L);
 	float3 halfway_vec = normalize(H);
-	return float4(atten * light_color * calc_brdf(diffuse, 0.2f, 16, light_vec, halfway_vec, normal), 1);
+	return float4(atten * light_color * CalcBRDFShading(diffuse, 0.2f, 16, light_vec, halfway_vec, normal), 1);
 }
 
 float4 DistanceMappingPS(float4 L	: TEXCOORD0,
@@ -367,7 +367,7 @@ float4 RefractEffectPS(float3 wPosition : TEXCOORD0, float3 wNormal : TEXCOORD1,
 
 	float3 refract_vec = refract(wViewVec, wNormal, refract_idx.y);
 	float3 reflect_vec = reflect(wViewVec, wNormal);
-	float fresnel_term = fresnel_term_schlick(-wViewVec, wNormal, 0.0977f).x;
+	float fresnel_term = FresnelTerm(-wViewVec, wNormal, 0.0977f).x;
 
 	float3 reflected_clr = env_cube.Sample(trilinear_sampler, float3(reflect_vec.x, -KLAYGE_FLIPPING * reflect_vec.y, reflect_vec.z)).xyz;
 

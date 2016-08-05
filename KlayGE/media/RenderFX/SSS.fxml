@@ -229,7 +229,7 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	coord_ls += 0.5f;
 	float s = abs(length(light_view_pos.xyz) - ReadAFloat(shadow_tex.Sample(bilinear_sampler, coord_ls), sm_far_plane));
 
-	float3 color = light_color * attenuation_term(light_pos_es, pos_es, light_falloff);
+	float3 color = light_color * AttenuationTerm(light_pos_es, pos_es, light_falloff);
 	float3 light_vec = normalize(pos_es - light_pos_es);
 	float irradiance = max(0.3f + dot(normal, light_vec), 0);
 	float3 transmittance = CalcTransmit(s * strength) * color * irradiance * GetDiffuse(mrt1).rgb;

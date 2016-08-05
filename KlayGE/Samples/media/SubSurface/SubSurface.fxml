@@ -118,7 +118,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 				float3 N	: TEXCOORD4,
 				float3 tc_w : TEXCOORD5) : SV_Target
 {
-	float attenuation = attenuation_term(0, -L.xyz, light_falloff);
+	float attenuation = AttenuationTerm(0, -L.xyz, light_falloff);
 
 	L = normalize(L);
 	V = normalize(V);
@@ -153,7 +153,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	float indirect_light = material_thickness * (min(0, dot(N, L)) + min(0, dot(V, L)));
 	indirect_light *= exp(thickness * sigma_t);
 
-	float3 clr = (albedo_clr.rgb * 0.2f * diffuse + calc_brdf(diffuse, specular, shininess, L, H, N)
+	float3 clr = (albedo_clr.rgb * 0.2f * diffuse + CalcBRDFShading(diffuse, specular, shininess, L, H, N)
 		+ indirect_light * extinction_coefficient) * attenuation;
 
 	return float4(clr.rgb * light_color, 1);

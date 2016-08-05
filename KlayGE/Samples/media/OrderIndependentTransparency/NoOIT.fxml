@@ -68,7 +68,7 @@ float4 Shading(float4 L, float4 H)
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H.xyz);
 
-	return float4(0.2f * diffuse + emissive + calc_brdf(diffuse, 0.5f, specular * 256, light_vec, halfway, normal), alpha);
+	return float4(0.2f * diffuse + emissive + CalcBRDFShading(diffuse, 0.5f, specular * 256, light_vec, halfway, normal), alpha);
 }
 
 void NoOITVS(float4 pos				: POSITION,

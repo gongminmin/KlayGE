@@ -92,7 +92,7 @@ float3 CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_di
 				{
 					total_weight += 1.0f;
 				
-					float atten = attenuation_term(pos_es_sample, pos_es, float3(1, 0.5f, 0));
+					float atten = AttenuationTerm(pos_es_sample, pos_es, float3(1, 0.5f, 0));
 					indirect += atten * dot(normalize(dir_es_sample), normal) * shading_tex.SampleLevel(bilinear_sampler, tc_sample, 0).xyz;
 				}
 			}

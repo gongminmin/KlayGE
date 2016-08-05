@@ -49,7 +49,7 @@ float4 VertexDisplacementPS(float2 texCoord : TEXCOORD0, float3 normal : TEXCOOR
 {
 	float3 l = -lightDir;
 	float3 n = normalize(normal);
-	return float4(calc_brdf(pow(max(flag_tex.Sample(flagSampler, texCoord).rgb, 0.0f), 2.2f), l, n), 1);
+	return float4(CalcBRDFShading(pow(max(flag_tex.Sample(flagSampler, texCoord).rgb, 0), 2.2f), l, n), 1);
 }
 		]]>
 	</shader>

@@ -56,7 +56,7 @@ float3 PrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, fl
 	float3 r = CalcPrefilteredEnvVec(normal, view);
 	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
 		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
-	return prefiltered_clr * saturate(calc_brdf(0, specular, shininess, r, normal, normal));
+	return prefiltered_clr * saturate(CalcBRDFShading(0, specular, shininess, r, normal, normal));
 }
 
 float3 PBPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 normal, float3 view)

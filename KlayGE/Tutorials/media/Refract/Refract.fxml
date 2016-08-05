@@ -83,7 +83,7 @@ void RefractVS(float4 pos			: POSITION,
 	float3 n_incident = normalize(incident.xyz);
 	float3 n_normal = normalize(out_normal);
 	refract_vec.xyz = refract(n_incident, n_normal, eta_ratio.g);
-	refract_vec.w = fresnel_term_schlick(-n_incident, n_normal, 0.0977f).x;
+	refract_vec.w = FresnelTerm(-n_incident, n_normal, 0.0977f).x;
 	dir_ss = mul(float4(refract_vec.xyz, 0), proj);
 }
 
