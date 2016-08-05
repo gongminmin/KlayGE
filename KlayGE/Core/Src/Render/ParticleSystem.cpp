@@ -329,6 +329,8 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
 			if (!*ps_desc_.ps)
 			{
 				ParticleSystemPtr ps = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
@@ -399,6 +401,7 @@ namespace
 
 	private:
 		ParticleSystemDesc ps_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 	
 #ifdef KLAYGE_HAS_STRUCT_PACK

@@ -769,6 +769,8 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
 			if (!*font_desc_.kfont)
 			{
 				std::shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
@@ -816,6 +818,7 @@ namespace
 
 	private:
 		FontDesc font_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 }
 

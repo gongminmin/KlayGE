@@ -142,6 +142,8 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
 			RenderModelPtr const & model = *model_desc_.model;
 			if (!model || !model->HWResourceReady())
 			{
@@ -366,6 +368,7 @@ namespace
 
 	private:
 		ModelDesc model_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 }
 

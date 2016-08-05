@@ -164,6 +164,8 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
 			if (!*pp_desc_.pp)
 			{
 				auto effect = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name);
@@ -218,6 +220,7 @@ namespace
 
 	private:
 		PostProcessDesc pp_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 }
 

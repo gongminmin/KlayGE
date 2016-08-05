@@ -1241,6 +1241,8 @@ namespace
 
 		std::shared_ptr<void> MainThreadStage()
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
 			TexturePtr const & tex = *tex_desc_.tex;
 			if (!tex || !tex->HWResourceReady())
 			{
@@ -1553,6 +1555,7 @@ namespace
 
 	private:
 		TexDesc tex_desc_;
+		std::mutex main_thread_stage_mutex_;
 	};
 }
 
