@@ -252,7 +252,7 @@ namespace
 				{
 					mtl.glossiness = attr->ValueFloat();
 				}
-				attr = metalness_node->Attrib("texture");
+				attr = glossiness_node->Attrib("texture");
 				if (attr)
 				{
 					offline_mtl.texture_slots.emplace_back("Glossiness", attr->ValueString());
@@ -2080,6 +2080,22 @@ namespace
 		}
 	}
 
+	std::string ReplaceExtToDDS(std::string const & name)
+	{
+		std::string ret;
+		size_t dot_pos = name.find_last_of('.');
+		if (dot_pos != std::string::npos)
+		{
+			std::string base_name = name.substr(0, dot_pos);
+			ret = base_name + ".dds";
+		}
+		else
+		{
+			ret = name;
+		}
+		return ret;
+	}
+
 	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, std::string const & platform)
 	{
 		std::ostringstream ss;
@@ -2109,28 +2125,28 @@ namespace
 						|| (CT_HASH("Diffuse Color Map") == type_hash)
 						|| (CT_HASH("Albedo") == type_hash))
 					{
-						mtls[i].material.albedo_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.albedo_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if (CT_HASH("Metalness") == type_hash)
 					{
-						mtls[i].material.metalness_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.metalness_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtls[i].material.glossiness_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.glossiness_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{
-						mtls[i].material.emissive_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.emissive_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
 						|| (CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
 					{
-						mtls[i].material.normal_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.normal_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 					{
-						mtls[i].material.height_tex_name = mtls[i].texture_slots[j].second;
+						mtls[i].material.height_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 				}
 			}
