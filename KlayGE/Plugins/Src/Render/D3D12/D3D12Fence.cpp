@@ -41,7 +41,7 @@
 namespace KlayGE
 {
 	D3D12Fence::D3D12Fence()
-			: fence_val_(1), last_completed_val_(0)
+			: last_completed_val_(0), fence_val_(1)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());

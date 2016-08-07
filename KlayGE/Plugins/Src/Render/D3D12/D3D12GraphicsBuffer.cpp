@@ -379,7 +379,7 @@ namespace KlayGE
 	void D3D12GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
 		uint8_t* p = static_cast<uint8_t*>(this->Map(BA_Write_Only));
-		std::memcpy(p + offset, data, size);
+		memcpy(p + offset, data, size);
 		this->Unmap();
 	}
 
