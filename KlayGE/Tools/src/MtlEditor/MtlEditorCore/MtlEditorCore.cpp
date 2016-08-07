@@ -467,7 +467,7 @@ namespace KlayGE
 #else
 		std::string ext_name = mesh_path.extension().string();
 #endif
-		if ((ext_name != "meshml") && (ext_name != "model_bin"))
+		if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
 		{
 			std::string meshconv_name = "MeshConv" KLAYGE_DBG_SUFFIX;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -499,11 +499,11 @@ namespace KlayGE
 				return false;
 			}
 
-			mesh_path.replace_extension("meshml");
+			mesh_path.replace_extension(".meshml");
 		}
 
 		std::experimental::filesystem::path imposter_path = mesh_path;
-		imposter_path.replace_extension("impml");
+		imposter_path.replace_extension(".impml");
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		std::string imposter_name = imposter_path;
 #else
