@@ -459,6 +459,14 @@ namespace
 					mtl.sss = attr->ValueInt() ? true : false;
 				}
 			}
+			else
+			{
+				XMLAttributePtr attr = mtl_node->Attrib("sss");
+				if (attr)
+				{
+					mtl.sss = attr->ValueInt() ? true : false;
+				}
+			}
 
 			XMLNodePtr tex_node = mtl_node->FirstNode("texture");
 			if (!tex_node)
