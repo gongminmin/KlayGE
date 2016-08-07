@@ -14,7 +14,7 @@ namespace KlayGE
 		void Refresh();
 		void Resize(uint32_t width, uint32_t height);
 
-		void OpenModel(System::String^ name);
+		bool OpenModel(System::String^ name);
 		void SaveModel(System::String^ name);
 
 		unsigned int NumFrames();

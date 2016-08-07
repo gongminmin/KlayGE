@@ -26,7 +26,7 @@ namespace KlayGE
 
 		void Resize(uint32_t width, uint32_t height);
 
-		void OpenModel(std::string const & name);
+		bool OpenModel(std::string const & name);
 		void SaveAsModel(std::string const & name);
 
 		uint32_t NumFrames() const;

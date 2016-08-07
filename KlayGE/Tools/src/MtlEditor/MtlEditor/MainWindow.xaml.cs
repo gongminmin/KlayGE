@@ -261,13 +261,11 @@ namespace MtlEditor
 
 		private void OpenModel(string file_name)
 		{
-			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
-			if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
+			if (!core_.OpenModel(file_name.ToLower()))
 			{
 				return;
 			}
 
-			core_.OpenModel(file_name);
 			this.FileNameChanged(file_name);
 
 			this.ClearHistroy();
@@ -321,7 +319,9 @@ namespace MtlEditor
 			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
 
 			dlg.DefaultExt = ".meshml";
-			dlg.Filter = "All Model Files (*.meshml, *.model_bin)|*.meshml;*.model_bin|MeshML Files (*.meshml)|*.meshml|model_bin Files (*.model_bin)|*.model_bin|All Files|*.*";
+			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.collada;*.dxf;*.csm;"
+				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
+				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x|All Files|*.*";
 			dlg.CheckPathExists = true;
 			dlg.CheckFileExists = true;
 			if (true == dlg.ShowDialog())

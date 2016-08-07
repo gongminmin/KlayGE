@@ -54,9 +54,9 @@ namespace KlayGE
 		core_->Resize(width, height);
 	}
 
-	void MtlEditorCoreWrapper::OpenModel(String^ name)
+	bool MtlEditorCoreWrapper::OpenModel(String^ name)
 	{
-		core_->OpenModel(StringToStd(name));
+		return core_->OpenModel(StringToStd(name));
 	}
 
 	void MtlEditorCoreWrapper::SaveModel(String^ name)
