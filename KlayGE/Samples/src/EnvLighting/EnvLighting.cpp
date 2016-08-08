@@ -117,7 +117,7 @@ namespace
 		SphereObject(float4 const & diff, float4 const & spec, float glossiness)
 			: SceneObjectHelper(SOA_Cullable)
 		{
-			renderable_ = SyncLoadModel("sphere_high.7z//sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
+			renderable_ = SyncLoadModel("sphere_high.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<SphereRenderable>())->Subrenderable(0);
 			checked_pointer_cast<SphereRenderable>(renderable_)->Material(diff, spec, glossiness);
 		}
 

@@ -168,7 +168,7 @@ void MetalnessApp::OnCreate()
 	{
 		for (uint32_t j = 0; j < spheres_column; ++ j)
 		{
-			spheres_[i * spheres_column + j] = MakeSharedPtr<MetalObject>("sphere_high.7z//sphere_high.meshml");
+			spheres_[i * spheres_column + j] = MakeSharedPtr<MetalObject>("sphere_high.meshml");
 			checked_pointer_cast<MetalObject>(spheres_[i * spheres_column + j])->Material(albedo_,
 				(i + 1.0f) / spheres_row, j / (spheres_column - 1.0f));
 			spheres_[i * spheres_column + j]->ModelMatrix(MathLib::scaling(1.3f, 1.3f, 1.3f)

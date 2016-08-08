@@ -1,5 +1,5 @@
 DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_color.dds" "cbda47a1678ce70b6720856736100979d469e159" "d7403dbcf242b65198c4d96816a655bee3f07622")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.7z" "cbda47a1678ce70b6720856736100979d469e159" "7caf25a9bc2fa910faec90bbfc53e8df7d1d8c95")
+DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.meshml" "54e95a3a317ffd3e884af63e008ce6cce2289af0" "94931e91dfc90c539aa641273c3b913a9d02425a")
 DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds" "cbda47a1678ce70b6720856736100979d469e159" "e006d8f16187e53c34f49c29d092a8f53f74824b")
 
 SET(SOURCE_FILES
