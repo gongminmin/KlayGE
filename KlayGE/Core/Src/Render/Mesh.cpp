@@ -232,7 +232,7 @@ namespace
 					mesh->AddIndexStream(rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
 
 					mesh->NumVertices(rhs_mesh->NumVertices());
-					mesh->NumTriangles(rhs_mesh->NumTriangles());
+					mesh->NumIndices(rhs_mesh->NumIndices());
 					mesh->StartVertexLocation(rhs_mesh->StartVertexLocation());
 					mesh->StartIndexLocation(rhs_mesh->StartIndexLocation());
 				}
@@ -324,7 +324,7 @@ namespace
 				mesh->AddIndexStream(model_desc_.model_data->merged_ib, model_desc_.model_data->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
 
 				mesh->NumVertices(model_desc_.model_data->mesh_num_vertices[mesh_index]);
-				mesh->NumTriangles(model_desc_.model_data->mesh_num_indices[mesh_index] / 3);
+				mesh->NumIndices(model_desc_.model_data->mesh_num_indices[mesh_index]);
 				mesh->StartVertexLocation(model_desc_.model_data->mesh_base_vertices[mesh_index]);
 				mesh->StartIndexLocation(model_desc_.model_data->mesh_start_indices[mesh_index]);
 			}
@@ -1015,7 +1015,7 @@ namespace KlayGE
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
+		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
 		std::vector<Joint>& joints, std::shared_ptr<AnimationActionsType>& actions,
 		std::shared_ptr<KeyFramesType>& kfs, uint32_t& num_frames, uint32_t& frame_rate,
 		std::vector<std::shared_ptr<AABBKeyFrames>>& frame_pos_bbs)
@@ -1235,8 +1235,8 @@ namespace KlayGE
 		tc_bbs.resize(num_meshes);
 		mesh_num_vertices.resize(num_meshes);
 		mesh_base_vertices.resize(num_meshes);
-		mesh_num_triangles.resize(num_meshes);
-		mesh_base_triangles.resize(num_meshes);
+		mesh_num_indices.resize(num_meshes);
+		mesh_base_indices.resize(num_meshes);
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
 			mesh_names[mesh_index] = ReadShortString(decoded);
@@ -1271,10 +1271,10 @@ namespace KlayGE
 			mesh_num_vertices[mesh_index] = LE2Native(mesh_num_vertices[mesh_index]);
 			decoded->read(&mesh_base_vertices[mesh_index], sizeof(mesh_base_vertices[mesh_index]));
 			mesh_base_vertices[mesh_index] = LE2Native(mesh_base_vertices[mesh_index]);
-			decoded->read(&mesh_num_triangles[mesh_index], sizeof(mesh_num_triangles[mesh_index]));
-			mesh_num_triangles[mesh_index] = LE2Native(mesh_num_triangles[mesh_index]);
-			decoded->read(&mesh_base_triangles[mesh_index], sizeof(mesh_base_triangles[mesh_index]));
-			mesh_base_triangles[mesh_index] = LE2Native(mesh_base_triangles[mesh_index]);
+			decoded->read(&mesh_num_indices[mesh_index], sizeof(mesh_num_indices[mesh_index]));
+			mesh_num_indices[mesh_index] = LE2Native(mesh_num_indices[mesh_index]);
+			decoded->read(&mesh_base_indices[mesh_index], sizeof(mesh_base_indices[mesh_index]));
+			mesh_base_indices[mesh_index] = LE2Native(mesh_base_indices[mesh_index]);
 		}
 
 		joints.resize(num_joints);
@@ -1456,7 +1456,7 @@ namespace KlayGE
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<uint32_t>& mesh_num_triangles, std::vector<uint32_t>& mesh_base_triangles,
+		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
 		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
 		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
 	{
@@ -1712,20 +1712,20 @@ namespace KlayGE
 				}
 			}
 
-			for (size_t t = 0; t < mesh_num_triangles[i]; ++ t)
+			for (size_t t = 0; t < mesh_num_indices[i]; t += 3)
 			{
 				int tri_id = obj.AllocTriangle(mesh_id);
 				int index[3];
 				if (all_is_index_16_bit)
 				{
-					uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_triangles[i] + t * 3) * sizeof(uint16_t)]);
+					uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_indices[i] + t) * sizeof(uint16_t)]);
 					index[0] = src[0];
 					index[1] = src[1];
 					index[2] = src[2];
 				}
 				else
 				{
-					uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_triangles[i] + t * 3)* sizeof(uint32_t)]);
+					uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_indices[i] + t)* sizeof(uint32_t)]);
 					index[0] = src[0];
 					index[1] = src[1];
 					index[2] = src[2];
@@ -1790,8 +1790,8 @@ namespace KlayGE
 		std::vector<AABBox> tc_bbs(mesh_names.size());
 		std::vector<uint32_t> mesh_num_vertices(mesh_names.size());
 		std::vector<uint32_t> mesh_base_vertices(mesh_names.size());
-		std::vector<uint32_t> mesh_num_triangles(mesh_names.size());
-		std::vector<uint32_t> mesh_base_triangles(mesh_names.size());
+		std::vector<uint32_t> mesh_num_indices(mesh_names.size());
+		std::vector<uint32_t> mesh_base_indices(mesh_names.size());
 		if (!mesh_names.empty())
 		{
 			{
@@ -1853,8 +1853,8 @@ namespace KlayGE
 
 				mesh_num_vertices[mesh_index] = mesh.NumVertices();
 				mesh_base_vertices[mesh_index] = mesh.StartVertexLocation();
-				mesh_num_triangles[mesh_index] = mesh.NumTriangles();
-				mesh_base_triangles[mesh_index] =  mesh.StartIndexLocation();
+				mesh_num_indices[mesh_index] = mesh.NumIndices();
+				mesh_base_indices[mesh_index] =  mesh.StartIndexLocation();
 			}
 		}
 
@@ -1915,7 +1915,7 @@ namespace KlayGE
 
 		SaveModel(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
 			mesh_names, mtl_ids, pos_bbs, tc_bbs,
-			mesh_num_vertices, mesh_base_vertices, mesh_num_triangles, mesh_base_triangles,
+			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 			joints, actions, kfs, num_frame, frame_rate);
 	}
 

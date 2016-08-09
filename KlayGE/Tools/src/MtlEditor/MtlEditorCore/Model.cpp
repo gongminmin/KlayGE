@@ -167,7 +167,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 		total_num_vertices += mesh->NumVertices();
-		total_num_indices += mesh->NumTriangles() * 3;
+		total_num_indices += mesh->NumIndices();
 	}
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -343,7 +343,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			{
 				StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 				MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
-					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumIndices(),
 					positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
 			}
 		}
@@ -356,7 +356,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
-				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumTriangles() * 3,
+				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumIndices(),
 				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices(),
 				texcoords.begin() + mesh->StartVertexLocation(), normals.begin() + mesh->StartVertexLocation());
 		}
