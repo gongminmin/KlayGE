@@ -17,8 +17,8 @@
 	</parameter>
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="clamp"/>
-		<state name="address_v" value="clamp"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
 	</parameter>
 
 	<parameter type="float" name="planet_radius" value="1"/>
@@ -27,6 +27,11 @@
 	<parameter type="float3" name="light_dir"/>
 	<parameter type="float3" name="beta" x="38.05" y="82.36" z="214.65"/>
 	<parameter type="float3" name="absorb" x="0.75" y="0.85" z="1"/>
+
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="tc_center"/>
+	<parameter type="float2" name="tc_extent"/>
 
 	<macro name="LN2" value="0.693147181"/>
 	<macro name="H50" value="(density * LN2)"/>
@@ -211,34 +216,32 @@ void PlanetVS(float4 pos		: POSITION,
 					out float3 oViewDir		: TEXCOORD2,
 					out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex = tex * tc_extent + tc_center;
+
 	oTex = tex;
 	oPosOS = pos.xyz;
 	oPos = mul(float4(oPosOS, pos.w), mvp);
-	oViewDir = oPosOS - eye_pos;
+	oViewDir = eye_pos - oPosOS;
 }
 
 float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_dir : TEXCOORD2) : SV_Target
 {
 	float3 color = 0;
-	view_dir = normalize(view_dir);
-	
-	// we have hit a surface point
-	// get surfance normal and generate spherical texture coordinates
-	float3 N = normalize(pos_os);
-	float2 uv = 0.5f + float2(0.15915494f, 0.31830989f) * float2(atan2(N.z, N.x), asin(-N.y));
-	
-	float3 P = N;
+	view_dir = normalize(view_dir);	
+	pos_os = normalize(pos_os);
 
-	float3 surface_color = earth_color_tex.Sample(linear_sampler, uv).xyz;
+	float3 normal = pos_os;
+
+	float3 surface_color = earth_color_tex.Sample(linear_sampler, tex).xyz;
 
 	// get the direct light color
 	// from the transmittance of the sun through the atmosphere
-	float3 light_color = Transmittance(P, light_dir);
+	float3 light_color = Transmittance(pos_os, light_dir);
 
 	// for shading the landmass we use the Lommel-Seeliger law
-	float3 V = -view_dir;
-	float dot_nv = max(0, dot(N, V));
-	float dot_nl = max(0, dot(N, light_dir));
+	float dot_nv = max(0, dot(normal, view_dir));
+	float dot_nl = max(0, dot(normal, light_dir));
 	float3 land_color = light_color * surface_color * dot_nl / (dot_nl + dot_nv);
 
 	// for shading the ocean 
@@ -246,23 +249,22 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	// via the aerial perspective of the reflection vector,
 	// and mix it with an approximate fresnel factor
 	float3 t, s;
-	AerialPerspective(P, P - reflect(V, N), true, t, s);
-	float fresnel = FresnelTerm(V, N, 0.027f).x;
+	AerialPerspective(pos_os, pos_os - reflect(view_dir, normal), true, t, s);
+	float fresnel = FresnelTerm(view_dir, normal, 0.04f).x;
 	float3 ocean_color = lerp(land_color, s, fresnel);
 
 	// we also add the specular reflection of the sun to the ocean
 	// uses the micro-facet shading model described in ShaderX7 
-	float3 H = normalize(light_dir + V);
-	float dot_nh = max(0, dot(N, H));
-	float dot_lh = max(0, dot(light_dir, H));
-	ocean_color += light_color * 0.02f * SpecularTerm(1, light_dir, H, N, 32) / pow(dot_lh, 3) * dot_nl;
+	float3 halfway = normalize(light_dir + view_dir);
+	float dot_lh = max(0, dot(light_dir, halfway));
+	ocean_color += light_color * SpecularTerm(0.04f, light_dir, halfway, normal, 32) / pow(dot_lh, 3) * dot_nl;
 
 	// final shaded surface color
-	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, uv).x);
+	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, tex).x);
 
 	// finally obtain the aerial perspective of the shaded surface point
 	// from the camera's point of view
-	AerialPerspective(eye_pos, P, false, t, s);
+	AerialPerspective(eye_pos, pos_os, false, t, s);
 	color = s + t * surface_color;
 
 	return float4(max(color, 0), 1);
@@ -276,6 +278,9 @@ void AtmosphereVS(float4 pos		: POSITION,
 					out float3 oViewDir		: TEXCOORD2,
 					out float4 oPos			: SV_Position)
 {
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	tex = tex * tc_extent + tc_center;
+
 	oTex = tex;
 	oPosOS = pos.xyz * atmosphere_top;
 	oPos = mul(float4(oPosOS, pos.w), mvp);
