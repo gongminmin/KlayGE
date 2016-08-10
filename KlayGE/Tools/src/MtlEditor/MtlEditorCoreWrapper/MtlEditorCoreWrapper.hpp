@@ -41,6 +41,7 @@ namespace KlayGE
 		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index);
 
 		uint32_t MaterialID(uint32_t mesh_id);
+		uint32_t NumMaterials();
 		array<float>^ AlbedoMaterial(uint32_t mtl_id);
 		float MetalnessMaterial(uint32_t mtl_id);
 		float GlossinessMaterial(uint32_t mtl_id);

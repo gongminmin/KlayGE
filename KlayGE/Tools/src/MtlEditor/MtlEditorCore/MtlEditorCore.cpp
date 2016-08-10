@@ -755,6 +755,12 @@ namespace KlayGE
 		return mesh->MaterialID();
 	}
 
+	uint32_t MtlEditorCore::NumMaterials() const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return static_cast<uint32_t>(model->NumMaterials());
+	}
+
 	float3 const & MtlEditorCore::AlbedoMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());

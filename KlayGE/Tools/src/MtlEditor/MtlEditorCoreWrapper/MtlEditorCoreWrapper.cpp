@@ -159,6 +159,11 @@ namespace KlayGE
 		return core_->MaterialID(mesh_id);
 	}
 
+	uint32_t MtlEditorCoreWrapper::NumMaterials()
+	{
+		return core_->NumMaterials();
+	}
+
 	array<float>^ MtlEditorCoreWrapper::AlbedoMaterial(uint32_t mtl_id)
 	{
 		auto const & clr = core_->AlbedoMaterial(mtl_id);

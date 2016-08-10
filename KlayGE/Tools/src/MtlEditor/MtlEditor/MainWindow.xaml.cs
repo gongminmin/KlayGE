@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,9 +27,7 @@ namespace MtlEditor
 	{
 		enum PropertyOrders
 		{
-			PO_Meshes = 0,
-			PO_VertexStreams,
-			PO_Albedo,
+			PO_Albedo = 0,
 			PO_Metalness,
 			PO_Glossiness,
 			PO_Emissive,
@@ -52,25 +51,12 @@ namespace MtlEditor
 			PO_SSS
 		};
 
-		[CategoryOrder("Meshes", 0)]
-		[CategoryOrder("Vertex Streams", 1)]
-		[CategoryOrder("Material", 2)]
-		[CategoryOrder("Textures", 3)]
-		[CategoryOrder("Detail", 4)]
-		[CategoryOrder("Attributes", 5)]
+		[CategoryOrder("Material", 0)]
+		[CategoryOrder("Textures", 1)]
+		[CategoryOrder("Detail", 2)]
+		[CategoryOrder("Attributes", 3)]
 		public class ModelPropertyTypes
 		{
-			[Category("Meshes")]
-			[DisplayName("Meshes")]
-			[ItemsSource(typeof(MeshItemsSource))]
-			[PropertyOrder((int)PropertyOrders.PO_Meshes)]
-			public string meshes { get; set; }
-
-			[Category("Vertex Streams")]
-			[DisplayName("Vertex Streams")]
-			[PropertyOrder((int)PropertyOrders.PO_VertexStreams)]
-			public List<string> vertex_streams { get; set; }
-
 			[Category("Material")]
 			[DisplayName("Albedo")]
 			[PropertyOrder((int)PropertyOrders.PO_Albedo)]
@@ -182,7 +168,19 @@ namespace MtlEditor
 
 			DataContext = this;
 
-			MeshItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
+			var model_root = new MeshEntityViewModel[1];
+			var model = new MeshEntity();
+			model.ID = 0;
+			model.Name = "Model";
+			model_root[0] = new MeshEntityViewModel(this, model);
+			meshes_ = new ReadOnlyCollection<MeshEntityViewModel>(model_root);
+
+			var material_root = new MaterialEntityViewModel[1];
+			var material = new MaterialEntity();
+			material.ID = 0;
+			material.Name = "Material";
+			material_root[0] = new MaterialEntityViewModel(this, material);
+			materials_ = new ReadOnlyCollection<MaterialEntityViewModel>(material_root);
 
 			DetailModeItemsSource.items = new Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection();
 			DetailModeItemsSource.items.Clear();
@@ -191,7 +189,6 @@ namespace MtlEditor
 			DetailModeItemsSource.items.Add("Smooth Tessellation");
 
 			properties_obj_ = new ModelPropertyTypes();
-			properties_obj_.vertex_streams = new List<string>();
 			properties.SelectedObject = properties_obj_;
 
 			save.IsEnabled = false;
@@ -220,7 +217,7 @@ namespace MtlEditor
 			IntPtr wnd = editor_wnd.Handle;
 			core_ = new KlayGE.MtlEditorCoreWrapper(wnd);
 
-			core_.UpdateSelectEntityCallback(this.UpdateSelectEntity);
+			core_.UpdateSelectEntityCallback(this.UpdateSelectMeshEntity);
 
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
@@ -299,15 +296,28 @@ namespace MtlEditor
 
 			frame_ = 0;
 
-			MeshItemsSource.items.Clear();
-			MeshItemsSource.items.Add("");
+			meshes_[0].Children.Clear();
+			materials_[0].Children.Clear();
 			uint num_meshes = core_.NumMeshes();
-			for (uint i = 0; i < num_meshes; ++i)
+			for (uint i = 0; i < num_meshes; ++ i)
 			{
-				MeshItemsSource.items.Add(core_.MeshName(i));
+				var entity = new MeshEntity();
+				entity.ID = i + 1;
+				entity.Name = core_.MeshName(i);
+				meshes_[0].Children.Add(new MeshEntityViewModel(this, entity));
 			}
+			this.SelectMeshEntity(0);
 
-			properties_obj_.meshes = "";
+			uint num_mtls = core_.NumMaterials();
+			for (uint i = 0; i < num_mtls; ++ i)
+			{
+				var entity = new MaterialEntity();
+				entity.ID = i + 1;
+				entity.Name = "Material " + i;
+				materials_[0].Children.Add(new MaterialEntityViewModel(this, entity));
+			}
+			this.SelectMaterialEntity(0);
+
 			this.UpdateMeshProperties(0);
 
 			properties.SelectedObject = null;
@@ -526,74 +536,79 @@ namespace MtlEditor
 			core_.KeyPress(e.KeyChar);
 		}
 
-		private void UpdateSelectEntity(uint mesh_id)
+		private void UpdateSelectMeshEntity(uint mesh_id)
 		{
-			this.ExecuteCommand(new MtlEditorCommandSelectMesh(core_, mesh_id));
+			foreach (var item in meshes_)
+			{
+				foreach (var entity in item.Children)
+				{
+					entity.IsSelected = false;
+				}
+			}
+
+			if (mesh_id > 0)
+			{
+				foreach (var item in meshes_)
+				{
+					foreach (var entity in item.Children)
+					{
+						if (entity.Entity.ID == mesh_id)
+						{
+							entity.IsSelected = true;
+						}
+					}
+				}
+			}
+			else
+			{
+				this.SelectMeshEntity(mesh_id);
+			}
 		}
 
 		private void UpdateMeshProperties(uint mesh_id)
 		{
 			selected_mesh_id_ = mesh_id;
+			if (mesh_id > 0)
+			{
+				uint mtl_id = core_.MaterialID(mesh_id) + 1;
+
+				foreach (var item in materials_)
+				{
+					foreach (var entity in item.Children)
+					{
+						entity.IsSelected = false;
+					}
+				}
+
+				if (mtl_id > 0)
+				{
+					foreach (var item in materials_)
+					{
+						foreach (var entity in item.Children)
+						{
+							if (entity.Entity.ID == mtl_id)
+							{
+								entity.IsSelected = true;
+							}
+						}
+					}
+				}
+				else
+				{
+					this.SelectMaterialEntity(mtl_id);
+				}
+			}
+		}
+
+		private void UpdateMaterialProperties(uint mtl_id)
+		{
+			selected_mtl_id_ = mtl_id;
 
 			properties.SelectedObject = null;
 
-			properties_obj_.meshes = MeshItemsSource.items[(int)mesh_id].DisplayName;
-
-			properties_obj_.vertex_streams.Clear();
-
-			if (mesh_id > 0)
+			if (mtl_id > 0)
 			{
-				uint num_vss = core_.NumVertexStreams(mesh_id - 1);
-				for (uint stream_index = 0; stream_index < num_vss; ++stream_index)
-				{
-					string stream_name = "";
-					uint num_usages = core_.NumVertexStreamUsages(mesh_id - 1, stream_index);
-					for (uint usage_index = 0; usage_index < num_usages; ++usage_index)
-					{
-						uint usage = core_.VertexStreamUsage(mesh_id - 1, stream_index, usage_index);
-						string usage_name;
-						switch (usage >> 16)
-						{
-							case 0:
-								usage_name = "Position";
-								break;
-							case 1:
-								usage_name = "Normal";
-								break;
-							case 2:
-								usage_name = "Diffuse";
-								break;
-							case 3:
-								usage_name = "Specular";
-								break;
-							case 4:
-								usage_name = "Blend Weight";
-								break;
-							case 5:
-								usage_name = "Blend Index";
-								break;
-							case 6:
-								usage_name = "TexCoord";
-								break;
-							case 7:
-								usage_name = "Tangent";
-								break;
-							case 8:
-							default:
-								usage_name = "Binormal";
-								break;
-						}
-						stream_name += usage_name + ' ' + (usage & 0xFFFF).ToString();
-						if (usage_index != num_usages - 1)
-						{
-							stream_name += " | ";
-						}
-					}
-
-					properties_obj_.vertex_streams.Add(stream_name);
-				}
-
-				uint mtl_id = core_.MaterialID(mesh_id);
+				-- mtl_id;
 
 				properties_obj_.albedo = this.FloatPtrToLDRColor(core_.AlbedoMaterial(mtl_id), 1);
 				properties_obj_.metalness = core_.MetalnessMaterial(mtl_id);
@@ -657,29 +672,10 @@ namespace MtlEditor
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
 			switch ((PropertyOrders)item.PropertyOrder)
 			{
-				case PropertyOrders.PO_Meshes:
-					{
-						uint mesh_id = 0;
-						for (; mesh_id < MeshItemsSource.items.Count; ++ mesh_id)
-						{
-							if (MeshItemsSource.items[(int)mesh_id].DisplayName == (e.NewValue as string))
-							{
-								break;
-							}
-						}
-
-						if (core_.SelectedMesh() != mesh_id)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSelectMesh(core_, mesh_id));
-							this.UpdateMeshProperties(mesh_id);
-						}
-					}
-					break;
-
 				case PropertyOrders.PO_Albedo:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						float[] albedo = ColorToFloatPtr(properties_obj_.albedo, 1);
 						float[] old_albedo = core_.AlbedoMaterial(mtl_id);
 						if (!this.FloatEqual(old_albedo[0], albedo[0]) || !this.FloatEqual(old_albedo[1], albedo[1])
@@ -691,9 +687,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_Metalness:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.MetalnessMaterial(mtl_id), properties_obj_.metalness))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetMetalnessMaterial(core_, mtl_id, properties_obj_.metalness));
@@ -702,9 +698,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_Glossiness:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.GlossinessMaterial(mtl_id), properties_obj_.glossiness))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetGlossinessMaterial(core_, mtl_id, properties_obj_.glossiness));
@@ -714,9 +710,9 @@ namespace MtlEditor
 
 				case PropertyOrders.PO_Emissive:
 				case PropertyOrders.PO_EmissiveMultiplier:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						float[] emissive = ColorToFloatPtr(properties_obj_.emissive, properties_obj_.emissive_multiplier);
 						float[] old_emissive = core_.EmissiveMaterial(mtl_id);
 						if (!this.FloatEqual(old_emissive[0], emissive[0]) || !this.FloatEqual(old_emissive[1], emissive[1])
@@ -728,9 +724,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_Opacity:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.OpacityMaterial(mtl_id), properties_obj_.opacity))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetOpacityMaterial(core_, mtl_id, properties_obj_.opacity));
@@ -739,9 +735,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_AlbedoTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string albedo_tex = RelativePath(properties_obj_.albedo_tex);
 						if (core_.AlbedoTexture(mtl_id) != albedo_tex)
 						{
@@ -751,9 +747,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_MetalnessTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string metalness_tex = RelativePath(properties_obj_.metalness_tex);
 						if (core_.MetalnessTexture(mtl_id) != metalness_tex)
 						{
@@ -763,9 +759,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_GlossinessTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string glossiness_tex = RelativePath(properties_obj_.glossiness_tex);
 						if (core_.GlossinessTexture(mtl_id) != glossiness_tex)
 						{
@@ -775,9 +771,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_EmissiveTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string emissive_tex = RelativePath(properties_obj_.emissive_tex);
 						if (core_.EmissiveTexture(mtl_id) != emissive_tex)
 						{
@@ -787,9 +783,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_NormalTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string normal_tex = RelativePath(properties_obj_.normal_tex);
 						if (core_.NormalTexture(mtl_id) != normal_tex)
 						{
@@ -799,9 +795,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_HeightTex:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						string height_tex = RelativePath(properties_obj_.height_tex);
 						if (core_.HeightTexture(mtl_id) != height_tex)
 						{
@@ -811,7 +807,7 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_DetailMode:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
 						uint mode = 0;
 						for (; mode < DetailModeItemsSource.items.Count; ++ mode)
@@ -822,7 +818,7 @@ namespace MtlEditor
 							}
 						}
 
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (core_.DetailMode(mtl_id) != mode)
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetDetailMode(core_, mtl_id, mode));
@@ -831,9 +827,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_HeightOffset:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.HeightOffset(mtl_id), properties_obj_.height_offset))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetHeightOffset(core_, mtl_id, properties_obj_.height_offset));
@@ -842,9 +838,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_HeightScale:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.HeightScale(mtl_id), properties_obj_.height_scale))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetHeightScale(core_, mtl_id, properties_obj_.height_scale));
@@ -853,9 +849,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_EdgeTessHint:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.EdgeTessHint(mtl_id), properties_obj_.edge_tess_hint))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetEdgeTessHint(core_, mtl_id, properties_obj_.edge_tess_hint));
@@ -864,9 +860,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_InsideTessHint:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.InsideTessHint(mtl_id), properties_obj_.inside_tess_hint))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetInsideTessHint(core_, mtl_id, properties_obj_.inside_tess_hint));
@@ -875,9 +871,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_MinTess:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.MinTess(mtl_id), properties_obj_.min_tess))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetMinTess(core_, mtl_id, properties_obj_.min_tess));
@@ -886,9 +882,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_MaxTess:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.MaxTess(mtl_id), properties_obj_.max_tess))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetMaxTess(core_, mtl_id, properties_obj_.max_tess));
@@ -897,9 +893,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_Transparent:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (core_.TransparentMaterial(mtl_id) != properties_obj_.transparent)
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetTransparent(core_, mtl_id, properties_obj_.transparent));
@@ -908,9 +904,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_AlphaTest:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (!this.FloatEqual(core_.AlphaTestMaterial(mtl_id), properties_obj_.alpha_test))
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetAlphaTest(core_, mtl_id, properties_obj_.alpha_test));
@@ -919,9 +915,9 @@ namespace MtlEditor
 					break;
 
 				case PropertyOrders.PO_SSS:
-					if (selected_mesh_id_ > 0)
+					if (selected_mtl_id_ > 0)
 					{
-						uint mtl_id = core_.MaterialID(selected_mesh_id_);
+						uint mtl_id = selected_mtl_id_ - 1;
 						if (core_.SSSMaterial(mtl_id) != properties_obj_.sss)
 						{
 							this.ExecuteCommand(new MtlEditorCommandSetSSS(core_, mtl_id, properties_obj_.sss));
@@ -958,6 +954,43 @@ namespace MtlEditor
 				Uri uri_tex = new Uri(name);
 				Uri relative_uri = uri_meshml.MakeRelativeUri(uri_tex);
 				return relative_uri.ToString();
+			}
+		}
+
+		public void SelectMeshEntity(uint mesh_id)
+		{
+			this.ExecuteCommand(new MtlEditorCommandSelectMesh(core_, mesh_id));
+			this.UpdateMeshProperties(mesh_id);
+
+			if (0 == mesh_id)
+			{
+				meshes_[0].SelectedInternal(true);
+			}
+		}
+
+		public void SelectMaterialEntity(uint mtl_id)
+		{
+			this.UpdateMaterialProperties(mtl_id);
+
+			if (0 == mtl_id)
+			{
+				materials_[0].SelectedInternal(true);
+			}
+		}
+
+		public ReadOnlyCollection<MeshEntityViewModel> ModelRoot
+		{
+			get
+			{
+				return meshes_;
+			}
+		}
+
+		public ReadOnlyCollection<MaterialEntityViewModel> MaterialRoot
+		{
+			get
+			{
+				return materials_;
 			}
 		}
 
@@ -1094,6 +1127,7 @@ namespace MtlEditor
 		private double frame_;
 		private ModelPropertyTypes properties_obj_;
 		private uint selected_mesh_id_ = 0;
+		private uint selected_mtl_id_ = 0;
 		private string opened_file_ = "";
 
 		private bool skinning_ = false;
@@ -1102,18 +1136,11 @@ namespace MtlEditor
 		private bool imposter_mode_ = false;
 		private bool play_ = false;
 
+		private readonly ReadOnlyCollection<MeshEntityViewModel> meshes_;
+		private readonly ReadOnlyCollection<MaterialEntityViewModel> materials_;
+
 		private List<MtlEditorCommand> command_history_ = new List<MtlEditorCommand>();
 		private int end_command_index_ = 0;
-	}
-
-	public class MeshItemsSource : IItemsSource
-	{
-		static public Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection items;
-
-		public Xceed.Wpf.Toolkit.PropertyGrid.Attributes.ItemCollection GetValues()
-		{
-			return items;
-		}
 	}
 
 	public class DetailModeItemsSource : IItemsSource

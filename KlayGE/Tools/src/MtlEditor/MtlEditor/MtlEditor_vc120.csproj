@@ -111,6 +111,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="MaterialEntity.cs" />
+    <Compile Include="MaterialEntityViewModel.cs" />
+    <Compile Include="MeshEntity.cs" />
+    <Compile Include="MeshEntityViewModel.cs" />
     <Compile Include="OpenTexUserControlEditor.xaml.cs">
       <DependentUpon>OpenTexUserControlEditor.xaml</DependentUpon>
     </Compile>

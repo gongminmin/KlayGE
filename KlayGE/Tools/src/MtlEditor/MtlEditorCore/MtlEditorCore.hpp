@@ -39,6 +39,7 @@ namespace KlayGE
 		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const;
 		uint32_t SelectedMesh() const;
 		uint32_t MaterialID(uint32_t mesh_id) const;
+		uint32_t NumMaterials() const;
 		float3 const & AlbedoMaterial(uint32_t mtl_id) const;
 		float MetalnessMaterial(uint32_t mtl_id) const;
 		float GlossinessMaterial(uint32_t mtl_id) const;
