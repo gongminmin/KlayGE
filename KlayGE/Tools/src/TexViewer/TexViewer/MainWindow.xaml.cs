@@ -153,6 +153,7 @@ namespace TexViewer
 		void MainWindowUnloaded(object sender, RoutedEventArgs e)
 		{
 			CompositionTarget.Rendering -= this.MainWindowIdle;
+			editor_frame.Dispose();
 			core_.Dispose();
 			core_ = null;
 		}

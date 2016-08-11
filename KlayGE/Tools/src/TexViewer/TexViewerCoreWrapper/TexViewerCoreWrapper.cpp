@@ -157,7 +157,6 @@ namespace KlayGE
 
 	TexViewerCoreWrapper::~TexViewerCoreWrapper()
 	{
-		core_->Destroy();
 		delete core_;
 	}
 

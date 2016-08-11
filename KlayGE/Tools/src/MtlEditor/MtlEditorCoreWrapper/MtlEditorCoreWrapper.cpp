@@ -40,7 +40,6 @@ namespace KlayGE
 
 	MtlEditorCoreWrapper::~MtlEditorCoreWrapper()
 	{
-		core_->Destroy();
 		delete core_;
 	}
 

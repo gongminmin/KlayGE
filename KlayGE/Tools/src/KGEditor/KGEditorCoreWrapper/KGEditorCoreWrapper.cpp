@@ -48,7 +48,6 @@ namespace KlayGE
 
 	KGEditorCoreWrapper::~KGEditorCoreWrapper()
 	{
-		core_->Destroy();
 		delete core_;
 	}
 
