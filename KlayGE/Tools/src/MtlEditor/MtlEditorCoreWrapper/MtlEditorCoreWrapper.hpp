@@ -64,6 +64,7 @@ namespace KlayGE
 		float AlphaTestMaterial(uint32_t mtl_id);
 		bool SSSMaterial(uint32_t mtl_id);
 
+		void MaterialID(uint32_t mesh_id, uint32_t mtl_id);
 		void AlbedoMaterial(uint32_t mtl_id, array<float>^ value);
 		void MetalnessMaterial(uint32_t mtl_id, float value);
 		void GlossinessMaterial(uint32_t mtl_id, float value);
@@ -85,6 +86,8 @@ namespace KlayGE
 		void TransparentMaterial(uint32_t mtl_id, bool value);
 		void AlphaTestMaterial(uint32_t mtl_id, float value);
 		void SSSMaterial(uint32_t mtl_id, bool value);
+
+		uint32_t CopyMaterial(uint32_t mtl_id);
 
 		uint32_t SelectedMesh();
 		void SelectMesh(uint32_t mesh_id);

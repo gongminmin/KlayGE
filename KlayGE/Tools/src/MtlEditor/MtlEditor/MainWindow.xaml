@@ -22,6 +22,11 @@
                     <RibbonButton LargeImageSource="Images\SaveAs.png" x:Name="save_as" Label="Save as" Click="SaveAsClick"/>
                 </RibbonGroup>
                 <RibbonGroup>
+                    <RibbonButton LargeImageSource="Images\AssignMaterial.png" x:Name="assign_mtl" Label="Assign Material" Click="AssignMaterialClick"/>
+                    <RibbonButton LargeImageSource="Images\CopyMaterial.png" x:Name="copy_mtl" Label="Copy Material" Click="CopyMaterialClick"/>
+                    <RibbonButton LargeImageSource="Images\DeleteMaterial.png" x:Name="delete_mtl" Label="Delete Material" Click="DeleteMaterialClick"/>
+                </RibbonGroup>
+                <RibbonGroup>
                     <RibbonButton LargeImageSource="Images\Undo.png" x:Name="undo" Label="Undo" Click="UndoClick"/>
                     <RibbonButton LargeImageSource="Images\Redo.png" x:Name="redo" Label="Redo" Click="RedoClick"/>
                 </RibbonGroup>

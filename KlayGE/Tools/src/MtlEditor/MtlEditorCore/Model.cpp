@@ -498,3 +498,10 @@ void DetailedSkinnedModel::UpdateMaterial(uint32_t mtl_index)
 		}
 	}
 }
+
+uint32_t DetailedSkinnedModel::CopyMaterial(uint32_t mtl_index)
+{
+	uint32_t new_index = static_cast<uint32_t>(materials_.size());
+	materials_.push_back(MakeSharedPtr<RenderMaterial>(*materials_[mtl_index]));
+	return new_index;
+}

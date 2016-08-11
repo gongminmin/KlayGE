@@ -29,6 +29,8 @@ namespace MtlEditor
 		ECC_SetTransparent,
 		ECC_SetAlphaTest,
 		ECC_SetSSS,
+		ECC_AssignMaterial,
+		ECC_CopyMaterial,
 
 		ECC_NumCommands
 	}
@@ -651,5 +653,54 @@ namespace MtlEditor
 		private uint mtl_id_;
 		private bool sss_;
 		private bool old_sss_;
+	};
+
+	class MtlEditorCommandAssignMaterial : MtlEditorCommand
+	{
+		public MtlEditorCommandAssignMaterial(MtlEditorCoreWrapper core, uint mesh_id, uint mtl_id)
+			: base(core, MtlEditorCommandCode.ECC_AssignMaterial, "Assign material")
+		{
+			mesh_id_ = mesh_id;
+			mtl_id_ = mtl_id;
+		}
+
+		public override object Execute()
+		{
+			old_mtl_id_ = core_.MaterialID(mesh_id_);
+			core_.MaterialID(mesh_id_, mtl_id_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.MaterialID(mesh_id_, old_mtl_id_);
+		}
+
+		private uint mesh_id_;
+		private uint mtl_id_;
+		private uint old_mtl_id_;
+	};
+
+	class MtlEditorCommandCopyMaterial : MtlEditorCommand
+	{
+		public MtlEditorCommandCopyMaterial(MtlEditorCoreWrapper core, uint mtl_id)
+			: base(core, MtlEditorCommandCode.ECC_CopyMaterial, "Copy material")
+		{
+			mtl_id_ = mtl_id;
+		}
+
+		public override object Execute()
+		{
+			new_mtl_id_ = core_.CopyMaterial(mtl_id_);
+			return new_mtl_id_;
+		}
+
+		public override void Revoke()
+		{
+			// TODO
+		}
+
+		private uint mtl_id_;
+		private uint new_mtl_id_;
 	};
 }

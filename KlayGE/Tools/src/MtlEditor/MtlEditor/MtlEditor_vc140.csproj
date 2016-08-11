@@ -187,6 +187,15 @@
     <Resource Include="Images\ImposterMode.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Images\AssignMaterial.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\DeleteMaterial.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\CopyMaterial.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\Build\vc140_win_x64\Tools\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">

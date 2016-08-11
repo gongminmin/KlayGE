@@ -273,6 +273,11 @@ namespace KlayGE
 		return core_->SSSMaterial(mtl_id);
 	}
 
+	void MtlEditorCoreWrapper::MaterialID(uint32_t mesh_id, uint32_t mtl_id)
+	{
+		core_->MaterialID(mesh_id, mtl_id);
+	}
+
 	void MtlEditorCoreWrapper::AlbedoMaterial(uint32_t mtl_id, array<float>^ value)
 	{
 		float r = value[0];
@@ -382,6 +387,11 @@ namespace KlayGE
 	void MtlEditorCoreWrapper::SSSMaterial(uint32_t mtl_id, bool value)
 	{
 		core_->SSSMaterial(mtl_id, value);
+	}
+
+	uint32_t MtlEditorCoreWrapper::CopyMaterial(uint32_t mtl_id)
+	{
+		return core_->CopyMaterial(mtl_id);
 	}
 
 	uint32_t MtlEditorCoreWrapper::SelectedMesh()

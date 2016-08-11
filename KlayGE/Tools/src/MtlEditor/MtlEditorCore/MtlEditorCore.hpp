@@ -64,6 +64,7 @@ namespace KlayGE
 
 		void CurrFrame(float frame);
 		void SelectMesh(uint32_t mesh_id);
+		void MaterialID(uint32_t mesh_id, uint32_t mtl_id);
 		void AlbedoMaterial(uint32_t mtl_id, float3 const & value);
 		void MetalnessMaterial(uint32_t mtl_id, float value);
 		void GlossinessMaterial(uint32_t mtl_id, float value);
@@ -85,6 +86,8 @@ namespace KlayGE
 		void TransparentMaterial(uint32_t mtl_id, bool value);
 		void AlphaTestMaterial(uint32_t mtl_id, float value);
 		void SSSMaterial(uint32_t mtl_id, bool value);
+
+		uint32_t CopyMaterial(uint32_t mtl_id);
 
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);

@@ -193,6 +193,9 @@ namespace MtlEditor
 
 			save.IsEnabled = false;
 			save_as.IsEnabled = false;
+			assign_mtl.IsEnabled = false;
+			copy_mtl.IsEnabled = false;
+			delete_mtl.IsEnabled = false;
 			undo.IsEnabled = false;
 			redo.IsEnabled = false;
 			skinning.IsEnabled = false;
@@ -270,6 +273,9 @@ namespace MtlEditor
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
+			assign_mtl.IsEnabled = false;
+			copy_mtl.IsEnabled = false;
+			delete_mtl.IsEnabled = false;
 			if (core_.NumFrames() != 0)
 			{
 				skinning.IsEnabled = true;
@@ -356,6 +362,37 @@ namespace MtlEditor
 			{
 				core_.SaveModel(dlg.FileName);
 				this.FileNameChanged(dlg.FileName);
+			}
+		}
+
+		private void AssignMaterialClick(object sender, RoutedEventArgs e)
+		{
+			this.ExecuteCommand(new MtlEditorCommandAssignMaterial(core_, selected_mesh_id_, selected_mtl_id_));
+		}
+
+		private void CopyMaterialClick(object sender, RoutedEventArgs e)
+		{
+			uint new_mtl_id = (uint)this.ExecuteCommand(new MtlEditorCommandCopyMaterial(core_, selected_mtl_id_ - 1));
+
+			var entity = new MaterialEntity();
+			entity.ID = new_mtl_id + 1;
+			entity.Name = "Material " + new_mtl_id;
+			materials_[0].Children.Add(new MaterialEntityViewModel(this, entity));
+			this.SelectMaterialEntity(entity.ID);
+		}
+
+		private void DeleteMaterialClick(object sender, RoutedEventArgs e)
+		{
+			foreach (var item in materials_)
+			{
+				foreach (var entity in item.Children)
+				{
+					if (entity.Entity.ID == selected_mtl_id_)
+					{
+						item.Children.Remove(entity);
+						break;
+					}
+				}
 			}
 		}
 
@@ -598,6 +635,8 @@ namespace MtlEditor
 					this.SelectMaterialEntity(mtl_id);
 				}
 			}
+
+			assign_mtl.IsEnabled = (selected_mesh_id_ > 0) && (selected_mtl_id_ > 0);
 		}
 
 		private void UpdateMaterialProperties(uint mtl_id)
@@ -635,6 +674,16 @@ namespace MtlEditor
 				properties_obj_.transparent = core_.TransparentMaterial(mtl_id);
 				properties_obj_.alpha_test = core_.AlphaTestMaterial(mtl_id);
 				properties_obj_.sss = core_.SSSMaterial(mtl_id);
+
+				bool used = false;
+				for (uint i = 0; i < core_.NumMeshes(); ++ i)
+				{
+					if (core_.MaterialID(i + 1) == mtl_id)
+					{
+						used = true;
+					}
+				}
+				delete_mtl.IsEnabled = !used;
 			}
 			else
 			{
@@ -662,9 +711,14 @@ namespace MtlEditor
 				properties_obj_.transparent = false;
 				properties_obj_.alpha_test = 0;
 				properties_obj_.sss = false;
+
+				delete_mtl.IsEnabled = false;
 			}
 
 			properties.SelectedObject = properties_obj_;
+
+			assign_mtl.IsEnabled = (selected_mesh_id_ > 0) && (selected_mtl_id_ > 0);
+			copy_mtl.IsEnabled = selected_mtl_id_ > 0;
 		}
 
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)

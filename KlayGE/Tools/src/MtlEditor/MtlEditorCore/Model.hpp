@@ -34,6 +34,8 @@ public:
 	void UpdateMaterial(KlayGE::uint32_t mtl_index);
 	void UpdateTechniques(KlayGE::uint32_t mtl_index);
 
+	KlayGE::uint32_t CopyMaterial(KlayGE::uint32_t mtl_index);
+
 	KlayGE::RenderEffectPtr const & Effect() const
 	{
 		return effect_;

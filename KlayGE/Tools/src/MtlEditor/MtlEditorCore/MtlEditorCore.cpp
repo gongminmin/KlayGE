@@ -887,6 +887,14 @@ namespace KlayGE
 		return model->GetMaterial(mtl_id)->sss;
 	}
 
+	void MtlEditorCore::MaterialID(uint32_t mesh_id, uint32_t mtl_id)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(model->Subrenderable(mesh_id - 1));
+		mesh->MaterialID(mtl_id - 1);
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id - 1);
+	}
+
 	void MtlEditorCore::AlbedoMaterial(uint32_t mtl_id, float3 const & value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
@@ -1034,6 +1042,12 @@ namespace KlayGE
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(mtl_id)->sss = value;
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	uint32_t MtlEditorCore::CopyMaterial(uint32_t mtl_id)
+	{
+		auto const & model = checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable());
+		return model->CopyMaterial(mtl_id);
 	}
 
 	uint32_t MtlEditorCore::SelectedMesh() const
