@@ -46,22 +46,24 @@ namespace
 				dx.resize(heights.size());
 				for (uint32_t y = 0; y < the_height; ++ y)
 				{
-					for (uint32_t x = 0; x < the_width - 1; ++ x)
+					for (uint32_t x = 0; x < the_width; ++ x)
 					{
-						dx[y * the_width + x] = heights[y * the_width + (x + 1)] - heights[y * the_width + x];
+						int x0 = x;
+						int x1 = (x0 + 1) % the_width;
+						dx[y * the_width + x] = heights[y * the_width + x1] - heights[y * the_width + x0];
 					}
-					dx[y * the_width + (the_width - 1)] = 0;
 				}
 
 				std::vector<int> dy;
 				dy.resize(heights.size());
 				for (uint32_t x = 0; x < the_width; ++ x)
 				{
-					for (uint32_t y = 0; y < the_height - 1; ++ y)
+					for (uint32_t y = 0; y < the_height; ++ y)
 					{
-						dy[y * the_width + x] = heights[(y + 1) * the_width + x] - heights[y * the_width + x];
+						int y0 = y;
+						int y1 = (y0 + 1) % the_height;
+						dy[y * the_width + x] = heights[y1 * the_width + x] - heights[y0 * the_width + x];
 					}
-					dy[(the_height - 1) * the_width + x] = 0;
 				}
 
 				base[i] = data_block.size();
