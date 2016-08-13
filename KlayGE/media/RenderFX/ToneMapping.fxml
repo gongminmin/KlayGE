@@ -29,16 +29,15 @@ float EyeAdaption(float lum)
 	return lerp(0.2f, lum, 0.5f);
 }
 
-float3 F(float3 x)
+float3 ACESFilm(float3 x)
 {
-	const float A = 0.22f;
-	const float B = 0.30f;
-	const float C = 0.10f;
-	const float D = 0.20f;
-	const float E = 0.01f;
-	const float F = 0.30f;
+	const float A = 2.51f;
+	const float B = 0.03f;
+	const float C = 2.43f;
+	const float D = 0.59f;
+	const float E = 0.14f;
 
-	return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+	return (x * (A * x + B)) / (x * (C * x + D) + E);
 }
 
 float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
@@ -57,9 +56,7 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 #else
 	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 
-	// Filmic Tonemapping from Unchart 2
-	const float White = 11.2f;
-	return F(1.6f * adapted_lum_dest * color) / F(White);
+	return ACESFilm(adapted_lum_dest * color);
 #endif
 }
 
