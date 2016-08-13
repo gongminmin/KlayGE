@@ -37,6 +37,7 @@ void DetailedMesh::DoBuildMeshInfo()
 	*(effect_->ParameterByName("albedo_tex")) = albedo_tex_;
 	*(effect_->ParameterByName("normal_tex")) = normal_tex_;
 	*(effect_->ParameterByName("glossiness_tex")) = glossiness_tex_;
+	*(effect_->ParameterByName("normal_map_enabled")) = static_cast<int32_t>(!!normal_tex_);
 
 	*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
 	*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!albedo_tex_);

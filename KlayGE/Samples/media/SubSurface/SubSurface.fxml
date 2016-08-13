@@ -33,6 +33,7 @@
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="int" name="normal_map_enabled"/>
 
 	<shader>
 		<![CDATA[
@@ -129,7 +130,15 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	L = normalize(L);
 	V = normalize(V);
 	H = normalize(H);
-	float3 N = decompress_normal(normal_tex.Sample(linear_sampler, uv));
+	float3 N;
+	if (normal_map_enabled)
+	{
+		N = decompress_normal(normal_tex.Sample(linear_sampler, uv));
+	}
+	else
+	{
+		N = float3(0, 0, 1);
+	}
 	
 	float3 albedo = albedo_clr.rgb;
 	if (albedo_map_enabled)
