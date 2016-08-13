@@ -35,7 +35,7 @@ void DetailedMesh::DoBuildMeshInfo()
 	depth_texture_support_ = caps.depth_texture_support;
 
 	*(effect_->ParameterByName("albedo_tex")) = albedo_tex_;
-	*(effect_->ParameterByName("bump_tex")) = normal_tex_;
+	*(effect_->ParameterByName("normal_tex")) = normal_tex_;
 	*(effect_->ParameterByName("glossiness_tex")) = glossiness_tex_;
 
 	*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;

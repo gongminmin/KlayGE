@@ -31,7 +31,7 @@
 	<parameter type="int" name="albedo_map_enabled"/>
 	
 	<parameter type="texture2D" name="albedo_tex"/>
-	<parameter type="texture2D" name="bump_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
 	<parameter type="texture2D" name="glossiness_tex"/>
 
 	<shader>
@@ -87,8 +87,7 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 				out float3 oL	: TEXCOORD1,
 				out float3 oV	: TEXCOORD2,
 				out float3 oH	: TEXCOORD3,
-				out float3 oN	: TEXCOORD4,
-				out float3 oTcW : TEXCOORD5,
+				out float3 oTcW : TEXCOORD4,
 				out float4 oPos : SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -97,10 +96,18 @@ void SubSurfaceVS(float2 tex0 : TEXCOORD0,
 	
 	oTex0 = tex0;
 	
-	oV = eye_pos - pos.xyz;
-	oL = light_pos - pos.xyz;
-	oH = normalize(oL) + normalize(oV);
-	oN = transform_quat(float3(0, 0, 1), tangent_quat);
+	float3x3 obj_to_ts;
+	obj_to_ts[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	obj_to_ts[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	obj_to_ts[2] = transform_quat(float3(0, 0, 1), tangent_quat);
+	
+	float3 view_vec = eye_pos - pos.xyz;
+	float3 light_vec = light_pos - pos.xyz;
+	float3 halfway = normalize(light_vec) + normalize(view_vec);
+	
+	oL = mul(obj_to_ts, light_vec);
+	oV = mul(obj_to_ts, view_vec);
+	oH = mul(obj_to_ts, halfway);
 
 	oPos = mul(pos, worldviewproj);
 	
@@ -115,7 +122,6 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 V	: TEXCOORD2,
 				float3 H	: TEXCOORD3,
-				float3 N	: TEXCOORD4,
 				float3 tc_w : TEXCOORD5) : SV_Target
 {
 	float attenuation = AttenuationTerm(0, -L.xyz, light_falloff);
@@ -123,7 +129,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 	L = normalize(L);
 	V = normalize(V);
 	H = normalize(H);
-	N = normalize(N + 0.11f * bump_tex.Sample(linear_sampler, uv).rgb);
+	float3 N = decompress_normal(normal_tex.Sample(linear_sampler, uv));
 	
 	float3 albedo = albedo_clr.rgb;
 	if (albedo_map_enabled)
