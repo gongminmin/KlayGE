@@ -63,6 +63,7 @@ def build_Python(build_info, compiler_info):
 		-DENABLE_CODECS_KR=\"OFF\" \
 		-DENABLE_CODECS_TW=\"OFF\" \
 		-DENABLE_CTYPES=\"OFF\" \
+		-DENABLE_CTYPES_TEST=\"OFF\" \
 		-DENABLE_DECIMAL=\"OFF\" \
 		-DENABLE_IPV6=\"OFF\" \
 		-DENABLE_LOCALE=\"OFF\" \
@@ -77,6 +78,7 @@ def build_Python(build_info, compiler_info):
 		-DENABLE_SELECT=\"OFF\" \
 		-DENABLE_SOCKET=\"OFF\" \
 		-DENABLE_SUBPROCESS=\"OFF\" \
+		-DENABLE_TESTCAPI=\"OFF\" \
 		-DINSTALL_DEVELOPMENT=\"OFF\" \
 		-DINSTALL_MANUAL=\"OFF\" \
 		-DINSTALL_TEST=\"OFF\" \
