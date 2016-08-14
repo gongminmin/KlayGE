@@ -63,6 +63,41 @@ namespace KlayGE
 		core_->SaveAsModel(StringToStd(name));
 	}
 
+	System::String^ MtlEditorCoreWrapper::SkyboxName()
+	{
+		return gcnew String(core_->SkyboxName());
+	}
+
+	void MtlEditorCoreWrapper::SkyboxName(String^ name)
+	{
+		core_->SkyboxName(StringToStd(name));
+	}
+
+	void MtlEditorCoreWrapper::DisplaySSVO(bool ssvo)
+	{
+		core_->DisplaySSVO(ssvo);
+	}
+
+	void MtlEditorCoreWrapper::DisplayHDR(bool hdr)
+	{
+		core_->DisplayHDR(hdr);
+	}
+
+	void MtlEditorCoreWrapper::DisplayAA(bool aa)
+	{
+		core_->DisplayAA(aa);
+	}
+
+	void MtlEditorCoreWrapper::DisplayGamma(bool gamma)
+	{
+		core_->DisplayGamma(gamma);
+	}
+
+	void MtlEditorCoreWrapper::DisplayColorGrading(bool cg)
+	{
+		core_->DisplayColorGrading(cg);
+	}
+
 	unsigned int MtlEditorCoreWrapper::NumFrames()
 	{
 		return core_->NumFrames();

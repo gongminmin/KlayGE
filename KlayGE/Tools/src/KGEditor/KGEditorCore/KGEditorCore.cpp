@@ -820,20 +820,33 @@ namespace KlayGE
 				}
 			}
 
-			if (!!c_tex)
+			if (c_tex)
 			{
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_tex, c_tex);
+				if (ambient_light_)
+				{
+					ambient_light_->SkylightTex(y_tex, c_tex);
+				}
 			}
 			else
 			{
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(y_tex);
+				if (ambient_light_)
+				{
+					ambient_light_->SkylightTex(y_tex);
+				}
 			}
 		}
 		else
 		{
+			TexturePtr y_cube = SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable);
+			TexturePtr c_cube = SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable);
 			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(
-				SyncLoadTexture("default_bg_y.dds", EAH_GPU_Read | EAH_Immutable),
-				SyncLoadTexture("default_bg_c.dds", EAH_GPU_Read | EAH_Immutable));
+				y_cube, c_cube);
+			if (ambient_light_)
+			{
+				ambient_light_->SkylightTex(y_cube, c_cube);
+			}
 		}
 	}
 
@@ -940,6 +953,16 @@ namespace KlayGE
 		{
 		case LightSource::LT_Ambient:
 			light = MakeSharedPtr<AmbientLightSource>();
+
+			ambient_light_ = light;
+			if (skybox_c_cube_)
+			{
+				light->SkylightTex(skybox_y_cube_, skybox_c_cube_);
+			}
+			else
+			{
+				light->SkylightTex(skybox_y_cube_);
+			}
 			break;
 
 		case LightSource::LT_Directional:

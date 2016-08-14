@@ -193,6 +193,10 @@ namespace KlayGE
 
 		std::string scene_name_;
 		std::string skybox_name_;
+		TexturePtr skybox_y_cube_;
+		TexturePtr skybox_c_cube_;
+
+		LightSourcePtr ambient_light_;
 
 		std::map<uint32_t, EntityInfo> entities_;
 		std::map<uint32_t, EntityInfo> backup_entities_;

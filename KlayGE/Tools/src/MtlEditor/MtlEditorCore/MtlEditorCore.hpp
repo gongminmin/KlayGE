@@ -29,6 +29,15 @@ namespace KlayGE
 		bool OpenModel(std::string const & name);
 		void SaveAsModel(std::string const & name);
 
+		char const * SkyboxName() const;
+		void SkyboxName(std::string const & name);
+
+		void DisplaySSVO(bool ssvo);
+		void DisplayHDR(bool hdr);
+		void DisplayAA(bool aa);
+		void DisplayGamma(bool gamma);
+		void DisplayColorGrading(bool cg);
+
 		uint32_t NumFrames() const;
 		float CurrFrame() const;
 		float ModelFrameRate() const;
@@ -114,7 +123,8 @@ namespace KlayGE
 	private:
 		FontPtr font_;
 
-		LightSourcePtr light_;
+		LightSourcePtr ambient_light_;
+		LightSourcePtr main_light_;
 
 		SceneObjectPtr model_;
 		SceneObjectPtr imposter_;
@@ -127,6 +137,9 @@ namespace KlayGE
 		bool is_fps_camera_;
 
 		DeferredRenderingLayer* deferred_rendering_;
+
+		std::string skybox_name_;
+		TexturePtr default_cube_map_;
 
 		bool skinning_;
 		float curr_frame_;

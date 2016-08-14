@@ -359,11 +359,15 @@ namespace KlayGE
 		deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 		deferred_rendering_->SSVOEnabled(0, false);
 
-		light_ = MakeSharedPtr<DirectionalLightSource>();
-		light_->Attrib(LightSource::LSA_NoShadow);
-		light_->Color(float3(1.0f, 1.0f, 1.0f));
-		light_->BindUpdateFunc(LightSourceUpdate());
-		light_->AddToSceneManager();
+		ambient_light_ = MakeSharedPtr<AmbientLightSource>();
+		ambient_light_->Color(float3(0.1f, 0.1f, 0.1f));
+		ambient_light_->AddToSceneManager();
+
+		main_light_ = MakeSharedPtr<DirectionalLightSource>();
+		main_light_->Attrib(LightSource::LSA_NoShadow);
+		main_light_->Color(float3(1.0f, 1.0f, 1.0f));
+		main_light_->BindUpdateFunc(LightSourceUpdate());
+		main_light_->AddToSceneManager();
 
 		axis_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderAxis>(),
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
@@ -401,9 +405,13 @@ namespace KlayGE
 			init_data[i].row_pitch = sizeof(uint32_t);
 			init_data[i].slice_pitch = init_data[i].row_pitch;
 		}
+		default_cube_map_ = rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
+
 		sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
-		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
+		checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(default_cube_map_);
 		sky_box_->AddToSceneManager();
+
+		ambient_light_->SkylightTex(default_cube_map_);
 
 		selected_bb_ = MakeSharedPtr<SceneObjectHelper>(MakeSharedPtr<RenderableLineBox>(),
 			SceneObject::SOA_Moveable | SceneObject::SOA_NotCastShadow);
@@ -433,7 +441,8 @@ namespace KlayGE
 		sky_box_.reset();
 		grid_.reset();
 		axis_.reset();
-		light_.reset();
+		main_light_.reset();
+		ambient_light_.reset();
 		selected_bb_.reset();
 
 		font_.reset();
@@ -694,6 +703,82 @@ namespace KlayGE
 		{
 			return 0;
 		}
+	}
+
+	char const * MtlEditorCore::SkyboxName() const
+	{
+		return skybox_name_.c_str();
+	}
+
+	void MtlEditorCore::SkyboxName(std::string const & name)
+	{
+		skybox_name_ = name;
+
+		if (!skybox_name_.empty())
+		{
+			TexturePtr y_tex = SyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable);
+			TexturePtr c_tex;
+
+			std::string::size_type pos = name.find_last_of('.');
+			if ((pos > 0) && ('_' == name[pos - 2]))
+			{
+				if ('y' == name[pos - 1])
+				{
+					std::string c_name = name;
+					c_name[pos - 1] = 'c';
+					c_tex = SyncLoadTexture(c_name, EAH_GPU_Read | EAH_Immutable);
+				}
+				else if ('c' == name[pos - 1])
+				{
+					c_tex = y_tex;
+
+					std::string y_name = name;
+					y_name[pos - 1] = 'y';
+					y_tex = SyncLoadTexture(y_name, EAH_GPU_Read | EAH_Immutable);
+				}
+			}
+
+			if (!!c_tex)
+			{
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_tex, c_tex);
+				ambient_light_->SkylightTex(y_tex, c_tex);
+			}
+			else
+			{
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(y_tex);
+				ambient_light_->SkylightTex(y_tex);
+			}
+		}
+		else
+		{
+			checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(default_cube_map_);
+			ambient_light_->SkylightTex(default_cube_map_);
+		}
+	}
+
+	void MtlEditorCore::DisplaySSVO(bool ssvo)
+	{
+		deferred_rendering_->SSVOEnabled(0, ssvo);
+	}
+
+	void MtlEditorCore::DisplayHDR(bool hdr)
+	{
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().HDREnabled(hdr);
+	}
+
+	void MtlEditorCore::DisplayAA(bool aa)
+	{
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().PPAAEnabled(aa);
+	}
+
+	void MtlEditorCore::DisplayGamma(bool gamma)
+	{
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().GammaEnabled(gamma);
+	}
+
+	void MtlEditorCore::DisplayColorGrading(bool cg)
+	{
+		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(cg);
 	}
 
 	float MtlEditorCore::CurrFrame() const

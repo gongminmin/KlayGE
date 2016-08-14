@@ -30,6 +30,15 @@ namespace KlayGE
 		bool OpenModel(System::String^ name);
 		void SaveModel(System::String^ name);
 
+		System::String^ SkyboxName();
+		void SkyboxName(System::String^ name);
+
+		void DisplaySSVO(bool ssvo);
+		void DisplayHDR(bool hdr);
+		void DisplayAA(bool aa);
+		void DisplayGamma(bool gamma);
+		void DisplayColorGrading(bool cg);
+
 		unsigned int NumFrames();
 		float CurrFrame();
 		void CurrFrame(float frame);

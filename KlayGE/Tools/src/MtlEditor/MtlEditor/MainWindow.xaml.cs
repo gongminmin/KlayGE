@@ -25,140 +25,189 @@ namespace MtlEditor
 	/// </summary>
 	public partial class MainWindow : RibbonWindow
 	{
-		enum PropertyOrders
+		enum SystemProperties
 		{
-			PO_Albedo = 0,
-			PO_Metalness,
-			PO_Glossiness,
-			PO_Emissive,
-			PO_EmissiveMultiplier,
-			PO_Opacity,
-			PO_AlbedoTex,
-			PO_MetalnessTex,
-			PO_GlossinessTex,
-			PO_EmissiveTex,
-			PO_NormalTex,
-			PO_HeightTex,
-			PO_DetailMode,
-			PO_HeightOffset,
-			PO_HeightScale,
-			PO_EdgeTessHint,
-			PO_InsideTessHint,
-			PO_MinTess,
-			PO_MaxTess,
-			PO_Transparent,
-			PO_AlphaTest,
-			PO_SSS
+			SP_SystemSkyBox = 0,
+			SP_SystemDisplaySSVO,
+			SP_SystemDisplayHDR,
+			SP_SystemDisplayAA,
+			SP_SystemDisplayGamma,
+			SP_SystemDisplayColorGrading,
+
+			Num_SystemProperties
+		}
+
+		enum MaterialProperties
+		{
+			MP_Albedo = 0,
+			MP_Metalness,
+			MP_Glossiness,
+			MP_Emissive,
+			MP_EmissiveMultiplier,
+			MP_Opacity,
+			MP_AlbedoTex,
+			MP_MetalnessTex,
+			MP_GlossinessTex,
+			MP_EmissiveTex,
+			MP_NormalTex,
+			MP_HeightTex,
+			MP_DetailMode,
+			MP_HeightOffset,
+			MP_HeightScale,
+			MP_EdgeTessHint,
+			MP_InsideTessHint,
+			MP_MinTess,
+			MP_MaxTess,
+			MP_Transparent,
+			MP_AlphaTest,
+			MP_SSS,
+
+			Num_MaterialProperties
 		};
+
+		[CategoryOrder("System", 0)]
+		public class SystemPropertyTypes
+		{
+			[Category("System")]
+			[DisplayName("Skybox")]
+			[PropertyOrder((int)SystemProperties.SP_SystemSkyBox)]
+			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
+			public string SkyBox { get; set; }
+
+			[Category("System")]
+			[DisplayName("SSVO")]
+			[PropertyOrder((int)SystemProperties.SP_SystemDisplaySSVO)]
+			public bool SSVO { get; set; }
+
+			[Category("System")]
+			[DisplayName("HDR")]
+			[PropertyOrder((int)SystemProperties.SP_SystemDisplayHDR)]
+			public bool HDR { get; set; }
+
+			[Category("System")]
+			[DisplayName("AA")]
+			[PropertyOrder((int)SystemProperties.SP_SystemDisplayAA)]
+			public bool AA { get; set; }
+
+			[Category("System")]
+			[DisplayName("Gamma")]
+			[PropertyOrder((int)SystemProperties.SP_SystemDisplayGamma)]
+			public bool Gamma { get; set; }
+
+			[Category("System")]
+			[DisplayName("Color Grading")]
+			[PropertyOrder((int)SystemProperties.SP_SystemDisplayColorGrading)]
+			public bool ColorGrading { get; set; }
+		}
 
 		[CategoryOrder("Material", 0)]
 		[CategoryOrder("Textures", 1)]
 		[CategoryOrder("Detail", 2)]
 		[CategoryOrder("Attributes", 3)]
-		public class ModelPropertyTypes
+		public class MaterialPropertyTypes
 		{
 			[Category("Material")]
 			[DisplayName("Albedo")]
-			[PropertyOrder((int)PropertyOrders.PO_Albedo)]
+			[PropertyOrder((int)MaterialProperties.MP_Albedo)]
 			public Color albedo { get; set; }
 			[Category("Material")]
 			[DisplayName("Metalness")]
 			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
-			[PropertyOrder((int)PropertyOrders.PO_Metalness)]
+			[PropertyOrder((int)MaterialProperties.MP_Metalness)]
 			public float metalness { get; set; }
 			[Category("Material")]
 			[DisplayName("Glossiness")]
 			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
-			[PropertyOrder((int)PropertyOrders.PO_Glossiness)]
+			[PropertyOrder((int)MaterialProperties.MP_Glossiness)]
 			public float glossiness { get; set; }
 			[Category("Material")]
 			[DisplayName("Emissive")]
-			[PropertyOrder((int)PropertyOrders.PO_Emissive)]
+			[PropertyOrder((int)MaterialProperties.MP_Emissive)]
 			public Color emissive { get; set; }
 			[Category("Material")]
 			[DisplayName("Emissive Multiplier")]
 			[Editor(typeof(MultiplierSliderUserControlEditor), typeof(SliderUserControlEditor))]
-			[PropertyOrder((int)PropertyOrders.PO_EmissiveMultiplier)]
+			[PropertyOrder((int)MaterialProperties.MP_EmissiveMultiplier)]
 			public float emissive_multiplier { get; set; }
 			[Category("Material")]
 			[DisplayName("Opacity")]
-			[PropertyOrder((int)PropertyOrders.PO_Opacity)]
+			[PropertyOrder((int)MaterialProperties.MP_Opacity)]
 			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
 			public float opacity { get; set; }
 
 			[Category("Textures")]
 			[DisplayName("Albedo")]
-			[PropertyOrder((int)PropertyOrders.PO_AlbedoTex)]
+			[PropertyOrder((int)MaterialProperties.MP_AlbedoTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string albedo_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Metalness")]
-			[PropertyOrder((int)PropertyOrders.PO_MetalnessTex)]
+			[PropertyOrder((int)MaterialProperties.MP_MetalnessTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string metalness_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Glossiness")]
-			[PropertyOrder((int)PropertyOrders.PO_GlossinessTex)]
+			[PropertyOrder((int)MaterialProperties.MP_GlossinessTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string glossiness_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Emissive")]
-			[PropertyOrder((int)PropertyOrders.PO_EmissiveTex)]
+			[PropertyOrder((int)MaterialProperties.MP_EmissiveTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string emissive_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Normal")]
-			[PropertyOrder((int)PropertyOrders.PO_NormalTex)]
+			[PropertyOrder((int)MaterialProperties.MP_NormalTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string normal_tex { get; set; }
 			[Category("Textures")]
 			[DisplayName("Height")]
-			[PropertyOrder((int)PropertyOrders.PO_HeightTex)]
+			[PropertyOrder((int)MaterialProperties.MP_HeightTex)]
 			[Editor(typeof(OpenTexUserControlEditor), typeof(OpenTexUserControlEditor))]
 			public string height_tex { get; set; }
 
 			[Category("Detail")]
 			[DisplayName("Mode")]
 			[ItemsSource(typeof(DetailModeItemsSource))]
-			[PropertyOrder((int)PropertyOrders.PO_DetailMode)]
+			[PropertyOrder((int)MaterialProperties.MP_DetailMode)]
 			public string detail_mode { get; set; }
 			[Category("Detail")]
 			[DisplayName("Height Offset")]
-			[PropertyOrder((int)PropertyOrders.PO_HeightOffset)]
+			[PropertyOrder((int)MaterialProperties.MP_HeightOffset)]
 			public float height_offset { get; set; }
 			[Category("Detail")]
 			[DisplayName("Height Scale")]
-			[PropertyOrder((int)PropertyOrders.PO_HeightScale)]
+			[PropertyOrder((int)MaterialProperties.MP_HeightScale)]
 			public float height_scale { get; set; }
 			[Category("Detail")]
 			[DisplayName("Edge Tessellation Hint")]
-			[PropertyOrder((int)PropertyOrders.PO_EdgeTessHint)]
+			[PropertyOrder((int)MaterialProperties.MP_EdgeTessHint)]
 			public float edge_tess_hint { get; set; }
 			[Category("Detail")]
 			[DisplayName("Inside Tessellation Hint")]
-			[PropertyOrder((int)PropertyOrders.PO_InsideTessHint)]
+			[PropertyOrder((int)MaterialProperties.MP_InsideTessHint)]
 			public float inside_tess_hint { get; set; }
 			[Category("Detail")]
 			[DisplayName("Min Tessellation")]
-			[PropertyOrder((int)PropertyOrders.PO_MinTess)]
+			[PropertyOrder((int)MaterialProperties.MP_MinTess)]
 			public float min_tess { get; set; }
 			[Category("Detail")]
 			[DisplayName("Max Tessellation")]
-			[PropertyOrder((int)PropertyOrders.PO_MaxTess)]
+			[PropertyOrder((int)MaterialProperties.MP_MaxTess)]
 			public float max_tess { get; set; }
 
 			[Category("Attributes")]
 			[DisplayName("Transparent")]
-			[PropertyOrder((int)PropertyOrders.PO_Transparent)]
+			[PropertyOrder((int)MaterialProperties.MP_Transparent)]
 			public bool transparent { get; set; }
 			[Category("Attributes")]
 			[DisplayName("Alpha Test")]
-			[PropertyOrder((int)PropertyOrders.PO_AlphaTest)]
+			[PropertyOrder((int)MaterialProperties.MP_AlphaTest)]
 			[Editor(typeof(SliderUserControlEditor), typeof(SliderUserControlEditor))]
 			public float alpha_test { get; set; }
 			[Category("Attributes")]
 			[DisplayName("SSS")]
-			[PropertyOrder((int)PropertyOrders.PO_SSS)]
+			[PropertyOrder((int)MaterialProperties.MP_SSS)]
 			public bool sss { get; set; }
 		}
 
@@ -188,8 +237,16 @@ namespace MtlEditor
 			DetailModeItemsSource.items.Add("Flat Tessellation");
 			DetailModeItemsSource.items.Add("Smooth Tessellation");
 
-			properties_obj_ = new ModelPropertyTypes();
-			properties.SelectedObject = properties_obj_;
+			system_properties_obj_ = new SystemPropertyTypes();
+			system_properties_obj_.SSVO = false;
+			system_properties_obj_.HDR = true;
+			system_properties_obj_.AA = true;
+			system_properties_obj_.Gamma = true;
+			system_properties_obj_.ColorGrading = true;
+
+			mtl_properties_obj_ = new MaterialPropertyTypes();
+
+			properties.SelectedObject = system_properties_obj_;
 
 			save.IsEnabled = false;
 			save_as.IsEnabled = false;
@@ -208,8 +265,6 @@ namespace MtlEditor
 
 			frame_slider.Minimum = 0;
 			frame_slider.Maximum = 1;
-
-			properties.IsEnabled = false;
 
 			last_time_ = DateTime.Now;
 
@@ -332,7 +387,7 @@ namespace MtlEditor
 			this.UpdateMeshProperties(0);
 
 			properties.SelectedObject = null;
-			properties.SelectedObject = properties_obj_;
+			properties.SelectedObject = system_properties_obj_;
 		}
 
 		private void OpenClick(object sender, RoutedEventArgs e)
@@ -673,6 +728,10 @@ namespace MtlEditor
 					this.SelectMaterialEntity(mtl_id);
 				}
 			}
+			else
+			{
+				this.SelectMaterialEntity(0);
+			}
 
 			assign_mtl.IsEnabled = (selected_mesh_id_ > 0) && (selected_mtl_id_ > 0);
 		}
@@ -687,31 +746,31 @@ namespace MtlEditor
 			{
 				-- mtl_id;
 
-				properties_obj_.albedo = this.FloatPtrToLDRColor(core_.AlbedoMaterial(mtl_id), 1);
-				properties_obj_.metalness = core_.MetalnessMaterial(mtl_id);
-				properties_obj_.glossiness = core_.GlossinessMaterial(mtl_id);
-				properties_obj_.emissive_multiplier = this.FloatPtrToMultipiler(core_.EmissiveMaterial(mtl_id));
-				properties_obj_.emissive = this.FloatPtrToLDRColor(core_.EmissiveMaterial(mtl_id), properties_obj_.emissive_multiplier);
-				properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
+				mtl_properties_obj_.albedo = this.FloatPtrToLDRColor(core_.AlbedoMaterial(mtl_id), 1);
+				mtl_properties_obj_.metalness = core_.MetalnessMaterial(mtl_id);
+				mtl_properties_obj_.glossiness = core_.GlossinessMaterial(mtl_id);
+				mtl_properties_obj_.emissive_multiplier = this.FloatPtrToMultipiler(core_.EmissiveMaterial(mtl_id));
+				mtl_properties_obj_.emissive = this.FloatPtrToLDRColor(core_.EmissiveMaterial(mtl_id), mtl_properties_obj_.emissive_multiplier);
+				mtl_properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
-				properties_obj_.albedo_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo);
-				properties_obj_.metalness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness);
-				properties_obj_.glossiness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness);
-				properties_obj_.emissive_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive);
-				properties_obj_.normal_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal);
-				properties_obj_.height_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height);
+				mtl_properties_obj_.albedo_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo);
+				mtl_properties_obj_.metalness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness);
+				mtl_properties_obj_.glossiness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness);
+				mtl_properties_obj_.emissive_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive);
+				mtl_properties_obj_.normal_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal);
+				mtl_properties_obj_.height_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height);
 
-				properties_obj_.detail_mode = DetailModeItemsSource.items[(int)core_.DetailMode(mtl_id)].DisplayName;
-				properties_obj_.height_offset = core_.HeightOffset(mtl_id);
-				properties_obj_.height_scale = core_.HeightScale(mtl_id);
-				properties_obj_.edge_tess_hint = core_.EdgeTessHint(mtl_id);
-				properties_obj_.inside_tess_hint = core_.InsideTessHint(mtl_id);
-				properties_obj_.min_tess = core_.MinTess(mtl_id);
-				properties_obj_.max_tess = core_.MaxTess(mtl_id);
+				mtl_properties_obj_.detail_mode = DetailModeItemsSource.items[(int)core_.DetailMode(mtl_id)].DisplayName;
+				mtl_properties_obj_.height_offset = core_.HeightOffset(mtl_id);
+				mtl_properties_obj_.height_scale = core_.HeightScale(mtl_id);
+				mtl_properties_obj_.edge_tess_hint = core_.EdgeTessHint(mtl_id);
+				mtl_properties_obj_.inside_tess_hint = core_.InsideTessHint(mtl_id);
+				mtl_properties_obj_.min_tess = core_.MinTess(mtl_id);
+				mtl_properties_obj_.max_tess = core_.MaxTess(mtl_id);
 
-				properties_obj_.transparent = core_.TransparentMaterial(mtl_id);
-				properties_obj_.alpha_test = core_.AlphaTestMaterial(mtl_id);
-				properties_obj_.sss = core_.SSSMaterial(mtl_id);
+				mtl_properties_obj_.transparent = core_.TransparentMaterial(mtl_id);
+				mtl_properties_obj_.alpha_test = core_.AlphaTestMaterial(mtl_id);
+				mtl_properties_obj_.sss = core_.SSSMaterial(mtl_id);
 
 				bool used = false;
 				for (uint i = 0; i < core_.NumMeshes(); ++ i)
@@ -722,38 +781,13 @@ namespace MtlEditor
 					}
 				}
 				delete_mtl.IsEnabled = !used;
+
+				properties.SelectedObject = mtl_properties_obj_;
 			}
 			else
 			{
-				properties_obj_.albedo = Color.FromArgb(0, 0, 0, 0);
-				properties_obj_.metalness = 0;
-				properties_obj_.glossiness = 0;
-				properties_obj_.emissive = Color.FromArgb(0, 0, 0, 0);
-				properties_obj_.opacity = 1;
-
-				properties_obj_.albedo_tex = "";
-				properties_obj_.metalness_tex = "";
-				properties_obj_.glossiness_tex = "";
-				properties_obj_.emissive_tex = "";
-				properties_obj_.normal_tex = "";
-				properties_obj_.height_tex = "";
-
-				properties_obj_.detail_mode = "Parallax";
-				properties_obj_.height_offset = -0.5f;
-				properties_obj_.height_scale = 0.06f;
-				properties_obj_.edge_tess_hint = 5;
-				properties_obj_.inside_tess_hint = 5;
-				properties_obj_.min_tess = 1;
-				properties_obj_.max_tess = 9;
-
-				properties_obj_.transparent = false;
-				properties_obj_.alpha_test = 0;
-				properties_obj_.sss = false;
-
-				delete_mtl.IsEnabled = false;
+				properties.SelectedObject = system_properties_obj_;
 			}
-
-			properties.SelectedObject = properties_obj_;
 
 			assign_mtl.IsEnabled = (selected_mesh_id_ > 0) && (selected_mtl_id_ > 0);
 			copy_mtl.IsEnabled = selected_mtl_id_ > 0;
@@ -763,269 +797,315 @@ namespace MtlEditor
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
 		{
 			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
-			switch ((PropertyOrders)item.PropertyOrder)
+			if (properties.SelectedObject == system_properties_obj_)
 			{
-				case PropertyOrders.PO_Albedo:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						float[] albedo = ColorToFloatPtr(properties_obj_.albedo, 1);
-						float[] old_albedo = core_.AlbedoMaterial(mtl_id);
-						if (!this.FloatEqual(old_albedo[0], albedo[0]) || !this.FloatEqual(old_albedo[1], albedo[1])
-							|| !this.FloatEqual(old_albedo[2], albedo[2]))
+				switch ((SystemProperties)item.PropertyOrder)
+				{
+					case SystemProperties.SP_SystemSkyBox:
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetAlbedoMaterial(core_, mtl_id, albedo));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_Metalness:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.MetalnessMaterial(mtl_id), properties_obj_.metalness))
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetMetalnessMaterial(core_, mtl_id, properties_obj_.metalness));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_Glossiness:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.GlossinessMaterial(mtl_id), properties_obj_.glossiness))
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetGlossinessMaterial(core_, mtl_id, properties_obj_.glossiness));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_Emissive:
-				case PropertyOrders.PO_EmissiveMultiplier:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						float[] emissive = ColorToFloatPtr(properties_obj_.emissive, properties_obj_.emissive_multiplier);
-						float[] old_emissive = core_.EmissiveMaterial(mtl_id);
-						if (!this.FloatEqual(old_emissive[0], emissive[0]) || !this.FloatEqual(old_emissive[1], emissive[1])
-							|| !this.FloatEqual(old_emissive[2], emissive[2]))
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetEmissiveMaterial(core_, mtl_id, emissive));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_Opacity:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.OpacityMaterial(mtl_id), properties_obj_.opacity))
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetOpacityMaterial(core_, mtl_id, properties_obj_.opacity));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_AlbedoTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string albedo_tex = RelativePath(properties_obj_.albedo_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo) != albedo_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo, albedo_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_MetalnessTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string metalness_tex = RelativePath(properties_obj_.metalness_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness) != metalness_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness, metalness_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_GlossinessTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string glossiness_tex = RelativePath(properties_obj_.glossiness_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness) != glossiness_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness, glossiness_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_EmissiveTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string emissive_tex = RelativePath(properties_obj_.emissive_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive) != emissive_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive, emissive_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_NormalTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string normal_tex = RelativePath(properties_obj_.normal_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal) != normal_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal, normal_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_HeightTex:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						string height_tex = RelativePath(properties_obj_.height_tex);
-						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height) != height_tex)
-						{
-							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
-								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height, height_tex));
-						}
-					}
-					break;
-
-				case PropertyOrders.PO_DetailMode:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mode = 0;
-						for (; mode < DetailModeItemsSource.items.Count; ++ mode)
-						{
-							if (DetailModeItemsSource.items[(int)mode].DisplayName == (e.NewValue as string))
+							string sky_box_name = RelativePath(system_properties_obj_.SkyBox);
+							if (core_.SkyboxName() != sky_box_name)
 							{
-								break;
+								this.ExecuteCommand(new MtlEditorCommandSetSkyboxName(core_, sky_box_name));
 							}
 						}
+						break;
 
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (core_.DetailMode(mtl_id) != mode)
+					case SystemProperties.SP_SystemDisplaySSVO:
+						core_.DisplaySSVO(system_properties_obj_.SSVO);
+						this.UpdateHistroy();
+						break;
+
+					case SystemProperties.SP_SystemDisplayHDR:
+						core_.DisplayHDR(system_properties_obj_.HDR);
+						this.UpdateHistroy();
+						break;
+
+					case SystemProperties.SP_SystemDisplayAA:
+						core_.DisplayAA(system_properties_obj_.AA);
+						this.UpdateHistroy();
+						break;
+
+					case SystemProperties.SP_SystemDisplayGamma:
+						core_.DisplayGamma(system_properties_obj_.Gamma);
+						this.UpdateHistroy();
+						break;
+
+					case SystemProperties.SP_SystemDisplayColorGrading:
+						core_.DisplayColorGrading(system_properties_obj_.ColorGrading);
+						this.UpdateHistroy();
+						break;
+
+					default:
+						break;
+				}
+			}
+			else
+			{
+				switch ((MaterialProperties)item.PropertyOrder)
+				{
+					case MaterialProperties.MP_Albedo:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetDetailMode(core_, mtl_id, mode));
+							uint mtl_id = selected_mtl_id_ - 1;
+							float[] albedo = ColorToFloatPtr(mtl_properties_obj_.albedo, 1);
+							float[] old_albedo = core_.AlbedoMaterial(mtl_id);
+							if (!this.FloatEqual(old_albedo[0], albedo[0]) || !this.FloatEqual(old_albedo[1], albedo[1])
+								|| !this.FloatEqual(old_albedo[2], albedo[2]))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetAlbedoMaterial(core_, mtl_id, albedo));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_HeightOffset:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.HeightOffset(mtl_id), properties_obj_.height_offset))
+					case MaterialProperties.MP_Metalness:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetHeightOffset(core_, mtl_id, properties_obj_.height_offset));
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.MetalnessMaterial(mtl_id), mtl_properties_obj_.metalness))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetMetalnessMaterial(core_, mtl_id, mtl_properties_obj_.metalness));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_HeightScale:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.HeightScale(mtl_id), properties_obj_.height_scale))
+					case MaterialProperties.MP_Glossiness:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetHeightScale(core_, mtl_id, properties_obj_.height_scale));
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.GlossinessMaterial(mtl_id), mtl_properties_obj_.glossiness))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetGlossinessMaterial(core_, mtl_id, mtl_properties_obj_.glossiness));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_EdgeTessHint:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.EdgeTessHint(mtl_id), properties_obj_.edge_tess_hint))
+					case MaterialProperties.MP_Emissive:
+					case MaterialProperties.MP_EmissiveMultiplier:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetEdgeTessHint(core_, mtl_id, properties_obj_.edge_tess_hint));
+							uint mtl_id = selected_mtl_id_ - 1;
+							float[] emissive = ColorToFloatPtr(mtl_properties_obj_.emissive, mtl_properties_obj_.emissive_multiplier);
+							float[] old_emissive = core_.EmissiveMaterial(mtl_id);
+							if (!this.FloatEqual(old_emissive[0], emissive[0]) || !this.FloatEqual(old_emissive[1], emissive[1])
+								|| !this.FloatEqual(old_emissive[2], emissive[2]))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetEmissiveMaterial(core_, mtl_id, emissive));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_InsideTessHint:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.InsideTessHint(mtl_id), properties_obj_.inside_tess_hint))
+					case MaterialProperties.MP_Opacity:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetInsideTessHint(core_, mtl_id, properties_obj_.inside_tess_hint));
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.OpacityMaterial(mtl_id), mtl_properties_obj_.opacity))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetOpacityMaterial(core_, mtl_id, mtl_properties_obj_.opacity));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_MinTess:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.MinTess(mtl_id), properties_obj_.min_tess))
+					case MaterialProperties.MP_AlbedoTex:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetMinTess(core_, mtl_id, properties_obj_.min_tess));
+							uint mtl_id = selected_mtl_id_ - 1;
+							string albedo_tex = RelativePath(mtl_properties_obj_.albedo_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo) != albedo_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo, albedo_tex));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_MaxTess:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.MaxTess(mtl_id), properties_obj_.max_tess))
+					case MaterialProperties.MP_MetalnessTex:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetMaxTess(core_, mtl_id, properties_obj_.max_tess));
+							uint mtl_id = selected_mtl_id_ - 1;
+							string metalness_tex = RelativePath(mtl_properties_obj_.metalness_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness) != metalness_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness, metalness_tex));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_Transparent:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (core_.TransparentMaterial(mtl_id) != properties_obj_.transparent)
+					case MaterialProperties.MP_GlossinessTex:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetTransparent(core_, mtl_id, properties_obj_.transparent));
+							uint mtl_id = selected_mtl_id_ - 1;
+							string glossiness_tex = RelativePath(mtl_properties_obj_.glossiness_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness) != glossiness_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness, glossiness_tex));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_AlphaTest:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (!this.FloatEqual(core_.AlphaTestMaterial(mtl_id), properties_obj_.alpha_test))
+					case MaterialProperties.MP_EmissiveTex:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetAlphaTest(core_, mtl_id, properties_obj_.alpha_test));
+							uint mtl_id = selected_mtl_id_ - 1;
+							string emissive_tex = RelativePath(mtl_properties_obj_.emissive_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive) != emissive_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive, emissive_tex));
+							}
 						}
-					}
-					break;
+						break;
 
-				case PropertyOrders.PO_SSS:
-					if (selected_mtl_id_ > 0)
-					{
-						uint mtl_id = selected_mtl_id_ - 1;
-						if (core_.SSSMaterial(mtl_id) != properties_obj_.sss)
+					case MaterialProperties.MP_NormalTex:
+						if (selected_mtl_id_ > 0)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetSSS(core_, mtl_id, properties_obj_.sss));
+							uint mtl_id = selected_mtl_id_ - 1;
+							string normal_tex = RelativePath(mtl_properties_obj_.normal_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal) != normal_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal, normal_tex));
+							}
 						}
-					}
-					break;
+						break;
 
-				default:
-					break;
+					case MaterialProperties.MP_HeightTex:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							string height_tex = RelativePath(mtl_properties_obj_.height_tex);
+							if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height) != height_tex)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+									KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height, height_tex));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_DetailMode:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mode = 0;
+							for (; mode < DetailModeItemsSource.items.Count; ++mode)
+							{
+								if (DetailModeItemsSource.items[(int)mode].DisplayName == (e.NewValue as string))
+								{
+									break;
+								}
+							}
+
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (core_.DetailMode(mtl_id) != mode)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetDetailMode(core_, mtl_id, mode));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_HeightOffset:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.HeightOffset(mtl_id), mtl_properties_obj_.height_offset))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetHeightOffset(core_, mtl_id, mtl_properties_obj_.height_offset));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_HeightScale:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.HeightScale(mtl_id), mtl_properties_obj_.height_scale))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetHeightScale(core_, mtl_id, mtl_properties_obj_.height_scale));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_EdgeTessHint:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.EdgeTessHint(mtl_id), mtl_properties_obj_.edge_tess_hint))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetEdgeTessHint(core_, mtl_id, mtl_properties_obj_.edge_tess_hint));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_InsideTessHint:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.InsideTessHint(mtl_id), mtl_properties_obj_.inside_tess_hint))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetInsideTessHint(core_, mtl_id, mtl_properties_obj_.inside_tess_hint));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_MinTess:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.MinTess(mtl_id), mtl_properties_obj_.min_tess))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetMinTess(core_, mtl_id, mtl_properties_obj_.min_tess));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_MaxTess:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.MaxTess(mtl_id), mtl_properties_obj_.max_tess))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetMaxTess(core_, mtl_id, mtl_properties_obj_.max_tess));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_Transparent:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (core_.TransparentMaterial(mtl_id) != mtl_properties_obj_.transparent)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTransparent(core_, mtl_id, mtl_properties_obj_.transparent));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_AlphaTest:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (!this.FloatEqual(core_.AlphaTestMaterial(mtl_id), mtl_properties_obj_.alpha_test))
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetAlphaTest(core_, mtl_id, mtl_properties_obj_.alpha_test));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_SSS:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (core_.SSSMaterial(mtl_id) != mtl_properties_obj_.sss)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetSSS(core_, mtl_id, mtl_properties_obj_.sss));
+							}
+						}
+						break;
+
+					default:
+						break;
+				}
 			}
 		}
 
@@ -1046,6 +1126,10 @@ namespace MtlEditor
 			if ("" == name)
 			{
 				return "";
+			}
+			else if ("" == opened_file_)
+			{
+				return name;
 			}
 			else
 			{
@@ -1224,7 +1308,8 @@ namespace MtlEditor
 		private KlayGE.MtlEditorCoreWrapper core_;
 		private DateTime last_time_;
 		private double frame_;
-		private ModelPropertyTypes properties_obj_;
+		private SystemPropertyTypes system_properties_obj_;
+		private MaterialPropertyTypes mtl_properties_obj_;
 		private uint selected_mesh_id_ = 0;
 		private uint selected_mtl_id_ = 0;
 		private string opened_file_ = "";

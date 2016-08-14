@@ -6,6 +6,7 @@ namespace MtlEditor
 {
 	enum MtlEditorCommandCode
 	{
+		ECC_SetSkyboxName,
 		ECC_SetCurrFrame,
 		ECC_SelectMesh,
 		ECC_SetAlbedoMaterial,
@@ -54,6 +55,30 @@ namespace MtlEditor
 		protected MtlEditorCoreWrapper core_;
 		protected MtlEditorCommandCode code_;
 		protected string cmd_name_;
+	};
+
+	class MtlEditorCommandSetSkyboxName : MtlEditorCommand
+	{
+		public MtlEditorCommandSetSkyboxName(MtlEditorCoreWrapper core, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetSkyboxName, "Set skybox name")
+		{
+			name_ = name;
+		}
+
+		public override object Execute()
+		{
+			old_name_ = core_.SkyboxName();
+			core_.SkyboxName(name_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.SkyboxName(old_name_);
+		}
+
+		private string name_;
+		private string old_name_;
 	};
 
 	class MtlEditorCommandSetCurrFrame : MtlEditorCommand
