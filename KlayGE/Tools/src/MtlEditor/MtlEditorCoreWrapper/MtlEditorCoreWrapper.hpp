@@ -3,10 +3,23 @@
 
 #pragma once
 
+#include <KlayGE/RenderMaterial.hpp>
+
 namespace KlayGE
 {
 	public ref class MtlEditorCoreWrapper
 	{
+	public:
+		enum class TextureSlot
+		{
+			TS_Albedo = RenderMaterial::TS_Albedo,
+			TS_Metalness = RenderMaterial::TS_Metalness,
+			TS_Glossiness = RenderMaterial::TS_Glossiness,
+			TS_Emissive = RenderMaterial::TS_Emissive,
+			TS_Normal = RenderMaterial::TS_Normal,
+			TS_Height = RenderMaterial::TS_Height
+		};
+
 	public:
 		explicit MtlEditorCoreWrapper(System::IntPtr native_wnd);
 		~MtlEditorCoreWrapper();
@@ -42,17 +55,13 @@ namespace KlayGE
 
 		uint32_t MaterialID(uint32_t mesh_id);
 		uint32_t NumMaterials();
+		System::String^ MaterialName(uint32_t mtl_id);
 		array<float>^ AlbedoMaterial(uint32_t mtl_id);
 		float MetalnessMaterial(uint32_t mtl_id);
 		float GlossinessMaterial(uint32_t mtl_id);
 		array<float>^ EmissiveMaterial(uint32_t mtl_id);
 		float OpacityMaterial(uint32_t mtl_id);
-		System::String^ AlbedoTexture(uint32_t mtl_id);
-		System::String^ MetalnessTexture(uint32_t mtl_id);
-		System::String^ GlossinessTexture(uint32_t mtl_id);
-		System::String^ EmissiveTexture(uint32_t mtl_id);
-		System::String^ NormalTexture(uint32_t mtl_id);
-		System::String^ HeightTexture(uint32_t mtl_id);
+		System::String^ Texture(uint32_t mtl_id, TextureSlot slot);
 		uint32_t DetailMode(uint32_t mtl_id);
 		float HeightOffset(uint32_t mtl_id);
 		float HeightScale(uint32_t mtl_id);
@@ -65,17 +74,13 @@ namespace KlayGE
 		bool SSSMaterial(uint32_t mtl_id);
 
 		void MaterialID(uint32_t mesh_id, uint32_t mtl_id);
+		void MaterialName(uint32_t mtl_id, System::String^ name);
 		void AlbedoMaterial(uint32_t mtl_id, array<float>^ value);
 		void MetalnessMaterial(uint32_t mtl_id, float value);
 		void GlossinessMaterial(uint32_t mtl_id, float value);
 		void EmissiveMaterial(uint32_t mtl_id, array<float>^ value);
 		void OpacityMaterial(uint32_t mtl_id, float value);
-		void AlbedoTexture(uint32_t mtl_id, System::String^ name);
-		void MetalnessTexture(uint32_t mtl_id, System::String^ name);
-		void GlossinessTexture(uint32_t mtl_id, System::String^ name);
-		void EmissiveTexture(uint32_t mtl_id, System::String^ name);
-		void NormalTexture(uint32_t mtl_id, System::String^ name);
-		void HeightTexture(uint32_t mtl_id, System::String^ name);
+		void Texture(uint32_t mtl_id, TextureSlot slot, System::String^ name);
 		void DetailMode(uint32_t mtl_id, uint32_t value);
 		void HeightOffset(uint32_t mtl_id, float value);
 		void HeightScale(uint32_t mtl_id, float value);
@@ -88,6 +93,8 @@ namespace KlayGE
 		void SSSMaterial(uint32_t mtl_id, bool value);
 
 		uint32_t CopyMaterial(uint32_t mtl_id);
+		uint32_t ImportMaterial(System::String^ name);
+		void ExportMaterial(uint32_t mtl_id, System::String^ name);
 
 		uint32_t SelectedMesh();
 		void SelectMesh(uint32_t mesh_id);

@@ -105,8 +105,8 @@ namespace KlayGE
 
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
-			normal_tex_ = rt0_tex;
-			albedo_tex_ = rt1_tex;
+			textures_[RenderMaterial::TS_Normal] = rt0_tex;
+			textures_[RenderMaterial::TS_Albedo]= rt1_tex;
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);

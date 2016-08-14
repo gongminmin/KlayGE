@@ -42,9 +42,7 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			mtl_->albedo = float4(0.6f, 0.6f, 0.6f, 1);
-			mtl_->metalness = 1;
-			mtl_->glossiness = Shininess2Glossiness(128);
+			mtl_ = SyncLoadRenderMaterial("ReflectMesh.mtlml");
 
 			effect_attrs_ |= EA_Reflection;
 
@@ -166,15 +164,7 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			mtl_->albedo = float4(0.73f, 1, 0.46f, 1);
-			if (Context::Instance().Config().graphics_cfg.gamma)
-			{
-				mtl_->albedo.x() = MathLib::srgb_to_linear(mtl_->albedo.x());
-				mtl_->albedo.y() = MathLib::srgb_to_linear(mtl_->albedo.y());
-				mtl_->albedo.z() = MathLib::srgb_to_linear(mtl_->albedo.z());
-			}
-			mtl_->metalness = 0.2f;
-			mtl_->glossiness = Shininess2Glossiness(64);
+			mtl_ = SyncLoadRenderMaterial("DinoMesh.mtlml");
 		}
 	};
 

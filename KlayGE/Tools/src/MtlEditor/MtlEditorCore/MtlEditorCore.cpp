@@ -251,8 +251,8 @@ namespace
 
 		void ImpostorTexture(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, float2 const & extent)
 		{
-			normal_tex_ = rt0_tex;
-			albedo_tex_ = rt1_tex;
+			textures_[RenderMaterial::TS_Normal] = rt0_tex;
+			textures_[RenderMaterial::TS_Albedo] = rt1_tex;
 
 			tc_aabb_.Min() = float3(-extent.x(), -extent.y(), 0);
 			tc_aabb_.Max() = float3(+extent.x(), +extent.y(), 0);
@@ -761,6 +761,12 @@ namespace KlayGE
 		return static_cast<uint32_t>(model->NumMaterials());
 	}
 
+	char const * MtlEditorCore::MaterialName(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->name.c_str();
+	}
+
 	float3 const & MtlEditorCore::AlbedoMaterial(uint32_t mtl_id) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
@@ -791,40 +797,10 @@ namespace KlayGE
 		return model->GetMaterial(mtl_id)->albedo.w();
 	}
 
-	char const * MtlEditorCore::AlbedoTexture(uint32_t mtl_id) const
+	char const * MtlEditorCore::Texture(uint32_t mtl_id, uint32_t slot) const
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->albedo_tex_name.c_str();
-	}
-
-	char const * MtlEditorCore::MetalnessTexture(uint32_t mtl_id) const
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->metalness_tex_name.c_str();
-	}
-
-	char const * MtlEditorCore::GlossinessTexture(uint32_t mtl_id) const
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->glossiness_tex_name.c_str();
-	}
-
-	char const * MtlEditorCore::EmissiveTexture(uint32_t mtl_id) const
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->emissive_tex_name.c_str();
-	}
-
-	char const * MtlEditorCore::NormalTexture(uint32_t mtl_id) const
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->normal_tex_name.c_str();
-	}
-
-	char const * MtlEditorCore::HeightTexture(uint32_t mtl_id) const
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		return model->GetMaterial(mtl_id)->height_tex_name.c_str();
+		return model->GetMaterial(mtl_id)->tex_names[slot].c_str();
 	}
 
 	uint32_t MtlEditorCore::DetailMode(uint32_t mtl_id) const
@@ -895,6 +871,13 @@ namespace KlayGE
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id - 1);
 	}
 
+	void MtlEditorCore::MaterialName(uint32_t mtl_id, std::string const & name)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		auto mtl = model->GetMaterial(mtl_id).get();
+		mtl->name = name;
+	}
+
 	void MtlEditorCore::AlbedoMaterial(uint32_t mtl_id, float3 const & value)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
@@ -931,45 +914,10 @@ namespace KlayGE
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
 	}
 
-	void MtlEditorCore::AlbedoTexture(uint32_t mtl_id, std::string const & name)
+	void MtlEditorCore::Texture(uint32_t mtl_id, uint32_t slot, std::string const & name)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->albedo_tex_name = name;
-		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
-	}
-
-	void MtlEditorCore::MetalnessTexture(uint32_t mtl_id, std::string const & name)
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->metalness_tex_name = name;
-		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
-	}
-
-	void MtlEditorCore::GlossinessTexture(uint32_t mtl_id, std::string const & name)
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->glossiness_tex_name = name;
-		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
-	}
-
-	void MtlEditorCore::EmissiveTexture(uint32_t mtl_id, std::string const & name)
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->emissive_tex_name = name;
-		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
-	}
-
-	void MtlEditorCore::NormalTexture(uint32_t mtl_id, std::string const & name)
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->normal_tex_name = name;
-		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
-	}
-
-	void MtlEditorCore::HeightTexture(uint32_t mtl_id, std::string const & name)
-	{
-		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
-		model->GetMaterial(mtl_id)->height_tex_name = name;
+		model->GetMaterial(mtl_id)->tex_names[slot] = name;
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateMaterial(mtl_id);
 	}
 
@@ -1048,6 +996,18 @@ namespace KlayGE
 	{
 		auto const & model = checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable());
 		return model->CopyMaterial(mtl_id);
+	}
+
+	uint32_t MtlEditorCore::ImportMaterial(std::string const & name)
+	{
+		auto const & model = checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable());
+		return model->ImportMaterial(name);
+	}
+
+	void MtlEditorCore::ExportMaterial(uint32_t mtl_id, std::string const & name)
+	{
+		auto const & model = checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable());
+		SaveRenderMaterial(model->GetMaterial(mtl_id), name);
 	}
 
 	uint32_t MtlEditorCore::SelectedMesh() const

@@ -95,14 +95,15 @@ namespace KlayGE
 			*tc_center_param_ = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*tc_extent_param_ = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 
+			*albedo_tex_param_ = textures_[RenderMaterial::TS_Albedo];
+			*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
+			*albedo_map_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
+
 			switch (type_)
 			{
 			case PT_OpaqueDepth:
 			case PT_TransparencyBackDepth:
 			case PT_TransparencyFrontDepth:
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
@@ -117,35 +118,29 @@ namespace KlayGE
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
 			case PT_GenReflectiveShadowMap:
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
-				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!metalness_tex_));
-				*metalness_tex_param_ = metalness_tex_;
+				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!textures_[RenderMaterial::TS_Metalness]));
+				*metalness_tex_param_ = textures_[RenderMaterial::TS_Metalness];
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*normal_map_enabled_param_ = static_cast<int32_t>(!!normal_tex_);
-				*normal_tex_param_ = normal_tex_;
+				*normal_map_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Normal]);
+				*normal_tex_param_ = textures_[RenderMaterial::TS_Normal];
 				if (!mtl_ || (RenderMaterial::SDM_Parallax == mtl_->detail_mode))
 				{
-					*height_map_parallax_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+					*height_map_parallax_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Height]);
 				}
 				else
 				{
-					*height_map_tess_enabled_param_ = static_cast<int32_t>(!!height_tex_);
+					*height_map_tess_enabled_param_ = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Height]);
 				}
-				*height_tex_param_ = height_tex_;
+				*height_tex_param_ = textures_[RenderMaterial::TS_Height];
 				*glossiness_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
-					static_cast<float>(!!glossiness_tex_));
-				*glossiness_tex_param_ = glossiness_tex_;
+					static_cast<float>(!!textures_[RenderMaterial::TS_Glossiness]));
+				*glossiness_tex_param_ = textures_[RenderMaterial::TS_Glossiness];
 				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_GenShadowMap:
 			case PT_GenCascadedShadowMap:
 			case PT_GenShadowMapWODepthTexture:
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				break;
 
@@ -153,39 +148,30 @@ namespace KlayGE
 			case PT_TransparencyBackShading:
 			case PT_TransparencyFrontShading:
 				*glossiness_clr_param_ = float2(MathLib::clamp(mtl_ ? mtl_->glossiness : 0, 1e-6f, 0.999f),
-					static_cast<float>(!!glossiness_tex_));
-				*glossiness_tex_param_ = glossiness_tex_;
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
-				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!metalness_tex_));
-				*metalness_tex_param_ = metalness_tex_;
+					static_cast<float>(!!textures_[RenderMaterial::TS_Glossiness]));
+				*glossiness_tex_param_ = textures_[RenderMaterial::TS_Glossiness];
+				*metalness_clr_param_ = float2(mtl_ ? mtl_->metalness : 0, static_cast<float>(!!textures_[RenderMaterial::TS_Metalness]));
+				*metalness_tex_param_ = textures_[RenderMaterial::TS_Metalness];
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*emissive_tex_param_ = emissive_tex_;
+				*emissive_tex_param_ = textures_[RenderMaterial::TS_Emissive];
 				*emissive_clr_param_ = float4(
 					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
-					static_cast<float>(!!emissive_tex_));
+					static_cast<float>(!!textures_[RenderMaterial::TS_Emissive]));
 				break;
 
 			case PT_OpaqueReflection:
 			case PT_TransparencyBackReflection:
 			case PT_TransparencyFrontReflection:
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
 				break;
 
 			case PT_OpaqueSpecialShading:
 			case PT_TransparencyBackSpecialShading:
 			case PT_TransparencyFrontSpecialShading:
-				*albedo_tex_param_ = albedo_tex_;
-				*albedo_clr_param_ = mtl_ ? mtl_->albedo : float4(0, 0, 0, 1);
-				*albedo_map_enabled_param_ = static_cast<int32_t>(!!albedo_tex_);
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*emissive_tex_param_ = emissive_tex_;
+				*emissive_tex_param_ = textures_[RenderMaterial::TS_Emissive];
 				*emissive_clr_param_ = float4(
 					mtl_ ? mtl_->emissive.x() : 0, mtl_ ? mtl_->emissive.y() : 0, mtl_ ? mtl_->emissive.z() : 0,
-					static_cast<float>(!!emissive_tex_));
+					static_cast<float>(!!textures_[RenderMaterial::TS_Emissive]));
 				if (reflection_tex_param_)
 				{
 					*reflection_tex_param_ = drl->ReflectionTex(drl->ActiveViewport());
@@ -318,29 +304,12 @@ namespace KlayGE
 	bool Renderable::AllHWResourceReady() const
 	{
 		bool ready = this->HWResourceReady();
-		if (ready && albedo_tex_)
+		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
-			ready = albedo_tex_->HWResourceReady();
-		}
-		if (ready && metalness_tex_)
-		{
-			ready = metalness_tex_->HWResourceReady();
-		}
-		if (ready && glossiness_tex_)
-		{
-			ready = glossiness_tex_->HWResourceReady();
-		}
-		if (ready && emissive_tex_)
-		{
-			ready = emissive_tex_->HWResourceReady();
-		}
-		if (ready && normal_tex_)
-		{
-			ready = normal_tex_->HWResourceReady();
-		}
-		if (ready && height_tex_)
-		{
-			ready = height_tex_->HWResourceReady();
+			if (ready && textures_[i])
+			{
+				ready = textures_[i]->HWResourceReady();
+			}
 		}
 		return ready;
 	}

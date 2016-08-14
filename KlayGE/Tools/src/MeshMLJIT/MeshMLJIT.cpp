@@ -108,7 +108,7 @@ namespace
 	}
 
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 12;
+	uint32_t const MODEL_BIN_VERSION = 13;
 
 	struct KeyFrames
 	{
@@ -170,9 +170,11 @@ namespace
 			OfflineRenderMaterial offline_mtl;
 			auto& mtl = offline_mtl.material;
 
+			mtl.name = "Material " + boost::lexical_cast<std::string>(mtl_index);
+
 			mtl.albedo = float4(0, 0, 0, 1);
 			mtl.metalness = 0;
-			mtl.glossiness = Shininess2Glossiness(16);
+			mtl.glossiness = 0;
 			mtl.emissive = float3(0, 0, 0);
 			mtl.transparent = false;
 			mtl.alpha_test = 0;
@@ -181,6 +183,14 @@ namespace
 			mtl.detail_mode = RenderMaterial::SDM_Parallax;
 			mtl.height_offset_scale = float2(-0.5f, 0.06f);
 			mtl.tess_factors = float4(5, 5, 1, 9);
+
+			{
+				XMLAttributePtr attr = mtl_node->Attrib("name");
+				if (attr)
+				{
+					mtl.name = attr->ValueString();
+				}
+			}
 
 			XMLNodePtr albedo_node = mtl_node->FirstNode("albedo");
 			if (albedo_node)
@@ -338,6 +348,7 @@ namespace
 				{
 					offline_mtl.texture_slots.emplace_back("Height", attr->ValueString());
 				}
+
 				attr = height_node->Attrib("offset");
 				if (attr)
 				{
@@ -1727,6 +1738,8 @@ namespace
 			auto& offline_mtl = mtls[i];
 			auto& mtl = offline_mtl.material;
 
+			WriteShortString(os, mtl.name);
+
 			for (uint32_t j = 0; j < 4; ++ j)
 			{
 				float const value = Native2LE(mtl.albedo[j]);
@@ -1754,13 +1767,11 @@ namespace
 			uint8_t sss = mtl.sss;
 			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
 
-			WriteShortString(os, mtl.albedo_tex_name);
-			WriteShortString(os, mtl.metalness_tex_name);
-			WriteShortString(os, mtl.glossiness_tex_name);
-			WriteShortString(os, mtl.emissive_tex_name);
-			WriteShortString(os, mtl.normal_tex_name);
-			WriteShortString(os, mtl.height_tex_name);
-			if (!mtl.height_tex_name.empty())
+			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
+			{
+				WriteShortString(os, mtl.tex_names[j]);
+			}
+			if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
 			{
 				float height_offset = Native2LE(mtl.height_offset_scale.x());
 				os.write(reinterpret_cast<char*>(&height_offset), sizeof(height_offset));
@@ -2133,28 +2144,28 @@ namespace
 						|| (CT_HASH("Diffuse Color Map") == type_hash)
 						|| (CT_HASH("Albedo") == type_hash))
 					{
-						mtls[i].material.albedo_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Albedo] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if (CT_HASH("Metalness") == type_hash)
 					{
-						mtls[i].material.metalness_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Metalness] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Glossiness") == type_hash) || (CT_HASH("Reflection Glossiness Map") == type_hash))
 					{
-						mtls[i].material.glossiness_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Glossiness] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Self-Illumination") == type_hash) || (CT_HASH("Emissive") == type_hash))
 					{
-						mtls[i].material.emissive_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Emissive] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Bump") == type_hash) || (CT_HASH("Bump Map") == type_hash)
 						|| (CT_HASH("Normal") == type_hash) || (CT_HASH("Normal Map") == type_hash))
 					{
-						mtls[i].material.normal_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Normal] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 					else if ((CT_HASH("Height") == type_hash) || (CT_HASH("Height Map") == type_hash))
 					{
-						mtls[i].material.height_tex_name = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
+						mtls[i].material.tex_names[RenderMaterial::TS_Height] = ReplaceExtToDDS(mtls[i].texture_slots[j].second);
 					}
 				}
 			}

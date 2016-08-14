@@ -196,6 +196,8 @@ namespace MtlEditor
 			assign_mtl.IsEnabled = false;
 			copy_mtl.IsEnabled = false;
 			delete_mtl.IsEnabled = false;
+			import_mtl.IsEnabled = false;
+			export_mtl.IsEnabled = false;
 			undo.IsEnabled = false;
 			redo.IsEnabled = false;
 			skinning.IsEnabled = false;
@@ -277,6 +279,8 @@ namespace MtlEditor
 			assign_mtl.IsEnabled = false;
 			copy_mtl.IsEnabled = false;
 			delete_mtl.IsEnabled = false;
+			import_mtl.IsEnabled = true;
+			export_mtl.IsEnabled = false;
 			if (core_.NumFrames() != 0)
 			{
 				skinning.IsEnabled = true;
@@ -320,7 +324,7 @@ namespace MtlEditor
 			{
 				var entity = new MaterialEntity();
 				entity.ID = i + 1;
-				entity.Name = "Material " + i;
+				entity.Name = core_.MaterialName(i);
 				materials_[0].Children.Add(new MaterialEntityViewModel(this, entity));
 			}
 			this.SelectMaterialEntity(0);
@@ -394,6 +398,39 @@ namespace MtlEditor
 						break;
 					}
 				}
+			}
+		}
+
+		private void ImportMaterialClick(object sender, RoutedEventArgs e)
+		{
+			Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+			dlg.DefaultExt = ".mtlml";
+			dlg.Filter = "MtlML Files (*.mtlml)|*.mtlml|All Files|*.*";
+			dlg.CheckPathExists = true;
+			dlg.CheckFileExists = true;
+			if (true == dlg.ShowDialog())
+			{
+				uint new_mtl_id = core_.ImportMaterial(dlg.FileName);
+
+				var entity = new MaterialEntity();
+				entity.ID = new_mtl_id + 1;
+				entity.Name = System.IO.Path.GetFileNameWithoutExtension(dlg.FileName);
+				materials_[0].Children.Add(new MaterialEntityViewModel(this, entity));
+				this.SelectMaterialEntity(entity.ID);
+			}
+		}
+
+		private void ExportMaterialClick(object sender, RoutedEventArgs e)
+		{
+			Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+			dlg.DefaultExt = ".mtlml";
+			dlg.Filter = "MtlML Files (*.mtlml)|*.mtlml|All Files|*.*";
+			dlg.OverwritePrompt = true;
+			if (true == dlg.ShowDialog())
+			{
+				core_.ExportMaterial(selected_mtl_id_ - 1, dlg.FileName);
 			}
 		}
 
@@ -657,12 +694,12 @@ namespace MtlEditor
 				properties_obj_.emissive = this.FloatPtrToLDRColor(core_.EmissiveMaterial(mtl_id), properties_obj_.emissive_multiplier);
 				properties_obj_.opacity = core_.OpacityMaterial(mtl_id);
 
-				properties_obj_.albedo_tex = core_.AlbedoTexture(mtl_id);
-				properties_obj_.metalness_tex = core_.MetalnessTexture(mtl_id);
-				properties_obj_.glossiness_tex = core_.GlossinessTexture(mtl_id);
-				properties_obj_.emissive_tex = core_.EmissiveTexture(mtl_id);
-				properties_obj_.normal_tex = core_.NormalTexture(mtl_id);
-				properties_obj_.height_tex = core_.HeightTexture(mtl_id);
+				properties_obj_.albedo_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo);
+				properties_obj_.metalness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness);
+				properties_obj_.glossiness_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness);
+				properties_obj_.emissive_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive);
+				properties_obj_.normal_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal);
+				properties_obj_.height_tex = core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height);
 
 				properties_obj_.detail_mode = DetailModeItemsSource.items[(int)core_.DetailMode(mtl_id)].DisplayName;
 				properties_obj_.height_offset = core_.HeightOffset(mtl_id);
@@ -720,6 +757,7 @@ namespace MtlEditor
 
 			assign_mtl.IsEnabled = (selected_mesh_id_ > 0) && (selected_mtl_id_ > 0);
 			copy_mtl.IsEnabled = selected_mtl_id_ > 0;
+			export_mtl.IsEnabled = selected_mtl_id_ > 0;
 		}
 
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
@@ -794,9 +832,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string albedo_tex = RelativePath(properties_obj_.albedo_tex);
-						if (core_.AlbedoTexture(mtl_id) != albedo_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo) != albedo_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetAlbedoTexture(core_, mtl_id, albedo_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Albedo, albedo_tex));
 						}
 					}
 					break;
@@ -806,9 +845,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string metalness_tex = RelativePath(properties_obj_.metalness_tex);
-						if (core_.MetalnessTexture(mtl_id) != metalness_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness) != metalness_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetMetalnessTexture(core_, mtl_id, metalness_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Metalness, metalness_tex));
 						}
 					}
 					break;
@@ -818,9 +858,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string glossiness_tex = RelativePath(properties_obj_.glossiness_tex);
-						if (core_.GlossinessTexture(mtl_id) != glossiness_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness) != glossiness_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetGlossinessTexture(core_, mtl_id, glossiness_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Glossiness, glossiness_tex));
 						}
 					}
 					break;
@@ -830,9 +871,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string emissive_tex = RelativePath(properties_obj_.emissive_tex);
-						if (core_.EmissiveTexture(mtl_id) != emissive_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive) != emissive_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetEmissiveTexture(core_, mtl_id, emissive_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Emissive, emissive_tex));
 						}
 					}
 					break;
@@ -842,9 +884,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string normal_tex = RelativePath(properties_obj_.normal_tex);
-						if (core_.NormalTexture(mtl_id) != normal_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal) != normal_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetNormalTexture(core_, mtl_id, normal_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Normal, normal_tex));
 						}
 					}
 					break;
@@ -854,9 +897,10 @@ namespace MtlEditor
 					{
 						uint mtl_id = selected_mtl_id_ - 1;
 						string height_tex = RelativePath(properties_obj_.height_tex);
-						if (core_.HeightTexture(mtl_id) != height_tex)
+						if (core_.Texture(mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height) != height_tex)
 						{
-							this.ExecuteCommand(new MtlEditorCommandSetHeightTexture(core_, mtl_id, height_tex));
+							this.ExecuteCommand(new MtlEditorCommandSetTexture(core_, mtl_id,
+								KlayGE.MtlEditorCoreWrapper.TextureSlot.TS_Height, height_tex));
 						}
 					}
 					break;

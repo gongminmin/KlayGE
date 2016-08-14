@@ -311,6 +311,7 @@ namespace KlayGE
 				uv_transss.push_back(std::map<int, std::pair<Matrix3, int>>());
 				std::map<int, std::pair<Matrix3, int>>& uv_transs = uv_transss.back();
 
+				char const * name = max_mtl->GetName().data();
 				::Color diffuse = max_mtl->GetDiffuse();
 				::Color emit;
 				if (max_mtl->GetSelfIllumColorOn())
@@ -324,7 +325,7 @@ namespace KlayGE
 				float opacity = 1 - max_mtl->GetXParency();
 				float glossiness = log(max_mtl->GetShininess() * 100) / log(8192.0f);
 
-				meshml_obj_.SetMaterial(mtl_id, float4(diffuse.r, diffuse.g, diffuse.b, opacity), 0, glossiness,
+				meshml_obj_.SetMaterial(mtl_id, name, float4(diffuse.r, diffuse.g, diffuse.b, opacity), 0, glossiness,
 					float3(emit.r, emit.g, emit.b), opacity < 1, 0, false);
 
 				for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
@@ -369,28 +370,28 @@ namespace KlayGE
 								|| (CT_HASH("Diffuse Color") == slot_name_hash)
 								|| (CT_HASH("Diffuse Color Map") == slot_name_hash))
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Albedo, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Albedo, map_name);
 							}
 							else if ((CT_HASH("Glossiness") == slot_name_hash)
 								|| (CT_HASH("Reflection Glossiness Map") == slot_name_hash))
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Glossiness, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Glossiness, map_name);
 							}
 							else if (CT_HASH("Self-Illumination") == slot_name_hash)
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Emissive, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Emissive, map_name);
 							}
 							else if ((CT_HASH("Bump") == slot_name_hash) || (CT_HASH("Bump Map") == slot_name_hash))
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Bump, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Bump, map_name);
 							}
 							else if ((CT_HASH("Normal") == slot_name_hash) || (CT_HASH("Normal Map") == slot_name_hash))
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Normal, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Normal, map_name);
 							}
 							else if ((CT_HASH("Height") == slot_name_hash) || (CT_HASH("Height Map") == slot_name_hash))
 							{
-								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::TT_Height, map_name);
+								meshml_obj_.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Height, map_name);
 							}
 						}
 					}
@@ -411,7 +412,8 @@ namespace KlayGE
 
 			uv_transss.push_back(std::map<int, std::pair<Matrix3, int>>());
 
-			meshml_obj_.SetMaterial(mtl_id, float4(0.5f, 0.5f, 0.5f, 1), 0, log(32.0f) / log(8192.0f), float3(0, 0, 0), false, 0, false);
+			meshml_obj_.SetMaterial(mtl_id, "default", float4(0.5f, 0.5f, 0.5f, 1), 0, log(32.0f) / log(8192.0f),
+				float3(0, 0, 0), false, 0, false);
 		}
 	}
 

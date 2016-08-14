@@ -84,6 +84,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderFactory.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderLayout.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderMaterial.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderStateObject.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderView.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/SATPostProcess.cpp

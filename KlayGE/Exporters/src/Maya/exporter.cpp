@@ -750,6 +750,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 				MColor ec = lambert.incandescence();
 				MColor tr = lambert.transparency();
 				float dcoeff = lambert.diffuseCoeff();
+				MString name = lambert.name();
 
 				float shininess = 32.0f;
 				if (surface_shader.hasFn(MFn::kPhong))
@@ -767,8 +768,8 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 				float glossiness = log(shininess) / log(8192.0f);
 
 				mtl_id = meshml_obj_.AllocMaterial();
-				meshml_obj_.SetMaterial(mtl_id, KlayGE::float4(dcoeff * dc.r, dcoeff * dc.g, dcoeff * dc.b, opacity), 0.0f, glossiness,
-					KlayGE::float3(ec.r, ec.g, ec.b), opacity < 1, 0, false);
+				meshml_obj_.SetMaterial(mtl_id, name.asChar(), KlayGE::float4(dcoeff * dc.r, dcoeff * dc.g, dcoeff * dc.b, opacity),
+					0.0f, glossiness, KlayGE::float3(ec.r, ec.g, ec.b), opacity < 1, 0, false);
 			}
 			else
 			{
@@ -788,10 +789,10 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 
 	// Setup texture types and corresponding names in Maya
 	// FIXME: how to handle other types: NormalMap, OpacityMap, etc.
-	std::map<MeshMLObj::TextureType, std::string> texture_type_map;
-	texture_type_map.emplace(MeshMLObj::TT_Albedo, "color");
-	texture_type_map.emplace(MeshMLObj::TT_Emissive, "incandescence");
-	texture_type_map.emplace(MeshMLObj::TT_Bump, "bumpValue");
+	std::map<MeshMLObj::Material::TextureSlot, std::string> texture_type_map;
+	texture_type_map.emplace(MeshMLObj::Material::TS_Albedo, "color");
+	texture_type_map.emplace(MeshMLObj::Material::TS_Emissive, "incandescence");
+	texture_type_map.emplace(MeshMLObj::Material::TS_Bump, "bumpValue");
 
 	// Record all texture types that are binded to this material
 	if (has_surface_shader)
@@ -834,7 +835,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 int MayaMeshExporter::AddDefaultMaterial()
 {
 	int mtl_id = meshml_obj_.AllocMaterial();
-	meshml_obj_.SetMaterial(mtl_id, KlayGE::float4(0, 0, 0, 1), 0, log(32.0f) / log(8192.0f), KlayGE::float3(0, 0, 0),
+	meshml_obj_.SetMaterial(mtl_id, "default", KlayGE::float4(0, 0, 0, 1), 0, log(32.0f) / log(8192.0f), KlayGE::float3(0, 0, 0),
 		false, 0, false);
 	return mtl_id;
 }

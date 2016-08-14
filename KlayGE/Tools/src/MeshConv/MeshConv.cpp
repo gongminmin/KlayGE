@@ -182,6 +182,7 @@ namespace
 		{
 			int mtl_id = meshml_obj.AllocMaterial();
 
+			std::string name;
 			float3 albedo(0, 0, 0);
 			float metalness = 0;
 			float shininess = 1;
@@ -189,12 +190,19 @@ namespace
 			float opacity = 1;
 			bool transparent = false;
 
+			aiString ai_name;
 			aiColor4D ai_albedo;
 			float ai_opacity;
 			float ai_shininess;
 			aiColor4D ai_emissive;
 
 			auto mtl = scene->mMaterials[mi];
+			
+			if (AI_SUCCESS == aiGetMaterialString(mtl, AI_MATKEY_NAME, &ai_name))
+			{
+				name = ai_name.C_Str();
+			}
+
 			if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &ai_albedo))
 			{
 				albedo = Color4ToFloat3(ai_albedo);
@@ -229,7 +237,7 @@ namespace
 				transparent = true;
 			}
 
-			meshml_obj.SetMaterial(mtl_id, float4(albedo.x(), albedo.y(), albedo.z(), opacity),
+			meshml_obj.SetMaterial(mtl_id, name, float4(albedo.x(), albedo.y(), albedo.z(), opacity),
 				metalness, Shininess2Glossiness(shininess),
 				emissive, transparent, 0, false);
 
@@ -239,7 +247,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_DIFFUSE, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Albedo, str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Albedo, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_SHININESS);
@@ -248,7 +256,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_SHININESS, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Glossiness, str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Glossiness, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_EMISSIVE);
@@ -257,7 +265,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_EMISSIVE, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Emissive, str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Emissive, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_NORMALS);
@@ -266,7 +274,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_NORMALS, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Normal, str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Normal, str.C_Str());
 			}
 
 			count = aiGetMaterialTextureCount(mtl, aiTextureType_HEIGHT);
@@ -275,7 +283,7 @@ namespace
 				aiString str;
 				aiGetMaterialTexture(mtl, aiTextureType_HEIGHT, 0, &str, 0, 0, 0, 0, 0, 0);
 
-				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Height, str.C_Str());
+				meshml_obj.SetTextureSlot(mtl_id, MeshMLObj::Material::TS_Height, str.C_Str());
 			}
 		}
 

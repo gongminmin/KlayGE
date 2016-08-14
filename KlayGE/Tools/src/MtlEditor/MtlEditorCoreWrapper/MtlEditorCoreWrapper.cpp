@@ -163,6 +163,11 @@ namespace KlayGE
 		return core_->NumMaterials();
 	}
 
+	System::String^ MtlEditorCoreWrapper::MaterialName(uint32_t mtl_id)
+	{
+		return gcnew String(core_->MaterialName(mtl_id));
+	}
+
 	array<float>^ MtlEditorCoreWrapper::AlbedoMaterial(uint32_t mtl_id)
 	{
 		auto const & clr = core_->AlbedoMaterial(mtl_id);
@@ -192,34 +197,9 @@ namespace KlayGE
 		return core_->OpacityMaterial(mtl_id);
 	}
 
-	String^ MtlEditorCoreWrapper::AlbedoTexture(uint32_t mtl_id)
+	String^ MtlEditorCoreWrapper::Texture(uint32_t mtl_id, TextureSlot slot)
 	{
-		return gcnew String(core_->AlbedoTexture(mtl_id));
-	}
-
-	String^MtlEditorCoreWrapper::MetalnessTexture(uint32_t mtl_id)
-	{
-		return gcnew String(core_->MetalnessTexture(mtl_id));
-	}
-
-	String^ MtlEditorCoreWrapper::GlossinessTexture(uint32_t mtl_id)
-	{
-		return gcnew String(core_->GlossinessTexture(mtl_id));
-	}
-
-	String^ MtlEditorCoreWrapper::EmissiveTexture(uint32_t mtl_id)
-	{
-		return gcnew String(core_->EmissiveTexture(mtl_id));
-	}
-
-	String^ MtlEditorCoreWrapper::NormalTexture(uint32_t mtl_id)
-	{
-		return gcnew String(core_->NormalTexture(mtl_id));
-	}
-
-	String^ MtlEditorCoreWrapper::HeightTexture(uint32_t mtl_id)
-	{
-		return gcnew String(core_->HeightTexture(mtl_id));
+		return gcnew String(core_->Texture(mtl_id, static_cast<uint32_t>(slot)));
 	}
 
 	uint32_t MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id)
@@ -277,6 +257,11 @@ namespace KlayGE
 		core_->MaterialID(mesh_id, mtl_id);
 	}
 
+	void MtlEditorCoreWrapper::MaterialName(uint32_t mtl_id, System::String^ name)
+	{
+		core_->MaterialName(mtl_id, StringToStd(name));
+	}
+
 	void MtlEditorCoreWrapper::AlbedoMaterial(uint32_t mtl_id, array<float>^ value)
 	{
 		float r = value[0];
@@ -308,34 +293,9 @@ namespace KlayGE
 		core_->OpacityMaterial(mtl_id, value);
 	}
 
-	void MtlEditorCoreWrapper::AlbedoTexture(uint32_t mtl_id, String^ name)
+	void MtlEditorCoreWrapper::Texture(uint32_t mtl_id, TextureSlot slot, String^ name)
 	{
-		core_->AlbedoTexture(mtl_id, StringToStd(name));
-	}
-
-	void MtlEditorCoreWrapper::MetalnessTexture(uint32_t mtl_id, String^ name)
-	{
-		core_->MetalnessTexture(mtl_id, StringToStd(name));
-	}
-
-	void MtlEditorCoreWrapper::GlossinessTexture(uint32_t mtl_id, String^ name)
-	{
-		core_->GlossinessTexture(mtl_id, StringToStd(name));
-	}
-
-	void MtlEditorCoreWrapper::EmissiveTexture(uint32_t mtl_id, String^ name)
-	{
-		core_->EmissiveTexture(mtl_id, StringToStd(name));
-	}
-
-	void MtlEditorCoreWrapper::NormalTexture(uint32_t mtl_id, String^ name)
-	{
-		core_->NormalTexture(mtl_id, StringToStd(name));
-	}
-
-	void MtlEditorCoreWrapper::HeightTexture(uint32_t mtl_id, String^ name)
-	{
-		core_->HeightTexture(mtl_id, StringToStd(name));
+		core_->Texture(mtl_id, static_cast<uint32_t>(slot), StringToStd(name));
 	}
 
 	void MtlEditorCoreWrapper::DetailMode(uint32_t mtl_id, uint32_t value)
@@ -393,6 +353,16 @@ namespace KlayGE
 		return core_->CopyMaterial(mtl_id);
 	}
 
+	uint32_t MtlEditorCoreWrapper::ImportMaterial(System::String^ name)
+	{
+		return core_->ImportMaterial(StringToStd(name));
+	}
+
+	void MtlEditorCoreWrapper::ExportMaterial(uint32_t mtl_id, String^ name)
+	{
+		core_->ExportMaterial(mtl_id, StringToStd(name));
+	}
+
 	uint32_t MtlEditorCoreWrapper::SelectedMesh()
 	{
 		return core_->SelectedMesh();
@@ -400,7 +370,7 @@ namespace KlayGE
 
 	void MtlEditorCoreWrapper::SelectMesh(uint32_t mesh_id)
 	{
-		return core_->SelectMesh(mesh_id);
+		core_->SelectMesh(mesh_id);
 	}
 
 	void MtlEditorCoreWrapper::UpdateSelectEntityCallback(UpdateSelectEntityDelegate^ callback)

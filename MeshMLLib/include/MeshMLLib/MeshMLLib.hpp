@@ -69,19 +69,23 @@ namespace KlayGE
 			UES_All = 0xFF
 		};
 
-		enum TextureType
-		{
-			TT_Albedo,
-			TT_Metalness,
-			TT_Glossiness,
-			TT_Emissive,
-			TT_Bump,
-			TT_Normal,
-			TT_Height
-		};
-
 		struct Material
 		{
+			enum TextureSlot
+			{
+				TS_Albedo,
+				TS_Metalness,
+				TS_Glossiness,
+				TS_Emissive,
+				TS_Normal,
+				TS_Height,
+
+				// Offline only
+				TS_Bump,	// Will be converted to normal map
+
+				TS_NumTextureSlots
+			};
+
 			enum SurfaceDetailMode
 			{
 				SDM_Parallax = 0,
@@ -96,6 +100,8 @@ namespace KlayGE
 			{
 			}
 
+			std::string name;
+
 			float4 albedo;
 			float metalness;
 			float glossiness;
@@ -105,13 +111,7 @@ namespace KlayGE
 			float alpha_test;
 			bool sss;
 
-			std::string albedo_tex_name;
-			std::string metalness_tex_name;
-			std::string glossiness_tex_name;
-			std::string emissive_tex_name;
-			std::string bump_tex_name;		// Will be converted to normal map
-			std::string normal_tex_name;
-			std::string height_tex_name;
+			std::array<std::string, TS_NumTextureSlots> tex_names;
 
 			SurfaceDetailMode detail_mode;
 			float2 height_offset_scale;
@@ -150,11 +150,11 @@ namespace KlayGE
 			Quaternion const & bind_real, Quaternion const & bind_dual);
 
 		int AllocMaterial();
-		void SetMaterial(int mtl_id, float4 const & albedo, float metalness, float glossiness, float3 const & emissive,
-			bool transparent, float alpha_test, bool sss);
+		void SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
+			float3 const & emissive, bool transparent, float alpha_test, bool sss);
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
-		void SetTextureSlot(int mtl_id, TextureType type, std::string const & name);
+		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string const & name);
 
 		int AllocMesh();
 		void SetMesh(int mesh_id, int material_id, std::string const & name);

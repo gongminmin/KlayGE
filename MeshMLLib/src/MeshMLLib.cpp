@@ -62,12 +62,7 @@ namespace KlayGE
 			&& (detail_mode == rhs.detail_mode)
 			&& (height_offset_scale == rhs.height_offset_scale)
 			&& (tess_factors == rhs.tess_factors)
-			&& (albedo_tex_name == rhs.albedo_tex_name)
-			&& (metalness_tex_name == rhs.metalness_tex_name)
-			&& (glossiness_tex_name == rhs.glossiness_tex_name)
-			&& (emissive_tex_name == rhs.emissive_tex_name)
-			&& (normal_tex_name == rhs.normal_tex_name)
-			&& (height_tex_name == rhs.height_tex_name);
+			&& (tex_names == rhs.tex_names);
 	}
 
 	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
@@ -140,12 +135,13 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetMaterial(int mtl_id, float4 const & albedo, float metalness, float glossiness, float3 const & emissive,
-		bool transparent, float alpha_test, bool sss)
+	void MeshMLObj::SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
+		float3 const & emissive, bool transparent, float alpha_test, bool sss)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
+		mtl.name = name;
 		mtl.albedo = albedo;
 		mtl.metalness = metalness;
 		mtl.glossiness = glossiness;
@@ -166,38 +162,12 @@ namespace KlayGE
 		mtl.tess_factors = float4(edge_tess_hint, inside_tess_hint, min_tess, max_tess);
 	}
 
-	void MeshMLObj::SetTextureSlot(int mtl_id, MeshMLObj::TextureType type, std::string const & name)
+	void MeshMLObj::SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string const & name)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
-		switch (type)
-		{
-		case TT_Albedo:
-			mtl.albedo_tex_name = name;
-			break;
-
-		case TT_Metalness:
-			mtl.metalness_tex_name = name;
-			break;
-
-		case TT_Glossiness:
-			mtl.glossiness_tex_name = name;
-			break;
-
-		case TT_Emissive:
-			mtl.emissive_tex_name = name;
-			break;
-
-		case TT_Normal:
-			mtl.normal_tex_name = name;
-			break;
-
-		case TT_Height:
-		default:
-			mtl.height_tex_name = name;
-			break;
-		}
+		mtl.tex_names[type] = name;
 	}
 
 	int MeshMLObj::AllocMesh()
@@ -508,48 +478,54 @@ namespace KlayGE
 		os << "\t<materials_chunk>" << std::endl;
 		for (auto const & mtl : materials_)
 		{
-			os << "\t\t<material>" << std::endl;
+			os << "\t\t<material name=\"" << mtl.name << "\">" << std::endl;
 			os << "\t\t\t<albedo color=\"" << mtl.albedo[0] << " " << mtl.albedo[1]
 				<< " " << mtl.albedo[2] << " " << mtl.albedo[3] << "\"";
-			if (!mtl.albedo_tex_name.empty())
+			if (!mtl.tex_names[Material::TS_Albedo].empty())
 			{
-				os << " texture=\"" << mtl.albedo_tex_name << "\"";
+				os << " texture=\"" << mtl.tex_names[Material::TS_Albedo] << "\"";
 			}
 			os << "/>" << std::endl;
-			os << "\t\t\t<metalness value=\"" << mtl.metalness << "\"";
-			if (!mtl.metalness_tex_name.empty())
+			if (mtl.metalness > 0)
 			{
-				os << " texture=\"" << mtl.metalness_tex_name << "\"";
-			}
-			os << "/>" << std::endl;
-			os << "\t\t\t<glossiness value=\"" << mtl.glossiness << "\"";
-			if (!mtl.glossiness_tex_name.empty())
-			{
-				os << " texture=\"" << mtl.glossiness_tex_name << "\"";
-			}
-			os << "/>" << std::endl;
-			if ((mtl.emissive[0] != 0) || (mtl.emissive[1] != 0) || (mtl.emissive[2] != 0)
-				|| !mtl.emissive_tex_name.empty())
-			{
-				os << "\t\t\t<emissive color=\"" << mtl.emissive[0] << " " << mtl.emissive[1]
-					<< " " << mtl.emissive[2] << "\"";
-				if (!mtl.emissive_tex_name.empty())
+				os << "\t\t\t<metalness value=\"" << mtl.metalness << "\"";
+				if (!mtl.tex_names[Material::TS_Metalness].empty())
 				{
-					os << " texture=\"" << mtl.emissive_tex_name << "\"";
+					os << " texture=\"" << mtl.tex_names[Material::TS_Metalness] << "\"";
 				}
 				os << "/>" << std::endl;
 			}
-			if (!mtl.bump_tex_name.empty())
+			if (mtl.glossiness > 0)
 			{
-				os << "\t\t\t<bump texture=\"" << mtl.bump_tex_name << "\"/>" << std::endl;
+				os << "\t\t\t<glossiness value=\"" << mtl.glossiness << "\"";
+				if (!mtl.tex_names[Material::TS_Glossiness].empty())
+				{
+					os << " texture=\"" << mtl.tex_names[Material::TS_Glossiness] << "\"";
+				}
+				os << "/>" << std::endl;
 			}
-			if (!mtl.normal_tex_name.empty())
+			if ((mtl.emissive[0] != 0) || (mtl.emissive[1] != 0) || (mtl.emissive[2] != 0)
+				|| !mtl.tex_names[Material::TS_Emissive].empty())
 			{
-				os << "\t\t\t<normal texture=\"" << mtl.normal_tex_name << "\"/>" << std::endl;
+				os << "\t\t\t<emissive color=\"" << mtl.emissive[0] << " " << mtl.emissive[1]
+					<< " " << mtl.emissive[2] << "\"";
+				if (!mtl.tex_names[Material::TS_Emissive].empty())
+				{
+					os << " texture=\"" << mtl.tex_names[Material::TS_Emissive] << "\"";
+				}
+				os << "/>" << std::endl;
 			}
-			if (!mtl.height_tex_name.empty())
+			if (!mtl.tex_names[Material::TS_Bump].empty())
 			{
-				os << "\t\t\t<height texture=\"" << mtl.height_tex_name << "\""
+				os << "\t\t\t<bump texture=\"" << mtl.tex_names[Material::TS_Bump] << "\"/>" << std::endl;
+			}
+			if (!mtl.tex_names[Material::TS_Normal].empty())
+			{
+				os << "\t\t\t<normal texture=\"" << mtl.tex_names[Material::TS_Normal] << "\"/>" << std::endl;
+			}
+			if (!mtl.tex_names[Material::TS_Height].empty())
+			{
+				os << "\t\t\t<height texture=\"" << mtl.tex_names[Material::TS_Height] << "\""
 					<< " offset=\"" << mtl.height_offset_scale.x() << "\""
 					<< " scale=\"" << mtl.height_offset_scale.y() << "\"/>" << std::endl;
 			}

@@ -34,18 +34,33 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <vector>
+#include <string>
+#include <array>
 
 namespace KlayGE
 {
 	struct KLAYGE_CORE_API RenderMaterial
 	{
+		enum TextureSlot
+		{
+			TS_Albedo,
+			TS_Metalness,
+			TS_Glossiness,
+			TS_Emissive,
+			TS_Normal,
+			TS_Height,
+
+			TS_NumTextureSlots
+		};
+
 		enum SurfaceDetailMode
 		{
 			SDM_Parallax = 0,
 			SDM_FlatTessellation,
 			SDM_SmoothTessellation
 		};
+
+		std::string name;
 
 		float4 albedo;
 		float metalness;
@@ -56,12 +71,7 @@ namespace KlayGE
 		float alpha_test;
 		bool sss;
 
-		std::string albedo_tex_name;
-		std::string metalness_tex_name;
-		std::string glossiness_tex_name;
-		std::string emissive_tex_name;
-		std::string normal_tex_name;
-		std::string height_tex_name;
+		std::array<std::string, TS_NumTextureSlots> tex_names;
 
 		SurfaceDetailMode detail_mode;
 		float2 height_offset_scale;
@@ -80,6 +90,10 @@ namespace KlayGE
 	{
 		return pow(MAX_SHININESS, glossiness);
 	}
+
+	KLAYGE_CORE_API RenderMaterialPtr SyncLoadRenderMaterial(std::string const & mtlml_name);
+	KLAYGE_CORE_API RenderMaterialPtr ASyncLoadRenderMaterial(std::string const & mtlml_name);
+	KLAYGE_CORE_API void SaveRenderMaterial(RenderMaterialPtr const & mtl, std::string const & mtlml_name);
 }
 
 #endif		//_RENDERMATERIAL_HPP

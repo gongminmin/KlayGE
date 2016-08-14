@@ -13,12 +13,7 @@ namespace MtlEditor
 		ECC_SetGlossinessMaterial,
 		ECC_SetEmissiveMaterial,
 		ECC_SetOpacityMaterial,
-		ECC_SetAlbedoTexture,
-		ECC_SetMetalnessTexture,
-		ECC_SetGlossinessTexture,
-		ECC_SetEmissiveTexture,
-		ECC_SetNormalTexture,
-		ECC_SetHeightTexture,
+		ECC_SetTexture,
 		ECC_SetDetailMode,
 		ECC_SetHeightOffset,
 		ECC_SetHeightScale,
@@ -239,158 +234,30 @@ namespace MtlEditor
 		private float old_opacity_;
 	};
 
-	class MtlEditorCommandSetAlbedoTexture : MtlEditorCommand
+	class MtlEditorCommandSetTexture : MtlEditorCommand
 	{
-		public MtlEditorCommandSetAlbedoTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetAlbedoTexture, "Set albedo texture")
+		public MtlEditorCommandSetTexture(MtlEditorCoreWrapper core, uint mtl_id, KlayGE.MtlEditorCoreWrapper.TextureSlot slot, string name)
+			: base(core, MtlEditorCommandCode.ECC_SetTexture, "Set texture")
 		{
 			mtl_id_ = mtl_id;
+			slot_ = slot;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_name_ = core_.AlbedoTexture(mtl_id_);
-			core_.AlbedoTexture(mtl_id_, name_);
+			old_name_ = core_.Texture(mtl_id_, slot_);
+			core_.Texture(mtl_id_, slot_, name_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.AlbedoTexture(mtl_id_, old_name_);
+			core_.Texture(mtl_id_, slot_, old_name_);
 		}
 
 		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetMetalnessTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetMetalnessTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetMetalnessTexture, "Set metalness texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.MetalnessTexture(mtl_id_);
-			core_.MetalnessTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.MetalnessTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetGlossinessTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetGlossinessTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetGlossinessTexture, "Set glossiness texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.GlossinessTexture(mtl_id_);
-			core_.GlossinessTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.GlossinessTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetEmissiveTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetEmissiveTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetEmissiveTexture, "Set emissive texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.EmissiveTexture(mtl_id_);
-			core_.EmissiveTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.EmissiveTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetNormalTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetNormalTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetNormalTexture, "Set normal texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.NormalTexture(mtl_id_);
-			core_.NormalTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.NormalTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
-		private string name_;
-		private string old_name_;
-	};
-
-	class MtlEditorCommandSetHeightTexture : MtlEditorCommand
-	{
-		public MtlEditorCommandSetHeightTexture(MtlEditorCoreWrapper core, uint mtl_id, string name)
-			: base(core, MtlEditorCommandCode.ECC_SetHeightTexture, "Set height texture")
-		{
-			mtl_id_ = mtl_id;
-			name_ = name;
-		}
-
-		public override object Execute()
-		{
-			old_name_ = core_.HeightTexture(mtl_id_);
-			core_.HeightTexture(mtl_id_, name_);
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			core_.HeightTexture(mtl_id_, old_name_);
-		}
-
-		private uint mtl_id_;
+		private KlayGE.MtlEditorCoreWrapper.TextureSlot slot_;
 		private string name_;
 		private string old_name_;
 	};

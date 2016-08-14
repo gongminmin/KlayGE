@@ -85,7 +85,7 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 	{
 		effect_attrs_ |= EA_SSS;
 	}
-	if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || emissive_tex_
+	if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || textures_[RenderMaterial::TS_Emissive]
 		|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 		|| (effect_attrs_ & EA_Reflection))
 	{
@@ -97,12 +97,10 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 
 void DetailedSkinnedMesh::UpdateMaterial()
 {
-	albedo_tex_.reset();
-	metalness_tex_.reset();
-	glossiness_tex_.reset();
-	emissive_tex_.reset();
-	normal_tex_.reset();
-	height_tex_.reset();
+	for (size_t i = 0; i < textures_.size(); ++ i)
+	{
+		textures_[i].reset();
+	}
 
 	StaticMesh::BuildMeshInfo();
 }
@@ -503,5 +501,12 @@ uint32_t DetailedSkinnedModel::CopyMaterial(uint32_t mtl_index)
 {
 	uint32_t new_index = static_cast<uint32_t>(materials_.size());
 	materials_.push_back(MakeSharedPtr<RenderMaterial>(*materials_[mtl_index]));
+	return new_index;
+}
+
+uint32_t DetailedSkinnedModel::ImportMaterial(std::string const & name)
+{
+	uint32_t new_index = static_cast<uint32_t>(materials_.size());
+	materials_.push_back(SyncLoadRenderMaterial(name));
 	return new_index;
 }

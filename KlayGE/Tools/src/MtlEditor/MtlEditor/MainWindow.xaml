@@ -25,6 +25,8 @@
                     <RibbonButton LargeImageSource="Images\AssignMaterial.png" x:Name="assign_mtl" Label="Assign Material" Click="AssignMaterialClick"/>
                     <RibbonButton LargeImageSource="Images\CopyMaterial.png" x:Name="copy_mtl" Label="Copy Material" Click="CopyMaterialClick"/>
                     <RibbonButton LargeImageSource="Images\DeleteMaterial.png" x:Name="delete_mtl" Label="Delete Material" Click="DeleteMaterialClick"/>
+                    <RibbonButton LargeImageSource="Images\ImportMaterial.png" x:Name="import_mtl" Label="Import Material" Click="ImportMaterialClick"/>
+                    <RibbonButton LargeImageSource="Images\ExportMaterial.png" x:Name="export_mtl" Label="Export Material" Click="ExportMaterialClick"/>
                 </RibbonGroup>
                 <RibbonGroup>
                     <RibbonButton LargeImageSource="Images\Undo.png" x:Name="undo" Label="Undo" Click="UndoClick"/>

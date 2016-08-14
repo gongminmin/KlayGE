@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<material>
+	<albedo color="0.6 0.6 0.6 1"/>
+	<metalness value="1"/>
+	<glossiness value="0.538462"/>
+</material>

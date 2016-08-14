@@ -23,6 +23,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
+#include <KlayGE/RenderMaterial.hpp>
 
 namespace KlayGE
 {
@@ -342,12 +343,7 @@ namespace KlayGE
 		RenderEffectParameter* reflection_tex_param_;
 		RenderEffectParameter* alpha_test_threshold_param_;
 
-		TexturePtr albedo_tex_;
-		TexturePtr metalness_tex_;
-		TexturePtr glossiness_tex_;
-		TexturePtr emissive_tex_;
-		TexturePtr normal_tex_;
-		TexturePtr height_tex_;
+		std::array<TexturePtr, RenderMaterial::TS_NumTextureSlots> textures_;
 
 		std::vector<RenderablePtr> subrenderables_;
 	};

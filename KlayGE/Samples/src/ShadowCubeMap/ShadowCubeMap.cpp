@@ -200,16 +200,17 @@ namespace
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			*(effect_->ParameterByName("albedo_tex")) = albedo_tex_;
-			*(effect_->ParameterByName("metalness_tex")) = metalness_tex_;
-			*(effect_->ParameterByName("glossiness_tex")) = glossiness_tex_;
-			*(effect_->ParameterByName("emissive_tex")) = emissive_tex_;
+			*(effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
+			*(effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
+			*(effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
+			*(effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
 
 			*(effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
-			*(effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness, !!metalness_tex_);
-			*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!glossiness_tex_);
-			*(effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(), !!emissive_tex_);
-			*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!albedo_tex_);
+			*(effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness, !!textures_[RenderMaterial::TS_Metalness]);
+			*(effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness, !!textures_[RenderMaterial::TS_Glossiness]);
+			*(effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
+				!!textures_[RenderMaterial::TS_Emissive]);
+			*(effect_->ParameterByName("albedo_map_enabled")) = static_cast<int32_t>(!!textures_[RenderMaterial::TS_Albedo]);
 
 			AABBox const & pos_bb = this->PosBound();
 			*(effect_->ParameterByName("pos_center")) = pos_bb.Center();

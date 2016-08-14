@@ -47,7 +47,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 12;
+	uint32_t const MODEL_BIN_VERSION = 13;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -520,46 +520,14 @@ namespace KlayGE
 
 		mtl_ = model->GetMaterial(this->MaterialID());
 
-		if (!mtl_->albedo_tex_name.empty())
+		for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 		{
-			if (!ResLoader::Instance().Locate(mtl_->albedo_tex_name).empty())
+			if (!mtl_->tex_names[i].empty())
 			{
-				albedo_tex_ = ASyncLoadTexture(mtl_->albedo_tex_name, EAH_GPU_Read | EAH_Immutable);
-			}
-		}
-		if (!mtl_->metalness_tex_name.empty())
-		{
-			if (!ResLoader::Instance().Locate(mtl_->metalness_tex_name).empty())
-			{
-				metalness_tex_ = ASyncLoadTexture(mtl_->metalness_tex_name, EAH_GPU_Read | EAH_Immutable);
-			}
-		}
-		if (!mtl_->glossiness_tex_name.empty())
-		{
-			if (!ResLoader::Instance().Locate(mtl_->glossiness_tex_name).empty())
-			{
-				glossiness_tex_ = ASyncLoadTexture(mtl_->glossiness_tex_name, EAH_GPU_Read | EAH_Immutable);
-			}
-		}
-		if (!mtl_->emissive_tex_name.empty())
-		{
-			if (!ResLoader::Instance().Locate(mtl_->emissive_tex_name).empty())
-			{
-				emissive_tex_ = ASyncLoadTexture(mtl_->emissive_tex_name, EAH_GPU_Read | EAH_Immutable);
-			}
-		}
-		if (!mtl_->normal_tex_name.empty())
-		{
-			if (!ResLoader::Instance().Locate(mtl_->normal_tex_name).empty())
-			{
-				normal_tex_ = ASyncLoadTexture(mtl_->normal_tex_name, EAH_GPU_Read | EAH_Immutable);
-			}
-		}
-		if (!mtl_->height_tex_name.empty())
-		{
-			if (!ResLoader::Instance().Locate(mtl_->height_tex_name).empty())
-			{
-				height_tex_ = ASyncLoadTexture(mtl_->height_tex_name, EAH_GPU_Read | EAH_Immutable);
+				if (!ResLoader::Instance().Locate(mtl_->tex_names[i]).empty())
+				{
+					textures_[i] = ASyncLoadTexture(mtl_->tex_names[i], EAH_GPU_Read | EAH_Immutable);
+				}
 			}
 		}
 
@@ -577,7 +545,7 @@ namespace KlayGE
 			effect_attrs_ |= EA_SSS;
 		}
 
-		if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || emissive_tex_
+		if ((mtl_->emissive.x() > 0) || (mtl_->emissive.y() > 0) || (mtl_->emissive.z() > 0) || textures_[RenderMaterial::TS_Emissive]
 			|| (effect_attrs_ & EA_TransparencyBack) || (effect_attrs_ & EA_TransparencyFront)
 			|| (effect_attrs_ & EA_Reflection))
 		{
@@ -1092,6 +1060,8 @@ namespace KlayGE
 			RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
 			mtls[mtl_index] = mtl;
 
+			mtl->name = ReadShortString(decoded);
+
 			decoded->read(&mtl->albedo, sizeof(mtl->albedo));
 			mtl->albedo.x() = LE2Native(mtl->albedo.x());
 			mtl->albedo.y() = LE2Native(mtl->albedo.y());
@@ -1121,13 +1091,11 @@ namespace KlayGE
 			decoded->read(&sss, sizeof(sss));
 			mtl->sss = sss ? true : false;
 
-			mtl->albedo_tex_name = ReadShortString(decoded);
-			mtl->metalness_tex_name = ReadShortString(decoded);
-			mtl->glossiness_tex_name = ReadShortString(decoded);
-			mtl->emissive_tex_name = ReadShortString(decoded);
-			mtl->normal_tex_name = ReadShortString(decoded);
-			mtl->height_tex_name = ReadShortString(decoded);
-			if (!mtl->height_tex_name.empty())
+			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
+			{
+				mtl->tex_names[i] = ReadShortString(decoded);
+			}
+			if (!mtl->tex_names[RenderMaterial::TS_Height].empty())
 			{
 				float height_offset;
 				decoded->read(&height_offset, sizeof(height_offset));
@@ -1485,15 +1453,19 @@ namespace KlayGE
 			int mtl_id = obj.AllocMaterial();
 			mtl_map.emplace(i, mtl_id);
 
-			obj.SetMaterial(mtl_id, mtls[i]->albedo, mtls[i]->metalness, mtls[i]->glossiness, mtls[i]->emissive,
-				mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss);
+			obj.SetMaterial(mtl_id, mtls[i]->name, mtls[i]->albedo, mtls[i]->metalness, mtls[i]->glossiness,
+				mtls[i]->emissive, mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss);
 
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Albedo, mtls[i]->albedo_tex_name);
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Metalness, mtls[i]->metalness_tex_name);
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Glossiness, mtls[i]->glossiness_tex_name);
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Emissive, mtls[i]->emissive_tex_name);
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Normal, mtls[i]->normal_tex_name);
-			obj.SetTextureSlot(mtl_id, MeshMLObj::TT_Height, mtls[i]->height_tex_name);
+			static_assert(MeshMLObj::Material::TS_Albedo == RenderMaterial::TS_Albedo, "Albedo texture slot doesn't consistent");
+			static_assert(MeshMLObj::Material::TS_Metalness == RenderMaterial::TS_Metalness, "Metalness texture slot doesn't consistent");
+			static_assert(MeshMLObj::Material::TS_Glossiness == RenderMaterial::TS_Glossiness, "Glossiness texture slot doesn't consistent");
+			static_assert(MeshMLObj::Material::TS_Emissive == RenderMaterial::TS_Emissive, "Emissive texture slot doesn't consistent");
+			static_assert(MeshMLObj::Material::TS_Normal == RenderMaterial::TS_Normal, "Normal texture slot doesn't consistent");
+			static_assert(MeshMLObj::Material::TS_Height == RenderMaterial::TS_Height, "Height texture slot doesn't consistent");
+			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
+			{
+				obj.SetTextureSlot(mtl_id, static_cast<MeshMLObj::Material::TextureSlot>(j), mtls[i]->tex_names[j]);
+			}
 
 			obj.SetDetailMaterial(mtl_id, static_cast<MeshMLObj::Material::SurfaceDetailMode>(mtls[i]->detail_mode),
 				mtls[i]->height_offset_scale.x(), mtls[i]->height_offset_scale.y(),

@@ -2,6 +2,8 @@ DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/AssignMaterial.png" "
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Camera.png" "cbda47a1678ce70b6720856736100979d469e159" "db8779719cd08b70bcf0e3c1700e9dd8b112a609")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/CopyMaterial.png" "043cc004649304f9e07fdd052953f654b529c758" "65253fdee9aac94212308b2b2f8912452fee896c")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/DeleteMaterial.png" "043cc004649304f9e07fdd052953f654b529c758" "774f2591d3bfb67f48f4da740f5c9fff058961c8")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/ExportMaterial.png" "dce7404a90a601e7d0dcdeab60b2a3e5258c2b30" "a00b3266059dc8e3736248149268a11e14e697b7")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/ImportMaterial.png" "dce7404a90a601e7d0dcdeab60b2a3e5258c2b30" "9b27264872a432464d6131868c567b3d6d220eab")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/ImposterMode.png" "67446d28c443c84b44f0f53d653a9313102dd911" "9111e3a0e8fd4852654094feb1262ac45a08cf4a")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/klayge_logo.ico" "cbda47a1678ce70b6720856736100979d469e159" "b05ac9575a9a001af17a3729987ba8dd77e4c017")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/LineMode.png" "bb0000e115d4c725f5da35ea74bb152f30f583a4" "d50971c40c7811045d1b6e726e8f4cfc9e034dae")

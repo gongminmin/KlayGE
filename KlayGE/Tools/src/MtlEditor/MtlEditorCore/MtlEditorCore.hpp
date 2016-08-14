@@ -40,17 +40,13 @@ namespace KlayGE
 		uint32_t SelectedMesh() const;
 		uint32_t MaterialID(uint32_t mesh_id) const;
 		uint32_t NumMaterials() const;
+		char const * MaterialName(uint32_t mtl_id) const;
 		float3 const & AlbedoMaterial(uint32_t mtl_id) const;
 		float MetalnessMaterial(uint32_t mtl_id) const;
 		float GlossinessMaterial(uint32_t mtl_id) const;
 		float3 const & EmissiveMaterial(uint32_t mtl_id) const;
 		float OpacityMaterial(uint32_t mtl_id) const;
-		char const * AlbedoTexture(uint32_t mtl_id) const;
-		char const * MetalnessTexture(uint32_t mtl_id) const;
-		char const * GlossinessTexture(uint32_t mtl_id) const;
-		char const * EmissiveTexture(uint32_t mtl_id) const;
-		char const * NormalTexture(uint32_t mtl_id) const;
-		char const * HeightTexture(uint32_t mtl_id) const;
+		char const * Texture(uint32_t mtl_id, uint32_t slot) const;
 		uint32_t DetailMode(uint32_t mtl_id) const;
 		float HeightOffset(uint32_t mtl_id) const;
 		float HeightScale(uint32_t mtl_id) const;
@@ -65,17 +61,13 @@ namespace KlayGE
 		void CurrFrame(float frame);
 		void SelectMesh(uint32_t mesh_id);
 		void MaterialID(uint32_t mesh_id, uint32_t mtl_id);
+		void MaterialName(uint32_t mtl_id, std::string const & name);
 		void AlbedoMaterial(uint32_t mtl_id, float3 const & value);
 		void MetalnessMaterial(uint32_t mtl_id, float value);
 		void GlossinessMaterial(uint32_t mtl_id, float value);
 		void EmissiveMaterial(uint32_t mtl_id, float3 const & value);
 		void OpacityMaterial(uint32_t mtl_id, float value);
-		void AlbedoTexture(uint32_t mtl_id, std::string const & name);
-		void MetalnessTexture(uint32_t mtl_id, std::string const & name);
-		void GlossinessTexture(uint32_t mtl_id, std::string const & name);
-		void EmissiveTexture(uint32_t mtl_id, std::string const & name);
-		void NormalTexture(uint32_t mtl_id, std::string const & name);
-		void HeightTexture(uint32_t mtl_id, std::string const & name);
+		void Texture(uint32_t mtl_id, uint32_t slot, std::string const & name);
 		void DetailMode(uint32_t mtl_id, uint32_t value);
 		void HeightOffset(uint32_t mtl_id, float value);
 		void HeightScale(uint32_t mtl_id, float value);
@@ -88,6 +80,8 @@ namespace KlayGE
 		void SSSMaterial(uint32_t mtl_id, bool value);
 
 		uint32_t CopyMaterial(uint32_t mtl_id);
+		uint32_t ImportMaterial(std::string const & name);
+		void ExportMaterial(uint32_t mtl_id, std::string const & name);
 
 		void SkinningOn(bool on);
 		void FPSCameraOn(bool on);
