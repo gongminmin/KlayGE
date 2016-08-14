@@ -93,6 +93,7 @@ namespace KlayGE
 		void ExportMaterial(uint32_t mtl_id, std::string const & name);
 
 		void SkinningOn(bool on);
+		void LightOn(bool on);
 		void FPSCameraOn(bool on);
 		void LineModeOn(bool on);
 		void ImposterModeOn(bool on);

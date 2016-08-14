@@ -1119,6 +1119,11 @@ namespace KlayGE
 		}
 	}
 
+	void MtlEditorCore::LightOn(bool on)
+	{
+		main_light_->Enabled(on);
+	}
+
 	void MtlEditorCore::FPSCameraOn(bool on)
 	{
 		is_fps_camera_ = on;

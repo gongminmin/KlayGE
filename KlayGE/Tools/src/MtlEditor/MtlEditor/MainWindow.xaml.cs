@@ -533,6 +533,19 @@ namespace MtlEditor
 			}
 		}
 
+		public bool LightValue
+		{
+			get
+			{
+				return light_;
+			}
+			set
+			{
+				light_ = value;
+				core_.LightOn(light_ ? 1 : 0);
+			}
+		}
+
 		public bool FPSCameraValue
 		{
 			get
@@ -1315,6 +1328,7 @@ namespace MtlEditor
 		private string opened_file_ = "";
 
 		private bool skinning_ = false;
+		private bool light_ = true;
 		private bool fps_camera_ = false;
 		private bool line_mode_ = false;
 		private bool imposter_mode_ = false;

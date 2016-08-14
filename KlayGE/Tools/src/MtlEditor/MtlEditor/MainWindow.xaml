@@ -37,6 +37,7 @@
                     <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation" IsChecked="{Binding PlayValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>
+                    <RibbonToggleButton LargeImageSource="Images\Light.png" x:Name="light" Label="Light" IsChecked="{Binding LightValue}"/>
                     <RibbonToggleButton LargeImageSource="Images\Camera.png" x:Name="fps_camera" Label="FPS Camera" IsChecked="{Binding FPSCameraValue}"/>
                     <RibbonToggleButton LargeImageSource="Images\LineMode.png" x:Name="line_mode" Label="Line Mode" IsChecked="{Binding LineModeValue}"/>
                     <RibbonToggleButton LargeImageSource="Images\ImposterMode.png" x:Name="imposter_mode" Label="Imposter Mode" IsChecked="{Binding ImposterModeValue}"/>
