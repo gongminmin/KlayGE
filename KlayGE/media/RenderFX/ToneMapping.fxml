@@ -54,7 +54,7 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 #if KLAYGE_NO_FP_COLOR
 	return color;
 #else
-	float adapted_lum_dest = 3 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
+	float adapted_lum_dest = 2 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 
 	return ACESFilm(adapted_lum_dest * color);
 #endif
