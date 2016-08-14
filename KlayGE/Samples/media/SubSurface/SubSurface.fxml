@@ -123,7 +123,7 @@ float4 SubSurfacePS(float2 uv : TEXCOORD0,
 				float3 L	: TEXCOORD1,
 				float3 V	: TEXCOORD2,
 				float3 H	: TEXCOORD3,
-				float3 tc_w : TEXCOORD5) : SV_Target
+				float3 tc_w : TEXCOORD4) : SV_Target
 {
 	float attenuation = AttenuationTerm(0, -L.xyz, light_falloff);
 

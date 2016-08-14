@@ -2116,8 +2116,8 @@ namespace KlayGE
 				root_signature_desc.Flags |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT;
 			}
 
-			ID3DBlob* signature;
-			ID3DBlob* error;
+			ID3DBlob* signature = nullptr;
+			ID3DBlob* error = nullptr;
 			TIF(D3D12InterfaceLoader::Instance().D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 			ID3D12RootSignature* rs;
 			TIF(d3d_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
