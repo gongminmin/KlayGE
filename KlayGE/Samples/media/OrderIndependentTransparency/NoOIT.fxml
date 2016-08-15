@@ -16,12 +16,20 @@
 		<parameter type="float2" name="tc_extent"/>
 		
 		<parameter type="float4x4" name="mvp" semantic="WORLDVIEWPROJECTION"/>
+
+		<parameter type="float4" name="albedo_clr"/>
+		<parameter type="float2" name="metalness_clr"/>
+		<parameter type="float2" name="glossiness_clr"/>
+		<parameter type="float4" name="emissive_clr"/>
+		<parameter type="int" name="albedo_map_enabled"/>
+		<parameter type="int" name="normal_map_enabled"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="diffuse_tex"/>
-	<parameter type="texture2D" name="specular_tex"/>
-	<parameter type="texture2D" name="normal_tex"/>
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="metalness_tex"/>
+	<parameter type="texture2D" name="glossiness_tex"/>
 	<parameter type="texture2D" name="emissive_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
 
 	<parameter type="sampler" name="linear_sampler">
 		<state name="filtering" value="min_mag_mip_linear"/>
@@ -60,15 +68,44 @@ float4 Shading(float4 L, float4 H)
 {
 	float2 uv = float2(L.w, H.w);
 
-	float3 diffuse = diffuse_tex.Sample(linear_sampler, uv).xyz;
-	float specular = specular_tex.Sample(linear_sampler, uv).x;
-	float3 normal = decompress_normal(normal_tex.Sample(linear_sampler, uv));
-	float3 emissive = emissive_tex.Sample(linear_sampler, uv).xyz * 16;
+	float3 albedo = albedo_clr.xyz;
+	if (albedo_map_enabled)
+	{
+		albedo *= albedo_tex.Sample(linear_sampler, uv).xyz;
+	}
+	float metalness = metalness_clr.x;
+	if (metalness_clr.y > 0.5f)
+	{
+		metalness *= glossiness_tex.Sample(linear_sampler, uv).x;
+	}
+	float glossiness = glossiness_clr.x;
+	if (glossiness_clr.y > 0.5f)
+	{
+		glossiness *= glossiness_tex.Sample(linear_sampler, uv).x;
+	}
+	float3 emissive = emissive_clr.xyz;
+	if (emissive_clr.w > 0.5f)
+	{
+		emissive *= emissive_tex.Sample(linear_sampler, uv).xyz;
+	}
+	float3 normal;
+	if (normal_map_enabled)
+	{
+		normal = decompress_normal(normal_tex.Sample(linear_sampler, uv));
+	}
+	else
+	{
+		normal = float3(0, 0, 1);
+	}
 
 	float3 light_vec = normalize(L.xyz);
 	float3 halfway = normalize(H.xyz);
 
-	return float4(0.2f * diffuse + emissive + CalcBRDFShading(diffuse, 0.5f, specular * 256, light_vec, halfway, normal), alpha);
+	float3 c_diff = DiffuseColor(albedo, metalness);
+	float3 c_spec = SpecularColor(albedo, metalness);
+
+	return float4(0.1f * albedo + emissive
+		+ CalcBRDFShading(c_diff, c_spec, Glossiness2Shininess(glossiness), light_vec, halfway, normal), alpha);
 }
 
 void NoOITVS(float4 pos				: POSITION,

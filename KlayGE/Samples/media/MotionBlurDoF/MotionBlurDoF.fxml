@@ -86,8 +86,12 @@ float4 ColorDepthPS(float3 clr : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 no
 	light_vec_ws = normalize(light_vec_ws);
 	halfway_vec_ws = normalize(halfway_vec_ws);
 	normal_ws = normalize(normal_ws);
+
+	float metalness = 0.7f;
+	float3 c_diff = DiffuseColor(clr, metalness);
+	float3 c_spec = SpecularColor(clr, metalness);
 	
-	return float4(0.05f * clr + CalcBRDFShading(clr, 0.2f, 35, light_vec_ws, halfway_vec_ws, normal_ws), 1);
+	return float4(0.05f * clr + CalcBRDFShading(c_diff, c_spec, 35, light_vec_ws, halfway_vec_ws, normal_ws), 1);
 }
 		]]>
 	</shader>

@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml" "cbda47a1678ce70b6720856736100979d469e159" "bf4a707865347ac588bdfd5aa284de835ded778a")
+DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot_clean.meshml" "e71178594bcbf0f70f4b0a9c531bc28066194562" "bf27b026ac931cedfc4237dc453d916936d42e66")
 DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159" "218c7dd270c056d5c4681c4cafbb00c9e8675260")
 DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_normal.dds" "cbda47a1678ce70b6720856736100979d469e159" "131ef20c80fae0592ec768cb8f624a93c4b978e3")
 DOWNLOAD_FILE("KlayGE/Samples/media/OrderIndependentTransparency/robot-clean_selfillumination.dds" "cbda47a1678ce70b6720856736100979d469e159" "cead9708e3350029fe597b13d26110adfab003bd")
