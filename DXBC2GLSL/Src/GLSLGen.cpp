@@ -6544,7 +6544,10 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 								{
 									out << "float";
 								}
-								else out << "vec" << count;//glsl only support float or double matrix 
+								else
+								{
+									out << "vec" << count;//glsl only support float or double matrix 
+								}
 								out << "(";
 								for (uint32_t i = 0; i < count; ++ i)
 								{
@@ -6567,6 +6570,8 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 										{
 											out << element_index;
 										}
+										// The index is in float4. So for 4x4 matrix, divide by register_stride
+										out << " / " << register_stride;
 										out << "]";
 									}
 									if (SVC_MATRIX_ROWS == var.type_desc.var_class)
