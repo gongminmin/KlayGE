@@ -32,7 +32,7 @@ namespace KlayGE
 		void ClearStencil(int32_t stencil);
 		void ClearDepthStencil(float depth, int32_t stencil);
 
-		GLuint OGLTexture() const
+		GLuint GLTexture() const
 		{
 			return tex_;
 		}
@@ -88,7 +88,7 @@ namespace KlayGE
 	class OGLESTexture1DRenderView : public OGLESRenderView, boost::noncopyable
 	{
 	public:
-		OGLESTexture1DRenderView(Texture& texture_1d, int array_index, int level);
+		OGLESTexture1DRenderView(Texture& texture_1d, int array_index, int array_size, int level);
 
 		void ClearColor(Color const & clr);
 
@@ -100,6 +100,7 @@ namespace KlayGE
 	private:
 		OGLESTexture1D& texture_1d_;
 		int array_index_;
+		int array_size_;
 		int level_;
 	};
 
@@ -109,7 +110,7 @@ namespace KlayGE
 	class OGLESTexture2DRenderView : public OGLESRenderView, boost::noncopyable
 	{
 	public:
-		OGLESTexture2DRenderView(Texture& texture_2d, int array_index, int level);
+		OGLESTexture2DRenderView(Texture& texture_2d, int array_index, int array_size, int level);
 
 		void ClearColor(Color const & clr);
 
@@ -121,6 +122,7 @@ namespace KlayGE
 	private:
 		OGLESTexture2D& texture_2d_;
 		int array_index_;
+		int array_size_;
 		int level_;
 	};
 
@@ -160,6 +162,7 @@ namespace KlayGE
 	{
 	public:
 		OGLESTextureCubeRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level);
+		OGLESTextureCubeRenderView(Texture& texture_cube, int array_index, int level);
 
 		void ClearColor(Color const & clr);
 
@@ -181,7 +184,7 @@ namespace KlayGE
 	{
 	public:
 		OGLESDepthStencilRenderView(uint32_t width, uint32_t height, ElementFormat pf, uint32_t sample_count, uint32_t sample_quality);
-		OGLESDepthStencilRenderView(Texture& texture, int array_index, int level);
+		OGLESDepthStencilRenderView(Texture& texture, int array_index, int array_size, int level);
 		~OGLESDepthStencilRenderView();
 
 		void ClearColor(Color const & clr);
@@ -194,6 +197,7 @@ namespace KlayGE
 	private:
 		GLenum target_type_;
 		int array_index_;
+		int array_size_;
 		int level_;
 		uint32_t sample_count_, sample_quality_;
 		GLuint rbos_[2];

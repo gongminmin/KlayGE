@@ -1663,7 +1663,6 @@ namespace KlayGE
 		{
 			caps_.full_npot_texture_support = (glloader_GLES_VERSION_3_0() || glloader_GLES_OES_texture_npot());
 		}
-		/* TODO
 		if ((caps_.max_texture_array_length > 1)
 			&& (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_geometry_shader()
 			|| glloader_GLES_EXT_geometry_shader() || glloader_GLES_ANDROID_extension_pack_es31a()))
@@ -1673,8 +1672,7 @@ namespace KlayGE
 		else
 		{
 			caps_.render_to_texture_array_support = false;
-		}*/
-		caps_.render_to_texture_array_support = false;
+		}
 		if (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_texture_buffer() || glloader_GLES_EXT_texture_buffer())
 		{
 			caps_.load_from_buffer_support = true;

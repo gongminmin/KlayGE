@@ -110,6 +110,99 @@ namespace KlayGE
 		}
 	}
 
+	void OGLESTextureCube::CopyToSubTexture2D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level,
+		uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, uint32_t src_level,
+		uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
+	{
+		BOOST_ASSERT(TT_2D == target.Type());
+
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		if (glloader_GLES_VERSION_3_0() && (!IsCompressedFormat(format_) && (glloader_GLES_EXT_texture_rg() || (4 == NumComponents(format_)))))
+		{
+			GLuint fbo_src, fbo_dst;
+			re.GetFBOForBlit(fbo_src, fbo_dst);
+
+			GLuint old_fbo = re.BindFramebuffer();
+
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo_src);
+			if (array_size_ > 1)
+			{
+				glFramebufferTextureLayer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, src_level, src_array_index);
+			}
+			else
+			{
+				glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + src_array_index, texture_, src_level);
+			}
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo_dst);
+			if (target.ArraySize() > 1)
+			{
+				glFramebufferTextureLayer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texture_, dst_level, dst_array_index);
+			}
+			else
+			{
+				glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, checked_cast<OGLESTexture*>(&target)->GLTexture(), dst_level);
+			}
+
+			glBlitFramebuffer(src_x_offset, src_y_offset, src_x_offset + src_width, src_y_offset + src_height,
+				dst_x_offset, dst_y_offset, dst_x_offset + dst_width, dst_y_offset + dst_height,
+				GL_COLOR_BUFFER_BIT, ((src_width == dst_width) && (src_height == dst_height)) ? GL_NEAREST : GL_LINEAR);
+
+			re.BindFramebuffer(old_fbo, true);
+		}
+		else
+		{
+			if ((src_width == dst_width) && (src_height == dst_height) && (format_ == target.Format()))
+			{
+				if (IsCompressedFormat(format_))
+				{
+					BOOST_ASSERT((0 == (src_x_offset & 0x3)) && (0 == (src_y_offset & 0x3)));
+					BOOST_ASSERT((0 == (dst_x_offset & 0x3)) && (0 == (dst_y_offset & 0x3)));
+					BOOST_ASSERT((0 == (src_width & 0x3)) && (0 == (src_height & 0x3)));
+					BOOST_ASSERT((0 == (dst_width & 0x3)) && (0 == (dst_height & 0x3)));
+
+					Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+					Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
+					uint8_t const * s = mapper_src.Pointer<uint8_t>();
+					uint8_t* d = mapper_dst.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < src_height; y += 4)
+					{
+						std::memcpy(d, s, src_width / 4 * block_size);
+
+						s += mapper_src.RowPitch();
+						d += mapper_dst.RowPitch();
+					}
+				}
+				else
+				{
+					size_t const format_size = NumFormatBytes(format_);
+
+					Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+					Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+					uint8_t const * s = mapper_src.Pointer<uint8_t>();
+					uint8_t* d = mapper_dst.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < src_height; ++y)
+					{
+						std::memcpy(d, s, src_width * format_size);
+
+						s += mapper_src.RowPitch();
+						d += mapper_dst.RowPitch();
+					}
+				}
+			}
+			else
+			{
+				this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+			}
+		}
+	}
+
 	void OGLESTextureCube::CopyToSubTextureCube(Texture& target,
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height)
