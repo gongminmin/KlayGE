@@ -245,6 +245,11 @@ namespace KlayGE
 		instances_.push_back(obj);
 	}
 
+	void Renderable::ClearInstances()
+	{
+		instances_.resize(0);
+	}
+
 	void Renderable::UpdateInstanceStream()
 	{
 		if (!instances_.empty() && !instances_[0]->InstanceFormat().empty())

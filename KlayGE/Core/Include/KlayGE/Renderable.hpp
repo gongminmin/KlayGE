@@ -174,14 +174,14 @@ namespace KlayGE
 		template <typename Iterator>
 		void AssignInstances(Iterator begin, Iterator end)
 		{
-			instances_.resize(0);
+			this->ClearInstances();
 			for (Iterator iter = begin; iter != end; ++ iter)
 			{
 				this->AddInstance(*iter);
 			}
 		}
 		void AddInstance(SceneObject const * obj);
-
+		void ClearInstances();
 		uint32_t NumInstances() const
 		{
 			return static_cast<uint32_t>(instances_.size());

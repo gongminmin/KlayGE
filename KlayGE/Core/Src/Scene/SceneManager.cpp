@@ -590,38 +590,35 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<std::pair<Renderable*, std::vector<SceneObject*>>> renderables;
+		for (auto const & obj : scene_objs)
 		{
-			std::map<Renderable*, size_t> renderables_map;
-			for (auto const & obj : scene_objs)
+			auto so = obj.get();
+			if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
 			{
-				auto so = obj.get();
-				if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
+				auto renderable = so->GetRenderable().get();
+				if (renderable)
 				{
-					auto renderable = so->GetRenderable().get();
-					if (renderable)
-					{
-						auto iter = renderables_map.lower_bound(renderable);
-						if ((iter != renderables_map.end()) && (iter->first == renderable))
-						{
-							renderables[iter->second].second.push_back(so);
-						}
-						else
-						{
-							renderables_map.emplace(renderable, renderables.size());
-							renderables.emplace_back(renderable, std::vector<SceneObject*>(1, so));
-						}
-
-						++ num_objects_rendered_;
-					}
+					renderable->ClearInstances();
 				}
 			}
 		}
-		for (auto const & renderable : renderables)
+
+		for (auto const & obj : scene_objs)
 		{
-			Renderable& ra(*renderable.first);
-			ra.AssignInstances(renderable.second.begin(), renderable.second.end());
-			ra.AddToRenderQueue();
+			auto so = obj.get();
+			if ((so->VisibleMark() != BO_No) && (0 == so->NumChildren()))
+			{
+				auto renderable = so->GetRenderable().get();
+				if (renderable)
+				{
+					if (0 == renderable->NumInstances())
+					{
+						renderable->AddToRenderQueue();
+					}
+					renderable->AddInstance(so);
+					++ num_objects_rendered_;
+				}
+			}
 		}
 
 		std::sort(render_queue_.begin(), render_queue_.end(),
