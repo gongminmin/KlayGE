@@ -124,75 +124,328 @@ namespace KlayGE
 		BOOST_ASSERT(false);
 	}
 
-	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetriveD3DShaderResourceView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*first_level*/, uint32_t /*num_levels*/)
+	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
+		uint32_t first_level, uint32_t num_levels)
 	{
-		BOOST_ASSERT(false);
-		static D3D12ShaderResourceViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Read);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(first_array_index);
+			boost::hash_combine(hash_val, num_items);
+			boost::hash_combine(hash_val, first_level);
+			boost::hash_combine(hash_val, num_levels);
+
+			auto iter = d3d_sr_views_.find(hash_val);
+			if (iter != d3d_sr_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillSRVDesc(first_array_index, num_items, first_level, num_levels);
+				D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(d3d_texture_, desc);
+				return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12ShaderResourceViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, uint32_t /*level*/)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+		uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12UnorderedAccessViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(first_array_index);
+			boost::hash_combine(hash_val, num_items);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_ua_views_.find(hash_val);
+			if (iter != d3d_ua_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillUAVDesc(first_array_index, num_items, level);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
+				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12UnorderedAccessViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12UnorderedAccessViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(array_index);
+			boost::hash_combine(hash_val, 1);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, first_slice);
+			boost::hash_combine(hash_val, num_slices);
+
+			auto iter = d3d_ua_views_.find(hash_val);
+			if (iter != d3d_ua_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillUAVDesc(array_index, first_slice, num_slices, level);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
+				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12UnorderedAccessViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t /*first_array_index*/, uint32_t /*num_items*/, CubeFaces /*first_face*/, uint32_t /*num_faces*/,
-		uint32_t /*level*/)
+	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUnorderedAccessView(uint32_t first_array_index, uint32_t num_items,
+		CubeFaces first_face, uint32_t num_faces, uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12UnorderedAccessViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Unordered);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(first_array_index * 6 + first_face);
+			boost::hash_combine(hash_val, num_items * 6 + num_faces);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_ua_views_.find(hash_val);
+			if (iter != d3d_ua_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillUAVDesc(first_array_index, num_items, first_face, num_faces, level);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
+				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12UnorderedAccessViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t first_array_index, uint32_t array_size,
+		uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12RenderTargetViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(first_array_index);
+			boost::hash_combine(hash_val, array_size);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_rt_views_.find(hash_val);
+			if (iter != d3d_rt_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillRTVDesc(first_array_index, array_size, level);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
+				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12RenderTargetViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t array_index, uint32_t first_slice,
+		uint32_t num_slices, uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12RenderTargetViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(array_index);
+			boost::hash_combine(hash_val, 1);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, first_slice);
+			boost::hash_combine(hash_val, num_slices);
+
+			auto iter = d3d_rt_views_.find(hash_val);
+			if (iter != d3d_rt_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillRTVDesc(array_index, first_slice, num_slices, level);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
+				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12RenderTargetViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
+	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRenderTargetView(uint32_t array_index, CubeFaces face,
+		uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12RenderTargetViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(array_index * 6 + face);
+			boost::hash_combine(hash_val, 1);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_rt_views_.find(hash_val);
+			if (iter != d3d_rt_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillRTVDesc(array_index, face, level);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
+				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12RenderTargetViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t /*first_array_index*/, uint32_t /*array_size*/, uint32_t /*level*/)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t first_array_index, uint32_t array_size,
+		uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12DepthStencilViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(first_array_index < this->ArraySize());
+		BOOST_ASSERT(first_array_index + array_size <= this->ArraySize());
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(first_array_index);
+			boost::hash_combine(hash_val, array_size);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_ds_views_.find(hash_val);
+			if (iter != d3d_ds_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillDSVDesc(first_array_index, array_size, level);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
+				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12DepthStencilViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, uint32_t /*first_slice*/, uint32_t /*num_slices*/, uint32_t /*level*/)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12DepthStencilViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+		BOOST_ASSERT(0 == array_index);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(array_index);
+			boost::hash_combine(hash_val, 1);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, first_slice);
+			boost::hash_combine(hash_val, num_slices);
+
+			auto iter = d3d_ds_views_.find(hash_val);
+			if (iter != d3d_ds_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillDSVDesc(array_index, first_slice, num_slices, level);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
+				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12DepthStencilViewSimulationPtr const view;
+			return view;
+		}
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t /*array_index*/, Texture::CubeFaces /*face*/, uint32_t /*level*/)
+	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDepthStencilView(uint32_t array_index, CubeFaces face, uint32_t level)
 	{
-		BOOST_ASSERT(false);
-		static D3D12DepthStencilViewSimulationPtr ret;
-		return ret;
+		BOOST_ASSERT(this->AccessHint() & EAH_GPU_Write);
+
+		if (this->HWResourceReady())
+		{
+			size_t hash_val = boost::hash_value(array_index * 6 + face);
+			boost::hash_combine(hash_val, 1);
+			boost::hash_combine(hash_val, level);
+			boost::hash_combine(hash_val, 0);
+			boost::hash_combine(hash_val, 0);
+
+			auto iter = d3d_ds_views_.find(hash_val);
+			if (iter != d3d_ds_views_.end())
+			{
+				return iter->second;
+			}
+			else
+			{
+				auto desc = this->FillDSVDesc(array_index, face, level);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
+				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
+			}
+		}
+		else
+		{
+			static D3D12DepthStencilViewSimulationPtr const view;
+			return view;
+		}
 	}
 
 	void D3D12Texture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
@@ -733,100 +986,112 @@ namespace KlayGE
 		}
 	}
 
-	D3D12ShaderResourceViewSimulationPtr const & D3D12Texture::RetriveD3DSRV(D3D12_SHADER_RESOURCE_VIEW_DESC const & desc)
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items, uint32_t level) const
 	{
-		if (this->HWResourceReady())
-		{
-			char const * p = reinterpret_cast<char const *>(&desc);
-			size_t hash_val = 0;
-			boost::hash_range(hash_val, p, p + sizeof(desc));
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(num_items);
+		KFL_UNUSED(level);
 
-			auto iter = d3d_sr_views_.find(hash_val);
-			if (iter != d3d_sr_views_.end())
-			{
-				return iter->second;
-			}
-
-			D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(d3d_texture_, desc);
-			return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
-		}
-		else
-		{
-			static D3D12ShaderResourceViewSimulationPtr view;
-			return view;
-		}
+		BOOST_ASSERT(false);
+		static D3D12_UNORDERED_ACCESS_VIEW_DESC const ret = {};
+		return ret;
 	}
 
-	D3D12UnorderedAccessViewSimulationPtr const & D3D12Texture::RetriveD3DUAV(D3D12_UNORDERED_ACCESS_VIEW_DESC const & desc)
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		uint32_t level) const
 	{
-		if (this->HWResourceReady())
-		{
-			char const * p = reinterpret_cast<char const *>(&desc);
-			size_t hash_val = 0;
-			boost::hash_range(hash_val, p, p + sizeof(desc));
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(first_slice);
+		KFL_UNUSED(num_slices);
+		KFL_UNUSED(level);
 
-			auto iter = d3d_ua_views_.find(hash_val);
-			if (iter != d3d_ua_views_.end())
-			{
-				return iter->second;
-			}
-
-			D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(d3d_texture_, desc);
-			return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
-		}
-		else
-		{
-			static D3D12UnorderedAccessViewSimulationPtr view;
-			return view;
-		}
+		BOOST_ASSERT(false);
+		static D3D12_UNORDERED_ACCESS_VIEW_DESC const ret = {};
+		return ret;
 	}
 
-	D3D12RenderTargetViewSimulationPtr const & D3D12Texture::RetriveD3DRTV(D3D12_RENDER_TARGET_VIEW_DESC const & desc)
+	D3D12_UNORDERED_ACCESS_VIEW_DESC D3D12Texture::FillUAVDesc(uint32_t first_array_index, uint32_t num_items,
+		CubeFaces first_face, uint32_t num_faces, uint32_t level) const
 	{
-		if (this->HWResourceReady())
-		{
-			char const * p = reinterpret_cast<char const *>(&desc);
-			size_t hash_val = 0;
-			boost::hash_range(hash_val, p, p + sizeof(desc));
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(num_items);
+		KFL_UNUSED(first_face);
+		KFL_UNUSED(num_faces);
+		KFL_UNUSED(level);
 
-			auto iter = d3d_rt_views_.find(hash_val);
-			if (iter != d3d_rt_views_.end())
-			{
-				return iter->second;
-			}
-
-			D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(d3d_texture_, desc);
-			return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
-		}
-		else
-		{
-			static D3D12RenderTargetViewSimulationPtr view;
-			return view;
-		}
+		BOOST_ASSERT(false);
+		static D3D12_UNORDERED_ACCESS_VIEW_DESC const ret = {};
+		return ret;
 	}
 
-	D3D12DepthStencilViewSimulationPtr const & D3D12Texture::RetriveD3DDSV(D3D12_DEPTH_STENCIL_VIEW_DESC const & desc)
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
 	{
-		if (this->HWResourceReady())
-		{
-			char const * p = reinterpret_cast<char const *>(&desc);
-			size_t hash_val = 0;
-			boost::hash_range(hash_val, p, p + sizeof(desc));
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(level);
 
-			auto iter = d3d_ds_views_.find(hash_val);
-			if (iter != d3d_ds_views_.end())
-			{
-				return iter->second;
-			}
+		BOOST_ASSERT(false);
+		static D3D12_RENDER_TARGET_VIEW_DESC const ret = {};
+		return ret;
+	}
 
-			D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(d3d_texture_, desc);
-			return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
-		}
-		else
-		{
-			static D3D12DepthStencilViewSimulationPtr view;
-			return view;
-		}
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		uint32_t level) const
+	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(first_slice);
+		KFL_UNUSED(num_slices);
+		KFL_UNUSED(level);
+
+		BOOST_ASSERT(false);
+		static D3D12_RENDER_TARGET_VIEW_DESC const ret = {};
+		return ret;
+	}
+
+	D3D12_RENDER_TARGET_VIEW_DESC D3D12Texture::FillRTVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
+	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+
+		BOOST_ASSERT(false);
+		static D3D12_RENDER_TARGET_VIEW_DESC const ret = {};
+		return ret;
+	}
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t first_array_index, uint32_t array_size, uint32_t level) const
+	{
+		KFL_UNUSED(first_array_index);
+		KFL_UNUSED(array_size);
+		KFL_UNUSED(level);
+
+		BOOST_ASSERT(false);
+		static D3D12_DEPTH_STENCIL_VIEW_DESC const ret = {};
+		return ret;
+	}
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t array_index, uint32_t first_slice, uint32_t num_slices,
+		uint32_t level) const
+	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(first_slice);
+		KFL_UNUSED(num_slices);
+		KFL_UNUSED(level);
+
+		BOOST_ASSERT(false);
+		static D3D12_DEPTH_STENCIL_VIEW_DESC const ret = {};
+		return ret;
+	}
+
+	D3D12_DEPTH_STENCIL_VIEW_DESC D3D12Texture::FillDSVDesc(uint32_t array_index, CubeFaces face, uint32_t level) const
+	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+
+		BOOST_ASSERT(false);
+		static D3D12_DEPTH_STENCIL_VIEW_DESC const ret = {};
+		return ret;
 	}
 	
 	void D3D12Texture::UpdateSubresource1D(uint32_t array_index, uint32_t level,
