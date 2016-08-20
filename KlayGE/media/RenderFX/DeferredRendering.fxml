@@ -871,7 +871,7 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
 	float3 c_diff = GetDiffuse(mrt_1);
 	float3 c_spec = GetSpecular(mrt_1);
-	float4 shading = float4(Shading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
+	float4 shading = float4(CalcShading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
 	shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
 	return shading;
 }

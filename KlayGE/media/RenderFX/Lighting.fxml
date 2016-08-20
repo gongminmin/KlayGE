@@ -69,7 +69,7 @@ float AttenuationTerm(float3 light_pos, float3 pos, float3 atten)
 	return 1 / dot(atten, float3(1, d, d2));
 }
 
-float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
+float3 CalcShading(float3 diff_lighting, float3 spec_lighting, float shininess,
 				float3 diffuse, float3 specular, float3 view_dir, float3 normal)
 {
 	return float3(max(diff_lighting * diffuse
@@ -77,13 +77,13 @@ float3 Shading(float3 diff_lighting, float3 spec_lighting, float shininess,
 			* FresnelTerm(normalize(view_dir), normal, specular), 0));
 }
 
-float3 Shading(float4 lighting, float shininess, float3 diffuse, float3 specular,
+float3 CalcShading(float4 lighting, float shininess, float3 diffuse, float3 specular,
 				float3 view_dir, float3 normal)
 {
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
 	float3 diff_lighting = lighting.rgb;
 	float3 spec_lighting = lighting.a / (dot(lighting.rgb, RGB_TO_LUM) + 1e-6f) * lighting.rgb;
-	return Shading(diff_lighting, spec_lighting, shininess, diffuse, specular,
+	return CalcShading(diff_lighting, spec_lighting, shininess, diffuse, specular,
 		view_dir, normal);
 }
 

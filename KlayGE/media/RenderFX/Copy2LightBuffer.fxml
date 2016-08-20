@@ -68,10 +68,10 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) :
 	
 	float detail_factor = dot(view_dir, normal) * 0.5f + 0.5f;
 
-	float4 lighting = float4(NearestDepthUpsamplingIL(tc).xyz * scaling_factor * detail_factor, 0);
-	
+	float3 diff_lighting = NearestDepthUpsamplingIL(tc).xyz * scaling_factor * detail_factor;
+
 	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(Shading(lighting, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
+	return float4(CalcShading(diff_lighting, 0, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
 }
 		]]>
 	</shader>
