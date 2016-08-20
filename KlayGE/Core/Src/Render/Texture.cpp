@@ -2582,6 +2582,10 @@ namespace KlayGE
 				break;
 			}
 			desc10.array_size = array_size;
+			if (Texture::TT_Cube == type)
+			{
+				desc10.array_size *= 6;
+			}
 			desc10.reserved = 0;
 
 			desc10.dxgi_format = Native2LE(desc10.dxgi_format);
