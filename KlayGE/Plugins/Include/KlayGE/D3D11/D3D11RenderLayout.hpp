@@ -27,12 +27,30 @@ namespace KlayGE
 	public:
 		D3D11RenderLayout();
 
-		ID3D11InputLayout* InputLayout(size_t signature, std::vector<uint8_t> const & vs_code) const;
+		void Active(ShaderObject const * so) const;
+
+		std::vector<ID3D11Buffer*> const & VBs() const
+		{
+			return vbs_;
+		}
+		std::vector<UINT> const & Strides() const
+		{
+			return strides_;
+		}
+		std::vector<UINT> const & Offsets() const
+		{
+			return offsets_;
+		}
+		ID3D11InputLayout* InputLayout() const
+		{
+			return layout_.get();
+		}
 
 	private:
-		std::vector<D3D11_INPUT_ELEMENT_DESC> vertex_elems_;
-
-		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr>> input_layouts_;
+		mutable std::vector<ID3D11Buffer*> vbs_;
+		mutable std::vector<UINT> strides_;
+		mutable std::vector<UINT> offsets_;
+		mutable ID3D11InputLayoutPtr layout_;
 	};
 }
 

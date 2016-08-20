@@ -626,29 +626,12 @@ namespace KlayGE
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
 
-		std::vector<ID3D11Buffer*> vbs(all_num_vertex_stream);
-		std::vector<UINT> strides(all_num_vertex_stream);
-		std::vector<UINT> offsets(all_num_vertex_stream);
-		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
-		{
-			GraphicsBuffer const * stream = rl.GetVertexStream(i).get();
+		D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
+		d3d_rl.Active(tech.Pass(0).GetShaderObject(effect).get());
 
-			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[i] = d3dvb.D3DBuffer();
-			strides[i] = rl.VertexSize(i);
-			offsets[i] = 0;
-		}
-		if (rl.InstanceStream())
-		{
-			uint32_t number = num_vertex_streams;
-			GraphicsBuffer const * stream = rl.InstanceStream().get();
-
-			D3D11GraphicsBuffer const & d3dvb = *checked_cast<D3D11GraphicsBuffer const *>(stream);
-			vbs[number] = d3dvb.D3DBuffer();
-			strides[number] = rl.InstanceSize();
-			offsets[number] = 0;
-		}
-
+		auto const & vbs = d3d_rl.VBs();
+		auto const & strides = d3d_rl.Strides();
+		auto const & offsets = d3d_rl.Offsets();
 		if (all_num_vertex_stream != 0)
 		{
 			if ((vb_cache_.size() != all_num_vertex_stream) || (vb_cache_ != vbs)
@@ -660,9 +643,7 @@ namespace KlayGE
 				vb_offset_cache_ = offsets;
 			}
 
-			D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
-			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject*>(tech.Pass(0).GetShaderObject(effect).get());
-			ID3D11InputLayout* layout = d3d_rl.InputLayout(shader.VSSignature(), *shader.VSCode());
+			auto layout = d3d_rl.InputLayout();
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout);
