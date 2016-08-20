@@ -241,22 +241,6 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 	BOOST_CHECK(mse < threshold);
 }
 
-class EncodeDecodeTexFixture
-{
-public:
-	EncodeDecodeTexFixture()
-	{
-		ResLoader::Instance().AddPath("../../Tests/media");
-	}
-
-	~EncodeDecodeTexFixture()
-	{
-		Context::Destroy();
-	}
-};
-
-BOOST_GLOBAL_FIXTURE(EncodeDecodeTexFixture);
-
 BOOST_AUTO_TEST_CASE(DecodeBC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc1.dds", EF_BC1, 4.7f);
