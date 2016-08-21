@@ -627,7 +627,7 @@ namespace KlayGE
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (rl.InstanceStream() ? 1 : 0);
 
 		D3D11RenderLayout const & d3d_rl = *checked_cast<D3D11RenderLayout const *>(&rl);
-		d3d_rl.Active(tech.Pass(0).GetShaderObject(effect).get());
+		d3d_rl.Active();
 
 		auto const & vbs = d3d_rl.VBs();
 		auto const & strides = d3d_rl.Strides();
@@ -643,7 +643,7 @@ namespace KlayGE
 				vb_offset_cache_ = offsets;
 			}
 
-			auto layout = d3d_rl.InputLayout();
+			auto layout = d3d_rl.InputLayout(tech.Pass(0).GetShaderObject(effect).get());
 			if (layout != input_layout_cache_)
 			{
 				d3d_imm_ctx_->IASetInputLayout(layout);

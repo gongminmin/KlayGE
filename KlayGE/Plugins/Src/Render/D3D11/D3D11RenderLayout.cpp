@@ -34,7 +34,7 @@ namespace KlayGE
 	{
 	}
 
-	void D3D11RenderLayout::Active(ShaderObject const * so) const
+	void D3D11RenderLayout::Active() const
 	{
 		if (streams_dirty_)
 		{
@@ -78,27 +78,31 @@ namespace KlayGE
 
 			streams_dirty_ = false;
 		}
+	}
 
-		D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject const *>(so);
-
-		bool found = false;
-		for (auto const & il : input_layouts_)
+	ID3D11InputLayout* D3D11RenderLayout::InputLayout(ShaderObject const * so) const
+	{
+		if (!vertex_elems_.empty())
 		{
-			if (il.first == shader.VSSignature())
+			D3D11ShaderObject const & shader = *checked_cast<D3D11ShaderObject const *>(so);
+
+			for (auto const & il : input_layouts_)
 			{
-				found = true;
-				layout_ = il.second.get();
-				break;
+				if (il.first == shader.VSSignature())
+				{
+					return il.second.get();
+				}
 			}
-		}
 
-		if (!found)
-		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
 			ID3D11InputLayoutPtr new_layout = re.CreateD3D11InputLayout(vertex_elems_, shader.VSSignature(), *shader.VSCode());
-			layout_ = new_layout.get();
 			input_layouts_.emplace_back(shader.VSSignature(), new_layout);
+			return new_layout.get();
+		}
+		else
+		{
+			return nullptr;
 		}
 	}
 }

@@ -27,7 +27,8 @@ namespace KlayGE
 	public:
 		D3D11RenderLayout();
 
-		void Active(ShaderObject const * so) const;
+		void Active() const;
+		ID3D11InputLayout* InputLayout(ShaderObject const * so) const;
 
 		std::vector<ID3D11Buffer*> const & VBs() const
 		{
@@ -41,10 +42,6 @@ namespace KlayGE
 		{
 			return offsets_;
 		}
-		ID3D11InputLayout* InputLayout() const
-		{
-			return layout_;
-		}
 
 	private:
 		mutable std::vector<D3D11_INPUT_ELEMENT_DESC> vertex_elems_;
@@ -53,7 +50,6 @@ namespace KlayGE
 		mutable std::vector<ID3D11Buffer*> vbs_;
 		mutable std::vector<UINT> strides_;
 		mutable std::vector<UINT> offsets_;
-		mutable ID3D11InputLayout* layout_;
 	};
 }
 

@@ -524,7 +524,7 @@ float4 RenderScenePS(float2 Texcoord : TEXCOORD0, float3 LightWorldPos : TEXCOOR
 	// Exponential shadow mapping
 	atten *= saturate(exp(occluder - esm_scale_factor * dist));
 	
-	float3 clr = albedo_clr.rgb * c_diff + emissive + shading * ori_color * atten;	
+	float3 clr = albedo * 0.2f + emissive + shading * ori_color * atten;	
 	return float4(clr, 1.0f);
 }
 		]]>
