@@ -67,6 +67,7 @@ def build_Python(build_info, compiler_info):
 		-DENABLE_DECIMAL=\"OFF\" \
 		-DENABLE_IPV6=\"OFF\" \
 		-DENABLE_LOCALE=\"OFF\" \
+		-DENABLE_MMAP=\"OFF\" \
 		-DENABLE_MSI=\"OFF\" \
 		-DENABLE_MSVCRT=\"OFF\" \
 		-DENABLE_MULTIBYTECODEC=\"OFF\" \
@@ -79,6 +80,7 @@ def build_Python(build_info, compiler_info):
 		-DENABLE_SOCKET=\"OFF\" \
 		-DENABLE_SUBPROCESS=\"OFF\" \
 		-DENABLE_TESTCAPI=\"OFF\" \
+		-DENABLE_WINAPI=\"OFF\" \
 		-DINSTALL_DEVELOPMENT=\"OFF\" \
 		-DINSTALL_MANUAL=\"OFF\" \
 		-DINSTALL_TEST=\"OFF\" \
