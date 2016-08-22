@@ -4896,15 +4896,6 @@ namespace KlayGE
 	}
 
 
-	RenderEffectConstantBuffer::RenderEffectConstantBuffer()
-		: dirty_(true)
-	{
-	}
-
-	RenderEffectConstantBuffer::~RenderEffectConstantBuffer()
-	{
-	}
-
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectConstantBuffer::Load(std::string const & name)
 	{
@@ -5006,14 +4997,6 @@ namespace KlayGE
 		buff_.resize(buff->Size());
 	}
 
-
-	RenderEffectParameter::RenderEffectParameter()
-	{
-	}
-
-	RenderEffectParameter::~RenderEffectParameter()
-	{
-	}
 
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::Load(XMLNodePtr const & node)

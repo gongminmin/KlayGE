@@ -939,8 +939,10 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectConstantBuffer : boost::noncopyable
 	{
 	public:
-		RenderEffectConstantBuffer();
-		~RenderEffectConstantBuffer();
+		RenderEffectConstantBuffer()
+			: dirty_(true)
+		{
+		}
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(std::string const & name);
@@ -1026,9 +1028,6 @@ namespace KlayGE
 	class KLAYGE_CORE_API RenderEffectParameter : boost::noncopyable
 	{
 	public:
-		explicit RenderEffectParameter();
-		~RenderEffectParameter();
-
 #if KLAYGE_IS_DEV_PLATFORM
 		void Load(XMLNodePtr const & node);
 #endif
@@ -1047,6 +1046,7 @@ namespace KlayGE
 
 		RenderVariable const & Var() const
 		{
+			BOOST_ASSERT(var_);
 			return *var_;
 		}
 
@@ -1097,6 +1097,7 @@ namespace KlayGE
 		void RebindToCBuffer(RenderEffectConstantBuffer& cbuff);
 		RenderEffectConstantBuffer& CBuffer() const
 		{
+			BOOST_ASSERT(cbuff_);
 			return *cbuff_;
 		}
 		bool InCBuffer() const
