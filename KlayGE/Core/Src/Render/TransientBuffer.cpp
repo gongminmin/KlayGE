@@ -33,6 +33,8 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 
+#include <cstring>
+
 #include <KlayGE/TransientBuffer.hpp>
 
 namespace KlayGE

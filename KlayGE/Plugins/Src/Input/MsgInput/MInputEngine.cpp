@@ -228,6 +228,9 @@ namespace KlayGE
 			std::placeholders::_2));
 		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
 #endif
+#elif defined KLAYGE_PLATFORM_LINUX
+		// TODO
+		KFL_UNUSED(main_wnd);
 #endif
 
 #if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN8)) \

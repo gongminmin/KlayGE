@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
 
+#include <cstring>
 #include <boost/assert.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP

@@ -249,20 +249,6 @@ namespace KlayGE
 		glXChooseVisualFUNC DynamicGlXChooseVisual = (glXChooseVisualFUNC)(glloader_get_gl_proc_address("glXChooseVisual"));
 		vi_ = DynamicGlXChooseVisual(x_display_, DefaultScreen(x_display_), &visual_attr[0]);
 
-		XSetWindowAttributes attr;
-		attr.colormap     = XCreateColormap(x_display_, RootWindow(x_display_, vi_->screen), vi_->visual, AllocNone);
-		attr.border_pixel = 0;
-		attr.event_mask   = ExposureMask
-								| VisibilityChangeMask
-								| KeyPressMask
-								| KeyReleaseMask
-								| ButtonPressMask
-								| ButtonReleaseMask
-								| PointerMotionMask
-								| StructureNotifyMask
-								| SubstructureNotifyMask
-								| FocusChangeMask
-								| ResizeRedirectMask;
 		x_window_ = reinterpret_cast<::Window>(native_wnd);
 		XStoreName(x_display_, x_window_, name.c_str());
 		XMapWindow(x_display_, x_window_);
