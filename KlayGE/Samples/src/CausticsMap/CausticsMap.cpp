@@ -1090,8 +1090,6 @@ void CausticsMapApp::ModelSelectionComboBox(KlayGE::UIComboBox const & sender)
 		refract_obj_->Visible(true);
 		break;
 	}
-
-	dummy_light_env_->Position(MathLib::transform_coord(refract_obj_->GetRenderable()->PosBound().Center(), refract_obj_->ModelMatrix()));
 }
 
 void CausticsMapApp::DoUpdateOverlay()
@@ -1128,6 +1126,9 @@ uint32_t CausticsMapApp::DoUpdate(uint32_t pass)
 	//Pass 0 ~ 3 Caustics Map
 	if (0 == pass)
 	{
+		dummy_light_env_->Position(MathLib::transform_coord(
+			refract_obj_->GetRenderable()->PosBound().Center(), refract_obj_->ModelMatrix()));
+
 		if (depth_texture_support_)
 		{
 			checked_pointer_cast<PlaneObject>(plane_object_)->CausticsPass(Position_Pass);
