@@ -90,9 +90,6 @@ namespace
 			*(effect_->ParameterByName("mvp")) = mvp;
 			*(effect_->ParameterByName("eye_pos")) = camera.EyePos();
 		}
-
-	private:
-		array<RenderTechnique*, 5> techs_;
 	};
 
 	class MetalObject : public SceneObjectHelper

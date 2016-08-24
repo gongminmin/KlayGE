@@ -1456,12 +1456,18 @@ namespace KlayGE
 			obj.SetMaterial(mtl_id, mtls[i]->name, mtls[i]->albedo, mtls[i]->metalness, mtls[i]->glossiness,
 				mtls[i]->emissive, mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss);
 
-			static_assert(MeshMLObj::Material::TS_Albedo == RenderMaterial::TS_Albedo, "Albedo texture slot doesn't consistent");
-			static_assert(MeshMLObj::Material::TS_Metalness == RenderMaterial::TS_Metalness, "Metalness texture slot doesn't consistent");
-			static_assert(MeshMLObj::Material::TS_Glossiness == RenderMaterial::TS_Glossiness, "Glossiness texture slot doesn't consistent");
-			static_assert(MeshMLObj::Material::TS_Emissive == RenderMaterial::TS_Emissive, "Emissive texture slot doesn't consistent");
-			static_assert(MeshMLObj::Material::TS_Normal == RenderMaterial::TS_Normal, "Normal texture slot doesn't consistent");
-			static_assert(MeshMLObj::Material::TS_Height == RenderMaterial::TS_Height, "Height texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Albedo) == RenderMaterial::TS_Albedo,
+				"Albedo texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Metalness) == RenderMaterial::TS_Metalness,
+				"Metalness texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Glossiness) == RenderMaterial::TS_Glossiness,
+				"Glossiness texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Emissive) == RenderMaterial::TS_Emissive,
+				"Emissive texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Normal) == RenderMaterial::TS_Normal,
+				"Normal texture slot doesn't consistent");
+			static_assert(static_cast<int>(MeshMLObj::Material::TS_Height) == RenderMaterial::TS_Height,
+				"Height texture slot doesn't consistent");
 			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
 			{
 				obj.SetTextureSlot(mtl_id, static_cast<MeshMLObj::Material::TextureSlot>(j), mtls[i]->tex_names[j]);

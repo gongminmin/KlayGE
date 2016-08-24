@@ -61,7 +61,7 @@ namespace KlayGE
 	struct PerViewport
 	{
 		PerViewport()
-			: attrib(0), ssvo_enabled(true), curr_merged_buffer_index_(0)
+			: attrib(0), curr_merged_buffer_index(0), ssvo_enabled(true)
 		{
 		}
 
@@ -104,7 +104,7 @@ namespace KlayGE
 		std::array<TexturePtr, 2> merged_shading_texs;
 		std::array<FrameBufferPtr, 2> merged_depth_fbs;
 		std::array<TexturePtr, 2> merged_depth_texs;
-		uint32_t curr_merged_buffer_index_;
+		uint32_t curr_merged_buffer_index;
 
 		TexturePtr small_ssvo_tex;
 		bool ssvo_enabled;
@@ -201,19 +201,19 @@ namespace KlayGE
 		}
 		TexturePtr const & CurrFrameShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].merged_shading_texs[viewports_[vp].curr_merged_buffer_index_];
+			return viewports_[vp].merged_shading_texs[viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & CurrFrameDepthTex(uint32_t vp) const
 		{
-			return viewports_[vp].merged_depth_texs[viewports_[vp].curr_merged_buffer_index_];
+			return viewports_[vp].merged_depth_texs[viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & PrevFrameShadingTex(uint32_t vp) const
 		{
-			return viewports_[vp].merged_shading_texs[!viewports_[vp].curr_merged_buffer_index_];
+			return viewports_[vp].merged_shading_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & PrevFrameDepthTex(uint32_t vp) const
 		{
-			return viewports_[vp].merged_depth_texs[!viewports_[vp].curr_merged_buffer_index_];
+			return viewports_[vp].merged_depth_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
 
 		TexturePtr const & SmallSSVOTex(uint32_t vp) const
