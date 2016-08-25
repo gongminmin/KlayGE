@@ -339,6 +339,9 @@ namespace KlayGE
 		core_win_stat->GetForCurrentThread(&core_win);
 		core_win->Activate();
 
+		WindowPtr const & win = app_->MainWnd();
+		win->OnActivated();
+
 		return S_OK;
 	}
 

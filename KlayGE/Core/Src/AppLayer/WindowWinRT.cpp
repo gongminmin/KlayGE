@@ -65,6 +65,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		width_ = settings.width;
 		height_ = settings.height;
+		full_screen_ = settings.full_screen;
 #else
 		KFL_UNUSED(settings);
 #endif
@@ -83,6 +84,7 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		width_ = settings.width;
 		height_ = settings.height;
+		full_screen_ = settings.full_screen;
 #else
 		KFL_UNUSED(settings);
 #endif
@@ -237,6 +239,55 @@ namespace KlayGE
 		default:
 			BOOST_ASSERT(false);
 			break;
+		}
+	}
+
+	bool Window::FullScreen(bool fs)
+	{
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		ComPtr<IApplicationViewStatics> app_view_stat;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
+
+		ComPtr<IApplicationViewStatics2> app_view_stat2;
+		app_view_stat.As(&app_view_stat2);
+
+		ComPtr<IApplicationView> app_view;
+		app_view_stat2->GetForCurrentView(&app_view);
+
+		ComPtr<IApplicationViewStatics3> app_view_stat3;
+		app_view_stat.As(&app_view_stat3);
+
+		ComPtr<IApplicationView3> app_view3;
+		app_view.As(&app_view3);
+
+		boolean success;
+		if (fs)
+		{
+			app_view3->TryEnterFullScreenMode(&success);
+			if (success)
+			{
+				app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_FullScreen);
+			}
+		}
+		else
+		{
+			success = true;
+			app_view3->ExitFullScreenMode();
+			app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
+		}
+
+		return success ? true : false;
+#else
+		KFL_UNUSED(fs);
+		return false;
+#endif
+	}
+
+	void Window::OnActivated()
+	{
+		if (full_screen_)
+		{
+			this->FullScreen(true);
 		}
 	}
 

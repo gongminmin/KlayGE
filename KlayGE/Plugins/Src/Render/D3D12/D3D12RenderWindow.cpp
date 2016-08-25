@@ -506,7 +506,18 @@ namespace KlayGE
 			::UpdateWindow(hWnd_);
 		}
 #else
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		if (isFullScreen_ != fs)
+		{
+			WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+			if (main_wnd->FullScreen(fs))
+			{
+				isFullScreen_ = fs;
+			}
+		}
+#else
 		KFL_UNUSED(fs);
+#endif
 #endif
 	}
 
@@ -567,6 +578,9 @@ namespace KlayGE
 		ComPtr<IDisplayInformation> disp_info;
 		TIF(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
+#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+		this->FullScreen(false);
+#endif
 #endif
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
@@ -680,7 +694,11 @@ namespace KlayGE
 
 			d3d12_re.ForceFlush();
 
-			UINT const present_flags = (dxgi_allow_tearing_ && !isFullScreen_) ? DXGI_PRESENT_ALLOW_TEARING : 0;
+			bool allow_tearing = dxgi_allow_tearing_;
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+			allow_tearing && = !isFullScreen_;
+#endif
+			UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
 			TIF(swap_chain_->Present(sync_interval_, present_flags));
 
 			curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();

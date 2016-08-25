@@ -105,6 +105,7 @@ namespace KlayGE
 			return wnd_;
 		}
 
+		void OnActivated();
 		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
 		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
 		void OnClosed();
@@ -117,6 +118,8 @@ namespace KlayGE
 		void OnDpiChanged();
 		void OnOrientationChanged();
 		void OnDisplayContentsInvalidated();
+
+		bool FullScreen(bool fs);
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* XDisplay() const
 		{
@@ -417,6 +420,7 @@ namespace KlayGE
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
 		std::array<uint32_t, 16> pointer_id_map_;
+		bool full_screen_;
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		::Display* x_display_;
