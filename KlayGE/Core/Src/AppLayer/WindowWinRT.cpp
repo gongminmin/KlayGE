@@ -271,6 +271,26 @@ namespace KlayGE
 		closed_ = true;
 	}
 
+	void Window::OnKeyDown(IKeyEventArgs* args)
+	{
+		ABI::Windows::System::VirtualKey vk;
+		TIF(args->get_VirtualKey(&vk));
+		if (vk < 256)
+		{
+			this->OnKeyDown()(*this, vk);
+		}
+	}
+
+	void Window::OnKeyUp(IKeyEventArgs* args)
+	{
+		ABI::Windows::System::VirtualKey vk;
+		TIF(args->get_VirtualKey(&vk));
+		if (vk < 256)
+		{
+			this->OnKeyUp()(*this, vk);
+		}
+	}
+
 	void Window::OnPointerPressed(IPointerEventArgs* args)
 	{
 		ComPtr<IPointerPoint> point;

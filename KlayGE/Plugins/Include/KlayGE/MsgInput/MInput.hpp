@@ -260,20 +260,19 @@ namespace KlayGE
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		boost::signals2::connection on_raw_input_;
-#elif defined KLAYGE_PLATFORM_ANDROID
+		boost::signals2::connection on_touch_;
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		boost::signals2::connection on_key_down_;
 		boost::signals2::connection on_key_up_;
+#if defined KLAYGE_PLATFORM_ANDROID
 		boost::signals2::connection on_mouse_down_;
 		boost::signals2::connection on_mouse_up_;
 		boost::signals2::connection on_mouse_move_;
 		boost::signals2::connection on_mouse_wheel_;
 		boost::signals2::connection on_joystick_axis_;
 		boost::signals2::connection on_joystick_buttons_;
-#elif defined KLAYGE_PLATFORM_DARWIN
-		boost::signals2::connection on_key_down_;
-		boost::signals2::connection on_key_up_;
 #endif
-		boost::signals2::connection on_touch_;
+#endif
 		boost::signals2::connection on_pointer_down_;
 		boost::signals2::connection on_pointer_up_;
 		boost::signals2::connection on_pointer_update_;
@@ -317,25 +316,22 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
 #endif
-#endif
-		void OnPointerDown(int2 const & pt, uint32_t id);
-		void OnPointerUp(int2 const & pt, uint32_t id);
-		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
-		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
-
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
+#if defined KLAYGE_PLATFORM_ANDROID
 		void OnMouseDown(int2 const & pt, uint32_t buttons);
 		void OnMouseUp(int2 const & pt, uint32_t buttons);
 		void OnMouseMove(int2 const & pt);
 		void OnMouseWheel(int2 const & pt, int32_t wheel_delta);
 		void OnJoystickAxis(uint32_t axis, int32_t value);
 		void OnJoystickButtons(uint32_t buttons);
-#elif defined KLAYGE_PLATFORM_DARWIN
-		void OnKeyDown(uint32_t key);
-		void OnKeyUp(uint32_t key);
 #endif
+#endif
+		void OnPointerDown(int2 const & pt, uint32_t id);
+		void OnPointerUp(int2 const & pt, uint32_t id);
+		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);
+		void OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta);
 	};
 
 	class MsgInputKeyboard : public InputKeyboard
@@ -346,7 +342,7 @@ namespace KlayGE
 		virtual std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
-#elif (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
 #endif

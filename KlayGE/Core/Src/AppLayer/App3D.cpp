@@ -102,6 +102,10 @@ namespace KlayGE
 			ABI::Windows::UI::Core::ICoreWindowEventArgs* args);
 		HRESULT OnVisibilityChanged(ABI::Windows::UI::Core::ICoreWindow* sender,
 			ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
+		HRESULT OnKeyDown(ABI::Windows::UI::Core::ICoreWindow* sender,
+			ABI::Windows::UI::Core::IKeyEventArgs* args);
+		HRESULT OnKeyUp(ABI::Windows::UI::Core::ICoreWindow* sender,
+			ABI::Windows::UI::Core::IKeyEventArgs* args);
 		HRESULT OnPointerPressed(ABI::Windows::UI::Core::ICoreWindow* sender,
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
 		HRESULT OnPointerReleased(ABI::Windows::UI::Core::ICoreWindow* sender,
@@ -132,6 +136,8 @@ namespace KlayGE
 		EventRegistrationToken win_closed_token_;
 		EventRegistrationToken dpi_changed_token_;
 		EventRegistrationToken orientation_changed_token_;
+		EventRegistrationToken key_down_token_;
+		EventRegistrationToken key_up_token_;
 		EventRegistrationToken pointer_pressed_token_;
 		EventRegistrationToken pointer_released_token_;
 		EventRegistrationToken pointer_moved_token_;
@@ -207,6 +213,13 @@ namespace KlayGE
 		cursor_factory->CreateCursor(CoreCursorType::CoreCursorType_Arrow, 0, &cursor);
 		window_->put_PointerCursor(cursor.Get());
 #endif
+
+		window_->add_KeyDown(Callback<ITypedEventHandler<CoreWindow*, KeyEventArgs*>>(
+			std::bind(&MetroFramework::OnKeyDown, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			&key_down_token_);
+		window_->add_KeyUp(Callback<ITypedEventHandler<CoreWindow*, KeyEventArgs*>>(
+			std::bind(&MetroFramework::OnKeyUp, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			&key_up_token_);
 
 		window_->add_PointerPressed(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
 			std::bind(&MetroFramework::OnPointerPressed, this, std::placeholders::_1, std::placeholders::_2)).Get(),
@@ -295,6 +308,8 @@ namespace KlayGE
 		window_->remove_PointerMoved(pointer_moved_token_);
 		window_->remove_PointerReleased(pointer_released_token_);
 		window_->remove_PointerPressed(pointer_pressed_token_);
+		window_->remove_KeyUp(key_up_token_);
+		window_->remove_KeyDown(key_down_token_);
 		window_->remove_Closed(win_closed_token_);
 		window_->remove_VisibilityChanged(visibility_changed_token_);
 		window_->remove_SizeChanged(win_size_changed_token_);
@@ -384,6 +399,26 @@ namespace KlayGE
 
 		WindowPtr const & win = app_->MainWnd();
 		win->OnClosed();
+
+		return S_OK;
+	}
+
+	HRESULT MetroFramework::OnKeyDown(ICoreWindow* sender, IKeyEventArgs* args)
+	{
+		KFL_UNUSED(sender);
+
+		WindowPtr const & win = app_->MainWnd();
+		win->OnKeyDown(args);
+
+		return S_OK;
+	}
+
+	HRESULT MetroFramework::OnKeyUp(ICoreWindow* sender, IKeyEventArgs* args)
+	{
+		KFL_UNUSED(sender);
+
+		WindowPtr const & win = app_->MainWnd();
+		win->OnKeyUp(args);
 
 		return S_OK;
 	}

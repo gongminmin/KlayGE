@@ -72,20 +72,19 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		on_raw_input_.disconnect();
-#elif defined KLAYGE_PLATFORM_ANDROID
+		on_touch_.disconnect();
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_.disconnect();
 		on_key_up_.disconnect();
+#if defined KLAYGE_PLATFORM_ANDROID
 		on_mouse_down_.disconnect();
 		on_mouse_up_.disconnect();
 		on_mouse_move_.disconnect();
 		on_mouse_wheel_.disconnect();
 		on_joystick_axis_.disconnect();
 		on_joystick_buttons_.disconnect();
-#elif defined KLAYGE_PLATFORM_DARWIN
-		on_key_down_.disconnect();
-		on_key_up_.disconnect();
 #endif
-		on_touch_.disconnect();
+#endif
 		on_pointer_down_.disconnect();
 		on_pointer_up_.disconnect();
 		on_pointer_update_.disconnect();
@@ -216,23 +215,13 @@ namespace KlayGE
 			}
 		}
 #endif
-#elif (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) || (defined KLAYGE_PLATFORM_ANDROID) || (defined KLAYGE_PLATFORM_DARWIN) || (defined KLAYGE_PLATFORM_IOS)
-		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(std::bind(&MsgInputEngine::OnPointerUpdate, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(std::bind(&MsgInputEngine::OnPointerWheel, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_ = main_wnd->OnKeyDown().connect(std::bind(&MsgInputEngine::OnKeyDown, this,
 			std::placeholders::_2));
 		on_key_up_ = main_wnd->OnKeyUp().connect(std::bind(&MsgInputEngine::OnKeyUp, this,
 			std::placeholders::_2));
 		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
-
+#if defined KLAYGE_PLATFORM_ANDROID
 		on_mouse_down_ = main_wnd->OnMouseDown().connect(std::bind(&MsgInputEngine::OnMouseDown, this,
 			std::placeholders::_2, std::placeholders::_3));
 		on_mouse_up_ = main_wnd->OnMouseUp().connect(std::bind(&MsgInputEngine::OnMouseUp, this,
@@ -248,14 +237,18 @@ namespace KlayGE
 		on_joystick_buttons_ = main_wnd->OnJoystickButtons().connect(std::bind(&MsgInputEngine::OnJoystickButtons, this,
 			std::placeholders::_2));
 		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
-#elif defined KLAYGE_PLATFORM_DARWIN
-		on_key_down_ = main_wnd->OnKeyDown().connect(std::bind(&MsgInputEngine::OnKeyDown, this,
-			std::placeholders::_2));
-		on_key_up_ = main_wnd->OnKeyUp().connect(std::bind(&MsgInputEngine::OnKeyUp, this,
-			std::placeholders::_2));
-		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
 #endif
 #endif
+
+		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
+			std::placeholders::_2, std::placeholders::_3));
+		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
+			std::placeholders::_2, std::placeholders::_3));
+		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(std::bind(&MsgInputEngine::OnPointerUpdate, this,
+			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(std::bind(&MsgInputEngine::OnPointerWheel, this,
+			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (defined KLAYGE_HAVE_LIBOVR)
 		OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
@@ -326,53 +319,7 @@ namespace KlayGE
 		}
 	}
 #endif
-#endif
-
-	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)
-	{
-		for (auto const & device : devices_)
-		{
-			if (InputEngine::IDT_Touch == device->Type())
-			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerDown(pt, id);
-			}
-		}
-	}
-
-	void MsgInputEngine::OnPointerUp(int2 const & pt, uint32_t id)
-	{
-		for (auto const & device : devices_)
-		{
-			if (InputEngine::IDT_Touch == device->Type())
-			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUp(pt, id);
-			}
-		}
-	}
-	
-	void MsgInputEngine::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
-	{
-		for (auto const & device : devices_)
-		{
-			if (InputEngine::IDT_Touch == device->Type())
-			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(pt, id, down);
-			}
-		}
-	}
-	
-	void MsgInputEngine::OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta)
-	{
-		for (auto const & device : devices_)
-		{
-			if (InputEngine::IDT_Touch == device->Type())
-			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnPointerWheel(pt, id, wheel_delta);
-			}
-		}
-	}
-
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 	void MsgInputEngine::OnKeyDown(uint32_t key)
 	{
 		for (auto const & device : devices_)
@@ -395,6 +342,7 @@ namespace KlayGE
 		}
 	}
 
+#if defined KLAYGE_PLATFORM_ANDROID
 	void MsgInputEngine::OnMouseDown(int2 const & pt, uint32_t buttons)
 	{
 		for (auto const & device : devices_)
@@ -460,29 +408,52 @@ namespace KlayGE
 			}
 		}
 	}
-#elif defined KLAYGE_PLATFORM_DARWIN
-	void MsgInputEngine::OnKeyDown(uint32_t key)
+#endif
+#endif
+
+	void MsgInputEngine::OnPointerDown(int2 const & pt, uint32_t id)
 	{
 		for (auto const & device : devices_)
 		{
-			if (InputEngine::IDT_Keyboard == device->Type())
+			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyDown(key);
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerDown(pt, id);
 			}
 		}
 	}
 
-	void MsgInputEngine::OnKeyUp(uint32_t key)
+	void MsgInputEngine::OnPointerUp(int2 const & pt, uint32_t id)
 	{
 		for (auto const & device : devices_)
 		{
-			if (InputEngine::IDT_Keyboard == device->Type())
+			if (InputEngine::IDT_Touch == device->Type())
 			{
-				checked_pointer_cast<MsgInputKeyboard>(device)->OnKeyUp(key);
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUp(pt, id);
 			}
 		}
 	}
-#endif
+
+	void MsgInputEngine::OnPointerUpdate(int2 const & pt, uint32_t id, bool down)
+	{
+		for (auto const & device : devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerUpdate(pt, id, down);
+			}
+		}
+	}
+
+	void MsgInputEngine::OnPointerWheel(int2 const & pt, uint32_t id, int32_t wheel_delta)
+	{
+		for (auto const & device : devices_)
+		{
+			if (InputEngine::IDT_Touch == device->Type())
+			{
+				checked_pointer_cast<MsgInputTouch>(device)->OnPointerWheel(pt, id, wheel_delta);
+			}
+		}
+	}
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	NTSTATUS MsgInputEngine::HidP_GetCaps(PHIDP_PREPARSED_DATA PreparsedData, PHIDP_CAPS Capabilities) const

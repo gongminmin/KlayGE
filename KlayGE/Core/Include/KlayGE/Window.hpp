@@ -108,6 +108,8 @@ namespace KlayGE
 		void OnSizeChanged(ABI::Windows::UI::Core::IWindowSizeChangedEventArgs* args);
 		void OnVisibilityChanged(ABI::Windows::UI::Core::IVisibilityChangedEventArgs* args);
 		void OnClosed();
+		void OnKeyDown(ABI::Windows::UI::Core::IKeyEventArgs* args);
+		void OnKeyUp(ABI::Windows::UI::Core::IKeyEventArgs* args);
 		void OnPointerPressed(ABI::Windows::UI::Core::IPointerEventArgs* args);
 		void OnPointerReleased(ABI::Windows::UI::Core::IPointerEventArgs* args);
 		void OnPointerMoved(ABI::Windows::UI::Core::IPointerEventArgs* args);
@@ -219,27 +221,24 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		typedef boost::signals2::signal<void(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)> TouchEvent;
 #endif
-#endif
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
+#if defined KLAYGE_PLATFORM_ANDROID
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t buttons)> MouseUpEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt)> MouseMoveEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, int32_t wheel_delta)> MouseWheelEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, int32_t axis, int32_t value)> JoystickAxisEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t buttons)> JoystickButtonsEvent;
-#elif defined KLAYGE_PLATFORM_LINUX
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
-#elif defined KLAYGE_PLATFORM_DARWIN
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
-		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
 #endif
+#endif
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerDownEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id)> PointerUpEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, bool down)> PointerUpdateEvent;
+		typedef boost::signals2::signal<void(Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)> PointerWheelEvent;
+
 		typedef boost::signals2::signal<void(Window const & wnd)> CloseEvent;
 
 		ActiveEvent& OnActive()
@@ -281,24 +280,8 @@ namespace KlayGE
 			return touch_event_;
 		}
 #endif
-#endif
-		PointerDownEvent& OnPointerDown()
-		{
-			return pointer_down_event_;
-		}
-		PointerUpEvent& OnPointerUp()
-		{
-			return pointer_up_event_;
-		}
-		PointerUpdateEvent& OnPointerUpdate()
-		{
-			return pointer_update_event_;
-		}
-		PointerWheelEvent& OnPointerWheel()
-		{
-			return pointer_wheel_event_;
-		}
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent& OnKeyDown()
 		{
 			return key_down_event_;
@@ -307,6 +290,7 @@ namespace KlayGE
 		{
 			return key_up_event_;
 		}
+#if defined KLAYGE_PLATFORM_ANDROID
 		MouseDownEvent& OnMouseDown()
 		{
 			return mouse_down_event_;
@@ -331,25 +315,24 @@ namespace KlayGE
 		{
 			return joystick_buttons_event_;
 		}
-#elif defined KLAYGE_PLATFORM_LINUX
-		KeyDownEvent& OnKeyDown()
-		{
-			return key_down_event_;
-		}
-		KeyUpEvent& OnKeyUp()
-		{
-			return key_up_event_;
-		}
-#elif defined KLAYGE_PLATFORM_DARWIN
-		KeyDownEvent& OnKeyDown()
-		{
-			return key_down_event_;
-		}
-		KeyUpEvent& OnKeyUp()
-		{
-			return key_up_event_;
-		}
 #endif
+#endif
+		PointerDownEvent& OnPointerDown()
+		{
+			return pointer_down_event_;
+		}
+		PointerUpEvent& OnPointerUp()
+		{
+			return pointer_up_event_;
+		}
+		PointerUpdateEvent& OnPointerUpdate()
+		{
+			return pointer_update_event_;
+		}
+		PointerWheelEvent& OnPointerWheel()
+		{
+			return pointer_wheel_event_;
+		}
 		CloseEvent& OnClose()
 		{
 			return close_event_;
@@ -368,27 +351,23 @@ namespace KlayGE
 #if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		TouchEvent touch_event_;
 #endif
-#endif
-		PointerDownEvent pointer_down_event_;
-		PointerUpEvent pointer_up_event_;
-		PointerUpdateEvent pointer_update_event_;
-		PointerWheelEvent pointer_wheel_event_;
-#if defined KLAYGE_PLATFORM_ANDROID
+#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;
+#if defined KLAYGE_PLATFORM_ANDROID
 		MouseDownEvent mouse_down_event_;
 		MouseUpEvent mouse_up_event_;
 		MouseMoveEvent mouse_move_event_;
 		MouseWheelEvent mouse_wheel_event_;
 		JoystickAxisEvent joystick_axis_event_;
 		JoystickButtonsEvent joystick_buttons_event_;
-#elif defined KLAYGE_PLATFORM_LINUX
-		KeyDownEvent key_down_event_;
-		KeyUpEvent key_up_event_;
-#elif defined KLAYGE_PLATFORM_DARWIN
-		KeyDownEvent key_down_event_;
-		KeyUpEvent key_up_event_;
 #endif
+#endif
+		PointerDownEvent pointer_down_event_;
+		PointerUpEvent pointer_up_event_;
+		PointerUpdateEvent pointer_update_event_;
+		PointerWheelEvent pointer_wheel_event_;
 		CloseEvent close_event_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS
