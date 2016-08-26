@@ -696,7 +696,7 @@ namespace KlayGE
 
 			bool allow_tearing = dxgi_allow_tearing_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			allow_tearing && = !isFullScreen_;
+			allow_tearing &= !isFullScreen_;
 #endif
 			UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
 			TIF(swap_chain_->Present(sync_interval_, present_flags));
