@@ -146,7 +146,7 @@ namespace KlayGE
 		{
 			ID3D11RenderTargetView** rts = rt_view.empty() ? nullptr : &rt_view[0];
 			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView(),
-				0, static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
+				static_cast<UINT>(rt_view.size()), static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
 		}
 	
 		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
