@@ -601,6 +601,10 @@ namespace KlayGE
 		}
 
 		std::ofstream ofs(mtlml_name.c_str());
+		if (!ofs)
+		{
+			ofs.open((ResLoader::Instance().LocalFolder() + mtlml_name).c_str());
+		}
 		doc.Print(ofs);
 	}
 }

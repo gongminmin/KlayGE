@@ -97,6 +97,10 @@ namespace KlayGE
 
 		void AddPath(std::string const & path);
 		void DelPath(std::string const & path);
+		std::string const & LocalFolder() const
+		{
+			return local_path_;
+		}
 
 		ResIdentifierPtr Open(std::string const & name);
 		std::string Locate(std::string const & name);
@@ -156,6 +160,7 @@ namespace KlayGE
 		};
 
 		std::string exe_path_;
+		std::string local_path_;
 		std::vector<std::string> paths_;
 		std::mutex paths_mutex_;
 

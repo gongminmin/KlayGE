@@ -1040,6 +1040,10 @@ namespace KlayGE
 		}
 
 		std::ofstream ofs(psml_name.c_str());
+		if (!ofs)
+		{
+			ofs.open((ResLoader::Instance().LocalFolder() + psml_name).c_str());
+		}
 		doc.Print(ofs);
 	}
 

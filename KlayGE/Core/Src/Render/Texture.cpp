@@ -2199,6 +2199,10 @@ namespace KlayGE
 		ElementFormat format, std::vector<ElementInitData> const & init_data)
 	{
 		std::ofstream file(tex_name.c_str(), std::ios_base::binary);
+		if (!file)
+		{
+			file.open((ResLoader::Instance().LocalFolder() + tex_name).c_str(), std::ios_base::binary);
+		}
 
 		uint32_t magic = Native2LE(MakeFourCC<'D', 'D', 'S', ' '>::value);
 		file.write(reinterpret_cast<char*>(&magic), sizeof(magic));

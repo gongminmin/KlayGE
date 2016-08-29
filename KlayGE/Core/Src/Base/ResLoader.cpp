@@ -125,6 +125,7 @@ namespace KlayGE
 		::GetModuleFileNameA(nullptr, buf, sizeof(buf));
 		exe_path_ = buf;
 		exe_path_ = exe_path_.substr(0, exe_path_.rfind("\\"));
+		local_path_ = exe_path_ + "/";
 #else
 		using namespace ABI::Windows::Foundation;
 		using namespace ABI::Windows::ApplicationModel;
@@ -141,13 +142,31 @@ namespace KlayGE
 		ComPtr<IStorageFolder> installed_loc;
 		TIF(package->get_InstalledLocation(&installed_loc));
 
-		ComPtr<IStorageItem> storage_item;
-		TIF(installed_loc.As(&storage_item));
+		ComPtr<IStorageItem> installed_loc_storage_item;
+		TIF(installed_loc.As(&installed_loc_storage_item));
 
-		HString folder_name;
-		TIF(storage_item->get_Path(folder_name.GetAddressOf()));
+		HString installed_loc_folder_name;
+		TIF(installed_loc_storage_item->get_Path(installed_loc_folder_name.GetAddressOf()));
 
-		Convert(exe_path_, folder_name.GetRawBuffer(nullptr));
+		Convert(exe_path_, installed_loc_folder_name.GetRawBuffer(nullptr));
+
+		ComPtr<IApplicationDataStatics> app_data_stat;
+		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Storage_ApplicationData).Get(), &app_data_stat));
+
+		ComPtr<IApplicationData> app_data;
+		TIF(app_data_stat->get_Current(&app_data));
+
+		ComPtr<IStorageFolder> local_folder;
+		TIF(app_data->get_LocalFolder(&local_folder));
+
+		ComPtr<IStorageItem> local_folder_storage_item;
+		TIF(local_folder.As(&local_folder_storage_item));
+
+		HString local_folder_name;
+		TIF(local_folder_storage_item->get_Path(local_folder_name.GetAddressOf()));
+
+		Convert(local_path_, local_folder_name.GetRawBuffer(nullptr));
+		local_path_ += "\\";
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
 		{
@@ -184,6 +203,8 @@ namespace KlayGE
 			exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("-"));
 			exe_path_ = "/data/data/" + exe_path_;
 #endif
+
+			local_path_ = exe_path_;
 		}
 #elif defined KLAYGE_PLATFORM_DARWIN
 		uint32_t size = 0;
@@ -192,12 +213,14 @@ namespace KlayGE
 		_NSGetExecutablePath(buffer.data(), &size);
 		exe_path_ = buffer.data();
 		exe_path_ = exe_path_.substr(0, exe_path_.find_last_of("/") + 1);
+		local_path_ = exe_path_;
 #endif
 
 		paths_.push_back("");
 
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 		this->AddPath("Assets/");
+		this->AddPath(local_path_);
 #else
 		this->AddPath("");
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP

@@ -1742,6 +1742,10 @@ namespace KlayGE
 		}
 
 		std::ofstream ofs(meshml_name.c_str());
+		if (!ofs)
+		{
+			ofs.open((ResLoader::Instance().LocalFolder() + meshml_name).c_str());
+		}
 		obj.WriteMeshML(ofs);
 	}
 
