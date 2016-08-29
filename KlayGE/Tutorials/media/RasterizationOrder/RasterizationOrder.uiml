@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+
+	<dialog id="Parameters" caption="Parameters" x="-140" y="200" align_x="right" width="140" height="140">
+		<control type="check_box" id="ColorMap" caption="Color Map" x="20" y="30" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+		<control type="button" id="Capture" caption="Capture" x="20" y="80" width="100" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+</ui>

@@ -10,6 +10,10 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Tutorials/media/RasterizationOrder/RasterizationOrder.fxml
 )
 
+SET(UI_FILES
+	${KLAYGE_PROJECT_DIR}/Tutorials/media/RasterizationOrder/RasterizationOrder.uiml
+)
+
 SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/bin/KlayGE.cfg
 	${KLAYGE_PROJECT_DIR}/media/Fonts/gkai00mp.kfont
