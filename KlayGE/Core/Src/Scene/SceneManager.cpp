@@ -142,8 +142,15 @@ namespace KlayGE
 
 					if (attr & SceneObject::SOA_Cullable)
 					{
-						visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-							so->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
+						if (small_obj_threshold_ > 0)
+						{
+							visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
+								so->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
+						}
+						else
+						{
+							visible = BO_Yes;
+						}
 					}
 					else
 					{
@@ -818,8 +825,15 @@ namespace KlayGE
 
 				if (attr & SceneObject::SOA_Cullable)
 				{
-					visible = (MathLib::perspective_area(eye_pos, view_proj,
-						obj->PosBoundWS()) > small_obj_threshold_) ? parent_bo : BO_No;
+					if (small_obj_threshold_ > 0)
+					{
+						visible = (MathLib::perspective_area(eye_pos, view_proj,
+							obj->PosBoundWS()) > small_obj_threshold_) ? parent_bo : BO_No;
+					}
+					else
+					{
+						visible = parent_bo;
+					}
 				}
 				else
 				{

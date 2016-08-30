@@ -183,9 +183,17 @@ namespace KlayGE
 
 					if (attr & SceneObject::SOA_Cullable)
 					{
-						AABBox const & aabb_ws = obj->PosBoundWS();
-						obj->VisibleMark((MathLib::perspective_area(camera.EyePos(), view_proj,
-							aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No);
+						BoundOverlap bo;
+						if (small_obj_threshold_ > 0)
+						{
+							AABBox const & aabb_ws = obj->PosBoundWS();
+							bo = (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
+						}
+						else
+						{
+							bo = BO_Yes;
+						}
+						obj->VisibleMark(bo);
 					}
 				}
 				else
@@ -356,7 +364,7 @@ namespace KlayGE
 		}
 
 		octree_node_t& node = octree_[index];
-		if (MathLib::perspective_area(camera.EyePos(), view_proj, node.bb) > small_obj_threshold_)
+		if ((small_obj_threshold_ <= 0) || (MathLib::perspective_area(camera.EyePos(), view_proj, node.bb) > small_obj_threshold_))
 		{
 			BoundOverlap const vis = frustum_->Intersect(node.bb);
 			node.visible = vis;
@@ -413,19 +421,17 @@ namespace KlayGE
 					if (BO_Partial == visible)
 					{
 						AABBox const & aabb_ws = so->PosBoundWS();
-						if (so->Parent() || (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+						if (so->Parent() || (small_obj_threshold_ <= 0)
+							|| (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
 						{
-							so->VisibleMark(frustum_->Intersect(aabb_ws));
+							visible = frustum_->Intersect(aabb_ws);
 						}
 						else
 						{
-							so->VisibleMark(BO_No);
+							visible = BO_No;
 						}
 					}
-					else
-					{
-						so->VisibleMark(visible);
-					}
+					so->VisibleMark(visible);
 				}
 			}
 
