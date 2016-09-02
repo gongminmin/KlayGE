@@ -13,14 +13,14 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['2.0', '3.0']
-glsl_ver_db = ['1.0', '1.1', '3.0']
+ogl_ver_db = ['2.0', '3.0', '3.1', '3.2']
+glsl_ver_db = ['1.0', '1.1', '3.0', '3.1', '3.2']
 
 features_db = {
 	'2.0' : {
 			'' : ''
 		},
-		
+
 	'3.0' : {
 			'OpenGL Shading Language ES 3.00' : lambda : is_supported('GLSL_3_0'),
 			'Transform feedback' : lambda : support_one(['GL_EXT_transform_feedback', 'GL_NV_transform_feedback']),
@@ -61,6 +61,40 @@ features_db = {
 			'Vertex Array Draw Element Range' : lambda : is_supported('GL_EXT_draw_range_elements'),
 			'New Blending Equations' : lambda : is_supported('GLES_EXT_blend_minmax'),
 			'Binary represtation of a program object' : lambda : support_one(['GLES_OES_get_program_binary', 'GLES_AMD_program_binary_Z400', 'GLES_IMG_program_binary', 'GLES_IMG_shader_binary', 'GLES_ARM_mali_shader_binary', 'GLES_VIV_shader_binary', 'GLES_DMP_shader_binary', 'GLES_FJ_shader_binary_GCCSO', 'GLES_ARM_mali_program_binary', 'GLES_NV_platform_binary', 'GLES_ANGLE_program_binary'])
+		},
+
+	'3.1' : {
+			'OpenGL Shading Language ES 3.10' : lambda : is_supported('GLSL_3_1'),
+			'Compute shader' : lambda : is_supported('GL_ARB_compute_shader'),
+			'Draw many GPU generated objects with one call' : lambda : support_one(['GL_ARB_multi_draw_indirect', 'GL_AMD_multi_draw_indirect']),
+			'Framebuffer without attachment' : lambda : is_supported('GL_ARB_framebuffer_no_attachments'),
+			'Shader reflection' : lambda : is_supported('GL_ARB_program_interface_query'),
+			'Separately shader objects for different shader stages' : lambda : is_supported('GLES_EXT_separate_shader_objects'),
+			'Loads from and stores to textures from shader' : lambda : support_one(['GL_ARB_shader_image_load_store', 'GL_EXT_shader_image_load_store']),
+			'Immutable storage objects for multisampled textures' : lambda : is_supported('GL_ARB_texture_storage_multisample'),
+			'Multisampled textures and texture samplers for specific sample locations' : lambda : is_supported('GL_ARB_texture_multisample'),
+			'Separate vertex attribute state from the data stores of each array' : lambda : is_supported('GL_ARB_vertex_attrib_binding'),
+			'Pre-assign attribute locations' : lambda : is_supported('GLES_NV_explicit_attrib_location'),
+		},
+
+	'3.2' : {
+			'OpenGL Shading Language ES 3.20' : lambda : is_supported('GLSL_3_2'),
+			'Blend equation advanced' : lambda : support_one(['GLES_KHR_blend_equation_advanced', 'GLES_NV_blend_equation_advanced']),
+			'Direct copy of pixels between textures and render buffers' : lambda : support_one(['GLES_OES_copy_image', 'GLES_EXT_copy_image']),
+			'Enhanced debug context' : lambda : is_supported('GLES_KHR_debug'),
+			'Draw buffers indexed' : lambda : support_one(['GLES_OES_draw_buffers_indexed', 'GLES_EXT_draw_buffers_indexed']),
+			'Modification of the base vertex index' : lambda : support_one(['GLES_EXT_draw_elements_base_vertex', 'GLES_OES_draw_elements_base_vertex']),
+			'Geometry shaders' : lambda : support_one(['GLES_OES_geometry_shader', 'GLES_EXT_geometry_shader']),
+			'Primitive bounding box' : lambda : support_one(['GLES_OES_primitive_bounding_box', 'GLES_EXT_primitive_bounding_box']),
+			'Robustness' : lambda : support_one(['GLES_KHR_robustness', 'GLES_EXT_robustness']),
+			'Explicitly shading at samples' : lambda : is_supported('GLES_OES_sample_shading'),
+			'Tessellation stages' : lambda : support_one(['GLES_OES_tessellation_shader', 'GLES_EXT_tessellation_shader']),
+			'Texture border clamp' : lambda : support_one(['GLES_OES_texture_border_clamp', 'GLES_EXT_texture_border_clamp']),
+			'Texture buffer' : lambda : support_one(['GLES_OES_texture_buffer', 'GLES_EXT_texture_buffer']),
+			'Immutable storage objects for multisampled 2d texture array' : lambda : is_supported('GLES_OES_texture_storage_multisample_2d_array'),
+			'Shader multisample interpolation' : lambda : is_supported('GLES_OES_shader_multisample_interpolation'),
+			'ASTC texture compression' : lambda : is_supported('GLES_OES_texture_compression_astc'),
+			'Cube map array' : lambda : is_supported('GLES_EXT_texture_cube_map_array'),
 		},
 }
 
@@ -170,6 +204,10 @@ class information:
 			is_supported.exts.append('GLSL_1_1')
 		if glsl_ver_index >= 2:
 			is_supported.exts.append('GLSL_3_0')
+		if glsl_ver_index >= 3:
+			is_supported.exts.append('GLSL_3_1')
+		if glsl_ver_index >= 4:
+			is_supported.exts.append('GLSL_3_2')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []
