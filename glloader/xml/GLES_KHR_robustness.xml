@@ -14,11 +14,7 @@
 	</tokens>
 
 	<functions>
-		<function name="glGetGraphicsResetStatusKHR" return="GLenum">
-			<mappings>
-				<mapping from="GLES_EXT_robustness" name="glGetGraphicsResetStatusEXT"/>
-			</mappings>
-		</function>
+		<function name="glGetGraphicsResetStatusKHR" return="GLenum"/>
 		<function name="glReadnPixelsKHR" return="void">
 			<params>
 				<param type="GLint" name="x"/>
@@ -30,9 +26,6 @@
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLvoid*" name="data"/>
 			</params>
-			<mappings>
-				<mapping from="GLES_EXT_robustness" name="glReadnPixelsEXT"/>
-			</mappings>
 		</function>
 		<function name="glGetnUniformfvKHR" return="void">
 			<params>
@@ -41,9 +34,6 @@
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLfloat*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformfvEXT"/>
-			</mappings>
 		</function>
 		<function name="glGetnUniformivKHR" return="void">
 			<params>
@@ -52,9 +42,6 @@
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLint*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformivEXT"/>
-			</mappings>
 		</function>
 		<function name="glGetnUniformuivKHR" return="void">
 			<params>
@@ -63,9 +50,6 @@
 				<param type="GLsizei" name="bufSize"/>
 				<param type="GLuint*" name="params"/>
 			</params>
-			<mappings>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformuivEXT"/>
-			</mappings>
 		</function>
 	</functions>
 </gl_extension>

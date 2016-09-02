@@ -526,7 +526,6 @@
 		<function name="glGetGraphicsResetStatus" return="GLenum" link="static">
 			<mappings>
 				<mapping from="GLES_KHR_robustness" name="glGetGraphicsResetStatusKHR"/>
-				<mapping from="GLES_EXT_robustness" name="glGetGraphicsResetStatusEXT"/>
 			</mappings>
 		</function>
 		<function name="glReadnPixels" return="void" link="static">
@@ -542,7 +541,6 @@
 			</params>
 			<mappings>
 				<mapping from="GLES_KHR_robustness" name="glReadnPixelsKHR"/>
-				<mapping from="GLES_EXT_robustness" name="glReadnPixelsEXT"/>
 			</mappings>
 		</function>
 		<function name="glGetnUniformfv" return="void" link="static">
@@ -554,7 +552,6 @@
 			</params>
 			<mappings>
 				<mapping from="GLES_KHR_robustness" name="glGetnUniformfvKHR"/>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformfvEXT"/>
 			</mappings>
 		</function>
 		<function name="glGetnUniformiv" return="void" link="static">
@@ -566,7 +563,6 @@
 			</params>
 			<mappings>
 				<mapping from="GLES_KHR_robustness" name="glGetnUniformivKHR"/>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformivEXT"/>
 			</mappings>
 		</function>
 		<function name="glGetnUniformuiv" return="void" link="static">
@@ -578,7 +574,6 @@
 			</params>
 			<mappings>
 				<mapping from="GLES_KHR_robustness" name="glGetnUniformuivKHR"/>
-				<mapping from="GLES_EXT_robustness" name="glGetnUniformuivEXT"/>
 			</mappings>
 		</function>
 		<function name="glMinSampleShading" return="void" link="static">
