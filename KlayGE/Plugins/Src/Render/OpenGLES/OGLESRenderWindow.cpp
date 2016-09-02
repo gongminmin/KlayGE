@@ -119,20 +119,29 @@ namespace KlayGE
 			break;
 		}
 
+		bool test_es_3_2 = true;
 		bool test_es_3_1 = true;
 		bool test_es_3_0 = true;
 #if defined(KLAYGE_PLATFORM_ANDROID)
+		// TODO
+		test_es_3_2 = false;
 		test_es_3_1 = false;
 #if (__ANDROID_API__ < 18)
 		test_es_3_0 = false;
 #endif
 #endif
 #if defined(KLAYGE_PLATFORM_DARWIN)
+		// TODO
+		test_es_3_2 = false;
 		test_es_3_1 = false;
 		test_es_3_0 = false;
 #endif
 
 		std::vector<std::tuple<std::string, EGLint, int, int>> available_versions;
+		if (test_es_3_2)
+		{
+			available_versions.push_back(std::make_tuple("3.2", EGL_OPENGL_ES3_BIT_KHR, 3, 2));
+		}
 		if (test_es_3_1)
 		{
 			available_versions.push_back(std::make_tuple("3.1", EGL_OPENGL_ES3_BIT_KHR, 3, 1));
