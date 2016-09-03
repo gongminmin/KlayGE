@@ -320,11 +320,6 @@ ScenePlayerApp::ScenePlayerApp()
 	ResLoader::Instance().AddPath("../../Samples/media/ScenePlayer");
 }
 
-bool ScenePlayerApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void ScenePlayerApp::LoadScene(std::string const & name)
 {
 	Context& context = Context::Instance();

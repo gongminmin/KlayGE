@@ -11,8 +11,6 @@ class DeferredRenderingApp : public KlayGE::App3DFramework
 public:
 	DeferredRenderingApp();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 

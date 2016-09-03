@@ -11,7 +11,7 @@ class FoliageApp : public KlayGE::App3DFramework
 public:
 	FoliageApp();
 
-	bool ConfirmDevice() const;
+	bool ConfirmDevice() const override;
 
 private:
 	void OnCreate();

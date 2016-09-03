@@ -243,11 +243,6 @@ DistanceMapping::DistanceMapping()
 	ResLoader::Instance().AddPath("../../Tutorials/media/DistanceMapping");
 }
 
-bool DistanceMapping::ConfirmDevice() const
-{
-	return true;
-}
-
 void DistanceMapping::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

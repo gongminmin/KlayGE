@@ -10,8 +10,6 @@ class MetalnessApp : public KlayGE::App3DFramework
 public:
 	MetalnessApp();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 	void DoUpdateOverlay();

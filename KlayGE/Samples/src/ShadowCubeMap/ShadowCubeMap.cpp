@@ -369,11 +369,6 @@ ShadowCubeMap::ShadowCubeMap()
 	ResLoader::Instance().AddPath("../../Samples/media/ShadowCubeMap");
 }
 
-bool ShadowCubeMap::ConfirmDevice() const
-{
-	return true;
-}
-
 void ShadowCubeMap::OnCreate()
 {
 	loading_percentage_ = 0;

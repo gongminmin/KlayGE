@@ -23,8 +23,6 @@ class SSSSSApp : public KlayGE::App3DFramework
 public:
 	SSSSSApp();
 
-	virtual bool ConfirmDevice() const override;
-
 private:
 	virtual void OnCreate() override;
 	virtual void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height) override;

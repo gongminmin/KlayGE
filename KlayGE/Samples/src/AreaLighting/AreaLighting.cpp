@@ -83,11 +83,6 @@ AreaLightingApp::AreaLightingApp()
 	ResLoader::Instance().AddPath("../../Samples/media/AreaLighting");
 }
 
-bool AreaLightingApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void AreaLightingApp::OnCreate()
 {
 	this->LookAt(float3(-12.2f, 15.8f, -2.4f), float3(-11.5f, 15.1f, -2.2f));

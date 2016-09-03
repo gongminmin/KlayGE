@@ -11,8 +11,6 @@ class AreaLightingApp : public KlayGE::App3DFramework
 public:
 	AreaLightingApp();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 

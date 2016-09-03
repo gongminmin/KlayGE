@@ -200,11 +200,6 @@ ScreenSpaceReflectionApp::ScreenSpaceReflectionApp()
 	ResLoader::Instance().AddPath("../../Samples/media/Reflection");
 }
 
-bool ScreenSpaceReflectionApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void ScreenSpaceReflectionApp::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

@@ -10,8 +10,6 @@ class EnvLightingApp : public KlayGE::App3DFramework
 public:
 	EnvLightingApp();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 	void DoUpdateOverlay();

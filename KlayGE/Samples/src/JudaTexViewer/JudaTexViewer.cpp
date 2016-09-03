@@ -286,11 +286,6 @@ JudaTexViewer::JudaTexViewer()
 	ResLoader::Instance().AddPath("../../Samples/media/JudaTexViewer");
 }
 
-bool JudaTexViewer::ConfirmDevice() const
-{
-	return true;
-}
-
 void JudaTexViewer::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

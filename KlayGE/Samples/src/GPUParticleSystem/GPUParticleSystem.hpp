@@ -11,7 +11,7 @@ class GPUParticleSystemApp : public KlayGE::App3DFramework
 public:
 	GPUParticleSystemApp();
 
-	bool ConfirmDevice() const;
+	bool ConfirmDevice() const override;
 
 private:
 	void OnCreate();

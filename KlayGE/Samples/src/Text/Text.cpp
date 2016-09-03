@@ -70,11 +70,6 @@ TextApp::TextApp()
 	ResLoader::Instance().AddPath("../../Samples/media/Text");
 }
 
-bool TextApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void TextApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

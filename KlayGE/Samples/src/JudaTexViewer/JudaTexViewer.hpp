@@ -13,8 +13,6 @@ class JudaTexViewer : public KlayGE::App3DFramework
 public:
 	JudaTexViewer();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 	void OnResize(KlayGE::uint32_t width, KlayGE::uint32_t height);

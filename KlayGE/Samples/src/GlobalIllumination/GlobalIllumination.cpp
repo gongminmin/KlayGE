@@ -74,11 +74,6 @@ GlobalIlluminationApp::GlobalIlluminationApp()
 	ResLoader::Instance().AddPath("../../Samples/media/GlobalIllumination");
 }
 
-bool GlobalIlluminationApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void GlobalIlluminationApp::OnCreate()
 {
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));

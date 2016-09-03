@@ -445,11 +445,6 @@ DetailedSurfaceApp::DetailedSurfaceApp()
 	ResLoader::Instance().AddPath("../../Samples/media/DetailedSurface");
 }
 
-bool DetailedSurfaceApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void DetailedSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

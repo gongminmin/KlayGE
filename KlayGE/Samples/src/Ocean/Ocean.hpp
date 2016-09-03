@@ -11,7 +11,7 @@ class OceanApp : public KlayGE::App3DFramework
 public:
 	OceanApp();
 
-	bool ConfirmDevice() const;
+	bool ConfirmDevice() const override;
 
 private:
 	void OnCreate();

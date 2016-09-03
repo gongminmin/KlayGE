@@ -112,11 +112,6 @@ VertexDisplacement::VertexDisplacement()
 	ResLoader::Instance().AddPath("../../Tutorials/media/VertexDisplacement");
 }
 
-bool VertexDisplacement::ConfirmDevice() const
-{
-	return true;
-}
-
 void VertexDisplacement::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

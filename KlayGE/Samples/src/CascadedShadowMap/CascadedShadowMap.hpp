@@ -11,8 +11,6 @@ class CascadedShadowMapApp : public KlayGE::App3DFramework
 public:
 	CascadedShadowMapApp();
 
-	bool ConfirmDevice() const;
-
 private:
 	void OnCreate();
 

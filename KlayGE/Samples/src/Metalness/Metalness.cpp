@@ -142,11 +142,6 @@ MetalnessApp::MetalnessApp()
 	albedo_ = float3(0.799102738f, 0.496932995f, 0.048171824f) * 0.5f;
 }
 
-bool MetalnessApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void MetalnessApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

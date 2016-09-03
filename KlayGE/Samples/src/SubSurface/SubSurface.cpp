@@ -106,11 +106,6 @@ SubSurfaceApp::SubSurfaceApp()
 	ResLoader::Instance().AddPath("../../Samples/media/SubSurface");
 }
 
-bool SubSurfaceApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void SubSurfaceApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

@@ -103,11 +103,6 @@ Fractal::Fractal()
 	ResLoader::Instance().AddPath("../../Tutorials/media/Fractal");
 }
 
-bool Fractal::ConfirmDevice() const
-{
-	return true;
-}
-
 void Fractal::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

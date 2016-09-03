@@ -60,11 +60,6 @@ CascadedShadowMapApp::CascadedShadowMapApp()
 	ResLoader::Instance().AddPath("../../Samples/media/CascadedShadowMap");
 }
 
-bool CascadedShadowMapApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void CascadedShadowMapApp::OnCreate()
 {
 	this->LookAt(float3(-25.72f, 29.65f, 24.57f), float3(-24.93f, 29.09f, 24.32f));

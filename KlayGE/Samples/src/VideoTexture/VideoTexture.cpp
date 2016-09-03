@@ -144,11 +144,6 @@ VideoTextureApp::VideoTextureApp()
 	ResLoader::Instance().AddPath("../../Samples/media/VideoTexture");
 }
 
-bool VideoTextureApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void VideoTextureApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

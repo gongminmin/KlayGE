@@ -185,11 +185,6 @@ ProceduralTexApp::ProceduralTexApp()
 	ResLoader::Instance().AddPath("../../Samples/media/ProceduralTex");
 }
 
-bool ProceduralTexApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void ProceduralTexApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

@@ -138,11 +138,6 @@ TessellationApp::TessellationApp()
 	ResLoader::Instance().AddPath("../../Tutorials/media/Tessellation");
 }
 
-bool TessellationApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void TessellationApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

@@ -85,11 +85,6 @@ PostProcessingApp::PostProcessingApp()
 	ResLoader::Instance().AddPath("../../Samples/media/PostProcessing");
 }
 
-bool PostProcessingApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void PostProcessingApp::OnCreate()
 {
 	this->LookAt(float3(0, 0.5f, -2), float3(0, 0, 0));

@@ -513,11 +513,6 @@ OrderIndependentTransparencyApp::OrderIndependentTransparencyApp()
 	ResLoader::Instance().AddPath("../../Samples/media/OrderIndependentTransparency");
 }
 
-bool OrderIndependentTransparencyApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void OrderIndependentTransparencyApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

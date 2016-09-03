@@ -569,11 +569,6 @@ EnvLightingApp::EnvLightingApp()
 	ResLoader::Instance().AddPath("../../Samples/media/EnvLighting");
 }
 
-bool EnvLightingApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void EnvLightingApp::OnCreate()
 {
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();

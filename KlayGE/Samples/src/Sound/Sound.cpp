@@ -63,11 +63,6 @@ SoundApp::SoundApp()
 	ResLoader::Instance().AddPath("../../Samples/media/Sound");
 }
 
-bool SoundApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void SoundApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

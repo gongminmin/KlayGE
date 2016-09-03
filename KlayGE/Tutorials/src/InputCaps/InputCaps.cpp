@@ -258,11 +258,6 @@ InputCaps::InputCaps()
 	ResLoader::Instance().AddPath("../../Tutorials/media/InputCaps");
 }
 
-bool InputCaps::ConfirmDevice() const
-{
-	return true;
-}
-
 void InputCaps::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

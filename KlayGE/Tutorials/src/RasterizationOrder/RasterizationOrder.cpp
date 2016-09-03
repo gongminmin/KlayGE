@@ -182,6 +182,11 @@ RasterizationOrderApp::RasterizationOrderApp()
 
 bool RasterizationOrderApp::ConfirmDevice() const
 {
+	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+	if (caps.max_shader_model < ShaderModel(5, 0))
+	{
+		return false;
+	}
 	return true;
 }
 

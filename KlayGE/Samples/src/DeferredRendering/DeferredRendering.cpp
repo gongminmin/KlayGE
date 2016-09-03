@@ -121,11 +121,6 @@ DeferredRenderingApp::DeferredRenderingApp()
 	ResLoader::Instance().AddPath("../../Samples/media/DeferredRendering");
 }
 
-bool DeferredRenderingApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void DeferredRenderingApp::OnCreate()
 {
 	this->LookAt(float3(-14.5f, 18, -3), float3(-13.6f, 17.55f, -2.8f));

@@ -21,7 +21,7 @@ namespace KlayGE
 	public:
 		explicit TexViewerCore(void* native_wnd);
 
-		virtual bool ConfirmDevice() const override;
+		bool ConfirmDevice() const override;
 
 		void Resize(uint32_t width, uint32_t height);
 

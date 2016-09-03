@@ -707,11 +707,6 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 	ResLoader::Instance().AddPath("../../Samples/media/MotionBlurDoF");
 }
 
-bool MotionBlurDoFApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;

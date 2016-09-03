@@ -144,11 +144,6 @@ ParticleEditorApp::ParticleEditorApp()
 	ResLoader::Instance().AddPath("../../Samples/media/ParticleEditor");
 }
 
-bool ParticleEditorApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void ParticleEditorApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

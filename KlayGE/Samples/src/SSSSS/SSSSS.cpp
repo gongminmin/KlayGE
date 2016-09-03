@@ -67,11 +67,6 @@ SSSSSApp::SSSSSApp()
 	ResLoader::Instance().AddPath("../../Samples/media/SSSSS");
 }
 
-bool SSSSSApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void SSSSSApp::OnCreate()
 {
 	RenderablePtr scene_model = ASyncLoadModel("ScifiRoom.meshml",

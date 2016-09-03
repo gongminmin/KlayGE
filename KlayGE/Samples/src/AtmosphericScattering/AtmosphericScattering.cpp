@@ -174,11 +174,6 @@ AtmosphericScatteringApp::AtmosphericScatteringApp()
 	ResLoader::Instance().AddPath("../../Samples/media/AtmosphericScattering");
 }
 
-bool AtmosphericScatteringApp::ConfirmDevice() const
-{
-	return true;
-}
-
 void AtmosphericScatteringApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");

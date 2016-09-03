@@ -98,11 +98,6 @@ public:
 	{
 	}
 
-	bool ConfirmDevice() const override
-	{
-		return true;
-	}
-
 private:
 	void OnCreate() override
 	{

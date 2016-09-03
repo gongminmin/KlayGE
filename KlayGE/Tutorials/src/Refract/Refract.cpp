@@ -171,11 +171,6 @@ Refract::Refract()
 	ResLoader::Instance().AddPath("../../Tutorials/media/Refract");
 }
 
-bool Refract::ConfirmDevice() const
-{
-	return true;
-}
-
 void Refract::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
