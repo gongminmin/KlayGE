@@ -125,7 +125,7 @@ float4 ESMDirectional(float3 pos_es, float2 light_proj_pos, float len, bool has_
 	float shadow = 1;
 	if (has_shadow)
 	{
-#if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
+#if (KLAYGE_MAX_TEX_ARRAY_LEN >= 4) && (1 == KLAYGE_RENDER_TO_TEX_ARRAY)
 		float occluder = ReadAFloat(Tex2DArraySampleLevel(filtered_sm_2d_tex_array, linear_sampler,
 			float3(light_proj_pos, sm_index), 0, 0), sm_far_plane * esm_scale_factor);
 #else
@@ -158,7 +158,7 @@ float4 ESMSun(float3 pos_es, float2 light_proj_pos, float4 tc_ddx_ddy, float len
 
 				float4 shadow_tc_ddx_ddy = tc_ddx_ddy * cascade_scale_bias[i].xyxy;
 
-#if KLAYGE_MAX_TEX_ARRAY_LEN >= 4
+#if (KLAYGE_MAX_TEX_ARRAY_LEN >= 4) && (1 == KLAYGE_RENDER_TO_TEX_ARRAY)
 				float occluder = ReadAFloat(filtered_csm_tex_array.SampleGrad(aniso_sampler, float3(shadow_tc, i),
 					shadow_tc_ddx_ddy.xy, shadow_tc_ddx_ddy.zw), sm_far_plane * esm_scale_factor);
 #else

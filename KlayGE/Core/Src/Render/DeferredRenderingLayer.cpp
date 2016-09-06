@@ -417,7 +417,7 @@ namespace KlayGE
 
 		mrt_g_buffer_support_ = (caps.max_simultaneous_rts > 1);
 		depth_texture_support_ = caps.depth_texture_support;
-		tex_array_support_ = (caps.max_texture_array_length >= 4);
+		tex_array_support_ = (caps.max_texture_array_length >= 4) && (caps.render_to_texture_array_support);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if ((caps.max_shader_model >= ShaderModel(5, 0)) && (caps.cs_support))

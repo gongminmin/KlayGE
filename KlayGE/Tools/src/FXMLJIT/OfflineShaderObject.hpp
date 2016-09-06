@@ -71,6 +71,7 @@ namespace KlayGE
 			bool shader_texture_lod_support : 1;
 			bool fp_color_support : 1;
 			bool pack_to_rgba_required : 1;
+			bool render_to_texture_array_support : 1;
 
 			bool gs_support : 1;
 			bool cs_support : 1;

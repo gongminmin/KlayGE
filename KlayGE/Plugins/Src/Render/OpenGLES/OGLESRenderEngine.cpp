@@ -1530,7 +1530,11 @@ namespace KlayGE
 			caps_.max_vertex_texture_units = 0;
 		}
 
-		if (glloader_GLES_VERSION_2_0())
+		if (glloader_GLES_VERSION_3_0())
+		{
+			caps_.max_shader_model = ShaderModel(4, 0);
+		}
+		else if (glloader_GLES_VERSION_2_0())
 		{
 			if (caps_.max_vertex_texture_units != 0)
 			{
@@ -1564,7 +1568,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, &temp);
 		caps_.max_texture_cube_size = temp;
 
-		if (glloader_GLES_VERSION_3_0() && !this->HackForAngle())
+		if (glloader_GLES_VERSION_3_0())
 		{
 			glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &temp);
 			caps_.max_texture_array_length = temp;

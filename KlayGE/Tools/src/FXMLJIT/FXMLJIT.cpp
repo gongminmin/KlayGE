@@ -148,6 +148,7 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 	caps.shader_texture_lod_support = RetrieveNodeValue(root, "shader_texture_lod_support", 0) ? true : false;
 	caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
 	caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
+	caps.render_to_texture_array_support = RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
 
 	caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
 	caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;

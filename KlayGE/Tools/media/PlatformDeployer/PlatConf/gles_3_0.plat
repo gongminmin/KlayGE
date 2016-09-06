@@ -8,7 +8,7 @@
 	<max_shader_model major="4" minor="0"/>
 
 	<max_texture_depth value="2048"/>
-	<max_texture_array_length value="1"/><!--TODO-->
+	<max_texture_array_length value="32"/>
 	<max_pixel_texture_units value="16"/>
 	<max_simultaneous_rts value="8"/>
 
@@ -16,6 +16,7 @@
 	<shader_texture_lod_support value="1"/>
 	<fp_color_support value="1"/>
 	<pack_to_rgba_required value="0"/>
+	<render_to_texture_array_support value="0"/>
 
 	<gs_support value="0"/><!--TODO-->
 	<cs_support value="0"/>

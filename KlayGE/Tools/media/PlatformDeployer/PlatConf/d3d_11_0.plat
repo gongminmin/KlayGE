@@ -16,6 +16,7 @@
 	<shader_texture_lod_support value="1"/>
 	<fp_color_support value="1"/>
 	<pack_to_rgba_required value="0"/>
+	<render_to_texture_array_support value="1"/>
 
 	<gs_support value="1"/>
 	<cs_support value="1"/>
