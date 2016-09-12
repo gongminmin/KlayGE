@@ -161,20 +161,8 @@ namespace KlayGE
 
 				re.BindFramebuffer(old_fbo, true);
 			}
-			else
+			else if ((src_width == dst_width) && (src_height == dst_height) && (format_ == target.Format()))
 			{
-				BOOST_ASSERT(format_ == target.Format());
-
-				GLint gl_internalFormat;
-				GLenum gl_format;
-				GLenum gl_type;
-				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-				GLint gl_target_internal_format;
-				GLenum gl_target_format;
-				GLenum gl_target_type;
-				OGLMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
 				if (IsCompressedFormat(format_))
 				{
 					BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
@@ -199,28 +187,25 @@ namespace KlayGE
 				}
 				else
 				{
-					if ((src_width == dst_width) && (src_height == dst_height))
-					{
-						size_t const format_size = NumFormatBytes(format_);
+					size_t const format_size = NumFormatBytes(format_);
 
-						Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
-						Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
-						uint8_t const * s = mapper_src.Pointer<uint8_t>();
-						uint8_t* d = mapper_dst.Pointer<uint8_t>();
-						for (uint32_t y = 0; y < src_height; ++ y)
-						{
-							std::memcpy(d, s, src_width * format_size);
-
-							s += mapper_src.RowPitch();
-							d += mapper_dst.RowPitch();
-						}
-					}
-					else
+					Texture::Mapper mapper_src(*this, src_array_index, src_level, TMA_Read_Only, src_x_offset, src_y_offset, src_width, src_height);
+					Texture::Mapper mapper_dst(target, dst_array_index, dst_level, TMA_Write_Only, dst_x_offset, dst_y_offset, dst_width, dst_height);
+					uint8_t const * s = mapper_src.Pointer<uint8_t>();
+					uint8_t* d = mapper_dst.Pointer<uint8_t>();
+					for (uint32_t y = 0; y < src_height; ++ y)
 					{
-						this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
-							src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
+						std::memcpy(d, s, src_width * format_size);
+
+						s += mapper_src.RowPitch();
+						d += mapper_dst.RowPitch();
 					}
 				}
+			}
+			else
+			{
+				this->ResizeTexture2D(target, dst_array_index, dst_level, dst_x_offset, dst_y_offset, dst_width, dst_height,
+					src_array_index, src_level, src_x_offset, src_y_offset, src_width, src_height, true);
 			}
 		}
 	}

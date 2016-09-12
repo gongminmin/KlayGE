@@ -164,16 +164,6 @@ namespace KlayGE
 		}
 		else if ((src_width == dst_width) && (src_height == dst_height) && (format_ == target.Format()))
 		{
-			GLint gl_internalFormat;
-			GLenum gl_format;
-			GLenum gl_type;
-			OGLESMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
-
-			GLint gl_target_internal_format;
-			GLenum gl_target_format;
-			GLenum gl_target_type;
-			OGLESMapping::MappingFormat(gl_target_internal_format, gl_target_format, gl_target_type, target.Format());
-
 			if (IsCompressedFormat(format_))
 			{
 				BOOST_ASSERT((src_width == dst_width) && (src_height == dst_height));
