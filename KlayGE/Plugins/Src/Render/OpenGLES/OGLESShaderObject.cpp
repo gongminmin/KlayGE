@@ -2286,7 +2286,7 @@ namespace KlayGE
 	void OGLESShaderObject::Bind()
 	{
 		if (glloader_GLES_VERSION_3_0()
-			&& (*glsl_srcs_)[ShaderObject::ST_PixelShader] && (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+			&& (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty()))
 		{
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
@@ -2336,7 +2336,7 @@ namespace KlayGE
 	void OGLESShaderObject::Unbind()
 	{
 		if (glloader_GLES_VERSION_3_0()
-			&& (*glsl_srcs_)[ShaderObject::ST_PixelShader] && (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+			&& (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty()))
 		{
 			glDisable(GL_RASTERIZER_DISCARD);
 		}
