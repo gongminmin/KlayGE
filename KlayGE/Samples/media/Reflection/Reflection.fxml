@@ -194,7 +194,7 @@ float4 ReflectSpecialShadingPS(
 		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
 	}
 	float metalness = metalness_clr.r;
-	if (metalness_clr.y)
+	if (metalness_clr.y > 0.5f)
 	{
 		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
 	}
