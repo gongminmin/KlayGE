@@ -2079,11 +2079,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(equal(vec4(";
+			out << " = (ivec4(equal(vec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), vec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2106,11 +2106,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(equal(ivec4(";
+			out << " = (ivec4(equal(ivec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}		
@@ -2128,11 +2128,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(notEqual(vec4(";
+			out << " = (ivec4(notEqual(vec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
-			out << "), ";
+			out << "), vec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2150,11 +2150,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(notEqual(ivec4(";
+			out << " = (ivec4(notEqual(ivec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2172,11 +2172,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(lessThan(vec4(";
+			out << " = (ivec4(lessThan(vec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), vec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2194,11 +2194,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(lessThan(ivec4(";
+			out << " = (ivec4(lessThan(ivec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2260,11 +2260,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(greaterThanEqual(vec4(";
+			out << " = (ivec4(greaterThanEqual(vec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), vec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
@@ -2282,11 +2282,11 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		}
 		else
 		{
-			out << " = ivec4(ivec4(greaterThanEqual(ivec4(";
+			out << " = (ivec4(greaterThanEqual(ivec4(";
 			this->ToOperands(out, *insn.ops[1], oit);
 			out << "), ivec4(";
 			this->ToOperands(out, *insn.ops[2], oit);
-			out << "))) * -1)";
+			out << "))) * ivec4(-1))";
 			this->ToComponentSelectors(out, *insn.ops[0]);
 			out << ";";
 		}
