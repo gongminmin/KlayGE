@@ -70,8 +70,30 @@ namespace KlayGE
 		height_ = height;
 		depth_ = depth;
 
-		pbos_.resize(num_mip_maps_);
-		glGenBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+		glGenBuffers(1, &pbo_);
+
+		mipmap_start_offset_.resize(num_mip_maps_ + 1);
+		mipmap_start_offset_[0] = 0;
+		for (uint32_t level = 0; level < num_mip_maps_; ++level)
+		{
+			uint32_t const w = this->Width(level);
+			uint32_t const h = this->Height(level);
+			uint32_t const d = this->Depth(level);
+
+			GLsizei image_size;
+			if (IsCompressedFormat(format_))
+			{
+				uint32_t const block_size = NumFormatBytes(format_) * 4;
+				image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
+			}
+			else
+			{
+				uint32_t const texel_size = NumFormatBytes(format_);
+				image_size = w * h * d * texel_size;
+			}
+
+			mipmap_start_offset_[level + 1] = mipmap_start_offset_[level] + image_size;
+		}
 	}
 
 	uint32_t OGLTexture3D::Width(uint32_t level) const
@@ -247,7 +269,7 @@ namespace KlayGE
 				OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
 				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
 
 				re.BindTexture(0, target_type_, texture_);
 				glGetTexImage(target_type_, level, gl_format, gl_type, nullptr);
@@ -259,7 +281,7 @@ namespace KlayGE
 		case TMA_Write_Only:
 			{
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY));
 			}
 			break;
@@ -270,6 +292,7 @@ namespace KlayGE
 			break;
 		}
 
+		p += array_index * mipmap_start_offset_.back() + mipmap_start_offset_[level];
 		data = p + ((z_offset * d + y_offset) * w + x_offset) * texel_size;
 	}
 
@@ -287,7 +310,7 @@ namespace KlayGE
 		{
 		case TMA_Read_Only:
 			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-			re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbos_[level]);
+			re.BindBuffer(GL_PIXEL_PACK_BUFFER, pbo_);
 			glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 			break;
 
@@ -302,9 +325,11 @@ namespace KlayGE
 				re.BindTexture(0, target_type_, texture_);
 
 				re.BindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
 				glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
+				GLvoid* offset = reinterpret_cast<GLvoid*>(
+					static_cast<GLintptr>(array_index * mipmap_start_offset_.back() + mipmap_start_offset_[level]));
 				if (IsCompressedFormat(format_))
 				{
 					uint32_t const block_size = NumFormatBytes(format_) * 4;
@@ -312,11 +337,11 @@ namespace KlayGE
 
 					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
 							w, h, d, gl_format, image_size,
-							nullptr);
+							offset);
 				}
 				else
 				{
-					glTexSubImage3D(target_type_, level, 0, 0, 0, w, h, d, gl_format, gl_type, nullptr);
+					glTexSubImage3D(target_type_, level, 0, 0, 0, w, h, d, gl_format, gl_type, offset);
 				}
 			}
 			break;
@@ -329,8 +354,6 @@ namespace KlayGE
 
 	void OGLTexture3D::CreateHWResource(ElementInitData const * init_data)
 	{
-		uint32_t texel_size = NumFormatBytes(format_);
-
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
@@ -340,31 +363,26 @@ namespace KlayGE
 		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_DRAW);
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
 			uint32_t const w = this->Width(level);
 			uint32_t const h = this->Height(level);
 			uint32_t const d = this->Depth(level);
 
-			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbos_[level]);
 			if (IsCompressedFormat(format_))
 			{
 				uint32_t const block_size = NumFormatBytes(format_) * 4;
 				GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
-
-				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, nullptr, GL_STREAM_DRAW);
-				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 				glCompressedTexImage3D(target_type_, level, glinternalFormat,
 					w, h, d, 0, image_size, (nullptr == init_data) ? nullptr : init_data[level].data);
 			}
 			else
 			{
-				GLsizei const image_size = w * h * d * texel_size;
-
-				glBufferData(GL_PIXEL_UNPACK_BUFFER, image_size, nullptr, GL_STREAM_DRAW);
-				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
 				glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype,
 					(nullptr == init_data) ? nullptr : init_data[level].data);
 			}

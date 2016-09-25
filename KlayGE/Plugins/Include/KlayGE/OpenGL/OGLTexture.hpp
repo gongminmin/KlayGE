@@ -66,11 +66,6 @@ namespace KlayGE
 			return target_type_;
 		}
 
-		GLuint GLPbo(uint32_t level) const
-		{
-			return pbos_[level];
-		}
-
 		void TexParameteri(GLenum pname, GLint param);
 		void TexParameterf(GLenum pname, GLfloat param);
 		void TexParameterfv(GLenum pname, GLfloat const * param);
@@ -118,7 +113,8 @@ namespace KlayGE
 	protected:
 		GLuint texture_;
 		GLenum target_type_;
-		std::vector<GLuint> pbos_;
+		GLuint pbo_;
+		std::vector<uint32_t> mipmap_start_offset_;
 		TextureMapAccess last_tma_;
 
 		std::map<GLenum, GLint> tex_param_i_;

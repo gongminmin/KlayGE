@@ -106,11 +106,11 @@ namespace KlayGE
 		if (Context::Instance().RenderFactoryValid())
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.DeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+			re.DeleteBuffers(1, &pbo_);
 		}
 		else
 		{
-			glDeleteBuffers(static_cast<GLsizei>(pbos_.size()), &pbos_[0]);
+			glDeleteBuffers(1, &pbo_);
 		}
 
 		if (sample_count_ <= 1)
