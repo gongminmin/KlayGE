@@ -99,6 +99,7 @@ namespace KlayGE
 		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
 		GLint gs_input_type_, gs_output_type_, gs_max_output_vertex_;
 		std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
+		bool tfb_separate_attribs_;
 		uint32_t ds_partitioning_, ds_output_primitive_;
 
 		parameter_binds_t param_binds_;

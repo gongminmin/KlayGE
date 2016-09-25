@@ -92,6 +92,7 @@ namespace KlayGE
 		std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
 		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
 		std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
+		bool tfb_separate_attribs_;
 #if KLAYGE_IS_DEV_PLATFORM
 		uint32_t ds_partitioning_, ds_output_primitive_;
 #endif

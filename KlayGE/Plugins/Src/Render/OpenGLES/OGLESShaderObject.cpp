@@ -2093,7 +2093,7 @@ namespace KlayGE
 			}
 
 			glTransformFeedbackVaryings(glsl_program_, static_cast<GLsizei>(glsl_tfb_varyings_->size()), &names[0],
-				GL_SEPARATE_ATTRIBS);
+				tfb_separate_attribs_ ? GL_SEPARATE_ATTRIBS : GL_INTERLEAVED_ATTRIBS);
 		}
 
 		glLinkProgram(glsl_program_);
@@ -2231,8 +2231,22 @@ namespace KlayGE
 				glsl_tfb_varyings_ = MakeSharedPtr<std::vector<std::string>>();
 			}
 
+			int slot = -1;
+			tfb_separate_attribs_ = false;
 			for (auto const & decl : sd.so_decl)
 			{
+				if (slot < 0)
+				{
+					slot = decl.slot;
+				}
+				else
+				{
+					if (slot != decl.slot)
+					{
+						tfb_separate_attribs_ = true;
+					}
+				}
+
 				std::string glsl_param_name;
 				switch (decl.usage)
 				{
