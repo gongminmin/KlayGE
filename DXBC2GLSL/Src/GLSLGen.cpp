@@ -6559,28 +6559,65 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 									//x y z w--> 0 1 2 3
 									uint32_t column = this->GetComponentSelector(op, i);
 									out << var.var_desc.name;
-									if (element_count)
+									if (glsl_rules_ & GSR_MatrixType)
 									{
-										out << "[";
-										if (dynamic_indexed && op.indices[1].reg)
+										if (element_count)
 										{
-											this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+											out << "[";
+											if (dynamic_indexed && op.indices[1].reg)
+											{
+												this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+											}
+											else
+											{
+												out << element_index;
+											}
+											// The index is in float4. So for 4x4 matrix, divide by register_stride
+											out << " / " << register_stride;
+											out << "]";
+										}
+										if (SVC_MATRIX_ROWS == var.type_desc.var_class)
+										{
+											out << "[" << column << "]" << "[" << row << "]";
 										}
 										else
 										{
-											out << element_index;
+											out << "[" << row << "]" << "[" << column << "]";
 										}
-										// The index is in float4. So for 4x4 matrix, divide by register_stride
-										out << " / " << register_stride;
-										out << "]";
-									}
-									if (SVC_MATRIX_ROWS == var.type_desc.var_class)
-									{
-										out << "[" << column << "]" << "[" << row << "]";
 									}
 									else
 									{
-										out << "[" << row << "]" << "[" << column << "]";
+										out << "[";
+										if (element_count)
+										{
+											if (dynamic_indexed && op.indices[1].reg)
+											{
+												this->ToOperands(out, *op.indices[1].reg, SIT_Int);
+											}
+											else
+											{
+												out << element_index;
+											}
+											out << " + ";
+										}
+										if (SVC_MATRIX_ROWS == var.type_desc.var_class)
+										{
+											out << column;
+										}
+										else
+										{
+											out << row;
+										}
+										out << "][";
+										if (SVC_MATRIX_ROWS == var.type_desc.var_class)
+										{
+											out << row;
+										}
+										else
+										{
+											out << column;
+										}
+										out << "]";
 									}
 								}
 								out << ")";
