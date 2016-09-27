@@ -434,7 +434,7 @@ namespace
 			output_pins_.emplace_back("output", TexturePtr());
 
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-			gs_support_ = (caps.max_shader_model >= ShaderModel(4, 0));
+			gs_support_ = caps.gs_support;
 
 			RenderEffectPtr effect = SyncLoadRenderEffect("DepthOfFieldPP.fxml");
 			if (gs_support_)

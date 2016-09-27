@@ -1610,7 +1610,7 @@ namespace KlayGE
 		caps_.is_tbdr = false;
 
 		caps_.hw_instancing_support = true;
-		caps_.instance_id_support = false;
+		caps_.instance_id_support = glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays();
 		if (glloader_GLES_VERSION_3_0())
 		{
 			caps_.stream_output_support = true;
@@ -1686,7 +1686,8 @@ namespace KlayGE
 			caps_.load_from_buffer_support = false;
 		}
 
-		caps_.gs_support = false;
+		caps_.gs_support = glloader_GLES_VERSION_3_2() || glloader_GLES_OES_geometry_shader()
+			|| glloader_GLES_EXT_geometry_shader() || glloader_GLES_ANDROID_extension_pack_es31a();
 		caps_.cs_support = false;
 		if (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_tessellation_shader()
 			|| glloader_GLES_EXT_tessellation_shader() || glloader_GLES_ANDROID_extension_pack_es31a())
@@ -1701,7 +1702,7 @@ namespace KlayGE
 			caps_.ds_support = false;
 			caps_.tess_method = TM_No;
 		}
-		
+
 		vertex_format_.insert(EF_A8);
 		vertex_format_.insert(EF_R8);
 		vertex_format_.insert(EF_GR8);
