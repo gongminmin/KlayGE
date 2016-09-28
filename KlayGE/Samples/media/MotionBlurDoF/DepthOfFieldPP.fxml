@@ -238,7 +238,7 @@ void SeparateBokehVS(float4 pos : POSITION,
 			{
 				center_pos.x += background_offset;
 			}
-		
+
 			oPos = float4(((center_pos + pos.zw * max_radius) * bokeh_width_height.zw) * 2 - 1, 0, 1);
 			oPos.y *= KLAYGE_FLIPPING;
 			oTc = pos.zw * 0.5f + 0.5f;
@@ -329,7 +329,7 @@ void SeparateBokehGS4(point float3 in_clr[1] : TEXCOORD0, point float4 in_pos[1]
 		[unroll]
 		for (int index = 0; index < 4; ++ index)
 		{
-			float2 offset = float2((index & 1) ? +1 : -1, (index & 2) ? +1 : -1);
+			float2 offset = float2((index & 1) ? +1 : -1, ((index & 2) ? -1 : +1) * KLAYGE_FLIPPING);
 			
 			PS_IN gs_out;
 

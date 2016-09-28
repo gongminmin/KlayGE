@@ -516,15 +516,18 @@ namespace
 				}
 				else
 				{
+					RenderEngine& re = rf.RenderEngineInstance();
+					float const flipping = re.RequiresFlipping() ? -1.0f : +1.0f;
+
 					std::vector<float4> points;
 					for (uint32_t y = 0; y < in_height; y += 2)
 					{
 						for (uint32_t x = 0; x < in_width; x += 2)
 						{
-							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, -1));
-							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, -1));
-							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, +1));
-							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, +1));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, +1 * flipping));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, +1 * flipping));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, -1, -1 * flipping));
+							points.push_back(float4((x + 0.5f) / in_width, (y + 0.5f) / in_height, +1, -1 * flipping));
 						}
 					}
 
@@ -534,9 +537,9 @@ namespace
 					{
 						bokeh_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-						for (uint32_t y = 0; y < in_height; ++ y)
+						for (uint32_t y = 0; y < in_height; y += 2)
 						{
-							for (uint32_t x = 0; x < in_width; ++ x)
+							for (uint32_t x = 0; x < in_width; x += 2)
 							{
 								indices.push_back(base + 0);
 								indices.push_back(base + 1);
@@ -552,9 +555,9 @@ namespace
 					{
 						bokeh_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-						for (uint32_t y = 0; y < in_height; ++ y)
+						for (uint32_t y = 0; y < in_height; y += 2)
 						{
-							for (uint32_t x = 0; x < in_width; ++ x)
+							for (uint32_t x = 0; x < in_width; x += 2)
 							{
 								indices.push_back(base + 0);
 								indices.push_back(base + 1);
