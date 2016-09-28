@@ -135,7 +135,7 @@ float2 HeightUVToWorldXZ(float2 uv)
 float SampleHeightForVS(float2 world_xz, float2 offset)
 {
 	float2 uv = WorldXZToHeightUV(world_xz) + offset;
-	float coarse = ReadAFloat(coarse_height_map.SampleLevel(linear_clamp_sampler, uv, 0), 1, -0.5f);
+	float coarse = coarse_height_map.SampleLevel(linear_clamp_sampler, uv, 0).x;
 	return vertical_scale.x * (coarse + SampleLevelDetailNoise(uv, coarse) * 0.5f);
 }
 
@@ -473,18 +473,12 @@ void GBufferTessTerrainDS(TERRAIN_HS_CONSTANT_DATA_OUTPUT input,
 float3 SampleDetailNormal(float2 world_xz)
 {
 	float2 uv = WorldXZToHeightUV(world_xz);
-	float coarse = ReadAFloat(coarse_height_map.Sample(linear_clamp_sampler, uv), 1, -0.5f);
+	float coarse = coarse_height_map.Sample(linear_clamp_sampler, uv).x;
 
 	float scale = saturate(coarse) * vertical_scale.y;
 
 	float2 grad = SampleDetailGradOctaves(uv);
 	return normalize(float3(scale * grad.x, coarse_sample_spacing * world_uv_repeats.y * detail_uv_scale.y, scale * grad.y));
-}
-
-float4 DepthTerrainPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1) : SV_Target
-{
-	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
-	return pos_es.z;
 }
 
 float3 CalcTerrainNormal(float3 world_pos)
@@ -515,12 +509,6 @@ float3 CalcTerrainColor(float3 world_pos, float debug_patch, float4 mask)
 	return color;
 }
 
-float4 GenNoTessTerrainShadowMapWODepthTexturePS(float3 world_pos : TEXCOORD0) : SV_Target
-{
-	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
-	return length(pos_es);
-}
-
 float4 GenNoTessTerrainCascadedShadowMapPS(float3 world_pos : TEXCOORD0) : SV_Target
 {
 	float3 pos_es = mul(float4(world_pos, 1), model_view).xyz;
@@ -529,25 +517,6 @@ float4 GenNoTessTerrainCascadedShadowMapPS(float3 world_pos : TEXCOORD0) : SV_Ta
 		]]>
 	</shader>
 
-	<technique name="DepthTessTerrainTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferTessTerrainVS()"/>
-			<state name="hull_shader" value="GBufferTessTerrainHS()"/>
-			<state name="domain_shader" value="GBufferTessTerrainDS()"/>
-			<state name="pixel_shader" value="DepthTerrainPS()"/>
-		</pass>
-	</technique>
-	<technique name="DepthNoTessTerrainTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
-			<state name="pixel_shader" value="DepthTerrainPS()"/>
-		</pass>
-	</technique>
-
 	<technique name="GenNoTessTerrainShadowMapTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
@@ -555,15 +524,6 @@ float4 GenNoTessTerrainCascadedShadowMapPS(float3 world_pos : TEXCOORD0) : SV_Ta
 
 			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
 			<state name="pixel_shader" value="GenShadowMapPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GenNoTessTerrainShadowMapWODepthTextureTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="GBufferNoTessTerrainVS()"/>
-			<state name="pixel_shader" value="GenNoTessTerrainShadowMapWODepthTexturePS()"/>
 		</pass>
 	</technique>
 

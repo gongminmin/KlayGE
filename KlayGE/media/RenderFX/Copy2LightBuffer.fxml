@@ -19,7 +19,6 @@
 
 	<parameter type="float" name="scaling_factor"/>
 	<parameter type="float2" name="inv_width_height"/>
-	<parameter type="float3" name="depth_near_far_invfar"/>
 	<parameter type="float4x4" name="inv_proj"/>
 	<parameter type="texture2D" name="indirect_lighting_tex"/>
 	<parameter type="texture2D" name="g_buffer_tex"/>
@@ -32,11 +31,11 @@ float4 NearestDepthUpsamplingIL(float2 tc)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0, 1), depth_near_far_invfar.y);
-	float z10 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1), depth_near_far_invfar.y);
-	float z01 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1), depth_near_far_invfar.y);
-	float z11 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1), depth_near_far_invfar.y);
-	float z_full = ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
+	float z00 = depth_tex.SampleLevel(point_sampler, tc0, 1).r;
+	float z10 = depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1).r;
+	float z01 = depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1).r;
+	float z11 = depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1).r;
+	float z_full = depth_tex.Sample(point_sampler, tc).r;
 	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);

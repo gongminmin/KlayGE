@@ -15,7 +15,6 @@
 			<param name="is_not_bottom_top_level"/>
 			<param name="depth_threshold"/>
 			<param name="smaller_level"/>
-			<param name="far_plane"/>
 		</params>
 		<input>
 			<pin name="normal_es_tex"/>

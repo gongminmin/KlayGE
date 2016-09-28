@@ -51,7 +51,6 @@ namespace KlayGE
 
 		proj_param_ = effect->ParameterByName("proj");
 		inv_proj_param_ = effect->ParameterByName("inv_proj");
-		far_plane_param_ = effect->ParameterByName("far_plane");
 	}
 
 	void SSVOPostProcess::OnRenderBegin()
@@ -61,6 +60,5 @@ namespace KlayGE
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 		*proj_param_ = camera.ProjMatrix();
 		*inv_proj_param_ = camera.InverseProjMatrix();
-		*far_plane_param_ = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 	}
 }

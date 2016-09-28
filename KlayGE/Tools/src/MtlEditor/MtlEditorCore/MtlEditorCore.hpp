@@ -22,8 +22,6 @@ namespace KlayGE
 	public:
 		explicit MtlEditorCore(void* native_wnd);
 
-		virtual bool ConfirmDevice() const override;
-
 		void Resize(uint32_t width, uint32_t height);
 
 		bool OpenModel(std::string const & name);

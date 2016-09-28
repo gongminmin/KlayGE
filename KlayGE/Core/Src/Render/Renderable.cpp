@@ -81,7 +81,6 @@ namespace KlayGE
 		{
 			*mvp_param_ = mvp;
 			*model_view_param_ = mv;
-			*far_plane_param_ = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 			*forward_vec_param_ = camera.ForwardVec();
 
 			FrameBufferPtr const & fb = re.CurFrameBuffer();
@@ -101,19 +100,6 @@ namespace KlayGE
 
 			switch (type_)
 			{
-			case PT_OpaqueDepth:
-			case PT_TransparencyBackDepth:
-			case PT_TransparencyFrontDepth:
-				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
-				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
-				break;
-
-			case PT_OpaqueGBufferRT0:
-			case PT_TransparencyBackGBufferRT0:
-			case PT_TransparencyFrontGBufferRT0:
-			case PT_OpaqueGBufferRT1:
-			case PT_TransparencyBackGBufferRT1:
-			case PT_TransparencyFrontGBufferRT1:
 			case PT_OpaqueGBufferMRT:
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
@@ -140,7 +126,6 @@ namespace KlayGE
 
 			case PT_GenShadowMap:
 			case PT_GenCascadedShadowMap:
-			case PT_GenShadowMapWODepthTexture:
 				*alpha_test_threshold_param_ = mtl_ ? mtl_->alpha_test : 0;
 				break;
 
@@ -349,7 +334,6 @@ namespace KlayGE
 
 		mvp_param_ = deferred_effect_->ParameterByName("mvp");
 		model_view_param_ = deferred_effect_->ParameterByName("model_view");
-		far_plane_param_ = deferred_effect_->ParameterByName("far_plane");
 		forward_vec_param_ = deferred_effect_->ParameterByName("forward_vec");
 		frame_size_param_ = deferred_effect_->ParameterByName("frame_size");
 		height_offset_scale_param_ = deferred_effect_->ParameterByName("height_offset_scale");
@@ -494,50 +478,28 @@ namespace KlayGE
 		{
 			if (sss)
 			{
-				depth_tech_ = deferred_effect_->TechniqueByName("SSSDepthAlphaTestTech");
-				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestRT0Tech");
-				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestRT1Tech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapAlphaTestTech");
-				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapWODepthTextureAlphaTestTech");
 			}
 			else
 			{
-				depth_tech_ = deferred_effect_->TechniqueByName("DepthAlphaTestTech");
-				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT0Tech");
-				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestRT1Tech");
 				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
 				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
-				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureAlphaTestTech");
 			}
 		}
 		else
 		{
 			if (sss)
 			{
-				depth_tech_ = deferred_effect_->TechniqueByName("SSSDepthTech");
-				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("SSSGBufferRT0Tech");
-				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("SSSGBufferRT1Tech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapTech");
-				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapWODepthTextureTech");
 			}
 			else
 			{
-				depth_tech_ = deferred_effect_->TechniqueByName("DepthTech");
-				gbuffer_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferRT0Tech");
-				gbuffer_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferRT1Tech");
 				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
 				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
-				gen_sm_wo_dt_tech_ = deferred_effect_->TechniqueByName("GenShadowMapWODepthTextureTech");
 			}
 		}
-		depth_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendBackTech");
-		depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("DepthAlphaBlendFrontTech");
-		gbuffer_alpha_blend_back_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT0Tech");
-		gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT0Tech");
-		gbuffer_alpha_blend_back_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackRT1Tech");
-		gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontRT1Tech");
 		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
 	}
 
@@ -545,33 +507,6 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_OpaqueDepth:
-			return depth_tech_;
-
-		case PT_TransparencyBackDepth:
-			return depth_alpha_blend_back_tech_;
-
-		case PT_TransparencyFrontDepth:
-			return depth_alpha_blend_front_tech_;
-
-		case PT_OpaqueGBufferRT0:
-			return gbuffer_rt0_tech_;
-
-		case PT_OpaqueGBufferRT1:
-			return gbuffer_rt1_tech_;
-
-		case PT_TransparencyBackGBufferRT0:
-			return gbuffer_alpha_blend_back_rt0_tech_;
-
-		case PT_TransparencyBackGBufferRT1:
-			return gbuffer_alpha_blend_back_rt1_tech_;
-
-		case PT_TransparencyFrontGBufferRT0:
-			return gbuffer_alpha_blend_front_rt0_tech_;
-
-		case PT_TransparencyFrontGBufferRT1:
-			return gbuffer_alpha_blend_front_rt1_tech_;
-
 		case PT_OpaqueGBufferMRT:
 			return gbuffer_mrt_tech_;
 
@@ -589,9 +524,6 @@ namespace KlayGE
 
 		case PT_GenCascadedShadowMap:
 			return gen_cascaded_sm_tech_;
-
-		case PT_GenShadowMapWODepthTexture:
-			return gen_sm_wo_dt_tech_;
 
 		case PT_OpaqueReflection:
 			return reflection_tech_;
@@ -616,7 +548,7 @@ namespace KlayGE
 
 		default:
 			BOOST_ASSERT(false);
-			return gbuffer_rt0_tech_;
+			return gbuffer_mrt_tech_;
 		}
 	}
 }

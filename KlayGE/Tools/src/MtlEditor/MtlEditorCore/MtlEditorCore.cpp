@@ -311,16 +311,6 @@ namespace KlayGE
 		ResLoader::Instance().AddPath("../../Tools/media/MtlEditor");
 	}
 
-	bool MtlEditorCore::ConfirmDevice() const
-	{
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.max_simultaneous_rts < 2)
-		{
-			return false;
-		}
-		return true;
-	}
-
 	void MtlEditorCore::Resize(uint32_t width, uint32_t height)
 	{
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(width, height);

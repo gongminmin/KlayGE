@@ -1921,16 +1921,21 @@ namespace KlayGE
 			rendertarget_format_.insert(EF_ABGR32UI);
 			rendertarget_format_.insert(EF_ABGR32I);
 		}
-		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
 		{
 			rendertarget_format_.insert(EF_R16F);
 			rendertarget_format_.insert(EF_GR16F);
 		}
-		if (glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float() || this->HackForTegra())
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float()
+			|| this->HackForTegra())
 		{
 			rendertarget_format_.insert(EF_ABGR16F);
 		}
-		if (glloader_GLES_EXT_color_buffer_float())
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_APPLE_color_buffer_packed_float() || glloader_GLES_NV_packed_float())
+		{
+			rendertarget_format_.insert(EF_B10G11R11F);
+		}
+		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_float())
 		{
 			rendertarget_format_.insert(EF_R32F);
 			rendertarget_format_.insert(EF_GR32F);

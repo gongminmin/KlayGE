@@ -5,7 +5,6 @@
 		<params>
 			<param name="scaling_factor"/>
 			<param name="inv_width_height"/>
-			<param name="depth_near_far_invfar"/>
 			<param name="inv_proj"/>
 		</params>
 		<input>
@@ -24,7 +23,6 @@
 		<params>
 			<param name="scaling_factor"/>
 			<param name="inv_width_height"/>
-			<param name="depth_near_far_invfar"/>
 			<param name="inv_proj"/>
 		</params>
 		<input>

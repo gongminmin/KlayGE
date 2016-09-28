@@ -55,12 +55,9 @@ namespace KlayGE
 			effect_attrs_ |= EA_SpecialShading;
 
 			this->BindDeferredEffect(effect);
-			depth_tech_ = effect->TechniqueByName("DepthSkyBoxTech");
-			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferSkyBoxRT0Tech");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferSkyBoxRT1Tech");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
 			special_shading_tech_ = effect->TechniqueByName("SkyBoxTech");
-			this->Technique(effect, gbuffer_rt0_tech_);
+			this->Technique(effect, gbuffer_mrt_tech_);
 		}
 		else
 		{
@@ -114,18 +111,6 @@ namespace KlayGE
 	{
 		switch (type)
 		{
-		case PT_OpaqueDepth:
-			technique_ = depth_tech_;
-			break;
-
-		case PT_OpaqueGBufferRT0:
-			technique_ = gbuffer_rt0_tech_;
-			break;
-
-		case PT_OpaqueGBufferRT1:
-			technique_ = gbuffer_rt1_tech_;
-			break;
-
 		case PT_OpaqueGBufferMRT:
 			technique_ = gbuffer_mrt_tech_;
 			break;

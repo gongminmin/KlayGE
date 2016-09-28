@@ -208,11 +208,11 @@ float4 NearestDepthUpsamplingShadowLevel(float2 tc, int channel)
 {
 	float2 l1_inv_width_height = inv_width_height * 2;
 	float2 tc0 = tc - inv_width_height;
-	float z00 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0, 1), depth_near_far_invfar.y);
-	float z10 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1), depth_near_far_invfar.y);
-	float z01 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1), depth_near_far_invfar.y);
-	float z11 = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1), depth_near_far_invfar.y);
-	float z_full = ReadAFloat(depth_tex.SampleLevel(point_sampler, tc, 0), depth_near_far_invfar.y);
+	float z00 = depth_tex.SampleLevel(point_sampler, tc0, 1).x;
+	float z10 = depth_tex.SampleLevel(point_sampler, tc0 + float2(l1_inv_width_height.x, 0), 1).x;
+	float z01 = depth_tex.SampleLevel(point_sampler, tc0 + float2(0, l1_inv_width_height.y), 1).x;
+	float z11 = depth_tex.SampleLevel(point_sampler, tc0 + l1_inv_width_height, 1).x;
+	float z_full = depth_tex.SampleLevel(point_sampler, tc, 0).x;
 	float threshold = 0.25f;
 
 	float3 ndus = NearestDepthUpsampling(tc0, float4(z00, z10, z01, z11), z_full, l1_inv_width_height, threshold);
@@ -466,7 +466,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 					float3 normal = GetNormal(mrt_0);
 					float glossiness = GetGlossiness(mrt_0);
 					float shininess = Glossiness2Shininess(glossiness);
-					float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(coord), depth_near_far_invfar.y) / view_dir.z);
+					float3 pos_es = view_dir * (depth_tex.Load(coord).x / view_dir.z);
 					float3 c_diff = GetDiffuse(mrt_1);
 					float3 c_spec = GetSpecular(mrt_1);
 					
@@ -595,7 +595,6 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 		<parameter type="float4x4" name="lights_view_proj" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 		<parameter type="int" name="filtered_sms_2d_light_index" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 		<parameter type="float" name="esms_scale_factor" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
-		<parameter type="float" name="sms_far_plane" array_size="MAX_NUM_SHADOWED_LIGHTS"/>
 	</cbuffer>
 
 	<shader type="compute_shader" version="5">
@@ -651,7 +650,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 			float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
 			float3 view_dir = normalize(texcoord_to_view(tc));
-			float3 pos_es = view_dir * (ReadAFloat(depth_tex.Load(coord * 2), depth_near_far_invfar.y) / view_dir.z);
+			float3 pos_es = view_dir * (depth_tex.Load(coord * 2).x / view_dir.z);
 
 			uint sun_index = MAX_NUM_SHADOWED_LIGHTS;
 			[unroll]
@@ -711,7 +710,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 						{
 							float len = dot(float4(pos_es, 1), view_z_to_light_view);
 							new_shadowing = ESMSun(pos_es, csm_tc_dd[gtid.y][gtid.x], sun_tc_ddx_ddy, len,
-								esms_scale_factor[i], sms_far_plane[i]);
+								esms_scale_factor[i]);
 						}
 						else if (LT_Spot == lights_type[i])
 						{
@@ -721,7 +720,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 							light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
 							float len = length(lights_pos_es[i].xyz - pos_es);
 							new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-								filtered_sms_2d_light_index[i], esms_scale_factor[i], sms_far_plane[i]);
+								filtered_sms_2d_light_index[i], esms_scale_factor[i]);
 						}
 						else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
 						{
@@ -729,7 +728,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 							float len = length(dir);
 							float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
 							new_shadowing = ESMOmnidirectional(dir_ls, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-								esms_scale_factor[i], sms_far_plane[i]);
+								esms_scale_factor[i]);
 						}
 
 						if (0 == i)

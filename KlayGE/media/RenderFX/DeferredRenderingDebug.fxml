@@ -35,7 +35,7 @@ void ShowQuadVS(float4 pos : POSITION,
 
 float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc0), depth_near_far_invfar.y) / view_dir.z);
+	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc0).x / view_dir.z);
 	return float4(pos_es * 0.03f, 1);
 }
 
@@ -48,7 +48,7 @@ float4 ShowNormalPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 float4 ShowDepthPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	return float4((ReadAFloat(depth_tex.Sample(point_sampler, tc0), depth_near_far_invfar.y) * depth_near_far_invfar.z * 10).xxx, 1);
+	return float4((depth_tex.Sample(point_sampler, tc0).x * depth_near_far_invfar.z * 10).xxx, 1);
 }
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0) : SV_Target

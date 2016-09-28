@@ -23,21 +23,6 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 	oPos = pos;
 }
 
-float4 DepthSkyBoxPS() : SV_Target
-{
-	return WriteAFloat(depth_far, 1.0f / depth_far);
-}
-
-float4 GBufferSkyBoxRT0PS() : SV_Target
-{
-	return 0;
-}
-
-float4 GBufferSkyBoxRT1PS() : SV_Target
-{
-	return 0;
-}
-
 void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	mrt_0 = mrt_1 = 0;
@@ -66,75 +51,25 @@ float4 SkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="DepthSkyBoxTech">
+	<technique name="GBufferSkyBoxMRTTech">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			<state name="depth_func" value="equal"/>
 			<state name="depth_write_mask" value="false"/>
 
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="DepthSkyBoxPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferSkyBoxRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="color_write_mask" value="0"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferSkyBoxRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferSkyBoxRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-			<state name="depth_func" value="equal"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="color_write_mask" value="0"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferSkyBoxRT1PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferSkyBoxMRTTech" inherit="GBufferSkyBoxRT0Tech">
-		<pass name="p0">
 			<state name="color_write_mask" index="0" value="0"/>
 			<state name="color_write_mask" index="1" value="0"/>
-			
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="GBufferSkyBoxVS()"/>
 			<state name="pixel_shader" value="GBufferSkyBoxMRTPS()"/>
 		</pass>
 	</technique>

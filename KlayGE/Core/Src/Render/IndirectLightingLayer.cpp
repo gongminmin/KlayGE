@@ -57,8 +57,6 @@ namespace KlayGE
 		multi_res_layer_ = MakeSharedPtr<MultiResLayer>();
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderEngine& re = rf.RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		vpl_tex_ = rf.MakeTexture2D(VPL_COUNT, 4, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);	
 
@@ -68,7 +66,6 @@ namespace KlayGE
 
 		vpl_view_param_ = vpls_lighting_effect_->ParameterByName("view");
 		vpl_proj_param_ = vpls_lighting_effect_->ParameterByName("proj");
-		vpl_depth_near_far_invfar_param_ = vpls_lighting_effect_->ParameterByName("depth_near_far_invfar");
 		vpl_light_pos_es_param_ = vpls_lighting_effect_->ParameterByName("light_pos_es");
 		vpl_light_color_param_ = vpls_lighting_effect_->ParameterByName("light_color");
 		vpl_light_falloff_param_ = vpls_lighting_effect_->ParameterByName("light_falloff");
@@ -80,10 +77,7 @@ namespace KlayGE
 
 		vpl_renderable_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
 			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0);
-		if (caps.instance_id_support)
-		{
-			vpl_renderable_->GetRenderLayout().NumInstances(VPL_COUNT);
-		}
+		vpl_renderable_->GetRenderLayout().NumInstances(VPL_COUNT);
 	}
 
 	void MultiResSILLayer::GBuffer(TexturePtr const & rt0_tex, TexturePtr const & rt1_tex, TexturePtr const & depth_tex)
@@ -179,7 +173,6 @@ namespace KlayGE
 
 	void MultiResSILLayer::UpdateRSM(Camera const & rsm_camera, LightSource const & light)
 	{
-		rsm_to_depth_derivate_pp_->SetParam(1, float2(rsm_camera.FarPlane(), 1 / rsm_camera.FarPlane()));
 		this->ExtractVPLs(rsm_camera, light);
 		this->VPLsLighting(light);
 	}
@@ -224,7 +217,6 @@ namespace KlayGE
 		rsm_to_vpls_pps_[type]->SetParam(9, int2(1, 0));
 		rsm_to_vpls_pps_[type]->SetParam(10, 0.12f * rsm_camera.FarPlane());
 		rsm_to_vpls_pps_[type]->SetParam(11, static_cast<float>(rsm_texs_[0]->NumMipMaps() - 1));
-		rsm_to_vpls_pps_[type]->SetParam(12, float2(rsm_camera.FarPlane(), 1 / rsm_camera.FarPlane()));
 
 		rsm_to_vpls_pps_[type]->Apply();
 	}
@@ -232,12 +224,9 @@ namespace KlayGE
 	void MultiResSILLayer::VPLsLighting(LightSource const & light)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		RenderDeviceCaps const & caps = re.DeviceCaps();
 
 		*vpl_view_param_ = g_buffer_camera_->ViewMatrix();
 		*vpl_proj_param_ = g_buffer_camera_->ProjMatrix();
-		*vpl_depth_near_far_invfar_param_ = float3(g_buffer_camera_->NearPlane(),
-			g_buffer_camera_->FarPlane(), 1 / g_buffer_camera_->FarPlane());
 
 		float3 p = MathLib::transform_coord(light.Position(), g_buffer_camera_->ViewMatrix());
 		*vpl_light_pos_es_param_ = float4(p.x(), p.y(), p.z(), 1);
@@ -251,19 +240,7 @@ namespace KlayGE
 		for (uint32_t i = 0; i < indirect_lighting_tex_->NumMipMaps(); ++ i)
 		{
 			re.BindFrameBuffer(multi_res_layer_->MultiResFB(i));
-
-			if (caps.instance_id_support)
-			{
-				re.Render(*vpls_lighting_effect_, *vpls_lighting_instance_id_tech_, rl_vpl);
-			}
-			else
-			{
-				for (int j = 0; j < VPL_COUNT; ++ j)
-				{
-					*vpl_x_coord_param_ = (j + 0.5f) / VPL_COUNT;
-					re.Render(*vpls_lighting_effect_, *vpls_lighting_no_instance_id_tech_, rl_vpl);
-				}
-			}
+			re.Render(*vpls_lighting_effect_, *vpls_lighting_instance_id_tech_, rl_vpl);
 		}
 	}
 

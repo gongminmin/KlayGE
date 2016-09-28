@@ -97,7 +97,6 @@ namespace KlayGE
 
 		RenderEffectParameter* vpl_view_param_;
 		RenderEffectParameter* vpl_proj_param_;
-		RenderEffectParameter* vpl_depth_near_far_invfar_param_;
 		RenderEffectParameter* vpl_light_pos_es_param_;
 		RenderEffectParameter* vpl_light_color_param_;
 		RenderEffectParameter* vpl_light_falloff_param_;

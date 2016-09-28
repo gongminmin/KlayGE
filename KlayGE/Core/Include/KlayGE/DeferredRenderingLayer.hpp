@@ -71,15 +71,11 @@ namespace KlayGE
 
 		std::array<bool, PTB_None> g_buffer_enables;
 
-		FrameBufferPtr pre_depth_fb;
-
 		FrameBufferPtr g_buffer;
-		FrameBufferPtr g_buffer_rt1;
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
-		std::vector<TexturePtr> g_buffer_depth_pingpong_texs;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
@@ -111,7 +107,6 @@ namespace KlayGE
 
 		float4x4 view, proj;
 		float4x4 inv_view, inv_proj;
-		float3 depth_near_far_invfar;
 		float4x4 proj_to_prev;
 
 		IndirectLightingLayerPtr il_layer;
@@ -155,6 +150,8 @@ namespace KlayGE
 
 	public:
 		DeferredRenderingLayer();
+
+		static bool ConfirmDevice();
 
 		void Suspend();
 		void Resume();
@@ -290,10 +287,6 @@ namespace KlayGE
 		{
 			return shadow_map_perf_;
 		}
-		PerfRangePtr const & DepthPerf(PassTargetBuffer ptb) const
-		{
-			return depth_perfs_[ptb];
-		}
 		PerfRangePtr const & GBufferPerf(PassTargetBuffer ptb) const
 		{
 			return gbuffer_perfs_[ptb];
@@ -335,7 +328,6 @@ namespace KlayGE
 		void AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index);
 		void AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb);
 		void PreparePVP(PerViewport& pvp);
-		void GenerateDepthBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void GenerateGBuffer(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void PostGenerateGBuffer(PerViewport const & pvp);
 		void BuildLinearDepthMipmap(PerViewport const & pvp);
@@ -374,8 +366,6 @@ namespace KlayGE
 #endif
 
 	private:
-		bool mrt_g_buffer_support_;
-		bool depth_texture_support_;
 		bool tex_array_support_;
 
 		RenderEffectPtr g_buffer_effect_;
@@ -476,7 +466,6 @@ namespace KlayGE
 		RenderEffectParameter* g_buffer_1_tex_param_;
 		RenderEffectParameter* depth_tex_param_;
 		RenderEffectParameter* shading_tex_param_;
-		RenderEffectParameter* depth_near_far_invfar_param_;
 		RenderEffectParameter* light_attrib_param_;
 		RenderEffectParameter* light_radius_extend_param_;
 		RenderEffectParameter* light_color_param_;
@@ -498,7 +487,6 @@ namespace KlayGE
 		RenderEffectParameter* projective_shadowing_tex_param_;
 		RenderEffectParameter* shadowing_channel_param_;
 		RenderEffectParameter* esm_scale_factor_param_;
-		RenderEffectParameter* sm_far_plane_param_;
 		RenderEffectParameter* near_q_param_;
 		RenderEffectParameter* cascade_intervals_param_;
 		RenderEffectParameter* cascade_scale_bias_param_;
@@ -528,7 +516,6 @@ namespace KlayGE
 		RenderEffectParameter* lights_view_proj_param_;
 		RenderEffectParameter* filtered_sms_2d_light_index_param_;
 		RenderEffectParameter* esms_scale_factor_param_;
-		RenderEffectParameter* sms_far_plane_param_;
 
 		RenderTechnique* technique_depth_to_tiled_min_max_;
 		RenderTechnique* technique_tbdr_lighting_mask_;
@@ -549,7 +536,6 @@ namespace KlayGE
 #endif
 
 		RenderEffectParameter* skylight_diff_spec_mip_param_;
-		RenderEffectParameter* skylight_mip_bias_param_;
 		RenderEffectParameter* inv_view_param_;
 		RenderEffectParameter* skylight_y_cube_tex_param_;
 		RenderEffectParameter* skylight_c_cube_tex_param_;
@@ -588,7 +574,6 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr shadow_map_perf_;
-		std::array<PerfRangePtr, PTB_None> depth_perfs_;
 		std::array<PerfRangePtr, PTB_None> gbuffer_perfs_;
 		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
 		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;

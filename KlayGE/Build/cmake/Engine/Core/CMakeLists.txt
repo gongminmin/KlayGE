@@ -175,7 +175,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferNoSkinning.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning64.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning128.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Imposter.fxml
@@ -183,7 +182,6 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensFlare.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering4.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightIndexedDeferredRendering32.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml

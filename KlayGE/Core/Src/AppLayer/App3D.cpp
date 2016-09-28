@@ -617,6 +617,19 @@ namespace KlayGE
 		return MakeSharedPtr<Window>(name, settings, native_wnd);
 	}
 
+	bool App3DFramework::ConfirmDevice() const
+	{
+		bool confirmed = true;
+
+		ContextCfg const & cfg = Context::Instance().Config();
+		if (cfg.deferred_rendering)
+		{
+			confirmed &= DeferredRenderingLayer::ConfirmDevice();
+		}
+
+		return confirmed;
+	}
+
 #if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	void App3DFramework::Run()
 	{

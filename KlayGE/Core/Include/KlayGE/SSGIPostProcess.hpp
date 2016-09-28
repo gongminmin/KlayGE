@@ -48,7 +48,6 @@ namespace KlayGE
 	private:
 		RenderEffectParameter* proj_param_;
 		RenderEffectParameter* inv_proj_param_;
-		RenderEffectParameter* far_plane_param_;
 	};
 }
 

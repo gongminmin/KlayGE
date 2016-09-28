@@ -23,7 +23,6 @@
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
-		<parameter type="float3" name="depth_near_far_invfar"/>
 
 		<parameter type="float4" name="light_pos_es"/>
 		<parameter type="float4" name="light_color"/>
@@ -37,9 +36,7 @@
 	<shader>
 		<![CDATA[
 #if !KLAYGE_DXBC2GLSL
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 #define NOPERSPECTIVE_SUPPORT
-#endif
 #endif
 
 void CalcVPLsLightingShape(float4 pos,
@@ -145,7 +142,7 @@ float4 VPLsLightingPS(
 	float2 tc = tc_w.xy / tc_w.z;
 #endif
 
-	float pixel_depth = ReadAFloat(depth_tex.Sample(point_sampler, tc), depth_near_far_invfar.y);
+	float pixel_depth = depth_tex.Sample(point_sampler, tc).x;
 	float3 color_i = 0;
 	clip(view_dir.z - pixel_depth);
 

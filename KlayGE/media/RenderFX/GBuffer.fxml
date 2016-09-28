@@ -11,7 +11,6 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
 		<parameter type="float4x4" name="inv_mv"/>
-		<parameter type="float2" name="far_plane"/>
 		<parameter type="float3" name="forward_vec"/>
 		<parameter type="int2" name="frame_size"/>
 	</cbuffer>
@@ -82,9 +81,7 @@
 	<shader>
 		<![CDATA[
 #if !KLAYGE_DXBC2GLSL
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 #define NOPERSPECTIVE_SUPPORT
-#endif
 #endif
 
 #if SKINNING_ON
@@ -217,38 +214,6 @@ void GBufferVS(float4 pos : POSITION,
 #endif
 }
 
-float4 DepthPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2) : SV_Target
-{
-	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
-}
-
-float4 DepthAlphaTestPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2) : SV_Target
-{
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
-	}
-	clip(opacity - alpha_test_threshold);
-	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
-}
-
-float4 DepthAlphaBlendPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3
-#else
-					float3 screen_tc_w : TEXCOORD3
-#endif
-		) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
-
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);	
-	return WriteAFloat(ts_to_view1_depth.w, far_plane.y);
-}
-
 float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float2 uv = texcoord_2xy.xy;
@@ -336,250 +301,11 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 #endif
 
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
-	clip(ReadAFloat(opaque_depth_tex.Sample(point_sampler, screen_tc), far_plane.x) - ts_to_view1_depth.w);
+	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
 	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
-}
-
-float4 GBufferRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-		mrt_0, mrt_1);
-	return mrt_0;
-}
-
-float4 GBufferAlphaTestRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferAlphaTestMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-		mrt_0, mrt_1);
-	return mrt_0;
-}
-
-float4 GBufferAlphaBlendRT0PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3
-#else
-					float3 screen_tc_w : TEXCOORD3
-#endif
-			) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferAlphaBlendMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth,
-#ifdef NOPERSPECTIVE_SUPPORT
-		screen_tc,
-#else
-		screen_tc_w,
-#endif
-		mrt_0, mrt_1);
-	return mrt_0;
-}
-
-float4 GBufferRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-		mrt_0, mrt_1);
-	return mrt_1;
-}
-
-float4 GBufferAlphaTestRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferAlphaTestMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1,
-		mrt_0, mrt_1);
-	return mrt_1;
-}
-
-float4 GBufferAlphaBlendRT1PS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3
-#else
-					float3 screen_tc_w : TEXCOORD3
-#endif
-			) : SV_Target
-{
-	float4 mrt_0, mrt_1;
-	GBufferAlphaBlendMRTPS(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth,
-#ifdef NOPERSPECTIVE_SUPPORT
-		screen_tc,
-#else
-		screen_tc_w,
-#endif
-		mrt_0, mrt_1);
-	return mrt_1;
 }
 		]]>
 	</shader>
-
-	<technique name="DepthTech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="DepthPS()"/>
-		</pass>
-	</technique>
-	<technique name="DepthAlphaTestTech" inherit="DepthTech">
-		<pass name="p0">
-			<state name="pixel_shader" value="DepthAlphaTestPS()"/>
-		</pass>
-	</technique>
-	<technique name="DepthAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="depth_func" value="greater"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="DepthAlphaBlendPS()"/>
-		</pass>
-	</technique>
-	<technique name="DepthAlphaBlendFrontTech" inherit="DepthAlphaBlendBackTech">
-		<pass name="p0">
-			<state name="depth_func" value="less"/>
-
-			<state name="cull_mode" value="back"/>
-		</pass>
-	</technique>
-	<technique name="SSSDepthTech" inherit="DepthTech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="front_stencil_write_mask" value="32"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="32"/>
-			<state name="back_stencil_pass" value="replace"/>
-			<state name="back_stencil_write_mask" value="32"/>
-		</pass>
-	</technique>
-	<technique name="SSSDepthAlphaTestTech" inherit="SSSDepthTech">
-		<pass name="p0">
-			<state name="pixel_shader" value="DepthAlphaTestPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferRT0Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferRT0PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaTestRT0Tech" inherit="GBufferRT0Tech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestRT0PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="depth_func" value="greater"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="0"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="0"/>
-			<state name="back_stencil_pass" value="replace"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendRT0PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendFrontRT0Tech" inherit="GBufferAlphaBlendBackRT0Tech">
-		<pass name="p0">
-			<state name="depth_func" value="less"/>
-
-			<state name="cull_mode" value="back"/>
-		</pass>
-	</technique>
-	<technique name="SSSGBufferRT0Tech" inherit="GBufferRT0Tech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="front_stencil_write_mask" value="32"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="32"/>
-			<state name="back_stencil_pass" value="replace"/>
-			<state name="back_stencil_write_mask" value="32"/>
-		</pass>
-	</technique>
-	<technique name="SSSGBufferAlphaTestRT0Tech" inherit="SSSGBufferRT0Tech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestRT0PS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GBufferRT1Tech">
-		<pass name="p0">
-			<state name="cull_mode" value="back"/>
-			<state name="depth_func" value="equal"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferRT1PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaTestRT1Tech" inherit="GBufferRT1Tech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestRT1PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="depth_func" value="equal"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="keep"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="keep"/>
-
-			<state name="vertex_shader" value="GBufferVS()"/>
-			<state name="pixel_shader" value="GBufferAlphaBlendRT1PS()"/>
-		</pass>
-	</technique>
-	<technique name="GBufferAlphaBlendFrontRT1Tech" inherit="GBufferAlphaBlendBackRT1Tech">
-		<pass name="p0">
-			<state name="depth_func" value="equal"/>
-
-			<state name="cull_mode" value="back"/>
-		</pass>
-	</technique>
-	<technique name="SSSGBufferRT1Tech" inherit="GBufferRT1Tech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="32"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="front_stencil_write_mask" value="32"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="32"/>
-			<state name="back_stencil_pass" value="replace"/>
-			<state name="back_stencil_write_mask" value="32"/>
-		</pass>
-	</technique>
-	<technique name="SSSGBufferAlphaTestRT1Tech" inherit="SSSGBufferRT1Tech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GBufferAlphaTestRT1PS()"/>
-		</pass>
-	</technique>
 
 	<technique name="GBufferMRTTech">
 		<pass name="p0">
@@ -739,65 +465,6 @@ float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
 	return 0;
 }
 
-void GenShadowMapWODepthTextureVS(float4 pos : POSITION,
-						float2 texcoord : TEXCOORD0,
-						float4 tangent_quat : TANGENT,
-#if SKINNING_ON
-						float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-						float4 blend_indices_f : BLENDINDICES,
-#else
-						uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
-						out float2 oTc : TEXCOORD0,
-						out float3 oViewDir : TEXCOORD1,
-						out float4 oPos : SV_Position)
-{
-#if SKINNING_ON
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
-
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-
-	float3 result_pos;
-	float4 result_tangent_quat;
-	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
-				blend_weights, blend_indices,
-#endif
-				oTc, result_pos,
-				result_tangent_quat);
-
-#if TRANSPARENCY_ON
-	float3 normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
-	result_pos.xyz += normal * 0.005f;
-#endif
-
-	oPos = mul(float4(result_pos, 1), mvp);
-	oViewDir = mul(float4(result_pos, 1), model_view).xyz;
-}
-
-float4 GenShadowMapWODepthTexturePS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
-	return WriteAFloat(length(view_dir), far_plane.y);
-}
-
-float4 GenShadowMapWODepthTextureAlphaTestPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
-	}
-	clip(opacity - alpha_test_threshold);
-	return WriteAFloat(length(view_dir), far_plane.y);
-}
-
 void GenCascadedShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float4 tangent_quat : TANGENT,
@@ -838,7 +505,7 @@ void GenCascadedShadowMapVS(float4 pos : POSITION,
 
 float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
 {
-	return WriteAFloat(depth, far_plane.y);
+	return depth;
 }
 
 float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
@@ -849,7 +516,7 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	return WriteAFloat(depth, far_plane.y);
+	return depth;
 }
 		]]>
 	</shader>
@@ -875,29 +542,6 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 	<technique name="SSSGenShadowMapAlphaTestTech" inherit="SSSGenShadowMapTech">
 		<pass name="p0">
 			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="GenShadowMapWODepthTextureTech">
-		<pass name="p0">
-			<state name="cull_mode" value="none"/>
-
-			<state name="vertex_shader" value="GenShadowMapWODepthTextureVS()"/>
-			<state name="pixel_shader" value="GenShadowMapWODepthTexturePS()"/>
-		</pass>
-	</technique>
-	<technique name="GenShadowMapWODepthTextureAlphaTestTech" inherit="GenShadowMapWODepthTextureTech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="SSSGenShadowMapWODepthTextureTech" inherit="GenShadowMapWODepthTextureTech">
-		<macro name="TRANSPARENCY_ON" value="1"/>
-	</technique>
-	<technique name="SSSGenShadowMapWODepthTextureAlphaTestTech" inherit="SSSGenShadowMapWODepthTextureTech">
-		<pass name="p0">
-			<state name="pixel_shader" value="GenShadowMapWODepthTextureAlphaTestPS()"/>
 		</pass>
 	</technique>
 

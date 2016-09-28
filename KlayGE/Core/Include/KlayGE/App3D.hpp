@@ -93,10 +93,7 @@ namespace KlayGE
 			return main_wnd_;
 		}
 
-		virtual bool ConfirmDevice() const
-		{
-			return true;
-		}
+		virtual bool ConfirmDevice() const;
 
 		Camera const & ActiveCamera() const;
 		Camera& ActiveCamera();

@@ -65,8 +65,6 @@ namespace KlayGE
 	public:
 		explicit KGEditorCore(void* native_wnd);
 
-		bool ConfirmDevice() const override;
-
 		void Resize(uint32_t width, uint32_t height);
 
 		void LoadScene(std::string const & file_name);

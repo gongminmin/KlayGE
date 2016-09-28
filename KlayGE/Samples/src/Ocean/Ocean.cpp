@@ -42,9 +42,6 @@ namespace
 			: InfTerrainRenderable(L"Ocean", 384)
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Ocean.fxml"));
-			depth_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanDepthAlphaBlendFront");
-			gbuffer_alpha_blend_front_rt0_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT0");
-			gbuffer_alpha_blend_front_rt1_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontRT1");
 			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("OceanGBufferAlphaBlendFrontMRT");
 			reflection_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanReflectionAlphaBlendFront");
 			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("OceanSpecialShadingAlphaBlendFront");
@@ -112,12 +109,6 @@ namespace
 
 			switch (type_)
 			{
-			case PT_OpaqueGBufferRT0:
-			case PT_TransparencyBackGBufferRT0:
-			case PT_TransparencyFrontGBufferRT0:
-			case PT_OpaqueGBufferRT1:
-			case PT_TransparencyBackGBufferRT1:
-			case PT_TransparencyFrontGBufferRT1:
 			case PT_OpaqueGBufferMRT:
 			case PT_TransparencyBackGBufferMRT:
 			case PT_TransparencyFrontGBufferMRT:
@@ -747,8 +738,6 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("Ocean.fxml");
 
-			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT0");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
 			this->Technique(effect, gbuffer_mrt_tech_);
@@ -805,16 +794,6 @@ OceanApp::OceanApp()
 				light_shaft_on_(true)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Ocean");
-}
-
-bool OceanApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < ShaderModel(3, 0))
-	{
-		return false;
-	}
-	return true;
 }
 
 void OceanApp::OnCreate()

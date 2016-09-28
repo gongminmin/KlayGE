@@ -29,8 +29,7 @@ namespace KlayGE
 {
 	enum PassCategory
 	{
-		PC_Depth = 0,
-		PC_GBuffer,
+		PC_GBuffer = 0,
 		PC_ShadowMap,
 		PC_Shadowing,
 		PC_IndirectLighting,
@@ -51,11 +50,8 @@ namespace KlayGE
 
 	enum PassRT
 	{
-		PRT_RT0 = 0,
-		PRT_RT1,
-		PRT_MRT,
+		PRT_MRT = 0,
 		PRT_ShadowMap,
-		PRT_ShadowMapWODepth,
 		PRT_CascadedShadowMap,
 		PRT_ReflectiveShadowMap,
 		PRT_None
@@ -72,22 +68,11 @@ namespace KlayGE
 
 	enum PassType
 	{
-		PT_OpaqueDepth = MakePassType<PRT_None, PTB_Opaque, PC_Depth>::value,
-		PT_TransparencyBackDepth = MakePassType<PRT_None, PTB_TransparencyBack, PC_Depth>::value,
-		PT_TransparencyFrontDepth = MakePassType<PRT_None, PTB_TransparencyFront, PC_Depth>::value,
-		
-		PT_OpaqueGBufferRT0 = MakePassType<PRT_RT0, PTB_Opaque, PC_GBuffer>::value,
-		PT_TransparencyBackGBufferRT0 = MakePassType<PRT_RT0, PTB_TransparencyBack, PC_GBuffer>::value,
-		PT_TransparencyFrontGBufferRT0 = MakePassType<PRT_RT0, PTB_TransparencyFront, PC_GBuffer>::value,
-		PT_OpaqueGBufferRT1 = MakePassType<PRT_RT1, PTB_Opaque, PC_GBuffer>::value,
-		PT_TransparencyBackGBufferRT1 = MakePassType<PRT_RT1, PTB_TransparencyBack, PC_GBuffer>::value,
-		PT_TransparencyFrontGBufferRT1 = MakePassType<PRT_RT1, PTB_TransparencyFront, PC_GBuffer>::value,
 		PT_OpaqueGBufferMRT = MakePassType<PRT_MRT, PTB_Opaque, PC_GBuffer>::value,
 		PT_TransparencyBackGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyBack, PC_GBuffer>::value,
 		PT_TransparencyFrontGBufferMRT = MakePassType<PRT_MRT, PTB_TransparencyFront, PC_GBuffer>::value,
 		
 		PT_GenShadowMap = MakePassType<PRT_ShadowMap, PTB_None, PC_ShadowMap>::value,
-		PT_GenShadowMapWODepthTexture = MakePassType<PRT_ShadowMapWODepth, PTB_None, PC_ShadowMap>::value,
 		PT_GenCascadedShadowMap = MakePassType<PRT_CascadedShadowMap, PTB_None, PC_ShadowMap>::value,
 		PT_GenReflectiveShadowMap = MakePassType<PRT_ReflectiveShadowMap, PTB_None, PC_ShadowMap>::value,
 		
@@ -283,20 +268,10 @@ namespace KlayGE
 
 		RenderEffectPtr deferred_effect_;
 
-		RenderTechnique* depth_tech_;
-		RenderTechnique* depth_alpha_blend_back_tech_;
-		RenderTechnique* depth_alpha_blend_front_tech_;
-		RenderTechnique* gbuffer_rt0_tech_;
-		RenderTechnique* gbuffer_alpha_blend_back_rt0_tech_;
-		RenderTechnique* gbuffer_alpha_blend_front_rt0_tech_;
-		RenderTechnique* gbuffer_rt1_tech_;
-		RenderTechnique* gbuffer_alpha_blend_back_rt1_tech_;
-		RenderTechnique* gbuffer_alpha_blend_front_rt1_tech_;
 		RenderTechnique* gbuffer_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_back_mrt_tech_;
 		RenderTechnique* gbuffer_alpha_blend_front_mrt_tech_;
 		RenderTechnique* gen_sm_tech_;
-		RenderTechnique* gen_sm_wo_dt_tech_;
 		RenderTechnique* gen_cascaded_sm_tech_;
 		RenderTechnique* gen_rsm_tech_;
 		RenderTechnique* reflection_tech_;
@@ -316,7 +291,6 @@ namespace KlayGE
 
 		RenderEffectParameter* mvp_param_;
 		RenderEffectParameter* model_view_param_;
-		RenderEffectParameter* far_plane_param_;
 		RenderEffectParameter* forward_vec_param_;
 		RenderEffectParameter* frame_size_param_;
 		RenderEffectParameter* height_offset_scale_param_;

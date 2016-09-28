@@ -63,11 +63,11 @@ namespace
 		{
 			switch (pass)
 			{
-			case PT_TransparencyBackDepth:
+			case PT_GenShadowMap:
 				technique_ = back_face_depth_tech_;
 				break;
 
-			case PT_TransparencyBackGBufferRT0:
+			case PT_TransparencyBackGBufferMRT:
 				technique_ = back_face_tech_;
 				break;
 
@@ -342,7 +342,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_buffer_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferMRT);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -352,7 +352,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			re.BindFrameBuffer(backface_depth_buffer_);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepth(0.0f);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackDepth);
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_GenShadowMap);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}
@@ -382,7 +382,7 @@ uint32_t Refract::DoUpdate(uint32_t pass)
 			// Pass 1: Render backface's normal and depth
 			re.BindFrameBuffer(backface_buffer_);
 
-			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferRT0);
+			checked_pointer_cast<RefractorObject>(refractor_)->Pass(PT_TransparencyBackGBufferMRT);
 			sky_box_->Visible(false);
 			return App3DFramework::URV_NeedFlush;
 		}

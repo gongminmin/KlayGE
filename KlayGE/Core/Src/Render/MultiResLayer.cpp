@@ -79,7 +79,6 @@ namespace KlayGE
 		subsplat_depth_deriv_tex_param_ = subsplat_stencil_effect_->ParameterByName("depth_deriv_tex");
 		subsplat_normal_cone_tex_param_ = subsplat_stencil_effect_->ParameterByName("normal_cone_tex");
 		subsplat_depth_normal_threshold_param_ = subsplat_stencil_effect_->ParameterByName("depth_normal_threshold");
-		subsplat_far_plane_param_ = subsplat_stencil_effect_->ParameterByName("far_plane");
 
 		upsampling_pp_ = SyncLoadPostProcess("MultiRes.ppml", "Upsampling");
 	}
@@ -167,7 +166,7 @@ namespace KlayGE
 	{
 		if (multi_res_tex_->NumMipMaps() > 1)
 		{
-			this->CreateDepthDerivativeMipMap(vp_camera);
+			this->CreateDepthDerivativeMipMap();
 			this->CreateNormalConeMipMap();
 			this->SetSubsplatStencil(vp_camera);
 		}
@@ -179,7 +178,7 @@ namespace KlayGE
 		}
 	}
 
-	void MultiResLayer::CreateDepthDerivativeMipMap(Camera const & vp_camera)
+	void MultiResLayer::CreateDepthDerivativeMipMap()
 	{
 		gbuffer_to_depth_derivate_pp_->InputPin(0, g_buffer_rt0_tex_);
 		gbuffer_to_depth_derivate_pp_->InputPin(1, g_buffer_depth_tex_);
@@ -188,7 +187,6 @@ namespace KlayGE
 		float delta_y = 1.0f / g_buffer_rt0_tex_->Height(0);
 		float4 delta_offset(delta_x, delta_y, delta_x / 2, delta_y / 2);
 		gbuffer_to_depth_derivate_pp_->SetParam(0, delta_offset);
-		gbuffer_to_depth_derivate_pp_->SetParam(1, float2(vp_camera.FarPlane(), 1.0f / vp_camera.FarPlane()));
 		gbuffer_to_depth_derivate_pp_->Apply();
 
 		depth_derivate_mipmap_pp_->InputPin(0, depth_deriative_tex_);
@@ -203,8 +201,7 @@ namespace KlayGE
 			delta_y = 1.0f / height;
 			delta_offset = float4(delta_x, delta_y, delta_x / 2, delta_y / 2);
 			depth_derivate_mipmap_pp_->SetParam(0, delta_offset);
-			depth_derivate_mipmap_pp_->SetParam(1, float2(vp_camera.FarPlane(), 1.0f / vp_camera.FarPlane()));
-			
+
 			depth_derivate_mipmap_pp_->OutputPin(0, depth_deriative_small_tex_, i - 1);
 			depth_derivate_mipmap_pp_->Apply();
 
@@ -250,7 +247,6 @@ namespace KlayGE
 		*subsplat_depth_deriv_tex_param_ = depth_deriative_tex_;
 		*subsplat_normal_cone_tex_param_ = normal_cone_tex_;
 		*subsplat_depth_normal_threshold_param_ = float2(0.001f * vp_camera.FarPlane(), 0.77f);
-		*subsplat_far_plane_param_ = float2(vp_camera.FarPlane(), 1.0f / vp_camera.FarPlane());
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		for (size_t i = 0; i < multi_res_fbs_.size(); ++ i)

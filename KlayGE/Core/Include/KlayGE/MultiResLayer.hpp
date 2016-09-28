@@ -54,7 +54,7 @@ namespace KlayGE
 		}
 
 	private:
-		void CreateDepthDerivativeMipMap(Camera const & vp_camera);
+		void CreateDepthDerivativeMipMap();
 		void CreateNormalConeMipMap();
 		void SetSubsplatStencil(Camera const & vp_camera);
 
@@ -88,7 +88,6 @@ namespace KlayGE
 		RenderEffectParameter* subsplat_depth_deriv_tex_param_;
 		RenderEffectParameter* subsplat_normal_cone_tex_param_;
 		RenderEffectParameter* subsplat_depth_normal_threshold_param_;
-		RenderEffectParameter* subsplat_far_plane_param_;
 	};
 }
 

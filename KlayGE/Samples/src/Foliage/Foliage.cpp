@@ -41,8 +41,6 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("FoggySkyBox.fxml");
 
-			gbuffer_rt0_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT0");
-			gbuffer_rt1_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxRT1");
 			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
 			this->Technique(effect, gbuffer_mrt_tech_);
@@ -99,16 +97,6 @@ FoliageApp::FoliageApp()
 				light_shaft_on_(true)
 {
 	ResLoader::Instance().AddPath("../../Samples/media/Foliage");
-}
-
-bool FoliageApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < ShaderModel(4, 0))
-	{
-		return false;
-	}
-	return true;
 }
 
 void FoliageApp::OnCreate()
