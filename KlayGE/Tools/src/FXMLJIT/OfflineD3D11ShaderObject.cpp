@@ -108,21 +108,7 @@ namespace KlayGE
 				break;
 
 			case 9:
-				switch (caps.minor_version)
-				{
-				case 3:
-					feature_level_ = D3D_FEATURE_LEVEL_9_3;
-					break;
-
-				case 2:
-					feature_level_ = D3D_FEATURE_LEVEL_9_2;
-					break;
-
-				default:
-				case 1:
-					feature_level_ = D3D_FEATURE_LEVEL_9_1;
-					break;
-				}
+				feature_level_ = D3D_FEATURE_LEVEL_9_3;
 				break;
 			}
 
@@ -159,17 +145,9 @@ namespace KlayGE
 				break;
 
 			case D3D_FEATURE_LEVEL_9_3:
+			default:
 				vs_profile_ = "vs_4_0_level_9_3";
 				ps_profile_ = "ps_4_0_level_9_3";
-				gs_profile_ = "";
-				cs_profile_ = "";
-				hs_profile_ = "";
-				ds_profile_ = "";
-				break;
-
-			default:
-				vs_profile_ = "vs_4_0_level_9_1";
-				ps_profile_ = "ps_4_0_level_9_1";
 				gs_profile_ = "";
 				cs_profile_ = "";
 				hs_profile_ = "";

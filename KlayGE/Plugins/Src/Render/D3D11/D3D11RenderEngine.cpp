@@ -344,19 +344,10 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
+		default:
 			native_shader_platform_name_ = "d3d_9_3";
 			vs_profile_ = "vs_4_0_level_9_3";
 			ps_profile_ = "ps_4_0_level_9_3";
-			gs_profile_ = "";
-			cs_profile_ = "";
-			hs_profile_ = "";
-			ds_profile_ = "";
-			break;
-
-		default:
-			native_shader_platform_name_ = "d3d_9_1";
-			vs_profile_ = "vs_4_0_level_9_1";
-			ps_profile_ = "ps_4_0_level_9_1";
 			gs_profile_ = "";
 			cs_profile_ = "";
 			hs_profile_ = "";
@@ -441,10 +432,7 @@ namespace KlayGE
 			settings.color_grading = false;
 		}
 #else
-		if (d3d_feature_level_ <= D3D_FEATURE_LEVEL_9_2)
-		{
-			settings.ppaa = false;
-		}
+		KFL_UNUSED(settings);
 #endif
 	}
 
@@ -1108,6 +1096,7 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
+		default:
 			caps_.max_shader_model = ShaderModel(2, 0);
 			caps_.max_texture_width = caps_.max_texture_height = D3D_FL9_3_REQ_TEXTURE2D_U_OR_V_DIMENSION;
 			caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
@@ -1117,23 +1106,6 @@ namespace KlayGE
 			caps_.max_pixel_texture_units = 16;
 			caps_.max_geometry_texture_units = 0;
 			caps_.max_simultaneous_rts = D3D_FL9_3_SIMULTANEOUS_RENDER_TARGET_COUNT;
-			caps_.max_simultaneous_uavs = 0;
-			caps_.cs_support = false;
-			caps_.tess_method = TM_No;
-			break;
-
-		case D3D_FEATURE_LEVEL_9_2:
-		case D3D_FEATURE_LEVEL_9_1:
-		default:
-			caps_.max_shader_model = ShaderModel(2, 0);
-			caps_.max_texture_width = caps_.max_texture_height = D3D_FL9_1_REQ_TEXTURE2D_U_OR_V_DIMENSION;
-			caps_.max_texture_depth = D3D_FL9_1_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
-			caps_.max_texture_cube_size = D3D_FL9_1_REQ_TEXTURECUBE_DIMENSION;
-			caps_.max_texture_array_length = 1;
-			caps_.max_vertex_texture_units = 0;
-			caps_.max_pixel_texture_units = 16;
-			caps_.max_geometry_texture_units = 0;
-			caps_.max_simultaneous_rts = D3D_FL9_1_SIMULTANEOUS_RENDER_TARGET_COUNT;
 			caps_.max_simultaneous_uavs = 0;
 			caps_.cs_support = false;
 			caps_.tess_method = TM_No;
@@ -1158,8 +1130,6 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
-		case D3D_FEATURE_LEVEL_9_2:
-		case D3D_FEATURE_LEVEL_9_1:
 		default:
 			caps_.max_vertex_streams = 16;
 			break;
@@ -1179,13 +1149,8 @@ namespace KlayGE
 			break;
 
 		case D3D_FEATURE_LEVEL_9_3:
-		case D3D_FEATURE_LEVEL_9_2:
-			caps_.max_texture_anisotropy = 16;
-			break;
-
-		case D3D_FEATURE_LEVEL_9_1:
 		default:
-			caps_.max_texture_anisotropy = 2;
+			caps_.max_texture_anisotropy = 16;
 			break;
 		}
 		if (d3d_11_runtime_sub_ver_ >= 1)

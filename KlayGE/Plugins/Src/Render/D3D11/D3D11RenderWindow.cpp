@@ -150,8 +150,6 @@ namespace KlayGE
 			available_feature_levels.emplace_back("10_1", D3D_FEATURE_LEVEL_10_1);
 			available_feature_levels.emplace_back("10_0", D3D_FEATURE_LEVEL_10_0);
 			available_feature_levels.emplace_back("9_3", D3D_FEATURE_LEVEL_9_3);
-			available_feature_levels.emplace_back("9_2", D3D_FEATURE_LEVEL_9_2);
-			available_feature_levels.emplace_back("9_1", D3D_FEATURE_LEVEL_9_1);
 
 			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{
@@ -194,7 +192,7 @@ namespace KlayGE
 					dx_adapter = adapter_->DXGIAdapter().get();
 					dev_type = D3D_DRIVER_TYPE_UNKNOWN;
 				}
-				D3D_FEATURE_LEVEL out_feature_level = D3D_FEATURE_LEVEL_9_1;
+				D3D_FEATURE_LEVEL out_feature_level = D3D_FEATURE_LEVEL_9_3;
 				HRESULT hr = E_FAIL;
 				for (auto const & flags : available_create_device_flags)
 				{
@@ -268,14 +266,6 @@ namespace KlayGE
 
 						case D3D_FEATURE_LEVEL_9_3:
 							fl_str = L"9.3";
-							break;
-
-						case D3D_FEATURE_LEVEL_9_2:
-							fl_str = L"9.2";
-							break;
-
-						case D3D_FEATURE_LEVEL_9_1:
-							fl_str = L"9.1";
 							break;
 
 						default:
