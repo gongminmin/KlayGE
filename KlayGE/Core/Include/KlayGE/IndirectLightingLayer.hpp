@@ -93,7 +93,6 @@ namespace KlayGE
 
 		RenderEffectPtr vpls_lighting_effect_;
 		RenderTechnique* vpls_lighting_instance_id_tech_;
-		RenderTechnique* vpls_lighting_no_instance_id_tech_;
 
 		RenderEffectParameter* vpl_view_param_;
 		RenderEffectParameter* vpl_proj_param_;

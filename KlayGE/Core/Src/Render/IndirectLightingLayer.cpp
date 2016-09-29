@@ -62,7 +62,6 @@ namespace KlayGE
 
 		vpls_lighting_effect_ = SyncLoadRenderEffect("VPLsLighting.fxml");
 		vpls_lighting_instance_id_tech_ = vpls_lighting_effect_->TechniqueByName("VPLsLightingInstanceID");
-		vpls_lighting_no_instance_id_tech_ = vpls_lighting_effect_->TechniqueByName("VPLsLightingNoInstanceID");
 
 		vpl_view_param_ = vpls_lighting_effect_->ParameterByName("view");
 		vpl_proj_param_ = vpls_lighting_effect_->ParameterByName("proj");

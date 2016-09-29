@@ -114,54 +114,6 @@ void VPLsLightingInstanceIDVS(float4 pos : POSITION,
 	CalcVPLsLightingShape(pos, (instance_id + 0.5f) * vpl_params.x,
 			oTc, oVPLColor, oViewDir, oPos);
 }
-
-void VPLsLightingNoInstanceIDVS(float4 pos : POSITION,
-#ifdef NOPERSPECTIVE_SUPPORT
-				out noperspective float2 oTc : TEXCOORD0,
-#else
-				out float3 oTc : TEXCOORD0,
-#endif
-				out float3 oVPLColor : TEXCOORD1,
-				out float4 oViewDir : TEXCOORD2,
-				out float4 oPos : SV_Position)
-{
-	CalcVPLsLightingShape(pos, x_coord,
-			oTc, oVPLColor, oViewDir, oPos);
-}
-
-float4 VPLsLightingPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
-	float3 vpl_color : TEXCOORD1, float4 view_dir : TEXCOORD2
-	) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-
-	float pixel_depth = depth_tex.Sample(point_sampler, tc).x;
-	float3 color_i = 0;
-	clip(view_dir.z - pixel_depth);
-
-	float3 norm_i = GetNormal(gbuffer_tex.Sample(point_sampler, tc));
-	float3 pos_i = view_dir.xyz * (pixel_depth / view_dir.z);
-
-	float3 pos_j = vpls_tex.SampleLevel(point_sampler, float2(view_dir.w, 2.5f / 4), 0).xyz;
-
-	float3 vij = normalize(pos_j - pos_i);
-	float cos_iv = dot(norm_i, vij);
-	if (cos_iv > 0)
-	{
-		float atten = AttenuationTerm(pos_j, pos_i, float3(1, 0, 1));
-		color_i = cos_iv * atten * vpl_color;
-	}
-
-	color_i.r += min_threshold;
-	return float4(color_i, 1);
-}
 		]]>
 	</shader>
 
@@ -194,12 +146,6 @@ float4 VPLsLightingPS(
 
 			<state name="vertex_shader" value="VPLsLightingInstanceIDVS()"/>
 			<state name="pixel_shader" value="VPLsLightingPS()"/>
-		</pass>
-	</technique>
-
-	<technique name="VPLsLightingNoInstanceID" inherit="VPLsLightingInstanceID">
-		<pass name="p0">
-			<state name="vertex_shader" value="VPLsLightingNoInstanceIDVS()"/>
 		</pass>
 	</technique>
 </effect>
