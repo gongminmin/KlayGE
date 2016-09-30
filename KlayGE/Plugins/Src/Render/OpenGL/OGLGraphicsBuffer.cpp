@@ -58,18 +58,39 @@ namespace KlayGE
 
 		glGenBuffers(1, &vb_);
 
+		GLenum usage;
+		if (BU_Static == usage_)
+		{
+			if (access_hint_ & EAH_CPU_Read)
+			{
+				usage = GL_STATIC_READ;
+			}
+			else
+			{
+				usage = GL_STATIC_DRAW;
+			}
+		}
+		else
+		{
+			if (access_hint_ & EAH_CPU_Read)
+			{
+				usage = GL_DYNAMIC_READ;
+			}
+			else
+			{
+				usage = GL_DYNAMIC_DRAW;
+			}
+		}
+
 		if (glloader_GL_EXT_direct_state_access())
 		{
-			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), data,
-				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), data, usage);
 		}
 		else
 		{
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindBuffer(target_, vb_);
-			glBufferData(target_,
-				static_cast<GLsizeiptr>(size_in_byte_), data,
-				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+			glBufferData(target_, static_cast<GLsizeiptr>(size_in_byte_), data, usage);
 		}
 
 		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))

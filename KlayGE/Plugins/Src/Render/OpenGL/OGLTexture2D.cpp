@@ -378,13 +378,12 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					glGetCompressedTexImage(target_type_, level, nullptr);
-					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 				}
 				else
 				{
 					glGetTexImage(target_type_, level, gl_format, gl_type, nullptr);
-					p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 				}
+				p = static_cast<uint8_t*>(glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 			}
 			break;
 
@@ -493,7 +492,7 @@ namespace KlayGE
 
 			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
-			glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_DRAW);
+			glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_COPY);
 			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)

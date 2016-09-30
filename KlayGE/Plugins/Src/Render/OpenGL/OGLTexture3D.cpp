@@ -364,7 +364,7 @@ namespace KlayGE
 
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_DRAW);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_COPY);
 		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
