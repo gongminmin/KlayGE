@@ -300,7 +300,7 @@ namespace KlayGE
 			{
 				primType = GL_PATCHES;
 				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;
-				glPatchParameteriOES(GL_PATCH_VERTICES, n);
+				glPatchParameteri(GL_PATCH_VERTICES, n);
 				primCount = vertexCount / 3;
 			}
 			else if (glloader_GLES_OES_tessellation_shader())

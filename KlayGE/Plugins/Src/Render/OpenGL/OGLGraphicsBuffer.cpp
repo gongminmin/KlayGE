@@ -56,7 +56,14 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(0 == vb_);
 
-		glGenBuffers(1, &vb_);
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glCreateBuffers(1, &vb_);
+		}
+		else
+		{
+			glGenBuffers(1, &vb_);
+		}
 
 		GLenum usage;
 		if (BU_Static == usage_)
@@ -82,7 +89,11 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GL_EXT_direct_state_access())
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glNamedBufferData(vb_, static_cast<GLsizeiptr>(size_in_byte_), data, usage);
+		}
+		else if (glloader_GL_EXT_direct_state_access())
 		{
 			glNamedBufferDataEXT(vb_, static_cast<GLsizeiptr>(size_in_byte_), data, usage);
 		}
@@ -100,11 +111,19 @@ namespace KlayGE
 			GLenum gl_type;
 			OGLMapping::MappingFormat(internal_fmt, gl_fmt, gl_type, fmt_as_shader_res_);
 
-			glGenTextures(1, &tex_);
-			// TODO: It could affect the texture binding cache in OGLRenderEngine
-			glBindTexture(GL_TEXTURE_BUFFER, tex_);
-			glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
-			glBindTexture(GL_TEXTURE_BUFFER, 0);
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glCreateTextures(GL_TEXTURE_BUFFER, 1, &tex_);
+				glTextureBuffer(tex_, internal_fmt, vb_);
+			}
+			else
+			{
+				glGenTextures(1, &tex_);
+				// TODO: It could affect the texture binding cache in OGLRenderEngine
+				glBindTexture(GL_TEXTURE_BUFFER, tex_);
+				glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
+				glBindTexture(GL_TEXTURE_BUFFER, 0);
+			}
 		}
 	}
 
@@ -141,7 +160,11 @@ namespace KlayGE
 		if (!(re.HackForIntel()) && (ba == BA_Write_Only) && (BU_Dynamic == usage_))
 		{
 			GLuint access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
-			if (glloader_GL_EXT_direct_state_access())
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				p = glMapNamedBufferRange(vb_, 0, static_cast<GLsizeiptr>(size_in_byte_), access);
+			}
+			else if (glloader_GL_EXT_direct_state_access())
 			{
 				p = glMapNamedBufferRangeEXT(vb_, 0, static_cast<GLsizeiptr>(size_in_byte_), access);
 			}
@@ -174,7 +197,11 @@ namespace KlayGE
 				break;
 			}
 
-			if (glloader_GL_EXT_direct_state_access())
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				p = glMapNamedBuffer(vb_, flag);
+			}
+			else if (glloader_GL_EXT_direct_state_access())
 			{
 				p = glMapNamedBufferEXT(vb_, flag);
 			}
@@ -189,7 +216,11 @@ namespace KlayGE
 
 	void OGLGraphicsBuffer::Unmap()
 	{
-		if (glloader_GL_EXT_direct_state_access())
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glUnmapNamedBuffer(vb_);
+		}
+		else if (glloader_GL_EXT_direct_state_access())
 		{
 			glUnmapNamedBufferEXT(vb_);
 		}
@@ -210,15 +241,29 @@ namespace KlayGE
 	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
-		re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
-		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
-						0, 0, size_in_byte_);
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glCopyNamedBufferSubData(vb_, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_, 0, 0, size_in_byte_);
+		}
+		else if (glloader_GL_EXT_direct_state_access())
+		{
+			glNamedCopyBufferSubDataEXT(vb_, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_, 0, 0, size_in_byte_);
+		}
+		else
+		{
+			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
+			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size_in_byte_);
+		}
 	}
 
 	void OGLGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
-		if (glloader_GL_EXT_direct_state_access())
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glNamedBufferSubDataEXT(vb_, offset, size, data);
+		}
+		else if (glloader_GL_EXT_direct_state_access())
 		{
 			glNamedBufferSubDataEXT(vb_, offset, size, data);
 		}

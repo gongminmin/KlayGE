@@ -40,7 +40,14 @@ namespace KlayGE
 
 		if (off_screen)
 		{
-			glGenFramebuffers(1, &fbo_);
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glCreateFramebuffers(1, &fbo_);
+			}
+			else
+			{
+				glGenFramebuffers(1, &fbo_);
+			}
 		}
 		else
 		{
@@ -75,7 +82,24 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
-		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			if (fbo_ != 0)
+			{
+				BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckNamedFramebufferStatus(fbo_, GL_FRAMEBUFFER));
+			}
+		}
+		else if (glloader_GL_EXT_direct_state_access())
+		{
+			if (fbo_ != 0)
+			{
+				BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckNamedFramebufferStatusEXT(fbo_, GL_FRAMEBUFFER));
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
+		}
 
 		if (fbo_ != 0)
 		{
@@ -257,14 +281,21 @@ namespace KlayGE
 				}
 			}
 
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+			{
+				glInvalidateNamedFramebufferData(fbo_, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+			}
+			else
+			{
+				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-			GLuint old_fbo = re.BindFramebuffer();
-			re.BindFramebuffer(fbo_);
+				GLuint old_fbo = re.BindFramebuffer();
+				re.BindFramebuffer(fbo_);
 
-			glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+				glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
 
-			re.BindFramebuffer(old_fbo);
+				re.BindFramebuffer(old_fbo);
+			}
 		}
 		else
 		{
