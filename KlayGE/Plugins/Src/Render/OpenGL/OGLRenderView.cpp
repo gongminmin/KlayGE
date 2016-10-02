@@ -77,31 +77,11 @@ namespace KlayGE
 
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (blend_desc.color_write_mask[i] != CMASK_All)
 				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaski(i, true, true, true, true);
-					}
-				}
-			}
-			else if (glloader_GL_EXT_draw_buffers2())
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaskIndexedEXT(i, true, true, true, true);
-					}
-				}
-			}
-			else
-			{
-				if (blend_desc.color_write_mask[0] != CMASK_All)
-				{
-					glColorMask(true, true, true, true);
+					glColorMaski(i, true, true, true, true);
 				}
 			}
 		}
@@ -124,89 +104,41 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GL_VERSION_3_0())
+		if (flags & GL_COLOR_BUFFER_BIT)
 		{
-			if (flags & GL_COLOR_BUFFER_BIT)
-			{
-				glClearBufferfv(GL_COLOR, index_, &clr[0]);
-			}
+			glClearBufferfv(GL_COLOR, index_, &clr[0]);
+		}
 
-			if ((flags & GL_DEPTH_BUFFER_BIT) && (flags & GL_STENCIL_BUFFER_BIT))
-			{
-				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
-			}
-			else
-			{
-				if (flags & GL_DEPTH_BUFFER_BIT)
-				{
-					glClearBufferfv(GL_DEPTH, 0, &depth);
-				}
-				else
-				{
-					if (flags & GL_STENCIL_BUFFER_BIT)
-					{
-						GLint s = stencil;
-						glClearBufferiv(GL_STENCIL, 0, &s);
-					}
-				}
-			}
+		if ((flags & GL_DEPTH_BUFFER_BIT) && (flags & GL_STENCIL_BUFFER_BIT))
+		{
+			glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 		}
 		else
 		{
-			if (flags & GL_COLOR_BUFFER_BIT)
-			{
-				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-			}
 			if (flags & GL_DEPTH_BUFFER_BIT)
 			{
-				re.ClearDepth(depth);
+				glClearBufferfv(GL_DEPTH, 0, &depth);
 			}
-			if (flags & GL_STENCIL_BUFFER_BIT)
+			else
 			{
-				re.ClearStencil(stencil);
-			}
-			if (flags != 0)
-			{
-				glClear(flags);
+				if (flags & GL_STENCIL_BUFFER_BIT)
+				{
+					GLint s = stencil;
+					glClearBufferiv(GL_STENCIL, 0, &s);
+				}
 			}
 		}
 
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (blend_desc.color_write_mask[i] != CMASK_All)
 				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
-				}
-			}
-			else if (glloader_GL_EXT_draw_buffers2())
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaskIndexedEXT(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
-				}
-			}
-			else
-			{
-				if (blend_desc.color_write_mask[0] != CMASK_All)
-				{
-					glColorMask((blend_desc.color_write_mask[0] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Alpha) != 0);
+					glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
 				}
 			}
 		}
@@ -397,17 +329,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_1D == texture_1d.Type());
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture_1d_.ArraySize())));
-
-		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
-		{
-			THR(errc::function_not_supported);
-		}
-
-		uint32_t const channels = NumComponents(texture_1d.Format());
-		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
-		{
-			THR(errc::function_not_supported);
-		}
 
 		tex_ = texture_1d_.GLTexture();
 
@@ -603,17 +524,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(Texture::TT_2D == texture_2d.Type());
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture_2d_.ArraySize())));
-
-		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
-		{
-			THR(errc::function_not_supported);
-		}
-
-		uint32_t const channels = NumComponents(texture_2d.Format());
-		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
-		{
-			THR(errc::function_not_supported);
-		}
 
 		tex_ = texture_2d_.GLTexture();
 
@@ -812,12 +722,6 @@ namespace KlayGE
 		BOOST_ASSERT(Texture::TT_3D == texture_3d.Type());
 		BOOST_ASSERT(texture_3d_.Depth(level) > slice);
 		BOOST_ASSERT(0 == array_index);
-
-		uint32_t const channels = NumComponents(texture_3d.Format());
-		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
-		{
-			THR(errc::function_not_supported);
-		}
 
 		tex_ = texture_3d_.GLTexture();
 
@@ -1030,12 +934,6 @@ namespace KlayGE
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(0 == array_index);
 
-		uint32_t const channels = NumComponents(texture_cube.Format());
-		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
-		{
-			THR(errc::function_not_supported);
-		}
-
 		tex_ = texture_cube_.GLTexture();
 
 		width_ = texture_cube_.Width(level);
@@ -1052,12 +950,6 @@ namespace KlayGE
 
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(0 == array_index);
-		
-		uint32_t const channels = NumComponents(texture_cube.Format());
-		if (((1 == channels) || (2 == channels)) && (!(glloader_GL_VERSION_3_0() || glloader_GL_ARB_texture_rg())))
-		{
-			THR(errc::function_not_supported);
-		}
 
 		tex_ = texture_cube_.GLTexture();
 
@@ -1354,11 +1246,6 @@ namespace KlayGE
 		BOOST_ASSERT((Texture::TT_2D == texture.Type()) || (Texture::TT_Cube == texture.Type()));
 		BOOST_ASSERT((1 == array_size) || ((0 == array_index) && (static_cast<uint32_t>(array_size) == texture.ArraySize())));
 		BOOST_ASSERT(IsDepthFormat(texture.Format()));
-
-		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
-		{
-			THR(errc::function_not_supported);
-		}
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
@@ -1719,13 +1606,11 @@ namespace KlayGE
 		: texture_cube_(*checked_cast<OGLTextureCube*>(&texture_cube)),
 			face_(face), level_(level)
 	{
+		KFL_UNUSED(array_index);
+
 		BOOST_ASSERT(Texture::TT_Cube == texture_cube.Type());
 		BOOST_ASSERT(IsDepthFormat(texture_cube.Format()));
-
-		if ((array_index > 0) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
-		{
-			THR(errc::function_not_supported);
-		}
+		BOOST_ASSERT(0 == array_index);
 
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Height(level);

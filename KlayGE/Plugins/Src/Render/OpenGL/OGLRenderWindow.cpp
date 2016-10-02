@@ -314,27 +314,14 @@ namespace KlayGE
 		uint32_t sample_count = settings.sample_count;
 #endif
 
-		if (!glloader_GL_VERSION_3_0()
-			&& (!glloader_GL_VERSION_2_1()
-				|| !(glloader_GL_ARB_framebuffer_object()
-					|| (glloader_GL_EXT_framebuffer_object()
-						&& glloader_GL_EXT_framebuffer_blit()))))
+		if (!glloader_GL_VERSION_3_1())
 		{
 			THR(errc::function_not_supported);
 		}
 
-		if (glloader_GL_VERSION_3_0())
-		{
-			glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
-			glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
-			glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
-		}
-		else if (glloader_GL_ARB_color_buffer_float())
-		{
-			glClampColorARB(GL_CLAMP_VERTEX_COLOR_ARB, GL_FALSE);
-			glClampColorARB(GL_CLAMP_FRAGMENT_COLOR_ARB, GL_FALSE);
-			glClampColorARB(GL_CLAMP_READ_COLOR_ARB, GL_FALSE);
-		}
+		glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);
+		glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
+		glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
 
 		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_seamless_cube_map())
 		{

@@ -339,41 +339,19 @@ namespace KlayGE
 				glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 			}
 		}
-		if (desc_.independent_blend_enable && (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2()))
+		if (desc_.independent_blend_enable)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
 				{
-					if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
+					if (desc_.blend_enable[i])
 					{
-						if (desc_.blend_enable[i])
-						{
-							glEnablei(GL_BLEND, i);
-						}
-						else
-						{
-							glDisablei(GL_BLEND, i);
-						}
+						glEnablei(GL_BLEND, i);
 					}
-				}
-			}
-			else
-			{
-				BOOST_ASSERT(glloader_GL_EXT_draw_buffers2());
-
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (cur_desc.blend_enable[i] != desc_.blend_enable[i])
+					else
 					{
-						if (desc_.blend_enable[i])
-						{
-							glEnableIndexedEXT(GL_BLEND, i);
-						}
-						else
-						{
-							glDisableIndexedEXT(GL_BLEND, i);
-						}
+						glDisablei(GL_BLEND, i);
 					}
 				}
 			}
@@ -456,34 +434,16 @@ namespace KlayGE
 					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
 			}
 		}
-		if (desc_.independent_blend_enable && (glloader_GL_VERSION_3_0() || glloader_GL_EXT_draw_buffers2()))
+		if (desc_.independent_blend_enable)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
 				{
-					if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
-					{
-						glColorMaski(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
-							(desc_.color_write_mask[i] & CMASK_Green) != 0,
-							(desc_.color_write_mask[i] & CMASK_Blue) != 0,
-							(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
-				}
-			}
-			else
-			{
-				BOOST_ASSERT(glloader_GL_EXT_draw_buffers2());
-
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (cur_desc.color_write_mask[i] != desc_.color_write_mask[i])
-					{
-						glColorMaskIndexedEXT(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
-							(desc_.color_write_mask[i] & CMASK_Green) != 0,
-							(desc_.color_write_mask[i] & CMASK_Blue) != 0,
-							(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
+					glColorMaski(i, (desc_.color_write_mask[i] & CMASK_Red) != 0,
+						(desc_.color_write_mask[i] & CMASK_Green) != 0,
+						(desc_.color_write_mask[i] & CMASK_Blue) != 0,
+						(desc_.color_write_mask[i] & CMASK_Alpha) != 0);
 				}
 			}
 		}

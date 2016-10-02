@@ -99,17 +99,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (!re.HackForAMD())
 		{
-			if (glloader_GL_VERSION_3_0())
-			{
-				glBeginConditionalRender(query_, GL_QUERY_WAIT);
-			}
-			else
-			{
-				if (glloader_GL_NV_conditional_render())
-				{
-					glBeginConditionalRenderNV(query_, GL_QUERY_WAIT_NV);
-				}
-			}
+			glBeginConditionalRender(query_, GL_QUERY_WAIT);
 		}
 	}
 
@@ -118,17 +108,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (!re.HackForAMD())
 		{
-			if (glloader_GL_VERSION_3_0())
-			{
-				glEndConditionalRender();
-			}
-			else
-			{
-				if (glloader_GL_NV_conditional_render())
-				{
-					glEndConditionalRenderNV();
-				}
-			}
+			glEndConditionalRender();
 		}
 	}
 

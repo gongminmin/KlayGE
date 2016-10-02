@@ -368,6 +368,7 @@ namespace KlayGE
 								break;
 
 							case 3:
+							default:
 								switch (caps.minor_version)
 								{
 								case 3:
@@ -379,27 +380,8 @@ namespace KlayGE
 									break;
 
 								case 1:
+								default:
 									gsv = GSV_140;
-									break;
-
-								default:
-								case 0:
-									gsv = GSV_130;
-									break;
-								}
-								break;
-
-							case 2:
-							default:
-								switch (caps.minor_version)
-								{
-								case 1:
-									gsv = GSV_120;
-									break;
-
-								default:
-								case 0:
-									gsv = GSV_110;
 									break;
 								}
 								break;

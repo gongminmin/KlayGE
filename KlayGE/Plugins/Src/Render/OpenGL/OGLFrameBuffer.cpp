@@ -109,31 +109,11 @@ namespace KlayGE
 
 		if (flags & CBM_Color)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (blend_desc.color_write_mask[i] != CMASK_All)
 				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaski(i, true, true, true, true);
-					}
-				}
-			}
-			else if (glloader_GL_EXT_draw_buffers2())
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaskIndexedEXT(i, true, true, true, true);
-					}
-				}
-			}
-			else
-			{
-				if (blend_desc.color_write_mask[0] != CMASK_All)
-				{
-					glColorMask(true, true, true, true);
+					glColorMaski(i, true, true, true, true);
 				}
 			}
 		}
@@ -156,104 +136,54 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GL_VERSION_3_0())
+		if (flags & CBM_Color)
 		{
-			if (flags & CBM_Color)
+			if (fbo_ != 0)
 			{
-				if (fbo_ != 0)
+				for (size_t i = 0; i < clr_views_.size(); ++ i)
 				{
-					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					if (clr_views_[i])
 					{
-						if (clr_views_[i])
-						{
-							glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
-						}
+						glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
 					}
 				}
-				else
-				{
-					glClearBufferfv(GL_COLOR, 0, &clr[0]);
-				}
-			}
-
-			if ((flags & CBM_Depth) && (flags & CBM_Stencil))
-			{
-				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 			}
 			else
 			{
-				if (flags & CBM_Depth)
-				{
-					glClearBufferfv(GL_DEPTH, 0, &depth);
-				}
-				else
-				{
-					if (flags & CBM_Stencil)
-					{
-						GLint s = stencil;
-						glClearBufferiv(GL_STENCIL, 0, &s);
-					}
-				}
+				glClearBufferfv(GL_COLOR, 0, &clr[0]);
 			}
+		}
+
+		if ((flags & CBM_Depth) && (flags & CBM_Stencil))
+		{
+			glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 		}
 		else
 		{
-			GLbitfield ogl_flags = 0;
-			if (flags & CBM_Color)
-			{
-				ogl_flags |= GL_COLOR_BUFFER_BIT;
-				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-			}
 			if (flags & CBM_Depth)
 			{
-				ogl_flags |= GL_DEPTH_BUFFER_BIT;
-				re.ClearDepth(depth);
+				glClearBufferfv(GL_DEPTH, 0, &depth);
 			}
-			if (flags & CBM_Stencil)
+			else
 			{
-				ogl_flags |= GL_STENCIL_BUFFER_BIT;
-				re.ClearStencil(stencil);
+				if (flags & CBM_Stencil)
+				{
+					GLint s = stencil;
+					glClearBufferiv(GL_STENCIL, 0, &s);
+				}
 			}
-
-			glClear(ogl_flags);
 		}
 
 		if (flags & CBM_Color)
 		{
-			if (glloader_GL_VERSION_3_0())
+			for (int i = 0; i < 8; ++ i)
 			{
-				for (int i = 0; i < 8; ++ i)
+				if (blend_desc.color_write_mask[i] != CMASK_All)
 				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
-				}
-			}
-			else if (glloader_GL_EXT_draw_buffers2())
-			{
-				for (int i = 0; i < 8; ++ i)
-				{
-					if (blend_desc.color_write_mask[i] != CMASK_All)
-					{
-						glColorMaskIndexedEXT(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
-					}
-				}
-			}
-			else
-			{
-				if (blend_desc.color_write_mask[0] != CMASK_All)
-				{
-					glColorMask((blend_desc.color_write_mask[0] & CMASK_Red) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Green) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Blue) != 0,
-							(blend_desc.color_write_mask[0] & CMASK_Alpha) != 0);
+					glColorMaski(i, (blend_desc.color_write_mask[i] & CMASK_Red) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Green) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Blue) != 0,
+						(blend_desc.color_write_mask[i] & CMASK_Alpha) != 0);
 				}
 			}
 		}

@@ -31,7 +31,6 @@ namespace KlayGE
 		~OGLRenderLayout();
 
 		void Active(ShaderObjectPtr const & so) const;
-		void Deactive(ShaderObjectPtr const & so) const;
 
 	private:
 		void BindVertexStreams(ShaderObjectPtr const & so, GLuint vao) const;
@@ -39,8 +38,6 @@ namespace KlayGE
 
 	private:
 		mutable std::map<ShaderObjectPtr, GLuint> vaos_;
-
-		bool use_vao_, use_nv_pri_restart_;
 	};
 }
 

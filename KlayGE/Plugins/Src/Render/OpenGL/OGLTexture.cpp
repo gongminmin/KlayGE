@@ -43,11 +43,6 @@ namespace KlayGE
 	{
 		array_size_ = array_size;
 
-		if ((array_size > 1) && (!(glloader_GL_VERSION_3_0() || glloader_GL_EXT_texture_array())))
-		{
-			THR(errc::function_not_supported);
-		}
-
 		switch (type_)
 		{
 		case TT_1D:

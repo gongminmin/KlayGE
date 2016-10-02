@@ -102,18 +102,9 @@ namespace KlayGE
 
 			glGenTextures(1, &tex_);
 			// TODO: It could affect the texture binding cache in OGLRenderEngine
-			if (glloader_GL_VERSION_3_1())
-			{
-				glBindTexture(GL_TEXTURE_BUFFER, tex_);
-				glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
-				glBindTexture(GL_TEXTURE_BUFFER, 0);
-			}
-			else if (glloader_GL_EXT_texture_buffer_object())
-			{
-				glBindTexture(GL_TEXTURE_BUFFER_EXT, tex_);
-				glTexBufferEXT(GL_TEXTURE_BUFFER_EXT, internal_fmt, vb_);
-				glBindTexture(GL_TEXTURE_BUFFER_EXT, 0);
-			}
+			glBindTexture(GL_TEXTURE_BUFFER, tex_);
+			glTexBuffer(GL_TEXTURE_BUFFER, internal_fmt, vb_);
+			glBindTexture(GL_TEXTURE_BUFFER, 0);
 		}
 	}
 
@@ -147,8 +138,7 @@ namespace KlayGE
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		void* p;
-		if (!(re.HackForIntel()) && ((glloader_GL_VERSION_3_0() || glloader_GL_ARB_map_buffer_range())
-			&& (ba == BA_Write_Only) && (BU_Dynamic == usage_)))
+		if (!(re.HackForIntel()) && (ba == BA_Write_Only) && (BU_Dynamic == usage_))
 		{
 			GLuint access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
 			if (glloader_GL_EXT_direct_state_access())
@@ -219,21 +209,11 @@ namespace KlayGE
 
 	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
 	{
-		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_copy_buffer())
-		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
-			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
-						  0, 0, size_in_byte_);
-		}
-		else
-		{
-			GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
-			GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
-			std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-				rhs_mapper.Pointer<uint8_t>());
-		}
+		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
+		re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+						0, 0, size_in_byte_);
 	}
 
 	void OGLGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)

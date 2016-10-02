@@ -1329,17 +1329,9 @@ namespace KlayGE
 						{
 							gsv = GSV_150;
 						}
-						else if (glloader_GL_VERSION_3_1())
+						else //if (glloader_GL_VERSION_3_1())
 						{
 							gsv = GSV_140;
-						}
-						else if (glloader_GL_VERSION_3_0())
-						{
-							gsv = GSV_130;
-						}
-						else
-						{
-							gsv = GSV_120;
 						}
 
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
@@ -2264,87 +2256,84 @@ namespace KlayGE
 
 	void OGLShaderObject::AttachUBOs(RenderEffect const & effect)
 	{
-		if (glloader_GL_VERSION_3_1() || glloader_GL_ARB_uniform_buffer_object())
+		GLint active_ubos = 0;
+		glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
+		all_cbuffs_.resize(active_ubos);
+		gl_bind_cbuffs_.resize(active_ubos);
+		for (int i = 0; i < active_ubos; ++ i)
 		{
-			GLint active_ubos = 0;
-			glGetProgramiv(glsl_program_, GL_ACTIVE_UNIFORM_BLOCKS, &active_ubos);
-			all_cbuffs_.resize(active_ubos);
-			gl_bind_cbuffs_.resize(active_ubos);
-			for (int i = 0; i < active_ubos; ++ i)
+			GLint length = 0;
+			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &length);
+
+			std::vector<GLchar> ubo_name(length, '\0');
+			glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
+
+			auto cbuff = effect.CBufferByName(&ubo_name[0]);
+			BOOST_ASSERT(cbuff);
+			all_cbuffs_[i] = cbuff;
+
+			glUniformBlockBinding(glsl_program_, glGetUniformBlockIndex(glsl_program_, &ubo_name[0]), i);
+
+			GLint ubo_size = 0;
+			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
+			cbuff->Resize(ubo_size);
+			gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer*>(cbuff->HWBuff().get())->GLvbo();
+
+			GLint uniforms = 0;
+			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
+
+			std::vector<GLuint> uniform_indices(uniforms);
+			glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
+				reinterpret_cast<GLint*>(&uniform_indices[0]));
+
+			std::vector<GLint> uniform_name_lens(uniforms);
+			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+				GL_UNIFORM_NAME_LENGTH, &uniform_name_lens[0]);
+
+			std::vector<GLint> uniform_array_strides(uniforms);
+			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+				GL_UNIFORM_ARRAY_STRIDE, &uniform_array_strides[0]);
+
+			std::vector<GLint> uniform_matrix_strides(uniforms);
+			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+				GL_UNIFORM_MATRIX_STRIDE, &uniform_matrix_strides[0]);
+
+			std::vector<GLint> uniform_offsets(uniforms);
+			glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
+				GL_UNIFORM_OFFSET, &uniform_offsets[0]);
+
+			for (GLint j = 0; j < uniforms; ++ j)
 			{
-				GLint length = 0;
-				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_NAME_LENGTH, &length);
+				std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
+				GLint size;
+				GLenum type;
+				glGetActiveUniform(glsl_program_, uniform_indices[j], uniform_name_lens[j],
+					nullptr, &size, &type, &uniform_name[0]);
 
-				std::vector<GLchar> ubo_name(length, '\0');
-				glGetActiveUniformBlockName(glsl_program_, i, length, nullptr, &ubo_name[0]);
-
-				auto cbuff = effect.CBufferByName(&ubo_name[0]);
-				BOOST_ASSERT(cbuff);
-				all_cbuffs_[i] = cbuff;
-
-				glUniformBlockBinding(glsl_program_, glGetUniformBlockIndex(glsl_program_, &ubo_name[0]), i);
-
-				GLint ubo_size = 0;
-				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_DATA_SIZE, &ubo_size);
-				cbuff->Resize(ubo_size);
-				gl_bind_cbuffs_[i] = checked_cast<OGLGraphicsBuffer*>(cbuff->HWBuff().get())->GLvbo();
-
-				GLint uniforms = 0;
-				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &uniforms);
-
-				std::vector<GLuint> uniform_indices(uniforms);
-				glGetActiveUniformBlockiv(glsl_program_, i, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES,
-					reinterpret_cast<GLint*>(&uniform_indices[0]));
-
-				std::vector<GLint> uniform_name_lens(uniforms);
-				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
-					GL_UNIFORM_NAME_LENGTH, &uniform_name_lens[0]);
-
-				std::vector<GLint> uniform_array_strides(uniforms);
-				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
-					GL_UNIFORM_ARRAY_STRIDE, &uniform_array_strides[0]);
-
-				std::vector<GLint> uniform_matrix_strides(uniforms);
-				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
-					GL_UNIFORM_MATRIX_STRIDE, &uniform_matrix_strides[0]);
-
-				std::vector<GLint> uniform_offsets(uniforms);
-				glGetActiveUniformsiv(glsl_program_, uniforms, &uniform_indices[0],
-					GL_UNIFORM_OFFSET, &uniform_offsets[0]);
-
-				for (GLint j = 0; j < uniforms; ++ j)
+				auto iter = std::find(uniform_name.begin(), uniform_name.end(), '[');
+				if (iter != uniform_name.end())
 				{
-					std::vector<GLchar> uniform_name(uniform_name_lens[j], '\0');
-					GLint size;
-					GLenum type;
-					glGetActiveUniform(glsl_program_, uniform_indices[j], uniform_name_lens[j],
-						nullptr, &size, &type, &uniform_name[0]);
+					*iter = '\0';
+				}
 
-					auto iter = std::find(uniform_name.begin(), uniform_name.end(), '[');
-					if (iter != uniform_name.end())
+				RenderEffectParameter* param = effect.ParameterByName(&uniform_name[0]);
+				GLint stride;
+				if (param->ArraySize())
+				{
+					stride = uniform_array_strides[j];
+				}
+				else
+				{
+					if (param->Type() != REDT_float4x4)
 					{
-						*iter = '\0';
-					}
-
-					RenderEffectParameter* param = effect.ParameterByName(&uniform_name[0]);
-					GLint stride;
-					if (param->ArraySize())
-					{
-						stride = uniform_array_strides[j];
+						stride = 4;
 					}
 					else
 					{
-						if (param->Type() != REDT_float4x4)
-						{
-							stride = 4;
-						}
-						else
-						{
-							stride = uniform_matrix_strides[j];
-						}
+						stride = uniform_matrix_strides[j];
 					}
-					param->BindToCBuffer(*cbuff, uniform_offsets[j], stride);
 				}
+				param->BindToCBuffer(*cbuff, uniform_offsets[j], stride);
 			}
 		}
 	}
