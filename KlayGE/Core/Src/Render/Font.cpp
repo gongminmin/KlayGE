@@ -93,7 +93,7 @@ namespace KlayGE
 			RenderDeviceCaps const & caps = renderEngine.DeviceCaps();
 			uint32_t size = std::min<uint32_t>(2048U, std::min<uint32_t>(caps.max_texture_width, caps.max_texture_height)) / kfont_char_size * kfont_char_size;
 			dist_texture_ = rf.MakeTexture2D(size, size, 1, 1, EF_R8, 1, 0, EAH_GPU_Read, nullptr);
-			a_char_texture_ = rf.MakeTexture2D(kfont_char_size, kfont_char_size, 1, 1, EF_R8, 1, 0, EAH_CPU_Write, nullptr);
+			a_char_data_.resize(kfont_char_size * kfont_char_size);
 
 			char_free_list_.emplace_back(0, size * size / kfont_char_size / kfont_char_size);
 
@@ -650,15 +650,9 @@ namespace KlayGE
 						charInfo.rc.bottom()	= charInfo.rc.top() + static_cast<float>(height) / tex_size;
 						charInfo.tick			= tick_;
 
-						{
-							Texture::Mapper mapper(*a_char_texture_, 0, 0, TMA_Write_Only,
-								0, 0, kfont_char_size, kfont_char_size);
-							kl.GetDistanceData(mapper.Pointer<uint8_t>(), mapper.RowPitch(), offset);
-						}
-
-						a_char_texture_->CopyToSubTexture2D(*dist_texture_,
-							0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
-							0, 0, 0, 0, kfont_char_size, kfont_char_size);
+						kl.GetDistanceData(&a_char_data_[0], kfont_char_size, offset);
+						dist_texture_->UpdateSubresource2D(0, 0, char_pos.x(), char_pos.y(), kfont_char_size, kfont_char_size,
+							&a_char_data_[0], kfont_char_size);
 
 						cim.emplace(ch, charInfo);
 					}
@@ -707,7 +701,7 @@ namespace KlayGE
 		std::vector<SubAlloc> tb_ib_sub_allocs_;
 
 		TexturePtr		dist_texture_;
-		TexturePtr		a_char_texture_;
+		std::vector<uint8_t> a_char_data_;
 
 		RenderEffectParameter* half_width_height_ep_;
 		RenderEffectParameter* mvp_ep_;

@@ -377,13 +377,25 @@ namespace KlayGE
 		}
 		else
 		{
-			uint8_t const * p = static_cast<uint8_t const *>(data);
-			for (uint32_t z = 0; z < depth; ++ z)
+			if (glloader_GLES_VERSION_3_0())
 			{
-				for (uint32_t y = 0; y < height; ++ y)
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, row_pitch / NumFormatBytes(format_));
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slice_pitch / row_pitch);
+				glTexSubImage3D(target_type_, level, x_offset, y_offset, z_offset, width, height, depth,
+					gl_format, gl_type, data);
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+			}
+			else
+			{
+				uint8_t const * p = static_cast<uint8_t const *>(data);
+				for (uint32_t z = 0; z < depth; ++ z)
 				{
-					glTexSubImage3D(target_type_, level, x_offset, y_offset + y, z_offset + z, width, height, depth,
-						gl_format, gl_type, p + z * slice_pitch + y * row_pitch);
+					for (uint32_t y = 0; y < height; ++ y)
+					{
+						glTexSubImage3D(target_type_, level, x_offset, y_offset + y, z_offset + z, width, 1, 1,
+							gl_format, gl_type, p + z * slice_pitch + y * row_pitch);
+					}
 				}
 			}
 		}

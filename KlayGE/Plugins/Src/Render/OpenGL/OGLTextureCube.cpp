@@ -545,6 +545,7 @@ namespace KlayGE
 		GLenum gl_type;
 		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		re.BindTexture(0, target_type_, texture_);
 
 		if (IsCompressedFormat(format_))
@@ -564,23 +565,18 @@ namespace KlayGE
 		}
 		else
 		{
-			uint8_t const * p = static_cast<uint8_t const *>(data);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, row_pitch / NumFormatBytes(format_));
 			if (array_size_ > 1)
 			{
-				for (uint32_t y = 0; y < height; ++ y)
-				{
-					glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset + y, array_index, width, height, 1,
-						gl_format, gl_type, p + y * row_pitch);
-				}
+				glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset, array_index, width, height, 1,
+					gl_format, gl_type, data);
 			}
 			else
 			{
-				for (uint32_t y = 0; y < height; ++ y)
-				{
-					glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset + y, width, height,
-						gl_format, gl_type, p + y * row_pitch);
-				}
+				glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, x_offset, y_offset, width, height,
+					gl_format, gl_type, data);
 			}
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		}
 	}
 }

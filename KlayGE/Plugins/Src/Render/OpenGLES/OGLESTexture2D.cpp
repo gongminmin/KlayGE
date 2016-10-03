@@ -520,21 +520,39 @@ namespace KlayGE
 		}
 		else
 		{
-			uint8_t const * p = static_cast<uint8_t const *>(data);
-			if (array_size_ > 1)
+			if (glloader_GLES_VERSION_3_0())
 			{
-				for (uint32_t y = 0; y < height; ++ y)
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, row_pitch / NumFormatBytes(format_));
+				if (array_size_ > 1)
 				{
-					glTexSubImage3D(target_type_, level, x_offset, y_offset + y, array_index, width, height, 1,
-						gl_format, gl_type, p + y * row_pitch);
+					glTexSubImage3D(target_type_, level, x_offset, y_offset, array_index, width, height, 1,
+						gl_format, gl_type, data);
 				}
+				else
+				{
+					glTexSubImage2D(target_type_, level, x_offset, y_offset, width, height,
+						gl_format, gl_type, data);
+				}
+				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 			}
 			else
 			{
-				for (uint32_t y = 0; y < height; ++ y)
+				uint8_t const * p = static_cast<uint8_t const *>(data);
+				if (array_size_ > 1)
 				{
-					glTexSubImage2D(target_type_, level, x_offset, y_offset + y, width, height,
-						gl_format, gl_type, p + y * row_pitch);
+					for (uint32_t y = 0; y < height; ++ y)
+					{
+						glTexSubImage3D(target_type_, level, x_offset, y_offset + y, array_index, width, 1, 1,
+							gl_format, gl_type, p + y * row_pitch);
+					}
+				}
+				else
+				{
+					for (uint32_t y = 0; y < height; ++ y)
+					{
+						glTexSubImage2D(target_type_, level, x_offset, y_offset + y, width, 1,
+							gl_format, gl_type, p + y * row_pitch);
+					}
 				}
 			}
 		}

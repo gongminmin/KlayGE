@@ -426,6 +426,7 @@ namespace KlayGE
 		GLenum gl_type;
 		OGLMapping::MappingFormat(gl_internalFormat, gl_format, gl_type, format_);
 
+		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		re.BindTexture(0, target_type_, texture_);
 
 		if (IsCompressedFormat(format_))
