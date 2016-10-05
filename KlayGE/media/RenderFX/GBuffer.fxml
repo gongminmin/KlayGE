@@ -346,6 +346,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="cull_mode" value="back"/>
 		</pass>
 	</technique>
+
 	<technique name="SSSGBufferMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
@@ -419,7 +420,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 						uint4 blend_indices : BLENDINDICES,
 #endif
 #endif
-						out float2 oTc : TEXCOORD0,
+						out float3 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
 #if SKINNING_ON
@@ -438,7 +439,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 #if SKINNING_ON
 				blend_weights, blend_indices,
 #endif
-				oTc, result_pos,
+				oTc.xy, result_pos,
 				result_tangent_quat);
 
 #if TRANSPARENCY_ON
@@ -447,76 +448,23 @@ void GenShadowMapVS(float4 pos : POSITION,
 #endif
 
 	oPos = mul(float4(result_pos, 1), mvp);
+	oTc.z = mul(float4(result_pos, 1), model_view).z;
 }
 
-float4 GenShadowMapPS() : SV_Target
+float4 GenShadowMapPS(float3 tc : TEXCOORD0) : SV_Target
 {
-	return 0;
+	return tc.z;
 }
 
-float4 GenShadowMapAlphaTestPS(float2 tc : TEXCOORD0) : SV_Target
-{
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
-	}
-	clip(opacity - alpha_test_threshold);
-	return 0;
-}
-
-void GenCascadedShadowMapVS(float4 pos : POSITION,
-						float2 texcoord : TEXCOORD0,
-						float4 tangent_quat : TANGENT,
-#if SKINNING_ON
-						float4 blend_weights : BLENDWEIGHT,
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-						float4 blend_indices_f : BLENDINDICES,
-#else
-						uint4 blend_indices : BLENDINDICES,
-#endif
-#endif
-						out float2 oTc : TEXCOORD0,
-						out float oDepth : TEXCOORD1,
-						out float4 oPos : SV_Position)
-{
-#if SKINNING_ON
-#if KLAYGE_OPENGL || KLAYGE_OPENGLES
-	int4 blend_indices = (int4)blend_indices_f;
-#endif
-#endif
-
-	pos = float4(pos.xyz * pos_extent + pos_center, 1);
-	texcoord = texcoord * tc_extent + tc_center;
-	tangent_quat = tangent_quat * 2 - 1;
-
-	float3 result_pos;
-	float4 result_tangent_quat;
-	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
-				blend_weights, blend_indices,
-#endif
-				oTc, result_pos,
-				result_tangent_quat);
-	
-	oPos = mul(float4(result_pos, 1), mvp);
-	oDepth = mul(float4(result_pos, 1), model_view).z;
-}
-
-float4 GenCascadedShadowMapPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
-{
-	return depth;
-}
-
-float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXCOORD1) : SV_Target
+float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 {
 	float opacity = albedo_clr.a;
 	if (albedo_map_enabled)
 	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, tc).a;
+		opacity *= albedo_tex.Sample(bilinear_sampler, tc.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	return depth;
+	return tc.z;
 }
 		]]>
 	</shader>
@@ -550,13 +498,22 @@ float4 GenCascadedShadowMapAlphaTestPS(float2 tc : TEXCOORD0, float depth : TEXC
 			<state name="cull_mode" value="none"/>
 			<state name="depth_clip_enable" value="false"/>
 
-			<state name="vertex_shader" value="GenCascadedShadowMapVS()"/>
-			<state name="pixel_shader" value="GenCascadedShadowMapPS()"/>
+			<state name="vertex_shader" value="GenShadowMapVS()"/>
+			<state name="pixel_shader" value="GenShadowMapPS()"/>
 		</pass>
 	</technique>
 	<technique name="GenCascadedShadowMapAlphaTestTech" inherit="GenCascadedShadowMapTech">
 		<pass name="p0">
-			<state name="pixel_shader" value="GenCascadedShadowMapAlphaTestPS()"/>
+			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="SSSGenCascadedShadowMapTech" inherit="GenCascadedShadowMapTech">
+		<macro name="TRANSPARENCY_ON" value="1"/>
+	</technique>
+	<technique name="SSSGenCascadedShadowMapAlphaTestTech" inherit="SSSGenCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="pixel_shader" value="GenShadowMapAlphaTestPS()"/>
 		</pass>
 	</technique>
 
@@ -875,7 +832,8 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
-	</technique><technique name="SpecialShadingFlatTessTech" inherit="SpecialShadingTech">
+	</technique>
+	<technique name="SpecialShadingFlatTessTech" inherit="SpecialShadingTech">
 		<pass name="p0">			
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>

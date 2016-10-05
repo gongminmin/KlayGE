@@ -476,30 +476,33 @@ namespace KlayGE
 
 		if (this->AlphaTest())
 		{
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 			if (sss)
 			{
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapAlphaTestTech");
+				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenCascadedShadowMapAlphaTestTech");
 			}
 			else
 			{
-				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
 				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 			}
 		}
 		else
 		{
+			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
 			if (sss)
 			{
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapTech");
+				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenCascadedShadowMapTech");
 			}
 			else
 			{
-				gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
 				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
 				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
 			}
 		}
+
 		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
 	}
 
