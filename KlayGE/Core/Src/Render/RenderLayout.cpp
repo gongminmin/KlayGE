@@ -80,6 +80,8 @@ namespace KlayGE
 					vertex_streams_[i].vertex_size = size;
 					vertex_streams_[i].type = type;
 					vertex_streams_[i].freq = freq;
+
+					streams_dirty_ = true;
 					return;
 				}
 			}
