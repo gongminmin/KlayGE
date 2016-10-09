@@ -59,6 +59,8 @@ namespace KlayGE
 	class SceneObjectCameraProxy;
 	typedef std::shared_ptr<SceneObjectCameraProxy> SceneObjectCameraProxyPtr;
 
+	class Blitter;
+	typedef std::shared_ptr<Blitter> BlitterPtr;
 	struct ElementInitData;
 	class Camera;
 	typedef std::shared_ptr<Camera> CameraPtr;

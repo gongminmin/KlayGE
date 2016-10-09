@@ -54,6 +54,7 @@ SOURCE_GROUP("Base\\Header Files" FILES ${BASE_HEADER_FILES})
 
 
 SET(RENDERING_SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Blitter.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Camera.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CameraController.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/CascadedShadowLayer.cpp
@@ -103,6 +104,7 @@ SET(RENDERING_SOURCE_FILES
 )
 
 SET(RENDERING_HEADER_FILES
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Blitter.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Camera.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CameraController.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/CascadedShadowLayer.hpp
@@ -156,6 +158,7 @@ SET(RENDERING_HEADER_FILES
 SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/2D.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/BilateralBlur.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blitter.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Bone.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/CameraProxy.fxml

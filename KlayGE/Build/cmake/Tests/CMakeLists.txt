@@ -15,6 +15,7 @@ IF(NOT MSVC)
 ENDIF()
 
 SET(SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Tests/src/BlitterTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/CTHashTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/EncodeDecodeTexTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.cpp

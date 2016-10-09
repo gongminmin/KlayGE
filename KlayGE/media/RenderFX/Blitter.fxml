@@ -1,0 +1,218 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<cbuffer name="from_tex">
+		<parameter type="float3" name="src_offset"/>
+		<parameter type="float3" name="src_scale"/>
+		<parameter type="int" name="src_array_index"/>
+		<parameter type="int" name="src_level"/>
+	</cbuffer>
+
+	<cbuffer name="from_buff">
+		<parameter type="float4" name="dst_width_height"/>
+	</cbuffer>
+
+	<parameter type="texture2D" name="src_2d_tex"/>
+	<parameter type="texture2DArray" name="src_2d_tex_array"/>
+	<parameter type="texture3D" name="src_3d_tex"/>
+
+	<shader>
+		<![CDATA[
+void Blit2DVS(float4 pos : POSITION,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oTex = TexCoordFromPos(pos) * src_scale.xy + src_offset.xy;
+	oPos = pos;
+}
+
+float4 Blit2DPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return Tex2DSampleLevel(src_2d_tex,
+#if LINEAR_SAMPLER
+		bilinear_sampler,
+#else
+		point_sampler,
+#endif
+		tc, src_level, 0);
+}
+
+float4 Blit2DArrayPS(float2 tc : TEXCOORD0) : SV_Target
+{
+	return Tex2DArraySampleLevel(src_2d_tex_array,
+#if LINEAR_SAMPLER
+		bilinear_sampler,
+#else
+		point_sampler,
+#endif
+		float3(tc, src_array_index), src_level, 0);
+}
+
+void Blit3DVS(float4 pos : POSITION,
+					out float3 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	oTex = float3(TexCoordFromPos(pos), 1) * src_scale + src_offset;
+	oPos = pos;
+}
+
+float4 Blit3DPS(float3 tc : TEXCOORD0) : SV_Target
+{
+	return Tex3DSampleLevel(src_3d_tex,
+#if LINEAR_SAMPLER
+		bilinear_sampler,
+#else
+		point_sampler,
+#endif
+		tc, src_level, 0);
+}
+
+void Blit2DToBuffVS(float pos : POSITION,
+					out float4 oColor : COLOR)
+{
+	uint ipos = pos;
+	uint dst_width = dst_width_height.x;
+
+	uint2 xy;
+	xy.y = ipos / dst_width;
+	xy.x = ipos - xy.y * dst_width;
+	float2 tc = src_offset.xy + (xy + 0.5f) * src_scale.xy;
+	oColor = Tex2DSampleLevel(src_2d_tex, point_sampler, tc, src_level, 0);
+}
+
+void Blit2DArrayToBuffVS(float pos : POSITION,
+					out float4 oColor : COLOR)
+{
+	uint ipos = pos;
+	uint dst_width = dst_width_height.x;
+
+	uint2 xy;
+	xy.y = ipos / dst_width;
+	xy.x = ipos - xy.y * dst_width;
+	float2 tc = src_offset.xy + (xy + 0.5f) * src_scale.xy;
+	oColor = Tex2DArraySampleLevel(src_2d_tex_array, point_sampler, float3(tc, src_array_index), src_level, 0);
+}
+
+void BlitBuffTo2DVS(float pos : POSITION,
+					float4 color : COLOR,
+					out float4 oColor : COLOR,
+					out float4 oPos : SV_Position)
+{
+	uint ipos = pos;
+	uint dst_width = dst_width_height.x;
+
+	uint2 xy;
+	xy.y = ipos / dst_width;
+	xy.x = ipos - xy.y * dst_width;
+	oPos.xy = (xy + 0.5f) * dst_width_height.zw * 2 - 1;
+	oPos.y *= KLAYGE_FLIPPING;
+	oPos.zw = float2(0, 1);
+
+	oColor = color;
+}
+
+float4 BlitBuffTo2DPS(float4 color : COLOR) : SV_Target
+{
+	return color;
+}
+		]]>
+	</shader>
+
+	<technique name="BlitPoint2D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="0"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="Blit2DVS()"/>
+			<state name="pixel_shader" value="Blit2DPS()"/>
+		</pass>
+	</technique>
+	<technique name="BlitPoint2DArray" inherit="BlitPoint2D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="0"/>
+			<state name="pixel_shader" value="Blit2DArrayPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="BlitLinear2D" inherit="BlitPoint2D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="1"/>
+			<state name="pixel_shader" value="Blit2DPS()"/>
+		</pass>
+	</technique>
+	<technique name="BlitLinear2DArray" inherit="BlitPoint2DArray">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="1"/>
+			<state name="pixel_shader" value="Blit2DArrayPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="BlitPoint3D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="0"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="Blit3DVS()"/>
+			<state name="pixel_shader" value="Blit3DPS()"/>
+		</pass>
+	</technique>
+	
+	<technique name="BlitLinear3D" inherit="BlitPoint3D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="1"/>
+			<state name="pixel_shader" value="Blit3DPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="Blit2DToBuff">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="Blit2DToBuffVS()">
+				<stream_output>
+					<entry usage="COLOR" usage_index="0" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+	<technique name="Blit2DArrayToBuff" inherit="Blit2DToBuff">
+		<pass name="p0">
+			<state name="vertex_shader" value="Blit2DArrayToBuffVS()">
+				<stream_output>
+					<entry usage="COLOR" usage_index="0" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<technique name="BlitBuffTo2D">
+		<pass name="p0">
+			<macro name="LINEAR_SAMPLER" value="0"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="BlitBuffTo2DVS()"/>
+			<state name="pixel_shader" value="BlitBuffTo2DPS()"/>
+		</pass>
+	</technique>
+</effect>
