@@ -3433,13 +3433,13 @@ namespace KlayGE
 		{
 			for (uint32_t z = 0; z < dst_depth; ++ z)
 			{
-				float fz = static_cast<float>(z) / dst_depth * src_depth;
-				uint32_t sz = std::min(static_cast<uint32_t>(fz + 0.5f), src_depth - 1);
+				float fz = static_cast<float>(z + 0.5f) / dst_depth * src_depth;
+				uint32_t sz = std::min(static_cast<uint32_t>(fz), src_depth - 1);
 
 				for (uint32_t y = 0; y < dst_height; ++ y)
 				{
-					float fy = static_cast<float>(y) / dst_height * src_height;
-					uint32_t sy = std::min(static_cast<uint32_t>(fy + 0.5f), src_height - 1);
+					float fy = static_cast<float>(y + 0.5f) / dst_height * src_height;
+					uint32_t sy = std::min(static_cast<uint32_t>(fy), src_height - 1);
 
 					uint8_t const * src_p = src_ptr + sz * src_cpu_slice_pitch + sy * src_cpu_row_pitch;
 					uint8_t* dst_p = dst_ptr + z * dst_cpu_slice_pitch + y * dst_cpu_row_pitch;
@@ -3452,8 +3452,8 @@ namespace KlayGE
 					{
 						for (uint32_t x = 0; x < dst_width; ++ x, dst_p += dst_elem_size)
 						{
-							float fx = static_cast<float>(x) / dst_width * src_width;
-							uint32_t sx = std::min(static_cast<uint32_t>(fx + 0.5f), src_width - 1);
+							float fx = static_cast<float>(x + 0.5f) / dst_width * src_width;
+							uint32_t sx = std::min(static_cast<uint32_t>(fx), src_width - 1);
 							std::memcpy(dst_p, src_p + sx * src_elem_size, src_elem_size);
 						}
 					}
@@ -3516,18 +3516,18 @@ namespace KlayGE
 			{
 				for (uint32_t z = 0; z < dst_depth; ++ z)
 				{
-					float fz = static_cast<float>(z) / dst_depth * src_depth;
-					uint32_t sz = std::min(static_cast<uint32_t>(fz + 0.5f), src_depth - 1);
+					float fz = static_cast<float>(z + 0.5f) / dst_depth * src_depth;
+					uint32_t sz = std::min(static_cast<uint32_t>(fz), src_depth - 1);
 
 					for (uint32_t y = 0; y < dst_height; ++ y)
 					{
-						float fy = static_cast<float>(y) / dst_height * src_height;
-						uint32_t sy = std::min(static_cast<uint32_t>(fy + 0.5f), src_height - 1);
+						float fy = static_cast<float>(y + 0.5f) / dst_height * src_height;
+						uint32_t sy = std::min(static_cast<uint32_t>(fy), src_height - 1);
 
 						for (uint32_t x = 0; x < dst_width; ++ x)
 						{
-							float fx = static_cast<float>(x) / dst_width * src_width;
-							uint32_t sx = std::min(static_cast<uint32_t>(fx + 0.5f), src_width - 1);
+							float fx = static_cast<float>(x + 0.5f) / dst_width * src_width;
+							uint32_t sx = std::min(static_cast<uint32_t>(fx), src_width - 1);
 							dst_32f[(z * dst_height + y) * dst_width + x] = src_32f[(sz * src_height + sy) * src_width + sx];
 						}
 					}
