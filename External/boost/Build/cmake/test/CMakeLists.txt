@@ -16,6 +16,7 @@ SET(SOURCE_FILES
 	${BOOST_PROJECT_DIR}/libs/test/src/unit_test_main.cpp
 	${BOOST_PROJECT_DIR}/libs/test/src/unit_test_monitor.cpp
 	${BOOST_PROJECT_DIR}/libs/test/src/unit_test_parameters.cpp
+	${BOOST_PROJECT_DIR}/libs/test/src/junit_log_formatter.cpp
 	${BOOST_PROJECT_DIR}/libs/test/src/xml_log_formatter.cpp
 	${BOOST_PROJECT_DIR}/libs/test/src/xml_report_formatter.cpp
 )
