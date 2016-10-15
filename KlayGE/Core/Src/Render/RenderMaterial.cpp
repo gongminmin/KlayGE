@@ -33,6 +33,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
+#include <KFL/Hash.hpp>
 
 #include <fstream>
 

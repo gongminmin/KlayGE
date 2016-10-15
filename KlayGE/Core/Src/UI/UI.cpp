@@ -31,6 +31,7 @@
 #include <KlayGE/Font.hpp>
 #include <KFL/Thread.hpp>
 #include <KlayGE/TransientBuffer.hpp>
+#include <KFL/Hash.hpp>
 
 #ifdef Bool
 #undef Bool		// for boost::foreach

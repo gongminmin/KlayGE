@@ -36,6 +36,7 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX11.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp

@@ -46,6 +46,7 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/TransientBuffer.hpp>
+#include <KFL/Hash.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -56,7 +57,6 @@
 #include <tuple>
 #include <type_traits>
 #include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <kfont/kfont.hpp>
 

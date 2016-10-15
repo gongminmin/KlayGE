@@ -36,6 +36,7 @@
 #include <KFL/Thread.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 #include <KlayGE/UI.hpp>
+#include <KFL/Hash.hpp>
 
 #include <fstream>
 #include <sstream>

@@ -32,9 +32,9 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KFL/Hash.hpp>
 
 #include <cstring>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/PostProcess.hpp>
 

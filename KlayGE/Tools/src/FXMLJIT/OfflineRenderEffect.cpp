@@ -34,6 +34,7 @@
 #include <KFL/Math.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/Thread.hpp>
+#include <KFL/Hash.hpp>
 
 #include <fstream>
 #include <boost/assert.hpp>
@@ -47,7 +48,6 @@
 #endif
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/functional/hash.hpp>
 
 #include "OfflineShaderObject.hpp"
 #include "OfflineRenderEffect.hpp"
@@ -2495,7 +2495,7 @@ namespace KlayGE
 
 		RenderEffectParameterPtr const & RenderEffect::ParameterByName(std::string const & name) const
 		{
-			size_t const name_hash = boost::hash_range(name.begin(), name.end());
+			size_t const name_hash = HashRange(name.begin(), name.end());
 			for (auto const & param : params_)
 			{
 				if (name_hash == param->NameHash())
@@ -2509,7 +2509,7 @@ namespace KlayGE
 
 		RenderEffectParameterPtr const & RenderEffect::ParameterBySemantic(std::string const & semantic) const
 		{
-			size_t const semantic_hash = boost::hash_range(semantic.begin(), semantic.end());
+			size_t const semantic_hash = HashRange(semantic.begin(), semantic.end());
 			for (auto const & param : params_)
 			{
 				if (semantic_hash == param->SemanticHash())
@@ -2523,7 +2523,7 @@ namespace KlayGE
 
 		RenderEffectConstantBufferPtr const & RenderEffect::CBufferByName(std::string const & name) const
 		{
-			size_t const name_hash = boost::hash_range(name.begin(), name.end());
+			size_t const name_hash = HashRange(name.begin(), name.end());
 			for (auto const & cbuffer : cbuffers_)
 			{
 				if (name_hash == cbuffer->NameHash())
@@ -2537,7 +2537,7 @@ namespace KlayGE
 
 		RenderTechniquePtr const & RenderEffect::TechniqueByName(std::string const & name) const
 		{
-			size_t const name_hash = boost::hash_range(name.begin(), name.end());
+			size_t const name_hash = HashRange(name.begin(), name.end());
 			for (auto const & tech : techniques_)
 			{
 				if (name_hash == tech->NameHash())
@@ -2862,7 +2862,7 @@ namespace KlayGE
 		void RenderTechnique::Load(XMLNodePtr const & node, uint32_t tech_index)
 		{
 			name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-			name_hash_ = boost::hash_range(name_->begin(), name_->end());
+			name_hash_ = HashRange(name_->begin(), name_->end());
 
 			RenderTechniquePtr parent_tech;
 			XMLAttributePtr inherit_attr = node->Attrib("inherit");
@@ -3063,7 +3063,7 @@ namespace KlayGE
 		void RenderPass::Load(XMLNodePtr const & node, uint32_t tech_index, uint32_t pass_index, RenderPassPtr const & inherit_pass)
 		{
 			name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-			name_hash_ = boost::hash_range(name_->begin(), name_->end());
+			name_hash_ = HashRange(name_->begin(), name_->end());
 
 			{
 				XMLNodePtr anno_node = node->FirstNode("annotation");
@@ -3131,14 +3131,14 @@ namespace KlayGE
 				for (uint32_t i = 0; i < tech->NumMacros(); ++ i)
 				{
 					std::pair<std::string, std::string> const & name_value = tech->MacroByIndex(i);
-					boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
-					boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+					HashRange(hash_val, name_value.first.begin(), name_value.first.end());
+					HashRange(hash_val, name_value.second.begin(), name_value.second.end());
 				}
 				for (uint32_t i = 0; i < this->NumMacros(); ++ i)
 				{
 					std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
-					boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
-					boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+					HashRange(hash_val, name_value.first.begin(), name_value.first.end());
+					HashRange(hash_val, name_value.second.begin(), name_value.second.end());
 				}
 				macros_hash = static_cast<uint64_t>(hash_val);
 			}
@@ -3566,7 +3566,7 @@ namespace KlayGE
 			BOOST_ASSERT(inherit_pass);
 
 			name_ = inherit_pass->name_;
-			name_hash_ = boost::hash_range(name_->begin(), name_->end());
+			name_hash_ = HashRange(name_->begin(), name_->end());
 			annotations_ = inherit_pass->annotations_;
 			macros_ = inherit_pass->macros_;
 
@@ -3578,14 +3578,14 @@ namespace KlayGE
 				for (uint32_t i = 0; i < tech->NumMacros(); ++ i)
 				{
 					std::pair<std::string, std::string> const & name_value = tech->MacroByIndex(i);
-					boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
-					boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+					HashRange(hash_val, name_value.first.begin(), name_value.first.end());
+					HashRange(hash_val, name_value.second.begin(), name_value.second.end());
 				}
 				for (uint32_t i = 0; i < this->NumMacros(); ++ i)
 				{
 					std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
-					boost::hash_range(hash_val, name_value.first.begin(), name_value.first.end());
-					boost::hash_range(hash_val, name_value.second.begin(), name_value.second.end());
+					HashRange(hash_val, name_value.first.begin(), name_value.first.end());
+					HashRange(hash_val, name_value.second.begin(), name_value.second.end());
 				}
 				macros_hash = static_cast<uint64_t>(hash_val);
 			}
@@ -3773,7 +3773,7 @@ namespace KlayGE
 		void RenderEffectConstantBuffer::Load(std::string const & name)
 		{
 			name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(name);
-			name_hash_ = boost::hash_range(name_->begin(), name_->end());
+			name_hash_ = HashRange(name_->begin(), name_->end());
 			param_indices_ = MakeSharedPtr<std::remove_reference<decltype(*param_indices_)>::type>();
 		}
 
@@ -3814,7 +3814,7 @@ namespace KlayGE
 		{
 			type_ = type_define::instance().type_code(node->Attrib("type")->ValueString());
 			name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>(node->Attrib("name")->ValueString());
-			name_hash_ = boost::hash_range(name_->begin(), name_->end());
+			name_hash_ = HashRange(name_->begin(), name_->end());
 
 			XMLAttributePtr attr = node->Attrib("semantic");
 			if (attr)

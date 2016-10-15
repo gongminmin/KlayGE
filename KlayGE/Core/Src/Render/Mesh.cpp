@@ -32,12 +32,12 @@
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderMaterial.hpp>
+#include <KFL/Hash.hpp>
 
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <cstring>
-#include <boost/functional/hash.hpp>
 
 #include <MeshMLLib/MeshMLLib.hpp>
 

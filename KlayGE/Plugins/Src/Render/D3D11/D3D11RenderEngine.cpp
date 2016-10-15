@@ -29,6 +29,7 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KFL/Hash.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
@@ -41,7 +42,6 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include "NV3DVision.hpp"
@@ -529,18 +529,18 @@ namespace KlayGE
 		size_t elems_signature = 0;
 		for (auto const & elem : elems)
 		{
-			size_t seed = boost::hash_range(elem.SemanticName, elem.SemanticName + strlen(elem.SemanticName));
-			boost::hash_combine(seed, elem.SemanticIndex);
-			boost::hash_combine(seed, static_cast<uint32_t>(elem.Format));
-			boost::hash_combine(seed, elem.InputSlot);
-			boost::hash_combine(seed, elem.AlignedByteOffset);
-			boost::hash_combine(seed, static_cast<uint32_t>(elem.InputSlotClass));
-			boost::hash_combine(seed, elem.InstanceDataStepRate);
+			size_t seed = RT_HASH(elem.SemanticName);
+			HashCombine(seed, elem.SemanticIndex);
+			HashCombine(seed, static_cast<uint32_t>(elem.Format));
+			HashCombine(seed, elem.InputSlot);
+			HashCombine(seed, elem.AlignedByteOffset);
+			HashCombine(seed, static_cast<uint32_t>(elem.InputSlotClass));
+			HashCombine(seed, elem.InstanceDataStepRate);
 
-			boost::hash_combine(elems_signature, seed);
+			HashCombine(elems_signature, seed);
 		}
 
-		boost::hash_combine(signature, elems_signature);
+		HashCombine(signature, elems_signature);
 
 		auto iter = input_layout_bank_.find(signature);
 		if (iter != input_layout_bank_.end())

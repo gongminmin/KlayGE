@@ -25,6 +25,7 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KFL/Hash.hpp>
 
 #include <glloader/glloader.h>
 

@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/Hash.hpp>
 
 #include <boost/assert.hpp>
 #ifdef KLAYGE_COMPILER_CLANG

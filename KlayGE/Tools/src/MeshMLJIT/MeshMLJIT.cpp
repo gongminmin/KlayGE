@@ -8,6 +8,7 @@
 #include <KlayGE/RenderMaterial.hpp>
 #include <KlayGE/Renderable.hpp>
 #include <KlayGE/Mesh.hpp>
+#include <KFL/Hash.hpp>
 
 #include <iostream>
 #include <fstream>

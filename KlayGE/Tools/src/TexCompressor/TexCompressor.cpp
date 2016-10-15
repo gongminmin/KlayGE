@@ -7,6 +7,7 @@
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
 #include <KFL/CpuInfo.hpp>
+#include <KFL/Hash.hpp>
 
 #include <boost/algorithm/string/case_conv.hpp>
 

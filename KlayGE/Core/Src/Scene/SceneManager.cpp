@@ -53,10 +53,10 @@
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KFL/Hash.hpp>
 
 #include <map>
 #include <algorithm>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/SceneManager.hpp>
 
@@ -562,9 +562,9 @@ namespace KlayGE
 				}
 			}
 			size_t seed = 0;
-			boost::hash_range(seed, visible_list.begin(), visible_list.end());
-			boost::hash_combine(seed, camera.OmniDirectionalMode());
-			boost::hash_combine(seed, &camera);
+			HashRange(seed, visible_list.begin(), visible_list.end());
+			HashCombine(seed, camera.OmniDirectionalMode());
+			HashCombine(seed, &camera);
 
 			auto vmiter = visible_marks_map_.find(seed);
 			if (vmiter == visible_marks_map_.end())

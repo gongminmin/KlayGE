@@ -22,6 +22,7 @@
 #include <KFL/Matrix.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KFL/Hash.hpp>
 
 #include <cstdio>
 #include <string>

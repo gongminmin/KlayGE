@@ -19,10 +19,10 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KFL/Hash.hpp>
 
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/SALWrapper.hpp>
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -113,10 +113,10 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(first_array_index);
-			boost::hash_combine(hash_val, num_items);
-			boost::hash_combine(hash_val, first_level);
-			boost::hash_combine(hash_val, num_levels);
+			size_t hash_val = HashValue(first_array_index);
+			HashCombine(hash_val, num_items);
+			HashCombine(hash_val, first_level);
+			HashCombine(hash_val, num_levels);
 
 			auto iter = d3d_sr_views_.find(hash_val);
 			if (iter != d3d_sr_views_.end())
@@ -145,11 +145,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(first_array_index);
-			boost::hash_combine(hash_val, num_items);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(first_array_index);
+			HashCombine(hash_val, num_items);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_ua_views_.find(hash_val);
 			if (iter != d3d_ua_views_.end())
@@ -178,11 +178,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(array_index);
-			boost::hash_combine(hash_val, 1);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, first_slice);
-			boost::hash_combine(hash_val, num_slices);
+			size_t hash_val = HashValue(array_index);
+			HashCombine(hash_val, 1);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, first_slice);
+			HashCombine(hash_val, num_slices);
 
 			auto iter = d3d_ua_views_.find(hash_val);
 			if (iter != d3d_ua_views_.end())
@@ -211,11 +211,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(first_array_index * 6 + first_face);
-			boost::hash_combine(hash_val, num_items * 6 + num_faces);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(first_array_index * 6 + first_face);
+			HashCombine(hash_val, num_items * 6 + num_faces);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_ua_views_.find(hash_val);
 			if (iter != d3d_ua_views_.end())
@@ -246,11 +246,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(first_array_index);
-			boost::hash_combine(hash_val, array_size);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(first_array_index);
+			HashCombine(hash_val, array_size);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_rt_views_.find(hash_val);
 			if (iter != d3d_rt_views_.end())
@@ -280,11 +280,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(array_index);
-			boost::hash_combine(hash_val, 1);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, first_slice);
-			boost::hash_combine(hash_val, num_slices);
+			size_t hash_val = HashValue(array_index);
+			HashCombine(hash_val, 1);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, first_slice);
+			HashCombine(hash_val, num_slices);
 
 			auto iter = d3d_rt_views_.find(hash_val);
 			if (iter != d3d_rt_views_.end())
@@ -313,11 +313,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(array_index * 6 + face);
-			boost::hash_combine(hash_val, 1);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(array_index * 6 + face);
+			HashCombine(hash_val, 1);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_rt_views_.find(hash_val);
 			if (iter != d3d_rt_views_.end())
@@ -348,11 +348,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(first_array_index);
-			boost::hash_combine(hash_val, array_size);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(first_array_index);
+			HashCombine(hash_val, array_size);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_ds_views_.find(hash_val);
 			if (iter != d3d_ds_views_.end())
@@ -382,11 +382,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(array_index);
-			boost::hash_combine(hash_val, 1);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, first_slice);
-			boost::hash_combine(hash_val, num_slices);
+			size_t hash_val = HashValue(array_index);
+			HashCombine(hash_val, 1);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, first_slice);
+			HashCombine(hash_val, num_slices);
 
 			auto iter = d3d_ds_views_.find(hash_val);
 			if (iter != d3d_ds_views_.end())
@@ -414,11 +414,11 @@ namespace KlayGE
 
 		if (this->HWResourceReady())
 		{
-			size_t hash_val = boost::hash_value(array_index * 6 + face);
-			boost::hash_combine(hash_val, 1);
-			boost::hash_combine(hash_val, level);
-			boost::hash_combine(hash_val, 0);
-			boost::hash_combine(hash_val, 0);
+			size_t hash_val = HashValue(array_index * 6 + face);
+			HashCombine(hash_val, 1);
+			HashCombine(hash_val, level);
+			HashCombine(hash_val, 0);
+			HashCombine(hash_val, 0);
 
 			auto iter = d3d_ds_views_.find(hash_val);
 			if (iter != d3d_ds_views_.end())

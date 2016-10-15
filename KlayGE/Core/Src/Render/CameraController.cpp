@@ -33,6 +33,7 @@
 #include <KlayGE/Camera.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/App3D.hpp>
+#include <KFL/Hash.hpp>
 
 #include <sstream>
 #include <boost/lexical_cast.hpp>

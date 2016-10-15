@@ -38,10 +38,10 @@
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
 #include <KFL/Half.hpp>
+#include <KFL/Hash.hpp>
 
 #include <cstring>
 #include <fstream>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/Texture.hpp>
 

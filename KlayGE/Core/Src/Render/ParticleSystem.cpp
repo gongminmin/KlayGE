@@ -39,10 +39,10 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
+#include <KFL/Hash.hpp>
 
 #include <fstream>
 
-#include <boost/functional/hash.hpp>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration

@@ -40,6 +40,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KFL/Thread.hpp>
+#include <KFL/Hash.hpp>
 
 #include <string>
 #include <map>
@@ -47,7 +48,6 @@
 #include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KlayGE/SALWrapper.hpp>
@@ -767,18 +767,18 @@ namespace KlayGE
 						{
 							reflection->GetInputParameterDesc(i, &signature);
 
-							size_t seed = boost::hash_range(signature.SemanticName, signature.SemanticName + strlen(signature.SemanticName));
-							boost::hash_combine(seed, signature.SemanticIndex);
-							boost::hash_combine(seed, signature.Register);
-							boost::hash_combine(seed, static_cast<uint32_t>(signature.SystemValueType));
-							boost::hash_combine(seed, static_cast<uint32_t>(signature.ComponentType));
-							boost::hash_combine(seed, signature.Mask);
-							boost::hash_combine(seed, signature.ReadWriteMask);
-							boost::hash_combine(seed, signature.Stream);
-							boost::hash_combine(seed, signature.MinPrecision);
+							size_t seed = RT_HASH(signature.SemanticName);
+							HashCombine(seed, signature.SemanticIndex);
+							HashCombine(seed, signature.Register);
+							HashCombine(seed, static_cast<uint32_t>(signature.SystemValueType));
+							HashCombine(seed, static_cast<uint32_t>(signature.ComponentType));
+							HashCombine(seed, signature.Mask);
+							HashCombine(seed, signature.ReadWriteMask);
+							HashCombine(seed, signature.Stream);
+							HashCombine(seed, signature.MinPrecision);
 
 							size_t sig = vs_signature_;
-							boost::hash_combine(sig, seed);
+							HashCombine(sig, seed);
 							vs_signature_ = static_cast<uint32_t>(sig);
 						}
 					}

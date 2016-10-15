@@ -45,6 +45,7 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Fence.hpp>
+#include <KFL/Hash.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderWindow.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
@@ -59,7 +60,6 @@
 
 #include <algorithm>
 #include <boost/assert.hpp>
-#include <boost/functional/hash.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
@@ -738,21 +738,21 @@ namespace KlayGE
 			for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 			{
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(i);
-				boost::hash_combine(hash_val, st);
-				boost::hash_combine(hash_val, so->SRVs(st).size());
+				HashCombine(hash_val, st);
+				HashCombine(hash_val, so->SRVs(st).size());
 				if (!so->SRVs(st).empty())
 				{
-					boost::hash_range(hash_val, so->SRVs(st).begin(), so->SRVs(st).end());
+					HashRange(hash_val, so->SRVs(st).begin(), so->SRVs(st).end());
 				}
 			}
 			for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 			{
 				ShaderObject::ShaderType st = static_cast<ShaderObject::ShaderType>(i);
-				boost::hash_combine(hash_val, st);
-				boost::hash_combine(hash_val, so->UAVs(st).size());
+				HashCombine(hash_val, st);
+				HashCombine(hash_val, so->UAVs(st).size());
 				if (!so->UAVs(st).empty())
 				{
-					boost::hash_range(hash_val, so->UAVs(st).begin(), so->UAVs(st).end());
+					HashRange(hash_val, so->UAVs(st).begin(), so->UAVs(st).end());
 				}
 			}
 
@@ -910,17 +910,17 @@ namespace KlayGE
 		if (num_handle > 0)
 		{
 			size_t hash_val = 0;
-			boost::hash_combine(hash_val, st);
-			boost::hash_combine(hash_val, so->SRVs(st).size());
+			HashCombine(hash_val, st);
+			HashCombine(hash_val, so->SRVs(st).size());
 			if (!so->SRVs(st).empty())
 			{
-				boost::hash_range(hash_val, so->SRVs(st).begin(), so->SRVs(st).end());
+				HashRange(hash_val, so->SRVs(st).begin(), so->SRVs(st).end());
 			}
-			boost::hash_combine(hash_val, st);
-			boost::hash_combine(hash_val, so->UAVs(st).size());
+			HashCombine(hash_val, st);
+			HashCombine(hash_val, so->UAVs(st).size());
 			if (!so->UAVs(st).empty())
 			{
-				boost::hash_range(hash_val, so->UAVs(st).begin(), so->UAVs(st).end());
+				HashRange(hash_val, so->UAVs(st).begin(), so->UAVs(st).end());
 			}
 
 			auto iter = cbv_srv_uav_heaps_.find(hash_val);
@@ -1910,9 +1910,9 @@ namespace KlayGE
 		ID3D12RootSignaturePtr ret;
 
 		size_t hash_val = 0;
-		boost::hash_range(hash_val, num.begin(), num.end());
-		boost::hash_combine(hash_val, has_vs);
-		boost::hash_combine(hash_val, has_stream_output);
+		HashRange(hash_val, num.begin(), num.end());
+		HashCombine(hash_val, has_vs);
+		HashCombine(hash_val, has_stream_output);
 		auto iter = root_signatures_.find(hash_val);
 		if (iter == root_signatures_.end())
 		{
@@ -2140,7 +2140,7 @@ namespace KlayGE
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
 		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
+		HashRange(hash_val, p, p + sizeof(desc));
 
 		auto iter = graphics_psos_.find(hash_val);
 		if (iter == graphics_psos_.end())
@@ -2159,7 +2159,7 @@ namespace KlayGE
 	{
 		char const * p = reinterpret_cast<char const *>(&desc);
 		size_t hash_val = 0;
-		boost::hash_range(hash_val, p, p + sizeof(desc));
+		HashRange(hash_val, p, p + sizeof(desc));
 
 		auto iter = compute_psos_.find(hash_val);
 		if (iter == compute_psos_.end())

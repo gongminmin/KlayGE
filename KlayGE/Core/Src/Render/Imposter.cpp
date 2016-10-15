@@ -32,6 +32,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KFL/Hash.hpp>
 
 #include <KlayGE/Imposter.hpp>
 

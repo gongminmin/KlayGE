@@ -58,6 +58,7 @@
 #undef PI
 #endif
 #include <KFL/KFL.hpp>
+#include <KFL/Hash.hpp>
 
 #include <fstream>
 #include <algorithm>

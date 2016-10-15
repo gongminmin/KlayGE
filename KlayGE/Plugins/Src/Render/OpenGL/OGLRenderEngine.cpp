@@ -50,6 +50,7 @@
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/PostProcess.hpp>
+#include <KFL/Hash.hpp>
 
 #include <glloader/glloader.h>
 

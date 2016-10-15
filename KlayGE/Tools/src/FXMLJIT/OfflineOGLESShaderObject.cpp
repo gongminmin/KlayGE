@@ -34,6 +34,7 @@
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KFL/Hash.hpp>
 
 #include <cstdio>
 #include <string>
