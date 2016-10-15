@@ -35,8 +35,6 @@
 
 #include <KFL/PreDeclare.hpp>
 
-#include <boost/functional/hash.hpp>
-
 namespace KlayGE
 {
 #define PRIME_NUM 0x9e3779b9
@@ -118,10 +116,15 @@ namespace KlayGE
 	}
 
 	template <typename T>
+	inline size_t HashValue(T* v)
+	{
+		return static_cast<size_t>(reinterpret_cast<ptrdiff_t>(v));
+	}
+
+	template <typename T>
 	inline void HashCombine(size_t& seed, T const & v)
 	{
-		boost::hash<T> hasher;
-		return HashCombineImpl(seed, hasher(v));
+		return HashCombineImpl(seed, HashValue(v));
 	}
 
 	template <typename T>
