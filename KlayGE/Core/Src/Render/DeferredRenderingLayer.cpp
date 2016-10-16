@@ -1425,11 +1425,12 @@ namespace KlayGE
 					|| ((LightSource::LT_Spot == light.Type()) && (1 == index_in_pass))
 					|| ((LightSource::LT_Sun == light.Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
 				{
+					curr_cascade_index_ = -1;
 					urv = 0;
 				}
 				else
 				{
-					urv = App3DFramework::URV_NeedFlush;
+					urv = App3DFramework::URV_NeedFlush | App3DFramework::URV_OpaqueOnly;
 					switch (pass_rt)
 					{
 					case PRT_ShadowMap:
@@ -1457,7 +1458,6 @@ namespace KlayGE
 						rsm_fb_->Attached(FrameBuffer::ATT_Color0)->Discard();
 						rsm_fb_->Attached(FrameBuffer::ATT_Color1)->Discard();
 						rsm_fb_->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1.0f, 0);
-						urv |= App3DFramework::URV_OpaqueOnly;
 						break;
 					}
 				}

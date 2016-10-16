@@ -100,6 +100,18 @@ void FoliageGBufferVS(float4 pos : POSITION,
 		</pass>
 	</technique>
 
+	<technique name="GenFoliageNoTessTerrainShadowMapTech" inherit="GenNoTessTerrainShadowMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoliageGBufferVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenFoliageNoTessTerrainCascadedShadowMapTech" inherit="GenNoTessTerrainCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoliageGBufferVS()"/>
+		</pass>
+	</technique>
+
 	<shader>
 		<![CDATA[
 void FoliageImpostorGBufferVS(float2 pos2 : POSITION,

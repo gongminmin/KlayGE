@@ -61,7 +61,7 @@ namespace KlayGE
 	struct PerViewport
 	{
 		PerViewport()
-			: attrib(0), curr_merged_buffer_index(0), ssvo_enabled(true)
+			: attrib(0), num_cascades(4), curr_merged_buffer_index(0), ssvo_enabled(true)
 		{
 		}
 

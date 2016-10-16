@@ -45,6 +45,9 @@ namespace KlayGE
 		{
 			this->BindDeferredEffect(SyncLoadRenderEffect("Foliage.fxml"));
 			technique_ = gbuffer_mrt_tech_;
+
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenFoliageNoTessTerrainShadowMapTech");
+			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenFoliageNoTessTerrainCascadedShadowMapTech");
 		}
 
 		void DoBuildMeshInfo() override
@@ -493,11 +496,14 @@ namespace KlayGE
 			}
 		}
 
-		for (size_t plant_type = 0; plant_type < plant_impostor_meshes_.size(); ++ plant_type)
+		if (GetPassCategory(type_) != PC_ShadowMap)
 		{
-			auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
-			mesh->Pass(type_);
-			mesh->Render();
+			for (size_t plant_type = 0; plant_type < plant_impostor_meshes_.size(); ++ plant_type)
+			{
+				auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+				mesh->Pass(type_);
+				mesh->Render();
+			}
 		}
 	}
 }
