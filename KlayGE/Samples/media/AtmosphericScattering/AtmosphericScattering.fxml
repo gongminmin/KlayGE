@@ -3,14 +3,17 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
-	
+
 	<parameter type="float4x4" name="mvp"/>
 
 	<parameter type="float3" name="eye_pos"/>
 	<parameter type="float3" name="look_at_vec"/>
 
-	<parameter type="texture2D" name="earth_color_tex">
-		<annotation type="string" name="SasResourceAddress" value="earth_color.dds"/>
+	<parameter type="texture2D" name="earth_day_tex">
+		<annotation type="string" name="SasResourceAddress" value="earth_day.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="earth_night_tex">
+		<annotation type="string" name="SasResourceAddress" value="earth_night.dds"/>
 	</parameter>
 	<parameter type="texture2D" name="ocean_mask_tex">
 		<annotation type="string" name="SasResourceAddress" value="ocean_mask.dds"/>
@@ -233,7 +236,8 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 
 	float3 normal = pos_os;
 
-	float3 surface_color = earth_color_tex.Sample(linear_sampler, tex).xyz;
+	float3 day_color = earth_day_tex.Sample(linear_sampler, tex).xyz;
+	float3 night_color = earth_night_tex.Sample(linear_sampler, tex).xyz;
 
 	// get the direct light color
 	// from the transmittance of the sun through the atmosphere
@@ -242,7 +246,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	// for shading the landmass we use the Lommel-Seeliger law
 	float dot_nv = max(0, dot(normal, view_dir));
 	float dot_nl = max(0, dot(normal, light_dir));
-	float3 land_color = light_color * surface_color * dot_nl / (dot_nl + dot_nv);
+	float3 land_color = light_color * day_color * dot_nl / (dot_nl + dot_nv) + pow(1 - dot_nl, 8) * night_color;
 
 	// for shading the ocean 
 	// we obtain the skycolor reflection
@@ -260,7 +264,7 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 	ocean_color += light_color * SpecularTerm(0.04f, light_dir, halfway, normal, 32) / pow(dot_lh, 3) * dot_nl;
 
 	// final shaded surface color
-	surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, tex).x);
+	float3 surface_color = lerp(land_color, ocean_color, ocean_mask_tex.Sample(linear_sampler, tex).x);
 
 	// finally obtain the aerial perspective of the shaded surface point
 	// from the camera's point of view
@@ -269,8 +273,8 @@ float4 PlanetPS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 view_d
 
 	return float4(max(color, 0), 1);
 }
-		
-		
+
+
 void AtmosphereVS(float4 pos		: POSITION,
 					float2 tex				: TEXCOORD0,
 					out float2 oTex			: TEXCOORD0,
@@ -313,7 +317,7 @@ float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 vi
 			<state name="back_stencil_func" value="always_pass"/>
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
-			
+
 			<state name="vertex_shader" value="PlanetVS()"/>
 			<state name="pixel_shader" value="PlanetPS()"/>
 		</pass>
@@ -329,7 +333,7 @@ float4 AtmospherePS(float2 tex : TEXCOORD0, float3 pos_os : TEXCOORD1, float3 vi
 			<state name="back_stencil_func" value="always_pass"/>
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
-			
+
 			<state name="vertex_shader" value="AtmosphereVS()"/>
 			<state name="pixel_shader" value="AtmospherePS()"/>
 		</pass>
