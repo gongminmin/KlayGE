@@ -69,7 +69,8 @@ namespace KlayGE
 
 		void Destroy();
 
-		void SwapBuffers();
+		void SwapBuffers() override;
+		void WaitOnSwapBuffers() override;
 
 		std::wstring const & Description() const;
 

@@ -959,11 +959,9 @@ namespace KlayGE
 
 	void RenderEngine::Refresh()
 	{
-		FrameBuffer& fb = *this->ScreenFrameBuffer();
 		if (Context::Instance().AppInstance().MainWnd()->Active())
 		{
 			Context::Instance().SceneManagerInstance().Update();
-			fb.SwapBuffers();
 
 #ifndef KLAYGE_SHIP
 			PerfProfiler::Instance().CollectData();

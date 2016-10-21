@@ -702,13 +702,14 @@ namespace KlayGE
 			TIF(swap_chain_->Present(sync_interval_, present_flags));
 
 			curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
+		}
+	}
 
+	void D3D12RenderWindow::WaitOnSwapBuffers()
+	{
+		if (swap_chain_)
+		{
 			this->WaitForGPU();
-
-			d3d12_re.ResetRenderCmd();
-			d3d12_re.ResetComputeCmd();
-			d3d12_re.ResetCopyCmd();
-			d3d12_re.ClearPSOCache();
 		}
 	}
 

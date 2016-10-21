@@ -78,6 +78,7 @@ namespace KlayGE
 		}
 
 		void BeginFrame() override;
+		void EndFrame() override;
 		void UpdateGPUTimestampsFrequency() override;
 
 		IDXGIFactory4* DXGIFactory4() const;

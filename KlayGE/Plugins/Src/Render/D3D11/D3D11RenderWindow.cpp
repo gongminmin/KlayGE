@@ -55,7 +55,8 @@ namespace KlayGE
 #else
 						:
 #endif
-							adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false)
+							adapter_(adapter), dxgi_stereo_support_(false), dxgi_allow_tearing_(false), dxgi_async_swap_chain_(false),
+								frame_latency_waitable_obj_(0)
 	{
 		// Store info
 		name_				= name;
@@ -105,6 +106,11 @@ namespace KlayGE
 		if (d3d11_re.DXGISubVer() >= 2)
 		{
 			dxgi_stereo_support_ = d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false;
+
+#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+			// Async swap chain doesn't get along very well with desktop full screen
+			dxgi_async_swap_chain_ = true;
+#endif
 		}
 		if (d3d11_re.DXGISubVer() >= 5)
 		{
@@ -381,6 +387,10 @@ namespace KlayGE
 			{
 				sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 			}
+			if (dxgi_async_swap_chain_)
+			{
+				sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+			}
 
 			sc_fs_desc_.RefreshRate.Numerator = 60;
 			sc_fs_desc_.RefreshRate.Denominator = 1;
@@ -460,6 +470,10 @@ namespace KlayGE
 			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 
 			sync_interval_ = std::max(1U, sync_interval_);
+		}
+		if (dxgi_async_swap_chain_)
+		{
+			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 		}
 #endif
 
@@ -575,6 +589,10 @@ namespace KlayGE
 		if (dxgi_allow_tearing_)
 		{
 			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		}
+		if (dxgi_async_swap_chain_)
+		{
+			flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 		}
 
 		this->OnUnbind();
@@ -792,6 +810,11 @@ namespace KlayGE
 #endif
 #endif
 
+		if (frame_latency_waitable_obj_ != 0)
+		{
+			::CloseHandle(frame_latency_waitable_obj_);
+		}
+
 		render_target_view_right_eye_.reset();
 		depth_stencil_view_right_eye_.reset();
 		render_target_view_.reset();
@@ -923,6 +946,16 @@ namespace KlayGE
 		swap_chain_1_->QueryInterface(IID_IDXGISwapChain, reinterpret_cast<void**>(&sc));
 		swap_chain_ = MakeCOMPtr(sc);
 #endif
+
+		if (dxgi_async_swap_chain_)
+		{
+			IDXGISwapChain3* sc3;
+			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3))))
+			{
+				frame_latency_waitable_obj_ = sc3->GetFrameLatencyWaitableObject();
+				sc3->Release();
+			}
+		}
 	}
 
 	void D3D11RenderWindow::SwapBuffers()
@@ -959,6 +992,14 @@ namespace KlayGE
 			{
 				d3d11_re.InvalidRTVCache();
 			}
+		}
+	}
+
+	void D3D11RenderWindow::WaitOnSwapBuffers()
+	{
+		if (swap_chain_ && dxgi_async_swap_chain_)
+		{
+			::WaitForSingleObjectEx(frame_latency_waitable_obj_, 1000, true);
 		}
 	}
 

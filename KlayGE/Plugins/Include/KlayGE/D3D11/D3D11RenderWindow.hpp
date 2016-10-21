@@ -53,7 +53,8 @@ namespace KlayGE
 
 		void Destroy();
 
-		void SwapBuffers();
+		void SwapBuffers() override;
+		void WaitOnSwapBuffers() override;
 
 		std::wstring const & Description() const;
 
@@ -123,6 +124,7 @@ namespace KlayGE
 		D3D11AdapterPtr			adapter_;
 		bool dxgi_stereo_support_;
 		bool dxgi_allow_tearing_;
+		bool dxgi_async_swap_chain_;
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		DXGI_SWAP_CHAIN_DESC sc_desc_;
@@ -135,6 +137,7 @@ namespace KlayGE
 		IDXGISwapChainPtr		swap_chain_;
 		IDXGISwapChain1Ptr		swap_chain_1_;
 		bool					main_wnd_;
+		HANDLE frame_latency_waitable_obj_;
 
 		IAmdDxExtQuadBufferStereoPtr stereo_amd_qb_ext_;
 		uint32_t stereo_amd_right_eye_height_;

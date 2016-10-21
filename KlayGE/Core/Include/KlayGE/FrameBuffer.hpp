@@ -91,6 +91,9 @@ namespace KlayGE
 		virtual void SwapBuffers()
 		{
 		}
+		virtual void WaitOnSwapBuffers()
+		{
+		}
 
 		bool Dirty() const
 		{

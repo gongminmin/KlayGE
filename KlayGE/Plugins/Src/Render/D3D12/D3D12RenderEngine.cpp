@@ -113,6 +113,16 @@ namespace KlayGE
 		RenderEngine::BeginFrame();
 	}
 
+	void D3D12RenderEngine::EndFrame()
+	{
+		RenderEngine::EndFrame();
+
+		this->ResetRenderCmd();
+		this->ResetComputeCmd();
+		this->ResetCopyCmd();
+		this->ClearPSOCache();
+	}
+
 	void D3D12RenderEngine::UpdateGPUTimestampsFrequency()
 	{
 		inv_timestamp_freq_ = 0;

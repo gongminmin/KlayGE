@@ -458,6 +458,10 @@ namespace KlayGE
 	{
 		deferred_mode_ = !!Context::Instance().DeferredRenderingLayerInstance();
 
+		App3DFramework& app = Context::Instance().AppInstance();
+		float const app_time = app.AppTime();
+		float const frame_time = app.FrameTime();
+
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BeginFrame();
 
@@ -467,26 +471,6 @@ namespace KlayGE
 		{
 			update_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
 				std::bind(&SceneManager::UpdateThreadFunc, this)));
-		}
-
-		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
-		ie.Update();
-
-		App3DFramework& app = Context::Instance().AppInstance();
-		float const app_time = app.AppTime();
-		float const frame_time = app.FrameTime();
-
-		for (auto const & camera : cameras_)
-		{
-			camera->Update(app_time, frame_time);
-		}
-
-		for (auto const & light : lights_)
-		{
-			if (light->Enabled())
-			{
-				light->Update(app_time, frame_time);
-			}
 		}
 
 		std::vector<SceneObjectPtr> added_scene_objs;
@@ -513,13 +497,34 @@ namespace KlayGE
 					++ iter;
 				}
 			}
-		
+
 			for (auto const & scene_obj : added_scene_objs)
 			{
 				scene_obj->OnAttachRenderable(true);
 				this->OnAddSceneObject(scene_obj);
 			}
 		}
+
+		FrameBuffer& fb = *re.ScreenFrameBuffer();
+		fb.SwapBuffers();
+
+		InputEngine& ie = Context::Instance().InputFactoryInstance().InputEngineInstance();
+		ie.Update();
+
+		for (auto const & camera : cameras_)
+		{
+			camera->Update(app_time, frame_time);
+		}
+
+		for (auto const & light : lights_)
+		{
+			if (light->Enabled())
+			{
+				light->Update(app_time, frame_time);
+			}
+		}
+
+		fb.WaitOnSwapBuffers();
 
 		re.EndFrame();
 	}
