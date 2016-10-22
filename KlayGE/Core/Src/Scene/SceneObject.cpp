@@ -262,6 +262,10 @@ namespace KlayGE
 		if (renderable_)
 		{
 			renderable_->Pass(type);
+			if (attrib_ & SOA_NotCastShadow)
+			{
+				this->Visible(PC_ShadowMap != GetPassCategory(type));
+			}
 		}
 	}
 
