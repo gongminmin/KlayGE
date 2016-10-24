@@ -143,8 +143,6 @@ namespace KlayGE
 		void DetachSRV(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres);
 		void InvalidRTVCache();
 
-		ID3D11InputLayoutPtr const & CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code);
-
 		HRESULT D3D11CreateDevice(IDXGIAdapter* pAdapter,
 								D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
 								D3D_FEATURE_LEVEL const * pFeatureLevels, UINT FeatureLevels, UINT SDKVersion,
@@ -245,8 +243,6 @@ namespace KlayGE
 		std::vector<uint32_t> compute_uav_init_count_cache_;
 		std::vector<ID3D11RenderTargetView*> rtv_ptr_cache_;
 		ID3D11DepthStencilView* dsv_ptr_cache_;
-
-		std::unordered_map<size_t, ID3D11InputLayoutPtr> input_layout_bank_;
 
 		char const * vs_profile_;
 		char const * ps_profile_;

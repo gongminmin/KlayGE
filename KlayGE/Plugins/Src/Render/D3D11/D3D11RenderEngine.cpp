@@ -524,39 +524,6 @@ namespace KlayGE
 		}
 	}
 
-	ID3D11InputLayoutPtr const & D3D11RenderEngine::CreateD3D11InputLayout(std::vector<D3D11_INPUT_ELEMENT_DESC> const & elems, size_t signature, std::vector<uint8_t> const & vs_code)
-	{
-		size_t elems_signature = 0;
-		for (auto const & elem : elems)
-		{
-			size_t seed = RT_HASH(elem.SemanticName);
-			HashCombine(seed, elem.SemanticIndex);
-			HashCombine(seed, static_cast<uint32_t>(elem.Format));
-			HashCombine(seed, elem.InputSlot);
-			HashCombine(seed, elem.AlignedByteOffset);
-			HashCombine(seed, static_cast<uint32_t>(elem.InputSlotClass));
-			HashCombine(seed, elem.InstanceDataStepRate);
-
-			HashCombine(elems_signature, seed);
-		}
-
-		HashCombine(signature, elems_signature);
-
-		auto iter = input_layout_bank_.find(signature);
-		if (iter != input_layout_bank_.end())
-		{
-			return iter->second;
-		}
-		else
-		{
-			ID3D11InputLayout* ia;
-			TIF(d3d_device_->CreateInputLayout(&elems[0], static_cast<UINT>(elems.size()), &vs_code[0], vs_code.size(), &ia));
-			ID3D11InputLayoutPtr ret = MakeCOMPtr(ia);
-
-			return input_layout_bank_.emplace(signature, ret).first->second;
-		}
-	}
-
 	// 设置当前渲染目标
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::DoBindFrameBuffer(FrameBufferPtr const & fb)
@@ -947,8 +914,6 @@ namespace KlayGE
 		compute_uav_init_count_cache_.clear();
 		rtv_ptr_cache_.clear();
 		dsv_ptr_cache_ = nullptr;
-
-		input_layout_bank_.clear();
 
 		stereo_nv_3d_vision_fb_.reset();
 		stereo_nv_3d_vision_tex_.reset();

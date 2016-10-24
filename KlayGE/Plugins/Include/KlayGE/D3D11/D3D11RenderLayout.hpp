@@ -45,7 +45,7 @@ namespace KlayGE
 
 	private:
 		mutable std::vector<D3D11_INPUT_ELEMENT_DESC> vertex_elems_;
-		mutable std::vector<std::pair<size_t, ID3D11InputLayoutPtr>> input_layouts_;
+		mutable std::vector<std::pair<uint32_t, ID3D11InputLayoutPtr>> input_layouts_;
 
 		mutable std::vector<ID3D11Buffer*> vbs_;
 		mutable std::vector<UINT> strides_;
