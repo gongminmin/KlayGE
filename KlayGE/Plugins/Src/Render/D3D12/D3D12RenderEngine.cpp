@@ -421,10 +421,9 @@ namespace KlayGE
 	{
 		cbv_srv_uav_heap_cache_.clear();
 
-		bool used = false;
-		for (auto const & buff : recycle_res_after_sync_)
+		for (auto const & used_mark : recycle_res_after_sync_)
 		{
-			buff->SetPrivateData(GUID_ResourceUsed, sizeof(used), &used);
+			*used_mark = false;
 		}
 		recycle_res_after_sync_.clear();
 	}

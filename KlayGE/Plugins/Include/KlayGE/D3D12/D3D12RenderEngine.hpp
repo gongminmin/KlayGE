@@ -49,8 +49,6 @@
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12GraphicsBuffer.hpp>
 
-GUID const GUID_ResourceUsed = { 0x09680F67, 0xC7E0, 0x4344, { 0xA6, 0xD9, 0x45, 0xF3, 0x4D, 0x96, 0x41, 0x2D } };
-
 namespace KlayGE
 {
 	class D3D12AdapterList;
@@ -211,9 +209,9 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
-		void AddResourceForRecyclingAfterSync(ID3D12ResourcePtr const & res)
+		void AddResourceForRecyclingAfterSync(bool* used_mark)
 		{
-			recycle_res_after_sync_.insert(res);
+			recycle_res_after_sync_.insert(used_mark);
 		}
 
 	private:
@@ -288,7 +286,7 @@ namespace KlayGE
 		D3D12_VIEWPORT viewport_cache_;
 		D3D12_RECT scissor_rc_cache_;
 		std::vector<GraphicsBufferPtr> so_buffs_;
-		std::set<ID3D12ResourcePtr> recycle_res_after_sync_;
+		std::set<bool*> recycle_res_after_sync_;
 		std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
 		std::unordered_map<size_t, ID3D12RootSignaturePtr> root_signatures_;
 		std::unordered_map<size_t, ID3D12PipelineStatePtr> graphics_psos_;

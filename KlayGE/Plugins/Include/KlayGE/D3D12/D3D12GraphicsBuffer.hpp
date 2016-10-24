@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include <list>
+
 #include <KlayGE/ElementFormat.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
@@ -49,7 +51,7 @@ namespace KlayGE
 
 		ID3D12ResourcePtr const & D3DBuffer() const
 		{
-			return buffer_pool_[buffer_index_];
+			return buffer_;
 		}
 		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
 		{
@@ -86,8 +88,8 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		std::vector<ID3D12ResourcePtr> buffer_pool_;
-		uint32_t buffer_index_;
+		std::list<std::pair<ID3D12ResourcePtr, bool>> buffer_pool_;
+		ID3D12ResourcePtr buffer_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
