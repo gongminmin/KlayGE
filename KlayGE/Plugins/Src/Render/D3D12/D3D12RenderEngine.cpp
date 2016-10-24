@@ -420,8 +420,13 @@ namespace KlayGE
 	void D3D12RenderEngine::ClearPSOCache()
 	{
 		cbv_srv_uav_heap_cache_.clear();
-		pso_cache_.clear();
-		remove_res_after_sync_.clear();
+
+		bool used = false;
+		for (auto const & buff : recycle_res_after_sync_)
+		{
+			buff->SetPrivateData(GUID_ResourceUsed, sizeof(used), &used);
+		}
+		recycle_res_after_sync_.clear();
 	}
 
 	void D3D12RenderEngine::CommitResCmd()
@@ -710,7 +715,6 @@ namespace KlayGE
 		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 		ID3D12PipelineStatePtr pso = this->CreateRenderPSO(pso_desc);
-		pso_cache_.push_back(pso);
 
 		d3d_render_cmd_list_->SetPipelineState(pso.get());
 		d3d_render_cmd_list_->SetGraphicsRootSignature(so->RootSignature().get());
@@ -905,7 +909,6 @@ namespace KlayGE
 		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 		ID3D12PipelineStatePtr pso = this->CreateComputePSO(pso_desc);
-		pso_cache_.push_back(pso);
 
 		d3d_compute_cmd_list_->SetPipelineState(pso.get());
 		d3d_compute_cmd_list_->SetComputeRootSignature(so->RootSignature().get());

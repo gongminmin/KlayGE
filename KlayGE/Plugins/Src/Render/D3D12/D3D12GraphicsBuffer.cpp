@@ -49,7 +49,7 @@ namespace KlayGE
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 							uint32_t size_in_byte, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
-							counter_offset_(0),
+							buffer_index_(0xFFFFFFFFU), counter_offset_(0),
 							fmt_as_shader_res_(fmt), curr_state_(D3D12_RESOURCE_STATE_COMMON)
 	{
 	}
@@ -124,8 +124,13 @@ namespace KlayGE
 		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
-		buffer_ = MakeCOMPtr(buffer);
+		ID3D12ResourcePtr buffer_ptr = MakeCOMPtr(buffer);
+		buffer_index_ = static_cast<uint32_t>(buffer_pool_.size());
+		buffer_pool_.push_back(buffer_ptr);
 		curr_state_ = init_state;
+
+		bool used = true;
+		buffer_ptr->SetPrivateData(GUID_ResourceUsed, sizeof(used), &used);
 
 		if (subres_init != nullptr)
 		{
@@ -145,7 +150,7 @@ namespace KlayGE
 			memcpy(p, subres_init, size_in_byte_);
 			buffer_upload->Unmap(0, nullptr);
 
-			cmd_list->CopyResource(buffer_.get(), buffer_upload.get());
+			cmd_list->CopyResource(buffer_ptr.get(), buffer_upload.get());
 
 			re.CommitResCmd();
 		}
@@ -163,7 +168,7 @@ namespace KlayGE
 			d3d_sr_view.Buffer.StructureByteStride = (access_hint_ & EAH_GPU_Structured) ? structure_byte_stride : 0;
 			d3d_sr_view.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			d3d_sr_view_ = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(buffer_, d3d_sr_view);
+			d3d_sr_view_ = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(buffer_ptr, d3d_sr_view);
 		}
 
 		if ((access_hint_ & EAH_GPU_Write)
@@ -220,7 +225,7 @@ namespace KlayGE
 				d3d_ua_view.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			}
 
-			d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(buffer_, d3d_ua_view);
+			d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(buffer_ptr, d3d_ua_view);
 		}
 	}
 
@@ -230,12 +235,14 @@ namespace KlayGE
 		d3d_ua_view_.reset();
 		counter_offset_ = 0;
 		buffer_counter_upload_.reset();
-		buffer_.reset();
+		buffer_index_ = 0xFFFFFFFFU;
+		buffer_pool_.clear();
 	}
 
 	void* D3D12GraphicsBuffer::Map(BufferAccess ba)
 	{
-		BOOST_ASSERT(buffer_);
+		BOOST_ASSERT(buffer_index_ != 0xFFFFFFFFU);
+		BOOST_ASSERT(buffer_pool_[buffer_index_]);
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (ba)
@@ -248,8 +255,26 @@ namespace KlayGE
 		case BA_Write_Only:
 			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
-				re.AddResourceForRemovingAfterSync(buffer_);
-				this->CreateHWResource(nullptr);
+				bool found = false;
+				for (size_t i = 0; i < buffer_pool_.size(); ++ i)
+				{
+					bool used;
+					UINT size = sizeof(used);
+					buffer_pool_[i]->GetPrivateData(GUID_ResourceUsed, &size, &used);
+					if (!used)
+					{
+						buffer_index_ = static_cast<uint32_t>(i);
+						used = true;
+						buffer_pool_[i]->SetPrivateData(GUID_ResourceUsed, size, &used);
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					this->CreateHWResource(nullptr);
+				}
+				re.AddResourceForRecyclingAfterSync(buffer_pool_[buffer_index_]);
 			}
 			else
 			{
@@ -266,15 +291,16 @@ namespace KlayGE
 		}
 
 		void* p;
-		TIF(buffer_->Map(0, nullptr, &p));
+		TIF(buffer_pool_[buffer_index_]->Map(0, nullptr, &p));
 		return p;
 	}
 
 	void D3D12GraphicsBuffer::Unmap()
 	{
-		BOOST_ASSERT(buffer_);
+		BOOST_ASSERT(buffer_index_ != 0xFFFFFFFFU);
+		BOOST_ASSERT(buffer_pool_[buffer_index_]);
 
-		buffer_->Unmap(0, nullptr);
+		buffer_pool_[buffer_index_]->Unmap(0, nullptr);
 	}
 
 	void D3D12GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
@@ -305,7 +331,7 @@ namespace KlayGE
 			src_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 		src_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-		src_barrier_before.Transition.pResource = buffer_.get();
+		src_barrier_before.Transition.pResource = buffer_pool_[buffer_index_].get();
 		src_barrier_before.Transition.Subresource = 0;
 		dst_barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		dst_barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
@@ -349,7 +375,7 @@ namespace KlayGE
 			cmd_list->ResourceBarrier(n, &barrier_before[0]);
 		}
 
-		cmd_list->CopyBufferRegion(d3d_gb.D3DBuffer().get(), 0, buffer_.get(), 0, size_in_byte_);
+		cmd_list->CopyBufferRegion(d3d_gb.D3DBuffer().get(), 0, buffer_pool_[buffer_index_].get(), 0, size_in_byte_);
 
 		D3D12_RESOURCE_BARRIER barrier_after[2];
 		if (n > 0)
@@ -358,7 +384,7 @@ namespace KlayGE
 			barrier_after[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			barrier_after[0].Transition.StateBefore = barrier_before[0].Transition.StateAfter;
 			barrier_after[0].Transition.StateAfter = barrier_before[0].Transition.StateBefore;
-			barrier_after[0].Transition.pResource = buffer_.get();
+			barrier_after[0].Transition.pResource = buffer_pool_[buffer_index_].get();
 			barrier_after[0].Transition.Subresource = 0;
 		}
 		if (n > 1)
@@ -391,7 +417,7 @@ namespace KlayGE
 		}
 		else
 		{
-			barrier.Transition.pResource = buffer_.get();
+			barrier.Transition.pResource = buffer_pool_[buffer_index_].get();
 			barrier.Transition.StateBefore = curr_state_;
 			barrier.Transition.StateAfter = target_state;
 			curr_state_ = target_state;

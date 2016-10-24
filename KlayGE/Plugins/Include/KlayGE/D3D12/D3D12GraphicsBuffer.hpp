@@ -49,7 +49,7 @@ namespace KlayGE
 
 		ID3D12ResourcePtr const & D3DBuffer() const
 		{
-			return buffer_;
+			return buffer_pool_[buffer_index_];
 		}
 		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
 		{
@@ -86,7 +86,8 @@ namespace KlayGE
 		void Unmap();
 
 	private:
-		ID3D12ResourcePtr buffer_;
+		std::vector<ID3D12ResourcePtr> buffer_pool_;
+		uint32_t buffer_index_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
