@@ -204,9 +204,9 @@ namespace KlayGE
 
 		GLuint restart_index_;
 
-		std::set<ElementFormat> vertex_format_;
-		std::set<ElementFormat> texture_format_;
-		std::set<ElementFormat> rendertarget_format_;
+		std::vector<ElementFormat> vertex_format_;
+		std::vector<ElementFormat> texture_format_;
+		std::vector<ElementFormat> rendertarget_format_;
 		uint32_t max_samples_;
 
 		std::map<GLuint, std::map<GLint, int4>> uniformi_cache_;

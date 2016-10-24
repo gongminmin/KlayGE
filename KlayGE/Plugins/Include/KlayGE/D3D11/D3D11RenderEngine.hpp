@@ -25,9 +25,7 @@
 #include <KFL/Color.hpp>
 
 #include <vector>
-#include <set>
 #include <map>
-#include <unordered_map>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -263,8 +261,8 @@ namespace KlayGE
 		FrameBufferPtr stereo_nv_3d_vision_fb_;
 		TexturePtr stereo_nv_3d_vision_tex_;
 
-		std::set<ElementFormat> vertex_format_;
-		std::set<ElementFormat> texture_format_;
+		std::vector<ElementFormat> vertex_format_;
+		std::vector<ElementFormat> texture_format_;
 		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t>>> rendertarget_format_;
 
 		ID3D11QueryPtr timestamp_disjoint_query_;

@@ -1444,12 +1444,14 @@ namespace KlayGE
 
 	bool D3D12RenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
 	{
-		return vertex_format_.find(elem_fmt) != vertex_format_.end();
+		auto iter = std::lower_bound(vertex_format_.begin(), vertex_format_.end(), elem_fmt);
+		return (iter != vertex_format_.end()) && (*iter == elem_fmt);
 	}
 
 	bool D3D12RenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
 	{
-		return texture_format_.find(elem_fmt) != texture_format_.end();
+		auto iter = std::lower_bound(texture_format_.begin(), texture_format_.end(), elem_fmt);
+		return (iter != texture_format_.end()) && (*iter == elem_fmt);
 	}
 
 	bool D3D12RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
@@ -1652,38 +1654,38 @@ namespace KlayGE
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					vertex_format_.insert(fmts[i].first);
+					vertex_format_.push_back(fmts[i].first);
 				}
 
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_LOAD;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 			}
 			else
@@ -1695,33 +1697,33 @@ namespace KlayGE
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					vertex_format_.insert(fmts[i].first);
+					vertex_format_.push_back(fmts[i].first);
 				}
 
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					texture_format_.insert(fmts[i].first);
+					texture_format_.push_back(fmts[i].first);
 				}
 			}
 
@@ -1772,6 +1774,11 @@ namespace KlayGE
 				}
 			}
 		}
+
+		std::sort(vertex_format_.begin(), vertex_format_.end());
+		vertex_format_.erase(std::unique(vertex_format_.begin(), vertex_format_.end()), vertex_format_.end());
+		std::sort(texture_format_.begin(), texture_format_.end());
+		texture_format_.erase(std::unique(texture_format_.begin(), texture_format_.end()), texture_format_.end());
 
 		caps_.vertex_format_support = std::bind<bool>(&D3D12RenderEngine::VertexFormatSupport, this,
 			std::placeholders::_1);
