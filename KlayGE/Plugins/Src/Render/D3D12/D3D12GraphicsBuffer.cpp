@@ -49,7 +49,7 @@ namespace KlayGE
 	D3D12GraphicsBuffer::D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 							uint32_t size_in_byte, ElementFormat fmt)
 						: GraphicsBuffer(usage, access_hint, size_in_byte),
-							counter_offset_(0),
+							next_free_index_(0), counter_offset_(0),
 							fmt_as_shader_res_(fmt), curr_state_(D3D12_RESOURCE_STATE_COMMON)
 	{
 	}
@@ -125,7 +125,8 @@ namespace KlayGE
 			&res_desc, init_state, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 		buffer_ = MakeCOMPtr(buffer);
-		buffer_pool_.emplace_back(buffer_, true);
+		buffer_pool_.push_back(buffer_);
+		next_free_index_ = buffer_pool_.size();
 		curr_state_ = init_state;
 
 		if (subres_init != nullptr)
@@ -250,25 +251,16 @@ namespace KlayGE
 		case BA_Write_Only:
 			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
-				bool* used_mark = nullptr;
-				bool found = false;
-				for (auto iter = buffer_pool_.begin(); iter != buffer_pool_.end(); ++ iter)
-				{
-					if (!iter->second)
-					{
-						buffer_ = iter->first;
-						iter->second = true;
-						used_mark = &iter->second;
-						found = true;
-						break;
-					}
-				}
-				if (!found)
+				if (next_free_index_ == buffer_pool_.size())
 				{
 					this->CreateHWResource(nullptr);
-					used_mark = &buffer_pool_.back().second;
 				}
-				re.AddResourceForRecyclingAfterSync(used_mark);
+				else
+				{
+					buffer_ = buffer_pool_[next_free_index_];
+					++ next_free_index_;
+				}
+				re.AddResourceForRecyclingAfterSync(this);
 			}
 			else
 			{
@@ -416,5 +408,10 @@ namespace KlayGE
 			curr_state_ = target_state;
 			return true;
 		}
+	}
+
+	void D3D12GraphicsBuffer::ResetBufferPool()
+	{
+		next_free_index_ = 0;
 	}
 }

@@ -82,13 +82,15 @@ namespace KlayGE
 
 		bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
 
-	private:
+		void ResetBufferPool();
 
+	private:
 		void* Map(BufferAccess ba);
 		void Unmap();
 
 	private:
-		std::list<std::pair<ID3D12ResourcePtr, bool>> buffer_pool_;
+		std::vector<ID3D12ResourcePtr> buffer_pool_;
+		size_t next_free_index_;
 		ID3D12ResourcePtr buffer_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;

@@ -421,9 +421,9 @@ namespace KlayGE
 	{
 		cbv_srv_uav_heap_cache_.clear();
 
-		for (auto const & used_mark : recycle_res_after_sync_)
+		for (auto const & buff : recycle_res_after_sync_)
 		{
-			*used_mark = false;
+			buff->ResetBufferPool();
 		}
 		recycle_res_after_sync_.clear();
 	}
