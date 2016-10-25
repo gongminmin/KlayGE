@@ -187,7 +187,9 @@ namespace KlayGE
 						if (small_obj_threshold_ > 0)
 						{
 							AABBox const & aabb_ws = obj->PosBoundWS();
-							bo = (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_) ? BO_Yes : BO_No;
+							bo = ((MathLib::ortho_area(camera.ForwardVec(), aabb_ws) > small_obj_threshold_)
+								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+								? BO_Yes : BO_No;
 						}
 						else
 						{
@@ -213,7 +215,7 @@ namespace KlayGE
 			{
 				if (obj->Visible())
 				{
-					BoundOverlap visible = this->VisibleTestFromParent(obj.get(), camera.EyePos(), view_proj);
+					BoundOverlap visible = this->VisibleTestFromParent(obj.get(), camera.ForwardVec(), camera.EyePos(), view_proj);
 					if (BO_Partial == visible)
 					{
 						uint32_t const attr = obj->Attrib();
@@ -364,7 +366,9 @@ namespace KlayGE
 		}
 
 		octree_node_t& node = octree_[index];
-		if ((small_obj_threshold_ <= 0) || (MathLib::perspective_area(camera.EyePos(), view_proj, node.bb) > small_obj_threshold_))
+		if ((small_obj_threshold_ <= 0)
+			|| ((MathLib::ortho_area(camera.ForwardVec(), node.bb) > small_obj_threshold_)
+				&& (MathLib::perspective_area(camera.EyePos(), view_proj, node.bb) > small_obj_threshold_)))
 		{
 			BoundOverlap const vis = frustum_->Intersect(node.bb);
 			node.visible = vis;
@@ -417,12 +421,13 @@ namespace KlayGE
 			{
 				if ((BO_No == so->VisibleMark()) && so->Visible())
 				{
-					BoundOverlap visible = this->VisibleTestFromParent(so, camera.EyePos(), view_proj);
+					BoundOverlap visible = this->VisibleTestFromParent(so, camera.ForwardVec(), camera.EyePos(), view_proj);
 					if (BO_Partial == visible)
 					{
 						AABBox const & aabb_ws = so->PosBoundWS();
 						if (so->Parent() || (small_obj_threshold_ <= 0)
-							|| (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_))
+							|| ((MathLib::ortho_area(camera.ForwardVec(), node.bb) > small_obj_threshold_)
+								&& (MathLib::perspective_area(camera.EyePos(), view_proj, aabb_ws) > small_obj_threshold_)))
 						{
 							visible = frustum_->Intersect(aabb_ws);
 						}

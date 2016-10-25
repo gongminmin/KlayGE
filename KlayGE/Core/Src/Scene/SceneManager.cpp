@@ -132,7 +132,7 @@ namespace KlayGE
 			uint32_t const attr = so->Attrib();
 			if (so->Visible())
 			{
-				visible = this->VisibleTestFromParent(so, camera.EyePos(), view_proj);
+				visible = this->VisibleTestFromParent(so, camera.ForwardVec(), camera.EyePos(), view_proj);
 				if (BO_Partial == visible)
 				{
 					if (attr & SceneObject::SOA_Moveable)
@@ -144,8 +144,9 @@ namespace KlayGE
 					{
 						if (small_obj_threshold_ > 0)
 						{
-							visible = (MathLib::perspective_area(camera.EyePos(), view_proj,
-								so->PosBoundWS()) > small_obj_threshold_) ? BO_Yes : BO_No;
+							visible = ((MathLib::ortho_area(camera.ForwardVec(), so->PosBoundWS()) > small_obj_threshold_)
+								&& (MathLib::perspective_area(camera.EyePos(), view_proj, so->PosBoundWS()) > small_obj_threshold_))
+								? BO_Yes : BO_No;
 						}
 						else
 						{
@@ -810,7 +811,8 @@ namespace KlayGE
 		}
 	}
 
-	BoundOverlap SceneManager::VisibleTestFromParent(SceneObject* obj, float3 const & eye_pos, float4x4 const & view_proj)
+	BoundOverlap SceneManager::VisibleTestFromParent(SceneObject* obj, float3 const & view_dir, float3 const & eye_pos,
+		float4x4 const & view_proj)
 	{
 		BoundOverlap visible;
 		if (obj->Parent())
@@ -832,8 +834,9 @@ namespace KlayGE
 				{
 					if (small_obj_threshold_ > 0)
 					{
-						visible = (MathLib::perspective_area(eye_pos, view_proj,
-							obj->PosBoundWS()) > small_obj_threshold_) ? parent_bo : BO_No;
+						visible = ((MathLib::ortho_area(view_dir, obj->PosBoundWS()) > small_obj_threshold_)
+							&& (MathLib::perspective_area(eye_pos, view_proj, obj->PosBoundWS()) > small_obj_threshold_))
+							? parent_bo : BO_No;
 					}
 					else
 					{

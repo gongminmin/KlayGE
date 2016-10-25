@@ -713,17 +713,17 @@ namespace KlayGE
 				return 0;
 			}
 
-			Vector_T<T, 3> dst[8];
+			Vector_T<T, 2> dst[8];
 			for (uint32_t i = 0; i < num; ++ i)
 			{
-				dst[i] = MathLib::transform_coord(aabbox.Corner(HULL_VERTEX[pos][i]), view_proj);
-				dst[i] = dst[i] * T(0.5) + Vector_T<T, 3>(0.5, 0.5, 0.0);
+				Vector_T<T, 3> v = MathLib::transform_coord(aabbox.Corner(HULL_VERTEX[pos][i]), view_proj);
+				dst[i] = Vector_T<T, 2>(v.x(), v.y()) * T(0.5) + Vector_T<T, 2>(0.5, 0.5);
 			}
 
-			T sum = 0;
-			for (uint32_t i = 0; i < num; ++ i)
+			T sum = abs((dst[num - 1].x() - dst[0].x()) * (dst[num - 1].y() + dst[0].y()));
+			for (uint32_t i = 0; i < num - 1; ++ i)
 			{
-				int next = (i + 1) % num;
+				uint32_t const next = i + 1;
 				sum += abs((dst[i].x() - dst[next].x()) * (dst[i].y() + dst[next].y()));
 			}
 			return sum / 2;
