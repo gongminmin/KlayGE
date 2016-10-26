@@ -386,6 +386,7 @@ namespace KlayGE
 
 			Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 			*(effect_->ParameterByName("inv_proj")) = camera.InverseProjMatrix();
+			*(effect_->ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};
 
