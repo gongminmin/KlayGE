@@ -239,6 +239,7 @@ namespace KlayGE
 
 		bool				front_stencil_enable;
 		CompareFunction		front_stencil_func;
+		uint16_t			front_stencil_ref;
 		uint16_t			front_stencil_read_mask;
 		uint16_t			front_stencil_write_mask;
 		StencilOperation	front_stencil_fail;
@@ -247,6 +248,7 @@ namespace KlayGE
 
 		bool				back_stencil_enable;
 		CompareFunction		back_stencil_func;
+		uint16_t			back_stencil_ref;
 		uint16_t			back_stencil_read_mask;
 		uint16_t			back_stencil_write_mask;
 		StencilOperation	back_stencil_fail;
@@ -260,6 +262,9 @@ namespace KlayGE
 
 	struct KLAYGE_CORE_API BlendStateDesc
 	{
+		Color blend_factor;
+		uint32_t sample_mask;
+
 		bool				alpha_to_coverage_enable;
 		bool				independent_blend_enable;
 
@@ -304,73 +309,40 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API RasterizerStateObject
+	class KLAYGE_CORE_API RenderStateObject
 	{
 	public:
-		explicit RasterizerStateObject(RasterizerStateDesc const & desc)
-			: desc_(desc)
+		explicit RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+				BlendStateDesc const & bs_desc)
+			: rs_desc_(rs_desc), dss_desc_(dss_desc), bs_desc_(bs_desc)
 		{
 		}
 
-		virtual ~RasterizerStateObject()
+		virtual ~RenderStateObject()
 		{
 		}
 
-		RasterizerStateDesc const & GetDesc() const
+		RasterizerStateDesc const & GetRasterizerStateDesc() const
 		{
-			return desc_;
+			return rs_desc_;
+		}
+
+		DepthStencilStateDesc const & GetDepthStencilStateDesc() const
+		{
+			return dss_desc_;
+		}
+
+		BlendStateDesc const & GetBlendStateDesc() const
+		{
+			return bs_desc_;
 		}
 
 		virtual void Active() = 0;
 
 	protected:
-		RasterizerStateDesc desc_;
-	};
-
-	class KLAYGE_CORE_API DepthStencilStateObject
-	{
-	public:
-		explicit DepthStencilStateObject(DepthStencilStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
-
-		virtual ~DepthStencilStateObject()
-		{
-		}
-
-		DepthStencilStateDesc const & GetDesc() const
-		{
-			return desc_;
-		}
-
-		virtual void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref) = 0;
-
-	protected:
-		DepthStencilStateDesc desc_;
-	};
-
-	class KLAYGE_CORE_API BlendStateObject
-	{
-	public:
-		explicit BlendStateObject(BlendStateDesc const & desc)
-			: desc_(desc)
-		{
-		}
-
-		virtual ~BlendStateObject()
-		{
-		}
-
-		BlendStateDesc const & GetDesc() const
-		{
-			return desc_;
-		}
-
-		virtual void Active(Color const & blend_factor, uint32_t sample_mask) = 0;
-
-	protected:
-		BlendStateDesc desc_;
+		RasterizerStateDesc rs_desc_;
+		DepthStencilStateDesc dss_desc_;
+		BlendStateDesc bs_desc_;
 	};
 
 	class KLAYGE_CORE_API SamplerStateObject

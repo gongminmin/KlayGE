@@ -71,7 +71,7 @@
 using namespace std;
 using namespace KlayGE;
 
-uint32_t const KFX_VERSION = 0x0108;
+uint32_t const KFX_VERSION = 0x0110;
 
 int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
 {

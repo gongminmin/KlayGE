@@ -71,8 +71,8 @@ namespace KlayGE
 		GLuint old_fbo = re.BindFramebuffer();
 		re.BindFramebuffer(fbo_);
 
-		DepthStencilStateDesc const & ds_desc = re.CurDSSObj()->GetDesc();
-		BlendStateDesc const & blend_desc = re.CurBSObj()->GetDesc();
+		DepthStencilStateDesc const & ds_desc = re.CurRenderStateObject()->GetDepthStencilStateDesc();
+		BlendStateDesc const & blend_desc = re.CurRenderStateObject()->GetBlendStateDesc();
 
 		if (flags & GL_COLOR_BUFFER_BIT)
 		{

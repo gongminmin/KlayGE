@@ -20,27 +20,18 @@
 
 namespace KlayGE
 {
-	class OGLESRasterizerStateObject : public RasterizerStateObject
+	class OGLESRenderStateObject : public RenderStateObject
 	{
 	public:
-		explicit OGLESRasterizerStateObject(RasterizerStateDesc const & desc);
+		OGLESRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+			BlendStateDesc const & bs_desc);
 
 		void Active();
 		void ForceDefaultState();
 
 	private:
 		GLenum ogl_front_face_;
-	};
 
-	class OGLESDepthStencilStateObject : public DepthStencilStateObject
-	{
-	public:
-		explicit OGLESDepthStencilStateObject(DepthStencilStateDesc const & desc);
-
-		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
-		void ForceDefaultState();
-
-	private:
 		GLboolean ogl_depth_write_mask_;
 		GLenum ogl_depth_func_;
 		GLenum ogl_front_stencil_func_;
@@ -51,17 +42,7 @@ namespace KlayGE
 		GLenum ogl_back_stencil_fail_;
 		GLenum ogl_back_stencil_depth_fail_;
 		GLenum ogl_back_stencil_pass_;
-	};
 
-	class OGLESBlendStateObject : public BlendStateObject
-	{
-	public:
-		explicit OGLESBlendStateObject(BlendStateDesc const & desc);
-
-		void Active(Color const & blend_factor, uint32_t sample_mask);
-		void ForceDefaultState();
-
-	private:
 		GLenum ogl_blend_op_;
 		GLenum ogl_blend_op_alpha_;
 		GLenum ogl_src_blend_;

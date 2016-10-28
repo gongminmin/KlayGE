@@ -255,19 +255,10 @@ namespace KlayGE
 		return MakeUniquePtr<D3D12RenderEngine>();
 	}
 
-	RasterizerStateObjectPtr D3D12RenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
+	RenderStateObjectPtr D3D12RenderFactory::DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc,
+		DepthStencilStateDesc const & dss_desc, BlendStateDesc const & bs_desc)
 	{
-		return MakeSharedPtr<D3D12RasterizerStateObject>(desc);
-	}
-
-	DepthStencilStateObjectPtr D3D12RenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
-	{
-		return MakeSharedPtr<D3D12DepthStencilStateObject>(desc);
-	}
-
-	BlendStateObjectPtr D3D12RenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
-	{
-		return MakeSharedPtr<D3D12BlendStateObject>(desc);
+		return MakeSharedPtr<D3D12RenderStateObject>(rs_desc, dss_desc, bs_desc);
 	}
 
 	SamplerStateObjectPtr D3D12RenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)

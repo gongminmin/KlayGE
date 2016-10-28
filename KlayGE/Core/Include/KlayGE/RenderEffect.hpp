@@ -881,17 +881,9 @@ namespace KlayGE
 			return is_validate_;
 		}
 
-		RasterizerStateObjectPtr const & GetRasterizerStateObject() const
+		RenderStateObjectPtr const & GetRenderStateObject() const
 		{
-			return rasterizer_state_obj_;
-		}
-		DepthStencilStateObjectPtr const & GetDepthStencilStateObject() const
-		{
-			return depth_stencil_state_obj_;
-		}
-		BlendStateObjectPtr const & GetBlendStateObject() const
-		{
-			return blend_state_obj_;
+			return render_state_obj_;
 		}
 		ShaderObjectPtr const & GetShaderObject(RenderEffect const & effect) const
 		{
@@ -925,12 +917,7 @@ namespace KlayGE
 		std::shared_ptr<std::vector<std::pair<std::string, std::string>>> macros_;
 		std::array<uint32_t, ShaderObject::ST_NumShaderTypes> shader_desc_ids_;
 
-		RasterizerStateObjectPtr rasterizer_state_obj_;
-		DepthStencilStateObjectPtr depth_stencil_state_obj_;
-		uint16_t front_stencil_ref_, back_stencil_ref_;
-		BlendStateObjectPtr blend_state_obj_;
-		Color blend_factor_;
-		uint32_t sample_mask_;
+		RenderStateObjectPtr render_state_obj_;
 		uint32_t shader_obj_index_;
 
 		bool is_validate_;

@@ -116,9 +116,7 @@ namespace KlayGE
 		void CreateRenderWindow(std::string const & name, RenderSettings& settings);
 		void DestroyRenderWindow();
 
-		void SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
-			DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
-			BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask);
+		void SetStateObject(RenderStateObjectPtr const & rs_obj);
 
 		void BindFrameBuffer(FrameBufferPtr const & fb);
 		FrameBufferPtr const & CurFrameBuffer() const;
@@ -194,33 +192,9 @@ namespace KlayGE
 			return motion_frames_;
 		}
 
-		RasterizerStateObjectPtr const & CurRSObj() const
+		RenderStateObjectPtr const & CurRenderStateObject() const
 		{
 			return cur_rs_obj_;
-		}
-		DepthStencilStateObjectPtr const & CurDSSObj() const
-		{
-			return cur_dss_obj_;
-		}
-		uint16_t CurFrontStencilRef() const
-		{
-			return cur_front_stencil_ref_;
-		}
-		uint16_t CurBackStencilRef() const
-		{
-			return cur_back_stencil_ref_;
-		}
-		BlendStateObjectPtr const & CurBSObj() const
-		{
-			return cur_bs_obj_;
-		}
-		Color const & CurBlendFactor() const
-		{
-			return cur_blend_factor_;
-		}
-		uint32_t CurSampleMask() const
-		{
-			return cur_sample_mask_;
 		}
 
 		RenderLayoutPtr const & PostProcessRenderLayout() const
@@ -313,14 +287,8 @@ namespace KlayGE
 
 		RenderDeviceCaps caps_;
 
-		RasterizerStateObjectPtr cur_rs_obj_;
-		RasterizerStateObjectPtr cur_line_rs_obj_;
-		DepthStencilStateObjectPtr cur_dss_obj_;
-		uint16_t cur_front_stencil_ref_;
-		uint16_t cur_back_stencil_ref_;
-		BlendStateObjectPtr cur_bs_obj_;
-		Color cur_blend_factor_;
-		uint32_t cur_sample_mask_;
+		RenderStateObjectPtr cur_rs_obj_;
+		RenderStateObjectPtr cur_line_rs_obj_;
 
 		float default_fov_;
 		float default_render_width_scale_;

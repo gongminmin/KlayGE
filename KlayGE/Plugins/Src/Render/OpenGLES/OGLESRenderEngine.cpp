@@ -305,12 +305,8 @@ namespace KlayGE
 	void OGLESRenderEngine::InitRenderStates()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
-		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
-		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
-		checked_pointer_cast<OGLESRasterizerStateObject>(cur_rs_obj_)->ForceDefaultState();
-		checked_pointer_cast<OGLESDepthStencilStateObject>(cur_dss_obj_)->ForceDefaultState();
-		checked_pointer_cast<OGLESBlendStateObject>(cur_bs_obj_)->ForceDefaultState();
+		cur_rs_obj_ = rf.MakeRenderStateObject(RasterizerStateDesc(), DepthStencilStateDesc(), BlendStateDesc());
+		checked_pointer_cast<OGLESRenderStateObject>(cur_rs_obj_)->ForceDefaultState();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		if (caps_.primitive_restart_support)

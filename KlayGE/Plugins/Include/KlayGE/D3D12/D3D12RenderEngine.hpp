@@ -156,7 +156,7 @@ namespace KlayGE
 		}
 
 		void OMSetStencilRef(uint16_t stencil_ref);
-		void OMSetBlendState(Color const & blend_factor, uint32_t sample_mask);
+		void OMSetBlendFactor(Color const & blend_factor);
 		void RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports);
 		
 		void ResetRenderStates();
@@ -281,7 +281,6 @@ namespace KlayGE
 
 		uint16_t stencil_ref_cache_;
 		Color blend_factor_cache_;
-		uint32_t sample_mask_cache_;
 		RenderLayout::topology_type topology_type_cache_;
 		D3D12_VIEWPORT viewport_cache_;
 		D3D12_RECT scissor_rc_cache_;

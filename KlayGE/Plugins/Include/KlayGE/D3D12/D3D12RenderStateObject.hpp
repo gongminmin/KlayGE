@@ -38,52 +38,40 @@
 
 namespace KlayGE
 {
-	class D3D12RasterizerStateObject : public RasterizerStateObject
+	class D3D12RenderStateObject : public RenderStateObject
 	{
 	public:
-		explicit D3D12RasterizerStateObject(RasterizerStateDesc const & desc);
+		D3D12RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+			BlendStateDesc const & bs_desc);
 
 		void Active();
 
-		D3D12_RASTERIZER_DESC const & D3DDesc() const
+		ID3D12PipelineStatePtr RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so, FrameBufferPtr const & fb,
+			bool has_tessellation) const;
+		ID3D12PipelineStatePtr RetrieveComputePSO(ShaderObjectPtr const & so) const;
+
+		D3D12_RASTERIZER_DESC const & D3DRasterizerDesc() const
 		{
-			return rasterizer_desc_;
+			return ps_desc_.graphics_ps_desc.RasterizerState;
+		}
+		D3D12_DEPTH_STENCIL_DESC const & D3DDepthStencilDesc() const
+		{
+			return ps_desc_.graphics_ps_desc.DepthStencilState;
+		}
+		D3D12_BLEND_DESC const & D3DBlendDesc() const
+		{
+			return ps_desc_.graphics_ps_desc.BlendState;
 		}
 
 	private:
-		D3D12_RASTERIZER_DESC rasterizer_desc_;
-	};
-
-	class D3D12DepthStencilStateObject : public DepthStencilStateObject
-	{
-	public:
-		explicit D3D12DepthStencilStateObject(DepthStencilStateDesc const & desc);
-
-		void Active(uint16_t front_stencil_ref, uint16_t back_stencil_ref);
-
-		D3D12_DEPTH_STENCIL_DESC const & D3DDesc() const
+		union PipelineStateDesc
 		{
-			return depth_stencil_desc_;
-		}
+			D3D12_GRAPHICS_PIPELINE_STATE_DESC graphics_ps_desc;
+			D3D12_COMPUTE_PIPELINE_STATE_DESC compute_ps_desc;
+		};
+		PipelineStateDesc ps_desc_;
 
-	private:
-		D3D12_DEPTH_STENCIL_DESC depth_stencil_desc_;
-	};
-
-	class D3D12BlendStateObject : public BlendStateObject
-	{
-	public:
-		explicit D3D12BlendStateObject(BlendStateDesc const & desc);
-
-		void Active(Color const & blend_factor, uint32_t sample_mask);
-
-		D3D12_BLEND_DESC const & D3DDesc() const
-		{
-			return blend_desc_;
-		}
-
-	private:
-		D3D12_BLEND_DESC blend_desc_;
+		mutable std::unordered_map<size_t, ID3D12PipelineStatePtr> psos_;
 	};
 
 	class D3D12SamplerStateObject : public SamplerStateObject

@@ -460,14 +460,13 @@ namespace KlayGE
 		domain_shader_cache_ = nullptr;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
-		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
-		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
+		cur_rs_obj_ = rf.MakeRenderStateObject(default_rs_desc, default_dss_desc, default_bs_desc);
 
-		rasterizer_state_cache_ = checked_cast<D3D11RasterizerStateObject*>(cur_rs_obj_.get())->D3DRasterizerState();
-		depth_stencil_state_cache_ = checked_cast<D3D11DepthStencilStateObject*>(cur_dss_obj_.get())->D3DDepthStencilState();
+		auto d3d_cur_rs_obj = checked_cast<D3D11RenderStateObject*>(cur_rs_obj_.get());
+		rasterizer_state_cache_ = d3d_cur_rs_obj->D3DRasterizerState();
+		depth_stencil_state_cache_ = d3d_cur_rs_obj->D3DDepthStencilState();
 		stencil_ref_cache_ = 0;
-		blend_state_cache_ = checked_cast<D3D11BlendStateObject*>(cur_bs_obj_.get())->D3DBlendState();
+		blend_state_cache_ = d3d_cur_rs_obj->D3DBlendState();
 		blend_factor_cache_ = Color(1, 1, 1, 1);
 		sample_mask_cache_ = 0xFFFFFFFF;
 

@@ -114,12 +114,8 @@ namespace KlayGE
 	struct DepthStencilStateDesc;
 	struct BlendStateDesc;
 	struct SamplerStateDesc;
-	class RasterizerStateObject;
-	typedef std::shared_ptr<RasterizerStateObject> RasterizerStateObjectPtr;
-	class DepthStencilStateObject;
-	typedef std::shared_ptr<DepthStencilStateObject> DepthStencilStateObjectPtr;
-	class BlendStateObject;
-	typedef std::shared_ptr<BlendStateObject> BlendStateObjectPtr;
+	class RenderStateObject;
+	typedef std::shared_ptr<RenderStateObject> RenderStateObjectPtr;
 	class SamplerStateObject;
 	typedef std::shared_ptr<SamplerStateObject> SamplerStateObjectPtr;
 	class ShaderObject;

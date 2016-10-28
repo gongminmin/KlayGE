@@ -335,13 +335,9 @@ namespace KlayGE
 	void OGLRenderEngine::InitRenderStates()
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRasterizerStateObject(RasterizerStateDesc());
-		polygon_mode_override_ = OGLMapping::Mapping(cur_rs_obj_->GetDesc().polygon_mode);
-		cur_dss_obj_ = rf.MakeDepthStencilStateObject(DepthStencilStateDesc());
-		cur_bs_obj_ = rf.MakeBlendStateObject(BlendStateDesc());
-		checked_pointer_cast<OGLRasterizerStateObject>(cur_rs_obj_)->ForceDefaultState();
-		checked_pointer_cast<OGLDepthStencilStateObject>(cur_dss_obj_)->ForceDefaultState();
-		checked_pointer_cast<OGLBlendStateObject>(cur_bs_obj_)->ForceDefaultState();
+		cur_rs_obj_ = rf.MakeRenderStateObject(RasterizerStateDesc(), DepthStencilStateDesc(), BlendStateDesc());
+		polygon_mode_override_ = OGLMapping::Mapping(cur_rs_obj_->GetRasterizerStateDesc().polygon_mode);
+		checked_pointer_cast<OGLRenderStateObject>(cur_rs_obj_)->ForceDefaultState();
 
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_POLYGON_OFFSET_POINT);

@@ -110,8 +110,8 @@ namespace KlayGE
 			has_stencil = (flags & CBM_Stencil) && IsStencilFormat(ds_view->Format());
 		}
 
-		DepthStencilStateDesc const & ds_desc = re.CurDSSObj()->GetDesc();
-		BlendStateDesc const & blend_desc = re.CurBSObj()->GetDesc();
+		DepthStencilStateDesc const & ds_desc = re.CurRenderStateObject()->GetDepthStencilStateDesc();
+		BlendStateDesc const & blend_desc = re.CurRenderStateObject()->GetBlendStateDesc();
 
 		if (has_color)
 		{

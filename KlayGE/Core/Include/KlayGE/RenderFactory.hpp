@@ -36,7 +36,7 @@
 #include <KlayGE/RenderStateObject.hpp>
 
 #include <string>
-#include <map>
+#include <unordered_map>
 
 namespace KlayGE
 {
@@ -113,18 +113,16 @@ namespace KlayGE
 		virtual UnorderedAccessViewPtr Make3DUnorderedAccessView(Texture& texture, int array_index, uint32_t first_slice, uint32_t num_slices, int level) = 0;
 		virtual UnorderedAccessViewPtr MakeGraphicsBufferUnorderedAccessView(GraphicsBuffer& gbuffer, ElementFormat pf) = 0;
 
-		RasterizerStateObjectPtr MakeRasterizerStateObject(RasterizerStateDesc const & desc);
-		DepthStencilStateObjectPtr MakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
-		BlendStateObjectPtr MakeBlendStateObject(BlendStateDesc const & desc);
+		RenderStateObjectPtr MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+			BlendStateDesc const & bs_desc);
 		SamplerStateObjectPtr MakeSamplerStateObject(SamplerStateDesc const & desc);
 		virtual ShaderObjectPtr MakeShaderObject() = 0;
 
 	private:
 		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() = 0;
 
-		virtual RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc) = 0;
-		virtual DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc) = 0;
-		virtual BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc) = 0;
+		virtual RenderStateObjectPtr DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+			BlendStateDesc const & bs_desc) = 0;
 		virtual SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc) = 0;
 
 		virtual void DoSuspend() = 0;
@@ -133,10 +131,8 @@ namespace KlayGE
 	protected:
 		std::unique_ptr<RenderEngine> re_;
 
-		std::map<RasterizerStateDesc, RasterizerStateObjectPtr> rs_pool_;
-		std::map<DepthStencilStateDesc, DepthStencilStateObjectPtr> dss_pool_;
-		std::map<BlendStateDesc, BlendStateObjectPtr> bs_pool_;
-		std::map<SamplerStateDesc, SamplerStateObjectPtr> ss_pool_;
+		std::unordered_map<size_t, RenderStateObjectPtr> rs_pool_;
+		std::unordered_map<size_t, SamplerStateObjectPtr> ss_pool_;
 	};
 }
 

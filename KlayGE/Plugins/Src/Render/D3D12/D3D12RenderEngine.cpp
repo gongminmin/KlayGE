@@ -505,13 +505,10 @@ namespace KlayGE
 		BlendStateDesc default_bs_desc;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		cur_rs_obj_ = rf.MakeRasterizerStateObject(default_rs_desc);
-		cur_dss_obj_ = rf.MakeDepthStencilStateObject(default_dss_desc);
-		cur_bs_obj_ = rf.MakeBlendStateObject(default_bs_desc);
+		cur_rs_obj_ = rf.MakeRenderStateObject(default_rs_desc, default_dss_desc, default_bs_desc);
 
 		stencil_ref_cache_ = 0;
 		blend_factor_cache_ = Color(1, 1, 1, 1);
-		sample_mask_cache_ = 0xFFFFFFFF;
 
 		topology_type_cache_ = RenderLayout::TT_PointList;
 		d3d_render_cmd_list_->IASetPrimitiveTopology(D3D12Mapping::Mapping(topology_type_cache_));
@@ -564,161 +561,15 @@ namespace KlayGE
 	void D3D12RenderEngine::UpdateRenderPSO(RenderEffect const & effect, RenderTechnique const & tech,
 		RenderPass const & pass, RenderLayout const & rl)
 	{
-		D3D12RenderLayout const & d3d12_rl = *checked_cast<D3D12RenderLayout const *>(&rl);
+		D3D12ShaderObjectPtr const & so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
+		D3D12RenderStateObject const & rso = *checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject());
 
-		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
-
-		D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
-		pso_desc.pRootSignature = so->RootSignature().get();
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_VertexShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.VS.pShaderBytecode = blob->data();
-				pso_desc.VS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.VS.pShaderBytecode = nullptr;
-				pso_desc.VS.BytecodeLength = 0;
-			}
-		}
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_PixelShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.PS.pShaderBytecode = blob->data();
-				pso_desc.PS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.PS.pShaderBytecode = nullptr;
-				pso_desc.PS.BytecodeLength = 0;
-			}
-		}
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_DomainShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.DS.pShaderBytecode = blob->data();
-				pso_desc.DS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.DS.pShaderBytecode = nullptr;
-				pso_desc.DS.BytecodeLength = 0;
-			}
-		}
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_HullShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.HS.pShaderBytecode = blob->data();
-				pso_desc.HS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.HS.pShaderBytecode = nullptr;
-				pso_desc.HS.BytecodeLength = 0;
-			}
-		}
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_GeometryShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.GS.pShaderBytecode = blob->data();
-				pso_desc.GS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.GS.pShaderBytecode = nullptr;
-				pso_desc.GS.BytecodeLength = 0;
-			}
-		}
-
-		auto const & so_decls = so->SODecl();
-		std::vector<UINT> so_strides(so_decls.size());
-		for (size_t i = 0; i < so_decls.size(); ++ i)
-		{
-			so_strides[i] = so_decls[i].ComponentCount * sizeof(float);
-		}
-		pso_desc.StreamOutput.pSODeclaration = so_decls.empty() ? nullptr : &so_decls[0];
-		pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decls.size());
-		pso_desc.StreamOutput.pBufferStrides = so_strides.empty() ? nullptr : &so_strides[0];
-		pso_desc.StreamOutput.NumStrides = static_cast<UINT>(so_strides.size());
-		pso_desc.StreamOutput.RasterizedStream = so->RasterizedStream();
-
-		pso_desc.BlendState = checked_pointer_cast<D3D12BlendStateObject>(pass.GetBlendStateObject())->D3DDesc();
-		pso_desc.SampleMask = sample_mask_cache_;
-		pso_desc.RasterizerState = checked_pointer_cast<D3D12RasterizerStateObject>(pass.GetRasterizerStateObject())->D3DDesc();
-		pso_desc.DepthStencilState = checked_pointer_cast<D3D12DepthStencilStateObject>(pass.GetDepthStencilStateObject())->D3DDesc();
-		pso_desc.InputLayout.pInputElementDescs = d3d12_rl.InputElementDesc().empty() ? nullptr : &d3d12_rl.InputElementDesc()[0];
-		pso_desc.InputLayout.NumElements = static_cast<UINT>(d3d12_rl.InputElementDesc().size());
-		pso_desc.IBStripCutValue = (EF_R16UI == rl.IndexStreamFormat())
-			? D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
-
-		RenderLayout::topology_type tt = rl.TopologyType();
-		if (tech.HasTessellation())
-		{
-			switch (tt)
-			{
-			case RenderLayout::TT_PointList:
-				tt = RenderLayout::TT_1_Ctrl_Pt_PatchList;
-				break;
-
-			case RenderLayout::TT_LineList:
-				tt = RenderLayout::TT_2_Ctrl_Pt_PatchList;
-				break;
-
-			case RenderLayout::TT_TriangleList:
-				tt = RenderLayout::TT_3_Ctrl_Pt_PatchList;
-				break;
-
-			default:
-				break;
-			}
-		}
-		pso_desc.PrimitiveTopologyType = D3D12Mapping::MappingPriTopoType(tt);
-
-		pso_desc.NumRenderTargets = 0;
-		FrameBufferPtr const & fb = this->CurFrameBuffer();
-		for (int i = sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]) - 1; i >= 0; -- i)
-		{
-			if (fb->Attached(FrameBuffer::ATT_Color0 + i))
-			{
-				pso_desc.NumRenderTargets = i + 1;
-				break;
-			}
-		}
-		for (uint32_t i = 0; i < pso_desc.NumRenderTargets; ++ i)
-		{
-			pso_desc.RTVFormats[i] = D3D12Mapping::MappingFormat(fb->Attached(FrameBuffer::ATT_Color0 + i)->Format());
-		}
-		for (uint32_t i = pso_desc.NumRenderTargets; i < sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]); ++ i)
-		{
-			pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
-		}
-		if (fb->Attached(FrameBuffer::ATT_DepthStencil))
-		{
-			pso_desc.DSVFormat = D3D12Mapping::MappingFormat(fb->Attached(FrameBuffer::ATT_DepthStencil)->Format());
-		}
-		else
-		{
-			pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
-		}
-		pso_desc.SampleDesc.Count = 1;
-		pso_desc.SampleDesc.Quality = 0;
-		pso_desc.NodeMask = 0;
-		pso_desc.CachedPSO.pCachedBlob = nullptr;
-		pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
-		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-
-		ID3D12PipelineStatePtr pso = this->CreateRenderPSO(pso_desc);
+		ID3D12PipelineStatePtr pso = rso.RetrieveGraphicsPSO(rl, so, this->CurFrameBuffer(), tech.HasTessellation());
 
 		d3d_render_cmd_list_->SetPipelineState(pso.get());
 		d3d_render_cmd_list_->SetGraphicsRootSignature(so->RootSignature().get());
 
-		if (pass.GetRasterizerStateObject()->GetDesc().scissor_enable)
+		if (pass.GetRenderStateObject()->GetRasterizerStateDesc().scissor_enable)
 		{
 			d3d_render_cmd_list_->RSSetScissorRects(1, &scissor_rc_cache_);
 		}
@@ -885,29 +736,10 @@ namespace KlayGE
 
 	void D3D12RenderEngine::UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass)
 	{
-		D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
+		D3D12ShaderObjectPtr const & so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
+		D3D12RenderStateObject const & rso = *checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject());
 
-		D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
-		pso_desc.pRootSignature = so->RootSignature().get();
-		{
-			auto const & blob = so->ShaderBlob(ShaderObject::ST_ComputeShader);
-			if (blob && !blob->empty())
-			{
-				pso_desc.CS.pShaderBytecode = blob->data();
-				pso_desc.CS.BytecodeLength = static_cast<UINT>(blob->size());
-			}
-			else
-			{
-				pso_desc.CS.pShaderBytecode = nullptr;
-				pso_desc.CS.BytecodeLength = 0;
-			}
-		}
-		pso_desc.NodeMask = 0;
-		pso_desc.CachedPSO.pCachedBlob = nullptr;
-		pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
-		pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
-
-		ID3D12PipelineStatePtr pso = this->CreateComputePSO(pso_desc);
+		ID3D12PipelineStatePtr pso = rso.RetrieveComputePSO(so);
 
 		d3d_compute_cmd_list_->SetPipelineState(pso.get());
 		d3d_compute_cmd_list_->SetComputeRootSignature(so->RootSignature().get());
@@ -1045,9 +877,6 @@ namespace KlayGE
 		D3D12FrameBuffer& fb = *checked_cast<D3D12FrameBuffer*>(this->CurFrameBuffer().get());
 		fb.SetRenderTargets();
 		fb.BindBarrier();
-
-		d3d_render_cmd_list_->OMSetStencilRef(stencil_ref_cache_);
-		d3d_render_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
 
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
@@ -1387,8 +1216,6 @@ namespace KlayGE
 
 		this->ClearPSOCache();
 
-		compute_psos_.clear();
-		graphics_psos_.clear();
 		root_signatures_.clear();
 
 		bilinear_blit_tech_ = nullptr;
@@ -1837,14 +1664,13 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderEngine::OMSetBlendState(Color const & blend_factor, uint32_t sample_mask)
+	void D3D12RenderEngine::OMSetBlendFactor(Color const & blend_factor)
 	{
 		if (blend_factor_cache_ != blend_factor)
 		{
 			blend_factor_cache_ = blend_factor;
 			d3d_render_cmd_list_->OMSetBlendFactor(&blend_factor_cache_.r());
 		}
-		sample_mask_cache_ = sample_mask;
 	}
 
 	void D3D12RenderEngine::RSSetViewports(UINT NumViewports, D3D12_VIEWPORT const * pViewports)

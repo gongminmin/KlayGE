@@ -27,6 +27,7 @@
 #include <KlayGE/ShaderObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/Fence.hpp>
+#include <KFL/Hash.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 
@@ -37,14 +38,6 @@ namespace KlayGE
 		for (auto& rs : rs_pool_)
 		{
 			rs.second.reset();
-		}
-		for (auto& dss : dss_pool_)
-		{
-			dss.second.reset();
-		}
-		for (auto& bs : bs_pool_)
-		{
-			bs.second.reset();
 		}
 		for (auto& ss : ss_pool_)
 		{
@@ -135,51 +128,27 @@ namespace KlayGE
 		return ret;
 	}
 
-	RasterizerStateObjectPtr RenderFactory::MakeRasterizerStateObject(RasterizerStateDesc const & desc)
+	RenderStateObjectPtr RenderFactory::MakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+		BlendStateDesc const & bs_desc)
 	{
-		RasterizerStateObjectPtr ret;
+		RenderStateObjectPtr ret;
 
-		auto iter = rs_pool_.find(desc);
+		char const * rs_desc_begin = reinterpret_cast<char const *>(&rs_desc);
+		char const * rs_desc_end = rs_desc_begin + sizeof(rs_desc);
+		char const * dss_desc_begin = reinterpret_cast<char const *>(&dss_desc);
+		char const * dss_desc_end = dss_desc_begin + sizeof(dss_desc);
+		char const * bs_desc_begin = reinterpret_cast<char const *>(&bs_desc);
+		char const * bs_desc_end = bs_desc_begin + sizeof(bs_desc);
+
+		size_t seed = HashRange(rs_desc_begin, rs_desc_end);
+		HashRange(seed, dss_desc_begin, dss_desc_end);
+		HashRange(seed, bs_desc_begin, bs_desc_end);
+
+		auto iter = rs_pool_.find(seed);
 		if (iter == rs_pool_.end())
 		{
-			ret = this->DoMakeRasterizerStateObject(desc);
-			rs_pool_.emplace(desc, ret);
-		}
-		else
-		{
-			ret = iter->second;
-		}
-
-		return ret;
-	}
-
-	DepthStencilStateObjectPtr RenderFactory::MakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
-	{
-		DepthStencilStateObjectPtr ret;
-
-		auto iter = dss_pool_.find(desc);
-		if (iter == dss_pool_.end())
-		{
-			ret = this->DoMakeDepthStencilStateObject(desc);
-			dss_pool_.emplace(desc, ret);
-		}
-		else
-		{
-			ret = iter->second;
-		}
-
-		return ret;
-	}
-
-	BlendStateObjectPtr RenderFactory::MakeBlendStateObject(BlendStateDesc const & desc)
-	{
-		BlendStateObjectPtr ret;
-
-		auto iter = bs_pool_.find(desc);
-		if (iter == bs_pool_.end())
-		{
-			ret = this->DoMakeBlendStateObject(desc);
-			bs_pool_.emplace(desc, ret);
+			ret = this->DoMakeRenderStateObject(rs_desc, dss_desc, bs_desc);
+			rs_pool_.emplace(seed, ret);
 		}
 		else
 		{
@@ -193,11 +162,16 @@ namespace KlayGE
 	{
 		SamplerStateObjectPtr ret;
 
-		auto iter = ss_pool_.find(desc);
+		char const * desc_begin = reinterpret_cast<char const *>(&desc);
+		char const * desc_end = desc_begin + sizeof(desc);
+
+		size_t seed = HashRange(desc_begin, desc_end);
+
+		auto iter = ss_pool_.find(seed);
 		if (iter == ss_pool_.end())
 		{
 			ret = this->DoMakeSamplerStateObject(desc);
-			ss_pool_.emplace(desc, ret);
+			ss_pool_.emplace(seed, ret);
 		}
 		else
 		{

@@ -66,10 +66,6 @@ namespace KlayGE
 	RenderEngine::RenderEngine()
 		: num_primitives_just_rendered_(0), num_vertices_just_rendered_(0),
 			num_draws_just_called_(0), num_dispatches_just_called_(0),
-			cur_front_stencil_ref_(0),
-			cur_back_stencil_ref_(0),
-			cur_blend_factor_(1, 1, 1, 1),
-			cur_sample_mask_(0xFFFFFFFF),
 			default_fov_(PI / 4), default_render_width_scale_(1), default_render_height_scale_(1),
 			motion_frames_(0),
 			stereo_method_(STM_None), stereo_separation_(0),
@@ -481,17 +477,17 @@ namespace KlayGE
 
 	// 设置当前渲染状态对象
 	/////////////////////////////////////////////////////////////////////////////////
-	void RenderEngine::SetStateObjects(RasterizerStateObjectPtr const & rs_obj,
-		DepthStencilStateObjectPtr const & dss_obj, uint16_t front_stencil_ref, uint16_t back_stencil_ref,
-		BlendStateObjectPtr const & bs_obj, Color const & blend_factor, uint32_t sample_mask)
+	void RenderEngine::SetStateObject(RenderStateObjectPtr const & rs_obj)
 	{
 		if (cur_rs_obj_ != rs_obj)
 		{
 			if (force_line_mode_)
 			{
-				RasterizerStateDesc desc = rs_obj->GetDesc();
-				desc.polygon_mode = PM_Line;
-				cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(desc);
+				auto rs_desc = rs_obj->GetRasterizerStateDesc();
+				auto const & dss_desc = rs_obj->GetDepthStencilStateDesc();
+				auto const & bs_desc = rs_obj->GetBlendStateDesc();
+				rs_desc.polygon_mode = PM_Line;
+				cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRenderStateObject(rs_desc, dss_desc, bs_desc);
 				cur_line_rs_obj_->Active();
 			}
 			else
@@ -499,22 +495,6 @@ namespace KlayGE
 				rs_obj->Active();
 			}
 			cur_rs_obj_ = rs_obj;
-		}
-
-		if ((cur_dss_obj_ != dss_obj) || (cur_front_stencil_ref_ != front_stencil_ref) || (cur_back_stencil_ref_ != back_stencil_ref))
-		{
-			dss_obj->Active(front_stencil_ref, back_stencil_ref);
-			cur_dss_obj_ = dss_obj;
-			cur_front_stencil_ref_ = front_stencil_ref;
-			cur_back_stencil_ref_ = back_stencil_ref;
-		}
-
-		if ((cur_bs_obj_ != bs_obj) || (cur_blend_factor_ != blend_factor) || (cur_sample_mask_ != sample_mask))
-		{
-			bs_obj->Active(blend_factor, sample_mask);
-			cur_bs_obj_ = bs_obj;
-			cur_blend_factor_ = blend_factor;
-			cur_sample_mask_ = sample_mask;
 		}
 	}
 
@@ -1199,9 +1179,11 @@ namespace KlayGE
 			{
 				if (force_line_mode_)
 				{
-					RasterizerStateDesc desc = cur_rs_obj_->GetDesc();
-					desc.polygon_mode = PM_Line;
-					cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRasterizerStateObject(desc);
+					auto rs_desc = cur_rs_obj_->GetRasterizerStateDesc();
+					auto const & dss_desc = cur_rs_obj_->GetDepthStencilStateDesc();
+					auto const & bs_desc = cur_rs_obj_->GetBlendStateDesc();
+					rs_desc.polygon_mode = PM_Line;
+					cur_line_rs_obj_ = Context::Instance().RenderFactoryInstance().MakeRenderStateObject(rs_desc, dss_desc, bs_desc);
 					cur_line_rs_obj_->Active();
 				}
 				else
@@ -1237,8 +1219,6 @@ namespace KlayGE
 
 		cur_rs_obj_.reset();
 		cur_line_rs_obj_.reset();
-		cur_dss_obj_.reset();
-		cur_bs_obj_.reset();
 
 		pp_rl_.reset();
 

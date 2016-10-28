@@ -83,9 +83,8 @@ namespace KlayGE
 	private:
 		virtual std::unique_ptr<RenderEngine> DoMakeRenderEngine() override;
 
-		RasterizerStateObjectPtr DoMakeRasterizerStateObject(RasterizerStateDesc const & desc);
-		DepthStencilStateObjectPtr DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc);
-		BlendStateObjectPtr DoMakeBlendStateObject(BlendStateDesc const & desc);
+		RenderStateObjectPtr DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+			BlendStateDesc const & bs_desc) override;
 		SamplerStateObjectPtr DoMakeSamplerStateObject(SamplerStateDesc const & desc);
 
 		virtual void DoSuspend() override;

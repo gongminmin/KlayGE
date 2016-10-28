@@ -263,19 +263,10 @@ namespace KlayGE
 		return MakeUniquePtr<OGLESRenderEngine>();
 	}
 
-	RasterizerStateObjectPtr OGLESRenderFactory::DoMakeRasterizerStateObject(RasterizerStateDesc const & desc)
+	RenderStateObjectPtr OGLESRenderFactory::DoMakeRenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
+		BlendStateDesc const & bs_desc)
 	{
-		return MakeSharedPtr<OGLESRasterizerStateObject>(desc);
-	}
-
-	DepthStencilStateObjectPtr OGLESRenderFactory::DoMakeDepthStencilStateObject(DepthStencilStateDesc const & desc)
-	{
-		return MakeSharedPtr<OGLESDepthStencilStateObject>(desc);
-	}
-
-	BlendStateObjectPtr OGLESRenderFactory::DoMakeBlendStateObject(BlendStateDesc const & desc)
-	{
-		return MakeSharedPtr<OGLESBlendStateObject>(desc);
+		return MakeSharedPtr<OGLESRenderStateObject>(rs_desc, dss_desc, bs_desc);
 	}
 
 	SamplerStateObjectPtr OGLESRenderFactory::DoMakeSamplerStateObject(SamplerStateDesc const & desc)
