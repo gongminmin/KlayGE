@@ -480,6 +480,11 @@ namespace KlayGE
 		void OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 		void OnOrientationDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 
+		bool Destroyed() const
+		{
+			return destroyed_;
+		}
+
 	private:
 		virtual void UpdateInputs() override;
 
@@ -490,6 +495,8 @@ namespace KlayGE
 		std::vector<std::shared_ptr<ISensorEvents>> motion_sensor_events_;
 		std::shared_ptr<ISensorCollection> orientation_sensor_collection_;
 		std::vector<std::shared_ptr<ISensorEvents>> orientation_sensor_events_;
+
+		bool destroyed_;
 	};
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 	class MsgInputSensor : public InputSensor

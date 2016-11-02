@@ -260,12 +260,15 @@ namespace KlayGE
 		{
 			HRESULT hr = S_OK;
 
-			if ((nullptr == data_report) || (nullptr == sensor))
+			if (!input_sensor_->Destroyed())
 			{
-				return E_INVALIDARG;
-			}
+				if ((nullptr == data_report) || (nullptr == sensor))
+				{
+					return E_INVALIDARG;
+				}
 
-			input_sensor_->OnMotionDataUpdated(sensor, data_report);
+				input_sensor_->OnMotionDataUpdated(sensor, data_report);
+			}
 
 			return hr;
 		}
@@ -283,12 +286,15 @@ namespace KlayGE
 		{
 			HRESULT hr = S_OK;
 
-			if ((nullptr == data_report) || (nullptr == sensor))
+			if (!input_sensor_->Destroyed())
 			{
-				return E_INVALIDARG;
-			}
+				if ((nullptr == data_report) || (nullptr == sensor))
+				{
+					return E_INVALIDARG;
+				}
 
-			input_sensor_->OnOrientationDataUpdated(sensor, data_report);
+				input_sensor_->OnOrientationDataUpdated(sensor, data_report);
+			}
 
 			return hr;
 		}
@@ -296,6 +302,7 @@ namespace KlayGE
 
 
 	MsgInputSensor::MsgInputSensor()
+		: destroyed_(false)
 	{
 		HRESULT hr = ::CoInitialize(0);
 
@@ -313,7 +320,7 @@ namespace KlayGE
 				{
 					locator_ = MakeCOMPtr(location);
 
-					location_event_ = MakeSharedPtr<MsgInputLocationEvents>(this);
+					location_event_ = MakeCOMPtr(new MsgInputLocationEvents(this));
 					ILocationEvents* sensor_event;
 					location_event_->QueryInterface(IID_ILocationEvents, reinterpret_cast<void**>(&sensor_event));
 
@@ -352,10 +359,12 @@ namespace KlayGE
 						hr = motion_sensor_collection_->GetAt(i, &sensor);
 						if (SUCCEEDED(hr))
 						{
-							std::shared_ptr<MsgInputMotionSensorEvents> motion_event = MakeSharedPtr<MsgInputMotionSensorEvents>(this);
+							std::shared_ptr<MsgInputMotionSensorEvents> motion_event
+								= MakeCOMPtr(new MsgInputMotionSensorEvents(this));
+							motion_sensor_events_.push_back(motion_event);
+
 							ISensorEvents* sensor_event;
 							motion_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
-							motion_sensor_events_.push_back(motion_event);
 
 							sensor->SetEventSink(sensor_event);
 
@@ -382,10 +391,12 @@ namespace KlayGE
 						hr = orientation_sensor_collection_->GetAt(i, &sensor);
 						if (SUCCEEDED(hr))
 						{
-							std::shared_ptr<MsgInputOrientationSensorEvents> orientation_event = MakeSharedPtr<MsgInputOrientationSensorEvents>(this);
+							std::shared_ptr<MsgInputOrientationSensorEvents> orientation_event
+								= MakeCOMPtr(new MsgInputOrientationSensorEvents(this));
+							orientation_sensor_events_.push_back(orientation_event);
+
 							ISensorEvents* sensor_event;
 							orientation_event->QueryInterface(IID_ISensorEvents, reinterpret_cast<void**>(&sensor_event));
-							orientation_sensor_events_.push_back(orientation_event);
 
 							sensor->SetEventSink(sensor_event);
 
@@ -402,6 +413,8 @@ namespace KlayGE
 
 	MsgInputSensor::~MsgInputSensor()
 	{
+		destroyed_ = true;
+
 		if (locator_)
 		{
 			IID REPORT_TYPES[] = { IID_ILatLongReport };
@@ -416,44 +429,12 @@ namespace KlayGE
 
 		if (motion_sensor_collection_)
 		{
-			ULONG count = 0;
-			HRESULT hr = motion_sensor_collection_->GetCount(&count);
-			if (SUCCEEDED(hr))
-			{
-				for (ULONG i = 0; i < count; ++ i)
-				{
-					ISensor* sensor;
-					hr = motion_sensor_collection_->GetAt(i, &sensor);
-					if (SUCCEEDED(hr))
-					{
-						sensor->SetEventSink(nullptr);
-						sensor->Release();
-					}
-				}
-			}
-
 			motion_sensor_events_.clear();
 			motion_sensor_collection_.reset();
 		}
 
 		if (orientation_sensor_collection_)
 		{
-			ULONG count = 0;
-			HRESULT hr = orientation_sensor_collection_->GetCount(&count);
-			if (SUCCEEDED(hr))
-			{
-				for (ULONG i = 0; i < count; ++ i)
-				{
-					ISensor* sensor;
-					hr = orientation_sensor_collection_->GetAt(i, &sensor);
-					if (SUCCEEDED(hr))
-					{
-						sensor->SetEventSink(nullptr);
-						sensor->Release();
-					}
-				}
-			}
-
 			orientation_sensor_events_.clear();
 			orientation_sensor_collection_.reset();
 		}
