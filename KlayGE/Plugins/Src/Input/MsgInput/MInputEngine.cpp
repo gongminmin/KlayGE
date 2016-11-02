@@ -194,17 +194,7 @@ namespace KlayGE
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				std::placeholders::_1, std::placeholders::_2));
 		}
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
-		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(std::bind(&MsgInputEngine::OnPointerUpdate, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(std::bind(&MsgInputEngine::OnPointerWheel, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN8) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
 		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
 		{
 			if (this->RegisterTouchWindow(hwnd, TWF_WANTPALM))
@@ -240,6 +230,8 @@ namespace KlayGE
 #endif
 #endif
 
+#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN8)) \
+			|| defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
 			std::placeholders::_2, std::placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
@@ -249,6 +241,7 @@ namespace KlayGE
 		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(std::bind(&MsgInputEngine::OnPointerWheel, this,
 			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
+#endif
 
 #if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (defined KLAYGE_HAVE_LIBOVR)
 		OVR::System::Init(OVR::Log::ConfigureDefaultLog(OVR::LogMask_All));
