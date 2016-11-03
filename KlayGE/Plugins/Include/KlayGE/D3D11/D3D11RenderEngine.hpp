@@ -66,6 +66,7 @@ namespace KlayGE
 		ID3D11Device1* D3DDevice1() const;
 		ID3D11Device2* D3DDevice2() const;
 		ID3D11Device3* D3DDevice3() const;
+		ID3D11Device4* D3DDevice4() const;
 		ID3D11DeviceContext* D3DDeviceImmContext() const;
 		ID3D11DeviceContext1* D3DDeviceImmContext1() const;
 		ID3D11DeviceContext2* D3DDeviceImmContext2() const;
@@ -171,10 +172,12 @@ namespace KlayGE
 
 		virtual void CheckConfig(RenderSettings& settings) override;
 
-	private:
 		D3D11AdapterList const & D3DAdapters() const;
 		D3D11AdapterPtr const & ActiveAdapter() const;
 
+		static void CALLBACK OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result);
+
+	private:
 		typedef HRESULT(WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
 		typedef HRESULT(WINAPI *D3D11CreateDeviceFunc)(IDXGIAdapter* pAdapter,
 			D3D_DRIVER_TYPE DriverType, HMODULE Software, UINT Flags,
@@ -198,6 +201,7 @@ namespace KlayGE
 		ID3D11Device1Ptr d3d_device_1_;
 		ID3D11Device2Ptr d3d_device_2_;
 		ID3D11Device3Ptr d3d_device_3_;
+		ID3D11Device4Ptr d3d_device_4_;
 		ID3D11DeviceContextPtr  d3d_imm_ctx_;
 		ID3D11DeviceContext1Ptr d3d_imm_ctx_1_;
 		ID3D11DeviceContext2Ptr d3d_imm_ctx_2_;
@@ -267,6 +271,10 @@ namespace KlayGE
 
 		ID3D11QueryPtr timestamp_disjoint_query_;
 		double inv_timestamp_freq_;
+
+		HANDLE device_lost_event_;
+		DWORD  device_lost_reg_cookie_;
+		PTP_WAIT thread_pool_wait_;
 	};
 }
 

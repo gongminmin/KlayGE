@@ -21,7 +21,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint
 #endif
-#include <d3d11_3.h>
+#include <d3d11_4.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #endif
@@ -44,6 +44,7 @@ namespace KlayGE
 	typedef std::shared_ptr<ID3D11Device1>				ID3D11Device1Ptr;
 	typedef std::shared_ptr<ID3D11Device2>				ID3D11Device2Ptr;
 	typedef std::shared_ptr<ID3D11Device3>				ID3D11Device3Ptr;
+	typedef std::shared_ptr<ID3D11Device4>				ID3D11Device4Ptr;
 	typedef std::shared_ptr<ID3D11DeviceContext>		ID3D11DeviceContextPtr;
 	typedef std::shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
 	typedef std::shared_ptr<ID3D11DeviceContext2>		ID3D11DeviceContext2Ptr;

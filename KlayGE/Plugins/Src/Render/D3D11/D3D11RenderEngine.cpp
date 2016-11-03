@@ -88,7 +88,8 @@ namespace KlayGE
 	D3D11RenderEngine::D3D11RenderEngine()
 		: num_so_buffs_(0),
 			dsv_ptr_cache_(nullptr),
-			inv_timestamp_freq_(0)
+			inv_timestamp_freq_(0),
+			device_lost_event_(nullptr), device_lost_reg_cookie_(0), thread_pool_wait_(nullptr)
 	{
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 5;
@@ -252,6 +253,11 @@ namespace KlayGE
 	ID3D11Device3* D3D11RenderEngine::D3DDevice3() const
 	{
 		return d3d_device_3_.get();
+	}
+
+	ID3D11Device4* D3D11RenderEngine::D3DDevice4() const
+	{
+		return d3d_device_4_.get();
 	}
 
 	ID3D11DeviceContext* D3D11RenderEngine::D3DDeviceImmContext() const
@@ -444,6 +450,20 @@ namespace KlayGE
 		Verify(device != nullptr);
 
 		this->FillRenderDeviceCaps();
+
+		if (d3d_11_runtime_sub_ver_ >= 4)
+		{
+#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
+			device_lost_event_ = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
+#else
+			device_lost_event_ = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+#endif
+
+			thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
+
+			::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, NULL);
+			TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+		}
 	}
 
 	void D3D11RenderEngine::ResetRenderStates()
@@ -885,6 +905,22 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoDestroy()
 	{
+		if ((device_lost_reg_cookie_ != 0) && d3d_device_4_)
+		{
+			d3d_device_4_->UnregisterDeviceRemoved(device_lost_reg_cookie_);
+			device_lost_reg_cookie_ = 0;
+		}
+		if (device_lost_event_ != nullptr)
+		{
+			::CloseHandle(device_lost_event_);
+			device_lost_event_ = nullptr;
+		}
+		if (thread_pool_wait_ != nullptr)
+		{
+			::CloseThreadpoolWait(thread_pool_wait_);
+			thread_pool_wait_ = nullptr;
+		}
+
 		adapterList_.Destroy();
 
 		rasterizer_state_cache_ = nullptr;
@@ -935,6 +971,7 @@ namespace KlayGE
 		d3d_device_1_.reset();
 		d3d_device_2_.reset();
 		d3d_device_3_.reset();
+		d3d_device_4_.reset();
 		gi_factory_1_.reset();
 		gi_factory_2_.reset();
 		gi_factory_3_.reset();
@@ -1410,6 +1447,14 @@ namespace KlayGE
 								d3d_device_3_ = MakeCOMPtr(d3d_device_3);
 								d3d_imm_ctx_3_ = MakeCOMPtr(d3d_imm_ctx_3);
 								d3d_11_runtime_sub_ver_ = 3;
+
+								ID3D11Device4* d3d_device_4 = nullptr;
+								device->QueryInterface(IID_ID3D11Device4, reinterpret_cast<void**>(&d3d_device_4));
+								if (d3d_device_4)
+								{
+									d3d_device_4_ = MakeCOMPtr(d3d_device_4);
+									d3d_11_runtime_sub_ver_ = 4;
+								}
 							}
 							else
 							{
@@ -1768,5 +1813,15 @@ namespace KlayGE
 	{
 		return DynamicD3D11CreateDevice_(pAdapter, DriverType, Software, Flags, pFeatureLevels, FeatureLevels, SDKVersion,
 			ppDevice, pFeatureLevel, ppImmediateContext);
+	}
+
+	void D3D11RenderEngine::OnDeviceLost(PTP_CALLBACK_INSTANCE instance, PVOID context, PTP_WAIT wait, TP_WAIT_RESULT wait_result)
+	{
+		KFL_UNUSED(instance);
+		KFL_UNUSED(context);
+		KFL_UNUSED(wait);
+		KFL_UNUSED(wait_result);
+
+		// TODO
 	}
 }
