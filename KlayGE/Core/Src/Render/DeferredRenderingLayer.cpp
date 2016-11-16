@@ -313,7 +313,7 @@ namespace KlayGE
 	{
 	public:
 		DeferredRenderingDebugPostProcess()
-			: PostProcess(L"DeferredRenderingDebug")
+			: PostProcess(L"DeferredRenderingDebug", false)
 		{
 			input_pins_.emplace_back("g_buffer_tex", TexturePtr());
 			input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());

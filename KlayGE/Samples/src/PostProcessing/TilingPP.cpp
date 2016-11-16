@@ -19,7 +19,7 @@ int const LOG_2_TILE_SIZE = 4;
 int const TILE_SIZE = 1 << LOG_2_TILE_SIZE;
 
 TilingPostProcess::TilingPostProcess()
-	: PostProcess(L"Tiling",
+	: PostProcess(L"Tiling", false,
 		std::vector<std::string>(),
 		std::vector<std::string>(1, "src_tex"),
 		std::vector<std::string>(1, "output"),

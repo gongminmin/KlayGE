@@ -25,7 +25,7 @@ namespace KlayGE
 	uint32_t const BLUR_ITERATE_NUM = 2;
 
 	LightShaftPostProcess::LightShaftPostProcess()
-		: PostProcess(L"LightShaft")
+		: PostProcess(L"LightShaft", false)
 	{
 		input_pins_.emplace_back("color_tex", TexturePtr());
 		input_pins_.emplace_back("depth_tex", TexturePtr());

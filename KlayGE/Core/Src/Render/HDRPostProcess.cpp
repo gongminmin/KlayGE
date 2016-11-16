@@ -33,7 +33,7 @@
 namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess()
-		: PostProcess(L"SumLum",
+		: PostProcess(L"SumLum", false,
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "out_tex"),
@@ -117,7 +117,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
-			: PostProcess(L"AdaptedLum",
+			: PostProcess(L"AdaptedLum", false,
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
@@ -180,7 +180,7 @@ namespace KlayGE
 
 
 	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
-			: PostProcess(L"AdaptedLumCS", 
+			: PostProcess(L"AdaptedLumCS", false,
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "out_tex"),
@@ -212,7 +212,7 @@ namespace KlayGE
 
 
 	ToneMappingPostProcess::ToneMappingPostProcess()
-		: PostProcess(L"ToneMapping")
+		: PostProcess(L"ToneMapping", false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -239,7 +239,7 @@ namespace KlayGE
 
 
 	ImageStatPostProcess::ImageStatPostProcess()
-		: PostProcess(L"ImageStat")
+		: PostProcess(L"ImageStat", false)
 	{
 		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcess>();
 		sum_lums_.resize(3);
@@ -327,7 +327,7 @@ namespace KlayGE
 
 
 	ImageStatPostProcessCS::ImageStatPostProcessCS()
-		: PostProcess(L"ImageStatCS")
+		: PostProcess(L"ImageStatCS", false)
 	{
 		sum_lums_1st_ = MakeSharedPtr<SumLumLogPostProcessCS>();
 		adapted_lum_ = MakeSharedPtr<AdaptedLumPostProcessCS>();
@@ -378,7 +378,7 @@ namespace KlayGE
 
 
 	LensEffectsPostProcess::LensEffectsPostProcess()
-		: PostProcess(L"LensEffects")
+		: PostProcess(L"LensEffects", false)
 	{
 		bright_pass_downsampler_ = SyncLoadPostProcess("LensEffects.ppml", "sqr_bright");
 		downsamplers_[0] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
@@ -469,7 +469,7 @@ namespace KlayGE
 	uint32_t const HEIGHT = 512;
 
 	FFTLensEffectsPostProcess::FFTLensEffectsPostProcess()
-		: PostProcess(L"FFTLensEffects")
+		: PostProcess(L"FFTLensEffects", false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -622,7 +622,7 @@ namespace KlayGE
 
 
 	HDRPostProcess::HDRPostProcess(bool fft_lens_effects)
-		: PostProcess(L"HDR")
+		: PostProcess(L"HDR", false)
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));

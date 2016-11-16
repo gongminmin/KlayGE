@@ -11,7 +11,7 @@
 using namespace KlayGE;
 
 NightVisionPostProcess::NightVisionPostProcess()
-	: PostProcess(L"NightVision",
+	: PostProcess(L"NightVision", false,
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),

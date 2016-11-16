@@ -237,7 +237,7 @@ namespace
 }
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
-	: PostProcess(L"AsciiArts",
+	: PostProcess(L"AsciiArts", false,
 			std::vector<std::string>(),
 			std::vector<std::string>(1, "src_tex"),
 			std::vector<std::string>(1, "output"),

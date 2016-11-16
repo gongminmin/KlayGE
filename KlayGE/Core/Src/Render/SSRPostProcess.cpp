@@ -39,7 +39,7 @@
 namespace KlayGE
 {
 	SSRPostProcess::SSRPostProcess()
-			: PostProcess(L"ScreenSpaceReflection")
+			: PostProcess(L"ScreenSpaceReflection", false)
 	{
 		input_pins_.emplace_back("g_buffer_0_tex", TexturePtr());
 		input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());

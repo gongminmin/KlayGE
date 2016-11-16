@@ -9,7 +9,7 @@
 using namespace KlayGE;
 
 CartoonPostProcess::CartoonPostProcess()
-		: PostProcess(L"Cartoon")
+		: PostProcess(L"Cartoon", false)
 {
 	input_pins_.emplace_back("normal_tex", TexturePtr());
 	input_pins_.emplace_back("depth_tex", TexturePtr());

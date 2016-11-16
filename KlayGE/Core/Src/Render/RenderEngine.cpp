@@ -139,15 +139,44 @@ namespace KlayGE
 		pp_rl_ = rf.MakeRenderLayout();
 		pp_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		float2 pos[] =
+		float2 pp_pos[] =
 		{
 			float2(-1, +1),
 			float2(+1, +1),
 			float2(-1, -1),
 			float2(+1, -1)
 		};
-		GraphicsBufferPtr pp_pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
+		GraphicsBufferPtr pp_pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pp_pos), &pp_pos[0]);
 		pp_rl_->BindVertexStream(pp_pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+
+		vpp_rl_ = rf.MakeRenderLayout();
+		vpp_rl_->TopologyType(RenderLayout::TT_TriangleList);
+
+		float3 vpp_pos[] =
+		{
+			float3(-1, +1, -1),
+			float3(+1, +1, -1),
+			float3(-1, -1, -1),
+			float3(+1, -1, -1),
+			float3(-1, +1, +1),
+			float3(+1, +1, +1),
+			float3(-1, -1, +1),
+			float3(+1, -1, +1)
+		};
+		GraphicsBufferPtr vpp_pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vpp_pos), &vpp_pos[0]);
+		vpp_rl_->BindVertexStream(vpp_pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+
+		uint16_t vpp_indices[] =
+		{
+			0, 1, 3, 3, 2, 0,
+			1, 5, 7, 7, 3, 1,
+			5, 4, 6, 6, 7, 5,
+			4, 0, 2, 2, 6, 4,
+			4, 5, 1, 1, 0, 4,
+			2, 3, 7, 7, 6, 2
+		};
+		GraphicsBufferPtr vpp_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vpp_indices), &vpp_indices[0]);
+		vpp_rl_->BindIndexStream(vpp_ib, EF_R16UI);
 
 		uint32_t const render_width = static_cast<uint32_t>(settings.width * default_render_width_scale_ + 0.5f);
 		uint32_t const render_height = static_cast<uint32_t>(settings.height * default_render_height_scale_ + 0.5f);
@@ -1221,6 +1250,7 @@ namespace KlayGE
 		cur_line_rs_obj_.reset();
 
 		pp_rl_.reset();
+		vpp_rl_.reset();
 
 		hdr_pp_.reset();
 		skip_hdr_pp_.reset();

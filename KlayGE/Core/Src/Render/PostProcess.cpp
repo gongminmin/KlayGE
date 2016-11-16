@@ -53,6 +53,7 @@ namespace
 			struct PostProcessData
 			{
 				std::wstring name;
+				bool volumetric;
 				std::vector<std::string> param_names;
 				std::vector<std::string> input_pin_names;
 				std::vector<std::string> output_pin_names;
@@ -104,6 +105,16 @@ namespace
 				if (pp_desc_.pp_name == name)
 				{
 					Convert(pp_desc_.pp_data->name, name);
+
+					XMLAttributePtr vol_attr = pp_node->Attrib("volumetric");
+					if (vol_attr)
+					{
+						pp_desc_.pp_data->volumetric = (vol_attr->ValueInt() != 0);
+					}
+					else
+					{
+						pp_desc_.pp_data->volumetric = false;
+					}
 
 					XMLNodePtr params_chunk = pp_node->FirstNode("params");
 					if (params_chunk)
@@ -171,7 +182,8 @@ namespace
 				auto effect = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name);
 				auto tech = effect->TechniqueByName(pp_desc_.pp_data->tech_name);
 
-				PostProcessPtr pp = MakeSharedPtr<PostProcess>(pp_desc_.pp_data->name, pp_desc_.pp_data->param_names,
+				PostProcessPtr pp = MakeSharedPtr<PostProcess>(pp_desc_.pp_data->name, pp_desc_.pp_data->volumetric,
+					pp_desc_.pp_data->param_names,
 					pp_desc_.pp_data->input_pin_names, pp_desc_.pp_data->output_pin_names, effect, tech);
 				pp->CSPixelPerThreadX(pp_desc_.pp_data->cs_data_per_thread_x);
 				pp->CSPixelPerThreadY(pp_desc_.pp_data->cs_data_per_thread_y);
@@ -226,19 +238,21 @@ namespace
 
 namespace KlayGE
 {
-	PostProcess::PostProcess(std::wstring const & name)
+	PostProcess::PostProcess(std::wstring const & name, bool volumetric)
 			: RenderableHelper(name),
+				volumetric_(volumetric),
 				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
 				num_bind_output_(0)
 	{
 	}
 
-	PostProcess::PostProcess(std::wstring const & name,
+	PostProcess::PostProcess(std::wstring const & name, bool volumetric,
 		std::vector<std::string> const & param_names,
 		std::vector<std::string> const & input_pin_names,
 		std::vector<std::string> const & output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
 			: RenderableHelper(name),
+				volumetric_(volumetric),
 				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
 				input_pins_(input_pin_names.size()),
 				output_pins_(output_pin_names.size()),
@@ -284,7 +298,7 @@ namespace KlayGE
 			output_pin_names[i] = output_pins_[i].first;
 		}
 
-		PostProcessPtr pp = MakeSharedPtr<PostProcess>(this->Name(),
+		PostProcessPtr pp = MakeSharedPtr<PostProcess>(this->Name(), volumetric_,
 			param_names, input_pin_names, output_pin_names, effect, tech);
 		pp->CSPixelPerThreadX(cs_pixel_per_thread_x_);
 		pp->CSPixelPerThreadY(cs_pixel_per_thread_y_);
@@ -303,6 +317,17 @@ namespace KlayGE
 			BOOST_ASSERT(effect);
 
 			cs_based_ = (technique_->Pass(0).GetShaderObject(*effect_)->CSBlockSizeX() > 0);
+
+			BOOST_ASSERT(!(cs_based_ && volumetric_));
+
+			if (volumetric_)
+			{
+				pp_mvp_param_ = effect_->ParameterByName("pp_mvp");
+			}
+			else
+			{
+				pp_mvp_param_ = nullptr;
+			}
 		}
 		else
 		{
@@ -789,12 +814,21 @@ namespace KlayGE
 		{
 			FrameBufferPtr const & fb = (0 == num_bind_output_) ? re.DefaultFrameBuffer() : frame_buffer_;
 			re.BindFrameBuffer(fb);
-			ViewportPtr const & vp = fb->GetViewport();
-			if ((!technique_->Transparent()) && (0 == vp->left) && (0 == vp->top)
-				&& (fb->Width() == static_cast<uint32_t>(vp->width))
-				&& (fb->Height() == static_cast<uint32_t>(vp->height)))
+			if (volumetric_)
 			{
-				fb->Discard(FrameBuffer::CBM_Color);
+				BOOST_ASSERT(pp_mvp_param_);
+
+				*pp_mvp_param_ = model_mat_ * frame_buffer_->GetViewport()->camera->ViewProjMatrix();
+			}
+			else
+			{
+				ViewportPtr const & vp = fb->GetViewport();
+				if ((!technique_->Transparent()) && (0 == vp->left) && (0 == vp->top)
+					&& (fb->Width() == static_cast<uint32_t>(vp->width))
+					&& (fb->Height() == static_cast<uint32_t>(vp->height)))
+				{
+					fb->Discard(FrameBuffer::CBM_Color);
+				}
 			}
 			this->Render();
 		}
@@ -816,8 +850,16 @@ namespace KlayGE
 			if (!rl_)
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+				RenderEngine& re = rf.RenderEngineInstance();
 
-				rl_ = rf.RenderEngineInstance().PostProcessRenderLayout();
+				if (volumetric_)
+				{
+					rl_ = re.VolumetricPostProcessRenderLayout();
+				}
+				else
+				{
+					rl_ = re.PostProcessRenderLayout();
+				}
 
 				pos_aabb_ = AABBox(float3(-1, -1, -1), float3(1, 1, 1));
 				tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
@@ -842,7 +884,7 @@ namespace KlayGE
 
 
 	PostProcessChain::PostProcessChain(std::wstring const & name)
-			: PostProcess(name)
+			: PostProcess(name, false)
 	{
 	}
 
@@ -851,7 +893,7 @@ namespace KlayGE
 		std::vector<std::string> const & input_pin_names,
 		std::vector<std::string> const & output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
-			: PostProcess(name, param_names, input_pin_names, output_pin_names, effect, tech)
+			: PostProcess(name, false, param_names, input_pin_names, output_pin_names, effect, tech)
 	{
 	}
 
@@ -1227,7 +1269,7 @@ namespace KlayGE
 
 	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
-		: PostProcess(L"SeparableBoxFilter",
+		: PostProcess(L"SeparableBoxFilter", false,
 				std::vector<std::string>(),
 				std::vector<std::string>(1, "src_tex"),
 				std::vector<std::string>(1, "output"),
@@ -1312,7 +1354,7 @@ namespace KlayGE
 
 	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
-			: PostProcess(L"SeparableGaussian",
+			: PostProcess(L"SeparableGaussian", false,
 					std::vector<std::string>(),
 					std::vector<std::string>(1, "src_tex"),
 					std::vector<std::string>(1, "output"),
@@ -1430,7 +1472,7 @@ namespace KlayGE
 
 	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(RenderEffectPtr const & effect,
 			RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
-		: PostProcess(L"SeparableBilateral"),
+		: PostProcess(L"SeparableBilateral", false),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
 		input_pins_.emplace_back("src1_tex", TexturePtr());
@@ -1508,7 +1550,7 @@ namespace KlayGE
 	
 	
 	SeparableLogGaussianFilterPostProcess::SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir)
-			: PostProcess(L"SeparableLogGaussian"),
+			: PostProcess(L"SeparableLogGaussian", false),
 				kernel_radius_(kernel_radius), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));

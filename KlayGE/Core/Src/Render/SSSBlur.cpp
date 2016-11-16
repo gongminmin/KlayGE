@@ -37,7 +37,7 @@
 namespace KlayGE
 {
 	SSSBlurPP::SSSBlurPP()
-			: PostProcess(L"SSSBlurPP")
+			: PostProcess(L"SSSBlurPP", false)
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;

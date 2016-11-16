@@ -253,7 +253,7 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(L"DepthOfField"),
+			: PostProcess(L"DepthOfField", false),
 				max_radius_(8), show_blur_factor_(false)
 		{
 			input_pins_.emplace_back("color_tex", TexturePtr());
@@ -425,7 +425,7 @@ namespace
 	{
 	public:
 		BokehFilter()
-			: PostProcess(L"BokehFilter"),
+			: PostProcess(L"BokehFilter", false),
 				max_radius_(8)
 		{
 			input_pins_.emplace_back("color_tex", TexturePtr());
@@ -639,7 +639,7 @@ namespace
 	{
 	public:
 		MotionBlur()
-			: PostProcess(L"MotionBlur"),
+			: PostProcess(L"MotionBlur", false),
 				show_motion_vec_(false)
 		{
 			input_pins_.emplace_back("color_tex", TexturePtr());

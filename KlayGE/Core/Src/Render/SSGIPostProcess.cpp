@@ -39,7 +39,7 @@
 namespace KlayGE
 {
 	SSGIPostProcess::SSGIPostProcess()
-			: PostProcess(L"SSGI")
+			: PostProcess(L"SSGI", false)
 	{
 		input_pins_.emplace_back("g_buffer_tex", TexturePtr());
 		input_pins_.emplace_back("depth_tex", TexturePtr());

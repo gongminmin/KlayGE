@@ -39,8 +39,8 @@ namespace KlayGE
 	class KLAYGE_CORE_API PostProcess : boost::noncopyable, public RenderableHelper
 	{
 	public:
-		explicit PostProcess(std::wstring const & name);
-		PostProcess(std::wstring const & name,
+		PostProcess(std::wstring const & name, bool volumetric);
+		PostProcess(std::wstring const & name, bool volumetric,
 			std::vector<std::string> const & param_names,
 			std::vector<std::string> const & input_pin_names,
 			std::vector<std::string> const & output_pin_names,
@@ -125,6 +125,11 @@ namespace KlayGE
 		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;
 
+		bool Volumetric() const
+		{
+			return volumetric_;
+		}
+
 		void CSPixelPerThreadX(uint32_t x)
 		{
 			cs_pixel_per_thread_x_ = x;
@@ -164,6 +169,8 @@ namespace KlayGE
 		void UpdateBinds();
 
 	protected:
+		bool volumetric_;
+
 		bool cs_based_;
 		uint32_t cs_pixel_per_thread_x_;
 		uint32_t cs_pixel_per_thread_y_;
@@ -173,6 +180,7 @@ namespace KlayGE
 		std::vector<std::pair<std::string, TexturePtr>> output_pins_;
 		uint32_t num_bind_output_;
 		std::vector<std::pair<std::string, RenderEffectParameter*>> params_;
+		RenderEffectParameter* pp_mvp_param_;
 
 		FrameBufferPtr frame_buffer_;
 

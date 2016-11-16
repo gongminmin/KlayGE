@@ -1,11 +1,25 @@
 <?xml version='1.0'?>
 
 <effect>
+	<parameter type="float4x4" name="pp_mvp"/>
+	
 	<shader>
 		<![CDATA[
+#if !KLAYGE_DXBC2GLSL
+#define NOPERSPECTIVE_SUPPORT
+#endif
+
 float2 TexCoordFromPos(float4 pos)
 {
 	float2 tex = pos.xy / 2;
+	tex.y *= KLAYGE_FLIPPING;
+	tex += 0.5;
+	return tex;
+}
+
+float3 VolTexCoordFromPos(float4 pos)
+{
+	float3 tex = pos.xyz / 2;
 	tex.y *= KLAYGE_FLIPPING;
 	tex += 0.5;
 	return tex;
@@ -17,6 +31,28 @@ void PostProcessVS(float4 pos : POSITION,
 {
 	oTex = TexCoordFromPos(pos);
 	oPos = pos;
+}
+
+void VolPostProcessVS(float4 pos : POSITION,
+					out float3 oTex : TEXCOORD0,
+#ifdef NOPERSPECTIVE_SUPPORT
+					out noperspective float2 oScreenTc : TEXCOORD1,
+#else
+					out float3 oScreenTc : TEXCOORD1,
+#endif
+					out float4 oPos : SV_Position)
+{
+	oTex = VolTexCoordFromPos(pos);
+	oPos = mul(pos, pp_mvp);
+
+	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
+	oScreenTc.y *= KLAYGE_FLIPPING;
+	oScreenTc.xy += 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	oScreenTc.z = oPos.w;
+	oScreenTc.xy *= oScreenTc.z;
+#endif
 }
 		]]>
 	</shader>

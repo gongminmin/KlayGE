@@ -201,6 +201,10 @@ namespace KlayGE
 		{
 			return pp_rl_;
 		}
+		RenderLayoutPtr const & VolumetricPostProcessRenderLayout() const
+		{
+			return vpp_rl_;
+		}
 
 		StereoMethod Stereo() const
 		{
@@ -305,6 +309,7 @@ namespace KlayGE
 		float ovr_scale_;
 
 		RenderLayoutPtr pp_rl_;
+		RenderLayoutPtr vpp_rl_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
