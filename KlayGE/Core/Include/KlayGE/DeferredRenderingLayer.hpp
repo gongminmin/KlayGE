@@ -124,6 +124,9 @@ namespace KlayGE
 
 		TexturePtr lighting_mask_tex;
 		FrameBufferPtr lighting_mask_fb;
+
+		TexturePtr lights_start_tex;
+		TexturePtr intersected_light_indices_tex;
 #endif
 	};
 
@@ -437,6 +440,7 @@ namespace KlayGE
 		RenderTechnique* technique_lidr_tube_area_no_shadow_;
 
 		RenderTechnique* technique_tbdr_shadowing_unified_;
+		RenderTechnique* technique_tbdr_light_intersection_unified_;
 		RenderTechnique* technique_tbdr_unified_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
@@ -532,6 +536,10 @@ namespace KlayGE
 		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
 		RenderEffectParameter* lights_type_param_;
+		RenderEffectParameter* lights_start_in_tex_param_;
+		RenderEffectParameter* lights_start_rw_tex_param_;
+		RenderEffectParameter* intersected_light_indices_in_tex_param_;
+		RenderEffectParameter* intersected_light_indices_rw_tex_param_;
 		PostProcessPtr copy_pp_;
 #endif
 

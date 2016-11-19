@@ -588,6 +588,7 @@ namespace KlayGE
 		if (cs_tbdr_)
 		{
 			technique_tbdr_shadowing_unified_ = dr_effect_->TechniqueByName("TBDRShadowingUnified");
+			technique_tbdr_light_intersection_unified_ = dr_effect_->TechniqueByName("TBDRLightIntersection");
 			technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnified");
 		}
 		else
@@ -780,6 +781,10 @@ namespace KlayGE
 			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
 			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
+			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
+			lights_start_rw_tex_param_ = dr_effect_->ParameterByName("lights_start_rw_tex");
+			intersected_light_indices_in_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_in_tex");
+			intersected_light_indices_rw_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_rw_tex");
 
 			projective_shadowing_rw_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_rw_tex");
 			shadowing_rw_tex_param_ = dr_effect_->ParameterByName("shadowing_rw_tex");
@@ -1130,6 +1135,28 @@ namespace KlayGE
 			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
+			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
+				nullptr);
+		}
+		else
+		{
+			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+				fmt = EF_ARGB8;
+			}
+			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
 		}
 #endif
 
@@ -1162,25 +1189,6 @@ namespace KlayGE
 			fmt = EF_ARGB8;
 		}
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-
-#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (!cs_tbdr_)
-		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
-			}
-			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
-		}
-#endif
 
 		if (0 == index)
 		{
@@ -3880,8 +3888,18 @@ namespace KlayGE
 				*shading_rw_tex_param_
 					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
 			}
-			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
+
+			*lights_start_rw_tex_param_ = pvp.lights_start_tex;
+			*intersected_light_indices_rw_tex_param_ = pvp.intersected_light_indices_tex;
+			re.Dispatch(*dr_effect_, *technique_tbdr_light_intersection_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
+
+			uint32_t const BLOCK_X = 16;
+			uint32_t const BLOCK_Y = 16;
+			*lights_start_in_tex_param_ = pvp.lights_start_tex;
+			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
+			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
+				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
 
 			if (available_lights[0].empty())
 			{

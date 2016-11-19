@@ -253,7 +253,7 @@ void DeferredRenderingVS(float4 pos : POSITION,
 }
 
 float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 view_dir,
-		float shininess, float2 tc, float atten, float irrandance_factor, float2 tc_ddx, float2 tc_ddy)
+		float shininess, float2 tc, float atten, float2 tc_ddx, float2 tc_ddy)
 {
 	float4 lighting = 0;
 	float3 dir = light_pos - pos_es;
@@ -271,7 +271,7 @@ float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 vie
 			}
 
 			float spec = DistributionTerm(normalize(dir - view_dir), normal, shininess).x;
-			lighting = CalcColor(n_dot_l, spec, atten, shadow, irrandance_factor * light_color, light_attrib);
+			lighting = CalcColor(n_dot_l, spec, atten, shadow, light_color, light_attrib);
 		}
 	}
 	
@@ -302,7 +302,7 @@ float4 DeferredRenderingPointPS(
 	
 	return CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 		shininess, tc,
-		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingSpotPS(
@@ -334,7 +334,7 @@ float4 DeferredRenderingSpotPS(
 		
 		lighting = CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 			shininess, tc,
-			spot * AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+			spot * AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), tc_ddx, tc_ddy);
 	}
 
 	return lighting;
@@ -451,7 +451,7 @@ float4 DeferredRenderingSphereAreaPS(
 	shininess = AreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius_extend.x, pos_es);
 	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
 		shininess, tc,
-		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(light_pos_es.xyz, pos_es, light_falloff_range.xyz), tc_ddx, tc_ddy);
 }
 
 float4 DeferredRenderingTubeAreaPS(
@@ -482,7 +482,7 @@ float4 DeferredRenderingTubeAreaPS(
 	float2 atten_irra_factor = TubeAreaLightAttenuationIrradianceFixup(l0, l1, normal);
 	shininess = AreaLightShininessFixup(shininess, light_pos_es.xyz, light_radius_extend.x, pos_es);
 	return CalcDRLighting(light_pos, pos_es, normal, view_dir,
-		shininess, tc, atten_irra_factor.x, atten_irra_factor.y, tc_ddx, tc_ddy);
+		shininess, tc, atten_irra_factor.x * atten_irra_factor.y, tc_ddx, tc_ddy);
 }
 
 float4 DeferredShadowingPointPS(

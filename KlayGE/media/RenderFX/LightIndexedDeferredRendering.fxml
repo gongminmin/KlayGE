@@ -238,7 +238,7 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 }
 
 float3 CalcLIDRShading(float3 light_pos, int index, int shadowing_channel, float3 pos_es, float3 normal, float3 view_dir,
-		float3 c_diff, float3 c_spec, float spec_normalize, float shininess, float2 tc, float atten, float irradiance_factor, float2 tc_ddx, float2 tc_ddy)
+		float3 c_diff, float3 c_spec, float spec_normalize, float shininess, float2 tc, float atten, float2 tc_ddx, float2 tc_ddy)
 {
 	float3 shading = 0;
 	float3 dir = light_pos - pos_es;
@@ -258,7 +258,7 @@ float3 CalcLIDRShading(float3 light_pos, int index, int shadowing_channel, float
 			float3 spec = spec_normalize * DistributionTerm(halfway, normal, shininess)
 				* FresnelTerm(dir, halfway, c_spec);			
 			shading = max((c_diff * lights_attrib[index].x + spec * lights_attrib[index].y) * (n_dot_l * atten), 0)
-				* irradiance_factor * lights_color[index].rgb * shadow;
+				* lights_color[index].rgb * shadow;
 		}
 	}
 
@@ -271,7 +271,7 @@ float3 CalcLIDRPointShading(int index, float3 pos_es, float3 normal, float3 view
 	float3 light_pos = lights_pos_es[index].xyz;
 	return CalcLIDRShading(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 		c_diff, c_spec, spec_normalize, shininess, tc,
-		AttenuationTerm(light_pos, pos_es, lights_falloff_range[index].xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(light_pos, pos_es, lights_falloff_range[index].xyz), tc_ddx, tc_ddy);
 }
 
 float3 CalcLIDRSpotShading(int index, float3 pos_es, float3 normal, float3 view_dir,
@@ -285,7 +285,7 @@ float3 CalcLIDRSpotShading(int index, float3 pos_es, float3 normal, float3 view_
 	{
 		shading = CalcLIDRShading(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 			c_diff, c_spec, spec_normalize, shininess, tc,
-			spot * AttenuationTerm(light_pos, pos_es, lights_falloff_range[index].xyz), 1, tc_ddx, tc_ddy);
+			spot * AttenuationTerm(light_pos, pos_es, lights_falloff_range[index].xyz), tc_ddx, tc_ddy);
 	}
 	
 	return shading;
@@ -300,7 +300,7 @@ float3 CalcLIDRSphereAreaShading(int index, float3 pos_es, float3 normal, float3
 	shininess = AreaLightShininessFixup(shininess, light_pos, lights_radius_extend[index].x, pos_es);
 	return CalcLIDRShading(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
 		c_diff, c_spec, spec_normalize, shininess, tc, 
-		AttenuationTerm(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz), 1, tc_ddx, tc_ddy);
+		AttenuationTerm(lights_pos_es[index].xyz, pos_es, lights_falloff_range[index].xyz), tc_ddx, tc_ddy);
 }
 
 float3 CalcLIDRTubeAreaShading(int index, float3 pos_es, float3 normal, float3 view_dir,
@@ -312,7 +312,7 @@ float3 CalcLIDRTubeAreaShading(int index, float3 pos_es, float3 normal, float3 v
 	float2 atten_irra_factor = TubeAreaLightAttenuationIrradianceFixup(l0, l1, normal);
 	shininess = AreaLightShininessFixup(shininess, lights_pos_es[index].xyz, lights_radius_extend[index].x, pos_es);
 	return CalcLIDRShading(light_pos, index, int(lights_attrib[index].z), pos_es, normal, view_dir,
-		c_diff, c_spec, spec_normalize, shininess, tc, atten_irra_factor.x, atten_irra_factor.y, tc_ddx, tc_ddy);
+		c_diff, c_spec, spec_normalize, shininess, tc, atten_irra_factor.x * atten_irra_factor.y, tc_ddx, tc_ddy);
 }
 
 float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
