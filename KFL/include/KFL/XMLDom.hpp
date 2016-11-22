@@ -86,33 +86,33 @@ namespace KlayGE
 		std::string const & Name() const;
 		XMLNodeType Type() const;
 
-		XMLNodePtr Parent();
+		XMLNodePtr Parent() const;
 
-		XMLAttributePtr FirstAttrib(std::string const & name);
-		XMLAttributePtr LastAttrib(std::string const & name);
-		XMLAttributePtr FirstAttrib();
-		XMLAttributePtr LastAttrib();
+		XMLAttributePtr FirstAttrib(std::string const & name) const;
+		XMLAttributePtr LastAttrib(std::string const & name) const;
+		XMLAttributePtr FirstAttrib() const;
+		XMLAttributePtr LastAttrib() const;
 
-		XMLAttributePtr Attrib(std::string const & name);
+		XMLAttributePtr Attrib(std::string const & name) const;
 
-		bool TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val);
-		bool TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val);
-		bool TryConvertAttrib(std::string const & name, float& val, float default_val);
+		bool TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val) const;
+		bool TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val) const;
+		bool TryConvertAttrib(std::string const & name, float& val, float default_val) const;
 
-		int32_t AttribInt(std::string const & name, int32_t default_val);
-		uint32_t AttribUInt(std::string const & name, uint32_t default_val);
-		float AttribFloat(std::string const & name, float default_val);
-		std::string AttribString(std::string const & name, std::string default_val);
+		int32_t AttribInt(std::string const & name, int32_t default_val) const;
+		uint32_t AttribUInt(std::string const & name, uint32_t default_val) const;
+		float AttribFloat(std::string const & name, float default_val) const;
+		std::string AttribString(std::string const & name, std::string default_val) const;
 
-		XMLNodePtr FirstNode(std::string const & name);
-		XMLNodePtr LastNode(std::string const & name);
-		XMLNodePtr FirstNode();
-		XMLNodePtr LastNode();
+		XMLNodePtr FirstNode(std::string const & name) const;
+		XMLNodePtr LastNode(std::string const & name) const;
+		XMLNodePtr FirstNode() const;
+		XMLNodePtr LastNode() const;
 
-		XMLNodePtr PrevSibling(std::string const & name);
-		XMLNodePtr NextSibling(std::string const & name);
-		XMLNodePtr PrevSibling();
-		XMLNodePtr NextSibling();
+		XMLNodePtr PrevSibling(std::string const & name) const;
+		XMLNodePtr NextSibling(std::string const & name) const;
+		XMLNodePtr PrevSibling() const;
+		XMLNodePtr NextSibling() const;
 
 		void InsertNode(XMLNodePtr const & location, XMLNodePtr const & new_node);
 		void InsertAttrib(XMLAttributePtr const & location, XMLAttributePtr const & new_attr);
@@ -150,8 +150,8 @@ namespace KlayGE
 
 		std::string const & Name() const;
 
-		XMLAttributePtr NextAttrib(std::string const & name);
-		XMLAttributePtr NextAttrib();
+		XMLAttributePtr NextAttrib(std::string const & name) const;
+		XMLAttributePtr NextAttrib() const;
 
 		bool TryConvert(int32_t& val) const;
 		bool TryConvert(uint32_t& val) const;
