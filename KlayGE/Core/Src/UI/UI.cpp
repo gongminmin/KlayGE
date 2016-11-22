@@ -106,8 +106,8 @@ namespace KlayGE
 
 			uint32_t const INDEX_PER_QUAD = restart_ ? 5 : 6;
 			uint32_t const INIT_NUM_QUAD = 1024;
-			tb_vb_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * 4 * sizeof(UIManager::VertexFormat)), TransientBuffer::BF_Vertex);
-			tb_ib_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * INDEX_PER_QUAD * sizeof(uint16_t)), TransientBuffer::BF_Index);
+			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * 4 * sizeof(UIManager::VertexFormat)), TransientBuffer::BF_Vertex);
+			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * INDEX_PER_QUAD * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
 			rl_->BindVertexStream(tb_vb_->GetBuffer(), std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
@@ -235,8 +235,8 @@ namespace KlayGE
 
 		TexturePtr texture_;
 
-		TransientBufferPtr tb_vb_;
-		TransientBufferPtr tb_ib_;
+		std::unique_ptr<TransientBuffer> tb_vb_;
+		std::unique_ptr<TransientBuffer> tb_ib_;
 		std::vector<SubAlloc> tb_vb_sub_allocs_;
 		std::vector<SubAlloc> tb_ib_sub_allocs_;
 	};
@@ -415,11 +415,11 @@ namespace KlayGE
 
 			XMLAttributePtr attr;
 
-			std::vector<XMLDocumentPtr> include_docs;
+			std::vector<std::unique_ptr<XMLDocument>> include_docs;
 			for (XMLNodePtr node = root->FirstNode("include"); node;)
 			{
 				attr = node->Attrib("name");
-				include_docs.push_back(MakeSharedPtr<XMLDocument>());
+				include_docs.push_back(MakeUniquePtr<XMLDocument>());
 				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
 
 				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())

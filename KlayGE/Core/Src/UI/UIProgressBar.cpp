@@ -59,14 +59,14 @@ namespace KlayGE
 		{
 			Element.TextureColor().States[UICS_Normal] = Color(1.0f, 1.0f, 1.0f, 1.0f);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Bar
 		{
 			Element.TextureColor().States[UICS_Normal] = Color(0.2f, 0.4f, 0.6f, 1.0f);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 

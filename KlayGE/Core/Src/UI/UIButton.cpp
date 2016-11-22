@@ -64,7 +64,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 200.0f / 255);
 			Element.FontColor().States[UICS_MouseOver] = Color(0, 0, 0, 1.0f);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Fill layer
@@ -74,7 +74,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 
@@ -160,29 +160,27 @@ namespace KlayGE
 			iState = UICS_Hidden;
 		}
 
-		// Background fill layer
-		//TODO: remove magic numbers
-		UIElementPtr pElement = elements_[0];
+		// TODO: remove magic numbers
 
-		IRect rcWindow = bounding_box_;
+		// Background fill layer
+		auto& bg_element = *elements_[0];
 
 		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		pElement->FontColor().SetState(iState);
+		bg_element.TextureColor().SetState(iState);
+		bg_element.FontColor().SetState(iState);
 
-		this->GetDialog()->DrawSprite(*pElement, rcWindow);
-		this->GetDialog()->DrawString(text_, *pElement, rcWindow);
+		this->GetDialog()->DrawSprite(bg_element, bounding_box_);
+		this->GetDialog()->DrawString(text_, bg_element, bounding_box_);
 
 		// Main button
-		pElement = elements_[1];
-
+		auto& main_button_element = *elements_[1];
 
 		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		pElement->FontColor().SetState(iState);
+		main_button_element.TextureColor().SetState(iState);
+		main_button_element.FontColor().SetState(iState);
 
-		this->GetDialog()->DrawSprite(*pElement, rcWindow);
-		this->GetDialog()->DrawString(text_, *pElement, rcWindow);
+		this->GetDialog()->DrawSprite(main_button_element, bounding_box_);
+		this->GetDialog()->DrawString(text_, main_button_element, bounding_box_);
 	}
 
 	std::wstring const & UIButton::GetText() const

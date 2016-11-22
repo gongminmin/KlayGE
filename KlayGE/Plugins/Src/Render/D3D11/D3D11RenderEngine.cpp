@@ -299,7 +299,7 @@ namespace KlayGE
 
 	// 获取当前适配器
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D11AdapterPtr const & D3D11RenderEngine::ActiveAdapter() const
+	D3D11Adapter& D3D11RenderEngine::ActiveAdapter() const
 	{
 		return adapterList_.Adapter(adapterList_.CurrentAdapterIndex());
 	}
@@ -311,7 +311,7 @@ namespace KlayGE
 	{
 		motion_frames_ = settings.motion_frames;
 
-		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(this->ActiveAdapter(),
+		D3D11RenderWindowPtr win = MakeSharedPtr<D3D11RenderWindow>(&this->ActiveAdapter(),
 			name, settings);
 
 		switch (d3d_feature_level_)

@@ -62,14 +62,14 @@ namespace KlayGE
 		{
 			Element.TextureColor().States[UICS_Normal] = Color(0.7f, 0.7f, 0.7f, 1.0f);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Coord line
 		{
 			Element.TextureColor().States[UICS_Normal] = Color(0.6f, 0.6f, 0.6f, 1.0f);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Polyline
@@ -77,7 +77,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Normal] = Color(0, 1, 0, 1);
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 0, 0, 1);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Control points
@@ -85,7 +85,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 0, 0, 1);
 			Element.TextureColor().SetState(UICS_Normal);
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 

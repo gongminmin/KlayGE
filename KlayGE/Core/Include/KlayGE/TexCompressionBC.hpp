@@ -112,20 +112,7 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		TexCompressionBC1Ptr bc1_codec_;
-	};
-
-	class KLAYGE_CORE_API TexCompressionBC3 : public TexCompression
-	{
-	public:
-		TexCompressionBC3();
-
-		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
-		virtual void DecodeBlock(void* output, void const * input) override;
-
-	private:
-		TexCompressionBC1Ptr bc1_codec_;
-		TexCompressionBC4Ptr bc4_codec_;
+		TexCompressionBC1 bc1_codec_;
 	};
 
 	class KLAYGE_CORE_API TexCompressionBC4 : public TexCompression
@@ -137,6 +124,19 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 	};
 
+	class KLAYGE_CORE_API TexCompressionBC3 : public TexCompression
+	{
+	public:
+		TexCompressionBC3();
+
+		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) override;
+		virtual void DecodeBlock(void* output, void const * input) override;
+
+	private:
+		TexCompressionBC1 bc1_codec_;
+		TexCompressionBC4 bc4_codec_;
+	};
+
 	class KLAYGE_CORE_API TexCompressionBC5 : public TexCompression
 	{
 	public:
@@ -146,7 +146,7 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		TexCompressionBC4Ptr bc4_codec_;
+		TexCompressionBC4 bc4_codec_;
 	};
 
 	class KLAYGE_CORE_API TexCompressionBC6U : public TexCompression
@@ -219,7 +219,7 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		TexCompressionBC6UPtr bc6u_codec_;
+		TexCompressionBC6U bc6u_codec_;
 	};
 
 	class KLAYGE_CORE_API TexCompressionBC7 : public TexCompression

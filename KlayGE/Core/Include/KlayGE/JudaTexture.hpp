@@ -18,6 +18,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderStateObject.hpp>
+#include <KlayGE/TexCompressionBC.hpp>
 
 #include <vector>
 #include <deque>
@@ -189,7 +190,7 @@ namespace KlayGE
 		TexturePtr tex_indirect_;
 		uint32_t cache_tile_border_size_;
 		uint32_t cache_tile_size_;
-		TexCompressionPtr tex_codec_;
+		std::unique_ptr<TexCompression> tex_codec_;
 
 		struct TileInfo
 		{

@@ -1437,8 +1437,6 @@ namespace KlayGE
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC2) * 4;
 		decoded_fmt_ = EF_ARGB8;
-
-		bc1_codec_ = MakeSharedPtr<TexCompressionBC1>();
 	}
 
 	void TexCompressionBC2::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1458,7 +1456,7 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i].a() >> 4);
 		}
 
-		bc1_codec_->EncodeBC1Internal(bc2.bc1, &xrgb[0], false, method);
+		bc1_codec_.EncodeBC1Internal(bc2.bc1, &xrgb[0], false, method);
 		
 		for (int i = 0; i < 4; ++ i)
 		{
@@ -1475,7 +1473,7 @@ namespace KlayGE
 		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		BC2Block const * bc2_block = static_cast<BC2Block const *>(input);
 
-		bc1_codec_->DecodeBlock(argb, &bc2_block->bc1);
+		bc1_codec_.DecodeBlock(argb, &bc2_block->bc1);
 
 		for (int i = 0; i < 4; ++ i)
 		{
@@ -1493,9 +1491,6 @@ namespace KlayGE
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC3) * 4;
 		decoded_fmt_ = EF_ARGB8;
-
-		bc1_codec_ = MakeSharedPtr<TexCompressionBC1>();
-		bc4_codec_ = MakeSharedPtr<TexCompressionBC4>();
 	}
 
 	void TexCompressionBC3::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1515,8 +1510,8 @@ namespace KlayGE
 			alpha[i] = static_cast<uint8_t>(argb[i].a());
 		}
 
-		bc1_codec_->EncodeBC1Internal(bc3.bc1, &xrgb[0], false, method);
-		bc4_codec_->EncodeBlock(&bc3.alpha, &alpha[0], method);
+		bc1_codec_.EncodeBC1Internal(bc3.bc1, &xrgb[0], false, method);
+		bc4_codec_.EncodeBlock(&bc3.alpha, &alpha[0], method);
 	}
 
 	void TexCompressionBC3::DecodeBlock(void* output, void const * input)
@@ -1527,10 +1522,10 @@ namespace KlayGE
 		ARGBColor32* argb = static_cast<ARGBColor32*>(output);
 		BC3Block const * bc3_block = static_cast<BC3Block const *>(input);
 
-		bc1_codec_->DecodeBlock(argb, &bc3_block->bc1);
+		bc1_codec_.DecodeBlock(argb, &bc3_block->bc1);
 
 		std::array<uint8_t, 16> alpha_block;
-		bc4_codec_->DecodeBlock(&alpha_block[0], &bc3_block->alpha);
+		bc4_codec_.DecodeBlock(&alpha_block[0], &bc3_block->alpha);
 
 		for (size_t i = 0; i < alpha_block.size(); ++ i)
 		{
@@ -1654,8 +1649,6 @@ namespace KlayGE
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC5) * 4;
 		decoded_fmt_ = EF_GR8;
-
-		bc4_codec_ = MakeSharedPtr<TexCompressionBC4>();
 	}
 
 	void TexCompressionBC5::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1674,8 +1667,8 @@ namespace KlayGE
 			g[i] = gr[i] >> 8;
 		}
 
-		bc4_codec_->EncodeBlock(&bc5.red, &r[0], method);
-		bc4_codec_->EncodeBlock(&bc5.green, &g[0], method);
+		bc4_codec_.EncodeBlock(&bc5.red, &r[0], method);
+		bc4_codec_.EncodeBlock(&bc5.green, &g[0], method);
 	}
 
 	void TexCompressionBC5::DecodeBlock(void* output, void const * input)
@@ -1687,9 +1680,9 @@ namespace KlayGE
 		BC5Block const * bc5_block = static_cast<BC5Block const *>(input);
 
 		std::array<uint8_t, 16> r;
-		bc4_codec_->DecodeBlock(&r[0], &bc5_block->red);
+		bc4_codec_.DecodeBlock(&r[0], &bc5_block->red);
 		std::array<uint8_t, 16> g;
-		bc4_codec_->DecodeBlock(&g[0], &bc5_block->green);
+		bc4_codec_.DecodeBlock(&g[0], &bc5_block->green);
 
 		for (size_t i = 0; i < r.size(); ++ i)
 		{
@@ -2226,7 +2219,7 @@ namespace KlayGE
 
 	void TexCompressionBC6S::DecodeBlock(void* output, void const * input)
 	{
-		bc6u_codec_->DecodeBC6Internal(output, input, true);
+		bc6u_codec_.DecodeBC6Internal(output, input, true);
 	}
 
 

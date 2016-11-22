@@ -25,7 +25,7 @@ namespace
 				std::vector<ElementInitData> const & in_data,
 				std::vector<ElementInitData> const & out_data, ElementFormat out_format)
 	{
-		TexCompressionPtr in_codec;
+		std::unique_ptr<TexCompression> in_codec;
 		if (IsCompressedFormat(in_format))
 		{
 			switch (in_format)
@@ -33,58 +33,58 @@ namespace
 			case EF_BC1:
 			case EF_BC1_SRGB:
 			case EF_SIGNED_BC1:
-				in_codec = MakeSharedPtr<TexCompressionBC1>();
+				in_codec = MakeUniquePtr<TexCompressionBC1>();
 				break;
 
 			case EF_BC2:
 			case EF_BC2_SRGB:
 			case EF_SIGNED_BC2:
-				in_codec = MakeSharedPtr<TexCompressionBC2>();
+				in_codec = MakeUniquePtr<TexCompressionBC2>();
 				break;
 
 			case EF_BC3:
 			case EF_BC3_SRGB:
 			case EF_SIGNED_BC3:
-				in_codec = MakeSharedPtr<TexCompressionBC3>();
+				in_codec = MakeUniquePtr<TexCompressionBC3>();
 				break;
 
 			case EF_BC4:
 			case EF_BC4_SRGB:
 			case EF_SIGNED_BC4:
-				in_codec = MakeSharedPtr<TexCompressionBC4>();
+				in_codec = MakeUniquePtr<TexCompressionBC4>();
 				break;
 
 			case EF_BC5:
 			case EF_BC5_SRGB:
 			case EF_SIGNED_BC5:
-				in_codec = MakeSharedPtr<TexCompressionBC5>();
+				in_codec = MakeUniquePtr<TexCompressionBC5>();
 				break;
 
 			case EF_BC6:
-				in_codec = MakeSharedPtr<TexCompressionBC6U>();
+				in_codec = MakeUniquePtr<TexCompressionBC6U>();
 				break;
 
 			case EF_SIGNED_BC6:
-				in_codec = MakeSharedPtr<TexCompressionBC6S>();
+				in_codec = MakeUniquePtr<TexCompressionBC6S>();
 				break;
 
 			case EF_BC7:
 			case EF_BC7_SRGB:
-				in_codec = MakeSharedPtr<TexCompressionBC7>();
+				in_codec = MakeUniquePtr<TexCompressionBC7>();
 				break;
 
 			case EF_ETC1:
-				in_codec = MakeSharedPtr<TexCompressionETC1>();
+				in_codec = MakeUniquePtr<TexCompressionETC1>();
 				break;
 
 			case EF_ETC2_BGR8:
 			case EF_ETC2_BGR8_SRGB:
-				in_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+				in_codec = MakeUniquePtr<TexCompressionETC2RGB8>();
 				break;
 
 			case EF_ETC2_A1BGR8:
 			case EF_ETC2_A1BGR8_SRGB:
-				in_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+				in_codec = MakeUniquePtr<TexCompressionETC2RGB8A1>();
 				break;
 
 			case EF_ETC2_ABGR8:
@@ -111,64 +111,64 @@ namespace
 			}
 		}
 
-		TexCompressionPtr out_codec;
+		std::unique_ptr<TexCompression> out_codec;
 		switch (out_format)
 		{
 		case EF_BC1:
 		case EF_BC1_SRGB:
 		case EF_SIGNED_BC1:
-			out_codec = MakeSharedPtr<TexCompressionBC1>();
+			out_codec = MakeUniquePtr<TexCompressionBC1>();
 			break;
 
 		case EF_BC2:
 		case EF_BC2_SRGB:
 		case EF_SIGNED_BC2:
-			out_codec = MakeSharedPtr<TexCompressionBC2>();
+			out_codec = MakeUniquePtr<TexCompressionBC2>();
 			break;
 
 		case EF_BC3:
 		case EF_BC3_SRGB:
 		case EF_SIGNED_BC3:
-			out_codec = MakeSharedPtr<TexCompressionBC3>();
+			out_codec = MakeUniquePtr<TexCompressionBC3>();
 			break;
 
 		case EF_BC4:
 		case EF_BC4_SRGB:
 		case EF_SIGNED_BC4:
-			out_codec = MakeSharedPtr<TexCompressionBC4>();
+			out_codec = MakeUniquePtr<TexCompressionBC4>();
 			break;
 
 		case EF_BC5:
 		case EF_BC5_SRGB:
 		case EF_SIGNED_BC5:
-			out_codec = MakeSharedPtr<TexCompressionBC5>();
+			out_codec = MakeUniquePtr<TexCompressionBC5>();
 			break;
 
 		case EF_BC6:
-			out_codec = MakeSharedPtr<TexCompressionBC6U>();
+			out_codec = MakeUniquePtr<TexCompressionBC6U>();
 			break;
 
 		case EF_SIGNED_BC6:
-			out_codec = MakeSharedPtr<TexCompressionBC6S>();
+			out_codec = MakeUniquePtr<TexCompressionBC6S>();
 			break;
 
 		case EF_BC7:
 		case EF_BC7_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionBC7>();
+			out_codec = MakeUniquePtr<TexCompressionBC7>();
 			break;
 
 		case EF_ETC1:
-			out_codec = MakeSharedPtr<TexCompressionETC1>();
+			out_codec = MakeUniquePtr<TexCompressionETC1>();
 			break;
 
 		case EF_ETC2_BGR8:
 		case EF_ETC2_BGR8_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			out_codec = MakeUniquePtr<TexCompressionETC2RGB8>();
 			break;
 
 		case EF_ETC2_A1BGR8:
 		case EF_ETC2_A1BGR8_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			out_codec = MakeUniquePtr<TexCompressionETC2RGB8A1>();
 			break;
 
 		case EF_ETC2_ABGR8:
@@ -275,64 +275,64 @@ namespace
 			fmt = MakeSRGB(fmt);
 		}
 
-		TexCompressionPtr out_codec;
+		std::unique_ptr<TexCompression> out_codec;
 		switch (fmt)
 		{
 		case EF_BC1:
 		case EF_BC1_SRGB:
 		case EF_SIGNED_BC1:
-			out_codec = MakeSharedPtr<TexCompressionBC1>();
+			out_codec = MakeUniquePtr<TexCompressionBC1>();
 			break;
 
 		case EF_BC2:
 		case EF_BC2_SRGB:
 		case EF_SIGNED_BC2:
-			out_codec = MakeSharedPtr<TexCompressionBC2>();
+			out_codec = MakeUniquePtr<TexCompressionBC2>();
 			break;
 
 		case EF_BC3:
 		case EF_BC3_SRGB:
 		case EF_SIGNED_BC3:
-			out_codec = MakeSharedPtr<TexCompressionBC3>();
+			out_codec = MakeUniquePtr<TexCompressionBC3>();
 			break;
 
 		case EF_BC4:
 		case EF_BC4_SRGB:
 		case EF_SIGNED_BC4:
-			out_codec = MakeSharedPtr<TexCompressionBC4>();
+			out_codec = MakeUniquePtr<TexCompressionBC4>();
 			break;
 
 		case EF_BC5:
 		case EF_BC5_SRGB:
 		case EF_SIGNED_BC5:
-			out_codec = MakeSharedPtr<TexCompressionBC5>();
+			out_codec = MakeUniquePtr<TexCompressionBC5>();
 			break;
 
 		case EF_BC6:
-			out_codec = MakeSharedPtr<TexCompressionBC6U>();
+			out_codec = MakeUniquePtr<TexCompressionBC6U>();
 			break;
 
 		case EF_SIGNED_BC6:
-			out_codec = MakeSharedPtr<TexCompressionBC6S>();
+			out_codec = MakeUniquePtr<TexCompressionBC6S>();
 			break;
 
 		case EF_BC7:
 		case EF_BC7_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionBC7>();
+			out_codec = MakeUniquePtr<TexCompressionBC7>();
 			break;
 
 		case EF_ETC1:
-			out_codec = MakeSharedPtr<TexCompressionETC1>();
+			out_codec = MakeUniquePtr<TexCompressionETC1>();
 			break;
 
 		case EF_ETC2_BGR8:
 		case EF_ETC2_BGR8_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionETC2RGB8>();
+			out_codec = MakeUniquePtr<TexCompressionETC2RGB8>();
 			break;
 
 		case EF_ETC2_A1BGR8:
 		case EF_ETC2_A1BGR8_SRGB:
-			out_codec = MakeSharedPtr<TexCompressionETC2RGB8A1>();
+			out_codec = MakeUniquePtr<TexCompressionETC2RGB8A1>();
 			break;
 
 		case EF_ETC2_ABGR8:

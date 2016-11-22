@@ -49,7 +49,7 @@ using namespace Microsoft::WRL::Wrappers;
 
 namespace KlayGE
 {
-	D3D11RenderWindow::D3D11RenderWindow(D3D11AdapterPtr const & adapter, std::string const & name, RenderSettings const & settings)
+	D3D11RenderWindow::D3D11RenderWindow(D3D11Adapter* adapter, std::string const & name, RenderSettings const & settings)
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 						: hWnd_(nullptr),
 #else

@@ -48,7 +48,7 @@ namespace KlayGE
 	class D3D11RenderWindow : public D3D11FrameBuffer
 	{
 	public:
-		D3D11RenderWindow(D3D11AdapterPtr const & adapter, std::string const & name, RenderSettings const & settings);
+		D3D11RenderWindow(D3D11Adapter* adapter, std::string const & name, RenderSettings const & settings);
 		~D3D11RenderWindow();
 
 		void Destroy();
@@ -121,7 +121,7 @@ namespace KlayGE
 		bool	isFullScreen_;
 		uint32_t sync_interval_;
 
-		D3D11AdapterPtr			adapter_;
+		D3D11Adapter* adapter_;
 		bool dxgi_stereo_support_;
 		bool dxgi_allow_tearing_;
 		bool dxgi_async_swap_chain_;

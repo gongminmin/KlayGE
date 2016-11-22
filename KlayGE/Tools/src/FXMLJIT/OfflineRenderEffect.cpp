@@ -2120,9 +2120,9 @@ namespace KlayGE
 		{
 		}
 
-		void RenderEffect::RecursiveIncludeNode(XMLNodePtr const & root, std::vector<std::string>& include_names) const
+		void RenderEffect::RecursiveIncludeNode(XMLNode const & root, std::vector<std::string>& include_names) const
 		{
-			for (XMLNodePtr node = root->FirstNode("include"); node; node = node->NextSibling("include"))
+			for (XMLNodePtr node = root.FirstNode("include"); node; node = node->NextSibling("include"))
 			{
 				XMLAttributePtr attr = node->Attrib("name");
 				BOOST_ASSERT(attr);
@@ -2131,7 +2131,7 @@ namespace KlayGE
 
 				XMLDocument include_doc;
 				XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
-				this->RecursiveIncludeNode(include_root, include_names);
+				this->RecursiveIncludeNode(*include_root, include_names);
 
 				bool found = false;
 				for (size_t i = 0; i < include_names.size(); ++ i)
@@ -2150,14 +2150,14 @@ namespace KlayGE
 			}
 		}
 
-		void RenderEffect::InsertIncludeNodes(XMLDocument& target_doc, XMLNodePtr const & target_root,
-			XMLNodePtr const & target_place, XMLNodePtr const & include_root) const
+		void RenderEffect::InsertIncludeNodes(XMLDocument& target_doc, XMLNode& target_root,
+			XMLNodePtr const & target_place, XMLNode const & include_root) const
 		{
-			for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
+			for (XMLNodePtr child_node = include_root.FirstNode(); child_node; child_node = child_node->NextSibling())
 			{
 				if ((XNT_Element == child_node->Type()) && (child_node->Name() != "include"))
 				{
-					target_root->InsertNode(target_place, target_doc.CloneNode(child_node));
+					target_root.InsertNode(target_place, target_doc.CloneNode(child_node));
 				}
 			}
 		}
@@ -2173,7 +2173,7 @@ namespace KlayGE
 
 			ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 
-			XMLDocumentPtr doc;
+			std::unique_ptr<XMLDocument> doc;
 			XMLNodePtr root;
 
 			res_name_ = MakeSharedPtr<std::string>(fxml_name);
@@ -2181,11 +2181,11 @@ namespace KlayGE
 			{
 				timestamp_ = source->Timestamp();
 
-				doc = MakeSharedPtr<XMLDocument>();
+				doc = MakeUniquePtr<XMLDocument>();
 				root = doc->Parse(source);
 
 				std::vector<std::string> include_names;
-				this->RecursiveIncludeNode(root, include_names);
+				this->RecursiveIncludeNode(*root, include_names);
 
 				for (auto const & include_name : include_names)
 				{
@@ -2207,7 +2207,7 @@ namespace KlayGE
 
 				XMLAttributePtr attr;
 
-				std::vector<XMLDocumentPtr> include_docs;
+				std::vector<std::unique_ptr<XMLDocument>> include_docs;
 				std::vector<std::string> whole_include_names;
 				for (XMLNodePtr node = root->FirstNode("include"); node;)
 				{
@@ -2215,11 +2215,11 @@ namespace KlayGE
 					BOOST_ASSERT(attr);
 					std::string include_name = attr->ValueString();
 
-					include_docs.push_back(MakeSharedPtr<XMLDocument>());
+					include_docs.push_back(MakeUniquePtr<XMLDocument>());
 					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
 
 					include_names.clear();
-					this->RecursiveIncludeNode(include_root, include_names);
+					this->RecursiveIncludeNode(*include_root, include_names);
 
 					if (!include_names.empty())
 					{
@@ -2241,9 +2241,9 @@ namespace KlayGE
 							}
 							else
 							{
-								include_docs.push_back(MakeSharedPtr<XMLDocument>());
+								include_docs.push_back(MakeUniquePtr<XMLDocument>());
 								XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
-								this->InsertIncludeNodes(*doc, root, node, recursive_include_root);
+								this->InsertIncludeNodes(*doc, *root, node, *recursive_include_root);
 
 								whole_include_names.push_back(*iter);
 								++ iter;
@@ -2263,7 +2263,7 @@ namespace KlayGE
 
 					if (!found)
 					{
-						this->InsertIncludeNodes(*doc, root, node, include_root);
+						this->InsertIncludeNodes(*doc, *root, node, *include_root);
 						whole_include_names.push_back(include_name);
 					}
 

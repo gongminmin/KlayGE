@@ -66,14 +66,14 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 1);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Check
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_RadioButton, 1));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 
@@ -183,13 +183,13 @@ namespace KlayGE
 			iState = UICS_Hidden;
 		}
 
-		UIElementPtr pElement = elements_[0];
+		auto& box_element = *elements_[0];
 
-		pElement->TextureColor().SetState(iState);
-		pElement->FontColor().SetState(iState);
+		box_element.TextureColor().SetState(iState);
+		box_element.FontColor().SetState(iState);
 
-		this->GetDialog()->DrawSprite(*pElement, button_rc_);
-		this->GetDialog()->DrawString(text_, *pElement, text_rc_, true);
+		this->GetDialog()->DrawSprite(box_element, button_rc_);
+		this->GetDialog()->DrawString(text_, box_element, text_rc_, true);
 
 		if (!checked_)
 		{
@@ -197,11 +197,11 @@ namespace KlayGE
 		}
 
 		// Main button
-		pElement = elements_[1];
+		auto& check_element = *elements_[1];
 
 		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, button_rc_);
+		check_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(check_element, button_rc_);
 	}
 
 	std::wstring const & UIRadioButton::GetText() const

@@ -16,7 +16,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KlayGE/TexCompressionBC.hpp>
 
 #include <fstream>
 #include <cstring>
@@ -1161,15 +1160,15 @@ namespace KlayGE
 				switch (format)
 				{
 				case EF_BC1:
-					tex_codec_ = MakeSharedPtr<TexCompressionBC1>();
+					tex_codec_ = MakeUniquePtr<TexCompressionBC1>();
 					break;
 
 				case EF_BC2:
-					tex_codec_ = MakeSharedPtr<TexCompressionBC2>();
+					tex_codec_ = MakeUniquePtr<TexCompressionBC2>();
 					break;
 
 				case EF_BC3:
-					tex_codec_ = MakeSharedPtr<TexCompressionBC3>();
+					tex_codec_ = MakeUniquePtr<TexCompressionBC3>();
 					break;
 
 				default:

@@ -87,7 +87,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 0));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Up Arrow
@@ -95,7 +95,7 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 1));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Down Arrow
@@ -103,14 +103,14 @@ namespace KlayGE
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 2));
 			Element.TextureColor().States[UICS_Disabled] = Color(200.0f / 255, 200.0f / 255, 200.0f / 255, 1);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Button
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_ScrollBar, 3));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 
@@ -396,33 +396,25 @@ namespace KlayGE
 		}
 
 
-		// Background track layer
-		UIElementPtr pElement = elements_[0];
+		auto& track_element = *elements_[0];
 
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, track_rc_);
+		track_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(track_element, track_rc_);
 
-		// Up Arrow
-		pElement = elements_[1];
+		auto& up_arrow_element = *elements_[1];
 
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, up_button_rc_);
+		up_arrow_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(up_arrow_element, up_button_rc_);
 
-		// Down Arrow
-		pElement = elements_[2];
+		auto& down_arrow_element = *elements_[2];
 
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, down_button_rc_);
+		down_arrow_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(down_arrow_element, down_button_rc_);
 
-		// Thumb button
-		pElement = elements_[3];
+		auto& thumb_element = *elements_[3];
 
-		// Blend current color
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, thumb_rc_);
+		thumb_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(thumb_element, thumb_rc_);
 	}
 
 	void UIScrollBar::SetTrackRange(size_t nStart, size_t nEnd)

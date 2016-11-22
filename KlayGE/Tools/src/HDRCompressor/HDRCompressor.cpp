@@ -213,15 +213,15 @@ namespace
 		uint32_t c_width = std::max(width / 2, 1U);
 		uint32_t c_height = std::max(height / 2, 1U);
 
-		TexCompressionPtr tex_codec;
+		std::unique_ptr<TexCompression> tex_codec;
 		switch (c_format)
 		{
 		case EF_BC3:
-			tex_codec = MakeSharedPtr<TexCompressionBC3>();
+			tex_codec = MakeUniquePtr<TexCompressionBC3>();
 			break;
 
 		case EF_BC5:
-			tex_codec = MakeSharedPtr<TexCompressionBC5>();
+			tex_codec = MakeUniquePtr<TexCompressionBC5>();
 			break;
 
 		default:

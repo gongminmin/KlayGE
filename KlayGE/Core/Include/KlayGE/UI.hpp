@@ -153,7 +153,7 @@ namespace KlayGE
 		UIStatesColor font_color_;
 	};
 
-	class KLAYGE_CORE_API UIControl : public std::enable_shared_from_this<UIControl>
+	class KLAYGE_CORE_API UIControl : public std::enable_shared_from_this<UIControl>, boost::noncopyable
 	{
 	public:
 		UIControl(uint32_t type, UIDialogPtr const & dialog)
@@ -276,26 +276,26 @@ namespace KlayGE
 
 		virtual void SetTextColor(Color const & color)
 		{
-			UIElementPtr const & element = elements_[0];
+			UIElement* element = elements_[0].get();
 			if (element)
 			{
 				element->FontColor().States[UICS_Normal] = color;
 			}
 		}
-		UIElementPtr const & GetElement(uint32_t iElement) const
+		UIElement* GetElement(uint32_t iElement) const
 		{
-			return elements_[iElement];
+			return elements_[iElement].get();
 		}
-		void SetElement(uint32_t iElement, UIElementPtr element)
+		void SetElement(uint32_t iElement, UIElement const & element)
 		{
 			// Make certain the array is this large
 			for (uint32_t i = static_cast<uint32_t>(elements_.size()); i <= iElement; ++ i)
 			{
-				elements_.push_back(MakeSharedPtr<UIElement>());
+				elements_.push_back(MakeUniquePtr<UIElement>());
 			}
 
 			// Update the data
-			*elements_[iElement] = *element;
+			*elements_[iElement] = element;
 		}
 
 		bool GetIsDefault() const
@@ -352,7 +352,7 @@ namespace KlayGE
 		std::weak_ptr<UIDialog> dialog_;    // Parent container
 		uint32_t index_;              // Index within the control list
 
-		std::vector<UIElementPtr> elements_;  // All display elements
+		std::vector<std::unique_ptr<UIElement>> elements_;  // All display elements
 
 	protected:
 		virtual void UpdateRects()

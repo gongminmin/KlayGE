@@ -106,8 +106,8 @@ namespace KlayGE
 
 			uint32_t const INDEX_PER_CHAR = restart_ ? 5 : 6;
 			uint32_t const INIT_NUM_CHAR = 1024;
-			tb_vb_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * 4 * sizeof(FontVert)), TransientBuffer::BF_Vertex);
-			tb_ib_ = MakeSharedPtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * INDEX_PER_CHAR * sizeof(uint16_t)), TransientBuffer::BF_Index);
+			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * 4 * sizeof(FontVert)), TransientBuffer::BF_Vertex);
+			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_CHAR * INDEX_PER_CHAR * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
 			rl_->BindVertexStream(tb_vb_->GetBuffer(), std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
 											vertex_element(VEU_Diffuse, 0, EF_ABGR8),
@@ -695,8 +695,8 @@ namespace KlayGE
 
 		bool three_dim_;
 
-		TransientBufferPtr tb_vb_;
-		TransientBufferPtr tb_ib_;
+		std::unique_ptr<TransientBuffer> tb_vb_;
+		std::unique_ptr<TransientBuffer> tb_ib_;
 		std::vector<SubAlloc> tb_vb_sub_allocs_;
 		std::vector<SubAlloc> tb_ib_sub_allocs_;
 

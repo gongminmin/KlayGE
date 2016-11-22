@@ -61,14 +61,14 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 200.0f / 255);
 			Element.TextureColor().States[UICS_Disabled] = Color(1, 1, 1, 70.0f / 255);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Button
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_Slider, 1));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 
@@ -251,14 +251,14 @@ namespace KlayGE
 			iState = UICS_Hidden;
 		}
 
-		UIElementPtr pElement = elements_[0];
+		auto& track_element = *elements_[0];
 
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, slider_rc_);
+		track_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(track_element, slider_rc_);
 
-		pElement = elements_[1];
+		auto& button_element = *elements_[1];
 
-		pElement->TextureColor().SetState(iState);
-		this->GetDialog()->DrawSprite(*pElement, button_rc_);
+		button_element.TextureColor().SetState(iState);
+		this->GetDialog()->DrawSprite(button_element, button_rc_);
 	}
 }

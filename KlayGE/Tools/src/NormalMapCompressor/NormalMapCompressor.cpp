@@ -126,15 +126,15 @@ namespace
 	{
 		KFL_UNUSED(restored_format);
 
-		TexCompressionPtr tex_codec;
+		std::unique_ptr<TexCompression> tex_codec;
 		switch (com_format)
 		{
 		case EF_BC3:
-			tex_codec = MakeSharedPtr<TexCompressionBC3>();
+			tex_codec = MakeUniquePtr<TexCompressionBC3>();
 			break;
 
 		case EF_BC5:
-			tex_codec = MakeSharedPtr<TexCompressionBC5>();
+			tex_codec = MakeUniquePtr<TexCompressionBC5>();
 			break;
 
 		default:

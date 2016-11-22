@@ -103,7 +103,7 @@ namespace KlayGE
 
 		float4x4 model_;
 		float4x4 abs_model_;
-		AABBoxPtr pos_aabb_ws_;
+		std::unique_ptr<AABBox> pos_aabb_ws_;
 		BoundOverlap visible_mark_;
 
 		std::function<void(SceneObject&, float, float)> sub_thread_update_func_;

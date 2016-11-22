@@ -66,7 +66,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Pressed] = Color(0, 0, 0, 60.0f / 255);
 			Element.TextureColor().States[UICS_Focus] = Color(1, 1, 1, 30.0f / 255);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		// Button
@@ -87,7 +87,7 @@ namespace KlayGE
 			Element.TextureColor().States[UICS_Pressed] = Color(1, 1, 1, 1);
 			Element.FontColor().States[UICS_MouseOver] = Color(0, 0, 0, 1);
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 	}
 
@@ -185,11 +185,11 @@ namespace KlayGE
 
 		for (int i = 0; i < 10; ++ i)
 		{
-			UIElementPtr pElement = elements_[i];
+			auto& element = *elements_[i];
 
 			// Blend current color
-			pElement->TextureColor().SetState(iState);
-			pElement->FontColor().SetState(iState);
+			element.TextureColor().SetState(iState);
+			element.FontColor().SetState(iState);
 		}
 
 		// Fill layer

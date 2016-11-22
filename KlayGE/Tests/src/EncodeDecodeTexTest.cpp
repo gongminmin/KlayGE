@@ -29,35 +29,35 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 	std::vector<uint8_t> bc_blocks;
 	uint32_t width, height;
 
-	TexCompressionPtr codec;
+	std::unique_ptr<TexCompression> codec;
 	switch (bc_fmt)
 	{
 	case EF_BC1:
-		codec = MakeSharedPtr<TexCompressionBC1>();
+		codec = MakeUniquePtr<TexCompressionBC1>();
 		break;
 
 	case EF_BC2:
-		codec = MakeSharedPtr<TexCompressionBC2>();
+		codec = MakeUniquePtr<TexCompressionBC2>();
 		break;
 
 	case EF_BC3:
-		codec = MakeSharedPtr<TexCompressionBC3>();
+		codec = MakeUniquePtr<TexCompressionBC3>();
 		break;
 
 	case EF_BC6:
-		codec = MakeSharedPtr<TexCompressionBC6U>();
+		codec = MakeUniquePtr<TexCompressionBC6U>();
 		break;
 
 	case EF_SIGNED_BC6:
-		codec = MakeSharedPtr<TexCompressionBC6S>();
+		codec = MakeUniquePtr<TexCompressionBC6S>();
 		break;
 
 	case EF_BC7:
-		codec = MakeSharedPtr<TexCompressionBC7>();
+		codec = MakeUniquePtr<TexCompressionBC7>();
 		break;
 
 	case EF_ETC1:
-		codec = MakeSharedPtr<TexCompressionETC1>();
+		codec = MakeUniquePtr<TexCompressionETC1>();
 		break;
 
 	default:

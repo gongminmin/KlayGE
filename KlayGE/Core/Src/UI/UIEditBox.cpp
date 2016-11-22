@@ -288,55 +288,55 @@ namespace KlayGE
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 0));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 1));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 2));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 3));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 4));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 5));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 6));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 7));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		{
 			Element.SetTexture(0, UIManager::Instance().ElementTextureRect(UICT_EditBox, 8));
 
-			elements_.push_back(MakeSharedPtr<UIElement>(Element));
+			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
 
 		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
@@ -797,10 +797,11 @@ namespace KlayGE
 
 	void UIEditBox::Render()
 	{
-		UIElementPtr pElement = this->GetElement(0);
-		if (pElement)
+		auto text_element = elements_[0].get();
+		if (text_element)
 		{
-			buffer_.SetFont(this->GetDialog()->GetFont(pElement->FontIndex()), this->GetDialog()->GetFontSize(pElement->FontIndex()));
+			buffer_.SetFont(this->GetDialog()->GetFont(text_element->FontIndex()),
+				this->GetDialog()->GetFontSize(text_element->FontIndex()));
 			this->PlaceCaret(caret_pos_);  // Call PlaceCaret now that we have the font info (node),
 			// so that scrolling can be handled.
 		}
@@ -808,17 +809,17 @@ namespace KlayGE
 		// Render the control graphics
 		for (int i = 0; i < 9; ++ i)
 		{
-			pElement = elements_[i];
+			auto& element = *elements_[i];
 			if (this->GetEnabled())
 			{
-				pElement->TextureColor().SetState(UICS_Normal);
+				element.TextureColor().SetState(UICS_Normal);
 			}
 			else
 			{
-				pElement->TextureColor().SetState(UICS_Disabled);
+				element.TextureColor().SetState(UICS_Disabled);
 			}
 
-			this->GetDialog()->DrawSprite(*pElement, render_rc_[i]);
+			this->GetDialog()->DrawSprite(element, render_rc_[i]);
 		}
 
 		//

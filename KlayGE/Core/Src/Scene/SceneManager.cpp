@@ -577,14 +577,13 @@ namespace KlayGE
 			{
 				this->ClipScene();
 
-				std::shared_ptr<std::vector<BoundOverlap>> visible_marks
-					= MakeSharedPtr<std::vector<BoundOverlap>>(scene_objs.size());
+				auto visible_marks = MakeUniquePtr<std::vector<BoundOverlap>>(scene_objs.size());
 				for (size_t i = 0; i < scene_objs.size(); ++ i)
 				{
 					(*visible_marks)[i] = scene_objs[i]->VisibleMark();
 				}
 
-				visible_marks_map_.emplace(seed, visible_marks);
+				visible_marks_map_.emplace(seed, std::move(visible_marks));
 			}
 			else
 			{

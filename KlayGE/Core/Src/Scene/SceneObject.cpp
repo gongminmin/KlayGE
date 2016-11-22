@@ -33,7 +33,7 @@ namespace KlayGE
 	{
 		if (!(attrib & SOA_Overlay) && (attrib & (SOA_Cullable | SOA_Moveable)))
 		{
-			pos_aabb_ws_ = MakeSharedPtr<AABBox>();
+			pos_aabb_ws_ = MakeUniquePtr<AABBox>();
 		}
 	}
 
