@@ -29,6 +29,10 @@ DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_c.dds" "cbda47a1
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_y.dds" "cbda47a1678ce70b6720856736100979d469e159" "c515b8aed52a6eafee96ea4d32b60eaf746ea985")
 DOWNLOAD_FILE("KlayGE/media/Textures/Juda/klayge_logo.jdt" "cbda47a1678ce70b6720856736100979d469e159" "4fed908fd641b6c536fee9f733dba37d4531079a")
 
+IF(NOT MSVC)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+ENDIF()
+
 SET(LIB_NAME ${KLAYGE_CORELIB_NAME})
 
 SET(BASE_SOURCE_FILES

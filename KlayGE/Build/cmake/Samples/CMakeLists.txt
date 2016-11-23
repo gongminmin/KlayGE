@@ -5,6 +5,10 @@
 # - EXTRA_LINKED_LIBRARIES: dependencies required besides KlayGE_Core and boost
 #
 MACRO(SETUP_SAMPLE EXE_NAME)
+	IF(NOT MSVC)
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
+	ENDIF()
+
 	IF(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		SET(SHORT_NAME ${EXE_NAME})
 
