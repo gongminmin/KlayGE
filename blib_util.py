@@ -234,6 +234,7 @@ class build_info:
 			elif "vc120" == compiler:
 				if "VS120COMNTOOLS" in env:
 					compiler_root = env["VS120COMNTOOLS"] + "..\\..\\VC\\bin\\"
+					vcvarsall_path = "..\\VCVARSALL.BAT"
 				else:
 					try_folder = program_files_folder + "\\Microsoft Visual Studio 12.0\\VC\\bin\\"
 					try_vcvarsall = "..\\VCVARSALL.BAT"
