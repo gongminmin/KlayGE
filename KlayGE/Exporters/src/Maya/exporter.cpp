@@ -946,7 +946,8 @@ char const* obj_default_options =" ";
 MStatus initializePlugin(MObject obj)
 {
 	MFnPlugin plugin(obj, "KlayGE", "4.0", "Any");
-	return plugin.registerFileTranslator("MeshMLMayaExporter", "none",
+	char pixmapName[] = "none";
+	return plugin.registerFileTranslator("MeshMLMayaExporter", pixmapName,
 		MayaToMeshML::creator, const_cast<char*>(obj_option_script), const_cast<char*>(obj_default_options));
 }
 

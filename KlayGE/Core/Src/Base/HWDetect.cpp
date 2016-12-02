@@ -36,6 +36,9 @@
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KFL/COMPtr.hpp>
 #include <comdef.h>
+#ifndef __wbemdisp_h__
+#define __wbemdisp_h__	// Force not to include wbemdisp.h
+#endif
 #include <WbemIdl.h>
 
 #if defined KLAYGE_COMPILER_MSVC
