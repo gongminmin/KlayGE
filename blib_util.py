@@ -25,11 +25,12 @@ class cfg_from_argv:
 			self.cfg = ""
 
 class compiler_info:
-	def __init__(self, arch, gen_name, toolset, compiler_root):
+	def __init__(self, arch, gen_name, toolset, compiler_root, vcvarsall_path = ""):
 		self.arch = arch
 		self.generator = gen_name
 		self.toolset = toolset
 		self.compiler_root = compiler_root
+		self.vcvarsall_path = vcvarsall_path
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
@@ -221,10 +222,13 @@ class build_info:
 			if "vc140" == compiler:
 				if "VS140COMNTOOLS" in env:
 					compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
+					vcvarsall_path = "..\\VCVARSALL.BAT"
 				else:
 					try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\bin\\"
-					if os.path.exists(try_folder + "..\\VCVARSALL.BAT"):
+					try_vcvarsall = "..\\VCVARSALL.BAT"
+					if os.path.exists(try_folder + try_vcvarsall):
 						compiler_root = try_folder
+						vcvarsall_path = try_vcvarsall
 					else:
 						log_error("Can't find the compiler.\n")
 			elif "vc120" == compiler:
@@ -232,8 +236,10 @@ class build_info:
 					compiler_root = env["VS120COMNTOOLS"] + "..\\..\\VC\\bin\\"
 				else:
 					try_folder = program_files_folder + "\\Microsoft Visual Studio 12.0\\VC\\bin\\"
-					if os.path.exists(try_folder + "..\\VCVARSALL.BAT"):
+					try_vcvarsall = "..\\VCVARSALL.BAT"
+					if os.path.exists(try_folder + try_vcvarsall):
 						compiler_root = try_folder
+						vcvarsall_path = try_vcvarsall
 					else:
 						log_error("Can't find the compiler.\n")
 			elif "clang" == compiler:
@@ -285,7 +291,7 @@ class build_info:
 					gen_name = "Visual Studio 14 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 14 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root))
+				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
 		elif "vc120" == compiler:
 			compiler_name = "vc"
 			compiler_version = 120
@@ -297,7 +303,7 @@ class build_info:
 					gen_name = "Visual Studio 12 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 12 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root))
+				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
 		elif "clang" == compiler:
 			compiler_name = "clang"
 			self.toolset = toolset
@@ -506,7 +512,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 			build_cmd = batch_command(build_info.host_platform)
 			if "vc" == build_info.compiler_name:
-				build_cmd.add_command('@CALL "%s..\\vcvarsall.bat" %s' % (compiler_info.compiler_root, vc_option))
+				build_cmd.add_command('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 			for config in build_info.cfg:
 				if "vc" == build_info.compiler_name:
 					build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
