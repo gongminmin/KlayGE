@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KlayGE/App3D.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -33,8 +32,8 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
 		float far_plane = camera.FarPlane();
 
@@ -123,8 +122,8 @@ namespace KlayGE
 
 	void InfTerrainRenderable::OnRenderBegin()
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
 		if (deferred_effect_)
 		{
@@ -159,8 +158,8 @@ namespace KlayGE
 
 	bool InfTerrainSceneObject::MainThreadUpdate(float /*app_time*/, float /*elapsed_time*/)
 	{
-		App3DFramework const & app = Context::Instance().AppInstance();
-		Camera const & camera = app.ActiveCamera();
+		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
 		float3 look_at_vec = float3(camera.LookAt().x() - camera.EyePos().x(), 0, camera.LookAt().z() - camera.EyePos().z());
 		if (MathLib::dot(look_at_vec, look_at_vec) < 1e-6f)
@@ -724,7 +723,7 @@ namespace KlayGE
 			reset_terrain_(true)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		last_eye_pos_ = re.CurFrameBuffer()->GetViewport()->camera->EyePos();
+		last_eye_pos_ = re.DefaultFrameBuffer()->GetViewport()->camera->EyePos();
 
 		renderable_ = renderable;
 		BOOST_ASSERT(!!std::dynamic_pointer_cast<HQTerrainRenderable>(renderable));
@@ -740,7 +739,7 @@ namespace KlayGE
 		KFL_UNUSED(elapsed_time);
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		Camera const & camera = *re.ScreenFrameBuffer()->GetViewport()->camera;
+		Camera const & camera = *re.DefaultFrameBuffer()->GetViewport()->camera;
 
 		checked_pointer_cast<HQTerrainRenderable>(renderable_)->SetMatrices(camera);
 
