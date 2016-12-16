@@ -115,11 +115,6 @@ void OceanGBufferVS(float2 pos : POSITION,
 #endif
 }
 
-float4 OceanDepthAlphaBlendPS(float3 texcoord_depth : TEXCOORD0) : SV_Target
-{
-	return texcoord_depth.z;
-}
-
 void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
 #ifdef NOPERSPECTIVE_SUPPORT
 					noperspective float2 screen_tc : TEXCOORD2,
