@@ -408,6 +408,7 @@ namespace KlayGE
 		AABBox box_aabb_;
 
 		LightSourcePtr default_ambient_light_;
+		LightSourcePtr merged_ambient_light_;
 		std::vector<LightSource*> lights_;
 		std::vector<RenderablePtr> decals_;
 

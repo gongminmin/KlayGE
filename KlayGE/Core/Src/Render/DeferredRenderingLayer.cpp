@@ -522,6 +522,7 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_TubeArea] = rl_box_;
 
 		default_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
+		merged_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 
 		g_buffer_effect_ = SyncLoadRenderEffect("GBufferNoSkinning.fxml");
 		g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBufferSkinning128.fxml");
@@ -1683,7 +1684,8 @@ namespace KlayGE
 			auto light = scene_mgr.GetLight(i).get();
 			if (light->Enabled() && (LightSource::LT_Ambient == light->Type()))
 			{
-				lights_.push_back(light);
+				merged_ambient_light_->SkylightTex(light->SkylightTexY(), light->SkylightTexC());
+				lights_.push_back(merged_ambient_light_.get());
 				break;
 			}
 		}
