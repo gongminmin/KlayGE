@@ -70,6 +70,7 @@ struct OfflineRenderDeviceCaps
 
 	bool bc1_support : 1;
 	bool bc3_support : 1;
+	bool bc4_support : 1;
 	bool bc5_support : 1;
 	bool bc7_support : 1;
 	bool etc1_support : 1;
@@ -177,6 +178,7 @@ OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
 
 	caps.bc1_support = RetrieveNodeValue(root, "bc1_support", 0) ? true : false;
 	caps.bc3_support = RetrieveNodeValue(root, "bc3_support", 0) ? true : false;
+	caps.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
 	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
 	caps.bc7_support = RetrieveNodeValue(root, "bc7_support", 0) ? true : false;
 	caps.etc1_support = RetrieveNodeValue(root, "etc1_support", 0) ? true : false;
@@ -211,6 +213,40 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 			if (caps.bc7_support)
 			{
 				ofs << "TexCompressor BC7 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.bc1_support)
+			{
+				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.etc1_support)
+			{
+				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else
+			{
+				ofs << "copy temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			ofs << "del temp.dds" << std::endl;
+			ofs << "@echo on" << std::endl << std::endl;
+		}
+	}
+	else if (("glossiness" == res_type)
+		|| ("metalness" == res_type))
+	{
+		for (size_t i = 0; i < res_names.size(); ++i)
+		{
+			ofs << "@echo Processing: " << res_names[i] << std::endl;
+
+			ofs << "@echo off" << std::endl << std::endl;
+			ofs << "copy \"" << res_names[i] << "\" temp.dds" << std::endl;
+			ofs << "Mipmapper temp.dds" << std::endl;
+			if (caps.bc7_support)
+			{
+				ofs << "TexCompressor BC7 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.bc4_support)
+			{
+				ofs << "TexCompressor BC4 temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			else if (caps.bc1_support)
 			{
@@ -285,13 +321,17 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 
 			ofs << "@echo off" << std::endl << std::endl;
 			ofs << "Mipmapper \"" << res_names[i] << "\" temp.dds" << std::endl;
-			if (caps.bc5_support)
+			if (caps.bc4_support)
 			{
 				ofs << "TexCompressor BC4 temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			else if (caps.bc1_support)
 			{
 				ofs << "TexCompressor BC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
+			}
+			else if (caps.etc1_support)
+			{
+				ofs << "TexCompressor ETC1 temp.dds \"" << res_names[i] << "\"" << std::endl;
 			}
 			else
 			{
@@ -352,6 +392,11 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 			ofs << "FXMLJIT " << caps.platform << " \"" << res_names[i] << "\"" << std::endl;
 			ofs << "@echo on" << std::endl << std::endl;
 		}
+	}
+	else
+	{
+		printf("Error: Unknown resource type.");
+		return;
 	}
 
 	ofs.close();
