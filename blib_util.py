@@ -506,7 +506,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			os.chdir(build_dir)
 
 			cmake_cmd = batch_command(build_info.host_platform)
-			cmake_cmd.add_command('@SET PATH=%s;%s;%%PATH%%' % (compiler_info.compiler_root, sys.exec_prefix))
+			if "win" == build_info.host_platform:
+				cmake_cmd.add_command('@SET PATH=%s;%s;%%PATH%%' % (compiler_info.compiler_root, sys.exec_prefix))
 			cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, toolset_name, additional_options, "../cmake"))
 			if cmake_cmd.execute() != 0:
 				log_error("Config %s failed." % name)

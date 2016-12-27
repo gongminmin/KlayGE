@@ -10,5 +10,5 @@ params = sys.argv[3:]
 
 my_env = os.environ.copy()
 my_env["PATH"] = "/usr/local/bin:opt/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:" + my_env["PATH"]
-ret = subprocess.call(["wineg++", "-mwindows", "-m32", input, "-o", output] + params, stderr = subprocess.STDOUT, env = my_env)
+ret = subprocess.call(["wineg++", input, "-o", output] + params, stderr = subprocess.STDOUT, env = my_env)
 sys.exit(ret)
