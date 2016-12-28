@@ -169,4 +169,30 @@ float4 DepthMipmapBilinearPS(float2 tc : TEXCOORD0) : SV_Target
 			<state name="pixel_shader" value="DepthMipmapBilinearPS()"/>
 		</pass>
 	</technique>
+
+
+	<parameter type="int" name="channel"/>
+
+	<shader>
+		<![CDATA[
+void CopyToDepthPS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
+{
+	oClr = 0;
+	oDepth = src_tex.Sample(point_sampler, tc)[channel];
+}
+		]]>
+	</shader>
+
+	<technique name="CopyToDepth">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="always_pass"/>
+
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="CopyToDepthPS()"/>
+		</pass>
+	</technique>
 </effect>

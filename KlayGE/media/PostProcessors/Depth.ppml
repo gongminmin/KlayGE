@@ -79,4 +79,17 @@
 		</output>
 		<shader effect="Depth.fxml" tech="DepthMipmapBilinear"/>
 	</post_processor>
+
+	<post_processor name="CopyToDepth">
+		<params>
+			<param name="channel"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Depth.fxml" tech="CopyToDepth"/>
+	</post_processor>
 </post_processors>
