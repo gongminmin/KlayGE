@@ -67,7 +67,7 @@ DOWNLOAD_FILE("KlayGE/Samples/media/Common/dino50.meshml" "54e95a3a317ffd3e884af
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/KlayGE_TemporaryKey.pfx" "f1e2d4826f7a3729a5f2ea6ff4f8209af303138e" "2d225129e161379646ac508b55dbf1e31b96201b")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/ScifiRoom.meshml" "54e95a3a317ffd3e884af63e008ce6cce2289af0" "c317cdac7156ac0260008c567b77a625dd51cb56")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/sphere_high.meshml" "54e95a3a317ffd3e884af63e008ce6cce2289af0" "19854a0d3ec4cf18120295bb17dff01afb32c37c")
-DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek.meshml" "54e95a3a317ffd3e884af63e008ce6cce2289af0" "03863d99fd4fa98dc531f5aaee0d459d2b67e3eb")
+DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek.meshml" "3fecc9967e6aa6b16ee4079c9cf0d1c794f24796" "7bda1a1ceea521f4249a17894c368d580127c03c")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/teapot.meshml" "cbda47a1678ce70b6720856736100979d469e159" "cd3ed9076ef1e2d9b1db447bc9fa8f2be73d009a")
 
 SET(LIB_NAME SampleCommon)
