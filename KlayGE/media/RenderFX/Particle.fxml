@@ -91,6 +91,18 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 
 	return clr;
 }
+
+void ParticleVDMPS(PS_IN ps_in,
+		out float4 oColor : SV_Target0,
+		out float4 oTransition : SV_Target1,
+		out float4 oCount : SV_Target2)
+{
+	oColor = ParticlePS(ps_in);
+	oTransition.x = ps_in.PosSS.w;
+	oTransition.y = oTransition.x * oTransition.x;
+	oTransition.zw = 1;
+	oCount = 1;
+}
 		]]>
 	</shader>
 
@@ -178,6 +190,18 @@ void ParticleGS(point float4 in_CenterView_Life[1] : SV_Position, point float3 i
 		<pass name="p0">
 			<state name="vertex_shader" value="ParticleVS2()"/>
 			<state name="geometry_shader" value="ParticleGS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParticleVDM" inherit="Particle">
+		<pass name="p0">
+			<state name="pixel_shader" value="ParticleVDMPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ParticleWithGSVDM" inherit="ParticleWithGS">
+		<pass name="p0">
+			<state name="pixel_shader" value="ParticleVDMPS()"/>
 		</pass>
 	</technique>
 </effect>

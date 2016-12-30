@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="VDMComposition">
+		<input>
+			<pin name="color_tex"/>
+			<pin name="transition_tex"/>
+			<pin name="count_tex"/>
+			<pin name="scene_depth_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="VarianceDepthMap.fxml" tech="VDMComposition"/>
+	</post_processor>
+</post_processors>

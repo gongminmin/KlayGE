@@ -1,0 +1,74 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="transition_tex"/>
+	<parameter type="texture2D" name="count_tex"/>
+	<parameter type="texture2D" name="scene_depth_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float erf(float x)
+{
+	if (abs(x) > 2.629639f)
+	{
+		return sign(x);
+	}
+	else
+	{
+		float z = 0.289226f * x * x - 1;
+		return ((((((0.0145688f * z - 0.0348595f) * z + 0.0503913f) * z - 0.0897001f) * z + 0.156097f) * z - 0.249431f) * z + 0.533201f)
+			* x;
+	}
+}
+
+float VDMTransmission(float2 transition, float depth)
+{
+	float variance = max(transition.y - transition.x * transition.x, 0);
+	return saturate(0.5f * (1 + erf((depth - transition.x) / sqrt(variance * 2))));
+}
+
+float4 VDMCompositionPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float2 transition = transition_tex.Sample(bilinear_sampler, texcoord).xy;
+	transition /= count_tex.Sample(bilinear_sampler, texcoord).x;
+	float scene_depth = scene_depth_tex.Sample(point_sampler, texcoord).x;
+	float alpha = VDMTransmission(transition, scene_depth);
+	float4 color = color_tex.Sample(bilinear_sampler, texcoord);
+	color.a = alpha;
+	return color;
+}
+		]]>
+	</shader>
+	
+	<technique name="VDMComposition">
+		<pass name="p1">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="blend_op" value="add"/>
+			<state name="src_blend" value="src_alpha"/>
+			<state name="dest_blend" value="one"/>
+			<state name="blend_op_alpha" value="add"/>
+			<state name="src_blend_alpha" value="one"/>
+			<state name="dest_blend_alpha" value="one"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="VDMCompositionPS()"/>
+		</pass>
+	</technique>
+</effect>

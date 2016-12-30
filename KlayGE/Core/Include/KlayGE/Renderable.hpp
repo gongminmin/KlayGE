@@ -37,6 +37,7 @@ namespace KlayGE
 		PC_Reflection,
 		PC_SpecialShading,
 		PC_SimpleForward,
+		PC_VDM,
 		PC_None
 	};
 
@@ -92,7 +93,9 @@ namespace KlayGE
 		PT_TransparencyBackSpecialShading = MakePassType<PRT_None, PTB_TransparencyBack, PC_SpecialShading>::value,
 		PT_TransparencyFrontSpecialShading = MakePassType<PRT_None, PTB_TransparencyFront, PC_SpecialShading>::value,
 		
-		PT_SimpleForward = MakePassType<PRT_None, PTB_None, PC_SimpleForward>::value
+		PT_SimpleForward = MakePassType<PRT_None, PTB_None, PC_SimpleForward>::value,
+
+		PT_VDM = MakePassType<PRT_None, PTB_None, PC_VDM>::value
 	};
 
 	inline PassRT GetPassRT(PassType pt)
@@ -124,7 +127,8 @@ namespace KlayGE
 			EA_AlphaTest = 1UL << 3,
 			EA_Reflection = 1UL << 4,
 			EA_SimpleForward = 1UL << 5,
-			EA_SSS = 1UL << 6
+			EA_SSS = 1UL << 6,
+			EA_VDM = 1UL << 7
 		};
 
 	public:
@@ -241,6 +245,10 @@ namespace KlayGE
 		{
 			return effect_attrs_ & EA_SimpleForward ? true : false;
 		}
+		virtual bool VDM() const
+		{
+			return effect_attrs_ & EA_VDM ? true : false;
+		}
 
 	protected:
 		virtual void UpdateInstanceStream();
@@ -281,6 +289,7 @@ namespace KlayGE
 		RenderTechnique* special_shading_alpha_blend_back_tech_;
 		RenderTechnique* special_shading_alpha_blend_front_tech_;
 		RenderTechnique* simple_forward_tech_;
+		RenderTechnique* vdm_tech_;
 
 		float4x4 model_mat_;
 

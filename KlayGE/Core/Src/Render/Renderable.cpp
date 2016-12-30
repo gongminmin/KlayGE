@@ -549,6 +549,9 @@ namespace KlayGE
 		case PT_SimpleForward:
 			return simple_forward_tech_;
 
+		case PT_VDM:
+			return vdm_tech_;
+
 		default:
 			BOOST_ASSERT(false);
 			return gbuffer_mrt_tech_;

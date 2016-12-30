@@ -90,6 +90,7 @@ namespace KlayGE
 		bool SSS() const;
 		bool Reflection() const;
 		bool SimpleForward() const;
+		bool VDM() const;
 
 	protected:
 		uint32_t attrib_;
