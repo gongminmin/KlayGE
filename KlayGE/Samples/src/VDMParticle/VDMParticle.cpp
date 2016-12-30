@@ -309,6 +309,7 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	vdm_quarter_res_fb_->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[1]);
 
 	copy_pp_->InputPin(0, scene_tex_);
+	copy_to_depth_pp_->InputPin(0, scene_ds_tex_);
 
 	vdm_composition_pp_->InputPin(0, low_res_color_texs_[1]);
 	vdm_composition_pp_->InputPin(1, vdm_transition_tex_);
@@ -374,6 +375,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 	case 0:
 		{
 			re.BindFrameBuffer(scene_fb_);
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 
 			Camera const & camera = this->ActiveCamera();
 			float q = camera.FarPlane() / (camera.FarPlane() - camera.NearPlane());
@@ -412,10 +414,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 			{
 				re.BindFrameBuffer(FrameBufferPtr());
 
-				copy_to_depth_pp_->OutputPin(0, TexturePtr());
-				copy_to_depth_pp_->InputPin(0, scene_ds_tex_);
 				copy_to_depth_pp_->Apply();
-
 				copy_pp_->Apply();
 				return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;
 			}
@@ -433,8 +432,8 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 					depth_to_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
 						static_cast<float>((h + 1) & ~1) / h));
 					depth_to_max_pp_->InputPin(0, input_tex);
-					depth_to_max_pp_->OutputPin(0, low_res_color_texs_[t]);
-					depth_to_max_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[t]);
+					depth_to_max_pp_->OutputPin(0, low_res_color_texs_[i]);
+					depth_to_max_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, low_res_max_ds_views_[i]);
 					depth_to_max_pp_->Apply();
 				}
 

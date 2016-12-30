@@ -43,12 +43,13 @@ float VDMTransmission(float2 transition, float depth)
 
 float4 VDMCompositionPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
+	float4 color = color_tex.Sample(bilinear_sampler, texcoord);
+	clip(color.a - 0.03f);
+
 	float2 transition = transition_tex.Sample(bilinear_sampler, texcoord).xy;
 	transition /= count_tex.Sample(bilinear_sampler, texcoord).x;
 	float scene_depth = scene_depth_tex.Sample(point_sampler, texcoord).x;
-	float alpha = VDMTransmission(transition, scene_depth);
-	float4 color = color_tex.Sample(bilinear_sampler, texcoord);
-	color.a = alpha;
+	color.a = VDMTransmission(transition, scene_depth);
 	return color;
 }
 		]]>
