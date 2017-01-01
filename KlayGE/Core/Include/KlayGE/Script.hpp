@@ -37,24 +37,11 @@
 #include <string>
 
 #include <boost/noncopyable.hpp>
-#ifdef KLAYGE_TS_LIBRARY_ANY_SUPPORT
-	#include <experimental/any>
-#else
-	#include <boost/any.hpp>
-	namespace std
-	{
-		namespace experimental
-		{
-			using boost::any;
-			using boost::any_cast;
-			using boost::bad_any_cast;
-		}
-	}
-#endif
+#include <KFL/CXX17/any.hpp>
 
 namespace KlayGE
 {
-	typedef std::vector<std::experimental::any> AnyDataListType;
+	typedef std::vector<std::any> AnyDataListType;
 
 	class KLAYGE_CORE_API ScriptModule
 	{
@@ -84,15 +71,15 @@ namespace KlayGE
 		virtual ~ScriptModule();
 
 		template <typename TupleType>
-		std::experimental::any Call(std::string const & func_name, TupleType const & t)
+		std::any Call(std::string const & func_name, TupleType const & t)
 		{
 			AnyDataListType v(Tuple2Vector<TupleType, std::tuple_size<TupleType>::value>::Do(t));
 			return Call(func_name, v);
 		}
 
-		virtual std::experimental::any Value(std::string const & name);
-		virtual std::experimental::any Call(std::string const & func_name, const AnyDataListType& args);
-		virtual std::experimental::any RunString(std::string const & script);
+		virtual std::any Value(std::string const & name);
+		virtual std::any Call(std::string const & func_name, const AnyDataListType& args);
+		virtual std::any RunString(std::string const & script);
 	};
 
 	typedef std::shared_ptr<ScriptModule> ScriptModulePtr;

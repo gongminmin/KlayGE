@@ -34,20 +34,7 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(pop)
 #endif
-#ifdef KLAYGE_TS_LIBRARY_ANY_SUPPORT
-	#include <experimental/any>
-#else
-	#include <boost/any.hpp>
-	namespace std
-	{
-		namespace experimental
-		{
-			using boost::any;
-			using boost::any_cast;
-			using boost::bad_any_cast;
-		}
-	}
-#endif
+#include <KFL/CXX17/any.hpp>
 
 namespace KlayGE
 {
@@ -1174,7 +1161,7 @@ namespace KlayGE
 	struct KLAYGE_CORE_API UIListBoxItem
 	{
 		std::wstring strText;
-		std::experimental::any data;
+		std::any data;
 
 		IRect  rcActive;
 		bool  bSelected;
@@ -1240,9 +1227,9 @@ namespace KlayGE
 			margin_ = margin;
 		}
 		int AddItem(std::wstring const & strText);
-		void SetItemData(int nIndex, std::experimental::any const & data);
-		int AddItem(std::wstring const & strText, std::experimental::any const & data);
-		void InsertItem(int nIndex, std::wstring const & strText, std::experimental::any const & data);
+		void SetItemData(int nIndex, std::any const & data);
+		int AddItem(std::wstring const & strText, std::any const & data);
+		void InsertItem(int nIndex, std::wstring const & strText, std::any const & data);
 		void RemoveItem(int nIndex);
 		void RemoveAllItems();
 
@@ -1297,7 +1284,7 @@ namespace KlayGE
 	struct UIComboBoxItem
 	{
 		std::wstring strText;
-		std::experimental::any data;
+		std::any data;
 
 		IRect  rcActive;
 		bool  bVisible;
@@ -1330,14 +1317,14 @@ namespace KlayGE
 		virtual void UpdateRects();
 
 		int AddItem(std::wstring const & strText);
-		void SetItemData(int nIndex, std::experimental::any const & data);
-		int AddItem(std::wstring const & strText, std::experimental::any const & data);
+		void SetItemData(int nIndex, std::any const & data);
+		int AddItem(std::wstring const & strText, std::any const & data);
 		void RemoveAllItems();
 		void RemoveItem(uint32_t index);
 		bool ContainsItem(std::wstring const & strText, uint32_t iStart = 0) const;
 		int FindItem(std::wstring const & strText, uint32_t iStart = 0) const;
-		std::experimental::any const GetItemData(std::wstring const & strText) const;
-		std::experimental::any const GetItemData(int nIndex) const;
+		std::any const GetItemData(std::wstring const & strText) const;
+		std::any const GetItemData(int nIndex) const;
 		void SetDropHeight(uint32_t nHeight)
 		{
 			drop_height_ = nHeight;
@@ -1353,7 +1340,7 @@ namespace KlayGE
 			this->UpdateRects();
 		}
 
-		std::experimental::any const GetSelectedData() const;
+		std::any const GetSelectedData() const;
 		std::shared_ptr<UIComboBoxItem> GetSelectedItem() const;
 		int GetSelectedIndex() const;
 
@@ -1376,7 +1363,7 @@ namespace KlayGE
 			{
 				std::shared_ptr<UIComboBoxItem> pItem = items_[i];
 
-				if (std::experimental::any_cast<T>(pItem->data) == data)
+				if (std::any_cast<T>(pItem->data) == data)
 				{
 					this->SetSelectedByIndex(static_cast<uint32_t>(i));
 				}

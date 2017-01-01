@@ -3,42 +3,14 @@
 #include <KlayGE/JudaTexture.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <regex>
 
 #include <boost/algorithm/string/case_conv.hpp>
-
-#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
-	#include <experimental/filesystem>
-#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
-	#include <filesystem>
-	namespace std
-	{
-		namespace experimental
-		{
-			namespace filesystem = std::tr2::sys;
-		}
-	}
-#else
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
-	#endif
-	#include <boost/filesystem.hpp>
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic pop
-	#endif
-	namespace std
-	{
-		namespace experimental
-		{
-			namespace filesystem = boost::filesystem;
-		}
-	}
-#endif
-#include <regex>
 
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
