@@ -38,11 +38,11 @@
 
 namespace KlayGE
 {
-	class SIMDMatrixF4 : boost::addable<SIMDMatrixF4,
-						boost::subtractable<SIMDMatrixF4,
-						boost::dividable2<SIMDMatrixF4, float,
-						boost::multipliable2<SIMDMatrixF4, float,
-						boost::multipliable<SIMDMatrixF4 > > > > >
+	class SIMDMatrixF4 final : boost::addable<SIMDMatrixF4,
+								boost::subtractable<SIMDMatrixF4,
+								boost::dividable2<SIMDMatrixF4, float,
+								boost::multipliable2<SIMDMatrixF4, float,
+								boost::multipliable<SIMDMatrixF4>>>>>
 	{
 	public:
 		SIMDMatrixF4();

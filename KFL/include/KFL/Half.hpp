@@ -74,7 +74,7 @@
 namespace KlayGE
 {
 	// 1s5e10m
-	class half : boost::addable<half,
+	class half final : boost::addable<half,
 						boost::subtractable<half,
 						boost::multipliable<half,
 						boost::dividable<half,

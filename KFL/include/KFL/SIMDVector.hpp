@@ -46,14 +46,14 @@ namespace KlayGE
 	typedef std::array<float, 4> V4TYPE;
 #endif
 
-	class SIMDVectorF4 : boost::addable<SIMDVectorF4,
-						boost::subtractable<SIMDVectorF4,
-						boost::multipliable<SIMDVectorF4,
-						boost::dividable<SIMDVectorF4,
-						boost::dividable2<SIMDVectorF4, float,
-						boost::multipliable2<SIMDVectorF4, float,
-						boost::addable2<SIMDVectorF4, float,
-						boost::subtractable2<SIMDVectorF4, float > > > > > > > >
+	class SIMDVectorF4 final : boost::addable<SIMDVectorF4,
+								boost::subtractable<SIMDVectorF4,
+								boost::multipliable<SIMDVectorF4,
+								boost::dividable<SIMDVectorF4,
+								boost::dividable2<SIMDVectorF4, float,
+								boost::multipliable2<SIMDVectorF4, float,
+								boost::addable2<SIMDVectorF4, float,
+								boost::subtractable2<SIMDVectorF4, float>>>>>>>>
 	{
 	public:
 		SIMDVectorF4()

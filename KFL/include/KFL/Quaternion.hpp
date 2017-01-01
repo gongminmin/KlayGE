@@ -40,12 +40,12 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Quaternion_T : boost::addable<Quaternion_T<T>,
-						boost::subtractable<Quaternion_T<T>,
-						boost::dividable2<Quaternion_T<T>, T,
-						boost::multipliable<Quaternion_T<T>,
-						boost::multipliable2<Quaternion_T<T>, T,
-						boost::equality_comparable<Quaternion_T<T>>>>>>>
+	class Quaternion_T final : boost::addable<Quaternion_T<T>,
+								boost::subtractable<Quaternion_T<T>,
+								boost::dividable2<Quaternion_T<T>, T,
+								boost::multipliable<Quaternion_T<T>,
+								boost::multipliable2<Quaternion_T<T>, T,
+								boost::equality_comparable<Quaternion_T<T>>>>>>>
 	{
 	public:
 		enum { elem_num = 4 };

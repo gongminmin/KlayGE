@@ -42,7 +42,7 @@
 namespace KlayGE
 {
 	template <typename T>
-	class AABBox_T : boost::addable2<AABBox_T<T>, Vector_T<T, 3>,
+	class AABBox_T final : boost::addable2<AABBox_T<T>, Vector_T<T, 3>,
 						boost::subtractable2<AABBox_T<T>, Vector_T<T, 3>,
 						boost::multipliable2<AABBox_T<T>, T,
 						boost::dividable2<AABBox_T<T>, T,
