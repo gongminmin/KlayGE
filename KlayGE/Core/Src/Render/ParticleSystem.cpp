@@ -441,6 +441,7 @@ namespace
 					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
 
 				simple_forward_tech_ = effect_->TechniqueByName("ParticleWithGS");
+				vdm_tech_ = effect_->TechniqueByName("ParticleWithGSVDM");
 			}
 			else
 			{
@@ -476,10 +477,11 @@ namespace
 				rl_->BindIndexStream(ib, EF_R16UI);
 
 				simple_forward_tech_ = effect_->TechniqueByName("Particle");
+				vdm_tech_ = effect_->TechniqueByName("ParticleVDM");
 			}
 			technique_ = simple_forward_tech_;
 
-			effect_attrs_ |= EA_SimpleForward;
+			effect_attrs_ |= EA_VDM;
 		}
 
 		void SceneDepthTexture(TexturePtr const & tex)
@@ -595,7 +597,7 @@ namespace KlayGE
 
 
 	ParticleSystem::ParticleSystem(uint32_t max_num_particles)
-		: SceneObjectHelper(SOA_Moveable),
+		: SceneObjectHelper(SOA_Moveable | SOA_NotCastShadow),
 			particles_(max_num_particles),
 			gravity_(0.5f), force_(0, 0, 0), media_density_(0.0f)
 	{

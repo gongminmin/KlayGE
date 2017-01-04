@@ -39,7 +39,7 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Frustum_T : public Bound_T<T>
+	class Frustum_T final : public Bound_T<T>
 	{
 	public:
 		Frustum_T() KLAYGE_NOEXCEPT

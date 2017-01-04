@@ -217,6 +217,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TileBasedDeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/util.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/VarianceDepthMap.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.fxml
 )
 
@@ -241,6 +242,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Translucency.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/VarianceDepthMap.ppml
 )
 
 SOURCE_GROUP("Rendering System\\Source Files" FILES ${RENDERING_SOURCE_FILES})

@@ -40,7 +40,7 @@ namespace KlayGE
 	namespace MathLib
 	{
 		template <typename T>
-		class SimplexNoise
+		class SimplexNoise final
 		{
 		public:
 			static SimplexNoise& Instance();

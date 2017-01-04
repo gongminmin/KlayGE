@@ -42,15 +42,15 @@
 namespace KlayGE
 {
 	template <typename T, int N>
-	class Vector_T : boost::addable<Vector_T<T, N>,
-						boost::subtractable<Vector_T<T, N>,
-						boost::multipliable<Vector_T<T, N>,
-						boost::dividable<Vector_T<T, N>,
-						boost::dividable2<Vector_T<T, N>, T,
-						boost::multipliable2<Vector_T<T, N>, T,
-						boost::addable2<Vector_T<T, N>, T,
-						boost::subtractable2<Vector_T<T, N>, T,
-						boost::equality_comparable<Vector_T<T, N>>>>>>>>>>
+	class Vector_T final : boost::addable<Vector_T<T, N>,
+							boost::subtractable<Vector_T<T, N>,
+							boost::multipliable<Vector_T<T, N>,
+							boost::dividable<Vector_T<T, N>,
+							boost::dividable2<Vector_T<T, N>, T,
+							boost::multipliable2<Vector_T<T, N>, T,
+							boost::addable2<Vector_T<T, N>, T,
+							boost::subtractable2<Vector_T<T, N>, T,
+							boost::equality_comparable<Vector_T<T, N>>>>>>>>>>
 	{
 		template <typename U, int M>
 		friend class Vector_T;

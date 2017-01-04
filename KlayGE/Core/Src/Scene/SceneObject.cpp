@@ -329,6 +329,18 @@ namespace KlayGE
 		}
 	}
 
+	bool SceneObject::VDM() const
+	{
+		if (renderable_)
+		{
+			return renderable_->VDM();
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	void SceneObject::OnAttachRenderable(bool add_to_scene)
 	{
 		if (add_to_scene)

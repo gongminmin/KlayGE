@@ -55,6 +55,20 @@
 		<shader effect="Depth.fxml" tech="ReduceMinMax"/>
 	</post_processor>
 
+	<post_processor name="DepthToMax">
+		<params>
+			<param name="offset"/>
+			<param name="tc_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Depth.fxml" tech="DepthToMax"/>
+	</post_processor>
+
 	<post_processor name="DepthMipmapPoint">
 		<params>
 			<param name="offset"/>
@@ -78,5 +92,18 @@
 			<pin name="output"/>
 		</output>
 		<shader effect="Depth.fxml" tech="DepthMipmapBilinear"/>
+	</post_processor>
+
+	<post_processor name="CopyToDepth">
+		<params>
+			<param name="channel"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Depth.fxml" tech="CopyToDepth"/>
 	</post_processor>
 </post_processors>

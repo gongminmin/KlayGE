@@ -110,6 +110,24 @@ float4 ReduceMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 
 	return WriteTwoHalf(float2(min_depth, max_depth));
 }
+
+void DepthToMaxPS(float2 tc : TEXCOORD0,
+		out float4 oColor : SV_Target0,
+		out float oDepth : SV_Depth)
+{
+	float z00 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(-offset.x, -offset.y)));
+	float z01 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(+offset.x, -offset.y)));
+	float z10 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(-offset.x, +offset.y)));
+	float z11 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(+offset.x, +offset.y)));
+
+	float max_depth = z00;
+	max_depth = max(max_depth, z01);
+	max_depth = max(max_depth, z10);
+	max_depth = max(max_depth, z11);
+
+	oColor = 0;
+	oDepth = max_depth;
+}
 		]]>
 	</shader>
 
@@ -129,6 +147,18 @@ float4 ReduceMinMaxPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="ReduceMinMaxPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="DepthToMax">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="always_pass"/>
+
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DepthToMaxPS()"/>
 		</pass>
 	</technique>
 
@@ -167,6 +197,32 @@ float4 DepthMipmapBilinearPS(float2 tc : TEXCOORD0) : SV_Target
 
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="DepthMipmapBilinearPS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="int" name="channel"/>
+
+	<shader>
+		<![CDATA[
+void CopyToDepthPS(float2 tc : TEXCOORD0,
+		out float4 oClr : SV_Target0, out float oDepth : SV_Depth)
+{
+	oClr = 0;
+	oDepth = src_tex.Sample(point_sampler, tc)[channel];
+}
+		]]>
+	</shader>
+
+	<technique name="CopyToDepth">
+		<pass name="p0">
+			<state name="depth_enable" value="true"/>
+			<state name="depth_func" value="always_pass"/>
+
+			<state name="color_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="CopyToDepthPS()"/>
 		</pass>
 	</technique>
 </effect>

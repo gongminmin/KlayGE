@@ -44,12 +44,12 @@ namespace KlayGE
 	// 4D æÿ’Û
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Matrix4_T : boost::addable<Matrix4_T<T>,
-						boost::subtractable<Matrix4_T<T>,
-						boost::dividable2<Matrix4_T<T>, T,
-						boost::multipliable2<Matrix4_T<T>, T,
-						boost::multipliable<Matrix4_T<T>,
-						boost::equality_comparable<Matrix4_T<T>>>>>>>
+	class Matrix4_T final : boost::addable<Matrix4_T<T>,
+							boost::subtractable<Matrix4_T<T>,
+							boost::dividable2<Matrix4_T<T>, T,
+							boost::multipliable2<Matrix4_T<T>, T,
+							boost::multipliable<Matrix4_T<T>,
+							boost::equality_comparable<Matrix4_T<T>>>>>>>
 	{
 	public:
 		typedef T					value_type;

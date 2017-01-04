@@ -590,12 +590,12 @@ namespace KlayGE
 		return ret;
 	}
 	
-	void UIComboBox::SetItemData(int nIndex, std::experimental::any const & data)
+	void UIComboBox::SetItemData(int nIndex, std::any const & data)
 	{
 		items_[nIndex]->data = data;
 	}
 
-	int UIComboBox::AddItem(std::wstring const & strText, std::experimental::any const & data)
+	int UIComboBox::AddItem(std::wstring const & strText, std::any const & data)
 	{
 		BOOST_ASSERT(!strText.empty());
 
@@ -664,11 +664,11 @@ namespace KlayGE
 		return -1;
 	}
 
-	std::experimental::any const UIComboBox::GetSelectedData() const
+	std::any const UIComboBox::GetSelectedData() const
 	{
 		if (selected_ < 0)
 		{
-			return std::experimental::any();
+			return std::any();
 		}
 
 		return items_[selected_]->data;
@@ -689,24 +689,24 @@ namespace KlayGE
 		return selected_;
 	}
 
-	std::experimental::any const UIComboBox::GetItemData(std::wstring const & strText) const
+	std::any const UIComboBox::GetItemData(std::wstring const & strText) const
 	{
 		int index = this->FindItem(strText);
 		if (index == -1)
 		{
-			return std::experimental::any();
+			return std::any();
 		}
 
 		std::shared_ptr<UIComboBoxItem> const & pItem = items_[index];
 		if (!pItem)
 		{
-			return std::experimental::any();
+			return std::any();
 		}
 
 		return pItem->data;
 	}
 
-	std::experimental::any const UIComboBox::GetItemData(int nIndex) const
+	std::any const UIComboBox::GetItemData(int nIndex) const
 	{
 		BOOST_ASSERT((nIndex >= 0) && (nIndex < static_cast<int>(items_.size())));
 

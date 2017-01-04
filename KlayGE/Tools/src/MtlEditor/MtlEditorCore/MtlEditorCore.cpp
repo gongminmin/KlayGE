@@ -17,40 +17,12 @@
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Input.hpp>
 #include <KlayGE/InputFactory.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 
 #include <sstream>
 #include <fstream>
 
 #include "MtlEditorCore.hpp"
-
-#if defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
-	#include <experimental/filesystem>
-#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
-	#include <filesystem>
-	namespace std
-	{
-		namespace experimental
-		{
-			namespace filesystem = std::tr2::sys;
-		}
-	}
-#else
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
-	#endif
-	#include <boost/filesystem.hpp>
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic pop
-	#endif
-	namespace std
-	{
-		namespace experimental
-		{
-			namespace filesystem = boost::filesystem;
-		}
-	}
-#endif
 
 using namespace std;
 using namespace KlayGE;
@@ -453,7 +425,7 @@ namespace KlayGE
 			ResLoader::Instance().DelPath(last_file_path_);
 		}
 
-		std::experimental::filesystem::path mesh_path = name;
+		std::filesystem::path mesh_path = name;
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		last_file_path_ = mesh_path.parent_path();
 #else
@@ -501,7 +473,7 @@ namespace KlayGE
 			mesh_path.replace_extension(".meshml");
 		}
 
-		std::experimental::filesystem::path imposter_path = mesh_path;
+		std::filesystem::path imposter_path = mesh_path;
 		imposter_path.replace_extension(".impml");
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 		std::string imposter_name = imposter_path;

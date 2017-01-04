@@ -44,12 +44,12 @@ namespace KlayGE
 	// RGBA，用4个浮点数表示r, g, b, a
 	///////////////////////////////////////////////////////////////////////////////
 	template <typename T>
-	class Color_T : boost::addable<Color_T<T>,
-						boost::subtractable<Color_T<T>,
-						boost::dividable2<Color_T<T>, T,
-						boost::multipliable<Color_T<T>,
-						boost::multipliable2<Color_T<T>, T,
-						boost::equality_comparable<Color_T<T>>>>>>>
+	class Color_T final : boost::addable<Color_T<T>,
+							boost::subtractable<Color_T<T>,
+							boost::dividable2<Color_T<T>, T,
+							boost::multipliable<Color_T<T>,
+							boost::multipliable2<Color_T<T>, T,
+							boost::equality_comparable<Color_T<T>>>>>>>
 	{
 	public:
 		enum { elem_num = 4 };

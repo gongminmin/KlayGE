@@ -42,11 +42,11 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Sphere_T : boost::addable2<Sphere_T<T>, Vector_T<T, 3>,
-						boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
-						boost::multipliable2<Sphere_T<T>, T,
-						boost::dividable2<Sphere_T<T>, T,
-						boost::equality_comparable<Sphere_T<T>>>>>>,
+	class Sphere_T final : boost::addable2<Sphere_T<T>, Vector_T<T, 3>,
+							boost::subtractable2<Sphere_T<T>, Vector_T<T, 3>,
+							boost::multipliable2<Sphere_T<T>, T,
+							boost::dividable2<Sphere_T<T>, T,
+							boost::equality_comparable<Sphere_T<T>>>>>>,
 				public Bound_T<T>
 	{
 	public:

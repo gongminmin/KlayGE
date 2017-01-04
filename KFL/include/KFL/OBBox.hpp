@@ -42,11 +42,11 @@
 namespace KlayGE
 {
 	template <typename T>
-	class OBBox_T : boost::addable2<OBBox_T<T>, Vector_T<T, 3>,
-						boost::subtractable2<OBBox_T<T>, Vector_T<T, 3>,
-						boost::multipliable2<OBBox_T<T>, T,
-						boost::dividable2<OBBox_T<T>, T,
-						boost::equality_comparable<OBBox_T<T>>>>>>,
+	class OBBox_T final : boost::addable2<OBBox_T<T>, Vector_T<T, 3>,
+							boost::subtractable2<OBBox_T<T>, Vector_T<T, 3>,
+							boost::multipliable2<OBBox_T<T>, T,
+							boost::dividable2<OBBox_T<T>, T,
+							boost::equality_comparable<OBBox_T<T>>>>>>,
 				public Bound_T<T>
 	{
 	public:

@@ -42,9 +42,9 @@
 namespace KlayGE
 {
 	template <typename T>
-	class Size_T : boost::addable<Size_T<T>,
-						boost::subtractable<Size_T<T>,
-						boost::equality_comparable<Size_T<T>>>>
+	class Size_T final : boost::addable<Size_T<T>,
+							boost::subtractable<Size_T<T>,
+							boost::equality_comparable<Size_T<T>>>>
 	{
 		template <typename U>
 		friend class Size_T;

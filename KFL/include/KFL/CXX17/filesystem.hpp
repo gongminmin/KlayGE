@@ -1,5 +1,5 @@
 /**
- * @file Script.cpp
+ * @file filesystem.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,64 +28,40 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
-#include <KFL/Util.hpp>
+#ifndef _KFL_CXX17_FILESYSTEM_HPP
+#define _KFL_CXX17_FILESYSTEM_HPP
 
-#include <boost/assert.hpp>
+#pragma once
 
-#include <KlayGE/Script.hpp>
+#include <KFL/Config.hpp>
 
-namespace KlayGE
-{
-	ScriptModule::ScriptModule()
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
+	#include <filesystem>
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+	#include <experimental/filesystem>
+	namespace std
 	{
+		namespace filesystem = experimental::filesystem;
 	}
-
-	ScriptModule::~ScriptModule()
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
+	#include <filesystem>
+	namespace std
 	{
+		namespace filesystem = tr2::sys;
 	}
-
-	std::any ScriptModule::Value(std::string const & /*name*/)
+#else
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic push
+		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+	#endif
+	#include <boost/filesystem.hpp>
+	#if defined(KLAYGE_COMPILER_GCC)
+		#pragma GCC diagnostic pop
+	#endif
+	namespace std
 	{
-		return std::any();
+		namespace filesystem = boost::filesystem;
 	}
+#endif
 
-	std::any ScriptModule::Call(std::string const & /*func_name*/, const AnyDataListType& /*args*/)
-	{
-		return std::any();
-	}
-
-	std::any ScriptModule::RunString(std::string const & /*script*/)
-	{
-		return std::any();
-	}
-
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
-	ScriptEngine::ScriptEngine()
-	{
-	}
-
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
-	ScriptEngine::~ScriptEngine()
-	{
-	}
-
-	void ScriptEngine::Suspend()
-	{
-		this->DoSuspend();
-	}
-
-	void ScriptEngine::Resume()
-	{
-		this->DoResume();
-	}
-
-	ScriptModulePtr ScriptEngine::CreateModule(std::string const & /*name*/)
-	{
-		static ScriptModulePtr obj = MakeSharedPtr<ScriptModule>();
-		return obj;
-	}
-}
+#endif		// _KFL_CXX17_FILESYSTEM_HPP

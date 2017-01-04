@@ -37,29 +37,11 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#ifdef KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-	#include <experimental/optional>
-#else
-
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'out', 'v'
-#endif
-	#include <boost/optional.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-	namespace std
-	{
-		namespace experimental
-		{
-			using boost::optional;
-		}
-	}
-#endif
 #include <exception>
 #include <vector>
 #include <functional>
+
+#include <KFL/CXX17/optional.hpp>
 
 namespace KlayGE
 {
@@ -101,10 +83,10 @@ namespace KlayGE
 	public:
 		// Representation of the storage to hold the return type:
 		//	if result_type == void
-		//		std::experimental::optional<void_t>
+		//		std::optional<void_t>
 		//	else
-		//		std::experimental::optional<result_type>
-		typedef std::experimental::optional<
+		//		std::optional<result_type>
+		typedef std::optional<
 			typename std::conditional<std::is_same<result_type, void>::value,
 				void_t, result_type>::type
 			>  result_opt;
@@ -280,7 +262,7 @@ namespace KlayGE
 			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
-			typedef std::experimental::optional<void_t>				void_optional_t;
+			typedef std::optional<void_t>							void_optional_t;
 
 			//Helper function to construct the optional from the
 			//return value and handle void return types

@@ -1,0 +1,127 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="util.fxml"/>
+	<include name="Lighting.fxml"/>
+	<include name="Quaternion.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4x4" name="mvp"/>
+
+		<parameter type="float3" name="light_pos"/>
+		<parameter type="float4" name="light_color"/>
+		<parameter type="float3" name="light_falloff"/>
+		<parameter type="float3" name="eye_pos"/>
+	</cbuffer>
+
+	<parameter type="sampler" name="aniso_sampler">
+		<state name="filtering" value="anisotropic"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+		<state name="max_anisotropy" value="8"/>
+	</parameter>
+
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="tc_center"/>
+	<parameter type="float2" name="tc_extent"/>
+
+	<parameter type="float4" name="albedo_clr"/>
+	<parameter type="float2" name="metalness_clr"/>
+	<parameter type="float2" name="glossiness_clr"/>
+	<parameter type="float4" name="emissive_clr"/>
+	<parameter type="int" name="albedo_map_enabled"/>
+
+	<parameter type="int" name="normal_map_enabled"/>
+
+	<parameter type="texture2D" name="albedo_tex"/>
+	<parameter type="texture2D" name="metalness_tex"/>
+	<parameter type="texture2D" name="glossiness_tex"/>
+	<parameter type="texture2D" name="emissive_tex"/>
+	<parameter type="texture2D" name="normal_tex"/>
+
+	<shader>
+		<![CDATA[
+void MeshVS(float4 position : POSITION,
+					float2 texcoord : TEXCOORD0,
+					float4 tangent_quat : TANGENT,
+					out float4 oL : TEXCOORD0,
+					out float4 oH : TEXCOORD1,
+					out float4 oPos : SV_Position)
+{
+	position = float4(position.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+	
+	oPos = mul(position, mvp);
+	
+	float3x3 obj_to_tangent;
+	obj_to_tangent[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
+
+	float3 light_vec = light_pos - position.xyz;
+	float3 view_vec = eye_pos - position.xyz;
+	float3 half_vec = normalize(light_vec) + normalize(view_vec);
+
+	oL.xyz = mul(obj_to_tangent, light_vec);
+	oH.xyz = mul(obj_to_tangent, half_vec);
+
+	oL.w = texcoord.x;
+	oH.w = texcoord.y;
+}
+
+float4 MeshPS(float4 L : TEXCOORD0, float4 H : TEXCOORD1) : SV_Target 
+{
+	float2 uv = float2(L.w, H.w);
+
+	float3 albedo = albedo_clr.rgb;
+	if (albedo_map_enabled)
+	{
+		albedo *= albedo_tex.Sample(aniso_sampler, uv).rgb;
+	}
+	float metalness = metalness_clr.r;
+	if (metalness_clr.y > 0.5f)
+	{
+		metalness *= metalness_tex.Sample(aniso_sampler, uv).r;
+	}
+	float glossiness = glossiness_clr.r;
+	if (glossiness_clr.y > 0.5f)
+	{
+		glossiness *= glossiness_tex.Sample(aniso_sampler, uv).r;
+	}
+	float shininess = Glossiness2Shininess(glossiness);
+	float3 emissive = emissive_clr.xyz;
+	if (emissive_clr.w > 0.5f)
+	{
+		emissive *= emissive_tex.Sample(aniso_sampler, uv).xyz;
+	}
+	float3 normal;
+	if (normal_map_enabled)
+	{
+		normal = decompress_normal(normal_tex.Sample(aniso_sampler, uv));
+	}
+	else
+	{
+		normal = float3(0, 0, 1);
+	}
+
+	float3 c_diff = DiffuseColor(albedo, metalness);
+	float3 c_spec = SpecularColor(albedo, metalness);
+
+	float3 light_vec = normalize(L.xyz);
+	float3 halfway = normalize(H.xyz);
+	
+	float atten = AttenuationTerm(0, -L.xyz, light_falloff);
+	return float4(0.2f * c_diff + atten * light_color.xyz * CalcBRDFShading(c_diff, c_spec, shininess, light_vec, halfway, normal), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Mesh">
+		<pass name="p0">
+			<state name="vertex_shader" value="MeshVS()"/>
+			<state name="pixel_shader" value="MeshPS()"/>
+		</pass>
+	</technique>
+</effect>

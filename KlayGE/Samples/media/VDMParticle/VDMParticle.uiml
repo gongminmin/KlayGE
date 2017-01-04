@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="VDMParticle" caption="VDM Particle" x="-180" y="200" align_x="right" width="180" height="120">
+		<control type="static" id="ParticleRenderingTypeStatic" caption="Particle rendering type:" x="20" y="20" width="160" height="24" is_default="0"/>
+		<control type="combo_box" id="ParticleRenderingTypeCombo" x="20" y="40" width="160" height="24" selected="0" hotkey="0" is_default="0">
+			<item name="Full Resolution"/>
+			<item name="Naive Half Resolution"/>
+			<item name="Naive Quarter Resolution"/>
+			<item name="VDM Quarter Resolution"/>
+		</control>
+
+		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="80" width="120" height="24" checked="0" hotkey="0" is_default="0"/>
+	</dialog>
+
+	<dialog id="Logo" caption="Logo" x="-128" y="-128" align_x="right" align_y="bottom" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

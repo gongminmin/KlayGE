@@ -345,10 +345,12 @@ namespace KlayGE
 					}
 				}
 
-				add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly))
+				add &= (deferred_mode_ && !obj->SimpleForward() && !(urt_ & App3DFramework::URV_SimpleForwardOnly)
+						&& !obj->VDM() && !(urt_ & App3DFramework::URV_VDMOnly))
 					|| !deferred_mode_;
 
 				add |= (deferred_mode_ && obj->SimpleForward() && (urt_ & App3DFramework::URV_SimpleForwardOnly));
+				add |= (deferred_mode_ && obj->VDM() && (urt_ & App3DFramework::URV_VDMOnly));
 			}
 
 			if (add)

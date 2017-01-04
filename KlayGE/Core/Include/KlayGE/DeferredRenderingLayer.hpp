@@ -80,6 +80,8 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 #endif
+		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
+		std::vector<RenderViewPtr> g_buffer_vdm_max_ds_views;
 
 		FrameBufferPtr shadowing_fb;
 		TexturePtr shadowing_tex;
@@ -89,6 +91,11 @@ namespace KlayGE
 
 		FrameBufferPtr reflection_fb;
 		TexturePtr reflection_tex;
+
+		FrameBufferPtr vdm_fb;
+		TexturePtr vdm_color_tex;
+		TexturePtr vdm_transition_tex;
+		TexturePtr vdm_count_tex;
 
 		FrameBufferPtr shading_fb;
 		TexturePtr shading_tex;
@@ -348,6 +355,7 @@ namespace KlayGE
 		void AddTranslucency(uint32_t light_index, PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void AddSSS(PerViewport const & pvp);
 		void AddSSR(PerViewport const & pvp);
+		void AddVDM(PerViewport const & pvp);
 		void AddAtmospheric(PerViewport const & pvp);
 		void AddTAA(PerViewport const & pvp);
 
@@ -367,6 +375,7 @@ namespace KlayGE
 		void UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
+		void CreateVDMDepthMaxMap(PerViewport const & pvp);
 
 	private:
 		bool tex_array_support_;
@@ -396,6 +405,9 @@ namespace KlayGE
 
 		PostProcessPtr taa_pp_;
 		bool taa_enabled_;
+
+		PostProcessPtr vdm_composition_pp_;
+		PostProcessPtr copy_to_depth_pp_;
 
 		float light_scale_;
 		RenderLayoutPtr rl_cone_;
@@ -515,6 +527,7 @@ namespace KlayGE
 		RenderEffectParameter* camera_proj_01_param_;
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
+		PostProcessPtr depth_to_max_pp_;
 
 		RenderEffectParameter* projective_shadowing_rw_tex_param_;
 		RenderEffectParameter* shadowing_rw_tex_param_;
@@ -553,6 +566,7 @@ namespace KlayGE
 		bool has_sss_objs_;
 		bool has_reflective_objs_;
 		bool has_simple_forward_objs_;
+		bool has_vdm_objs_;
 
 		PostProcessPtr atmospheric_pp_;
 
@@ -593,6 +607,8 @@ namespace KlayGE
 		PerfRangePtr ssr_pp_perf_;
 		PerfRangePtr atmospheric_pp_perf_;
 		PerfRangePtr taa_pp_perf_;
+		PerfRangePtr vdm_perf_;
+		PerfRangePtr vdm_composition_pp_perf_;
 #endif
 	};
 }

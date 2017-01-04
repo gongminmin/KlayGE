@@ -68,9 +68,9 @@ namespace
 			}
 		}
 
-		std::vector<std::experimental::any> store_to_py()
+		std::vector<std::any> store_to_py()
 		{
-			std::vector<std::experimental::any> ret;
+			std::vector<std::any> ret;
 
 			ret.push_back(vendor_);
 			ret.push_back(renderer_);
@@ -140,7 +140,7 @@ int main()
 	app.Create();
 
 	information info;
-	std::vector<std::experimental::any> for_py = info.store_to_py();
+	std::vector<std::any> for_py = info.store_to_py();
 
 	ScriptEngine& scriptEng = Context::Instance().ScriptFactoryInstance().ScriptEngineInstance();
 	ScriptModulePtr module = scriptEng.CreateModule("GLCompatibility");
