@@ -137,8 +137,6 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 
 int main(int argc, char* argv[])
 {
-	using namespace std::experimental;
-
 	if (argc < 2)
 	{
 		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3|ios xxx.fxml [target folder]" << endl;

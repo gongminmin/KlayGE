@@ -424,7 +424,6 @@ namespace
 int main(int argc, char* argv[])
 {
 	using namespace KlayGE;
-	using namespace std::experimental;
 
 	if (argc < 2)
 	{
