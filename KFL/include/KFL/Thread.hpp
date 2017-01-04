@@ -45,9 +45,9 @@
 
 namespace KlayGE
 {
-	struct void_t
+	struct my_void_t
 	{
-		typedef void_t type;
+		typedef my_void_t type;
 	};
 
 	typedef std::thread::id thread_id;
@@ -83,12 +83,12 @@ namespace KlayGE
 	public:
 		// Representation of the storage to hold the return type:
 		//	if result_type == void
-		//		std::optional<void_t>
+		//		std::optional<my_void_t>
 		//	else
 		//		std::optional<result_type>
 		typedef std::optional<
 			typename std::conditional<std::is_same<result_type, void>::value,
-				void_t, result_type>::type
+				my_void_t, result_type>::type
 			>  result_opt;
 
 		typedef typename std::conditional<std::is_same<result_type, void>::value,
@@ -262,7 +262,7 @@ namespace KlayGE
 			typedef typename std::result_of<Threadable()>::type		result_t;
 			typedef JoinerImpl										joiner_impl_t;
 			typedef typename JoinerImpl::result_opt					result_opt;
-			typedef std::optional<void_t>							void_optional_t;
+			typedef std::optional<my_void_t>						void_optional_t;
 
 			//Helper function to construct the optional from the
 			//return value and handle void return types
@@ -276,7 +276,7 @@ namespace KlayGE
 			static void construct_result(MainFunctionHolder& in, void_optional_t& out)
 			{
 				in.main_();
-				out = void_t();
+				out = my_void_t();
 			}
 
 		public:
