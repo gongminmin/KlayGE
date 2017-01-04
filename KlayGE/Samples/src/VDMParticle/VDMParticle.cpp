@@ -45,6 +45,7 @@ namespace
 		{
 			effect_ = SyncLoadRenderEffect("VDMParticle.fxml");
 			technique_ = effect_->TechniqueByName("Mesh");
+                        color_tech_ = nullptr;
 		}
 
 		void DoBuildMeshInfo() override

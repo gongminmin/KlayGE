@@ -32,7 +32,6 @@
 
 using namespace std;
 using namespace KlayGE;
-using namespace std::experimental;
 
 struct OfflineRenderDeviceCaps
 {

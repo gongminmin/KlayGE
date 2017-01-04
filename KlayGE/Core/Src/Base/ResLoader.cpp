@@ -258,7 +258,7 @@ namespace KlayGE
 
 	std::string ResLoader::AbsPath(std::string const & path)
 	{
-		using namespace std::experimental;
+		using namespace boost;
 
 		filesystem::path new_path(path);
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
@@ -349,7 +349,7 @@ namespace KlayGE
 #elif defined(KLAYGE_PLATFORM_IOS)
 		return LocateFileIOS(name);
 #else
-		using namespace std::experimental;
+		using namespace boost;
 
 		{
 			std::lock_guard<std::mutex> lock(paths_mutex_);
@@ -393,7 +393,7 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Open(std::string const & name)
 	{
-		using namespace std::experimental;
+		using namespace boost;
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		AAsset* asset = LocateFileAndroid(name);
 		if (asset != nullptr)
@@ -740,7 +740,7 @@ namespace KlayGE
 	ResIdentifierPtr ResLoader::LocatePkt(std::string const & name, std::string const & res_name,
 			std::string& password, std::string& internal_name)
 	{
-		using namespace std::experimental;
+		using namespace boost;
 
 		ResIdentifierPtr res;
 		std::string::size_type const pkt_offset(res_name.find("//"));
