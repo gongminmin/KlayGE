@@ -182,6 +182,9 @@
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
 	#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
+	#if KLAYGE_COMPILER_VERSION >= 61
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__dllexport__))

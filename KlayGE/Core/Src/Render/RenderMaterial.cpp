@@ -139,8 +139,7 @@ namespace
 				}
 				else
 				{
-					using namespace std::experimental;
-					filesystem::path res_path(mtl_desc_.res_name);
+					std::filesystem::path res_path(mtl_desc_.res_name);
 #ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
 					mtl_desc_.mtl_data->name = res_path.stem();
 #else

@@ -60,7 +60,6 @@
 
 using namespace std;
 using namespace KlayGE;
-using namespace std::experimental;
 
 class ImposterGenApp : public KlayGE::App3DFramework
 {
