@@ -97,7 +97,6 @@ namespace
 		}
 
 	private:
-		RenderTechnique* color_tech_;
 		float4x4 inv_model_mat_;
 	};
 
