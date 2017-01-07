@@ -206,15 +206,15 @@ namespace KlayGE
 #endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
-		this->AddPath("../");
-		this->AddPath("../../media/RenderFX/");
-		this->AddPath("../../media/Models/");
-		this->AddPath("../../media/Textures/2D/");
-		this->AddPath("../../media/Textures/3D/");
-		this->AddPath("../../media/Textures/Cube/");
-		this->AddPath("../../media/Textures/Juda/");
-		this->AddPath("../../media/Fonts/");
-		this->AddPath("../../media/PostProcessors/");
+		this->AddPath("..");
+		this->AddPath("../../media/RenderFX");
+		this->AddPath("../../media/Models");
+		this->AddPath("../../media/Textures/2D");
+		this->AddPath("../../media/Textures/3D");
+		this->AddPath("../../media/Textures/Cube");
+		this->AddPath("../../media/Textures/Juda");
+		this->AddPath("../../media/Fonts");
+		this->AddPath("../../media/PostProcessors");
 #endif
 #endif
 
@@ -402,7 +402,7 @@ namespace KlayGE
 		if (!res_name.empty())
 		{
 			std::filesystem::path res_path(res_name);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
 			uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
 			uint64_t timestamp = std::filesystem::last_write_time(res_path);
@@ -424,7 +424,7 @@ namespace KlayGE
 				std::filesystem::path res_path(res_name);
 				if (std::filesystem::exists(res_path))
 				{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
 					uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
 #else
 					uint64_t timestamp = std::filesystem::last_write_time(res_path);
@@ -753,7 +753,7 @@ namespace KlayGE
 				}
 				internal_name = res_name.substr(pkt_offset + 2);
 
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
 				uint64_t timestamp = std::filesystem::last_write_time(pkt_path).time_since_epoch().count();
 #else
 				uint64_t timestamp = std::filesystem::last_write_time(pkt_path);
