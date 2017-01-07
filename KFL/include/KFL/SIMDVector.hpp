@@ -34,9 +34,6 @@
 #pragma once
 
 #include <boost/operators.hpp>
-#if !defined(KLAYGE_COMPILER_MSVC) && !defined(KLAYGE_CPU_ARM)
-#include <x86intrin.h>
-#endif
 
 namespace KlayGE
 {

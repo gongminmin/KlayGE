@@ -39,6 +39,9 @@
 #include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
+#ifdef KLAYGE_COMPILER_MSVC
+	#include <intrin.h>		// For _BitScanForward
+#endif
 
 #include <KlayGE/TexCompressionBC.hpp>
 

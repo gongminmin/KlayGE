@@ -36,9 +36,10 @@
 #include <KFL/PreDeclare.hpp>
 
 #if defined(KLAYGE_SSE_SUPPORT)
-#	define SIMD_MATH_SSE
+	#define SIMD_MATH_SSE
+	#include <xmmintrin.h>
 #else
-#	define SIMD_MATH_GENERAL
+	#define SIMD_MATH_GENERAL
 #endif
 
 namespace KlayGE
