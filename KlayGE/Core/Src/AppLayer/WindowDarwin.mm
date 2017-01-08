@@ -105,8 +105,16 @@ namespace KlayGE
 
 		NSScreen* mainDisplay = [NSScreen mainScreen];
 		NSRect initContentRect = NSMakeRect(settings.left, settings.top, settings.width, settings.height);
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_11
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 		NSUInteger initStyleMask = NSTitledWindowMask | NSMiniaturizableWindowMask | NSClosableWindowMask | NSResizableWindowMask;
-		
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_11
+#pragma GCC diagnostic pop
+#endif
+
 		// TODO: full screen support
 		ns_window_ = [[KlayGEWindow alloc] initWithContentRect:initContentRect
 											 styleMask:initStyleMask
@@ -266,7 +274,14 @@ namespace KlayGE
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		for (;;)
 		{
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_11
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 			NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil inMode:NSDefaultRunLoopMode dequeue:YES];
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_11
+#pragma GCC diagnostic pop
+#endif
 			if (nil == event)
 			{
 				break;
