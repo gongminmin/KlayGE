@@ -97,12 +97,13 @@
 
 	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
+	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 
 	#if defined(__APPLE__)
-		#if CLANG_VERSION >= 40
+		#if CLANG_VERSION >= 61
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
-			#error "Unsupported compiler version. Please install Apple clang++ 4.0 or up."
+			#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
 		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
@@ -184,6 +185,9 @@
 	#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 	#if KLAYGE_COMPILER_VERSION >= 61
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+	#endif
+	#if KLAYGE_COMPILER_VERSION >= 60
+		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

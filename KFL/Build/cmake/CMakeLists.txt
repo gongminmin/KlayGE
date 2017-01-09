@@ -42,6 +42,7 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX11.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CXX17.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
