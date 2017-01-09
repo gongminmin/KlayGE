@@ -58,7 +58,7 @@ class build_info:
 			cfg_build.shader_platform_name
 		except:
 			cfg_build.shader_platform_name = "auto"
-			
+
 		env = os.environ
 
 		host_platform = sys.platform
@@ -200,9 +200,9 @@ class build_info:
 						compiler = "clang"
 					elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
 						compiler = "mingw"
-				elif ("linux" == target_platform) or ("android" == target_platform):
+				elif ("linux" == target_platform):
 					compiler = "gcc"
-				elif ("darwin" == target_platform) or ("ios" == target_platform):
+				elif ("android" == target_platform) or ("darwin" == target_platform) or ("ios" == target_platform):
 					compiler = "clang"
 				else:
 					log_error("Unsupported target platform.\n")
@@ -266,8 +266,6 @@ class build_info:
 					toolset = "v140"
 				elif "vc120" == compiler:
 					toolset = "v120"
-			elif "android" == target_platform:
-				toolset = "3.6"
 
 		if "" == archs:
 			archs = cfg_build.arch
@@ -372,15 +370,14 @@ class build_info:
 	def retrive_clang_version(self):
 		if ("android" == self.target_platform):
 			android_ndk_path = os.environ["ANDROID_NDK"]
-			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm-%s" % self.toolset
-			if not os.path.isdir(prebuilt_llvm_path):
-				prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
+			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
 			prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows\\bin"
 			if not os.path.isdir(prebuilt_clang_path):
 				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
-			clang_ver = subprocess.check_output([prebuilt_clang_path + "\\clang", "--version"]).decode()
+			clang_path = prebuilt_clang_path + "\\clang"
 		else:
-			clang_ver = subprocess.check_output(["clang", "--version"]).decode()
+			clang_path = "clang"
+		clang_ver = subprocess.check_output([clang_path, "--version"]).decode()
 		clang_ver_tokens = clang_ver.split()
 		for i in range(0, len(clang_ver_tokens)):
 			if "version" == clang_ver_tokens[i]:
@@ -434,15 +431,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	if ("vc" == build_info.compiler_name) and (not build_info.is_windows_runtime):
 		toolset_name = "-T %s" % compiler_info.toolset
 	elif ("android" == build_info.target_platform):
-		if ("clang" == build_info.compiler_name):
-			android_ndk_path = os.environ["ANDROID_NDK"]
-			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
-			if os.path.isdir(prebuilt_llvm_path):
-				toolset_name = "clang"
-			else:
-				toolset_name = "clang%s" % compiler_info.toolset
-		else:
-			toolset_name = compiler_info.toolset
+		android_ndk_path = os.environ["ANDROID_NDK"]
+		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
+		toolset_name = "clang"
 
 	if build_info.compiler_name != "vc":
 		additional_options += " -DKLAYGE_ARCH_NAME:STRING=\"%s\"" % compiler_info.arch
@@ -560,21 +551,19 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 				os.chdir(build_dir)
 
-				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+				config_options = "-DANDROID_STL=c++_static -DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 				if "android" == build_info.target_platform:
 					config_options += " -DANDROID_ABI=%s" % compiler_info.arch
 
 					if "x86" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=x86-%s" % toolset_name
+						toolchain_arch = "x86"
 					elif "x86_64" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=x86_64-%s" % toolset_name
+						toolchain_arch = "x86_64"
 					elif "arm64-v8a" == compiler_info.arch:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=aarch64-linux-android-%s" % toolset_name
+						toolchain_arch = "aarch64-linux-android"
 					else:
-						config_options += " -DANDROID_TOOLCHAIN_NAME=arm-linux-androideabi-%s" % toolset_name
-
-					if "clang" == build_info.compiler_name:
-						config_options += " -DANDROID_STL=c++_static"
+						toolchain_arch = "arm-linux-androideabi"
+					config_options += " -DANDROID_TOOLCHAIN_NAME=%s-clang" % toolchain_arch
 
 				cmake_cmd = batch_command(build_info.host_platform)
 				cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, additional_options, config_options, "../cmake"))
