@@ -551,9 +551,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 				os.chdir(build_dir)
 
-				config_options = "-DANDROID_STL=c++_static -DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
+				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 				if "android" == build_info.target_platform:
-					config_options += " -DANDROID_ABI=%s" % compiler_info.arch
+					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=%s" % compiler_info.arch
 
 					if "x86" == compiler_info.arch:
 						toolchain_arch = "x86"

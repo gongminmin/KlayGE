@@ -273,12 +273,6 @@
 		#include <sdkddkver.h>
 	#endif
 
-	#ifndef _WIN32_WINNT_WINXP
-		#define _WIN32_WINNT_WINXP 0x0501
-	#endif
-	#ifndef _WIN32_WINNT_VISTA
-		#define _WIN32_WINNT_VISTA 0x0600
-	#endif
 	#ifndef _WIN32_WINNT_WIN7
 		#define _WIN32_WINNT_WIN7 0x0601
 	#endif

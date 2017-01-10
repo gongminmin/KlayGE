@@ -451,7 +451,6 @@ namespace KlayGE
 
 		this->FillRenderDeviceCaps();
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		if (d3d_11_runtime_sub_ver_ >= 4)
 		{
 			device_lost_event_ = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
@@ -460,7 +459,6 @@ namespace KlayGE
 			::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, NULL);
 			TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
 		}
-#endif
 	}
 
 	void D3D11RenderEngine::ResetRenderStates()
@@ -902,7 +900,6 @@ namespace KlayGE
 
 	void D3D11RenderEngine::DoDestroy()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_VISTA)
 		if ((device_lost_reg_cookie_ != 0) && d3d_device_4_)
 		{
 			d3d_device_4_->UnregisterDeviceRemoved(device_lost_reg_cookie_);
@@ -918,7 +915,7 @@ namespace KlayGE
 			::CloseThreadpoolWait(thread_pool_wait_);
 			thread_pool_wait_ = nullptr;
 		}
-#endif
+
 		adapterList_.Destroy();
 
 		rasterizer_state_cache_ = nullptr;

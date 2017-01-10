@@ -141,55 +141,6 @@ namespace
 		CFM_ApicIdCoreIdSize_AMD    = 0x0000F000,
 	};
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
-#if defined(KLAYGE_COMPILER_GCC) && !defined(__MINGW64_VERSION_MAJOR)
-	typedef enum _LOGICAL_PROCESSOR_RELATIONSHIP
-	{
-		RelationProcessorCore,
-		RelationNumaNode,
-		RelationCache
-	} LOGICAL_PROCESSOR_RELATIONSHIP;
-
-	typedef enum _PROCESSOR_CACHE_TYPE
-	{
-		CacheUnified,
-		CacheInstruction,
-		CacheData,
-		CacheTrace
-	} PROCESSOR_CACHE_TYPE;
-
-	typedef struct _CACHE_DESCRIPTOR
-	{
-		BYTE   Level;
-		BYTE   Associativity;
-		WORD   LineSize;
-		DWORD  Size;
-		PROCESSOR_CACHE_TYPE Type;
-	} CACHE_DESCRIPTOR, *PCACHE_DESCRIPTOR;
-
-	typedef struct _SYSTEM_LOGICAL_PROCESSOR_INFORMATION
-	{
-		ULONG_PTR   ProcessorMask;
-		LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
-		union
-		{
-			struct
-			{
-				BYTE  Flags;
-			} ProcessorCore;
-			struct
-			{
-				DWORD NodeNumber;
-			} NumaNode;
-			CACHE_DESCRIPTOR Cache;
-			ULONGLONG  Reserved[2];
-		};
-	} SYSTEM_LOGICAL_PROCESSOR_INFORMATION, *PSYSTEM_LOGICAL_PROCESSOR_INFORMATION;
-#endif
-
-	typedef BOOL (WINAPI* GetLogicalProcessorInformationPtr)(SYSTEM_LOGICAL_PROCESSOR_INFORMATION*, uint32_t*);
-#endif
-
 	class ApicExtractor
 	{
 	public:
@@ -334,6 +285,8 @@ namespace KlayGE
 		bool is_intel = (&GenuineIntel[0] == cpu_string_);
 		bool is_amd = (&AuthenticAMD[0] == cpu_string_);
 
+		KFL_UNUSED(is_intel);
+
 		if (max_std_fn >= 1)
 		{
 			cpuid.Call(1);
@@ -430,285 +383,127 @@ namespace KlayGE
 		num_hw_threads_ = sysconf(_SC_NPROCESSORS_CONF);	// This will tell us how many CPUs are currently enabled.
 #endif
 
-#if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		GetLogicalProcessorInformationPtr glpi = nullptr;
-		{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-			if (IsWindowsVistaOrGreater())
-#else
-			OSVERSIONINFO os_ver_info;
-			memset(&os_ver_info, 0, sizeof(os_ver_info));
-			os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
-			::GetVersionEx(&os_ver_info);
+		std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpi_;
 
-			// There is a bug with the implementation of GetLogicalProcessorInformation
-			// on Windows Server 2003 and XP64. Therefore, only
-			// GetLogicalProcessorInformation on Windows Vista and up are supported for now.
-			if (os_ver_info.dwMajorVersion >= 6)
-#endif
+		DWORD cbBuffer = 0;
+		GetLogicalProcessorInformation(nullptr, &cbBuffer);
+
+		slpi_.resize(cbBuffer / sizeof(slpi_[0]));
+		GetLogicalProcessorInformation(&slpi_[0], &cbBuffer);
+
+		num_cores_ = 0;
+		for (size_t i = 0; i < slpi_.size(); ++ i)
+		{
+			if (::RelationProcessorCore == slpi_[i].Relationship)
 			{
-				HMODULE hMod = ::GetModuleHandle(TEXT("kernel32"));
-				if (hMod)
-				{
-					glpi = (GetLogicalProcessorInformationPtr)::GetProcAddress(hMod,
-						"GetLogicalProcessorInformation");
-				}
+				++ num_cores_;
 			}
 		}
-
-		if (glpi != nullptr)
+#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+		num_cores_ = num_hw_threads_;
+#elif defined KLAYGE_PLATFORM_LINUX
+		if (is_intel || is_amd)
 		{
-			std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION> slpi_;
+			uint8_t log_procs_per_pkg = 1;
+			uint8_t cores_per_pkg = 1;
 
-			uint32_t cbBuffer = 0;
-			glpi(nullptr, &cbBuffer);
-
-			slpi_.resize(cbBuffer / sizeof(slpi_[0]));
-			glpi(&slpi_[0], &cbBuffer);
-
-			num_cores_ = 0;
-			for (size_t i = 0; i < slpi_.size(); ++ i)
+			// Determine if hyper-threading is enabled.
+			if (this->IsFeatureSupport(CF_HTT))
 			{
-				if (::RelationProcessorCore == slpi_[i].Relationship)
+				cpuid.Call(1);
+
+				// Determine the total number of logical processors per package.
+				log_procs_per_pkg = static_cast<uint8_t>((cpuid.Ebx() & CFM_LogicalProcessorCount_Intel) >> 16);
+
+				// Determine the total number of cores per package.  This info
+				// is extracted differently dependending on the cpu vendor.
+				if (is_intel)
 				{
-					++ num_cores_;
-				}
-			}
-		}
-		else
-		{
-			// Indicates if a CpuidImpl object is supported on this platform.
-			// Support is only granted on Intel and AMD platforms where the current
-			// calling process has security rights to query process affinity and
-			// change it if the process and system affinity differ.  CpuidImpl is
-			// also not supported if thread affinity cannot be set on systems with
-			// more than 1 logical processor.
-
-			bool supported = is_intel || is_amd;
-
-			if (supported)
-			{
-				DWORD_PTR process_affinity = 0;
-				DWORD_PTR system_affinity = 0;
-				HANDLE process_handle = ::GetCurrentProcess();
-
-				// Query process affinity mask
-				supported = (::GetProcessAffinityMask(process_handle, &process_affinity, &system_affinity) != 0);
-				if (supported)
-				{
-					if (process_affinity != system_affinity)
+					if (max_std_fn >= 4)
 					{
-						// The process and system affinities differ.  Attempt to set
-						// the process affinity to the system affinity.
-						supported = (::SetProcessAffinityMask(process_handle, system_affinity) != 0);
-						if (supported)
-						{
-							// Restore previous process affinity
-							supported = (::SetProcessAffinityMask(process_handle, process_affinity) != 0);
-						}
+						cpuid.Call(4);
+						cores_per_pkg = static_cast<uint8_t>(((cpuid.Eax() & CFM_NC_Intel) >> 26) + 1);
 					}
+				}
+				else
+				{
+					BOOST_ASSERT(is_amd);
 
-					if (supported && (system_affinity > 1))
+					if (max_ext_fn >= 0x80000008)
 					{
-						// Attempt to set the thread affinity
-						HANDLE thread_handle = ::GetCurrentThread();
-						DWORD_PTR thread_affinity = ::SetThreadAffinityMask(thread_handle, process_affinity);
-						if (thread_affinity)
+						cpuid.Call(0x80000008);
+
+						// AMD reports the msb width of the CORE_ID bit field of the APIC ID
+						// in ApicIdCoreIdSize_Amd.  The maximum value represented by the msb
+						// width is the theoretical number of cores the processor can support
+						// and not the actual number of current cores, which is how the msb width
+						// of the CORE_ID bit field has been traditionally determined.  If the
+						// ApicIdCoreIdSize_Amd value is zero, then you use the traditional method
+						// to determine the CORE_ID msb width.
+						uint32_t msb_width = cpuid.Ecx() & CFM_ApicIdCoreIdSize_AMD;
+						if (msb_width)
 						{
-							// Restore the previous thread affinity
-							supported = (::SetThreadAffinityMask(thread_handle, thread_affinity) != 0);
+							// Set cores_per_pkg to the maximum theortical number of cores
+							// the processor package can support (2 ^ width) so the APIC
+							// extractor object can be configured to extract the proper
+							// values from an APIC.
+							cores_per_pkg = static_cast<uint8_t>(1 << ((msb_width >> 12) - 1));
 						}
 						else
 						{
-							supported = false;
+							// Set cores_per_pkg to the actual number of cores being reported
+							// by the CPUID instruction.
+							cores_per_pkg = static_cast<uint8_t>((cpuid.Ecx() & CFM_NC_AMD) + 1);
 						}
 					}
 				}
 			}
-#else
-		{
-			bool supported = false;
-#endif
-#elif defined KLAYGE_PLATFORM_LINUX
-		{
-			bool supported = is_intel || is_amd;
-#elif defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS)
-		{
-			bool supported = false;
-#endif
 
-			if (supported)
+			std::vector<uint8_t> apic_ids;
+
+			// Configure the APIC extractor object with the information it needs to
+			// be able to decode the APIC.
+			ApicExtractor apic_extractor(log_procs_per_pkg, cores_per_pkg);
+
+			if (1 == num_hw_threads_)
 			{
-				uint8_t log_procs_per_pkg = 1;
-				uint8_t cores_per_pkg = 1;
+				// Since we only have 1 logical processor present on the system, we
+				// can explicitly set a single APIC ID to zero.
+				BOOST_ASSERT(1 == log_procs_per_pkg);
+				apic_ids.push_back(0);
+			}
+			else
+			{
+				cpu_set_t backup_cpu;
+				sched_getaffinity(0, sizeof(backup_cpu), &backup_cpu);
 
-				// Determine if hyper-threading is enabled.
-				if (this->IsFeatureSupport(CF_HTT))
+				cpu_set_t current_cpu;
+				// Call cpuid on each active logical processor in the system affinity.
+				for (int j = 0; j < num_hw_threads_; ++j)
 				{
-					cpuid.Call(1);
-
-					// Determine the total number of logical processors per package.
-					log_procs_per_pkg = static_cast<uint8_t>((cpuid.Ebx() & CFM_LogicalProcessorCount_Intel) >> 16);
-
-					// Determine the total number of cores per package.  This info
-					// is extracted differently dependending on the cpu vendor.
-					if (is_intel)
+					CPU_ZERO(&current_cpu);
+					CPU_SET(j, &current_cpu);
+					if (0 == sched_setaffinity(0, sizeof(current_cpu), &current_cpu))
 					{
-						if (max_std_fn >= 4)
-						{
-							cpuid.Call(4);
-							cores_per_pkg = static_cast<uint8_t>(((cpuid.Eax() & CFM_NC_Intel) >> 26) + 1);
-						}
-					}
-					else
-					{
-						BOOST_ASSERT(is_amd);
+						// Allow the thread to switch to masked logical processor.
+						sleep(0);
 
-						if (max_ext_fn >= 0x80000008)
-						{
-							cpuid.Call(0x80000008);
-
-							// AMD reports the msb width of the CORE_ID bit field of the APIC ID
-							// in ApicIdCoreIdSize_Amd.  The maximum value represented by the msb
-							// width is the theoretical number of cores the processor can support
-							// and not the actual number of current cores, which is how the msb width
-							// of the CORE_ID bit field has been traditionally determined.  If the
-							// ApicIdCoreIdSize_Amd value is zero, then you use the traditional method
-							// to determine the CORE_ID msb width.
-							uint32_t msb_width = cpuid.Ecx() & CFM_ApicIdCoreIdSize_AMD;
-							if (msb_width)
-							{
-								// Set cores_per_pkg to the maximum theortical number of cores
-								// the processor package can support (2 ^ width) so the APIC
-								// extractor object can be configured to extract the proper
-								// values from an APIC.
-								cores_per_pkg = static_cast<uint8_t>(1 << ((msb_width >> 12) - 1));
-							}
-							else
-							{
-								// Set cores_per_pkg to the actual number of cores being reported
-								// by the CPUID instruction.
-								cores_per_pkg = static_cast<uint8_t>((cpuid.Ecx() & CFM_NC_AMD) + 1);
-							}
-						}
+						// Store the APIC ID
+						cpuid.Call(1);
+						apic_ids.push_back(static_cast<uint8_t>((cpuid.Ebx() & CFM_ApicId_Intel) >> 24));
 					}
 				}
 
-				std::vector<uint8_t> apic_ids;
-
-				// Configure the APIC extractor object with the information it needs to
-				// be able to decode the APIC.
-				ApicExtractor apic_extractor(log_procs_per_pkg, cores_per_pkg);
-
-#if defined KLAYGE_PLATFORM_WINDOWS
-#if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-				DWORD_PTR process_affinity = 0;
-				DWORD_PTR system_affinity = 0;
-				HANDLE process_handle = ::GetCurrentProcess();
-				HANDLE thread_handle = ::GetCurrentThread();
-				::GetProcessAffinityMask(process_handle, &process_affinity, &system_affinity);
-				if (1 == system_affinity)
-				{
-					// Since we only have 1 logical processor present on the system, we
-					// can explicitly set a single APIC ID to zero.
-					BOOST_ASSERT(1 == log_procs_per_pkg);
-					apic_ids.push_back(0);
-				}
-				else
-				{
-					// Set the process affinity to the system affinity if they are not
-					// equal so that all logical processors can be accounted for.
-					if (process_affinity != system_affinity)
-					{
-						::SetProcessAffinityMask(process_handle, system_affinity);
-					}
-
-					// Call cpuid on each active logical processor in the system affinity.
-					DWORD_PTR prev_thread_affinity = 0;
-					for (DWORD_PTR thread_affinity = 1; thread_affinity && (thread_affinity <= system_affinity);
-						thread_affinity <<= 1)
-					{
-						if (system_affinity & thread_affinity)
-						{
-							if (0 == prev_thread_affinity)
-							{
-								// Save the previous thread affinity so we can return
-								// the executing thread affinity back to this state.
-								BOOST_ASSERT(apic_ids.empty());
-								prev_thread_affinity = ::SetThreadAffinityMask(thread_handle, thread_affinity);
-							}
-							else
-							{
-								BOOST_ASSERT(!apic_ids.empty());
-								::SetThreadAffinityMask(thread_handle, thread_affinity);
-							}
-
-							// Allow the thread to switch to masked logical processor.
-							::Sleep(0);
-
-							// Store the APIC ID
-							cpuid.Call(1);
-							apic_ids.push_back(static_cast<uint8_t>((cpuid.Ebx() & CFM_ApicId_Intel) >> 24));
-						}
-					}
-
-					// Restore the previous process and thread affinity state.
-					::SetProcessAffinityMask(process_handle, process_affinity);
-					::SetThreadAffinityMask(thread_handle, prev_thread_affinity);
-					::Sleep(0);
-				}
-#endif
-#elif defined KLAYGE_PLATFORM_LINUX
-				if (1 == num_hw_threads_)
-				{
-					// Since we only have 1 logical processor present on the system, we
-					// can explicitly set a single APIC ID to zero.
-					BOOST_ASSERT(1 == log_procs_per_pkg);
-					apic_ids.push_back(0);
-				}
-				else
-				{
-					cpu_set_t backup_cpu;
-					sched_getaffinity(0, sizeof(backup_cpu), &backup_cpu);
-
-					cpu_set_t current_cpu;
-					// Call cpuid on each active logical processor in the system affinity.
-					for (int j = 0; j < num_hw_threads_; ++ j)
-					{
-						CPU_ZERO(&current_cpu);
-						CPU_SET(j, &current_cpu);
-						if (0 == sched_setaffinity(0, sizeof(current_cpu), &current_cpu))
-						{
-							// Allow the thread to switch to masked logical processor.
-							sleep(0);
-
-							// Store the APIC ID
-							cpuid.Call(1);
-							apic_ids.push_back(static_cast<uint8_t>((cpuid.Ebx() & CFM_ApicId_Intel) >> 24));
-						}
-					}
-
-					// Restore the previous process and thread affinity state.
-					sched_setaffinity(0, sizeof(backup_cpu), &backup_cpu);
-					sleep(0);
-				}
-#endif
-
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-				num_cores_ = num_hw_threads_;
-#else
-				std::vector<uint8_t> pkg_core_ids(apic_ids.size());
-				for (size_t i = 0; i < apic_ids.size(); ++ i)
-				{
-					pkg_core_ids[i] = apic_extractor.PackageCoreId(apic_ids[i]);
-				}
-				std::sort(pkg_core_ids.begin(), pkg_core_ids.end());
-				pkg_core_ids.erase(std::unique(pkg_core_ids.begin(), pkg_core_ids.end()), pkg_core_ids.end());
-				num_cores_ = static_cast<int>(pkg_core_ids.size());
-#endif
+				// Restore the previous process and thread affinity state.
+				sched_setaffinity(0, sizeof(backup_cpu), &backup_cpu);
+				sleep(0);
 			}
 		}
+#elif defined(KLAYGE_PLATFORM_DARWIN) || defined(KLAYGE_PLATFORM_IOS)
+		// TODO
+		num_cores_ = num_hw_threads_;
+#endif
 #endif
 	}
 }

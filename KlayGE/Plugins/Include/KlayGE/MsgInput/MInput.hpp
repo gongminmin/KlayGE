@@ -34,6 +34,7 @@
 #pragma once
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+#define INITGUID
 #include <windows.h>
 #if defined KLAYGE_HAVE_LIBOVR
 #include <OVR.h>

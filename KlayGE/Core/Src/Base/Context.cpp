@@ -564,25 +564,7 @@ namespace KlayGE
 			}
 		}
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
-		if (!IsWindowsVistaOrGreater())
-#else
-		OSVERSIONINFO os_ver_info;
-		memset(&os_ver_info, 0, sizeof(os_ver_info));
-		os_ver_info.dwOSVersionInfoSize = sizeof(os_ver_info);
-		::GetVersionEx(&os_ver_info);
-
-		if (os_ver_info.dwMajorVersion < 6)
-#endif
-		{
-			if (("D3D11" == rf_name) || ("D3D12" == rf_name))
-			{
-				rf_name = "OpenGL";
-			}
-		}
-
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+#if defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
 		rf_name = "D3D11";
 #elif defined(KLAYGE_PLATFORM_LINUX)
 		if (("D3D11" == rf_name) || ("D3D12" == rf_name))

@@ -19,7 +19,16 @@
 #include <KFL/Thread.hpp>
 
 #include <d3d9.h>
+#ifdef KLAYGE_COMPILER_GCC
+#define _WIN32_WINNT_BACKUP _WIN32_WINNT
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0501
+#endif
 #include <strmif.h>
+#ifdef KLAYGE_COMPILER_GCC
+#undef _WIN32_WINNT
+#define _WIN32_WINNT _WIN32_WINNT_BACKUP
+#endif
 #include <vmr9.h>
 #include <vector>
 #include <atomic>
@@ -43,30 +52,30 @@ namespace KlayGE
 				/* [in] */ DWORD_PTR dwUserID,
 				/* [in] */ VMR9AllocationInfo *lpAllocInfo,
 				/* [out][in] */ DWORD *lpNumBuffers);
-	            
+
 		virtual HRESULT STDMETHODCALLTYPE TerminateDevice( 
 			/* [in] */ DWORD_PTR dwID);
-	    
+
 		virtual HRESULT STDMETHODCALLTYPE GetSurface( 
 			/* [in] */ DWORD_PTR dwUserID,
 			/* [in] */ DWORD SurfaceIndex,
 			/* [in] */ DWORD SurfaceFlags,
 			/* [out] */ IDirect3DSurface9 **lplpSurface);
-	    
+
 		virtual HRESULT STDMETHODCALLTYPE AdviseNotify( 
 			/* [in] */ IVMRSurfaceAllocatorNotify9 *lpIVMRSurfAllocNotify);
 
 		// IVMRImagePresenter9
 		virtual HRESULT STDMETHODCALLTYPE StartPresenting( 
 			/* [in] */ DWORD_PTR dwUserID);
-	    
+
 		virtual HRESULT STDMETHODCALLTYPE StopPresenting( 
 			/* [in] */ DWORD_PTR dwUserID);
-	    
+
 		virtual HRESULT STDMETHODCALLTYPE PresentImage( 
 			/* [in] */ DWORD_PTR dwUserID,
 			/* [in] */ VMR9PresentationInfo *lpPresInfo);
-	    
+
 		// IUnknown
 		virtual HRESULT STDMETHODCALLTYPE QueryInterface( 
 			REFIID riid,
