@@ -31,6 +31,10 @@
 #include <KFL/KFL.hpp>
 #include <KFL/SIMDMath.hpp>
 
+#ifdef SIMD_MATH_SSE
+	#include <emmintrin.h>
+#endif
+
 namespace KlayGE
 {
 	namespace SIMDMathLib
