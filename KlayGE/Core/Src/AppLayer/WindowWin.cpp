@@ -330,7 +330,7 @@ namespace KlayGE
 			this->OnRawInput()(*this, reinterpret_cast<HRAWINPUT>(lParam));
 			break;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		case WM_POINTERDOWN:
 			{
 				POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
@@ -365,15 +365,8 @@ namespace KlayGE
 			}
 			break;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		case WM_DPICHANGED:
 			dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
-			break;
-#endif
-
-#elif (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		case WM_TOUCH:
-			this->OnTouch()(*this, reinterpret_cast<HTOUCHINPUT>(lParam), LOWORD(wParam));
 			break;
 #endif
 

@@ -266,18 +266,12 @@
 			#define KLAYGE_COMPILER_NAME mgw
 			#include <_mingw.h>
 		#endif
-		#ifndef WINVER
-			#define WINVER 0x0501
-		#endif
 	#else
 		#include <sdkddkver.h>
 	#endif
 
 	#ifndef _WIN32_WINNT_WIN7
 		#define _WIN32_WINNT_WIN7 0x0601
-	#endif
-	#ifndef _WIN32_WINNT_WIN8
-		#define _WIN32_WINNT_WIN8 0x0602
 	#endif
 	#ifndef _WIN32_WINNT_WINBLUE
 		#define _WIN32_WINNT_WINBLUE 0x0603
@@ -286,7 +280,7 @@
 		#define _WIN32_WINNT_WIN10 0x0A00
 	#endif
 
-	#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+	#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		#include <winapifamily.h>
 		#if defined(WINAPI_FAMILY)
 			#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP

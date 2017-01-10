@@ -277,12 +277,6 @@ namespace KlayGE
 		{
 			return raw_input_event_;
 		}
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		TouchEvent& OnTouch()
-		{
-			return touch_event_;
-		}
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent& OnKeyDown()
@@ -351,9 +345,6 @@ namespace KlayGE
 		CharEvent char_event_;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		TouchEvent touch_event_;
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent key_down_event_;

@@ -39,7 +39,7 @@
 #if defined KLAYGE_HAVE_LIBOVR
 #include <OVR.h>
 #endif
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN8)
+#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 #include <hidsdi.h>
 #else
 #ifndef _NTDEF_
@@ -314,9 +314,6 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
@@ -450,9 +447,6 @@ namespace KlayGE
 		MsgInputTouch();
 
 		virtual std::wstring const & Name() const override;
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		void OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs);
-#endif
 		void OnPointerDown(int2 const & pt, uint32_t id);
 		void OnPointerUp(int2 const & pt, uint32_t id);
 		void OnPointerUpdate(int2 const & pt, uint32_t id, bool down);

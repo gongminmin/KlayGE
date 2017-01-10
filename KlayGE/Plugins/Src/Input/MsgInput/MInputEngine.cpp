@@ -194,17 +194,6 @@ namespace KlayGE
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				std::placeholders::_1, std::placeholders::_2));
 		}
-#if (_WIN32_WINNT < _WIN32_WINNT_WIN8) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		if (::GetSystemMetrics(SM_DIGITIZER) & NID_READY)
-		{
-			if (this->RegisterTouchWindow(hwnd, TWF_WANTPALM))
-			{
-				on_touch_ = main_wnd->OnTouch().connect(std::bind(&MsgInputEngine::OnTouch, this,
-					std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
-				devices_.push_back(MakeSharedPtr<MsgInputTouch>());
-			}
-		}
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_ = main_wnd->OnKeyDown().connect(std::bind(&MsgInputEngine::OnKeyDown, this,
 			std::placeholders::_2));
@@ -233,7 +222,7 @@ namespace KlayGE
 		KFL_UNUSED(main_wnd);
 #endif
 
-#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN8)) \
+#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)) \
 			|| defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
 			std::placeholders::_2, std::placeholders::_3));
@@ -303,18 +292,6 @@ namespace KlayGE
 		}
 	}
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-	void MsgInputEngine::OnTouch(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)
-	{
-		for (auto const & device : devices_)
-		{
-			if (InputEngine::IDT_Touch == device->Type())
-			{
-				checked_pointer_cast<MsgInputTouch>(device)->OnTouch(wnd, hti, num_inputs);
-			}
-		}
-	}
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 	void MsgInputEngine::OnKeyDown(uint32_t key)
 	{
