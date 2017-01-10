@@ -37,17 +37,11 @@
 
 #if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT)
 	#include <filesystem>
-#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT)
+#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 	#include <experimental/filesystem>
 	namespace std
 	{
 		namespace filesystem = experimental::filesystem;
-	}
-#elif defined(KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT)
-	#include <filesystem>
-	namespace std
-	{
-		namespace filesystem = tr2::sys;
 	}
 #else
 	#if defined(KLAYGE_COMPILER_GCC)

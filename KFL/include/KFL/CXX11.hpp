@@ -33,19 +33,4 @@
 
 #pragma once
 
-#ifdef KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-	#define KLAYGE_NOEXCEPT noexcept
-	#define KLAYGE_NOEXCEPT_IF(predicate) noexcept((predicate))
-	#define KLAYGE_NOEXCEPT_EXPR(expression) noexcept((expression))
-#else
-	#define KLAYGE_NOEXCEPT throw()
-	#define KLAYGE_NOEXCEPT_IF(predicate)
-	#define KLAYGE_NOEXCEPT_EXPR(expression) false
-#endif
-#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#define KLAYGE_CONSTEXPR constexpr
-#else
-	#define KLAYGE_CONSTEXPR
-#endif
-
 #endif		// _KFL_CXX11_HPP

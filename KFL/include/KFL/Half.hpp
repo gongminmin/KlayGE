@@ -81,42 +81,42 @@ namespace KlayGE
 						boost::equality_comparable<half>>>>>
 	{
 	public:
-		half() KLAYGE_NOEXCEPT
+		half() noexcept
 		{
 		}
 
-		explicit half(float f) KLAYGE_NOEXCEPT;
+		explicit half(float f) noexcept;
 
-		operator float() const KLAYGE_NOEXCEPT;
+		operator float() const noexcept;
 
 		// 特殊值
 
 		// returns +infinity
-		static half pos_inf() KLAYGE_NOEXCEPT;
+		static half pos_inf() noexcept;
 
 		// returns -infinity
-		static half neg_inf() KLAYGE_NOEXCEPT;
+		static half neg_inf() noexcept;
 
 		// returns a NAN with the bit pattern 0111111111111111
-		static half q_nan() KLAYGE_NOEXCEPT;
+		static half q_nan() noexcept;
 
 		// returns a NAN with the bit pattern 0111110111111111
-		static half s_nan() KLAYGE_NOEXCEPT;
+		static half s_nan() noexcept;
 
 
 		// 赋值操作符
-		half const & operator+=(half const & rhs) KLAYGE_NOEXCEPT;
-		half const & operator-=(half const & rhs) KLAYGE_NOEXCEPT;
-		half const & operator*=(half const & rhs) KLAYGE_NOEXCEPT;
-		half const & operator/=(half const & rhs) KLAYGE_NOEXCEPT;
+		half const & operator+=(half const & rhs) noexcept;
+		half const & operator-=(half const & rhs) noexcept;
+		half const & operator*=(half const & rhs) noexcept;
+		half const & operator/=(half const & rhs) noexcept;
 
-		half& operator=(half const & rhs) KLAYGE_NOEXCEPT;
+		half& operator=(half const & rhs) noexcept;
 
 		// 一元操作符
-		half const operator+() const KLAYGE_NOEXCEPT;
-		half const operator-() const KLAYGE_NOEXCEPT;
+		half const operator+() const noexcept;
+		half const operator-() const noexcept;
 
-		bool operator==(half const & rhs) KLAYGE_NOEXCEPT;
+		bool operator==(half const & rhs) noexcept;
 
 	private:
 		uint16_t value_;
@@ -152,36 +152,36 @@ namespace std
 		static bool const tinyness_before = false;
 		static float_round_style const round_style = round_to_nearest;
 
-		static KlayGE::half min() KLAYGE_NOEXCEPT
+		static KlayGE::half min() noexcept
 		{
 			return KlayGE::half(HALF_NRM_MIN);
 		}
-		static KlayGE::half max() KLAYGE_NOEXCEPT
+		static KlayGE::half max() noexcept
 		{
 			return KlayGE::half(HALF_MAX);
 		}
-		static KlayGE::half epsilon() KLAYGE_NOEXCEPT
+		static KlayGE::half epsilon() noexcept
 		{
 			return KlayGE::half(HALF_EPSILON);
 		}
-		static KlayGE::half round_error() KLAYGE_NOEXCEPT
+		static KlayGE::half round_error() noexcept
 		{
 			return KlayGE::half(HALF_EPSILON / 2);
 		}
 
-		static KlayGE::half infinity() KLAYGE_NOEXCEPT
+		static KlayGE::half infinity() noexcept
 		{
 			return KlayGE::half::pos_inf();
 		}
-		static KlayGE::half quiet_NaN() KLAYGE_NOEXCEPT
+		static KlayGE::half quiet_NaN() noexcept
 		{
 			return KlayGE::half::q_nan();
 		}
-		static KlayGE::half signaling_NaN() KLAYGE_NOEXCEPT
+		static KlayGE::half signaling_NaN() noexcept
 		{
 			return KlayGE::half::s_nan();
 		}
-		static KlayGE::half denorm_min() KLAYGE_NOEXCEPT
+		static KlayGE::half denorm_min() noexcept
 		{
 			return KlayGE::half(HALF_MIN);
 		}

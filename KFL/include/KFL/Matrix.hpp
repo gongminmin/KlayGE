@@ -67,78 +67,78 @@ namespace KlayGE
 		enum { elem_num = row_num * col_num };
 
 	public:
-		Matrix4_T() KLAYGE_NOEXCEPT
+		Matrix4_T() noexcept
 		{
 		}
-		explicit Matrix4_T(T const * rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T(Matrix4_T const & rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T(Matrix4_T&& rhs) KLAYGE_NOEXCEPT;
+		explicit Matrix4_T(T const * rhs) noexcept;
+		Matrix4_T(Matrix4_T const & rhs) noexcept;
+		Matrix4_T(Matrix4_T&& rhs) noexcept;
 		Matrix4_T(T f11, T f12, T f13, T f14,
 			T f21, T f22, T f23, T f24,
 			T f31, T f32, T f33, T f34,
-			T f41, T f42, T f43, T f44) KLAYGE_NOEXCEPT;
+			T f41, T f42, T f43, T f44) noexcept;
 
-		static size_t size() KLAYGE_NOEXCEPT
+		static size_t size() noexcept
 		{
 			return elem_num;
 		}
 
-		static Matrix4_T const & Zero() KLAYGE_NOEXCEPT;
-		static Matrix4_T const & Identity() KLAYGE_NOEXCEPT;
+		static Matrix4_T const & Zero() noexcept;
+		static Matrix4_T const & Identity() noexcept;
 
-		reference operator()(size_t row, size_t col) KLAYGE_NOEXCEPT
+		reference operator()(size_t row, size_t col) noexcept
 		{
 			return m_[row][col];
 		}
-		const_reference operator()(size_t row, size_t col) const KLAYGE_NOEXCEPT
+		const_reference operator()(size_t row, size_t col) const noexcept
 		{
 			return m_[row][col];
 		}
-		iterator begin() KLAYGE_NOEXCEPT
+		iterator begin() noexcept
 		{
 			return &m_[0][0];
 		}
-		const_iterator begin() const KLAYGE_NOEXCEPT
+		const_iterator begin() const noexcept
 		{
 			return &m_[0][0];
 		}
-		iterator end() KLAYGE_NOEXCEPT
+		iterator end() noexcept
 		{
 			return this->begin() + elem_num;
 		}
-		const_iterator end() const KLAYGE_NOEXCEPT
+		const_iterator end() const noexcept
 		{
 			return this->begin() + elem_num;
 		}
-		reference operator[](size_t index) KLAYGE_NOEXCEPT
+		reference operator[](size_t index) noexcept
 		{
 			return *(this->begin() + index);
 		}
-		const_reference operator[](size_t index) const KLAYGE_NOEXCEPT
+		const_reference operator[](size_t index) const noexcept
 		{
 			return *(this->begin() + index);
 		}
 
-		void Row(size_t index, Vector_T<T, col_num> const & rhs) KLAYGE_NOEXCEPT;
-		Vector_T<T, 4> const & Row(size_t index) const KLAYGE_NOEXCEPT;
-		void Col(size_t index, Vector_T<T, row_num> const & rhs) KLAYGE_NOEXCEPT;
-		Vector_T<T, 4> const Col(size_t index) const KLAYGE_NOEXCEPT;
+		void Row(size_t index, Vector_T<T, col_num> const & rhs) noexcept;
+		Vector_T<T, 4> const & Row(size_t index) const noexcept;
+		void Col(size_t index, Vector_T<T, row_num> const & rhs) noexcept;
+		Vector_T<T, 4> const Col(size_t index) const noexcept;
 
 		// 赋值操作符
-		Matrix4_T& operator+=(Matrix4_T const & rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T& operator-=(Matrix4_T const & rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T& operator*=(Matrix4_T const & rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T& operator*=(T rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T& operator/=(T rhs) KLAYGE_NOEXCEPT;
+		Matrix4_T& operator+=(Matrix4_T const & rhs) noexcept;
+		Matrix4_T& operator-=(Matrix4_T const & rhs) noexcept;
+		Matrix4_T& operator*=(Matrix4_T const & rhs) noexcept;
+		Matrix4_T& operator*=(T rhs) noexcept;
+		Matrix4_T& operator/=(T rhs) noexcept;
 
-		Matrix4_T& operator=(Matrix4_T const & rhs) KLAYGE_NOEXCEPT;
-		Matrix4_T& operator=(Matrix4_T&& rhs) KLAYGE_NOEXCEPT;
+		Matrix4_T& operator=(Matrix4_T const & rhs) noexcept;
+		Matrix4_T& operator=(Matrix4_T&& rhs) noexcept;
 
 		// 一元操作符
-		Matrix4_T const operator+() const KLAYGE_NOEXCEPT;
-		Matrix4_T const operator-() const KLAYGE_NOEXCEPT;
+		Matrix4_T const operator+() const noexcept;
+		Matrix4_T const operator-() const noexcept;
 
-		bool operator==(Matrix4_T const & rhs) const KLAYGE_NOEXCEPT;
+		bool operator==(Matrix4_T const & rhs) const noexcept;
 
 	private:
 		Vector_T<Vector_T<T, col_num>, row_num> m_;

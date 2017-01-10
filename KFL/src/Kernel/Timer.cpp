@@ -32,35 +32,11 @@
 
 #include <limits>
 #include <chrono>
-#ifdef KLAYGE_COMPILER_MSVC
-#include <windows.h>
-#endif
 
 #include <KFL/Timer.hpp>
 
 namespace KlayGE
 {
-#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION < 140)
-	// In vc11 and vc12, a system_clock is synonymous with a high_resolution_clock.
-	//  So using QueryPerformance* for high resolution timing.
-	#define USE_QUERY_PERFORMANCE
-#endif
-
-#ifdef USE_QUERY_PERFORMANCE
-	uint64_t CPS()
-	{
-		static uint64_t cps = 0;
-		if (0 == cps)
-		{
-			::LARGE_INTEGER frequency;
-			::QueryPerformanceFrequency(&frequency);
-			cps = static_cast<uint64_t>(frequency.QuadPart);
-		}
-
-		return cps;
-	}
-#endif
-
 	Timer::Timer()
 	{
 		this->restart();
@@ -80,32 +56,18 @@ namespace KlayGE
 	// return estimated maximum value for elapsed()
 	double Timer::elapsed_max() const
 	{
-#ifdef USE_QUERY_PERFORMANCE
-		return static_cast<double>(std::numeric_limits<uint64_t>::max()) / CPS() - start_time_;
-#else
 		return std::chrono::duration<double>::max().count();
-#endif
 	}
 
 	// return minimum value for elapsed()
 	double Timer::elapsed_min() const
 	{
-#ifdef USE_QUERY_PERFORMANCE
-		return 1.0 / CPS();
-#else
 		return std::chrono::duration<double>::min().count();
-#endif
 	}
 
 	double Timer::current_time() const
 	{
-#ifdef USE_QUERY_PERFORMANCE
-		::LARGE_INTEGER count;
-		::QueryPerformanceCounter(&count);
-		return static_cast<double>(count.QuadPart) / CPS();
-#else
 		std::chrono::high_resolution_clock::time_point tp = std::chrono::high_resolution_clock::now();
 		return std::chrono::duration_cast<std::chrono::duration<double>>(tp.time_since_epoch()).count();
-#endif
 	}
 }

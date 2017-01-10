@@ -34,46 +34,46 @@
 
 namespace KlayGE
 {
-	template Color_T<float>::Color_T(float const * rhs) KLAYGE_NOEXCEPT;
-	template Color_T<float>::Color_T(Color const & rhs) KLAYGE_NOEXCEPT;
-	template Color_T<float>::Color_T(Color&& rhs) KLAYGE_NOEXCEPT;
-	template Color_T<float>::Color_T(float r, float g, float b, float a) KLAYGE_NOEXCEPT;
-	template Color_T<float>::Color_T(uint32_t dw) KLAYGE_NOEXCEPT;
-	template void Color_T<float>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const KLAYGE_NOEXCEPT;
-	template uint32_t Color_T<float>::ARGB() const KLAYGE_NOEXCEPT;
-	template uint32_t Color_T<float>::ABGR() const KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator+=(Color const & rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator-=(Color const & rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator*=(float rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator*=(Color const & rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator/=(float rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator=(Color const & rhs) KLAYGE_NOEXCEPT;
-	template Color& Color_T<float>::operator=(Color&& rhs) KLAYGE_NOEXCEPT;
-	template Color const Color_T<float>::operator+() const KLAYGE_NOEXCEPT;
-	template Color const Color_T<float>::operator-() const KLAYGE_NOEXCEPT;
-	template bool Color_T<float>::operator==(Color const & rhs) const KLAYGE_NOEXCEPT;
+	template Color_T<float>::Color_T(float const * rhs) noexcept;
+	template Color_T<float>::Color_T(Color const & rhs) noexcept;
+	template Color_T<float>::Color_T(Color&& rhs) noexcept;
+	template Color_T<float>::Color_T(float r, float g, float b, float a) noexcept;
+	template Color_T<float>::Color_T(uint32_t dw) noexcept;
+	template void Color_T<float>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const noexcept;
+	template uint32_t Color_T<float>::ARGB() const noexcept;
+	template uint32_t Color_T<float>::ABGR() const noexcept;
+	template Color& Color_T<float>::operator+=(Color const & rhs) noexcept;
+	template Color& Color_T<float>::operator-=(Color const & rhs) noexcept;
+	template Color& Color_T<float>::operator*=(float rhs) noexcept;
+	template Color& Color_T<float>::operator*=(Color const & rhs) noexcept;
+	template Color& Color_T<float>::operator/=(float rhs) noexcept;
+	template Color& Color_T<float>::operator=(Color const & rhs) noexcept;
+	template Color& Color_T<float>::operator=(Color&& rhs) noexcept;
+	template Color const Color_T<float>::operator+() const noexcept;
+	template Color const Color_T<float>::operator-() const noexcept;
+	template bool Color_T<float>::operator==(Color const & rhs) const noexcept;
 
 
 	template <typename T>
-	Color_T<T>::Color_T(T const * rhs) KLAYGE_NOEXCEPT
+	Color_T<T>::Color_T(T const * rhs) noexcept
 		: col_(rhs)
 	{
 	}
 
 	template <typename T>
-	Color_T<T>::Color_T(Color_T const & rhs) KLAYGE_NOEXCEPT
+	Color_T<T>::Color_T(Color_T const & rhs) noexcept
 		: col_(rhs.col_)
 	{
 	}
 
 	template <typename T>
-	Color_T<T>::Color_T(Color_T&& rhs) KLAYGE_NOEXCEPT
+	Color_T<T>::Color_T(Color_T&& rhs) noexcept
 		: col_(std::move(rhs.col_))
 	{
 	}
 
 	template <typename T>
-	Color_T<T>::Color_T(T r, T g, T b, T a) KLAYGE_NOEXCEPT
+	Color_T<T>::Color_T(T r, T g, T b, T a) noexcept
 	{
 		this->r() = r;
 		this->g() = g;
@@ -82,7 +82,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Color_T<T>::Color_T(uint32_t dw) KLAYGE_NOEXCEPT
+	Color_T<T>::Color_T(uint32_t dw) noexcept
 	{
 		static T const f(1 / T(255));
 		this->a() = f * (static_cast<T>(static_cast<uint8_t>(dw >> 24)));
@@ -92,7 +92,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	void Color_T<T>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const KLAYGE_NOEXCEPT
+	void Color_T<T>::RGBA(uint8_t& R, uint8_t& G, uint8_t& B, uint8_t& A) const noexcept
 	{
 		R = static_cast<uint8_t>(MathLib::clamp(this->r(), T(0), T(1)) * 255 + 0.5f);
 		G = static_cast<uint8_t>(MathLib::clamp(this->g(), T(0), T(1)) * 255 + 0.5f);
@@ -101,7 +101,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	uint32_t Color_T<T>::ARGB() const KLAYGE_NOEXCEPT
+	uint32_t Color_T<T>::ARGB() const noexcept
 	{
 		uint8_t r, g, b, a;
 		this->RGBA(r, g, b, a);
@@ -109,7 +109,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	uint32_t Color_T<T>::ABGR() const KLAYGE_NOEXCEPT
+	uint32_t Color_T<T>::ABGR() const noexcept
 	{
 		uint8_t r, g, b, a;
 		this->RGBA(r, g, b, a);
@@ -117,42 +117,42 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator+=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator+=(Color_T<T> const & rhs) noexcept
 	{
 		col_ += rhs.col_;
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator-=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator-=(Color_T<T> const & rhs) noexcept
 	{
 		col_ -= rhs.col_;
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator*=(T rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator*=(T rhs) noexcept
 	{
 		col_ *= rhs;
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator*=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator*=(Color_T<T> const & rhs) noexcept
 	{
 		*this = MathLib::modulate(*this, rhs);
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator/=(T rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator/=(T rhs) noexcept
 	{
 		col_ /= rhs;
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator=(Color_T<T> const & rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator=(Color_T<T> const & rhs) noexcept
 	{
 		if (this != &rhs)
 		{
@@ -162,26 +162,26 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	Color_T<T>& Color_T<T>::operator=(Color_T<T>&& rhs) KLAYGE_NOEXCEPT
+	Color_T<T>& Color_T<T>::operator=(Color_T<T>&& rhs) noexcept
 	{
 		col_ = std::move(rhs.col_);
 		return *this;
 	}
 
 	template <typename T>
-	Color_T<T> const Color_T<T>::operator+() const KLAYGE_NOEXCEPT
+	Color_T<T> const Color_T<T>::operator+() const noexcept
 	{
 		return *this;
 	}
 	
 	template <typename T>
-	Color_T<T> const Color_T<T>::operator-() const KLAYGE_NOEXCEPT
+	Color_T<T> const Color_T<T>::operator-() const noexcept
 	{
 		return Color_T(-this->r(), -this->g(), -this->b(), -this->a());
 	}
 
 	template <typename T>
-	bool Color_T<T>::operator==(Color_T<T> const & rhs) const KLAYGE_NOEXCEPT
+	bool Color_T<T>::operator==(Color_T<T> const & rhs) const noexcept
 	{
 		return col_ == rhs.col_;
 	}

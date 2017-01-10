@@ -64,49 +64,49 @@ namespace KlayGE
 		enum { elem_num = 2 };
 
 	public:
-		Size_T() KLAYGE_NOEXCEPT
+		Size_T() noexcept
 		{
 		}
-		explicit Size_T(T const * rhs) KLAYGE_NOEXCEPT;
+		explicit Size_T(T const * rhs) noexcept;
 		// Leave them in header due to a compiling issue under GCC
-		Size_T(Size_T const & rhs) KLAYGE_NOEXCEPT
+		Size_T(Size_T const & rhs) noexcept
 			: size_(rhs.size_)
 		{
 		}
 		template <typename U>
-		Size_T(Size_T<U> const & rhs) KLAYGE_NOEXCEPT
+		Size_T(Size_T<U> const & rhs) noexcept
 			: size_(rhs.size_)
 		{
 		}
-		Size_T(Size_T&& rhs) KLAYGE_NOEXCEPT;
-		Size_T(T cx, T cy) KLAYGE_NOEXCEPT;
+		Size_T(Size_T&& rhs) noexcept;
+		Size_T(T cx, T cy) noexcept;
 
 		// 取向量
-		reference cx() KLAYGE_NOEXCEPT
+		reference cx() noexcept
 		{
 			return size_[0];
 		}
-		const_reference cx() const KLAYGE_NOEXCEPT
+		const_reference cx() const noexcept
 		{
 			return size_[0];
 		}
-		reference cy() KLAYGE_NOEXCEPT
+		reference cy() noexcept
 		{
 			return size_[1];
 		}
-		const_reference cy() const KLAYGE_NOEXCEPT
+		const_reference cy() const noexcept
 		{
 			return size_[1];
 		}
 
 		// 赋值操作符
 		template <typename U>
-		Size_T const & operator+=(Size_T<U> const & rhs) KLAYGE_NOEXCEPT;
+		Size_T const & operator+=(Size_T<U> const & rhs) noexcept;
 		template <typename U>
-		Size_T const & operator-=(Size_T<U> const & rhs) KLAYGE_NOEXCEPT;
+		Size_T const & operator-=(Size_T<U> const & rhs) noexcept;
 
 		// Leave them in header due to a compiling issue under GCC
-		Size_T& operator=(Size_T const & rhs) KLAYGE_NOEXCEPT
+		Size_T& operator=(Size_T const & rhs) noexcept
 		{
 			if (this != &rhs)
 			{
@@ -115,18 +115,18 @@ namespace KlayGE
 			return *this;
 		}
 		template <typename U>
-		Size_T& operator=(Size_T<U> const & rhs) KLAYGE_NOEXCEPT
+		Size_T& operator=(Size_T<U> const & rhs) noexcept
 		{
 			size_ = rhs.size_;
 			return *this;
 		}
-		Size_T& operator=(Size_T&& rhs) KLAYGE_NOEXCEPT;
+		Size_T& operator=(Size_T&& rhs) noexcept;
 
 		// 一元操作符
-		Size_T<T> const operator+() const KLAYGE_NOEXCEPT;
-		Size_T<T> const operator-() const KLAYGE_NOEXCEPT;
+		Size_T<T> const operator+() const noexcept;
+		Size_T<T> const operator-() const noexcept;
 
-		bool operator==(Size_T<T> const & rhs) const KLAYGE_NOEXCEPT;
+		bool operator==(Size_T<T> const & rhs) const noexcept;
 
 	private:
 		Vector_T<T, elem_num> size_;

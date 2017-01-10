@@ -39,11 +39,7 @@
 #include <system_error>
 namespace KlayGE
 {
-#if defined(KLAYGE_COMPILER_MSVC) && (KLAYGE_COMPILER_VERSION < 120)
-	namespace errc = std::errc;
-#else
 	using std::errc;
-#endif
 }
 
 #ifndef _HRESULT_DEFINED

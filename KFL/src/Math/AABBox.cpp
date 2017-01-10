@@ -36,46 +36,46 @@
 
 namespace KlayGE
 {
-	template AABBox_T<float>::AABBox_T(float3 const & vMin, float3 const & vMax) KLAYGE_NOEXCEPT;
-	template AABBox_T<float>::AABBox_T(float3&& vMin, float3&& vMax) KLAYGE_NOEXCEPT;
-	template AABBox_T<float>::AABBox_T(AABBox const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox_T<float>::AABBox_T(AABBox&& rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator+=(float3 const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator-=(float3 const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator*=(float rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator/=(float rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator&=(AABBox const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator|=(AABBox const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator=(AABBox const & rhs) KLAYGE_NOEXCEPT;
-	template AABBox& AABBox_T<float>::operator=(AABBox&& rhs) KLAYGE_NOEXCEPT;
-	template AABBox const AABBox_T<float>::operator+() const KLAYGE_NOEXCEPT;
-	template AABBox const AABBox_T<float>::operator-() const KLAYGE_NOEXCEPT;
-	template float AABBox_T<float>::Width() const KLAYGE_NOEXCEPT;
-	template float AABBox_T<float>::Height() const KLAYGE_NOEXCEPT;
-	template float AABBox_T<float>::Depth() const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::IsEmpty() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::LeftBottomNear() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::LeftTopNear() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::RightBottomNear() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::RightTopNear() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::LeftBottomFar() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::LeftTopFar() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::RightBottomFar() const KLAYGE_NOEXCEPT;
-	template float3 const AABBox_T<float>::RightTopFar() const KLAYGE_NOEXCEPT;
-	template float3 AABBox_T<float>::Center() const KLAYGE_NOEXCEPT;
-	template float3 AABBox_T<float>::HalfSize() const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::VecInBound(float3 const & v) const KLAYGE_NOEXCEPT;
-	template float AABBox_T<float>::MaxRadiusSq() const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::Intersect(AABBox const & aabb) const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::Intersect(OBBox const & obb) const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::Intersect(Sphere const & sphere) const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::Intersect(Frustum const & frustum) const KLAYGE_NOEXCEPT;
-	template float3 AABBox_T<float>::Corner(size_t index) const KLAYGE_NOEXCEPT;
-	template bool AABBox_T<float>::operator==(AABBox const & rhs) const KLAYGE_NOEXCEPT;
+	template AABBox_T<float>::AABBox_T(float3 const & vMin, float3 const & vMax) noexcept;
+	template AABBox_T<float>::AABBox_T(float3&& vMin, float3&& vMax) noexcept;
+	template AABBox_T<float>::AABBox_T(AABBox const & rhs) noexcept;
+	template AABBox_T<float>::AABBox_T(AABBox&& rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator+=(float3 const & rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator-=(float3 const & rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator*=(float rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator/=(float rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator&=(AABBox const & rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator|=(AABBox const & rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator=(AABBox const & rhs) noexcept;
+	template AABBox& AABBox_T<float>::operator=(AABBox&& rhs) noexcept;
+	template AABBox const AABBox_T<float>::operator+() const noexcept;
+	template AABBox const AABBox_T<float>::operator-() const noexcept;
+	template float AABBox_T<float>::Width() const noexcept;
+	template float AABBox_T<float>::Height() const noexcept;
+	template float AABBox_T<float>::Depth() const noexcept;
+	template bool AABBox_T<float>::IsEmpty() const noexcept;
+	template float3 const AABBox_T<float>::LeftBottomNear() const noexcept;
+	template float3 const AABBox_T<float>::LeftTopNear() const noexcept;
+	template float3 const AABBox_T<float>::RightBottomNear() const noexcept;
+	template float3 const AABBox_T<float>::RightTopNear() const noexcept;
+	template float3 const AABBox_T<float>::LeftBottomFar() const noexcept;
+	template float3 const AABBox_T<float>::LeftTopFar() const noexcept;
+	template float3 const AABBox_T<float>::RightBottomFar() const noexcept;
+	template float3 const AABBox_T<float>::RightTopFar() const noexcept;
+	template float3 AABBox_T<float>::Center() const noexcept;
+	template float3 AABBox_T<float>::HalfSize() const noexcept;
+	template bool AABBox_T<float>::VecInBound(float3 const & v) const noexcept;
+	template float AABBox_T<float>::MaxRadiusSq() const noexcept;
+	template bool AABBox_T<float>::Intersect(AABBox const & aabb) const noexcept;
+	template bool AABBox_T<float>::Intersect(OBBox const & obb) const noexcept;
+	template bool AABBox_T<float>::Intersect(Sphere const & sphere) const noexcept;
+	template bool AABBox_T<float>::Intersect(Frustum const & frustum) const noexcept;
+	template float3 AABBox_T<float>::Corner(size_t index) const noexcept;
+	template bool AABBox_T<float>::operator==(AABBox const & rhs) const noexcept;
 
 
 	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) KLAYGE_NOEXCEPT
+	AABBox_T<T>::AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) noexcept
 				: min_(vMin), max_(vMax)
 	{
 		BOOST_ASSERT(vMin.x() <= vMax.x());
@@ -84,7 +84,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>::AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax) KLAYGE_NOEXCEPT
+	AABBox_T<T>::AABBox_T(Vector_T<T, 3>&& vMin, Vector_T<T, 3>&& vMax) noexcept
 		: min_(std::move(vMin)), max_(std::move(vMax))
 	{
 		BOOST_ASSERT(vMin.x() <= vMax.x());
@@ -93,21 +93,21 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>::AABBox_T(AABBox_T<T> const & rhs) noexcept
 			: Bound_T<T>(rhs),
 				min_(rhs.min_), max_(rhs.max_)
 	{
 	}
 
 	template <typename T>
-	AABBox_T<T>::AABBox_T(AABBox_T<T>&& rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>::AABBox_T(AABBox_T<T>&& rhs) noexcept
 		: Bound_T<T>(rhs),
 			min_(std::move(rhs.min_)), max_(std::move(rhs.max_))
 	{
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator+=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator+=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		min_ += rhs;
 		max_ += rhs;
@@ -115,7 +115,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator-=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator-=(Vector_T<T, 3> const & rhs) noexcept
 	{
 		min_ -= rhs;
 		max_ -= rhs;
@@ -123,7 +123,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator*=(T rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator*=(T rhs) noexcept
 	{
 		this->Min() *= rhs;
 		this->Max() *= rhs;
@@ -131,13 +131,13 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator/=(T rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator/=(T rhs) noexcept
 	{
 		return this->operator*=(1.0f / rhs);
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator&=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator&=(AABBox_T<T> const & rhs) noexcept
 	{
 		min_ = MathLib::maximize(this->Min(), rhs.Min());
 		max_ = MathLib::minimize(this->Max(), rhs.Max());
@@ -145,7 +145,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator|=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator|=(AABBox_T<T> const & rhs) noexcept
 	{
 		min_ = MathLib::minimize(this->Min(), rhs.Min());
 		max_ = MathLib::maximize(this->Max(), rhs.Max());
@@ -153,7 +153,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator=(AABBox_T<T> const & rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator=(AABBox_T<T> const & rhs) noexcept
 	{
 		if (this != &rhs)
 		{
@@ -164,7 +164,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T>& AABBox_T<T>::operator=(AABBox_T<T>&& rhs) KLAYGE_NOEXCEPT
+	AABBox_T<T>& AABBox_T<T>::operator=(AABBox_T<T>&& rhs) noexcept
 	{
 		min_ = std::move(rhs.min_);
 		max_ = std::move(rhs.max_);
@@ -172,139 +172,139 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator+() const KLAYGE_NOEXCEPT
+	AABBox_T<T> const AABBox_T<T>::operator+() const noexcept
 	{
 		return *this;
 	}
 
 	template <typename T>
-	AABBox_T<T> const AABBox_T<T>::operator-() const KLAYGE_NOEXCEPT
+	AABBox_T<T> const AABBox_T<T>::operator-() const noexcept
 	{
 		return AABBox_T<T>(-this->Max(), -this->Min());
 	}
 
 	template <typename T>
-	T AABBox_T<T>::Width() const KLAYGE_NOEXCEPT
+	T AABBox_T<T>::Width() const noexcept
 	{
 		return this->Max().x() - this->Min().x();
 	}
 
 	template <typename T>
-	T AABBox_T<T>::Height() const KLAYGE_NOEXCEPT
+	T AABBox_T<T>::Height() const noexcept
 	{
 		return this->Max().y() - this->Min().y();
 	}
 
 	template <typename T>
-	T AABBox_T<T>::Depth() const KLAYGE_NOEXCEPT
+	T AABBox_T<T>::Depth() const noexcept
 	{
 		return this->Max().z() - this->Min().z();
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::IsEmpty() const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::IsEmpty() const noexcept
 	{
 		return this->Min() == this->Max();
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::LeftBottomNear() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::LeftBottomNear() const noexcept
 	{
 		return this->Min();
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::LeftTopNear() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::LeftTopNear() const noexcept
 	{
 		return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Min().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::RightBottomNear() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::RightBottomNear() const noexcept
 	{
 		return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Min().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::RightTopNear() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::RightTopNear() const noexcept
 	{
 		return Vector_T<T, 3>(this->Max().x(), this->Max().y(), this->Min().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::LeftBottomFar() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::LeftBottomFar() const noexcept
 	{
 		return Vector_T<T, 3>(this->Min().x(), this->Min().y(), this->Max().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::LeftTopFar() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::LeftTopFar() const noexcept
 	{
 		return Vector_T<T, 3>(this->Min().x(), this->Max().y(), this->Max().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::RightBottomFar() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::RightBottomFar() const noexcept
 	{
 		return Vector_T<T, 3>(this->Max().x(), this->Min().y(), this->Max().z());
 	}
 
 	template <typename T>
-	Vector_T<T, 3> const AABBox_T<T>::RightTopFar() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> const AABBox_T<T>::RightTopFar() const noexcept
 	{
 		return this->Max();
 	}
 
 	template <typename T>
-	Vector_T<T, 3> AABBox_T<T>::Center() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> AABBox_T<T>::Center() const noexcept
 	{
 		return (min_ + max_) / 2.0f;
 	}
 
 	template <typename T>
-	Vector_T<T, 3> AABBox_T<T>::HalfSize() const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> AABBox_T<T>::HalfSize() const noexcept
 	{
 		return (max_ - min_) / 2.0f;
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::VecInBound(Vector_T<T, 3> const & v) const noexcept
 	{
 		return MathLib::intersect_point_aabb(v, *this);
 	}
 
 	template <typename T>
-	T AABBox_T<T>::MaxRadiusSq() const KLAYGE_NOEXCEPT
+	T AABBox_T<T>::MaxRadiusSq() const noexcept
 	{
 		return std::max<T>(MathLib::length_sq(this->Max()), MathLib::length_sq(this->Min()));
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::Intersect(AABBox_T<T> const & aabb) const noexcept
 	{
 		return MathLib::intersect_aabb_aabb(*this, aabb);
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::Intersect(OBBox_T<T> const & obb) const noexcept
 	{
 		return MathLib::intersect_aabb_obb(*this, obb);
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::Intersect(Sphere_T<T> const & sphere) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::Intersect(Sphere_T<T> const & sphere) const noexcept
 	{
 		return MathLib::intersect_aabb_sphere(*this, sphere);
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::Intersect(Frustum_T<T> const & frustum) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::Intersect(Frustum_T<T> const & frustum) const noexcept
 	{
 		return MathLib::intersect_aabb_frustum(*this, frustum) != BO_No;
 	}
 
 	template <typename T>
-	Vector_T<T, 3> AABBox_T<T>::Corner(size_t index) const KLAYGE_NOEXCEPT
+	Vector_T<T, 3> AABBox_T<T>::Corner(size_t index) const noexcept
 	{
 		BOOST_ASSERT(index < 8);
 
@@ -314,7 +314,7 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	bool AABBox_T<T>::operator==(AABBox_T<T> const & rhs) const KLAYGE_NOEXCEPT
+	bool AABBox_T<T>::operator==(AABBox_T<T> const & rhs) const noexcept
 	{
 		return (this->Min() == rhs.Min()) && (this->Max() == rhs.Max());
 	}

@@ -50,56 +50,56 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		OBBox_T() KLAYGE_NOEXCEPT;
+		OBBox_T() noexcept;
 		OBBox_T(Vector_T<T, 3> const & center,
 			Vector_T<T, 3> const & x_axis, Vector_T<T, 3> const & y_axis, Vector_T<T, 3> const & z_axis,
-			Vector_T<T, 3> const & extent) KLAYGE_NOEXCEPT;
+			Vector_T<T, 3> const & extent) noexcept;
 		OBBox_T(Vector_T<T, 3> const & center,
 			Quaternion_T<T> const & rotation,
-			Vector_T<T, 3> const & extent) KLAYGE_NOEXCEPT;
+			Vector_T<T, 3> const & extent) noexcept;
 		OBBox_T(Vector_T<T, 3>&& center,
 			Quaternion_T<T>&& rotation,
-			Vector_T<T, 3>&& extent) KLAYGE_NOEXCEPT;
-		OBBox_T(OBBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
-		OBBox_T(OBBox_T<T>&& rhs) KLAYGE_NOEXCEPT;
+			Vector_T<T, 3>&& extent) noexcept;
+		OBBox_T(OBBox_T<T> const & rhs) noexcept;
+		OBBox_T(OBBox_T<T>&& rhs) noexcept;
 
-		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT;
-		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs) KLAYGE_NOEXCEPT;
-		OBBox_T<T>& operator*=(T rhs) KLAYGE_NOEXCEPT;
-		OBBox_T<T>& operator/=(T rhs) KLAYGE_NOEXCEPT;
+		OBBox_T<T>& operator+=(Vector_T<T, 3> const & rhs) noexcept;
+		OBBox_T<T>& operator-=(Vector_T<T, 3> const & rhs) noexcept;
+		OBBox_T<T>& operator*=(T rhs) noexcept;
+		OBBox_T<T>& operator/=(T rhs) noexcept;
 
-		OBBox_T<T>& operator=(OBBox_T<T> const & rhs) KLAYGE_NOEXCEPT;
-		OBBox_T<T>& operator=(OBBox_T<T>&& rhs) KLAYGE_NOEXCEPT;
+		OBBox_T<T>& operator=(OBBox_T<T> const & rhs) noexcept;
+		OBBox_T<T>& operator=(OBBox_T<T>&& rhs) noexcept;
 
-		OBBox_T<T> const operator+() const KLAYGE_NOEXCEPT;
-		OBBox_T<T> const operator-() const KLAYGE_NOEXCEPT;
+		OBBox_T<T> const operator+() const noexcept;
+		OBBox_T<T> const operator-() const noexcept;
 
-		virtual bool IsEmpty() const KLAYGE_NOEXCEPT override;
-		virtual bool VecInBound(Vector_T<T, 3> const & v) const KLAYGE_NOEXCEPT override;
-		virtual T MaxRadiusSq() const KLAYGE_NOEXCEPT override;
+		virtual bool IsEmpty() const noexcept override;
+		virtual bool VecInBound(Vector_T<T, 3> const & v) const noexcept override;
+		virtual T MaxRadiusSq() const noexcept override;
 
-		Vector_T<T, 3> const & Center() const KLAYGE_NOEXCEPT
+		Vector_T<T, 3> const & Center() const noexcept
 		{
 			return center_;
 		}
-		Quaternion_T<T> const & Rotation() const KLAYGE_NOEXCEPT
+		Quaternion_T<T> const & Rotation() const noexcept
 		{
 			return rotation_;
 		}
-		Vector_T<T, 3> Axis(uint32_t index) const KLAYGE_NOEXCEPT;
-		Vector_T<T, 3> const & HalfSize() const KLAYGE_NOEXCEPT
+		Vector_T<T, 3> Axis(uint32_t index) const noexcept;
+		Vector_T<T, 3> const & HalfSize() const noexcept
 		{
 			return extent_;
 		}
 
-		bool Intersect(AABBox_T<T> const & aabb) const KLAYGE_NOEXCEPT;
-		bool Intersect(OBBox_T<T> const & obb) const KLAYGE_NOEXCEPT;
-		bool Intersect(Sphere_T<T> const & sphere) const KLAYGE_NOEXCEPT;
-		bool Intersect(Frustum_T<T> const & frustum) const KLAYGE_NOEXCEPT;
+		bool Intersect(AABBox_T<T> const & aabb) const noexcept;
+		bool Intersect(OBBox_T<T> const & obb) const noexcept;
+		bool Intersect(Sphere_T<T> const & sphere) const noexcept;
+		bool Intersect(Frustum_T<T> const & frustum) const noexcept;
 
-		Vector_T<T, 3> Corner(uint32_t index) const KLAYGE_NOEXCEPT;
+		Vector_T<T, 3> Corner(uint32_t index) const noexcept;
 
-		bool operator==(OBBox_T<T> const & rhs) const KLAYGE_NOEXCEPT;
+		bool operator==(OBBox_T<T> const & rhs) const noexcept;
 
 	private:
 		Vector_T<T, 3> center_;

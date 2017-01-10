@@ -69,7 +69,7 @@ namespace KlayGE
 	class bad_join : public std::exception
 	{
 	public:
-		const char* what() const KLAYGE_NOEXCEPT
+		const char* what() const noexcept
 		{
 			return "bad join";
 		}

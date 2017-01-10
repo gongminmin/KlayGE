@@ -39,7 +39,6 @@ namespace KlayGE
 {
 #define PRIME_NUM 0x9e3779b9
 
-#ifdef KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
 #ifdef KLAYGE_COMPILER_MSVC
 #pragma warning(disable: 4307) // The hash here could cause integral constant overflow
 #endif
@@ -59,35 +58,6 @@ namespace KlayGE
 	#define CT_HASH(x) (EnsureConst<_Hash(x, 0)>::value)
 #else
 	#define CT_HASH(x) (_Hash(x, 0))
-#endif
-#else
-	#if defined(KLAYGE_COMPILER_MSVC)
-		#define FORCEINLINE __forceinline
-	#else
-		#define FORCEINLINE inline
-	#endif
-
-	FORCEINLINE size_t _Hash(const char (&str)[1])
-	{
-		return *str + PRIME_NUM;
-	}
-
-	template <size_t N>
-	FORCEINLINE size_t _Hash(const char (&str)[N])
-	{
-		typedef const char (&truncated_str)[N - 1];
-		size_t seed = _Hash((truncated_str)str);
-		return seed ^ (*(str + N - 1) + PRIME_NUM + (seed << 6) + (seed >> 2));
-	}
-
-	template <size_t N>
-	FORCEINLINE size_t CT_HASH(const char (&str)[N])
-	{
-		typedef const char (&truncated_str)[N - 1];
-		return _Hash((truncated_str)str);
-	}
-
-	#undef FORCEINLINE
 #endif
 
 	template <typename SizeT>

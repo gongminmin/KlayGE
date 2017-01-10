@@ -34,7 +34,3 @@ using namespace System::Security::Permissions;
 [assembly:ComVisible(false)];
 
 [assembly:CLSCompliantAttribute(true)];
-
-#if _MSC_VER <= 1700
-[assembly:SecurityPermission(SecurityAction::RequestMinimum, UnmanagedCode = true)];
-#endif

@@ -45,30 +45,30 @@ namespace KlayGE
 		public:
 			static SimplexNoise& Instance();
 
-			T noise(T x, T y) KLAYGE_NOEXCEPT;
-			T noise(T x, T y, T z) KLAYGE_NOEXCEPT;
+			T noise(T x, T y) noexcept;
+			T noise(T x, T y, T z) noexcept;
 
-			T fBm(T x, T y, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
-			T fBm(T x, T y, T z, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+			T fBm(T x, T y, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
+			T fBm(T x, T y, T z, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 
-			T turbulence(T x, T y, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
-			T turbulence(T x, T y, T z, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+			T turbulence(T x, T y, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
+			T turbulence(T x, T y, T z, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 
-			T tileable_noise(T x, T y, T w, T h) KLAYGE_NOEXCEPT;
-			T tileable_noise(T x, T y, T z, T w, T h, T d) KLAYGE_NOEXCEPT;
+			T tileable_noise(T x, T y, T w, T h) noexcept;
+			T tileable_noise(T x, T y, T z, T w, T h, T d) noexcept;
 
 			T tileable_fBm(T x, T y, T w, T h,
-				int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+				int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 			T tileable_fBm(T x, T y, T z, T w, T h, T d,
-				int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+				int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 
 			T tileable_turbulence(T x, T y,
-				T w, T h, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+				T w, T h, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 			T tileable_turbulence(T x, T y, T z,
-				T w, T h, T d, int octaves, T lacunarity = T(2), T gain = T(0.5)) KLAYGE_NOEXCEPT;
+				T w, T h, T d, int octaves, T lacunarity = T(2), T gain = T(0.5)) noexcept;
 
 		private:
-			SimplexNoise() KLAYGE_NOEXCEPT;
+			SimplexNoise() noexcept;
 
 		private:
 			int p_[512];

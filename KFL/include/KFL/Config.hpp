@@ -95,8 +95,6 @@
 
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 
 	#if defined(__APPLE__)
@@ -179,12 +177,10 @@
 		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 	#endif
 
-	#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-	#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
 	#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
 	#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
 	#if KLAYGE_COMPILER_VERSION >= 61
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif
 	#if KLAYGE_COMPILER_VERSION >= 60
 		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
@@ -209,19 +205,11 @@
 		#define KLAYGE_COMPILER_VERSION 141
 	#elif _MSC_VER >= 1900
 		#define KLAYGE_COMPILER_VERSION 140
-	#elif _MSC_VER >= 1800
-		#define KLAYGE_COMPILER_VERSION 120
 	#else
-		#error "Unsupported compiler version. Please install vc12 or up."
+		#error "Unsupported compiler version. Please install vc14 or up."
 	#endif
 
-	#if KLAYGE_COMPILER_VERSION >= 140
-		#define KLAYGE_CXX11_CORE_CONSTEXPR_SUPPORT
-		#define KLAYGE_CXX11_CORE_NOEXCEPT_SUPPORT
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V3_SUPPORT
-	#else
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	#endif
+	#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.
 	#pragma warning(disable: 4275) // Derived from non dllexport classes.

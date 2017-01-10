@@ -36,30 +36,30 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
-		template SimplexNoise<float>::SimplexNoise() KLAYGE_NOEXCEPT;
+		template SimplexNoise<float>::SimplexNoise() noexcept;
 		template SimplexNoise<float>& SimplexNoise<float>::Instance();
-		template float SimplexNoise<float>::noise(float x, float y) KLAYGE_NOEXCEPT;
-		template float SimplexNoise<float>::noise(float x, float y, float z) KLAYGE_NOEXCEPT;
-		template float SimplexNoise<float>::fBm(float x, float y, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
-		template float SimplexNoise<float>::fBm(float x, float y, float z, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
-		template float SimplexNoise<float>::turbulence(float x, float y, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
-		template float SimplexNoise<float>::turbulence(float x, float y, float z, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
+		template float SimplexNoise<float>::noise(float x, float y) noexcept;
+		template float SimplexNoise<float>::noise(float x, float y, float z) noexcept;
+		template float SimplexNoise<float>::fBm(float x, float y, int octaves, float lacunarity, float gain) noexcept;
+		template float SimplexNoise<float>::fBm(float x, float y, float z, int octaves, float lacunarity, float gain) noexcept;
+		template float SimplexNoise<float>::turbulence(float x, float y, int octaves, float lacunarity, float gain) noexcept;
+		template float SimplexNoise<float>::turbulence(float x, float y, float z, int octaves, float lacunarity, float gain) noexcept;
 		template float SimplexNoise<float>::tileable_noise(float x, float y,
-				float w, float h) KLAYGE_NOEXCEPT;
+				float w, float h) noexcept;
 		template float SimplexNoise<float>::tileable_noise(float x, float y, float z,
-				float w, float h, float d) KLAYGE_NOEXCEPT;
+				float w, float h, float d) noexcept;
 		template float SimplexNoise<float>::tileable_fBm(float x, float y, float w, float h,
-				int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
+				int octaves, float lacunarity, float gain) noexcept;
 		template float SimplexNoise<float>::tileable_fBm(float x, float y, float z, float w, float h, float d,
-				int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
+				int octaves, float lacunarity, float gain) noexcept;
 		template float SimplexNoise<float>::tileable_turbulence(float x, float y,
-				float w, float h, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
+				float w, float h, int octaves, float lacunarity, float gain) noexcept;
 		template float SimplexNoise<float>::tileable_turbulence(float x, float y, float z,
-				float w, float h, float d, int octaves, float lacunarity, float gain) KLAYGE_NOEXCEPT;
+				float w, float h, float d, int octaves, float lacunarity, float gain) noexcept;
 
 
 		template <typename T>
-		SimplexNoise<T>::SimplexNoise() KLAYGE_NOEXCEPT
+		SimplexNoise<T>::SimplexNoise() noexcept
 		{
 			int const permutation[] =
 			{
@@ -104,7 +104,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::noise(T x, T y) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::noise(T x, T y) noexcept
 		{
 			T const F2 = T(0.366025403784);//(sqrt(3) - 1) / 2
 			T const G2 = T(0.211324865405);//(3 - sqrt(3)) / 6
@@ -163,7 +163,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::noise(T x, T y, T z) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::noise(T x, T y, T z) noexcept
 		{
 			T const F3 = 1 / T(3);
 			T const G3 = 1 / T(6);
@@ -294,7 +294,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::fBm(T x, T y, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::fBm(T x, T y, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -311,7 +311,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::fBm(T x, T y, T z, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::fBm(T x, T y, T z, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -329,7 +329,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::turbulence(T x, T y, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::turbulence(T x, T y, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -346,7 +346,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::turbulence(T x, T y, T z, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::turbulence(T x, T y, T z, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -364,7 +364,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::tileable_noise(T x, T y, T w, T h) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::tileable_noise(T x, T y, T w, T h) noexcept
 		{
 			return (this->noise(x + 0, y + 0) * (w - x) * (h - y)
 				+ this->noise(x - w, y + 0) * (0 + x) * (h - y)
@@ -373,7 +373,7 @@ namespace KlayGE
 		}
 
 		template <typename T>
-		T SimplexNoise<T>::tileable_noise(T x, T y, T z, T w, T h, T d) KLAYGE_NOEXCEPT
+		T SimplexNoise<T>::tileable_noise(T x, T y, T z, T w, T h, T d) noexcept
 		{
 			return (this->noise(x + 0, y + 0, z + 0) * (w - x) * (h - y) * (d - z)
 				+ this->noise(x - w, y + 0, z + 0) * (0 + x) * (h - y) * (d - z)
@@ -387,7 +387,7 @@ namespace KlayGE
 
 		template <typename T>
 		T SimplexNoise<T>::tileable_fBm(T x, T y, T w, T h,
-			int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+			int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -407,7 +407,7 @@ namespace KlayGE
 
 		template <typename T>
 		T SimplexNoise<T>::tileable_fBm(T x, T y, T z, T w, T h, T d,
-			int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+			int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -429,7 +429,7 @@ namespace KlayGE
 
 		template <typename T>
 		T SimplexNoise<T>::tileable_turbulence(T x, T y,
-			T w, T h, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+			T w, T h, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
@@ -449,7 +449,7 @@ namespace KlayGE
 
 		template <typename T>
 		T SimplexNoise<T>::tileable_turbulence(T x, T y, T z,
-			T w, T h, T d, int octaves, T lacunarity, T gain) KLAYGE_NOEXCEPT
+			T w, T h, T d, int octaves, T lacunarity, T gain) noexcept
 		{
 			T sum = 0;
 			T amp = 1;
