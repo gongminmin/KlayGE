@@ -258,7 +258,11 @@ int main(int argc, char* argv[])
 	if (!target_folder.empty())
 	{
 		filesystem::copy_file(kfx_path, target_folder / kfx_name,
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 			filesystem::copy_options::overwrite_existing);
+#else
+			filesystem::copy_option::overwrite_if_exists);
+#endif
 		kfx_path = target_folder / kfx_name;
 	}
 

@@ -402,7 +402,12 @@ namespace KlayGE
 		if (!res_name.empty())
 		{
 			std::filesystem::path res_path(res_name);
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 			uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
+			uint64_t timestamp = std::filesystem::last_write_time(res_path);
+#endif
+
 			return MakeSharedPtr<ResIdentifier>(name, timestamp,
 				MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 		}
@@ -419,7 +424,12 @@ namespace KlayGE
 				std::filesystem::path res_path(res_name);
 				if (std::filesystem::exists(res_path))
 				{
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 					uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
+#else
+					uint64_t timestamp = std::filesystem::last_write_time(res_path);
+#endif
+
 					return MakeSharedPtr<ResIdentifier>(name, timestamp,
 						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
 				}
@@ -744,7 +754,11 @@ namespace KlayGE
 				}
 				internal_name = res_name.substr(pkt_offset + 2);
 
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 				uint64_t timestamp = std::filesystem::last_write_time(pkt_path).time_since_epoch().count();
+#else
+				uint64_t timestamp = std::filesystem::last_write_time(pkt_path);
+#endif
 				res = MakeSharedPtr<ResIdentifier>(name, timestamp,
 					MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
 			}
