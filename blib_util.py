@@ -204,8 +204,6 @@ class build_info:
 					if 0 == len(compiler):
 						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
 							compiler = "vc140"
-						elif ("VS120COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 12.0\\VC\\VCVARSALL.BAT"):
-							compiler = "vc120"
 						elif 0 == os.system("where clang++"):
 							compiler = "clang"
 						elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
@@ -218,10 +216,6 @@ class build_info:
 					log_error("Unsupported target platform.\n")
 			else:
 				compiler = cfg_build.compiler
-
-				if compiler in ("vc14", "vc12"):
-					compiler += '0'
-					log_warning("Deprecated compiler name, please use " + compiler + " instead.\n")
 
 		if 0 == target_platform.find("win"):
 			if "ProgramFiles" in env:
@@ -258,18 +252,6 @@ class build_info:
 						vcvarsall_path = try_vcvarsall
 					else:
 						log_error("Can't find the compiler.\n")
-			elif "vc120" == compiler:
-				if "VS120COMNTOOLS" in env:
-					compiler_root = env["VS120COMNTOOLS"] + "..\\..\\VC\\bin\\"
-					vcvarsall_path = "..\\VCVARSALL.BAT"
-				else:
-					try_folder = program_files_folder + "\\Microsoft Visual Studio 12.0\\VC\\bin\\"
-					try_vcvarsall = "..\\VCVARSALL.BAT"
-					if os.path.exists(try_folder + try_vcvarsall):
-						compiler_root = try_folder
-						vcvarsall_path = try_vcvarsall
-					else:
-						log_error("Can't find the compiler.\n")
 			elif "clang" == compiler:
 				clang_loc = subprocess.check_output("where clang++").decode()
 				clang_loc = clang_loc.split("\r\n")[0]
@@ -293,8 +275,6 @@ class build_info:
 					toolset = "v141"
 				elif "vc140" == compiler:
 					toolset = "v140"
-				elif "vc120" == compiler:
-					toolset = "v120"
 
 		if "" == archs:
 			archs = cfg_build.arch
@@ -331,18 +311,6 @@ class build_info:
 					gen_name = "Visual Studio 14 ARM"
 				elif "x64" == arch:
 					gen_name = "Visual Studio 14 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
-		elif "vc120" == compiler:
-			compiler_name = "vc"
-			compiler_version = 120
-			multi_config = True
-			for arch in archs:
-				if "x86" == arch:
-					gen_name = "Visual Studio 12"
-				elif "arm" == arch:
-					gen_name = "Visual Studio 12 ARM"
-				elif "x64" == arch:
-					gen_name = "Visual Studio 12 Win64"
 				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
 		elif "clang" == compiler:
 			compiler_name = "clang"
