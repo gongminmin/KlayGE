@@ -338,7 +338,17 @@ namespace KlayGE
 		SS_AnySensing
 	};
 
-	typedef std::pair<uint16_t, uint16_t> InputActionDefine;
+	struct KLAYGE_CORE_API InputActionDefine
+	{
+		InputActionDefine(uint32_t a, uint32_t s)
+			: action(static_cast<uint16_t>(a)), semantic(static_cast<uint16_t>(s))
+		{
+		}
+
+		uint16_t action;
+		uint16_t semantic;
+	};
+
 	typedef std::pair<uint16_t, InputActionParamPtr> InputAction;
 	typedef std::vector<InputAction> InputActionsType;
 

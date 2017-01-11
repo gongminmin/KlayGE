@@ -179,7 +179,7 @@ namespace
 			{
 				std::string file_path;
 				TIF(GetArchiveItemPath(archive, i, file_path));
-				std::replace(file_path.begin(), file_path.end(), L'\\', L'/');
+				std::replace(file_path.begin(), file_path.end(), '\\', '/');
 				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
 					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))
 				{

@@ -96,7 +96,7 @@ namespace KlayGE
 		if (data.empty())
 		{
 			// 如果wav空白，用静音填充
-			std::fill_n(lockedBuffer, lockedBufferSize, 128);
+			memset(lockedBuffer, 128, lockedBufferSize);
 		}
 		else
 		{
@@ -105,7 +105,7 @@ namespace KlayGE
 				std::copy(data.begin(), data.end(), lockedBuffer);
 
 				// 如果音频数据源比缓冲区小，则用音频数据填充缓冲区
-				std::fill_n(lockedBuffer + data.size(), lockedBufferSize - data.size(), 128);
+				memset(lockedBuffer + data.size(), 128, lockedBufferSize - data.size());
 			}
 		}
 

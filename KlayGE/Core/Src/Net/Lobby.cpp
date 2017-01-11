@@ -274,7 +274,7 @@ namespace KlayGE
 		//			最大Players数	1 字节
 		//			Lobby名字		16 字节
 
-		std::fill_n(sendBuf, 18, 0);
+		memset(sendBuf, 0, 18);
 		sendBuf[0] = this->NumPlayer();
 		sendBuf[1] = this->MaxPlayers();
 		this->LobbyName().copy(&sendBuf[2], this->LobbyName().length());
