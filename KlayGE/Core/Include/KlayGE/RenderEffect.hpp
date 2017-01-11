@@ -59,8 +59,6 @@
 #include <string>
 #include <algorithm>
 
-#include <boost/noncopyable.hpp>
-
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -136,7 +134,7 @@ namespace KlayGE
 		}
 	};
 
-	class KLAYGE_CORE_API RenderVariable
+	class KLAYGE_CORE_API RenderVariable : boost::noncopyable
 	{
 	public:
 		RenderVariable();
@@ -532,7 +530,7 @@ namespace KlayGE
 	typedef RenderVariableArray<float4> RenderVariableFloat4Array;
 
 
-	class KLAYGE_CORE_API RenderEffectAnnotation
+	class KLAYGE_CORE_API RenderEffectAnnotation : boost::noncopyable
 	{
 	public:
 #if KLAYGE_IS_DEV_PLATFORM

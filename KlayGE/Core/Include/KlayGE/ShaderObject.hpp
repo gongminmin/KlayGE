@@ -79,7 +79,7 @@ namespace KlayGE
 		}
 	};
 
-	class KLAYGE_CORE_API ShaderObject
+	class KLAYGE_CORE_API ShaderObject : boost::noncopyable
 	{
 	public:
 		enum ShaderType

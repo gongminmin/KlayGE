@@ -27,7 +27,7 @@ namespace KlayGE
 {
 	// 高度图地形生成
 	/////////////////////////////////////////////////////////////////////////////////
-	class HeightMap
+	class HeightMap : boost::noncopyable
 	{
 	public:
 		void BuildTerrain(float start_x, float start_y, float end_x, float end_y, float span_x, float span_y,

@@ -44,7 +44,6 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <vector>
-#include <boost/noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +60,7 @@ namespace KlayGE
 		BA_Write_No_Overwrite
 	};
 
-	class KLAYGE_CORE_API GraphicsBuffer
+	class KLAYGE_CORE_API GraphicsBuffer : boost::noncopyable
 	{
 	public:
 		class Mapper : boost::noncopyable

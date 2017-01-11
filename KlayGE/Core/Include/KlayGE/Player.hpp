@@ -36,7 +36,7 @@ namespace KlayGE
 		sockaddr_in		addr;
 	};
 
-	class KLAYGE_CORE_API Player
+	class KLAYGE_CORE_API Player : boost::noncopyable
 	{
 	public:
 		Player();

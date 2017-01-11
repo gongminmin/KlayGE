@@ -30,8 +30,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include <boost/noncopyable.hpp>
-
 namespace KlayGE
 {
 	class KLAYGE_CORE_API SceneManager : boost::noncopyable

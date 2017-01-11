@@ -40,7 +40,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderFactory
+	class KLAYGE_CORE_API RenderFactory : boost::noncopyable
 	{
 	public:
 		virtual ~RenderFactory();

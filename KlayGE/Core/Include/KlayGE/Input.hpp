@@ -374,7 +374,7 @@ namespace KlayGE
 
 	//  ‰»Î“˝«Ê
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API InputEngine
+	class KLAYGE_CORE_API InputEngine : boost::noncopyable
 	{
 	public:
 		enum InputDeviceType
@@ -417,7 +417,7 @@ namespace KlayGE
 		float elapsed_time_;
 	};
 
-	class KLAYGE_CORE_API InputDevice
+	class KLAYGE_CORE_API InputDevice : boost::noncopyable
 	{
 	public:
 		virtual ~InputDevice();

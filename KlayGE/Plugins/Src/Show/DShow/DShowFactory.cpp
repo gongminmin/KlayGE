@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class DShowFactory : boost::noncopyable, public ShowFactory
+	class DShowFactory : public ShowFactory
 	{
 	public:
 		std::wstring const & Name() const

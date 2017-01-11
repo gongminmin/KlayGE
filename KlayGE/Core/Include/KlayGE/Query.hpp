@@ -25,7 +25,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Query
+	class KLAYGE_CORE_API Query : boost::noncopyable
 	{
 	public:
 		virtual ~Query();

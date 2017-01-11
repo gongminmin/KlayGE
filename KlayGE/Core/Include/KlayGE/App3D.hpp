@@ -51,7 +51,7 @@ namespace KlayGE
 	//			DoUpdate()				- 刷新场景
 	//			DoUpdateOverlay()		- 刷新Overlay物体
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API App3DFramework
+	class KLAYGE_CORE_API App3DFramework : boost::noncopyable
 	{
 		friend class SceneManager;
 

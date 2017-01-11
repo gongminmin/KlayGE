@@ -30,7 +30,7 @@ namespace KlayGE
 		SS_Playing,
 	};
 
-	class KLAYGE_CORE_API ShowEngine
+	class KLAYGE_CORE_API ShowEngine : boost::noncopyable
 	{
 	public:
 		ShowEngine();

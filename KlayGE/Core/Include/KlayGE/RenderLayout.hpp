@@ -81,7 +81,7 @@ namespace KlayGE
 	typedef std::vector<vertex_element> vertex_elements_type;
 
 
-	class KLAYGE_CORE_API RenderLayout
+	class KLAYGE_CORE_API RenderLayout : boost::noncopyable
 	{
 	public:
 		enum topology_type

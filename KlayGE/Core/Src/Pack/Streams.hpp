@@ -43,7 +43,7 @@
 
 namespace KlayGE
 {
-	class CInStream : public IInStream, public IStreamGetSize
+	class CInStream : boost::noncopyable, public IInStream, public IStreamGetSize
 	{
 	public:
 		STDMETHOD_(ULONG, AddRef)()
@@ -109,7 +109,7 @@ namespace KlayGE
 		uint64_t stream_size_;
 	};
 
-	class COutStream : public IOutStream
+	class COutStream : boost::noncopyable, public IOutStream
 	{
 	public:
 		STDMETHOD_(ULONG, AddRef)()

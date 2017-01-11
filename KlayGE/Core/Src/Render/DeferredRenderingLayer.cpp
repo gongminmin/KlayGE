@@ -501,7 +501,7 @@ namespace KlayGE
 			rl_quad_ = rf.MakeRenderLayout();
 			rl_quad_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-			float3 pos[] = 
+			float3 const pos[] = 
 			{
 				float3(+1, +1, 1),
 				float3(-1, +1, 1),

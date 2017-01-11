@@ -56,7 +56,6 @@
 #include <string>
 #include <vector>
 #include <boost/assert.hpp>
-#include <boost/noncopyable.hpp>
 
 namespace KlayGE
 {
@@ -74,7 +73,7 @@ namespace KlayGE
 	// This class represents the commonalities, and is the one 'used'
 	// by programmers even though the real implementation could be
 	// different in reality.
-	class KLAYGE_CORE_API Texture
+	class KLAYGE_CORE_API Texture : boost::noncopyable
 	{
 	public:
 		// Enum identifying the texture type

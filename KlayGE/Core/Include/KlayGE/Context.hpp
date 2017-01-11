@@ -59,7 +59,7 @@ namespace KlayGE
 		bool location_sensor;
 	};
 
-	class KLAYGE_CORE_API Context
+	class KLAYGE_CORE_API Context : boost::noncopyable
 	{
 	public:
 		Context();

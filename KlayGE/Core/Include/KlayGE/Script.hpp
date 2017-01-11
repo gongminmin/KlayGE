@@ -36,14 +36,13 @@
 #include <vector>
 #include <string>
 
-#include <boost/noncopyable.hpp>
 #include <KFL/CXX17/any.hpp>
 
 namespace KlayGE
 {
 	typedef std::vector<std::any> AnyDataListType;
 
-	class KLAYGE_CORE_API ScriptModule
+	class KLAYGE_CORE_API ScriptModule : boost::noncopyable
 	{
 	private:
 		template <typename tuple_type, int N>

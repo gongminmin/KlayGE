@@ -116,7 +116,7 @@ namespace KlayGE
 	}
 
 	// Abstract class defining the interface all renderable objects must implement.
-	class KLAYGE_CORE_API Renderable
+	class KLAYGE_CORE_API Renderable : boost::noncopyable
 	{
 	public:
 		enum EffectAttribute

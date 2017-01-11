@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderView
+	class KLAYGE_CORE_API RenderView : boost::noncopyable
 	{
 	public:
 		virtual ~RenderView()
@@ -62,7 +62,7 @@ namespace KlayGE
 		ElementFormat pf_;
 	};
 
-	class KLAYGE_CORE_API UnorderedAccessView
+	class KLAYGE_CORE_API UnorderedAccessView : boost::noncopyable
 	{
 	public:
 		UnorderedAccessView()

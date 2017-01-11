@@ -41,7 +41,7 @@
 
 namespace KlayGE
 {
-	class CArchiveOpenCallback : public IArchiveOpenCallback, public ICryptoGetTextPassword
+	class CArchiveOpenCallback : boost::noncopyable, public IArchiveOpenCallback, public ICryptoGetTextPassword
 	{
 	public:
 		STDMETHOD_(ULONG, AddRef)()

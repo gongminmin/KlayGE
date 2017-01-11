@@ -52,7 +52,7 @@ namespace KlayGE
 		TCEM_Nonuniform,  // { 0.3, 0.59, 0.11 }
 	};
 
-	class KLAYGE_CORE_API TexCompression
+	class KLAYGE_CORE_API TexCompression : boost::noncopyable
 	{
 	public:
 		virtual ~TexCompression()

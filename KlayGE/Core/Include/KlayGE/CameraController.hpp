@@ -32,7 +32,7 @@ namespace KlayGE
 {
 	// ÉãÏñ»ú¿ØÖÆÆ÷
 	//////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API CameraController
+	class KLAYGE_CORE_API CameraController : boost::noncopyable
 	{
 	public:
 		CameraController();

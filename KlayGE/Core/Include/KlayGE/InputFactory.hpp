@@ -26,7 +26,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API InputFactory
+	class KLAYGE_CORE_API InputFactory : boost::noncopyable
 	{
 	public:
 		virtual ~InputFactory()

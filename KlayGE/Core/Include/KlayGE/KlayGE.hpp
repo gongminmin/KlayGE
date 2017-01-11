@@ -58,6 +58,7 @@
 #include <string>
 
 #include <boost/assert.hpp>
+#include <boost/noncopyable.hpp>
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Context.hpp>

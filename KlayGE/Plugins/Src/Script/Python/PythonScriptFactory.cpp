@@ -38,7 +38,7 @@
 
 namespace KlayGE
 {
-	class PythonScriptFactory : boost::noncopyable, public ScriptFactory
+	class PythonScriptFactory : public ScriptFactory
 	{
 	public:
 		std::wstring const & Name() const

@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API GpuFft
+	class KLAYGE_CORE_API GpuFft : boost::noncopyable
 	{
 	public:
 		virtual ~GpuFft()

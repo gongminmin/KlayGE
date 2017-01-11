@@ -21,13 +21,12 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <string>
-#include <boost/noncopyable.hpp>
 
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API AudioFactory
+	class KLAYGE_CORE_API AudioFactory : boost::noncopyable
 	{
 	public:
 		virtual ~AudioFactory()
@@ -54,7 +53,7 @@ namespace KlayGE
 	};
 
 	template <typename AudioEngineType, typename SoundBufferType, typename MusicBufferType>
-	class ConcreteAudioFactory : boost::noncopyable, public AudioFactory
+	class ConcreteAudioFactory : public AudioFactory
 	{
 	public:
 		ConcreteAudioFactory(std::wstring const & name)

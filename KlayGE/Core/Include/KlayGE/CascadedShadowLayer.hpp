@@ -47,7 +47,7 @@ namespace KlayGE
 	KLAYGE_CORE_API AABBox CalcFrustumExtents(Camera const & camera, float near_z, float far_z,
 		float4x4 const & light_view_proj);
 
-	class KLAYGE_CORE_API CascadedShadowLayer
+	class KLAYGE_CORE_API CascadedShadowLayer : boost::noncopyable
 	{
 	public:
 		static uint32_t const MAX_NUM_CASCADES = 4UL;

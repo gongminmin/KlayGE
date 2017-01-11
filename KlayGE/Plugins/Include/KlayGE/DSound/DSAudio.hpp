@@ -26,8 +26,6 @@
 #endif
 #include <dsound.h>
 
-#include <boost/noncopyable.hpp>
-
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
@@ -39,7 +37,7 @@ namespace KlayGE
 
 	// …˘“Ùª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSSoundBuffer : boost::noncopyable, public SoundBuffer
+	class DSSoundBuffer : public SoundBuffer
 	{
 	public:
 		DSSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
@@ -75,7 +73,7 @@ namespace KlayGE
 
 	// “Ù¿÷ª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSMusicBuffer : boost::noncopyable, public MusicBuffer
+	class DSMusicBuffer : public MusicBuffer
 	{
 	public:
 		DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume);
@@ -119,7 +117,7 @@ namespace KlayGE
 
 	// π‹¿Ì“Ù∆µ≤•∑≈
 	/////////////////////////////////////////////////////////////////////////////////
-	class DSAudioEngine : boost::noncopyable, public AudioEngine
+	class DSAudioEngine : public AudioEngine
 	{
 	public:
 		DSAudioEngine();

@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class MInputFactory : boost::noncopyable, public InputFactory
+	class MInputFactory : public InputFactory
 	{
 	public:
 		std::wstring const & Name() const

@@ -21,7 +21,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LightSource : public std::enable_shared_from_this<LightSource>
+	class KLAYGE_CORE_API LightSource : boost::noncopyable, public std::enable_shared_from_this<LightSource>
 	{
 	public:
 		enum LightType

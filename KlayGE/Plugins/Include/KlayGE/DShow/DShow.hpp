@@ -32,13 +32,11 @@
 
 #include <string>
 
-#include <boost/noncopyable.hpp>
-
 #include <KlayGE/Show.hpp>
 
 namespace KlayGE
 {
-	class DShowEngine : boost::noncopyable, public ShowEngine
+	class DShowEngine : public ShowEngine
 	{
 	public:
 		DShowEngine();

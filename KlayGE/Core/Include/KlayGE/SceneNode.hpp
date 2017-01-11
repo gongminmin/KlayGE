@@ -8,7 +8,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneNode
+	class KLAYGE_CORE_API SceneNode : boost::noncopyable
 	{
 	public:
 		virtual ~SceneNode()

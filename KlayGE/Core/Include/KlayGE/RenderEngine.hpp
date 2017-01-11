@@ -82,7 +82,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API RenderEngine
+	class KLAYGE_CORE_API RenderEngine : boost::noncopyable
 	{
 	public:
 		RenderEngine();

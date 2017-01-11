@@ -23,7 +23,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API ShowFactory
+	class KLAYGE_CORE_API ShowFactory : boost::noncopyable
 	{
 	public:
 		virtual ~ShowFactory()

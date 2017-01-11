@@ -137,7 +137,7 @@ namespace KlayGE
 #endif
 	};
 
-	class KLAYGE_CORE_API DeferredRenderingLayer
+	class KLAYGE_CORE_API DeferredRenderingLayer : boost::noncopyable
 	{
 	public:
 		enum DisplayType

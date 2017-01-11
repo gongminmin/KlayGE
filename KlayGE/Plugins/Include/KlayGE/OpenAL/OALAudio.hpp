@@ -34,8 +34,6 @@
 
 #include <vector>
 
-#include <boost/noncopyable.hpp>
-
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
@@ -46,7 +44,7 @@ namespace KlayGE
 
 	// …˘“Ùª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALSoundBuffer : boost::noncopyable, public SoundBuffer
+	class OALSoundBuffer : public SoundBuffer
 	{
 	public:
 		OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
@@ -81,7 +79,7 @@ namespace KlayGE
 
 	// “Ù¿÷ª∫≥Â«¯
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALMusicBuffer : boost::noncopyable, public MusicBuffer
+	class OALMusicBuffer : public MusicBuffer
 	{
 	public:
 		OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume);
@@ -120,7 +118,7 @@ namespace KlayGE
 
 	// π‹¿Ì“Ù∆µ≤•∑≈
 	/////////////////////////////////////////////////////////////////////////////////
-	class OALAudioEngine : boost::noncopyable, public AudioEngine
+	class OALAudioEngine : public AudioEngine
 	{
 	public:
 		OALAudioEngine();

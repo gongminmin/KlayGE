@@ -29,7 +29,7 @@ namespace KlayGE
 {
 	// 声音缓冲区抽象接口
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API AudioBuffer
+	class KLAYGE_CORE_API AudioBuffer : boost::noncopyable
 	{
 	public:
 		AudioBuffer(AudioDataSourcePtr const & dataSource);
@@ -104,7 +104,7 @@ namespace KlayGE
 
 	// 管理音频播放
 	/////////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API AudioEngine
+	class KLAYGE_CORE_API AudioEngine : boost::noncopyable
 	{
 	public:
 		AudioEngine();

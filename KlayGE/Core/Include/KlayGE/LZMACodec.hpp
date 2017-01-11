@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API LZMACodec
+	class KLAYGE_CORE_API LZMACodec : boost::noncopyable
 	{
 	public:
 		LZMACodec();

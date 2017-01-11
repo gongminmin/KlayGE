@@ -37,7 +37,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API Fence
+	class KLAYGE_CORE_API Fence : boost::noncopyable
 	{
 	public:
 		enum FenceType

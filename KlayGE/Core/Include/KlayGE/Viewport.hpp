@@ -19,7 +19,7 @@
 
 namespace KlayGE
 {
-	struct KLAYGE_CORE_API Viewport
+	struct KLAYGE_CORE_API Viewport : boost::noncopyable
 	{
 		Viewport();
 		Viewport(int _left, int _top, int _width, int _height);

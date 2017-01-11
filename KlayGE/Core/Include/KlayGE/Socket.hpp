@@ -46,7 +46,7 @@ namespace KlayGE
 
 	// Í¬²½Ì×½Ó×Ö
 	///////////////////////////////////////////////////////////////////////////////
-	class KLAYGE_CORE_API Socket
+	class KLAYGE_CORE_API Socket : boost::noncopyable
 	{
 	public:
 		Socket();

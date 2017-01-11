@@ -39,7 +39,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API IndirectLightingLayer
+	class KLAYGE_CORE_API IndirectLightingLayer : boost::noncopyable
 	{
 	public:
 		virtual ~IndirectLightingLayer()

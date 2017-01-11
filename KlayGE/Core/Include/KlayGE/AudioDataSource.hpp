@@ -32,7 +32,7 @@ namespace KlayGE
 		AF_Unknown,
 	};
 
-	class KLAYGE_CORE_API AudioDataSource
+	class KLAYGE_CORE_API AudioDataSource : boost::noncopyable
 	{
 	public:
 		virtual void Open(ResIdentifierPtr const & file) = 0;
@@ -53,7 +53,7 @@ namespace KlayGE
 		uint32_t				freq_;
 	};
 
-	class KLAYGE_CORE_API AudioDataSourceFactory
+	class KLAYGE_CORE_API AudioDataSourceFactory : boost::noncopyable
 	{
 	public:
 		virtual ~AudioDataSourceFactory()

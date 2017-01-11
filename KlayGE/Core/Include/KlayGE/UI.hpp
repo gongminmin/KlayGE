@@ -356,7 +356,7 @@ namespace KlayGE
 		IRect bounding_box_;		// Rectangle defining the active region of the control
 	};
 
-	class KLAYGE_CORE_API UIManager : public std::enable_shared_from_this<UIManager>
+	class KLAYGE_CORE_API UIManager : boost::noncopyable, public std::enable_shared_from_this<UIManager>
 	{
 	public:
 		struct VertexFormat
@@ -465,7 +465,7 @@ namespace KlayGE
 		bool inited_;
 	};
 
-	class KLAYGE_CORE_API UIDialog
+	class KLAYGE_CORE_API UIDialog : boost::noncopyable
 	{
 		friend class UIManager;
 
@@ -1410,7 +1410,7 @@ namespace KlayGE
 	};
 
 	// UniBuffer class for the edit control
-	class KLAYGE_CORE_API UniBuffer
+	class KLAYGE_CORE_API UniBuffer : boost::noncopyable
 	{
 	public:
 		explicit UniBuffer(int nInitialSize = 1);

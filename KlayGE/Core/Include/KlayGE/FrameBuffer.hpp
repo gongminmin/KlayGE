@@ -36,7 +36,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API FrameBuffer
+	class KLAYGE_CORE_API FrameBuffer : boost::noncopyable
 	{
 	public:
 		enum Attachment

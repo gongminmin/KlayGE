@@ -25,7 +25,7 @@
 
 namespace KlayGE
 {
-	class KLAYGE_CORE_API SceneObject : public std::enable_shared_from_this<SceneObject>
+	class KLAYGE_CORE_API SceneObject : boost::noncopyable, public std::enable_shared_from_this<SceneObject>
 	{
 	public:
 		enum SOAttrib

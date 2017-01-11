@@ -309,7 +309,7 @@ namespace KlayGE
 #pragma pack(pop)
 #endif
 
-	class KLAYGE_CORE_API RenderStateObject
+	class KLAYGE_CORE_API RenderStateObject : boost::noncopyable
 	{
 	public:
 		explicit RenderStateObject(RasterizerStateDesc const & rs_desc, DepthStencilStateDesc const & dss_desc,
@@ -345,7 +345,7 @@ namespace KlayGE
 		BlendStateDesc bs_desc_;
 	};
 
-	class KLAYGE_CORE_API SamplerStateObject
+	class KLAYGE_CORE_API SamplerStateObject : boost::noncopyable
 	{
 	public:
 		explicit SamplerStateObject(SamplerStateDesc const & desc)

@@ -225,11 +225,9 @@ typedef struct _HIDP_VALUE_CAPS
 
 #include <array>
 
-#include <boost/noncopyable.hpp>
-
 namespace KlayGE
 {
-	class MsgInputEngine : boost::noncopyable, public InputEngine
+	class MsgInputEngine : public InputEngine
 	{
 	public:
 		MsgInputEngine();

@@ -55,7 +55,7 @@ namespace KlayGE
 		}
 	};
 
-	class KLAYGE_CORE_API TransientBuffer
+	class KLAYGE_CORE_API TransientBuffer : boost::noncopyable
 	{
 		// Frames that have ended
 		struct RetiredFrame
