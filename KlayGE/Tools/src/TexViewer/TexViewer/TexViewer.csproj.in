@@ -3,33 +3,33 @@
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-    <ProjectGuid>{8CA43660-BCBF-4340-ADDE-D7EA7D450950}</ProjectGuid>
+    <Platform Condition=" '$(Platform)' == '' ">@KLAYGE_ARCH_NAME@</Platform>
+    <ProjectGuid>{286F748D-9BC6-4A3B-901B-FF45AA98634E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>KGEditor</RootNamespace>
-    <AssemblyName>KGEditor</AssemblyName>
+    <RootNamespace>TexViewer</RootNamespace>
+    <AssemblyName>TexViewer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
-    <PlatformTarget>x64</PlatformTarget>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|@KLAYGE_ARCH_NAME@' ">
+    <PlatformTarget>@KLAYGE_ARCH_NAME@</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\bin\win_x64\</OutputPath>
+    <OutputPath>..\..\..\..\bin\@KLAYGE_PLATFORM_NAME@\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'MinSizeRel|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\..\..\..\bin\win_x64\</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'MinSizeRel|@KLAYGE_ARCH_NAME@'">
+    <PlatformTarget>@KLAYGE_ARCH_NAME@</PlatformTarget>
+    <OutputPath>..\..\..\..\bin\@KLAYGE_PLATFORM_NAME@\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -38,9 +38,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'RelWithDebInfo|x64'">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\..\..\..\bin\win_x64\</OutputPath>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'RelWithDebInfo|@KLAYGE_ARCH_NAME@'">
+    <PlatformTarget>@KLAYGE_ARCH_NAME@</PlatformTarget>
+    <OutputPath>..\..\..\..\bin\@KLAYGE_PLATFORM_NAME@\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -49,9 +49,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
-    <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>..\..\..\..\bin\win_x64\</OutputPath>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|@KLAYGE_ARCH_NAME@' ">
+    <PlatformTarget>@KLAYGE_ARCH_NAME@</PlatformTarget>
+    <OutputPath>..\..\..\..\bin\@KLAYGE_PLATFORM_NAME@\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>none</DebugType>
@@ -88,10 +88,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\External\wpftoolkit\Main\bin\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\..\..\..\Build\vc141_win_x64\Tools\KGEditor\KGEditorCoreWrapper\KGEditorCoreWrapper.vcxproj">
-      <Project>{3917feeb-9015-3f06-9442-c9a0b78af479}</Project>
-      <Name>KGEditorCoreWrapper</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -106,25 +102,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Commands.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Compile>
-    <Page Include="OpenTexUserControlEditor.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Compile Include="OpenTexUserControlEditor.xaml.cs">
-      <DependentUpon>OpenTexUserControlEditor.xaml</DependentUpon>
     </Compile>
     <Page Include="SliderUserControlEditor.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="SceneEntity.cs" />
-    <Compile Include="SceneEntityViewModel.cs" />
-    <Compile Include="SceneLight.cs" />
     <Compile Include="SliderUserControlEditor.xaml.cs">
       <DependentUpon>SliderUserControlEditor.xaml</DependentUpon>
     </Compile>
@@ -155,15 +140,22 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\A.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\B.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Images\G.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Images\klayge_logo.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\Camera.png">
+    <Resource Include="Images\Open.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\Open.png">
+    <Resource Include="Images\R.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
     <Resource Include="Images\Save.png">
@@ -172,33 +164,12 @@
     <Resource Include="Images\SaveAs.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Images\Redo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Undo.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Rotation.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Scaling.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Selection.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Translation.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Light.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Mesh.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Images\Remove.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Build\@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@\Tools\TexViewer\TexViewerCoreWrapper\TexViewerCoreWrapper.vcxproj">
+      <Project>{87cc476a-db48-3dfd-99fd-a4435721c4a6}</Project>
+      <Name>TexViewerCoreWrapper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

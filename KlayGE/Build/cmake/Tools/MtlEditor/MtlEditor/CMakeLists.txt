@@ -16,6 +16,12 @@ DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/SaveAs.png" "cbda47a1
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Skinning.png" "cbda47a1678ce70b6720856736100979d469e159" "19dd2371bf2b11742dcc2fd45b2d06d0b0a6427e")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Undo.png" "cbda47a1678ce70b6720856736100979d469e159" "23c318d9bbe5c95b8b0fbbea662facd56a3a66dc")
 
+CONFIGURE_FILE(
+	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditor/MtlEditor.csproj.in
+	${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditor/MtlEditor${KLAYGE_OUTPUT_SUFFIX}.csproj
+	@ONLY
+)
+
 INCLUDE_EXTERNAL_MSPROJECT(
 	MtlEditor ${KLAYGE_PROJECT_DIR}/Tools/src/MtlEditor/MtlEditor/MtlEditor${KLAYGE_OUTPUT_SUFFIX}.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)

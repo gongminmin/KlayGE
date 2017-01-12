@@ -7,6 +7,12 @@ DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/R.png" "7017f9e98422e
 DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/Save.png" "7017f9e98422e295d76b70000276676386c16658" "1bba12c7f5c9b339e15f5d73507988f14bfdd7e2")
 DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/SaveAs.png" "7017f9e98422e295d76b70000276676386c16658" "43561560c76dad3bd62c80edd17d569ad39651d7")
 
+CONFIGURE_FILE(
+	${KLAYGE_PROJECT_DIR}/Tools/src/TexViewer/TexViewer/TexViewer.csproj.in
+	${KLAYGE_PROJECT_DIR}/Tools/src/TexViewer/TexViewer/TexViewer${KLAYGE_OUTPUT_SUFFIX}.csproj
+	@ONLY
+)
+
 INCLUDE_EXTERNAL_MSPROJECT(
 	TexViewer ${KLAYGE_PROJECT_DIR}/Tools/src/TexViewer/TexViewer/TexViewer${KLAYGE_OUTPUT_SUFFIX}.csproj
 	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
