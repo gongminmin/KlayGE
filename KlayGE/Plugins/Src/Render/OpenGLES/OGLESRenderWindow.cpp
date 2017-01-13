@@ -125,10 +125,6 @@ namespace KlayGE
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		// TODO
 		test_es_3_2 = false;
-		test_es_3_1 = false;
-#if (__ANDROID_API__ < 18)
-		test_es_3_0 = false;
-#endif
 #endif
 #if defined(KLAYGE_PLATFORM_DARWIN)
 		// TODO

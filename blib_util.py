@@ -79,54 +79,18 @@ class build_info:
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
 					target_platform = target_platform[0:space_place]
-					if "5.1" == android_ver:
+					if "7.1" == android_ver:
+						target_api_level = 25
+					elif "7.0" == android_ver:
+						target_api_level = 24
+					elif "6.0" == android_ver:
+						target_api_level = 23
+					elif "5.1" == android_ver:
 						target_api_level = 22
-					elif "5.0" == android_ver:
-						target_api_level = 21
-					elif "4.4w" == android_ver:
-						target_api_level = 20
-					elif "4.4" == android_ver:
-						target_api_level = 19
-					elif "4.3" == android_ver:
-						target_api_level = 18
-					elif "4.2" == android_ver:
-						target_api_level = 17
-					elif "4.1" == android_ver:
-						target_api_level = 16
-					elif ("4.0.3" == android_ver) or ("4.0.4" == android_ver):
-						target_api_level = 15
-					elif "4.0" == android_ver:
-						target_api_level = 14
-					elif "3.2" == android_ver:
-						target_api_level = 13
-					elif "3.1" == android_ver:
-						target_api_level = 12
-					elif "3.0" == android_ver:
-						target_api_level = 11
-					elif ("2.3.4" == android_ver) or ("2.3.3" == android_ver):
-						target_api_level = 10
-					elif "2.3" == android_ver:
-						target_api_level = 9
-					elif "2.2" == android_ver:
-						target_api_level = 8
-					elif "2.1" == android_ver:
-						target_api_level = 7
-					elif "2.0.1" == android_ver:
-						target_api_level = 6
-					elif "2.0" == android_ver:
-						target_api_level = 5
-					elif "1.6" == android_ver:
-						target_api_level = 4
-					elif "1.5" == android_ver:
-						target_api_level = 3
-					elif "1.1" == android_ver:
-						target_api_level = 2
-					elif "1.0" == android_ver:
-						target_api_level = 1
 					else:
 						log_error("Unsupported android version\n")
 				else:
-					target_api_level = 10
+					target_api_level = 22
 				self.target_api_level = target_api_level
 			elif (0 == target_platform.find("win_store")) or (0 == target_platform.find("win_phone")):
 				space_place = target_platform.find(' ')
