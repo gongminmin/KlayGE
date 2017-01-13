@@ -25,23 +25,22 @@ class cfg_from_argv:
 			self.cfg = ""
 
 class compiler_info:
-	def __init__(self, arch, gen_name, toolset, compiler_root, vcvarsall_path = ""):
+	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = ""):
 		self.arch = arch
 		self.generator = gen_name
-		self.toolset = toolset
 		self.compiler_root = compiler_root
 		self.vcvarsall_path = vcvarsall_path
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
 		try:
+			cfg_build.project
+		except:
+			cfg_build.project = "auto"
+		try:
 			cfg_build.compiler
 		except:
 			cfg_build.compiler = "auto"
-		try:
-			cfg_build.toolset
-		except:
-			cfg_build.toolset = "auto"
 		try:
 			cfg_build.arch
 		except:
@@ -185,37 +184,51 @@ class build_info:
 		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
 
 		if ("" == compiler) or self.is_clean:
-			if ("" == cfg_build.compiler) or ("auto" == cfg_build.compiler):
+			project_type = ""
+			compiler = ""
+			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
 					if "ProgramFiles" in env:
 						program_files_folder = env["ProgramFiles"]
 					else:
 						program_files_folder = "C:\Program Files"
 
-					compiler = ""
 					if "VS150COMNTOOLS" in env:
+						project_type = "vs2017"
 						compiler = "vc141"
 					else:
 						editions = ("Community", "Professional", "Enterprise")
 						for edition in editions:
 							if os.path.exists(program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\VCVARSALL.BAT" % edition):
+								project_type = "vs2017"
 								compiler = "vc141"
 								break
 					if 0 == len(compiler):
 						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
+							project_type = "vs2015"
 							compiler = "vc140"
 						elif 0 == os.system("where clang++"):
+							project_type = "make"
 							compiler = "clang"
-						elif os.path.exists("C:/MinGW/bin/g++.exe") or (0 == os.system("where g++")):
+						elif 0 == os.system("where g++"):
+							project_type = "make"
 							compiler = "mingw"
 				elif ("linux" == target_platform):
+					project_type = "make"
 					compiler = "gcc"
-				elif ("android" == target_platform) or ("darwin" == target_platform) or ("ios" == target_platform):
+				elif ("android" == target_platform):
+					project_type = "make"
+					compiler = "clang"
+				elif ("darwin" == target_platform) or ("ios" == target_platform):
+					project_type = "xcode"
 					compiler = "clang"
 				else:
 					log_error("Unsupported target platform.\n")
 			else:
-				compiler = cfg_build.compiler
+				if cfg_build.project != "auto":
+					project_type = cfg_build.project
+				if cfg_build.compiler != "auto":
+					compiler = cfg_build.compiler
 
 		if 0 == target_platform.find("win"):
 			if "ProgramFiles" in env:
@@ -257,24 +270,21 @@ class build_info:
 				clang_loc = clang_loc.split("\r\n")[0]
 				compiler_root = clang_loc[0:clang_loc.rfind("\\clang++") + 1]
 			elif "mingw" == compiler:
-				if os.path.exists("C:/MinGW/bin/g++.exe"):
-					compiler_root = "C:/MinGW/bin/"
-				else:
-					gcc_loc = subprocess.check_output("where g++").decode()
-					gcc_loc = gcc_loc.split("\r\n")[0]
-					compiler_root = gcc_loc[0:gcc_loc.rfind("\\g++") + 1]
+				gcc_loc = subprocess.check_output("where g++").decode()
+				gcc_loc = gcc_loc.split("\r\n")[0]
+				compiler_root = gcc_loc[0:gcc_loc.rfind("\\g++") + 1]
 		else:
 			compiler_root = ""
 
-		toolset = cfg_build.toolset
-		if ("win_store" == target_platform) or ("win_phone" == target_platform):
-			toolset = "auto"
-		elif ("" == toolset) or ("auto" == toolset):
-			if 0 == target_platform.find("win"):
-				if "vc141" == compiler:
-					toolset = "v141"
-				elif "vc140" == compiler:
-					toolset = "v140"
+		if "" == project_type:
+			if "vc141" == compiler:
+				project_type = "vs2017"
+			elif "vc140" == compiler:
+				project_type = "vs2015"
+			elif ("clang" == compiler) and (("darwin" == target_platform) or ("ios" == target_platform)):
+				project_type = "xcode"
+			else:
+				project_type = "make"
 
 		if "" == archs:
 			archs = cfg_build.arch
@@ -288,75 +298,90 @@ class build_info:
 
 		multi_config = False
 		compilers = []
-		if "vc141" == compiler:
-			compiler_name = "vc"
-			compiler_version = 141
+		if "vs2017" == project_type:
+			self.vs_version = 15
+			if "vc141" == compiler:
+				compiler_name = "vc"
+				compiler_version = 141
+			elif "vc140" == compiler:
+				compiler_name = "vc"
+				compiler_version = 140
+			else:
+				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
-					gen_name = "Visual Studio 15"
+					gen_suffix = ""
 				elif "arm" == arch:
-					gen_name = "Visual Studio 15 ARM"
+					gen_suffix = " ARM"
 				elif "x64" == arch:
-					gen_name = "Visual Studio 15 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
-		elif "vc140" == compiler:
-			compiler_name = "vc"
-			compiler_version = 140
+					gen_suffix = " Win64"
+				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
+		elif "vs2015" == project_type:
+			self.vs_version = 14
+			if "vc140" == compiler:
+				compiler_name = "vc"
+				compiler_version = 140
+			else:
+				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
 				if "x86" == arch:
-					gen_name = "Visual Studio 14"
+					gen_suffix = ""
 				elif "arm" == arch:
-					gen_name = "Visual Studio 14 ARM"
+					gen_suffix = " ARM"
 				elif "x64" == arch:
-					gen_name = "Visual Studio 14 Win64"
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root, vcvarsall_path))
-		elif "clang" == compiler:
-			compiler_name = "clang"
-			self.toolset = toolset
-			compiler_version = self.retrive_clang_version()
-			if "win" == host_platform:
-				gen_name = "MinGW Makefiles"
-			elif ("darwin" == host_platform) or ("ios" == target_platform):
+					gen_suffix = " Win64"
+				compilers.append(compiler_info(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
+		elif "xcode" == project_type:
+			if "clang" == compiler:
+				compiler_name = "clang"
+				compiler_version = self.retrive_clang_version()
 				gen_name = "Xcode"
 				multi_config = True
+				for arch in archs:
+					compilers.append(compiler_info(arch, gen_name, compiler_root))
 			else:
-				gen_name = "Unix Makefiles"
-			for arch in archs:
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root))
-		elif "mingw" == compiler:
-			compiler_name = "mgw"
-			compiler_version = self.retrive_gcc_version()
-			for arch in archs:
-				compilers.append(compiler_info(arch, "MinGW Makefiles", toolset, compiler_root))
-		elif "gcc" == compiler:
-			compiler_name = "gcc"
-			compiler_version = self.retrive_gcc_version()
+				log_error("Wrong combination between project and compiler")
+		elif "make" == project_type:
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
 			else:
 				gen_name = "Unix Makefiles"
-			for arch in archs:
-				compilers.append(compiler_info(arch, gen_name, toolset, compiler_root))
+			if "clang" == compiler:
+				compiler_name = "clang"
+				compiler_version = self.retrive_clang_version()
+				for arch in archs:
+					compilers.append(compiler_info(arch, gen_name, compiler_root))
+			elif "mingw" == compiler:
+				compiler_name = "mgw"
+				compiler_version = self.retrive_gcc_version()
+				for arch in archs:
+					compilers.append(compiler_info(arch, gen_name, compiler_root))
+			elif "gcc" == compiler:
+				compiler_name = "gcc"
+				compiler_version = self.retrive_gcc_version()
+				for arch in archs:
+					compilers.append(compiler_info(arch, gen_name, compiler_root))
+			else:
+				log_error("Wrong combination between project and compiler")
 		else:
 			compiler_name = ""
 			compiler_version = 0
 			log_error("Unsupported compiler.\n")
 
-		if "vc" == compiler_name:
+		if 0 == project_type.find("vs"):
 			self.proj_ext_name = "vcxproj"
-		else:
-			self.proj_ext_name = ""
 
+		self.project_type = project_type
 		self.compiler_name = compiler_name
 		self.compiler_version = compiler_version
 		self.multi_config = multi_config
 		self.compilers = compilers
 		self.cfg = cfg
 
-	def msvc_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
-		batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % (self.compiler_version / 10))
+	def msbuild_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
+		batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.vs_version)
 		if len(proj_name) != 0:
 			file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 		else:
@@ -437,8 +462,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if ("vc" == build_info.compiler_name) and (not build_info.is_windows_runtime):
-		toolset_name = "-T %s" % compiler_info.toolset
+	if (0 == build_info.project_type.find("vs")) and (not build_info.is_windows_runtime):
+		toolset_name = "-T v%s" % build_info.compiler_version
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -473,7 +498,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			log_error("Unsupported iOS arch\n")
 
 	if build_info.multi_config:
-		if "vc" == build_info.compiler_name:
+		if 0 == build_info.project_type.find("vs"):
 			if "x86" == compiler_info.arch:
 				vc_option = "x86"
 				vc_arch = "Win32"
@@ -491,7 +516,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				system_name = "WindowsPhone"
 			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
 
-		build_dir = "%s/Build/%s%d_%s_%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+		build_dir = "%s/Build/%s_%s%d_%s_%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if build_info.is_clean:
 			print("Cleaning %s..." % name)
 
@@ -521,11 +546,11 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			if "vc" == build_info.compiler_name:
 				build_cmd.add_command('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 			for config in build_info.cfg:
-				if "vc" == build_info.compiler_name:
-					build_info.msvc_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
+				if 0 == build_info.project_type.find("vs"):
+					build_info.msbuild_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
 					if need_install:
-						build_info.msvc_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
-				elif "clang" == build_info.compiler_name:
+						build_info.msbuild_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+				elif "xcode" == build_info.project_type:
 					build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
 					if need_install and (not build_info.prefer_static):
 						build_info.xcodebuild_add_build_command(build_cmd, "install", config)
@@ -544,7 +569,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in build_info.cfg:
-			build_dir = "%s/Build/%s%d_%s_%s-%s" % (build_path, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
+			build_dir = "%s/Build/%s_%s%d_%s_%s-%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
 			if build_info.is_clean:
 				print("Cleaning %s %s..." % (name, config))
 

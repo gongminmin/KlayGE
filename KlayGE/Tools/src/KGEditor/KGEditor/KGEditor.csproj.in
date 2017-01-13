@@ -88,7 +88,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\External\wpftoolkit\Main\bin\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
-    <ProjectReference Include="..\..\..\..\Build\@KLAYGE_COMPILER_NAME@@KLAYGE_COMPILER_VERSION@_@KLAYGE_PLATFORM_NAME@\Tools\KGEditor\KGEditorCoreWrapper\KGEditorCoreWrapper.vcxproj">
+    <ProjectReference Include="@CMAKE_BINARY_DIR@\Tools\KGEditor\KGEditorCoreWrapper\KGEditorCoreWrapper.vcxproj">
       <Project>{3917feeb-9015-3f06-9442-c9a0b78af479}</Project>
       <Name>KGEditorCoreWrapper</Name>
     </ProjectReference>

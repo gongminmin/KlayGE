@@ -11,10 +11,10 @@
 KlayGE.log
 __pycache__
 cfg_build.py
-mgw*_*_*
-gcc*_*_*
-vc*_*_*
-clang*_*_*
+*_mgw*_*_*
+*_gcc*_*_*
+*_vc*_*_*
+*_clang*_*_*
 lib
 glloader/doc/html/
 glloader/include/glloader/glloader_egl.h
@@ -64,6 +64,7 @@ KlayGE/Tools/media/*/MakePyZip.py
 KlayGE/Tools/media/*/*.dds
 KlayGE/Tools/media/*/*Py.zip
 KlayGE/Tools/src/*/*/obj
+KlayGE/Tools/src/*/*/*.csproj
 KlayGE/Tools/src/KGEditor/KGEditor/Images
 KlayGE/Tools/src/MtlEditor/MtlEditor/Images
 KlayGE/Tools/src/TexViewer/TexViewer/Images

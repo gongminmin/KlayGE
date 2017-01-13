@@ -2,6 +2,16 @@
 # !!!! DO NOT DELETE ANY FIELD OF THIS FILE !!!!
 ################################################
 
+# Project type.
+#   On Windows desktop, could be "vs2017", "vs2015", "make", "auto".
+#   On Windows store, could be "vs2017", "vs2015", "auto".
+#   On Windows phone, could be "vs2017", "vs2015", "auto".
+#   On Android, could be "make", "auto".
+#   On Linux, could be "make", "auto".
+#   On MacOSX, could be "xcode", "auto".
+#   On iOS, could be "xcode", "auto".
+project			= "auto"
+
 # Compiler name.
 #   On Windows desktop, could be "vc141", "vc140", "mingw", "auto".
 #   On Windows store, could be "vc141", "vc140", "auto".
@@ -11,16 +21,6 @@
 #   On MacOSX, could be "clang", "auto".
 #   On iOS, could be "clang", "auto".
 compiler		= "auto"
-
-# Toolset name.
-#   On Windows desktop, could be "vc141", "v140", "auto".
-#   On Windows store, could be "auto".
-#   On Windows phone, could be "auto".
-#   On Android, could be "auto".
-#   On Linux, could be "auto".
-#   On MacOSX, could be "auto".
-#   On iOS, could be "auto".
-toolset			= "auto"
 
 # Target CPU architecture.
 #   On Windows desktop, could be "x86", "x64".
