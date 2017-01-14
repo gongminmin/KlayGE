@@ -58,15 +58,6 @@ namespace KlayGE
 			DynamicHidP_GetUsages_ = reinterpret_cast<HidP_GetUsagesFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsages"));
 			DynamicHidP_GetUsageValue_ = reinterpret_cast<HidP_GetUsageValueFunc>(::GetProcAddress(mod_hid_, "HidP_GetUsageValue"));
 		}
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		HMODULE mod_user = ::GetModuleHandle(TEXT("user32"));
-		KLAYGE_ASSUME(mod_user != nullptr);
-
-		DynamicRegisterTouchWindow_ = reinterpret_cast<RegisterTouchWindowFunc>(::GetProcAddress(mod_user, "RegisterTouchWindow"));
-		DynamicGetTouchInputInfo_ = reinterpret_cast<GetTouchInputInfoFunc>(::GetProcAddress(mod_user, "GetTouchInputInfo"));
-		DynamicCloseTouchInputHandle_ = reinterpret_cast<CloseTouchInputHandleFunc>(::GetProcAddress(mod_user, "CloseTouchInputHandle"));
-#endif
 #endif
 	}
 
@@ -74,7 +65,6 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		on_raw_input_.disconnect();
-		on_touch_.disconnect();
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_.disconnect();
 		on_key_up_.disconnect();
@@ -463,22 +453,5 @@ namespace KlayGE
 		return DynamicHidP_GetUsageValue_(ReportType, UsagePage, LinkCollection, Usage, UsageValue, PreparsedData,
 			Report, ReportLength);
 	}
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-	BOOL MsgInputEngine::RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const
-	{
-		return DynamicRegisterTouchWindow_(hWnd, ulFlags);
-	}
-
-	BOOL MsgInputEngine::GetTouchInputInfo(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize) const
-	{
-		return DynamicGetTouchInputInfo_(hTouchInput, cInputs, pInputs, cbSize);
-	}
-
-	BOOL MsgInputEngine::CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const
-	{
-		return DynamicCloseTouchInputHandle_(hTouchInput);
-	}
-#endif
 #endif
 }

@@ -248,18 +248,11 @@ namespace KlayGE
 		NTSTATUS HidP_GetUsageValue(HIDP_REPORT_TYPE ReportType, USAGE UsagePage,
 			USHORT LinkCollection, USAGE Usage, PULONG UsageValue, PHIDP_PREPARSED_DATA PreparsedData,
 			PCHAR Report, ULONG ReportLength) const;
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		BOOL RegisterTouchWindow(HWND hWnd, ULONG ulFlags) const;
-		BOOL GetTouchInputInfo(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize) const;
-		BOOL CloseTouchInputHandle(HTOUCHINPUT hTouchInput) const;
-#endif
 #endif
 
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		boost::signals2::connection on_raw_input_;
-		boost::signals2::connection on_touch_;
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		boost::signals2::connection on_key_down_;
 		boost::signals2::connection on_key_up_;
@@ -295,15 +288,6 @@ namespace KlayGE
 		HidP_GetValueCapsFunc DynamicHidP_GetValueCaps_;
 		HidP_GetUsagesFunc DynamicHidP_GetUsages_;
 		HidP_GetUsageValueFunc DynamicHidP_GetUsageValue_;
-
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		typedef BOOL (WINAPI *RegisterTouchWindowFunc)(HWND hWnd, ULONG ulFlags);
-		typedef BOOL (WINAPI *GetTouchInputInfoFunc)(HTOUCHINPUT hTouchInput, UINT cInputs, PTOUCHINPUT pInputs, int cbSize);
-		typedef BOOL (WINAPI *CloseTouchInputHandleFunc)(HTOUCHINPUT hTouchInput);
-		RegisterTouchWindowFunc DynamicRegisterTouchWindow_;
-		GetTouchInputInfoFunc DynamicGetTouchInputInfo_;
-		CloseTouchInputHandleFunc DynamicCloseTouchInputHandle_;
-#endif
 #endif
 
 	private:

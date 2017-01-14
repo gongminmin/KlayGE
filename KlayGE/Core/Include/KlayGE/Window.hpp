@@ -221,9 +221,6 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
-		typedef boost::signals2::signal<void(Window const & wnd, HTOUCHINPUT hti, uint32_t num_inputs)> TouchEvent;
-#endif
 #elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
