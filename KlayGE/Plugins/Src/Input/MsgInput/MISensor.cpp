@@ -35,9 +35,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)) \
-	|| (defined KLAYGE_PLATFORM_WINDOWS_RUNTIME) \
-	|| (defined KLAYGE_PLATFORM_ANDROID)
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
 	std::wstring const & MsgInputSensor::Name() const
@@ -52,7 +50,7 @@ namespace KlayGE
 }
 #endif
 
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 
 #if (_WIN32_WINNT < _WIN32_WINNT_WINBLUE)
 	// Magnetometer Accuracy Data Types
@@ -80,6 +78,7 @@ namespace KlayGE
 
 namespace KlayGE
 {
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 	class MsgInputLocationEvents : public ILocationEvents
 	{
 	public:
@@ -159,6 +158,7 @@ namespace KlayGE
 	private:
 		long ref_;
 	};
+#endif
 
 	class MsgInputSensorEvents : public ISensorEvents
 	{
@@ -306,6 +306,7 @@ namespace KlayGE
 	{
 		HRESULT hr = ::CoInitialize(0);
 
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		if (Context::Instance().Config().location_sensor)
 		{
 			ILocation* location = nullptr;
@@ -337,6 +338,7 @@ namespace KlayGE
 				}
 			}
 		}
+#endif
 
 		ISensorManager* sensor_mgr = nullptr;
 		hr = ::CoCreateInstance(CLSID_SensorManager, nullptr, CLSCTX_INPROC_SERVER,
@@ -415,6 +417,7 @@ namespace KlayGE
 	{
 		destroyed_ = true;
 
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		if (locator_)
 		{
 			IID REPORT_TYPES[] = { IID_ILatLongReport };
@@ -426,6 +429,7 @@ namespace KlayGE
 			location_event_.reset();
 			locator_.reset();
 		}
+#endif
 
 		if (motion_sensor_collection_)
 		{
@@ -442,6 +446,7 @@ namespace KlayGE
 		::CoUninitialize();
 	}
 
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 	void MsgInputSensor::OnLocationChanged(REFIID report_type, ILocationReport* location_report)
 	{
 		if (IID_ILatLongReport == report_type)
@@ -484,6 +489,7 @@ namespace KlayGE
 			}
 		}
 	}
+#endif
 
 	void MsgInputSensor::OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report)
 	{

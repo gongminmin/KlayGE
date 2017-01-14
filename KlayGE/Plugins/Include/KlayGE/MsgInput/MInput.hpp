@@ -207,12 +207,13 @@ typedef struct _HIDP_VALUE_CAPS
 #define HIDP_STATUS_SUCCESS                  (HIDP_ERROR_CODES(0x0,0))
 #endif
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN7)
+#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 #include <LocationApi.h>
+#endif
 #include <SensorsApi.h>
 #include <Sensors.h>
 #endif
-
 #elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
 #include <windows.devices.geolocation.h>
 #include <windows.devices.sensors.h>
@@ -444,7 +445,7 @@ namespace KlayGE
 		int32_t wheel_delta_state_;
 	};
 	
-#if (defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WIN7) && (_WIN32_WINNT < _WIN32_WINNT_WIN10)
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 	class MsgInputSensor : public InputSensor
 	{
 	public:
@@ -453,7 +454,9 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const override;
 
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		void OnLocationChanged(REFIID report_type, ILocationReport* location_report);
+#endif
 		void OnMotionDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 		void OnOrientationDataUpdated(ISensor* sensor, ISensorDataReport* data_report);
 
@@ -466,8 +469,10 @@ namespace KlayGE
 		virtual void UpdateInputs() override;
 
 	private:
+#if (_WIN32_WINNT < _WIN32_WINNT_WIN10)
 		std::shared_ptr<ILocation> locator_;
 		std::shared_ptr<ILocationEvents> location_event_;
+#endif
 		std::shared_ptr<ISensorCollection> motion_sensor_collection_;
 		std::vector<std::shared_ptr<ISensorEvents>> motion_sensor_events_;
 		std::shared_ptr<ISensorCollection> orientation_sensor_collection_;
