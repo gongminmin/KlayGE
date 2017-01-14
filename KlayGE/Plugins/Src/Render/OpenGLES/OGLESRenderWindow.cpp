@@ -23,6 +23,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <map>
+#include <system_error>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -279,7 +280,7 @@ namespace KlayGE
 
 		if (!glloader_GLES_VERSION_2_0())
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		eglSwapInterval(display_, 0);

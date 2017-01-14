@@ -16,6 +16,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
+
+#include <system_error>
+
 #include <KlayGE/FrameBuffer.hpp>
 
 namespace KlayGE
@@ -99,7 +102,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(errc::function_not_supported);
+					THR(std::errc::function_not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
@@ -159,7 +162,7 @@ namespace KlayGE
 				RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 				if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 				{
-					THR(errc::function_not_supported);
+					THR(std::errc::function_not_supported);
 				}
 
 				uint32_t clr_id = att - ATT_Color0;
@@ -202,7 +205,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (att >= static_cast<uint32_t>(re.DeviceCaps().max_simultaneous_uavs))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		if ((att < ua_views_.size()) && ua_views_[att])
@@ -229,7 +232,7 @@ namespace KlayGE
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		if (att >= static_cast<uint32_t>(ATT_Color0 + re.DeviceCaps().max_simultaneous_rts))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		if ((att < ua_views_.size()) && ua_views_[att])

@@ -30,6 +30,7 @@
 
 #include <KFL/KFL.hpp>
 
+#include <system_error>
 #include <boost/lexical_cast.hpp>
 
 #include <KFL/ThrowErr.hpp>
@@ -39,5 +40,13 @@ namespace KlayGE
 	std::string CombineFileLine(std::string const & file, int line)
 	{
 		return file + ": " + boost::lexical_cast<std::string>(line);
+	}
+
+	void Verify(bool x)
+	{
+		if (!x)
+		{
+			THR(std::errc::function_not_supported);
+		}
 	}
 }

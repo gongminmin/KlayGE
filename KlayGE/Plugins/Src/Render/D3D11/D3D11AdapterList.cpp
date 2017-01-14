@@ -16,6 +16,7 @@
 #include <KFL/COMPtr.hpp>
 
 #include <vector>
+#include <system_error>
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11AdapterList.hpp>
@@ -87,7 +88,7 @@ namespace KlayGE
 		// 如果没有找到兼容的设备则抛出错误
 		if (adapters_.empty())
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 }

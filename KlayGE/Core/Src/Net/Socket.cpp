@@ -17,6 +17,7 @@
 #include <KFL/ThrowErr.hpp>
 
 #include <cstring>
+#include <system_error>
 #include <boost/assert.hpp>
 
 #include <KlayGE/Socket.hpp>
@@ -77,7 +78,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::bad_address);
+				THR(std::errc::bad_address);
 			}
 		}
 

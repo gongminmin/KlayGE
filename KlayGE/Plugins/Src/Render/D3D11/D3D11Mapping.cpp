@@ -19,6 +19,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 
+#include <system_error>
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -895,7 +896,7 @@ namespace KlayGE
 			return DXGI_FORMAT_BC7_UNORM_SRGB;
 
 		default:
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 
@@ -1105,7 +1106,7 @@ namespace KlayGE
 			return EF_BC7_SRGB;
 
 		default:
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 }

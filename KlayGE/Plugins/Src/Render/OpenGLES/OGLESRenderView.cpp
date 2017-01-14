@@ -19,6 +19,7 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
+#include <system_error>
 #include <boost/assert.hpp>
 
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
@@ -361,13 +362,13 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		uint32_t const channels = NumComponents(texture_1d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_1d_.GLTexture();
@@ -470,13 +471,13 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		uint32_t const channels = NumComponents(texture_2d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_2d_.GLTexture();
@@ -583,7 +584,7 @@ namespace KlayGE
 		uint32_t const channels = NumComponents(texture_3d.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_3d_.GLTexture();
@@ -737,7 +738,7 @@ namespace KlayGE
 		uint32_t const channels = NumComponents(texture_cube.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_cube_.GLTexture();
@@ -760,7 +761,7 @@ namespace KlayGE
 		uint32_t const channels = NumComponents(texture_cube.Format());
 		if (((1 == channels) || (2 == channels)) && (!(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_texture_rg())))
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_cube_.GLTexture();
@@ -1135,7 +1136,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		width_ = texture_cube.Width(level);

@@ -33,6 +33,7 @@
 #include <KlayGE/Window.hpp>
 
 #include <map>
+#include <system_error>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -316,7 +317,7 @@ namespace KlayGE
 
 		if (!glloader_GL_VERSION_3_1())
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);

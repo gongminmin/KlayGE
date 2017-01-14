@@ -20,6 +20,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderLayout.hpp>
 
+#include <system_error>
 #include <boost/assert.hpp>
 
 #include <glloader/glloader.h>
@@ -187,7 +188,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 
 		case BOP_Max:
@@ -201,7 +202,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 
 		default:
@@ -319,12 +320,12 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
 		default:
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 
@@ -350,7 +351,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -363,7 +364,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -376,7 +377,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -437,7 +438,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -456,7 +457,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -475,7 +476,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -500,7 +501,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -513,7 +514,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -526,7 +527,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -539,7 +540,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -552,7 +553,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -565,7 +566,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -578,7 +579,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -591,7 +592,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -604,7 +605,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -617,7 +618,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -630,7 +631,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -643,7 +644,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -656,7 +657,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -669,7 +670,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -682,7 +683,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -695,7 +696,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -708,7 +709,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -721,7 +722,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -734,7 +735,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -747,7 +748,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -760,7 +761,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -773,7 +774,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -792,7 +793,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -811,7 +812,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -824,7 +825,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -843,7 +844,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -862,7 +863,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -881,7 +882,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -900,7 +901,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -919,7 +920,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -938,7 +939,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -951,7 +952,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -964,7 +965,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -977,7 +978,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -990,7 +991,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1003,7 +1004,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1016,7 +1017,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1029,7 +1030,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1061,7 +1062,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1074,7 +1075,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1087,7 +1088,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1106,7 +1107,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1119,7 +1120,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1132,7 +1133,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1145,7 +1146,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1158,7 +1159,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1171,7 +1172,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1184,7 +1185,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1197,7 +1198,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1210,7 +1211,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1223,7 +1224,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1236,12 +1237,12 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
 		default:
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 
@@ -1291,7 +1292,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1303,7 +1304,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(errc::function_not_supported);
+				THR(std::errc::function_not_supported);
 			}
 			break;
 
@@ -1372,7 +1373,7 @@ namespace KlayGE
 			break;
 
 		default:
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 	}
 }

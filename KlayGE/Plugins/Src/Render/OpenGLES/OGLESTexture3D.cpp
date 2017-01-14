@@ -20,6 +20,7 @@
 #include <KlayGE/Texture.hpp>
 
 #include <cstring>
+#include <system_error>
 
 #include <glloader/glloader.h>
 
@@ -35,7 +36,7 @@ namespace KlayGE
 	{
 		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		if (IsSRGB(format))

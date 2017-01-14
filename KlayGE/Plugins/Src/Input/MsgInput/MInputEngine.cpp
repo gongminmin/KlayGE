@@ -35,6 +35,8 @@
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 
+#include <system_error>
+
 #include <KlayGE/MsgInput/MInput.hpp>
 
 namespace KlayGE
@@ -125,7 +127,7 @@ namespace KlayGE
 		UINT devices = 0;
 		if (::GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
 		{
-			THR(errc::function_not_supported);
+			THR(std::errc::function_not_supported);
 		}
 
 		std::vector<RAWINPUTDEVICELIST> raw_input_devices(devices);

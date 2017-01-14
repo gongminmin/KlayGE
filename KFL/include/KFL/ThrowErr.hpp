@@ -36,12 +36,6 @@
 #include <string>
 #include <stdexcept>
 
-#include <system_error>
-namespace KlayGE
-{
-	using std::errc;
-}
-
 #ifndef _HRESULT_DEFINED
 #define _HRESULT_DEFINED
 typedef long HRESULT;
@@ -50,22 +44,12 @@ typedef long HRESULT;
 namespace KlayGE
 {
 	std::string CombineFileLine(std::string const & file, int line);
+	void Verify(bool x);
 }
 
 #define THR(x)			{ throw std::system_error(std::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
 
 // Throw if failed
 #define TIF(x)			{ HRESULT _hr = x; if (static_cast<HRESULT>(_hr) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
-
-namespace KlayGE
-{
-	inline void Verify(bool x)
-	{
-		if (!x)
-		{
-			THR(errc::function_not_supported);
-		}
-	}
-}
 
 #endif		// _KFL_THROWERR_HPP
