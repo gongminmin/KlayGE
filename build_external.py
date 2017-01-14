@@ -14,7 +14,7 @@ def build_Boost(build_info, compiler_info):
 	else:
 		with_program_options = False
 		with_test = False
-	if "vc" == build_info.compiler_name:
+	if ("vc" == build_info.compiler_name) or ((("gcc" == build_info.compiler_name) or ("mgw" == build_info.compiler_name)) and (build_info.compiler_version > 60)):
 		with_filesystem = False
 		with_system = False
 
