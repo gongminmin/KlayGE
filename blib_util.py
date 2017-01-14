@@ -551,17 +551,19 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 				config_options = "-DCMAKE_BUILD_TYPE:STRING=\"%s\"" % config
 				if "android" == build_info.target_platform:
-					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=%s" % compiler_info.arch
-
 					if "x86" == compiler_info.arch:
+						abi_arch = "x86"
 						toolchain_arch = "x86"
 					elif "x86_64" == compiler_info.arch:
+						abi_arch = "x86_64"
 						toolchain_arch = "x86_64"
 					elif "arm64-v8a" == compiler_info.arch:
+						abi_arch = "arm64-v8a"
 						toolchain_arch = "aarch64-linux-android"
 					else:
+						abi_arch = "armeabi-v7a with NEON"
 						toolchain_arch = "arm-linux-androideabi"
-					config_options += " -DANDROID_TOOLCHAIN_NAME=%s-clang" % toolchain_arch
+					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = batch_command(build_info.host_platform)
 				cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, additional_options, config_options, "../cmake"))

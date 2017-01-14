@@ -250,7 +250,6 @@ namespace KlayGE
 					}
 					break;
 
-#if (__ANDROID_API__ >= 12)
 				case AINPUT_SOURCE_JOYSTICK:
 					{
 						for (uint32_t i = 0; i < 8; i++)
@@ -259,7 +258,6 @@ namespace KlayGE
 						}
 					}
 					break;
-#endif
 
 				default:
 					break;
@@ -289,11 +287,9 @@ namespace KlayGE
 				}
 				break;
 
-#if (__ANDROID_API__ >= 12)
 			case AINPUT_SOURCE_JOYSTICK:
 				win->OnJoystickButtons()(*win, AMotionEvent_getButtonState(event));
 				break;
-#endif
 
 			default:
 				break;

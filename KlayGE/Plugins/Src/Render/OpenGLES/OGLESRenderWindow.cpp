@@ -396,9 +396,9 @@ namespace KlayGE
 
 	void OGLESRenderWindow::WindowMovedOrResized(Window const & win)
 	{
-#if defined KLAYGE_PLATFORM_WINDOWS
 		KFL_UNUSED(win);
 
+#if defined KLAYGE_PLATFORM_WINDOWS
 		::RECT rect;
 		::GetClientRect(hWnd_, &rect);
 
@@ -416,27 +416,17 @@ namespace KlayGE
 		uint32_t new_width = DisplayWidth(x_display_, screen);
 		uint32_t new_height = DisplayHeight(x_display_, screen);
 #elif defined KLAYGE_PLATFORM_ANDROID
-		// TODO: Is it correct?
-		uint32_t new_left = win.Left() / 2;
-		uint32_t new_top = win.Top() / 2;
-		if ((new_left != left_) || (new_top != top_))
-		{
-			this->Reposition(new_left, new_top);
-		}
-
 		EGLint w, h;
 		eglQuerySurface(display_, surf_, EGL_WIDTH, &w);
 		eglQuerySurface(display_, surf_, EGL_HEIGHT, &h);
 
-		uint32_t new_width = w - new_left;
-		uint32_t new_height = h - new_top;
+		uint32_t new_width = w;
+		uint32_t new_height = h;
 #elif defined KLAYGE_PLATFORM_DARWIN
-		KFL_UNUSED(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetNSViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];
 #elif defined KLAYGE_PLATFORM_IOS
-		KFL_UNUSED(win);
 		uint2 screen = Context::Instance().AppInstance().MainWnd()->GetGLKViewSize();
 		uint32_t new_width = screen[0];
 		uint32_t new_height = screen[1];

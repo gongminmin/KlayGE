@@ -32,9 +32,6 @@
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/Window.hpp>
-#ifdef KLAYGE_PLATFORM_ANDROID
-#include <KlayGE/App3D.hpp>
-#endif
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -113,11 +110,6 @@ namespace KlayGE
 
 	int2 MsgInputTouch::AdjustPoint(int2 const & pt) const
 	{
-#ifdef KLAYGE_PLATFORM_ANDROID
-		WindowPtr const & win = Context::Instance().AppInstance().MainWnd();
-		return pt - int2(win->Left() / 2, win->Top() / 2);
-#else
 		return pt;
-#endif
 	}
 }
