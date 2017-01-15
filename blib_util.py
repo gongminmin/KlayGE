@@ -92,13 +92,13 @@ class build_info:
 				else:
 					target_api_level = 22
 				self.target_api_level = target_api_level
-			elif (0 == target_platform.find("win_store")) or (0 == target_platform.find("win_phone")):
+			elif 0 == target_platform.find("win_store"):
 				space_place = target_platform.find(' ')
 				if space_place != -1:
 					target_api_level = target_platform[space_place + 1:]
 					target_platform = target_platform[0:space_place]
 				else:
-					target_api_level = "8.0"
+					target_api_level = "10.0"
 				self.target_api_level = target_api_level
 		if ("android" == target_platform) or ("ios" == target_platform):
 			prefer_static = True
@@ -117,8 +117,6 @@ class build_info:
 
 		self.is_windows_desktop = False
 		self.is_windows_store = False
-		self.is_windows_phone = False
-		self.is_windows_runtime = False
 		self.is_windows = False
 		self.is_android = False
 		self.is_linux = False
@@ -131,11 +129,6 @@ class build_info:
 		elif "win_store" == target_platform:
 			self.is_windows = True
 			self.is_windows_store = True
-			self.is_windows_runtime = True
-		elif "win_phone" == target_platform:
-			self.is_windows = True
-			self.is_windows_phone = True
-			self.is_windows_runtime = True
 		elif "android" == target_platform:
 			self.is_android = True
 		elif "linux" == target_platform:
@@ -426,7 +419,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
-	if (0 == build_info.project_type.find("vs")) and (not build_info.is_windows_runtime):
+	if (0 == build_info.project_type.find("vs")) and (not build_info.is_windows_store):
 		toolset_name = "-T v%s" % build_info.compiler_version
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
@@ -473,12 +466,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				vc_option = "x86_arm"
 				vc_arch = "ARM"
 
-		if build_info.is_windows_runtime:
-			if build_info.is_windows_store:
-				system_name = "WindowsStore"
-			elif build_info.is_windows_phone:
-				system_name = "WindowsPhone"
-			additional_options += " -DCMAKE_SYSTEM_NAME=%s -DCMAKE_SYSTEM_VERSION=%s" % (system_name, build_info.target_api_level)
+		if build_info.is_windows_store:
+			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
 
 		build_dir = "%s/Build/%s_%s%d_%s_%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if build_info.is_clean:

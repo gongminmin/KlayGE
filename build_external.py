@@ -131,16 +131,13 @@ def build_assimp(build_info, compiler_info):
 
 def build_external_libs(build_info):
 	for compiler_info in build_info.compilers:
-		platform_dir = "%s_%s" % (build_info.target_platform, compiler_info.arch)
-		dst_dir = "KlayGE/bin/%s/" % platform_dir
-
 		build_Boost(build_info, compiler_info)
 		build_Python(build_info, compiler_info)
 		build_7z(build_info, compiler_info)
 		build_rapidxml(build_info, compiler_info)
 		build_android_native_app_glue(build_info, compiler_info)
 
-		if not build_info.is_windows_runtime:
+		if not build_info.is_windows_store:
 			build_libogg(build_info, compiler_info)
 			build_libvorbis(build_info, compiler_info)
 
