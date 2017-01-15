@@ -47,7 +47,7 @@
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <windows.ui.core.h>
 #elif defined KLAYGE_PLATFORM_LINUX
 #include <X11/X.h>
@@ -97,7 +97,7 @@ namespace KlayGE
 		{
 			return wnd_;
 		}
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 		void SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window);
 
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> GetWindow() const
@@ -221,7 +221,7 @@ namespace KlayGE
 		typedef boost::signals2::signal<void(Window const & wnd, wchar_t ch)> CharEvent;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		typedef boost::signals2::signal<void(Window const & wnd, HRAWINPUT ri)> RawInputEvent;
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyDownEvent;
 		typedef boost::signals2::signal<void(Window const & wnd, uint32_t key)> KeyUpEvent;
@@ -274,7 +274,7 @@ namespace KlayGE
 		{
 			return raw_input_event_;
 		}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent& OnKeyDown()
 		{
@@ -342,7 +342,7 @@ namespace KlayGE
 		CharEvent char_event_;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		RawInputEvent raw_input_event_;
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) \
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) \
 	|| defined(KLAYGE_PLATFORM_LINUX) || defined(KLAYGE_PLATFORM_DARWIN)
 		KeyDownEvent key_down_event_;
 		KeyUpEvent key_up_event_;

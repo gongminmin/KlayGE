@@ -145,7 +145,7 @@ namespace KlayGE
 		AAsset* LocateFileAndroid(std::string const & name);
 #elif defined(KLAYGE_PLATFORM_IOS)
 		std::string LocateFileIOS(std::string const & name);
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		std::string LocateFileWinRT(std::string const & name);
 #endif
 

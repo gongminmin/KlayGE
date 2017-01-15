@@ -53,7 +53,7 @@
 #include <KlayGE/D3D12/D3D12InterfaceLoader.hpp>
 #include <KlayGE/D3D12/D3D12RenderWindow.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <wrl/client.h>
 #include <wrl/event.h>
 #include <wrl/wrappers/corewrappers.h>
@@ -315,7 +315,7 @@ namespace KlayGE
 		{
 			sc_desc1_.Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 		}
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 		else
 		{
 			sc_desc1_.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
@@ -506,7 +506,6 @@ namespace KlayGE
 			::UpdateWindow(hWnd_);
 		}
 #else
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		if (isFullScreen_ != fs)
 		{
 			WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
@@ -515,9 +514,6 @@ namespace KlayGE
 				isFullScreen_ = fs;
 			}
 		}
-#else
-		KFL_UNUSED(fs);
-#endif
 #endif
 	}
 
@@ -578,9 +574,8 @@ namespace KlayGE
 		ComPtr<IDisplayInformation> disp_info;
 		TIF(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
+
 		this->FullScreen(false);
-#endif
 #endif
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
@@ -736,7 +731,7 @@ namespace KlayGE
 		}
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 	HRESULT D3D12RenderWindow::OnStereoEnabledChanged(IDisplayInformation* sender, IInspectable* args)
 	{
 		KFL_UNUSED(sender);

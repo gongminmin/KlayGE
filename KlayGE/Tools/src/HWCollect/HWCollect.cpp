@@ -191,13 +191,7 @@ void DetectOSInfo(std::ostream& os)
 		os << "SP " << os_ver_info.wServicePackMajor << '.' << os_ver_info.wServicePackMinor;
 	}
 #else
-#if defined KLAYGE_PLATFORM_WINDOWS_UWP
-	os << "Windows UWP";
-#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 	os << "Windows Store";
-#elif defined KLAYGE_PLATFORM_WINDOWS_PHONE
-	os << "Windows Phone";
-#endif
 
 	::GetNativeSystemInfo(&si);
 #endif

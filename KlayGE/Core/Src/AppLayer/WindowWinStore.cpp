@@ -1,5 +1,5 @@
 /**
- * @file WindowWinRT.cpp
+ * @file WindowWinStore.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -46,9 +46,7 @@ using namespace ABI::Windows::Foundation;
 using namespace ABI::Windows::Graphics::Display;
 using namespace ABI::Windows::UI::Core;
 using namespace ABI::Windows::UI::Input;
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 using namespace ABI::Windows::UI::ViewManagement;
-#endif
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
@@ -62,13 +60,9 @@ namespace KlayGE
 
 		pointer_id_map_.fill(0);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		width_ = settings.width;
 		height_ = settings.height;
 		full_screen_ = settings.full_screen;
-#else
-		KFL_UNUSED(settings);
-#endif
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
@@ -81,13 +75,9 @@ namespace KlayGE
 
 		pointer_id_map_.fill(0);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		width_ = settings.width;
 		height_ = settings.height;
 		full_screen_ = settings.full_screen;
-#else
-		KFL_UNUSED(settings);
-#endif
 	}
 
 	Window::~Window()
@@ -104,7 +94,6 @@ namespace KlayGE
 		this->DetectsDPI();
 		this->DetectsOrientation();
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		ComPtr<IApplicationViewStatics> app_view_stat;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
 
@@ -124,7 +113,6 @@ namespace KlayGE
 		size.Height = static_cast<float>(height_ / dpi_scale_);
 		app_view_stat3->put_PreferredLaunchViewSize(size);
 		app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
-#endif
 
 		ABI::Windows::Foundation::Rect rc;
 		wnd_->get_Bounds(&rc);
@@ -136,7 +124,6 @@ namespace KlayGE
 
 	void Window::DetectsDPI()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
@@ -146,21 +133,12 @@ namespace KlayGE
 
 		float dpi;
 		TIF(disp_info->get_LogicalDpi(&dpi));
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop));
-
-		float dpi;
-		TIF(disp_prop->get_LogicalDpi(&dpi));
-#endif
 
 		dpi_scale_ = dpi / 96;
 	}
 
 	void Window::DetectsOrientation()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
@@ -173,14 +151,6 @@ namespace KlayGE
 
 		DisplayOrientations curr_orientation;
 		TIF(disp_info->get_CurrentOrientation(&curr_orientation));
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop));
-
-		DisplayOrientations orientation;
-		TIF(disp_prop->get_CurrentOrientation(&orientation));
-#endif
 
 		win_rotation_ = WR_Unspecified;
 
@@ -244,7 +214,6 @@ namespace KlayGE
 
 	bool Window::FullScreen(bool fs)
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		ComPtr<IApplicationViewStatics> app_view_stat;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
 
@@ -277,10 +246,6 @@ namespace KlayGE
 		}
 
 		return success ? true : false;
-#else
-		KFL_UNUSED(fs);
-		return false;
-#endif
 	}
 
 	void Window::OnActivated()

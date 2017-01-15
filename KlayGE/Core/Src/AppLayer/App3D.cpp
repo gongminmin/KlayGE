@@ -45,7 +45,7 @@
 
 #include <KlayGE/App3D.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 #include <KFL/COMPtr.hpp>
 
 #include <wrl/client.h>
@@ -73,7 +73,7 @@ using namespace concurrency;
 
 namespace KlayGE
 {
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 	class MetroFrameworkSource;
 
 	class MetroFramework : public RuntimeClass<ABI::Windows::ApplicationModel::Core::IFrameworkView>
@@ -114,13 +114,8 @@ namespace KlayGE
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
 		HRESULT OnPointerWheelChanged(ABI::Windows::UI::Core::ICoreWindow* sender,
 			ABI::Windows::UI::Core::IPointerEventArgs* args);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		HRESULT OnDpiChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
 		HRESULT OnOrientationChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender, IInspectable* args);
-#else
-		HRESULT OnDpiChanged(IInspectable* sender);
-		HRESULT OnOrientationChanged(IInspectable* sender);
-#endif
 
 	private:
 		App3DFramework* app_;
@@ -205,14 +200,12 @@ namespace KlayGE
 			std::bind(&MetroFramework::OnWindowClosed, this, std::placeholders::_1, std::placeholders::_2)).Get(),
 			&win_closed_token_);
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_PHONE
 		ComPtr<ICoreCursorFactory> cursor_factory;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreCursor).Get(),
 			&cursor_factory);
 		ComPtr<ICoreCursor> cursor;
 		cursor_factory->CreateCursor(CoreCursorType::CoreCursorType_Arrow, 0, &cursor);
 		window_->put_PointerCursor(cursor.Get());
-#endif
 
 		window_->add_KeyDown(Callback<ITypedEventHandler<CoreWindow*, KeyEventArgs*>>(
 			std::bind(&MetroFramework::OnKeyDown, this, std::placeholders::_1, std::placeholders::_2)).Get(),
@@ -234,7 +227,6 @@ namespace KlayGE
 			std::bind(&MetroFramework::OnPointerWheelChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
 			&pointer_wheel_changed_token_);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat);
@@ -249,19 +241,6 @@ namespace KlayGE
 		disp_info->add_OrientationChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
 			std::bind(&MetroFramework::OnOrientationChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
 			&orientation_changed_token_);
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop);
-
-		disp_prop->add_LogicalDpiChanged(Callback<IDisplayPropertiesEventHandler>(
-			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1)).Get(),
-			&dpi_changed_token_);
-
-		disp_prop->add_OrientationChanged(Callback<IDisplayPropertiesEventHandler>(
-			std::bind(&MetroFramework::OnOrientationChanged, this, std::placeholders::_1)).Get(),
-			&orientation_changed_token_);
-#endif
 
 		app_->MainWnd()->SetWindow(window_);
 		app_->MetroCreate();
@@ -285,7 +264,6 @@ namespace KlayGE
 
 	IFACEMETHODIMP MetroFramework::Uninitialize()
 	{
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat);
@@ -295,14 +273,6 @@ namespace KlayGE
 
 		disp_info->remove_DpiChanged(dpi_changed_token_);
 		disp_info->remove_OrientationChanged(orientation_changed_token_);
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop);
-
-		disp_prop->remove_LogicalDpiChanged(dpi_changed_token_);
-		disp_prop->remove_OrientationChanged(orientation_changed_token_);
-#endif
 
 		window_->remove_PointerWheelChanged(pointer_wheel_changed_token_);
 		window_->remove_PointerMoved(pointer_moved_token_);
@@ -466,16 +436,10 @@ namespace KlayGE
 		return S_OK;
 	}
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	HRESULT MetroFramework::OnDpiChanged(IDisplayInformation* sender, IInspectable* args)
-#else
-	HRESULT MetroFramework::OnDpiChanged(IInspectable* sender)
-#endif
 	{
 		KFL_UNUSED(sender);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		KFL_UNUSED(args);
-#endif
 
 		WindowPtr const & win = app_->MainWnd();
 		win->OnDpiChanged();
@@ -483,16 +447,10 @@ namespace KlayGE
 		return S_OK;
 	}
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 	HRESULT MetroFramework::OnOrientationChanged(IDisplayInformation* sender, IInspectable* args)
-#else
-	HRESULT MetroFramework::OnOrientationChanged(IInspectable* sender)
-#endif
 	{
 		KFL_UNUSED(sender);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		KFL_UNUSED(args);
-#endif
 
 		WindowPtr const & win = app_->MainWnd();
 		win->OnOrientationChanged();
@@ -523,7 +481,7 @@ namespace KlayGE
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg);
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		cfg.graphics_cfg.left = main_wnd_->Left();
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
@@ -541,7 +499,7 @@ namespace KlayGE
 
 		ContextCfg cfg = Context::Instance().Config();
 		main_wnd_ = this->MakeWindow(name_, cfg.graphics_cfg, native_wnd);
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		cfg.graphics_cfg.left = main_wnd_->Left();
 		cfg.graphics_cfg.top = main_wnd_->Top();
 		cfg.graphics_cfg.width = main_wnd_->Width();
@@ -557,7 +515,7 @@ namespace KlayGE
 
 	// 建立应用程序主窗口
 	/////////////////////////////////////////////////////////////////////////////////
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 	void App3DFramework::Create()
 	{
 	}
@@ -630,7 +588,7 @@ namespace KlayGE
 		return confirmed;
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 	void App3DFramework::Run()
 	{
 		ComPtr<ICoreApplication> core_app;
@@ -678,7 +636,7 @@ namespace KlayGE
 				re.Refresh();
 			}
 		}
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 		ComPtr<ICoreWindowStatic> core_win_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
 			&core_win_stat));

@@ -23,7 +23,7 @@
 #include <KlayGE/NetMsg.hpp>
 #include <KlayGE/Player.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 
 namespace
 {

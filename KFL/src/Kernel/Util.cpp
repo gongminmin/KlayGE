@@ -33,7 +33,7 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 	#include <windows.h>
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 	#include <KFL/Thread.hpp>
 #endif
 #else

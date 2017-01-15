@@ -20,7 +20,7 @@
 
 #include <string>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 #if defined KLAYGE_PLATFORM_WINDOWS
 	#ifndef _WINSOCKAPI_
 	#include <winsock.h>

@@ -270,21 +270,13 @@
 		#define _WIN32_WINNT_WIN10 0x0A00
 	#endif
 
-	#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+	#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		#include <winapifamily.h>
 		#if defined(WINAPI_FAMILY)
 			#if WINAPI_FAMILY == WINAPI_FAMILY_DESKTOP_APP
 				#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			#else
-				#if WINAPI_FAMILY == WINAPI_FAMILY_PC_APP
-					#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
-						#define KLAYGE_PLATFORM_WINDOWS_UWP
-					#endif
-					#define KLAYGE_PLATFORM_WINDOWS_STORE
-				#elif WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-					#define KLAYGE_PLATFORM_WINDOWS_PHONE
-				#endif
-				#define KLAYGE_PLATFORM_WINDOWS_RUNTIME
+				#define KLAYGE_PLATFORM_WINDOWS_STORE
 			#endif
 		#else
 			#define KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -306,7 +298,7 @@
 		#define KLAYGE_PLATFORM_DARWIN
 	#endif
 #else
-	#error "Unknown platform. The supported target platforms are Windows, Android, Linux, OSX and iOS."
+	#error "Unknown platform. The supported target platforms are Windows, Android, Linux, OSX, and iOS."
 #endif
 
 // Defines supported CPUs

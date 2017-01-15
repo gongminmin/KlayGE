@@ -564,7 +564,7 @@ namespace KlayGE
 			}
 		}
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		rf_name = "D3D11";
 #elif defined(KLAYGE_PLATFORM_LINUX)
 		if (("D3D11" == rf_name) || ("D3D12" == rf_name))

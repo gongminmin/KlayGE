@@ -24,7 +24,7 @@
 #include <KFL/Thread.hpp>
 #include <KlayGE/Socket.hpp>
 
-#ifndef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 
 namespace KlayGE
 {

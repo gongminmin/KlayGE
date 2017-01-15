@@ -322,7 +322,7 @@ namespace KlayGE
 			keys_state_[ks] = (RI_KEY_MAKE == (ri.data.keyboard.Flags & 1UL));
 		}
 	}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined (KLAYGE_PLATFORM_ANDROID) || defined (KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined (KLAYGE_PLATFORM_ANDROID) || defined (KLAYGE_PLATFORM_DARWIN)
 	void MsgInputKeyboard::OnKeyDown(uint32_t key)
 	{
 		// TODO: a VK_MAPPING for Android/Darwin

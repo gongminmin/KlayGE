@@ -18,7 +18,7 @@
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <windows.ui.core.h>
 #include <windows.graphics.display.h>
 #endif
@@ -96,13 +96,9 @@ namespace KlayGE
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
 			IInspectable* args);
-#else
-		HRESULT OnStereoEnabledChanged(IInspectable* sender);
-#endif
 #endif
 
 	private:

@@ -65,7 +65,7 @@ namespace KlayGE
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		on_raw_input_.disconnect();
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_.disconnect();
 		on_key_up_.disconnect();
 #if defined KLAYGE_PLATFORM_ANDROID
@@ -186,7 +186,7 @@ namespace KlayGE
 			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
 				std::placeholders::_1, std::placeholders::_2));
 		}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_key_down_ = main_wnd->OnKeyDown().connect(std::bind(&MsgInputEngine::OnKeyDown, this,
 			std::placeholders::_2));
 		on_key_up_ = main_wnd->OnKeyUp().connect(std::bind(&MsgInputEngine::OnKeyUp, this,
@@ -215,7 +215,7 @@ namespace KlayGE
 #endif
 
 #if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)) \
-			|| defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+			|| defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
 			std::placeholders::_2, std::placeholders::_3));
 		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
@@ -232,7 +232,7 @@ namespace KlayGE
 		devices_.push_back(MakeSharedPtr<MsgInputOVR>());
 #endif
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID)
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID)
 		devices_.push_back(MakeSharedPtr<MsgInputSensor>());
 #endif
 	}
@@ -283,7 +283,7 @@ namespace KlayGE
 		}
 	}
 
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 	void MsgInputEngine::OnKeyDown(uint32_t key)
 	{
 		for (auto const & device : devices_)

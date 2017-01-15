@@ -400,7 +400,7 @@ namespace KlayGE
 				++ num_cores_;
 			}
 		}
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 		num_cores_ = num_hw_threads_;
 #elif defined KLAYGE_PLATFORM_LINUX
 		if (is_intel || is_amd)

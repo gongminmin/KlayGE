@@ -35,7 +35,7 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID)
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {
 	std::wstring const & MsgInputSensor::Name() const
@@ -724,7 +724,7 @@ namespace KlayGE
 	}
 }
 
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 
 #include <wrl/client.h>
 #include <wrl/event.h>
@@ -874,7 +874,6 @@ namespace KlayGE
 		double tmp;
 		IReference<double>* rtmp;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IGeocoordinateWithPoint> coordinate_with_point;
 		TIF(coordinate.As(&coordinate_with_point));
 		ComPtr<IGeopoint> point;
@@ -884,18 +883,6 @@ namespace KlayGE
 		latitude_ = static_cast<float>(geo_position.Latitude);
 		longitude_ = static_cast<float>(geo_position.Longitude);
 		altitude_ = static_cast<float>(geo_position.Altitude);
-#else
-		TIF(coordinate->get_Latitude(&tmp));
-		latitude_ = static_cast<float>(tmp);
-		TIF(coordinate->get_Longitude(&tmp));
-		longitude_ = static_cast<float>(tmp);
-		TIF(coordinate->get_Altitude(&rtmp));
-		if (rtmp)
-		{
-			TIF(rtmp->get_Value(&tmp));
-			altitude_ = static_cast<float>(tmp);
-		}
-#endif
 
 		TIF(coordinate->get_Accuracy(&tmp));
 		location_error_radius_ = static_cast<float>(tmp);
@@ -986,7 +973,6 @@ namespace KlayGE
 		TIF(reading->get_HeadingMagneticNorth(&tmp));
 		magnetic_heading_north_ = static_cast<float>(tmp);
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<ICompassReadingHeadingAccuracy> reading_with_accuracy;
 		if (SUCCEEDED(reading.As(&reading_with_accuracy)))
 		{
@@ -998,9 +984,6 @@ namespace KlayGE
 		{
 			magnetometer_accuracy_ = 0;
 		}
-#else
-		magnetometer_accuracy_ = 0;
-#endif
 
 		return S_OK;
 	}

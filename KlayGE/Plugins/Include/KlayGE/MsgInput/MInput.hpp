@@ -214,7 +214,7 @@ typedef struct _HIDP_VALUE_CAPS
 #include <SensorsApi.h>
 #include <Sensors.h>
 #endif
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <windows.devices.geolocation.h>
 #include <windows.devices.sensors.h>
 #elif defined KLAYGE_PLATFORM_ANDROID
@@ -254,7 +254,7 @@ namespace KlayGE
 	private:
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		boost::signals2::connection on_raw_input_;
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		boost::signals2::connection on_key_down_;
 		boost::signals2::connection on_key_up_;
 #if defined KLAYGE_PLATFORM_ANDROID
@@ -297,7 +297,7 @@ namespace KlayGE
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(Window const & wnd, HRAWINPUT ri);
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
 #if defined KLAYGE_PLATFORM_ANDROID
@@ -323,7 +323,7 @@ namespace KlayGE
 		virtual std::wstring const & Name() const override;
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		void OnRawInput(RAWINPUT const & ri);
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
 		void OnKeyDown(uint32_t key);
 		void OnKeyUp(uint32_t key);
 #endif
@@ -480,7 +480,7 @@ namespace KlayGE
 
 		bool destroyed_;
 	};
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 	class MsgInputSensor : public InputSensor
 	{
 	public:

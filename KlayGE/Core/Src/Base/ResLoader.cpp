@@ -38,7 +38,7 @@
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <windows.h>
-#elif defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <Windows.ApplicationModel.h>
 #include <windows.storage.h>
 
@@ -191,7 +191,7 @@ namespace KlayGE
 
 		paths_.push_back("");
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 		this->AddPath("Assets/");
 		this->AddPath(local_path_);
 #else
@@ -375,7 +375,7 @@ namespace KlayGE
 				}
 			}
 		}
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 		std::string const & res_name = LocateFileWinRT(name);
 		if (!res_name.empty())
 		{
@@ -447,7 +447,7 @@ namespace KlayGE
 				}
 			}
 		}
-#if defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		std::string const & res_name = LocateFileWinRT(name);
 		if (!res_name.empty())
 		{
@@ -802,7 +802,7 @@ namespace KlayGE
 		}
 		return res_name;
 	}
-#elif defined(KLAYGE_PLATFORM_WINDOWS_RUNTIME)
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 	std::string ResLoader::LocateFileWinRT(std::string const & name)
 	{
 		std::string res_name;

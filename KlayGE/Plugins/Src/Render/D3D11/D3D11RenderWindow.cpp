@@ -36,7 +36,7 @@
 
 #include "AMDQuadBuffer.hpp"
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <wrl/client.h>
 #include <wrl/event.h>
 #include <wrl/wrappers/corewrappers.h>
@@ -107,7 +107,7 @@ namespace KlayGE
 		{
 			dxgi_stereo_support_ = d3d11_re.DXGIFactory2()->IsWindowedStereoEnabled() ? true : false;
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 			// Async swap chain doesn't get along very well with desktop full screen
 			dxgi_async_swap_chain_ = true;
 #endif
@@ -236,7 +236,7 @@ namespace KlayGE
 								adapter_->ResetAdapter(MakeCOMPtr(ada1));
 								adapter_->Enumerate();
 							}
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 							dxgi_device->SetMaximumFrameLatency(1);
 #endif
 							dxgi_device->Release();
@@ -419,7 +419,6 @@ namespace KlayGE
 #else
 		bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
@@ -430,16 +429,6 @@ namespace KlayGE
 		ComPtr<IDisplayInformation> disp_info;
 		TIF(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop));
-
-		auto callback = Callback<IDisplayPropertiesEventHandler>(
-			std::bind(&D3D11RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1));
-
-		disp_prop->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
-#endif
 
 		sc_desc1_.Width = this->Width();
 		sc_desc1_.Height = this->Height();
@@ -719,7 +708,6 @@ namespace KlayGE
 			::UpdateWindow(hWnd_);
 		}
 #else
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		if (isFullScreen_ != fs)
 		{
 			WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
@@ -728,9 +716,6 @@ namespace KlayGE
 				isFullScreen_ = fs;
 			}
 		}
-#else
-		KFL_UNUSED(fs);
-#endif
 #endif
 	}
 
@@ -790,7 +775,6 @@ namespace KlayGE
 			d3d11_re.DXGIFactory2()->UnregisterStereoStatus(stereo_cookie_);
 		}
 #else
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
@@ -798,16 +782,8 @@ namespace KlayGE
 		ComPtr<IDisplayInformation> disp_info;
 		TIF(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
-#else
-		ComPtr<IDisplayPropertiesStatics> disp_prop;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayProperties).Get(),
-			&disp_prop));
 
-		disp_prop->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
-#endif
-#if (_WIN32_WINNT >= _WIN32_WINNT_WIN10)
 		this->FullScreen(false);
-#endif
 #endif
 
 		if (frame_latency_waitable_obj_ != 0)
@@ -1019,17 +995,11 @@ namespace KlayGE
 		}
 	}
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(IDisplayInformation* sender, IInspectable* args)
-#else
-	HRESULT D3D11RenderWindow::OnStereoEnabledChanged(IInspectable* sender)
-#endif
 	{
 		KFL_UNUSED(sender);
-#if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		KFL_UNUSED(args);
-#endif
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());

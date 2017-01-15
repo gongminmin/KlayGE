@@ -37,7 +37,7 @@
 #include <KlayGE/D3D12/D3D12Adapter.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
-#if defined KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #include <windows.ui.core.h>
 #include <windows.graphics.display.h>
 #endif
@@ -111,7 +111,7 @@ namespace KlayGE
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_RUNTIME
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 		HRESULT OnStereoEnabledChanged(ABI::Windows::Graphics::Display::IDisplayInformation* sender,
 			IInspectable* args);
 #endif
