@@ -1297,10 +1297,6 @@ namespace KlayGE
 						if (glloader_GLES_VERSION_3_0())
 						{
 							rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_DrawBuffers) : 0;
-							if (re.HackForAngle())
-							{
-								rules &= ~GSR_UseUBO;
-							}
 						}
 						else
 						{
