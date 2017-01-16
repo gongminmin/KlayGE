@@ -171,7 +171,7 @@ namespace KlayGE
 		static uint32_t const BC6_WEIGHT_SHIFT = 6;
 		static int32_t const BC6_WEIGHT_ROUND = 32;
 
-		enum ModeField
+		enum ModeField : uint8_t
 		{
 			NA, // N/A
 			M,  // Mode

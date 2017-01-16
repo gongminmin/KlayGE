@@ -107,7 +107,7 @@ namespace
 			: SceneObjectHelper(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
-			renderable_.reset(new RenderTile());
+			renderable_ = MakeSharedPtr<RenderTile>();
 		}
 
 		void TileSize(uint32_t tile_size)
@@ -207,7 +207,7 @@ namespace
 			: SceneObjectHelper(0),
 				position_(0.0f, 0.0f), scale_(1.0f)
 		{
-			renderable_.reset(new RenderGridBorder());
+			renderable_ = MakeSharedPtr<RenderGridBorder>();
 		}
 
 		void TileSize(uint32_t tile_size)
