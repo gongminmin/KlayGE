@@ -201,11 +201,7 @@ int main(int argc, char* argv[])
 
 	std::string fxml_name(argv[2]);
 	filesystem::path fxml_path(fxml_name);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	std::string const base_name = fxml_path.stem();
-#else
 	std::string const base_name = fxml_path.stem().string();
-#endif
 	filesystem::path fxml_directory = fxml_path.parent_path();
 	ResLoader::Instance().AddPath(fxml_directory.string());
 

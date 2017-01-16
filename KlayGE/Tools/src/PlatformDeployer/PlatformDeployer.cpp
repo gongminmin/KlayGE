@@ -434,11 +434,7 @@ int main(int argc, char* argv[])
 					if (filesystem::is_regular_file(i->status()))
 					{
 						std::smatch what;
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-						std::string const name = i->path().filename();
-#else
 						std::string const name = i->path().filename().string();
-#endif
 						if (std::regex_match(name, what, filter))
 						{
 							res_names.push_back(name);
@@ -460,11 +456,7 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		std::string ext_name = filesystem::path(res_names[0]).extension();
-#else
 		std::string ext_name = filesystem::path(res_names[0]).extension().string();
-#endif
 		if (".dds" == ext_name)
 		{
 			res_type = "albedo";

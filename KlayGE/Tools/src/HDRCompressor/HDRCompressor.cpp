@@ -452,13 +452,8 @@ int main(int argc, char* argv[])
 	}
 
 	filesystem::path output_path(argv[1]);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-	std::string y_file = output_path.stem() + "_y" + output_path.extension();
-	std::string c_file = output_path.stem() + "_c" + output_path.extension();
-#else
 	std::string y_file = output_path.stem().string() + "_y" + output_path.extension().string();
 	std::string c_file = output_path.stem().string() + "_c" + output_path.extension().string();
-#endif
 
 	CompressHDR(argv[1], y_file, c_file, y_format, c_format);
 

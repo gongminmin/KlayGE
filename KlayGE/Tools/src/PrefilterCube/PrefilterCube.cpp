@@ -487,11 +487,7 @@ int main(int argc, char* argv[])
 	else
 	{
 		filesystem::path output_path(argv[1]);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		output = output_path.stem() + "_filtered.dds";
-#else
 		output = output_path.stem().string() + "_filtered.dds";
-#endif
 	}
 
 	Timer timer;

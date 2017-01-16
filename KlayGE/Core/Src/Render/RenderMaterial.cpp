@@ -140,11 +140,7 @@ namespace
 				else
 				{
 					std::filesystem::path res_path(mtl_desc_.res_name);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-					mtl_desc_.mtl_data->name = res_path.stem();
-#else
 					mtl_desc_.mtl_data->name = res_path.stem().string();
-#endif
 				}
 			}
 

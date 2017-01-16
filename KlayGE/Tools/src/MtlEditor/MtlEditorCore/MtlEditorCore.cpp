@@ -426,18 +426,10 @@ namespace KlayGE
 		}
 
 		std::filesystem::path mesh_path = name;
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		last_file_path_ = mesh_path.parent_path();
-#else
 		last_file_path_ = mesh_path.parent_path().string();
-#endif
 		ResLoader::Instance().AddPath(last_file_path_);
 
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		std::string ext_name = mesh_path.extension();
-#else
 		std::string ext_name = mesh_path.extension().string();
-#endif
 		if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
 		{
 			std::string meshconv_name = "MeshConv" KLAYGE_DBG_SUFFIX;
@@ -475,11 +467,7 @@ namespace KlayGE
 
 		std::filesystem::path imposter_path = mesh_path;
 		imposter_path.replace_extension(".impml");
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		std::string imposter_name = imposter_path;
-#else
 		std::string imposter_name = imposter_path.string();
-#endif
 
 		if (model_)
 		{
@@ -490,11 +478,7 @@ namespace KlayGE
 			imposter_->DelFromSceneManager();
 		}
 
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		std::string mesh_name = mesh_path;
-#else
 		std::string mesh_name = mesh_path.string();
-#endif
 		model_ = MakeSharedPtr<ModelObject>(mesh_name);
 		model_->AddToSceneManager();
 		for (size_t i = 0; i < model_->GetRenderable()->NumSubrenderables(); ++ i)

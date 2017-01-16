@@ -259,19 +259,12 @@ namespace KlayGE
 	std::string ResLoader::AbsPath(std::string const & path)
 	{
 		std::filesystem::path new_path(path);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		if (!new_path.is_complete())
-#else
 		if (!new_path.is_absolute())
-#endif
 		{
 			std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
 			if (!std::filesystem::exists(full_path))
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-				full_path = std::filesystem::current_path<filesystem::path>() / new_path;
-#else
 				try
 				{
 					full_path = std::filesystem::current_path() / new_path;
@@ -280,7 +273,6 @@ namespace KlayGE
 				{
 					full_path = new_path;
 				}
-#endif
 				if (!std::filesystem::exists(full_path))
 				{
 					return "";

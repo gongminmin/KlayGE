@@ -50,13 +50,8 @@ namespace
 	// Return path when appended to a_From will resolve to same as a_To
 	filesystem::path make_relative(filesystem::path from_path, filesystem::path to_path)
 	{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		from_path = filesystem::complete(from_path);
-		to_path = filesystem::complete(to_path);
-#else
 		from_path = filesystem::absolute(from_path);
 		to_path = filesystem::absolute(to_path);
-#endif
 
 		filesystem::path::const_iterator iter_from(from_path.begin());
 		filesystem::path::const_iterator iter_to(to_path.begin());
@@ -1949,21 +1944,13 @@ namespace
 		std::vector<std::pair<filesystem::path, std::string>> deploy_files;
 		for (auto const & slot : all_texture_slots)
 		{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-			std::string ext_name = slot.first.extension();
-#else
 			std::string ext_name = slot.first.extension().string();
-#endif
 			if (ext_name != ".dds")
 			{
 				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
 				system(cmd.c_str());
 
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-				std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
-#else
 				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
-#endif
 				deploy_files.emplace_back(filesystem::path(tex_base + ".dds"),
 					mtls[slot.second[0].first].texture_slots[slot.second[0].second].first);
 			}
@@ -1973,11 +1960,7 @@ namespace
 		std::map<filesystem::path, std::vector<std::pair<size_t, size_t>>> augmented_texture_slots;
 		for (auto const & slot : all_texture_slots)
 		{
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-			std::string tex_base = (slot.first.parent_path() / filesystem::path(slot.first.stem())).string();
-#else
 			std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
-#endif
 			augmented_texture_slots[filesystem::path(tex_base + ".dds")].push_back(slot.second[0]);
 
 			for (size_t i = 1; i < slot.second.size(); ++ i)
@@ -2317,11 +2300,7 @@ int main(int argc, char* argv[])
 	if (meshml_name.empty())
 	{
 		filesystem::path input_path(input_name);
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		std::string base_name = input_path.stem();
-#else
 		std::string base_name = input_path.stem().string();
-#endif
 		filesystem::path folder = input_path.parent_path();
 		meshml_name = (folder / filesystem::path(base_name)).string() + ".7z//" + base_name + ".meshml";
 	}
@@ -2351,11 +2330,7 @@ int main(int argc, char* argv[])
 		{
 			target_folder = meshml_path.parent_path();
 		}
-#ifdef KLAYGE_TS_LIBRARY_FILESYSTEM_V2_SUPPORT
-		file_name = meshml_path.filename();
-#else
 		file_name = meshml_path.filename().string();
-#endif
 	}
 
 	std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
