@@ -21,7 +21,7 @@
 #include <vector>
 #include <windows.h>
 #include <KlayGE/SALWrapper.hpp>
-#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+#if (defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)) && !defined(KLAYGE_COMPILER_CLANGC2)
 #define __null
 #endif
 #include <dsound.h>

@@ -36,7 +36,14 @@
 #include <cmath>
 #include <limits>
 
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
+#endif
 #include <boost/lexical_cast.hpp>
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic pop
+#endif
 #include <boost/assert.hpp>
 
 namespace

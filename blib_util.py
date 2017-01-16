@@ -222,6 +222,18 @@ class build_info:
 						vcvarsall_path = try_vcvarsall
 					else:
 						log_error("Can't find the compiler.\n")
+			elif "clangc2" == compiler:
+				if "VS140COMNTOOLS" in env:
+					compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"
+					vcvarsall_path = "..\\..\\..\\VCVARSALL.BAT"
+				else:
+					try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\ClangC2\\bin\\x86\\"
+					try_vcvarsall = "..\\..\\..\\VCVARSALL.BAT"
+					if os.path.exists(try_folder + try_vcvarsall):
+						compiler_root = try_folder
+						vcvarsall_path = try_vcvarsall
+					else:
+						log_error("Can't find the compiler.\n")
 			elif "clang" == compiler:
 				clang_loc = subprocess.check_output("where clang++").decode()
 				clang_loc = clang_loc.split("\r\n")[0]
@@ -263,6 +275,9 @@ class build_info:
 			elif "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
+			elif "clangc2" == compiler:
+				compiler_name = "clang"
+				compiler_version = self.retrive_clang_version(compiler_root)
 			else:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
@@ -279,6 +294,9 @@ class build_info:
 			if "vc140" == compiler:
 				compiler_name = "vc"
 				compiler_version = 140
+			elif "clangc2" == compiler:
+				compiler_name = "clang"
+				compiler_version = self.retrive_clang_version(compiler_root)
 			else:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
@@ -358,7 +376,7 @@ class build_info:
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
-	def retrive_clang_version(self):
+	def retrive_clang_version(self, path = ""):
 		if ("android" == self.target_platform):
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -367,7 +385,7 @@ class build_info:
 				prebuilt_clang_path = prebuilt_llvm_path + "\\prebuilt\\windows-x86_64\\bin"
 			clang_path = prebuilt_clang_path + "\\clang"
 		else:
-			clang_path = "clang"
+			clang_path = path + "clang"
 		clang_ver = subprocess.check_output([clang_path, "--version"]).decode()
 		clang_ver_tokens = clang_ver.split()
 		for i in range(0, len(clang_ver_tokens)):
@@ -420,7 +438,14 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 	toolset_name = ""
 	if (0 == build_info.project_type.find("vs")) and (not build_info.is_windows_store):
-		toolset_name = "-T v%s" % build_info.compiler_version
+		if "vc" == build_info.compiler_name:
+			toolset_name = "v%s" % build_info.compiler_version
+		else:
+			if "vs2017" == build_info.project_type:
+				toolset_name = "v141_clang_c2"
+			else:
+				toolset_name = "v140_clang_c2"
+		toolset_name = "-T %s" % toolset_name
 	elif ("android" == build_info.target_platform):
 		android_ndk_path = os.environ["ANDROID_NDK"]
 		prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -496,7 +521,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				log_error("Config %s failed." % name)
 
 			build_cmd = batch_command(build_info.host_platform)
-			if "vc" == build_info.compiler_name:
+			if 0 == build_info.project_type.find("vs"):
 				build_cmd.add_command('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
 			for config in build_info.cfg:
 				if 0 == build_info.project_type.find("vs"):

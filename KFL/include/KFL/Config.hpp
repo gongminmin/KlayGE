@@ -146,6 +146,26 @@
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
+	#elif defined(_MSC_VER)
+		#if CLANG_VERSION >= 36
+			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+		#else
+			#error "Unsupported compiler version. Please install clang++ 3.6 or up."
+		#endif
+
+		#define KLAYGE_COMPILER_CLANGC2
+
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT
+
+		#ifndef _CRT_SECURE_NO_DEPRECATE
+			#define _CRT_SECURE_NO_DEPRECATE
+		#endif
+		#ifndef _SCL_SECURE_NO_DEPRECATE
+			#define _SCL_SECURE_NO_DEPRECATE
+		#endif
 	#else
 		#error "Clang++ on an unknown platform. Only Apple and Windows are supported."
 	#endif

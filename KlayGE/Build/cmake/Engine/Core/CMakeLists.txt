@@ -29,7 +29,7 @@ DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_c.dds" "cbda47a1
 DOWNLOAD_FILE("KlayGE/media/Textures/Cube/uffizi_cross_filtered_y.dds" "cbda47a1678ce70b6720856736100979d469e159" "c515b8aed52a6eafee96ea4d32b60eaf746ea985")
 DOWNLOAD_FILE("KlayGE/media/Textures/Juda/klayge_logo.jdt" "cbda47a1678ce70b6720856736100979d469e159" "4fed908fd641b6c536fee9f733dba37d4531079a")
 
-IF(NOT MSVC)
+IF(NOT KLAYGE_COMPILER_MSVC)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
 ENDIF()
 
@@ -503,7 +503,7 @@ ELSEIF(KLAYGE_PLATFORM_LINUX)
 		debug glloader${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader${KLAYGE_OUTPUT_SUFFIX})
 ENDIF()
 
-IF(NOT MSVC)
+IF(NOT KLAYGE_COMPILER_MSVC)
 	SET(FS_LIB ${Boost_FILESYSTEM_LIBRARY})
 	IF(KLAYGE_COMPILER_GCC AND (KLAYGE_COMPILER_VERSION STRGREATER "60"))
 		SET(FS_LIB "stdc++fs")

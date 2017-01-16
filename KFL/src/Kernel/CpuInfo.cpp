@@ -95,7 +95,7 @@ namespace
 
 
 #if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
-	enum CPUIDFeatureMask
+	enum CPUIDFeatureMask : uint32_t
 	{
 		// In EBX of type 1. Intel only.
 		CFM_LogicalProcessorCount_Intel = 0x00FF0000,
@@ -124,10 +124,10 @@ namespace
 		CFM_AVX2		= 1UL << 5,
 
 		// In EAX of type 4. Intel only.
-		CFM_NC_Intel                = 0xFC000000,
+		CFM_NC_Intel				= 0xFC000000,
 
 		// In ECX of type 0x80000001. AMD only.
-		CFM_CmpLegacy_AMD           = 0x00000002,
+		CFM_CmpLegacy_AMD			= 0x00000002,
 		CFM_LZCNT_AMD				= 1UL << 5,
 		CFM_SSE4A_AMD				= 1UL << 6,
 		CFM_MisalignedSSE_AMD		= 1UL << 7,
@@ -137,8 +137,8 @@ namespace
 		CFM_X64						= 1UL << 29,
 
 		// In ECX of type 0x80000008. AMD only.
-		CFM_NC_AMD                  = 0x000000FF,
-		CFM_ApicIdCoreIdSize_AMD    = 0x0000F000,
+		CFM_NC_AMD					= 0x000000FF,
+		CFM_ApicIdCoreIdSize_AMD	= 0x0000F000,
 	};
 
 	class ApicExtractor
