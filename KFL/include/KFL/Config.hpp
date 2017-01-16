@@ -106,35 +106,6 @@
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
-	#elif defined(__MINGW32__)
-		#if CLANG_VERSION >= 36
-			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
-		#else
-			#error "Unsupported compiler version. Please install clang++ 3.6 or up."
-		#endif
-			
-		#include <bits/c++config.h>
-		#ifdef _GLIBCXX_USE_FLOAT128
-			#undef _GLIBCXX_USE_FLOAT128
-		#endif
-		#ifdef _GLIBCXX_USE_INT128
-			#undef _GLIBCXX_USE_INT128
-		#endif
-
-		#ifdef __GLIBCXX__
-			#if __GLIBCXX__ < 20150422 // g++ 5.1
-				#error "Unsupported library version. Please install clang++ with g++ 5.1 or up."
-			#endif
-			#if !defined(_GLIBCXX_HAS_GTHREADS)
-				#error "_GLIBCXX_HAS_GTHREADS must be turned on."
-			#endif
-
-			#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
-			#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-		#endif
-
-		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
-		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 	#elif defined(__ANDROID__)
 		#if CLANG_VERSION >= 36
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
@@ -272,10 +243,8 @@
 	#endif
 
 	#if defined(__MINGW32__)
-		#if !defined(__clang__)
-			#define KLAYGE_COMPILER_NAME mgw
-			#include <_mingw.h>
-		#endif
+		#define KLAYGE_COMPILER_NAME mgw
+		#include <_mingw.h>
 	#else
 		#include <sdkddkver.h>
 	#endif
