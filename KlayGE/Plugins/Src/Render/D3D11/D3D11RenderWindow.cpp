@@ -301,10 +301,10 @@ namespace KlayGE
 			main_wnd_ = true;
 		}
 
-		Verify(!!d3d_device);
-		Verify(!!d3d_imm_ctx);
-		KLAYGE_ASSUME(!!d3d_device);
-		KLAYGE_ASSUME(!!d3d_imm_ctx);
+		Verify(d3d_device != nullptr);
+		Verify(d3d_imm_ctx != nullptr);
+		KLAYGE_ASSUME(d3d_device != nullptr);
+		KLAYGE_ASSUME(d3d_imm_ctx != nullptr);
 
 		depth_stencil_fmt_ = settings.depth_stencil_fmt;
 		if (IsDepthFormat(depth_stencil_fmt_))

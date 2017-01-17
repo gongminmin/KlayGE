@@ -454,10 +454,15 @@ namespace KlayGE
 		if (d3d_11_runtime_sub_ver_ >= 4)
 		{
 			device_lost_event_ = ::CreateEventEx(nullptr, nullptr, CREATE_EVENT_MANUAL_RESET, EVENT_ALL_ACCESS);
-			thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
-
-			::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, NULL);
-			TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+			if (device_lost_event_ != nullptr)
+			{
+				thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
+				if (thread_pool_wait_ != nullptr)
+				{
+					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, NULL);
+					TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+				}
+			}
 		}
 	}
 

@@ -309,8 +309,10 @@ namespace
 				tech = ppll_render_tech_;
 				rl = rl_quad_.get();
 			}
-			else if (OM_AdaptiveTransparency == mode_)
+			else
 			{
+				BOOST_ASSERT(OM_AdaptiveTransparency == mode_);
+
 				effect = at_effect_.get();
 				tech = at_render_tech_;
 				rl = rl_quad_.get();

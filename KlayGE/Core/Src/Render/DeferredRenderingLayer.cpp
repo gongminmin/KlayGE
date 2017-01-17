@@ -2588,6 +2588,8 @@ namespace KlayGE
 					case LightSource::LT_Sun:
 						{
 							sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
+							BOOST_ASSERT(sm_camera);
+							KLAYGE_ASSUME(sm_camera);
 
 							*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
@@ -2760,6 +2762,7 @@ namespace KlayGE
 					}
 				}
 				BOOST_ASSERT(sm_camera);
+				KLAYGE_ASSUME(sm_camera);
 
 				*reinterpret_cast<uint32_t*>(lights_type + shadowing_channel * lights_type_param_->Stride()) = type;
 
