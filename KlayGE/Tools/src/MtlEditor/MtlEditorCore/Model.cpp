@@ -402,7 +402,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	if (has_skinned)
 	{
 		effect_ = SyncLoadRenderEffect("MtlEditorSkinning128.fxml");
-		if (!effect_->TechniqueByName("GBufferRT0Tech")->Validate())
+		if (!effect_->TechniqueByName("GBufferMRTTech")->Validate())
 		{
 			effect_ = SyncLoadRenderEffect("MtlEditorSkinning64.fxml");
 		}
