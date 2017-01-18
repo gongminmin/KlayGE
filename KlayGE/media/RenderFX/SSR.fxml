@@ -40,7 +40,7 @@
 
 	<shader>
 		<![CDATA[
-float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool front_side, bool strictness)
+float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool front_side, float depth_threshold)
 {
 	normal = normalize(normal); // eye space normal 
 	float3 view_dir = normalize(pos_es); // eye space view direction
@@ -141,8 +141,8 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		}
 
 		float4 ret;
-		if (!strictness || ((sample_z < near_q_far.z - 1e-6f)
-			&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q_far.x, near_q_far.y)) < 0.1f)))
+		if ((sample_z < near_q_far.z - 1e-6f)
+			&& (abs(sample_z - non_linear_depth_to_linear(sample_tex_pos.z, near_q_far.x, near_q_far.y)) < depth_threshold))
 		{
 			float reflect_dir_fade_out_factor = 1 - orientation_factor;
 			float screen_edge_fade_out_factor = saturate((distance(sample_tex_pos.xy, 0.5f) - 0.4f) * 3);
@@ -179,7 +179,7 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 {
 	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
 	float3 normal = GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc));
-	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0);
+	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0.1f);
 	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(g_buffer_1_tex.Sample(ssr_linear_sampler, tc))).x;
 	return float4(clr.xyz, saturate(clr.w * fresnel));
 }

@@ -103,6 +103,17 @@ namespace
 			*(effect_->ParameterByName("interpolate_frac")) = frac;
 		}
 
+		void SkylightTex(TexturePtr const & y_cube, TexturePtr const & c_cube)
+		{
+			*(effect_->ParameterByName("skybox_tex")) = y_cube;
+			*(effect_->ParameterByName("skybox_C_tex")) = c_cube;
+		}
+
+		void FogColor(Color const & fog_color)
+		{
+			*(effect_->ParameterByName("fog_color")) = float3(fog_color.r(), fog_color.g(), fog_color.b());
+		}
+
 		void OnRenderBegin()
 		{
 			InfTerrainRenderable::OnRenderBegin();
@@ -514,6 +525,16 @@ namespace
 			}
 		}
 
+		void SkylightTex(TexturePtr const & y_cube, TexturePtr const & c_cube)
+		{
+			checked_pointer_cast<RenderOcean>(renderable_)->SkylightTex(y_cube, c_cube);
+		}
+
+		void FogColor(Color const & fog_color)
+		{
+			checked_pointer_cast<RenderOcean>(renderable_)->FogColor(fog_color);
+		}
+
 	private:
 		void GenWaveTextures()
 		{
@@ -837,6 +858,8 @@ void OceanApp::OnCreate()
 
 	ocean_ = MakeSharedPtr<OceanObject>();
 	ocean_->AddToSceneManager();
+	checked_pointer_cast<OceanObject>(ocean_)->SkylightTex(y_cube, c_cube);
+	checked_pointer_cast<OceanObject>(ocean_)->FogColor(fog_color);
 
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);

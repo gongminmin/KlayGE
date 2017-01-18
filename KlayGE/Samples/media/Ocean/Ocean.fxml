@@ -197,9 +197,17 @@ float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0,
 	float3 normal = view[1].xyz;
 
 	eye_dir = normalize(eye_dir);
+	
+	float3 reflect_vec = normalize(reflect(-eye_dir, normal));
+	reflect_vec = mul(reflect_vec, (float3x3)inv_view);
+	float3 sky_reflection = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, reflect_vec).r,
+		skybox_C_tex.Sample(skybox_sampler, reflect_vec)).rgb;		
+	float fog = saturate(normalize(reflect_vec).y * 4.2 - 0.2);
+	fog *= fog * (3 - 2 * fog);
+	sky_reflection = lerp(fog_color, sky_reflection, fog);
 
-	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, 1, 0);
-	float3 reflection = reflection4.xyz * reflection4.w;
+	float4 reflection4 = CalcSSR(tc, normal, -eye_dir, -eye_dir, 1, 500.0f);
+	float3 reflection = lerp(sky_reflection, reflection4.xyz, reflection4.w);
 	return float4(reflection, 1);
 }
 
