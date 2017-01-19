@@ -204,7 +204,7 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="@CMAKE_BINARY_DIR@\Tools\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">
+    <ProjectReference Include="@WRAPPER_DIR@\Tools\MtlEditor\MtlEditorCoreWrapper\MtlEditorCoreWrapper.vcxproj">
       <Project>{3917feeb-9015-3f06-9442-c9a0b78af479}</Project>
       <Name>MtlEditorCoreWrapper</Name>
     </ProjectReference>

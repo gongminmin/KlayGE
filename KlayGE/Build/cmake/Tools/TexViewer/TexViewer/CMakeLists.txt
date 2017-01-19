@@ -7,6 +7,7 @@ DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/R.png" "7017f9e98422e
 DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/Save.png" "7017f9e98422e295d76b70000276676386c16658" "1bba12c7f5c9b339e15f5d73507988f14bfdd7e2")
 DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/SaveAs.png" "7017f9e98422e295d76b70000276676386c16658" "43561560c76dad3bd62c80edd17d569ad39651d7")
 
+STRING(REPLACE "/" "\\" WRAPPER_DIR ${CMAKE_BINARY_DIR})
 CONFIGURE_FILE(
 	${KLAYGE_PROJECT_DIR}/Tools/src/TexViewer/TexViewer/TexViewer.csproj.in
 	${KLAYGE_PROJECT_DIR}/Tools/src/TexViewer/TexViewer/TexViewer${KLAYGE_OUTPUT_SUFFIX}.csproj

@@ -166,7 +166,7 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="@CMAKE_BINARY_DIR@\Tools\TexViewer\TexViewerCoreWrapper\TexViewerCoreWrapper.vcxproj">
+    <ProjectReference Include="@WRAPPER_DIR@\Tools\TexViewer\TexViewerCoreWrapper\TexViewerCoreWrapper.vcxproj">
       <Project>{87cc476a-db48-3dfd-99fd-a4435721c4a6}</Project>
       <Name>TexViewerCoreWrapper</Name>
     </ProjectReference>

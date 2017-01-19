@@ -15,6 +15,7 @@ DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Selection.png" "1716601
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Translation.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "f576b607913cfad949dbc08f041419b828ec8a65")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Undo.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "23c318d9bbe5c95b8b0fbbea662facd56a3a66dc")
 
+STRING(REPLACE "/" "\\" WRAPPER_DIR ${CMAKE_BINARY_DIR})
 CONFIGURE_FILE(
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/KGEditor.csproj.in
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/KGEditor${KLAYGE_OUTPUT_SUFFIX}.csproj
