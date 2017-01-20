@@ -74,7 +74,7 @@ namespace KlayGE
 
 		mipmap_start_offset_.resize(num_mip_maps_ + 1);
 		mipmap_start_offset_[0] = 0;
-		for (uint32_t level = 0; level < num_mip_maps_; ++level)
+		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 		{
 			uint32_t const w = this->Width(level);
 			uint32_t const h = this->Height(level);

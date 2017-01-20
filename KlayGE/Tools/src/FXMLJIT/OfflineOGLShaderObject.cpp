@@ -362,29 +362,15 @@ namespace KlayGE
 									break;
 
 								default:
-								case 0:
+									BOOST_ASSERT(false);
 									gsv = GSV_400;
 									break;
 								}
 								break;
 
-							case 3:
 							default:
-								switch (caps.minor_version)
-								{
-								case 3:
-									gsv = GSV_330;
-									break;
-
-								case 2:
-									gsv = GSV_150;
-									break;
-
-								case 1:
-								default:
-									gsv = GSV_140;
-									break;
-								}
+								BOOST_ASSERT(false);
+								gsv = GSV_110;
 								break;
 							}
 

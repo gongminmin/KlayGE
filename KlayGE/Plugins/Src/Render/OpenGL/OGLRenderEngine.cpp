@@ -260,25 +260,9 @@ namespace KlayGE
 		{
 			native_shader_platform_name_ = "gl_4_2";
 		}
-		else if (glloader_GL_VERSION_4_1())
+		else //if (glloader_GL_VERSION_4_1())
 		{
 			native_shader_platform_name_ = "gl_4_1";
-		}
-		else if (glloader_GL_VERSION_4_0())
-		{
-			native_shader_platform_name_ = "gl_4_0";
-		}
-		else if (glloader_GL_VERSION_3_3())
-		{
-			native_shader_platform_name_ = "gl_3_3";
-		}
-		else if (glloader_GL_VERSION_3_2())
-		{
-			native_shader_platform_name_ = "gl_3_2";
-		}
-		else //if (glloader_GL_VERSION_3_1())
-		{
-			native_shader_platform_name_ = "gl_3_1";
 		}
 
 		this->FillRenderDeviceCaps();
@@ -1108,7 +1092,7 @@ namespace KlayGE
 
 		uint32_t const num_passes = tech.NumPasses();
 		GraphicsBufferPtr const & buff_args = rl.GetIndirectArgs();
-		if ((glloader_GL_VERSION_4_0() || glloader_GL_ARB_draw_indirect()) && buff_args)
+		if (buff_args)
 		{
 			this->BindBuffer(GL_DRAW_INDIRECT_BUFFER, checked_pointer_cast<OGLGraphicsBuffer>(buff_args)->GLvbo());
 			GLvoid* args_offset = reinterpret_cast<GLvoid*>(static_cast<GLintptr>(rl.IndirectArgsOffset()));
@@ -1173,7 +1157,7 @@ namespace KlayGE
 
 			num_draws_just_called_ += num_passes;
 		}
-		else if ((glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()) && (rl.NumInstances() > 1))
+		else if (rl.NumInstances() > 1)
 		{
 			if (rl.UseIndices())
 			{
@@ -1557,28 +1541,7 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_vertex_texture_units = static_cast<uint8_t>(temp);
 
-		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_gpu_shader5())
-		{
-			caps_.max_shader_model = ShaderModel(5, 0);
-		}
-		else
-		{
-			if (caps_.max_vertex_texture_units != 0)
-			{
-				if (glloader_GL_EXT_gpu_shader4())
-				{
-					caps_.max_shader_model = ShaderModel(4, 0);
-				}
-				else
-				{
-					caps_.max_shader_model = ShaderModel(3, 0);
-				}
-			}
-			else
-			{
-				caps_.max_shader_model = ShaderModel(2, 0);
-			}
-		}
+		caps_.max_shader_model = ShaderModel(5, 0);
 
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &temp);
 		caps_.max_texture_height = caps_.max_texture_width = temp;
@@ -1594,15 +1557,8 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_pixel_texture_units = static_cast<uint8_t>(temp);
 
-		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
-		{
-			glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &temp);
-			caps_.max_geometry_texture_units = static_cast<uint8_t>(temp);
-		}
-		else
-		{
-			caps_.max_geometry_texture_units = 0;
-		}
+		glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &temp);
+		caps_.max_geometry_texture_units = static_cast<uint8_t>(temp);
 
 		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
@@ -1644,18 +1600,10 @@ namespace KlayGE
 		}
 		caps_.logic_op_support = true;
 		caps_.independent_blend_support = true;
-		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_draw_indirect())
-		{
-			caps_.draw_indirect_support = true;
-		}
-		else
-		{
-			caps_.draw_indirect_support = false;
-		}
+		caps_.draw_indirect_support = true;
 		caps_.no_overwrite_support = false;
 		caps_.full_npot_texture_support = true;
-		if ((caps_.max_texture_array_length > 1)
-			&& (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4()))
+		if (caps_.max_texture_array_length > 1)
 		{
 			caps_.render_to_texture_array_support = true;
 		}
@@ -1665,28 +1613,12 @@ namespace KlayGE
 		}
 		caps_.load_from_buffer_support = true;
 
-		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_geometry_shader4() || glloader_GL_EXT_geometry_shader4())
-		{
-			caps_.gs_support = true;
-		}
-		else
-		{
-			caps_.gs_support = false;
-		}
-			
-		caps_.cs_support = false;
-		if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
-		{
-			caps_.hs_support = true;
-			caps_.ds_support = true;
-			caps_.tess_method = TM_Hardware;
-		}
-		else
-		{
-			caps_.hs_support = false;
-			caps_.ds_support = false;
-			caps_.tess_method = TM_No;
-		}
+		caps_.gs_support = true;
+
+		caps_.cs_support = false;	// TODO
+		caps_.hs_support = true;
+		caps_.ds_support = true;
+		caps_.tess_method = TM_Hardware;
 
 		std::string vendor(reinterpret_cast<char const *>(glGetString(GL_VENDOR)));
 		if (vendor.find("NVIDIA", 0) != std::string::npos)
@@ -1761,10 +1693,7 @@ namespace KlayGE
 		vertex_format_.push_back(EF_GR32F);
 		vertex_format_.push_back(EF_BGR32F);
 		vertex_format_.push_back(EF_ABGR32F);
-		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
-		{
-			vertex_format_.push_back(EF_SIGNED_A2BGR10);
-		}
+		vertex_format_.push_back(EF_SIGNED_A2BGR10);
 		vertex_format_.push_back(EF_R16F);
 		vertex_format_.push_back(EF_GR16F);
 		vertex_format_.push_back(EF_BGR16F);

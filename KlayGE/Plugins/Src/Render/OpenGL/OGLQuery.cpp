@@ -72,26 +72,12 @@ namespace KlayGE
 
 	void OGLConditionalRender::Begin()
 	{
-		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_occlusion_query2())
-		{
-			glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
-		}
-		else
-		{
-			glBeginQuery(GL_SAMPLES_PASSED, query_);
-		}
+		glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
 	}
 
 	void OGLConditionalRender::End()
 	{
-		if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_occlusion_query2())
-		{
-			glEndQuery(GL_ANY_SAMPLES_PASSED);
-		}
-		else
-		{
-			glEndQuery(GL_SAMPLES_PASSED);
-		}
+		glEndQuery(GL_ANY_SAMPLES_PASSED);
 	}
 
 	void OGLConditionalRender::BeginConditionalRender()

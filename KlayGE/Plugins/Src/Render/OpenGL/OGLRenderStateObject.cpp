@@ -100,16 +100,13 @@ namespace KlayGE
 
 		if (cur_rs_desc.depth_clip_enable != rs_desc_.depth_clip_enable)
 		{
-			if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_depth_clamp())
+			if (rs_desc_.depth_clip_enable)
 			{
-				if (rs_desc_.depth_clip_enable)
-				{
-					glDisable(GL_DEPTH_CLAMP);
-				}
-				else
-				{
-					glEnable(GL_DEPTH_CLAMP);
-				}
+				glDisable(GL_DEPTH_CLAMP);
+			}
+			else
+			{
+				glEnable(GL_DEPTH_CLAMP);
 			}
 		}
 
@@ -263,60 +260,24 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GL_VERSION_4_0())
+		for (int i = 0; i < 8; ++ i)
 		{
-			for (int i = 0; i < 8; ++i)
+			if (cur_bs_desc.blend_op[i] != bs_desc_.blend_op[i])
 			{
-				if (cur_bs_desc.blend_op[i] != bs_desc_.blend_op[i])
-				{
-					glBlendEquationSeparatei(i, ogl_blend_op_, ogl_blend_op_alpha_);
-				}
-				if ((cur_bs_desc.src_blend[i] != bs_desc_.src_blend[i])
-					|| (cur_bs_desc.dest_blend[i] != bs_desc_.dest_blend[i])
-					|| (cur_bs_desc.src_blend_alpha[i] != bs_desc_.src_blend_alpha[i])
-					|| (cur_bs_desc.dest_blend_alpha[i] != bs_desc_.dest_blend_alpha[i]))
-				{
-					glBlendFuncSeparatei(i, ogl_src_blend_, ogl_dest_blend_,
-						ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
-				}
+				glBlendEquationSeparatei(i, ogl_blend_op_, ogl_blend_op_alpha_);
 			}
-		}
-		else if (glloader_GL_ARB_draw_buffers_blend())
-		{
-			for (int i = 0; i < 8; ++i)
+			if ((cur_bs_desc.src_blend[i] != bs_desc_.src_blend[i])
+				|| (cur_bs_desc.dest_blend[i] != bs_desc_.dest_blend[i])
+				|| (cur_bs_desc.src_blend_alpha[i] != bs_desc_.src_blend_alpha[i])
+				|| (cur_bs_desc.dest_blend_alpha[i] != bs_desc_.dest_blend_alpha[i]))
 			{
-				if (cur_bs_desc.blend_op[i] != bs_desc_.blend_op[i])
-				{
-					glBlendEquationSeparateiARB(i, ogl_blend_op_, ogl_blend_op_alpha_);
-				}
-				if ((cur_bs_desc.src_blend[i] != bs_desc_.src_blend[i])
-					|| (cur_bs_desc.dest_blend[i] != bs_desc_.dest_blend[i])
-					|| (cur_bs_desc.src_blend_alpha[i] != bs_desc_.src_blend_alpha[i])
-					|| (cur_bs_desc.dest_blend_alpha[i] != bs_desc_.dest_blend_alpha[i]))
-				{
-					glBlendFuncSeparateiARB(i, ogl_src_blend_, ogl_dest_blend_,
-						ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
-				}
-			}
-		}
-		else
-		{
-			if (cur_bs_desc.blend_op[0] != bs_desc_.blend_op[0])
-			{
-				glBlendEquationSeparate(ogl_blend_op_, ogl_blend_op_alpha_);
-			}
-			if ((cur_bs_desc.src_blend[0] != bs_desc_.src_blend[0])
-				|| (cur_bs_desc.dest_blend[0] != bs_desc_.dest_blend[0])
-				|| (cur_bs_desc.src_blend_alpha[0] != bs_desc_.src_blend_alpha[0])
-				|| (cur_bs_desc.dest_blend_alpha[0] != bs_desc_.dest_blend_alpha[0]))
-			{
-				glBlendFuncSeparate(ogl_src_blend_, ogl_dest_blend_,
+				glBlendFuncSeparatei(i, ogl_src_blend_, ogl_dest_blend_,
 					ogl_src_blend_alpha_, ogl_dest_blend_alpha_);
 			}
 		}
 		if (bs_desc_.independent_blend_enable)
 		{
-			for (int i = 0; i < 8; ++i)
+			for (int i = 0; i < 8; ++ i)
 			{
 				if (cur_bs_desc.color_write_mask[i] != bs_desc_.color_write_mask[i])
 				{
@@ -378,16 +339,13 @@ namespace KlayGE
 
 		glPolygonOffset(rs_desc.polygon_offset_factor, rs_desc.polygon_offset_units);
 
-		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_depth_clamp())
+		if (rs_desc.depth_clip_enable)
 		{
-			if (rs_desc.depth_clip_enable)
-			{
-				glDisable(GL_DEPTH_CLAMP);
-			}
-			else
-			{
-				glEnable(GL_DEPTH_CLAMP);
-			}
+			glDisable(GL_DEPTH_CLAMP);
+		}
+		else
+		{
+			glEnable(GL_DEPTH_CLAMP);
 		}
 
 		if (rs_desc.scissor_enable)

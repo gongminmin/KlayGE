@@ -72,693 +72,6 @@ namespace
 	};
 
 	template <>
-	class SetOGLShaderParameter<bool>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			bool v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform1i(location_, v);
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint32_t>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			uint32_t v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform1ui(location_, v);
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int32_t>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			int32_t v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform1i(location_, v);
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			float v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform1f(location_, v);
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint2>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			uint2 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform2uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint3>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			uint3 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform3uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint4>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			uint4 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform4uiv(location_, 1, reinterpret_cast<GLuint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int2>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			int2 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform2iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int3>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			int3 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform3iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int4>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			int4 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform4iv(location_, 1, reinterpret_cast<GLint*>(&v.x()));
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float2>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			float2 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform2fv(location_, 1, &v.x());
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float3>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			float3 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform3fv(location_, 1, &v.x());
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float4>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			float4 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.Uniform4fv(location_, 1, &v.x());
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float4x4>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			float4x4 v;
-			param_->Value(v);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.UniformMatrix4fv(location_, 1, true, &v[0]);
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<bool*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<bool> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				std::vector<int> tmp(v.begin(), v.end());
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform1iv(location_, static_cast<int>(tmp.size()), &tmp[0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint32_t*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<uint32_t> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform1uiv(location_, static_cast<int>(v.size()), reinterpret_cast<GLuint*>(&v[0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int32_t*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<int32_t> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform1iv(location_, static_cast<int>(v.size()), reinterpret_cast<GLint*>(&v[0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform1fv(location_, static_cast<int>(v.size()), &v[0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint2*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<uint2> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform2uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint3*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<uint3> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform3uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<uint4*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<uint4> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform4uiv(location_, static_cast<long>(v.size()), reinterpret_cast<GLuint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int2*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<int2> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform2iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int3*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<int3> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform3iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<int4*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<int4> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform4iv(location_, static_cast<long>(v.size()), reinterpret_cast<GLint*>(&v[0][0]));
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float2*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float2> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform2fv(location_, static_cast<long>(v.size()), &v[0][0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float3*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float3> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform3fv(location_, static_cast<long>(v.size()), &v[0][0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float4*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float4> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.Uniform4fv(location_, static_cast<long>(v.size()), &v[0][0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
-	class SetOGLShaderParameter<float4x4*>
-	{
-	public:
-		SetOGLShaderParameter(GLint location, RenderEffectParameter* param)
-			: location_(location), param_(param)
-		{
-		}
-
-		void operator()()
-		{
-			std::vector<float4x4> v;
-			param_->Value(v);
-
-			if (!v.empty())
-			{
-				OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.UniformMatrix4fv(location_, static_cast<GLsizei>(v.size()), false, &v[0][0]);
-			}
-		}
-
-	private:
-		GLint location_;
-		RenderEffectParameter* param_;
-	};
-
-	template <>
 	class SetOGLShaderParameter<GraphicsBufferPtr>
 	{
 	public:
@@ -1314,25 +627,9 @@ namespace KlayGE
 						{
 							gsv = GSV_420;
 						}
-						else if (glloader_GL_VERSION_4_1())
+						else //if (glloader_GL_VERSION_4_1())
 						{
 							gsv = GSV_410;
-						}
-						else if (glloader_GL_VERSION_4_0())
-						{
-							gsv = GSV_400;
-						}
-						else if (glloader_GL_VERSION_3_3())
-						{
-							gsv = GSV_330;
-						}
-						else if (glloader_GL_VERSION_3_2())
-						{
-							gsv = GSV_150;
-						}
-						else //if (glloader_GL_VERSION_3_1())
-						{
-							gsv = GSV_140;
 						}
 
 						DXBC2GLSL::DXBC2GLSL dxbc2glsl;
@@ -1646,15 +943,12 @@ namespace KlayGE
 
 		if (is_validate_)
 		{
-			if (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary())
-			{
-				glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-			}
+			glProgramParameteri(glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
 			this->LinkGLSL();
 			this->AttachUBOs(effect);
 
-			if (is_validate_ && (glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()))
+			if (is_validate_)
 			{
 				GLint num = 0;
 				glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, &num);
@@ -1679,26 +973,21 @@ namespace KlayGE
 							RenderEffectParameter* p = effect.ParameterByName((*(*pnames_)[type])[pi]);
 							if (p)
 							{
-								if (REDT_buffer == p->Type())
-								{
-									parameter_bind_t pb;
-									pb.param = p;
-									pb.location = location;
+								BOOST_ASSERT(REDT_buffer == p->Type());
 
-									uint32_t index = static_cast<uint32_t>(textures_.size());
-									textures_.resize(index + 1);
-									gl_bind_targets_.resize(index + 1);
-									gl_bind_textures_.resize(index + 1);
+								parameter_bind_t pb;
+								pb.param = p;
+								pb.location = location;
 
-									pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(textures_,
-										gl_bind_targets_, gl_bind_textures_, location, index, p);
+								uint32_t index = static_cast<uint32_t>(textures_.size());
+								textures_.resize(index + 1);
+								gl_bind_targets_.resize(index + 1);
+								gl_bind_textures_.resize(index + 1);
 
-									param_binds_.push_back(pb);
-								}
-								else
-								{
-									param_binds_.push_back(this->GetBindFunc(location, p));
-								}
+								pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(textures_,
+									gl_bind_targets_, gl_bind_textures_, location, index, p);
+
+								param_binds_.push_back(pb);
 							}
 							else
 							{
@@ -1775,7 +1064,7 @@ namespace KlayGE
 			std::get<3>(ret->tex_sampler_binds_[i]) = std::get<3>(tex_sampler_binds_[i]);
 		}
 
-		if ((glloader_GL_VERSION_4_1() || glloader_GL_ARB_get_program_binary()) && glsl_bin_program_)
+		if (glsl_bin_program_)
 		{
 			ret->is_validate_ = is_validate_;
 			for (size_t type = 0; type < ST_NumShaderTypes; ++ type)
@@ -1843,27 +1132,22 @@ namespace KlayGE
 				if (pb.param)
 				{
 					RenderEffectParameter* p = effect.ParameterByName(pb.param->Name());
-					if (REDT_buffer == p->Type())
-					{
-						parameter_bind_t new_pb;
-						new_pb.param = p;
-						new_pb.location = pb.location;
+					BOOST_ASSERT(REDT_buffer == p->Type());
 
-						uint32_t index = static_cast<uint32_t>(ret->textures_.size());
-						ret->textures_.resize(index + 1);
-						ret->gl_bind_targets_.resize(index + 1);
-						ret->gl_bind_textures_.resize(index + 1);
+					parameter_bind_t new_pb;
+					new_pb.param = p;
+					new_pb.location = pb.location;
 
-						new_pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(ret->textures_,
-							ret->gl_bind_targets_, ret->gl_bind_textures_,
-							new_pb.location, index, p);
+					uint32_t index = static_cast<uint32_t>(ret->textures_.size());
+					ret->textures_.resize(index + 1);
+					ret->gl_bind_targets_.resize(index + 1);
+					ret->gl_bind_textures_.resize(index + 1);
 
-						ret->param_binds_.push_back(new_pb);
-					}
-					else
-					{
-						ret->param_binds_.push_back(ret->GetBindFunc(pb.location, p));
-					}
+					new_pb.func = SetOGLShaderParameter<GraphicsBufferPtr>(ret->textures_,
+						ret->gl_bind_targets_, ret->gl_bind_textures_,
+						new_pb.location, index, p);
+
+					ret->param_binds_.push_back(new_pb);
 				}
 				else
 				{
@@ -1913,176 +1197,6 @@ namespace KlayGE
 		{
 			return -1;
 		}
-	}
-
-	OGLShaderObject::parameter_bind_t OGLShaderObject::GetBindFunc(GLint location, RenderEffectParameter* param)
-	{
-		parameter_bind_t ret;
-		ret.param = param;
-		ret.location = location;
-
-		switch (param->Type())
-		{
-		case REDT_bool:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<bool*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<bool>(location, param);
-			}
-			break;
-
-		case REDT_uint:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<uint32_t*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<uint32_t>(location, param);
-			}
-			break;
-
-		case REDT_int:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<int32_t*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<int32_t>(location, param);
-			}
-			break;
-
-		case REDT_float:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<float*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<float>(location, param);
-			}
-			break;
-
-		case REDT_uint2:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<uint2*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<uint2>(location, param);
-			}
-			break;
-
-		case REDT_uint3:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<uint3*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<uint3>(location, param);
-			}
-			break;
-
-		case REDT_uint4:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<uint4*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<uint4>(location, param);
-			}
-			break;
-
-		case REDT_int2:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<int2*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<int2>(location, param);
-			}
-			break;
-
-		case REDT_int3:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<int3*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<int3>(location, param);
-			}
-			break;
-
-		case REDT_int4:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<int4*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<int4>(location, param);
-			}
-			break;
-
-		case REDT_float2:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<float2*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<float2>(location, param);
-			}
-			break;
-
-		case REDT_float3:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<float3*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<float3>(location, param);
-			}
-			break;
-
-		case REDT_float4:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<float4*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<float4>(location, param);
-			}
-			break;
-
-		case REDT_float4x4:
-			if (param->ArraySize())
-			{
-				ret.func = SetOGLShaderParameter<float4x4*>(location, param);
-			}
-			else
-			{
-				ret.func = SetOGLShaderParameter<float4x4>(location, param);
-			}
-			break;
-
-		default:
-			BOOST_ASSERT(false);
-			break;
-		}
-
-		return ret;
 	}
 
 	void OGLShaderObject::AttachGLSL(uint32_t type)
@@ -2146,31 +1260,12 @@ namespace KlayGE
 
 		glAttachShader(glsl_program_, object);
 
-		if (ST_GeometryShader == type)
-		{
-			if (!glloader_GL_VERSION_3_2())
-			{
-				if (glloader_GL_ARB_geometry_shader4())
-				{
-					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_INPUT_TYPE_ARB, gs_input_type_);
-					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_ARB, gs_output_type_);
-					glProgramParameteriARB(glsl_program_, GL_GEOMETRY_VERTICES_OUT_ARB, gs_max_output_vertex_);
-				}
-				else if (glloader_GL_EXT_geometry_shader4())
-				{
-					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_INPUT_TYPE_EXT, gs_input_type_);
-					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_OUTPUT_TYPE_EXT, gs_output_type_);
-					glProgramParameteriEXT(glsl_program_, GL_GEOMETRY_VERTICES_OUT_EXT, gs_max_output_vertex_);
-				}
-			}
-		}
-
 		glDeleteShader(object);
 	}
 
 	void OGLShaderObject::LinkGLSL()
 	{
-		if (glloader_GL_VERSION_3_3() && glsl_tfb_varyings_ && !glsl_tfb_varyings_->empty())
+		if (glsl_tfb_varyings_ && !glsl_tfb_varyings_->empty())
 		{
 			std::vector<GLchar const *> names(glsl_tfb_varyings_->size());
 			for (size_t i = 0; i < glsl_tfb_varyings_->size(); ++ i)
@@ -2341,83 +1436,79 @@ namespace KlayGE
 
 	void OGLShaderObject::FillTFBVaryings(ShaderDesc const & sd)
 	{
-		if (glloader_GL_VERSION_3_3())
+		if (!sd.so_decl.empty())
 		{
-			if (!sd.so_decl.empty())
+			glsl_tfb_varyings_ = MakeSharedPtr<std::vector<std::string>>();
+		}
+
+		int slot = -1;
+		tfb_separate_attribs_ = false;
+		for (auto const & decl : sd.so_decl)
+		{
+			if (slot < 0)
 			{
-				glsl_tfb_varyings_ = MakeSharedPtr<std::vector<std::string>>();
+				slot = decl.slot;
+			}
+			else
+			{
+				if (slot != decl.slot)
+				{
+					tfb_separate_attribs_ = true;
+				}
 			}
 
-			int slot = -1;
-			tfb_separate_attribs_ = false;
-			for (auto const & decl : sd.so_decl)
+			std::string glsl_param_name;
+			switch (decl.usage)
 			{
-				if (slot < 0)
-				{
-					slot = decl.slot;
-				}
-				else
-				{
-					if (slot != decl.slot)
-					{
-						tfb_separate_attribs_ = true;
-					}
-				}
+			case VEU_Position:
+				glsl_param_name = "gl_Position";
+				break;
 
-				std::string glsl_param_name;
-				switch (decl.usage)
-				{
-				case VEU_Position:
-					glsl_param_name = "gl_Position";
-					break;
+			case VEU_Normal:
+				glsl_param_name = "v_NORMAL0";
+				break;
 
-				case VEU_Normal:
-					glsl_param_name = "v_NORMAL0";
-					break;
+			case VEU_Diffuse:
+				glsl_param_name = "v_COLOR0";
+				break;
 
-				case VEU_Diffuse:
-					glsl_param_name = "v_COLOR0";
-					break;
+			case VEU_Specular:
+				glsl_param_name = "v_COLOR1";
+				break;
 
-				case VEU_Specular:
-					glsl_param_name = "v_COLOR1";
-					break;
+			case VEU_BlendWeight:
+				glsl_param_name = "v_BLENDWEIGHT0";
+				break;
 
-				case VEU_BlendWeight:
-					glsl_param_name = "v_BLENDWEIGHT0";
-					break;
+			case VEU_BlendIndex:
+				glsl_param_name = "v_BLENDINDICES0";
+				break;
 
-				case VEU_BlendIndex:
-					glsl_param_name = "v_BLENDINDICES0";
-					break;
+			case VEU_TextureCoord:
+				glsl_param_name = "v_TEXCOORD" + boost::lexical_cast<std::string>(static_cast<int>(decl.usage_index));
+				break;
 
-				case VEU_TextureCoord:
-					glsl_param_name = "v_TEXCOORD" + boost::lexical_cast<std::string>(static_cast<int>(decl.usage_index));
-					break;
+			case VEU_Tangent:
+				glsl_param_name = "v_TANGENT0";
+				break;
 
-				case VEU_Tangent:
-					glsl_param_name = "v_TANGENT0";
-					break;
+			case VEU_Binormal:
+				glsl_param_name = "v_BINORMAL0";
+				break;
 
-				case VEU_Binormal:
-					glsl_param_name = "v_BINORMAL0";
-					break;
-
-				default:
-					BOOST_ASSERT(false);
-					glsl_param_name = "gl_Position";
-					break;
-				}
-
-				glsl_tfb_varyings_->push_back(glsl_param_name);
+			default:
+				BOOST_ASSERT(false);
+				glsl_param_name = "gl_Position";
+				break;
 			}
+
+			glsl_tfb_varyings_->push_back(glsl_param_name);
 		}
 	}
 
 	void OGLShaderObject::Bind()
 	{
-		if (glloader_GL_VERSION_3_3()
-			&& (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty()))
+		if (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
 		{
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
@@ -2466,8 +1557,7 @@ namespace KlayGE
 
 	void OGLShaderObject::Unbind()
 	{
-		if (glloader_GL_VERSION_3_3()
-			&& (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty()))
+		if (!(*glsl_srcs_)[ShaderObject::ST_PixelShader] || (*glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
 		{
 			glDisable(GL_RASTERIZER_DISCARD);
 		}

@@ -66,11 +66,6 @@ namespace KlayGE
 		available_versions.emplace_back("4.3", std::make_pair(4, 3));
 		available_versions.emplace_back("4.2", std::make_pair(4, 2));
 		available_versions.emplace_back("4.1", std::make_pair(4, 1));
-		available_versions.emplace_back("4.0", std::make_pair(4, 0));
-		available_versions.emplace_back("3.3", std::make_pair(3, 3));
-		available_versions.emplace_back("3.2", std::make_pair(3, 2));
-		available_versions.emplace_back("3.1", std::make_pair(3, 1));
-		available_versions.emplace_back("3.0", std::make_pair(3, 0));
 
 		for (size_t index = 0; index < settings.options.size(); ++ index)
 		{
@@ -315,7 +310,7 @@ namespace KlayGE
 		uint32_t sample_count = settings.sample_count;
 #endif
 
-		if (!glloader_GL_VERSION_3_1())
+		if (!glloader_GL_VERSION_4_1())
 		{
 			THR(std::errc::function_not_supported);
 		}
@@ -324,10 +319,7 @@ namespace KlayGE
 		glClampColor(GL_CLAMP_FRAGMENT_COLOR, GL_FALSE);
 		glClampColor(GL_CLAMP_READ_COLOR, GL_FALSE);
 
-		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_seamless_cube_map())
-		{
-			glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		}
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 #if defined KLAYGE_PLATFORM_WINDOWS
 		if (glloader_WGL_EXT_swap_control())

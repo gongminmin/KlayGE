@@ -106,7 +106,7 @@ namespace KlayGE
 			}
 		}
 
-		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+		if (this->InstanceStream())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->InstanceStream()));
 
@@ -149,30 +149,14 @@ namespace KlayGE
 						glVertexArrayVertexAttribOffsetEXT(vao, stream.GLvbo(), attr, num_components, type,
 							normalized, instance_size, offset);
 						glEnableVertexArrayAttribEXT(vao, attr);
-
-						if (glloader_GL_VERSION_3_3())
-						{
-							glVertexAttribDivisor(attr, 1);
-						}
-						else
-						{
-							glVertexAttribDivisorARB(attr, 1);
-						}
+						glVertexAttribDivisor(attr, 1);
 					}
 					else
 					{
 						glVertexAttribPointer(attr, num_components, type, normalized, instance_size,
 							reinterpret_cast<GLvoid*>(offset));
 						glEnableVertexAttribArray(attr);
-
-						if (glloader_GL_VERSION_3_3())
-						{
-							glVertexAttribDivisor(attr, 1);
-						}
-						else
-						{
-							glVertexAttribDivisorARB(attr, 1);
-						}
+						glVertexAttribDivisor(attr, 1);
 					}
 
 					used_streams[attr] = 1;
@@ -230,7 +214,7 @@ namespace KlayGE
 			}
 		}
 
-		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+		if (this->InstanceStream())
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{
@@ -251,28 +235,12 @@ namespace KlayGE
 					else if (glloader_GL_EXT_direct_state_access())
 					{
 						glDisableVertexArrayAttribEXT(vao, attr);
-
-						if (glloader_GL_VERSION_3_3())
-						{
-							glVertexAttribDivisor(attr, 0);
-						}
-						else
-						{
-							glVertexAttribDivisorARB(attr, 0);
-						}
+						glVertexAttribDivisor(attr, 0);
 					}
 					else
 					{
 						glDisableVertexAttribArray(attr);
-
-						if (glloader_GL_VERSION_3_3())
-						{
-							glVertexAttribDivisor(attr, 0);
-						}
-						else
-						{
-							glVertexAttribDivisorARB(attr, 0);
-						}
+						glVertexAttribDivisor(attr, 0);
 					}
 				}
 			}
@@ -315,7 +283,7 @@ namespace KlayGE
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
 			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
 		}
-		if (this->InstanceStream() && (glloader_GL_VERSION_3_3() || glloader_GL_ARB_instanced_arrays()))
+		if (this->InstanceStream())
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->InstanceStream()));
 			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());

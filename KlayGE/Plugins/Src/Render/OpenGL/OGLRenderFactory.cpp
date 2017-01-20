@@ -114,12 +114,7 @@ namespace KlayGE
 
 	FencePtr OGLRenderFactory::MakeFence()
 	{
-		FencePtr ret;
-		if (glloader_GL_VERSION_3_2() || glloader_GL_ARB_sync())
-		{
-			ret = MakeSharedPtr<OGLFence>();
-		}
-		return ret;
+		return MakeSharedPtr<OGLFence>();
 	}
 
 	RenderViewPtr OGLRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

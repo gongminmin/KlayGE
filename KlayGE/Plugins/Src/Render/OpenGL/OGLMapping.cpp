@@ -127,48 +127,16 @@ namespace KlayGE
 			return GL_ONE_MINUS_CONSTANT_COLOR;
 
 		case ABF_Src1_Alpha:
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
-			{
-				return GL_SRC1_ALPHA;
-			}
-			else
-			{
-				BOOST_ASSERT(false);
-				return GL_ZERO;
-			}
+			return GL_SRC1_ALPHA;
 
 		case ABF_Inv_Src1_Alpha:
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
-			{
-				return GL_ONE_MINUS_SRC1_ALPHA;
-			}
-			else
-			{
-				BOOST_ASSERT(false);
-				return GL_ZERO;
-			}
+			return GL_ONE_MINUS_SRC1_ALPHA;
 
 		case ABF_Src1_Color:
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
-			{
-				return GL_SRC1_COLOR;
-			}
-			else
-			{
-				BOOST_ASSERT(false);
-				return GL_ZERO;
-			}
+			return GL_SRC1_COLOR;
 
 		case ABF_Inv_Src1_Color:
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_blend_func_extended())
-			{
-				return GL_ONE_MINUS_SRC1_COLOR;
-			}
-			else
-			{
-				BOOST_ASSERT(false);
-				return GL_ZERO;
-			}
+			return GL_ONE_MINUS_SRC1_COLOR;
 
 		default:
 			BOOST_ASSERT(false);
@@ -416,17 +384,9 @@ namespace KlayGE
 		case RenderLayout::TT_30_Ctrl_Pt_PatchList:
 		case RenderLayout::TT_31_Ctrl_Pt_PatchList:
 		case RenderLayout::TT_32_Ctrl_Pt_PatchList:
-			if (glloader_GL_VERSION_4_0() || glloader_GL_ARB_tessellation_shader())
-			{
-				primType = GL_PATCHES;
-				uint32_t n = rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1;
-				glPatchParameteri(GL_PATCH_VERTICES, n);
-				primCount = vertexCount / 3;
-			}
-			else
-			{
-				THR(std::errc::function_not_supported);
-			}
+			primType = GL_PATCHES;
+			glPatchParameteri(GL_PATCH_VERTICES, rl.TopologyType() - RenderLayout::TT_1_Ctrl_Pt_PatchList + 1);
+			primCount = vertexCount / 3;
 			break;
 
 		default:
@@ -525,14 +485,7 @@ namespace KlayGE
 		case EF_SIGNED_A2BGR10:
 			internalFormat = GL_RGB10_A2;
 			glformat = GL_RGBA;
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
-			{
-				gltype = GL_INT_2_10_10_10_REV;
-			}
-			else
-			{
-				gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
-			}
+			gltype = GL_INT_2_10_10_10_REV;
 			break;
 
 		case EF_R8UI:
@@ -1096,14 +1049,7 @@ namespace KlayGE
 			break;
 
 		case EF_SIGNED_A2BGR10:
-			if (glloader_GL_VERSION_3_3() || glloader_GL_ARB_vertex_type_2_10_10_10_rev())
-			{
-				gltype = GL_INT_2_10_10_10_REV;
-			}
-			else
-			{
-				gltype = GL_UNSIGNED_INT_2_10_10_10_REV;
-			}
+			gltype = GL_INT_2_10_10_10_REV;
 			normalized = GL_TRUE;
 			break;
 
