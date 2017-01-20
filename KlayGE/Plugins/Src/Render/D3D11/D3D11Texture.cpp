@@ -495,13 +495,9 @@ namespace KlayGE
 				bind_flags |= D3D11_BIND_RENDER_TARGET;
 			}
 		}
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_11_0)
+		if (access_hint_ & EAH_GPU_Unordered)
 		{
-			if (access_hint_ & EAH_GPU_Unordered)
-			{
-				bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
-			}
+			bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
 		}
 
 		cpu_access_flags = 0;

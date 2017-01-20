@@ -112,9 +112,6 @@ namespace KlayGE
 				ds_profile_ = "ds_5_0";
 				break;
 
-			case D3D_FEATURE_LEVEL_10_1:
-			case D3D_FEATURE_LEVEL_10_0:
-			case D3D_FEATURE_LEVEL_9_3:
 			default:
 				BOOST_ASSERT(false);
 				break;

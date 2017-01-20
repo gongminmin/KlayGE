@@ -41,5 +41,5 @@ config			= ("Debug", "RelWithDebInfo")
 #   On iOS, could be "ios".
 target			= "auto"
 
-# A name for offline FXML compiling. Could be one of "d3d_11_0", "d3d_10_1", "d3d_10_0", "d3d_9_3", "gles_2_0", "gles_3_0", "gles_3_1", "gles_3_2", or "auto".
+# A name for offline FXML compiling. Could be one of "d3d_11_0", "gles_2_0", "gles_3_0", "gles_3_1", "gles_3_2", or "auto".
 shader_platform_name	= "auto"

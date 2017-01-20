@@ -96,41 +96,17 @@ namespace KlayGE
 
 	QueryPtr D3D11RenderFactory::MakeConditionalRender()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0)
-		{
-			return MakeSharedPtr<D3D11ConditionalRender>();
-		}
-		else
-		{
-			return QueryPtr();
-		}
+		return MakeSharedPtr<D3D11ConditionalRender>();
 	}
 
 	QueryPtr D3D11RenderFactory::MakeTimerQuery()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0)
-		{
-			return MakeSharedPtr<D3D11TimerQuery>();
-		}
-		else
-		{
-			return QueryPtr();
-		}
+		return MakeSharedPtr<D3D11TimerQuery>();
 	}
 
 	QueryPtr D3D11RenderFactory::MakeSOStatisticsQuery()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0)
-		{
-			return MakeSharedPtr<D3D11SOStatisticsQuery>();
-		}
-		else
-		{
-			return QueryPtr();
-		}
+		return MakeSharedPtr<D3D11SOStatisticsQuery>();
 	}
 
 	FencePtr D3D11RenderFactory::MakeFence()

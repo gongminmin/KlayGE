@@ -374,9 +374,9 @@ namespace KlayGE
 		// Compression formats
 		if (IsDepthFormat(format_) || IsCompressedFormat(format_))
 		{
-			for (uint32_t index = 0; index < this->ArraySize(); ++index)
+			for (uint32_t index = 0; index < this->ArraySize(); ++ index)
 			{
-				for (uint32_t level = 1; level < this->NumMipMaps(); ++level)
+				for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
 				{
 					this->ResizeTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level),
 						index, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1), true);

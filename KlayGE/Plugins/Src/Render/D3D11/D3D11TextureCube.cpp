@@ -47,32 +47,6 @@ namespace KlayGE
 		}
 		num_mip_maps_ = numMipMaps;
 
-		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		if (re.DeviceFeatureLevel() <= D3D_FEATURE_LEVEL_9_3)
-		{
-			if (!re.DeviceCaps().full_npot_texture_support
-				&& (num_mip_maps_ > 1) && ((size & (size - 1)) != 0))
-			{
-				// height or width is not a power of 2 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
-				num_mip_maps_ = 1;
-			}
-
-			if ((num_mip_maps_ > 1) && IsCompressedFormat(format))
-			{
-				// height or width is not a multiply of 4 and multiple mip levels are specified. This is not supported at feature levels below 10.0.
-				uint32_t clamped_num_mip_maps;
-				for (clamped_num_mip_maps = 0; clamped_num_mip_maps < num_mip_maps_; ++ clamped_num_mip_maps)
-				{
-					uint32_t s = std::max<uint32_t>(1U, size >> clamped_num_mip_maps);
-					if ((s & 0x3) != 0)
-					{
-						break;
-					}
-				}
-				num_mip_maps_ = clamped_num_mip_maps;
-			}
-		}
-
 		array_size_ = array_size;
 		format_		= format;
 		dxgi_fmt_ = D3D11Mapping::MappingFormat(format_);

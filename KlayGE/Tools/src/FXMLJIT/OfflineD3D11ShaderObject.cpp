@@ -93,22 +93,8 @@ namespace KlayGE
 				}
 				break;
 
-			case 10:
-				switch (caps.minor_version)
-				{
-				case 1:
-					feature_level_ = D3D_FEATURE_LEVEL_10_1;
-					break;
-
-				default:
-				case 0:
-					feature_level_ = D3D_FEATURE_LEVEL_10_0;
-					break;
-				}
-				break;
-
-			case 9:
-				feature_level_ = D3D_FEATURE_LEVEL_9_3;
+			default:
+				BOOST_ASSERT(false);
 				break;
 			}
 
@@ -126,32 +112,8 @@ namespace KlayGE
 				ds_profile_ = "ds_5_0";
 				break;
 
-			case D3D_FEATURE_LEVEL_10_1:
-				vs_profile_ = "vs_4_1";
-				ps_profile_ = "ps_4_1";
-				gs_profile_ = "gs_4_1";
-				cs_profile_ = "cs_4_1";
-				hs_profile_ = "";
-				ds_profile_ = "";
-				break;
-
-			case D3D_FEATURE_LEVEL_10_0:
-				vs_profile_ = "vs_4_0";
-				ps_profile_ = "ps_4_0";
-				gs_profile_ = "gs_4_0";
-				cs_profile_ = "cs_4_0";
-				hs_profile_ = "";
-				ds_profile_ = "";
-				break;
-
-			case D3D_FEATURE_LEVEL_9_3:
 			default:
-				vs_profile_ = "vs_4_0_level_9_3";
-				ps_profile_ = "ps_4_0_level_9_3";
-				gs_profile_ = "";
-				cs_profile_ = "";
-				hs_profile_ = "";
-				ds_profile_ = "";
+				BOOST_ASSERT(false);
 				break;
 			}
 		}
@@ -357,11 +319,6 @@ namespace KlayGE
 			{
 				std::vector<std::pair<char const *, char const *>> macros;
 				macros.emplace_back("KLAYGE_D3D11", "1");
-				if (feature_level <= D3D_FEATURE_LEVEL_9_3)
-				{
-					macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
-					macros.emplace_back("KLAYGE_BC4_AS_G", "1");
-				}
 				macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
 				uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;

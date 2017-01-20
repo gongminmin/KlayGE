@@ -41,7 +41,7 @@ namespace KlayGE
 		d3d_rs_desc.DepthBias = static_cast<int>(rs_desc.polygon_offset_units);
 		d3d_rs_desc.DepthBiasClamp = rs_desc.polygon_offset_units;
 		d3d_rs_desc.SlopeScaledDepthBias = rs_desc.polygon_offset_factor;
-		d3d_rs_desc.DepthClipEnable = re.DeviceFeatureLevel() >= D3D_FEATURE_LEVEL_10_0 ? rs_desc.depth_clip_enable : true;
+		d3d_rs_desc.DepthClipEnable = rs_desc.depth_clip_enable;
 		d3d_rs_desc.ScissorEnable = rs_desc.scissor_enable;
 		d3d_rs_desc.MultisampleEnable = rs_desc.multisample_enable;
 		d3d_rs_desc.AntialiasedLineEnable = false;
@@ -160,7 +160,6 @@ namespace KlayGE
 	{
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11Device* d3d_device = render_eng.D3DDevice();
-		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 
 		D3D11_SAMPLER_DESC d3d_desc;
 		d3d_desc.Filter = D3D11Mapping::Mapping(desc.filter);
@@ -174,16 +173,8 @@ namespace KlayGE
 		d3d_desc.BorderColor[1] = desc.border_clr.g();
 		d3d_desc.BorderColor[2] = desc.border_clr.b();
 		d3d_desc.BorderColor[3] = desc.border_clr.a();
-		if (feature_level <= D3D_FEATURE_LEVEL_9_3)
-		{
-			d3d_desc.MinLOD = floor(desc.min_lod);
-			d3d_desc.MaxLOD = std::numeric_limits<float>::max();
-		}
-		else
-		{
-			d3d_desc.MinLOD = desc.min_lod;
-			d3d_desc.MaxLOD = desc.max_lod;
-		}
+		d3d_desc.MinLOD = desc.min_lod;
+		d3d_desc.MaxLOD = desc.max_lod;
 
 		ID3D11SamplerState* sampler_state;
 		TIF(d3d_device->CreateSamplerState(&d3d_desc, &sampler_state));

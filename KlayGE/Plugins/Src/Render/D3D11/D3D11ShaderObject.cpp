@@ -516,7 +516,6 @@ namespace KlayGE
 	{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		D3D11RenderEngine const & render_eng = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		D3D_FEATURE_LEVEL feature_level = render_eng.DeviceFeatureLevel();
 		RenderDeviceCaps const & caps = render_eng.DeviceCaps();
 
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -612,11 +611,6 @@ namespace KlayGE
 		{
 			std::vector<std::pair<char const *, char const *>> macros;
 			macros.emplace_back("KLAYGE_D3D11", "1");
-			if (feature_level <= D3D_FEATURE_LEVEL_9_3)
-			{
-				macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
-				macros.emplace_back("KLAYGE_BC4_AS_G", "1");
-			}
 			macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
 
 			uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
