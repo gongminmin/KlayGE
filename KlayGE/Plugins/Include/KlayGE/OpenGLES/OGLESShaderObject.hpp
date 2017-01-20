@@ -72,7 +72,6 @@ namespace KlayGE
 		};
 		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		parameter_bind_t GetBindFunc(GLint location, RenderEffectParameter* param);
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);

@@ -122,7 +122,6 @@ namespace KlayGE
 		switch (ba)
 		{
 		case BA_Write_Only:
-			if (glloader_GLES_VERSION_3_0())
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
@@ -132,16 +131,6 @@ namespace KlayGE
 					flags |= GL_MAP_INVALIDATE_BUFFER_BIT;
 				}
 				return glMapBufferRange(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), flags);
-			}
-			else if (glloader_GLES_OES_mapbuffer())
-			{
-				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-				re.BindBuffer(target_, vb_);
-				return glMapBufferOES(target_, GL_WRITE_ONLY_OES);
-			}
-			else
-			{
-				return &buf_data_[0];
 			}
 
 		default:
@@ -158,18 +147,7 @@ namespace KlayGE
 			{
 				OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 				re.BindBuffer(target_, vb_);
-				if (glloader_GLES_VERSION_3_0())
-				{
-					glUnmapBuffer(target_);
-				}
-				else if (glloader_GLES_OES_mapbuffer())
-				{
-					glUnmapBufferOES(target_);
-				}
-				else
-				{
-					glBufferSubData(target_, 0, static_cast<GLsizeiptr>(size_in_byte_), &buf_data_[0]);
-				}
+				glUnmapBuffer(target_);
 			}
 			break;
 			
@@ -194,11 +172,6 @@ namespace KlayGE
 
 	void OGLESGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
 	{
-		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_mapbuffer())
-		{
-			memcpy(&buf_data_[offset], data, size);
-		}
-
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
 		glBufferSubData(target_, offset, size, data);

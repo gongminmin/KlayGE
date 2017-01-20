@@ -366,14 +366,7 @@ namespace KlayGE
 
 		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
 		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		if (glloader_GLES_VERSION_3_0())
-		{
-			tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
-		}
-		else if (glloader_GLES_OES_texture_3D())
-		{
-			tex.TexParameteri(GL_TEXTURE_WRAP_R_OES, ogl_addr_mode_w_);
-		}
+		tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
 
 		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
 		GLenum min_filter = ogl_min_filter_;

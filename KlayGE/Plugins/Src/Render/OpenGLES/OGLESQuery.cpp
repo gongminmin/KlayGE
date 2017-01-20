@@ -26,65 +26,24 @@
 
 namespace KlayGE
 {
-	glGenQueriesFUNC OGLESConditionalRender::glGenQueries_ = nullptr;
-	glDeleteQueriesFUNC OGLESConditionalRender::glDeleteQueries_ = nullptr;
-	glBeginQueryFUNC OGLESConditionalRender::glBeginQuery_ = nullptr;
-	glEndQueryFUNC OGLESConditionalRender::glEndQuery_ = nullptr;
-	glGetQueryObjectuivFUNC OGLESConditionalRender::glGetQueryObjectuiv_ = nullptr;
-
-	glGenQueriesFUNC OGLESTimerQuery::glGenQueries_ = nullptr;
-	glDeleteQueriesFUNC OGLESTimerQuery::glDeleteQueries_ = nullptr;
-	glBeginQueryFUNC OGLESTimerQuery::glBeginQuery_ = nullptr;
-	glEndQueryFUNC OGLESTimerQuery::glEndQuery_ = nullptr;
-	glGetQueryObjectuivFUNC OGLESTimerQuery::glGetQueryObjectuiv_ = nullptr;
-
-	glGenQueriesFUNC OGLESSOStatisticsQuery::glGenQueries_ = nullptr;
-	glDeleteQueriesFUNC OGLESSOStatisticsQuery::glDeleteQueries_ = nullptr;
-	glBeginQueryFUNC OGLESSOStatisticsQuery::glBeginQuery_ = nullptr;
-	glEndQueryFUNC OGLESSOStatisticsQuery::glEndQuery_ = nullptr;
-	glGetQueryObjectuivFUNC OGLESSOStatisticsQuery::glGetQueryObjectuiv_ = nullptr;
-
 	OGLESConditionalRender::OGLESConditionalRender()
 	{
-		BOOST_ASSERT(glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_occlusion_query_boolean());
-
-		// TODO: No thread safety here
-		if (!glGenQueries_)
-		{
-			if (glloader_GLES_VERSION_3_0())
-			{
-				glGenQueries_ = glGenQueries;
-				glDeleteQueries_ = glDeleteQueries;
-				glBeginQuery_ = glBeginQuery;
-				glEndQuery_ = glEndQuery;
-				glGetQueryObjectuiv_ = glGetQueryObjectuiv;
-			}
-			else
-			{
-				glGenQueries_ = glGenQueriesEXT;
-				glDeleteQueries_ = glDeleteQueriesEXT;
-				glBeginQuery_ = glBeginQueryEXT;
-				glEndQuery_ = glEndQueryEXT;
-				glGetQueryObjectuiv_ = glGetQueryObjectuivEXT;
-			}
-		}
-
-		glGenQueries_(1, &query_);
+		glGenQueries(1, &query_);
 	}
 
 	OGLESConditionalRender::~OGLESConditionalRender()
 	{
-		glDeleteQueries_(1, &query_);
+		glDeleteQueries(1, &query_);
 	}
 
 	void OGLESConditionalRender::Begin()
 	{
-		glBeginQuery_(GL_ANY_SAMPLES_PASSED, query_);
+		glBeginQuery(GL_ANY_SAMPLES_PASSED, query_);
 	}
 
 	void OGLESConditionalRender::End()
 	{
-		glEndQuery_(GL_ANY_SAMPLES_PASSED);
+		glEndQuery(GL_ANY_SAMPLES_PASSED);
 	}
 
 	void OGLESConditionalRender::BeginConditionalRender()
@@ -101,10 +60,10 @@ namespace KlayGE
 		GLuint available = 0;
 		while (!available)
 		{
-			glGetQueryObjectuiv_(query_, GL_QUERY_RESULT_AVAILABLE, &available);
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
 		}
 
-		glGetQueryObjectuiv_(query_, GL_QUERY_RESULT, &ret);
+		glGetQueryObjectuiv(query_, GL_QUERY_RESULT, &ret);
 		return (ret != 0);
 	}
 
@@ -113,43 +72,22 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(glloader_GLES_EXT_disjoint_timer_query());
 
-		// TODO: No thread safety here
-		if (!glGenQueries_)
-		{
-			if (glloader_GLES_VERSION_3_0())
-			{
-				glGenQueries_ = glGenQueries;
-				glDeleteQueries_ = glDeleteQueries;
-				glBeginQuery_ = glBeginQuery;
-				glEndQuery_ = glEndQuery;
-				glGetQueryObjectuiv_ = glGetQueryObjectuiv;
-			}
-			else
-			{
-				glGenQueries_ = glGenQueriesEXT;
-				glDeleteQueries_ = glDeleteQueriesEXT;
-				glBeginQuery_ = glBeginQueryEXT;
-				glEndQuery_ = glEndQueryEXT;
-				glGetQueryObjectuiv_ = glGetQueryObjectuivEXT;
-			}
-		}
-
-		glGenQueries_(1, &query_);
+		glGenQueries(1, &query_);
 	}
 
 	OGLESTimerQuery::~OGLESTimerQuery()
 	{
-		glDeleteQueries_(1, &query_);
+		glDeleteQueries(1, &query_);
 	}
 
 	void OGLESTimerQuery::Begin()
 	{
-		glBeginQuery_(GL_TIME_ELAPSED_EXT, query_);
+		glBeginQuery(GL_TIME_ELAPSED_EXT, query_);
 	}
 
 	void OGLESTimerQuery::End()
 	{
-		glEndQuery_(GL_TIME_ELAPSED_EXT);
+		glEndQuery(GL_TIME_ELAPSED_EXT);
 	}
 
 	double OGLESTimerQuery::TimeElapsed()
@@ -157,7 +95,7 @@ namespace KlayGE
 		GLuint available = 0;
 		while (!available)
 		{
-			glGetQueryObjectuiv_(query_, GL_QUERY_RESULT_AVAILABLE, &available);
+			glGetQueryObjectuiv(query_, GL_QUERY_RESULT_AVAILABLE, &available);
 		}
 
 		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -176,22 +114,10 @@ namespace KlayGE
 
 	OGLESSOStatisticsQuery::OGLESSOStatisticsQuery()
 	{
-		BOOST_ASSERT(glloader_GLES_VERSION_3_0());
-
-		// TODO: No thread safety here
-		if (!glGenQueries_)
-		{
-			glGenQueries_ = glGenQueries;
-			glDeleteQueries_ = glDeleteQueries;
-			glBeginQuery_ = glBeginQuery;
-			glEndQuery_ = glEndQuery;
-			glGetQueryObjectuiv_ = glGetQueryObjectuiv;
-		}
-
-		glGenQueries_(1, &primitive_written_query_);
+		glGenQueries(1, &primitive_written_query_);
 		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_geometry_shader())
 		{
-			glGenQueries_(1, &primitive_generated_query_);
+			glGenQueries(1, &primitive_generated_query_);
 		}
 		else
 		{
@@ -201,10 +127,10 @@ namespace KlayGE
 
 	OGLESSOStatisticsQuery::~OGLESSOStatisticsQuery()
 	{
-		glDeleteQueries_(1, &primitive_written_query_);
+		glDeleteQueries(1, &primitive_written_query_);
 		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_geometry_shader())
 		{
-			glDeleteQueries_(1, &primitive_generated_query_);
+			glDeleteQueries(1, &primitive_generated_query_);
 		}
 	}
 

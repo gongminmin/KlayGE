@@ -34,11 +34,6 @@ namespace KlayGE
 	{
 		array_size_ = array_size;
 
-		if ((array_size > 1) && !glloader_GLES_VERSION_3_0())
-		{
-			THR(std::errc::function_not_supported);
-		}
-
 		switch (type_)
 		{
 		case TT_1D:
@@ -54,18 +49,7 @@ namespace KlayGE
 			break;
 
 		case TT_3D:
-			if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
-			{
-				THR(std::errc::function_not_supported);
-			}
-			if (glloader_GLES_VERSION_3_0())
-			{
-				target_type_ = GL_TEXTURE_3D;
-			}
-			else
-			{
-				target_type_ = GL_TEXTURE_3D_OES;
-			}
+			target_type_ = GL_TEXTURE_3D;
 			break;
 
 		case TT_Cube:

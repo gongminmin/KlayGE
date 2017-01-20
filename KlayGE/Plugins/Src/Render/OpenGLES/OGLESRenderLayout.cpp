@@ -31,24 +31,13 @@ namespace KlayGE
 {
 	OGLESRenderLayout::OGLESRenderLayout()
 	{
-		if (glloader_GLES_VERSION_3_0())
-		{
-			use_vao_ = true;
-		}
-		else
-		{
-			use_vao_ = false;
-		}
 	}
 
 	OGLESRenderLayout::~OGLESRenderLayout()
 	{
-		if (use_vao_)
+		for (auto const & vao : vaos_)
 		{
-			for (auto const & vao : vaos_)
-			{
-				glDeleteVertexArrays(1, &vao.second);
-			}
+			glDeleteVertexArrays(1, &vao.second);
 		}
 	}
 
@@ -80,7 +69,7 @@ namespace KlayGE
 					normalized = (((VEU_Diffuse == vs_elem.usage) || (VEU_Specular == vs_elem.usage)) && !IsFloatFormat(vs_elem.format)) ? GL_TRUE : normalized;
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
-					stream.Active(use_vao_);
+					stream.Active(true);
 					glVertexAttribPointer(attr, num_components, type, normalized, size, offset);
 					glEnableVertexAttribArray(attr);
 
@@ -91,7 +80,7 @@ namespace KlayGE
 			}
 		}
 
-		if (this->InstanceStream() && (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()))
+		if (this->InstanceStream())
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
 
@@ -115,18 +104,10 @@ namespace KlayGE
 					GLvoid* offset = static_cast<GLvoid*>(elem_offset + this->StartInstanceLocation() * instance_size);
 
 					BOOST_ASSERT(GL_ARRAY_BUFFER == stream.GLType());
-					stream.Active(use_vao_);
+					stream.Active(true);
 					glVertexAttribPointer(attr, num_components, type, normalized, instance_size, offset);
 					glEnableVertexAttribArray(attr);
-
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glVertexAttribDivisor(attr, 1);
-					}
-					else
-					{
-						glVertexAttribDivisorEXT(attr, 1);
-					}
+					glVertexAttribDivisor(attr, 1);
 
 					used_streams[attr] = 1;
 				}
@@ -148,7 +129,7 @@ namespace KlayGE
 		{
 			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
 			BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
-			stream.Active(use_vao_);
+			stream.Active(true);
 		}
 	}
 
@@ -170,7 +151,7 @@ namespace KlayGE
 			}
 		}
 
-		if (this->InstanceStream() && (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()))
+		if (this->InstanceStream())
 		{
 			size_t const inst_format_size = this->InstanceStreamFormat().size();
 			for (size_t i = 0; i < inst_format_size; ++ i)
@@ -180,14 +161,7 @@ namespace KlayGE
 				if (attr != -1)
 				{
 					glDisableVertexAttribArray(attr);
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glVertexAttribDivisor(attr, 0);
-					}
-					else
-					{
-						glVertexAttribDivisorEXT(attr, 0);
-					}
+					glVertexAttribDivisor(attr, 0);
 				}
 			}
 		}
@@ -195,72 +169,57 @@ namespace KlayGE
 
 	void OGLESRenderLayout::Active(ShaderObjectPtr const & so) const
 	{
-		if (use_vao_)
+		GLuint vao;
+		auto iter = vaos_.find(so);
+		if (iter == vaos_.end())
 		{
-			GLuint vao;
-			auto iter = vaos_.find(so);
-			if (iter == vaos_.end())
-			{
-				glGenVertexArrays(1, &vao);
-				glBindVertexArray(vao);
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
 
-				vaos_.emplace(so, vao);
+			vaos_.emplace(so, vao);
+			this->BindVertexStreams(so);
+		}
+		else
+		{
+			vao = iter->second;
+			glBindVertexArray(vao);
+			if (streams_dirty_)
+			{
 				this->BindVertexStreams(so);
+				streams_dirty_ = false;
+			}
+		}
+
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		if (this->NumVertexStreams() > 0)
+		{
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
+			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
+		}
+		if (this->InstanceStream())
+		{
+			OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
+			re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
+		}
+
+		if (this->UseIndices())
+		{
+			if (re.HackForMali() || re.HackForAdreno())
+			{
+				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
+				stream.Active(true);
 			}
 			else
 			{
-				vao = iter->second;
-				glBindVertexArray(vao);
-				if (streams_dirty_)
-				{
-					this->BindVertexStreams(so);
-					streams_dirty_ = false;
-				}
-			}
-
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (this->NumVertexStreams() > 0)
-			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetVertexStream(this->NumVertexStreams() - 1)));
+				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
+				BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
 				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
-			}
-			if (this->InstanceStream() && (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_instanced_arrays()))
-			{
-				OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->InstanceStream()));
-				re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
-			}
-
-			if (this->UseIndices())
-			{
-				if (re.HackForMali() || re.HackForAdreno())
-				{
-					OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
-					BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
-					stream.Active(use_vao_);
-				}
-				else
-				{
-					OGLESGraphicsBuffer& stream(*checked_pointer_cast<OGLESGraphicsBuffer>(this->GetIndexStream()));
-					BOOST_ASSERT(GL_ELEMENT_ARRAY_BUFFER == stream.GLType());
-					re.OverrideBindBufferCache(stream.GLType(), stream.GLvbo());
-				}
-			}
-			else
-			{
-				re.OverrideBindBufferCache(GL_ELEMENT_ARRAY_BUFFER, 0);
 			}
 		}
 		else
 		{
-			this->BindVertexStreams(so);
-		}
-	}
-
-	void OGLESRenderLayout::Deactive(ShaderObjectPtr const & so) const
-	{
-		if (!use_vao_)
-		{
-			this->UnbindVertexStreams(so);
+			re.OverrideBindBufferCache(GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 	}
 }

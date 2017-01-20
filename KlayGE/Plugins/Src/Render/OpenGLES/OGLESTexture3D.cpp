@@ -34,11 +34,6 @@ namespace KlayGE
 							uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
 					: OGLESTexture(TT_3D, array_size, sample_count, sample_quality, access_hint)
 	{
-		if (!glloader_GLES_VERSION_3_0() && !glloader_GLES_OES_texture_3D())
-		{
-			THR(std::errc::function_not_supported);
-		}
-
 		if (IsSRGB(format))
 		{
 			format = this->SRGBToRGB(format);
@@ -74,23 +69,8 @@ namespace KlayGE
 		tex_data_.resize(num_mip_maps_);
 
 		glBindTexture(target_type_, texture_);
-		if (glloader_GLES_VERSION_3_0())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-		}
-		else if (glloader_GLES_APPLE_texture_max_level())
-		{
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL_APPLE, num_mip_maps_ - 1);
-		}
-		else
-		{
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			if (re.HackForTegra())
-			{
-				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-			}
-		}
+		glTexParameteri(target_type_, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
 	}
 
 	uint32_t OGLESTexture3D::Width(uint32_t level) const
@@ -244,29 +224,13 @@ namespace KlayGE
 					uint32_t const block_size = NumFormatBytes(format_) * 4;
 					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
-							w, h, d, gl_format, image_size, &tex_data_[level][0]);
-					}
-					else
-					{
-						glCompressedTexSubImage3DOES(target_type_, level, 0, 0, 0,
-							w, h, d, gl_format, image_size, &tex_data_[level][0]);
-					}
+					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
+						w, h, d, gl_format, image_size, &tex_data_[level][0]);
 				}
 				else
 				{
-					if (glloader_GLES_VERSION_3_0())
-					{
-						glTexSubImage3D(target_type_, level,
-							0, 0, 0, w, h, d, gl_format, gl_type, &tex_data_[level][0]);
-					}
-					else
-					{
-						glTexSubImage3DOES(target_type_, level,
-							0, 0, 0, w, h, d, gl_format, gl_type, &tex_data_[level][0]);
-					}
+					glTexSubImage3D(target_type_, level,
+						0, 0, 0, w, h, d, gl_format, gl_type, &tex_data_[level][0]);
 				}
 			}
 			break;
@@ -310,16 +274,8 @@ namespace KlayGE
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 					ptr = &tex_data_[level][0];
 				}
-				if (glloader_GLES_VERSION_3_0())
-				{
-					glCompressedTexImage3D(target_type_, level, glinternalFormat,
-						w, h, d, 0, image_size, ptr);
-				}
-				else
-				{
-					glCompressedTexImage3DOES(target_type_, level, glinternalFormat,
-						w, h, d, 0, image_size, ptr);
-				}
+				glCompressedTexImage3D(target_type_, level, glinternalFormat,
+					w, h, d, 0, image_size, ptr);
 			}
 			else
 			{
@@ -337,14 +293,7 @@ namespace KlayGE
 					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
 					ptr = &tex_data_[level][0];
 				}
-				if (glloader_GLES_VERSION_3_0())
-				{
-					glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype, ptr);
-				}
-				else
-				{
-					glTexImage3DOES(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype, ptr);
-				}
+				glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype, ptr);
 			}
 		}
 
@@ -378,27 +327,12 @@ namespace KlayGE
 		}
 		else
 		{
-			if (glloader_GLES_VERSION_3_0())
-			{
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, row_pitch / NumFormatBytes(format_));
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slice_pitch / row_pitch);
-				glTexSubImage3D(target_type_, level, x_offset, y_offset, z_offset, width, height, depth,
-					gl_format, gl_type, data);
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-				glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-			}
-			else
-			{
-				uint8_t const * p = static_cast<uint8_t const *>(data);
-				for (uint32_t z = 0; z < depth; ++ z)
-				{
-					for (uint32_t y = 0; y < height; ++ y)
-					{
-						glTexSubImage3D(target_type_, level, x_offset, y_offset + y, z_offset + z, width, 1, 1,
-							gl_format, gl_type, p + z * slice_pitch + y * row_pitch);
-					}
-				}
-			}
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, row_pitch / NumFormatBytes(format_));
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, slice_pitch / row_pitch);
+			glTexSubImage3D(target_type_, level, x_offset, y_offset, z_offset, width, height, depth,
+				gl_format, gl_type, data);
+			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+			glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
 		}
 	}
 }

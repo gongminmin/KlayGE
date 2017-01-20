@@ -89,12 +89,7 @@ namespace KlayGE
 	GraphicsBufferPtr OGLESRenderFactory::MakeDelayCreationConstantBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, ElementFormat fmt)
 	{
-		GraphicsBufferPtr ret;
-		if (glloader_GLES_VERSION_3_0())
-		{
-			ret = MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, fmt);
-		}
-		return ret;
+		return MakeSharedPtr<OGLESGraphicsBuffer>(usage, access_hint, GL_UNIFORM_BUFFER, size_in_byte, fmt);
 	}
 
 	QueryPtr OGLESRenderFactory::MakeOcclusionQuery()
@@ -104,14 +99,7 @@ namespace KlayGE
 
 	QueryPtr OGLESRenderFactory::MakeConditionalRender()
 	{
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_occlusion_query_boolean())
-		{
-			return MakeSharedPtr<OGLESConditionalRender>();
-		}
-		else
-		{
-			return QueryPtr();
-		}
+		return MakeSharedPtr<OGLESConditionalRender>();
 	}
 
 	QueryPtr OGLESRenderFactory::MakeTimerQuery()
@@ -128,24 +116,12 @@ namespace KlayGE
 
 	QueryPtr OGLESRenderFactory::MakeSOStatisticsQuery()
 	{
-		if (glloader_GLES_VERSION_3_0())
-		{
-			return MakeSharedPtr<OGLESSOStatisticsQuery>();
-		}
-		else
-		{
-			return QueryPtr();
-		}
+		return MakeSharedPtr<OGLESSOStatisticsQuery>();
 	}
 
 	FencePtr OGLESRenderFactory::MakeFence()
 	{
-		FencePtr ret;
-		if (glloader_GLES_VERSION_3_0())
-		{
-			ret = MakeSharedPtr<OGLESFence>();
-		}
-		return ret;
+		return MakeSharedPtr<OGLESFence>();
 	}
 
 	RenderViewPtr OGLESRenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

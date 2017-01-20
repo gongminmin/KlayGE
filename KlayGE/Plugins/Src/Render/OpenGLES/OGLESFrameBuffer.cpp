@@ -74,22 +74,19 @@ namespace KlayGE
 
 		BOOST_ASSERT(GL_FRAMEBUFFER_COMPLETE == glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
-		if (glloader_GLES_VERSION_3_0())
+		if (fbo_ != 0)
 		{
-			if (fbo_ != 0)
+			std::vector<GLenum> targets(clr_views_.size());
+			for (size_t i = 0; i < clr_views_.size(); ++ i)
 			{
-				std::vector<GLenum> targets(clr_views_.size());
-				for (size_t i = 0; i < clr_views_.size(); ++ i)
-				{
-					targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
-				}
-				glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
 			}
-			else
-			{
-				GLenum targets[] = { GL_BACK };
-				glDrawBuffers(1, &targets[0]);
-			}
+			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
+		}
+		else
+		{
+			GLenum targets[] = { GL_BACK };
+			glDrawBuffers(1, &targets[0]);
 		}
 	}
 
@@ -139,63 +136,39 @@ namespace KlayGE
 			}
 		}
 
-		if (glloader_GLES_VERSION_3_0())
+		if (flags & CBM_Color)
 		{
-			if (flags & CBM_Color)
+			if (fbo_ != 0)
 			{
-				if (fbo_ != 0)
+				for (size_t i = 0; i < clr_views_.size(); ++ i)
 				{
-					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					if (clr_views_[i])
 					{
-						if (clr_views_[i])
-						{
-							glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
-						}
+						glClearBufferfv(GL_COLOR, static_cast<GLint>(i), &clr[0]);
 					}
 				}
-				else
-				{
-					glClearBufferfv(GL_COLOR, 0, &clr[0]);
-				}
-			}
-
-			if (has_depth && has_stencil)
-			{
-				glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 			}
 			else
 			{
-				if (has_depth)
-				{
-					glClearBufferfv(GL_DEPTH, 0, &depth);
-				}
-				else if (has_stencil)
-				{
-					GLint s = stencil;
-					glClearBufferiv(GL_STENCIL, 0, &s);
-				}
+				glClearBufferfv(GL_COLOR, 0, &clr[0]);
 			}
+		}
+
+		if (has_depth && has_stencil)
+		{
+			glClearBufferfi(GL_DEPTH_STENCIL, 0, depth, stencil);
 		}
 		else
 		{
-			GLbitfield ogl_flags = 0;
-			if (has_color)
-			{
-				ogl_flags |= GL_COLOR_BUFFER_BIT;
-				re.ClearColor(clr.r(), clr.g(), clr.b(), clr.a());
-			}
 			if (has_depth)
 			{
-				ogl_flags |= GL_DEPTH_BUFFER_BIT;
-				re.ClearDepth(depth);
+				glClearBufferfv(GL_DEPTH, 0, &depth);
 			}
-			if (has_stencil)
+			else if (has_stencil)
 			{
-				ogl_flags |= GL_STENCIL_BUFFER_BIT;
-				re.ClearStencil(stencil);
+				GLint s = stencil;
+				glClearBufferiv(GL_STENCIL, 0, &s);
 			}
-
-			glClear(ogl_flags);
 		}
 
 		if (flags & CBM_Color)
@@ -232,71 +205,57 @@ namespace KlayGE
 
 	void OGLESFrameBuffer::Discard(uint32_t flags)
 	{
-		if (glloader_GLES_VERSION_3_0() || glloader_GLES_EXT_discard_framebuffer())
+		std::vector<GLenum> attachments;
+		if (fbo_ != 0)
 		{
-			std::vector<GLenum> attachments;
-			if (fbo_ != 0)
+			if (flags & CBM_Color)
 			{
-				if (flags & CBM_Color)
+				for (size_t i = 0; i < clr_views_.size(); ++ i)
 				{
-					for (size_t i = 0; i < clr_views_.size(); ++ i)
+					if (clr_views_[i])
 					{
-						if (clr_views_[i])
-						{
-							attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
-						}
-					}
-				}
-				if (flags & CBM_Depth)
-				{
-					if (rs_view_)
-					{
-						attachments.push_back(GL_DEPTH_ATTACHMENT);
-					}
-				}
-				if (flags & CBM_Stencil)
-				{
-					if (rs_view_)
-					{
-						attachments.push_back(GL_STENCIL_ATTACHMENT);
+						attachments.push_back(static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i));
 					}
 				}
 			}
-			else
+			if (flags & CBM_Depth)
 			{
-				if (flags & CBM_Color)
+				if (rs_view_)
 				{
-					attachments.push_back(GL_COLOR);
-				}
-				if (flags & CBM_Depth)
-				{
-					attachments.push_back(GL_DEPTH);
-				}
-				if (flags & CBM_Stencil)
-				{
-					attachments.push_back(GL_STENCIL);
+					attachments.push_back(GL_DEPTH_ATTACHMENT);
 				}
 			}
-
-			OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-			GLuint old_fbo = re.BindFramebuffer();
-			re.BindFramebuffer(fbo_);
-
-			if (glloader_GLES_VERSION_3_0())
+			if (flags & CBM_Stencil)
 			{
-				glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+				if (rs_view_)
+				{
+					attachments.push_back(GL_STENCIL_ATTACHMENT);
+				}
 			}
-			else
-			{
-				glDiscardFramebufferEXT(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
-			}
-
-			re.BindFramebuffer(old_fbo);
 		}
 		else
 		{
-			this->Clear(flags, Color(0, 0, 0, 0), 1, 0);
+			if (flags & CBM_Color)
+			{
+				attachments.push_back(GL_COLOR);
+			}
+			if (flags & CBM_Depth)
+			{
+				attachments.push_back(GL_DEPTH);
+			}
+			if (flags & CBM_Stencil)
+			{
+				attachments.push_back(GL_STENCIL);
+			}
 		}
+
+		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		GLuint old_fbo = re.BindFramebuffer();
+		re.BindFramebuffer(fbo_);
+
+		glInvalidateFramebuffer(GL_FRAMEBUFFER, static_cast<GLsizei>(attachments.size()), &attachments[0]);
+
+		re.BindFramebuffer(old_fbo);
 	}
 }

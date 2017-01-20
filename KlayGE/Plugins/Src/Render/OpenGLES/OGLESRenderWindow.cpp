@@ -122,7 +122,6 @@ namespace KlayGE
 
 		bool test_es_3_2 = true;
 		bool test_es_3_1 = true;
-		bool test_es_3_0 = true;
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		// TODO
 		test_es_3_2 = false;
@@ -131,7 +130,6 @@ namespace KlayGE
 		// TODO
 		test_es_3_2 = false;
 		test_es_3_1 = false;
-		test_es_3_0 = false;
 #endif
 
 		std::vector<std::tuple<std::string, EGLint, int, int>> available_versions;
@@ -143,11 +141,7 @@ namespace KlayGE
 		{
 			available_versions.push_back(std::make_tuple("3.1", EGL_OPENGL_ES3_BIT_KHR, 3, 1));
 		}
-		if (test_es_3_0)
-		{
-			available_versions.push_back(std::make_tuple("3.0", EGL_OPENGL_ES3_BIT_KHR, 3, 0));
-		}
-		available_versions.push_back(std::make_tuple("2.0", EGL_OPENGL_ES2_BIT, 2, 0));
+		available_versions.push_back(std::make_tuple("3.0", EGL_OPENGL_ES3_BIT_KHR, 3, 0));
 
 		for (size_t index = 0; index < settings.options.size(); ++ index)
 		{
@@ -278,7 +272,7 @@ namespace KlayGE
 
 		eglMakeCurrent(display_, surf_, surf_, context_);
 
-		if (!glloader_GLES_VERSION_2_0())
+		if (!glloader_GLES_VERSION_3_0())
 		{
 			THR(std::errc::function_not_supported);
 		}
