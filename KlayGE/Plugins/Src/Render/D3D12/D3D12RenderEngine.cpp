@@ -1369,8 +1369,6 @@ namespace KlayGE
 		caps_.multithread_rendering_support = true;
 		caps_.multithread_res_creating_support = true;
 		caps_.mrt_independent_bit_depths_support = true;
-		caps_.standard_derivatives_support = true;
-		caps_.shader_texture_lod_support = true;
 		caps_.logic_op_support = true;
 		caps_.independent_blend_support = true;
 		caps_.draw_indirect_support = true;

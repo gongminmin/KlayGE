@@ -116,8 +116,6 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 	caps.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
 	caps.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
 
-	caps.standard_derivatives_support = RetrieveNodeValue(root, "standard_derivatives_support", 0) ? true : false;
-	caps.shader_texture_lod_support = RetrieveNodeValue(root, "shader_texture_lod_support", 0) ? true : false;
 	caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
 	caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
 	caps.render_to_texture_array_support = RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
@@ -130,7 +128,6 @@ Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform
 	caps.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
 	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
 	caps.frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
-	caps.ubo_support = RetrieveNodeValue(root, "ubo_support", 0) ? true : false;
 
 	return caps;
 }

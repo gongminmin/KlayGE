@@ -216,7 +216,7 @@ void DepthOfFieldSpreadingCS(uint3 gid : SV_GroupID,
 
 	<parameter type="texture2D" name="bokeh_tex"/>
 
-	<shader version="3">
+	<shader>
 		<![CDATA[
 void SeparateBokehVS(float4 pos : POSITION,
 						out float2 oTc : TEXCOORD0,

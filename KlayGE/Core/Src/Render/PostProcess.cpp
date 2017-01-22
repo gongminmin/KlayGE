@@ -1555,13 +1555,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (caps.max_shader_model <= ShaderModel(2, 0))
-		{
-			kernel_radius_ = std::min(kernel_radius_, 2);
-		}
-
 		params_.emplace_back("esm_scale_factor", nullptr);
 		params_.emplace_back("near_q_far", nullptr);
 		input_pins_.emplace_back("src_tex", TexturePtr());
@@ -1592,12 +1585,7 @@ namespace KlayGE
 		BOOST_ASSERT((radius > 0) && (radius <= 7));
 
 		kernel_radius_ = radius;
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-		if (caps.max_shader_model <= ShaderModel(2, 0))
-		{
-			kernel_radius_ = std::min(kernel_radius_, 2);
-		}
+
 		TexturePtr const & tex = this->InputPin(0);
 		if (!!tex)
 		{

@@ -111,16 +111,6 @@ namespace KlayGE
 		ResLoader::Instance().AddPath("../../Tools/media/TexViewer");
 	}
 
-	bool TexViewerCore::ConfirmDevice() const
-	{
-		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.max_shader_model < ShaderModel(4, 0))
-		{
-			return false;
-		}
-		return true;
-	}
-
 	void TexViewerCore::Resize(uint32_t width, uint32_t height)
 	{
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().Resize(width, height);

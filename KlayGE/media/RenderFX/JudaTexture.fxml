@@ -75,11 +75,7 @@ void decode_tile_id(out int2 tile_xy, float4 tile_id)
 
 float3 calc_cache_addr(int2 tile_xy, float2 in_tile_coord)
 {
-#if KLAYGE_DERIVATIVES
-	float3 cache_addr = juda_tex_indirect.SampleGrad(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 1, 1).rgb * 255;
-#else
-	float3 cache_addr = juda_tex_indirect.Sample(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size).rgb * 255;
-#endif
+	float3 cache_addr = juda_tex_indirect.SampleLevel(jdt_point_sampler, float2(tile_xy) * inv_juda_tex_indirect_size, 0).rgb * 255;
 	cache_addr.xy = cache_addr.xy * tile_size.y + tile_size.z;
 	float2 tc = float2((cache_addr.xy + in_tile_coord * tile_size.x) * inv_juda_tex_cache_size);
 	return float3(tc, cache_addr.z);
@@ -263,44 +259,28 @@ float4 judatex2d_clamp(int4 tile_bb, float2 texcoord)
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_clamp(tile_xy, in_tile_coord, tile_bb, texcoord);
-#if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
-#else
-	return judatex2d_internal(tile_xy, in_tile_coord);
-#endif
 }
 float4 judatex2d_wrap(int4 tile_bb, float2 texcoord)
 {
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_wrap(tile_xy, in_tile_coord, tile_bb, texcoord);
-#if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
-#else
-	return judatex2d_internal(tile_xy, in_tile_coord);
-#endif
 }
 float4 judatex2d_mirror(int4 tile_bb, float2 texcoord)
 {
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_mirror(tile_xy, in_tile_coord, tile_bb, texcoord);
-#if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
-#else
-	return judatex2d_internal(tile_xy, in_tile_coord);
-#endif
 }
 float4 judatex2d_border(int4 tile_bb, float2 texcoord)
 {
 	int2 tile_xy;
 	float2 in_tile_coord;
 	calc_border(tile_xy, in_tile_coord, tile_bb, texcoord);
-#if KLAYGE_DERIVATIVES
 	return judatex2d_grad_internal(tile_xy, in_tile_coord, ddx(texcoord), ddy(texcoord));
-#else
-	return judatex2d_internal(tile_xy, in_tile_coord);
-#endif
 }
 
 float4 judatex2d_bias_clamp(int4 tile_bb, float2 texcoord, float bias)

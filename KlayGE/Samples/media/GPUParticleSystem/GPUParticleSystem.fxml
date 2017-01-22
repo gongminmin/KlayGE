@@ -313,7 +313,7 @@ float4 UpdateVelPS(float2 tex : TEXCOORD0) : SV_Target
 	</technique>
 
 
-	<shader type="vertex_shader" version="3">
+	<shader type="vertex_shader">
 		<![CDATA[
 void ParticlesVS2(float2 tex_pos : POSITION,
 					out float4 CenterView_Life : SV_Position)
@@ -322,12 +322,7 @@ void ParticlesVS2(float2 tex_pos : POSITION,
 
 	CenterView_Life = float4(mul(float4(pos.xyz, 1), View).xyz, pos.w);
 }
-		]]>
-	</shader>
 
-
-	<shader type="vertex_shader">
-		<![CDATA[
 void ParticlesVS3(float4 pos : POSITION,
 					out float4 CenterView_Life : SV_Position)
 {

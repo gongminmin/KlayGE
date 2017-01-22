@@ -23,9 +23,7 @@ float3 DebugFxaaPixelShader(float2 pos)
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	[branch]
-#endif
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
 		return lumaM / (1 + (0.587f / 0.299f));
@@ -74,14 +72,6 @@ float3 DebugFxaaPixelShader(float2 pos)
 
 float3 FxaaPixelShader(float2 pos)
 {
-#if KLAYGE_DERIVATIVES
-	float2 grad_x = ddx(pos);
-	float2 grad_y = ddy(pos);
-#else
-	float2 grad_x = 0;
-	float2 grad_y = 0;
-#endif
-	
 	float2 posM = pos;
 	
 	float4 rgbyM = color_tex.Sample(linear_wrap_sampler, pos.xy);
@@ -93,9 +83,7 @@ float3 FxaaPixelShader(float2 pos)
 	float rangeMin = min(lumaM, min(min(lumaN, lumaW), min(lumaS, lumaE)));
 	float rangeMax = max(lumaM, max(max(lumaN, lumaW), max(lumaS, lumaE)));
 	float range = rangeMax - rangeMin;
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	[branch]
-#endif
 	if (range < max(1 / 24.0f, rangeMax / 8))
 	{
 		return rgbyM.xyz;
@@ -207,12 +195,12 @@ float3 FxaaPixelShader(float2 pos)
 
 			if (!doneN)
 			{
-				lumaEndN = color_tex.SampleGrad(linear_wrap_sampler, posN.xy, grad_x, grad_y).w;
+				lumaEndN = color_tex.SampleLevel(linear_wrap_sampler, posN.xy, 0).w;
 				lumaEndN = lumaEndN - lumaNN * 0.5f;
 			}
 			if (!doneP)
 			{
-				lumaEndP = color_tex.SampleGrad(linear_wrap_sampler, posP.xy, grad_x, grad_y).w;
+				lumaEndP = color_tex.SampleLevel(linear_wrap_sampler, posP.xy, 0).w;
 				lumaEndP = lumaEndP - lumaNN * 0.5f;
 			}
 			doneN = abs(lumaEndN) >= gradientScaled;

@@ -346,22 +346,7 @@ namespace KlayGE
 							uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 							rules &= ~GSR_UniformBlockBinding;
 							rules &= ~GSR_MatrixType;
-							if (caps.major_version >= 3)
-							{
-								rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_DrawBuffers) : 0;
-								if (!caps.ubo_support)
-								{
-									rules &= ~GSR_UseUBO;
-								}
-							}
-							else
-							{
-								rules |= caps.shader_texture_lod_support ? static_cast<uint32_t>(GSR_EXTShaderTextureLod) : 0;
-								rules |= caps.standard_derivatives_support ? static_cast<uint32_t>(GSR_OESStandardDerivatives) : 0;
-								rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_EXTDrawBuffers) : 0;
-								rules |= caps.frag_depth_support ? static_cast<uint32_t>(GSR_EXTFragDepth) : 0;
-								rules &= ~GSR_VersionDecl;
-							}
+							rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_DrawBuffers) : 0;
 							if ((ST_HullShader == type) || (ST_DomainShader == type))
 							{
 								rules |= static_cast<uint32_t>(GSR_EXTTessellationShader);

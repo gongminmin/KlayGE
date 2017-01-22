@@ -837,10 +837,8 @@ namespace KlayGE
 	bool DeferredRenderingLayer::ConfirmDevice()
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		if (caps.max_shader_model < ShaderModel(4, 0)
-			|| (caps.max_simultaneous_rts < 2)
+		if ((caps.max_simultaneous_rts < 2)
 			|| !caps.hw_instancing_support || !caps.instance_id_support
-			|| !caps.standard_derivatives_support || !caps.shader_texture_lod_support
 			|| !caps.depth_texture_support
 			|| !caps.fp_color_support
 			|| caps.pack_to_rgba_required

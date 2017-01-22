@@ -588,16 +588,6 @@ CausticsMapApp::CausticsMapApp()
 	ResLoader::Instance().AddPath("../../Samples/media/CausticsMap");
 }
 
-bool CausticsMapApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < ShaderModel(3, 0))
-	{
-		return false;
-	}
-	return true;
-}
-
 void CausticsMapApp::OnCreate()
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

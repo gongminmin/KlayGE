@@ -491,12 +491,6 @@ void ShadowCubeMap::OnCreate()
 	{
 		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(4);
 	}
-	if (caps.max_shader_model < ShaderModel(4, 0))
-	{
-		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(3);
-		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(2);
-		dialog_->Control<UIComboBox>(id_sm_type_combo_)->RemoveItem(1);
-	}
 }
 
 void ShadowCubeMap::OnResize(uint32_t width, uint32_t height)

@@ -747,10 +747,7 @@ void MotionBlurDoFApp::OnCreate()
 		&& caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
 	{
 		depth_of_field_ = MakeSharedPtr<DepthOfField>();
-		if (caps.max_shader_model >= ShaderModel(3, 0))
-		{
-			bokeh_filter_ = MakeSharedPtr<BokehFilter>();
-		}
+		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
 	}
 	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	

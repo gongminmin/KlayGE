@@ -1097,8 +1097,6 @@ namespace KlayGE
 			caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
 		}
 		caps_.mrt_independent_bit_depths_support = true;
-		caps_.standard_derivatives_support = true;
-		caps_.shader_texture_lod_support = true;
 		if (d3d_11_runtime_sub_ver_ >= 1)
 		{
 			D3D11_FEATURE_DATA_D3D11_OPTIONS d3d11_feature;

@@ -12,8 +12,6 @@
 	<max_pixel_texture_units value="16"/>
 	<max_simultaneous_rts value="8"/>
 
-	<standard_derivatives_support value="1"/>
-	<shader_texture_lod_support value="1"/>
 	<fp_color_support value="1"/>
 	<pack_to_rgba_required value="0"/>
 	<render_to_texture_array_support value="1"/>
@@ -36,5 +34,4 @@
 	<srgb_support value="1"/>
 
 	<frag_depth_support value="0"/>
-	<ubo_support value="1"/>
 </platform>

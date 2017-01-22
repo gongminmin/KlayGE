@@ -571,8 +571,6 @@ EnvLightingApp::EnvLightingApp()
 
 void EnvLightingApp::OnCreate()
 {
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
 	TexturePtr y_cube_map = ASyncLoadTexture("uffizi_cross_filtered_y.dds", EAH_GPU_Read | EAH_Immutable);
@@ -630,12 +628,6 @@ void EnvLightingApp::OnCreate()
 
 	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&EnvLightingApp::TypeChangedHandler, this, std::placeholders::_1));
 	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
-
-	if (caps.max_shader_model < ShaderModel(4, 0))
-	{
-		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(4);
-		dialog_->Control<UIComboBox>(id_type_combo_)->RemoveItem(3);
-	}
 }
 
 void EnvLightingApp::OnResize(uint32_t width, uint32_t height)

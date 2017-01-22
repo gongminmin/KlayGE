@@ -171,11 +171,7 @@ float4 LogBlurXPS(float4 tex0 : TEXCOORD0, float4 tex1 : TEXCOORD1,
 	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tex3.zw), near_q_far.z);
 #endif
 	float color = color_weight[7];
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	for (int i = 0; i < 7; ++ i)
-#else
-	for (int i = 0; i < 2; ++ i)
-#endif
 	{
 #if NON_LINEAR_DEPTH
 		float d1 = non_linear_depth_to_linear(src_tex.Sample(src_sampler, float2(tex[i].x, tex3.w)).x, near_q_far.x, near_q_far.y);
@@ -198,11 +194,7 @@ float4 LogBlurYPS(float4 tex0 : TEXCOORD0, float4 tex1 : TEXCOORD1,
 
 	float d0 = ReadAFloat(src_tex.Sample(src_sampler, tex3.zw), near_q_far.z);
 	float color = color_weight[7];
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	for (int i = 0; i < 7; ++ i)
-#else
-	for (int i = 0; i < 2; ++ i)
-#endif
 	{
 		float d1 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex3.z, tex[i].x)), near_q_far.z);
 		float d2 = ReadAFloat(src_tex.Sample(src_sampler, float2(tex3.z, tex[i].y)), near_q_far.z);

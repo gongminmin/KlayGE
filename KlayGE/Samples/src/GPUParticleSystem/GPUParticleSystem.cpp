@@ -713,32 +713,10 @@ namespace
 		explicit TerrainRenderable(TexturePtr const & height_map, TexturePtr const & normal_map)
 			: RenderablePlane(4, 4, 64, 64, true, false)
 		{
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 			effect_ = SyncLoadRenderEffect("Terrain.fxml");
 			technique_ = effect_->TechniqueByName("Terrain");
 			*(effect_->ParameterByName("grass_tex")) = ASyncLoadTexture("grass.dds", EAH_GPU_Read | EAH_Immutable);
-
-			RenderEngine& re = rf.RenderEngineInstance();
-			RenderDeviceCaps const & caps = re.DeviceCaps();
-			if (ShaderModel(3, 0) == caps.max_shader_model)
-			{
-				if (caps.texture_format_support(EF_R32F))
-				{
-					TexturePtr height_32f = rf.MakeTexture2D(height_map->Width(0), height_map->Height(0), 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, nullptr);
-					height_map->CopyToTexture(*height_32f);
-					*(effect_->ParameterByName("height_map_tex")) = height_32f;
-				}
-				else
-				{
-					*(effect_->ParameterByName("height_map_tex")) = height_map;
-				}
-			}
-			else
-			{
-				*(effect_->ParameterByName("height_map_tex")) = height_map;
-			}
-
+			*(effect_->ParameterByName("height_map_tex")) = height_map;
 			*(effect_->ParameterByName("normal_map_tex")) = normal_map;
 		}
 
@@ -794,17 +772,6 @@ GPUParticleSystemApp::GPUParticleSystemApp()
 							: App3DFramework("GPU Particle System")
 {
 	ResLoader::Instance().AddPath("../../Samples/media/GPUParticleSystem");
-}
-
-bool GPUParticleSystemApp::ConfirmDevice() const
-{
-	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-	if (caps.max_shader_model < ShaderModel(3, 0))
-	{
-		return false;
-	}
-
-	return true;
 }
 
 void GPUParticleSystemApp::OnCreate()

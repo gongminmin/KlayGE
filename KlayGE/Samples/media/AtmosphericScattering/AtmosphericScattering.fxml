@@ -130,11 +130,7 @@ void AerialPerspective(float3 r0, float3 r1, bool infinite,
 	// initialization of
 	// the integration loop variables
 
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(3, 0)
 	const int NMAX = 8;
-#else
-	const int NMAX = 4;
-#endif
 	int N = NMAX;
 	float range = t1 - t0;
 	float dt = range / (N - 1);

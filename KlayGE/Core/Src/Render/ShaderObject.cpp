@@ -311,8 +311,6 @@ namespace KlayGE
 		std::string max_tex_depth_str = boost::lexical_cast<std::string>(caps.max_texture_depth);
 		std::string max_tex_units_str = boost::lexical_cast<std::string>(static_cast<int>(caps.max_pixel_texture_units));
 		std::string flipping_str = boost::lexical_cast<std::string>(re.RequiresFlipping() ? -1 : +1);
-		std::string standard_derivatives_str = boost::lexical_cast<std::string>(caps.standard_derivatives_support ? 1 : 0);
-		std::string no_tex_lod_str = boost::lexical_cast<std::string>((ST_PixelShader == type) ? (caps.shader_texture_lod_support ? 0 : 1) : 1);
 		std::string render_to_tex_array_str = boost::lexical_cast<std::string>(caps.render_to_texture_array_support ? 1 : 0);
 
 		std::string err_msg;
@@ -342,14 +340,6 @@ namespace KlayGE
 		}
 		{
 			D3D_SHADER_MACRO macro = { "KLAYGE_FLIPPING", flipping_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_DERIVATIVES", standard_derivatives_str.c_str() };
-			macros.push_back(macro);
-		}
-		{
-			D3D_SHADER_MACRO macro = { "KLAYGE_NO_TEX_LOD", no_tex_lod_str.c_str() };
 			macros.push_back(macro);
 		}
 		{

@@ -3638,9 +3638,7 @@ namespace KlayGE
 				break;
 
 			case REDT_buffer:
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
 				str += "Buffer<" + elem_type + "> " + param_name + ";\n";
-				str += "#endif\n";
 				break;
 
 			case REDT_sampler:
@@ -3648,15 +3646,11 @@ namespace KlayGE
 				break;
 
 			case REDT_structured_buffer:
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
 				str += "StructuredBuffer<" + elem_type + "> " + param_name + ";\n";
-				str += "#endif\n";
 				break;
 
 			case REDT_byte_address_buffer:
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
 				str += "ByteAddressBuffer " + param_name + ";\n";
-				str += "#endif\n";
 				break;
 
 			case REDT_rw_buffer:
@@ -3666,9 +3660,7 @@ namespace KlayGE
 				break;
 
 			case REDT_rw_structured_buffer:
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
 				str += "RWStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
-				str += "#endif\n";
 				break;
 
 			case REDT_rw_texture1D:
@@ -3702,9 +3694,7 @@ namespace KlayGE
 				break;
 
 			case REDT_rw_byte_address_buffer:
-				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)\n";
 				str += "RWByteAddressBuffer " + param_name + ";\n";
-				str += "#endif\n";
 				break;
 
 			case REDT_append_structured_buffer:

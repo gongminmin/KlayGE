@@ -67,8 +67,6 @@ namespace KlayGE
 			uint8_t max_pixel_texture_units;
 			uint8_t max_simultaneous_rts;
 
-			bool standard_derivatives_support : 1;
-			bool shader_texture_lod_support : 1;
 			bool fp_color_support : 1;
 			bool pack_to_rgba_required : 1;
 			bool render_to_texture_array_support : 1;
@@ -81,7 +79,6 @@ namespace KlayGE
 			bool bc4_support : 1;
 			bool bc5_support : 1;
 			bool frag_depth_support : 1;
-			bool ubo_support : 1;
 		};
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(pop)

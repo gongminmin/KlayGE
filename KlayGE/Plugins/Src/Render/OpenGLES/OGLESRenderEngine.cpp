@@ -1576,9 +1576,6 @@ namespace KlayGE
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
-		glGetIntegerv(GL_FRAGMENT_SHADER_DERIVATIVE_HINT_OES, &temp);
-		caps_.standard_derivatives_support = (temp != 0);
-		caps_.shader_texture_lod_support = true;
 		caps_.logic_op_support = false;
 		caps_.independent_blend_support = false;
 		if (glloader_GLES_VERSION_3_1())

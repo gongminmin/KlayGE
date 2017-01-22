@@ -49,51 +49,31 @@ float4 decode_hdr_yc(float y, float4 c)
 
 float mipmap_level(float2 uv, float2 texture_size)
 {
-#if KLAYGE_DERIVATIVES
 	float2 dx = ddx(uv * texture_size.x);
 	float2 dy = ddy(uv * texture_size.y);
 	float d = max(dot(dx, dx), dot(dy, dy));
 
 	return log2(sqrt(d));
-#else
-	return 0;
-#endif
 }
 
 float4 Tex2DSampleLevel(Texture2D tex, sampler sa, float2 tc, float mip, float mip_bias)
 {
-#if defined(KLAYGE_PIXEL_SHADER) && KLAYGE_NO_TEX_LOD
-	return tex.SampleBias(sa, tc, mip + mip_bias + 0.5f);
-#else
 	return tex.SampleLevel(sa, tc, mip);
-#endif
 }
 
 float4 Tex2DArraySampleLevel(Texture2DArray tex, sampler sa, float3 tc, float mip, float mip_bias)
 {
-#if defined(KLAYGE_PIXEL_SHADER) && KLAYGE_NO_TEX_LOD
-	return tex.SampleBias(sa, tc, mip + mip_bias + 0.5f);
-#else
 	return tex.SampleLevel(sa, tc, mip);
-#endif
 }
 
 float4 Tex3DSampleLevel(Texture3D tex, sampler sa, float3 tc, float mip, float mip_bias)
 {
-#if defined(KLAYGE_PIXEL_SHADER) && KLAYGE_NO_TEX_LOD
-	return tex.SampleBias(sa, tc, mip + mip_bias + 0.5f);
-#else
 	return tex.SampleLevel(sa, tc, mip);
-#endif
 }
 
 float4 TexCubeSampleLevel(TextureCube tex, sampler sa, float3 tc, float mip, float mip_bias)
 {
-#if defined(KLAYGE_PIXEL_SHADER) && KLAYGE_NO_TEX_LOD
-	return tex.SampleBias(sa, tc, mip + mip_bias + 0.5f);
-#else
 	return tex.SampleLevel(sa, tc, mip);
-#endif
 }
 
 float non_linear_depth_to_linear(float depth, float near_mul_q, float q)
@@ -218,7 +198,6 @@ float4 rcp(float4 v)
 	return 1 / v;
 }
 
-#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(4, 0)
 uint countbits(uint v)
 {
 	v = v - ((v >> 1) & 0x55555555);
@@ -364,7 +343,6 @@ uint4 reverse(uint4 v)
 	v = (((v & 0xFF00FF00) >> 8) | ((v & 0x00FF00FF) << 8));
 	return (v >> 16) | (v << 16);
 }
-#endif
 #endif
 		]]>
 	</shader>

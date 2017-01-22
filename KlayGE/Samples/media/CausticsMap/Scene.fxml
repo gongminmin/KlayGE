@@ -244,10 +244,8 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 		discard;
 	}
 
-#if KLAYGE_DERIVATIVES
 	float2 dx = ddx(texCoord0.xy);
 	float2 dy = ddy(texCoord0.xy);
-#endif
 
 	//roughly hack only for this demo, in order to correct shadow for distance mapping
 	float3 deltaUV = normalize(float3(texUV.xy, 0.5f)) - normalize(float3(texCoord0.xy, 0.5f));
@@ -264,13 +262,8 @@ float4 DistanceMappingPS(float4 L	: TEXCOORD0,
 	lookup_uv += float2(delta.x, -KLAYGE_FLIPPING * delta.y);
 	float4 caustics = float4(caustics_tex.Sample(linear_border_sampler, lookup_uv).xyz, 1);
 
-#if KLAYGE_DERIVATIVES
 	float3 diffuse = diffuse_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy).rgb;
 	float3 bump_normal = decompress_normal(normal_tex.SampleGrad(linear_sampler, texUV.xy, dx, dy));
-#else
-	float3 diffuse = diffuse_tex.Sample(linear_sampler, texUV.xy).rgb;
-	float3 bump_normal = decompress_normal(normal_tex.Sample(linear_sampler, texUV.xy));
-#endif
 	return DistanceMappingShading(L.xyz, V.xyz, H.xyz, diffuse, bump_normal) * atten + caustics;
 }
 

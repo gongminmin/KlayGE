@@ -214,9 +214,6 @@ namespace KlayGE
 	ToneMappingPostProcess::ToneMappingPostProcess()
 		: PostProcess(L"ToneMapping", false)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-
 		input_pins_.emplace_back("src_tex", TexturePtr());
 		input_pins_.emplace_back("lum_tex", TexturePtr());
 		input_pins_.emplace_back("bloom_tex", TexturePtr());
@@ -224,15 +221,7 @@ namespace KlayGE
 		output_pins_.emplace_back("out_tex", TexturePtr());
 		
 		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
-		RenderTechnique* tech;
-		if (caps.max_shader_model >= ShaderModel(3, 0))
-		{
-			tech = effect->TechniqueByName("ToneMapping30");
-		}
-		else
-		{
-			tech = effect->TechniqueByName("ToneMapping20");
-		}
+		RenderTechnique* tech = effect->TechniqueByName("ToneMapping");
 
 		this->Technique(effect, tech);
 	}

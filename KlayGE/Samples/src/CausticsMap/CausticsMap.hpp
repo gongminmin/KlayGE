@@ -10,8 +10,6 @@ class CausticsMapApp : public KlayGE::App3DFramework
 public:
 	CausticsMapApp();
 
-	bool ConfirmDevice() const override;
-
 	//Caustics Map Parameter
 	bool IsEnableDualFaceCaustics()
 	{
