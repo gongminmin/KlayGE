@@ -1,3 +1,7 @@
+IF(KLAYGE_COMPILER_CLANGC2)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value -Wno-microsoft-const-init -Wno-sign-compare -Wno-unused-variable -Wno-error")
+ENDIF()
+
 SET(LIB_NAME KlayGE_RenderEngine_D3D11)
 
 SET(D3D11_RE_SOURCE_FILES

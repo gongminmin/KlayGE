@@ -38,10 +38,7 @@ namespace KlayGE
 	class DShowVMR9Allocator : public IVMRSurfaceAllocator9, IVMRImagePresenter9
 	{
 	public:
-		enum
-		{
-			USER_ID = 0xBAFEDCBA
-		};
+		static uint64_t constexpr USER_ID = 0xBAFEDCBA;
 
 	public:
 		explicit DShowVMR9Allocator(HWND wnd);

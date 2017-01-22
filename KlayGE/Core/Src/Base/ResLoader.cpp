@@ -421,9 +421,9 @@ namespace KlayGE
 #else
 					uint64_t timestamp = std::filesystem::last_write_time(res_path);
 #endif
-
+					// The static_cast is a workaround for a bug in clang/c2
 					return MakeSharedPtr<ResIdentifier>(name, timestamp,
-						MakeSharedPtr<std::ifstream>(res_name.c_str(), std::ios_base::binary));
+						MakeSharedPtr<std::ifstream>(res_name.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::binary)));
 				}
 				else
 				{
@@ -751,8 +751,9 @@ namespace KlayGE
 #else
 				uint64_t timestamp = std::filesystem::last_write_time(pkt_path);
 #endif
+				// The static_cast is a workaround for a bug in clang/c2
 				res = MakeSharedPtr<ResIdentifier>(name, timestamp,
-					MakeSharedPtr<std::ifstream>(pkt_name.c_str(), std::ios_base::binary));
+					MakeSharedPtr<std::ifstream>(pkt_name.c_str(), static_cast<std::ios_base::openmode>(std::ios_base::binary)));
 			}
 		}
 

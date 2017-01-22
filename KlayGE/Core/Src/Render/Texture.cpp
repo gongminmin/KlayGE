@@ -202,7 +202,7 @@ namespace
 #endif
 
 #ifndef DXGI_FORMAT_DEFINED
-	enum DXGI_FORMAT
+	enum DXGI_FORMAT : uint32_t
 	{
 		DXGI_FORMAT_UNKNOWN	                    = 0,
 		DXGI_FORMAT_R32G32B32A32_TYPELESS       = 1,

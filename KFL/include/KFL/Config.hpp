@@ -95,7 +95,9 @@
 
 	#define CLANG_VERSION KFL_JOIN(__clang_major__, __clang_minor__)
 
-	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+	#if __cplusplus > 201402L
+		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+	#endif
 
 	#if defined(__APPLE__)
 		#if CLANG_VERSION >= 61
@@ -128,8 +130,8 @@
 
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
-		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
-		#define KLAYGE_SYMBOL_IMPORT
+		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
+		#define KLAYGE_SYMBOL_IMPORT __declspec(dllimport)
 
 		#ifndef _CRT_SECURE_NO_DEPRECATE
 			#define _CRT_SECURE_NO_DEPRECATE
@@ -174,7 +176,9 @@
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif
 	#if KLAYGE_COMPILER_VERSION >= 60
-		#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#if __cplusplus > 201402L
+			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+		#endif
 	#endif
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

@@ -57,7 +57,7 @@ enum GLSLVersion
 	GSV_320_ES			// GL ES 3.2
 };
 
-enum GLSLRules
+enum GLSLRules : uint32_t
 {
 	GSR_UniformBlockBinding = 1UL << 0,		// Set means allow uniform block layout bindings e.g.layout(binding=N) uniform {};.
 	GSR_GlobalUniformsInUBO = 1UL << 1,		// Set means collect global uniforms in uniform block named $Globals.
@@ -83,8 +83,7 @@ enum GLSLRules
 	GSR_OESStandardDerivatives = 1UL << 21,
 	GSR_EXTFragDepth = 1UL << 22,
 	GSR_EXTTessellationShader = 1UL << 23,
-	GSR_PrecisionOnSampler = 1UL << 24,
-	GSR_ForceUInt32 = 0xFFFFFFFF
+	GSR_PrecisionOnSampler = 1UL << 24
 };
 
 struct RegisterDesc

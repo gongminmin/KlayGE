@@ -1,3 +1,7 @@
+IF(KLAYGE_COMPILER_CLANGC2)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-microsoft-enum-value")
+ENDIF()
+
 SET(LIB_NAME KlayGE_ShowEngine_DShow)
 
 SET(DSHOW_SE_SOURCE_FILES
