@@ -35,7 +35,7 @@
 
 #include <string>
 
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_CLANGC2)
 	#define DLL_PREFIX ""
 #else
 	#define DLL_PREFIX "lib"
