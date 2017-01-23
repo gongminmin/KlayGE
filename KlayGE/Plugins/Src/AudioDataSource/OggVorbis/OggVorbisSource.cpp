@@ -88,10 +88,7 @@ namespace KlayGE
 			}
 			else
 			{
-				if (result <= 0)
-				{
-					break;
-				}
+				break;
 			}
 		}
 

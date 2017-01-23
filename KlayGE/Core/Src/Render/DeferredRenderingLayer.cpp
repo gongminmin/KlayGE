@@ -3426,8 +3426,8 @@ namespace KlayGE
 		}
 		*shadowing_channel_param_ = shadowing_channel;
 
-		*light_attrib_param_ = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-			attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
+		*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+			(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
 		*light_color_param_ = light.Color();
 		*light_falloff_range_param_ = float4(light.Falloff().x(), light.Falloff().y(),
 			light.Falloff().z(), 0);
@@ -3507,8 +3507,8 @@ namespace KlayGE
 			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
-			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0));
+			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0));
 		}
 
 		lights_attrib[0].w() = iter_end - iter_beg + 0.5f;
@@ -3594,8 +3594,8 @@ namespace KlayGE
 				channel = sm_light_indices_[*iter].second;
 			}
 
-			lights_attrib.push_back(float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-				attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, channel + 0.5f, 0));
+			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, channel + 0.5f, 0));
 
 			float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
 			lights_radius_extend.push_back(float4(light.Radius(), extend_es.x(),
@@ -3923,8 +3923,8 @@ namespace KlayGE
 					}
 
 					*reinterpret_cast<float4*>(lights_attrib
-						+ offset * lights_attrib_param_->Stride()) = float4(attr & LightSource::LSA_NoDiffuse ? 0.0f : 1.0f,
-						attr & LightSource::LSA_NoSpecular ? 0.0f : 1.0f, 0, 0);
+						+ offset * lights_attrib_param_->Stride()) = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
 
 					float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
 					*reinterpret_cast<float4*>(lights_radius_extend

@@ -899,12 +899,6 @@ namespace KlayGE
 		}
 		else
 		{
-			std::string::size_type offset = meshml_name.rfind("/");
-			if (offset != std::string::npos)
-			{
-				folder_name = meshml_name.substr(0, offset + 1);
-			}
-
 			path_name = meshml_name;
 		}
 

@@ -33,10 +33,6 @@
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
 
-#ifdef Bool
-#undef Bool		// for boost::foreach
-#endif
-
 #include <cstring>
 #include <fstream>
 
