@@ -123,6 +123,11 @@ namespace KlayGE
 		core_->SkinningOn(on ? true : false);
 	}
 
+	void MtlEditorCoreWrapper::SkeletonOn(int on)
+	{
+		core_->SkeletonOn(on ? true : false);
+	}
+
 	void MtlEditorCoreWrapper::LightOn(int on)
 	{
 		core_->LightOn(on ? true : false);

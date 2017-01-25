@@ -14,6 +14,7 @@ DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Redo.png" "cbda47a167
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Save.png" "cbda47a1678ce70b6720856736100979d469e159" "1bba12c7f5c9b339e15f5d73507988f14bfdd7e2")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/SaveAs.png" "cbda47a1678ce70b6720856736100979d469e159" "43561560c76dad3bd62c80edd17d569ad39651d7")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Skinning.png" "cbda47a1678ce70b6720856736100979d469e159" "19dd2371bf2b11742dcc2fd45b2d06d0b0a6427e")
+DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Skeleton.png" "f0fb740fec86cf910733cfa895eed4cefbcf9994" "1163f1f6661a0d0a882d7b199d87baea47fa2130")
 DOWNLOAD_FILE("KlayGE/Tools/src/MtlEditor/MtlEditor/Images/Undo.png" "cbda47a1678ce70b6720856736100979d469e159" "23c318d9bbe5c95b8b0fbbea662facd56a3a66dc")
 
 STRING(REPLACE "/" "\\" WRAPPER_DIR ${CMAKE_BINARY_DIR})

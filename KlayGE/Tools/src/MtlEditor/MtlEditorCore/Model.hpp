@@ -5,9 +5,6 @@
 #include <string>
 #include <KlayGE/Mesh.hpp>
 
-void InitInstancedTessBuffs();
-void DeinitInstancedTessBuffs();
-
 class DetailedSkinnedMesh;
 
 class DetailedSkinnedModel : public KlayGE::SkinnedModel
@@ -17,9 +14,9 @@ class DetailedSkinnedModel : public KlayGE::SkinnedModel
 public:
 	explicit DetailedSkinnedModel(std::wstring const & name);
 
-	virtual void DoBuildModelInfo() override;
+	void DoBuildModelInfo() override;
 
-	virtual bool IsSkinned() const override
+	bool IsSkinned() const override
 	{
 		return is_skinned_;
 	}
@@ -55,7 +52,7 @@ class DetailedSkinnedMesh : public KlayGE::SkinnedMesh
 public:
 	DetailedSkinnedMesh(KlayGE::RenderModelPtr const & model, std::wstring const & name);
 
-	virtual void DoBuildMeshInfo() override;
+	void DoBuildMeshInfo() override;
 
 	void OnRenderBegin();
 
@@ -69,6 +66,14 @@ public:
 
 private:
 	int visualize_;
+};
+
+class SkeletonMesh : public KlayGE::SkinnedMesh
+{
+public:
+	explicit SkeletonMesh(KlayGE::RenderModelPtr const & model);
+
+	void OnRenderBegin() override;
 };
 
 #endif		// _MTL_EDITOR_CORE_MODEL_HPP

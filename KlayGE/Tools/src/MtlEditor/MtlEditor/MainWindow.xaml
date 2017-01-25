@@ -34,6 +34,7 @@
                 </RibbonGroup>
                 <RibbonGroup>
                     <RibbonToggleButton LargeImageSource="Images\Skinning.png" x:Name="skinning" Label="Skinning" IsChecked="{Binding SkinningValue}"/>
+                    <RibbonToggleButton LargeImageSource="Images\Skeleton.png" x:Name="skeleton" Label="Skeleton" IsChecked="{Binding SkeletonValue}"/>
                     <RibbonToggleButton LargeImageSource="Images\Play.png" x:Name="play" Label="Play Animation" IsChecked="{Binding PlayValue}"/>
                 </RibbonGroup>
                 <RibbonGroup>

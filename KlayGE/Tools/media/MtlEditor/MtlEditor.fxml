@@ -246,4 +246,63 @@ void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
 			<state name="pixel_shader" value="VisualizeTextureMRTPS()"/>
 		</pass>
 	</technique>
+
+	<parameter type="texture2D" name="color_map"/>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void SkeletonVS(float4 pos : POSITION,
+#if SKINNING_ON
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+				float4 blend_indices_f : BLENDINDICES,
+#else
+				uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
+				out float oColor : COLOR0,
+				out float4 oPos : SV_Position)
+{
+#if SKINNING_ON
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+#else
+	int4 blend_indices = 0;
+#endif
+
+	float3 result_pos;
+	float4 result_tangent_quat;
+	float2 oTex;
+	CalcMesh(float4(pos.xyz, 1), 0, 0,
+#if SKINNING_ON
+				float4(1, 0, 0, 0), blend_indices,
+#endif
+				oTex, result_pos,
+				result_tangent_quat);
+
+	oColor = pos.w;
+	oPos = mul(float4(result_pos, 1), mvp);
+}
+
+float4 SkeletonPS(float color : COLOR0) : SV_Target
+{
+	return color_map.SampleLevel(linear_sampler, float2(color, 0.5f), 0);
+}
+		]]>
+	</shader>
+	<technique name="SkeletonTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+			<state name="polygon_mode" value="line"/>
+			<state name="depth_enable" value="false"/>
+
+			<state name="vertex_shader" value="SkeletonVS()"/>
+			<state name="pixel_shader" value="SkeletonPS()"/>
+		</pass>
+	</technique>
 </effect>

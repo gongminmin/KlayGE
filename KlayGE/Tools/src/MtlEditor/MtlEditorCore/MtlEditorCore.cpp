@@ -252,16 +252,6 @@ namespace
 		ImposterPtr imposter_;
 	};
 
-	class ImposterObject : public SceneObjectHelper
-	{
-	public:
-		ImposterObject(std::string const & name, AABBox const & aabbox)
-			: SceneObjectHelper(0)
-		{
-			renderable_ = MakeSharedPtr<RenderImpostor>(name, aabbox);
-		}
-	};
-
 	class LightSourceUpdate
 	{
 	public:
@@ -472,10 +462,17 @@ namespace KlayGE
 		if (model_)
 		{
 			model_->DelFromSceneManager();
+			model_.reset();
+		}
+		if (skeleton_model_)
+		{
+			skeleton_model_->DelFromSceneManager();
+			skeleton_model_.reset();
 		}
 		if (imposter_)
 		{
 			imposter_->DelFromSceneManager();
+			imposter_.reset();
 		}
 
 		std::string mesh_name = mesh_path.string();
@@ -486,9 +483,17 @@ namespace KlayGE
 			model_->GetRenderable()->Subrenderable(i)->ObjectID(static_cast<uint32_t>(i + 1));
 		}
 
+		if (checked_pointer_cast<DetailedSkinnedModel>(model_->GetRenderable())->NumJoints() > 0)
+		{
+			skeleton_model_ = MakeSharedPtr<SceneObjectHelper>(
+				MakeSharedPtr<SkeletonMesh>(checked_pointer_cast<RenderModel>(model_->GetRenderable())), 0);
+			skeleton_model_->AddToSceneManager();
+		}
+
 		if (!ResLoader::Instance().Locate(imposter_name).empty())
 		{
-			imposter_ = MakeSharedPtr<ImposterObject>(imposter_name, model_->GetRenderable()->PosBound());
+			imposter_ = MakeSharedPtr<SceneObjectHelper>(
+				MakeSharedPtr<RenderImpostor>(imposter_name, model_->GetRenderable()->PosBound()), 0);
 			imposter_->AddToSceneManager();
 			imposter_->Visible(false);
 		}
@@ -1062,6 +1067,14 @@ namespace KlayGE
 		else
 		{
 			checked_pointer_cast<ModelObject>(model_)->UnbindJoints();
+		}
+	}
+
+	void MtlEditorCore::SkeletonOn(bool on)
+	{
+		if (skeleton_model_)
+		{
+			skeleton_model_->Visible(on);
 		}
 	}
 

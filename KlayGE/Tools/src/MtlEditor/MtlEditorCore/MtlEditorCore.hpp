@@ -91,6 +91,7 @@ namespace KlayGE
 		void ExportMaterial(uint32_t mtl_id, std::string const & name);
 
 		void SkinningOn(bool on);
+		void SkeletonOn(bool on);
 		void LightOn(bool on);
 		void FPSCameraOn(bool on);
 		void LineModeOn(bool on);
@@ -126,6 +127,7 @@ namespace KlayGE
 		LightSourcePtr main_light_;
 
 		SceneObjectPtr model_;
+		SceneObjectPtr skeleton_model_;
 		SceneObjectPtr imposter_;
 		SceneObjectPtr axis_;
 		SceneObjectPtr grid_;

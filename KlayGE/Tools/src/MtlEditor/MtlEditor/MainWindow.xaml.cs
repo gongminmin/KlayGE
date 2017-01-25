@@ -258,6 +258,7 @@ namespace MtlEditor
 			undo.IsEnabled = false;
 			redo.IsEnabled = false;
 			skinning.IsEnabled = false;
+			skeleton.IsEnabled = false;
 			play.IsEnabled = false;
 			visualize.IsEnabled = false;
 			frame_text.IsEnabled = false;
@@ -340,6 +341,8 @@ namespace MtlEditor
 			{
 				skinning.IsEnabled = true;
 				skinning.IsChecked = true;
+				skeleton.IsEnabled = true;
+				skeleton.IsChecked = false;
 				play.IsEnabled = true;
 				frame_text.IsEnabled = true;
 				frame_slider.IsEnabled = true;
@@ -349,6 +352,8 @@ namespace MtlEditor
 			{
 				skinning.IsEnabled = false;
 				skinning.IsChecked = false;
+				skeleton.IsEnabled = false;
+				skeleton.IsChecked = false;
 				play.IsEnabled = false;
 				frame_text.IsEnabled = false;
 				frame_slider.IsEnabled = false;
@@ -518,6 +523,19 @@ namespace MtlEditor
 				skinning_ = value;
 				core_.SkinningOn(skinning_ ? 1 : 0);
 				play.IsEnabled = skinning_;
+			}
+		}
+
+		public bool SkeletonValue
+		{
+			get
+			{
+				return skeleton_;
+			}
+			set
+			{
+				skeleton_ = value;
+				core_.SkeletonOn(skeleton_ ? 1 : 0);
 			}
 		}
 
@@ -1332,6 +1350,7 @@ namespace MtlEditor
 		private bool fps_camera_ = false;
 		private bool line_mode_ = false;
 		private bool imposter_mode_ = false;
+		private bool skeleton_ = false;
 		private bool play_ = false;
 
 		private readonly ReadOnlyCollection<MeshEntityViewModel> meshes_;
