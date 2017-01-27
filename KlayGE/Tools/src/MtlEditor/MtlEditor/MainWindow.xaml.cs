@@ -401,7 +401,7 @@ namespace MtlEditor
 
 			dlg.DefaultExt = ".meshml";
 			dlg.Filter = "All Model Files|*.meshml;*.model_bin;*.3ds;*.ac;*.ase;*.assbin;*.assxml;*.b3d;*.bvh;*.collada;*.dxf;*.csm;"
-				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
+				+ "*.hmp;*.irr;*.lwo;*.lws;*.md2;*.md3;*.md5mesh;*.mdc;*.mdl;*.nff;*.ndo;*.off;*.obj;*.ogre;*.opengex;*.ply;*.ms3d;*.cob;"
 				+ "*.blend;*.ifc;*.xgl;*.fbx;*.q3d;*.q3bsp;*.raw;*.smd;*.stl;*.terragen;*.3d;*.x|All Files|*.*";
 			dlg.CheckPathExists = true;
 			dlg.CheckFileExists = true;
