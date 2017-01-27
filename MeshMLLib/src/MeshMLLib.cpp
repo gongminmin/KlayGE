@@ -122,7 +122,7 @@ namespace KlayGE
 		Quaternion const & bind_real, Quaternion const & bind_dual)
 	{
 		float scale = MathLib::length(bind_real);
-		if (bind_real.w() < 0)
+		if (MathLib::SignBit(bind_real.w()) < 0)
 		{
 			scale = -scale;
 		}
@@ -328,7 +328,7 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(keyframes_[kfs_id].bind_reals.size()) > kf_id);
 
 		float scale = MathLib::length(bind_real);
-		if (bind_real.w() < 0)
+		if (MathLib::SignBit(bind_real.w()) < 0)
 		{
 			scale = -scale;
 		}
@@ -1136,7 +1136,7 @@ namespace KlayGE
 
 		dual = MathLib::quat_trans_to_udq(real, trans * unit_scale_);
 
-		if (flip * real.w() < 0)
+		if (flip * MathLib::SignBit(real.w()) < 0)
 		{
 			real = -real;
 			dual = -dual;
@@ -1158,7 +1158,7 @@ namespace KlayGE
 		{
 			Joint inverse_joint;
 
-			float flip = MathLib::sgn(bind_joints[i].bind_scale);
+			float flip = MathLib::SignBit(bind_joints[i].bind_scale);
 
 			inverse_joint.bind_scale = 1 / bind_joints[i].bind_scale;
 
@@ -1280,7 +1280,7 @@ namespace KlayGE
 					joint.bind_real, joint.bind_dual);
 				bind_scale = inverse_joint.bind_scale * joint.bind_scale;
 
-				if (bind_real.w() < 0)
+				if (MathLib::SignBit(bind_real.w()) < 0)
 				{
 					bind_real = -bind_real;
 					bind_dual = -bind_dual;
@@ -1316,7 +1316,7 @@ namespace KlayGE
 				bind_dual = MathLib::quat_trans_to_udq(rot, trans);
 				bind_scale = scale.x();
 
-				if (flip * bind_real.w() < 0)
+				if (flip * MathLib::SignBit(bind_real.w()) < 0)
 				{
 					bind_real = -bind_real;
 					bind_dual = -bind_dual;

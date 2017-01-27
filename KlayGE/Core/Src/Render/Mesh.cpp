@@ -736,7 +736,7 @@ namespace KlayGE
 					joint.bind_real, joint.bind_dual);
 				bind_scale = joint.inverse_origin_scale * joint.bind_scale;
 
-				if (bind_real.w() < 0)
+				if (MathLib::SignBit(bind_real.w()) < 0)
 				{
 					bind_real = -bind_real;
 					bind_dual = -bind_dual;
@@ -772,7 +772,7 @@ namespace KlayGE
 				bind_dual = MathLib::quat_trans_to_udq(rot, trans);
 				bind_scale = scale.x();
 
-				if (flip * bind_real.w() < 0)
+				if (flip * MathLib::SignBit(bind_real.w()) < 0)
 				{
 					bind_real = -bind_real;
 					bind_dual = -bind_dual;
@@ -1259,7 +1259,7 @@ namespace KlayGE
 			joint.bind_dual[2] = LE2Native(joint.bind_dual[2]);
 			joint.bind_dual[3] = LE2Native(joint.bind_dual[3]);
 
-			float flip = MathLib::sgn(joint.bind_real.w());
+			float flip = MathLib::SignBit(joint.bind_real.w());
 
 			joint.bind_scale = MathLib::length(joint.bind_real);
 			joint.inverse_origin_scale = 1 / joint.bind_scale;
@@ -1330,7 +1330,7 @@ namespace KlayGE
 					kf.bind_dual[k_index][2] = LE2Native(kf.bind_dual[k_index][2]);
 					kf.bind_dual[k_index][3] = LE2Native(kf.bind_dual[k_index][3]);
 
-					float flip = MathLib::sgn(kf.bind_real[k_index].w());
+					float flip = MathLib::SignBit(kf.bind_real[k_index].w());
 
 					kf.bind_scale[k_index] = MathLib::length(kf.bind_real[k_index]);
 					kf.bind_real[k_index] /= kf.bind_scale[k_index];
@@ -1843,7 +1843,7 @@ namespace KlayGE
 			{
 				Joint joint = skinned->GetJoint(i);
 
-				float flip = MathLib::sgn(joint.inverse_origin_scale);
+				float flip = MathLib::SignBit(joint.inverse_origin_scale);
 
 				joint.bind_scale = 1 / joint.inverse_origin_scale;
 				if (flip > 0)
