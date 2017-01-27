@@ -301,6 +301,9 @@ namespace KlayGE
 		float cosh(float x) noexcept;
 		float tanh(float x) noexcept;
 
+		int32_t SignBit(int32_t x) noexcept;
+		float SignBit(float x) noexcept;
+
 
 		// 几种类型的Dot
 		template <typename T>

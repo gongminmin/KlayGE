@@ -224,6 +224,22 @@ namespace KlayGE
 			return std::tanh(x);
 		}
 
+		int32_t SignBit(int32_t x) noexcept
+		{
+			return (x & 0x80000000U) ? -1 : 1;
+		}
+
+		float SignBit(float x) noexcept
+		{
+			union FNI
+			{
+				float f;
+				int32_t i;
+			} fni;
+			fni.f = x;
+			return static_cast<float>(SignBit(fni.i));
+		}
+
 
 		template int32_t dot(int1 const & lhs, int1 const & rhs) noexcept;
 		template int32_t dot(int2 const & lhs, int2 const & rhs) noexcept;
