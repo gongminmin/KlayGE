@@ -359,6 +359,7 @@ namespace MtlEditor
 				frame_slider.IsEnabled = false;
 				frame_slider.Maximum = 1;
 			}
+			frame_slider.Value = 0;
 			visualize.IsEnabled = true;
 			properties.IsEnabled = true;
 			// Workround for.NET 4.6.1
