@@ -612,36 +612,52 @@ namespace KlayGE
 
 	std::pair<std::pair<Quaternion, Quaternion>, float> KeyFrames::Frame(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
-
-		auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
-		int index = static_cast<int>(iter - frame_id.begin());
-
-		int index0 = index - 1;
-		int index1 = index % frame_id.size();
-		int frame0 = frame_id[index0];
-		int frame1 = frame_id[index1];
-		float factor = (frame - frame0) / (frame1 - frame0);
 		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
-		ret.first = MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], factor);
-		ret.second = MathLib::lerp(bind_scale[index0], bind_scale[index1], factor);
+		if (frame_id.size() == 1)
+		{
+			ret.first.first = bind_real[0];
+			ret.first.second = bind_dual[0];
+			ret.second = bind_scale[0];
+		}
+		else
+		{
+			frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+
+			auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+			int index = static_cast<int>(iter - frame_id.begin());
+
+			int index0 = index - 1;
+			int index1 = index % frame_id.size();
+			int frame0 = frame_id[index0];
+			int frame1 = frame_id[index1];
+			float factor = (frame - frame0) / (frame1 - frame0);
+			ret.first = MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], factor);
+			ret.second = MathLib::lerp(bind_scale[index0], bind_scale[index1], factor);
+		}
 		return ret;
 	}
 
 	AABBox AABBKeyFrames::Frame(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
+		if (frame_id.size() == 1)
+		{
+			return bb[0];
+		}
+		else
+		{
+			frame = std::fmod(frame, static_cast<float>(frame_id.back() + 1));
 
-		auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
-		int index = static_cast<int>(iter - frame_id.begin());
+			auto iter = std::upper_bound(frame_id.begin(), frame_id.end(), frame);
+			int index = static_cast<int>(iter - frame_id.begin());
 
-		int index0 = index - 1;
-		int index1 = index % frame_id.size();
-		int frame0 = frame_id[index0];
-		int frame1 = frame_id[index1];
-		float factor = (frame - frame0) / (frame1 - frame0);
-		return AABBox(MathLib::lerp(bb[index0].Min(), bb[index1].Min(), factor),
-			MathLib::lerp(bb[index0].Max(), bb[index1].Max(), factor));
+			int index0 = index - 1;
+			int index1 = index % frame_id.size();
+			int frame0 = frame_id[index0];
+			int frame1 = frame_id[index1];
+			float factor = (frame - frame0) / (frame1 - frame0);
+			return AABBox(MathLib::lerp(bb[index0].Min(), bb[index1].Min(), factor),
+				MathLib::lerp(bb[index0].Max(), bb[index1].Max(), factor));
+		}
 	}
 
 

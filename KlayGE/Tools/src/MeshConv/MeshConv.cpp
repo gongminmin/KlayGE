@@ -729,9 +729,6 @@ namespace
 					}
 					default_tf.scale = scale.x();
 					anim.resampled_frames[joint_id].push_back(default_tf);
-
-					default_tf.frame = anim.frame_num - 1;
-					anim.resampled_frames[joint_id].push_back(default_tf);
 				}
 			}
 

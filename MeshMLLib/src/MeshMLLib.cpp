@@ -74,19 +74,28 @@ namespace KlayGE
 
 	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
 	{
-		frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
-
-		auto iter = std::upper_bound(frame_ids.begin(), frame_ids.end(), frame);
-		int index = static_cast<int>(iter - frame_ids.begin());
-
-		int index0 = index - 1;
-		int index1 = index % frame_ids.size();
-		int frame0 = frame_ids[index0];
-		int frame1 = frame_ids[index1];
-		float factor = (frame - frame0) / (frame1 - frame0);
 		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
-		ret.first = MathLib::sclerp(bind_reals[index0], bind_duals[index0], bind_reals[index1], bind_duals[index1], factor);
-		ret.second = MathLib::lerp(bind_scales[index0], bind_scales[index1], factor);
+		if (frame_ids.size() == 1)
+		{
+			ret.first.first = bind_reals[0];
+			ret.first.second = bind_duals[0];
+			ret.second = bind_scales[0];
+		}
+		else
+		{
+			frame = std::fmod(frame, static_cast<float>(frame_ids.back() + 1));
+
+			auto iter = std::upper_bound(frame_ids.begin(), frame_ids.end(), frame);
+			int index = static_cast<int>(iter - frame_ids.begin());
+
+			int index0 = index - 1;
+			int index1 = index % frame_ids.size();
+			int frame0 = frame_ids[index0];
+			int frame1 = frame_ids[index1];
+			float factor = (frame - frame0) / (frame1 - frame0);
+			ret.first = MathLib::sclerp(bind_reals[index0], bind_duals[index0], bind_reals[index1], bind_duals[index1], factor);
+			ret.second = MathLib::lerp(bind_scales[index0], bind_scales[index1], factor);
+		}
 		return ret;
 	}
 
