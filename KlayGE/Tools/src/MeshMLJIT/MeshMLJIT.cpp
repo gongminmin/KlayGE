@@ -1434,6 +1434,7 @@ namespace
 
 				joint.bind_dual = MathLib::quat_trans_to_udq(bind_quat, bind_pos);
 				joint.bind_real = bind_quat * scale;
+				joint.bind_scale = scale;
 			}
 			else
 			{
@@ -1472,6 +1473,14 @@ namespace
 					joint.bind_dual.z() = bind_dual_node->Attrib("z")->ValueFloat();
 					joint.bind_dual.w() = bind_dual_node->Attrib("w")->ValueFloat();
 				}
+
+				joint.bind_scale = MathLib::length(joint.bind_real);
+				joint.bind_real /= joint.bind_scale;
+				if (MathLib::SignBit(joint.bind_real.w()) < 0)
+				{
+					joint.bind_real = -joint.bind_real;
+					joint.bind_scale = -joint.bind_scale;
+				}
 			}
 
 			joints.push_back(joint);
@@ -1495,9 +1504,20 @@ namespace
 		}
 		frame_rate = key_frames_chunk->Attrib("frame_rate")->ValueUInt();
 
-		KeyFrames kfs;
+		uint32_t joint_id = 0;
 		for (XMLNodePtr kf_node = key_frames_chunk->FirstNode("key_frame"); kf_node; kf_node = kf_node->NextSibling("key_frame"))
 		{
+			XMLAttributePtr joint_attr = kf_node->Attrib("joint");
+			if (joint_attr)
+			{
+				joint_id = joint_attr->ValueUInt();
+			}
+			else
+			{
+				++ joint_id;
+			}
+			KeyFrames& kfs = kfss[joint_id];
+
 			kfs.frame_id.clear();
 			kfs.bind_real.clear();
 			kfs.bind_dual.clear();
@@ -1574,7 +1594,7 @@ namespace
 
 					bind_scale = MathLib::length(bind_real);
 					bind_real /= bind_scale;
-					if (bind_real.w() < 0)
+					if (MathLib::SignBit(bind_real.w()) < 0)
 					{
 						bind_real = -bind_real;
 						bind_scale = -bind_scale;
@@ -2171,11 +2191,39 @@ namespace
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
 		uint32_t num_frames = 0;
 		uint32_t frame_rate = 0;
-		std::vector<KeyFrames> kfs;
+		std::vector<KeyFrames> kfs(joints.size());
 		std::vector<AABBKeyFrames> bb_kfs;
 		if (key_frames_chunk)
 		{
 			CompileKeyFramesChunk(key_frames_chunk, num_frames, frame_rate, kfs);
+
+			for (size_t i = 0; i < kfs.size(); ++ i)
+			{
+				if (kfs[i].frame_id.empty())
+				{
+					Quaternion inv_parent_real;
+					Quaternion inv_parent_dual;
+					float inv_parent_scale;
+					if (joints[i].parent < 0)
+					{
+						inv_parent_real = Quaternion::Identity();
+						inv_parent_dual = Quaternion(0, 0, 0, 0);
+						inv_parent_scale = 1;
+					}
+					else
+					{
+						std::tie(inv_parent_real, inv_parent_dual)
+							= MathLib::inverse(joints[joints[i].parent].bind_real, joints[joints[i].parent].bind_dual);
+						inv_parent_scale = 1 / joints[joints[i].parent].bind_scale;
+					}
+
+					kfs[i].frame_id.push_back(0);
+					kfs[i].bind_real.push_back(MathLib::mul_real(joints[i].bind_real, inv_parent_real));
+					kfs[i].bind_dual.push_back(MathLib::mul_dual(joints[i].bind_real, joints[i].bind_dual * inv_parent_scale,
+						inv_parent_real, inv_parent_dual));
+					kfs[i].bind_scale.push_back(joints[i].bind_scale * inv_parent_scale);
+				}
+			}
 
 			XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
 			CompileBBKeyFramesChunk(bb_kfs_chunk, pos_bbs, num_frames, bb_kfs);

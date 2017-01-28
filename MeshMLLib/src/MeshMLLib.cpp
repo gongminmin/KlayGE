@@ -745,22 +745,15 @@ namespace KlayGE
 	{
 		float const THRESHOLD = 1e-3f;
 
-		std::map<int, int> joint_index_to_kf;
-		for (size_t i = 0; i < keyframes_.size(); ++ i)
-		{
-			joint_index_to_kf.emplace(keyframes_[i].joint_id, static_cast<int>(i));
-		}
-
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		for (int joint_index = 0; joint_index < static_cast<int>(joints_.size()); ++ joint_index)
+		for (size_t i = 0; i < keyframes_.size(); ++i)
 		{
-			auto iter = joint_index_to_kf.find(joint_index);
-			BOOST_ASSERT(iter != joint_index_to_kf.end());
+			Keyframes kf = keyframes_[i];
 
-			Keyframes kf = keyframes_[iter->second];
-
-			BOOST_ASSERT(kf.bind_reals.size() == kf.bind_duals.size());
+			BOOST_ASSERT((kf.bind_reals.size() == kf.bind_duals.size())
+				&& (kf.frame_ids.size() == kf.bind_scales.size())
+				&& (kf.frame_ids.size() == kf.bind_reals.size()));
 
 			int base = 0;
 			while (base < static_cast<int>(kf.frame_ids.size() - 2))
