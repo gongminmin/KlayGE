@@ -687,7 +687,7 @@ namespace KlayGE
 					key_dq.first.second = -key_dq.first.second;
 				}
 
-				if ((key_dq.second > 0) && (parent.bind_scale > 0))
+				if ((MathLib::SignBit(key_dq.second) > 0) && (MathLib::SignBit(parent.bind_scale) > 0))
 				{
 					joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
 					joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
@@ -745,7 +745,7 @@ namespace KlayGE
 
 			Quaternion bind_real, bind_dual;
 			float bind_scale;
-			if ((joint.inverse_origin_scale > 0) && (joint.bind_scale > 0))
+			if ((MathLib::SignBit(joint.inverse_origin_scale) > 0) && (MathLib::SignBit(joint.bind_scale) > 0))
 			{
 				bind_real = MathLib::mul_real(joint.inverse_origin_real, joint.bind_real);
 				bind_dual = MathLib::mul_dual(joint.inverse_origin_real, joint.inverse_origin_dual,

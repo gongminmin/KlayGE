@@ -529,11 +529,18 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 
 			float const color = i / (skinned_model->NumJoints() - 1.0f);
 
+			Quaternion bind_real = joint.inverse_origin_real;
+			Quaternion bind_dual = joint.inverse_origin_dual;
+			float bind_scale = joint.inverse_origin_scale;
+			if (MathLib::SignBit(joint.inverse_origin_scale) > 0)
+			{
+				bind_dual *= bind_scale;
+			}
+
 			float4x4 mat = MathLib::inverse(
-				MathLib::scaling(MathLib::abs(joint.inverse_origin_scale), MathLib::abs(joint.inverse_origin_scale),
-					joint.inverse_origin_scale)
-				* MathLib::to_matrix(joint.inverse_origin_real)
-				* MathLib::translation(MathLib::udq_to_trans(joint.inverse_origin_real, joint.inverse_origin_dual)));
+				MathLib::scaling(MathLib::abs(bind_scale), MathLib::abs(bind_scale), bind_scale)
+				* MathLib::to_matrix(bind_real)
+				* MathLib::translation(MathLib::udq_to_trans(bind_real, bind_dual)));
 			float3 joint_pos = MathLib::transform_coord(float3(0, 0, 0), mat);
 
 			positions.push_back(float4(joint_pos.x(), joint_pos.y(), joint_pos.z(), color));
@@ -541,11 +548,18 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 
 			auto& parent_joint = skinned_model->GetJoint(joint.parent);
 
+			bind_real = parent_joint.inverse_origin_real;
+			bind_dual = parent_joint.inverse_origin_dual;
+			bind_scale = parent_joint.inverse_origin_scale;
+			if (MathLib::SignBit(parent_joint.inverse_origin_scale) > 0)
+			{
+				bind_dual *= bind_scale;
+			}
+
 			float4x4 parent_mat = MathLib::inverse(
-				MathLib::scaling(MathLib::abs(parent_joint.inverse_origin_scale), MathLib::abs(parent_joint.inverse_origin_scale),
-					parent_joint.inverse_origin_scale)
-				* MathLib::to_matrix(parent_joint.inverse_origin_real)
-				* MathLib::translation(MathLib::udq_to_trans(parent_joint.inverse_origin_real, parent_joint.inverse_origin_dual)));
+				MathLib::scaling(MathLib::abs(bind_scale), MathLib::abs(bind_scale), bind_scale)
+				* MathLib::to_matrix(bind_real)
+				* MathLib::translation(MathLib::udq_to_trans(bind_real, bind_dual)));
 			float3 parent_joint_pos = MathLib::transform_coord(float3(0, 0, 0), parent_mat);
 
 			float3 bone_vec = joint_pos - parent_joint_pos;
