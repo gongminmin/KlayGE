@@ -93,6 +93,7 @@ namespace
 				bool transparent;
 				float alpha_test;
 				bool sss;
+				bool two_sided;
 
 				std::array<std::string, RenderMaterial::TS_NumTextureSlots> tex_names;
 
@@ -151,6 +152,7 @@ namespace
 			mtl_desc_.mtl_data->transparent = false;
 			mtl_desc_.mtl_data->alpha_test = 0;
 			mtl_desc_.mtl_data->sss = false;
+			mtl_desc_.mtl_data->two_sided = false;
 
 			mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_Parallax;
 			mtl_desc_.mtl_data->height_offset_scale = float2(-0.5f, 0.06f);
@@ -322,6 +324,16 @@ namespace
 				}
 			}
 
+			XMLNodePtr two_sided_node = root->FirstNode("two_sided");
+			if (two_sided_node)
+			{
+				XMLAttributePtr attr = two_sided_node->Attrib("value");
+				if (attr)
+				{
+					mtl_desc_.mtl_data->two_sided = attr->ValueInt() ? true : false;
+				}
+			}
+
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
@@ -346,6 +358,7 @@ namespace
 				mtl->transparent = mtl_desc_.mtl_data->transparent;
 				mtl->alpha_test = mtl_desc_.mtl_data->alpha_test;
 				mtl->sss = mtl_desc_.mtl_data->sss;
+				mtl->two_sided = mtl_desc_.mtl_data->two_sided;
 
 				mtl->tex_names = mtl_desc_.mtl_data->tex_names;
 
@@ -563,9 +576,18 @@ namespace KlayGE
 		{
 			XMLNodePtr sss_node = doc.AllocNode(XNT_Element, "sss");
 
-			sss_node->AppendAttrib(doc.AllocAttribString("sss", "1"));
+			sss_node->AppendAttrib(doc.AllocAttribString("value", "1"));
 
 			root->AppendNode(sss_node);
+		}
+
+		if (mtl->two_sided)
+		{
+			XMLNodePtr two_sided_node = doc.AllocNode(XNT_Element, "two_sided");
+
+			two_sided_node->AppendAttrib(doc.AllocAttribString("value", "1"));
+
+			root->AppendNode(two_sided_node);
 		}
 
 		std::ofstream ofs(mtlml_name.c_str());

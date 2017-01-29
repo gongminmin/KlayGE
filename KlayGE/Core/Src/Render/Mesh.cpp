@@ -1464,7 +1464,7 @@ namespace KlayGE
 			mtl_map.emplace(i, mtl_id);
 
 			obj.SetMaterial(mtl_id, mtls[i]->name, mtls[i]->albedo, mtls[i]->metalness, mtls[i]->glossiness,
-				mtls[i]->emissive, mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss);
+				mtls[i]->emissive, mtls[i]->transparent, mtls[i]->alpha_test, mtls[i]->sss, mtls[i]->two_sided);
 
 			KLAYGE_STATIC_ASSERT(static_cast<int>(MeshMLObj::Material::TS_Albedo) == RenderMaterial::TS_Albedo);
 			KLAYGE_STATIC_ASSERT(static_cast<int>(MeshMLObj::Material::TS_Metalness) == RenderMaterial::TS_Metalness);

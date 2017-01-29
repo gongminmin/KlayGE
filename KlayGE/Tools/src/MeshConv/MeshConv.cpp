@@ -174,12 +174,14 @@ namespace
 			float3 emissive(0, 0, 0);
 			float opacity = 1;
 			bool transparent = false;
+			bool two_sided = false;
 
 			aiString ai_name;
 			aiColor4D ai_albedo;
 			float ai_opacity;
 			float ai_shininess;
 			aiColor4D ai_emissive;
+			int ai_two_sided;
 
 			auto mtl = scene->mMaterials[mi];
 			
@@ -222,9 +224,15 @@ namespace
 				transparent = true;
 			}
 
+			max = 1;
+			if (AI_SUCCESS == aiGetMaterialIntegerArray(mtl, AI_MATKEY_TWOSIDED, &ai_two_sided, &max))
+			{
+				two_sided = ai_two_sided ? true : false;
+			}
+
 			meshml_obj.SetMaterial(mtl_id, name, float4(albedo.x(), albedo.y(), albedo.z(), opacity),
 				metalness, Shininess2Glossiness(shininess),
-				emissive, transparent, 0, false);
+				emissive, transparent, 0, false, two_sided);
 
 			unsigned int count = aiGetMaterialTextureCount(mtl, aiTextureType_DIFFUSE);
 			if (count > 0)
@@ -283,13 +291,6 @@ namespace
 			meshes[mi].mtl_id = mesh->mMaterialIndex;
 			meshes[mi].name = mesh->mName.C_Str();
 
-			unsigned int max = 1;
-			int two_sided = 0;
-			if (aiGetMaterialIntegerArray(scene->mMaterials[mesh->mMaterialIndex], AI_MATKEY_TWOSIDED, &two_sided, &max) != AI_SUCCESS)
-			{
-				two_sided = 0;
-			}
-
 			auto& indices = meshes[mi].indices;
 			for (unsigned int fi = 0; fi < mesh->mNumFaces; ++ fi)
 			{
@@ -298,13 +299,6 @@ namespace
 				indices.push_back(mesh->mFaces[fi].mIndices[0]);
 				indices.push_back(mesh->mFaces[fi].mIndices[1]);
 				indices.push_back(mesh->mFaces[fi].mIndices[2]);
-
-				if (two_sided)
-				{
-					indices.push_back(mesh->mFaces[fi].mIndices[0]);
-					indices.push_back(mesh->mFaces[fi].mIndices[2]);
-					indices.push_back(mesh->mFaces[fi].mIndices[1]);
-				}
 			}
 
 			bool has_normal = (mesh->mNormals != nullptr);

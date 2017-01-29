@@ -769,7 +769,7 @@ int MayaMeshExporter::ExportMaterialAndTexture(MObject* shader, MObjectArray con
 
 				mtl_id = meshml_obj_.AllocMaterial();
 				meshml_obj_.SetMaterial(mtl_id, name.asChar(), KlayGE::float4(dcoeff * dc.r, dcoeff * dc.g, dcoeff * dc.b, opacity),
-					0.0f, glossiness, KlayGE::float3(ec.r, ec.g, ec.b), opacity < 1, 0, false);
+					0.0f, glossiness, KlayGE::float3(ec.r, ec.g, ec.b), opacity < 1, 0, false, false);
 			}
 			else
 			{
@@ -836,7 +836,7 @@ int MayaMeshExporter::AddDefaultMaterial()
 {
 	int mtl_id = meshml_obj_.AllocMaterial();
 	meshml_obj_.SetMaterial(mtl_id, "default", KlayGE::float4(0, 0, 0, 1), 0, log(32.0f) / log(8192.0f), KlayGE::float3(0, 0, 0),
-		false, 0, false);
+		false, 0, false, false);
 	return mtl_id;
 }
 

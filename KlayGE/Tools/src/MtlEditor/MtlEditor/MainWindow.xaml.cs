@@ -61,6 +61,7 @@ namespace MtlEditor
 			MP_Transparent,
 			MP_AlphaTest,
 			MP_SSS,
+			MP_TwoSided,
 
 			Num_MaterialProperties
 		};
@@ -209,6 +210,10 @@ namespace MtlEditor
 			[DisplayName("SSS")]
 			[PropertyOrder((int)MaterialProperties.MP_SSS)]
 			public bool sss { get; set; }
+			[Category("Attributes")]
+			[DisplayName("Two Sided")]
+			[PropertyOrder((int)MaterialProperties.MP_TwoSided)]
+			public bool two_sided { get; set; }
 		}
 
 		public MainWindow()
@@ -803,6 +808,7 @@ namespace MtlEditor
 				mtl_properties_obj_.transparent = core_.TransparentMaterial(mtl_id);
 				mtl_properties_obj_.alpha_test = core_.AlphaTestMaterial(mtl_id);
 				mtl_properties_obj_.sss = core_.SSSMaterial(mtl_id);
+				mtl_properties_obj_.two_sided = core_.TwoSidedMaterial(mtl_id);
 
 				bool used = false;
 				for (uint i = 0; i < core_.NumMeshes(); ++ i)
@@ -1131,6 +1137,17 @@ namespace MtlEditor
 							if (core_.SSSMaterial(mtl_id) != mtl_properties_obj_.sss)
 							{
 								this.ExecuteCommand(new MtlEditorCommandSetSSS(core_, mtl_id, mtl_properties_obj_.sss));
+							}
+						}
+						break;
+
+					case MaterialProperties.MP_TwoSided:
+						if (selected_mtl_id_ > 0)
+						{
+							uint mtl_id = selected_mtl_id_ - 1;
+							if (core_.TwoSidedMaterial(mtl_id) != mtl_properties_obj_.two_sided)
+							{
+								this.ExecuteCommand(new MtlEditorCommandSetTwoSided(core_, mtl_id, mtl_properties_obj_.two_sided));
 							}
 						}
 						break;

@@ -66,6 +66,7 @@ namespace KlayGE
 			&& (transparent == rhs.transparent)
 			&& (alpha_test == rhs.alpha_test)
 			&& (sss == rhs.sss)
+			&& (two_sided == rhs.two_sided)
 			&& (detail_mode == rhs.detail_mode)
 			&& (height_offset_scale == rhs.height_offset_scale)
 			&& (tess_factors == rhs.tess_factors)
@@ -152,7 +153,7 @@ namespace KlayGE
 	}
 
 	void MeshMLObj::SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
-		float3 const & emissive, bool transparent, float alpha_test, bool sss)
+		float3 const & emissive, bool transparent, float alpha_test, bool sss, bool two_sided)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
@@ -165,6 +166,7 @@ namespace KlayGE
 		mtl.transparent = transparent;
 		mtl.alpha_test = alpha_test;
 		mtl.sss = sss;
+		mtl.two_sided = two_sided;
 	}
 
 	void MeshMLObj::SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
@@ -585,6 +587,10 @@ namespace KlayGE
 			if (mtl.sss)
 			{
 				os << "\t\t\t<sss value=\"1\"/>" << std::endl;
+			}
+			if (mtl.two_sided)
+			{
+				os << "\t\t\t<two_sided value=\"1\"/>" << std::endl;
 			}
 			os << "\t\t</material>" << std::endl;
 		}

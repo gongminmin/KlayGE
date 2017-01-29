@@ -110,6 +110,7 @@ namespace KlayGE
 			bool transparent;
 			float alpha_test;
 			bool sss;
+			bool two_sided;
 
 			std::array<std::string, TS_NumTextureSlots> tex_names;
 
@@ -151,7 +152,7 @@ namespace KlayGE
 
 		int AllocMaterial();
 		void SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
-			float3 const & emissive, bool transparent, float alpha_test, bool sss);
+			float3 const & emissive, bool transparent, float alpha_test, bool sss, bool two_sided);
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
 		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string const & name);

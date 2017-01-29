@@ -70,6 +70,7 @@ namespace KlayGE
 		bool transparent;
 		float alpha_test;
 		bool sss;
+		bool two_sided;
 
 		std::array<std::string, TS_NumTextureSlots> tex_names;
 

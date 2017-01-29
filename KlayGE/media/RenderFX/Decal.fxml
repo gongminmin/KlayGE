@@ -80,7 +80,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 		]]>
 	</shader>

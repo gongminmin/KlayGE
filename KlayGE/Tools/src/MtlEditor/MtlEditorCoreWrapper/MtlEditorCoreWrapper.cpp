@@ -297,6 +297,11 @@ namespace KlayGE
 		return core_->SSSMaterial(mtl_id);
 	}
 
+	bool MtlEditorCoreWrapper::TwoSidedMaterial(uint32_t mtl_id)
+	{
+		return core_->TwoSidedMaterial(mtl_id);
+	}
+
 	void MtlEditorCoreWrapper::MaterialID(uint32_t mesh_id, uint32_t mtl_id)
 	{
 		core_->MaterialID(mesh_id, mtl_id);
@@ -391,6 +396,11 @@ namespace KlayGE
 	void MtlEditorCoreWrapper::SSSMaterial(uint32_t mtl_id, bool value)
 	{
 		core_->SSSMaterial(mtl_id, value);
+	}
+
+	void MtlEditorCoreWrapper::TwoSidedMaterial(uint32_t mtl_id, bool value)
+	{
+		core_->TwoSidedMaterial(mtl_id, value);
 	}
 
 	uint32_t MtlEditorCoreWrapper::CopyMaterial(uint32_t mtl_id)

@@ -327,7 +327,7 @@ namespace KlayGE
 				float glossiness = log(max_mtl->GetShininess() * 100) / log(8192.0f);
 
 				meshml_obj_.SetMaterial(mtl_id, name, float4(diffuse.r, diffuse.g, diffuse.b, opacity), 0, glossiness,
-					float3(emit.r, emit.g, emit.b), opacity < 1, 0, false);
+					float3(emit.r, emit.g, emit.b), opacity < 1, 0, false, false);
 
 				for (int j = 0; j < max_mtl->NumSubTexmaps(); ++ j)
 				{
@@ -414,7 +414,7 @@ namespace KlayGE
 			uv_transss.push_back(std::map<int, std::pair<Matrix3, int>>());
 
 			meshml_obj_.SetMaterial(mtl_id, "default", float4(0.5f, 0.5f, 0.5f, 1), 0, log(32.0f) / log(8192.0f),
-				float3(0, 0, 0), false, 0, false);
+				float3(0, 0, 0), false, 0, false, false);
 		}
 	}
 

@@ -365,15 +365,18 @@ namespace KlayGE
 	void Renderable::UpdateTechniques()
 	{
 		bool sss;
+		bool two_sided;
 		RenderMaterial::SurfaceDetailMode sdm;
 		if (mtl_)
 		{
 			sss = mtl_->sss;
+			two_sided = mtl_->two_sided;
 			sdm = mtl_->detail_mode;
 		}
 		else
 		{
 			sss = false;
+			two_sided = false;
 			sdm = RenderMaterial::SDM_Parallax;
 		}
 
@@ -384,22 +387,50 @@ namespace KlayGE
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
+					}
 				}
 			}
 			else
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
+					}
 				}
 			}
 			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
@@ -414,22 +445,50 @@ namespace KlayGE
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferFlatTessAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessAlphaTestMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferFlatTessAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaTestMRTTech");
+					}
 				}
 			}
 			else
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferFlatTessMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferFlatTessMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessMRTTech");
+					}
 				}
 			}
 			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendBackMRTTech");
@@ -444,22 +503,50 @@ namespace KlayGE
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferSmoothTessAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessAlphaTestMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaTestMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferSmoothTessAlphaTestMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaTestMRTTech");
+					}
 				}
 			}
 			else
 			{
 				if (sss)
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferSmoothTessMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessMRTTech");
+					}
 				}
 				else
 				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessMRTTech");
+					if (two_sided)
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferSmoothTessMRTTech");
+					}
+					else
+					{
+						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessMRTTech");
+					}
 				}
 			}
 			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendBackMRTTech");

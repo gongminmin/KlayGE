@@ -242,10 +242,10 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 	return normal;
 }
 
-void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
+void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
 					out float4 mrt_0, out float4 mrt_1)
 {
-	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
+	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
 
 	float3 albedo = albedo_clr.rgb;
 	if (albedo_map_enabled)
@@ -269,13 +269,15 @@ void ConstructMRTGBuffer(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_t
 }
 
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+					bool is_front_face : SV_IsFrontFace,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
 void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
+					bool is_front_face : SV_IsFrontFace,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
@@ -285,7 +287,7 @@ void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
 
 void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
@@ -302,7 +304,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
-	ConstructMRTGBuffer(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
+	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
 }
 		]]>
 	</shader>
@@ -344,6 +346,17 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="depth_func" value="less"/>
 
 			<state name="cull_mode" value="back"/>
+		</pass>
+	</technique>
+
+	<technique name="TwoSidedGBufferMRTTech" inherit="GBufferMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedGBufferAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
 		</pass>
 	</technique>
 
@@ -392,6 +405,17 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="32"/>
 			<state name="back_stencil_pass" value="replace"/>
 			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+
+	<technique name="TwoSidedSSSGBufferMRTTech" inherit="SSSGBufferMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedSSSGBufferAlphaTestMRTTech" inherit="SSSGBufferAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
 		</pass>
 	</technique>
 
@@ -855,6 +879,17 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="TwoSidedGBufferFlatTessMRTTech" inherit="GBufferFlatTessMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedGBufferFlatTessAlphaTestMRTTech" inherit="GBufferFlatTessAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+
 	<technique name="SSSGBufferFlatTessMRTTech" inherit="SSSGBufferMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
@@ -881,6 +916,17 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="TwoSidedSSSGBufferFlatTessMRTTech" inherit="SSSGBufferFlatTessMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedSSSGBufferFlatTessAlphaTestMRTTech" inherit="SSSGBufferFlatTessAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
 		</pass>
 	</technique>
 
@@ -934,6 +980,17 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 
+	<technique name="TwoSidedGBufferSmoothTessMRTTech" inherit="GBufferSmoothTessMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedGBufferSmoothTessAlphaTestMRTTech" inherit="GBufferSmoothTessAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+
 	<technique name="SSSGBufferSmoothTessMRTTech" inherit="SSSGBufferMRTTech">
 		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
@@ -960,6 +1017,17 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+
+	<technique name="TwoSidedSSSGBufferSmoothTessMRTTech" inherit="SSSGBufferSmoothTessMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+	<technique name="TwoSidedSSSGBufferSmoothTessAlphaTestMRTTech" inherit="SSSGBufferSmoothTessAlphaTestMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
 		</pass>
 	</technique>
 	

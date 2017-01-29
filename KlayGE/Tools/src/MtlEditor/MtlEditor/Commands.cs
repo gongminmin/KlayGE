@@ -25,6 +25,7 @@ namespace MtlEditor
 		ECC_SetTransparent,
 		ECC_SetAlphaTest,
 		ECC_SetSSS,
+		ECC_SetTwoSided,
 		ECC_AssignMaterial,
 		ECC_CopyMaterial,
 
@@ -545,6 +546,32 @@ namespace MtlEditor
 		private uint mtl_id_;
 		private bool sss_;
 		private bool old_sss_;
+	};
+
+	class MtlEditorCommandSetTwoSided : MtlEditorCommand
+	{
+		public MtlEditorCommandSetTwoSided(MtlEditorCoreWrapper core, uint mtl_id, bool value)
+			: base(core, MtlEditorCommandCode.ECC_SetTwoSided, "Set two sided")
+		{
+			mtl_id_ = mtl_id;
+			two_sided_ = value;
+		}
+
+		public override object Execute()
+		{
+			old_two_sided_ = core_.TwoSidedMaterial(mtl_id_);
+			core_.TwoSidedMaterial(mtl_id_, two_sided_);
+			return null;
+		}
+
+		public override void Revoke()
+		{
+			core_.TwoSidedMaterial(mtl_id_, old_two_sided_);
+		}
+
+		private uint mtl_id_;
+		private bool two_sided_;
+		private bool old_two_sided_;
 	};
 
 	class MtlEditorCommandAssignMaterial : MtlEditorCommand

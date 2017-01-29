@@ -64,6 +64,7 @@ namespace KlayGE
 		bool TransparentMaterial(uint32_t mtl_id) const;
 		float AlphaTestMaterial(uint32_t mtl_id) const;
 		bool SSSMaterial(uint32_t mtl_id) const;
+		bool TwoSidedMaterial(uint32_t mtl_id) const;
 
 		void CurrFrame(float frame);
 		void SelectMesh(uint32_t mesh_id);
@@ -85,6 +86,7 @@ namespace KlayGE
 		void TransparentMaterial(uint32_t mtl_id, bool value);
 		void AlphaTestMaterial(uint32_t mtl_id, float value);
 		void SSSMaterial(uint32_t mtl_id, bool value);
+		void TwoSidedMaterial(uint32_t mtl_id, bool value);
 
 		uint32_t CopyMaterial(uint32_t mtl_id);
 		uint32_t ImportMaterial(std::string const & name);

@@ -899,6 +899,12 @@ namespace KlayGE
 		return model->GetMaterial(mtl_id)->sss;
 	}
 
+	bool MtlEditorCore::TwoSidedMaterial(uint32_t mtl_id) const
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		return model->GetMaterial(mtl_id)->two_sided;
+	}
+
 	void MtlEditorCore::MaterialID(uint32_t mesh_id, uint32_t mtl_id)
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
@@ -1025,6 +1031,13 @@ namespace KlayGE
 	{
 		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
 		model->GetMaterial(mtl_id)->sss = value;
+		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
+	}
+
+	void MtlEditorCore::TwoSidedMaterial(uint32_t mtl_id, bool value)
+	{
+		RenderModelPtr model = checked_pointer_cast<RenderModel>(model_->GetRenderable());
+		model->GetMaterial(mtl_id)->two_sided = value;
 		checked_pointer_cast<DetailedSkinnedModel>(model)->UpdateEffectAttrib(mtl_id);
 	}
 
