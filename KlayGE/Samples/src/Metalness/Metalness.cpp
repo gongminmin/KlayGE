@@ -95,7 +95,7 @@ namespace
 	class MetalObject : public SceneObjectHelper
 	{
 	public:
-		MetalObject(std::string const & model_name)
+		explicit MetalObject(std::string const & model_name)
 			: SceneObjectHelper(SOA_Cullable)
 		{
 			renderable_ = SyncLoadModel(model_name, EAH_GPU_Read | EAH_Immutable,

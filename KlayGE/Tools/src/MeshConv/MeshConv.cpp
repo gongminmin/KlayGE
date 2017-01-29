@@ -812,7 +812,6 @@ int main(int argc, char* argv[])
 {
 	std::string input_name;
 	filesystem::path target_folder;
-	std::string platform;
 	float scale = 1;
 	bool swap_yz = false;
 	bool inverse_z = false;

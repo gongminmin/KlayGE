@@ -24,10 +24,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 
-#ifdef Bool
-#undef Bool		// foreach
-#endif
-
 #include <vector>
 #include <sstream>
 #include <fstream>

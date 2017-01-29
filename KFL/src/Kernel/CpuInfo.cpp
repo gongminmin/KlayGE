@@ -291,20 +291,23 @@ namespace KlayGE
 		{
 			cpuid.Call(1);
 
-			feature_mask_ |= cpuid.Edx() & CFM_MMX ? CF_MMX : 0;
-			feature_mask_ |= cpuid.Edx() & CFM_SSE ? CF_SSE : 0;
-			feature_mask_ |= cpuid.Edx() & CFM_SSE2 ? CF_SSE2 : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_SSE3 ? CF_SSE3 : 0;
-			feature_mask_ |= cpuid.Edx() & CFM_HTT ? CF_HTT : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_SSSE3 ? CF_SSSE3 : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_SSE41 ? CF_SSE41 : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_SSE42 ? CF_SSE42 : 0;
-			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_FMA3 ? CF_FMA3 : 0);
-			feature_mask_ |= cpuid.Ecx() & CFM_MOVBE ? CF_MOVBE : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_POPCNT ? CF_POPCNT : 0;
-			feature_mask_ |= cpuid.Ecx() & CFM_AES ? CF_AES : 0;
-			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_AVX) ? CF_AVX : 0;
-			feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_F16C ? CF_F16C : 0);
+			feature_mask_ |= (cpuid.Edx() & CFM_MMX) ? CF_MMX : 0;
+			feature_mask_ |= (cpuid.Edx() & CFM_SSE) ? CF_SSE : 0;
+			feature_mask_ |= (cpuid.Edx() & CFM_SSE2) ? CF_SSE2 : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_SSE3) ? CF_SSE3 : 0;
+			feature_mask_ |= (cpuid.Edx() & CFM_HTT) ? CF_HTT : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_SSSE3) ? CF_SSSE3 : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_SSE41) ? CF_SSE41 : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_SSE42) ? CF_SSE42 : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_MOVBE) ? CF_MOVBE : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_POPCNT) ? CF_POPCNT : 0;
+			feature_mask_ |= (cpuid.Ecx() & CFM_AES) ? CF_AES : 0;
+			if (cpuid.Ecx() & CFM_OSXSAVE)
+			{
+				feature_mask_ |= (cpuid.Ecx() & CFM_FMA3) ? CF_FMA3 : 0;
+				feature_mask_ |= (cpuid.Ecx() & CFM_AVX) ? CF_AVX : 0;
+				feature_mask_ |= (cpuid.Ecx() & CFM_F16C) ? CF_F16C : 0;
+			}
 
 			if (max_std_fn >= 7)
 			{

@@ -773,7 +773,7 @@ namespace
 	class SceneObjectFoggySkyBox : public SceneObjectSkyBox
 	{
 	public:
-		SceneObjectFoggySkyBox(uint32_t attrib = 0)
+		explicit SceneObjectFoggySkyBox(uint32_t attrib = 0)
 			: SceneObjectSkyBox(attrib)
 		{
 			renderable_ = MakeSharedPtr<RenderableFoggySkyBox>();
