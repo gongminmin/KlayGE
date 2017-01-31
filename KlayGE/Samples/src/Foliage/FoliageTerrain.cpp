@@ -56,11 +56,25 @@ namespace KlayGE
 
 			if ((effect_attrs_ & EA_AlphaTest) || (effect_attrs_ & EA_SSS))
 			{
-				gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferAlphaTestMRT");
+				if (mtl_->two_sided)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageTwoSidedGBufferAlphaTestMRT");
+				}
+				else
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferAlphaTestMRT");
+				}
 			}
 			else
 			{
-				gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferMRT");
+				if (mtl_->two_sided)
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageTwoSidedGBufferMRT");
+				}
+				else
+				{
+					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferMRT");
+				}
 			}
 			technique_ = gbuffer_mrt_tech_;
 		}
