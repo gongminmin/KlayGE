@@ -830,7 +830,7 @@ void OceanApp::OnCreate()
 	deferred_rendering_ = Context::Instance().DeferredRenderingLayerInstance();
 	deferred_rendering_->SSVOEnabled(0, false);
 
-	sun_light_ = MakeSharedPtr<SunLightSource>();
+	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(0);
 	sun_light_->Direction(float3(0.267835f, -0.0517653f, -0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));

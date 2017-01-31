@@ -28,7 +28,6 @@ namespace KlayGE
 		enum class LightType
 		{
 			LT_Ambient = LightSource::LT_Ambient,
-			LT_Sun,
 			LT_Directional,
 			LT_Point,
 			LT_Spot,

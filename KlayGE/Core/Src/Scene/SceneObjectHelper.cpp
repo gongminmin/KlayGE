@@ -176,7 +176,6 @@ namespace KlayGE
 			break;
 
 		case LightSource::LT_Directional:
-		case LightSource::LT_Sun:
 			mesh_name = "directional_light_proxy.meshml";
 			break;
 

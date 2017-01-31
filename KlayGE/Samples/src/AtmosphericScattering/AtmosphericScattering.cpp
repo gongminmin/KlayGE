@@ -218,7 +218,7 @@ void AtmosphericScatteringApp::OnCreate()
 	this->LoadAbsorb(Color(0.75f, 0.85f, 1, 1));
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(0);
+	sun_light_->Attrib(LightSource::LSA_NoShadow);
 	sun_light_->Color(float3(1, 1, 1));
 	sun_light_->AddToSceneManager();
 

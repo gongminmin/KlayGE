@@ -27,7 +27,6 @@ namespace KlayGE
 		enum LightType
 		{
 			LT_Ambient = 0,
-			LT_Sun,
 			LT_Directional,
 			LT_Point,
 			LT_Spot,
@@ -214,16 +213,6 @@ namespace KlayGE
 	public:
 		DirectionalLightSource();
 		virtual ~DirectionalLightSource();
-
-		using LightSource::Attrib;
-		virtual void Attrib(int32_t attrib) override;
-	};
-
-	class KLAYGE_CORE_API SunLightSource : public LightSource
-	{
-	public:
-		SunLightSource();
-		virtual ~SunLightSource();
 
 		using LightSource::Attrib;
 		virtual void Attrib(int32_t attrib) override;

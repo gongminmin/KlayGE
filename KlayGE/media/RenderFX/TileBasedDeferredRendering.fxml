@@ -571,12 +571,12 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 			}
 			for (i = lights_type[1]; i < lights_type[2]; ++ i)
 			{
-				shading.rgb += CalcTBDRShading(i, int(lights_attrib[0].z), lights_dir_es[i].xyz, normal, view_dir, -1,
+				shading.rgb += CalcTBDRShading(i, -1, lights_dir_es[i].xyz, normal, view_dir, -1,
 					c_diff, c_spec, spec_normalize, shininess, tc, 1);
 			}
 			for (i = lights_type[2]; i < lights_type[3]; ++ i)
 			{
-				shading.rgb += CalcTBDRShading(i, -1, lights_dir_es[i].xyz, normal, view_dir, -1,
+				shading.rgb += CalcTBDRShading(i, int(lights_attrib[0].z), lights_dir_es[i].xyz, normal, view_dir, -1,
 					c_diff, c_spec, spec_normalize, shininess, tc, 1);
 			}
 
@@ -683,12 +683,11 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 							uint GI : SV_GroupIndex)
 {
 	const uint LT_Ambient = 0;
-	const uint LT_Sun = 1;
-	const uint LT_Directional = 2;
-	const uint LT_Point = 3;
-	const uint LT_Spot = 4;
-	const uint LT_SphereArea = 5;
-	const uint LT_TubeArea = 6;
+	const uint LT_Directional = 1;
+	const uint LT_Point = 2;
+	const uint LT_Spot = 3;
+	const uint LT_SphereArea = 4;
+	const uint LT_TubeArea = 5;
 			
 	float4 planes[6];
 	float2 min_max = min_max_depth_tex.Load(gid * 2).xy;
@@ -698,7 +697,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 	{
 		bool intersected = false;
 
-		if (LT_Sun == lights_type[GI])
+		if (LT_Directional == lights_type[GI])
 		{
 			intersected = true;
 		}
@@ -731,7 +730,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 			[unroll]
 			for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
 			{
-				if (intersected_shadowing_lights_sh[i] && (LT_Sun == lights_type[i]))
+				if (intersected_shadowing_lights_sh[i] && (LT_Directional == lights_type[i]))
 				{
 					sun_index = i;
 					break;
@@ -781,7 +780,7 @@ void TBDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 					if (intersected_shadowing_lights_sh[i])
 					{
 						float4 new_shadowing;
-						if (LT_Sun == lights_type[i])
+						if (LT_Directional == lights_type[i])
 						{
 							float len = dot(float4(pos_es, 1), view_z_to_light_view);
 							new_shadowing = ESMSun(pos_es, csm_tc_dd[gtid.y][gtid.x], sun_tc_ddx_ddy, len,

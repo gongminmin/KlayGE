@@ -85,7 +85,7 @@ void CascadedShadowMapApp::OnCreate()
 	ambient_light->Color(float3(0.1f, 0.1f, 0.1f));
 	ambient_light->AddToSceneManager();
 	
-	sun_light_ = MakeSharedPtr<SunLightSource>();
+	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
 	sun_light_->Attrib(0);
 	sun_light_->Direction(MathLib::normalize(float3(50, -50, 50)));
 	sun_light_->Color(float3(1, 1, 1));

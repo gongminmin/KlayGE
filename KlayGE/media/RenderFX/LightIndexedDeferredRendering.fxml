@@ -19,11 +19,6 @@
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="light_index_tex"/>
-	<macro name="LT_Ambient" value="0"/>
-	<macro name="LT_Sun" value="1"/>
-	<macro name="LT_Directional" value="2"/>
-	<macro name="LT_Point" value="3"/>
-	<macro name="LT_Spot" value="4"/>
 	
 	<shader>
 		<![CDATA[
@@ -171,44 +166,11 @@ float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Ta
 	return shading;
 }
 
-float4 LIDRSunPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
-
-	float3 shading = 0;
-
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float3 normal = GetNormal(mrt_0);
-
-	float3 dir = light_dir_es.xyz;
-	float n_dot_l = dot(normal, dir);
-	if (n_dot_l > 0)
-	{
-		float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
 	
-		view_dir = normalize(view_dir);
-
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-		float3 c_diff = GetDiffuse(mrt_1);
-		float3 c_spec = GetSpecular(mrt_1);
-
-		float3 shadow = 1;
-		if (shadowing_channel >= 0)
-		{
-			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
-		}
-		
-		float3 halfway = normalize(dir - view_dir);
-		float3 spec = SpecularTerm(c_spec, dir, halfway, normal, shininess);
-		shading = max((c_diff * light_attrib.x + spec * light_attrib.y) * n_dot_l, 0) * light_color.rgb * shadow;
-	}
-	
-	return float4(shading, 1);
-}
-
-float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
-{
 	float3 shading = 0;
 
 	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
@@ -228,9 +190,14 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 		float n_dot_l = dot(normal, dir);
 		if (n_dot_l > 0)
 		{
+			float3 shadow = 1;
+#if WITH_SHADOW
+			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
+#endif
+
 			float3 halfway = normalize(dir - view_dir);
 			float3 spec = SpecularTerm(c_spec, dir, halfway, normal, shininess);
-			shading = max((c_diff * lights_attrib[i].x + spec * lights_attrib[i].y) * n_dot_l, 0) * lights_color[i].rgb;
+			shading = max((c_diff * lights_attrib[i].x + spec * lights_attrib[i].y) * n_dot_l, 0) * lights_color[i].rgb * shadow;
 		}
 	}
 	
@@ -499,7 +466,8 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 			<state name="pixel_shader" value="LIDRAmbientPS()"/>
 		</pass>
 	</technique>
-	<technique name="LIDRSun" inherit="LIDRAmbient">
+	<technique name="LIDRDirectionalShadow" inherit="LIDRAmbient">
+		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="blend_enable" value="true"/>
 			<state name="blend_op" value="add"/>
@@ -509,15 +477,16 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 			<state name="src_blend_alpha" value="one"/>
 			<state name="dest_blend_alpha" value="one"/>
 
-			<state name="pixel_shader" value="LIDRSunPS()"/>
+			<state name="pixel_shader" value="LIDRDirectionalPS()"/>
 		</pass>
 	</technique>
-	<technique name="LIDRDirectional" inherit="LIDRSun">
+	<technique name="LIDRDirectionalNoShadow" inherit="LIDRDirectionalShadow">
+		<macro name="WITH_SHADOW" value="0"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LIDRDirectionalPS()"/>
 		</pass>
 	</technique>
-	<technique name="LIDRPointShadow" inherit="LIDRDirectional">
+	<technique name="LIDRPointShadow" inherit="LIDRDirectionalNoShadow">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LIDRPointPS()"/>
@@ -526,7 +495,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	<technique name="LIDRPointNoShadow" inherit="LIDRPointShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
-	<technique name="LIDRSpotShadow" inherit="LIDRDirectional">
+	<technique name="LIDRSpotShadow" inherit="LIDRDirectionalNoShadow">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LIDRSpotPS()"/>
@@ -535,7 +504,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	<technique name="LIDRSpotNoShadow" inherit="LIDRSpotShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
-	<technique name="LIDRSphereAreaShadow" inherit="LIDRDirectional">
+	<technique name="LIDRSphereAreaShadow" inherit="LIDRDirectionalNoShadow">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LIDRSphereAreaPS()"/>
@@ -544,7 +513,7 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	<technique name="LIDRSphereAreaNoShadow" inherit="LIDRSphereAreaShadow">
 		<macro name="WITH_SHADOW" value="0"/>
 	</technique>
-	<technique name="LIDRTubeAreaShadow" inherit="LIDRDirectional">
+	<technique name="LIDRTubeAreaShadow" inherit="LIDRDirectionalNoShadow">
 		<macro name="WITH_SHADOW" value="1"/>
 		<pass name="p0">
 			<state name="pixel_shader" value="LIDRTubeAreaPS()"/>

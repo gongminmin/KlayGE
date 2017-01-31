@@ -189,8 +189,6 @@ namespace KlayGE
 	typedef std::shared_ptr<SpotLightSource> SpotLightSourcePtr;
 	class DirectionalLightSource;
 	typedef std::shared_ptr<DirectionalLightSource> DirectionalLightSourcePtr;
-	class SunLightSource;
-	typedef std::shared_ptr<SunLightSource> SunLightSourcePtr;
 	class SphereAreaLightSource;
 	typedef std::shared_ptr<SphereAreaLightSource> SphereAreaLightSourcePtr;
 	class TubeAreaLightSource;

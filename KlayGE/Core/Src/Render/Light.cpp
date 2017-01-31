@@ -514,9 +514,10 @@ namespace KlayGE
 
 
 	DirectionalLightSource::DirectionalLightSource()
-		: LightSource(LT_Directional)
+		: LightSource(LT_Directional),
+			sm_camera_(MakeSharedPtr<Camera>())
 	{
-		attrib_ = LSA_NoShadow;
+		attrib_ = 0;
 	}
 
 	DirectionalLightSource::~DirectionalLightSource()
@@ -527,38 +528,16 @@ namespace KlayGE
 	{
 		LightSource::Attrib(attrib);
 
-		// Disable shadow and GI
-		attrib_ |= LSA_NoShadow;
+		// Disable GI
 		attrib_ &= ~LSA_IndirectLighting;
 	}
 
-
-	SunLightSource::SunLightSource()
-		: LightSource(LT_Sun),
-			sm_camera_(MakeSharedPtr<Camera>())
-	{
-		attrib_ = 0;
-	}
-
-	SunLightSource::~SunLightSource()
-	{
-	}
-
-	void SunLightSource::Attrib(int32_t attrib)
-	{
-		LightSource::Attrib(attrib);
-
-		// Enable shadow and disable GI
-		attrib_ &= ~LSA_NoShadow;
-		attrib_ &= ~LSA_IndirectLighting;
-	}
-
-	CameraPtr const & SunLightSource::SMCamera(uint32_t /*index*/) const
+	CameraPtr const & DirectionalLightSource::SMCamera(uint32_t /*index*/) const
 	{
 		return sm_camera_;
 	}
 
-	void SunLightSource::UpdateSMCamera(Camera const & scene_camera)
+	void DirectionalLightSource::UpdateSMCamera(Camera const & scene_camera)
 	{
 		float3 const dir = this->Direction();
 

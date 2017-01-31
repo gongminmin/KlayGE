@@ -340,7 +340,7 @@ float4 DeferredRenderingSpotPS(
 	return lighting;
 }
 
-float4 DeferredRenderingSunPS(
+float4 DeferredRenderingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0,
 #else
@@ -372,35 +372,6 @@ float4 DeferredRenderingSunPS(
 			shadow = NearestDepthUpsamplingShadow(tc, tc_ddx, tc_ddy, shadowing_channel).xyz;
 		}
 		lighting = CalcColor(n_dot_l, spec, 1, shadow, light_color, light_attrib);
-	}
-
-	return lighting;
-}
-
-float4 DeferredRenderingDirectionalPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
-	float3 view_dir : TEXCOORD1) : SV_Target
-{
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
-	
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float4 lighting = 0;
-	
-	view_dir = normalize(view_dir);
-
-	float3 dir = light_dir_es.xyz;
-	float3 normal = GetNormal(mrt_0);
-	float n_dot_l = dot(normal, dir);
-	if (n_dot_l > 0)
-	{
-		float spec = DistributionTerm(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(mrt_0))).x;
-		lighting = CalcColor(n_dot_l, spec, 1, 1, light_color, light_attrib);
 	}
 
 	return lighting;
@@ -528,7 +499,7 @@ float4 DeferredShadowingSpotPS(
 		esm_scale_factor);
 }
 
-float4 DeferredShadowingSunPS(
+float4 DeferredShadowingDirectionalPS(
 #ifdef NOPERSPECTIVE_SUPPORT
 	noperspective float2 tc : TEXCOORD0,
 #else
@@ -633,7 +604,7 @@ float4 DeferredShadowingSunPS(
 		</pass>
 	</technique>
 
-	<technique name="DeferredRenderingSun" inherit="DeferredRenderingPoint">
+	<technique name="DeferredRenderingDirectional" inherit="DeferredRenderingPoint">
 		<pass name="p0">
 			<state name="front_stencil_func" value="equal"/>
 			<state name="front_stencil_pass" value="keep"/>
@@ -643,18 +614,12 @@ float4 DeferredShadowingSunPS(
 			<state name="back_stencil_pass" value="keep"/>
 			<state name="back_stencil_read_mask" value="128"/>
 			<state name="back_stencil_write_mask" value="0"/>
-			
-			<state name="pixel_shader" value="DeferredRenderingSunPS()"/>
-		</pass>
-	</technique>
 
-	<technique name="DeferredRenderingDirectional" inherit="DeferredRenderingSun">
-		<pass name="p0">			
 			<state name="pixel_shader" value="DeferredRenderingDirectionalPS()"/>
 		</pass>
 	</technique>
 			
-	<technique name="DeferredRenderingAmbient" inherit="DeferredRenderingSun">
+	<technique name="DeferredRenderingAmbient" inherit="DeferredRenderingDirectional">
 		<pass name="p0">
 			<state name="blend_enable" value="false"/>
 
@@ -734,27 +699,27 @@ float4 DeferredShadowingSunPS(
 		</pass>
 	</technique>
 
-	<technique name="DeferredShadowingSun" inherit="DeferredShadowingPoint">
+	<technique name="DeferredShadowingDirectional" inherit="DeferredShadowingPoint">
 		<pass name="p0">
-			<state name="pixel_shader" value="DeferredShadowingSunPS()"/>
+			<state name="pixel_shader" value="DeferredShadowingDirectionalPS()"/>
 		</pass>
 	</technique>
-	<technique name="DeferredShadowingSunR" inherit="DeferredShadowingSun">
+	<technique name="DeferredShadowingDirectionalR" inherit="DeferredShadowingDirectional">
 		<pass name="p0">
 			<state name="color_write_mask" value="1"/>
 		</pass>
 	</technique>
-	<technique name="DeferredShadowingSunG" inherit="DeferredShadowingSunR">
+	<technique name="DeferredShadowingDirectionalG" inherit="DeferredShadowingDirectionalR">
 		<pass name="p0">
 			<state name="color_write_mask" value="2"/>
 		</pass>
 	</technique>
-	<technique name="DeferredShadowingSunB" inherit="DeferredShadowingSunR">
+	<technique name="DeferredShadowingDirectionalB" inherit="DeferredShadowingDirectionalR">
 		<pass name="p0">
 			<state name="color_write_mask" value="4"/>
 		</pass>
 	</technique>
-	<technique name="DeferredShadowingSunA" inherit="DeferredShadowingSunR">
+	<technique name="DeferredShadowingDirectionalA" inherit="DeferredShadowingDirectionalR">
 		<pass name="p0">
 			<state name="color_write_mask" value="8"/>
 		</pass>

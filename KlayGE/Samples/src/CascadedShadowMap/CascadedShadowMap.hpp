@@ -43,7 +43,7 @@ private:
 	int id_pssm_factor_slider_;
 	int id_ctrl_camera_;
 
-	KlayGE::SunLightSourcePtr sun_light_;
+	KlayGE::LightSourcePtr sun_light_;
 
 	KlayGE::uint32_t num_cascades_;
 	float pssm_factor_;

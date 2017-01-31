@@ -118,7 +118,7 @@ void FoliageApp::OnCreate()
 	ambient_light->AddToSceneManager();
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(0);
+	sun_light_->Attrib(LightSource::LSA_NoShadow);
 	sun_light_->Direction(float3(0.267835f, -0.0517653f, -0.960315f));
 	sun_light_->Color(float3(3, 3, 3));
 	sun_light_->AddToSceneManager();

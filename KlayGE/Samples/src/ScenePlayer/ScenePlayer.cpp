@@ -408,10 +408,6 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		{
 			light = MakeSharedPtr<AmbientLightSource>();
 		}
-		else if ("sun" == lt_str)
-		{
-			light = MakeSharedPtr<SunLightSource>();
-		}
 		else if ("directional" == lt_str)
 		{
 			light = MakeSharedPtr<DirectionalLightSource>();

@@ -441,8 +441,8 @@ namespace KlayGE
 		RenderTechnique* technique_draw_light_index_point_;
 		RenderTechnique* technique_draw_light_index_spot_;
 		RenderTechnique* technique_lidr_ambient_;
-		RenderTechnique* technique_lidr_sun_;
-		RenderTechnique* technique_lidr_directional_;
+		RenderTechnique* technique_lidr_directional_shadow_;
+		RenderTechnique* technique_lidr_directional_no_shadow_;
 		RenderTechnique* technique_lidr_point_shadow_;
 		RenderTechnique* technique_lidr_point_no_shadow_;
 		RenderTechnique* technique_lidr_spot_shadow_;
@@ -510,6 +510,7 @@ namespace KlayGE
 		RenderEffectParameter* num_cascades_param_;
 		RenderEffectParameter* view_z_to_light_view_param_;
 		std::array<RenderEffectParameter*, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
+		PostProcessPtr depth_to_max_pp_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		RenderEffectParameter* lighting_tex_param_;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -527,7 +528,6 @@ namespace KlayGE
 		RenderEffectParameter* camera_proj_01_param_;
 		PostProcessPtr depth_to_min_max_pp_;
 		PostProcessPtr reduce_min_max_pp_;
-		PostProcessPtr depth_to_max_pp_;
 
 		RenderEffectParameter* projective_shadowing_rw_tex_param_;
 		RenderEffectParameter* shadowing_rw_tex_param_;

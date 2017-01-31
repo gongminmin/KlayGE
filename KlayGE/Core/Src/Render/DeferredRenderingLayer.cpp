@@ -518,7 +518,6 @@ namespace KlayGE
 		light_volume_rl_[LightSource::LT_Directional] = rl_quad_;
 		light_volume_rl_[LightSource::LT_Point] = rl_box_;
 		light_volume_rl_[LightSource::LT_Spot] = rl_cone_;
-		light_volume_rl_[LightSource::LT_Sun] = rl_quad_;
 		light_volume_rl_[LightSource::LT_SphereArea] = rl_box_;
 		light_volume_rl_[LightSource::LT_TubeArea] = rl_box_;
 
@@ -552,11 +551,11 @@ namespace KlayGE
 		technique_shadows_[LightSource::LT_Spot][2] = dr_effect_->TechniqueByName("DeferredShadowingSpotB");
 		technique_shadows_[LightSource::LT_Spot][3] = dr_effect_->TechniqueByName("DeferredShadowingSpotA");
 		technique_shadows_[LightSource::LT_Spot][4] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_shadows_[LightSource::LT_Sun][0] = dr_effect_->TechniqueByName("DeferredShadowingSunR");
-		technique_shadows_[LightSource::LT_Sun][1] = dr_effect_->TechniqueByName("DeferredShadowingSunG");
-		technique_shadows_[LightSource::LT_Sun][2] = dr_effect_->TechniqueByName("DeferredShadowingSunB");
-		technique_shadows_[LightSource::LT_Sun][3] = dr_effect_->TechniqueByName("DeferredShadowingSunA");
-		technique_shadows_[LightSource::LT_Sun][4] = dr_effect_->TechniqueByName("DeferredShadowingSun");
+		technique_shadows_[LightSource::LT_Directional][0] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalR");
+		technique_shadows_[LightSource::LT_Directional][1] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalG");
+		technique_shadows_[LightSource::LT_Directional][2] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalB");
+		technique_shadows_[LightSource::LT_Directional][3] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalA");
+		technique_shadows_[LightSource::LT_Directional][4] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
 		technique_shadows_[LightSource::LT_SphereArea][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
 		technique_shadows_[LightSource::LT_SphereArea][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
 		technique_shadows_[LightSource::LT_SphereArea][2] = dr_effect_->TechniqueByName("DeferredShadowingPointB");
@@ -572,7 +571,6 @@ namespace KlayGE
 		technique_lights_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
 		technique_lights_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
 		technique_lights_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
-		technique_lights_[LightSource::LT_Sun] = dr_effect_->TechniqueByName("DeferredRenderingSun");
 		technique_lights_[LightSource::LT_SphereArea] = dr_effect_->TechniqueByName("DeferredRenderingSphereArea");
 		technique_lights_[LightSource::LT_TubeArea] = dr_effect_->TechniqueByName("DeferredRenderingTubeArea");
 		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
@@ -598,8 +596,8 @@ namespace KlayGE
 			technique_draw_light_index_point_ = dr_effect_->TechniqueByName("DrawLightIndexPoint");
 			technique_draw_light_index_spot_ = dr_effect_->TechniqueByName("DrawLightIndexSpot");
 			technique_lidr_ambient_ = dr_effect_->TechniqueByName("LIDRAmbient");
-			technique_lidr_sun_ = dr_effect_->TechniqueByName("LIDRSun");
-			technique_lidr_directional_ = dr_effect_->TechniqueByName("LIDRDirectional");
+			technique_lidr_directional_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalShadow");
+			technique_lidr_directional_no_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalNoShadow");
 			technique_lidr_point_shadow_ = dr_effect_->TechniqueByName("LIDRPointShadow");
 			technique_lidr_point_no_shadow_ = dr_effect_->TechniqueByName("LIDRPointNoShadow");
 			technique_lidr_spot_shadow_ = dr_effect_->TechniqueByName("LIDRSpotShadow");
@@ -807,8 +805,8 @@ namespace KlayGE
 
 		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
 		reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
-		depth_to_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMax");
 #endif
+		depth_to_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMax");
 
 		this->SetCascadedShadowType(CSLT_Auto);
 
@@ -1402,7 +1400,7 @@ namespace KlayGE
 							Camera const & scene_camera = *pvp.frame_buffer->GetViewport()->camera;
 							Camera const & light_camera = *lights_[cascaded_shadow_index_]->SMCamera(0);
 
-							checked_cast<SunLightSource*>(lights_[cascaded_shadow_index_])->UpdateSMCamera(scene_camera);
+							checked_cast<DirectionalLightSource*>(lights_[cascaded_shadow_index_])->UpdateSMCamera(scene_camera);
 
 							float const BLUR_FACTOR = 0.2f;
 							blur_size_light_space_.x() = BLUR_FACTOR * 0.5f * light_camera.ProjMatrix()(0, 0);
@@ -1463,7 +1461,7 @@ namespace KlayGE
 				if ((((LightSource::LT_Point == light.Type()) || (LightSource::LT_SphereArea == light.Type())
 					|| (LightSource::LT_TubeArea == light.Type())) && (6 == index_in_pass))
 					|| ((LightSource::LT_Spot == light.Type()) && (1 == index_in_pass))
-					|| ((LightSource::LT_Sun == light.Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
+					|| ((LightSource::LT_Directional == light.Type()) && (static_cast<int32_t>(pvp.num_cascades) == index_in_pass)))
 				{
 					curr_cascade_index_ = -1;
 					urv = 0;
@@ -1783,7 +1781,7 @@ namespace KlayGE
 					{
 						switch (light->Type())
 						{
-						case LightSource::LT_Sun:
+						case LightSource::LT_Directional:
 							sm_light_indices_.emplace_back(0, num_sm_lights);
 							++ num_sm_lights;
 							cascaded_shadow_index_ = static_cast<int32_t>(i + 1 - num_ambient_lights);
@@ -2134,7 +2132,7 @@ namespace KlayGE
 			}
 			break;
 
-		case LightSource::LT_Sun:
+		case LightSource::LT_Directional:
 			break;
 
 		default:
@@ -2148,7 +2146,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::AppendCascadedShadowPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
-		BOOST_ASSERT(LightSource::LT_Sun == lights_[light_index]->Type());
+		BOOST_ASSERT(LightSource::LT_Directional == lights_[light_index]->Type());
 
 #ifndef KLAYGE_SHIP
 		pass_scaned_.push_back(this->ComposePassScanCode(vp_index, PT_GenCascadedShadowMap,
@@ -2314,7 +2312,7 @@ namespace KlayGE
 		{
 		case LightSource::LT_Point:
 		case LightSource::LT_Spot:
-		case LightSource::LT_Sun:
+		case LightSource::LT_Directional:
 		case LightSource::LT_SphereArea:
 		case LightSource::LT_TubeArea:
 			{
@@ -2325,7 +2323,7 @@ namespace KlayGE
 					dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
 					sm_camera = light.SMCamera(0);
 				}
-				else if (LightSource::LT_Sun == type)
+				else if (LightSource::LT_Directional == type)
 				{
 					dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 					sm_camera = light.SMCamera(0);
@@ -2341,7 +2339,7 @@ namespace KlayGE
 
 				sm_fb_->GetViewport()->camera = sm_camera;
 
-				if ((LightSource::LT_Sun == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
+				if ((LightSource::LT_Directional == type) && (pass_cat != PC_Shadowing) && (pass_cat != PC_Shading))
 				{
 					curr_cascade_index_ = index_in_pass;
 				}
@@ -2403,7 +2401,7 @@ namespace KlayGE
 					}
 					break;
 
-				case LightSource::LT_Sun:
+				case LightSource::LT_Directional:
 					*light_volume_mv_param_ = pvp.inv_proj;
 					*light_volume_mvp_param_ = float4x4::Identity();
 					break;
@@ -2416,15 +2414,6 @@ namespace KlayGE
 				*light_pos_es_param_ = light_pos_es_actived;
 				*light_dir_es_param_ = light_dir_es_actived;
 			}
-			break;
-
-		case LightSource::LT_Directional:
-			{
-				float3 const dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
-				*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
-			}
-			*light_volume_mv_param_ = pvp.inv_proj;
-			*light_volume_mvp_param_ = float4x4::Identity();
 			break;
 
 		case LightSource::LT_Ambient:
@@ -2446,14 +2435,14 @@ namespace KlayGE
 	{
 		LightSource::LightType const type = lights_[org_no]->Type();
 
-		if (type != LightSource::LT_Sun)
+		if (type != LightSource::LT_Directional)
 		{
 			sm_fb_->Attached(FrameBuffer::ATT_Color0)->Discard();
 			depth_to_esm_pp_->Apply();
 		}
 
 		PostProcessChainPtr pp_chain;
-		if (LightSource::LT_Sun == type)
+		if (LightSource::LT_Directional == type)
 		{
 			pp_chain = checked_pointer_cast<PostProcessChain>(csm_filter_pp_);
 			if (tex_array_support_)
@@ -2491,7 +2480,7 @@ namespace KlayGE
 		}
 
 		int2 kernel_size;
-		if (LightSource::LT_Sun == type)
+		if (LightSource::LT_Directional == type)
 		{
 			float3 const & scale = cascaded_shadow_layer_->CascadeScales()[index_in_pass - 1];
 			float2 blur_kernel_size = blur_size_light_space_ * float2(scale.x(), scale.y()) * static_cast<float>(csm_tex_->Width(0));
@@ -2509,7 +2498,7 @@ namespace KlayGE
 		checked_pointer_cast<LogGaussianBlurPostProcess>(pp_chain)->ESMScaleFactor(ESM_SCALE_FACTOR, *sm_fb_->GetViewport()->camera);
 		pp_chain->Apply();
 
-		if (LightSource::LT_Sun == type)
+		if (LightSource::LT_Directional == type)
 		{
 			if (tex_array_support_)
 			{
@@ -2558,8 +2547,7 @@ namespace KlayGE
 
 				int32_t const light_index = sm_light_indices_[li].first;
 				int32_t const shadowing_channel = sm_light_indices_[li].second;
-				if (((light_index >= 0) && (0 == (light.Attrib() & LightSource::LSA_NoShadow)))
-					|| (LightSource::LT_Sun == type))
+				if ((light_index >= 0) || (LightSource::LT_Directional == type))
 				{
 					switch (type)
 					{
@@ -2583,7 +2571,7 @@ namespace KlayGE
 						*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
 						break;
 
-					case LightSource::LT_Sun:
+					case LightSource::LT_Directional:
 						{
 							sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
 							BOOST_ASSERT(sm_camera);
@@ -2699,7 +2687,7 @@ namespace KlayGE
 
 				int32_t const light_index = sm_light_indices_[li].first;
 				int32_t const shadowing_channel = sm_light_indices_[li].second;
-				if ((light_index >= 0) || (LightSource::LT_Sun == type))
+				if ((light_index >= 0) || (LightSource::LT_Directional == type))
 				{
 					switch (type)
 					{
@@ -2722,7 +2710,7 @@ namespace KlayGE
 						*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
 						break;
 
-					case LightSource::LT_Sun:
+					case LightSource::LT_Directional:
 						{
 							sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
 
@@ -2811,7 +2799,7 @@ namespace KlayGE
 					}
 					break;
 
-				case LightSource::LT_Sun:
+				case LightSource::LT_Directional:
 					{
 						float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 						light_dir_es_actived = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
@@ -2928,7 +2916,7 @@ namespace KlayGE
 
 		if (PTB_Opaque == pass_tb)
 		{
-			re.BindFrameBuffer(pvp.curr_merged_shading_fb);
+			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
 			re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
 		}
 		else
@@ -2971,9 +2959,8 @@ namespace KlayGE
 		auto & light = lights_[org_no];
 		LightSource::LightType const type = light->Type();
 		int32_t const light_index = sm_light_indices_[org_no].first;
-		if (light->Enabled() && pvp.light_visibles[org_no]
-			&& (((light_index >= 0) && (0 == (light->Attrib() & LightSource::LSA_NoShadow)))
-				|| (LightSource::LT_Sun == type)))
+		if (light->Enabled() && pvp.light_visibles[org_no] && (0 == (light->Attrib() & LightSource::LSA_NoShadow))
+			&& ((light_index >= 0) || (LightSource::LT_Directional == type)))
 		{
 			Camera* light_camera = nullptr;
 			switch (type)
@@ -2983,7 +2970,7 @@ namespace KlayGE
 				translucency_pp_->InputPin(3, unfiltered_sm_2d_texs_[light_index]);
 				break;
 
-			case LightSource::LT_Sun:
+			case LightSource::LT_Directional:
 				// TODO
 				break;
 
@@ -3215,6 +3202,25 @@ namespace KlayGE
 		is_profile = (code & 1) ? true : false;
 	}
 
+	void DeferredRenderingLayer::CreateVDMDepthMaxMap(PerViewport const & pvp)
+	{
+		for (uint32_t i = 0; i < 2; ++ i)
+		{
+			TexturePtr input_tex = (0 == i) ? pvp.g_buffer_ds_tex : pvp.g_buffer_vdm_max_ds_texs[i - 1];
+
+			uint32_t const & w = input_tex->Width(0);
+			uint32_t const & h = input_tex->Height(0);
+			depth_to_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
+			depth_to_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
+				static_cast<float>((h + 1) & ~1) / h));
+			depth_to_max_pp_->InputPin(0, input_tex);
+			// Borrow the small_ssvo_tex
+			depth_to_max_pp_->OutputPin(0, (0 == i) ? pvp.small_ssvo_tex : pvp.vdm_color_tex);
+			depth_to_max_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, pvp.g_buffer_vdm_max_ds_views[i]);
+			depth_to_max_pp_->Apply();
+		}
+	}
+
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
@@ -3247,12 +3253,18 @@ namespace KlayGE
 				switch (type)
 				{
 				case LightSource::LT_Ambient:
-				case LightSource::LT_Sun:
 					this->UpdateLightIndexedLightingAmbientSun(pvp, type, li, pass_tb);
 					break;
 
 				case LightSource::LT_Directional:
-					directional_lights.push_back(li);
+					if (light.Attrib() & LightSource::LSA_NoShadow)
+					{
+						directional_lights.push_back(li);
+					}
+					else
+					{
+						this->UpdateLightIndexedLightingAmbientSun(pvp, type, li, pass_tb);
+					}
 					break;
 
 				case LightSource::LT_Point:
@@ -3426,29 +3438,26 @@ namespace KlayGE
 		}
 		*shadowing_channel_param_ = shadowing_channel;
 
-		*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-			(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
-		*light_color_param_ = light.Color();
-		*light_falloff_range_param_ = float4(light.Falloff().x(), light.Falloff().y(),
-			light.Falloff().z(), 0);
-
 		RenderTechnique* tech;
-		if (LightSource::LT_Sun == type)
+		if (LightSource::LT_Directional == type)
 		{
+			std::vector<float4> lights_color;
+			std::vector<float4> lights_dir_es;
+			std::vector<float4> lights_attrib;
+
+			lights_color.push_back(light.Color());
+
 			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
-			CameraPtr sm_camera = light.SMCamera(0);
-			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
 
-			sm_fb_->GetViewport()->camera = sm_camera;
+			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 1.5f));
 
-			curr_cascade_index_ = -1;
-			*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
+			*lights_color_param_ = lights_color;
+			*lights_dir_es_param_ = lights_dir_es;
+			*lights_attrib_param_ = lights_attrib;
 
-			float3 const & p = light.Position();
-			float3 loc_es = MathLib::transform_coord(p, pvp.view);
-			*light_pos_es_param_ = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-			tech = technique_lidr_sun_;
+			tech = technique_lidr_directional_shadow_;
 		}
 		else
 		{
@@ -3456,6 +3465,10 @@ namespace KlayGE
 
 			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
+
+			*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
+				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
+			*light_color_param_ = light.Color();
 
 			if (light.SkylightTexY())
 			{
@@ -3524,7 +3537,7 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		re.BindFrameBuffer((PTB_Opaque == pass_tb) ? pvp.merged_shading_fbs[pvp.curr_merged_buffer_index] : pvp.shading_fb);
-		re.Render(*dr_effect_, *technique_lidr_directional_, *rl_quad_);
+		re.Render(*dr_effect_, *technique_lidr_directional_no_shadow_, *rl_quad_);
 	}
 
 	void DeferredRenderingLayer::UpdateLightIndexedLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
@@ -3715,25 +3728,6 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::CreateVDMDepthMaxMap(PerViewport const & pvp)
-	{
-		for (uint32_t i = 0; i < 2; ++ i)
-		{
-			TexturePtr input_tex = (0 == i) ? pvp.g_buffer_ds_tex : pvp.g_buffer_vdm_max_ds_texs[i - 1];
-
-			uint32_t const & w = input_tex->Width(0);
-			uint32_t const & h = input_tex->Height(0);
-			depth_to_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
-			depth_to_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
-				static_cast<float>((h + 1) & ~1) / h));
-			depth_to_max_pp_->InputPin(0, input_tex);
-			// Borrow the small_ssvo_tex
-			depth_to_max_pp_->OutputPin(0, (0 == i) ? pvp.small_ssvo_tex : pvp.vdm_color_tex);
-			depth_to_max_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, pvp.g_buffer_vdm_max_ds_views[i]);
-			depth_to_max_pp_->Apply();
-		}
-	}
-
 	void DeferredRenderingLayer::UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -3793,12 +3787,15 @@ namespace KlayGE
 						}
 						break;
 
-					case LightSource::LT_Sun:
-						available_lights[1].push_back(li);
-						break;
-
 					case LightSource::LT_Directional:
-						available_lights[2].push_back(li);
+						if (light.Attrib() & LightSource::LSA_NoShadow)
+						{
+							available_lights[1].push_back(li);
+						}
+						else
+						{
+							available_lights[2].push_back(li);
+						}
 						break;
 
 					case LightSource::LT_Point:
@@ -3899,7 +3896,6 @@ namespace KlayGE
 						dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
 						break;
 
-					case LightSource::LT_Sun:
 					case LightSource::LT_Directional:
 						dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
 						break;
@@ -3936,7 +3932,7 @@ namespace KlayGE
 						int32_t channel = sm_light_indices_[available_lights[t][i]].second;
 						switch (type)
 						{
-						case LightSource::LT_Sun:
+						case LightSource::LT_Directional:
 							lights_shadowing_channel[0] = channel;
 							break;
 
