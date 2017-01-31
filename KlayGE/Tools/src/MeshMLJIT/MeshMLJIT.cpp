@@ -76,7 +76,7 @@ namespace
 	}
 
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 13;
+	uint32_t const MODEL_BIN_VERSION = 14;
 
 	struct KeyFrames
 	{
@@ -147,6 +147,7 @@ namespace
 			mtl.transparent = false;
 			mtl.alpha_test = 0;
 			mtl.sss = false;
+			mtl.two_sided = false;
 
 			mtl.detail_mode = RenderMaterial::SDM_Parallax;
 			mtl.height_offset_scale = float2(-0.5f, 0.06f);
@@ -444,6 +445,16 @@ namespace
 				if (attr)
 				{
 					mtl.sss = attr->ValueInt() ? true : false;
+				}
+			}
+
+			XMLNodePtr two_sided_node = mtl_node->FirstNode("two_sided");
+			if (two_sided_node)
+			{
+				XMLAttributePtr attr = two_sided_node->Attrib("value");
+				if (attr)
+				{
+					mtl.two_sided = attr->ValueInt() ? true : false;
 				}
 			}
 
@@ -1754,6 +1765,9 @@ namespace
 
 			uint8_t sss = mtl.sss;
 			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
+
+			uint8_t two_sided = mtl.two_sided;
+			os.write(reinterpret_cast<char*>(&two_sided), sizeof(two_sided));
 
 			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
 			{

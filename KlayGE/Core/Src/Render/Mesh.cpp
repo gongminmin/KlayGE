@@ -47,7 +47,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 13;
+	uint32_t const MODEL_BIN_VERSION = 14;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -1100,6 +1100,10 @@ namespace KlayGE
 			uint8_t sss;
 			decoded->read(&sss, sizeof(sss));
 			mtl->sss = sss ? true : false;
+
+			uint8_t two_sided;
+			decoded->read(&two_sided, sizeof(two_sided));
+			mtl->two_sided = two_sided ? true : false;
 
 			for (size_t i = 0; i < RenderMaterial::TS_NumTextureSlots; ++ i)
 			{
