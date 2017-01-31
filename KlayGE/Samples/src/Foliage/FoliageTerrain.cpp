@@ -343,12 +343,12 @@ namespace KlayGE
 			plant_impostor_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
 		}
 
-		*(foliage_dist_effect_->ParameterByName("tile_size")) = tile_size;
+		*(foliage_dist_effect_->ParameterByName("foliage_tile_size")) = tile_size;
 		*(foliage_dist_effect_->ParameterByName("half_num_tiles_edge")) = num_tiles_edge_ * 0.5f;
 
-		*(foliage_dist_effect_->ParameterByName("world_uv_repeats"))
+		*(foliage_dist_effect_->ParameterByName("foliage_world_uv_repeats"))
 			= float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_);
-		*(foliage_dist_effect_->ParameterByName("vertical_scale")) = vertical_scale_;
+		*(foliage_dist_effect_->ParameterByName("foliage_vertical_scale")) = vertical_scale_;
 		*(foliage_dist_effect_->ParameterByName("height_map_tex")) = height_map_tex_;
 	}
 
@@ -389,7 +389,7 @@ namespace KlayGE
 		*(foliage_dist_effect_->ParameterByName("model_mat")) = model_mat_;
 		*(foliage_dist_effect_->ParameterByName("eye_pos_xz")) = eye_pos_xz;
 		*(foliage_dist_effect_->ParameterByName("view_frustum_planes")) = view_frustum_planes;
-		*(foliage_dist_effect_->ParameterByName("texture_world_offset")) = texture_world_offset_;
+		*(foliage_dist_effect_->ParameterByName("foliage_texture_world_offset")) = texture_world_offset_;
 
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{

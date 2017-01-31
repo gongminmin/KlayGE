@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBufferNoSkinning.fxml"/>
+	<include name="InfTerrain.fxml"/>
 	<include name="Quaternion.fxml"/>
 
 	<cbuffer name="per_frame">
@@ -178,13 +178,13 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 
 	<parameter type="uint4" name="num_tile_plants"/>
 	<parameter type="uint2" name="tile_addr_offset_width"/>
-	<parameter type="float" name="tile_size"/>
+	<parameter type="float" name="foliage_tile_size"/>
 	<parameter type="float" name="half_num_tiles_edge"/>
 	<parameter type="float4" name="plant_spacing"/>
 	<parameter type="float2" name="impostor_dist"/>
-	<parameter type="float2" name="world_uv_repeats"/>
-	<parameter type="float3" name="texture_world_offset"/>
-	<parameter type="float" name="vertical_scale"/>
+	<parameter type="float2" name="foliage_world_uv_repeats"/>
+	<parameter type="float3" name="foliage_texture_world_offset"/>
+	<parameter type="float" name="foliage_vertical_scale"/>
 	<parameter type="float4x4" name="model_mat"/>
 	<parameter type="float2" name="eye_pos_xz"/>
 	<parameter type="float3" name="plant_aabb_min"/>
@@ -199,12 +199,6 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 	</parameter>
 	<parameter type="texture2D" name="noise_tex">
 		<annotation type="string" name="SasResourceAddress" value="white_noise_tex.dds"/>
-	</parameter>
-
-	<parameter type="sampler" name="linear_wrap_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="wrap"/>
-		<state name="address_v" value="wrap"/>
 	</parameter>
 
 	<shader>
@@ -276,12 +270,12 @@ void FoliageDistribution(uint vid, bool is_impostor,
 	tile_xy += tile_addr_offset_width.x;
 
 	float3 displaced_pos;
-	displaced_pos.xz = (tile_xy - half_num_tiles_edge + tile_uv) * tile_size
+	displaced_pos.xz = (tile_xy - half_num_tiles_edge + tile_uv) * foliage_tile_size
 		+ (float2(noise_tex.SampleLevel(linear_wrap_sampler, tile_uv * 13 / 256, 0).x,
 				noise_tex.SampleLevel(linear_wrap_sampler, tile_uv * 23 / 256, 0).x) - 0.5f) * plant_spacing.xy;
 	displaced_pos.y = 0;
 
-	float2 global_uv = displaced_pos.xz + 2 * texture_world_offset.xz;
+	float2 global_uv = displaced_pos.xz + 2 * foliage_texture_world_offset.xz;
 
 	float2 probobility_uv = global_uv + float2(noise_tex.SampleLevel(linear_wrap_sampler, global_uv * 7, 0).x,
 		noise_tex.SampleLevel(linear_wrap_sampler, global_uv * 5, 0).x) - 0.5f;
@@ -313,8 +307,8 @@ void FoliageDistribution(uint vid, bool is_impostor,
 	
 	if (foliage_planted && in_dist)
 	{
-		float2 height_uv = displaced_pos.xz * world_uv_repeats.y * 0.5f + 0.5f;
-		float height = height_map_tex.SampleLevel(linear_wrap_sampler, height_uv, 0).x * vertical_scale;
+		float2 height_uv = displaced_pos.xz * foliage_world_uv_repeats.y * 0.5f + 0.5f;
+		float height = height_map_tex.SampleLevel(linear_wrap_sampler, height_uv, 0).x * foliage_vertical_scale;
 
 		displaced_pos = world_displaced_pos + height * model_mat[1].xyz;
 
