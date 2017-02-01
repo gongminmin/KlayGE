@@ -56,7 +56,7 @@ namespace KlayGE
 {
 	// 设第n bit为1
 	inline uint32_t
-	SetMask(uint32_t n)
+	SetMask(uint32_t n) noexcept
 		{ return 1UL << n; }
 	template <uint32_t n>
 	struct Mask
@@ -66,7 +66,7 @@ namespace KlayGE
 
 	// 取数中的第 n bit
 	inline uint32_t
-	GetBit(uint32_t x, uint32_t n)
+	GetBit(uint32_t x, uint32_t n) noexcept
 		{ return (x >> n) & 1; }
 	// 置数中的第 n bit为1
 	inline uint32_t
@@ -75,34 +75,34 @@ namespace KlayGE
 
 	// 取低字节
 	inline uint16_t
-	LO_U8(uint16_t x)
+	LO_U8(uint16_t x) noexcept
 		{ return x & 0xFF; }
 	// 取高字节
 	inline uint16_t
-	HI_U8(uint16_t x)
+	HI_U8(uint16_t x) noexcept
 		{ return x >> 8; }
 
 	// 取低字
 	inline uint32_t
-	LO_U16(uint32_t x)
+	LO_U16(uint32_t x) noexcept
 		{ return x & 0xFFFF; }
 	// 取高字
 	inline uint32_t
-	HI_U16(uint32_t x)
+	HI_U16(uint32_t x) noexcept
 		{ return x >> 16; }
 
 	// 高低字节交换
 	inline uint16_t
-	HI_LO_SwapU8(uint16_t x)
+	HI_LO_SwapU8(uint16_t x) noexcept
 		{ return (LO_U8(x) << 8) | HI_U8(x); }
 	// 高低字交换
 	inline uint32_t
-	HI_LO_SwapU16(uint32_t x)
+	HI_LO_SwapU16(uint32_t x) noexcept
 		{ return (LO_U16(x) << 16) | HI_U16(x); }
 
 	// 获得n位都是1的掩码
 	inline uint32_t
-	MakeMask(uint32_t n)
+	MakeMask(uint32_t n) noexcept
 		{ return (1UL << (n + 1)) - 1; }
 
 	// 产生FourCC常量
@@ -123,10 +123,10 @@ namespace KlayGE
 
 	// Endian的转换
 	template <int size>
-	void EndianSwitch(void* p);
+	void EndianSwitch(void* p) noexcept;
 
 	template <typename T>
-	T Native2BE(T x)
+	T Native2BE(T x) noexcept
 	{
 #ifdef KLAYGE_LITTLE_ENDIAN
 		EndianSwitch<sizeof(T)>(&x);
@@ -136,7 +136,7 @@ namespace KlayGE
 		return x;
 	}
 	template <typename T>
-	T Native2LE(T x)
+	T Native2LE(T x) noexcept
 	{
 #ifdef KLAYGE_LITTLE_ENDIAN
 		KFL_UNUSED(x);
@@ -147,12 +147,12 @@ namespace KlayGE
 	}
 
 	template <typename T>
-	T BE2Native(T x)
+	T BE2Native(T x) noexcept
 	{
 		return Native2BE(x);
 	}
 	template <typename T>
-	T LE2Native(T x)
+	T LE2Native(T x) noexcept
 	{
 		return Native2LE(x);
 	}
@@ -160,7 +160,7 @@ namespace KlayGE
 
 	template <typename To, typename From>
 	inline To
-	checked_cast(From p)
+	checked_cast(From p) noexcept
 	{
 		BOOST_ASSERT(dynamic_cast<To>(p) == static_cast<To>(p));
 		return static_cast<To>(p);
@@ -168,7 +168,7 @@ namespace KlayGE
 
 	template <typename To, typename From>
 	inline std::shared_ptr<To>
-	checked_pointer_cast(std::shared_ptr<From> const & p)
+	checked_pointer_cast(std::shared_ptr<From> const & p) noexcept
 	{
 		BOOST_ASSERT(std::dynamic_pointer_cast<To>(p) == std::static_pointer_cast<To>(p));
 		return std::static_pointer_cast<To>(p);
