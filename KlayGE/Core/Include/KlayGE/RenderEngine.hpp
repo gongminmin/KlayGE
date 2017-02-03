@@ -185,7 +185,7 @@ namespace KlayGE
 		{
 		}
 
-		void Stereoscopic();
+		void ConvertToDisplay();
 
 		uint32_t NumMotionFrames() const
 		{

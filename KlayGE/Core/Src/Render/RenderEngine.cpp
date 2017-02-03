@@ -448,6 +448,7 @@ namespace KlayGE
 
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 		this->Stereo(settings.stereo_method);
+		this->StereoSeparation(settings.stereo_separation);
 
 #ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = PerfProfiler::Instance();
@@ -978,7 +979,7 @@ namespace KlayGE
 		}
 	}
 
-	void RenderEngine::Stereoscopic()
+	void RenderEngine::ConvertToDisplay()
 	{
 		if (stereo_method_ != STM_None)
 		{

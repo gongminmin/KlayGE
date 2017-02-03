@@ -771,7 +771,7 @@ namespace KlayGE
 		}
 		this->Flush(App3DFramework::URV_Overlay);
 
-		re.Stereoscopic();
+		re.ConvertToDisplay();
 
 		num_draw_calls_ = re.NumDrawsJustCalled();
 		num_dispatch_calls_ = re.NumDispatchesJustCalled();

@@ -247,7 +247,7 @@ namespace KlayGE
 		bool ppaa = false;
 		bool gamma = false;
 		bool color_grading = false;
-		int stereo_method = 0;
+		StereoMethod stereo_method = STM_None;
 		float stereo_separation = 0;
 		std::vector<std::pair<std::string, std::string>> graphics_options;
 		bool perf_profiler = false;
@@ -611,7 +611,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.ppaa = ppaa;
 		cfg_.graphics_cfg.gamma = gamma;
 		cfg_.graphics_cfg.color_grading = color_grading;
-		cfg_.graphics_cfg.stereo_method = static_cast<StereoMethod>(stereo_method);
+		cfg_.graphics_cfg.stereo_method = stereo_method;
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 		cfg_.graphics_cfg.options = std::move(graphics_options);
 
