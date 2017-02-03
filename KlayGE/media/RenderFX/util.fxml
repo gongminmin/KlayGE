@@ -86,18 +86,6 @@ float linear_depth_to_non_linear(float depth, float near_mul_q, float q)
 	return (depth * q - near_mul_q) / depth;
 }
 
-float3 linear_to_srgb(float3 rgb)
-{
-	const float ALPHA = 0.055f;
-	return rgb < 0.0031308f ? 12.92f * rgb : (1 + ALPHA) * pow(rgb, 1 / 2.4f) - ALPHA;
-}
-
-float3 srgb_to_linear(float3 srgb)
-{
-	const float ALPHA = 0.055f;
-	return srgb < 0.04045f ? srgb / 12.92f : pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
-}
-
 // Encoding a [0, 1) float into a rgba8. From http://aras-p.info/blog/2009/07/30/encoding-floats-to-rgba-the-final/
 float4 EncodeFloatRGBA(float v)
 {

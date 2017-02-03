@@ -2,7 +2,7 @@
 
 <effect>
 	<include name="PostProcess.fxml"/>
-	<include name="util.fxml"/>
+	<include name="ColorSpaceUtil.fxml"/>
 
 	<parameter type="sampler" name="point_clamp_sampler">
 		<state name="filtering" value="min_mag_mip_point"/>
@@ -26,7 +26,7 @@
 		<![CDATA[
 float3 SRGBCorrection(float3 rgb)
 {
-	return linear_to_srgb(max(rgb, 1e-6f));
+	return LinearToSRGB(max(rgb, 1e-6f));
 }
 
 float3 ColorGrading(float3 rgb)

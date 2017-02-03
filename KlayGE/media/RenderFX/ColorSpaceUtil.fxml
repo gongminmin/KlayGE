@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+float3 LinearToSRGB(float3 rgb)
+{
+	const float ALPHA = 0.055f;
+	return rgb < 0.0031308f ? 12.92f * rgb : (1 + ALPHA) * pow(rgb, 1 / 2.4f) - ALPHA;
+}
+
+float3 SRGBToLinear(float3 rgb)
+{
+	const float ALPHA = 0.055f;
+	return rgb < 0.04045f ? rgb / 12.92f : pow((rgb + ALPHA) / (1 + ALPHA), 2.4f);
+}
+		]]>
+	</shader>
+</effect>
