@@ -49,6 +49,7 @@
 #pragma GCC diagnostic pop
 #endif
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/lexical_cast.hpp>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS
 #include <windows.h>
@@ -249,6 +250,9 @@ namespace KlayGE
 		bool color_grading = false;
 		StereoMethod stereo_method = STM_None;
 		float stereo_separation = 0;
+		DisplayOutputMethod display_output_method = DOM_sRGB;
+		uint32_t paper_white = 100;
+		uint32_t display_max_luminance = 100;
 		std::vector<std::pair<std::string, std::string>> graphics_options;
 		bool perf_profiler = false;
 		bool location_sensor = false;
@@ -374,6 +378,10 @@ namespace KlayGE
 			else if (CT_HASH("A2BGR10") == color_fmt_str_hash)
 			{
 				color_fmt = EF_A2BGR10;
+			}
+			else if (CT_HASH("ABGR16F") == color_fmt_str_hash)
+			{
+				color_fmt = EF_ABGR16F;
 			}
 
 			size_t const depth_stencil_fmt_str_hash = RT_HASH(depth_stencil_fmt_str.c_str());
@@ -541,6 +549,45 @@ namespace KlayGE
 				stereo_separation = attr->ValueFloat();
 			}
 
+			XMLNodePtr output_node = graphics_node->FirstNode("output");
+			attr = output_node->Attrib("method");
+			if (attr)
+			{
+				std::string const & method_str = attr->ValueString();
+				size_t const method_str_hash = RT_HASH(method_str.c_str());
+				if (CT_HASH("hdr10") == method_str_hash)
+				{
+					display_output_method = DOM_HDR10;
+				}
+				else
+				{
+					display_output_method = DOM_sRGB;
+				}
+			}
+
+			attr = output_node->Attrib("white");
+			if (attr)
+			{
+				paper_white = attr->ValueUInt();
+			}
+			attr = output_node->Attrib("max_lum");
+			if (attr)
+			{
+				display_max_luminance = attr->ValueUInt();
+			}
+
+			if (display_output_method == DOM_sRGB)
+			{
+				paper_white = display_max_luminance = 100;
+			}
+			else
+			{
+				if ((color_fmt == EF_ARGB8) || (color_fmt == EF_ABGR8))
+				{
+					color_fmt = EF_A2BGR10;
+				}
+			}
+
 			XMLNodePtr options_node = graphics_node->FirstNode("options");
 			if (options_node)
 			{
@@ -613,6 +660,9 @@ namespace KlayGE
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.stereo_method = stereo_method;
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
+		cfg_.graphics_cfg.display_output_method = display_output_method;
+		cfg_.graphics_cfg.paper_white = paper_white;
+		cfg_.graphics_cfg.display_max_luminance = display_max_luminance;
 		cfg_.graphics_cfg.options = std::move(graphics_options);
 
 		cfg_.deferred_rendering = false;
@@ -685,6 +735,10 @@ namespace KlayGE
 
 			case EF_A2BGR10:
 				color_fmt_str = "A2BGR10";
+				break;
+
+			case EF_ABGR16F:
+				color_fmt_str = "ABGR16F";
 				break;
 
 			default:
@@ -805,6 +859,27 @@ namespace KlayGE
 			stereo_node->AppendAttrib(cfg_doc.AllocAttribString("separation", oss.str()));
 
 			graphics_node->AppendNode(stereo_node);
+
+			XMLNodePtr output_node = cfg_doc.AllocNode(XNT_Element, "output");
+			switch (cfg_.graphics_cfg.display_output_method)
+			{
+			case DOM_HDR10:
+				method_str = "hdr10";
+				break;
+
+			default:
+				method_str = "srgb";
+				break;
+			}
+			output_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
+
+			output_node->AppendAttrib(cfg_doc.AllocAttribString("white",
+				boost::lexical_cast<std::string>(cfg_.graphics_cfg.paper_white)));
+
+			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum",
+				boost::lexical_cast<std::string>(cfg_.graphics_cfg.display_max_luminance)));
+
+			graphics_node->AppendNode(output_node);
 		}
 		root->AppendNode(graphics_node);
 

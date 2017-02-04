@@ -709,6 +709,13 @@ namespace KlayGE
 		STM_Vertical,
 		STM_OculusVR
 	};
+
+
+	enum DisplayOutputMethod
+	{
+		DOM_sRGB,
+		DOM_HDR10
+	};
 }
 
 #endif			// _ELEMENTFORMAT_HPP

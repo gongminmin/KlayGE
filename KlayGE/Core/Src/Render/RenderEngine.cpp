@@ -195,11 +195,11 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				ldr_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml",
+				post_tone_mapping_pps_[i] = SyncLoadPostProcess("PostToneMapping.ppml",
 					"PostToneMapping" + boost::lexical_cast<std::string>(i));
 			}
 
-			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
+			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 
 		bool need_resize = false;
@@ -237,7 +237,7 @@ namespace KlayGE
 		}
 
 		RenderViewPtr ds_view;
-		if (hdr_pp_ || ldr_pp_ || (settings.stereo_method != STM_None))
+		if (hdr_pp_ || post_tone_mapping_pp_ || (settings.stereo_method != STM_None))
 		{
 			ds_tex_ = this->ScreenDepthStencilTexture();
 			if (ds_tex_ && (screen_width == render_width) && (screen_height == render_height))
@@ -283,19 +283,26 @@ namespace KlayGE
 			}
 		}
 
-		if (settings.stereo_method != STM_None)
+		if ((settings.stereo_method != STM_None) || (settings.display_output_method != DOM_sRGB))
 		{
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
 			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
-			ElementFormat fmt;
-			if (caps.texture_format_support(settings.color_fmt) && caps.rendertarget_format_support(settings.color_fmt, 1, 0))
+			ElementFormat fmt = EF_Unknown;
+			if (settings.display_output_method != DOM_sRGB)
 			{
-				fmt = settings.color_fmt;
+				if (caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+				{
+					fmt = EF_B10G11R11F;
+				}
 			}
-			else
+			if (fmt == EF_Unknown)
 			{
-				if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+				if (caps.texture_format_support(settings.color_fmt) && caps.rendertarget_format_support(settings.color_fmt, 1, 0))
+				{
+					fmt = settings.color_fmt;
+				}
+				else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
 				{
 					fmt = EF_ABGR8;
 				}
@@ -316,6 +323,17 @@ namespace KlayGE
 
 			overlay_frame_buffer_ = rf.MakeFrameBuffer();
 			overlay_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+
+			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+				fmt = EF_ARGB8;
+			}
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
 				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -374,33 +392,48 @@ namespace KlayGE
 			}
 		}
 		
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
-			ldr_frame_buffer_ = rf.MakeFrameBuffer();
-			ldr_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
+			post_tone_mapping_frame_buffer_ = rf.MakeFrameBuffer();
+			post_tone_mapping_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
 			ElementFormat fmt;
-			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			if (settings.display_output_method == DOM_sRGB)
 			{
-				fmt = EF_ABGR8;
+				if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+				{
+					fmt = EF_ABGR8;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+					fmt = EF_ARGB8;
+				}
+				ElementFormat fmt_srgb = MakeSRGB(fmt);
+				if (caps.texture_format_support(fmt_srgb) && caps.rendertarget_format_support(fmt_srgb, 1, 0))
+				{
+					fmt = fmt_srgb;
+				}
 			}
 			else
 			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
+				if (caps.texture_format_support(EF_B10G11R11F) && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+				{
+					fmt = EF_B10G11R11F;
+				}
+				else
+				{
+					BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F) && caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+					fmt = EF_ABGR16F;
+				}
 			}
-			ElementFormat fmt_srgb = MakeSRGB(fmt);
-			if (caps.texture_format_support(fmt_srgb) && caps.rendertarget_format_support(fmt_srgb, 1, 0))
-			{
-				fmt = fmt_srgb;
-			}
 
-			ldr_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
-			ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*post_tone_mapping_tex_, 0, 1, 0));
+			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-			default_frame_buffers_[0] = default_frame_buffers_[1] = ldr_frame_buffer_;
+			default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 		}
 
 		if (hdr_pp_)
@@ -449,12 +482,16 @@ namespace KlayGE
 		this->BindFrameBuffer(default_frame_buffers_[0]);
 		this->Stereo(settings.stereo_method);
 		this->StereoSeparation(settings.stereo_separation);
+		this->DisplayOutput(settings.display_output_method);
+		this->PaperWhiteNits(settings.paper_white);
+		this->DisplayMaxLuminanceNits(settings.display_max_luminance);
 
 #ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = PerfProfiler::Instance();
 		hdr_pp_perf_ = profiler.CreatePerfRange(0, "HDR PP");
-		ldr_pp_perf_ = profiler.CreatePerfRange(0, "LDR PP");
+		post_tone_mapping_pp_perf_ = profiler.CreatePerfRange(0, "Post tone mapping PP");
 		resize_pp_perf_ = profiler.CreatePerfRange(0, "Resize PP");
+		hdr_display_pp_perf_ = profiler.CreatePerfRange(0, "HDR display PP");
 		stereoscopic_pp_perf_ = profiler.CreatePerfRange(0, "Stereoscopic PP");
 #endif
 	}
@@ -468,15 +505,16 @@ namespace KlayGE
 		cur_frame_buffer_.reset();
 
 		stereoscopic_pp_.reset();
+		hdr_display_pp_.reset();
 		for (size_t i = 0; i < 2; ++ i)
 		{
 			resize_pps_[i].reset();
 		}
 		for (size_t i = 0; i < 12; ++ i)
 		{
-			ldr_pps_[i].reset();
+			post_tone_mapping_pps_[i].reset();
 		}
-		ldr_pp_.reset();
+		post_tone_mapping_pp_.reset();
 		skip_hdr_pp_.reset();
 		hdr_pp_.reset();
 
@@ -484,7 +522,7 @@ namespace KlayGE
 		overlay_frame_buffer_.reset();
 		mono_frame_buffer_.reset();
 		resize_frame_buffer_.reset();
-		ldr_frame_buffer_.reset();
+		post_tone_mapping_frame_buffer_.reset();
 		hdr_frame_buffer_.reset();
 
 		overlay_tex_.reset();
@@ -493,7 +531,7 @@ namespace KlayGE
 		hdr_tex_.reset();
 		hdr_tex_.reset();
 		ds_tex_.reset();
-		ldr_tex_.reset();
+		post_tone_mapping_tex_.reset();
 
 		for (int i = 3; i >= 0; -- i)
 		{
@@ -670,7 +708,7 @@ namespace KlayGE
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
 			RenderViewPtr ds_view;
-			if (hdr_pp_ || ldr_pp_ || (stereo_method_ != STM_None))
+			if (hdr_pp_ || post_tone_mapping_pp_ || (stereo_method_ != STM_None))
 			{
 				ElementFormat fmt = ds_tex_->Format();
 				ds_tex_ = this->ScreenDepthStencilTexture();
@@ -707,7 +745,7 @@ namespace KlayGE
 			default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = default_frame_buffers_[3]
 				= screen_frame_buffer_;
 
-			if (stereo_method_ != STM_None)
+			if ((stereo_method_ != STM_None) || (display_output_method_ != DOM_sRGB))
 			{
 				ElementFormat fmt = mono_tex_->Format();
 				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
@@ -785,14 +823,15 @@ namespace KlayGE
 					default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = resize_frame_buffer_;
 				}
 			}
-			if (ldr_pp_)
+			if (post_tone_mapping_pp_)
 			{
-				ElementFormat fmt = ldr_tex_->Format();
-				ldr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-				ldr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ldr_tex_, 0, 1, 0));
-				ldr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+				ElementFormat fmt = post_tone_mapping_tex_->Format();
+				post_tone_mapping_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*post_tone_mapping_tex_, 0, 1, 0));
+				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-				default_frame_buffers_[0] = default_frame_buffers_[1] = ldr_frame_buffer_;
+				default_frame_buffers_[0] = default_frame_buffers_[1] = post_tone_mapping_frame_buffer_;
 			}
 			if (hdr_pp_)
 			{
@@ -856,28 +895,28 @@ namespace KlayGE
 		fb_stage_ = 2;
 
 #ifndef KLAYGE_SHIP
-		ldr_pp_perf_->Begin();
+		post_tone_mapping_pp_perf_->Begin();
 #endif
 		if (ppaa_enabled_ || gamma_enabled_ || color_grading_enabled_)
 		{
 			if (skip)
 			{
-				ldr_pps_[0]->Apply();
+				post_tone_mapping_pps_[0]->Apply();
 			}
 			else
 			{
-				ldr_pp_->Apply();
+				post_tone_mapping_pp_->Apply();
 			}
 		}
 		else
 		{
-			if (ldr_pps_[0])
+			if (post_tone_mapping_pps_[0])
 			{
-				ldr_pps_[0]->Apply();
+				post_tone_mapping_pps_[0]->Apply();
 			}
 		}
 #ifndef KLAYGE_SHIP
-		ldr_pp_perf_->End();
+		post_tone_mapping_pp_perf_->End();
 #endif
 
 		fb_stage_ = 3;
@@ -939,31 +978,31 @@ namespace KlayGE
 
 	void RenderEngine::PPAAEnabled(int aa)
 	{
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
 			pp_chain_dirty_ = true;
 			ppaa_enabled_ = aa;
-			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
+			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
 	void RenderEngine::GammaEnabled(bool gamma)
 	{
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
 			pp_chain_dirty_ = true;
 			gamma_enabled_ = gamma;
-			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
+			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
 	void RenderEngine::ColorGradingEnabled(bool cg)
 	{
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
 			pp_chain_dirty_ = true;
 			color_grading_enabled_ = cg;
-			ldr_pp_ = ldr_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
+			post_tone_mapping_pp_ = post_tone_mapping_pps_[ppaa_enabled_ * 4 + gamma_enabled_ * 2 + color_grading_enabled_];
 		}
 	}
 
@@ -981,7 +1020,28 @@ namespace KlayGE
 
 	void RenderEngine::ConvertToDisplay()
 	{
-		if (stereo_method_ != STM_None)
+		if (display_output_method_ != DOM_sRGB)
+		{
+			BOOST_ASSERT(hdr_display_pp_);
+
+			fb_stage_ = 3;
+
+#ifndef KLAYGE_SHIP
+			hdr_display_pp_perf_->Begin();
+#endif
+
+			this->BindFrameBuffer(screen_frame_buffer_);
+			hdr_display_pp_->SetParam(0, static_cast<float>(paper_white_));
+			hdr_display_pp_->SetParam(1, static_cast<float>(display_max_luminance_));
+			hdr_display_pp_->Render();
+
+#ifndef KLAYGE_SHIP
+			hdr_display_pp_perf_->End();
+#endif
+
+			fb_stage_ = 0;
+		}
+		else if (stereo_method_ != STM_None)
 		{
 			fb_stage_ = 3;
 
@@ -1109,13 +1169,62 @@ namespace KlayGE
 		pp_chain_dirty_ = true;
 	}
 
+	void RenderEngine::DisplayOutput(DisplayOutputMethod method)
+	{
+		display_output_method_ = method;
+
+		if (display_output_method_ != DOM_sRGB)
+		{
+			std::string pp_name;
+			switch (display_output_method_)
+			{
+			case DOM_HDR10:
+				pp_name = "DisplayHDR10";
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				break;
+			}
+			hdr_display_pp_ = SyncLoadPostProcess("HDRDisplay.ppml", pp_name);
+
+			hdr_enabled_ = true;
+			gamma_enabled_ = false;
+			color_grading_enabled_ = false;
+		}
+		else
+		{
+			hdr_display_pp_.reset();
+		}
+
+		pp_chain_dirty_ = true;
+	}
+
+	void RenderEngine::PaperWhiteNits(uint32_t nits)
+	{
+		paper_white_ = nits;
+		this->UpdateHDRRescale();
+	}
+
+	void RenderEngine::DisplayMaxLuminanceNits(uint32_t nits)
+	{
+		display_max_luminance_ = nits;
+		this->UpdateHDRRescale();
+	}
+
+	void RenderEngine::UpdateHDRRescale()
+	{
+		float constexpr N = 0.25f;
+		hdr_rescale_ = log2(1 - N * paper_white_ / display_max_luminance_) / log2(1 - N);
+	}
+
 	void RenderEngine::AssemblePostProcessChain()
 	{
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				ldr_pps_[i]->OutputPin(0, TexturePtr());
+				post_tone_mapping_pps_[i]->OutputPin(0, TexturePtr());
 			}
 		}				
 		if (hdr_pp_)
@@ -1128,11 +1237,11 @@ namespace KlayGE
 		{
 			if (stereoscopic_pp_)
 			{
-				if (ldr_pp_)
+				if (post_tone_mapping_pp_)
 				{
 					for (size_t i = 0; i < 12; ++ i)
 					{
-						ldr_pps_[i]->OutputPin(0, mono_tex_);
+						post_tone_mapping_pps_[i]->OutputPin(0, mono_tex_);
 					}
 				}
 				if (hdr_pp_)
@@ -1146,6 +1255,29 @@ namespace KlayGE
 				stereoscopic_pp_->InputPin(2, overlay_tex_);
 			}
 		}
+		else if (display_output_method_ != DOM_sRGB)
+		{
+			// TODO: Make HDR output work with stereoscopic
+
+			if (hdr_display_pp_)
+			{
+				if (post_tone_mapping_pp_)
+				{
+					for (size_t i = 0; i < 12; ++i)
+					{
+						post_tone_mapping_pps_[i]->OutputPin(0, mono_tex_);
+					}
+				}
+				if (hdr_pp_)
+				{
+					hdr_pp_->OutputPin(0, mono_tex_);
+					skip_hdr_pp_->OutputPin(0, mono_tex_);
+				}
+
+				hdr_display_pp_->InputPin(0, mono_tex_);
+				hdr_display_pp_->InputPin(1, overlay_tex_);
+			}
+		}
 		else
 		{
 			uint32_t const screen_width = default_frame_buffers_[3]->Width();
@@ -1155,11 +1287,11 @@ namespace KlayGE
 			bool need_resize = ((render_width != screen_width) || (render_height != screen_height));
 			if (need_resize)
 			{
-				if (ldr_pp_)
+				if (post_tone_mapping_pp_)
 				{
 					for (size_t i = 0; i < 12; ++ i)
 					{
-						ldr_pps_[i]->OutputPin(0, resize_tex_);
+						post_tone_mapping_pps_[i]->OutputPin(0, resize_tex_);
 					}
 				}
 				if (hdr_pp_)
@@ -1178,17 +1310,17 @@ namespace KlayGE
 			}
 		}
 
-		if (ldr_pp_)
+		if (post_tone_mapping_pp_)
 		{
 			if (hdr_pp_)
 			{
-				hdr_pp_->OutputPin(0, ldr_tex_);
-				skip_hdr_pp_->OutputPin(0, ldr_tex_);
+				hdr_pp_->OutputPin(0, post_tone_mapping_tex_);
+				skip_hdr_pp_->OutputPin(0, post_tone_mapping_tex_);
 			}
 
 			for (size_t i = 0; i < 12; ++ i)
 			{
-				ldr_pps_[i]->InputPin(0, ldr_tex_);
+				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_tex_);
 			}
 		}
 
@@ -1231,8 +1363,8 @@ namespace KlayGE
 		ds_tex_.reset();
 		hdr_frame_buffer_.reset();
 		hdr_tex_.reset();
-		ldr_frame_buffer_.reset();
-		ldr_tex_.reset();
+		post_tone_mapping_frame_buffer_.reset();
+		post_tone_mapping_tex_.reset();
 		resize_frame_buffer_.reset();
 		resize_tex_.reset();
 		mono_frame_buffer_.reset();
@@ -1255,20 +1387,22 @@ namespace KlayGE
 
 		hdr_pp_.reset();
 		skip_hdr_pp_.reset();
-		ldr_pp_.reset();
+		post_tone_mapping_pp_.reset();
 		resize_pps_[0].reset();
 		resize_pps_[1].reset();
+		hdr_display_pp_.reset();
 		stereoscopic_pp_.reset();
 
 		for (int i = 0; i < 12; ++ i)
 		{
-			ldr_pps_[i].reset();
+			post_tone_mapping_pps_[i].reset();
 		}
 
 #ifndef KLAYGE_SHIP
 		hdr_pp_perf_.reset();
-		ldr_pp_perf_.reset();
+		post_tone_mapping_pp_perf_.reset();
 		resize_pp_perf_.reset();
+		hdr_display_pp_perf_.reset();
 		stereoscopic_pp_perf_.reset();
 #endif
 

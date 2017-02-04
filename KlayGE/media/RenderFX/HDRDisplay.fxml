@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
+	<include name="ColorSpaceUtil.fxml"/>
+
+	<parameter type="float" name="paper_white"/>
+	<parameter type="float" name="max_luminance"/>
+	
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="overlay_tex"/>
+
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float4 DisplayHDR10PS(float2 tc : TEXCOORD0) : SV_Target
+{
+	float4 color = color_tex.Sample(linear_sampler, tc);
+	float4 overlay = overlay_tex.Sample(linear_sampler, tc);
+	overlay.rgb = SRGBToLinear(overlay.rgb) * paper_white;
+
+	color.rgb = color.rgb * max_luminance;
+	color.rgb = lerp(color.rgb, overlay.rgb, overlay.a);
+
+	return float4(LinearToSt2084(Rec709ToRec2020(color.rgb) / 10000.0), 1);
+}
+		]]>
+	</shader>
+
+	<technique name="DisplayHDR10">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="DisplayHDR10PS()"/>
+		</pass>
+	</technique>
+</effect>

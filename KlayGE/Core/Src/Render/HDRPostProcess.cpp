@@ -224,6 +224,16 @@ namespace KlayGE
 		RenderTechnique* tech = effect->TechniqueByName("ToneMapping");
 
 		this->Technique(effect, tech);
+
+		hdr_rescale_ep_ = effect_->ParameterByName("hdr_rescale");
+	}
+
+	void ToneMappingPostProcess::OnRenderBegin()
+	{
+		PostProcess::OnRenderBegin();
+
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		*hdr_rescale_ep_ = re.HDRRescale();
 	}
 
 

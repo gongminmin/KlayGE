@@ -187,6 +187,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferNoSkinning.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning128.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/HDRDisplay.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Imposter.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/JudaTexture.fxml
@@ -235,6 +236,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Fog.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/FXAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/GammaCorrection.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/HDRDisplay.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml

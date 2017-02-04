@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="DisplayHDR10">
+		<params>
+			<param name="paper_white"/>
+			<param name="max_luminance"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="overlay_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="HDRDisplay.fxml" tech="DisplayHDR10"/>
+	</post_processor>
+</post_processors>

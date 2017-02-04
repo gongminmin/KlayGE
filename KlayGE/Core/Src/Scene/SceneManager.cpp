@@ -764,7 +764,7 @@ namespace KlayGE
 
 		re.PostProcess((urt & App3DFramework::URV_SkipPostProcess) != 0);
 
-		if (re.Stereo() != STM_None)
+		if ((re.Stereo() != STM_None) || (re.DisplayOutput() != DOM_sRGB))
 		{
 			re.BindFrameBuffer(re.OverlayFrameBuffer());
 			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0, 0, 0, 0), 1.0f, 0);

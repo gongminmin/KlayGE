@@ -75,6 +75,22 @@ DLGPROC tab_dlg_procs[] =
 	Show_Tab_DlgProc
 };
 
+uint32_t constexpr paper_white_candidates[] =
+{
+	80,
+	100,
+	200,
+	400
+};
+
+uint32_t constexpr max_lum_candidates[] =
+{
+	80,
+	100,
+	400,
+	1000
+};
+
 INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	switch(uMsg)
@@ -176,6 +192,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ARGB8")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR8")));
 			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("A2BGR10")));
+			SendMessage(hClrFmtCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("ABGR16F")));
 
 			int sel = 0;
 			switch (cfg.graphics_cfg.color_fmt)
@@ -339,6 +356,56 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			Convert(str, oss.str());
 
 			SetWindowText(hStereoSepEdit, str.c_str());
+		}
+		{
+			HWND hOutputCombo = GetDlgItem(hDlg, IDC_OUTPUT_COMBO);
+			SendMessage(hOutputCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("sRGB")));
+			SendMessage(hOutputCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("HDR10")));
+
+			int sel = 0;
+			switch (cfg.graphics_cfg.display_output_method)
+			{
+			case DOM_HDR10:
+				sel = 1;
+
+			case DOM_sRGB:
+			default:
+				sel = 0;
+				break;
+			}
+			SendMessage(hOutputCombo, CB_SETCURSEL, sel, 0);
+		}
+		{
+			int sel = -1;
+			HWND hPaperWhiteCombo = GetDlgItem(hDlg, IDC_PAPER_WHITE_COMBO);
+			for (uint32_t i = 0; i < sizeof(paper_white_candidates) / sizeof(paper_white_candidates[0]); ++i)
+			{
+				std::basic_string<TCHAR> str;
+				Convert(str, boost::lexical_cast<std::string>(paper_white_candidates[i]));
+				SendMessage(hPaperWhiteCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(str.c_str()));
+
+				if ((sel == -1) && (cfg.graphics_cfg.paper_white <= paper_white_candidates[i]))
+				{
+					sel = static_cast<int>(i);
+				}
+			}
+			SendMessage(hPaperWhiteCombo, CB_SETCURSEL, sel, 0);
+		}
+		{
+			int sel = -1;
+			HWND hMaxLumCombo = GetDlgItem(hDlg, IDC_MAX_LUM_COMBO);
+			for (uint32_t i = 0; i < sizeof(max_lum_candidates) / sizeof(max_lum_candidates[0]); ++i)
+			{
+				std::basic_string<TCHAR> str;
+				Convert(str, boost::lexical_cast<std::string>(max_lum_candidates[i]));
+				SendMessage(hMaxLumCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(str.c_str()));
+
+				if ((sel == -1) && (cfg.graphics_cfg.display_max_luminance <= max_lum_candidates[i]))
+				{
+					sel = static_cast<int>(i);
+				}
+			}
+			SendMessage(hMaxLumCombo, CB_SETCURSEL, sel, 0);
 		}
 		return TRUE;
 
@@ -699,6 +766,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					GetWindowText(hStereoSepEdit, buf, sizeof(buf) / sizeof(buf[0]));
 					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.stereo_separation;
 				}
+				{
+					HWND hOutputCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_OUTPUT_COMBO);
+					int n = static_cast<int>(SendMessage(hOutputCombo, CB_GETCURSEL, 0, 0));
+					cfg.graphics_cfg.display_output_method = static_cast<DisplayOutputMethod>(n);
+				}
+				{
+					HWND hPaperWhiteCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_PAPER_WHITE_COMBO);
+					int n = static_cast<int>(SendMessage(hPaperWhiteCombo, CB_GETCURSEL, 0, 0));
+					cfg.graphics_cfg.paper_white = paper_white_candidates[n];
+				}
+				{
+					HWND hMaxLumCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_MAX_LUM_COMBO);
+					int n = static_cast<int>(SendMessage(hMaxLumCombo, CB_GETCURSEL, 0, 0));
+					cfg.graphics_cfg.display_max_luminance = max_lum_candidates[n];
+				}
 			}
 			{
 				HWND hFactoryCombo = GetDlgItem(hTabDlg[AUDIO_TAB], IDC_FACTORY_COMBO);
@@ -778,7 +860,7 @@ bool UIConfiguration(HINSTANCE hInstance)
 	int cx = ::GetSystemMetrics(SM_CXSCREEN);
 	int cy = ::GetSystemMetrics(SM_CYSCREEN);
 	int width = 420;
-	int height = 500;
+	int height = 600;
 
 	HWND hWnd = ::CreateWindow(wc.lpszClassName, TEXT("KlayGE Configuration Tool"),
 		WS_CAPTION | WS_SYSMENU, (cx - width) / 2, (cy - height) / 2,

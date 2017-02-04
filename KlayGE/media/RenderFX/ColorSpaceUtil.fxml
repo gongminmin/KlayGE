@@ -14,6 +14,62 @@ float3 SRGBToLinear(float3 rgb)
 	const float ALPHA = 0.055f;
 	return rgb < 0.04045f ? rgb / 12.92f : pow((rgb + ALPHA) / (1 + ALPHA), 2.4f);
 }
+
+float3 LinearToRec709(float3 rgb)
+{
+	const float ALPHA = 0.0993f;
+	return rgb < 0.0181f ? 4.5f * rgb : (1 + ALPHA) * pow(rgb, 0.45f) - ALPHA;
+}
+
+float3 Rec709ToLinear(float3 rgb)
+{
+	const float ALPHA = 0.0993f;
+	return rgb < 0.08145f ? rgb / 4.5f : pow((rgb + ALPHA) / (1 + ALPHA), 1 / 0.45f);
+}
+
+float3 LinearToSt2084(float3 rgb)
+{
+	float m1 = 2610 / 4096.0f / 4;
+	float m2 = 2523 / 4096.0f * 128;
+	float c1 = 3424 / 4096.0f;
+	float c2 = 2413 / 4096.0f * 32;
+	float c3 = 2392 / 4096.0f * 32;
+	rgb = pow(rgb, m1);
+	return pow((c1 + c2 * rgb) / (1 + c3 * rgb), m2);
+}
+
+float3 St2084ToLinear(float3 rgb)
+{
+	float m1 = 2610 / 4096.0f / 4;
+	float m2 = 2523 / 4096.0f * 128;
+	float c1 = 3424 / 4096.0f;
+	float c2 = 2413 / 4096.0f * 32;
+	float c3 = 2392 / 4096.0f * 32;
+	rgb = pow(rgb, 1 / m2);
+	return pow(max(rgb - c1, 0) / (c2 - c3 * rgb), 1 / m1);
+}
+
+float3 Rec709ToRec2020(float3 rgb709)
+{
+	static const float3x3 conv_mat =
+	{
+		0.627402, 0.329292, 0.043306,
+		0.069095, 0.919544, 0.011360,
+		0.016394, 0.088028, 0.895578
+	};
+	return mul(conv_mat, rgb709);
+}
+
+float3 Rec2020ToRec709(float3 rgb2020)
+{
+	static const float3x3 conv_mat =
+	{
+		1.660496, -0.587656, -0.072840,
+		-0.124547, 1.132895, -0.008348,
+		-0.018154, -0.100597, 1.118751
+	};
+	return mul(conv_mat, rgb2020);
+}
 		]]>
 	</shader>
 </effect>

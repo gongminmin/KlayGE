@@ -3,6 +3,10 @@
 // Used by KGEConfig.rc
 //
 #define IDC_RES_COMBO                   1008
+#define IDC_OUTPUT_COMBO                1009
+#define IDC_PAPER_WHITE_COMBO           1010
+#define IDC_RES_COMBO4                  1011
+#define IDC_MAX_LUM_COMBO               1011
 #define IDC_MB_FRAMES_EDIT              1013
 #define IDC_SYNC_COMBO                  1014
 #define IDC_FACTORY_COMBO               1015
@@ -19,7 +23,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        107
+#define _APS_NEXT_RESOURCE_VALUE        108
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1018
 #define _APS_NEXT_SYMED_VALUE           101

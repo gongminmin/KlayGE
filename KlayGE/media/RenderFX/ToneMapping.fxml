@@ -22,6 +22,8 @@
 	<parameter type="texture2D" name="lum_tex"/>
 	<parameter type="texture2D" name="bloom_tex"/>
 
+	<parameter type="float" name="hdr_rescale"/>
+
 	<shader>
 		<![CDATA[
 float EyeAdaption(float lum)
@@ -56,7 +58,7 @@ float3 ToneMapping(float3 color, float3 blur, float adapted_lum)
 #else
 	float adapted_lum_dest = 2 / (max(0.1f, 1 + 10 * EyeAdaption(adapted_lum)));
 
-	return ACESFilm(adapted_lum_dest * color);
+	return ACESFilm(adapted_lum_dest * hdr_rescale * color);
 #endif
 }
 

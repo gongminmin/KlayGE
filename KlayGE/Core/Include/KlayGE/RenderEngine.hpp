@@ -236,7 +236,27 @@ namespace KlayGE
 		{
 			ovr_scale_ = scale;
 		}
-		
+
+		DisplayOutputMethod DisplayOutput() const
+		{
+			return display_output_method_;
+		}
+		void DisplayOutput(DisplayOutputMethod method);
+		void PaperWhiteNits(uint32_t nits);
+		uint32_t PaperWhiteNits() const
+		{
+			return paper_white_;
+		}
+		void DisplayMaxLuminanceNits(uint32_t nits);
+		uint32_t DisplayMaxLuminanceNits() const
+		{
+			return display_max_luminance_;
+		}
+		float HDRRescale() const
+		{
+			return hdr_rescale_;
+		}
+
 		// For debug only
 		void ForceLineMode(bool line);
 		bool ForceLineMode() const
@@ -265,14 +285,16 @@ namespace KlayGE
 		virtual void DoSuspend() = 0;
 		virtual void DoResume() = 0;
 
+		void UpdateHDRRescale();
+
 	protected:
 		FrameBufferPtr cur_frame_buffer_;
 		FrameBufferPtr screen_frame_buffer_;
 		TexturePtr ds_tex_;
 		FrameBufferPtr hdr_frame_buffer_;
 		TexturePtr hdr_tex_;
-		FrameBufferPtr ldr_frame_buffer_;
-		TexturePtr ldr_tex_;
+		FrameBufferPtr post_tone_mapping_frame_buffer_;
+		TexturePtr post_tone_mapping_tex_;
 		FrameBufferPtr resize_frame_buffer_;
 		TexturePtr resize_tex_;
 		FrameBufferPtr mono_frame_buffer_;
@@ -308,22 +330,28 @@ namespace KlayGE
 		float ovr_x_center_offset_;
 		float ovr_scale_;
 
+		DisplayOutputMethod display_output_method_;
+		uint32_t paper_white_;
+		uint32_t display_max_luminance_;
+		float hdr_rescale_;
+
 		RenderLayoutPtr pp_rl_;
 		RenderLayoutPtr vpp_rl_;
 
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
 		bool hdr_enabled_;
-		PostProcessPtr ldr_pp_;
+		PostProcessPtr post_tone_mapping_pp_;
 		int ppaa_enabled_;
 		bool gamma_enabled_;
 		bool color_grading_enabled_;
 		PostProcessPtr resize_pps_[2];
+		PostProcessPtr hdr_display_pp_;
 		PostProcessPtr stereoscopic_pp_;
 		int fb_stage_;
 		bool pp_chain_dirty_;
 
-		PostProcessPtr ldr_pps_[12];
+		PostProcessPtr post_tone_mapping_pps_[12];
 
 		bool force_line_mode_;
 
@@ -333,8 +361,9 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;
-		PerfRangePtr ldr_pp_perf_;
+		PerfRangePtr post_tone_mapping_pp_perf_;
 		PerfRangePtr resize_pp_perf_;
+		PerfRangePtr hdr_display_pp_perf_;
 		PerfRangePtr stereoscopic_pp_perf_;
 #endif
 	};

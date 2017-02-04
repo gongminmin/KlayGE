@@ -181,6 +181,11 @@ namespace KlayGE
 	{
 	public:
 		ToneMappingPostProcess();
+
+		void OnRenderBegin();
+
+	private:
+		RenderEffectParameter* hdr_rescale_ep_;
 	};
 
 
