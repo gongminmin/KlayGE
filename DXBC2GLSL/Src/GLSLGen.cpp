@@ -1020,8 +1020,15 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						need_comps = true;
 						break;
 
+					// TODO: Processing SN_CLIP_DISTANCE and SN_CULL_DISTANCE
+
 					case SN_RENDER_TARGET_ARRAY_INDEX:
 						out << "gl_Layer";
+						need_comps = false;
+						break;
+
+					case SN_VIEWPORT_ARRAY_INDEX:
+						out << "gl_ViewportIndex";
 						need_comps = false;
 						break;
 
@@ -1030,18 +1037,18 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						need_comps = false;
 						break;
 
-					case SN_INSTANCE_ID:
-						out << "gl_InstanceID";
-						need_comps = false;
-						break;
-
 					case SN_PRIMITIVE_ID:
 						out << "gl_PrimitiveID";
 						need_comps = false;
 						break;
 
-					case SN_VIEWPORT_ARRAY_INDEX:
-						out << "gl_ViewportIndex";
+					case SN_INSTANCE_ID:
+						out << "gl_InstanceID";
+						need_comps = false;
+						break;
+
+					case SN_IS_FRONT_FACE:
+						out << "(gl_FrontFacing ? 1 : 0)";
 						need_comps = false;
 						break;
 
