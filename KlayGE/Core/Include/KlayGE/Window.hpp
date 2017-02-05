@@ -91,8 +91,6 @@ namespace KlayGE
 		~Window();
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		void Recreate();
-
 		HWND HWnd() const
 		{
 			return wnd_;

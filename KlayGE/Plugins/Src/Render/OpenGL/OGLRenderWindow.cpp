@@ -130,87 +130,156 @@ namespace KlayGE
 		::SetWindowPos(hWnd_, nullptr, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
 			SWP_SHOWWINDOW | SWP_NOZORDER);
 
-		// there is no guarantee that the contents of the stack that become
-		// the pfd are zeroed, therefore _make sure_ to clear these bits.
-		PIXELFORMATDESCRIPTOR pfd;
-		memset(&pfd, 0, sizeof(pfd));
-		pfd.nSize		= sizeof(pfd);
-		pfd.nVersion	= 1;
-		pfd.dwFlags		= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-		if (STM_LCDShutter == settings.stereo_method)
-		{
-			pfd.dwFlags |= PFD_STEREO;
-		}
-		pfd.iPixelType	= PFD_TYPE_RGBA;
-		pfd.cColorBits	= static_cast<BYTE>(color_bits_);
-		pfd.cDepthBits	= static_cast<BYTE>(depth_bits);
-		pfd.cStencilBits = static_cast<BYTE>(stencil_bits);
-		pfd.iLayerType	= PFD_MAIN_PLANE;
-
-		int pixelFormat = ::ChoosePixelFormat(hDC_, &pfd);
-		BOOST_ASSERT(pixelFormat != 0);
-
-		::SetPixelFormat(hDC_, pixelFormat, &pfd);
-
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		hRC_ = re.wglCreateContext(hDC_);
-		re.wglMakeCurrent(hDC_, hRC_);
-
 		uint32_t sample_count = settings.sample_count;
-
-		if (sample_count > 1)
+		int requested_pixel_format = -1;
+		PIXELFORMATDESCRIPTOR requested_pfd{};
 		{
+			WNDCLASSEXW wc;
+			wc.cbSize = sizeof(wc);
+			wc.style = CS_OWNDC;
+			wc.lpfnWndProc = DefWindowProc;
+			wc.cbClsExtra = 0;
+			wc.cbWndExtra = sizeof(this);
+			wc.hInstance = ::GetModuleHandle(nullptr);
+			wc.hIcon = nullptr;
+			wc.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
+			wc.hbrBackground = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
+			wc.lpszMenuName = nullptr;
+			wc.lpszClassName = L"DummyWindow";
+			wc.hIconSm = nullptr;
+			::RegisterClassExW(&wc);
+
+			HWND dummy_wnd = ::CreateWindowW(wc.lpszClassName, L"", WS_OVERLAPPEDWINDOW, 0, 0, 1, 1, 0, 0, wc.hInstance, nullptr);
+			HDC dummy_dc = ::GetDC(dummy_wnd);
+
+			PIXELFORMATDESCRIPTOR pfd;
+			memset(&pfd, 0, sizeof(pfd));
+			pfd.nSize = sizeof(pfd);
+			pfd.nVersion = 1;
+			pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+			pfd.iPixelType = PFD_TYPE_RGBA;
+			pfd.cColorBits = static_cast<BYTE>(color_bits_);
+			pfd.cDepthBits = static_cast<BYTE>(depth_bits);
+			pfd.cStencilBits = static_cast<BYTE>(stencil_bits);
+			pfd.iLayerType = PFD_MAIN_PLANE;
+
+			int dummy_pixel_format = ::ChoosePixelFormat(dummy_dc, &pfd);
+			BOOST_ASSERT(dummy_pixel_format != 0);
+
+			::SetPixelFormat(dummy_dc, dummy_pixel_format, &pfd);
+
+			HGLRC dummy_rc = re.wglCreateContext(dummy_dc);
+			re.wglMakeCurrent(dummy_dc, dummy_rc);
+
+			auto color_fmt = settings.color_fmt;
+			if (color_fmt == EF_A2BGR10)
+			{
+				// TODO: Figure out why A2BGR10 doesn't work
+				color_fmt = EF_ABGR16F;
+			}
+
+			int r_bits, g_bits, b_bits, a_bits;
+			switch (color_fmt)
+			{
+			case EF_ARGB8:
+			case EF_ABGR8:
+				r_bits = 8;
+				g_bits = 8;
+				b_bits = 8;
+				a_bits = 8;
+				break;
+
+			case EF_A2BGR10:
+				r_bits = 10;
+				g_bits = 10;
+				b_bits = 10;
+				a_bits = 2;
+				break;
+
+			case EF_ABGR16F:
+				r_bits = 16;
+				g_bits = 16;
+				b_bits = 16;
+				a_bits = 16;
+				break;
+
+			default:
+				BOOST_ASSERT(false);
+				r_bits = 0;
+				g_bits = 0;
+				b_bits = 0;
+				a_bits = 0;
+				break;
+			}
+
+			int pixel_format;
 			UINT num_formats;
 			float float_attrs[] = { 0, 0 };
 			BOOL valid;
 			do
 			{
-				int int_attrs[] =
+				std::vector<int> int_attrs =
 				{
 					WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,
 					WGL_SUPPORT_OPENGL_ARB, GL_TRUE,
 					WGL_ACCELERATION_ARB, WGL_FULL_ACCELERATION_ARB,
-					WGL_COLOR_BITS_ARB, static_cast<int>(color_bits_),
+					WGL_RED_BITS_ARB, r_bits,
+					WGL_GREEN_BITS_ARB, g_bits,
+					WGL_BLUE_BITS_ARB, b_bits,
+					WGL_ALPHA_BITS_ARB, a_bits,
 					WGL_DEPTH_BITS_ARB, static_cast<int>(depth_bits),
 					WGL_STENCIL_BITS_ARB, static_cast<int>(stencil_bits),
-					WGL_DOUBLE_BUFFER_ARB, GL_TRUE,
-					WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,
-					WGL_SAMPLES_ARB, static_cast<int>(sample_count),
-					0, 0
+					WGL_DOUBLE_BUFFER_ARB, GL_TRUE
 				};
 
-				valid = wglChoosePixelFormatARB(hDC_, int_attrs, float_attrs, 1, &pixelFormat, &num_formats);
-				if (!valid || (num_formats < 1))
+				if (IsFloatFormat(color_fmt))
+				{
+					int_attrs.push_back(WGL_PIXEL_TYPE_ARB);
+					int_attrs.push_back(WGL_TYPE_RGBA_FLOAT_ARB);
+				}
+				if (sample_count > 1)
+				{
+					int_attrs.push_back(WGL_SAMPLE_BUFFERS_ARB);
+					int_attrs.push_back(GL_TRUE);
+					int_attrs.push_back(WGL_SAMPLES_ARB);
+					int_attrs.push_back(static_cast<int>(sample_count));
+				}
+				if (settings.stereo_method == STM_LCDShutter)
+				{
+					int_attrs.push_back(WGL_STEREO_ARB);
+					int_attrs.push_back(GL_TRUE);
+				}
+				int_attrs.push_back(0);
+				int_attrs.push_back(0);
+
+				valid = wglChoosePixelFormatARB(dummy_dc, &int_attrs[0], float_attrs, 1, &pixel_format, &num_formats);
+				if (valid && (num_formats > 0))
+				{
+					break;
+				}
+				else
 				{
 					-- sample_count;
 				}
-			} while ((sample_count > 1) && (!valid || (num_formats < 1)));
+			} while (sample_count > 0);
 
-			if (valid && (sample_count > 1))
+			if (valid && (sample_count > 0))
 			{
-				re.wglMakeCurrent(hDC_, nullptr);
-				re.wglDeleteContext(hRC_);
-				::ReleaseDC(hWnd_, hDC_);
+				requested_pixel_format = pixel_format;
+				requested_pfd = pfd;
 
-				main_wnd->Recreate();
-
-				hWnd_ = main_wnd->HWnd();
-				hDC_ = ::GetDC(hWnd_);
-
-				::SetWindowLongPtrW(hWnd_, GWL_STYLE, style);
-				::SetWindowPos(hWnd_, nullptr, settings.left, settings.top, rc.right - rc.left, rc.bottom - rc.top,
-					SWP_SHOWWINDOW | SWP_NOZORDER);
-
-				::SetPixelFormat(hDC_, pixelFormat, &pfd);
-
-				hRC_ = re.wglCreateContext(hDC_);
-				re.wglMakeCurrent(hDC_, hRC_);
-
-				// reinit glloader
-				glloader_init();
+				re.wglMakeCurrent(dummy_dc, nullptr);
+				re.wglDeleteContext(dummy_rc);
+				::ReleaseDC(dummy_wnd, dummy_dc);
+				::DestroyWindow(dummy_wnd);
 			}
 		}
+
+		::SetPixelFormat(hDC_, requested_pixel_format, &requested_pfd);
+		hRC_ = re.wglCreateContext(hDC_);
+		re.wglMakeCurrent(hDC_, hRC_);
 
 		if (glloader_WGL_ARB_create_context())
 		{

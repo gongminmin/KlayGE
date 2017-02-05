@@ -219,48 +219,6 @@ namespace KlayGE
 		}
 	}
 
-	void Window::Recreate()
-	{
-		if (!external_wnd_)
-		{
-			ready_ = false;
-
-			this->DetectsDPI();
-
-			HINSTANCE hInst = ::GetModuleHandle(nullptr);
-
-			uint32_t style = static_cast<uint32_t>(::GetWindowLongPtrW(wnd_, GWL_STYLE));
-			RECT rc = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
-			::AdjustWindowRect(&rc, style, false);
-
-			::DestroyWindow(wnd_);
-
-			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
-				style, left_, top_,
-				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-
-			::GetClientRect(wnd_, &rc);
-			left_ = rc.left;
-			top_ = rc.top;
-			width_ = rc.right - rc.left;
-			height_ = rc.bottom - rc.top;
-
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
-#endif
-			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
-
-			::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
-			::UpdateWindow(wnd_);
-
-			ready_ = true;
-		}
-	}
-
 	LRESULT Window::MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
 		switch (uMsg)
