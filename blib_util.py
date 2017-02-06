@@ -187,6 +187,14 @@ class build_info:
 				if cfg_build.compiler != "auto":
 					compiler = cfg_build.compiler
 
+		if (project_type != "") and (compiler == ""):
+			if project_type == "vs2017":
+				compiler = "vc141"
+			elif project_type == "vs2015":
+				compiler = "vc140"
+			elif project_type == "xcode":
+				compiler = "clang"
+
 		if 0 == target_platform.find("win"):
 			if "ProgramFiles" in env:
 				program_files_folder = env["ProgramFiles"]
