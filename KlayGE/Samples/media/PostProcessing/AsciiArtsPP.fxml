@@ -28,7 +28,7 @@ float4 AsciiArtsPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 {
 	int OUTPUT_NUM_ASCII = 64;
 	const float3 RGB_TO_LUM = float3(0.2126f, 0.7152f, 0.0722f);
-	float3 clr = Tex2DSampleLevel(src_tex, src_sampler, tex_coord0, 3, 0).rgb;
+	float3 clr = src_tex.SampleLevel(src_sampler, tex_coord0, 3).rgb;
 	float lum = saturate(dot(clr, RGB_TO_LUM));
 	float2 t = float2(floor(lum * (OUTPUT_NUM_ASCII - 1)) / OUTPUT_NUM_ASCII, 0)
 		+ frac(tex_coord0 / cell_per_row_line) / float2(OUTPUT_NUM_ASCII, 1);

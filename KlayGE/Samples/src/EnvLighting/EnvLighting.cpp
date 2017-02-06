@@ -61,7 +61,6 @@ namespace
 
 					uint32_t const mip = light->SkylightTexY()->NumMipMaps();
 					*(effect_->ParameterByName("diff_spec_mip")) = int2(mip - 1, mip - 2);
-					*(effect_->ParameterByName("mip_bias")) = mip / -2.0f;
 					break;
 				}
 			}

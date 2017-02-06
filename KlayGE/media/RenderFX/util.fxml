@@ -56,26 +56,6 @@ float mipmap_level(float2 uv, float2 texture_size)
 	return log2(sqrt(d));
 }
 
-float4 Tex2DSampleLevel(Texture2D tex, sampler sa, float2 tc, float mip, float mip_bias)
-{
-	return tex.SampleLevel(sa, tc, mip);
-}
-
-float4 Tex2DArraySampleLevel(Texture2DArray tex, sampler sa, float3 tc, float mip, float mip_bias)
-{
-	return tex.SampleLevel(sa, tc, mip);
-}
-
-float4 Tex3DSampleLevel(Texture3D tex, sampler sa, float3 tc, float mip, float mip_bias)
-{
-	return tex.SampleLevel(sa, tc, mip);
-}
-
-float4 TexCubeSampleLevel(TextureCube tex, sampler sa, float3 tc, float mip, float mip_bias)
-{
-	return tex.SampleLevel(sa, tc, mip);
-}
-
 float non_linear_depth_to_linear(float depth, float near_mul_q, float q)
 {
 	return near_mul_q / (q - depth);

@@ -42,24 +42,24 @@ void Blit2DVS(float4 pos : POSITION,
 
 float4 Blit2DPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return Tex2DSampleLevel(src_2d_tex,
+	return src_2d_tex.SampleLevel(
 #if LINEAR_SAMPLER
 		bilinear_sampler,
 #else
 		point_sampler,
 #endif
-		tc, src_level, 0);
+		tc, src_level);
 }
 
 float4 Blit2DArrayPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return Tex2DArraySampleLevel(src_2d_tex_array,
+	return src_2d_tex_array.SampleLevel(
 #if LINEAR_SAMPLER
 		bilinear_sampler,
 #else
 		point_sampler,
 #endif
-		float3(tc, src_array_index), src_level, 0);
+		float3(tc, src_array_index), src_level);
 }
 
 void Blit3DVS(float4 pos : POSITION,
@@ -72,13 +72,13 @@ void Blit3DVS(float4 pos : POSITION,
 
 float4 Blit3DPS(float3 tc : TEXCOORD0) : SV_Target
 {
-	return Tex3DSampleLevel(src_3d_tex,
+	return src_3d_tex.SampleLevel(
 #if LINEAR_SAMPLER
 		bilinear_sampler,
 #else
 		point_sampler,
 #endif
-		tc, src_level, 0);
+		tc, src_level);
 }
 
 void Blit2DToBuffVS(float pos : POSITION,
@@ -91,7 +91,7 @@ void Blit2DToBuffVS(float pos : POSITION,
 	xy.y = ipos / dst_width;
 	xy.x = ipos - xy.y * dst_width;
 	float2 tc = src_offset.xy + (xy + 0.5f) * src_scale.xy;
-	oColor = Tex2DSampleLevel(src_2d_tex, point_sampler, tc, src_level, 0);
+	oColor = src_2d_tex.SampleLevel(point_sampler, tc, src_level);
 }
 
 void Blit2DArrayToBuffVS(float pos : POSITION,
@@ -104,7 +104,7 @@ void Blit2DArrayToBuffVS(float pos : POSITION,
 	xy.y = ipos / dst_width;
 	xy.x = ipos - xy.y * dst_width;
 	float2 tc = src_offset.xy + (xy + 0.5f) * src_scale.xy;
-	oColor = Tex2DArraySampleLevel(src_2d_tex_array, point_sampler, float3(tc, src_array_index), src_level, 0);
+	oColor = src_2d_tex_array.SampleLevel(point_sampler, float3(tc, src_array_index), src_level);
 }
 
 void BlitBuffTo2DVS(float pos : POSITION,

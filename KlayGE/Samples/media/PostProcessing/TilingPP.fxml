@@ -36,7 +36,7 @@ float4 TilingPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	{
 		factor *= 2;
 	}
-	return Tex2DSampleLevel(src_tex, src_sampler, tex_coord0, 3, 0) * factor;
+	return src_tex.SampleLevel(src_sampler, tex_coord0, 3) * factor;
 }
 		]]>
 	</shader>

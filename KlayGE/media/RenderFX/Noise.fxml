@@ -23,7 +23,7 @@
 		<![CDATA[
 float perm2d(float2 xy)
 {
-	return Tex2DSampleLevel(grad3_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0).w * 255;
+	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).w * 255;
 }
 
 float perm(float x)
@@ -33,17 +33,17 @@ float perm(float x)
 
 float3 grad3_perm(float2 xy)
 {
-	return Tex2DSampleLevel(grad3_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0).xyz * 2 - 1;
+	return grad3_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0).xyz * 2 - 1;
 }
 
 float4 grad4_perm(float2 xy)
 {
-	return Tex2DSampleLevel(grad4_perm_tex, noise_point_sampler, (xy + 0.5f) / 256, 0, 0) * 2 - 1;
+	return grad4_perm_tex.SampleLevel(noise_point_sampler, (xy + 0.5f) / 256, 0) * 2 - 1;
 }
 
 float4 simplex(float x)
 {
-	return Tex2DSampleLevel(simplex_tex, noise_point_sampler, float2((x + 0.5f) / 64, 0.5f), 0, 0) * 255;
+	return simplex_tex.SampleLevel(noise_point_sampler, float2((x + 0.5f) / 64, 0.5f), 0) * 255;
 }
 
 float simplex_noise(float2 p)

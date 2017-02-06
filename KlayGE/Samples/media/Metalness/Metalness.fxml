@@ -17,7 +17,6 @@
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float3" name="eye_pos"/>
 		<parameter type="int2" name="diff_spec_mip"/>
-		<parameter type="float" name="mip_bias"/>
 		<parameter type="float3" name="albedo"/>
 		<parameter type="float" name="metalness"/>
 		<parameter type="float" name="glossiness"/>
@@ -36,8 +35,8 @@
 		<![CDATA[
 float3 PrefilteredDiffuseIBL(float3 c_diff, float3 normal)
 {
-	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, normal, diff_spec_mip.x, 0).r,
-		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, normal, diff_spec_mip.x, 0)).xyz;
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, normal, diff_spec_mip.x).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, normal, diff_spec_mip.x)).xyz;
 	return CalcEnvDiffuse(prefiltered_clr, c_diff);
 }
 
@@ -45,8 +44,8 @@ float3 PBFittingPrefilteredSpecularIBL(float3 c_spec, float glossiness, float3 n
 {
 	float mip = CalcPrefilteredEnvMip(glossiness, diff_spec_mip.y);
 	float3 r = CalcPrefilteredEnvVec(normal, view);
-	float3 prefiltered_clr = decode_hdr_yc(TexCubeSampleLevel(skybox_Ycube_tex, skybox_sampler, r, mip, mip_bias).r,
-		TexCubeSampleLevel(skybox_Ccube_tex, skybox_sampler, r, mip, mip_bias)).xyz;
+	float3 prefiltered_clr = decode_hdr_yc(skybox_Ycube_tex.SampleLevel(skybox_sampler, r, mip).r,
+		skybox_Ccube_tex.SampleLevel(skybox_sampler, r, mip)).xyz;
 	return CalcEnvSpecular(prefiltered_clr, c_spec, glossiness, normal, view);
 }
 

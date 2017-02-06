@@ -118,15 +118,15 @@ float4 RefractPS(float3 normal			: TEXCOORD0,
 	refract_rgb[2] = mul(float4(refract_rgb[2], 0), inv_view).xyz;
 	reflect_vec = mul(float4(reflect_vec, 0), inv_view).xyz;
 
-	float4 y = float4(TexCubeSampleLevel(skybox_Ycube_tex, skybox_YcubeMapSampler, refract_rgb[0], 0, 0).r,
-									TexCubeSampleLevel(skybox_Ycube_tex, skybox_YcubeMapSampler, refract_rgb[1], 0, 0).r,
-									TexCubeSampleLevel(skybox_Ycube_tex, skybox_YcubeMapSampler, refract_rgb[2], 0, 0).r,
-									TexCubeSampleLevel(skybox_Ycube_tex, skybox_YcubeMapSampler, reflect_vec, 0, 0).r);
+	float4 y = float4(skybox_Ycube_tex.SampleLevel(skybox_YcubeMapSampler, refract_rgb[0], 0).r,
+									skybox_Ycube_tex.SampleLevel(skybox_YcubeMapSampler, refract_rgb[1], 0).r,
+									skybox_Ycube_tex.SampleLevel(skybox_YcubeMapSampler, refract_rgb[2], 0).r,
+									skybox_Ycube_tex.SampleLevel(skybox_YcubeMapSampler, reflect_vec, 0).r);
 	y = exp2(y * 65536 / 2048 - 16);
-	float4 refracted_c = float4(get_xy_channel(TexCubeSampleLevel(skybox_Ccube_tex, skybox_CcubeMapSampler, refract_rgb[0], 0, 0)).y,
-									get_xy_channel(TexCubeSampleLevel(skybox_Ccube_tex, skybox_CcubeMapSampler, refract_rgb[1], 0, 0)).x,
-									get_xy_channel(TexCubeSampleLevel(skybox_Ccube_tex, skybox_CcubeMapSampler, refract_rgb[2], 0, 0)));
-	float2 reflected_c = get_xy_channel(TexCubeSampleLevel(skybox_Ccube_tex, skybox_CcubeMapSampler, reflect_vec, 0, 0));
+	float4 refracted_c = float4(get_xy_channel(skybox_Ccube_tex.SampleLevel(skybox_CcubeMapSampler, refract_rgb[0], 0)).y,
+									get_xy_channel(skybox_Ccube_tex.SampleLevel(skybox_CcubeMapSampler, refract_rgb[1], 0)).x,
+									get_xy_channel(skybox_Ccube_tex.SampleLevel(skybox_CcubeMapSampler, refract_rgb[2], 0)));
+	float2 reflected_c = get_xy_channel(skybox_Ccube_tex.SampleLevel(skybox_CcubeMapSampler, reflect_vec, 0));
 	refracted_c *= refracted_c;
 	reflected_c *= reflected_c;
 
