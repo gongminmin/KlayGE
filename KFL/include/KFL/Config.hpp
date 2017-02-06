@@ -119,7 +119,7 @@
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
-	#elif defined(_MSC_VER)
+	#elif defined(__c2__)
 		#if CLANG_VERSION >= 36
 			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
 		#else
