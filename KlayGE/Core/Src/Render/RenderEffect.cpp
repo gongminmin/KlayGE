@@ -5794,7 +5794,8 @@ namespace KlayGE
 			array_size = value->ArraySize();
 			mipmap = value->NumMipMaps();
 		}
-		return this->operator=(TextureSubresource(value, 0, array_size, 0, mipmap));
+		val_ = TextureSubresource(value, 0, array_size, 0, mipmap);
+		return *this;
 	}
 
 	RenderVariable& RenderVariableTexture::operator=(TextureSubresource const & value)
