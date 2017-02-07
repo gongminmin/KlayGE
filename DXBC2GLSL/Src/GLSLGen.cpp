@@ -229,12 +229,13 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 }
 
 void GLSLGen::FeedDXBC(std::shared_ptr<ShaderProgram> const & program,
-		bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+		bool has_gs, bool has_ps, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
 		GLSLVersion version, uint32_t glsl_rules)
 {
 	program_ = program;
 	shader_type_ = program_->version.type;
 	has_gs_ = has_gs;
+	has_ps_ = has_ps;
 	ds_partitioning_ = ds_partitioning;
 	ds_output_primitive_ = ds_output_primitive;
 	glsl_version_ = version;
@@ -702,7 +703,7 @@ void GLSLGen::ToDclInterShaderOutputRecords(std::ostream& out)
 			if (output_var)
 			{
 				int num_comps = 4;
-				if (ST_PS == shader_type_)
+				if (((ST_GS == shader_type_) && !has_ps_) || ((ST_DS == shader_type_) && !has_gs_ && !has_ps_) || (ST_PS == shader_type_))
 				{
 					num_comps = bitcount32(program_->params_out[i].mask);
 				}

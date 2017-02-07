@@ -454,6 +454,12 @@ namespace KlayGE
 
 		(*shader_func_names_)[type] = sd.func_name;
 
+		bool has_ps = false;
+		if (!effect.GetShaderDesc(shader_desc_ids[ST_PixelShader]).func_name.empty())
+		{
+			has_ps = true;
+		}
+
 		is_shader_validate_[type] = true;
 		switch (type)
 		{
@@ -614,7 +620,7 @@ namespace KlayGE
 							rules |= static_cast<uint32_t>(GSR_EXTTessellationShader);
 						}
 						dxbc2glsl.FeedDXBC(&code[0],
-							false, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
+							false, has_ps, static_cast<ShaderTessellatorPartitioning>(ds_partitioning_),
 							static_cast<ShaderTessellatorOutputPrimitive>(ds_output_primitive_),
 							gsv, rules);
 						(*glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());

@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	try
 	{
 		DXBC2GLSL::DXBC2GLSL dxbc2glsl;
-		dxbc2glsl.FeedDXBC(&data[0], true, STP_Fractional_Odd, STOP_Triangle_CW, GSV_430);
+		dxbc2glsl.FeedDXBC(&data[0], true, true, STP_Fractional_Odd, STOP_Triangle_CW, GSV_430);
 		std::string glsl = dxbc2glsl.GLSLString();
 		if (!screen_only)
 		{

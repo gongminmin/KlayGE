@@ -130,7 +130,7 @@ public:
 	static uint32_t DefaultRules(GLSLVersion version);
 
 	void FeedDXBC(std::shared_ptr<ShaderProgram> const & program,
-		bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+		bool has_gs, bool has_ps, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
 		GLSLVersion version, uint32_t glsl_rules);
 	void ToGLSL(std::ostream& out);
 	void ToHSControlPointPhase(std::ostream& out);
@@ -200,6 +200,7 @@ private:
 
 	ShaderType shader_type_;
 	bool has_gs_;
+	bool has_ps_;
 	ShaderTessellatorPartitioning ds_partitioning_;
 	ShaderTessellatorOutputPrimitive ds_output_primitive_;
 	std::vector<DclIndexRangeInfo> idx_range_info_;

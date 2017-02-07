@@ -619,11 +619,22 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 		<< "\n";
 	for (uint32_t i = 0; i < count; ++ i)
 	{
-		std::cout << "//"
+		out << "//"
 			<< std::setw(15) << signature[i].semantic_name
-			<< std::setw(6) << signature[i].semantic_index
-			<< std::setw(7) << static_cast<uint32_t>(signature[i].mask)
-			<< std::setw(9) << signature[i].register_index
+			<< std::setw(6) << signature[i].semantic_index;
+		out << std::setw(4);
+		for (uint32_t j = 0; j < 4; ++ j)
+		{
+			if (signature[i].mask & (1 << j))
+			{
+				out << "xyzw"[j];
+			}
+			else
+			{
+				out << " ";
+			}
+		}
+		out << std::setw(9) << signature[i].register_index
 			<< std::setw(15) << ShaderSystemValueName(static_cast<ShaderSystemValue>(signature[i].system_value_type))
 			<< std::setw(15) << ShaderRegisterComponentTypeName(signature[i].component_type);
 		uint32_t used;
@@ -635,7 +646,19 @@ void ASMGen::Disasm(std::ostream& out, std::vector<DXBCSignatureParamDesc> const
 		{
 			used = static_cast<uint32_t>(signature[i].read_write_mask);
 		}
-		std::cout << std::setw(10) << used << "\n";
+		out << std::setw(7);
+		for (uint32_t j = 0; j < 4; ++ j)
+		{
+			if (used & (1 << j))
+			{
+				out << "xyzw"[j];
+			}
+			else
+			{
+				out << " ";
+			}
+		}
+		out << "\n";
 	}
 	out << "//\n";
 }

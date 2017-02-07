@@ -52,10 +52,10 @@ namespace DXBC2GLSL
 		static uint32_t DefaultRules(GLSLVersion version);
 
 		void FeedDXBC(void const * dxbc_data,
-			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+			bool has_gs, bool has_ps, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
 			GLSLVersion version);
 		void FeedDXBC(void const * dxbc_data,
-			bool has_gs, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
+			bool has_gs, bool has_ps, ShaderTessellatorPartitioning ds_partitioning, ShaderTessellatorOutputPrimitive ds_output_primitive,
 			GLSLVersion version, uint32_t glsl_rules);
 
 		std::string const & GLSLString() const;
