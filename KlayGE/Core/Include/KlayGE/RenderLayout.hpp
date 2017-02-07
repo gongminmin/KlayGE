@@ -250,8 +250,6 @@ namespace KlayGE
 		void IndirectArgsOffset(uint32_t offset);
 		uint32_t IndirectArgsOffset() const;
 
-		void ExpandInstance(GraphicsBufferPtr& hint, uint32_t inst_no) const;
-
 	private:
 		template <typename tuple_type, int N>
 		struct Tuple2Vector

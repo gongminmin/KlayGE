@@ -732,58 +732,28 @@ namespace KlayGE
 		}
 		else
 		{
-			if (num_instances > 1)
+			if (rl.UseIndices())
 			{
-				if (rl.UseIndices())
+				uint32_t const num_indices = rl.NumIndices();
+				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					uint32_t const num_indices = rl.NumIndices();
-					for (uint32_t i = 0; i < num_passes; ++ i)
-					{
-						auto& pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-						pass.Bind(effect);
-						d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
-						pass.Unbind(effect);
-					}
-				}
-				else
-				{
-					uint32_t const num_vertices = rl.NumVertices();
-					for (uint32_t i = 0; i < num_passes; ++ i)
-					{
-						auto& pass = tech.Pass(i);
-
-						pass.Bind(effect);
-						d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
-						pass.Unbind(effect);
-					}
+					pass.Bind(effect);
+					d3d_imm_ctx_->DrawIndexedInstanced(num_indices, num_instances, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation());
+					pass.Unbind(effect);
 				}
 			}
 			else
 			{
-				if (rl.UseIndices())
+				uint32_t const num_vertices = rl.NumVertices();
+				for (uint32_t i = 0; i < num_passes; ++ i)
 				{
-					uint32_t const num_indices = rl.NumIndices();
-					for (uint32_t i = 0; i < num_passes; ++ i)
-					{
-						auto& pass = tech.Pass(i);
+					auto& pass = tech.Pass(i);
 
-						pass.Bind(effect);
-						d3d_imm_ctx_->DrawIndexed(num_indices, rl.StartIndexLocation(), rl.StartVertexLocation());
-						pass.Unbind(effect);
-					}
-				}
-				else
-				{
-					uint32_t const num_vertices = rl.NumVertices();
-					for (uint32_t i = 0; i < num_passes; ++ i)
-					{
-						auto& pass = tech.Pass(i);
-
-						pass.Bind(effect);
-						d3d_imm_ctx_->Draw(num_vertices, rl.StartVertexLocation());
-						pass.Unbind(effect);
-					}
+					pass.Bind(effect);
+					d3d_imm_ctx_->DrawInstanced(num_vertices, num_instances, rl.StartVertexLocation(), rl.StartInstanceLocation());
+					pass.Unbind(effect);
 				}
 			}
 		}
