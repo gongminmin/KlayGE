@@ -315,93 +315,76 @@ namespace KlayGE
 
 
 	OGLESSamplerStateObject::OGLESSamplerStateObject(SamplerStateDesc const & desc)
-		: SamplerStateObject(desc),
-			ogl_addr_mode_u_(OGLESMapping::Mapping(desc_.addr_mode_u)),
-			ogl_addr_mode_v_(OGLESMapping::Mapping(desc_.addr_mode_v)),
-			ogl_addr_mode_w_(OGLESMapping::Mapping(desc_.addr_mode_w))
+		: SamplerStateObject(desc)
 	{
+		GLenum ogl_min_filter;
+		GLenum ogl_mag_filter;
 		if (desc_.filter & TFOE_Min_Linear)
 		{
 			if (desc_.filter & TFOE_Mip_Linear)
 			{
-				ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+				ogl_min_filter = GL_LINEAR_MIPMAP_LINEAR;
 			}
 			else
 			{
-				ogl_min_filter_ = GL_LINEAR_MIPMAP_NEAREST;
+				ogl_min_filter = GL_LINEAR_MIPMAP_NEAREST;
 			}
 		}
 		else
 		{
 			if (desc_.filter & TFOE_Mip_Linear)
 			{
-				ogl_min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
+				ogl_min_filter = GL_NEAREST_MIPMAP_LINEAR;
 			}
 			else
 			{
-				ogl_min_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+				ogl_min_filter = GL_NEAREST_MIPMAP_NEAREST;
 			}
 		}
 		if (desc_.filter & TFOE_Mag_Linear)
 		{
-			ogl_mag_filter_ = GL_LINEAR;
+			ogl_mag_filter = GL_LINEAR;
 		}
 		else
 		{
-			ogl_mag_filter_ = GL_NEAREST;
+			ogl_mag_filter = GL_NEAREST;
 		}
 		if (desc_.filter & TFOE_Anisotropic)
 		{
-			ogl_mag_filter_ = GL_LINEAR;
-			ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			ogl_mag_filter = GL_LINEAR;
+			ogl_min_filter = GL_LINEAR_MIPMAP_LINEAR;
 		}
+
+		glGenSamplers(1, &sampler_);
+
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_S, OGLESMapping::Mapping(desc_.addr_mode_u));
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_T, OGLESMapping::Mapping(desc_.addr_mode_v));
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_R, OGLESMapping::Mapping(desc_.addr_mode_w));
+
+		glSamplerParameteri(sampler_, GL_TEXTURE_MIN_FILTER, ogl_min_filter);
+		glSamplerParameteri(sampler_, GL_TEXTURE_MAG_FILTER, ogl_mag_filter);
+		glSamplerParameterf(sampler_, GL_TEXTURE_MIN_LOD, desc_.min_lod);
+		glSamplerParameterf(sampler_, GL_TEXTURE_MAX_LOD, desc_.max_lod);
+		glSamplerParameteri(sampler_, GL_TEXTURE_COMPARE_MODE, (desc_.cmp_func != CF_AlwaysFail) ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE);
+		glSamplerParameteri(sampler_, GL_TEXTURE_COMPARE_FUNC, OGLESMapping::Mapping(desc_.cmp_func));
+
+		if (glloader_GLES_EXT_texture_lod_bias())
+		{
+			glSamplerParameterf(sampler_, GL_TEXTURE_LOD_BIAS_EXT, desc_.mip_map_lod_bias);
+		}
+	}
+
+	OGLESSamplerStateObject::~OGLESSamplerStateObject()
+	{
+		glDeleteSamplers(1, &sampler_);
 	}
 
 	void OGLESSamplerStateObject::Active(TexturePtr const & texture)
 	{
-		OGLESRenderEngine const & re = *checked_cast<OGLESRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		RenderDeviceCaps const & caps = re.DeviceCaps();
-
-		OGLESTexture& tex = *checked_pointer_cast<OGLESTexture>(texture);
-
-		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
-		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
-
-		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
-		GLenum min_filter = ogl_min_filter_;
-		if (!caps.full_npot_texture_support)
-		{
-			// Only POT texture with full mipmap chain supports mipmap filter for now.
-			uint32_t pot = 1UL << (texture->NumMipMaps() - 1);
-			if ((pot != texture->Width(0)) || (pot != texture->Height(0)))
-			{
-				switch (ogl_min_filter_)
-				{
-				case GL_NEAREST_MIPMAP_NEAREST:
-				case GL_NEAREST_MIPMAP_LINEAR:
-					min_filter = GL_NEAREST;
-					break;
-
-				case GL_LINEAR_MIPMAP_NEAREST:
-				case GL_LINEAR_MIPMAP_LINEAR:
-					min_filter = GL_LINEAR;
-					break;
-				}
-			}
-		}
-		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, min_filter);
-
+		auto tex = checked_cast<OGLESTexture*>(texture.get());
 		if (glloader_GLES_EXT_texture_filter_anisotropic())
 		{
-			if (desc_.filter & TFOE_Anisotropic)
-			{
-				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
-			}
-			else
-			{
-				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
-			}
+			tex->TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
 		}
 	}
 }

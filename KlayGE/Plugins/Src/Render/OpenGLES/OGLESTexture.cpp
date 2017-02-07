@@ -64,8 +64,6 @@ namespace KlayGE
 
 		glGenTextures(1, &texture_);
 		glBindTexture(target_type_, texture_);
-		glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
 	OGLESTexture::~OGLESTexture()

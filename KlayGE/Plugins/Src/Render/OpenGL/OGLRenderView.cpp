@@ -880,10 +880,6 @@ namespace KlayGE
 							   0, GL_RGBA32F_ARB,
 							   width_, height_, 0,
 							   GL_RGBA, GL_FLOAT, nullptr);
-					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					glTextureParameteriEXT(tex_2d_, GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 					copy_to_tex_ = 2;
 				}
@@ -925,10 +921,6 @@ namespace KlayGE
 					re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 					glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 						0, GL_RGBA, GL_FLOAT, nullptr);
-					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-					glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 					copy_to_tex_ = 2;
 				}
@@ -1223,10 +1215,6 @@ namespace KlayGE
 		re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 		glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, width_, height_,
 			0, GL_RGBA, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
 	OGLGraphicsBufferRenderView::~OGLGraphicsBufferRenderView()

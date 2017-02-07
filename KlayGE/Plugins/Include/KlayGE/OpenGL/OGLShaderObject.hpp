@@ -76,7 +76,6 @@ namespace KlayGE
 			int tex_sampler_bind_index;
 			std::function<void()> func;
 		};
-		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
@@ -101,11 +100,12 @@ namespace KlayGE
 		bool tfb_separate_attribs_;
 		uint32_t ds_partitioning_, ds_output_primitive_;
 
-		parameter_binds_t param_binds_;
+		std::vector<parameter_bind_t> param_binds_;
 
 		std::vector<TextureBind> textures_;
 		std::vector<GLuint> gl_bind_targets_;
 		std::vector<GLuint> gl_bind_textures_;
+		std::vector<GLuint> gl_bind_samplers_;
 		std::vector<GLuint> gl_bind_cbuffs_;
 
 		std::vector<std::tuple<std::string, RenderEffectParameter*, RenderEffectParameter*, uint32_t>> tex_sampler_binds_;

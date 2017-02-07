@@ -86,21 +86,15 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{
 				glCreateTextures(target_type_, 1, &texture_);
-				glTextureParameteri(texture_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTextureParameteri(texture_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			}
 			else if (glloader_GL_EXT_direct_state_access())
 			{
 				glGenTextures(1, &texture_);
-				glTextureParameteriEXT(texture_, target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTextureParameteriEXT(texture_, target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			}
 			else
 			{
 				glGenTextures(1, &texture_);
 				glBindTexture(target_type_, texture_);
-				glTexParameteri(target_type_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(target_type_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			}
 		}
 		else

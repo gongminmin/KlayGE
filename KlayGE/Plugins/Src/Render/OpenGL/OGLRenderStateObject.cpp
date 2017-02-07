@@ -436,84 +436,70 @@ namespace KlayGE
 
 
 	OGLSamplerStateObject::OGLSamplerStateObject(SamplerStateDesc const & desc)
-		: SamplerStateObject(desc),
-			ogl_addr_mode_u_(OGLMapping::Mapping(desc_.addr_mode_u)),
-			ogl_addr_mode_v_(OGLMapping::Mapping(desc_.addr_mode_v)),
-			ogl_addr_mode_w_(OGLMapping::Mapping(desc_.addr_mode_w))
+		: SamplerStateObject(desc)
 	{
+		GLenum ogl_min_filter;
+		GLenum ogl_mag_filter;
 		if (desc_.filter & TFOE_Min_Linear)
 		{
 			if (desc_.filter & TFOE_Mip_Linear)
 			{
-				ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+				ogl_min_filter = GL_LINEAR_MIPMAP_LINEAR;
 			}
 			else
 			{
-				ogl_min_filter_ = GL_LINEAR_MIPMAP_NEAREST;
+				ogl_min_filter = GL_LINEAR_MIPMAP_NEAREST;
 			}
 		}
 		else
 		{
 			if (desc_.filter & TFOE_Mip_Linear)
 			{
-				ogl_min_filter_ = GL_NEAREST_MIPMAP_LINEAR;
+				ogl_min_filter = GL_NEAREST_MIPMAP_LINEAR;
 			}
 			else
 			{
-				ogl_min_filter_ = GL_NEAREST_MIPMAP_NEAREST;
+				ogl_min_filter = GL_NEAREST_MIPMAP_NEAREST;
 			}
 		}
 		if (desc_.filter & TFOE_Mag_Linear)
 		{
-			ogl_mag_filter_ = GL_LINEAR;
+			ogl_mag_filter = GL_LINEAR;
 		}
 		else
 		{
-			ogl_mag_filter_ = GL_NEAREST;
+			ogl_mag_filter = GL_NEAREST;
 		}
 		if (desc_.filter & TFOE_Anisotropic)
 		{
-			ogl_mag_filter_ = GL_LINEAR;
-			ogl_min_filter_ = GL_LINEAR_MIPMAP_LINEAR;
+			ogl_mag_filter = GL_LINEAR;
+			ogl_min_filter = GL_LINEAR_MIPMAP_LINEAR;
 		}
-	}
 
-	void OGLSamplerStateObject::Active(TexturePtr const & texture)
-	{
-		OGLTexture& tex = *checked_cast<OGLTexture*>(texture.get());
+		glGenSamplers(1, &sampler_);
 
-		tex.TexParameteri(GL_TEXTURE_WRAP_S, ogl_addr_mode_u_);
-		tex.TexParameteri(GL_TEXTURE_WRAP_T, ogl_addr_mode_v_);
-		tex.TexParameteri(GL_TEXTURE_WRAP_R, ogl_addr_mode_w_);
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_S, OGLMapping::Mapping(desc_.addr_mode_u));
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_T, OGLMapping::Mapping(desc_.addr_mode_v));
+		glSamplerParameteri(sampler_, GL_TEXTURE_WRAP_R, OGLMapping::Mapping(desc_.addr_mode_w));
 
-		tex.TexParameterfv(GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
+		glSamplerParameterfv(sampler_, GL_TEXTURE_BORDER_COLOR, &desc_.border_clr.r());
 
-		tex.TexParameteri(GL_TEXTURE_MAG_FILTER, ogl_mag_filter_);
-		tex.TexParameteri(GL_TEXTURE_MIN_FILTER, ogl_min_filter_);
-
+		glSamplerParameteri(sampler_, GL_TEXTURE_MIN_FILTER, ogl_min_filter);
+		glSamplerParameteri(sampler_, GL_TEXTURE_MAG_FILTER, ogl_mag_filter);
 		if (glloader_GL_EXT_texture_filter_anisotropic())
 		{
-			if (desc_.filter & TFOE_Anisotropic)
-			{
-				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, desc_.max_anisotropy);
-			}
-			else
-			{
-				tex.TexParameteri(GL_TEXTURE_MAX_ANISOTROPY_EXT, 1);
-			}
+			glSamplerParameteri(sampler_, GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
 		}
-		tex.TexParameterf(GL_TEXTURE_MIN_LOD, desc_.min_lod);
-		tex.TexParameterf(GL_TEXTURE_MAX_LOD, desc_.max_lod);
-		if (desc_.cmp_func != CF_AlwaysFail)
-		{
-			tex.TexParameteri(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-		}
-		else
-		{
-			tex.TexParameteri(GL_TEXTURE_COMPARE_MODE, GL_NONE);
-		}
-		tex.TexParameteri(GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
+		glSamplerParameterf(sampler_, GL_TEXTURE_MIN_LOD, desc_.min_lod);
+		glSamplerParameterf(sampler_, GL_TEXTURE_MAX_LOD, desc_.max_lod);
+		glSamplerParameteri(sampler_, GL_TEXTURE_COMPARE_MODE, (desc_.cmp_func != CF_AlwaysFail) ? GL_COMPARE_REF_TO_TEXTURE : GL_NONE);
+		glSamplerParameteri(sampler_, GL_TEXTURE_COMPARE_FUNC, OGLMapping::Mapping(desc_.cmp_func));
 
-		tex.TexParameterf(GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
+		glSamplerParameterf(sampler_, GL_TEXTURE_LOD_BIAS, desc_.mip_map_lod_bias);
+	}
+
+	OGLSamplerStateObject::~OGLSamplerStateObject()
+	{
+		glDeleteSamplers(1, &sampler_);
 	}
 }

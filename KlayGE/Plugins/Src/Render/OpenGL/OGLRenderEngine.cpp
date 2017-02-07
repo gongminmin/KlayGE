@@ -334,6 +334,7 @@ namespace KlayGE
 
 		binded_targets_.clear();
 		binded_textures_.clear();
+		binded_samplers_.clear();
 		binded_buffers_.clear();
 
 		fb_srgb_cache_ = false;
@@ -400,6 +401,55 @@ namespace KlayGE
 
 			memcpy(&binded_targets_[first], &targets[first], count * sizeof(targets[0]));
 			memcpy(&binded_textures_[first], &textures[first], count * sizeof(textures[0]));
+		}
+	}
+
+	void OGLRenderEngine::BindSampler(GLuint index, GLuint sampler, bool force)
+	{
+		this->BindSamplers(index, 1, &sampler, force);
+	}
+
+	void OGLRenderEngine::BindSamplers(GLuint first, GLsizei count, GLuint const * samplers, bool force)
+	{
+		if (first + count > binded_samplers_.size())
+		{
+			binded_samplers_.resize(first + count, 0xFFFFFFFF);
+		}
+
+		bool dirty = force;
+		if (!dirty)
+		{
+			uint32_t start_dirty = first;
+			uint32_t end_dirty = first + count;
+			while ((start_dirty != end_dirty) && (binded_samplers_[start_dirty] == samplers[start_dirty]))
+			{
+				++ start_dirty;
+			}
+			while ((start_dirty != end_dirty) && (binded_samplers_[end_dirty - 1] == samplers[end_dirty - 1]))
+			{
+				-- end_dirty;
+			}
+
+			first = start_dirty;
+			count = end_dirty - start_dirty;
+			dirty = (count > 0);
+		}
+
+		if (dirty)
+		{
+			if (glloader_GL_VERSION_4_4() || glloader_GL_ARB_multi_bind())
+			{
+				glBindSamplers(first, count, &samplers[first]);
+			}
+			else
+			{
+				for (uint32_t i = first; i < first + count; ++ i)
+				{
+					glBindSampler(i, samplers[i]);
+				}
+			}
+
+			memcpy(&binded_samplers_[first], &samplers[first], count * sizeof(samplers[0]));
 		}
 	}
 

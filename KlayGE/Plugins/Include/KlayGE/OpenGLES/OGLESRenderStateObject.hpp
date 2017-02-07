@@ -55,15 +55,17 @@ namespace KlayGE
 	{
 	public:
 		explicit OGLESSamplerStateObject(SamplerStateDesc const & desc);
+		virtual ~OGLESSamplerStateObject();
 
 		void Active(TexturePtr const & texture);
 
+		GLuint GLSampler() const
+		{
+			return sampler_;
+		}
+
 	private:
-		GLenum ogl_addr_mode_u_;
-		GLenum ogl_addr_mode_v_;
-		GLenum ogl_addr_mode_w_;
-		GLenum ogl_min_filter_;
-		GLenum ogl_mag_filter_;
+		GLuint sampler_;
 	};
 }
 

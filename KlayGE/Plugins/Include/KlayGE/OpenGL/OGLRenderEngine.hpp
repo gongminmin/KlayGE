@@ -77,6 +77,8 @@ namespace KlayGE
 		void ActiveTexture(GLenum tex_unit);
 		void BindTexture(GLuint index, GLuint target, GLuint texture, bool force = false);
 		void BindTextures(GLuint first, GLsizei count, GLuint const * targets, GLuint const * textures, bool force = false);
+		void BindSampler(GLuint index, GLuint sampler, bool force = false);
+		void BindSamplers(GLuint first, GLsizei count, GLuint const * samplers, bool force = false);
 		void BindBuffer(GLenum target, GLuint buffer, bool force = false);
 		void BindBuffersBase(GLenum target, GLuint first, GLsizei count, GLuint const * buffers, bool force = false);
 		void DeleteBuffers(GLsizei n, GLuint const * buffers);
@@ -199,6 +201,7 @@ namespace KlayGE
 		GLenum active_tex_unit_;
 		std::vector<GLuint> binded_targets_;
 		std::vector<GLuint> binded_textures_;
+		std::vector<GLuint> binded_samplers_;
 		std::map<GLenum, GLuint> binded_buffers_;
 		std::map<GLenum, std::vector<GLuint>> binded_buffers_with_binding_points_;
 
