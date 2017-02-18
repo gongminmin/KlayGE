@@ -154,9 +154,9 @@ class build_info:
 						project_type = "vs2017"
 						compiler = "vc141"
 					else:
-						editions = ("Community", "Professional", "Enterprise")
-						for edition in editions:
-							if os.path.exists(program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\VCVARSALL.BAT" % edition):
+						skus = ("Community", "Professional", "Enterprise")
+						for sku in skus:
+							if os.path.exists(program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\VCVARSALL.BAT" % sku):
 								project_type = "vs2017"
 								compiler = "vc141"
 								break
@@ -206,10 +206,10 @@ class build_info:
 					compiler_root = env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\"
 					vcvarsall_path = "VCVARSALL.BAT"
 				else:
-					editions = ("Community", "Professional", "Enterprise")
+					skus = ("Community", "Professional", "Enterprise")
 					found = False
-					for edition in editions:
-						try_folder = program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\" % edition
+					for sku in skus:
+						try_folder = program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\" % sku
 						try_vcvarsall = "VCVARSALL.BAT"
 						if os.path.exists(try_folder + try_vcvarsall):
 							compiler_root = try_folder
@@ -231,17 +231,35 @@ class build_info:
 					else:
 						log_error("Can't find the compiler.\n")
 			elif "clangc2" == compiler:
-				if "VS140COMNTOOLS" in env:
-					compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"
-					vcvarsall_path = "..\\..\\..\\VCVARSALL.BAT"
+				found = False
+				if "VS150COMNTOOLS" in env:
+					ret_list = self.find_vs2017_clangc2(env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\")
+					if ret_list[0]:
+						compiler_root = ret_list[1]
+						vcvarsall_path = ret_list[2]
+						found = True
 				else:
-					try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\ClangC2\\bin\\x86\\"
-					try_vcvarsall = "..\\..\\..\\VCVARSALL.BAT"
-					if os.path.exists(try_folder + try_vcvarsall):
-						compiler_root = try_folder
-						vcvarsall_path = try_vcvarsall
+					skus = ("Community", "Professional", "Enterprise")
+					for sku in skus:
+						try_folder = program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\" % sku
+						ret_list = self.find_vs2017_clangc2(try_folder)
+						if ret_list[0]:
+							compiler_root = ret_list[1]
+							vcvarsall_path = ret_list[2]
+							found = True
+							break
+				if (not found):
+					if "VS140COMNTOOLS" in env:
+						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"
+						vcvarsall_path = "..\\..\\..\\VCVARSALL.BAT"
 					else:
-						log_error("Can't find the compiler.\n")
+						try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\ClangC2\\bin\\x86\\"
+						try_vcvarsall = "..\\..\\..\\VCVARSALL.BAT"
+						if os.path.exists(try_folder + try_vcvarsall):
+							compiler_root = try_folder
+							vcvarsall_path = try_vcvarsall
+						else:
+							log_error("Can't find the compiler.\n")
 			elif "clang" == compiler:
 				clang_loc = subprocess.check_output("where clang++").decode()
 				clang_loc = clang_loc.split("\r\n")[0]
@@ -401,6 +419,19 @@ class build_info:
 				clang_ver_components = clang_ver_tokens[i + 1].split(".")
 				break
 		return int(clang_ver_components[0] + clang_ver_components[1])
+
+	def find_vs2017_clangc2(self, folder):
+		found = False
+		compiler_root = ""
+		vcvarsall_path = ""
+		if os.path.exists(folder + "Microsoft.ClangC2Version.default.txt"):
+			version_file = open(folder + "Microsoft.ClangC2Version.default.txt")
+			version = version_file.read()
+			compiler_root = "%s\\..\\..\\Tools\\ClangC2\\%s\\bin\\HostX86\\" % (folder, version)
+			vcvarsall_path = "..\\..\\..\\..\\..\\Auxiliary\\Build\\VCVARSALL.BAT"
+			found = True
+			version_file.close()
+		return (found, compiler_root, vcvarsall_path)
 
 class batch_command:
 	def __init__(self, host_platform):
