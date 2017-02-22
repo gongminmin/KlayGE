@@ -145,7 +145,8 @@ def build_external_libs(build_info):
 
 		if build_info.is_dev_platform:
 			build_freetype(build_info, compiler_info)			
-			build_UniversalDXSDK(build_info, compiler_info)
+			if compiler_info.arch != "arm":
+				build_UniversalDXSDK(build_info, compiler_info)
 
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				build_OpenALSDK(build_info, compiler_info)
