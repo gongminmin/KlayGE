@@ -314,6 +314,8 @@ class build_info:
 					gen_suffix = " ARM"
 				elif "x64" == arch:
 					gen_suffix = " Win64"
+				elif "arm64" == arch:
+					gen_suffix = " ARM64"
 				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
@@ -529,6 +531,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			elif "arm" == compiler_info.arch:
 				vc_option = "x86_arm"
 				vc_arch = "ARM"
+			elif "arm64" == compiler_info.arch:
+				vc_option = "x86_arm64"
+				vc_arch = "ARM64"
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level

@@ -302,11 +302,14 @@
 	#elif defined(_M_IX86)
 		#define KLAYGE_CPU_X86
 		#define KLAYGE_COMPILER_TARGET x86
+	#elif defined(_M_ARM64)
+		#define KLAYGE_CPU_ARM64
+		#define KLAYGE_COMPILER_TARGET arm64
 	#elif defined(_M_ARM)
 		#define KLAYGE_CPU_ARM
 		#define KLAYGE_COMPILER_TARGET arm
 	#else
-		#error "Unknown CPU type. In vc, x86, x64 and arm are supported."
+		#error "Unknown CPU type. In vc, x86, x64, arm, and arm64 are supported."
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#if defined(__x86_64__)
