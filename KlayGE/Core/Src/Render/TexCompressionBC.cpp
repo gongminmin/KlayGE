@@ -44,6 +44,7 @@
 #endif
 
 #include <KlayGE/TexCompressionBC.hpp>
+#include "../Base/TableGen/Tables.hpp"
 
 namespace
 {
@@ -883,13 +884,7 @@ namespace
 
 namespace KlayGE
 {
-	uint8_t TexCompressionBC1::expand5_[32];
-	uint8_t TexCompressionBC1::expand6_[64];
-	uint8_t TexCompressionBC1::o_match5_[256][2];
-	uint8_t TexCompressionBC1::o_match6_[256][2];
-	uint8_t TexCompressionBC1::quant_rb_tab_[256 + 16];
-	uint8_t TexCompressionBC1::quant_g_tab_[256 + 16];
-	bool TexCompressionBC1::lut_inited_ = false;
+	using namespace TexCompressionLUT;
 
 	TexCompressionBC1::TexCompressionBC1()
 	{
@@ -897,35 +892,6 @@ namespace KlayGE
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC1) * 4;
 		decoded_fmt_ = EF_ARGB8;
-
-		if (!lut_inited_)
-		{
-			std::lock_guard<std::mutex> lock(singleton_mutex);
-			if (!lut_inited_)
-			{
-				for (int i = 0; i < 32; ++ i)
-				{
-					expand5_[i] = Extend5To8Bits(i);
-				}
-
-				for (int i = 0; i < 64; ++ i)
-				{
-					expand6_[i] = Extend6To8Bits(i);
-				}
-
-				for (int i = 0; i < 256 + 16; ++ i)
-				{
-					int v = MathLib::clamp(i - 8, 0, 255);
-					quant_rb_tab_[i] = expand5_[Mul8Bit(v, 31)];
-					quant_g_tab_[i] = expand6_[Mul8Bit(v, 63)];
-				}
-
-				this->PrepareOptTable(&o_match5_[0][0], expand5_, 32);
-				this->PrepareOptTable(&o_match6_[0][0], expand6_, 64);
-
-				lut_inited_ = true;
-			}
-		}
 	}
 
 	void TexCompressionBC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -997,34 +963,10 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionBC1::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const
-	{
-		for (int i = 0; i < 256; ++ i)
-		{
-			int best_err = 256;
-
-			for (int min = 0; min < size; ++ min)
-			{
-				for (int max = 0; max < size; ++ max)
-				{
-					int min_e = expand[min];
-					int max_e = expand[max];
-					int err = abs(max_e + Mul8Bit(min_e - max_e, 0x55) - i);
-					if (err < best_err)
-					{
-						table[i * 2 + 0] = static_cast<uint8_t>(max);
-						table[i * 2 + 1] = static_cast<uint8_t>(min);
-						best_err = err;
-					}
-				}
-			}
-		}
-	}
-
 	ARGBColor32 TexCompressionBC1::RGB565To888(uint16_t rgb) const
 	{
-		return ARGBColor32(255, expand5_[(rgb >> 11) & 0x1F], expand6_[(rgb >> 5) & 0x3F],
-			expand5_[(rgb >> 0) & 0x1F]);
+		return ARGBColor32(255, EXPAND5[(rgb >> 11) & 0x1F], EXPAND6[(rgb >> 5) & 0x3F],
+			EXPAND5[(rgb >> 0) & 0x1F]);
 	}
 
 	uint16_t TexCompressionBC1::RGB888To565(ARGBColor32 const & rgb) const
@@ -1391,8 +1333,8 @@ namespace KlayGE
 				int const b = argb[0].b();
 
 				mask = 0xAAAAAAAA;
-				max16 = (o_match5_[r][0] << 11) | (o_match6_[g][0] << 5) | o_match5_[b][0];
-				min16 = (o_match5_[r][1] << 11) | (o_match6_[g][1] << 5) | o_match5_[b][1];
+				max16 = (O_MATCH5[r][0] << 11) | (O_MATCH6[g][0] << 5) | O_MATCH5[b][0];
+				min16 = (O_MATCH5[r][1] << 11) | (O_MATCH6[g][1] << 5) | O_MATCH5[b][1];
 			}
 		}
 
@@ -2247,12 +2189,6 @@ namespace KlayGE
 		{ 2, 6, 4, 0, 0, 2, 0, ARGBColor32(5, 5, 5, 5), ARGBColor32(6, 6, 6, 6), PBT_Unique }
 	};
 
-	uint8_t TexCompressionBC7::expand6_[64];
-	uint8_t TexCompressionBC7::expand7_[128];
-	uint8_t TexCompressionBC7::o_match6_[256][2];
-	uint8_t TexCompressionBC7::o_match7_[256][2];
-	bool TexCompressionBC7::lut_inited_ = false;
-
 	TexCompressionBC7::TexCompressionBC7()
 		: index_mode_(0)
 	{
@@ -2260,27 +2196,6 @@ namespace KlayGE
 		block_depth_ = 1;
 		block_bytes_ = NumFormatBytes(EF_BC7) * 4;
 		decoded_fmt_ = EF_ARGB8;
-
-		if (!lut_inited_)
-		{
-			std::lock_guard<std::mutex> lock(singleton_mutex);
-			if (!lut_inited_)
-			{
-				for (int i = 0; i < 64; ++ i)
-				{
-					expand6_[i] = Extend6To8Bits(i);
-				}
-				for (int i = 0; i < 128; ++ i)
-				{
-					expand7_[i] = Extend7To8Bits(i);
-				}
-
-				this->PrepareOptTable(&o_match6_[0][0], expand6_, 64);
-				this->PrepareOptTable2(&o_match7_[0][0], expand7_, 128);
-
-				lut_inited_ = true;
-			}
-		}
 	}
 
 	void TexCompressionBC7::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2540,53 +2455,6 @@ namespace KlayGE
 		}
 	}
 
-	void TexCompressionBC7::PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const
-	{
-		for (int i = 0; i < 256; ++ i)
-		{
-			int best_err = 256;
-
-			for (int min = 0; min < size; ++ min)
-			{
-				for (int max = 0; max < size; ++ max)
-				{
-					int min_e = expand[min];
-					int max_e = expand[max];
-					int err = abs(max_e + Mul8Bit(min_e - max_e, 0x55) - i);
-					if (err < best_err)
-					{
-						table[i * 2 + 0] = static_cast<uint8_t>(max);
-						table[i * 2 + 1] = static_cast<uint8_t>(min);
-						best_err = err;
-					}
-				}
-			}
-		}
-	}
-
-	void TexCompressionBC7::PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const
-	{
-		for (int i = 0; i < 256; ++ i)
-		{
-			int best_err = 256;
-
-			for (int min = 0; min < size; ++ min)
-			{
-				for (int max = 0; max < size; ++ max)
-				{
-					int combo = (43 * expand[min] + 21 * expand[max] + 32) >> 6;
-					int err = abs(i - combo);
-					if (err < best_err)
-					{
-						table[i * 2 + 0] = static_cast<uint8_t>(min);
-						table[i * 2 + 1] = static_cast<uint8_t>(max);
-						best_err = err;
-					}
-				}
-			}
-		}
-	}
-
 	void TexCompressionBC7::PackBC7UniformBlock(void* output, ARGBColor32 const & pixel)
 	{
 		size_t start_bit = 0;
@@ -2598,14 +2466,14 @@ namespace KlayGE
 		uint8_t const b = pixel.b();
 		uint8_t const a = pixel.a();
 
-		WriteBits(output, start_bit, 7, o_match7_[r][0]);
-		WriteBits(output, start_bit, 7, o_match7_[r][1]);
+		WriteBits(output, start_bit, 7, O_MATCH7[r][0]);
+		WriteBits(output, start_bit, 7, O_MATCH7[r][1]);
 
-		WriteBits(output, start_bit, 7, o_match7_[g][0]);
-		WriteBits(output, start_bit, 7, o_match7_[g][1]);
+		WriteBits(output, start_bit, 7, O_MATCH7[g][0]);
+		WriteBits(output, start_bit, 7, O_MATCH7[g][1]);
 
-		WriteBits(output, start_bit, 7, o_match7_[b][0]);
-		WriteBits(output, start_bit, 7, o_match7_[b][1]);
+		WriteBits(output, start_bit, 7, O_MATCH7[b][0]);
+		WriteBits(output, start_bit, 7, O_MATCH7[b][1]);
 
 		WriteBits(output, start_bit, 8, a);
 		WriteBits(output, start_bit, 8, a);
@@ -3470,8 +3338,8 @@ namespace KlayGE
 				BOOST_ASSERT(4 == mode);
 
 				// Mode 4 can be treated like the 6 channel of DXT1 compression.
-				uint32_t a1i = Extend6To8Bits(o_match6_[a_be][1]);
-				uint32_t a2i = Extend6To8Bits(o_match6_[a_be][0]);
+				uint32_t a1i = Extend6To8Bits(O_MATCH6[a_be][1]);
+				uint32_t a2i = Extend6To8Bits(O_MATCH6[a_be][0]);
 
 				if (1 == index_mode_)
 				{

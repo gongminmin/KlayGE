@@ -86,21 +86,11 @@ namespace KlayGE
 		void EncodeBC1Internal(BC1Block& bc1, ARGBColor32 const * argb, bool alpha, TexCompressionMethod method) const;
 
 	private:
-		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
 		ARGBColor32 RGB565To888(uint16_t rgb) const;
 		uint16_t RGB888To565(ARGBColor32 const & rgb) const;
 		uint32_t MatchColorsBlock(ARGBColor32 const * argb, ARGBColor32 const & min_clr, ARGBColor32 const & max_clr, bool alpha) const;
 		void OptimizeColorsBlock(ARGBColor32 const * argb, ARGBColor32& min_clr, ARGBColor32& max_clr, TexCompressionMethod method) const;
 		bool RefineBlock(ARGBColor32 const * argb, ARGBColor32& min_clr, ARGBColor32& max_clr, uint32_t mask) const;
-
-	private:
-		static uint8_t expand5_[32];
-		static uint8_t expand6_[64];
-		static uint8_t o_match5_[256][2];
-		static uint8_t o_match6_[256][2];
-		static uint8_t quant_rb_tab_[256 + 16];
-		static uint8_t quant_g_tab_[256 + 16];
-		static bool lut_inited_;
 	};
 
 	class KLAYGE_CORE_API TexCompressionBC2 : public TexCompression
@@ -282,8 +272,6 @@ namespace KlayGE
 		virtual void DecodeBlock(void* output, void const * input) override;
 
 	private:
-		void PrepareOptTable(uint8_t* table, uint8_t const * expand, int size) const;
-		void PrepareOptTable2(uint8_t* table, uint8_t const * expand, int size) const;
 		void PackBC7UniformBlock(void* output, ARGBColor32 const & pixel);
 		void PackBC7Block(int mode, CompressParams& params, void* output);
 		int RotationMode(ModeInfo const & mode_info) const;
@@ -322,12 +310,6 @@ namespace KlayGE
 		int index_mode_;
 
 		static ModeInfo const mode_info_[];
-
-		static uint8_t expand6_[64];
-		static uint8_t expand7_[128];
-		static uint8_t o_match6_[256][2];
-		static uint8_t o_match7_[256][2];
-		static bool lut_inited_;
 	};
 
 	KLAYGE_CORE_API void BC4ToBC1G(BC1Block& bc1, BC4Block const & bc4);

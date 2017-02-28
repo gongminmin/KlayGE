@@ -1,4 +1,4 @@
-# Projects
+ADD_SUBDIRECTORY(Core/TableGen)
 ADD_SUBDIRECTORY(Core)
 
 ADD_SUBDIRECTORY(Plugins/Scene/OCTree)

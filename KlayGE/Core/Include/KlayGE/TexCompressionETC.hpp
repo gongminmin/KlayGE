@@ -184,10 +184,6 @@ namespace KlayGE
 		bool EvaluateSolutionFast(ETC1SolutionCoordinates const & coords, PotentialSolution& trial_solution, PotentialSolution& best_solution);
 
 	private:
-		static uint8_t quant_5_tab_[256 + 16];
-		static uint16_t etc1_inverse_lookup_[2 * 8 * 4][256];
-		static bool lut_inited_;
-
 		Params const * params_;
 		Results* result_;
 
