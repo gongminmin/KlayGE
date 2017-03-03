@@ -235,7 +235,7 @@ namespace KlayGE
 			float2(+1, -1)
 		};
 		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-		quad_layout_->BindVertexStream(quad_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		quad_layout_->BindVertexStream(quad_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 		tex_fb_ = rf.MakeFrameBuffer();
 
@@ -315,7 +315,7 @@ namespace KlayGE
 		pstride = 1;
 		*(effect_->ParameterByName("ostride")) = ostride;
 		*(effect_->ParameterByName("pstride")) = pstride;
-		
+
 		istride /= 8;
 		istride3 /= 8;
 		phase_base *= 8.0f;

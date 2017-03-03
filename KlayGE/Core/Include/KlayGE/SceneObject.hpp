@@ -74,7 +74,7 @@ namespace KlayGE
 		bool Visible() const;
 		void Visible(bool vis);
 
-		vertex_elements_type const & InstanceFormat() const;
+		std::vector<VertexElement> const & InstanceFormat() const;
 		virtual void const * InstanceData() const;
 
 		// For select mode
@@ -100,7 +100,7 @@ namespace KlayGE
 
 		RenderablePtr renderable_;
 		bool renderable_hw_res_ready_;
-		vertex_elements_type instance_format_;
+		std::vector<VertexElement> instance_format_;
 
 		float4x4 model_;
 		float4x4 abs_model_;

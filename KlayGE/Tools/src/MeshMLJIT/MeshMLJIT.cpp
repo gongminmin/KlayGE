@@ -481,7 +481,7 @@ namespace
 	}
 
 	void CompileMeshesVerticesChunk(XMLNodePtr const & vertices_chunk,
-		AABBox& pos_bb, AABBox& tc_bb, std::vector<vertex_element>& vertex_elements,
+		AABBox& pos_bb, AABBox& tc_bb, std::vector<VertexElement>& vertex_elements,
 		std::vector<int16_t>& positions, std::vector<uint32_t>& normals,
 		std::vector<uint32_t>& tangent_quats, 
 		std::vector<uint32_t>& diffuses, std::vector<uint32_t>& speculars,
@@ -839,7 +839,7 @@ namespace
 		bool recompute_tangent_quat = false;
 
 		{
-			vertex_element ve;
+			VertexElement ve;
 
 			{
 				ve.usage = VEU_Position;
@@ -1121,7 +1121,7 @@ namespace
 		}
 	}
 
-	void AppendMeshVertices(std::vector<vertex_element> const & ves,
+	void AppendMeshVertices(std::vector<VertexElement> const & ves,
 		std::vector<int16_t> const & positions, std::vector<uint32_t> const & normals,
 		std::vector<uint32_t> const & tangent_quats, 
 		std::vector<uint32_t> const & diffuses, std::vector<uint32_t> const & speculars,
@@ -1129,7 +1129,7 @@ namespace
 		std::vector<uint32_t> const & bone_indices, std::vector<uint32_t> const & bone_weights,
 		std::vector<uint32_t>& mesh_num_vertices,
 		std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<vertex_element>& merged_ves,
+		std::vector<VertexElement>& merged_ves,
 		std::vector<std::vector<uint8_t>>& merged_vertices)
 	{
 		uint32_t num_vertices = static_cast<uint32_t>(positions.size() / 4);
@@ -1333,7 +1333,7 @@ namespace
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs, 
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_start_indices,
-		std::vector<vertex_element>& merged_ves, std::vector<std::vector<uint8_t>>& merged_vertices,
+		std::vector<VertexElement>& merged_ves, std::vector<std::vector<uint8_t>>& merged_vertices,
 		std::vector<uint8_t>& merged_indices, char& is_index_16_bit)
 	{
 		mesh_names.clear();
@@ -1348,7 +1348,7 @@ namespace
 		merged_indices.clear();
 		is_index_16_bit = true;
 
-		std::vector<vertex_element> ves;
+		std::vector<VertexElement> ves;
 		std::vector<int16_t> positions;
 		std::vector<uint32_t> normals;
 		std::vector<uint32_t> tangent_quats;
@@ -1801,7 +1801,7 @@ namespace
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_start_indices,
-		std::vector<vertex_element> const & merged_ves,
+		std::vector<VertexElement> const & merged_ves,
 		std::vector<std::vector<uint8_t>> const & merged_vertices, std::vector<uint8_t> const & merged_indices,
 		char is_index_16_bit, std::ostream& os)
 	{
@@ -1809,7 +1809,7 @@ namespace
 		os.write(reinterpret_cast<char*>(&num_merged_ves), sizeof(num_merged_ves));
 		for (size_t i = 0; i < merged_ves.size(); ++ i)
 		{
-			vertex_element ve = merged_ves[i];
+			VertexElement ve = merged_ves[i];
 			ve.usage = Native2LE(ve.usage);
 			ve.format = Native2LE(ve.format);
 			os.write(reinterpret_cast<char*>(&ve), sizeof(ve));
@@ -2174,7 +2174,7 @@ namespace
 		std::vector<uint32_t> mesh_base_vertices;
 		std::vector<uint32_t> mesh_num_indices;
 		std::vector<uint32_t> mesh_start_indices;
-		std::vector<vertex_element> merged_ves;
+		std::vector<VertexElement> merged_ves;
 		std::vector<std::vector<uint8_t>> merged_vertices;
 		std::vector<uint8_t> merged_indices;
 		char is_index_16_bit = true;

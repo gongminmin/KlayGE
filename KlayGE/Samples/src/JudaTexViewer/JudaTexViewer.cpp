@@ -72,7 +72,7 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 			rl_->BindIndexStream(ib, EF_R16UI);
@@ -81,7 +81,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rl_->BindVertexStream(pos_vb,
-				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
+				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
 				RenderLayout::ST_Instance);
 		}
 
@@ -172,7 +172,7 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_LineStrip);
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 			rl_->BindIndexStream(ib, EF_R16UI);
@@ -181,7 +181,7 @@ namespace
 		void SetPosBuffer(GraphicsBufferPtr const & pos_vb)
 		{
 			rl_->BindVertexStream(pos_vb,
-				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F), vertex_element(VEU_Diffuse, 0, EF_ABGR8)),
+				{ VertexElement(VEU_TextureCoord, 0, EF_GR32F), VertexElement(VEU_Diffuse, 0, EF_ABGR8) },
 				RenderLayout::ST_Instance);
 		}
 

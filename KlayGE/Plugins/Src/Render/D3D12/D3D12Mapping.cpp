@@ -597,14 +597,15 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Mapping::Mapping(std::vector<D3D12_INPUT_ELEMENT_DESC>& elements, size_t stream, vertex_elements_type const & vet, RenderLayout::stream_type type, uint32_t freq)
+	void D3D12Mapping::Mapping(std::vector<D3D12_INPUT_ELEMENT_DESC>& elements, size_t stream, ArrayRef<VertexElement> vet,
+		RenderLayout::stream_type type, uint32_t freq)
 	{
 		elements.resize(vet.size());
 
 		uint16_t elem_offset = 0;
 		for (uint32_t i = 0; i < elements.size(); ++i)
 		{
-			vertex_element const & vs_elem = vet[i];
+			VertexElement const & vs_elem = vet[i];
 
 			D3D12_INPUT_ELEMENT_DESC& element = elements[i];
 			element.SemanticIndex = vs_elem.usage_index;

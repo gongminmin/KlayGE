@@ -62,7 +62,7 @@ namespace
 			struct ModelData
 			{
 				std::vector<RenderMaterialPtr> mtls;
-				std::vector<vertex_element> merged_ves;
+				std::vector<VertexElement> merged_ves;
 				char all_is_index_16_bit;
 				std::vector<std::vector<uint8_t>> merged_buff;
 				std::vector<uint8_t> merged_indices;
@@ -584,16 +584,16 @@ namespace KlayGE
 		tc_aabb_ = aabb;
 	}
 
-	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint)
+	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, size, buf);
 		this->AddVertexStream(vb, ve);
 	}
 
-	void StaticMesh::AddVertexStream(GraphicsBufferPtr const & buffer, vertex_element const & ve)
+	void StaticMesh::AddVertexStream(GraphicsBufferPtr const & buffer, VertexElement const & ve)
 	{
-		rl_->BindVertexStream(buffer, std::make_tuple(ve));
+		rl_->BindVertexStream(buffer, ve);
 	}
 
 	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)
@@ -988,7 +988,7 @@ namespace KlayGE
 	}
 
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
-		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
+		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
@@ -1433,7 +1433,7 @@ namespace KlayGE
 	}
 
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
-		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 
+		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
@@ -1770,7 +1770,7 @@ namespace KlayGE
 			}
 		}
 
-		std::vector<vertex_element> merged_ves;
+		std::vector<VertexElement> merged_ves;
 		std::vector<std::vector<uint8_t>> merged_buffs;
 		char all_is_index_16_bit = false;
 		std::vector<uint8_t> merged_indices;

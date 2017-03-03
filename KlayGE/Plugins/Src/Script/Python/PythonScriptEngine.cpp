@@ -435,7 +435,7 @@ namespace KlayGE
 		return MakePyObjectPtr(p);
 	}
 
-	std::any PythonScriptModule::Call(std::string const & func_name, const AnyDataListType& args)
+	std::any PythonScriptModule::Call(std::string const & func_name, ArrayRef<std::any> args)
 	{
 		PyObjectPtr py_args = MakePyObjectPtr(PyTuple_New(args.size()));
 		for (size_t i = 0; i < args.size(); ++ i)

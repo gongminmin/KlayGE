@@ -101,7 +101,7 @@ namespace KlayGE
 		~PythonScriptModule();
 
 		virtual std::any Value(std::string const & name);
-		virtual std::any Call(std::string const & func_name, const AnyDataListType& args);
+		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args);
 		virtual std::any RunString(std::string const & script);
 
 	private:

@@ -62,8 +62,7 @@ namespace KlayGE
 			};
 
 			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
-				static_cast<uint32_t>(sizeof(pos)), &pos[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				static_cast<uint32_t>(sizeof(pos)), &pos[0]), VertexElement(VEU_Position, 0, EF_BGR32F));
 		}
 
 		gbuffer_to_depth_derivate_pp_ = SyncLoadPostProcess("MultiRes.ppml", "GBuffer2DepthDerivate");

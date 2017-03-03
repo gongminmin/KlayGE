@@ -105,9 +105,8 @@ namespace KlayGE
 			tb_vb_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * 4 * sizeof(UIManager::VertexFormat)), TransientBuffer::BF_Vertex);
 			tb_ib_ = MakeUniquePtr<TransientBuffer>(static_cast<uint32_t>(INIT_NUM_QUAD * INDEX_PER_QUAD * sizeof(uint16_t)), TransientBuffer::BF_Index);
 
-			rl_->BindVertexStream(tb_vb_->GetBuffer(), std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F),
-												vertex_element(VEU_Diffuse, 0, EF_ABGR32F),
-												vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+			rl_->BindVertexStream(tb_vb_->GetBuffer(), { VertexElement(VEU_Position, 0, EF_BGR32F),
+				VertexElement(VEU_Diffuse, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 0, EF_GR32F) });
 			rl_->BindIndexStream(tb_ib_->GetBuffer(), EF_R16UI);
 
 			effect_ = effect;

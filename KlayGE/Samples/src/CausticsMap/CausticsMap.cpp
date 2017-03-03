@@ -453,7 +453,7 @@ namespace
 
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
-				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+				rl_->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 				single_caustics_pass_ = effect_->TechniqueByName("GenSingleFaceCausticsMapWithGS");
 				BOOST_ASSERT(single_caustics_pass_->Validate());
@@ -466,7 +466,7 @@ namespace
 
 				GraphicsBufferPtr point_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					static_cast<uint32_t>(xys.size() * sizeof(xys[0])), &xys[0]);
-				rl_->BindVertexStream(point_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)), RenderLayout::ST_Instance, 1);
+				rl_->BindVertexStream(point_vb, VertexElement(VEU_Position, 0, EF_GR32F), RenderLayout::ST_Instance, 1);
 
 				float2 texs[] =
 				{
@@ -482,7 +482,8 @@ namespace
 				};
 
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(texs), texs);
-				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)), RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
+				rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
+					RenderLayout::ST_Geometry, static_cast<uint32_t>(xys.size()));
 
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 				rl_->BindIndexStream(ib, EF_R16UI);

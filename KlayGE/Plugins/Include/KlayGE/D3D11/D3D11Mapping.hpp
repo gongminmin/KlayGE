@@ -16,6 +16,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/ArrayRef.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/RenderLayout.hpp>
@@ -44,7 +45,8 @@ namespace KlayGE
 		static D3D11_LOGIC_OP Mapping(LogicOperation lo);
 
 		static D3D11_PRIMITIVE_TOPOLOGY Mapping(RenderLayout::topology_type tt);
-		static void Mapping(std::vector<D3D11_INPUT_ELEMENT_DESC>& elements, size_t stream, vertex_elements_type const & vet, RenderLayout::stream_type type, uint32_t freq);
+		static void Mapping(std::vector<D3D11_INPUT_ELEMENT_DESC>& elements, size_t stream, ArrayRef<VertexElement> vet,
+			RenderLayout::stream_type type, uint32_t freq);
 
 		static D3D11_SO_DECLARATION_ENTRY Mapping(ShaderDesc::StreamOutputDecl const & decl);
 

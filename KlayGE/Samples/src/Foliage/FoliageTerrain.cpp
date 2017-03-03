@@ -81,8 +81,7 @@ namespace KlayGE
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F),
-				vertex_element(VEU_TextureCoord, 2, EF_GR32F)),
+			rl_->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
 				RenderLayout::ST_Instance);
 		}
 
@@ -111,7 +110,7 @@ namespace KlayGE
 				float2(+1, -1)
 			};
 			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
-			rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			this->BindDeferredEffect(SyncLoadRenderEffect("Foliage.fxml"));
 			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageImpostorGBufferAlphaTestMRT");
@@ -131,8 +130,7 @@ namespace KlayGE
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F),
-				vertex_element(VEU_TextureCoord, 2, EF_GR32F)),
+			rl_->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
 				RenderLayout::ST_Instance);
 		}
 
@@ -340,7 +338,7 @@ namespace KlayGE
 
 			plant_instance_rls_[plant_type] = rf.MakeRenderLayout();
 			plant_instance_rls_[plant_type]->BindVertexStream(plant_instance_buffers_[plant_type],
-				std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F), vertex_element(VEU_TextureCoord, 2, EF_GR32F)));
+				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
 
 			plant_impostor_instance_buffers_[plant_type] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
 				plant_visible_tiles * plant_visible_tiles * num_tile_plants_[plant_type].x() * sizeof(PlantInstanceData), nullptr);
@@ -351,7 +349,7 @@ namespace KlayGE
 
 			plant_impostor_instance_rls_[plant_type] = rf.MakeRenderLayout();
 			plant_impostor_instance_rls_[plant_type]->BindVertexStream(plant_impostor_instance_buffers_[plant_type],
-				std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F), vertex_element(VEU_TextureCoord, 2, EF_GR32F)));
+				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
 
 			plant_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
 			plant_impostor_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();

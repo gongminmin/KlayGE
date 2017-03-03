@@ -195,13 +195,13 @@ namespace
 			: SceneObjectHelper(SOA_Moveable | SOA_Cullable),
 				last_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
 		{
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR8));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 3, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 4, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 5, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 6, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)
@@ -367,7 +367,7 @@ namespace
 					};
 				
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
-					normalization_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					normalization_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 				}
 
 				sat_pp_->InputPin(0, spread_tex_);
@@ -512,7 +512,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
-					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 				}
 				else
 				{
@@ -574,7 +574,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
-					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
 					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
@@ -1083,7 +1083,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 				{
 					std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-						std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+						{ i, j, NUM_INSTANCE, NUM_LINE }));
 
 					float3 pos;
 					pos.x() = std::any_cast<float>(scr_pos[0]);
@@ -1091,7 +1091,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					pos.z() = std::any_cast<float>(scr_pos[2]);
 
 					std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-						std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+						{i, j, NUM_INSTANCE, NUM_LINE }));
 
 					Color clr;
 					clr.r() = std::any_cast<float>(scr_clr[0]);

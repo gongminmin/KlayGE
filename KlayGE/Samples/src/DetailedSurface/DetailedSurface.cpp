@@ -155,7 +155,7 @@ namespace
 
 			GraphicsBufferPtr distortion_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(distortions.size() * sizeof(distortions[0])), &distortions[0]);
-			rl.BindVertexStream(distortion_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 1, EF_R32F)));
+			rl.BindVertexStream(distortion_vb, VertexElement(VEU_TextureCoord, 1, EF_R32F));
 		}
 	};
 

@@ -459,7 +459,7 @@ namespace KlayGE
 
 			rl_cone_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(pos.size() * sizeof(pos[0])), &pos[0]), 
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			rl_cone_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]),
@@ -476,7 +476,7 @@ namespace KlayGE
 
 			rl_pyramid_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(pos.size() * sizeof(pos[0])), &pos[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			rl_pyramid_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]), EF_R16UI);
@@ -492,7 +492,7 @@ namespace KlayGE
 
 			rl_box_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(pos.size() * sizeof(pos[0])), &pos[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			rl_box_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(index.size() * sizeof(index[0])), &index[0]), EF_R16UI);
@@ -511,7 +511,7 @@ namespace KlayGE
 
 			rl_quad_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(sizeof(pos)), pos),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 		}
 
 		light_volume_rl_[LightSource::LT_Ambient] = rl_quad_;

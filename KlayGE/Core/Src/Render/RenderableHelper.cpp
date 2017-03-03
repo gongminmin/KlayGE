@@ -120,7 +120,7 @@ namespace KlayGE
 
 		float v = 0;
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(v), &v);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -189,7 +189,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -260,7 +260,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
@@ -347,7 +347,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rl_->BindIndexStream(ib, EF_R16UI);
@@ -434,7 +434,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rl_->BindIndexStream(ib, EF_R16UI);
@@ -480,7 +480,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]);
-		rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_SIGNED_ABGR16)));
+		rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_SIGNED_ABGR16));
 
 		if (has_tex_coord)
 		{
@@ -504,7 +504,7 @@ namespace KlayGE
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(tex_coords.size() * sizeof(tex_coords[0])), &tex_coords[0]);
-			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_SIGNED_GR16)));
+			rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_SIGNED_GR16));
 		}
 
 		if (has_tangent)
@@ -526,7 +526,7 @@ namespace KlayGE
 
 			GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(tangent.size() * sizeof(tangent[0])), &tangent[0]);
-			rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Tangent, 0, fmt)));
+			rl_->BindVertexStream(tex_vb, VertexElement(VEU_Tangent, 0, fmt));
 		}
 
 		std::vector<uint16_t> index;
@@ -586,7 +586,7 @@ namespace KlayGE
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-		rl_->BindVertexStream(vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rl_->BindIndexStream(ib, EF_R16UI);

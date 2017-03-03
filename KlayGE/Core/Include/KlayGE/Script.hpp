@@ -37,47 +37,18 @@
 #include <string>
 
 #include <KFL/CXX17/any.hpp>
+#include <KFL/ArrayRef.hpp>
 
 namespace KlayGE
 {
-	typedef std::vector<std::any> AnyDataListType;
-
 	class KLAYGE_CORE_API ScriptModule : boost::noncopyable
 	{
-	private:
-		template <typename tuple_type, int N>
-		struct Tuple2Vector
-		{
-			static AnyDataListType Do(tuple_type const & t)
-			{
-				AnyDataListType ret = Tuple2Vector<tuple_type, N - 1>::Do(t);
-				ret.push_back(std::get<N - 1>(t));
-				return ret;
-			}
-		};
-
-		template <typename tuple_type>
-		struct Tuple2Vector<tuple_type, 1>
-		{
-			static AnyDataListType Do(tuple_type const & t)
-			{
-				return AnyDataListType(1, std::get<0>(t));
-			}
-		};
-
 	public:
 		ScriptModule();
 		virtual ~ScriptModule();
 
-		template <typename TupleType>
-		std::any Call(std::string const & func_name, TupleType const & t)
-		{
-			AnyDataListType v(Tuple2Vector<TupleType, std::tuple_size<TupleType>::value>::Do(t));
-			return Call(func_name, v);
-		}
-
 		virtual std::any Value(std::string const & name);
-		virtual std::any Call(std::string const & func_name, const AnyDataListType& args);
+		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args);
 		virtual std::any RunString(std::string const & script);
 	};
 

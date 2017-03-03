@@ -31,6 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
+#include <KFL/ArrayRef.hpp>
 
 #include <boost/assert.hpp>
 
@@ -51,7 +52,7 @@ namespace KlayGE
 		return std::any();
 	}
 
-	std::any ScriptModule::Call(std::string const & /*func_name*/, const AnyDataListType& /*args*/)
+	std::any ScriptModule::Call(std::string const & /*func_name*/, ArrayRef<std::any> /*args*/)
 	{
 		return std::any();
 	}

@@ -61,7 +61,7 @@ namespace
 		{
 			module_->RunString(*script_);
 
-			return module_->Call("update", std::make_tuple(app_time, elapsed_time));
+			return module_->Call("update", { app_time, elapsed_time });
 		}
 
 	private:

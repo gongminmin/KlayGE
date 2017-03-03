@@ -55,7 +55,7 @@ namespace
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
 
-			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 			float3 clr0(0, 0.2f, 0.6f);
 			float3 clr1(0.2f, 1, 0);

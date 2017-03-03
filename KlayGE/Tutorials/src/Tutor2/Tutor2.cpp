@@ -103,7 +103,7 @@ void TutorFramework::OnCreate()
 	meshes[0] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"side_mesh");
 
 	meshes[0]->AddVertexStream(&vertices[0], static_cast<KlayGE::uint32_t>(sizeof(vertices[0]) * vertices.size()),
-		KlayGE::vertex_element(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
+		KlayGE::VertexElement(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
 
 	meshes[0]->AddIndexStream(&indices1[0], static_cast<KlayGE::uint32_t>(sizeof(indices1[0]) * indices1.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
@@ -120,7 +120,7 @@ void TutorFramework::OnCreate()
 
 	meshes[1] = KlayGE::MakeSharedPtr<RenderPolygon>(model, L"cap_mesh");
 	meshes[1]->AddVertexStream(&vertices[0], static_cast<KlayGE::uint32_t>(sizeof(vertices[0]) * vertices.size()),
-		KlayGE::vertex_element(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
+		KlayGE::VertexElement(KlayGE::VEU_Position, 0, KlayGE::EF_BGR32F), KlayGE::EAH_GPU_Read);
 	meshes[1]->AddIndexStream(&indices2[0], static_cast<KlayGE::uint32_t>(sizeof(indices2[0]) * indices2.size()),
 		KlayGE::EF_R16UI, KlayGE::EAH_GPU_Read);
 	meshes[1]->GetRenderLayout().TopologyType(KlayGE::RenderLayout::TT_TriangleList);
