@@ -42,6 +42,9 @@
 
 #define KFL_UNUSED(x) (void)(x)
 
+// The opposite side of "explicit", for tracking purpose
+#define KFL_IMPLICIT
+
 #include <KFL/Log.hpp>
 
 #ifdef KLAYGE_DEBUG

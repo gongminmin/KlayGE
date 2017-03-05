@@ -31,6 +31,8 @@
 #ifndef _KFL_ARRAYREF_HPP
 #define _KFL_ARRAYREF_HPP
 
+#include <KFL/Util.hpp>
+
 #include <vector>
 
 #include <boost/assert.hpp>
@@ -70,7 +72,7 @@ namespace KlayGE
 		{
 		}
 
-		ArrayRef(T const & t)
+		KFL_IMPLICIT ArrayRef(T const & t)
 			: data_(&t), size_(1)
 		{
 		}
@@ -86,13 +88,13 @@ namespace KlayGE
 		}
 
 		template <typename A>
-		ArrayRef(std::vector<T, A> const & v)
+		KFL_IMPLICIT ArrayRef(std::vector<T, A> const & v)
 			: data_(v.data()), size_(v.size())
 		{
 		}
 
 		template <size_t N>
-		constexpr ArrayRef(T const (&arr)[N])
+		KFL_IMPLICIT constexpr ArrayRef(T const (&arr)[N])
 			: data_(arr), size_(N)
 		{
 		}
@@ -103,14 +105,14 @@ namespace KlayGE
 		}
 
 		template <typename U>
-		ArrayRef(ArrayRef<U*> const & rhs,
+		KFL_IMPLICIT ArrayRef(ArrayRef<U*> const & rhs,
 			typename std::enable_if<std::is_convertible<U* const *, T const *>::value>::type* = 0)
 			: data_(rhs.data()), size_(rhs.size())
 		{
 		}
 
 		template <typename U, typename A>
-		ArrayRef(std::vector<U*, A> const & v,
+		KFL_IMPLICIT ArrayRef(std::vector<U*, A> const & v,
 			typename std::enable_if<std::is_convertible<U* const *, T const *>::value>::type* = 0)
 			: data_(v.data()), size_(v.size())
 		{
