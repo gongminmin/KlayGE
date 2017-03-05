@@ -196,7 +196,7 @@ namespace KlayGE
 				fmt = EF_ARGB8;
 			}
 		}
-		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read, nullptr);
+		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
 		IDirect3DSurface9* surf;
 		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,

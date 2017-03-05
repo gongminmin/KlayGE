@@ -55,7 +55,7 @@ namespace KlayGE
 			init_data.data = ptr;
 			init_data.row_pitch = width_ * sizeof(half) * 4;
 			init_data.slice_pitch = init_data.row_pitch;
-			lookup_i_wr_wi_x_tex_[i] = rf.MakeTexture2D(width_, 1, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+			lookup_i_wr_wi_x_tex_[i] = rf.MakeTexture2D(width_, 1, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			ptr += width_ * 4;
 		}
 
@@ -67,14 +67,14 @@ namespace KlayGE
 			init_data.data = ptr;
 			init_data.row_pitch = sizeof(half) * 4;
 			init_data.slice_pitch = init_data.row_pitch * height_;
-			lookup_i_wr_wi_y_tex_[i] = rf.MakeTexture2D(1, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+			lookup_i_wr_wi_y_tex_[i] = rf.MakeTexture2D(1, height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			ptr += height_ * 4;
 		}
 
-		tmp_real_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		tmp_real_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		tmp_real_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		tmp_real_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		tmp_imag_tex_[0] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		tmp_imag_tex_[1] = rf.MakeTexture2D(width_, height_, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		fft_x_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_x");
 		fft_y_pp_ = SyncLoadPostProcess("FFT.ppml", "fft_y");
@@ -386,11 +386,11 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		tmp_real_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
-		tmp_imag_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
+		tmp_real_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+		tmp_imag_tex_[0] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
 
-		tmp_real_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
-		tmp_imag_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
+		tmp_real_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+		tmp_imag_tex_[1] = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
 
 		effect_ = SyncLoadRenderEffect("FFT.fxml");
 		radix008a_tech_ = effect_->TechniqueByName("FFTRadix008A5");

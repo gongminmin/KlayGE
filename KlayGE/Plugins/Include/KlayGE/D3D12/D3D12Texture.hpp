@@ -103,7 +103,7 @@ namespace KlayGE
 
 		void DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim,
 			uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-			ElementInitData const * init_data);
+			ArrayRef<ElementInitData> init_data);
 
 		void DoMap(uint32_t subres, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
@@ -191,7 +191,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ElementInitData const * init_data) override;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
 
 	private:
 		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -231,7 +231,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ElementInitData const * init_data) override;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
 
 	private:
 		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -266,7 +266,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ElementInitData const * init_data) override;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
 
 	private:
 		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -311,7 +311,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ElementInitData const * init_data) override;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
 
 	private:
 		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,

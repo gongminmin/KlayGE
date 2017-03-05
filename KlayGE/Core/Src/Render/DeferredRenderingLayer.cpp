@@ -620,38 +620,38 @@ namespace KlayGE
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
 			fmt = EF_R16F;
 		}
-		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		sm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
-		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		RenderViewPtr sm_depth_view = rf.Make2DDepthStencilRenderView(*sm_depth_tex_, 0, 1, 0);
 		sm_fb_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
 
 		csm_fb_ = rf.MakeFrameBuffer();
-		csm_tex_ = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		csm_tex_ = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		csm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*csm_tex_, 0, 1, 0));
 		csm_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE * 2, SM_SIZE * 2, EF_D24S8, 1, 0));
 
 		for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
 		{
 			unfiltered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				EAH_GPU_Read | EAH_GPU_Write);
 		}
 		if (tex_array_support_)
 		{
 			filtered_sm_2d_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, static_cast<uint32_t>(filtered_sm_2d_texs_.size()),
-				sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 		else
 		{
 			for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
 			{
 				filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					EAH_GPU_Read | EAH_GPU_Write);
 			}
 		}
 		for (uint32_t i = 0; i < filtered_sm_cube_texs_.size(); ++ i)
 		{
-			filtered_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			filtered_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
@@ -687,8 +687,10 @@ namespace KlayGE
 
 			fmt8 = EF_ARGB8;
 		}
-		rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
-		rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
+		rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
+			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		rsm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*rsm_texs_[0], 0, 1, 0)); // normal (light space)
 		rsm_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*rsm_texs_[1], 0, 1, 0)); // albedo
 		rsm_fb_->Attach(FrameBuffer::ATT_DepthStencil, sm_depth_view);
@@ -947,13 +949,13 @@ namespace KlayGE
 			depth_fmt = EF_R32F;
 		}
 
-		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 1, 0);
 
 		pvp.g_buffer_rt0_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, fmt8, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		pvp.g_buffer_rt1_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
-			EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			EAH_GPU_Read | EAH_GPU_Write);
 		uint32_t hint = EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
@@ -961,9 +963,8 @@ namespace KlayGE
 			hint |= EAH_GPU_Unordered;
 		}
 #endif
-		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0, hint, nullptr);
-		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0,
-			EAH_GPU_Read, nullptr);
+		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0, hint);
+		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		{
 			ElementFormat min_max_depth_fmt;
@@ -983,7 +984,7 @@ namespace KlayGE
 				uint32_t w = std::max(1U, (width + TILE_SIZE - 1) / TILE_SIZE);
 				uint32_t h = std::max(1U, (height + TILE_SIZE - 1) / TILE_SIZE);
 				pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr));
+					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered));
 			}
 			else
 			{
@@ -992,7 +993,7 @@ namespace KlayGE
 				for (uint32_t ts = TILE_SIZE; ts > 1; ts /= 2)
 				{
 					pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write, nullptr));
+						EAH_GPU_Read | EAH_GPU_Write));
 					w = std::max(1U, (w + 1) / 2);
 					h = std::max(1U, (h + 1) / 2);
 				}
@@ -1005,7 +1006,7 @@ namespace KlayGE
 			uint32_t h = std::max(1U, height / 2);
 			for (uint32_t i = 0; i < 2; ++ i)
 			{
-				TexturePtr tex = rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				TexturePtr tex = rf.MakeTexture2D(w, h, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				pvp.g_buffer_vdm_max_ds_texs.push_back(tex);
 				pvp.g_buffer_vdm_max_ds_views.push_back(rf.Make2DDepthStencilRenderView(*tex, 0, 1, 0));
 				w = std::max(1U, w / 2);
@@ -1036,14 +1037,14 @@ namespace KlayGE
 		if (tex_array_support_)
 		{
 			pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
-				CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				CascadedShadowLayer::MAX_NUM_CASCADES, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		}
 		else
 		{
 			for (size_t i = 0; i < pvp.filtered_csm_texs.size(); ++ i)
 			{
 				pvp.filtered_csm_texs[i] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3, 1, fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 			}
 		}
 
@@ -1063,7 +1064,7 @@ namespace KlayGE
 			hint |= EAH_GPU_Unordered;
 		}
 #endif
-		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint, nullptr);
+		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
 
 		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
@@ -1088,10 +1089,10 @@ namespace KlayGE
 				fmt = fmt_srgb;
 			}
 		}
-		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint, nullptr);
+		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.projective_shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
 
-		pvp.reflection_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.reflection_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.reflection_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.reflection_tex, 0, 1, 0));
 		pvp.reflection_fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(
 			pvp.reflection_tex->Width(0), pvp.reflection_tex->Height(0), ds_view->Format(), 1, 0));
@@ -1100,16 +1101,16 @@ namespace KlayGE
 		ElementFormat shading_fmt = EF_ABGR16F;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.lighting_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.lighting_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_tex, 0, 1, 0));
 		pvp.lighting_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 #endif
 
 		uint32_t const vdm_width = std::max(1U, width / 4);
 		uint32_t const vdm_height = std::max(1U, height / 4);
-		pvp.vdm_color_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.vdm_transition_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		pvp.vdm_count_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.vdm_color_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		pvp.vdm_transition_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		pvp.vdm_count_tex = rf.MakeTexture2D(vdm_width, vdm_height, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.vdm_color_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*pvp.vdm_transition_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*pvp.vdm_count_tex, 0, 1, 0));
@@ -1131,17 +1132,16 @@ namespace KlayGE
 			hint |= EAH_GPU_Unordered;
 		}
 #endif
-		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, hint, nullptr);
+		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, hint);
 		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++i)
 		{
-			pvp.merged_shading_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, hint, nullptr);
-			pvp.merged_depth_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.merged_shading_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, hint);
+			pvp.merged_depth_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
 		{
-			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Unordered, nullptr);
+			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
 
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
@@ -1157,15 +1157,14 @@ namespace KlayGE
 				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 				lighting_mask_fmt = EF_ARGB8;
 			}
-			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
-				nullptr);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 		}
 		else
 		{
@@ -1180,7 +1179,7 @@ namespace KlayGE
 				fmt = EF_ARGB8;
 			}
 			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
 		}
 #endif
@@ -1213,7 +1212,7 @@ namespace KlayGE
 			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 			fmt = EF_ARGB8;
 		}
-		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		if (0 == index)
 		{
@@ -4059,7 +4058,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer->Width(), viewports_[0].g_buffer->Height(),
-			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write, nullptr);
+			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write);
 		pp->OutputPin(0, temp_tex);
 
 		std::string index_str = boost::lexical_cast<std::string>(index);

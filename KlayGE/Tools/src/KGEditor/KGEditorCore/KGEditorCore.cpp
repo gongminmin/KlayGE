@@ -551,8 +551,8 @@ namespace KlayGE
 			fmt = EF_ARGB8;
 		}
 
-		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write, NULL);
-		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read, NULL);
+		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
+		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read);
 		selective_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*selective_tex_, 0, 1, 0));
 		selective_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
 

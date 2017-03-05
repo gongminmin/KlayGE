@@ -43,9 +43,9 @@ namespace KlayGE
 			}
 		}
 		height_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, height_fmt,
-			1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		height_map_cpu_tex_ = rf.MakeTexture2D(height_map_tex_->Width(0), height_map_tex_->Height(0),
-			1, 1, height_map_tex_->Format(), 1, 0, EAH_CPU_Read, nullptr);
+			1, 1, height_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
 		ElementFormat gradient_fmt;
 		if (EF_R16F == height_fmt)
@@ -61,9 +61,9 @@ namespace KlayGE
 			gradient_fmt = height_fmt;
 		}
 		gradient_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, gradient_fmt,
-			1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		gradient_map_cpu_tex_ = rf.MakeTexture2D(gradient_map_tex_->Width(0), gradient_map_tex_->Height(0),
-			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read, nullptr);
+			1, 1, gradient_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
 		ElementFormat mask_fmt;
 		if (caps.texture_format_support(EF_ABGR8))
@@ -76,9 +76,9 @@ namespace KlayGE
 			mask_fmt = EF_ARGB8;
 		}
 		mask_map_tex_ = rf.MakeTexture2D(COARSE_HEIGHT_MAP_SIZE, COARSE_HEIGHT_MAP_SIZE, 1, 1, mask_fmt,
-			1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		mask_map_cpu_tex_ = rf.MakeTexture2D(mask_map_tex_->Width(0), mask_map_tex_->Height(0),
-			1, 1, mask_map_tex_->Format(), 1, 0, EAH_CPU_Read, nullptr);
+			1, 1, mask_map_tex_->Format(), 1, 0, EAH_CPU_Read);
 
 		height_pp_ = SyncLoadPostProcess("ProceduralTerrain.ppml", "height");
 		gradient_pp_ = SyncLoadPostProcess("ProceduralTerrain.ppml", "gradient");

@@ -261,7 +261,7 @@ namespace KlayGE
 
 						fmt = EF_D16;
 					}
-					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					ds_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 					ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 				}
 				else
@@ -315,7 +315,7 @@ namespace KlayGE
 			}
 
 			mono_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
-				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 
 			default_frame_buffers_[0] = default_frame_buffers_[1]
@@ -336,7 +336,7 @@ namespace KlayGE
 			}
 
 			overlay_tex_ = rf.MakeTexture2D(screen_width, screen_height, 1, 1,
-				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			overlay_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*overlay_tex_, 0, 1, 0));
 
 			RenderViewPtr screen_size_ds_view;
@@ -370,7 +370,7 @@ namespace KlayGE
 				}
 
 				resize_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1,
-					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
 
 				ElementFormat ds_fmt;
@@ -429,7 +429,7 @@ namespace KlayGE
 				}
 			}
 
-			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			post_tone_mapping_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*post_tone_mapping_tex_, 0, 1, 0));
 			post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -472,7 +472,7 @@ namespace KlayGE
 					fmt = fmt_srgb;
 				}
 			}
-			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+			hdr_tex_ = rf.MakeTexture2D(render_width, render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 			hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -721,7 +721,7 @@ namespace KlayGE
 					if (caps.texture_format_support(EF_D32F) || caps.texture_format_support(EF_D24S8)
 						|| caps.texture_format_support(EF_D16))
 					{
-						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+						ds_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 						ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 					}
 					else
@@ -748,7 +748,7 @@ namespace KlayGE
 			if ((stereo_method_ != STM_None) || (display_output_method_ != DOM_sRGB))
 			{
 				ElementFormat fmt = mono_tex_->Format();
-				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				mono_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				mono_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*mono_tex_, 0, 1, 0));
 
 				default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = mono_frame_buffer_;
@@ -783,7 +783,7 @@ namespace KlayGE
 						}
 					}
 
-					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					resize_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 					resize_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*resize_tex_, 0, 1, 0));
 
 					ElementFormat ds_fmt;
@@ -827,7 +827,7 @@ namespace KlayGE
 			{
 				ElementFormat fmt = post_tone_mapping_tex_->Format();
 				post_tone_mapping_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1, fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					EAH_GPU_Read | EAH_GPU_Write);
 				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*post_tone_mapping_tex_, 0, 1, 0));
 				post_tone_mapping_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -836,7 +836,8 @@ namespace KlayGE
 			if (hdr_pp_)
 			{
 				ElementFormat fmt = hdr_tex_->Format();
-				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+				hdr_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 4, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 				hdr_frame_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*hdr_tex_, 0, 1, 0));
 				hdr_frame_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 

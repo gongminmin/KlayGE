@@ -157,7 +157,7 @@ DetailedModel::DetailedModel(std::wstring const & name)
 	{
 		format = EF_ARGB8;
 	}
-	empty_bump_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read | EAH_Immutable, &nor_init_data);
+	empty_bump_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read | EAH_Immutable, nor_init_data);
 }
 
 void DetailedModel::EyePos(KlayGE::float3 const & eye_pos)

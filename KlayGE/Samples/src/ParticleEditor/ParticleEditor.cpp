@@ -277,7 +277,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 		fmt = EF_ARGB8;
 	}
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	if (caps.pack_to_rgba_required)
 	{
@@ -303,7 +303,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 			fmt = EF_R32F;
 		}
 	}
-	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	ElementFormat ds_fmt;
 	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
@@ -320,7 +320,7 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view;
 	if (depth_texture_support_)
 	{
-		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		ds_view = rf.Make2DDepthStencilRenderView(*scene_ds_tex_, 0, 1, 0);
 
 		depth_to_linear_pp_->InputPin(0, scene_ds_tex_);
@@ -723,7 +723,7 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 	if (EF_R8 == tex->Format())
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read, nullptr);
+		TexturePtr cpu_tex = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, EF_R8, 1, 0, EAH_CPU_Read);
 		tex->CopyToTexture(*cpu_tex);
 
 		std::vector<uint8_t> data(tex->Width(0) * tex->Height(0) * 4);
@@ -747,7 +747,8 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
 		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1,
-			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0,
+			EAH_GPU_Read | EAH_Immutable, init_data);
 	}
 	else
 	{
@@ -768,7 +769,7 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
 	dialog_->Control<UITexButton>(id)->SetTexture(tex_for_button);
 }

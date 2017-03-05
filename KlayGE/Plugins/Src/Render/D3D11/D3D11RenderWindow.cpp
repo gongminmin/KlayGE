@@ -845,7 +845,7 @@ namespace KlayGE
 		{
 			depth_stencil_ = rf.MakeTexture2D(width_, height_, 1, stereo ? 2 : 1, depth_stencil_fmt_,
 				back_buffer_->SampleCount(), back_buffer_->SampleQuality(),
-				EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				EAH_GPU_Read | EAH_GPU_Write);
 
 			depth_stencil_view_ = rf.Make2DDepthStencilRenderView(*depth_stencil_, 0, 1, 0);
 

@@ -245,10 +245,10 @@ namespace KlayGE
 			reduce_z_bounds_from_depth_mip_map_pp_ = SyncLoadPostProcess("CascadedShadow.ppml", "reduce_z_bounds_from_depth_mip_map");
 			compute_log_cascades_from_z_bounds_pp_ = SyncLoadPostProcess("CascadedShadow.ppml", "compute_log_cascades_from_z_bounds");
 
-			interval_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			interval_tex_ = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			for (uint32_t i = 0; i < 2; ++ i)
 			{
-				interval_cpu_texs_[i] = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read, nullptr);
+				interval_cpu_texs_[i] = rf.MakeTexture2D(MAX_NUM_CASCADES, 1, 1, 1, EF_GR16F, 1, 0, EAH_CPU_Read);
 			}
 		}
 	}
@@ -264,8 +264,8 @@ namespace KlayGE
 			uint32_t const width = depth_tex->Width(0);
 			uint32_t const height = depth_tex->Height(0);
 
-			depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Write, nullptr);
+			depth_deriative_tex_ = rf.MakeTexture2D(width / 2, height / 2, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			depth_deriative_small_tex_ = rf.MakeTexture2D(width / 4, height / 4, 0, 1, EF_GR16F, 1, 0, EAH_GPU_Write);
 
 			float delta_x = 1.0f / depth_tex_->Width(0);
 			float delta_y = 1.0f / depth_tex_->Height(0);

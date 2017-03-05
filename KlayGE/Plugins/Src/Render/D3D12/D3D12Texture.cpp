@@ -638,7 +638,7 @@ namespace KlayGE
 
 	void D3D12Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim,
 			uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-			ElementInitData const * init_data)
+			ArrayRef<ElementInitData> init_data)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12DevicePtr const & device = re.D3DDevice();
@@ -769,7 +769,7 @@ namespace KlayGE
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture_readback_heaps)));
 		d3d_texture_readback_heaps_ = MakeCOMPtr(d3d_texture_readback_heaps);
 
-		if (init_data != nullptr)
+		if (!init_data.empty())
 		{
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());

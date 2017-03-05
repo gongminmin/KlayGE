@@ -241,7 +241,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture3D::CreateHWResource(ElementInitData const * init_data)
+	void OGLESTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		uint32_t texel_size = NumFormatBytes(format_);
 
@@ -263,7 +263,7 @@ namespace KlayGE
 				GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
 				void* ptr;
-				if (nullptr == init_data)
+				if (init_data.empty())
 				{
 					tex_data_[level].resize(image_size, 0);
 					ptr = nullptr;
@@ -282,7 +282,7 @@ namespace KlayGE
 				GLsizei const image_size = w * h * d * texel_size;
 
 				void* ptr;
-				if (nullptr == init_data)
+				if (init_data.empty())
 				{
 					tex_data_[level].resize(image_size, 0);
 					ptr = nullptr;

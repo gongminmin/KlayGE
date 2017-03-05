@@ -458,7 +458,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTextureCube::CreateHWResource(ElementInitData const * init_data)
+	void OGLTextureCube::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -494,7 +494,7 @@ namespace KlayGE
 									s, s, array_size_, 0, image_size * array_size_, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glCompressedTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, array_index, s, s, 1,
 									glformat, image_size, init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
@@ -503,7 +503,7 @@ namespace KlayGE
 						else
 						{
 							glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-								s, s, 0, image_size, (nullptr == init_data) ? nullptr : init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
+								s, s, 0, image_size, init_data.empty() ? nullptr : init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
 						}
 					}
 					else
@@ -515,7 +515,7 @@ namespace KlayGE
 								glTexImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, s, s, array_size_, 0, glformat, gltype, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, array_index, s, s, 1,
 									glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
@@ -524,7 +524,7 @@ namespace KlayGE
 						else
 						{
 							glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat,
-								s, s, 0, glformat, gltype, (nullptr == init_data) ? nullptr : init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
+								s, s, 0, glformat, gltype, init_data.empty() ? nullptr : init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
 						}
 					}
 				}

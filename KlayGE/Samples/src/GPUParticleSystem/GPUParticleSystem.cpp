@@ -111,7 +111,7 @@ namespace
 		{
 			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 			{
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			}
 			else
 			{
@@ -120,7 +120,7 @@ namespace
 					std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 				}
 
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			}
 		}
 
@@ -456,10 +456,10 @@ namespace
 						pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
 						pos_init.slice_pitch = 0;
 					}
-					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				}
 
 				FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
@@ -512,7 +512,7 @@ namespace
 					vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 					vel_init.slice_pitch = 0;
 
-					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
+					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, vel_init);
 					*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 				}
 
@@ -566,7 +566,7 @@ namespace
 				init_data.row_pitch = tex_width_ * sizeof(half);
 				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 				*(effect_->ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -841,11 +841,11 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 

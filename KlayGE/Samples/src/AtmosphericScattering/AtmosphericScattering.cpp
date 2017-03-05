@@ -268,7 +268,7 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 	dialog_param_->Control<UITexButton>(id_beta_button_)->SetTexture(tex_for_button);
 }
 
@@ -297,7 +297,7 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 	ElementInitData init_data;
 	init_data.data = &data;
 	init_data.row_pitch = 4;
-	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	TexturePtr tex_for_button = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 	dialog_param_->Control<UITexButton>(id_absorb_button_)->SetTexture(tex_for_button);
 }
 

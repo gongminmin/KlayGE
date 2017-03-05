@@ -53,8 +53,8 @@ namespace KlayGE
 	class ArrayRef
 	{
 	public:
-		typedef const T *iterator;
-		typedef const T *const_iterator;
+		typedef T const * iterator;
+		typedef T const * const_iterator;
 		typedef size_t size_type;
 
 		typedef std::reverse_iterator<iterator> reverse_iterator;

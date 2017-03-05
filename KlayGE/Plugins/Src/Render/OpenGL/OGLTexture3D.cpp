@@ -352,7 +352,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3D::CreateHWResource(ElementInitData const * init_data)
+	void OGLTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -379,12 +379,12 @@ namespace KlayGE
 				GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
 				glCompressedTexImage3D(target_type_, level, glinternalFormat,
-					w, h, d, 0, image_size, (nullptr == init_data) ? nullptr : init_data[level].data);
+					w, h, d, 0, image_size, init_data.empty() ? nullptr : init_data[level].data);
 			}
 			else
 			{
 				glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype,
-					(nullptr == init_data) ? nullptr : init_data[level].data);
+					init_data.empty() ? nullptr : init_data[level].data);
 			}
 		}
 

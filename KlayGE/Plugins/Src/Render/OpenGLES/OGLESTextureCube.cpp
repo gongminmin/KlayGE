@@ -342,7 +342,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTextureCube::CreateHWResource(ElementInitData const * init_data)
+	void OGLESTextureCube::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		uint32_t texel_size = NumFormatBytes(format_);
 
@@ -366,7 +366,7 @@ namespace KlayGE
 						GLsizei const image_size = ((s + 3) / 4) * ((s + 3) / 4) * block_size;
 
 						void* ptr;
-						if (nullptr == init_data)
+						if (init_data.empty())
 						{
 							tex_data_[(array_index * 6 + face) * num_mip_maps_ + level].resize(image_size, 0);
 							ptr = nullptr;
@@ -387,7 +387,7 @@ namespace KlayGE
 									s, s, array_size_, 0, image_size * array_size_, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glCompressedTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, array_index, s, s, 1,
 									glformat, image_size, init_data[(array_index * 6 + face) * num_mip_maps_ + level].data);
@@ -404,7 +404,7 @@ namespace KlayGE
 						GLsizei const image_size = s * s * texel_size;
 
 						void* ptr;
-						if (nullptr == init_data)
+						if (init_data.empty())
 						{
 							tex_data_[(array_index * 6 + face) * num_mip_maps_ + level].resize(image_size, 0);
 							ptr = nullptr;
@@ -424,7 +424,7 @@ namespace KlayGE
 								glTexImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, glinternalFormat, s, s, array_size_, 0, glformat, gltype, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glTexSubImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, level, 0, 0, array_index, s, s, 1,
 									glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);

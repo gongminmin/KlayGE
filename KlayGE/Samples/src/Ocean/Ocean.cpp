@@ -292,12 +292,12 @@ namespace
 
 			if (use_tex_array_)
 			{
-				ElementInitData* did = nullptr;
-				ElementInitData* gid = nullptr;
+				ArrayRef<ElementInitData> did;
+				ArrayRef<ElementInitData> gid;
 				if (use_load_tex)
 				{
-					did = &disp_init_data[0];
-					gid = &grad_init_data[0];
+					did = disp_init_data;
+					gid = grad_init_data;
 				}
 
 				displacement_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -306,7 +306,7 @@ namespace
 				TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
 					1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, gid);
 				gradient_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					0, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+					0, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
 					gta->CopyToSubTexture2D(*gradient_tex_array_,
@@ -336,11 +336,16 @@ namespace
 						fmt = EF_ABGR8;
 					}
 
+					ArrayRef<ElementInitData> did;
+					if (use_load_tex)
+					{
+						did = disp_init_data[i * disp_num_mipmaps];
+					}
+
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						0, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+						0, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 					displacement_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write,
-						use_load_tex ? &disp_init_data[i * disp_num_mipmaps] : nullptr);
+						1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, did);
 
 					if (use_load_tex)
 					{
@@ -348,12 +353,12 @@ namespace
 						if (EF_GR8 == fmt)
 						{
 							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, &grad_init_data[i * grad_num_mipmaps]);
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, grad_init_data[i * grad_num_mipmaps]);
 						}
 						else
 						{
 							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 
 							Texture::Mapper mapper(*gta, 0, 0, TMA_Write_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
 							ElementInitData* gid = &grad_init_data[i * grad_num_mipmaps];
@@ -544,7 +549,7 @@ namespace
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr disp_cpu_tex = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+					1, 1, EF_ABGR16F, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 
 			std::vector<float4> min_disps(ocean_param_.num_frames, float4(+1e10f, +1e10f, +1e10f, +1e10f));
 			std::vector<float4> disp_ranges(ocean_param_.num_frames);
@@ -598,7 +603,7 @@ namespace
 				init_data.row_pitch = ocean_param_.dmap_dim * sizeof(uint32_t);
 				init_data.slice_pitch = init_data.row_pitch * ocean_param_.dmap_dim;
 				TexturePtr disp_8 = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, &init_data);
+					1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, init_data);
 
 				if (use_tex_array_)
 				{
@@ -650,10 +655,10 @@ namespace
 
 			std::string const PREFIX = "../../Samples/media/Ocean/";
 
-			std::vector<ElementInitData> param_init_data(1);
-			param_init_data[0].data = &disp_params[0];
-			param_init_data[0].row_pitch = ocean_param_.num_frames * sizeof(float4);
-			param_init_data[0].slice_pitch = param_init_data[0].row_pitch * 2;
+			ElementInitData param_init_data;
+			param_init_data.data = &disp_params[0];
+			param_init_data.row_pitch = ocean_param_.num_frames * sizeof(float4);
+			param_init_data.slice_pitch = param_init_data.row_pitch * 2;
 			SaveTexture(PREFIX + "OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
 
 			if (use_tex_array_)
@@ -661,7 +666,7 @@ namespace
 				SaveTexture(displacement_tex_array_, PREFIX + "OceanDisplacement.dds");
 
 				TexturePtr gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-					1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+					1, ocean_param_.num_frames, EF_GR8, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
 					gradient_tex_array_->CopyToSubTexture2D(*gta,
@@ -677,7 +682,7 @@ namespace
 					std::vector<ElementInitData> disp_init_data(ocean_param_.num_frames);
 					std::vector<std::vector<uint8_t>> disp_data(ocean_param_.num_frames);
 					TexturePtr disp_slice = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						1, 1, displacement_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+						1, 1, displacement_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
 						displacement_tex_[i]->CopyToTexture(*disp_slice);
@@ -707,7 +712,7 @@ namespace
 					std::vector<ElementInitData> grad_init_data(ocean_param_.num_frames);
 					std::vector<std::vector<uint8_t>> grad_data(ocean_param_.num_frames);
 					TexturePtr grad_slice = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-						1, 1, gradient_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+						1, 1, gradient_tex_[0]->Format(), 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 					for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 					{
 						gradient_tex_[i]->CopyToSubTexture2D(*grad_slice,

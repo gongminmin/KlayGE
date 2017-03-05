@@ -541,13 +541,13 @@ namespace
 		bc5_codec.EncodeMem(WIDTH, HEIGHT, &integrated_brdf_bc5[0], WIDTH * 4, WIDTH * HEIGHT,
 			&integrate_brdf_gr[0], WIDTH * 2, WIDTH * HEIGHT * 2, TCM_Quality);
 
-		std::vector<ElementInitData> init_data(1);
-		init_data[0].data = &integrated_brdf_bc5[0];
-		init_data[0].row_pitch = WIDTH * 4;
-		init_data[0].slice_pitch = WIDTH * HEIGHT;
+		ElementInitData init_data;
+		init_data.data = &integrated_brdf_bc5[0];
+		init_data.row_pitch = WIDTH * 4;
+		init_data.slice_pitch = WIDTH * HEIGHT;
 		
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance(); 
-		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_BC5, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+		return rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_BC5, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 	}
 }
 

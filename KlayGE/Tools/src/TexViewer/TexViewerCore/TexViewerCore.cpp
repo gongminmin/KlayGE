@@ -306,7 +306,7 @@ namespace KlayGE
 			if (texels_.empty())
 			{
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				TexturePtr texture_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, nullptr);
+				TexturePtr texture_cpu = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read);
 				texture_display_->CopyToSubTexture2D(*texture_cpu, 0, 0, 0, 0, width, height,
 					0, 0, 0, 0, width, height);
 
@@ -335,7 +335,7 @@ namespace KlayGE
 		uint32_t const height = texture_original_->Height(active_mipmap_level_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		texture_display_ = rf.MakeTexture2D(width, height, 1, 1, texture_original_->Format(), 1, 0, EAH_GPU_Read, nullptr);
+		texture_display_ = rf.MakeTexture2D(width, height, 1, 1, texture_original_->Format(), 1, 0, EAH_GPU_Read);
 		switch (texture_original_->Type())
 		{
 		case Texture::TT_1D:
@@ -347,7 +347,7 @@ namespace KlayGE
 		case Texture::TT_3D:
 			{
 				TexturePtr texture_3d_cpu = rf.MakeTexture3D(width, height, 1, 1, 1, texture_original_->Format(),
-					1, 0, EAH_CPU_Read, nullptr);
+					1, 0, EAH_CPU_Read);
 				texture_original_->CopyToSubTexture3D(*texture_3d_cpu, 0, 0, 0, 0, 0, width, height, 1,
 					active_array_index_, active_mipmap_level_, 0, 0, active_depth_index_, width, height, 1);
 				Texture::Mapper mapper_3d(*texture_3d_cpu, 0, 0, TMA_Read_Only, 0, 0, 0, width, height, 1);
@@ -356,7 +356,7 @@ namespace KlayGE
 				init_data.row_pitch = mapper_3d.RowPitch();
 				init_data.slice_pitch = mapper_3d.SlicePitch();
 				TexturePtr texture_2d_cpu = rf.MakeTexture2D(width, height, 1, 1, texture_original_->Format(),
-					1, 0, EAH_CPU_Write, &init_data);
+					1, 0, EAH_CPU_Write, init_data);
 				texture_2d_cpu->CopyToSubTexture2D(*texture_display_, 0, 0, 0, 0, width, height,
 					0, 0, 0, 0, width, height);
 			}

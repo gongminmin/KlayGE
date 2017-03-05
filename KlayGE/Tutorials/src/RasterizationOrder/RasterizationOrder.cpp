@@ -132,7 +132,7 @@ namespace
 			init_data.row_pitch = sizeof(color_map);
 			init_data.slice_pitch = init_data.row_pitch * 1;
 			TexturePtr color_map_tex = rf.MakeTexture2D(sizeof(color_map) / sizeof(color_map[0]), 1, 1, 1, EF_ABGR8,
-				1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
 
@@ -231,7 +231,7 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 	ras_order_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*ras_order_buff_, EF_R32UI);
 	ras_order_fb_->AttachUAV(0, ras_order_uav_);
 
-	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	ras_order_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ras_order_tex_, 0, 1, 0));
 
 	copy_pp_->InputPin(0, ras_order_tex_);
