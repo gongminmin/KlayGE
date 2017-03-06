@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os, sys, multiprocessing, subprocess, shutil
+import os, sys, multiprocessing, subprocess, shutil, platform
 try:
 	import cfg_build
 except:
@@ -145,10 +145,16 @@ class build_info:
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
-					if "ProgramFiles" in env:
-						program_files_folder = env["ProgramFiles"]
+					if "64bit" == platform.architecture()[0]:
+						if "ProgramFiles(x86)" in env:
+							program_files_folder = env["ProgramFiles(x86)"]
+						else:
+							program_files_folder = "C:\Program Files (x86)"
 					else:
-						program_files_folder = "C:\Program Files"
+						if "ProgramFiles" in env:
+							program_files_folder = env["ProgramFiles"]
+						else:
+							program_files_folder = "C:\Program Files"
 
 					if "VS150COMNTOOLS" in env:
 						project_type = "vs2017"
@@ -196,10 +202,16 @@ class build_info:
 				compiler = "clang"
 
 		if 0 == target_platform.find("win"):
-			if "ProgramFiles" in env:
-				program_files_folder = env["ProgramFiles"]
+			if "64bit" == platform.architecture()[0]:
+				if "ProgramFiles(x86)" in env:
+					program_files_folder = env["ProgramFiles(x86)"]
+				else:
+					program_files_folder = "C:\Program Files (x86)"
 			else:
-				program_files_folder = "C:\Program Files"
+				if "ProgramFiles" in env:
+					program_files_folder = env["ProgramFiles"]
+				else:
+					program_files_folder = "C:\Program Files"
 
 			if "vc141" == compiler:
 				if "VS150COMNTOOLS" in env:
