@@ -17,6 +17,8 @@ def build_Boost(build_info, compiler_info):
 	if (0 == build_info.project_type.find("vs")) or ((("gcc" == build_info.compiler_name) or ("mgw" == build_info.compiler_name)) and (build_info.compiler_version > 60)):
 		with_filesystem = False
 		with_system = False
+	if (0 == build_info.project_type.find("vs")) and ("clang" == build_info.compiler_name):
+		with_test = False
 
 	need_install = False
 	additional_options = " -DWITH_FILESYSTEM:BOOL="
@@ -143,7 +145,8 @@ def build_external_libs(build_info):
 
 		if build_info.is_dev_platform:
 			build_freetype(build_info, compiler_info)			
-			build_UniversalDXSDK(build_info, compiler_info)
+			if compiler_info.arch != "arm":
+				build_UniversalDXSDK(build_info, compiler_info)
 
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm"):
 				build_OpenALSDK(build_info, compiler_info)
