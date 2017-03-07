@@ -478,7 +478,7 @@ namespace KlayGE
 		}
 	}
 	
-	void OGLTexture2D::CreateHWResource(ElementInitData const * init_data)
+	void OGLTexture2D::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		GLint glinternalFormat;
 		GLenum glformat;
@@ -515,7 +515,7 @@ namespace KlayGE
 									w, h, array_size_, 0, image_size * array_size_, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
 									glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
@@ -524,7 +524,7 @@ namespace KlayGE
 						else
 						{
 							glCompressedTexImage2D(target_type_, level, glinternalFormat,
-								w, h, 0, image_size, (nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+								w, h, 0, image_size, init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 					}
 					else
@@ -536,7 +536,7 @@ namespace KlayGE
 								glTexImage3D(target_type_, level, glinternalFormat, w, h, array_size_, 0, glformat, gltype, nullptr);
 							}
 
-							if (init_data != nullptr)
+							if (!init_data.empty())
 							{
 								glTexSubImage3D(target_type_, level, 0, 0, array_index, w, h, 1,
 									glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
@@ -545,7 +545,7 @@ namespace KlayGE
 						else
 						{
 							glTexImage2D(target_type_, level, glinternalFormat, w, h, 0, glformat, gltype,
-								(nullptr == init_data) ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+								init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
 						}
 					}
 				}

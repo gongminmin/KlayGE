@@ -77,7 +77,7 @@ namespace KlayGE
 			float2(+1, -1)
 		};
 		GraphicsBufferPtr quad_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xys), xys);
-		quad_layout_->BindVertexStream(quad_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+		quad_layout_->BindVertexStream(quad_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
 		time_param_ = effect_->ParameterByName("time");
 
@@ -170,23 +170,23 @@ namespace KlayGE
 		init_data.data = &h0_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float2);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+		h0_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_GR32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
 		init_data.data = &omega_data[0];
 		init_data.row_pitch = (params.dmap_dim + 1) * sizeof(float);
 		init_data.slice_pitch = init_data.row_pitch * (params.dmap_dim + 1);
-		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+		omega_tex_ = rf.MakeTexture2D(params.dmap_dim + 1, params.dmap_dim + 1, 1, 1, EF_R32F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		displacement_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		gradient_tex_ = rf.MakeTexture2D(params.dmap_dim, params.dmap_dim, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		displacement_fb_ = rf.MakeFrameBuffer();
 		displacement_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*displacement_tex_, 0, 1, 0));
 		gradient_fb_ = rf.MakeFrameBuffer();
 		gradient_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*gradient_tex_, 0, 1, 0));
 
-		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		out_real_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		out_imag_tex_ = rf.MakeTexture2D(param_.dmap_dim, param_.dmap_dim, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		tex_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*out_real_tex_, 0, 1, 0));
 		tex_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*out_imag_tex_, 0, 1, 0));
 

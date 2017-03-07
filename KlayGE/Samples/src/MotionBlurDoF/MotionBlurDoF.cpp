@@ -195,13 +195,13 @@ namespace
 			: SceneObjectHelper(SOA_Moveable | SOA_Cullable),
 				last_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
 		{
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 1, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 2, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 3, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 4, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 5, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_TextureCoord, 6, EF_ABGR32F));
-			instance_format_.push_back(vertex_element(VEU_Diffuse, 0, EF_ABGR8));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 3, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 4, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 5, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_TextureCoord, 6, EF_ABGR32F));
+			instance_format_.push_back(VertexElement(VEU_Diffuse, 0, EF_ABGR8));
 		}
 
 		void Instance(float4x4 const & mat, Color const & clr)
@@ -350,7 +350,7 @@ namespace
 				}
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0), nullptr);
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 1, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
@@ -367,7 +367,7 @@ namespace
 					};
 				
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), &pos[0]);
-					normalization_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					normalization_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 				}
 
 				sat_pp_->InputPin(0, spread_tex_);
@@ -494,7 +494,7 @@ namespace
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				bokeh_tex_ = rf.MakeTexture2D(out_width, out_height, 1, 1, tex->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				bokeh_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*bokeh_tex_, 0, 1, 0));
 
 				if (gs_support_)
@@ -512,7 +512,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
-					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_GR32F));
 				}
 				else
 				{
@@ -574,7 +574,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(points.size() * sizeof(points[0])), &points[0]);
-					bokeh_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+					bokeh_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
 					GraphicsBufferPtr pos_ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
@@ -817,7 +817,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr ds_view;
 	if (depth_texture_support_)
 	{
-		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		ds_view = rf.Make2DDepthStencilRenderView(*ds_tex_, 0, 1, 0);
 	}
 	else
@@ -850,7 +850,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 			depth_fmt = EF_R32F;
 		}
 	}
-	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
 	if (depth_texture_support_)
 	{
@@ -885,7 +885,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
@@ -908,11 +908,11 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
 	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	if (depth_of_field_)
 	{
@@ -1083,7 +1083,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 				{
 					std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-						std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+						{ i, j, NUM_INSTANCE, NUM_LINE }));
 
 					float3 pos;
 					pos.x() = std::any_cast<float>(scr_pos[0]);
@@ -1091,7 +1091,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					pos.z() = std::any_cast<float>(scr_pos[2]);
 
 					std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-						std::make_tuple(i, j, NUM_INSTANCE, NUM_LINE)));
+						{i, j, NUM_INSTANCE, NUM_LINE }));
 
 					Color clr;
 					clr.r() = std::any_cast<float>(scr_clr[0]);

@@ -329,7 +329,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(tcs16[0]) * tcs16.size()),
-				vertex_element(VEU_TextureCoord, 0, EF_GR16), EAH_GPU_Read);
+				VertexElement(VEU_TextureCoord, 0, EF_GR16), EAH_GPU_Read);
 		}
 	}
 
@@ -395,7 +395,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
 			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
-				vertex_element(VEU_Tangent, 0, fmt), EAH_GPU_Read);
+				VertexElement(VEU_Tangent, 0, fmt), EAH_GPU_Read);
 		}
 	}
 
@@ -616,8 +616,8 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 
 	rl_ = rf.MakeRenderLayout();
 	rl_->TopologyType(RenderLayout::TT_TriangleList);
-	rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-	rl_->BindVertexStream(bone_index_vb, std::make_tuple(vertex_element(VEU_BlendIndex, 0, EF_ABGR8UI)));
+	rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
+	rl_->BindVertexStream(bone_index_vb, VertexElement(VEU_BlendIndex, 0, EF_ABGR8UI));
 	rl_->BindIndexStream(ib, EF_R16UI);
 
 	effect_attrs_ |= EA_SimpleForward;
@@ -700,7 +700,7 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 		init_data.row_pitch = sizeof(color_map);
 		init_data.slice_pitch = init_data.row_pitch * 1;
 		TexturePtr color_map_tex = rf.MakeTexture2D(sizeof(color_map) / sizeof(color_map[0]), 1, 1, 1, EF_ABGR8,
-			1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+			1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 		*(effect_->ParameterByName("color_map")) = color_map_tex;
 	}
 

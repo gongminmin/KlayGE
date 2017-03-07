@@ -212,9 +212,9 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
-		tex_to_buff_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
+		tex_to_buff_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
 
-		tex_to_buff_so_rl_->BindVertexStream(dst, std::make_tuple(vertex_element(VEU_Diffuse, 0, EF_ABGR32F)));
+		tex_to_buff_so_rl_->BindVertexStream(dst, VertexElement(VEU_Diffuse, 0, EF_ABGR32F));
 
 		re.BindSOBuffers(tex_to_buff_so_rl_);
 		re.Render(*effect_, *tech, *tex_to_buff_rl_);
@@ -252,8 +252,8 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(pos_data.size() * sizeof(pos_data[0])), &pos_data[0]);
-		buff_to_tex_rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_R32F)));
-		buff_to_tex_rl_->BindVertexStream(src, std::make_tuple(vertex_element(VEU_Diffuse, 0, src_fmt)));
+		buff_to_tex_rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_R32F));
+		buff_to_tex_rl_->BindVertexStream(src, VertexElement(VEU_Diffuse, 0, src_fmt));
 
 		FrameBufferPtr curr_fb = re.CurFrameBuffer();
 		re.BindFrameBuffer(frame_buffer_);

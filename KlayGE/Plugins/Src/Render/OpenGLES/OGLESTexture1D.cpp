@@ -265,7 +265,7 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture1D::CreateHWResource(ElementInitData const * init_data)
+	void OGLESTexture1D::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		uint32_t texel_size = NumFormatBytes(format_);
 
@@ -287,7 +287,7 @@ namespace KlayGE
 					GLsizei const image_size = ((w + 3) / 4) * block_size;
 
 					void* ptr;
-					if (nullptr == init_data)
+					if (init_data.empty())
 					{
 						tex_data_[array_index * num_mip_maps_ + level].resize(image_size, 0);
 						ptr = nullptr;
@@ -308,7 +308,7 @@ namespace KlayGE
 								w, 1, array_size_, 0, image_size * array_size_, nullptr);
 						}
 
-						if (init_data != nullptr)
+						if (!init_data.empty())
 						{
 							glCompressedTexSubImage3D(target_type_, level, 0, 0, array_index, w, 1, 1,
 								glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
@@ -325,7 +325,7 @@ namespace KlayGE
 					GLsizei const image_size = w * texel_size;
 
 					void* ptr;
-					if (nullptr == init_data)
+					if (init_data.empty())
 					{
 						tex_data_[array_index * num_mip_maps_ + level].resize(image_size, 0);
 						ptr = nullptr;
@@ -345,7 +345,7 @@ namespace KlayGE
 							glTexImage3D(target_type_, level, glinternalFormat, w, 1, array_size_, 0, glformat, gltype, nullptr);
 						}
 
-						if (init_data != nullptr)
+						if (!init_data.empty())
 						{
 							glTexSubImage3D(target_type_, level, 0, 0, array_index, w, 1, 1,
 								glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);

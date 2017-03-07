@@ -635,7 +635,7 @@ namespace KlayGE
 		if (depth_stencil_fmt_ != EF_Unknown)
 		{
 			depth_stencil_ = rf.MakeTexture2D(this->Width(), this->Height(), 1, stereo ? 2 : 1, depth_stencil_fmt_,
-				render_targets_[0]->SampleCount(), render_targets_[0]->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				render_targets_[0]->SampleCount(), render_targets_[0]->SampleQuality(), EAH_GPU_Read | EAH_GPU_Write);
 		}
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)

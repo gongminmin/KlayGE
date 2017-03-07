@@ -52,7 +52,7 @@ namespace
 	using namespace KlayGE;
 
 
-#ifndef KLAYGE_CPU_ARM
+#if !defined(KLAYGE_CPU_ARM) && !defined(KLAYGE_CPU_ARM64)
 	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #if defined(KLAYGE_COMPILER_MSVC)

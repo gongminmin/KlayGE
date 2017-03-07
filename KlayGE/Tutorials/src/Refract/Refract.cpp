@@ -238,7 +238,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 
 			ds_fmt = EF_D16;
 		}
-		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		backface_ds_view = rf.Make2DDepthStencilRenderView(*backface_ds_tex_, 0, 1, 0);
 	}
 	else
@@ -271,7 +271,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 			depth_fmt = EF_R32F;
 		}
 	}
-	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	ElementFormat normal_fmt;
 	if (caps.rendertarget_format_support(EF_GR8, 1, 0))
@@ -287,7 +287,7 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
 		normal_fmt = EF_ARGB8;
 	}
-	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	backface_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_tex_, 0, 1, 0));
 	backface_buffer_->Attach(FrameBuffer::ATT_DepthStencil, backface_ds_view);

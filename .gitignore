@@ -15,6 +15,7 @@ cfg_build.py
 *_gcc*_*_*
 *_vc*_*_*
 *_clang*_*_*
+.vs
 lib
 glloader/doc/html/
 glloader/include/glloader/glloader_egl.h
@@ -42,6 +43,7 @@ KlayGE/bin/*/*.py
 KlayGE/bin/*/*Py.zip
 KlayGE/bin/*/GL*CompatibilityReport.html
 KlayGE/bin/*/HWCollect.txt
+KlayGE/Core/Src/Base/TableGen
 KlayGE/media/Fonts
 KlayGE/media/Models
 KlayGE/media/Textures

@@ -554,7 +554,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12TextureCube::CreateHWResource(ElementInitData const * init_data)
+	void D3D12TextureCube::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE2D,
 			width_, width_, 1, array_size_ * 6, init_data);

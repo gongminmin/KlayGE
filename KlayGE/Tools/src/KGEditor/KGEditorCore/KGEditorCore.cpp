@@ -64,7 +64,7 @@ namespace
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 
-			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -171,13 +171,13 @@ namespace
 
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
-				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_R32F)));
+				VertexElement(VEU_TextureCoord, 0, EF_R32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
-				std::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
 			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
@@ -277,13 +277,13 @@ namespace
 
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
-				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_R32F)));
+				VertexElement(VEU_TextureCoord, 0, EF_R32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
-				std::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
 			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
@@ -440,13 +440,13 @@ namespace
 
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(positions.size() * sizeof(positions[0])), &positions[0]),
-				std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+				VertexElement(VEU_Position, 0, EF_BGR32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(axises.size() * sizeof(axises[0])), &axises[0]),
-				std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_R32F)));
+				VertexElement(VEU_TextureCoord, 0, EF_R32F));
 			rl_->BindVertexStream(rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(normals.size() * sizeof(normals[0])), &normals[0]),
-				std::make_tuple(vertex_element(VEU_Normal, 0, EF_BGR32F)));
+				VertexElement(VEU_Normal, 0, EF_BGR32F));
 
 			rl_->BindIndexStream(rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 				static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]), EF_R16UI);
@@ -502,7 +502,7 @@ namespace
 			rl_->TopologyType(RenderLayout::TT_LineList);
 
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
-			rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -551,8 +551,8 @@ namespace KlayGE
 			fmt = EF_ARGB8;
 		}
 
-		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write, NULL);
-		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read, NULL);
+		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
+		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read);
 		selective_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*selective_tex_, 0, 1, 0));
 		selective_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, EF_D24S8, 1, 0));
 

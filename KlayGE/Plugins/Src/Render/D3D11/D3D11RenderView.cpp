@@ -192,7 +192,7 @@ namespace KlayGE
 		BOOST_ASSERT(IsDepthFormat(pf));
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write, nullptr);
+		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
 		ds_view_ = checked_cast<D3D11Texture*>(ds_tex.get())->RetriveD3DDepthStencilView(0, 1, 0);
 
 		width_ = width;

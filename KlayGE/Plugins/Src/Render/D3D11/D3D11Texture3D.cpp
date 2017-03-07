@@ -278,7 +278,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture3D::CreateHWResource(ElementInitData const * init_data)
+	void D3D11Texture3D::CreateHWResource(ArrayRef<ElementInitData> init_data)
 	{
 		D3D11_TEXTURE3D_DESC desc;
 		desc.Width = width_;
@@ -288,10 +288,12 @@ namespace KlayGE
 		desc.Format = D3D11Mapping::MappingFormat(format_);
 		this->GetD3DFlags(desc.Usage, desc.BindFlags, desc.CPUAccessFlags, desc.MiscFlags);
 
-		std::vector<D3D11_SUBRESOURCE_DATA> subres_data(num_mip_maps_);
-		if (init_data != nullptr)
+		std::vector<D3D11_SUBRESOURCE_DATA> subres_data;
+		if (!init_data.empty())
 		{
-			for (uint32_t i = 0; i < num_mip_maps_; ++ i)
+			BOOST_ASSERT(init_data.size() == num_mip_maps_);
+			subres_data.resize(init_data.size());
+			for (size_t i = 0; i < init_data.size(); ++ i)
 			{
 				subres_data[i].pSysMem = init_data[i].data;
 				subres_data[i].SysMemPitch = init_data[i].row_pitch;
@@ -300,7 +302,7 @@ namespace KlayGE
 		}
 
 		ID3D11Texture3D* d3d_tex;
-		TIF(d3d_device_->CreateTexture3D(&desc, (init_data != nullptr) ? &subres_data[0] : nullptr, &d3d_tex));
+		TIF(d3d_device_->CreateTexture3D(&desc, subres_data.data(), &d3d_tex));
 		d3d_texture_ = MakeCOMPtr(d3d_tex);
 
 		if ((access_hint_ & (EAH_GPU_Read | EAH_Generate_Mips)) && (num_mip_maps_ > 1))

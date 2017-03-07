@@ -128,7 +128,7 @@ namespace KlayGE
 		if (uncompressed_tex->Format() != decoded_fmt_)
 		{
 			uncompressed_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
-				1, 1, decoded_fmt_, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+				1, 1, decoded_fmt_, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 			in_tex->CopyToTexture(*uncompressed_tex);
 		}
 		else
@@ -151,7 +151,7 @@ namespace KlayGE
 		if (out_tex->Format() != decoded_fmt_)
 		{
 			decoded_tex = Context::Instance().RenderFactoryInstance().MakeTexture2D(width, height,
-				1, 1, decoded_fmt_, 1, 0, EAH_CPU_Read | EAH_CPU_Write, nullptr);
+				1, 1, decoded_fmt_, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 		}
 		else
 		{

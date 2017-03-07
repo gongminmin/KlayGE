@@ -186,7 +186,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 			fmt = EF_ARGB8;
 		}
 		// Just dummy
-		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
 		{
@@ -198,7 +198,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 			fmt = EF_D16;
 		}
-		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_ds_tex);
@@ -221,7 +221,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 		{
 			fmt = EF_R16F;
 		}
-		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
 		checked_pointer_cast<ModelObject>(model_)->BackFaceDepthTex(back_face_depth_tex);

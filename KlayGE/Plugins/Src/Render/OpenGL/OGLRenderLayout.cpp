@@ -59,7 +59,7 @@ namespace KlayGE
 		{
 			OGLGraphicsBuffer& stream(*checked_pointer_cast<OGLGraphicsBuffer>(this->GetVertexStream(i)));
 			uint32_t const size = this->VertexSize(i);
-			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
+			auto const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{
@@ -124,7 +124,7 @@ namespace KlayGE
 			uint32_t elem_offset = 0;
 			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
-				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+				VertexElement const & vs_elem = this->InstanceStreamFormat()[i];
 
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
@@ -191,7 +191,7 @@ namespace KlayGE
 		OGLShaderObjectPtr const & ogl_so = checked_pointer_cast<OGLShaderObject>(so);
 		for (uint32_t i = 0; i < this->NumVertexStreams(); ++ i)
 		{
-			vertex_elements_type const & vertex_stream_fmt = this->VertexStreamFormat(i);
+			auto const & vertex_stream_fmt = this->VertexStreamFormat(i);
 
 			for (auto const & vs_elem : vertex_stream_fmt)
 			{
@@ -224,7 +224,7 @@ namespace KlayGE
 			size_t const inst_format_size = this->InstanceStreamFormat().size();
 			for (size_t i = 0; i < inst_format_size; ++ i)
 			{
-				vertex_element const & vs_elem = this->InstanceStreamFormat()[i];
+				VertexElement const & vs_elem = this->InstanceStreamFormat()[i];
 				GLint attr = ogl_so->GetAttribLocation(vs_elem.usage, vs_elem.usage_index);
 				if (attr != -1)
 				{

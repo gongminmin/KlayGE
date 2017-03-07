@@ -129,28 +129,30 @@ namespace KlayGE
 			}
 			for (size_t i = 1; i < widths.size(); ++ i)
 			{
-				inter_tex_x_up[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				inter_tex_x_up[i] = rf.MakeTexture2D(widths[i], tex_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			}
 			{
 				inter_tex_x_down[0] = inter_tex_x_up.back();
 			}
 			for (size_t i = 1; i < widths.size(); ++ i)
 			{
-				inter_tex_x_down[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				inter_tex_x_down[i] = rf.MakeTexture2D(widths[widths.size() - 1 - i], tex_height, 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write);
 			}
 			{
 				inter_tex_y_up[0] = inter_tex_x_down.back();
 			}
 			for (size_t i = 1; i < heights.size(); ++ i)
 			{
-				inter_tex_y_up[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				inter_tex_y_up[i] = rf.MakeTexture2D(tex_width, heights[i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			}
 			{
 				inter_tex_y_down[0] = inter_tex_y_up.back();
 			}
 			for (size_t i = 1; i < heights.size(); ++ i)
 			{
-				inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+				inter_tex_y_down[i] = rf.MakeTexture2D(tex_width, heights[heights.size() - 1 - i], 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write);
 			}
 
 			for (size_t i = 0; i < inter_tex_x_up.size() - 1; ++ i)
@@ -239,7 +241,7 @@ namespace KlayGE
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr inter_tex = rf.MakeTexture2D(tex_width, tex_height, 1, 1, EF_ABGR16F, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered, nullptr);
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 
 			{
 				int32_t const wave_x = (tex_width + BLOCK_SIZE - 1) / BLOCK_SIZE;

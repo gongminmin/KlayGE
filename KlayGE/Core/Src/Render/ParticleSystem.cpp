@@ -437,8 +437,8 @@ namespace
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
 					sizeof(ParticleInstance), nullptr);
-				rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F),
-					vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				rl_->BindVertexStream(pos_vb,
+					{ VertexElement(VEU_Position, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 0, EF_ABGR32F) });
 
 				simple_forward_tech_ = effect_->TechniqueByName("ParticleWithGS");
 				vdm_tech_ = effect_->TechniqueByName("ParticleWithGSVDM");
@@ -462,14 +462,13 @@ namespace
 
 				GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 					sizeof(texs), texs);
-				rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+				rl_->BindVertexStream(tex_vb, VertexElement(VEU_Position, 0, EF_GR32F),
 					RenderLayout::ST_Geometry, 0);
 
 				GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_CPU_Write,
 					sizeof(ParticleInstance), nullptr);
 				rl_->BindVertexStream(pos_vb,
-					std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F),
-						vertex_element(VEU_TextureCoord, 1, EF_ABGR32F)),
+					{ VertexElement(VEU_TextureCoord, 0, EF_ABGR32F), VertexElement(VEU_TextureCoord, 1, EF_ABGR32F) },
 					RenderLayout::ST_Instance);
 
 				GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,

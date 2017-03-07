@@ -219,7 +219,7 @@ namespace KlayGE
 		}
 	}
 
-	vertex_elements_type const & SceneObject::InstanceFormat() const
+	std::vector<VertexElement> const & SceneObject::InstanceFormat() const
 	{
 		return instance_format_;
 	}

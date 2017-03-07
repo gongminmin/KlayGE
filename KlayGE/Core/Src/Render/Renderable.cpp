@@ -239,7 +239,7 @@ namespace KlayGE
 	{
 		if (!instances_.empty() && !instances_[0]->InstanceFormat().empty())
 		{
-			vertex_elements_type const & vet = instances_[0]->InstanceFormat();
+			auto const & vet = instances_[0]->InstanceFormat();
 			uint32_t size = 0;
 			for (size_t i = 0; i < vet.size(); ++ i)
 			{

@@ -45,7 +45,7 @@ namespace
 		diff_pp->InputPin(0, in_tex);
 		spec_pp->InputPin(0, in_tex);
 
-		TexturePtr out_tex = rf.MakeTextureCube(in_width, out_num_mipmaps, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write, nullptr);
+		TexturePtr out_tex = rf.MakeTextureCube(in_width, out_num_mipmaps, 1, EF_ABGR16F, 1, 0, EAH_GPU_Write);
 
 		for (int face = 0; face < 6; ++ face)
 		{

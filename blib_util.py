@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #-*- coding: ascii -*-
 
-import os, sys, multiprocessing, subprocess, shutil
+import os, sys, multiprocessing, subprocess, shutil, platform
 try:
 	import cfg_build
 except:
@@ -145,10 +145,16 @@ class build_info:
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
-					if "ProgramFiles" in env:
-						program_files_folder = env["ProgramFiles"]
+					if "64bit" == platform.architecture()[0]:
+						if "ProgramFiles(x86)" in env:
+							program_files_folder = env["ProgramFiles(x86)"]
+						else:
+							program_files_folder = "C:\Program Files (x86)"
 					else:
-						program_files_folder = "C:\Program Files"
+						if "ProgramFiles" in env:
+							program_files_folder = env["ProgramFiles"]
+						else:
+							program_files_folder = "C:\Program Files"
 
 					if "VS150COMNTOOLS" in env:
 						project_type = "vs2017"
@@ -196,10 +202,16 @@ class build_info:
 				compiler = "clang"
 
 		if 0 == target_platform.find("win"):
-			if "ProgramFiles" in env:
-				program_files_folder = env["ProgramFiles"]
+			if "64bit" == platform.architecture()[0]:
+				if "ProgramFiles(x86)" in env:
+					program_files_folder = env["ProgramFiles(x86)"]
+				else:
+					program_files_folder = "C:\Program Files (x86)"
 			else:
-				program_files_folder = "C:\Program Files"
+				if "ProgramFiles" in env:
+					program_files_folder = env["ProgramFiles"]
+				else:
+					program_files_folder = "C:\Program Files"
 
 			if "vc141" == compiler:
 				if "VS150COMNTOOLS" in env:
@@ -314,6 +326,8 @@ class build_info:
 					gen_suffix = " ARM"
 				elif "x64" == arch:
 					gen_suffix = " Win64"
+				elif "arm64" == arch:
+					gen_suffix = " ARM64"
 				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
@@ -529,6 +543,9 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			elif "arm" == compiler_info.arch:
 				vc_option = "x86_arm"
 				vc_arch = "ARM"
+			elif "arm64" == compiler_info.arch:
+				vc_option = "x86_arm64"
+				vc_arch = "ARM64"
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level

@@ -52,6 +52,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/ElementFormat.hpp>
+#include <KFL/ArrayRef.hpp>
 
 #include <string>
 #include <vector>
@@ -265,7 +266,7 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) = 0;
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) = 0;
 
-		virtual void CreateHWResource(ElementInitData const * init_data) = 0;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) = 0;
 		virtual void DeleteHWResource() = 0;
 		virtual bool HWResourceReady() const = 0;
 
@@ -329,7 +330,7 @@ namespace KlayGE
 
 	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
 		uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,
-		ElementFormat format, std::vector<ElementInitData> const & init_data);
+		ElementFormat format, ArrayRef<ElementInitData> init_data);
 	KLAYGE_CORE_API void SaveTexture(TexturePtr const & texture, std::string const & tex_name);
 
 	KLAYGE_CORE_API void ResizeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format,

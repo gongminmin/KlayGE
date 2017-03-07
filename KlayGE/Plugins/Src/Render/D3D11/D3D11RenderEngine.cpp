@@ -361,7 +361,7 @@ namespace KlayGE
 					uint32_t const w = win->Width();
 					uint32_t const h = win->Height();
 					stereo_nv_3d_vision_tex_ = rf.MakeTexture2D(w * 2, h + 1, 1, 1,
-						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+						settings.color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 					stereo_nv_3d_vision_fb_ = rf.MakeFrameBuffer();
 					stereo_nv_3d_vision_fb_->Attach(FrameBuffer::ATT_Color0,
@@ -379,7 +379,7 @@ namespace KlayGE
 					init_data.row_pitch = sizeof(sih);
 					init_data.slice_pitch = init_data.row_pitch;
 					TexturePtr sih_tex = rf.MakeTexture2D(sizeof(sih) / NumFormatBytes(settings.color_fmt),
-						1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, &init_data);
+						1, 1, 1, settings.color_fmt, 1, 0, EAH_GPU_Read, init_data);
 
 					sih_tex->CopyToSubTexture2D(*stereo_nv_3d_vision_tex_,
 						0, 0, 0, h, sih_tex->Width(0), 1,

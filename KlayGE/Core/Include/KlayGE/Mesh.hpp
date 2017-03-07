@@ -87,8 +87,8 @@ namespace KlayGE
 			return rl_->NumIndices();
 		}
 
-		void AddVertexStream(void const * buf, uint32_t size, vertex_element const & ve, uint32_t access_hint);
-		void AddVertexStream(GraphicsBufferPtr const & buffer, vertex_element const & ve);
+		void AddVertexStream(void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint);
+		void AddVertexStream(GraphicsBufferPtr const & buffer, VertexElement const & ve);
 		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
 		void AddIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format);
 
@@ -436,7 +436,7 @@ namespace KlayGE
 	};
 
 	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
-		std::vector<vertex_element>& merged_ves, char& all_is_index_16_bit,
+		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
 		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
@@ -453,7 +453,7 @@ namespace KlayGE
 		std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc = CreateMeshFactory<StaticMesh>());
 
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
-		std::vector<vertex_element> const & merged_ves, char all_is_index_16_bit, 
+		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,

@@ -37,6 +37,7 @@ SET(KERNEL_CXX17_HEADER_FILES
 )
 SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/AlignedAllocator.hpp
+	${KFL_PROJECT_DIR}/include/KFL/ArrayRef.hpp
 	${KFL_PROJECT_DIR}/include/KFL/COMPtr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp

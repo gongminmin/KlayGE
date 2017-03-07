@@ -1191,18 +1191,19 @@ namespace KlayGE
 			if (caps.max_texture_array_length > array_size)
 			{
 				tex_cache_ = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap,
-					std::max(array_size, 2U), format, 1, 0, EAH_GPU_Read, nullptr);
+					std::max(array_size, 2U), format, 1, 0, EAH_GPU_Read);
 			}
 			else
 			{
 				tex_cache_array_.resize(array_size);
 				for (uint32_t i = 0; i < array_size; ++ i)
 				{
-					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, 1, format, 1, 0, EAH_GPU_Read, nullptr);
+					tex_cache_array_[i] = rf.MakeTexture2D(tile_with_border_size * s, tile_with_border_size * s, mipmap, 1, format, 1, 0,
+						EAH_GPU_Read);
 				}
 			}
 
-			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read, nullptr);
+			tex_indirect_ = rf.MakeTexture2D(num_tiles_, num_tiles_, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read);
 
 			tile_free_list_.emplace_back(0, pages);
 		}

@@ -111,7 +111,7 @@ namespace
 		{
 			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
 			{
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			}
 			else
 			{
@@ -120,7 +120,7 @@ namespace
 					std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 				}
 
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			}
 		}
 
@@ -179,7 +179,7 @@ namespace
 					GraphicsBufferPtr pos = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						max_num_particles * sizeof(float2), &p_in_tex[0]);
 
-					rl_->BindVertexStream(pos, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)));
+					rl_->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F));
 					technique_ = effect_->TechniqueByName("ParticlesWithGS");
 				}
 			}
@@ -201,9 +201,9 @@ namespace
 					sizeof(indices), indices);
 
 				rl_->TopologyType(RenderLayout::TT_TriangleStrip);
-				rl_->BindVertexStream(tex0, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)),
+				rl_->BindVertexStream(tex0, VertexElement(VEU_TextureCoord, 0, EF_GR32F),
 										RenderLayout::ST_Geometry, max_num_particles);
-				rl_->BindVertexStream(pos, std::make_tuple(vertex_element(VEU_Position, 0, EF_GR32F)),
+				rl_->BindVertexStream(pos, VertexElement(VEU_Position, 0, EF_GR32F),
 										RenderLayout::ST_Instance, 1);
 				rl_->BindIndexStream(ib, EF_R16UI);
 
@@ -244,7 +244,7 @@ namespace
 		{
 			if (use_gs && (use_so || use_cs))
 			{
-				rl_->BindVertexStream(particle_pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
+				rl_->BindVertexStream(particle_pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 			}
 		}
 
@@ -348,10 +348,10 @@ namespace
 				particle_vel_vb_[1] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
 					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
 
-				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
-				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], std::make_tuple(vertex_element(VEU_Position, 0, EF_ABGR32F)));
-				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_ABGR32F)));
+				particle_rl_[0]->BindVertexStream(particle_pos_vb_[0], VertexElement(VEU_Position, 0, EF_ABGR32F));
+				particle_rl_[0]->BindVertexStream(particle_vel_vb_[0], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
+				particle_rl_[1]->BindVertexStream(particle_pos_vb_[1], VertexElement(VEU_Position, 0, EF_ABGR32F));
+				particle_rl_[1]->BindVertexStream(particle_vel_vb_[1], VertexElement(VEU_TextureCoord, 0, EF_ABGR32F));
 
 				for (int i = 0; i < max_num_particles_; ++ i)
 				{
@@ -383,7 +383,7 @@ namespace
 
 					GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						sizeof(xyzs), &xyzs[0]);
-					rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+					rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 					pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[4]);
 				}
@@ -398,7 +398,7 @@ namespace
 
 					GraphicsBufferPtr tex_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 						sizeof(texs), &texs[0]);
-					rl_->BindVertexStream(tex_vb, std::make_tuple(vertex_element(VEU_TextureCoord, 0, EF_GR32F)));
+					rl_->BindVertexStream(tex_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
 
 					tc_aabb_ = AABBox(float3(0, 0, 0), float3(1, 1, 0));
 				}
@@ -456,10 +456,10 @@ namespace
 						pos_init.row_pitch = tex_width_ * sizeof(half) * 4;
 						pos_init.slice_pitch = 0;
 					}
-					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, &pos_init);
-					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
-					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					particle_pos_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_pos_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, pos_init);
+					particle_vel_texture_[0] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+					particle_vel_texture_[1] = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 				}
 
 				FrameBufferPtr const & screen_buffer = re.CurFrameBuffer();
@@ -512,7 +512,7 @@ namespace
 					vel_init.row_pitch = tex_width_ * sizeof(half) * 4;
 					vel_init.slice_pitch = 0;
 
-					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &vel_init);
+					TexturePtr particle_init_vel = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_Immutable, vel_init);
 					*(effect_->ParameterByName("particle_init_vel_tex")) = particle_init_vel;
 				}
 
@@ -566,7 +566,7 @@ namespace
 				init_data.row_pitch = tex_width_ * sizeof(half);
 				init_data.slice_pitch = init_data.row_pitch * tex_height_;
 
-				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+				TexturePtr particle_birth_time_tex = rf.MakeTexture2D(tex_width_, tex_height_, 1, 1, EF_R16F, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 				*(effect_->ParameterByName("particle_birth_time_tex")) = particle_birth_time_tex;
 			}
 		}
@@ -841,11 +841,11 @@ void GPUParticleSystemApp::OnResize(uint32_t width, uint32_t height)
 
 	RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 
-	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	scene_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*scene_tex_, 0, 1, 0));
 	scene_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+	fog_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	fog_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*fog_tex_, 0, 1, 0));
 	fog_buffer_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 

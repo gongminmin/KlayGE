@@ -1669,7 +1669,7 @@ namespace KlayGE
 			uint32_t x_height = tex->Height(0);
 
 			TexturePtr blur_x = rf.MakeTexture2D(x_width, x_height, 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pp_chain_[0]->OutputPin(0, blur_x);
 			pp_chain_[1]->InputPin(0, blur_x);
 		}
@@ -1717,7 +1717,7 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			TexturePtr blur_x = rf.MakeTexture2D(tex->Width(0), tex->Height(0), 1, 1, tex->Format(),
-					1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+					1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pp_chain_[0]->OutputPin(0, blur_x);
 			pp_chain_[1]->InputPin(0, blur_x);
 		}

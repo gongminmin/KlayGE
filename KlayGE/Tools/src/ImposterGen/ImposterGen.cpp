@@ -97,9 +97,9 @@ void GeneratesImposters(std::string const & meshml_name, std::string const & tar
 	RenderEngine& re = rf.RenderEngineInstance();
 
 	TexturePtr impostors_g_buffer_rt0 = rf.MakeTexture2D(size * num_azimuth, size * num_elevation,
-		0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 	TexturePtr impostors_g_buffer_rt1 = rf.MakeTexture2D(size * num_azimuth, size * num_elevation,
-		0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips, nullptr);
+		0, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
 	FrameBufferPtr imposter_fb = rf.MakeFrameBuffer();
 	imposter_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*impostors_g_buffer_rt0, 0, 1, 0));

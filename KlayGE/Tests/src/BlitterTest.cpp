@@ -34,11 +34,11 @@ bool Compare2D(std::string const & test_name,
 	ElementFormat const tex0_fmt = tex0.Format();
 	ElementFormat const tex1_fmt = tex1.Format();
 
-	TexturePtr tex0_cpu = rf.MakeTexture2D(width, height, 1, 1, tex0_fmt, 1, 0, EAH_CPU_Read, nullptr);
+	TexturePtr tex0_cpu = rf.MakeTexture2D(width, height, 1, 1, tex0_fmt, 1, 0, EAH_CPU_Read);
 	tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height,
 		tex0_array_index, tex0_level, tex0_x_offset, tex0_y_offset, width, height);
 
-	TexturePtr tex1_cpu = rf.MakeTexture2D(width, height, 1, 1, tex1_fmt, 1, 0, EAH_CPU_Read, nullptr);
+	TexturePtr tex1_cpu = rf.MakeTexture2D(width, height, 1, 1, tex1_fmt, 1, 0, EAH_CPU_Read);
 	tex1.CopyToSubTexture2D(*tex1_cpu, 0, 0, 0, 0, width, height,
 		tex1_array_index, tex1_level, tex1_x_offset, tex1_y_offset, width, height);
 
@@ -122,9 +122,9 @@ void TestBlitter2D(std::string const & test_name, uint32_t array_size, uint32_t 
 			init_data[i * mip_levels + m].slice_pitch = init_data[i].row_pitch * h;
 		}
 	}
-	TexturePtr src = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+	TexturePtr src = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
-	TexturePtr dst = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Write, nullptr);
+	TexturePtr dst = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Write);
 
 	std::ranlux24_base gen;
 	std::uniform_int_distribution<uint32_t> dis_index(0, array_size - 1);
@@ -165,7 +165,7 @@ void TestBlitter2D(std::string const & test_name, uint32_t array_size, uint32_t 
 		sanity_init_data.data = &sanity_data[0];
 		sanity_init_data.row_pitch = dst_x_size * sizeof(uint32_t);
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
-		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, &sanity_init_data);
+		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
 		BOOST_CHECK(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,
@@ -213,7 +213,7 @@ void TestBlitter2DToBuff(std::string const & test_name, uint32_t array_size, uin
 			init_data[i * mip_levels + m].slice_pitch = init_data[i].row_pitch * h;
 		}
 	}
-	TexturePtr src = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data[0]);
+	TexturePtr src = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 
 	GraphicsBufferPtr dst = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Write, WIDTH * HEIGHT * sizeof(float4), nullptr, EF_ABGR32F);
 
@@ -253,7 +253,7 @@ void TestBlitter2DToBuff(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.data = mapper.Pointer<float4>();
 		sanity_init_data.row_pitch = src_x_size * sizeof(float4);
 		sanity_init_data.slice_pitch = src_x_size * src_y_size * sizeof(float4);
-		TexturePtr dst_sanity = rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, &sanity_init_data);
+		TexturePtr dst_sanity = rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, sanity_init_data);
 
 		BOOST_CHECK(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,
@@ -281,7 +281,7 @@ void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uin
 	GraphicsBufferPtr src = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 		static_cast<uint32_t>(data.size() * sizeof(data[0])), &data[0]);
 
-	TexturePtr dst = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Write, nullptr);
+	TexturePtr dst = rf.MakeTexture2D(WIDTH, HEIGHT, mip_levels, array_size, EF_ABGR8, 1, 0, EAH_GPU_Write);
 
 	std::ranlux24_base gen;
 	std::uniform_int_distribution<uint32_t> dis_index(0, array_size - 1);
@@ -325,7 +325,7 @@ void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.data = &sanity_data[0];
 		sanity_init_data.row_pitch = dst_x_size * sizeof(uint32_t);
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
-		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, &sanity_init_data);
+		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
 		BOOST_CHECK(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,

@@ -43,7 +43,7 @@ namespace KlayGE
 
 		GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 			static_cast<uint32_t>(vertices.size() * sizeof(vertices[0])), &vertices[0]);
-		rl_->BindVertexStream(pos_vb, std::make_tuple(vertex_element(VEU_Position, 0, EF_BGR32F)));
+		rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
 		std::vector<uint32_t> indices;
 		for (int i = 0; i < SUN_FLARENUM; ++ i)

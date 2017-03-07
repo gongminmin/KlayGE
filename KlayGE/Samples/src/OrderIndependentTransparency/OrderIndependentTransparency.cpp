@@ -634,7 +634,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	{
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
 		{
-			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, ds_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, ds_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			depth_views_[i] = rf.Make2DDepthStencilRenderView(*depth_texs_[i], 0, 1, 0);
 		}
 	}
@@ -652,7 +652,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		}
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
 		{
-			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			depth_views_[i] = rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0);
 		}
 	}
@@ -673,7 +673,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	}
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
-		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*peeled_texs_[i], 0, 1, 0));
 		peeling_fbs_[i]->Attach(FrameBuffer::ATT_DepthStencil, depth_views_[i % 2]);
@@ -698,7 +698,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 		{
 			opaque_bg_format = peel_format;
 		}
-		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write, nullptr);
+		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));
 		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
