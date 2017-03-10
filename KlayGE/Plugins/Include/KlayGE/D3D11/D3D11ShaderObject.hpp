@@ -25,20 +25,6 @@ namespace KlayGE
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 2)
 #endif
-	struct D3D11ShaderParameterHandle
-	{
-		uint32_t shader_type;
-
-		D3D_SHADER_VARIABLE_TYPE param_type;
-
-		uint32_t cbuff;
-
-		uint32_t offset;
-		uint32_t elements;
-		uint8_t rows;
-		uint8_t columns;
-	};
-
 	struct D3D11ShaderDesc
 	{
 		D3D11ShaderDesc()
@@ -121,15 +107,14 @@ namespace KlayGE
 		}
 
 	private:
-		struct parameter_bind_t
+		struct ParameterBind
 		{
 			RenderEffectParameter* param;
-			D3D11ShaderParameterHandle p_handle;
+			uint32_t offset;
 			std::function<void()> func;
 		};
-		typedef std::vector<parameter_bind_t> parameter_binds_t;
 
-		parameter_bind_t GetBindFunc(D3D11ShaderParameterHandle const & p_handle, RenderEffectParameter* param);
+		ParameterBind GetBindFunc(ShaderType type, uint32_t offset, RenderEffectParameter* param);
 
 		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
 		std::shared_ptr<std::vector<uint8_t>> CompiteToBytecode(ShaderType type, RenderEffect const & effect,
@@ -138,7 +123,7 @@ namespace KlayGE
 			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
 
 	private:
-		std::array<parameter_binds_t, ST_NumShaderTypes> param_binds_;
+		std::array<std::vector<ParameterBind>, ST_NumShaderTypes> param_binds_;
 
 		ID3D11VertexShaderPtr vertex_shader_;
 		ID3D11PixelShaderPtr pixel_shader_;

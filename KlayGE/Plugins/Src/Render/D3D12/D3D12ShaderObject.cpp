@@ -975,37 +975,19 @@ namespace KlayGE
 				RenderEffectParameter* p = effect.ParameterByName(shader_desc_[type]->res_desc[i].name);
 				BOOST_ASSERT(p);
 
-				D3D12ShaderParameterHandle p_handle;
-				p_handle.shader_type = static_cast<uint8_t>(type);
-				p_handle.cbuff = 0;
-				p_handle.offset = shader_desc_[type]->res_desc[i].bind_point;
-				p_handle.elements = 1;
-				p_handle.rows = 0;
-				p_handle.columns = 1;
+				uint32_t offset = shader_desc_[type]->res_desc[i].bind_point;
 				if (D3D_SIT_SAMPLER == shader_desc_[type]->res_desc[i].type)
 				{
-					p_handle.param_type = D3D_SVT_SAMPLER;
-
 					SamplerStateObjectPtr sampler;
 					p->Value(sampler);
 					if (sampler)
 					{
-						samplers_[p_handle.shader_type][p_handle.offset]
-							= checked_cast<D3D12SamplerStateObject*>(sampler.get())->D3DDesc();
+						samplers_[type][offset] = checked_cast<D3D12SamplerStateObject*>(sampler.get())->D3DDesc();
 					}
 				}
 				else
 				{
-					if (D3D_SRV_DIMENSION_BUFFER == shader_desc_[type]->res_desc[i].dimension)
-					{
-						p_handle.param_type = D3D_SVT_BUFFER;
-					}
-					else
-					{
-						p_handle.param_type = D3D_SVT_TEXTURE;
-					}
-
-					param_binds_[type].push_back(this->GetBindFunc(p_handle, p));
+					param_binds_[type].push_back(this->GetBindFunc(type, offset, p));
 				}
 			}
 		}
@@ -1100,7 +1082,7 @@ namespace KlayGE
 			param_binds_[type].reserve(so.param_binds_[type].size());
 			for (auto const & pb : so.param_binds_[type])
 			{
-				param_binds_[type].push_back(this->GetBindFunc(pb.p_handle, pb.param));
+				param_binds_[type].push_back(this->GetBindFunc(type, pb.offset, pb.param));
 			}
 		}
 	}
@@ -1259,7 +1241,7 @@ namespace KlayGE
 			ret->param_binds_[i].reserve(param_binds_[i].size());
 			for (auto const & pb : param_binds_[i])
 			{
-				ret->param_binds_[i].push_back(ret->GetBindFunc(pb.p_handle, effect.ParameterByName(pb.param->Name())));
+				ret->param_binds_[i].push_back(ret->GetBindFunc(static_cast<ShaderType>(i), pb.offset, effect.ParameterByName(pb.param->Name())));
 			}
 		}
 
@@ -1278,12 +1260,11 @@ namespace KlayGE
 		return ret;
 	}
 
-	D3D12ShaderObject::parameter_bind_t D3D12ShaderObject::GetBindFunc(D3D12ShaderParameterHandle const & p_handle,
-		RenderEffectParameter* param)
+	D3D12ShaderObject::ParameterBind D3D12ShaderObject::GetBindFunc(ShaderType type, uint32_t offset, RenderEffectParameter* param)
 	{
-		parameter_bind_t ret;
+		ParameterBind ret;
 		ret.param = param;
-		std::memcpy(&ret.p_handle, &p_handle, sizeof(p_handle));
+		ret.offset = offset;
 
 		switch (param->Type())
 		{
@@ -1312,7 +1293,7 @@ namespace KlayGE
 		case REDT_texture2DArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
-			ret.func = SetD3D12ShaderParameterTextureSRV(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D12ShaderParameterTextureSRV(srvsrcs_[type][offset], srvs_[type][offset], param);
 			break;
 
 		case REDT_buffer:
@@ -1320,7 +1301,7 @@ namespace KlayGE
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
 		case REDT_byte_address_buffer:
-			ret.func = SetD3D12ShaderParameterGraphicsBufferSRV(srvsrcs_[p_handle.shader_type][p_handle.offset], srvs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D12ShaderParameterGraphicsBufferSRV(srvsrcs_[type][offset], srvs_[type][offset], param);
 			break;
 
 		case REDT_rw_texture1D:
@@ -1328,13 +1309,13 @@ namespace KlayGE
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
-			ret.func = SetD3D12ShaderParameterTextureUAV(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D12ShaderParameterTextureUAV(uavsrcs_[type][offset], uavs_[type][offset], param);
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
-			ret.func = SetD3D12ShaderParameterGraphicsBufferUAV(uavsrcs_[p_handle.shader_type][p_handle.offset], uavs_[p_handle.shader_type][p_handle.offset], param);
+			ret.func = SetD3D12ShaderParameterGraphicsBufferUAV(uavsrcs_[type][offset], uavs_[type][offset], param);
 			break;
 
 		default:

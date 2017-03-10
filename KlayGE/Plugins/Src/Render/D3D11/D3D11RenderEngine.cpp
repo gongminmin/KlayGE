@@ -423,7 +423,7 @@ namespace KlayGE
 				thread_pool_wait_ = ::CreateThreadpoolWait(D3D11RenderEngine::OnDeviceLost, this, nullptr);
 				if (thread_pool_wait_ != nullptr)
 				{
-					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, NULL);
+					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, nullptr);
 					TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
 				}
 			}
