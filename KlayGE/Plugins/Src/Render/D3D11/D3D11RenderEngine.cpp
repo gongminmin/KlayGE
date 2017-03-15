@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -121,7 +121,7 @@ namespace KlayGE
 #endif
 
 		IDXGIFactory1* gi_factory;
-		TIF(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
+		TIFHR(DynamicCreateDXGIFactory1_(IID_IDXGIFactory1, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_1_ = MakeCOMPtr(gi_factory);
 		dxgi_sub_ver_ = 1;
 
@@ -424,7 +424,7 @@ namespace KlayGE
 				if (thread_pool_wait_ != nullptr)
 				{
 					::SetThreadpoolWait(thread_pool_wait_, device_lost_event_, nullptr);
-					TIF(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
+					TIFHR(d3d_device_4_->RegisterDeviceRemovedEvent(device_lost_event_, &device_lost_reg_cookie_));
 				}
 			}
 		}

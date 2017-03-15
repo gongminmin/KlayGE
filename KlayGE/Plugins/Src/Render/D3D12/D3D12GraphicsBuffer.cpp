@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -121,7 +121,7 @@ namespace KlayGE
 		}
 
 		ID3D12Resource* buffer;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, init_state, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 		buffer_ = MakeCOMPtr(buffer);
@@ -137,7 +137,7 @@ namespace KlayGE
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 			res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-			TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+			TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 				&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 			ID3D12ResourcePtr buffer_upload = MakeCOMPtr(buffer);
@@ -183,7 +183,7 @@ namespace KlayGE
 				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
 				res_desc.Width = sizeof(uint64_t);
 				res_desc.Flags &= ~D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
-				TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+				TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 					&res_desc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 					IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 				buffer_counter_upload_ = MakeCOMPtr(buffer);
@@ -277,7 +277,7 @@ namespace KlayGE
 		}
 
 		void* p;
-		TIF(buffer_->Map(0, nullptr, &p));
+		TIFHR(buffer_->Map(0, nullptr, &p));
 		return p;
 	}
 

@@ -45,13 +45,13 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX11.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17.hpp
 	${KFL_PROJECT_DIR}/include/KFL/DllLoader.hpp
+	${KFL_PROJECT_DIR}/include/KFL/ErrorHandling.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Thread.hpp
-	${KFL_PROJECT_DIR}/include/KFL/ThrowErr.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Timer.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Trace.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Types.hpp
@@ -62,9 +62,9 @@ SET(KERNEL_SOURCE_FILES
 	${KFL_PROJECT_DIR}/src/Kernel/CpuInfo.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/CustomizedStreamBuf.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/DllLoader.cpp
+	${KFL_PROJECT_DIR}/src/Kernel/ErrorHandling.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/KFL.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Log.cpp
-	${KFL_PROJECT_DIR}/src/Kernel/ThrowErr.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Thread.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Timer.cpp
 	${KFL_PROJECT_DIR}/src/Kernel/Util.cpp

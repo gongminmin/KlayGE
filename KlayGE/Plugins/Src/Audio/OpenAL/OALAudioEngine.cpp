@@ -11,7 +11,6 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>

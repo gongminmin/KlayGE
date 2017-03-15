@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 
 #include <cstring>
 #include <system_error>
@@ -78,7 +78,7 @@ namespace KlayGE
 			}
 			else
 			{
-				THR(std::errc::bad_address);
+				TERRC(std::errc::bad_address);
 			}
 		}
 

@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
 #include <KFL/COMPtr.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cmath>
@@ -103,10 +103,10 @@ namespace KlayGE
 		}
 
 		IDirectSound* dsound(nullptr);
-		TIF(DynamicDirectSoundCreate_(&DSDEVID_DefaultPlayback, &dsound, nullptr));
+		TIFHR(DynamicDirectSoundCreate_(&DSDEVID_DefaultPlayback, &dsound, nullptr));
 		dsound_ = MakeCOMPtr(dsound);
 
-		TIF(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
+		TIFHR(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
 
 		DSBUFFERDESC desc;
 		std::memset(&desc, 0, sizeof(desc));
@@ -114,7 +114,7 @@ namespace KlayGE
 		desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
 		IDirectSoundBuffer* pDSBPrimary(nullptr);
-		TIF(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, nullptr));
+		TIFHR(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, nullptr));
 
 		WAVEFORMATEX wfx;
 		wfx.wFormatTag		= WAVE_FORMAT_PCM;
@@ -125,10 +125,10 @@ namespace KlayGE
 		wfx.nAvgBytesPerSec	= wfx.nSamplesPerSec * wfx.nBlockAlign;
 		wfx.cbSize			= 0;
 
-		TIF(pDSBPrimary->SetFormat(&wfx));
+		TIFHR(pDSBPrimary->SetFormat(&wfx));
 
 		IDirectSound3DListener* ds3dListener;
-		TIF(pDSBPrimary->QueryInterface(IID_IDirectSound3DListener,
+		TIFHR(pDSBPrimary->QueryInterface(IID_IDirectSound3DListener,
 			reinterpret_cast<void**>(&ds3dListener)));
 		ds3dListener_ = MakeCOMPtr(ds3dListener);
 

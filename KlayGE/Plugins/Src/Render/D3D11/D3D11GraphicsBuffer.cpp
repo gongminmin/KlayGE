@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -55,7 +55,7 @@ namespace KlayGE
 			desc.Buffer.ElementWidth = this->Size() / NumFormatBytes(fmt_as_shader_res_);
 
 			ID3D11RenderTargetView* rt_view;
-			TIF(d3d_device_->CreateRenderTargetView(buffer_.get(), &desc, &rt_view));
+			TIFHR(d3d_device_->CreateRenderTargetView(buffer_.get(), &desc, &rt_view));
 			d3d_rt_view_ = MakeCOMPtr(rt_view);
 		}
 		return d3d_rt_view_;
@@ -151,7 +151,7 @@ namespace KlayGE
 		desc.StructureByteStride = NumFormatBytes(fmt_as_shader_res_);
 
 		ID3D11Buffer* buffer;
-		TIF(d3d_device_->CreateBuffer(&desc, p_subres, &buffer));
+		TIFHR(d3d_device_->CreateBuffer(&desc, p_subres, &buffer));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if ((access_hint_ & EAH_GPU_Read) && (fmt_as_shader_res_ != EF_Unknown))
@@ -163,7 +163,7 @@ namespace KlayGE
 			sr_desc.Buffer.ElementWidth = size_in_byte_ / desc.StructureByteStride;
 
 			ID3D11ShaderResourceView* d3d_sr_view;
-			TIF(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
+			TIFHR(d3d_device_->CreateShaderResourceView(buffer_.get(), &sr_desc, &d3d_sr_view));
 			d3d_sr_view_ = MakeCOMPtr(d3d_sr_view);
 		}
 
@@ -200,7 +200,7 @@ namespace KlayGE
 			}
 
 			ID3D11UnorderedAccessView* d3d_ua_view;
-			TIF(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
+			TIFHR(d3d_device_->CreateUnorderedAccessView(buffer_.get(), &uav_desc, &d3d_ua_view));
 			d3d_ua_view_ = MakeCOMPtr(d3d_ua_view);
 		}
 	}
@@ -249,7 +249,7 @@ namespace KlayGE
 		}
 
 		D3D11_MAPPED_SUBRESOURCE mapped;
-		TIF(d3d_imm_ctx_->Map(buffer_.get(), 0, type, 0, &mapped));
+		TIFHR(d3d_imm_ctx_->Map(buffer_.get(), 0, type, 0, &mapped));
 		return mapped.pData;
 	}
 

@@ -21,7 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -381,7 +381,7 @@ namespace KlayGE
 
 		if (!glloader_GL_VERSION_4_1())
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		glClampColor(GL_CLAMP_VERTEX_COLOR, GL_FALSE);

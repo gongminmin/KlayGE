@@ -45,7 +45,7 @@
 #include <wrl/client.h>
 #include <wrl/wrappers/corewrappers.h>
 
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #elif defined KLAYGE_PLATFORM_LINUX
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/asset_manager.h>
@@ -107,36 +107,36 @@ namespace KlayGE
 		using namespace Microsoft::WRL::Wrappers;
 
 		ComPtr<IPackageStatics> package_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Package).Get(), &package_stat));
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Package).Get(), &package_stat));
 
 		ComPtr<IPackage> package;
-		TIF(package_stat->get_Current(&package));
+		TIFHR(package_stat->get_Current(&package));
 
 		ComPtr<IStorageFolder> installed_loc;
-		TIF(package->get_InstalledLocation(&installed_loc));
+		TIFHR(package->get_InstalledLocation(&installed_loc));
 
 		ComPtr<IStorageItem> installed_loc_storage_item;
-		TIF(installed_loc.As(&installed_loc_storage_item));
+		TIFHR(installed_loc.As(&installed_loc_storage_item));
 
 		HString installed_loc_folder_name;
-		TIF(installed_loc_storage_item->get_Path(installed_loc_folder_name.GetAddressOf()));
+		TIFHR(installed_loc_storage_item->get_Path(installed_loc_folder_name.GetAddressOf()));
 
 		Convert(exe_path_, installed_loc_folder_name.GetRawBuffer(nullptr));
 
 		ComPtr<IApplicationDataStatics> app_data_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Storage_ApplicationData).Get(), &app_data_stat));
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Storage_ApplicationData).Get(), &app_data_stat));
 
 		ComPtr<IApplicationData> app_data;
-		TIF(app_data_stat->get_Current(&app_data));
+		TIFHR(app_data_stat->get_Current(&app_data));
 
 		ComPtr<IStorageFolder> local_folder;
-		TIF(app_data->get_LocalFolder(&local_folder));
+		TIFHR(app_data->get_LocalFolder(&local_folder));
 
 		ComPtr<IStorageItem> local_folder_storage_item;
-		TIF(local_folder.As(&local_folder_storage_item));
+		TIFHR(local_folder.As(&local_folder_storage_item));
 
 		HString local_folder_name;
-		TIF(local_folder_storage_item->get_Path(local_folder_name.GetAddressOf()));
+		TIFHR(local_folder_storage_item->get_Path(local_folder_name.GetAddressOf()));
 
 		Convert(local_path_, local_folder_name.GetRawBuffer(nullptr));
 		local_path_ += "\\";

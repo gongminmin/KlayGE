@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
@@ -117,7 +117,7 @@ namespace KlayGE
 		UINT devices = 0;
 		if (::GetRawInputDeviceList(nullptr, &devices, sizeof(RAWINPUTDEVICELIST)) != 0)
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		std::vector<RAWINPUTDEVICELIST> raw_input_devices(devices);

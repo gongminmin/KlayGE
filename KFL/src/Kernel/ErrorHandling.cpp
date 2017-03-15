@@ -1,5 +1,5 @@
 /**
- * @file ThrowErr.hpp
+ * @file ErrorHandling.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,28 +28,32 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_THROWERR_HPP
-#define _KFL_THROWERR_HPP
+#include <KFL/KFL.hpp>
 
-#pragma once
-
-#include <string>
-#include <stdexcept>
-
-#ifndef _HRESULT_DEFINED
-#define _HRESULT_DEFINED
-typedef long HRESULT;
+#include <system_error>
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
 #endif
+#include <boost/lexical_cast.hpp>
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic pop
+#endif
+
+#include <KFL/ErrorHandling.hpp>
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string const & file, int line);
-	void Verify(bool x);
+	std::string CombineFileLine(std::string const & file, int line)
+	{
+		return file + ": " + boost::lexical_cast<std::string>(line);
+	}
+
+	void Verify(bool x)
+	{
+		if (!x)
+		{
+			TERRC(std::errc::function_not_supported);
+		}
+	}
 }
-
-#define THR(x)			{ throw std::system_error(std::make_error_code(x), KlayGE::CombineFileLine(__FILE__, __LINE__)); }
-
-// Throw if failed
-#define TIF(x)			{ HRESULT _hr = x; if (static_cast<HRESULT>(_hr) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
-
-#endif		// _KFL_THROWERR_HPP

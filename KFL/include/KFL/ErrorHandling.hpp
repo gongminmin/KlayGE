@@ -1,5 +1,5 @@
 /**
- * @file ThrowErr.cpp
+ * @file ErrorHandling.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,32 +28,38 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#include <KFL/KFL.hpp>
+#ifndef _KFL_ERRORHANDLING_HPP
+#define _KFL_ERRORHANDLING_HPP
 
-#include <system_error>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#pragma once
 
-#include <KFL/ThrowErr.hpp>
+#include <string>
+#include <stdexcept>
+
+#ifndef _HRESULT_DEFINED
+#define _HRESULT_DEFINED
+typedef long HRESULT;
+#endif
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string const & file, int line)
-	{
-		return file + ": " + boost::lexical_cast<std::string>(line);
-	}
-
-	void Verify(bool x)
-	{
-		if (!x)
-		{
-			THR(std::errc::function_not_supported);
-		}
-	}
+	std::string CombineFileLine(std::string const & file, int line);
+	void Verify(bool x);
 }
+
+// Throw error code
+#define TEC(x)			{ throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__)); }
+
+// Throw if failed (error code)
+#define TIFEC(x)		{ if (x) TEC(x) }
+
+// Throw if failed (errc)
+#define TERRC(x)		TEC(std::make_error_code(x))
+
+// Throw if failed (errc)
+#define TIFERRC(x)		TIFEC(std::make_error_code(x))
+
+// Throw if failed (HRESULT)
+#define TIFHR(x)		{ if (static_cast<HRESULT>(x) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
+
+#endif		// _KFL_ERRORHANDLING_HPP

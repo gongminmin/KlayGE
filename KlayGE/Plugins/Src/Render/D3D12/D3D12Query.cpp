@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -53,7 +53,7 @@ namespace KlayGE
 		query_heap_desc.NodeMask = 0;
 
 		ID3D12QueryHeap* query_heap;
-		TIF(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
 			reinterpret_cast<void**>(&query_heap)));
 		query_heap_ = MakeCOMPtr(query_heap);
 
@@ -78,7 +78,7 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12Resource* query_result;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&query_result)));
 		query_result_ = MakeCOMPtr(query_result);
@@ -134,7 +134,7 @@ namespace KlayGE
 		query_heap_desc.NodeMask = 0;
 
 		ID3D12QueryHeap* predicate_heap;
-		TIF(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
 			reinterpret_cast<void**>(&predicate_heap)));
 		predicate_heap_ = MakeCOMPtr(predicate_heap);
 
@@ -159,7 +159,7 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12Resource* predicate_result;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&predicate_result)));
 		predicate_result_ = MakeCOMPtr(predicate_result);
@@ -229,7 +229,7 @@ namespace KlayGE
 		timestamp_query_heap_desc.Count = 2;
 		timestamp_query_heap_desc.NodeMask = 0;
 		ID3D12QueryHeap* timestamp_heap;
-		TIF(device->CreateQueryHeap(&timestamp_query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&timestamp_query_heap_desc, IID_ID3D12QueryHeap,
 			reinterpret_cast<void**>(&timestamp_heap)));
 		timestamp_heap_ = MakeCOMPtr(timestamp_heap);
 
@@ -254,7 +254,7 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12Resource* timestamp_result;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&timestamp_result)));
 		timestamp_result_ = MakeCOMPtr(timestamp_result);
@@ -319,7 +319,7 @@ namespace KlayGE
 		query_heap_desc.NodeMask = 0;
 
 		ID3D12QueryHeap* query_heap;
-		TIF(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
+		TIFHR(device->CreateQueryHeap(&query_heap_desc, IID_ID3D12QueryHeap,
 			reinterpret_cast<void**>(&query_heap)));
 		so_stat_query_heap_ = MakeCOMPtr(query_heap);
 
@@ -344,7 +344,7 @@ namespace KlayGE
 		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12Resource* query_result;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&res_desc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&query_result)));
 		so_stat_query_result_ = MakeCOMPtr(query_result);

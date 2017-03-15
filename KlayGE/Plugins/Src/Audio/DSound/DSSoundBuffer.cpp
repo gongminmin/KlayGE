@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
@@ -70,20 +70,20 @@ namespace KlayGE
 
 		// DirectSound只能播放 PCM 数据。其他格式可能不能工作。
 		IDirectSoundBuffer* temp;
-		TIF(dsound->CreateSoundBuffer(&dsbd, &temp, nullptr));
+		TIFHR(dsound->CreateSoundBuffer(&dsbd, &temp, nullptr));
 		sources_[0] = MakeCOMPtr(temp);
 
 		// 复制缓冲区，使所有缓冲区使用同一段数据
 		for (auto iter = sources_.begin() + 1; iter != sources_.end(); ++ iter)
 		{
-			TIF(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
+			TIFHR(dsound->DuplicateSoundBuffer(sources_[0].get(), &temp));
 			*iter = MakeCOMPtr(temp);
 		}
 
 		// 锁定缓冲区
 		uint8_t* lockedBuffer;			// 指向缓冲区锁定的内存的指针
 		DWORD lockedBufferSize;		// 锁定的内存大小
-		TIF(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
+		TIFHR(sources_[0]->Lock(0, static_cast<DWORD>(dataSource_->Size()),
 			reinterpret_cast<void**>(&lockedBuffer), &lockedBufferSize,
 			nullptr, nullptr, DSBLOCK_FROMWRITECURSOR));
 

@@ -16,7 +16,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/COMPtr.hpp>

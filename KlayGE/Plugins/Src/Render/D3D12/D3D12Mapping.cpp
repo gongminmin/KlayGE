@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -943,7 +943,7 @@ namespace KlayGE
 			return DXGI_FORMAT_BC7_UNORM_SRGB;
 
 		default:
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 	}
 
@@ -1153,7 +1153,7 @@ namespace KlayGE
 			return EF_BC7_SRGB;
 
 		default:
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 	}
 }

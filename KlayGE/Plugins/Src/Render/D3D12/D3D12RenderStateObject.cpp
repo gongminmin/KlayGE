@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -368,7 +368,7 @@ namespace KlayGE
 			auto d3d_device = re.D3DDevice().get();
 
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
@@ -419,7 +419,7 @@ namespace KlayGE
 			auto d3d_device = re.D3DDevice().get();
 
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else

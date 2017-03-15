@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -404,14 +404,14 @@ namespace KlayGE
 		bool stereo = (STM_LCDShutter == settings.stereo_method) && dxgi_stereo_support_;
 
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		auto callback = Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
 			std::bind(&D3D11RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
 
 		sc_desc1_.Width = this->Width();
@@ -760,11 +760,11 @@ namespace KlayGE
 		}
 #else
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
 
 		this->FullScreen(false);
@@ -824,12 +824,12 @@ namespace KlayGE
 					break;
 				}
 
-				TIF(swap_chain_1_->SetRotation(dxgi_rotation));
+				TIFHR(swap_chain_1_->SetRotation(dxgi_rotation));
 			}
 		}
 
 		ID3D11Texture2D* back_buffer;
-		TIF(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
+		TIFHR(swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, reinterpret_cast<void**>(&back_buffer)));
 		back_buffer_ = MakeSharedPtr<D3D11Texture2D>(MakeCOMPtr(back_buffer));
 
 		render_target_view_ = rf.Make2DRenderView(*back_buffer_, 0, 1, 0);
@@ -927,7 +927,7 @@ namespace KlayGE
 			allow_tearing &= !isFullScreen_;
 #endif
 			UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
-			TIF(swap_chain_->Present(sync_interval_, present_flags));
+			TIFHR(swap_chain_->Present(sync_interval_, present_flags));
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D11RenderEngine& d3d11_re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());

@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -204,7 +204,7 @@ namespace KlayGE
 					queue_desc.NodeMask = 0;
 
 					ID3D12CommandQueue* cmd_queue;
-					TIF(d3d_device->CreateCommandQueue(&queue_desc,
+					TIFHR(d3d_device->CreateCommandQueue(&queue_desc,
 						IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
 					d3d_cmd_queue = MakeCOMPtr(cmd_queue);
 
@@ -278,14 +278,14 @@ namespace KlayGE
 		d3d12_re.DXGIFactory4()->RegisterStereoStatusWindow(hWnd_, WM_SIZE, &stereo_cookie_);
 #else
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		auto callback = Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
 			std::bind(&D3D12RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->add_StereoEnabledChanged(callback.Get(), &stereo_enabled_changed_token_);
 #endif
 
@@ -568,11 +568,11 @@ namespace KlayGE
 		d3d12_re.DXGIFactory4()->UnregisterStereoStatus(stereo_cookie_);
 #else
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 		disp_info->remove_StereoEnabledChanged(stereo_enabled_changed_token_);
 
 		this->FullScreen(false);
@@ -620,12 +620,12 @@ namespace KlayGE
 			break;
 		}
 
-		TIF(swap_chain_->SetRotation(dxgi_rotation));
+		TIFHR(swap_chain_->SetRotation(dxgi_rotation));
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
 			ID3D12Resource* bb12;
-			TIF(swap_chain_->GetBuffer(static_cast<UINT>(i),
+			TIFHR(swap_chain_->GetBuffer(static_cast<UINT>(i),
 				IID_ID3D12Resource, reinterpret_cast<void**>(&bb12)));
 			render_targets_[i] = MakeSharedPtr<D3D12Texture2D>(MakeCOMPtr<ID3D12Resource>(bb12));
 		}
@@ -694,7 +694,7 @@ namespace KlayGE
 			allow_tearing &= !isFullScreen_;
 #endif
 			UINT const present_flags = allow_tearing ? DXGI_PRESENT_ALLOW_TEARING : 0;
-			TIF(swap_chain_->Present(sync_interval_, present_flags));
+			TIFHR(swap_chain_->Present(sync_interval_, present_flags));
 
 			curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 		}

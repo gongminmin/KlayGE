@@ -11,7 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
@@ -274,7 +274,7 @@ namespace KlayGE
 
 		if (!glloader_GLES_VERSION_3_0())
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		eglSwapInterval(display_, 0);

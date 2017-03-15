@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/COMPtr.hpp>
@@ -1177,7 +1177,7 @@ namespace KlayGE
 			sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 			sampler_heap_desc.NodeMask = 0;
 			ID3D12DescriptorHeap* s_heap;
-			TIF(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&s_heap)));
+			TIFHR(device->CreateDescriptorHeap(&sampler_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&s_heap)));
 			sampler_heap_ = MakeCOMPtr(s_heap);
 
 			UINT const sampler_desc_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER);
