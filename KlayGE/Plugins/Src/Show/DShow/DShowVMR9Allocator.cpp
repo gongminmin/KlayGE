@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ElementFormat.hpp>
@@ -86,7 +86,7 @@ namespace KlayGE
 		}
 
 		IDirect3DDevice9* d3d_device;
-		TIF(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
+		TIFHR(d3d_->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL,
 			wnd_, vp_mode | D3DCREATE_FPU_PRESERVE | D3DCREATE_MULTITHREADED,
 			&d3dpp_, &d3d_device));
 		d3d_device_ = MakeCOMPtr(d3d_device);
@@ -150,7 +150,7 @@ namespace KlayGE
 			lpAllocInfo->dwFlags &= ~VMR9AllocFlag_TextureSurface;
 			lpAllocInfo->dwFlags |= VMR9AllocFlag_OffscreenSurface;
 
-			TIF(vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]));
+			TIFHR(vmr_surf_alloc_notify_->AllocateSurfaceHelper(lpAllocInfo, lpNumBuffers, &surfaces_[0]));
 		}
 
 
@@ -199,7 +199,7 @@ namespace KlayGE
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
 		IDirect3DSurface9* surf;
-		TIF(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
+		TIFHR(d3d_device_->CreateOffscreenPlainSurface(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight,
 			D3DFMT_X8R8G8B8, D3DPOOL_SYSTEMMEM, &surf, nullptr));
 		cache_surf_ = MakeCOMPtr(surf);
 
@@ -251,7 +251,7 @@ namespace KlayGE
 		vmr_surf_alloc_notify_->AddRef();
 
 		HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
-		TIF(vmr_surf_alloc_notify_->SetD3DDevice(d3d_device_.get(), hMonitor));
+		TIFHR(vmr_surf_alloc_notify_->SetD3DDevice(d3d_device_.get(), hMonitor));
 
 		return S_OK;
 	}
@@ -331,7 +331,7 @@ namespace KlayGE
 			this->CreateDevice();
 
 			HMONITOR hMonitor = d3d_->GetAdapterMonitor(D3DADAPTER_DEFAULT);
-			TIF(vmr_surf_alloc_notify_->ChangeD3DDevice(d3d_device_.get(), hMonitor));
+			TIFHR(vmr_surf_alloc_notify_->ChangeD3DDevice(d3d_device_.get(), hMonitor));
 		}
 
 		return S_OK;
@@ -406,10 +406,10 @@ namespace KlayGE
 
 		if (cur_surf_index_ < surfaces_.size())
 		{
-			TIF(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
+			TIFHR(d3d_device_->GetRenderTargetData(surfaces_[cur_surf_index_], cache_surf_.get()));
 
 			D3DLOCKED_RECT d3dlocked_rc;
-			TIF(cache_surf_->LockRect(&d3dlocked_rc, nullptr, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
+			TIFHR(cache_surf_->LockRect(&d3dlocked_rc, nullptr, D3DLOCK_NOSYSLOCK | D3DLOCK_READONLY));
 
 			uint32_t const width = present_tex_->Width(0);
 			uint32_t const height = present_tex_->Height(0);
@@ -448,7 +448,7 @@ namespace KlayGE
 				}
 			}
 
-			TIF(cache_surf_->UnlockRect());
+			TIFHR(cache_surf_->UnlockRect());
 		}
 
 		return present_tex_;

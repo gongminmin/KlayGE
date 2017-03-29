@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
@@ -48,7 +48,7 @@ namespace KlayGE
 		ID3D12DevicePtr const & device = re.D3DDevice();
 
 		ID3D12Fence* fence;
-		TIF(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
+		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
 		fence_ = MakeCOMPtr(fence);
 
 		fence_event_ = ::CreateEventEx(nullptr, nullptr, 0, EVENT_ALL_ACCESS);
@@ -84,7 +84,7 @@ namespace KlayGE
 		}
 
 		uint64_t const id = fence_val_;
-		TIF(cmd_queue->Signal(fence_.get(), id));
+		TIFHR(cmd_queue->Signal(fence_.get(), id));
 		++ fence_val_;
 		return id;
 	}
@@ -93,7 +93,7 @@ namespace KlayGE
 	{
 		if (!this->Completed(id))
 		{
-			TIF(fence_->SetEventOnCompletion(id, fence_event_));
+			TIFHR(fence_->SetEventOnCompletion(id, fence_event_));
 			::WaitForSingleObjectEx(fence_event_, INFINITE, FALSE);
 		}
 	}

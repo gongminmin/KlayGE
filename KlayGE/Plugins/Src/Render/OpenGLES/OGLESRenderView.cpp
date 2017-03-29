@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
@@ -312,7 +312,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_1d_.GLTexture();
@@ -415,7 +415,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		tex_ = texture_2d_.GLTexture();
@@ -1024,7 +1024,7 @@ namespace KlayGE
 
 		if (array_index > 0)
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 
 		width_ = texture_cube.Width(level);

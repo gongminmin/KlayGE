@@ -31,7 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -721,7 +721,7 @@ namespace KlayGE
 		heap_prop.VisibleNodeMask = 0;
 
 		ID3D12Resource* d3d_texture;
-		TIF(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&tex_desc, D3D12_RESOURCE_STATE_COMMON, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture)));
 		d3d_texture_ = MakeCOMPtr(d3d_texture);
@@ -751,7 +751,7 @@ namespace KlayGE
 		buff_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
 		ID3D12Resource* d3d_texture_upload_heaps;
-		TIF(device->CreateCommittedResource(&upload_heap_prop, D3D12_HEAP_FLAG_NONE, &buff_desc,
+		TIFHR(device->CreateCommittedResource(&upload_heap_prop, D3D12_HEAP_FLAG_NONE, &buff_desc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture_upload_heaps)));
 		d3d_texture_upload_heaps_ = MakeCOMPtr(d3d_texture_upload_heaps);
@@ -764,7 +764,7 @@ namespace KlayGE
 		readback_heap_prop.VisibleNodeMask = 0;
 
 		ID3D12Resource* d3d_texture_readback_heaps;
-		TIF(device->CreateCommittedResource(&readback_heap_prop, D3D12_HEAP_FLAG_NONE, &buff_desc,
+		TIFHR(device->CreateCommittedResource(&readback_heap_prop, D3D12_HEAP_FLAG_NONE, &buff_desc,
 			D3D12_RESOURCE_STATE_COPY_DEST, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture_readback_heaps)));
 		d3d_texture_readback_heaps_ = MakeCOMPtr(d3d_texture_readback_heaps);

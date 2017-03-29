@@ -12,7 +12,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define _WIN32_DCOM
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
@@ -84,21 +84,21 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoPlay()
 	{
-		TIF(media_control_->Run());
+		TIFHR(media_control_->Run());
 	}
 
 	// 暂停播放
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoPause()
 	{
-		TIF(media_control_->Pause());
+		TIFHR(media_control_->Pause());
 	}
 
 	// 停止播放
 	/////////////////////////////////////////////////////////////////////////////////
 	void DShowEngine::DoStop()
 	{
-		TIF(media_control_->Stop());
+		TIFHR(media_control_->Stop());
 	}
 
 	// 载入文件
@@ -109,29 +109,29 @@ namespace KlayGE
 		this->Init();
 
 		IGraphBuilder* graph;
-		TIF(::CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_ALL,
+		TIFHR(::CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_ALL,
 			IID_IGraphBuilder, reinterpret_cast<void**>(&graph)));
 		graph_ = MakeCOMPtr(graph);
 
 		IBaseFilter* filter;
-		TIF(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
+		TIFHR(::CoCreateInstance(CLSID_VideoMixingRenderer9, nullptr, CLSCTX_INPROC_SERVER,
 			IID_IBaseFilter, reinterpret_cast<void**>(&filter)));
 		filter_ = MakeCOMPtr(filter);
 
 		std::shared_ptr<IVMRFilterConfig9> filter_config;
 		{
 			IVMRFilterConfig9* tmp;
-			TIF(filter_->QueryInterface(IID_IVMRFilterConfig9, reinterpret_cast<void**>(&tmp)));
+			TIFHR(filter_->QueryInterface(IID_IVMRFilterConfig9, reinterpret_cast<void**>(&tmp)));
 			filter_config = MakeCOMPtr(tmp);
 		}
 
-		TIF(filter_config->SetRenderingMode(VMR9Mode_Renderless));
-		TIF(filter_config->SetNumberOfStreams(1));
+		TIFHR(filter_config->SetRenderingMode(VMR9Mode_Renderless));
+		TIFHR(filter_config->SetNumberOfStreams(1));
 
 		std::shared_ptr<IVMRSurfaceAllocatorNotify9> vmr_surf_alloc_notify;
 		{
 			IVMRSurfaceAllocatorNotify9* tmp;
-			TIF(filter_->QueryInterface(IID_IVMRSurfaceAllocatorNotify9, reinterpret_cast<void**>(&tmp)));
+			TIFHR(filter_->QueryInterface(IID_IVMRSurfaceAllocatorNotify9, reinterpret_cast<void**>(&tmp)));
 			vmr_surf_alloc_notify = MakeCOMPtr(tmp);
 		}
 
@@ -139,26 +139,26 @@ namespace KlayGE
 		vmr_allocator_ = MakeCOMPtr(new DShowVMR9Allocator(Context::Instance().AppInstance().MainWnd()->HWnd()));
 
 		// let the allocator and the notify know about each other
-		TIF(vmr_surf_alloc_notify->AdviseSurfaceAllocator(static_cast<DWORD_PTR>(DShowVMR9Allocator::USER_ID),
+		TIFHR(vmr_surf_alloc_notify->AdviseSurfaceAllocator(static_cast<DWORD_PTR>(DShowVMR9Allocator::USER_ID),
 			vmr_allocator_.get()));
-		TIF(vmr_allocator_->AdviseNotify(vmr_surf_alloc_notify.get()));
+		TIFHR(vmr_allocator_->AdviseNotify(vmr_surf_alloc_notify.get()));
 
-		TIF(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
+		TIFHR(graph_->AddFilter(filter_.get(), L"Video Mixing Renderer 9"));
 
 		{
 			IMediaControl* tmp;
-			TIF(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&tmp)));
+			TIFHR(graph_->QueryInterface(IID_IMediaControl, reinterpret_cast<void**>(&tmp)));
 			media_control_ = MakeCOMPtr(tmp);
 		}
 		{
 			IMediaEvent* tmp;
-			TIF(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&tmp)));
+			TIFHR(graph_->QueryInterface(IID_IMediaEvent, reinterpret_cast<void**>(&tmp)));
 			media_event_ = MakeCOMPtr(tmp);
 		}
 
 		std::wstring fn;
 		Convert(fn, fileName);
-		TIF(graph_->RenderFile(fn.c_str(), nullptr));
+		TIFHR(graph_->RenderFile(fn.c_str(), nullptr));
 
 		state_ = SS_Stopped;
 	}
@@ -180,7 +180,7 @@ namespace KlayGE
 			}
 
 			// 释放和这个事件相关的内存
-			TIF(media_event_->FreeEventParams(lEventCode, lParam1, lParam2));
+			TIFHR(media_event_->FreeEventParams(lEventCode, lParam1, lParam2));
 		}
 
 		return ret;

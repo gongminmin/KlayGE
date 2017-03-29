@@ -12,7 +12,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>

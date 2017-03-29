@@ -31,7 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Context.hpp>
@@ -339,7 +339,7 @@ namespace KlayGE
 		heap_prop.VisibleNodeMask = 0;
 
 		ID3D12Resource* depth_tex;
-		TIF(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+		TIFHR(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
 			&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&depth_tex)));
 		ds_src_ = MakeCOMPtr(depth_tex);
@@ -567,7 +567,7 @@ namespace KlayGE
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeap* csu_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
 		D3D12_RESOURCE_BARRIER barrier_before;
@@ -605,7 +605,7 @@ namespace KlayGE
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeap* csu_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
 		D3D12_RESOURCE_BARRIER barrier_before;

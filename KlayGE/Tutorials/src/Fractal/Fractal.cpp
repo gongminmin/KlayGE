@@ -1,5 +1,4 @@
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>

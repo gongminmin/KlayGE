@@ -14,7 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
@@ -59,7 +59,7 @@ namespace KlayGE
 
 		// DirectSound只能播放PCM数据。其他格式可能不能工作。
 		IDirectSoundBuffer* buffer;
-		TIF(dsound->CreateSoundBuffer(&dsbd, &buffer, nullptr));
+		TIFHR(dsound->CreateSoundBuffer(&dsbd, &buffer, nullptr));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if (mono)
@@ -169,7 +169,7 @@ namespace KlayGE
 
 		uint8_t* locked_buff[2];
 		DWORD locked_buff_size[2];
-		TIF(buffer_->Lock(0, size,
+		TIFHR(buffer_->Lock(0, size,
 			reinterpret_cast<void**>(&locked_buff[0]), &locked_buff_size[0],
 			reinterpret_cast<void**>(&locked_buff[1]), &locked_buff_size[1],
 			DSBLOCK_FROMWRITECURSOR));

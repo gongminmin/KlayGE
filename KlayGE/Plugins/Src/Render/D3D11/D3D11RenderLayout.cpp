@@ -13,7 +13,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -100,7 +100,7 @@ namespace KlayGE
 			D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&rf.RenderEngineInstance());
 			ID3D11Device* d3d_device = re.D3DDevice();
 			ID3D11InputLayout* ia;
-			TIF(d3d_device->CreateInputLayout(&vertex_elems_[0], static_cast<UINT>(vertex_elems_.size()),
+			TIFHR(d3d_device->CreateInputLayout(&vertex_elems_[0], static_cast<UINT>(vertex_elems_.size()),
 				&vs_code[0], vs_code.size(), &ia));
 			ID3D11InputLayoutPtr new_layout = MakeCOMPtr(ia);
 			input_layouts_.emplace_back(signature, new_layout);

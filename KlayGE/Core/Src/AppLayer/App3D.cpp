@@ -27,7 +27,6 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -302,7 +301,7 @@ namespace KlayGE
 		KFL_UNUSED(args);
 
 		ComPtr<ICoreWindowStatic> core_win_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
 			&core_win_stat));
 
 		ComPtr<ICoreWindow> core_win;
@@ -592,12 +591,12 @@ namespace KlayGE
 	void App3DFramework::Run()
 	{
 		ComPtr<ICoreApplication> core_app;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Core_CoreApplication).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_ApplicationModel_Core_CoreApplication).Get(),
 			&core_app));
 
 		ComPtr<MetroFrameworkSource> metro_app;
 		MakeAndInitialize<MetroFrameworkSource>(&metro_app, this);
-		TIF(core_app->Run(metro_app.Get()));
+		TIFHR(core_app->Run(metro_app.Get()));
 	}
 
 	void App3DFramework::MetroRun()
@@ -638,7 +637,7 @@ namespace KlayGE
 		}
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
 		ComPtr<ICoreWindowStatic> core_win_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_Core_CoreWindow).Get(),
 			&core_win_stat));
 
 		ComPtr<ICoreWindow> core_win;

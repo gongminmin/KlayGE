@@ -27,7 +27,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -562,7 +562,7 @@ namespace
 			return EF_ETC2_ABGR8_SRGB;
 
 		default:
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 	}
 
@@ -805,7 +805,7 @@ namespace
 			return static_cast<DXGI_FORMAT>(0x8000000AUL);
 
 		default:
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 	}
 

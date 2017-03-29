@@ -30,7 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 
 #include <vector>
@@ -114,7 +114,7 @@ namespace KlayGE
 		// 如果没有找到兼容的设备则抛出错误
 		if (adapters_.empty())
 		{
-			THR(std::errc::function_not_supported);
+			TERRC(std::errc::function_not_supported);
 		}
 	}
 }

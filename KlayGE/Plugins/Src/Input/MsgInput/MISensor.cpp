@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KlayGE/Context.hpp>
-#include <KFL/ThrowErr.hpp>
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
@@ -744,92 +743,92 @@ namespace KlayGE
 		if (Context::Instance().Config().location_sensor)
 		{
 			ABI::Windows::Devices::Geolocation::IGeolocator* locator;
-			TIF(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_Devices_Geolocation_Geolocator).Get(),
+			TIFHR(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_Devices_Geolocation_Geolocator).Get(),
 				&locator));
 			locator_ = MakeCOMPtr(locator);
 
 			auto callback = Callback<ITypedEventHandler<Geolocator*, PositionChangedEventArgs*>>(
 				std::bind(&MsgInputSensor::OnPositionChanged, this, std::placeholders::_1, std::placeholders::_2));
-			TIF(locator_->add_PositionChanged(callback.Get(), &position_token_));
+			TIFHR(locator_->add_PositionChanged(callback.Get(), &position_token_));
 		}
 		{
 			ComPtr<IAccelerometerStatics> accelerometer_stat;
-			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Accelerometer).Get(),
+			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Accelerometer).Get(),
 				&accelerometer_stat));
 
 			IAccelerometer* accelerometer;
-			TIF(accelerometer_stat->GetDefault(&accelerometer));
+			TIFHR(accelerometer_stat->GetDefault(&accelerometer));
 			if (accelerometer)
 			{
 				accelerometer_ = MakeCOMPtr(accelerometer);
 
 				auto callback = Callback<ITypedEventHandler<Accelerometer*, AccelerometerReadingChangedEventArgs*>>(
 					std::bind(&MsgInputSensor::OnAccelerometeReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
-				TIF(accelerometer_->add_ReadingChanged(callback.Get(), &accelerometer_reading_token_));
+				TIFHR(accelerometer_->add_ReadingChanged(callback.Get(), &accelerometer_reading_token_));
 			}
 		}
 		{
 			ComPtr<IGyrometerStatics> gyrometer_stat;
-			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Gyrometer).Get(),
+			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Gyrometer).Get(),
 				&gyrometer_stat));
 
 			IGyrometer* gyrometer;
-			TIF(gyrometer_stat->GetDefault(&gyrometer));
+			TIFHR(gyrometer_stat->GetDefault(&gyrometer));
 			if (gyrometer)
 			{
 				gyrometer_ = MakeCOMPtr(gyrometer);
 
 				auto callback = Callback<ITypedEventHandler<Gyrometer*, GyrometerReadingChangedEventArgs*>>(
 					std::bind(&MsgInputSensor::OnGyrometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
-				TIF(gyrometer_->add_ReadingChanged(callback.Get(), &gyrometer_reading_token_));
+				TIFHR(gyrometer_->add_ReadingChanged(callback.Get(), &gyrometer_reading_token_));
 			}
 		}
 		{
 			ComPtr<IInclinometerStatics> inclinometer_stat;
-			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Inclinometer).Get(),
+			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Inclinometer).Get(),
 				&inclinometer_stat));
 
 			IInclinometer* inclinometer;
-			TIF(inclinometer_stat->GetDefault(&inclinometer));
+			TIFHR(inclinometer_stat->GetDefault(&inclinometer));
 			if (inclinometer)
 			{
 				inclinometer_ = MakeCOMPtr(inclinometer);
 
 				auto callback = Callback<ITypedEventHandler<Inclinometer*, InclinometerReadingChangedEventArgs*>>(
 					std::bind(&MsgInputSensor::OnInclinometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
-				TIF(inclinometer_->add_ReadingChanged(callback.Get(), &inclinometer_reading_token_));
+				TIFHR(inclinometer_->add_ReadingChanged(callback.Get(), &inclinometer_reading_token_));
 			}
 		}
 		{
 			ComPtr<ICompassStatics> compass_stat;
-			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Compass).Get(),
+			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_Compass).Get(),
 				&compass_stat));
 
 			ICompass* compass;
-			TIF(compass_stat->GetDefault(&compass));
+			TIFHR(compass_stat->GetDefault(&compass));
 			if (compass)
 			{
 				compass_ = MakeCOMPtr(compass);
 
 				auto callback = Callback<ITypedEventHandler<Compass*, CompassReadingChangedEventArgs*>>(
 					std::bind(&MsgInputSensor::OnCompassReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
-				TIF(compass_->add_ReadingChanged(callback.Get(), &compass_reading_token_));
+				TIFHR(compass_->add_ReadingChanged(callback.Get(), &compass_reading_token_));
 			}
 		}
 		{
 			ComPtr<IOrientationSensorStatics> orientation_stat;
-			TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_OrientationSensor).Get(),
+			TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Devices_Sensors_OrientationSensor).Get(),
 				&orientation_stat));
 			
 			IOrientationSensor* orientation;
-			TIF(orientation_stat->GetDefault(&orientation));
+			TIFHR(orientation_stat->GetDefault(&orientation));
 			if (orientation)
 			{
 				orientation_ = MakeCOMPtr(orientation);
 
 				auto callback = Callback<ITypedEventHandler<OrientationSensor*, OrientationSensorReadingChangedEventArgs*>>(
 					std::bind(&MsgInputSensor::OnOrientationSensorReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
-				TIF(orientation_->add_ReadingChanged(callback.Get(), &orientation_reading_token_));
+				TIFHR(orientation_->add_ReadingChanged(callback.Get(), &orientation_reading_token_));
 			}
 		}
 	}
@@ -867,38 +866,38 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<IGeoposition> position;
-		TIF(e->get_Position(&position));
+		TIFHR(e->get_Position(&position));
 		ComPtr<IGeocoordinate> coordinate;
-		TIF(position->get_Coordinate(&coordinate));
+		TIFHR(position->get_Coordinate(&coordinate));
 		
 		double tmp;
 		IReference<double>* rtmp;
 
 		ComPtr<IGeocoordinateWithPoint> coordinate_with_point;
-		TIF(coordinate.As(&coordinate_with_point));
+		TIFHR(coordinate.As(&coordinate_with_point));
 		ComPtr<IGeopoint> point;
-		TIF(coordinate_with_point->get_Point(&point));
+		TIFHR(coordinate_with_point->get_Point(&point));
 		BasicGeoposition geo_position;
-		TIF(point->get_Position(&geo_position));
+		TIFHR(point->get_Position(&geo_position));
 		latitude_ = static_cast<float>(geo_position.Latitude);
 		longitude_ = static_cast<float>(geo_position.Longitude);
 		altitude_ = static_cast<float>(geo_position.Altitude);
 
-		TIF(coordinate->get_Accuracy(&tmp));
+		TIFHR(coordinate->get_Accuracy(&tmp));
 		location_error_radius_ = static_cast<float>(tmp);
 
-		TIF(coordinate->get_AltitudeAccuracy(&rtmp));
+		TIFHR(coordinate->get_AltitudeAccuracy(&rtmp));
 		if (rtmp)
 		{
-			TIF(rtmp->get_Value(&tmp));
+			TIFHR(rtmp->get_Value(&tmp));
 			location_altitude_error_ = static_cast<float>(tmp);
 		}
 
 		rtmp = nullptr;
-		TIF(coordinate->get_Speed(&rtmp));
+		TIFHR(coordinate->get_Speed(&rtmp));
 		if (rtmp)
 		{
-			TIF(rtmp->get_Value(&tmp));
+			TIFHR(rtmp->get_Value(&tmp));
 			speed_ = static_cast<float>(tmp);
 		}
 
@@ -910,17 +909,17 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<IAccelerometerReading> reading;
-		TIF(e->get_Reading(&reading));
+		TIFHR(e->get_Reading(&reading));
 
 		double tmp;
 
-		TIF(reading->get_AccelerationX(&tmp));
+		TIFHR(reading->get_AccelerationX(&tmp));
 		accel_.x() = static_cast<float>(tmp);
 
-		TIF(reading->get_AccelerationY(&tmp));
+		TIFHR(reading->get_AccelerationY(&tmp));
 		accel_.y() = static_cast<float>(tmp);
 
-		TIF(reading->get_AccelerationZ(&tmp));
+		TIFHR(reading->get_AccelerationZ(&tmp));
 		accel_.z() = static_cast<float>(tmp);
 
 		return S_OK;
@@ -931,17 +930,17 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<IGyrometerReading> reading;
-		TIF(e->get_Reading(&reading));
+		TIFHR(e->get_Reading(&reading));
 
 		double tmp;
 
-		TIF(reading->get_AngularVelocityX(&tmp));
+		TIFHR(reading->get_AngularVelocityX(&tmp));
 		angular_velocity_.x() = static_cast<float>(tmp);
 
-		TIF(reading->get_AngularVelocityY(&tmp));
+		TIFHR(reading->get_AngularVelocityY(&tmp));
 		angular_velocity_.y() = static_cast<float>(tmp);
 
-		TIF(reading->get_AngularVelocityZ(&tmp));
+		TIFHR(reading->get_AngularVelocityZ(&tmp));
 		angular_velocity_.z() = static_cast<float>(tmp);
 
 		return S_OK;
@@ -952,11 +951,11 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<IInclinometerReading> reading;
-		TIF(e->get_Reading(&reading));
+		TIFHR(e->get_Reading(&reading));
 
-		TIF(reading->get_PitchDegrees(&tilt_.x()));
-		TIF(reading->get_RollDegrees(&tilt_.y()));
-		TIF(reading->get_YawDegrees(&tilt_.z()));
+		TIFHR(reading->get_PitchDegrees(&tilt_.x()));
+		TIFHR(reading->get_RollDegrees(&tilt_.y()));
+		TIFHR(reading->get_YawDegrees(&tilt_.z()));
 
 		return S_OK;
 	}
@@ -966,18 +965,18 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<ICompassReading> reading;
-		TIF(e->get_Reading(&reading));
+		TIFHR(e->get_Reading(&reading));
 
 		double tmp;
 
-		TIF(reading->get_HeadingMagneticNorth(&tmp));
+		TIFHR(reading->get_HeadingMagneticNorth(&tmp));
 		magnetic_heading_north_ = static_cast<float>(tmp);
 
 		ComPtr<ICompassReadingHeadingAccuracy> reading_with_accuracy;
 		if (SUCCEEDED(reading.As(&reading_with_accuracy)))
 		{
 			ABI::Windows::Devices::Sensors::MagnetometerAccuracy accuracy;
-			TIF(reading_with_accuracy->get_HeadingAccuracy(&accuracy));
+			TIFHR(reading_with_accuracy->get_HeadingAccuracy(&accuracy));
 			magnetometer_accuracy_ = static_cast<int32_t>(accuracy);
 		}
 		else
@@ -994,15 +993,15 @@ namespace KlayGE
 		KFL_UNUSED(sender);
 
 		ComPtr<IOrientationSensorReading> reading;
-		TIF(e->get_Reading(&reading));
+		TIFHR(e->get_Reading(&reading));
 
 		ComPtr<ISensorQuaternion> quat;
-		TIF(reading->get_Quaternion(&quat));
+		TIFHR(reading->get_Quaternion(&quat));
 
-		TIF(quat->get_X(&orientation_quat_.x()));
-		TIF(quat->get_Y(&orientation_quat_.y()));
-		TIF(quat->get_Z(&orientation_quat_.z()));
-		TIF(quat->get_W(&orientation_quat_.w()));
+		TIFHR(quat->get_X(&orientation_quat_.x()));
+		TIFHR(quat->get_Y(&orientation_quat_.y()));
+		TIFHR(quat->get_Z(&orientation_quat_.z()));
+		TIFHR(quat->get_W(&orientation_quat_.w()));
 
 		return S_OK;
 	}

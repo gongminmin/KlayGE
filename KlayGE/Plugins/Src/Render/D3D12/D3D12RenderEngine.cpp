@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -76,7 +76,7 @@ namespace KlayGE
 		native_shader_version_ = 5;
 
 		IDXGIFactory4* gi_factory;
-		TIF(D3D12InterfaceLoader::Instance().CreateDXGIFactory1(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory)));
+		TIFHR(D3D12InterfaceLoader::Instance().CreateDXGIFactory1(IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory)));
 		gi_factory_4_ = MakeCOMPtr(gi_factory);
 		dxgi_sub_ver_ = 4;
 
@@ -291,12 +291,12 @@ namespace KlayGE
 		Verify(!!d3d_device_);
 
 		ID3D12CommandAllocator* d3d_render_cmd_allocator;
-		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_render_cmd_allocator)));
 		d3d_render_cmd_allocator_ = MakeCOMPtr(d3d_render_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_render_cmd_list;
-		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_render_cmd_allocator_.get(), nullptr,
+		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_render_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_render_cmd_list)));
 		d3d_render_cmd_list_ = MakeCOMPtr(d3d_render_cmd_list);
 
@@ -307,44 +307,44 @@ namespace KlayGE
 		queue_desc.NodeMask = 0;
 
 		ID3D12CommandQueue* d3d_compute_cmd_queue;
-		TIF(d3d_device_->CreateCommandQueue(&queue_desc,
+		TIFHR(d3d_device_->CreateCommandQueue(&queue_desc,
 			IID_ID3D12CommandQueue, reinterpret_cast<void**>(&d3d_compute_cmd_queue)));
 		d3d_compute_cmd_queue_ = MakeCOMPtr(d3d_compute_cmd_queue);
 
 		ID3D12CommandAllocator* d3d_compute_cmd_allocator;
-		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE,
+		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_compute_cmd_allocator)));
 		d3d_compute_cmd_allocator_ = MakeCOMPtr(d3d_compute_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_compute_cmd_list;
-		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, d3d_compute_cmd_allocator_.get(), nullptr,
+		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, d3d_compute_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_compute_cmd_list)));
 		d3d_compute_cmd_list_ = MakeCOMPtr(d3d_compute_cmd_list);
 
 		queue_desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
 
 		ID3D12CommandQueue* d3d_copy_cmd_queue;
-		TIF(d3d_device_->CreateCommandQueue(&queue_desc,
+		TIFHR(d3d_device_->CreateCommandQueue(&queue_desc,
 			IID_ID3D12CommandQueue, reinterpret_cast<void**>(&d3d_copy_cmd_queue)));
 		d3d_copy_cmd_queue_ = MakeCOMPtr(d3d_copy_cmd_queue);
 
 		ID3D12CommandAllocator* d3d_copy_cmd_allocator;
-		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COPY,
+		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COPY,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_copy_cmd_allocator)));
 		d3d_copy_cmd_allocator_ = MakeCOMPtr(d3d_copy_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_copy_cmd_list;
-		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COPY, d3d_copy_cmd_allocator_.get(), nullptr,
+		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COPY, d3d_copy_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_copy_cmd_list)));
 		d3d_copy_cmd_list_ = MakeCOMPtr(d3d_copy_cmd_list);
 
 		ID3D12CommandAllocator* d3d_res_cmd_allocator;
-		TIF(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_res_cmd_allocator)));
 		d3d_res_cmd_allocator_ = MakeCOMPtr(d3d_res_cmd_allocator);
 
 		ID3D12GraphicsCommandList* d3d_res_cmd_list;
-		TIF(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_res_cmd_allocator_.get(), nullptr,
+		TIFHR(d3d_device_->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, d3d_res_cmd_allocator_.get(), nullptr,
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_res_cmd_list)));
 		d3d_res_cmd_list_ = MakeCOMPtr(d3d_res_cmd_list);
 
@@ -354,7 +354,7 @@ namespace KlayGE
 		rtv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtv_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* rtv_descriptor_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&rtv_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&rtv_descriptor_heap)));
 		rtv_desc_heap_ = MakeCOMPtr(rtv_descriptor_heap);
 		rtv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -365,7 +365,7 @@ namespace KlayGE
 		dsv_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsv_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* dsv_descriptor_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&dsv_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&dsv_descriptor_heap)));
 		dsv_desc_heap_ = MakeCOMPtr(dsv_descriptor_heap);
 		dsv_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
@@ -376,7 +376,7 @@ namespace KlayGE
 		cbv_srv_uav_desc_heap.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		cbv_srv_uav_desc_heap.NodeMask = 0;
 		ID3D12DescriptorHeap* cbv_srv_uav_descriptor_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, IID_ID3D12DescriptorHeap,
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_uav_desc_heap, IID_ID3D12DescriptorHeap,
 			reinterpret_cast<void**>(&cbv_srv_uav_descriptor_heap)));
 		cbv_srv_uav_desc_heap_ = MakeCOMPtr(cbv_srv_uav_descriptor_heap);
 		cbv_srv_uav_desc_size_ = d3d_device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
@@ -430,7 +430,7 @@ namespace KlayGE
 
 	void D3D12RenderEngine::CommitResCmd()
 	{
-		TIF(d3d_res_cmd_list_->Close());
+		TIFHR(d3d_res_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_res_cmd_list_.get() };
 		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 
@@ -443,21 +443,21 @@ namespace KlayGE
 
 	void D3D12RenderEngine::CommitRenderCmd()
 	{
-		TIF(d3d_render_cmd_list_->Close());
+		TIFHR(d3d_render_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_render_cmd_list_.get() };
 		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 	}
 
 	void D3D12RenderEngine::CommitComputeCmd()
 	{
-		TIF(d3d_compute_cmd_list_->Close());
+		TIFHR(d3d_compute_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_compute_cmd_list_.get() };
 		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 	}
 
 	void D3D12RenderEngine::CommitCopyCmd()
 	{
-		TIF(d3d_copy_cmd_list_->Close());
+		TIFHR(d3d_copy_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_copy_cmd_list_.get() };
 		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
 	}
@@ -1153,9 +1153,9 @@ namespace KlayGE
 
 	void D3D12RenderEngine::ForceFlush()
 	{
-		TIF(d3d_render_cmd_list_->Close());
-		TIF(d3d_compute_cmd_list_->Close());
-		TIF(d3d_copy_cmd_list_->Close());
+		TIFHR(d3d_render_cmd_list_->Close());
+		TIFHR(d3d_compute_cmd_list_->Close());
+		TIFHR(d3d_copy_cmd_list_->Close());
 
 		ID3D12CommandList* cmd_lists[1];
 
@@ -1961,9 +1961,9 @@ namespace KlayGE
 
 			ID3DBlob* signature = nullptr;
 			ID3DBlob* error = nullptr;
-			TIF(D3D12InterfaceLoader::Instance().D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
+			TIFHR(D3D12InterfaceLoader::Instance().D3D12SerializeRootSignature(&root_signature_desc, D3D_ROOT_SIGNATURE_VERSION_1, &signature, &error));
 			ID3D12RootSignature* rs;
-			TIF(d3d_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
+			TIFHR(d3d_device_->CreateRootSignature(0, signature->GetBufferPointer(), signature->GetBufferSize(),
 				IID_ID3D12RootSignature, reinterpret_cast<void**>(&rs)));
 			signature->Release();
 			if (error)
@@ -1989,7 +1989,7 @@ namespace KlayGE
 		if (iter == graphics_psos_.end())
 		{
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIFHR(d3d_device_->CreateGraphicsPipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return graphics_psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
@@ -2008,7 +2008,7 @@ namespace KlayGE
 		if (iter == compute_psos_.end())
 		{
 			ID3D12PipelineState* d3d_pso;
-			TIF(d3d_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
+			TIFHR(d3d_device_->CreateComputePipelineState(&desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
 			return compute_psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
 		}
 		else
@@ -2025,7 +2025,7 @@ namespace KlayGE
 		cbv_srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		cbv_srv_heap_desc.NodeMask = 0;
 		ID3D12DescriptorHeap* csu_heap;
-		TIF(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
+		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 		cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
 		return cbv_srv_uav_heap;

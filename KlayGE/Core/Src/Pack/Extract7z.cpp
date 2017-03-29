@@ -31,7 +31,7 @@
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
 
 #include <CPP/Common/MyWindows.h>
@@ -81,7 +81,7 @@ namespace
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
-		TIF(archive->GetProperty(index, kpidPath, &prop));
+		TIFHR(archive->GetProperty(index, kpidPath, &prop));
 		switch (prop.vt)
 		{
 		case VT_BSTR:
@@ -101,7 +101,7 @@ namespace
 	{
 		PROPVARIANT prop;
 		prop.vt = VT_EMPTY;
-		TIF(archive->GetProperty(index, kpidIsDir, &prop));
+		TIFHR(archive->GetProperty(index, kpidIsDir, &prop));
 		switch (prop.vt)
 		{
 		case VT_BOOL:
@@ -156,7 +156,7 @@ namespace
 
 		{
 			IInArchive* tmp;
-			TIF(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
+			TIFHR(SevenZipLoader::Instance().CreateObject(&CLSID_CFormat7z, &IID_IInArchive, reinterpret_cast<void**>(&tmp)));
 			archive = MakeCOMPtr(tmp);
 		}
 
@@ -165,20 +165,20 @@ namespace
 
 		std::shared_ptr<IArchiveOpenCallback> ocb = MakeCOMPtr(new CArchiveOpenCallback);
 		checked_pointer_cast<CArchiveOpenCallback>(ocb)->Init(password);
-		TIF(archive->Open(file.get(), 0, ocb.get()));
+		TIFHR(archive->Open(file.get(), 0, ocb.get()));
 
 		real_index = 0xFFFFFFFF;
 		uint32_t num_items;
-		TIF(archive->GetNumberOfItems(&num_items));
+		TIFHR(archive->GetNumberOfItems(&num_items));
 
 		for (uint32_t i = 0; i < num_items; ++ i)
 		{
 			bool is_folder = true;
-			TIF(IsArchiveItemFolder(archive, i, is_folder));
+			TIFHR(IsArchiveItemFolder(archive, i, is_folder));
 			if (!is_folder)
 			{
 				std::string file_path;
-				TIF(GetArchiveItemPath(archive, i, file_path));
+				TIFHR(GetArchiveItemPath(archive, i, file_path));
 				std::replace(file_path.begin(), file_path.end(), '\\', '/');
 				if (!boost::algorithm::ilexicographical_compare(extract_file_path, file_path)
 					&& !boost::algorithm::ilexicographical_compare(file_path, extract_file_path))
@@ -192,11 +192,11 @@ namespace
 		{
 			PROPVARIANT prop;
 			prop.vt = VT_EMPTY;
-			TIF(archive->GetProperty(real_index, kpidIsAnti, &prop));
+			TIFHR(archive->GetProperty(real_index, kpidIsAnti, &prop));
 			if ((VT_BOOL == prop.vt) && (VARIANT_FALSE == prop.boolVal))
 			{
 				prop.vt = VT_EMPTY;
-				TIF(archive->GetProperty(real_index, kpidPosition, &prop));
+				TIFHR(archive->GetProperty(real_index, kpidPosition, &prop));
 				if (prop.vt != VT_EMPTY)
 				{
 					if ((prop.vt != VT_UI8) || (prop.uhVal.QuadPart != 0))
@@ -241,7 +241,7 @@ namespace KlayGE
 			std::shared_ptr<IArchiveExtractCallback> ecb = MakeCOMPtr(new CArchiveExtractCallback);
 			checked_pointer_cast<CArchiveExtractCallback>(ecb)->Init(password, out_stream);
 
-			TIF(archive->Extract(&real_index, 1, false, ecb.get()));
+			TIFHR(archive->Extract(&real_index, 1, false, ecb.get()));
 		}
 	}
 }
