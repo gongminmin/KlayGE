@@ -67,16 +67,38 @@ namespace KlayGE
 		}
 
 	private:
-		struct parameter_bind_t
+		struct OGLShaderObjectTemplate
+		{
+			OGLShaderObjectTemplate();
+
+			GLenum glsl_bin_format_;
+			std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
+			std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
+			std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
+			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
+			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
+			std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
+			std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
+			std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
+			GLint gs_input_type_, gs_output_type_, gs_max_output_vertex_;
+			std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
+			bool tfb_separate_attribs_;
+			uint32_t ds_partitioning_, ds_output_primitive_;
+		};
+
+		struct ParameterBind
 		{
 			std::string combined_sampler_name;
 			RenderEffectParameter* param;
 			int location;
-			int shader_type;
 			int tex_sampler_bind_index;
 			std::function<void()> func;
 		};
 
+	public:
+		explicit OGLShaderObject(std::shared_ptr<OGLShaderObjectTemplate> const & so_template);
+
+	private:
 		void AttachGLSL(uint32_t type);
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);
@@ -85,22 +107,11 @@ namespace KlayGE
 		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
 	private:
-		GLuint glsl_program_;
-		GLenum glsl_bin_format_;
-		std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
-		std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
-		std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
-		std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
-		std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
-		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
-		GLint gs_input_type_, gs_output_type_, gs_max_output_vertex_;
-		std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
-		bool tfb_separate_attribs_;
-		uint32_t ds_partitioning_, ds_output_primitive_;
+		std::shared_ptr<OGLShaderObjectTemplate> so_template_;
 
-		std::vector<parameter_bind_t> param_binds_;
+		GLuint glsl_program_;
+
+		std::vector<ParameterBind> param_binds_;
 
 		std::vector<TextureBind> textures_;
 		std::vector<GLuint> gl_bind_targets_;

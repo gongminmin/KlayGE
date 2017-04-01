@@ -61,12 +61,31 @@ namespace KlayGE
 		}
 
 	private:
-		struct parameter_bind_t
+		struct OGLESShaderObjectTemplate
+		{
+			OGLESShaderObjectTemplate();
+
+			GLenum glsl_bin_format_;
+			std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
+			std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
+			std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
+			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
+			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
+			std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
+			std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
+			std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
+			std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
+			bool tfb_separate_attribs_;
+#if KLAYGE_IS_DEV_PLATFORM
+			uint32_t ds_partitioning_, ds_output_primitive_;
+#endif
+		};
+
+		struct ParameterBind
 		{
 			std::string combined_sampler_name;
 			RenderEffectParameter* param;
 			int location;
-			int shader_type;
 			int tex_sampler_bind_index;
 			std::function<void()> func;
 		};
@@ -78,24 +97,15 @@ namespace KlayGE
 		void PrintGLSLError(ShaderType type, char const * info);
 		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
-	private:
-		GLuint glsl_program_;
-		GLenum glsl_bin_format_;
-		std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
-		std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
-		std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
-		std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
-		std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
-		std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
-		std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
-		std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
-		bool tfb_separate_attribs_;
-#if KLAYGE_IS_DEV_PLATFORM
-		uint32_t ds_partitioning_, ds_output_primitive_;
-#endif
+	public:
+		explicit OGLESShaderObject(std::shared_ptr<OGLESShaderObjectTemplate> const & so_template);
 
-		std::vector<parameter_bind_t> param_binds_;
+	private:
+		std::shared_ptr<OGLESShaderObjectTemplate> so_template_;
+
+		GLuint glsl_program_;
+
+		std::vector<ParameterBind> param_binds_;
 
 		std::vector<TextureBind> textures_;
 		std::vector<GLuint> gl_bind_targets_;

@@ -126,75 +126,7 @@ namespace KlayGE
 
 		size_t hash_val = 0;
 		{
-			HashCombine(hash_val, 'V');
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_VertexShader);
-				if (blob && !blob->empty())
-				{
-					HashCombine(hash_val, blob->data());
-				}
-				else
-				{
-					HashCombine(hash_val, 0);
-				}
-			}
-			HashCombine(hash_val, 'P');
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_PixelShader);
-				if (blob && !blob->empty())
-				{
-					HashCombine(hash_val, blob->data());
-				}
-				else
-				{
-					HashCombine(hash_val, 0);
-				}
-			}
-			HashCombine(hash_val, 'D');
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_DomainShader);
-				if (blob && !blob->empty())
-				{
-					HashCombine(hash_val, blob->data());
-				}
-				else
-				{
-					HashCombine(hash_val, 0);
-				}
-			}
-			HashCombine(hash_val, 'H');
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_HullShader);
-				if (blob && !blob->empty())
-				{
-					HashCombine(hash_val, blob->data());
-				}
-				else
-				{
-					HashCombine(hash_val, 0);
-				}
-			}
-			HashCombine(hash_val, 'G');
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_GeometryShader);
-				if (blob && !blob->empty())
-				{
-					HashCombine(hash_val, blob->data());
-				}
-				else
-				{
-					HashCombine(hash_val, 0);
-				}
-			}
-
-			auto const & so_decls = d3d12_so->SODecl();
-			std::vector<UINT> so_strides(so_decls.size());
-			for (size_t i = 0; i < so_decls.size(); ++ i)
-			{
-				char const * p = reinterpret_cast<char const *>(&so_decls[i]);
-				HashRange(hash_val, p, p + sizeof(so_decls[i]));
-			}
-			HashCombine(hash_val, d3d12_so->RasterizedStream());
+			HashCombine(hash_val, d3d12_so->ShaderObjectTemplate());
 
 			HashCombine(hash_val, 'I');
 			auto const & input_elem_desc = d3d12_rl.InputElementDesc();
@@ -382,16 +314,7 @@ namespace KlayGE
 		D3D12ShaderObjectPtr const & d3d12_so = checked_pointer_cast<D3D12ShaderObject>(so);
 
 		size_t hash_val = 0;
-		HashCombine(hash_val, 'C');
-		auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_ComputeShader);
-		if (blob && !blob->empty())
-		{
-			HashCombine(hash_val, blob->data());
-		}
-		else
-		{
-			HashCombine(hash_val, 0);
-		}
+		HashCombine(hash_val, d3d12_so->ShaderObjectTemplate());
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
@@ -399,6 +322,7 @@ namespace KlayGE
 			D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
 			pso_desc.pRootSignature = d3d12_so->RootSignature().get();
 			{
+				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_ComputeShader);
 				if (blob && !blob->empty())
 				{
 					pso_desc.CS.pShaderBytecode = blob->data();
