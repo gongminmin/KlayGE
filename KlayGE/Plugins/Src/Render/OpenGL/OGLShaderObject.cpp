@@ -1280,9 +1280,9 @@ namespace KlayGE
 			std::string shader_names;
 			for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 			{
-				if (!(*shader_func_names_)[type].empty())
+				if (!(*so_template_->shader_func_names_)[type].empty())
 				{
-					shader_names += (*shader_func_names_)[type] + '/';
+					shader_names += (*so_template_->shader_func_names_)[type] + '/';
 				}
 			}
 			if (!shader_names.empty())
