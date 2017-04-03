@@ -38,6 +38,7 @@ namespace KlayGE
 				color_fmt(EF_ARGB8), depth_stencil_fmt(EF_D16),
 				sample_count(1), sample_quality(0),
 				motion_frames(0), hdr(false), fft_lens_effects(false), ppaa(false), gamma(false), color_grading(false),
+				bloom(0.25f), blue_shift(true),
 				stereo_method(STM_None), stereo_separation(0),
 				display_output_method(DOM_sRGB), paper_white(100), display_max_luminance(100)
 		{
@@ -60,6 +61,9 @@ namespace KlayGE
 		bool ppaa;
 		bool gamma;
 		bool color_grading;
+
+		float bloom;
+		bool blue_shift;
 
 		StereoMethod stereo_method;
 		float stereo_separation;

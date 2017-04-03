@@ -225,12 +225,19 @@ namespace KlayGE
 
 		this->Technique(effect, tech);
 
+		bloom_strength_ep_ = effect->ParameterByName("bloom_strength");
+		blue_shift_ep_ = effect->ParameterByName("blue_shift");
 		hdr_rescale_ep_ = effect_->ParameterByName("hdr_rescale");
 	}
 
 	void ToneMappingPostProcess::OnRenderBegin()
 	{
 		PostProcess::OnRenderBegin();
+
+		auto const & graphics_cfg = Context::Instance().Config().graphics_cfg;
+
+		*bloom_strength_ep_ = graphics_cfg.bloom;
+		*blue_shift_ep_ = static_cast<int32_t>(graphics_cfg.blue_shift ? 1 : 0);
 
 		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 		*hdr_rescale_ep_ = re.HDRRescale();

@@ -248,6 +248,8 @@ namespace KlayGE
 		bool ppaa = false;
 		bool gamma = false;
 		bool color_grading = false;
+		float bloom = 0.25f;
+		bool blue_shift = true;
 		StereoMethod stereo_method = STM_None;
 		float stereo_separation = 0;
 		DisplayOutputMethod display_output_method = DOM_sRGB;
@@ -440,6 +442,24 @@ namespace KlayGE
 				else
 				{
 					hdr = false;
+				}
+			}
+			attr = hdr_node->Attrib("bloom");
+			if (attr)
+			{
+				bloom = attr->ValueFloat();
+			}
+			attr = hdr_node->Attrib("blue_shift");
+			if (attr)
+			{
+				std::string const & blue_shift_str = attr->ValueString();
+				if (("1" == blue_shift_str) || ("true" == blue_shift_str))
+				{
+					blue_shift = true;
+				}
+				else
+				{
+					blue_shift = false;
 				}
 			}
 
@@ -658,6 +678,8 @@ namespace KlayGE
 		cfg_.graphics_cfg.ppaa = ppaa;
 		cfg_.graphics_cfg.gamma = gamma;
 		cfg_.graphics_cfg.color_grading = color_grading;
+		cfg_.graphics_cfg.bloom = bloom;
+		cfg_.graphics_cfg.blue_shift = blue_shift;
 		cfg_.graphics_cfg.stereo_method = stereo_method;
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 		cfg_.graphics_cfg.display_output_method = display_output_method;
@@ -789,6 +811,8 @@ namespace KlayGE
 
 			XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
 			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));
+			hdr_node->AppendAttrib(cfg_doc.AllocAttribFloat("bloom", cfg_.graphics_cfg.bloom));
+			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("blue_shift", cfg_.graphics_cfg.blue_shift));
 			graphics_node->AppendNode(hdr_node);
 
 			XMLNodePtr ppaa_node = cfg_doc.AllocNode(XNT_Element, "ppaa");

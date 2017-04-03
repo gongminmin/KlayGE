@@ -185,6 +185,8 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
+		RenderEffectParameter* bloom_strength_ep_;
+		RenderEffectParameter* blue_shift_ep_;
 		RenderEffectParameter* hdr_rescale_ep_;
 	};
 
