@@ -32,6 +32,8 @@
 #include <KFL/Thread.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <cstring>
 #include <fstream>
@@ -121,6 +123,7 @@ namespace KlayGE
 
 			ui_tex_ep_ = effect->ParameterByName("ui_tex");
 			half_width_height_ep_ = effect->ParameterByName("half_width_height");
+			dpi_scale_ep_ = effect->ParameterByName("dpi_scale");
 		}
 
 		bool Empty() const
@@ -139,6 +142,7 @@ namespace KlayGE
 			float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
 			*half_width_height_ep_ = float2(half_width, half_height);
+			*dpi_scale_ep_ = Context::Instance().AppInstance().MainWnd()->DPIScale();
 
 			tb_vb_->EnsureDataReady();
 			tb_ib_->EnsureDataReady();
@@ -225,6 +229,7 @@ namespace KlayGE
 	private:
 		bool restart_;
 
+		RenderEffectParameter* dpi_scale_ep_;
 		RenderEffectParameter* ui_tex_ep_;
 		RenderEffectParameter* half_width_height_ep_;
 
@@ -1077,14 +1082,18 @@ namespace KlayGE
 			case InputEngine::IDT_Mouse:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					int2 abs_coord = param->abs_coord;
+					float const dpi_scale = Context::Instance().AppInstance().MainWnd()->DPIScale();
+					abs_coord.x() = static_cast<int32_t>(abs_coord.x() / dpi_scale);
+					abs_coord.y() = static_cast<int32_t>(abs_coord.y() / dpi_scale);
 					mouse_on_ui_ = false;
 					for (auto const & dialog : dialogs_)
 					{
-						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						if (dialog->GetVisible() && dialog->ContainsPoint(abs_coord))
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseOverHandler(param->buttons_state, param->abs_coord);
+						dialog->MouseOverHandler(param->buttons_state, abs_coord);
 					}
 				}
 				break;
@@ -1100,14 +1109,18 @@ namespace KlayGE
 			case InputEngine::IDT_Mouse:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					int2 abs_coord = param->abs_coord;
+					float const dpi_scale = Context::Instance().AppInstance().MainWnd()->DPIScale();
+					abs_coord.x() = static_cast<int32_t>(abs_coord.x() / dpi_scale);
+					abs_coord.y() = static_cast<int32_t>(abs_coord.y() / dpi_scale);
 					mouse_on_ui_ = false;
 					for (auto const & dialog : dialogs_)
 					{
-						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						if (dialog->GetVisible() && dialog->ContainsPoint(abs_coord))
 						{
 							mouse_on_ui_ = true;
 						}
-						dialog->MouseWheelHandler(param->buttons_state, param->abs_coord, param->wheel_delta);
+						dialog->MouseWheelHandler(param->buttons_state, abs_coord, param->wheel_delta);
 					}
 				}
 				break;
@@ -1123,20 +1136,24 @@ namespace KlayGE
 			case InputEngine::IDT_Mouse:
 				{
 					InputMouseActionParamPtr param = checked_pointer_cast<InputMouseActionParam>(action.second);
+					int2 abs_coord = param->abs_coord;
+					float const dpi_scale = Context::Instance().AppInstance().MainWnd()->DPIScale();
+					abs_coord.x() = static_cast<int32_t>(abs_coord.x() / dpi_scale);
+					abs_coord.y() = static_cast<int32_t>(abs_coord.y() / dpi_scale);
 					mouse_on_ui_ = false;
 					for (auto const & dialog : dialogs_)
 					{
-						if (dialog->GetVisible() && dialog->ContainsPoint(param->abs_coord))
+						if (dialog->GetVisible() && dialog->ContainsPoint(abs_coord))
 						{
 							mouse_on_ui_ = true;
 						}
 						if (param->buttons_down & MB_Left)
 						{
-							dialog->MouseDownHandler(param->buttons_down, param->abs_coord);
+							dialog->MouseDownHandler(param->buttons_down, abs_coord);
 						}
 						else if (param->buttons_up & MB_Left)
 						{
-							dialog->MouseUpHandler(param->buttons_up, param->abs_coord);
+							dialog->MouseUpHandler(param->buttons_up, abs_coord);
 						}
 					}
 				}
@@ -1153,24 +1170,28 @@ namespace KlayGE
 			case InputEngine::IDT_Touch:
 				{
 					InputTouchActionParamPtr param = checked_pointer_cast<InputTouchActionParam>(action.second);
+					int2 abs_coord = param->touches_coord[0];
+					float const dpi_scale = Context::Instance().AppInstance().MainWnd()->DPIScale();
+					abs_coord.x() = static_cast<int32_t>(abs_coord.x() / dpi_scale);
+					abs_coord.y() = static_cast<int32_t>(abs_coord.y() / dpi_scale);
 					mouse_on_ui_ = false;
 					for (auto const & dialog : dialogs_)
 					{
-						if (dialog->GetVisible() && dialog->ContainsPoint(param->touches_coord[0]))
+						if (dialog->GetVisible() && dialog->ContainsPoint(abs_coord))
 						{
 							mouse_on_ui_ = true;
 						}
 						if (param->touches_down & 1UL)
 						{
-							dialog->MouseDownHandler(MB_Left, param->touches_coord[0]);
+							dialog->MouseDownHandler(MB_Left, abs_coord);
 						}
 						else if (param->touches_up & 1UL)
 						{
-							dialog->MouseUpHandler(MB_Left, param->touches_coord[0]);
+							dialog->MouseUpHandler(MB_Left, abs_coord);
 						}
 						else if (param->touches_state & 1UL)
 						{
-							dialog->MouseOverHandler(MB_Left, param->touches_coord[0]);
+							dialog->MouseOverHandler(MB_Left, abs_coord);
 						}
 					}
 				}
@@ -1888,9 +1909,10 @@ namespace KlayGE
 
 	void UIDialog::SettleCtrls()
 	{
+		float const dpi_scale = Context::Instance().AppInstance().MainWnd()->DPIScale();
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		uint32_t width = re.ScreenFrameBuffer()->Width();
-		uint32_t height = re.ScreenFrameBuffer()->Height();
+		uint32_t width = static_cast<uint32_t>(re.ScreenFrameBuffer()->Width() / dpi_scale);
+		uint32_t height = static_cast<uint32_t>(re.ScreenFrameBuffer()->Height() / dpi_scale);
 
 		for (auto const & id_loc : id_location_)
 		{

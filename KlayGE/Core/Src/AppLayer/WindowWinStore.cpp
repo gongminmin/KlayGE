@@ -116,8 +116,8 @@ namespace KlayGE
 		app_view_stat.As(&app_view_stat3);
 
 		ABI::Windows::Foundation::Size size;
-		size.Width = static_cast<float>(width_ / dpi_scale_);
-		size.Height = static_cast<float>(height_ / dpi_scale_);
+		size.Width = static_cast<float>(width_);
+		size.Height = static_cast<float>(height_);
 		app_view_stat3->put_PreferredLaunchViewSize(size);
 		app_view_stat3->put_PreferredLaunchWindowingMode(ApplicationViewWindowingMode_PreferredLaunchViewSize);
 
@@ -422,7 +422,29 @@ namespace KlayGE
 
 	void Window::OnDpiChanged()
 	{
+		ABI::Windows::Foundation::Size size;
+		size.Width = static_cast<float>(width_ / dpi_scale_);
+		size.Height = static_cast<float>(height_ / dpi_scale_);
+
 		this->DetectsDPI();
+
+		ComPtr<IApplicationViewStatics> app_view_stat;
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
+
+		ComPtr<IApplicationViewStatics2> app_view_stat2;
+		app_view_stat.As(&app_view_stat2);
+
+		ComPtr<IApplicationView> app_view;
+		app_view_stat2->GetForCurrentView(&app_view);
+
+		ComPtr<IApplicationView3> app_view3;
+		app_view.As(&app_view3);
+
+		boolean success;
+		do
+		{
+			app_view3->TryResizeView(size, &success);
+		} while (!success);
 	}
 
 	void Window::OnOrientationChanged()

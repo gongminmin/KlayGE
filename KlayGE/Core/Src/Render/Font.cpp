@@ -46,6 +46,8 @@
 #include <KlayGE/LZMACodec.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/Window.hpp>
 
 #include <algorithm>
 #include <vector>
@@ -101,6 +103,7 @@ namespace KlayGE
 			*(effect_->ParameterByName("distance_base_scale")) = float2(kfont_loader_->DistBase() / 32768.0f * 32 + 1, (kfont_loader_->DistScale() / 32768.0f + 1.0f) * 32);
 
 			half_width_height_ep_ = effect_->ParameterByName("half_width_height");
+			dpi_scale_ep_ = effect_->ParameterByName("dpi_scale");
 			mvp_ep_ = effect_->ParameterByName("mvp");
 
 			uint32_t const INDEX_PER_CHAR = restart_ ? 5 : 6;
@@ -137,6 +140,7 @@ namespace KlayGE
 				float const half_height = re.CurFrameBuffer()->Height() / 2.0f;
 
 				*half_width_height_ep_ = float2(half_width, half_height);
+				*dpi_scale_ep_ = Context::Instance().AppInstance().MainWnd()->DPIScale();
 			}
 
 			tb_vb_->EnsureDataReady();
@@ -702,6 +706,7 @@ namespace KlayGE
 		std::vector<uint8_t> a_char_data_;
 
 		RenderEffectParameter* half_width_height_ep_;
+		RenderEffectParameter* dpi_scale_ep_;
 		RenderEffectParameter* mvp_ep_;
 
 		std::shared_ptr<KFont> kfont_loader_;

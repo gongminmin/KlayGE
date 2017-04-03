@@ -122,23 +122,21 @@ namespace KlayGE
 		wc.hIconSm = nullptr;
 		::RegisterClassExW(&wc);
 
-		uint32_t style;
 		if (settings.full_screen)
 		{
-			style = WS_POPUP;
+			win_style_ = WS_POPUP;
 		}
 		else
 		{
-			style = WS_OVERLAPPEDWINDOW;
+			win_style_ = WS_OVERLAPPEDWINDOW;
 		}
 
-		RECT rc = { 0, 0, settings.width, settings.height };
-		::AdjustWindowRect(&rc, style, false);
+		RECT rc = { 0, 0, static_cast<LONG>(settings.width * dpi_scale_ + 0.5f), static_cast<LONG>(settings.height * dpi_scale_ + 0.5f) };
+		::AdjustWindowRect(&rc, win_style_, false);
 
 		// Create our main window
 		// Pass pointer to self
-		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(),
-			style, settings.left, settings.top,
+		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(), win_style_, settings.left, settings.top,
 			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
 
 		default_wnd_proc_ = ::DefWindowProc;
@@ -324,7 +322,25 @@ namespace KlayGE
 			break;
 
 		case WM_DPICHANGED:
-			dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+			{
+				RECT rc;
+				::GetClientRect(wnd_, &rc);
+				rc.left = static_cast<int32_t>(rc.left / dpi_scale_ + 0.5f);
+				rc.top = static_cast<int32_t>(rc.top / dpi_scale_ + 0.5f);
+				rc.right = static_cast<uint32_t>(rc.right / dpi_scale_ + 0.5f);
+				rc.bottom = static_cast<uint32_t>(rc.bottom / dpi_scale_ + 0.5f);
+
+				dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+
+				rc.left = static_cast<int32_t>(rc.left * dpi_scale_ + 0.5f);
+				rc.top = static_cast<int32_t>(rc.top * dpi_scale_ + 0.5f);
+				rc.right = static_cast<uint32_t>(rc.right * dpi_scale_ + 0.5f);
+				rc.bottom = static_cast<uint32_t>(rc.bottom * dpi_scale_ + 0.5f);
+
+				::AdjustWindowRect(&rc, win_style_, false);
+
+				::SetWindowPos(this->HWnd(), HWND_TOP, rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top, SWP_NOREPOSITION);
+			}
 			break;
 #endif
 

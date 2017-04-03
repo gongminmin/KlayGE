@@ -394,6 +394,7 @@ namespace KlayGE
 		int32_t top_;
 		uint32_t width_;
 		uint32_t height_;
+		uint32_t win_style_;
 
 		bool active_;
 		bool ready_;
