@@ -34,9 +34,16 @@
 
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
-#include <KFL/ThrowErr.hpp>
+#include <KFL/ErrorHandling.hpp>
 
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#endif
 #include <windows.graphics.display.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #include <wrl/client.h>
 #include <wrl/wrappers/corewrappers.h>
 
@@ -125,14 +132,14 @@ namespace KlayGE
 	void Window::DetectsDPI()
 	{
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 
 		float dpi;
-		TIF(disp_info->get_LogicalDpi(&dpi));
+		TIFHR(disp_info->get_LogicalDpi(&dpi));
 
 		dpi_scale_ = dpi / 96;
 	}
@@ -140,17 +147,17 @@ namespace KlayGE
 	void Window::DetectsOrientation()
 	{
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
-		TIF(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
+		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
 			&disp_info_stat));
 
 		ComPtr<IDisplayInformation> disp_info;
-		TIF(disp_info_stat->GetForCurrentView(&disp_info));
+		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));
 
 		DisplayOrientations native_orientation;
-		TIF(disp_info->get_NativeOrientation(&native_orientation));
+		TIFHR(disp_info->get_NativeOrientation(&native_orientation));
 
 		DisplayOrientations curr_orientation;
-		TIF(disp_info->get_CurrentOrientation(&curr_orientation));
+		TIFHR(disp_info->get_CurrentOrientation(&curr_orientation));
 
 		win_rotation_ = WR_Unspecified;
 
@@ -272,7 +279,7 @@ namespace KlayGE
 	void Window::OnVisibilityChanged(IVisibilityChangedEventArgs* args)
 	{
 		boolean vis;
-		TIF(args->get_Visible(&vis));
+		TIFHR(args->get_Visible(&vis));
 
 		active_ = vis ? true : false;
 		this->OnActive()(*this, active_);
@@ -290,7 +297,7 @@ namespace KlayGE
 	void Window::OnKeyDown(IKeyEventArgs* args)
 	{
 		ABI::Windows::System::VirtualKey vk;
-		TIF(args->get_VirtualKey(&vk));
+		TIFHR(args->get_VirtualKey(&vk));
 		if (vk < 256)
 		{
 			this->OnKeyDown()(*this, vk);
@@ -300,7 +307,7 @@ namespace KlayGE
 	void Window::OnKeyUp(IKeyEventArgs* args)
 	{
 		ABI::Windows::System::VirtualKey vk;
-		TIF(args->get_VirtualKey(&vk));
+		TIFHR(args->get_VirtualKey(&vk));
 		if (vk < 256)
 		{
 			this->OnKeyUp()(*this, vk);
@@ -310,10 +317,10 @@ namespace KlayGE
 	void Window::OnPointerPressed(IPointerEventArgs* args)
 	{
 		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
+		TIFHR(args->get_CurrentPoint(&point));
 
 		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
+		TIFHR(point->get_PointerId(&pid));
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -327,7 +334,7 @@ namespace KlayGE
 		}
 
 		Point position;
-		TIF(point->get_Position(&position));
+		TIFHR(point->get_Position(&position));
 
 		this->OnPointerDown()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
 	}
@@ -335,10 +342,10 @@ namespace KlayGE
 	void Window::OnPointerReleased(IPointerEventArgs* args)
 	{
 		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
+		TIFHR(args->get_CurrentPoint(&point));
 
 		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
+		TIFHR(point->get_PointerId(&pid));
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -352,7 +359,7 @@ namespace KlayGE
 		}
 
 		Point position;
-		TIF(point->get_Position(&position));
+		TIFHR(point->get_Position(&position));
 
 		this->OnPointerUp()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)), conv_id);
 	}
@@ -360,10 +367,10 @@ namespace KlayGE
 	void Window::OnPointerMoved(IPointerEventArgs* args)
 	{
 		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
+		TIFHR(args->get_CurrentPoint(&point));
 
 		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
+		TIFHR(point->get_PointerId(&pid));
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -376,9 +383,9 @@ namespace KlayGE
 		}
 
 		Point position;
-		TIF(point->get_Position(&position));
+		TIFHR(point->get_Position(&position));
 		boolean contact;
-		TIF(point->get_IsInContact(&contact));
+		TIFHR(point->get_IsInContact(&contact));
 
 		this->OnPointerUpdate()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
 			conv_id, contact ? true : false);
@@ -387,10 +394,10 @@ namespace KlayGE
 	void Window::OnPointerWheelChanged(IPointerEventArgs* args)
 	{
 		ComPtr<IPointerPoint> point;
-		TIF(args->get_CurrentPoint(&point));
+		TIFHR(args->get_CurrentPoint(&point));
 
 		UINT32 pid;
-		TIF(point->get_PointerId(&pid));
+		TIFHR(point->get_PointerId(&pid));
 
 		uint32_t conv_id = 0;
 		for (size_t i = 0; i < pointer_id_map_.size(); ++i)
@@ -403,11 +410,11 @@ namespace KlayGE
 		}
 
 		Point position;
-		TIF(point->get_Position(&position));
+		TIFHR(point->get_Position(&position));
 		ComPtr<IPointerPointProperties> properties;
-		TIF(point->get_Properties(&properties));
+		TIFHR(point->get_Properties(&properties));
 		INT32 wheel;
-		TIF(properties->get_MouseWheelDelta(&wheel));
+		TIFHR(properties->get_MouseWheelDelta(&wheel));
 
 		this->OnPointerWheel()(*this, int2(static_cast<int>(position.X * dpi_scale_), static_cast<int>(position.Y * dpi_scale_)),
 			conv_id, wheel);

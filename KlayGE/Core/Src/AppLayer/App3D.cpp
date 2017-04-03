@@ -26,6 +26,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -47,13 +48,20 @@
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 #include <KFL/COMPtr.hpp>
 
-#include <wrl/client.h>
-#include <wrl/event.h>
-#include <wrl/wrappers/corewrappers.h>
-
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#endif
 #include <Windows.ApplicationModel.h>
 #include <Windows.ApplicationModel.core.h>
 #include <windows.graphics.display.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
+
+#include <wrl/client.h>
+#include <wrl/event.h>
+#include <wrl/wrappers/corewrappers.h>
 
 #include <ppl.h>
 #include <ppltasks.h>

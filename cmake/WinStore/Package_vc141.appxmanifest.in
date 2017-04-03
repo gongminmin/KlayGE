@@ -16,7 +16,7 @@
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="@SHORT_NAME@.App">
       <uap:VisualElements DisplayName="@SHORT_NAME@" Description="KlayGE Sample: @SHORT_NAME@" BackgroundColor="#336699" Square150x150Logo="Logo.png" Square44x44Logo="SmallLogo44.png">
-        <uap:DefaultTile Wide310x150Logo="SplashScreen.png"/>
+        <uap:DefaultTile Wide310x150Logo="Wide310x150Logo.png"/>
         <uap:SplashScreen Image="SplashScreen.png" />
       </uap:VisualElements>
     </Application>

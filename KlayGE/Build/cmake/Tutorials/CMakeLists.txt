@@ -33,6 +33,7 @@ MACRO(SETUP_TUTORIAL EXE_NAME)
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SmallLogo44.png
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/SplashScreen.png
 			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/StoreLogo.png
+			${KLAYGE_PROJECT_DIR}/Samples/media/Common/Assets/Wide310x150Logo.png
 		)
 
 		SET(DEBUG_CONTENT_FILES ${DEBUG_CONTENT_FILES}

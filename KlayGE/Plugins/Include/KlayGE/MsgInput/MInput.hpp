@@ -215,8 +215,15 @@ typedef struct _HIDP_VALUE_CAPS
 #include <Sensors.h>
 #endif
 #elif defined KLAYGE_PLATFORM_WINDOWS_STORE
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(push)
+#pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
+#endif
 #include <windows.devices.geolocation.h>
 #include <windows.devices.sensors.h>
+#if defined(KLAYGE_COMPILER_MSVC)
+#pragma warning(pop)
+#endif
 #elif defined KLAYGE_PLATFORM_ANDROID
 #include <android/sensor.h>
 #endif

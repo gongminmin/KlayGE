@@ -198,7 +198,7 @@ void VideoTextureApp::OnCreate()
 	init_data.data = &data;
 	init_data.slice_pitch = init_data.row_pitch = sizeof(data);
 
-	TexturePtr dummy_tex = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, &init_data);
+	TexturePtr dummy_tex = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(dummy_tex);
 #endif
 

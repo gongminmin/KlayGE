@@ -1,6 +1,9 @@
 IF(KLAYGE_COMPILER_CLANGC2)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value -Wno-unused-variable -Wno-unknown-pragmas")
 ENDIF()
+IF(KLAYGE_PLATFORM_WINDOWS_STORE)
+	STRING(REPLACE "/permissive-" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+ENDIF()
 
 SET(LIB_NAME KlayGE_RenderEngine_D3D12)
 
