@@ -32,6 +32,7 @@
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_STORE
 
+#include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ErrorHandling.hpp>
@@ -51,6 +52,7 @@
 
 using namespace ABI::Windows::Foundation;
 using namespace ABI::Windows::Graphics::Display;
+using namespace ABI::Windows::System::Display;
 using namespace ABI::Windows::UI::Core;
 using namespace ABI::Windows::UI::Input;
 using namespace ABI::Windows::UI::ViewManagement;
@@ -60,7 +62,7 @@ using namespace Microsoft::WRL::Wrappers;
 namespace KlayGE
 {
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false),
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		Convert(wname_, name);
@@ -73,7 +75,7 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false),
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		KFL_UNUSED(native_wnd);
@@ -89,6 +91,13 @@ namespace KlayGE
 
 	Window::~Window()
 	{
+		if (keep_screen_on_)
+		{
+			if (disp_request_)
+			{
+				disp_request_->RequestRelease();
+			}
+		}
 	}
 
 	void Window::SetWindow(std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> const & window)
@@ -257,6 +266,21 @@ namespace KlayGE
 
 	void Window::OnActivated()
 	{
+		if (keep_screen_on_)
+		{
+			if (!disp_request_)
+			{
+				IDisplayRequest* disp_request;
+				TIFHR(Windows::Foundation::ActivateInstance(HStringReference(RuntimeClass_Windows_System_Display_DisplayRequest).Get(),
+					&disp_request));
+				disp_request_ = MakeCOMPtr(disp_request);
+			}
+			if (disp_request_)
+			{
+				disp_request_->RequestActive();
+			}
+		}
+
 		if (full_screen_)
 		{
 			this->FullScreen(true);

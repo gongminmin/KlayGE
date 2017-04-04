@@ -32,6 +32,8 @@
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 
+#include <android/window.h>
+
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 
@@ -41,7 +43,7 @@
 namespace KlayGE
 {
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on), dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		a_window_ = nullptr;
 
@@ -79,10 +81,15 @@ namespace KlayGE
 		top_ = settings.top;
 		width_ = ANativeWindow_getWidth(a_window_);
 		height_ = ANativeWindow_getHeight(a_window_);
+
+		if (keep_screen_on_)
+		{
+			ANativeActivity_setWindowFlags(state->activity, AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
+		}
 	}
 
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on), dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		a_window_ = static_cast<ANativeWindow*>(native_wnd);
 
@@ -120,10 +127,20 @@ namespace KlayGE
 		top_ = settings.top;
 		width_ = ANativeWindow_getWidth(a_window_);
 		height_ = ANativeWindow_getHeight(a_window_);
+
+		if (keep_screen_on_)
+		{
+			ANativeActivity_setWindowFlags(state->activity, AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
+		}
 	}
 
 	Window::~Window()
 	{
+		if (keep_screen_on_)
+		{
+			android_app* state = Context::Instance().AppState();
+			ANativeActivity_setWindowFlags(state->activity, 0, AWINDOW_FLAG_KEEP_SCREEN_ON);
+		}
 	}
 
 	void Window::HandleCMD(android_app* app, int32_t cmd)

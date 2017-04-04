@@ -250,6 +250,7 @@ namespace KlayGE
 		bool color_grading = false;
 		float bloom = 0.25f;
 		bool blue_shift = true;
+		bool keep_screen_on = true;
 		StereoMethod stereo_method = STM_None;
 		float stereo_separation = 0;
 		DisplayOutputMethod display_output_method = DOM_sRGB;
@@ -365,6 +366,19 @@ namespace KlayGE
 				else
 				{
 					full_screen = false;
+				}
+			}
+			attr = frame_node->Attrib("keep_screen_on");
+			if (attr)
+			{
+				std::string const & kso_str = attr->ValueString();
+				if (("1" == kso_str) || ("true" == kso_str))
+				{
+					keep_screen_on = true;
+				}
+				else
+				{
+					keep_screen_on = false;
 				}
 			}
 
@@ -680,6 +694,7 @@ namespace KlayGE
 		cfg_.graphics_cfg.color_grading = color_grading;
 		cfg_.graphics_cfg.bloom = bloom;
 		cfg_.graphics_cfg.blue_shift = blue_shift;
+		cfg_.graphics_cfg.keep_screen_on = keep_screen_on;
 		cfg_.graphics_cfg.stereo_method = stereo_method;
 		cfg_.graphics_cfg.stereo_separation = stereo_separation;
 		cfg_.graphics_cfg.display_output_method = display_output_method;
@@ -791,6 +806,7 @@ namespace KlayGE
 			frame_node->AppendAttrib(cfg_doc.AllocAttribString("depth_stencil_fmt", depth_stencil_fmt_str));
 
 			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("fullscreen", cfg_.graphics_cfg.full_screen));
+			frame_node->AppendAttrib(cfg_doc.AllocAttribInt("keep_screen_on", cfg_.graphics_cfg.keep_screen_on));
 
 			{
 				XMLNodePtr sample_node = cfg_doc.AllocNode(XNT_Element, "sample");

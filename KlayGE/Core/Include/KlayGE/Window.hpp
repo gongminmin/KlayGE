@@ -52,6 +52,7 @@
 #pragma warning(push)
 #pragma warning(disable: 4471) // A forward declaration of an unscoped enumeration must have an underlying type
 #endif
+#include <windows.system.display.h>
 #include <windows.ui.core.h>
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(pop)
@@ -372,6 +373,7 @@ namespace KlayGE
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		static BOOL CALLBACK EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam);
+		void KeepScreenOn();
 #endif
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -394,11 +396,11 @@ namespace KlayGE
 		int32_t top_;
 		uint32_t width_;
 		uint32_t height_;
-		uint32_t win_style_;
 
 		bool active_;
 		bool ready_;
 		bool closed_;
+		bool keep_screen_on_;
 
 		float dpi_scale_;
 		WindowRotation win_rotation_;
@@ -409,10 +411,12 @@ namespace KlayGE
 		std::wstring wname_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		uint32_t win_style_;
 		HWND wnd_;
 		WNDPROC default_wnd_proc_;
 #else
 		std::shared_ptr<ABI::Windows::UI::Core::ICoreWindow> wnd_;
+		std::shared_ptr<ABI::Windows::System::Display::IDisplayRequest> disp_request_;
 		std::array<uint32_t, 16> pointer_id_map_;
 		bool full_screen_;
 #endif

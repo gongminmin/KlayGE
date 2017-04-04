@@ -99,9 +99,11 @@ namespace KlayGE
 #endif
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
+			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
 		this->DetectsDPI();
+		this->KeepScreenOn();
 
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
 
@@ -164,9 +166,11 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
+			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
 		this->DetectsDPI();
+		this->KeepScreenOn();
 
 		Convert(wname_, name);
 
@@ -198,6 +202,13 @@ namespace KlayGE
 
 	Window::~Window()
 	{
+		if (keep_screen_on_)
+		{
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+			::SetThreadExecutionState(ES_CONTINUOUS);
+#endif
+		}
+
 		if (wnd_ != nullptr)
 		{
 #ifdef KLAYGE_COMPILER_MSVC
@@ -351,6 +362,21 @@ namespace KlayGE
 			closed_ = true;
 			::PostQuitMessage(0);
 			return 0;
+
+		case WM_SYSCOMMAND:
+			if (keep_screen_on_)
+			{
+				switch (wParam)
+				{
+				case SC_SCREENSAVE:
+				case SC_MONITORPOWER:
+					return 0;
+
+				default:
+					break;
+				}
+			}
+			break;
 		}
 
 		return default_wnd_proc_(hWnd, uMsg, wParam, lParam);
@@ -389,6 +415,16 @@ namespace KlayGE
 			}
 		}
 #endif
+	}
+
+	void Window::KeepScreenOn()
+	{
+		if (keep_screen_on_)
+		{
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+			::SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_AWAYMODE_REQUIRED);
+#endif
+		}
 	}
 }
 
