@@ -222,7 +222,6 @@ namespace KlayGE
 				RenderTechnique const & tech, RenderPass const & pass, std::vector<uint32_t> const & shader_desc_ids)
 		{
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-			D3D_FEATURE_LEVEL const feature_level = feature_level_;
 			OfflineRenderDeviceCaps const & caps = caps_;
 
 			ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);

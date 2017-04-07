@@ -373,8 +373,8 @@ namespace KlayGE
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		static BOOL CALLBACK EnumMonProc(HMONITOR mon, HDC dc_mon, RECT* rc_mon, LPARAM lparam);
-		void KeepScreenOn();
 #endif
+		void KeepScreenOn();
 
 		LRESULT MsgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #else

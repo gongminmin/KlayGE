@@ -185,7 +185,7 @@ namespace KlayGE
 
 		ArrayRef<T> DropBack(uint32_t n = 1) const
 		{
-			BOOST_ASSERT_MSG(this->size() >= N, "Dropping more elements than exist");
+			BOOST_ASSERT_MSG(this->size() >= n, "Dropping more elements than exist");
 			return this->Slice(0, this->Size() - n);
 		}
 

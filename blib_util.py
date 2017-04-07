@@ -440,7 +440,7 @@ class build_info:
 		vcvarsall_path = ""
 		if os.path.exists(folder + "Microsoft.ClangC2Version.default.txt"):
 			version_file = open(folder + "Microsoft.ClangC2Version.default.txt")
-			version = version_file.read()
+			version = version_file.read().strip()
 			compiler_root = "%s\\..\\..\\Tools\\ClangC2\\%s\\bin\\HostX86\\" % (folder, version)
 			vcvarsall_path = "..\\..\\..\\..\\..\\Auxiliary\\Build\\VCVARSALL.BAT"
 			found = True

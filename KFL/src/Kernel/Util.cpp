@@ -160,14 +160,14 @@ namespace KlayGE
 	// EndianµÄÇÐ»»
 	/////////////////////////////////////////////////////////////////////////////////
 	template <>
-	void EndianSwitch<2>(void* p) noexcept
+	void EndianSwitch<2>(void* p)
 	{
 		uint8_t* bytes = static_cast<uint8_t*>(p);
 		std::swap(bytes[0], bytes[1]);
 	}
 
 	template <>
-	void EndianSwitch<4>(void* p) noexcept
+	void EndianSwitch<4>(void* p)
 	{
 		uint8_t* bytes = static_cast<uint8_t*>(p);
 		std::swap(bytes[0], bytes[3]);
@@ -175,7 +175,7 @@ namespace KlayGE
 	}
 
 	template <>
-	void EndianSwitch<8>(void* p) noexcept
+	void EndianSwitch<8>(void* p)
 	{
 		uint8_t* bytes = static_cast<uint8_t*>(p);
 		std::swap(bytes[0], bytes[7]);
