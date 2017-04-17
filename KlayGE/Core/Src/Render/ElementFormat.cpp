@@ -29,7 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ElementFormat.hpp>
 
 #include <boost/assert.hpp>
@@ -740,8 +740,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Not supported element format");
 		}
 	}
 
@@ -1532,8 +1531,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Not supported element format");
 		}
 	}
 }

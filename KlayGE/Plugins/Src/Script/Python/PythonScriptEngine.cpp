@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Vector.hpp>
@@ -360,8 +361,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(false);
-			return CppType2PyObjectPtr(std::any_cast<int32_t>(t));
+			KFL_UNREACHABLE("Invalid type");
 		}
 	}
 

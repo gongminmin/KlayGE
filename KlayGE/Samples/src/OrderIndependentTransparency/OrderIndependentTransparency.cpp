@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -198,8 +199,7 @@ namespace
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid OIT mode");
 				}
 			}
 			else
@@ -227,8 +227,7 @@ namespace
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid OIT mode");
 				}
 			}
 		}
@@ -359,8 +358,7 @@ namespace
 				}
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid OIT mode");
 			}
 		}
 

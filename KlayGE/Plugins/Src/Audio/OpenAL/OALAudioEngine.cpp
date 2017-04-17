@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <boost/assert.hpp>
@@ -48,8 +49,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid audio format");
 		}
 
 		return out;

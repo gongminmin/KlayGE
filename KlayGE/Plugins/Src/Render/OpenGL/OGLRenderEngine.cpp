@@ -35,6 +35,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
 #include <KFL/Math.hpp>
@@ -97,8 +98,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			ret = nullptr;
+			KFL_UNREACHABLE("Invalid debug source");
 		}
 
 		return ret;
@@ -138,8 +138,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			ret = nullptr;
+			KFL_UNREACHABLE("Invalid debug type");
 		}
 
 		return ret;
@@ -164,8 +163,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			ret = nullptr;
+			KFL_UNREACHABLE("Invalid debug severity");
 		}
 
 		return ret;
@@ -1076,9 +1074,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				so_primitive_mode_ = GL_POINTS;
-				break;
+				KFL_UNREACHABLE("Invalid topoloty type");
 			}
 
 			so_buffs_.resize(so_rl_->NumVertexStreams());
@@ -1274,24 +1270,24 @@ namespace KlayGE
 	void OGLRenderEngine::DoDispatch(RenderEffect const & effect, RenderTechnique const & tech,
 		uint32_t tgx, uint32_t tgy, uint32_t tgz)
 	{
-		BOOST_ASSERT(false);
-
 		KFL_UNUSED(effect);
 		KFL_UNUSED(tech);
 		KFL_UNUSED(tgx);
 		KFL_UNUSED(tgy);
 		KFL_UNUSED(tgz);
+
+		KFL_UNREACHABLE("Not implemented");
 	}
 
 	void OGLRenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 			GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
-		BOOST_ASSERT(false);
-
 		KFL_UNUSED(effect);
 		KFL_UNUSED(tech);
 		KFL_UNUSED(buff_args);
 		KFL_UNUSED(offset);
+
+		KFL_UNREACHABLE("Not implemented");
 	}
 
 	void OGLRenderEngine::ForceFlush()

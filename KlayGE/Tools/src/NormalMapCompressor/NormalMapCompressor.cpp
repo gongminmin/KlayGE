@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
@@ -138,8 +139,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Compression formats other than BC3 and BC5 are not supported");
 		}
 
 		std::vector<uint8_t> normals(width * height * 4);

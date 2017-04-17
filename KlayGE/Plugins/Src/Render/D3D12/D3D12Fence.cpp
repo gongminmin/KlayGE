@@ -79,8 +79,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid fence type");
 		}
 
 		uint64_t const id = fence_val_;

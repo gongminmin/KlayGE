@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/TexCompressionBC.hpp>
 #include <KlayGE/TexCompressionETC.hpp>
 #include <KlayGE/Texture.hpp>
@@ -61,8 +62,7 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 		break;
 
 	default:
-		BOOST_ASSERT(false);
-		break;
+		KFL_UNREACHABLE("Unsupported compression format");
 	}
 
 	ElementFormat const decoded_fmt = codec->DecodedFormat();

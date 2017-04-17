@@ -56,4 +56,25 @@ namespace KlayGE
 			TERRC(std::errc::function_not_supported);
 		}
 	}
+
+#if !defined(NDEBUG) || !defined(LLVM_BUILTIN_UNREACHABLE)
+	void KFLUnreachableInternal(char const * msg, char const * file, uint32_t line)
+	{
+		if (msg)
+		{
+			LogError(msg);
+		}
+		if (file)
+		{
+			LogError("UNREACHABLE executed at %s: %d.", file, line);
+		}
+		else
+		{
+			LogError("UNREACHABLE executed.");
+		}
+
+		TMSG("Unreachable.");
+	}
+#endif
+
 }

@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
@@ -51,8 +52,7 @@ namespace
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Compression formats other than BC3 and BC5 are not supported");
 			}
 
 			for (uint32_t y_base = 0; y_base < height; y_base += 4)

@@ -1318,8 +1318,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Can't be called");
 		}
 
 		return ret;

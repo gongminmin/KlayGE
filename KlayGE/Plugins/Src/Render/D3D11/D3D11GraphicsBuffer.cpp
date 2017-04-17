@@ -243,9 +243,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			type = D3D11_MAP_READ;
-			break;
+			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
 		D3D11_MAPPED_SUBRESOURCE mapped;

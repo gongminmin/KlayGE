@@ -45,6 +45,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
@@ -105,8 +106,8 @@ namespace
 					return i;
 				}
 			}
-			BOOST_ASSERT(false);
-			return 0xFFFFFFFF;
+
+			KFL_UNREACHABLE("Invalid type name");
 		}
 
 		std::string const & type_name(uint32_t code) const
@@ -115,10 +116,8 @@ namespace
 			{
 				return types_[code];
 			}
-			BOOST_ASSERT(false);
 
-			static std::string empty_str("");
-			return empty_str;
+			KFL_UNREACHABLE("Invalid type code");
 		}
 
 		type_define()
@@ -211,9 +210,8 @@ namespace
 					return static_cast<ShadeMode>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong ShadeMode name: %s", name.c_str());
-			return static_cast<ShadeMode>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid ShadeMode name");
 		}
 
 		shade_mode_define()
@@ -255,9 +253,8 @@ namespace
 					return static_cast<CompareFunction>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong CompareFunction name: %s", name.c_str());
-			return static_cast<CompareFunction>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid CompareFunction name");
 		}
 
 		compare_function_define()
@@ -305,9 +302,8 @@ namespace
 					return static_cast<CullMode>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong CullMode name: %s", name.c_str());
-			return static_cast<CullMode>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid CullMode name");
 		}
 
 		cull_mode_define()
@@ -350,9 +346,8 @@ namespace
 					return static_cast<PolygonMode>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong PolygonMode name: %s", name.c_str());
-			return static_cast<PolygonMode>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid PolygonMode name");
 		}
 
 		polygon_mode_define()
@@ -395,9 +390,8 @@ namespace
 					return static_cast<AlphaBlendFactor>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong AlphaBlendFactor name: %s", name.c_str());
-			return static_cast<AlphaBlendFactor>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid AlphaBlendFactor name");
 		}
 
 		alpha_blend_factor_define()
@@ -454,9 +448,8 @@ namespace
 					return static_cast<BlendOperation>(i + 1);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong BlendOperation name: %s", name.c_str());
-			return static_cast<BlendOperation>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid BlendOperation name");
 		}
 
 		blend_operation_define()
@@ -501,9 +494,8 @@ namespace
 					return static_cast<StencilOperation>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong StencilOperation name: %s", name.c_str());
-			return static_cast<StencilOperation>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid StencilOperation name");
 		}
 
 		stencil_operation_define()
@@ -567,9 +559,8 @@ namespace
 			{
 				return static_cast<TexFilterOp>((cmp << 4) + TFO_Anisotropic);
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong TexFilterOp name: %s", name.c_str());
-			return static_cast<TexFilterOp>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid TexFilterOp name");
 		}
 
 		texture_filter_mode_define()
@@ -617,9 +608,8 @@ namespace
 					return static_cast<TexAddressingMode>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong TexAddressingMode name: %s", name.c_str());
-			return static_cast<TexAddressingMode>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid TexAddressingMode name");
 		}
 
 		texture_addr_mode_define()
@@ -663,9 +653,8 @@ namespace
 					return static_cast<LogicOperation>(i);
 				}
 			}
-			BOOST_ASSERT(false);
-			LogError("Wrong LogicOperation name: %s", name.c_str());
-			return static_cast<LogicOperation>(0xFFFFFFFF);
+
+			KFL_UNREACHABLE("Invalid LogicOperation name");
 		}
 
 		logic_operation_define()
@@ -958,8 +947,7 @@ namespace
 					}
 					else
 					{
-						BOOST_ASSERT(false);
-						LogError("Wrong sampler state name: %s", name.c_str());
+						KFL_UNREACHABLE("Invalid sampler state name");
 					}
 				}
 
@@ -1583,8 +1571,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid type");
 		}
 
 		return var;
@@ -2135,8 +2122,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid type");
 		}
 
 		return var;
@@ -2657,8 +2643,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid type");
 		}
 	}
 #endif
@@ -3748,8 +3733,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid shader type");
 			}
 			ShaderModel const & ver = effect_shader_frag.Version();
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
@@ -4509,8 +4493,7 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(false);
-				LogError("Wrong state name: %s", state_name.c_str());
+				KFL_UNREACHABLE("Invalid state name");
 			}
 		}
 
@@ -5302,376 +5285,342 @@ namespace KlayGE
 
 	RenderVariable& RenderVariable::operator=(bool const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(uint32_t const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(int32_t const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(float const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(uint2 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(uint3 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(uint4 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(int2 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(int3 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(int4 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(float2 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(float3 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(float4 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(float4x4 const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(TexturePtr const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(TextureSubresource const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(SamplerStateObjectPtr const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(GraphicsBufferPtr const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::string const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(ShaderDesc const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<bool> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<uint32_t> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<int32_t> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<uint2> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<uint3> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<uint4> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<int2> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<int3> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<int4> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float2> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float3> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float4> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	RenderVariable& RenderVariable::operator=(std::vector<float4x4> const & /*value*/)
 	{
-		BOOST_ASSERT(false);
-		return *this;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(bool& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(uint32_t& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(int32_t& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(float& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(uint2& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(uint3& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(uint4& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(int2& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(int3& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(int4& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(float2& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(float3& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(float4& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(float4x4& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(TexturePtr& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(TextureSubresource& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(SamplerStateObjectPtr& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(GraphicsBufferPtr& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::string& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(ShaderDesc& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<bool>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<uint32_t>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<int32_t>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<float>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<uint2>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<uint3>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<uint4>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<int2>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<int3>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<int4>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<float2>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<float3>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<float4>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::Value(std::vector<float4x4>& /*value*/) const
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::BindToCBuffer(RenderEffectConstantBuffer& cbuff, uint32_t offset,
@@ -5681,14 +5630,14 @@ namespace KlayGE
 		KFL_UNUSED(offset);
 		KFL_UNUSED(stride);
 
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void RenderVariable::RebindToCBuffer(RenderEffectConstantBuffer& cbuff)
 	{
 		KFL_UNUSED(cbuff);
-
-		BOOST_ASSERT(false);
+		
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	std::unique_ptr<RenderVariable> RenderVariableFloat4x4::Clone()

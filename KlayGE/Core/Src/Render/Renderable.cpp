@@ -17,6 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -557,8 +558,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid surface detail mode");
 		}
 
 		if (this->AlphaTest())
@@ -640,8 +640,7 @@ namespace KlayGE
 			return vdm_tech_;
 
 		default:
-			BOOST_ASSERT(false);
-			return gbuffer_mrt_tech_;
+			KFL_UNREACHABLE("Invalid pass type");
 		}
 	}
 }

@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KFL/Math.hpp>
@@ -90,24 +91,23 @@ namespace
 			case EF_ETC2_ABGR8:
 			case EF_ETC2_ABGR8_SRGB:
 				// TODO
-				BOOST_ASSERT(false);
+				KFL_UNREACHABLE("Not implemented");
 				break;
 
 			case EF_ETC2_R11:
 			case EF_SIGNED_ETC2_R11:
 				// TODO
-				BOOST_ASSERT(false);
+				KFL_UNREACHABLE("Not implemented");
 				break;
 
 			case EF_ETC2_GR11:
 			case EF_SIGNED_ETC2_GR11:
 				// TODO
-				BOOST_ASSERT(false);
+				KFL_UNREACHABLE("Not implemented");
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid compression format");
 			}
 		}
 
@@ -174,24 +174,23 @@ namespace
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid compression format");
 		}
 
 		ElementFormat const block_in_fmt = in_codec ? in_codec->DecodedFormat() : in_format;
@@ -338,24 +337,23 @@ namespace
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid compression format");
 		}
 
 		uint32_t out_width = (in_width + out_codec->BlockWidth() - 1) & ~(out_codec->BlockWidth() - 1);

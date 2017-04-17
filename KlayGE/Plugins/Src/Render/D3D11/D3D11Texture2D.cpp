@@ -101,8 +101,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid usage");
 		}
 		if (desc.BindFlags & D3D11_BIND_UNORDERED_ACCESS)
 		{

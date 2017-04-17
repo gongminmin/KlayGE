@@ -240,17 +240,17 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::ClearDepth(float /*depth*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D12RenderTargetRenderView::ClearStencil(int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D12RenderTargetRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D12RenderTargetRenderView::Discard()
@@ -371,7 +371,8 @@ namespace KlayGE
 	void D3D12DepthStencilRenderView::ClearColor(Color const & clr)
 	{
 		KFL_UNUSED(clr);
-		BOOST_ASSERT(false);
+
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D12DepthStencilRenderView::ClearDepth(float depth)

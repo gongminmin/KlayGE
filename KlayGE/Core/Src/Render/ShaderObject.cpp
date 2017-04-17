@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/Context.hpp>
@@ -385,8 +386,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid shader type");
 			}
 			macros.push_back(macro_shader_type);
 		}

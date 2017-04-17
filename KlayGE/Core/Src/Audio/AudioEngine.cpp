@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
@@ -110,8 +111,7 @@ namespace KlayGE
 			return iter->second;
 		}
 
-		BOOST_ASSERT(false);
-		return AudioBufferPtr();
+		KFL_UNREACHABLE("Invalid buffer id");
 	}
 
 	// 设置音效音量，vol的取值范围为0--1.0f

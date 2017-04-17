@@ -255,8 +255,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 
 		this->ResetRenderStates();
@@ -1018,8 +1017,7 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(false);
-				prim_count = 0;
+				KFL_UNREACHABLE("Invalid topology type");
 			}
 			break;
 		}
@@ -1324,8 +1322,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature type");
 		}
 
 		switch (d3d_feature_level_)
@@ -1338,8 +1335,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 		switch (d3d_feature_level_)
 		{
@@ -1351,8 +1347,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 
 		{
@@ -1688,8 +1683,7 @@ namespace KlayGE
 			}
 		}
 
-		BOOST_ASSERT(false);
-		return 0;
+		KFL_UNREACHABLE("Can't allocate more RTVs");
 	}
 
 	uint32_t D3D12RenderEngine::AllocDSV()
@@ -1703,8 +1697,7 @@ namespace KlayGE
 			}
 		}
 
-		BOOST_ASSERT(false);
-		return 0;
+		KFL_UNREACHABLE("Can't allocate more DSVs");
 	}
 
 	uint32_t D3D12RenderEngine::AllocCBVSRVUAV()
@@ -1717,9 +1710,7 @@ namespace KlayGE
 				return static_cast<uint32_t>(i) * cbv_srv_uav_desc_size_;
 			}
 		}
-
-		BOOST_ASSERT(false);
-		return 0;
+		KFL_UNREACHABLE("Can't allocate more CBVs/SRVs/UAVs");
 	}
 
 	void D3D12RenderEngine::DeallocRTV(uint32_t offset)

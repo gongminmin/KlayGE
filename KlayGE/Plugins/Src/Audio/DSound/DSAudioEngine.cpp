@@ -58,9 +58,8 @@ namespace KlayGE
 			wfx.nChannels		= 2;
 			break;
 
-		case AF_Unknown:
-			BOOST_ASSERT(false);
-			break;
+		default:
+			KFL_UNREACHABLE("Invalid audio format");
 		}
 
 		wfx.nBlockAlign		= wfx.nChannels * wfx.wBitsPerSample / 8;

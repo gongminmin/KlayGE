@@ -158,9 +158,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			dir = std::ios_base::beg;
-			break;
+			KFL_UNREACHABLE("Invalid whence");
 		};
 
 		vorbis_data->oggFile_->seekg(static_cast<long>(offset), dir);

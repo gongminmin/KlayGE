@@ -562,7 +562,7 @@ namespace
 			return EF_ETC2_ABGR8_SRGB;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid format");
 		}
 	}
 
@@ -805,7 +805,7 @@ namespace
 			return static_cast<DXGI_FORMAT>(0x8000000AUL);
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid format");
 		}
 	}
 
@@ -880,24 +880,23 @@ namespace
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid compression format");
 		}
 
 		uint8_t const * src = static_cast<uint8_t const *>(src_data);
@@ -974,9 +973,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			dst_format = src_format;
-			break;
+			KFL_UNREACHABLE("Invalid destination format");
 		}
 
 		std::unique_ptr<TexCompression> codec;
@@ -1042,24 +1039,23 @@ namespace
 		case EF_ETC2_ABGR8:
 		case EF_ETC2_ABGR8_SRGB:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_R11:
 		case EF_SIGNED_ETC2_R11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		case EF_ETC2_GR11:
 		case EF_SIGNED_ETC2_GR11:
 			// TODO
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Not implemented");
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid source format");
 		}
 
 		dst_row_pitch = src_width * NumFormatBytes(dst_format);
@@ -1547,8 +1543,7 @@ namespace
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid texture type");
 			}
 
 			return texture;
@@ -1728,7 +1723,7 @@ namespace KlayGE
 					}
 					else
 					{
-						BOOST_ASSERT(false);
+						KFL_UNREACHABLE("Invalid format");
 					}
 					break;
 
@@ -1768,7 +1763,7 @@ namespace KlayGE
 								}
 								else
 								{
-									BOOST_ASSERT(false);
+									KFL_UNREACHABLE("Invalid format");
 								}
 							}
 						}
@@ -1776,8 +1771,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid rgb bit count");
 				}
 			}
 			else
@@ -1793,7 +1787,7 @@ namespace KlayGE
 						}
 						else
 						{
-							BOOST_ASSERT(false);
+							KFL_UNREACHABLE("Invalid format");
 						}
 						break;
 
@@ -1804,13 +1798,12 @@ namespace KlayGE
 						}
 						else
 						{
-							BOOST_ASSERT(false);
+							KFL_UNREACHABLE("Invalid format");
 						}
 						break;
 
 					default:
-						BOOST_ASSERT(false);
-						break;
+						KFL_UNREACHABLE("Invalid rgb bit count");
 					}
 				}
 				else
@@ -1833,7 +1826,7 @@ namespace KlayGE
 								}
 								else
 								{
-									BOOST_ASSERT(false);
+									KFL_UNREACHABLE("Invalid format");
 								}
 							}
 							break;
@@ -1865,14 +1858,14 @@ namespace KlayGE
 									}
 									else
 									{
-										BOOST_ASSERT(false);
+										KFL_UNREACHABLE("Invalid format");
 									}
 								}
 							}
 							break;
 
 						default:
-							BOOST_ASSERT(false);
+							KFL_UNREACHABLE("Invalid rgb bit count");
 							break;
 						}
 					}
@@ -1884,7 +1877,7 @@ namespace KlayGE
 						}
 						else
 						{
-							BOOST_ASSERT(false);
+							KFL_UNREACHABLE("Invalid alpha format");
 						}
 					}
 				}
@@ -1948,8 +1941,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid resource dimension");
 				}
 			}	
 		}
@@ -2331,8 +2323,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid element format");
 				}
 			}
 			else
@@ -2481,8 +2472,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid element format");
 				}
 			}
 		}
@@ -2582,9 +2572,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				desc10.resource_dim = D3D_RESOURCE_DIMENSION_TEXTURE2D;
-				break;
+				KFL_UNREACHABLE("Invalid texture type");
 			}
 			desc10.array_size = array_size;
 			if (Texture::TT_Cube == type)
@@ -2756,8 +2744,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid texture type");
 		}
 		texture->CopyToTexture(*texture_sys_mem);
 
@@ -3407,9 +3394,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				dst_cpu_format = src_format;
-				break;
+				KFL_UNREACHABLE("Invalid destination format");
 			}
 
 			dst_cpu_row_pitch = dst_width * NumFormatBytes(src_cpu_format);

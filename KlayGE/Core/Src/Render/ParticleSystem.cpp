@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -644,7 +645,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Unsupported emitter type");
 		}
 
 		return ret;
@@ -659,7 +660,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Unsupported updater type");
 		}
 
 		return ret;

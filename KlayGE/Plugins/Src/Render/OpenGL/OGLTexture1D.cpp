@@ -20,6 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
@@ -250,9 +251,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			p = nullptr;
-			break;
+			KFL_UNREACHABLE("Invalid texture map access mode");
 		}
 
 		p += array_index * mipmap_start_offset_.back() + mipmap_start_offset_[level];
@@ -328,8 +327,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid texture map access mode");
 		}
 	}
 

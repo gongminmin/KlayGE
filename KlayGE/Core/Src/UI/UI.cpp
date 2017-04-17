@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Font.hpp>
@@ -1936,8 +1937,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid alignment mode");
 			}
 
 			switch (id_loc.second.align_y)
@@ -1954,8 +1954,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid alignment mode");
 			}
 
 			if (id_loc.first < 0)

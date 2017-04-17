@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -638,9 +639,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(false);
-
-			return 0;
+			KFL_UNREACHABLE("Can't be here");
 		}
 	}
 

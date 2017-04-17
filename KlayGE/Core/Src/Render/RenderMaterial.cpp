@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -537,8 +538,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid surface detail mode");
 			}
 			detail_node->AppendAttrib(doc.AllocAttribString("mode", detail_mode_str));
 

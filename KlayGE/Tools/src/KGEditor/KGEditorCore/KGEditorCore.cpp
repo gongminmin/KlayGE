@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/FrameBuffer.hpp>
@@ -761,9 +762,7 @@ namespace KlayGE
 		}
 		else
 		{
-			BOOST_ASSERT(false);
-
-			return 0;
+			KFL_UNREACHABLE("Can't be here");
 		}
 	}
 
@@ -970,7 +969,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
+			KFL_UNREACHABLE("Invalid light type");
 			break;
 		}
 		light->Attrib(0);
@@ -1723,7 +1722,7 @@ namespace KlayGE
 						break;
 
 					default:
-						BOOST_ASSERT(false);
+						KFL_UNREACHABLE("Invalid axis type");
 						break;
 					}
 
@@ -2168,7 +2167,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
+					KFL_UNREACHABLE("Invalid light type");
 					break;
 				}
 				ofs << "\" name=\"" << iter->second.name << "\">" << endl;

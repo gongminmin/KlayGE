@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Texture.hpp>
@@ -276,8 +277,7 @@ void WriteJTML(std::shared_ptr<TexPackNode> const & root, std::string const & jt
 		break;
 
 	default:
-		BOOST_ASSERT(false);
-		break;
+		KFL_UNREACHABLE("Unsupported element format");
 	}
 
 	std::ofstream os(jtml_name.c_str());

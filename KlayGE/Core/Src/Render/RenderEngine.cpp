@@ -37,6 +37,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -1160,8 +1161,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid stereo method");
 			}
 
 			stereoscopic_pp_ = SyncLoadPostProcess("Stereoscopic.ppml", pp_name);
@@ -1184,8 +1184,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid display output method");
 			}
 			hdr_display_pp_ = SyncLoadPostProcess("HDRDisplay.ppml", pp_name);
 

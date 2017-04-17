@@ -29,6 +29,7 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Math.hpp>
@@ -487,9 +488,7 @@ namespace KlayGE
 											}
 											else
 											{
-												BOOST_ASSERT(false);
-												usage = VEU_Position;
-												glsl_param_name = "POSITION0";
+												KFL_UNREACHABLE("Invalid semantic");
 											}
 
 											vs_usages_->push_back(usage);

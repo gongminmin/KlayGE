@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -1725,8 +1726,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid light type");
 		}
 	}
 
@@ -1999,8 +1999,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid light type");
 				}
 					
 				*light_pos_es_param_ = light_pos_es_actived;
@@ -2018,8 +2017,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid light type");
 		}
 	}
 
@@ -2334,8 +2332,7 @@ namespace KlayGE
 						break;
 
 					default:
-						BOOST_ASSERT(false);
-						break;
+						KFL_UNREACHABLE("Invalid light type");
 					}
 				}
 				BOOST_ASSERT(sm_camera);
@@ -2385,8 +2382,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid light type");
 				}
 
 				*reinterpret_cast<float4*>(lights_pos_es + shadowing_channel * lights_pos_es_param_->Stride()) = light_pos_es_actived;
@@ -2888,8 +2884,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid light type");
 				}
 			}
 		}
@@ -3274,8 +3269,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid light type");
 		}
 		re.Render(*dr_effect_, *tech, *rl_quad_);
 	}
@@ -3419,8 +3413,7 @@ namespace KlayGE
 						break;
 
 					default:
-						BOOST_ASSERT(false);
-						break;
+						KFL_UNREACHABLE("Invalid light type");
 					}
 				}
 			}

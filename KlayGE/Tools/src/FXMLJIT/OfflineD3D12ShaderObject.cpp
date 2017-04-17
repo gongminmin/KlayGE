@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/COMPtr.hpp>
@@ -93,8 +94,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid shader version");
 			}
 
 			switch (feature_level_)
@@ -112,8 +112,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid feature level");
 			}
 		}
 

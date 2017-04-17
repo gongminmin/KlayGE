@@ -94,8 +94,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid color format");
 		}
 		switch (settings.depth_stencil_fmt)
 		{

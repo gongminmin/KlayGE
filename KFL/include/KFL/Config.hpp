@@ -142,6 +142,9 @@
 	#else
 		#error "Clang++ on an unknown platform. Only Apple and Windows are supported."
 	#endif
+
+	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
+	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(__GNUC__)
 	// GNU C++
 
@@ -188,6 +191,9 @@
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
 	#endif
+
+	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))
+	#define KLAYGE_BUILTIN_UNREACHABLE __builtin_unreachable()
 #elif defined(_MSC_VER)
 	#define KLAYGE_COMPILER_MSVC
 	#define KLAYGE_COMPILER_NAME vc
@@ -217,6 +223,9 @@
 	#ifndef _SCL_SECURE_NO_DEPRECATE
 		#define _SCL_SECURE_NO_DEPRECATE
 	#endif
+
+	#define KLAYGE_ATTRIBUTE_NORETURN __declspec(noreturn)
+	#define KLAYGE_BUILTIN_UNREACHABLE __assume(false)
 #else
 	#error "Unknown compiler. Please install vc, g++ or clang."
 #endif

@@ -76,8 +76,7 @@ namespace KlayGE
 			return GL_GREATER;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_EQUAL;
+			KFL_UNREACHABLE("Invalid compare function");
 		};
 	}
 
@@ -139,8 +138,7 @@ namespace KlayGE
 			return GL_ONE_MINUS_SRC1_COLOR;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_ZERO;
+			KFL_UNREACHABLE("Invalid alpha blend factor");
 		}
 	}
 
@@ -175,8 +173,7 @@ namespace KlayGE
 			return GL_DECR_WRAP;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_KEEP;
+			KFL_UNREACHABLE("Invalid stencil operation");
 		};
 	}
 
@@ -194,8 +191,7 @@ namespace KlayGE
 			return GL_FILL;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_FILL;
+			KFL_UNREACHABLE("Invalid polygon mode");
 		}
 	}
 
@@ -210,8 +206,7 @@ namespace KlayGE
 			return GL_SMOOTH;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_FLAT;
+			KFL_UNREACHABLE("Invalid shade mode");
 		}
 	}
 
@@ -235,8 +230,7 @@ namespace KlayGE
 			return GL_MAX;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_FUNC_ADD;
+			KFL_UNREACHABLE("Invalid blend operation");
 		}
 	}
 
@@ -257,8 +251,7 @@ namespace KlayGE
 			return GL_CLAMP_TO_BORDER;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_REPEAT;
+			KFL_UNREACHABLE("Invalid texture addressing mode");
 		}
 	}
 
@@ -315,8 +308,7 @@ namespace KlayGE
 			return GL_OR_INVERTED;
 
 		default:
-			BOOST_ASSERT(false);
-			return GL_NOOP;
+			KFL_UNREACHABLE("Invalid logic operation");
 		}
 	}
 
@@ -390,7 +382,7 @@ namespace KlayGE
 			break;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid topology type");
 		}
 	}
 
@@ -1001,7 +993,7 @@ namespace KlayGE
 			break;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid element format");
 		}
 	}
 
@@ -1123,7 +1115,7 @@ namespace KlayGE
 			break;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid vertex format");
 		}
 	}
 }

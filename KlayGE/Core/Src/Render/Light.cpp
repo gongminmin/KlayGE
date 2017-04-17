@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -100,23 +101,17 @@ namespace KlayGE
 
 	TexturePtr const & LightSource::SkylightTexY() const
 	{
-		BOOST_ASSERT(false);
-		static TexturePtr ret;
-		return ret;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	TexturePtr const & LightSource::SkylightTexC() const
 	{
-		BOOST_ASSERT(false);
-		static TexturePtr ret;
-		return ret;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	TexturePtr const & LightSource::SkylightTex() const
 	{
-		BOOST_ASSERT(false);
-		static TexturePtr ret;
-		return ret;
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void LightSource::SkylightTex(TexturePtr const & tex_y, TexturePtr const & tex_c)
@@ -124,14 +119,14 @@ namespace KlayGE
 		KFL_UNUSED(tex_y);
 		KFL_UNUSED(tex_c);
 
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void LightSource::SkylightTex(TexturePtr const & tex)
 	{
 		KFL_UNUSED(tex);
 
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	float3 const & LightSource::Position() const

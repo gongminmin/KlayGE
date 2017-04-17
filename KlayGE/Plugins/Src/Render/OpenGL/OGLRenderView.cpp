@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -252,17 +253,17 @@ namespace KlayGE
 
 	void OGLScreenColorRenderView::ClearDepth(float /*depth*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLScreenColorRenderView::ClearStencil(int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLScreenColorRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLScreenColorRenderView::Discard()
@@ -305,7 +306,7 @@ namespace KlayGE
 
 	void OGLScreenDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLScreenDepthStencilRenderView::Discard()
@@ -1392,7 +1393,7 @@ namespace KlayGE
 
 	void OGLDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLDepthStencilRenderView::Discard()
@@ -1865,7 +1866,7 @@ namespace KlayGE
 
 	void OGLTextureCubeDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLTextureCubeDepthStencilRenderView::Discard()

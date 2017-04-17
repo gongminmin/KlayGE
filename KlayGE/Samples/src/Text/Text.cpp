@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -142,8 +143,7 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid input type");
 		}
 		break;
 
@@ -189,8 +189,7 @@ void TextApp::InputHandler(InputEngine const & /*sender*/, InputAction const & a
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid input type");
 		}
 		break;
 

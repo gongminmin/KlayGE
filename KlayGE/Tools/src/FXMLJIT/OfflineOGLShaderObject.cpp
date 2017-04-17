@@ -29,6 +29,7 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Math.hpp>
@@ -366,16 +367,12 @@ namespace KlayGE
 									break;
 
 								default:
-									BOOST_ASSERT(false);
-									gsv = GSV_400;
-									break;
+									KFL_UNREACHABLE("Invalid OpenGL 4 sub-version");
 								}
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								gsv = GSV_110;
-								break;
+								KFL_UNREACHABLE("Invalid OpenGL version");
 							}
 
 							DXBC2GLSL::DXBC2GLSL dxbc2glsl;
@@ -512,9 +509,7 @@ namespace KlayGE
 											}
 											else
 											{
-												BOOST_ASSERT(false);
-												usage = VEU_Position;
-												glsl_param_name = "POSITION0";
+												KFL_UNREACHABLE("Invalid sementic");
 											}
 
 											vs_usages_->push_back(usage);
@@ -549,9 +544,7 @@ namespace KlayGE
 									break;
 
 								default:
-									BOOST_ASSERT(false);
-									gs_input_type_ = 0;
-									break;
+									KFL_UNREACHABLE("Invalid GS input primitive");
 								}
 
 								switch (dxbc2glsl.GSOutputTopology(0))
@@ -569,9 +562,7 @@ namespace KlayGE
 									break;
 
 								default:
-									BOOST_ASSERT(false);
-									gs_output_type_ = 0;
-									break;
+									KFL_UNREACHABLE("Invalid GS output topology");
 								}
 
 								gs_max_output_vertex_ = dxbc2glsl.MaxGSOutputVertex();

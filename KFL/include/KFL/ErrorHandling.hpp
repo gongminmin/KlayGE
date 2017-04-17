@@ -45,10 +45,17 @@ namespace KlayGE
 {
 	std::string CombineFileLine(std::string const & file, int line);
 	void Verify(bool x);
+
+#if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
+	KLAYGE_ATTRIBUTE_NORETURN void KFLUnreachableInternal(char const * msg = nullptr, char const * file = nullptr, uint32_t line = 0);
+#endif
 }
 
 // Throw error code
 #define TEC(x)			{ throw std::system_error(x, KlayGE::CombineFileLine(__FILE__, __LINE__)); }
+
+// Throw error message
+#define TMSG(msg)		{ throw std::runtime_error(msg); }
 
 // Throw if failed (error code)
 #define TIFEC(x)		{ if (x) TEC(x) }
@@ -60,6 +67,14 @@ namespace KlayGE
 #define TIFERRC(x)		TIFEC(std::make_error_code(x))
 
 // Throw if failed (HRESULT)
-#define TIFHR(x)		{ if (static_cast<HRESULT>(x) < 0) { throw std::runtime_error(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
+#define TIFHR(x)		{ if (static_cast<HRESULT>(x) < 0) { TMSG(KlayGE::CombineFileLine(__FILE__, __LINE__)); } }
+
+#ifdef KLAYGE_DEBUG
+	#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal(msg, __FILE__, __LINE__)
+#elif defined(KLAYGE_BUILTIN_UNREACHABLE)
+	#define KFL_UNREACHABLE(msg) KLAYGE_BUILTIN_UNREACHABLE
+#else
+	#define KFL_UNREACHABLE(msg) KlayGE::KFLUnreachableInternal()
+#endif
 
 #endif		// _KFL_ERRORHANDLING_HPP

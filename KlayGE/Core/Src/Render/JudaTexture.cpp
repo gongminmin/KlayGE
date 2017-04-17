@@ -161,8 +161,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Not supported element format");
 		}
 
 		tree_levels_ = 0;
@@ -1172,8 +1171,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Not supported compression format");
 				}
 
 				// BC format must be multiply of 4
@@ -1566,8 +1564,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -1602,8 +1599,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -1681,8 +1677,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -1717,8 +1712,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -1793,8 +1787,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -1829,8 +1822,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -1909,8 +1901,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -1945,8 +1936,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_tile_size; ++ y)
@@ -2024,8 +2014,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -2060,8 +2049,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_tile_size; ++ y)
@@ -2140,8 +2128,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -2176,8 +2163,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -2255,8 +2241,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -2291,8 +2276,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -2367,8 +2351,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 							switch (addr_v)
 							{
@@ -2403,8 +2386,7 @@ namespace KlayGE
 								break;
 
 							default:
-								BOOST_ASSERT(false);
-								break;
+								KFL_UNREACHABLE("Invalid texture addressing mode");
 							}
 
 							for (uint32_t y = 0; y < mip_border_size; ++ y)
@@ -2539,10 +2521,7 @@ namespace KlayGE
 							break;
 
 						default:
-							BOOST_ASSERT(false);
-							p_argb = nullptr;
-							row_pitch = slice_pitch = 0;
-							break;
+							KFL_UNREACHABLE("Not supported element format");
 						}
 
 						tex_codec_->EncodeMem(mip_tile_with_border_size, mip_tile_with_border_size,

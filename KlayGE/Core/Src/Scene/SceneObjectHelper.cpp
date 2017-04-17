@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -188,8 +189,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid light type");
 		}
 		RenderModelPtr light_model = SyncLoadModel(mesh_name.c_str(), EAH_GPU_Read | EAH_Immutable,
 			CreateModelFactory<RenderModel>(), CreateMeshFactoryFunc);

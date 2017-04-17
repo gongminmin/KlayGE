@@ -24,6 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/InputFactory.hpp>
@@ -155,8 +156,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid input type");
 				}
 				break;
 
@@ -739,8 +739,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid interpolate type");
 				}
 
 				break;
@@ -788,8 +787,7 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(false);
-				type = CameraPathController::IT_Linear;
+				KFL_UNREACHABLE("Invalid interpolate type");
 			}
 			uint32_t num_frames = curve_node->Attrib("num_frames")->ValueUInt();
 			uint32_t curve_id = ret->AddCurve(type, num_frames);
@@ -863,8 +861,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid interpolate type");
 			}
 			curve_node->AppendAttrib(doc.AllocAttribString("type", type_str));
 			curve_node->AppendAttrib(doc.AllocAttribUInt("num_frames", path->NumCurveFrames(curve_id)));

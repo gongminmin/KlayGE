@@ -819,9 +819,7 @@ namespace KlayGE
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					dxgi_rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
-					break;
+					KFL_UNREACHABLE("Invalid rotation mode");
 				}
 
 				TIFHR(swap_chain_1_->SetRotation(dxgi_rotation));

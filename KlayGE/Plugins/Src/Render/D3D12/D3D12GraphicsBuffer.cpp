@@ -272,8 +272,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
 		void* p;

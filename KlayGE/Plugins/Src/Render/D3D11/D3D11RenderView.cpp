@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -97,17 +98,17 @@ namespace KlayGE
 
 	void D3D11RenderTargetRenderView::ClearDepth(float /*depth*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D11RenderTargetRenderView::ClearStencil(int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D11RenderTargetRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D11RenderTargetRenderView::Discard()
@@ -203,7 +204,7 @@ namespace KlayGE
 
 	void D3D11DepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void D3D11DepthStencilRenderView::ClearDepth(float depth)

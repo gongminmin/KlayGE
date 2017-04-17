@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 #include <KlayGE/Context.hpp>
@@ -770,9 +771,7 @@ namespace KlayGE
 										}
 										else
 										{
-											BOOST_ASSERT(false);
-											usage = VEU_Position;
-											glsl_param_name = "POSITION0";
+											KFL_UNREACHABLE("Invalid sementic");
 										}
 
 										so_template_->vs_usages_->push_back(usage);
@@ -1370,9 +1369,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				glsl_param_name = "gl_Position";
-				break;
+				KFL_UNREACHABLE("Invalid usage");
 			}
 
 			so_template_->glsl_tfb_varyings_->push_back(glsl_param_name);

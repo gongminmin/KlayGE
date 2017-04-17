@@ -206,12 +206,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				r_bits = 0;
-				g_bits = 0;
-				b_bits = 0;
-				a_bits = 0;
-				break;
+				KFL_UNREACHABLE("Invalid color format");
 			}
 
 			int pixel_format;

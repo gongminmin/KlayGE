@@ -219,17 +219,17 @@ namespace KlayGE
 
 	void OGLESScreenColorRenderView::ClearDepth(float /*depth*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESScreenColorRenderView::ClearStencil(int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESScreenColorRenderView::ClearDepthStencil(float /*depth*/, int32_t /*stencil*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESScreenColorRenderView::Discard()
@@ -272,7 +272,7 @@ namespace KlayGE
 
 	void OGLESScreenDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESScreenDepthStencilRenderView::Discard()
@@ -824,7 +824,7 @@ namespace KlayGE
 
 	void OGLESDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESDepthStencilRenderView::Discard()
@@ -1036,7 +1036,7 @@ namespace KlayGE
 
 	void OGLESTextureCubeDepthStencilRenderView::ClearColor(Color const & /*clr*/)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 
 	void OGLESTextureCubeDepthStencilRenderView::Discard()
@@ -1119,7 +1119,7 @@ namespace KlayGE
 	}
 	void OGLESEAGLRenderView::ClearDepth(float)
 	{
-		BOOST_ASSERT(false);
+		KFL_UNREACHABLE("Can't be called");
 	}
 	
 	void OGLESEAGLRenderView::Discard()

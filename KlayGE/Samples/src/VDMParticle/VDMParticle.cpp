@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
@@ -455,8 +456,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 					break;
 
 				default:
-					BOOST_ASSERT(false);
-					break;
+					KFL_UNREACHABLE("Invalid particle rendering type");
 				}
 
 				return App3DFramework::URV_NeedFlush;
@@ -489,8 +489,7 @@ uint32_t VDMParticleApp::DoUpdate(uint32_t pass)
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid particle rendering type");
 		}
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_Finished;

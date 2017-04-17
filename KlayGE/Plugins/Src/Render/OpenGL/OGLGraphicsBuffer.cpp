@@ -24,6 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/RenderEngine.hpp>
@@ -192,7 +193,7 @@ namespace KlayGE
 
 			case BA_Write_No_Overwrite:
 				// TODO
-				BOOST_ASSERT(false);
+				KFL_UNREACHABLE("Not implemented");
 				break;
 			}
 

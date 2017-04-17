@@ -327,15 +327,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			native_shader_platform_name_ = "";
-			vs_profile_ = "";
-			ps_profile_ = "";
-			gs_profile_ = "";
-			cs_profile_ = "";
-			hs_profile_ = "";
-			ds_profile_ = "";
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 
 		this->ResetRenderStates();
@@ -670,8 +662,7 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT(false);
-				prim_count = 0;
+				KFL_UNREACHABLE("Invalid topology type");
 			}
 			break;
 		}
@@ -1006,8 +997,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 
 		switch (d3d_feature_level_)
@@ -1020,8 +1010,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 		switch (d3d_feature_level_)
 		{
@@ -1033,8 +1022,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid feature level");
 		}
 		if (d3d_11_runtime_sub_ver_ >= 1)
 		{

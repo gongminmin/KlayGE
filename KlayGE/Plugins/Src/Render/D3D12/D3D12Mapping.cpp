@@ -98,8 +98,7 @@ namespace KlayGE
 			return D3D12_COMPARISON_FUNC_GREATER;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_COMPARISON_FUNC_NEVER;
+			KFL_UNREACHABLE("Invalid compare function");
 		};
 	}
 
@@ -132,8 +131,7 @@ namespace KlayGE
 			return D3D12_STENCIL_OP_DECR;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_STENCIL_OP_KEEP;
+			KFL_UNREACHABLE("Invalid stencil operation");
 		};
 	}
 
@@ -193,8 +191,7 @@ namespace KlayGE
 			return D3D12_BLEND_INV_SRC1_COLOR;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_BLEND_ZERO;
+			KFL_UNREACHABLE("Invalid alpha blend factor");
 		}
 	}
 
@@ -212,8 +209,7 @@ namespace KlayGE
 			return D3D12_CULL_MODE_BACK;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_CULL_MODE_NONE;
+			KFL_UNREACHABLE("Invalid cull mode");
 		}
 	}
 
@@ -231,8 +227,7 @@ namespace KlayGE
 			return D3D12_FILL_MODE_SOLID;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_FILL_MODE_SOLID;
+			KFL_UNREACHABLE("Invalid polygon mode");
 		}
 	}
 
@@ -256,8 +251,7 @@ namespace KlayGE
 			return D3D12_BLEND_OP_MAX;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_BLEND_OP_ADD;
+			KFL_UNREACHABLE("Invalid blend operation");
 		}
 	}
 
@@ -278,8 +272,7 @@ namespace KlayGE
 			return D3D12_TEXTURE_ADDRESS_MODE_BORDER;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_TEXTURE_ADDRESS_MODE_CLAMP;
+			KFL_UNREACHABLE("Invalid texture addressing mode");
 		}
 	}
 
@@ -330,8 +323,7 @@ namespace KlayGE
 			return D3D12_FILTER_COMPARISON_ANISOTROPIC;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_FILTER_MIN_MAG_MIP_POINT;
+			KFL_UNREACHABLE("Invalid texture filter operation");
 		}
 	}
 
@@ -400,8 +392,7 @@ namespace KlayGE
 			return D3D12_LOGIC_OP_OR_INVERTED;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_LOGIC_OP_NOOP;
+			KFL_UNREACHABLE("Invalid logic operation");
 		}
 	}
 
@@ -533,8 +524,7 @@ namespace KlayGE
 			return D3D11_PRIMITIVE_TOPOLOGY_32_CONTROL_POINT_PATCHLIST;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+			KFL_UNREACHABLE("Invalid topology type");
 		}
 	}
 
@@ -592,8 +582,7 @@ namespace KlayGE
 			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
 
 		default:
-			BOOST_ASSERT(false);
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
+			KFL_UNREACHABLE("Invalid topology type");
 		}
 	}
 
@@ -943,7 +932,7 @@ namespace KlayGE
 			return DXGI_FORMAT_BC7_UNORM_SRGB;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid format");
 		}
 	}
 
@@ -1153,7 +1142,7 @@ namespace KlayGE
 			return EF_BC7_SRGB;
 
 		default:
-			TERRC(std::errc::function_not_supported);
+			KFL_UNREACHABLE("Invalid format");
 		}
 	}
 }

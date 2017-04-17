@@ -29,6 +29,7 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Color.hpp>
@@ -876,8 +877,7 @@ namespace
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			break;
+			KFL_UNREACHABLE("Invalid rotation mode");
 		}
 	}
 }
@@ -2237,9 +2237,7 @@ namespace KlayGE
 			break;
 
 		default:
-			BOOST_ASSERT(false);
-			sa_steps = 0;
-			break;
+			KFL_UNREACHABLE("Invalid compression method");
 		}
 
 		RGBACluster block_cluster(argb, block_width_ * block_height_, GetPartition);
@@ -2546,8 +2544,7 @@ namespace KlayGE
 				break;
 
 			default:
-				BOOST_ASSERT(false);
-				break;
+				KFL_UNREACHABLE("Invalid p-bit type");
 			}
 		}
 
@@ -2754,8 +2751,7 @@ namespace KlayGE
 			return 4;
 
 		default:
-			BOOST_ASSERT(false);
-			return 1;
+			KFL_UNREACHABLE("Invalid p-bit type");
 		}
 	}
 
@@ -2779,8 +2775,7 @@ namespace KlayGE
 			return pbits[idx % 4];
 
 		default:
-			BOOST_ASSERT(false);
-			return pbits[2];
+			KFL_UNREACHABLE("Invalid p-bit type");
 		}
 	}
 
