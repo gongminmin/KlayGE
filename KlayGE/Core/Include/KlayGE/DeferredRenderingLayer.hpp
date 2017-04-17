@@ -36,6 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 
 #include <array>
+#include <functional>
 
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>
@@ -139,6 +140,24 @@ namespace KlayGE
 
 	class KLAYGE_CORE_API DeferredRenderingLayer : boost::noncopyable
 	{
+		class DeferredRenderingJob : boost::noncopyable
+		{
+		public:
+			explicit DeferredRenderingJob(std::function<uint32_t()> const & job_func)
+				: func_(job_func)
+			{
+			}
+
+			uint32_t Run()
+			{
+				return func_();
+			}
+
+		private:
+			std::function<uint32_t()> func_;
+		};
+
+
 	public:
 		enum DisplayType
 		{
@@ -345,9 +364,9 @@ namespace KlayGE
 		void PrepareLightCamera(PerViewport const & pvp, LightSource const & light,
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
-		void UpdateShadowing(PerViewport const & pvp, int32_t index_in_pass);
+		void UpdateShadowing(PerViewport const & pvp);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		void UpdateShadowingCS(PerViewport const & pvp, int32_t index_in_pass);
+		void UpdateShadowingCS(PerViewport const & pvp);
 #endif
 		void MergeIndirectLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void MergeSSVO(PerViewport const & pvp, PassTargetBuffer pass_tb);
@@ -376,6 +395,27 @@ namespace KlayGE
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 		void CreateVDMDepthMaxMap(PerViewport const & pvp);
+
+		uint32_t BeginPerfProfileDRJob(PerfRange& perf);
+		uint32_t EndPerfProfileDRJob(PerfRange& perf);
+		uint32_t RenderingStatsDRJob();
+		uint32_t GBufferGenerationDRJob(PerViewport& pvp, PassType pass_type);
+		uint32_t GBufferProcessingDRJob(PerViewport const & pvp);
+		uint32_t OpaqueGBufferProcessingDRJob(PerViewport const & pvp);
+		uint32_t ShadowMapGenerationDRJob(PerViewport const & pvp, PassType pass_type, int32_t org_no, int32_t index_in_pass);
+		uint32_t IndirectLightingDRJob(PerViewport const & pvp, int32_t org_no);
+		uint32_t ShadowingDRJob(PerViewport const & pvp, PassTargetBuffer pass_tb);
+		uint32_t ShadingDRJob(PerViewport const & pvp, PassType pass_type, int32_t index_in_pass);
+		uint32_t ReflectionDRJob(PerViewport const & pvp, PassType pass_type);
+		uint32_t VDMDRJob(PerViewport const & pvp);
+		uint32_t SpecialShadingDRJob(PerViewport& pvp, PassType pass_type);
+		uint32_t MergeShadingAndDepthDRJob(PerViewport& pvp, PassTargetBuffer pass_tb);
+		uint32_t PostEffectsDRJob(PerViewport& pvp);
+		uint32_t SimpleForwardDRJob();
+		uint32_t FinishingDRJob();
+		uint32_t SwitchViewportDRJob(uint32_t vp_index);
+		uint32_t VisualizeGBufferDRJob();
+		uint32_t VisualizeLightingDRJob();
 
 	private:
 		bool tex_array_support_;
@@ -424,7 +464,8 @@ namespace KlayGE
 		std::vector<LightSource*> lights_;
 		std::vector<RenderablePtr> decals_;
 
-		std::vector<uint32_t> pass_scaned_;
+		std::vector<std::shared_ptr<DeferredRenderingJob>> jobs_;
+		std::vector<std::shared_ptr<DeferredRenderingJob>>::iterator curr_job_iter_;
 
 		std::array<std::array<RenderTechnique*, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechnique* technique_no_lighting_;
