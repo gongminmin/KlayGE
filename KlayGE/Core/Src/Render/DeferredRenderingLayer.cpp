@@ -3882,6 +3882,8 @@ namespace KlayGE
 	{
 #ifndef KLAYGE_SHIP
 		shadowing_perfs_[pass_tb]->Begin();
+#else
+		KFL_UNUSED(pass_tb);
 #endif
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
