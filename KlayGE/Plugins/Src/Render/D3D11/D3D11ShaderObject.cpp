@@ -951,9 +951,6 @@ namespace KlayGE
 							so_template_->compute_shader_ = MakeCOMPtr(cs);
 							so_template_->shader_code_[type].first = code_blob;
 						}
-
-						uavsrcs_.resize(so_template_->shader_desc_[type]->num_uavs, nullptr);
-						uavs_.resize(so_template_->shader_desc_[type]->num_uavs);
 					}
 					else
 					{
@@ -1067,6 +1064,8 @@ namespace KlayGE
 			samplers_[type].resize(so_template_->shader_desc_[type]->num_samplers);
 			srvsrcs_[type].resize(so_template_->shader_desc_[type]->num_srvs, std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so_template_->shader_desc_[type]->num_srvs);
+			uavsrcs_.resize(so_template_->shader_desc_[type]->num_uavs, nullptr);
+			uavs_.resize(so_template_->shader_desc_[type]->num_uavs);
 
 			for (size_t i = 0; i < so_template_->shader_desc_[type]->res_desc.size(); ++ i)
 			{
@@ -1133,8 +1132,6 @@ namespace KlayGE
 				cs_block_size_x_ = so.cs_block_size_x_;
 				cs_block_size_y_ = so.cs_block_size_y_;
 				cs_block_size_z_ = so.cs_block_size_z_;
-				uavsrcs_.resize(so.uavs_.size(), nullptr);
-				uavs_.resize(so.uavs_.size());
 				break;
 
 			case ST_HullShader:
@@ -1162,6 +1159,11 @@ namespace KlayGE
 			samplers_[type] = so.samplers_[type];
 			srvsrcs_[type].resize(so.srvs_[type].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
+			if (so.so_template_->shader_desc_[type]->num_uavs > 0)
+			{
+				uavsrcs_.resize(so.uavs_.size(), nullptr);
+				uavs_.resize(so.uavs_.size());
+			}
 
 			so_template_->cbuff_indices_[type] = so.so_template_->cbuff_indices_[type];
 			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
