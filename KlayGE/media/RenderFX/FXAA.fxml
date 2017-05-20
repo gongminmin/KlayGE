@@ -30,10 +30,10 @@ float3 DebugFxaaPixelShader(float2 pos)
 	}
 	else
 	{
-		float lumaNW = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(-1, -1) * inv_width_height).w;
-		float lumaNE = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(+1, -1) * inv_width_height).w;
-		float lumaSW = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(-1, +1) * inv_width_height).w;
-		float lumaSE = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(+1, +1) * inv_width_height).w;
+		float lumaNW = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
+		float lumaNE = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
+		float lumaSW = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
+		float lumaSE = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
 
 		float lumaNS = lumaN + lumaS;
 		float lumaWE = lumaW + lumaE;
@@ -90,10 +90,10 @@ float3 FxaaPixelShader(float2 pos)
 	}
 	else
 	{
-		float lumaNW = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(-1, -1) * inv_width_height).w;
-		float lumaNE = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(+1, -1) * inv_width_height).w;
-		float lumaSW = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(-1, +1) * inv_width_height).w;
-		float lumaSE = color_tex.Sample(linear_wrap_sampler, pos.xy + float2(+1, +1) * inv_width_height).w;
+		float lumaNW = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(-1, -1) * inv_width_height, 0).w;
+		float lumaNE = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(+1, -1) * inv_width_height, 0).w;
+		float lumaSW = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(-1, +1) * inv_width_height, 0).w;
+		float lumaSE = color_tex.SampleLevel(linear_wrap_sampler, pos.xy + float2(+1, +1) * inv_width_height, 0).w;
 
 		float lumaNS = lumaN + lumaS;
 		float lumaWE = lumaW + lumaE;
@@ -161,9 +161,9 @@ float3 FxaaPixelShader(float2 pos)
 		float2 posN = posB - offNP;
 		float2 posP = posB + offNP;
 		float subpixD = -2 * subpixC + 3;
-		float lumaEndN = color_tex.Sample(linear_wrap_sampler, posN).w;
+		float lumaEndN = color_tex.SampleLevel(linear_wrap_sampler, posN, 0).w;
 		float subpixE = subpixC * subpixC;
-		float lumaEndP = color_tex.Sample(linear_wrap_sampler, posP).w;
+		float lumaEndP = color_tex.SampleLevel(linear_wrap_sampler, posP, 0).w;
 
 		if (!pairN)
 		{
@@ -247,7 +247,7 @@ float3 FxaaPixelShader(float2 pos)
 			posM.x += pixelOffsetSubpix * lengthSign;
 		}
 
-		return color_tex.Sample(linear_wrap_sampler, posM).xyz;
+		return color_tex.SampleLevel(linear_wrap_sampler, posM, 0).xyz;
 	}
 }
 

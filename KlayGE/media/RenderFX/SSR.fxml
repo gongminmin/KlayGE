@@ -48,6 +48,9 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 	float linear_depth = pos_es.z;
 	float non_linear_depth = linear_depth_to_non_linear(linear_depth, near_q_far.x, near_q_far.y);
 	float3 tex_pos = float3(tc, non_linear_depth); // let z component be projected nonlinear depth, so we can do linear interpolation in screen space
+	
+	float2 tex_ddx = ddx(tc.xy);
+	float2 tex_ddy = ddy(tc.xy);
 
 	float3 reflect_vec = normalize(reflect(incident_es, normal)); // eye space reflect vector
 	float4 proj_ray_end = mul(float4(pos_es + reflect_vec * ray_length, 1), proj);
@@ -92,8 +95,6 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		float4 sample_step = float4(tex_offset, 1) / num_steps;
 
 		float3 cur_tex_pos = tex_pos;
-		float2 tex_ddx = ddx(cur_tex_pos.xy);
-		float2 tex_ddy = ddy(cur_tex_pos.xy);
 
 		float t = 0;
 		float4 pt = linear_depth;
@@ -133,11 +134,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 		float sample_z;
 		if (front_side)
 		{
-			sample_z = front_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).x;
+			sample_z = front_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).x;
 		}
 		else
 		{
-			sample_z = back_side_depth_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).x;
+			sample_z = back_side_depth_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).x;
 		}
 
 		float4 ret;
@@ -149,11 +150,11 @@ float4 CalcSSR(float2 tc, float3 normal, float3 pos_es, float3 incident_es, bool
 
 			if (front_side)
 			{
-				ret.xyz = front_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+				ret.xyz = front_side_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).rgb;
 			}
 			else
 			{
-				ret.xyz = back_side_tex.Sample(ssr_linear_sampler, sample_tex_pos.xy).rgb;
+				ret.xyz = back_side_tex.SampleGrad(ssr_linear_sampler, sample_tex_pos.xy, tex_ddx, tex_ddx).rgb;
 			}
 			ret.w = 1 - max(screen_edge_fade_out_factor, reflect_dir_fade_out_factor);
 		}
