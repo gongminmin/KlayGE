@@ -129,7 +129,7 @@ def build_android_native_app_glue(build_info, compiler_info):
 	build_a_project("android_native_app_glue", "External/android_native_app_glue", build_info, compiler_info)
 
 def build_assimp(build_info, compiler_info):
-	build_a_project("assimp", "External/assimp", build_info, compiler_info)
+	build_a_project("assimp", "External/assimp", build_info, compiler_info, True)
 
 def build_external_libs(build_info):
 	for compiler_info in build_info.compilers:
