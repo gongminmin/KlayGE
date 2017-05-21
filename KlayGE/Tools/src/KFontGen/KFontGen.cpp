@@ -98,7 +98,7 @@ float AADist(std::vector<float> const & img, std::vector<float2> const & grad,
 	int width, int offset_addr, int2 const & offset_dist_xy, float2 const & new_dist)
 {
 	int closest = offset_addr - offset_dist_xy.y() * width - offset_dist_xy.x(); // Index to the edge pixel pointed to from c
-	float val = img[closest];
+	float val = MathLib::clamp(img[closest], 0.0f, 1.0f);
 	if (0 == val)
 	{
 		return 1e10f;
@@ -230,9 +230,10 @@ void ComputeGradient(std::vector<float> const & img_2x, int w, int h, std::vecto
 			int addr = y * w * 2 + x;
 			if ((img_2x[addr] > 0) && (img_2x[addr] < 1))
 			{
-				float s = -img_2x[addr - w * 2 - 1] - img_2x[addr + w * 2 - 1] + img_2x[addr - w * 2 + 1] + img_2x[addr + w * 2 + 1];
-				grad_2x[addr] = MathLib::normalize(float2(s - SQRT2 * (img_2x[addr - 1] - img_2x[addr + 1]),
-					s - SQRT2 * (img_2x[addr - w * 2] - img_2x[addr + w * 2])));
+				float s0 = -img_2x[addr - w * 2 - 1] + img_2x[addr + w * 2 + 1];
+				float s1 = -img_2x[addr + w * 2 - 1] + img_2x[addr - w * 2 + 1];
+				grad_2x[addr] = MathLib::normalize(float2(s0 + s1 - SQRT2 * (img_2x[addr - 1] - img_2x[addr + 1]),
+					s0 - s1 - SQRT2 * (img_2x[addr - w * 2] - img_2x[addr + w * 2])));
 			}
 		}
 	}
