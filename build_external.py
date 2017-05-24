@@ -131,6 +131,9 @@ def build_android_native_app_glue(build_info, compiler_info):
 def build_assimp(build_info, compiler_info):
 	build_a_project("assimp", "External/assimp", build_info, compiler_info, True)
 
+def build_nanosvg(build_info, compiler_info):
+	build_a_project("nanosvg", "External/nanosvg", build_info, compiler_info)
+
 def build_external_libs(build_info):
 	for compiler_info in build_info.compilers:
 		build_Boost(build_info, compiler_info)
@@ -152,6 +155,7 @@ def build_external_libs(build_info):
 				build_OpenALSDK(build_info, compiler_info)
 
 			build_assimp(build_info, compiler_info)
+			build_nanosvg(build_info, compiler_info)
 
 		if build_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
 			build_wpftoolkit(build_info, compiler_info)

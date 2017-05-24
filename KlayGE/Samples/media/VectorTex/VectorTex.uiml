@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8' standalone='no'?>
+
+<ui>
+	<dialog id="Logo" caption="Logo" x="-128" y="0" align_x="right" align_y="top" width="128" height="128" show_caption="false" opacity="true" bg_color_a="0">
+		<control type="tex_button" id="LogoButton" texture="powered_by_klayge.dds" x="0" y="0" width="128" height="128" is_default="0"/>
+	</dialog>
+</ui>

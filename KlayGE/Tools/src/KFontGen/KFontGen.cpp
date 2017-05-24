@@ -5,7 +5,7 @@
 #include <KFL/Thread.hpp>
 #include <KFL/CpuInfo.hpp>
 #include <KlayGE/LZMACodec.hpp>
-#include <KFL/AlignedAllocator.hpp>
+#include <KlayGE/DistanceField.hpp>
 
 #include <kfont/kfont.hpp>
 
@@ -61,194 +61,6 @@ struct font_info
 
 	uint32_t dist_index;
 };
-
-float EdgeDistance(float2 const & grad, float val)
-{
-	float df;
-	if ((0 == grad.x()) || (0 == grad.y()))
-	{
-		df = 0.5f - val;
-	}
-	else
-	{
-		float2 n_grad = MathLib::abs(MathLib::normalize(grad));
-		if (n_grad.x() < n_grad.y())
-		{
-			std::swap(n_grad.x(), n_grad.y());
-		}
-
-		float v1 = 0.5f * n_grad.y() / n_grad.x();
-		if (val < v1)
-		{
-			df = 0.5f * (n_grad.x() + n_grad.y()) - MathLib::sqrt(2 * n_grad.x() * n_grad.y() * val);
-		}
-		else if (val < 1 - v1)
-		{
-			df = (0.5f - val) * n_grad.x();
-		}
-		else
-		{
-			df = -0.5f * (n_grad.x() + n_grad.y()) + MathLib::sqrt(2 * n_grad.x() * n_grad.y() * (1 - val));
-		}
-	}
-	return df;
-}
-
-float AADist(std::vector<float> const & img, std::vector<float2> const & grad,
-	int width, int offset_addr, int2 const & offset_dist_xy, float2 const & new_dist)
-{
-	int closest = offset_addr - offset_dist_xy.y() * width - offset_dist_xy.x(); // Index to the edge pixel pointed to from c
-	float val = MathLib::clamp(img[closest], 0.0f, 1.0f);
-	if (0 == val)
-	{
-		return 1e10f;
-	}
-
-	float di = MathLib::length(new_dist);
-	float df;
-	if (0 == di)
-	{
-		df = EdgeDistance(grad[closest], val);
-	}
-	else
-	{
-		df = EdgeDistance(new_dist, val);
-	}
-	return di + df;
-}
-
-bool UpdateDistance(int x, int y, int dx, int dy, std::vector<float> const & img, int width,
-	std::vector<float2> const & grad, std::vector<int2>& dist_xy, std::vector<float>& dist)
-{
-	float const EPSILON = 1e-3f;
-
-	bool changed = false;
-	int addr = y * width + x;
-	float old_dist = dist[addr];
-	if (old_dist > 0)
-	{
-		int offset_addr = (y + dy) * width + (x + dx);
-		int2 new_dist_xy = dist_xy[offset_addr] - int2(dx, dy);
-		float new_dist = AADist(img, grad, width, offset_addr, dist_xy[offset_addr], new_dist_xy);
-		if (new_dist < old_dist - EPSILON)
-		{
-			dist_xy[addr] = new_dist_xy;
-			dist[addr] = new_dist;
-			changed = true;
-		}
-	}
-
-	return changed;
-}
-
-void AAEuclideanDistance(std::vector<float> const & img, std::vector<float2> const & grad,
-	int width, int height, std::vector<float>& dist)
-{
-	std::vector<int2> dist_xy(img.size(), int2(0, 0));
-
-	for (size_t i = 0; i < img.size(); ++ i)
-	{
-		if (img[i] <= 0)
-		{
-			dist[i] = 1e10f;
-		}
-		else if (img[i] < 1)
-		{
-			dist[i] = EdgeDistance(grad[i], img[i]);
-		}
-		else
-		{
-			dist[i] = 0;
-		}
-	}
-
-	bool changed;
-	do
-	{
-		changed = false;
-
-		for (int y = 1; y < height; ++ y)
-		{
-			// Scan right, propagate distances from above & left
-			for (int x = 0; x < width; ++ x)
-			{
-				if (x > 0)
-				{
-					changed |= UpdateDistance(x, y, -1, +0, img, width, grad, dist_xy, dist);
-					changed |= UpdateDistance(x, y, -1, -1, img, width, grad, dist_xy, dist);
-				}
-				changed |= UpdateDistance(x, y, +0, -1, img, width, grad, dist_xy, dist);
-				if (x < width - 1)
-				{
-					changed |= UpdateDistance(x, y, +1, -1, img, width, grad, dist_xy, dist);
-				}
-			}
-
-			// Scan left, propagate distance from right
-			for (int x = width - 2; x >= 0; -- x)
-			{
-				changed |= UpdateDistance(x, y, +1, +0, img, width, grad, dist_xy, dist);
-			}
-		}
-
-		for (int y = height - 2; y >= 0; -- y)
-		{
-			// Scan left, propagate distances from below & right
-			for (int x = width - 1; x >= 0; -- x)
-			{
-				if (x < width - 1)
-				{
-					changed |= UpdateDistance(x, y, +1, +0, img, width, grad, dist_xy, dist);
-					changed |= UpdateDistance(x, y, +1, +1, img, width, grad, dist_xy, dist);
-				}
-				changed |= UpdateDistance(x, y, +0, +1, img, width, grad, dist_xy, dist);
-				if (x > 0)
-				{
-					changed |= UpdateDistance(x, y, -1, +1, img, width, grad, dist_xy, dist);
-				}
-			}
-
-			// Scan right, propagate distance from left
-			for (int x = 1; x < width; ++ x)
-			{
-				changed |= UpdateDistance(x, y, -1, +0, img, width, grad, dist_xy, dist);
-			}
-		}
-	} while (changed);
-}
-
-void ComputeGradient(std::vector<float> const & img_2x, int w, int h, std::vector<float2>& grad)
-{
-	BOOST_ASSERT(img_2x.size() == static_cast<size_t>(w * h * 4));
-	BOOST_ASSERT(grad.size() == static_cast<size_t>(w * h));
-
-	std::vector<float2> grad_2x(w * h * 4, float2(0, 0));
-	for (int y = 1; y < h * 2 - 1; ++ y)
-	{
-		for (int x = 1; x < w * 2 - 1; ++ x)
-		{
-			int addr = y * w * 2 + x;
-			if ((img_2x[addr] > 0) && (img_2x[addr] < 1))
-			{
-				float s0 = -img_2x[addr - w * 2 - 1] + img_2x[addr + w * 2 + 1];
-				float s1 = -img_2x[addr + w * 2 - 1] + img_2x[addr - w * 2 + 1];
-				grad_2x[addr] = MathLib::normalize(float2(s0 + s1 - SQRT2 * (img_2x[addr - 1] - img_2x[addr + 1]),
-					s0 - s1 - SQRT2 * (img_2x[addr - w * 2] - img_2x[addr + w * 2])));
-			}
-		}
-	}
-
-	for (int y = 0; y < h; ++ y)
-	{
-		for (int x = 0; x < w; ++ x)
-		{
-			grad[y * w + x] = (grad_2x[(y * 2 + 0) * w * 2 + (x * 2 + 0)]
-				+ grad_2x[(y * 2 + 0) * w * 2 + (x * 2 + 1)]
-				+ grad_2x[(y * 2 + 1) * w * 2 + (x * 2 + 0)]
-				+ grad_2x[(y * 2 + 1) * w * 2 + (x * 2 + 1)]) * 0.25f;
-		}
-	}
-}
 
 struct raster_user_struct
 {
@@ -323,12 +135,9 @@ public:
 
 		float const scale = 1 / MathLib::sqrt(static_cast<float>(char_size_ * char_size_ + char_size_ * char_size_));
 
-		std::vector<uint8_t, aligned_allocator<uint8_t, 16>> char_bitmap(internal_char_size_ / 8 * internal_char_size_);
+		std::vector<uint8_t> char_bitmap(internal_char_size_ / 8 * internal_char_size_);
 		std::vector<float> aa_char_bitmap_2x(char_size_ * char_size_ * 4);
-		std::vector<float> aa_char_bitmap(char_size_ * char_size_);
-		std::vector<float2> grad(char_size_ * char_size_);
-		std::vector<float> outside(char_size_ * char_size_);
-		std::vector<float> inside(char_size_ * char_size_);
+		std::vector<float> dist_data(char_size_ * char_size_);
 
 		raster_user_struct raster_user;
 		raster_user.internal_char_size = internal_char_size_;
@@ -384,9 +193,7 @@ public:
 					ci.height = static_cast<uint16_t>(std::min<float>(1.0f, (buf_height + y_offset) / internal_char_size_) * char_size_ + 0.5f);
 
 					memset(&aa_char_bitmap_2x[0], 0, sizeof(aa_char_bitmap_2x[0]) * aa_char_bitmap_2x.size());
-					memset(&grad[0], 0, sizeof(grad[0]) * grad.size());
-					memset(&outside[0], 0, sizeof(outside[0]) * outside.size());
-					memset(&inside[0], 0, sizeof(outside[0]) * outside.size());
+					memset(&dist_data[0], 0, sizeof(dist_data[0]) * dist_data.size());
 
 					{
 						float const fblock = static_cast<float>(internal_char_size_) / ((char_size_ - 2) * 2);
@@ -414,43 +221,13 @@ public:
 								aa_char_bitmap_2x[y * char_size_ * 2 + x] = static_cast<float>(aa64) / block_sq;
 							}
 						}
-
-						for (uint32_t y = 0; y < char_size_; ++ y)
-						{
-							for (uint32_t x = 0; x < char_size_; ++ x)
-							{
-								aa_char_bitmap[y * char_size_ + x] = (aa_char_bitmap_2x[(y * 2 + 0) * char_size_ * 2 + (x * 2 + 0)]
-									+ aa_char_bitmap_2x[(y * 2 + 0) * char_size_ * 2 + (x * 2 + 1)]
-									+ aa_char_bitmap_2x[(y * 2 + 1) * char_size_ * 2 + (x * 2 + 0)]
-									+ aa_char_bitmap_2x[(y * 2 + 1) * char_size_ * 2 + (x * 2 + 1)]) * 0.25f;
-							}
-						}
 					}
 
-					ComputeGradient(aa_char_bitmap_2x, char_size_, char_size_, grad);
+					ComputeDistance(aa_char_bitmap_2x, char_size_ * 2, char_size_ * 2, dist_data);
 
-					AAEuclideanDistance(aa_char_bitmap, grad, char_size_, char_size_, outside);
-
-					for (size_t i = 0; i < grad.size(); ++ i)
+					for (uint32_t i = 0; i < dist_data.size(); ++ i)
 					{
-						aa_char_bitmap[i] = 1 - aa_char_bitmap[i];
-						grad[i] = -grad[i];
-					}
-
-					AAEuclideanDistance(aa_char_bitmap, grad, char_size_, char_size_, inside);
-
-					for (uint32_t i = 0; i < outside.size(); ++ i)
-					{
-						if (inside[i] < 0)
-						{
-							inside[i] = 0;
-						}
-						if (outside[i] < 0)
-						{
-							outside[i] = 0;
-						}
-
-						float value = (inside[i] - outside[i]) * scale;
+						float value = dist_data[i] * scale;
 
 						char_dist_data_[ci.dist_index + i] = value;
 						*min_value_ = std::min(*min_value_, value);
@@ -817,11 +594,6 @@ int main(int argc, char* argv[])
 	cout << "\tEnd code: " << end_code << endl;
 	cout << "\tCharacter size: " << header.char_size << endl;
 	cout << "\tNumber of threads: " << num_threads << endl;
-	cout << endl;
-	if (cpu.IsFeatureSupport(CPUInfo::CF_SSE2))
-	{
-		cout << "SSE2 is used." << endl;
-	}
 	cout << endl;
 
 	std::vector<uint8_t> ttf;

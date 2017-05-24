@@ -82,6 +82,7 @@ External/Python
 External/freetype
 External/libogg
 External/libvorbis
+External/nanosvg
 External/OpenALSDK
 External/rapidxml
 External/wpftoolkit

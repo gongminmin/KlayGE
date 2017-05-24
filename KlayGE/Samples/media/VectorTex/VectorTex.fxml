@@ -1,0 +1,49 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="ColorSpaceUtil.fxml"/>
+
+	<parameter type="float4x4" name="mvp"/>
+	<parameter type="float4x4" name="mv"/>
+	<parameter type="float3" name="eye_pos"/>
+
+	<parameter type="float3" name="pos_center"/>
+	<parameter type="float3" name="pos_extent"/>
+	<parameter type="float2" name="tc_center"/>
+	<parameter type="float2" name="tc_extent"/>
+
+	<parameter type="texture2D" name="vector_tex"/>
+	<parameter type="sampler" name="bilinear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="wrap"/>
+		<state name="address_v" value="wrap"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+void ObjectVS(float4 Position : POSITION,
+					float2 Tex0 : TEXCOORD0,
+					out float2 oTex0 : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	Position = float4(Position.xyz * pos_extent + pos_center, 1);
+	Tex0 = Tex0 * tc_extent + tc_center;
+	
+	oPos = mul(Position, mvp);
+	oTex0 = Tex0;
+}
+
+float4 ObjectPS(float2 tex0 : TEXCOORD0) : SV_Target 
+{
+	return saturate(vector_tex.Sample(bilinear_sampler, tex0) * 2 - 1);
+}
+		]]>
+	</shader>
+
+	<technique name="Object">
+		<pass name="p0">
+			<state name="vertex_shader" value="ObjectVS()"/>
+			<state name="pixel_shader" value="ObjectPS()"/>
+		</pass>
+	</technique>
+</effect>
