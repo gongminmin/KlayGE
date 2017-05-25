@@ -238,6 +238,7 @@ namespace KlayGE
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
+		bool UAVFormatSupport(ElementFormat elem_fmt);
 
 		virtual void CheckConfig(RenderSettings& settings) override;
 
@@ -323,6 +324,7 @@ namespace KlayGE
 		std::vector<ElementFormat> vertex_format_;
 		std::vector<ElementFormat> texture_format_;
 		std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t>>> rendertarget_format_;
+		std::vector<ElementFormat> uav_format_;
 
 		double inv_timestamp_freq_;
 

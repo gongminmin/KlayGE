@@ -39,6 +39,7 @@ namespace
 	bool use_so = false;
 	bool use_cs = false;
 	bool use_mrt = false;
+	bool use_typed_uav = false;
 
 	int const NUM_PARTICLE = 65536;
 
@@ -289,7 +290,14 @@ namespace
 			effect_ = SyncLoadRenderEffect("GPUParticleSystem.fxml");
 			if (use_cs)
 			{
-				update_cs_tech_ = effect_->TechniqueByName("UpdateCS");
+				if (use_typed_uav)
+				{
+					update_cs_tech_ = effect_->TechniqueByName("UpdateTypedUAVCS");
+				}
+				else
+				{
+					update_cs_tech_ = effect_->TechniqueByName("UpdateCS");
+				}
 				technique_ = update_cs_tech_;
 
 				std::vector<float4> p(max_num_particles_);
@@ -298,17 +306,31 @@ namespace
 					p[i] = float4(0, 0, 0, -1);
 				}
 
-				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
+				uint32_t access_hint = EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered;
+				if (!use_typed_uav)
+				{
+					access_hint |=EAH_GPU_Structured;
+				}
+
+				particle_pos_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint,
 					max_num_particles_ * sizeof(float4), &p[0], EF_ABGR32F);
 				particle_pos_vb_[1] = particle_pos_vb_[0];
-				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
+				particle_vel_vb_[0] = rf.MakeVertexBuffer(BU_Dynamic, access_hint,
 					max_num_particles_ * sizeof(float4), nullptr, EF_ABGR32F);
 				particle_vel_vb_[1] = particle_vel_vb_[0];
 
-				*(effect_->ParameterByName("particle_pos_rw_buff")) = particle_pos_vb_[0];
-				*(effect_->ParameterByName("particle_vel_rw_buff")) = particle_vel_vb_[0];
+				if (use_typed_uav)
+				{
+					*(effect_->ParameterByName("particle_pos_rw_buff")) = particle_pos_vb_[0];
+					*(effect_->ParameterByName("particle_vel_rw_buff")) = particle_vel_vb_[0];
+				}
+				else
+				{
+					*(effect_->ParameterByName("particle_pos_rw_stru_buff")) = particle_pos_vb_[0];
+					*(effect_->ParameterByName("particle_vel_rw_stru_buff")) = particle_vel_vb_[0];
+				}
 
-				for (int i = 0; i < max_num_particles_; ++i)
+				for (int i = 0; i < max_num_particles_; ++ i)
 				{
 					float const angel = this->RandomGen() / 0.05f * PI;
 					float const r = this->RandomGen() * 3;
@@ -781,7 +803,11 @@ void GPUParticleSystemApp::OnCreate()
 
 	use_gs = caps.gs_support;
 	use_cs = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
-	if (!use_cs)
+	if (use_cs)
+	{
+		use_typed_uav = caps.uav_format_support(EF_ABGR16F);
+	}
+	else
 	{
 		use_so = caps.stream_output_support && caps.load_from_buffer_support;
 	}

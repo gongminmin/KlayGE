@@ -155,6 +155,7 @@ namespace KlayGE
 		bool VertexFormatSupport(ElementFormat elem_fmt);
 		bool TextureFormatSupport(ElementFormat elem_fmt);
 		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
+		bool UAVFormatSupport(ElementFormat elem_fmt);
 
 		virtual void CheckConfig(RenderSettings& settings) override;
 

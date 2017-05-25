@@ -106,6 +106,7 @@ namespace KlayGE
 		std::function<bool(ElementFormat)> vertex_format_support;
 		std::function<bool(ElementFormat)> texture_format_support;
 		std::function<bool(ElementFormat, uint32_t, uint32_t)> rendertarget_format_support;
+		std::function<bool(ElementFormat)> uav_format_support;
 	};
 }
 

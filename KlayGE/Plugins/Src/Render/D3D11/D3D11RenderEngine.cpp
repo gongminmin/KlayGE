@@ -969,6 +969,12 @@ namespace KlayGE
 		return false;
 	}
 
+	bool D3D11RenderEngine::UAVFormatSupport(ElementFormat elem_fmt)
+	{
+		auto iter = std::lower_bound(uav_format_.begin(), uav_format_.end(), elem_fmt);
+		return (iter != uav_format_.end()) && (*iter == elem_fmt);
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11RenderEngine::FillRenderDeviceCaps()
@@ -1085,6 +1091,15 @@ namespace KlayGE
 		caps_.ds_support = true;
 
 		bool check_16bpp_fmts = (dxgi_sub_ver_ >= 2);
+		bool check_uav_fmts = false;
+		if (d3d_11_runtime_sub_ver_ >= 3)
+		{
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 feature_data;
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &feature_data, sizeof(feature_data))))
+			{
+				check_uav_fmts = feature_data.TypedUAVLoadAdditionalFormats ? true : false;
+			}
+		}
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
@@ -1223,6 +1238,19 @@ namespace KlayGE
 					{
 						texture_format_.push_back(fmts[i].first);
 					}
+
+					if (check_uav_fmts)
+					{
+						D3D11_FEATURE_DATA_FORMAT_SUPPORT2 format_support = { fmts[i].second , 0};
+						HRESULT hr = d3d_device_->CheckFeatureSupport(D3D11_FEATURE_FORMAT_SUPPORT2,
+							&format_support, sizeof(format_support));
+						if (SUCCEEDED(hr)
+							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
+							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
+						{
+							uav_format_.push_back(fmts[i].first);
+						}
+					}
 				}
 
 				if (s & (D3D11_FORMAT_SUPPORT_RENDER_TARGET | D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET
@@ -1257,6 +1285,8 @@ namespace KlayGE
 		vertex_format_.erase(std::unique(vertex_format_.begin(), vertex_format_.end()), vertex_format_.end());
 		std::sort(texture_format_.begin(), texture_format_.end());
 		texture_format_.erase(std::unique(texture_format_.begin(), texture_format_.end()), texture_format_.end());
+		std::sort(uav_format_.begin(), uav_format_.end());
+		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
 
 		caps_.vertex_format_support = std::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this,
 			std::placeholders::_1);
@@ -1264,6 +1294,8 @@ namespace KlayGE
 			std::placeholders::_1);
 		caps_.rendertarget_format_support = std::bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
 			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+		caps_.uav_format_support = std::bind<bool>(&D3D11RenderEngine::UAVFormatSupport, this,
+			std::placeholders::_1);
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

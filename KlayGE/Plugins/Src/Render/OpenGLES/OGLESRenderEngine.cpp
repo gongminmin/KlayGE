@@ -1353,6 +1353,12 @@ namespace KlayGE
 		return (iter != rendertarget_format_.end()) && (*iter == elem_fmt) && (sample_count <= max_samples_);
 	}
 
+	bool OGLESRenderEngine::UAVFormatSupport(ElementFormat elem_fmt)
+	{
+		KFL_UNUSED(elem_fmt);
+		return false;
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void OGLESRenderEngine::FillRenderDeviceCaps()
@@ -1730,6 +1736,8 @@ namespace KlayGE
 			std::placeholders::_1);
 		caps_.rendertarget_format_support = std::bind<bool>(&OGLESRenderEngine::RenderTargetFormatSupport, this,
 			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+		caps_.uav_format_support = std::bind<bool>(&OGLESRenderEngine::UAVFormatSupport, this,
+			std::placeholders::_1);
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

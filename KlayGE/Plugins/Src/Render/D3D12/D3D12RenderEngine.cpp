@@ -1294,6 +1294,12 @@ namespace KlayGE
 		return false;
 	}
 
+	bool D3D12RenderEngine::UAVFormatSupport(ElementFormat elem_fmt)
+	{
+		auto iter = std::lower_bound(uav_format_.begin(), uav_format_.end(), elem_fmt);
+		return (iter != uav_format_.end()) && (*iter == elem_fmt);
+	}
+
 	// 填充设备能力
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12RenderEngine::FillRenderDeviceCaps()
@@ -1374,6 +1380,18 @@ namespace KlayGE
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;
+
+		bool check_uav_fmts = false;
+		{
+			D3D12_FEATURE_DATA_D3D12_OPTIONS feature_data;
+			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &feature_data, sizeof(feature_data))))
+			{
+				if (feature_data.TypedUAVLoadAdditionalFormats)
+				{
+					check_uav_fmts = true;
+				}
+			}
+		}
 
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
@@ -1544,6 +1562,19 @@ namespace KlayGE
 				{
 					texture_format_.push_back(fmts[i].first);
 				}
+
+				if (check_uav_fmts)
+				{
+					fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
+					fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
+					HRESULT hr = d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support));
+					if (SUCCEEDED(hr)
+						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
+						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
+					{
+						uav_format_.push_back(fmts[i].first);
+					}
+				}
 			}
 
 			bool rt_supported = false;
@@ -1605,6 +1636,8 @@ namespace KlayGE
 			std::placeholders::_1);
 		caps_.rendertarget_format_support = std::bind<bool>(&D3D12RenderEngine::RenderTargetFormatSupport, this,
 			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+		caps_.uav_format_support = std::bind<bool>(&D3D12RenderEngine::UAVFormatSupport, this,
+			std::placeholders::_1);
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))
