@@ -115,19 +115,26 @@ namespace
 			mtl_desc_.mtl = MakeSharedPtr<RenderMaterialPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("RenderMaterialLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return true;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
+			if (*mtl_desc_.mtl)
+			{
+				return;
+			}
+
 			ResIdentifierPtr mtl_input = ResLoader::Instance().Open(mtl_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
@@ -339,14 +346,54 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			this->MainThreadStageNoLock();
+		}
 
+		bool HasSubThreadStage() const override
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const override
+		{
+			if (this->Type() == rhs.Type())
+			{
+				RenderMaterialLoadingDesc const & mtlld = static_cast<RenderMaterialLoadingDesc const &>(rhs);
+				return (mtl_desc_.res_name == mtlld.mtl_desc_.res_name);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			RenderMaterialLoadingDesc const & mtlld = static_cast<RenderMaterialLoadingDesc const &>(rhs);
+			mtl_desc_.res_name = mtlld.mtl_desc_.res_name;
+			mtl_desc_.mtl_data = mtlld.mtl_desc_.mtl_data;
+			mtl_desc_.mtl = mtlld.mtl_desc_.mtl;
+		}
+
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
+		{
+			return resource;
+		}
+
+		std::shared_ptr<void> Resource() const override
+		{
+			return *mtl_desc_.mtl;
+		}
+
+	private:
+		void MainThreadStageNoLock()
+		{
 			if (!*mtl_desc_.mtl)
 			{
 				RenderMaterialPtr mtl = MakeSharedPtr<RenderMaterial>();
@@ -369,42 +416,6 @@ namespace
 
 				*mtl_desc_.mtl = mtl;
 			}
-			return std::static_pointer_cast<void>(*mtl_desc_.mtl);
-		}
-
-		bool HasSubThreadStage() const
-		{
-			return true;
-		}
-
-		bool Match(ResLoadingDesc const & rhs) const
-		{
-			if (this->Type() == rhs.Type())
-			{
-				RenderMaterialLoadingDesc const & mtlld = static_cast<RenderMaterialLoadingDesc const &>(rhs);
-				return (mtl_desc_.res_name == mtlld.mtl_desc_.res_name);
-			}
-			return false;
-		}
-
-		void CopyDataFrom(ResLoadingDesc const & rhs)
-		{
-			BOOST_ASSERT(this->Type() == rhs.Type());
-
-			RenderMaterialLoadingDesc const & mtlld = static_cast<RenderMaterialLoadingDesc const &>(rhs);
-			mtl_desc_.res_name = mtlld.mtl_desc_.res_name;
-			mtl_desc_.mtl_data = mtlld.mtl_desc_.mtl_data;
-			mtl_desc_.mtl = mtlld.mtl_desc_.mtl;
-		}
-
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
-		{
-			return resource;
-		}
-
-		virtual std::shared_ptr<void> Resource() const override
-		{
-			return *mtl_desc_.mtl;
 		}
 
 	private:

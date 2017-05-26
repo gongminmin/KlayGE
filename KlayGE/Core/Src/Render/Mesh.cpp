@@ -89,7 +89,7 @@ namespace
 		};
 
 	public:
-		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint, 
+		RenderModelLoadingDesc(std::string const & res_name, uint32_t access_hint,
 			std::function<RenderModelPtr(std::wstring const &)> CreateModelFactoryFunc,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc)
 		{
@@ -101,33 +101,41 @@ namespace
 			model_desc_.model = MakeSharedPtr<RenderModelPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("RenderModelLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return false;
 		}
 
-		virtual std::shared_ptr<void> CreateResource() override
+		std::shared_ptr<void> CreateResource() override
 		{
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(L"Model");
 			*model_desc_.model = model;
 			return model;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
+			RenderModelPtr const & model = *model_desc_.model;
+			if (model && model->HWResourceReady())
+			{
+				return;
+			}
+
 			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
 				model_desc_.model_data->all_is_index_16_bit,
 				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
 				model_desc_.model_data->mesh_names, model_desc_.model_data->mtl_ids,
 				model_desc_.model_data->pos_bbs, model_desc_.model_data->tc_bbs,
 				model_desc_.model_data->mesh_num_vertices, model_desc_.model_data->mesh_base_vertices,
-				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices, 
+				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices,
 				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
 				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
 				model_desc_.model_data->frame_pos_bbs);
@@ -136,44 +144,22 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
-
-			RenderModelPtr const & model = *model_desc_.model;
-			if (!model || !model->HWResourceReady())
-			{
-				this->FillModel();
-
-				for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++i)
-				{
-					model_desc_.model_data->merged_vbs[i]->CreateHWResource(&model_desc_.model_data->merged_buff[i][0]);
-				}
-				model_desc_.model_data->merged_ib->CreateHWResource(&model_desc_.model_data->merged_indices[0]);
-
-				this->AddsSubPath();
-
-				model->BuildModelInfo();
-				for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
-				{
-					checked_pointer_cast<StaticMesh>(model->Subrenderable(i))->BuildMeshInfo();
-				}
-
-				model_desc_.model_data.reset();
-			}
-			return std::static_pointer_cast<void>(model);
+			this->MainThreadStageNoLock();
 		}
 
-		bool HasSubThreadStage() const
+		bool HasSubThreadStage() const override
 		{
 			return true;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const
+		bool Match(ResLoadingDesc const & rhs) const override
 		{
 			if (this->Type() == rhs.Type())
 			{
@@ -184,7 +170,7 @@ namespace
 			return false;
 		}
 
-		void CopyDataFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -195,7 +181,7 @@ namespace
 			model_desc_.model = rmld.model_desc_.model;
 		}
 
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			RenderModelPtr rhs_model = std::static_pointer_cast<RenderModel>(resource);
 			RenderModelPtr model = model_desc_.CreateModelFactoryFunc(rhs_model->Name());
@@ -277,7 +263,7 @@ namespace
 			return std::static_pointer_cast<void>(model);
 		}
 
-		virtual std::shared_ptr<void> Resource() const override
+		std::shared_ptr<void> Resource() const override
 		{
 			return *model_desc_.model;
 		}
@@ -363,6 +349,31 @@ namespace
 				{
 					ResLoader::Instance().AddPath(sub_path);
 				}
+			}
+		}
+
+		void MainThreadStageNoLock()
+		{
+			RenderModelPtr const & model = *model_desc_.model;
+			if (!model || !model->HWResourceReady())
+			{
+				this->FillModel();
+
+				for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
+				{
+					model_desc_.model_data->merged_vbs[i]->CreateHWResource(&model_desc_.model_data->merged_buff[i][0]);
+				}
+				model_desc_.model_data->merged_ib->CreateHWResource(&model_desc_.model_data->merged_indices[0]);
+
+				this->AddsSubPath();
+
+				model->BuildModelInfo();
+				for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+				{
+					checked_pointer_cast<StaticMesh>(model->Subrenderable(i))->BuildMeshInfo();
+				}
+
+				model_desc_.model_data.reset();
 			}
 		}
 

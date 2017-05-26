@@ -740,19 +740,26 @@ namespace
 			font_desc_.kfont = MakeSharedPtr<FontPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("FontLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return true;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
+			if (*font_desc_.kfont)
+			{
+				return;
+			}
+
 			ResIdentifierPtr kfont_input = ResLoader::Instance().Open(font_desc_.res_name);
 			font_desc_.kfont_loader->Load(kfont_input);
 
@@ -760,28 +767,22 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
-
-			if (!*font_desc_.kfont)
-			{
-				std::shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
-				*font_desc_.kfont = MakeSharedPtr<Font>(fr, font_desc_.flag);
-			}
-			return std::static_pointer_cast<void>(*font_desc_.kfont);
+			this->MainThreadStageNoLock();
 		}
 
-		bool HasSubThreadStage() const
+		bool HasSubThreadStage() const override
 		{
 			return true;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const
+		bool Match(ResLoadingDesc const & rhs) const override
 		{
 			if (this->Type() == rhs.Type())
 			{
@@ -792,7 +793,7 @@ namespace
 			return false;
 		}
 
-		void CopyDataFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -803,14 +804,24 @@ namespace
 			font_desc_.kfont = fld.font_desc_.kfont;
 		}
 
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const override
+		std::shared_ptr<void> Resource() const override
 		{
 			return *font_desc_.kfont;
+		}
+
+	private:
+		void MainThreadStageNoLock()
+		{
+			if (!*font_desc_.kfont)
+			{
+				std::shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
+				*font_desc_.kfont = MakeSharedPtr<Font>(fr, font_desc_.flag);
+			}
 		}
 
 	private:

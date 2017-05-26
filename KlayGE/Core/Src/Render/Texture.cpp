@@ -1107,13 +1107,13 @@ namespace
 			tex_desc_.tex = MakeSharedPtr<TexturePtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("TextureLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return true;
 		}
@@ -1231,30 +1231,31 @@ namespace
 			return *tex_desc_.tex;
 		}
 
-		void SubThreadStage()
-		{
-			this->LoadDDS();
-		}
-
-		std::shared_ptr<void> MainThreadStage()
+		void SubThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
 
 			TexturePtr const & tex = *tex_desc_.tex;
-			if (!tex || !tex->HWResourceReady())
+			if (tex && tex->HWResourceReady())
 			{
-				tex->CreateHWResource(tex_desc_.tex_data->init_data);
-				tex_desc_.tex_data.reset();
+				return;
 			}
-			return std::static_pointer_cast<void>(tex);
+
+			this->LoadDDS();
 		}
 
-		bool HasSubThreadStage() const
+		void MainThreadStage() override
+		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			this->MainThreadStageNoLock();
+		}
+
+		bool HasSubThreadStage() const override
 		{
 			return true;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const
+		bool Match(ResLoadingDesc const & rhs) const override
 		{
 			if (this->Type() == rhs.Type())
 			{
@@ -1265,7 +1266,7 @@ namespace
 			return false;
 		}
 
-		void CopyDataFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -1276,12 +1277,12 @@ namespace
 			tex_desc_.tex = tld.tex_desc_.tex;
 		}
 
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const override
+		std::shared_ptr<void> Resource() const override
 		{
 			return *tex_desc_.tex;
 		}
@@ -1510,7 +1511,7 @@ namespace
 
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
@@ -1547,6 +1548,16 @@ namespace
 			}
 
 			return texture;
+		}
+
+		void MainThreadStageNoLock()
+		{
+			TexturePtr const & tex = *tex_desc_.tex;
+			if (!tex || !tex->HWResourceReady())
+			{
+				tex->CreateHWResource(tex_desc_.tex_data->init_data);
+				tex_desc_.tex_data.reset();
+			}
 		}
 
 	private:

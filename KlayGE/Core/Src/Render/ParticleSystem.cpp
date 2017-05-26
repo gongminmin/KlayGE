@@ -107,19 +107,26 @@ namespace
 			ps_desc_.ps = MakeSharedPtr<ParticleSystemPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("ParticleSystemLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return false;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+
+			if (*ps_desc_.ps)
+			{
+				return;
+			}
+
 			ResIdentifierPtr psmm_input = ResLoader::Instance().Open(ps_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
@@ -324,14 +331,55 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			this->MainThreadStageNoLock();
+		}
 
+		bool HasSubThreadStage() const override
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const override
+		{
+			if (this->Type() == rhs.Type())
+			{
+				ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
+				return (ps_desc_.res_name == psld.ps_desc_.res_name);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
+			ps_desc_.res_name = psld.ps_desc_.res_name;
+			ps_desc_.ps_data = psld.ps_desc_.ps_data;
+			ps_desc_.ps = psld.ps_desc_.ps;
+		}
+
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
+		{
+			ParticleSystemPtr rhs_pp = std::static_pointer_cast<ParticleSystem>(resource);
+			return std::static_pointer_cast<void>(rhs_pp->Clone());
+		}
+
+		std::shared_ptr<void> Resource() const override
+		{
+			return *ps_desc_.ps;
+		}
+
+	private:
+		void MainThreadStageNoLock()
+		{
 			if (!*ps_desc_.ps)
 			{
 				ParticleSystemPtr ps = MakeSharedPtr<ParticleSystem>(NUM_PARTICLES);
@@ -361,43 +409,6 @@ namespace
 
 				*ps_desc_.ps = ps;
 			}
-			return std::static_pointer_cast<void>(*ps_desc_.ps);
-		}
-
-		bool HasSubThreadStage() const
-		{
-			return true;
-		}
-
-		bool Match(ResLoadingDesc const & rhs) const
-		{
-			if (this->Type() == rhs.Type())
-			{
-				ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
-				return (ps_desc_.res_name == psld.ps_desc_.res_name);
-			}
-			return false;
-		}
-
-		void CopyDataFrom(ResLoadingDesc const & rhs)
-		{
-			BOOST_ASSERT(this->Type() == rhs.Type());
-
-			ParticleSystemLoadingDesc const & psld = static_cast<ParticleSystemLoadingDesc const &>(rhs);
-			ps_desc_.res_name = psld.ps_desc_.res_name;
-			ps_desc_.ps_data = psld.ps_desc_.ps_data;
-			ps_desc_.ps = psld.ps_desc_.ps;
-		}
-
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
-		{
-			ParticleSystemPtr rhs_pp = std::static_pointer_cast<ParticleSystem>(resource);
-			return std::static_pointer_cast<void>(rhs_pp->Clone());
-		}
-
-		virtual std::shared_ptr<void> Resource() const override
-		{
-			return *ps_desc_.ps;
 		}
 
 	private:

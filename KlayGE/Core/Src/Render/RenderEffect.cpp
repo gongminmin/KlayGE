@@ -2667,34 +2667,33 @@ namespace KlayGE
 			effect_desc_.res_name = name;
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("EffectLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return false;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			effect_desc_.effect = MakeSharedPtr<RenderEffect>();
 			effect_desc_.effect->Load(effect_desc_.res_name);
-			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
-		bool HasSubThreadStage() const
+		bool HasSubThreadStage() const override
 		{
 			return false;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const
+		bool Match(ResLoadingDesc const & rhs) const override
 		{
 			if (this->Type() == rhs.Type())
 			{
@@ -2704,7 +2703,7 @@ namespace KlayGE
 			return false;
 		}
 
-		void CopyDataFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -2712,13 +2711,13 @@ namespace KlayGE
 			effect_desc_.res_name = eld.effect_desc_.res_name;
 		}
 
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			effect_desc_.effect = std::static_pointer_cast<RenderEffect>(resource)->Clone();
 			return std::static_pointer_cast<void>(effect_desc_.effect);
 		}
 
-		virtual std::shared_ptr<void> Resource() const override
+		std::shared_ptr<void> Resource() const override
 		{
 			return effect_desc_.effect;
 		}

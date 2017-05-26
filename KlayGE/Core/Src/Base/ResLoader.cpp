@@ -513,7 +513,8 @@ namespace KlayGE
 				res_desc->SubThreadStage();
 			}
 
-			res = res_desc->MainThreadStage();
+			res_desc->MainThreadStage();
+			res = res_desc->Resource();
 			this->AddLoadedResource(res_desc, res);
 		}
 
@@ -585,7 +586,8 @@ namespace KlayGE
 				}
 				else
 				{
-					res = res_desc->MainThreadStage();
+					res_desc->MainThreadStage();
+					res = res_desc->Resource();
 					this->AddLoadedResource(res_desc, res);
 				}
 			}
@@ -689,7 +691,8 @@ namespace KlayGE
 				}
 				else
 				{
-					res = res_desc->MainThreadStage();
+					res_desc->MainThreadStage();
+					res = res_desc->Resource();
 					this->AddLoadedResource(res_desc, res);
 				}
 

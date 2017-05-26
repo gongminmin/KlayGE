@@ -77,19 +77,25 @@ namespace
 			pp_desc_.pp = MakeSharedPtr<PostProcessPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("PostProcessLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return false;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			if (*pp_desc_.pp)
+			{
+				return;
+			}
+
 			ResIdentifierPtr ppmm_input = ResLoader::Instance().Open(pp_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
@@ -169,14 +175,56 @@ namespace
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 			if (caps.multithread_res_creating_support)
 			{
-				this->MainThreadStage();
+				this->MainThreadStageNoLock();
 			}
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			std::lock_guard<std::mutex> lock(main_thread_stage_mutex_);
+			this->MainThreadStageNoLock();
+		}
 
+		bool HasSubThreadStage() const override
+		{
+			return true;
+		}
+
+		bool Match(ResLoadingDesc const & rhs) const override
+		{
+			if (this->Type() == rhs.Type())
+			{
+				PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
+				return (pp_desc_.res_name == ppld.pp_desc_.res_name)
+					&& (pp_desc_.pp_name == ppld.pp_desc_.pp_name);
+			}
+			return false;
+		}
+
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
+		{
+			BOOST_ASSERT(this->Type() == rhs.Type());
+
+			PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
+			pp_desc_.res_name = ppld.pp_desc_.res_name;
+			pp_desc_.pp_name = ppld.pp_desc_.pp_name;
+			pp_desc_.pp_data = ppld.pp_desc_.pp_data;
+		}
+
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
+		{
+			PostProcessPtr rhs_pp = std::static_pointer_cast<PostProcess>(resource);
+			return std::static_pointer_cast<void>(rhs_pp->Clone());
+		}
+
+		std::shared_ptr<void> Resource() const override
+		{
+			return *pp_desc_.pp;
+		}
+
+	private:
+		void MainThreadStageNoLock()
+		{
 			if (!*pp_desc_.pp)
 			{
 				auto effect = SyncLoadRenderEffect(pp_desc_.pp_data->effect_name);
@@ -190,44 +238,6 @@ namespace
 				pp->CSPixelPerThreadZ(pp_desc_.pp_data->cs_data_per_thread_z);
 				*pp_desc_.pp = pp;
 			}
-			return std::static_pointer_cast<void>(*pp_desc_.pp);
-		}
-
-		bool HasSubThreadStage() const
-		{
-			return true;
-		}
-
-		bool Match(ResLoadingDesc const & rhs) const
-		{
-			if (this->Type() == rhs.Type())
-			{
-				PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
-				return (pp_desc_.res_name == ppld.pp_desc_.res_name)
-					&& (pp_desc_.pp_name == ppld.pp_desc_.pp_name);
-			}
-			return false;
-		}
-
-		void CopyDataFrom(ResLoadingDesc const & rhs)
-		{
-			BOOST_ASSERT(this->Type() == rhs.Type());
-
-			PostProcessLoadingDesc const & ppld = static_cast<PostProcessLoadingDesc const &>(rhs);
-			pp_desc_.res_name = ppld.pp_desc_.res_name;
-			pp_desc_.pp_name = ppld.pp_desc_.pp_name;
-			pp_desc_.pp_data = ppld.pp_desc_.pp_data;
-		}
-
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
-		{
-			PostProcessPtr rhs_pp = std::static_pointer_cast<PostProcess>(resource);
-			return std::static_pointer_cast<void>(rhs_pp->Clone());
-		}
-
-		virtual std::shared_ptr<void> Resource() const override
-		{
-			return *pp_desc_.pp;
 		}
 
 	private:

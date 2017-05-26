@@ -72,7 +72,7 @@ namespace KlayGE
 			return std::shared_ptr<void>();
 		}
 		virtual void SubThreadStage() = 0;
-		virtual std::shared_ptr<void> MainThreadStage() = 0;
+		virtual void MainThreadStage() = 0;
 
 		virtual bool HasSubThreadStage() const = 0;
 

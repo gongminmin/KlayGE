@@ -67,19 +67,24 @@ namespace KlayGE
 			imposter_desc_.imposter = MakeSharedPtr<ImposterPtr>();
 		}
 
-		uint64_t Type() const
+		uint64_t Type() const override
 		{
 			static uint64_t const type = CT_HASH("ImposterLoadingDesc");
 			return type;
 		}
 
-		bool StateLess() const
+		bool StateLess() const override
 		{
 			return true;
 		}
 
-		void SubThreadStage()
+		void SubThreadStage() override
 		{
+			if (*imposter_desc_.imposter)
+			{
+				return;
+			}
+
 			ResIdentifierPtr impml_input = ResLoader::Instance().Open(imposter_desc_.res_name);
 
 			KlayGE::XMLDocument doc;
@@ -101,7 +106,7 @@ namespace KlayGE
 			imposter_desc_.imposter_data->rt1_name = rt1_node->Attrib("name")->ValueString();
 		}
 
-		std::shared_ptr<void> MainThreadStage()
+		void MainThreadStage() override
 		{
 			if (!*imposter_desc_.imposter)
 			{
@@ -112,15 +117,14 @@ namespace KlayGE
 					imposter_desc_.imposter_data->num_azimuth, imposter_desc_.imposter_data->num_elevation,
 					imposter_desc_.imposter_data->size, rt0_tex, rt1_tex);
 			}
-			return std::static_pointer_cast<void>(*imposter_desc_.imposter);
 		}
 
-		bool HasSubThreadStage() const
+		bool HasSubThreadStage() const override
 		{
 			return true;
 		}
 
-		bool Match(ResLoadingDesc const & rhs) const
+		bool Match(ResLoadingDesc const & rhs) const override
 		{
 			if (this->Type() == rhs.Type())
 			{
@@ -130,7 +134,7 @@ namespace KlayGE
 			return false;
 		}
 
-		void CopyDataFrom(ResLoadingDesc const & rhs)
+		void CopyDataFrom(ResLoadingDesc const & rhs) override
 		{
 			BOOST_ASSERT(this->Type() == rhs.Type());
 
@@ -140,12 +144,12 @@ namespace KlayGE
 			imposter_desc_.imposter = ild.imposter_desc_.imposter;
 		}
 
-		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource)
+		std::shared_ptr<void> CloneResourceFrom(std::shared_ptr<void> const & resource) override
 		{
 			return resource;
 		}
 
-		virtual std::shared_ptr<void> Resource() const override
+		std::shared_ptr<void> Resource() const override
 		{
 			return *imposter_desc_.imposter;
 		}
