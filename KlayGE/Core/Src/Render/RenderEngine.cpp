@@ -186,7 +186,7 @@ namespace KlayGE
 		if (settings.hdr)
 		{
 			hdr_pp_ = MakeSharedPtr<HDRPostProcess>(settings.fft_lens_effects);
-			skip_hdr_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+			skip_hdr_pp_ = SyncLoadPostProcess("ToneMapping.ppml", "skip_tone_mapping");
 		}
 
 		ppaa_enabled_ = settings.ppaa ? 1 : 0;

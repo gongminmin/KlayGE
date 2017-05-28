@@ -17,4 +17,14 @@
 		</output>
 		<shader effect="ToneMapping.fxml" tech="ToneMapping"/>
 	</post_processor>
+
+	<post_processor name="skip_tone_mapping">
+		<input>
+			<pin name="src_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="ToneMapping.fxml" tech="SkipToneMapping"/>
+	</post_processor>
 </post_processors>
