@@ -177,19 +177,6 @@ namespace KlayGE
 		GpuFftPtr ifft_;
 	};
 
-	class KLAYGE_CORE_API ToneMappingPostProcess : public PostProcess
-	{
-	public:
-		ToneMappingPostProcess();
-
-		void OnRenderBegin();
-
-	private:
-		RenderEffectParameter* bloom_strength_ep_;
-		RenderEffectParameter* blue_shift_ep_;
-		RenderEffectParameter* hdr_rescale_ep_;
-	};
-
 
 	class KLAYGE_CORE_API HDRPostProcess : public PostProcess
 	{

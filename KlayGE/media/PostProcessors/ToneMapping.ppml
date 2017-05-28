@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="tone_mapping">
+		<params>
+			<param name="bloom_strength"/>
+			<param name="blue_shift"/>
+			<param name="hdr_rescale"/>
+		</params>
+		<input>
+			<pin name="src_tex"/>
+			<pin name="lum_tex"/>
+			<pin name="bloom_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="ToneMapping.fxml" tech="ToneMapping"/>
+	</post_processor>
+</post_processors>

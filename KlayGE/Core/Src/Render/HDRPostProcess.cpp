@@ -211,39 +211,6 @@ namespace KlayGE
 	}
 
 
-	ToneMappingPostProcess::ToneMappingPostProcess()
-		: PostProcess(L"ToneMapping", false)
-	{
-		input_pins_.emplace_back("src_tex", TexturePtr());
-		input_pins_.emplace_back("lum_tex", TexturePtr());
-		input_pins_.emplace_back("bloom_tex", TexturePtr());
-
-		output_pins_.emplace_back("out_tex", TexturePtr());
-		
-		RenderEffectPtr effect = SyncLoadRenderEffect("ToneMapping.fxml");
-		RenderTechnique* tech = effect->TechniqueByName("ToneMapping");
-
-		this->Technique(effect, tech);
-
-		bloom_strength_ep_ = effect->ParameterByName("bloom_strength");
-		blue_shift_ep_ = effect->ParameterByName("blue_shift");
-		hdr_rescale_ep_ = effect_->ParameterByName("hdr_rescale");
-	}
-
-	void ToneMappingPostProcess::OnRenderBegin()
-	{
-		PostProcess::OnRenderBegin();
-
-		auto const & graphics_cfg = Context::Instance().Config().graphics_cfg;
-
-		*bloom_strength_ep_ = graphics_cfg.bloom;
-		*blue_shift_ep_ = static_cast<int32_t>(graphics_cfg.blue_shift ? 1 : 0);
-
-		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		*hdr_rescale_ep_ = re.HDRRescale();
-	}
-
-
 	ImageStatPostProcess::ImageStatPostProcess()
 		: PostProcess(L"ImageStat", false)
 	{
@@ -663,7 +630,7 @@ namespace KlayGE
 			lens_effects_ = MakeSharedPtr<LensEffectsPostProcess>();
 		}
 
-		tone_mapping_ = MakeSharedPtr<ToneMappingPostProcess>();
+		tone_mapping_ = SyncLoadPostProcess("ToneMapping.ppml", "tone_mapping");
 	}
 
 	void HDRPostProcess::InputPin(uint32_t index, TexturePtr const & tex)
@@ -711,6 +678,15 @@ namespace KlayGE
 		}
 
 		lens_effects_->Apply();
+
+		auto const & graphics_cfg = Context::Instance().Config().graphics_cfg;
+
+		tone_mapping_->SetParam(0, graphics_cfg.bloom);
+		tone_mapping_->SetParam(1, static_cast<int32_t>(graphics_cfg.blue_shift ? 1 : 0));
+
+		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+		tone_mapping_->SetParam(2, re.HDRRescale());
+
 		tone_mapping_->Apply();
 	}
 }

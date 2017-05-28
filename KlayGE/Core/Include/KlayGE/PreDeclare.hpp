@@ -234,8 +234,6 @@ namespace KlayGE
 	typedef std::shared_ptr<LensEffectsPostProcess> LensEffectsPostProcessPtr;
 	class LensEffectsPostProcessCS;
 	typedef std::shared_ptr<LensEffectsPostProcessCS> LensEffectsPostProcessCSPtr;
-	class ToneMappingPostProcess;
-	typedef std::shared_ptr<ToneMappingPostProcess> ToneMappingPostProcessPtr;
 	class HDRPostProcess;
 	typedef std::shared_ptr<HDRPostProcess> HDRPostProcessPtr;
 	class SATSeparableScanSweepPostProcess;
