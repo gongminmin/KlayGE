@@ -61,7 +61,7 @@ namespace
 	{
 		std::vector<std::string> strs;
 		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
-		for (size_t i = 0; i < N; ++i)
+		for (size_t i = 0; i < N; ++ i)
 		{
 			if (i < strs.size())
 			{

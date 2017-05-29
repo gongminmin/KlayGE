@@ -432,7 +432,7 @@ namespace KlayGE
 			pvp.shadowing_fb = rf.MakeFrameBuffer();
 			pvp.projective_shadowing_fb = rf.MakeFrameBuffer();
 			pvp.reflection_fb = rf.MakeFrameBuffer();
-			for (size_t i = 0; i < pvp.merged_shading_fbs.size(); ++i)
+			for (size_t i = 0; i < pvp.merged_shading_fbs.size(); ++ i)
 			{
 				pvp.merged_shading_fbs[i] = rf.MakeFrameBuffer();
 				pvp.merged_depth_fbs[i] = rf.MakeFrameBuffer();
@@ -1134,7 +1134,7 @@ namespace KlayGE
 		}
 #endif
 		pvp.shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, hint);
-		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++i)
+		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++ i)
 		{
 			pvp.merged_shading_texs[i] = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, hint);
 			pvp.merged_depth_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -1188,7 +1188,7 @@ namespace KlayGE
 		pvp.shading_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shading_tex, 0, 1, 0));
 		pvp.shading_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++i)
+		for (size_t i = 0; i < pvp.merged_shading_texs.size(); ++ i)
 		{
 			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.merged_shading_texs[i], 0, 1, 0));
 			pvp.merged_shading_fbs[i]->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
@@ -2170,7 +2170,7 @@ namespace KlayGE
 							*light_view_proj_param_ = pvp.inv_view * sm_camera->ViewProjMatrix();
 
 							std::vector<float4> cascade_scale_bias(pvp.num_cascades);
-							for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
 								float3 const & scale = cascaded_shadow_layer_->CascadeScales()[i];
 								float3 const & bias = cascaded_shadow_layer_->CascadeBiases()[i];
@@ -2190,7 +2190,7 @@ namespace KlayGE
 						}
 						else
 						{
-							for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
 								*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
 							}
@@ -2304,7 +2304,7 @@ namespace KlayGE
 							sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
 
 							std::vector<float4> cascade_scale_bias(pvp.num_cascades);
-							for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
 								float3 const & scale = cascaded_shadow_layer_->CascadeScales()[i];
 								float3 const & bias = cascaded_shadow_layer_->CascadeBiases()[i];
@@ -2324,7 +2324,7 @@ namespace KlayGE
 						}
 						else
 						{
-							for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+							for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 							{
 								*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
 							}

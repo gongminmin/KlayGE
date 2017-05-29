@@ -551,7 +551,7 @@ namespace TexViewer
 				case TextureProperties.TP_Face:
 					if (KlayGE.TexViewerCoreWrapper.TextureType.TT_Cube == core_.Type())
 					{
-						for (int i = 0; i < ZoomSource.zooms.Length; ++i)
+						for (int i = 0; i < ZoomSource.zooms.Length; ++ i)
 						{
 							if (TextureFaceSource.items[i].DisplayName == properties_obj_.Face)
 							{

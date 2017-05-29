@@ -567,7 +567,7 @@ namespace
 		// use @itime_upper as a hint to speed up find
 		size_t vec_size = vec.size();
 		size_t i = 0;
-		for (i = itime_upper; i < vec_size; ++i)
+		for (i = itime_upper; i < vec_size; ++ i)
 		{
 			if (vec[i].first >= time)
 			{

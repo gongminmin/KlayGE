@@ -1326,7 +1326,7 @@ namespace MtlEditor
 		private Color FloatPtrToLDRColor(float[] clr, float multiplier)
 		{
 			float[] temp = new float[3];
-			for (int i = 0; i < 3; ++i)
+			for (int i = 0; i < 3; ++ i)
 			{
 				temp[i] = LinearToSRGB(clr[i] / multiplier);
 			}
@@ -1342,7 +1342,7 @@ namespace MtlEditor
 			ret[0] = clr.R / 255.0f;
 			ret[1] = clr.G / 255.0f;
 			ret[2] = clr.B / 255.0f;
-			for (int i = 0; i < 3; ++i)
+			for (int i = 0; i < 3; ++ i)
 			{
 				ret[i] = SRGBToLinear(ret[i]) * multiplier;
 			}

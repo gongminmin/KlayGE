@@ -384,7 +384,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					texel = color.ARGB();
 				}
 				ElementInitData init_data[6];
-				for (int i = 0; i < 6; ++i)
+				for (int i = 0; i < 6; ++ i)
 				{
 					init_data[i].data = &texel;
 					init_data[i].row_pitch = sizeof(uint32_t);

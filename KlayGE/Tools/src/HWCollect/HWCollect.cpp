@@ -352,7 +352,7 @@ void DetectMainboardInfo(std::ostream& os)
 		os << endl;
 
 		MemoryBank mem;
-		for (size_t i = 0; i < mem.SlotCount(); ++i)
+		for (size_t i = 0; i < mem.SlotCount(); ++ i)
 		{
 			if (mem[i].size != 0)
 			{

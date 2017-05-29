@@ -2574,20 +2574,20 @@ namespace KlayGE
 
 			str += "#define SHADER_MODEL(major, minor) ((major) * 4 + (minor))\n\n";
 
-			for (uint32_t i = 0; i < this->NumMacros(); ++i)
+			for (uint32_t i = 0; i < this->NumMacros(); ++ i)
 			{
 				std::pair<std::string, std::string> const & name_value = this->MacroByIndex(i);
 				str += "#define " + name_value.first + " " + name_value.second + "\n";
 			}
 			str += '\n';
 
-			for (uint32_t i = 0; i < this->NumCBuffers(); ++i)
+			for (uint32_t i = 0; i < this->NumCBuffers(); ++ i)
 			{
 				RenderEffectConstantBufferPtr const & cbuff = this->CBufferByIndex(i);
 				str += "cbuffer " + *cbuff->Name() + "\n";
 				str += "{\n";
 
-				for (uint32_t j = 0; j < cbuff->NumParameters(); ++j)
+				for (uint32_t j = 0; j < cbuff->NumParameters(); ++ j)
 				{
 					RenderEffectParameter& param = *this->ParameterByIndex(cbuff->ParameterIndex(j));
 					switch (param.Type())
@@ -2630,7 +2630,7 @@ namespace KlayGE
 				str += "};\n";
 			}
 
-			for (uint32_t i = 0; i < this->NumParameters(); ++i)
+			for (uint32_t i = 0; i < this->NumParameters(); ++ i)
 			{
 				RenderEffectParameter& param = *this->ParameterByIndex(i);
 
@@ -2763,7 +2763,7 @@ namespace KlayGE
 				}
 			}
 
-			for (uint32_t i = 0; i < this->NumShaderFragments(); ++i)
+			for (uint32_t i = 0; i < this->NumShaderFragments(); ++ i)
 			{
 				RenderShaderFragment const & effect_shader_frag = this->ShaderFragmentByIndex(i);
 				ShaderObject::ShaderType const shader_type = effect_shader_frag.Type();
@@ -3655,7 +3655,7 @@ namespace KlayGE
 			dss_desc.back_stencil_pass = Native2LE(dss_desc.back_stencil_pass);
 			os.write(reinterpret_cast<char const *>(&dss_desc), sizeof(dss_desc));
 
-			for (size_t i = 0; i < 4; ++i)
+			for (size_t i = 0; i < 4; ++ i)
 			{
 				bs_desc.blend_factor[i] = Native2LE(bs_desc.blend_factor[i]);
 			}

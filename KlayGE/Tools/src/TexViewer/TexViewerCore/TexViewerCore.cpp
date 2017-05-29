@@ -316,7 +316,7 @@ namespace KlayGE
 				Texture::Mapper mapper(*texture_cpu, 0, 0, TMA_Read_Only, 0, 0, width, height);
 				float4 const * p = mapper.Pointer<float4>();
 				uint32_t pitch = mapper.RowPitch() / sizeof(float4);
-				for (uint32_t i = 0; i < height; ++i)
+				for (uint32_t i = 0; i < height; ++ i)
 				{
 					memcpy(&texels_[i * width], p + i * pitch, width * sizeof(float4));
 				}

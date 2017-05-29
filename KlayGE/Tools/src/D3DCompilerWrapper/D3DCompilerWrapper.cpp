@@ -397,7 +397,7 @@ int main(int argc, char* argv[])
 			if (shader_type == D3D11_SHVER_VERTEX_SHADER)
 			{
 				D3D11_SIGNATURE_PARAMETER_DESC_47 signature;
-				for (UINT i = 0; i < desc.InputParameters; ++i)
+				for (UINT i = 0; i < desc.InputParameters; ++ i)
 				{
 					reflection->GetInputParameterDesc(i, reinterpret_cast<D3D11_SIGNATURE_PARAMETER_DESC*>(&signature));
 					WriteString(signature.SemanticName, fp);

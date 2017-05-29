@@ -394,7 +394,7 @@ namespace KlayGE
 		
 		auto const & frustum = camera->ViewFrustum();
 		std::vector<float4> view_frustum_planes(6);
-		for (size_t i = 0; i < view_frustum_planes.size(); ++i)
+		for (size_t i = 0; i < view_frustum_planes.size(); ++ i)
 		{
 			view_frustum_planes[i] = float4(&frustum.FrustumPlane(static_cast<uint32_t>(i)).a());
 		}

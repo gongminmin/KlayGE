@@ -117,7 +117,7 @@ namespace KlayGE
 			D3D11_BLEND_DESC1 d3d_bs_desc1;
 			d3d_bs_desc1.AlphaToCoverageEnable = d3d_bs_desc.AlphaToCoverageEnable;
 			d3d_bs_desc1.IndependentBlendEnable = d3d_bs_desc.IndependentBlendEnable;
-			for (int i = 0; i < 8; ++i)
+			for (int i = 0; i < 8; ++ i)
 			{
 				uint32_t const rt_index = caps.independent_blend_support ? i : 0;
 

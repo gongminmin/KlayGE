@@ -592,7 +592,7 @@ namespace KlayGE
 		elements.resize(vet.size());
 
 		uint16_t elem_offset = 0;
-		for (uint32_t i = 0; i < elements.size(); ++i)
+		for (uint32_t i = 0; i < elements.size(); ++ i)
 		{
 			VertexElement const & vs_elem = vet[i];
 

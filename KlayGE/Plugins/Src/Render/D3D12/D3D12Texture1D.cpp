@@ -341,7 +341,7 @@ namespace KlayGE
 
 			pso_desc.NumRenderTargets = 1;
 			pso_desc.RTVFormats[0] = dxgi_fmt_;
-			for (uint32_t i = pso_desc.NumRenderTargets; i < sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]); ++i)
+			for (uint32_t i = pso_desc.NumRenderTargets; i < sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]); ++ i)
 			{
 				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
 			}

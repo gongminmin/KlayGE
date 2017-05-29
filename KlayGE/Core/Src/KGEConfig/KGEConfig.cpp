@@ -378,7 +378,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			int sel = -1;
 			HWND hPaperWhiteCombo = GetDlgItem(hDlg, IDC_PAPER_WHITE_COMBO);
-			for (uint32_t i = 0; i < sizeof(paper_white_candidates) / sizeof(paper_white_candidates[0]); ++i)
+			for (uint32_t i = 0; i < sizeof(paper_white_candidates) / sizeof(paper_white_candidates[0]); ++ i)
 			{
 				std::basic_string<TCHAR> str;
 				Convert(str, boost::lexical_cast<std::string>(paper_white_candidates[i]));
@@ -394,7 +394,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			int sel = -1;
 			HWND hMaxLumCombo = GetDlgItem(hDlg, IDC_MAX_LUM_COMBO);
-			for (uint32_t i = 0; i < sizeof(max_lum_candidates) / sizeof(max_lum_candidates[0]); ++i)
+			for (uint32_t i = 0; i < sizeof(max_lum_candidates) / sizeof(max_lum_candidates[0]); ++ i)
 			{
 				std::basic_string<TCHAR> str;
 				Convert(str, boost::lexical_cast<std::string>(max_lum_candidates[i]));

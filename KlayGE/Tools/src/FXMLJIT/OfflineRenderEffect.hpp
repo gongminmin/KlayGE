@@ -377,7 +377,7 @@ namespace KlayGE
 					uint8_t* target = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
 
 					size_ = static_cast<uint32_t>(value.size());
-					for (size_t i = 0; i < value.size(); ++i)
+					for (size_t i = 0; i < value.size(); ++ i)
 					{
 						memcpy(target + i * this->data_.cbuff_desc.stride, &value[i], sizeof(value[i]));
 					}
@@ -396,7 +396,7 @@ namespace KlayGE
 					uint8_t const * src = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
 
 					val.resize(size_);
-					for (size_t i = 0; i < size_; ++i)
+					for (size_t i = 0; i < size_; ++ i)
 					{
 						memcpy(&val[i], src + i * this->data_.cbuff_desc.stride, sizeof(val[i]));
 					}

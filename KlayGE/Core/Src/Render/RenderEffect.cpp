@@ -3133,7 +3133,7 @@ namespace KlayGE
 						size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
 						bool found = false;
-						for (size_t i = 0; i < effect.cbuffers_.size(); ++i)
+						for (size_t i = 0; i < effect.cbuffers_.size(); ++ i)
 						{
 							if (effect.cbuffers_[i]->NameHash() == cbuff_name_hash)
 							{
@@ -3380,7 +3380,7 @@ namespace KlayGE
 		{
 			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
-			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++i)
+			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
 			{
 				effect.cbuffers_[i]->StreamOut(os);
 			}
@@ -3389,7 +3389,7 @@ namespace KlayGE
 		{
 			uint16_t num_params = Native2LE(static_cast<uint16_t>(effect.params_.size()));
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
-			for (uint32_t i = 0; i < effect.params_.size(); ++i)
+			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
 			{
 				effect.params_[i]->StreamOut(os);
 			}

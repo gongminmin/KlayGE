@@ -167,7 +167,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 	if (("albedo" == res_type)
 		|| ("emissive" == res_type))
 	{
-		for (size_t i = 0; i < res_names.size(); ++i)
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
 			ofs << "@echo Processing: " << res_names[i] << std::endl;
 
@@ -204,7 +204,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 	else if (("glossiness" == res_type)
 		|| ("metalness" == res_type))
 	{
-		for (size_t i = 0; i < res_names.size(); ++i)
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
 			ofs << "@echo Processing: " << res_names[i] << std::endl;
 
@@ -286,7 +286,7 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 	}
 	else if ("height" == res_type)
 	{
-		for (size_t i = 0; i < res_names.size(); ++i)
+		for (size_t i = 0; i < res_names.size(); ++ i)
 		{
 			ofs << "@echo Processing: " << res_names[i] << std::endl;
 

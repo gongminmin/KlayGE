@@ -68,7 +68,7 @@ namespace KlayGE
 	{
 		this->SetRenderTargets();
 
-		for (size_t i = 0; i < ua_views_.size(); ++i)
+		for (size_t i = 0; i < ua_views_.size(); ++ i)
 		{
 			checked_pointer_cast<D3D12UnorderedAccessView>(ua_views_[i])->ResetInitCount();
 		}
@@ -196,7 +196,7 @@ namespace KlayGE
 		std::vector<ID3D12Resource*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
 		std::vector<uint32_t> rt_num_subres;
-		for (uint32_t i = 0; i < clr_views_.size(); ++i)
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{
@@ -267,7 +267,7 @@ namespace KlayGE
 		std::vector<ID3D12Resource*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
 		std::vector<uint32_t> rt_num_subres;
-		for (uint32_t i = 0; i < clr_views_.size(); ++i)
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			if (clr_views_[i])
 			{

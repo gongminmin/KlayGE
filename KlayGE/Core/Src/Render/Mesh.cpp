@@ -282,7 +282,7 @@ namespace
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 			model_desc_.model_data->merged_vbs.resize(model_desc_.model_data->merged_buff.size());
-			for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++i)
+			for (size_t i = 0; i < model_desc_.model_data->merged_buff.size(); ++ i)
 			{
 				model_desc_.model_data->merged_vbs[i] = rf.MakeDelayCreationVertexBuffer(BU_Static, model_desc_.access_hint,
 					static_cast<uint32_t>(model_desc_.model_data->merged_buff[i].size()));
@@ -500,7 +500,7 @@ namespace KlayGE
 		bool ready = hw_res_ready_;
 		if (ready)
 		{
-			for (uint32_t i = 0; i < this->NumSubrenderables(); ++i)
+			for (uint32_t i = 0; i < this->NumSubrenderables(); ++ i)
 			{
 				ready &= checked_pointer_cast<StaticMesh>(this->Subrenderable(i))->HWResourceReady();
 				if (!ready)

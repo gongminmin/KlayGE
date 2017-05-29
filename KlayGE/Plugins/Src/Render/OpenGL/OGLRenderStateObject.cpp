@@ -218,7 +218,7 @@ namespace KlayGE
 		}
 		if (bs_desc_.independent_blend_enable)
 		{
-			for (int i = 0; i < 8; ++i)
+			for (int i = 0; i < 8; ++ i)
 			{
 				if (cur_bs_desc.blend_enable[i] != bs_desc_.blend_enable[i])
 				{

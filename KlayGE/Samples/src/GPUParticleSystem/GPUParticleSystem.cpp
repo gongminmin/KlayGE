@@ -301,7 +301,7 @@ namespace
 				technique_ = update_cs_tech_;
 
 				std::vector<float4> p(max_num_particles_);
-				for (size_t i = 0; i < p.size(); ++i)
+				for (size_t i = 0; i < p.size(); ++ i)
 				{
 					p[i] = float4(0, 0, 0, -1);
 				}

@@ -1263,7 +1263,7 @@ namespace KlayGE
 			{
 				if (post_tone_mapping_pp_)
 				{
-					for (size_t i = 0; i < 12; ++i)
+					for (size_t i = 0; i < 12; ++ i)
 					{
 						post_tone_mapping_pps_[i]->OutputPin(0, mono_tex_);
 					}

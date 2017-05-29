@@ -1174,7 +1174,7 @@ namespace KlayGE
 		if (so_template_->glsl_tfb_varyings_ && !so_template_->glsl_tfb_varyings_->empty())
 		{
 			std::vector<GLchar const *> names(so_template_->glsl_tfb_varyings_->size());
-			for (size_t i = 0; i < so_template_->glsl_tfb_varyings_->size(); ++i)
+			for (size_t i = 0; i < so_template_->glsl_tfb_varyings_->size(); ++ i)
 			{
 				names[i] = (*so_template_->glsl_tfb_varyings_)[i].c_str();
 			}
