@@ -1,0 +1,488 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+	<include name="util.fxml"/>
+
+	<parameter type="float4" name="width_height"/>
+	<parameter type="float2" name="near_q"/>
+
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<shader>
+		<![CDATA[
+float3 GatherNeighbors(float2 texcoord, float4 offset)
+{
+	float depth = non_linear_depth_to_linear(depth_tex.SampleLevel(linear_sampler, texcoord, 0).x, near_q.x, near_q.y);
+	float depth_left = non_linear_depth_to_linear(depth_tex.SampleLevel(linear_sampler, offset.xy, 0).x, near_q.x, near_q.y);
+	float depth_top  = non_linear_depth_to_linear(depth_tex.SampleLevel(linear_sampler, offset.zw, 0).x, near_q.x, near_q.y);
+	return float3(depth, depth_left, depth_top);
+}
+
+float2 CalculatePredicatedThreshold(float2 texcoord, float4 offset)
+{
+	const float THRESHOLD = 0.1f;
+	const float PREDICATION_THRESHOLD = 0.01f;
+	const float PREDICATION_SCALE = 2.0f;
+	const float PREDICATION_STRENGTH = 0.4f;
+
+	float3 neighbors = GatherNeighbors(texcoord, offset);
+	float2 delta = abs(neighbors.x - neighbors.yz);
+	float2 edges = step(PREDICATION_THRESHOLD, delta);
+	return PREDICATION_SCALE * THRESHOLD * (1 - PREDICATION_STRENGTH * edges);
+}
+
+void LumaEdgeDetectionVS(float4 pos : POSITION,
+	out float2 oTex : TEXCOORD0,
+	out float4 oOffset0 : TEXCOORD1,
+	out float4 oOffset1 : TEXCOORD2,
+	out float4 oOffset2 : TEXCOORD3,
+	out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTex, oPos);
+
+	oOffset0 = oTex.xyxy + float4(-1, 0, 0, -1) * width_height.zwzw;
+	oOffset1 = oTex.xyxy + float4(+1, 0, 0, +1) * width_height.zwzw;
+	oOffset2 = oTex.xyxy + float4(-2, 0, 0, -2) * width_height.zwzw;
+}
+
+float4 LumaEdgeDetectionPS(float2 texcoord : TEXCOORD0,
+	float4 offset0 : TEXCOORD1, float4 offset1 : TEXCOORD2, float4 offset2 : TEXCOORD3) : SV_Target
+{
+	float2 threshold = CalculatePredicatedThreshold(texcoord, offset0);
+
+	float lum = color_tex.SampleLevel(linear_sampler, texcoord, 0).w;
+	float lum_left = color_tex.SampleLevel(linear_sampler, offset0.xy, 0).w;
+	float lum_top = color_tex.SampleLevel(linear_sampler, offset0.zw, 0).w;
+
+	float4 delta;
+	delta.xy = abs(lum - float2(lum_left, lum_top));
+	float2 edges = step(threshold, delta.xy);
+
+	[branch]
+	if (dot(edges, 1.0f) == 0)
+	{
+		discard;
+	}
+
+	float lum_right = color_tex.SampleLevel(linear_sampler, offset1.xy, 0).w;
+	float lum_bottom = color_tex.SampleLevel(linear_sampler, offset1.zw, 0).w;
+	delta.zw = abs(lum - float2(lum_right, lum_bottom));
+
+	float2 max_delta = max(delta.xy, delta.zw);
+	max_delta = max(max_delta.x, max_delta.y);
+
+	float lum_left_left = color_tex.SampleLevel(linear_sampler, offset2.xy, 0).w;
+	float lum_top_top = color_tex.SampleLevel(linear_sampler, offset2.zw, 0).w;
+	delta.zw = abs(float2(lum_left, lum_top) - float2(lum_left_left, lum_top_top));
+
+	max_delta = max(max_delta.xy, delta.zw);
+
+	edges *= step(0.5f * max_delta, delta.xy);
+	return float4(edges, 0, 0);
+}
+		]]>
+	</shader>
+
+	<technique name="LumaEdgeDetection">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="1"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="1"/>
+			<state name="back_stencil_pass" value="replace"/>
+
+			<state name="vertex_shader" value="LumaEdgeDetectionVS()"/>
+			<state name="pixel_shader" value="LumaEdgeDetectionPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="texture2D" name="edges_tex"/>
+	<parameter type="texture2D" name="area_tex">
+		<annotation type="string" name="SasResourceAddress" value="SMAAAreaTex.dds"/>
+	</parameter>
+	<parameter type="texture2D" name="search_tex">
+		<annotation type="string" name="SasResourceAddress" value="SMAASearchTex.dds"/>
+	</parameter>
+	
+	<shader>
+		<![CDATA[
+static const int SMAA_MAX_SEARCH_STEPS = 16;
+static const int SMAA_MAX_SEARCH_STEPS_DIAG = 8;
+static const int SMAA_CORNER_ROUNDING = 25;
+
+static const float SMAA_AREA_TEX_MAX_DISTANCE = 16;
+static const float SMAA_AREA_TEX_MAX_DISTANCE_DIAG = 20;
+static const float2 SMAA_AREA_TEX_PIXEL_SIZE = 1 / float2(160, 560);
+static const float SMAA_AREA_TEX_SUBTEX_SIZE = 1 / 7.0f;
+
+static const float SMAA_EDGE_ACTIVATED = 0.8281f;
+
+float SearchDiag1(float2 texcoord, float2 dir, float c)
+{
+	texcoord += dir * width_height.zw;
+	float2 e = 0;
+	float i;
+	for (i = 0.0f; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
+	{
+		e.xy = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+		[flatten]
+		if (dot(e, 1.0f) < 1.9f)
+		{
+			break;
+		}
+		texcoord += dir * width_height.zw;
+	}
+	return i + (e.y > 0.9f) * c;
+}
+
+float SearchDiag2(float2 texcoord, float2 dir, float c)
+{
+	texcoord += dir * width_height.zw;
+	float2 e = 0;
+	float i;
+	for (i = 0.0f; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
+	{
+		e.y = edges_tex.SampleLevel(linear_sampler, texcoord, 0).y;
+		e.x = edges_tex.SampleLevel(linear_sampler, texcoord, 0, int2(1, 0)).x;
+		[flatten]
+		if (dot(e, 1.0f) < 1.9f)
+		{
+			break;
+		}
+		texcoord += dir * width_height.zw;
+	}
+	return i + (e.y > 0.9f) * c;
+}
+
+float2 AreaDiag(float2 dist, float2 e, float offset)
+{
+	float2 texcoord = SMAA_AREA_TEX_MAX_DISTANCE_DIAG * e + dist;
+	texcoord = (texcoord + 0.5f) * SMAA_AREA_TEX_PIXEL_SIZE;
+	texcoord.x += 0.5f;
+	texcoord.y += SMAA_AREA_TEX_SUBTEX_SIZE * offset;
+
+	return area_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+}
+
+float2 CalculateDiagWeights(float2 texcoord, float2 e, int4 subsample_indices)
+{
+	float2 weights = 0;
+
+	float2 d;
+	d.x = e.x > 0 ? SearchDiag1(texcoord, float2(-1, 1), 1) : 0;
+	d.y = SearchDiag1(texcoord, float2(1, -1), 0);
+
+	[branch]
+	if (d.x + d.y > 2)
+	{
+		float4 coords = float4(-d.x, d.x, d.y, -d.y) * width_height.zwzw + texcoord.xyxy;
+
+		float4 c;
+		c.x = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(-1, +0)).y;
+		c.y = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(+0, +0)).x;
+		c.z = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(+1, +0)).y;
+		c.w = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(+1, -1)).x;
+		float2 e = 2 * c.xz + c.yw;
+		e *= step(d.xy, SMAA_MAX_SEARCH_STEPS_DIAG - 1);
+
+		weights += AreaDiag(d, e, subsample_indices.z);
+	}
+
+	d.x = SearchDiag2(texcoord, float2(-1, -1), 0);
+	float right = edges_tex.SampleLevel(linear_sampler, texcoord, 0, int2(1, 0)).x;
+	d.y = right > 0 ? SearchDiag2(texcoord, float2(1, 1), 1) : 0;
+
+	[branch]
+	if (d.x + d.y > 2)
+	{
+		float4 coords = float4(-d.x, -d.x, d.y, d.y) * width_height.zwzw + texcoord.xyxy;
+
+		float4 c;
+		c.x  = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(-1, +0)).y;
+		c.y  = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(+0, -1)).x;
+		c.zw = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(+1, +0)).yx;
+		float2 e = 2 * c.xz + c.yw;
+		e *= step(d.xy, SMAA_MAX_SEARCH_STEPS_DIAG - 1);
+
+		weights += AreaDiag(d, e, subsample_indices.w).yx;
+	}
+
+	return weights;
+}
+
+float SearchLength(float2 e, float bias, float scale)
+{
+	e.x = bias + e.x * scale;
+	return search_tex.SampleLevel(point_sampler, e, 0).x * 255;
+}
+
+float SearchXLeft(float2 texcoord, float end)
+{	
+	float2 e = float2(0, 1);
+	while ((texcoord.x > end)
+		&& (e.y > SMAA_EDGE_ACTIVATED) // Is there some edge not activated?
+		&& (e.x == 0)) // Or is there a crossing edge that breaks the line?
+	{
+		e = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+		texcoord.x -= 2* width_height.z;
+	}
+
+	return texcoord.x + (3.25f - SearchLength(e, 0, 0.5f)) * width_height.z;
+}
+
+float SearchXRight(float2 texcoord, float end)
+{
+	float2 e = float2(0, 1);
+	while ((texcoord.x < end)
+		&& (e.y > SMAA_EDGE_ACTIVATED)
+		&& (e.x == 0))
+	{
+		e = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+		texcoord.x += 2 * width_height.z;
+	}
+
+	return texcoord.x + (SearchLength(e, 0.5f, 0.5f) - 3.25f) * width_height.z;
+}
+
+float SearchYUp(float2 texcoord, float end)
+{
+	float2 e = float2(1, 0);
+	while ((texcoord.y > end)
+		&& (e.x > SMAA_EDGE_ACTIVATED)
+		&& (e.y == 0))
+	{
+		e = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+		texcoord.y -= 2 * width_height.w;
+	}
+
+	return texcoord.y + (3.25f - SearchLength(e.yx, 0, 0.5f)) * width_height.w;
+}
+
+float SearchYDown(float2 texcoord, float end)
+{
+	float2 e = float2(1, 0);
+	while ((texcoord.y < end)
+		&& (e.x > SMAA_EDGE_ACTIVATED)
+		&& (e.y == 0))
+	{
+		e = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+		texcoord.y += 2 * width_height.w;
+	}
+	
+	return texcoord.y + (SearchLength(e.yx, 0.5f, 0.5f) - 3.25f) * width_height.w;
+}
+
+float2 Area(float2 dist, float2 e, float offset)
+{
+	float2 texcoord = round(e * 4) * SMAA_AREA_TEX_MAX_DISTANCE + dist;
+	texcoord = (texcoord + 0.5f) * SMAA_AREA_TEX_PIXEL_SIZE;
+	texcoord.y += SMAA_AREA_TEX_SUBTEX_SIZE * offset;
+	
+	return area_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+}
+
+float2 DetectHorizontalCornerPattern(float2 weights, float2 texcoord, float2 d)
+{
+	float4 coords = float4(d.x, 0, d.y, 0) * width_height.zwzw + texcoord.xyxy;
+	float2 e;
+	if (abs(d.x) < abs(d.y))
+	{
+		e.x = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(0, +1)).x;
+		e.y = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(0, -2)).x;
+	}
+	else
+	{
+		e.x = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(1, +1)).x;
+		e.y = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(1, -2)).x;
+	}
+	return weights * saturate(SMAA_CORNER_ROUNDING / 100.0f + 1 - e);
+}
+
+float2 DetectVerticalCornerPattern(float2 weights, float2 texcoord, float2 d)
+{
+	float4 coords = float4(0, d.x, 0, d.y) * width_height.zwzw + texcoord.xyxy;
+	float2 e;	
+	if (abs(d.x) < abs(d.y))
+	{
+		e.x = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(+1, 0)).y;
+		e.y = edges_tex.SampleLevel(linear_sampler, coords.xy, 0, int2(-2, 0)).y;
+	}
+	else
+	{
+		e.x = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(+1, 1)).y;
+		e.y = edges_tex.SampleLevel(linear_sampler, coords.zw, 0, int2(-2, 1)).y;
+	}
+	return weights * saturate(SMAA_CORNER_ROUNDING / 100.0f + 1 - e);
+}
+
+void BlendingWeightCalculationVS(float4 pos : POSITION,
+	out float2 oTex : TEXCOORD0,
+	out float4 oOffset0 : TEXCOORD1,
+	out float4 oOffset1 : TEXCOORD2,
+	out float4 oOffset2 : TEXCOORD3,
+	out float2 oPixCoord : TEXCOORD4,
+	out float4 oPos : SV_Position)
+{
+	PostProcessVS(pos, oTex, oPos);
+
+	oPixCoord = oTex * width_height.xy;
+
+	oOffset0 = oTex.xyxy + float4(-0.25f, -0.125f, 1.25f, -0.125f) * width_height.zwzw;
+	oOffset1 = oTex.xyxy + float4(-0.125f, -0.25f, -0.125f, 1.25f) * width_height.zwzw;
+	oOffset2 = float4(oOffset0.xz, oOffset1.yw) + float4(-2, 2, -2, 2) * width_height.zzww * SMAA_MAX_SEARCH_STEPS;
+}
+
+float4 BlendingWeightCalculationPS(float2 texcoord : TEXCOORD0,
+	float4 offset0 : TEXCOORD1, float4 offset1 : TEXCOORD2, float4 offset2 : TEXCOORD3,
+	float2 pixcoord : TEXCOORD4) : SV_Target
+{
+	int4 subsample_indices = int4(0, 0, 0, 0); // SMAA 1x
+	float4 weights = float4(0, 0, 0, 0);
+
+	float2 e = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
+
+	[branch]
+	if (e.y > 0)
+	{
+		weights.xy = CalculateDiagWeights(texcoord, e, subsample_indices);
+
+		[branch]
+		if (dot(weights.xy, 1.0f) == 0)
+		{
+			float2 d;
+
+			float2 coords;
+			coords.x = SearchXLeft(offset0.xy, offset2.x);
+			coords.y = offset1.y;
+			d.x = coords.x;
+
+			float e1 = edges_tex.SampleLevel(linear_sampler, coords, 0).x;
+
+			coords.x = SearchXRight(offset0.zw, offset2.y);
+			d.y = coords.x;
+
+			d = d * width_height.x - pixcoord.x;
+
+			float2 sqrt_d = sqrt(abs(d));
+			float e2 = edges_tex.SampleLevel(linear_sampler, coords, 0, int2(1, 0)).x;
+			weights.xy = Area(sqrt_d, float2(e1, e2), subsample_indices.y);
+
+			weights.xy = DetectHorizontalCornerPattern(weights.xy, texcoord, d);
+		}
+		else
+		{
+			e.x = 0;
+		}
+	}
+
+	[branch]
+	if (e.x > 0)
+	{
+		float2 d;
+
+		float2 coords;
+		coords.y = SearchYUp(offset1.xy, offset2.z);
+		coords.x = offset0.x;
+		d.x = coords.y;
+
+		float e1 = edges_tex.SampleLevel(linear_sampler, coords, 0).y;
+
+		coords.y = SearchYDown(offset1.zw, offset2.w);
+		d.y = coords.y;
+
+		d = d * width_height.y - pixcoord.y;
+
+		float2 sqrt_d = sqrt(abs(d));
+		float e2 = edges_tex.SampleLevel(linear_sampler, coords, 0, int2(0, 1)).y;
+		weights.zw = Area(sqrt_d, float2(e1, e2), subsample_indices.x);
+
+		weights.zw = DetectVerticalCornerPattern(weights.zw, texcoord, d);
+	}
+
+	return weights;
+}
+		]]>
+	</shader>
+
+	<technique name="BlendingWeightCalculation">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="1"/>
+			<state name="front_stencil_pass" value="keep"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="1"/>
+			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="BlendingWeightCalculationVS()"/>
+			<state name="pixel_shader" value="BlendingWeightCalculationPS()"/>
+		</pass>
+	</technique>
+
+	<parameter type="texture2D" name="blend_tex"/>
+
+	<shader>
+		<![CDATA[
+float4 NeighborhoodBlendingPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	float4 weights;
+	weights.xz = blend_tex.SampleLevel(linear_sampler, texcoord, 0).xz;
+	weights.y = blend_tex.SampleLevel(linear_sampler, texcoord, 0, int2(0, 1)).y;
+	weights.w = blend_tex.SampleLevel(linear_sampler, texcoord, 0, int2(1, 0)).w;
+
+	[branch]
+	if (dot(weights, 1.0f) >= 1e-5f)
+	{
+		float2 o;
+		o.x = weights.w > weights.z ? weights.w : -weights.z;
+		o.y = weights.y > weights.x ? weights.y : -weights.x;
+		if (abs(o.x) > abs(o.y))
+		{
+			o.y = 0;
+		}
+		else
+		{
+			o.x = 0;
+		}
+
+		texcoord += o * width_height.zw;
+	}
+
+	return color_tex.SampleLevel(linear_sampler, texcoord, 0);
+}
+		]]>
+	</shader>
+
+	<technique name="NeighborhoodBlending">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="NeighborhoodBlendingPS()"/>
+		</pass>
+	</technique>
+</effect>

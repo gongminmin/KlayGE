@@ -3,6 +3,7 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 	<include name="util.fxml"/>
+	<include name="ColorSpaceUtil.fxml"/>
 	
 	<macro name="RGB_TO_LUM" value="float3(0.2126f, 0.7152f, 0.0722f)"/>
 
@@ -85,14 +86,14 @@ float4 ToneMappingPS(float3 iTex : TEXCOORD0) : SV_Target
 {
 	// For FXAA
 	float3 ldr_rgb = saturate(ToneMapping(src_tex.Sample(linear_sampler, iTex.xy).rgb, bloom_tex.Sample(linear_sampler, iTex.xy).rgb, iTex.z));
-	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
+	return float4(ldr_rgb, dot(LinearToSRGB(ldr_rgb), RGB_TO_LUM));
 }
 
 float4 SkipToneMappingPS(float2 tex : TEXCOORD0) : SV_Target
 {
 	// For FXAA
 	float3 ldr_rgb = saturate(src_tex.Sample(linear_sampler, tex.xy).rgb);
-	return float4(ldr_rgb, dot(ldr_rgb, RGB_TO_LUM));
+	return float4(ldr_rgb, dot(LinearToSRGB(ldr_rgb), RGB_TO_LUM));
 }
 		]]>
 	</shader>

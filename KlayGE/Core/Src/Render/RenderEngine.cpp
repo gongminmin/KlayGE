@@ -190,6 +190,12 @@ namespace KlayGE
 		}
 
 		ppaa_enabled_ = settings.ppaa ? 1 : 0;
+		if (settings.ppaa)
+		{
+			smaa_edge_detection_pp_ = SyncLoadPostProcess("SMAA.ppml", "luma_edge_detection");
+			smaa_blending_weight_pp_ = SyncLoadPostProcess("SMAA.ppml", "blending_weight_calculation");
+		}
+
 		gamma_enabled_ = settings.gamma;
 		color_grading_enabled_ = settings.color_grading;
 		if (settings.ppaa || settings.color_grading || settings.gamma)
@@ -392,6 +398,45 @@ namespace KlayGE
 					= default_frame_buffers_[2] = resize_frame_buffer_;
 			}
 		}
+
+		if (smaa_edge_detection_pp_ || smaa_blending_weight_pp_)
+		{
+			ElementFormat fmt;
+			if (caps.texture_format_support(EF_GR8) && caps.rendertarget_format_support(EF_GR8, 1, 0))
+			{
+				fmt = EF_GR8;
+			}
+			else if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+				fmt = EF_ARGB8;
+			}
+			smaa_edges_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+
+			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
+			{
+				fmt = EF_ABGR8;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+
+				fmt = EF_ARGB8;
+			}
+			smaa_blend_tex_ = rf.MakeTexture2D(render_width, render_height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+
+			smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
+			smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+			smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
+			smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
+			smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		}
 		
 		if (post_tone_mapping_pp_)
 		{
@@ -490,6 +535,7 @@ namespace KlayGE
 #ifndef KLAYGE_SHIP
 		PerfProfiler& profiler = PerfProfiler::Instance();
 		hdr_pp_perf_ = profiler.CreatePerfRange(0, "HDR PP");
+		smaa_pp_perf_ = profiler.CreatePerfRange(0, "SMAA PP");
 		post_tone_mapping_pp_perf_ = profiler.CreatePerfRange(0, "Post tone mapping PP");
 		resize_pp_perf_ = profiler.CreatePerfRange(0, "Resize PP");
 		hdr_display_pp_perf_ = profiler.CreatePerfRange(0, "HDR display PP");
@@ -516,6 +562,8 @@ namespace KlayGE
 			post_tone_mapping_pps_[i].reset();
 		}
 		post_tone_mapping_pp_.reset();
+		smaa_edge_detection_pp_.reset();
+		smaa_blending_weight_pp_.reset();
 		skip_hdr_pp_.reset();
 		hdr_pp_.reset();
 
@@ -824,6 +872,20 @@ namespace KlayGE
 					default_frame_buffers_[0] = default_frame_buffers_[1] = default_frame_buffers_[2] = resize_frame_buffer_;
 				}
 			}
+			if (smaa_edge_detection_pp_ || smaa_blending_weight_pp_)
+			{
+				smaa_edges_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
+					smaa_edges_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+				smaa_blend_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
+					smaa_blend_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+
+				smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
+				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+
+				smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
+				smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
+				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+			}
 			if (post_tone_mapping_pp_)
 			{
 				ElementFormat fmt = post_tone_mapping_tex_->Format();
@@ -895,6 +957,28 @@ namespace KlayGE
 #endif
 
 		fb_stage_ = 2;
+
+#ifndef KLAYGE_SHIP
+		smaa_pp_perf_->Begin();
+#endif
+		if (ppaa_enabled_)
+		{
+			if (!skip)
+			{
+				CameraPtr const & camera = cur_frame_buffer_->GetViewport()->camera;
+				float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
+				float2 near_q(camera->NearPlane() * q, q);
+				smaa_edge_detection_pp_->SetParam(0, near_q);
+				smaa_edge_detection_pp_->OutputFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Stencil,
+					Color(0, 0, 0, 0), 1, 0);
+				smaa_edge_detection_pp_->Apply();
+
+				smaa_blending_weight_pp_->Apply();
+			}
+		}
+#ifndef KLAYGE_SHIP
+		smaa_pp_perf_->End();
+#endif
 
 #ifndef KLAYGE_SHIP
 		post_tone_mapping_pp_perf_->Begin();
@@ -1226,7 +1310,7 @@ namespace KlayGE
 			{
 				post_tone_mapping_pps_[i]->OutputPin(0, TexturePtr());
 			}
-		}				
+		}
 		if (hdr_pp_)
 		{
 			hdr_pp_->OutputPin(0, TexturePtr());
@@ -1321,6 +1405,14 @@ namespace KlayGE
 			for (size_t i = 0; i < 12; ++ i)
 			{
 				post_tone_mapping_pps_[i]->InputPin(0, post_tone_mapping_tex_);
+				post_tone_mapping_pps_[i]->InputPin(1, smaa_blend_tex_);
+				post_tone_mapping_pps_[i]->InputPin(2, smaa_edges_tex_);
+			}
+
+			if (smaa_edge_detection_pp_)
+			{
+				smaa_edge_detection_pp_->InputPin(0, post_tone_mapping_tex_);
+				smaa_edge_detection_pp_->InputPin(1, ds_tex_);
 			}
 		}
 
@@ -1377,6 +1469,9 @@ namespace KlayGE
 		overlay_frame_buffer_.reset();
 		overlay_tex_.reset();
 
+		smaa_edges_tex_.reset();
+		smaa_blend_tex_.reset();
+
 		so_buffers_.reset();
 
 		cur_rs_obj_.reset();
@@ -1387,6 +1482,8 @@ namespace KlayGE
 
 		hdr_pp_.reset();
 		skip_hdr_pp_.reset();
+		smaa_edge_detection_pp_.reset();
+		smaa_blending_weight_pp_.reset();
 		post_tone_mapping_pp_.reset();
 		resize_pps_[0].reset();
 		resize_pps_[1].reset();
@@ -1400,6 +1497,7 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		hdr_pp_perf_.reset();
+		smaa_pp_perf_.reset();
 		post_tone_mapping_pp_perf_.reset();
 		resize_pp_perf_.reset();
 		hdr_display_pp_perf_.reset();

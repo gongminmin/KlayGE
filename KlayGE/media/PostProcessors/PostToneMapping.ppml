@@ -4,6 +4,8 @@
 	<post_processor name="PostToneMapping0">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -13,6 +15,8 @@
 	<post_processor name="PostToneMapping1">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -22,6 +26,8 @@
 	<post_processor name="PostToneMapping2">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -31,6 +37,8 @@
 	<post_processor name="PostToneMapping3">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -40,6 +48,8 @@
 	<post_processor name="PostToneMapping4">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -49,6 +59,8 @@
 	<post_processor name="PostToneMapping5">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -58,6 +70,8 @@
 	<post_processor name="PostToneMapping6">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -67,6 +81,8 @@
 	<post_processor name="PostToneMapping7">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -76,6 +92,8 @@
 	<post_processor name="PostToneMapping8">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -85,6 +103,8 @@
 	<post_processor name="PostToneMapping9">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -94,6 +114,8 @@
 	<post_processor name="PostToneMapping10">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>
@@ -103,6 +125,8 @@
 	<post_processor name="PostToneMapping11">
 		<input>
 			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+			<pin name="edges_tex"/>
 		</input>
 		<output>
 			<pin name="output"/>

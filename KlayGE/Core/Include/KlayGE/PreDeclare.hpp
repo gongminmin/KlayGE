@@ -242,8 +242,6 @@ namespace KlayGE
 	typedef std::shared_ptr<SATPostProcess> SATPostProcessPtr;
 	class SATPostProcessCS;
 	typedef std::shared_ptr<SATPostProcessCS> SATPostProcessCSPtr;
-	class TAAPostProcess;
-	typedef std::shared_ptr<TAAPostProcess> TAAPostProcessPtr;
 	class SSVOPostProcess;
 	typedef std::shared_ptr<SSVOPostProcess> SSVOPostProcessPtr;
 	struct Particle;

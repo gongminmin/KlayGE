@@ -1,0 +1,38 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="luma_edge_detection">
+		<params>
+			<param name="near_q"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SMAA.fxml" tech="LumaEdgeDetection"/>
+	</post_processor>
+
+	<post_processor name="blending_weight_calculation">
+		<input>
+			<pin name="edges_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SMAA.fxml" tech="BlendingWeightCalculation"/>
+	</post_processor>
+
+	<post_processor name="neighborhood_blending">
+		<input>
+			<pin name="color_tex"/>
+			<pin name="blend_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SMAA.fxml" tech="NeighborhoodBlending"/>
+	</post_processor>
+</post_processors>

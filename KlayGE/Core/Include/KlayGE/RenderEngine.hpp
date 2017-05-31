@@ -304,6 +304,9 @@ namespace KlayGE
 		FrameBufferPtr overlay_frame_buffer_;
 		TexturePtr overlay_tex_;
 
+		TexturePtr smaa_edges_tex_;
+		TexturePtr smaa_blend_tex_;
+
 		RenderLayoutPtr so_buffers_;
 
 		uint32_t num_primitives_just_rendered_;
@@ -341,6 +344,8 @@ namespace KlayGE
 		PostProcessPtr hdr_pp_;
 		PostProcessPtr skip_hdr_pp_;
 		bool hdr_enabled_;
+		PostProcessPtr smaa_edge_detection_pp_;
+		PostProcessPtr smaa_blending_weight_pp_;
 		PostProcessPtr post_tone_mapping_pp_;
 		int ppaa_enabled_;
 		bool gamma_enabled_;
@@ -361,6 +366,7 @@ namespace KlayGE
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;
+		PerfRangePtr smaa_pp_perf_;
 		PerfRangePtr post_tone_mapping_pp_perf_;
 		PerfRangePtr resize_pp_perf_;
 		PerfRangePtr hdr_display_pp_perf_;

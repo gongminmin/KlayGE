@@ -217,6 +217,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SMAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Sort.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.fxml
@@ -252,6 +253,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SAT.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SMAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Sort.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Stereoscopic.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml

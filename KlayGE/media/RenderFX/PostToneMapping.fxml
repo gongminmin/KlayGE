@@ -3,21 +3,21 @@
 <effect>
 	<include name="PostProcess.fxml"/>
 	<include name="util.fxml"/>
-	<include name="FXAA.fxml"/>
+	<include name="SMAA.fxml"/>
 	<include name="ColorGrading.fxml"/>
 	
 	<shader>
 		<![CDATA[
 float4 PostToneMappingPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-#if PTM_FXAA
-#if PTM_FXAA_EDGE
-	float3 rgb = DebugFxaaPixelShader(tc0);
+#if PTM_SMAA
+#if PTM_SMAA_EDGE
+	float3 rgb = edges_tex.SampleLevel(linear_sampler, tc0, 0).rgb;
 #else
-	float3 rgb = FxaaPixelShader(tc0);
+	float3 rgb = NeighborhoodBlendingPS(tc0).rgb;
 #endif
 #else
-	float3 rgb = color_tex.Sample(linear_wrap_sampler, tc0).xyz;
+	float3 rgb = color_tex.Sample(linear_sampler, tc0).xyz;
 #endif
 #if PTM_SRGB
 	rgb = SRGBCorrection(rgb);
@@ -50,38 +50,38 @@ float4 PostToneMappingPS(float2 tc0 : TEXCOORD0) : SV_Target
 		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
 	<technique name="PostToneMapping4" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
 	</technique>
 	<technique name="PostToneMapping5" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
 		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
 	<technique name="PostToneMapping6" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
 		<macro name="PTM_SRGB" value="1"/>
 	</technique>
 	<technique name="PostToneMapping7" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
 		<macro name="PTM_SRGB" value="1"/>
 		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
 	<technique name="PostToneMapping8" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
-		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
+		<macro name="PTM_SMAA_EDGE" value="1"/>
 	</technique>
 	<technique name="PostToneMapping9" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
-		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
+		<macro name="PTM_SMAA_EDGE" value="1"/>
 		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
 	<technique name="PostToneMapping10" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
-		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
+		<macro name="PTM_SMAA_EDGE" value="1"/>
 		<macro name="PTM_SRGB" value="1"/>
 	</technique>
 	<technique name="PostToneMapping11" inherit="PostToneMapping0">
-		<macro name="PTM_FXAA" value="1"/>
-		<macro name="PTM_FXAA_EDGE" value="1"/>
+		<macro name="PTM_SMAA" value="1"/>
+		<macro name="PTM_SMAA_EDGE" value="1"/>
 		<macro name="PTM_SRGB" value="1"/>
 		<macro name="PTM_COLOR_GRADING" value="1"/>
 	</technique>
