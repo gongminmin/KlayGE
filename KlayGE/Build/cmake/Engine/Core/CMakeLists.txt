@@ -18,6 +18,8 @@ DOWNLOAD_FILE("KlayGE/media/Textures/2D/noise_grad3_perm.dds" "cbda47a1678ce70b6
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/noise_grad4_perm.dds" "cbda47a1678ce70b6720856736100979d469e159" "a2c879dd71f5b96eef5286bf20b3ba38937d4e0d")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/noise_simplex.dds" "cbda47a1678ce70b6720856736100979d469e159" "83b8b76f165a00e998ff13e39c40c27393d3e271")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/powered_by_klayge.dds" "cbda47a1678ce70b6720856736100979d469e159" "21346648b14a0366de7abd628393e6de0253317d")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/SMAAAreaTex.dds" "f05441b3b4ed5261cc525ad2985b28e5afd9c4fb" "6edf67ea2e127b5cab8a8b37d20ab05c54d0c757")
+DOWNLOAD_FILE("KlayGE/media/Textures/2D/SMAASearchTex.dds" "f05441b3b4ed5261cc525ad2985b28e5afd9c4fb" "49dece98e469fa2629412e6226ff75abe2b889b0")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/ui.dds" "cbda47a1678ce70b6720856736100979d469e159" "7bdafaf02f9f5f2fef748d38c12c84212004cda6")
 DOWNLOAD_FILE("KlayGE/media/Textures/2D/white_noise_tex.dds" "0cd916b426c9892dfe05743199f481a13489217c" "5739284048778c68fb862d957f0d956430b5c279")
 DOWNLOAD_FILE("KlayGE/media/Textures/3D/color_grading.dds" "cbda47a1678ce70b6720856736100979d469e159" "44bee46635485aef2068095a45cab5a9fbc6d838")
