@@ -140,8 +140,8 @@ float SearchDiag1(float2 texcoord, float2 dir, float c)
 {
 	texcoord += dir * width_height.zw;
 	float2 e = 0;
-	float i;
-	for (i = 0.0f; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
+	int i;
+	for (i = 0; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
 	{
 		e.xy = edges_tex.SampleLevel(linear_sampler, texcoord, 0).xy;
 		[flatten]
@@ -158,8 +158,8 @@ float SearchDiag2(float2 texcoord, float2 dir, float c)
 {
 	texcoord += dir * width_height.zw;
 	float2 e = 0;
-	float i;
-	for (i = 0.0f; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
+	int i;
+	for (i = 0; i < SMAA_MAX_SEARCH_STEPS_DIAG; ++ i)
 	{
 		e.y = edges_tex.SampleLevel(linear_sampler, texcoord, 0).y;
 		e.x = edges_tex.SampleLevel(linear_sampler, texcoord, 0, int2(1, 0)).x;

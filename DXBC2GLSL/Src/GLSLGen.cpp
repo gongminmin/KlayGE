@@ -1049,7 +1049,11 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						break;
 
 					case SN_IS_FRONT_FACE:
-						out << "(gl_FrontFacing ? 1U : 0U)";
+						if (glsl_rules_ & GSR_UIntType)
+						{
+							out << "uint";
+						}
+						out << "(gl_FrontFacing ? 1 : 0)";
 						need_comps = false;
 						break;
 

@@ -625,6 +625,7 @@ namespace KlayGE
 						uint32_t rules = DXBC2GLSL::DXBC2GLSL::DefaultRules(gsv);
 						rules &= ~GSR_UniformBlockBinding;
 						rules &= ~GSR_MatrixType;
+						rules &= ~GSR_UIntType;
 						rules |= caps.max_simultaneous_rts > 1 ? static_cast<uint32_t>(GSR_DrawBuffers) : 0;
 						if ((ST_HullShader == type) || (ST_DomainShader == type))
 						{
