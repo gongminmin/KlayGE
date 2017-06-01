@@ -1,5 +1,0 @@
-SET(SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Tools/src/RGB2FakeHeight/RGB2FakeHeight.cpp
-)
-
-SETUP_TOOL(RGB2FakeHeight)
