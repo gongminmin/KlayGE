@@ -332,7 +332,7 @@ namespace KlayGE
 		sc_fs_desc_.Windowed = !this->FullScreen();
 #endif
 
-		this->CreateSwapChain(d3d_cmd_queue.get());
+		this->CreateSwapChain(d3d_cmd_queue.get(), settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -426,7 +426,7 @@ namespace KlayGE
 		{
 			ID3D12CommandQueuePtr const & cmd_queue = d3d12_re.D3DRenderCmdQueue();
 
-			this->CreateSwapChain(cmd_queue.get());
+			this->CreateSwapChain(cmd_queue.get(), Context::Instance().Config().graphics_cfg.display_output_method != DOM_sRGB);
 			Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -658,7 +658,7 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12RenderWindow::CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue)
+	void D3D12RenderWindow::CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue, bool try_hdr_display)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
@@ -676,6 +676,20 @@ namespace KlayGE
 		sc->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3));
 		swap_chain_ = MakeCOMPtr(sc3);
 		sc->Release();
+
+		if (try_hdr_display)
+		{
+			IDXGISwapChain4* sc4;
+			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain4, reinterpret_cast<void**>(&sc4))))
+			{
+				UINT color_space_support;
+				if (SUCCEEDED(sc4->CheckColorSpaceSupport(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020, &color_space_support))
+					&& (color_space_support & DXGI_SWAP_CHAIN_COLOR_SPACE_SUPPORT_FLAG_PRESENT))
+				{
+					sc4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
+				}
+			}
+		}
 	}
 
 	void D3D12RenderWindow::SwapBuffers()

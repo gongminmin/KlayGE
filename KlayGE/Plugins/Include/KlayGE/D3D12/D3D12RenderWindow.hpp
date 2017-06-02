@@ -125,7 +125,7 @@ namespace KlayGE
 
 	private:
 		void UpdateSurfacesPtrs();
-		void CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue);
+		void CreateSwapChain(ID3D12CommandQueue* d3d_cmd_queue, bool try_hdr_display);
 		void WaitForGPU();
 
 	private:

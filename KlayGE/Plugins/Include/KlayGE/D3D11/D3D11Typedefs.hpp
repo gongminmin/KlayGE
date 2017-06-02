@@ -16,7 +16,7 @@
 #pragma once
 
 #include <KlayGE/SALWrapper.hpp>
-#include <dxgi1_5.h>
+#include <dxgi1_6.h>
 #if defined(KLAYGE_COMPILER_GCC)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare" // Ignore comparison between int and uint

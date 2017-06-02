@@ -34,7 +34,7 @@
 #pragma once
 
 #include <KlayGE/SALWrapper.hpp>
-#include <dxgi1_5.h>
+#include <dxgi1_6.h>
 #include <d3d12.h>
 #if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 #undef __out

@@ -110,7 +110,7 @@ namespace KlayGE
 
 	private:
 		void UpdateSurfacesPtrs();
-		void CreateSwapChain(ID3D11Device* d3d_device);
+		void CreateSwapChain(ID3D11Device* d3d_device, bool try_hdr_display);
 
 	private:
 		std::string	name_;
