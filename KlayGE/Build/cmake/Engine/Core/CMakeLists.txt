@@ -180,6 +180,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Bone.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/CameraProxy.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ClusteredDeferredRendering.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ColorGrading.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ColorSpaceUtil.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.fxml
