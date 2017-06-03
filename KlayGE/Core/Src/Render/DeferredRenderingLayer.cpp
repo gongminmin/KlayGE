@@ -562,7 +562,7 @@ namespace KlayGE
 		}
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		// Clustered Shading TODO: Make it at least 4
-		num_depth_slices_ = 1;
+		num_depth_slices_ = 4;
 		if (cs_cldr_)
 		{
 			light_batch_ = 1024;
@@ -4537,6 +4537,74 @@ namespace KlayGE
 		}
 	}
 
+	bool DeferredRenderingLayer::OverlapTestPoint(std::vector<float4> const & planes, float4 const & lights_pos_es, 
+		float4 const & lights_falloff_range)
+	{
+		int overlap = 1;
+
+		for (int j = 0; j < 6; ++ j)
+		{
+			float d = planes[j].x * lights_pos_es.x + planes[j].y * lights_pos_es.y +
+				planes[j].z * lights_pos_es.z + planes[j].w;
+			overlap *= (d > -lights_falloff_range.w);
+		}
+
+		return overlap;
+	}
+
+	bool DeferredRenderingLayer::OverlapTestSpot(std::vector<float4> const & planes, float3 const & lights_aabb_min, 
+		float3 const & lights_aabb_max)
+	{
+		float3 min_pt = lights_aabb_min;
+		float3 max_pt = lights_aabb_max;
+
+		int overlap = 1;
+		for (int j = 0; j < 6; ++ j)
+		{
+			float4 plane = planes[j];
+			// Not sure what plane.xyz < 0 mean
+			float3 v0 = float3(plane.x < 0 ? min_pt.x : max_pt.x, plane.y < 0 ? min_pt.y : max_pt.y, 
+				plane.z < 0 ? min_pt.z : max_pt.z);
+			float d = plane.x * v0.x + plane.y * v0.y + plane.z * v0.z + plane.w;
+			overlap *= (d >= 0);
+		}
+
+		return overlap;
+	}
+		
+	void DeferredRenderingLayer::CalcTileViewFrustum(Cluster const & cluster, 
+		float2 const & tile_scale, PerViewport const & pvp, std::vector<float4> & planes) 
+	{
+		float near_plane = cluster.min_z;
+		float far_plane = cluster.max_z;
+
+		if (far_plane - near_plane < 1e-3f)
+		{
+			far_plane += 1e-3f;
+		}
+
+		float2 coord = float2(cluster.i, cluster.j);
+		float2 tile_bias = float2(tile_scale.x, tile_scale.y) - coord;
+		float q = far_plane / (far_plane - near_plane);
+
+		float4 column1 = float4(pvp.proj(0, 0) * tile_scale.x(), 0, tile_bias.x, 0);
+		float4 column2 = float4(0, -pvp.proj(1, 1) * tile_scale.y(), tile_bias.y, 0);
+		float4 column3 = float4(0, 0, q, -near_plane * q);
+		float4 column4 = float4(0, 0, 1, 0);
+		planes[0] = column4 - column1;
+		planes[1] = column4 + column1;
+		planes[2] = column4 - column2;
+		planes[3] = column4 + column2;
+		planes[4] = column4 - column3;
+		// TODO: Should be column3 only
+		planes[5] = column4 + column3;
+		for (int i = 0; i < 6; ++ i)
+		{
+			// length(): what is this
+			planes[i] /= sqrt(planes[i].x * planes[i].x + planes[i].y * planes[i].y + planes[i].z * planes[i].z);
+		}
+	}
+
 	void DeferredRenderingLayer::UpdateClusteredLightingCS(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -4807,17 +4875,90 @@ namespace KlayGE
 					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
 			}
 
+			std::vector<Cluster> clusters;
 			{
 				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
 
-				float* depth_slices = depth_slices_param_->MemoryInCBuff<float>();
-				depth_slices[0] = camera->NearPlane();
 				// Clustered Shading TODO: Fill the depth slices
-				depth_slices[1] = camera->FarPlane();
+				float* depth_slices = depth_slices_param_->MemoryInCBuff<float>();
+				float const near_plane = camera->NearPlane();
+				float const far_plane = camera->FarPlane();
+				float const base = far_plane / near_plane;
+				depth_slices[0] = near_plane;
+				for (uint32_t i = 1; i < num_depth_slices_; ++ i)
+				{
+					depth_slices[i] = near_plane * pow(base, static_cast<float>(i) / num_depth_slices_);
+				}
+				depth_slices[num_depth_slices_] = far_plane;
+
+				// Fill all clusters with min_z and max_z;
+				for (uint32_t tile_idx_x = 0; tile_idx_x < tile_scale.x; ++ tile_idx_x) 
+				{
+					for (uint32_t tile_idx_y = 0; tile_idx_y < tile_scale.y; ++ tile_idx_y) 
+					{
+						for (uint32_t tile_idx_z = 0; tile_idx_z < num_depth_slices_ - 1; ++ tile_idx_z)
+						{
+							Cluster cluster;
+							cluster.i = tile_idx_x;
+							cluster.j = tile_idx_y;
+							cluster.k = tile_idx_z;
+							cluster.min_z = depth_slices[tile_idx_z];
+							cluster.max_z = depth_slices[tile_idx_z + 1];
+							clusters.push_back(cluster);
+						}
+					}
+				}
 			}
 			depth_slices_param_->CBuffer().Dirty(true);
 
 			// Clustered Shading TODO: Also have a CPU-version of calculating intersected_light_indices
+			{
+				for (uint32_t cl_idx = 0; cl_idx < clusters.size(); ++ cl_idx)
+				{
+					std::vector<float4> planes;
+					CalcTileViewFrustum(clusters[cl_idx], tile_scale, pvp, planes);
+					for (uint32_t t = 0; t < available_lights.size(); ++ t)
+					{
+						clusters[cl_idx].lights_intersected_index_starts.push_back(0);
+						for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
+						{
+							auto const & light = *lights_[available_lights[t][i]];
+							LightSource::LightType type = light.Type();
+
+							float const range = light.Range() * light_scale_;
+
+							if (type == LightSource::LT_Point)
+							{
+								float3 const & p = light.Position();
+								float3 const loc_es = MathLib::transform_coord(p, pvp.view);
+								float4 lights_pos_es = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
+
+								float4 lights_falloff_range = float4(light.Falloff().x(), light.Falloff().y(), light.Falloff().z(), range);
+
+								if (OverlapTestPoint(planes, lights_pos_es, lights_falloff_range))
+								{
+									clusters[cl_idx].lights_intersected_indices.push_back(i);
+								}
+							}
+							else if (type == LightSource::LT_Spot)
+							{
+								AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
+								float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
+								float const scale = light.CosOuterInner().w();
+								float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
+								float4x4 light_mv = light_model * light_to_view;
+								aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
+								
+								if (OverlapTestSpot(planes, aabb.Min(), aabb.Max()))
+								{
+									clusters[cl_idx].lights_intersected_indices.push_back(i);
+								}
+							}
+						}
+						clusters[cl_idx].lights_intersected_index_starts.push_back(clusters[cl_idx].lights_intersected_indices.size());
+					}
+				}
+			}
 
 			*lights_start_rw_tex_param_ = pvp.lights_start_tex;
 			*intersected_light_indices_rw_tex_param_ = pvp.intersected_light_indices_tex;
