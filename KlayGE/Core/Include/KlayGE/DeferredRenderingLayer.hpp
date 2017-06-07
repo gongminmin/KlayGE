@@ -406,6 +406,16 @@ namespace KlayGE
 		void UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
+		struct Cluster
+		{
+			int i;
+			int j;
+			int k;
+			float min_z;
+			float max_z;
+			std::vector<uint32_t> lights_intersected_index_starts;
+			std::vector<uint32_t> lights_intersected_indices;
+		};
 		void UpdateClusteredLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void UpdateClusteredLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
 			int32_t org_no, PassTargetBuffer pass_tb);
@@ -415,6 +425,10 @@ namespace KlayGE
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
+		void CalcTileViewFrustum(Cluster const & cluster, float2 const & tile_scale, PerViewport const & pvp, std::vector<float4> & planes);
+		bool OverlapTestPoint(std::vector<float4> const & planes, float4 const & lights_pos_es, float4 const & lights_falloff_range);
+		bool OverlapTestSpot(std::vector<float4> const & planes, float3 const & lights_aabb_min, float3 const & lights_aabb_max);
+		
 		void UpdateClusteredLightingCS(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
