@@ -2,7 +2,7 @@
 
 <effect>
 	<macro name="LIGHT_BATCH" value="1024"/>
-	<macro name="NUM_DEPTH_SLICES" value="1"/>
+	<macro name="NUM_DEPTH_SLICES" value="8"/>
 	
 	<include name="DeferredRendering.fxml"/>
 
@@ -515,28 +515,33 @@ void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
 	}
 }
 
-groupshared uint intersected_light_indices_sh[LIGHT_BATCH];
-groupshared uint light_start_sh[8];
+uint CalcDepthSlice(float depth)
+{
+	uint slice = 1;
+	while ((slice <= NUM_DEPTH_SLICES) && (depth_slices[slice] <= depth))
+	{
+		++ slice;
+	}
+	return slice - 1;
+}
+
+groupshared	uint light_start_sh[NUM_DEPTH_SLICES][8];
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
-	uint3 tile_id = uint3(gid.xy / uint2(TILE_SIZE / BLOCK_X, TILE_SIZE / BLOCK_Y), gid.z);
+	uint3 tile_id = uint3(gid.xy / uint2(TILE_SIZE / BLOCK_X, TILE_SIZE / BLOCK_Y), 0);
 
-	if (GI < 8)
+	if (GI < 8 * NUM_DEPTH_SLICES)
 	{
-		light_start_sh[GI] = lights_start_in_tex.Load(uint4(tile_id.x * 8 + GI, tile_id.yz, 0));
+		uint slice = GI / 8;
+		uint offset = GI - slice * 8;
+		light_start_sh[slice][offset] = lights_start_in_tex.Load(uint4(tile_id.x * 8 + offset, tile_id.y, slice, 0));
 	}
 	GroupMemoryBarrierWithGroupSync();
 
-	for (uint i = GI; i < light_start_sh[7]; i += BLOCK_SIZE)
-	{
-		intersected_light_indices_sh[i] = ReadALightIndex(tile_id, i);
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
 	uint3 coord = uint3(gid.xy * uint2(BLOCK_X, BLOCK_Y) + gtid.xy, 0);
 
 	[branch]
@@ -557,13 +562,15 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			float3 pos_es = view_dir * (depth_tex.Load(coord).x / view_dir.z);
 			float3 c_diff = GetDiffuse(mrt_1);
 			float3 c_spec = GetSpecular(mrt_1);
-			
+
 			view_dir = -view_dir;
+
+			tile_id.z = CalcDepthSlice(pos_es.z);
 
 			float spec_normalize = SpecularNormalizeFactor(shininess);
 
 			shading = float4(0, 0, 0, 1);
-			for (i = lights_type[0]; i < lights_type[1]; ++ i)
+			for (uint i = lights_type[0]; i < lights_type[1]; ++ i)
 			{
 				float3 light_dir = lights_dir_es[i].xyz;
 				float n_dot_l = 0.5f + 0.5f * dot(light_dir, normal);
@@ -581,51 +588,51 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 					c_diff, c_spec, spec_normalize, shininess, tc, 1);
 			}
 
-			for (i = 0; i < light_start_sh[0]; ++ i)
+			for (i = 0; i < light_start_sh[tile_id.z][0]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRPoint(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[0]; i < light_start_sh[1]; ++ i)
+			for (i = light_start_sh[tile_id.z][0]; i < light_start_sh[tile_id.z][1]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li - lights_type[4] + 1].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[1]; i < light_start_sh[2]; ++ i)
+			for (i = light_start_sh[tile_id.z][1]; i < light_start_sh[tile_id.z][2]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSpot(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[2]; i < light_start_sh[3]; ++ i)
+			for (i = light_start_sh[tile_id.z][2]; i < light_start_sh[tile_id.z][3]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li - lights_type[6] + 2].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[3]; i < light_start_sh[4]; ++ i)
+			for (i = light_start_sh[tile_id.z][3]; i < light_start_sh[tile_id.z][4]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSphereArea(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[4]; i < light_start_sh[5]; ++ i)
+			for (i = light_start_sh[tile_id.z][4]; i < light_start_sh[tile_id.z][5]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li - lights_type[8] + 1].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[5]; i < light_start_sh[6]; ++ i)
+			for (i = light_start_sh[tile_id.z][5]; i < light_start_sh[tile_id.z][6]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRTubeArea(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[6]; i < light_start_sh[7]; ++ i)
+			for (i = light_start_sh[tile_id.z][6]; i < light_start_sh[tile_id.z][7]; ++ i)
 			{
-				uint li = intersected_light_indices_sh[i];
+				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li - lights_type[10] + 1].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
