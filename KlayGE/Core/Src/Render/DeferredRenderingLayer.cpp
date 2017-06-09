@@ -431,7 +431,7 @@ namespace KlayGE
 		}
 #endif
 
-		for (size_t vpi = 0; vpi < viewports_.size(); ++vpi)
+		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
 			pvp.g_buffer = rf.MakeFrameBuffer();
@@ -558,7 +558,7 @@ namespace KlayGE
 		else
 		{
 			light_batch_ = 32;
-			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering32.fxml");
+			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering.fxml");
 		}
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		num_depth_slices_ = 8;
@@ -842,7 +842,6 @@ namespace KlayGE
 			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
 			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
 			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
-			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
 			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
 			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
@@ -893,7 +892,6 @@ namespace KlayGE
 			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
 			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
 			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
-			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
 			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
 			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
@@ -931,6 +929,11 @@ namespace KlayGE
 			gbuffer_perfs_[i] = profiler.CreatePerfRange(0, "GBuffer (" + buffer_name[i] + ")");
 			shadowing_perfs_[i] = profiler.CreatePerfRange(0, "Shadowing (" + buffer_name[i] + ")");
 			indirect_lighting_perfs_[i] = profiler.CreatePerfRange(0, "Indirect lighting (" + buffer_name[i] + ")");
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+			tiling_perfs_[i] = profiler.CreatePerfRange(0, "Tiling (" + buffer_name[i] + ")");
+#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
+			clustering_perfs_[i] = profiler.CreatePerfRange(0, "Clustering (" + buffer_name[i] + ")");
+#endif
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
 			reflection_perfs_[i] = profiler.CreatePerfRange(0, "Reflection (" + buffer_name[i] + ")");
 			special_shading_perfs_[i] = profiler.CreatePerfRange(0, "Special shading (" + buffer_name[i] + ")");
@@ -1300,8 +1303,6 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
 		{
-			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
-
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
 			{
@@ -1320,10 +1321,23 @@ namespace KlayGE
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
+			ElementFormat light_indices_fmt;
+			if (caps.uav_format_support(EF_R16UI))
+			{
+				light_indices_fmt = EF_R16UI;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.uav_format_support(EF_R32UI));
+
+				light_indices_fmt = EF_R32UI;
+			}
 			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, light_indices_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, EF_R32UI, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, light_indices_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
 		}
 		else
 		{
@@ -1344,8 +1358,6 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
-			pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
-
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
 			{
@@ -2333,7 +2345,7 @@ namespace KlayGE
 
 	void DeferredRenderingLayer::UpdateShadowing(PerViewport const & pvp)
 	{
-		for (uint32_t li = 0; li < lights_.size(); ++li)
+		for (uint32_t li = 0; li < lights_.size(); ++ li)
 		{
 			auto const & light = *lights_[li];
 			int32_t const attr = light.Attrib();
@@ -2731,7 +2743,7 @@ namespace KlayGE
 						sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
 
 						std::vector<float4> cascade_scale_bias(pvp.num_cascades);
-						for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+						for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 						{
 							float3 const & scale = cascaded_shadow_layer_->CascadeScales()[i];
 							float3 const & bias = cascaded_shadow_layer_->CascadeBiases()[i];
@@ -2751,7 +2763,7 @@ namespace KlayGE
 					}
 					else
 					{
-						for (uint32_t i = 0; i < pvp.num_cascades; ++i)
+						for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
 						{
 							*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
 						}
@@ -3982,38 +3994,27 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer().Dirty(true);
 			lights_aabb_max_param_->CBuffer().Dirty(true);
 
-			if (available_lights[0].empty())
-			{
-				*shading_in_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-				*shading_rw_tex_param_ = pvp.temp_shading_tex;
-			}
-			else
-			{
-				*shading_in_tex_param_ = TexturePtr();
-				*shading_rw_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-			}
+			*shading_rw_tex_param_
+				= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+
+#ifndef KLAYGE_SHIP
+			tiling_perfs_[pass_tb]->Begin();
+#endif
 
 			*lights_start_rw_tex_param_ = pvp.lights_start_tex;
 			*intersected_light_indices_rw_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_tbdr_light_intersection_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
 
+#ifndef KLAYGE_SHIP
+			tiling_perfs_[pass_tb]->End();
+#endif
 			uint32_t const BLOCK_X = 16;
 			uint32_t const BLOCK_Y = 16;
 			*lights_start_in_tex_param_ = pvp.lights_start_tex;
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
 				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
-
-			if (available_lights[0].empty())
-			{
-				copy_pp_->InputPin(0, pvp.temp_shading_tex);
-				copy_pp_->OutputPin(0,
-					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
-				copy_pp_->Apply();
-			}
 		}
 	}
 
@@ -4965,18 +4966,8 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer().Dirty(true);
 			lights_aabb_max_param_->CBuffer().Dirty(true);
 
-			if (available_lights[0].empty())
-			{
-				*shading_in_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-				*shading_rw_tex_param_ = pvp.temp_shading_tex;
-			}
-			else
-			{
-				*shading_in_tex_param_ = TexturePtr();
-				*shading_rw_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-			}
+			*shading_rw_tex_param_
+				= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
 
 			{
 				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
@@ -4999,10 +4990,18 @@ namespace KlayGE
 				depth_slices_param_->CBuffer().Dirty(true);
 			}
 
+#ifndef KLAYGE_SHIP
+			clustering_perfs_[pass_tb]->Begin();
+#endif
+
 			*lights_start_rw_tex_param_ = pvp.lights_start_tex;
 			*intersected_light_indices_rw_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_cldr_light_intersection_unified_,
 				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, num_depth_slices_);
+
+#ifndef KLAYGE_SHIP
+			clustering_perfs_[pass_tb]->End();
+#endif
 
 			uint32_t const BLOCK_X = 16;
 			uint32_t const BLOCK_Y = 16;
@@ -5010,14 +5009,6 @@ namespace KlayGE
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_cldr_unified_,
 				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
-
-			if (available_lights[0].empty())
-			{
-				copy_pp_->InputPin(0, pvp.temp_shading_tex);
-				copy_pp_->OutputPin(0,
-					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
-				copy_pp_->Apply();
-			}
 		}
 	}
 

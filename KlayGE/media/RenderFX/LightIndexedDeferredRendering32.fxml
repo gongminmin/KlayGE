@@ -1,6 +1,0 @@
-<?xml version='1.0'?>
-
-<effect>
-	<macro name="LIGHT_BATCH" value="32"/>
-	<include name="LightIndexedDeferredRendering.fxml"/>
-</effect>

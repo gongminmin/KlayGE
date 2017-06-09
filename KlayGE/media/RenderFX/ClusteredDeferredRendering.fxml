@@ -132,7 +132,6 @@ float4 ClusteredDRLightingMaskPS() : SV_Target
 		<parameter type="uint" name="lights_type" array_size="12"/>
 	</cbuffer>
 	<parameter type="texture2D" name="lighting_mask_tex"/>
-	<parameter type="texture2D" name="shading_in_tex"/>
 	<parameter type="rw_texture2D" name="shading_rw_tex"/>
 
 	<parameter type="texture3D" elem_type="uint" name="lights_start_in_tex"/>
@@ -639,7 +638,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 
 			if (lights_type[0] == lights_type[1])
 			{
-				shading += shading_in_tex.Load(coord);
+				shading += shading_rw_tex[coord.xy];
 			}
 			else
 			{

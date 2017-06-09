@@ -131,7 +131,6 @@ float4 TBDRLightingMaskPS() : SV_Target
 	</cbuffer>
 	<parameter type="texture2D" name="min_max_depth_tex"/>
 	<parameter type="texture2D" name="lighting_mask_tex"/>
-	<parameter type="texture2D" name="shading_in_tex"/>
 	<parameter type="rw_texture2D" name="shading_rw_tex"/>
 
 	<parameter type="texture2D" elem_type="uint" name="lights_start_in_tex"/>
@@ -629,9 +628,10 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 
+			[branch]
 			if (lights_type[0] == lights_type[1])
 			{
-				shading += shading_in_tex.Load(coord);
+				shading += shading_rw_tex[coord.xy];
 			}
 			else
 			{

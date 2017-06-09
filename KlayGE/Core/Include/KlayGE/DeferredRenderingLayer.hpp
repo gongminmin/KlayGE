@@ -129,8 +129,6 @@ namespace KlayGE
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
 
-		TexturePtr temp_shading_tex;
-
 		TexturePtr lighting_mask_tex;
 		FrameBufferPtr lighting_mask_fb;
 
@@ -139,8 +137,6 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		FrameBufferPtr light_index_fb;
 		TexturePtr light_index_tex;
-
-		TexturePtr temp_shading_tex;
 
 		TexturePtr lighting_mask_tex;
 		FrameBufferPtr lighting_mask_fb;
@@ -645,7 +641,6 @@ namespace KlayGE
 		RenderEffectParameter* y_dir_param_;
 		RenderEffectParameter* read_no_lighting_param_;
 		RenderEffectParameter* lighting_mask_tex_param_;
-		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
 		RenderEffectParameter* lights_type_param_;
 		RenderEffectParameter* lights_start_in_tex_param_;
@@ -687,7 +682,6 @@ namespace KlayGE
 		RenderEffectParameter* y_dir_param_;
 		RenderEffectParameter* read_no_lighting_param_;
 		RenderEffectParameter* lighting_mask_tex_param_;
-		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
 		RenderEffectParameter* lights_type_param_;
 		RenderEffectParameter* lights_start_in_tex_param_;
@@ -741,6 +735,11 @@ namespace KlayGE
 		std::array<PerfRangePtr, PTB_None> gbuffer_perfs_;
 		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
 		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		std::array<PerfRangePtr, PTB_None> tiling_perfs_;
+#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
+		std::array<PerfRangePtr, PTB_None> clustering_perfs_;
+#endif
 		std::array<PerfRangePtr, PTB_None> shading_perfs_;
 		std::array<PerfRangePtr, PTB_None> reflection_perfs_;
 		std::array<PerfRangePtr, PTB_None> special_shading_perfs_;
