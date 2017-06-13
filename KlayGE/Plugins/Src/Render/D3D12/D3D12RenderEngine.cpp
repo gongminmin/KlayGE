@@ -1487,42 +1487,24 @@ namespace KlayGE
 				}
 
 				fmt_support.Format = dxgi_fmt;
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER;
+				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					vertex_format_.push_back(fmts[i].first);
-				}
+					if (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER)
+					{
+						vertex_format_.push_back(fmts[i].first);
+					}
 
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_LOAD;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
+					if ((fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE1D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE2D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE3D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURECUBE)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_LOAD)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE))
+					{
+						texture_format_.push_back(fmts[i].first);
+					}
 				}
 			}
 			else
@@ -1530,45 +1512,25 @@ namespace KlayGE
 				dxgi_fmt = fmts[i].second;
 
 				fmt_support.Format = dxgi_fmt;
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER;
+				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 				{
-					vertex_format_.push_back(fmts[i].first);
-				}
+					if (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER)
+					{
+						vertex_format_.push_back(fmts[i].first);
+					}
 
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE1D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE2D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURE3D;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_TEXTURECUBE;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
-				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE;
-				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-				{
-					texture_format_.push_back(fmts[i].first);
-				}
+					if ((fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE1D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE2D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE3D)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURECUBE)
+						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE))
+					{
+						texture_format_.push_back(fmts[i].first);
+					}
 
-				if (check_uav_fmts)
-				{
-					fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
-					fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
-					HRESULT hr = d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support));
-					if (SUCCEEDED(hr)
+					if (check_uav_fmts
 						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
 						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
 					{
@@ -1577,49 +1539,39 @@ namespace KlayGE
 				}
 			}
 
-			bool rt_supported = false;
-			fmt_support.Format = dxgi_fmt;
-			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_RENDER_TARGET;
+			fmt_support.Format = fmts[i].second;
+			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 			fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
 			{
-				rt_supported = true;
-			}
-			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_MULTISAMPLE_RENDERTARGET;
-			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-			{
-				rt_supported = true;
-			}
-			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL;
-			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
-			{
-				rt_supported = true;
-			}
-
-			if (rt_supported)
-			{
-				D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msaa_quality_levels;
-				msaa_quality_levels.Format = dxgi_fmt;
-
-				UINT count = 1;
-				while (count <= D3D12_MAX_MULTISAMPLE_SAMPLE_COUNT)
+				if ((fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET)
+					|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_MULTISAMPLE_RENDERTARGET)
+					|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL))
 				{
-					msaa_quality_levels.SampleCount = count;
-					if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &msaa_quality_levels, sizeof(msaa_quality_levels))))
+					D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msaa_quality_levels;
+					msaa_quality_levels.Format = dxgi_fmt;
+
+					UINT count = 1;
+					while (count <= D3D12_MAX_MULTISAMPLE_SAMPLE_COUNT)
 					{
-						if (msaa_quality_levels.NumQualityLevels > 0)
+						msaa_quality_levels.SampleCount = count;
+						if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS,
+							&msaa_quality_levels, sizeof(msaa_quality_levels))))
 						{
-							rendertarget_format_[fmts[i].first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
-							count <<= 1;
+							if (msaa_quality_levels.NumQualityLevels > 0)
+							{
+								rendertarget_format_[fmts[i].first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
+								count <<= 1;
+							}
+							else
+							{
+								break;
+							}
 						}
 						else
 						{
 							break;
 						}
-					}
-					else
-					{
-						break;
 					}
 				}
 			}
@@ -1629,6 +1581,8 @@ namespace KlayGE
 		vertex_format_.erase(std::unique(vertex_format_.begin(), vertex_format_.end()), vertex_format_.end());
 		std::sort(texture_format_.begin(), texture_format_.end());
 		texture_format_.erase(std::unique(texture_format_.begin(), texture_format_.end()), texture_format_.end());
+		std::sort(uav_format_.begin(), uav_format_.end());
+		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
 
 		caps_.vertex_format_support = std::bind<bool>(&D3D12RenderEngine::VertexFormatSupport, this,
 			std::placeholders::_1);
