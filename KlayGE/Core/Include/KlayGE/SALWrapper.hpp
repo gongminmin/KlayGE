@@ -208,6 +208,9 @@
 #ifndef _Field_size_bytes_full_
 	#define _Field_size_bytes_full_(size)
 #endif
+#ifndef _Field_size_full_opt_
+	#define _Field_size_full_opt_(size)
+#endif
 
 #endif
 
