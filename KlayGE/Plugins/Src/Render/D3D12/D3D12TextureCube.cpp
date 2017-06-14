@@ -500,20 +500,23 @@ namespace KlayGE
 					{
 						cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
 
-						std::vector<D3D12_RESOURCE_BARRIER> barriers;
+						UINT n = 0;
+						D3D12_RESOURCE_BARRIER barriers[2];
 						if (this->UpdateResourceBarrier(CalcSubresource(level - 1, index * 6 + f, 0, num_mip_maps_, array_size_),
 							barrier, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE))
 						{
-							barriers.push_back(barrier);
+							barriers[n] = barrier;
+							++ n;
 						}
 						if (this->UpdateResourceBarrier(CalcSubresource(level, index * 6 + f, 0, num_mip_maps_, array_size_),
 							barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
 						{
-							barriers.push_back(barrier);
+							barriers[n] = barrier;
+							++ n;
 						}
-						if (!barriers.empty())
+						if (n > 0)
 						{
-							cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+							cmd_list->ResourceBarrier(n, barriers);
 						}
 
 						D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetriveD3DRenderTargetView(index * 6 + f, 1, level)->Handle();

@@ -524,21 +524,25 @@ namespace KlayGE
 
 		uint32_t const num_subres = array_size_ * num_mip_maps_;
 
-		D3D12_RESOURCE_BARRIER barrier_before[2];
-		barrier_before[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before[0].Transition.pResource = d3d_resource_.get();
-		barrier_before[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-		barrier_before[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier_before[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before[1].Transition.pResource = other.D3DResource().get();
-		barrier_before[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_before[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-		cmd_list->ResourceBarrier(2, barrier_before);
+		UINT n = 0;
+		D3D12_RESOURCE_BARRIER barriers[2];
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
+		{
+			barriers[n] = barrier;
+			++ n;
+		}
+		if (other.UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		{
+			barriers[n] = barrier;
+			++ n;
+		}
+		if (n > 0)
+		{
+			cmd_list->ResourceBarrier(n, barriers);
+		}
 
 		if ((this->SampleCount() > 1) && (1 == target.SampleCount()))
 		{
@@ -551,22 +555,6 @@ namespace KlayGE
 		{
 			cmd_list->CopyResource(other.D3DResource().get(), d3d_resource_.get());
 		}
-
-		D3D12_RESOURCE_BARRIER barrier_after[2];
-		barrier_after[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after[0].Transition.pResource = d3d_resource_.get();
-		barrier_after[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE;
-		barrier_after[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after[0].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		barrier_after[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after[1].Transition.pResource = other.D3DResource().get();
-		barrier_after[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_after[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after[1].Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-		cmd_list->ResourceBarrier(2, barrier_after);
 	}
 
 	void D3D12Texture::DoHWCopyToSubTexture(Texture& target,
@@ -584,21 +572,24 @@ namespace KlayGE
 
 		D3D12Texture& other = *checked_cast<D3D12Texture2D*>(&target);
 
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		UINT n = 0;
+		D3D12_RESOURCE_BARRIER barriers[2];
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		if (this->UpdateResourceBarrier(src_subres, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
 		{
-			barriers.push_back(barrier);
+			barriers[n] = barrier;
+			++ n;
 		}
 		if (other.UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
 		{
-			barriers.push_back(barrier);
+			barriers[n] = barrier;
+			++ n;
 		}
-		if (!barriers.empty())
+		if (n > 0)
 		{
-			cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+			cmd_list->ResourceBarrier(n, barriers);
 		}
 
 		D3D12_TEXTURE_COPY_LOCATION src;
@@ -756,15 +747,13 @@ namespace KlayGE
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
-			D3D12_RESOURCE_BARRIER barrier_before;
-			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before.Transition.pResource = d3d_resource_.get();
-			barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-			cmd_list->ResourceBarrier(1, &barrier_before);
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+			{
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
 
 			std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> layouts(num_subres);
 			std::vector<uint64_t> row_sizes_in_bytes(num_subres);
@@ -816,16 +805,6 @@ namespace KlayGE
 				cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
 			}
 
-			D3D12_RESOURCE_BARRIER barrier_after;
-			barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after.Transition.pResource = d3d_resource_.get();
-			barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			barrier_after.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-
-			cmd_list->ResourceBarrier(1, &barrier_after);
-
 			re.CommitResCmd();
 		}
 	}
@@ -853,15 +832,13 @@ namespace KlayGE
 		{
 			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
-			D3D12_RESOURCE_BARRIER barrier_before;
-			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before.Transition.pResource = d3d_resource_.get();
-			barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-			barrier_before.Transition.Subresource = subres;
-
-			cmd_list->ResourceBarrier(1, &barrier_before);
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (this->UpdateResourceBarrier(subres, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
+			{
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
 
 			D3D12_TEXTURE_COPY_LOCATION src;
 			src.pResource = d3d_resource_.get();
@@ -874,16 +851,6 @@ namespace KlayGE
 			dst.PlacedFootprint = layout;
 
 			cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-
-			D3D12_RESOURCE_BARRIER barrier_after;
-			barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after.Transition.pResource = d3d_resource_.get();
-			barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_SOURCE;
-			barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			barrier_after.Transition.Subresource = subres;
-
-			cmd_list->ResourceBarrier(1, &barrier_after);
 
 			re.ForceCPUGPUSync();
 		}
@@ -928,15 +895,13 @@ namespace KlayGE
 
 			re.ForceCPUGPUSync();
 
-			D3D12_RESOURCE_BARRIER barrier_before;
-			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before.Transition.pResource = d3d_resource_.get();
-			barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_before.Transition.Subresource = subres;
-
-			cmd_list->ResourceBarrier(1, &barrier_before);
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (this->UpdateResourceBarrier(subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+			{
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
 
 			D3D12_TEXTURE_COPY_LOCATION src;
 			src.pResource = d3d_texture_upload_heaps_.get();
@@ -949,16 +914,6 @@ namespace KlayGE
 			dst.SubresourceIndex = subres;
 
 			cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-
-			D3D12_RESOURCE_BARRIER barrier_after;
-			barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after.Transition.pResource = d3d_resource_.get();
-			barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			barrier_after.Transition.Subresource = subres;
-
-			cmd_list->ResourceBarrier(1, &barrier_after);
 		}
 	}
 
@@ -1117,15 +1072,13 @@ namespace KlayGE
 			re.ForceCPUGPUSync();
 		}
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = d3d_resource_.get();
-		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_before.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (this->UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		{
+			cmd_list->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_TEXTURE_COPY_LOCATION src;
 		src.pResource = d3d_texture_upload_heaps_.get();
@@ -1146,16 +1099,6 @@ namespace KlayGE
 		src_box.back = 1;
 
 		cmd_list->CopyTextureRegion(&dst, x_offset, 0, 0, &src, &src_box);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = d3d_resource_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_after);
 
 		re.ForceCPUGPUSync();
 	}
@@ -1223,15 +1166,13 @@ namespace KlayGE
 			re.ForceCPUGPUSync();
 		}
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = d3d_resource_.get();
-		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_before.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (this->UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		{
+			cmd_list->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_TEXTURE_COPY_LOCATION src;
 		src.pResource = d3d_texture_upload_heaps_.get();
@@ -1252,16 +1193,6 @@ namespace KlayGE
 		src_box.back = 1;
 
 		cmd_list->CopyTextureRegion(&dst, x_offset, y_offset, 0, &src, &src_box);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = d3d_resource_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_after);
 
 		re.ForceCPUGPUSync();
 	}
@@ -1330,15 +1261,13 @@ namespace KlayGE
 			re.ForceCPUGPUSync();
 		}
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = d3d_resource_.get();
-		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_before.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (this->UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		{
+			cmd_list->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_TEXTURE_COPY_LOCATION src;
 		src.pResource = d3d_texture_upload_heaps_.get();
@@ -1359,16 +1288,6 @@ namespace KlayGE
 		src_box.back = depth;
 
 		cmd_list->CopyTextureRegion(&dst, x_offset, y_offset, z_offset, &src, &src_box);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = d3d_resource_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_after);
 
 		re.ForceCPUGPUSync();
 	}
@@ -1436,15 +1355,13 @@ namespace KlayGE
 			re.ForceCPUGPUSync();
 		}
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = d3d_resource_.get();
-		barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_before.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (this->UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		{
+			cmd_list->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_TEXTURE_COPY_LOCATION src;
 		src.pResource = d3d_texture_upload_heaps_.get();
@@ -1465,16 +1382,6 @@ namespace KlayGE
 		src_box.back = 1;
 
 		cmd_list->CopyTextureRegion(&dst, x_offset, y_offset, 0, &src, &src_box);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = d3d_resource_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-		barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		barrier_after.Transition.Subresource = dst_subres;
-
-		cmd_list->ResourceBarrier(1, &barrier_after);
 
 		re.ForceCPUGPUSync();
 	}

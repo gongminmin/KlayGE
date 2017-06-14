@@ -287,95 +287,57 @@ namespace KlayGE
 		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 		D3D12GraphicsBuffer& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&rhs);
 
-		D3D12_RESOURCE_BARRIER src_barrier_before, dst_barrier_before;
-		src_barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		src_barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		D3D12_HEAP_TYPE src_heap_type;
 		if (EAH_CPU_Read == access_hint_)
 		{
-			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 			src_heap_type = D3D12_HEAP_TYPE_READBACK;
 		}
 		else if ((access_hint_ & EAH_CPU_Read) || (access_hint_ & EAH_CPU_Write))
 		{
-			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
 			src_heap_type = D3D12_HEAP_TYPE_UPLOAD;
 		}
 		else
 		{
-			src_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
 			src_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
-		src_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_SOURCE;
-		src_barrier_before.Transition.pResource = d3d_resource_.get();
-		src_barrier_before.Transition.Subresource = 0;
-		dst_barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		dst_barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		D3D12_HEAP_TYPE dst_heap_type;
 		if (EAH_CPU_Read == rhs.AccessHint())
 		{
-			dst_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
 			dst_heap_type = D3D12_HEAP_TYPE_READBACK;
 		}
 		else if ((rhs.AccessHint() & EAH_CPU_Read) || (rhs.AccessHint() & EAH_CPU_Write))
 		{
-			dst_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_GENERIC_READ;
 			dst_heap_type = D3D12_HEAP_TYPE_UPLOAD;
 		}
 		else
 		{
-			dst_barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
 			dst_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
-		dst_barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-		dst_barrier_before.Transition.pResource = d3d_gb.D3DResource().get();
-		dst_barrier_before.Transition.Subresource = 0;
 
-		int n = 0;
-		D3D12_RESOURCE_BARRIER barrier_before[2];
 		if (src_heap_type != dst_heap_type)
 		{
-			if (D3D12_HEAP_TYPE_DEFAULT == src_heap_type)
+			UINT n = 0;
+			D3D12_RESOURCE_BARRIER barriers[2];
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
 			{
-				barrier_before[n] = src_barrier_before;
+				barriers[n] = barrier;
 				++ n;
 			}
-			if (D3D12_HEAP_TYPE_DEFAULT == dst_heap_type)
+			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
 			{
-				barrier_before[n] = dst_barrier_before;
+				barriers[n] = barrier;
 				++ n;
 			}
-		}
-		if (n > 0)
-		{
-			cmd_list->ResourceBarrier(n, &barrier_before[0]);
+			if (n > 0)
+			{
+				cmd_list->ResourceBarrier(n, barriers);
+			}
 		}
 
 		cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), 0, d3d_resource_.get(), 0, size_in_byte_);
-
-		D3D12_RESOURCE_BARRIER barrier_after[2];
-		if (n > 0)
-		{
-			barrier_after[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after[0].Transition.StateBefore = barrier_before[0].Transition.StateAfter;
-			barrier_after[0].Transition.StateAfter = barrier_before[0].Transition.StateBefore;
-			barrier_after[0].Transition.pResource = d3d_resource_.get();
-			barrier_after[0].Transition.Subresource = 0;
-		}
-		if (n > 1)
-		{
-			barrier_after[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after[1].Transition.StateBefore = barrier_before[1].Transition.StateAfter;
-			barrier_after[1].Transition.StateAfter = barrier_before[1].Transition.StateBefore;
-			barrier_after[1].Transition.pResource = d3d_gb.D3DResource().get();
-			barrier_after[1].Transition.Subresource = 0;
-		}
-		if (n > 0)
-		{
-			cmd_list->ResourceBarrier(n, &barrier_after[0]);
-		}
 	}
 
 	void D3D12GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
