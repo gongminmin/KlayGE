@@ -39,20 +39,16 @@
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
+#include <KlayGE/D3D12/D3D12Resource.hpp>
 
 namespace KlayGE
 {
-	class D3D12GraphicsBuffer : public GraphicsBuffer
+	class D3D12GraphicsBuffer : public GraphicsBuffer, public D3D12Resource, public std::enable_shared_from_this<D3D12GraphicsBuffer>
 	{
 	public:
 		D3D12GraphicsBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, ElementFormat fmt);
-		virtual ~D3D12GraphicsBuffer();
 
-		ID3D12ResourcePtr const & D3DBuffer() const
-		{
-			return buffer_;
-		}
 		ID3D12ResourcePtr const & D3DBufferCounterUpload() const
 		{
 			return buffer_counter_upload_;
@@ -80,8 +76,6 @@ namespace KlayGE
 			return counter_offset_;
 		}
 
-		bool UpdateResourceBarrier(D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
-
 		void ResetBufferPool();
 
 	private:
@@ -91,15 +85,12 @@ namespace KlayGE
 	private:
 		std::vector<ID3D12ResourcePtr> buffer_pool_;
 		size_t next_free_index_;
-		ID3D12ResourcePtr buffer_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		uint32_t counter_offset_;
 
 		ElementFormat fmt_as_shader_res_;
-
-		D3D12_RESOURCE_STATES curr_state_;
 	};
 	typedef std::shared_ptr<D3D12GraphicsBuffer> D3D12GraphicsBufferPtr;
 }

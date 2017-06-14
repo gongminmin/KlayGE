@@ -46,7 +46,7 @@
 
 namespace KlayGE
 {
-	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(ID3D12ResourcePtr const & res,
+	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(D3D12ResourcePtr const & res,
 			D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc)
 		: res_(res)
 	{
@@ -55,7 +55,7 @@ namespace KlayGE
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateShaderResourceView(res.get(), &srv_desc, handle_);
+		device->CreateShaderResourceView(res->D3DResource().get(), &srv_desc, handle_);
 	}
 
 	D3D12ShaderResourceViewSimulation::~D3D12ShaderResourceViewSimulation()
@@ -68,7 +68,7 @@ namespace KlayGE
 	}
 
 
-	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(ID3D12ResourcePtr const & res,
+	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(D3D12ResourcePtr const & res,
 			D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc)
 		: res_(res)
 	{
@@ -77,7 +77,7 @@ namespace KlayGE
 
 		handle_ = re.RTVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocRTV();
-		device->CreateRenderTargetView(res.get(), &rtv_desc, handle_);
+		device->CreateRenderTargetView(res->D3DResource().get(), &rtv_desc, handle_);
 	}
 
 	D3D12RenderTargetViewSimulation::~D3D12RenderTargetViewSimulation()
@@ -90,7 +90,7 @@ namespace KlayGE
 	}
 
 
-	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(ID3D12ResourcePtr const & res,
+	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(D3D12ResourcePtr const & res,
 		D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc)
 		: res_(res)
 	{
@@ -99,7 +99,7 @@ namespace KlayGE
 
 		handle_ = re.DSVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocDSV();
-		device->CreateDepthStencilView(res.get(), &dsv_desc, handle_);
+		device->CreateDepthStencilView(res->D3DResource().get(), &dsv_desc, handle_);
 	}
 
 	D3D12DepthStencilViewSimulation::~D3D12DepthStencilViewSimulation()
@@ -112,7 +112,7 @@ namespace KlayGE
 	}
 
 
-	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(ID3D12ResourcePtr const & res,
+	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(D3D12ResourcePtr const & res,
 			D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc)
 		: res_(res), counter_offset_(0)
 	{
@@ -125,13 +125,13 @@ namespace KlayGE
 			counter_offset_ = static_cast<uint32_t>(uav_desc.Buffer.CounterOffsetInBytes);
 			if (counter_offset_ != 0)
 			{
-				counter = res.get();
+				counter = res->D3DResource().get();
 			}
 		}
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateUnorderedAccessView(res.get(), counter, &uav_desc, handle_);
+		device->CreateUnorderedAccessView(res->D3DResource().get(), counter, &uav_desc, handle_);
 	}
 
 	D3D12UnorderedAccessViewSimulation::~D3D12UnorderedAccessViewSimulation()
@@ -161,7 +161,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
 		rt_view_ = d3d_tex->RetriveD3DRenderTargetView(first_array_index, array_size, level);
-		rt_src_ = d3d_tex->D3DResource();
+		rt_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
@@ -173,7 +173,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
 		rt_view_ = d3d_tex->RetriveD3DRenderTargetView(array_index, first_slice, num_slices, level);
-		rt_src_ = d3d_tex->D3DResource();
+		rt_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
@@ -185,7 +185,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
 		rt_view_ = d3d_tex->RetriveD3DRenderTargetView(array_index, face, level);
-		rt_src_ = d3d_tex->D3DResource();
+		rt_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
@@ -197,7 +197,7 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(gb.AccessHint() & EAH_GPU_Write);
 
-		rt_src_ = checked_cast<D3D12GraphicsBuffer*>(&gb)->D3DBuffer();
+		rt_src_ = checked_cast<D3D12GraphicsBuffer*>(&gb)->shared_from_this();
 
 		D3D12_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D12Mapping::MappingFormat(pf);
@@ -218,24 +218,19 @@ namespace KlayGE
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = rt_src_.get();
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
-			barrier.Transition.Subresource = rt_first_subres_ + i;
-			barriers.push_back(barrier);
+			if (rt_src_->UpdateResourceBarrier(rt_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+			{
+				barriers.push_back(barrier);
+			}
 		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
 
 		d3d_cmd_list_->ClearRenderTargetView(rt_view_->Handle(), &clr.r(), 0, nullptr);
-
-		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
-		{
-			barriers[i].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			barriers[i].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 	}
 
 	void D3D12RenderTargetRenderView::ClearDepth(float /*depth*/)
@@ -255,12 +250,13 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::Discard()
 	{
-		D3D12_DISCARD_REGION region;
+		// TODO: Figure out how to discard a view
+		/*D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = rt_first_subres_;
 		region.NumSubresources = rt_num_subres_;
-		d3d_cmd_list_->DiscardResource(rt_src_.get(), &region);
+		d3d_cmd_list_->DiscardResource(rt_src_->D3DResource().get(), &region);*/
 	}
 
 	void D3D12RenderTargetRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -281,7 +277,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
 		ds_view_ = d3d_tex->RetriveD3DDepthStencilView(first_array_index, array_size, level);
-		ds_src_ = d3d_tex->D3DResource();
+		ds_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
@@ -293,7 +289,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
 		ds_view_ = d3d_tex->RetriveD3DDepthStencilView(array_index, first_slice, num_slices, level);
-		ds_src_ = d3d_tex->D3DResource();
+		ds_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
@@ -305,7 +301,7 @@ namespace KlayGE
 	{
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
 		ds_view_ = d3d_tex->RetriveD3DDepthStencilView(array_index, face, level);
-		ds_src_ = d3d_tex->D3DResource();
+		ds_src_ = d3d_tex->shared_from_this();
 
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
@@ -318,50 +314,10 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(IsDepthFormat(pf));
 
-		D3D12_RESOURCE_DESC tex_desc;
-		tex_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-		tex_desc.Alignment = 0;
-		tex_desc.Width = width;
-		tex_desc.Height = height;
-		tex_desc.DepthOrArraySize = 1;
-		tex_desc.MipLevels = 1;
-		tex_desc.Format = D3D12Mapping::MappingFormat(pf);
-		tex_desc.SampleDesc.Count = sample_count;
-		tex_desc.SampleDesc.Quality = sample_quality;
-		tex_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		tex_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-		D3D12_HEAP_PROPERTIES heap_prop;
-		heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
-		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-		heap_prop.CreationNodeMask = 0;
-		heap_prop.VisibleNodeMask = 0;
-
-		ID3D12Resource* depth_tex;
-		TIFHR(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&tex_desc, D3D12_RESOURCE_STATE_COMMON, nullptr,
-			IID_ID3D12Resource, reinterpret_cast<void**>(&depth_tex)));
-		ds_src_ = MakeCOMPtr(depth_tex);
-
-		D3D12_DEPTH_STENCIL_VIEW_DESC desc;
-		desc.Format = tex_desc.Format;
-		desc.Flags = D3D12_DSV_FLAG_NONE;
-		if (sample_count > 1)
-		{
-			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMSARRAY;
-			desc.Texture2DMSArray.FirstArraySlice = 0;
-			desc.Texture2DMSArray.ArraySize = 1;
-		}
-		else
-		{
-			desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DARRAY;
-			desc.Texture2DArray.MipSlice = 0;
-			desc.Texture2DArray.FirstArraySlice = 0;
-			desc.Texture2DArray.ArraySize = 1;
-		}
-
-		ds_view_ = MakeSharedPtr<D3D12DepthStencilViewSimulation>(ds_src_, desc);
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
+		ds_src_ = checked_pointer_cast<D3D12Texture>(ds_tex);
+		ds_view_ = checked_cast<D3D12Texture*>(ds_src_.get())->RetriveD3DDepthStencilView(0, 1, 0);
 
 		width_ = width;
 		height_ = height;
@@ -381,24 +337,19 @@ namespace KlayGE
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = ds_src_.get();
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			barrier.Transition.Subresource = ds_first_subres_ + i;
-			barriers.push_back(barrier);
+			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+			{
+				barriers.push_back(barrier);
+			}
 		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
 
 		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
-
-		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
-		{
-			barriers[i].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-			barriers[i].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 	}
 
 	void D3D12DepthStencilRenderView::ClearStencil(int32_t stencil)
@@ -407,24 +358,19 @@ namespace KlayGE
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = ds_src_.get();
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			barrier.Transition.Subresource = ds_first_subres_ + i;
-			barriers.push_back(barrier);
+			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+			{
+				barriers.push_back(barrier);
+			}
 		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
 
 		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
-
-		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
-		{
-			barriers[i].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-			barriers[i].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 	}
 
 	void D3D12DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
@@ -433,34 +379,30 @@ namespace KlayGE
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier.Transition.pResource = ds_src_.get();
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			barrier.Transition.Subresource = ds_first_subres_ + i;
-			barriers.push_back(barrier);
+			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+			{
+				barriers.push_back(barrier);
+			}
 		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-
-		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, depth, static_cast<uint8_t>(stencil), 0, nullptr);
-
-		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
+		if (!barriers.empty())
 		{
-			barriers[i].Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-			barriers[i].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
-		d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+
+		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
+			depth, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
 	void D3D12DepthStencilRenderView::Discard()
 	{
-		D3D12_DISCARD_REGION region;
+		/*D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ds_first_subres_;
 		region.NumSubresources = ds_num_subres_;
-		d3d_cmd_list_->DiscardResource(ds_src_.get(), &region);
+		d3d_cmd_list_->DiscardResource(ds_src_->D3DResource().get(), &region);*/
 	}
 
 	void D3D12DepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -489,7 +431,7 @@ namespace KlayGE
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(first_array_index, array_size, level);
-		ua_src_ = d3d_tex->D3DResource();
+		ua_src_ = d3d_tex->shared_from_this();
 		counter_offset_ = 0;
 
 		width_ = texture.Width(level);
@@ -506,7 +448,7 @@ namespace KlayGE
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_3d);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(array_index, first_slice, num_slices, level);
-		ua_src_ = d3d_tex->D3DResource();
+		ua_src_ = d3d_tex->shared_from_this();
 		counter_offset_ = 0;
 
 		width_ = texture_3d.Width(level);
@@ -523,7 +465,7 @@ namespace KlayGE
 
 		D3D12Texture* d3d_tex = checked_cast<D3D12Texture*>(&texture_cube);
 		ua_view_ = d3d_tex->RetriveD3DUnorderedAccessView(array_index, face, level);
-		ua_src_ = d3d_tex->D3DResource();
+		ua_src_ = d3d_tex->shared_from_this();
 		counter_offset_ = 0;
 
 		width_ = texture_cube.Width(level);
@@ -542,18 +484,9 @@ namespace KlayGE
 
 		D3D12GraphicsBuffer* d3d_buff = checked_cast<D3D12GraphicsBuffer*>(&gb);
 		ua_view_ = d3d_buff->D3DUnorderedAccessView();
-		ua_src_ = d3d_buff->D3DBuffer();
+		ua_src_ = d3d_buff->shared_from_this();
 		ua_counter_upload_src_ = d3d_buff->D3DBufferCounterUpload();
 		counter_offset_ = d3d_buff->CounterOffset();
-
-		if ((gb.AccessHint() & EAH_CPU_Read) || (gb.AccessHint() & EAH_CPU_Write))
-		{
-			ua_src_init_state_ = D3D12_RESOURCE_STATE_GENERIC_READ;
-		}
-		else
-		{
-			ua_src_init_state_ = D3D12_RESOURCE_STATE_COMMON;
-		}
 
 		width_ = gb.Size() / NumFormatBytes(pf);
 		height_ = 1;
@@ -571,14 +504,13 @@ namespace KlayGE
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = ua_src_.get();
-		barrier_before.Transition.StateBefore = ua_src_init_state_;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier_before.Transition.Subresource = 0;
-		d3d_cmd_list_->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
+		{
+			d3d_cmd_list_->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -586,16 +518,7 @@ namespace KlayGE
 
 		clear_f4_val_ = val;
 		d3d_cmd_list_->ClearUnorderedAccessViewFloat(gpu_handle, ua_view_->Handle(),
-			ua_src_.get(), &clear_f4_val_.x(), 0, nullptr);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = ua_src_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier_after.Transition.StateAfter = ua_src_init_state_;
-		barrier_after.Transition.Subresource = 0;
-		d3d_cmd_list_->ResourceBarrier(1, &barrier_after);
+			ua_src_->D3DResource().get(), &clear_f4_val_.x(), 0, nullptr);
 	}
 
 	void D3D12UnorderedAccessView::Clear(uint4 const & val)
@@ -609,14 +532,13 @@ namespace KlayGE
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
-		D3D12_RESOURCE_BARRIER barrier_before;
-		barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_before.Transition.pResource = ua_src_.get();
-		barrier_before.Transition.StateBefore = ua_src_init_state_;
-		barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier_before.Transition.Subresource = 0;
-		d3d_cmd_list_->ResourceBarrier(1, &barrier_before);
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
+		{
+			d3d_cmd_list_->ResourceBarrier(1, &barrier);
+		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -624,26 +546,17 @@ namespace KlayGE
 
 		clear_ui4_val_ = val;
 		d3d_cmd_list_->ClearUnorderedAccessViewUint(gpu_handle, ua_view_->Handle(),
-			ua_src_.get(), &clear_ui4_val_.x(), 0, nullptr);
-
-		D3D12_RESOURCE_BARRIER barrier_after;
-		barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		barrier_after.Transition.pResource = ua_src_.get();
-		barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-		barrier_after.Transition.StateAfter = ua_src_init_state_;
-		barrier_after.Transition.Subresource = 0;
-		d3d_cmd_list_->ResourceBarrier(1, &barrier_after);
+			ua_src_->D3DResource().get(), &clear_ui4_val_.x(), 0, nullptr);
 	}
 
 	void D3D12UnorderedAccessView::Discard()
 	{
-		D3D12_DISCARD_REGION region;
+		/*D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ua_first_subres_;
 		region.NumSubresources = ua_num_subres_;
-		d3d_cmd_list_->DiscardResource(ua_src_.get(), &region);
+		d3d_cmd_list_->DiscardResource(ua_src_->D3DResource().get(), &region);*/
 	}
 
 	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -668,26 +581,16 @@ namespace KlayGE
 			memcpy(mapped, &count, sizeof(count));
 			ua_counter_upload_src_->Unmap(0, nullptr);
 
-			D3D12_RESOURCE_BARRIER barrier_before;
-			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before.Transition.pResource = ua_src_.get();
-			barrier_before.Transition.StateBefore = ua_src_init_state_;
-			barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_before.Transition.Subresource = 0;
-			d3d_cmd_list_->ResourceBarrier(1, &barrier_before);
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+			{
+				d3d_cmd_list_->ResourceBarrier(1, &barrier);
+			}
 
-			d3d_cmd_list_->CopyBufferRegion(ua_src_.get(),
+			d3d_cmd_list_->CopyBufferRegion(ua_src_->D3DResource().get(),
 				counter_offset_, ua_counter_upload_src_.get(), 0, sizeof(count));
-
-			D3D12_RESOURCE_BARRIER barrier_after;
-			barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after.Transition.pResource = ua_src_.get();
-			barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
-			barrier_after.Transition.StateAfter = ua_src_init_state_;
-			barrier_after.Transition.Subresource = 0;
-			d3d_cmd_list_->ResourceBarrier(1, &barrier_after);
 		}
 	}
 }

@@ -36,14 +36,14 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
+#include <KlayGE/D3D12/D3D12Resource.hpp>
 
 namespace KlayGE
 {
-	class D3D12Texture : public Texture
+	class D3D12Texture : public Texture, public D3D12Resource, public std::enable_shared_from_this<D3D12Texture>
 	{
 	public:
 		explicit D3D12Texture(TextureType type, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint);
-		virtual ~D3D12Texture();
 
 		std::wstring const & Name() const;
 
@@ -63,11 +63,6 @@ namespace KlayGE
 		virtual void CopyToSubTextureCube(Texture& target,
 			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_width, uint32_t dst_height,
 			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_width, uint32_t src_height);
-
-		ID3D12ResourcePtr const & D3DResource() const
-		{
-			return d3d_texture_;
-		}
 
 		D3D12ShaderResourceViewSimulationPtr const & RetriveD3DShaderResourceView(uint32_t first_array_index, uint32_t num_items,
 			uint32_t first_level, uint32_t num_levels);
@@ -164,7 +159,6 @@ namespace KlayGE
 	protected:
 		DXGI_FORMAT dxgi_fmt_;
 
-		ID3D12ResourcePtr d3d_texture_;
 		ID3D12ResourcePtr d3d_texture_upload_heaps_;
 		ID3D12ResourcePtr d3d_texture_readback_heaps_;
 

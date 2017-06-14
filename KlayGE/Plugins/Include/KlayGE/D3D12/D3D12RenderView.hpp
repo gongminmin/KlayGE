@@ -38,6 +38,7 @@
 #include <KlayGE/Texture.hpp>
 
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
+#include <KlayGE/D3D12/D3D12Resource.hpp>
 
 namespace KlayGE
 {
@@ -50,7 +51,7 @@ namespace KlayGE
 	class D3D12ShaderResourceViewSimulation
 	{
 	public:
-		D3D12ShaderResourceViewSimulation(ID3D12ResourcePtr const & res, D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc);
+		D3D12ShaderResourceViewSimulation(D3D12ResourcePtr const & res, D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc);
 		~D3D12ShaderResourceViewSimulation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
@@ -59,7 +60,7 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12ResourcePtr res_;
+		D3D12ResourcePtr res_;
 		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
 	};
 	typedef std::shared_ptr<D3D12ShaderResourceViewSimulation> D3D12ShaderResourceViewSimulationPtr;
@@ -67,7 +68,7 @@ namespace KlayGE
 	class D3D12RenderTargetViewSimulation
 	{
 	public:
-		D3D12RenderTargetViewSimulation(ID3D12ResourcePtr const & res, D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc);
+		D3D12RenderTargetViewSimulation(D3D12ResourcePtr const & res, D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc);
 		~D3D12RenderTargetViewSimulation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
@@ -76,7 +77,7 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12ResourcePtr res_;
+		D3D12ResourcePtr res_;
 		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
 	};
 	typedef std::shared_ptr<D3D12RenderTargetViewSimulation> D3D12RenderTargetViewSimulationPtr;
@@ -84,7 +85,7 @@ namespace KlayGE
 	class D3D12DepthStencilViewSimulation
 	{
 	public:
-		D3D12DepthStencilViewSimulation(ID3D12ResourcePtr const & res, D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc);
+		D3D12DepthStencilViewSimulation(D3D12ResourcePtr const & res, D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc);
 		~D3D12DepthStencilViewSimulation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
@@ -93,7 +94,7 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12ResourcePtr res_;
+		D3D12ResourcePtr res_;
 		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
 	};
 	typedef std::shared_ptr<D3D12DepthStencilViewSimulation> D3D12DepthStencilViewSimulationPtr;
@@ -101,7 +102,7 @@ namespace KlayGE
 	class D3D12UnorderedAccessViewSimulation
 	{
 	public:
-		D3D12UnorderedAccessViewSimulation(ID3D12ResourcePtr const & res, D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc);
+		D3D12UnorderedAccessViewSimulation(D3D12ResourcePtr const & res, D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc);
 		~D3D12UnorderedAccessViewSimulation();
 
 		D3D12_CPU_DESCRIPTOR_HANDLE const & Handle() const
@@ -110,7 +111,7 @@ namespace KlayGE
 		}
 
 	private:
-		ID3D12ResourcePtr res_;
+		D3D12ResourcePtr res_;
 		ID3D12ResourcePtr counter_;
 		D3D12_CPU_DESCRIPTOR_HANDLE handle_;
 		uint32_t counter_offset_;
@@ -152,7 +153,7 @@ namespace KlayGE
 			return rt_view_;
 		}
 
-		ID3D12ResourcePtr const & RTSrc() const
+		D3D12ResourcePtr const & RTSrc() const
 		{
 			return rt_src_;
 		}
@@ -167,7 +168,7 @@ namespace KlayGE
 
 	private:
 		D3D12RenderTargetViewSimulationPtr rt_view_;
-		ID3D12ResourcePtr rt_src_;
+		D3D12ResourcePtr rt_src_;
 		uint32_t rt_first_subres_;
 		uint32_t rt_num_subres_;
 	};
@@ -196,7 +197,7 @@ namespace KlayGE
 			return ds_view_;
 		}
 
-		ID3D12ResourcePtr const & DSSrc() const
+		D3D12ResourcePtr const & DSSrc() const
 		{
 			return ds_src_;
 		}
@@ -211,7 +212,7 @@ namespace KlayGE
 
 	private:
 		D3D12DepthStencilViewSimulationPtr ds_view_;
-		ID3D12ResourcePtr ds_src_;
+		D3D12ResourcePtr ds_src_;
 		uint32_t ds_first_subres_;
 		uint32_t ds_num_subres_;
 	};
@@ -239,7 +240,7 @@ namespace KlayGE
 			return ua_view_;
 		}
 
-		ID3D12ResourcePtr const & UASrc() const
+		D3D12ResourcePtr const & UASrc() const
 		{
 			return ua_src_;
 		}
@@ -259,9 +260,8 @@ namespace KlayGE
 		ID3D12GraphicsCommandListPtr d3d_cmd_list_;
 
 		D3D12UnorderedAccessViewSimulationPtr ua_view_;
-		ID3D12ResourcePtr ua_src_;
+		D3D12ResourcePtr ua_src_;
 		ID3D12ResourcePtr ua_counter_upload_src_;
-		D3D12_RESOURCE_STATES ua_src_init_state_;
 		uint32_t ua_first_subres_;
 		uint32_t ua_num_subres_;
 		uint32_t counter_offset_;

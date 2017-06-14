@@ -542,7 +542,7 @@ namespace KlayGE
 				D3D12GraphicsBufferPtr d3d12_buf = checked_pointer_cast<D3D12GraphicsBuffer>(rl->GetVertexStream(i));
 
 				so_buffs_[i] = d3d12_buf;
-				sobv[i].BufferLocation = d3d12_buf->D3DBuffer()->GetGPUVirtualAddress();
+				sobv[i].BufferLocation = d3d12_buf->D3DResource()->GetGPUVirtualAddress();
 				sobv[i].SizeInBytes = d3d12_buf->Size();
 				sobv[i].BufferFilledSizeLocation = sobv[i].BufferLocation + d3d12_buf->CounterOffset();
 			}
@@ -651,7 +651,7 @@ namespace KlayGE
 			{
 				for (uint32_t j = 0; j < so->CBuffers(st).size(); ++ j)
 				{
-					ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DBuffer();
+					ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DResource();
 					if (buff)
 					{
 						d3d_render_cmd_list_->SetGraphicsRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
@@ -795,7 +795,7 @@ namespace KlayGE
 		{
 			for (uint32_t j = 0; j < so->CBuffers(st).size(); ++ j)
 			{
-				ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DBuffer();
+				ID3D12ResourcePtr const & buff = checked_cast<D3D12GraphicsBuffer*>(so->CBuffers(st)[j])->D3DResource();
 				if (buff)
 				{
 					d3d_compute_cmd_list_->SetComputeRootConstantBufferView(root_param_index, buff->GetGPUVirtualAddress());
@@ -886,8 +886,7 @@ namespace KlayGE
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.Subresource = 0;
-			if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_STREAM_OUT))
+			if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_STREAM_OUT))
 			{
 				barriers.push_back(barrier);
 			}
@@ -905,8 +904,7 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.Subresource = 0;
-				if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
+				if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
 				{
 					barriers.push_back(barrier);
 				}
@@ -922,8 +920,7 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.Subresource = 0;
-				if (d3dvb.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
+				if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
 				{
 					barriers.push_back(barrier);
 				}
@@ -938,8 +935,7 @@ namespace KlayGE
 				D3D12_RESOURCE_BARRIER barrier;
 				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				barrier.Transition.Subresource = 0;
-				if (ib.UpdateResourceBarrier(barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER))
+				if (ib.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER))
 				{
 					barriers.push_back(barrier);
 				}
@@ -1041,7 +1037,7 @@ namespace KlayGE
 					pass.Bind(effect);
 					this->UpdateRenderPSO(effect, tech, pass, rl);
 					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
-						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
@@ -1056,7 +1052,7 @@ namespace KlayGE
 					this->UpdateRenderPSO(effect, tech, pass, rl);
 					// TODO: ExecuteIndirect's first 2 parameters can't be right
 					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
-						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DBuffer().get(),
+						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get(),
 						rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
@@ -1140,7 +1136,7 @@ namespace KlayGE
 			pass.Bind(effect);
 			this->UpdateComputePSO(effect, pass);
 			// TODO: ExecuteIndirect's first 2 parameters can't be right
-			d3d_compute_cmd_list_->ExecuteIndirect(nullptr, 0, checked_cast<D3D12GraphicsBuffer*>(buff_args.get())->D3DBuffer().get(),
+			d3d_compute_cmd_list_->ExecuteIndirect(nullptr, 0, checked_cast<D3D12GraphicsBuffer*>(buff_args.get())->D3DResource().get(),
 				offset, nullptr, 0);
 			pass.Unbind(effect);
 		}

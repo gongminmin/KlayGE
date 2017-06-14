@@ -90,6 +90,8 @@ namespace KlayGE
 			dxgi_fmt_ = D3D12Mapping::MappingFormat(format_);
 			break;
 		}
+
+		curr_states_.assign(array_size_ * num_mip_maps_, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	uint32_t D3D12TextureCube::Width(uint32_t level) const
@@ -465,7 +467,7 @@ namespace KlayGE
 			D3D12GraphicsBuffer& vb = *checked_pointer_cast<D3D12GraphicsBuffer>(rl.GetVertexStream(0));
 
 			D3D12_VERTEX_BUFFER_VIEW vbv;
-			vbv.BufferLocation = vb.D3DBuffer()->GetGPUVirtualAddress();
+			vbv.BufferLocation = vb.D3DResource()->GetGPUVirtualAddress();
 			vbv.SizeInBytes = vb.Size();
 			vbv.StrideInBytes = rl.VertexSize(0);
 
@@ -483,29 +485,9 @@ namespace KlayGE
 			scissor_rc.left = 0;
 			scissor_rc.top = 0;
 
-			D3D12_RESOURCE_BARRIER barrier_before[2];
-			barrier_before[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before[0].Transition.pResource = d3d_texture_.get();
-			barrier_before[0].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before[0].Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-			barrier_before[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before[1].Transition.pResource = d3d_texture_.get();
-			barrier_before[1].Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before[1].Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-
-			D3D12_RESOURCE_BARRIER barrier_after[2];
-			barrier_after[0].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after[0].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after[0].Transition.pResource = d3d_texture_.get();
-			barrier_after[0].Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
-			barrier_after[0].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			barrier_after[1].Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after[1].Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after[1].Transition.pResource = d3d_texture_.get();
-			barrier_after[1].Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			barrier_after[1].Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -518,9 +500,21 @@ namespace KlayGE
 					{
 						cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
 
-						barrier_before[0].Transition.Subresource = CalcSubresource(level - 1, index * 6 + f, 0, num_mip_maps_, array_size_);
-						barrier_before[1].Transition.Subresource = CalcSubresource(level, index * 6 + f, 0, num_mip_maps_, array_size_);
-						cmd_list->ResourceBarrier(2, barrier_before);
+						std::vector<D3D12_RESOURCE_BARRIER> barriers;
+						if (this->UpdateResourceBarrier(CalcSubresource(level - 1, index * 6 + f, 0, num_mip_maps_, array_size_),
+							barrier, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE))
+						{
+							barriers.push_back(barrier);
+						}
+						if (this->UpdateResourceBarrier(CalcSubresource(level, index * 6 + f, 0, num_mip_maps_, array_size_),
+							barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+						{
+							barriers.push_back(barrier);
+						}
+						if (!barriers.empty())
+						{
+							cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+						}
 
 						D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetriveD3DRenderTargetView(index * 6 + f, 1, level)->Handle();
 
@@ -538,10 +532,6 @@ namespace KlayGE
 						cmd_list->RSSetScissorRects(1, &scissor_rc);
 
 						cmd_list->DrawInstanced(4, 1, 0, 0);
-
-						barrier_after[0].Transition.Subresource = barrier_before[0].Transition.Subresource;
-						barrier_after[1].Transition.Subresource = barrier_before[1].Transition.Subresource;
-						cmd_list->ResourceBarrier(2, barrier_after);
 
 						cpu_cbv_srv_uav_handle.ptr += srv_desc_size;
 						gpu_cbv_srv_uav_handle.ptr += srv_desc_size;

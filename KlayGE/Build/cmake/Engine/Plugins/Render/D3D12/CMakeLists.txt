@@ -22,6 +22,7 @@ SET(D3D12_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12RenderStateObject.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12RenderView.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12RenderWindow.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Resource.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12ShaderObject.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Texture.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/D3D12/D3D12Texture1D.cpp
@@ -47,6 +48,7 @@ SET(D3D12_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderView.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderWindow.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Resource.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12ShaderObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Texture.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Typedefs.hpp

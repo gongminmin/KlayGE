@@ -68,7 +68,7 @@ namespace
 	class SetD3D12ShaderParameterTextureSRV
 	{
 	public:
-		SetD3D12ShaderParameterTextureSRV(std::tuple<ID3D12Resource*, uint32_t, uint32_t>& srvsrc,
+		SetD3D12ShaderParameterTextureSRV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc,
 				D3D12ShaderResourceViewSimulation*& srv, RenderEffectParameter* param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
@@ -80,7 +80,7 @@ namespace
 			param_->Value(tex_subres);
 			if (tex_subres.tex)
 			{
-				*srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(tex_subres.tex.get())->D3DResource().get(),
+				*srvsrc_ = std::make_tuple(checked_cast<D3D12Texture*>(tex_subres.tex.get()),
 					tex_subres.first_array_index * tex_subres.tex->NumMipMaps() + tex_subres.first_level,
 					tex_subres.num_items * tex_subres.num_levels);
 				*srv_ = checked_cast<D3D12Texture*>(tex_subres.tex.get())->RetriveD3DShaderResourceView(
@@ -94,7 +94,7 @@ namespace
 		}
 
 	private:
-		std::tuple<ID3D12Resource*, uint32_t, uint32_t>* srvsrc_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>* srvsrc_;
 		D3D12ShaderResourceViewSimulation** srv_;
 		RenderEffectParameter* param_;
 	};
@@ -102,7 +102,7 @@ namespace
 	class SetD3D12ShaderParameterGraphicsBufferSRV
 	{
 	public:
-		SetD3D12ShaderParameterGraphicsBufferSRV(std::tuple<ID3D12Resource*, uint32_t, uint32_t>& srvsrc,
+		SetD3D12ShaderParameterGraphicsBufferSRV(std::tuple<D3D12Resource*, uint32_t, uint32_t>& srvsrc,
 				D3D12ShaderResourceViewSimulation*& srv, RenderEffectParameter* param)
 			: srvsrc_(&srvsrc), srv_(&srv), param_(param)
 		{
@@ -114,7 +114,7 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
-				*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DBuffer().get(), 0, 1);
+				*srvsrc_ = std::make_tuple(checked_cast<D3D12GraphicsBuffer*>(buf.get()), 0, 1);
 				*srv_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DShaderResourceView().get();
 			}
 			else
@@ -124,7 +124,7 @@ namespace
 		}
 
 	private:
-		std::tuple<ID3D12Resource*, uint32_t, uint32_t>* srvsrc_;
+		std::tuple<D3D12Resource*, uint32_t, uint32_t>* srvsrc_;
 		D3D12ShaderResourceViewSimulation** srv_;
 		RenderEffectParameter* param_;
 	};
@@ -132,7 +132,7 @@ namespace
 	class SetD3D12ShaderParameterTextureUAV
 	{
 	public:
-		SetD3D12ShaderParameterTextureUAV(std::pair<ID3D12Resource*, ID3D12Resource*>& uavsrc,
+		SetD3D12ShaderParameterTextureUAV(std::pair<D3D12Resource*, ID3D12Resource*>& uavsrc,
 				D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
@@ -144,7 +144,7 @@ namespace
 			param_->Value(tex_subres);
 			if (tex_subres.tex)
 			{
-				uavsrc_->first = checked_cast<D3D12Texture*>(tex_subres.tex.get())->D3DResource().get();
+				uavsrc_->first = checked_cast<D3D12Texture*>(tex_subres.tex.get());
 				uavsrc_->second = nullptr; // TODO
 				*uav_ = checked_cast<D3D12Texture*>(tex_subres.tex.get())->RetriveD3DUnorderedAccessView(
 					tex_subres.first_array_index, tex_subres.num_items, tex_subres.first_level).get();
@@ -157,7 +157,7 @@ namespace
 		}
 
 	private:
-		std::pair<ID3D12Resource*, ID3D12Resource*>* uavsrc_;
+		std::pair<D3D12Resource*, ID3D12Resource*>* uavsrc_;
 		D3D12UnorderedAccessViewSimulation** uav_;
 		RenderEffectParameter* param_;
 	};
@@ -165,7 +165,7 @@ namespace
 	class SetD3D12ShaderParameterGraphicsBufferUAV
 	{
 	public:
-		SetD3D12ShaderParameterGraphicsBufferUAV(std::pair<ID3D12Resource*, ID3D12Resource*>& uavsrc,
+		SetD3D12ShaderParameterGraphicsBufferUAV(std::pair<D3D12Resource*, ID3D12Resource*>& uavsrc,
 				D3D12UnorderedAccessViewSimulation*& uav, RenderEffectParameter* const & param)
 			: uavsrc_(&uavsrc), uav_(&uav), param_(param)
 		{
@@ -177,7 +177,7 @@ namespace
 			param_->Value(buf);
 			if (buf)
 			{
-				uavsrc_->first = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DBuffer().get();
+				uavsrc_->first = checked_cast<D3D12GraphicsBuffer*>(buf.get());
 				uavsrc_->second = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DBufferCounterUpload().get();
 				*uav_ = checked_cast<D3D12GraphicsBuffer*>(buf.get())->D3DUnorderedAccessView().get();
 			}
@@ -189,7 +189,7 @@ namespace
 		}
 
 	private:
-		std::pair<ID3D12Resource*, ID3D12Resource*>* uavsrc_;
+		std::pair<D3D12Resource*, ID3D12Resource*>* uavsrc_;
 		D3D12UnorderedAccessViewSimulation** uav_;
 		RenderEffectParameter* param_;
 	};
@@ -970,10 +970,10 @@ namespace KlayGE
 
 			samplers_[type].resize(so_template_->shader_desc_[type]->num_samplers);
 			srvsrcs_[type].resize(so_template_->shader_desc_[type]->num_srvs,
-				std::make_tuple(static_cast<ID3D12Resource*>(nullptr), 0, 0));
+				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			srvs_[type].resize(so_template_->shader_desc_[type]->num_srvs);
 			uavsrcs_[type].resize(so_template_->shader_desc_[type]->num_uavs,
-				std::make_pair(static_cast<ID3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
+				std::make_pair(static_cast<D3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
 			uavs_[type].resize(so_template_->shader_desc_[type]->num_uavs);
 
 			for (size_t i = 0; i < so_template_->shader_desc_[type]->res_desc.size(); ++ i)
@@ -1076,10 +1076,10 @@ namespace KlayGE
 
 			samplers_[type] = so.samplers_[type];
 			srvsrcs_[type].resize(so.srvs_[type].size(),
-				std::make_tuple(static_cast<ID3D12Resource*>(nullptr), 0, 0));
+				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			srvs_[type].resize(so.srvs_[type].size());
 			uavsrcs_[type].resize(so.uavs_[type].size(),
-				std::make_pair(static_cast<ID3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
+				std::make_pair(static_cast<D3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
 			uavs_[type].resize(so.uavs_[type].size());
 
 			so_template_->cbuff_indices_[type] = so.so_template_->cbuff_indices_[type];
@@ -1221,10 +1221,10 @@ namespace KlayGE
 
 			ret->samplers_[i] = samplers_[i];
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(),
-				std::make_tuple(static_cast<ID3D12Resource*>(nullptr), 0, 0));
+				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));
 			ret->srvs_[i].resize(srvs_[i].size());
 			ret->uavsrcs_[i].resize(uavsrcs_[i].size(),
-				std::make_pair(static_cast<ID3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
+				std::make_pair(static_cast<D3D12Resource*>(nullptr), static_cast<ID3D12Resource*>(nullptr)));
 			ret->uavs_[i].resize(uavs_[i].size());
 
 			if (so_template_->cbuff_indices_[i] && !so_template_->cbuff_indices_[i]->empty())
@@ -1334,47 +1334,32 @@ namespace KlayGE
 				pb.func();
 			}
 
-			D3D12_RESOURCE_BARRIER barrier_before;
-			barrier_before.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_before.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_before.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier_before.Transition.StateAfter
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+			D3D12_RESOURCE_STATES state_after
 				= (ST_PixelShader == st) ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 					: D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 			for (auto const & srvsrc : srvsrcs_[st])
 			{
 				for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++ subres)
 				{
-					barrier_before.Transition.pResource = std::get<0>(srvsrc);
-					if (barrier_before.Transition.pResource != nullptr)
+					auto res = std::get<0>(srvsrc);
+					if (res != nullptr)
 					{
-						barrier_before.Transition.Subresource = std::get<1>(srvsrc) + subres;
-
-						bool found = false;
-						for (size_t prev = 0; prev < barriers.size(); ++ prev)
+						if (res->UpdateResourceBarrier(std::get<1>(srvsrc) + subres, barrier, state_after))
 						{
-							if ((barriers[prev].Transition.pResource == barrier_before.Transition.pResource)
-								&& (barriers[prev].Transition.Subresource == barrier_before.Transition.Subresource))
-							{
-								found = true;
-								break;
-							}
-						}
-
-						if (!found)
-						{
-							barriers.push_back(barrier_before);
+							barriers.push_back(barrier);
 						}
 					}
 				}
 			}
 
-			barrier_before.Transition.StateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-			barrier_before.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+			state_after = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
 			for (auto const & uavsrc : uavsrcs_[st])
 			{
-				barrier_before.Transition.pResource = uavsrc.first;
-				if (barrier_before.Transition.pResource != nullptr)
+				if (uavsrc.first != nullptr)
 				{
 #ifdef KLAYGE_DEBUG
 					for (auto const & srvsrc : srvsrcs_[st])
@@ -1383,20 +1368,9 @@ namespace KlayGE
 					}
 #endif
 
-					bool found = false;
-					for (auto const & barrier : barriers)
+					if (uavsrc.first->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, state_after))
 					{
-						if ((barrier.Transition.pResource == barrier_before.Transition.pResource)
-							&& (barrier.Transition.Subresource == barrier_before.Transition.Subresource))
-						{
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						barriers.push_back(barrier_before);
+						barriers.push_back(barrier);
 					}
 				}
 			}
@@ -1415,80 +1389,5 @@ namespace KlayGE
 
 	void D3D12ShaderObject::Unbind()
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
-		{
-			D3D12_RESOURCE_BARRIER barrier_after;
-			barrier_after.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier_after.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier_after.Transition.StateBefore
-				= (ST_PixelShader == st) ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
-					: D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
-			barrier_after.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			for (auto const & srvsrc : srvsrcs_[st])
-			{
-				for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++ subres)
-				{
-					barrier_after.Transition.pResource = std::get<0>(srvsrc);
-					if (barrier_after.Transition.pResource != nullptr)
-					{
-						barrier_after.Transition.Subresource = std::get<1>(srvsrc) + subres;
-
-						bool found = false;
-						for (size_t prev = 0; prev < barriers.size(); ++ prev)
-						{
-							if ((barriers[prev].Transition.pResource == barrier_after.Transition.pResource)
-								&& (barriers[prev].Transition.Subresource == barrier_after.Transition.Subresource))
-							{
-								found = true;
-								break;
-							}
-						}
-
-						if (!found)
-						{
-							barriers.push_back(barrier_after);
-						}
-					}
-				}
-			}
-
-			barrier_after.Transition.StateBefore = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
-			barrier_after.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-			for (auto const & uavsrc : uavsrcs_[st])
-			{
-				barrier_after.Transition.pResource = uavsrc.first;
-				if (barrier_after.Transition.pResource != nullptr)
-				{
-#ifdef KLAYGE_DEBUG
-					for (auto const & srvsrc : srvsrcs_[st])
-					{
-						BOOST_ASSERT(std::get<0>(srvsrc) != uavsrc.first);
-					}
-#endif
-
-					bool found = false;
-					for (size_t prev = 0; prev < barriers.size(); ++ prev)
-					{
-						if ((barriers[prev].Transition.pResource == barrier_after.Transition.pResource)
-							&& (barriers[prev].Transition.Subresource == barrier_after.Transition.Subresource))
-						{
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						barriers.push_back(barrier_after);
-					}
-				}
-			}
-		}
-		if (!barriers.empty())
-		{
-			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.D3DRenderCmdList()->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
 	}
 }

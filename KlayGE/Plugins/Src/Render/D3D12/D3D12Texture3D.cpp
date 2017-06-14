@@ -78,6 +78,8 @@ namespace KlayGE
 		depth_ = depth;
 
 		dxgi_fmt_ = D3D12Mapping::MappingFormat(format_);
+
+		curr_states_.assign(array_size_ * num_mip_maps_, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	uint32_t D3D12Texture3D::Width(uint32_t level) const

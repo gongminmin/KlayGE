@@ -88,7 +88,7 @@ namespace KlayGE
 			if (clr_views_[i])
 			{
 				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src.push_back(p->RTSrc().get());
+				rt_src.push_back(p->RTSrc()->D3DResource().get());
 				rt_first_subres.push_back(p->RTFirstSubRes());
 				rt_num_subres.push_back(p->RTNumSubRes());
 
@@ -193,7 +193,7 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
 
-		std::vector<ID3D12Resource*> rt_src;
+		std::vector<D3D12Resource*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
 		std::vector<uint32_t> rt_num_subres;
 		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
@@ -207,7 +207,7 @@ namespace KlayGE
 			}
 		}
 
-		ID3D12Resource* ds_src;
+		D3D12Resource* ds_src;
 		uint32_t ds_first_subres;
 		uint32_t ds_num_subres;
 		if (rs_view_)
@@ -224,19 +224,18 @@ namespace KlayGE
 			ds_num_subres = 0;
 		}
 
-		std::vector<D3D12_RESOURCE_BARRIER> barrier_before;
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 		for (size_t i = 0; i < rt_src.size(); ++ i)
 		{
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = rt_src[i];
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
 			for (uint32_t j = 0; j < rt_num_subres[i]; ++ j)
 			{
-				barrier.Transition.Subresource = rt_first_subres[i] + j;
-				barrier_before.push_back(barrier);
+				if (rt_src[i]->UpdateResourceBarrier(rt_first_subres[i] + j, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+				{
+					barriers.push_back(barrier);
+				}
 			}
 		}
 		if (ds_src)
@@ -244,89 +243,21 @@ namespace KlayGE
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = ds_src;
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_DEPTH_WRITE;
 			for (uint32_t j = 0; j < ds_num_subres; ++ j)
 			{
-				barrier.Transition.Subresource = ds_first_subres + j;
-				barrier_before.push_back(barrier);
+				if (ds_src->UpdateResourceBarrier(ds_first_subres + j, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+				{
+					barriers.push_back(barrier);
+				}
 			}
 		}
-		if (!barrier_before.empty())
+		if (!barriers.empty())
 		{
-			cmd_list->ResourceBarrier(static_cast<UINT>(barrier_before.size()), &barrier_before[0]);
+			cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
 		}
 	}
 
 	void D3D12FrameBuffer::UnbindBarrier()
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
-
-		std::vector<ID3D12Resource*> rt_src;
-		std::vector<uint32_t> rt_first_subres;
-		std::vector<uint32_t> rt_num_subres;
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
-		{
-			if (clr_views_[i])
-			{
-				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src.push_back(p->RTSrc().get());
-				rt_first_subres.push_back(p->RTFirstSubRes());
-				rt_num_subres.push_back(p->RTNumSubRes());
-			}
-		}
-
-		ID3D12Resource* ds_src;
-		uint32_t ds_first_subres;
-		uint32_t ds_num_subres;
-		if (rs_view_)
-		{
-			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(rs_view_.get());
-			ds_src = p->DSSrc().get();
-			ds_first_subres = p->DSFirstSubRes();
-			ds_num_subres = p->DSNumSubRes();
-		}
-		else
-		{
-			ds_src = nullptr;
-			ds_first_subres = 0;
-			ds_num_subres = 0;
-		}
-
-		std::vector<D3D12_RESOURCE_BARRIER> barrier_after;
-		for (size_t i = 0; i < rt_src.size(); ++ i)
-		{
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = rt_src[i];
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			for (uint32_t j = 0; j < rt_num_subres[i]; ++ j)
-			{
-				barrier.Transition.Subresource = rt_first_subres[i] + j;
-				barrier_after.push_back(barrier);
-			}
-		}
-		if (ds_src)
-		{
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			barrier.Transition.pResource = ds_src;
-			barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_DEPTH_WRITE;
-			barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_COMMON;
-			for (uint32_t j = 0; j < ds_num_subres; ++ j)
-			{
-				barrier.Transition.Subresource = ds_first_subres + j;
-				barrier_after.push_back(barrier);
-			}
-		}
-		if (!barrier_after.empty())
-		{
-			cmd_list->ResourceBarrier(static_cast<UINT>(barrier_after.size()), &barrier_after[0]);
-		}
 	}
 }

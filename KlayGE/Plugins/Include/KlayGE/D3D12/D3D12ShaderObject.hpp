@@ -80,7 +80,7 @@ namespace KlayGE
 			return samplers_[type];
 		}
 
-		std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>> const & SRVSrcs(ShaderType type) const
+		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> const & SRVSrcs(ShaderType type) const
 		{
 			return srvsrcs_[type];
 		}
@@ -90,7 +90,7 @@ namespace KlayGE
 			return srvs_[type];
 		}
 
-		std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>> const & UAVSrcs(ShaderType type) const
+		std::vector<std::pair<D3D12Resource*, ID3D12Resource*>> const & UAVSrcs(ShaderType type) const
 		{
 			return uavsrcs_[type];
 		}
@@ -224,9 +224,9 @@ namespace KlayGE
 		std::array<std::vector<ParameterBind>, ST_NumShaderTypes> param_binds_;
 
 		std::array<std::vector<D3D12_SAMPLER_DESC>, ST_NumShaderTypes> samplers_;
-		std::array<std::vector<std::tuple<ID3D12Resource*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
+		std::array<std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
 		std::array<std::vector<D3D12ShaderResourceViewSimulation*>, ST_NumShaderTypes> srvs_;
-		std::array<std::vector<std::pair<ID3D12Resource*, ID3D12Resource*>>, ST_NumShaderTypes> uavsrcs_;
+		std::array<std::vector<std::pair<D3D12Resource*, ID3D12Resource*>>, ST_NumShaderTypes> uavsrcs_;
 		std::array<std::vector<D3D12UnorderedAccessViewSimulation*>, ST_NumShaderTypes> uavs_;
 		std::array<std::vector<GraphicsBuffer*>, ST_NumShaderTypes> d3d_cbuffs_;
 
