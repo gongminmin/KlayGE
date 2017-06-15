@@ -693,9 +693,16 @@ namespace KlayGE
 		heap_prop.CreationNodeMask = 0;
 		heap_prop.VisibleNodeMask = 0;
 
+		D3D12_RESOURCE_STATES init_state = D3D12_RESOURCE_STATE_COMMON;
+		if (IsDepthFormat(format_) && (access_hint_ & EAH_GPU_Write))
+		{
+			init_state = D3D12_RESOURCE_STATE_DEPTH_WRITE;
+			std::fill(curr_states_.begin(), curr_states_.end(), init_state);
+		}
+
 		ID3D12Resource* d3d_texture;
 		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
-			&tex_desc, D3D12_RESOURCE_STATE_COMMON, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
+			&tex_desc, init_state, (access_hint_ & EAH_GPU_Write) ? &clear_value : nullptr,
 			IID_ID3D12Resource, reinterpret_cast<void**>(&d3d_texture)));
 		d3d_resource_ = MakeCOMPtr(d3d_texture);
 
