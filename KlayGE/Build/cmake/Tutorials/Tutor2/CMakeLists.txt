@@ -9,6 +9,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SMAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
@@ -16,8 +18,11 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SMAA.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAAAreaTex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAASearchTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Common/teapot.meshml.model_bin
 )

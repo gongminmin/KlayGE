@@ -25,7 +25,9 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/RSM2VPLs.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SMAA.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/TAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Translucency.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/VarianceDepthMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
@@ -47,6 +49,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RSM2VPLs.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SMAA.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSGI.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSR.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSS.kfx
@@ -59,6 +62,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAAAreaTex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAASearchTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/white_noise_tex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds

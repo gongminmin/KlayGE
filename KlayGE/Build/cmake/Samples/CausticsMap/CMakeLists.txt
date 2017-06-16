@@ -30,6 +30,8 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/SMAA.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/ToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
@@ -39,10 +41,13 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SkyBox.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/SMAA.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/UI.kfx
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/powered_by_klayge.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAAAreaTex.dds
+	${KLAYGE_PROJECT_DIR}/media/Textures/2D/SMAASearchTex.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/2D/ui.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/3D/color_grading.dds
 	${KLAYGE_PROJECT_DIR}/media/Textures/Cube/uffizi_cross_filtered_c.dds
