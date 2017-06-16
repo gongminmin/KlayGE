@@ -973,9 +973,13 @@ namespace KlayGE
 				smaa_edge_detection_pp_->SetParam(0, near_q);
 				smaa_edge_detection_pp_->OutputFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Stencil,
 					Color(0, 0, 0, 0), 1, 0);
-				smaa_edge_detection_pp_->Apply();
+				this->BindFrameBuffer(smaa_edge_detection_pp_->OutputFrameBuffer());
+				smaa_edge_detection_pp_->Render();
 
-				smaa_blending_weight_pp_->Apply();
+				smaa_blending_weight_pp_->OutputFrameBuffer()->Clear(FrameBuffer::CBM_Color,
+					Color(0, 0, 0, 0), 1, 0);
+				this->BindFrameBuffer(smaa_blending_weight_pp_->OutputFrameBuffer());
+				smaa_blending_weight_pp_->Render();
 			}
 		}
 #ifndef KLAYGE_SHIP
