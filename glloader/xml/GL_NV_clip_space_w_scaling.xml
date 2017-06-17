@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_clip_space_w_scaling" reg_no="486">
+	<tokens>
+		<token name="GL_VIEWPORT_POSITION_W_SCALE_NV" value="0x937C"/>
+		<token name="GL_VIEWPORT_POSITION_W_SCALE_X_COEFF_NV" value="0x937D"/>
+		<token name="GL_VIEWPORT_POSITION_W_SCALE_Y_COEFF_NV" value="0x937E"/>
+	</tokens>
+
+	<functions>
+		<function name="glViewportPositionWScaleNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="xcoeff"/>
+				<param type="GLfloat" name="ycoeff"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

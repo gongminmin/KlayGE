@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="WGL_EXT_colorspace" reg_no="498">
+	<tokens>
+		<token name="WGL_COLORSPACE_EXT" value="0x309D"/>
+		<token name="WGL_COLORSPACE_SRGB_EXT" value="0x3089"/>
+		<token name="WGL_COLORSPACE_LINEAR_EXT" value="0x308A"/>
+	</tokens>
+</gl_extension>

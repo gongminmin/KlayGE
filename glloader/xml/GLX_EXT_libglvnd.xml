@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLX_EXT_libglvnd" reg_no="482">
+	<tokens>
+		<token name="GLX_VENDOR_NAMES_EXT" value="0x20F6"/>
+	</tokens>
+</gl_extension>

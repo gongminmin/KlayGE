@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_SGIX_pixel_texture" reg_no="15">
+<gl_extension name="GL_SGIX_pixel_texture" reg_no="499">
 	<tokens>
 		<token name="GL_PIXEL_TEX_GEN_SGIX" value="0x8139"/>
 		<token name="GL_PIXEL_TEX_GEN_MODE_SGIX" value="0x832B"/>

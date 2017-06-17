@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_gpu_shader_half_float" reg_no="496">
+	<tokens>
+		<token name="GL_FLOAT16_NV" value="0x8FF8"/>
+		<token name="GL_FLOAT16_VEC2_NV" value="0x8FF9"/>
+		<token name="GL_FLOAT16_VEC3_NV" value="0x8FFA"/>
+		<token name="GL_FLOAT16_VEC4_NV" value="0x8FFB"/>
+		<token name="GL_FLOAT16_MAT2_AMD" value="0x91C5"/>
+		<token name="GL_FLOAT16_MAT3_AMD" value="0x91C6"/>
+		<token name="GL_FLOAT16_MAT4_AMD" value="0x91C7"/>
+		<token name="GL_FLOAT16_MAT2x3_AMD" value="0x91C8"/>
+		<token name="GL_FLOAT16_MAT2x4_AMD" value="0x91C9"/>
+		<token name="GL_FLOAT16_MAT3x2_AMD" value="0x91CA"/>
+		<token name="GL_FLOAT16_MAT3x4_AMD" value="0x91CB"/>
+		<token name="GL_FLOAT16_MAT4x2_AMD" value="0x91CC"/>
+		<token name="GL_FLOAT16_MAT4x3_AMD" value="0x91CD"/>
+	</tokens>
+</gl_extension>

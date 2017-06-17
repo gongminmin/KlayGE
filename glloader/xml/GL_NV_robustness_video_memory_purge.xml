@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_robustness_video_memory_purge" reg_no="484">
+	<tokens>
+		<token name="GL_PURGED_CONTEXT_RESET_NV" value="0x92BB"/>
+		<token name="GLX_GENERATE_RESET_ON_VIDEO_MEMORY_PURGE_NV" value="0x20F7"/>
+		<token name="EGL_GENERATE_RESET_ON_VIDEO_MEMORY_PURGE_NV" value="0x334C"/>
+	</tokens>
+</gl_extension>

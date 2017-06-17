@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_alpha_to_coverage_dither_control" reg_no="500">
+	<tokens>
+		<token name="GL_ALPHA_TO_COVERAGE_DITHER_DEFAULT_NV" value="0x934D"/>
+		<token name="GL_ALPHA_TO_COVERAGE_DITHER_ENABLE_NV" value="0x934E"/>
+		<token name="GL_ALPHA_TO_COVERAGE_DITHER_DISABLE_NV" value="0x934F"/>
+		<token name="GL_ALPHA_TO_COVERAGE_DITHER_MODE_NV" value="0x92BF"/>
+	</tokens>
+
+	<functions>
+		<function name="glAlphaToCoverageDitherControlNV" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

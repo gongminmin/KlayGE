@@ -1,0 +1,4 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_AMD_texture_gather_bias_lod" reg_no="502">
+</gl_extension>

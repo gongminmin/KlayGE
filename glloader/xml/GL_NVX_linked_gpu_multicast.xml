@@ -1,0 +1,43 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NVX_linked_gpu_multicast" reg_no="493">
+	<tokens>
+		<token name="GL_LGPU_SEPARATE_STORAGE_BIT_NVX" value="0x0800"/>
+		<token name="GL_MAX_LGPU_GPUS_NVX" value="0x92BA"/>
+	</tokens>
+
+	<functions>
+		<function name="glLGPUNamedBufferSubDataNVX" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLbitfield" name="gpuMask"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const void*" name="data"/>
+			</params>
+		</function>
+		<function name="glLGPUCopyImageSubDataNVX" return="void">
+			<params>
+				<param type="GLuint" name="sourceGpu"/>
+				<param type="GLbitfield" name="destinationGpuMask"/>
+				<param type="GLuint" name="srcName"/>
+				<param type="GLenum" name="srcTarget"/>
+				<param type="GLint" name="srcLevel"/>
+				<param type="GLint" name="srcX"/>
+				<param type="GLint" name="srxY"/>
+				<param type="GLint" name="srcZ"/>
+				<param type="GLuint" name="dstName"/>
+				<param type="GLenum" name="dstTarget"/>
+				<param type="GLint" name="dstLevel"/>
+				<param type="GLint" name="dstX"/>
+				<param type="GLint" name="dstY"/>
+				<param type="GLint" name="dstZ"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+			</params>
+		</function>
+		<function name="glLGPUInterlockNVX" return="void"/>
+	</functions>
+</gl_extension>

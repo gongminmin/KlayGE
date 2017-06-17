@@ -1,0 +1,18 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_memory_object_fd" reg_no="504">
+	<tokens>
+		<token name="GL_HANDLE_TYPE_OPAQUE_FD_EXT" value="0x9586"/>
+	</tokens>
+
+	<functions>
+		<function name="glImportMemoryFdEXT" return="void">
+			<params>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="size"/>
+				<param type="GLenum" name="handleType"/>
+				<param type="GLint" name="fd"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

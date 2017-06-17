@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_EXT_window_rectangles" reg_no="490">
+	<tokens>
+		<token name="GL_INCLUSIVE_EXT" value="0x8F10"/>
+		<token name="GL_EXCLUSIVE_EXT" value="0x8F11"/>
+		<token name="GL_WINDOW_RECTANGLE_EXT" value="0x8F12"/>
+		<token name="GL_WINDOW_RECTANGLE_MODE_EXT" value="0x8F13"/>
+		<token name="GL_MAX_WINDOW_RECTANGLES_EXT" value="0x8F14"/>
+		<token name="GL_NUM_WINDOW_RECTANGLES_EXT" value="0x8F15"/>
+	</tokens>
+
+	<functions>
+		<function name="glWindowRectanglesEXT" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="box"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

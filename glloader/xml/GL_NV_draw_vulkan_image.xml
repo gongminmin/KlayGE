@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_draw_vulkan_image" reg_no="501">
+	<typedefs>
+		<typedef type="void" synonym="(GLLOADER_APIENTRY *VULKANPROCNV)()"/>
+	</typedefs>
+
+	<functions>
+		<function name="glDrawVkImageNV" return="void">
+			<params>
+				<param type="GLuint64" name="vkImage"/>
+				<param type="GLuint" name="sampler"/>
+				<param type="GLfloat" name="x0"/>
+				<param type="GLfloat" name="y0"/>
+				<param type="GLfloat" name="x1"/>
+				<param type="GLfloat" name="y1"/>
+				<param type="GLfloat" name="z"/>
+				<param type="GLfloat" name="s0"/>
+				<param type="GLfloat" name="t0"/>
+				<param type="GLfloat" name="s1"/>
+				<param type="GLfloat" name="t1"/>
+			</params>
+		</function>
+		<function name="glGetVkProcAddrNV" return="VULKANPROCNV">
+			<params>
+				<param type="const GLchar*" name="name"/>
+			</params>
+		</function>
+		<function name="glWaitVkSemaphoreNV" return="void">
+			<params>
+				<param type="GLuint64" name="vkSemaphore"/>
+			</params>
+		</function>
+		<function name="glSignalVkSemaphoreNV" return="void">
+			<params>
+				<param type="GLuint64" name="vkSemaphore"/>
+			</params>
+		</function>
+		<function name="glSignalVkFenceNV" return="void">
+			<params>
+				<param type="GLuint64" name="vkFence"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

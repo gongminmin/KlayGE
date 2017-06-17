@@ -1,0 +1,124 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_NV_gpu_multicast" reg_no="494">
+	<tokens>
+		<token name="GL_PER_GPU_STORAGE_BIT_NV" value="0x0800"/>
+		<token name="GL_MULTICAST_GPUS_NV" value="0x92BA"/>
+		<token name="GL_RENDER_GPU_MASK_NV" value="0x9558"/>
+		<token name="GL_PER_GPU_STORAGE_NV" value="0x9548"/>
+		<token name="GL_MULTICAST_PROGRAMMABLE_SAMPLE_LOCATION_NV" value="0x9549"/>
+	</tokens>
+
+	<functions>
+		<function name="glRenderGpuMaskNV" return="void">
+			<params>
+				<param type="GLbitfield" name="mask"/>
+			</params>
+		</function>
+		<function name="glMulticastBufferSubDataNV" return="void">
+			<params>
+				<param type="GLbitfield" name="gpuMask"/>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="const void*" name="data"/>
+			</params>
+		</function>
+		<function name="glMulticastCopyBufferSubDataNV" return="void">
+			<params>
+				<param type="GLuint" name="readGpu"/>
+				<param type="GLbitfield" name="writeGpuMask"/>
+				<param type="GLuint" name="readBuffer"/>
+				<param type="GLuint" name="writeBuffer"/>
+				<param type="GLintptr" name="readOffset"/>
+				<param type="GLintptr" name="writeOffset"/>
+				<param type="GLsizeiptr" name="size"/>
+			</params>
+		</function>
+		<function name="glMulticastCopyImageSubDataNV" return="void">
+			<params>
+				<param type="GLuint" name="srcGpu"/>
+				<param type="GLbitfield" name="dstGpuMask"/>
+				<param type="GLuint" name="srcName"/>
+				<param type="GLenum" name="srcTarget"/>
+				<param type="GLint" name="srcLevel"/>
+				<param type="GLint" name="srcX"/>
+				<param type="GLint" name="srxY"/>
+				<param type="GLint" name="srcZ"/>
+				<param type="GLuint" name="dstName"/>
+				<param type="GLenum" name="dstTarget"/>
+				<param type="GLint" name="dstLevel"/>
+				<param type="GLint" name="dstX"/>
+				<param type="GLint" name="dstY"/>
+				<param type="GLint" name="dstZ"/>
+				<param type="GLsizei" name="srcWidth"/>
+				<param type="GLsizei" name="srcHeight"/>
+				<param type="GLsizei" name="srcDepth"/>
+			</params>
+		</function>
+		<function name="glMulticastBlitFramebufferNV" return="void">
+			<params>
+				<param type="GLuint" name="srcGpu"/>
+				<param type="GLuint" name="dstGpu"/>
+				<param type="GLint" name="srcX0"/>
+				<param type="GLint" name="srcY0"/>
+				<param type="GLint" name="srcX1"/>
+				<param type="GLint" name="srcY1"/>
+				<param type="GLint" name="dstX0"/>
+				<param type="GLint" name="dstY0"/>
+				<param type="GLint" name="dstX1"/>
+				<param type="GLint" name="dstY1"/>
+				<param type="GLbitfield" name="mask"/>
+				<param type="GLenum" name="filter"/>
+			</params>
+		</function>
+		<function name="glMulticastFramebufferSampleLocationsfvNV" return="void">
+			<params>
+				<param type="GLuint" name="gpu"/>
+				<param type="GLuint" name="framebuffer"/>
+				<param type="GLuint" name="start"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glMulticastBarrierNV" return="void"/>
+		<function name="glMulticastWaitSyncNV" return="void">
+			<params>
+				<param type="GLuint" name="signalGpu"/>
+				<param type="GLbitfield" name="waitGpuMask"/>
+			</params>
+		</function>
+		<function name="glMulticastGetQueryObjectivNV" return="void">
+			<params>
+				<param type="GLuint" name="gpu"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glMulticastGetQueryObjectuivNV" return="void">
+			<params>
+				<param type="GLuint" name="gpu"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint*" name="params"/>
+			</params>
+		</function>
+		<function name="glMulticastGetQueryObjecti64vNV" return="void">
+			<params>
+				<param type="GLuint" name="gpu"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glMulticastGetQueryObjectui64vNV" return="void">
+			<params>
+				<param type="GLuint" name="gpu"/>
+				<param type="GLuint" name="id"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
