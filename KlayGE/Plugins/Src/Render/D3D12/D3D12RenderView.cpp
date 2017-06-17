@@ -250,13 +250,28 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::Discard()
 	{
-		// TODO: Figure out how to discard a view
-		/*D3D12_DISCARD_REGION region;
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		for (uint32_t i = 0; i < rt_num_subres_; ++i)
+		{
+			if (rt_src_->UpdateResourceBarrier(rt_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+			{
+				barriers.push_back(barrier);
+			}
+		}
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
+
+		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = rt_first_subres_;
 		region.NumSubresources = rt_num_subres_;
-		d3d_cmd_list_->DiscardResource(rt_src_->D3DResource().get(), &region);*/
+		d3d_cmd_list_->DiscardResource(rt_src_->D3DResource().get(), &region);
 	}
 
 	void D3D12RenderTargetRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -397,12 +412,28 @@ namespace KlayGE
 
 	void D3D12DepthStencilRenderView::Discard()
 	{
-		/*D3D12_DISCARD_REGION region;
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
+		{
+			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+			{
+				barriers.push_back(barrier);
+			}
+		}
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
+
+		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ds_first_subres_;
 		region.NumSubresources = ds_num_subres_;
-		d3d_cmd_list_->DiscardResource(ds_src_->D3DResource().get(), &region);*/
+		d3d_cmd_list_->DiscardResource(ds_src_->D3DResource().get(), &region);
 	}
 
 	void D3D12DepthStencilRenderView::OnAttached(FrameBuffer& fb, uint32_t att)
@@ -551,12 +582,28 @@ namespace KlayGE
 
 	void D3D12UnorderedAccessView::Discard()
 	{
-		/*D3D12_DISCARD_REGION region;
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+		for (uint32_t i = 0; i < ua_num_subres_; ++ i)
+		{
+			if (ua_src_->UpdateResourceBarrier(ua_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
+			{
+				barriers.push_back(barrier);
+			}
+		}
+		if (!barriers.empty())
+		{
+			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
+
+		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
 		region.pRects = nullptr;
 		region.FirstSubresource = ua_first_subres_;
 		region.NumSubresources = ua_num_subres_;
-		d3d_cmd_list_->DiscardResource(ua_src_->D3DResource().get(), &region);*/
+		d3d_cmd_list_->DiscardResource(ua_src_->D3DResource().get(), &region);
 	}
 
 	void D3D12UnorderedAccessView::OnAttached(FrameBuffer& fb, uint32_t att)

@@ -1210,7 +1210,11 @@ namespace KlayGE
 
 		this->ClearPSOCache();
 
+		so_buffs_.clear();
 		root_signatures_.clear();
+		graphics_psos_.clear();
+		compute_psos_.clear();
+		cbv_srv_uav_heaps_.clear();
 
 		bilinear_blit_tech_ = nullptr;
 		blit_effect_.reset();
