@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_clear_texture" reg_no="269">
+	<functions>
+		<function name="glClearTexImageEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="data"/>
+			</params>
+		</function>
+		<function name="glClearTexSubImageEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xoffset"/>
+				<param type="GLint" name="yoffset"/>
+				<param type="GLint" name="zoffset"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLenum" name="format"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="data"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

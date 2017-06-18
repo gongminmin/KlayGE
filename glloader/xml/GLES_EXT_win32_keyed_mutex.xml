@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_win32_keyed_mutex" reg_no="283">
+	<functions>
+		<function name="glAcquireKeyedMutexWin32EXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="key"/>
+				<param type="GLuint" name="timeout"/>
+			</params>
+		</function>
+		<function name="glReleaseKeyedMutexWin32EXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="key"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

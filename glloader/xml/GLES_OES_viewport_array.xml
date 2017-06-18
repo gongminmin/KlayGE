@@ -1,0 +1,100 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_OES_viewport_array" reg_no="267">
+	<tokens>
+		<token name="GL_MAX_VIEWPORTS_OES" value="0x825B"/>
+		<token name="GL_VIEWPORT_SUBPIXEL_BITS_OES" value="0x825C"/>
+		<token name="GL_VIEWPORT_BOUNDS_RANGE_OES" value="0x825D"/>
+		<token name="GL_VIEWPORT_INDEX_PROVOKING_VERTEX_OES" value="0x825F"/>
+		<token name="GL_SCISSOR_BOX" value="0x0C10"/>
+		<token name="GL_VIEWPORT" value="0x0BA2"/>
+		<token name="GL_DEPTH_RANGE" value="0x0B70"/>
+		<token name="GL_SCISSOR_TEST" value="0x0C11"/>
+	</tokens>
+
+	<functions>
+		<function name="glViewportArrayvOES" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedfOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="x"/>
+				<param type="GLfloat" name="y"/>
+				<param type="GLfloat" name="w"/>
+				<param type="GLfloat" name="h"/>
+			</params>
+		</function>
+		<function name="glViewportIndexedfvOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorArrayvOES" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glScissorIndexedOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLint" name="left"/>
+				<param type="GLint" name="bottom"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+			</params>
+		</function>
+		<function name="glScissorIndexedvOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="const GLint*" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeArrayfvOES" return="void">
+			<params>
+				<param type="GLuint" name="first"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLfloat*" name="v"/>
+			</params>
+		</function>
+		<function name="glDepthRangeIndexedfOES" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat" name="n"/>
+				<param type="GLfloat" name="f"/>
+			</params>
+		</function>
+		<function name="glGetFloati_vOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLfloat*" name="data"/>
+			</params>
+		</function>
+		<function name="glEnableiOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glDisableiOES" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+		<function name="glIsEnablediOES" return="GLboolean">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

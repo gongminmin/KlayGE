@@ -1,0 +1,32 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_framebuffer_foveated" reg_no="273">
+	<tokens>
+		<token name="GL_FOVEATION_ENABLE_BIT_QCOM" value="0x1"/>
+		<token name="GL_FOVEATION_SCALED_BIN_METHOD_BIT_QCOM" value="0x2"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferFoveationConfigQCOM" return="void">
+			<params>
+				<param type="GLuint" name="fbo"/>
+				<param type="GLuint" name="numLayers"/>
+				<param type="GLuint" name="focalPointsPerLayer"/>
+				<param type="GLuint" name="requestedFeatures"/>
+				<param type="GLuint*" name="providedFeatures"/>
+			</params>
+		</function>
+		<function name="glFramebufferFoveationParametersQCOM" return="void">
+			<params>
+				<param type="GLuint" name="fbo"/>
+				<param type="GLuint" name="layer"/>
+				<param type="GLuint" name="focalPoint"/>
+				<param type="GLfloat" name="focalX"/>
+				<param type="GLfloat" name="focalY"/>
+				<param type="GLfloat" name="gainX"/>
+				<param type="GLfloat" name="gainY"/>
+				<param type="GLfloat" name="foveaArea"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

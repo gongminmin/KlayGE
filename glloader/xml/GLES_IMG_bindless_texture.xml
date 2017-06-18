@@ -1,0 +1,45 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_bindless_texture" reg_no="270">
+	<functions>
+		<function name="glGetTextureHandleIMG" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+			</params>
+		</function>
+		<function name="glGetTextureSamplerHandleIMG" return="GLuint64">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLuint" name="sampler"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64IMG" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glUniformHandleui64vIMG" return="void">
+			<params>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64IMG" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLuint64" name="value"/>
+			</params>
+		</function>
+		<function name="glProgramUniformHandleui64vIMG" return="void">
+			<params>
+				<param type="GLuint" name="program"/>
+				<param type="GLint" name="location"/>
+				<param type="GLsizei" name="count"/>
+				<param type="const GLuint64*" name="values"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

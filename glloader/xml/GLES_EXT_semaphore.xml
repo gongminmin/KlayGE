@@ -1,0 +1,80 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_semaphore" reg_no="280">
+	<tokens>
+		<token name="GL_LAYOUT_GENERAL_EXT" value="0x958D"/>
+		<token name="GL_LAYOUT_COLOR_ATTACHMENT_EXT" value="0x958E"/>
+		<token name="GL_LAYOUT_DEPTH_STENCIL_ATTACHMENT_EXT" value="0x958F"/>
+		<token name="GL_LAYOUT_DEPTH_STENCIL_READ_ONLY_EXT" value="0x9590"/>
+		<token name="GL_LAYOUT_SHADER_READ_ONLY_EXT" value="0x9591"/>
+		<token name="GL_LAYOUT_TRANSFER_SRC_EXT" value="0x9592"/>
+		<token name="GL_LAYOUT_TRANSFER_DST_EXT" value="0x9593"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetUnsignedBytevEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLubyte*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetUnsignedBytei_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLubyte*" name="data"/>
+			</params>
+		</function>
+		<function name="glGenSemaphoresEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="semaphores"/>
+			</params>
+		</function>
+		<function name="glDeleteSemaphoresEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="semaphores"/>
+			</params>
+		</function>
+		<function name="glIsSemaphoreEXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+			</params>
+		</function>
+		<function name="glSemaphoreParameterui64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLuint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetSemaphoreParameterui64vEXT" return="void">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLuint64*" name="params"/>
+			</params>
+		</function>
+		<function name="glWaitSemaphoreEXT" return="void">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+				<param type="GLuint" name="numBufferBarriers"/>
+				<param type="const GLuint*" name="buffers"/>
+				<param type="GLuint" name="numTextureBarriers"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLenum*" name="srcLayouts"/>
+			</params>
+		</function>
+		<function name="glSignalSemaphoreEXT" return="void">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+				<param type="GLuint" name="numBufferBarriers"/>
+				<param type="const GLuint*" name="buffers"/>
+				<param type="GLuint" name="numTextureBarriers"/>
+				<param type="const GLuint*" name="textures"/>
+				<param type="const GLenum*" name="dstLayouts"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

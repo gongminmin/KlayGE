@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_conservative_raster_pre_snap_triangles" reg_no="262">
+	<tokens>
+		<token name="GL_CONSERVATIVE_RASTER_MODE_NV" value="0x954D"/>
+		<token name="GL_CONSERVATIVE_RASTER_MODE_POST_SNAP_NV" value="0x954E"/>
+		<token name="GL_CONSERVATIVE_RASTER_MODE_PRE_SNAP_TRIANGLES_NV" value="0x954F"/>
+		<token name="GL_CONSERVATIVE_RASTER_MODE_NV" value="0x954D"/>
+	</tokens>
+
+	<functions>
+		<function name="glConservativeRasterParameteriNV" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint" name="param"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_semaphore_fd" reg_no="281">
+	<tokens>
+		<token name="GL_HANDLE_TYPE_OPAQUE_FD_EXT" value="0x9586"/>
+	</tokens>
+
+	<functions>
+		<function name="glImportSemaphoreFdEXT" return="void">
+			<params>
+				<param type="GLuint" name="semaphore"/>
+				<param type="GLenum" name="handleType"/>
+				<param type="GLint" name="fd"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

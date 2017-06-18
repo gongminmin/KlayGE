@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_viewport_swizzle" reg_no="258">
+	<tokens>
+		<token name="GL_VIEWPORT_SWIZZLE_POSITIVE_X_NV" value="0x9350"/>
+		<token name="GL_VIEWPORT_SWIZZLE_NEGATIVE_X_NV" value="0x9351"/>
+		<token name="GL_VIEWPORT_SWIZZLE_POSITIVE_Y_NV" value="0x9352"/>
+		<token name="GL_VIEWPORT_SWIZZLE_NEGATIVE_Y_NV" value="0x9353"/>
+		<token name="GL_VIEWPORT_SWIZZLE_POSITIVE_Z_NV" value="0x9354"/>
+		<token name="GL_VIEWPORT_SWIZZLE_NEGATIVE_Z_NV" value="0x9355"/>
+		<token name="GL_VIEWPORT_SWIZZLE_POSITIVE_W_NV" value="0x9356"/>
+		<token name="GL_VIEWPORT_SWIZZLE_NEGATIVE_W_NV" value="0x9357"/>
+		<token name="GL_VIEWPORT_SWIZZLE_X_NV" value="0x9358"/>
+		<token name="GL_VIEWPORT_SWIZZLE_Y_NV" value="0x9359"/>
+		<token name="GL_VIEWPORT_SWIZZLE_Z_NV" value="0x935A"/>
+		<token name="GL_VIEWPORT_SWIZZLE_W_NV" value="0x935B"/>
+	</tokens>
+
+	<functions>
+		<function name="glViewportSwizzleNV" return="void">
+			<params>
+				<param type="GLuint" name="index"/>
+				<param type="GLenum" name="swizzlex"/>
+				<param type="GLenum" name="swizzley"/>
+				<param type="GLenum" name="swizzlez"/>
+				<param type="GLenum" name="swizzlew"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

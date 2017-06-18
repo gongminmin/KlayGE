@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_NV_texture_barrier" reg_no="271">
+	<functions>
+		<function name="glTextureBarrierNV" return="void"/>
+	</functions>
+</gl_extension>

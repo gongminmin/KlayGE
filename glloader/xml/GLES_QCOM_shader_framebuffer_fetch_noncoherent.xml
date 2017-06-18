@@ -1,0 +1,11 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_QCOM_shader_framebuffer_fetch_noncoherent" reg_no="277">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_FETCH_NONCOHERENT_QCOM" value="0x96A2"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferFetchBarrierQCOM" return="void"/>
+	</functions>
+</gl_extension>

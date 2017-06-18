@@ -1,0 +1,195 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_memory_object" reg_no="280">
+	<tokens>
+		<token name="GL_TEXTURE_TILING_EXT" value="0x9580"/>
+		<token name="GL_PROTECTED_MEMORY_OBJECT_EXT" value="0x959B"/>
+		<token name="GL_NUM_TILING_TYPES_EXT" value="0x9582"/>
+		<token name="GL_TILING_TYPES_EXT" value="0x9583"/>
+		<token name="GL_OPTIMAL_TILING_EXT" value="0x9584"/>
+		<token name="GL_LINEAR_TILING_EXT" value="0x9585"/>
+		<token name="GL_NUM_DEVICE_UUIDS_EXT" value="0x9596"/>
+		<token name="GL_DEVICE_UUID_EXT" value="0x9597"/>
+		<token name="GL_DRIVER_UUID_EXT" value="0x9598"/>
+		<token name="GL_UUID_SIZE_EXT" value="16"/>
+	</tokens>
+
+	<functions>
+		<function name="glGetUnsignedBytevEXT" return="void">
+			<params>
+				<param type="GLenum" name="pname"/>
+				<param type="GLubyte*" name="data"/>
+			</params>
+		</function>
+		<function name="glGetUnsignedBytei_vEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLuint" name="index"/>
+				<param type="GLubyte*" name="data"/>
+			</params>
+		</function>
+		<function name="glDeleteMemoryObjectsEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="memoryObjects"/>
+			</params>
+		</function>
+		<function name="IsMemoryObjectEXT" return="GLboolean">
+			<params>
+				<param type="GLuint" name="memoryObject"/>
+			</params>
+		</function>
+		<function name="glCreateMemoryObjectsEXT" return="void">
+			<params>
+				<param type="GLsizei" name="n"/>
+				<param type="GLuint*" name="memoryObjects"/>
+			</params>
+		</function>
+		<function name="glMemoryObjectParameterivEXT" return="void">
+			<params>
+				<param type="GLuint" name="memoryObject"/>
+				<param type="GLenum" name="pname"/>
+				<param type="const GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glGetMemoryObjectParameterivEXT" return="void">
+			<params>
+				<param type="GLuint" name="memoryObject"/>
+				<param type="GLenum" name="pname"/>
+				<param type="GLint*" name="params"/>
+			</params>
+		</function>
+		<function name="glTexStorageMem2DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTexStorageMem2DMultisampleEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTexStorageMem3DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTexStorageMem3DMultisampleEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glBufferStorageMemEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTextureStorageMem2DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTextureStorageMem2DMultisampleEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTextureStorageMem3DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTextureStorageMem3DMultisampleEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="samples"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLsizei" name="height"/>
+				<param type="GLsizei" name="depth"/>
+				<param type="GLboolean" name="fixedSampleLocations"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glNamedBufferStorageMemEXT" return="void">
+			<params>
+				<param type="GLuint" name="buffer"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTexStorageMem1DEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+		<function name="glTextureStorageMem1DEXT" return="void">
+			<params>
+				<param type="GLuint" name="texture"/>
+				<param type="GLsizei" name="levels"/>
+				<param type="GLenum" name="internalFormat"/>
+				<param type="GLsizei" name="width"/>
+				<param type="GLuint" name="memory"/>
+				<param type="GLuint64" name="offset"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

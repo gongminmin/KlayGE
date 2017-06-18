@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_IMG_framebuffer_downsample" reg_no="255">
+	<tokens>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_AND_DOWNSAMPLE_IMG" value="0x913C"/>
+		<token name="GL_NUM_DOWNSAMPLE_SCALES_IMG" value="0x913D"/>
+		<token name="GL_DOWNSAMPLE_SCALES_IMG" value="0x913E"/>
+		<token name="GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_SCALE_IMG" value="0x913F"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferTexture2DDownsampleIMG" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLenum" name="textarget"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="xscale"/>
+				<param type="GLint" name="yscale"/>
+			</params>
+		</function>
+		<function name="glFramebufferTextureLayerDownsampleIMG" return="GLsizei">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLenum" name="attachment"/>
+				<param type="GLuint" name="texture"/>
+				<param type="GLint" name="level"/>
+				<param type="GLint" name="layer"/>
+				<param type="GLint" name="xscale"/>
+				<param type="GLint" name="yscale"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

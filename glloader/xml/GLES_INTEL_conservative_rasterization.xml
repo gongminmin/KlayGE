@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_INTEL_conservative_rasterization" reg_no="265">
+	<tokens>
+		<token name="GL_CONSERVATIVE_RASTERIZATION_INTEL" value="0x83FE"/>
+	</tokens>
+</gl_extension>

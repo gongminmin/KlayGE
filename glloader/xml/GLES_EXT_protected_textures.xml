@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_protected_textures" reg_no="256">
+	<tokens>
+		<token name="GL_CONTEXT_FLAG_PROTECTED_CONTENT_BIT_EXT" value="0x00000010"/>
+		<token name="GL_TEXTURE_PROTECTED_EXT" value="0x8BFA"/>
+	</tokens>
+</gl_extension>

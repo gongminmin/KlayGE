@@ -1,0 +1,30 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_shader_pixel_local_storage2" reg_no="253">
+	<tokens>
+		<token name="GL_MAX_SHADER_COMBINED_LOCAL_STORAGE_FAST_SIZE_EXT" value="0x9650"/>
+		<token name="GL_MAX_SHADER_COMBINED_LOCAL_STORAGE_SIZE_EXT" value="0x9651"/>
+		<token name="GL_FRAMEBUFFER_INCOMPLETE_INSUFFICIENT_SHADER_COMBINED_LOCAL_STORAGE_EXT" value="0x9652"/>
+	</tokens>
+
+	<functions>
+		<function name="glFramebufferPixelLocalStorageSizeEXT" return="void">
+			<params>
+				<param type="GLuint" name="target"/>
+				<param type="GLsizei" name="size"/>
+			</params>
+		</function>
+		<function name="glGetFramebufferPixelLocalStorageSizeEXT" return="GLsizei">
+			<params>
+				<param type="GLuint" name="target"/>
+			</params>
+		</function>
+		<function name="glClearPixelLocalStorageuiEXT" return="void">
+			<params>
+				<param type="GLsizei" name="offset"/>
+				<param type="GLsizei" name="n"/>
+				<param type="const GLuint*" name="values"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>
