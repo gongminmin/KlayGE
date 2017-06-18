@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_pixel_format_float" reg_no="106">
+	<tokens>
+		<token name="EGL_COLOR_COMPONENT_TYPE_EXT" value="0x3339"/>
+		<token name="EGL_COLOR_COMPONENT_TYPE_FIXED_EXT" value="0x333A"/>
+		<token name="EGL_COLOR_COMPONENT_TYPE_FLOAT_EXT" value="0x333B"/>
+	</tokens>
+</gl_extension>

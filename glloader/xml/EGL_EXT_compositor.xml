@@ -1,0 +1,58 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_compositor" reg_no="116">
+	<tokens>
+		<token name="EGL_PRIMARY_COMPOSITOR_CONTEXT_EXT" value="0x3460"/>
+		<token name="EGL_EXTERNAL_REF_ID_EXT" value="0x3461"/>
+		<token name="EGL_COMPOSITOR_DROP_NEWEST_FRAME_EXT" value="0x3462"/>
+		<token name="EGL_COMPOSITOR_KEEP_NEWEST_FRAME_EXT" value="0x3463"/>
+	</tokens>
+
+	<functions>
+		<function name="eglCompositorSetContextListEXT" return="EGLBoolean">
+			<params>
+				<param type="const EGLint*" name="external_ref_ids"/>
+				<param type="EGLint" name="num_entries"/>
+			</params>
+		</function>
+		<function name="eglCompositorSetContextAttributesEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_ref_id"/>
+				<param type="const EGLint*" name="context_attributes"/>
+				<param type="EGLint" name="num_entries"/>
+			</params>
+		</function>
+		<function name="eglCompositorSetWindowListEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_ref_id"/>
+				<param type="const EGLint*" name="external_ref_ids"/>
+				<param type="EGLint" name="num_entries"/>
+			</params>
+		</function>
+		<function name="eglCompositorSetWindowAttributesEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_win_id"/>
+				<param type="const EGLint*" name="window_attributes"/>
+				<param type="EGLint" name="num_entries"/>
+			</params>
+		</function>
+		<function name="eglCompositorBindTexWindowEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_win_id"/>
+			</params>
+		</function>
+		<function name="eglCompositorSetSizeEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_win_id"/>
+				<param type="EGLint" name="width"/>
+				<param type="EGLint" name="height"/>
+			</params>
+		</function>
+		<function name="eglCompositorSwapPolicyEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLint" name="external_win_id"/>
+				<param type="EGLint" name="policy"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_gl_colorspace_bt2020_pq" reg_no="107">
+	<tokens>
+		<token name="EGL_GL_COLORSPACE_BT2020_PQ_EXT" value="0x3340"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_presentation_time" reg_no="98">
+	<typedefs>
+		<typedef type="khronos_stime_nanoseconds_t" synonym="EGLnsecsANDROID"/>
+	</typedefs>
+
+	<functions>
+		<function name="eglPresentationTimeANDROID" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLSurface" name="surface"/>
+				<param type="EGLnsecsANDROID" name="time"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

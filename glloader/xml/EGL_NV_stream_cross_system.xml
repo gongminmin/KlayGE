@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_cross_system" reg_no="114">
+	<tokens>
+		<token name="EGL_STREAM_CROSS_SYSTEM_NV" value="0x334F"/>
+	</tokens>
+</gl_extension>

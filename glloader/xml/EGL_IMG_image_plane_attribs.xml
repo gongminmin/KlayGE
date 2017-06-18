@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_IMG_image_plane_attribs" reg_no="95">
+	<tokens>
+		<token name="EGL_NATIVE_BUFFER_MULTIPLANE_SEPARATE_IMG" value="0x3105"/>
+		<token name="EGL_NATIVE_BUFFER_PLANE_OFFSET_IMG" value="0x3106"/>
+	</tokens>
+</gl_extension>

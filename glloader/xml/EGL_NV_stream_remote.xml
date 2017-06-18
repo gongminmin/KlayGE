@@ -1,0 +1,14 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_remote" reg_no="114">
+	<tokens>
+		<token name="EGL_STREAM_STATE_INITIALIZING_NV" value="0x3240"/>
+		<token name="EGL_STREAM_TYPE_NV" value="0x3241"/>
+		<token name="EGL_STREAM_PROTOCOL_NV" value="0x3242"/>
+		<token name="EGL_STREAM_ENDPOINT_NV" value="0x3243"/>
+		<token name="EGL_STREAM_LOCAL_NV" value="0x3244"/>
+		<token name="EGL_STREAM_PROTOCOL_FD_NV" value="0x3246"/>
+		<token name="EGL_STREAM_PRODUCER_NV" value="0x3247"/>
+		<token name="EGL_STREAM_CONSUMER_NV" value="0x3248"/>
+	</tokens>
+</gl_extension>

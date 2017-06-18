@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ANDROID_front_buffer_auto_refresh" reg_no="100">
+	<tokens>
+		<token name="EGL_FRONT_BUFFER_AUTO_REFRESH_ANDROID" value="0x314C"/>
+	</tokens>
+</gl_extension>

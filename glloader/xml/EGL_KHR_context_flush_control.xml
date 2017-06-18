@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_context_flush_control" reg_no="102">
+	<tokens>
+		<token name="EGL_CONTEXT_RELEASE_BEHAVIOR_KHR" value="0x2097"/>
+		<token name="EGL_CONTEXT_RELEASE_BEHAVIOR_NONE_KHR" value="0x0000"/>
+		<token name="EGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_KHR" value="0x2098"/>	
+	</tokens>
+</gl_extension>

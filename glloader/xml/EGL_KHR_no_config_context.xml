@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_no_config_context" reg_no="101">
+	<tokens>
+		<token name="EGL_NO_CONFIG_KHR" value="((EGLConfig)0)"/>
+	</tokens>
+</gl_extension>

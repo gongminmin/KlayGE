@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_KHR_mutable_render_buffer" reg_no="96">
+	<tokens>
+		<token name="EGL_MUTABLE_RENDER_BUFFER_BIT_KHR" value="0x00001000"/>
+	</tokens>
+</gl_extension>

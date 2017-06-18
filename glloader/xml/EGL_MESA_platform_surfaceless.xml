@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_MESA_platform_surfaceless" reg_no="104">
+	<tokens>
+		<token name="EGL_PLATFORM_SURFACELESS_MESA" value="0x31DD"/>
+	</tokens>
+</gl_extension>

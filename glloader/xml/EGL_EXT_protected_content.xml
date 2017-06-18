@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_protected_content" reg_no="97">
+	<tokens>
+		<token name="EGL_PROTECTED_CONTENT_EXT" value="0x32C0"/>
+	</tokens>
+</gl_extension>

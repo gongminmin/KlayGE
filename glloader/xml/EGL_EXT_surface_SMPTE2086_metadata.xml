@@ -1,0 +1,16 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_surface_SMPTE2086_metadata" reg_no="109">
+	<tokens>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_RX_EXT" value="0x3341"/>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_RY_EXT" value="0x3342"/>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_GX_EXT" value="0x3343"/>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_GY_EXT" value="0x3344"/>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_BX_EXT" value="0x3345"/>
+		<token name="EGL_SMPTE2086_DISPLAY_PRIMARY_BY_EXT" value="0x3346"/>
+		<token name="EGL_SMPTE2086_WHITE_POINT_X_EXT" value="0x3347"/>
+		<token name="EGL_SMPTE2086_WHITE_POINT_Y_EXT" value="0x3348"/>
+		<token name="EGL_SMPTE2086_MAX_LUMINANCE_EXT" value="0x3349"/>
+		<token name="EGL_SMPTE2086_MIN_LUMINANCE_EXT" value="0x334A"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_consumer_gltexture_yuv" reg_no="94">
+	<tokens>
+		<token name="EGL_YUV_PLANE0_TEXTURE_UNIT_NV" value="0x332C"/>
+		<token name="EGL_YUV_PLANE1_TEXTURE_UNIT_NV" value="0x332D"/>
+		<token name="EGL_YUV_PLANE2_TEXTURE_UNIT_NV" value="0x332E"/>
+		<token name="EGL_YUV_NUMBER_OF_PLANES_EXT" value="0x3311"/>
+		<token name="EGL_YUV_BUFFER_EXT" value="0x3300"/>
+	</tokens>
+
+	<functions>
+		<function name="eglStreamConsumerGLTextureExternalAttribsNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLAttrib*" name="attrib_list"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

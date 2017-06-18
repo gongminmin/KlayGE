@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_fifo_next" reg_no="110">
+	<tokens>
+		<token name="EGL_PENDING_FRAME_NV" value="0x3329"/>
+		<token name="EGL_STREAM_TIME_PENDING_NV" value="0x332A"/>
+	</tokens>
+</gl_extension>

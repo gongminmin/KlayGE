@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_fifo_synchronous" reg_no="111">
+	<tokens>
+		<token name="EGL_STREAM_FIFO_SYNCHRONOUS_NV" value="0x3336"/>
+	</tokens>
+</gl_extension>

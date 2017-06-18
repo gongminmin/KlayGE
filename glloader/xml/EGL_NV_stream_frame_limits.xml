@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_frame_limits" reg_no="113">
+	<tokens>
+		<token name="EGL_PRODUCER_MAX_FRAME_HINT_NV" value="0x3337"/>
+		<token name="EGL_CONSUMER_MAX_FRAME_HINT_NV" value="0x3338"/>
+	</tokens>
+</gl_extension>

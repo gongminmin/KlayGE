@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_gl_colorspace_scrgb_linear" reg_no="108">
+	<tokens>
+		<token name="EGL_GL_COLORSPACE_SCRGB_LINEAR_EXT" value="0x3350"/>
+	</tokens>
+</gl_extension>

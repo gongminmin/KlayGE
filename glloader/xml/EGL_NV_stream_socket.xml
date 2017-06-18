@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_socket" reg_no="115">
+	<tokens>
+		<token name="EGL_STREAM_PROTOCOL_SOCKET_NV" value="0x324B"/>
+		<token name="EGL_SOCKET_HANDLE_NV" value="0x324C"/>
+		<token name="EGL_SOCKET_TYPE_NV" value="0x324D"/>
+	</tokens>
+</gl_extension>

@@ -1,0 +1,42 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_image_dma_buf_import_modifiers" reg_no="105">
+	<typedefs>
+		<typedef type="khronos_uint64_t" synonym="EGLuint64KHR"/>
+	</typedefs>
+
+	<tokens>
+		<token name="EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT" value="0x3443"/>
+		<token name="EGL_DMA_BUF_PLANE0_MODIFIER_HI_EXT" value="0x3444"/>
+		<token name="EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT" value="0x3445"/>
+		<token name="EGL_DMA_BUF_PLANE1_MODIFIER_HI_EXT" value="0x3446"/>
+		<token name="EGL_DMA_BUF_PLANE2_MODIFIER_LO_EXT" value="0x3447"/>
+		<token name="EGL_DMA_BUF_PLANE2_MODIFIER_HI_EXT" value="0x3448"/>
+		<token name="EGL_DMA_BUF_PLANE3_FD_EXT" value="0x3440"/>
+		<token name="EGL_DMA_BUF_PLANE3_OFFSET_EXT" value="0x3441"/>
+		<token name="EGL_DMA_BUF_PLANE3_PITCH_EXT" value="0x3442"/>
+		<token name="EGL_DMA_BUF_PLANE3_MODIFIER_LO_EXT" value="0x3449"/>
+		<token name="EGL_DMA_BUF_PLANE3_MODIFIER_HI_EXT" value="0x344A"/>
+	</tokens>
+
+	<functions>
+		<function name="eglQueryDmaBufFormatsEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLint" name="max_formats"/>
+				<param type="EGLint*" name="formats"/>
+				<param type="EGLint*" name="num_formats"/>
+			</params>
+		</function>
+		<function name="eglQueryDmaBufModifiersEXT" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLint" name="format"/>
+				<param type="EGLint" name="max_modifiers"/>
+				<param type="EGLuint64KHR*" name="modifiers"/>
+				<param type="EGLBoolean*" name="external_only"/>
+				<param type="EGLint*" name="num_modifiers"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

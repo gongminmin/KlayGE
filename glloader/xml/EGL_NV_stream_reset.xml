@@ -1,0 +1,17 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_reset" reg_no="112">
+	<tokens>
+		<token name="EGL_SUPPORT_RESET_NV" value="0x3334"/>
+		<token name="EGL_SUPPORT_REUSE_NV" value="0x3335"/>
+	</tokens>
+
+	<functions>
+		<function name="eglResetStreamNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

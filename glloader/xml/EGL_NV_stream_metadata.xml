@@ -1,0 +1,51 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_NV_stream_metadata" reg_no="93">
+	<tokens>
+		<token name="EGL_MAX_STREAM_METADATA_BLOCKS_NV" value="0x3250"/>
+		<token name="EGL_MAX_STREAM_METADATA_BLOCK_SIZE_NV" value="0x3251"/>
+		<token name="EGL_MAX_STREAM_METADATA_TOTAL_SIZE_NV" value="0x3252"/>
+		<token name="EGL_PRODUCER_METADATA_NV" value="0x3253"/>
+		<token name="EGL_CONSUMER_METADATA_NV" value="0x3254"/>
+		<token name="EGL_PENDING_METADATA_NV" value="0x3328"/>
+		<token name="EGL_METADATA0_SIZE_NV" value="0x3255"/>
+		<token name="EGL_METADATA1_SIZE_NV" value="0x3256"/>
+		<token name="EGL_METADATA2_SIZE_NV" value="0x3257"/>
+		<token name="EGL_METADATA3_SIZE_NV" value="0x3258"/>
+		<token name="EGL_METADATA0_TYPE_NV" value="0x3259"/>
+		<token name="EGL_METADATA1_TYPE_NV" value="0x325A"/>
+		<token name="EGL_METADATA2_TYPE_NV" value="0x325B"/>
+		<token name="EGL_METADATA3_TYPE_NV" value="0x325C"/>
+	</tokens>
+
+	<functions>
+		<function name="eglQueryDisplayAttribNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLint" name="attribute"/>
+				<param type="EGLAttrib*" name="value"/>
+			</params>
+		</function>
+		<function name="eglSetStreamMetadataNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLint" name="n"/>
+				<param type="EGLint" name="offset"/>
+				<param type="EGLint" name="size"/>
+				<param type="const void*" name="data"/>
+			</params>
+		</function>
+		<function name="eglQueryStreamMetadataNV" return="EGLBoolean">
+			<params>
+				<param type="EGLDisplay" name="dpy"/>
+				<param type="EGLStreamKHR" name="stream"/>
+				<param type="EGLenum" name="name"/>
+				<param type="EGLint" name="n"/>
+				<param type="EGLint" name="offset"/>
+				<param type="EGLint" name="size"/>
+				<param type="void*" name="data"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

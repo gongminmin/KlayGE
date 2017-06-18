@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_ARM_implicit_external_sync" reg_no="103">
+	<tokens>
+		<token name="EGL_SYNC_PRIOR_COMMANDS_IMPLICIT_EXTERNAL_ARM" value="0x328A"/>
+	</tokens>
+</gl_extension>
