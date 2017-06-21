@@ -135,8 +135,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillSRVDesc(first_array_index, num_items, first_level, num_levels);
-				D3D12ShaderResourceViewSimulationPtr sr_view
-					= MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this->shared_from_this(), desc);
+				D3D12ShaderResourceViewSimulationPtr sr_view = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, desc);
 				return d3d_sr_views_.emplace(hash_val, sr_view).first->second;
 			}
 		}
@@ -168,8 +167,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillUAVDesc(first_array_index, num_items, level);
-				D3D12UnorderedAccessViewSimulationPtr ua_view
-					= MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this->shared_from_this(), desc);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
 		}
@@ -201,8 +199,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillUAVDesc(array_index, first_slice, num_slices, level);
-				D3D12UnorderedAccessViewSimulationPtr ua_view
-					= MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this->shared_from_this(), desc);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
 		}
@@ -234,8 +231,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillUAVDesc(first_array_index, num_items, first_face, num_faces, level);
-				D3D12UnorderedAccessViewSimulationPtr ua_view
-					= MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this->shared_from_this(), desc);
+				D3D12UnorderedAccessViewSimulationPtr ua_view = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, desc);
 				return d3d_ua_views_.emplace(hash_val, ua_view).first->second;
 			}
 		}
@@ -269,8 +265,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillRTVDesc(first_array_index, array_size, level);
-				D3D12RenderTargetViewSimulationPtr rt_view
-					= MakeSharedPtr<D3D12RenderTargetViewSimulation>(this->shared_from_this(), desc);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
 		}
@@ -303,8 +298,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillRTVDesc(array_index, first_slice, num_slices, level);
-				D3D12RenderTargetViewSimulationPtr rt_view
-					= MakeSharedPtr<D3D12RenderTargetViewSimulation>(this->shared_from_this(), desc);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
 		}
@@ -336,8 +330,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillRTVDesc(array_index, face, level);
-				D3D12RenderTargetViewSimulationPtr rt_view
-					= MakeSharedPtr<D3D12RenderTargetViewSimulation>(this->shared_from_this(), desc);
+				D3D12RenderTargetViewSimulationPtr rt_view = MakeSharedPtr<D3D12RenderTargetViewSimulation>(this, desc);
 				return d3d_rt_views_.emplace(hash_val, rt_view).first->second;
 			}
 		}
@@ -371,8 +364,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillDSVDesc(first_array_index, array_size, level);
-				D3D12DepthStencilViewSimulationPtr ds_view
-					= MakeSharedPtr<D3D12DepthStencilViewSimulation>(this->shared_from_this(), desc);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
 		}
@@ -405,8 +397,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillDSVDesc(array_index, first_slice, num_slices, level);
-				D3D12DepthStencilViewSimulationPtr ds_view
-					= MakeSharedPtr<D3D12DepthStencilViewSimulation>(this->shared_from_this(), desc);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
 		}
@@ -437,8 +428,7 @@ namespace KlayGE
 			else
 			{
 				auto desc = this->FillDSVDesc(array_index, face, level);
-				D3D12DepthStencilViewSimulationPtr ds_view
-					= MakeSharedPtr<D3D12DepthStencilViewSimulation>(this->shared_from_this(), desc);
+				D3D12DepthStencilViewSimulationPtr ds_view = MakeSharedPtr<D3D12DepthStencilViewSimulation>(this, desc);
 				return d3d_ds_views_.emplace(hash_val, ds_view).first->second;
 			}
 		}

@@ -46,7 +46,7 @@
 
 namespace KlayGE
 {
-	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(D3D12ResourcePtr const & res,
+	D3D12ShaderResourceViewSimulation::D3D12ShaderResourceViewSimulation(D3D12Resource* res,
 			D3D12_SHADER_RESOURCE_VIEW_DESC const & srv_desc)
 		: res_(res)
 	{
@@ -68,7 +68,7 @@ namespace KlayGE
 	}
 
 
-	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(D3D12ResourcePtr const & res,
+	D3D12RenderTargetViewSimulation::D3D12RenderTargetViewSimulation(D3D12Resource* res,
 			D3D12_RENDER_TARGET_VIEW_DESC const & rtv_desc)
 		: res_(res)
 	{
@@ -90,7 +90,7 @@ namespace KlayGE
 	}
 
 
-	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(D3D12ResourcePtr const & res,
+	D3D12DepthStencilViewSimulation::D3D12DepthStencilViewSimulation(D3D12Resource* res,
 		D3D12_DEPTH_STENCIL_VIEW_DESC const & dsv_desc)
 		: res_(res)
 	{
@@ -112,7 +112,7 @@ namespace KlayGE
 	}
 
 
-	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(D3D12ResourcePtr const & res,
+	D3D12UnorderedAccessViewSimulation::D3D12UnorderedAccessViewSimulation(D3D12Resource* res,
 			D3D12_UNORDERED_ACCESS_VIEW_DESC const & uav_desc)
 		: res_(res), counter_offset_(0)
 	{
@@ -205,7 +205,7 @@ namespace KlayGE
 		desc.Buffer.FirstElement = 0;
 		desc.Buffer.NumElements = std::min(width * height, gb.Size() / NumFormatBytes(pf));
 
-		rt_view_ = MakeSharedPtr<D3D12RenderTargetViewSimulation>(rt_src_, desc);
+		rt_view_ = MakeSharedPtr<D3D12RenderTargetViewSimulation>(rt_src_.get(), desc);
 
 		width_ = width * height;
 		height_ = 1;
@@ -330,8 +330,8 @@ namespace KlayGE
 		BOOST_ASSERT(IsDepthFormat(pf));
 
 		auto& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr ds_tex = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
-		ds_src_ = checked_pointer_cast<D3D12Texture>(ds_tex);
+		ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, pf, sample_count, sample_quality, EAH_GPU_Write);
+		ds_src_ = checked_pointer_cast<D3D12Texture>(ds_tex_);
 		ds_view_ = checked_cast<D3D12Texture*>(ds_src_.get())->RetriveD3DDepthStencilView(0, 1, 0);
 
 		width_ = width;

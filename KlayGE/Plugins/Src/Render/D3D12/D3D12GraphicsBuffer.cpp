@@ -157,7 +157,7 @@ namespace KlayGE
 			d3d_sr_view.Buffer.StructureByteStride = (access_hint_ & EAH_GPU_Structured) ? structure_byte_stride : 0;
 			d3d_sr_view.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			d3d_sr_view_ = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this->shared_from_this(), d3d_sr_view);
+			d3d_sr_view_ = MakeSharedPtr<D3D12ShaderResourceViewSimulation>(this, d3d_sr_view);
 		}
 
 		if ((access_hint_ & EAH_GPU_Write)
@@ -214,7 +214,7 @@ namespace KlayGE
 				d3d_ua_view.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
 			}
 
-			d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this->shared_from_this(), d3d_ua_view);
+			d3d_ua_view_ = MakeSharedPtr<D3D12UnorderedAccessViewSimulation>(this, d3d_ua_view);
 		}
 	}
 
