@@ -1159,7 +1159,7 @@ namespace KlayGE
 	void D3D12ShaderObject::CreateRootSignature()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		std::array<size_t, ShaderObject::ST_NumShaderTypes * 4> num;
 		size_t num_sampler = 0;

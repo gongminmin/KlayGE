@@ -45,7 +45,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		ID3D12Fence* fence;
 		TIFHR(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_ID3D12Fence, reinterpret_cast<void**>(&fence)));
@@ -63,7 +63,7 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D12CommandQueuePtr cmd_queue;
+		ID3D12CommandQueue* cmd_queue;
 		switch (ft)
 		{
 		case FT_Render:
@@ -82,6 +82,11 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid fence type");
 		}
 
+		return this->Signal(cmd_queue);
+	}
+
+	uint64_t D3D12Fence::Signal(ID3D12CommandQueue* cmd_queue)
+	{
 		uint64_t const id = fence_val_;
 		TIFHR(cmd_queue->Signal(fence_.get(), id));
 		++ fence_val_;

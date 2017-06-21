@@ -77,7 +77,7 @@ namespace KlayGE
 	void D3D12FrameBuffer::SetRenderTargets()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		std::vector<ID3D12Resource*> rt_src;
 		std::vector<uint32_t> rt_first_subres;
@@ -191,7 +191,7 @@ namespace KlayGE
 	void D3D12FrameBuffer::BindBarrier()
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		std::vector<D3D12Resource*> rt_src;
 		std::vector<uint32_t> rt_first_subres;

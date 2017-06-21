@@ -58,7 +58,7 @@ namespace KlayGE
 	void D3D12GraphicsBuffer::CreateHWResource(void const * subres_init)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_RESOURCE_STATES init_state;
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -123,7 +123,7 @@ namespace KlayGE
 
 		if (subres_init != nullptr)
 		{
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
+			ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
 			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
@@ -284,7 +284,7 @@ namespace KlayGE
 		BOOST_ASSERT(this->Size() <= rhs.Size());
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 		D3D12GraphicsBuffer& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&rhs);
 
 		D3D12_HEAP_TYPE src_heap_type;

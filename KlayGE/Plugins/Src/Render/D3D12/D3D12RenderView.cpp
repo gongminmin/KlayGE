@@ -51,7 +51,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
@@ -73,7 +73,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		handle_ = re.RTVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocRTV();
@@ -95,7 +95,7 @@ namespace KlayGE
 		: res_(res)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		handle_ = re.DSVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocDSV();
@@ -117,7 +117,7 @@ namespace KlayGE
 		: res_(res), counter_offset_(0)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		ID3D12Resource* counter = nullptr;
 		if (D3D12_UAV_DIMENSION_BUFFER == uav_desc.ViewDimension)

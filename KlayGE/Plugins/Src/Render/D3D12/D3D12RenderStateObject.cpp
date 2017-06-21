@@ -297,7 +297,7 @@ namespace KlayGE
 			pso_desc.SampleDesc.Quality = 0;
 		
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto d3d_device = re.D3DDevice().get();
+			auto d3d_device = re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
@@ -340,7 +340,7 @@ namespace KlayGE
 			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto d3d_device = re.D3DDevice().get();
+			auto d3d_device = re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));

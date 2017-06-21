@@ -389,8 +389,8 @@ namespace KlayGE
 		else
 		{
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			ID3D12DevicePtr const & device = re.D3DDevice();
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+			ID3D12Device* device = re.D3DDevice();
+			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 			auto const & effect = *re.BlitEffect();
 			auto const & tech = *re.BilinearBlitTech();

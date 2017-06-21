@@ -125,8 +125,8 @@ namespace KlayGE
 		virtual ~D3D12RenderView();
 
 	protected:
-		ID3D12DevicePtr d3d_device_;
-		ID3D12GraphicsCommandListPtr d3d_cmd_list_;
+		ID3D12Device* d3d_device_;
+		ID3D12GraphicsCommandList* d3d_cmd_list_;
 	};
 	typedef std::shared_ptr<D3D12RenderView> D3D12RenderViewPtr;
 
@@ -256,8 +256,8 @@ namespace KlayGE
 		void ResetInitCount();
 
 	private:
-		ID3D12DevicePtr d3d_device_;
-		ID3D12GraphicsCommandListPtr d3d_cmd_list_;
+		ID3D12Device* d3d_device_;
+		ID3D12GraphicsCommandList* d3d_cmd_list_;
 
 		D3D12UnorderedAccessViewSimulationPtr ua_view_;
 		D3D12ResourcePtr ua_src_;

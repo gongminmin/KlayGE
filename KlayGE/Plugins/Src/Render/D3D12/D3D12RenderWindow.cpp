@@ -128,8 +128,8 @@ namespace KlayGE
 		viewport_->width	= width_;
 		viewport_->height	= height_;
 
-		ID3D12DevicePtr d3d_device;
-		ID3D12CommandQueuePtr d3d_cmd_queue;
+		ID3D12Device* d3d_device = nullptr;
+		ID3D12CommandQueue* d3d_cmd_queue = nullptr;
 
 		if (d3d12_re.D3DDevice())
 		{
@@ -140,19 +140,6 @@ namespace KlayGE
 		}
 		else
 		{
-#ifdef KLAYGE_DEBUG
-			{
-				ID3D12Debug* debug_ctrl = nullptr;
-				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12GetDebugInterface(
-						IID_ID3D12Debug, reinterpret_cast<void**>(&debug_ctrl))))
-				{
-					BOOST_ASSERT(debug_ctrl);
-					debug_ctrl->EnableDebugLayer();
-					debug_ctrl->Release();
-				}
-			}
-#endif
-
 			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
 			available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
 			available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
@@ -195,7 +182,7 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(adapter_->DXGIAdapter().get(),
 						feature_levels[i], IID_ID3D12Device, reinterpret_cast<void**>(&device))))
 				{
-					d3d_device = MakeCOMPtr(device);
+					d3d_device = device;
 
 					D3D12_COMMAND_QUEUE_DESC queue_desc;
 					queue_desc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -206,7 +193,7 @@ namespace KlayGE
 					ID3D12CommandQueue* cmd_queue;
 					TIFHR(d3d_device->CreateCommandQueue(&queue_desc,
 						IID_ID3D12CommandQueue, reinterpret_cast<void**>(&cmd_queue)));
-					d3d_cmd_queue = MakeCOMPtr(cmd_queue);
+					d3d_cmd_queue = cmd_queue;
 
 					D3D12_FEATURE_DATA_FEATURE_LEVELS req_feature_levels;
 					req_feature_levels.NumFeatureLevels = static_cast<UINT>(feature_levels.size());
@@ -252,8 +239,11 @@ namespace KlayGE
 					}
 					else
 					{
-						d3d_device.reset();
-						d3d_cmd_queue.reset();
+						d3d_device->Release();
+						d3d_device = nullptr;
+
+						d3d_cmd_queue->Release();
+						d3d_cmd_queue = nullptr;
 					}
 				}
 			}
@@ -332,7 +322,7 @@ namespace KlayGE
 		sc_fs_desc_.Windowed = !this->FullScreen();
 #endif
 
-		this->CreateSwapChain(d3d_cmd_queue.get(), settings.display_output_method != DOM_sRGB);
+		this->CreateSwapChain(d3d_cmd_queue, settings.display_output_method != DOM_sRGB);
 		Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -380,7 +370,7 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = d3d12_re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = d3d12_re.D3DRenderCmdList();
 		if (cmd_list)
 		{
 			cmd_list->ClearState(nullptr);
@@ -424,9 +414,9 @@ namespace KlayGE
 		}
 		else
 		{
-			ID3D12CommandQueuePtr const & cmd_queue = d3d12_re.D3DRenderCmdQueue();
+			ID3D12CommandQueue* cmd_queue = d3d12_re.D3DRenderCmdQueue();
 
-			this->CreateSwapChain(cmd_queue.get(), Context::Instance().Config().graphics_cfg.display_output_method != DOM_sRGB);
+			this->CreateSwapChain(cmd_queue, Context::Instance().Config().graphics_cfg.display_output_method != DOM_sRGB);
 			Verify(!!swap_chain_);
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -688,6 +678,8 @@ namespace KlayGE
 				{
 					sc4->SetColorSpace1(DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020);
 				}
+
+				sc4->Release();
 			}
 		}
 	}

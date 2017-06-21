@@ -55,6 +55,8 @@ namespace KlayGE
 			return fence_;
 		}
 
+		uint64_t Signal(ID3D12CommandQueue* cmd_queue);
+
 	private:
 		ID3D12FencePtr fence_;
 		HANDLE fence_event_;

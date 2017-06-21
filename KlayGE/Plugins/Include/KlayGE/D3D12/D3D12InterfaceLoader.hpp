@@ -42,7 +42,9 @@ namespace KlayGE
 	public:
 		static D3D12InterfaceLoader& Instance();
 
-		HRESULT CreateDXGIFactory1(REFIID riid, void** ppFactory) const;
+		void Destroy();
+
+		HRESULT CreateDXGIFactory2(UINT flags, REFIID riid, void** ppFactory) const;
 		HRESULT D3D12CreateDevice(IUnknown* pAdapter,
 			D3D_FEATURE_LEVEL MinimumFeatureLevel, REFIID riid,
 			void** ppDevice);
@@ -55,7 +57,7 @@ namespace KlayGE
 		~D3D12InterfaceLoader();
 
 	private:
-		typedef HRESULT (WINAPI *CreateDXGIFactory1Func)(REFIID riid, void** ppFactory);
+		typedef HRESULT (WINAPI *CreateDXGIFactory2Func)(UINT flags, REFIID riid, void** ppFactory);
 		typedef HRESULT (WINAPI *D3D12CreateDeviceFunc)(IUnknown* pAdapter,
 			D3D_FEATURE_LEVEL MinimumFeatureLevel, REFIID riid,
 			void** ppDevice);
@@ -63,7 +65,7 @@ namespace KlayGE
 		typedef HRESULT (WINAPI *D3D12SerializeRootSignatureFunc)(D3D12_ROOT_SIGNATURE_DESC const * pRootSignature,
 			D3D_ROOT_SIGNATURE_VERSION Version, ID3DBlob** ppBlob, ID3DBlob** ppErrorBlob);
 
-		CreateDXGIFactory1Func DynamicCreateDXGIFactory1_;
+		CreateDXGIFactory2Func DynamicCreateDXGIFactory2_;
 		D3D12CreateDeviceFunc DynamicD3D12CreateDevice_;
 		D3D12GetDebugInterfaceFunc DynamicD3D12GetDebugInterface_;
 		D3D12SerializeRootSignatureFunc DynamicD3D12SerializeRootSignature_;

@@ -85,24 +85,24 @@ namespace KlayGE
 		IDXGIFactory5* DXGIFactory5() const;
 		uint8_t DXGISubVer() const;
 
-		ID3D12DevicePtr const & D3DDevice() const;
-		ID3D12CommandQueuePtr const & D3DRenderCmdQueue() const;
-		ID3D12CommandAllocatorPtr const & D3DRenderCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3DRenderCmdList() const;
-		ID3D12CommandQueuePtr const & D3DComputeCmdQueue() const;
-		ID3D12CommandAllocatorPtr const & D3DComputeCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3DComputeCmdList() const;
-		ID3D12CommandQueuePtr const & D3DCopyCmdQueue() const;
-		ID3D12CommandAllocatorPtr const & D3DCopyCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3DCopyCmdList() const;
-		ID3D12CommandAllocatorPtr const & D3DResCmdAllocator() const;
-		ID3D12GraphicsCommandListPtr const & D3DResCmdList() const;
+		ID3D12Device* D3DDevice() const;
+		ID3D12CommandQueue* D3DRenderCmdQueue() const;
+		ID3D12CommandAllocator* D3DRenderCmdAllocator() const;
+		ID3D12GraphicsCommandList* D3DRenderCmdList() const;
+		ID3D12CommandQueue* D3DComputeCmdQueue() const;
+		ID3D12CommandAllocator* D3DComputeCmdAllocator() const;
+		ID3D12GraphicsCommandList*D3DComputeCmdList() const;
+		ID3D12CommandQueue* D3DCopyCmdQueue() const;
+		ID3D12CommandAllocator* D3DCopyCmdAllocator() const;
+		ID3D12GraphicsCommandList* D3DCopyCmdList() const;
+		ID3D12CommandAllocator* D3DResCmdAllocator() const;
+		ID3D12GraphicsCommandList* D3DResCmdList() const;
 		std::mutex& D3DResCmdListMutex()
 		{
 			return res_cmd_list_mutex_;
 		}
 		D3D_FEATURE_LEVEL DeviceFeatureLevel() const;
-		void D3DDevice(ID3D12DevicePtr const & device, ID3D12CommandQueuePtr const & cmd_queue, D3D_FEATURE_LEVEL feature_level);
+		void D3DDevice(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
 		void ClearPSOCache();
 		void CommitRenderCmd();
 		void CommitComputeCmd();
@@ -161,17 +161,17 @@ namespace KlayGE
 		
 		void ResetRenderStates();
 
-		ID3D12DescriptorHeapPtr const & RTVDescHeap() const
+		ID3D12DescriptorHeap* RTVDescHeap() const
 		{
-			return rtv_desc_heap_;
+			return rtv_desc_heap_.get();
 		}
-		ID3D12DescriptorHeapPtr const & DSVDescHeap() const
+		ID3D12DescriptorHeap* DSVDescHeap() const
 		{
-			return dsv_desc_heap_;
+			return dsv_desc_heap_.get();
 		}
-		ID3D12DescriptorHeapPtr const & CBVSRVUAVDescHeap() const
+		ID3D12DescriptorHeap* CBVSRVUAVDescHeap() const
 		{
-			return cbv_srv_uav_desc_heap_;
+			return cbv_srv_uav_desc_heap_.get();
 		}
 		uint32_t RTVDescSize() const
 		{

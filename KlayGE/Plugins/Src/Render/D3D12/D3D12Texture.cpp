@@ -513,7 +513,7 @@ namespace KlayGE
 	void D3D12Texture::DoHWCopyToTexture(Texture& target)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if ((access_hint_ & EAH_CPU_Write) && (target.AccessHint() & EAH_GPU_Read))
 		{
@@ -563,7 +563,7 @@ namespace KlayGE
 			uint32_t width, uint32_t height, uint32_t depth)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if ((access_hint_ & EAH_CPU_Write) && (target.AccessHint() & EAH_GPU_Read))
 		{
@@ -618,7 +618,7 @@ namespace KlayGE
 			ArrayRef<ElementInitData> init_data)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_CLEAR_VALUE clear_value;
 
@@ -751,7 +751,7 @@ namespace KlayGE
 
 		if (!init_data.empty())
 		{
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DResCmdList();
+			ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
 			D3D12_RESOURCE_BARRIER barrier;
@@ -822,7 +822,7 @@ namespace KlayGE
 			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		KFL_UNUSED(width);
 		KFL_UNUSED(height);
@@ -837,7 +837,7 @@ namespace KlayGE
 
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -887,7 +887,7 @@ namespace KlayGE
 	void D3D12Texture::DoUnmap(uint32_t subres)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		d3d_texture_upload_heaps_->Unmap(0, nullptr);
 
@@ -898,7 +898,7 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, nullptr, nullptr, &required_size);
 
-			ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 			re.ForceCPUGPUSync();
 
@@ -1021,7 +1021,7 @@ namespace KlayGE
 		void const * data)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1072,7 +1072,7 @@ namespace KlayGE
 		uint32_t const dst_subres = CalcSubresource(level, array_index, 0,
 			num_mip_maps_, array_size_);
 
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if (access_hint_ & EAH_GPU_Read)
 		{
@@ -1115,7 +1115,7 @@ namespace KlayGE
 		void const * data, uint32_t row_pitch)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1166,7 +1166,7 @@ namespace KlayGE
 		uint32_t const dst_subres = CalcSubresource(level, array_index, 0,
 			num_mip_maps_, array_size_);
 
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if (access_hint_ & EAH_GPU_Read)
 		{
@@ -1210,7 +1210,7 @@ namespace KlayGE
 		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1261,7 +1261,7 @@ namespace KlayGE
 		uint32_t const dst_subres = CalcSubresource(level, array_index, 0,
 			num_mip_maps_, array_size_);
 
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if (access_hint_ & EAH_GPU_Read)
 		{
@@ -1304,7 +1304,7 @@ namespace KlayGE
 		void const * data, uint32_t row_pitch)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12DevicePtr const & device = re.D3DDevice();
+		ID3D12Device* device = re.D3DDevice();
 
 		D3D12_RESOURCE_DESC tex_desc;
 		tex_desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
@@ -1355,7 +1355,7 @@ namespace KlayGE
 		uint32_t const dst_subres = CalcSubresource(level, array_index * 6 + face - CF_Positive_X, 0,
 			num_mip_maps_, array_size_);
 
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 		if (access_hint_ & EAH_GPU_Read)
 		{

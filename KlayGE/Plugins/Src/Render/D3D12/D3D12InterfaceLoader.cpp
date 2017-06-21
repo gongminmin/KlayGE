@@ -52,7 +52,7 @@ namespace KlayGE
 
 		if (mod_dxgi_ != nullptr)
 		{
-			DynamicCreateDXGIFactory1_ = reinterpret_cast<CreateDXGIFactory1Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory1"));
+			DynamicCreateDXGIFactory2_ = reinterpret_cast<CreateDXGIFactory2Func>(::GetProcAddress(mod_dxgi_, "CreateDXGIFactory2"));
 		}
 		if (mod_d3d12_ != nullptr)
 		{
@@ -70,10 +70,7 @@ namespace KlayGE
 
 	D3D12InterfaceLoader::~D3D12InterfaceLoader()
 	{
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-		::FreeLibrary(mod_d3d12_);
-		::FreeLibrary(mod_dxgi_);
-#endif
+		this->Destroy();
 	}
 
 	D3D12InterfaceLoader& D3D12InterfaceLoader::Instance()
@@ -82,9 +79,26 @@ namespace KlayGE
 		return ret;
 	}
 
-	HRESULT D3D12InterfaceLoader::CreateDXGIFactory1(REFIID riid, void** ppFactory) const
+	void D3D12InterfaceLoader::Destroy()
 	{
-		return DynamicCreateDXGIFactory1_(riid, ppFactory);
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
+		if (mod_d3d12_)
+		{
+			BOOST_ASSERT(mod_dxgi_ != nullptr);
+
+			::FreeLibrary(mod_d3d12_);
+			::FreeLibrary(mod_dxgi_);
+
+			mod_d3d12_ = nullptr;
+			mod_dxgi_ = nullptr;
+		}
+#endif
+
+	}
+
+	HRESULT D3D12InterfaceLoader::CreateDXGIFactory2(UINT flags, REFIID riid, void** ppFactory) const
+	{
+		return DynamicCreateDXGIFactory2_(flags, riid, ppFactory);
 	}
 
 	HRESULT D3D12InterfaceLoader::D3D12CreateDevice(IUnknown* pAdapter,

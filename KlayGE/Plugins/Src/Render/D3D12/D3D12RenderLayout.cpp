@@ -115,7 +115,7 @@ namespace KlayGE
 		}
 
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandListPtr const & cmd_list = re.D3DRenderCmdList();
+		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 		if (all_num_vertex_stream != 0)
 		{
 			cmd_list->IASetVertexBuffers(0, all_num_vertex_stream, &vbvs_[0]);
