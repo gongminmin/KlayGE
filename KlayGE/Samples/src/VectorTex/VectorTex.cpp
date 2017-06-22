@@ -134,7 +134,7 @@ void VectorTexApp::OnCreate()
 	object_ = MakeSharedPtr<TeapotObject>();
 	object_->AddToSceneManager();
 
-	checked_pointer_cast<TeapotObject>(object_)->VectorTexture(ASyncLoadTexture("drawing.dds", EAH_GPU_Read | EAH_Immutable));
+	checked_pointer_cast<TeapotObject>(object_)->VectorTexture(ASyncLoadTexture("Drawing.dds", EAH_GPU_Read | EAH_Immutable));
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
 }
