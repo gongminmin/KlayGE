@@ -333,7 +333,7 @@ namespace KlayGE
 		D3D12_RESOURCE_DESC res_desc;
 		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
 		res_desc.Alignment = 0;
-		res_desc.Width = sizeof(uint64_t);
+		res_desc.Width = sizeof(D3D12_QUERY_DATA_SO_STATISTICS);
 		res_desc.Height = 1;
 		res_desc.DepthOrArraySize = 1;
 		res_desc.MipLevels = 1;

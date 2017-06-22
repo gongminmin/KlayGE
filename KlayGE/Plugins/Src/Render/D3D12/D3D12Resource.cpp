@@ -51,6 +51,11 @@ namespace KlayGE
 
 	bool D3D12Resource::UpdateResourceBarrier(uint32_t sub_res, D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state)
 	{
+		if (!d3d_resource_)
+		{
+			return false;
+		}
+
 		if (sub_res == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 		{
 #ifdef KLAYGE_DEBUG

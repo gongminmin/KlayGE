@@ -236,8 +236,8 @@ namespace KlayGE
 			}
 			pso_desc.StreamOutput.pSODeclaration = so_decls.empty() ? nullptr : &so_decls[0];
 			pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decls.size());
-			pso_desc.StreamOutput.pBufferStrides = so_strides.empty() ? nullptr : &so_strides[0];
-			pso_desc.StreamOutput.NumStrides = static_cast<UINT>(so_strides.size());
+			pso_desc.StreamOutput.pBufferStrides = nullptr;
+			pso_desc.StreamOutput.NumStrides = 0;
 			pso_desc.StreamOutput.RasterizedStream = d3d12_so->RasterizedStream();
 
 			pso_desc.InputLayout.pInputElementDescs = d3d12_rl.InputElementDesc().empty() ? nullptr : &d3d12_rl.InputElementDesc()[0];

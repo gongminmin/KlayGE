@@ -314,7 +314,16 @@ namespace KlayGE
 			dst_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 
-		if (src_heap_type != dst_heap_type)
+		if ((src_heap_type == dst_heap_type) && (src_heap_type != D3D12_HEAP_TYPE_DEFAULT))
+		{
+			uint8_t const * src = static_cast<uint8_t const *>(this->Map(BA_Read_Only));
+			uint8_t* dst = static_cast<uint8_t*>(d3d_gb.Map(BA_Write_Only));
+			memcpy(dst, src, this->Size());
+			d3d_gb.Unmap();
+			this->Unmap();
+
+		}
+		else
 		{
 			UINT n = 0;
 			D3D12_RESOURCE_BARRIER barriers[2];
@@ -335,9 +344,9 @@ namespace KlayGE
 			{
 				cmd_list->ResourceBarrier(n, barriers);
 			}
-		}
 
-		cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), 0, d3d_resource_.get(), 0, size_in_byte_);
+			cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), 0, d3d_resource_.get(), 0, size_in_byte_);
+		}
 	}
 
 	void D3D12GraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)

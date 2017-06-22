@@ -700,7 +700,7 @@ namespace KlayGE
 					for (uint32_t j = 0; j < so->SRVs(st).size(); ++ j)
 					{
 						d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
-							std::get<0>(so->SRVSrcs(st)[j]) ? so->SRVs(st)[j]->Handle() : null_srv_handle_,
+							so->SRVs(st)[j] ? so->SRVs(st)[j]->Handle() : null_srv_handle_,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
@@ -719,7 +719,7 @@ namespace KlayGE
 					for (uint32_t j = 0; j < so->UAVs(st).size(); ++ j)
 					{
 						d3d_device_->CopyDescriptorsSimple(1, cpu_cbv_srv_uav_handle,
-							so->UAVSrcs(st)[j].first ? so->UAVs(st)[j]->Handle() : null_uav_handle_,
+							so->UAVs(st)[j] ? so->UAVs(st)[j]->Handle() : null_uav_handle_,
 							D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 						cpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;
 						gpu_cbv_srv_uav_handle.ptr += cbv_srv_uav_desc_size;

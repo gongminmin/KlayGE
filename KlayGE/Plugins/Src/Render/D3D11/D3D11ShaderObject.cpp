@@ -853,7 +853,8 @@ namespace KlayGE
 
 									ID3D11GeometryShader* gs;
 									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
+										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
+										&gs)))
 									{
 										is_shader_validate_[type] = false;
 									}
@@ -921,7 +922,8 @@ namespace KlayGE
 
 							ID3D11GeometryShader* gs;
 							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
+								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
+								&gs)))
 							{
 								is_shader_validate_[type] = false;
 							}
@@ -1010,7 +1012,8 @@ namespace KlayGE
 
 									ID3D11GeometryShader* gs;
 									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), 0, 0, rasterized_stream, nullptr, &gs)))
+										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
+										&gs)))
 									{
 										is_shader_validate_[type] = false;
 									}

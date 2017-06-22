@@ -91,7 +91,7 @@ namespace KlayGE
 			break;
 		}
 
-		curr_states_.assign(array_size_ * num_mip_maps_, D3D12_RESOURCE_STATE_COMMON);
+		curr_states_.assign(6 * array_size_ * num_mip_maps_, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	uint32_t D3D12TextureCube::Width(uint32_t level) const
