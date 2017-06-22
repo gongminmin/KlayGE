@@ -4,6 +4,7 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/DistanceField.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <iostream>
 #include <string>
@@ -121,6 +122,13 @@ int main(int argc, char* argv[])
 		out_name += ".dds";
 	}
 
+	if (ResLoader::Instance().Locate(in_name).empty())
+	{
+		std::cerr << "Could NOT find " << in_name << std::endl;
+		Context::Destroy();
+		return 1;
+	}
+
 	uint32_t width, height, ras_width, ras_height;
 	ElementFormat format;
 	std::vector<uint8_t> rgba;
@@ -129,9 +137,17 @@ int main(int argc, char* argv[])
 		if (num_channels != 4)
 		{
 			std::cerr << "Unsupported channels. Must be 4 for svg." << std::endl;
+			Context::Destroy();
+			return 1;
 		}
 
 		NSVGimage* image = nsvgParseFromFile(in_name.c_str(), "px", 96);
+		if (!image)
+		{
+			std::cerr << "Could NOT open " << in_name << " as an SVG." << std::endl;
+			Context::Destroy();
+			return 1;
+		}
 
 		width = (static_cast<uint32_t>(image->width + 0.5f) + 3) / 4;
 		height = (static_cast<uint32_t>(image->height + 0.5f) + 3) / 4;
@@ -175,6 +191,7 @@ int main(int argc, char* argv[])
 		if (NumComponents(format) != num_channels)
 		{
 			std::cerr << "Unsupported pixel format. Must be " << num_channels << " channels." << std::endl;
+			Context::Destroy();
 			return 1;
 		}
 
@@ -208,7 +225,7 @@ int main(int argc, char* argv[])
 		{
 			for (uint32_t c = 0; c < num_channels; ++ c)
 			{
-				ras_data[c][y * ras_width + x] = rgba[(y * ras_width + x) * num_channels + c] ? 1.0f : 0.0f;
+				ras_data[c][y * ras_width + x] = (rgba[(y * ras_width + x) * num_channels + c] > 127) ? 1.0f : 0.0f;
 			};
 		}
 	}
@@ -234,4 +251,6 @@ int main(int argc, char* argv[])
 	init_data.row_pitch = width * num_channels;
 	init_data.slice_pitch = width * height * num_channels;
 	SaveTexture(out_name, Texture::TT_2D, width, height, 1, 1, 1, format, init_data);
+
+	Context::Destroy();
 }
