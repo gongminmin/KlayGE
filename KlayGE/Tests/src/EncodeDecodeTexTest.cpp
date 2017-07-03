@@ -6,19 +6,11 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Half.hpp>
 
-#include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
-#endif
-#include <boost/test/unit_test.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-
 #include <vector>
 #include <string>
 #include <iostream>
+
+#include "KlayGETests.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -238,70 +230,70 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 	}
 
 	mse = sqrt(mse / (width * height) / 4);
-	BOOST_CHECK(mse < threshold);
+	EXPECT_LT(mse, threshold);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC1)
+TEST_F(KlayGETest, DecodeBC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc1.dds", EF_BC1, 4.7f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC2)
+TEST_F(KlayGETest, DecodeBC2)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.2f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC3)
+TEST_F(KlayGETest, DecodeBC3)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.9f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC6U)
+TEST_F(KlayGETest, DecodeBC6U)
 {
 	TestEncodeDecodeTex("memorial.dds", "memorial_bc6u.dds", EF_BC6, 0.1f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC6S)
+TEST_F(KlayGETest, DecodeBC6S)
 {
 	TestEncodeDecodeTex("uffizi_probe.dds", "uffizi_probe_bc6s.dds", EF_SIGNED_BC6, 0.1f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC7XRGB)
+TEST_F(KlayGETest, DecodeBC7XRGB)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc7.dds", EF_BC7, 2.1f);
 }
 
-BOOST_AUTO_TEST_CASE(DecodeBC7ARGB)
+TEST_F(KlayGETest, DecodeBC7ARGB)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 4.6f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeBC1)
+TEST_F(KlayGETest, EncodeDecodeBC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_BC1, 4.6f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeBC2)
+TEST_F(KlayGETest, EncodeDecodeBC2)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC2, 9.1f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeBC3)
+TEST_F(KlayGETest, EncodeDecodeBC3)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC3, 8.9f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeBC7XRGB)
+TEST_F(KlayGETest, EncodeDecodeBC7XRGB)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_BC7, 1.8f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeBC7ARGB)
+TEST_F(KlayGETest, EncodeDecodeBC7ARGB)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.1f);
 }
 
-BOOST_AUTO_TEST_CASE(EncodeDecodeETC1)
+TEST_F(KlayGETest, EncodeDecodeETC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_ETC1, 4.8f);
 }

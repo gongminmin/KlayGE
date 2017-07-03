@@ -77,12 +77,13 @@ External/android_native_app_glue
 External/assimp
 External/boost
 External/Downloads
-External/UniversalDXSDK
-External/Python
 External/freetype
+External/googletest
 External/libogg
 External/libvorbis
 External/nanosvg
 External/OpenALSDK
+External/Python
 External/rapidxml
+External/UniversalDXSDK
 External/wpftoolkit

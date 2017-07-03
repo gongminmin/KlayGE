@@ -4,20 +4,12 @@
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/Blitter.hpp>
 
-#include <boost/assert.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
-#endif
-#include <boost/test/unit_test.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
-#pragma clang diagnostic pop
-#endif
-
 #include <vector>
 #include <string>
 #include <iostream>
 #include <random>
+
+#include "KlayGETests.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -167,7 +159,7 @@ void TestBlitter2D(std::string const & test_name, uint32_t array_size, uint32_t 
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
 		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		BOOST_CHECK(Compare2D(test_name,
+		EXPECT_TRUE(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
 			dst_x_size, dst_y_size, 2.0f / 255));
@@ -255,7 +247,7 @@ void TestBlitter2DToBuff(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.slice_pitch = src_x_size * src_y_size * sizeof(float4);
 		TexturePtr dst_sanity = rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		BOOST_CHECK(Compare2D(test_name,
+		EXPECT_TRUE(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,
 			*src, array_index, mip, src_x_offset, src_y_offset,
 			src_x_size, src_y_size, 2.0f / 255));
@@ -327,34 +319,34 @@ void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
 		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		BOOST_CHECK(Compare2D(test_name,
+		EXPECT_TRUE(Compare2D(test_name,
 			*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
 			dst_x_size, dst_y_size, 2.0f / 255));
 	}
 }
 
-BOOST_AUTO_TEST_CASE(Blit2D)
+TEST_F(KlayGETest, Blit2D)
 {
 	TestBlitter2D("Blit2D", 1, 3, false);
 }
 
-BOOST_AUTO_TEST_CASE(Blit2DArray)
+TEST_F(KlayGETest, Blit2DArray)
 {
 	TestBlitter2D("Blit2DArray", 5, 4, false);
 }
 
-BOOST_AUTO_TEST_CASE(Blit2DToBuff)
+TEST_F(KlayGETest, Blit2DToBuff)
 {
 	TestBlitter2DToBuff("Blit2DToBuff", 1, 3);
 }
 
-BOOST_AUTO_TEST_CASE(Blit2DArrayToBuff)
+TEST_F(KlayGETest, Blit2DArrayToBuff)
 {
 	TestBlitter2DToBuff("Blit2DArrayToBuff", 5, 4);
 }
 
-BOOST_AUTO_TEST_CASE(BlitBuffTo2D)
+TEST_F(KlayGETest, BlitBuffTo2D)
 {
 	TestBlitterBuffTo2D("BlitBuffTo2D", 5, 4);
 }
