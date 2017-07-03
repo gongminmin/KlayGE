@@ -60,11 +60,11 @@ namespace KlayGE
 
 		XMLNodePtr CloneNode(XMLNodePtr const & node);
 
-		XMLNodePtr AllocNode(XMLNodeType type, std::string const & name);
-		XMLAttributePtr AllocAttribInt(std::string const & name, int32_t value);
-		XMLAttributePtr AllocAttribUInt(std::string const & name, uint32_t value);
-		XMLAttributePtr AllocAttribFloat(std::string const & name, float value);
-		XMLAttributePtr AllocAttribString(std::string const & name, std::string const & value);
+		XMLNodePtr AllocNode(XMLNodeType type, std::string_view name);
+		XMLAttributePtr AllocAttribInt(std::string_view name, int32_t value);
+		XMLAttributePtr AllocAttribUInt(std::string_view name, uint32_t value);
+		XMLAttributePtr AllocAttribFloat(std::string_view name, float value);
+		XMLAttributePtr AllocAttribString(std::string_view name, std::string_view value);
 
 		void RootNode(XMLNodePtr const & new_node);
 
@@ -81,36 +81,36 @@ namespace KlayGE
 
 	public:
 		explicit XMLNode(void* node);
-		XMLNode(void* doc, XMLNodeType type, std::string const & name);
+		XMLNode(void* doc, XMLNodeType type, std::string_view name);
 
 		std::string const & Name() const;
 		XMLNodeType Type() const;
 
 		XMLNodePtr Parent() const;
 
-		XMLAttributePtr FirstAttrib(std::string const & name) const;
-		XMLAttributePtr LastAttrib(std::string const & name) const;
+		XMLAttributePtr FirstAttrib(std::string_view name) const;
+		XMLAttributePtr LastAttrib(std::string_view name) const;
 		XMLAttributePtr FirstAttrib() const;
 		XMLAttributePtr LastAttrib() const;
 
-		XMLAttributePtr Attrib(std::string const & name) const;
+		XMLAttributePtr Attrib(std::string_view name) const;
 
-		bool TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val) const;
-		bool TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val) const;
-		bool TryConvertAttrib(std::string const & name, float& val, float default_val) const;
+		bool TryConvertAttrib(std::string_view name, int32_t& val, int32_t default_val) const;
+		bool TryConvertAttrib(std::string_view name, uint32_t& val, uint32_t default_val) const;
+		bool TryConvertAttrib(std::string_view name, float& val, float default_val) const;
 
-		int32_t AttribInt(std::string const & name, int32_t default_val) const;
-		uint32_t AttribUInt(std::string const & name, uint32_t default_val) const;
-		float AttribFloat(std::string const & name, float default_val) const;
-		std::string AttribString(std::string const & name, std::string default_val) const;
+		int32_t AttribInt(std::string_view name, int32_t default_val) const;
+		uint32_t AttribUInt(std::string_view name, uint32_t default_val) const;
+		float AttribFloat(std::string_view name, float default_val) const;
+		std::string AttribString(std::string_view name, std::string default_val) const;
 
-		XMLNodePtr FirstNode(std::string const & name) const;
-		XMLNodePtr LastNode(std::string const & name) const;
+		XMLNodePtr FirstNode(std::string_view name) const;
+		XMLNodePtr LastNode(std::string_view name) const;
 		XMLNodePtr FirstNode() const;
 		XMLNodePtr LastNode() const;
 
-		XMLNodePtr PrevSibling(std::string const & name) const;
-		XMLNodePtr NextSibling(std::string const & name) const;
+		XMLNodePtr PrevSibling(std::string_view name) const;
+		XMLNodePtr NextSibling(std::string_view name) const;
 		XMLNodePtr PrevSibling() const;
 		XMLNodePtr NextSibling() const;
 
@@ -146,11 +146,11 @@ namespace KlayGE
 
 	public:
 		explicit XMLAttribute(void* attr);
-		XMLAttribute(void* doc, std::string const & name, std::string const & value);
+		XMLAttribute(void* doc, std::string_view name, std::string_view value);
 
 		std::string const & Name() const;
 
-		XMLAttributePtr NextAttrib(std::string const & name) const;
+		XMLAttributePtr NextAttrib(std::string_view name) const;
 		XMLAttributePtr NextAttrib() const;
 
 		bool TryConvert(int32_t& val) const;

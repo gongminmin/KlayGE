@@ -98,7 +98,7 @@ namespace KlayGE
 	}
 #endif
 
-	Window::Window(std::string const & name, RenderSettings const & settings)
+	Window::Window(std::string_view name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
@@ -165,7 +165,7 @@ namespace KlayGE
 		ready_ = true;
 	}
 
-	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
+	Window::Window(std::string_view name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{

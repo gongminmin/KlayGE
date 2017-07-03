@@ -74,6 +74,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderDeviceCaps.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KFL/Color.hpp>
@@ -134,8 +135,8 @@ namespace KlayGE
 		// Scissor support
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
-		virtual void GetCustomAttrib(std::string const & name, void* value);
-		virtual void SetCustomAttrib(std::string const & name, void* value);
+		virtual void GetCustomAttrib(std::string_view name, void* value);
+		virtual void SetCustomAttrib(std::string_view name, void* value);
 
 		void Resize(uint32_t width, uint32_t height);
 		virtual bool FullScreen() const = 0;
@@ -149,7 +150,7 @@ namespace KlayGE
 		{
 			return native_shader_version_;
 		}
-		std::string NativeShaderPlatformName() const
+		std::string_view NativeShaderPlatformName() const
 		{
 			return native_shader_platform_name_;
 		}
@@ -362,7 +363,7 @@ namespace KlayGE
 
 		uint32_t native_shader_fourcc_;
 		uint32_t native_shader_version_;
-		std::string native_shader_platform_name_;
+		std::string_view native_shader_platform_name_;
 
 #ifndef KLAYGE_SHIP
 		PerfRangePtr hdr_pp_perf_;

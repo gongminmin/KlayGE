@@ -140,7 +140,7 @@ namespace KlayGE
 		}
 		else
 		{
-			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
+			std::vector<std::pair<std::string_view, D3D_FEATURE_LEVEL>> available_feature_levels;
 			available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
 			available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
 			available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
@@ -148,14 +148,14 @@ namespace KlayGE
 
 			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{
-				std::string const & opt_name = settings.options[index].first;
-				std::string const & opt_val = settings.options[index].second;
-				if (0 == strcmp("level", opt_name.c_str()))
+				std::string_view opt_name = settings.options[index].first;
+				std::string_view opt_val = settings.options[index].second;
+				if ("level" == opt_name)
 				{
 					size_t feature_index = 0;
 					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
 					{
-						if (0 == strcmp(available_feature_levels[i].first, opt_val.c_str()))
+						if (available_feature_levels[i].first == opt_val)
 						{
 							feature_index = i;
 							break;
@@ -205,7 +205,7 @@ namespace KlayGE
 					if (Context::Instance().AppInstance().ConfirmDevice())
 					{
 						description_ = adapter_->Description() + L" FL ";
-						wchar_t const * fl_str;
+						std::wstring_view fl_str;
 						switch (req_feature_levels.MaxSupportedFeatureLevel)
 						{
 						case D3D_FEATURE_LEVEL_12_1:
@@ -228,7 +228,7 @@ namespace KlayGE
 							fl_str = L"Unknown";
 							break;
 						}
-						description_ += fl_str;
+						description_ += fl_str.data();
 						if (settings.sample_count > 1)
 						{
 							description_ += L" ("

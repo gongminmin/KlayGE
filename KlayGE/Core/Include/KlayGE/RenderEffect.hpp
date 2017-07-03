@@ -615,8 +615,8 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(params_.size());
 		}
-		RenderEffectParameter* ParameterBySemantic(std::string const & semantic) const;
-		RenderEffectParameter* ParameterByName(std::string const & name) const;
+		RenderEffectParameter* ParameterBySemantic(std::string_view semantic) const;
+		RenderEffectParameter* ParameterByName(std::string_view name) const;
 		RenderEffectParameter* ParameterByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumParameters());
@@ -627,7 +627,7 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(cbuffers_.size());
 		}
-		RenderEffectConstantBuffer* CBufferByName(std::string const & name) const;
+		RenderEffectConstantBuffer* CBufferByName(std::string_view name) const;
 		RenderEffectConstantBuffer* CBufferByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumCBuffers());
@@ -635,7 +635,7 @@ namespace KlayGE
 		}
 
 		uint32_t NumTechniques() const;
-		RenderTechnique* TechniqueByName(std::string const & name) const;
+		RenderTechnique* TechniqueByName(std::string_view name) const;
 		RenderTechnique* TechniqueByIndex(uint32_t n) const;
 
 		uint32_t NumShaderFragments() const;
@@ -691,7 +691,7 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(techniques_.size());
 		}
-		RenderTechnique* TechniqueByName(std::string const & name) const;
+		RenderTechnique* TechniqueByName(std::string_view name) const;
 		RenderTechnique* TechniqueByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumTechniques());

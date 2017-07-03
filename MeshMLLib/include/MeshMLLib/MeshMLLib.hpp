@@ -143,22 +143,22 @@ namespace KlayGE
 		}
 
 		int AllocJoint();
-		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+		void SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 			float4x4 const & bind_mat);
-		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+		void SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 			Quaternion const & bind_quat, float3 const & bind_pos);
-		void SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+		void SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 			Quaternion const & bind_real, Quaternion const & bind_dual);
 
 		int AllocMaterial();
-		void SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
+		void SetMaterial(int mtl_id, std::string_view name, float4 const & albedo, float metalness, float glossiness,
 			float3 const & emissive, bool transparent, float alpha_test, bool sss, bool two_sided);
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
-		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string const & name);
+		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string_view name);
 
 		int AllocMesh();
-		void SetMesh(int mesh_id, int material_id, std::string const & name);
+		void SetMesh(int mesh_id, int material_id, std::string_view name);
 		int AllocVertex(int mesh_id);
 		void SetVertex(int mesh_id, int vertex_id, float3 const & pos, float3 const & normal,
 			int texcoord_components, std::vector<float3> const & texcoords);
@@ -181,11 +181,11 @@ namespace KlayGE
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual);
 
 		int AllocAction();
-		void SetAction(int action_id, std::string const & name, int start_frame, int end_frame);
+		void SetAction(int action_id, std::string_view name, int start_frame, int end_frame);
 
 		void WriteMeshML(std::ostream& os,
 			int vertex_export_settings = VES_TangentQuat | VES_Texcoord, int user_export_settings = UES_SortMeshes,
-			std::string const & encoding = std::string());
+			std::string_view encoding = std::string_view());
 
 	private:
 		typedef std::pair<int, float> JointBinding;

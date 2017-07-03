@@ -20,6 +20,7 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 #include <KFL/Timer.hpp>
 #include <KlayGE/Input.hpp>
 
@@ -407,7 +408,7 @@ namespace KlayGE
 		{
 			return dialogs_;
 		}
-		UIDialogPtr const & GetDialog(std::string const & id) const;
+		UIDialogPtr const & GetDialog(std::string_view id) const;
 
 		UIDialogPtr const & GetNextDialog(UIDialogPtr const & dialog) const;
 		UIDialogPtr const & GetPrevDialog(UIDialogPtr const & dialog) const;

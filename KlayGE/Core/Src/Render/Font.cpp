@@ -200,7 +200,7 @@ namespace KlayGE
 			this->OnRenderEnd();
 		}
 
-		Size_T<float> CalcSize(std::wstring const & text, float font_size)
+		Size_T<float> CalcSize(std::wstring_view text, float font_size)
 		{
 			this->UpdateTexture(text);
 
@@ -228,7 +228,7 @@ namespace KlayGE
 		}
 
 		void AddText2D(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, float font_size)
+			float xScale, float yScale, Color const & clr, std::wstring_view text, float font_size)
 		{
 			three_dim_ = false;
 
@@ -236,14 +236,14 @@ namespace KlayGE
 		}
 
 		void AddText2D(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, float font_size, uint32_t align)
+			float xScale, float yScale, Color const & clr, std::wstring_view text, float font_size, uint32_t align)
 		{
 			three_dim_ = false;
 
 			this->AddText(rc, sz, xScale, yScale, clr, text, font_size, align);
 		}
 
-		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring const & text, float font_size)
+		void AddText3D(float4x4 const & mvp, Color const & clr, std::wstring_view text, float font_size)
 		{
 			three_dim_ = true;
 			*mvp_ep_ = mvp;
@@ -253,7 +253,7 @@ namespace KlayGE
 
 	private:
 		void AddText(Rect const & rc, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, float font_size, uint32_t align)
+			float xScale, float yScale, Color const & clr, std::wstring_view text, float font_size, uint32_t align)
 		{
 			this->UpdateTexture(text);
 
@@ -419,7 +419,7 @@ namespace KlayGE
 		}
 
 		void AddText(float sx, float sy, float sz,
-			float xScale, float yScale, Color const & clr, std::wstring const & text, float font_size)
+			float xScale, float yScale, Color const & clr, std::wstring_view text, float font_size)
 		{
 			this->UpdateTexture(text);
 
@@ -528,7 +528,7 @@ namespace KlayGE
 
 		// 更新纹理，使用LRU算法
 		/////////////////////////////////////////////////////////////////////////////////
-		void UpdateTexture(std::wstring const & text)
+		void UpdateTexture(std::wstring_view text)
 		{
 			++ tick_;
 
@@ -852,7 +852,7 @@ namespace KlayGE
 
 	// 计算文字大小
 	/////////////////////////////////////////////////////////////////////////////////
-	Size_T<float> Font::CalcSize(std::wstring const & text, float font_size)
+	Size_T<float> Font::CalcSize(std::wstring_view text, float font_size)
 	{
 		if (text.empty())
 		{
@@ -867,7 +867,7 @@ namespace KlayGE
 	// 在指定位置画出文字
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float sx, float sy, Color const & clr,
-		std::wstring const & text, float font_size)
+		std::wstring_view text, float font_size)
 	{
 		this->RenderText(sx, sy, 0, 1, 1, clr, text, font_size);
 	}
@@ -876,7 +876,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(float x, float y, float z,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, float font_size)
+		std::wstring_view text, float font_size)
 	{
 		if (!text.empty())
 		{
@@ -890,7 +890,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void Font::RenderText(Rect const & rc, float z,
 		float xScale, float yScale, Color const & clr,
-		std::wstring const & text, float font_size, uint32_t align)
+		std::wstring_view text, float font_size, uint32_t align)
 	{
 		if (!text.empty())
 		{
@@ -902,7 +902,7 @@ namespace KlayGE
 
 	// 在指定位置画出3D的文字
 	/////////////////////////////////////////////////////////////////////////////////
-	void Font::RenderText(float4x4 const & mvp, Color const & clr, std::wstring const & text, float font_size)
+	void Font::RenderText(float4x4 const & mvp, Color const & clr, std::wstring_view text, float font_size)
 	{
 		if (!text.empty())
 		{

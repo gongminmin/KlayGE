@@ -210,13 +210,13 @@ namespace KlayGE
 		is_shader_validate_.fill(true);
 	}
 
-	std::string D3D12ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
+	std::string_view D3D12ShaderObject::GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id)
 	{
 		auto const & sd = effect.GetShaderDesc(shader_desc_id);
 		auto const & re = *checked_cast<D3D12RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto const & caps = re.DeviceCaps();
-		std::string shader_profile = sd.profile;
-		size_t const shader_profile_hash = RT_HASH(shader_profile.c_str());
+		std::string_view shader_profile = sd.profile;
+		size_t const shader_profile_hash = HashRange(shader_profile.begin(), shader_profile.end());
 		switch (type)
 		{
 		case ST_VertexShader:
@@ -286,7 +286,7 @@ namespace KlayGE
 		bool ret = false;
 
 		is_shader_validate_[type] = false;
-		std::string shader_profile = this->GetShaderProfile(type, effect, shader_desc_ids[type]);
+		std::string_view shader_profile = this->GetShaderProfile(type, effect, shader_desc_ids[type]);
 		if (native_shader_block.size() >= 25 + shader_profile.size())
 		{
 			uint8_t const * nsbp = &native_shader_block[0];

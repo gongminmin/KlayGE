@@ -149,8 +149,8 @@ namespace
 
 	void GetArchiveIndex(std::shared_ptr<IInArchive>& archive, uint32_t& real_index,
 								ResIdentifierPtr const & archive_is,
-								std::string const & password,
-								std::string const & extract_file_path)
+								std::string_view password,
+								std::string_view extract_file_path)
 	{
 		BOOST_ASSERT(archive_is);
 
@@ -216,8 +216,8 @@ namespace
 namespace KlayGE
 {
 	uint32_t Find7z(ResIdentifierPtr const & archive_is,
-								std::string const & password,
-								std::string const & extract_file_path)
+								std::string_view password,
+								std::string_view extract_file_path)
 	{
 		std::shared_ptr<IInArchive> archive;
 		uint32_t real_index;
@@ -226,8 +226,8 @@ namespace KlayGE
 	}
 
 	void Extract7z(ResIdentifierPtr const & archive_is,
-							   std::string const & password,
-							   std::string const & extract_file_path,
+							   std::string_view password,
+							   std::string_view extract_file_path,
 		std::shared_ptr<std::ostream> const & os)
 	{
 		std::shared_ptr<IInArchive> archive;

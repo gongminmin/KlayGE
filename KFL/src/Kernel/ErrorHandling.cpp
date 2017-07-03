@@ -44,9 +44,9 @@
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string const & file, int line)
+	std::string CombineFileLine(std::string_view file, int line)
 	{
-		return file + ": " + boost::lexical_cast<std::string>(line);
+		return file.to_string() + ": " + boost::lexical_cast<std::string>(line);
 	}
 
 	void Verify(bool x)

@@ -34,17 +34,18 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 
 #include <string>
 
 namespace KlayGE
 {
 	KLAYGE_CORE_API uint32_t Find7z(ResIdentifierPtr const & archive_is,
-		std::string const & password,
-		std::string const & extract_file_path);
+		std::string_view password,
+		std::string_view extract_file_path);
 	KLAYGE_CORE_API void Extract7z(ResIdentifierPtr const & archive_is,
-		std::string const & password,
-		std::string const & extract_file_path,
+		std::string_view password,
+		std::string_view extract_file_path,
 		std::shared_ptr<std::ostream> const & os);
 }
 

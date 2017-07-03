@@ -78,27 +78,27 @@ namespace KlayGE
 		return MakeSharedPtr<XMLNode>(static_cast<rapidxml::xml_document<>*>(doc_.get())->clone_node(static_cast<rapidxml::xml_node<>*>(node->node_)));
 	}
 
-	XMLNodePtr XMLDocument::AllocNode(XMLNodeType type, std::string const & name)
+	XMLNodePtr XMLDocument::AllocNode(XMLNodeType type, std::string_view name)
 	{
 		return MakeSharedPtr<XMLNode>(doc_.get(), type, name);
 	}
 	
-	XMLAttributePtr XMLDocument::AllocAttribInt(std::string const & name, int32_t value)
+	XMLAttributePtr XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
 	{
 		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
 	}
 
-	XMLAttributePtr XMLDocument::AllocAttribUInt(std::string const & name, uint32_t value)
+	XMLAttributePtr XMLDocument::AllocAttribUInt(std::string_view name, uint32_t value)
 	{
 		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
 	}
 
-	XMLAttributePtr XMLDocument::AllocAttribFloat(std::string const & name, float value)
+	XMLAttributePtr XMLDocument::AllocAttribFloat(std::string_view name, float value)
 	{
 		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
 	}
 
-	XMLAttributePtr XMLDocument::AllocAttribString(std::string const & name, std::string const & value)
+	XMLAttributePtr XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
 	{
 		return MakeSharedPtr<XMLAttribute>(doc_.get(), name, value);
 	}
@@ -121,7 +121,7 @@ namespace KlayGE
 		}
 	}
 
-	XMLNode::XMLNode(void* doc, XMLNodeType type, std::string const & name)
+	XMLNode::XMLNode(void* doc, XMLNodeType type, std::string_view name)
 		: name_(name)
 	{
 		rapidxml::node_type xtype;
@@ -161,7 +161,7 @@ namespace KlayGE
 			break;
 		}
 
-		node_ = static_cast<rapidxml::xml_document<>*>(doc)->allocate_node(xtype, name_.c_str());
+		node_ = static_cast<rapidxml::xml_document<>*>(doc)->allocate_node(xtype, name.data(), nullptr, name.size());
 	}
 
 	std::string const & XMLNode::Name() const
@@ -213,9 +213,9 @@ namespace KlayGE
 		}
 	}
 
-	XMLAttributePtr XMLNode::FirstAttrib(std::string const & name) const
+	XMLAttributePtr XMLNode::FirstAttrib(std::string_view name) const
 	{
-		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_node<>*>(node_)->first_attribute(name.c_str());
+		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_node<>*>(node_)->first_attribute(name.data(), name.size());
 		if (attr)
 		{
 			return MakeSharedPtr<XMLAttribute>(attr);
@@ -226,9 +226,9 @@ namespace KlayGE
 		}
 	}
 	
-	XMLAttributePtr XMLNode::LastAttrib(std::string const & name) const
+	XMLAttributePtr XMLNode::LastAttrib(std::string_view name) const
 	{
-		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_node<>*>(node_)->last_attribute(name.c_str());
+		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_node<>*>(node_)->last_attribute(name.data(), name.size());
 		if (attr)
 		{
 			return MakeSharedPtr<XMLAttribute>(attr);
@@ -265,12 +265,12 @@ namespace KlayGE
 		}
 	}
 
-	XMLAttributePtr XMLNode::Attrib(std::string const & name) const
+	XMLAttributePtr XMLNode::Attrib(std::string_view name) const
 	{
 		return this->FirstAttrib(name);
 	}
 
-	bool XMLNode::TryConvertAttrib(std::string const & name, int32_t& val, int32_t default_val) const
+	bool XMLNode::TryConvertAttrib(std::string_view name, int32_t& val, int32_t default_val) const
 	{
 		val = default_val;
 
@@ -278,7 +278,7 @@ namespace KlayGE
 		return attr ? attr->TryConvert(val) : true;
 	}
 
-	bool XMLNode::TryConvertAttrib(std::string const & name, uint32_t& val, uint32_t default_val) const
+	bool XMLNode::TryConvertAttrib(std::string_view name, uint32_t& val, uint32_t default_val) const
 	{
 		val = default_val;
 
@@ -286,7 +286,7 @@ namespace KlayGE
 		return attr ? attr->TryConvert(val) : true;
 	}
 
-	bool XMLNode::TryConvertAttrib(std::string const & name, float& val, float default_val) const
+	bool XMLNode::TryConvertAttrib(std::string_view name, float& val, float default_val) const
 	{
 		val = default_val;
 
@@ -294,33 +294,33 @@ namespace KlayGE
 		return attr ? attr->TryConvert(val) : true;
 	}
 
-	int32_t XMLNode::AttribInt(std::string const & name, int32_t default_val) const
+	int32_t XMLNode::AttribInt(std::string_view name, int32_t default_val) const
 	{
 		XMLAttributePtr attr = this->Attrib(name);
 		return attr ? attr->ValueInt() : default_val;
 	}
 
-	uint32_t XMLNode::AttribUInt(std::string const & name, uint32_t default_val) const
+	uint32_t XMLNode::AttribUInt(std::string_view name, uint32_t default_val) const
 	{
 		XMLAttributePtr attr = this->Attrib(name);
 		return attr ? attr->ValueUInt() : default_val;
 	}
 
-	float XMLNode::AttribFloat(std::string const & name, float default_val) const
+	float XMLNode::AttribFloat(std::string_view name, float default_val) const
 	{
 		XMLAttributePtr attr = this->Attrib(name);
 		return attr ? attr->ValueFloat() : default_val;
 	}
 
-	std::string XMLNode::AttribString(std::string const & name, std::string default_val) const
+	std::string XMLNode::AttribString(std::string_view name, std::string default_val) const
 	{
 		XMLAttributePtr attr = this->Attrib(name);
 		return attr ? attr->ValueString() : default_val;
 	}
 
-	XMLNodePtr XMLNode::FirstNode(std::string const & name) const
+	XMLNodePtr XMLNode::FirstNode(std::string_view name) const
 	{
-		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->first_node(name.c_str());
+		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->first_node(name.data(), name.size());
 		if (node)
 		{
 			return MakeSharedPtr<XMLNode>(node);
@@ -331,9 +331,9 @@ namespace KlayGE
 		}
 	}
 
-	XMLNodePtr XMLNode::LastNode(std::string const & name) const
+	XMLNodePtr XMLNode::LastNode(std::string_view name) const
 	{
-		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->last_node(name.c_str());
+		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->last_node(name.data(), name.size());
 		if (node)
 		{
 			return MakeSharedPtr<XMLNode>(node);
@@ -370,9 +370,9 @@ namespace KlayGE
 		}
 	}
 
-	XMLNodePtr XMLNode::PrevSibling(std::string const & name) const
+	XMLNodePtr XMLNode::PrevSibling(std::string_view name) const
 	{
-		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->previous_sibling(name.c_str());
+		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->previous_sibling(name.data(), name.size());
 		if (node)
 		{
 			return MakeSharedPtr<XMLNode>(node);
@@ -383,9 +383,9 @@ namespace KlayGE
 		}
 	}
 
-	XMLNodePtr XMLNode::NextSibling(std::string const & name) const
+	XMLNodePtr XMLNode::NextSibling(std::string_view name) const
 	{
-		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->next_sibling(name.c_str());
+		rapidxml::xml_node<>* node = static_cast<rapidxml::xml_node<>*>(node_)->next_sibling(name.data(), name.size());
 		if (node)
 		{
 			return MakeSharedPtr<XMLNode>(node);
@@ -530,15 +530,16 @@ namespace KlayGE
 	{
 		if (attr_ != nullptr)
 		{
-			name_ = std::string(static_cast<rapidxml::xml_attribute<>*>(attr_)->name(), static_cast<rapidxml::xml_attribute<>*>(attr_)->name_size());
-			value_ = std::string(static_cast<rapidxml::xml_attribute<>*>(attr_)->value(), static_cast<rapidxml::xml_attribute<>*>(attr_)->value_size());
+			auto xml_attr = static_cast<rapidxml::xml_attribute<>*>(attr_);
+			name_ = std::string(xml_attr->name(), xml_attr->name_size());
+			value_ = std::string(xml_attr->value(), xml_attr->value_size());
 		}
 	}
 
-	XMLAttribute::XMLAttribute(void* doc, std::string const & name, std::string const & value)
+	XMLAttribute::XMLAttribute(void* doc, std::string_view name, std::string_view value)
 		: name_(name), value_(value)
 	{
-		attr_ = static_cast<rapidxml::xml_document<>*>(doc)->allocate_attribute(name_.c_str(), value_.c_str());
+		attr_ = static_cast<rapidxml::xml_document<>*>(doc)->allocate_attribute(name.data(), value.data(), name.size(), value.size());
 	}
 
 	std::string const & XMLAttribute::Name() const
@@ -546,9 +547,9 @@ namespace KlayGE
 		return name_;
 	}
 
-	XMLAttributePtr XMLAttribute::NextAttrib(std::string const & name) const
+	XMLAttributePtr XMLAttribute::NextAttrib(std::string_view name) const
 	{
-		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_attribute<>*>(attr_)->next_attribute(name.c_str());
+		rapidxml::xml_attribute<>* attr = static_cast<rapidxml::xml_attribute<>*>(attr_)->next_attribute(name.data(), name.size());
 		if (attr)
 		{
 			return MakeSharedPtr<XMLAttribute>(attr);

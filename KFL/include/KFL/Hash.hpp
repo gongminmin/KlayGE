@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 
 namespace KlayGE
 {

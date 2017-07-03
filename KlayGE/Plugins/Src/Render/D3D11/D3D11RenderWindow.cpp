@@ -137,11 +137,11 @@ namespace KlayGE
 #endif
 			available_create_device_flags.push_back(create_device_flags);
 
-			std::vector<std::pair<D3D_DRIVER_TYPE, wchar_t const *>> dev_type_behaviors;
+			std::vector<std::pair<D3D_DRIVER_TYPE, std::wstring_view>> dev_type_behaviors;
 			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_HARDWARE, L"HW");
 			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_WARP, L"WARP");
 
-			std::vector<std::pair<char const *, D3D_FEATURE_LEVEL>> available_feature_levels;
+			std::vector<std::pair<std::string_view, D3D_FEATURE_LEVEL>> available_feature_levels;
 			if (d3d11_re.DXGISubVer() >= 4)
 			{
 				available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
@@ -155,14 +155,14 @@ namespace KlayGE
 
 			for (size_t index = 0; index < settings.options.size(); ++ index)
 			{
-				std::string const & opt_name = settings.options[index].first;
-				std::string const & opt_val = settings.options[index].second;
-				if (0 == strcmp("level", opt_name.c_str()))
+				std::string_view opt_name = settings.options[index].first;
+				std::string_view opt_val = settings.options[index].second;
+				if ("level" == opt_name)
 				{
 					size_t feature_index = 0;
 					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
 					{
-						if (0 == strcmp(available_feature_levels[i].first, opt_val.c_str()))
+						if (available_feature_levels[i].first == opt_val)
 						{
 							feature_index = i;
 							break;
@@ -238,8 +238,8 @@ namespace KlayGE
 							dxgi_device->Release();
 						}
 
-						description_ = adapter_->Description() + L" " + dev_type_beh.second + L" FL ";
-						wchar_t const * fl_str;
+						description_ = adapter_->Description() + L" " + dev_type_beh.second.data() + L" FL ";
+						std::wstring_view fl_str;
 						switch (static_cast<uint32_t>(out_feature_level))
 						{
 						case D3D_FEATURE_LEVEL_12_1:
@@ -262,7 +262,7 @@ namespace KlayGE
 							fl_str = L"Unknown";
 							break;
 						}
-						description_ += fl_str;
+						description_ += fl_str.data();
 						if (settings.sample_count > 1)
 						{
 							description_ += L" ("

@@ -54,12 +54,12 @@ namespace KlayGE
 {
 	// 把一个wstring转化为string
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& Convert(std::string& dest, std::wstring const & src)
+	std::string& Convert(std::string& dest, std::wstring_view src)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
-		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
+		int const mbs_len = WideCharToMultiByte(CP_ACP, 0, src.data(), static_cast<int>(src.size()), nullptr, 0, nullptr, nullptr);
 		std::vector<char> tmp(mbs_len + 1);
-		WideCharToMultiByte(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), &tmp[0], mbs_len, nullptr, nullptr);
+		WideCharToMultiByte(CP_ACP, 0, src.data(), static_cast<int>(src.size()), &tmp[0], mbs_len, nullptr, nullptr);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for wcstombs
 		std::vector<char> tmp;
@@ -79,9 +79,9 @@ namespace KlayGE
 #else
 		std::setlocale(LC_CTYPE, "");
 
-		size_t const mbs_len = wcstombs(nullptr, src.c_str(), 0);
+		size_t const mbs_len = wcstombs(nullptr, src.data(), src.size());
 		std::vector<char> tmp(mbs_len + 1);
-		wcstombs(&tmp[0], src.c_str(), tmp.size());
+		wcstombs(&tmp[0], src.data(), tmp.size());
 #endif
 
 		dest.assign(tmp.begin(), tmp.end() - 1);
@@ -91,21 +91,21 @@ namespace KlayGE
 
 	// 把一个string转化为string
 	/////////////////////////////////////////////////////////////////////////////////
-	std::string& Convert(std::string& dest, std::string const & src)
+	std::string& Convert(std::string& dest, std::string_view src)
 	{
-		dest = src;
+		dest = src.to_string();
 
 		return dest;
 	}
 
 	// 把一个string转化为wstring
 	/////////////////////////////////////////////////////////////////////////////////
-	std::wstring& Convert(std::wstring& dest, std::string const & src)
+	std::wstring& Convert(std::wstring& dest, std::string_view src)
 	{
 #if defined KLAYGE_PLATFORM_WINDOWS
-		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), nullptr, 0);
+		int const wcs_len = MultiByteToWideChar(CP_ACP, 0, src.data(), static_cast<int>(src.size()), nullptr, 0);
 		std::vector<wchar_t> tmp(wcs_len + 1);
-		MultiByteToWideChar(CP_ACP, 0, src.c_str(), static_cast<int>(src.size()), &tmp[0], wcs_len);
+		MultiByteToWideChar(CP_ACP, 0, src.data(), static_cast<int>(src.size()), &tmp[0], wcs_len);
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for mbstowcs
 		std::vector<wchar_t> tmp;
@@ -127,9 +127,9 @@ namespace KlayGE
 #else
 		std::setlocale(LC_CTYPE, "");
 
-		size_t const wcs_len = mbstowcs(nullptr, src.c_str(), 0);
+		size_t const wcs_len = mbstowcs(nullptr, src.data(), src.size());
 		std::vector<wchar_t> tmp(wcs_len + 1);
-		mbstowcs(&tmp[0], src.c_str(), src.size());
+		mbstowcs(&tmp[0], src.data(), src.size());
 #endif
 
 		dest.assign(tmp.begin(), tmp.end() - 1);
@@ -139,9 +139,9 @@ namespace KlayGE
 
 	// 把一个wstring转化为wstring
 	/////////////////////////////////////////////////////////////////////////////////
-	std::wstring& Convert(std::wstring& dest, std::wstring const & src)
+	std::wstring& Convert(std::wstring& dest, std::wstring_view src)
 	{
-		dest = src;
+		dest = src.to_string();
 
 		return dest;
 	}
@@ -210,14 +210,14 @@ namespace KlayGE
 		return tmp;
 	}
 
-	void WriteShortString(std::ostream& os, std::string const & str)
+	void WriteShortString(std::ostream& os, std::string_view str)
 	{
 		uint8_t len = static_cast<uint8_t>(std::min(str.size(), static_cast<size_t>(255)));
 		os.write(reinterpret_cast<char*>(&len), sizeof(len));
 
 		if (len > 0)
 		{
-			os.write(&str[0], len * sizeof(str[0]));
+			os.write(str.data(), len * sizeof(str[0]));
 		}
 	}
 }

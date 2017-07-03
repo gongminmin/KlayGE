@@ -135,7 +135,7 @@ namespace KlayGE
 	private:
 		ParameterBind GetBindFunc(ShaderType type, uint32_t offset, RenderEffectParameter* param);
 
-		std::string GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
+		std::string_view GetShaderProfile(ShaderType type, RenderEffect const & effect, uint32_t shader_desc_id);
 		std::shared_ptr<std::vector<uint8_t>> CompiteToBytecode(ShaderType type, RenderEffect const & effect,
 			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids);
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,

@@ -210,6 +210,12 @@
 		#error "Unsupported compiler version. Please install vc14 or up."
 	#endif
 
+	#if _MSVC_LANG > 201402
+		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+	#endif
+
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.

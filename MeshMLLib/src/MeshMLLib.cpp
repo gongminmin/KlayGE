@@ -113,7 +113,7 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+	void MeshMLObj::SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 		float4x4 const & bind_mat)
 	{
 		Quaternion real, dual;
@@ -122,13 +122,13 @@ namespace KlayGE
 		this->SetJoint(joint_id, joint_name, parent_id, real, dual);
 	}
 
-	void MeshMLObj::SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+	void MeshMLObj::SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 		Quaternion const & bind_quat, float3 const & bind_pos)
 	{
 		this->SetJoint(joint_id, joint_name, parent_id, bind_quat, MathLib::quat_trans_to_udq(bind_quat, bind_pos));
 	}
 
-	void MeshMLObj::SetJoint(int joint_id, std::string const & joint_name, int parent_id,
+	void MeshMLObj::SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 		Quaternion const & bind_real, Quaternion const & bind_dual)
 	{
 		float scale = MathLib::length(bind_real);
@@ -138,7 +138,7 @@ namespace KlayGE
 		}
 
 		Joint& joint = joints_[joint_id];
-		joint.name = joint_name;
+		joint.name = joint_name.to_string();
 		joint.parent_id = parent_id;
 		joint.bind_real = bind_real / scale;
 		joint.bind_dual = bind_dual;
@@ -152,13 +152,13 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetMaterial(int mtl_id, std::string const & name, float4 const & albedo, float metalness, float glossiness,
+	void MeshMLObj::SetMaterial(int mtl_id, std::string_view name, float4 const & albedo, float metalness, float glossiness,
 		float3 const & emissive, bool transparent, float alpha_test, bool sss, bool two_sided)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
-		mtl.name = name;
+		mtl.name = name.to_string();
 		mtl.albedo = albedo;
 		mtl.metalness = metalness;
 		mtl.glossiness = glossiness;
@@ -180,12 +180,12 @@ namespace KlayGE
 		mtl.tess_factors = float4(edge_tess_hint, inside_tess_hint, min_tess, max_tess);
 	}
 
-	void MeshMLObj::SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string const & name)
+	void MeshMLObj::SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string_view name)
 	{
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
-		mtl.tex_names[type] = name;
+		mtl.tex_names[type] = name.to_string();
 	}
 
 	int MeshMLObj::AllocMesh()
@@ -195,13 +195,13 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetMesh(int mesh_id, int material_id, std::string const & name)
+	void MeshMLObj::SetMesh(int mesh_id, int material_id, std::string_view name)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
 
 		Mesh& mesh = meshes_[mesh_id];
 		mesh.material_id = material_id;
-		mesh.name = name;
+		mesh.name = name.to_string();
 	}
 
 	int MeshMLObj::AllocVertex(int mesh_id)
@@ -358,17 +358,17 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetAction(int action_id, std::string const & name, int start_frame, int end_frame)
+	void MeshMLObj::SetAction(int action_id, std::string_view name, int start_frame, int end_frame)
 	{
 		BOOST_ASSERT(static_cast<int>(actions_.size()) > action_id);
 
 		AnimationAction& action = actions_[action_id];
-		action.name = name;
+		action.name = name.to_string();
 		action.start_frame = start_frame;
 		action.end_frame = end_frame;
 	}
 
-	void MeshMLObj::WriteMeshML(std::ostream& os, int vertex_export_settings, int user_export_settings, std::string const & encoding)
+	void MeshMLObj::WriteMeshML(std::ostream& os, int vertex_export_settings, int user_export_settings, std::string_view encoding)
 	{
 		this->OptimizeJoints();
 		this->OptimizeMaterials();

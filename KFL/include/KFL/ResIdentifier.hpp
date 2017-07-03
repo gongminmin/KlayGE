@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 #include <istream>
 #include <vector>
 #include <string>
@@ -43,20 +44,20 @@ namespace KlayGE
 	class ResIdentifier
 	{
 	public:
-		ResIdentifier(std::string const & name, uint64_t timestamp,
+		ResIdentifier(std::string_view name, uint64_t timestamp,
 				std::shared_ptr<std::istream> const & is)
 			: res_name_(name), timestamp_(timestamp), istream_(is)
 		{
 		}
-		ResIdentifier(std::string const & name, uint64_t timestamp,
+		ResIdentifier(std::string_view name, uint64_t timestamp,
 				std::shared_ptr<std::istream> const & is, std::shared_ptr<std::streambuf> const & streambuf)
 			: res_name_(name), timestamp_(timestamp), istream_(is), streambuf_(streambuf)
 		{
 		}
 
-		void ResName(std::string const & name)
+		void ResName(std::string_view name)
 		{
-			res_name_ = name;
+			res_name_ = name.to_string();
 		}
 		std::string const & ResName() const
 		{

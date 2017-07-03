@@ -34,6 +34,7 @@
 #pragma once
 
 #include <KFL/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 
 #include <string>
 #include <functional>
@@ -116,10 +117,10 @@ namespace KlayGE
 	};
 
 	// Unicode函数, 用于string, wstring之间的转换
-	std::string& Convert(std::string& strDest, std::string const & strSrc);
-	std::string& Convert(std::string& strDest, std::wstring const & wstrSrc);
-	std::wstring& Convert(std::wstring& wstrDest, std::string const & strSrc);
-	std::wstring& Convert(std::wstring& wstrDest, std::wstring const & wstrSrc);
+	std::string& Convert(std::string& dest, std::string_view src);
+	std::string& Convert(std::string& dest, std::wstring_view src);
+	std::wstring& Convert(std::wstring& dest, std::string_view src);
+	std::wstring& Convert(std::wstring& dest, std::wstring_view src);
 
 	// 暂停几毫秒
 	void Sleep(uint32_t ms);
@@ -180,7 +181,7 @@ namespace KlayGE
 	uint32_t LastError();
 
 	std::string ReadShortString(ResIdentifierPtr const & res);
-	void WriteShortString(std::ostream& os, std::string const & str);
+	void WriteShortString(std::ostream& os, std::string_view str);
 
 	template <typename T, typename... Args>
 	inline std::shared_ptr<T> MakeSharedPtr(Args&&... args)

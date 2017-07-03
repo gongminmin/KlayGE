@@ -95,7 +95,7 @@ namespace KlayGE
 		}
 	}
 
-	void CArchiveExtractCallback::Init(std::string const & pw, std::shared_ptr<ISequentialOutStream> const & outFileStream)
+	void CArchiveExtractCallback::Init(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & outFileStream)
 	{
 		_outFileStream = outFileStream;
 

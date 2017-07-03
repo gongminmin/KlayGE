@@ -98,7 +98,7 @@ namespace KlayGE
 		{
 		}
 
-		void Init(std::string const & pw);
+		void Init(std::string_view pw);
 
 	private:
 		std::atomic<int32_t> ref_count_;

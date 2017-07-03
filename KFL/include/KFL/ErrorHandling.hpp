@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include <KFL/CXX17/string_view.hpp>
 #include <string>
 #include <stdexcept>
 
@@ -43,7 +44,7 @@ typedef long HRESULT;
 
 namespace KlayGE
 {
-	std::string CombineFileLine(std::string const & file, int line);
+	std::string CombineFileLine(std::string_view file, int line);
 	void Verify(bool x);
 
 #if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)

@@ -64,7 +64,7 @@ namespace KlayGE
 		}
 	}
 
-	void CArchiveOpenCallback::Init(std::string const & pw)
+	void CArchiveOpenCallback::Init(std::string_view pw)
 	{
 		password_is_defined_ = !pw.empty();
 		Convert(password_, pw);

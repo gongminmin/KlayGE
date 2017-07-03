@@ -647,7 +647,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ParticleEmitterPtr ParticleSystem::MakeEmitter(std::string const & name)
+	ParticleEmitterPtr ParticleSystem::MakeEmitter(std::string_view name)
 	{
 		ParticleEmitterPtr ret;
 		if ("point" == name)
@@ -662,7 +662,7 @@ namespace KlayGE
 		return ret;
 	}
 
-	ParticleUpdaterPtr ParticleSystem::MakeUpdater(std::string const & name)
+	ParticleUpdaterPtr ParticleSystem::MakeUpdater(std::string_view name)
 	{
 		ParticleUpdaterPtr ret;
 		if ("polyline" == name)

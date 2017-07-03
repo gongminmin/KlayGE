@@ -256,8 +256,8 @@ namespace KlayGE
 			return media_density_;
 		}
 
-		ParticleEmitterPtr MakeEmitter(std::string const & type);
-		ParticleUpdaterPtr MakeUpdater(std::string const & type);
+		ParticleEmitterPtr MakeEmitter(std::string_view type);
+		ParticleUpdaterPtr MakeUpdater(std::string_view type);
 
 		void AddEmitter(ParticleEmitterPtr const & emitter);
 		void DelEmitter(ParticleEmitterPtr const & emitter);

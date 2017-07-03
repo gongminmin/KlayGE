@@ -734,12 +734,16 @@ namespace KlayGE
 		return caps_;
 	}
 
-	void RenderEngine::GetCustomAttrib(std::string const & /*name*/, void* /*value*/)
+	void RenderEngine::GetCustomAttrib(std::string_view name, void* value)
 	{
+		KFL_UNUSED(name);
+		KFL_UNUSED(value);
 	}
 
-	void RenderEngine::SetCustomAttrib(std::string const & /*name*/, void* /*value*/)
+	void RenderEngine::SetCustomAttrib(std::string_view name, void* value)
 	{
+		KFL_UNUSED(name);
+		KFL_UNUSED(value);
 	}
 
 	void RenderEngine::Resize(uint32_t width, uint32_t height)

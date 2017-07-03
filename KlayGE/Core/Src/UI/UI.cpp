@@ -863,7 +863,7 @@ namespace KlayGE
 		}
 	}
 
-	UIDialogPtr const & UIManager::GetDialog(std::string const & id) const
+	UIDialogPtr const & UIManager::GetDialog(std::string_view id) const
 	{
 		for (size_t i = 0; i < dialogs_.size(); ++ i)
 		{

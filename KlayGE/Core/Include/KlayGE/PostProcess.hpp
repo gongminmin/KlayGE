@@ -28,6 +28,7 @@
 #include <vector>
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KFL/CXX17/string_view.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -52,7 +53,7 @@ namespace KlayGE
 		void Technique(RenderEffectPtr const & effect, RenderTechnique* tech);
 
 		virtual uint32_t NumParams() const;
-		virtual uint32_t ParamByName(std::string const & name) const;
+		virtual uint32_t ParamByName(std::string_view name) const;
 		virtual std::string const & ParamName(uint32_t index) const;
 		virtual void SetParam(uint32_t index, bool const & value);
 		virtual void SetParam(uint32_t index, uint32_t const & value);
@@ -112,13 +113,13 @@ namespace KlayGE
 		virtual void GetParam(uint32_t index, std::vector<float4x4>& value);
 
 		virtual uint32_t NumInputPins() const;
-		virtual uint32_t InputPinByName(std::string const & name) const;
+		virtual uint32_t InputPinByName(std::string_view name) const;
 		virtual std::string const & InputPinName(uint32_t index) const;
 		virtual void InputPin(uint32_t index, TexturePtr const & tex);
 		virtual TexturePtr const & InputPin(uint32_t index) const;
 
 		virtual uint32_t NumOutputPins() const;
-		virtual uint32_t OutputPinByName(std::string const & name) const;
+		virtual uint32_t OutputPinByName(std::string_view name) const;
 		virtual std::string const & OutputPinName(uint32_t index) const;
 		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;
@@ -211,7 +212,7 @@ namespace KlayGE
 		PostProcessPtr const & GetPostProcess(uint32_t index) const;
 
 		virtual uint32_t NumParams() const;
-		virtual uint32_t ParamByName(std::string const & name) const;
+		virtual uint32_t ParamByName(std::string_view name) const;
 		virtual std::string const & ParamName(uint32_t index) const;
 		virtual void SetParam(uint32_t index, bool const & value);
 		virtual void SetParam(uint32_t index, uint32_t const & value);
@@ -271,13 +272,13 @@ namespace KlayGE
 		virtual void GetParam(uint32_t index, std::vector<float4x4>& value);
 
 		virtual uint32_t NumInputPins() const;
-		virtual uint32_t InputPinByName(std::string const & name) const;
+		virtual uint32_t InputPinByName(std::string_view name) const;
 		virtual std::string const & InputPinName(uint32_t index) const;
 		virtual void InputPin(uint32_t index, TexturePtr const & tex);
 		virtual TexturePtr const & InputPin(uint32_t index) const;
 
 		virtual uint32_t NumOutputPins() const;
-		virtual uint32_t OutputPinByName(std::string const & name) const;
+		virtual uint32_t OutputPinByName(std::string_view name) const;
 		virtual std::string const & OutputPinName(uint32_t index) const;
 		virtual void OutputPin(uint32_t index, TexturePtr const & tex, int level = 0, int array_index = 0, int face = 0);
 		virtual TexturePtr const & OutputPin(uint32_t index) const;

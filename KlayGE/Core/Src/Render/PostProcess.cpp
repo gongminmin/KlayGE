@@ -384,7 +384,7 @@ namespace KlayGE
 		return static_cast<uint32_t>(params_.size());
 	}
 
-	uint32_t PostProcess::ParamByName(std::string const & name) const
+	uint32_t PostProcess::ParamByName(std::string_view name) const
 	{
 		for (size_t i = 0; i < params_.size(); ++ i)
 		{
@@ -686,7 +686,7 @@ namespace KlayGE
 		return static_cast<uint32_t>(input_pins_.size());
 	}
 
-	uint32_t PostProcess::InputPinByName(std::string const & name) const
+	uint32_t PostProcess::InputPinByName(std::string_view name) const
 	{
 		for (size_t i = 0; i < input_pins_.size(); ++ i)
 		{
@@ -734,7 +734,7 @@ namespace KlayGE
 		return static_cast<uint32_t>(output_pins_.size());
 	}
 
-	uint32_t PostProcess::OutputPinByName(std::string const & name) const
+	uint32_t PostProcess::OutputPinByName(std::string_view name) const
 	{
 		for (size_t i = 0; i < output_pins_.size(); ++ i)
 		{
@@ -928,7 +928,7 @@ namespace KlayGE
 		return pp_chain_.front()->NumParams();
 	}
 
-	uint32_t PostProcessChain::ParamByName(std::string const & name) const
+	uint32_t PostProcessChain::ParamByName(std::string_view name) const
 	{
 		return pp_chain_.front()->ParamByName(name);
 	}
@@ -1223,7 +1223,7 @@ namespace KlayGE
 		return pp_chain_.front()->NumInputPins();
 	}
 
-	uint32_t PostProcessChain::InputPinByName(std::string const & name) const
+	uint32_t PostProcessChain::InputPinByName(std::string_view name) const
 	{
 		return pp_chain_.front()->InputPinByName(name);
 	}
@@ -1248,7 +1248,7 @@ namespace KlayGE
 		return pp_chain_.back()->NumOutputPins();
 	}
 
-	uint32_t PostProcessChain::OutputPinByName(std::string const & name) const
+	uint32_t PostProcessChain::OutputPinByName(std::string_view name) const
 	{
 		return pp_chain_.back()->OutputPinByName(name);
 	}

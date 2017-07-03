@@ -34,6 +34,7 @@ SET(KERNEL_CXX17_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/any.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/filesystem.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CXX17/optional.hpp
+	${KFL_PROJECT_DIR}/include/KFL/CXX17/string_view.hpp
 )
 SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/AlignedAllocator.hpp

@@ -69,9 +69,9 @@ namespace KlayGE
 
 		for (size_t index = 0; index < settings.options.size(); ++ index)
 		{
-			std::string const & opt_name = settings.options[index].first;
-			std::string const & opt_val = settings.options[index].second;
-			if (0 == strcmp("version", opt_name.c_str()))
+			std::string_view opt_name = settings.options[index].first;
+			std::string_view opt_val = settings.options[index].second;
+			if ("version" == opt_name)
 			{
 				size_t feature_index = 0;
 				for (size_t i = 0; i < available_versions.size(); ++ i)
