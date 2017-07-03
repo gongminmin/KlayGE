@@ -124,7 +124,7 @@ def build_assimp(build_info, compiler_info):
 def build_nanosvg(build_info, compiler_info):
 	build_a_project("nanosvg", "External/nanosvg", build_info, compiler_info)
 
-def build_nanosvg(build_info, compiler_info):
+def build_gtest(build_info, compiler_info):
 	build_a_project("googletest", "External/googletest", build_info, compiler_info)
 
 def build_external_libs(build_info):
