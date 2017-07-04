@@ -57,7 +57,7 @@ namespace KlayGE
 
 		void ResName(std::string_view name)
 		{
-			res_name_ = name.to_string();
+			res_name_ = std::string(name);
 		}
 		std::string const & ResName() const
 		{

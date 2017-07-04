@@ -63,7 +63,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for wcstombs
 		std::vector<char> tmp;
-		for (std::wstring::const_reference ch : src)
+		for (auto ch : src)
 		{
 			if (ch < 0x80)
 			{
@@ -93,7 +93,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::string& Convert(std::string& dest, std::string_view src)
 	{
-		dest = src.to_string();
+		dest = std::string(src);
 
 		return dest;
 	}
@@ -109,7 +109,7 @@ namespace KlayGE
 #elif defined KLAYGE_PLATFORM_ANDROID
 		// Hack for mbstowcs
 		std::vector<wchar_t> tmp;
-		for (std::string::const_iterator iter = src.begin(); iter != src.end(); ++ iter)
+		for (auto iter = src.begin(); iter != src.end(); ++ iter)
 		{
 			unsigned char ch = *iter;
 			wchar_t wch = ch;
@@ -141,7 +141,7 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring& Convert(std::wstring& dest, std::wstring_view src)
 	{
-		dest = src.to_string();
+		dest = std::wstring(src);
 
 		return dest;
 	}

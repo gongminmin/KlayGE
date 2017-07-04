@@ -138,7 +138,7 @@ namespace KlayGE
 		}
 
 		Joint& joint = joints_[joint_id];
-		joint.name = joint_name.to_string();
+		joint.name = std::string(joint_name);
 		joint.parent_id = parent_id;
 		joint.bind_real = bind_real / scale;
 		joint.bind_dual = bind_dual;
@@ -158,7 +158,7 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
-		mtl.name = name.to_string();
+		mtl.name = std::string(name);
 		mtl.albedo = albedo;
 		mtl.metalness = metalness;
 		mtl.glossiness = glossiness;
@@ -185,7 +185,7 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
 
 		Material& mtl = materials_[mtl_id];
-		mtl.tex_names[type] = name.to_string();
+		mtl.tex_names[type] = std::string(name);
 	}
 
 	int MeshMLObj::AllocMesh()
@@ -201,7 +201,7 @@ namespace KlayGE
 
 		Mesh& mesh = meshes_[mesh_id];
 		mesh.material_id = material_id;
-		mesh.name = name.to_string();
+		mesh.name = std::string(name);
 	}
 
 	int MeshMLObj::AllocVertex(int mesh_id)
@@ -363,7 +363,7 @@ namespace KlayGE
 		BOOST_ASSERT(static_cast<int>(actions_.size()) > action_id);
 
 		AnimationAction& action = actions_[action_id];
-		action.name = name.to_string();
+		action.name = std::string(name);
 		action.start_frame = start_frame;
 		action.end_frame = end_frame;
 	}
