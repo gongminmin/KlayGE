@@ -589,7 +589,7 @@ namespace
 		{
 			v.w() -= step.w();
 		}
-		else if (!(dir * 8UL) && (1 == old_pbit))
+		else if (!(dir & 8UL) && (1 == old_pbit))
 		{
 			v.w() += step.w();
 		}
