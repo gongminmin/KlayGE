@@ -148,7 +148,7 @@ namespace KlayGE
 	int MeshMLObj::AllocMaterial()
 	{
 		int id = static_cast<int>(materials_.size());
-		materials_.push_back(Material());
+		materials_.resize(id + 1);
 		return id;
 	}
 
@@ -191,7 +191,7 @@ namespace KlayGE
 	int MeshMLObj::AllocMesh()
 	{
 		int id = static_cast<int>(meshes_.size());
-		meshes_.push_back(Mesh());
+		meshes_.resize(id + 1);
 		return id;
 	}
 
@@ -210,7 +210,7 @@ namespace KlayGE
 
 		Mesh& mesh = meshes_[mesh_id];
 		int id = static_cast<int>(mesh.vertices.size());
-		mesh.vertices.push_back(Vertex());
+		mesh.vertices.resize(id + 1);
 		return id;
 	}
 
@@ -255,7 +255,7 @@ namespace KlayGE
 
 		Vertex& vertex = meshes_[mesh_id].vertices[vertex_id];
 		int id = static_cast<int>(vertex.binds.size());
-		vertex.binds.push_back(JointBinding());
+		vertex.binds.resize(id + 1);
 		return id;
 	}
 
@@ -277,7 +277,7 @@ namespace KlayGE
 
 		Mesh& mesh = meshes_[mesh_id];
 		int id = static_cast<int>(mesh.triangles.size());
-		mesh.triangles.push_back(Triangle());
+		mesh.triangles.resize(id + 1);
 		return id;
 	}
 
@@ -295,7 +295,7 @@ namespace KlayGE
 	int MeshMLObj::AllocKeyframes()
 	{
 		int id = static_cast<int>(keyframes_.size());
-		keyframes_.push_back(Keyframes());
+		keyframes_.resize(id + 1);
 		return id;
 	}
 
@@ -354,7 +354,7 @@ namespace KlayGE
 	int MeshMLObj::AllocAction()
 	{
 		int id = static_cast<int>(actions_.size());
-		actions_.push_back(AnimationAction());
+		actions_.resize(id + 1);
 		return id;
 	}
 

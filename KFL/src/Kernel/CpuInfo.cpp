@@ -331,7 +331,10 @@ namespace KlayGE
 					feature_mask_ |= cpuid.Ecx() & CFM_MisalignedSSE_AMD ? CF_MisalignedSSE : 0;
 				}
 				feature_mask_ |= cpuid.Edx() & CFM_X64 ? CF_X64 : 0;
-				feature_mask_ |= (cpuid.Ecx() & CFM_OSXSAVE) && (cpuid.Ecx() & CFM_FMA4 ? CF_FMA4 : 0);
+				if (cpuid.Ecx() & CFM_OSXSAVE)
+				{
+					feature_mask_ |= cpuid.Ecx() & CFM_FMA4 ? CF_FMA4 : 0;
+				}
 			}
 
 			if (max_ext_fn >= 0x80000004)

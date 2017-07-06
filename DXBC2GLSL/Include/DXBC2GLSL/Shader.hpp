@@ -355,6 +355,7 @@ struct ShaderDecl : public TokenizedShaderInstruction
 
 	ShaderDecl()
 	{
+		memset(&insn, 0, sizeof(insn));
 		memset(&intf, 0, sizeof(intf));
 	}
 };

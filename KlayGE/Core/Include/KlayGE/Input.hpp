@@ -41,10 +41,15 @@
 #if defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter in boost
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing" // Ignore aliasing in flat_tree.hpp
 #endif
 #include <boost/container/flat_map.hpp>
 #if defined(KLAYGE_COMPILER_CLANG)
 #pragma clang diagnostic pop
+#elif defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
 #endif
 #if defined(KLAYGE_COMPILER_MSVC)
 #pragma warning(push)
