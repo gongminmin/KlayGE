@@ -367,6 +367,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			{
 			case DOM_HDR10:
 				sel = 1;
+				break;
 
 			case DOM_sRGB:
 			default:
