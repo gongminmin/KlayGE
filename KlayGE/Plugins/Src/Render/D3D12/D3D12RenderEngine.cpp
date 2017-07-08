@@ -1412,6 +1412,13 @@ namespace KlayGE
 			}
 		}
 
+		if (!check_uav_fmts)
+		{
+			uav_format_.push_back(EF_R32F);
+			uav_format_.push_back(EF_R32UI);
+			uav_format_.push_back(EF_R32I);
+		}
+
 		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
 		{
 			std::make_pair(EF_A8, DXGI_FORMAT_A8_UNORM),

@@ -624,7 +624,14 @@ namespace KlayGE
 		{
 			technique_tbdr_shadowing_unified_ = dr_effect_->TechniqueByName("TBDRShadowingUnified");
 			technique_tbdr_light_intersection_unified_ = dr_effect_->TechniqueByName("TBDRLightIntersection");
-			technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnified");
+			if (caps.uav_format_support(EF_ABGR16F))
+			{
+				technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnified");
+			}
+			else
+			{
+				technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnifiedNoTypedUAV");
+			}
 		}
 		else
 		{
@@ -647,7 +654,14 @@ namespace KlayGE
 		{
 			technique_cldr_shadowing_unified_ = dr_effect_->TechniqueByName("ClusteredDRShadowingUnified");
 			technique_cldr_light_intersection_unified_ = dr_effect_->TechniqueByName("ClusteredDRLightIntersection");
-			technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnified");
+			if (caps.uav_format_support(EF_ABGR16F))
+			{
+				technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnified");
+			}
+			else
+			{
+				technique_tbdr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnifiedNoTypedUAV");
+			}
 		}
 		else
 		{
@@ -842,6 +856,7 @@ namespace KlayGE
 			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
 			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
 			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
+			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
 			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
 			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
@@ -892,6 +907,7 @@ namespace KlayGE
 			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
 			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
 			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
+			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
 			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
 			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
@@ -1303,6 +1319,11 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_tbdr_)
 		{
+			if (!caps.uav_format_support(shading_fmt))
+			{
+				pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+			}
+
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
 			{
@@ -1358,6 +1379,11 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
+			if (!caps.uav_format_support(shading_fmt))
+			{
+				pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
+			}
+
 			ElementFormat lighting_mask_fmt;
 			if (caps.rendertarget_format_support(EF_R8, 1, 0))
 			{
@@ -3994,8 +4020,26 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer().Dirty(true);
 			lights_aabb_max_param_->CBuffer().Dirty(true);
 
-			*shading_rw_tex_param_
-				= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+			if (pvp.temp_shading_tex)
+			{
+				if (available_lights[0].empty())
+				{
+					*shading_in_tex_param_
+						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+					*shading_rw_tex_param_ = pvp.temp_shading_tex;
+				}
+				else
+				{
+					*shading_in_tex_param_ = TexturePtr();
+					*shading_rw_tex_param_
+						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+				}
+			}
+			else
+			{
+				*shading_rw_tex_param_
+					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+			}
 
 #ifndef KLAYGE_SHIP
 			tiling_perfs_[pass_tb]->Begin();
@@ -4015,6 +4059,14 @@ namespace KlayGE
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
 				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
+
+			if (available_lights[0].empty() && pvp.temp_shading_tex)
+			{
+				copy_pp_->InputPin(0, pvp.temp_shading_tex);
+				copy_pp_->OutputPin(0,
+					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+				copy_pp_->Apply();
+			}
 		}
 	}
 
@@ -4966,8 +5018,26 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer().Dirty(true);
 			lights_aabb_max_param_->CBuffer().Dirty(true);
 
-			*shading_rw_tex_param_
-				= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+			if (pvp.temp_shading_tex)
+			{
+				if (available_lights[0].empty())
+				{
+					*shading_in_tex_param_
+						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+					*shading_rw_tex_param_ = pvp.temp_shading_tex;
+				}
+				else
+				{
+					*shading_in_tex_param_ = TexturePtr();
+					*shading_rw_tex_param_
+						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+				}
+			}
+			else
+			{
+				*shading_rw_tex_param_
+					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+			}
 
 			{
 				CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
@@ -5009,6 +5079,14 @@ namespace KlayGE
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_cldr_unified_,
 				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
+
+			if (available_lights[0].empty() && pvp.temp_shading_tex)
+			{
+				copy_pp_->InputPin(0, pvp.temp_shading_tex);
+				copy_pp_->OutputPin(0,
+					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
+				copy_pp_->Apply();
+			}
 		}
 	}
 
