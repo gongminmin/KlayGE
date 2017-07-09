@@ -22,7 +22,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KFL/CXX17/string_view.hpp>
 
 #include <KlayGE/RenderSettings.hpp>
 
@@ -95,8 +94,8 @@ namespace KlayGE
 		};
 
 	public:
-		Window(std::string_view name, RenderSettings const & settings);
-		Window(std::string_view name, RenderSettings const & settings, void* native_wnd);
+		Window(std::string const & name, RenderSettings const & settings);
+		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		~Window();
 
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
