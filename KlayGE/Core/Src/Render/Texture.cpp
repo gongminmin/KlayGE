@@ -27,6 +27,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
@@ -1209,7 +1210,7 @@ namespace
 			while (!caps.texture_format_support(tex_data.format))
 			{
 				bool found = false;
-				for (size_t i = 0; i < sizeof(convert_fmts) / sizeof(convert_fmts[0][0]) / 2; ++ i)
+				for (size_t i = 0; i < std::size(convert_fmts); ++ i)
 				{
 					if (convert_fmts[i][0] == tex_data.format)
 					{
@@ -1400,7 +1401,7 @@ namespace
 			while (!caps.texture_format_support(tex_data.format))
 			{
 				bool found = false;
-				for (size_t i = 0; i < sizeof(convert_fmts) / sizeof(convert_fmts[0][0]) / 2; ++ i)
+				for (size_t i = 0; i < std::size(convert_fmts); ++ i)
 				{
 					if (convert_fmts[i][0] == tex_data.format)
 					{
@@ -1596,7 +1597,7 @@ namespace KlayGE
 		desc.pitch = LE2Native(desc.pitch);
 		desc.depth = LE2Native(desc.depth);
 		desc.mip_map_count = LE2Native(desc.mip_map_count);
-		for (uint32_t i = 0; i < sizeof(desc.reserved1) / sizeof(desc.reserved1[0]); ++ i)
+		for (uint32_t i = 0; i < std::size(desc.reserved1); ++ i)
 		{
 			desc.reserved1[i] = LE2Native(desc.reserved1[i]);
 		}
@@ -1610,7 +1611,7 @@ namespace KlayGE
 		desc.pixel_format.rgb_alpha_bit_mask = LE2Native(desc.pixel_format.rgb_alpha_bit_mask);
 		desc.dds_caps.caps1 = LE2Native(desc.dds_caps.caps1);
 		desc.dds_caps.caps2 = LE2Native(desc.dds_caps.caps2);
-		for (uint32_t i = 0; i < sizeof(desc.dds_caps.reserved) / sizeof(desc.dds_caps.reserved[0]); ++ i)
+		for (uint32_t i = 0; i < std::size(desc.dds_caps.reserved); ++ i)
 		{
 			desc.dds_caps.reserved[i] = LE2Native(desc.dds_caps.reserved[i]);
 		}
@@ -2537,7 +2538,7 @@ namespace KlayGE
 		desc_le.pitch = Native2LE(desc_le.pitch);
 		desc_le.depth = Native2LE(desc_le.depth);
 		desc_le.mip_map_count = Native2LE(desc_le.mip_map_count);
-		for (uint32_t i = 0; i < sizeof(desc_le.reserved1) / sizeof(desc_le.reserved1[0]); ++ i)
+		for (uint32_t i = 0; i < std::size(desc_le.reserved1); ++ i)
 		{
 			desc_le.reserved1[i] = Native2LE(desc_le.reserved1[i]);
 		}
@@ -2551,7 +2552,7 @@ namespace KlayGE
 		desc_le.pixel_format.rgb_alpha_bit_mask = Native2LE(desc_le.pixel_format.rgb_alpha_bit_mask);
 		desc_le.dds_caps.caps1 = Native2LE(desc_le.dds_caps.caps1);
 		desc_le.dds_caps.caps2 = Native2LE(desc_le.dds_caps.caps2);
-		for (uint32_t i = 0; i < sizeof(desc_le.dds_caps.reserved) / sizeof(desc_le.dds_caps.reserved[0]); ++ i)
+		for (uint32_t i = 0; i < std::size(desc_le.dds_caps.reserved); ++ i)
 		{
 			desc_le.dds_caps.reserved[i] = Native2LE(desc_le.dds_caps.reserved[i]);
 		}

@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -572,10 +573,10 @@ namespace
 					{
 						for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
 						{
-							float4 disp = float4(float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
+							float4 disp = float4(static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
 							min_disps[i] = MathLib::minimize(min_disps[i], disp);
 							max_disp = MathLib::maximize(max_disp, disp);
 						}
@@ -587,10 +588,10 @@ namespace
 					{
 						for (int x = 0; x < ocean_param_.dmap_dim; ++ x)
 						{
-							float4 disp = float4(float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
-								float(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
+							float4 disp = float4(static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 0]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 1]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 2]),
+								static_cast<float>(p[y * mapper.RowPitch() / sizeof(half) + x * 4 + 3]));
 							float4 normalized_disp = (disp - min_disps[i]) / disp_ranges[i];
 							abgr8_disp[y * ocean_param_.dmap_dim + x] = Color(&normalized_disp.x()).ABGR();
 						}
@@ -887,7 +888,7 @@ void OceanApp::OnCreate()
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
-	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&OceanApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));

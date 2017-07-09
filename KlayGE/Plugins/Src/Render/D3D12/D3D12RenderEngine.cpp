@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -449,7 +450,7 @@ namespace KlayGE
 	{
 		TIFHR(d3d_res_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_res_cmd_list_.get() };
-		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_render_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 
 		res_cmd_fence_val_ = res_cmd_fence_->Signal(Fence::FT_Render);
 		res_cmd_fence_->Wait(res_cmd_fence_val_);
@@ -462,21 +463,21 @@ namespace KlayGE
 	{
 		TIFHR(d3d_render_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_render_cmd_list_.get() };
-		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_render_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 	}
 
 	void D3D12RenderEngine::CommitComputeCmd()
 	{
 		TIFHR(d3d_compute_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_compute_cmd_list_.get() };
-		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_compute_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 	}
 
 	void D3D12RenderEngine::CommitCopyCmd()
 	{
 		TIFHR(d3d_copy_cmd_list_->Close());
 		ID3D12CommandList* cmd_lists[] = { d3d_copy_cmd_list_.get() };
-		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_copy_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 	}
 
 	void D3D12RenderEngine::SyncRenderCmd()
@@ -1172,13 +1173,13 @@ namespace KlayGE
 		ID3D12CommandList* cmd_lists[1];
 
 		cmd_lists[0] = d3d_render_cmd_list_.get();
-		d3d_render_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_render_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 
 		cmd_lists[0] = d3d_compute_cmd_list_.get();
-		d3d_compute_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_compute_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 
 		cmd_lists[0] = d3d_copy_cmd_list_.get();
-		d3d_copy_cmd_queue_->ExecuteCommandLists(sizeof(cmd_lists) / sizeof(cmd_lists[0]), cmd_lists);
+		d3d_copy_cmd_queue_->ExecuteCommandLists(static_cast<uint32_t>(std::size(cmd_lists)), cmd_lists);
 	}
 
 	void D3D12RenderEngine::ForceCPUGPUSync()
@@ -1491,7 +1492,7 @@ namespace KlayGE
 		};
 
 		D3D12_FEATURE_DATA_FORMAT_SUPPORT fmt_support;
-		for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++ i)
+		for (size_t i = 0; i < std::size(fmts); ++ i)
 		{
 			DXGI_FORMAT dxgi_fmt;
 			if (IsDepthFormat(fmts[i].first))

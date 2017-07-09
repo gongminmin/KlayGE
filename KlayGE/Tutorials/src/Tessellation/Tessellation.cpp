@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -56,7 +57,7 @@ namespace
 			GraphicsBufferPtr pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(xyzs), xyzs);
 			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
-			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
@@ -150,7 +151,7 @@ void TessellationApp::OnCreate()
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
-	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&TessellationApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));

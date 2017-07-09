@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -269,7 +270,7 @@ namespace KlayGE
 			pso_desc.PrimitiveTopologyType = D3D12Mapping::MappingPriTopoType(tt);
 
 			pso_desc.NumRenderTargets = 0;
-			for (int i = sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]) - 1; i >= 0; -- i)
+			for (int i = static_cast<int>(std::size(pso_desc.RTVFormats)) - 1; i >= 0; -- i)
 			{
 				if (fb->Attached(FrameBuffer::ATT_Color0 + i))
 				{
@@ -281,7 +282,7 @@ namespace KlayGE
 			{
 				pso_desc.RTVFormats[i] = D3D12Mapping::MappingFormat(fb->Attached(FrameBuffer::ATT_Color0 + i)->Format());
 			}
-			for (uint32_t i = pso_desc.NumRenderTargets; i < sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]); ++ i)
+			for (uint32_t i = pso_desc.NumRenderTargets; i < std::size(pso_desc.RTVFormats); ++ i)
 			{
 				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
 			}

@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -299,7 +300,7 @@ void JudaTexViewer::OnCreate()
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
-	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&JudaTexViewer::InputHandler, this, std::placeholders::_1, std::placeholders::_2));

@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
 #include <KFL/Math.hpp>
@@ -130,7 +131,7 @@ namespace
 			init_data.data = color_map;
 			init_data.row_pitch = sizeof(color_map);
 			init_data.slice_pitch = init_data.row_pitch * 1;
-			TexturePtr color_map_tex = rf.MakeTexture2D(sizeof(color_map) / sizeof(color_map[0]), 1, 1, 1, EF_ABGR8,
+			TexturePtr color_map_tex = rf.MakeTexture2D(static_cast<uint32_t>(std::size(color_map)), 1, 1, 1, EF_ABGR8,
 				1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			*(effect_->ParameterByName("color_map")) = color_map_tex;
 		}
@@ -203,7 +204,7 @@ void RasterizationOrderApp::OnCreate()
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
-	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&RasterizationOrderApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));

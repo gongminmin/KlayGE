@@ -24,6 +24,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
@@ -95,7 +96,7 @@ namespace KlayGE
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
-			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
+			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(std::bind(&FirstPersonCameraController::InputHandler, this,
@@ -285,7 +286,7 @@ namespace KlayGE
 
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
-			actionMap.AddActions(&actions[0], &actions[sizeof(actions) / sizeof(actions[0])]);
+			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(std::bind(&TrackballCameraController::InputHandler, this,

@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderLayout.hpp>
 #include <KlayGE/RenderFactory.hpp>
@@ -370,7 +371,7 @@ namespace KlayGE
 		this->CreateTessIB();
 
 		int widths[] = { 0, 16, 16, 16, 16 };
-		uint32_t const rings = sizeof(widths) / sizeof(widths[0]) - 1;
+		uint32_t const rings = static_cast<uint32_t>(std::size(widths)) - 1;
 		KFL_UNUSED(MAX_RINGS);
 		BOOST_ASSERT(rings <= MAX_RINGS);
 

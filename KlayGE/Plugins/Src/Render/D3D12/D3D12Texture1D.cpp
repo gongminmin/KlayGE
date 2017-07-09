@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
@@ -343,7 +344,7 @@ namespace KlayGE
 
 			pso_desc.NumRenderTargets = 1;
 			pso_desc.RTVFormats[0] = dxgi_fmt_;
-			for (uint32_t i = pso_desc.NumRenderTargets; i < sizeof(pso_desc.RTVFormats) / sizeof(pso_desc.RTVFormats[0]); ++ i)
+			for (uint32_t i = pso_desc.NumRenderTargets; i < std::size(pso_desc.RTVFormats); ++ i)
 			{
 				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
 			}
@@ -364,7 +365,7 @@ namespace KlayGE
 			ID3D12DescriptorHeapPtr sampler_heap = so->SamplerHeap();
 
 			ID3D12DescriptorHeap* heaps[] = { cbv_srv_uav_heap.get(), sampler_heap.get() };
-			cmd_list->SetDescriptorHeaps(sizeof(heaps) / sizeof(heaps[0]), heaps);
+			cmd_list->SetDescriptorHeaps(static_cast<uint32_t>(std::size(heaps)), heaps);
 
 			if (sampler_heap)
 			{

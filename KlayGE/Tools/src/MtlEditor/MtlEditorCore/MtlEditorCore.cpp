@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -59,7 +60,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
 
-			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 			effect_attrs_ |= EA_SimpleForward;
@@ -101,7 +102,7 @@ namespace
 
 			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
-			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 
 			effect_attrs_ |= EA_SimpleForward;

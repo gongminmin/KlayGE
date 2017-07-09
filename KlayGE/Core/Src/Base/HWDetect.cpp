@@ -30,6 +30,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
+#include <KFL/CXX17/iterator.hpp>
 
 #include <cstring>
 #include <boost/assert.hpp>
@@ -480,7 +481,7 @@ namespace KlayGE
 
 	char const * Mainboard::BoardTypeName() const
 	{
-		BOOST_ASSERT(mainboard_.board_type < sizeof(mainboard_type_name_) / sizeof(mainboard_type_name_[0]));
+		BOOST_ASSERT(mainboard_.board_type < std::size(mainboard_type_name_));
 		return mainboard_type_name_[mainboard_.board_type];
 	}
 

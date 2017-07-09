@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -234,7 +235,7 @@ namespace
 
 			tile_ids_.clear();
 			uint32_t level = juda_tex->TreeLevels() - 1;
-			for (size_t i = 0; i < sizeof(tile_bb_) / sizeof(tile_bb_[0]); ++ i)
+			for (size_t i = 0; i < std::size(tile_bb_); ++ i)
 			{
 				for (int32_t y = 0; y < tile_bb_[i].w(); ++ y)
 				{
@@ -594,7 +595,7 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 		{
 			InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 			InputActionMap actionMap;
-			actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
 			input_handler->connect(std::bind(&DetailedSurfaceApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));

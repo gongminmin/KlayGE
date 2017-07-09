@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
@@ -160,7 +161,7 @@ namespace KlayGE
 		: HQTerrainRenderable(SyncLoadRenderEffect("ProceduralTerrain.fxml"), 800, 1),
 			num_3d_plants_(0), num_impostor_plants_(0)
 	{
-		for (size_t i = 0; i < sizeof(plant_parameters) / sizeof(plant_parameters[0]); ++ i)
+		for (size_t i = 0; i < std::size(plant_parameters); ++ i)
 		{
 			if (plant_parameters[i].impostor_distance > 0)
 			{
@@ -272,7 +273,7 @@ namespace KlayGE
 		float const tile_size = tile_rings_[0]->TileSize();
 		num_tiles_edge_ = static_cast<uint32_t>(total_size / tile_size + 0.5f);
 
-		plant_meshes_.resize(sizeof(plant_parameters) / sizeof(plant_parameters[0]));
+		plant_meshes_.resize(std::size(plant_parameters));
 		plant_impostor_meshes_.resize(plant_meshes_.size());
 		plant_imposters_.resize(plant_meshes_.size());
 		plant_instance_buffers_.resize(plant_meshes_.size());

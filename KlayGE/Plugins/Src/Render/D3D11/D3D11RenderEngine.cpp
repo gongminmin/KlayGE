@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
@@ -1180,7 +1181,7 @@ namespace KlayGE
 		};
 
 		UINT s;
-		for (size_t i = 0; i < sizeof(fmts) / sizeof(fmts[0]); ++ i)
+		for (size_t i = 0; i < std::size(fmts); ++ i)
 		{
 			if ((caps_.max_shader_model < ShaderModel(5, 0))
 				&& ((EF_BC6 == fmts[i].first) || (EF_SIGNED_BC6 == fmts[i].first)

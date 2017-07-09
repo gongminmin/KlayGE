@@ -106,6 +106,8 @@
 			#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
 		#endif
 
+		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT
 	#elif defined(__ANDROID__)
@@ -128,6 +130,7 @@
 
 		#define KLAYGE_COMPILER_CLANGC2
 
+		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 		#define KLAYGE_SYMBOL_EXPORT __declspec(dllexport)
@@ -183,6 +186,7 @@
 	#endif
 
 	#if KLAYGE_COMPILER_VERSION >= 61
+		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 	#endif
 	#if KLAYGE_COMPILER_VERSION >= 60
@@ -223,6 +227,7 @@
 		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
 	#endif
 
+	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 	#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 	#pragma warning(disable: 4251) // STL classes are not dllexport.

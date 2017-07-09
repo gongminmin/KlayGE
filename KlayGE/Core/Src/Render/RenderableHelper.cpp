@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/GraphicsBuffer.hpp>
@@ -152,7 +153,7 @@ namespace KlayGE
 		{
 			v0, v1
 		};
-		pos_aabb_ = MathLib::compute_aabbox(&vs[0], &vs[0] + sizeof(vs) / sizeof(vs[0]));
+		pos_aabb_ = MathLib::compute_aabbox(&vs[0], &vs[0] + std::size(vs));
 		
 		*v0_ep_ = v0;
 		*v1_ep_ = v1;
@@ -221,7 +222,7 @@ namespace KlayGE
 		{
 			v0, v1, v2
 		};
-		pos_aabb_ = MathLib::compute_aabbox(&vs[0], &vs[0] + sizeof(vs) / sizeof(vs[0]));
+		pos_aabb_ = MathLib::compute_aabbox(&vs[0], &vs[0] + std::size(vs));
 		
 		*v0_ep_ = v0;
 		*v1_ep_ = v1;

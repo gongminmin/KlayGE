@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/COMPtr.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/Context.hpp>
@@ -315,8 +316,7 @@ namespace KlayGE
 			if (SUCCEEDED(hr))
 			{
 				IID REPORT_TYPES[] = { IID_ILatLongReport };
-				hr = location->RequestPermissions(nullptr, REPORT_TYPES,
-					sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]), true);
+				hr = location->RequestPermissions(nullptr, REPORT_TYPES, std::size(REPORT_TYPES), true);
 				if (SUCCEEDED(hr))
 				{
 					locator_ = MakeCOMPtr(location);
@@ -325,7 +325,7 @@ namespace KlayGE
 					ILocationEvents* sensor_event;
 					location_event_->QueryInterface(IID_ILocationEvents, reinterpret_cast<void**>(&sensor_event));
 
-					for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+					for (DWORD index = 0; index < std::size(REPORT_TYPES); ++ index)
 					{
 						hr = locator_->RegisterForReport(sensor_event, REPORT_TYPES[index], 1000);
 					}
@@ -421,7 +421,7 @@ namespace KlayGE
 		if (locator_)
 		{
 			IID REPORT_TYPES[] = { IID_ILatLongReport };
-			for (DWORD index = 0; index < sizeof(REPORT_TYPES) / sizeof(REPORT_TYPES[0]); ++ index)
+			for (DWORD index = 0; index < std::size(REPORT_TYPES); ++ index)
 			{
 				locator_->UnregisterForReport(REPORT_TYPES[index]);
 			}

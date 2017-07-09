@@ -29,6 +29,7 @@
 */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Color.hpp>
@@ -752,19 +753,19 @@ namespace KlayGE
 					if (TCM_Quality == params.quality_)
 					{
 						static int const scan_delta_0_to_4[] = { -4, -3, -2, -1, 0, 1, 2, 3, 4 };
-						params.scan_delta_size_ = sizeof(scan_delta_0_to_4) / sizeof(scan_delta_0_to_4[0]);
+						params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_0_to_4));
 						params.scan_deltas_ = scan_delta_0_to_4;
 					}
 					else if (TCM_Balanced == params.quality_)
 					{
 						static int const scan_delta_0_to_1[] = { -1, 0, 1 };
-						params.scan_delta_size_ = sizeof(scan_delta_0_to_1) / sizeof(scan_delta_0_to_1[0]);
+						params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_0_to_1));
 						params.scan_deltas_ = scan_delta_0_to_1;
 					}
 					else
 					{
 						static int const scan_delta_0[] = { 0 };
-						params.scan_delta_size_ = sizeof(scan_delta_0) / sizeof(scan_delta_0[0]);
+						params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_0));
 						params.scan_deltas_ = scan_delta_0;
 					}
 
@@ -784,7 +785,7 @@ namespace KlayGE
 							if (TCM_Balanced == params.quality_)
 							{
 								static int const scan_delta_2_to_3[] = { -3, -2, 2, 3 };
-								params.scan_delta_size_ = sizeof(scan_delta_2_to_3) / sizeof(scan_delta_2_to_3[0]);
+								params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_2_to_3));
 								params.scan_deltas_ = scan_delta_2_to_3;
 							}
 							else
@@ -793,12 +794,12 @@ namespace KlayGE
 								static int const scan_delta_5_to_8[] = { -8, -7, -6, -5, 5, 6, 7, 8 };
 								if (results[subblock].error_ > refinement_error_thresh1)
 								{
-									params.scan_delta_size_ = sizeof(scan_delta_5_to_8) / sizeof(scan_delta_5_to_8[0]);
+									params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_5_to_8));
 									params.scan_deltas_ = scan_delta_5_to_8;
 								}
 								else
 								{
-									params.scan_delta_size_ = sizeof(scan_delta_5_to_5) / sizeof(scan_delta_5_to_5[0]);
+									params.scan_delta_size_ = static_cast<uint32_t>(std::size(scan_delta_5_to_5));
 									params.scan_deltas_ = scan_delta_5_to_5;
 								}
 							}

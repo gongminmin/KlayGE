@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/Util.hpp>
@@ -379,7 +380,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			int sel = -1;
 			HWND hPaperWhiteCombo = GetDlgItem(hDlg, IDC_PAPER_WHITE_COMBO);
-			for (uint32_t i = 0; i < sizeof(paper_white_candidates) / sizeof(paper_white_candidates[0]); ++ i)
+			for (uint32_t i = 0; i < std::size(paper_white_candidates); ++ i)
 			{
 				std::basic_string<TCHAR> str;
 				Convert(str, boost::lexical_cast<std::string>(paper_white_candidates[i]));
@@ -395,7 +396,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 		{
 			int sel = -1;
 			HWND hMaxLumCombo = GetDlgItem(hDlg, IDC_MAX_LUM_COMBO);
-			for (uint32_t i = 0; i < sizeof(max_lum_candidates) / sizeof(max_lum_candidates[0]); ++ i)
+			for (uint32_t i = 0; i < std::size(max_lum_candidates); ++ i)
 			{
 				std::basic_string<TCHAR> str;
 				Convert(str, boost::lexical_cast<std::string>(max_lum_candidates[i]));
@@ -748,7 +749,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					HWND hMBFramesEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_MB_FRAMES_EDIT);
 					TCHAR buf[256];
-					GetWindowText(hMBFramesEdit, buf, sizeof(buf) / sizeof(buf[0]));
+					GetWindowText(hMBFramesEdit, buf, static_cast<uint32_t>(std::size(buf)));
 					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.motion_frames;
 				}
 				{
@@ -764,7 +765,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				{
 					HWND hStereoSepEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_SEP_EDIT);
 					TCHAR buf[256];
-					GetWindowText(hStereoSepEdit, buf, sizeof(buf) / sizeof(buf[0]));
+					GetWindowText(hStereoSepEdit, buf, static_cast<int>(std::size(buf)));
 					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.stereo_separation;
 				}
 				{

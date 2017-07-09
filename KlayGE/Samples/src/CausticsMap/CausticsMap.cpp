@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Input.hpp>
@@ -632,7 +633,7 @@ void CausticsMapApp::OnCreate()
 	//Input Bind
 	InputEngine& ie(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap action_map;
-	action_map.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	action_map.AddActions(actions, actions + std::size(actions));
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&CausticsMapApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	ie.ActionMap(action_map, input_handler);

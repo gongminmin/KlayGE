@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -81,19 +82,19 @@ namespace
 			rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 			rl_->BindVertexStream(tex0_vb, VertexElement(VEU_TextureCoord, 0, EF_GR32F));
 
-			float3 normal_float3[sizeof(xyzs) / sizeof(xyzs[0])];
+			float3 normal_float3[std::size(xyzs)];
 			MathLib::compute_normal(normal_float3,
-				indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]));
+				indices, indices + std::size(indices),
+				xyzs, xyzs + std::size(xyzs));
 
-			float4 tangent_float4[sizeof(xyzs) / sizeof(xyzs[0])];
-			float3 binormal_float3[sizeof(xyzs) / sizeof(xyzs[0])];
+			float4 tangent_float4[std::size(xyzs)];
+			float3 binormal_float3[std::size(xyzs)];
 			MathLib::compute_tangent(tangent_float4, binormal_float3,
-				indices, indices + sizeof(indices) / sizeof(indices[0]),
-				xyzs, xyzs + sizeof(xyzs) / sizeof(xyzs[0]), texs, normal_float3);
+				indices, indices + std::size(indices),
+				xyzs, xyzs + std::size(xyzs), texs, normal_float3);
 
-			Quaternion tangent_quat[sizeof(xyzs) / sizeof(xyzs[0])];
-			for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+			Quaternion tangent_quat[std::size(xyzs)];
+			for (uint32_t j = 0; j < std::size(xyzs); ++ j)
 			{
 				float3 n = MathLib::normalize(normal_float3[j]);
 				float3 b = MathLib::normalize(binormal_float3[j]);
@@ -104,13 +105,13 @@ namespace
 				tangent_quat[j] = MathLib::to_quaternion(t, b, n, 8);
 			}
 
-			uint32_t tangent[sizeof(xyzs) / sizeof(xyzs[0])];
+			uint32_t tangent[std::size(xyzs)];
 			ElementFormat fmt;
 			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
 			{
 				fmt = EF_ABGR8;
 
-				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				for (uint32_t j = 0; j < std::size(xyzs); ++ j)
 				{
 					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 0)
 						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
@@ -124,7 +125,7 @@ namespace
 
 				fmt = EF_ARGB8;
 
-				for (uint32_t j = 0; j < sizeof(xyzs) / sizeof(xyzs[0]); ++ j)
+				for (uint32_t j = 0; j < std::size(xyzs); ++ j)
 				{
 					tangent[j] = (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].x() * 0.5f + 0.5f) * 255), 0, 255) << 16)
 						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>((tangent_quat[j].y() * 0.5f + 0.5f) * 255), 0, 255) << 8)
@@ -139,7 +140,7 @@ namespace
 			GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 			rl_->BindIndexStream(ib, EF_R16UI);
 
-			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[sizeof(xyzs) / sizeof(xyzs[0])]);
+			pos_aabb_ = MathLib::compute_aabbox(&xyzs[0], &xyzs[0] + std::size(xyzs));
 			tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
 		}
 
@@ -273,7 +274,7 @@ void DistanceMapping::OnCreate()
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;
-	actionMap.AddActions(actions, actions + sizeof(actions) / sizeof(actions[0]));
+	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
 	input_handler->connect(std::bind(&DistanceMapping::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
