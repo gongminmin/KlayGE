@@ -39,14 +39,12 @@
 namespace KlayGE
 {
 	SSGIPostProcess::SSGIPostProcess()
-			: PostProcess(L"SSGI", false)
+			: PostProcess(L"SSGI", false,
+				{},
+				{ "g_buffer_tex", "depth_tex", "shading_tex" },
+				{ "out_tex" },
+				RenderEffectPtr(), nullptr)
 	{
-		input_pins_.emplace_back("g_buffer_tex", TexturePtr());
-		input_pins_.emplace_back("depth_tex", TexturePtr());
-		input_pins_.emplace_back("shading_tex", TexturePtr());
-
-		output_pins_.emplace_back("out_tex", TexturePtr());
-
 		auto effect = SyncLoadRenderEffect("SSGI.fxml");
 		this->Technique(effect, effect->TechniqueByName("SSGI"));
 

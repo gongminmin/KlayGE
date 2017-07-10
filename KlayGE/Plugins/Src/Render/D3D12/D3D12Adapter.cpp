@@ -78,12 +78,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D12Adapter::Enumerate()
 	{
-		std::vector<DXGI_FORMAT> formats;
-		formats.push_back(DXGI_FORMAT_R8G8B8A8_UNORM);
-		formats.push_back(DXGI_FORMAT_R8G8B8A8_UNORM_SRGB);
-		formats.push_back(DXGI_FORMAT_B8G8R8A8_UNORM);
-		formats.push_back(DXGI_FORMAT_B8G8R8A8_UNORM_SRGB);
-		formats.push_back(DXGI_FORMAT_R10G10B10A2_UNORM);
+		static DXGI_FORMAT constexpr formats[] =
+		{
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+			DXGI_FORMAT_B8G8R8A8_UNORM,
+			DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
+			DXGI_FORMAT_R10G10B10A2_UNORM
+		};
 
 		UINT i = 0;
 		IDXGIOutput* output = nullptr;

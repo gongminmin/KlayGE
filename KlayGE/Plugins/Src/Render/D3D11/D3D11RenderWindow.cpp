@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -20,8 +21,8 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
+#include <KFL/ArrayRef.hpp>
 
-#include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
@@ -130,57 +131,68 @@ namespace KlayGE
 		}
 		else
 		{
-			std::vector<UINT> available_create_device_flags;
-			UINT create_device_flags = 0;
+			UINT const create_device_flags = 0;
+			static UINT const available_create_device_flags[] =
+			{
 #ifdef KLAYGE_DEBUG
-			available_create_device_flags.push_back(create_device_flags | D3D11_CREATE_DEVICE_DEBUG);
+				create_device_flags | D3D11_CREATE_DEVICE_DEBUG,
 #endif
-			available_create_device_flags.push_back(create_device_flags);
+				create_device_flags
+			};
 
-			std::vector<std::pair<D3D_DRIVER_TYPE, std::wstring_view>> dev_type_behaviors;
-			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_HARDWARE, L"HW");
-			dev_type_behaviors.emplace_back(D3D_DRIVER_TYPE_WARP, L"WARP");
+			static std::pair<D3D_DRIVER_TYPE, std::wstring_view> const dev_type_behaviors[] =
+			{
+				std::make_pair(D3D_DRIVER_TYPE_HARDWARE, L"HW"),
+				std::make_pair(D3D_DRIVER_TYPE_WARP, L"WARP")
+			};
 
-			std::vector<std::pair<std::string_view, D3D_FEATURE_LEVEL>> available_feature_levels;
-			if (d3d11_re.DXGISubVer() >= 4)
+			static D3D_FEATURE_LEVEL constexpr all_feature_levels[] =
 			{
-				available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
-				available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
-			}
-			if (d3d11_re.DXGISubVer() >= 2)
-			{
-				available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
-			}
-			available_feature_levels.emplace_back("11_0", D3D_FEATURE_LEVEL_11_0);
+				D3D_FEATURE_LEVEL_12_1,
+				D3D_FEATURE_LEVEL_12_0,
+				D3D_FEATURE_LEVEL_11_1,
+				D3D_FEATURE_LEVEL_11_0
+			};
 
-			for (size_t index = 0; index < settings.options.size(); ++ index)
+			ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
 			{
-				std::string_view opt_name = settings.options[index].first;
-				std::string_view opt_val = settings.options[index].second;
-				if ("level" == opt_name)
+				static std::string_view const feature_level_names[] =
 				{
-					size_t feature_index = 0;
-					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
-					{
-						if (available_feature_levels[i].first == opt_val)
-						{
-							feature_index = i;
-							break;
-						}
-					}
+					"12_1",
+					"12_0",
+					"11_1",
+					"11_0"
+				};
+				KLAYGE_STATIC_ASSERT(std::size(feature_level_names) == std::size(all_feature_levels));
 
-					if (feature_index > 0)
+				uint32_t feature_level_start_index = 0;
+				if (d3d11_re.DXGISubVer() < 4)
+				{
+					feature_level_start_index = 2;
+
+					if (d3d11_re.DXGISubVer() < 2)
 					{
-						available_feature_levels.erase(available_feature_levels.begin(),
-							available_feature_levels.begin() + feature_index);
+						feature_level_start_index = 3;
 					}
 				}
-			}
+				for (size_t index = 0; index < settings.options.size(); ++ index)
+				{
+					std::string_view opt_name = settings.options[index].first;
+					std::string_view opt_val = settings.options[index].second;
+					if ("level" == opt_name)
+					{
+						for (uint32_t i = feature_level_start_index; i < std::size(feature_level_names); ++ i)
+						{
+							if (feature_level_names[i] == opt_val)
+							{
+								feature_level_start_index = i;
+								break;
+							}
+						}
+					}
+				}
 
-			std::vector<D3D_FEATURE_LEVEL> feature_levels;
-			for (size_t i = 0; i < available_feature_levels.size(); ++ i)
-			{
-				feature_levels.push_back(available_feature_levels[i].second);
+				feature_levels = ArrayRef<D3D_FEATURE_LEVEL>(all_feature_levels).Slice(feature_level_start_index);
 			}
 
 			for (auto const & dev_type_beh : dev_type_behaviors)

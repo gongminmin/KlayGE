@@ -39,17 +39,12 @@
 namespace KlayGE
 {
 	SSRPostProcess::SSRPostProcess()
-			: PostProcess(L"ScreenSpaceReflection", false)
+			: PostProcess(L"ScreenSpaceReflection", false,
+				{ "min_samples", "max_samples" },
+				{ "g_buffer_0_tex", "g_buffer_1_tex", "front_side_depth_tex", "front_side_tex", "foreground_depth_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr)
 	{
-		input_pins_.emplace_back("g_buffer_0_tex", TexturePtr());
-		input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());
-		input_pins_.emplace_back("front_side_depth_tex", TexturePtr());
-		input_pins_.emplace_back("front_side_tex", TexturePtr());
-		input_pins_.emplace_back("foreground_depth_tex", TexturePtr());
-
-		params_.emplace_back("min_samples", nullptr);
-		params_.emplace_back("max_samples", nullptr);
-
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
 		this->Technique(effect, effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
 
