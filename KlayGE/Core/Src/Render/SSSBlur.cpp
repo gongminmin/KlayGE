@@ -37,18 +37,14 @@
 namespace KlayGE
 {
 	SSSBlurPP::SSSBlurPP()
-			: PostProcess(L"SSSBlurPP", false)
+			: PostProcess(L"SSSBlurPP", false,
+				{ "strength", "correction" },
+				{ "src_tex", "depth_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr)
 	{
 		RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;
-
-		input_pins_.emplace_back("src_tex", TexturePtr());
-		input_pins_.emplace_back("depth_tex", TexturePtr());
-
-		output_pins_.emplace_back("output", TexturePtr());
-
-		params_.emplace_back("strength", nullptr);
-		params_.emplace_back("correction", nullptr);
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSS.fxml");
 		copy_tech_ = effect->TechniqueByName("Copy");

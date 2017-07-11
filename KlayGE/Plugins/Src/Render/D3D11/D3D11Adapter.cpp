@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <array>
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
@@ -61,12 +60,14 @@ namespace KlayGE
 	/////////////////////////////////////////////////////////////////////////////////
 	void D3D11Adapter::Enumerate()
 	{
-		std::array<DXGI_FORMAT, 5> formats;
-		formats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-		formats[1] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
-		formats[2] = DXGI_FORMAT_B8G8R8A8_UNORM;
-		formats[3] = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
-		formats[4] = DXGI_FORMAT_R10G10B10A2_UNORM;
+		static DXGI_FORMAT constexpr formats[] =
+		{
+			DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
+			DXGI_FORMAT_B8G8R8A8_UNORM,
+			DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
+			DXGI_FORMAT_R10G10B10A2_UNORM
+		};
 
 		UINT i = 0;
 		IDXGIOutput* output = nullptr;

@@ -20,9 +20,9 @@ int const TILE_SIZE = 1 << LOG_2_TILE_SIZE;
 
 TilingPostProcess::TilingPostProcess()
 	: PostProcess(L"Tiling", false,
-		std::vector<std::string>(),
-		std::vector<std::string>(1, "src_tex"),
-		std::vector<std::string>(1, "output"),
+		{},
+		{ "src_tex" },
+		{ "output" },
 		RenderEffectPtr(), nullptr)
 {
 	auto effect = SyncLoadRenderEffect("TilingPP.fxml");

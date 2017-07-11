@@ -257,9 +257,9 @@ namespace KlayGE
 	}
 
 	PostProcess::PostProcess(std::wstring const & name, bool volumetric,
-		std::vector<std::string> const & param_names,
-		std::vector<std::string> const & input_pin_names,
-		std::vector<std::string> const & output_pin_names,
+		ArrayRef<std::string> param_names,
+		ArrayRef<std::string> input_pin_names,
+		ArrayRef<std::string> output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
 			: RenderableHelper(name),
 				volumetric_(volumetric),
@@ -899,9 +899,9 @@ namespace KlayGE
 	}
 
 	PostProcessChain::PostProcessChain(std::wstring const & name,
-		std::vector<std::string> const & param_names,
-		std::vector<std::string> const & input_pin_names,
-		std::vector<std::string> const & output_pin_names,
+		ArrayRef<std::string> param_names,
+		ArrayRef<std::string> input_pin_names,
+		ArrayRef<std::string> output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
 			: PostProcess(name, false, param_names, input_pin_names, output_pin_names, effect, tech)
 	{
@@ -1280,9 +1280,9 @@ namespace KlayGE
 	SeparableBoxFilterPostProcess::SeparableBoxFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
 		: PostProcess(L"SeparableBoxFilter", false,
-				std::vector<std::string>(),
-				std::vector<std::string>(1, "src_tex"),
-				std::vector<std::string>(1, "output"),
+				{},
+				{ "src_tex" },
+				{ "output" },
 				effect, tech),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
@@ -1365,9 +1365,9 @@ namespace KlayGE
 	SeparableGaussianFilterPostProcess::SeparableGaussianFilterPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
 			: PostProcess(L"SeparableGaussian", false,
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
+					{},
+					{ "src_tex" },
+					{ "output" },
 					effect, tech),
 				kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
@@ -1482,14 +1482,13 @@ namespace KlayGE
 
 	SeparableBilateralFilterPostProcess::SeparableBilateralFilterPostProcess(RenderEffectPtr const & effect,
 			RenderTechnique* tech, int kernel_radius, float multiplier, bool x_dir)
-		: PostProcess(L"SeparableBilateral", false),
+		: PostProcess(L"SeparableBilateral", false,
+			{},
+			{ "src1_tex", "src2_tex" },
+			{ "out_tex" },
+			RenderEffectPtr(), nullptr),
 			kernel_radius_(kernel_radius), multiplier_(multiplier), x_dir_(x_dir)
 	{
-		input_pins_.emplace_back("src1_tex", TexturePtr());
-		input_pins_.emplace_back("src2_tex", TexturePtr());
-
-		output_pins_.emplace_back("out_tex", TexturePtr());
-
 		RenderEffectPtr ei;
 		RenderTechnique* te;
 		if (tech)
@@ -1560,15 +1559,14 @@ namespace KlayGE
 	
 	
 	SeparableLogGaussianFilterPostProcess::SeparableLogGaussianFilterPostProcess(int kernel_radius, bool linear_depth, bool x_dir)
-			: PostProcess(L"SeparableLogGaussian", false),
+			: PostProcess(L"SeparableLogGaussian", false,
+				{ "esm_scale_factor", "near_q_far"},
+				{ "src_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr),
 				kernel_radius_(kernel_radius), x_dir_(x_dir)
 	{
 		BOOST_ASSERT((kernel_radius > 0) && (kernel_radius <= 7));
-
-		params_.emplace_back("esm_scale_factor", nullptr);
-		params_.emplace_back("near_q_far", nullptr);
-		input_pins_.emplace_back("src_tex", TexturePtr());
-		output_pins_.emplace_back("output", TexturePtr());
 
 		auto effect = SyncLoadRenderEffect("Blur.fxml");
 		this->Technique(effect, effect->TechniqueByName(x_dir ? (linear_depth ? "LogBlurX" : "LogBlurXNLD") : "LogBlurY"));

@@ -253,14 +253,13 @@ namespace
 	{
 	public:
 		DepthOfField()
-			: PostProcess(L"DepthOfField", false),
+			: PostProcess(L"DepthOfField", false,
+				{},
+				{ "color_tex", "depth_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr),
 				max_radius_(8), show_blur_factor_(false)
 		{
-			input_pins_.emplace_back("color_tex", TexturePtr());
-			input_pins_.emplace_back("depth_tex", TexturePtr());
-
-			output_pins_.emplace_back("output", TexturePtr());
-
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			cs_support_ = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 
@@ -425,14 +424,13 @@ namespace
 	{
 	public:
 		BokehFilter()
-			: PostProcess(L"BokehFilter", false),
+			: PostProcess(L"BokehFilter", false,
+				{},
+				{ "color_tex", "depth_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr),
 				max_radius_(8)
 		{
-			input_pins_.emplace_back("color_tex", TexturePtr());
-			input_pins_.emplace_back("depth_tex", TexturePtr());
-
-			output_pins_.emplace_back("output", TexturePtr());
-
 			RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 			gs_support_ = caps.gs_support;
 
@@ -639,15 +637,13 @@ namespace
 	{
 	public:
 		MotionBlur()
-			: PostProcess(L"MotionBlur", false),
+			: PostProcess(L"MotionBlur", false,
+				{},
+				{ "color_tex", "depth_tex", "motion_vec_tex" },
+				{ "output" },
+				RenderEffectPtr(), nullptr),
 				show_motion_vec_(false)
 		{
-			input_pins_.emplace_back("color_tex", TexturePtr());
-			input_pins_.emplace_back("depth_tex", TexturePtr());
-			input_pins_.emplace_back("motion_vec_tex", TexturePtr());
-
-			output_pins_.emplace_back("output", TexturePtr());
-
 			auto effect = SyncLoadRenderEffect("MotionBlurPP.fxml");
 			this->Technique(effect, effect->TechniqueByName("MotionBlur"));
 		}

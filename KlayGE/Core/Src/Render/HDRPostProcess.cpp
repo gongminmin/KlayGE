@@ -34,9 +34,9 @@ namespace KlayGE
 {
 	SumLumPostProcess::SumLumPostProcess()
 		: PostProcess(L"SumLum", false,
-			std::vector<std::string>(),
-			std::vector<std::string>(1, "src_tex"),
-			std::vector<std::string>(1, "out_tex"),
+			{},
+			{ "src_tex" },
+			{ "out_tex" },
 			RenderEffectPtr(), nullptr)
 	{
 	}
@@ -118,16 +118,16 @@ namespace KlayGE
 
 	AdaptedLumPostProcess::AdaptedLumPostProcess()
 			: PostProcess(L"AdaptedLum", false,
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
+					{},
+					{ "src_tex" },
+					{ "output" },
 					RenderEffectPtr(), nullptr),
 				last_index_(false)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		std::vector<int> data_v(4, 0);
+		std::array<int, 4> data_v = { 0, 0, 0, 0 };
 		ElementInitData init_data;
 		init_data.row_pitch = sizeof(int);
 		init_data.slice_pitch = 0;
@@ -181,9 +181,9 @@ namespace KlayGE
 
 	AdaptedLumPostProcessCS::AdaptedLumPostProcessCS()
 			: PostProcess(L"AdaptedLumCS", false,
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "out_tex"),
+					{},
+					{ "src_tex" },
+					{ "out_tex" },
 					RenderEffectPtr(), nullptr)
 	{
 		auto effect = SyncLoadRenderEffect("SumLum.fxml");

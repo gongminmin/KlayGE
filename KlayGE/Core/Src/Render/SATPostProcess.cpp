@@ -29,9 +29,9 @@ namespace KlayGE
 	SATSeparableScanSweepPostProcess::SATSeparableScanSweepPostProcess(RenderEffectPtr const & effect,
 		RenderTechnique* tech)
 			: PostProcess(L"SATSeparableScanSweep", false,
-					std::vector<std::string>(),
-					std::vector<std::string>(1, "src_tex"),
-					std::vector<std::string>(1, "output"),
+					{},
+					{ "src_tex" },
+					{ "output" },
 					effect, tech)
 	{
 		if (technique_)

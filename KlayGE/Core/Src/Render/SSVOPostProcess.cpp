@@ -39,13 +39,12 @@
 namespace KlayGE
 {
 	SSVOPostProcess::SSVOPostProcess()
-			: PostProcess(L"SSVO", false)
+			: PostProcess(L"SSVO", false,
+				{},
+				{ "g_buffer_tex", "depth_tex" },
+				{ "out_tex" },
+				RenderEffectPtr(), nullptr)
 	{
-		input_pins_.emplace_back("g_buffer_tex", TexturePtr());
-		input_pins_.emplace_back("depth_tex", TexturePtr());
-
-		output_pins_.emplace_back("out_tex", TexturePtr());
-
 		auto effect = SyncLoadRenderEffect("SSVO.fxml");
 		this->Technique(effect, effect->TechniqueByName("SSVO"));
 

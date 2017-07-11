@@ -9,12 +9,12 @@
 using namespace KlayGE;
 
 CartoonPostProcess::CartoonPostProcess()
-		: PostProcess(L"Cartoon", false)
+		: PostProcess(L"Cartoon", false,
+			{},
+			{ "normal_tex", "depth_tex", "color_tex" },
+			{ "output" },
+			RenderEffectPtr(), nullptr)
 {
-	input_pins_.emplace_back("normal_tex", TexturePtr());
-	input_pins_.emplace_back("depth_tex", TexturePtr());
-	input_pins_.emplace_back("color_tex", TexturePtr());
-
 	auto effect = SyncLoadRenderEffect("CartoonPP.fxml");
 	this->Technique(effect, effect->TechniqueByName("Cartoon"));
 }

@@ -21,6 +21,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -31,6 +32,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
+#include <KFL/ArrayRef.hpp>
 
 #include <map>
 #include <system_error>
@@ -60,35 +62,46 @@ namespace KlayGE
 		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&OGLRenderWindow::OnSize, this,
 			std::placeholders::_1, std::placeholders::_2));
 
-		std::vector<std::pair<std::string, std::pair<int, int>>> available_versions;
-		available_versions.emplace_back("4.5", std::make_pair(4, 5));
-		available_versions.emplace_back("4.4", std::make_pair(4, 4));
-		available_versions.emplace_back("4.3", std::make_pair(4, 3));
-		available_versions.emplace_back("4.2", std::make_pair(4, 2));
-		available_versions.emplace_back("4.1", std::make_pair(4, 1));
-
-		for (size_t index = 0; index < settings.options.size(); ++ index)
+		static std::pair<int, int> constexpr all_versions[] =
 		{
-			std::string_view opt_name = settings.options[index].first;
-			std::string_view opt_val = settings.options[index].second;
-			if ("version" == opt_name)
+			std::make_pair(4, 5),
+			std::make_pair(4, 4),
+			std::make_pair(4, 3),
+			std::make_pair(4, 2),
+			std::make_pair(4, 1)
+		};
+
+		ArrayRef<std::pair<int, int>> available_versions;
+		{
+			static std::string_view const all_version_names[] =
 			{
-				size_t feature_index = 0;
-				for (size_t i = 0; i < available_versions.size(); ++ i)
+				"4.5",
+				"4.4",
+				"4.3",
+				"4.2",
+				"4.1"
+			};
+			KLAYGE_STATIC_ASSERT(std::size(all_version_names) == std::size(all_versions));
+
+			uint32_t version_start_index = 0;
+			for (size_t index = 0; index < settings.options.size(); ++ index)
+			{
+				std::string_view opt_name = settings.options[index].first;
+				std::string_view opt_val = settings.options[index].second;
+				if ("version" == opt_name)
 				{
-					if (available_versions[i].first == opt_val)
+					for (uint32_t i = version_start_index; i < std::size(all_version_names); ++ i)
 					{
-						feature_index = i;
-						break;
+						if (all_version_names[i] == opt_val)
+						{
+							version_start_index = i;
+							break;
+						}
 					}
 				}
-
-				if (feature_index > 0)
-				{
-					available_versions.erase(available_versions.begin(),
-						available_versions.begin() + feature_index);
-				}
 			}
+
+			available_versions = ArrayRef<std::pair<int, int>>(all_versions).Slice(version_start_index);
 		}
 
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -283,12 +296,18 @@ namespace KlayGE
 			flags |= WGL_CONTEXT_DEBUG_BIT_ARB;
 #endif
 
-			int attribs[] = { WGL_CONTEXT_MAJOR_VERSION_ARB, 0, WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-				WGL_CONTEXT_FLAGS_ARB, flags, WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB, 0 };
+			int attribs[] =
+			{
+				WGL_CONTEXT_MAJOR_VERSION_ARB, 0,
+				WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+				WGL_CONTEXT_FLAGS_ARB, flags,
+				WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+				0
+			};
 			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
-				attribs[1] = available_versions[i].second.first;
-				attribs[3] = available_versions[i].second.second;
+				attribs[1] = available_versions[i].first;
+				attribs[3] = available_versions[i].second;
 				HGLRC hRC_new = wglCreateContextAttribsARB(hDC_, nullptr, attribs);
 				if (hRC_new != nullptr)
 				{
@@ -335,11 +354,16 @@ namespace KlayGE
 
 		if (glloader_GLX_ARB_create_context())
 		{
-			int attribs[] = { GLX_CONTEXT_MAJOR_VERSION_ARB, 0, GLX_CONTEXT_MINOR_VERSION_ARB, 0, 0 };
+			int attribs[] =
+			{
+				GLX_CONTEXT_MAJOR_VERSION_ARB, 0,
+				GLX_CONTEXT_MINOR_VERSION_ARB, 0,
+				0
+			};
 			for (size_t i = 0; i < available_versions.size(); ++ i)
 			{
-				attribs[1] = available_versions[i].second.first;
-				attribs[3] = available_versions[i].second.second;
+				attribs[1] = available_versions[i].first;
+				attribs[3] = available_versions[i].second;
 				GLXContext x_context_new = glXCreateContextAttribsARB(x_display_, nullptr, nullptr, GL_TRUE, attribs);
 				if (x_context_new != nullptr)
 				{

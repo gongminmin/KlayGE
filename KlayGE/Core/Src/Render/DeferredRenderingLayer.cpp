@@ -314,16 +314,12 @@ namespace KlayGE
 	{
 	public:
 		DeferredRenderingDebugPostProcess()
-			: PostProcess(L"DeferredRenderingDebug", false)
+			: PostProcess(L"DeferredRenderingDebug", false,
+				{},
+				{ "g_buffer_tex", "g_buffer_1_tex", "depth_tex", "lighting_tex", "ssvo_tex" },
+				{ "out_tex" },
+				RenderEffectPtr(), nullptr)
 		{
-			input_pins_.emplace_back("g_buffer_tex", TexturePtr());
-			input_pins_.emplace_back("g_buffer_1_tex", TexturePtr());
-			input_pins_.emplace_back("depth_tex", TexturePtr());
-			input_pins_.emplace_back("lighting_tex", TexturePtr());
-			input_pins_.emplace_back("ssvo_tex", TexturePtr());
-
-			output_pins_.emplace_back("out_tex", TexturePtr());
-
 			auto effect = SyncLoadRenderEffect("DeferredRenderingDebug.fxml");
 			this->Technique(effect, effect->TechniqueByName("ShowPosition"));
 		}

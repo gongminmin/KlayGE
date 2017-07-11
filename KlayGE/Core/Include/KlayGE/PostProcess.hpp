@@ -29,6 +29,7 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/CXX17/string_view.hpp>
+#include <KFL/ArrayRef.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 #include <KlayGE/RenderableHelper.hpp>
@@ -40,9 +41,9 @@ namespace KlayGE
 	public:
 		PostProcess(std::wstring const & name, bool volumetric);
 		PostProcess(std::wstring const & name, bool volumetric,
-			std::vector<std::string> const & param_names,
-			std::vector<std::string> const & input_pin_names,
-			std::vector<std::string> const & output_pin_names,
+			ArrayRef<std::string> param_names,
+			ArrayRef<std::string> input_pin_names,
+			ArrayRef<std::string> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
 		virtual ~PostProcess()
 		{
@@ -199,9 +200,9 @@ namespace KlayGE
 	public:
 		explicit PostProcessChain(std::wstring const & name);
 		PostProcessChain(std::wstring const & name,
-			std::vector<std::string> const & param_names,
-			std::vector<std::string> const & input_pin_names,
-			std::vector<std::string> const & output_pin_names,
+			ArrayRef<std::string> param_names,
+			ArrayRef<std::string> input_pin_names,
+			ArrayRef<std::string> output_pin_names,
 			RenderEffectPtr const & effect, RenderTechnique* tech);
 		virtual ~PostProcessChain()
 		{

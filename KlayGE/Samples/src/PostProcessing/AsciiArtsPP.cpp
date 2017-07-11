@@ -243,9 +243,9 @@ namespace
 
 AsciiArtsPostProcess::AsciiArtsPostProcess()
 	: PostProcess(L"AsciiArts", false,
-			std::vector<std::string>(),
-			std::vector<std::string>(1, "src_tex"),
-			std::vector<std::string>(1, "output"),
+			{},
+			{ "src_tex" },
+			{ "output" },
 			RenderEffectPtr(), nullptr)
 {
 	auto effect = SyncLoadRenderEffect("AsciiArtsPP.fxml");

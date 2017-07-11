@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
@@ -119,64 +120,73 @@ namespace KlayGE
 			break;
 		}
 
-		bool test_es_3_2 = true;
-		bool test_es_3_1 = true;
+		static std::pair<int, int> constexpr all_versions[] =
+		{
+			std::make_pair(3, 2),
+			std::make_pair(3, 1),
+			std::make_pair(3, 0)
+		};
+
+		ArrayRef<std::pair<int, int>> available_versions;
+		{
+			static std::string_view const all_version_names[] =
+			{
+				"3.2",
+				"3.1",
+				"3.0"
+			};
+			KLAYGE_STATIC_ASSERT(std::size(all_version_names) == std::size(all_versions));
+
+			bool test_es_3_2 = true;
+			bool test_es_3_1 = true;
 #if defined(KLAYGE_PLATFORM_ANDROID)
-		// TODO
-		test_es_3_2 = false;
+			// TODO
+			test_es_3_2 = false;
 #endif
 #if defined(KLAYGE_PLATFORM_DARWIN)
-		// TODO
-		test_es_3_2 = false;
-		test_es_3_1 = false;
+			// TODO
+			test_es_3_2 = false;
+			test_es_3_1 = false;
 #endif
 
-		std::vector<std::tuple<std::string, EGLint, int, int>> available_versions;
-		if (test_es_3_2)
-		{
-			available_versions.push_back(std::make_tuple("3.2", EGL_OPENGL_ES3_BIT_KHR, 3, 2));
-		}
-		if (test_es_3_1)
-		{
-			available_versions.push_back(std::make_tuple("3.1", EGL_OPENGL_ES3_BIT_KHR, 3, 1));
-		}
-		available_versions.push_back(std::make_tuple("3.0", EGL_OPENGL_ES3_BIT_KHR, 3, 0));
-
-		for (size_t index = 0; index < settings.options.size(); ++ index)
-		{
-			std::string_view opt_name = settings.options[index].first;
-			std::string_view opt_val = settings.options[index].second;
-			if ("version" == opt_name)
+			uint32_t version_start_index = 0;
+			if (!test_es_3_2)
 			{
-				size_t feature_index = 0;
-				for (size_t i = 0; i < available_versions.size(); ++ i)
+				version_start_index = 1;
+			}
+			if (!test_es_3_1)
+			{
+				version_start_index = 2;
+			}
+
+			for (size_t index = 0; index < settings.options.size(); ++ index)
+			{
+				std::string_view opt_name = settings.options[index].first;
+				std::string_view opt_val = settings.options[index].second;
+				if ("version" == opt_name)
 				{
-					if (std::get<0>(available_versions[i]) == opt_val)
+					for (uint32_t i = version_start_index; i < std::size(all_version_names); ++ i)
 					{
-						feature_index = i;
-						break;
+						if (all_version_names[i] == opt_val)
+						{
+							version_start_index = i;
+							break;
+						}
 					}
 				}
-
-				if (feature_index > 0)
-				{
-					available_versions.erase(available_versions.begin(),
-						available_versions.begin() + feature_index);
-				}
 			}
+
+			available_versions = ArrayRef<std::pair<int, int>>(all_versions).Slice(version_start_index);
 		}
 
-		std::vector<EGLint> visual_attr;
-		visual_attr.push_back(EGL_RENDERABLE_TYPE);
-		visual_attr.push_back(std::get<1>(available_versions[0]));
-		visual_attr.push_back(EGL_RED_SIZE);
-		visual_attr.push_back(r_size);
-		visual_attr.push_back(EGL_GREEN_SIZE);
-		visual_attr.push_back(g_size);
-		visual_attr.push_back(EGL_BLUE_SIZE);
-		visual_attr.push_back(b_size);
-		visual_attr.push_back(EGL_ALPHA_SIZE);
-		visual_attr.push_back(a_size);
+		std::vector<EGLint> visual_attr =
+		{
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+			EGL_RED_SIZE, r_size,
+			EGL_GREEN_SIZE, g_size,
+			EGL_BLUE_SIZE, b_size,
+			EGL_ALPHA_SIZE, a_size
+		};
 		if (d_size > 0)
 		{
 			visual_attr.push_back(EGL_DEPTH_SIZE);
@@ -195,39 +205,17 @@ namespace KlayGE
 		visual_attr.push_back(EGL_NONE);				// end of list
 
 		EGLint egl_major_ver, egl_minor_ver;
-		EGLint num_cfgs;
 		eglInitialize(display_, &egl_major_ver, &egl_minor_ver);
 
-		int start_version_index = -1;
-		for (size_t i = 0; i < available_versions.size(); ++ i)
+		EGLint num_cfgs;
+		if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
 		{
-			visual_attr[1] = std::get<1>(available_versions[i]);
-			if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
+			if ((num_cfgs == 0) && (24 == d_size))
 			{
-				if (num_cfgs > 0)
-				{
-					start_version_index = static_cast<int>(i);
-					break;
-				}
+				visual_attr[11] = 16;
+				eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs);
 			}
 		}
-		if ((start_version_index < 0) && (24 == d_size))
-		{
-			visual_attr[11] = 16;
-			for (size_t i = 0; i < available_versions.size(); ++ i)
-			{
-				visual_attr[1] = std::get<1>(available_versions[i]);
-				if (eglChooseConfig(display_, &visual_attr[0], &cfg_, 1, &num_cfgs))
-				{
-					if (num_cfgs > 0)
-					{
-						start_version_index = static_cast<int>(i);
-						break;
-					}
-				}
-			}
-		}
-		BOOST_ASSERT(start_version_index != -1);
 
 		NativeWindowType wnd;
 #if defined KLAYGE_PLATFORM_WINDOWS
@@ -246,14 +234,18 @@ namespace KlayGE
 		surf_ = eglCreateWindowSurface(display_, cfg_, wnd, nullptr);
 
 		context_ = nullptr;
-		EGLint ctx_attr[] = { EGL_CONTEXT_MAJOR_VERSION_KHR, std::get<2>(available_versions[start_version_index]),
-			EGL_CONTEXT_MINOR_VERSION_KHR, std::get<3>(available_versions[start_version_index]), EGL_NONE };
-		size_t test_version_index = start_version_index;
+		EGLint ctx_attr[] =
+		{
+			EGL_CONTEXT_MAJOR_VERSION_KHR, available_versions[0].first,
+			EGL_CONTEXT_MINOR_VERSION_KHR, available_versions[0].second,
+			EGL_NONE
+		};
+		size_t test_version_index = 0;
 		while ((nullptr == context_) && (test_version_index < available_versions.size()))
 		{
-			ctx_attr[1] = std::get<2>(available_versions[test_version_index]);
+			ctx_attr[1] = available_versions[test_version_index].first;
 			ctx_attr[2] = EGL_CONTEXT_MINOR_VERSION_KHR;
-			ctx_attr[3] = std::get<3>(available_versions[test_version_index]);
+			ctx_attr[3] = available_versions[test_version_index].second;
 			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
 
 			if (nullptr == context_)

@@ -29,6 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
@@ -38,8 +39,8 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
+#include <KFL/ArrayRef.hpp>
 
-#include <vector>
 #include <cstring>
 #include <boost/assert.hpp>
 #include <boost/lexical_cast.hpp>
@@ -140,40 +141,44 @@ namespace KlayGE
 		}
 		else
 		{
-			std::vector<std::pair<std::string_view, D3D_FEATURE_LEVEL>> available_feature_levels;
-			available_feature_levels.emplace_back("12_1", D3D_FEATURE_LEVEL_12_1);
-			available_feature_levels.emplace_back("12_0", D3D_FEATURE_LEVEL_12_0);
-			available_feature_levels.emplace_back("11_1", D3D_FEATURE_LEVEL_11_1);
-			available_feature_levels.emplace_back("11_0", D3D_FEATURE_LEVEL_11_0);
-
-			for (size_t index = 0; index < settings.options.size(); ++ index)
+			static D3D_FEATURE_LEVEL constexpr all_feature_levels[] =
 			{
-				std::string_view opt_name = settings.options[index].first;
-				std::string_view opt_val = settings.options[index].second;
-				if ("level" == opt_name)
+				D3D_FEATURE_LEVEL_12_1,
+				D3D_FEATURE_LEVEL_12_0,
+				D3D_FEATURE_LEVEL_11_1,
+				D3D_FEATURE_LEVEL_11_0
+			};
+
+			ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
+			{
+				static std::string_view const feature_level_names[] =
 				{
-					size_t feature_index = 0;
-					for (size_t i = 0; i < available_feature_levels.size(); ++ i)
+					"12_1",
+					"12_0",
+					"11_1",
+					"11_0"
+				};
+				KLAYGE_STATIC_ASSERT(std::size(feature_level_names) == std::size(all_feature_levels));
+
+				uint32_t feature_level_start_index = 0;
+				for (size_t index = 0; index < settings.options.size(); ++ index)
+				{
+					std::string_view opt_name = settings.options[index].first;
+					std::string_view opt_val = settings.options[index].second;
+					if ("level" == opt_name)
 					{
-						if (available_feature_levels[i].first == opt_val)
+						for (uint32_t i = feature_level_start_index; i < std::size(feature_level_names); ++ i)
 						{
-							feature_index = i;
-							break;
+							if (feature_level_names[i] == opt_val)
+							{
+								feature_level_start_index = i;
+								break;
+							}
 						}
 					}
-
-					if (feature_index > 0)
-					{
-						available_feature_levels.erase(available_feature_levels.begin(),
-							available_feature_levels.begin() + feature_index);
-					}
 				}
-			}
 
-			std::vector<D3D_FEATURE_LEVEL> feature_levels;
-			for (size_t i = 0; i < available_feature_levels.size(); ++ i)
-			{
-				feature_levels.push_back(available_feature_levels[i].second);
+				feature_levels = ArrayRef<D3D_FEATURE_LEVEL>(all_feature_levels).Slice(feature_level_start_index);
 			}
 
 			for (size_t i = 0; i < feature_levels.size(); ++ i)

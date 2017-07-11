@@ -25,18 +25,12 @@ namespace KlayGE
 	uint32_t const BLUR_ITERATE_NUM = 2;
 
 	LightShaftPostProcess::LightShaftPostProcess()
-		: PostProcess(L"LightShaft", false)
+		: PostProcess(L"LightShaft", false,
+			{ "light_pos", "light_shaft_clr", "light_intensity", "shadow_intensity", "depth_clip", "cutoff_decay_weight" },
+			{ "color_tex", "depth_tex" },
+			{},
+			RenderEffectPtr(), nullptr)
 	{
-		input_pins_.emplace_back("color_tex", TexturePtr());
-		input_pins_.emplace_back("depth_tex", TexturePtr());
-
-		params_.emplace_back("light_pos", nullptr);
-		params_.emplace_back("light_shaft_clr", nullptr);
-		params_.emplace_back("light_intensity", nullptr);
-		params_.emplace_back("shadow_intensity", nullptr);
-		params_.emplace_back("depth_clip", nullptr);
-		params_.emplace_back("cutoff_decay_weight", nullptr);
-
 		RenderEffectPtr effect = SyncLoadRenderEffect("LightShaft.fxml");
 		this->Technique(effect, effect->TechniqueByName("ApplyLightShaft"));
 
