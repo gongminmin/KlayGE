@@ -248,12 +248,12 @@ BOOST_AUTO_TEST_CASE(DecodeBC1)
 
 BOOST_AUTO_TEST_CASE(DecodeBC2)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.2f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.0f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC3)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.9f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.8f);
 }
 
 BOOST_AUTO_TEST_CASE(DecodeBC6U)
@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE(DecodeBC7XRGB)
 
 BOOST_AUTO_TEST_CASE(DecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 4.6f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 8.6f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeBC1)
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(EncodeDecodeBC7XRGB)
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.1f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.8f);
 }
 
 BOOST_AUTO_TEST_CASE(EncodeDecodeETC1)

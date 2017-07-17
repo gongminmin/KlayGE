@@ -202,7 +202,7 @@ namespace
 		while (block_index < static_cast<int>(block_addrs.size()))
 		{
 			uint32_t index = block_index ++;
-			if (index >= block_addrs.size() - 1)
+			if (index >= block_addrs.size())
 			{
 				break;
 			}
