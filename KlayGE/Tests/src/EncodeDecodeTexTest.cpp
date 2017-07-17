@@ -240,12 +240,12 @@ TEST_F(KlayGETest, DecodeBC1)
 
 TEST_F(KlayGETest, DecodeBC2)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.2f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.0f);
 }
 
 TEST_F(KlayGETest, DecodeBC3)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.9f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.8f);
 }
 
 TEST_F(KlayGETest, DecodeBC6U)
@@ -265,7 +265,7 @@ TEST_F(KlayGETest, DecodeBC7XRGB)
 
 TEST_F(KlayGETest, DecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 4.6f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 8.6f);
 }
 
 TEST_F(KlayGETest, EncodeDecodeBC1)
@@ -290,7 +290,7 @@ TEST_F(KlayGETest, EncodeDecodeBC7XRGB)
 
 TEST_F(KlayGETest, EncodeDecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.1f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.8f);
 }
 
 TEST_F(KlayGETest, EncodeDecodeETC1)
