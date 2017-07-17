@@ -1,0 +1,62 @@
+<?xml version='1.0'?>
+
+<effect>
+	<!--
+	Need 2 macros before include this fxml.
+	For example,
+	<macro name="BLOCK_SIZE" value="128"/>
+	<macro name="SCAN_TYPE" value="float4"/>
+	<include name="PrefixSum.fxml"/>
+	-->
+	
+	<shader type="compute_shader" version="5">
+		<![CDATA[
+groupshared SCAN_TYPE forscan_sh[BLOCK_SIZE];
+
+SCAN_TYPE ScanWarp(bool inclusive, uint GI, uint size = 32)
+{
+	uint lane = GI & 31;
+	[unroll]
+	for (uint i = 1; i < size; i *= 2)
+	{
+		if (lane >= i)
+		{
+			forscan_sh[GI] += forscan_sh[GI - i];
+		}
+	}
+	return inclusive ? forscan_sh[GI] : ((lane > 0) ? forscan_sh[GI - 1] : 0);
+}
+
+SCAN_TYPE ScanBlock(bool inclusive, uint GI, SCAN_TYPE input)
+{
+	uint lane = GI & 31;
+	uint warp_id = GI >> 5;
+
+	forscan_sh[GI] = input;
+	
+	SCAN_TYPE val = ScanWarp(inclusive, GI);
+	GroupMemoryBarrierWithGroupSync();
+	
+	if (31 == lane)
+	{
+		forscan_sh[warp_id] = forscan_sh[GI];
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	if (0 == warp_id)
+	{
+		ScanWarp(true, GI, BLOCK_SIZE / 32);
+	}
+	GroupMemoryBarrierWithGroupSync();
+	
+	if (warp_id > 0)
+	{
+		val += forscan_sh[warp_id - 1];
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	return val;
+}
+		]]>
+	</shader>
+</effect>

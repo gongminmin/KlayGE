@@ -134,54 +134,15 @@ float4 SATScanYDownSweepPS(float2 tex_coord0 : TEXCOORD0) : SV_Target
 	</technique>
 
 	<macro name="BLOCK_SIZE" value="128"/>
+	<macro name="SCAN_TYPE" value="float4"/>
+	<include name="PrefixSum.fxml"/>
+
 	<parameter type="rw_texture2D" elem_type="float4" name="out_tex"/>
 	<parameter type="texture2D" name="in_tex"/>
 	<parameter type="int" name="num_waves"/>
 
 	<shader type="compute_shader" version="5">
 		<![CDATA[
-groupshared float4 shared_forscan[BLOCK_SIZE];
-
-float4 InclusiveScanWarp(uint GI, float4 val, uint size = 32)
-{
-	shared_forscan[GI] = val;
-
-	uint lane = GI & 31;
-	[unroll]
-	for (uint i = 1; i < size; i *= 2)
-	{
-		if (lane >= i)
-		{
-			val += shared_forscan[GI - i];
-			shared_forscan[GI] = val;
-		}
-	}
-	return val;
-}
-
-float4 InclusiveScanBlock(uint GI, float4 input)
-{
-	uint lane = GI & 31;
-	uint warp_id = GI >> 5;
-	
-	float4 val = InclusiveScanWarp(GI, input);
-	GroupMemoryBarrierWithGroupSync();
-	
-	if (31 == lane)
-	{
-		shared_forscan[warp_id] = val;
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == warp_id)
-	{
-		InclusiveScanWarp(GI, shared_forscan[GI], BLOCK_SIZE / 32);
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
-	return val + shared_forscan[warp_id - 1];
-}
-
 [numthreads(BLOCK_SIZE, 1, 1)]
 void InclusiveScanXCS(uint3 dtid : SV_DispatchThreadID, 
 				uint GI : SV_GroupIndex)
@@ -190,16 +151,16 @@ void InclusiveScanXCS(uint3 dtid : SV_DispatchThreadID,
 	float4 sum = 0;
 	for (int w = 0; w < num_waves; ++ w)
 	{
-		float4 val = InclusiveScanBlock(GI, in_tex[int2(x, dtid.y)]) + sum;
+		float4 val = ScanBlock(true, GI, in_tex[int2(x, dtid.y)]) + sum;
 		out_tex[int2(x, dtid.y)] = val;
-		
+
 		if (BLOCK_SIZE - 1 == GI)
 		{
-			shared_forscan[BLOCK_SIZE - 1] = val;
+			forscan_sh[BLOCK_SIZE - 1] = val;
 		}
 		GroupMemoryBarrierWithGroupSync();
-		
-		sum = shared_forscan[BLOCK_SIZE - 1];
+
+		sum = forscan_sh[BLOCK_SIZE - 1];
 		x += BLOCK_SIZE;
 		GroupMemoryBarrierWithGroupSync();
 	}
@@ -213,16 +174,16 @@ void InclusiveScanYCS(uint3 dtid : SV_DispatchThreadID,
 	float4 sum = 0;
 	for (int w = 0; w < num_waves; ++ w)
 	{
-		float4 val = InclusiveScanBlock(GI, in_tex[int2(dtid.x, y)]) + sum;
+		float4 val = ScanBlock(true, GI, in_tex[int2(dtid.x, y)]) + sum;
 		out_tex[int2(dtid.x, y)] = val;
-		
+
 		if (BLOCK_SIZE - 1 == GI)
 		{
-			shared_forscan[BLOCK_SIZE - 1] = val;
+			forscan_sh[BLOCK_SIZE - 1] = val;
 		}
 		GroupMemoryBarrierWithGroupSync();
-		
-		sum = shared_forscan[BLOCK_SIZE - 1];
+
+		sum = forscan_sh[BLOCK_SIZE - 1];
 		y += BLOCK_SIZE;
 		GroupMemoryBarrierWithGroupSync();
 	}

@@ -214,6 +214,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PointSprite.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostProcess.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/PostToneMapping.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/PrefixSum.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Quaternion.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/RenderableHelper.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Resizer.fxml
