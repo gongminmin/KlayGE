@@ -8,7 +8,7 @@
 	<macro name="SCAN_TYPE" value="float4"/>
 	<include name="PrefixSum.fxml"/>
 	-->
-	
+
 	<shader type="compute_shader" version="5">
 		<![CDATA[
 groupshared SCAN_TYPE forscan_sh[BLOCK_SIZE];
@@ -33,10 +33,11 @@ SCAN_TYPE ScanBlock(bool inclusive, uint GI, SCAN_TYPE input)
 	uint warp_id = GI >> 5;
 
 	forscan_sh[GI] = input;
-	
+	GroupMemoryBarrierWithGroupSync();
+
 	SCAN_TYPE val = ScanWarp(inclusive, GI);
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	if (31 == lane)
 	{
 		forscan_sh[warp_id] = forscan_sh[GI];
@@ -48,7 +49,7 @@ SCAN_TYPE ScanBlock(bool inclusive, uint GI, SCAN_TYPE input)
 		ScanWarp(true, GI, BLOCK_SIZE / 32);
 	}
 	GroupMemoryBarrierWithGroupSync();
-	
+
 	if (warp_id > 0)
 	{
 		val += forscan_sh[warp_id - 1];
