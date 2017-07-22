@@ -597,7 +597,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[tile_id.z][0]; i < light_start_sh[tile_id.z][1]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
-				shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li - lights_type[4] + 1].z),
+				shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[tile_id.z][1]; i < light_start_sh[tile_id.z][2]; ++ i)
@@ -609,7 +609,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[tile_id.z][2]; i < light_start_sh[tile_id.z][3]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
-				shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li - lights_type[6] + 2].z),
+				shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[tile_id.z][3]; i < light_start_sh[tile_id.z][4]; ++ i)
@@ -621,7 +621,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[tile_id.z][4]; i < light_start_sh[tile_id.z][5]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
-				shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li - lights_type[8] + 1].z),
+				shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[tile_id.z][5]; i < light_start_sh[tile_id.z][6]; ++ i)
@@ -633,7 +633,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[tile_id.z][6]; i < light_start_sh[tile_id.z][7]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
-				shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li - lights_type[10] + 1].z),
+				shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 

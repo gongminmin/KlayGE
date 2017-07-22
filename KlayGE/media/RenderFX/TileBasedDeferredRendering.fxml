@@ -589,7 +589,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[0]; i < light_start_sh[1]; ++ i)
 			{
 				uint li = intersected_light_indices_sh[i];
-				shading.rgb += CalcTBDRPoint(li, int(lights_attrib[li - lights_type[4] + 1].z),
+				shading.rgb += CalcTBDRPoint(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[1]; i < light_start_sh[2]; ++ i)
@@ -601,7 +601,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[2]; i < light_start_sh[3]; ++ i)
 			{
 				uint li = intersected_light_indices_sh[i];
-				shading.rgb += CalcTBDRSpot(li, int(lights_attrib[li - lights_type[6] + 2].z),
+				shading.rgb += CalcTBDRSpot(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[3]; i < light_start_sh[4]; ++ i)
@@ -613,7 +613,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[4]; i < light_start_sh[5]; ++ i)
 			{
 				uint li = intersected_light_indices_sh[i];
-				shading.rgb += CalcTBDRSphereArea(li, int(lights_attrib[li - lights_type[8] + 1].z),
+				shading.rgb += CalcTBDRSphereArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 			for (i = light_start_sh[5]; i < light_start_sh[6]; ++ i)
@@ -625,7 +625,7 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 			for (i = light_start_sh[6]; i < light_start_sh[7]; ++ i)
 			{
 				uint li = intersected_light_indices_sh[i];
-				shading.rgb += CalcTBDRTubeArea(li, int(lights_attrib[li - lights_type[10] + 1].z),
+				shading.rgb += CalcTBDRTubeArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 

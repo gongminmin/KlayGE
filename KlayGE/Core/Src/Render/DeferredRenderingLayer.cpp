@@ -3900,8 +3900,6 @@ namespace KlayGE
 			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-			std::array<int, 6> lights_shadowing_channel;
-			lights_shadowing_channel.fill(-1);
 			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{
 				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
@@ -3948,38 +3946,24 @@ namespace KlayGE
 							+ offset * lights_dir_es_param_->Stride())->w() = light.CosOuterInner().y();
 					}
 
+					int32_t shadowing_channel;
+					if (0 == (light.Attrib() & LightSource::LSA_NoShadow))
+					{
+						shadowing_channel = sm_light_indices_[available_lights[t][i]].second;
+					}
+					else
+					{
+						shadowing_channel = -1;
+					}
+
 					*reinterpret_cast<float4*>(lights_attrib
 						+ offset * lights_attrib_param_->Stride()) = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
+						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, shadowing_channel + 0.5f, 0);
 
 					float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
 					*reinterpret_cast<float4*>(lights_radius_extend
 						+ offset * lights_radius_extend_param_->Stride()) = float4(light.Radius(),
 						extend_es.x(), extend_es.y(), extend_es.z());
-
-					if (0 == (attr & LightSource::LSA_NoShadow))
-					{
-						int32_t channel = sm_light_indices_[available_lights[t][i]].second;
-						switch (type)
-						{
-						case LightSource::LT_Directional:
-							lights_shadowing_channel[0] = channel;
-							break;
-
-						case LightSource::LT_Point:
-						case LightSource::LT_SphereArea:
-						case LightSource::LT_TubeArea:
-							lights_shadowing_channel[1] = channel;
-							break;
-
-						case LightSource::LT_Spot:
-							lights_shadowing_channel[2 + i] = channel;
-							break;
-
-						default:
-							break;
-						}
-					}
 
 					float range = light.Range() * light_scale_;
 					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
@@ -3998,12 +3982,6 @@ namespace KlayGE
 					*reinterpret_cast<float4*>(lights_aabb_max + offset * lights_aabb_max_param_->Stride())
 						= float4(aabb.Max().x(), aabb.Max().y(), aabb.Max().z(), 0);
 				}
-			}
-
-			for (size_t i = 0; i < lights_shadowing_channel.size(); ++ i)
-			{
-				reinterpret_cast<float4*>(lights_attrib
-					+ i * lights_attrib_param_->Stride())->z() = lights_shadowing_channel[i] + 0.5f;
 			}
 
 			lights_type_param_->CBuffer().Dirty(true);
@@ -4898,8 +4876,6 @@ namespace KlayGE
 			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
 			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-			std::array<int, 6> lights_shadowing_channel;
-			lights_shadowing_channel.fill(-1);
 			for (uint32_t t = 0; t < available_lights.size(); ++ t)
 			{
 				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
@@ -4946,38 +4922,24 @@ namespace KlayGE
 							+ offset * lights_dir_es_param_->Stride())->w() = light.CosOuterInner().y();
 					}
 
+					int32_t shadowing_channel;
+					if (0 == (light.Attrib() & LightSource::LSA_NoShadow))
+					{
+						shadowing_channel = sm_light_indices_[available_lights[t][i]].second;
+					}
+					else
+					{
+						shadowing_channel = -1;
+					}
+
 					*reinterpret_cast<float4*>(lights_attrib
 						+ offset * lights_attrib_param_->Stride()) = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
+						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, shadowing_channel + 0.5f, 0);
 
 					float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
 					*reinterpret_cast<float4*>(lights_radius_extend
 						+ offset * lights_radius_extend_param_->Stride()) = float4(light.Radius(),
 						extend_es.x(), extend_es.y(), extend_es.z());
-
-					if (0 == (attr & LightSource::LSA_NoShadow))
-					{
-						int32_t channel = sm_light_indices_[available_lights[t][i]].second;
-						switch (type)
-						{
-						case LightSource::LT_Directional:
-							lights_shadowing_channel[0] = channel;
-							break;
-
-						case LightSource::LT_Point:
-						case LightSource::LT_SphereArea:
-						case LightSource::LT_TubeArea:
-							lights_shadowing_channel[1] = channel;
-							break;
-
-						case LightSource::LT_Spot:
-							lights_shadowing_channel[2 + i] = channel;
-							break;
-
-						default:
-							break;
-						}
-					}
 
 					float range = light.Range() * light_scale_;
 					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
@@ -4996,12 +4958,6 @@ namespace KlayGE
 					*reinterpret_cast<float4*>(lights_aabb_max + offset * lights_aabb_max_param_->Stride())
 						= float4(aabb.Max().x(), aabb.Max().y(), aabb.Max().z(), 0);
 				}
-			}
-
-			for (size_t i = 0; i < lights_shadowing_channel.size(); ++ i)
-			{
-				reinterpret_cast<float4*>(lights_attrib
-					+ i * lights_attrib_param_->Stride())->z() = lights_shadowing_channel[i] + 0.5f;
 			}
 
 			lights_type_param_->CBuffer().Dirty(true);
