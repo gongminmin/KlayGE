@@ -656,7 +656,7 @@ namespace KlayGE
 			}
 			else
 			{
-				technique_tbdr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnifiedNoTypedUAV");
+				technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnifiedNoTypedUAV");
 			}
 		}
 		else
@@ -1114,7 +1114,7 @@ namespace KlayGE
 				uint32_t w = std::max(1U, (width + TILE_SIZE - 1) / TILE_SIZE);
 				uint32_t h = std::max(1U, (height + TILE_SIZE - 1) / TILE_SIZE);
 				pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered));
+					EAH_GPU_Read | EAH_GPU_Unordered));
 			}
 			else
 			{
@@ -1148,7 +1148,7 @@ namespace KlayGE
 				uint32_t w = std::max(1U, (width + TILE_SIZE - 1) / TILE_SIZE);
 				uint32_t h = std::max(1U, (height + TILE_SIZE - 1) / TILE_SIZE);
 				pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered));
+					EAH_GPU_Read | EAH_GPU_Unordered));
 			}
 			else
 			{
@@ -1351,10 +1351,10 @@ namespace KlayGE
 			}
 			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, light_indices_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				EAH_GPU_Read | EAH_GPU_Unordered);
 			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, light_indices_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				EAH_GPU_Read | EAH_GPU_Unordered);
 		}
 		else
 		{
@@ -1398,18 +1398,29 @@ namespace KlayGE
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
+			ElementFormat light_indices_fmt;
+			if (caps.uav_format_support(EF_R16UI))
+			{
+				light_indices_fmt = EF_R16UI;
+			}
+			else
+			{
+				BOOST_ASSERT(caps.uav_format_support(EF_R32UI));
+
+				light_indices_fmt = EF_R32UI;
+			}
 			pvp.lights_start_tex = rf.MakeTexture3D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, num_depth_slices_, 1, 1, EF_R32UI, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, num_depth_slices_, 1, 1, light_indices_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Unordered);
 			pvp.intersected_light_indices_tex = rf.MakeTexture3D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, num_depth_slices_, 1, 1, EF_R32UI, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered);
+				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, num_depth_slices_, 1, 1, light_indices_fmt, 1, 0,
+				EAH_GPU_Read | EAH_GPU_Unordered);
 
 			pvp.lights_start_tex_cpu = rf.MakeTexture3D(pvp.lights_start_tex->Width(0),
-				pvp.lights_start_tex->Height(0), pvp.lights_start_tex->Depth(0), 1, 1, EF_R32UI, 1, 0,
+				pvp.lights_start_tex->Height(0), pvp.lights_start_tex->Depth(0), 1, 1, EF_R16UI, 1, 0,
 				EAH_CPU_Write);
 			pvp.intersected_light_indices_tex_cpu = rf.MakeTexture3D(pvp.intersected_light_indices_tex->Width(0),
-				pvp.intersected_light_indices_tex->Height(0), pvp.intersected_light_indices_tex->Depth(0), 1, 1, EF_R32UI, 1, 0,
+				pvp.intersected_light_indices_tex->Height(0), pvp.intersected_light_indices_tex->Depth(0), 1, 1, EF_R16UI, 1, 0,
 				EAH_CPU_Write);
 		}
 		else
@@ -2850,7 +2861,7 @@ namespace KlayGE
 
 				*reinterpret_cast<float4*>(lights_attrib + shadowing_channel * lights_attrib_param_->Stride())
 					= float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f, (attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f,
-					(attr & LightSource::LSA_NoShadow) ? -1.0f : 1.0f,
+						(attr & LightSource::LSA_NoShadow) ? -1.0f : 1.0f,
 						light.ProjectiveTexture() ? 1.0f : -1.0f);
 
 				*reinterpret_cast<float4*>(lights_falloff_range + shadowing_channel * lights_falloff_range_param_->Stride())
@@ -4642,12 +4653,12 @@ namespace KlayGE
 				pvp.intersected_light_indices_tex_cpu->Width(0), pvp.intersected_light_indices_tex_cpu->Height(0),
 				pvp.intersected_light_indices_tex_cpu->Depth(0));
 
-			uint32_t* lights_start_ptr = lights_start_mapper.Pointer<uint32_t>();
-			uint32_t const lights_start_row_pitch = lights_start_mapper.RowPitch() / sizeof(uint32_t);
-			uint32_t const lights_start_slice_pitch = lights_start_mapper.SlicePitch() / sizeof(uint32_t);
-			uint32_t* light_indices_ptr = intersected_light_indices_mapper.Pointer<uint32_t>();
-			uint32_t const light_indices_row_pitch = intersected_light_indices_mapper.RowPitch() / sizeof(uint32_t);
-			uint32_t const light_indices_slice_pitch = intersected_light_indices_mapper.SlicePitch() / sizeof(uint32_t);
+			uint16_t* lights_start_ptr = lights_start_mapper.Pointer<uint16_t>();
+			uint32_t const lights_start_row_pitch = lights_start_mapper.RowPitch() / sizeof(uint16_t);
+			uint32_t const lights_start_slice_pitch = lights_start_mapper.SlicePitch() / sizeof(uint16_t);
+			uint16_t* light_indices_ptr = intersected_light_indices_mapper.Pointer<uint16_t>();
+			uint32_t const light_indices_row_pitch = intersected_light_indices_mapper.RowPitch() / sizeof(uint16_t);
+			uint32_t const light_indices_slice_pitch = intersected_light_indices_mapper.SlicePitch() / sizeof(uint16_t);
 
 			std::vector<uint32_t> lights_type(available_lights.size() + 1);
 			lights_type.push_back(0);
@@ -4724,7 +4735,7 @@ namespace KlayGE
 
 							lights_start_ptr[tile_idx_z * lights_start_slice_pitch
 								+ tile_idx_y * lights_start_row_pitch + tile_idx_x * 8 + t - 3]
-								= static_cast<uint32_t>(lights_intersected_size);
+								= static_cast<uint16_t>(lights_intersected_size);
 						}
 					}
 				}

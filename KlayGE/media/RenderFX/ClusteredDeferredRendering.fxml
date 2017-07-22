@@ -570,73 +570,77 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			float spec_normalize = SpecularNormalizeFactor(shininess);
 
 			shading = float4(0, 0, 0, 1);
-			for (uint i = lights_type[0]; i < lights_type[1]; ++ i)
+
+			uint i = lights_type[0];
+			for (; i < lights_type[1]; ++ i)
 			{
 				float3 light_dir = lights_dir_es[i].xyz;
 				float n_dot_l = 0.5f + 0.5f * dot(light_dir, normal);
 				float3 halfway = normalize(light_dir + view_dir);
 				shading.rgb += max(c_diff * lights_attrib[i].x * n_dot_l, 0) * lights_color[i].rgb;
 			}
-			for (i = lights_type[1]; i < lights_type[2]; ++ i)
+			for (; i < lights_type[2]; ++ i)
 			{
 				shading.rgb += CalcClusteredDRShading(i, -1, lights_dir_es[i].xyz, normal, view_dir, -1,
 					c_diff, c_spec, spec_normalize, shininess, tc, 1);
 			}
-			for (i = lights_type[2]; i < lights_type[3]; ++ i)
+			for (; i < lights_type[3]; ++ i)
 			{
 				shading.rgb += CalcClusteredDRShading(i, int(lights_attrib[0].z), lights_dir_es[i].xyz, normal, view_dir, -1,
 					c_diff, c_spec, spec_normalize, shininess, tc, 1);
 			}
 
-			for (i = 0; i < light_start_sh[tile_id.z][0]; ++ i)
+			i = 0;
+			for (; i < light_start_sh[tile_id.z][0]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRPoint(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][0]; i < light_start_sh[tile_id.z][1]; ++ i)
+			for (; i < light_start_sh[tile_id.z][1]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][1]; i < light_start_sh[tile_id.z][2]; ++ i)
+			for (; i < light_start_sh[tile_id.z][2]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSpot(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][2]; i < light_start_sh[tile_id.z][3]; ++ i)
+			for (; i < light_start_sh[tile_id.z][3]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][3]; i < light_start_sh[tile_id.z][4]; ++ i)
+			for (; i < light_start_sh[tile_id.z][4]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSphereArea(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][4]; i < light_start_sh[tile_id.z][5]; ++ i)
+			for (; i < light_start_sh[tile_id.z][5]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][5]; i < light_start_sh[tile_id.z][6]; ++ i)
+			for (; i < light_start_sh[tile_id.z][6]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRTubeArea(li, -1,
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
-			for (i = light_start_sh[tile_id.z][6]; i < light_start_sh[tile_id.z][7]; ++ i)
+			for (; i < light_start_sh[tile_id.z][7]; ++ i)
 			{
 				uint li = ReadALightIndex(tile_id, i);
 				shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li].z),
 					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
 			}
 
+			[branch]
 			if (lights_type[0] == lights_type[1])
 			{
 #if TYPED_UAV_SUPPORT
@@ -674,10 +678,9 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 		</pass>
 	</technique>
 
-	<technique name="ClusteredDRUnifiedNoTypedUAV">
+	<technique name="ClusteredDRUnifiedNoTypedUAV" inherit="ClusteredDRUnified">
 		<pass name="p0">
 			<macro name="TYPED_UAV_SUPPORT" value="0"/>
-			<state name="compute_shader" value="ClusteredDRUnifiedCS()"/>
 		</pass>
 	</technique>
 
