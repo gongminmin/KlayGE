@@ -42,7 +42,6 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 	min_max_z_sh[GI] = min_max_z;
 	GroupMemoryBarrierWithGroupSync();
 
-	[unroll]
 	for (uint offset = BLOCK_SIZE >> 1; offset > 32; offset >>= 1)
 	{
 		if (GI < offset)
@@ -52,7 +51,6 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		}
 		GroupMemoryBarrierWithGroupSync();
 	}
-	[unroll]
 	for (offset = 32; offset > 0; offset >>= 1)
 	{
 		if (GI < offset)
@@ -661,17 +659,14 @@ void TBDRUnifiedCS(uint3 gid : SV_GroupID,
 	</technique>
 
 	<technique name="TBDRUnified">
+		<macro name="TYPED_UAV_SUPPORT" value="1"/>
 		<pass name="p0">
-			<macro name="TYPED_UAV_SUPPORT" value="1"/>
 			<state name="compute_shader" value="TBDRUnifiedCS()"/>
 		</pass>
 	</technique>
 
-	<technique name="TBDRUnifiedNoTypedUAV">
-		<pass name="p0">
-			<macro name="TYPED_UAV_SUPPORT" value="0"/>
-			<state name="compute_shader" value="TBDRUnifiedCS()"/>
-		</pass>
+	<technique name="TBDRUnifiedNoTypedUAV" inherit="TBDRUnified">
+		<macro name="TYPED_UAV_SUPPORT" value="0"/>
 	</technique>
 
 
