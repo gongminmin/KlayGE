@@ -194,6 +194,7 @@ private:
 	void FindHSControlPointPhase();
 	void FindHSForkPhases();
 	void FindHSJoinPhases();
+	ShaderImmType FindTextureReturnType(ShaderOperand const & op) const;
 
 private:
 	std::shared_ptr<ShaderProgram> program_;

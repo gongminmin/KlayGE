@@ -4214,8 +4214,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4303,8 +4315,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4373,8 +4397,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4464,8 +4500,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< "Lod" << (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4572,8 +4620,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< "Lod" << (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4669,8 +4729,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(texture" << ((glsl_rules_ & GSR_GenericTexture) ? "" : texture_type)
 				<< ((glsl_rules_ & GSR_TextureGrad) ? "Grad"  : "") << (offset ? "Offset" : "") << "(";
 			this->ToOperands(out, *insn.ops[2], oit, false);
 			out << "_";
@@ -4820,8 +4892,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 						BOOST_ASSERT(false);
 						break;
 					}
+					oot = this->FindTextureReturnType(*insn.ops[2]);
 					this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-					out << " = vec4(texelFetch";
+					out << " = ";
+					switch (oot)
+					{
+					case SIT_UInt:
+					case SIT_Int:
+						out << "i";
+						break;
+
+					default:
+						break;
+					}
+					out << "vec4(texelFetch";
 					if (lod)
 					{
 						out << "Offset";
@@ -4934,8 +5018,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(textureGather";
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(textureGather";
 			if (offset)
 			{
 				out << "Offset(";
@@ -4996,8 +5092,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(textureGather";
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(textureGather";
 			if (offset)
 			{
 				out << "Offset(";
@@ -5047,8 +5155,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(textureGatherOffset(";
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(textureGatherOffset(";
 			this->ToOperands(out, *insn.ops[3], oit, false);
 			out << "_";
 			this->ToOperands(out, *insn.ops[4], oit, false);
@@ -5088,8 +5208,20 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 				BOOST_ASSERT(false);
 				break;
 			}
+			oot = this->FindTextureReturnType(*insn.ops[2]);
 			this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
-			out << " = vec4(textureGatherOffset(";
+			out << " = ";
+			switch (oot)
+			{
+			case SIT_UInt:
+			case SIT_Int:
+				out << "i";
+				break;
+
+			default:
+				break;
+			}
+			out << "vec4(textureGatherOffset(";
 			this->ToOperands(out, *insn.ops[3], oit, false);
 			out << "_";
 			this->ToOperands(out, *insn.ops[4], oit, false);
@@ -8098,4 +8230,36 @@ void GLSLGen::ToCopyToInterShaderPatchConstantRegisters(std::ostream& out)const
 			out << ";\n";
 		}
 	}
+}
+
+ShaderImmType GLSLGen::FindTextureReturnType(ShaderOperand const & op) const
+{
+	ShaderImmType ret;
+	DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_TEXTURE, static_cast<uint32_t>(op.indices[0].disp));
+	switch (desc.return_type)
+	{
+	case SRRT_UINT:
+		if (glsl_rules_ & GSR_UIntType)
+		{
+			ret = SIT_UInt;
+		}
+		else
+		{
+			ret = SIT_Int;
+		}
+		break;
+
+	case SRRT_SINT:
+		ret = SIT_Int;
+		break;
+
+	case SRRT_DOUBLE:
+		ret = SIT_Double;
+		break;
+
+	default:
+		ret = SIT_Float;
+		break;
+	}
+	return ret;
 }
