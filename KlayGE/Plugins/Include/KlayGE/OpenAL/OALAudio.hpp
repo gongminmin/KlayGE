@@ -1,20 +1,35 @@
-// OALAudio.hpp
-// KlayGE OpenAL声音引擎 头文件
-// Ver 3.2.0
-// 版权所有(C) 龚敏敏, 2003-2006
-// Homepage: http://www.klayge.org
-//
-// 3.2.0
-// 改进了OALMusicBuffer中线程的使用 (2006.4.29)
-//
-// 2.0.0
-// 初次建立 (2003.7.7)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file OALAudio.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
-#ifndef _OALAUDIO_HPP
-#define _OALAUDIO_HPP
+#ifndef _KLAYGE_PLUGINS_OAL_AUDIO_HPP
+#define _KLAYGE_PLUGINS_OAL_AUDIO_HPP
 
 #pragma once
 
@@ -42,72 +57,68 @@ namespace KlayGE
 	float3 VecToALVec(float3 const & v);
 	float3 ALVecToVec(float3 const & v);
 
-	// 声音缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	class OALSoundBuffer : public SoundBuffer
 	{
 	public:
-		OALSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
-		~OALSoundBuffer();
+		OALSoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
+		~OALSoundBuffer() override;
 
-		void Play(bool loop = false);
-		void Stop();
+		void Play(bool loop = false) override;
+		void Stop() override;
 
-		void Volume(float vol);
+		void Volume(float vol) override;
 
-		bool IsPlaying() const;
+		bool IsPlaying() const override;
 
-		float3 Position() const;
-		void Position(float3 const & v);
-		float3 Velocity() const;
-		void Velocity(float3 const & v);
-		float3 Direction() const;
-		void Direction(float3 const & v);
+		float3 Position() const override;
+		void Position(float3 const & v) override;
+		float3 Velocity() const override;
+		void Velocity(float3 const & v) override;
+		float3 Direction() const override;
+		void Direction(float3 const & v) override;
 
 	private:
-		void DoReset();
-		std::vector<ALuint>::iterator FreeSource();
+		void DoReset() override;
+		ALuint FreeSource();
 
 	private:
 		std::vector<ALuint>	sources_;
-		ALuint			buffer_;
+		ALuint buffer_;
 
-		float3		pos_;
-		float3		vel_;
-		float3		dir_;
+		float3 pos_;
+		float3 vel_;
+		float3 dir_;
 	};
 
-	// 音乐缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	class OALMusicBuffer : public MusicBuffer
 	{
 	public:
-		OALMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume);
-		~OALMusicBuffer();
+		OALMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
+		~OALMusicBuffer() override;
 
-		void Volume(float vol);
+		void Volume(float vol) override;
 
-		bool IsPlaying() const;
+		bool IsPlaying() const override;
 
-		float3 Position() const;
-		void Position(float3 const & v);
-		float3 Velocity() const;
-		void Velocity(float3 const & v);
-		float3 Direction() const;
-		void Direction(float3 const & v);
+		float3 Position() const override;
+		void Position(float3 const & v) override;
+		float3 Velocity() const override;
+		void Velocity(float3 const & v) override;
+		float3 Direction() const override;
+		void Direction(float3 const & v) override;
 
 		void LoopUpdateBuffer();
 
 	private:
-		void DoReset();
-		void DoPlay(bool loop);
-		void DoStop();
+		void DoReset() override;
+		void DoPlay(bool loop) override;
+		void DoStop() override;
 
 	private:
-		ALuint					source_;
-		std::vector<ALuint>		bufferQueue_;
+		ALuint source_;
+		std::vector<ALuint> buffer_queue_;
 
-		bool		loop_;
+		bool loop_;
 
 		bool played_;
 		bool stopped_;
@@ -116,27 +127,25 @@ namespace KlayGE
 		joiner<void> play_thread_;
 	};
 
-	// 管理音频播放
-	/////////////////////////////////////////////////////////////////////////////////
 	class OALAudioEngine : public AudioEngine
 	{
 	public:
 		OALAudioEngine();
-		~OALAudioEngine();
+		~OALAudioEngine() override;
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		float3 GetListenerPos() const;
-		void SetListenerPos(float3 const & v);
-		float3 GetListenerVel() const;
-		void SetListenerVel(float3 const & v);
-		void GetListenerOri(float3& face, float3& up) const;
-		void SetListenerOri(float3 const & face, float3 const & up);
+		float3 GetListenerPos() const override;
+		void SetListenerPos(float3 const & v) override;
+		float3 GetListenerVel() const override;
+		void SetListenerVel(float3 const & v) override;
+		void GetListenerOri(float3& face, float3& up) const override;
+		void SetListenerOri(float3 const & face, float3 const & up) override;
 
 	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 	};
 }
 
-#endif		// _OALAUDIO_HPP
+#endif		// _KLAYGE_PLUGINS_OAL_AUDIO_HPP

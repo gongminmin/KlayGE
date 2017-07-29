@@ -1,14 +1,32 @@
-// OALAudioEngine.cpp
-// KlayGE OpenAL音频引擎类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.klayge.org
-//
-// 2.0.0
-// 初次建立 (2003.7.7)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file OALAudioEngine.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
@@ -18,14 +36,8 @@
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma comment(lib, "OpenAL32.lib")
-#endif
-
 namespace KlayGE
 {
-	// 从AudioFormat转化为OpenAL的格式标志
-	/////////////////////////////////////////////////////////////////////////////////
 	ALenum Convert(AudioFormat format)
 	{
 		ALenum out = AL_FORMAT_MONO8;
@@ -55,26 +67,20 @@ namespace KlayGE
 		return out;
 	}
 
-	// 从左手坐标系的float3转化为OpenAL的右手坐标系
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 VecToALVec(float3 const & v)
 	{
 		return float3(v.x(), v.y(), -v.z());
 	}
 
-	// 从OpenAL的右手坐标系转化为左手坐标系的float3
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 ALVecToVec(float3 const & v)
 	{
 		return float3(v.x(), v.y(), -v.z());
 	}
 
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
 	OALAudioEngine::OALAudioEngine()
 	{
-		ALCdevice* device(alcOpenDevice(nullptr));
-		ALCcontext* context(alcCreateContext(device, 0));
+		ALCdevice* device = alcOpenDevice(nullptr);
+		ALCcontext* context = alcCreateContext(device, 0);
 
 		alcMakeContextCurrent(context);
 
@@ -84,18 +90,16 @@ namespace KlayGE
 
 		alDistanceModel(AL_INVERSE_DISTANCE);
 
-		alDopplerFactor(1);		// 按照现实的多普勒效应
-		alDopplerVelocity(343); // 以 米/秒 为单位
+		alDopplerFactor(1);
+		alDopplerVelocity(343); // m/s
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	OALAudioEngine::~OALAudioEngine()
 	{
-		audioBufs_.clear();
+		audio_buffs_.clear();
 
-		ALCcontext* context(alcGetCurrentContext());
-		ALCdevice* device(alcGetContextsDevice(context));
+		ALCcontext* context = alcGetCurrentContext();
+		ALCdevice* device = alcGetContextsDevice(context);
 
 		alcMakeContextCurrent(0);
 
@@ -113,50 +117,38 @@ namespace KlayGE
 		// TODO
 	}
 
-	// 音频引擎名字
-	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & OALAudioEngine::Name() const
 	{
 		static std::wstring const name(L"OpenAL Audio Engine");
 		return name;
 	}
 
-	// 获取3D听者位置
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 OALAudioEngine::GetListenerPos() const
 	{
 		float3 v;
-		alGetListener3f(AL_POSITION, &v.x(), &v.y(), &v.z());
+		alGetListener3f(AL_POSITION, &v[0], &v[1], &v[2]);
 		return ALVecToVec(v);
 	}
 
-	// 设置3D听者位置
-	/////////////////////////////////////////////////////////////////////////////////
 	void OALAudioEngine::SetListenerPos(float3 const & v)
 	{
 		float3 alv(VecToALVec(v));
 		alListener3f(AL_POSITION, alv.x(), alv.y(), alv.z());
 	}
 
-	// 获取3D听者速度
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 OALAudioEngine::GetListenerVel() const
 	{
 		float3 v;
-		alGetListener3f(AL_VELOCITY, &v.x(), &v.y(), &v.z());
+		alGetListener3f(AL_VELOCITY, &v[0], &v[1], &v[2]);
 		return ALVecToVec(v);
 	}
 
-	// 设置3D听者速度
-	/////////////////////////////////////////////////////////////////////////////////
 	void OALAudioEngine::SetListenerVel(float3 const & v)
 	{
-		float3 alv(VecToALVec(v));
+		float3 alv = VecToALVec(v);
 		alListener3f(AL_VELOCITY, alv.x(), alv.y(), alv.z());
 	}
 
-	// 获取3D听者方向
-	/////////////////////////////////////////////////////////////////////////////////
 	void OALAudioEngine::GetListenerOri(float3& face, float3& up) const
 	{
 		float v[6];
@@ -165,13 +157,11 @@ namespace KlayGE
 		up = ALVecToVec(float3(&v[3]));
 	}
 
-	// 获取3D听者方向
-	/////////////////////////////////////////////////////////////////////////////////
 	void OALAudioEngine::SetListenerOri(float3 const & face, float3 const & up)
 	{
-		float3 alface(VecToALVec(face));
-		float3 alup(VecToALVec(up));
-		float v[6] = { alface.x(), alface.y(), alface.z(), alup.x(), alup.y(), alup.z() };
+		float3 al_face = VecToALVec(face);
+		float3 al_up = VecToALVec(up);
+		float v[6] = { al_face.x(), al_face.y(), al_face.z(), al_up.x(), al_up.y(), al_up.z() };
 		alListenerfv(AL_ORIENTATION, v);
 	}
 }

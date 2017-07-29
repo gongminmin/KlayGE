@@ -1,17 +1,35 @@
-// DSAudio.hpp
-// KlayGE DirectSound8声音引擎 头文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.klayge.org
-//
-// 2.0.0
-// 初次建立 (2003.10.4)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file DSAudio.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
-#ifndef _DSAUDIO_HPP
-#define _DSAUDIO_HPP
+#ifndef _KLAYGE_PLUGINS_DS_AUDIO_HPP
+#define _KLAYGE_PLUGINS_DS_AUDIO_HPP
 
 #pragma once
 
@@ -32,81 +50,79 @@ namespace KlayGE
 {
 	typedef std::shared_ptr<IDirectSoundBuffer> IDSBufferPtr;
 
-	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource);
+	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & data_source);
+
+	// Convert linear 0 to 1 volumn to dB
 	long LinearGainToDB(float vol);
 
-	// 声音缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	class DSSoundBuffer : public SoundBuffer
 	{
 	public:
-		DSSoundBuffer(AudioDataSourcePtr const & dataSource, uint32_t numSource, float volume);
-		~DSSoundBuffer();
+		DSSoundBuffer(AudioDataSourcePtr const & data_source, uint32_t num_sources, float volume);
+		~DSSoundBuffer() override;
 
-		void Play(bool loop = false);
-		void Stop();
+		void Play(bool loop = false) override;
+		void Stop() override;
 
-		void Volume(float vol);
+		void Volume(float vol) override;
 
-		bool IsPlaying() const;
+		bool IsPlaying() const override;
 
-		float3 Position() const;
-		void Position(float3 const & v);
-		float3 Velocity() const;
-		void Velocity(float3 const & v);
-		float3 Direction() const;
-		void Direction(float3 const & v);
-
-	private:
-		std::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(std::vector<IDSBufferPtr>::iterator iter);
-
-		void DoReset();
-		std::vector<IDSBufferPtr>::iterator FreeSource();
+		float3 Position() const override;
+		void Position(float3 const & v) override;
+		float3 Velocity() const override;
+		void Velocity(float3 const & v) override;
+		float3 Direction() const override;
+		void Direction(float3 const & v) override;
 
 	private:
-		std::vector<IDSBufferPtr>		sources_;
+		std::shared_ptr<IDirectSound3DBuffer> Get3DBufferInterface(IDirectSoundBuffer* ds_buff);
 
-		float3		pos_;
-		float3		vel_;
-		float3		dir_;
+		void DoReset() override;
+		IDirectSoundBuffer* FreeSource();
+
+	private:
+		std::vector<IDSBufferPtr> sources_;
+
+		float3 pos_;
+		float3 vel_;
+		float3 dir_;
 	};
 
-	// 音乐缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	class DSMusicBuffer : public MusicBuffer
 	{
 	public:
-		DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume);
-		~DSMusicBuffer();
+		DSMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume);
+		~DSMusicBuffer() override;
 
-		void Volume(float vol);
+		void Volume(float vol) override;
 
-		bool IsPlaying() const;
+		bool IsPlaying() const override;
 
-		float3 Position() const;
-		void Position(float3 const & v);
-		float3 Velocity() const;
-		void Velocity(float3 const & v);
-		float3 Direction() const;
-		void Direction(float3 const & v);
+		float3 Position() const override;
+		void Position(float3 const & v) override;
+		float3 Velocity() const override;
+		void Velocity(float3 const & v) override;
+		float3 Direction() const override;
+		void Direction(float3 const & v) override;
 
 	private:
 		void LoopUpdateBuffer();
 
-		void DoReset();
-		void DoPlay(bool loop);
-		void DoStop();
+		void DoReset() override;
+		void DoPlay(bool loop) override;
+		void DoStop() override;
 
 		bool FillData(uint32_t size);
 
 	private:
-		IDSBufferPtr	buffer_;
-		uint32_t		fillSize_;
-		uint32_t		fillCount_;
+		IDSBufferPtr buffer_;
+		uint32_t fill_size_;
+		uint32_t fill_count_;
 
-		std::shared_ptr<IDirectSound3DBuffer> ds3DBuffer_;
+		std::shared_ptr<IDirectSound3DBuffer> ds_3d_buffer_;
 
-		bool		loop_;
+		bool loop_;
 
 		bool played_;
 		bool stopped_;
@@ -115,33 +131,33 @@ namespace KlayGE
 		joiner<void> play_thread_;
 	};
 
-	// 管理音频播放
-	/////////////////////////////////////////////////////////////////////////////////
 	class DSAudioEngine : public AudioEngine
 	{
 	public:
 		DSAudioEngine();
-		~DSAudioEngine();
+		~DSAudioEngine() override;
 
-		std::shared_ptr<IDirectSound> const & DSound() const
-			{ return dsound_; }
+		IDirectSound* DSound() const
+		{
+			return dsound_.get();
+		}
 
-		std::wstring const & Name() const;
+		std::wstring const & Name() const override;
 
-		float3 GetListenerPos() const;
-		void SetListenerPos(float3 const & v);
-		float3 GetListenerVel() const;
-		void SetListenerVel(float3 const & v);
-		void GetListenerOri(float3& face, float3& up) const;
-		void SetListenerOri(float3 const & face, float3 const & up);
-
-	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		float3 GetListenerPos() const override;
+		void SetListenerPos(float3 const & v) override;
+		float3 GetListenerVel() const override;
+		void SetListenerVel(float3 const & v) override;
+		void GetListenerOri(float3& face, float3& up) const override;
+		void SetListenerOri(float3 const & face, float3 const & up) override;
 
 	private:
-		std::shared_ptr<IDirectSound>				dsound_;
-		std::shared_ptr<IDirectSound3DListener>	ds3dListener_;
+		void DoSuspend() override;
+		void DoResume() override;
+
+	private:
+		std::shared_ptr<IDirectSound> dsound_;
+		std::shared_ptr<IDirectSound3DListener> ds_3d_listener_;
 
 		HMODULE mod_dsound_;
 		typedef HRESULT (WINAPI *DirectSoundCreateFunc)(LPCGUID pcGuidDevice, LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);

@@ -1,43 +1,53 @@
-// AudioEngine.cpp
-// KlayGE 音频引擎类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.klayge.org
-//
-// 2.0.0
-// 初次建立 (2003.7.7)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file AudioEngine.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
-#include <KFL/Util.hpp>
 #include <KlayGE/AudioDataSource.hpp>
-
-#include <boost/assert.hpp>
 
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
 {
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
 	AudioEngine::AudioEngine()
-					: soundVol_(1),
-						musicVol_(1)
+		: sound_vol_(1), music_vol_(1)
 	{
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	AudioEngine::~AudioEngine()
 	{
 	}
 
 	void AudioEngine::Suspend()
 	{
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			ab.second->Suspend();
 		}
@@ -47,66 +57,52 @@ namespace KlayGE
 	void AudioEngine::Resume()
 	{
 		this->DoResume();
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			ab.second->Resume();
 		}
 	}
 
-	// 往列表里添加一个音频缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::AddBuffer(size_t id, AudioBufferPtr const & buffer)
 	{
-		audioBufs_.emplace(id, buffer);
+		audio_buffs_.emplace(id, buffer);
 	}
 
-	// 播放id所指定的声音
-	/////////////////////////////////////////////////////////////////////////////////
-	void AudioEngine::Play(size_t bufID, bool loop)
+	void AudioEngine::Play(size_t buf_id, bool loop)
 	{
-		this->Buffer(bufID)->Play(loop);
+		this->Buffer(buf_id)->Play(loop);
 	}
 
-	// 停止id所指定的声音
-	/////////////////////////////////////////////////////////////////////////////////
-	void AudioEngine::Stop(size_t bufID)
+	void AudioEngine::Stop(size_t buf_id)
 	{
-		this->Buffer(bufID)->Stop();
+		this->Buffer(buf_id)->Stop();
 	}
 
-	// 播放所有的声音
-	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::PlayAll(bool loop)
 	{
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			ab.second->Play(loop);
 		}
 	}
 
-	// 停止所有的声音
-	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::StopAll()
 	{
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			ab.second->Stop();
 		}
 	}
 
-	// 列表里缓冲区的数目
-	/////////////////////////////////////////////////////////////////////////////////
 	size_t AudioEngine::NumBuffer() const
 	{
-		return audioBufs_.size();
+		return audio_buffs_.size();
 	}
 
-	// 获取声音缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	AudioBufferPtr AudioEngine::Buffer(size_t bufID) const
+	AudioBufferPtr AudioEngine::Buffer(size_t buff_id) const
 	{
-		auto iter = audioBufs_.find(bufID);
-		if (iter != audioBufs_.end())
+		auto iter = audio_buffs_.find(buff_id);
+		if (iter != audio_buffs_.end())
 		{
 			return iter->second;
 		}
@@ -114,13 +110,11 @@ namespace KlayGE
 		KFL_UNREACHABLE("Invalid buffer id");
 	}
 
-	// 设置音效音量，vol的取值范围为0--1.0f
-	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::SoundVolume(float vol)
 	{
-		soundVol_ = vol;
+		sound_vol_ = vol;
 
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			if (ab.second->IsSound())
 			{
@@ -129,20 +123,16 @@ namespace KlayGE
 		}
 	}
 
-	// 获取音效音量
-	/////////////////////////////////////////////////////////////////////////////////
 	float AudioEngine::SoundVolume() const
 	{
-		return soundVol_;
+		return sound_vol_;
 	}
 
-	// 设置音乐音量，vol的取值范围为0--1.0f
-	/////////////////////////////////////////////////////////////////////////////////
 	void AudioEngine::MusicVolume(float vol)
 	{
-		musicVol_ = vol;
+		music_vol_ = vol;
 
-		for (auto const & ab : audioBufs_)
+		for (auto const & ab : audio_buffs_)
 		{
 			if (!(ab.second->IsSound()))
 			{
@@ -151,10 +141,8 @@ namespace KlayGE
 		}
 	}
 
-	// 获取音乐音量
-	/////////////////////////////////////////////////////////////////////////////////
 	float AudioEngine::MusicVolume() const
 	{
-		return musicVol_;
+		return music_vol_;
 	}
 }

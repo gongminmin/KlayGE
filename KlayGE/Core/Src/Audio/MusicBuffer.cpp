@@ -1,48 +1,54 @@
-// MusicBuffer.cpp
-// KlayGE 音乐缓冲区类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.klayge.org
-//
-// 2.0.0
-// 初次建立 (2003.7.7)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file MusicBuffer.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/AudioDataSource.hpp>
-
-#include <boost/assert.hpp>
 
 #include <KlayGE/Audio.hpp>
 
 namespace KlayGE
 {
-	uint32_t MusicBuffer::PreSecond = 2;
-
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
-	MusicBuffer::MusicBuffer(AudioDataSourcePtr const & dataSource)
-					: AudioBuffer(dataSource)
+	MusicBuffer::MusicBuffer(AudioDataSourcePtr const & data_source)
+		: AudioBuffer(data_source)
 	{
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	MusicBuffer::~MusicBuffer()
 	{
 	}
 
-	// 是否是声音
-	/////////////////////////////////////////////////////////////////////////////////
 	bool MusicBuffer::IsSound() const
 	{
 		return false;
 	}
 
-	// 缓冲区复位以便于从头播放
-	/////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Reset()
 	{
 		this->Stop();
@@ -50,22 +56,18 @@ namespace KlayGE
 		this->DoReset();
 	}
 
-	// 播放音频流
-	/////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Play(bool loop)
 	{
 		this->DoStop();
 		this->DoPlay(loop);
 	}
 
-	// 停止播放音频流
-	////////////////////////////////////////////////////////////////////////////////
 	void MusicBuffer::Stop()
 	{
 		if (this->IsPlaying())
 		{
 			this->DoStop();
-			dataSource_->Reset();
+			data_source_->Reset();
 		}
 	}
 }

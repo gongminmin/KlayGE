@@ -1,17 +1,32 @@
-// DSMusicBuffer.cpp
-// KlayGE DirectSound音乐缓冲区类 实现文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://www.klayge.org
-//
-// 2.0.4
-// 改用timeSetEvent实现 (2004.3.28)
-//
-// 2.0.0
-// 初次建立 (2003.10.4)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file DSMusicBuffer.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/ErrorHandling.hpp>
@@ -23,51 +38,44 @@
 
 #include <algorithm>
 #include <cstring>
-#include <boost/assert.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
 namespace KlayGE
 {
-	// 构造函数。建立一个可以用于流式播放的缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
-	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & dataSource, uint32_t bufferSeconds, float volume)
-					: MusicBuffer(dataSource),
+	DSMusicBuffer::DSMusicBuffer(AudioDataSourcePtr const & data_source, uint32_t buffer_seconds, float volume)
+					: MusicBuffer(data_source),
 						played_(false), stopped_(true)
 	{
-		WAVEFORMATEX wfx(WaveFormatEx(dataSource));
-		fillSize_	= wfx.nAvgBytesPerSec / PreSecond;
-		fillCount_	= bufferSeconds * PreSecond;
+		WAVEFORMATEX wfx = WaveFormatEx(data_source);
+		fill_size_ = wfx.nAvgBytesPerSec / BUFFERS_PER_SECOND;
+		fill_count_	= buffer_seconds * BUFFERS_PER_SECOND;
 
-		bool const mono(1 == wfx.nChannels);
+		bool const mono = (1 == wfx.nChannels);
 
-		std::shared_ptr<IDirectSound> const & dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
+		auto dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
-		// 建立 DirectSound 缓冲区，要尽量减少使用建立标志，
-		// 因为使用太多不必要的标志会影响硬件加速性能
 		DSBUFFERDESC dsbd;
 		dsbd.dwSize = sizeof(dsbd);
 		dsbd.dwFlags = DSBCAPS_CTRLVOLUME;
 		if (mono)
 		{
 			dsbd.dwFlags |= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
-			dsbd.guid3DAlgorithm	= GUID_NULL;
+			dsbd.guid3DAlgorithm = GUID_NULL;
 		}
-		dsbd.dwBufferBytes		= fillSize_ * fillCount_;
-		dsbd.dwReserved			= 0;
-		dsbd.lpwfxFormat		= &wfx;
+		dsbd.dwBufferBytes = fill_size_ * fill_count_;
+		dsbd.dwReserved = 0;
+		dsbd.lpwfxFormat = &wfx;
 
-		// DirectSound只能播放PCM数据。其他格式可能不能工作。
 		IDirectSoundBuffer* buffer;
 		TIFHR(dsound->CreateSoundBuffer(&dsbd, &buffer, nullptr));
 		buffer_ = MakeCOMPtr(buffer);
 
 		if (mono)
 		{
-			IDirectSound3DBuffer* ds3DBuffer;
-			buffer_->QueryInterface(IID_IDirectSound3DBuffer,
-				reinterpret_cast<void**>(&ds3DBuffer));
-			ds3DBuffer_ = MakeCOMPtr(ds3DBuffer);
+			IDirectSound3DBuffer* ds_3d_buffer;
+			buffer_->QueryInterface(IID_IDirectSound3DBuffer, reinterpret_cast<void**>(&ds_3d_buffer));
+			ds_3d_buffer_ = MakeCOMPtr(ds_3d_buffer);
 		}
 
 		this->Position(float3::Zero());
@@ -79,8 +87,6 @@ namespace KlayGE
 		this->Reset();
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	DSMusicBuffer::~DSMusicBuffer()
 	{
 		this->Stop();
@@ -100,10 +106,10 @@ namespace KlayGE
 			DWORD play_cursor, write_cursor;
 			buffer_->GetCurrentPosition(&play_cursor, &write_cursor);
 
-			uint32_t const next_cursor = play_cursor + fillSize_;
+			uint32_t const next_cursor = play_cursor + fill_size_;
 			if (next_cursor >= write_cursor)
 			{
-				if (this->FillData(fillSize_))
+				if (this->FillData(fill_size_))
 				{
 					if (loop_)
 					{
@@ -118,21 +124,17 @@ namespace KlayGE
 				}
 			}
 
-			Sleep(1000 / PreSecond);
+			Sleep(1000 / BUFFERS_PER_SECOND);
 		}
 	}
 
-	// 缓冲区复位以便于从头播放
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoReset()
 	{
-		dataSource_->Reset();
+		data_source_->Reset();
 
 		buffer_->SetCurrentPosition(0);
 	}
 
-	// 播放音频流
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoPlay(bool loop)
 	{
 		play_thread_ = Context::Instance().ThreadPool()(std::bind(&DSMusicBuffer::LoopUpdateBuffer, this));
@@ -149,8 +151,6 @@ namespace KlayGE
 		buffer_->Play(0, 0, DSBPLAY_LOOPING);
 	}
 
-	// 停止播放音频流
-	////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::DoStop()
 	{
 		if (!stopped_)
@@ -165,7 +165,7 @@ namespace KlayGE
 	bool DSMusicBuffer::FillData(uint32_t size)
 	{
 		std::vector<uint8_t> data(size);
-		data.resize(dataSource_->Read(&data[0], size));
+		data.resize(data_source_->Read(data.data(), size));
 
 		uint8_t* locked_buff[2];
 		DWORD locked_buff_size[2];
@@ -208,8 +208,6 @@ namespace KlayGE
 		return ret;
 	}
 
-	// 检查缓冲区是否在播放
-	/////////////////////////////////////////////////////////////////////////////////
 	bool DSMusicBuffer::IsPlaying() const
 	{
 		if (buffer_)
@@ -222,89 +220,74 @@ namespace KlayGE
 		return false;
 	}
 
-	// 设置音量
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Volume(float vol)
 	{
 		buffer_->SetVolume(LinearGainToDB(vol));
 	}
 
-
-	// 获取声源位置
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 DSMusicBuffer::Position() const
 	{
-		float3 ret(float3::Zero());
+		float3 ret = float3::Zero();
 
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
 			D3DVECTOR v;
-			ds3DBuffer_->GetPosition(&v);
+			ds_3d_buffer_->GetPosition(&v);
 			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
 	}
 
-	// 设置声源位置
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Position(float3 const & v)
 	{
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
-			ds3DBuffer_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
+			ds_3d_buffer_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}
 	}
 
-	// 获取声源速度
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 DSMusicBuffer::Velocity() const
 	{
-		float3 ret(float3::Zero());
+		float3 ret = float3::Zero();
 
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
 			D3DVECTOR v;
-			ds3DBuffer_->GetVelocity(&v);
+			ds_3d_buffer_->GetVelocity(&v);
 			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
 	}
 
-	// 设置声源速度
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Velocity(float3 const & v)
 	{
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
-			ds3DBuffer_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
+			ds_3d_buffer_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}
 	}
 
-	// 获取声源方向
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 DSMusicBuffer::Direction() const
 	{
-		float3 ret(float3::Zero());
+		float3 ret = float3::Zero();
 
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
 			D3DVECTOR v;
-			ds3DBuffer_->GetConeOrientation(&v);
+			ds_3d_buffer_->GetConeOrientation(&v);
 			ret = float3(v.x, v.y, v.z);
 		}
 
 		return ret;
 	}
 
-	// 设置声源方向
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSMusicBuffer::Direction(float3 const & v)
 	{
-		if (ds3DBuffer_)
+		if (ds_3d_buffer_)
 		{
-			ds3DBuffer_->SetConeOrientation(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
+			ds_3d_buffer_->SetConeOrientation(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 		}
 	}
 }

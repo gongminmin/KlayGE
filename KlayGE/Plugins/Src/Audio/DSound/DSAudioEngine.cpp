@@ -1,14 +1,32 @@
-// DSAudioEngine.cpp
-// KlayGE DirectSound音频引擎类 实现文件
-// Ver 2.0.0
-// 版权所有(C) 龚敏敏, 2003
-// Homepage: http://www.klayge.org
-//
-// 2.0.0
-// 初次建立 (2003.10.4)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file DSAudioEngine.cpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
 #include <KlayGE/KlayGE.hpp>
 #define INITGUID
@@ -17,26 +35,22 @@
 #include <KlayGE/AudioDataSource.hpp>
 
 #include <cmath>
-#include <cstring>
-#include <boost/assert.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
 
 namespace KlayGE
 {
-	// 从AudioDataSource获取WAVEFORMATEX
-	/////////////////////////////////////////////////////////////////////////////////
-	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & dataSource)
+	WAVEFORMATEX WaveFormatEx(AudioDataSourcePtr const & data_source)
 	{
 		WAVEFORMATEX wfx;
 
 		wfx.wFormatTag		= WAVE_FORMAT_PCM;
-		wfx.nSamplesPerSec	= dataSource->Freq();
+		wfx.nSamplesPerSec	= data_source->Freq();
 		wfx.cbSize			= 0;
 		wfx.wBitsPerSample	= 8;
 		wfx.nChannels		= 1;
 
-		switch (dataSource->Format())
+		switch (data_source->Format())
 		{
 		case AF_Mono8:
 			wfx.wBitsPerSample	= 8;
@@ -68,26 +82,22 @@ namespace KlayGE
 		return wfx;
 	}
 
-	// 从0--1的音量转化为dB为单位的音量
-	/////////////////////////////////////////////////////////////////////////////////
 	long LinearGainToDB(float vol)
 	{
-		long dB;
+		long db;
 		if (vol > 0)
 		{
-			dB = static_cast<long>(2000 * std::log10(vol));
+			db = static_cast<long>(2000 * std::log10(vol));
 		}
 		else
 		{
-			dB = -10000;
+			db = -10000;
 		}
 
-		return dB;
+		return db;
 	}
 
 
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
 	DSAudioEngine::DSAudioEngine()
 	{
 		mod_dsound_ = ::LoadLibraryEx(TEXT("dsound.dll"), nullptr, 0);
@@ -101,19 +111,19 @@ namespace KlayGE
 			DynamicDirectSoundCreate_ = reinterpret_cast<DirectSoundCreateFunc>(::GetProcAddress(mod_dsound_, "DirectSoundCreate"));
 		}
 
-		IDirectSound* dsound(nullptr);
+		IDirectSound* dsound = nullptr;
 		TIFHR(DynamicDirectSoundCreate_(&DSDEVID_DefaultPlayback, &dsound, nullptr));
 		dsound_ = MakeCOMPtr(dsound);
 
 		TIFHR(dsound_->SetCooperativeLevel(::GetForegroundWindow(), DSSCL_PRIORITY));
 
-		DSBUFFERDESC desc;
-		std::memset(&desc, 0, sizeof(desc));
-		desc.dwSize  = sizeof(desc);
+		DSBUFFERDESC desc{};
+		desc.dwSize = sizeof(desc);
 		desc.dwFlags = DSBCAPS_CTRL3D | DSBCAPS_PRIMARYBUFFER;
 
-		IDirectSoundBuffer* pDSBPrimary(nullptr);
-		TIFHR(dsound_->CreateSoundBuffer(&desc, &pDSBPrimary, nullptr));
+		IDirectSoundBuffer* ds_buff = nullptr;
+		TIFHR(dsound_->CreateSoundBuffer(&desc, &ds_buff, nullptr));
+		auto ds_buff_primary = MakeCOMPtr(ds_buff);
 
 		WAVEFORMATEX wfx;
 		wfx.wFormatTag		= WAVE_FORMAT_PCM;
@@ -124,27 +134,21 @@ namespace KlayGE
 		wfx.nAvgBytesPerSec	= wfx.nSamplesPerSec * wfx.nBlockAlign;
 		wfx.cbSize			= 0;
 
-		TIFHR(pDSBPrimary->SetFormat(&wfx));
+		TIFHR(ds_buff_primary->SetFormat(&wfx));
 
-		IDirectSound3DListener* ds3dListener;
-		TIFHR(pDSBPrimary->QueryInterface(IID_IDirectSound3DListener,
-			reinterpret_cast<void**>(&ds3dListener)));
-		ds3dListener_ = MakeCOMPtr(ds3dListener);
-
+		IDirectSound3DListener* ds_3d_listener;
+		TIFHR(ds_buff_primary->QueryInterface(IID_IDirectSound3DListener, reinterpret_cast<void**>(&ds_3d_listener)));
+		ds_3d_listener_ = MakeCOMPtr(ds_3d_listener);
 
 		this->SetListenerPos(float3(0, 0, 0));
 		this->SetListenerVel(float3(0, 0, 0));
 		this->SetListenerOri(float3(0, 0, 1), float3(0, 1, 0));
-
-		pDSBPrimary->Release();
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	DSAudioEngine::~DSAudioEngine()
 	{
-		audioBufs_.clear();
-		ds3dListener_.reset();
+		audio_buffs_.clear();
+		ds_3d_listener_.reset();
 		dsound_.reset();
 
 		::FreeLibrary(mod_dsound_);
@@ -160,62 +164,48 @@ namespace KlayGE
 		// TODO
 	}
 
-	// 音频引擎名字
-	/////////////////////////////////////////////////////////////////////////////////
 	std::wstring const & DSAudioEngine::Name() const
 	{
 		static std::wstring const name(L"DirectSound Audio Engine");
 		return name;
 	}
 
-	// 获取3D听者位置
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 DSAudioEngine::GetListenerPos() const
 	{
 		D3DVECTOR vec;
-		this->ds3dListener_->GetPosition(&vec);
+		ds_3d_listener_->GetPosition(&vec);
 		return float3(vec.x, vec.y, vec.z);
 	}
 
-	// 设置3D听者位置
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSAudioEngine::SetListenerPos(float3 const & v)
 	{
-		this->ds3dListener_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
+		ds_3d_listener_->SetPosition(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
-	// 获取3D听者速度
-	/////////////////////////////////////////////////////////////////////////////////
 	float3 DSAudioEngine::GetListenerVel() const
 	{
 		D3DVECTOR vec;
-		this->ds3dListener_->GetVelocity(&vec);
+		ds_3d_listener_->GetVelocity(&vec);
 		return float3(vec.x, vec.y, vec.z);
 	}
 
-	// 设置3D听者速度
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSAudioEngine::SetListenerVel(float3 const & v)
 	{
-		this->ds3dListener_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
+		ds_3d_listener_->SetVelocity(v.x(), v.y(), v.z(), DS3D_IMMEDIATE);
 	}
 
-	// 获取3D听者方向
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSAudioEngine::GetListenerOri(float3& face, float3& up) const
 	{
-		D3DVECTOR d3dFace, d3dUp;
-		this->ds3dListener_->GetOrientation(&d3dFace, &d3dUp);
+		D3DVECTOR d3d_face, d3d_up;
+		ds_3d_listener_->GetOrientation(&d3d_face, &d3d_up);
 
-		face = float3(d3dFace.x, d3dFace.y, d3dFace.z);
-		up = float3(d3dUp.x, d3dUp.y, d3dUp.z);
+		face = float3(d3d_face.x, d3d_face.y, d3d_face.z);
+		up = float3(d3d_up.x, d3d_up.y, d3d_up.z);
 	}
 
-	// 获取3D听者方向
-	/////////////////////////////////////////////////////////////////////////////////
 	void DSAudioEngine::SetListenerOri(float3 const & face, float3 const & up)
 	{
-		this->ds3dListener_->SetOrientation(face.x(), face.y(), face.z(),
+		ds_3d_listener_->SetOrientation(face.x(), face.y(), face.z(),
 			up.x(), up.y(), up.z(), DS3D_IMMEDIATE);
 	}
 }

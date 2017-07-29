@@ -1,20 +1,35 @@
-// Audio.hpp
-// KlayGE 声音引擎 头文件
-// Ver 2.0.4
-// 版权所有(C) 龚敏敏, 2003-2004
-// Homepage: http://www.klayge.org
-//
-// 2.0.4
-// 增加了NullObject (2004.4.7)
-//
-// 2.0.0
-// 初次建立 (2003.7.7)
-//
-// 修改记录
-/////////////////////////////////////////////////////////////////////////////////
+/**
+ * @file Audio.hpp
+ * @author Minmin Gong
+ *
+ * @section DESCRIPTION
+ *
+ * This source file is part of KlayGE
+ * For the latest info, see http://www.klayge.org
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published
+ * by the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ * You may alternatively use this source under the terms of
+ * the KlayGE Proprietary License (KPL). You can obtained such a license
+ * from http://www.klayge.org/licensing/.
+ */
 
-#ifndef _AUDIO_HPP
-#define _AUDIO_HPP
+#ifndef _KLAYGE_CORE_AUDIO_HPP
+#define _KLAYGE_CORE_AUDIO_HPP
 
 #pragma once
 
@@ -27,12 +42,10 @@
 
 namespace KlayGE
 {
-	// 声音缓冲区抽象接口
-	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API AudioBuffer : boost::noncopyable
 	{
 	public:
-		AudioBuffer(AudioDataSourcePtr const & dataSource);
+		explicit AudioBuffer(AudioDataSourcePtr const & data_source);
 		virtual ~AudioBuffer();
 
 		void Suspend();
@@ -55,55 +68,48 @@ namespace KlayGE
 		virtual void Direction(float3 const & v) = 0;
 
 	protected:
-		AudioDataSourcePtr dataSource_;
+		AudioDataSourcePtr data_source_;
 
 		AudioFormat	format_;
-		uint32_t			freq_;
+		uint32_t freq_;
 
 		bool resume_playing_;
 	};
 
-	// 声音缓冲区
-	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API SoundBuffer : public AudioBuffer
 	{
 	public:
-		SoundBuffer(AudioDataSourcePtr const & dataSource);
-		virtual ~SoundBuffer();
+		explicit SoundBuffer(AudioDataSourcePtr const & data_source);
+		~SoundBuffer() override;
 
-		virtual void Reset();
+		void Reset() override;
 
-		bool IsSound() const;
+		bool IsSound() const override;
 
 	protected:
 		virtual void DoReset() = 0;
 	};
 
-	// 音乐缓冲区，流式结构
-	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API MusicBuffer : public AudioBuffer
 	{
 	public:
-		MusicBuffer(AudioDataSourcePtr const & dataSource);
-		virtual ~MusicBuffer();
+		explicit MusicBuffer(AudioDataSourcePtr const & data_source);
+		~MusicBuffer() override;
 
-		void Play(bool loop = false);
-		void Stop();
-		void Reset();
+		void Play(bool loop = false) override;
+		void Stop() override;
+		void Reset() override;
 
-		bool IsSound() const;
+		bool IsSound() const override;
 
 	protected:
 		virtual void DoReset() = 0;
 		virtual void DoPlay(bool loop) = 0;
 		virtual void DoStop() = 0;
 
-		// 每秒读取的次数
-		static uint32_t	PreSecond;
+		static uint32_t constexpr BUFFERS_PER_SECOND = 2;
 	};
 
-	// 管理音频播放
-	/////////////////////////////////////////////////////////////////////////////////
 	class KLAYGE_CORE_API AudioEngine : boost::noncopyable
 	{
 	public:
@@ -118,14 +124,13 @@ namespace KlayGE
 		virtual void AddBuffer(size_t id, AudioBufferPtr const & buffer);
 
 		size_t NumBuffer() const;
-		virtual AudioBufferPtr Buffer(size_t bufID) const;
+		virtual AudioBufferPtr Buffer(size_t buff_id) const;
 
-		void Play(size_t bufID, bool loop = false);
-		void Stop(size_t bufID);
+		void Play(size_t buff_id, bool loop = false);
+		void Stop(size_t buff_id);
 		void PlayAll(bool loop = false);
 		void StopAll();
 
-		// 设置和获取音量
 		void  SoundVolume(float vol);
 		float SoundVolume() const;
 		void  MusicVolume(float vol);
@@ -143,11 +148,11 @@ namespace KlayGE
 		virtual void DoResume() = 0;
 
 	protected:
-		std::map<size_t, AudioBufferPtr> audioBufs_;
+		std::map<size_t, AudioBufferPtr> audio_buffs_;
 
-		float		soundVol_;
-		float		musicVol_;
+		float sound_vol_;
+		float music_vol_;
 	};
 }
 
-#endif		// _AUDIO_HPP
+#endif		// _KLAYGE_CORE_AUDIO_HPP
