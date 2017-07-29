@@ -78,6 +78,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/VarianceDepthMap.ppml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Blur.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/CascadedShadow.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/ClusteredDeferredRendering.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Copy2LightBuffer.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRendering.kfx
@@ -105,7 +106,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SSVO.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/SumLum.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/TAA.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/TileBasedDeferredRendering.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/ToneMapping.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VarianceDepthMap.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/VPLsLighting.kfx

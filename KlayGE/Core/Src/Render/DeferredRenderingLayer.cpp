@@ -68,7 +68,7 @@ namespace KlayGE
 
 	float const ESM_SCALE_FACTOR = 300.0f;
 
-#if (DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED) || (DEFAULT_DEFERRED == CLUSTERED_DEFERRED)
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	uint32_t const TILE_SIZE = 32;
 #endif
 
@@ -408,17 +408,6 @@ namespace KlayGE
 		{
 			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
-			cs_tbdr_ = true;
-		}
-		else
-		{
-			cs_tbdr_ = false;
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		if ((caps.max_shader_model >= ShaderModel(5, 0)) && caps.cs_support)
-		{
-			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
-
 			cs_cldr_ = true;
 		}
 		else
@@ -445,15 +434,6 @@ namespace KlayGE
 				pvp.merged_depth_fbs[i] = rf.MakeFrameBuffer();
 			}
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-			if (cs_tbdr_)
-			{
-				pvp.lighting_mask_fb = rf.MakeFrameBuffer();
-			}
-			else
-			{
-				pvp.light_index_fb = rf.MakeFrameBuffer();
-			}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 			if (cs_cldr_)
 			{
 				pvp.lighting_mask_fb = rf.MakeFrameBuffer();
@@ -546,29 +526,17 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
+		if (cs_cldr_)
 		{
+			num_depth_slices_ = 8;
+			depth_slices_.resize(num_depth_slices_ + 1);
 			light_batch_ = 1024;
-			dr_effect_ = SyncLoadRenderEffect("TileBasedDeferredRendering.fxml");
+			dr_effect_ = SyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
 		}
 		else
 		{
 			light_batch_ = 32;
 			dr_effect_ = SyncLoadRenderEffect("LightIndexedDeferredRendering.fxml");
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		num_depth_slices_ = 8;
-		depth_slices_.resize(num_depth_slices_ + 1);
-		if (cs_cldr_)
-		{
-			light_batch_ = 1024;
-			dr_effect_ = SyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
-		}
-		else
-		{
-			light_batch_ = 32;
-			// TODO
-			dr_effect_ = SyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
 		}
 #endif
 
@@ -616,36 +584,6 @@ namespace KlayGE
 		technique_copy_shading_depth_ = dr_effect_->TechniqueByName("CopyShadingDepthTech");
 		technique_copy_depth_ = dr_effect_->TechniqueByName("CopyDepthTech");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			technique_tbdr_shadowing_unified_ = dr_effect_->TechniqueByName("TBDRShadowingUnified");
-			technique_tbdr_light_intersection_unified_ = dr_effect_->TechniqueByName("TBDRLightIntersection");
-			if (caps.uav_format_support(EF_ABGR16F))
-			{
-				technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnified");
-			}
-			else
-			{
-				technique_tbdr_unified_ = dr_effect_->TechniqueByName("TBDRUnifiedNoTypedUAV");
-			}
-		}
-		else
-		{
-			technique_draw_light_index_point_ = dr_effect_->TechniqueByName("DrawLightIndexPoint");
-			technique_draw_light_index_spot_ = dr_effect_->TechniqueByName("DrawLightIndexSpot");
-			technique_lidr_ambient_ = dr_effect_->TechniqueByName("LIDRAmbient");
-			technique_lidr_directional_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalShadow");
-			technique_lidr_directional_no_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalNoShadow");
-			technique_lidr_point_shadow_ = dr_effect_->TechniqueByName("LIDRPointShadow");
-			technique_lidr_point_no_shadow_ = dr_effect_->TechniqueByName("LIDRPointNoShadow");
-			technique_lidr_spot_shadow_ = dr_effect_->TechniqueByName("LIDRSpotShadow");
-			technique_lidr_spot_no_shadow_ = dr_effect_->TechniqueByName("LIDRSpotNoShadow");
-			technique_lidr_sphere_area_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaShadow");
-			technique_lidr_sphere_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaNoShadow");
-			technique_lidr_tube_area_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaShadow");
-			technique_lidr_tube_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaNoShadow");
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			technique_cldr_shadowing_unified_ = dr_effect_->TechniqueByName("ClusteredDRShadowingUnified");
@@ -663,17 +601,17 @@ namespace KlayGE
 		{
 			technique_draw_light_index_point_ = dr_effect_->TechniqueByName("DrawLightIndexPoint");
 			technique_draw_light_index_spot_ = dr_effect_->TechniqueByName("DrawLightIndexSpot");
-			technique_cldr_ambient_ = dr_effect_->TechniqueByName("ClusteredDRAmbient");
-			technique_cldr_directional_shadow_ = dr_effect_->TechniqueByName("ClusteredDRDirectionalShadow");
-			technique_cldr_directional_no_shadow_ = dr_effect_->TechniqueByName("ClusteredDRDirectionalNoShadow");
-			technique_cldr_point_shadow_ = dr_effect_->TechniqueByName("ClusteredDRPointShadow");
-			technique_cldr_point_no_shadow_ = dr_effect_->TechniqueByName("ClusteredDRPointNoShadow");
-			technique_cldr_spot_shadow_ = dr_effect_->TechniqueByName("ClusteredDRSpotShadow");
-			technique_cldr_spot_no_shadow_ = dr_effect_->TechniqueByName("ClusteredDRSpotNoShadow");
-			technique_cldr_sphere_area_shadow_ = dr_effect_->TechniqueByName("ClusteredDRSphereAreaShadow");
-			technique_cldr_sphere_area_no_shadow_ = dr_effect_->TechniqueByName("ClusteredDRSphereAreaNoShadow");
-			technique_cldr_tube_area_shadow_ = dr_effect_->TechniqueByName("ClusteredDRTubeAreaShadow");
-			technique_cldr_tube_area_no_shadow_ = dr_effect_->TechniqueByName("ClusteredDRTubeAreaNoShadow");
+			technique_lidr_ambient_ = dr_effect_->TechniqueByName("LIDRAmbient");
+			technique_lidr_directional_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalShadow");
+			technique_lidr_directional_no_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalNoShadow");
+			technique_lidr_point_shadow_ = dr_effect_->TechniqueByName("LIDRPointShadow");
+			technique_lidr_point_no_shadow_ = dr_effect_->TechniqueByName("LIDRPointNoShadow");
+			technique_lidr_spot_shadow_ = dr_effect_->TechniqueByName("LIDRSpotShadow");
+			technique_lidr_spot_no_shadow_ = dr_effect_->TechniqueByName("LIDRSpotNoShadow");
+			technique_lidr_sphere_area_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaShadow");
+			technique_lidr_sphere_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaNoShadow");
+			technique_lidr_tube_area_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaShadow");
+			technique_lidr_tube_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaNoShadow");
 		}
 #endif
 
@@ -837,61 +775,10 @@ namespace KlayGE
 		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
 		camera_proj_01_param_ = dr_effect_->ParameterByName("camera_proj_01");
 
-		if (cs_tbdr_)
-		{
-			technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
-			technique_tbdr_lighting_mask_ = dr_effect_->TechniqueByName("TBDRLightingMask");
-
-			near_q_far_param_ = dr_effect_->ParameterByName("near_q_far");
-			width_height_param_ = dr_effect_->ParameterByName("width_height");
-			depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
-			depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
-			linear_depth_rw_tex_param_ = dr_effect_->ParameterByName("linear_depth_rw_tex");
-			upper_left_param_ = dr_effect_->ParameterByName("upper_left");
-			x_dir_param_ = dr_effect_->ParameterByName("x_dir");
-			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
-			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
-			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
-			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
-			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
-			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
-			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
-			lights_start_rw_tex_param_ = dr_effect_->ParameterByName("lights_start_rw_tex");
-			intersected_light_indices_in_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_in_tex");
-			intersected_light_indices_rw_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_rw_tex");
-
-			projective_shadowing_rw_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_rw_tex");
-			shadowing_rw_tex_param_ = dr_effect_->ParameterByName("shadowing_rw_tex");
-			lights_view_proj_param_ = dr_effect_->ParameterByName("lights_view_proj");
-			filtered_sms_2d_light_index_param_ = dr_effect_->ParameterByName("filtered_sms_2d_light_index");
-			esms_scale_factor_param_ = dr_effect_->ParameterByName("esms_scale_factor");
-
-			copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-		}
-		else
-		{
-			light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
-		}
-
-		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");
-		reduce_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "ReduceMinMax");
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		min_max_depth_tex_param_ = dr_effect_->ParameterByName("min_max_depth_tex");
-		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
-		lights_pos_es_param_ = dr_effect_->ParameterByName("lights_pos_es");
-		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
-		lights_falloff_range_param_ = dr_effect_->ParameterByName("lights_falloff_range");
-		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
-		lights_radius_extend_param_ = dr_effect_->ParameterByName("lights_radius_extend");
-		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
-		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
-		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
-		camera_proj_01_param_ = dr_effect_->ParameterByName("camera_proj_01");
-
 		if (cs_cldr_)
 		{
 			technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
-			technique_tbdr_lighting_mask_ = dr_effect_->TechniqueByName("ClusteredDRLightingMask");
+			technique_cldr_lighting_mask_ = dr_effect_->TechniqueByName("ClusteredDRLightingMask");
 
 			near_q_far_param_ = dr_effect_->ParameterByName("near_q_far");
 			width_height_param_ = dr_effect_->ParameterByName("width_height");
@@ -901,7 +788,6 @@ namespace KlayGE
 			upper_left_param_ = dr_effect_->ParameterByName("upper_left");
 			x_dir_param_ = dr_effect_->ParameterByName("x_dir");
 			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
-			read_no_lighting_param_ = dr_effect_->ParameterByName("read_no_lighting");
 			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
 			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
 			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
@@ -942,8 +828,6 @@ namespace KlayGE
 			shadowing_perfs_[i] = profiler.CreatePerfRange(0, "Shadowing (" + buffer_name[i] + ")");
 			indirect_lighting_perfs_[i] = profiler.CreatePerfRange(0, "Indirect lighting (" + buffer_name[i] + ")");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-			tiling_perfs_[i] = profiler.CreatePerfRange(0, "Tiling (" + buffer_name[i] + ")");
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 			clustering_perfs_[i] = profiler.CreatePerfRange(0, "Clustering (" + buffer_name[i] + ")");
 #endif
 			shading_perfs_[i] = profiler.CreatePerfRange(0, "Shading (" + buffer_name[i] + ")");
@@ -1083,11 +967,6 @@ namespace KlayGE
 			EAH_GPU_Read | EAH_GPU_Write);
 		uint32_t hint = EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			hint |= EAH_GPU_Unordered;
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			hint |= EAH_GPU_Unordered;
@@ -1096,40 +975,6 @@ namespace KlayGE
 		pvp.g_buffer_depth_tex = rf.MakeTexture2D(width, height, MAX_IL_MIPMAP_LEVELS + 1, 1, depth_fmt, 1, 0, hint);
 		pvp.g_buffer_rt0_backup_tex = rf.MakeTexture2D(width, height, 1, 1, fmt8, 1, 0, EAH_GPU_Read);
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		{
-			ElementFormat min_max_depth_fmt;
-			if (EF_R16F == depth_fmt)
-			{
-				min_max_depth_fmt = EF_GR16F;
-			}
-			else
-			{
-				BOOST_ASSERT(EF_R32F == depth_fmt);
-				min_max_depth_fmt = EF_GR32F;
-			}
-
-			pvp.g_buffer_min_max_depth_texs.clear();
-			if (cs_tbdr_)
-			{
-				uint32_t w = std::max(1U, (width + TILE_SIZE - 1) / TILE_SIZE);
-				uint32_t h = std::max(1U, (height + TILE_SIZE - 1) / TILE_SIZE);
-				pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-					EAH_GPU_Read | EAH_GPU_Unordered));
-			}
-			else
-			{
-				uint32_t w = std::max(1U, (width + 1) / 2);
-				uint32_t h = std::max(1U, (height + 1) / 2);
-				for (uint32_t ts = TILE_SIZE; ts > 1; ts /= 2)
-				{
-					pvp.g_buffer_min_max_depth_texs.push_back(rf.MakeTexture2D(w, h, 1, 1, min_max_depth_fmt, 1, 0,
-						EAH_GPU_Read | EAH_GPU_Write));
-					w = std::max(1U, (w + 1) / 2);
-					h = std::max(1U, (h + 1) / 2);
-				}
-			}
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		{
 			ElementFormat min_max_depth_fmt;
 			if (EF_R16F == depth_fmt)
@@ -1223,11 +1068,6 @@ namespace KlayGE
 		}
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			hint |= EAH_GPU_Unordered;
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			hint |= EAH_GPU_Unordered;
@@ -1296,11 +1136,6 @@ namespace KlayGE
 		}
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			hint |= EAH_GPU_Unordered;
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			hint |= EAH_GPU_Unordered;
@@ -1313,66 +1148,6 @@ namespace KlayGE
 			pvp.merged_depth_texs[i] = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			if (!caps.uav_format_support(shading_fmt))
-			{
-				pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
-			}
-
-			ElementFormat lighting_mask_fmt;
-			if (caps.rendertarget_format_support(EF_R8, 1, 0))
-			{
-				lighting_mask_fmt = EF_R8;
-			}
-			else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				lighting_mask_fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				lighting_mask_fmt = EF_ARGB8;
-			}
-			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
-			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
-
-			ElementFormat light_indices_fmt;
-			if (caps.uav_format_support(EF_R16UI))
-			{
-				light_indices_fmt = EF_R16UI;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.uav_format_support(EF_R32UI));
-
-				light_indices_fmt = EF_R32UI;
-			}
-			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, light_indices_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Unordered);
-			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, 1, light_indices_fmt, 1, 0,
-				EAH_GPU_Read | EAH_GPU_Unordered);
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
-			}
-			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			if (!caps.uav_format_support(shading_fmt))
@@ -1415,13 +1190,6 @@ namespace KlayGE
 			pvp.intersected_light_indices_tex = rf.MakeTexture3D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, num_depth_slices_, 1, 1, light_indices_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Unordered);
-
-			pvp.lights_start_tex_cpu = rf.MakeTexture3D(pvp.lights_start_tex->Width(0),
-				pvp.lights_start_tex->Height(0), pvp.lights_start_tex->Depth(0), 1, 1, EF_R16UI, 1, 0,
-				EAH_CPU_Write);
-			pvp.intersected_light_indices_tex_cpu = rf.MakeTexture3D(pvp.intersected_light_indices_tex->Width(0),
-				pvp.intersected_light_indices_tex->Height(0), pvp.intersected_light_indices_tex->Depth(0), 1, 1, EF_R16UI, 1, 0,
-				EAH_CPU_Write);
 		}
 		else
 		{
@@ -2104,29 +1872,13 @@ namespace KlayGE
 		pvp.g_buffer_rt0_tex->BuildMipSubLevels();
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-			re.BindFrameBuffer(pvp.lighting_mask_fb);
-			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-			re.Render(*dr_effect_, *technique_tbdr_lighting_mask_, *rl_quad_);
-
-			this->CreateDepthMinMaxMapCS(pvp);
-		}
-		else
-		{
-			this->BuildLinearDepthMipmap(pvp);
-			this->CreateDepthMinMaxMap(pvp);
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 			re.BindFrameBuffer(pvp.lighting_mask_fb);
 			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-			re.Render(*dr_effect_, *technique_tbdr_lighting_mask_, *rl_quad_);
+			re.Render(*dr_effect_, *technique_cldr_lighting_mask_, *rl_quad_);
 
 			this->CreateDepthMinMaxMapCS(pvp);
 		}
@@ -2649,206 +2401,6 @@ namespace KlayGE
 						*view_to_light_model_param_ = pvp.inv_view * MathLib::inverse(light_model);
 					}
 					break;
-
-				case LightSource::LT_Directional:
-					break;
-
-				default:
-					KFL_UNREACHABLE("Invalid light type");
-				}
-
-				*reinterpret_cast<float4*>(lights_pos_es + shadowing_channel * lights_pos_es_param_->Stride()) = light_pos_es_actived;
-
-				*reinterpret_cast<float4*>(lights_attrib + shadowing_channel * lights_attrib_param_->Stride())
-					= float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f, (attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f,
-						(attr & LightSource::LSA_NoShadow) ? -1.0f : 1.0f,
-						light.ProjectiveTexture() ? 1.0f : -1.0f);
-
-				*reinterpret_cast<float4*>(lights_falloff_range + shadowing_channel * lights_falloff_range_param_->Stride())
-					= float4(light.Falloff().x(), light.Falloff().y(), light.Falloff().z(), range);
-				*reinterpret_cast<float4*>(lights_aabb_min + shadowing_channel * lights_aabb_min_param_->Stride())
-					= float4(aabb.Min().x(), aabb.Min().y(), aabb.Min().z(), 0);
-				*reinterpret_cast<float4*>(lights_aabb_max + shadowing_channel * lights_aabb_max_param_->Stride())
-					= float4(aabb.Max().x(), aabb.Max().y(), aabb.Max().z(), 0);
-
-				if (4 == shadowing_channel)
-				{
-					if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
-						|| (LightSource::LT_TubeArea == type))
-					{
-						*projective_map_cube_tex_param_ = light.ProjectiveTexture();
-					}
-					else
-					{
-						*projective_map_2d_tex_param_ = light.ProjectiveTexture();
-					}
-				}
-			}
-		}
-
-		lights_type_param_->CBuffer().Dirty(true);
-		lights_pos_es_param_->CBuffer().Dirty(true);
-		lights_falloff_range_param_->CBuffer().Dirty(true);
-		lights_attrib_param_->CBuffer().Dirty(true);
-		lights_aabb_min_param_->CBuffer().Dirty(true);
-		lights_aabb_max_param_->CBuffer().Dirty(true);
-		lights_view_proj_param_->CBuffer().Dirty(true);
-		filtered_sms_2d_light_index_param_->CBuffer().Dirty(true);
-		esms_scale_factor_param_->CBuffer().Dirty(true);
-
-		re.Dispatch(*dr_effect_, *technique_tbdr_shadowing_unified_, (w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
-	}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-	void DeferredRenderingLayer::UpdateShadowingCS(PerViewport const & pvp)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(FrameBufferPtr());
-
-		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
-		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
-		*projective_shadowing_rw_tex_param_ = pvp.projective_shadowing_tex;
-		*shadowing_rw_tex_param_ = pvp.shadowing_tex;
-
-		uint32_t w = pvp.shadowing_tex->Width(0);
-		uint32_t h = pvp.shadowing_tex->Height(0);
-		float2 tile_scale(((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE),
-			((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE));
-		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
-		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
-
-		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
-		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
-		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
-		*upper_left_param_ = upper_left;
-		*x_dir_param_ = upper_right - upper_left;
-		*y_dir_param_ = lower_left - upper_left;
-
-		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
-		*width_height_param_ = uint2(w, h);
-
-		uint8_t* lights_type = lights_type_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_pos_es = lights_pos_es_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_falloff_range = lights_falloff_range_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_attrib = lights_attrib_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* lights_view_proj = lights_view_proj_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* filtered_sms_2d_light_index = filtered_sms_2d_light_index_param_->MemoryInCBuff<uint8_t>();
-		uint8_t* esms_scale_factor = esms_scale_factor_param_->MemoryInCBuff<uint8_t>();
-
-		for (uint32_t li = 0; li < lights_.size(); ++ li)
-		{
-			auto const & light = *lights_[li];
-			int32_t const attr = light.Attrib();
-			if (light.Enabled() && (0 == (attr & LightSource::LSA_NoShadow)) && pvp.light_visibles[li])
-			{
-				LightSource::LightType const type = light.Type();
-
-				Camera* sm_camera = nullptr;
-
-				int32_t const light_index = sm_light_indices_[li].first;
-				int32_t const shadowing_channel = sm_light_indices_[li].second;
-				if ((light_index >= 0) || (LightSource::LT_Directional == type))
-				{
-					switch (type)
-					{
-					case LightSource::LT_Spot:
-						sm_camera = light.SMCamera(0).get();
-						if (tex_array_support_)
-						{
-							*filtered_sm_2d_tex_array_param_ = filtered_sm_2d_texs_[0];
-						}
-						else
-						{
-							*filtered_sm_2d_tex_param_ = filtered_sm_2d_texs_[light_index];
-						}
-						break;
-
-					case LightSource::LT_Point:
-					case LightSource::LT_SphereArea:
-					case LightSource::LT_TubeArea:
-						sm_camera = light.SMCamera(0).get();
-						*filtered_sm_cube_tex_param_ = filtered_sm_cube_texs_[light_index];
-						break;
-
-					case LightSource::LT_Directional:
-					{
-						sm_camera = lights_[cascaded_shadow_index_]->SMCamera(0).get();
-
-						std::vector<float4> cascade_scale_bias(pvp.num_cascades);
-						for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
-						{
-							float3 const & scale = cascaded_shadow_layer_->CascadeScales()[i];
-							float3 const & bias = cascaded_shadow_layer_->CascadeBiases()[i];
-							cascade_scale_bias[i] = float4(scale.x(), scale.y(),
-								bias.x(), bias.y());
-						}
-						*cascade_intervals_param_ = cascaded_shadow_layer_->CascadeIntervals();
-						*cascade_scale_bias_param_ = cascade_scale_bias;
-						*num_cascades_param_ = static_cast<int32_t>(pvp.num_cascades);
-
-						float4x4 light_view = pvp.inv_view * sm_camera->ViewMatrix();
-						*view_z_to_light_view_param_ = light_view.Col(2);
-					}
-					if (tex_array_support_)
-					{
-						*filtered_csm_texs_param_[0] = pvp.filtered_csm_texs[0];
-					}
-					else
-					{
-						for (uint32_t i = 0; i < pvp.num_cascades; ++ i)
-						{
-							*filtered_csm_texs_param_[i] = pvp.filtered_csm_texs[i];
-						}
-					}
-					break;
-
-					default:
-						KFL_UNREACHABLE("Invalid light type");
-					}
-				}
-				BOOST_ASSERT(sm_camera);
-				KLAYGE_ASSUME(sm_camera);
-
-				*reinterpret_cast<uint32_t*>(lights_type + shadowing_channel * lights_type_param_->Stride()) = type;
-
-				*reinterpret_cast<float4x4*>(lights_view_proj + shadowing_channel * lights_view_proj_param_->Stride())
-					= MathLib::transpose(pvp.inv_view * sm_camera->ViewProjMatrix());
-				*reinterpret_cast<float*>(esms_scale_factor + shadowing_channel * esms_scale_factor_param_->Stride())
-					= ESM_SCALE_FACTOR / (sm_camera->FarPlane() - sm_camera->NearPlane());
-
-				float3 loc_es = MathLib::transform_coord(light.Position(), pvp.view);
-				float4 light_pos_es_actived = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-				float range = light.Range() * light_scale_;
-				AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
-				switch (type)
-				{
-				case LightSource::LT_Spot:
-				{
-					light_pos_es_actived.w() = light.CosOuterInner().x();
-
-					*reinterpret_cast<int32_t*>(filtered_sms_2d_light_index
-						+ shadowing_channel * filtered_sms_2d_light_index_param_->Stride()) = light_index;
-
-					float4x4 const light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
-					float const scale = light.CosOuterInner().w();
-					float4x4 const light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
-					float4x4 const light_mv = light_model * light_to_view;
-					aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
-				}
-				break;
-
-				case LightSource::LT_Point:
-				case LightSource::LT_SphereArea:
-				case LightSource::LT_TubeArea:
-				{
-					float light_scale = std::min(light.Range() * 0.01f, 1.0f) * light_scale_;
-					float4x4 const light_model = MathLib::scaling(light_scale, light_scale, light_scale)
-						* MathLib::to_matrix(light.Rotation()) * MathLib::translation(light.Position());
-					*view_to_light_model_param_ = pvp.inv_view * MathLib::inverse(light_model);
-				}
-				break;
 
 				case LightSource::LT_Directional:
 					break;
@@ -3770,984 +3322,8 @@ namespace KlayGE
 		}
 	}
 
-	void DeferredRenderingLayer::UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
-
-		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
-		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
-		float2 tile_scale(((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE),
-			((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)) / (2.0f * TILE_SIZE));
-		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
-		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
-
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-
-		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
-		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
-		float3 lower_left = MathLib::transform_coord(float3(-1, -1, 1), pvp.inv_proj);
-		*upper_left_param_ = upper_left;
-		*x_dir_param_ = upper_right - upper_left;
-		*y_dir_param_ = lower_left - upper_left;
-
-		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
-		*width_height_param_ = uint2(w, h);
-
-		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
-		*read_no_lighting_param_ = static_cast<int32_t>(PTB_Opaque == pass_tb);
-
-		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
-
-		for (uint32_t li = 0; li < lights_.size();)
-		{
-			std::array<std::vector<uint32_t>, 11> available_lights;
-			for (uint32_t batch = 0; (batch < light_batch_) && (li < lights_.size()); ++ li)
-			{
-				auto const & light = *lights_[li];
-				if (light.Enabled() && pvp.light_visibles[li])
-				{
-					++ batch;
-
-					LightSource::LightType type = light.Type();
-					switch (type)
-					{
-					case LightSource::LT_Ambient:
-						available_lights[0].push_back(li);
-						if (light.SkylightTexY())
-						{
-							*skylight_y_cube_tex_param_ = light.SkylightTexY();
-							*skylight_c_cube_tex_param_ = light.SkylightTexC();
-
-							uint32_t const mip = light.SkylightTexY()->NumMipMaps();
-							*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
-
-							*inv_view_param_ = pvp.inv_view;
-						}
-						break;
-
-					case LightSource::LT_Directional:
-						if (light.Attrib() & LightSource::LSA_NoShadow)
-						{
-							available_lights[1].push_back(li);
-						}
-						else
-						{
-							available_lights[2].push_back(li);
-						}
-						break;
-
-					case LightSource::LT_Point:
-						if (light.Attrib() & LightSource::LSA_NoShadow)
-						{
-							available_lights[3].push_back(li);
-						}
-						else
-						{
-							available_lights[4].push_back(li);
-						}
-						break;
-
-					case LightSource::LT_Spot:
-						if (light.Attrib() & LightSource::LSA_NoShadow)
-						{
-							available_lights[5].push_back(li);
-						}
-						else
-						{
-							available_lights[6].push_back(li);
-						}
-						break;
-
-					case LightSource::LT_SphereArea:
-						if (light.Attrib() & LightSource::LSA_NoShadow)
-						{
-							available_lights[7].push_back(li);
-						}
-						else
-						{
-							available_lights[8].push_back(li);
-						}
-						break;
-
-					case LightSource::LT_TubeArea:
-						if (light.Attrib() & LightSource::LSA_NoShadow)
-						{
-							available_lights[9].push_back(li);
-						}
-						else
-						{
-							available_lights[10].push_back(li);
-						}
-						break;
-
-					default:
-						KFL_UNREACHABLE("Invalid light type");
-					}
-				}
-			}
-
-			uint8_t* lights_type = lights_type_param_->MemoryInCBuff<uint8_t>();
-			*reinterpret_cast<uint32_t*>(lights_type + 0 * lights_type_param_->Stride()) = 0;
-			for (size_t i = 1; i < available_lights.size() + 1; ++ i)
-			{
-				*reinterpret_cast<uint32_t*>(lights_type + i * lights_type_param_->Stride()) =
-					*reinterpret_cast<uint32_t*>(lights_type + (i - 1) * lights_type_param_->Stride())
-						+ static_cast<uint32_t>(available_lights[i - 1].size());
-			}
-
-			re.BindFrameBuffer(re.DefaultFrameBuffer());
-			re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth
-				| FrameBuffer::CBM_Stencil);
-
-			uint8_t* lights_color = lights_color_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_pos_es = lights_pos_es_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_dir_es = lights_dir_es_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_falloff_range = lights_falloff_range_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_attrib = lights_attrib_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_radius_extend = lights_radius_extend_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_aabb_min = lights_aabb_min_param_->MemoryInCBuff<uint8_t>();
-			uint8_t* lights_aabb_max = lights_aabb_max_param_->MemoryInCBuff<uint8_t>();
-			for (uint32_t t = 0; t < available_lights.size(); ++ t)
-			{
-				for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
-				{
-					auto const & light = *lights_[available_lights[t][i]];
-					LightSource::LightType type = light.Type();
-					int32_t attr = light.Attrib();
-					uint32_t offset = *reinterpret_cast<uint32_t*>(lights_type + t * lights_type_param_->Stride()) + i;
-
-					*reinterpret_cast<float4*>(lights_color
-						+ offset * lights_color_param_->Stride()) = light.Color();
-
-					float3 const & p = light.Position();
-					float3 loc_es = MathLib::transform_coord(p, pvp.view);
-					*reinterpret_cast<float4*>(lights_pos_es
-						+ offset * lights_pos_es_param_->Stride()) = float4(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-
-					float3 dir_es(0, 0, 0);
-					switch (type)
-					{
-					case LightSource::LT_Ambient:
-						dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
-						break;
-
-					case LightSource::LT_Directional:
-						dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
-						break;
-
-					case LightSource::LT_Spot:
-						dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
-						break;
-
-					default:
-						break;
-					}
-					*reinterpret_cast<float4*>(lights_dir_es
-						+ offset * lights_dir_es_param_->Stride()) = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
-
-					if (LightSource::LT_Spot == type)
-					{
-						reinterpret_cast<float4*>(lights_pos_es
-							+ offset * lights_pos_es_param_->Stride())->w() = light.CosOuterInner().x();
-						reinterpret_cast<float4*>(lights_dir_es
-							+ offset * lights_dir_es_param_->Stride())->w() = light.CosOuterInner().y();
-					}
-
-					int32_t shadowing_channel;
-					if (0 == (light.Attrib() & LightSource::LSA_NoShadow))
-					{
-						shadowing_channel = sm_light_indices_[available_lights[t][i]].second;
-					}
-					else
-					{
-						shadowing_channel = -1;
-					}
-
-					*reinterpret_cast<float4*>(lights_attrib
-						+ offset * lights_attrib_param_->Stride()) = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-						(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, shadowing_channel + 0.5f, 0);
-
-					float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
-					*reinterpret_cast<float4*>(lights_radius_extend
-						+ offset * lights_radius_extend_param_->Stride()) = float4(light.Radius(),
-						extend_es.x(), extend_es.y(), extend_es.z());
-
-					float range = light.Range() * light_scale_;
-					AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
-					if (LightSource::LT_Spot == type)
-					{
-						float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
-						float const scale = light.CosOuterInner().w();
-						float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
-						float4x4 light_mv = light_model * light_to_view;
-						aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
-					}
-					*reinterpret_cast<float4*>(lights_falloff_range + offset * lights_falloff_range_param_->Stride())
-						= float4(light.Falloff().x(), light.Falloff().y(), light.Falloff().z(), range);
-					*reinterpret_cast<float4*>(lights_aabb_min + offset * lights_aabb_min_param_->Stride())
-						= float4(aabb.Min().x(), aabb.Min().y(), aabb.Min().z(), 0);
-					*reinterpret_cast<float4*>(lights_aabb_max + offset * lights_aabb_max_param_->Stride())
-						= float4(aabb.Max().x(), aabb.Max().y(), aabb.Max().z(), 0);
-				}
-			}
-
-			lights_type_param_->CBuffer().Dirty(true);
-			lights_color_param_->CBuffer().Dirty(true);
-			lights_pos_es_param_->CBuffer().Dirty(true);
-			lights_dir_es_param_->CBuffer().Dirty(true);
-			lights_falloff_range_param_->CBuffer().Dirty(true);
-			lights_attrib_param_->CBuffer().Dirty(true);
-			lights_radius_extend_param_->CBuffer().Dirty(true);
-			lights_aabb_min_param_->CBuffer().Dirty(true);
-			lights_aabb_max_param_->CBuffer().Dirty(true);
-
-			if (pvp.temp_shading_tex)
-			{
-				if (available_lights[0].empty())
-				{
-					*shading_in_tex_param_
-						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-					*shading_rw_tex_param_ = pvp.temp_shading_tex;
-				}
-				else
-				{
-					*shading_in_tex_param_ = TexturePtr();
-					*shading_rw_tex_param_
-						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-				}
-			}
-			else
-			{
-				*shading_rw_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-			}
-
-#ifndef KLAYGE_SHIP
-			tiling_perfs_[pass_tb]->Begin();
-#endif
-
-			*lights_start_rw_tex_param_ = pvp.lights_start_tex;
-			*intersected_light_indices_rw_tex_param_ = pvp.intersected_light_indices_tex;
-			re.Dispatch(*dr_effect_, *technique_tbdr_light_intersection_unified_,
-				(w + TILE_SIZE - 1) / TILE_SIZE, (h + TILE_SIZE - 1) / TILE_SIZE, 1);
-
-#ifndef KLAYGE_SHIP
-			tiling_perfs_[pass_tb]->End();
-#endif
-			uint32_t const BLOCK_X = 16;
-			uint32_t const BLOCK_Y = 16;
-			*lights_start_in_tex_param_ = pvp.lights_start_tex;
-			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
-			re.Dispatch(*dr_effect_, *technique_tbdr_unified_,
-				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
-
-			if (available_lights[0].empty() && pvp.temp_shading_tex)
-			{
-				copy_pp_->InputPin(0, pvp.temp_shading_tex);
-				copy_pp_->OutputPin(0,
-					(PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex);
-				copy_pp_->Apply();
-			}
-		}
-	}
-
-	void DeferredRenderingLayer::CreateDepthMinMaxMapCS(PerViewport const & pvp)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer(re.DefaultFrameBuffer());
-		re.DefaultFrameBuffer()->Discard(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil);
-
-		TexturePtr const & in_tex = pvp.g_buffer_ds_tex;
-		TexturePtr const & out_tex = pvp.g_buffer_min_max_depth_texs.back();
-		*width_height_param_ = uint2(in_tex->Width(0) - 1, in_tex->Height(0) - 1);
-		*depth_to_tiled_depth_in_tex_param_ = in_tex;
-		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
-		*linear_depth_rw_tex_param_ = pvp.g_buffer_depth_tex;
-
-		CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-		float q = camera->FarPlane() / (camera->FarPlane() - camera->NearPlane());
-		float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
-		*near_q_far_param_ = near_q_far;
-
-		re.Dispatch(*dr_effect_, *technique_depth_to_tiled_min_max_, out_tex->Width(0), out_tex->Height(0), 1);
-
-		pvp.g_buffer_depth_tex->BuildMipSubLevels();
-	}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 	void DeferredRenderingLayer::UpdateClusteredLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
-		if (PTB_Opaque == pass_tb)
-		{
-			*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-			*light_volume_mv_param_ = pvp.inv_proj;
-
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEngine& re = rf.RenderEngineInstance();
-			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-			re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
-		}
-
-		std::vector<uint32_t> directional_lights;
-		std::vector<uint32_t> point_lights_shadow;
-		std::vector<uint32_t> point_lights_no_shadow;
-		std::vector<uint32_t> spot_lights_shadow;
-		std::vector<uint32_t> spot_lights_no_shadow;
-		std::vector<uint32_t> sphere_area_lights_shadow;
-		std::vector<uint32_t> sphere_area_lights_no_shadow;
-		std::vector<uint32_t> tube_area_lights_shadow;
-		std::vector<uint32_t> tube_area_lights_no_shadow;
-		for (uint32_t li = 0; li < lights_.size(); ++ li)
-		{
-			auto const & light = *lights_[li];
-			if (light.Enabled() && pvp.light_visibles[li])
-			{
-				LightSource::LightType const type = light.Type();
-				switch (type)
-				{
-				case LightSource::LT_Ambient:
-					this->UpdateClusteredLightingAmbientSun(pvp, type, li, pass_tb);
-					break;
-
-				case LightSource::LT_Directional:
-					if (light.Attrib() & LightSource::LSA_NoShadow)
-					{
-						directional_lights.push_back(li);
-					}
-					else
-					{
-						this->UpdateClusteredLightingAmbientSun(pvp, type, li, pass_tb);
-					}
-					break;
-
-				case LightSource::LT_Point:
-					if (light.Attrib() & LightSource::LSA_NoShadow)
-					{
-						point_lights_no_shadow.push_back(li);
-					}
-					else
-					{
-						point_lights_shadow.push_back(li);
-					}
-					break;
-
-				case LightSource::LT_Spot:
-					if (light.Attrib() & LightSource::LSA_NoShadow)
-					{
-						spot_lights_no_shadow.push_back(li);
-					}
-					else
-					{
-						spot_lights_shadow.push_back(li);
-					}
-					break;
-
-				case LightSource::LT_SphereArea:
-					if (light.Attrib() & LightSource::LSA_NoShadow)
-					{
-						sphere_area_lights_no_shadow.push_back(li);
-					}
-					else
-					{
-						sphere_area_lights_shadow.push_back(li);
-					}
-					break;
-
-				case LightSource::LT_TubeArea:
-					if (light.Attrib() & LightSource::LSA_NoShadow)
-					{
-						tube_area_lights_no_shadow.push_back(li);
-					}
-					else
-					{
-						tube_area_lights_shadow.push_back(li);
-					}
-					break;
-
-				default:
-					KFL_UNREACHABLE("Invalid light type");
-				}
-			}
-		}
-
-		{
-			uint32_t li = 0;
-			while (li < directional_lights.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(directional_lights.size() - li));
-				auto iter_beg = directional_lights.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingDirectional(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < point_lights_no_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_no_shadow.size() - li));
-				auto iter_beg = point_lights_no_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < point_lights_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(point_lights_shadow.size() - li));
-				auto iter_beg = point_lights_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < spot_lights_no_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_no_shadow.size() - li));
-				auto iter_beg = spot_lights_no_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < spot_lights_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(spot_lights_shadow.size() - li));
-				auto iter_beg = spot_lights_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < sphere_area_lights_no_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_no_shadow.size() - li));
-				auto iter_beg = sphere_area_lights_no_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < sphere_area_lights_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(sphere_area_lights_shadow.size() - li));
-				auto iter_beg = sphere_area_lights_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < tube_area_lights_no_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_no_shadow.size() - li));
-				auto iter_beg = tube_area_lights_no_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-		{
-			uint32_t li = 0;
-			while (li < tube_area_lights_shadow.size())
-			{
-				uint32_t nl = std::min(light_batch_, static_cast<uint32_t>(tube_area_lights_shadow.size() - li));
-				auto iter_beg = tube_area_lights_shadow.begin() + li;
-				auto iter_end = iter_beg + nl;
-				this->UpdateClusteredLightingPointSpotArea(pvp, pass_tb, iter_beg, iter_end);
-				li += nl;
-			}
-		}
-	}
-
-	void DeferredRenderingLayer::UpdateClusteredLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-		int32_t org_no, PassTargetBuffer pass_tb)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		auto const & light = *lights_[org_no];
-		int32_t const attr = light.Attrib();
-		
-		int32_t shadowing_channel;
-		if (0 == (attr & LightSource::LSA_NoShadow))
-		{
-			shadowing_channel = sm_light_indices_[org_no].second;
-		}
-		else
-		{
-			shadowing_channel = -1;
-		}
-		*shadowing_channel_param_ = shadowing_channel;
-
-		RenderTechnique* tech;
-		if (LightSource::LT_Directional == type)
-		{
-			std::vector<float4> lights_color;
-			std::vector<float4> lights_dir_es;
-			std::vector<float4> lights_attrib;
-
-			lights_color.push_back(light.Color());
-
-			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
-			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
-
-			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 1.5f));
-
-			*lights_color_param_ = lights_color;
-			*lights_dir_es_param_ = lights_dir_es;
-			*lights_attrib_param_ = lights_attrib;
-
-			tech = technique_cldr_directional_shadow_;
-		}
-		else
-		{
-			BOOST_ASSERT(LightSource::LT_Ambient == type);
-
-			float3 dir_es = MathLib::transform_normal(float3(0, 1, 0), pvp.view);
-			*light_dir_es_param_ = float4(dir_es.x(), dir_es.y(), dir_es.z(), 0);
-
-			*light_attrib_param_ = float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0);
-			*light_color_param_ = light.Color();
-
-			if (light.SkylightTexY())
-			{
-				*skylight_y_cube_tex_param_ = light.SkylightTexY();
-				*skylight_c_cube_tex_param_ = light.SkylightTexC();
-
-				uint32_t const mip = light.SkylightTexY()->NumMipMaps();
-				*skylight_diff_spec_mip_param_ = int3(mip - 1, mip - 2, 1);
-
-				*inv_view_param_ = pvp.inv_view;
-			}
-			else
-			{
-				*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
-			}
-
-			tech = technique_cldr_ambient_;
-		}
-
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*light_volume_mv_param_ = pvp.inv_proj;
-
-		if (PTB_Opaque == pass_tb)
-		{
-			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-		}
-		else
-		{
-			re.BindFrameBuffer(pvp.shading_fb);
-		}
-		re.Render(*dr_effect_, *tech, *rl_quad_);
-	}
-
-	void DeferredRenderingLayer::UpdateClusteredLightingDirectional(PerViewport const & pvp,
-		PassTargetBuffer pass_tb, std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
-	{
-		std::vector<float4> lights_color;
-		std::vector<float4> lights_dir_es;
-		std::vector<float4> lights_attrib;
-		for (auto iter = iter_beg; iter != iter_end; ++ iter)
-		{
-			auto const & light = *lights_[*iter];
-			BOOST_ASSERT(LightSource::LT_Directional == light.Type());
-			int32_t attr = light.Attrib();
-
-			lights_color.push_back(light.Color());
-
-			float3 dir_es = MathLib::transform_normal(-light.Direction(), pvp.view);
-			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
-
-			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, 0, 0));
-		}
-
-		lights_attrib[0].w() = iter_end - iter_beg + 0.5f;
-
-		*lights_color_param_ = lights_color;
-		*lights_dir_es_param_ = lights_dir_es;
-		*lights_attrib_param_ = lights_attrib;
-
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		*light_volume_mv_param_ = pvp.inv_proj;
-
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		re.BindFrameBuffer((PTB_Opaque == pass_tb) ? pvp.merged_shading_fbs[pvp.curr_merged_buffer_index] : pvp.shading_fb);
-		re.Render(*dr_effect_, *technique_cldr_directional_no_shadow_, *rl_quad_);
-	}
-
-	void DeferredRenderingLayer::UpdateClusteredLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
-		std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end)
-	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-
-		re.BindFrameBuffer(pvp.light_index_fb);
-		pvp.light_index_fb->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-
-		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
-
-		uint32_t w = (pvp.g_buffer_depth_tex->Width(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-		uint32_t h = (pvp.g_buffer_depth_tex->Height(0) + TILE_SIZE - 1) & ~(TILE_SIZE - 1);
-		float2 tile_scale(w / (2.0f * TILE_SIZE), h / (2.0f * TILE_SIZE));
-		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(),
-			static_cast<float>(pvp.light_index_tex->Width(0)),
-			static_cast<float>(pvp.light_index_tex->Height(0)));
-
-		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
-
-		LightSource::LightType type = lights_[*iter_beg]->Type();
-		bool with_shadow = !(lights_[*iter_beg]->Attrib() & LightSource::LSA_NoShadow);
-
-		BOOST_ASSERT((LightSource::LT_Point == type) || (LightSource::LT_Spot == type)
-			|| (LightSource::LT_SphereArea == type) || (LightSource::LT_TubeArea == type));
-
-		std::vector<float4> lights_color;
-		std::vector<float4> lights_pos_es;
-		std::vector<float4> lights_dir_es;
-		std::vector<float4> lights_falloff_range;
-		std::vector<float4> lights_attrib;
-		std::vector<float4> lights_radius_extend;
-		std::vector<float3> lights_aabb_min;
-		std::vector<float3> lights_aabb_max;
-		for (auto iter = iter_beg; iter != iter_end; ++ iter)
-		{
-			auto const & light = *lights_[*iter];
-			BOOST_ASSERT(type == light.Type());
-
-			int32_t const attr = light.Attrib();
-
-			lights_color.push_back(light.Color());
-
-			float3 const & p = light.Position();
-			float3 const loc_es = MathLib::transform_coord(p, pvp.view);
-			lights_pos_es.push_back(float4(loc_es.x(), loc_es.y(), loc_es.z(), 1));
-
-			float3 dir_es(0, 0, 0);
-			if (LightSource::LT_Spot == type)
-			{
-				dir_es = MathLib::transform_normal(light.Direction(), pvp.view);
-			}
-			lights_dir_es.push_back(float4(dir_es.x(), dir_es.y(), dir_es.z(), 0));
-
-			if (LightSource::LT_Spot == type)
-			{
-				lights_pos_es.back().w() = light.CosOuterInner().x();
-				lights_dir_es.back().w() = light.CosOuterInner().y();
-			}
-
-			int channel = -1;
-			if (with_shadow)
-			{
-				BOOST_ASSERT(0 == (light.Attrib() & LightSource::LSA_NoShadow));
-				BOOST_ASSERT(iter - iter_beg < 4);
-				channel = sm_light_indices_[*iter].second;
-			}
-
-			lights_attrib.push_back(float4((attr & LightSource::LSA_NoDiffuse) ? 0.0f : 1.0f,
-				(attr & LightSource::LSA_NoSpecular) ? 0.0f : 1.0f, channel + 0.5f, 0));
-
-			float3 extend_es = MathLib::transform_normal(light.Extend(), pvp.view);
-			lights_radius_extend.push_back(float4(light.Radius(), extend_es.x(),
-				extend_es.y(), extend_es.z()));
-
-			float const range = light.Range() * light_scale_;
-			AABBox aabb(float3(0, 0, 0), float3(0, 0, 0));
-			if (LightSource::LT_Spot == type)
-			{
-				float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
-				float const scale = light.CosOuterInner().w();
-				float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
-				float4x4 light_mv = light_model * light_to_view;
-				aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
-			}
-			lights_falloff_range.push_back(float4(light.Falloff().x(), light.Falloff().y(),
-				light.Falloff().z(), range));
-			lights_aabb_min.push_back(aabb.Min());
-			lights_aabb_max.push_back(aabb.Max());
-		}
-
-		if (lights_attrib.size() < 3)
-		{
-			lights_attrib.resize(3);
-		}
-
-		lights_attrib[0].w() = iter_end - iter_beg + 0.5f;
-
-		w = pvp.g_buffer_depth_tex->Width(0);
-		h = pvp.g_buffer_depth_tex->Height(0);
-		float2 tc_to_tile_scale(static_cast<float>(w) / ((w + TILE_SIZE - 1) & ~(TILE_SIZE - 1)),
-			static_cast<float>(h) / ((h + TILE_SIZE - 1) & ~(TILE_SIZE - 1)));
-		lights_attrib[1].w() = tc_to_tile_scale.x();
-		lights_attrib[2].w() = tc_to_tile_scale.y();
-
-		*lights_color_param_ = lights_color;
-		*lights_pos_es_param_ = lights_pos_es;
-		*lights_dir_es_param_ = lights_dir_es;
-		*lights_falloff_range_param_ = lights_falloff_range;
-		*lights_attrib_param_ = lights_attrib;
-		*lights_radius_extend_param_ = lights_radius_extend;
-		*lights_aabb_min_param_ = lights_aabb_min;
-		*lights_aabb_max_param_ = lights_aabb_max;
-
-		RenderTechnique* tech;
-		if ((LightSource::LT_Point == type) || (LightSource::LT_SphereArea == type)
-			|| (LightSource::LT_TubeArea == type))
-		{
-			tech = technique_draw_light_index_point_;
-		}
-		else
-		{
-			tech = technique_draw_light_index_spot_;
-		}
-		re.Render(*dr_effect_, *tech, *rl_quad_);
-
-		*light_index_tex_param_ = pvp.light_index_tex;
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		*light_volume_mv_param_ = pvp.inv_proj;
-
-		if (PTB_Opaque == pass_tb)
-		{
-			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-		}
-		else
-		{
-			re.BindFrameBuffer(pvp.shading_fb);
-		}
-		switch (type)
-		{
-		case LightSource::LT_Point:
-			tech = with_shadow ? technique_cldr_point_shadow_ : technique_cldr_point_no_shadow_;
-			break;
-		
-		case LightSource::LT_Spot:
-			tech = with_shadow ? technique_cldr_spot_shadow_ : technique_cldr_spot_no_shadow_;
-			break;
-
-		case LightSource::LT_SphereArea:
-			tech = with_shadow ? technique_cldr_sphere_area_shadow_ : technique_cldr_sphere_area_no_shadow_;
-			break;
-
-		case LightSource::LT_TubeArea:
-			tech = with_shadow ? technique_cldr_tube_area_shadow_ : technique_cldr_tube_area_no_shadow_;
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid light type");
-		}
-		re.Render(*dr_effect_, *tech, *rl_quad_);
-	}
-
-	void DeferredRenderingLayer::CreateDepthMinMaxMap(PerViewport const & pvp)
-	{
-		uint32_t w = pvp.g_buffer_depth_tex->Width(0);
-		uint32_t h = pvp.g_buffer_depth_tex->Height(0);
-		depth_to_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
-		depth_to_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
-			static_cast<float>((h + 1) & ~1) / h));
-		depth_to_min_max_pp_->InputPin(0, pvp.g_buffer_depth_tex);
-		depth_to_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[0]);
-		depth_to_min_max_pp_->Apply();
-
-		for (uint32_t i = 1; i < pvp.g_buffer_min_max_depth_texs.size(); ++ i)
-		{
-			w = pvp.g_buffer_min_max_depth_texs[i - 1]->Width(0);
-			h = pvp.g_buffer_min_max_depth_texs[i - 1]->Height(0);
-			reduce_min_max_pp_->SetParam(0, float2(0.5f / w, 0.5f / h));
-			reduce_min_max_pp_->SetParam(1, float2(static_cast<float>((w + 1) & ~1) / w,
-				static_cast<float>((h + 1) & ~1) / h));
-			reduce_min_max_pp_->InputPin(0, pvp.g_buffer_min_max_depth_texs[i - 1]);
-			reduce_min_max_pp_->OutputPin(0, pvp.g_buffer_min_max_depth_texs[i]);
-			reduce_min_max_pp_->Apply();
-		}
-	}
-
-	bool DeferredRenderingLayer::OverlapTestPoint(float4 planes[6], float4 const & lights_pos_es, float4 const & lights_falloff_range)
-	{
-		int overlap = 1;
-
-		for (int j = 0; j < 6; ++ j)
-		{
-			float d = planes[j].x() * lights_pos_es.x() + planes[j].y() * lights_pos_es.y() +
-				planes[j].z() * lights_pos_es.z() + planes[j].w();
-			overlap *= (d > -lights_falloff_range.w());
-		}
-
-		return overlap;
-	}
-
-	bool DeferredRenderingLayer::OverlapTestSpot(float4 planes[6], float3 const & lights_aabb_min, float3 const & lights_aabb_max)
-	{
-		float3 min_pt = lights_aabb_min;
-		float3 max_pt = lights_aabb_max;
-
-		int overlap = 1;
-		for (int j = 0; j < 6; ++ j)
-		{
-			float4 plane = planes[j];
-			float3 v0 = float3(plane.x() < 0 ? min_pt.x() : max_pt.x(), plane.y() < 0 ? min_pt.y() : max_pt.y(),
-				plane.z() < 0 ? min_pt.z() : max_pt.z());
-			float d = plane.x() * v0.x() + plane.y() * v0.y() + plane.z() * v0.z() + plane.w();
-			overlap *= (d >= 0);
-		}
-
-		return overlap;
-	}
-
-	void DeferredRenderingLayer::CalcTileViewFrustum(uint32_t cluster_x, uint32_t cluster_y, float near_plane, float far_plane,
-		float2 const & tile_scale, PerViewport const & pvp, float4 planes[6])
-	{
-		if (far_plane - near_plane < 1e-3f)
-		{
-			far_plane += 1e-3f;
-		}
-
-		float2 coord = float2(static_cast<float>(cluster_x), static_cast<float>(cluster_y));
-		float2 tile_bias = tile_scale - coord;
-		float q = far_plane / (far_plane - near_plane);
-
-		float4 column1 = float4(pvp.proj(0, 0) * tile_scale.x(), 0, tile_bias.x(), 0);
-		float4 column2 = float4(0, -pvp.proj(1, 1) * tile_scale.y(), tile_bias.y(), 0);
-		float4 column3 = float4(0, 0, q, -near_plane * q);
-		float4 column4 = float4(0, 0, 1, 0);
-		planes[0] = column4 - column1;
-		planes[1] = column4 + column1;
-		planes[2] = column4 - column2;
-		planes[3] = column4 + column2;
-		planes[4] = column4 - column3;
-		// TODO: Should be column3 only
-		planes[5] = column4 + column3;
-		for (int i = 0; i < 6; ++ i)
-		{
-			planes[i] = MathLib::normalize(planes[i]);
-		}
-	}
-
-	void DeferredRenderingLayer::LightIntersectionCPU(PerViewport const & pvp, float2 const & tile_scale,
-		std::array<std::vector<uint32_t>, 11> const & available_lights)
-	{
-		{
-			Texture::Mapper lights_start_mapper(*pvp.lights_start_tex_cpu, 0, 0, TMA_Write_Only, 0, 0, 0,
-				pvp.lights_start_tex_cpu->Width(0), pvp.lights_start_tex_cpu->Height(0), pvp.lights_start_tex_cpu->Depth(0));
-			Texture::Mapper intersected_light_indices_mapper(*pvp.intersected_light_indices_tex_cpu, 0, 0, TMA_Write_Only, 0, 0, 0,
-				pvp.intersected_light_indices_tex_cpu->Width(0), pvp.intersected_light_indices_tex_cpu->Height(0),
-				pvp.intersected_light_indices_tex_cpu->Depth(0));
-
-			uint16_t* lights_start_ptr = lights_start_mapper.Pointer<uint16_t>();
-			uint32_t const lights_start_row_pitch = lights_start_mapper.RowPitch() / sizeof(uint16_t);
-			uint32_t const lights_start_slice_pitch = lights_start_mapper.SlicePitch() / sizeof(uint16_t);
-			uint16_t* light_indices_ptr = intersected_light_indices_mapper.Pointer<uint16_t>();
-			uint32_t const light_indices_row_pitch = intersected_light_indices_mapper.RowPitch() / sizeof(uint16_t);
-			uint32_t const light_indices_slice_pitch = intersected_light_indices_mapper.SlicePitch() / sizeof(uint16_t);
-
-			std::vector<uint32_t> lights_type(available_lights.size() + 1);
-			lights_type.push_back(0);
-			for (size_t i = 1; i < available_lights.size() + 1; ++ i)
-			{
-				lights_type[i] = lights_type[i - 1] + static_cast<uint32_t>(available_lights[i - 1].size());
-			}
-
-			uint32_t const w = pvp.g_buffer_depth_tex->Width(0);
-			uint32_t const h = pvp.g_buffer_depth_tex->Height(0);
-			uint32_t const dim_x = (w + TILE_SIZE - 1) / TILE_SIZE;
-			uint32_t const dim_y = (h + TILE_SIZE - 1) / TILE_SIZE;
-
-			for (uint32_t tile_idx_x = 0; tile_idx_x < dim_x; ++ tile_idx_x)
-			{
-				for (uint32_t tile_idx_y = 0; tile_idx_y < dim_y; ++ tile_idx_y)
-				{
-					for (uint32_t tile_idx_z = 0; tile_idx_z < num_depth_slices_ - 1; ++ tile_idx_z)
-					{
-						uint32_t lights_intersected_size = 0;
-
-						float4 planes[6];
-						CalcTileViewFrustum(tile_idx_x, tile_idx_y, depth_slices_[tile_idx_z], depth_slices_[tile_idx_z + 1],
-							tile_scale, pvp, planes);
-						for (uint32_t t = 3; t < available_lights.size(); ++ t)
-						{
-							for (uint32_t i = 0; i < available_lights[t].size(); ++ i)
-							{
-								uint32_t light_index = lights_type[t] + i;
-								auto const & light = *lights_[available_lights[t][i]];
-								LightSource::LightType type = light.Type();
-
-								float const range = light.Range() * light_scale_;
-
-								if (type == LightSource::LT_Spot)
-								{
-									float4x4 light_to_view = light.SMCamera(0)->InverseViewMatrix() * pvp.view;
-									float const scale = light.CosOuterInner().w();
-									float4x4 light_model = MathLib::scaling(range * 0.01f * float3(scale, scale, 1));
-									float4x4 light_mv = light_model * light_to_view;
-									AABBox aabb = MathLib::transform_aabb(cone_aabb_, light_mv);
-
-									if (OverlapTestSpot(planes, aabb.Min(), aabb.Max()))
-									{
-										uint32_t offset_y = lights_intersected_size / 32;
-										uint32_t offset_x = lights_intersected_size - offset_y * 32;
-										light_indices_ptr[tile_idx_z * light_indices_slice_pitch
-											+ (tile_idx_y * 32 + offset_y) * light_indices_row_pitch
-											+ tile_idx_x * 32 + offset_x] = light_index;
-										++ lights_intersected_size;
-									}
-								}
-								else
-								{
-									BOOST_ASSERT((type == LightSource::LT_Point)
-										|| (type == LightSource::LT_SphereArea) || (type == LightSource::LT_TubeArea));
-
-									float3 const & p = light.Position();
-									float3 const loc_es = MathLib::transform_coord(p, pvp.view);
-									float4 const light_pos_es(loc_es.x(), loc_es.y(), loc_es.z(), 1);
-									float4 const light_falloff_range(light.Falloff().x(), light.Falloff().y(), light.Falloff().z(), range);
-
-									if (OverlapTestPoint(planes, light_pos_es, light_falloff_range))
-									{
-										uint32_t offset_y = lights_intersected_size / 32;
-										uint32_t offset_x = lights_intersected_size - offset_y * 32;
-										light_indices_ptr[tile_idx_z * light_indices_slice_pitch
-											+ (tile_idx_y * 32 + offset_y) * light_indices_row_pitch
-											+ tile_idx_x * 32 + offset_x] = light_index;
-										++ lights_intersected_size;
-									}
-								}
-							}
-
-							lights_start_ptr[tile_idx_z * lights_start_slice_pitch
-								+ tile_idx_y * lights_start_row_pitch + tile_idx_x * 8 + t - 3]
-								= static_cast<uint16_t>(lights_intersected_size);
-						}
-					}
-				}
-			}
-		}
-
-		pvp.lights_start_tex_cpu->CopyToTexture(*pvp.lights_start_tex);
-		pvp.intersected_light_indices_tex_cpu->CopyToTexture(*pvp.intersected_light_indices_tex);
-	}
-
-	void DeferredRenderingLayer::UpdateClusteredLightingCS(PerViewport const & pvp, PassTargetBuffer pass_tb)
-	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
 		*min_max_depth_tex_param_ = pvp.g_buffer_min_max_depth_texs.back();
@@ -4774,7 +3350,6 @@ namespace KlayGE
 		*width_height_param_ = uint2(w, h);
 
 		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
-		*read_no_lighting_param_ = static_cast<int32_t>(PTB_Opaque == pass_tb);
 
 		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
 
@@ -5007,11 +3582,12 @@ namespace KlayGE
 
 				float const near_plane = camera->NearPlane();
 				float const far_plane = camera->FarPlane();
-				float const base = far_plane / near_plane;
 				depth_slices_[0] = near_plane;
-				for (uint32_t i = 1; i < num_depth_slices_; ++ i)
+				depth_slices_[1] = depth_slices_[0] + (far_plane - near_plane) * 0.02f;
+				float const base = far_plane / depth_slices_[1];
+				for (uint32_t i = 2; i < num_depth_slices_; ++ i)
 				{
-					depth_slices_[i] = near_plane * pow(base, static_cast<float>(i) / num_depth_slices_);
+					depth_slices_[i] = depth_slices_[1] * pow(base, static_cast<float>(i) / num_depth_slices_);
 				}
 				depth_slices_[num_depth_slices_] = far_plane;
 
@@ -5040,8 +3616,7 @@ namespace KlayGE
 			uint32_t const BLOCK_Y = 16;
 			*lights_start_in_tex_param_ = pvp.lights_start_tex;
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
-			re.Dispatch(*dr_effect_, *technique_cldr_unified_,
-				(w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
+			re.Dispatch(*dr_effect_, *technique_cldr_unified_, (w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
 
 			if (available_lights[0].empty() && pvp.temp_shading_tex)
 			{
@@ -5350,15 +3925,6 @@ namespace KlayGE
 #endif
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_tbdr_)
-		{
-			this->UpdateShadowingCS(pvp);
-		}
-		else
-		{
-			this->UpdateShadowing(pvp);
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		if (cs_cldr_)
 		{
 			this->UpdateShadowingCS(pvp);
@@ -5389,24 +3955,13 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		KFL_UNUSED(index_in_pass);
 
-		if (cs_tbdr_)
+		if (cs_cldr_)
 		{
-			this->UpdateTileBasedLighting(pvp, pass_tb);
+			this->UpdateClusteredLighting(pvp, pass_tb);
 		}
 		else
 		{
 			this->UpdateLightIndexedLighting(pvp, pass_tb);
-		}
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		KFL_UNUSED(index_in_pass);
-
-		if (cs_cldr_)
-		{
-			this->UpdateClusteredLightingCS(pvp, pass_tb);
-		}
-		else
-		{
-			this->UpdateClusteredLighting(pvp, pass_tb);
 		}
 #elif DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		for (uint32_t li = 0; li < lights_.size(); ++ li)

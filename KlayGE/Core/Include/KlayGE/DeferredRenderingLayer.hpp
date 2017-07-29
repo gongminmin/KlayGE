@@ -44,7 +44,6 @@
 
 #define TRIDITIONAL_DEFERRED 0
 #define LIGHT_INDEXED_DEFERRED 1
-#define CLUSTERED_DEFERRED 2
 #define DEFAULT_DEFERRED LIGHT_INDEXED_DEFERRED
 
 namespace KlayGE
@@ -79,7 +78,7 @@ namespace KlayGE
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
-#if (DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED) || (DEFAULT_DEFERRED == CLUSTERED_DEFERRED)
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
 #endif
 		std::vector<TexturePtr> g_buffer_vdm_max_ds_texs;
@@ -136,20 +135,6 @@ namespace KlayGE
 
 		TexturePtr lights_start_tex;
 		TexturePtr intersected_light_indices_tex;
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		FrameBufferPtr light_index_fb;
-		TexturePtr light_index_tex;
-
-		TexturePtr temp_shading_tex;
-
-		TexturePtr lighting_mask_tex;
-		FrameBufferPtr lighting_mask_fb;
-
-		TexturePtr lights_start_tex;
-		TexturePtr intersected_light_indices_tex;
-
-		TexturePtr lights_start_tex_cpu;
-		TexturePtr intersected_light_indices_tex_cpu;
 #endif
 	};
 
@@ -380,7 +365,7 @@ namespace KlayGE
 			int32_t index_in_pass, PassType pass_type);
 		void PostGenerateShadowMap(PerViewport const & pvp, int32_t org_no, int32_t index_in_pass);
 		void UpdateShadowing(PerViewport const & pvp);
-#if (DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED) || (DEFAULT_DEFERRED == CLUSTERED_DEFERRED)
+#if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		void UpdateShadowingCS(PerViewport const & pvp);
 #endif
 		void MergeIndirectLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
@@ -406,26 +391,7 @@ namespace KlayGE
 			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
 		void CreateDepthMinMaxMap(PerViewport const & pvp);
 
-		void UpdateTileBasedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
-		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		void UpdateClusteredLighting(PerViewport const & pvp, PassTargetBuffer pass_tb);
-		void UpdateClusteredLightingAmbientSun(PerViewport const & pvp, LightSource::LightType type,
-			int32_t org_no, PassTargetBuffer pass_tb);
-		void UpdateClusteredLightingDirectional(PerViewport const & pvp, PassTargetBuffer pass_tb,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void UpdateClusteredLightingPointSpotArea(PerViewport const & pvp, PassTargetBuffer pass_tb,
-			std::vector<uint32_t>::const_iterator iter_beg, std::vector<uint32_t>::const_iterator iter_end);
-		void CreateDepthMinMaxMap(PerViewport const & pvp);
-
-		void CalcTileViewFrustum(uint32_t cluster_x, uint32_t cluster_y, float near_plane, float far_plane,
-			float2 const & tile_scale, PerViewport const & pvp, float4 planes[6]);
-		bool OverlapTestPoint(float4 planes[6], float4 const & lights_pos_es, float4 const & lights_falloff_range);
-		bool OverlapTestSpot(float4 planes[6], float3 const & lights_aabb_min, float3 const & lights_aabb_max);
-		void LightIntersectionCPU(PerViewport const & pvp, float2 const & tile_scale,
-			std::array<std::vector<uint32_t>, 11> const & available_lights);
-
-		void UpdateClusteredLightingCS(PerViewport const & pvp, PassTargetBuffer pass_tb);
 		void CreateDepthMinMaxMapCS(PerViewport const & pvp);
 #endif
 		void CreateVDMDepthMaxMap(PerViewport const & pvp);
@@ -458,9 +424,6 @@ namespace KlayGE
 		RenderEffectPtr g_buffer_skinning_effect_;
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		uint32_t light_batch_;
-		bool cs_tbdr_;
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		uint32_t light_batch_;
 		uint32_t num_depth_slices_;
 		std::vector<float> depth_slices_;
@@ -531,24 +494,6 @@ namespace KlayGE
 		RenderTechnique* technique_lidr_sphere_area_no_shadow_;
 		RenderTechnique* technique_lidr_tube_area_shadow_;
 		RenderTechnique* technique_lidr_tube_area_no_shadow_;
-
-		RenderTechnique* technique_tbdr_shadowing_unified_;
-		RenderTechnique* technique_tbdr_light_intersection_unified_;
-		RenderTechnique* technique_tbdr_unified_;
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		RenderTechnique* technique_draw_light_index_point_;
-		RenderTechnique* technique_draw_light_index_spot_;
-		RenderTechnique* technique_cldr_ambient_;
-		RenderTechnique* technique_cldr_directional_shadow_;
-		RenderTechnique* technique_cldr_directional_no_shadow_;
-		RenderTechnique* technique_cldr_point_shadow_;
-		RenderTechnique* technique_cldr_point_no_shadow_;
-		RenderTechnique* technique_cldr_spot_shadow_;
-		RenderTechnique* technique_cldr_spot_no_shadow_;
-		RenderTechnique* technique_cldr_sphere_area_shadow_;
-		RenderTechnique* technique_cldr_sphere_area_no_shadow_;
-		RenderTechnique* technique_cldr_tube_area_shadow_;
-		RenderTechnique* technique_cldr_tube_area_no_shadow_;
 
 		RenderTechnique* technique_cldr_shadowing_unified_;
 		RenderTechnique* technique_cldr_light_intersection_unified_;
@@ -634,7 +579,7 @@ namespace KlayGE
 		RenderEffectParameter* esms_scale_factor_param_;
 
 		RenderTechnique* technique_depth_to_tiled_min_max_;
-		RenderTechnique* technique_tbdr_lighting_mask_;
+		RenderTechnique* technique_cldr_lighting_mask_;
 		RenderEffectParameter* near_q_far_param_;
 		RenderEffectParameter* width_height_param_;
 		RenderEffectParameter* depth_to_tiled_depth_in_tex_param_;
@@ -643,49 +588,6 @@ namespace KlayGE
 		RenderEffectParameter* upper_left_param_;
 		RenderEffectParameter* x_dir_param_;
 		RenderEffectParameter* y_dir_param_;
-		RenderEffectParameter* read_no_lighting_param_;
-		RenderEffectParameter* lighting_mask_tex_param_;
-		RenderEffectParameter* shading_in_tex_param_;
-		RenderEffectParameter* shading_rw_tex_param_;
-		RenderEffectParameter* lights_type_param_;
-		RenderEffectParameter* lights_start_in_tex_param_;
-		RenderEffectParameter* lights_start_rw_tex_param_;
-		RenderEffectParameter* intersected_light_indices_in_tex_param_;
-		RenderEffectParameter* intersected_light_indices_rw_tex_param_;
-		PostProcessPtr copy_pp_;
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
-		RenderEffectParameter* min_max_depth_tex_param_;
-		RenderEffectParameter* lights_color_param_;
-		RenderEffectParameter* lights_pos_es_param_;
-		RenderEffectParameter* lights_dir_es_param_;
-		RenderEffectParameter* lights_falloff_range_param_;
-		RenderEffectParameter* lights_attrib_param_;
-		RenderEffectParameter* lights_radius_extend_param_;
-		RenderEffectParameter* lights_aabb_min_param_;
-		RenderEffectParameter* lights_aabb_max_param_;
-		RenderEffectParameter* light_index_tex_param_;
-		RenderEffectParameter* tile_scale_param_;
-		RenderEffectParameter* camera_proj_01_param_;
-		PostProcessPtr depth_to_min_max_pp_;
-		PostProcessPtr reduce_min_max_pp_;
-
-		RenderEffectParameter* projective_shadowing_rw_tex_param_;
-		RenderEffectParameter* shadowing_rw_tex_param_;
-		RenderEffectParameter* lights_view_proj_param_;
-		RenderEffectParameter* filtered_sms_2d_light_index_param_;
-		RenderEffectParameter* esms_scale_factor_param_;
-
-		RenderTechnique* technique_depth_to_tiled_min_max_;
-		RenderTechnique* technique_tbdr_lighting_mask_;
-		RenderEffectParameter* near_q_far_param_;
-		RenderEffectParameter* width_height_param_;
-		RenderEffectParameter* depth_to_tiled_depth_in_tex_param_;
-		RenderEffectParameter* depth_to_tiled_min_max_depth_rw_tex_param_;
-		RenderEffectParameter* linear_depth_rw_tex_param_;
-		RenderEffectParameter* upper_left_param_;
-		RenderEffectParameter* x_dir_param_;
-		RenderEffectParameter* y_dir_param_;
-		RenderEffectParameter* read_no_lighting_param_;
 		RenderEffectParameter* lighting_mask_tex_param_;
 		RenderEffectParameter* shading_in_tex_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
@@ -742,8 +644,6 @@ namespace KlayGE
 		std::array<PerfRangePtr, PTB_None> shadowing_perfs_;
 		std::array<PerfRangePtr, PTB_None> indirect_lighting_perfs_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		std::array<PerfRangePtr, PTB_None> tiling_perfs_;
-#elif DEFAULT_DEFERRED == CLUSTERED_DEFERRED
 		std::array<PerfRangePtr, PTB_None> clustering_perfs_;
 #endif
 		std::array<PerfRangePtr, PTB_None> shading_perfs_;
