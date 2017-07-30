@@ -55,16 +55,14 @@ namespace KlayGE
 
 		auto dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
-		DSBUFFERDESC dsbd;
+		DSBUFFERDESC dsbd{};
 		dsbd.dwSize = sizeof(dsbd);
 		dsbd.dwFlags = DSBCAPS_CTRLVOLUME;
 		if (mono)
 		{
 			dsbd.dwFlags |= DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
-			dsbd.guid3DAlgorithm = GUID_NULL;
 		}
 		dsbd.dwBufferBytes = fill_size_ * fill_count_;
-		dsbd.dwReserved = 0;
 		dsbd.lpwfxFormat = &wfx;
 
 		IDirectSoundBuffer* buffer;

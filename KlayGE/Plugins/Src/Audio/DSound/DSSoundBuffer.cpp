@@ -66,13 +66,11 @@ namespace KlayGE
 	{
 		WAVEFORMATEX wfx = WaveFormatEx(data_source);
 
-		DSBUFFERDESC dsbd;
+		DSBUFFERDESC dsbd{};
 		dsbd.dwSize = sizeof(dsbd);
 		dsbd.dwFlags = DSBCAPS_CTRLVOLUME | DSBCAPS_CTRL3D | DSBCAPS_MUTE3DATMAXDISTANCE;
 		dsbd.dwBufferBytes = static_cast<uint32_t>(data_source->Size());
-		dsbd.dwReserved = 0;
 		dsbd.lpwfxFormat = &wfx;
-		dsbd.guid3DAlgorithm = GUID_NULL;
 
 		auto dsound = checked_cast<DSAudioEngine const *>(&Context::Instance().AudioFactoryInstance().AudioEngineInstance())->DSound();
 
