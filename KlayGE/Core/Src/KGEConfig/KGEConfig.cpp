@@ -435,6 +435,12 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DSound")));
 				FreeLibrary(mod_ds);
 			}
+			HMODULE mod_xaudio = LoadLibraryEx(TEXT("XAudio2_8.dll"), nullptr, 0);
+			if (mod_xaudio)
+			{
+				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("XAudio")));
+				FreeLibrary(mod_xaudio);
+			}
 
 			TCHAR buf[256];
 			int n = static_cast<int>(SendMessage(hFactoryCombo, CB_GETCOUNT, 0, 0));
