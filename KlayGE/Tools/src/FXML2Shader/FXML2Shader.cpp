@@ -6,6 +6,8 @@
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KFL/XMLDom.hpp>
+#include <KlayGE/ResLoader.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -14,26 +16,12 @@
 using namespace KlayGE;
 using namespace std;
 
-namespace
-{
-	std::string fxml_name;
-	std::string shader_text;
-}
-
 class FXML2ShaderApp : public KlayGE::App3DFramework
 {
 public:
 	FXML2ShaderApp()
 		: App3DFramework("FXML2Shader")
 	{
-	}
-
-	void OnCreate()
-	{
-		RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
-
-		ofstream ofs((fxml_name + ".shader").c_str(), std::ios_base::binary);
-		ofs << effect->HLSLShaderText();
 	}
 
 	void DoUpdateOverlay()
@@ -56,7 +44,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	fxml_name = argv[1];
+	std::string fxml_name = argv[1];
 
 	Context::Instance().LoadCfg("KlayGE.cfg");
 	ContextCfg context_cfg = Context::Instance().Config();
@@ -67,6 +55,15 @@ int main(int argc, char* argv[])
 
 	FXML2ShaderApp app;
 	app.Create();
+
+	fxml_name = ResLoader::Instance().Locate(fxml_name);
+	std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
+	filesystem::remove(kfx_name);
+
+	RenderEffectPtr effect = SyncLoadRenderEffect(fxml_name);
+
+	ofstream ofs((fxml_name + ".shader").c_str());
+	ofs << effect->HLSLShaderText();
 
 	return 0;
 }
