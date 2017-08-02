@@ -1472,9 +1472,9 @@ namespace KlayGE
 		glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, &temp);
 		caps_.max_geometry_texture_units = static_cast<uint8_t>(temp);
 
-		if (glloader_GL_EXT_texture_filter_anisotropic())
+		if (glloader_GL_VERSION_4_6() || glloader_GL_ARB_texture_filter_anisotropic() || glloader_GL_EXT_texture_filter_anisotropic())
 		{
-			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &temp);
+			glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &temp);
 			caps_.max_texture_anisotropy = static_cast<uint8_t>(temp);
 		}
 		else

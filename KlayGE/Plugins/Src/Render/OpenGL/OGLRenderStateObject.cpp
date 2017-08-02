@@ -486,9 +486,9 @@ namespace KlayGE
 
 		glSamplerParameteri(sampler_, GL_TEXTURE_MIN_FILTER, ogl_min_filter);
 		glSamplerParameteri(sampler_, GL_TEXTURE_MAG_FILTER, ogl_mag_filter);
-		if (glloader_GL_EXT_texture_filter_anisotropic())
+		if (glloader_GL_VERSION_4_6() || glloader_GL_ARB_texture_filter_anisotropic() || glloader_GL_EXT_texture_filter_anisotropic())
 		{
-			glSamplerParameteri(sampler_, GL_TEXTURE_MAX_ANISOTROPY_EXT, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
+			glSamplerParameteri(sampler_, GL_TEXTURE_MAX_ANISOTROPY, (desc_.filter & TFOE_Anisotropic) ? desc_.max_anisotropy : 1);
 		}
 		glSamplerParameterf(sampler_, GL_TEXTURE_MIN_LOD, desc_.min_lod);
 		glSamplerParameterf(sampler_, GL_TEXTURE_MAX_LOD, desc_.max_lod);

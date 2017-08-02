@@ -64,6 +64,7 @@ namespace KlayGE
 
 		static std::pair<int, int> constexpr all_versions[] =
 		{
+			std::make_pair(4, 6),
 			std::make_pair(4, 5),
 			std::make_pair(4, 4),
 			std::make_pair(4, 3),
@@ -75,6 +76,7 @@ namespace KlayGE
 		{
 			static std::string_view const all_version_names[] =
 			{
+				"4.6",
 				"4.5",
 				"4.4",
 				"4.3",
