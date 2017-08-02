@@ -13,8 +13,8 @@ def support_one(feature_names):
 			return True
 	return False
 
-ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5']
-glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5']
+ogl_ver_db = ['1.1', '1.2', '1.3', '1.4', '1.5', '2.0', '2.1', '3.0', '3.1', '3.2', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5', '4.6']
+glsl_ver_db = ['0.0', '1.1', '1.2', '1.3', '1.4', '1.5', '3.3', '4.0', '4.1', '4.2', '4.3', '4.4', '4.5', '4.6']
 
 features_db = {
 	'1.1' : {
@@ -246,6 +246,20 @@ features_db = {
 			'Robustness' : lambda : support_one(['GL_KHR_robustness', 'GL_ARB_robustness']),
 			'GLSL texture image samples' : lambda : is_supported('GL_ARB_shader_texture_image_samples'),
 			'Texture barrier' : lambda : support_one(['GL_ARB_texture_barrier', 'GL_NV_texture_barrier']),
+		},
+
+	'4.6' : {
+			'Indirect parameters' : lambda : is_supported('GL_ARB_indirect_parameters'),
+			'Pipeline statistics query' : lambda : is_supported('GL_ARB_pipeline_statistics_query'),
+			'Polygon offset clamp' : lambda : support_one(['GL_ARB_polygon_offset_clamp', 'GL_EXT_polygon_offset_clamp']),
+			'No error context' : lambda : is_supported('GL_KHR_no_error'),
+			'Shader atomic counter ops' : lambda : is_supported('GL_ARB_shader_atomic_counter_ops'),
+			'Shader draw parameters' : lambda : is_supported('GL_ARB_shader_draw_parameters'),
+			'Shader group vote' : lambda : is_supported('GL_ARB_shader_group_vote'),
+			'SPIR-V' : lambda : is_supported('GL_ARB_gl_spirv'),
+			'SPIR-V extensions' : lambda : is_supported('GL_ARB_spirv_extensions'),
+			'Texture filter anisotropic' : lambda : support_one(['GL_ARB_texture_filter_anisotropic', 'GL_EXT_texture_filter_anisotropic']),
+			'Transform feedback overflow query' : lambda : is_supported('GL_ARB_transform_feedback_overflow_query'),
 		}
 }
 
@@ -375,6 +389,8 @@ class information:
 			is_supported.exts.append('GLSL_4_4')
 		if glsl_ver_index >= 12:
 			is_supported.exts.append('GLSL_4_5')
+		if glsl_ver_index >= 13:
+			is_supported.exts.append('GLSL_4_6')
 
 		for i in range(0, len(ogl_ver_db)):
 			supported = []

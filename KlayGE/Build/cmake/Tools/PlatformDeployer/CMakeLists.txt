@@ -12,6 +12,7 @@ SET(RESOURCE_FILES ${RESOURCE_FILES}
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gl_4_3.plat
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gl_4_4.plat
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gl_4_5.plat
+	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gl_4_6.plat
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gles_3_0.plat
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gles_3_1.plat
 	${KLAYGE_PROJECT_DIR}/Tools/media/PlatformDeployer/PlatConf/gles_3_2.plat
