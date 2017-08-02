@@ -1,6 +1,7 @@
 ADD_SUBDIRECTORY(Core/TableGen)
 ADD_SUBDIRECTORY(Core)
 
+ADD_SUBDIRECTORY(Plugins/Render/NullRender)
 ADD_SUBDIRECTORY(Plugins/Scene/OCTree)
 ADD_SUBDIRECTORY(Plugins/Input/MsgInput)
 ADD_SUBDIRECTORY(Plugins/Script/Python)
