@@ -1,0 +1,8 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_spirv_extensions" reg_no="194">
+	<tokens>
+		<token name="GL_SPIR_V_EXTENSIONS" value="0x9553"/>
+		<token name="GL_NUM_SPIR_V_EXTENSIONS" value="0x9554"/>
+	</tokens>
+</gl_extension>

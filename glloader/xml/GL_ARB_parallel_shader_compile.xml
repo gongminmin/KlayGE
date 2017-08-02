@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 
-<gl_extension name="GL_ARB_parallel_shader_compile" reg_no="179">
+<gl_extension name="GL_ARB_parallel_shader_compile" reg_no="179" prefer="GL_KHR_parallel_shader_compile">
 	<tokens>
 		<token name="GL_MAX_SHADER_COMPILER_THREADS_ARB" value="0x91B0"/>
 		<token name="GL_COMPLETION_STATUS_ARB" value="0x91B1"/>

@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_gl_colorspace_display_p3_linear" reg_no="118">
+	<tokens>
+		<token name="EGL_GL_COLORSPACE_DISPLAY_P3_LINEAR_EXT" value="0x3362"/>
+	</tokens>
+</gl_extension>

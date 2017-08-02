@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_image_implicit_sync_control" reg_no="120">
+	<tokens>
+		<token name="EGL_IMPORT_SYNC_TYPE_EXT" value="0x3470"/>
+		<token name="EGL_IMPORT_IMPLICIT_SYNC_EXT" value="0x3471"/>
+		<token name="EGL_IMPORT_EXPLICIT_SYNC_EXT" value="0x3472"/>
+	</tokens>
+</gl_extension>

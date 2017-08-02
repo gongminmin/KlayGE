@@ -1,0 +1,7 @@
+<?xml version='1.0'?>
+
+<gl_extension name="EGL_EXT_bind_to_front" reg_no="121">
+	<tokens>
+		<token name="EGL_FRONT_BUFFER_EXT" value="0x3464"/>
+	</tokens>
+</gl_extension>

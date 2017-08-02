@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_ARB_polygon_offset_clamp" reg_no="193">
+	<tokens>
+		<token name="GL_POLYGON_OFFSET_CLAMP" value="0x8E1B"/>
+	</tokens>
+
+	<functions>
+		<function name="glPolygonOffsetClamp" return="void">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="units"/>
+				<param type="GLfloat" name="clamp"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_polygon_offset_clamp" name="glPolygonOffsetClampEXT"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>

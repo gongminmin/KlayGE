@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_EXT_external_buffer" reg_no="284">
+	<typedefs>
+		<typedef type="void*" synonym="GLeglClientBufferEXT"/>
+	</typedefs>
+
+	<functions>
+		<function name="glBufferStorageExternalEXT" return="void">
+			<params>
+				<param type="GLenum" name="target"/>
+				<param type="GLintptr" name="offset"/>
+				<param type="GLsizeiptr" name="size"/>
+				<param type="GLeglClientBufferEXT" name="clientBuffer"/>
+				<param type="GLbitfield" name="flags"/>
+			</params>
+		</function>
+	</functions>
+</gl_extension>

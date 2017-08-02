@@ -1,0 +1,90 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GL_VERSION_4_6">
+	<tokens>
+		<token name="GL_SHADER_BINARY_FORMAT_SPIR_V" value="0x9551"/>
+		<token name="GL_SPIR_V_BINARY" value="0x9552"/>
+		<token name="GL_PARAMETER_BUFFER" value="0x80EE"/>
+		<token name="GL_PARAMETER_BUFFER_BINDING" value="0x80EF"/>
+		<token name="GL_CONTEXT_FLAG_NO_ERROR_BIT" value="0x00000008"/>
+		<token name="GL_VERTICES_SUBMITTED" value="0x82EE"/>
+		<token name="GL_PRIMITIVES_SUBMITTED" value="0x82EF"/>
+		<token name="GL_VERTEX_SHADER_INVOCATIONS" value="0x82F0"/>
+		<token name="GL_TESS_CONTROL_SHADER_PATCHES" value="0x82F1"/>
+		<token name="GL_TESS_EVALUATION_SHADER_INVOCATIONS" value="0x82F2"/>
+		<token name="GL_GEOMETRY_SHADER_PRIMITIVES_EMITTED" value="0x82F3"/>
+		<token name="GL_FRAGMENT_SHADER_INVOCATIONS" value="0x82F4"/>
+		<token name="GL_COMPUTE_SHADER_INVOCATIONS" value="0x82F5"/>
+		<token name="GL_CLIPPING_INPUT_PRIMITIVES" value="0x82F6"/>
+		<token name="GL_CLIPPING_OUTPUT_PRIMITIVES" value="0x82F7"/>
+		<token name="GL_POLYGON_OFFSET_CLAMP" value="0x8E1B"/>
+		<token name="GL_SPIR_V_EXTENSIONS" value="0x9553"/>
+		<token name="GL_NUM_SPIR_V_EXTENSIONS" value="0x9554"/>
+		<token name="GL_TEXTURE_MAX_ANISOTROPY" value="0x84FE"/>
+		<token name="GL_MAX_TEXTURE_MAX_ANISOTROPY" value="0x84FF"/>
+		<token name="GL_TRANSFORM_FEEDBACK_OVERFLOW" value="0x82EC"/>
+		<token name="GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW" value="0x82ED"/>
+	</tokens>
+
+	<functions>	
+		<function name="glSpecializeShader" return="void">
+			<params>
+				<param type="GLuint" name="shader"/>
+				<param type="const GLchar*" name="pEntryPoint"/>
+				<param type="GLuint" name="numSpecializationConstants"/>
+				<param type="const GLuint*" name="pConstantIndex"/>
+				<param type="const GLuint*" name="pConstantValue"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_gl_spirv" name="glSpecializeShaderARB"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawArraysIndirectCount" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLintptr" name="drawcount"/>
+				<param type="GLsizei" name="maxdrawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_indirect_parameters" name="glMultiDrawArraysIndirectCountARB"/>
+			</mappings>
+		</function>
+		<function name="glMultiDrawElementsIndirectCount" return="void">
+			<params>
+				<param type="GLenum" name="mode"/>
+				<param type="GLenum" name="type"/>
+				<param type="const void*" name="indirect"/>
+				<param type="GLintptr" name="drawcount"/>
+				<param type="GLsizei" name="maxdrawcount"/>
+				<param type="GLsizei" name="stride"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_indirect_parameters" name="glMultiDrawElementsIndirectCountARB"/>
+			</mappings>
+		</function>
+		<function name="glPolygonOffsetClamp" return="void">
+			<params>
+				<param type="GLfloat" name="factor"/>
+				<param type="GLfloat" name="units"/>
+				<param type="GLfloat" name="clamp"/>
+			</params>
+			<mappings>
+				<mapping from="GL_EXT_polygon_offset_clamp" name="glPolygonOffsetClampEXT"/>
+			</mappings>
+		</function>
+	</functions>
+
+	<additionals>
+		<ext name="GL_ARB_pipeline_statistics_query"/>
+		<ext name="GL_ARB_polygon_offset_clamp"/>
+		<ext name="GL_KHR_no_error"/>
+		<ext name="GL_ARB_shader_atomic_counter_ops"/>
+		<ext name="GL_ARB_shader_draw_parameters"/>
+		<ext name="GL_ARB_shader_group_vote"/>
+		<ext name="GL_ARB_spirv_extensions"/>
+		<ext name="GL_ARB_texture_filter_anisotropic"/>
+		<ext name="GL_ARB_transform_feedback_overflow_query"/>
+	</additionals>
+</gl_extension>

@@ -1,0 +1,19 @@
+<?xml version='1.0'?>
+
+<gl_extension name="GLES_KHR_parallel_shader_compile" reg_no="288">
+	<tokens>
+		<token name="GL_MAX_SHADER_COMPILER_THREADS_KHR" value="0x91B0"/>
+		<token name="GL_COMPLETION_STATUS_KHR" value="0x91B1"/>
+	</tokens>
+
+	<functions>
+		<function name="glMaxShaderCompilerThreadsKHR" return="void">
+			<params>
+				<param type="GLuint" name="count"/>
+			</params>
+			<mappings>
+				<mapping from="GL_ARB_parallel_shader_compile" name="glMaxShaderCompilerThreadsARB"/>
+			</mappings>
+		</function>
+	</functions>
+</gl_extension>
