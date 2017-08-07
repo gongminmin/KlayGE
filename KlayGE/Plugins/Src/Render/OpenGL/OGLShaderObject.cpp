@@ -172,15 +172,6 @@ namespace KlayGE
 		: gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0),
 			ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 	{
-		shader_func_names_ = MakeSharedPtr<std::array<std::string, ShaderObject::ST_NumShaderTypes>>();
-		glsl_srcs_ = MakeSharedPtr<std::array<std::shared_ptr<std::string>, ShaderObject::ST_NumShaderTypes>>();
-
-		pnames_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ShaderObject::ST_NumShaderTypes>>();
-		glsl_res_names_ = MakeSharedPtr<std::array<std::shared_ptr<std::vector<std::string>>, ShaderObject::ST_NumShaderTypes>>();
-
-		vs_usages_ = MakeSharedPtr<std::vector<VertexElementUsage>>();
-		vs_usage_indices_ = MakeSharedPtr<std::vector<uint8_t>>();
-		glsl_vs_attrib_names_ = MakeSharedPtr<std::vector<std::string>>();
 	}
 
 	OGLShaderObject::OGLShaderObject()
@@ -210,7 +201,7 @@ namespace KlayGE
 
 		auto const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
-		(*so_template_->shader_func_names_)[type] = sd.func_name;
+		so_template_->shader_func_names_[type] = sd.func_name;
 
 		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
@@ -223,38 +214,38 @@ namespace KlayGE
 			std::memcpy(&len32, nsbp, sizeof(len32));
 			nsbp += sizeof(len32);
 			len32 = LE2Native(len32);
-			(*so_template_->glsl_srcs_)[type] = MakeSharedPtr<std::string>(len32, '\0');
-			std::memcpy(&(*(*so_template_->glsl_srcs_)[type])[0], nsbp, len32);
+			so_template_->glsl_srcs_[type] = MakeSharedPtr<std::string>(len32, '\0');
+			std::memcpy(&(*so_template_->glsl_srcs_[type])[0], nsbp, len32);
 			nsbp += len32;
 
 			uint16_t num16;
 			std::memcpy(&num16, nsbp, sizeof(num16));
 			nsbp += sizeof(num16);
 			num16 = LE2Native(num16);
-			(*so_template_->pnames_)[type] = MakeSharedPtr<std::vector<std::string>>(num16);
+			so_template_->pnames_[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
 				std::memcpy(&len8, nsbp, sizeof(len8));
 				nsbp += sizeof(len8);
 
-				(*(*so_template_->pnames_)[type])[i].resize(len8);
-				std::memcpy(&(*(*so_template_->pnames_)[type])[i][0], nsbp, len8);
+				(*so_template_->pnames_[type])[i].resize(len8);
+				std::memcpy(&(*so_template_->pnames_[type])[i][0], nsbp, len8);
 				nsbp += len8;
 			}
 
 			std::memcpy(&num16, nsbp, sizeof(num16));
 			nsbp += sizeof(num16);
 			num16 = LE2Native(num16);
-			(*so_template_->glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string>>(num16);
+			so_template_->glsl_res_names_[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
 				std::memcpy(&len8, nsbp, sizeof(len8));
 				nsbp += sizeof(len8);
 
-				(*(*so_template_->glsl_res_names_)[type])[i].resize(len8);
-				std::memcpy(&(*(*so_template_->glsl_res_names_)[type])[i][0], nsbp, len8);
+				(*so_template_->glsl_res_names_[type])[i].resize(len8);
+				std::memcpy(&(*so_template_->glsl_res_names_[type])[i][0], nsbp, len8);
 				nsbp += len8;
 			}
 
@@ -304,36 +295,36 @@ namespace KlayGE
 				uint8_t num8;
 				std::memcpy(&num8, nsbp, sizeof(num8));
 				nsbp += sizeof(num8);
-				so_template_->vs_usages_->resize(num8);
+				so_template_->vs_usages_.resize(num8);
 				for (size_t i = 0; i < num8; ++ i)
 				{
 					uint8_t veu;
 					std::memcpy(&veu, nsbp, sizeof(veu));
 					nsbp += sizeof(veu);
 
-					(*so_template_->vs_usages_)[i] = static_cast<VertexElementUsage>(veu);
+					so_template_->vs_usages_[i] = static_cast<VertexElementUsage>(veu);
 				}
 
 				std::memcpy(&num8, nsbp, sizeof(num8));
 				nsbp += sizeof(num8);
 				if (num8 > 0)
 				{
-					so_template_->vs_usage_indices_->resize(num8);
-					std::memcpy(&(*so_template_->vs_usage_indices_)[0], nsbp, num8 * sizeof((*so_template_->vs_usage_indices_)[0]));
-					nsbp += num8 * sizeof((*so_template_->vs_usage_indices_)[0]);
+					so_template_->vs_usage_indices_.resize(num8);
+					std::memcpy(&so_template_->vs_usage_indices_[0], nsbp, num8 * sizeof(so_template_->vs_usage_indices_[0]));
+					nsbp += num8 * sizeof(so_template_->vs_usage_indices_[0]);
 				}
 
 				std::memcpy(&num8, nsbp, sizeof(num8));
 				nsbp += sizeof(num8);
-				so_template_->glsl_vs_attrib_names_->resize(num8);
+				so_template_->glsl_vs_attrib_names_.resize(num8);
 				for (size_t i = 0; i < num8; ++ i)
 				{
 					uint8_t len8;
 					std::memcpy(&len8, nsbp, sizeof(len8));
 					nsbp += sizeof(len8);
 
-					(*so_template_->glsl_vs_attrib_names_)[i].resize(len8);
-					std::memcpy(&(*so_template_->glsl_vs_attrib_names_)[i][0], nsbp, len8);
+					so_template_->glsl_vs_attrib_names_[i].resize(len8);
+					std::memcpy(&so_template_->glsl_vs_attrib_names_[i][0], nsbp, len8);
 					nsbp += len8;
 				}
 			}
@@ -380,30 +371,30 @@ namespace KlayGE
 	{
 		std::vector<uint8_t> native_shader_block;
 
-		if ((*so_template_->glsl_srcs_)[type])
+		if (so_template_->glsl_srcs_[type])
 		{
 			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
 
-			uint32_t len32 = Native2LE(static_cast<uint32_t>((*so_template_->glsl_srcs_)[type]->size()));
+			uint32_t len32 = Native2LE(static_cast<uint32_t>(so_template_->glsl_srcs_[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
-			oss.write(&(*(*so_template_->glsl_srcs_)[type])[0], (*so_template_->glsl_srcs_)[type]->size());
+			oss.write(&(*so_template_->glsl_srcs_[type])[0], so_template_->glsl_srcs_[type]->size());
 
-			uint16_t num16 = Native2LE(static_cast<uint16_t>((*so_template_->pnames_)[type]->size()));
+			uint16_t num16 = Native2LE(static_cast<uint16_t>(so_template_->pnames_[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
-			for (size_t i = 0; i < (*so_template_->pnames_)[type]->size(); ++ i)
+			for (size_t i = 0; i < so_template_->pnames_[type]->size(); ++ i)
 			{
-				uint8_t len8 = static_cast<uint8_t>((*(*so_template_->pnames_)[type])[i].size());
+				uint8_t len8 = static_cast<uint8_t>((*so_template_->pnames_[type])[i].size());
 				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
-				oss.write(&(*(*so_template_->pnames_)[type])[i][0], (*(*so_template_->pnames_)[type])[i].size());
+				oss.write(&(*so_template_->pnames_[type])[i][0], (*so_template_->pnames_[type])[i].size());
 			}
 
-			num16 = Native2LE(static_cast<uint16_t>((*so_template_->glsl_res_names_)[type]->size()));
+			num16 = Native2LE(static_cast<uint16_t>(so_template_->glsl_res_names_[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&num16), sizeof(num16));
-			for (size_t i = 0; i < (*so_template_->glsl_res_names_)[type]->size(); ++ i)
+			for (size_t i = 0; i < so_template_->glsl_res_names_[type]->size(); ++ i)
 			{
-				uint8_t len8 = static_cast<uint8_t>((*(*so_template_->glsl_res_names_)[type])[i].size());
+				uint8_t len8 = static_cast<uint8_t>((*so_template_->glsl_res_names_[type])[i].size());
 				oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
-				oss.write(&(*(*so_template_->glsl_res_names_)[type])[i][0], (*(*so_template_->glsl_res_names_)[type])[i].size());
+				oss.write(&(*so_template_->glsl_res_names_[type])[i][0], (*so_template_->glsl_res_names_[type])[i].size());
 			}
 
 			std::vector<std::pair<std::string, std::string>> tex_sampler_pairs;
@@ -431,29 +422,29 @@ namespace KlayGE
 
 			if (ST_VertexShader == type)
 			{
-				uint8_t num8 = static_cast<uint8_t>(so_template_->vs_usages_->size());
+				uint8_t num8 = static_cast<uint8_t>(so_template_->vs_usages_.size());
 				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
-				for (size_t i = 0; i < so_template_->vs_usages_->size(); ++ i)
+				for (size_t i = 0; i < so_template_->vs_usages_.size(); ++ i)
 				{
-					uint8_t veu = static_cast<uint8_t>((*so_template_->vs_usages_)[i]);
+					uint8_t veu = static_cast<uint8_t>(so_template_->vs_usages_[i]);
 					oss.write(reinterpret_cast<char const *>(&veu), sizeof(veu));
 				}
 
-				num8 = static_cast<uint8_t>(so_template_->vs_usage_indices_->size());
+				num8 = static_cast<uint8_t>(so_template_->vs_usage_indices_.size());
 				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
-				if (!so_template_->vs_usage_indices_->empty())
+				if (!so_template_->vs_usage_indices_.empty())
 				{
-					oss.write(reinterpret_cast<char const *>(&(*so_template_->vs_usage_indices_)[0]),
-						so_template_->vs_usage_indices_->size() * sizeof((*so_template_->vs_usage_indices_)[0]));
+					oss.write(reinterpret_cast<char const *>(&so_template_->vs_usage_indices_[0]),
+						so_template_->vs_usage_indices_.size() * sizeof(so_template_->vs_usage_indices_[0]));
 				}
 
-				num8 = static_cast<uint8_t>(so_template_->glsl_vs_attrib_names_->size());
+				num8 = static_cast<uint8_t>(so_template_->glsl_vs_attrib_names_.size());
 				oss.write(reinterpret_cast<char const *>(&num8), sizeof(num8));
-				for (size_t i = 0; i < so_template_->glsl_vs_attrib_names_->size(); ++ i)
+				for (size_t i = 0; i < so_template_->glsl_vs_attrib_names_.size(); ++ i)
 				{
-					uint8_t len8 = static_cast<uint8_t>((*so_template_->glsl_vs_attrib_names_)[i].size());
+					uint8_t len8 = static_cast<uint8_t>(so_template_->glsl_vs_attrib_names_[i].size());
 					oss.write(reinterpret_cast<char const *>(&len8), sizeof(len8));
-					oss.write(&(*so_template_->glsl_vs_attrib_names_)[i][0], (*so_template_->glsl_vs_attrib_names_)[i].size());
+					oss.write(&so_template_->glsl_vs_attrib_names_[i][0], so_template_->glsl_vs_attrib_names_[i].size());
 				}
 			}
 			else if (ST_GeometryShader == type)
@@ -489,7 +480,7 @@ namespace KlayGE
 	{
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
 
-		(*so_template_->shader_func_names_)[type] = sd.func_name;
+		so_template_->shader_func_names_[type] = sd.func_name;
 
 		bool has_gs = false;
 		if (!effect.GetShaderDesc(shader_desc_ids[ST_GeometryShader]).func_name.empty())
@@ -663,9 +654,9 @@ namespace KlayGE
 							has_gs, has_ps, static_cast<ShaderTessellatorPartitioning>(so_template_->ds_partitioning_),
 							static_cast<ShaderTessellatorOutputPrimitive>(so_template_->ds_output_primitive_),
 							gsv, rules);
-						(*so_template_->glsl_srcs_)[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
-						(*so_template_->pnames_)[type] = MakeSharedPtr<std::vector<std::string>>();
-						(*so_template_->glsl_res_names_)[type] = MakeSharedPtr<std::vector<std::string>>();
+						so_template_->glsl_srcs_[type] = MakeSharedPtr<std::string>(dxbc2glsl.GLSLString());
+						so_template_->pnames_[type] = MakeSharedPtr<std::vector<std::string>>();
+						so_template_->glsl_res_names_[type] = MakeSharedPtr<std::vector<std::string>>();
 
 						for (uint32_t i = 0; i < dxbc2glsl.NumCBuffers(); ++ i)
 						{
@@ -673,8 +664,8 @@ namespace KlayGE
 							{
 								if (dxbc2glsl.VariableUsed(i, j))
 								{
-									(*so_template_->pnames_)[type]->push_back(dxbc2glsl.VariableName(i, j));
-									(*so_template_->glsl_res_names_)[type]->push_back(dxbc2glsl.VariableName(i, j));
+									so_template_->pnames_[type]->push_back(dxbc2glsl.VariableName(i, j));
+									so_template_->glsl_res_names_[type]->push_back(dxbc2glsl.VariableName(i, j));
 								}
 							}
 						}
@@ -691,8 +682,8 @@ namespace KlayGE
 								{
 									if (SSD_BUFFER == dxbc2glsl.ResourceDimension(i))
 									{
-										(*so_template_->pnames_)[type]->push_back(res_name);
-										(*so_template_->glsl_res_names_)[type]->push_back(res_name);
+										so_template_->pnames_[type]->push_back(res_name);
+										so_template_->glsl_res_names_[type]->push_back(res_name);
 									}
 									else
 									{
@@ -728,8 +719,8 @@ namespace KlayGE
 										param, effect.ParameterByName(sampler_names[j]), 1UL << type));
 								}
 
-								(*so_template_->pnames_)[type]->push_back(combined_sampler_name);
-								(*so_template_->glsl_res_names_)[type]->push_back(combined_sampler_name);
+								so_template_->pnames_[type]->push_back(combined_sampler_name);
+								so_template_->glsl_res_names_[type]->push_back(combined_sampler_name);
 							}
 						}
 
@@ -803,9 +794,9 @@ namespace KlayGE
 											KFL_UNREACHABLE("Invalid sementic");
 										}
 
-										so_template_->vs_usages_->push_back(usage);
-										so_template_->vs_usage_indices_->push_back(usage_index);
-										so_template_->glsl_vs_attrib_names_->push_back(glsl_param_name);
+										so_template_->vs_usages_.push_back(usage);
+										so_template_->vs_usage_indices_.push_back(usage_index);
+										so_template_->glsl_vs_attrib_names_.push_back(glsl_param_name);
 									}
 								}
 							}
@@ -889,19 +880,19 @@ namespace KlayGE
 		auto so = checked_cast<OGLShaderObject*>(shared_so.get());
 
 		is_shader_validate_[type] = so->is_shader_validate_[type];
-		(*so_template_->shader_func_names_)[type] = (*so->so_template_->shader_func_names_)[type];
+		so_template_->shader_func_names_[type] = so->so_template_->shader_func_names_[type];
 
 		if (is_shader_validate_[type])
 		{
-			(*so_template_->glsl_srcs_)[type] = (*so->so_template_->glsl_srcs_)[type];
+			so_template_->glsl_srcs_[type] = so->so_template_->glsl_srcs_[type];
 
-			(*so_template_->pnames_)[type] = (*so->so_template_->pnames_)[type];
-			(*so_template_->glsl_res_names_)[type] = (*so->so_template_->glsl_res_names_)[type];
+			so_template_->pnames_[type] = so->so_template_->pnames_[type];
+			so_template_->glsl_res_names_[type] = so->so_template_->glsl_res_names_[type];
 			if (ST_VertexShader == type)
 			{
-				*so_template_->vs_usages_ = *so->so_template_->vs_usages_;
-				*so_template_->vs_usage_indices_ = *so->so_template_->vs_usage_indices_;
-				*so_template_->glsl_vs_attrib_names_ = *so->so_template_->glsl_vs_attrib_names_;
+				so_template_->vs_usages_ = so->so_template_->vs_usages_;
+				so_template_->vs_usage_indices_ = so->so_template_->vs_usage_indices_;
+				so_template_->glsl_vs_attrib_names_ = so->so_template_->glsl_vs_attrib_names_;
 				so_template_->glsl_tfb_varyings_ = so->so_template_->glsl_tfb_varyings_;
 			}
 			else if (ST_GeometryShader == type)
@@ -953,7 +944,7 @@ namespace KlayGE
 		is_validate_ = true;
 		for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 		{
-			if (!(*so_template_->shader_func_names_)[type].empty())
+			if (!so_template_->shader_func_names_[type].empty())
 			{
 				is_validate_ &= is_shader_validate_[type];
 			}
@@ -974,23 +965,23 @@ namespace KlayGE
 				{
 					GLint len = 0;
 					glGetProgramiv(glsl_program_, GL_PROGRAM_BINARY_LENGTH, &len);
-					so_template_->glsl_bin_program_ = MakeSharedPtr<std::vector<uint8_t>>(len);
+					so_template_->glsl_bin_program_.resize(len);
 					glGetProgramBinary(glsl_program_, len, nullptr, &so_template_->glsl_bin_format_,
-						&(*so_template_->glsl_bin_program_)[0]);
+						so_template_->glsl_bin_program_.data());
 				}
 			}
 
 			for (int type = 0; type < ST_NumShaderTypes; ++ type)
 			{
-				if ((*so_template_->pnames_)[type])
+				if (so_template_->pnames_[type])
 				{
-					for (size_t pi = 0; pi < (*so_template_->pnames_)[type]->size(); ++ pi)
+					for (size_t pi = 0; pi < so_template_->pnames_[type]->size(); ++ pi)
 					{
 						GLint location = glGetUniformLocation(glsl_program_,
-							(*(*so_template_->glsl_res_names_)[type])[pi].c_str());
+							(*so_template_->glsl_res_names_[type])[pi].c_str());
 						if (location != -1)
 						{
-							RenderEffectParameter* p = effect.ParameterByName((*(*so_template_->pnames_)[type])[pi]);
+							RenderEffectParameter* p = effect.ParameterByName((*so_template_->pnames_[type])[pi]);
 							if (p)
 							{
 								BOOST_ASSERT(REDT_buffer == p->Type());
@@ -1014,7 +1005,7 @@ namespace KlayGE
 							{
 								for (size_t i = 0; i < tex_sampler_binds_.size(); ++ i)
 								{
-									if (std::get<0>(tex_sampler_binds_[i]) == (*(*so_template_->pnames_)[type])[pi])
+									if (std::get<0>(tex_sampler_binds_[i]) == (*so_template_->pnames_[type])[pi])
 									{
 										ParameterBind pb;
 										pb.combined_sampler_name = std::get<0>(tex_sampler_binds_[i]);
@@ -1044,10 +1035,10 @@ namespace KlayGE
 
 				if (ST_VertexShader == type)
 				{
-					for (size_t pi = 0; pi < so_template_->glsl_vs_attrib_names_->size(); ++ pi)
+					for (size_t pi = 0; pi < so_template_->glsl_vs_attrib_names_.size(); ++ pi)
 					{
-						attrib_locs_.emplace(std::make_pair((*so_template_->vs_usages_)[pi], (*so_template_->vs_usage_indices_)[pi]),
-								glGetAttribLocation(glsl_program_, (*so_template_->glsl_vs_attrib_names_)[pi].c_str()));
+						attrib_locs_.emplace(std::make_pair(so_template_->vs_usages_[pi], so_template_->vs_usage_indices_[pi]),
+								glGetAttribLocation(glsl_program_, so_template_->glsl_vs_attrib_names_[pi].c_str()));
 					}
 				}
 			}
@@ -1074,11 +1065,11 @@ namespace KlayGE
 
 		if (ret->is_validate_)
 		{
-			if (so_template_->glsl_bin_program_)
+			if (!so_template_->glsl_bin_program_.empty())
 			{
 				glProgramParameteri(ret->glsl_program_, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 				glProgramBinary(ret->glsl_program_, so_template_->glsl_bin_format_,
-					&(*so_template_->glsl_bin_program_)[0], static_cast<GLsizei>(so_template_->glsl_bin_program_->size()));
+					so_template_->glsl_bin_program_.data(), static_cast<GLsizei>(so_template_->glsl_bin_program_.size()));
 
 #ifdef KLAYGE_DEBUG
 				GLint linked = false;
@@ -1102,7 +1093,7 @@ namespace KlayGE
 				{
 					if (ret->is_shader_validate_[type])
 					{
-						if ((*so_template_->glsl_srcs_)[type] && !(*so_template_->glsl_srcs_)[type]->empty())
+						if (so_template_->glsl_srcs_[type] && !so_template_->glsl_srcs_[type]->empty())
 						{
 							ret->AttachGLSL(static_cast<uint32_t>(type));
 						}
@@ -1217,7 +1208,7 @@ namespace KlayGE
 			break;
 		}
 
-		char const * glsl = (*so_template_->glsl_srcs_)[type]->c_str();
+		char const * glsl = so_template_->glsl_srcs_[type]->c_str();
 		GLuint object = glCreateShader(shader_type);
 		if (0 == object)
 		{
@@ -1232,7 +1223,7 @@ namespace KlayGE
 		glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
 		if (!compiled)
 		{
-			LogError("Error when compiling GLSL %s:", (*so_template_->shader_func_names_)[type].c_str());
+			LogError("Error when compiling GLSL %s:", so_template_->shader_func_names_[type].c_str());
 
 			GLint len = 0;
 			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
@@ -1253,15 +1244,15 @@ namespace KlayGE
 
 	void OGLShaderObject::LinkGLSL()
 	{
-		if (so_template_->glsl_tfb_varyings_ && !so_template_->glsl_tfb_varyings_->empty())
+		if (!so_template_->glsl_tfb_varyings_.empty())
 		{
-			std::vector<GLchar const *> names(so_template_->glsl_tfb_varyings_->size());
-			for (size_t i = 0; i < so_template_->glsl_tfb_varyings_->size(); ++ i)
+			std::vector<GLchar const *> names(so_template_->glsl_tfb_varyings_.size());
+			for (size_t i = 0; i < so_template_->glsl_tfb_varyings_.size(); ++ i)
 			{
-				names[i] = (*so_template_->glsl_tfb_varyings_)[i].c_str();
+				names[i] = so_template_->glsl_tfb_varyings_[i].c_str();
 			}
 
-			glTransformFeedbackVaryings(glsl_program_, static_cast<GLsizei>(so_template_->glsl_tfb_varyings_->size()),
+			glTransformFeedbackVaryings(glsl_program_, static_cast<GLsizei>(so_template_->glsl_tfb_varyings_.size()),
 				&names[0], so_template_->tfb_separate_attribs_ ? GL_SEPARATE_ATTRIBS : GL_INTERLEAVED_ATTRIBS);
 		}
 
@@ -1275,9 +1266,9 @@ namespace KlayGE
 			std::string shader_names;
 			for (size_t type = 0; type < ShaderObject::ST_NumShaderTypes; ++ type)
 			{
-				if (!(*so_template_->shader_func_names_)[type].empty())
+				if (!so_template_->shader_func_names_[type].empty())
 				{
-					shader_names += (*so_template_->shader_func_names_)[type] + '/';
+					shader_names += so_template_->shader_func_names_[type] + '/';
 				}
 			}
 			if (!shader_names.empty())
@@ -1424,11 +1415,6 @@ namespace KlayGE
 
 	void OGLShaderObject::FillTFBVaryings(ShaderDesc const & sd)
 	{
-		if (!sd.so_decl.empty())
-		{
-			so_template_->glsl_tfb_varyings_ = MakeSharedPtr<std::vector<std::string>>();
-		}
-
 		int slot = -1;
 		so_template_->tfb_separate_attribs_ = false;
 		for (auto const & decl : sd.so_decl)
@@ -1488,14 +1474,14 @@ namespace KlayGE
 				KFL_UNREACHABLE("Invalid usage");
 			}
 
-			so_template_->glsl_tfb_varyings_->push_back(glsl_param_name);
+			so_template_->glsl_tfb_varyings_.push_back(glsl_param_name);
 		}
 	}
 
 	void OGLShaderObject::Bind()
 	{
-		if (!(*so_template_->glsl_srcs_)[ShaderObject::ST_PixelShader]
-			|| (*so_template_->glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+		if (!so_template_->glsl_srcs_[ShaderObject::ST_PixelShader]
+			|| so_template_->glsl_srcs_[ShaderObject::ST_PixelShader]->empty())
 		{
 			glEnable(GL_RASTERIZER_DISCARD);
 		}
@@ -1549,8 +1535,8 @@ namespace KlayGE
 
 	void OGLShaderObject::Unbind()
 	{
-		if (!(*so_template_->glsl_srcs_)[ShaderObject::ST_PixelShader]
-			|| (*so_template_->glsl_srcs_)[ShaderObject::ST_PixelShader]->empty())
+		if (!so_template_->glsl_srcs_[ShaderObject::ST_PixelShader]
+			|| so_template_->glsl_srcs_[ShaderObject::ST_PixelShader]->empty())
 		{
 			glDisable(GL_RASTERIZER_DISCARD);
 		}
@@ -1559,7 +1545,7 @@ namespace KlayGE
 	void OGLShaderObject::PrintGLSLError(ShaderType type, char const * info)
 	{
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		std::string const & glsl = *(*so_template_->glsl_srcs_)[type];
+		std::string const & glsl = *so_template_->glsl_srcs_[type];
 
 		if (re.HackForIntel())
 		{

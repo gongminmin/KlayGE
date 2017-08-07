@@ -72,16 +72,16 @@ namespace KlayGE
 			OGLShaderObjectTemplate();
 
 			GLenum glsl_bin_format_;
-			std::shared_ptr<std::vector<uint8_t>> glsl_bin_program_;
-			std::shared_ptr<std::array<std::string, ST_NumShaderTypes>> shader_func_names_;
-			std::shared_ptr<std::array<std::shared_ptr<std::string>, ST_NumShaderTypes>> glsl_srcs_;
-			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> pnames_;
-			std::shared_ptr<std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes>> glsl_res_names_;
-			std::shared_ptr<std::vector<VertexElementUsage>> vs_usages_;
-			std::shared_ptr<std::vector<uint8_t>> vs_usage_indices_;
-			std::shared_ptr<std::vector<std::string>> glsl_vs_attrib_names_;
+			std::vector<uint8_t> glsl_bin_program_;
+			std::array<std::string, ST_NumShaderTypes> shader_func_names_;
+			std::array<std::shared_ptr<std::string>, ST_NumShaderTypes> glsl_srcs_;
+			std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes> pnames_;
+			std::array<std::shared_ptr<std::vector<std::string>>, ST_NumShaderTypes> glsl_res_names_;
+			std::vector<VertexElementUsage> vs_usages_;
+			std::vector<uint8_t> vs_usage_indices_;
+			std::vector<std::string> glsl_vs_attrib_names_;
 			GLint gs_input_type_, gs_output_type_, gs_max_output_vertex_;
-			std::shared_ptr<std::vector<std::string>> glsl_tfb_varyings_;
+			std::vector<std::string> glsl_tfb_varyings_;
 			bool tfb_separate_attribs_;
 			uint32_t ds_partitioning_, ds_output_primitive_;
 		};
