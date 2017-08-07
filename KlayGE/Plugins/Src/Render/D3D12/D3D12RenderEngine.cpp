@@ -258,19 +258,19 @@ namespace KlayGE
 
 		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(this->ActiveAdapter(), name, settings);
 
+		native_shader_platform_name_ = "d3d_12_0";
 		switch (d3d_feature_level_)
 		{
 		case D3D_FEATURE_LEVEL_12_1:
 		case D3D_FEATURE_LEVEL_12_0:
 		case D3D_FEATURE_LEVEL_11_1:
 		case D3D_FEATURE_LEVEL_11_0:
-			native_shader_platform_name_ = "d3d_11_0";
-			vs_profile_ = "vs_5_0";
-			ps_profile_ = "ps_5_0";
-			gs_profile_ = "gs_5_0";
-			cs_profile_ = "cs_5_0";
-			hs_profile_ = "hs_5_0";
-			ds_profile_ = "ds_5_0";
+			vs_profile_ = "vs_5_1";
+			ps_profile_ = "ps_5_1";
+			gs_profile_ = "gs_5_1";
+			cs_profile_ = "cs_5_1";
+			hs_profile_ = "hs_5_1";
+			ds_profile_ = "ds_5_1";
 			break;
 
 		default:
