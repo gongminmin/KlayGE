@@ -763,7 +763,7 @@ namespace KlayGE
 										}
 										else
 										{
-											KFL_UNREACHABLE("Invalid sementic");
+											KFL_UNREACHABLE("Invalid semantic");
 										}
 
 										so_template_->vs_usages_.push_back(usage);
