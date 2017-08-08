@@ -135,7 +135,7 @@ namespace KlayGE
 		// Scissor support
 		virtual void ScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) = 0;
 
-		virtual void GetCustomAttrib(std::string_view name, void* value);
+		virtual void GetCustomAttrib(std::string_view name, void* value) const;
 		virtual void SetCustomAttrib(std::string_view name, void* value);
 
 		void Resize(uint32_t width, uint32_t height);

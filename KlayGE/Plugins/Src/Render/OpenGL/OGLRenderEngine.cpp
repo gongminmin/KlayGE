@@ -1308,7 +1308,7 @@ namespace KlayGE
 		glScissor(x, y, width, height);
 	}
 
-	void OGLRenderEngine::GetCustomAttrib(std::string_view name, void* value)
+	void OGLRenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
 		size_t const name_hash = HashRange(name.begin(), name.end());
 		if (CT_HASH("VENDOR") == name_hash)

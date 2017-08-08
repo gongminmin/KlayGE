@@ -803,7 +803,7 @@ namespace KlayGE
 		d3d_imm_ctx_->RSSetScissorRects(1, &rc);
 	}
 
-	void D3D11RenderEngine::GetCustomAttrib(std::string_view name, void* value)
+	void D3D11RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
 		size_t const name_hash = HashRange(name.begin(), name.end());
 		if (CT_HASH("D3D_DEVICE") == name_hash)

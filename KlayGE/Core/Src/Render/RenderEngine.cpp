@@ -734,7 +734,7 @@ namespace KlayGE
 		return caps_;
 	}
 
-	void RenderEngine::GetCustomAttrib(std::string_view name, void* value)
+	void RenderEngine::GetCustomAttrib(std::string_view name, void* value) const
 	{
 		KFL_UNUSED(name);
 		KFL_UNUSED(value);
