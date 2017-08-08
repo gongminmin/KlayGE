@@ -33,17 +33,56 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KFL/CXX17/filesystem.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderEffect.hpp>
 
 #include <iostream>
 
 #include <boost/algorithm/string/case_conv.hpp>
 
-#include "OfflineRenderEffect.hpp"
-
 using namespace std;
 using namespace KlayGE;
 
 uint32_t const KFX_VERSION = 0x0110;
+
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
+struct PlatformDefinition
+{
+	std::string platform;
+	uint8_t major_version;
+	uint8_t minor_version;
+
+	bool requires_flipping;
+	uint32_t native_shader_fourcc;
+	uint32_t native_shader_version;
+
+	ShaderModel max_shader_model;
+
+	uint32_t max_texture_depth;
+	uint32_t max_texture_array_length;
+	uint8_t max_pixel_texture_units;
+	uint8_t max_simultaneous_rts;
+
+	bool fp_color_support : 1;
+	bool pack_to_rgba_required : 1;
+	bool render_to_texture_array_support : 1;
+
+	bool gs_support : 1;
+	bool cs_support : 1;
+	bool hs_support : 1;
+	bool ds_support : 1;
+
+	bool bc4_support : 1;
+	bool bc5_support : 1;
+	bool frag_depth_support : 1;
+};
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
 
 int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
 {
@@ -89,102 +128,60 @@ std::string RetrieveNodeValue(XMLNodePtr root, std::string const & node_name, st
 	return default_value;
 }
 
-Offline::OfflineRenderDeviceCaps LoadPlatformConfig(std::string const & platform)
+PlatformDefinition LoadPlatformConfig(std::string const & platform)
 {
 	ResIdentifierPtr plat = ResLoader::Instance().Open("PlatConf/" + platform + ".plat");
 
 	KlayGE::XMLDocument doc;
 	XMLNodePtr root = doc.Parse(plat);
 
-	Offline::OfflineRenderDeviceCaps caps;
+	PlatformDefinition ret;
 
-	caps.platform = RetrieveAttrValue(root, "name", "");
-	caps.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
-	caps.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
+	ret.platform = RetrieveAttrValue(root, "name", "");
+	ret.major_version = static_cast<uint8_t>(RetrieveAttrValue(root, "major_version", 0));
+	ret.minor_version = static_cast<uint8_t>(RetrieveAttrValue(root, "minor_version", 0));
 
-	caps.requires_flipping = RetrieveNodeValue(root, "requires_flipping", 0) ? true : false;
+	ret.requires_flipping = RetrieveNodeValue(root, "requires_flipping", 0) ? true : false;
 	std::string const fourcc_str = RetrieveNodeValue(root, "native_shader_fourcc", "");
-	caps.native_shader_fourcc = (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
-	caps.native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
+	ret.native_shader_fourcc = (fourcc_str[0] << 0) + (fourcc_str[1] << 8) + (fourcc_str[2] << 16) + (fourcc_str[3] << 24);
+	ret.native_shader_version = RetrieveNodeValue(root, "native_shader_version", 0);
 
 	XMLNodePtr max_shader_model_node = root->FirstNode("max_shader_model");
-	caps.max_shader_model = ShaderModel(static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
+	ret.max_shader_model = ShaderModel(static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "major", 0)),
 		static_cast<uint8_t>(RetrieveAttrValue(max_shader_model_node, "minor", 0)));
 
-	caps.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
-	caps.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
-	caps.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
-	caps.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
+	ret.max_texture_depth = RetrieveNodeValue(root, "max_texture_depth", 0);
+	ret.max_texture_array_length = RetrieveNodeValue(root, "max_texture_array_length", 0);
+	ret.max_pixel_texture_units = static_cast<uint8_t>(RetrieveNodeValue(root, "max_pixel_texture_units", 0));
+	ret.max_simultaneous_rts = static_cast<uint8_t>(RetrieveNodeValue(root, "max_simultaneous_rts", 0));
 
-	caps.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
-	caps.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
-	caps.render_to_texture_array_support = RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
+	ret.fp_color_support = RetrieveNodeValue(root, "fp_color_support", 0) ? true : false;
+	ret.pack_to_rgba_required = RetrieveNodeValue(root, "pack_to_rgba_required", 0) ? true : false;
+	ret.render_to_texture_array_support = RetrieveNodeValue(root, "render_to_texture_array_support", 0) ? true : false;
 
-	caps.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
-	caps.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
-	caps.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
-	caps.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
+	ret.gs_support = RetrieveNodeValue(root, "gs_support", 0) ? true : false;
+	ret.cs_support = RetrieveNodeValue(root, "cs_support", 0) ? true : false;
+	ret.hs_support = RetrieveNodeValue(root, "hs_support", 0) ? true : false;
+	ret.ds_support = RetrieveNodeValue(root, "ds_support", 0) ? true : false;
 
-	caps.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
-	caps.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
-	caps.frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
+	ret.bc4_support = RetrieveNodeValue(root, "bc4_support", 0) ? true : false;
+	ret.bc5_support = RetrieveNodeValue(root, "bc5_support", 0) ? true : false;
+	ret.frag_depth_support = RetrieveNodeValue(root, "frag_depth_support", 0) ? true : false;
 
-	return caps;
+	return ret;
 }
 
 int main(int argc, char* argv[])
 {
 	if (argc < 2)
 	{
-		cout << "Usage: FXMLJIT pc_dx11|pc_dx10|pc_dx9|win_tegra3|pc_gl4|pc_gl3|pc_gl2|android_tegra3|ios xxx.fxml [target folder]" << endl;
+		cout << "Usage: FXMLJIT d3d_12_1|d3d_12_0|d3d_11_1|d3d_11_0|gl_4_6|gl_4_5|gl_4_4|gl_4_3|gl_4_2|gl_4_1|gles_3_2|gles_3_1|gles_3_0 xxx.fxml [target folder]" << endl;
 		return 1;
 	}
 
 	ResLoader::Instance().AddPath("../../Tools/media/PlatformDeployer");
 
 	std::string platform = argv[1];
-
-	if (("pc_dx11" == platform) || ("pc_dx10" == platform) || ("pc_dx9" == platform) || ("win_tegra3" == platform)
-		|| ("pc_gl4" == platform) || ("pc_gl3" == platform) || ("pc_gl2" == platform)
-		|| ("android_tegra3" == platform) || ("ios" == platform))
-	{
-		if ("pc_dx11" == platform)
-		{
-			platform = "d3d_11_0";
-		}
-		else if ("pc_dx10" == platform)
-		{
-			platform = "d3d_10_0";
-		}
-		else if ("pc_dx9" == platform)
-		{
-			platform = "d3d_9_3";
-		}
-		else if ("win_tegra3" == platform)
-		{
-			platform = "d3d_9_1";
-		}
-		else if ("pc_gl4" == platform)
-		{
-			platform = "gl_4_0";
-		}
-		else if ("pc_gl3" == platform)
-		{
-			platform = "gl_3_0";
-		}
-		else if ("pc_gl2" == platform)
-		{
-			platform = "gl_2_0";
-		}
-		else if ("android_tegra3" == platform)
-		{
-			platform = "gles_2_0";
-		}
-		else if ("ios" == platform)
-		{
-			platform = "gles_2_0";
-		}
-	}
 
 	boost::algorithm::to_lower(platform);
 
@@ -194,7 +191,62 @@ int main(int argc, char* argv[])
 		target_folder = argv[3];
 	}
 
-	Offline::OfflineRenderDeviceCaps caps = LoadPlatformConfig(platform);
+	Context::Instance().LoadCfg("KlayGE.cfg");
+	ContextCfg context_cfg = Context::Instance().Config();
+	context_cfg.render_factory_name = "NullRender";
+	context_cfg.graphics_cfg.hide_win = true;
+	context_cfg.graphics_cfg.hdr = false;
+	context_cfg.graphics_cfg.ppaa = false;
+	context_cfg.graphics_cfg.gamma = false;
+	context_cfg.graphics_cfg.color_grading = false;
+	Context::Instance().Config(context_cfg);
+
+	PlatformDefinition plat = LoadPlatformConfig(platform);
+
+	// We only care about some fields
+	RenderDeviceCaps device_caps{};
+
+	device_caps.max_shader_model = plat.max_shader_model;
+
+	device_caps.max_texture_depth = plat.max_texture_depth;
+	device_caps.max_texture_array_length = plat.max_texture_array_length;
+	device_caps.max_pixel_texture_units = plat.max_pixel_texture_units;
+	device_caps.max_simultaneous_rts = plat.max_simultaneous_rts;
+
+	device_caps.fp_color_support = plat.fp_color_support;
+	device_caps.pack_to_rgba_required = plat.pack_to_rgba_required;
+	device_caps.render_to_texture_array_support = plat.render_to_texture_array_support;
+
+	device_caps.gs_support = plat.gs_support;
+	device_caps.cs_support = plat.cs_support;
+	device_caps.hs_support = plat.hs_support;
+	device_caps.ds_support = plat.ds_support;
+
+	std::vector<ElementFormat> texture_format;
+	if (plat.bc4_support)
+	{
+		texture_format.push_back(EF_BC4);
+		texture_format.push_back(EF_BC4_SRGB);
+	}
+	if (plat.bc5_support)
+	{
+		texture_format.push_back(EF_BC5);
+		texture_format.push_back(EF_BC5_SRGB);
+	}
+
+	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
+	int major_version = plat.major_version;
+	int minor_version = plat.minor_version;
+	bool frag_depth_support = plat.frag_depth_support;
+	re.SetCustomAttrib("PLATFORM", &plat.platform);
+	re.SetCustomAttrib("MAJOR_VERSION", &major_version);
+	re.SetCustomAttrib("MINOR_VERSION", &minor_version);
+	re.SetCustomAttrib("NATIVE_SHADER_FOURCC", &plat.native_shader_fourcc);
+	re.SetCustomAttrib("NATIVE_SHADER_VERSION", &plat.native_shader_version);
+	re.SetCustomAttrib("REQUIRES_FLIPPING", &plat.requires_flipping);
+	re.SetCustomAttrib("DEVICE_CAPS", &device_caps);
+	re.SetCustomAttrib("TEXTURE_FORMAT", &texture_format);
+	re.SetCustomAttrib("FRAG_DEPTH_SUPPORT", &frag_depth_support);
 
 	std::string fxml_name(argv[2]);
 	filesystem::path fxml_path(fxml_name);
@@ -204,48 +256,8 @@ int main(int argc, char* argv[])
 
 	filesystem::path kfx_name(base_name + ".kfx");
 	filesystem::path kfx_path = fxml_directory / kfx_name;
-	bool skip_jit = false;
-	if (filesystem::exists(kfx_path))
 	{
-		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
-		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
-
-		uint64_t src_timestamp = source->Timestamp();
-
-		uint32_t fourcc;
-		kfx_source->read(&fourcc, sizeof(fourcc));
-		fourcc = LE2Native(fourcc);
-
-		uint32_t ver;
-		kfx_source->read(&ver, sizeof(ver));
-		ver = LE2Native(ver);
-
-		if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
-		{
-			uint32_t shader_fourcc;
-			kfx_source->read(&shader_fourcc, sizeof(shader_fourcc));
-			shader_fourcc = LE2Native(shader_fourcc);
-
-			uint32_t shader_ver;
-			kfx_source->read(&shader_ver, sizeof(shader_ver));
-			shader_ver = LE2Native(shader_ver);
-
-			if ((caps.native_shader_fourcc == shader_fourcc) && (caps.native_shader_version == shader_ver))
-			{
-				uint64_t timestamp;
-				kfx_source->read(&timestamp, sizeof(timestamp));
-				timestamp = LE2Native(timestamp);
-				if (src_timestamp <= timestamp)
-				{
-					skip_jit = true;
-				}
-			}
-		}
-	}
-
-	if (!skip_jit)
-	{
-		Offline::RenderEffect effect(caps);
+		RenderEffect effect;
 		effect.Load(fxml_name);
 	}
 	if (!target_folder.empty())
