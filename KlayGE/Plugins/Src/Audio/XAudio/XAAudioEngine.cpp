@@ -87,6 +87,7 @@ namespace KlayGE
 	XAAudioEngine::XAAudioEngine()
 		: listener_{}
 	{
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		mod_xaudio2_ = ::LoadLibraryEx(TEXT(XAUDIO2_DLL_A), nullptr, 0);
 		if (nullptr == mod_xaudio2_)
 		{
@@ -99,6 +100,11 @@ namespace KlayGE
 			DynamicX3DAudioInitialize_ = reinterpret_cast<X3DAudioInitializeFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioInitialize"));
 			DynamicX3DAudioCalculate_ = reinterpret_cast<X3DAudioCalculateFunc>(::GetProcAddress(mod_xaudio2_, "X3DAudioCalculate"));
 		}
+#else
+		DynamicXAudio2Create_ = ::XAudio2Create;
+		DynamicX3DAudioInitialize_ = ::X3DAudioInitialize;
+		DynamicX3DAudioCalculate_ = ::X3DAudioCalculate;
+#endif
 
 		IXAudio2* xaudio = nullptr;
 		TIFHR(DynamicXAudio2Create_(&xaudio, 0, Processor1));
@@ -128,7 +134,9 @@ namespace KlayGE
 		mastering_voice_.reset();
 		xaudio_.reset();
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		::FreeLibrary(mod_xaudio2_);
+#endif
 	}
 
 	void XAAudioEngine::X3DAudioCalculate(X3DAUDIO_EMITTER const * emitter, uint32_t flags, X3DAUDIO_DSP_SETTINGS* dsp_settings) const
