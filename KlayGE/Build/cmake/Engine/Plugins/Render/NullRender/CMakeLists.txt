@@ -12,6 +12,7 @@ SET(NULL_RE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/NullRender/NullRenderFactory.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/NullRender/NullRenderStateObject.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/NullRender/NullShaderObject.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Render/NullRender/NullTexture.cpp
 )
 
 SET(NULL_RE_HEADER_FILES
@@ -20,6 +21,7 @@ SET(NULL_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderFactoryInternal.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullShaderObject.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullTexture.hpp
 )
 
 SOURCE_GROUP("Source Files" FILES ${NULL_RE_SOURCE_FILES})

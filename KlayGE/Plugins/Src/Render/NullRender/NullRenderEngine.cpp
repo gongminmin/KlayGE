@@ -32,12 +32,6 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Hash.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-#include <KlayGE/SALWrapper.hpp>
-#include <d3dcompiler.h>
-#include <d3d11shader.h>
-#endif
-
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 
 namespace KlayGE

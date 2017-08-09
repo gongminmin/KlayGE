@@ -33,6 +33,7 @@
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 #include <KlayGE/NullRender/NullRenderStateObject.hpp>
 #include <KlayGE/NullRender/NullShaderObject.hpp>
+#include <KlayGE/NullRender/NullTexture.hpp>
 
 #include <KlayGE/NullRender/NullRenderFactory.hpp>
 #include <KlayGE/NullRender/NullRenderFactoryInternal.hpp>
@@ -56,10 +57,7 @@ namespace KlayGE
 		KFL_UNUSED(num_mip_maps);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(format);
-		KFL_UNUSED(sample_count);
-		KFL_UNUSED(sample_quality);
-		KFL_UNUSED(access_hint);
-		return TexturePtr();
+		return MakeSharedPtr<NullTexture>(Texture::TT_1D, sample_count, sample_quality, access_hint);
 	}
 	TexturePtr NullRenderFactory::MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
@@ -69,10 +67,7 @@ namespace KlayGE
 		KFL_UNUSED(num_mip_maps);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(format);
-		KFL_UNUSED(sample_count);
-		KFL_UNUSED(sample_quality);
-		KFL_UNUSED(access_hint);
-		return TexturePtr();
+		return MakeSharedPtr<NullTexture>(Texture::TT_2D, sample_count, sample_quality, access_hint);
 	}
 	TexturePtr NullRenderFactory::MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
@@ -83,10 +78,7 @@ namespace KlayGE
 		KFL_UNUSED(num_mip_maps);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(format);
-		KFL_UNUSED(sample_count);
-		KFL_UNUSED(sample_quality);
-		KFL_UNUSED(access_hint);
-		return TexturePtr();
+		return MakeSharedPtr<NullTexture>(Texture::TT_3D, sample_count, sample_quality, access_hint);
 	}
 	TexturePtr NullRenderFactory::MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 			ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint)
@@ -95,10 +87,7 @@ namespace KlayGE
 		KFL_UNUSED(num_mip_maps);
 		KFL_UNUSED(array_size);
 		KFL_UNUSED(format);
-		KFL_UNUSED(sample_count);
-		KFL_UNUSED(sample_quality);
-		KFL_UNUSED(access_hint);
-		return TexturePtr();
+		return MakeSharedPtr<NullTexture>(Texture::TT_Cube, sample_count, sample_quality, access_hint);
 	}
 
 	FrameBufferPtr NullRenderFactory::MakeFrameBuffer()
