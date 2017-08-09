@@ -61,7 +61,7 @@ namespace KlayGE
 			DynamicD3D12SerializeRootSignature_ = reinterpret_cast<D3D12SerializeRootSignatureFunc>(::GetProcAddress(mod_d3d12_, "D3D12SerializeRootSignature"));
 		}
 #else
-		DynamicCreateDXGIFactory1_ = ::CreateDXGIFactory1;
+		DynamicCreateDXGIFactory2_ = ::CreateDXGIFactory2;
 		DynamicD3D12CreateDevice_ = ::D3D12CreateDevice;
 		DynamicD3D12GetDebugInterface_ = ::D3D12GetDebugInterface;
 		DynamicD3D12SerializeRootSignature_ = ::D3D12SerializeRootSignature;
