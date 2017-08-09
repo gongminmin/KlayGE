@@ -256,6 +256,52 @@ int main(int argc, char* argv[])
 
 	filesystem::path kfx_name(base_name + ".kfx");
 	filesystem::path kfx_path = fxml_directory / kfx_name;
+	bool skip_jit = false;
+	if (filesystem::exists(kfx_path))
+	{
+		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
+		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
+
+		uint64_t src_timestamp = source->Timestamp();
+
+		uint32_t fourcc;
+		kfx_source->read(&fourcc, sizeof(fourcc));
+		fourcc = LE2Native(fourcc);
+
+		uint32_t ver;
+		kfx_source->read(&ver, sizeof(ver));
+		ver = LE2Native(ver);
+
+		if ((MakeFourCC<'K', 'F', 'X', ' '>::value == fourcc) && (KFX_VERSION == ver))
+		{
+			uint32_t shader_fourcc;
+			kfx_source->read(&shader_fourcc, sizeof(shader_fourcc));
+			shader_fourcc = LE2Native(shader_fourcc);
+
+			uint32_t shader_ver;
+			kfx_source->read(&shader_ver, sizeof(shader_ver));
+			shader_ver = LE2Native(shader_ver);
+
+			uint8_t shader_platform_name_len;
+			kfx_source->read(&shader_platform_name_len, sizeof(shader_platform_name_len));
+			std::string shader_platform_name(shader_platform_name_len, 0);
+			kfx_source->read(&shader_platform_name[0], shader_platform_name_len);
+
+			if ((re.NativeShaderFourCC() == shader_fourcc) && (re.NativeShaderVersion() == shader_ver)
+				&& (re.NativeShaderPlatformName() == shader_platform_name))
+			{
+				uint64_t timestamp;
+				kfx_source->read(&timestamp, sizeof(timestamp));
+				timestamp = LE2Native(timestamp);
+				if (src_timestamp <= timestamp)
+				{
+					skip_jit = true;
+				}
+			}
+		}
+	}
+
+	if (!skip_jit)
 	{
 		RenderEffect effect;
 		effect.Load(fxml_name);
