@@ -142,6 +142,7 @@ namespace KlayGE
 			uint32_t vs_signature_;
 		};
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		struct OGLShaderObjectTemplate : public NullShaderObjectTemplate
 		{
 			OGLShaderObjectTemplate();
@@ -159,6 +160,7 @@ namespace KlayGE
 			int32_t gs_input_type_, gs_output_type_, gs_max_output_vertex_;	// Only in GL
 			uint32_t ds_partitioning_, ds_output_primitive_;
 		};
+#endif
 
 	public:
 		explicit NullShaderObject(std::shared_ptr<NullShaderObjectTemplate> const & so_template);

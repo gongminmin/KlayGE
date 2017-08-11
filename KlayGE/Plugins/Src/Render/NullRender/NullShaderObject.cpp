@@ -41,25 +41,28 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <glloader/glloader.h>
-
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KlayGE/SALWrapper.hpp>
 #include <d3dcompiler.h>
 #endif
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
+#include <glloader/glloader.h>
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
+#endif
 
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 #include <KlayGE/NullRender/NullShaderObject.hpp>
 
 namespace KlayGE
 {
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 	NullShaderObject::OGLShaderObjectTemplate::OGLShaderObjectTemplate()
 		: gs_input_type_(0), gs_output_type_(0), gs_max_output_vertex_(0),
 			ds_partitioning_(STP_Undefined), ds_output_primitive_(STOP_Undefined)
 	{
 	}
+#endif
 
 	NullShaderObject::NullShaderObject()
 	{
@@ -74,6 +77,7 @@ namespace KlayGE
 			so_template_ = MakeSharedPtr<D3D11ShaderObjectTemplate>();
 			so_template_->as_d3d12_ = true;
 		}
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		else if (re.NativeShaderPlatformName().find("gl_") == 0)
 		{
 			so_template_ = MakeSharedPtr<OGLShaderObjectTemplate>();
@@ -84,6 +88,7 @@ namespace KlayGE
 			so_template_ = MakeSharedPtr<OGLShaderObjectTemplate>();
 			so_template_->as_gles_ = true;
 		}
+#endif
 
 		has_discard_ = true;
 		has_tessellation_ = false;
@@ -298,9 +303,9 @@ namespace KlayGE
 		// D3D11ShaderObject::CompiteToBytecode
 		// D3D12ShaderObject::CompiteToBytecode
 
+#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		auto d3d_so_template = checked_cast<D3D11ShaderObjectTemplate*>(so_template_.get());
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		auto const & re = *checked_cast<NullRenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		auto const & caps = re.DeviceCaps();
 
@@ -781,6 +786,7 @@ namespace KlayGE
 		// OGLShaderObject::StreamOut
 		// OGLESShaderObject::StreamOut
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		auto ogl_so_template = checked_cast<OGLShaderObjectTemplate*>(so_template_.get());
 
 		std::vector<uint8_t> native_shader_block;
@@ -887,6 +893,10 @@ namespace KlayGE
 		{
 			os.write(reinterpret_cast<char const *>(&native_shader_block[0]), len * sizeof(native_shader_block[0]));
 		}
+#else
+		KFL_UNUSED(os);
+		KFL_UNUSED(type);
+#endif
 	}
 
 	void NullShaderObject::OGLAttachShader(ShaderType type, RenderEffect const & effect,
@@ -895,6 +905,7 @@ namespace KlayGE
 		// OGLShaderObject::AttachShader
 		// OGLESShaderObject::AttachShader
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		auto ogl_so_template = checked_cast<OGLShaderObjectTemplate*>(so_template_.get());
 
 		ShaderDesc const & sd = effect.GetShaderDesc(shader_desc_ids[type]);
@@ -1387,6 +1398,13 @@ namespace KlayGE
 				}
 			}
 		}
+#else
+		KFL_UNUSED(type);
+		KFL_UNUSED(effect);
+		KFL_UNUSED(tech);
+		KFL_UNUSED(pass);
+		KFL_UNUSED(shader_desc_ids);
+#endif
 	}
 
 	void NullShaderObject::OGLAttachShader(ShaderType type, RenderEffect const & effect,
@@ -1399,6 +1417,7 @@ namespace KlayGE
 		KFL_UNUSED(tech);
 		KFL_UNUSED(pass);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		auto so = checked_cast<NullShaderObject*>(shared_so.get());
 
 		auto ogl_so_template = checked_cast<OGLShaderObjectTemplate*>(so_template_.get());
@@ -1454,6 +1473,10 @@ namespace KlayGE
 				}
 			}
 		}
+#else
+		KFL_UNUSED(type);
+		KFL_UNUSED(shared_so);
+#endif
 	}
 
 	void NullShaderObject::OGLLinkShaders(RenderEffect const & effect)
@@ -1463,6 +1486,7 @@ namespace KlayGE
 
 		KFL_UNUSED(effect);
 
+#ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		auto ogl_so_template = checked_cast<OGLShaderObjectTemplate*>(so_template_.get());
 
 		is_validate_ = true;
@@ -1473,5 +1497,6 @@ namespace KlayGE
 				is_validate_ &= is_shader_validate_[type];
 			}
 		}
+#endif
 	}
 }
