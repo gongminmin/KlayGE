@@ -530,7 +530,7 @@ namespace KlayGE
 	{
 		if (attr_ != nullptr)
 		{
-			auto xml_attr = static_cast<rapidxml::xml_attribute<>*>(attr_);
+			auto const xml_attr = static_cast<rapidxml::xml_attribute<>*>(attr_);
 			name_ = std::string(xml_attr->name(), xml_attr->name_size());
 			value_ = std::string(xml_attr->value(), xml_attr->value_size());
 		}

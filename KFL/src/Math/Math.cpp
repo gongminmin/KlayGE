@@ -139,7 +139,7 @@ namespace KlayGE
 		{
 			float const threehalfs = 1.5f;
 
-			float x2 = number * 0.5f;
+			float const x2 = number * 0.5f;
 			union FNI
 			{
 				float f;
@@ -623,7 +623,7 @@ namespace KlayGE
 			temp.z() = (winVec.z() - nearPlane) / (farPlane - nearPlane);
 			temp.w() = clipW;
 
-			Matrix4_T<T> mat(inverse(world * view * proj));
+			Matrix4_T<T> const mat(inverse(world * view * proj));
 			temp = transform(temp, mat);
 
 			return Vector_T<T, 3>(temp.x(), temp.y(), temp.z()) / temp.w();
@@ -1074,7 +1074,7 @@ namespace KlayGE
 		template <typename T>
 		Matrix4_T<T> rotation(T const & angle, T const & x, T const & y, T const & z) noexcept
 		{
-			Quaternion_T<T> quat(rotation_axis(Vector_T<T, 3>(x, y, z), angle));
+			Quaternion_T<T> const quat(rotation_axis(Vector_T<T, 3>(x, y, z), angle));
 			return to_matrix(quat);
 		}
 
@@ -1083,9 +1083,9 @@ namespace KlayGE
 		template <typename T>
 		Matrix4_T<T> rotation_matrix_yaw_pitch_roll(T const & yaw, T const & pitch, T const & roll) noexcept
 		{
-			Matrix4_T<T> rotX(rotation_x(pitch));
-			Matrix4_T<T> rotY(rotation_y(yaw));
-			Matrix4_T<T> rotZ(rotation_z(roll));
+			Matrix4_T<T> const rotX(rotation_x(pitch));
+			Matrix4_T<T> const rotY(rotation_y(yaw));
+			Matrix4_T<T> const rotZ(rotation_z(roll));
 			return rotZ * rotX * rotY;
 		}
 
@@ -1366,8 +1366,8 @@ namespace KlayGE
 		template <typename T>
 		Quaternion_T<T> axis_to_axis(Vector_T<T, 3> const & from, Vector_T<T, 3> const & to) noexcept
 		{
-			Vector_T<T, 3> a(normalize(from));
-			Vector_T<T, 3> b(normalize(to));
+			Vector_T<T, 3> const a(normalize(from));
+			Vector_T<T, 3> const b(normalize(to));
 
 			return unit_axis_to_unit_axis(a, b);
 		}
@@ -1817,7 +1817,7 @@ namespace KlayGE
 		template <typename T>
 		Plane_T<T> from_points(Vector_T<T, 3> const & v0, Vector_T<T, 3> const & v1, Vector_T<T, 3> const & v2) noexcept
 		{
-			Vector_T<T, 3> vec(cross(v1 - v0, v2 - v0));
+			Vector_T<T, 3> const vec(cross(v1 - v0, v2 - v0));
 			return from_point_normal(v0, normalize(vec));
 		}
 
@@ -2030,7 +2030,7 @@ namespace KlayGE
 					int i2;
 					for (i2 = i0; i2 <= 3 - 2; ++ i2)
 					{
-						value_type tmp = abs(diagonal[i2]) + abs(diagonal[i2+1]);
+						value_type const tmp = abs(diagonal[i2]) + abs(diagonal[i2+1]);
 
 						if (abs(sub_diagonal[i2]) + tmp == tmp)
 						{
@@ -2295,7 +2295,7 @@ namespace KlayGE
 			Vector_T<T, 3> const extent_z = extent.z() * obb.Axis(2);
 			for (int i = 0; i < 8; ++ i)
 			{
-				Vector_T<T, 3> corner = center + ((i & 1) ? extent_x : -extent_x)
+				Vector_T<T, 3> const corner = center + ((i & 1) ? extent_x : -extent_x)
 					+ ((i & 2) ? extent_y : -extent_y) + ((i & 4) ? extent_z : -extent_z);
 
 				min = minimize(min, corner);
@@ -2335,7 +2335,7 @@ namespace KlayGE
 			min = max = transform_quat(aabb.Corner(0) * scale, rot) + trans;
 			for (size_t j = 1; j < 8; ++ j)
 			{
-				Vector_T<T, 3> vec = transform_quat(aabb.Corner(j) * scale, rot) + trans;
+				Vector_T<T, 3> const vec = transform_quat(aabb.Corner(j) * scale, rot) + trans;
 				min = minimize(min, vec);
 				max = maximize(max, vec);
 			}
@@ -2431,7 +2431,7 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_point_obb(Vector_T<T, 3> const & v, OBBox_T<T> const & obb) noexcept
 		{
-			Vector_T<T, 3> d = v - obb.Center();
+			Vector_T<T, 3> const d = v - obb.Center();
 			return (dot(d, obb.Axis(0)) <= obb.HalfSize().x())
 				&& (dot(d, obb.Axis(1)) <= obb.HalfSize().y())
 				&& (dot(d, obb.Axis(2)) <= obb.HalfSize().z());
@@ -2519,12 +2519,12 @@ namespace KlayGE
 			T t_near = T(-1e10);
 			T t_far = T(+1e10);
 			
-			Vector_T<T, 3> p = obb.Center() - orig;
+			Vector_T<T, 3> const p = obb.Center() - orig;
 			Vector_T<T, 3> const & extent = obb.HalfSize();
 			for (int i = 0; i < 3; ++ i)
 			{
-				T e = dot(obb.Axis(i), p);
-				T f = dot(obb.Axis(i), dir);
+				T const e = dot(obb.Axis(i), p);
+				T const f = dot(obb.Axis(i), dir);
 				if (equal(f, T(0)))
 				{
 					if ((e < -extent[i]) || (e > extent[i]))
@@ -2605,8 +2605,8 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_aabb_sphere(AABBox_T<T> const & lhs, Sphere_T<T> const & sphere) noexcept
 		{
-			Vector_T<T, 3> half_size = lhs.HalfSize();
-			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
+			Vector_T<T, 3> const half_size = lhs.HalfSize();
+			Vector_T<T, 3> const d = sphere.Center() - lhs.Center();
 			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
 			for (int i = 0; i < 3; ++ i)
 			{
@@ -2624,7 +2624,7 @@ namespace KlayGE
 				closest_point_on_obb += dist * axis;
 			}
 
-			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+			Vector_T<T, 3> const v = closest_point_on_obb - sphere.Center();
 			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
@@ -2664,8 +2664,8 @@ namespace KlayGE
 			// Test the three major axes of this OBB.
 			for (int i = 0; i < 3; ++ i)
 			{
-				T ra = lr[i];
-				T rb = rr[0] * abs_r_mat(i, 0) +  rr[1] * abs_r_mat(i, 1) + rr[2] * abs_r_mat(i, 2);
+				T const ra = lr[i];
+				T const rb = rr[0] * abs_r_mat(i, 0) +  rr[1] * abs_r_mat(i, 1) + rr[2] * abs_r_mat(i, 2);
 				if (MathLib::abs(t[i]) > ra + rb) 
 				{
 					return false;
@@ -2675,8 +2675,8 @@ namespace KlayGE
 			// Test the three major axes of the OBB b.
 			for (int i = 0; i < 3; ++ i)
 			{
-				T ra = lr[0] * abs_r_mat(0, i) + lr[1] * abs_r_mat(1, i) + lr[2] * abs_r_mat(2, i);
-				T rb = rr[i];
+				T const ra = lr[0] * abs_r_mat(0, i) + lr[1] * abs_r_mat(1, i) + lr[2] * abs_r_mat(2, i);
+				T const rb = rr[i];
 				if (MathLib::abs(t.x() * r_mat(0, i) + t.y() * r_mat(1, i) + t.z() * r_mat(2, i)) > ra + rb)
 				{
 					return false;
@@ -2765,7 +2765,7 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_obb_sphere(OBBox_T<T> const & lhs, Sphere_T<T> const & sphere) noexcept
 		{
-			Vector_T<T, 3> d = sphere.Center() - lhs.Center();
+			Vector_T<T, 3> const d = sphere.Center() - lhs.Center();
 			Vector_T<T, 3> closest_point_on_obb = lhs.Center();
 			for (int i = 0; i < 3; ++ i)
 			{
@@ -2781,7 +2781,7 @@ namespace KlayGE
 				closest_point_on_obb += dist * lhs.Axis(i);
 			}
 
-			Vector_T<T, 3> v = closest_point_on_obb - sphere.Center();
+			Vector_T<T, 3> const v = closest_point_on_obb - sphere.Center();
 			return length_sq(v) <= sphere.Radius() * sphere.Radius();
 		}
 
@@ -2790,8 +2790,8 @@ namespace KlayGE
 		template <typename T>
 		bool intersect_sphere_sphere(Sphere_T<T> const & lhs, Sphere_T<T> const & sphere) noexcept
 		{
-			Vector_T<T, 3> d = lhs.Center() - sphere.Center();
-			float r = lhs.Radius() + sphere.Radius();
+			Vector_T<T, 3> const d = lhs.Center() - sphere.Center();
+			float const r = lhs.Radius() + sphere.Radius();
 			return length_sq(d) <= r * r;
 		}
 
@@ -2835,7 +2835,7 @@ namespace KlayGE
 			Vector_T<T, 3> max_pt = min_pt;
 			for (int i = 1; i < 8; ++ i)
 			{
-				Vector_T<T, 3> corner = obb.Corner(i);
+				Vector_T<T, 3> const corner = obb.Corner(i);
 
 				min_pt = minimize(min_pt, corner);
 				max_pt = maximize(max_pt, corner);
@@ -2873,7 +2873,7 @@ namespace KlayGE
 			{
 				Plane_T<T> const & plane = frustum.FrustumPlane(i);
 
-				float d = dot_coord(plane, sphere.Center());
+				float const d = dot_coord(plane, sphere.Center());
 				if (d <= -sphere.Radius())
 				{
 					return BO_No;
@@ -2957,18 +2957,18 @@ namespace KlayGE
 			{
 				for (int j = 0; j < 6; ++ j)
 				{
-					Vector_T<T, 3> Axis = cross(edge_axis_l[i], edge_axis_r[j]);
+					Vector_T<T, 3> const axis = cross(edge_axis_l[i], edge_axis_r[j]);
 
 					T min_l, max_l, min_r, max_r;
-					min_l = max_l = dot(Axis, rhs.Corner(0));
-					min_r = max_r = dot(Axis, lhs.Corner(0));
+					min_l = max_l = dot(axis, rhs.Corner(0));
+					min_r = max_r = dot(axis, lhs.Corner(0));
 					for (int k = 1; k < 8; ++ k)
 					{
-						T tmp = dot(Axis, rhs.Corner(k));
+						T tmp = dot(axis, rhs.Corner(k));
 						min_l = std::min(min_l, tmp);
 						max_l = std::max(max_l, tmp);
 
-						tmp = dot(Axis, lhs.Corner(k));
+						tmp = dot(axis, lhs.Corner(k));
 						min_r = std::min(min_r, tmp);
 						max_r = std::max(max_r, tmp);
 					}
@@ -2996,11 +2996,11 @@ namespace KlayGE
 						T& t, T& u, T& v) noexcept
 		{
 			// Find vectors for two edges sharing vert0
-			Vector_T<T, 3> edge1 = v1 - v0;
-			Vector_T<T, 3> edge2 = v2 - v0;
+			Vector_T<T, 3> const edge1 = v1 - v0;
+			Vector_T<T, 3> const edge2 = v2 - v0;
 
 			// Begin calculating determinant - also used to calculate U parameter
-			Vector_T<T, 3> pvec(cross(ray_dir, edge2));
+			Vector_T<T, 3> const pvec(cross(ray_dir, edge2));
 
 			// If determinant is near zero, ray lies in plane of triangle
 			T det = dot(edge1, pvec);
@@ -3020,7 +3020,7 @@ namespace KlayGE
 			u = dot(tvec, pvec);
 
 			// Prepare to test V parameter
-			Vector_T<T, 3> qvec(cross(tvec, edge1));
+			Vector_T<T, 3> const qvec(cross(tvec, edge1));
 
 			// Calculate V parameter
 			v = dot(ray_dir, qvec);
@@ -3150,10 +3150,10 @@ namespace KlayGE
 		template <typename T>
 		std::pair<Quaternion_T<T>, Quaternion_T<T>> inverse(Quaternion_T<T> const & real, Quaternion_T<T> const & dual) noexcept
 		{
-			float sqr_len_0 = dot(real, real);
-			float sqr_len_e = 2.0f * dot(real, dual);
-			float inv_sqr_len_0 = 1.0f / sqr_len_0;
-			float inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
+			float const sqr_len_0 = dot(real, real);
+			float const sqr_len_e = 2.0f * dot(real, dual);
+			float const inv_sqr_len_0 = 1.0f / sqr_len_0;
+			float const inv_sqr_len_e = -sqr_len_e / (sqr_len_0 * sqr_len_0);
 			std::pair<Quaternion_T<T>, Quaternion_T<T>> conj = conjugate(real, dual);
 			return std::make_pair(inv_sqr_len_0 * conj.first, inv_sqr_len_0 * conj.second + inv_sqr_len_e * conj.first);
 		}
@@ -3209,7 +3209,7 @@ namespace KlayGE
 			{ 
 				angle = 2 * acos(real.w());
 
-				float s = length_sq(real.v());
+				float const s = length_sq(real.v());
 				if (s < T(1e-6))
 				{
 					dir = Vector_T<T, 3>::Zero();
@@ -3248,7 +3248,7 @@ namespace KlayGE
 			Quaternion_T<T> const & rhs_real, Quaternion_T<T> const & rhs_dual, T s) noexcept
 		{
 			// Make sure dot product is >= 0
-			float quat_dot = dot(lhs_real, rhs_real);
+			float const quat_dot = dot(lhs_real, rhs_real);
 			Quaternion to_sign_corrected_real = rhs_real;
 			Quaternion to_sign_corrected_dual = rhs_dual;
 			if (quat_dot < 0)

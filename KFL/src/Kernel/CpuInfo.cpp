@@ -272,7 +272,7 @@ namespace KlayGE
 		Cpuid cpuid;
 
 		cpuid.Call(0);
-		uint32_t max_std_fn = cpuid.Eax();
+		uint32_t const max_std_fn = cpuid.Eax();
 
 		cpu_string_.resize(12);
 		uint32_t temp = cpuid.Ebx();
@@ -282,8 +282,8 @@ namespace KlayGE
 		temp = cpuid.Ecx();
 		memcpy(&cpu_string_[8], &temp, sizeof(temp));
 
-		bool is_intel = (&GenuineIntel[0] == cpu_string_);
-		bool is_amd = (&AuthenticAMD[0] == cpu_string_);
+		bool const is_intel = (&GenuineIntel[0] == cpu_string_);
+		bool const is_amd = (&AuthenticAMD[0] == cpu_string_);
 
 		KFL_UNUSED(is_intel);
 
@@ -318,7 +318,7 @@ namespace KlayGE
 		}
 
 		cpuid.Call(0x80000000);
-		uint32_t max_ext_fn = cpuid.Eax();
+		uint32_t const max_ext_fn = cpuid.Eax();
 		if (max_ext_fn & 0x80000000)
 		{
 			if (max_ext_fn >= 0x80000001)

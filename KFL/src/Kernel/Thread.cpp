@@ -207,7 +207,7 @@ namespace KlayGE
 		general_cleanup_ = true;
 
 		// Wake up queued threads
-		size_t num_cached = threads_.size();
+		size_t const num_cached = threads_.size();
 		for (size_t i = 0; i < num_cached; ++ i)
 		{
 			threads_.back()->kill();

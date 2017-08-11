@@ -544,8 +544,8 @@ namespace KlayGE
 
 		SIMDVectorF4 Refract(SIMDVectorF4 const & incident, SIMDVectorF4 const & normal, float refraction_index)
 		{
-			float t = GetX(DotVector3(incident, normal));
-			float r = 1 - refraction_index * refraction_index * (1 - t * t);
+			float const t = GetX(DotVector3(incident, normal));
+			float const r = 1 - refraction_index * refraction_index * (1 - t * t);
 
 			if (r < 0)
 			{
@@ -554,7 +554,7 @@ namespace KlayGE
 			}
 			else
 			{
-				float s = refraction_index * t + sqrt(std::abs(r));
+				float const s = refraction_index * t + sqrt(std::abs(r));
 				return refraction_index * incident - s * normal;
 			}
 		}
@@ -863,7 +863,7 @@ namespace KlayGE
 				(GetZ(win_vec) - near_plane) / (far_plane - near_plane),
 				clip_w);
 
-			SIMDMatrixF4 mat(Inverse(world * view * proj));
+			SIMDMatrixF4 const mat(Inverse(world * view * proj));
 			temp = TransformVector4(temp, mat);
 
 			ret = SetVector(GetX(temp), GetY(temp), GetZ(temp), 0.0f) / GetW(temp);
@@ -1324,9 +1324,9 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			// TODO
 #endif
-			SIMDVectorF4 z_axis = NormalizeVector3(at - eye);
-			SIMDVectorF4 x_axis = NormalizeVector3(CrossVector3(up, z_axis));
-			SIMDVectorF4 y_axis = CrossVector3(z_axis, x_axis);
+			SIMDVectorF4 const z_axis = NormalizeVector3(at - eye);
+			SIMDVectorF4 const x_axis = NormalizeVector3(CrossVector3(up, z_axis));
+			SIMDVectorF4 const y_axis = CrossVector3(z_axis, x_axis);
 
 			ret = SIMDMatrixF4(
 				GetX(x_axis), GetX(y_axis), GetX(z_axis), 0,
@@ -1348,9 +1348,9 @@ namespace KlayGE
 #if defined(SIMD_MATH_SSE)
 			// TODO
 #endif
-			SIMDVectorF4 z_axis = NormalizeVector3(eye - at);
-			SIMDVectorF4 x_axis = NormalizeVector3(CrossVector3(up, z_axis));
-			SIMDVectorF4 y_axis = CrossVector3(z_axis, x_axis);
+			SIMDVectorF4 const z_axis = NormalizeVector3(eye - at);
+			SIMDVectorF4 const x_axis = NormalizeVector3(CrossVector3(up, z_axis));
+			SIMDVectorF4 const y_axis = CrossVector3(z_axis, x_axis);
 
 			ret = SIMDMatrixF4(
 				GetX(x_axis), GetX(y_axis), GetX(z_axis), 0,
@@ -1526,15 +1526,15 @@ namespace KlayGE
 
 		SIMDMatrixF4 Rotation(float angle, float x, float y, float z)
 		{
-			SIMDVectorF4 quat = RotationAxis(SetVector(x, y, z, 0), angle);
+			SIMDVectorF4 const quat = RotationAxis(SetVector(x, y, z, 0), angle);
 			return QuatToMatrix(quat);
 		}
 
 		SIMDMatrixF4 RotationMatrixYawPitchRoll(float yaw, float pitch, float roll)
 		{
-			SIMDMatrixF4 rotX(RotationX(pitch));
-			SIMDMatrixF4 rotY(RotationY(yaw));
-			SIMDMatrixF4 rotZ(RotationZ(roll));
+			SIMDMatrixF4 const rotX(RotationX(pitch));
+			SIMDMatrixF4 const rotY(RotationY(yaw));
+			SIMDMatrixF4 const rotZ(RotationZ(roll));
 			return rotZ * rotX * rotY;
 		}
 
@@ -1740,8 +1740,8 @@ namespace KlayGE
 
 		SIMDVectorF4 AxisToAxis(SIMDVectorF4 const & from, SIMDVectorF4 const & to)
 		{
-			SIMDVectorF4 a = NormalizeVector3(from);
-			SIMDVectorF4 b = NormalizeVector3(to);
+			SIMDVectorF4 const a = NormalizeVector3(from);
+			SIMDVectorF4 const b = NormalizeVector3(to);
 			return UnitAxisToUnitAxis(a, b);
 		}
 
@@ -1762,7 +1762,7 @@ namespace KlayGE
 				{
 					// From http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
 
-					SIMDVectorF4 w = CrossVector3(from, to);
+					SIMDVectorF4 const w = CrossVector3(from, to);
 					return NormalizeVector4(SetVector(GetX(w), GetY(w), GetZ(w), 1 + cos_theta));
 				}
 			}
@@ -1859,12 +1859,12 @@ namespace KlayGE
 		// From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
 		void ToYawPitchRoll(float& yaw, float& pitch, float& roll, SIMDVectorF4 const & quat)
 		{
-			float sqx = GetX(quat) * GetX(quat);
-			float sqy = GetY(quat) * GetY(quat);
-			float sqz = GetZ(quat) * GetZ(quat);
-			float sqw = GetW(quat) * GetW(quat);
-			float unit = sqx + sqy + sqz + sqw;
-			float test = GetW(quat) * GetX(quat) + GetY(quat) * GetZ(quat);
+			float const sqx = GetX(quat) * GetX(quat);
+			float const sqy = GetY(quat) * GetY(quat);
+			float const sqz = GetZ(quat) * GetZ(quat);
+			float const sqw = GetW(quat) * GetW(quat);
+			float const unit = sqx + sqy + sqz + sqw;
+			float const test = GetW(quat) * GetX(quat) + GetY(quat) * GetZ(quat);
 			if (test > 0.499f * unit)
 			{
 				// singularity at north pole
@@ -2112,7 +2112,7 @@ namespace KlayGE
 
 		SIMDVectorF4 FromPoints(SIMDVectorF4 const & v0, SIMDVectorF4 const & v1, SIMDVectorF4 const & v2)
 		{
-			SIMDVectorF4 vec = CrossVector3(v1 - v0, v2 - v0);
+			SIMDVectorF4 const vec = CrossVector3(v1 - v0, v2 - v0);
 			return FromPointNormal(v0, NormalizeVector3(vec));
 		}
 
@@ -2145,7 +2145,7 @@ namespace KlayGE
 		// From Game Programming Gems 5, Section 2.6.
 		void ObliqueClipping(SIMDMatrixF4& proj, SIMDVectorF4 const & clip_plane)
 		{
-			SIMDVectorF4 q = SetVector(
+			SIMDVectorF4 const q = SetVector(
 				(MathLib::sgn(GetX(clip_plane)) - proj(2, 0)) / proj(0, 0),
 				(MathLib::sgn(GetY(clip_plane)) - proj(2, 1)) / proj(1, 1),
 				1,
