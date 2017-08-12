@@ -20,6 +20,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ArrayRef.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Log.hpp>
@@ -235,6 +236,51 @@ namespace KlayGE
 
 	void Context::LoadCfg(std::string const & cfg_file)
 	{
+#if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+		ArrayRef<char const *> available_rfs = { "D3D11", "OpenGL", "OpenGLES", "D3D12" };
+		ArrayRef<char const *> available_afs = { "OpenAL", "DSound", "XAudio" };
+		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
+		ArrayRef<char const *> available_ifs = { "MsgInput" };
+		ArrayRef<char const *> available_sfs = { "DShow" };
+		ArrayRef<char const *> available_scfs = { "Python" };
+#elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
+		ArrayRef<char const *> available_rfs = { "D3D11", "D3D12" };
+		ArrayRef<char const *> available_afs = { "XAudio" };
+		ArrayRef<char const *> available_adsfs = { "" };
+		ArrayRef<char const *> available_ifs = { "MsgInput" };
+		ArrayRef<char const *> available_sfs = { "" };
+		ArrayRef<char const *> available_scfs = { "Python" };
+#elif defined(KLAYGE_PLATFORM_LINUX)
+		ArrayRef<char const *> available_rfs = { "OpenGL" };
+		ArrayRef<char const *> available_afs = { "OpenAL" };
+		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
+		ArrayRef<char const *> available_ifs = { "" };
+		ArrayRef<char const *> available_sfs = { "" };
+		ArrayRef<char const *> available_scfs = { "Python" };
+#elif defined(KLAYGE_PLATFORM_ANDROID)
+		ArrayRef<char const *> available_rfs = { "OpenGLES" };
+		ArrayRef<char const *> available_afs = { "" };
+		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
+		ArrayRef<char const *> available_ifs = { "MsgInput" };
+		ArrayRef<char const *> available_sfs = { "" };
+		ArrayRef<char const *> available_scfs = { "" };
+#elif defined(KLAYGE_PLATFORM_IOS)
+		ArrayRef<char const *> available_rfs = { "OpenGLES" };
+		ArrayRef<char const *> available_afs = { "OpenAL" };
+		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
+		ArrayRef<char const *> available_ifs = { "MsgInput" };
+		ArrayRef<char const *> available_sfs = { "" };
+		ArrayRef<char const *> available_scfs = { "" };
+#elif defined(KLAYGE_PLATFORM_DARWIN)
+		ArrayRef<char const *> available_rfs = { "OpenGL" };
+		ArrayRef<char const *> available_afs = { "OpenAL" };
+		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
+		ArrayRef<char const *> available_ifs = { "MsgInput" };
+		ArrayRef<char const *> available_sfs = { "" };
+		ArrayRef<char const *> available_scfs = { "Python" };
+#endif
+		ArrayRef<char const *> available_sms = { "OCTree" };
+
 		int width = 800;
 		int height = 600;
 		ElementFormat color_fmt = EF_ARGB8;
@@ -260,11 +306,11 @@ namespace KlayGE
 		bool perf_profiler = false;
 		bool location_sensor = false;
 
-		std::string rf_name = "D3D11";
-		std::string af_name = "OpenAL";
-		std::string if_name = "MsgInput";
-		std::string sf_name = "DShow";
-		std::string scf_name = "Python";
+		std::string rf_name;
+		std::string af_name;
+		std::string if_name;
+		std::string sf_name;
+		std::string scf_name;
 		std::string sm_name;
 		std::string adsf_name;
 
@@ -645,31 +691,34 @@ namespace KlayGE
 			}
 		}
 
-#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
-		rf_name = "D3D11";
-		af_name = "XAudio";
-#elif defined(KLAYGE_PLATFORM_LINUX)
-		if (("D3D11" == rf_name) || ("D3D12" == rf_name))
+		if (std::find(available_rfs.begin(), available_rfs.end(), rf_name) == available_rfs.end())
 		{
-			rf_name = "OpenGL";
+			rf_name = available_rfs[0];
 		}
-		if ("DSound" == af_name)
+		if (std::find(available_afs.begin(), available_afs.end(), af_name) == available_afs.end())
 		{
-			af_name = "OpenAL";
+			af_name = available_afs[0];
 		}
-#elif defined(KLAYGE_PLATFORM_ANDROID)
-		rf_name = "OpenGLES";
-		af_name = "OpenAL";
-#elif defined(KLAYGE_PLATFORM_IOS)
-		rf_name = "OpenGLES";
-		af_name = "OpenAL";
-#elif defined(KLAYGE_PLATFORM_DARWIN)
-		if (("D3D11" == rf_name) || ("D3D12" == rf_name))
+		if (std::find(available_adsfs.begin(), available_adsfs.end(), adsf_name) == available_adsfs.end())
 		{
-			rf_name = "OpenGL";
+			adsf_name = available_adsfs[0];
 		}
-		af_name = "OpenAL";
-#endif
+		if (std::find(available_ifs.begin(), available_ifs.end(), if_name) == available_ifs.end())
+		{
+			if_name = available_ifs[0];
+		}
+		if (std::find(available_sfs.begin(), available_sfs.end(), sf_name) == available_sfs.end())
+		{
+			sf_name = available_sfs[0];
+		}
+		if (std::find(available_scfs.begin(), available_scfs.end(), scf_name) == available_scfs.end())
+		{
+			scf_name = available_scfs[0];
+		}
+		if (std::find(available_sms.begin(), available_sms.end(), sm_name) == available_sms.end())
+		{
+			sm_name = available_sms[0];
+		}
 
 		cfg_.render_factory_name = std::move(rf_name);
 		cfg_.audio_factory_name = std::move(af_name);
