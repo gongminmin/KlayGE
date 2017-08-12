@@ -368,6 +368,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		HWND hwnd_;
 		uint32_t device_id_;
+		int2 last_abs_state_;
 #elif defined KLAYGE_PLATFORM_ANDROID
 		int2 last_abs_state_;
 		int2 abs_state_;

@@ -39,6 +39,7 @@ namespace KlayGE
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	MsgInputMouse::MsgInputMouse(HWND hwnd, HANDLE device)
 		: hwnd_(hwnd), device_id_(0xFFFFFFFF),
+			last_abs_state_(0x7FFFFFFF, 0x7FFFFFFF),
 #elif defined KLAYGE_PLATFORM_ANDROID
 	MsgInputMouse::MsgInputMouse()
 		: last_abs_state_(-1, -1), abs_state_(0, 0),
@@ -100,7 +101,23 @@ namespace KlayGE
 			}
 		}
 
-		if (MOUSE_MOVE_RELATIVE == (ri.data.mouse.usFlags & 1UL))
+		if ((ri.data.mouse.usFlags & MOUSE_MOVE_ABSOLUTE) == MOUSE_MOVE_ABSOLUTE)
+		{
+			bool const virtual_desktop = ((ri.data.mouse.usFlags & MOUSE_VIRTUAL_DESKTOP) == MOUSE_VIRTUAL_DESKTOP);
+			int const width = ::GetSystemMetrics(virtual_desktop ? SM_CXVIRTUALSCREEN : SM_CXSCREEN);
+			int const height = ::GetSystemMetrics(virtual_desktop ? SM_CYVIRTUALSCREEN : SM_CYSCREEN);
+			int2 const new_point(static_cast<int>((ri.data.mouse.lLastX / 65535.0f) * width),
+				static_cast<int>((ri.data.mouse.lLastY / 65535.0f) * height));
+			if (last_abs_state_ == int2(0x7FFFFFFF, 0x7FFFFFFF))
+			{
+				last_abs_state_ = new_point;
+			}
+
+			offset_state_.x() += new_point.x() - last_abs_state_.x();
+			offset_state_.y() += new_point.y() - last_abs_state_.y();
+			last_abs_state_ = new_point;
+		}
+		else
 		{
 			offset_state_.x() += ri.data.mouse.lLastX;
 			offset_state_.y() += ri.data.mouse.lLastY;
