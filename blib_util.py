@@ -550,7 +550,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
 
-		build_dir = "%s/Build/%s_%s%d_%s_%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+		build_folder = "%s_%s%d_%s_%s" % (build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
+		build_dir = "%s/Build/%s" % (build_path, build_folder)
 		if build_info.is_clean:
 			print("Cleaning %s..." % name)
 
@@ -572,7 +573,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				cmake_cmd.add_command('@SET PATH=%s;%%PATH%%' % new_path)
 			else:
 				cmake_cmd.add_command('export PATH=$PATH:%s' % new_path)
-			cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, toolset_name, additional_options, "../cmake"))
+			cmake_cmd.add_command('cmake -G "%s" %s %s -DKLAYGE_BUILD_FOLDER="%s" %s' % (compiler_info.generator, toolset_name, additional_options, build_folder, "../cmake"))
 			if cmake_cmd.execute() != 0:
 				log_error("Config %s failed." % name)
 
@@ -603,7 +604,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in build_info.cfg:
-			build_dir = "%s/Build/%s_%s%d_%s_%s-%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
+			build_folder = "%s_%s%d_%s_%s-%s" % (build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
+			build_dir = "%s/Build/%s" % (build_path, build_folder)
 			if build_info.is_clean:
 				print("Cleaning %s %s..." % (name, config))
 
@@ -636,7 +638,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = batch_command(build_info.host_platform)
-				cmake_cmd.add_command('cmake -G "%s" %s %s %s' % (compiler_info.generator, additional_options, config_options, "../cmake"))
+				cmake_cmd.add_command('cmake -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
 				if cmake_cmd.execute() != 0:
 					log_error("Config %s failed." % name)		
 
