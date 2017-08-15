@@ -248,35 +248,35 @@ namespace KlayGE
 		static char const * available_afs_array[] = { "XAudio" };
 		static char const * available_adsfs_array[] = { "NullAudioDataSource" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "" };
+		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_LINUX)
 		static char const * available_rfs_array[] = { "OpenGL" };
 		static char const * available_afs_array[] = { "OpenAL" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "" };
-		static char const * available_sfs_array[] = { "" };
+		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_ANDROID)
 		static char const * available_rfs_array[] = { "OpenGLES" };
 		static char const * available_afs_array[] = { "NullAudio" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "" };
+		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "" };
 #elif defined(KLAYGE_PLATFORM_IOS)
 		static char const * available_rfs_array[] = { "OpenGLES" };
 		static char const * available_afs_array[] = { "OpenAL" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "" };
+		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "" };
 #elif defined(KLAYGE_PLATFORM_DARWIN)
 		static char const * available_rfs_array[] = { "OpenGL" };
 		static char const * available_afs_array[] = { "OpenAL" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "" };
+		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "Python" };
 #endif
 		static char const * available_sms_array[] = { "OCTree" };
