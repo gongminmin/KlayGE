@@ -1,3 +1,7 @@
+IF(MSVC_VERSION GREATER 1910)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Zc:twoPhase-")
+ENDIF()
+
 SET(SOURCE_FILES 
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCoreWrapper/AssemblyInfo.cpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCoreWrapper/KGEditorCoreWrapper.cpp

@@ -237,49 +237,49 @@ namespace KlayGE
 	void Context::LoadCfg(std::string const & cfg_file)
 	{
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
-		ArrayRef<char const *> available_rfs = { "D3D11", "OpenGL", "OpenGLES", "D3D12" };
-		ArrayRef<char const *> available_afs = { "OpenAL", "DSound", "XAudio" };
-		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
-		ArrayRef<char const *> available_ifs = { "MsgInput" };
-		ArrayRef<char const *> available_sfs = { "DShow" };
-		ArrayRef<char const *> available_scfs = { "Python" };
+		static char const * available_rfs_array[] = { "D3D11", "OpenGL", "OpenGLES", "D3D12" };
+		static char const * available_afs_array[] = { "OpenAL", "DSound", "XAudio" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
+		static char const * available_ifs_array[] = { "MsgInput" };
+		static char const * available_sfs_array[] = { "DShow" };
+		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
-		ArrayRef<char const *> available_rfs = { "D3D11", "D3D12" };
-		ArrayRef<char const *> available_afs = { "XAudio" };
-		ArrayRef<char const *> available_adsfs = { "" };
-		ArrayRef<char const *> available_ifs = { "MsgInput" };
-		ArrayRef<char const *> available_sfs = { "" };
-		ArrayRef<char const *> available_scfs = { "Python" };
+		static char const * available_rfs_array[] = { "D3D11", "D3D12" };
+		static char const * available_afs_array[] = { "XAudio" };
+		static char const * available_adsfs_array[] = { "" };
+		static char const * available_ifs_array[] = { "MsgInput" };
+		static char const * available_sfs_array[] = { "" };
+		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_LINUX)
-		ArrayRef<char const *> available_rfs = { "OpenGL" };
-		ArrayRef<char const *> available_afs = { "OpenAL" };
-		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
-		ArrayRef<char const *> available_ifs = { "" };
-		ArrayRef<char const *> available_sfs = { "" };
-		ArrayRef<char const *> available_scfs = { "Python" };
+		static char const * available_rfs_array[] = { "OpenGL" };
+		static char const * available_afs_array[] = { "OpenAL" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
+		static char const * available_ifs_array[] = { "" };
+		static char const * available_sfs_array[] = { "" };
+		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_ANDROID)
-		ArrayRef<char const *> available_rfs = { "OpenGLES" };
-		ArrayRef<char const *> available_afs = { "" };
-		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
-		ArrayRef<char const *> available_ifs = { "MsgInput" };
-		ArrayRef<char const *> available_sfs = { "" };
-		ArrayRef<char const *> available_scfs = { "" };
+		static char const * available_rfs_array[] = { "OpenGLES" };
+		static char const * available_afs_array[] = { "" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
+		static char const * available_ifs_array[] = { "MsgInput" };
+		static char const * available_sfs_array[] = { "" };
+		static char const * available_scfs_array[] = { "" };
 #elif defined(KLAYGE_PLATFORM_IOS)
-		ArrayRef<char const *> available_rfs = { "OpenGLES" };
-		ArrayRef<char const *> available_afs = { "OpenAL" };
-		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
-		ArrayRef<char const *> available_ifs = { "MsgInput" };
-		ArrayRef<char const *> available_sfs = { "" };
-		ArrayRef<char const *> available_scfs = { "" };
+		static char const * available_rfs_array[] = { "OpenGLES" };
+		static char const * available_afs_array[] = { "OpenAL" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
+		static char const * available_ifs_array[] = { "MsgInput" };
+		static char const * available_sfs_array[] = { "" };
+		static char const * available_scfs_array[] = { "" };
 #elif defined(KLAYGE_PLATFORM_DARWIN)
-		ArrayRef<char const *> available_rfs = { "OpenGL" };
-		ArrayRef<char const *> available_afs = { "OpenAL" };
-		ArrayRef<char const *> available_adsfs = { "OggVorbis" };
-		ArrayRef<char const *> available_ifs = { "MsgInput" };
-		ArrayRef<char const *> available_sfs = { "" };
-		ArrayRef<char const *> available_scfs = { "Python" };
+		static char const * available_rfs_array[] = { "OpenGL" };
+		static char const * available_afs_array[] = { "OpenAL" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
+		static char const * available_ifs_array[] = { "MsgInput" };
+		static char const * available_sfs_array[] = { "" };
+		static char const * available_scfs_array[] = { "Python" };
 #endif
-		ArrayRef<char const *> available_sms = { "OCTree" };
+		static char const * available_sms_array[] = { "OCTree" };
 
 		int width = 800;
 		int height = 600;
@@ -690,6 +690,14 @@ namespace KlayGE
 				}
 			}
 		}
+
+		ArrayRef<char const *> const available_rfs = available_rfs_array;
+		ArrayRef<char const *> const available_afs = available_afs_array;
+		ArrayRef<char const *> const available_adsfs = available_adsfs_array;
+		ArrayRef<char const *> const available_ifs = available_ifs_array;
+		ArrayRef<char const *> const available_sfs = available_sfs_array;
+		ArrayRef<char const *> const available_scfs = available_scfs_array;
+		ArrayRef<char const *> const available_sms = available_sms_array;
 
 		if (std::find(available_rfs.begin(), available_rfs.end(), rf_name) == available_rfs.end())
 		{
