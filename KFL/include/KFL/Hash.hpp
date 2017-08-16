@@ -44,21 +44,21 @@ namespace KlayGE
 #pragma warning(disable: 4307) // The hash here could cause integral constant overflow
 #endif
 
-	constexpr size_t _Hash(char const * str, size_t seed)
+	size_t constexpr CTHashImpl(char const * str, size_t seed)
 	{
-		return 0 == *str ? seed : _Hash(str + 1, seed ^ (*str + PRIME_NUM + (seed << 6) + (seed >> 2)));
+		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (*str + PRIME_NUM + (seed << 6) + (seed >> 2)));
 	}
 
 #ifdef KLAYGE_COMPILER_MSVC
 	template <size_t N>
 	struct EnsureConst
 	{
-		static const size_t value = N;
+		static size_t constexpr value = N;
 	};
 
-	#define CT_HASH(x) (EnsureConst<_Hash(x, 0)>::value)
+	#define CT_HASH(x) (EnsureConst<CTHashImpl(x, 0)>::value)
 #else
-	#define CT_HASH(x) (_Hash(x, 0))
+	#define CT_HASH(x) (CTHashImpl(x, 0))
 #endif
 
 	template <typename SizeT>

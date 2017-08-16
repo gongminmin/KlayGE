@@ -9,7 +9,12 @@ IF(CMAKE_C_COMPILER_ID MATCHES MSVC)
 		SET(KLAYGE_COMPILER_VERSION "140")
 	ENDIF()
 
-	SET(CMAKE_CXX_FLAGS "/W4 /WX /EHsc /MP /bigobj /std:c++14 /Zc:throwingNew /Zc:strictStrings /Zc:rvalueCast /Gw")
+	SET(CMAKE_CXX_FLAGS "/W4 /WX /EHsc /MP /bigobj /Zc:throwingNew /Zc:strictStrings /Zc:rvalueCast /Gw")
+	IF(MSVC_VERSION GREATER 1910)
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++17")
+	ELSE()
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++14")
+	ENDIF()
 	IF(MSVC_VERSION GREATER 1900)
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
 
