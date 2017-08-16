@@ -1,3 +1,7 @@
+#ifndef NOMINMAX
+	#define NOMINMAX
+#endif
+
 #include <maya/MLibrary.h>
 #include <maya/MGlobal.h>
 #include <maya/MArgList.h>
