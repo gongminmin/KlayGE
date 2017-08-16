@@ -5,12 +5,12 @@ ENDIF()
 SET(LIB_NAME KlayGE_ScriptEngine_Python)
 
 SET(PYTHON_SE_SOURCE_FILES
-	${KLAYGE_PROJECT_DIR}/Plugins/Src/Script/Python/PythonScriptEngine.cpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Src/Script/Python/PythonScript.cpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Script/Python/PythonScriptFactory.cpp
 )
 
 SET(PYTHON_SE_HEADER_FILES
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/Python/PythonScriptEngine.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/Python/PythonScript.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/Python/PythonScriptFactory.hpp
 )
 

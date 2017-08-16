@@ -1,5 +1,5 @@
 /**
- * @file PythonEngine.hpp
+ * @file PythonScript.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _PYTHONSCRIPTENGINE_HPP
-#define _PYTHONSCRIPTENGINE_HPP
+#ifndef KLAYGE_PLUGINS_PYTHON_SCRIPT_HPP
+#define KLAYGE_PLUGINS_PYTHON_SCRIPT_HPP
 
 #pragma once
 
@@ -98,11 +98,11 @@ namespace KlayGE
 	{
 	public:
 		explicit PythonScriptModule(std::string const & name);
-		~PythonScriptModule();
+		~PythonScriptModule() override;
 
-		virtual std::any Value(std::string const & name);
-		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args);
-		virtual std::any RunString(std::string const & script);
+		std::any Value(std::string const & name) override;
+		std::any Call(std::string const & func_name, ArrayRef<std::any> args) override;
+		std::any RunString(std::string const & script) override;
 
 	private:
 		PyObjectPtr module_;
@@ -113,14 +113,14 @@ namespace KlayGE
 	{
 	public:
 		PythonEngine();
-		~PythonEngine();
+		~PythonEngine() override;
 
-		virtual ScriptModulePtr CreateModule(std::string const & name);
+		ScriptModulePtr CreateModule(std::string const & name) override;
 
 	private:
-		virtual void DoSuspend() override;
-		virtual void DoResume() override;
+		void DoSuspend() override;
+		void DoResume() override;
 	};
 }
 
-#endif  // _PYTHON_ENGINE_HPP
+#endif		// KLAYGE_PLUGINS_PYTHON_SCRIPT_HPP

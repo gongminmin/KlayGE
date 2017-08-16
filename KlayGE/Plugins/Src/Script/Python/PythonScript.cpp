@@ -1,5 +1,5 @@
 /**
- * @file PythonEngine.cpp
+ * @file PythonScript.cpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -42,7 +42,7 @@
 #include <functional>
 #include <boost/assert.hpp>
 
-#include <KlayGE/Python/PythonScriptEngine.hpp>
+#include <KlayGE/Python/PythonScript.hpp>
 
 namespace KlayGE
 {

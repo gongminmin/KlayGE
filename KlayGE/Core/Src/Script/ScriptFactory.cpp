@@ -29,10 +29,7 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/Util.hpp>
 #include <KlayGE/Script.hpp>
-
-#include <string>
 
 #include <KlayGE/ScriptFactory.hpp>
 

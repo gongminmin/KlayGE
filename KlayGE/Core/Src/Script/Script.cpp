@@ -29,10 +29,6 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/Util.hpp>
-#include <KFL/ArrayRef.hpp>
-
-#include <boost/assert.hpp>
 
 #include <KlayGE/Script.hpp>
 
@@ -46,29 +42,11 @@ namespace KlayGE
 	{
 	}
 
-	std::any ScriptModule::Value(std::string const & /*name*/)
-	{
-		return std::any();
-	}
 
-	std::any ScriptModule::Call(std::string const & /*func_name*/, ArrayRef<std::any> /*args*/)
-	{
-		return std::any();
-	}
-
-	std::any ScriptModule::RunString(std::string const & /*script*/)
-	{
-		return std::any();
-	}
-
-	// 构造函数
-	/////////////////////////////////////////////////////////////////////////////////
 	ScriptEngine::ScriptEngine()
 	{
 	}
 
-	// 析构函数
-	/////////////////////////////////////////////////////////////////////////////////
 	ScriptEngine::~ScriptEngine()
 	{
 	}
@@ -81,11 +59,5 @@ namespace KlayGE
 	void ScriptEngine::Resume()
 	{
 		this->DoResume();
-	}
-
-	ScriptModulePtr ScriptEngine::CreateModule(std::string const & /*name*/)
-	{
-		static ScriptModulePtr obj = MakeSharedPtr<ScriptModule>();
-		return obj;
 	}
 }

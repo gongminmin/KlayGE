@@ -28,12 +28,11 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _SCRIPT_HPP
-#define _SCRIPT_HPP
+#ifndef KLAYGE_CORE_SCRIPT_HPP
+#define KLAYGE_CORE_SCRIPT_HPP
 
 #pragma once
 
-#include <vector>
 #include <string>
 
 #include <KFL/CXX17/any.hpp>
@@ -47,15 +46,14 @@ namespace KlayGE
 		ScriptModule();
 		virtual ~ScriptModule();
 
-		virtual std::any Value(std::string const & name);
-		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args);
-		virtual std::any RunString(std::string const & script);
+		virtual std::any Value(std::string const & name) = 0;
+		virtual std::any Call(std::string const & func_name, ArrayRef<std::any> args) = 0;
+		virtual std::any RunString(std::string const & script) = 0;
 	};
 
 	typedef std::shared_ptr<ScriptModule> ScriptModulePtr;
 
-	// 实现脚本引擎的功能
-	/////////////////////////////////////////////////////////////////////////////////
+
 	class KLAYGE_CORE_API ScriptEngine : boost::noncopyable
 	{
 	public:
@@ -65,8 +63,7 @@ namespace KlayGE
 		void Suspend();
 		void Resume();
 
-		// 创建一个新的脚本模块
-		virtual ScriptModulePtr CreateModule(std::string const & name);
+		virtual ScriptModulePtr CreateModule(std::string const & name) = 0;
 
 	private:
 		virtual void DoSuspend() = 0;
@@ -74,4 +71,4 @@ namespace KlayGE
 	};
 }
 
-#endif		// _SCRIPT_HPP
+#endif		// KLAYGE_CORE_SCRIPT_HPP

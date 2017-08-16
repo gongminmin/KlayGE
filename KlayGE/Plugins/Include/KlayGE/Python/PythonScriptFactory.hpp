@@ -1,5 +1,5 @@
 /**
- * @file PythonFactory.hpp
+ * @file PythonScriptFactory.hpp
  * @author Minmin Gong
  *
  * @section DESCRIPTION
@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _PYTHONSCRIPTFACTORY_HPP
-#define _PYTHONSCRIPTFACTORY_HPP
+#ifndef KLAYGE_PLUGINS_PYTHON_SCRIPT_FACTORY_HPP
+#define KLAYGE_PLUGINS_PYTHON_SCRIPT_FACTORY_HPP
 
 #pragma once
 
@@ -47,4 +47,4 @@ extern "C"
 	KLAYGE_PYTHON_SCRIPT_API void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr);
 }
 
-#endif  // _PYTHONFACTORY_HPP
+#endif		// KLAYGE_PLUGINS_PYTHON_SCRIPT_FACTORY_HPP
