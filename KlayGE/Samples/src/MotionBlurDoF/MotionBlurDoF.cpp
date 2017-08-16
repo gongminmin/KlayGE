@@ -686,10 +686,6 @@ namespace
 
 int SampleMain()
 {
-	ContextCfg cfg = Context::Instance().Config();
-	cfg.script_factory_name = "Python";
-	Context::Instance().Config(cfg);
-
 	MotionBlurDoFApp app;
 	app.Create();
 	app.Run();
@@ -1078,22 +1074,29 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 				int32_t i = loading_percentage_ - (80 - NUM_LINE);
 				for (int32_t j = 0; j < NUM_INSTANCE / NUM_LINE; ++ j)
 				{
-					std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
-						{ i, j, NUM_INSTANCE, NUM_LINE }));
+					float3 pos(0, 0, 0);
+					Color clr(0, 0, 0, 1);
+					try
+					{
+						std::vector<std::any> scr_pos = std::any_cast<std::vector<std::any>>(script_module_->Call("get_pos",
+							{ i, j, NUM_INSTANCE, NUM_LINE }));
 
-					float3 pos;
-					pos.x() = std::any_cast<float>(scr_pos[0]);
-					pos.y() = std::any_cast<float>(scr_pos[1]);
-					pos.z() = std::any_cast<float>(scr_pos[2]);
+						pos.x() = std::any_cast<float>(scr_pos[0]);
+						pos.y() = std::any_cast<float>(scr_pos[1]);
+						pos.z() = std::any_cast<float>(scr_pos[2]);
 
-					std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
-						{i, j, NUM_INSTANCE, NUM_LINE }));
+						std::vector<std::any> scr_clr = std::any_cast<std::vector<std::any>>(script_module_->Call("get_clr",
+							{i, j, NUM_INSTANCE, NUM_LINE }));
 
-					Color clr;
-					clr.r() = std::any_cast<float>(scr_clr[0]);
-					clr.g() = std::any_cast<float>(scr_clr[1]);
-					clr.b() = std::any_cast<float>(scr_clr[2]);
-					clr.a() = std::any_cast<float>(scr_clr[3]);
+						clr.r() = std::any_cast<float>(scr_clr[0]);
+						clr.g() = std::any_cast<float>(scr_clr[1]);
+						clr.b() = std::any_cast<float>(scr_clr[2]);
+						clr.a() = std::any_cast<float>(scr_clr[3]);
+					}
+					catch (...)
+					{
+						LogWarn("Wrong callings to script engine");
+					}
 
 					SceneObjectPtr so = MakeSharedPtr<Teapot>();
 					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);

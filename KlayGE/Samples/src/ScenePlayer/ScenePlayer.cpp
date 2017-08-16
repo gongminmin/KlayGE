@@ -301,7 +301,6 @@ namespace
 int SampleMain()
 {
 	ContextCfg cfg = Context::Instance().Config();
-	cfg.script_factory_name = "Python";
 	cfg.deferred_rendering = true;
 	cfg.graphics_cfg.fft_lens_effects = true;
 	Context::Instance().Config(cfg);
