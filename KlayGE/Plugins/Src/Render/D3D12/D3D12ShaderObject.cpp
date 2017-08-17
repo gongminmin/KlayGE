@@ -1218,7 +1218,6 @@ namespace KlayGE
 		std::vector<uint32_t> all_cbuff_indices;
 		for (size_t i = 0; i < ST_NumShaderTypes; ++ i)
 		{
-
 			ret->samplers_[i] = samplers_[i];
 			ret->srvsrcs_[i].resize(srvsrcs_[i].size(),
 				std::make_tuple(static_cast<D3D12Resource*>(nullptr), 0, 0));

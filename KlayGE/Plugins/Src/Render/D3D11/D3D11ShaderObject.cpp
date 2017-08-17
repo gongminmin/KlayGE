@@ -1400,7 +1400,7 @@ namespace KlayGE
 			}
 		}
 
-		if (!uavs_.empty())
+		if (so_template_->compute_shader_ && !uavs_.empty())
 		{
 			for (uint32_t i = 0; i < uavs_.size(); ++ i)
 			{
@@ -1419,7 +1419,7 @@ namespace KlayGE
 	{
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-		if (!uavs_.empty())
+		if (so_template_->compute_shader_ && !uavs_.empty())
 		{
 			std::vector<ID3D11UnorderedAccessView*> uavs(uavs_.size(), nullptr);
 			std::vector<UINT> uav_init_counts(uavs_.size(), 0);
