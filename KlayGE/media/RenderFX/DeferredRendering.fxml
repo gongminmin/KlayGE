@@ -910,11 +910,11 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_ref" value="16"/>
 			<state name="front_stencil_pass" value="keep"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_ref" value="16"/>
 			<state name="back_stencil_pass" value="keep"/>
 
 			<state name="vertex_shader" value="ShadingVS()"/>
@@ -932,11 +932,11 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_ref" value="16"/>
 			<state name="front_stencil_pass" value="keep"/>
 			<state name="back_stencil_enable" value="true"/>
 			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_ref" value="16"/>
 			<state name="back_stencil_pass" value="keep"/>
 		</pass>
 	</technique>
