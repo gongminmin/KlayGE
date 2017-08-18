@@ -1862,7 +1862,7 @@ namespace KlayGE
 		re.BindFrameBuffer(pvp.g_buffer);
 
 		float depth = (PTB_TransparencyBack == pass_tb) ? 0.0f : 1.0f;
-		int32_t stencil = (PTB_Opaque == pass_tb) ? 0 : 128;
+		int32_t stencil = (PTB_Opaque == pass_tb) ? 0 : 16;
 		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0, 0, 0, 0), depth, stencil);
 	}
