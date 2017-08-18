@@ -2820,16 +2820,13 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
-		if (PTB_Opaque == pass_tb)
-		{
-			*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
-			*light_volume_mv_param_ = pvp.inv_proj;
+		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*light_volume_mv_param_ = pvp.inv_proj;
 
-			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-			RenderEngine& re = rf.RenderEngineInstance();
-			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
-			re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
-		}
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		RenderEngine& re = rf.RenderEngineInstance();
+		re.BindFrameBuffer((PTB_Opaque == pass_tb) ? pvp.merged_shading_fbs[pvp.curr_merged_buffer_index] : pvp.shading_fb);
+		re.Render(*dr_effect_, *technique_no_lighting_, *rl_quad_);
 
 		std::vector<uint32_t> directional_lights;
 		std::vector<uint32_t> point_lights_shadow;
