@@ -46,41 +46,7 @@
 #define KFL_DO_JOIN(X, Y) KFL_DO_JOIN2(X, Y)
 #define KFL_DO_JOIN2(X, Y) X##Y
 
-// KlayGE requires vc 12.0+, g++ 4.8+, clang 3.4+, with C++11 and C++14 option on.
-
-// All those C++11 features are supported by those compilers. Use them safely without wrapper.
-//   Static assertions (N1720)
-//   Multi-declarator auto (N1737)
-//   Right angle brackets (N1757)
-//   auto-typed variables (N1984)
-//   Extern templates (N1987)
-//   Rvalue references (N2118)
-//   Variadic templates (N2242)
-//   Declared type of an expression (N2343)
-//   Standard Layout Types (N2342)
-//   Strongly-typed enums (N2347)
-//   Null pointer constant (N2431)
-//   New function declarator syntax (N2541)
-//   Removal of auto as a storage-class specifier (N2546)
-//   Forward declarations for enums (N2764)
-//   New wording for C++11 lambdas (N2927)
-//   Explicit virtual overrides (N2928)
-//   Range-based for (N2930)
-//   <algorithm>
-//   <array>
-//   <atomic>
-//   <chrono>
-//   <cstdint>
-//   <functional>
-//   <memory>
-//   <random>
-//   <regex>
-//   <system_error>
-//   <thread>
-//   <tuple>
-//   <type_traits>
-//   <unordered_map>
-//   <unordered_set>
+// KlayGE requires vc 12.0+, g++ 5.1+, clang 3.6+, with C++14 or C++17 option on.
 
 // Defines supported compilers
 #if defined(__clang__)
@@ -324,11 +290,8 @@
 // Defines supported CPUs
 #if defined(KLAYGE_COMPILER_MSVC)
 	#if defined(_M_X64)
-		#define KLAYGE_CPU_X64		
+		#define KLAYGE_CPU_X64
 		#define KLAYGE_COMPILER_TARGET x64
-	#elif defined(_M_IX86)
-		#define KLAYGE_CPU_X86
-		#define KLAYGE_COMPILER_TARGET x86
 	#elif defined(_M_ARM64)
 		#define KLAYGE_CPU_ARM64
 		#define KLAYGE_COMPILER_TARGET arm64
@@ -336,7 +299,7 @@
 		#define KLAYGE_CPU_ARM
 		#define KLAYGE_COMPILER_TARGET arm
 	#else
-		#error "Unknown CPU type. In vc, x86, x64, arm, and arm64 are supported."
+		#error "Unknown CPU type. In msvc, x64, arm, and arm64 are supported."
 	#endif
 #elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 	#if defined(__x86_64__)
@@ -402,24 +365,7 @@
 		#endif
 	#endif
 #elif defined KLAYGE_CPU_X86
-	#if defined(KLAYGE_COMPILER_MSVC)
-		#if 600 == _M_IX86
-			#define KLAYGE_MMX_SUPPORT
-		#endif
-
-		#if 1 == _M_IX86_FP
-			#define KLAYGE_SSE_SUPPORT
-		#elif 2 == _M_IX86_FP
-			#define KLAYGE_SSE_SUPPORT
-			#define KLAYGE_SSE2_SUPPORT
-			#ifdef __AVX__
-				#define KLAYGE_AVX_SUPPORT
-			#endif
-			#ifdef __AVX2__
-				#define KLAYGE_AVX2_SUPPORT
-			#endif
-		#endif
-	#elif defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
+	#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
 		#ifdef __MMX__
 			#define KLAYGE_MMX_SUPPORT
 		#endif

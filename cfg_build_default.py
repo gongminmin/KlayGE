@@ -21,10 +21,10 @@ project			= "auto"
 compiler		= "auto"
 
 # Target CPU architecture.
-#   On Windows desktop, could be "x86", "x64".
-#   On Windows store, could be "arm", "x86", "x64".
+#   On Windows desktop, could be "x64".
+#   On Windows store, could be "arm", "x64".
 #   On Android, cound be "armeabi-v7a", "arm64-v8a", "x86", "x86_64".
-#   On Linux, could be "x86", "x64".
+#   On Linux, could be "x64".
 #   On macOS, could be "x64".
 #   On iOS, could be "arm", "x86".
 arch			= ("x64", )

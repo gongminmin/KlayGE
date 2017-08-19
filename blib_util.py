@@ -320,14 +320,14 @@ class build_info:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
-				if "x86" == arch:
-					gen_suffix = ""
-				elif "arm" == arch:
+				if "arm" == arch:
 					gen_suffix = " ARM"
 				elif "x64" == arch:
 					gen_suffix = " Win64"
 				elif "arm64" == arch:
 					gen_suffix = " ARM64"
+				else:
+					log_error("%s is not supported in %s.\n" % (arch, compiler))
 				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
@@ -341,12 +341,12 @@ class build_info:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
-				if "x86" == arch:
-					gen_suffix = ""
-				elif "arm" == arch:
+				if "arm" == arch:
 					gen_suffix = " ARM"
 				elif "x64" == arch:
 					gen_suffix = " Win64"
+				else:
+					log_error("%s is not supported in %s.\n" % (arch, compiler))
 				compilers.append(compiler_info(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
@@ -519,8 +519,6 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 	elif "darwin" == build_info.target_platform:
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
-		elif "x86" == compiler_info.arch:
-			additional_options += " -DCMAKE_OSX_ARCHITECTURES=i386"
 		else:
 			log_error("Unsupported Darwin arch\n")
 	elif "ios" == build_info.target_platform:
@@ -534,10 +532,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 
 	if build_info.multi_config:
 		if 0 == build_info.project_type.find("vs"):
-			if "x86" == compiler_info.arch:
-				vc_option = "x86"
-				vc_arch = "Win32"
-			elif "x64" == compiler_info.arch:
+			if "x64" == compiler_info.arch:
 				vc_option = "x86_amd64"
 				vc_arch = "x64"
 			elif "arm" == compiler_info.arch:
