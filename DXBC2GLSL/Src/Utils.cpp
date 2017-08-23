@@ -32,6 +32,7 @@
 #include <exception>
 #include <sstream>
 #include <limits>
+#include <cmath>
 
 namespace
 {
@@ -81,7 +82,7 @@ bool ValidFloat(float f)
 		uint32_t ui;
 	} fnui;
 	fnui.f = f;
-	return (0x80000000 == fnui.ui) || ((f == f)
+	return (0x80000000 == fnui.ui) || (!std::isnan(f)
 		&& ((f >= std::numeric_limits<float>::min())
 			|| (-f >= std::numeric_limits<float>::min()))
 		&& ((f <= std::numeric_limits<float>::max())
