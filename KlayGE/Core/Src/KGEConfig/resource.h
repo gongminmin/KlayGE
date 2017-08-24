@@ -7,7 +7,6 @@
 #define IDC_PAPER_WHITE_COMBO           1010
 #define IDC_RES_COMBO4                  1011
 #define IDC_MAX_LUM_COMBO               1011
-#define IDC_MB_FRAMES_EDIT              1013
 #define IDC_SYNC_COMBO                  1014
 #define IDC_FACTORY_COMBO               1015
 #define IDC_STEREO_SEP_EDIT             1016

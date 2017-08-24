@@ -289,7 +289,6 @@ namespace KlayGE
 		int sample_quality = 0;
 		bool full_screen = false;
 		int sync_interval = 0;
-		int motion_frames = 0;
 		bool hdr = false;
 		bool ppaa = false;
 		bool gamma = false;
@@ -481,13 +480,6 @@ namespace KlayGE
 			if (attr)
 			{
 				sync_interval = attr->ValueInt();
-			}
-
-			XMLNodePtr motion_blur_node = graphics_node->FirstNode("motion_blur");
-			attr = motion_blur_node->Attrib("frames");
-			if (attr)
-			{
-				motion_frames = attr->ValueInt();
 			}
 
 			XMLNodePtr hdr_node = graphics_node->FirstNode("hdr");
@@ -745,7 +737,6 @@ namespace KlayGE
 		cfg_.graphics_cfg.sample_quality = sample_quality;
 		cfg_.graphics_cfg.full_screen = full_screen;
 		cfg_.graphics_cfg.sync_interval = sync_interval;
-		cfg_.graphics_cfg.motion_frames = motion_frames;
 		cfg_.graphics_cfg.hdr = hdr;
 		cfg_.graphics_cfg.ppaa = ppaa;
 		cfg_.graphics_cfg.gamma = gamma;
@@ -878,10 +869,6 @@ namespace KlayGE
 			XMLNodePtr sync_interval_node = cfg_doc.AllocNode(XNT_Element, "sync_interval");
 			sync_interval_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.sync_interval));
 			graphics_node->AppendNode(sync_interval_node);
-
-			XMLNodePtr motion_blur_node = cfg_doc.AllocNode(XNT_Element, "motion_blur");
-			motion_blur_node->AppendAttrib(cfg_doc.AllocAttribInt("frames", cfg_.graphics_cfg.motion_frames));
-			graphics_node->AppendNode(motion_blur_node);
 
 			XMLNodePtr hdr_node = cfg_doc.AllocNode(XNT_Element, "hdr");
 			hdr_node->AppendAttrib(cfg_doc.AllocAttribInt("value", cfg_.graphics_cfg.hdr));

@@ -1,0 +1,68 @@
+<?xml version='1.0'?>
+
+<post_processors>
+	<post_processor name="MotionBlurTileMaxXDir">
+		<params>
+			<param name="blur_radius"/>
+		</params>
+		<input>
+			<pin name="velocity_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlur.fxml" tech="MotionBlurTileMaxXDir"/>
+	</post_processor>
+	<post_processor name="MotionBlurTileMaxYDir">
+		<params>
+			<param name="blur_radius"/>
+		</params>
+		<input>
+			<pin name="velocity_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlur.fxml" tech="MotionBlurTileMaxYDir"/>
+	</post_processor>
+
+	<post_processor name="MotionBlurNeighborMax">
+		<input>
+			<pin name="velocity_tile_max_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlur.fxml" tech="MotionBlurNeighborMax"/>
+	</post_processor>
+
+	<post_processor name="MotionBlurGather">
+		<params>
+			<param name="half_exposure"/>
+			<param name="blur_radius"/>
+			<param name="reconstruction_samples"/>
+			<param name="max_sample_tap_distance"/>
+		</params>
+		<input>
+			<pin name="color_tex"/>
+			<pin name="depth_tex"/>
+			<pin name="velocity_tex"/>
+			<pin name="velocity_neighbor_max_tex"/>
+			<pin name="random_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlur.fxml" tech="MotionBlurGather"/>
+	</post_processor>
+
+	<post_processor name="MotionBlurVisualize">
+		<input>
+			<pin name="velocity_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="MotionBlur.fxml" tech="MotionBlurVisualize"/>
+	</post_processor>
+</post_processors>

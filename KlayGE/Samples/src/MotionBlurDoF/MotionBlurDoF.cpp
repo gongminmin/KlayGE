@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/iterator.hpp>
+#include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -18,14 +19,14 @@
 #include <KlayGE/SATPostProcess.hpp>
 #include <KlayGE/Script.hpp>
 #include <KlayGE/Camera.hpp>
+#include <KlayGE/MotionBlur.hpp>
 
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/InputFactory.hpp>
 #include <KlayGE/ScriptFactory.hpp>
 
 #include <sstream>
-
-#include <boost/circular_buffer.hpp>
+#include <random>
 
 #include "SampleCommon.hpp"
 #include "MotionBlurDoF.hpp"
@@ -42,11 +43,25 @@ namespace
 	{
 	public:
 		MotionBlurRenderMesh(RenderModelPtr const & model, std::wstring const & name)
-			: StaticMesh(model, name)
+			: StaticMesh(model, name),
+				half_exposure_(1)
 		{
 		}
 
-		virtual void MotionVecPass(bool motion_vec) = 0;
+		virtual void VelocityPass(bool velocity) = 0;
+
+		void BlurRadius(uint32_t blur_radius)
+		{
+			*(effect_->ParameterByName("blur_radius")) = static_cast<float>(blur_radius);
+		}
+
+		void Exposure(float exposure)
+		{
+			half_exposure_ = 0.5f * exposure;
+		}
+
+	protected:
+		float half_exposure_;
 	};
 
 	class RenderInstanceMesh : public MotionBlurRenderMesh
@@ -79,16 +94,17 @@ namespace
 			*(effect_->ParameterByName("eye_in_world")) = camera.EyePos();
 			*(effect_->ParameterByName("view")) = curr_view;
 			*(effect_->ParameterByName("proj")) = curr_proj;
+
 			*(effect_->ParameterByName("prev_view")) = prev_view;
 			*(effect_->ParameterByName("prev_proj")) = prev_proj;
-			*(effect_->ParameterByName("elapsed_time")) = app.FrameTime();
+			*(effect_->ParameterByName("half_exposure_x_framerate")) = half_exposure_ / app.FrameTime();
 		}
 
-		void MotionVecPass(bool motion_vec)
+		void VelocityPass(bool velocity) override
 		{
-			if (motion_vec)
+			if (velocity)
 			{
-				technique_ = effect_->TechniqueByName("MotionVectorInstanced");
+				technique_ = effect_->TechniqueByName("VelocityInstanced");
 			}
 			else
 			{
@@ -138,6 +154,8 @@ namespace
 			*(effect_->ParameterByName("prev_view")) = prev_view;
 			*(effect_->ParameterByName("prev_proj")) = prev_proj;
 			*(effect_->ParameterByName("elapsed_time")) = app.FrameTime();
+
+			*(effect_->ParameterByName("half_exposure_x_framerate")) = half_exposure_ / app.FrameTime();
 		}
 
 		void OnInstanceBegin(uint32_t id)
@@ -162,11 +180,11 @@ namespace
 			*(effect_->ParameterByName("color")) = float4(clr.b(), clr.g(), clr.r(), clr.a());	// swap b and r
 		}
 
-		void MotionVecPass(bool motion_vec)
+		void VelocityPass(bool velocity) override
 		{
-			if (motion_vec)
+			if (velocity)
 			{
-				technique_ = effect_->TechniqueByName("MotionVectorNonInstanced");
+				technique_ = effect_->TechniqueByName("VelocityNonInstanced");
 			}
 			else
 			{
@@ -192,8 +210,7 @@ namespace
 
 	public:
 		Teapot()
-			: SceneObjectHelper(SOA_Moveable | SOA_Cullable),
-				last_mats_(Context::Instance().RenderFactoryInstance().RenderEngineInstance().NumMotionFrames())
+			: SceneObjectHelper(SOA_Moveable | SOA_Cullable)
 		{
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 1, EF_ABGR32F));
 			instance_format_.push_back(VertexElement(VEU_TextureCoord, 2, EF_ABGR32F));
@@ -220,32 +237,44 @@ namespace
 			renderable_ = ra;
 		}
 
-		virtual void SubThreadUpdate(float /*app_time*/, float elapsed_time) override
+		void SubThreadUpdate(float app_time, float elapsed_time) override
 		{
-			last_mats_.push_back(model_);
+			KFL_UNUSED(app_time);
 
-			float4x4 matT = MathLib::transpose(last_mats_.front());
-			inst_.last_mat[0] = matT.Row(0);
-			inst_.last_mat[1] = matT.Row(1);
-			inst_.last_mat[2] = matT.Row(2);
+			last_model_ = model_;
+
+			float4x4 mat_t = MathLib::transpose(last_model_);
+			inst_.last_mat[0] = mat_t.Row(0);
+			inst_.last_mat[1] = mat_t.Row(1);
+			inst_.last_mat[2] = mat_t.Row(2);
 
 			float e = elapsed_time * 0.3f * -model_(3, 1);
 			model_ *= MathLib::rotation_y(e);
 
-			matT = MathLib::transpose(model_);
-			inst_.mat[0] = matT.Row(0);
-			inst_.mat[1] = matT.Row(1);
-			inst_.mat[2] = matT.Row(2);
+			mat_t = MathLib::transpose(model_);
+			inst_.mat[0] = mat_t.Row(0);
+			inst_.mat[1] = mat_t.Row(1);
+			inst_.mat[2] = mat_t.Row(2);
 		}
 
-		void MotionVecPass(bool motion_vec)
+		void VelocityPass(bool velocity)
 		{
-			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->MotionVecPass(motion_vec);
+			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->VelocityPass(velocity);
+		}
+
+		void BlurRadius(uint32_t blur_radius)
+		{
+			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->BlurRadius(blur_radius);
+		}
+
+		void Exposure(float exposure)
+		{
+			checked_pointer_cast<MotionBlurRenderMesh>(renderable_)->Exposure(exposure);
 		}
 
 	private:
 		InstData inst_;
-		boost::circular_buffer<float4x4> last_mats_;
+		float4x4 last_model_;
 	};
 
 
@@ -349,7 +378,8 @@ namespace
 				}
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
+				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_GPU_Write | (cs_support_ ? EAH_GPU_Unordered : 0));
 				spread_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*spread_tex_, 0, 1, 0));
 
 				spreading_pp_->SetParam(0, float4(static_cast<float>(width),
@@ -633,42 +663,6 @@ namespace
 		PostProcessPtr merge_bokeh_pp_;
 	};
 
-	class MotionBlur : public PostProcess
-	{
-	public:
-		MotionBlur()
-			: PostProcess(L"MotionBlur", false,
-				{},
-				{ "color_tex", "depth_tex", "motion_vec_tex" },
-				{ "output" },
-				RenderEffectPtr(), nullptr),
-				show_motion_vec_(false)
-		{
-			auto effect = SyncLoadRenderEffect("MotionBlurPP.fxml");
-			this->Technique(effect, effect->TechniqueByName("MotionBlur"));
-		}
-
-		void ShowMotionVector(bool show)
-		{
-			show_motion_vec_ = show;
-			if (show_motion_vec_)
-			{
-				technique_ = effect_->TechniqueByName("MotionBlurMotionVec");
-			}
-			else
-			{
-				technique_ = effect_->TechniqueByName("MotionBlur");
-			}
-		}
-		bool ShowMotionVector() const
-		{
-			return show_motion_vec_;
-		}
-
-	private:
-		bool show_motion_vec_;
-	};
-
 
 	enum
 	{
@@ -695,6 +689,7 @@ int SampleMain()
 
 MotionBlurDoFApp::MotionBlurDoFApp()
 					: App3DFramework("MotionBlurDoF"),
+						use_instance_(true), exposure_(2), blur_radius_(2),
 						dof_on_(true), bokeh_on_(true), mb_on_(true),
 						num_objs_rendered_(0), num_renderables_rendered_(0),
 						num_primitives_rendered_(0), num_vertices_rendered_(0)
@@ -705,8 +700,10 @@ MotionBlurDoFApp::MotionBlurDoFApp()
 void MotionBlurDoFApp::OnCreate()
 {
 	loading_percentage_ = 0;
-	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
-	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable, CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
+	model_instance_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderInstanceMesh>());
+	model_mesh_ = ASyncLoadModel("teapot.meshml", EAH_GPU_Read | EAH_Immutable,
+		CreateModelFactory<RenderModel>(), CreateMeshFactory<RenderNonInstancedMesh>());
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -721,9 +718,9 @@ void MotionBlurDoFApp::OnCreate()
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 	clr_depth_fb_ = rf.MakeFrameBuffer();
-	motion_vec_fb_ = rf.MakeFrameBuffer();
+	velocity_fb_ = rf.MakeFrameBuffer();
 	clr_depth_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
-	motion_vec_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+	velocity_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 
 	fpcController_.Scalers(0.05f, 0.5f);
 
@@ -743,7 +740,7 @@ void MotionBlurDoFApp::OnCreate()
 	}
 	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 	
-	motion_blur_ = MakeSharedPtr<MotionBlur>();
+	motion_blur_ = MakeSharedPtr<MotionBlurPostProcess>();
 	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
@@ -753,47 +750,69 @@ void MotionBlurDoFApp::OnCreate()
 
 	id_dof_on_ = dof_dialog_->IDFromName("DoFOn");
 	id_bokeh_on_ = dof_dialog_->IDFromName("BokehOn");
-	id_focus_plane_static_ = dof_dialog_->IDFromName("FocusPlaneStatic");
-	id_focus_plane_slider_ = dof_dialog_->IDFromName("FocusPlaneSlider");
-	id_focus_range_static_ = dof_dialog_->IDFromName("FocusRangeStatic");
-	id_focus_range_slider_ = dof_dialog_->IDFromName("FocusRangeSlider");
-	id_blur_factor_ = dof_dialog_->IDFromName("BlurFactor");
+	id_dof_focus_plane_static_ = dof_dialog_->IDFromName("FocusPlaneStatic");
+	id_dof_focus_plane_slider_ = dof_dialog_->IDFromName("FocusPlaneSlider");
+	id_dof_focus_range_static_ = dof_dialog_->IDFromName("FocusRangeStatic");
+	id_dof_focus_range_slider_ = dof_dialog_->IDFromName("FocusRangeSlider");
+	id_dof_blur_factor_ = dof_dialog_->IDFromName("BlurFactor");
 	id_mb_on_ = mb_dialog_->IDFromName("MBOn");
-	id_motion_vec_ = mb_dialog_->IDFromName("MotionVec");
+	id_mb_exposure_static_ = mb_dialog_->IDFromName("ExposureStatic");
+	id_mb_exposure_slider_ = mb_dialog_->IDFromName("ExposureSlider");
+	id_mb_blur_radius_static_ = mb_dialog_->IDFromName("BlurRadiusStatic");
+	id_mb_blur_radius_slider_ = mb_dialog_->IDFromName("BlurRadiusSlider");
+	id_mb_reconstruction_samples_static_ = mb_dialog_->IDFromName("SamplesStatic");
+	id_mb_reconstruction_samples_slider_ = mb_dialog_->IDFromName("SamplesSlider");
+	id_motion_blur_type_ = mb_dialog_->IDFromName("MotionBlurTypeCombo");
 	id_use_instancing_ = app_dialog_->IDFromName("UseInstancing");
 	id_ctrl_camera_ = app_dialog_->IDFromName("CtrlCamera");
 
 	if (depth_of_field_)
 	{
-		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::DoFOnHandler, this, std::placeholders::_1));
+		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(
+			std::bind(&MotionBlurDoFApp::DoFOnHandler, this, std::placeholders::_1));
 		this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
-		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::BokehOnHandler, this, std::placeholders::_1));
+		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(
+			std::bind(&MotionBlurDoFApp::BokehOnHandler, this, std::placeholders::_1));
 		this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
-		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->OnValueChangedEvent().connect(std::bind(&MotionBlurDoFApp::FocusPlaneChangedHandler, this, std::placeholders::_1));
-		this->FocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_plane_slider_));
-		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->OnValueChangedEvent().connect(std::bind(&MotionBlurDoFApp::FocusRangeChangedHandler, this, std::placeholders::_1));
-		this->FocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_focus_range_slider_));
-		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::BlurFactorHandler, this, std::placeholders::_1));
-		this->BlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_blur_factor_));
+		dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->OnValueChangedEvent().connect(
+			std::bind(&MotionBlurDoFApp::DoFFocusPlaneChangedHandler, this, std::placeholders::_1));
+		this->DoFFocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_));
+		dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->OnValueChangedEvent().connect(
+			std::bind(&MotionBlurDoFApp::DoFFocusRangeChangedHandler, this, std::placeholders::_1));
+		this->DoFFocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_));
+		dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->OnChangedEvent().connect(
+			std::bind(&MotionBlurDoFApp::DoFBlurFactorHandler, this, std::placeholders::_1));
+		this->DoFBlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_));
 	}
 	else
 	{
 		dof_dialog_->Control<UICheckBox>(id_dof_on_)->SetEnabled(false);
 		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->SetEnabled(false);
-		dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(false);
-		dof_dialog_->Control<UISlider>(id_focus_range_slider_)->SetEnabled(false);
-		dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(false);
+		dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->SetEnabled(false);
+		dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->SetEnabled(false);
+		dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->SetEnabled(false);
 		dof_on_ = false;
 	}
 
-	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::MBOnHandler, this, std::placeholders::_1));
-	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::MotionVecHandler, this, std::placeholders::_1));
+	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::MBOnHandler, this, std::placeholders::_1));
+	mb_dialog_->Control<UISlider>(id_mb_exposure_slider_)->OnValueChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::MBExposureChangedHandler, this, std::placeholders::_1));
+	this->MBExposureChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_exposure_slider_));
+	mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_)->OnValueChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::MBBlurRadiusChangedHandler, this, std::placeholders::_1));
+	this->MBBlurRadiusChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_));
+	mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_)->OnValueChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::MBReconstructionSamplesChangedHandler, this, std::placeholders::_1));
+	this->MBReconstructionSamplesChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_));
+	mb_dialog_->Control<UIComboBox>(id_motion_blur_type_)->OnSelectionChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::MotionBlurChangedHandler, this, std::placeholders::_1));
 
-	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, std::placeholders::_1));
+	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, std::placeholders::_1));
 
-	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(std::bind(&MotionBlurDoFApp::UseInstancingHandler, this, std::placeholders::_1));
-
-	use_instance_ = true;
+	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(
+		std::bind(&MotionBlurDoFApp::UseInstancingHandler, this, std::placeholders::_1));
 }
 
 void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
@@ -900,9 +919,9 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	motion_vec_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-	motion_vec_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*motion_vec_tex_, 0, 1, 0));
-	motion_vec_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	velocity_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*velocity_tex_, 0, 1, 0));
+	velocity_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 	dof_tex_ = rf.MakeTexture2D(width, height, 1, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
@@ -924,7 +943,7 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 
 	motion_blur_->InputPin(0, dof_tex_);
 	motion_blur_->InputPin(1, depth_tex_);
-	motion_blur_->InputPin(2, motion_vec_tex_);
+	motion_blur_->InputPin(2, velocity_tex_);
 	motion_blur_copy_pp_->InputPin(0, dof_tex_);
 
 	UIManager::Instance().SettleCtrls();
@@ -945,11 +964,11 @@ void MotionBlurDoFApp::DoFOnHandler(KlayGE::UICheckBox const & sender)
 	dof_on_ = sender.GetChecked();
 
 	dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->SetEnabled(dof_on_);
-	dof_dialog_->Control<UIStatic>(id_focus_plane_static_)->SetEnabled(dof_on_);
-	dof_dialog_->Control<UISlider>(id_focus_plane_slider_)->SetEnabled(dof_on_);
-	dof_dialog_->Control<UIStatic>(id_focus_range_static_)->SetEnabled(dof_on_);
-	dof_dialog_->Control<UISlider>(id_focus_range_slider_)->SetEnabled(dof_on_);
-	dof_dialog_->Control<UICheckBox>(id_blur_factor_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UIStatic>(id_dof_focus_plane_static_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UIStatic>(id_dof_focus_range_static_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->SetEnabled(dof_on_);
+	dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->SetEnabled(dof_on_);
 }
 
 void MotionBlurDoFApp::BokehOnHandler(KlayGE::UICheckBox const & sender)
@@ -957,25 +976,35 @@ void MotionBlurDoFApp::BokehOnHandler(KlayGE::UICheckBox const & sender)
 	bokeh_on_ = sender.GetChecked();
 }
 
-void MotionBlurDoFApp::FocusPlaneChangedHandler(KlayGE::UISlider const & sender)
+void MotionBlurDoFApp::DoFFocusPlaneChangedHandler(KlayGE::UISlider const & sender)
 {
-	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusPlane(sender.GetValue() / 50.0f);
+	float focus_plane = sender.GetValue() / 50.0f;
+	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusPlane(focus_plane);
 	if (bokeh_filter_)
 	{
-		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusPlane(sender.GetValue() / 50.0f);
+		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusPlane(focus_plane);
 	}
+
+	std::wostringstream stream;
+	stream << "Focus Plane: " << focus_plane;
+	dof_dialog_->Control<UIStatic>(id_dof_focus_plane_static_)->SetText(stream.str());
 }
 
-void MotionBlurDoFApp::FocusRangeChangedHandler(KlayGE::UISlider const & sender)
+void MotionBlurDoFApp::DoFFocusRangeChangedHandler(KlayGE::UISlider const & sender)
 {
-	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(sender.GetValue() / 50.0f);
+	float focus_range = sender.GetValue() / 50.0f;
+	checked_pointer_cast<DepthOfField>(depth_of_field_)->FocusRange(focus_range);
 	if (bokeh_filter_)
 	{
-		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusRange(sender.GetValue() / 50.0f);
+		checked_pointer_cast<BokehFilter>(bokeh_filter_)->FocusRange(focus_range);
 	}
+
+	std::wostringstream stream;
+	stream << "Focus Range: " << focus_range;
+	dof_dialog_->Control<UIStatic>(id_dof_focus_range_static_)->SetText(stream.str());
 }
 
-void MotionBlurDoFApp::BlurFactorHandler(KlayGE::UICheckBox const & sender)
+void MotionBlurDoFApp::DoFBlurFactorHandler(KlayGE::UICheckBox const & sender)
 {
 	checked_pointer_cast<DepthOfField>(depth_of_field_)->ShowBlurFactor(sender.GetChecked());
 }
@@ -984,12 +1013,52 @@ void MotionBlurDoFApp::MBOnHandler(KlayGE::UICheckBox const & sender)
 {
 	mb_on_ = sender.GetChecked();
 
-	mb_dialog_->Control<UICheckBox>(id_motion_vec_)->SetEnabled(mb_on_);
+	mb_dialog_->Control<UIComboBox>(id_motion_blur_type_)->SetEnabled(mb_on_);
 }
 
-void MotionBlurDoFApp::MotionVecHandler(KlayGE::UICheckBox const & sender)
+void MotionBlurDoFApp::MBExposureChangedHandler(KlayGE::UISlider const & sender)
 {
-	checked_pointer_cast<MotionBlur>(motion_blur_)->ShowMotionVector(sender.GetChecked());
+	exposure_ = sender.GetValue() / 10.0f;
+	motion_blur_->SetParam(0, exposure_);
+
+	std::wostringstream stream;
+	stream << "Exposure: " << exposure_;
+	mb_dialog_->Control<UIStatic>(id_mb_exposure_static_)->SetText(stream.str());
+
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		checked_pointer_cast<Teapot>(scene_objs_[i])->Exposure(exposure_);
+	}
+}
+
+void MotionBlurDoFApp::MBBlurRadiusChangedHandler(KlayGE::UISlider const & sender)
+{
+	blur_radius_ = sender.GetValue();
+	motion_blur_->SetParam(1, blur_radius_);
+
+	std::wostringstream stream;
+	stream << "Blur Radius: " << blur_radius_;
+	mb_dialog_->Control<UIStatic>(id_mb_blur_radius_static_)->SetText(stream.str());
+
+	for (size_t i = 0; i < scene_objs_.size(); ++ i)
+	{
+		checked_pointer_cast<Teapot>(scene_objs_[i])->BlurRadius(blur_radius_);
+	}
+}
+
+void MotionBlurDoFApp::MBReconstructionSamplesChangedHandler(KlayGE::UISlider const & sender)
+{
+	uint32_t reconstruction_samples = sender.GetValue();
+	motion_blur_->SetParam(2, reconstruction_samples);
+
+	std::wostringstream stream;
+	stream << "Samples: " << reconstruction_samples;
+	mb_dialog_->Control<UIStatic>(id_mb_reconstruction_samples_static_)->SetText(stream.str());
+}
+
+void MotionBlurDoFApp::MotionBlurChangedHandler(KlayGE::UIComboBox const & sender)
+{
+	motion_blur_->SetParam(3, static_cast<uint32_t>(sender.GetSelectedIndex()));
 }
 
 void MotionBlurDoFApp::UseInstancingHandler(UICheckBox const & /*sender*/)
@@ -1102,6 +1171,8 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					checked_pointer_cast<Teapot>(so)->Instance(MathLib::translation(pos), clr);
 
 					checked_pointer_cast<Teapot>(so)->SetRenderable(renderInstance_);
+					checked_pointer_cast<Teapot>(so)->Exposure(exposure_);
+					checked_pointer_cast<Teapot>(so)->BlurRadius(blur_radius_);
 					so->AddToSceneManager();
 					scene_objs_.push_back(so);
 
@@ -1156,7 +1227,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 		}
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(false);
+			checked_pointer_cast<Teapot>(scene_objs_[i])->VelocityPass(false);
 		}
 		return App3DFramework::URV_NeedFlush;
 
@@ -1166,11 +1237,11 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 			depth_to_linear_pp_->Apply();
 		}
 
-		renderEngine.BindFrameBuffer(motion_vec_fb_);
+		renderEngine.BindFrameBuffer(velocity_fb_);
 		renderEngine.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, Color(0.5f, 0.5f, 0.5f, 1), 1.0f, 0);
 		for (size_t i = 0; i < scene_objs_.size(); ++ i)
 		{
-			checked_pointer_cast<Teapot>(scene_objs_[i])->MotionVecPass(true);
+			checked_pointer_cast<Teapot>(scene_objs_[i])->VelocityPass(true);
 		}
 		return App3DFramework::URV_NeedFlush;
 

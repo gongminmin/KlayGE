@@ -315,14 +315,6 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			SendMessage(hSyncCombo, CB_SETCURSEL, sel, 0);
 		}
 		{
-			HWND hMBFramesEdit = GetDlgItem(hDlg, IDC_MB_FRAMES_EDIT);
-
-			std::basic_string<TCHAR> str;
-			Convert(str, boost::lexical_cast<std::string>(cfg.graphics_cfg.motion_frames));
-
-			SetWindowText(hMBFramesEdit, str.c_str());
-		}
-		{
 			HWND hHDRCombo = GetDlgItem(hDlg, IDC_HDR_COMBO);
 			SendMessage(hHDRCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("Yes")));
 			SendMessage(hHDRCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("No")));
@@ -751,12 +743,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 						cfg.graphics_cfg.sync_interval = 0;
 						break;
 					}
-				}
-				{
-					HWND hMBFramesEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_MB_FRAMES_EDIT);
-					TCHAR buf[256];
-					GetWindowText(hMBFramesEdit, buf, static_cast<uint32_t>(std::size(buf)));
-					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.motion_frames;
 				}
 				{
 					HWND hHDRCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_HDR_COMBO);

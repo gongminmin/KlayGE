@@ -91,6 +91,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Light.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/LightShaft.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Mesh.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/MotionBlur.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/MultiResLayer.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/ParticleSystem.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/PostProcess.cpp
@@ -142,6 +143,7 @@ SET(RENDERING_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Light.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/LightShaft.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/Mesh.hpp
+	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MotionBlur.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/MultiResLayer.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/ParticleSystem.hpp
 	${KLAYGE_PROJECT_DIR}/Core/Include/KlayGE/PostProcess.hpp
@@ -208,6 +210,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Lighting.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightShaft.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/MotionBlur.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/MultiRes.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Noise.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Particle.fxml
@@ -250,6 +253,7 @@ SET(RENDERING_POSTPROCESSOR_FILES
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/HDRDisplay.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LensEffects.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/LightShaft.ppml
+	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MotionBlur.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/MultiRes.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/PostToneMapping.ppml
 	${KLAYGE_PROJECT_DIR}/media/PostProcessors/Resizer.ppml

@@ -38,11 +38,6 @@ namespace KlayGE
 		: view_proj_mat_dirty_(true), view_proj_mat_wo_adjust_dirty_(true), frustum_dirty_(true),
 			mode_(0), cur_jitter_index_(0)
 	{
-		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		uint32_t num_motion_frames = re.NumMotionFrames();
-		prev_view_mats_.resize(num_motion_frames);
-		prev_proj_mats_.resize(num_motion_frames);
-
 		this->ViewParams(float3(0, 0, 0), float3(0, 0, 1), float3(0, 1, 0));
 		this->ProjParams(PI / 4, 1, 1, 1000);
 	}
@@ -129,13 +124,13 @@ namespace KlayGE
 
 	void Camera::Update(float app_time, float elapsed_time)
 	{
+		prev_view_mat_ = view_mat_;
+		prev_proj_mat_ = proj_mat_;
+
 		if (update_func_)
 		{
 			update_func_(*this, app_time, elapsed_time);
 		}
-
-		prev_view_mats_.push_back(view_mat_);
-		prev_proj_mats_.push_back(proj_mat_);
 
 		if (this->JitterMode())
 		{
@@ -254,12 +249,12 @@ namespace KlayGE
 
 	float4x4 const & Camera::PrevViewMatrix() const
 	{
-		return prev_view_mats_.front();
+		return prev_view_mat_;
 	}
 	
 	float4x4 const & Camera::PrevProjMatrix() const
 	{
-		return prev_proj_mats_.front();
+		return prev_proj_mat_;
 	}
 
 	Frustum const & Camera::ViewFrustum() const

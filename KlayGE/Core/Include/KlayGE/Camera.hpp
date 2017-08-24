@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <boost/circular_buffer.hpp>
-
 #include <KFL/Frustum.hpp>
 #include <KFL/Vector.hpp>
 #include <KFL/Matrix.hpp>
@@ -105,8 +103,8 @@ namespace KlayGE
 		float4x4	proj_mat_wo_adjust_;
 		float4x4	inv_proj_mat_wo_adjust_;
 
-		boost::circular_buffer<float4x4> prev_view_mats_;
-		boost::circular_buffer<float4x4> prev_proj_mats_;
+		float4x4 prev_view_mat_;
+		float4x4 prev_proj_mat_;
 
 		mutable float4x4	view_proj_mat_;
 		mutable float4x4	inv_view_proj_mat_;

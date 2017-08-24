@@ -55,8 +55,6 @@ BEGIN
     LTEXT           "Anti-alias:",IDC_STATIC,18,97,33,8
     LTEXT           "Sync interval:",IDC_STATIC,18,139,45,8
     COMBOBOX        IDC_SYNC_COMBO,87,134,158,48,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Motion blur frames:",IDC_STATIC,18,155,63,8
-    EDITTEXT        IDC_MB_FRAMES_EDIT,87,150,158,14,ES_AUTOHSCROLL
     LTEXT           "Stereo separation:",IDC_STATIC,18,221,61,8
     EDITTEXT        IDC_STEREO_SEP_EDIT,87,216,158,14,ES_AUTOHSCROLL
     LTEXT           "Full screen:",IDC_STATIC,18,114,38,8

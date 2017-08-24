@@ -21,11 +21,14 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void DoFOnHandler(KlayGE::UICheckBox const & sender);
 	void BokehOnHandler(KlayGE::UICheckBox const & sender);
-	void FocusPlaneChangedHandler(KlayGE::UISlider const & sender);
-	void FocusRangeChangedHandler(KlayGE::UISlider const & sender);
-	void BlurFactorHandler(KlayGE::UICheckBox const & sender);
+	void DoFFocusPlaneChangedHandler(KlayGE::UISlider const & sender);
+	void DoFFocusRangeChangedHandler(KlayGE::UISlider const & sender);
+	void DoFBlurFactorHandler(KlayGE::UICheckBox const & sender);
 	void MBOnHandler(KlayGE::UICheckBox const & sender);
-	void MotionVecHandler(KlayGE::UICheckBox const & sender);
+	void MBExposureChangedHandler(KlayGE::UISlider const & sender);
+	void MBBlurRadiusChangedHandler(KlayGE::UISlider const & sender);
+	void MBReconstructionSamplesChangedHandler(KlayGE::UISlider const & sender);
+	void MotionBlurChangedHandler(KlayGE::UIComboBox const & sender);
 	void UseInstancingHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
@@ -36,6 +39,8 @@ private:
 	std::vector<KlayGE::SceneObjectPtr> scene_objs_;
 
 	bool use_instance_;
+	float exposure_;
+	uint32_t blur_radius_;
 
 	KlayGE::FirstPersonCameraController fpcController_;
 
@@ -43,11 +48,11 @@ private:
 	KlayGE::PostProcessPtr depth_to_linear_pp_;
 
 	KlayGE::FrameBufferPtr clr_depth_fb_;
-	KlayGE::FrameBufferPtr motion_vec_fb_;
+	KlayGE::FrameBufferPtr velocity_fb_;
 	KlayGE::TexturePtr color_tex_;
 	KlayGE::TexturePtr ds_tex_;
 	KlayGE::TexturePtr depth_tex_;
-	KlayGE::TexturePtr motion_vec_tex_;
+	KlayGE::TexturePtr velocity_tex_;
 	KlayGE::TexturePtr dof_tex_;
 
 	KlayGE::PostProcessPtr depth_of_field_;
@@ -70,13 +75,19 @@ private:
 	KlayGE::UIDialogPtr app_dialog_;
 	int id_dof_on_;
 	int id_bokeh_on_;
-	int id_focus_plane_static_;
-	int id_focus_plane_slider_;
-	int id_focus_range_static_;
-	int id_focus_range_slider_;
-	int id_blur_factor_;
+	int id_dof_focus_plane_static_;
+	int id_dof_focus_plane_slider_;
+	int id_dof_focus_range_static_;
+	int id_dof_focus_range_slider_;
+	int id_dof_blur_factor_;
 	int id_mb_on_;
-	int id_motion_vec_;
+	int id_mb_exposure_static_;
+	int id_mb_exposure_slider_;
+	int id_mb_blur_radius_static_;
+	int id_mb_blur_radius_slider_;
+	int id_mb_reconstruction_samples_static_;
+	int id_mb_reconstruction_samples_slider_;
+	int id_motion_blur_type_;
 	int id_use_instancing_;
 	int id_ctrl_camera_;
 

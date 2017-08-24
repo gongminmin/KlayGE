@@ -68,7 +68,6 @@ namespace KlayGE
 		: num_primitives_just_rendered_(0), num_vertices_just_rendered_(0),
 			num_draws_just_called_(0), num_dispatches_just_called_(0),
 			default_fov_(PI / 4), default_render_width_scale_(1), default_render_height_scale_(1),
-			motion_frames_(0),
 			stereo_method_(STM_None), stereo_separation_(0),
 			fb_stage_(0), force_line_mode_(false)
 	{

@@ -237,8 +237,6 @@ namespace KlayGE
 	void OGLRenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		motion_frames_ = settings.motion_frames;
-
 		FrameBufferPtr win = MakeSharedPtr<OGLRenderWindow>(name, settings);
 
 		if (glloader_GL_VERSION_4_5())

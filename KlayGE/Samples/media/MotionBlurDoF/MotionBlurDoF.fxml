@@ -4,13 +4,13 @@
 	<include name="Lighting.fxml"/>
 	<include name="Quaternion.fxml"/>
 	<include name="PostProcess.fxml"/>
+	<include name="MotionBlur.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="view"/>
 		<parameter type="float4x4" name="proj"/>
 		<parameter type="float3" name="light_in_world" x="2" y="2" z="-3"/>
 		<parameter type="float3" name="eye_in_world"/>
-		<parameter type="float" name="elapsed_time"/>
 		<parameter type="float3" name="pos_center"/>
 		<parameter type="float3" name="pos_extent"/>
 	</cbuffer>
@@ -18,6 +18,8 @@
 	<parameter type="float4x4" name="modelmat" semantic="WORLD"/>
 	<parameter type="float4x4" name="last_modelmat"/>
 	<parameter type="float4" name="color"/>
+
+	<macro name="EPSILON" value="0.01f"/>
 
 	<shader>
 		<![CDATA[
@@ -113,27 +115,22 @@ float4 ColorDepthPS(float3 clr : TEXCOORD0, float3 pos_ws : TEXCOORD1, float3 no
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="prev_view"/>
 		<parameter type="float4x4" name="prev_proj"/>
+		<parameter type="float" name="half_exposure_x_framerate"/>
 	</cbuffer>
 	
 	<shader>
 		<![CDATA[
 void CalcMotionVector(float4 pos_curr, float4 pos_prev, float3 normal_es,
-					out float2 oVelocity, out float4 oPos)
+					out float4 oPosCurr, out float4 oPosPrev)
 {
 	pos_curr = mul(pos_curr, view);
 	pos_prev = mul(pos_prev, prev_view);
-	float3 motion_vec = pos_curr.xyz - pos_prev.xyz;
-	
-	pos_curr = mul(pos_curr, proj);
-	pos_prev = mul(pos_prev, prev_proj);
-	oPos = dot(motion_vec, normal_es) > 0 ? pos_curr : pos_prev;
-	
-	pos_curr /= pos_curr.w;
-	pos_prev /= pos_prev.w;
-	oVelocity = (pos_curr.xy - pos_prev.xy) / (elapsed_time * 60);
+
+	oPosCurr = mul(pos_curr, proj);
+	oPosPrev = mul(pos_prev, prev_proj);
 }
 
-void MotionVectorInstancedVS(float4 pos			: POSITION,
+void VelocityInstancedVS(float4 pos			: POSITION,
 					float4 tangent_quat		: TANGENT,
 
 					float4 row0			: TEXCOORD1,
@@ -144,7 +141,8 @@ void MotionVectorInstancedVS(float4 pos			: POSITION,
 					float4 last_row2	: TEXCOORD6,
 					float3 clr			: COLOR0,
 
-					out float2 oVelocity : TEXCOORD0,
+					out float4 oPosCurr : TEXCOORD0,
+					out float4 oPosPrev : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -154,13 +152,16 @@ void MotionVectorInstancedVS(float4 pos			: POSITION,
 	float4x4 last_model = { last_row0, last_row1, last_row2, float4(0, 0, 0, 1) };
 
 	float3 normal = mul(mul((float3x3)model, transform_quat(float3(0, 0, 1), tangent_quat)), (float3x3)view);
-	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oVelocity, oPos);
+	CalcMotionVector(mul(model, pos), mul(last_model, pos), normal, oPosCurr, oPosPrev);
+
+	oPos = oPosCurr;
 }
 
-void MotionVectorNonInstancedVS(float4 pos			: POSITION,
+void VelocityNonInstancedVS(float4 pos		: POSITION,
 					float4 tangent_quat		: TANGENT,
 
-					out float2 oVelocity : TEXCOORD0,
+					out float4 oPosCurr : TEXCOORD0,
+					out float4 oPosPrev : TEXCOORD1,
 					out float4 oPos		: SV_Position)
 {
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -168,28 +169,29 @@ void MotionVectorNonInstancedVS(float4 pos			: POSITION,
 	
 	float4 pos_ws = mul(pos, modelmat);
 	float3 normal = mul(mul(transform_quat(float3(0, 0, 1), tangent_quat), (float3x3)modelmat), (float3x3)view);
-	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oVelocity, oPos);
+	CalcMotionVector(mul(pos, modelmat), mul(pos, last_modelmat), normal, oPosCurr, oPosPrev);
+
+	oPos = oPosCurr;
 }
 
-float4 MotionVectorPS(float2 velocity : TEXCOORD0) : SV_Target
+float4 VelocityPS(float4 pos_curr : TEXCOORD0, float4 pos_prev : TEXCOORD1) : SV_Target
 {
-	velocity.y *= KLAYGE_FLIPPING;
-	return float4(velocity * 10 + 0.5f, 1, 1);
+	return float4(GenerateVelocity(pos_curr, pos_prev, half_exposure_x_framerate), 1, 1);
 }
 		]]>
 	</shader>
 
-	<technique name="MotionVectorInstanced">
+	<technique name="VelocityInstanced">
 		<pass name="p0">
-			<state name="vertex_shader" value="MotionVectorInstancedVS()"/>
-			<state name="pixel_shader" value="MotionVectorPS()"/>
+			<state name="vertex_shader" value="VelocityInstancedVS()"/>
+			<state name="pixel_shader" value="VelocityPS()"/>
 		</pass>
 	</technique>
 
-	<technique name="MotionVectorNonInstanced">
+	<technique name="VelocityNonInstanced">
 		<pass name="p0">
-			<state name="vertex_shader" value="MotionVectorNonInstancedVS()"/>
-			<state name="pixel_shader" value="MotionVectorPS()"/>
+			<state name="vertex_shader" value="VelocityNonInstancedVS()"/>
+			<state name="pixel_shader" value="VelocityPS()"/>
 		</pass>
 	</technique>
 </effect>

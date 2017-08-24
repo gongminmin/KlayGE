@@ -188,11 +188,6 @@ namespace KlayGE
 
 		void ConvertToDisplay();
 
-		uint32_t NumMotionFrames() const
-		{
-			return motion_frames_;
-		}
-
 		RenderStateObjectPtr const & CurRenderStateObject() const
 		{
 			return cur_rs_obj_;
@@ -323,8 +318,6 @@ namespace KlayGE
 		float default_fov_;
 		float default_render_width_scale_;
 		float default_render_height_scale_;
-
-		uint32_t motion_frames_;
 
 		StereoMethod stereo_method_;
 		float stereo_separation_;

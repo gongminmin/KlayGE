@@ -254,8 +254,6 @@ namespace KlayGE
 	void D3D12RenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		motion_frames_ = settings.motion_frames;
-
 		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(this->ActiveAdapter(), name, settings);
 
 		native_shader_platform_name_ = "d3d_12_0";

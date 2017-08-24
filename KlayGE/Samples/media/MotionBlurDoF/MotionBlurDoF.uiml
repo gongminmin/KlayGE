@@ -1,25 +1,41 @@
 <?xml version='1.0' encoding='utf-8' standalone='no'?>
 
 <ui>
-	<dialog id="DoF" caption="Depth of field" x="-140" y="60" align_x="right" width="140" height="250">
+	<dialog id="DoF" caption="Depth of field" x="-180" y="0" align_x="right" width="180" height="246">
 		<control type="check_box" id="DoFOn" caption="DoF on" x="20" y="20" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="BokehOn" caption="Bokeh on" x="20" y="60" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
-		
-		<control type="static" id="FocusPlaneStatic" caption="Focus plane:" x="20" y="100" width="100" height="24" is_default="0"/>
-		<control type="slider" id="FocusPlaneSlider" x="20" y="120" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
 
-		<control type="static" id="FocusRangeStatic" caption="Focus range:" x="20" y="148" width="100" height="24" is_default="0"/>
-		<control type="slider" id="FocusRangeSlider" x="20" y="168" width="100" height="24" min="0" max="200" value="100" is_default="0"/>
+		<control type="static" id="FocusPlaneStatic" caption="Focus Plane:" x="20" y="100" width="140" height="24" is_default="0"/>
+		<control type="slider" id="FocusPlaneSlider" x="20" y="118" width="140" height="24" min="0" max="200" value="100" is_default="0"/>
+
+		<control type="static" id="FocusRangeStatic" caption="Focus Range:" x="20" y="148" width="140" height="24" is_default="0"/>
+		<control type="slider" id="FocusRangeSlider" x="20" y="166" width="140" height="24" min="0" max="200" value="100" is_default="0"/>
 
 		<control type="check_box" id="BlurFactor" caption="Show Blur factor" x="20" y="206" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
-	<dialog id="MotionBlur" caption="Motion Blur" x="-140" y="360" align_x="right" width="140" height="120">
+	<dialog id="MotionBlur" caption="Motion Blur" x="-180" y="274" align_x="right" width="180" height="274">
 		<control type="check_box" id="MBOn" caption="Motion blur on" x="20" y="20" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
-		<control type="check_box" id="MotionVec" caption="Show Motion Vector" x="20" y="60" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+
+		<control type="static" id="ExposureStatic" caption="Exposure:" x="20" y="60" width="140" height="24" is_default="0"/>
+		<control type="slider" id="ExposureSlider" x="20" y="78" width="140" height="24" min="0" max="100" value="20" is_default="0"/>
+
+		<control type="static" id="BlurRadiusStatic" caption="Blur Radius:" x="20" y="108" width="140" height="24" is_default="0"/>
+		<control type="slider" id="BlurRadiusSlider" x="20" y="126" width="140" height="24" min="1" max="20" value="2" is_default="0"/>
+
+		<control type="static" id="SamplesStatic" caption="Samples:" x="20" y="156" width="140" height="24" is_default="0"/>
+		<control type="slider" id="SamplesSlider" x="20" y="174" width="140" height="24" min="1" max="20" value="15" is_default="0"/>
+
+		<control type="static" id="TypeStatic" caption="Show Motion Vector:" x="20" y="214" width="140" height="24" is_default="0"/>
+		<control type="combo_box" id="MotionBlurTypeCombo" x="20" y="234" width="140" height="24" hotkey="0" selected="3" is_default="0">
+			<item name="Veolicity"/>
+			<item name="Tile Max Velocity"/>
+			<item name="Neighbor Max Velocity"/>
+			<item name="Result"/>
+		</control>
 	</dialog>
 
-	<dialog id="App" caption="Application" x="-140" y="540" align_x="right" width="140" height="90">
+	<dialog id="App" caption="Application" x="-180" y="578" align_x="right" width="180" height="90">
 		<control type="check_box" id="UseInstancing" caption="Use instincing" x="20" y="20" width="350" height="24" checked="1" hotkey="0" is_default="0"/>
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="50" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>

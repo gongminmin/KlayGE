@@ -1,0 +1,294 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="PostProcess.fxml"/>
+
+	<parameter type="texture2D" name="color_tex"/>
+	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2D" name="velocity_tex"/>
+	<parameter type="texture2D" name="velocity_tile_max_tex"/>
+	<parameter type="texture2D" name="velocity_neighbor_max_tex"/>
+	<parameter type="texture2D" name="random_tex"/>
+
+	<parameter type="sampler" name="point_sampler">
+		<state name="filtering" value="min_mag_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+	<parameter type="sampler" name="linear_sampler">
+		<state name="filtering" value="min_mag_linear_mip_point"/>
+		<state name="address_u" value="clamp"/>
+		<state name="address_v" value="clamp"/>
+	</parameter>
+
+	<cbuffer name="per_frame">
+		<parameter type="float4" name="width_height"/>
+		<parameter type="float" name="blur_radius"/>
+		<parameter type="float" name="half_exposure"/>
+		<parameter type="float" name="reconstruction_samples"/>
+		<parameter type="float" name="max_sample_tap_distance"/>
+	</cbuffer>
+
+	<macro name="EPSILON" value="0.01f"/>
+	<macro name="HALF_VELOCITY_CUTOFF" value="0.25f"/>
+	<macro name="SOFT_Z_EXTENT" value="0.1f"/>
+	<macro name="CYLINDER_CORNER_1" value="0.95f"/>
+	<macro name="CYLINDER_CORNER_2" value="1.05f"/>
+	<macro name="VARIANCE_THRESHOLD" value="1.5f"/>
+	<macro name="WEIGHT_CORRECTION_FACTOR" value="60"/>
+
+	<shader>
+		<![CDATA[
+float2 GenerateVelocity(float4 pos_curr, float4 pos_prev, float half_exposure_x_framerate)
+{
+	float2 velocity = (pos_curr.xy / pos_curr.w - pos_prev.xy / pos_prev.w) * half_exposure_x_framerate;
+	float len_velocity = length(velocity);
+
+	float weight = max(0.5f, min(len_velocity, blur_radius));
+	weight /= max(len_velocity, EPSILON);
+	velocity *= weight;
+	velocity.y *= KLAYGE_FLIPPING;
+	return velocity * 0.5f + 0.5f;
+}
+		]]>
+	</shader>
+
+	<shader>
+		<![CDATA[
+float4 MotionBlurTileMaxXDirPS(float2 tex_coord0 : TEXCOORD0) : SV_Target0
+{
+	float2 max_velocity = 0;
+	float max_magnitude_squared = 0;
+	for (int s = 0; s < blur_radius; ++ s)
+	{
+		float2 tex_coord = tex_coord0 + float2(s, 0) * width_height.zw;
+		float2 velocity = velocity_tex.SampleLevel(point_sampler, tex_coord, 0).xy * 2 - 1;
+
+		float magnitude_squared = dot(velocity, velocity);
+		if (max_magnitude_squared < magnitude_squared)
+		{
+			max_velocity = velocity;
+			max_magnitude_squared = magnitude_squared;
+		}
+	}
+
+	return float4(max_velocity * 0.5f + 0.5f, 0, 0);
+}
+
+float4 MotionBlurTileMaxYDirPS(float2 tex_coord0 : TEXCOORD0) : SV_Target0
+{
+	float2 max_velocity = 0;
+	float max_magnitude_squared = 0;
+	for (int t = 0; t < blur_radius; ++ t)
+	{
+		float2 tex_coord = tex_coord0 + float2(0, t) * width_height.zw;
+		float2 velocity = velocity_tex.SampleLevel(point_sampler, tex_coord, 0).xy * 2 - 1;
+
+		float magnitude_squared = dot(velocity, velocity);
+		if (max_magnitude_squared < magnitude_squared)
+		{
+			max_velocity = velocity;
+			max_magnitude_squared = magnitude_squared;
+		}
+	}
+
+	return float4(max_velocity * 0.5f + 0.5f, 0, 0);
+}
+
+float4 MotionBlurNeighborMaxPS(float2 tex_coord0 : TEXCOORD0) : SV_Target0
+{
+	float2 max_velocity = 0;
+	float max_magnitude_squared = 0;
+	for (int s = -1; s <= 1; ++ s)
+	{
+		for (int t = -1; t <= 1; ++ t)
+		{
+			float2 tex_coord = tex_coord0 + float2(s, t) * width_height.zw;
+			float2 velocity = velocity_tile_max_tex.SampleLevel(point_sampler, tex_coord, 0).xy * 2 - 1;
+
+			float magnitude_squared = dot(velocity, velocity);
+			if (max_magnitude_squared < magnitude_squared)
+			{
+				float displacement = abs(s) + abs(t);
+				float2 orientation = sign(float2(s, t) * velocity);
+				float distance = orientation.x + orientation.y;
+				if (abs(distance) == displacement)
+				{
+					max_velocity = velocity;
+					max_magnitude_squared = magnitude_squared;
+				}
+			}
+		}
+	}
+
+	return float4(max_velocity * 0.5f + 0.5f, 0, 0);
+}
+
+float Cone(float mag_diff, float mag_v)
+{
+	return 1 - abs(mag_diff) / mag_v;
+}
+
+float Cylinder(float mag_diff, float mag_v)
+{
+	return 1 - smoothstep(CYLINDER_CORNER_1 * mag_v, CYLINDER_CORNER_2 * mag_v, abs(mag_diff));
+}
+
+float SoftDepthCompare(float za, float zb)
+{
+	return clamp((1 - (zb - za) / SOFT_Z_EXTENT), 0, 1);
+}
+
+float4 MotionBlurGatherPS(float2 tex_coord0 : TEXCOORD0) : SV_Target0
+{
+	float4 color = color_tex.SampleLevel(linear_sampler, tex_coord0, 0);
+
+	float2 neighbor_vel = velocity_neighbor_max_tex.Sample(point_sampler, tex_coord0).xy * 2 - 1;
+	float len_neighbor_vel = length(neighbor_vel);
+
+	float temp_neighbor_vel = len_neighbor_vel * half_exposure;
+	bool flag_neighbor_vel = (temp_neighbor_vel >= EPSILON);
+	temp_neighbor_vel = clamp(temp_neighbor_vel, 0.1f, blur_radius);
+
+	[branch]
+	if (temp_neighbor_vel < HALF_VELOCITY_CUTOFF)
+	{
+		return color;
+	}
+
+	if (flag_neighbor_vel)
+	{
+		neighbor_vel *= temp_neighbor_vel / len_neighbor_vel;
+	}
+
+	float2 curr_vel = velocity_tex.Sample(point_sampler, tex_coord0).xy * 2 - 1;
+	float len_curr_vel = length(curr_vel);
+
+	float temp_curr_vel = len_curr_vel * half_exposure;
+	bool flag_curr_vel = (temp_curr_vel >= EPSILON);
+	temp_curr_vel = clamp(temp_curr_vel, 0.1f, blur_radius);
+	if (flag_curr_vel)
+	{
+		curr_vel *= temp_curr_vel / len_curr_vel;
+		len_curr_vel = length(curr_vel);
+	}
+
+	float rand = random_tex.SampleLevel(point_sampler, tex_coord0 * blur_radius, 0).x - 0.5f;
+
+	float curr_depth = depth_tex.SampleLevel(point_sampler, tex_coord0, 0).x;
+
+	// If current velocity is too small, then we use neighbor velocity
+	float2 corrected_vel = (len_curr_vel < VARIANCE_THRESHOLD) ? normalize(neighbor_vel) : normalize(curr_vel);
+
+	// Weight value (suggested by the article authors' implementation)
+	float weight = reconstruction_samples / WEIGHT_CORRECTION_FACTOR / temp_curr_vel;
+
+	float4 sum = float4(color.xyz, 1) * weight;
+
+	int self_index = (reconstruction_samples - 1) / 2;
+
+	float max_distance = max_sample_tap_distance * width_height.z;
+	float2 half_texel = 0.5f * width_height.z;
+
+	for (int i = 0; i < reconstruction_samples; ++ i)
+	{
+		[branch]
+		if (i != self_index)
+		{
+			// t is distance between current fragment and sample tap.
+			// NOTE: we are not sampling adjacent ones; we are extending our taps
+			//       a little further
+			float lerp_amount = (i + rand + 1) / (reconstruction_samples + 1);
+			float t = lerp(-max_distance, max_distance, lerp_amount);
+
+			// The authors' implementation suggests alternating between the corrected velocity and the neighborhood's
+			float2 velocity = ((i & 1) == 1) ? corrected_vel : neighbor_vel;
+
+			float2 sample_coord = float2(tex_coord0 + float2(velocity * t + half_texel));
+
+			float2 sample_vel = velocity_tex.SampleLevel(point_sampler, sample_coord, 0).xy * 2 - 1;
+			float len_sample_vel = length(sample_vel);
+
+			float temp_sample_vel = len_sample_vel * half_exposure;
+			bool flag_sample_vel = (temp_sample_vel >= EPSILON);
+			temp_sample_vel = clamp(temp_sample_vel, 0.1f, blur_radius);
+			if (flag_sample_vel)
+			{
+				sample_vel *= temp_sample_vel / len_sample_vel;
+			}
+
+			float sample_depth = depth_tex.SampleLevel(point_sampler, sample_coord, 0).x;
+
+			// alpha = foreground contribution + background contribution + blur of both foreground and background
+			weight = SoftDepthCompare(curr_depth, sample_depth) * Cone(t, temp_sample_vel)
+				+ SoftDepthCompare(sample_depth, curr_depth) * Cone(t, temp_curr_vel)
+				+ Cylinder(t, temp_sample_vel) * Cylinder(t, temp_curr_vel) * 2;
+
+			sum += float4(color_tex.SampleLevel(linear_sampler, sample_coord, 0).xyz, 1) * weight;
+		}
+	}
+
+	return float4(sum.xyz / sum.w, 1);
+}
+		]]>
+	</shader>
+
+	<technique name="MotionBlurTileMaxXDir">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurTileMaxXDirPS()"/>
+		</pass>
+	</technique>
+	<technique name="MotionBlurTileMaxYDir">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurTileMaxYDirPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MotionBlurNeighborMax">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurNeighborMaxPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="MotionBlurGather">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurGatherPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+float4 MotionBlurVisualizePS(float2 tex_coord0 : TEXCOORD0) : SV_Target
+{
+	float2 velocity = velocity_tex.Sample(point_sampler, tex_coord0).xy * 2 - 1;
+	return float4(velocity.xy, 1, 1);
+}
+		]]>
+	</shader>
+				
+	<technique name="MotionBlurVisualize">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MotionBlurVisualizePS()"/>
+		</pass>
+	</technique>
+</effect>
