@@ -97,13 +97,15 @@ float4 TBDRLightingMaskPS() : SV_Target
 			<state name="cull_mode" value="front"/>
 
 			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="not_equal"/>
-			<state name="front_stencil_ref" value="128"/>
+			<state name="front_stencil_func" value="equal"/>
+			<state name="front_stencil_ref" value="0"/>
 			<state name="front_stencil_pass" value="keep"/>
+			<state name="front_stencil_read_mask" value="144"/> <!--128 is no lighting, 16 is transparent-->
 			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="not_equal"/>
-			<state name="back_stencil_ref" value="128"/>
+			<state name="back_stencil_func" value="equal"/>
+			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="keep"/>
+			<state name="back_stencil_read_mask" value="144"/>
 
 			<state name="vertex_shader" value="TBDRLightingMaskVS()"/>
 			<state name="pixel_shader" value="TBDRLightingMaskPS()"/>
