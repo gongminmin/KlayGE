@@ -246,7 +246,7 @@ namespace KlayGE
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		static char const * available_rfs_array[] = { "D3D11", "D3D12" };
 		static char const * available_afs_array[] = { "XAudio" };
-		static char const * available_adsfs_array[] = { "NullAudioDataSource" };
+		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
 		static char const * available_sfs_array[] = { "NullShow" };
 		static char const * available_scfs_array[] = { "Python" };
