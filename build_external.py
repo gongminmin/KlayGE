@@ -134,10 +134,8 @@ def build_external_libs(build_info):
 		build_7z(build_info, compiler_info)
 		build_rapidxml(build_info, compiler_info)
 		build_android_native_app_glue(build_info, compiler_info)
-
-		if not build_info.is_windows_store:
-			build_libogg(build_info, compiler_info)
-			build_libvorbis(build_info, compiler_info)
+		build_libogg(build_info, compiler_info)
+		build_libvorbis(build_info, compiler_info)
 
 		if build_info.is_dev_platform:
 			build_freetype(build_info, compiler_info)			
