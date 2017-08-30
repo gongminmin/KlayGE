@@ -49,6 +49,7 @@ SET(BASE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/KlayGE.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/PerfProfiler.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/ResLoader.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/Tables.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Base/TableGen/TableGen.py
 )
 
