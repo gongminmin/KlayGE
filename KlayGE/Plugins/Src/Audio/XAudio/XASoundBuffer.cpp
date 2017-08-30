@@ -53,7 +53,7 @@ namespace
 		}
 		virtual ~SoundVoiceContext()
 		{
-			is_playing_holder_ = false;
+			*is_playing_holder_ = false;
 		}
 
 		STDMETHOD_(void, OnVoiceProcessingPassStart)(UINT32)
