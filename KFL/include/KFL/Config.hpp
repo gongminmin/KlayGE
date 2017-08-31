@@ -403,6 +403,7 @@
 		#endif
 	#endif
 #elif defined KLAYGE_CPU_ARM64
+	#define KLAYGE_NEON_SUPPORT
 #endif
 
 #if defined(KLAYGE_COMPILER_MSVC) || defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANG)
