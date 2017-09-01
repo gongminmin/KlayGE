@@ -145,27 +145,15 @@ class build_info:
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
-					if "64bit" == platform.architecture()[0]:
-						if "ProgramFiles(x86)" in env:
-							program_files_folder = env["ProgramFiles(x86)"]
-						else:
-							program_files_folder = "C:\Program Files (x86)"
-					else:
-						if "ProgramFiles" in env:
-							program_files_folder = env["ProgramFiles"]
-						else:
-							program_files_folder = "C:\Program Files"
+					program_files_folder = self.FindProgramFilesFolder()
 
 					if "VS150COMNTOOLS" in env:
 						project_type = "vs2017"
 						compiler = "vc141"
 					else:
-						skus = ("Community", "Professional", "Enterprise")
-						for sku in skus:
-							if os.path.exists(program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\VCVARSALL.BAT" % sku):
-								project_type = "vs2017"
-								compiler = "vc141"
-								break
+						if len(self.FindVS2017Folder(program_files_folder)) > 0:
+							project_type = "vs2017"
+							compiler = "vc141"
 					if 0 == len(compiler):
 						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
 							project_type = "vs2015"
@@ -202,33 +190,18 @@ class build_info:
 				compiler = "clang"
 
 		if 0 == target_platform.find("win"):
-			if "64bit" == platform.architecture()[0]:
-				if "ProgramFiles(x86)" in env:
-					program_files_folder = env["ProgramFiles(x86)"]
-				else:
-					program_files_folder = "C:\Program Files (x86)"
-			else:
-				if "ProgramFiles" in env:
-					program_files_folder = env["ProgramFiles"]
-				else:
-					program_files_folder = "C:\Program Files"
+			program_files_folder = self.FindProgramFilesFolder()
 
 			if "vc141" == compiler:
 				if "VS150COMNTOOLS" in env:
 					compiler_root = env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\"
 					vcvarsall_path = "VCVARSALL.BAT"
 				else:
-					skus = ("Community", "Professional", "Enterprise")
-					found = False
-					for sku in skus:
-						try_folder = program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\" % sku
-						try_vcvarsall = "VCVARSALL.BAT"
-						if os.path.exists(try_folder + try_vcvarsall):
-							compiler_root = try_folder
-							vcvarsall_path = try_vcvarsall
-							found = True
-							break
-					if not found:
+					try_folder = self.FindVS2017Folder(program_files_folder)
+					if len(try_folder) > 0:
+						compiler_root = try_folder
+						vcvarsall_path = "VCVARSALL.BAT"
+					else:
 						log_error("Can't find the compiler.\n")
 			elif "vc140" == compiler:
 				if "VS140COMNTOOLS" in env:
@@ -251,15 +224,13 @@ class build_info:
 						vcvarsall_path = ret_list[2]
 						found = True
 				else:
-					skus = ("Community", "Professional", "Enterprise")
-					for sku in skus:
-						try_folder = program_files_folder + "\\Microsoft Visual Studio\\2017\\%s\\VC\\Auxiliary\\Build\\" % sku
+					try_folder = self.FindVS2017Folder(program_files_folder)
+					if len(try_folder) > 0:
 						ret_list = self.find_vs2017_clangc2(try_folder)
 						if ret_list[0]:
 							compiler_root = ret_list[1]
 							vcvarsall_path = ret_list[2]
 							found = True
-							break
 				if (not found):
 					if "VS140COMNTOOLS" in env:
 						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\ClangC2\\bin\\x86\\"
@@ -446,6 +417,31 @@ class build_info:
 			found = True
 			version_file.close()
 		return (found, compiler_root, vcvarsall_path)
+
+	def FindProgramFilesFolder(self):
+		env = os.environ
+		if "64bit" == platform.architecture()[0]:
+			if "ProgramFiles(x86)" in env:
+				program_files_folder = env["ProgramFiles(x86)"]
+			else:
+				program_files_folder = "C:\Program Files (x86)"
+		else:
+			if "ProgramFiles" in env:
+				program_files_folder = env["ProgramFiles"]
+			else:
+				program_files_folder = "C:\Program Files"
+		return program_files_folder
+
+	def FindVS2017Folder(self, program_files_folder):
+		names = ("Preview", "2017")
+		skus = ("Community", "Professional", "Enterprise")
+		for name in names:
+			for sku in skus:
+				try_folder = program_files_folder + "\\Microsoft Visual Studio\\%s\\%s\\VC\\Auxiliary\\Build\\" % (name, sku)
+				try_vcvarsall = "VCVARSALL.BAT"
+				if os.path.exists(try_folder + try_vcvarsall):
+					return try_folder
+		return ""
 
 class batch_command:
 	def __init__(self, host_platform):
