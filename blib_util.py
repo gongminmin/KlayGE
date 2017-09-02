@@ -58,6 +58,8 @@ class build_info:
 		except:
 			cfg_build.shader_platform_name = "auto"
 
+		self.cmake_ver = self.RetriveCMakeVersion()
+
 		env = os.environ
 
 		host_platform = sys.platform
@@ -291,14 +293,15 @@ class build_info:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
-				if "arm" == arch:
-					gen_suffix = " ARM"
-				elif "x64" == arch:
-					gen_suffix = " Win64"
-				elif "arm64" == arch:
-					gen_suffix = " ARM64"
+				if self.cmake_ver >= 39:
+					gen_suffix = ""
 				else:
-					log_error("%s is not supported in %s.\n" % (arch, compiler))
+					if "arm" == arch:
+						gen_suffix = " ARM"
+					elif "x64" == arch:
+						gen_suffix = " Win64"
+					else:
+						log_error("%s is not supported in %s.\n" % (arch, compiler))
 				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
@@ -312,12 +315,15 @@ class build_info:
 				log_error("Wrong combination between project and compiler")
 			multi_config = True
 			for arch in archs:
-				if "arm" == arch:
-					gen_suffix = " ARM"
-				elif "x64" == arch:
-					gen_suffix = " Win64"
+				if self.cmake_ver >= 39:
+					gen_suffix = ""
 				else:
-					log_error("%s is not supported in %s.\n" % (arch, compiler))
+					if "arm" == arch:
+						gen_suffix = " ARM"
+					elif "x64" == arch:
+						gen_suffix = " Win64"
+					else:
+						log_error("%s is not supported in %s.\n" % (arch, compiler))
 				compilers.append(compiler_info(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
@@ -443,6 +449,14 @@ class build_info:
 					return try_folder
 		return ""
 
+	def RetriveCMakeVersion(self):
+		cmake_ver = subprocess.check_output(["cmake", "--version"]).decode()
+		if len(cmake_ver) == 0:
+			log_error("Could NOT find cmake. Please install cmake 3.4+ and put it into %%PATH%%.")
+		cmake_ver = cmake_ver.split()[2]
+		cmake_ver_components = cmake_ver.split('.')
+		return int(cmake_ver_components[0] + cmake_ver_components[1])
+
 class batch_command:
 	def __init__(self, host_platform):
 		self.commands_ = []
@@ -537,6 +551,10 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			elif "arm64" == compiler_info.arch:
 				vc_option = "x86_arm64"
 				vc_arch = "ARM64"
+			else:
+				log_error("Unsupported VS arch\n")
+			if build_info.cmake_ver >= 39:
+				additional_options += " -A %s" % vc_arch
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
@@ -631,7 +649,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				cmake_cmd = batch_command(build_info.host_platform)
 				cmake_cmd.add_command('cmake -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
 				if cmake_cmd.execute() != 0:
-					log_error("Config %s failed." % name)		
+					log_error("Config %s failed." % name)
 
 				install_str = ""
 				if need_install and (not build_info.prefer_static):
