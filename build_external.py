@@ -127,6 +127,9 @@ def build_nanosvg(build_info, compiler_info):
 def build_gtest(build_info, compiler_info):
 	build_a_project("googletest", "External/googletest", build_info, compiler_info)
 
+def build_FreeImage(build_info, compiler_info):
+	build_a_project("FreeImage", "External/FreeImage", build_info, compiler_info, build_info.is_windows)
+
 def build_external_libs(build_info):
 	for compiler_info in build_info.compilers:
 		build_Boost(build_info, compiler_info)
@@ -138,16 +141,17 @@ def build_external_libs(build_info):
 		build_libvorbis(build_info, compiler_info)
 
 		if build_info.is_dev_platform:
-			build_freetype(build_info, compiler_info)			
+			build_freetype(build_info, compiler_info)
+			build_assimp(build_info, compiler_info)
+			build_nanosvg(build_info, compiler_info)
+			build_gtest(build_info, compiler_info)
+			build_FreeImage(build_info, compiler_info)
+
 			if (compiler_info.arch != "arm") and (compiler_info.arch != "arm64"):
 				build_UniversalDXSDK(build_info, compiler_info)
 
 			if ("win" == build_info.target_platform) and (compiler_info.arch != "arm") and (compiler_info.arch != "arm64"):
 				build_OpenALSDK(build_info, compiler_info)
-
-			build_assimp(build_info, compiler_info)
-			build_nanosvg(build_info, compiler_info)
-			build_gtest(build_info, compiler_info)
 
 		if build_info.is_windows_desktop and ("x64" == compiler_info.arch) and ("vc" == build_info.compiler_name):
 			build_wpftoolkit(build_info, compiler_info)
