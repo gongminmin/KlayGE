@@ -50,6 +50,7 @@ enum GLSLVersion
 	GSV_430,			// GL 4.3
 	GSV_440,			// GL 4.4
 	GSV_450,			// GL 4.5
+	GSV_460,			// GL 4.6
 
 	GSV_100_ES,			// GL ES 2.0
 	GSV_300_ES,			// GL ES 3.0

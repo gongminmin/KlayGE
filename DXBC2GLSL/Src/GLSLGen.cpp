@@ -191,6 +191,9 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 		if (version >= GSV_450)
 		{
 		}
+		if (version >= GSV_460)
+		{
+		}
 	}
 	else
 	{
