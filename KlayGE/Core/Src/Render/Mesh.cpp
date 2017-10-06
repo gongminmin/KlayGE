@@ -1443,13 +1443,13 @@ namespace KlayGE
 			access_hint, CreateModelFactoryFunc, CreateMeshFactoryFunc));
 	}
 
-	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
+	void SaveModelToMeshML(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
-		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
+		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
+		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
 		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
 	{
@@ -1766,6 +1766,359 @@ namespace KlayGE
 			ofs.open((ResLoader::Instance().LocalFolder() + meshml_name).c_str());
 		}
 		obj.WriteMeshML(ofs);
+	}
+
+	void WriteMaterialsChunk(std::vector<RenderMaterialPtr> const & mtls, std::ostream& os)
+	{
+		for (size_t i = 0; i < mtls.size(); ++ i)
+		{
+			auto& mtl = *mtls[i];
+
+			WriteShortString(os, mtl.name);
+
+			for (uint32_t j = 0; j < 4; ++ j)
+			{
+				float const value = Native2LE(mtl.albedo[j]);
+				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
+			}
+
+			float metalness = Native2LE(mtl.metalness);
+			os.write(reinterpret_cast<char*>(&metalness), sizeof(metalness));
+
+			float glossiness = Native2LE(mtl.glossiness);
+			os.write(reinterpret_cast<char*>(&glossiness), sizeof(glossiness));
+
+			for (uint32_t j = 0; j < 3; ++ j)
+			{
+				float const value = Native2LE(mtl.emissive[j]);
+				os.write(reinterpret_cast<char const *>(&value), sizeof(value));
+			}
+
+			uint8_t transparent = mtl.transparent;
+			os.write(reinterpret_cast<char*>(&transparent), sizeof(transparent));
+
+			uint8_t alpha_test = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(mtl.alpha_test * 255.0f + 0.5f), 0, 255));
+			os.write(reinterpret_cast<char*>(&alpha_test), sizeof(alpha_test));
+
+			uint8_t sss = mtl.sss;
+			os.write(reinterpret_cast<char*>(&sss), sizeof(sss));
+
+			uint8_t two_sided = mtl.two_sided;
+			os.write(reinterpret_cast<char*>(&two_sided), sizeof(two_sided));
+
+			for (size_t j = 0; j < RenderMaterial::TS_NumTextureSlots; ++ j)
+			{
+				WriteShortString(os, mtl.tex_names[j]);
+			}
+			if (!mtl.tex_names[RenderMaterial::TS_Height].empty())
+			{
+				float height_offset = Native2LE(mtl.height_offset_scale.x());
+				os.write(reinterpret_cast<char*>(&height_offset), sizeof(height_offset));
+				float height_scale = Native2LE(mtl.height_offset_scale.y());
+				os.write(reinterpret_cast<char*>(&height_scale), sizeof(height_scale));
+			}
+
+			uint8_t detail_mode = static_cast<uint8_t>(mtl.detail_mode);
+			os.write(reinterpret_cast<char*>(&detail_mode), sizeof(detail_mode));
+			if (mtl.detail_mode != RenderMaterial::SDM_Parallax)
+			{
+				float tess_factor = Native2LE(mtl.tess_factors.x());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.y());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.z());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+				tess_factor = Native2LE(mtl.tess_factors.w());
+				os.write(reinterpret_cast<char*>(&tess_factor), sizeof(tess_factor));
+			}
+		}
+	}
+
+	void WriteMeshesChunk(std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
+		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
+		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_start_indices,
+		std::vector<VertexElement> const & merged_ves,
+		std::vector<std::vector<uint8_t>> const & merged_vertices, std::vector<uint8_t> const & merged_indices,
+		char is_index_16_bit, std::ostream& os)
+	{
+		uint32_t num_merged_ves = Native2LE(static_cast<uint32_t>(merged_ves.size()));
+		os.write(reinterpret_cast<char*>(&num_merged_ves), sizeof(num_merged_ves));
+		for (size_t i = 0; i < merged_ves.size(); ++ i)
+		{
+			VertexElement ve = merged_ves[i];
+			ve.usage = Native2LE(ve.usage);
+			ve.format = Native2LE(ve.format);
+			os.write(reinterpret_cast<char*>(&ve), sizeof(ve));
+		}
+
+		uint32_t num_vertices = Native2LE(mesh_base_vertices.back());
+		os.write(reinterpret_cast<char*>(&num_vertices), sizeof(num_vertices));
+		uint32_t num_indices = Native2LE(mesh_start_indices.back());
+		os.write(reinterpret_cast<char*>(&num_indices), sizeof(num_indices));
+		os.write(&is_index_16_bit, sizeof(is_index_16_bit));
+
+		for (size_t i = 0; i < merged_vertices.size(); ++ i)
+		{
+			os.write(reinterpret_cast<char const *>(&merged_vertices[i][0]), merged_vertices[i].size() * sizeof(merged_vertices[i][0]));
+		}
+		os.write(reinterpret_cast<char const *>(&merged_indices[0]), merged_indices.size() * sizeof(merged_indices[0]));
+
+		for (uint32_t mesh_index = 0; mesh_index < mesh_num_vertices.size(); ++ mesh_index)
+		{
+			WriteShortString(os, mesh_names[mesh_index]);
+
+			int32_t mtl_id = Native2LE(mtl_ids[mesh_index]);
+			os.write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+
+			float3 min_bb;
+			min_bb.x() = Native2LE(pos_bbs[mesh_index].Min().x());
+			min_bb.y() = Native2LE(pos_bbs[mesh_index].Min().y());
+			min_bb.z() = Native2LE(pos_bbs[mesh_index].Min().z());
+			os.write(reinterpret_cast<char*>(&min_bb), sizeof(min_bb));
+			float3 max_bb;
+			max_bb.x() = Native2LE(pos_bbs[mesh_index].Max().x());
+			max_bb.y() = Native2LE(pos_bbs[mesh_index].Max().y());
+			max_bb.z() = Native2LE(pos_bbs[mesh_index].Max().z());
+			os.write(reinterpret_cast<char*>(&max_bb), sizeof(max_bb));
+
+			min_bb.x() = Native2LE(tc_bbs[mesh_index].Min().x());
+			min_bb.y() = Native2LE(tc_bbs[mesh_index].Min().y());
+			os.write(reinterpret_cast<char*>(&min_bb[0]), sizeof(min_bb[0]));
+			os.write(reinterpret_cast<char*>(&min_bb[1]), sizeof(min_bb[1]));
+			max_bb.x() = Native2LE(tc_bbs[mesh_index].Max().x());
+			max_bb.y() = Native2LE(tc_bbs[mesh_index].Max().y());
+			os.write(reinterpret_cast<char*>(&max_bb[0]), sizeof(max_bb[0]));
+			os.write(reinterpret_cast<char*>(&max_bb[1]), sizeof(max_bb[1]));
+
+			uint32_t nv = Native2LE(mesh_num_vertices[mesh_index]);
+			os.write(reinterpret_cast<char*>(&nv), sizeof(nv));
+			uint32_t bv = Native2LE(mesh_base_vertices[mesh_index]);
+			os.write(reinterpret_cast<char*>(&bv), sizeof(bv));
+			uint32_t ni = Native2LE(mesh_num_indices[mesh_index]);
+			os.write(reinterpret_cast<char*>(&ni), sizeof(ni));
+			uint32_t si = Native2LE(mesh_start_indices[mesh_index]);
+			os.write(reinterpret_cast<char*>(&si), sizeof(si));
+		}
+	}
+
+	void WriteBonesChunk(std::vector<Joint> const & joints, std::ostream& os)
+	{
+		for (size_t i = 0; i < joints.size(); ++ i)
+		{
+			WriteShortString(os, joints[i].name);
+
+			int16_t joint_parent = Native2LE(joints[i].parent);
+			os.write(reinterpret_cast<char*>(&joint_parent), sizeof(joint_parent));
+
+			Quaternion bind_real;
+			bind_real.x() = Native2LE(joints[i].bind_real.x());
+			bind_real.y() = Native2LE(joints[i].bind_real.y());
+			bind_real.z() = Native2LE(joints[i].bind_real.z());
+			bind_real.w() = Native2LE(joints[i].bind_real.w());
+			os.write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
+			Quaternion bind_dual;
+			bind_dual.x() = Native2LE(joints[i].bind_dual.x());
+			bind_dual.y() = Native2LE(joints[i].bind_dual.y());
+			bind_dual.z() = Native2LE(joints[i].bind_dual.z());
+			bind_dual.w() = Native2LE(joints[i].bind_dual.w());
+			os.write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+		}
+	}
+
+	void WriteKeyFramesChunk(uint32_t num_frames, uint32_t frame_rate, std::vector<KeyFrames>& kfs,
+		std::ostream& os)
+	{
+		num_frames = Native2LE(num_frames);
+		os.write(reinterpret_cast<char*>(&num_frames), sizeof(num_frames));
+		frame_rate = Native2LE(frame_rate);
+		os.write(reinterpret_cast<char*>(&frame_rate), sizeof(frame_rate));
+
+		for (size_t i = 0; i < kfs.size(); ++ i)
+		{
+			uint32_t num_kf = Native2LE(static_cast<uint32_t>(kfs[i].frame_id.size()));
+			os.write(reinterpret_cast<char*>(&num_kf), sizeof(num_kf));
+
+			for (size_t j = 0; j < kfs[i].frame_id.size(); ++ j)
+			{
+				Quaternion bind_real = kfs[i].bind_real[j];
+				Quaternion bind_dual = kfs[i].bind_dual[j];
+				float bind_scale = kfs[i].bind_scale[j];
+
+				uint32_t frame_id = Native2LE(kfs[i].frame_id[j]);
+				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
+				bind_real *= bind_scale;
+				bind_real.x() = Native2LE(bind_real.x());
+				bind_real.y() = Native2LE(bind_real.y());
+				bind_real.z() = Native2LE(bind_real.z());
+				bind_real.w() = Native2LE(bind_real.w());
+				os.write(reinterpret_cast<char*>(&bind_real), sizeof(bind_real));
+				bind_dual.x() = Native2LE(bind_dual.x());
+				bind_dual.y() = Native2LE(bind_dual.y());
+				bind_dual.z() = Native2LE(bind_dual.z());
+				bind_dual.w() = Native2LE(bind_dual.w());
+				os.write(reinterpret_cast<char*>(&bind_dual), sizeof(bind_dual));
+			}
+		}
+	}
+
+	void WriteBBKeyFramesChunk(std::vector<AABBKeyFrames> const & bb_kfs, std::ostream& os)
+	{
+		for (size_t i = 0; i < bb_kfs.size(); ++ i)
+		{
+			uint32_t num_bb_kf = Native2LE(static_cast<uint32_t>(bb_kfs[i].frame_id.size()));
+			os.write(reinterpret_cast<char*>(&num_bb_kf), sizeof(num_bb_kf));
+
+			for (uint32_t j = 0; j < bb_kfs[i].frame_id.size(); ++ j)
+			{
+				uint32_t frame_id = Native2LE(bb_kfs[i].frame_id[j]);
+				os.write(reinterpret_cast<char*>(&frame_id), sizeof(frame_id));
+				float3 bb_min;
+				bb_min.x() = Native2LE(bb_kfs[i].bb[j].Min().x());
+				bb_min.y() = Native2LE(bb_kfs[i].bb[j].Min().y());
+				bb_min.z() = Native2LE(bb_kfs[i].bb[j].Min().z());
+				os.write(reinterpret_cast<char*>(&bb_min), sizeof(bb_min));
+				float3 bb_max = bb_kfs[i].bb[j].Max();
+				bb_max.x() = Native2LE(bb_kfs[i].bb[j].Max().x());
+				bb_max.y() = Native2LE(bb_kfs[i].bb[j].Max().y());
+				bb_max.z() = Native2LE(bb_kfs[i].bb[j].Max().z());
+				os.write(reinterpret_cast<char*>(&bb_max), sizeof(bb_max));
+			}
+		}
+	}
+
+	void WriteActionsChunk(std::vector<AnimationAction> const & actions, std::ostream& os)
+	{
+		for (size_t i = 0; i < actions.size(); ++ i)
+		{
+			WriteShortString(os, actions[i].name);
+
+			uint32_t sf = Native2LE(actions[i].start_frame);
+			os.write(reinterpret_cast<char*>(&sf), sizeof(sf));
+
+			uint32_t ef = Native2LE(actions[i].end_frame);
+			os.write(reinterpret_cast<char*>(&ef), sizeof(ef));
+		}
+	}
+
+	void SaveModelToJIT(std::string const & jit_name, std::vector<RenderMaterialPtr> const & mtls,
+		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit,
+		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
+		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
+		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
+		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
+		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
+	{
+		std::ostringstream ss;
+
+		{
+			uint32_t num_mtls = Native2LE(static_cast<uint32_t>(mtls.size()));
+			ss.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
+
+			uint32_t num_meshes = Native2LE(static_cast<uint32_t>(pos_bbs.size()));
+			ss.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
+
+			uint32_t num_joints = Native2LE(static_cast<uint32_t>(joints.size()));
+			ss.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
+
+			uint32_t num_kfs = Native2LE(kfs ? static_cast<uint32_t>(kfs->size()) : 0);
+			ss.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
+
+			uint32_t num_actions = Native2LE(actions ? std::max(static_cast<uint32_t>(actions->size()), 1U) : 0);
+			ss.write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+		}
+
+		if (!mtls.empty())
+		{
+			WriteMaterialsChunk(mtls, ss);
+		}
+
+		if (!mesh_names.empty())
+		{
+			WriteMeshesChunk(mesh_names, mtl_ids, pos_bbs, tc_bbs,
+				mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
+				merged_ves, merged_buffs, merged_indices, all_is_index_16_bit, ss);
+		}
+
+		if (!joints.empty())
+		{
+			WriteBonesChunk(joints, ss);
+		}
+
+		if (kfs && !kfs->empty())
+		{
+			WriteKeyFramesChunk(num_frames, frame_rate, *kfs, ss);
+
+			std::vector<AABBKeyFrames> bb_kfss;
+
+			AABBKeyFrames bb_kfs;
+			bb_kfs.frame_id.resize(2);
+			bb_kfs.bb.resize(2);
+
+			bb_kfs.frame_id[0] = 0;
+			bb_kfs.frame_id[1] = num_frames - 1;
+
+			for (uint32_t mesh_index = 0; mesh_index < pos_bbs.size(); ++ mesh_index)
+			{
+				bb_kfs.bb[0] = pos_bbs[mesh_index];
+				bb_kfs.bb[1] = pos_bbs[mesh_index];
+
+				bb_kfss.push_back(bb_kfs);
+			}
+			WriteBBKeyFramesChunk(bb_kfss, ss);
+
+			WriteActionsChunk(*actions, ss);
+		}
+
+		std::ofstream ofs(jit_name.c_str(), std::ios_base::binary);
+		BOOST_ASSERT(ofs);
+		uint32_t fourcc = Native2LE(MakeFourCC<'K', 'L', 'M', ' '>::value);
+		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
+
+		uint32_t ver = Native2LE(MODEL_BIN_VERSION);
+		ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
+
+		uint64_t original_len = Native2LE(static_cast<uint64_t>(ss.str().size()));
+		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
+
+		std::ofstream::pos_type p = ofs.tellp();
+		uint64_t len = 0;
+		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
+
+		LZMACodec lzma;
+		len = lzma.Encode(ofs, ss.str().c_str(), ss.str().size());
+
+		ofs.seekp(p, std::ios_base::beg);
+		len = Native2LE(len);
+		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
+	}
+
+	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
+		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit,
+		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
+		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
+		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
+		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
+		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate)
+	{
+		if (meshml_name.find(jit_ext_name) != std::string::npos)
+		{
+			SaveModelToJIT(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+				mesh_names, mtl_ids, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
+				mesh_num_indices, mesh_base_indices, joints, actions,
+				kfs, num_frames, frame_rate);
+		}
+		else
+		{
+			SaveModelToMeshML(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
+				mesh_names, mtl_ids, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
+				mesh_num_indices, mesh_base_indices, joints, actions,
+				kfs, num_frames, frame_rate);
+		}
 	}
 
 	void SaveModel(RenderModelPtr const & model, std::string const & meshml_name)

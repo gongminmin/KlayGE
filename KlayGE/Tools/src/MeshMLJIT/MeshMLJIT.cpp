@@ -13,7 +13,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <sstream>
 #include <vector>
 #include <cstring>
 
@@ -76,21 +75,6 @@ namespace
 	}
 
 	std::string const JIT_EXT_NAME = ".model_bin";
-	uint32_t const MODEL_BIN_VERSION = 14;
-
-	struct KeyFrames
-	{
-		std::vector<uint32_t> frame_id;
-		std::vector<Quaternion> bind_real;
-		std::vector<Quaternion> bind_dual;
-		std::vector<float> bind_scale;
-	};
-
-	struct AABBKeyFrames
-	{
-		std::vector<uint32_t> frame_id;
-		std::vector<AABBox> bb;
-	};
 
 	template <int N>
 	void ExtractFVector(std::string const & value_str, float* v)
@@ -1500,7 +1484,7 @@ namespace
 
 	void CompileKeyFramesChunk(XMLNodePtr const & key_frames_chunk,
 		uint32_t& num_frames, uint32_t& frame_rate,
-		std::vector<KeyFrames>& kfss)
+		KeyFramesType& kfss)
 	{
 		XMLAttributePtr nf_attr = key_frames_chunk->Attrib("num_frames");
 		if (nf_attr)
@@ -2107,8 +2091,6 @@ namespace
 
 	void MeshMLJIT(std::string const & meshml_name, std::string const & output_name, std::string const & platform)
 	{
-		std::ostringstream ss;
-
 		ResIdentifierPtr file = ResLoader::Instance().Open(meshml_name);
 		KlayGE::XMLDocument doc;
 		XMLNodePtr root = doc.Parse(file);
@@ -2160,10 +2142,6 @@ namespace
 				}
 			}
 		}
-		{
-			uint32_t num_mtls = Native2LE(static_cast<uint32_t>(mtls.size()));
-			ss.write(reinterpret_cast<char*>(&num_mtls), sizeof(num_mtls));
-		}
 
 		XMLNodePtr meshes_chunk = root->FirstNode("meshes_chunk");
 		std::vector<std::string> mesh_names;
@@ -2186,20 +2164,12 @@ namespace
 				merged_ves, merged_vertices, merged_indices,
 				is_index_16_bit);
 		}
-		{
-			uint32_t num_meshes = Native2LE(static_cast<uint32_t>(pos_bbs.size()));
-			ss.write(reinterpret_cast<char*>(&num_meshes), sizeof(num_meshes));
-		}
 
 		XMLNodePtr bones_chunk = root->FirstNode("bones_chunk");
 		std::vector<Joint> joints;
 		if (bones_chunk)
 		{
 			CompileBonesChunk(bones_chunk, joints);
-		}
-		{
-			uint32_t num_joints = Native2LE(static_cast<uint32_t>(joints.size()));
-			ss.write(reinterpret_cast<char*>(&num_joints), sizeof(num_joints));
 		}
 
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
@@ -2242,10 +2212,6 @@ namespace
 			XMLNodePtr bb_kfs_chunk = root->FirstNode("bb_key_frames_chunk");
 			CompileBBKeyFramesChunk(bb_kfs_chunk, pos_bbs, num_frames, bb_kfs);
 		}
-		{
-			uint32_t num_kfs = Native2LE(static_cast<uint32_t>(kfs.size()));
-			ss.write(reinterpret_cast<char*>(&num_kfs), sizeof(num_kfs));
-		}
 
 		XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
 		std::vector<AnimationAction> actions;
@@ -2253,56 +2219,16 @@ namespace
 		{
 			CompileActionsChunk(actions_chunk, num_frames, actions);
 		}
+
+		std::vector<RenderMaterialPtr> output_mtls(mtls.size());
+		for (size_t i = 0; i < mtls.size(); ++ i)
 		{
-			uint32_t num_actions = Native2LE(key_frames_chunk ? std::max(static_cast<uint32_t>(actions.size()), 1U) : 0);
-			ss.write(reinterpret_cast<char*>(&num_actions), sizeof(num_actions));
+			output_mtls[i] = MakeSharedPtr<RenderMaterial>(mtls[i].material);
 		}
-
-		if (materials_chunk)
-		{
-			WriteMaterialsChunk(mtls, ss);
-		}
-
-		if (meshes_chunk)
-		{
-			WriteMeshesChunk(mesh_names, mtl_ids, pos_bbs, tc_bbs,
-				mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_start_indices,
-				merged_ves, merged_vertices, merged_indices, is_index_16_bit, ss);
-		}
-
-		if (bones_chunk)
-		{
-			WriteBonesChunk(joints, ss);
-		}
-
-		if (key_frames_chunk)
-		{
-			WriteKeyFramesChunk(num_frames, frame_rate, kfs, ss);
-			WriteBBKeyFramesChunk(bb_kfs, ss);
-			WriteActionsChunk(actions, ss);
-		}
-
-		std::ofstream ofs(output_name.c_str(), std::ios_base::binary);
-		BOOST_ASSERT(ofs);
-		uint32_t fourcc = Native2LE(MakeFourCC<'K', 'L', 'M', ' '>::value);
-		ofs.write(reinterpret_cast<char*>(&fourcc), sizeof(fourcc));
-
-		uint32_t ver = Native2LE(MODEL_BIN_VERSION);
-		ofs.write(reinterpret_cast<char*>(&ver), sizeof(ver));
-
-		uint64_t original_len = Native2LE(static_cast<uint64_t>(ss.str().size()));
-		ofs.write(reinterpret_cast<char*>(&original_len), sizeof(original_len));
-
-		std::ofstream::pos_type p = ofs.tellp();
-		uint64_t len = 0;
-		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
-
-		LZMACodec lzma;
-		len = lzma.Encode(ofs, ss.str().c_str(), ss.str().size());
-
-		ofs.seekp(p, std::ios_base::beg);
-		len = Native2LE(len);
-		ofs.write(reinterpret_cast<char*>(&len), sizeof(len));
+		SaveModel(output_name, output_mtls, merged_ves, is_index_16_bit, merged_vertices, merged_indices,
+			mesh_names, mtl_ids, pos_bbs, tc_bbs,
+			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_start_indices,
+			joints, MakeSharedPtr<std::vector<AnimationAction>>(actions), MakeSharedPtr<KeyFramesType>(kfs), num_frames, frame_rate);
 	}
 }
 

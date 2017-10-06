@@ -457,8 +457,8 @@ namespace KlayGE
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
 		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
-		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
-		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
+		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
+		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
 		std::vector<Joint> const & joints, std::shared_ptr<AnimationActionsType> const & actions,
 		std::shared_ptr<KeyFramesType> const & kfs, uint32_t num_frames, uint32_t frame_rate);
 	KLAYGE_CORE_API void SaveModel(RenderModelPtr const & model, std::string const & meshml_name);
