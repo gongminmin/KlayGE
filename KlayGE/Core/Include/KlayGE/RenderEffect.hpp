@@ -714,15 +714,13 @@ namespace KlayGE
 
 		uint32_t NumMacros() const
 		{
-			return macros_ ? static_cast<uint32_t>(macros_->size()) : 0;
+			return static_cast<uint32_t>(macros_.size());
 		}
 		std::pair<std::string, std::string> const & MacroByIndex(uint32_t n) const
 		{
 			BOOST_ASSERT(n < this->NumMacros());
-			return (*macros_)[n].first;
+			return macros_[n].first;
 		}
-
-		std::string const & TypeName(uint32_t code) const;
 
 #if KLAYGE_IS_DEV_PLATFORM
 		void GenHLSLShaderText(RenderEffect const & effect);
@@ -748,7 +746,7 @@ namespace KlayGE
 
 		std::vector<std::unique_ptr<RenderTechnique>> techniques_;
 
-		std::shared_ptr<std::vector<std::pair<std::pair<std::string, std::string>, bool>>> macros_;
+		std::vector<std::pair<std::pair<std::string, std::string>, bool>> macros_;
 		std::vector<RenderShaderFragment> shader_frags_;
 #if KLAYGE_IS_DEV_PLATFORM
 		std::string hlsl_shader_;

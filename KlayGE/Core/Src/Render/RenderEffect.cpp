@@ -3007,7 +3007,7 @@ namespace KlayGE
 				effect.cbuffers_.clear();
 				effect.shader_objs_.clear();
 
-				macros_.reset();
+				macros_.clear();
 				shader_frags_.clear();
 				hlsl_shader_.clear();
 				techniques_.clear();
@@ -3083,13 +3083,9 @@ namespace KlayGE
 
 				{
 					XMLNodePtr macro_node = root->FirstNode("macro");
-					if (macro_node)
-					{
-						macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
-					}
 					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 					{
-						macros_->emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
+						macros_.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
 					}
 				}
 
@@ -3226,15 +3222,12 @@ namespace KlayGE
 							source->read(&num_macros, sizeof(num_macros));
 							num_macros = LE2Native(num_macros);
 
-							if (num_macros > 0)
-							{
-								macros_ = MakeSharedPtr<std::remove_reference<decltype(*macros_)>::type>();
-							}
+							macros_.resize(num_macros);
 							for (uint32_t i = 0; i < num_macros; ++ i)
 							{
 								std::string name = ReadShortString(source);
 								std::string value = ReadShortString(source);
-								macros_->emplace_back(std::make_pair(name, value), true);
+								macros_[i] = std::make_pair(std::make_pair(name, value), true);
 							}
 						}
 
@@ -3350,35 +3343,30 @@ namespace KlayGE
 
 		{
 			uint16_t num_macros = 0;
-			if (macros_)
+			for (uint32_t i = 0; i < macros_.size(); ++ i)
 			{
-				for (uint32_t i = 0; i < macros_->size(); ++ i)
+				if (macros_[i].second)
 				{
-					if ((*macros_)[i].second)
-					{
-						++ num_macros;
-					}
+					++ num_macros;
 				}
 			}
 
 			num_macros = Native2LE(num_macros);
 			os.write(reinterpret_cast<char const *>(&num_macros), sizeof(num_macros));
 
-			if (macros_)
+			for (uint32_t i = 0; i < macros_.size(); ++ i)
 			{
-				for (uint32_t i = 0; i < macros_->size(); ++ i)
+				if (macros_[i].second)
 				{
-					if ((*macros_)[i].second)
-					{
-						WriteShortString(os, (*macros_)[i].first.first);
-						WriteShortString(os, (*macros_)[i].first.second);
-					}
+					WriteShortString(os, macros_[i].first.first);
+					WriteShortString(os, macros_[i].first.second);
 				}
 			}
 		}
 
 		{
 			uint16_t num_cbufs = Native2LE(static_cast<uint16_t>(effect.cbuffers_.size()));
+			num_cbufs = Native2LE(num_cbufs);
 			os.write(reinterpret_cast<char const *>(&num_cbufs), sizeof(num_cbufs));
 			for (uint32_t i = 0; i < effect.cbuffers_.size(); ++ i)
 			{
@@ -3388,6 +3376,7 @@ namespace KlayGE
 
 		{
 			uint16_t num_params = Native2LE(static_cast<uint16_t>(effect.params_.size()));
+			num_params = Native2LE(num_params);
 			os.write(reinterpret_cast<char const *>(&num_params), sizeof(num_params));
 			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
 			{
@@ -3397,6 +3386,7 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_frags = Native2LE(static_cast<uint16_t>(shader_frags_.size()));
+			num_shader_frags = Native2LE(num_shader_frags);
 			os.write(reinterpret_cast<char const *>(&num_shader_frags), sizeof(num_shader_frags));
 			for (uint32_t i = 0; i < shader_frags_.size(); ++ i)
 			{
@@ -3406,6 +3396,7 @@ namespace KlayGE
 
 		{
 			uint16_t num_shader_descs = Native2LE(static_cast<uint16_t>(shader_descs_.size() - 1));
+			num_shader_descs = Native2LE(num_shader_descs);
 			os.write(reinterpret_cast<char const *>(&num_shader_descs), sizeof(num_shader_descs));
 			for (uint32_t i = 0; i < shader_descs_.size() - 1; ++ i)
 			{
@@ -3413,9 +3404,11 @@ namespace KlayGE
 				WriteShortString(os, shader_descs_[i + 1].func_name);
 
 				uint64_t tmp64 = Native2LE(shader_descs_[i + 1].macros_hash);
+				tmp64 = Native2LE(tmp64);
 				os.write(reinterpret_cast<char const *>(&tmp64), sizeof(tmp64));
 
 				uint32_t tmp32 = Native2LE(shader_descs_[i + 1].tech_pass_type);
+				tmp32 = Native2LE(tmp32);
 				os.write(reinterpret_cast<char const *>(&tmp32), sizeof(tmp32));
 
 				uint8_t len = static_cast<uint8_t>(shader_descs_[i + 1].so_decl.size());
@@ -3431,6 +3424,7 @@ namespace KlayGE
 
 		{
 			uint16_t num_techs = Native2LE(static_cast<uint16_t>(techniques_.size()));
+			num_techs = Native2LE(num_techs);
 			os.write(reinterpret_cast<char const *>(&num_techs), sizeof(num_techs));
 			for (uint32_t i = 0; i < techniques_.size(); ++ i)
 			{
@@ -3478,11 +3472,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(id < shader_descs_.size());
 		return shader_descs_[id];
-	}
-
-	std::string const & RenderEffectTemplate::TypeName(uint32_t code) const
-	{
-		return type_define::instance().TypeName(code);
 	}
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -3535,7 +3524,7 @@ namespace KlayGE
 					break;
 
 				default:
-					str += this->TypeName(param.Type()) + " " + param.Name();
+					str += type_define::instance().TypeName(param.Type()) + " " + param.Name();
 					if (param.ArraySize())
 					{
 						str += "[" + *param.ArraySize() + "]";
