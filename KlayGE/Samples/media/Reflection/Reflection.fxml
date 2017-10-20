@@ -3,7 +3,7 @@
 <effect>
 	<include name="util.fxml"/>
 	<include name="Lighting.fxml"/>
-	<include name="GBufferNoSkinning.fxml"/>
+	<include name="GBuffer.Static.fxml"/>
 	<include name="PostProcess.fxml"/>
 	<include name="SSR.fxml"/>
 	<include name="Noise.fxml"/>

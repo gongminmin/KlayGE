@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBufferNoSkinning.fxml"/>
+	<include name="GBuffer.Static.fxml"/>
 	
 	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 

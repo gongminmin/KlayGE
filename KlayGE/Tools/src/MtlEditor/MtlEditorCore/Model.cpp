@@ -402,15 +402,11 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	if (has_skinned)
 	{
-		effect_ = SyncLoadRenderEffect("MtlEditorSkinning128.fxml");
-		if (!effect_->TechniqueByName("GBufferMRTTech")->Validate())
-		{
-			effect_ = SyncLoadRenderEffect("MtlEditorSkinning64.fxml");
-		}
+		effect_ = SyncLoadRenderEffect("MtlEditor.Skinning.fxml");
 	}
 	else
 	{
-		effect_ = SyncLoadRenderEffect("MtlEditorNoSkinning.fxml");
+		effect_ = SyncLoadRenderEffect("MtlEditor.Static.fxml");
 	}
 
 	std::string g_buffer_mrt_tech_str;

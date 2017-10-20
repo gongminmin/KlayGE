@@ -180,9 +180,7 @@ void VisualizeVertexVS(float4 pos : POSITION,
 	float4 result_tangent_quat;
 	float2 oTex;
 	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
 				blend_weights, blend_indices,
-#endif
 				oTex, result_pos,
 				result_tangent_quat);
 				
@@ -279,9 +277,7 @@ void SkeletonVS(float4 pos : POSITION,
 	float4 result_tangent_quat;
 	float2 oTex;
 	CalcMesh(float4(pos.xyz, 1), 0, 0,
-#if SKINNING_ON
 				float4(1, 0, 0, 0), blend_indices,
-#endif
 				oTex, result_pos,
 				result_tangent_quat);
 

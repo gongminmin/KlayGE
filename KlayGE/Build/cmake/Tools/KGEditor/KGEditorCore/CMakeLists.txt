@@ -2,17 +2,13 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCore/KGEditorCore.cpp
 )
 
-SET(HEADER_FILES 
+SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCore/Common.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCore/KGEditorCore.hpp
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditorCore/PreDeclare.hpp
 )
 
-SET(EFFECT_FILES 
-	${KLAYGE_PROJECT_DIR}/Tools/media/KGEditor/KGEditor.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/KGEditor/KGEditorNoSkinning.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/KGEditor/KGEditorSkinning64.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/KGEditor/KGEditorSkinning128.fxml
+SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/media/KGEditor/MVUtil.fxml
 )
 

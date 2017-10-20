@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBufferNoSkinning.fxml"/>
+	<include name="GBuffer.Static.fxml"/>
 	
 	<parameter type="float" name="stretch"/>
 	<parameter type="float" name="base_level"/>

@@ -10,9 +10,8 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES 
 	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditor.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditorNoSkinning.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditorSkinning64.fxml
-	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditorSkinning128.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditor.Skinning.fxml
+	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MtlEditor.Static.fxml
 	${KLAYGE_PROJECT_DIR}/Tools/media/MtlEditor/MVUtil.fxml
 )
 

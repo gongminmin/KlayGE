@@ -6,7 +6,7 @@
 	<include name="util.fxml"/>
 	<include name="Tessellation.fxml"/>
 	<include name="Lighting.fxml"/>
-	
+
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="mvp"/>
 		<parameter type="float4x4" name="model_view"/>
@@ -71,13 +71,6 @@
 	<parameter type="texture2D" name="opaque_depth_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 
-	<parameter type="sampler" name="bilinear_border_sampler">
-		<state name="filtering" value="min_mag_linear_mip_point"/>
-		<state name="address_u" value="border"/>
-		<state name="address_v" value="border"/>
-		<state name="border_clr" r="0" g="0" b="0" a="0"/>
-	</parameter>
-
 	<shader>
 		<![CDATA[
 #if !KLAYGE_DXBC2GLSL
@@ -131,10 +124,8 @@ void DQSkinned(float3 pos,
 void CalcMesh(float4 pos,
 				float2 tex0,
 				float4 tangent_quat,
-#if SKINNING_ON
 				float4 blend_weights,
 				int4 blend_indices,
-#endif
 				out float2 oTex,
 				out float3 oPos,
 				out float4 oTangentQuat)
@@ -175,21 +166,22 @@ void GBufferVS(float4 pos : POSITION,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
 #endif
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
 	texcoord = texcoord * tc_extent + tc_center;
 	tangent_quat = tangent_quat * 2 - 1;
-	
+
 	float3 result_pos;
 	float4 result_tangent_quat;
 	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
 				blend_weights, blend_indices,
-#endif
 				oTexCoord_2xy.xy, result_pos,
 				result_tangent_quat);
-				
+
 	oPos = mul(float4(result_pos, 1), mvp);
 
 	float3x3 obj_to_ts;
@@ -203,11 +195,11 @@ void GBufferVS(float4 pos : POSITION,
 	oTsToView0_2z.w = ts_to_view[2].z;
 
 	oTsToView1_Depth.w = oPos.w;
-	
+
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
 	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
-	
+
 #ifndef NOPERSPECTIVE_SUPPORT
 	oScreenTc.z = oPos.w;
 	oScreenTc.xy *= oScreenTc.z;
@@ -238,7 +230,7 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 		ts_to_view[2] = normal;
 		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
 	}
-	
+
 	return normal;
 }
 
@@ -263,7 +255,7 @@ void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_
 	{
 		glossiness *= glossiness_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
 	}
-	
+
 	StoreGBufferMRT(normal, glossiness, albedo, metalness,
 		mrt_0, mrt_1);
 }
@@ -451,6 +443,9 @@ void GenShadowMapVS(float4 pos : POSITION,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
 #endif
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -460,15 +455,13 @@ void GenShadowMapVS(float4 pos : POSITION,
 	float3 result_pos;
 	float4 result_tangent_quat;
 	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
 				blend_weights, blend_indices,
-#endif
 				oTc.xy, result_pos,
 				result_tangent_quat);
 
 #if TRANSPARENCY_ON
 	float3 normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
-	result_pos.xyz += normal * 0.005f;
+	result_pos += normal * 0.005f;
 #endif
 
 	oPos = mul(float4(result_pos, 1), mvp);
@@ -557,7 +550,7 @@ float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 shading = SpecialShadingPS(texcoord);
-	
+
 	float opacity = albedo_clr.a;
 	if (albedo_map_enabled)
 	{
@@ -626,6 +619,9 @@ VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
 #endif
 
 	pos = float4(pos.xyz * pos_extent + pos_center, 1);
@@ -635,9 +631,7 @@ VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 	VS_CONTROL_POINT_OUTPUT output;
 
 	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
 				blend_weights, blend_indices,
-#endif
 				output.Texcoord, output.Pos,
 				output.TangentQuat);
 
@@ -756,11 +750,11 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 	oTsToView0_2z.w = ts_to_view[2].z;
 
 	oTsToView1_Depth.w = oPos.w;
-	
+
 	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
 	oScreenTc.y *= KLAYGE_FLIPPING;
 	oScreenTc.xy += 0.5f;
-	
+
 #ifndef NOPERSPECTIVE_SUPPORT
 	oScreenTc.z = oPos.w;
 	oScreenTc.xy *= oScreenTc.z;
@@ -830,49 +824,49 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 	</shader>
 
 	<technique name="GBufferFlatTessMRTTech" inherit="GBufferMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferFlatTessAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferFlatTessAlphaBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferFlatTessAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingFlatTessTech" inherit="SpecialShadingTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingFlatTessAlphaBlendBackTech" inherit="SpecialShadingAlphaBlendBackTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingFlatTessAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferFlatTessDS()"/>
@@ -945,35 +939,35 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 		</pass>
 	</technique>
 	<technique name="GBufferSmoothTessAlphaBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="GBufferSmoothTessAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingSmoothTessTech" inherit="SpecialShadingTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingSmoothTessAlphaBlendBackTech" inherit="SpecialShadingAlphaBlendBackTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
 		</pass>
 	</technique>
 	<technique name="SpecialShadingSmoothTessAlphaBlendFrontTech" inherit="SpecialShadingAlphaBlendFrontTech">
-		<pass name="p0">			
+		<pass name="p0">
 			<state name="vertex_shader" value="GBufferTessVS()"/>
 			<state name="hull_shader" value="GBufferTessHS()"/>
 			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
@@ -1030,7 +1024,7 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 			<state name="cull_mode" value="none"/>
 		</pass>
 	</technique>
-	
+
 
 	<shader>
 		<![CDATA[

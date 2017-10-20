@@ -1,7 +1,0 @@
-<?xml version='1.0'?>
-
-<effect>
-	<macro name="SKINNING_ON" value="1"/>
-	<macro name="NUM_JOINTS" value="64"/>
-	<include name="MtlEditor.fxml"/>
-</effect>

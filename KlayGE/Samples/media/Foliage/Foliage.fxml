@@ -39,6 +39,9 @@ void FoliageGBufferVS(float4 pos : POSITION,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
 #endif
 
 	float4 rotation_y_quat = float4(0, instance_rotation.x, 0, instance_rotation.y);
@@ -56,9 +59,7 @@ void FoliageGBufferVS(float4 pos : POSITION,
 	float3 result_pos;
 	float4 result_tangent_quat;
 	CalcMesh(pos, texcoord, tangent_quat,
-#if SKINNING_ON
 				blend_weights, blend_indices,
-#endif
 				oTexCoord_2xy.xy, result_pos,
 				result_tangent_quat);
 

@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBufferNoSkinning.fxml"/>
+	<include name="GBuffer.Static.fxml"/>
 
 	<cbuffer name="per_frame">
 		<parameter type="float4x4" name="billboard_mat"/>
