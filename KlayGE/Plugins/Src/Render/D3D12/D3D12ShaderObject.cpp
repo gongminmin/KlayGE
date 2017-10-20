@@ -637,6 +637,10 @@ namespace KlayGE
 			std::vector<std::pair<char const *, char const *>> macros;
 			macros.emplace_back("KLAYGE_D3D12", "1");
 			macros.emplace_back("KLAYGE_FRAG_DEPTH", "1");
+			if (caps.uav_format_support(EF_ABGR16F))
+			{
+				macros.emplace_back("KLAYGE_TYPED_UAV_SUPPORT", "1");
+			}
 
 			uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
 #if !defined(KLAYGE_DEBUG)

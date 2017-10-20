@@ -482,15 +482,23 @@ void UpdateCS(uint3 dtid : SV_DispatchThreadID)
 
 	uint id = dtid.x;
 
-#if TYPED_UAV
+#if USE_TYPED_UAV
+#if KLAYGE_TYPED_UAV_SUPPORT
 	float4 cur_pos = particle_pos_rw_buff[id];
+#else
+	float4 cur_pos = 0;
+#endif
 #else
 	float4 cur_pos = particle_pos_rw_stru_buff[id];
 #endif
 	if (cur_pos.w > 0)
 	{
-#if TYPED_UAV
+#if USE_TYPED_UAV
+#if KLAYGE_TYPED_UAV_SUPPORT
 		float3 cur_vel = particle_vel_rw_buff[id].xyz;
+#else
+		float3 cur_vel = 0;
+#endif
 #else
 		float3 cur_vel = particle_vel_rw_stru_buff[id].xyz;
 #endif
@@ -530,9 +538,11 @@ void UpdateCS(uint3 dtid : SV_DispatchThreadID)
 		}
 	}
 
-#if TYPED_UAV
+#if USE_TYPED_UAV
+#if KLAYGE_TYPED_UAV_SUPPORT
 	particle_pos_rw_buff[id] = out_pos;
 	particle_vel_rw_buff[id] = out_vel;
+#endif
 #else
 	particle_pos_rw_stru_buff[id] = out_pos;
 	particle_vel_rw_stru_buff[id] = out_vel;
@@ -542,16 +552,13 @@ void UpdateCS(uint3 dtid : SV_DispatchThreadID)
 	</shader>
 
 	<technique name="UpdateCS">
+		<macro name="USE_TYPED_UAV" value="0"/>
 		<pass name="p0">
-			<macro name="TYPED_UAV" value="0"/>
 			<state name="compute_shader" value="UpdateCS()"/>
 		</pass>
 	</technique>
 
-	<technique name="UpdateTypedUAVCS">
-		<pass name="p0">
-			<macro name="TYPED_UAV" value="1"/>
-			<state name="compute_shader" value="UpdateCS()"/>
-		</pass>
+	<technique name="UpdateTypedUAVCS" inherit="UpdateCS">
+		<macro name="USE_TYPED_UAV" value="1"/>
 	</technique>
 </effect>

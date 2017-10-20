@@ -675,8 +675,10 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			[branch]
 			if (lights_type[0] == lights_type[1])
 			{
-#if TYPED_UAV_SUPPORT
+#if USE_TYPED_UAV
+#if KLAYGE_TYPED_UAV_SUPPORT
 				shading += shading_rw_tex[coord.xy];
+#endif
 #else
 				shading += shading_in_tex.Load(coord);
 #endif
@@ -704,14 +706,14 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	</technique>
 
 	<technique name="ClusteredDRUnified">
-		<macro name="TYPED_UAV_SUPPORT" value="1"/>
+		<macro name="USE_TYPED_UAV" value="1"/>
 		<pass name="p0">
 			<state name="compute_shader" value="ClusteredDRUnifiedCS()"/>
 		</pass>
 	</technique>
 
 	<technique name="ClusteredDRUnifiedNoTypedUAV" inherit="ClusteredDRUnified">
-		<macro name="TYPED_UAV_SUPPORT" value="0"/>
+		<macro name="USE_TYPED_UAV" value="0"/>
 	</technique>
 
 
