@@ -35,17 +35,9 @@
 
 	<shader>
 		<![CDATA[
-#if !KLAYGE_DXBC2GLSL
-#define NOPERSPECTIVE_SUPPORT
-#endif
-
 void VPLsLightingInstanceIDVS(float4 pos : POSITION,
 				uint instance_id : SV_InstanceID,
-#ifdef NOPERSPECTIVE_SUPPORT
-				out noperspective float2 oTc : TEXCOORD0,
-#else
-				out float3 oTc : TEXCOORD0,
-#endif
+				out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
 				out float3 oVPLColor : TEXCOORD1,
 				out float4 oViewDir : TEXCOORD2,
 				out float4 oPos : SV_Position)
@@ -89,29 +81,16 @@ void VPLsLightingInstanceIDVS(float4 pos : POSITION,
 		oViewDir.xyz = rot_pos * scale + offset;
 		oPos = mul(float4(oViewDir.xyz, 1), proj);
 
-		oTc.xy = oPos.xy / oPos.w * 0.5f;
-		oTc.y *= KLAYGE_FLIPPING;
-		oTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-		oTc.z = oPos.w;
-		oTc.xy *= oTc.z;
-#endif
+		oTc = EncodeSSTexcoord(oPos);
 	}
 }
 
 float4 VPLsLightingPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 vpl_color : TEXCOORD1, float4 view_dir : TEXCOORD2
 	) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float pixel_depth = depth_tex.Sample(point_sampler, tc).x;
 	float3 color_i = 0;

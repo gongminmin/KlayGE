@@ -73,10 +73,6 @@
 
 	<shader>
 		<![CDATA[
-#if !KLAYGE_DXBC2GLSL
-#define NOPERSPECTIVE_SUPPORT
-#endif
-
 #if SKINNING_ON
 void DQSkinned(float3 pos,
 			float4 tangent_quat,
@@ -155,11 +151,7 @@ void GBufferVS(float4 pos : POSITION,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD3,
-#else
-			out float3 oScreenTc : TEXCOORD3,
-#endif
+			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
 #if SKINNING_ON
@@ -196,14 +188,7 @@ void GBufferVS(float4 pos : POSITION,
 
 	oTsToView1_Depth.w = oPos.w;
 
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
+	oScreenTc = EncodeSSTexcoord(oPos);
 }
 
 float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
@@ -283,16 +268,10 @@ void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 }
 
 void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3,
-#else
-					float3 screen_tc_w : TEXCOORD3,
-#endif
+					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
+	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
@@ -722,11 +701,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 						out float4 oTexCoord_2xy,
 						out float4 oTsToView0_2z,
 						out float4 oTsToView1_Depth,
-#ifdef NOPERSPECTIVE_SUPPORT
-						out noperspective float2 oScreenTc,
-#else
-						out float3 oScreenTc,
-#endif
+						out SS_TEXCOORD_TYPE oScreenTc,
 						out float4 oPos)
 {
 	float3x3 obj_to_tangent;
@@ -751,14 +726,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 
 	oTsToView1_Depth.w = oPos.w;
 
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
+	oScreenTc = EncodeSSTexcoord(oPos);
 }
 
 [domain("tri")]
@@ -769,11 +737,7 @@ void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oTexCoord_2xy : TEXCOORD0,
 							out float4 oTsToView0_2z : TEXCOORD1,
 							out float4 oTsToView1_Depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-							out noperspective float2 oScreenTc : TEXCOORD3,
-#else
-							out float3 oScreenTc : TEXCOORD3,
-#endif
+							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;
@@ -799,11 +763,7 @@ void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData,
 							out float4 oTexCoord_2xy : TEXCOORD0,
 							out float4 oTsToView0_2z : TEXCOORD1,
 							out float4 oTsToView1_Depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-							out noperspective float2 oScreenTc : TEXCOORD3,
-#else
-							out float3 oScreenTc : TEXCOORD3,
-#endif
+							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 							out float4 oPos : SV_Position)
 {
 	float3 pos;

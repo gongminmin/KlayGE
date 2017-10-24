@@ -55,11 +55,7 @@
 void OceanGBufferVS(float2 pos : POSITION,
 			out float3 oTexCoordDepth : TEXCOORD0,
 			out float2 noise_grad : TEXCOORD1,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD2,
-#else
-			out float3 oScreenTc : TEXCOORD2,
-#endif
+			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD2,
 			out float4 oPos : SV_Position)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
@@ -105,27 +101,14 @@ void OceanGBufferVS(float2 pos : POSITION,
 	oTexCoordDepth.xy = tex_coord;
 	oTexCoordDepth.z = oPos.w;
 
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
+	oScreenTc = EncodeSSTexcoord(oPos);
 }
 
 void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD2,
-#else
-					float3 screen_tc_w : TEXCOORD2,
-#endif
+					SS_TEXCOORD_TYPE ss_tc : TEXCOORD2,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
+	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - texcoord_depth.z);
 
@@ -152,11 +135,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 
 void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
 					out float3 eye_dir : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-					out noperspective float2 oTc : TEXCOORD1,
-#else
-					out float3 oTc : TEXCOORD1,
-#endif
+					out SS_TEXCOORD_TYPE oTc : TEXCOORD1,
 					out float4 oPos : SV_Position)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
@@ -172,27 +151,12 @@ void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
 
 	oPos = mul(pos_os, mvp);
 
-	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy = oTc.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
+	oTc = EncodeSSTexcoord(oPos);
 }
 
-float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD1
-#else
-	float3 tc_w : TEXCOORD1
-#endif
-	) : SV_Target
+float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0, SS_TEXCOORD_TYPE ss_tc : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float3 normal = view[1].xyz;
 
@@ -215,11 +179,7 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 					out float3 eye_dir : TEXCOORD0,
 					out float4 tex_coord_noise_grad : TEXCOORD1,
 					out float4 pos_ss : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					out noperspective float2 oTc : TEXCOORD3,
-#else
-					out float3 oTc : TEXCOORD3,
-#endif
+					out SS_TEXCOORD_TYPE oTc : TEXCOORD3,
 					out float4 oPos : SV_Position)
 {
 	float4 pos_os = GetInfTerrainPosOS(pos, 10);
@@ -259,28 +219,14 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 	
 	tex_coord_noise_grad = float4(tex_coord, noise_grad);
 	pos_ss = oPos;
-	
-	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy = oTc.xy * 0.5f + 0.5f;
 
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
+	oTc = EncodeSSTexcoord(oPos);
 }
 
 float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_coord_noise_grad : TEXCOORD1, float4 pos_ss : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD3
-#else
-	float3 tc_w : TEXCOORD3
-#endif
-	) : SV_Target
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD3) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);

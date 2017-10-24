@@ -74,10 +74,6 @@
 
 	<shader>
 		<![CDATA[
-#if !KLAYGE_DXBC2GLSL
-#define NOPERSPECTIVE_SUPPORT
-#endif
-
 float4 CalcColor(float n_dot_l, float spec, float atten, float3 shadow, float4 light_color, float4 light_attrib)
 {
 	float2 ds = n_dot_l * atten * float2(1, spec);
@@ -231,25 +227,14 @@ float4 DeferredRenderingDepthOnlyPS() : SV_Target
 }
 
 void DeferredRenderingVS(float4 pos : POSITION,
-#ifdef NOPERSPECTIVE_SUPPORT
-				out noperspective float2 oTc : TEXCOORD0,
-#else
-				out float3 oTc : TEXCOORD0,
-#endif
+				out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
 				out float3 oViewDir : TEXCOORD1,
 				out float4 oPos : SV_Position)
 {
 	oPos = mul(pos, light_volume_mvp);
 
 	oViewDir = mul(pos, light_volume_mv).xyz;
-	oTc.xy = oPos.xy / oPos.w * 0.5f;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy += 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
+	oTc = EncodeSSTexcoord(oPos);
 }
 
 float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 view_dir,
@@ -279,16 +264,10 @@ float4 CalcDRLighting(float3 light_pos, float3 pos_es, float3 normal, float3 vie
 }
 
 float4 DeferredRenderingPointPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
@@ -306,16 +285,10 @@ float4 DeferredRenderingPointPS(
 }
 
 float4 DeferredRenderingSpotPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
@@ -341,16 +314,10 @@ float4 DeferredRenderingSpotPS(
 }
 
 float4 DeferredRenderingDirectionalPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
@@ -378,16 +345,10 @@ float4 DeferredRenderingDirectionalPS(
 }
 
 float4 DeferredRenderingAmbientPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0
-#else
-	float3 tc_w : TEXCOORD0
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0
 	) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(mrt_0);
@@ -396,16 +357,10 @@ float4 DeferredRenderingAmbientPS(
 }
 
 float4 DeferredRenderingSphereAreaPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
@@ -426,16 +381,10 @@ float4 DeferredRenderingSphereAreaPS(
 }
 
 float4 DeferredRenderingTubeAreaPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
@@ -457,16 +406,10 @@ float4 DeferredRenderingTubeAreaPS(
 }
 
 float4 DeferredShadowingPointPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
@@ -477,16 +420,10 @@ float4 DeferredShadowingPointPS(
 }
 
 float4 DeferredShadowingSpotPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
@@ -500,16 +437,10 @@ float4 DeferredShadowingSpotPS(
 }
 
 float4 DeferredShadowingDirectionalPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-	noperspective float2 tc : TEXCOORD0,
-#else
-	float3 tc_w : TEXCOORD0,
-#endif
+	SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 	float3 view_dir : TEXCOORD1) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);

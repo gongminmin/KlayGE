@@ -131,6 +131,53 @@ float2 ReadTwoHalf(float4 v, float scale = 1, float bias = 0)
 }
 
 
+#if !KLAYGE_DXBC2GLSL
+	#define NOPERSPECTIVE_SUPPORT
+#endif
+
+#ifdef NOPERSPECTIVE_SUPPORT
+	#define SS_TEXCOORD_TYPE noperspective float2
+#else
+	#define SS_TEXCOORD_TYPE float3
+#endif
+
+#ifdef NOPERSPECTIVE_SUPPORT
+float2 EncodeSSTexcoord(float4 pos_ss)
+#else
+float3 EncodeSSTexcoord(float4 pos_ss)
+#endif
+{
+#ifdef NOPERSPECTIVE_SUPPORT
+	float2 tc;
+#else
+	float3 tc;
+#endif
+
+	tc.xy = pos_ss.xy / pos_ss.w * 0.5f;
+	tc.y *= KLAYGE_FLIPPING;
+	tc.xy += 0.5f;
+
+#ifndef NOPERSPECTIVE_SUPPORT
+	tc.z = pos_ss.w;
+	tc.xy *= tc.z;
+#endif
+
+	return tc;
+}
+
+#ifdef NOPERSPECTIVE_SUPPORT
+float2 DecodeSSTexcoord(float2 ss_tc)
+{
+	return ss_tc;
+}
+#else
+float2 DecodeSSTexcoord(float3 ss_tc)
+{
+	return ss_tc.xy / ss_tc.z;
+}
+#endif
+
+
 #if KLAYGE_SHADER_MODEL < SHADER_MODEL(5, 0)
 float mad(float mvalue, float avalue, float bvalue)
 {

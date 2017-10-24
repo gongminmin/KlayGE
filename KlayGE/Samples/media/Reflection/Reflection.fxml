@@ -35,13 +35,8 @@
 void ReflectReflectionVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oTcFront : TEXCOORD0,
-			out noperspective float2 oTcBack : TEXCOORD1,
-#else
-			out float3 oTcFront : TEXCOORD0,
-			out float3 oTcBack : TEXCOORD1,
-#endif
+			out SS_TEXCOORD_TYPE oTcFront : TEXCOORD0,
+			out SS_TEXCOORD_TYPE oTcBack : TEXCOORD1,
 			out float3 oPosESFront : TEXCOORD2,
 			out float3 oPosESBack : TEXCOORD3,
 			out float3 oNormalOS : TEXCOORD4,
@@ -64,41 +59,21 @@ void ReflectReflectionVS(float4 pos : POSITION,
 	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
 	oPosOS = pos.xyz * 200;
 
-	oTcFront.xy = oPos.xy / oPos.w;
-	oTcFront.y *= KLAYGE_FLIPPING;
-	oTcFront.xy = oTcFront.xy * 0.5f + 0.5f;
-	
-	oTcBack.xy = pos_back.xy / pos_back.w;
-	oTcBack.y *= KLAYGE_FLIPPING;
-	oTcBack.xy = oTcBack.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTcFront.z = oPos.w;
-	oTcFront.xy *= oTcFront.z;
-
-	oTcBack.z = pos_back.w;
-	oTcBack.xy *= oTcBack.z;
-#endif
+	oTcFront = EncodeSSTexcoord(oPos);	
+	oTcBack = EncodeSSTexcoord(pos_back);
 }
 
 float4 ReflectReflectionPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-			noperspective float2 tc_front : TEXCOORD0,
-			noperspective float2 tc_back : TEXCOORD1,
-#else
-			float3 tc_w_front : TEXCOORD0,
-			float3 tc_w_back : TEXCOORD1,
-#endif
+			SS_TEXCOORD_TYPE ss_tc_front : TEXCOORD0,
+			SS_TEXCOORD_TYPE ss_tc_back : TEXCOORD1,
 			float3 pos_es_front : TEXCOORD2,
 			float3 pos_es_back : TEXCOORD3,
 			float3 normal_os : TEXCOORD4,
 			float3 pos_os : TEXCOORD5,
 			float2 texcoord : TEXCOORD6) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc_front = tc_w_front.xy / tc_w_front.z;
-	float2 tc_back = tc_w_back.xy / tc_w_back.z;
-#endif
+	float2 tc_front = DecodeSSTexcoord(ss_tc_front);
+	float2 tc_back = DecodeSSTexcoord(ss_tc_back);
 
 	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
 	float3 normal = normalize(normal_os + bump * 0.01f);
@@ -136,11 +111,7 @@ float4 ReflectReflectionPS(
 void ReflectSpecialShadingVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oTc : TEXCOORD0,
-#else
-			out float3 oTc : TEXCOORD0,
-#endif
+			out SS_TEXCOORD_TYPE oTc : TEXCOORD0,
 			out float3 oPosES : TEXCOORD1,
 			out float3 oNormalOS : TEXCOORD2,
 			out float3 oPosOS : TEXCOORD3,
@@ -159,30 +130,17 @@ void ReflectSpecialShadingVS(float4 pos : POSITION,
 	oNormalOS = transform_quat(float3(0, 0, 1), tangent_quat);
 	oPosOS = pos.xyz * 200;
 
-	oTc.xy = oPos.xy / oPos.w;
-	oTc.y *= KLAYGE_FLIPPING;
-	oTc.xy = oTc.xy * 0.5f + 0.5f;
-
-#ifndef NOPERSPECTIVE_SUPPORT
-	oTc.z = oPos.w;
-	oTc.xy *= oTc.z;
-#endif
+	oTc = EncodeSSTexcoord(oPos);
 }
 
 float4 ReflectSpecialShadingPS(
-#ifdef NOPERSPECTIVE_SUPPORT
-			noperspective float2 tc : TEXCOORD0,
-#else
-			float3 tc_w : TEXCOORD0,
-#endif
+			SS_TEXCOORD_TYPE ss_tc : TEXCOORD0,
 			float3 pos_es : TEXCOORD1,
 			float3 normal_os : TEXCOORD2,
 			float3 pos_os : TEXCOORD3,
 			float2 texcoord : TEXCOORD4) : SV_Target
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 tc = tc_w.xy / tc_w.z;
-#endif
+	float2 tc = DecodeSSTexcoord(ss_tc);
 
 	float3 bump = simplex_noise_gradient(pos_os, 0.1f);
 	float3 normal = normal_os + bump * 0.01f;

@@ -2,6 +2,7 @@
 
 <effect>
 	<include name="GBuffer.Static.fxml"/>
+	<include name="util.fxml"/>
 	
 	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 
@@ -11,11 +12,7 @@ void DecalGBufferVS(float4 pos : POSITION,
 			out float4 oTexCoord_2xy : TEXCOORD0,
 			out float4 oTsToView0_2z : TEXCOORD1,
 			out float4 oTsToView1_Depth : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-			out noperspective float2 oScreenTc : TEXCOORD3,
-#else
-			out float3 oScreenTc : TEXCOORD3,
-#endif
+			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 			out float3 oViewDir : TEXCOORD4,
 			out float4 oPos : SV_Position)
 {
@@ -34,30 +31,17 @@ void DecalGBufferVS(float4 pos : POSITION,
 	
 	oTsToView1_Depth.w = oPos.w;
 	
-	oScreenTc.xy = oPos.xy / oPos.w * 0.5f;
-	oScreenTc.y *= KLAYGE_FLIPPING;
-	oScreenTc.xy += 0.5f;
-	
-#ifndef NOPERSPECTIVE_SUPPORT
-	oScreenTc.z = oPos.w;
-	oScreenTc.xy *= oScreenTc.z;
-#endif
+	oScreenTc = EncodeSSTexcoord(oPos);
 
 	oViewDir = mul(pos, model_view).xyz;
 }
 
 void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
-#ifdef NOPERSPECTIVE_SUPPORT
-					noperspective float2 screen_tc : TEXCOORD3,
-#else
-					float3 screen_tc_w : TEXCOORD3,
-#endif
+					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					float3 view_dir : TEXCOORD4,
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
-#ifndef NOPERSPECTIVE_SUPPORT
-	float2 screen_tc = screen_tc_w.xy / screen_tc_w.z;
-#endif
+	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
 	float3 pos_es = view_dir * (opaque_depth_tex.Sample(point_sampler, screen_tc).x / view_dir.z);
 
