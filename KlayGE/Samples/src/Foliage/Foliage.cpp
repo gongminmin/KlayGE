@@ -41,7 +41,7 @@ namespace
 		{
 			RenderEffectPtr effect = SyncLoadRenderEffect("FoggySkyBox.fxml");
 
-			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferFoggySkyBoxMRT");
+			gbuffer_mrt_tech_ = effect->TechniqueByName("GBufferSkyBoxMRTTech");
 			special_shading_tech_ = effect->TechniqueByName("SpecialShadingFoggySkyBox");
 			this->Technique(effect, gbuffer_mrt_tech_);
 		}

@@ -289,19 +289,6 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 
 	<shader>
 		<![CDATA[
-void FoggySkyBoxVS(float4 pos : POSITION,
-			out float3 texcoord0 : TEXCOORD0,
-			out float4 oPos : SV_Position)
-{
-	oPos = pos;
-	texcoord0 = mul(pos, inv_mvp).xyz;
-}
-
-void GBufferFoggySkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
-{
-	mrt_0 = mrt_1 = 0;
-}
-
 float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 {
 	float fog = saturate(normalize(texCoord0).y * scale_bias.x + scale_bias.y);
@@ -315,16 +302,8 @@ float4 SpecialShadingFoggySkyBoxPS(float3 texCoord0 : TEXCOORD0) : SV_Target
 		]]>
 	</shader>
 
-	<technique name="GBufferFoggySkyBoxMRT" inherit="GBufferSkyBoxMRTTech">
-		<pass name="p0">
-			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
-			<state name="pixel_shader" value="GBufferFoggySkyBoxMRTPS()"/>
-		</pass>
-	</technique>
-
 	<technique name="SpecialShadingFoggySkyBox" inherit="SkyBoxTech">
 		<pass name="p0">
-			<state name="vertex_shader" value="FoggySkyBoxVS()"/>
 			<state name="pixel_shader" value="SpecialShadingFoggySkyBoxPS()"/>
 		</pass>
 	</technique>
