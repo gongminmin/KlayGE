@@ -1,9 +1,9 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBuffer.Static.fxml"/>
+	<include name="GBuffer.fxml"/>
 	<include name="util.fxml"/>
-	
+
 	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 
 	<shader>

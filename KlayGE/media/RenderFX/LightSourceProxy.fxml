@@ -2,7 +2,7 @@
 
 <effect>
 	<include name="Lighting.fxml"/>
-	<include name="GBuffer.Static.fxml"/>
+	<include name="GBuffer.fxml"/>
 
 	<parameter type="float4x4" name="model"/>
 	<parameter type="float4" name="light_color"/>

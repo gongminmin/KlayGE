@@ -1,7 +1,0 @@
-<?xml version='1.0'?>
-
-<effect>
-	<macro name="SKINNING_ON" value="0"/>
-	<macro name="NUM_JOINTS" value="1"/>
-	<include name="GBuffer.fxml"/>
-</effect>

@@ -1,8 +1,8 @@
 <?xml version='1.0'?>
 
 <effect>
-	<include name="GBuffer.Static.fxml"/>
-	
+	<include name="GBuffer.fxml"/>
+
 	<parameter type="float" name="stretch"/>
 	<parameter type="float" name="base_level"/>
 

@@ -16,7 +16,7 @@ static const float PI = 3.1415926f;
 void FoliageGBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 			float4 blend_weights : BLENDWEIGHT,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
@@ -32,7 +32,7 @@ void FoliageGBufferVS(float4 pos : POSITION,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
@@ -55,10 +55,8 @@ void FoliageGBufferVS(float4 pos : POSITION,
 
 	float3 result_pos;
 	float4 result_tangent_quat;
-	CalcMesh(pos, texcoord, tangent_quat,
-				blend_weights, blend_indices,
-				oTexCoord_2xy.xy, result_pos,
-				result_tangent_quat);
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
+	oTexCoord_2xy.xy = TexcoordNode(texcoord);
 
 	oPos = mul(float4(result_pos, 1), mvp);
 

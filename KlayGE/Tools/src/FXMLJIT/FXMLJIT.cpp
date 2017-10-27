@@ -41,6 +41,15 @@
 #include <iostream>
 
 #include <boost/algorithm/string/case_conv.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
+#endif
+#include <boost/algorithm/string/split.hpp>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
+#include <boost/algorithm/string/classification.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -257,7 +266,7 @@ int main(int argc, char* argv[])
 	filesystem::path kfx_name(base_name + ".kfx");
 	filesystem::path kfx_path = fxml_directory / kfx_name;
 	bool skip_jit = false;
-	if (filesystem::exists(kfx_path))
+	if (filesystem::exists(fxml_path) && filesystem::exists(kfx_path))
 	{
 		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
 		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_path.string());
@@ -303,8 +312,25 @@ int main(int argc, char* argv[])
 
 	if (!skip_jit)
 	{
+		std::vector<string> fxml_names;
+		if (ResLoader::Instance().Locate(fxml_name).empty())
+		{
+			std::vector<std::string> frags;
+			boost::algorithm::split(frags, base_name, boost::is_any_of("+"));
+			for (auto const & frag : frags)
+			{
+				fxml_names.push_back(frag + ".fxml");
+			}
+
+			fxml_names.back() = (fxml_directory / fxml_names.back()).string();
+		}
+		else
+		{
+			fxml_names.push_back(fxml_name);
+		}
+
 		RenderEffect effect;
-		effect.Load(fxml_name);
+		effect.Load(fxml_names);
 	}
 	if (!target_folder.empty())
 	{

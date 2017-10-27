@@ -34,11 +34,6 @@
 		<parameter type="float4" name="object_id"/>
 	</cbuffer>
 
-	<cbuffer name="skinning">
-		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
-		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
-	</cbuffer>
-
 	<parameter type="texture2D" name="albedo_tex"/>
 	<parameter type="texture2D" name="metalness_tex"/>
 	<parameter type="texture2D" name="glossiness_tex"/>
@@ -71,76 +66,52 @@
 	<parameter type="texture2D" name="opaque_depth_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 
+	<shader_graph_nodes>
+		<node name="PositionNode" return="void" impl="StaticPositionNode">
+			<param type="float3" name="pos"/>
+			<param type="float4" name="tangent_quat"/>
+			<param type="float4" name="blend_weights"/>
+			<param type="int4" name="blend_indices"/>
+			<param type="out float3" name="result_pos"/>
+			<param type="out float4" name="result_tangent_quat"/>
+		</node>
+		<node name="TexcoordNode" return="float2" impl="StaticTexcoordNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+
+		<node name="AlbedoNode" return="float3" impl="StaticAlbedoNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="MetalnessNode" return="float" impl="StaticMetalnessNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="GlossinessNode" return="float" impl="StaticGlossinessNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="EmissiveNode" return="float3" impl="StaticEmissiveNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="OpacityNode" return="float" impl="StaticOpacityNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+
+		<node name="NormalNode" return="float3" impl="StaticNormalNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="HeightForParallaxNode" return="float" impl="StaticHeightForParallaxNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+		<node name="HeightForTessellationNode" return="float" impl="StaticHeightForTessellationNode">
+			<param type="float2" name="texcoord"/>
+		</node>
+	</shader_graph_nodes>
+
 	<shader>
 		<![CDATA[
-#if SKINNING_ON
-void DQSkinned(float3 pos,
-			float4 tangent_quat,
-			float4 blend_weights,
-			int4 blend_indices,
-			out float3 result_pos,
-			out float4 result_tangent_quat)
-{
-	float4 dp0 = joint_reals[blend_indices[0]];
-
-	float3 pos_s = 0;
-	float4 blend_real = 0;
-	float4 blend_dual = 0;
-	[unroll]
-	for (int i = 0; i < 4; ++ i)
-	{
-		float4 joint_real = joint_reals[blend_indices[i]];
-		float4 joint_dual = joint_duals[blend_indices[i]];
-		
-		float scale = length(joint_real);
-		joint_real /= scale;
-
-		float weight = blend_weights[i];
-		
-		if (dot(dp0, joint_real) < 0)
-		{
-			joint_real = -joint_real;
-			joint_dual = -joint_dual;
-		}
-
-		pos_s += pos * scale * weight;
-		blend_real += joint_real * weight;
-		blend_dual += joint_dual * weight;
-	}
-
-	float len = length(blend_real);
-	blend_real /= len;
-	blend_dual /= len;
-
-	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
-	result_tangent_quat = mul_quat(tangent_quat, blend_real);
-}
-#endif
-
-void CalcMesh(float4 pos,
-				float2 tex0,
-				float4 tangent_quat,
-				float4 blend_weights,
-				int4 blend_indices,
-				out float2 oTex,
-				out float3 oPos,
-				out float4 oTangentQuat)
-{
-#if SKINNING_ON
-	DQSkinned(pos.xyz, tangent_quat, blend_weights, blend_indices, oPos, oTangentQuat);
-#else
-	oPos = pos.xyz;
-	oTangentQuat = tangent_quat;
-#endif
-
-	oTex = tex0;
-	oTangentQuat = normalize(oTangentQuat);
-}
-
 void GBufferVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT,
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 			float4 blend_weights : BLENDWEIGHT,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES,
@@ -154,7 +125,7 @@ void GBufferVS(float4 pos : POSITION,
 			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
 			out float4 oPos : SV_Position)
 {
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
@@ -169,10 +140,8 @@ void GBufferVS(float4 pos : POSITION,
 
 	float3 result_pos;
 	float4 result_tangent_quat;
-	CalcMesh(pos, texcoord, tangent_quat,
-				blend_weights, blend_indices,
-				oTexCoord_2xy.xy, result_pos,
-				result_tangent_quat);
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
+	oTexCoord_2xy.xy = TexcoordNode(texcoord);
 
 	oPos = mul(float4(result_pos, 1), mvp);
 
@@ -194,27 +163,20 @@ void GBufferVS(float4 pos : POSITION,
 float2 ParallaxMappingCorrection(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float2 uv = texcoord_2xy.xy;
-	if (height_map_parallax_enabled)
-	{
-		float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
-
-		float height = (height_tex.Sample(trilinear_sampler, uv).r + height_offset_scale.x) * height_offset_scale.y;
-		uv += view.xy * height;
-	}
+	float3 view = normalize(float3(ts_to_view0_2z.z, ts_to_view1.z, ts_to_view0_2z.w));
+	uv += view.xy * HeightForParallaxNode(uv);
 	return uv;
 }
 
 float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1)
 {
 	float3 normal = normalize(float3(texcoord_2xy.zw, ts_to_view0_2z.w));
-	if (normal_map_enabled)
-	{
-		float3x3 ts_to_view;
-		ts_to_view[0] = normalize(ts_to_view0_2z.xyz);
-		ts_to_view[1] = normalize(ts_to_view1);
-		ts_to_view[2] = normal;
-		normal = normalize(mul(decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord_2xy.xy)), ts_to_view));
-	}
+
+	float3x3 ts_to_view;
+	ts_to_view[0] = normalize(ts_to_view0_2z.xyz);
+	ts_to_view[1] = normalize(ts_to_view1);
+	ts_to_view[2] = normal;
+	normal = normalize(mul(NormalNode(texcoord_2xy.xy), ts_to_view));
 
 	return normal;
 }
@@ -224,22 +186,9 @@ void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
 
-	float3 albedo = albedo_clr.rgb;
-	if (albedo_map_enabled)
-	{
-		albedo *= albedo_tex.Sample(aniso_sampler, texcoord_2xy.xy).rgb;
-	}
-	float metalness = metalness_clr.r;
-	if (metalness_clr.y > 0.5f)
-	{
-		metalness *= metalness_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
-	}
-
-	float glossiness = glossiness_clr.r;
-	if (glossiness_clr.y > 0.5f)
-	{
-		glossiness *= glossiness_tex.Sample(aniso_sampler, texcoord_2xy.xy).r;
-	}
+	float3 albedo = AlbedoNode(texcoord_2xy.xy);
+	float metalness = MetalnessNode(texcoord_2xy.xy);
+	float glossiness = GlossinessNode(texcoord_2xy.xy);
 
 	StoreGBufferMRT(normal, glossiness, albedo, metalness,
 		mrt_0, mrt_1);
@@ -258,11 +207,7 @@ void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2
 					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
-	}
+	float opacity = OpacityNode(texcoord_2xy.xy);
 	clip(opacity - alpha_test_threshold);
 	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
 }
@@ -407,7 +352,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 void GenShadowMapVS(float4 pos : POSITION,
 						float2 texcoord : TEXCOORD0,
 						float4 tangent_quat : TANGENT,
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 						float4 blend_weights : BLENDWEIGHT,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 						float4 blend_indices_f : BLENDINDICES,
@@ -418,7 +363,7 @@ void GenShadowMapVS(float4 pos : POSITION,
 						out float3 oTc : TEXCOORD0,
 						out float4 oPos : SV_Position)
 {
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
@@ -433,15 +378,12 @@ void GenShadowMapVS(float4 pos : POSITION,
 
 	float3 result_pos;
 	float4 result_tangent_quat;
-	CalcMesh(pos, texcoord, tangent_quat,
-				blend_weights, blend_indices,
-				oTc.xy, result_pos,
-				result_tangent_quat);
-
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
 #if TRANSPARENCY_ON
 	float3 normal = transform_quat(float3(0, 0, 1), result_tangent_quat);
 	result_pos += normal * 0.005f;
 #endif
+	oTc.xy = TexcoordNode(texcoord);
 
 	oPos = mul(float4(result_pos, 1), mvp);
 	oTc.z = mul(float4(result_pos, 1), model_view).z;
@@ -454,11 +396,7 @@ float4 GenShadowMapPS(float3 tc : TEXCOORD0) : SV_Target
 
 float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 {
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(bilinear_sampler, tc.xy).a;
-	}
+	float opacity = OpacityNode(tc.xy);
 	clip(opacity - alpha_test_threshold);
 	return tc.z;
 }
@@ -518,11 +456,7 @@ float4 GenShadowMapAlphaTestPS(float3 tc : TEXCOORD0) : SV_Target
 		<![CDATA[
 float4 SpecialShadingPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
-	float3 emissive = emissive_clr.rgb;
-	if (emissive_clr.w > 0.5f)
-	{
-		emissive *= emissive_tex.Sample(aniso_sampler, texcoord).rgb;
-	}
+	float3 emissive = EmissiveNode(texcoord);
 	return float4(max(emissive, 0), 1);
 }
 
@@ -530,11 +464,7 @@ float4 SpecialShadingAlphaBlendPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
 	float4 shading = SpecialShadingPS(texcoord);
 
-	float opacity = albedo_clr.a;
-	if (albedo_map_enabled)
-	{
-		opacity *= albedo_tex.Sample(aniso_sampler, texcoord).a;
-	}
+	float opacity = OpacityNode(texcoord);
 	return float4(shading.xyz, opacity);
 }
 		]]>
@@ -584,7 +514,7 @@ struct VS_CONTROL_POINT_OUTPUT
 VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 			float2 texcoord : TEXCOORD0,
 			float4 tangent_quat : TANGENT
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 			, float4 blend_weights : BLENDWEIGHT,
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 			float4 blend_indices_f : BLENDINDICES
@@ -594,7 +524,7 @@ VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 #endif
 			)
 {
-#if SKINNING_ON
+#if NUM_JOINTS > 0
 #if KLAYGE_OPENGL || KLAYGE_OPENGLES
 	int4 blend_indices = (int4)blend_indices_f;
 #endif
@@ -609,10 +539,8 @@ VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
 
 	VS_CONTROL_POINT_OUTPUT output;
 
-	CalcMesh(pos, texcoord, tangent_quat,
-				blend_weights, blend_indices,
-				output.Texcoord, output.Pos,
-				output.TangentQuat);
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, output.Pos, output.TangentQuat);
+	output.Texcoord = TexcoordNode(texcoord);
 
 	return output;
 }
@@ -709,11 +637,7 @@ void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_qu
 	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
 	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
 
-	if (height_map_tess_enabled)
-	{
-		float height = (height_tex.SampleLevel(bilinear_sampler, uv, 0).r + height_offset_scale.x) * 0.1f * height_offset_scale.y;
-		pos += height * obj_to_tangent[2];
-	}
+	pos += HeightForTessellationNode(uv) * obj_to_tangent[2];
 
 	oPos = mul(float4(pos, 1), mvp);
 	oTexCoord_2xy.xy = uv;
@@ -1003,4 +927,100 @@ float4 SelectModePS() : SV_Target
 			<state name="pixel_shader" value="SelectModePS()"/>
 		</pass>
 	</technique>
+
+
+	<shader>
+		<![CDATA[
+void StaticPositionNode(float3 pos, float4 tangent_quat, float4 blend_weights, int4 blend_indices, out float3 result_pos, out float4 result_tangent_quat)
+{
+	result_pos = pos.xyz;
+	result_tangent_quat = normalize(tangent_quat);
+}
+
+float2 StaticTexcoordNode(float2 texcoord)
+{
+	return texcoord;
+}
+
+float3 StaticAlbedoNode(float2 texcoord)
+{
+	float3 albedo = albedo_clr.rgb;
+	if (albedo_map_enabled)
+	{
+		albedo *= albedo_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	return albedo;
+}
+
+float StaticMetalnessNode(float2 texcoord)
+{
+	float metalness = metalness_clr.r;
+	if (metalness_clr.y > 0.5f)
+	{
+		metalness *= metalness_tex.Sample(aniso_sampler, texcoord).r;
+	}
+	return metalness;
+}
+
+float StaticGlossinessNode(float2 texcoord)
+{
+	float glossiness = glossiness_clr.r;
+	if (glossiness_clr.y > 0.5f)
+	{
+		glossiness *= glossiness_tex.Sample(aniso_sampler, texcoord).r;
+	}
+	return glossiness;
+}
+
+float3 StaticEmissiveNode(float2 texcoord)
+{
+	float3 emissive = emissive_clr.rgb;
+	if (emissive_clr.w > 0.5f)
+	{
+		emissive *= emissive_tex.Sample(aniso_sampler, texcoord).rgb;
+	}
+	return emissive;
+}
+
+float StaticOpacityNode(float2 texcoord)
+{
+	float opacity = albedo_clr.a;
+	if (albedo_map_enabled)
+	{
+		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord).a;
+	}
+	return opacity;
+}
+
+float3 StaticNormalNode(float2 texcoord)
+{
+	float3 normal = float3(0, 0, 1);
+	if (normal_map_enabled)
+	{
+		normal = decompress_normal(normal_tex.Sample(trilinear_sampler, texcoord));
+	}
+	return normal;
+}
+
+float StaticHeightForParallaxNode(float2 texcoord)
+{
+	float height = 0;
+	if (height_map_parallax_enabled)
+	{
+		height = (height_tex.Sample(trilinear_sampler, texcoord).x + height_offset_scale.x) * height_offset_scale.y;
+	}
+	return height;
+}
+
+float StaticHeightForTessellationNode(float2 texcoord)
+{
+	float height = 0;
+	if (height_map_tess_enabled)
+	{
+		height = (height_tex.SampleLevel(bilinear_sampler, texcoord, 0).x + height_offset_scale.x) * 0.1f * height_offset_scale.y;
+	}
+	return height;
+}
+		]]>
+	</shader>
 </effect>

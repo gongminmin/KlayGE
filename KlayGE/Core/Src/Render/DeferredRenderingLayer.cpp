@@ -521,8 +521,8 @@ namespace KlayGE
 		default_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 		merged_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 
-		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.Static.fxml");
-		g_buffer_skinning_effect_ = SyncLoadRenderEffect("GBuffer.Skinning.fxml");
+		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
+		g_buffer_skinning_effect_ = SyncLoadRenderEffects({ "GBuffer.fxml", "GBuffer.Skinning.fxml" });
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED

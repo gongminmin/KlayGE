@@ -402,11 +402,11 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	if (has_skinned)
 	{
-		effect_ = SyncLoadRenderEffect("MtlEditor.Skinning.fxml");
+		effect_ = SyncLoadRenderEffects({ "MtlEditor.fxml", "GBuffer.Skinning.fxml" });
 	}
 	else
 	{
-		effect_ = SyncLoadRenderEffect("MtlEditor.Static.fxml");
+		effect_ = SyncLoadRenderEffect("MtlEditor.fxml");
 	}
 
 	std::string g_buffer_mrt_tech_str;

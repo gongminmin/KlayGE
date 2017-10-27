@@ -56,6 +56,7 @@
 #include <KFL/XMLDom.hpp>
 #include <KFL/Thread.hpp>
 #include <KFL/Hash.hpp>
+#include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
 #include <boost/assert.hpp>
@@ -76,7 +77,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0110;
+	uint32_t const KFX_VERSION = 0x0120;
 
 	std::mutex singleton_mutex;
 
@@ -2656,15 +2657,15 @@ namespace KlayGE
 	private:
 		struct EffectDesc
 		{
-			std::string res_name;
+			std::vector<std::string> res_name;
 
 			RenderEffectPtr effect;
 		};
 
 	public:
-		explicit EffectLoadingDesc(std::string const & name)
+		explicit EffectLoadingDesc(ArrayRef<std::string> name)
 		{
-			effect_desc_.res_name = name;
+			effect_desc_.res_name = std::vector<std::string>(name.begin(), name.end());
 		}
 
 		uint64_t Type() const override
@@ -2755,10 +2756,10 @@ namespace KlayGE
 #endif
 
 
-	void RenderEffect::Load(std::string const & name)
+	void RenderEffect::Load(ArrayRef<std::string> names)
 	{
 		effect_template_ = MakeSharedPtr<RenderEffectTemplate>();
-		effect_template_->Load(name, *this);
+		effect_template_->Load(names, *this);
 	}
 
 	RenderEffectPtr RenderEffect::Clone()
@@ -2908,6 +2909,73 @@ namespace KlayGE
 
 
 #if KLAYGE_IS_DEV_PLATFORM
+	void RenderEffectTemplate::PreprocessIncludes(XMLDocument& doc, XMLNode& root, std::vector<std::unique_ptr<XMLDocument>>& include_docs)
+	{
+		std::vector<std::string> whole_include_names;
+		for (XMLNodePtr node = root.FirstNode("include"); node;)
+		{
+			XMLAttributePtr attr = node->Attrib("name");
+			BOOST_ASSERT(attr);
+			std::string include_name = attr->ValueString();
+
+			include_docs.push_back(MakeUniquePtr<XMLDocument>());
+			XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
+
+			std::vector<std::string> include_names;
+			this->RecursiveIncludeNode(*include_root, include_names);
+
+			if (!include_names.empty())
+			{
+				for (auto iter = include_names.begin(); iter != include_names.end();)
+				{
+					bool found = false;
+					for (auto iter_w = whole_include_names.begin(); iter_w != whole_include_names.end(); ++ iter_w)
+					{
+						if (*iter == *iter_w)
+						{
+							found = true;
+							break;
+						}
+					}
+
+					if (found)
+					{
+						iter = include_names.erase(iter);
+					}
+					else
+					{
+						include_docs.push_back(MakeUniquePtr<XMLDocument>());
+						XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
+						this->InsertIncludeNodes(doc, root, node, *recursive_include_root);
+
+						whole_include_names.push_back(*iter);
+						++ iter;
+					}
+				}
+			}
+
+			bool found = false;
+			for (auto iter_w = whole_include_names.begin(); iter_w != whole_include_names.end(); ++ iter_w)
+			{
+				if (include_name == *iter_w)
+				{
+					found = true;
+					break;
+				}
+			}
+
+			if (!found)
+			{
+				this->InsertIncludeNodes(doc, root, node, *include_root);
+				whole_include_names.push_back(include_name);
+			}
+
+			XMLNodePtr node_next = node->NextSibling("include");
+			root.RemoveNode(node);
+			node = node_next;
+		}
+	}
+
 	void RenderEffectTemplate::RecursiveIncludeNode(XMLNode const & root, std::vector<std::string>& include_names) const
 	{
 		for (XMLNodePtr node = root.FirstNode("include"); node; node = node->NextSibling("include"))
@@ -2949,224 +3017,223 @@ namespace KlayGE
 			}
 		}
 	}
-#endif
 
-	void RenderEffectTemplate::Load(std::string const & name, RenderEffect& effect)
+	void RenderEffectTemplate::Load(XMLNode const & root, RenderEffect& effect)
 	{
-		std::string fxml_name = ResLoader::Instance().Locate(name);
-		if (fxml_name.empty())
 		{
-			fxml_name = name;
-		}
-		std::string kfx_name = fxml_name.substr(0, fxml_name.rfind(".")) + ".kfx";
-
-#if KLAYGE_IS_DEV_PLATFORM
-		ResIdentifierPtr source = ResLoader::Instance().Open(fxml_name);
-#endif
-		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
-
-#if KLAYGE_IS_DEV_PLATFORM
-		std::unique_ptr<XMLDocument> doc;
-		XMLNodePtr root;
-#endif
-
-		res_name_ = fxml_name;
-		res_name_hash_ = HashRange(fxml_name.begin(), fxml_name.end());
-#if KLAYGE_IS_DEV_PLATFORM
-		if (source)
-		{
-			timestamp_ = source->Timestamp();
-
-			doc = MakeUniquePtr<XMLDocument>();
-			root = doc->Parse(source);
-
-			std::vector<std::string> include_names;
-			this->RecursiveIncludeNode(*root, include_names);
-
-			for (auto const & include_name : include_names)
+			XMLNodePtr macro_node = root.FirstNode("macro");
+			for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 			{
-				ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
-				if (include_source)
+				macros_.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
+			}
+		}
+
+		std::vector<XMLNodePtr> parameter_nodes;
+		for (XMLNodePtr node = root.FirstNode(); node; node = node->NextSibling())
+		{
+			if ("parameter" == node->Name())
+			{
+				parameter_nodes.push_back(node);
+			}
+			else if ("cbuffer" == node->Name())
+			{
+				for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
 				{
-					timestamp_ = std::max(timestamp_, include_source->Timestamp());
+					parameter_nodes.push_back(sub_node);
 				}
 			}
 		}
-		else
+
+		for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
+		{
+			XMLNodePtr const & node = parameter_nodes[param_index];
+
+			uint32_t type = type_define::instance().TypeCode(node->Attrib("type")->ValueString());
+			if ((type != REDT_sampler)
+				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D)
+				&& (type != REDT_textureCUBE)
+				&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray)
+				&& (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray)
+				&& (type != REDT_buffer) && (type != REDT_structured_buffer)
+				&& (type != REDT_byte_address_buffer) && (type != REDT_rw_buffer)
+				&& (type != REDT_rw_structured_buffer) && (type != REDT_rw_texture1D)
+				&& (type != REDT_rw_texture2D) && (type != REDT_rw_texture3D)
+				&& (type != REDT_rw_texture1DArray) && (type != REDT_rw_texture2DArray)
+				&& (type != REDT_rw_byte_address_buffer) && (type != REDT_append_structured_buffer)
+				&& (type != REDT_consume_structured_buffer))
+			{
+				RenderEffectConstantBuffer* cbuff = nullptr;
+				XMLNodePtr parent_node = node->Parent();
+				std::string cbuff_name = parent_node->AttribString("name", "global_cb");
+				size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
+
+				bool found = false;
+				for (size_t i = 0; i < effect.cbuffers_.size(); ++ i)
+				{
+					if (effect.cbuffers_[i]->NameHash() == cbuff_name_hash)
+					{
+						cbuff = effect.cbuffers_[i].get();
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+				{
+					effect.cbuffers_.push_back(MakeUniquePtr<RenderEffectConstantBuffer>());
+					cbuff = effect.cbuffers_.back().get();
+					cbuff->Load(cbuff_name);
+				}
+				BOOST_ASSERT(cbuff);
+
+				cbuff->AddParameter(param_index);
+			}
+
+			effect.params_.push_back(MakeUniquePtr<RenderEffectParameter>());
+			effect.params_.back()->Load(node);
+		}
+
+		for (XMLNodePtr shader_graph_nodes_node = root.FirstNode("shader_graph_nodes"); shader_graph_nodes_node;
+			shader_graph_nodes_node = shader_graph_nodes_node->NextSibling("shader_graph_nodes"))
+		{
+			for (XMLNodePtr shader_node = shader_graph_nodes_node->FirstNode("node"); shader_node;
+				shader_node = shader_node->NextSibling("node"))
+			{
+				auto name_attr = shader_node->Attrib("name");
+				BOOST_ASSERT(name_attr);
+
+				auto const & node_name = name_attr->ValueString();
+				size_t const node_name_hash = HashRange(node_name.begin(), node_name.end());
+				bool found = false;
+				for (auto& gn : shader_graph_nodes_)
+				{
+					if (node_name_hash == gn.NameHash())
+					{
+						gn.Load(shader_node);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+					shader_graph_nodes_.push_back(RenderShaderGraphNode());
+					shader_graph_nodes_.back().Load(shader_node);
+				}
+			}
+		}
+
+		for (XMLNodePtr shader_node = root.FirstNode("shader"); shader_node; shader_node = shader_node->NextSibling("shader"))
+		{
+			shader_frags_.push_back(RenderShaderFragment());
+			shader_frags_.back().Load(shader_node);
+		}
+
+		this->GenHLSLShaderText(effect);
+
+		uint32_t index = 0;
+		for (XMLNodePtr node = root.FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
+		{
+			techniques_.push_back(MakeUniquePtr<RenderTechnique>());
+			techniques_.back()->Load(effect, node, index);
+		}
+	}
+#endif
+
+	void RenderEffectTemplate::Load(ArrayRef<std::string> names, RenderEffect& effect)
+	{
+		std::filesystem::path last_fxml_path(ResLoader::Instance().Locate(names.back()));
+		std::filesystem::path last_fxml_directory = last_fxml_path.parent_path();
+
+		std::string connected_name;
+		for (size_t i = 0; i < names.size(); ++ i)
+		{
+			connected_name += std::filesystem::path(names[i]).stem().string();
+			if (i != names.size() - 1)
+			{
+				connected_name += '+';
+			}
+		}
+
+		std::string kfx_name = ResLoader::Instance().Locate(connected_name + ".kfx");
+		if (kfx_name.empty())
+		{
+			kfx_name = (last_fxml_directory / (connected_name + ".kfx")).string();
+		}
+
+		res_name_ = (last_fxml_directory / (connected_name + ".fxml")).string();
+		res_name_hash_ = HashRange(res_name_.begin(), res_name_.end());
+#if KLAYGE_IS_DEV_PLATFORM
+		for (auto const & name : names)
 		{
 			timestamp_ = 0;
+
+			ResIdentifierPtr source = ResLoader::Instance().Open(name);
+			if (source)
+			{
+				timestamp_ = std::max(timestamp_, source->Timestamp());
+
+				std::unique_ptr<XMLDocument> doc = MakeUniquePtr<XMLDocument>();
+				XMLNodePtr root = doc->Parse(source);
+
+				std::vector<std::string> include_names;
+				this->RecursiveIncludeNode(*root, include_names);
+
+				for (auto const & include_name : include_names)
+				{
+					ResIdentifierPtr include_source = ResLoader::Instance().Open(include_name);
+					if (include_source)
+					{
+						timestamp_ = std::max(timestamp_, include_source->Timestamp());
+					}
+				}
+			}
 		}
 #endif
 
+		ResIdentifierPtr kfx_source = ResLoader::Instance().Open(kfx_name);
 		if (!this->StreamIn(kfx_source, effect))
 		{
 #if KLAYGE_IS_DEV_PLATFORM
-			if (source)
+			effect.params_.clear();
+			effect.cbuffers_.clear();
+			effect.shader_objs_.clear();
+
+			macros_.clear();
+			shader_frags_.clear();
+			hlsl_shader_.clear();
+			techniques_.clear();
+			shader_graph_nodes_.clear();
+
+			shader_descs_.resize(1);
+
+			std::vector<std::unique_ptr<XMLDocument>> include_docs;
+			std::vector<std::unique_ptr<XMLDocument>> frag_docs(names.size());
+
+			ResIdentifierPtr main_source = ResLoader::Instance().Open(names[0]);
+			if (main_source)
 			{
-				effect.params_.clear();
-				effect.cbuffers_.clear();
-				effect.shader_objs_.clear();
-
-				macros_.clear();
-				shader_frags_.clear();
-				hlsl_shader_.clear();
-				techniques_.clear();
-
-				shader_descs_.resize(1);
-
-				XMLAttributePtr attr;
-
-				std::vector<std::unique_ptr<XMLDocument>> include_docs;
-				std::vector<std::string> whole_include_names;
-				for (XMLNodePtr node = root->FirstNode("include"); node;)
+				frag_docs[0] = MakeUniquePtr<XMLDocument>();
+				XMLNodePtr root = frag_docs[0]->Parse(main_source);
+				this->PreprocessIncludes(*frag_docs[0], *root, include_docs);
+			
+				for (size_t i = 1; i < names.size(); ++ i)
 				{
-					attr = node->Attrib("name");
-					BOOST_ASSERT(attr);
-					std::string include_name = attr->ValueString();
-
-					include_docs.push_back(MakeUniquePtr<XMLDocument>());
-					XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
-
-					std::vector<std::string> include_names;
-					this->RecursiveIncludeNode(*include_root, include_names);
-
-					if (!include_names.empty())
+					ResIdentifierPtr source = ResLoader::Instance().Open(names[i]);
+					if (source)
 					{
-						for (auto iter = include_names.begin(); iter != include_names.end();)
+						frag_docs[i] = MakeUniquePtr<XMLDocument>();
+						XMLNodePtr frag_root = frag_docs[i]->Parse(source);
+
+						this->PreprocessIncludes(*frag_docs[i], *frag_root, include_docs);
+
+						for (auto frag_node = frag_root->FirstNode(); frag_node; frag_node = frag_node->NextSibling())
 						{
-							bool found = false;
-							for (auto iter_w = whole_include_names.begin(); iter_w != whole_include_names.end(); ++ iter_w)
-							{
-								if (*iter == *iter_w)
-								{
-									found = true;
-									break;
-								}
-							}
-
-							if (found)
-							{
-								iter = include_names.erase(iter);
-							}
-							else
-							{
-								include_docs.push_back(MakeUniquePtr<XMLDocument>());
-								XMLNodePtr recursive_include_root = include_docs.back()->Parse(ResLoader::Instance().Open(*iter));
-								this->InsertIncludeNodes(*doc, *root, node, *recursive_include_root);
-
-								whole_include_names.push_back(*iter);
-								++ iter;
-							}
-						}
-					}
-
-					bool found = false;
-					for (auto iter_w = whole_include_names.begin(); iter_w != whole_include_names.end(); ++ iter_w)
-					{
-						if (include_name == *iter_w)
-						{
-							found = true;
-							break;
-						}
-					}
-
-					if (!found)
-					{
-						this->InsertIncludeNodes(*doc, *root, node, *include_root);
-						whole_include_names.push_back(include_name);
-					}
-
-					XMLNodePtr node_next = node->NextSibling("include");
-					root->RemoveNode(node);
-					node = node_next;
-				}
-
-				{
-					XMLNodePtr macro_node = root->FirstNode("macro");
-					for (; macro_node; macro_node = macro_node->NextSibling("macro"))
-					{
-						macros_.emplace_back(std::make_pair(macro_node->Attrib("name")->ValueString(), macro_node->Attrib("value")->ValueString()), true);
-					}
-				}
-
-				std::vector<XMLNodePtr> parameter_nodes;
-				for (XMLNodePtr node = root->FirstNode(); node; node = node->NextSibling())
-				{
-					if ("parameter" == node->Name())
-					{
-						parameter_nodes.push_back(node);
-					}
-					else if ("cbuffer" == node->Name())
-					{
-						for (XMLNodePtr sub_node = node->FirstNode("parameter"); sub_node; sub_node = sub_node->NextSibling("parameter"))
-						{
-							parameter_nodes.push_back(sub_node);
+							root->AppendNode(frag_docs[i]->CloneNode(frag_node));
 						}
 					}
 				}
 
-				for (uint32_t param_index = 0; param_index < parameter_nodes.size(); ++ param_index)
-				{
-					XMLNodePtr const & node = parameter_nodes[param_index];
-
-					uint32_t type = type_define::instance().TypeCode(node->Attrib("type")->ValueString());
-					if ((type != REDT_sampler)
-						&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D)
-						&& (type != REDT_textureCUBE)
-						&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray)
-						&& (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray)
-						&& (type != REDT_buffer) && (type != REDT_structured_buffer)
-						&& (type != REDT_byte_address_buffer) && (type != REDT_rw_buffer)
-						&& (type != REDT_rw_structured_buffer) && (type != REDT_rw_texture1D)
-						&& (type != REDT_rw_texture2D) && (type != REDT_rw_texture3D)
-						&& (type != REDT_rw_texture1DArray) && (type != REDT_rw_texture2DArray)
-						&& (type != REDT_rw_byte_address_buffer) && (type != REDT_append_structured_buffer)
-						&& (type != REDT_consume_structured_buffer))
-					{
-						RenderEffectConstantBuffer* cbuff = nullptr;
-						XMLNodePtr parent_node = node->Parent();
-						std::string cbuff_name = parent_node->AttribString("name", "global_cb");
-						size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
-
-						bool found = false;
-						for (size_t i = 0; i < effect.cbuffers_.size(); ++ i)
-						{
-							if (effect.cbuffers_[i]->NameHash() == cbuff_name_hash)
-							{
-								cbuff = effect.cbuffers_[i].get();
-								found = true;
-								break;
-							}
-						}
-						if (!found)
-						{
-							effect.cbuffers_.push_back(MakeUniquePtr<RenderEffectConstantBuffer>());
-							cbuff = effect.cbuffers_.back().get();
-							cbuff->Load(cbuff_name);
-						}
-						BOOST_ASSERT(cbuff);
-
-						cbuff->AddParameter(param_index);
-					}
-
-					effect.params_.push_back(MakeUniquePtr<RenderEffectParameter>());
-					effect.params_.back()->Load(node);
-				}
-
-				for (XMLNodePtr shader_node = root->FirstNode("shader"); shader_node; shader_node = shader_node->NextSibling("shader"))
-				{
-					shader_frags_.push_back(RenderShaderFragment());
-					shader_frags_.back().Load(shader_node);
-				}
-
-				this->GenHLSLShaderText(effect);
-
-				uint32_t index = 0;
-				for (XMLNodePtr node = root->FirstNode("technique"); node; node = node->NextSibling("technique"), ++ index)
-				{
-					techniques_.push_back(MakeUniquePtr<RenderTechnique>());
-					techniques_.back()->Load(effect, node, index);
-				}
+				this->Load(*root, effect);
 			}
 
 			std::ofstream ofs(kfx_name.c_str(), std::ios_base::binary | std::ios_base::out);
@@ -3252,6 +3319,16 @@ namespace KlayGE
 							{
 								effect.params_[i] = MakeUniquePtr<RenderEffectParameter>();
 								effect.params_[i]->StreamIn(source);
+							}
+						}
+
+						{
+							uint8_t num_shader_graph_nodes;
+							source->read(&num_shader_graph_nodes, sizeof(num_shader_graph_nodes));
+							shader_graph_nodes_.resize(num_shader_graph_nodes);
+							for (uint32_t i = 0; i < num_shader_graph_nodes; ++ i)
+							{
+								shader_graph_nodes_[i].StreamIn(source);
 							}
 						}
 
@@ -3381,6 +3458,15 @@ namespace KlayGE
 			for (uint32_t i = 0; i < effect.params_.size(); ++ i)
 			{
 				effect.params_[i]->StreamOut(os);
+			}
+		}
+
+		{
+			uint8_t num_shader_graph_nodes = static_cast<uint8_t>(shader_graph_nodes_.size());
+			os.write(reinterpret_cast<char const *>(&num_shader_graph_nodes), sizeof(num_shader_graph_nodes));
+			for (uint32_t i = 0; i < shader_graph_nodes_.size(); ++ i)
+			{
+				shader_graph_nodes_[i].StreamOut(os);
 			}
 		}
 
@@ -3687,6 +3773,16 @@ namespace KlayGE
 			}
 		}
 
+		if (this->NumShaderGraphNodes() > 0)
+		{
+			for (uint32_t i = 0; i < this->NumShaderGraphNodes(); ++ i)
+			{
+				auto const & node = this->ShaderGraphNodesByIndex(i);
+				str += node.GenDeclarationCode();
+			}
+			str += '\n';
+		}
+
 		for (uint32_t i = 0; i < this->NumShaderFragments(); ++ i)
 		{
 			RenderShaderFragment const & effect_shader_frag = this->ShaderFragmentByIndex(i);
@@ -3741,6 +3837,17 @@ namespace KlayGE
 			{
 				str += "#endif\n";
 			}
+		}
+
+		if (this->NumShaderGraphNodes() > 0)
+		{
+			str += '\n';
+			for (uint32_t i = 0; i < this->NumShaderGraphNodes(); ++ i)
+			{
+				auto const & node = this->ShaderGraphNodesByIndex(i);
+				str += node.GenDefinitionCode();
+			}
+			str += '\n';
 		}
 	}
 #endif
@@ -5263,6 +5370,160 @@ namespace KlayGE
 #endif
 
 
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderShaderGraphNode::Load(XMLNodePtr const & node)
+	{
+		XMLAttributePtr attr = node->Attrib("name");
+		BOOST_ASSERT(attr);
+
+		if (!name_.empty())
+		{
+			BOOST_ASSERT(name_ == attr->ValueString());
+		}
+		else
+		{
+			name_ = attr->ValueString();
+			name_hash_ = HashRange(name_.begin(), name_.end());
+
+			attr = node->Attrib("return");
+			if (attr)
+			{
+				return_type_ = attr->ValueString();
+			}
+			else
+			{
+				return_type_ = "void";
+			}
+
+			for (XMLNodePtr param_node = node->FirstNode(); param_node; param_node = param_node->NextSibling())
+			{
+				XMLAttributePtr type_attr = param_node->Attrib("type");
+				XMLAttributePtr name_attr = param_node->Attrib("name");
+				BOOST_ASSERT(type_attr);
+				BOOST_ASSERT(name_attr);
+
+				params_.emplace_back(type_attr->ValueString(), name_attr->ValueString());
+			}
+		}
+
+		attr = node->Attrib("impl");
+		if (attr)
+		{
+			impl_ = attr->ValueString();
+		}
+	}
+#endif
+
+	void RenderShaderGraphNode::StreamIn(ResIdentifierPtr const & res)
+	{
+		name_ = ReadShortString(res);
+		name_hash_ = HashRange(name_.begin(), name_.end());
+
+		return_type_ = ReadShortString(res);
+		impl_ = ReadShortString(res);
+
+		uint8_t len;
+		res->read(&len, sizeof(len));
+		params_.resize(len);
+		for (uint32_t i = 0; i < len; ++ i)
+		{
+			params_.emplace_back(ReadShortString(res), ReadShortString(res));
+		}
+	}
+
+#if KLAYGE_IS_DEV_PLATFORM
+	void RenderShaderGraphNode::StreamOut(std::ostream& os) const
+	{
+		WriteShortString(os, name_);
+		WriteShortString(os, return_type_);
+		WriteShortString(os, impl_);
+
+		uint8_t len = static_cast<uint8_t>(params_.size());
+		os.write(reinterpret_cast<char*>(&len), sizeof(len));
+		for (uint32_t i = 0; i < len; ++ i)
+		{
+			WriteShortString(os, params_[i].first);
+			WriteShortString(os, params_[i].second);
+		}
+	}
+#endif
+
+#if KLAYGE_IS_DEV_PLATFORM
+	std::string RenderShaderGraphNode::GenDeclarationCode() const
+	{
+		std::string ret;
+
+		ret += return_type_;
+		ret += ' ';
+		ret += name_;
+		ret += '(';
+		for (size_t i = 0; i < params_.size(); ++ i)
+		{
+			auto const & param = params_[i];
+
+			ret += param.first;
+			ret += ' ';
+			ret += param.second;
+
+			if (i != params_.size() - 1)
+			{
+				ret += ", ";
+			}
+		}
+		ret += ");\n";
+
+		return ret;
+	}
+
+	std::string RenderShaderGraphNode::GenDefinitionCode() const
+	{
+		std::string ret;
+
+		ret += return_type_;
+		ret += ' ';
+		ret += name_;
+		ret += '(';
+		for (size_t i = 0; i < params_.size(); ++ i)
+		{
+			auto const & param = params_[i];
+
+			ret += param.first;
+			ret += ' ';
+			ret += param.second;
+
+			if (i != params_.size() - 1)
+			{
+				ret += ", ";
+			}
+		}
+		ret += ")\n";
+		ret += "{\n";
+		ret += "\t";
+		if (return_type_ != "void")
+		{
+			ret += "return ";
+		}
+		ret += impl_;
+		ret += '(';
+		for (size_t i = 0; i < params_.size(); ++ i)
+		{
+			auto const & param = params_[i];
+
+			ret += param.second;
+
+			if (i != params_.size() - 1)
+			{
+				ret += ", ";
+			}
+		}
+		ret += ");\n";
+		ret += "}\n\n";
+
+		return ret;
+	}
+#endif
+
+
 	RenderVariable::RenderVariable()
 	{
 	}
@@ -5848,9 +6109,20 @@ namespace KlayGE
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
 	}
 
+	RenderEffectPtr SyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	{
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
+	}
+
 	RenderEffectPtr ASyncLoadRenderEffect(std::string const & effect_name)
 	{
 		// TODO: Make it really async
 		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_name));
+	}
+
+	RenderEffectPtr ASyncLoadRenderEffects(ArrayRef<std::string> effect_names)
+	{
+		// TODO: Make it really async
+		return ResLoader::Instance().SyncQueryT<RenderEffect>(MakeSharedPtr<EffectLoadingDesc>(effect_names));
 	}
 }

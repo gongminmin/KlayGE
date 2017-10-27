@@ -1,7 +1,66 @@
 <?xml version='1.0'?>
 
 <effect>
-	<macro name="SKINNING_ON" value="1"/>
 	<macro name="NUM_JOINTS" value="128"/>
-	<include name="GBuffer.fxml"/>
+
+	<cbuffer name="skinning">
+		<parameter type="float4" name="joint_reals" array_size="NUM_JOINTS"/>
+		<parameter type="float4" name="joint_duals" array_size="NUM_JOINTS"/>
+	</cbuffer>
+
+	<shader>
+		<![CDATA[
+void DQSkinned(float3 pos,
+			float4 tangent_quat,
+			float4 blend_weights,
+			int4 blend_indices,
+			out float3 result_pos,
+			out float4 result_tangent_quat)
+{
+	float4 dp0 = joint_reals[blend_indices[0]];
+
+	float3 pos_s = 0;
+	float4 blend_real = 0;
+	float4 blend_dual = 0;
+	[unroll]
+	for (int i = 0; i < 4; ++ i)
+	{
+		float4 joint_real = joint_reals[blend_indices[i]];
+		float4 joint_dual = joint_duals[blend_indices[i]];
+		
+		float scale = length(joint_real);
+		joint_real /= scale;
+
+		float weight = blend_weights[i];
+		
+		if (dot(dp0, joint_real) < 0)
+		{
+			joint_real = -joint_real;
+			joint_dual = -joint_dual;
+		}
+
+		pos_s += pos * scale * weight;
+		blend_real += joint_real * weight;
+		blend_dual += joint_dual * weight;
+	}
+
+	float len = length(blend_real);
+	blend_real /= len;
+	blend_dual /= len;
+
+	result_pos = transform_quat(pos_s, blend_real) + 2 * mul_quat(float4(blend_dual.xyz, -blend_dual.w), blend_real).xyz;
+	result_tangent_quat = mul_quat(tangent_quat, blend_real);
+}
+
+void SkinningPositionNode(float3 pos, float4 tangent_quat, float4 blend_weights, int4 blend_indices, out float3 result_pos, out float4 result_tangent_quat)
+{
+	DQSkinned(pos, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
+	result_tangent_quat = normalize(tangent_quat);
+}
+		]]>
+	</shader>
+
+	<shader_graph_nodes>
+		<node name="PositionNode" impl="SkinningPositionNode"/>
+	</shader_graph_nodes>
 </effect>

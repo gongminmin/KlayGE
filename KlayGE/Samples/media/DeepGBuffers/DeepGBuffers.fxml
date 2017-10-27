@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <effect>
-	<include name="GBuffer.Static.fxml"/>
+	<include name="GBuffer.fxml"/>
 
 	<technique name="NoLightingGBufferMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
