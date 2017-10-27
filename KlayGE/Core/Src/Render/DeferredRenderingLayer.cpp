@@ -1184,11 +1184,11 @@ namespace KlayGE
 
 				light_indices_fmt = EF_R32UI;
 			}
-			pvp.lights_start_tex = rf.MakeTexture3D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE, num_depth_slices_, 1, 1, light_indices_fmt, 1, 0,
+			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, num_depth_slices_, light_indices_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Unordered);
-			pvp.intersected_light_indices_tex = rf.MakeTexture3D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
-				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, num_depth_slices_, 1, 1, light_indices_fmt, 1, 0,
+			pvp.intersected_light_indices_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 32,
+				(height + (TILE_SIZE - 1)) / TILE_SIZE * 32, 1, num_depth_slices_, light_indices_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Unordered);
 		}
 		else

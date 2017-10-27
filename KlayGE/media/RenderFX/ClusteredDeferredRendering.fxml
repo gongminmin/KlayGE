@@ -135,10 +135,10 @@ float4 ClusteredDRLightingMaskPS() : SV_Target
 	<parameter type="texture2D" name="shading_in_tex"/>
 	<parameter type="rw_texture2D" name="shading_rw_tex"/>
 
-	<parameter type="texture3D" elem_type="uint" name="lights_start_in_tex"/>
-	<parameter type="rw_texture3D" elem_type="uint" name="lights_start_rw_tex"/>
-	<parameter type="texture3D" elem_type="uint" name="intersected_light_indices_in_tex"/>
-	<parameter type="rw_texture3D" elem_type="uint" name="intersected_light_indices_rw_tex"/>
+	<parameter type="texture2DArray" elem_type="uint" name="lights_start_in_tex"/>
+	<parameter type="rw_texture2DArray" elem_type="uint" name="lights_start_rw_tex"/>
+	<parameter type="texture2DArray" elem_type="uint" name="intersected_light_indices_in_tex"/>
+	<parameter type="rw_texture2DArray" elem_type="uint" name="intersected_light_indices_rw_tex"/>
 
 	<parameter type="float3" name="upper_left"/>
 	<parameter type="float3" name="x_dir"/>
