@@ -640,7 +640,7 @@ namespace KlayGE
 
 		void OverrideImpl(std::string_view impl)
 		{
-			impl_ = impl;
+			impl_ = std::string(impl);
 		}
 
 #if KLAYGE_IS_DEV_PLATFORM

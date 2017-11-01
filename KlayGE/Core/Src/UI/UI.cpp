@@ -46,6 +46,18 @@ namespace
 {
 	std::mutex singleton_mutex;
 
+	bool BoolFromStr(std::string_view name)
+	{
+		if (("true" == name) || ("1" == name))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	bool ReadBool(KlayGE::XMLNodePtr& node, std::string const & name, bool default_val)
 	{
 		bool ret = default_val;
@@ -53,16 +65,7 @@ namespace
 		KlayGE::XMLAttributePtr attr = node->Attrib(name);
 		if (attr)
 		{
-			std::string val_str = attr->ValueString();
-			if (("true" == val_str) || ("1" == val_str))
-			{
-				ret = true;
-			}
-			else
-			{
-				BOOST_ASSERT(("false" == val_str) || ("0" == val_str));
-				ret = false;
-			}
+			ret = BoolFromStr(attr->ValueString());
 		}
 
 		return ret;
@@ -454,43 +457,37 @@ namespace KlayGE
 					attr = node->Attrib("align_x");
 					if (attr)
 					{
-						std::string align_x_str = attr->ValueString();
+						std::string const & align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
 						}
+						else if ("right" == align_x_str)
+						{
+							align_x = UIDialog::CA_Right;
+						}
 						else
 						{
-							if ("right" == align_x_str)
-							{
-								align_x = UIDialog::CA_Right;
-							}
-							else
-							{
-								BOOST_ASSERT("center" == align_x_str);
-								align_x = UIDialog::CA_Center;
-							}
+							BOOST_ASSERT("center" == align_x_str);
+							align_x = UIDialog::CA_Center;
 						}
 					}
 					attr = node->Attrib("align_y");
 					if (attr)
 					{
-						std::string align_y_str = attr->ValueString();
+						std::string const & align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
 						}
+						else if ("bottom" == align_y_str)
+						{
+							align_y = UIDialog::CA_Bottom;
+						}
 						else
 						{
-							if ("bottom" == align_y_str)
-							{
-								align_y = UIDialog::CA_Bottom;
-							}
-							else
-							{
-								BOOST_ASSERT("middle" == align_y_str);
-								align_y = UIDialog::CA_Middle;
-							}
+							BOOST_ASSERT("middle" == align_y_str);
+							align_y = UIDialog::CA_Middle;
 						}
 					}
 
@@ -568,43 +565,37 @@ namespace KlayGE
 					attr = ctrl_node->Attrib("align_x");
 					if (attr)
 					{
-						std::string align_x_str = attr->ValueString();
+						std::string const & align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
 						}
+						else if ("right" == align_x_str)
+						{
+							align_x = UIDialog::CA_Right;
+						}
 						else
 						{
-							if ("right" == align_x_str)
-							{
-								align_x = UIDialog::CA_Right;
-							}
-							else
-							{
-								BOOST_ASSERT("center" == align_x_str);
-								align_x = UIDialog::CA_Center;
-							}
+							BOOST_ASSERT("center" == align_x_str);
+							align_x = UIDialog::CA_Center;
 						}
 					}
 					attr = ctrl_node->Attrib("align_y");
 					if (attr)
 					{
-						std::string align_y_str = attr->ValueString();
+						std::string const & align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
 						}
+						else if ("bottom" == align_y_str)
+						{
+							align_y = UIDialog::CA_Bottom;
+						}
 						else
 						{
-							if ("bottom" == align_y_str)
-							{
-								align_y = UIDialog::CA_Bottom;
-							}
-							else
-							{
-								BOOST_ASSERT("middle" == align_y_str);
-								align_y = UIDialog::CA_Middle;
-							}
+							BOOST_ASSERT("middle" == align_y_str);
+							align_y = UIDialog::CA_Middle;
 						}
 					}
 
@@ -689,7 +680,7 @@ namespace KlayGE
 						attr = ctrl_node->Attrib("style");
 						if (attr)
 						{
-							std::string style_str = attr->ValueString();
+							std::string const & style_str = attr->ValueString();
 							if ("single" == style_str)
 							{
 								style = UIListBox::SINGLE_SELECTION;

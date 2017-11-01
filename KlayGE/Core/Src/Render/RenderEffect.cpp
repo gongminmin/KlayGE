@@ -742,8 +742,7 @@ namespace
 				bool tmp = false;
 				if (attr)
 				{
-					std::string value_str = attr->ValueString();
-					tmp = BoolFromStr(value_str);
+					tmp = BoolFromStr(attr->ValueString());
 				}
 
 				var = MakeUniquePtr<RenderVariableBool>();
@@ -774,7 +773,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
@@ -815,7 +814,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
@@ -882,46 +881,43 @@ namespace
 					std::string name = state_node->Attrib("name")->ValueString();
 					size_t const name_hash = RT_HASH(name.c_str());
 
+					XMLAttributePtr value_attr = state_node->Attrib("value");
+
 					if (CT_HASH("filtering") == name_hash)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
-						desc.filter = texture_filter_mode_define::instance().FromStr(value_str);
+						desc.filter = texture_filter_mode_define::instance().FromStr(value_attr->ValueString());
 					}
 					else if (CT_HASH("address_u") == name_hash)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
-						desc.addr_mode_u = texture_addr_mode_define::instance().FromStr(value_str);
+						desc.addr_mode_u = texture_addr_mode_define::instance().FromStr(value_attr->ValueString());
 					}
 					else if (CT_HASH("address_v") == name_hash)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
-						desc.addr_mode_v = texture_addr_mode_define::instance().FromStr(value_str);
+						desc.addr_mode_v = texture_addr_mode_define::instance().FromStr(value_attr->ValueString());
 					}
 					else if (CT_HASH("address_w") == name_hash)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
-						desc.addr_mode_w = texture_addr_mode_define::instance().FromStr(value_str);
+						desc.addr_mode_w = texture_addr_mode_define::instance().FromStr(value_attr->ValueString());
 					}
 					else if (CT_HASH("max_anisotropy") == name_hash)
 					{
-						desc.max_anisotropy = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
+						desc.max_anisotropy = static_cast<uint8_t>(value_attr->ValueUInt());
 					}
 					else if (CT_HASH("min_lod") == name_hash)
 					{
-						desc.min_lod = state_node->Attrib("value")->ValueFloat();
+						desc.min_lod = value_attr->ValueFloat();
 					}
 					else if (CT_HASH("max_lod") == name_hash)
 					{
-						desc.max_lod = state_node->Attrib("value")->ValueFloat();
+						desc.max_lod = value_attr->ValueFloat();
 					}
 					else if (CT_HASH("mip_map_lod_bias") == name_hash)
 					{
-						desc.mip_map_lod_bias = state_node->Attrib("value")->ValueFloat();
+						desc.mip_map_lod_bias = value_attr->ValueFloat();
 					}
 					else if (CT_HASH("cmp_func") == name_hash)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
-						desc.cmp_func = compare_function_define::instance().FromStr(value_str);
+						desc.cmp_func = compare_function_define::instance().FromStr(value_attr->ValueString());
 					}
 					else if (CT_HASH("border_clr") == name_hash)
 					{
@@ -991,7 +987,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0.0f);
@@ -1037,7 +1033,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
@@ -1091,7 +1087,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
@@ -1150,7 +1146,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
@@ -1199,7 +1195,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
@@ -1253,7 +1249,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
@@ -1312,7 +1308,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
@@ -1361,7 +1357,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), float2(0, 0));
@@ -1415,7 +1411,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), float3(0, 0, 0));
@@ -1474,7 +1470,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
@@ -1525,7 +1521,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string value_str = value_node->ValueString();
+						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
@@ -2916,7 +2912,8 @@ namespace KlayGE
 		{
 			XMLAttributePtr attr = node->Attrib("name");
 			BOOST_ASSERT(attr);
-			std::string include_name = attr->ValueString();
+
+			std::string const & include_name = attr->ValueString();
 
 			include_docs.push_back(MakeUniquePtr<XMLDocument>());
 			XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
@@ -2983,7 +2980,7 @@ namespace KlayGE
 			XMLAttributePtr attr = node->Attrib("name");
 			BOOST_ASSERT(attr);
 
-			std::string include_name = attr->ValueString();
+			std::string const & include_name = attr->ValueString();
 
 			XMLDocument include_doc;
 			XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
@@ -3863,7 +3860,7 @@ namespace KlayGE
 		XMLAttributePtr inherit_attr = node->Attrib("inherit");
 		if (inherit_attr)
 		{
-			std::string inherit = inherit_attr->ValueString();
+			std::string const & inherit = inherit_attr->ValueString();
 			BOOST_ASSERT(inherit != name_);
 
 			parent_tech = effect.TechniqueByName(inherit);
@@ -4132,8 +4129,6 @@ namespace KlayGE
 	void RenderPass::Load(RenderEffect& effect, XMLNodePtr const & node,
 		uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
 		name_ = node->Attrib("name")->ValueString();
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
@@ -4235,117 +4230,101 @@ namespace KlayGE
 			std::string state_name = state_node->Attrib("name")->ValueString();
 			size_t const state_name_hash = RT_HASH(state_name.c_str());
 
+			XMLAttributePtr value_attr = state_node->Attrib("value");
+
 			if (CT_HASH("polygon_mode") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.polygon_mode = polygon_mode_define::instance().FromStr(value_str);
+				rs_desc.polygon_mode = polygon_mode_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("shade_mode") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.shade_mode = shade_mode_define::instance().FromStr(value_str);
+				rs_desc.shade_mode = shade_mode_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("cull_mode") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.cull_mode = cull_mode_define::instance().FromStr(value_str);
+				rs_desc.cull_mode = cull_mode_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_face_ccw") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.front_face_ccw = BoolFromStr(value_str);
+				rs_desc.front_face_ccw = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("polygon_offset_factor") == state_name_hash)
 			{
-				rs_desc.polygon_offset_factor = state_node->Attrib("value")->ValueFloat();
+				rs_desc.polygon_offset_factor = value_attr->ValueFloat();
 			}
 			else if (CT_HASH("polygon_offset_units") == state_name_hash)
 			{
-				rs_desc.polygon_offset_units = state_node->Attrib("value")->ValueFloat();
+				rs_desc.polygon_offset_units = value_attr->ValueFloat();
 			}
 			else if (CT_HASH("depth_clip_enable") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.depth_clip_enable = BoolFromStr(value_str);
+				rs_desc.depth_clip_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("scissor_enable") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.scissor_enable = BoolFromStr(value_str);
+				rs_desc.scissor_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("multisample_enable") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				rs_desc.multisample_enable = BoolFromStr(value_str);
+				rs_desc.multisample_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("alpha_to_coverage_enable") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.alpha_to_coverage_enable = BoolFromStr(value_str);
+				bs_desc.alpha_to_coverage_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("independent_blend_enable") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.independent_blend_enable = BoolFromStr(value_str);
+				bs_desc.independent_blend_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("blend_enable") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.blend_enable[index] = BoolFromStr(value_str);
+				bs_desc.blend_enable[index] = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("logic_op_enable") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.logic_op_enable[index] = BoolFromStr(value_str);
+				bs_desc.logic_op_enable[index] = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("blend_op") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.blend_op[index] = blend_operation_define::instance().FromStr(value_str);
+				bs_desc.blend_op[index] = blend_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("src_blend") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.src_blend[index] = alpha_blend_factor_define::instance().FromStr(value_str);
+				bs_desc.src_blend[index] = alpha_blend_factor_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("dest_blend") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.dest_blend[index] = alpha_blend_factor_define::instance().FromStr(value_str);
+				bs_desc.dest_blend[index] = alpha_blend_factor_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("blend_op_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.blend_op_alpha[index] = blend_operation_define::instance().FromStr(value_str);
+				bs_desc.blend_op_alpha[index] = blend_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("src_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.src_blend_alpha[index] = alpha_blend_factor_define::instance().FromStr(value_str);
+				bs_desc.src_blend_alpha[index] = alpha_blend_factor_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("dest_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().FromStr(value_str);
+				bs_desc.dest_blend_alpha[index] = alpha_blend_factor_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("logic_op") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				bs_desc.logic_op[index] = logic_operation_define::instance().FromStr(value_str);
+				bs_desc.logic_op[index] = logic_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("color_write_mask") == state_name_hash)
 			{
 				int index = get_index(state_node);
-				bs_desc.color_write_mask[index] = static_cast<uint8_t>(state_node->Attrib("value")->ValueUInt());
+				bs_desc.color_write_mask[index] = static_cast<uint8_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("blend_factor") == state_name_hash)
 			{
@@ -4372,92 +4351,83 @@ namespace KlayGE
 			}
 			else if (CT_HASH("sample_mask") == state_name_hash)
 			{
-				bs_desc.sample_mask = state_node->Attrib("value")->ValueUInt();
+				bs_desc.sample_mask = value_attr->ValueUInt();
 			}
 			else if (CT_HASH("depth_enable") == state_name_hash)
 			{
-				dss_desc.depth_enable = BoolFromStr(state_node->Attrib("value")->ValueString());
+				dss_desc.depth_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("depth_write_mask") == state_name_hash)
 			{
-				dss_desc.depth_write_mask = BoolFromStr(state_node->Attrib("value")->ValueString());
+				dss_desc.depth_write_mask = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("depth_func") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.depth_func = compare_function_define::instance().FromStr(value_str);
+				dss_desc.depth_func = compare_function_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_stencil_enable") == state_name_hash)
 			{
-				dss_desc.front_stencil_enable = BoolFromStr(state_node->Attrib("value")->ValueString());
+				dss_desc.front_stencil_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_stencil_func") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.front_stencil_func = compare_function_define::instance().FromStr(value_str);
+				dss_desc.front_stencil_func = compare_function_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_stencil_ref") == state_name_hash)
 			{
-				dss_desc.front_stencil_ref = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.front_stencil_ref = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("front_stencil_read_mask") == state_name_hash)
 			{
-				dss_desc.front_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.front_stencil_read_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("front_stencil_write_mask") == state_name_hash)
 			{
-				dss_desc.front_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.front_stencil_write_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("front_stencil_fail") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.front_stencil_fail = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.front_stencil_fail = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_stencil_depth_fail") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.front_stencil_depth_fail = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.front_stencil_depth_fail = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("front_stencil_pass") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.front_stencil_pass = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.front_stencil_pass = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("back_stencil_enable") == state_name_hash)
 			{
-				dss_desc.back_stencil_enable = BoolFromStr(state_node->Attrib("value")->ValueString());
+				dss_desc.back_stencil_enable = BoolFromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("back_stencil_func") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.back_stencil_func = compare_function_define::instance().FromStr(value_str);
+				dss_desc.back_stencil_func = compare_function_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("back_stencil_ref") == state_name_hash)
 			{
-				dss_desc.back_stencil_ref = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.back_stencil_ref = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("back_stencil_read_mask") == state_name_hash)
 			{
-				dss_desc.back_stencil_read_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.back_stencil_read_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("back_stencil_write_mask") == state_name_hash)
 			{
-				dss_desc.back_stencil_write_mask = static_cast<uint16_t>(state_node->Attrib("value")->ValueUInt());
+				dss_desc.back_stencil_write_mask = static_cast<uint16_t>(value_attr->ValueUInt());
 			}
 			else if (CT_HASH("back_stencil_fail") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.back_stencil_fail = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.back_stencil_fail = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("back_stencil_depth_fail") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.back_stencil_depth_fail = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.back_stencil_depth_fail = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if (CT_HASH("back_stencil_pass") == state_name_hash)
 			{
-				std::string value_str = state_node->Attrib("value")->ValueString();
-				dss_desc.back_stencil_pass = stencil_operation_define::instance().FromStr(value_str);
+				dss_desc.back_stencil_pass = stencil_operation_define::instance().FromStr(value_attr->ValueString());
 			}
 			else if ((CT_HASH("vertex_shader") == state_name_hash) || (CT_HASH("pixel_shader") == state_name_hash)
 				|| (CT_HASH("geometry_shader") == state_name_hash) || (CT_HASH("compute_shader") == state_name_hash)
@@ -4560,7 +4530,7 @@ namespace KlayGE
 							std::string component_str;
 							if (attr)
 							{
-								component_str = entry_node->Attrib("component")->ValueString();
+								component_str = attr->ValueString();
 							}
 							else
 							{
@@ -4572,7 +4542,7 @@ namespace KlayGE
 							attr = entry_node->Attrib("slot");
 							if (attr)
 							{
-								decl.slot = static_cast<uint8_t>(entry_node->Attrib("slot")->ValueInt());
+								decl.slot = static_cast<uint8_t>(attr->ValueInt());
 							}
 							else
 							{
@@ -4592,6 +4562,7 @@ namespace KlayGE
 			}
 		}
 
+		auto& rf = Context::Instance().RenderFactoryInstance();
 		render_state_obj_ = rf.MakeRenderStateObject(rs_desc, dss_desc, bs_desc);
 
 		auto const & shader_obj = this->GetShaderObject(effect);
@@ -5281,7 +5252,7 @@ namespace KlayGE
 		XMLAttributePtr attr = node->Attrib("type");
 		if (attr)
 		{
-			std::string type_str = attr->ValueString();
+			std::string const & type_str = attr->ValueString();
 			size_t const type_str_hash = RT_HASH(type_str.c_str());
 			if (CT_HASH("vertex_shader") == type_str_hash)
 			{
@@ -5305,7 +5276,7 @@ namespace KlayGE
 			}
 			else
 			{
-				BOOST_ASSERT("domain_shader" == type_str);
+				BOOST_ASSERT(CT_HASH("domain_shader") == type_str_hash);
 				type_ = ShaderObject::ST_DomainShader;
 			}
 		}

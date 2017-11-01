@@ -74,6 +74,18 @@
 namespace
 {
 	std::mutex singleton_mutex;
+
+	bool BoolFromStr(std::string_view name)
+	{
+		if (("true" == name) || ("1" == name))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 namespace KlayGE
@@ -403,28 +415,12 @@ namespace KlayGE
 			attr = frame_node->Attrib("fullscreen");
 			if (attr)
 			{
-				std::string const & fs_str = attr->ValueString();
-				if (("1" == fs_str) || ("true" == fs_str))
-				{
-					full_screen = true;
-				}
-				else
-				{
-					full_screen = false;
-				}
+				full_screen = BoolFromStr(attr->ValueString());
 			}
 			attr = frame_node->Attrib("keep_screen_on");
 			if (attr)
 			{
-				std::string const & kso_str = attr->ValueString();
-				if (("1" == kso_str) || ("true" == kso_str))
-				{
-					keep_screen_on = true;
-				}
-				else
-				{
-					keep_screen_on = false;
-				}
+				keep_screen_on = BoolFromStr(attr->ValueString());
 			}
 
 			size_t const color_fmt_str_hash = RT_HASH(color_fmt_str.c_str());
@@ -486,15 +482,7 @@ namespace KlayGE
 			attr = hdr_node->Attrib("value");
 			if (attr)
 			{
-				std::string const & hdr_str = attr->ValueString();
-				if (("1" == hdr_str) || ("true" == hdr_str))
-				{
-					hdr = true;
-				}
-				else
-				{
-					hdr = false;
-				}
+				hdr = BoolFromStr(attr->ValueString());
 			}
 			attr = hdr_node->Attrib("bloom");
 			if (attr)
@@ -504,60 +492,28 @@ namespace KlayGE
 			attr = hdr_node->Attrib("blue_shift");
 			if (attr)
 			{
-				std::string const & blue_shift_str = attr->ValueString();
-				if (("1" == blue_shift_str) || ("true" == blue_shift_str))
-				{
-					blue_shift = true;
-				}
-				else
-				{
-					blue_shift = false;
-				}
+				blue_shift = BoolFromStr(attr->ValueString());
 			}
 
 			XMLNodePtr ppaa_node = graphics_node->FirstNode("ppaa");
 			attr = ppaa_node->Attrib("value");
 			if (attr)
 			{
-				std::string const & ppaa_str = attr->ValueString();
-				if (("1" == ppaa_str) || ("true" == ppaa_str))
-				{
-					ppaa = true;
-				}
-				else
-				{
-					ppaa = false;
-				}
+				ppaa = BoolFromStr(attr->ValueString());
 			}
 
 			XMLNodePtr gamma_node = graphics_node->FirstNode("gamma");
 			attr = gamma_node->Attrib("value");
 			if (attr)
 			{
-				std::string const & gamma_str = attr->ValueString();
-				if (("1" == gamma_str) || ("true" == gamma_str))
-				{
-					gamma = true;
-				}
-				else
-				{
-					gamma = false;
-				}
+				gamma = BoolFromStr(attr->ValueString());
 			}
 
 			XMLNodePtr color_grading_node = graphics_node->FirstNode("color_grading");
 			attr = color_grading_node->Attrib("value");
 			if (attr)
 			{
-				std::string const & color_grading_str = attr->ValueString();
-				if (("1" == color_grading_str) || ("true" == color_grading_str))
-				{
-					color_grading = true;
-				}
-				else
-				{
-					color_grading = false;
-				}
+				color_grading = BoolFromStr(attr->ValueString());
 			}
 
 			XMLNodePtr stereo_node = graphics_node->FirstNode("stereo");
@@ -652,12 +608,9 @@ namespace KlayGE
 			{
 				paper_white = display_max_luminance = 100;
 			}
-			else
+			else if ((color_fmt == EF_ARGB8) || (color_fmt == EF_ABGR8))
 			{
-				if ((color_fmt == EF_ARGB8) || (color_fmt == EF_ABGR8))
-				{
-					color_fmt = EF_A2BGR10;
-				}
+				color_fmt = EF_A2BGR10;
 			}
 
 			XMLNodePtr options_node = graphics_node->FirstNode("options");
