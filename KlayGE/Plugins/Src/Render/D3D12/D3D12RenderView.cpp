@@ -55,7 +55,7 @@ namespace KlayGE
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateShaderResourceView(res->D3DResource().get(), &srv_desc, handle_);
+		device->CreateShaderResourceView(res_->D3DResource().get(), &srv_desc, handle_);
 	}
 
 	D3D12ShaderResourceViewSimulation::~D3D12ShaderResourceViewSimulation()
@@ -77,7 +77,7 @@ namespace KlayGE
 
 		handle_ = re.RTVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocRTV();
-		device->CreateRenderTargetView(res->D3DResource().get(), &rtv_desc, handle_);
+		device->CreateRenderTargetView(res_->D3DResource().get(), &rtv_desc, handle_);
 	}
 
 	D3D12RenderTargetViewSimulation::~D3D12RenderTargetViewSimulation()
@@ -99,7 +99,7 @@ namespace KlayGE
 
 		handle_ = re.DSVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocDSV();
-		device->CreateDepthStencilView(res->D3DResource().get(), &dsv_desc, handle_);
+		device->CreateDepthStencilView(res_->D3DResource().get(), &dsv_desc, handle_);
 	}
 
 	D3D12DepthStencilViewSimulation::~D3D12DepthStencilViewSimulation()
@@ -125,13 +125,13 @@ namespace KlayGE
 			counter_offset_ = static_cast<uint32_t>(uav_desc.Buffer.CounterOffsetInBytes);
 			if (counter_offset_ != 0)
 			{
-				counter = res->D3DResource().get();
+				counter = res_->D3DResource().get();
 			}
 		}
 
 		handle_ = re.CBVSRVUAVDescHeap()->GetCPUDescriptorHandleForHeapStart();
 		handle_.ptr += re.AllocCBVSRVUAV();
-		device->CreateUnorderedAccessView(res->D3DResource().get(), counter, &uav_desc, handle_);
+		device->CreateUnorderedAccessView(res_->D3DResource().get(), counter, &uav_desc, handle_);
 	}
 
 	D3D12UnorderedAccessViewSimulation::~D3D12UnorderedAccessViewSimulation()

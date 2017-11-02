@@ -1,7 +1,7 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Math.hpp>
 
-#include <gtest/gtest.h>
+#include "KlayGETests.hpp"
 
 #include <vector>
 #include <string>

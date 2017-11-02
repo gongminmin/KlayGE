@@ -12,9 +12,6 @@ DOWNLOAD_FILE("KlayGE/Tests/media/uffizi_probe_bc6s.dds" "cbda47a1678ce70b672085
 
 IF(NOT KLAYGE_COMPILER_MSVC)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-	IF(KLAYGE_COMPILER_CLANGC2)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value -Wno-unknown-pragmas")
-	ENDIF()
 ENDIF()
 
 SET(SOURCE_FILES

@@ -2,7 +2,7 @@
 #include <KFL/Math.hpp>
 #include <KFL/SIMDMath.hpp>
 
-#include <gtest/gtest.h>
+#include "KlayGETests.hpp"
 
 #include <vector>
 #include <string>

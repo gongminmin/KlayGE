@@ -2,7 +2,7 @@
 #include <KFL/Util.hpp>
 #include <KFL/Hash.hpp>
 
-#include <gtest/gtest.h>
+#include "KlayGETests.hpp"
 
 using namespace std;
 using namespace KlayGE;
