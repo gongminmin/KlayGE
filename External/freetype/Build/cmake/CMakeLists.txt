@@ -29,13 +29,14 @@ SET(PACKAGE_FILE_ID "fd422b83bb810ace5fd09ffcc265fd7f6a6d37db")
 
 DOWNLOAD_PACKAGE("freetype" ${REL_PATH} ${PACKAGE_COMMIT_ID} ${PACKAGE_FILE_ID} "README")
 
-IF(KLAYGE_COMPILER_MSVC)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX-")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX-")
-ELSE()
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-error")
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
-ENDIF()
+FOREACH(flag_var
+		CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
+	IF(KLAYGE_COMPILER_MSVC)
+		STRING(REPLACE "/WX" "/WX-" ${flag_var} "${${flag_var}}")
+	ELSE()
+		STRING(REPLACE "-Werror" "-Wno-error" ${flag_var} "${${flag_var}}")
+	ENDIF()
+ENDFOREACH()
 
 # The project settings
 
