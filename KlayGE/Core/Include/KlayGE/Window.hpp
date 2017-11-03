@@ -211,6 +211,10 @@ namespace KlayGE
 		{
 			return dpi_scale_;
 		}
+		float EffectiveDPIScale() const
+		{
+			return effective_dpi_scale_;
+		}
 
 		WindowRotation Rotation() const
 		{
@@ -367,6 +371,9 @@ namespace KlayGE
 		PointerWheelEvent pointer_wheel_event_;
 		CloseEvent close_event_;
 
+	private:
+		void UpdateDpiScale(float scale);
+
 #if defined KLAYGE_PLATFORM_WINDOWS
 #if defined KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	private:
@@ -381,7 +388,7 @@ namespace KlayGE
 		void DetectsOrientation();
 #endif
 
-		void DetectsDPI();
+		void DetectsDpi();
 #elif defined KLAYGE_PLATFORM_LINUX
 	public:
 		void MsgProc(XEvent const & event);
@@ -403,6 +410,7 @@ namespace KlayGE
 		bool keep_screen_on_;
 
 		float dpi_scale_;
+		float effective_dpi_scale_;
 		WindowRotation win_rotation_;
 
 #if defined KLAYGE_PLATFORM_WINDOWS

@@ -43,7 +43,8 @@
 namespace KlayGE
 {
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on), dpi_scale_(1), win_rotation_(WR_Identity)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		a_window_ = nullptr;
 
@@ -89,7 +90,8 @@ namespace KlayGE
 	}
 
 	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on), dpi_scale_(1), win_rotation_(WR_Identity)
+		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		a_window_ = static_cast<ANativeWindow*>(native_wnd);
 

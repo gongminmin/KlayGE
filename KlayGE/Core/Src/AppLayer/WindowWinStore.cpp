@@ -63,7 +63,7 @@ namespace KlayGE
 {
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), win_rotation_(WR_Identity)
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		Convert(wname_, name);
 
@@ -76,7 +76,7 @@ namespace KlayGE
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), win_rotation_(WR_Identity)
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		KFL_UNUSED(native_wnd);
 
@@ -107,7 +107,7 @@ namespace KlayGE
 		left_ = 0;
 		top_ = 0;
 		
-		this->DetectsDPI();
+		this->DetectsDpi();
 		this->DetectsOrientation();
 
 		ComPtr<IApplicationViewStatics> app_view_stat;
@@ -138,7 +138,7 @@ namespace KlayGE
 		ready_ = true;
 	}
 
-	void Window::DetectsDPI()
+	void Window::DetectsDpi()
 	{
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
 		TIFHR(GetActivationFactory(HStringReference(RuntimeClass_Windows_Graphics_Display_DisplayInformation).Get(),
@@ -150,7 +150,7 @@ namespace KlayGE
 		float dpi;
 		TIFHR(disp_info->get_LogicalDpi(&dpi));
 
-		dpi_scale_ = dpi / 96;
+		this->UpdateDpiScale(dpi / 96);
 	}
 
 	void Window::DetectsOrientation()
@@ -450,7 +450,7 @@ namespace KlayGE
 		size.Width = static_cast<float>(width_ / dpi_scale_);
 		size.Height = static_cast<float>(height_ / dpi_scale_);
 
-		this->DetectsDPI();
+		this->DetectsDpi();
 
 		ComPtr<IApplicationViewStatics> app_view_stat;
 		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);

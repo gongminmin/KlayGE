@@ -87,7 +87,7 @@ namespace KlayGE
 				if (S_OK == DynamicGetDpiForMonitor(mon, MDT_DEFAULT, &dpi_x, &dpi_y))
 				{
 					Window* win = reinterpret_cast<Window*>(lparam);
-					win->dpi_scale_ = std::max(win->dpi_scale_, static_cast<float>(std::max(dpi_x, dpi_y)) / USER_DEFAULT_SCREEN_DPI);
+					win->UpdateDpiScale(std::max(win->dpi_scale_, static_cast<float>(std::max(dpi_x, dpi_y)) / USER_DEFAULT_SCREEN_DPI));
 				}
 			}
 
@@ -100,9 +100,9 @@ namespace KlayGE
 
 	Window::Window(std::string const & name, RenderSettings const & settings)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
-		this->DetectsDPI();
+		this->DetectsDpi();
 		this->KeepScreenOn();
 
 		HINSTANCE hInst = ::GetModuleHandle(nullptr);
@@ -167,9 +167,9 @@ namespace KlayGE
 
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
+			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
 	{
-		this->DetectsDPI();
+		this->DetectsDpi();
 		this->KeepScreenOn();
 
 		Convert(wname_, name);
@@ -341,7 +341,7 @@ namespace KlayGE
 				rc.right = static_cast<uint32_t>(rc.right / dpi_scale_ + 0.5f);
 				rc.bottom = static_cast<uint32_t>(rc.bottom / dpi_scale_ + 0.5f);
 
-				dpi_scale_ = static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI;
+				this->UpdateDpiScale(static_cast<float>(HIWORD(wParam)) / USER_DEFAULT_SCREEN_DPI);
 
 				rc.left = static_cast<int32_t>(rc.left * dpi_scale_ + 0.5f);
 				rc.top = static_cast<int32_t>(rc.top * dpi_scale_ + 0.5f);
@@ -382,7 +382,7 @@ namespace KlayGE
 		return default_wnd_proc_(hWnd, uMsg, wParam, lParam);
 	}
 
-	void Window::DetectsDPI()
+	void Window::DetectsDpi()
 	{
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 		HMODULE shcore = ::LoadLibraryEx(TEXT("SHCore.dll"), nullptr, 0);
