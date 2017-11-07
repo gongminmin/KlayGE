@@ -37,6 +37,9 @@
 
 #include <DXBC2GLSL/GLSLGen.hpp>
 
+#include <KFL/CXX17.hpp>
+#include <KFL/CXX17/iterator.hpp>
+
 #include <string>
 #include <ostream>
 
@@ -56,12 +59,14 @@ namespace
 		"430",
 		"440",
 		"450",
+		"460",
 
 		"100",
 		"300 es",
 		"310 es",
 		"320 es"
 	};
+	KLAYGE_STATIC_ASSERT(GSV_NumVersions == std::size(GLSLVersionStr));
 
 
 	uint32_t bitcount32(uint32_t x)
