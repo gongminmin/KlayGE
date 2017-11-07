@@ -45,6 +45,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/ResLoader.hpp>
@@ -100,9 +101,9 @@ namespace
 		uint32_t TypeCode(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < types_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(types_); ++ i)
 			{
-				if (types_hash_[i] == name_hash)
+				if (types_[i].second == name_hash)
 				{
 					return i;
 				}
@@ -111,75 +112,68 @@ namespace
 			KFL_UNREACHABLE("Invalid type name");
 		}
 
-		std::string const & TypeName(uint32_t code) const
+		std::string_view TypeName(uint32_t code) const
 		{
-			if (code < types_.size())
+			if (code < std::size(types_))
 			{
-				return types_[code];
+				return types_[code].first;
 			}
 
 			KFL_UNREACHABLE("Invalid type code");
 		}
 
-		type_define()
-		{
-			types_.push_back("bool");
-			types_.push_back("string");
-			types_.push_back("texture1D");
-			types_.push_back("texture2D");
-			types_.push_back("texture3D");
-			types_.push_back("textureCUBE");
-			types_.push_back("texture1DArray");
-			types_.push_back("texture2DArray");
-			types_.push_back("texture3DArray");
-			types_.push_back("textureCUBEArray");
-			types_.push_back("sampler");
-			types_.push_back("shader");
-			types_.push_back("uint");
-			types_.push_back("uint2");
-			types_.push_back("uint3");
-			types_.push_back("uint4");
-			types_.push_back("int");
-			types_.push_back("int2");
-			types_.push_back("int3");
-			types_.push_back("int4");
-			types_.push_back("float");
-			types_.push_back("float2");
-			types_.push_back("float2x2");
-			types_.push_back("float2x3");
-			types_.push_back("float2x4");
-			types_.push_back("float3");
-			types_.push_back("float3x2");
-			types_.push_back("float3x3");
-			types_.push_back("float3x4");
-			types_.push_back("float4");
-			types_.push_back("float4x2");
-			types_.push_back("float4x3");
-			types_.push_back("float4x4");
-			types_.push_back("buffer");
-			types_.push_back("structured_buffer");
-			types_.push_back("byte_address_buffer");
-			types_.push_back("rw_buffer");
-			types_.push_back("rw_structured_buffer");
-			types_.push_back("rw_texture1D");
-			types_.push_back("rw_texture2D");
-			types_.push_back("rw_texture3D");
-			types_.push_back("rw_texture1DArray");
-			types_.push_back("rw_texture2DArray");
-			types_.push_back("rw_byte_address_buffer");
-			types_.push_back("append_structured_buffer");
-			types_.push_back("consume_structured_buffer");
-
-			types_hash_.resize(types_.size());
-			for (size_t i = 0; i < types_.size(); ++ i)
-			{
-				types_hash_[i] = RT_HASH(types_[i].c_str());
-			}
-		}
-
 	private:
-		std::vector<std::string> types_;
-		std::vector<size_t> types_hash_;
+#define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
+		static std::pair<char const *, size_t> constexpr types_[] =
+		{
+			NAME_AND_HASH("bool"),
+			NAME_AND_HASH("string"),
+			NAME_AND_HASH("texture1D"),
+			NAME_AND_HASH("texture2D"),
+			NAME_AND_HASH("texture3D"),
+			NAME_AND_HASH("textureCUBE"),
+			NAME_AND_HASH("texture1DArray"),
+			NAME_AND_HASH("texture2DArray"),
+			NAME_AND_HASH("texture3DArray"),
+			NAME_AND_HASH("textureCUBEArray"),
+			NAME_AND_HASH("sampler"),
+			NAME_AND_HASH("shader"),
+			NAME_AND_HASH("uint"),
+			NAME_AND_HASH("uint2"),
+			NAME_AND_HASH("uint3"),
+			NAME_AND_HASH("uint4"),
+			NAME_AND_HASH("int"),
+			NAME_AND_HASH("int2"),
+			NAME_AND_HASH("int3"),
+			NAME_AND_HASH("int4"),
+			NAME_AND_HASH("float"),
+			NAME_AND_HASH("float2"),
+			NAME_AND_HASH("float2x2"),
+			NAME_AND_HASH("float2x3"),
+			NAME_AND_HASH("float2x4"),
+			NAME_AND_HASH("float3"),
+			NAME_AND_HASH("float3x2"),
+			NAME_AND_HASH("float3x3"),
+			NAME_AND_HASH("float3x4"),
+			NAME_AND_HASH("float4"),
+			NAME_AND_HASH("float4x2"),
+			NAME_AND_HASH("float4x3"),
+			NAME_AND_HASH("float4x4"),
+			NAME_AND_HASH("buffer"),
+			NAME_AND_HASH("structured_buffer"),
+			NAME_AND_HASH("byte_address_buffer"),
+			NAME_AND_HASH("rw_buffer"),
+			NAME_AND_HASH("rw_structured_buffer"),
+			NAME_AND_HASH("rw_texture1D"),
+			NAME_AND_HASH("rw_texture2D"),
+			NAME_AND_HASH("rw_texture3D"),
+			NAME_AND_HASH("rw_texture1DArray"),
+			NAME_AND_HASH("rw_texture2DArray"),
+			NAME_AND_HASH("rw_byte_address_buffer"),
+			NAME_AND_HASH("append_structured_buffer"),
+			NAME_AND_HASH("consume_structured_buffer")
+		};
+#undef NAME_AND_HASH
 
 		static std::unique_ptr<type_define> instance_;
 	};
@@ -204,7 +198,7 @@ namespace
 		ShadeMode FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < sms_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(sms_hash_); ++ i)
 			{
 				if (sms_hash_[i] == name_hash)
 				{
@@ -215,14 +209,12 @@ namespace
 			KFL_UNREACHABLE("Invalid ShadeMode name");
 		}
 
-		shade_mode_define()
-		{
-			sms_hash_.push_back(CT_HASH("flat"));
-			sms_hash_.push_back(CT_HASH("gouraud"));
-		}
-
 	private:
-		std::vector<size_t> sms_hash_;
+		static size_t constexpr sms_hash_[] = 
+		{
+			CT_HASH("flat"),
+			CT_HASH("gouraud")
+		};
 
 		static std::unique_ptr<shade_mode_define> instance_;
 	};
@@ -247,7 +239,7 @@ namespace
 		CompareFunction FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < cfs_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(cfs_hash_); ++ i)
 			{
 				if (cfs_hash_[i] == name_hash)
 				{
@@ -258,20 +250,18 @@ namespace
 			KFL_UNREACHABLE("Invalid CompareFunction name");
 		}
 
-		compare_function_define()
-		{
-			cfs_hash_.push_back(CT_HASH("always_fail"));
-			cfs_hash_.push_back(CT_HASH("always_pass"));
-			cfs_hash_.push_back(CT_HASH("less"));
-			cfs_hash_.push_back(CT_HASH("less_equal"));
-			cfs_hash_.push_back(CT_HASH("equal"));
-			cfs_hash_.push_back(CT_HASH("not_equal"));
-			cfs_hash_.push_back(CT_HASH("greater_equal"));
-			cfs_hash_.push_back(CT_HASH("greater"));
-		}
-
 	private:
-		std::vector<size_t> cfs_hash_;
+		static size_t constexpr cfs_hash_[] =
+		{
+			CT_HASH("always_fail"),
+			CT_HASH("always_pass"),
+			CT_HASH("less"),
+			CT_HASH("less_equal"),
+			CT_HASH("equal"),
+			CT_HASH("not_equal"),
+			CT_HASH("greater_equal"),
+			CT_HASH("greater")
+		};
 
 		static std::unique_ptr<compare_function_define> instance_;
 	};
@@ -296,7 +286,7 @@ namespace
 		CullMode FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < cms_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(cms_hash_); ++ i)
 			{
 				if (cms_hash_[i] == name_hash)
 				{
@@ -307,15 +297,13 @@ namespace
 			KFL_UNREACHABLE("Invalid CullMode name");
 		}
 
-		cull_mode_define()
-		{
-			cms_hash_.push_back(CT_HASH("none"));
-			cms_hash_.push_back(CT_HASH("front"));
-			cms_hash_.push_back(CT_HASH("back"));
-		}
-
 	private:
-		std::vector<size_t> cms_hash_;
+		static size_t constexpr cms_hash_[] =
+		{
+			CT_HASH("none"),
+			CT_HASH("front"),
+			CT_HASH("back")
+		};
 
 		static std::unique_ptr<cull_mode_define> instance_;
 	};
@@ -340,7 +328,7 @@ namespace
 		PolygonMode FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < pms_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(pms_hash_); ++ i)
 			{
 				if (pms_hash_[i] == name_hash)
 				{
@@ -351,15 +339,13 @@ namespace
 			KFL_UNREACHABLE("Invalid PolygonMode name");
 		}
 
-		polygon_mode_define()
-		{
-			pms_hash_.push_back(CT_HASH("point"));
-			pms_hash_.push_back(CT_HASH("line"));
-			pms_hash_.push_back(CT_HASH("fill"));
-		}
-
 	private:
-		std::vector<size_t> pms_hash_;
+		static size_t constexpr pms_hash_[] =
+		{
+			CT_HASH("point"),
+			CT_HASH("line"),
+			CT_HASH("fill")
+		};
 
 		static std::unique_ptr<polygon_mode_define> instance_;
 	};
@@ -384,7 +370,7 @@ namespace
 		AlphaBlendFactor FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < abfs_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(abfs_hash_); ++ i)
 			{
 				if (abfs_hash_[i] == name_hash)
 				{
@@ -395,29 +381,27 @@ namespace
 			KFL_UNREACHABLE("Invalid AlphaBlendFactor name");
 		}
 
-		alpha_blend_factor_define()
-		{
-			abfs_hash_.push_back(CT_HASH("zero"));
-			abfs_hash_.push_back(CT_HASH("one"));
-			abfs_hash_.push_back(CT_HASH("src_alpha"));
-			abfs_hash_.push_back(CT_HASH("dst_alpha"));
-			abfs_hash_.push_back(CT_HASH("inv_src_alpha"));
-			abfs_hash_.push_back(CT_HASH("inv_dst_alpha"));
-			abfs_hash_.push_back(CT_HASH("src_color"));
-			abfs_hash_.push_back(CT_HASH("dst_color"));
-			abfs_hash_.push_back(CT_HASH("inv_src_color"));
-			abfs_hash_.push_back(CT_HASH("inv_dst_color"));
-			abfs_hash_.push_back(CT_HASH("src_alpha_sat"));
-			abfs_hash_.push_back(CT_HASH("blend_factor"));
-			abfs_hash_.push_back(CT_HASH("inv_blend_factor"));
-			abfs_hash_.push_back(CT_HASH("src1_alpha"));
-			abfs_hash_.push_back(CT_HASH("inv_src1_alpha"));
-			abfs_hash_.push_back(CT_HASH("src1_color"));
-			abfs_hash_.push_back(CT_HASH("inv_src1_color"));
-		}
-
 	private:
-		std::vector<size_t> abfs_hash_;
+		static size_t constexpr abfs_hash_[] =
+		{
+			CT_HASH("zero"),
+			CT_HASH("one"),
+			CT_HASH("src_alpha"),
+			CT_HASH("dst_alpha"),
+			CT_HASH("inv_src_alpha"),
+			CT_HASH("inv_dst_alpha"),
+			CT_HASH("src_color"),
+			CT_HASH("dst_color"),
+			CT_HASH("inv_src_color"),
+			CT_HASH("inv_dst_color"),
+			CT_HASH("src_alpha_sat"),
+			CT_HASH("blend_factor"),
+			CT_HASH("inv_blend_factor"),
+			CT_HASH("src1_alpha"),
+			CT_HASH("inv_src1_alpha"),
+			CT_HASH("src1_color"),
+			CT_HASH("inv_src1_color")
+		};
 
 		static std::unique_ptr<alpha_blend_factor_define> instance_;
 	};
@@ -442,7 +426,7 @@ namespace
 		BlendOperation FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < bops_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(bops_hash_); ++ i)
 			{
 				if (bops_hash_[i] == name_hash)
 				{
@@ -453,17 +437,15 @@ namespace
 			KFL_UNREACHABLE("Invalid BlendOperation name");
 		}
 
-		blend_operation_define()
-		{
-			bops_hash_.push_back(CT_HASH("add"));
-			bops_hash_.push_back(CT_HASH("sub"));
-			bops_hash_.push_back(CT_HASH("rev_sub"));
-			bops_hash_.push_back(CT_HASH("min"));
-			bops_hash_.push_back(CT_HASH("max"));
-		}
-
 	private:
-		std::vector<size_t> bops_hash_;
+		static size_t constexpr bops_hash_[] =
+		{
+			CT_HASH("add"),
+			CT_HASH("sub"),
+			CT_HASH("rev_sub"),
+			CT_HASH("min"),
+			CT_HASH("max")
+		};
 
 		static std::unique_ptr<blend_operation_define> instance_;
 	};
@@ -488,7 +470,7 @@ namespace
 		StencilOperation FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < sops_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(sops_hash_); ++ i)
 			{
 				if (sops_hash_[i] == name_hash)
 				{
@@ -499,20 +481,18 @@ namespace
 			KFL_UNREACHABLE("Invalid StencilOperation name");
 		}
 
-		stencil_operation_define()
-		{
-			sops_hash_.push_back(CT_HASH("keep"));
-			sops_hash_.push_back(CT_HASH("zero"));
-			sops_hash_.push_back(CT_HASH("replace"));
-			sops_hash_.push_back(CT_HASH("incr"));
-			sops_hash_.push_back(CT_HASH("decr"));
-			sops_hash_.push_back(CT_HASH("invert"));
-			sops_hash_.push_back(CT_HASH("incr_wrap"));
-			sops_hash_.push_back(CT_HASH("decr_wrap"));
-		}
-
 	private:
-		std::vector<size_t> sops_hash_;
+		static size_t constexpr sops_hash_[] =
+		{
+			CT_HASH("keep"),
+			CT_HASH("zero"),
+			CT_HASH("replace"),
+			CT_HASH("incr"),
+			CT_HASH("decr"),
+			CT_HASH("invert"),
+			CT_HASH("incr_wrap"),
+			CT_HASH("decr_wrap")
+		};
 
 		static std::unique_ptr<stencil_operation_define> instance_;
 	};
@@ -549,7 +529,7 @@ namespace
 				f = name;
 			}
 			size_t const f_hash = HashRange(f.begin(), f.end());
-			for (uint32_t i = 0; i < tfs_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(tfs_hash_); ++ i)
 			{
 				if (tfs_hash_[i] == f_hash)
 				{
@@ -564,20 +544,18 @@ namespace
 			KFL_UNREACHABLE("Invalid TexFilterOp name");
 		}
 
-		texture_filter_mode_define()
-		{
-			tfs_hash_.push_back(CT_HASH("min_mag_mip_point"));
-			tfs_hash_.push_back(CT_HASH("min_mag_point_mip_linear"));
-			tfs_hash_.push_back(CT_HASH("min_point_mag_linear_mip_point"));
-			tfs_hash_.push_back(CT_HASH("min_point_mag_mip_linear"));
-			tfs_hash_.push_back(CT_HASH("min_linear_mag_mip_point"));
-			tfs_hash_.push_back(CT_HASH("min_linear_mag_point_mip_linear"));
-			tfs_hash_.push_back(CT_HASH("min_mag_linear_mip_point"));
-			tfs_hash_.push_back(CT_HASH("min_mag_mip_linear"));
-		}
-
 	private:
-		std::vector<size_t> tfs_hash_;
+		static size_t constexpr tfs_hash_[] =
+		{
+			CT_HASH("min_mag_mip_point"),
+			CT_HASH("min_mag_point_mip_linear"),
+			CT_HASH("min_point_mag_linear_mip_point"),
+			CT_HASH("min_point_mag_mip_linear"),
+			CT_HASH("min_linear_mag_mip_point"),
+			CT_HASH("min_linear_mag_point_mip_linear"),
+			CT_HASH("min_mag_linear_mip_point"),
+			CT_HASH("min_mag_mip_linear")
+		};
 
 		static std::unique_ptr<texture_filter_mode_define> instance_;
 	};
@@ -602,7 +580,7 @@ namespace
 		TexAddressingMode FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < tams_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(tams_hash_); ++ i)
 			{
 				if (tams_hash_[i] == name_hash)
 				{
@@ -613,16 +591,14 @@ namespace
 			KFL_UNREACHABLE("Invalid TexAddressingMode name");
 		}
 
-		texture_addr_mode_define()
-		{
-			tams_hash_.push_back(CT_HASH("wrap"));
-			tams_hash_.push_back(CT_HASH("mirror"));
-			tams_hash_.push_back(CT_HASH("clamp"));
-			tams_hash_.push_back(CT_HASH("border"));
-		}
-
 	private:
-		std::vector<size_t> tams_hash_;
+		static size_t constexpr tams_hash_[] =
+		{
+			CT_HASH("wrap"),
+			CT_HASH("mirror"),
+			CT_HASH("clamp"),
+			CT_HASH("border")
+		};
 
 		static std::unique_ptr<texture_addr_mode_define> instance_;
 	};
@@ -647,7 +623,7 @@ namespace
 		LogicOperation FromStr(std::string_view name) const
 		{
 			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < lops_hash_.size(); ++ i)
+			for (uint32_t i = 0; i < std::size(lops_hash_); ++ i)
 			{
 				if (lops_hash_[i] == name_hash)
 				{
@@ -658,28 +634,26 @@ namespace
 			KFL_UNREACHABLE("Invalid LogicOperation name");
 		}
 
-		logic_operation_define()
-		{
-			lops_hash_.push_back(CT_HASH("clear"));
-			lops_hash_.push_back(CT_HASH("set"));
-			lops_hash_.push_back(CT_HASH("copy"));
-			lops_hash_.push_back(CT_HASH("copy_inverted"));
-			lops_hash_.push_back(CT_HASH("noop"));
-			lops_hash_.push_back(CT_HASH("invert"));
-			lops_hash_.push_back(CT_HASH("and"));
-			lops_hash_.push_back(CT_HASH("nand"));
-			lops_hash_.push_back(CT_HASH("or"));
-			lops_hash_.push_back(CT_HASH("nor"));
-			lops_hash_.push_back(CT_HASH("xor"));
-			lops_hash_.push_back(CT_HASH("equiv"));
-			lops_hash_.push_back(CT_HASH("and_reverse"));
-			lops_hash_.push_back(CT_HASH("and_inverted"));
-			lops_hash_.push_back(CT_HASH("or_reverse"));
-			lops_hash_.push_back(CT_HASH("or_inverted"));
-		}
-
 	private:
-		std::vector<size_t> lops_hash_;
+		static size_t constexpr lops_hash_[] =
+		{
+			CT_HASH("clear"),
+			CT_HASH("set"),
+			CT_HASH("copy"),
+			CT_HASH("copy_inverted"),
+			CT_HASH("noop"),
+			CT_HASH("invert"),
+			CT_HASH("and"),
+			CT_HASH("nand"),
+			CT_HASH("or"),
+			CT_HASH("nor"),
+			CT_HASH("xor"),
+			CT_HASH("equiv"),
+			CT_HASH("and_reverse"),
+			CT_HASH("and_inverted"),
+			CT_HASH("or_reverse"),
+			CT_HASH("or_inverted")
+		};
 
 		static std::unique_ptr<logic_operation_define> instance_;
 	};
@@ -3607,7 +3581,7 @@ namespace KlayGE
 					break;
 
 				default:
-					str += type_define::instance().TypeName(param.Type()) + " " + param.Name();
+					str += std::string(type_define::instance().TypeName(param.Type())) + " " + param.Name();
 					if (param.ArraySize())
 					{
 						str += "[" + *param.ArraySize() + "]";
