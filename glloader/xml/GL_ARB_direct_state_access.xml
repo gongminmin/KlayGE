@@ -412,7 +412,7 @@
 				<param type="GLboolean" name="fixedsamplelocations"/>
 			</params>
 		</function>
-		<function name="glTextureSubImage1DEXT" return="void">
+		<function name="glTextureSubImage1D" return="void">
 			<params>
 				<param type="GLuint" name="texture"/>
 				<param type="GLint" name="level"/>
@@ -423,7 +423,7 @@
 				<param type="const GLvoid*" name="pixels"/>
 			</params>
 		</function>
-		<function name="glTextureSubImage2DEXT" return="void">
+		<function name="glTextureSubImage2D" return="void">
 			<params>
 				<param type="GLuint" name="texture"/>
 				<param type="GLint" name="level"/>
@@ -546,14 +546,14 @@
 				<param type="GLint" name="param"/>
 			</params>
 		</function>
-		<function name="glTextureParameterIivEXT" return="void">
+		<function name="glTextureParameterIiv" return="void">
 			<params>
 				<param type="GLuint" name="texture"/>
 				<param type="GLenum" name="pname"/>
 				<param type="const GLint*" name="params"/>
 			</params>
 		</function>
-		<function name="glTextureParameterIuivEXT" return="void">
+		<function name="glTextureParameterIuiv" return="void">
 			<params>
 				<param type="GLuint" name="texture"/>
 				<param type="GLenum" name="pname"/>
@@ -633,7 +633,7 @@
 				<param type="GLuint*" name="params"/>
 			</params>
 		</function>
-		<function name="glGetTextureParameterivEXT" return="void">
+		<function name="glGetTextureParameteriv" return="void">
 			<params>
 				<param type="GLuint" name="texture"/>
 				<param type="GLenum" name="pname"/>

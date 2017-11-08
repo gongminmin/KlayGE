@@ -34,7 +34,7 @@
 				<param type="const GLuint*" name="memoryObjects"/>
 			</params>
 		</function>
-		<function name="IsMemoryObjectEXT" return="GLboolean">
+		<function name="glIsMemoryObjectEXT" return="GLboolean">
 			<params>
 				<param type="GLuint" name="memoryObject"/>
 			</params>
