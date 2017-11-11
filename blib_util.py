@@ -572,6 +572,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
 
+			build_dir = os.path.abspath(build_dir)
 			os.chdir(build_dir)
 
 			cmake_cmd = batch_command(build_info.host_platform)
@@ -589,6 +590,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			build_cmd = batch_command(build_info.host_platform)
 			if 0 == build_info.project_type.find("vs"):
 				build_cmd.add_command('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
+				build_cmd.add_command('@CD /d "%s"' % build_dir)
 			for config in build_info.cfg:
 				if 0 == build_info.project_type.find("vs"):
 					build_info.msbuild_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
