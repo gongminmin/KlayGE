@@ -62,7 +62,14 @@ namespace KlayGE
 
 		width_ = width;
 
-		glGenBuffers(1, &pbo_);
+		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
+		{
+			glCreateBuffers(1, &pbo_);
+		}
+		else
+		{
+			glGenBuffers(1, &pbo_);
+		}
 
 		mipmap_start_offset_.resize(num_mip_maps_ + 1);
 		mipmap_start_offset_[0] = 0;
@@ -340,64 +347,192 @@ namespace KlayGE
 
 		if (sample_count_ <= 1)
 		{
-			glBindTexture(target_type_, texture_);
-			glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
-
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
-			glBufferData(GL_PIXEL_UNPACK_BUFFER, mipmap_start_offset_.back() * array_size_, nullptr, GL_STREAM_COPY);
-			re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+			uint32_t const pbo_size = mipmap_start_offset_.back() * array_size_;
+			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 			{
-				for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+				glTextureParameteri(texture_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+
+				glNamedBufferStorage(pbo_, pbo_size, nullptr, GL_MAP_READ_BIT | GL_MAP_WRITE_BIT | GL_DYNAMIC_STORAGE_BIT);
+
+				uint32_t const w0 = this->Width(0);
+
+				if (array_size_ > 1)
 				{
-					uint32_t const w = this->Width(level);
+					glTextureStorage2D(texture_, num_mip_maps_, glinternalFormat, w0, array_size_);
+				}
+				else
+				{
+					glTextureStorage1D(texture_, num_mip_maps_, glinternalFormat, w0);
+				}
 
-					if (IsCompressedFormat(format_))
+				if (!init_data.empty())
+				{
+					for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
 					{
-						uint32_t const block_size = NumFormatBytes(format_) * 4;
-						GLsizei const image_size = ((w + 3) / 4) * block_size;
-
-						if (array_size_ > 1)
+						for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 						{
-							if (0 == array_index)
-							{
-								glCompressedTexImage2D(target_type_, level, glinternalFormat,
-									w, array_size_, 0, image_size * array_size_, nullptr);
-							}
+							uint32_t const w = this->Width(level);
+							GLvoid const * data = init_data[array_index * num_mip_maps_ + level].data;
 
-							if (!init_data.empty())
+							if (IsCompressedFormat(format_))
 							{
-								glCompressedTexSubImage2D(target_type_, level, 0, array_index, w, 1,
-									glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
+								uint32_t const block_size = NumFormatBytes(format_) * 4;
+								GLsizei const image_size = ((w + 3) / 4) * block_size;
+
+								if (array_size_ > 1)
+								{
+									glCompressedTextureSubImage2D(texture_, level, 0, array_index,
+										w, 1, glformat, image_size, data);
+								}
+								else
+								{
+									glCompressedTextureSubImage1D(texture_, level, 0,
+										w, glformat, image_size, data);
+								}
+							}
+							else
+							{
+								if (array_size_ > 1)
+								{
+									glTextureSubImage2D(texture_, level, 0, array_index, w, 1,
+										glformat, gltype, data);
+								}
+								else
+								{
+									glTextureSubImage1D(texture_, level, 0, w, glformat, gltype, data);
+								}
 							}
 						}
-						else
-						{
-							glCompressedTexImage1D(target_type_, level, glinternalFormat,
-								w, 0, image_size, init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
-						}
+					}
+				}
+			}
+			else
+			{
+				auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				
+				re.BindTexture(0, target_type_, texture_);
+				glTexParameteri(target_type_, GL_TEXTURE_MAX_LEVEL, num_mip_maps_ - 1);
+
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+				if (glloader_GL_VERSION_4_4() || glloader_GL_ARB_buffer_storage())
+				{
+					glBufferStorage(GL_PIXEL_UNPACK_BUFFER, pbo_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
+				}
+				else
+				{
+					glBufferData(GL_PIXEL_UNPACK_BUFFER, pbo_size, nullptr, GL_STREAM_COPY);
+				}
+				re.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+				if (glloader_GL_VERSION_4_2() || glloader_GL_ARB_texture_storage())
+				{
+					uint32_t const w0 = this->Width(0);
+
+					if (array_size_ > 1)
+					{
+						glTexStorage2D(target_type_, num_mip_maps_, glinternalFormat, w0, array_size_);
 					}
 					else
 					{
-						if (array_size_ > 1)
-						{
-							if (0 == array_index)
-							{
-								glTexImage2D(target_type_, level, glinternalFormat, w, array_size_, 0, glformat, gltype, nullptr);
-							}
+						glTexStorage1D(target_type_, num_mip_maps_, glinternalFormat, w0);
+					}
 
-							if (!init_data.empty())
+					if (!init_data.empty())
+					{
+						for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+						{
+							for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 							{
-								glTexSubImage2D(target_type_, level, 0, array_index, w, 1,
-									glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
+								uint32_t const w = this->Width(level);
+								GLvoid const * data = init_data[array_index * num_mip_maps_ + level].data;
+
+								if (IsCompressedFormat(format_))
+								{
+									uint32_t const block_size = NumFormatBytes(format_) * 4;
+									GLsizei const image_size = ((w + 3) / 4) * block_size;
+
+									if (array_size_ > 1)
+									{
+										glCompressedTexSubImage2D(target_type_, level, 0, array_index,
+											w, 1, glformat, image_size, data);
+									}
+									else
+									{
+										glCompressedTexSubImage1D(target_type_, level, 0,
+											w, glformat, image_size, data);
+									}
+								}
+								else
+								{
+									if (array_size_ > 1)
+									{
+										glTexSubImage2D(target_type_, level, 0, array_index, w, 1,
+											glformat, gltype, data);
+									}
+									else
+									{
+										glTexSubImage1D(target_type_, level, 0, w, glformat, gltype, data);
+									}
+								}
 							}
 						}
-						else
+					}
+				}
+				else
+				{
+					for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+					{
+						for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 						{
-							glTexImage1D(target_type_, level, glinternalFormat, w, 0, glformat, gltype,
-								init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+							uint32_t const w = this->Width(level);
+
+							if (IsCompressedFormat(format_))
+							{
+								uint32_t const block_size = NumFormatBytes(format_) * 4;
+								GLsizei const image_size = ((w + 3) / 4) * block_size;
+
+								if (array_size_ > 1)
+								{
+									if (0 == array_index)
+									{
+										glCompressedTexImage2D(target_type_, level, glinternalFormat,
+											w, array_size_, 0, image_size * array_size_, nullptr);
+									}
+
+									if (!init_data.empty())
+									{
+										glCompressedTexSubImage2D(target_type_, level, 0, array_index, w, 1,
+											glformat, image_size, init_data[array_index * num_mip_maps_ + level].data);
+									}
+								}
+								else
+								{
+									glCompressedTexImage1D(target_type_, level, glinternalFormat,
+										w, 0, image_size,
+										init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+								}
+							}
+							else
+							{
+								if (array_size_ > 1)
+								{
+									if (0 == array_index)
+									{
+										glTexImage2D(target_type_, level, glinternalFormat, w, array_size_, 0, glformat, gltype, nullptr);
+									}
+
+									if (!init_data.empty())
+									{
+										glTexSubImage2D(target_type_, level, 0, array_index, w, 1,
+											glformat, gltype, init_data[array_index * num_mip_maps_ + level].data);
+									}
+								}
+								else
+								{
+									glTexImage1D(target_type_, level, glinternalFormat, w, 0, glformat, gltype,
+										init_data.empty() ? nullptr : init_data[array_index * num_mip_maps_ + level].data);
+								}
+							}
 						}
 					}
 				}

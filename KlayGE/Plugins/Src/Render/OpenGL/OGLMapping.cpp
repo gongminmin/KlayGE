@@ -767,25 +767,25 @@ namespace KlayGE
 
 		case EF_BC4:
 			internalFormat = GL_COMPRESSED_RED_RGTC1;
-			glformat = GL_COMPRESSED_LUMINANCE;
+			glformat = GL_COMPRESSED_RED_RGTC1;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC5:
 			internalFormat = GL_COMPRESSED_RG_RGTC2;
-			glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
+			glformat = GL_COMPRESSED_RG_RGTC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_SIGNED_BC4:
 			internalFormat = GL_COMPRESSED_SIGNED_RED_RGTC1;
-			glformat = GL_COMPRESSED_LUMINANCE;
+			glformat = GL_COMPRESSED_SIGNED_RED_RGTC1;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_SIGNED_BC5:
 			internalFormat = GL_COMPRESSED_SIGNED_RG_RGTC2;
-			glformat = GL_COMPRESSED_LUMINANCE_ALPHA;
+			glformat = GL_COMPRESSED_SIGNED_RG_RGTC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
@@ -821,31 +821,31 @@ namespace KlayGE
 
 		case EF_BC1_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
-			glformat = GL_BGRA;
+			glformat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC2_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
-			glformat = GL_BGRA;
+			glformat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC3_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
-			glformat = GL_BGRA;
+			glformat = GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC4_SRGB:
 			internalFormat = GL_COMPRESSED_SLUMINANCE;
-			glformat = GL_LUMINANCE;
+			glformat = GL_COMPRESSED_SLUMINANCE;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_BC5_SRGB:
 			internalFormat = GL_COMPRESSED_SLUMINANCE_ALPHA;
-			glformat = GL_LUMINANCE_ALPHA;
+			glformat = GL_COMPRESSED_SLUMINANCE_ALPHA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
@@ -853,7 +853,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_RGB8_ETC2;
-				glformat = GL_RGB;
+				glformat = GL_COMPRESSED_RGB8_ETC2;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -866,7 +866,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_R11_EAC;
-				glformat = GL_RED;
+				glformat = GL_COMPRESSED_R11_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -879,7 +879,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
-				glformat = GL_RED;
+				glformat = GL_COMPRESSED_SIGNED_R11_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -892,7 +892,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_RG11_EAC;
-				glformat = GL_RG;
+				glformat = GL_COMPRESSED_RG11_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -905,7 +905,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
-				glformat = GL_RG;
+				glformat = GL_COMPRESSED_SIGNED_RG11_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -918,7 +918,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_RGB8_ETC2;
-				glformat = GL_RGB;
+				glformat = GL_COMPRESSED_RGB8_ETC2;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -931,7 +931,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_SRGB8_ETC2;
-				glformat = GL_RGB;
+				glformat = GL_COMPRESSED_SRGB8_ETC2;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -944,7 +944,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-				glformat = GL_RGBA;
+				glformat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -957,7 +957,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-				glformat = GL_RGBA;
+				glformat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -970,7 +970,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
-				glformat = GL_RGBA;
+				glformat = GL_COMPRESSED_RGBA8_ETC2_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
@@ -983,7 +983,7 @@ namespace KlayGE
 			if (glloader_GL_VERSION_4_3() || glloader_GL_ARB_ES3_compatibility())
 			{
 				internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
-				glformat = GL_RGBA;
+				glformat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 				gltype = GL_UNSIGNED_BYTE;
 			}
 			else
