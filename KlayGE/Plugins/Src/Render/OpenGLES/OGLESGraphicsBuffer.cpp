@@ -44,11 +44,35 @@ namespace KlayGE
 
 		glGenBuffers(1, &vb_);
 
+		GLbitfield flags = 0;
+		if (glloader_GLES_EXT_buffer_storage())
+		{
+			if (BU_Dynamic == usage_)
+			{
+				flags |= GL_DYNAMIC_STORAGE_BIT_EXT;
+			}
+		}
+		if (access_hint_ & EAH_CPU_Read)
+		{
+			flags |= GL_MAP_READ_BIT;
+		}
+		else if (access_hint_ & EAH_CPU_Write)
+		{
+			flags |= GL_MAP_WRITE_BIT;
+		}
+
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindBuffer(target_, vb_);
-		glBufferData(target_,
-			static_cast<GLsizeiptr>(size_in_byte_), data,
-			(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		if (glloader_GLES_EXT_buffer_storage())
+		{
+			glBufferStorageEXT(target_, static_cast<GLsizeiptr>(size_in_byte_), data, flags);
+		}
+		else
+		{
+			glBufferData(target_,
+				static_cast<GLsizeiptr>(size_in_byte_), data,
+				(BU_Static == usage_) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
+		}
 		if (data != nullptr)
 		{
 			buf_data_.assign(static_cast<uint8_t const *>(data),

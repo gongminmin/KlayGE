@@ -248,50 +248,107 @@ namespace KlayGE
 		GLenum gltype;
 		OGLESMapping::MappingFormat(glinternalFormat, glformat, gltype, format_);
 
-		glBindTexture(target_type_, texture_);
-		for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+		auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.BindTexture(0, target_type_, texture_);
+
+		if (!re.HackForAdreno())
 		{
-			uint32_t const w = this->Width(level);
-			uint32_t const h = this->Height(level);
-			uint32_t const d = this->Depth(level);
+			uint32_t const w0 = this->Width(0);
+			uint32_t const h0 = this->Height(0);
+			uint32_t const d0 = this->Depth(0);
 
-			if (IsCompressedFormat(format_))
+			glTexStorage3D(target_type_, num_mip_maps_, glinternalFormat, w0, h0, d0);
+
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				uint32_t const block_size = NumFormatBytes(format_) * 4;
-				GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
+				uint32_t const w = this->Width(level);
+				uint32_t const h = this->Height(level);
+				uint32_t const d = this->Depth(level);
 
-				void* ptr;
-				if (init_data.empty())
+				if (IsCompressedFormat(format_))
 				{
-					tex_data_[level].resize(image_size, 0);
-					ptr = nullptr;
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
+					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
+
+					if (init_data.empty())
+					{
+						tex_data_[level].resize(image_size, 0);
+					}
+					else
+					{
+						GLvoid const * data = init_data[level].data;
+						tex_data_[level].resize(image_size);
+						std::memcpy(&tex_data_[level][0], data, image_size);
+
+						glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
+							w, h, d, glformat, image_size, data);
+					}
 				}
 				else
 				{
-					tex_data_[level].resize(image_size);
-					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
-					ptr = &tex_data_[level][0];
+					GLsizei const image_size = w * h * d * texel_size;
+
+					if (init_data.empty())
+					{
+						tex_data_[level].resize(image_size, 0);
+					}
+					else
+					{
+						GLvoid const * data = init_data[level].data;
+						tex_data_[level].resize(image_size);
+						std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+
+						glTexSubImage3D(target_type_, level, 0, 0, 0, w, h, d, glformat, gltype, data);
+					}
 				}
-				glCompressedTexImage3D(target_type_, level, glinternalFormat,
-					w, h, d, 0, image_size, ptr);
 			}
-			else
+		}
+		else
+		{
+			for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 			{
-				GLsizei const image_size = w * h * d * texel_size;
+				uint32_t const w = this->Width(level);
+				uint32_t const h = this->Height(level);
+				uint32_t const d = this->Depth(level);
 
-				void* ptr;
-				if (init_data.empty())
+				if (IsCompressedFormat(format_))
 				{
-					tex_data_[level].resize(image_size, 0);
-					ptr = nullptr;
+					uint32_t const block_size = NumFormatBytes(format_) * 4;
+					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
+
+					void* ptr;
+					if (init_data.empty())
+					{
+						tex_data_[level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[level].resize(image_size);
+						std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+						ptr = &tex_data_[level][0];
+					}
+					glCompressedTexImage3D(target_type_, level, glinternalFormat,
+						w, h, d, 0, image_size, ptr);
 				}
 				else
 				{
-					tex_data_[level].resize(image_size);
-					std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
-					ptr = &tex_data_[level][0];
+					GLsizei const image_size = w * h * d * texel_size;
+
+					void* ptr;
+					if (init_data.empty())
+					{
+						tex_data_[level].resize(image_size, 0);
+						ptr = nullptr;
+					}
+					else
+					{
+						tex_data_[level].resize(image_size);
+						std::memcpy(&tex_data_[level][0], init_data[level].data, image_size);
+						ptr = &tex_data_[level][0];
+					}
+					glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype, ptr);
 				}
-				glTexImage3D(target_type_, level, glinternalFormat, w, h, d, 0, glformat, gltype, ptr);
 			}
 		}
 

@@ -101,80 +101,198 @@ namespace KlayGE
 		return 1;
 	}
 
-	void OGLESTexture::CopyToSubTexture1D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_width*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_width*/)
+	void OGLESTexture::CopyToSubTexture1D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
 	{
+		KFL_UNUSED(target);
+		KFL_UNUSED(dst_array_index);
+		KFL_UNUSED(dst_level);
+		KFL_UNUSED(dst_x_offset);
+		KFL_UNUSED(dst_width);
+		KFL_UNUSED(src_array_index);
+		KFL_UNUSED(src_level);
+		KFL_UNUSED(src_x_offset);
+		KFL_UNUSED(src_width);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTexture2D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void OGLESTexture::CopyToSubTexture2D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+		uint32_t src_width, uint32_t src_height)
 	{
+		KFL_UNUSED(target);
+		KFL_UNUSED(dst_array_index);
+		KFL_UNUSED(dst_level);
+		KFL_UNUSED(dst_x_offset);
+		KFL_UNUSED(dst_y_offset);
+		KFL_UNUSED(dst_width);
+		KFL_UNUSED(dst_height);
+		KFL_UNUSED(src_array_index);
+		KFL_UNUSED(src_level);
+		KFL_UNUSED(src_x_offset);
+		KFL_UNUSED(src_y_offset);
+		KFL_UNUSED(src_width);
+		KFL_UNUSED(src_height);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTexture3D(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_z_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/, uint32_t /*dst_depth*/,
-			uint32_t /*src_array_index*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_z_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/, uint32_t /*src_depth*/)
+	void OGLESTexture::CopyToSubTexture3D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_z_offset, uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+		uint32_t src_z_offset, uint32_t src_width, uint32_t src_height, uint32_t src_depth)
 	{
+		KFL_UNUSED(target);
+		KFL_UNUSED(dst_array_index);
+		KFL_UNUSED(dst_level);
+		KFL_UNUSED(dst_x_offset);
+		KFL_UNUSED(dst_y_offset);
+		KFL_UNUSED(dst_z_offset);
+		KFL_UNUSED(dst_width);
+		KFL_UNUSED(dst_height);
+		KFL_UNUSED(dst_depth);
+		KFL_UNUSED(src_array_index);
+		KFL_UNUSED(src_level);
+		KFL_UNUSED(src_x_offset);
+		KFL_UNUSED(src_y_offset);
+		KFL_UNUSED(src_z_offset);
+		KFL_UNUSED(src_width);
+		KFL_UNUSED(src_height);
+		KFL_UNUSED(src_depth);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::CopyToSubTextureCube(Texture& /*target*/,
-			uint32_t /*dst_array_index*/, CubeFaces /*dst_face*/, uint32_t /*dst_level*/, uint32_t /*dst_x_offset*/, uint32_t /*dst_y_offset*/, uint32_t /*dst_width*/, uint32_t /*dst_height*/,
-			uint32_t /*src_array_index*/, CubeFaces /*src_face*/, uint32_t /*src_level*/, uint32_t /*src_x_offset*/, uint32_t /*src_y_offset*/, uint32_t /*src_width*/, uint32_t /*src_height*/)
+	void OGLESTexture::CopyToSubTextureCube(Texture& target,
+		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+		uint32_t src_width, uint32_t src_height)
 	{
+		KFL_UNUSED(target);
+		KFL_UNUSED(dst_array_index);
+		KFL_UNUSED(dst_face);
+		KFL_UNUSED(dst_level);
+		KFL_UNUSED(dst_x_offset);
+		KFL_UNUSED(dst_y_offset);
+		KFL_UNUSED(dst_width);
+		KFL_UNUSED(dst_height);
+		KFL_UNUSED(src_array_index);
+		KFL_UNUSED(src_face);
+		KFL_UNUSED(src_level);
+		KFL_UNUSED(src_x_offset);
+		KFL_UNUSED(src_y_offset);
+		KFL_UNUSED(src_width);
+		KFL_UNUSED(src_height);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Map1D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
-		uint32_t /*x_offset*/, uint32_t /*width*/, void*& /*data*/)
+	void OGLESTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t width, void*& data)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(tma);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(data);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Map2D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
-		uint32_t /*x_offset*/, uint32_t /*y_offset*/,
-		uint32_t /*width*/, uint32_t /*height*/,
-		void*& /*data*/, uint32_t& /*row_pitch*/)
+	void OGLESTexture::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset,
+		uint32_t width, uint32_t height,
+		void*& data, uint32_t& row_pitch)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(tma);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Map3D(uint32_t /*array_index*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
-		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*z_offset*/,
-		uint32_t /*width*/, uint32_t /*height*/, uint32_t /*depth*/,
-		void*& /*data*/, uint32_t& /*row_pitch*/, uint32_t& /*slice_pitch*/)
+	void OGLESTexture::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+		KFL_UNUSED(tma);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(z_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(depth);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+		KFL_UNUSED(slice_pitch);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::MapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/, TextureMapAccess /*tma*/,
-		uint32_t /*x_offset*/, uint32_t /*y_offset*/, uint32_t /*width*/, uint32_t /*height*/,
-		void*& /*data*/, uint32_t& /*row_pitch*/)
+	void OGLESTexture::MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& row_pitch)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+		KFL_UNUSED(tma);
+		KFL_UNUSED(x_offset);
+		KFL_UNUSED(y_offset);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(data);
+		KFL_UNUSED(row_pitch);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Unmap1D(uint32_t /*array_index*/, uint32_t /*level*/)
+	void OGLESTexture::Unmap1D(uint32_t array_index, uint32_t level)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Unmap2D(uint32_t /*array_index*/, uint32_t /*level*/)
+	void OGLESTexture::Unmap2D(uint32_t array_index, uint32_t level)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::Unmap3D(uint32_t /*array_index*/, uint32_t /*level*/)
+	void OGLESTexture::Unmap3D(uint32_t array_index, uint32_t level)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(level);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 
-	void OGLESTexture::UnmapCube(uint32_t /*array_index*/, CubeFaces /*face*/, uint32_t /*level*/)
+	void OGLESTexture::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
 	{
+		KFL_UNUSED(array_index);
+		KFL_UNUSED(face);
+		KFL_UNUSED(level);
+
 		KFL_UNREACHABLE("Can't be called");
 	}
 

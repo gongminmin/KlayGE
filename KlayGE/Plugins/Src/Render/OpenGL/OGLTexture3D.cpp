@@ -338,7 +338,7 @@ namespace KlayGE
 				if (IsCompressedFormat(format_))
 				{
 					uint32_t const block_size = NumFormatBytes(format_) * 4;
-					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+					GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
 					glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
 							w, h, d, gl_format, image_size,
@@ -388,7 +388,7 @@ namespace KlayGE
 					if (IsCompressedFormat(format_))
 					{
 						uint32_t const block_size = NumFormatBytes(format_) * 4;
-						GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+						GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
 						glCompressedTextureSubImage3D(texture_, level, 0, 0, 0,
 								w, h, d, glformat, image_size, data);
@@ -438,7 +438,7 @@ namespace KlayGE
 						if (IsCompressedFormat(format_))
 						{
 							uint32_t const block_size = NumFormatBytes(format_) * 4;
-							GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * block_size;
+							GLsizei const image_size = ((w + 3) / 4) * ((h + 3) / 4) * d * block_size;
 
 							glCompressedTexSubImage3D(target_type_, level, 0, 0, 0,
 									w, h, d, glformat, image_size, data);

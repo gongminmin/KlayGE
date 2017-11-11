@@ -363,7 +363,7 @@ namespace KlayGE
 		case EF_ARGB8:
 			if (glloader_GLES_EXT_texture_format_BGRA8888())
 			{
-				internalFormat = GL_BGRA_EXT;
+				internalFormat = GL_BGRA8_EXT;
 				glformat = GL_BGRA_EXT;
 				gltype = GL_UNSIGNED_BYTE;
 			}
@@ -374,7 +374,7 @@ namespace KlayGE
 			break;
 
 		case EF_ABGR8:
-			internalFormat = GL_RGBA;
+			internalFormat = GL_RGBA8;
 			glformat = GL_RGBA;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
@@ -682,67 +682,67 @@ namespace KlayGE
 
 		case EF_ETC1:
 			internalFormat = GL_COMPRESSED_RGB8_ETC2;
-			glformat = GL_RGB;
+			glformat = GL_COMPRESSED_RGB8_ETC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_R11:
 			internalFormat = GL_COMPRESSED_R11_EAC;
-			glformat = GL_RED;
+			glformat = GL_COMPRESSED_R11_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_SIGNED_ETC2_R11:
 			internalFormat = GL_COMPRESSED_SIGNED_R11_EAC;
-			glformat = GL_RED;
+			glformat = GL_COMPRESSED_SIGNED_R11_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_GR11:
 			internalFormat = GL_COMPRESSED_RG11_EAC;
-			glformat = GL_RG;
+			glformat = GL_COMPRESSED_RG11_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_SIGNED_ETC2_GR11:
 			internalFormat = GL_COMPRESSED_SIGNED_RG11_EAC;
-			glformat = GL_RG;
+			glformat = GL_COMPRESSED_SIGNED_RG11_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_BGR8:
 			internalFormat = GL_COMPRESSED_RGB8_ETC2;
-			glformat = GL_RGB;
+			glformat = GL_COMPRESSED_RGB8_ETC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_BGR8_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB8_ETC2;
-			glformat = GL_RGB;
+			glformat = GL_COMPRESSED_SRGB8_ETC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_A1BGR8:
 			internalFormat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-			glformat = GL_RGBA;
+			glformat = GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_A1BGR8_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
-			glformat = GL_RGBA;
+			glformat = GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_ABGR8:
 			internalFormat = GL_COMPRESSED_RGBA8_ETC2_EAC;
-			glformat = GL_RGBA;
+			glformat = GL_COMPRESSED_RGBA8_ETC2_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
 		case EF_ETC2_ABGR8_SRGB:
 			internalFormat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
-			glformat = GL_RGBA;
+			glformat = GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC;
 			gltype = GL_UNSIGNED_BYTE;
 			break;
 
