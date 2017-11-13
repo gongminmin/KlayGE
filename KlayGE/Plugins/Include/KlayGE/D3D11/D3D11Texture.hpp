@@ -156,7 +156,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
+		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
 
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -196,7 +196,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
+		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
 
 	private:
 		virtual void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -231,7 +231,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
+		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
 
 	private:
 		virtual void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
@@ -276,7 +276,7 @@ namespace KlayGE
 
 		void BuildMipSubLevels();
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) override;
+		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
 
 	private:
 		virtual void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,

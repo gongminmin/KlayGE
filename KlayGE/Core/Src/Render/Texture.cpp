@@ -1556,7 +1556,7 @@ namespace
 			TexturePtr const & tex = *tex_desc_.tex;
 			if (!tex || !tex->HWResourceReady())
 			{
-				tex->CreateHWResource(tex_desc_.tex_data->init_data);
+				tex->CreateHWResource(tex_desc_.tex_data->init_data, nullptr);
 				tex_desc_.tex_data.reset();
 			}
 		}

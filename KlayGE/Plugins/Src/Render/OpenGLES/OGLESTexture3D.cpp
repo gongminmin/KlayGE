@@ -239,8 +239,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLESTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data)
+	void OGLESTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
+		KFL_UNUSED(clear_value_hint);
+
 		uint32_t texel_size = NumFormatBytes(format_);
 
 		GLint glinternalFormat;

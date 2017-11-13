@@ -266,7 +266,7 @@ namespace KlayGE
 		virtual void Unmap3D(uint32_t array_index, uint32_t level) = 0;
 		virtual void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) = 0;
 
-		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data) = 0;
+		virtual void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) = 0;
 		virtual void DeleteHWResource() = 0;
 		virtual bool HWResourceReady() const = 0;
 

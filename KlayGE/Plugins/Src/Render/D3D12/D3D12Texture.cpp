@@ -605,7 +605,7 @@ namespace KlayGE
 
 	void D3D12Texture::DoCreateHWResource(D3D12_RESOURCE_DIMENSION dim,
 			uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-			ArrayRef<ElementInitData> init_data)
+			ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
@@ -660,15 +660,33 @@ namespace KlayGE
 				default:
 					KFL_UNREACHABLE("Invalid depth format");
 				}
-				clear_value.DepthStencil.Depth = 1.0f;
-				clear_value.DepthStencil.Stencil = 0;
+				if (clear_value_hint != nullptr)
+				{
+					clear_value.DepthStencil.Depth = (*clear_value_hint)[0];
+					clear_value.DepthStencil.Stencil = static_cast<UINT8>((*clear_value_hint)[1] + 0.5f);
+				}
+				else
+				{
+					clear_value.DepthStencil.Depth = 1.0f;
+					clear_value.DepthStencil.Stencil = 0;
+				}
 			}
 			else
 			{
 				tex_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 
 				clear_value.Format = dxgi_fmt_;
-				clear_value.Color[0] = clear_value.Color[1] = clear_value.Color[2] = clear_value.Color[3] = 0;
+				if (clear_value_hint != nullptr)
+				{
+					clear_value.Color[0] = (*clear_value_hint)[0];
+					clear_value.Color[1] = (*clear_value_hint)[1];
+					clear_value.Color[2] = (*clear_value_hint)[2];
+					clear_value.Color[3] = (*clear_value_hint)[3];
+				}
+				else
+				{
+					clear_value.Color[0] = clear_value.Color[1] = clear_value.Color[2] = clear_value.Color[3] = 0;
+				}
 			}
 		}
 		if (access_hint_ & EAH_GPU_Unordered)

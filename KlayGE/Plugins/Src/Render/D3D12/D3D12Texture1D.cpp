@@ -452,9 +452,9 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12Texture1D::CreateHWResource(ArrayRef<ElementInitData> init_data)
+	void D3D12Texture1D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
 		this->DoCreateHWResource(D3D12_RESOURCE_DIMENSION_TEXTURE1D,
-			width_, 1, 1, array_size_, init_data);
+			width_, 1, 1, array_size_, init_data, clear_value_hint);
 	}
 }

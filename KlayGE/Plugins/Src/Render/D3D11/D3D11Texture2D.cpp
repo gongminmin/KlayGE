@@ -420,8 +420,10 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11Texture2D::CreateHWResource(ArrayRef<ElementInitData> init_data)
+	void D3D11Texture2D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
+		KFL_UNUSED(clear_value_hint);
+
 		D3D11_TEXTURE2D_DESC desc;
 		desc.Width = width_;
 		desc.Height = height_;

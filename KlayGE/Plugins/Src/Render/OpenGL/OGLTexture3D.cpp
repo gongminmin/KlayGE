@@ -356,8 +356,10 @@ namespace KlayGE
 		}
 	}
 
-	void OGLTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data)
+	void OGLTexture3D::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
 	{
+		KFL_UNUSED(clear_value_hint);
+
 		GLint glinternalFormat;
 		GLenum glformat;
 		GLenum gltype;
