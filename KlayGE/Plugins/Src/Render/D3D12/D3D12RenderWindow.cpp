@@ -386,7 +386,7 @@ namespace KlayGE
 		{
 			clr_views_[i].reset();
 		}
-		rs_view_.reset();
+		ds_view_.reset();
 
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{

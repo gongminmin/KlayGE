@@ -39,6 +39,15 @@ namespace KlayGE
 		virtual void Discard(uint32_t flags) override;
 
 	private:
+		std::vector<void*> d3d_rt_src_;
+		std::vector<uint32_t> d3d_rt_first_subres_;
+		std::vector<uint32_t> d3d_rt_num_subres_;
+
+		std::vector<ID3D11RenderTargetView*> d3d_rt_view_;
+		ID3D11DepthStencilView* d3d_ds_view_;
+		std::vector<ID3D11UnorderedAccessView*> d3d_ua_view_;
+		std::vector<UINT> d3d_ua_init_count_;
+
 		D3D11_VIEWPORT d3d_viewport_;
 	};
 }

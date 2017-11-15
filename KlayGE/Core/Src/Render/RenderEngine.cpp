@@ -632,7 +632,7 @@ namespace KlayGE
 			new_fb = this->DefaultFrameBuffer();
 		}
 
-		if ((fb != new_fb) || (fb && fb->Dirty()))
+		if ((cur_frame_buffer_ != new_fb) || (new_fb && new_fb->Dirty()))
 		{
 			if (cur_frame_buffer_)
 			{

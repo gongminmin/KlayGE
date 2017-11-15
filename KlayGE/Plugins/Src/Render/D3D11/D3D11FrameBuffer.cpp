@@ -55,9 +55,9 @@ namespace KlayGE
 
 	ID3D11DepthStencilView* D3D11FrameBuffer::D3DDSView() const
 	{
-		if (rs_view_)
+		if (ds_view_)
 		{
-			return checked_cast<D3D11DepthStencilRenderView*>(rs_view_.get())->D3DDepthStencilView();
+			return checked_cast<D3D11DepthStencilRenderView*>(ds_view_.get())->D3DDepthStencilView();
 		}
 
 		return nullptr;
@@ -84,74 +84,86 @@ namespace KlayGE
 
 	void D3D11FrameBuffer::OnBind()
 	{
-		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-
-		std::vector<void*> rt_src;
-		std::vector<uint32_t> rt_first_subres;
-		std::vector<uint32_t> rt_num_subres;
-		std::vector<ID3D11RenderTargetView*> rt_view(clr_views_.size());
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+		if (views_dirty_)
 		{
-			if (clr_views_[i])
+			d3d_rt_src_.clear();
+			d3d_rt_first_subres_.clear();
+			d3d_rt_num_subres_.clear();
+			d3d_rt_view_.resize(clr_views_.size());
+			for (uint32_t i = 0; i < clr_views_.size(); ++ i)
 			{
-				D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src.push_back(p->RTSrc());
-				rt_first_subres.push_back(p->RTFirstSubRes());
-				rt_num_subres.push_back(p->RTNumSubRes());
-				rt_view[i] = this->D3DRTView(i);
+				if (clr_views_[i])
+				{
+					D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
+					d3d_rt_src_.push_back(p->RTSrc());
+					d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
+					d3d_rt_num_subres_.push_back(p->RTNumSubRes());
+					d3d_rt_view_[i] = this->D3DRTView(i);
+				}
+				else
+				{
+					d3d_rt_view_[i] = nullptr;
+				}
+			}
+			if (ds_view_)
+			{
+				D3D11DepthStencilRenderView* p = checked_cast<D3D11DepthStencilRenderView*>(ds_view_.get());
+				d3d_rt_src_.push_back(p->RTSrc());
+				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
+				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
+				d3d_ds_view_ = this->D3DDSView();
 			}
 			else
 			{
-				rt_view[i] = nullptr;
+				d3d_ds_view_ = nullptr;
 			}
-		}
-		if (rs_view_)
-		{
-			D3D11DepthStencilRenderView* p = checked_cast<D3D11DepthStencilRenderView*>(rs_view_.get());
-			rt_src.push_back(p->RTSrc());
-			rt_first_subres.push_back(p->RTFirstSubRes());
-			rt_num_subres.push_back(p->RTNumSubRes());
-		}
-		std::vector<ID3D11UnorderedAccessView*> ua_view(ua_views_.size());
-		std::vector<UINT> ua_init_count(ua_views_.size());
-		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
-		{
-			if (ua_views_[i])
+
+			d3d_ua_view_.resize(ua_views_.size());
+			d3d_ua_init_count_.resize(ua_views_.size());
+			for (uint32_t i = 0; i < ua_views_.size(); ++ i)
 			{
-				D3D11UnorderedAccessView* p = checked_cast<D3D11UnorderedAccessView*>(ua_views_[i].get());
-				rt_src.push_back(p->UASrc());
-				rt_first_subres.push_back(p->UAFirstSubRes());
-				rt_num_subres.push_back(p->UANumSubRes());
-				ua_view[i] = this->D3DUAView(i);
-				ua_init_count[i] = ua_views_[i]->InitCount();
+				if (ua_views_[i])
+				{
+					D3D11UnorderedAccessView* p = checked_cast<D3D11UnorderedAccessView*>(ua_views_[i].get());
+					d3d_rt_src_.push_back(p->UASrc());
+					d3d_rt_first_subres_.push_back(p->UAFirstSubRes());
+					d3d_rt_num_subres_.push_back(p->UANumSubRes());
+					d3d_ua_view_[i] = this->D3DUAView(i);
+					d3d_ua_init_count_[i] = ua_views_[i]->InitCount();
+				}
+				else
+				{
+					d3d_ua_view_[i] = nullptr;
+					d3d_ua_init_count_[i] = 0;
+				}
 			}
-			else
-			{
-				ua_view[i] = nullptr;
-				ua_init_count[i] = 0;
-			}
+
+			d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
+			d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
+			d3d_viewport_.Width = static_cast<float>(viewport_->width);
+			d3d_viewport_.Height = static_cast<float>(viewport_->height);
+
+			views_dirty_ = false;
 		}
 
-		for (size_t i = 0; i < rt_src.size(); ++ i)
+		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{
-			re.DetachSRV(rt_src[i], rt_first_subres[i], rt_num_subres[i]);
+			re.DetachSRV(d3d_rt_src_[i], d3d_rt_first_subres_[i], d3d_rt_num_subres_[i]);
 		}
 
 		if (ua_views_.empty())
 		{
-			re.OMSetRenderTargets(static_cast<UINT>(rt_view.size()), &rt_view[0], this->D3DDSView());
+			re.OMSetRenderTargets(static_cast<UINT>(d3d_rt_view_.size()), &d3d_rt_view_[0], d3d_ds_view_);
 		}
 		else
 		{
-			ID3D11RenderTargetView** rts = rt_view.empty() ? nullptr : &rt_view[0];
-			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(rt_view.size()), rts, this->D3DDSView(),
-				static_cast<UINT>(rt_view.size()), static_cast<UINT>(ua_view.size()), &ua_view[0], &ua_init_count[0]);
+			ID3D11RenderTargetView** rts = d3d_rt_view_.empty() ? nullptr : &d3d_rt_view_[0];
+			re.OMSetRenderTargetsAndUnorderedAccessViews(static_cast<UINT>(d3d_rt_view_.size()), rts, d3d_ds_view_,
+				static_cast<UINT>(d3d_rt_view_.size()), static_cast<UINT>(d3d_ua_view_.size()), &d3d_ua_view_[0], &d3d_ua_init_count_[0]);
 		}
-	
-		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
-		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
-		d3d_viewport_.Width = static_cast<float>(viewport_->width);
-		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+
 		re.RSSetViewports(1, &d3d_viewport_);
 	}
 
@@ -173,26 +185,26 @@ namespace KlayGE
 		}
 		if ((flags & CBM_Depth) && (flags & CBM_Stencil))
 		{
-			if (rs_view_)
+			if (ds_view_)
 			{
-				rs_view_->ClearDepthStencil(depth, stencil);
+				ds_view_->ClearDepthStencil(depth, stencil);
 			}
 		}
 		else
 		{
 			if (flags & CBM_Depth)
 			{
-				if (rs_view_)
+				if (ds_view_)
 				{
-					rs_view_->ClearDepth(depth);
+					ds_view_->ClearDepth(depth);
 				}
 			}
 
 			if (flags & CBM_Stencil)
 			{
-				if (rs_view_)
+				if (ds_view_)
 				{
-					rs_view_->ClearStencil(stencil);
+					ds_view_->ClearStencil(stencil);
 				}
 			}
 		}
@@ -212,9 +224,9 @@ namespace KlayGE
 		}
 		if ((flags & CBM_Depth) || (flags & CBM_Stencil))
 		{
-			if (rs_view_)
+			if (ds_view_)
 			{
-				rs_view_->Discard();
+				ds_view_->Discard();
 			}
 		}
 	}

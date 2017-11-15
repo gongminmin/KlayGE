@@ -78,6 +78,25 @@ namespace KlayGE
 
 	void OGLFrameBuffer::OnBind()
 	{
+		if (views_dirty_)
+		{
+			if (fbo_ != 0)
+			{
+				gl_targets_.resize(clr_views_.size());
+				for (size_t i = 0; i < clr_views_.size(); ++ i)
+				{
+					gl_targets_[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
+				}
+			}
+			else
+			{
+				gl_targets_.resize(1);
+				gl_targets_[0] = GL_BACK_LEFT;
+			}
+
+			views_dirty_ = false;
+		}
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		re.BindFramebuffer(fbo_);
 
@@ -103,21 +122,17 @@ namespace KlayGE
 		if (fbo_ != 0)
 		{
 			re.EnableFramebufferSRGB(IsSRGB(clr_views_[0]->Format()));
-
-			std::vector<GLenum> targets(clr_views_.size());
-			for (size_t i = 0; i < clr_views_.size(); ++ i)
-			{
-				targets[i] = static_cast<GLenum>(GL_COLOR_ATTACHMENT0 + i);
-			}
-			glDrawBuffers(static_cast<GLsizei>(targets.size()), &targets[0]);
 		}
 		else
 		{
 			re.EnableFramebufferSRGB(false);
-
-			GLenum targets[] = { GL_BACK_LEFT };
-			glDrawBuffers(1, &targets[0]);
 		}
+
+		glDrawBuffers(static_cast<GLsizei>(gl_targets_.size()), &gl_targets_[0]);
+	}
+
+	void OGLFrameBuffer::OnUnbind()
+	{
 	}
 
 	void OGLFrameBuffer::Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil)
@@ -251,14 +266,14 @@ namespace KlayGE
 				}
 				if (flags & CBM_Depth)
 				{
-					if (rs_view_)
+					if (ds_view_)
 					{
 						attachments.push_back(GL_DEPTH_ATTACHMENT);
 					}
 				}
 				if (flags & CBM_Stencil)
 				{
-					if (rs_view_)
+					if (ds_view_)
 					{
 						attachments.push_back(GL_STENCIL_ATTACHMENT);
 					}

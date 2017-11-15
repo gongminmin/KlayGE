@@ -74,57 +74,24 @@ namespace KlayGE
 		}
 	}
 
+	void D3D12FrameBuffer::OnUnbind()
+	{
+	}
+
 	void D3D12FrameBuffer::SetRenderTargets()
 	{
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
-
-		std::vector<ID3D12Resource*> rt_src;
-		std::vector<uint32_t> rt_first_subres;
-		std::vector<uint32_t> rt_num_subres;
-		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> rt_handles(clr_views_.size());
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+		if (views_dirty_)
 		{
-			if (clr_views_[i])
-			{
-				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src.push_back(p->RTSrc()->D3DResource().get());
-				rt_first_subres.push_back(p->RTFirstSubRes());
-				rt_num_subres.push_back(p->RTNumSubRes());
+			this->UpdateViewPointers();
 
-				rt_handles[i] = p->D3DRenderTargetView()->Handle();
-			}
-			else
-			{
-#ifdef KLAYGE_CPU_X64
-				rt_handles[i].ptr = ~0ULL;
-#else
-				rt_handles[i].ptr = ~0UL;
-#endif
-			}
+			views_dirty_ = false;
 		}
 
-		D3D12_CPU_DESCRIPTOR_HANDLE ds_handle;
-		D3D12_CPU_DESCRIPTOR_HANDLE* ds_handle_ptr;
-		if (rs_view_)
-		{
-			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(rs_view_.get());
+		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* cmd_list = re.D3DRenderCmdList();
 
-			ds_handle = p->D3DDepthStencilView()->Handle();
-			ds_handle_ptr = &ds_handle;
-		}
-		else
-		{
-			ds_handle_ptr = nullptr;
-		}
-
-		cmd_list->OMSetRenderTargets(static_cast<UINT>(rt_handles.size()),
-			rt_handles.empty() ? nullptr : &rt_handles[0], false, ds_handle_ptr);
-
-		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
-		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
-		d3d_viewport_.Width = static_cast<float>(viewport_->width);
-		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+		cmd_list->OMSetRenderTargets(static_cast<UINT>(d3d_rt_handles_.size()),
+			d3d_rt_handles_.empty() ? nullptr : &d3d_rt_handles_[0], false, d3d_ds_handle_ptr_);
 		re.RSSetViewports(1, &d3d_viewport_);
 	}
 
@@ -142,26 +109,26 @@ namespace KlayGE
 		}
 		if ((flags & CBM_Depth) && (flags & CBM_Stencil))
 		{
-			if (rs_view_)
+			if (ds_view_)
 			{
-				rs_view_->ClearDepthStencil(depth, stencil);
+				ds_view_->ClearDepthStencil(depth, stencil);
 			}
 		}
 		else
 		{
 			if (flags & CBM_Depth)
 			{
-				if (rs_view_)
+				if (ds_view_)
 				{
-					rs_view_->ClearDepth(depth);
+					ds_view_->ClearDepth(depth);
 				}
 			}
 
 			if (flags & CBM_Stencil)
 			{
-				if (rs_view_)
+				if (ds_view_)
 				{
-					rs_view_->ClearStencil(stencil);
+					ds_view_->ClearStencil(stencil);
 				}
 			}
 		}
@@ -181,71 +148,47 @@ namespace KlayGE
 		}
 		if ((flags & CBM_Depth) || (flags & CBM_Stencil))
 		{
-			if (rs_view_)
+			if (ds_view_)
 			{
-				rs_view_->Discard();
+				ds_view_->Discard();
 			}
 		}
 	}
 
 	void D3D12FrameBuffer::BindBarrier()
 	{
+		if (views_dirty_)
+		{
+			this->UpdateViewPointers();
+
+			views_dirty_ = false;
+		}
+
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		std::vector<D3D12Resource*> rt_src;
-		std::vector<uint32_t> rt_first_subres;
-		std::vector<uint32_t> rt_num_subres;
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
-		{
-			if (clr_views_[i])
-			{
-				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
-				rt_src.push_back(p->RTSrc().get());
-				rt_first_subres.push_back(p->RTFirstSubRes());
-				rt_num_subres.push_back(p->RTNumSubRes());
-			}
-		}
-
-		D3D12Resource* ds_src;
-		uint32_t ds_first_subres;
-		uint32_t ds_num_subres;
-		if (rs_view_)
-		{
-			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(rs_view_.get());
-			ds_src = p->DSSrc().get();
-			ds_first_subres = p->DSFirstSubRes();
-			ds_num_subres = p->DSNumSubRes();
-		}
-		else
-		{
-			ds_src = nullptr;
-			ds_first_subres = 0;
-			ds_num_subres = 0;
-		}
-
 		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		for (size_t i = 0; i < rt_src.size(); ++ i)
+		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			for (uint32_t j = 0; j < rt_num_subres[i]; ++ j)
+			for (uint32_t j = 0; j < d3d_rt_num_subres_[i]; ++ j)
 			{
-				if (rt_src[i]->UpdateResourceBarrier(rt_first_subres[i] + j, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
+				if (d3d_rt_src_[i]->UpdateResourceBarrier(d3d_rt_first_subres_[i] + j, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
 				{
 					barriers.push_back(barrier);
 				}
 			}
 		}
-		if (ds_src)
+		if (d3d_ds_src_)
 		{
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			for (uint32_t j = 0; j < ds_num_subres; ++ j)
+			for (uint32_t j = 0; j < d3d_ds_num_subres_; ++ j)
 			{
-				if (ds_src->UpdateResourceBarrier(ds_first_subres + j, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
+				if (d3d_ds_src_->UpdateResourceBarrier(d3d_ds_first_subres_ + j, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
 				{
 					barriers.push_back(barrier);
 				}
@@ -257,7 +200,55 @@ namespace KlayGE
 		}
 	}
 
-	void D3D12FrameBuffer::UnbindBarrier()
+	void D3D12FrameBuffer::UpdateViewPointers()
 	{
+		d3d_rt_src_.clear();
+		d3d_rt_first_subres_.clear();
+		d3d_rt_num_subres_.clear();
+		d3d_rt_handles_.resize(clr_views_.size());
+		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
+		{
+			if (clr_views_[i])
+			{
+				D3D12RenderTargetRenderView* p = checked_cast<D3D12RenderTargetRenderView*>(clr_views_[i].get());
+				d3d_rt_src_.push_back(p->RTSrc().get());
+				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
+				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
+
+				d3d_rt_handles_[i] = p->D3DRenderTargetView()->Handle();
+			}
+			else
+			{
+#ifdef KLAYGE_CPU_X64
+				d3d_rt_handles_[i].ptr = ~0ULL;
+#else
+				d3d_rt_handles_[i].ptr = ~0UL;
+#endif
+			}
+		}
+
+		if (ds_view_)
+		{
+			D3D12DepthStencilRenderView* p = checked_cast<D3D12DepthStencilRenderView*>(ds_view_.get());
+			d3d_ds_src_ = p->DSSrc().get();
+			d3d_ds_first_subres_ = p->DSFirstSubRes();
+			d3d_ds_num_subres_ = p->DSNumSubRes();
+
+			d3d_ds_handle_ = p->D3DDepthStencilView()->Handle();
+			d3d_ds_handle_ptr_ = &d3d_ds_handle_;
+		}
+		else
+		{
+			d3d_ds_src_ = nullptr;
+			d3d_ds_first_subres_ = 0;
+			d3d_ds_num_subres_ = 0;
+
+			d3d_ds_handle_ptr_ = nullptr;
+		}
+
+		d3d_viewport_.TopLeftX = static_cast<float>(viewport_->left);
+		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
+		d3d_viewport_.Width = static_cast<float>(viewport_->width);
+		d3d_viewport_.Height = static_cast<float>(viewport_->height);
 	}
 }

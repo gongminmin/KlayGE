@@ -558,7 +558,7 @@ namespace KlayGE
 		{
 			clr_views_[i].reset();
 		}
-		rs_view_.reset();
+		ds_view_.reset();
 
 		render_target_view_right_eye_.reset();
 		depth_stencil_view_right_eye_.reset();

@@ -11,25 +11,21 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
-#include <KFL/Util.hpp>
 #include <KlayGE/RenderView.hpp>
 
 namespace KlayGE
 {
-	void RenderView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
-	{
-	}
-	
-	void RenderView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	RenderView::~RenderView()
 	{
 	}
 
 
-	void UnorderedAccessView::OnBind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+	UnorderedAccessView::UnorderedAccessView()
+		: init_count_(0)
 	{
 	}
-	
-	void UnorderedAccessView::OnUnbind(FrameBuffer& /*fb*/, uint32_t /*att*/)
+
+	UnorderedAccessView::~UnorderedAccessView()
 	{
 	}
 }

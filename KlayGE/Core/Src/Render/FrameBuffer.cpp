@@ -86,12 +86,12 @@ namespace KlayGE
 		{
 		case ATT_DepthStencil:
 			{
-				if (rs_view_)
+				if (ds_view_)
 				{
 					this->Detach(att);
 				}
 
-				rs_view_ = view;
+				ds_view_ = view;
 			}
 			break;
 
@@ -152,9 +152,7 @@ namespace KlayGE
 		switch (att)
 		{
 		case ATT_DepthStencil:
-			{
-				rs_view_.reset();
-			}
+			ds_view_.reset();
 			break;
 
 		default:
@@ -183,7 +181,7 @@ namespace KlayGE
 		switch (att)
 		{
 		case ATT_DepthStencil:
-			return rs_view_;
+			return ds_view_;
 
 		default:
 			{
@@ -253,51 +251,6 @@ namespace KlayGE
 		else
 		{
 			return UnorderedAccessViewPtr();
-		}
-	}
-
-	void FrameBuffer::OnBind()
-	{
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
-		{
-			if (clr_views_[i])
-			{
-				clr_views_[i]->OnBind(*this, ATT_Color0 + i);
-			}
-		}
-		if (rs_view_)
-		{
-			rs_view_->OnBind(*this, ATT_DepthStencil);
-		}
-		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
-		{
-			if (ua_views_[i])
-			{
-				ua_views_[i]->OnBind(*this, i);
-			}
-		}
-		views_dirty_ = false;
-	}
-
-	void FrameBuffer::OnUnbind()
-	{
-		for (uint32_t i = 0; i < clr_views_.size(); ++ i)
-		{
-			if (clr_views_[i])
-			{
-				clr_views_[i]->OnUnbind(*this, ATT_Color0 + i);
-			}
-		}
-		if (rs_view_)
-		{
-			rs_view_->OnUnbind(*this, ATT_DepthStencil);
-		}
-		for (uint32_t i = 0; i < ua_views_.size(); ++ i)
-		{
-			if (ua_views_[i])
-			{
-				ua_views_[i]->OnUnbind(*this, i);
-			}
 		}
 	}
 }

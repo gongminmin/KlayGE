@@ -1109,8 +1109,6 @@ namespace KlayGE
 
 		num_draws_just_called_ += num_passes;
 
-		fb.UnbindBarrier();
-
 		last_engine_type_ = ET_Render;
 	}
 

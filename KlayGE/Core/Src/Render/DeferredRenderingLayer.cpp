@@ -4044,9 +4044,7 @@ namespace KlayGE
 		this->CreateVDMDepthMaxMap(pvp);
 
 		re.BindFrameBuffer(pvp.vdm_fb);
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color0)->ClearColor(Color(0, 0, 0, 0));
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color1)->ClearColor(Color(0, 0, 0, 0));
-		re.CurFrameBuffer()->Attached(FrameBuffer::ATT_Color2)->ClearColor(Color(0, 0, 0, 0));
+		re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 0), 0, 0);
 
 		return App3DFramework::URV_NeedFlush | App3DFramework::URV_VDMOnly;
 	}
