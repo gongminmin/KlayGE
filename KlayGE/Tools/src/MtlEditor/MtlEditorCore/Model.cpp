@@ -165,8 +165,11 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 	for (auto const & renderable : subrenderables_)
 	{
 		StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-		total_num_vertices += mesh->NumVertices();
-		total_num_indices += mesh->NumIndices();
+		for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+		{
+			total_num_vertices += mesh->NumVertices(lod);
+			total_num_indices += mesh->NumIndices(lod);
+		}
 	}
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -329,8 +332,11 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		for (auto const & renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			mesh->AddVertexStream(&texcoords[0], static_cast<uint32_t>(sizeof(tcs16[0]) * tcs16.size()),
-				VertexElement(VEU_TextureCoord, 0, EF_GR16), EAH_GPU_Read);
+			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+			{
+				mesh->AddVertexStream(lod, &texcoords[0], static_cast<uint32_t>(sizeof(tcs16[0]) * tcs16.size()),
+					VertexElement(VEU_TextureCoord, 0, EF_GR16), EAH_GPU_Read);
+			}
 		}
 	}
 
@@ -341,9 +347,12 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			for (auto const & renderable : subrenderables_)
 			{
 				StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-				MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(),
-					indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumIndices(),
-					positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices());
+				for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+				{
+					MathLib::compute_normal(normals.begin() + mesh->StartVertexLocation(lod),
+						indices.begin() + mesh->StartIndexLocation(lod), indices.begin() + mesh->StartIndexLocation(lod) + mesh->NumIndices(lod),
+						positions.begin() + mesh->StartVertexLocation(lod), positions.begin() + mesh->StartVertexLocation(lod) + mesh->NumVertices(lod));
+				}
 			}
 		}
 
@@ -354,10 +363,13 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		for (auto const & renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(), binormals.begin() + mesh->StartVertexLocation(),
-				indices.begin() + mesh->StartIndexLocation(), indices.begin() + mesh->StartIndexLocation() + mesh->NumIndices(),
-				positions.begin() + mesh->StartVertexLocation(), positions.begin() + mesh->StartVertexLocation() + mesh->NumVertices(),
-				texcoords.begin() + mesh->StartVertexLocation(), normals.begin() + mesh->StartVertexLocation());
+			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+			{
+				MathLib::compute_tangent(tangents.begin() + mesh->StartVertexLocation(lod), binormals.begin() + mesh->StartVertexLocation(lod),
+					indices.begin() + mesh->StartIndexLocation(lod), indices.begin() + mesh->StartIndexLocation(lod) + mesh->NumIndices(lod),
+					positions.begin() + mesh->StartVertexLocation(lod), positions.begin() + mesh->StartVertexLocation(lod) + mesh->NumVertices(lod),
+					texcoords.begin() + mesh->StartVertexLocation(lod), normals.begin() + mesh->StartVertexLocation(lod));
+			}
 		}
 
 		for (size_t j = 0; j < total_num_vertices; ++ j)
@@ -395,8 +407,11 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		for (auto const & renderable : subrenderables_)
 		{
 			StaticMeshPtr mesh = checked_pointer_cast<StaticMesh>(renderable);
-			mesh->AddVertexStream(&compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
-				VertexElement(VEU_Tangent, 0, fmt), EAH_GPU_Read);
+			for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
+			{
+				mesh->AddVertexStream(lod, &compacted[0], static_cast<uint32_t>(sizeof(compacted[0]) * compacted.size()),
+					VertexElement(VEU_Tangent, 0, fmt), EAH_GPU_Read);
+			}
 		}
 	}
 
@@ -611,11 +626,11 @@ SkeletonMesh::SkeletonMesh(RenderModelPtr const & model)
 	GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable,
 		static_cast<uint32_t>(indices.size() * sizeof(indices[0])), &indices[0]);
 
-	rl_ = rf.MakeRenderLayout();
-	rl_->TopologyType(RenderLayout::TT_TriangleList);
-	rl_->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
-	rl_->BindVertexStream(bone_index_vb, VertexElement(VEU_BlendIndex, 0, EF_ABGR8UI));
-	rl_->BindIndexStream(ib, EF_R16UI);
+	this->NumLods(1);
+	rls_[0]->TopologyType(RenderLayout::TT_TriangleList);
+	rls_[0]->BindVertexStream(pos_vb, VertexElement(VEU_Position, 0, EF_ABGR32F));
+	rls_[0]->BindVertexStream(bone_index_vb, VertexElement(VEU_BlendIndex, 0, EF_ABGR8UI));
+	rls_[0]->BindIndexStream(ib, EF_R16UI);
 
 	effect_attrs_ |= EA_SimpleForward;
 

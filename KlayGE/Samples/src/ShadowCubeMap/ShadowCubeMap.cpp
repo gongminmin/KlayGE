@@ -230,7 +230,10 @@ namespace
 		{
 			ShadowMapped::GenShadowMapPass(gen_sm, sm_type, pass_index);
 
-			rl_->TopologyType(RenderLayout::TT_TriangleList);
+			for (auto const & rl : rls_)
+			{
+				rl->TopologyType(RenderLayout::TT_TriangleList);
+			}
 
 			if (gen_sm)
 			{
@@ -242,7 +245,10 @@ namespace
 						if (TM_Hardware == caps.tess_method)
 						{
 							technique_ = effect_->TechniqueByName("GenDPShadowMapTessTech");
-							rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+							for (auto const & rl : rls_)
+							{
+								rl->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+							}
 							smooth_mesh_ = true;
 						}
 						else
@@ -251,31 +257,46 @@ namespace
 							smooth_mesh_ = false;
 						}
 					}
-					rl_->NumInstances(1);
+					for (auto const & rl : rls_)
+					{
+						rl->NumInstances(1);
+					}
 					break;
 				
 				case SMT_Cube:
 					technique_ = effect_->TechniqueByName("GenCubeShadowMap");
 					smooth_mesh_ = false;
-					rl_->NumInstances(1);
+					for (auto const & rl : rls_)
+					{
+						rl->NumInstances(1);
+					}
 					break;
 
 				case SMT_CubeOne:
 					technique_ = effect_->TechniqueByName("GenCubeOneShadowMap");
 					smooth_mesh_ = false;
-					rl_->NumInstances(1);
+					for (auto const & rl : rls_)
+					{
+						rl->NumInstances(1);
+					}
 					break;
 
 				case SMT_CubeOneInstance:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceShadowMap");
 					smooth_mesh_ = false;
-					rl_->NumInstances(6);
+					for (auto const & rl : rls_)
+					{
+						rl->NumInstances(6);
+					}
 					break;
 
 				default:
 					technique_ = effect_->TechniqueByName("GenCubeOneInstanceGSShadowMap");
 					smooth_mesh_ = false;
-					rl_->NumInstances(1);
+					for (auto const & rl : rls_)
+					{
+						rl->NumInstances(1);
+					}
 					break;
 				}
 			}
@@ -290,7 +311,10 @@ namespace
 					technique_ = effect_->TechniqueByName("RenderScene");
 				}
 				smooth_mesh_ = false;
-				rl_->NumInstances(1);
+				for (auto const & rl : rls_)
+				{
+					rl->NumInstances(1);
+				}
 			}
 		}
 

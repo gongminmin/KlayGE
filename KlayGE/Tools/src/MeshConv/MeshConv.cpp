@@ -112,18 +112,18 @@ namespace
 			auto const & mesh = meshes[node->mMeshes[n]];
 
 			int mesh_id = meshml_obj.AllocMesh();
-			meshml_obj.SetMesh(mesh_id, mesh.mtl_id, mesh.name);
+			meshml_obj.SetMesh(mesh_id, mesh.mtl_id, mesh.name, 1);
 
 			for (unsigned int ti = 0; ti < mesh.indices.size(); ti += 3)
 			{
-				int tri_id = meshml_obj.AllocTriangle(mesh_id);
-				meshml_obj.SetTriangle(mesh_id, tri_id, mesh.indices[ti + 0],
+				int tri_id = meshml_obj.AllocTriangle(mesh_id, 0);
+				meshml_obj.SetTriangle(mesh_id, 0, tri_id, mesh.indices[ti + 0],
 					mesh.indices[ti + 1], mesh.indices[ti + 2]);
 			}
 
 			for (unsigned int vi = 0; vi < mesh.positions.size(); ++ vi)
 			{
-				int vertex_id = meshml_obj.AllocVertex(mesh_id);
+				int vertex_id = meshml_obj.AllocVertex(mesh_id, 0);
 
 				std::vector<float3> texcoords;
 				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
@@ -138,20 +138,20 @@ namespace
 				if (mesh.has_tangent_frame)
 				{
 					auto const quat = mesh.tangent_quats[vi] * trans_quat;
-					meshml_obj.SetVertex(mesh_id, vertex_id, pos, quat, 2, texcoords);
+					meshml_obj.SetVertex(mesh_id, 0, vertex_id, pos, quat, 2, texcoords);
 				}
 				else
 				{
 					auto const normal = MathLib::transform_normal(mesh.normals[vi], trans_mat);
-					meshml_obj.SetVertex(mesh_id, vertex_id, pos, normal, 2, texcoords);
+					meshml_obj.SetVertex(mesh_id, 0, vertex_id, pos, normal, 2, texcoords);
 				}
 			}
 
 			for (unsigned int wi = 0; wi < mesh.joint_binding.size(); ++wi)
 			{
 				auto binding = mesh.joint_binding[wi];
-				int bind_id = meshml_obj.AllocJointBinding(mesh_id, binding.vertex_id);
-				meshml_obj.SetJointBinding(mesh_id, binding.vertex_id, bind_id, binding.joint_id, binding.weight);
+				int bind_id = meshml_obj.AllocJointBinding(mesh_id, 0, binding.vertex_id);
+				meshml_obj.SetJointBinding(mesh_id, 0, binding.vertex_id, bind_id, binding.joint_id, binding.weight);
 			}
 		}
 

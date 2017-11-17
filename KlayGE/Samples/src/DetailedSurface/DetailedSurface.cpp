@@ -313,11 +313,17 @@ namespace
 
 			if ((DT_FlatTessellation == detail_type_) || (DT_SmoothTessellation == detail_type_))
 			{
-				rl_->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				for (auto const & rl : rls_)
+				{
+					rl->TopologyType(RenderLayout::TT_3_Ctrl_Pt_PatchList);
+				}
 			}
 			else
 			{
-				rl_->TopologyType(RenderLayout::TT_TriangleList);
+				for (auto const & rl : rls_)
+				{
+					rl->TopologyType(RenderLayout::TT_TriangleList);
+				}
 			}
 		}
 

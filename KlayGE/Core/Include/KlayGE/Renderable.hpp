@@ -143,7 +143,16 @@ namespace KlayGE
 		{
 			return technique_;
 		}
+
+		virtual void NumLods(uint32_t lods);
+		virtual uint32_t NumLods() const;
+		virtual void ActiveLod(int32_t lod);
+		virtual int32_t ActiveLod() const
+		{
+			return active_lod_;
+		}
 		virtual RenderLayout& GetRenderLayout() const = 0;
+		virtual RenderLayout& GetRenderLayout(uint32_t lod) const;
 		virtual std::wstring const & Name() const = 0;
 
 		virtual void OnRenderBegin();
@@ -264,6 +273,8 @@ namespace KlayGE
 
 		RenderEffectPtr effect_;
 		RenderTechnique* technique_;
+
+		int32_t active_lod_;
 
 		// For select mode
 

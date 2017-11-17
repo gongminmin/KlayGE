@@ -47,7 +47,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const MODEL_BIN_VERSION = 14;
+	uint32_t const MODEL_BIN_VERSION = 15;
 
 	class RenderModelLoadingDesc : public ResLoadingDesc
 	{
@@ -61,21 +61,30 @@ namespace
 
 			struct ModelData
 			{
+				struct MeshData
+				{
+					std::string name;
+					int32_t mtl_id;
+					uint32_t lods;
+					AABBox pos_bb;
+					AABBox tc_bb;
+					std::vector<uint32_t> num_vertices;
+					std::vector<uint32_t> base_vertices;
+					std::vector<uint32_t> num_indices;
+					std::vector<uint32_t> start_indices;
+				};
+
 				std::vector<RenderMaterialPtr> mtls;
+
 				std::vector<VertexElement> merged_ves;
 				char all_is_index_16_bit;
 				std::vector<std::vector<uint8_t>> merged_buff;
 				std::vector<uint8_t> merged_indices;
 				std::vector<GraphicsBufferPtr> merged_vbs;
 				GraphicsBufferPtr merged_ib;
-				std::vector<std::string> mesh_names;
-				std::vector<int32_t> mtl_ids;
-				std::vector<AABBox> pos_bbs;
-				std::vector<AABBox> tc_bbs;
-				std::vector<uint32_t> mesh_num_vertices;
-				std::vector<uint32_t> mesh_base_vertices;
-				std::vector<uint32_t> mesh_num_indices;
-				std::vector<uint32_t> mesh_start_indices;
+
+				std::vector<MeshData> meshes;
+
 				std::vector<Joint> joints;
 				std::shared_ptr<AnimationActionsType> actions;
 				std::shared_ptr<KeyFramesType> kfs;
@@ -129,16 +138,47 @@ namespace
 				return;
 			}
 
+			std::vector<std::string> mesh_names;
+			std::vector<int32_t> mtl_ids;
+			std::vector<uint32_t> mesh_lods;
+			std::vector<AABBox> pos_bbs;
+			std::vector<AABBox> tc_bbs;
+			std::vector<uint32_t> mesh_num_vertices;
+			std::vector<uint32_t> mesh_base_vertices;
+			std::vector<uint32_t> mesh_num_indices;
+			std::vector<uint32_t> mesh_start_indices;
 			LoadModel(model_desc_.res_name, model_desc_.model_data->mtls, model_desc_.model_data->merged_ves,
 				model_desc_.model_data->all_is_index_16_bit,
 				model_desc_.model_data->merged_buff, model_desc_.model_data->merged_indices,
-				model_desc_.model_data->mesh_names, model_desc_.model_data->mtl_ids,
-				model_desc_.model_data->pos_bbs, model_desc_.model_data->tc_bbs,
-				model_desc_.model_data->mesh_num_vertices, model_desc_.model_data->mesh_base_vertices,
-				model_desc_.model_data->mesh_num_indices, model_desc_.model_data->mesh_start_indices,
+				mesh_names, mtl_ids, mesh_lods,
+				pos_bbs, tc_bbs,
+				mesh_num_vertices, mesh_base_vertices,
+				mesh_num_indices, mesh_start_indices,
 				model_desc_.model_data->joints, model_desc_.model_data->actions, model_desc_.model_data->kfs,
 				model_desc_.model_data->num_frames, model_desc_.model_data->frame_rate,
 				model_desc_.model_data->frame_pos_bbs);
+
+			model_desc_.model_data->meshes.resize(mesh_names.size());
+			uint32_t mesh_lod_index = 0;
+			for (size_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
+			{
+				model_desc_.model_data->meshes[mesh_index].name = mesh_names[mesh_index];
+				model_desc_.model_data->meshes[mesh_index].mtl_id = mtl_ids[mesh_index];
+				model_desc_.model_data->meshes[mesh_index].lods = mesh_lods[mesh_index];
+				model_desc_.model_data->meshes[mesh_index].pos_bb = pos_bbs[mesh_index];
+				model_desc_.model_data->meshes[mesh_index].tc_bb = tc_bbs[mesh_index];
+
+				uint32_t const lods = model_desc_.model_data->meshes[mesh_index].lods;
+				model_desc_.model_data->meshes[mesh_index].num_vertices.resize(lods);
+				model_desc_.model_data->meshes[mesh_index].base_vertices.resize(lods);
+				model_desc_.model_data->meshes[mesh_index].num_indices.resize(lods);
+				model_desc_.model_data->meshes[mesh_index].start_indices.resize(lods);
+				memcpy(&model_desc_.model_data->meshes[mesh_index].num_vertices[0], &mesh_num_vertices[mesh_lod_index], lods * sizeof(uint32_t));
+				memcpy(&model_desc_.model_data->meshes[mesh_index].base_vertices[0], &mesh_base_vertices[mesh_lod_index], lods * sizeof(uint32_t));
+				memcpy(&model_desc_.model_data->meshes[mesh_index].num_indices[0], &mesh_num_indices[mesh_lod_index], lods * sizeof(uint32_t));
+				memcpy(&model_desc_.model_data->meshes[mesh_index].start_indices[0], &mesh_start_indices[mesh_lod_index], lods * sizeof(uint32_t));
+				mesh_lod_index += lods;
+			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -196,8 +236,6 @@ namespace
 
 			if (rhs_model->NumSubrenderables() > 0)
 			{
-				RenderLayout const & rhs_rl = rhs_model->Subrenderable(0)->GetRenderLayout();
-			
 				std::vector<StaticMeshPtr> meshes(rhs_model->NumSubrenderables());
 				for (uint32_t mesh_index = 0; mesh_index < rhs_model->NumSubrenderables(); ++ mesh_index)
 				{
@@ -207,20 +245,26 @@ namespace
 					StaticMeshPtr& mesh = meshes[mesh_index];
 
 					mesh->MaterialID(rhs_mesh->MaterialID());
+					mesh->NumLods(rhs_mesh->NumLods());
 					mesh->PosBound(rhs_mesh->PosBound());
 					mesh->TexcoordBound(rhs_mesh->TexcoordBound());
 
-					for (uint32_t ve_index = 0; ve_index < rhs_rl.NumVertexStreams(); ++ ve_index)
+					for (uint32_t lod = 0; lod < rhs_mesh->NumLods(); ++ lod)
 					{
-						mesh->AddVertexStream(rhs_rl.GetVertexStream(ve_index),
-							rhs_rl.VertexStreamFormat(ve_index)[0]);
-					}
-					mesh->AddIndexStream(rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
+						RenderLayout const & rhs_rl = rhs_mesh->GetRenderLayout(lod);
 
-					mesh->NumVertices(rhs_mesh->NumVertices());
-					mesh->NumIndices(rhs_mesh->NumIndices());
-					mesh->StartVertexLocation(rhs_mesh->StartVertexLocation());
-					mesh->StartIndexLocation(rhs_mesh->StartIndexLocation());
+						for (uint32_t ve_index = 0; ve_index < rhs_rl.NumVertexStreams(); ++ ve_index)
+						{
+							mesh->AddVertexStream(lod, rhs_rl.GetVertexStream(ve_index),
+								rhs_rl.VertexStreamFormat(ve_index)[0]);
+						}
+						mesh->AddIndexStream(lod, rhs_rl.GetIndexStream(), rhs_rl.IndexStreamFormat());
+
+						mesh->NumVertices(lod, rhs_mesh->NumVertices(lod));
+						mesh->NumIndices(lod, rhs_mesh->NumIndices(lod));
+						mesh->StartVertexLocation(lod, rhs_mesh->StartVertexLocation(lod));
+						mesh->StartIndexLocation(lod, rhs_mesh->StartIndexLocation(lod));
+					}
 				}
 
 				BOOST_ASSERT(model->IsSkinned() == rhs_model->IsSkinned());
@@ -290,29 +334,34 @@ namespace
 			model_desc_.model_data->merged_ib = rf.MakeDelayCreationIndexBuffer(BU_Static, model_desc_.access_hint,
 				static_cast<uint32_t>(model_desc_.model_data->merged_indices.size()));
 
-			std::vector<StaticMeshPtr> meshes(model_desc_.model_data->mesh_names.size());
-			for (uint32_t mesh_index = 0; mesh_index < model_desc_.model_data->mesh_names.size(); ++ mesh_index)
+			std::vector<StaticMeshPtr> meshes(model_desc_.model_data->meshes.size());
+			for (uint32_t mesh_index = 0; mesh_index < model_desc_.model_data->meshes.size(); ++ mesh_index)
 			{
 				std::wstring wname;
-				Convert(wname, model_desc_.model_data->mesh_names[mesh_index]);
+				Convert(wname, model_desc_.model_data->meshes[mesh_index].name);
 
 				meshes[mesh_index] = model_desc_.CreateMeshFactoryFunc(model, wname);
 				StaticMeshPtr& mesh = meshes[mesh_index];
 
-				mesh->MaterialID(model_desc_.model_data->mtl_ids[mesh_index]);
-				mesh->PosBound(model_desc_.model_data->pos_bbs[mesh_index]);
-				mesh->TexcoordBound(model_desc_.model_data->tc_bbs[mesh_index]);
+				mesh->MaterialID(model_desc_.model_data->meshes[mesh_index].mtl_id);
+				mesh->PosBound(model_desc_.model_data->meshes[mesh_index].pos_bb);
+				mesh->TexcoordBound(model_desc_.model_data->meshes[mesh_index].tc_bb);
 
-				for (uint32_t ve_index = 0; ve_index < model_desc_.model_data->merged_buff.size(); ++ ve_index)
+				uint32_t const lods = model_desc_.model_data->meshes[mesh_index].lods;
+				mesh->NumLods(lods);
+				for (uint32_t lod = 0; lod < lods; ++ lod)
 				{
-					mesh->AddVertexStream(model_desc_.model_data->merged_vbs[ve_index], model_desc_.model_data->merged_ves[ve_index]);
-				}
-				mesh->AddIndexStream(model_desc_.model_data->merged_ib, model_desc_.model_data->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
+					for (uint32_t ve_index = 0; ve_index < model_desc_.model_data->merged_buff.size(); ++ ve_index)
+					{
+						mesh->AddVertexStream(lod, model_desc_.model_data->merged_vbs[ve_index], model_desc_.model_data->merged_ves[ve_index]);
+					}
+					mesh->AddIndexStream(lod, model_desc_.model_data->merged_ib, model_desc_.model_data->all_is_index_16_bit ? EF_R16UI : EF_R32UI);
 
-				mesh->NumVertices(model_desc_.model_data->mesh_num_vertices[mesh_index]);
-				mesh->NumIndices(model_desc_.model_data->mesh_num_indices[mesh_index]);
-				mesh->StartVertexLocation(model_desc_.model_data->mesh_base_vertices[mesh_index]);
-				mesh->StartIndexLocation(model_desc_.model_data->mesh_start_indices[mesh_index]);
+					mesh->NumVertices(lod, model_desc_.model_data->meshes[mesh_index].num_vertices[lod]);
+					mesh->NumIndices(lod, model_desc_.model_data->meshes[mesh_index].num_indices[lod]);
+					mesh->StartVertexLocation(lod, model_desc_.model_data->meshes[mesh_index].base_vertices[lod]);
+					mesh->StartIndexLocation(lod, model_desc_.model_data->meshes[mesh_index].start_indices[lod]);
+				}
 			}
 
 			if (model_desc_.model_data->kfs && !model_desc_.model_data->kfs->empty())
@@ -389,6 +438,24 @@ namespace KlayGE
 		: name_(name),
 			hw_res_ready_(false)
 	{
+	}
+
+	void RenderModel::NumLods(uint32_t lods)
+	{
+		for (auto const & mesh : subrenderables_)
+		{
+			mesh->NumLods(lods);
+		}
+	}
+
+	uint32_t RenderModel::NumLods() const
+	{
+		uint32_t max_lod = 0;
+		for (auto const & mesh : subrenderables_)
+		{
+			max_lod = std::max(max_lod, mesh->NumLods());
+		}
+		return max_lod;
 	}
 
 	void RenderModel::AddToRenderQueue()
@@ -517,12 +584,22 @@ namespace KlayGE
 		: name_(name), model_(model),
 			hw_res_ready_(false)
 	{
-		rl_ = Context::Instance().RenderFactoryInstance().MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
 	}
 
 	StaticMesh::~StaticMesh()
 	{
+	}
+
+	void StaticMesh::NumLods(uint32_t lods)
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
+		rls_.resize(lods);
+		for (auto& rl : rls_)
+		{
+			rl = rf.MakeRenderLayout();
+			rl->TopologyType(RenderLayout::TT_TriangleList);
+		}
 	}
 
 	void StaticMesh::DoBuildMeshInfo()
@@ -595,29 +672,29 @@ namespace KlayGE
 		tc_aabb_ = aabb;
 	}
 
-	void StaticMesh::AddVertexStream(void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint)
+	void StaticMesh::AddVertexStream(uint32_t lod, void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, access_hint, size, buf);
-		this->AddVertexStream(vb, ve);
+		this->AddVertexStream(lod, vb, ve);
 	}
 
-	void StaticMesh::AddVertexStream(GraphicsBufferPtr const & buffer, VertexElement const & ve)
+	void StaticMesh::AddVertexStream(uint32_t lod, GraphicsBufferPtr const & buffer, VertexElement const & ve)
 	{
-		rl_->BindVertexStream(buffer, ve);
+		rls_[lod]->BindVertexStream(buffer, ve);
 	}
 
-	void StaticMesh::AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)
+	void StaticMesh::AddIndexStream(uint32_t lod, void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, access_hint, size, buf);
-		this->AddIndexStream(ib, format);
+		this->AddIndexStream(lod, ib, format);
 	}
 
-	void StaticMesh::AddIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format)
+	void StaticMesh::AddIndexStream(uint32_t lod, GraphicsBufferPtr const & index_stream, ElementFormat format)
 	{
-		rl_->BindIndexStream(index_stream, format);
+		rls_[lod]->BindIndexStream(index_stream, format);
 	}
 
 
@@ -1001,7 +1078,7 @@ namespace KlayGE
 	void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<uint32_t>& mesh_lods,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
@@ -1224,18 +1301,22 @@ namespace KlayGE
 
 		mesh_names.resize(num_meshes);
 		mtl_ids.resize(num_meshes);
+		mesh_lods.resize(num_meshes);
 		pos_bbs.resize(num_meshes);
 		tc_bbs.resize(num_meshes);
-		mesh_num_vertices.resize(num_meshes);
-		mesh_base_vertices.resize(num_meshes);
-		mesh_num_indices.resize(num_meshes);
-		mesh_base_indices.resize(num_meshes);
+		mesh_num_vertices.clear();
+		mesh_base_vertices.clear();
+		mesh_num_indices.clear();
+		mesh_base_indices.clear();
 		for (uint32_t mesh_index = 0; mesh_index < num_meshes; ++ mesh_index)
 		{
 			mesh_names[mesh_index] = ReadShortString(decoded);
 
 			decoded->read(&mtl_ids[mesh_index], sizeof(mtl_ids[mesh_index]));
 			mtl_ids[mesh_index] = LE2Native(mtl_ids[mesh_index]);
+
+			decoded->read(&mesh_lods[mesh_index], sizeof(mesh_lods[mesh_index]));
+			mesh_lods[mesh_index] = LE2Native(mesh_lods[mesh_index]);
 
 			float3 min_bb, max_bb;
 			decoded->read(&min_bb, sizeof(min_bb));
@@ -1260,14 +1341,18 @@ namespace KlayGE
 			max_bb.z() = 0;
 			tc_bbs[mesh_index] = AABBox(min_bb, max_bb);
 
-			decoded->read(&mesh_num_vertices[mesh_index], sizeof(mesh_num_vertices[mesh_index]));
-			mesh_num_vertices[mesh_index] = LE2Native(mesh_num_vertices[mesh_index]);
-			decoded->read(&mesh_base_vertices[mesh_index], sizeof(mesh_base_vertices[mesh_index]));
-			mesh_base_vertices[mesh_index] = LE2Native(mesh_base_vertices[mesh_index]);
-			decoded->read(&mesh_num_indices[mesh_index], sizeof(mesh_num_indices[mesh_index]));
-			mesh_num_indices[mesh_index] = LE2Native(mesh_num_indices[mesh_index]);
-			decoded->read(&mesh_base_indices[mesh_index], sizeof(mesh_base_indices[mesh_index]));
-			mesh_base_indices[mesh_index] = LE2Native(mesh_base_indices[mesh_index]);
+			for (uint32_t lod = 0; lod < mesh_lods[mesh_index]; ++ lod)
+			{
+				uint32_t tmp;
+				decoded->read(&tmp, sizeof(tmp));
+				mesh_num_vertices.push_back(LE2Native(tmp));
+				decoded->read(&tmp, sizeof(tmp));
+				mesh_base_vertices.push_back(LE2Native(tmp));
+				decoded->read(&tmp, sizeof(tmp));
+				mesh_num_indices.push_back(LE2Native(tmp));
+				decoded->read(&tmp, sizeof(tmp));
+				mesh_base_indices.push_back(LE2Native(tmp));
+			}
 		}
 
 		joints.resize(num_joints);
@@ -1446,7 +1531,7 @@ namespace KlayGE
 	void SaveModelToMeshML(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
-		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
@@ -1497,11 +1582,12 @@ namespace KlayGE
 				mtls[i]->tess_factors.x(), mtls[i]->tess_factors.y(), mtls[i]->tess_factors.z(), mtls[i]->tess_factors.w());
 		}
 
+		uint32_t mesh_lod_index = 0;
 		for (size_t i = 0; i < mesh_names.size(); ++ i)
 		{
 			int mesh_id = obj.AllocMesh();
 			
-			obj.SetMesh(mesh_id, mtl_map[mtl_ids[i]], mesh_names[i]);
+			obj.SetMesh(mesh_id, mtl_map[mtl_ids[i]], mesh_names[i], mesh_lods[i]);
 
 			AABBox const & pos_bb = pos_bbs[i];
 			AABBox const & tc_bb = tc_bbs[i];
@@ -1510,224 +1596,227 @@ namespace KlayGE
 			float3 const tc_center = tc_bb.Center();
 			float3 const tc_extent = tc_bb.HalfSize();
 
-			for (size_t v = 0; v < mesh_num_vertices[i]; ++ v)
+			for (uint32_t lod = 0; lod < mesh_lods[i]; ++ lod, ++ mesh_lod_index)
 			{
-				int vert_id = obj.AllocVertex(mesh_id);
-
-				float3 pos;
-				float3 normal;
-				Quaternion tangent_quat;
-				std::vector<float3> texcoords;
-				std::vector<std::pair<int, float>> bindings;
-				bool has_normal = false;
-				for (size_t ve = 0; ve < merged_ves.size(); ++ ve)
+				for (size_t v = 0; v < mesh_num_vertices[mesh_lod_index]; ++ v)
 				{
-					uint8_t const * src = &merged_buffs[ve][(mesh_base_vertices[i] + v) * merged_ves[ve].element_size()];
+					int vert_id = obj.AllocVertex(mesh_id, lod);
 
-					switch (merged_ves[ve].usage)
+					float3 pos;
+					float3 normal;
+					Quaternion tangent_quat;
+					std::vector<float3> texcoords;
+					std::vector<std::pair<int, float>> bindings;
+					bool has_normal = false;
+					for (size_t ve = 0; ve < merged_ves.size(); ++ ve)
 					{
-					case VEU_Position:
-						pos = float3(0, 0, 0);
-						switch (merged_ves[ve].format)
+						uint8_t const * src = &merged_buffs[ve][(mesh_base_vertices[i] + v) * merged_ves[ve].element_size()];
+
+						switch (merged_ves[ve].usage)
 						{
-						case EF_ABGR32F:
-						case EF_BGR32F:
-						case EF_GR32F:
-						case EF_R32F:
-							std::memcpy(&pos, src, std::min<int>(merged_ves[ve].element_size(), sizeof(pos)));
-							break;
-
-						default:
+						case VEU_Position:
+							pos = float3(0, 0, 0);
+							switch (merged_ves[ve].format)
 							{
-								BOOST_ASSERT(EF_SIGNED_ABGR16 == merged_ves[ve].format);
+							case EF_ABGR32F:
+							case EF_BGR32F:
+							case EF_GR32F:
+							case EF_R32F:
+								std::memcpy(&pos, src, std::min<int>(merged_ves[ve].element_size(), sizeof(pos)));
+								break;
 
-								int16_t const * p = reinterpret_cast<int16_t const *>(src);
-								pos.x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * pos_extent.x() + pos_center.x();
-								pos.y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * pos_extent.y() + pos_center.y();
-								pos.z() = (((p[2] + 32768) / 65536.0f) * 2 - 1) * pos_extent.z() + pos_center.z();
-							}
-							break;
-						}
-						break;
+							default:
+								{
+									BOOST_ASSERT(EF_SIGNED_ABGR16 == merged_ves[ve].format);
 
-					case VEU_TextureCoord:
-						texcoords.push_back(float3(0, 0, 0));
-						switch (merged_ves[ve].format)
-						{
-						case EF_ABGR32F:
-						case EF_BGR32F:
-						case EF_GR32F:
-						case EF_R32F:
-							std::memcpy(&texcoords.back(), src, std::min<int>(merged_ves[ve].element_size(), sizeof(texcoords.back())));
-							break;
-
-						default:
-							{
-								BOOST_ASSERT(EF_SIGNED_GR16 == merged_ves[ve].format);
-
-								int16_t const * p = reinterpret_cast<int16_t const *>(src);
-								texcoords.back().x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * tc_extent.x() + tc_center.x();
-								texcoords.back().y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * tc_extent.y() + tc_center.y();
-							}
-							break;
-						}
-						break;
-
-					case VEU_Normal:
-						has_normal = true;
-						switch (merged_ves[ve].format)
-						{
-						case EF_ABGR32F:
-						case EF_BGR32F:
-							std::memcpy(&normal, src, std::min<int>(merged_ves[ve].element_size(), sizeof(normal)));
-							break;
-
-						case EF_A2BGR10:
-							{
-								uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
-								normal.x() = ((p >>  0) & 0x3FF) / 1023.0f * 2 - 1;
-								normal.y() = ((p >> 10) & 0x3FF) / 1023.0f * 2 - 1;
-								normal.z() = ((p >> 20) & 0x3FF) / 1023.0f * 2 - 1;
+									int16_t const * p = reinterpret_cast<int16_t const *>(src);
+									pos.x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * pos_extent.x() + pos_center.x();
+									pos.y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * pos_extent.y() + pos_center.y();
+									pos.z() = (((p[2] + 32768) / 65536.0f) * 2 - 1) * pos_extent.z() + pos_center.z();
+								}
+								break;
 							}
 							break;
 
-						case EF_ABGR8:
+						case VEU_TextureCoord:
+							texcoords.push_back(float3(0, 0, 0));
+							switch (merged_ves[ve].format)
 							{
-								uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
-								normal.x() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
-								normal.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
-								normal.z() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
+							case EF_ABGR32F:
+							case EF_BGR32F:
+							case EF_GR32F:
+							case EF_R32F:
+								std::memcpy(&texcoords.back(), src, std::min<int>(merged_ves[ve].element_size(), sizeof(texcoords.back())));
+								break;
+
+							default:
+								{
+									BOOST_ASSERT(EF_SIGNED_GR16 == merged_ves[ve].format);
+
+									int16_t const * p = reinterpret_cast<int16_t const *>(src);
+									texcoords.back().x() = (((p[0] + 32768) / 65536.0f) * 2 - 1) * tc_extent.x() + tc_center.x();
+									texcoords.back().y() = (((p[1] + 32768) / 65536.0f) * 2 - 1) * tc_extent.y() + tc_center.y();
+								}
+								break;
 							}
 							break;
 
-						default:
+						case VEU_Normal:
+							has_normal = true;
+							switch (merged_ves[ve].format)
 							{
-								BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
+							case EF_ABGR32F:
+							case EF_BGR32F:
+								std::memcpy(&normal, src, std::min<int>(merged_ves[ve].element_size(), sizeof(normal)));
+								break;
 
-								uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
-								normal.x() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
-								normal.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
-								normal.z() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
+							case EF_A2BGR10:
+								{
+									uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
+									normal.x() = ((p >>  0) & 0x3FF) / 1023.0f * 2 - 1;
+									normal.y() = ((p >> 10) & 0x3FF) / 1023.0f * 2 - 1;
+									normal.z() = ((p >> 20) & 0x3FF) / 1023.0f * 2 - 1;
+								}
+								break;
+
+							case EF_ABGR8:
+								{
+									uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
+									normal.x() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
+									normal.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
+									normal.z() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
+								}
+								break;
+
+							default:
+								{
+									BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
+
+									uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
+									normal.x() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
+									normal.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
+									normal.z() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
+								}
+								break;
 							}
 							break;
-						}
-						break;
 
-					case VEU_Tangent:
-						has_normal = false;
-						switch (merged_ves[ve].format)
-						{
-						case EF_ABGR32F:
-							std::memcpy(&tangent_quat, src, std::min<int>(merged_ves[ve].element_size(), sizeof(tangent_quat)));
-							break;
-
-						case EF_ABGR8:
+						case VEU_Tangent:
+							has_normal = false;
+							switch (merged_ves[ve].format)
 							{
-								uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
-								tangent_quat.x() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.z() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.w() = ((p >> 24) & 0xFF) / 255.0f * 2 - 1;
+							case EF_ABGR32F:
+								std::memcpy(&tangent_quat, src, std::min<int>(merged_ves[ve].element_size(), sizeof(tangent_quat)));
+								break;
+
+							case EF_ABGR8:
+								{
+									uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
+									tangent_quat.x() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.z() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.w() = ((p >> 24) & 0xFF) / 255.0f * 2 - 1;
+								}
+								break;
+
+							default:
+								{
+									BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
+
+									uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
+									tangent_quat.x() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.z() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
+									tangent_quat.w() = ((p >> 24) & 0xFF) / 255.0f * 2 - 1;
+								}
+								break;
 							}
 							break;
 
-						default:
+						case VEU_BlendIndex:
+							bindings.resize(4);
+							for (int b = 0; b < 4; ++ b)
 							{
-								BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
-
-								uint32_t const p = *reinterpret_cast<uint32_t const *>(src);
-								tangent_quat.x() = ((p >> 16) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.y() = ((p >>  8) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.z() = ((p >>  0) & 0xFF) / 255.0f * 2 - 1;
-								tangent_quat.w() = ((p >> 24) & 0xFF) / 255.0f * 2 - 1;
+								bindings[b].first = src[b];
 							}
 							break;
-						}
-						break;
 
-					case VEU_BlendIndex:
-						bindings.resize(4);
-						for (int b = 0; b < 4; ++ b)
-						{
-							bindings[b].first = src[b];
-						}
-						break;
-
-					case VEU_BlendWeight:
-						bindings.resize(4);
-						switch (merged_ves[ve].format)
-						{
-						case EF_ABGR32F:
+						case VEU_BlendWeight:
+							bindings.resize(4);
+							switch (merged_ves[ve].format)
 							{
-								float const * p = reinterpret_cast<float const *>(src);
+							case EF_ABGR32F:
+								{
+									float const * p = reinterpret_cast<float const *>(src);
+									for (int b = 0; b < 4; ++ b)
+									{
+										bindings[b].second = p[b];
+									}
+								}
+								break;
+
+							case EF_ABGR8:
 								for (int b = 0; b < 4; ++ b)
 								{
-									bindings[b].second = p[b];
+									bindings[b].second = src[b] / 255.0f;
 								}
-							}
-							break;
+								break;
 
-						case EF_ABGR8:
-							for (int b = 0; b < 4; ++ b)
-							{
-								bindings[b].second = src[b] / 255.0f;
+							default:
+								BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
+								
+								for (int b = 0; b < 4; ++ b)
+								{
+									bindings[b].second = src[b] / 255.0f;
+								}
+								std::swap(bindings[0].second, bindings[2].second);
+								break;
 							}
 							break;
 
 						default:
-							BOOST_ASSERT(EF_ARGB8 == merged_ves[ve].format);
-								
-							for (int b = 0; b < 4; ++ b)
-							{
-								bindings[b].second = src[b] / 255.0f;
-							}
-							std::swap(bindings[0].second, bindings[2].second);
 							break;
 						}
-						break;
-
-					default:
-						break;
 					}
-				}
-				if (has_normal)
-				{
-					obj.SetVertex(mesh_id, vert_id, pos, normal, 2, texcoords);
-				}
-				else
-				{
-					obj.SetVertex(mesh_id, vert_id, pos, tangent_quat, 2, texcoords);
-				}
-
-				for (size_t b = 0; b < bindings.size(); ++ b)
-				{
-					if (bindings[b].second > 0)
+					if (has_normal)
 					{
-						int binding_id = obj.AllocJointBinding(mesh_id, vert_id);
-						obj.SetJointBinding(mesh_id, vert_id, binding_id, joint_map[bindings[b].first], bindings[b].second);
+						obj.SetVertex(mesh_id, lod, vert_id, pos, normal, 2, texcoords);
+					}
+					else
+					{
+						obj.SetVertex(mesh_id, lod, vert_id, pos, tangent_quat, 2, texcoords);
+					}
+
+					for (size_t b = 0; b < bindings.size(); ++ b)
+					{
+						if (bindings[b].second > 0)
+						{
+							int binding_id = obj.AllocJointBinding(mesh_id, lod, vert_id);
+							obj.SetJointBinding(mesh_id, lod, vert_id, binding_id, joint_map[bindings[b].first], bindings[b].second);
+						}
 					}
 				}
-			}
 
-			for (size_t t = 0; t < mesh_num_indices[i]; t += 3)
-			{
-				int tri_id = obj.AllocTriangle(mesh_id);
-				int index[3];
-				if (all_is_index_16_bit)
+				for (size_t t = 0; t < mesh_num_indices[mesh_lod_index]; t += 3)
 				{
-					uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_indices[i] + t) * sizeof(uint16_t)]);
-					index[0] = src[0];
-					index[1] = src[1];
-					index[2] = src[2];
+					int tri_id = obj.AllocTriangle(mesh_id, lod);
+					int index[3];
+					if (all_is_index_16_bit)
+					{
+						uint16_t const * src = reinterpret_cast<uint16_t const *>(&merged_indices[(mesh_base_indices[mesh_lod_index] + t) * sizeof(uint16_t)]);
+						index[0] = src[0];
+						index[1] = src[1];
+						index[2] = src[2];
+					}
+					else
+					{
+						uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_indices[mesh_lod_index] + t)* sizeof(uint32_t)]);
+						index[0] = src[0];
+						index[1] = src[1];
+						index[2] = src[2];
+					}
+					obj.SetTriangle(mesh_id, lod, tri_id, index[0], index[1], index[2]);
 				}
-				else
-				{
-					uint32_t const * src = reinterpret_cast<uint32_t const *>(&merged_indices[(mesh_base_indices[i] + t)* sizeof(uint32_t)]);
-					index[0] = src[0];
-					index[1] = src[1];
-					index[2] = src[2];
-				}
-				obj.SetTriangle(mesh_id, tri_id, index[0], index[1], index[2]);
 			}
 		}
 
@@ -1834,7 +1923,7 @@ namespace KlayGE
 		}
 	}
 
-	void WriteMeshesChunk(std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+	void WriteMeshesChunk(std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_start_indices,
@@ -1864,12 +1953,16 @@ namespace KlayGE
 		}
 		os.write(reinterpret_cast<char const *>(&merged_indices[0]), merged_indices.size() * sizeof(merged_indices[0]));
 
-		for (uint32_t mesh_index = 0; mesh_index < mesh_num_vertices.size(); ++ mesh_index)
+		uint32_t mesh_lod_index = 0;
+		for (uint32_t mesh_index = 0; mesh_index < mesh_names.size(); ++ mesh_index)
 		{
 			WriteShortString(os, mesh_names[mesh_index]);
 
 			int32_t mtl_id = Native2LE(mtl_ids[mesh_index]);
 			os.write(reinterpret_cast<char*>(&mtl_id), sizeof(mtl_id));
+
+			uint32_t lods = Native2LE(mesh_lods[mesh_index]);
+			os.write(reinterpret_cast<char*>(&lods), sizeof(lods));
 
 			float3 min_bb;
 			min_bb.x() = Native2LE(pos_bbs[mesh_index].Min().x());
@@ -1891,14 +1984,17 @@ namespace KlayGE
 			os.write(reinterpret_cast<char*>(&max_bb[0]), sizeof(max_bb[0]));
 			os.write(reinterpret_cast<char*>(&max_bb[1]), sizeof(max_bb[1]));
 
-			uint32_t nv = Native2LE(mesh_num_vertices[mesh_index]);
-			os.write(reinterpret_cast<char*>(&nv), sizeof(nv));
-			uint32_t bv = Native2LE(mesh_base_vertices[mesh_index]);
-			os.write(reinterpret_cast<char*>(&bv), sizeof(bv));
-			uint32_t ni = Native2LE(mesh_num_indices[mesh_index]);
-			os.write(reinterpret_cast<char*>(&ni), sizeof(ni));
-			uint32_t si = Native2LE(mesh_start_indices[mesh_index]);
-			os.write(reinterpret_cast<char*>(&si), sizeof(si));
+			for (uint32_t lod = 0; lod < lods; ++ lod, ++ mesh_lod_index)
+			{
+				uint32_t nv = Native2LE(mesh_num_vertices[mesh_lod_index]);
+				os.write(reinterpret_cast<char*>(&nv), sizeof(nv));
+				uint32_t bv = Native2LE(mesh_base_vertices[mesh_lod_index]);
+				os.write(reinterpret_cast<char*>(&bv), sizeof(bv));
+				uint32_t ni = Native2LE(mesh_num_indices[mesh_lod_index]);
+				os.write(reinterpret_cast<char*>(&ni), sizeof(ni));
+				uint32_t si = Native2LE(mesh_start_indices[mesh_lod_index]);
+				os.write(reinterpret_cast<char*>(&si), sizeof(si));
+			}
 		}
 	}
 
@@ -2004,7 +2100,7 @@ namespace KlayGE
 	void SaveModelToJIT(std::string const & jit_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
-		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
@@ -2037,7 +2133,7 @@ namespace KlayGE
 
 		if (!mesh_names.empty())
 		{
-			WriteMeshesChunk(mesh_names, mtl_ids, pos_bbs, tc_bbs,
+			WriteMeshesChunk(mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 				mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 				merged_ves, merged_buffs, merged_indices, all_is_index_16_bit, ss);
 		}
@@ -2098,7 +2194,7 @@ namespace KlayGE
 	void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
-		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,
@@ -2108,14 +2204,14 @@ namespace KlayGE
 		if (meshml_name.find(jit_ext_name) != std::string::npos)
 		{
 			SaveModelToJIT(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
-				mesh_names, mtl_ids, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
+				mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_base_indices, joints, actions,
 				kfs, num_frames, frame_rate);
 		}
 		else
 		{
 			SaveModelToMeshML(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
-				mesh_names, mtl_ids, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
+				mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs, mesh_num_vertices, mesh_base_vertices,
 				mesh_num_indices, mesh_base_indices, joints, actions,
 				kfs, num_frames, frame_rate);
 		}
@@ -2140,12 +2236,13 @@ namespace KlayGE
 		std::vector<uint8_t> merged_indices;
 		std::vector<std::string> mesh_names(model->NumSubrenderables());
 		std::vector<int32_t> mtl_ids(mesh_names.size());
+		std::vector<uint32_t> mesh_lods(mesh_names.size());
 		std::vector<AABBox> pos_bbs(mesh_names.size());
 		std::vector<AABBox> tc_bbs(mesh_names.size());
-		std::vector<uint32_t> mesh_num_vertices(mesh_names.size());
-		std::vector<uint32_t> mesh_base_vertices(mesh_names.size());
-		std::vector<uint32_t> mesh_num_indices(mesh_names.size());
-		std::vector<uint32_t> mesh_base_indices(mesh_names.size());
+		std::vector<uint32_t> mesh_num_vertices;
+		std::vector<uint32_t> mesh_base_vertices;
+		std::vector<uint32_t> mesh_num_indices;
+		std::vector<uint32_t> mesh_base_indices;
 		if (!mesh_names.empty())
 		{
 			{
@@ -2202,13 +2299,18 @@ namespace KlayGE
 				Convert(mesh_names[mesh_index], mesh.Name());
 				mtl_ids[mesh_index] = mesh.MaterialID();
 
+				mesh_lods[mesh_index] = mesh.NumLods();
+
 				pos_bbs[mesh_index] = mesh.PosBound();
 				tc_bbs[mesh_index] = mesh.TexcoordBound();
 
-				mesh_num_vertices[mesh_index] = mesh.NumVertices();
-				mesh_base_vertices[mesh_index] = mesh.StartVertexLocation();
-				mesh_num_indices[mesh_index] = mesh.NumIndices();
-				mesh_base_indices[mesh_index] =  mesh.StartIndexLocation();
+				for (uint32_t lod = 0; lod < mesh_lods[mesh_index]; ++ lod)
+				{
+					mesh_num_vertices.push_back(mesh.NumVertices(lod));
+					mesh_base_vertices.push_back(mesh.StartVertexLocation(lod));
+					mesh_num_indices.push_back(mesh.NumIndices(lod));
+					mesh_base_indices.push_back(mesh.StartIndexLocation(lod));
+				}
 			}
 		}
 
@@ -2268,7 +2370,7 @@ namespace KlayGE
 		}
 
 		SaveModel(meshml_name, mtls, merged_ves, all_is_index_16_bit, merged_buffs, merged_indices,
-			mesh_names, mtl_ids, pos_bbs, tc_bbs,
+			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_base_indices,
 			joints, actions, kfs, num_frame, frame_rate);
 	}

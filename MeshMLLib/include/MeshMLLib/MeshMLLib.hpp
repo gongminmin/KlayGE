@@ -158,20 +158,20 @@ namespace KlayGE
 		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string_view name);
 
 		int AllocMesh();
-		void SetMesh(int mesh_id, int material_id, std::string_view name);
-		int AllocVertex(int mesh_id);
-		void SetVertex(int mesh_id, int vertex_id, float3 const & pos, float3 const & normal,
+		void SetMesh(int mesh_id, int material_id, std::string_view name, int num_lods);
+		int AllocVertex(int mesh_id, int lod);
+		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, float3 const & normal,
 			int texcoord_components, std::vector<float3> const & texcoords);
-		void SetVertex(int mesh_id, int vertex_id, float3 const & pos,
+		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos,
 			float3 const & tangent, float3 const & binormal, float3 const & normal,
 			int texcoord_components, std::vector<float3> const & texcoords);
-		void SetVertex(int mesh_id, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
+		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
 			int texcoord_components, std::vector<float3> const & texcoords);
-		int AllocJointBinding(int mesh_id, int vertex_id);
-		void SetJointBinding(int mesh_id, int vertex_id, int binding_id,
+		int AllocJointBinding(int mesh_id, int lod, int vertex_id);
+		void SetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
 			int joint_id, float weight);
-		int AllocTriangle(int mesh_id);
-		void SetTriangle(int mesh_id, int triangle_id, int index0, int index1, int index2);
+		int AllocTriangle(int mesh_id, int lod);
+		void SetTriangle(int mesh_id, int lod, int triangle_id, int index0, int index1, int index2);
 
 		int AllocKeyframes();
 		void SetKeyframes(int kfs_id, int joint_id);
@@ -209,8 +209,8 @@ namespace KlayGE
 		{
 			int material_id;
 			std::string name;
-			std::vector<Vertex> vertices;
-			std::vector<Triangle> triangles;
+			std::vector<std::vector<Vertex>> lod_vertices;
+			std::vector<std::vector<Triangle>> lod_triangles;
 		};
 
 		struct Joint
@@ -248,6 +248,8 @@ namespace KlayGE
 		void WriteJointChunk(std::ostream& os);
 		void WriteMaterialChunk(std::ostream& os);
 		void WriteMeshChunk(std::ostream& os, int vertex_export_settings);
+		void WriteLodVerticesChunk(std::ostream& os, Mesh const & mesh, size_t lod, std::string_view indent, int vertex_export_settings);
+		void WriteLodTrianglesChunk(std::ostream& os, Mesh const & mesh, size_t lod, std::string_view indent);
 		void WriteKeyframeChunk(std::ostream& os);
 		void WriteAABBKeyframeChunk(std::ostream& os);
 		void WriteActionChunk(std::ostream& os);

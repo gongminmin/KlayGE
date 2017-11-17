@@ -460,7 +460,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 		int mtl_id = this->ExportMaterialAndTexture((shader_objects.length() > 0) ? &shader_objects[0] : NULL,
 			texture_objects);
 
-		meshml_obj_.SetMesh(mesh_id, mtl_id, obj_name.asChar());
+		meshml_obj_.SetMesh(mesh_id, mtl_id, obj_name.asChar(), 1);
 
 		// Get points
 		MFloatPointArray points;
@@ -606,7 +606,7 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 					BOOST_ASSERT(vert_weights.size() == joint_dag_paths.size());
 					size_t num_binds = vert_weights.size();
 
-					int vertex_id = meshml_obj_.AllocVertex(mesh_id);
+					int vertex_id = meshml_obj_.AllocVertex(mesh_id, 0);
 					if (has_texcoords)
 					{
 						MFloatVector tang = tangents[attr.tangent_index];
@@ -617,13 +617,13 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 						std::vector<KlayGE::float3> texcoords;
 						texcoords.push_back(KlayGE::float3(u, v, 0));
 
-						meshml_obj_.SetVertex(mesh_id, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
+						meshml_obj_.SetVertex(mesh_id, 0, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
 							KlayGE::float3(tang[0], tang[1], tang[2]), KlayGE::float3(bi[0], bi[1], bi[2]),
 							KlayGE::float3(norm[0], norm[1], norm[2]), 2, texcoords);
 					}
 					else
 					{
-						meshml_obj_.SetVertex(mesh_id, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
+						meshml_obj_.SetVertex(mesh_id, 0, vertex_id, KlayGE::float3(pos[0], pos[1], pos[2]),
 							KlayGE::float3(norm[0], norm[1], norm[2]), 2, std::vector<KlayGE::float3>());
 					}
 					
@@ -634,8 +634,8 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 							auto iter = joint_to_id_.find(joint_dag_paths[n].fullPathName().asChar());
 							BOOST_ASSERT(iter != joint_to_id_.end());
 
-							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, vertex_id);
-							meshml_obj_.SetJointBinding(mesh_id, vertex_id, binding_id, iter->second, vert_weights[n]);
+							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, 0, vertex_id);
+							meshml_obj_.SetJointBinding(mesh_id, 0, vertex_id, binding_id, iter->second, vert_weights[n]);
 						}
 					}
 
@@ -650,16 +650,16 @@ void MayaMeshExporter::ExportMesh(MString const & obj_name, MFnMesh& fn_mesh, MD
 
 			if (3 == poly_vertex_count)
 			{
-				int tri_id = meshml_obj_.AllocTriangle(mesh_id);
-				meshml_obj_.SetTriangle(mesh_id, tri_id, tri_indices[0], tri_indices[1], tri_indices[2]);
+				int tri_id = meshml_obj_.AllocTriangle(mesh_id, 0);
+				meshml_obj_.SetTriangle(mesh_id, 0, tri_id, tri_indices[0], tri_indices[1], tri_indices[2]);
 			}
 			else if (4 == poly_vertex_count)
 			{
-				int tri0_id = meshml_obj_.AllocTriangle(mesh_id);
-				meshml_obj_.SetTriangle(mesh_id, tri0_id, tri_indices[0], tri_indices[1], tri_indices[2]);
+				int tri0_id = meshml_obj_.AllocTriangle(mesh_id, 0);
+				meshml_obj_.SetTriangle(mesh_id, 0, tri0_id, tri_indices[0], tri_indices[1], tri_indices[2]);
 
-				int tri1_id = meshml_obj_.AllocTriangle(mesh_id);
-				meshml_obj_.SetTriangle(mesh_id, tri1_id, tri_indices[0], tri_indices[2], tri_indices[3]);
+				int tri1_id = meshml_obj_.AllocTriangle(mesh_id, 0);
+				meshml_obj_.SetTriangle(mesh_id, 0, tri1_id, tri_indices[0], tri_indices[2], tri_indices[3]);
 			}
 		}
 	}

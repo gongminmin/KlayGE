@@ -57,9 +57,18 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		virtual RenderLayout& GetRenderLayout() const override
+		void NumLods(uint32_t lods) override;
+		uint32_t NumLods() const override
 		{
-			return *rl_;
+			return static_cast<uint32_t>(rls_.size());
+		}
+		RenderLayout& GetRenderLayout() const override
+		{
+			return this->GetRenderLayout(active_lod_);
+		}
+		RenderLayout& GetRenderLayout(uint32_t lod) const override
+		{
+			return *rls_[lod];
 		}
 
 		virtual AABBox const & PosBound() const;
@@ -69,54 +78,54 @@ namespace KlayGE
 
 		virtual std::wstring const & Name() const;
 
-		void NumVertices(uint32_t n)
+		void NumVertices(uint32_t lod, uint32_t n)
 		{
-			rl_->NumVertices(n);
+			rls_[lod]->NumVertices(n);
 		}
-		uint32_t NumVertices() const
+		uint32_t NumVertices(uint32_t lod) const
 		{
-			return rl_->NumVertices();
-		}
-
-		void NumIndices(uint32_t n)
-		{
-			rl_->NumIndices(n);
-		}
-		uint32_t NumIndices() const
-		{
-			return rl_->NumIndices();
+			return rls_[lod]->NumVertices();
 		}
 
-		void AddVertexStream(void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint);
-		void AddVertexStream(GraphicsBufferPtr const & buffer, VertexElement const & ve);
-		void AddIndexStream(void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
-		void AddIndexStream(GraphicsBufferPtr const & index_stream, ElementFormat format);
-
-		void StartVertexLocation(uint32_t location)
+		void NumIndices(uint32_t lod, uint32_t n)
 		{
-			rl_->StartVertexLocation(location);
+			rls_[lod]->NumIndices(n);
 		}
-		uint32_t StartVertexLocation() const
+		uint32_t NumIndices(uint32_t lod) const
 		{
-			return rl_->StartVertexLocation();
+			return rls_[lod]->NumIndices();
 		}
 
-		void StartIndexLocation(uint32_t location)
+		void AddVertexStream(uint32_t lod, void const * buf, uint32_t size, VertexElement const & ve, uint32_t access_hint);
+		void AddVertexStream(uint32_t lod, GraphicsBufferPtr const & buffer, VertexElement const & ve);
+		void AddIndexStream(uint32_t lod, void const * buf, uint32_t size, ElementFormat format, uint32_t access_hint);
+		void AddIndexStream(uint32_t lod, GraphicsBufferPtr const & index_stream, ElementFormat format);
+
+		void StartVertexLocation(uint32_t lod, uint32_t location)
 		{
-			rl_->StartIndexLocation(location);
+			rls_[lod]->StartVertexLocation(location);
 		}
-		uint32_t StartIndexLocation() const
+		uint32_t StartVertexLocation(uint32_t lod) const
 		{
-			return rl_->StartIndexLocation();
+			return rls_[lod]->StartVertexLocation();
 		}
 
-		void StartInstanceLocation(uint32_t location)
+		void StartIndexLocation(uint32_t lod, uint32_t location)
 		{
-			rl_->StartInstanceLocation(location);
+			rls_[lod]->StartIndexLocation(location);
 		}
-		uint32_t StartInstanceLocation() const
+		uint32_t StartIndexLocation(uint32_t lod) const
 		{
-			return rl_->StartInstanceLocation();
+			return rls_[lod]->StartIndexLocation();
+		}
+
+		void StartInstanceLocation(uint32_t lod, uint32_t location)
+		{
+			rls_[lod]->StartInstanceLocation(location);
+		}
+		uint32_t StartInstanceLocation(uint32_t lod) const
+		{
+			return rls_[lod]->StartInstanceLocation();
 		}
 
 		int32_t MaterialID() const
@@ -139,7 +148,7 @@ namespace KlayGE
 	protected:
 		std::wstring name_;
 
-		RenderLayoutPtr rl_;
+		std::vector<RenderLayoutPtr> rls_;
 
 		AABBox pos_aabb_;
 		AABBox tc_aabb_;
@@ -177,7 +186,9 @@ namespace KlayGE
 			technique_ = tech;
 		}
 
-		virtual RenderLayout& GetRenderLayout() const override
+		void NumLods(uint32_t lods) override;
+		uint32_t NumLods() const override;
+		RenderLayout& GetRenderLayout() const override
 		{
 			return *rl_;
 		}
@@ -438,7 +449,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void LoadModel(std::string const & meshml_name, std::vector<RenderMaterialPtr>& mtls,
 		std::vector<VertexElement>& merged_ves, char& all_is_index_16_bit,
 		std::vector<std::vector<uint8_t>>& merged_buff, std::vector<uint8_t>& merged_indices,
-		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids,
+		std::vector<std::string>& mesh_names, std::vector<int32_t>& mtl_ids, std::vector<uint32_t>& mesh_lods,
 		std::vector<AABBox>& pos_bbs, std::vector<AABBox>& tc_bbs,
 		std::vector<uint32_t>& mesh_num_vertices, std::vector<uint32_t>& mesh_base_vertices,
 		std::vector<uint32_t>& mesh_num_indices, std::vector<uint32_t>& mesh_base_indices,
@@ -455,7 +466,7 @@ namespace KlayGE
 	KLAYGE_CORE_API void SaveModel(std::string const & meshml_name, std::vector<RenderMaterialPtr> const & mtls,
 		std::vector<VertexElement> const & merged_ves, char all_is_index_16_bit, 
 		std::vector<std::vector<uint8_t>> const & merged_buffs, std::vector<uint8_t> const & merged_indices,
-		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids,
+		std::vector<std::string> const & mesh_names, std::vector<int32_t> const & mtl_ids, std::vector<uint32_t> const & mesh_lods,
 		std::vector<AABBox> const & pos_bbs, std::vector<AABBox> const & tc_bbs,
 		std::vector<uint32_t> const & mesh_num_vertices, std::vector<uint32_t> const & mesh_base_vertices,
 		std::vector<uint32_t> const & mesh_num_indices, std::vector<uint32_t> const & mesh_base_indices,

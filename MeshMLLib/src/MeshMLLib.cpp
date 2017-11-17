@@ -195,98 +195,107 @@ namespace KlayGE
 		return id;
 	}
 
-	void MeshMLObj::SetMesh(int mesh_id, int material_id, std::string_view name)
+	void MeshMLObj::SetMesh(int mesh_id, int material_id, std::string_view name, int lod)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
 
 		Mesh& mesh = meshes_[mesh_id];
 		mesh.material_id = material_id;
 		mesh.name = std::string(name);
+		mesh.lod_vertices.resize(lod);
+		mesh.lod_triangles.resize(lod);
 	}
 
-	int MeshMLObj::AllocVertex(int mesh_id)
+	int MeshMLObj::AllocVertex(int mesh_id, int lod)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
 
 		Mesh& mesh = meshes_[mesh_id];
-		int id = static_cast<int>(mesh.vertices.size());
-		mesh.vertices.resize(id + 1);
+		int id = static_cast<int>(mesh.lod_vertices[lod].size());
+		mesh.lod_vertices[lod].resize(id + 1);
 		return id;
 	}
 
-	void MeshMLObj::SetVertex(int mesh_id, int vertex_id, float3 const & pos, float3 const & normal,
+	void MeshMLObj::SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, float3 const & normal,
 		int texcoord_components, std::vector<float3> const & texcoords)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].vertices.size()) > vertex_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
 
-		Vertex& vertex = meshes_[mesh_id].vertices[vertex_id];
+		Vertex& vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		vertex.position = pos * unit_scale_;
 		vertex.normal = normal;
 		vertex.texcoord_components = texcoord_components;
 		vertex.texcoords = texcoords;
 	}
 
-	void MeshMLObj::SetVertex(int mesh_id, int vertex_id, float3 const & pos,
+	void MeshMLObj::SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos,
 		float3 const & tangent, float3 const & binormal, float3 const & normal,
 		int texcoord_components, std::vector<float3> const & texcoords)
 	{
-		this->SetVertex(mesh_id, vertex_id, pos, MathLib::to_quaternion(tangent, binormal, normal, 8),
+		this->SetVertex(mesh_id, lod, vertex_id, pos, MathLib::to_quaternion(tangent, binormal, normal, 8),
 			texcoord_components, texcoords);
 	}
 
-	void MeshMLObj::SetVertex(int mesh_id, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
+	void MeshMLObj::SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
 		int texcoord_components, std::vector<float3> const & texcoords)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].vertices.size()) > vertex_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
 
-		Vertex& vertex = meshes_[mesh_id].vertices[vertex_id];
+		Vertex& vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		vertex.position = pos * unit_scale_;
 		vertex.tangent_quat = tangent_quat;
 		vertex.texcoord_components = texcoord_components;
 		vertex.texcoords = texcoords;
 	}
 
-	int MeshMLObj::AllocJointBinding(int mesh_id, int vertex_id)
+	int MeshMLObj::AllocJointBinding(int mesh_id, int lod, int vertex_id)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].vertices.size()) > vertex_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
 
-		Vertex& vertex = meshes_[mesh_id].vertices[vertex_id];
+		Vertex& vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		int id = static_cast<int>(vertex.binds.size());
 		vertex.binds.resize(id + 1);
 		return id;
 	}
 
-	void MeshMLObj::SetJointBinding(int mesh_id, int vertex_id, int binding_id,
+	void MeshMLObj::SetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
 			int joint_id, float weight)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].vertices.size()) > vertex_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].vertices[vertex_id].binds.size()) > binding_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod][vertex_id].binds.size()) > binding_id);
 
-		JointBinding& binding = meshes_[mesh_id].vertices[vertex_id].binds[binding_id];
+		JointBinding& binding = meshes_[mesh_id].lod_vertices[lod][vertex_id].binds[binding_id];
 		binding.first = joint_id;
 		binding.second = weight;
 	}
 
-	int MeshMLObj::AllocTriangle(int mesh_id)
+	int MeshMLObj::AllocTriangle(int mesh_id, int lod)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles.size()) > lod);
 
 		Mesh& mesh = meshes_[mesh_id];
-		int id = static_cast<int>(mesh.triangles.size());
-		mesh.triangles.resize(id + 1);
+		int id = static_cast<int>(mesh.lod_triangles[lod].size());
+		mesh.lod_triangles[lod].resize(id + 1);
 		return id;
 	}
 
-	void MeshMLObj::SetTriangle(int mesh_id, int triangle_id, int index0, int index1, int index2)
+	void MeshMLObj::SetTriangle(int mesh_id, int lod, int triangle_id, int index0, int index1, int index2)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
-		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].triangles.size()) > triangle_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles[lod].size()) > triangle_id);
 
-		Triangle& triangle = meshes_[mesh_id].triangles[triangle_id];
+		Triangle& triangle = meshes_[mesh_id].lod_triangles[lod][triangle_id];
 		triangle.vertex_index[0] = index0;
 		triangle.vertex_index[1] = index1;
 		triangle.vertex_index[2] = index2;
@@ -407,14 +416,17 @@ namespace KlayGE
 			// Replace joint_id in weight
 			for (auto& mesh : meshes_)
 			{
-				for (auto& vertex : mesh.vertices)
+				for (auto& lod : mesh.lod_vertices)
 				{
-					for (auto& bind : vertex.binds)
+					for (auto& vertex : lod)
 					{
-						auto fiter = joint_id_to_index.find(bind.first);
-						BOOST_ASSERT(fiter != joint_id_to_index.end());
+						for (auto& bind : vertex.binds)
+						{
+							auto fiter = joint_id_to_index.find(bind.first);
+							BOOST_ASSERT(fiter != joint_id_to_index.end());
 
-						bind.first = fiter->second;
+							bind.first = fiter->second;
+						}
 					}
 				}
 			}
@@ -605,17 +617,15 @@ namespace KlayGE
 			os << "\t\t<mesh name=\"" << RemoveQuote(mesh.name)
 				<< "\" mtl_id=\"" << mesh.material_id << "\">" << std::endl;
 
-			os << "\t\t\t<vertices_chunk>" << std::endl;
-
-			float3 pos_min_bb = mesh.vertices[0].position;
+			float3 pos_min_bb = mesh.lod_vertices[0][0].position;
 			float3 pos_max_bb = pos_min_bb;
 			float2 tc_min_bb(-1, -1);
 			float2 tc_max_bb(+1, +1);
 			if (vertex_export_settings & VES_Texcoord)
 			{
-				tc_min_bb = tc_max_bb = mesh.vertices[0].texcoords[0];
+				tc_min_bb = tc_max_bb = mesh.lod_vertices[0][0].texcoords[0];
 			}
-			for (auto const & vertex : mesh.vertices)
+			for (auto const & vertex : mesh.lod_vertices[0])
 			{
 				pos_min_bb.x() = std::min(pos_min_bb.x(), vertex.position.x());
 				pos_min_bb.y() = std::min(pos_min_bb.y(), vertex.position.y());
@@ -635,116 +645,152 @@ namespace KlayGE
 				}
 			}
 
-			os << "\t\t\t\t<pos_bb min=\"" << pos_min_bb.x() << " " << pos_min_bb.y()
-				<< " " << pos_min_bb.z() << "\" max=\"" << pos_max_bb.x() << " " << pos_max_bb.y()
-				<< " " << pos_max_bb.z() << "\"/>" << std::endl;
-			if (vertex_export_settings & VES_Texcoord)
+			if (mesh.lod_vertices.size() == 1)
 			{
-				os << "\t\t\t\t<tc_bb min=\"" << tc_min_bb.x() << " " << tc_min_bb.y()
-					<< "\" max=\"" << tc_max_bb.x() << " " << tc_max_bb.y() << "\"/>" << std::endl;
-			}
-			os << std::endl;
+				os << "\t\t\t<vertices_chunk>" << std::endl;
 
-			for (auto const & vertex : mesh.vertices)
-			{
-				os << "\t\t\t\t<vertex v=\"" << vertex.position.x()
-					<< " " << vertex.position.y()
-					<< " " << vertex.position.z() << "\"";
-				if (vertex_export_settings != VES_None)
+				os << "\t\t\t\t<pos_bb min=\"" << pos_min_bb.x() << " " << pos_min_bb.y()
+					<< " " << pos_min_bb.z() << "\" max=\"" << pos_max_bb.x() << " " << pos_max_bb.y()
+					<< " " << pos_max_bb.z() << "\"/>" << std::endl;
+				if (vertex_export_settings & VES_Texcoord)
 				{
-					os << ">" << std::endl;
-
-					if (vertex_export_settings & VES_Normal)
-					{
-						os << "\t\t\t\t\t<normal v=\"" << vertex.normal.x()
-							<< " " << vertex.normal.y()
-							<< " " << vertex.normal.z() << "\"/>" << std::endl;
-					}
-
-					if (vertex_export_settings & VES_TangentQuat)
-					{
-						os << "\t\t\t\t\t<tangent_quat v=\"" << vertex.tangent_quat.x()
-							<< " " << vertex.tangent_quat.y()
-							<< " " << vertex.tangent_quat.z()
-							<< " " << vertex.tangent_quat.w() << "\"/>" << std::endl;
-					}
-
-					if (vertex_export_settings & VES_Texcoord)
-					{
-						switch (vertex.texcoord_components)
-						{
-						case 1:
-							for (auto const & tc : vertex.texcoords)
-							{
-								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x() << "\"/>" << std::endl;
-							}
-							break;
-
-						case 2:
-							for (auto const & tc : vertex.texcoords)
-							{
-								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
-									<< " " << tc.y() << "\"/>" << std::endl;
-							}
-							break;
-
-						case 3:
-							for (auto const & tc : vertex.texcoords)
-							{
-								os << "\t\t\t\t\t<tex_coord v=\"" << tc.x()
-									<< " " << tc.y() << " " << tc.z() << "\"/>" << std::endl;
-							}
-							break;
-
-						default:
-							break;
-						}
-					}
-
-					if (!vertex.binds.empty())
-					{
-						os << "\t\t\t\t\t<weight joint=\"";
-						for (size_t i = 0; i < vertex.binds.size(); ++ i)
-						{
-							os << vertex.binds[i].first;
-							if (i != vertex.binds.size() - 1)
-							{
-								os << ' ';
-							}
-						}
-						os << "\" weight=\"";
-						for (size_t i = 0; i < vertex.binds.size(); ++ i)
-						{
-							os << vertex.binds[i].second;
-							if (i != vertex.binds.size() - 1)
-							{
-								os << ' ';
-							}
-						}
-						os << "\"/>" << std::endl;
-					}
-
-					os << "\t\t\t\t</vertex>" << std::endl;
+					os << "\t\t\t\t<tc_bb min=\"" << tc_min_bb.x() << " " << tc_min_bb.y()
+						<< "\" max=\"" << tc_max_bb.x() << " " << tc_max_bb.y() << "\"/>" << std::endl;
 				}
-				else
+				os << std::endl;
+
+				WriteLodVerticesChunk(os, mesh, 0, "\t\t\t\t", vertex_export_settings);
+
+				os << "\t\t\t</vertices_chunk>" << std::endl;
+
+				os << "\t\t\t<triangles_chunk>" << std::endl;
+				WriteLodTrianglesChunk(os, mesh, 0, "\t\t\t\t");
+				os << "\t\t\t</triangles_chunk>" << std::endl;
+			}
+			else
+			{
+				os << "\t\t\t<pos_bb min=\"" << pos_min_bb.x() << " " << pos_min_bb.y()
+					<< " " << pos_min_bb.z() << "\" max=\"" << pos_max_bb.x() << " " << pos_max_bb.y()
+					<< " " << pos_max_bb.z() << "\"/>" << std::endl;
+				if (vertex_export_settings & VES_Texcoord)
 				{
-					os << "/>" << std::endl;
+					os << "\t\t\t<tc_bb min=\"" << tc_min_bb.x() << " " << tc_min_bb.y()
+						<< "\" max=\"" << tc_max_bb.x() << " " << tc_max_bb.y() << "\"/>" << std::endl;
+				}
+				os << std::endl;
+
+				for (size_t lod = 0; lod < mesh.lod_vertices.size(); ++ lod)
+				{
+					os << "\t\t\t<lod value=\"" << lod << "\"/>" << std::endl;
+					WriteLodVerticesChunk(os, mesh, lod, "\t\t\t\t", vertex_export_settings);
+					WriteLodTrianglesChunk(os, mesh, lod, "\t\t\t\t");
+					os << "\t\t\t</lod>" << std::endl;
 				}
 			}
-			os << "\t\t\t</vertices_chunk>" << std::endl;
-
-			os << "\t\t\t<triangles_chunk>" << std::endl;
-			for (auto const & tri : mesh.triangles)
-			{
-				os << "\t\t\t\t<triangle index=\"" << tri.vertex_index[0]
-					<< " " << tri.vertex_index[1]
-					<< " " << tri.vertex_index[2] << "\"/>" << std::endl;
-			}
-			os << "\t\t\t</triangles_chunk>" << std::endl;
 
 			os << "\t\t</mesh>" << std::endl;
 		}
 		os << "\t</meshes_chunk>" << std::endl;
+	}
+
+	void MeshMLObj::WriteLodVerticesChunk(std::ostream& os, Mesh const & mesh, size_t lod, std::string_view indent, int vertex_export_settings)
+	{
+		for (auto const & vertex : mesh.lod_vertices[lod])
+		{
+			os << indent << "<vertex v=\"" << vertex.position.x()
+				<< " " << vertex.position.y()
+				<< " " << vertex.position.z() << "\"";
+			if (vertex_export_settings != VES_None)
+			{
+				os << ">" << std::endl;
+
+				if (vertex_export_settings & VES_Normal)
+				{
+					os << indent << "\t<normal v=\"" << vertex.normal.x()
+						<< " " << vertex.normal.y()
+						<< " " << vertex.normal.z() << "\"/>" << std::endl;
+				}
+
+				if (vertex_export_settings & VES_TangentQuat)
+				{
+					os << indent << "\t<tangent_quat v=\"" << vertex.tangent_quat.x()
+						<< " " << vertex.tangent_quat.y()
+						<< " " << vertex.tangent_quat.z()
+						<< " " << vertex.tangent_quat.w() << "\"/>" << std::endl;
+				}
+
+				if (vertex_export_settings & VES_Texcoord)
+				{
+					switch (vertex.texcoord_components)
+					{
+					case 1:
+						for (auto const & tc : vertex.texcoords)
+						{
+							os << indent << "\t<tex_coord v=\"" << tc.x() << "\"/>" << std::endl;
+						}
+						break;
+
+					case 2:
+						for (auto const & tc : vertex.texcoords)
+						{
+							os << indent << "\t<tex_coord v=\"" << tc.x()
+								<< " " << tc.y() << "\"/>" << std::endl;
+						}
+						break;
+
+					case 3:
+						for (auto const & tc : vertex.texcoords)
+						{
+							os << indent << "\t<tex_coord v=\"" << tc.x()
+								<< " " << tc.y() << " " << tc.z() << "\"/>" << std::endl;
+						}
+						break;
+
+					default:
+						break;
+					}
+				}
+
+				if (!vertex.binds.empty())
+				{
+					os << indent << "\t<weight joint=\"";
+					for (size_t i = 0; i < vertex.binds.size(); ++ i)
+					{
+						os << vertex.binds[i].first;
+						if (i != vertex.binds.size() - 1)
+						{
+							os << ' ';
+						}
+					}
+					os << "\" weight=\"";
+					for (size_t i = 0; i < vertex.binds.size(); ++ i)
+					{
+						os << vertex.binds[i].second;
+						if (i != vertex.binds.size() - 1)
+						{
+							os << ' ';
+						}
+					}
+					os << "\"/>" << std::endl;
+				}
+
+				os << indent << "</vertex>" << std::endl;
+			}
+			else
+			{
+				os << "/>" << std::endl;
+			}
+		}
+	}
+
+	void MeshMLObj::WriteLodTrianglesChunk(std::ostream& os, Mesh const & mesh, size_t lod, std::string_view indent)
+	{
+		for (auto const & tri : mesh.lod_triangles[lod])
+		{
+			os << indent << "<triangle index=\"" << tri.vertex_index[0]
+				<< " " << tri.vertex_index[1]
+				<< " " << tri.vertex_index[2] << "\"/>" << std::endl;
+		}
 	}
 
 	void MeshMLObj::WriteKeyframeChunk(std::ostream& os)
@@ -845,9 +891,9 @@ namespace KlayGE
 			{
 				float3 bb_min(+1e10f, +1e10f, +1e10f);
 				float3 bb_max(-1e10f, -1e10f, -1e10f);
-				for (size_t v = 0; v < meshes_[m].vertices.size(); ++ v)
+				for (size_t v = 0; v < meshes_[m].lod_vertices[0].size(); ++ v)
 				{
-					Vertex const & vertex = meshes_[m].vertices[v];
+					Vertex const & vertex = meshes_[m].lod_vertices[0][v];
 
 					Quaternion const & dp0 = bind_reals[vertex.binds[0].first];
 	
@@ -987,11 +1033,14 @@ namespace KlayGE
 		// Find all joints used in the mesh list
 		for (auto const & mesh : meshes_)
 		{
-			for (auto const & vertex : mesh.vertices)
+			for (auto const & lod : mesh.lod_vertices)
 			{
-				for (auto const & bind : vertex.binds)
+				for (auto const & vertex : lod)
 				{
-					joints_used.insert(bind.first);
+					for (auto const & bind : vertex.binds)
+					{
+						joints_used.insert(bind.first);
+					}
 				}
 			}
 		}
@@ -1089,17 +1138,27 @@ namespace KlayGE
 
 					for (auto const & mesh : meshes_to_combine)
 					{
-						int base = static_cast<int>(opt_mesh.vertices.size());
-						opt_mesh.vertices.insert(opt_mesh.vertices.end(),
-							mesh.vertices.begin(), mesh.vertices.end());
+						opt_mesh.lod_vertices.resize(std::max(opt_mesh.lod_vertices.size(), mesh.lod_vertices.size()));
+						opt_mesh.lod_triangles.resize(std::max(opt_mesh.lod_triangles.size(), mesh.lod_triangles.size()));
+					}
 
-						for (auto const & tri : mesh.triangles)
+					for (auto const & mesh : meshes_to_combine)
+					{
+						size_t lod = 0;
+						for (; lod < mesh.lod_vertices.size(); ++ lod)
 						{
-							Triangle opt_tri;
-							opt_tri.vertex_index[0] = tri.vertex_index[0] + base;
-							opt_tri.vertex_index[1] = tri.vertex_index[1] + base;
-							opt_tri.vertex_index[2] = tri.vertex_index[2] + base;
-							opt_mesh.triangles.push_back(opt_tri);
+							int base = static_cast<int>(opt_mesh.lod_vertices[lod].size());
+							opt_mesh.lod_vertices[lod].insert(opt_mesh.lod_vertices[lod].end(),
+								mesh.lod_vertices[lod].begin(), mesh.lod_vertices[lod].end());
+
+							for (auto const & tri : mesh.lod_triangles[lod])
+							{
+								Triangle opt_tri;
+								opt_tri.vertex_index[0] = tri.vertex_index[0] + base;
+								opt_tri.vertex_index[1] = tri.vertex_index[1] + base;
+								opt_tri.vertex_index[2] = tri.vertex_index[2] + base;
+								opt_mesh.lod_triangles[lod].push_back(opt_tri);
+							}
 						}
 					}
 					meshes_finished.push_back(opt_mesh);

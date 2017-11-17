@@ -82,13 +82,19 @@ namespace KlayGE
 
 		void InstanceBuffer(GraphicsBufferPtr const & vb)
 		{
-			rl_->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
-				RenderLayout::ST_Instance);
+			for (auto const & rl : rls_)
+			{
+				rl->BindVertexStream(vb, { VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) },
+					RenderLayout::ST_Instance);
+			}
 		}
 
 		void ForceNumInstances(uint32_t num)
 		{
-			rl_->NumInstances(num);
+			for (auto const & rl : rls_)
+			{
+				rl->NumInstances(num);
+			}
 		}
 	};
 

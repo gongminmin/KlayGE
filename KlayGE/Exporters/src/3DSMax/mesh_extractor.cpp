@@ -810,7 +810,7 @@ namespace KlayGE
 
 						vertex_t const & vert = obj_vertices[*iter];
 
-						int vertex_id = meshml_obj_.AllocVertex(mesh_id);
+						int vertex_id = meshml_obj_.AllocVertex(mesh_id, 0);
 						float3 pos(vert.pos.x, vert.pos.y, vert.pos.z);
 						float3 normal(vert.normal.x, vert.normal.y, vert.normal.z);
 						float3 tangent(vert.tangent.x, vert.tangent.y, vert.tangent.z);
@@ -820,30 +820,30 @@ namespace KlayGE
 						{
 							tex_coords[ti] = float3(vert.tex[ti].x, vert.tex[ti].y, 0);
 						}
-						meshml_obj_.SetVertex(mesh_id, vertex_id, pos, tangent, binormal, normal, 2, tex_coords);
+						meshml_obj_.SetVertex(mesh_id, 0, vertex_id, pos, tangent, binormal, normal, 2, tex_coords);
 
 						for (size_t bi = 0; bi < obj_vertices[*iter].binds.size(); ++ bi)
 						{
-							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, vertex_id);
-							meshml_obj_.SetJointBinding(mesh_id, vertex_id, binding_id,
+							int binding_id = meshml_obj_.AllocJointBinding(mesh_id, 0, vertex_id);
+							meshml_obj_.SetJointBinding(mesh_id, 0, vertex_id, binding_id,
 								joint_node_to_id_[obj_vertices[*iter].binds[bi].first], obj_vertices[*iter].binds[bi].second);
 						}
 					}
 					for (size_t j = 0; j < obj_info_tris.size(); ++ j)
 					{
-						int triangle_id = meshml_obj_.AllocTriangle(mesh_id);
-						meshml_obj_.SetTriangle(mesh_id, triangle_id, mapping[obj_info_tris[j].vertex_index[0]],
+						int triangle_id = meshml_obj_.AllocTriangle(mesh_id, 0);
+						meshml_obj_.SetTriangle(mesh_id, 0, triangle_id, mapping[obj_info_tris[j].vertex_index[0]],
 							mapping[obj_info_tris[j].vertex_index[1]], mapping[obj_info_tris[j].vertex_index[2]]);
 					}
 				
 					if (objs_mtl_id_.size() - mtl_base_index <= 1)
 					{
-						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], obj_name);
+						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], obj_name, 1);
 					}
 					else
 					{
 						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], 
-							obj_name + "__mat_" + boost::lexical_cast<std::string>(i - mtl_base_index));
+							obj_name + "__mat_" + boost::lexical_cast<std::string>(i - mtl_base_index), 1);
 					}
 				}
 			}
