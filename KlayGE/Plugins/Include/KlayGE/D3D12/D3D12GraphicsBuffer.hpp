@@ -91,6 +91,8 @@ namespace KlayGE
 		uint32_t counter_offset_;
 
 		ElementFormat fmt_as_shader_res_;
+
+		BufferAccess last_ba_;
 	};
 	typedef std::shared_ptr<D3D12GraphicsBuffer> D3D12GraphicsBufferPtr;
 }

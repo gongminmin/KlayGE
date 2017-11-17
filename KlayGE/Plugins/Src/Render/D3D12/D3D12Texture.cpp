@@ -777,8 +777,12 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, 0, num_subres, 0, &layouts[0], &num_rows[0], &row_sizes_in_bytes[0], &required_size);
 
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			uint8_t* p;
-			d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
 				D3D12_SUBRESOURCE_DATA src_data;
@@ -870,8 +874,12 @@ namespace KlayGE
 			re.ForceCPUGPUSync();
 		}
 
+		D3D12_RANGE read_range;
+		read_range.Begin = 0;
+		read_range.End = (tma == TMA_Write_Only) ? 0 : required_size;
+
 		uint8_t* p;
-		d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+		d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 
 		data = p + layout.Offset + (z_offset * layout.Footprint.Height + y_offset) * layout.Footprint.RowPitch
 			+ x_offset * NumFormatBytes(format_);
@@ -880,7 +888,13 @@ namespace KlayGE
 
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			d3d_texture_readback_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			read_range.End = required_size;
+
+			D3D12_RANGE write_range;
+			write_range.Begin = 0;
+			write_range.End = (tma == TMA_Read_Only) ? 0 : required_size;
+
+			d3d_texture_readback_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 			uint8_t* src_p = p + layout.Offset + (z_offset * layout.Footprint.Height + y_offset) * layout.Footprint.RowPitch
 				+ x_offset * NumFormatBytes(format_);
 			uint8_t* dst_p = static_cast<uint8_t*>(data);
@@ -888,7 +902,7 @@ namespace KlayGE
 			{
 				memcpy(dst_p + z * slice_pitch, src_p + z * slice_pitch, row_pitch * height);
 			}
-			d3d_texture_readback_heaps_->Unmap(0, nullptr);
+			d3d_texture_readback_heaps_->Unmap(0,  &write_range);
 		}
 	}
 
@@ -897,15 +911,19 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12Device* device = re.D3DDevice();
 
-		d3d_texture_upload_heaps_->Unmap(0, nullptr);
+		D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
+		D3D12_RESOURCE_DESC const tex_desc = d3d_resource_->GetDesc();
+		uint64_t required_size = 0;
+		device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, nullptr, nullptr, &required_size);
+
+		D3D12_RANGE write_range;
+		write_range.Begin = 0;
+		write_range.End = (last_tma_ == TMA_Read_Only) ? 0 : required_size;
+
+		d3d_texture_upload_heaps_->Unmap(0, &write_range);
 
 		if ((TMA_Write_Only == last_tma_) || (TMA_Read_Write == last_tma_))
 		{
-			D3D12_PLACED_SUBRESOURCE_FOOTPRINT layout;
-			D3D12_RESOURCE_DESC const tex_desc = d3d_resource_->GetDesc();
-			uint64_t required_size = 0;
-			device->GetCopyableFootprints(&tex_desc, subres, 1, 0, &layout, nullptr, nullptr, &required_size);
-
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
 			re.ForceCPUGPUSync();
@@ -1051,8 +1069,12 @@ namespace KlayGE
 		device->GetCopyableFootprints(&tex_desc, 0, 1, 0, &layout, &num_row, &row_sizes_in_byte, &upload_buffer_size);
 
 		{
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			uint8_t* p;
-			d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 
 			D3D12_SUBRESOURCE_DATA src_data;
 			src_data.pData = data;
@@ -1145,8 +1167,12 @@ namespace KlayGE
 		device->GetCopyableFootprints(&tex_desc, 0, 1, 0, &layout, &num_row, &row_sizes_in_byte, &upload_buffer_size);
 
 		{
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			uint8_t* p;
-			d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 
 			D3D12_SUBRESOURCE_DATA src_data;
 			src_data.pData = data;
@@ -1240,8 +1266,12 @@ namespace KlayGE
 		device->GetCopyableFootprints(&tex_desc, 0, 1, 0, &layout, &num_row, &row_sizes_in_byte, &upload_buffer_size);
 
 		{
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			uint8_t* p;
-			d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 
 			D3D12_SUBRESOURCE_DATA src_data;
 			src_data.pData = data;
@@ -1334,8 +1364,12 @@ namespace KlayGE
 		device->GetCopyableFootprints(&tex_desc, 0, 1, 0, &layout, &num_row, &row_sizes_in_byte, &upload_buffer_size);
 
 		{
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			uint8_t* p;
-			d3d_texture_upload_heaps_->Map(0, nullptr, reinterpret_cast<void**>(&p));
+			d3d_texture_upload_heaps_->Map(0, &read_range, reinterpret_cast<void**>(&p));
 
 			D3D12_SUBRESOURCE_DATA src_data;
 			src_data.pData = data;

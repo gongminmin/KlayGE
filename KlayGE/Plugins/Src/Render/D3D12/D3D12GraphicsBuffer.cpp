@@ -74,7 +74,7 @@ namespace KlayGE
 		}
 		else
 		{
-			init_state = D3D12_RESOURCE_STATE_COMMON;
+			init_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
 			heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -134,12 +134,26 @@ namespace KlayGE
 				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
 			ID3D12ResourcePtr buffer_upload = MakeCOMPtr(buffer);
 
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			void* p;
-			buffer_upload->Map(0, nullptr, &p);
+			buffer_upload->Map(0, &read_range, &p);
 			memcpy(p, subres_init, size_in_byte_);
 			buffer_upload->Unmap(0, nullptr);
 
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+			{
+				cmd_list->ResourceBarrier(1, &barrier);
+			}
+
 			cmd_list->CopyResource(d3d_resource_.get(), buffer_upload.get());
+
+			curr_states_[0] = init_state;
 
 			re.CommitResCmd();
 		}
@@ -232,6 +246,8 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_resource_);
 
+		last_ba_ = ba;
+
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		switch (ba)
 		{
@@ -267,8 +283,12 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid buffer access mode");
 		}
 
+		D3D12_RANGE read_range;
+		read_range.Begin = 0;
+		read_range.End = (ba == BA_Write_Only) ? 0 : size_in_byte_;
+
 		void* p;
-		TIFHR(d3d_resource_->Map(0, nullptr, &p));
+		TIFHR(d3d_resource_->Map(0, &read_range, &p));
 		return p;
 	}
 
@@ -276,7 +296,11 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(d3d_resource_);
 
-		d3d_resource_->Unmap(0, nullptr);
+		D3D12_RANGE write_range;
+		write_range.Begin = 0;
+		write_range.End = (last_ba_ == BA_Read_Only) ? 0 : size_in_byte_;
+
+		d3d_resource_->Unmap(0, &write_range);
 	}
 
 	void D3D12GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
@@ -321,7 +345,6 @@ namespace KlayGE
 			memcpy(dst, src, this->Size());
 			d3d_gb.Unmap();
 			this->Unmap();
-
 		}
 		else
 		{
@@ -335,7 +358,7 @@ namespace KlayGE
 				barriers[n] = barrier;
 				++ n;
 			}
-			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+			if (d3d_gb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
 			{
 				barriers[n] = barrier;
 				++ n;

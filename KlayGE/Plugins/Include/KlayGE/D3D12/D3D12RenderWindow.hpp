@@ -114,7 +114,6 @@ namespace KlayGE
 		void WindowMovedOrResized();
 
 	private:
-		virtual void OnBind() override;
 		void OnExitSizeMove(Window const & win);
 		void OnSize(Window const & win, bool active);
 

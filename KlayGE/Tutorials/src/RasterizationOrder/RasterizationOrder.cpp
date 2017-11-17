@@ -141,6 +141,11 @@ namespace
 			technique_ = ras_order_tech_[on];
 		}
 
+		void BindRasOrderBuffer(GraphicsBufferPtr const & ras_order_buff)
+		{
+			*(effect_->ParameterByName("ras_order_buff")) = ras_order_buff;
+		}
+
 	private:
 		RenderTechnique* ras_order_tech_[2];
 	};
@@ -230,6 +235,8 @@ void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)
 		width * height * sizeof(uint32_t), nullptr, EF_R32UI);
 	ras_order_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*ras_order_buff_, EF_R32UI);
 	ras_order_fb_->AttachUAV(0, ras_order_uav_);
+
+	checked_pointer_cast<RenderQuad>(render_quad_)->BindRasOrderBuffer(ras_order_buff_);
 
 	ras_order_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	ras_order_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*ras_order_tex_, 0, 1, 0));

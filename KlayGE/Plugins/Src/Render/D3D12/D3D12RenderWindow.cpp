@@ -716,6 +716,8 @@ namespace KlayGE
 			TIFHR(swap_chain_->Present(sync_interval_, present_flags));
 
 			curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
+
+			this->Attach(ATT_Color0, render_target_render_views_[curr_back_buffer_]);
 		}
 	}
 
@@ -725,13 +727,6 @@ namespace KlayGE
 		{
 			this->WaitForGPU();
 		}
-	}
-
-	void D3D12RenderWindow::OnBind()
-	{
-		this->Attach(ATT_Color0, render_target_render_views_[curr_back_buffer_]);
-
-		D3D12FrameBuffer::OnBind();
 	}
 
 	void D3D12RenderWindow::OnExitSizeMove(Window const & /*win*/)

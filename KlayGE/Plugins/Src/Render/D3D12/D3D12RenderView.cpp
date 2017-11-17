@@ -623,8 +623,13 @@ namespace KlayGE
 		if (ua_counter_upload_src_)
 		{
 			uint32_t const count = this->InitCount();
+
+			D3D12_RANGE read_range;
+			read_range.Begin = 0;
+			read_range.End = 0;
+
 			void* mapped = nullptr;
-			ua_counter_upload_src_->Map(0, nullptr, &mapped);
+			ua_counter_upload_src_->Map(0, &read_range, &mapped);
 			memcpy(mapped, &count, sizeof(count));
 			ua_counter_upload_src_->Unmap(0, nullptr);
 
