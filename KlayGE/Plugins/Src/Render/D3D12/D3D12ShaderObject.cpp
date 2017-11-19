@@ -1340,7 +1340,8 @@ namespace KlayGE
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			D3D12_RESOURCE_STATES state_after = D3D12_RESOURCE_STATE_GENERIC_READ;
+			D3D12_RESOURCE_STATES state_after
+				= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 			for (auto const & srvsrc : srvsrcs_[st])
 			{
 				for (uint32_t subres = 0; subres < std::get<2>(srvsrc); ++ subres)

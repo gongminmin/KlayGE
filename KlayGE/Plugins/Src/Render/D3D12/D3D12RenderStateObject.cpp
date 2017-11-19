@@ -119,10 +119,10 @@ namespace KlayGE
 		re.OMSetBlendFactor(bs_desc_.blend_factor);
 	}
 
-	ID3D12PipelineStatePtr D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so,
+	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so,
 		FrameBufferPtr const & fb, bool has_tessellation) const
 	{
-		D3D12ShaderObjectPtr const & d3d12_so = checked_pointer_cast<D3D12ShaderObject>(so);
+		D3D12ShaderObject* d3d12_so = checked_cast<D3D12ShaderObject*>(so.get());
 		D3D12RenderLayout const & d3d12_rl = *checked_cast<D3D12RenderLayout const *>(&rl);
 
 		size_t hash_val = 0;
@@ -162,7 +162,7 @@ namespace KlayGE
 		if (iter == psos_.end())
 		{
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = ps_desc_.graphics_ps_desc;
-			pso_desc.pRootSignature = d3d12_so->RootSignature().get();
+			pso_desc.pRootSignature = d3d12_so->RootSignature();
 			{
 				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_VertexShader);
 				if (blob && !blob->empty())
@@ -302,17 +302,15 @@ namespace KlayGE
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			return psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
+			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
 		}
-		else
-		{
-			return iter->second;
-		}
+
+		return iter->second.get();
 	}
 
-	ID3D12PipelineStatePtr D3D12RenderStateObject::RetrieveComputePSO(ShaderObjectPtr const & so) const
+	ID3D12PipelineState* D3D12RenderStateObject::RetrieveComputePSO(ShaderObjectPtr const & so) const
 	{
-		D3D12ShaderObjectPtr const & d3d12_so = checked_pointer_cast<D3D12ShaderObject>(so);
+		D3D12ShaderObject* d3d12_so = checked_cast<D3D12ShaderObject*>(so.get());
 
 		size_t hash_val = 0;
 		HashCombine(hash_val, d3d12_so->ShaderObjectTemplate());
@@ -321,7 +319,7 @@ namespace KlayGE
 		if (iter == psos_.end())
 		{
 			D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
-			pso_desc.pRootSignature = d3d12_so->RootSignature().get();
+			pso_desc.pRootSignature = d3d12_so->RootSignature();
 			{
 				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_ComputeShader);
 				if (blob && !blob->empty())
@@ -345,12 +343,10 @@ namespace KlayGE
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
-			return psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first->second;
+			iter = psos_.emplace(hash_val, MakeCOMPtr(d3d_pso)).first;
 		}
-		else
-		{
-			return iter->second;
-		}
+
+		return iter->second.get();
 	}
 
 

@@ -49,6 +49,7 @@
 #include <KlayGE/D3D12/D3D12Texture.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>
+#include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 
 namespace KlayGE
@@ -402,7 +403,7 @@ namespace KlayGE
 			D3D12RenderLayout& rl = *checked_pointer_cast<D3D12RenderLayout>(re.PostProcessRenderLayout());
 
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
-			pso_desc.pRootSignature = so->RootSignature().get();
+			pso_desc.pRootSignature = so->RootSignature();
 			{
 				auto const & blob = so->ShaderBlob(ShaderObject::ST_VertexShader);
 				if (blob && !blob->empty())
@@ -477,12 +478,12 @@ namespace KlayGE
 			ID3D12PipelineStatePtr const & pso = re.CreateRenderPSO(pso_desc);
 
 			cmd_list->SetPipelineState(pso.get());
-			cmd_list->SetGraphicsRootSignature(so->RootSignature().get());
+			cmd_list->SetGraphicsRootSignature(so->RootSignature());
 
 			ID3D12DescriptorHeapPtr cbv_srv_uav_heap = re.CreateDynamicCBVSRVUAVDescriptorHeap(array_size_ * (num_mip_maps_ - 1));
-			ID3D12DescriptorHeapPtr sampler_heap = so->SamplerHeap();
+			auto sampler_heap = so->SamplerHeap();
 
-			ID3D12DescriptorHeap* heaps[] = { cbv_srv_uav_heap.get(), sampler_heap.get() };
+			ID3D12DescriptorHeap* heaps[] = { cbv_srv_uav_heap.get(), sampler_heap };
 			cmd_list->SetDescriptorHeaps(static_cast<uint32_t>(std::size(heaps)), heaps);
 
 			if (sampler_heap)
@@ -567,6 +568,9 @@ namespace KlayGE
 			}
 
 			pass.Unbind(effect);
+
+			auto& fb = *checked_cast<D3D12FrameBuffer*>(re.CurFrameBuffer().get());
+			fb.SetRenderTargets();
 		}
 	}
 

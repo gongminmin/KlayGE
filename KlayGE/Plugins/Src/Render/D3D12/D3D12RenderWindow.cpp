@@ -769,7 +769,6 @@ namespace KlayGE
 		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 
 		d3d12_re.SyncRenderCmd();
-		d3d12_re.SyncComputeCmd();
 		d3d12_re.SyncCopyCmd();
 	}
 }

@@ -115,13 +115,13 @@ namespace KlayGE
 			return so_template_->rasterized_stream_;
 		}
 
-		ID3D12RootSignaturePtr const & RootSignature() const
+		ID3D12RootSignature* RootSignature() const
 		{
-			return so_template_->root_signature_;
+			return so_template_->root_signature_.get();
 		}
-		ID3D12DescriptorHeapPtr const & SamplerHeap() const
+		ID3D12DescriptorHeap* SamplerHeap() const
 		{
-			return so_template_->sampler_heap_;
+			return so_template_->sampler_heap_.get();
 		}
 
 		void* ShaderObjectTemplate()

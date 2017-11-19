@@ -46,9 +46,9 @@ namespace KlayGE
 
 		void Active();
 
-		ID3D12PipelineStatePtr RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so, FrameBufferPtr const & fb,
+		ID3D12PipelineState* RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so, FrameBufferPtr const & fb,
 			bool has_tessellation) const;
-		ID3D12PipelineStatePtr RetrieveComputePSO(ShaderObjectPtr const & so) const;
+		ID3D12PipelineState* RetrieveComputePSO(ShaderObjectPtr const & so) const;
 
 		D3D12_RASTERIZER_DESC const & D3DRasterizerDesc() const
 		{

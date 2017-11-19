@@ -70,10 +70,6 @@ namespace KlayGE
 			cmd_queue = re.D3DRenderCmdQueue();
 			break;
 
-		case FT_Compute:
-			cmd_queue = re.D3DComputeCmdQueue();
-			break;
-
 		case FT_Copy:
 			cmd_queue = re.D3DCopyCmdQueue();
 			break;

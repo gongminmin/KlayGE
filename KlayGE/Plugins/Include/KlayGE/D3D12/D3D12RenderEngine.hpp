@@ -89,9 +89,6 @@ namespace KlayGE
 		ID3D12CommandQueue* D3DRenderCmdQueue() const;
 		ID3D12CommandAllocator* D3DRenderCmdAllocator() const;
 		ID3D12GraphicsCommandList* D3DRenderCmdList() const;
-		ID3D12CommandQueue* D3DComputeCmdQueue() const;
-		ID3D12CommandAllocator* D3DComputeCmdAllocator() const;
-		ID3D12GraphicsCommandList*D3DComputeCmdList() const;
 		ID3D12CommandQueue* D3DCopyCmdQueue() const;
 		ID3D12CommandAllocator* D3DCopyCmdAllocator() const;
 		ID3D12GraphicsCommandList* D3DCopyCmdList() const;
@@ -105,13 +102,10 @@ namespace KlayGE
 		void D3DDevice(ID3D12Device* device, ID3D12CommandQueue* cmd_queue, D3D_FEATURE_LEVEL feature_level);
 		void ClearPSOCache();
 		void CommitRenderCmd();
-		void CommitComputeCmd();
 		void CommitCopyCmd();
 		void SyncRenderCmd();
-		void SyncComputeCmd();
 		void SyncCopyCmd();
 		void ResetRenderCmd();
-		void ResetComputeCmd();
 		void ResetCopyCmd();
 		void CommitResCmd();
 
@@ -247,13 +241,6 @@ namespace KlayGE
 		void UpdateComputePSO(RenderEffect const & effect, RenderPass const & pass);
 
 	private:
-		enum EngineType
-		{
-			ET_Render,
-			ET_Compute,
-			ET_Copy
-		};
-
 		// Direct3D rendering device
 		// Only created after top-level window created
 		IDXGIFactory4Ptr gi_factory_4_;
@@ -264,9 +251,6 @@ namespace KlayGE
 		ID3D12CommandQueuePtr d3d_render_cmd_queue_;
 		ID3D12CommandAllocatorPtr d3d_render_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_render_cmd_list_;
-		ID3D12CommandQueuePtr d3d_compute_cmd_queue_;
-		ID3D12CommandAllocatorPtr d3d_compute_cmd_allocator_;
-		ID3D12GraphicsCommandListPtr d3d_compute_cmd_list_;
 		ID3D12CommandQueuePtr d3d_copy_cmd_queue_;
 		ID3D12CommandAllocatorPtr d3d_copy_cmd_allocator_;
 		ID3D12GraphicsCommandListPtr d3d_copy_cmd_list_;
@@ -274,7 +258,6 @@ namespace KlayGE
 		ID3D12GraphicsCommandListPtr d3d_res_cmd_list_;
 		std::mutex res_cmd_list_mutex_;
 		D3D_FEATURE_LEVEL d3d_feature_level_;
-		EngineType last_engine_type_;
 
 		// List of D3D drivers installed (video cards)
 		// Enumerates itself
@@ -330,8 +313,6 @@ namespace KlayGE
 
 		FencePtr render_cmd_fence_;
 		uint64_t render_cmd_fence_val_;
-		FencePtr compute_cmd_fence_;
-		uint64_t compute_cmd_fence_val_;
 		FencePtr copy_cmd_fence_;
 		uint64_t copy_cmd_fence_val_;
 
