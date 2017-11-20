@@ -81,8 +81,7 @@ namespace KlayGE
 		uint32_t const num_vertex_streams = this->NumVertexStreams();
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (this->InstanceStream() ? 1 : 0);
 
-		// TODO: Figure out why
-		//if (streams_dirty_)
+		if (streams_dirty_)
 		{
 			vbvs_.resize(all_num_vertex_stream);
 			for (uint32_t i = 0; i < num_vertex_streams; ++ i)
