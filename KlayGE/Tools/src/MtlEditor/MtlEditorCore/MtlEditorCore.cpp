@@ -131,6 +131,16 @@ namespace
 			ResLoader::Instance().Unload(renderable_);
 		}
 
+		uint32_t NumLods() const
+		{
+			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumLods();
+		}
+
+		void ActiveLod(int32_t lod)
+		{
+			checked_pointer_cast<DetailedSkinnedModel>(renderable_)->ActiveLod(lod);
+		}
+
 		uint32_t NumFrames() const
 		{
 			return checked_pointer_cast<DetailedSkinnedModel>(renderable_)->NumFrames();
@@ -751,6 +761,16 @@ namespace KlayGE
 	float MtlEditorCore::ModelFrameRate() const
 	{
 		return static_cast<float>(checked_pointer_cast<ModelObject>(model_)->FrameRate());
+	}
+
+	uint32_t MtlEditorCore::NumLods() const
+	{
+		return checked_pointer_cast<ModelObject>(model_)->NumLods();
+	}
+
+	void MtlEditorCore::ActiveLod(int32_t lod)
+	{
+		checked_pointer_cast<ModelObject>(model_)->ActiveLod(lod);
 	}
 
 	uint32_t MtlEditorCore::NumMeshes() const

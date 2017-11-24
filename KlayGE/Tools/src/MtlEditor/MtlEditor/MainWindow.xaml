@@ -49,29 +49,42 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <RibbonComboBox Name="visualize" Label="Visualize" Margin="0,10,0,0" Grid.Row="0">
-                            <RibbonGallery Name="visualize_gallery" SelectedValue="Lighting" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="VisualizeSelectionChanged">
-                                <RibbonGalleryCategory>
-                                    <RibbonGalleryItem Content="Lighting" DataContext="0"/>
-                                    <RibbonGalleryItem Content="Vertex Position" DataContext="1"/>
-                                    <RibbonGalleryItem Content="Vertex Normal" DataContext="2"/>
-                                    <RibbonGalleryItem Content="Vertex Diffuse" DataContext="3"/>
-                                    <RibbonGalleryItem Content="Vertex Specular" DataContext="4"/>
-                                    <RibbonGalleryItem Content="Vertex Bone Weight" DataContext="5"/>
-                                    <RibbonGalleryItem Content="Vertex Bone Indices" DataContext="6"/>
-                                    <RibbonGalleryItem Content="Vertex Texcoord" DataContext="7"/>
-                                    <RibbonGalleryItem Content="Vertex Tangent" DataContext="8"/>
-                                    <RibbonGalleryItem Content="Vertex Binormal" DataContext="9"/>
-                                    <RibbonGalleryItem Content="Texture Albedo" DataContext="10"/>
-                                    <RibbonGalleryItem Content="Texture Metalness" DataContext="11"/>
-                                    <RibbonGalleryItem Content="Texture Glossiness" DataContext="12"/>
-                                    <RibbonGalleryItem Content="Texture Emissive" DataContext="13"/>
-                                    <RibbonGalleryItem Content="Texture Opacity" DataContext="14"/>
-                                    <RibbonGalleryItem Content="Texture Normal" DataContext="15"/>
-                                    <RibbonGalleryItem Content="Texture Height" DataContext="16"/>
-                                </RibbonGalleryCategory>
-                            </RibbonGallery>
-                        </RibbonComboBox>
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <RibbonComboBox Name="visualize" Label="Visualize" Margin="0,10,0,0" Grid.Column="0">
+                                <RibbonGallery Name="visualize_gallery" SelectedValue="Lighting" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="VisualizeSelectionChanged">
+                                    <RibbonGalleryCategory>
+                                        <RibbonGalleryItem Content="Lighting" DataContext="0"/>
+                                        <RibbonGalleryItem Content="Vertex Position" DataContext="1"/>
+                                        <RibbonGalleryItem Content="Vertex Normal" DataContext="2"/>
+                                        <RibbonGalleryItem Content="Vertex Diffuse" DataContext="3"/>
+                                        <RibbonGalleryItem Content="Vertex Specular" DataContext="4"/>
+                                        <RibbonGalleryItem Content="Vertex Bone Weight" DataContext="5"/>
+                                        <RibbonGalleryItem Content="Vertex Bone Indices" DataContext="6"/>
+                                        <RibbonGalleryItem Content="Vertex Texcoord" DataContext="7"/>
+                                        <RibbonGalleryItem Content="Vertex Tangent" DataContext="8"/>
+                                        <RibbonGalleryItem Content="Vertex Binormal" DataContext="9"/>
+                                        <RibbonGalleryItem Content="Texture Albedo" DataContext="10"/>
+                                        <RibbonGalleryItem Content="Texture Metalness" DataContext="11"/>
+                                        <RibbonGalleryItem Content="Texture Glossiness" DataContext="12"/>
+                                        <RibbonGalleryItem Content="Texture Emissive" DataContext="13"/>
+                                        <RibbonGalleryItem Content="Texture Opacity" DataContext="14"/>
+                                        <RibbonGalleryItem Content="Texture Normal" DataContext="15"/>
+                                        <RibbonGalleryItem Content="Texture Height" DataContext="16"/>
+                                    </RibbonGalleryCategory>
+                                </RibbonGallery>
+                            </RibbonComboBox>
+
+                            <RibbonComboBox Name="lod" Label="LoD" Margin="0,10,0,0" Grid.Column="1">
+                                <RibbonGallery Name="lod_gallery" SelectedValue="0" SelectedValuePath="Content" MaxColumnCount="1" SelectionChanged="LodSelectionChanged">
+                                    <RibbonGalleryCategory x:Name="lods_items"/>
+                                </RibbonGallery>
+                            </RibbonComboBox>
+                        </Grid>
+
                         <Label Name="frame_text" Content="Frame 0" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Grid.Row="1"/>
                         <Slider Name="frame_slider" Margin="60,10,0,0" Width="700" Grid.Row="1" Value="{Binding FrameSliderValue}"/>
                     </Grid>

@@ -39,8 +39,13 @@ namespace KlayGE
 		uint32_t NumFrames() const;
 		float CurrFrame() const;
 		float ModelFrameRate() const;
+
+		uint32_t NumLods() const;
+		void ActiveLod(int32_t lod);
+
 		uint32_t NumMeshes() const;
 		wchar_t const * MeshName(uint32_t index) const;
+
 		uint32_t NumVertexStreams(uint32_t mesh_id) const;
 		uint32_t NumVertexStreamUsages(uint32_t mesh_id, uint32_t stream_index) const;
 		uint32_t VertexStreamUsage(uint32_t mesh_id, uint32_t stream_index, uint32_t usage_index) const;

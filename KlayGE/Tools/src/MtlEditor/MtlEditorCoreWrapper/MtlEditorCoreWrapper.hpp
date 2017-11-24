@@ -57,6 +57,9 @@ namespace KlayGE
 		void MouseDown(int x, int y, uint32_t button);
 		void KeyPress(int key);
 
+		uint32_t NumLods();
+		void ActiveLod(int lod);
+
 		uint32_t NumMeshes();
 		System::String^ MeshName(uint32_t index);
 

@@ -173,6 +173,16 @@ namespace KlayGE
 		core_->KeyPress(key);
 	}
 
+	uint32_t MtlEditorCoreWrapper::NumLods()
+	{
+		return core_->NumLods();
+	}
+
+	void MtlEditorCoreWrapper::ActiveLod(int lod)
+	{
+		core_->ActiveLod(lod);
+	}
+
 	uint32_t MtlEditorCoreWrapper::NumMeshes()
 	{
 		return core_->NumMeshes();
