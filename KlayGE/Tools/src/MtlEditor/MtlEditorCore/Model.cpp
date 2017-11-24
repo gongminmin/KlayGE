@@ -37,7 +37,7 @@ void DetailedSkinnedMesh::OnRenderBegin()
 	SkinnedMesh::OnRenderBegin();
 	
 	RenderModelPtr model = model_.lock();
-	if (model)
+	if (model && model->IsSkinned())
 	{
 		*(deferred_effect_->ParameterByName("joint_reals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindRealParts();
 		*(deferred_effect_->ParameterByName("joint_duals")) = checked_pointer_cast<DetailedSkinnedModel>(model)->GetBindDualParts();
