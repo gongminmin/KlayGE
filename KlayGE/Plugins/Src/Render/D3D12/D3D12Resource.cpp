@@ -29,7 +29,10 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/ErrorHandling.hpp>
+#include <KFL/COMPtr.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KlayGE/Context.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12Resource.hpp>
@@ -45,7 +48,7 @@ namespace KlayGE
 		if (Context::Instance().RenderFactoryValid())
 		{
 			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.ForceCPUGPUSync();
+			re.ReleaseAfterSync(d3d_resource_);
 		}
 	}
 
@@ -98,5 +101,56 @@ namespace KlayGE
 				return true;
 			}
 		}
+	}
+
+	ID3D12ResourcePtr D3D12Resource::CreateBuffer(uint32_t access_hint, uint32_t size_in_byte)
+	{
+		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto device = re.D3DDevice();
+
+		D3D12_RESOURCE_STATES init_state;
+		D3D12_HEAP_PROPERTIES heap_prop;
+		if (EAH_CPU_Read == access_hint)
+		{
+			init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+			heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
+		}
+		else if ((0 == access_hint) || (access_hint & EAH_CPU_Read) || (access_hint & EAH_CPU_Write))
+		{
+			init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+			heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+		}
+		else
+		{
+			init_state = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER;
+			heap_prop.Type = D3D12_HEAP_TYPE_DEFAULT;
+		}
+		heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		heap_prop.CreationNodeMask = 0;
+		heap_prop.VisibleNodeMask = 0;
+
+		D3D12_RESOURCE_DESC res_desc;
+		res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		res_desc.Alignment = 0;
+		res_desc.Width = size_in_byte;
+		res_desc.Height = 1;
+		res_desc.DepthOrArraySize = 1;
+		res_desc.MipLevels = 1;
+		res_desc.Format = DXGI_FORMAT_UNKNOWN;
+		res_desc.SampleDesc.Count = 1;
+		res_desc.SampleDesc.Quality = 0;
+		res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		if (access_hint & EAH_GPU_Unordered)
+		{
+			res_desc.Flags |= D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
+		}
+
+		ID3D12Resource* buffer;
+		TIFHR(device->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+			&res_desc, init_state, nullptr,
+			IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
+		return MakeCOMPtr(buffer);
 	}
 }

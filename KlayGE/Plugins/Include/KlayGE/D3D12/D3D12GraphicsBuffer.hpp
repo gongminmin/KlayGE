@@ -76,15 +76,11 @@ namespace KlayGE
 			return counter_offset_;
 		}
 
-		void ResetBufferPool();
-
 	private:
 		void* Map(BufferAccess ba);
 		void Unmap();
 
 	private:
-		std::vector<ID3D12ResourcePtr> buffer_pool_;
-		size_t next_free_index_;
 		ID3D12ResourcePtr buffer_counter_upload_;
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
@@ -92,7 +88,7 @@ namespace KlayGE
 
 		ElementFormat fmt_as_shader_res_;
 
-		BufferAccess last_ba_;
+		BufferAccess mapped_ba_;
 	};
 	typedef std::shared_ptr<D3D12GraphicsBuffer> D3D12GraphicsBufferPtr;
 }

@@ -120,6 +120,11 @@ namespace KlayGE
 			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 			void const * data, uint32_t row_pitch) override;
 
+		void GetCopyableFootprints(uint32_t width, uint32_t height, uint32_t depth,
+			D3D12_PLACED_SUBRESOURCE_FOOTPRINT& layout,
+			uint32_t& num_row, uint32_t& row_size_in_bytes,
+			uint32_t& total_bytes);
+
 	private:
 		virtual void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
 			uint32_t x_offset, uint32_t width,
@@ -159,10 +164,16 @@ namespace KlayGE
 	protected:
 		DXGI_FORMAT dxgi_fmt_;
 
-		ID3D12ResourcePtr d3d_texture_upload_heaps_;
-		ID3D12ResourcePtr d3d_texture_readback_heaps_;
+		ID3D12ResourcePtr d3d_texture_upload_buff_;
+		ID3D12ResourcePtr d3d_texture_readback_buff_;
 
-		TextureMapAccess last_tma_;
+		TextureMapAccess mapped_tma_;
+		uint32_t mapped_x_offset_;
+		uint32_t mapped_y_offset_;
+		uint32_t mapped_z_offset_;
+		uint32_t mapped_width_;
+		uint32_t mapped_height_;
+		uint32_t mapped_depth_;
 
 		std::unordered_map<size_t, D3D12ShaderResourceViewSimulationPtr> d3d_sr_views_;
 		std::unordered_map<size_t, D3D12UnorderedAccessViewSimulationPtr> d3d_ua_views_;

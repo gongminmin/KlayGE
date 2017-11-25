@@ -51,6 +51,9 @@ namespace KlayGE
 		bool UpdateResourceBarrier(uint32_t sub_res, D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state);
 
 	protected:
+		ID3D12ResourcePtr CreateBuffer(uint32_t access_hint, uint32_t size_in_byte);
+
+	protected:
 		ID3D12ResourcePtr d3d_resource_;
 
 		std::vector<D3D12_RESOURCE_STATES> curr_states_;

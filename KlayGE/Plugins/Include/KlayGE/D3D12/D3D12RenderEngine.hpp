@@ -203,10 +203,10 @@ namespace KlayGE
 		ID3D12PipelineStatePtr const & CreateComputePSO(D3D12_COMPUTE_PIPELINE_STATE_DESC const & desc);
 		ID3D12DescriptorHeapPtr CreateDynamicCBVSRVUAVDescriptorHeap(uint32_t num);
 
-		void AddResourceForRecyclingAfterSync(D3D12GraphicsBuffer* buff)
-		{
-			recycle_res_after_sync_.insert(buff);
-		}
+		ID3D12ResourcePtr CreateTempBuffer(bool is_upload, uint32_t size_in_byte);
+		void RecycleTempBuffer(ID3D12ResourcePtr const & buff);
+
+		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
 
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
@@ -269,12 +269,18 @@ namespace KlayGE
 		D3D12_VIEWPORT viewport_cache_;
 		D3D12_RECT scissor_rc_cache_;
 		std::vector<GraphicsBufferPtr> so_buffs_;
-		std::set<D3D12GraphicsBuffer*> recycle_res_after_sync_;
 		std::vector<ID3D12DescriptorHeapPtr> cbv_srv_uav_heap_cache_;
 		std::unordered_map<size_t, ID3D12RootSignaturePtr> root_signatures_;
 		std::unordered_map<size_t, ID3D12PipelineStatePtr> graphics_psos_;
 		std::unordered_map<size_t, ID3D12PipelineStatePtr> compute_psos_;
 		std::unordered_map<size_t, ID3D12DescriptorHeapPtr> cbv_srv_uav_heaps_;
+
+		std::mutex temp_upload_buff_mutex_;
+		std::multimap<uint32_t, ID3D12ResourcePtr> temp_upload_free_buffs_;
+		std::multimap<uint32_t, ID3D12ResourcePtr> temp_readback_free_buffs_;
+		std::vector<ID3D12ResourcePtr> recycle_after_sync_buffs_;
+
+		std::vector<ID3D12ResourcePtr> release_after_sync_buffs_;
 
 		ID3D12DescriptorHeapPtr rtv_desc_heap_;
 		uint32_t rtv_desc_size_;

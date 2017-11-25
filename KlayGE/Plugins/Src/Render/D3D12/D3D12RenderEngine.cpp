@@ -405,11 +405,30 @@ namespace KlayGE
 	{
 		cbv_srv_uav_heap_cache_.clear();
 
-		for (auto const & buff : recycle_res_after_sync_)
 		{
-			buff->ResetBufferPool();
+			std::lock_guard<std::mutex> lock(temp_upload_buff_mutex_);
+			for (auto iter = recycle_after_sync_buffs_.begin(); iter != recycle_after_sync_buffs_.end(); ++ iter)
+			{
+				auto const & buff = *iter;
+				D3D12_HEAP_PROPERTIES heap_prop;
+				D3D12_HEAP_FLAGS heap_flags;
+				buff->GetHeapProperties(&heap_prop, &heap_flags);
+				std::multimap<uint32_t, ID3D12ResourcePtr>* buffs;
+				if (heap_prop.Type == D3D12_HEAP_TYPE_UPLOAD)
+				{
+					buffs = &temp_upload_free_buffs_;
+				}
+				else
+				{
+					BOOST_ASSERT(heap_prop.Type == D3D12_HEAP_TYPE_READBACK);
+					buffs = &temp_readback_free_buffs_;
+				}
+				buffs->emplace(static_cast<uint32_t>(buff->GetDesc().Width), buff);
+			}
+			recycle_after_sync_buffs_.clear();
 		}
-		recycle_res_after_sync_.clear();
+
+		release_after_sync_buffs_.clear();
 	}
 
 	void D3D12RenderEngine::CommitResCmd()
@@ -1150,6 +1169,12 @@ namespace KlayGE
 		copy_cmd_fence_.reset();
 
 		this->ClearPSOCache();
+
+		{
+			std::lock_guard<std::mutex> lock(temp_upload_buff_mutex_);
+			temp_upload_free_buffs_.clear();
+			temp_readback_free_buffs_.clear();
+		}
 
 		so_buffs_.clear();
 		root_signatures_.clear();
@@ -1949,5 +1974,86 @@ namespace KlayGE
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 		cbv_srv_uav_heap_cache_.push_back(cbv_srv_uav_heap);
 		return cbv_srv_uav_heap;
+	}
+
+	ID3D12ResourcePtr D3D12RenderEngine::CreateTempBuffer(bool is_upload, uint32_t size_in_byte)
+	{
+		std::lock_guard<std::mutex> lock(temp_upload_buff_mutex_);
+
+		ID3D12ResourcePtr ret;
+
+		std::multimap<uint32_t, ID3D12ResourcePtr>* buffs;
+		if (is_upload)
+		{
+			buffs = &temp_upload_free_buffs_;
+		}
+		else
+		{
+			buffs = &temp_readback_free_buffs_;
+		}
+
+		auto iter = buffs->lower_bound(size_in_byte);
+		if ((iter != buffs->end()) && (iter->first == size_in_byte))
+		{
+			ret = iter->second;
+
+			buffs->erase(iter);
+		}
+		else
+		{
+			D3D12_RESOURCE_STATES init_state;
+			D3D12_HEAP_PROPERTIES heap_prop;
+			if (is_upload)
+			{
+				init_state = D3D12_RESOURCE_STATE_GENERIC_READ;
+				heap_prop.Type = D3D12_HEAP_TYPE_UPLOAD;
+			}
+			else
+			{
+				init_state = D3D12_RESOURCE_STATE_COPY_DEST;
+				heap_prop.Type = D3D12_HEAP_TYPE_READBACK;
+			}
+			heap_prop.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+			heap_prop.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+			heap_prop.CreationNodeMask = 0;
+			heap_prop.VisibleNodeMask = 0;
+
+			D3D12_RESOURCE_DESC res_desc;
+			res_desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+			res_desc.Alignment = 0;
+			res_desc.Width = size_in_byte;
+			res_desc.Height = 1;
+			res_desc.DepthOrArraySize = 1;
+			res_desc.MipLevels = 1;
+			res_desc.Format = DXGI_FORMAT_UNKNOWN;
+			res_desc.SampleDesc.Count = 1;
+			res_desc.SampleDesc.Quality = 0;
+			res_desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+			res_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+			ID3D12Resource* buffer;
+			TIFHR(d3d_device_->CreateCommittedResource(&heap_prop, D3D12_HEAP_FLAG_NONE,
+				&res_desc, init_state, nullptr,
+				IID_ID3D12Resource, reinterpret_cast<void**>(&buffer)));
+			ret = MakeCOMPtr(buffer);
+		}
+
+		return ret;
+	}
+
+	void D3D12RenderEngine::RecycleTempBuffer(ID3D12ResourcePtr const & buff)
+	{
+		if (buff)
+		{
+			recycle_after_sync_buffs_.push_back(buff);
+		}
+	}
+	
+	void D3D12RenderEngine::ReleaseAfterSync(ID3D12ResourcePtr const & buff)
+	{
+		if (buff)
+		{
+			release_after_sync_buffs_.push_back(buff);
+		}
 	}
 }
