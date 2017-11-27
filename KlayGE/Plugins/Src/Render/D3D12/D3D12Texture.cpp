@@ -779,7 +779,7 @@ namespace KlayGE
 			uint64_t required_size = 0;
 			device->GetCopyableFootprints(&tex_desc, 0, num_subres, 0, &layouts[0], &num_rows[0], &row_sizes_in_bytes[0], &required_size);
 
-			d3d_texture_upload_buff_ = re.CreateTempBuffer(true, static_cast<uint32_t>(required_size));
+			d3d_texture_upload_buff_ = re.AllocTempBuffer(true, static_cast<uint32_t>(required_size));
 
 			D3D12_RANGE read_range;
 			read_range.Begin = 0;
@@ -859,7 +859,7 @@ namespace KlayGE
 
 		if ((TMA_Read_Only == tma) || (TMA_Read_Write == tma))
 		{
-			d3d_texture_readback_buff_ = re.CreateTempBuffer(false, static_cast<uint32_t>(required_size));
+			d3d_texture_readback_buff_ = re.AllocTempBuffer(false, static_cast<uint32_t>(required_size));
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
@@ -903,7 +903,7 @@ namespace KlayGE
 
 		case TMA_Read_Write:
 		case TMA_Write_Only:
-			d3d_texture_upload_buff_ = re.CreateTempBuffer(true, static_cast<uint32_t>(required_size));
+			d3d_texture_upload_buff_ = re.AllocTempBuffer(true, static_cast<uint32_t>(required_size));
 			d3d_texture_map_buff = d3d_texture_upload_buff_;
 			break;
 

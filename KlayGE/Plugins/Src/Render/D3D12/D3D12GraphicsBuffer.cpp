@@ -236,7 +236,7 @@ namespace KlayGE
 			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
 				re.RecycleTempBuffer(d3d_resource_);
-				d3d_resource_ = re.CreateTempBuffer(true, size_in_byte_);
+				d3d_resource_ = re.AllocTempBuffer(true, size_in_byte_);
 			}
 			else
 			{
@@ -353,7 +353,7 @@ namespace KlayGE
 			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			auto cmd_list = re.D3DRenderCmdList();
 
-			auto upload_buff = re.CreateTempBuffer(true, size);
+			auto upload_buff = re.AllocTempBuffer(true, size);
 
 			D3D12_RANGE read_range;
 			read_range.Begin = 0;

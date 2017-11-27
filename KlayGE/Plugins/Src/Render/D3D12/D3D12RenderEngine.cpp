@@ -1976,7 +1976,7 @@ namespace KlayGE
 		return cbv_srv_uav_heap;
 	}
 
-	ID3D12ResourcePtr D3D12RenderEngine::CreateTempBuffer(bool is_upload, uint32_t size_in_byte)
+	ID3D12ResourcePtr D3D12RenderEngine::AllocTempBuffer(bool is_upload, uint32_t size_in_byte)
 	{
 		std::lock_guard<std::mutex> lock(temp_upload_buff_mutex_);
 
