@@ -340,8 +340,6 @@ namespace KlayGE
 		curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 
 		this->UpdateSurfacesPtrs();
-
-		this->WaitForGPU();
 	}
 
 	D3D12RenderWindow::~D3D12RenderWindow()
@@ -552,7 +550,10 @@ namespace KlayGE
 
 	void D3D12RenderWindow::Destroy()
 	{
-		this->WaitForGPU();
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+
+		d3d12_re.ForceFinish();
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		if (swap_chain_)
@@ -560,8 +561,6 @@ namespace KlayGE
 			swap_chain_->SetFullscreenState(false, nullptr);
 		}
 
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
 		d3d12_re.DXGIFactory4()->UnregisterStereoStatus(stereo_cookie_);
 #else
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
@@ -718,7 +717,7 @@ namespace KlayGE
 				d3d12_re.D3DRenderCmdList()->ResourceBarrier(1, &barrier);
 			}
 
-			d3d12_re.ForceFlush();
+			d3d12_re.CommitRenderCmd();
 
 			bool allow_tearing = dxgi_allow_tearing_;
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
@@ -738,7 +737,6 @@ namespace KlayGE
 		if (swap_chain_)
 		{
 			::WaitForSingleObjectEx(frame_latency_waitable_obj_, 1000, true);
-			this->WaitForGPU();
 		}
 	}
 
@@ -775,13 +773,4 @@ namespace KlayGE
 		return S_OK;
 	}
 #endif
-
-	void D3D12RenderWindow::WaitForGPU()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
-
-		d3d12_re.SyncRenderCmd();
-		d3d12_re.SyncCopyCmd();
-	}
 }

@@ -70,10 +70,6 @@ namespace KlayGE
 			cmd_queue = re.D3DRenderCmdQueue();
 			break;
 
-		case FT_Copy:
-			cmd_queue = re.D3DCopyCmdQueue();
-			break;
-
 		default:
 			KFL_UNREACHABLE("Invalid fence type");
 		}

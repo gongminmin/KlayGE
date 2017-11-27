@@ -229,18 +229,18 @@ namespace KlayGE
 		{
 		case BA_Read_Only:
 		case BA_Read_Write:
-			re.ForceCPUGPUSync();
+			re.ForceFinish();
 			break;
 
 		case BA_Write_Only:
 			if ((0 == access_hint_) || (EAH_CPU_Write == access_hint_) || ((EAH_CPU_Write | EAH_GPU_Read) == access_hint_))
 			{
-				re.RecycleTempBuffer(d3d_resource_);
+				re.RecycleTempBuffer(d3d_resource_, true, size_in_byte_);
 				d3d_resource_ = re.AllocTempBuffer(true, size_in_byte_);
 			}
 			else
 			{
-				re.ForceCPUGPUSync();
+				re.ForceFinish();
 			}
 			break;
 
@@ -374,7 +374,7 @@ namespace KlayGE
 
 			cmd_list->CopyBufferRegion(d3d_resource_.get(), offset, upload_buff.get(), 0, size);
 
-			re.RecycleTempBuffer(upload_buff);
+			re.RecycleTempBuffer(upload_buff, true, size);
 		}
 	}
 }

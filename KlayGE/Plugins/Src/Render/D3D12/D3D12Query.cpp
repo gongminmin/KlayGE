@@ -107,7 +107,7 @@ namespace KlayGE
 
 		cmd_list->ResolveQueryData(query_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0, 1, query_result_.get(), 0);
 
-		re.ForceCPUGPUSync();
+		re.ForceFinish();
 
 		D3D12_RANGE range;
 		range.Begin = 0;
@@ -204,7 +204,7 @@ namespace KlayGE
 
 		cmd_list->ResolveQueryData(predicate_heap_.get(), D3D12_QUERY_TYPE_OCCLUSION, 0, 1, predicate_result_.get(), 0);
 
-		re.ForceCPUGPUSync();
+		re.ForceFinish();
 
 		D3D12_RANGE range;
 		range.Begin = 0;
@@ -286,7 +286,7 @@ namespace KlayGE
 
 			cmd_list->ResolveQueryData(timestamp_heap_.get(), D3D12_QUERY_TYPE_TIMESTAMP, 0, 2, timestamp_result_.get(), 0);
 
-			re.ForceCPUGPUSync();
+			re.ForceFinish();
 
 			D3D12_RANGE range;
 			range.Begin = 0;
@@ -373,7 +373,7 @@ namespace KlayGE
 
 		cmd_list->ResolveQueryData(so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, so_stat_query_result_.get(), 0);
 
-		re.ForceCPUGPUSync();
+		re.ForceFinish();
 
 		D3D12_RANGE range;
 		range.Begin = 0;
@@ -394,7 +394,7 @@ namespace KlayGE
 
 		cmd_list->ResolveQueryData(so_stat_query_heap_.get(), D3D12_QUERY_TYPE_SO_STATISTICS_STREAM0, 0, 1, so_stat_query_result_.get(), 0);
 
-		re.ForceCPUGPUSync();
+		re.ForceFinish();
 
 		D3D12_RANGE range;
 		range.Begin = 0;

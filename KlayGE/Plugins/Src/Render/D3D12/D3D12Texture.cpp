@@ -831,7 +831,7 @@ namespace KlayGE
 
 			re.CommitResCmd();
 
-			re.RecycleTempBuffer(d3d_texture_upload_buff_);
+			re.RecycleTempBuffer(d3d_texture_upload_buff_, true, static_cast<uint32_t>(required_size));
 			d3d_texture_upload_buff_.reset();
 		}
 	}
@@ -891,7 +891,7 @@ namespace KlayGE
 
 			cmd_list->CopyTextureRegion(&dst, 0, 0, 0, &src, &src_box);
 
-			re.ForceCPUGPUSync();
+			re.ForceFinish();
 		}
 
 		ID3D12ResourcePtr d3d_texture_map_buff;
@@ -1001,8 +1001,8 @@ namespace KlayGE
 			cmd_list->CopyTextureRegion(&dst, mapped_x_offset_, mapped_y_offset_, mapped_z_offset_, &src, &src_box);
 		}
 
-		re.RecycleTempBuffer(d3d_texture_upload_buff_);
-		re.RecycleTempBuffer(d3d_texture_readback_buff_);
+		re.RecycleTempBuffer(d3d_texture_upload_buff_, true, static_cast<uint32_t>(required_size));
+		re.RecycleTempBuffer(d3d_texture_readback_buff_, false, static_cast<uint32_t>(required_size));
 		d3d_texture_upload_buff_.reset();
 		d3d_texture_readback_buff_.reset();
 	}
