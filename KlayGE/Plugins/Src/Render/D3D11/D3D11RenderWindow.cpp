@@ -923,6 +923,10 @@ namespace KlayGE
 			IDXGISwapChain3* sc3;
 			if (SUCCEEDED(swap_chain_->QueryInterface(IID_IDXGISwapChain3, reinterpret_cast<void**>(&sc3))))
 			{
+				if (frame_latency_waitable_obj_ != 0)
+				{
+					::CloseHandle(frame_latency_waitable_obj_);
+				}
 				frame_latency_waitable_obj_ = sc3->GetFrameLatencyWaitableObject();
 				sc3->Release();
 			}

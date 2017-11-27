@@ -74,7 +74,8 @@ namespace KlayGE
 #else
 						:
 #endif
-							adapter_(adapter), dxgi_allow_tearing_(false)
+							adapter_(adapter), dxgi_allow_tearing_(false),
+								frame_latency_waitable_obj_(0)
 	{
 		// Store info
 		name_				= name;
@@ -292,7 +293,7 @@ namespace KlayGE
 		sc_desc1_.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 		sc_desc1_.BufferCount = NUM_BACK_BUFFERS;
 		sc_desc1_.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-		sc_desc1_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+		sc_desc1_.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 		if (stereo)
 		{
 			sc_desc1_.SampleDesc.Count = 1;
@@ -396,7 +397,7 @@ namespace KlayGE
 		}
 		depth_stencil_.reset();
 
-		UINT flags = 0;
+		UINT flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 		if (this->FullScreen())
 		{
 			flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
@@ -574,6 +575,11 @@ namespace KlayGE
 		this->FullScreen(false);
 #endif
 
+		if (frame_latency_waitable_obj_ != 0)
+		{
+			::CloseHandle(frame_latency_waitable_obj_);
+		}
+
 		for (size_t i = 0; i < render_targets_.size(); ++ i)
 		{
 			render_target_render_views_right_eye_[i].reset();
@@ -673,6 +679,12 @@ namespace KlayGE
 		swap_chain_ = MakeCOMPtr(sc3);
 		sc->Release();
 
+		if (frame_latency_waitable_obj_ != 0)
+		{
+			::CloseHandle(frame_latency_waitable_obj_);
+		}
+		frame_latency_waitable_obj_ = swap_chain_->GetFrameLatencyWaitableObject();
+
 		if (try_hdr_display)
 		{
 			IDXGISwapChain4* sc4;
@@ -725,6 +737,7 @@ namespace KlayGE
 	{
 		if (swap_chain_)
 		{
+			::WaitForSingleObjectEx(frame_latency_waitable_obj_, 1000, true);
 			this->WaitForGPU();
 		}
 	}

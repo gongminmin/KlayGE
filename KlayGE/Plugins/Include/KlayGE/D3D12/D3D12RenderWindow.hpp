@@ -151,6 +151,7 @@ namespace KlayGE
 #endif
 		IDXGISwapChain3Ptr		swap_chain_;
 		bool					main_wnd_;
+		HANDLE frame_latency_waitable_obj_;
 
 		std::array<TexturePtr, NUM_BACK_BUFFERS> render_targets_;
 		std::array<RenderViewPtr, NUM_BACK_BUFFERS> render_target_render_views_;
