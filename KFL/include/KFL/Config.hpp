@@ -73,6 +73,9 @@
 		#endif
 
 		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+		#if CLANG_VERSION >= 90
+			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+		#endif
 
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
 		#define KLAYGE_SYMBOL_IMPORT

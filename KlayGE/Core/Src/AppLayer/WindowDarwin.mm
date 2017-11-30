@@ -342,10 +342,17 @@ namespace KlayGE
 	
 	[view setNextResponder:self];
 	
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_12
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 	if ([view respondsToSelector:@selector(setAcceptsTouchEvents:)])
 	{
 		[view setAcceptsTouchEvents:YES];
 	}
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_12
+#pragma GCC diagnostic pop
+#endif
 }
 
 - (void)close

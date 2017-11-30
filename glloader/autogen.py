@@ -578,4 +578,4 @@ if __name__ == "__main__":
 		if ("-q" == sys.argv[1]):
 			quite_mode = True
 
-	auto_gen_glloader_files(os.path.dirname(sys.argv[0]), quite_mode)
+	auto_gen_glloader_files(os.curdir, quite_mode)

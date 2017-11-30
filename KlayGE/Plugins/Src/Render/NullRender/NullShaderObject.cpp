@@ -51,6 +51,16 @@
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
 #endif
 
+#ifndef D3DCOMPILE_SKIP_OPTIMIZATION
+#define D3DCOMPILE_SKIP_OPTIMIZATION 0x00000004
+#endif
+#ifndef D3DCOMPILE_PREFER_FLOW_CONTROL
+#define D3DCOMPILE_PREFER_FLOW_CONTROL 0x00000400
+#endif
+#ifndef D3DCOMPILE_ENABLE_STRICTNESS
+#define D3DCOMPILE_ENABLE_STRICTNESS 0x00000800
+#endif
+
 #include <KlayGE/NullRender/NullRenderEngine.hpp>
 #include <KlayGE/NullRender/NullShaderObject.hpp>
 
