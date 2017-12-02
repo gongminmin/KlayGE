@@ -74,6 +74,7 @@ namespace KlayGE
 		}
 
 		d3d_resource_ = this->CreateBuffer(access_hint_, total_size);
+		gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();
 
 		D3D12_RESOURCE_DESC res_desc = d3d_resource_->GetDesc();
 		D3D12_HEAP_PROPERTIES heap_prop;
@@ -237,6 +238,7 @@ namespace KlayGE
 			{
 				re.RecycleTempBuffer(d3d_resource_, true, size_in_byte_);
 				d3d_resource_ = re.AllocTempBuffer(true, size_in_byte_);
+				gpu_vaddr_ = d3d_resource_->GetGPUVirtualAddress();
 			}
 			else
 			{

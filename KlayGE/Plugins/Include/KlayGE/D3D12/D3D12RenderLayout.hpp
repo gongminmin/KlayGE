@@ -49,11 +49,22 @@ namespace KlayGE
 
 		void Active() const;
 
+		size_t PsoHashValue();
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc, bool has_tessellation);
+
+	private:
+		void UpdateViewPointers();
+
 	private:
 		mutable std::vector<D3D12_INPUT_ELEMENT_DESC> vertex_elems_;
 
-		mutable std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
-		mutable D3D12_INDEX_BUFFER_VIEW ibv_;
+		std::vector<D3D12_VERTEX_BUFFER_VIEW> vbvs_;
+		D3D12_INDEX_BUFFER_VIEW ibv_;
+
+		// For PSOs
+		size_t pso_hash_value_;
+		D3D12_INDEX_BUFFER_STRIP_CUT_VALUE ib_strip_cut_value_;
+		D3D12_PRIMITIVE_TOPOLOGY_TYPE prim_topology_;
 	};
 }
 

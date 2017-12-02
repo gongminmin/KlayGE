@@ -76,11 +76,11 @@ namespace KlayGE
 
 		void Attach(uint32_t att, RenderViewPtr const & view);
 		void Detach(uint32_t att);
-		RenderViewPtr Attached(uint32_t att) const;
+		RenderViewPtr const & Attached(uint32_t att) const;
 
 		void AttachUAV(uint32_t att, UnorderedAccessViewPtr const & view);
 		void DetachUAV(uint32_t att);
-		UnorderedAccessViewPtr AttachedUAV(uint32_t att) const;
+		UnorderedAccessViewPtr const & AttachedUAV(uint32_t att) const;
 
 		virtual void Clear(uint32_t flags, Color const & clr, float depth, int32_t stencil) = 0;
 		virtual void Discard(uint32_t flags) = 0;

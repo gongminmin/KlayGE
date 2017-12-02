@@ -372,50 +372,12 @@ namespace KlayGE
 			auto const & tech = *re.BilinearBlitTech();
 			auto& pass = tech.Pass(0);
 			pass.Bind(effect);
-			D3D12ShaderObjectPtr so = checked_pointer_cast<D3D12ShaderObject>(pass.GetShaderObject(effect));
+			D3D12ShaderObject& d3d12_so = *checked_cast<D3D12ShaderObject*>(pass.GetShaderObject(effect).get());
 
-			D3D12RenderLayout& rl = *checked_pointer_cast<D3D12RenderLayout>(re.PostProcessRenderLayout());
+			D3D12RenderLayout& d3d12_rl = *checked_cast<D3D12RenderLayout*>(re.PostProcessRenderLayout().get());
 
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc;
-			pso_desc.pRootSignature = so->RootSignature();
-			{
-				auto const & blob = so->ShaderBlob(ShaderObject::ST_VertexShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.VS.pShaderBytecode = blob->data();
-					pso_desc.VS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.VS.pShaderBytecode = nullptr;
-					pso_desc.VS.BytecodeLength = 0;
-				}
-			}
-			{
-				auto const & blob = so->ShaderBlob(ShaderObject::ST_PixelShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.PS.pShaderBytecode = blob->data();
-					pso_desc.PS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.PS.pShaderBytecode = nullptr;
-					pso_desc.PS.BytecodeLength = 0;
-				}
-			}
-			{
-				pso_desc.DS.pShaderBytecode = nullptr;
-				pso_desc.DS.BytecodeLength = 0;
-			}
-			{
-				pso_desc.HS.pShaderBytecode = nullptr;
-				pso_desc.HS.BytecodeLength = 0;
-			}
-			{
-				pso_desc.GS.pShaderBytecode = nullptr;
-				pso_desc.GS.BytecodeLength = 0;
-			}
+			d3d12_so.UpdatePsoDesc(pso_desc);
 
 			pso_desc.StreamOutput.pSODeclaration = nullptr;
 			pso_desc.StreamOutput.NumEntries = 0;
@@ -427,12 +389,12 @@ namespace KlayGE
 			pso_desc.SampleMask = 0xFFFFFFFF;
 			pso_desc.RasterizerState = checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject())->D3DRasterizerDesc();
 			pso_desc.DepthStencilState = checked_pointer_cast<D3D12RenderStateObject>(pass.GetRenderStateObject())->D3DDepthStencilDesc();
-			pso_desc.InputLayout.pInputElementDescs = &rl.InputElementDesc()[0];
-			pso_desc.InputLayout.NumElements = static_cast<UINT>(rl.InputElementDesc().size());
-			pso_desc.IBStripCutValue = (EF_R16UI == rl.IndexStreamFormat())
+			pso_desc.InputLayout.pInputElementDescs = &d3d12_rl.InputElementDesc()[0];
+			pso_desc.InputLayout.NumElements = static_cast<UINT>(d3d12_rl.InputElementDesc().size());
+			pso_desc.IBStripCutValue = (EF_R16UI == d3d12_rl.IndexStreamFormat())
 				? D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
 
-			RenderLayout::topology_type tt = rl.TopologyType();
+			RenderLayout::topology_type tt = d3d12_rl.TopologyType();
 			pso_desc.PrimitiveTopologyType = D3D12Mapping::MappingPriTopoType(tt);
 
 			pso_desc.NumRenderTargets = 1;
@@ -451,14 +413,24 @@ namespace KlayGE
 
 			ID3D12PipelineStatePtr const & pso = re.CreateRenderPSO(pso_desc);
 
-			cmd_list->SetPipelineState(pso.get());
-			cmd_list->SetGraphicsRootSignature(so->RootSignature());
+			re.SetPipelineState(pso.get());
+			re.SetGraphicsRootSignature(d3d12_so.RootSignature());
 
 			ID3D12DescriptorHeapPtr cbv_srv_uav_heap = re.CreateDynamicCBVSRVUAVDescriptorHeap(array_size_ * 6 * (num_mip_maps_ - 1));
-			auto sampler_heap = so->SamplerHeap();
+			auto sampler_heap = d3d12_so.SamplerHeap();
 
-			ID3D12DescriptorHeap* heaps[] = { cbv_srv_uav_heap.get(), sampler_heap };
-			cmd_list->SetDescriptorHeaps(static_cast<uint32_t>(std::size(heaps)), heaps);
+			std::array<ID3D12DescriptorHeap*, 2> heaps;
+			uint32_t num_heaps = 0;
+			{
+				heaps[num_heaps] = cbv_srv_uav_heap.get();
+				++ num_heaps;
+			}
+			if (sampler_heap)
+			{
+				heaps[num_heaps] = sampler_heap;
+				++ num_heaps;
+			}
+			re.SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*>(heaps.data(), num_heaps));
 
 			if (sampler_heap)
 			{
@@ -466,16 +438,16 @@ namespace KlayGE
 				cmd_list->SetGraphicsRootDescriptorTable(1, gpu_sampler_handle);
 			}
 
-			D3D12GraphicsBuffer& vb = *checked_pointer_cast<D3D12GraphicsBuffer>(rl.GetVertexStream(0));
+			D3D12GraphicsBuffer& vb = *checked_cast<D3D12GraphicsBuffer*>(d3d12_rl.GetVertexStream(0).get());
 
 			D3D12_VERTEX_BUFFER_VIEW vbv;
-			vbv.BufferLocation = vb.D3DResource()->GetGPUVirtualAddress();
+			vbv.BufferLocation = vb.GPUVirtualAddress();
 			vbv.SizeInBytes = vb.Size();
-			vbv.StrideInBytes = rl.VertexSize(0);
+			vbv.StrideInBytes = d3d12_rl.VertexSize(0);
 
-			cmd_list->IASetVertexBuffers(0, 1, &vbv);
+			re.IASetVertexBuffers(0, vbv);
 
-			cmd_list->IASetPrimitiveTopology(D3D12Mapping::Mapping(tt));
+			re.IASetPrimitiveTopology(tt);
 
 			D3D12_VIEWPORT vp;
 			vp.TopLeftX = 0;
@@ -493,7 +465,7 @@ namespace KlayGE
 
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
-			uint32_t const srv_desc_size = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+			uint32_t const srv_desc_size = re.CBVSRVUAVDescSize();
 			for (uint32_t index = 0; index < array_size_; ++ index)
 			{
 				for (int f = 0; f < 6; ++ f)
@@ -530,11 +502,11 @@ namespace KlayGE
 
 						vp.Width = static_cast<float>(this->Width(level));
 						vp.Height = static_cast<float>(this->Height(level));
-						cmd_list->RSSetViewports(1, &vp);
+						re.RSSetViewports(1, &vp);
 
 						scissor_rc.right = this->Width(level);
 						scissor_rc.bottom = this->Height(level);
-						cmd_list->RSSetScissorRects(1, &scissor_rc);
+						re.RSSetScissorRects(scissor_rc);
 
 						cmd_list->DrawInstanced(4, 1, 0, 0);
 

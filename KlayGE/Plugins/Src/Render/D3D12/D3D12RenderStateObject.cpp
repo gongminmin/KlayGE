@@ -45,6 +45,7 @@
 #include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12RenderLayout.hpp>
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
+#include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 #include <KlayGE/D3D12/D3D12RenderStateObject.hpp>
 
 namespace KlayGE
@@ -119,186 +120,30 @@ namespace KlayGE
 		re.OMSetBlendFactor(bs_desc_.blend_factor);
 	}
 
-	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObjectPtr const & so,
-		FrameBufferPtr const & fb, bool has_tessellation) const
+	ID3D12PipelineState* D3D12RenderStateObject::RetrieveGraphicsPSO(RenderLayout const & rl, ShaderObject const & so,
+		FrameBuffer const & fb, bool has_tessellation) const
 	{
-		D3D12ShaderObject* d3d12_so = checked_cast<D3D12ShaderObject*>(so.get());
-		D3D12RenderLayout const & d3d12_rl = *checked_cast<D3D12RenderLayout const *>(&rl);
+		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
+		auto& d3d12_rl = *checked_cast<D3D12RenderLayout*>(const_cast<RenderLayout*>(&rl));
+		auto& d3d12_fb = *checked_cast<D3D12FrameBuffer*>(const_cast<FrameBuffer*>(&fb));
 
 		size_t hash_val = 0;
-		{
-			HashCombine(hash_val, d3d12_so->ShaderObjectTemplate());
-
-			HashCombine(hash_val, 'I');
-			auto const & input_elem_desc = d3d12_rl.InputElementDesc();
-			for (size_t i = 0; i < input_elem_desc.size(); ++ i)
-			{
-				char const * p = reinterpret_cast<char const *>(&input_elem_desc[i]);
-				HashRange(hash_val, p, p + sizeof(input_elem_desc[i]));
-			}
-			HashCombine(hash_val, rl.IndexStreamFormat());
-
-			HashCombine(hash_val, rl.TopologyType());
-			HashCombine(hash_val, has_tessellation);
-
-			for (uint32_t i = 0; i < 8; ++ i)
-			{
-				auto const & view = fb->Attached(FrameBuffer::ATT_Color0 + i);
-				if (view)
-				{
-					HashCombine(hash_val, view->Format());
-				}
-			}
-			{
-				auto const & view = fb->Attached(FrameBuffer::ATT_DepthStencil);
-				if (view)
-				{
-					HashCombine(hash_val, view->Format());
-				}
-			}
-		}
+		HashCombine(hash_val, d3d12_rl.PsoHashValue());
+		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_fb.PsoHashValue());
+		HashCombine(hash_val, has_tessellation);
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
 		{
 			D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = ps_desc_.graphics_ps_desc;
-			pso_desc.pRootSignature = d3d12_so->RootSignature();
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_VertexShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.VS.pShaderBytecode = blob->data();
-					pso_desc.VS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.VS.pShaderBytecode = nullptr;
-					pso_desc.VS.BytecodeLength = 0;
-				}
-			}
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_PixelShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.PS.pShaderBytecode = blob->data();
-					pso_desc.PS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.PS.pShaderBytecode = nullptr;
-					pso_desc.PS.BytecodeLength = 0;
-				}
-			}
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_DomainShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.DS.pShaderBytecode = blob->data();
-					pso_desc.DS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.DS.pShaderBytecode = nullptr;
-					pso_desc.DS.BytecodeLength = 0;
-				}
-			}
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_HullShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.HS.pShaderBytecode = blob->data();
-					pso_desc.HS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.HS.pShaderBytecode = nullptr;
-					pso_desc.HS.BytecodeLength = 0;
-				}
-			}
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_GeometryShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.GS.pShaderBytecode = blob->data();
-					pso_desc.GS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.GS.pShaderBytecode = nullptr;
-					pso_desc.GS.BytecodeLength = 0;
-				}
-			}
 
-			auto const & so_decls = d3d12_so->SODecl();
-			std::vector<UINT> so_strides(so_decls.size());
-			for (size_t i = 0; i < so_decls.size(); ++ i)
-			{
-				so_strides[i] = so_decls[i].ComponentCount * sizeof(float);
-			}
-			pso_desc.StreamOutput.pSODeclaration = so_decls.empty() ? nullptr : &so_decls[0];
-			pso_desc.StreamOutput.NumEntries = static_cast<UINT>(so_decls.size());
-			pso_desc.StreamOutput.pBufferStrides = nullptr;
-			pso_desc.StreamOutput.NumStrides = 0;
-			pso_desc.StreamOutput.RasterizedStream = d3d12_so->RasterizedStream();
-
-			pso_desc.InputLayout.pInputElementDescs = d3d12_rl.InputElementDesc().empty() ? nullptr : &d3d12_rl.InputElementDesc()[0];
-			pso_desc.InputLayout.NumElements = static_cast<UINT>(d3d12_rl.InputElementDesc().size());
-			pso_desc.IBStripCutValue = (EF_R16UI == rl.IndexStreamFormat())
-				? D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFF : D3D12_INDEX_BUFFER_STRIP_CUT_VALUE_0xFFFFFFFF;
-
-			RenderLayout::topology_type tt = rl.TopologyType();
-			if (has_tessellation)
-			{
-				switch (tt)
-				{
-				case RenderLayout::TT_PointList:
-					tt = RenderLayout::TT_1_Ctrl_Pt_PatchList;
-					break;
-
-				case RenderLayout::TT_LineList:
-					tt = RenderLayout::TT_2_Ctrl_Pt_PatchList;
-					break;
-
-				case RenderLayout::TT_TriangleList:
-					tt = RenderLayout::TT_3_Ctrl_Pt_PatchList;
-					break;
-
-				default:
-					break;
-				}
-			}
-			pso_desc.PrimitiveTopologyType = D3D12Mapping::MappingPriTopoType(tt);
-
-			pso_desc.NumRenderTargets = 0;
-			for (int i = static_cast<int>(std::size(pso_desc.RTVFormats)) - 1; i >= 0; -- i)
-			{
-				if (fb->Attached(FrameBuffer::ATT_Color0 + i))
-				{
-					pso_desc.NumRenderTargets = i + 1;
-					break;
-				}
-			}
-			for (uint32_t i = 0; i < pso_desc.NumRenderTargets; ++ i)
-			{
-				pso_desc.RTVFormats[i] = D3D12Mapping::MappingFormat(fb->Attached(FrameBuffer::ATT_Color0 + i)->Format());
-			}
-			for (uint32_t i = pso_desc.NumRenderTargets; i < std::size(pso_desc.RTVFormats); ++ i)
-			{
-				pso_desc.RTVFormats[i] = DXGI_FORMAT_UNKNOWN;
-			}
-			if (fb->Attached(FrameBuffer::ATT_DepthStencil))
-			{
-				pso_desc.DSVFormat = D3D12Mapping::MappingFormat(fb->Attached(FrameBuffer::ATT_DepthStencil)->Format());
-			}
-			else
-			{
-				pso_desc.DSVFormat = DXGI_FORMAT_UNKNOWN;
-			}
-			pso_desc.SampleDesc.Count = 1;
-			pso_desc.SampleDesc.Quality = 0;
+			d3d12_rl.UpdatePsoDesc(pso_desc, has_tessellation);
+			d3d12_so.UpdatePsoDesc(pso_desc);
+			d3d12_fb.UpdatePsoDesc(pso_desc);
 		
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto d3d_device = re.D3DDevice();
+			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto d3d_device = d3d12_re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateGraphicsPipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));
@@ -308,38 +153,25 @@ namespace KlayGE
 		return iter->second.get();
 	}
 
-	ID3D12PipelineState* D3D12RenderStateObject::RetrieveComputePSO(ShaderObjectPtr const & so) const
+	ID3D12PipelineState* D3D12RenderStateObject::RetrieveComputePSO(ShaderObject const & so) const
 	{
-		D3D12ShaderObject* d3d12_so = checked_cast<D3D12ShaderObject*>(so.get());
+		auto& d3d12_so = *checked_cast<D3D12ShaderObject*>(const_cast<ShaderObject*>(&so));
 
 		size_t hash_val = 0;
-		HashCombine(hash_val, d3d12_so->ShaderObjectTemplate());
+		HashCombine(hash_val, d3d12_so.ShaderObjectTemplate());
 
 		auto iter = psos_.find(hash_val);
 		if (iter == psos_.end())
 		{
 			D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc;
-			pso_desc.pRootSignature = d3d12_so->RootSignature();
-			{
-				auto const & blob = d3d12_so->ShaderBlob(ShaderObject::ST_ComputeShader);
-				if (blob && !blob->empty())
-				{
-					pso_desc.CS.pShaderBytecode = blob->data();
-					pso_desc.CS.BytecodeLength = static_cast<UINT>(blob->size());
-				}
-				else
-				{
-					pso_desc.CS.pShaderBytecode = nullptr;
-					pso_desc.CS.BytecodeLength = 0;
-				}
-			}
+			d3d12_so.UpdatePsoDesc(pso_desc);
 			pso_desc.NodeMask = 0;
 			pso_desc.CachedPSO.pCachedBlob = nullptr;
 			pso_desc.CachedPSO.CachedBlobSizeInBytes = 0;
 			pso_desc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 		
-			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			auto d3d_device = re.D3DDevice();
+			auto& d3d12_re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto d3d_device = d3d12_re.D3DDevice();
 
 			ID3D12PipelineState* d3d_pso;
 			TIFHR(d3d_device->CreateComputePipelineState(&pso_desc, IID_ID3D12PipelineState, reinterpret_cast<void**>(&d3d_pso)));

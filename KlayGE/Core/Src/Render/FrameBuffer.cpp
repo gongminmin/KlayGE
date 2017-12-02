@@ -176,7 +176,7 @@ namespace KlayGE
 		views_dirty_ = true;
 	}
 
-	RenderViewPtr FrameBuffer::Attached(uint32_t att) const
+	RenderViewPtr const & FrameBuffer::Attached(uint32_t att) const
 	{
 		switch (att)
 		{
@@ -185,14 +185,15 @@ namespace KlayGE
 
 		default:
 			{
-				uint32_t clr_id = att - ATT_Color0;
+				uint32_t const clr_id = att - ATT_Color0;
 				if (clr_id < clr_views_.size())
 				{
 					return clr_views_[clr_id];
 				}
 				else
 				{
-					return RenderViewPtr();
+					static RenderViewPtr null_view;
+					return null_view;
 				}
 			}
 		}
@@ -242,7 +243,7 @@ namespace KlayGE
 		views_dirty_ = true;
 	}
 
-	UnorderedAccessViewPtr FrameBuffer::AttachedUAV(uint32_t att) const
+	UnorderedAccessViewPtr const & FrameBuffer::AttachedUAV(uint32_t att) const
 	{
 		if (att < ua_views_.size())
 		{
@@ -250,7 +251,8 @@ namespace KlayGE
 		}
 		else
 		{
-			return UnorderedAccessViewPtr();
+			static UnorderedAccessViewPtr null_view;
+			return null_view;
 		}
 	}
 }

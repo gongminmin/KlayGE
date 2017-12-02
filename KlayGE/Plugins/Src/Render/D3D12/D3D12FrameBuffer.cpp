@@ -31,12 +31,14 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
+#include <KFL/Hash.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/Texture.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/FrameBuffer.hpp>
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
+#include <KlayGE/D3D12/D3D12Mapping.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
 
@@ -250,5 +252,64 @@ namespace KlayGE
 		d3d_viewport_.TopLeftY = static_cast<float>(viewport_->top);
 		d3d_viewport_.Width = static_cast<float>(viewport_->width);
 		d3d_viewport_.Height = static_cast<float>(viewport_->height);
+
+		pso_hash_value_ = 0;
+		num_rts_ = 0;
+		rtv_formats_.fill(DXGI_FORMAT_UNKNOWN);
+		for (size_t i = 0; i < clr_views_.size(); ++ i)
+		{
+			auto view = clr_views_[i].get();
+			if (view)
+			{
+				auto fmt = view->Format();
+				HashCombine(pso_hash_value_, fmt);
+				rtv_formats_[i] = D3D12Mapping::MappingFormat(fmt);
+				num_rts_ = static_cast<uint32_t>(i + 1);
+			}
+		}
+		{
+			auto view = ds_view_.get();
+			if (view)
+			{
+				auto fmt = view->Format();
+				HashCombine(pso_hash_value_, fmt);
+				dsv_format_ = D3D12Mapping::MappingFormat(fmt);
+			}
+			else
+			{
+				dsv_format_ = DXGI_FORMAT_UNKNOWN;
+			}
+		}
+	}
+
+	size_t D3D12FrameBuffer::PsoHashValue()
+	{
+		if (views_dirty_)
+		{
+			this->UpdateViewPointers();
+
+			views_dirty_ = false;
+		}
+
+		return pso_hash_value_;
+	}
+
+	void D3D12FrameBuffer::UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc)
+	{
+		if (views_dirty_)
+		{
+			this->UpdateViewPointers();
+
+			views_dirty_ = false;
+		}
+
+		pso_desc.NumRenderTargets = num_rts_;
+		for (uint32_t i = 0; i < 8; ++ i)
+		{
+			pso_desc.RTVFormats[i] = rtv_formats_[i];
+		}
+		pso_desc.DSVFormat = dsv_format_;
+		pso_desc.SampleDesc.Count = 1;
+		pso_desc.SampleDesc.Quality = 0;
 	}
 }

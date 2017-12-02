@@ -76,6 +76,11 @@ namespace KlayGE
 			return counter_offset_;
 		}
 
+		D3D12_GPU_VIRTUAL_ADDRESS GPUVirtualAddress() const
+		{
+			return gpu_vaddr_;
+		}
+
 	private:
 		void* Map(BufferAccess ba);
 		void Unmap();
@@ -85,6 +90,7 @@ namespace KlayGE
 		D3D12ShaderResourceViewSimulationPtr d3d_sr_view_;
 		D3D12UnorderedAccessViewSimulationPtr d3d_ua_view_;
 		uint32_t counter_offset_;
+		D3D12_GPU_VIRTUAL_ADDRESS gpu_vaddr_;
 
 		ElementFormat fmt_as_shader_res_;
 

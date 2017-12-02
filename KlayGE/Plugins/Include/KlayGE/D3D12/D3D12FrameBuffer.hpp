@@ -58,6 +58,9 @@ namespace KlayGE
 
 		virtual void SetRenderTargets();
 
+		size_t PsoHashValue();
+		void UpdatePsoDesc(D3D12_GRAPHICS_PIPELINE_STATE_DESC& pso_desc);
+
 	private:
 		void UpdateViewPointers();
 
@@ -75,6 +78,12 @@ namespace KlayGE
 		D3D12_CPU_DESCRIPTOR_HANDLE* d3d_ds_handle_ptr_;
 
 		D3D12_VIEWPORT d3d_viewport_;
+
+		// For PSOs
+		size_t pso_hash_value_;
+		uint32_t num_rts_;
+		std::array<DXGI_FORMAT, 8> rtv_formats_;
+		DXGI_FORMAT dsv_format_;
 	};
 
 	typedef std::shared_ptr<D3D12FrameBuffer> D3D12FrameBufferPtr;
