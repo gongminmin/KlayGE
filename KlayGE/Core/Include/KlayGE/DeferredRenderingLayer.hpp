@@ -428,6 +428,7 @@ namespace KlayGE
 		uint32_t num_depth_slices_;
 		std::vector<float> depth_slices_;
 		bool cs_cldr_;
+		bool typed_uav_;
 #endif
 
 		std::array<PerViewport, 8> viewports_;

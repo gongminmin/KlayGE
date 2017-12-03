@@ -404,11 +404,16 @@ namespace KlayGE
 		tex_array_support_ = (caps.max_texture_array_length >= 4) && (caps.render_to_texture_array_support);
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		typed_uav_ = false;
 		if ((caps.max_shader_model >= ShaderModel(5, 0)) && caps.cs_support)
 		{
 			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
 			cs_cldr_ = true;
+			if (caps.uav_format_support(EF_ABGR16F) && caps.uav_format_support(EF_B10G11R11F) && caps.uav_format_support(EF_ABGR8))
+			{
+				typed_uav_ = true;
+			}
 		}
 		else
 		{
@@ -588,7 +593,7 @@ namespace KlayGE
 		{
 			technique_cldr_shadowing_unified_ = dr_effect_->TechniqueByName("ClusteredDRShadowingUnified");
 			technique_cldr_light_intersection_unified_ = dr_effect_->TechniqueByName("ClusteredDRLightIntersection");
-			if (caps.uav_format_support(EF_ABGR16F))
+			if (typed_uav_)
 			{
 				technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnified");
 			}
@@ -3922,7 +3927,7 @@ namespace KlayGE
 #endif
 
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		if (cs_cldr_)
+		if (cs_cldr_ && typed_uav_)
 		{
 			this->UpdateShadowingCS(pvp);
 		}
