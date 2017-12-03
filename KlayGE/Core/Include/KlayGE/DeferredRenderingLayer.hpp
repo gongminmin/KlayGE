@@ -598,6 +598,7 @@ namespace KlayGE
 		RenderEffectParameter* intersected_light_indices_in_tex_param_;
 		RenderEffectParameter* intersected_light_indices_rw_tex_param_;
 		RenderEffectParameter* depth_slices_param_;
+		RenderEffectParameter* depth_slices_shading_param_;
 		PostProcessPtr copy_pp_;
 #endif
 

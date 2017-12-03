@@ -533,7 +533,7 @@ namespace KlayGE
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
-			num_depth_slices_ = 8;
+			num_depth_slices_ = 4;
 			depth_slices_.resize(num_depth_slices_ + 1);
 			light_batch_ = 1024;
 			dr_effect_ = SyncLoadRenderEffect("ClusteredDeferredRendering.fxml");
@@ -802,6 +802,7 @@ namespace KlayGE
 			intersected_light_indices_in_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_in_tex");
 			intersected_light_indices_rw_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_rw_tex");
 			depth_slices_param_ = dr_effect_->ParameterByName("depth_slices");
+			depth_slices_shading_param_ = dr_effect_->ParameterByName("depth_slices_shading");
 
 			projective_shadowing_rw_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_rw_tex");
 			shadowing_rw_tex_param_ = dr_effect_->ParameterByName("shadowing_rw_tex");
@@ -2056,7 +2057,6 @@ namespace KlayGE
 
 		if (type != LightSource::LT_Directional)
 		{
-			sm_fb_->Attached(FrameBuffer::ATT_Color0)->Discard();
 			depth_to_esm_pp_->Apply();
 		}
 
@@ -3593,12 +3593,17 @@ namespace KlayGE
 				}
 				depth_slices_[num_depth_slices_] = far_plane;
 
-				uint8_t* depth_slices = depth_slices_param_->MemoryInCBuff<uint8_t>();
-				for (size_t i = 0; i < depth_slices_.size(); ++ i)
 				{
-					*reinterpret_cast<float*>(depth_slices + i * depth_slices_param_->Stride()) = depth_slices_[i];
+					uint8_t* depth_slices = depth_slices_param_->MemoryInCBuff<uint8_t>();
+					for (size_t i = 0; i < depth_slices_.size(); ++ i)
+					{
+						*reinterpret_cast<float*>(depth_slices + i * depth_slices_param_->Stride()) = depth_slices_[i];
+					}
+					depth_slices_param_->CBuffer().Dirty(true);
 				}
-				depth_slices_param_->CBuffer().Dirty(true);
+
+				float const log_depth_1 = std::log(depth_slices_[1]);
+				*depth_slices_shading_param_ = float3(depth_slices_[1], log_depth_1, std::log(far_plane) - log_depth_1);
 			}
 
 #ifndef KLAYGE_SHIP

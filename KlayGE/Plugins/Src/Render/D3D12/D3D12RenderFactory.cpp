@@ -107,7 +107,7 @@ namespace KlayGE
 			uint32_t size_in_byte, ElementFormat fmt)
 	{
 		return MakeSharedPtr<D3D12GraphicsBuffer>(usage, access_hint,
-			(size_in_byte + 255) & ~255, fmt);
+			size_in_byte, fmt);
 	}
 
 	QueryPtr D3D12RenderFactory::MakeOcclusionQuery()

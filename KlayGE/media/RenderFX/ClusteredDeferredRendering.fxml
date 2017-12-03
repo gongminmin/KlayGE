@@ -2,7 +2,7 @@
 
 <effect>
 	<macro name="LIGHT_BATCH" value="1024"/>
-	<macro name="NUM_DEPTH_SLICES" value="8"/>
+	<macro name="NUM_DEPTH_SLICES" value="4"/>
 	
 	<include name="DeferredRendering.fxml"/>
 
@@ -119,6 +119,7 @@ float4 ClusteredDRLightingMaskPS() : SV_Target
 		<parameter type="float3" name="lights_aabb_min" array_size="LIGHT_BATCH"/>
 		<parameter type="float3" name="lights_aabb_max" array_size="LIGHT_BATCH"/>
 		<parameter type="float" name="depth_slices" array_size="NUM_DEPTH_SLICES + 1"/>
+		<parameter type="float3" name="depth_slices_shading"/>
 	</cbuffer>
 	<cbuffer name="light_batch1">
 		<parameter type="float4" name="lights_color" array_size="LIGHT_BATCH"/>
@@ -534,12 +535,9 @@ void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
 
 uint CalcDepthSlice(float depth)
 {
-	uint slice = 0;
-	while ((slice < NUM_DEPTH_SLICES) && (depth_slices[slice + 1] < depth))
-	{
-		++ slice;
-	}
-	return slice;
+	// Must match depth_slices calculation in DeferredRenderingLayer::UpdateClusteredLighting
+	return (depth < depth_slices_shading.x) ? 0 :
+		max(1, uint((log(depth) - depth_slices_shading.y) / depth_slices_shading.z * NUM_DEPTH_SLICES));
 }
 
 groupshared uint intersected_light_indices_sh[NUM_DEPTH_SLICES][LIGHT_BATCH / 2];
@@ -587,15 +585,13 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 
 			float4 mrt_0 = g_buffer_tex.Load(coord);
 			float4 mrt_1 = g_buffer_1_tex.Load(coord);
-			float3 view_dir = normalize(texcoord_to_view(tc));
+			float3 view_dir = -normalize(texcoord_to_view(tc));
 			float3 normal = GetNormal(mrt_0);
 			float glossiness = GetGlossiness(mrt_0);
 			float shininess = Glossiness2Shininess(glossiness);
 			float3 pos_es = view_dir * (depth_tex.Load(coord).x / view_dir.z);
 			float3 c_diff = GetDiffuse(mrt_1);
 			float3 c_spec = GetSpecular(mrt_1);
-
-			view_dir = -view_dir;
 
 			tile_id.z = CalcDepthSlice(pos_es.z);
 

@@ -104,20 +104,23 @@ namespace KlayGE
 		{
 			bind_flags = bind_flags_;
 		}
-		if ((access_hint_ & EAH_GPU_Read) && !(access_hint_ & EAH_CPU_Write))
+		if (bind_flags != D3D11_BIND_CONSTANT_BUFFER)
 		{
-			bind_flags |= D3D11_BIND_SHADER_RESOURCE;
-		}
-		if (access_hint_ & EAH_GPU_Write)
-		{
-			if (!((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
+			if ((access_hint_ & EAH_GPU_Read) && !(access_hint_ & EAH_CPU_Write))
 			{
-				bind_flags |= D3D11_BIND_STREAM_OUTPUT;
+				bind_flags |= D3D11_BIND_SHADER_RESOURCE;
 			}
-		}
-		if (access_hint_ & EAH_GPU_Unordered)
-		{
-			bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
+			if (access_hint_ & EAH_GPU_Write)
+			{
+				if (!((access_hint_ & EAH_GPU_Structured) || (access_hint_ & EAH_GPU_Unordered)))
+				{
+					bind_flags |= D3D11_BIND_STREAM_OUTPUT;
+				}
+			}
+			if (access_hint_ & EAH_GPU_Unordered)
+			{
+				bind_flags |= D3D11_BIND_UNORDERED_ACCESS;
+			}
 		}
 
 		misc_flags = 0;
