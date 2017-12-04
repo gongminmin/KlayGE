@@ -378,14 +378,21 @@ namespace MtlEditor
 			frame_ = 0;
 
 			lods_items.Items.Clear();
+			{
+				var item = new RibbonGalleryItem();
+				item.Content = "Auto";
+				item.DataContext = "-1";
+				lods_items.Items.Add(item);
+			}
 			uint lods = core_.NumLods();
 			for (uint i = 0; i < lods; ++ i)
 			{
 				var item = new RibbonGalleryItem();
 				item.Content = i.ToString();
+				item.DataContext = i.ToString();
 				lods_items.Items.Add(item);
 			}
-			lod_gallery.SelectedItem = lods_items.Items[0];
+			lod_gallery.SelectedItem = lods_items.Items[1];
 
 			meshes_[0].Children.Clear();
 			materials_[0].Children.Clear();
@@ -653,7 +660,7 @@ namespace MtlEditor
 			if (core_ != null)
 			{
 				System.Windows.Controls.Ribbon.RibbonGalleryItem item = e.NewValue as System.Windows.Controls.Ribbon.RibbonGalleryItem;
-				core_.ActiveLod(Int32.Parse((string)item.Content));
+				core_.ActiveLod(Int32.Parse((string)item.DataContext));
 			}
 		}
 

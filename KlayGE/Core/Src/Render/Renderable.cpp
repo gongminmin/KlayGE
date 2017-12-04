@@ -228,7 +228,18 @@ namespace KlayGE
 
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		RenderLayout const & layout = this->GetRenderLayout();
+		int32_t lod;
+		if (active_lod_ < 0)
+		{
+			auto const & camera = *re.CurFrameBuffer()->GetViewport()->camera;
+			lod = MathLib::clamp(static_cast<int32_t>(this->CalcLod(camera.EyePos(), camera.ProjMatrix()(0, 0)) + 0.5f),
+				0, static_cast<int32_t>(this->NumLods() - 1));
+		}
+		else
+		{
+			lod = active_lod_;
+		}
+		RenderLayout const & layout = this->GetRenderLayout(lod);
 		GraphicsBufferPtr const & inst_stream = layout.InstanceStream();
 		RenderTechnique const & tech = *this->GetRenderTechnique();
 		auto const & effect = *this->GetRenderEffect();
@@ -325,6 +336,16 @@ namespace KlayGE
 
 	void Renderable::UpdateBoundBox()
 	{
+	}
+
+	float Renderable::CalcLod(float3 const & eye_pos, float fov_scale) const
+	{
+		auto const aabb_ws = MathLib::transform_aabb(this->PosBound(), model_mat_);
+		float3 view_dir = aabb_ws.Center() - eye_pos;
+		float const dist_sq = MathLib::length_sq(view_dir);
+		view_dir *= MathLib::recip_sqrt(dist_sq);
+		float const area = MathLib::ortho_area(view_dir, aabb_ws);
+		return dist_sq / area / fov_scale;
 	}
 
 	bool Renderable::AllHWResourceReady() const
