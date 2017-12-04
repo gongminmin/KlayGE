@@ -891,12 +891,14 @@ namespace KlayGE
 				smaa_blend_tex_ = rf.MakeTexture2D(new_render_width, new_render_height, 1, 1,
 					smaa_blend_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
+				RenderViewPtr smaa_ds_view = rf.Make2DDepthStencilRenderView(new_render_width, new_render_height, EF_D24S8, 1, 0);
+
 				smaa_edge_detection_pp_->OutputPin(0, smaa_edges_tex_);
-				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+				smaa_edge_detection_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, smaa_ds_view);
 
 				smaa_blending_weight_pp_->InputPin(0, smaa_edges_tex_);
 				smaa_blending_weight_pp_->OutputPin(0, smaa_blend_tex_);
-				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+				smaa_blending_weight_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil, smaa_ds_view);
 			}
 			if (post_tone_mapping_pp_)
 			{
