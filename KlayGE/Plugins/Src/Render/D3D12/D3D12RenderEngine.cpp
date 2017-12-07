@@ -284,14 +284,6 @@ namespace KlayGE
 			IID_ID3D12GraphicsCommandList, reinterpret_cast<void**>(&d3d_render_cmd_list)));
 		d3d_render_cmd_list_ = MakeCOMPtr(d3d_render_cmd_list);
 
-		D3D12_COMMAND_QUEUE_DESC queue_desc;
-		queue_desc.Type = D3D12_COMMAND_LIST_TYPE_COMPUTE;
-		queue_desc.Priority = 0;
-		queue_desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-		queue_desc.NodeMask = 0;
-
-		queue_desc.Type = D3D12_COMMAND_LIST_TYPE_COPY;
-
 		ID3D12CommandAllocator* d3d_res_cmd_allocator;
 		TIFHR(d3d_device_->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
 			IID_ID3D12CommandAllocator, reinterpret_cast<void**>(&d3d_res_cmd_allocator)));

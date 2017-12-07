@@ -178,6 +178,7 @@ namespace
 		static std::unique_ptr<type_define> instance_;
 	};
 	std::unique_ptr<type_define> type_define::instance_;
+	std::pair<char const *, size_t> constexpr type_define::types_[];
 
 	class shade_mode_define
 	{
@@ -210,7 +211,7 @@ namespace
 		}
 
 	private:
-		static size_t constexpr sms_hash_[] = 
+		static size_t constexpr sms_hash_[] =
 		{
 			CT_HASH("flat"),
 			CT_HASH("gouraud")
@@ -219,6 +220,7 @@ namespace
 		static std::unique_ptr<shade_mode_define> instance_;
 	};
 	std::unique_ptr<shade_mode_define> shade_mode_define::instance_;
+	size_t constexpr shade_mode_define::sms_hash_[];
 
 	class compare_function_define
 	{
@@ -266,6 +268,7 @@ namespace
 		static std::unique_ptr<compare_function_define> instance_;
 	};
 	std::unique_ptr<compare_function_define> compare_function_define::instance_;
+	size_t constexpr compare_function_define::cfs_hash_[];
 
 	class cull_mode_define
 	{
@@ -308,6 +311,7 @@ namespace
 		static std::unique_ptr<cull_mode_define> instance_;
 	};
 	std::unique_ptr<cull_mode_define> cull_mode_define::instance_;
+	size_t constexpr cull_mode_define::cms_hash_[];
 
 	class polygon_mode_define
 	{
@@ -350,6 +354,7 @@ namespace
 		static std::unique_ptr<polygon_mode_define> instance_;
 	};
 	std::unique_ptr<polygon_mode_define> polygon_mode_define::instance_;
+	size_t constexpr polygon_mode_define::pms_hash_[];
 
 	class alpha_blend_factor_define
 	{
@@ -406,6 +411,7 @@ namespace
 		static std::unique_ptr<alpha_blend_factor_define> instance_;
 	};
 	std::unique_ptr<alpha_blend_factor_define> alpha_blend_factor_define::instance_;
+	size_t constexpr alpha_blend_factor_define::abfs_hash_[];
 
 	class blend_operation_define
 	{
@@ -450,6 +456,7 @@ namespace
 		static std::unique_ptr<blend_operation_define> instance_;
 	};
 	std::unique_ptr<blend_operation_define> blend_operation_define::instance_;
+	size_t constexpr blend_operation_define::bops_hash_[];
 
 	class stencil_operation_define
 	{
@@ -497,6 +504,7 @@ namespace
 		static std::unique_ptr<stencil_operation_define> instance_;
 	};
 	std::unique_ptr<stencil_operation_define> stencil_operation_define::instance_;
+	size_t constexpr stencil_operation_define::sops_hash_[];
 
 	class texture_filter_mode_define
 	{
@@ -560,6 +568,7 @@ namespace
 		static std::unique_ptr<texture_filter_mode_define> instance_;
 	};
 	std::unique_ptr<texture_filter_mode_define> texture_filter_mode_define::instance_;
+	size_t constexpr texture_filter_mode_define::tfs_hash_[];
 
 	class texture_addr_mode_define
 	{
@@ -603,6 +612,7 @@ namespace
 		static std::unique_ptr<texture_addr_mode_define> instance_;
 	};
 	std::unique_ptr<texture_addr_mode_define> texture_addr_mode_define::instance_;
+	size_t constexpr texture_addr_mode_define::tams_hash_[];
 
 	class logic_operation_define
 	{
@@ -658,6 +668,7 @@ namespace
 		static std::unique_ptr<logic_operation_define> instance_;
 	};
 	std::unique_ptr<logic_operation_define> logic_operation_define::instance_;
+	size_t constexpr logic_operation_define::lops_hash_[];
 
 #if KLAYGE_IS_DEV_PLATFORM
 	bool BoolFromStr(std::string_view name)
