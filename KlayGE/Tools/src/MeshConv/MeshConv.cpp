@@ -102,7 +102,8 @@ namespace
 
 	typedef std::map<std::string, Joint> JointsMap;
 
-	void RecursiveTransformMesh(MeshMLObj& meshml_obj, float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes)
+	void RecursiveTransformMesh(MeshMLObj& meshml_obj, uint32_t num_lods, uint32_t lod,
+		float4x4 const & parent_mat, aiNode const * node, std::vector<Mesh> const & meshes, std::vector<Mesh> const & lod0_meshes)
 	{
 		auto const trans_mat = MathLib::transpose(float4x4(&node->mTransformation.a1)) * parent_mat;
 		auto const trans_quat = MathLib::to_quaternion(trans_mat);
@@ -111,19 +112,36 @@ namespace
 		{
 			auto const & mesh = meshes[node->mMeshes[n]];
 
-			int mesh_id = meshml_obj.AllocMesh();
-			meshml_obj.SetMesh(mesh_id, mesh.mtl_id, mesh.name, 1);
+			int mesh_id;
+			if (lod == 0)
+			{
+				mesh_id = meshml_obj.AllocMesh();
+				meshml_obj.SetMesh(mesh_id, mesh.mtl_id, mesh.name, num_lods);
+			}
+			else
+			{
+				mesh_id = -1;
+				for (size_t i = 0; i < lod0_meshes.size(); ++ i)
+				{
+					if (lod0_meshes[i].mtl_id == mesh.mtl_id)
+					{
+						mesh_id = static_cast<int>(i);
+						break;
+					}
+				}
+				BOOST_ASSERT(mesh_id != -1);
+			}
 
 			for (unsigned int ti = 0; ti < mesh.indices.size(); ti += 3)
 			{
-				int tri_id = meshml_obj.AllocTriangle(mesh_id, 0);
-				meshml_obj.SetTriangle(mesh_id, 0, tri_id, mesh.indices[ti + 0],
+				int tri_id = meshml_obj.AllocTriangle(mesh_id, lod);
+				meshml_obj.SetTriangle(mesh_id, lod, tri_id, mesh.indices[ti + 0],
 					mesh.indices[ti + 1], mesh.indices[ti + 2]);
 			}
 
 			for (unsigned int vi = 0; vi < mesh.positions.size(); ++ vi)
 			{
-				int vertex_id = meshml_obj.AllocVertex(mesh_id, 0);
+				int vertex_id = meshml_obj.AllocVertex(mesh_id, lod);
 
 				std::vector<float3> texcoords;
 				for (unsigned int tci = 0; tci < AI_MAX_NUMBER_OF_TEXTURECOORDS; ++ tci)
@@ -138,26 +156,26 @@ namespace
 				if (mesh.has_tangent_frame)
 				{
 					auto const quat = mesh.tangent_quats[vi] * trans_quat;
-					meshml_obj.SetVertex(mesh_id, 0, vertex_id, pos, quat, 2, texcoords);
+					meshml_obj.SetVertex(mesh_id, lod, vertex_id, pos, quat, 2, texcoords);
 				}
 				else
 				{
 					auto const normal = MathLib::transform_normal(mesh.normals[vi], trans_mat);
-					meshml_obj.SetVertex(mesh_id, 0, vertex_id, pos, normal, 2, texcoords);
+					meshml_obj.SetVertex(mesh_id, lod, vertex_id, pos, normal, 2, texcoords);
 				}
 			}
 
 			for (unsigned int wi = 0; wi < mesh.joint_binding.size(); ++wi)
 			{
 				auto binding = mesh.joint_binding[wi];
-				int bind_id = meshml_obj.AllocJointBinding(mesh_id, 0, binding.vertex_id);
-				meshml_obj.SetJointBinding(mesh_id, 0, binding.vertex_id, bind_id, binding.joint_id, binding.weight);
+				int bind_id = meshml_obj.AllocJointBinding(mesh_id, lod, binding.vertex_id);
+				meshml_obj.SetJointBinding(mesh_id, lod, binding.vertex_id, bind_id, binding.joint_id, binding.weight);
 			}
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; ++ i)
 		{
-			RecursiveTransformMesh(meshml_obj, trans_mat, node->mChildren[i], meshes);
+			RecursiveTransformMesh(meshml_obj, num_lods, lod, trans_mat, node->mChildren[i], meshes, lod0_meshes);
 		}
 	}
 
@@ -757,7 +775,8 @@ namespace
 		meshml_obj.NumFrames(action_frame_offset);
 	}
 
-	bool ConvertScene(std::string const & in_name, std::string const & out_name, float scale, bool swap_yz, bool inverse_z)
+	bool ConvertScene(std::vector<std::string> const & in_names, std::string const & out_name, float scale, bool swap_yz, bool inverse_z,
+		bool quiet)
 	{
 		aiPropertyStore* props = aiCreatePropertyStore();
 		aiSetImportPropertyInteger(props, AI_CONFIG_IMPORT_TER_MAKE_UVS, 1);
@@ -771,38 +790,72 @@ namespace
 			| aiProcess_RemoveRedundantMaterials // remove redundant materials
 			| aiProcess_FindInstances; // search for instanced meshes and remove them by references to one master
 
-		aiScene const * scene = aiImportFileExWithProperties(in_name.c_str(),
-			ppsteps // configurable pp steps
-			| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
-			| aiProcess_Triangulate // triangulate polygons with more than 3 edges
-			| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
-			| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
-			nullptr, props);
+		uint32_t const num_lods = static_cast<uint32_t>(in_names.size());
+
+		std::vector<aiScene const *> scenes(num_lods);
+		for (uint32_t lod = 0; lod < num_lods; ++ lod)
+		{
+			scenes[lod] = aiImportFileExWithProperties(in_names[lod].c_str(),
+				ppsteps // configurable pp steps
+				| aiProcess_GenSmoothNormals // generate smooth normal vectors if not existing
+				| aiProcess_Triangulate // triangulate polygons with more than 3 edges
+				| aiProcess_ConvertToLeftHanded // convert everything to D3D left handed space
+				| aiProcess_FixInfacingNormals, // find normals facing inwards and inverts them
+				nullptr, props);
+
+			if (!scenes[lod])
+			{
+				cout << "Assimp: Import file error: " << aiGetErrorString() << '\n';
+				return false;
+			}
+		}
 
 		aiReleasePropertyStore(props);
 
-		if (!scene)
+		MeshMLObj meshml_obj(scale);
+		ConvertMaterials(meshml_obj, scenes[0]);
+
+		std::vector<std::vector<Mesh>> meshes(num_lods);
+		for (uint32_t lod = 0; lod < num_lods; ++ lod)
 		{
-			cout << "Assimp: Import file error: " << aiGetErrorString() << '\n';
-			return false;
+			meshes[lod].resize(scenes[lod]->mNumMeshes);
 		}
 
-		MeshMLObj meshml_obj(scale);
-		ConvertMaterials(meshml_obj, scene);
-
-		std::vector<Mesh> meshes(scene->mNumMeshes);
 		JointsMap joint_nodes;
 
-		int vertex_export_settings;
-		BuildJoints(meshml_obj, joint_nodes, scene);
-		BuildMeshData(meshes, vertex_export_settings, joint_nodes, scene, swap_yz, inverse_z);
-		RecursiveTransformMesh(meshml_obj, float4x4::Identity(), scene->mRootNode, meshes);
-		BuildActions(meshml_obj, joint_nodes, scene);
+		BuildJoints(meshml_obj, joint_nodes, scenes[0]);
+
+		int vertex_export_settings = 0;
+		for (uint32_t lod = 0; lod < num_lods; ++ lod)
+		{
+			BuildMeshData(meshes[lod], vertex_export_settings, joint_nodes, scenes[lod], swap_yz, inverse_z);
+			RecursiveTransformMesh(meshml_obj, num_lods, lod, float4x4::Identity(), scenes[lod]->mRootNode, meshes[lod], meshes[0]);
+		}
+		BuildActions(meshml_obj, joint_nodes, scenes[0]);
 
 		std::ofstream ofs(out_name.c_str());
 		meshml_obj.WriteMeshML(ofs, vertex_export_settings, 0);
 
-		aiReleaseImport(scene);
+		for (uint32_t lod = 0; lod < num_lods; ++ lod)
+		{
+			aiReleaseImport(scenes[lod]);
+		}
+
+		if (!quiet)
+		{
+			for (uint32_t lod = 0; lod < num_lods; ++ lod)
+			{
+				size_t num_vertices = 0;
+				size_t num_triangles = 0;
+				for (auto const & mesh : meshes[lod])
+				{
+					num_vertices += mesh.positions.size();
+					num_triangles += mesh.indices.size() / 3;
+				}
+
+				cout << "LOD " << lod << ": " << num_vertices << " vertices, " << num_triangles << " triangles." << endl;
+			}
+		}
 
 		return true;
 	}
@@ -815,6 +868,7 @@ int main(int argc, char* argv[])
 	float scale = 1;
 	bool swap_yz = false;
 	bool inverse_z = false;
+	bool lod_inputs = false;
 	bool quiet = false;
 
 	boost::program_options::options_description desc("Allowed options");
@@ -825,6 +879,7 @@ int main(int argc, char* argv[])
 		("scale,S", boost::program_options::value<float>(), "Scale.")
 		("swap-yz,W", "Swap Y and Z axis.")
 		("inverse-z,Z", "Inverse Z axis.")
+		("lod,L", "Consume lod meshes, e.g. <INPUT>_lod0.xxx as lod 0, <INPUT>_lod1.xxx as lod 1, etc.")
 		("quiet,q", boost::program_options::value<bool>()->implicit_value(true), "Quiet mode.")
 		("version,v", "Version.");
 
@@ -867,29 +922,62 @@ int main(int argc, char* argv[])
 	{
 		inverse_z = true;
 	}
+	if (vm.count("lod") > 0)
+	{
+		lod_inputs = true;
+	}
 	if (vm.count("quiet") > 0)
 	{
 		quiet = vm["quiet"].as<bool>();
 	}
 
-	std::string file_name = ResLoader::Instance().Locate(input_name);
-	if (file_name.empty())
+	filesystem::path const input_path(input_name);
+	filesystem::path const base_name = input_path.stem();
+
+	std::vector<std::string> lod_file_names;
+	if (lod_inputs)
+	{
+		filesystem::path const source_folder = input_path.parent_path();
+		filesystem::path const ext_name = input_path.extension();
+
+		for (uint32_t num_lods = 0;; ++ num_lods)
+		{
+			std::string const lod_file_name = base_name.string() + "_lod" + boost::lexical_cast<std::string>(num_lods) + ext_name.string();
+			std::string const file_name = ResLoader::Instance().Locate((source_folder / lod_file_name).string());
+			if (file_name.empty())
+			{
+				break;
+			}
+			else
+			{
+				lod_file_names.push_back(file_name);
+			}
+		}
+	}
+	else
+	{
+		std::string file_name = ResLoader::Instance().Locate(input_name);
+		if (!file_name.empty())
+		{
+			lod_file_names.push_back(file_name);
+		}
+	}
+
+	if (lod_file_names.empty())
 	{
 		cout << "Could NOT find " << input_name << endl;
 		Context::Destroy();
 		return 1;
 	}
 
-	filesystem::path input_path(file_name);
-	filesystem::path base_name = input_path.stem();
 	if (target_folder.empty())
 	{
-		target_folder = input_path.parent_path();
+		target_folder = filesystem::path(ResLoader::Instance().Locate(lod_file_names[0])).parent_path();
 	}
 
-	std::string output_name = (target_folder / base_name).string() + ".meshml";
+	std::string const output_name = (target_folder / base_name).string() + ".meshml";
 
-	bool succ = ConvertScene(file_name, output_name, scale, swap_yz, inverse_z);
+	bool succ = ConvertScene(lod_file_names, output_name, scale, swap_yz, inverse_z, quiet);
 
 	if (succ && !quiet)
 	{

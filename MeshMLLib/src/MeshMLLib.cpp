@@ -681,9 +681,16 @@ namespace KlayGE
 
 				for (size_t lod = 0; lod < mesh.lod_vertices.size(); ++ lod)
 				{
-					os << "\t\t\t<lod value=\"" << lod << "\"/>" << std::endl;
+					os << "\t\t\t<lod value=\"" << lod << "\">" << std::endl;
+
+					os << "\t\t\t\t<vertices_chunk>" << std::endl;
 					WriteLodVerticesChunk(os, mesh, lod, "\t\t\t\t", vertex_export_settings);
+					os << "\t\t\t\t</vertices_chunk>" << std::endl;
+
+					os << "\t\t\t\t<triangles_chunk>" << std::endl;
 					WriteLodTrianglesChunk(os, mesh, lod, "\t\t\t\t");
+					os << "\t\t\t\t</triangles_chunk>" << std::endl;
+
 					os << "\t\t\t</lod>" << std::endl;
 				}
 			}
