@@ -36,6 +36,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
 #include <KFL/Hash.hpp>
+#include <KFL/ResIdentifier.hpp>
 
 #include <sstream>
 
@@ -126,10 +127,18 @@ namespace KlayGE
 	bool NullShaderObject::StreamIn(ResIdentifierPtr const & res, ShaderType type, RenderEffect const & effect,
 		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids)
 	{
-		KFL_UNUSED(res);
 		KFL_UNUSED(type);
 		KFL_UNUSED(effect);
 		KFL_UNUSED(shader_desc_ids);
+
+		uint32_t len;
+		res->read(&len, sizeof(len));
+		len = LE2Native(len);
+		if (len > 0)
+		{
+			res->seekg(len, 1);
+		}
+
 		return true;
 	}
 
