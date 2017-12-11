@@ -110,11 +110,8 @@ namespace KlayGE
 		this->DetectsDpi();
 		this->DetectsOrientation();
 
-		ComPtr<IApplicationViewStatics> app_view_stat;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
-
 		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		app_view_stat.As(&app_view_stat2);
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
 
 		ComPtr<IApplicationView> app_view;
 		app_view_stat2->GetForCurrentView(&app_view);
@@ -122,7 +119,7 @@ namespace KlayGE
 		app_view->put_Title(HStringReference(wname_.c_str()).Get());
 
 		ComPtr<IApplicationViewStatics3> app_view_stat3;
-		app_view_stat.As(&app_view_stat3);
+		app_view_stat2.As(&app_view_stat3);
 
 		ABI::Windows::Foundation::Size size;
 		size.Width = static_cast<float>(width_);
@@ -230,17 +227,14 @@ namespace KlayGE
 
 	bool Window::FullScreen(bool fs)
 	{
-		ComPtr<IApplicationViewStatics> app_view_stat;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
-
 		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		app_view_stat.As(&app_view_stat2);
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
 
 		ComPtr<IApplicationView> app_view;
 		app_view_stat2->GetForCurrentView(&app_view);
 
 		ComPtr<IApplicationViewStatics3> app_view_stat3;
-		app_view_stat.As(&app_view_stat3);
+		app_view_stat2.As(&app_view_stat3);
 
 		ComPtr<IApplicationView3> app_view3;
 		app_view.As(&app_view3);
@@ -452,11 +446,8 @@ namespace KlayGE
 
 		this->DetectsDpi();
 
-		ComPtr<IApplicationViewStatics> app_view_stat;
-		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat);
-
 		ComPtr<IApplicationViewStatics2> app_view_stat2;
-		app_view_stat.As(&app_view_stat2);
+		GetActivationFactory(HStringReference(RuntimeClass_Windows_UI_ViewManagement_ApplicationView).Get(), &app_view_stat2);
 
 		ComPtr<IApplicationView> app_view;
 		app_view_stat2->GetForCurrentView(&app_view);
