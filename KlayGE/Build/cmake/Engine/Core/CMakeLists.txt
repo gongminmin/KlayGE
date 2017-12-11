@@ -200,7 +200,7 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.Skinning.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/HDRDisplay.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Imposter.fxml

@@ -85,7 +85,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer+GBuffer.Skinning.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer+GBufferSkinning.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
@@ -133,17 +133,17 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.imposter.rt1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica_2.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Grass2/WC_Euphorbia-larica.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a_lod0.impml
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a_lod0.imposter.rt0.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a_lod0.imposter.rt1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a_lod0.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.impml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.imposter.rt0.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.imposter.rt1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/tree1a.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/bark1_nmp.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree1/leafs1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a_lod0.impml
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a_lod0.imposter.rt0.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a_lod0.imposter.rt1.dds
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a_lod0.meshml.model_bin
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.impml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.imposter.rt0.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.imposter.rt1.dds
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/tree2a.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/bark2_nmp.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Tree2/leafs2.dds

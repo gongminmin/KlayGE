@@ -417,7 +417,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 	if (has_skinned)
 	{
-		effect_ = SyncLoadRenderEffects({ "MtlEditor.fxml", "GBuffer.Skinning.fxml" });
+		effect_ = SyncLoadRenderEffects({ "MtlEditor.fxml", "GBufferSkinning.fxml" });
 	}
 	else
 	{

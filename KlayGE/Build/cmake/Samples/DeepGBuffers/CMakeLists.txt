@@ -45,7 +45,7 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer+GBuffer.Skinning.kfx
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer+GBufferSkinning.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LightSourceProxy.kfx
