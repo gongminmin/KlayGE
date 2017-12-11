@@ -176,12 +176,14 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 	<parameter type="float3" name="foliage_texture_world_offset"/>
 	<parameter type="float" name="foliage_vertical_scale"/>
 	<parameter type="float4x4" name="model_mat"/>
-	<parameter type="float2" name="eye_pos_xz"/>
 	<parameter type="float3" name="plant_aabb_min"/>
 	<parameter type="float3" name="plant_aabb_max"/>
 	<parameter type="float4" name="view_frustum_planes" array_size="6"/>
 	<parameter type="uint" name="probability_channel"/>
 	<parameter type="float4" name="center_tc_angles_step"/>
+	<parameter type="uint" name="lod"/>
+	<parameter type="uint" name="num_lods"/>
+	<parameter type="float" name="fov_scale"/>
 
 	<parameter type="texture2D" name="height_map_tex"/>
 	<parameter type="texture2D" name="probability_tex">
@@ -240,6 +242,21 @@ int IntersectAABBFrustum(float3 aabb_min, float3 aabb_max, float4 view_frustum_p
 	return intersect ? 2 : 0;
 }
 
+float OrthoArea(float3 view_dir, float3 aabb_min, float3 aabb_max)
+{
+	float3 size = aabb_max - aabb_min;
+	return dot(abs(view_dir), size.yzx * size.zxy);
+}
+
+float CalcLod(float3 aabb_min, float3 aabb_max, float3 eye_pos, float fov_scale)
+{
+	float3 view_dir = (aabb_min + aabb_max) / 2 - eye_pos;
+	float dist_sq = dot(view_dir, view_dir);
+	view_dir *= rsqrt(dist_sq);
+	float area = OrthoArea(view_dir, aabb_min, aabb_max);
+	return dist_sq / area / fov_scale;
+}
+
 void FoliageDistribution(uint vid, bool is_impostor,
 					out float4 out_pos_scale,
 					out float2 out_rotation)
@@ -273,7 +290,7 @@ void FoliageDistribution(uint vid, bool is_impostor,
 	bool foliage_planted = (probability >= noise_tex.SampleLevel(linear_wrap_sampler, global_uv * 3, 0).x);
 
 	float3 world_displaced_pos = mul(float4(displaced_pos, 1), model_mat).xyz;
-	float2 dist = world_displaced_pos.xz - eye_pos_xz;
+	float2 dist = world_displaced_pos.xz - eye_pos.xz;
 	float dist_sq = dot(dist, dist);
 
 	bool in_dist = false;
@@ -309,7 +326,9 @@ void FoliageDistribution(uint vid, bool is_impostor,
 		float3 aabb_min = plant_aabb_min;
 		float3 aabb_max = plant_aabb_max;
 		TransformAABB(aabb_min, aabb_max, scale, rot_quat, displaced_pos);
-		if (IntersectAABBFrustum(aabb_min, aabb_max, view_frustum_planes) != 1)
+		
+		if ((is_impostor || (lod == clamp((uint)(CalcLod(aabb_min, aabb_max, eye_pos, fov_scale) + 0.5f), 0, num_lods - 1)))
+			&& (IntersectAABBFrustum(aabb_min, aabb_max, view_frustum_planes) != 1))
 		{
 			out_pos_scale = float4(displaced_pos, scale);
 

@@ -50,8 +50,8 @@ namespace KlayGE
 		std::vector<RenderablePtr> plant_impostor_meshes_;
 		std::vector<ImposterPtr> plant_imposters_;
 
-		std::vector<GraphicsBufferPtr> plant_instance_buffers_;
-		std::vector<RenderLayoutPtr> plant_instance_rls_;
+		std::vector<std::vector<GraphicsBufferPtr>> plant_lod_instance_buffers_;
+		std::vector<std::vector<RenderLayoutPtr>> plant_lod_instance_rls_;
 		std::vector<GraphicsBufferPtr> plant_impostor_instance_buffers_;
 		std::vector<RenderLayoutPtr> plant_impostor_instance_rls_;
 		std::vector<uint4> num_tile_plants_;
@@ -66,7 +66,7 @@ namespace KlayGE
 		uint32_t num_3d_plants_;
 		uint32_t num_impostor_plants_;
 
-		std::vector<QueryPtr> plant_primitive_written_query_;
+		std::vector<std::vector<QueryPtr>> plant_lod_primitive_written_query_;
 		std::vector<QueryPtr> plant_impostor_primitive_written_query_;
 	};
 }
