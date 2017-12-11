@@ -982,6 +982,7 @@ namespace KlayGE
 			if (DXGI_PRESENT_ALLOW_TEARING == present_flags)
 			{
 				d3d11_re.InvalidRTVCache();
+				views_dirty_ = true;
 			}
 		}
 	}
