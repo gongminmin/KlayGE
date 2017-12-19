@@ -52,13 +52,15 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
 #include <VersionHelpers.h>
 #endif
 #endif
+#elif defined(KLAYGE_PLATFORM_ANDROID)
+#include <android_native_app_glue.h>
 #endif
 
 #if defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS)

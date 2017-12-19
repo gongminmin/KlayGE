@@ -54,6 +54,10 @@
 #include <KFL/ResIdentifier.hpp>
 #include <KFL/Thread.hpp>
 
+#if defined(KLAYGE_PLATFORM_ANDROID)
+struct AAsset;
+#endif
+
 namespace KlayGE
 {
 	class KLAYGE_CORE_API ResLoadingDesc : boost::noncopyable

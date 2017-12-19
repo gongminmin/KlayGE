@@ -33,12 +33,12 @@
 #include <string>
 #include <boost/assert.hpp>
 
-#ifdef KLAYGE_PLATFORM_ANDROID
-#include <android_native_app_glue.h>
-#endif
-
 #include <KlayGE/RenderSettings.hpp>
 #include <KFL/DllLoader.hpp>
+
+#ifdef KLAYGE_PLATFORM_ANDROID
+struct android_app;
+#endif
 
 namespace KlayGE
 {

@@ -45,7 +45,7 @@
 
 #include <KlayGE/App3D.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
+#if defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 #include <KFL/COMPtr.hpp>
 
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -76,6 +76,8 @@ using namespace ABI::Windows::UI::Input;
 using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 using namespace concurrency;
+#elif defined(KLAYGE_PLATFORM_ANDROID)
+#include <android_native_app_glue.h>
 #endif
 
 namespace KlayGE

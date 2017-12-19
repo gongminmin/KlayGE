@@ -36,6 +36,10 @@
 
 #include <KlayGE/MsgInput/MInput.hpp>
 
+#if defined KLAYGE_PLATFORM_ANDROID
+#include <android_native_app_glue.h>
+#endif
+
 #if defined(KLAYGE_PLATFORM_WINDOWS_DESKTOP) || defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID)
 namespace KlayGE
 {

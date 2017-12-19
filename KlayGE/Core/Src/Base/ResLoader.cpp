@@ -55,6 +55,7 @@
 #include <KFL/ErrorHandling.hpp>
 #elif defined KLAYGE_PLATFORM_LINUX
 #elif defined KLAYGE_PLATFORM_ANDROID
+#include <android_native_app_glue.h>
 #include <android/asset_manager.h>
 #include <KFL/CustomizedStreamBuf.hpp>
 #elif defined KLAYGE_PLATFORM_DARWIN
