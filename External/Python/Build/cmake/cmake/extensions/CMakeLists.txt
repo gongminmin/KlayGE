@@ -452,7 +452,7 @@ add_python_extension(_decimal
     ${_decimal_LIBRARIES}
     ${_decimal_INCLUDEDIRS}
 )
-if(_decimal_compile_flags AND NOT BUILTIN_DECIMAL)
+if(_decimal_compile_flags AND ENABLE_DECIMAL AND NOT BUILTIN_DECIMAL)
     set_target_properties(extension_decimal PROPERTIES COMPILE_FLAGS ${_decimal_compile_flags})
 endif()
 

@@ -51,8 +51,7 @@ namespace
 {
 	using namespace KlayGE;
 
-
-#if !defined(KLAYGE_CPU_ARM) && !defined(KLAYGE_CPU_ARM64)
+#if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
 	void get_cpuid(uint32_t* peax, uint32_t* pebx, uint32_t* pecx, uint32_t* pedx)
 	{	
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -91,10 +90,7 @@ namespace
 		// TODO: Supports other compiler
 #endif
 	}
-#endif
 
-
-#if (defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64)) && !defined(KLAYGE_PLATFORM_ANDROID)
 	enum CPUIDFeatureMask : uint32_t
 	{
 		// In EBX of type 1. Intel only.
