@@ -1166,30 +1166,7 @@ namespace KlayGE
 			caps_.max_simultaneous_uavs = D3D12_PS_CS_UAV_REGISTER_COUNT;
 			caps_.cs_support = true;
 			caps_.tess_method = TM_Hardware;
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid feature type");
-		}
-
-		switch (d3d_feature_level_)
-		{
-		case D3D_FEATURE_LEVEL_12_1:
-		case D3D_FEATURE_LEVEL_12_0:
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_vertex_streams = D3D12_STANDARD_VERTEX_ELEMENT_COUNT;
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid feature level");
-		}
-		switch (d3d_feature_level_)
-		{
-		case D3D_FEATURE_LEVEL_12_1:
-		case D3D_FEATURE_LEVEL_12_0:
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
 			caps_.max_texture_anisotropy = D3D12_MAX_MAXANISOTROPY;
 			break;
 
@@ -1241,7 +1218,7 @@ namespace KlayGE
 			uav_format_.push_back(EF_R32I);
 		}
 
-		std::pair<ElementFormat, DXGI_FORMAT> fmts[] = 
+		std::pair<ElementFormat, DXGI_FORMAT> const fmts[] = 
 		{
 			std::make_pair(EF_A8, DXGI_FORMAT_A8_UNORM),
 			std::make_pair(EF_R5G6B5, DXGI_FORMAT_B5G6R5_UNORM),
@@ -1313,12 +1290,12 @@ namespace KlayGE
 		};
 
 		D3D12_FEATURE_DATA_FORMAT_SUPPORT fmt_support;
-		for (size_t i = 0; i < std::size(fmts); ++ i)
+		for (auto const & fmt : fmts)
 		{
 			DXGI_FORMAT dxgi_fmt;
-			if (IsDepthFormat(fmts[i].first))
+			if (IsDepthFormat(fmt.first))
 			{
-				switch (fmts[i].first)
+				switch (fmt.first)
 				{
 				case EF_D16:
 					dxgi_fmt = DXGI_FORMAT_R16_TYPELESS;
@@ -1341,7 +1318,7 @@ namespace KlayGE
 				{
 					if (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER)
 					{
-						vertex_format_.push_back(fmts[i].first);
+						vertex_format_.push_back(fmt.first);
 					}
 
 					if ((fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE1D)
@@ -1351,13 +1328,13 @@ namespace KlayGE
 						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_LOAD)
 						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE))
 					{
-						texture_format_.push_back(fmts[i].first);
+						texture_format_.push_back(fmt.first);
 					}
 				}
 			}
 			else
 			{
-				dxgi_fmt = fmts[i].second;
+				dxgi_fmt = fmt.second;
 
 				fmt_support.Format = dxgi_fmt;
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
@@ -1366,7 +1343,7 @@ namespace KlayGE
 				{
 					if (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_IA_VERTEX_BUFFER)
 					{
-						vertex_format_.push_back(fmts[i].first);
+						vertex_format_.push_back(fmt.first);
 					}
 
 					if ((fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURE1D)
@@ -1375,19 +1352,19 @@ namespace KlayGE
 						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_TEXTURECUBE)
 						|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE))
 					{
-						texture_format_.push_back(fmts[i].first);
+						texture_format_.push_back(fmt.first);
 					}
 
 					if (check_uav_fmts
 						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
 						&& ((fmt_support.Support2 & D3D12_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
 					{
-						uav_format_.push_back(fmts[i].first);
+						uav_format_.push_back(fmt.first);
 					}
 				}
 			}
 
-			fmt_support.Format = fmts[i].second;
+			fmt_support.Format = fmt.second;
 			fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 			fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
@@ -1408,7 +1385,7 @@ namespace KlayGE
 						{
 							if (msaa_quality_levels.NumQualityLevels > 0)
 							{
-								rendertarget_format_[fmts[i].first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
+								rendertarget_format_[fmt.first].emplace_back(count, msaa_quality_levels.NumQualityLevels);
 								count <<= 1;
 							}
 							else

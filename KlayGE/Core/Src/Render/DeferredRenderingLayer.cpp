@@ -390,12 +390,12 @@ namespace KlayGE
 
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: active_viewport_(0),
-		sss_enabled_(true), translucency_enabled_(true),
-		ssr_enabled_(true), taa_enabled_(true),
-		light_scale_(1), illum_(0), indirect_scale_(1.0f),
-		curr_cascade_index_(-1), force_line_mode_(false),
-		dr_debug_pp_(MakeSharedPtr<DeferredRenderingDebugPostProcess>()),
-		display_type_(DT_Final)
+			sss_enabled_(true), translucency_enabled_(true),
+			ssr_enabled_(true), taa_enabled_(true),
+			light_scale_(1), illum_(0), indirect_scale_(1.0f),
+			curr_cascade_index_(-1), force_line_mode_(false),
+			dr_debug_pp_(MakeSharedPtr<DeferredRenderingDebugPostProcess>()),
+			display_type_(DT_Final)
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderEngine& re = rf.RenderEngineInstance();
@@ -433,7 +433,7 @@ namespace KlayGE
 			pvp.shadowing_fb = rf.MakeFrameBuffer();
 			pvp.projective_shadowing_fb = rf.MakeFrameBuffer();
 			pvp.reflection_fb = rf.MakeFrameBuffer();
-			for (size_t i = 0; i < pvp.merged_shading_fbs.size(); ++i)
+			for (size_t i = 0; i < pvp.merged_shading_fbs.size(); ++ i)
 			{
 				pvp.merged_shading_fbs[i] = rf.MakeFrameBuffer();
 				pvp.merged_depth_fbs[i] = rf.MakeFrameBuffer();
@@ -545,78 +545,73 @@ namespace KlayGE
 		}
 #endif
 
-		technique_shadows_[LightSource::LT_Point][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
-		technique_shadows_[LightSource::LT_Point][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
-		technique_shadows_[LightSource::LT_Point][2] = dr_effect_->TechniqueByName("DeferredShadowingPointB");
-		technique_shadows_[LightSource::LT_Point][3] = dr_effect_->TechniqueByName("DeferredShadowingPointA");
-		technique_shadows_[LightSource::LT_Point][4] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
-		technique_shadows_[LightSource::LT_Spot][0] = dr_effect_->TechniqueByName("DeferredShadowingSpotR");
-		technique_shadows_[LightSource::LT_Spot][1] = dr_effect_->TechniqueByName("DeferredShadowingSpotG");
-		technique_shadows_[LightSource::LT_Spot][2] = dr_effect_->TechniqueByName("DeferredShadowingSpotB");
-		technique_shadows_[LightSource::LT_Spot][3] = dr_effect_->TechniqueByName("DeferredShadowingSpotA");
-		technique_shadows_[LightSource::LT_Spot][4] = dr_effect_->TechniqueByName("DeferredShadowingSpot");
-		technique_shadows_[LightSource::LT_Directional][0] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalR");
-		technique_shadows_[LightSource::LT_Directional][1] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalG");
-		technique_shadows_[LightSource::LT_Directional][2] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalB");
-		technique_shadows_[LightSource::LT_Directional][3] = dr_effect_->TechniqueByName("DeferredShadowingDirectionalA");
-		technique_shadows_[LightSource::LT_Directional][4] = dr_effect_->TechniqueByName("DeferredShadowingDirectional");
-		technique_shadows_[LightSource::LT_SphereArea][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
-		technique_shadows_[LightSource::LT_SphereArea][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
-		technique_shadows_[LightSource::LT_SphereArea][2] = dr_effect_->TechniqueByName("DeferredShadowingPointB");
-		technique_shadows_[LightSource::LT_SphereArea][3] = dr_effect_->TechniqueByName("DeferredShadowingPointA");
-		technique_shadows_[LightSource::LT_SphereArea][4] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
-		technique_shadows_[LightSource::LT_TubeArea][0] = dr_effect_->TechniqueByName("DeferredShadowingPointR");
-		technique_shadows_[LightSource::LT_TubeArea][1] = dr_effect_->TechniqueByName("DeferredShadowingPointG");
-		technique_shadows_[LightSource::LT_TubeArea][2] = dr_effect_->TechniqueByName("DeferredShadowingPointB");
-		technique_shadows_[LightSource::LT_TubeArea][3] = dr_effect_->TechniqueByName("DeferredShadowingPointA");
-		technique_shadows_[LightSource::LT_TubeArea][4] = dr_effect_->TechniqueByName("DeferredShadowingPoint");
+		auto dr_effect = dr_effect_.get();
+
+		technique_shadows_[LightSource::LT_Point][0] = dr_effect->TechniqueByName("DeferredShadowingPointR");
+		technique_shadows_[LightSource::LT_Point][1] = dr_effect->TechniqueByName("DeferredShadowingPointG");
+		technique_shadows_[LightSource::LT_Point][2] = dr_effect->TechniqueByName("DeferredShadowingPointB");
+		technique_shadows_[LightSource::LT_Point][3] = dr_effect->TechniqueByName("DeferredShadowingPointA");
+		technique_shadows_[LightSource::LT_Point][4] = dr_effect->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LightSource::LT_Spot][0] = dr_effect->TechniqueByName("DeferredShadowingSpotR");
+		technique_shadows_[LightSource::LT_Spot][1] = dr_effect->TechniqueByName("DeferredShadowingSpotG");
+		technique_shadows_[LightSource::LT_Spot][2] = dr_effect->TechniqueByName("DeferredShadowingSpotB");
+		technique_shadows_[LightSource::LT_Spot][3] = dr_effect->TechniqueByName("DeferredShadowingSpotA");
+		technique_shadows_[LightSource::LT_Spot][4] = dr_effect->TechniqueByName("DeferredShadowingSpot");
+		technique_shadows_[LightSource::LT_Directional][0] = dr_effect->TechniqueByName("DeferredShadowingDirectionalR");
+		technique_shadows_[LightSource::LT_Directional][1] = dr_effect->TechniqueByName("DeferredShadowingDirectionalG");
+		technique_shadows_[LightSource::LT_Directional][2] = dr_effect->TechniqueByName("DeferredShadowingDirectionalB");
+		technique_shadows_[LightSource::LT_Directional][3] = dr_effect->TechniqueByName("DeferredShadowingDirectionalA");
+		technique_shadows_[LightSource::LT_Directional][4] = dr_effect->TechniqueByName("DeferredShadowingDirectional");
+		technique_shadows_[LightSource::LT_SphereArea][0] = dr_effect->TechniqueByName("DeferredShadowingPointR");
+		technique_shadows_[LightSource::LT_SphereArea][1] = dr_effect->TechniqueByName("DeferredShadowingPointG");
+		technique_shadows_[LightSource::LT_SphereArea][2] = dr_effect->TechniqueByName("DeferredShadowingPointB");
+		technique_shadows_[LightSource::LT_SphereArea][3] = dr_effect->TechniqueByName("DeferredShadowingPointA");
+		technique_shadows_[LightSource::LT_SphereArea][4] = dr_effect->TechniqueByName("DeferredShadowingPoint");
+		technique_shadows_[LightSource::LT_TubeArea][0] = dr_effect->TechniqueByName("DeferredShadowingPointR");
+		technique_shadows_[LightSource::LT_TubeArea][1] = dr_effect->TechniqueByName("DeferredShadowingPointG");
+		technique_shadows_[LightSource::LT_TubeArea][2] = dr_effect->TechniqueByName("DeferredShadowingPointB");
+		technique_shadows_[LightSource::LT_TubeArea][3] = dr_effect->TechniqueByName("DeferredShadowingPointA");
+		technique_shadows_[LightSource::LT_TubeArea][4] = dr_effect->TechniqueByName("DeferredShadowingPoint");
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		technique_lights_[LightSource::LT_Ambient] = dr_effect_->TechniqueByName("DeferredRenderingAmbient");
-		technique_lights_[LightSource::LT_Directional] = dr_effect_->TechniqueByName("DeferredRenderingDirectional");
-		technique_lights_[LightSource::LT_Point] = dr_effect_->TechniqueByName("DeferredRenderingPoint");
-		technique_lights_[LightSource::LT_Spot] = dr_effect_->TechniqueByName("DeferredRenderingSpot");
-		technique_lights_[LightSource::LT_SphereArea] = dr_effect_->TechniqueByName("DeferredRenderingSphereArea");
-		technique_lights_[LightSource::LT_TubeArea] = dr_effect_->TechniqueByName("DeferredRenderingTubeArea");
-		technique_light_depth_only_ = dr_effect_->TechniqueByName("DeferredRenderingLightDepthOnly");
-		technique_light_stencil_ = dr_effect_->TechniqueByName("DeferredRenderingLightStencil");
+		technique_lights_[LightSource::LT_Ambient] = dr_effect->TechniqueByName("DeferredRenderingAmbient");
+		technique_lights_[LightSource::LT_Directional] = dr_effect->TechniqueByName("DeferredRenderingDirectional");
+		technique_lights_[LightSource::LT_Point] = dr_effect->TechniqueByName("DeferredRenderingPoint");
+		technique_lights_[LightSource::LT_Spot] = dr_effect->TechniqueByName("DeferredRenderingSpot");
+		technique_lights_[LightSource::LT_SphereArea] = dr_effect->TechniqueByName("DeferredRenderingSphereArea");
+		technique_lights_[LightSource::LT_TubeArea] = dr_effect->TechniqueByName("DeferredRenderingTubeArea");
+		technique_light_depth_only_ = dr_effect->TechniqueByName("DeferredRenderingLightDepthOnly");
+		technique_light_stencil_ = dr_effect->TechniqueByName("DeferredRenderingLightStencil");
 #endif
-		technique_no_lighting_ = dr_effect_->TechniqueByName("NoLightingTech");
-		technique_shading_ = dr_effect_->TechniqueByName("ShadingTech");
-		technique_merge_shadings_[0] = dr_effect_->TechniqueByName("MergeShadingTech");
-		technique_merge_shadings_[1] = dr_effect_->TechniqueByName("MergeShadingAlphaBlendTech");
-		technique_merge_depths_[0] = dr_effect_->TechniqueByName("MergeDepthTech");
-		technique_merge_depths_[1] = dr_effect_->TechniqueByName("MergeDepthAlphaBlendTech");
-		technique_copy_shading_depth_ = dr_effect_->TechniqueByName("CopyShadingDepthTech");
-		technique_copy_depth_ = dr_effect_->TechniqueByName("CopyDepthTech");
+		technique_no_lighting_ = dr_effect->TechniqueByName("NoLightingTech");
+		technique_shading_ = dr_effect->TechniqueByName("ShadingTech");
+		technique_merge_shadings_[0] = dr_effect->TechniqueByName("MergeShadingTech");
+		technique_merge_shadings_[1] = dr_effect->TechniqueByName("MergeShadingAlphaBlendTech");
+		technique_merge_depths_[0] = dr_effect->TechniqueByName("MergeDepthTech");
+		technique_merge_depths_[1] = dr_effect->TechniqueByName("MergeDepthAlphaBlendTech");
+		technique_copy_shading_depth_ = dr_effect->TechniqueByName("CopyShadingDepthTech");
+		technique_copy_depth_ = dr_effect->TechniqueByName("CopyDepthTech");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
-			technique_cldr_shadowing_unified_ = dr_effect_->TechniqueByName("ClusteredDRShadowingUnified");
-			technique_cldr_light_intersection_unified_ = dr_effect_->TechniqueByName("ClusteredDRLightIntersection");
-			if (typed_uav_)
-			{
-				technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnified");
-			}
-			else
-			{
-				technique_cldr_unified_ = dr_effect_->TechniqueByName("ClusteredDRUnifiedNoTypedUAV");
-			}
+			technique_cldr_shadowing_unified_ = dr_effect->TechniqueByName("ClusteredDRShadowingUnified");
+			technique_cldr_light_intersection_unified_ = dr_effect->TechniqueByName("ClusteredDRLightIntersection");
+			technique_cldr_unified_ = dr_effect->TechniqueByName(typed_uav_ ? "ClusteredDRUnified" : "ClusteredDRUnifiedNoTypedUAV");
 		}
 		else
 		{
-			technique_draw_light_index_point_ = dr_effect_->TechniqueByName("DrawLightIndexPoint");
-			technique_draw_light_index_spot_ = dr_effect_->TechniqueByName("DrawLightIndexSpot");
-			technique_lidr_ambient_ = dr_effect_->TechniqueByName("LIDRAmbient");
-			technique_lidr_directional_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalShadow");
-			technique_lidr_directional_no_shadow_ = dr_effect_->TechniqueByName("LIDRDirectionalNoShadow");
-			technique_lidr_point_shadow_ = dr_effect_->TechniqueByName("LIDRPointShadow");
-			technique_lidr_point_no_shadow_ = dr_effect_->TechniqueByName("LIDRPointNoShadow");
-			technique_lidr_spot_shadow_ = dr_effect_->TechniqueByName("LIDRSpotShadow");
-			technique_lidr_spot_no_shadow_ = dr_effect_->TechniqueByName("LIDRSpotNoShadow");
-			technique_lidr_sphere_area_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaShadow");
-			technique_lidr_sphere_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRSphereAreaNoShadow");
-			technique_lidr_tube_area_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaShadow");
-			technique_lidr_tube_area_no_shadow_ = dr_effect_->TechniqueByName("LIDRTubeAreaNoShadow");
+			technique_draw_light_index_point_ = dr_effect->TechniqueByName("DrawLightIndexPoint");
+			technique_draw_light_index_spot_ = dr_effect->TechniqueByName("DrawLightIndexSpot");
+			technique_lidr_ambient_ = dr_effect->TechniqueByName("LIDRAmbient");
+			technique_lidr_directional_shadow_ = dr_effect->TechniqueByName("LIDRDirectionalShadow");
+			technique_lidr_directional_no_shadow_ = dr_effect->TechniqueByName("LIDRDirectionalNoShadow");
+			technique_lidr_point_shadow_ = dr_effect->TechniqueByName("LIDRPointShadow");
+			technique_lidr_point_no_shadow_ = dr_effect->TechniqueByName("LIDRPointNoShadow");
+			technique_lidr_spot_shadow_ = dr_effect->TechniqueByName("LIDRSpotShadow");
+			technique_lidr_spot_no_shadow_ = dr_effect->TechniqueByName("LIDRSpotNoShadow");
+			technique_lidr_sphere_area_shadow_ = dr_effect->TechniqueByName("LIDRSphereAreaShadow");
+			technique_lidr_sphere_area_no_shadow_ = dr_effect->TechniqueByName("LIDRSphereAreaNoShadow");
+			technique_lidr_tube_area_shadow_ = dr_effect->TechniqueByName("LIDRTubeAreaShadow");
+			technique_lidr_tube_area_no_shadow_ = dr_effect->TechniqueByName("LIDRTubeAreaNoShadow");
 		}
 #endif
 
@@ -642,10 +637,9 @@ namespace KlayGE
 		csm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*csm_tex_, 0, 1, 0));
 		csm_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(SM_SIZE * 2, SM_SIZE * 2, EF_D24S8, 1, 0));
 
-		for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
+		for (auto& tex : unfiltered_sm_2d_texs_)
 		{
-			unfiltered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
-				EAH_GPU_Read | EAH_GPU_Write);
+			tex = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 		if (tex_array_support_)
 		{
@@ -654,15 +648,14 @@ namespace KlayGE
 		}
 		else
 		{
-			for (uint32_t i = 0; i < filtered_sm_2d_texs_.size(); ++ i)
+			for (auto& tex : filtered_sm_2d_texs_)
 			{
-				filtered_sm_2d_texs_[i] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0,
-					EAH_GPU_Read | EAH_GPU_Write);
+				tex = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			}
 		}
-		for (uint32_t i = 0; i < filtered_sm_cube_texs_.size(); ++ i)
+		for (auto& tex : filtered_sm_cube_texs_)
 		{
-			filtered_sm_cube_texs_[i] = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+			tex = rf.MakeTextureCube(SM_SIZE, 1, 1, sm_tex_->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		}
 
 		ssvo_pp_ = MakeSharedPtr<SSVOPostProcess>();
@@ -719,102 +712,102 @@ namespace KlayGE
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 		depth_mipmap_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthMipmapBilinear");
 
-		g_buffer_tex_param_ = dr_effect_->ParameterByName("g_buffer_tex");
-		g_buffer_1_tex_param_ = dr_effect_->ParameterByName("g_buffer_1_tex");
-		depth_tex_param_ = dr_effect_->ParameterByName("depth_tex");
+		g_buffer_tex_param_ = dr_effect->ParameterByName("g_buffer_tex");
+		g_buffer_1_tex_param_ = dr_effect->ParameterByName("g_buffer_1_tex");
+		depth_tex_param_ = dr_effect->ParameterByName("depth_tex");
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
-		lighting_tex_param_ = dr_effect_->ParameterByName("lighting_tex");
+		lighting_tex_param_ = dr_effect->ParameterByName("lighting_tex");
 #endif
-		shading_tex_param_ = dr_effect_->ParameterByName("shading_tex");
-		light_attrib_param_ = dr_effect_->ParameterByName("light_attrib");
-		light_radius_extend_param_ = dr_effect_->ParameterByName("light_radius_extend");
-		light_color_param_ = dr_effect_->ParameterByName("light_color");
-		light_falloff_range_param_ = dr_effect_->ParameterByName("light_falloff_range");
-		light_view_proj_param_ = dr_effect_->ParameterByName("light_view_proj");
-		light_volume_mv_param_ = dr_effect_->ParameterByName("light_volume_mv");
-		light_volume_mvp_param_ = dr_effect_->ParameterByName("light_volume_mvp");
-		view_to_light_model_param_ = dr_effect_->ParameterByName("view_to_light_model");
-		light_pos_es_param_ = dr_effect_->ParameterByName("light_pos_es");
-		light_dir_es_param_ = dr_effect_->ParameterByName("light_dir_es");
-		projective_map_2d_tex_param_ = dr_effect_->ParameterByName("projective_map_2d_tex");
-		projective_map_cube_tex_param_ = dr_effect_->ParameterByName("projective_map_cube_tex");
-		filtered_sm_2d_tex_param_ = dr_effect_->ParameterByName("filtered_sm_2d_tex");
-		filtered_sm_2d_tex_array_param_ = dr_effect_->ParameterByName("filtered_sm_2d_tex_array");
-		filtered_sm_2d_light_index_param_ = dr_effect_->ParameterByName("filtered_sm_2d_light_index");
-		filtered_sm_cube_tex_param_ = dr_effect_->ParameterByName("filtered_sm_cube_tex");
-		inv_width_height_param_ = dr_effect_->ParameterByName("inv_width_height");
-		shadowing_tex_param_ = dr_effect_->ParameterByName("shadowing_tex");
-		projective_shadowing_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_tex");
-		shadowing_channel_param_ = dr_effect_->ParameterByName("shadowing_channel");
-		esm_scale_factor_param_ = dr_effect_->ParameterByName("esm_scale_factor");
-		near_q_param_ = dr_effect_->ParameterByName("near_q");
-		cascade_intervals_param_ = dr_effect_->ParameterByName("cascade_intervals");
-		cascade_scale_bias_param_ = dr_effect_->ParameterByName("cascade_scale_bias");
-		num_cascades_param_ = dr_effect_->ParameterByName("num_cascades");
-		view_z_to_light_view_param_ = dr_effect_->ParameterByName("view_z_to_light_view");
+		shading_tex_param_ = dr_effect->ParameterByName("shading_tex");
+		light_attrib_param_ = dr_effect->ParameterByName("light_attrib");
+		light_radius_extend_param_ = dr_effect->ParameterByName("light_radius_extend");
+		light_color_param_ = dr_effect->ParameterByName("light_color");
+		light_falloff_range_param_ = dr_effect->ParameterByName("light_falloff_range");
+		light_view_proj_param_ = dr_effect->ParameterByName("light_view_proj");
+		light_volume_mv_param_ = dr_effect->ParameterByName("light_volume_mv");
+		light_volume_mvp_param_ = dr_effect->ParameterByName("light_volume_mvp");
+		view_to_light_model_param_ = dr_effect->ParameterByName("view_to_light_model");
+		light_pos_es_param_ = dr_effect->ParameterByName("light_pos_es");
+		light_dir_es_param_ = dr_effect->ParameterByName("light_dir_es");
+		projective_map_2d_tex_param_ = dr_effect->ParameterByName("projective_map_2d_tex");
+		projective_map_cube_tex_param_ = dr_effect->ParameterByName("projective_map_cube_tex");
+		filtered_sm_2d_tex_param_ = dr_effect->ParameterByName("filtered_sm_2d_tex");
+		filtered_sm_2d_tex_array_param_ = dr_effect->ParameterByName("filtered_sm_2d_tex_array");
+		filtered_sm_2d_light_index_param_ = dr_effect->ParameterByName("filtered_sm_2d_light_index");
+		filtered_sm_cube_tex_param_ = dr_effect->ParameterByName("filtered_sm_cube_tex");
+		inv_width_height_param_ = dr_effect->ParameterByName("inv_width_height");
+		shadowing_tex_param_ = dr_effect->ParameterByName("shadowing_tex");
+		projective_shadowing_tex_param_ = dr_effect->ParameterByName("projective_shadowing_tex");
+		shadowing_channel_param_ = dr_effect->ParameterByName("shadowing_channel");
+		esm_scale_factor_param_ = dr_effect->ParameterByName("esm_scale_factor");
+		near_q_param_ = dr_effect->ParameterByName("near_q");
+		cascade_intervals_param_ = dr_effect->ParameterByName("cascade_intervals");
+		cascade_scale_bias_param_ = dr_effect->ParameterByName("cascade_scale_bias");
+		num_cascades_param_ = dr_effect->ParameterByName("num_cascades");
+		view_z_to_light_view_param_ = dr_effect->ParameterByName("view_z_to_light_view");
 		if (tex_array_support_)
 		{
-			filtered_csm_texs_param_[0] = dr_effect_->ParameterByName("filtered_csm_tex_array");
+			filtered_csm_texs_param_[0] = dr_effect->ParameterByName("filtered_csm_tex_array");
 		}
 		else
 		{
-			filtered_csm_texs_param_[0] = dr_effect_->ParameterByName("filtered_csm_0_tex");
-			filtered_csm_texs_param_[1] = dr_effect_->ParameterByName("filtered_csm_1_tex");
-			filtered_csm_texs_param_[2] = dr_effect_->ParameterByName("filtered_csm_2_tex");
-			filtered_csm_texs_param_[3] = dr_effect_->ParameterByName("filtered_csm_3_tex");
+			filtered_csm_texs_param_[0] = dr_effect->ParameterByName("filtered_csm_0_tex");
+			filtered_csm_texs_param_[1] = dr_effect->ParameterByName("filtered_csm_1_tex");
+			filtered_csm_texs_param_[2] = dr_effect->ParameterByName("filtered_csm_2_tex");
+			filtered_csm_texs_param_[3] = dr_effect->ParameterByName("filtered_csm_3_tex");
 		}
-		skylight_diff_spec_mip_param_ = dr_effect_->ParameterByName("skylight_diff_spec_mip");
-		inv_view_param_ = dr_effect_->ParameterByName("inv_view");
-		skylight_y_cube_tex_param_ = dr_effect_->ParameterByName("skylight_y_cube_tex");
-		skylight_c_cube_tex_param_ = dr_effect_->ParameterByName("skylight_c_cube_tex");
+		skylight_diff_spec_mip_param_ = dr_effect->ParameterByName("skylight_diff_spec_mip");
+		inv_view_param_ = dr_effect->ParameterByName("inv_view");
+		skylight_y_cube_tex_param_ = dr_effect->ParameterByName("skylight_y_cube_tex");
+		skylight_c_cube_tex_param_ = dr_effect->ParameterByName("skylight_c_cube_tex");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
-		min_max_depth_tex_param_ = dr_effect_->ParameterByName("min_max_depth_tex");
-		lights_color_param_ = dr_effect_->ParameterByName("lights_color");
-		lights_pos_es_param_ = dr_effect_->ParameterByName("lights_pos_es");
-		lights_dir_es_param_ = dr_effect_->ParameterByName("lights_dir_es");
-		lights_falloff_range_param_ = dr_effect_->ParameterByName("lights_falloff_range");
-		lights_attrib_param_ = dr_effect_->ParameterByName("lights_attrib");
-		lights_radius_extend_param_ = dr_effect_->ParameterByName("lights_radius_extend");
-		lights_aabb_min_param_ = dr_effect_->ParameterByName("lights_aabb_min");
-		lights_aabb_max_param_ = dr_effect_->ParameterByName("lights_aabb_max");
-		tile_scale_param_ = dr_effect_->ParameterByName("tile_scale");
-		camera_proj_01_param_ = dr_effect_->ParameterByName("camera_proj_01");
+		min_max_depth_tex_param_ = dr_effect->ParameterByName("min_max_depth_tex");
+		lights_color_param_ = dr_effect->ParameterByName("lights_color");
+		lights_pos_es_param_ = dr_effect->ParameterByName("lights_pos_es");
+		lights_dir_es_param_ = dr_effect->ParameterByName("lights_dir_es");
+		lights_falloff_range_param_ = dr_effect->ParameterByName("lights_falloff_range");
+		lights_attrib_param_ = dr_effect->ParameterByName("lights_attrib");
+		lights_radius_extend_param_ = dr_effect->ParameterByName("lights_radius_extend");
+		lights_aabb_min_param_ = dr_effect->ParameterByName("lights_aabb_min");
+		lights_aabb_max_param_ = dr_effect->ParameterByName("lights_aabb_max");
+		tile_scale_param_ = dr_effect->ParameterByName("tile_scale");
+		camera_proj_01_param_ = dr_effect->ParameterByName("camera_proj_01");
 
 		if (cs_cldr_)
 		{
-			technique_depth_to_tiled_min_max_ = dr_effect_->TechniqueByName("DepthToTiledMinMax");
-			technique_cldr_lighting_mask_ = dr_effect_->TechniqueByName("ClusteredDRLightingMask");
+			technique_depth_to_tiled_min_max_ = dr_effect->TechniqueByName("DepthToTiledMinMax");
+			technique_cldr_lighting_mask_ = dr_effect->TechniqueByName("ClusteredDRLightingMask");
 
-			near_q_far_param_ = dr_effect_->ParameterByName("near_q_far");
-			width_height_param_ = dr_effect_->ParameterByName("width_height");
-			depth_to_tiled_depth_in_tex_param_ = dr_effect_->ParameterByName("depth_in_tex");
-			depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect_->ParameterByName("min_max_depth_rw_tex");
-			linear_depth_rw_tex_param_ = dr_effect_->ParameterByName("linear_depth_rw_tex");
-			upper_left_param_ = dr_effect_->ParameterByName("upper_left");
-			x_dir_param_ = dr_effect_->ParameterByName("x_dir");
-			y_dir_param_ = dr_effect_->ParameterByName("y_dir");
-			lighting_mask_tex_param_ = dr_effect_->ParameterByName("lighting_mask_tex");
-			shading_in_tex_param_ = dr_effect_->ParameterByName("shading_in_tex");
-			shading_rw_tex_param_ = dr_effect_->ParameterByName("shading_rw_tex");
-			lights_type_param_ = dr_effect_->ParameterByName("lights_type");
-			lights_start_in_tex_param_ = dr_effect_->ParameterByName("lights_start_in_tex");
-			lights_start_rw_tex_param_ = dr_effect_->ParameterByName("lights_start_rw_tex");
-			intersected_light_indices_in_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_in_tex");
-			intersected_light_indices_rw_tex_param_ = dr_effect_->ParameterByName("intersected_light_indices_rw_tex");
-			depth_slices_param_ = dr_effect_->ParameterByName("depth_slices");
-			depth_slices_shading_param_ = dr_effect_->ParameterByName("depth_slices_shading");
+			near_q_far_param_ = dr_effect->ParameterByName("near_q_far");
+			width_height_param_ = dr_effect->ParameterByName("width_height");
+			depth_to_tiled_depth_in_tex_param_ = dr_effect->ParameterByName("depth_in_tex");
+			depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect->ParameterByName("min_max_depth_rw_tex");
+			linear_depth_rw_tex_param_ = dr_effect->ParameterByName("linear_depth_rw_tex");
+			upper_left_param_ = dr_effect->ParameterByName("upper_left");
+			x_dir_param_ = dr_effect->ParameterByName("x_dir");
+			y_dir_param_ = dr_effect->ParameterByName("y_dir");
+			lighting_mask_tex_param_ = dr_effect->ParameterByName("lighting_mask_tex");
+			shading_in_tex_param_ = dr_effect->ParameterByName("shading_in_tex");
+			shading_rw_tex_param_ = dr_effect->ParameterByName("shading_rw_tex");
+			lights_type_param_ = dr_effect->ParameterByName("lights_type");
+			lights_start_in_tex_param_ = dr_effect->ParameterByName("lights_start_in_tex");
+			lights_start_rw_tex_param_ = dr_effect->ParameterByName("lights_start_rw_tex");
+			intersected_light_indices_in_tex_param_ = dr_effect->ParameterByName("intersected_light_indices_in_tex");
+			intersected_light_indices_rw_tex_param_ = dr_effect->ParameterByName("intersected_light_indices_rw_tex");
+			depth_slices_param_ = dr_effect->ParameterByName("depth_slices");
+			depth_slices_shading_param_ = dr_effect->ParameterByName("depth_slices_shading");
 
-			projective_shadowing_rw_tex_param_ = dr_effect_->ParameterByName("projective_shadowing_rw_tex");
-			shadowing_rw_tex_param_ = dr_effect_->ParameterByName("shadowing_rw_tex");
-			lights_view_proj_param_ = dr_effect_->ParameterByName("lights_view_proj");
-			filtered_sms_2d_light_index_param_ = dr_effect_->ParameterByName("filtered_sms_2d_light_index");
-			esms_scale_factor_param_ = dr_effect_->ParameterByName("esms_scale_factor");
+			projective_shadowing_rw_tex_param_ = dr_effect->ParameterByName("projective_shadowing_rw_tex");
+			shadowing_rw_tex_param_ = dr_effect->ParameterByName("shadowing_rw_tex");
+			lights_view_proj_param_ = dr_effect->ParameterByName("lights_view_proj");
+			filtered_sms_2d_light_index_param_ = dr_effect->ParameterByName("filtered_sms_2d_light_index");
+			esms_scale_factor_param_ = dr_effect->ParameterByName("esms_scale_factor");
 
 			copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
 		}
 		else
 		{
-			light_index_tex_param_ = dr_effect_->ParameterByName("light_index_tex");
+			light_index_tex_param_ = dr_effect->ParameterByName("light_index_tex");
 		}
 
 		depth_to_min_max_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToMinMax");

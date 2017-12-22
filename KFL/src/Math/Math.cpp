@@ -645,7 +645,7 @@ namespace KlayGE
 		template <typename T>
 		T perspective_area(Vector_T<T, 3> const & view_pos, Matrix4_T<T> const & view_proj, AABBox_T<T> const & aabbox) noexcept
 		{
-			static uint32_t const HULL_VERTEX[64][7] = 
+			static uint8_t const HULL_VERTEX[64][7] = 
 			{
 				{ 0, 0, 0, 0, 0, 0, 0 },
 				{ 0, 4, 7, 3, 0, 0, 4 },

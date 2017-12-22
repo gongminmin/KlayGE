@@ -34,7 +34,6 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/Texture.hpp>
 
 namespace KlayGE
 {

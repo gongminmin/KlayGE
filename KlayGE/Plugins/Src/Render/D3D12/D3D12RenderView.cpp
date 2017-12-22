@@ -254,7 +254,7 @@ namespace KlayGE
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		for (uint32_t i = 0; i < rt_num_subres_; ++i)
+		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
 			if (rt_src_->UpdateResourceBarrier(rt_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
 			{

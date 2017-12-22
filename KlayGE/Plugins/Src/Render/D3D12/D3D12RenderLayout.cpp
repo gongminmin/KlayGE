@@ -106,7 +106,7 @@ namespace KlayGE
 		uint32_t const all_num_vertex_stream = num_vertex_streams + (this->InstanceStream() ? 1 : 0);
 
 		vbvs_.resize(all_num_vertex_stream);
-		for (uint32_t i = 0; i < num_vertex_streams; ++i)
+		for (uint32_t i = 0; i < num_vertex_streams; ++ i)
 		{
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(this->GetVertexStream(i).get());
 			vbvs_[i].BufferLocation = d3dvb.GPUVirtualAddress();

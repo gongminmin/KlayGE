@@ -805,6 +805,41 @@ namespace KlayGE
 #endif
 	}
 
+	void D3D11ShaderObject::CreateGeometryShaderWithStreamOutput(ShaderType type, RenderEffect const & effect,
+		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob,
+		std::vector<ShaderDesc::StreamOutputDecl> const & so_decl)
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto const & d3d11_re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
+		auto d3d_device = d3d11_re.D3DDevice();
+		auto const & caps = d3d11_re.DeviceCaps();
+
+		std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(so_decl.size());
+		for (size_t i = 0; i < so_decl.size(); ++i)
+		{
+			d3d11_decl[i] = D3D11Mapping::Mapping(so_decl[i]);
+		}
+
+		UINT rasterized_stream = 0;
+		if ((caps.max_shader_model >= ShaderModel(5, 0))
+			&& (effect.GetShaderDesc(shader_desc_ids[ShaderObject::ST_PixelShader]).func_name.empty()))
+		{
+			rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
+		}
+
+		ID3D11GeometryShader* gs;
+		if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
+			&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
+			&gs)))
+		{
+			is_shader_validate_[type] = false;
+		}
+		else
+		{
+			so_template_->geometry_shader_ = MakeCOMPtr(gs);
+		}
+	}
+
 	void D3D11ShaderObject::AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 		std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob)
 	{
@@ -842,30 +877,8 @@ namespace KlayGE
 							{
 								if (caps.gs_support)
 								{
-									std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
-									for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-									{
-										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
-									}
-
-									UINT rasterized_stream = 0;
-									if ((caps.max_shader_model >= ShaderModel(5, 0))
-										&& (effect.GetShaderDesc(shader_desc_ids[ShaderObject::ST_PixelShader]).func_name.empty()))
-									{
-										rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
-									}
-
-									ID3D11GeometryShader* gs;
-									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
-										&gs)))
-									{
-										is_shader_validate_[type] = false;
-									}
-									else
-									{
-										so_template_->geometry_shader_ = MakeCOMPtr(gs);
-									}
+									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+										sd.so_decl);
 								}
 								else
 								{
@@ -911,29 +924,11 @@ namespace KlayGE
 						}
 						else
 						{
-							std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
-							for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-							{
-								d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
-							}
+							this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+								sd.so_decl);
 
-							UINT rasterized_stream = 0;
-							if ((caps.max_shader_model >= ShaderModel(5, 0))
-								&& (effect.GetShaderDesc(shader_desc_ids[ShaderObject::ST_PixelShader]).func_name.empty()))
+							if (is_shader_validate_[type])
 							{
-								rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
-							}
-
-							ID3D11GeometryShader* gs;
-							if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-								&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
-								&gs)))
-							{
-								is_shader_validate_[type] = false;
-							}
-							else
-							{
-								so_template_->geometry_shader_ = MakeCOMPtr(gs);
 								so_template_->shader_code_[type].first = code_blob;
 							}
 						}
@@ -1001,30 +996,8 @@ namespace KlayGE
 							{
 								if (caps.gs_support)
 								{
-									std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(sd.so_decl.size());
-									for (size_t i = 0; i < sd.so_decl.size(); ++ i)
-									{
-										d3d11_decl[i] = D3D11Mapping::Mapping(sd.so_decl[i]);
-									}
-
-									UINT rasterized_stream = 0;
-									if ((caps.max_shader_model >= ShaderModel(5, 0))
-										&& (effect.GetShaderDesc(shader_desc_ids[ShaderObject::ST_PixelShader]).func_name.empty()))
-									{
-										rasterized_stream = D3D11_SO_NO_RASTERIZED_STREAM;
-									}
-
-									ID3D11GeometryShader* gs;
-									if (FAILED(d3d_device->CreateGeometryShaderWithStreamOutput(&((*code_blob)[0]), code_blob->size(),
-										&d3d11_decl[0], static_cast<UINT>(d3d11_decl.size()), nullptr, 0, rasterized_stream, nullptr,
-										&gs)))
-									{
-										is_shader_validate_[type] = false;
-									}
-									else
-									{
-										so_template_->geometry_shader_ = MakeCOMPtr(gs);
-									}
+									this->CreateGeometryShaderWithStreamOutput(type, effect, shader_desc_ids, code_blob,
+										sd.so_decl);
 								}
 								else
 								{

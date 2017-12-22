@@ -47,8 +47,6 @@ namespace
 {
 	using namespace KlayGE;
 
-	std::mutex singleton_mutex;
-
 	static uint8_t const selector_index_to_etc1[] = { 3, 2, 0, 1 };
 
 	// color8_to_etc_block_config_0_255[color][table_index] = Supplies for each 8-bit color value a list of packed ETC1 diff/intensity table/selectors/packed_colors that map to that color.
@@ -1110,8 +1108,6 @@ namespace KlayGE
 	// For random 888 inputs, MSE results are better than Erricson's ETC1 packer in "slow" mode ~9.5% of the time, is slightly worse only ~.01% of the time, and is equal the rest of the time.
 	uint64_t TexCompressionETC1::PackETC1UniformBlock(ETC1Block& block, ARGBColor32 const * argb) const
 	{
-		BOOST_ASSERT(ETC1_INVERSE_LOOKUP[0][255]);
-
 		static uint32_t const next_comp[] = { 1, 2, 0, 1 };
 
 		uint8_t const * color = reinterpret_cast<uint8_t const *>(argb);
@@ -1214,8 +1210,6 @@ namespace KlayGE
 	uint32_t TexCompressionETC1::PackETC1UniformPartition(Results& results, uint32_t num_colors, ARGBColor32 const * argb,
 			bool use_diff, ARGBColor32 const * base_color5_unscaled) const
 	{
-		BOOST_ASSERT(ETC1_INVERSE_LOOKUP[0][255]);
-
 		static uint32_t const next_comp[] = { 1, 2, 0, 1 };
 
 		uint8_t const * color = reinterpret_cast<uint8_t const *>(argb);

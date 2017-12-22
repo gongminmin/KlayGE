@@ -140,6 +140,9 @@ namespace KlayGE
 			RenderTechnique const & tech, RenderPass const & pass, std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids);
 		void AttachShaderBytecode(ShaderType type, RenderEffect const & effect,
 			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob);
+		void CreateGeometryShaderWithStreamOutput(ShaderType type, RenderEffect const & effect,
+			std::array<uint32_t, ST_NumShaderTypes> const & shader_desc_ids, std::shared_ptr<std::vector<uint8_t>> const & code_blob,
+			std::vector<ShaderDesc::StreamOutputDecl> const & so_decl);
 
 	private:
 		std::shared_ptr<D3D11ShaderObjectTemplate> so_template_;

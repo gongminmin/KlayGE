@@ -34,6 +34,7 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/COMPtr.hpp>
+#include <KFL/Hash.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
@@ -69,13 +70,8 @@ using namespace Microsoft::WRL::Wrappers;
 namespace KlayGE
 {
 	D3D12RenderWindow::D3D12RenderWindow(D3D12AdapterPtr const & adapter, std::string const & name, RenderSettings const & settings)
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
-						: hWnd_(nullptr),
-#else
-						:
-#endif
-							adapter_(adapter), dxgi_allow_tearing_(false),
-								frame_latency_waitable_obj_(0)
+						: adapter_(adapter), dxgi_allow_tearing_(false),
+							frame_latency_waitable_obj_(0)
 	{
 		// Store info
 		name_				= name;
@@ -84,7 +80,7 @@ namespace KlayGE
 
 		ElementFormat format = settings.color_fmt;
 
-		WindowPtr const & main_wnd = Context::Instance().AppInstance().MainWnd();
+		auto main_wnd = Context::Instance().AppInstance().MainWnd().get();
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 		hWnd_ = main_wnd->HWnd();
 #else
@@ -153,25 +149,25 @@ namespace KlayGE
 
 			ArrayRef<D3D_FEATURE_LEVEL> feature_levels;
 			{
-				static std::string_view const feature_level_names[] =
+				static size_t constexpr feature_level_name_hashes[] =
 				{
-					"12_1",
-					"12_0",
-					"11_1",
-					"11_0"
+					CT_HASH("12_1"),
+					CT_HASH("12_0"),
+					CT_HASH("11_1"),
+					CT_HASH("11_0")
 				};
-				KLAYGE_STATIC_ASSERT(std::size(feature_level_names) == std::size(all_feature_levels));
+				KLAYGE_STATIC_ASSERT(std::size(feature_level_name_hashes) == std::size(all_feature_levels));
 
 				uint32_t feature_level_start_index = 0;
 				for (size_t index = 0; index < settings.options.size(); ++ index)
 				{
-					std::string_view opt_name = settings.options[index].first;
-					std::string_view opt_val = settings.options[index].second;
-					if ("level" == opt_name)
+					size_t const opt_name_hash = RT_HASH(settings.options[index].first.c_str());
+					size_t const opt_val_hash = RT_HASH(settings.options[index].second.c_str());
+					if (CT_HASH("level") == opt_name_hash)
 					{
-						for (uint32_t i = feature_level_start_index; i < std::size(feature_level_names); ++ i)
+						for (uint32_t i = feature_level_start_index; i < std::size(feature_level_name_hashes); ++ i)
 						{
-							if (feature_level_names[i] == opt_val)
+							if (feature_level_name_hashes[i] == opt_val_hash)
 							{
 								feature_level_start_index = i;
 								break;

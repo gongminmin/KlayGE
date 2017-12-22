@@ -249,7 +249,7 @@ void DeepGBuffersApp::ReceivesLightingHandler(UICheckBox const & sender)
 	bool lighting = sender.GetChecked();
 
 	RenderablePtr const & model = scene_obj_->GetRenderable();
-	for (uint32_t i = 0; i < model->NumSubrenderables(); ++i)
+	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 	{
 		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->ReceivesLighting(lighting);
 	}

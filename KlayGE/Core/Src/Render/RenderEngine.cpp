@@ -139,7 +139,7 @@ namespace KlayGE
 		pp_rl_ = rf.MakeRenderLayout();
 		pp_rl_->TopologyType(RenderLayout::TT_TriangleStrip);
 
-		float2 pp_pos[] =
+		float2 const pp_pos[] =
 		{
 			float2(-1, +1),
 			float2(+1, +1),
@@ -152,7 +152,7 @@ namespace KlayGE
 		vpp_rl_ = rf.MakeRenderLayout();
 		vpp_rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		float3 vpp_pos[] =
+		float3 const vpp_pos[] =
 		{
 			float3(-1, +1, -1),
 			float3(+1, +1, -1),
@@ -166,7 +166,7 @@ namespace KlayGE
 		GraphicsBufferPtr vpp_pos_vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vpp_pos), &vpp_pos[0]);
 		vpp_rl_->BindVertexStream(vpp_pos_vb, VertexElement(VEU_Position, 0, EF_BGR32F));
 
-		uint16_t vpp_indices[] =
+		uint16_t constexpr vpp_indices[] =
 		{
 			0, 1, 3, 3, 2, 0,
 			1, 5, 7, 7, 3, 1,
