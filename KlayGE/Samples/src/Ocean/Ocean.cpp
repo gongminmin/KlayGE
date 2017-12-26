@@ -54,7 +54,6 @@ namespace
 
 			model_mat_ = float4x4::Identity();
 			effect_attrs_ |= EA_TransparencyFront;
-			effect_attrs_ |= EA_Reflection;
 			effect_attrs_ |= EA_SpecialShading;
 		}
 
@@ -114,9 +113,16 @@ namespace
 			*(effect_->ParameterByName("fog_color")) = float3(fog_color.r(), fog_color.g(), fog_color.b());
 		}
 
+		void ReflectionTex(TexturePtr const & tex)
+		{
+			reflection_tex_ = tex;
+		}
+
 		void OnRenderBegin()
 		{
 			InfTerrainRenderable::OnRenderBegin();
+
+			auto drl = Context::Instance().DeferredRenderingLayerInstance();
 
 			switch (type_)
 			{
@@ -130,7 +136,7 @@ namespace
 				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
 				*metalness_clr_param_ = float2(1, 0);
 				*glossiness_clr_param_ = float2(0.5f, 0);
-				*opaque_depth_tex_param_ = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
+				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueReflection:
@@ -140,7 +146,7 @@ namespace
 				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
-				*(effect_->ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
+				*(effect_->ParameterByName("g_buffer_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -155,8 +161,8 @@ namespace
 					*(effect_->ParameterByName("view")) = camera.ViewMatrix();
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
-				*(effect_->ParameterByName("front_side_depth_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameDepthTex(0);
-				*(effect_->ParameterByName("front_side_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
+				*(effect_->ParameterByName("front_side_depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("front_side_tex")) = drl->CurrFrameShadingTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueSpecialShading:
@@ -166,8 +172,8 @@ namespace
 				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
-				*(effect_->ParameterByName("opaque_shading_tex")) = Context::Instance().DeferredRenderingLayerInstance()->CurrFrameShadingTex(0);
-				*(effect_->ParameterByName("g_buffer_tex")) = Context::Instance().DeferredRenderingLayerInstance()->GBufferRT0Tex(0);
+				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameShadingTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -176,12 +182,16 @@ namespace
 					*(effect_->ParameterByName("near_q_far")) = near_q_far;
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
+				*reflection_tex_param_ = reflection_tex_;
 				break;
 
 			default:
 				break;
 			}
 		}
+
+	private:
+		TexturePtr reflection_tex_;
 	};
 
 	class OceanObject : public InfTerrainSceneObject
@@ -198,6 +208,7 @@ namespace
 			renderable_ = MakeSharedPtr<RenderOcean>(base_level_, strength_);
 
 			ocean_plane_ = MathLib::from_point_normal(float3(0, base_level_, 0), float3(0, 1, 0));
+			reflect_mat_ = MathLib::reflect(ocean_plane_);
 
 			// The size of displacement map.
 			ocean_param_.dmap_dim			= 512;
@@ -424,6 +435,20 @@ namespace
 				displacement_params_[ocean_param_.num_frames + frame0], displacement_params_[ocean_param_.num_frames + frame1]);
 
 			return false;
+		}
+
+		void ReflectionTex(TexturePtr const & tex)
+		{
+			checked_pointer_cast<RenderOcean>(renderable_)->ReflectionTex(tex);
+		}
+
+		void ReflectViewParams(float3& reflect_eye, float3& reflect_at, float3& reflect_up,
+			float3 const & eye, float3 const & at, float3 const & up)
+		{
+			reflect_eye = MathLib::transform_coord(eye, reflect_mat_);
+			reflect_at = MathLib::transform_coord(at, reflect_mat_);
+			reflect_up = MathLib::transform_normal(up, reflect_mat_);
+			reflect_up *= -1.0f;
 		}
 
 		int DMapDim() const
@@ -746,6 +771,7 @@ namespace
 		bool dirty_;
 
 		Plane ocean_plane_;
+		float4x4 reflect_mat_;
 
 		std::shared_ptr<OceanSimulator> ocean_simulator_;
 
@@ -836,7 +862,8 @@ void OceanApp::OnCreate()
 	deferred_rendering_->SSVOEnabled(0, false);
 
 	sun_light_ = MakeSharedPtr<DirectionalLightSource>();
-	sun_light_->Attrib(0);
+	// TODO: Fix the shadow flicking
+	sun_light_->Attrib(LightSource::LSA_NoShadow);
 	sun_light_->Direction(float3(0.267835f, -0.0517653f, -0.960315f));
 	sun_light_->Color(float3(1, 0.7f, 0.5f));
 	sun_light_->AddToSceneManager();
@@ -866,6 +893,9 @@ void OceanApp::OnCreate()
 	checked_pointer_cast<OceanObject>(ocean_)->SkylightTex(y_cube, c_cube);
 	checked_pointer_cast<OceanObject>(ocean_)->FogColor(fog_color);
 
+	checked_pointer_cast<ProceduralTerrain>(terrain_->GetRenderable())
+		->ReflectionPlane(checked_pointer_cast<OceanObject>(ocean_)->OceanPlane());
+
 	sky_box_ = MakeSharedPtr<SceneObjectFoggySkyBox>();
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->CompressedCubeMap(y_cube, c_cube);
 	checked_pointer_cast<SceneObjectFoggySkyBox>(sky_box_)->FogColor(fog_color);
@@ -883,6 +913,11 @@ void OceanApp::OnCreate()
 
 	light_shaft_pp_ = MakeSharedPtr<LightShaftPostProcess>();
 	light_shaft_pp_->SetParam(1, sun_light_->Color());
+
+	Camera& scene_camera = this->ActiveCamera();
+	reflection_fb_ = Context::Instance().RenderFactoryInstance().MakeFrameBuffer();
+	reflection_fb_->GetViewport()->camera->ProjParams(scene_camera.FOV(), scene_camera.Aspect(),
+		scene_camera.NearPlane(), scene_camera.FarPlane());
 
 	fpcController_.Scalers(0.05f, 1.0f);
 
@@ -948,10 +983,24 @@ void OceanApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
-	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-	deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
-
 	UIManager::Instance().SettleCtrls();
+
+	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+	RenderEngine& re = rf.RenderEngineInstance();
+
+	deferred_rendering_->SetupViewport(1, re.CurFrameBuffer(), 0);
+
+	reflection_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1,
+		deferred_rendering_->ShadingTex(1)->Format(), 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	reflection_ds_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1,
+		EF_D16, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+	reflection_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*reflection_tex_, 0, 1, 0));
+	reflection_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(*reflection_ds_tex_, 0, 1, 0));
+
+	deferred_rendering_->SetupViewport(0, reflection_fb_,
+		VPAM_NoTransparencyBack | VPAM_NoTransparencyFront | VPAM_NoSimpleForward | VPAM_NoGI | VPAM_NoSSVO);
+
+	screen_camera_ = re.CurFrameBuffer()->GetViewport()->camera;
 }
 
 void OceanApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
@@ -1090,14 +1139,30 @@ void OceanApp::DoUpdateOverlay()
 
 uint32_t OceanApp::DoUpdate(uint32_t pass)
 {
+	if (0 == deferred_rendering_->ActiveViewport())
+	{
+		ocean_->Visible(false);
+
+		float3 reflect_eye, reflect_at, reflect_up;
+		checked_pointer_cast<OceanObject>(ocean_)->ReflectViewParams(reflect_eye, reflect_at, reflect_up,
+			screen_camera_->EyePos(), screen_camera_->LookAt(), screen_camera_->UpVec());
+		reflection_fb_->GetViewport()->camera->ViewParams(reflect_eye, reflect_at, reflect_up);
+	}
+	else
+	{
+		ocean_->Visible(true);
+
+		checked_pointer_cast<OceanObject>(ocean_)->ReflectionTex(reflection_tex_);
+	}
+
 	uint32_t ret = deferred_rendering_->Update(pass);
 	if (ret & App3DFramework::URV_Finished)
 	{
 		if (light_shaft_on_)
 		{
 			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
-			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(0));
-			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(0));
+			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(deferred_rendering_->ActiveViewport()));
 			light_shaft_pp_->Apply();
 		}
 	}

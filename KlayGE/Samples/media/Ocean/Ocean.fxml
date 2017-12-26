@@ -23,7 +23,7 @@
 	<parameter type="texture2DArray" name="gradient_tex_array"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
-	<cbuffer name="per_frame">		
+	<cbuffer name="per_frame">s
 		<parameter type="int2" name="frames"/>
 		<parameter type="float3" name="min_disp0"/>
 		<parameter type="float3" name="min_disp1"/>
@@ -73,7 +73,7 @@ void OceanGBufferVS(float2 pos : POSITION,
 
 	float lacunarity = 1.93485736f;
 	float gain = 1.0f / 1.93485736f;
-	
+
 	float3 eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
 	float height_scale = 1 - fog_scale;
@@ -126,7 +126,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 
 	float2 gradient = lerp(lerp(gradient0, gradient1, 0.3f), lerp(gradient2, gradient3, 0.3f), interpolate_frac) * 2 - 1;
 	gradient = lerp(noise_grad, gradient, BLEND_FACTOR);
-	
+
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
 	StoreGBufferMRT(normal, glossiness_clr.x, waterbody_color, 0,
@@ -144,7 +144,7 @@ void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
 	eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
 	float height_scale = 1 - fog_scale;
-	
+
 	eye_dir = mul(eye_dir, (float3x3)model_view);
 
 	pos_os.y = base_level;
@@ -161,7 +161,7 @@ float4 OceanReflectionAlphaBlendPS(float3 eye_dir : TEXCOORD0, SS_TEXCOORD_TYPE 
 	float3 normal = view[1].xyz;
 
 	eye_dir = normalize(eye_dir);
-	
+
 	float3 reflect_vec = normalize(reflect(-eye_dir, normal));
 	reflect_vec = mul(reflect_vec, (float3x3)inv_view);
 	float3 sky_reflection = decode_hdr_yc(skybox_tex.Sample(skybox_sampler, reflect_vec).r,
@@ -201,11 +201,11 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 	eye_dir = eye_pos - pos_os.xyz;
 	float fog_scale = saturate(length(eye_dir.xz) / 1200.0f);
 	float height_scale = 1 - fog_scale;
-	
+
 	eye_dir = mul(eye_dir, (float3x3)model_view);
 
 	pos_os.xz += disp.xy;
-	
+
 	float noise_height = fBm(tex_coord, 3, lacunarity, gain);
 
 	float d = 1.0f / 64;
@@ -214,9 +214,9 @@ void OceanSpecialShadingAlphaBlendVS(float2 pos : POSITION,
 	float2 noise_grad = (float2(fx, fy) - noise_height) * stretch;
 
 	pos_os.y = base_level + lerp(noise_height * stretch, disp.z, BLEND_FACTOR) * height_scale;
-	
+
 	oPos = mul(pos_os, mvp);
-	
+
 	tex_coord_noise_grad = float4(tex_coord, noise_grad);
 	pos_ss = oPos;
 
@@ -236,7 +236,7 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 	eye_dir = normalize(eye_dir);
 
 	float2 bump = normal_ws.xz / (pos_ss.z / pos_ss.w);
-	float3 reflection = reflection_tex.Sample(reflection_sampler, tc + bump * 0.2f).xyz;
+	float3 reflection = reflection_tex.Sample(reflection_sampler, float2(tc.x, 1 - tc.y) + bump * 0.2f).xyz;
 
 	float no_water_depth = opaque_depth_tex.Sample(point_clamp_sampler, tc).x;
 

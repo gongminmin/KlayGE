@@ -1024,11 +1024,10 @@ namespace KlayGE
 
 		RenderViewPtr g_buffer_rt0_view = rf.Make2DRenderView(*pvp.g_buffer_rt0_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_rt1_view = rf.Make2DRenderView(*pvp.g_buffer_rt1_tex, 0, 1, 0);
-		RenderViewPtr g_buffer_depth_view = rf.Make2DRenderView(*pvp.g_buffer_depth_tex, 0, 1, 0);
 
 		pvp.g_buffer->Attach(FrameBuffer::ATT_Color0, g_buffer_rt0_view);
-		pvp.g_buffer->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 		pvp.g_buffer->Attach(FrameBuffer::ATT_Color1, g_buffer_rt1_view);
+		pvp.g_buffer->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		this->SetupViewportGI(index, false);
 

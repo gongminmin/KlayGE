@@ -3,6 +3,8 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KFL/Half.hpp>
+#include <KlayGE/App3D.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include "ProceduralTerrain.hpp"
 
@@ -122,5 +124,39 @@ namespace KlayGE
 		//SaveTexture(height_map_cpu_tex_, "height_map.dds");
 		//SaveTexture(gradient_map_tex_, "gradient_map.dds");
 		//SaveTexture(mask_map_tex_, "mask_map.dds");
+	}
+
+	void ProceduralTerrain::ReflectionPlane(Plane const & plane)
+	{
+		reflection_plane_ = plane;
+	}
+
+	void ProceduralTerrain::OnRenderBegin()
+	{
+		HQTerrainRenderable::OnRenderBegin();
+
+		auto drl = Context::Instance().DeferredRenderingLayerInstance();
+		if (drl && (drl->ActiveViewport() == 0))
+		{
+			App3DFramework const & app = Context::Instance().AppInstance();
+			Camera const & camera = app.ActiveCamera();
+			float4x4 const & view = camera.ViewMatrix();
+			float4x4 proj = camera.ProjMatrixWOAdjust();
+
+			MathLib::oblique_clipping(proj,
+				MathLib::mul(reflection_plane_, MathLib::transpose(camera.InverseViewMatrix())));
+			Context::Instance().RenderFactoryInstance().RenderEngineInstance().AdjustProjectionMatrix(proj);
+
+			float4x4 mvp = model_mat_ * view * proj;
+
+			int32_t cas_index = drl->CurrCascadeIndex();
+			if (cas_index >= 0)
+			{
+				mvp *= drl->GetCascadedShadowLayer()->CascadeCropMatrix(cas_index);
+			}
+
+			// TODO: Figure out how to restore depth from oblique clipping matrix
+			//*mvp_param_ = mvp;
+		}
 	}
 }

@@ -44,6 +44,12 @@ private:
 	bool light_shaft_on_;
 	KlayGE::PostProcessPtr light_shaft_pp_;
 
+	KlayGE::TexturePtr reflection_tex_;
+	KlayGE::TexturePtr reflection_ds_tex_;
+	KlayGE::FrameBufferPtr reflection_fb_;
+
+	KlayGE::CameraPtr screen_camera_;
+
 	KlayGE::UIDialogPtr dialog_params_;
 	int id_dmap_dim_static_;
 	int id_dmap_dim_slider_;

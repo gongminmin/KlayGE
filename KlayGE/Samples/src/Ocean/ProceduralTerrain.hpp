@@ -18,6 +18,10 @@ namespace KlayGE
 	public:
 		ProceduralTerrain();
 
+		void ReflectionPlane(Plane const & plane);
+
+		void OnRenderBegin() override;
+
 	protected:
 		virtual void FlushTerrainData() override;
 
@@ -25,6 +29,7 @@ namespace KlayGE
 		PostProcessPtr height_pp_;
 		PostProcessPtr gradient_pp_;
 		PostProcessPtr mask_pp_;
+		Plane reflection_plane_;
 	};
 }
 
