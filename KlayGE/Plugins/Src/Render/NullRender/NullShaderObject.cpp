@@ -136,7 +136,7 @@ namespace KlayGE
 		len = LE2Native(len);
 		if (len > 0)
 		{
-			res->seekg(len, 1);
+			res->seekg(len, std::ios_base::cur);
 		}
 
 		return true;
