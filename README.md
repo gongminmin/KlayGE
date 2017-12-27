@@ -7,16 +7,15 @@ Before compiling KlayGE, Python 2.7+ and CMake 3.4+ must be installed first. The
 # Platforms
 KlayGE can be developed on those platforms, with no limitation.
 * Windows desktop
-* MacOSX
+* macOS
 * Linux
 
 KlayGE can be deployed and run on those runtime platforms. Some of them doesn't supports all plugins. Details in http://www.klayge.org/wiki/index.php/Platforms
 * Windows desktop
-* Windows tablet
-* Windows phone
+* Windows store
 * Android
 * Linux
-* MacOSX
+* macOS
 * iOS
 
 # Contribute
