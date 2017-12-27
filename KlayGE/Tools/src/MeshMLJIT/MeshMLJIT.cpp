@@ -2116,44 +2116,55 @@ int main(int argc, char* argv[])
 		filesystem::path input_path(input_name);
 		std::string base_name = input_path.stem().string();
 		filesystem::path folder = input_path.parent_path();
-		meshml_name = (folder / filesystem::path(base_name)).string() + ".7z//" + base_name + ".meshml";
+		std::string package_name = (folder / filesystem::path(base_name)).string() + ".7z";
+		if (!ResLoader::Instance().Locate(package_name).empty())
+		{
+			meshml_name = package_name + "//" + base_name + ".meshml";
+		}
 	}
 
-	std::string::size_type const pkt_offset(meshml_name.find("//"));
-	std::string file_name;
-	if (pkt_offset != std::string::npos)
+	if (meshml_name.empty())
 	{
-		std::string pkt_name = meshml_name.substr(0, pkt_offset);
-		std::string::size_type const password_offset = pkt_name.find("|");
-		if (password_offset != std::string::npos)
-		{
-			pkt_name = pkt_name.substr(0, password_offset - 1);
-		}
-
-		if (target_folder.empty())
-		{
-			target_folder = filesystem::path(pkt_name).parent_path();
-		}
-
-		file_name = meshml_name.substr(pkt_offset + 2);
+		cout << "Couldn't locate " << input_name << endl;
 	}
 	else
 	{
-		filesystem::path meshml_path(meshml_name);
-		if (target_folder.empty())
+		std::string::size_type const pkt_offset(meshml_name.find("//"));
+		std::string file_name;
+		if (pkt_offset != std::string::npos)
 		{
-			target_folder = meshml_path.parent_path();
+			std::string pkt_name = meshml_name.substr(0, pkt_offset);
+			std::string::size_type const password_offset = pkt_name.find("|");
+			if (password_offset != std::string::npos)
+			{
+				pkt_name = pkt_name.substr(0, password_offset - 1);
+			}
+
+			if (target_folder.empty())
+			{
+				target_folder = filesystem::path(pkt_name).parent_path();
+			}
+
+			file_name = meshml_name.substr(pkt_offset + 2);
 		}
-		file_name = meshml_path.filename().string();
-	}
+		else
+		{
+			filesystem::path meshml_path(meshml_name);
+			if (target_folder.empty())
+			{
+				target_folder = meshml_path.parent_path();
+			}
+			file_name = meshml_path.filename().string();
+		}
 
-	std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
+		std::string output_name = (target_folder / filesystem::path(file_name)).string() + JIT_EXT_NAME;
 
-	MeshMLJIT(meshml_name, output_name, platform);
+		MeshMLJIT(meshml_name, output_name, platform);
 
-	if (!quiet)
-	{
-		cout << "Binary model has been saved to " << output_name << "." << endl;
+		if (!quiet)
+		{
+			cout << "Binary model has been saved to " << output_name << "." << endl;
+		}
 	}
 
 	Context::Destroy();
