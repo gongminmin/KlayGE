@@ -429,11 +429,11 @@ namespace KlayGE
 					world_scale_ / plant_parameters[plant_type].plant_spacing_height);
 			*(foliage_dist_effect_->ParameterByName("impostor_dist"))
 				= float2(plant_parameters[plant_type].impostor_distance_sq, plant_parameters[plant_type].fade_out_distance_sq);
-			*(foliage_dist_effect_->ParameterByName("num_lods")) = plant_meshes_[plant_type]->NumLods();
+			*(foliage_dist_effect_->ParameterByName("num_lods")) = static_cast<int32_t>(plant_meshes_[plant_type]->NumLods());
 
 			for (uint32_t lod = 0; lod < static_cast<uint32_t>(plant_lod_instance_buffers_[plant_type].size()); ++ lod)
 			{
-				*(foliage_dist_effect_->ParameterByName("lod")) = lod;
+				*(foliage_dist_effect_->ParameterByName("lod")) = static_cast<int32_t>(lod);
 
 				uint32_t const num_vertices = plant_lod_instance_buffers_[plant_type][lod]->Size() / sizeof(PlantInstanceData);
 				foliage_dist_rl_->NumVertices(num_vertices);

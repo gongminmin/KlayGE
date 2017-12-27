@@ -181,8 +181,8 @@ void FoliageImpostorGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float
 	<parameter type="float4" name="view_frustum_planes" array_size="6"/>
 	<parameter type="uint" name="probability_channel"/>
 	<parameter type="float4" name="center_tc_angles_step"/>
-	<parameter type="uint" name="lod"/>
-	<parameter type="uint" name="num_lods"/>
+	<parameter type="int" name="lod"/>
+	<parameter type="int" name="num_lods"/>
 	<parameter type="float" name="fov_scale"/>
 
 	<parameter type="texture2D" name="height_map_tex"/>
@@ -326,8 +326,8 @@ void FoliageDistribution(uint vid, bool is_impostor,
 		float3 aabb_min = plant_aabb_min;
 		float3 aabb_max = plant_aabb_max;
 		TransformAABB(aabb_min, aabb_max, scale, rot_quat, displaced_pos);
-		
-		if ((is_impostor || (lod == clamp((uint)(CalcLod(aabb_min, aabb_max, eye_pos, fov_scale) + 0.5f), 0, num_lods - 1)))
+
+		if ((is_impostor || (lod == clamp((int)(CalcLod(aabb_min, aabb_max, eye_pos, fov_scale) + 0.5f), 0, num_lods - 1)))
 			&& (IntersectAABBFrustum(aabb_min, aabb_max, view_frustum_planes) != 1))
 		{
 			out_pos_scale = float4(displaced_pos, scale);
