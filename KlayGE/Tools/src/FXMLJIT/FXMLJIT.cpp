@@ -232,6 +232,15 @@ int main(int argc, char* argv[])
 	device_caps.ds_support = plat.ds_support;
 
 	std::vector<ElementFormat> texture_format;
+	texture_format.push_back(EF_R8);
+	texture_format.push_back(EF_ABGR8);
+	texture_format.push_back(EF_ARGB8);
+	texture_format.push_back(EF_BC1);
+	texture_format.push_back(EF_BC1_SRGB);
+	texture_format.push_back(EF_BC2);
+	texture_format.push_back(EF_BC2_SRGB);
+	texture_format.push_back(EF_BC3);
+	texture_format.push_back(EF_BC3_SRGB);
 	if (plat.bc4_support)
 	{
 		texture_format.push_back(EF_BC4);
@@ -241,6 +250,17 @@ int main(int argc, char* argv[])
 	{
 		texture_format.push_back(EF_BC5);
 		texture_format.push_back(EF_BC5_SRGB);
+	}
+
+	std::vector<ElementFormat> uav_format;
+	if (device_caps.max_shader_model >= ShaderModel(5, 1))
+	{
+		uav_format.push_back(EF_ABGR16F);
+		uav_format.push_back(EF_B10G11R11F);
+		uav_format.push_back(EF_ABGR8);
+		uav_format.push_back(EF_R16UI);
+		uav_format.push_back(EF_R32UI);
+		uav_format.push_back(EF_R32F);
 	}
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
@@ -255,6 +275,7 @@ int main(int argc, char* argv[])
 	re.SetCustomAttrib("REQUIRES_FLIPPING", &plat.requires_flipping);
 	re.SetCustomAttrib("DEVICE_CAPS", &device_caps);
 	re.SetCustomAttrib("TEXTURE_FORMAT", &texture_format);
+	re.SetCustomAttrib("UAV_FORMAT", &uav_format);
 	re.SetCustomAttrib("FRAG_DEPTH_SUPPORT", &frag_depth_support);
 
 	std::string fxml_name(argv[2]);
