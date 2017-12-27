@@ -806,7 +806,12 @@ void GPUParticleSystemApp::OnCreate()
 	use_cs = caps.cs_support && (caps.max_shader_model >= ShaderModel(5, 0));
 	if (use_cs)
 	{
+#ifdef KLAYGE_PLATFORM_WINDOWS_STORE
+		// Shaders are compiled to d3d11_0 for Windows store apps. No typed UAV support.
+		use_typed_uav = false;
+#else
 		use_typed_uav = caps.uav_format_support(EF_ABGR16F);
+#endif
 	}
 	else
 	{
