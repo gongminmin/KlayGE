@@ -244,6 +244,10 @@
 	#ifndef BOOST_ALL_DYN_LINK
 		#define BOOST_ALL_DYN_LINK
 	#endif
+	// Skips boost's #pragma lib
+	#ifndef BOOST_ALL_NO_LIB
+		#define BOOST_ALL_NO_LIB
+	#endif
 
 	#if defined(__MINGW32__)
 		#define KLAYGE_COMPILER_NAME mgw
