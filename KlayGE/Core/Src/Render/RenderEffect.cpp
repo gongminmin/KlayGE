@@ -123,62 +123,61 @@ namespace
 		}
 
 	private:
-#define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
-		static std::pair<char const *, size_t> constexpr types_[] =
-		{
-			NAME_AND_HASH("bool"),
-			NAME_AND_HASH("string"),
-			NAME_AND_HASH("texture1D"),
-			NAME_AND_HASH("texture2D"),
-			NAME_AND_HASH("texture3D"),
-			NAME_AND_HASH("textureCUBE"),
-			NAME_AND_HASH("texture1DArray"),
-			NAME_AND_HASH("texture2DArray"),
-			NAME_AND_HASH("texture3DArray"),
-			NAME_AND_HASH("textureCUBEArray"),
-			NAME_AND_HASH("sampler"),
-			NAME_AND_HASH("shader"),
-			NAME_AND_HASH("uint"),
-			NAME_AND_HASH("uint2"),
-			NAME_AND_HASH("uint3"),
-			NAME_AND_HASH("uint4"),
-			NAME_AND_HASH("int"),
-			NAME_AND_HASH("int2"),
-			NAME_AND_HASH("int3"),
-			NAME_AND_HASH("int4"),
-			NAME_AND_HASH("float"),
-			NAME_AND_HASH("float2"),
-			NAME_AND_HASH("float2x2"),
-			NAME_AND_HASH("float2x3"),
-			NAME_AND_HASH("float2x4"),
-			NAME_AND_HASH("float3"),
-			NAME_AND_HASH("float3x2"),
-			NAME_AND_HASH("float3x3"),
-			NAME_AND_HASH("float3x4"),
-			NAME_AND_HASH("float4"),
-			NAME_AND_HASH("float4x2"),
-			NAME_AND_HASH("float4x3"),
-			NAME_AND_HASH("float4x4"),
-			NAME_AND_HASH("buffer"),
-			NAME_AND_HASH("structured_buffer"),
-			NAME_AND_HASH("byte_address_buffer"),
-			NAME_AND_HASH("rw_buffer"),
-			NAME_AND_HASH("rw_structured_buffer"),
-			NAME_AND_HASH("rw_texture1D"),
-			NAME_AND_HASH("rw_texture2D"),
-			NAME_AND_HASH("rw_texture3D"),
-			NAME_AND_HASH("rw_texture1DArray"),
-			NAME_AND_HASH("rw_texture2DArray"),
-			NAME_AND_HASH("rw_byte_address_buffer"),
-			NAME_AND_HASH("append_structured_buffer"),
-			NAME_AND_HASH("consume_structured_buffer")
-		};
-#undef NAME_AND_HASH
-
+		static std::pair<char const *, size_t> const types_[46];
 		static std::unique_ptr<type_define> instance_;
 	};
 	std::unique_ptr<type_define> type_define::instance_;
-	std::pair<char const *, size_t> constexpr type_define::types_[];
+#define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
+	std::pair<char const *, size_t> const type_define::types_[] =
+	{
+		NAME_AND_HASH("bool"),
+		NAME_AND_HASH("string"),
+		NAME_AND_HASH("texture1D"),
+		NAME_AND_HASH("texture2D"),
+		NAME_AND_HASH("texture3D"),
+		NAME_AND_HASH("textureCUBE"),
+		NAME_AND_HASH("texture1DArray"),
+		NAME_AND_HASH("texture2DArray"),
+		NAME_AND_HASH("texture3DArray"),
+		NAME_AND_HASH("textureCUBEArray"),
+		NAME_AND_HASH("sampler"),
+		NAME_AND_HASH("shader"),
+		NAME_AND_HASH("uint"),
+		NAME_AND_HASH("uint2"),
+		NAME_AND_HASH("uint3"),
+		NAME_AND_HASH("uint4"),
+		NAME_AND_HASH("int"),
+		NAME_AND_HASH("int2"),
+		NAME_AND_HASH("int3"),
+		NAME_AND_HASH("int4"),
+		NAME_AND_HASH("float"),
+		NAME_AND_HASH("float2"),
+		NAME_AND_HASH("float2x2"),
+		NAME_AND_HASH("float2x3"),
+		NAME_AND_HASH("float2x4"),
+		NAME_AND_HASH("float3"),
+		NAME_AND_HASH("float3x2"),
+		NAME_AND_HASH("float3x3"),
+		NAME_AND_HASH("float3x4"),
+		NAME_AND_HASH("float4"),
+		NAME_AND_HASH("float4x2"),
+		NAME_AND_HASH("float4x3"),
+		NAME_AND_HASH("float4x4"),
+		NAME_AND_HASH("buffer"),
+		NAME_AND_HASH("structured_buffer"),
+		NAME_AND_HASH("byte_address_buffer"),
+		NAME_AND_HASH("rw_buffer"),
+		NAME_AND_HASH("rw_structured_buffer"),
+		NAME_AND_HASH("rw_texture1D"),
+		NAME_AND_HASH("rw_texture2D"),
+		NAME_AND_HASH("rw_texture3D"),
+		NAME_AND_HASH("rw_texture1DArray"),
+		NAME_AND_HASH("rw_texture2DArray"),
+		NAME_AND_HASH("rw_byte_address_buffer"),
+		NAME_AND_HASH("append_structured_buffer"),
+		NAME_AND_HASH("consume_structured_buffer")
+	};
+#undef NAME_AND_HASH
 
 	ShadeMode ShadeModeFromStr(std::string_view name)
 	{
