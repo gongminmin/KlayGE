@@ -38,58 +38,7 @@ def build_Boost(build_info, compiler_info):
 	build_a_project("boost", "External/boost", build_info, compiler_info, build_info.is_windows and need_install, additional_options)
 
 def build_Python(build_info, compiler_info):
-	additional_options = "-DPY_VERSION_MAJOR=\"3\" -DPY_VERSION_MINOR=\"5\" -DPY_VERSION_PATCH=\"1\" \
-		-DCMAKE_CONFIGURATION_TYPES=\"Debug;Release;RelWithDebInfo;MinSizeRel\" \
-		-DDOWNLOAD_SOURCES=\"OFF\" \
-		-DBUILD_EXTENSIONS_AS_BUILTIN=\"ON\" \
-		-DBUILD_FREEZE_IMPORTLIB=\"OFF\" \
-		-DBUILD_PYTHON_DEVELOPMENT=\"OFF\" \
-		-DBUILD_PYTHON_EXECUTABLE=\"OFF\" \
-		-DBUILD_PGEN=\"OFF\" \
-		-DBUILD_WININST=\"OFF\" \
-		-DENABLE_AUDIOOP=\"OFF\" \
-		-DENABLE_CODECS_CN=\"OFF\" \
-		-DENABLE_CODECS_HK=\"OFF\" \
-		-DENABLE_CODECS_ISO2022=\"OFF\" \
-		-DENABLE_CODECS_JP=\"OFF\" \
-		-DENABLE_CODECS_KR=\"OFF\" \
-		-DENABLE_CODECS_TW=\"OFF\" \
-		-DENABLE_CTYPES=\"OFF\" \
-		-DENABLE_CTYPES_TEST=\"OFF\" \
-		-DENABLE_DECIMAL=\"OFF\" \
-		-DENABLE_IPV6=\"OFF\" \
-		-DENABLE_LOCALE=\"OFF\" \
-		-DENABLE_MMAP=\"OFF\" \
-		-DENABLE_MSI=\"OFF\" \
-		-DENABLE_MSVCRT=\"OFF\" \
-		-DENABLE_MULTIBYTECODEC=\"OFF\" \
-		-DENABLE_MULTIPROCESSING=\"OFF\" \
-		-DENABLE_OSSAUDIODEV=\"OFF\" \
-		-DENABLE_OVERLAPPED=\"OFF\" \
-		-DENABLE_PYEXPAT=\"OFF\" \
-		-DENABLE_SCPROXY=\"OFF\" \
-		-DENABLE_SELECT=\"OFF\" \
-		-DENABLE_SOCKET=\"OFF\" \
-		-DENABLE_SUBPROCESS=\"OFF\" \
-		-DENABLE_TESTCAPI=\"OFF\" \
-		-DENABLE_WINAPI=\"OFF\" \
-		-DINSTALL_DEVELOPMENT=\"OFF\" \
-		-DINSTALL_MANUAL=\"OFF\" \
-		-DINSTALL_TEST=\"OFF\" \
-		-DUSE_SYSTEM_BZip2=\"OFF\" \
-		-DUSE_SYSTEM_Curses=\"OFF\" \
-		-DUSE_SYSTEM_EXPAT=\"OFF\" \
-		-DUSE_SYSTEM_DB=\"OFF\" \
-		-DUSE_SYSTEM_GDBM=\"OFF\" \
-		-DUSE_SYSTEM_OpenSSL=\"OFF\" \
-		-DUSE_SYSTEM_READLINE=\"OFF\" \
-		-DUSE_SYSTEM_SQLITE3=\"OFF\" \
-		-DUSE_SYSTEM_TCL=\"OFF\" \
-		-DUSE_SYSTEM_ZLIB=\"OFF\" \
-		-DWITH_COMPUTED_GOTOS=\"OFF\" \
-		-DWITH_DOC_STRINGS=\"OFF\" \
-		-DWITH_TSC:BOOL=\"OFF\""
-	build_a_project("Python", "External/Python", build_info, compiler_info, False, additional_options)
+	build_a_project("Python", "External/Python", build_info, compiler_info, False)
 
 def build_libogg(build_info, compiler_info):
 	build_a_project("libogg", "External/libogg", build_info, compiler_info)
