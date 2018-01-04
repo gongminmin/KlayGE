@@ -439,14 +439,27 @@ class build_info:
 		return program_files_folder
 
 	def FindVS2017Folder(self, program_files_folder):
-		names = ("Preview", "2017")
-		skus = ("Community", "Professional", "Enterprise")
-		for name in names:
-			for sku in skus:
-				try_folder = program_files_folder + "\\Microsoft Visual Studio\\%s\\%s\\VC\\Auxiliary\\Build\\" % (name, sku)
-				try_vcvarsall = "VCVARSALL.BAT"
-				if os.path.exists(try_folder + try_vcvarsall):
-					return try_folder
+		try_vswhere_location = program_files_folder + "\\Microsoft Visual Studio\\Installer\\vswhere.exe"
+		if os.path.exists(try_vswhere_location):
+			vs_location = subprocess.check_output([try_vswhere_location,
+				"-latest",
+				"-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+				"-property", "installationPath",
+				"-version", "[15.0,16.0)",
+				"-prerelease"]).decode().split("\r\n")[0]
+			try_folder = vs_location + "\\VC\\Auxiliary\\Build\\"
+			try_vcvarsall = "VCVARSALL.BAT"
+			if os.path.exists(try_folder + try_vcvarsall):
+				return try_folder
+		else:
+			names = ("Preview", "2017")
+			skus = ("Community", "Professional", "Enterprise")
+			for name in names:
+				for sku in skus:
+					try_folder = program_files_folder + "\\Microsoft Visual Studio\\%s\\%s\\VC\\Auxiliary\\Build\\" % (name, sku)
+					try_vcvarsall = "VCVARSALL.BAT"
+					if os.path.exists(try_folder + try_vcvarsall):
+						return try_folder
 		return ""
 
 	def RetriveCMakeVersion(self):
