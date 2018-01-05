@@ -460,10 +460,8 @@ namespace KlayGE
 
 	void RenderModel::AddToRenderQueue()
 	{
-		for (auto const & mesh : subrenderables_)
-		{
-			mesh->AddToRenderQueue();
-		}
+		// SceneObjects on RenderMeshes' are in charge of adding them to render queue.
+		// Don't need to do it here.
 	}
 
 	void RenderModel::OnRenderBegin()
