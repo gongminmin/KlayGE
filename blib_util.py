@@ -25,11 +25,12 @@ class cfg_from_argv:
 			self.cfg = ""
 
 class compiler_info:
-	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = ""):
+	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
 		self.arch = arch
 		self.generator = gen_name
 		self.compiler_root = compiler_root
 		self.vcvarsall_path = vcvarsall_path
+		self.vcvarsall_options = vcvarsall_options
 
 class build_info:
 	def __init__(self, compiler, archs, cfg):
@@ -205,19 +206,36 @@ class build_info:
 						vcvarsall_path = "VCVARSALL.BAT"
 					else:
 						log_error("Can't find the compiler.\n")
+				vcvarsall_options = ""
 			elif "vc140" == compiler:
-				if "VS140COMNTOOLS" in env:
-					compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
-					vcvarsall_path = "..\\VCVARSALL.BAT"
-				else:
-					try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\bin\\"
-					try_vcvarsall = "..\\VCVARSALL.BAT"
-					if os.path.exists(try_folder + try_vcvarsall):
-						compiler_root = try_folder
-						vcvarsall_path = try_vcvarsall
+				if project_type == "vs2017":
+					if "VS150COMNTOOLS" in env:
+						compiler_root = env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\"
+						vcvarsall_path = "VCVARSALL.BAT"
+						vcvarsall_options = "-vcvars_ver=14.0"
 					else:
-						log_error("Can't find the compiler.\n")
+						try_folder = self.FindVS2017Folder(program_files_folder)
+						if len(try_folder) > 0:
+							compiler_root = try_folder
+							vcvarsall_path = "VCVARSALL.BAT"
+							vcvarsall_options = "-vcvars_ver=14.0"
+						else:
+							log_error("Can't find the compiler.\n")
+				else:
+					if "VS140COMNTOOLS" in env:
+						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
+						vcvarsall_path = "..\\VCVARSALL.BAT"
+					else:
+						try_folder = program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\bin\\"
+						try_vcvarsall = "..\\VCVARSALL.BAT"
+						if os.path.exists(try_folder + try_vcvarsall):
+							compiler_root = try_folder
+							vcvarsall_path = try_vcvarsall
+						else:
+							log_error("Can't find the compiler.\n")
+					vcvarsall_options = ""
 			elif "clangc2" == compiler:
+				vcvarsall_options = ""
 				found = False
 				if "VS150COMNTOOLS" in env:
 					ret_list = self.find_vs2017_clangc2(env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\")
@@ -302,7 +320,7 @@ class build_info:
 						gen_suffix = " Win64"
 					else:
 						log_error("%s is not supported in %s.\n" % (arch, compiler))
-				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path))
+				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
 			if "vc140" == compiler:
@@ -566,6 +584,8 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				vc_arch = "ARM64"
 			else:
 				log_error("Unsupported VS arch\n")
+			if len(compiler_info.vcvarsall_options) > 0:
+				vc_option += " %s" % compiler_info.vcvarsall_options
 			if build_info.cmake_ver >= 39:
 				additional_options += " -A %s" % vc_arch
 
