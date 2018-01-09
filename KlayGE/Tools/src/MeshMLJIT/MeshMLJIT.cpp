@@ -2001,15 +2001,18 @@ namespace
 		XMLNodePtr key_frames_chunk = root->FirstNode("key_frames_chunk");
 		uint32_t num_frames = 0;
 		uint32_t frame_rate = 0;
-		std::vector<KeyFrames> kfs(joints.size());
-		std::vector<AABBKeyFrames> bb_kfs;
+		std::shared_ptr<std::vector<KeyFrames>> kfs;
 		if (key_frames_chunk)
 		{
-			CompileKeyFramesChunk(key_frames_chunk, num_frames, frame_rate, kfs);
+			kfs = MakeSharedPtr<KeyFramesType>(joints.size());
+			std::vector<AABBKeyFrames> bb_kfs;
 
-			for (size_t i = 0; i < kfs.size(); ++ i)
+			CompileKeyFramesChunk(key_frames_chunk, num_frames, frame_rate, *kfs);
+
+			for (size_t i = 0; i < kfs->size(); ++ i)
 			{
-				if (kfs[i].frame_id.empty())
+				auto& kf = (*kfs)[i];
+				if (kf.frame_id.empty())
 				{
 					Quaternion inv_parent_real;
 					Quaternion inv_parent_dual;
@@ -2027,11 +2030,11 @@ namespace
 						inv_parent_scale = 1 / joints[joints[i].parent].bind_scale;
 					}
 
-					kfs[i].frame_id.push_back(0);
-					kfs[i].bind_real.push_back(MathLib::mul_real(joints[i].bind_real, inv_parent_real));
-					kfs[i].bind_dual.push_back(MathLib::mul_dual(joints[i].bind_real, joints[i].bind_dual * inv_parent_scale,
+					kf.frame_id.push_back(0);
+					kf.bind_real.push_back(MathLib::mul_real(joints[i].bind_real, inv_parent_real));
+					kf.bind_dual.push_back(MathLib::mul_dual(joints[i].bind_real, joints[i].bind_dual * inv_parent_scale,
 						inv_parent_real, inv_parent_dual));
-					kfs[i].bind_scale.push_back(joints[i].bind_scale * inv_parent_scale);
+					kf.bind_scale.push_back(joints[i].bind_scale * inv_parent_scale);
 				}
 			}
 
@@ -2040,10 +2043,11 @@ namespace
 		}
 
 		XMLNodePtr actions_chunk = root->FirstNode("actions_chunk");
-		std::vector<AnimationAction> actions;
+		std::shared_ptr<std::vector<AnimationAction>> actions;
 		if (actions_chunk)
 		{
-			CompileActionsChunk(actions_chunk, num_frames, actions);
+			actions = MakeSharedPtr<std::vector<AnimationAction>>();
+			CompileActionsChunk(actions_chunk, num_frames, *actions);
 		}
 
 		std::vector<RenderMaterialPtr> output_mtls(mtls.size());
@@ -2054,7 +2058,7 @@ namespace
 		SaveModel(output_name, output_mtls, merged_ves, is_index_16_bit, merged_vertices, merged_indices,
 			mesh_names, mtl_ids, mesh_lods, pos_bbs, tc_bbs,
 			mesh_num_vertices, mesh_base_vertices, mesh_num_indices, mesh_start_indices,
-			joints, MakeSharedPtr<std::vector<AnimationAction>>(actions), MakeSharedPtr<KeyFramesType>(kfs), num_frames, frame_rate);
+			joints, actions, kfs, num_frames, frame_rate);
 	}
 }
 
