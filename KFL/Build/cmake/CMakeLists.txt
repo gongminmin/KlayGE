@@ -39,8 +39,10 @@ SET(KERNEL_CXX17_HEADER_FILES
 )
 SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/AlignedAllocator.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Architecture.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ArrayRef.hpp
 	${KFL_PROJECT_DIR}/include/KFL/COMPtr.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Compiler.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Config.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CpuInfo.hpp
 	${KFL_PROJECT_DIR}/include/KFL/CustomizedStreamBuf.hpp
@@ -51,6 +53,7 @@ SET(KERNEL_HEADER_FILES
 	${KFL_PROJECT_DIR}/include/KFL/Hash.hpp
 	${KFL_PROJECT_DIR}/include/KFL/KFL.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Log.hpp
+	${KFL_PROJECT_DIR}/include/KFL/Platform.hpp
 	${KFL_PROJECT_DIR}/include/KFL/PreDeclare.hpp
 	${KFL_PROJECT_DIR}/include/KFL/ResIdentifier.hpp
 	${KFL_PROJECT_DIR}/include/KFL/Thread.hpp
