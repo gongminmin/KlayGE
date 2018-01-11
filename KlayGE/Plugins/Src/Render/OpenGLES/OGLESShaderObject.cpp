@@ -1132,33 +1132,35 @@ namespace KlayGE
 		{
 			is_shader_validate_[type] = false;
 		}
-
-		glShaderSource(object, 1, &glsl, nullptr);
-
-		glCompileShader(object);
-
-		GLint compiled = false;
-		glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
-		if (!compiled)
+		else
 		{
-			LogError("Error when compiling ESSL %s:", so_template_->shader_func_names_[type].c_str());
+			glShaderSource(object, 1, &glsl, nullptr);
 
-			GLint len = 0;
-			glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
-			if (len > 0)
+			glCompileShader(object);
+
+			GLint compiled = false;
+			glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
+			if (!compiled)
 			{
-				std::vector<char> info(len + 1, 0);
-				glGetShaderInfoLog(object, len, &len, &info[0]);
-				this->PrintGLSLError(static_cast<ShaderType>(type), &info[0]);
+				LogError("Error when compiling ESSL %s:", so_template_->shader_func_names_[type].c_str());
+
+				GLint len = 0;
+				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
+				if (len > 0)
+				{
+					std::vector<char> info(len + 1, 0);
+					glGetShaderInfoLog(object, len, &len, &info[0]);
+					this->PrintGLSLError(static_cast<ShaderType>(type), &info[0]);
+				}
+
+				is_shader_validate_[type] = false;
 			}
-		}
 
-		is_shader_validate_[type] &= compiled ? true : false;
-
-		glAttachShader(glsl_program_, object);
+			glAttachShader(glsl_program_, object);
 #ifndef KLAYGE_PLATFORM_ANDROID
-		glDeleteShader(object);
+			glDeleteShader(object);
 #endif
+		}
 	}
 
 	void OGLESShaderObject::LinkGLSL()
