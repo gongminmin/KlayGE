@@ -80,6 +80,7 @@ namespace
 
 	uint32_t const KFX_VERSION = 0x0120;
 
+#if KLAYGE_IS_DEV_PLATFORM
 	std::mutex singleton_mutex;
 
 	class type_define
@@ -449,7 +450,6 @@ namespace
 		KFL_UNREACHABLE("Invalid LogicOperation name");
 	}
 
-#if KLAYGE_IS_DEV_PLATFORM
 	bool BoolFromStr(std::string_view name)
 	{
 		if (("true" == name) || ("1" == name))
