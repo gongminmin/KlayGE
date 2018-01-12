@@ -52,8 +52,6 @@ namespace
 {
 	using namespace KlayGE;
 
-	std::mutex singleton_mutex;
-
 	static int const BC67_PREC_WEIGHTS[][16] =
 	{
 		{ 0, 21, 43, 64 },
