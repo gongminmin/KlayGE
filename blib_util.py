@@ -678,12 +678,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 						toolchain_arch = "aarch64-linux-android"
 					else:
 						log_error("Unsupported Android arch\n")
-					if "arm64-v8a" == compiler_info.arch:
-						# On NDK 12 arm64-v8a, c++_static doesn't link.
-						config_options += " -DANDROID_STL=gnustl_static"
-					else:
-						config_options += " -DANDROID_STL=c++_static"
-					config_options += " -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
+					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = batch_command(build_info.host_platform)
 				cmake_cmd.add_command('cmake -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
