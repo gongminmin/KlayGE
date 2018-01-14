@@ -12,7 +12,7 @@ def build_Boost(build_info, compiler_info):
 		with_program_options = True
 	else:
 		with_program_options = False
-	if (0 == build_info.project_type.find("vs")) or ((("gcc" == build_info.compiler_name) or ("mgw" == build_info.compiler_name)) and (build_info.compiler_version > 60)):
+	if (0 == build_info.project_type.find("vs")) or ("gcc" == build_info.compiler_name) or ("mgw" == build_info.compiler_name):
 		with_filesystem = False
 		with_system = False
 

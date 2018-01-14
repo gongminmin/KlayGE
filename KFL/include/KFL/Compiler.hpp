@@ -117,37 +117,25 @@
 
 	#define GCC_VERSION KFL_JOIN(__GNUC__, __GNUC_MINOR__)
 
-	#if GCC_VERSION >= 51
+	#if GCC_VERSION >= 71
 		#define KLAYGE_COMPILER_VERSION GCC_VERSION
 	#else
-		#error "Unsupported compiler version. Please install g++ 5.1 or up."
+		#error "Unsupported compiler version. Please install g++ 7.1 or up."
 	#endif
 
-	#if __cplusplus < 201402L
-		#error "-std=c++14 must be turned on."
+	#if __cplusplus < 201703L
+		#error "-std=c++1z must be turned on."
 	#endif
 	#if !defined(_GLIBCXX_HAS_GTHREADS)
 		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 	#endif
 
-	#if KLAYGE_COMPILER_VERSION >= 71
-		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
-		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
-	#else
-		#define KLAYGE_TS_LIBRARY_ANY_SUPPORT
-		#define KLAYGE_TS_LIBRARY_OPTIONAL_SUPPORT
-	#endif
-
-	#if KLAYGE_COMPILER_VERSION >= 61
-		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
-		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
-	#endif
-	#if KLAYGE_COMPILER_VERSION >= 60
-		#if __cplusplus > 201402L
-			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
-		#endif
-	#endif
+	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+	#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+	#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
 	#if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 		#define KLAYGE_SYMBOL_EXPORT __attribute__((__dllexport__))
