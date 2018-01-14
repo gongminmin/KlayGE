@@ -1018,7 +1018,11 @@ namespace KlayGE
 {
 	MsgInputSensor::MsgInputSensor()
 	{
+#if __ANDROID_API__ >= 26
+		sensor_mgr_ = ASensorManager_getInstanceForPackage(nullptr);
+#else
 		sensor_mgr_ = ASensorManager_getInstance();
+#endif
 		if (sensor_mgr_)
 		{
 			sensor_event_queue_ = ASensorManager_createEventQueue(sensor_mgr_, ALooper_forThread(),

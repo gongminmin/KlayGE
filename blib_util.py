@@ -82,7 +82,11 @@ class build_info:
 				if space_place != -1:
 					android_ver = target_platform[space_place + 1:]
 					target_platform = target_platform[0:space_place]
-					if "7.1" == android_ver:
+					if "8.1" == android_ver:
+						target_api_level = 27
+					elif "8.0" == android_ver:
+						target_api_level = 26
+					elif "7.1" == android_ver:
 						target_api_level = 25
 					elif "7.0" == android_ver:
 						target_api_level = 24
