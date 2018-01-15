@@ -6,39 +6,10 @@ import os, sys
 from blib_util import *
 
 def build_Boost(build_info, compiler_info):
-	with_filesystem = True
-	with_system = True
-	if build_info.is_dev_platform:
-		with_program_options = True
-	else:
-		with_program_options = False
-	if (0 == build_info.project_type.find("vs")) or ("gcc" == build_info.compiler_name) or ("mgw" == build_info.compiler_name):
-		with_filesystem = False
-		with_system = False
-
-	need_install = False
-	additional_options = " -DWITH_FILESYSTEM:BOOL="
-	if with_filesystem:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_PROGRAM_OPTIONS:BOOL="
-	if with_program_options:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	additional_options += " -DWITH_SYSTEM:BOOL="
-	if with_system:
-		additional_options += "\"ON\""
-		need_install = True
-	else:
-		additional_options += "\"OFF\""
-	build_a_project("boost", "External/boost", build_info, compiler_info, build_info.is_windows and need_install, additional_options)
+	build_a_project("boost", "External/boost", build_info, compiler_info, build_info.is_windows)
 
 def build_Python(build_info, compiler_info):
-	build_a_project("Python", "External/Python", build_info, compiler_info, False)
+	build_a_project("Python", "External/Python", build_info, compiler_info)
 
 def build_libogg(build_info, compiler_info):
 	build_a_project("libogg", "External/libogg", build_info, compiler_info)

@@ -31,7 +31,7 @@
 #ifndef KFL_COMPILER_HPP
 #define KFL_COMPILER_HPP
 
-// KlayGE requires vc 14.0+, g++ 5.1+, clang 3.6+, with C++14 or C++17 option on.
+// KlayGE requires vc 14.0+, g++ 7.1+, clang 3.6+, with C++14 or C++17 option on.
 
 // Detects supported compilers
 #if defined(__clang__)
