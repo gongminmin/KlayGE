@@ -29,6 +29,7 @@ glloader/src/glloader_gl.c
 glloader/src/glloader_gles.c
 glloader/src/glloader_glx.c
 glloader/src/glloader_wgl.c
+KlayGE/bin/*/*.apk
 KlayGE/bin/*/*/*.dll
 KlayGE/bin/*/*/*.so
 KlayGE/bin/*/*/*.dylib
