@@ -10,10 +10,6 @@ DOWNLOAD_FILE("KlayGE/Tests/media/memorial_bc6u.dds" "cbda47a1678ce70b6720856736
 DOWNLOAD_FILE("KlayGE/Tests/media/uffizi_probe.dds" "cbda47a1678ce70b6720856736100979d469e159" "f614b2494da0b649e0c14a2648213a3c95da8bcc")
 DOWNLOAD_FILE("KlayGE/Tests/media/uffizi_probe_bc6s.dds" "cbda47a1678ce70b6720856736100979d469e159" "f3b28807c56a1c8b99d1fe8d831d6a653539abd1")
 
-IF(NOT KLAYGE_COMPILER_MSVC)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-ENDIF()
-
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/BlitterTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/CTHashTest.cpp

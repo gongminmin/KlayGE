@@ -1089,6 +1089,9 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		uint32_t const limit = diff ? 32 : 16;
 		BOOST_ASSERT((diff < 2) && (inten < 8) && (selector < 4) && (packed_c < limit));
+#if defined(KLAYGE_COMPILER_CLANGC2)
+		KFL_UNUSED(limit);
+#endif
 #endif
 		int c;
 		if (diff)
@@ -1153,6 +1156,12 @@ namespace KlayGE
 						uint32_t selector = (x >> 4) & 3;
 						uint32_t p0 = (x >> 8) & 255;
 						BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
+#if defined(KLAYGE_COMPILER_CLANGC2)
+						KFL_UNUSED(diff);
+						KFL_UNUSED(inten);
+						KFL_UNUSED(selector);
+						KFL_UNUSED(p0);
+#endif
 					}
 #endif
 
@@ -1277,6 +1286,11 @@ namespace KlayGE
 						uint32_t const selector = (x >> 4) & 3;
 						uint32_t const p0 = (x >> 8) & 0xFF;
 						BOOST_ASSERT(ETC1DecodeValue(diff, inten, selector, p0) == static_cast<uint32_t>(c_plus_delta));
+#if defined(KLAYGE_COMPILER_CLANGC2)
+						KFL_UNUSED(inten);
+						KFL_UNUSED(selector);
+						KFL_UNUSED(p0);
+#endif
 					}
 #endif
 

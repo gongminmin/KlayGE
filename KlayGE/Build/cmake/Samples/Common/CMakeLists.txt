@@ -71,10 +71,6 @@ DOWNLOAD_FILE("KlayGE/Samples/media/Common/sphere_high.meshml" "54e95a3a317ffd3e
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/sponza_crytek.meshml" "3fecc9967e6aa6b16ee4079c9cf0d1c794f24796" "7bda1a1ceea521f4249a17894c368d580127c03c")
 DOWNLOAD_FILE("KlayGE/Samples/media/Common/teapot.meshml" "cbda47a1678ce70b6720856736100979d469e159" "cd3ed9076ef1e2d9b1db447bc9fa8f2be73d009a")
 
-IF(KLAYGE_COMPILER_CLANGC2)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable")
-ENDIF()
-
 SET(LIB_NAME SampleCommon)
 
 SET(SAMPLE_COMMON_LIB_OUTPUT_DIR ${KLAYGE_PROJECT_DIR}/Samples/lib/${KLAYGE_PLATFORM_NAME})

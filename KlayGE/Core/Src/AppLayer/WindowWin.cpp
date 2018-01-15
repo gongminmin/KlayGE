@@ -51,14 +51,7 @@ namespace KlayGE
 {
 	LRESULT Window::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4312) // LONG_PTR to Window*, could cast to a greater size
-#endif
 		Window* win = reinterpret_cast<Window*>(::GetWindowLongPtrW(hWnd, GWLP_USERDATA));
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 		if (win != nullptr)
 		{
 			return win->MsgProc(hWnd, uMsg, wParam, lParam);
@@ -150,14 +143,7 @@ namespace KlayGE
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
-#endif
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 		::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
@@ -186,14 +172,7 @@ namespace KlayGE
 		width_ = rc.right - rc.left;
 		height_ = rc.bottom - rc.top;
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
-#endif
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 		::UpdateWindow(wnd_);
 
@@ -211,14 +190,7 @@ namespace KlayGE
 
 		if (wnd_ != nullptr)
 		{
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4244) // Pointer to LONG_PTR, possible loss of data
-#endif
 			::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(nullptr));
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 			if (!external_wnd_)
 			{
 				::DestroyWindow(wnd_);

@@ -1,8 +1,9 @@
-SET(LIB_NAME KlayGE_AudioEngine_XAudio)
-
-IF(NOT KLAYGE_COMPILER_MSVC)
+IF(KLAYGE_COMPILER_GCC)
+	# GCC warnings emitted by preprocessor can't be suppressed with pragma GCC diagnostic ignored
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
 ENDIF()
+
+SET(LIB_NAME KlayGE_AudioEngine_XAudio)
 
 SET(XAUDIO_AE_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Src/Audio/XAudio/XAAudioEngine.cpp

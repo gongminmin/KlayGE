@@ -44,14 +44,7 @@
 		namespace filesystem = experimental::filesystem;
 	}
 #else
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic push
-		#pragma GCC diagnostic ignored "-Wdeprecated-declarations" // Ignore auto_ptr declaration
-	#endif
 	#include <boost/filesystem.hpp>
-	#if defined(KLAYGE_COMPILER_GCC)
-		#pragma GCC diagnostic pop
-	#endif
 	namespace std
 	{
 		namespace filesystem = boost::filesystem;

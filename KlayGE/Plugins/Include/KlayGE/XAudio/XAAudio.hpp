@@ -43,8 +43,23 @@
 #include <xaudio2.h>
 #include <x3daudio.h>
 #else
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+// This GCC diagnostic ignored line doesn't work, because this warning is emitted by preprocessor
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
+#endif
 #include <xaudio2.legacy.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-pragmas" // Ignore unknown pragmas
+#endif
 #include <x3daudio.legacy.h>
+#if defined(KLAYGE_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#endif
 #define XAUDIO2_DLL_A  "xaudio2_7.dll"
 #define XAUDIO2_DLL_W L"xaudio2_7.dll"
 #endif

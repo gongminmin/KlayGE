@@ -3,14 +3,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/Camera.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4793) // boost::signals2::detail::do_postconstruct/do_predestruct can't have /clr
-#endif
 #include "../KGEditorCore/KGEditorCore.hpp"
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
-#endif
 
 #include "KGEditorCoreWrapper.hpp"
 

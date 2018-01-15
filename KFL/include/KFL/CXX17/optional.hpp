@@ -44,12 +44,12 @@
 		using experimental::optional;
 	}
 #else
-#ifdef KLAYGE_COMPILER_CLANG
+#ifdef KLAYGE_COMPILER_CLANGC2
 	#pragma clang diagnostic push
 	#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'out', 'v'
 #endif
 #include <boost/optional.hpp>
-#ifdef KLAYGE_COMPILER_CLANG
+#ifdef KLAYGE_COMPILER_CLANGC2
 	#pragma clang diagnostic pop
 #endif
 	namespace std

@@ -18,14 +18,14 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/OpenGLES/OGLESFrameBuffer.hpp>
 
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4512) // boost::iterators::function_output_iterator<T>::output_proxy doesn't have assignment operator
-#pragma warning(disable: 4913) // User defined binary operator ',' exists but no overload could convert all operands
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter" // Ignore unused parameter 'sp'
+#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
 #endif
 #include <boost/signals2.hpp>
-#ifdef KLAYGE_COMPILER_MSVC
-#pragma warning(pop)
+#if defined(KLAYGE_COMPILER_CLANGC2)
+#pragma clang diagnostic pop
 #endif
 
 namespace KlayGE

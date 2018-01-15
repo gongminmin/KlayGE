@@ -65,6 +65,9 @@ namespace KlayGE
 			for (auto state : curr_states_)
 			{
 				BOOST_ASSERT(state == curr_states_[0]);
+#if defined(KLAYGE_COMPILER_CLANGC2)
+				KFL_UNUSED(state);
+#endif
 			}
 #endif
 

@@ -22,7 +22,6 @@
 #include <KFL/Thread.hpp>
 
 #include <cstring>
-#include <d3d9.h>
 #include <boost/assert.hpp>
 
 #include <KlayGE/DShow/DShowVMR9Allocator.hpp>

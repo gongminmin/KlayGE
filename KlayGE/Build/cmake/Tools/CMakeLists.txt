@@ -5,10 +5,6 @@
 # - EXTRA_LINKED_LIBRARIES: dependencies required besides KlayGE_Core and boost
 #
 MACRO(SETUP_TOOL EXE_NAME)
-	IF(KLAYGE_COMPILER_CLANGC2)
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-microsoft-enum-value -Wno-unknown-pragmas")
-	ENDIF()
-
 	SET(RESOURCE_FILES ${RESOURCE_FILES}
 		${KLAYGE_PROJECT_DIR}/Tools/media/Common/KlayGETool.rc
 		${KLAYGE_PROJECT_DIR}/klayge_logo.ico
