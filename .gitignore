@@ -10,7 +10,7 @@
 *.gch
 KlayGE.log
 __pycache__
-cfg_build.py
+CfgBuild.py
 *_mgw*_*_*
 *_gcc*_*_*
 *_vc*_*_*

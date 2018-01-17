@@ -2,29 +2,42 @@
 #-*- coding: ascii -*-
 
 import os, sys, multiprocessing, subprocess, shutil, platform
+
+def GenerateCfgBuildFromDefault():
+	print("Generating CfgBuild.py ...")
+	shutil.copyfile("CfgBuildDefault.py", "CfgBuild.py")
+
+def LogError(message):
+	print("[E] %s" % message)
+	if 0 == sys.platform.find("win"):
+		os.system("pause")
+	else:
+		os.system("read")
+	sys.exit(1)
+
+def LogInfo(message):
+	print("[I] %s" % message)
+
+def LogWarning(message):
+	print("[W] %s" % message)
+
 try:
 	import cfg_build
+	GenerateCfgBuildFromDefault()
+	hint_for_migrating = True
 except:
-	print("Generating cfg_build.py ...")
-	shutil.copyfile("cfg_build_default.py", "cfg_build.py")
-	import cfg_build
+	hint_for_migrating = False
 
-class cfg_from_argv:
-	def __init__(self, argv, base = 0):
-		if len(argv) > base + 1:
-			self.compiler = argv[base + 1]
-		else:
-			self.compiler = ""
-		if len(argv) > base + 2:
-			self.archs = (argv[base + 2], )
-		else:
-			self.archs = ""
-		if len(argv) > base + 3:
-			self.cfg = (argv[base + 3], )
-		else:
-			self.cfg = ""
+if hint_for_migrating:
+	LogError("cfg_build.py is retired. Please migrate your configurations to new CfgBuild.py.")
 
-class compiler_info:
+try:
+	from CfgBuild import ActivedCfgBuild
+except:
+	GenerateCfgBuildFromDefault()
+	from CfgBuild import ActivedCfgBuild
+
+class CompilerInfo:
 	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
 		self.arch = arch
 		self.generator = gen_name
@@ -32,8 +45,30 @@ class compiler_info:
 		self.vcvarsall_path = vcvarsall_path
 		self.vcvarsall_options = vcvarsall_options
 
-class build_info:
+class BuildInfo:
+	@classmethod
+	def FromArgv(BuildInfo, argv, base = 0):
+		if len(argv) > base + 1:
+			compiler = argv[base + 1]
+		else:
+			compiler = ""
+		if len(argv) > base + 2:
+			archs = (argv[base + 2], )
+		else:
+			archs = ""
+		if len(argv) > base + 3:
+			cfg = (argv[base + 3], )
+		else:
+			cfg = ""
+
+		return BuildInfo(compiler, archs, cfg)
+
 	def __init__(self, compiler, archs, cfg):
+		cfg_build = ActivedCfgBuild()
+		try:
+			cfg_build.cmake_path
+		except:
+			cfg_build.cmake_path = "auto"
 		try:
 			cfg_build.project
 		except:
@@ -58,7 +93,30 @@ class build_info:
 			cfg_build.shader_platform_name
 		except:
 			cfg_build.shader_platform_name = "auto"
+		try:
+			cfg_build.gles_include_dir
+		except:
+			cfg_build.gles_include_dir = "auto"
+		try:
+			cfg_build.max_path
+		except:
+			cfg_build.max_path = "auto"
+		try:
+			cfg_build.max_sdk_path
+		except:
+			cfg_build.max_sdk_path = "auto"
+		try:
+			cfg_build.maya_path
+		except:
+			cfg_build.maya_path = "auto"
+		try:
+			cfg_build.libovr_path
+		except:
+			cfg_build.libovr_path = "auto"
 
+		self.cmake_path = cfg_build.cmake_path
+		if self.cmake_path == "auto":
+			self.cmake_path = self.FindCMake()
 		self.cmake_ver = self.RetriveCMakeVersion()
 
 		env = os.environ
@@ -76,7 +134,7 @@ class build_info:
 			target_platform = cfg_build.target
 			if 0 == target_platform.find("android"):
 				if not "ANDROID_NDK" in env:
-					log_error("You must define a ANDROID_NDK environ variable to your location of NDK.\n")
+					LogError("You must define an ANDROID_NDK environment variable to your location of NDK.\n")
 
 				space_place = target_platform.find(' ')
 				if space_place != -1:
@@ -95,7 +153,7 @@ class build_info:
 					elif "5.1" == android_ver:
 						target_api_level = 22
 					else:
-						log_error("Unsupported android version\n")
+						LogError("Unsupported Android version.\n")
 				else:
 					target_api_level = 22
 				self.target_api_level = target_api_level
@@ -181,7 +239,7 @@ class build_info:
 					project_type = "xcode"
 					compiler = "clang"
 				else:
-					log_error("Unsupported target platform.\n")
+					LogError("Unsupported target platform.\n")
 			else:
 				if cfg_build.project != "auto":
 					project_type = cfg_build.project
@@ -209,7 +267,7 @@ class build_info:
 						compiler_root = try_folder
 						vcvarsall_path = "VCVARSALL.BAT"
 					else:
-						log_error("Can't find the compiler.\n")
+						LogError("Could NOT find vc141 compiler.\n")
 				vcvarsall_options = ""
 			elif "vc140" == compiler:
 				if project_type == "vs2017":
@@ -224,7 +282,7 @@ class build_info:
 							vcvarsall_path = "VCVARSALL.BAT"
 							vcvarsall_options = "-vcvars_ver=14.0"
 						else:
-							log_error("Can't find the compiler.\n")
+							LogError("Could NOT find vc140 compiler toolset for VS2017.\n")
 				else:
 					if "VS140COMNTOOLS" in env:
 						compiler_root = env["VS140COMNTOOLS"] + "..\\..\\VC\\bin\\"
@@ -236,13 +294,13 @@ class build_info:
 							compiler_root = try_folder
 							vcvarsall_path = try_vcvarsall
 						else:
-							log_error("Can't find the compiler.\n")
+							LogError("Could NOT find vc140 compiler.\n")
 					vcvarsall_options = ""
 			elif "clangc2" == compiler:
 				vcvarsall_options = ""
 				found = False
 				if "VS150COMNTOOLS" in env:
-					ret_list = self.find_vs2017_clangc2(env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\")
+					ret_list = self.FindVS2017ClangC2(env["VS150COMNTOOLS"] + "..\\..\\VC\\Auxiliary\\Build\\")
 					if ret_list[0]:
 						compiler_root = ret_list[1]
 						vcvarsall_path = ret_list[2]
@@ -250,7 +308,7 @@ class build_info:
 				else:
 					try_folder = self.FindVS2017Folder(program_files_folder)
 					if len(try_folder) > 0:
-						ret_list = self.find_vs2017_clangc2(try_folder)
+						ret_list = self.FindVS2017ClangC2(try_folder)
 						if ret_list[0]:
 							compiler_root = ret_list[1]
 							vcvarsall_path = ret_list[2]
@@ -266,7 +324,7 @@ class build_info:
 							compiler_root = try_folder
 							vcvarsall_path = try_vcvarsall
 						else:
-							log_error("Can't find the compiler.\n")
+							LogError("Could NOT find clangc2 compiler toolset.\n")
 			elif "clang" == compiler:
 				clang_loc = subprocess.check_output("where clang++").decode()
 				clang_loc = clang_loc.split("\r\n")[0]
@@ -310,9 +368,9 @@ class build_info:
 				compiler_version = 140
 			elif "clangc2" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.retrive_clang_version(compiler_root)
+				compiler_version = self.RetriveClangVersion(compiler_root)
 			else:
-				log_error("Wrong combination between project and compiler")
+				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
 			for arch in archs:
 				if self.cmake_ver >= 39:
@@ -323,8 +381,8 @@ class build_info:
 					elif "x64" == arch:
 						gen_suffix = " Win64"
 					else:
-						log_error("%s is not supported in %s.\n" % (arch, compiler))
-				compilers.append(compiler_info(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path, vcvarsall_options))
+						LogError("%s is not supported in %s.\n" % (arch, compiler))
+				compilers.append(CompilerInfo(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
 			if "vc140" == compiler:
@@ -332,9 +390,9 @@ class build_info:
 				compiler_version = 140
 			elif "clangc2" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.retrive_clang_version(compiler_root)
+				compiler_version = self.RetriveClangVersion(compiler_root)
 			else:
-				log_error("Wrong combination between project and compiler")
+				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
 			for arch in archs:
 				if self.cmake_ver >= 39:
@@ -345,18 +403,18 @@ class build_info:
 					elif "x64" == arch:
 						gen_suffix = " Win64"
 					else:
-						log_error("%s is not supported in %s.\n" % (arch, compiler))
-				compilers.append(compiler_info(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
+						LogError("%s is not supported in %s.\n" % (arch, compiler))
+				compilers.append(CompilerInfo(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.retrive_clang_version()
+				compiler_version = self.RetriveClangVersion()
 				gen_name = "Xcode"
 				multi_config = True
 				for arch in archs:
-					compilers.append(compiler_info(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
-				log_error("Wrong combination between project and compiler")
+				LogError("Wrong combination of project and compiler.\n")
 		elif "make" == project_type:
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
@@ -364,25 +422,25 @@ class build_info:
 				gen_name = "Unix Makefiles"
 			if "clang" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.retrive_clang_version()
+				compiler_version = self.RetriveClangVersion()
 				for arch in archs:
-					compilers.append(compiler_info(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			elif "mingw" == compiler:
 				compiler_name = "mgw"
-				compiler_version = self.retrive_gcc_version()
+				compiler_version = self.RetriveGCCVersion()
 				for arch in archs:
-					compilers.append(compiler_info(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			elif "gcc" == compiler:
 				compiler_name = "gcc"
-				compiler_version = self.retrive_gcc_version()
+				compiler_version = self.RetriveGCCVersion()
 				for arch in archs:
-					compilers.append(compiler_info(arch, gen_name, compiler_root))
+					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
-				log_error("Wrong combination between project and compiler")
+				LogError("Wrong combination of project and compiler.\n")
 		else:
 			compiler_name = ""
 			compiler_version = 0
-			log_error("Unsupported compiler.\n")
+			LogError("Unsupported compiler.\n")
 
 		if 0 == project_type.find("vs"):
 			self.proj_ext_name = "vcxproj"
@@ -394,8 +452,16 @@ class build_info:
 		self.compilers = compilers
 		self.cfg = cfg
 
-	def msbuild_add_build_command(self, batch_cmd, sln_name, proj_name, config, arch = ""):
-		batch_cmd.add_command('@SET VisualStudioVersion=%d.0' % self.vs_version)
+		self.gles_include_dir = cfg_build.gles_include_dir
+		self.max_path = cfg_build.max_path
+		self.max_sdk_path = cfg_build.max_sdk_path
+		self.maya_path = cfg_build.maya_path
+		self.libovr_path = cfg_build.libovr_path
+
+		self.DisplayInfo();
+
+	def MSBuildAddBuildCommand(self, batch_cmd, sln_name, proj_name, config, arch = ""):
+		batch_cmd.AddCommand('@SET VisualStudioVersion=%d.0' % self.vs_version)
 		if len(proj_name) != 0:
 			file_name = "%s.%s" % (proj_name, self.proj_ext_name)
 		else:
@@ -403,19 +469,19 @@ class build_info:
 		config_str = "Configuration=%s" % config
 		if len(arch) != 0:
 			config_str = "%s,Platform=%s" % (config_str, arch)
-		batch_cmd.add_command('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
-		batch_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+		batch_cmd.AddCommand('@MSBuild %s /nologo /m /v:m /p:%s' % (file_name, config_str))
+		batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 		
-	def xcodebuild_add_build_command(self, batch_cmd, target_name, config):
-		batch_cmd.add_command('xcodebuild -target %s -configuration %s' % (target_name, config))
-		batch_cmd.add_command('if (($? != 0)); then exit 1; fi')
+	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
+		batch_cmd.AddCommand('xcodebuild -target %s -configuration %s' % (target_name, config))
+		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
 		
-	def retrive_gcc_version(self):
+	def RetriveGCCVersion(self):
 		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
-	def retrive_clang_version(self, path = ""):
+	def RetriveClangVersion(self, path = ""):
 		if ("android" == self.target_platform):
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -433,7 +499,7 @@ class build_info:
 				break
 		return int(clang_ver_components[0] + clang_ver_components[1])
 
-	def find_vs2017_clangc2(self, folder):
+	def FindVS2017ClangC2(self, folder):
 		found = False
 		compiler_root = ""
 		vcvarsall_path = ""
@@ -484,23 +550,65 @@ class build_info:
 						return try_folder
 		return ""
 
+	def FindCMake(self):
+		cmake_loc = subprocess.check_output("where cmake").decode()
+		if len(cmake_loc) == 0:
+			LogError("Could NOT find CMake. Please install CMake 3.4+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
+		return cmake_loc.split("\r\n")[0]
+
 	def RetriveCMakeVersion(self):
-		cmake_ver = subprocess.check_output(["cmake", "--version"]).decode()
+		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
 		if len(cmake_ver) == 0:
-			log_error("Could NOT find cmake. Please install cmake 3.4+ and put it into %%PATH%%.")
+			LogError("Could NOT find CMake. Please install CMake 3.4+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		cmake_ver = cmake_ver.split()[2]
 		cmake_ver_components = cmake_ver.split('.')
 		return int(cmake_ver_components[0] + cmake_ver_components[1])
 
-class batch_command:
+	def DisplayInfo(self):
+		print("Build information:")
+		print("\tCMake path: %s" % self.cmake_path)
+		print("\tCMake version: %s" % self.cmake_ver)
+		print("\tHost platform: %s" % self.host_platform)
+		print("\tTarget platform: %s" % self.target_platform)
+		if self.is_android:
+			print("\tTarget API level: %d" % self.target_api_level)
+		elif self.is_windows_store:
+			print("\tTarget API level: %s" % self.target_api_level)
+		print("\tPrefer static library: %s" % self.prefer_static)
+		print("\tShader platform: %s" % self.shader_platform_name)
+		print("\tIs dev platform: %s" % self.is_dev_platform)
+		print("\tProject type: %s" % self.project_type)
+		print("\tCompiler: %s%d" % (self.compiler_name, self.compiler_version))
+		archs = ""
+		for i in range(0, len(self.compilers)):
+			archs += self.compilers[i].arch
+			if i != len(self.compilers) - 1:
+				archs += ", "
+		print("\tArchitectures: %s" % archs)
+		cfgs = ""
+		for i in range(0, len(self.cfg)):
+			cfgs += self.cfg[i]
+			if i != len(self.cfg) - 1:
+				cfgs += ", "
+		print("\tConfigures: %s" % cfgs)
+		print("\tGLES SDK include path: %s" % self.gles_include_dir)
+		if self.is_windows_desktop:
+			print("\t3DSMax path: %s" % self.max_path)
+			print("\t3DSMax SDK path: %s" % self.max_sdk_path)
+			print("\tMaya path: %s" % self.maya_path)
+			print("\tOculus LibOVR path: %s" % self.libovr_path)
+		
+		print()
+
+class BatchCommand:
 	def __init__(self, host_platform):
 		self.commands_ = []
 		self.host_platform_ = host_platform
 
-	def add_command(self, cmd):
+	def AddCommand(self, cmd):
 		self.commands_ += [cmd]
 
-	def execute(self):
+	def Execute(self):
 		batch_file = "kge_build."
 		if "win" == self.host_platform_:
 			batch_file += "bat"
@@ -517,21 +625,7 @@ class batch_command:
 		os.remove(batch_file)
 		return ret_code
 
-def log_error(message):
-	print("[E] %s" % message)
-	if 0 == sys.platform.find("win"):
-		os.system("pause")
-	else:
-		os.system("read")
-	sys.exit(1)
-
-def log_info(message):
-	print("[I] %s" % message)
-
-def log_warning(message):
-	print("[W] %s" % message)
-
-def build_a_project(name, build_path, build_info, compiler_info, need_install = False, additional_options = ""):
+def BuildAProject(name, build_path, build_info, compiler_info, need_install = False, additional_options = ""):
 	curdir = os.path.abspath(os.curdir)
 
 	toolset_name = ""
@@ -565,7 +659,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		if "x64" == compiler_info.arch:
 			additional_options += " -DCMAKE_OSX_ARCHITECTURES=x86_64"
 		else:
-			log_error("Unsupported Darwin arch\n")
+			LogError("Unsupported Darwin architecture.\n")
 	elif "ios" == build_info.target_platform:
 		additional_options += " -DCMAKE_TOOLCHAIN_FILE=\"%s/cmake/iOS.cmake\"" % curdir
 		if "arm" == compiler_info.arch:
@@ -573,7 +667,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 		elif "x86" == compiler_info.arch:
 			additional_options += " -DIOS_PLATFORM=SIMULATOR"
 		else:
-			log_error("Unsupported iOS arch\n")
+			LogError("Unsupported iOS architecture.\n")
 
 	if build_info.multi_config:
 		if 0 == build_info.project_type.find("vs"):
@@ -587,7 +681,7 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 				vc_option = "x86_arm64"
 				vc_arch = "ARM64"
 			else:
-				log_error("Unsupported VS arch\n")
+				LogError("Unsupported VS architecture.\n")
 			if len(compiler_info.vcvarsall_options) > 0:
 				vc_option += " %s" % compiler_info.vcvarsall_options
 			if build_info.cmake_ver >= 39:
@@ -612,33 +706,33 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 			build_dir = os.path.abspath(build_dir)
 			os.chdir(build_dir)
 
-			cmake_cmd = batch_command(build_info.host_platform)
+			cmake_cmd = BatchCommand(build_info.host_platform)
 			new_path = sys.exec_prefix
 			if len(compiler_info.compiler_root) > 0:
 				new_path += ";" + compiler_info.compiler_root
 			if "win" == build_info.host_platform:
-				cmake_cmd.add_command('@SET PATH=%s;%%PATH%%' % new_path)
+				cmake_cmd.AddCommand('@SET PATH=%s;%%PATH%%' % new_path)
 			else:
-				cmake_cmd.add_command('export PATH=$PATH:%s' % new_path)
-			cmake_cmd.add_command('cmake -G "%s" %s %s -DKLAYGE_BUILD_FOLDER="%s" %s' % (compiler_info.generator, toolset_name, additional_options, build_folder, "../cmake"))
-			if cmake_cmd.execute() != 0:
-				log_error("Config %s failed." % name)
+				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
+			cmake_cmd.AddCommand('"%s" -G "%s" %s %s -DKLAYGE_BUILD_FOLDER="%s" %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, build_folder, "../cmake"))
+			if cmake_cmd.Execute() != 0:
+				LogError("Config %s failed.\n" % name)
 
-			build_cmd = batch_command(build_info.host_platform)
+			build_cmd = BatchCommand(build_info.host_platform)
 			if 0 == build_info.project_type.find("vs"):
-				build_cmd.add_command('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
-				build_cmd.add_command('@CD /d "%s"' % build_dir)
+				build_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
+				build_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			for config in build_info.cfg:
 				if 0 == build_info.project_type.find("vs"):
-					build_info.msbuild_add_build_command(build_cmd, name, "ALL_BUILD", config, vc_arch)
+					build_info.MSBuildAddBuildCommand(build_cmd, name, "ALL_BUILD", config, vc_arch)
 					if need_install:
-						build_info.msbuild_add_build_command(build_cmd, name, "INSTALL", config, vc_arch)
+						build_info.MSBuildAddBuildCommand(build_cmd, name, "INSTALL", config, vc_arch)
 				elif "xcode" == build_info.project_type:
-					build_info.xcodebuild_add_build_command(build_cmd, "ALL_BUILD", config)
+					build_info.XCodeBuildAddBuildCommand(build_cmd, "ALL_BUILD", config)
 					if need_install and (not build_info.prefer_static):
-						build_info.xcodebuild_add_build_command(build_cmd, "install", config)
-			if build_cmd.execute() != 0:
-				log_error("Build %s failed." % name)
+						build_info.XCodeBuildAddBuildCommand(build_cmd, "install", config)
+			if build_cmd.Execute() != 0:
+				LogError("Build %s failed.\n" % name)
 
 			os.chdir(curdir)
 
@@ -681,26 +775,26 @@ def build_a_project(name, build_path, build_info, compiler_info, need_install = 
 						abi_arch = "arm64-v8a"
 						toolchain_arch = "aarch64-linux-android"
 					else:
-						log_error("Unsupported Android arch\n")
+						LogError("Unsupported Android architecture.\n")
 					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
-				cmake_cmd = batch_command(build_info.host_platform)
-				cmake_cmd.add_command('cmake -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
-				if cmake_cmd.execute() != 0:
-					log_error("Config %s failed." % name)
+				cmake_cmd = BatchCommand(build_info.host_platform)
+				cmake_cmd.AddCommand('"%s" -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (build_info.cmake_path, compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
+				if cmake_cmd.Execute() != 0:
+					LogError("Config %s failed.\n" % name)
 
 				install_str = ""
 				if need_install and (not build_info.prefer_static):
 					install_str = "install"
-				build_cmd = batch_command(build_info.host_platform)
+				build_cmd = BatchCommand(build_info.host_platform)
 				if "win" == build_info.host_platform:
-					build_cmd.add_command("@%s %s" % (make_name, install_str))
-					build_cmd.add_command('@if ERRORLEVEL 1 exit /B 1')
+					build_cmd.AddCommand("@%s %s" % (make_name, install_str))
+					build_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 				else:
-					build_cmd.add_command("%s %s" % (make_name, install_str))
-					build_cmd.add_command('if [ $? -ne 0 ]; then exit 1; fi')
-				if build_cmd.execute() != 0:
-					log_error("Build %s failed." % name)
+					build_cmd.AddCommand("%s %s" % (make_name, install_str))
+					build_cmd.AddCommand('if [ $? -ne 0 ]; then exit 1; fi')
+				if build_cmd.Execute() != 0:
+					LogError("Build %s failed.\n" % name)
 
 				os.chdir(curdir)
 

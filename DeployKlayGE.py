@@ -3,21 +3,21 @@
 
 from __future__ import print_function
 import os, sys
-from blib_util import *
+from BLibUtil import *
 
-def copy_to_dst(src_name, dst_dir):
+def CopyToDst(src_name, dst_dir):
 	print("Copy %s to %s" % (src_name, dst_dir))
 	import shutil
 	shutil.copy2(src_name, dst_dir)
 
-def deploy_KlayGE(target_dir, build_info, compiler_arch):
+def DeployKlayGE(target_dir, build_info, compiler_arch):
 	import glob
 
 	bin_dst_dir = "%s/bin/%s_%s/" % (target_dir, build_info.target_platform, compiler_arch)
 	if "win" == build_info.target_platform:
 		bat_suffix = "bat"
 		dll_suffix = "dll"
-	elif "linux" == build_info.target_platform:
+	elif ("linux" == build_info.target_platform) or ("darwin" == build_info.target_platform):
 		bat_suffix = "sh"
 		dll_suffix = "so"
 	output_suffix = "_%s%d*" % (build_info.compiler_name, build_info.compiler_version)
@@ -40,53 +40,53 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	if not os.path.exists("%sShow/" % bin_dst_dir):
 		os.mkdir("%sShow/" % bin_dst_dir);
 
-	copy_to_dst("KlayGE/bin/KlayGE.cfg", "%s/bin/" % target_dir);
+	CopyToDst("KlayGE/bin/KlayGE.cfg", "%s/bin/" % target_dir);
 	
 	print("Deploying boost...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/boost_*.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying 7z...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/7zxa*.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/LZMA*.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying DXSDK...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/d3dcompiler_47.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying OpenAL...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/OpenAL32.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/wrap_oal.%s" % (compiler_arch, dll_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying glloader...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/glloader%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying kfont...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/kfont%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying KlayGE...\n")
 	for fname in glob.iglob("KlayGE/bin/win_%s/KlayGE_Core%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Audio/KlayGE_Audio*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sAudio/" % bin_dst_dir);
+		CopyToDst(fname, "%sAudio/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Input/KlayGE_Input*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sInput/" % bin_dst_dir);
+		CopyToDst(fname, "%sInput/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Render/KlayGE_Render*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sRender/" % bin_dst_dir);
+		CopyToDst(fname, "%sRender/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Scene/KlayGE_Scene*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sScene/" % bin_dst_dir);
+		CopyToDst(fname, "%sScene/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Script/KlayGE_Script*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sScript/" % bin_dst_dir);
+		CopyToDst(fname, "%sScript/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/Show/KlayGE_Show*%s" % (compiler_arch, lib_suffix)):
-		copy_to_dst(fname, "%sShow/" % bin_dst_dir);
+		CopyToDst(fname, "%sShow/" % bin_dst_dir);
 	for fname in glob.iglob("KlayGE/bin/win_%s/MeshMLJIT*" % compiler_arch):
-		copy_to_dst(fname, bin_dst_dir);
+		CopyToDst(fname, bin_dst_dir);
 
 	print("Deploying media files...\n")
 
@@ -111,38 +111,35 @@ def deploy_KlayGE(target_dir, build_info, compiler_arch):
 	if not os.path.exists("%s/media/Textures/Juda" % target_dir):
 		os.mkdir("%s/media/Textures/Juda" % target_dir);
 
-	copy_to_dst("KlayGE/media/Fonts/gkai00mp.kfont", "%s/media/Fonts/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/ambient_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/directional_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/indirect_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/point_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/spot_light_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/camera_proxy.meshml", "%s/media/Models/" % target_dir);
-	copy_to_dst("KlayGE/media/Models/tube_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Fonts/gkai00mp.kfont", "%s/media/Fonts/" % target_dir);
+	CopyToDst("KlayGE/media/Models/ambient_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/directional_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/indirect_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/point_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/spot_light_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/camera_proxy.meshml", "%s/media/Models/" % target_dir);
+	CopyToDst("KlayGE/media/Models/tube_light_proxy.meshml", "%s/media/Models/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/PostProcessors/*.ppml"):
-		copy_to_dst(fname, "%s/media/PostProcessors" % target_dir);
+		CopyToDst(fname, "%s/media/PostProcessors" % target_dir);
 	for fname in glob.iglob("KlayGE/media/RenderFX/*.fxml"):
-		copy_to_dst(fname, "%s/media/RenderFX" % target_dir);
+		CopyToDst(fname, "%s/media/RenderFX" % target_dir);
 	for fname in glob.iglob("KlayGE/media/Textures/2D/*.dds"):
-		copy_to_dst(fname, "%s/media/Textures/2D/" % target_dir);
-	copy_to_dst("KlayGE/media/Textures/3D/color_grading.dds", "%s/media/Textures/3D/" % target_dir);
+		CopyToDst(fname, "%s/media/Textures/2D/" % target_dir);
+	CopyToDst("KlayGE/media/Textures/3D/color_grading.dds", "%s/media/Textures/3D/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/Textures/Cube/Lake_CraterLake03_*.dds"):
-		copy_to_dst(fname, "%s/media/Textures/Cube/" % target_dir);
+		CopyToDst(fname, "%s/media/Textures/Cube/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/Textures/Cube/rnl_cross_*.dds"):
-		copy_to_dst(fname, "%s/media/Textures/Cube/" % target_dir);
+		CopyToDst(fname, "%s/media/Textures/Cube/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/Textures/Cube/uffizi_cross_*.dds"):
-		copy_to_dst(fname, "%s/media/Textures/Cube/" % target_dir);
+		CopyToDst(fname, "%s/media/Textures/Cube/" % target_dir);
 	for fname in glob.iglob("KlayGE/media/Textures/Juda/*.jdt"):
-		copy_to_dst(fname, "%s/media/Textures/Juda/" % target_dir);
+		CopyToDst(fname, "%s/media/Textures/Juda/" % target_dir);
 
 if __name__ == "__main__":
 	if len(sys.argv) > 1:
 		target_dir = sys.argv[1]
-
-		cfg = cfg_from_argv(sys.argv, 1)
-		bi = build_info(cfg.compiler, cfg.archs, cfg.cfg)
-
+		bi = BuildInfo.FromArgv(sys.argv, 1)
 		for compiler_info in bi.compilers:
-			deploy_KlayGE(target_dir, bi, compiler_info.arch)
+			DeployKlayGE(target_dir, bi, compiler_info.arch)
 	else:
-		print("Usage: deploy_KlayGE.py target_dir [compiler] [arch] [config]")
+		print("Usage: DeployKlayGE.py target_dir [compiler] [arch] [config]")
