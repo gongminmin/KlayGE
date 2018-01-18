@@ -290,7 +290,7 @@ TEST_F(KlayGETest, EncodeDecodeBC7XRGB)
 
 TEST_F(KlayGETest, EncodeDecodeBC7ARGB)
 {
-	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 10.8f);
+	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 11.0f);
 }
 
 TEST_F(KlayGETest, EncodeDecodeETC1)

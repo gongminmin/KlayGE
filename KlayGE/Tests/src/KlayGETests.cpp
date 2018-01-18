@@ -4,6 +4,8 @@
 
 #include "KlayGETests.hpp"
 
+using namespace testing;
+
 namespace KlayGE
 {
 	class KlayGETestsApp : public App3DFramework
@@ -44,4 +46,16 @@ namespace KlayGE
 	void KlayGETest::TearDown()
 	{
 	}
+}
+
+int main(int argc, char** argv)
+{
+	InitGoogleTest(&argc, argv);
+	int ret_val = RUN_ALL_TESTS();
+	if (ret_val != 0)
+	{
+		getchar();
+	}
+
+	return ret_val;
 }
