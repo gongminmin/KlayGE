@@ -5,7 +5,7 @@ import sys
 from BLibUtil import *
 
 def BuildBoost(build_info, compiler_info):
-	BuildAProject("boost", "External/boost", build_info, compiler_info, build_info.is_windows)
+	BuildAProject("boost", "External/boost", build_info, compiler_info, build_info.is_windows_desktop)
 
 def BuildPython(build_info, compiler_info):
 	BuildAProject("Python", "External/Python", build_info, compiler_info)
