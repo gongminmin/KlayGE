@@ -1,7 +1,6 @@
 DOWNLOAD_FILE("KlayGE/Tools/media/KGEditor/default_bg_c.dds" "1716601561dda04e4b9f5bc5ac509685401d23a2" "0bdca4602a264aae0e6a7957478a181bd78c4032")
 DOWNLOAD_FILE("KlayGE/Tools/media/KGEditor/default_bg_y.dds" "1716601561dda04e4b9f5bc5ac509685401d23a2" "5a2e630a4b456382c6105c3682083213e7d36e09")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Camera.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "b8e2d89c418c800b4adb61de5155903ef8260928")
-DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/klayge_logo.ico" "1716601561dda04e4b9f5bc5ac509685401d23a2" "b05ac9575a9a001af17a3729987ba8dd77e4c017")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Light.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "0affe205574a9fc269e254625e7c582915160188")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Mesh.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "cd73d4e6f877a2f7266d2995ba52f330644d98e6")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Open.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "2494b313c7b71b2b4aec75541faacc720acc0b16")
@@ -58,7 +57,6 @@ ENDFOREACH()
 
 SET(IMAGE_LINKS
 	Images/Camera.png
-	Images/klayge_logo.ico
 	Images/Light.png
 	Images/Mesh.png
 	Images/Open.png
@@ -83,6 +81,12 @@ FOREACH(link_var ${IMAGE_LINKS})
 		${image_file}
 	)
 ENDFOREACH()
+SET(IMAGE_FILES ${IMAGE_FILES}
+	"${KLAYGE_PROJECT_DIR}/klayge_logo.ico"	
+)
+SET_SOURCE_FILES_PROPERTIES("${KLAYGE_PROJECT_DIR}/klayge_logo.ico" PROPERTIES
+	VS_CSHARP_Link "Images/klayge_logo.ico"
+)
 
 CSHARP_SET_DESIGNER_CS_PROPERTIES(${PROPERTY_FILES})
 CSHARP_SET_XAML_CS_PROPERTIES(${SOURCE_FILES})
