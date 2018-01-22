@@ -118,6 +118,8 @@ class BuildInfo:
 		if self.cmake_path == "auto":
 			self.cmake_path = self.FindCMake()
 		self.cmake_ver = self.RetriveCMakeVersion()
+		if self.cmake_ver < 39:
+			LogError("CMake 3.9+ is required.")
 
 		env = os.environ
 
@@ -373,16 +375,7 @@ class BuildInfo:
 				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
 			for arch in archs:
-				if self.cmake_ver >= 39:
-					gen_suffix = ""
-				else:
-					if "arm" == arch:
-						gen_suffix = " ARM"
-					elif "x64" == arch:
-						gen_suffix = " Win64"
-					else:
-						LogError("%s is not supported in %s.\n" % (arch, compiler))
-				compilers.append(CompilerInfo(arch, "Visual Studio 15" + gen_suffix, compiler_root, vcvarsall_path, vcvarsall_options))
+				compilers.append(CompilerInfo(arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
 		elif "vs2015" == project_type:
 			self.vs_version = 14
 			if "vc140" == compiler:
@@ -395,16 +388,7 @@ class BuildInfo:
 				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
 			for arch in archs:
-				if self.cmake_ver >= 39:
-					gen_suffix = ""
-				else:
-					if "arm" == arch:
-						gen_suffix = " ARM"
-					elif "x64" == arch:
-						gen_suffix = " Win64"
-					else:
-						LogError("%s is not supported in %s.\n" % (arch, compiler))
-				compilers.append(CompilerInfo(arch, "Visual Studio 14" + gen_suffix, compiler_root, vcvarsall_path))
+				compilers.append(CompilerInfo(arch, "Visual Studio 14", compiler_root, vcvarsall_path))
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
@@ -553,13 +537,13 @@ class BuildInfo:
 	def FindCMake(self):
 		cmake_loc = subprocess.check_output("where cmake").decode()
 		if len(cmake_loc) == 0:
-			LogError("Could NOT find CMake. Please install CMake 3.4+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
+			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split("\r\n")[0]
 
 	def RetriveCMakeVersion(self):
 		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
 		if len(cmake_ver) == 0:
-			LogError("Could NOT find CMake. Please install CMake 3.4+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
+			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		cmake_ver = cmake_ver.split()[2]
 		cmake_ver_components = cmake_ver.split('.')
 		return int(cmake_ver_components[0] + cmake_ver_components[1])
@@ -684,8 +668,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				LogError("Unsupported VS architecture.\n")
 			if len(compiler_info.vcvarsall_options) > 0:
 				vc_option += " %s" % compiler_info.vcvarsall_options
-			if build_info.cmake_ver >= 39:
-				additional_options += " -A %s" % vc_arch
+			additional_options += " -A %s" % vc_arch
 
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level

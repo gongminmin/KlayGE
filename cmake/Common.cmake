@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.4 FATAL_ERROR)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9 FATAL_ERROR)
 
 SET(CMAKE_DEBUG_POSTFIX "_d" CACHE STRING "Add a postfix, usually _d on windows")
 SET(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
@@ -6,7 +6,7 @@ SET(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Add a postfix, usually empty o
 SET(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Add a postfix, usually empty on windows")
 
 FIND_PACKAGE(PythonInterp)
-IF (PYTHONINTERP_FOUND)
+IF(PYTHONINTERP_FOUND)
 	IF (${PYTHON_VERSION_STRING} VERSION_LESS "2.7.0")
 		MESSAGE(FATAL_ERROR "Unsupported Python version. Please install Python 2.7.0 or up.")
 	ENDIF()
