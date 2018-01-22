@@ -76,7 +76,7 @@ float4 Shading(float4 L, float4 H)
 	float metalness = metalness_clr.x;
 	if (metalness_clr.y > 0.5f)
 	{
-		metalness *= glossiness_tex.Sample(linear_sampler, uv).x;
+		metalness *= metalness_tex.Sample(linear_sampler, uv).x;
 	}
 	float glossiness = glossiness_clr.x;
 	if (glossiness_clr.y > 0.5f)
