@@ -15,17 +15,105 @@ DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Selection.png" "1716601
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Translation.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "f576b607913cfad949dbc08f041419b828ec8a65")
 DOWNLOAD_FILE("KlayGE/Tools/src/KGEditor/KGEditor/Images/Undo.png" "1716601561dda04e4b9f5bc5ac509685401d23a2" "23c318d9bbe5c95b8b0fbbea662facd56a3a66dc")
 
-STRING(REPLACE "/" "\\" WRAPPER_DIR ${CMAKE_BINARY_DIR})
-CONFIGURE_FILE(
-	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/KGEditor.csproj.in
-	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/KGEditor${KLAYGE_OUTPUT_SUFFIX}.csproj
-	@ONLY
+INCLUDE(CSharpUtilities)
+
+SET(EXE_NAME "KGEditor")
+
+ENABLE_LANGUAGE(CSharp)
+
+SET(SOURCE_FILES
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/App.config
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/App.xaml
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/App.xaml.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/Commands.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/MainWindow.xaml
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/MainWindow.xaml.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/OpenTexUserControlEditor.xaml
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/OpenTexUserControlEditor.xaml.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntity.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntityViewModel.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneLight.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SliderUserControlEditor.xaml
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SliderUserControlEditor.xaml.cs
 )
 
-INCLUDE_EXTERNAL_MSPROJECT(
-	KGEditor ${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/KGEditor${KLAYGE_OUTPUT_SUFFIX}.csproj
-	TYPE FAE04EC0-301F-11D3-BF4B-00C04F79EFBC)
+SET(PROPERTY_LINKS
+	Properties/AssemblyInfo.cs
+	Properties/Resources.Designer.cs
+	Properties/Resources.resx
+	Properties/Settings.Designer.cs
+	Properties/Settings.settings
+)
+FOREACH(link_var ${PROPERTY_LINKS})
+	SET(property_file "${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/${link_var}")
 
-ADD_DEPENDENCIES(KGEditor KGEditorCoreWrapper)
+	SET_SOURCE_FILES_PROPERTIES(${property_file} PROPERTIES
+		VS_CSHARP_Link ${link_var}
+	)
 
-SET_TARGET_PROPERTIES(KGEditor PROPERTIES FOLDER "Tools/KGEditor")
+	SET(PROPERTY_FILES ${PROPERTY_FILES}
+		${property_file}
+	)
+ENDFOREACH()
+
+SET(IMAGE_LINKS
+	Images/Camera.png
+	Images/klayge_logo.ico
+	Images/Light.png
+	Images/Mesh.png
+	Images/Open.png
+	Images/Redo.png
+	Images/Remove.png
+	Images/Rotation.png
+	Images/Save.png
+	Images/SaveAs.png
+	Images/Scaling.png
+	Images/Selection.png
+	Images/Translation.png
+	Images/Undo.png
+)
+FOREACH(link_var ${IMAGE_LINKS})
+	SET(image_file "${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/${link_var}")
+
+	SET_SOURCE_FILES_PROPERTIES(${image_file} PROPERTIES
+		VS_CSHARP_Link ${link_var}
+	)
+
+	SET(IMAGE_FILES ${IMAGE_FILES}
+		${image_file}
+	)
+ENDFOREACH()
+
+CSHARP_SET_DESIGNER_CS_PROPERTIES(${PROPERTY_FILES})
+CSHARP_SET_XAML_CS_PROPERTIES(${SOURCE_FILES})
+
+SET_SOURCE_FILES_PROPERTIES(${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/App.xaml PROPERTIES
+	VS_XAML_TYPE "ApplicationDefinition"
+)
+SET_SOURCE_FILES_PROPERTIES(${IMAGE_FILES} PROPERTIES
+	VS_COPY_TO_OUT_DIR "PreserveNewest"
+	VS_TOOL_OVERRIDE "Resource"
+)
+
+ADD_EXECUTABLE(${EXE_NAME} WIN32 ${SOURCE_FILES} ${PROPERTY_FILES} ${IMAGE_FILES})
+ADD_DEPENDENCIES(${EXE_NAME} KGEditorCoreWrapper)
+
+SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES
+	PROJECT_LABEL ${EXE_NAME}
+	DEBUG_POSTFIX ${CMAKE_DEBUG_POSTFIX}
+	OUTPUT_NAME ${EXE_NAME}
+	RUNTIME_OUTPUT_DIRECTORY ${KLAYGE_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG ${KLAYGE_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE ${KLAYGE_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${KLAYGE_BIN_DIR}
+	RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${KLAYGE_BIN_DIR}
+	VS_GLOBAL_ROOTNAMESPACE ${EXE_NAME}
+	VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.5"
+	VS_DOTNET_REFERENCES "Microsoft.CSharp;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Data.DataSetExtensions;System.Windows.Controls.Ribbon;System.Windows.Forms;System.Xaml;System.Xml;System.Xml.Linq;WindowsBase;WindowsFormsIntegration"
+	VS_DOTNET_REFERENCE_Xceed.Wpf.AvalonDock "${KLAYGE_BIN_DIR}/Xceed.Wpf.AvalonDock.dll"
+	VS_DOTNET_REFERENCE_Xceed.Wpf.Toolkit "${KLAYGE_BIN_DIR}/Xceed.Wpf.Toolkit.dll"
+)
+
+TARGET_LINK_LIBRARIES(${EXE_NAME} ${EXTRA_LINKED_LIBRARIES})
+
+SET_TARGET_PROPERTIES(${EXE_NAME} PROPERTIES FOLDER "Tools/KGEditor")
