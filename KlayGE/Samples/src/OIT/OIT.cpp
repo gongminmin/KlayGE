@@ -27,7 +27,7 @@
 #include <sstream>
 
 #include "SampleCommon.hpp"
-#include "OrderIndependentTransparency.hpp"
+#include "OIT.hpp"
 
 using namespace std;
 using namespace KlayGE;
@@ -499,21 +499,21 @@ namespace
 
 int SampleMain()
 {
-	OrderIndependentTransparencyApp app;
+	OITApp app;
 	app.Create();
 	app.Run();
 
 	return 0;
 }
 
-OrderIndependentTransparencyApp::OrderIndependentTransparencyApp()
+OITApp::OITApp()
 			: App3DFramework("Order Independent Transparency"),
 				num_layers_(0)
 {
-	ResLoader::Instance().AddPath("../../Samples/media/OrderIndependentTransparency");
+	ResLoader::Instance().AddPath("../../Samples/media/OIT");
 }
 
-void OrderIndependentTransparencyApp::OnCreate()
+void OITApp::OnCreate()
 {
 	font_ = SyncLoadFont("gkai00mp.kfont");
 
@@ -574,12 +574,12 @@ void OrderIndependentTransparencyApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&OrderIndependentTransparencyApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(std::bind(&OITApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
 
-	UIManager::Instance().Load(ResLoader::Instance().Open("OrderIndependentTransparency.uiml"));
+	UIManager::Instance().Load(ResLoader::Instance().Open("OIT.uiml"));
 	dialog_oit_ = UIManager::Instance().GetDialogs()[0];
 	dialog_layer_ = UIManager::Instance().GetDialogs()[1];
 
@@ -595,12 +595,15 @@ void OrderIndependentTransparencyApp::OnCreate()
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
 	}
 
-	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::OITModeHandler, this, std::placeholders::_1));
+	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(
+		std::bind(&OITApp::OITModeHandler, this, std::placeholders::_1));
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
-	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::AlphaHandler, this, std::placeholders::_1));
+	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(
+		std::bind(&OITApp::AlphaHandler, this, std::placeholders::_1));
 	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
 
-	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(std::bind(&OrderIndependentTransparencyApp::LayerChangedHandler, this, std::placeholders::_1));
+	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(
+		std::bind(&OITApp::LayerChangedHandler, this, std::placeholders::_1));
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
 
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)
@@ -611,7 +614,7 @@ void OrderIndependentTransparencyApp::OnCreate()
 	}
 }
 
-void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
+void OITApp::OnResize(uint32_t width, uint32_t height)
 {
 	App3DFramework::OnResize(width, height);
 
@@ -718,7 +721,7 @@ void OrderIndependentTransparencyApp::OnResize(uint32_t width, uint32_t height)
 	UIManager::Instance().SettleCtrls();
 }
 
-void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
+void OITApp::InputHandler(InputEngine const & /*sender*/, InputAction const & action)
 {
 	switch (action.first)
 	{
@@ -728,14 +731,14 @@ void OrderIndependentTransparencyApp::InputHandler(InputEngine const & /*sender*
 	}
 }
 
-void OrderIndependentTransparencyApp::OITModeHandler(KlayGE::UIComboBox const & sender)
+void OITApp::OITModeHandler(KlayGE::UIComboBox const & sender)
 {
 	oit_mode_ = static_cast<OITMode>(sender.GetSelectedIndex());
 	checked_pointer_cast<PolygonObject>(polygon_)->SetOITMode(oit_mode_);
 	dialog_layer_->SetVisible(OM_DepthPeeling == oit_mode_);
 }
 
-void OrderIndependentTransparencyApp::AlphaHandler(KlayGE::UISlider const & sender)
+void OITApp::AlphaHandler(KlayGE::UISlider const & sender)
 {
 	float alpha = sender.GetValue() * 0.01f;
 	checked_pointer_cast<PolygonObject>(polygon_)->SetAlpha(alpha);
@@ -745,7 +748,7 @@ void OrderIndependentTransparencyApp::AlphaHandler(KlayGE::UISlider const & send
 	dialog_oit_->Control<UIStatic>(id_alpha_static_)->SetText(stream.str());
 }
 
-void OrderIndependentTransparencyApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
+void OITApp::LayerChangedHandler(KlayGE::UIComboBox const & sender)
 {
 	if (sender.GetSelectedIndex() >= 0)
 	{
@@ -753,7 +756,7 @@ void OrderIndependentTransparencyApp::LayerChangedHandler(KlayGE::UIComboBox con
 	}
 }
 
-void OrderIndependentTransparencyApp::DoUpdateOverlay()
+void OITApp::DoUpdateOverlay()
 {
 	SceneManager& sceneMgr(Context::Instance().SceneManagerInstance());
 
@@ -780,7 +783,7 @@ void OrderIndependentTransparencyApp::DoUpdateOverlay()
 	}
 }
 
-uint32_t OrderIndependentTransparencyApp::DoUpdate(uint32_t pass)
+uint32_t OITApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 

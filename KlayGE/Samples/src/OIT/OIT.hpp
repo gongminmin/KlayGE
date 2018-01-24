@@ -1,5 +1,5 @@
-#ifndef _ORDERINDEPENDENTTRANSPARENCY_HPP
-#define _ORDERINDEPENDENTTRANSPARENCY_HPP
+#ifndef KLAYGE_SAMPLES_OIT_HPP
+#define KLAYGE_SAMPLES_OIT_HPP
 
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Font.hpp>
@@ -14,10 +14,10 @@ enum OITMode
 	OM_AdaptiveTransparency
 };
 
-class OrderIndependentTransparencyApp : public KlayGE::App3DFramework
+class OITApp : public KlayGE::App3DFramework
 {
 public:
-	OrderIndependentTransparencyApp();
+	OITApp();
 
 private:
 	void OnCreate();
@@ -69,4 +69,4 @@ private:
 	int id_layer_tex_;
 };
 
-#endif		// _ORDERINDEPENDENTTRANSPARENCY_HPP
+#endif		// KLAYGE_SAMPLES_OIT_HPP
