@@ -1,4 +1,4 @@
-PROJECT(freetype)
+PROJECT(freetype C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6)
 
