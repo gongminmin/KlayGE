@@ -10,9 +10,10 @@ def GenerateCfgBuildFromDefault():
 def LogError(message):
 	print("[E] %s" % message)
 	if 0 == sys.platform.find("win"):
-		os.system("pause")
+		pause_cmd = "pause"
 	else:
-		os.system("read")
+		pause_cmd = "read"
+	subprocess.call(pause_cmd, shell = True)
 	sys.exit(1)
 
 def LogInfo(message):
@@ -224,10 +225,10 @@ class BuildInfo:
 						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
 							project_type = "vs2015"
 							compiler = "vc140"
-						elif 0 == os.system("where clang++"):
+						elif 0 == subprocess.call("where clang++"):
 							project_type = "make"
 							compiler = "clang"
-						elif 0 == os.system("where g++"):
+						elif 0 == subprocess.call("where g++"):
 							project_type = "make"
 							compiler = "mingw"
 				elif ("linux" == target_platform):
@@ -534,13 +535,16 @@ class BuildInfo:
 		return ""
 
 	def FindCMake(self):
-		if self.host_platform == "darwin":
-			cmake_loc = "/usr/local/bin/cmake"
+		if self.host_platform == "win":
+			where_cmd = "where"
+			sep = "\r\n"
 		else:
-			cmake_loc = subprocess.check_output("where cmake").decode()
+			where_cmd = "which"
+			sep = "\n"
+		cmake_loc = subprocess.check_output(where_cmd + " cmake", shell = True).decode()
 		if len(cmake_loc) == 0:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
-		return cmake_loc.split("\r\n")[0]
+		return cmake_loc.split(sep)[0]
 
 	def RetriveCMakeVersion(self):
 		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
@@ -604,10 +608,10 @@ class BatchCommand:
 		batch_f.writelines([cmd_line + "\n" for cmd_line in self.commands_])
 		batch_f.close()
 		if "win" == self.host_platform_:
-			ret_code = os.system(batch_file)
+			ret_code = subprocess.call(batch_file, shell = True)
 		else:
-			os.system("chmod 777 " + batch_file)
-			ret_code = os.system("./" + batch_file)
+			subprocess.call("chmod 777 " + batch_file, shell = True)
+			ret_code = subprocess.call("./" + batch_file, shell = True)
 		os.remove(batch_file)
 		return ret_code
 
