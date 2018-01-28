@@ -1,4 +1,4 @@
-PROJECT(AndroidNativeAppGlue)
+PROJECT(AndroidNativeAppGlue NONE)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6)
 
@@ -11,7 +11,6 @@ SET(KLAYGE_ROOT_DIR "${ANAG_DIR}/../..")
 
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
-INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/External/Build/CMake/ExternalCommon.cmake)
 
 SET(REL_PATH "External/Downloads/android_native_app_glue.7z")

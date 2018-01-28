@@ -1,4 +1,4 @@
-PROJECT(OpenALSDK)
+PROJECT(OpenALSDK NONE)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.6)
 
@@ -11,7 +11,6 @@ SET(KLAYGE_ROOT_DIR "${OPENALSDK_DIR}/../..")
 
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Common.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Platform.cmake)
-INCLUDE(${KLAYGE_ROOT_DIR}/cmake/Compiler.cmake)
 INCLUDE(${KLAYGE_ROOT_DIR}/External/Build/CMake/ExternalCommon.cmake)
 
 SET(KLAYGE_BIN_DIR "${OPENALSDK_DIR}/../../KlayGE/bin/${KLAYGE_PLATFORM_NAME}")
