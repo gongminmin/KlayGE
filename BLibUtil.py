@@ -113,14 +113,6 @@ class BuildInfo:
 			cfg_build.libovr_path
 		except:
 			cfg_build.libovr_path = "auto"
-
-		self.cmake_path = cfg_build.cmake_path
-		if self.cmake_path == "auto":
-			self.cmake_path = self.FindCMake()
-		self.cmake_ver = self.RetriveCMakeVersion()
-		if self.cmake_ver < 39:
-			LogError("CMake 3.9+ is required.")
-
 		env = os.environ
 
 		host_platform = sys.platform
@@ -181,6 +173,13 @@ class BuildInfo:
 		self.shader_platform_name = shader_platform_name
 		self.prefer_static = prefer_static
 		self.is_clean = ("clean" == compiler)
+
+		self.cmake_path = cfg_build.cmake_path
+		if self.cmake_path == "auto":
+			self.cmake_path = self.FindCMake()
+		self.cmake_ver = self.RetriveCMakeVersion()
+		if self.cmake_ver < 39:
+			LogError("CMake 3.9+ is required.")
 
 		self.is_windows_desktop = False
 		self.is_windows_store = False
@@ -535,7 +534,10 @@ class BuildInfo:
 		return ""
 
 	def FindCMake(self):
-		cmake_loc = subprocess.check_output("where cmake").decode()
+		if self.host_platform == "darwin":
+			cmake_loc = "/usr/local/bin/cmake"
+		else:
+			cmake_loc = subprocess.check_output("where cmake").decode()
 		if len(cmake_loc) == 0:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split("\r\n")[0]
@@ -582,7 +584,7 @@ class BuildInfo:
 			print("\tMaya path: %s" % self.maya_path)
 			print("\tOculus LibOVR path: %s" % self.libovr_path)
 		
-		print()
+		print("")
 
 class BatchCommand:
 	def __init__(self, host_platform):
