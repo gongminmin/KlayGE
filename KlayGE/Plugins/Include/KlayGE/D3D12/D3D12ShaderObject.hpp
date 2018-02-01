@@ -75,19 +75,9 @@ namespace KlayGE
 			return samplers_[type];
 		}
 
-		std::vector<std::tuple<D3D12Resource*, uint32_t, uint32_t>> const & SRVSrcs(ShaderType type) const
-		{
-			return srvsrcs_[type];
-		}
-
 		std::vector<D3D12ShaderResourceViewSimulation*> const & SRVs(ShaderType type) const
 		{
 			return srvs_[type];
-		}
-
-		std::vector<std::pair<D3D12Resource*, ID3D12Resource*>> const & UAVSrcs(ShaderType type) const
-		{
-			return uavsrcs_[type];
 		}
 
 		std::vector<D3D12UnorderedAccessViewSimulation*> const & UAVs(ShaderType type) const

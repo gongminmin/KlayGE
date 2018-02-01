@@ -343,6 +343,28 @@ namespace KlayGE
 		curr_back_buffer_ = swap_chain_->GetCurrentBackBufferIndex();
 
 		this->UpdateSurfacesPtrs();
+
+#ifdef KLAYGE_DEBUG
+		ID3D12InfoQueue* d3d_info_queue = nullptr;
+		if (SUCCEEDED(d3d_device->QueryInterface(IID_ID3D12InfoQueue, reinterpret_cast<void**>(&d3d_info_queue))))
+		{
+			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+			d3d_info_queue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+
+			D3D12_MESSAGE_ID hide[] =
+			{
+				D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+				D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+			};
+
+			D3D12_INFO_QUEUE_FILTER filter = {};
+			filter.DenyList.NumIDs = static_cast<UINT>(std::size(hide));
+			filter.DenyList.pIDList = hide;
+			d3d_info_queue->AddStorageFilterEntries(&filter);
+
+			d3d_info_queue->Release();
+		}
+#endif
 	}
 
 	D3D12RenderWindow::~D3D12RenderWindow()

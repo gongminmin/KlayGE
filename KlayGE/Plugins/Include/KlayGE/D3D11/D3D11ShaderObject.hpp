@@ -150,10 +150,8 @@ namespace KlayGE
 		std::array<std::vector<ParameterBind>, ST_NumShaderTypes> param_binds_;
 
 		std::array<std::vector<ID3D11SamplerState*>, ST_NumShaderTypes> samplers_;
-		std::array<std::vector<std::tuple<void*, uint32_t, uint32_t>>, ST_NumShaderTypes> srvsrcs_;
 		std::array<std::vector<ID3D11ShaderResourceView*>, ST_NumShaderTypes> srvs_;
 		std::array<std::vector<ID3D11Buffer*>, ST_NumShaderTypes> d3d11_cbuffs_;
-		std::vector<void*> uavsrcs_;
 		std::vector<ID3D11UnorderedAccessView*> uavs_;
 
 		std::vector<RenderEffectConstantBuffer*> all_cbuffs_;
