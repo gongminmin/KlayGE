@@ -478,6 +478,7 @@ namespace KlayGE
 			{
 				std::fill(shader_srv_ptr_cache_[i].begin(), shader_srv_ptr_cache_[i].end(), static_cast<ID3D11ShaderResourceView*>(nullptr));
 				ShaderSetShaderResources[i](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[i].size()), &shader_srv_ptr_cache_[i][0]);
+				shader_srvsrc_cache_[i].clear();
 				shader_srv_ptr_cache_[i].clear();
 			}
 
@@ -523,6 +524,14 @@ namespace KlayGE
 
 				so_src[i] = d3d11_buf;
 				d3d11_buffs[i] = d3d11_buf->D3DBuffer();
+			}
+
+			for (uint32_t i = 0; i < num_buffs; ++ i)
+			{
+				if (so_src[i] != nullptr)
+				{
+					this->DetachSRV(so_src[i], 0, 1);
+				}
 			}
 
 			d3d_imm_ctx_->SOSetTargets(static_cast<UINT>(num_buffs), &d3d11_buffs[0], &d3d11_buff_offsets[0]);
@@ -853,6 +862,7 @@ namespace KlayGE
 
 		for (size_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
 		{
+			shader_srvsrc_cache_[i].clear();
 			shader_srv_ptr_cache_[i].clear();
 			shader_sampler_ptr_cache_[i].clear();
 			shader_cb_ptr_cache_[i].clear();
@@ -1598,7 +1608,9 @@ namespace KlayGE
 		}
 	}
 
-	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st, std::vector<ID3D11ShaderResourceView*> const & srvs)
+	void D3D11RenderEngine::SetShaderResources(ShaderObject::ShaderType st,
+			std::vector<std::tuple<void*, uint32_t, uint32_t>> const & srvsrcs,
+			std::vector<ID3D11ShaderResourceView*> const & srvs)
 	{
 		if (shader_srv_ptr_cache_[st] != srvs)
 		{
@@ -1612,6 +1624,7 @@ namespace KlayGE
 			ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0,
 				static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
 
+			shader_srvsrc_cache_[st] = srvsrcs;
 			shader_srv_ptr_cache_[st].resize(srvs.size());
 		}
 	}
@@ -1633,6 +1646,40 @@ namespace KlayGE
 			ShaderSetConstantBuffers[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(cbs.size()), &cbs[0]);
 
 			shader_cb_ptr_cache_[st] = cbs;
+		}
+	}
+
+	void D3D11RenderEngine::DetachSRV(void* rtv_src, uint32_t rt_first_subres, uint32_t rt_num_subres)
+	{
+		for (uint32_t st = 0; st < ShaderObject::ST_NumShaderTypes; ++ st)
+		{
+			bool cleared = false;
+			for (uint32_t i = 0; i < shader_srvsrc_cache_[st].size(); ++ i)
+			{
+				if (std::get<0>(shader_srvsrc_cache_[st][i]))
+				{
+					if (std::get<0>(shader_srvsrc_cache_[st][i]) == rtv_src)
+					{
+						uint32_t const first = std::get<1>(shader_srvsrc_cache_[st][i]);
+						uint32_t const last = first + std::get<2>(shader_srvsrc_cache_[st][i]);
+						uint32_t const rt_first = rt_first_subres;
+						uint32_t const rt_last = rt_first_subres + rt_num_subres;
+						if (((first >= rt_first) && (first < rt_last))
+							|| ((last >= rt_first) && (last < rt_last))
+							|| ((rt_first >= first) && (rt_first < last))
+							|| ((rt_last >= first) && (rt_last < last)))
+						{
+							shader_srv_ptr_cache_[st][i] = nullptr;
+							cleared = true;
+						}
+					}
+				}
+			}
+
+			if (cleared)
+			{
+				ShaderSetShaderResources[st](d3d_imm_ctx_.get(), 0, static_cast<UINT>(shader_srv_ptr_cache_[st].size()), &shader_srv_ptr_cache_[st][0]);
+			}
 		}
 	}
 

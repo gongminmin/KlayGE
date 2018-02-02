@@ -523,21 +523,6 @@ namespace KlayGE
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
 			d3d_info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
 
-			D3D11_MESSAGE_ID hide[] =
-			{
-				D3D11_MESSAGE_ID_DEVICE_VSSETSHADERRESOURCES_HAZARD,
-				D3D11_MESSAGE_ID_DEVICE_GSSETSHADERRESOURCES_HAZARD,
-				D3D11_MESSAGE_ID_DEVICE_PSSETSHADERRESOURCES_HAZARD,
-				D3D11_MESSAGE_ID_DEVICE_OMSETRENDERTARGETS_HAZARD,
-				D3D11_MESSAGE_ID_DEVICE_SOSETTARGETS_HAZARD,
-				D3D11_MESSAGE_ID_DEVICE_CSSETUNORDEREDACCESSVIEWS_HAZARD,
-			};
-
-			D3D11_INFO_QUEUE_FILTER filter = {};
-			filter.DenyList.NumIDs = static_cast<UINT>(std::size(hide));
-			filter.DenyList.pIDList = hide;
-			d3d_info_queue->AddStorageFilterEntries(&filter);
-
 			d3d_info_queue->Release();
 		}
 #endif

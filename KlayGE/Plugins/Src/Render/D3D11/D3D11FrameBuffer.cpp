@@ -86,6 +86,7 @@ namespace KlayGE
 	{
 		if (views_dirty_)
 		{
+			d3d_rt_src_.clear();
 			d3d_rt_first_subres_.clear();
 			d3d_rt_num_subres_.clear();
 			d3d_rt_view_.resize(clr_views_.size());
@@ -94,6 +95,7 @@ namespace KlayGE
 				if (clr_views_[i])
 				{
 					D3D11RenderTargetRenderView* p = checked_cast<D3D11RenderTargetRenderView*>(clr_views_[i].get());
+					d3d_rt_src_.push_back(p->RTSrc());
 					d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 					d3d_rt_num_subres_.push_back(p->RTNumSubRes());
 					d3d_rt_view_[i] = this->D3DRTView(i);
@@ -106,6 +108,7 @@ namespace KlayGE
 			if (ds_view_)
 			{
 				D3D11DepthStencilRenderView* p = checked_cast<D3D11DepthStencilRenderView*>(ds_view_.get());
+				d3d_rt_src_.push_back(p->RTSrc());
 				d3d_rt_first_subres_.push_back(p->RTFirstSubRes());
 				d3d_rt_num_subres_.push_back(p->RTNumSubRes());
 				d3d_ds_view_ = this->D3DDSView();
@@ -122,6 +125,7 @@ namespace KlayGE
 				if (ua_views_[i])
 				{
 					D3D11UnorderedAccessView* p = checked_cast<D3D11UnorderedAccessView*>(ua_views_[i].get());
+					d3d_rt_src_.push_back(p->UASrc());
 					d3d_rt_first_subres_.push_back(p->UAFirstSubRes());
 					d3d_rt_num_subres_.push_back(p->UANumSubRes());
 					d3d_ua_view_[i] = this->D3DUAView(i);
@@ -143,6 +147,11 @@ namespace KlayGE
 		}
 
 		auto& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+
+		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
+		{
+			re.DetachSRV(d3d_rt_src_[i], d3d_rt_first_subres_[i], d3d_rt_num_subres_[i]);
+		}
 
 		if (ua_views_.empty())
 		{
