@@ -36,28 +36,6 @@ namespace KlayGE
 {
 	namespace MathLib
 	{
-		template SimplexNoise<float>::SimplexNoise() noexcept;
-		template SimplexNoise<float>& SimplexNoise<float>::Instance();
-		template float SimplexNoise<float>::noise(float x, float y) noexcept;
-		template float SimplexNoise<float>::noise(float x, float y, float z) noexcept;
-		template float SimplexNoise<float>::fBm(float x, float y, int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::fBm(float x, float y, float z, int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::turbulence(float x, float y, int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::turbulence(float x, float y, float z, int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::tileable_noise(float x, float y,
-				float w, float h) noexcept;
-		template float SimplexNoise<float>::tileable_noise(float x, float y, float z,
-				float w, float h, float d) noexcept;
-		template float SimplexNoise<float>::tileable_fBm(float x, float y, float w, float h,
-				int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::tileable_fBm(float x, float y, float z, float w, float h, float d,
-				int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::tileable_turbulence(float x, float y,
-				float w, float h, int octaves, float lacunarity, float gain) noexcept;
-		template float SimplexNoise<float>::tileable_turbulence(float x, float y, float z,
-				float w, float h, float d, int octaves, float lacunarity, float gain) noexcept;
-
-
 		template <typename T>
 		SimplexNoise<T>::SimplexNoise() noexcept
 		{
@@ -468,5 +446,8 @@ namespace KlayGE
 			}
 			return sum / amp_sum;
 		}
+
+
+		template class SimplexNoise<float>;
 	}
 }

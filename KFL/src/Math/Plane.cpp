@@ -34,23 +34,6 @@
 
 namespace KlayGE
 {
-	template Plane_T<float>::Plane_T(float const * rhs) noexcept;
-	template Plane_T<float>::Plane_T(Plane_T const & rhs) noexcept;
-	template Plane_T<float>::Plane_T(Plane_T&& rhs) noexcept;
-	template Plane_T<float>::Plane_T(float4 const & rhs) noexcept;
-	template Plane_T<float>::Plane_T(float4&& rhs) noexcept;
-	template Plane_T<float>::Plane_T(float a, float b, float c, float d) noexcept;
-	template Plane_T<float>& Plane_T<float>::operator=(Plane const & rhs) noexcept;
-	template Plane_T<float>& Plane_T<float>::operator=(Plane&& rhs) noexcept;
-	template Plane_T<float>& Plane_T<float>::operator=(float4 const & rhs) noexcept;
-	template Plane_T<float>& Plane_T<float>::operator=(float4&& rhs) noexcept;
-	template Plane_T<float> const Plane_T<float>::operator+() const noexcept;
-	template Plane_T<float> const Plane_T<float>::operator-() const noexcept;
-	template float3 const Plane_T<float>::Normal() const noexcept;
-	template void Plane_T<float>::Normal(Vector_T<float, 3> const & rhs) noexcept;
-	template bool Plane_T<float>::operator==(Plane_T<float> const & rhs) const noexcept;
-
-
 	template <typename T>
 	Plane_T<T>::Plane_T(T const * rhs) noexcept
 		: plane_(rhs)
@@ -152,4 +135,7 @@ namespace KlayGE
 	{
 		return plane_ == rhs.plane_;
 	}
+
+
+	template class Plane_T<float>;
 }

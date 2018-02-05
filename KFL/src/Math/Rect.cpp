@@ -34,99 +34,6 @@
 
 namespace KlayGE
 {
-	template Rect_T<float>::Rect_T(float const * rhs) noexcept;
-	template Rect_T<float>::Rect_T(Rect&& rhs) noexcept;
-	template Rect_T<float>::Rect_T(float left, float top, float right, float bottom) noexcept;
-	template Rect const & Rect_T<float>::operator+=(float2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator+=(int2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator+=(uint2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(float2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(int2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(uint2 const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator+=(Rect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator+=(IRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator+=(UIRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(Rect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(IRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator-=(UIRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator&=(Rect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator&=(IRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator&=(UIRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator|=(Rect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator|=(IRect const & rhs) noexcept;
-	template Rect const & Rect_T<float>::operator|=(UIRect const & rhs) noexcept;
-	template Rect& Rect_T<float>::operator=(Rect&& rhs) noexcept;
-	template Rect const Rect_T<float>::operator+() const noexcept;
-	template Rect const Rect_T<float>::operator-() const noexcept;
-	template float Rect_T<float>::Width() const noexcept;
-	template float Rect_T<float>::Height() const noexcept;
-	template Size const Rect_T<float>::Size() const noexcept;
-	template bool Rect_T<float>::IsEmpty() const noexcept;
-	template bool Rect_T<float>::operator==(Rect const & rhs) const noexcept;
-	template bool Rect_T<float>::PtInRect(float2 const & pt) const noexcept;
-
-	template Rect_T<int32_t>::Rect_T(int32_t const * rhs) noexcept;
-	template Rect_T<int32_t>::Rect_T(IRect&& rhs) noexcept;
-	template Rect_T<int32_t>::Rect_T(int32_t left, int32_t top, int32_t right, int32_t bottom) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(float2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(int2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(uint2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(float2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(int2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(uint2 const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(Rect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(IRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator+=(UIRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(Rect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(IRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator-=(UIRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator&=(Rect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator&=(IRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator&=(UIRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator|=(Rect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator|=(IRect const & rhs) noexcept;
-	template IRect const & Rect_T<int32_t>::operator|=(UIRect const & rhs) noexcept;
-	template IRect& Rect_T<int32_t>::operator=(IRect&& rhs) noexcept;
-	template IRect const Rect_T<int32_t>::operator+() const noexcept;
-	template IRect const Rect_T<int32_t>::operator-() const noexcept;
-	template int32_t Rect_T<int32_t>::Width() const noexcept;
-	template int32_t Rect_T<int32_t>::Height() const noexcept;
-	template ISize const Rect_T<int32_t>::Size() const noexcept;
-	template bool Rect_T<int32_t>::IsEmpty() const noexcept;
-	template bool Rect_T<int32_t>::operator==(IRect const & rhs) const noexcept;
-	template bool Rect_T<int32_t>::PtInRect(int2 const & pt) const noexcept;
-
-	template Rect_T<uint32_t>::Rect_T(uint32_t const * rhs) noexcept;
-	template Rect_T<uint32_t>::Rect_T(UIRect&& rhs) noexcept;
-	template Rect_T<uint32_t>::Rect_T(uint32_t left, uint32_t top, uint32_t right, uint32_t bottom) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(float2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(int2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(uint2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(float2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(int2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(uint2 const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(Rect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(IRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator+=(UIRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(Rect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(IRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator-=(UIRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator&=(Rect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator&=(IRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator&=(UIRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator|=(Rect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator|=(IRect const & rhs) noexcept;
-	template UIRect const & Rect_T<uint32_t>::operator|=(UIRect const & rhs) noexcept;
-	template UIRect& Rect_T<uint32_t>::operator=(UIRect&& rhs) noexcept;
-	template UIRect const Rect_T<uint32_t>::operator+() const noexcept;
-	template uint32_t Rect_T<uint32_t>::Width() const noexcept;
-	template uint32_t Rect_T<uint32_t>::Height() const noexcept;
-	template UISize const Rect_T<uint32_t>::Size() const noexcept;
-	template bool Rect_T<uint32_t>::IsEmpty() const noexcept;
-	template bool Rect_T<uint32_t>::operator==(UIRect const & rhs) const noexcept;
-	template bool Rect_T<uint32_t>::PtInRect(uint2 const & pt) const noexcept;
-
-
 	template <typename T>
 	Rect_T<T>::Rect_T(T const * rhs) noexcept
 		: rect_(rhs)
@@ -224,7 +131,14 @@ namespace KlayGE
 	template <typename T>
 	Rect_T<T> const Rect_T<T>::operator-() const noexcept
 	{
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable: 4146) // Unary minus operator on uint32_t
+#endif
 		return Rect_T<T>(-this->left(), -this->top(), -this->right(), -this->bottom());
+#ifdef KLAYGE_COMPILER_MSVC
+#pragma warning(pop)
+#endif
 	}
 
 	template <typename T>
@@ -263,4 +177,67 @@ namespace KlayGE
 		return MathLib::in_bound(pt.x(), this->left(), this->right())
 			&& MathLib::in_bound(pt.y(), this->top(), this->bottom());
 	}
+
+
+
+	template class Rect_T<float>;
+	template class Rect_T<int32_t>;
+	template class Rect_T<uint32_t>;
+
+	template Rect const & Rect_T<float>::operator+=(float2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator+=(int2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator+=(uint2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(float2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(int2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(uint2 const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator+=(Rect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator+=(IRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator+=(UIRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(Rect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(IRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator-=(UIRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator&=(Rect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator&=(IRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator&=(UIRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator|=(Rect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator|=(IRect const & rhs) noexcept;
+	template Rect const & Rect_T<float>::operator|=(UIRect const & rhs) noexcept;
+
+	template IRect const & Rect_T<int32_t>::operator+=(float2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator+=(int2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator+=(uint2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(float2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(int2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(uint2 const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator+=(Rect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator+=(IRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator+=(UIRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(Rect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(IRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator-=(UIRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator&=(Rect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator&=(IRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator&=(UIRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator|=(Rect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator|=(IRect const & rhs) noexcept;
+	template IRect const & Rect_T<int32_t>::operator|=(UIRect const & rhs) noexcept;
+
+	template UIRect const & Rect_T<uint32_t>::operator+=(float2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator+=(int2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator+=(uint2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(float2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(int2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(uint2 const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator+=(Rect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator+=(IRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator+=(UIRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(Rect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(IRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator-=(UIRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator&=(Rect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator&=(IRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator&=(UIRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator|=(Rect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator|=(IRect const & rhs) noexcept;
+	template UIRect const & Rect_T<uint32_t>::operator|=(UIRect const & rhs) noexcept;
 }

@@ -36,27 +36,6 @@
 
 namespace KlayGE
 {
-	template Sphere_T<float>::Sphere_T(float3 const & center, float radius) noexcept;
-	template Sphere_T<float>::Sphere_T(Sphere_T<float> const & rhs) noexcept;
-	template Sphere_T<float>::Sphere_T(Sphere_T<float>&& rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator+=(float3 const & rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator-=(float3 const & rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator*=(float rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator/=(float rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator=(Sphere const & rhs) noexcept;
-	template Sphere& Sphere_T<float>::operator=(Sphere&& rhs) noexcept;
-	template Sphere const & Sphere_T<float>::operator+() const noexcept;
-	template Sphere const & Sphere_T<float>::operator-() const noexcept;
-	template bool Sphere_T<float>::IsEmpty() const noexcept;
-	template bool Sphere_T<float>::VecInBound(float3 const & v) const noexcept;
-	template float Sphere_T<float>::MaxRadiusSq() const noexcept;
-	template bool Sphere_T<float>::Intersect(AABBox const & aabb) const noexcept;
-	template bool Sphere_T<float>::Intersect(OBBox const & obb) const noexcept;
-	template bool Sphere_T<float>::Intersect(Sphere const & sphere) const noexcept;
-	template bool Sphere_T<float>::Intersect(Frustum const & frustum) const noexcept;
-	template bool Sphere_T<float>::operator==(Sphere const & rhs) const noexcept;
-
-
 	template <typename T>
 	Sphere_T<T>::Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept
 		: center_(center),
@@ -183,4 +162,7 @@ namespace KlayGE
 	{
 		return (center_ == rhs.center_) && (radius_ == rhs.radius_);
 	}
+
+
+	template class Sphere_T<float>;
 }

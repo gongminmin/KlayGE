@@ -34,20 +34,6 @@
 
 namespace KlayGE
 {
-	template Frustum_T<float>::Frustum_T(Frustum const & rhs) noexcept;
-	template Frustum_T<float>::Frustum_T(Frustum&& rhs) noexcept;
-	template Frustum& Frustum_T<float>::operator=(Frustum const & rhs) noexcept;
-	template Frustum& Frustum_T<float>::operator=(Frustum&& rhs) noexcept;
-	template void Frustum_T<float>::ClipMatrix(float4x4 const & clip, float4x4 const & inv_clip) noexcept;
-	template bool Frustum_T<float>::IsEmpty() const noexcept;
-	template bool Frustum_T<float>::VecInBound(float3 const & v) const noexcept;
-	template float Frustum_T<float>::MaxRadiusSq() const noexcept;
-	template BoundOverlap Frustum_T<float>::Intersect(AABBox const & aabb) const noexcept;
-	template BoundOverlap Frustum_T<float>::Intersect(OBBox const & obb) const noexcept;
-	template BoundOverlap Frustum_T<float>::Intersect(Sphere const & sphere) const noexcept;
-	template BoundOverlap Frustum_T<float>::Intersect(Frustum const & frustum) const noexcept;
-
-
 	template <typename T>
 	Frustum_T<T>::Frustum_T(Frustum_T<T> const & rhs) noexcept
 		: planes_(rhs.planes_), corners_(rhs.corners_)
@@ -152,4 +138,7 @@ namespace KlayGE
 	{
 		return MathLib::intersect_frustum_frustum(frustum, *this);
 	}
+
+
+	template class Frustum_T<float>;
 }
