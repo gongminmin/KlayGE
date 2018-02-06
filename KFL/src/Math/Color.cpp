@@ -35,12 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Color_T<T>::Color_T(T const * rhs) noexcept
-		: col_(rhs)
-	{
-	}
-
-	template <typename T>
 	Color_T<T>::Color_T(Color_T const & rhs) noexcept
 		: col_(rhs.col_)
 	{
@@ -50,15 +44,6 @@ namespace KlayGE
 	Color_T<T>::Color_T(Color_T&& rhs) noexcept
 		: col_(std::move(rhs.col_))
 	{
-	}
-
-	template <typename T>
-	Color_T<T>::Color_T(T r, T g, T b, T a) noexcept
-	{
-		this->r() = r;
-		this->g() = g;
-		this->b() = b;
-		this->a() = a;
 	}
 
 	template <typename T>

@@ -67,7 +67,7 @@ namespace KlayGE
 		enum { elem_num = row_num * col_num };
 
 	public:
-		Matrix4_T() noexcept
+		constexpr Matrix4_T() noexcept
 		{
 		}
 		explicit Matrix4_T(T const * rhs) noexcept;
@@ -90,7 +90,7 @@ namespace KlayGE
 		{
 			return m_[row][col];
 		}
-		const_reference operator()(size_t row, size_t col) const noexcept
+		constexpr const_reference operator()(size_t row, size_t col) const noexcept
 		{
 			return m_[row][col];
 		}
@@ -98,7 +98,7 @@ namespace KlayGE
 		{
 			return &m_[0][0];
 		}
-		const_iterator begin() const noexcept
+		constexpr const_iterator begin() const noexcept
 		{
 			return &m_[0][0];
 		}
@@ -106,7 +106,7 @@ namespace KlayGE
 		{
 			return this->begin() + elem_num;
 		}
-		const_iterator end() const noexcept
+		constexpr const_iterator end() const noexcept
 		{
 			return this->begin() + elem_num;
 		}
@@ -114,7 +114,7 @@ namespace KlayGE
 		{
 			return *(this->begin() + index);
 		}
-		const_reference operator[](size_t index) const noexcept
+		constexpr const_reference operator[](size_t index) const noexcept
 		{
 			return *(this->begin() + index);
 		}

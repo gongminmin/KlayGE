@@ -151,7 +151,7 @@ namespace KlayGE
 		multi_res_fbs_.resize(multi_res_tex->NumMipMaps());
 		for (uint32_t i = 0; i < multi_res_tex->NumMipMaps(); ++ i)
 		{
-			float4 const subsplat_clear_value(0, 128, 0, 0);
+			float4 constexpr subsplat_clear_value(0, 128, 0, 0);
 			auto subsplat_ds_tex = rf.MakeTexture2D(multi_res_tex->Width(i), multi_res_tex->Height(i), 1, 1, EF_D24S8,
 				1, 0, EAH_GPU_Write, {}, &subsplat_clear_value);
 			auto subsplat_ds_view = rf.Make2DDepthStencilRenderView(*subsplat_ds_tex, 0, 1, 0);

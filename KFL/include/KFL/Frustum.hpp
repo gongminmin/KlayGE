@@ -42,7 +42,7 @@ namespace KlayGE
 	class Frustum_T final : public Bound_T<T>
 	{
 	public:
-		Frustum_T() noexcept
+		constexpr Frustum_T() noexcept
 		{
 		}
 		Frustum_T(Frustum_T<T> const & rhs) noexcept;
@@ -62,7 +62,7 @@ namespace KlayGE
 		{
 			planes_[index] = plane;
 		}
-		Plane_T<T> const & FrustumPlane(uint32_t index) const noexcept
+		constexpr Plane_T<T> const & FrustumPlane(uint32_t index) const noexcept
 		{
 			return planes_[index];
 		}
@@ -71,7 +71,7 @@ namespace KlayGE
 		{
 			corners_[index] = corner;
 		}
-		Vector_T<T, 3> const & Corner(uint32_t index) const noexcept
+		constexpr Vector_T<T, 3> const & Corner(uint32_t index) const noexcept
 		{
 			return corners_[index];
 		}

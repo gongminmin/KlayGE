@@ -35,19 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Size_T<T>::Size_T(T const * rhs) noexcept
-		: size_(rhs)
-	{
-	}
-
-	template <typename T>
-	Size_T<T>::Size_T(T cx, T cy) noexcept
-	{
-		this->cx() = cx;
-		this->cy() = cy;
-	}
-
-	template <typename T>
 	Size_T<T>::Size_T(Size_T<T>&& rhs) noexcept
 		: size_(std::move(rhs.size_))
 	{

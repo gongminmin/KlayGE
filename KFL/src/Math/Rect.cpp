@@ -35,24 +35,9 @@
 namespace KlayGE
 {
 	template <typename T>
-	Rect_T<T>::Rect_T(T const * rhs) noexcept
-		: rect_(rhs)
-	{
-	}
-
-	template <typename T>
 	Rect_T<T>::Rect_T(Rect_T&& rhs) noexcept
 		: rect_(std::move(rhs.rect_))
 	{
-	}
-
-	template <typename T>
-	Rect_T<T>::Rect_T(T left, T top, T right, T bottom) noexcept
-	{
-		this->left()	= left;
-		this->top()		= top;
-		this->right()	= right;
-		this->bottom()	= bottom;
 	}
 
 	template <typename T>
@@ -177,7 +162,6 @@ namespace KlayGE
 		return MathLib::in_bound(pt.x(), this->left(), this->right())
 			&& MathLib::in_bound(pt.y(), this->top(), this->bottom());
 	}
-
 
 
 	template class Rect_T<float>;

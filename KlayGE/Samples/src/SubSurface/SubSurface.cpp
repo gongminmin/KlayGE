@@ -198,7 +198,7 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 
 			fmt = EF_D16;
 		}
-		float4 const back_face_ds_clear_value(0, 0, 0, 0);
+		float4 constexpr back_face_ds_clear_value(0, 0, 0, 0);
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, {}, &back_face_ds_clear_value);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
 

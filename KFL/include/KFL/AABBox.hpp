@@ -52,7 +52,7 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		AABBox_T() noexcept
+		constexpr AABBox_T() noexcept
 		{
 		}
 		AABBox_T(Vector_T<T, 3> const & vMin, Vector_T<T, 3> const & vMax) noexcept;
@@ -94,7 +94,7 @@ namespace KlayGE
 		{
 			return min_;
 		}
-		Vector_T<T, 3> const & Min() const noexcept
+		constexpr Vector_T<T, 3> const & Min() const noexcept
 		{
 			return min_;
 		}
@@ -102,7 +102,7 @@ namespace KlayGE
 		{
 			return max_;
 		}
-		Vector_T<T, 3> const & Max() const noexcept
+		constexpr Vector_T<T, 3> const & Max() const noexcept
 		{
 			return max_;
 		}

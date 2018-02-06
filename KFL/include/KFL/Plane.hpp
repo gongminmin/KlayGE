@@ -59,22 +59,34 @@ namespace KlayGE
 		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
-		Plane_T() noexcept
+		constexpr Plane_T() noexcept
 		{
 		}
-		explicit Plane_T(T const * rhs) noexcept;
+		explicit constexpr Plane_T(T const * rhs) noexcept
+			: plane_(rhs)
+		{
+		}
 		Plane_T(Plane_T const & rhs) noexcept;
 		Plane_T(Plane_T&& rhs) noexcept;
-		Plane_T(Vector_T<T, elem_num> const & rhs) noexcept;
-		Plane_T(Vector_T<T, elem_num>&& rhs) noexcept;
-		Plane_T(T a, T b, T c, T d) noexcept;
+		constexpr Plane_T(Vector_T<T, elem_num> const & rhs) noexcept
+			: plane_(rhs)
+		{
+		}
+		constexpr Plane_T(Vector_T<T, elem_num>&& rhs) noexcept
+			: plane_(std::move(rhs))
+		{
+		}
+		constexpr Plane_T(T a, T b, T c, T d) noexcept
+			: plane_(a, b, c, d)
+		{
+		}
 
 		// »°œÚ¡ø
 		iterator begin() noexcept
 		{
 			return plane_.begin();
 		}
-		const_iterator begin() const noexcept
+		constexpr const_iterator begin() const noexcept
 		{
 			return plane_.begin();
 		}
@@ -82,7 +94,7 @@ namespace KlayGE
 		{
 			return plane_.end();
 		}
-		const_iterator end() const noexcept
+		constexpr const_iterator end() const noexcept
 		{
 			return plane_.end();
 		}
@@ -90,7 +102,7 @@ namespace KlayGE
 		{
 			return plane_[index];
 		}
-		const_reference operator[](size_t index) const noexcept
+		constexpr const_reference operator[](size_t index) const noexcept
 		{
 			return plane_[index];
 		}
@@ -99,7 +111,7 @@ namespace KlayGE
 		{
 			return plane_[0];
 		}
-		const_reference a() const noexcept
+		constexpr const_reference a() const noexcept
 		{
 			return plane_[0];
 		}
@@ -107,7 +119,7 @@ namespace KlayGE
 		{
 			return plane_[1];
 		}
-		const_reference b() const noexcept
+		constexpr const_reference b() const noexcept
 		{
 			return plane_[1];
 		}
@@ -115,7 +127,7 @@ namespace KlayGE
 		{
 			return plane_[2];
 		}
-		const_reference c() const noexcept
+		constexpr const_reference c() const noexcept
 		{
 			return plane_[2];
 		}
@@ -123,7 +135,7 @@ namespace KlayGE
 		{
 			return plane_[3];
 		}
-		const_reference d() const noexcept
+		constexpr const_reference d() const noexcept
 		{
 			return plane_[3];
 		}

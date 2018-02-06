@@ -69,29 +69,35 @@ namespace KlayGE
 		enum { elem_num = 4 };
 
 	public:
-		Rect_T() noexcept
+		constexpr Rect_T() noexcept
 		{
 		}
-		explicit Rect_T(T const * rhs) noexcept;
+		explicit constexpr Rect_T(T const * rhs) noexcept
+			: rect_(rhs)
+		{
+		}
 		// Leave them in header due to a compiling issue under GCC
 		Rect_T(Rect_T const & rhs) noexcept
 			: rect_(rhs.rect_)
 		{
 		}
 		template <typename U>
-		Rect_T(Rect_T<U> const & rhs) noexcept
+		constexpr Rect_T(Rect_T<U> const & rhs) noexcept
 			: rect_(rhs.rect_)
 		{
 		}
 		Rect_T(Rect_T&& rhs) noexcept;
-		Rect_T(T left, T top, T right, T bottom) noexcept;
+		constexpr Rect_T(T left, T top, T right, T bottom) noexcept
+			: rect_(left, top, right, bottom)
+		{
+		}
 
 		// »°œÚ¡ø
 		reference left() noexcept
 		{
 			return rect_[0];
 		}
-		const_reference left() const noexcept
+		constexpr const_reference left() const noexcept
 		{
 			return rect_[0];
 		}
@@ -99,7 +105,7 @@ namespace KlayGE
 		{
 			return rect_[1];
 		}
-		const_reference top() const noexcept
+		constexpr const_reference top() const noexcept
 		{
 			return rect_[1];
 		}
@@ -107,7 +113,7 @@ namespace KlayGE
 		{
 			return rect_[2];
 		}
-		const_reference right() const noexcept
+		constexpr const_reference right() const noexcept
 		{
 			return rect_[2];
 		}
@@ -115,7 +121,7 @@ namespace KlayGE
 		{
 			return rect_[3];
 		}
-		const_reference bottom() const noexcept
+		constexpr const_reference bottom() const noexcept
 		{
 			return rect_[3];
 		}

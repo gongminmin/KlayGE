@@ -75,14 +75,14 @@ namespace KlayGE
 		enum { elem_num = N };
 
 	public:
-		Vector_T() noexcept
+		constexpr Vector_T() noexcept
 		{
 		}
-		explicit Vector_T(T const * rhs) noexcept
+		explicit constexpr Vector_T(T const * rhs) noexcept
 		{
 			detail::vector_helper<T, N>::DoCopy(&vec_[0], rhs);
 		}
-		explicit Vector_T(T const & rhs) noexcept
+		constexpr Vector_T(T const & rhs) noexcept
 		{
 			detail::vector_helper<T, N>::DoAssign(&vec_[0], rhs);
 		}
@@ -95,60 +95,42 @@ namespace KlayGE
 		{
 		}
 		template <typename U, int M>
-		Vector_T(Vector_T<U, M> const & rhs) noexcept
+		constexpr Vector_T(Vector_T<U, M> const & rhs) noexcept
 		{
 			static_assert(M >= N, "Could not convert to a smaller vector.");
 
 			detail::vector_helper<T, N>::DoCopy(&vec_[0], &rhs[0]);
 		}
 
-		Vector_T(T const & x, T const & y) noexcept
+		constexpr Vector_T(T const & x, T const & y) noexcept
+			: vec_{ x, y }
 		{
 			static_assert(2 == elem_num, "Must be 2D vector.");
-
-			this->x() = x;
-			this->y() = y;
 		}
-		Vector_T(T&& x, T&& y) noexcept
+		constexpr Vector_T(T&& x, T&& y) noexcept
+			: vec_{ std::move(x), std::move(y) }
 		{
 			static_assert(2 == elem_num, "Must be 2D vector.");
-
-			vec_[0] = std::move(x);
-			vec_[1] = std::move(y);
 		}
-		Vector_T(T const & x, T const & y, T const & z) noexcept
+		constexpr Vector_T(T const & x, T const & y, T const & z) noexcept
+			: vec_{ x, y, z }
 		{
 			static_assert(3 == elem_num, "Must be 3D vector.");
-
-			this->x() = x;
-			this->y() = y;
-			this->z() = z;
 		}
-		Vector_T(T&& x, T&& y, T&& z) noexcept
+		constexpr Vector_T(T&& x, T&& y, T&& z) noexcept
+			: vec_{ std::move(x), std::move(y), std::move(z) }
 		{
 			static_assert(3 == elem_num, "Must be 3D vector.");
-
-			vec_[0] = std::move(x);
-			vec_[1] = std::move(y);
-			vec_[2] = std::move(z);
 		}
-		Vector_T(T const & x, T const & y, T const & z, T const & w) noexcept
+		constexpr Vector_T(T const & x, T const & y, T const & z, T const & w) noexcept
+			: vec_{ x, y, z, w }
 		{
 			static_assert(4 == elem_num, "Must be 4D vector.");
-
-			this->x() = x;
-			this->y() = y;
-			this->z() = z;
-			this->w() = w;
 		}
-		Vector_T(T&& x, T&& y, T&& z, T&& w) noexcept
+		constexpr Vector_T(T&& x, T&& y, T&& z, T&& w) noexcept
+			: vec_{ std::move(x), std::move(y), std::move(z), std::move(w) }
 		{
 			static_assert(4 == elem_num, "Must be 4D vector.");
-
-			vec_[0] = std::move(x);
-			vec_[1] = std::move(y);
-			vec_[2] = std::move(z);
-			vec_[3] = std::move(w);
 		}
 
 		static size_t size() noexcept
@@ -167,7 +149,7 @@ namespace KlayGE
 		{
 			return vec_.begin();
 		}
-		const_iterator begin() const noexcept
+		constexpr const_iterator begin() const noexcept
 		{
 			return vec_.begin();
 		}
@@ -175,7 +157,7 @@ namespace KlayGE
 		{
 			return vec_.end();
 		}
-		const_iterator end() const noexcept
+		constexpr const_iterator end() const noexcept
 		{
 			return vec_.end();
 		}
@@ -183,7 +165,7 @@ namespace KlayGE
 		{
 			return vec_[index];
 		}
-		const_reference operator[](size_t index) const noexcept
+		constexpr const_reference operator[](size_t index) const noexcept
 		{
 			return vec_[index];
 		}
@@ -193,7 +175,7 @@ namespace KlayGE
 			static_assert(elem_num >= 1, "Must be 1D vector.");
 			return vec_[0];
 		}
-		const_reference x() const noexcept
+		constexpr const_reference x() const noexcept
 		{
 			static_assert(elem_num >= 1, "Must be 1D vector.");
 			return vec_[0];
@@ -204,7 +186,7 @@ namespace KlayGE
 			static_assert(elem_num >= 2, "Must be 2D vector.");
 			return vec_[1];
 		}
-		const_reference y() const noexcept
+		constexpr const_reference y() const noexcept
 		{
 			static_assert(elem_num >= 2, "Must be 2D vector.");
 			return vec_[1];
@@ -215,7 +197,7 @@ namespace KlayGE
 			static_assert(elem_num >= 3, "Must be 3D vector.");
 			return vec_[2];
 		}
-		const_reference z() const noexcept
+		constexpr const_reference z() const noexcept
 		{
 			static_assert(elem_num >= 3, "Must be 3D vector.");
 			return vec_[2];
@@ -226,7 +208,7 @@ namespace KlayGE
 			static_assert(elem_num >= 4, "Must be 4D vector.");
 			return vec_[3];
 		}
-		const_reference w() const noexcept
+		constexpr const_reference w() const noexcept
 		{
 			static_assert(elem_num >= 4, "Must be 4D vector.");
 			return vec_[3];

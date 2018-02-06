@@ -66,13 +66,19 @@ namespace KlayGE
 		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
-		Color_T() noexcept
+		constexpr Color_T() noexcept
 		{
 		}
-		explicit Color_T(T const * rhs) noexcept;
+		explicit constexpr Color_T(T const * rhs) noexcept
+			: col_(rhs)
+		{
+		}
 		Color_T(Color_T const & rhs) noexcept;
 		Color_T(Color_T&& rhs) noexcept;
-		Color_T(T r, T g, T b, T a) noexcept;
+		constexpr Color_T(T r, T g, T b, T a) noexcept
+			: col_(r, g, b, a)
+		{
+		}
 		explicit Color_T(uint32_t dw) noexcept;
 
 		// È¡ÑÕÉ«
@@ -80,7 +86,7 @@ namespace KlayGE
 		{
 			return col_.begin();
 		}
-		const_iterator begin() const noexcept
+		constexpr const_iterator begin() const noexcept
 		{
 			return col_.begin();
 		}
@@ -88,7 +94,7 @@ namespace KlayGE
 		{
 			return col_.end();
 		}
-		const_iterator end() const noexcept
+		constexpr const_iterator end() const noexcept
 		{
 			return col_.end();
 		}
@@ -96,7 +102,7 @@ namespace KlayGE
 		{
 			return col_[index];
 		}
-		const_reference operator[](size_t index) const noexcept
+		constexpr const_reference operator[](size_t index) const noexcept
 		{
 			return col_[index];
 		}
@@ -105,7 +111,7 @@ namespace KlayGE
 		{
 			return col_[0];
 		}
-		const_reference r() const noexcept
+		constexpr const_reference r() const noexcept
 		{
 			return col_[0];
 		}
@@ -113,7 +119,7 @@ namespace KlayGE
 		{
 			return col_[1];
 		}
-		const_reference g() const noexcept
+		constexpr const_reference g() const noexcept
 		{
 			return col_[1];
 		}
@@ -121,7 +127,7 @@ namespace KlayGE
 		{
 			return col_[2];
 		}
-		const_reference b() const noexcept
+		constexpr const_reference b() const noexcept
 		{
 			return col_[2];
 		}
@@ -129,7 +135,7 @@ namespace KlayGE
 		{
 			return col_[3];
 		}
-		const_reference a() const noexcept
+		constexpr const_reference a() const noexcept
 		{
 			return col_[3];
 		}

@@ -35,12 +35,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Plane_T<T>::Plane_T(T const * rhs) noexcept
-		: plane_(rhs)
-	{
-	}
-
-	template <typename T>
 	Plane_T<T>::Plane_T(Plane_T const & rhs) noexcept
 		: plane_(rhs.plane_)
 	{
@@ -50,27 +44,6 @@ namespace KlayGE
 	Plane_T<T>::Plane_T(Plane_T&& rhs) noexcept
 		: plane_(std::move(rhs.plane_))
 	{
-	}
-
-	template <typename T>
-	Plane_T<T>::Plane_T(Vector_T<T, elem_num> const & rhs) noexcept
-		: plane_(rhs)
-	{		
-	}
-
-	template <typename T>
-	Plane_T<T>::Plane_T(Vector_T<T, elem_num>&& rhs) noexcept
-		: plane_(std::move(rhs))
-	{
-	}
-
-	template <typename T>
-	Plane_T<T>::Plane_T(T a, T b, T c, T d) noexcept
-	{
-		this->a() = a;
-		this->b() = b;
-		this->c() = c;
-		this->d() = d;
 	}
 
 	template <typename T>

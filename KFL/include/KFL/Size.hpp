@@ -64,29 +64,35 @@ namespace KlayGE
 		enum { elem_num = 2 };
 
 	public:
-		Size_T() noexcept
+		constexpr Size_T() noexcept
 		{
 		}
-		explicit Size_T(T const * rhs) noexcept;
+		explicit constexpr Size_T(T const * rhs) noexcept
+			: size_(rhs)
+		{
+		}
 		// Leave them in header due to a compiling issue under GCC
 		Size_T(Size_T const & rhs) noexcept
 			: size_(rhs.size_)
 		{
 		}
 		template <typename U>
-		Size_T(Size_T<U> const & rhs) noexcept
+		constexpr Size_T(Size_T<U> const & rhs) noexcept
 			: size_(rhs.size_)
 		{
 		}
 		Size_T(Size_T&& rhs) noexcept;
-		Size_T(T cx, T cy) noexcept;
+		constexpr Size_T(T cx, T cy) noexcept
+			: size_(cx, cy)
+		{
+		}
 
 		// »°œÚ¡ø
 		reference cx() noexcept
 		{
 			return size_[0];
 		}
-		const_reference cx() const noexcept
+		constexpr const_reference cx() const noexcept
 		{
 			return size_[0];
 		}
@@ -94,7 +100,7 @@ namespace KlayGE
 		{
 			return size_[1];
 		}
-		const_reference cy() const noexcept
+		constexpr const_reference cy() const noexcept
 		{
 			return size_[1];
 		}

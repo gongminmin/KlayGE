@@ -81,7 +81,8 @@ namespace KlayGE
 						boost::equality_comparable<half>>>>>
 	{
 	public:
-		half() noexcept
+		constexpr half() noexcept
+			: value_()
 		{
 		}
 

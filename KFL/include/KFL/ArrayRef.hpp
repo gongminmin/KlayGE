@@ -62,7 +62,7 @@ namespace KlayGE
 		typedef std::reverse_iterator<iterator> reverse_iterator;
 
 	public:
-		ArrayRef()
+		constexpr ArrayRef()
 			: data_(nullptr), size_(0)
 		{
 		}
@@ -72,23 +72,23 @@ namespace KlayGE
 		{
 		}
 
-		KFL_IMPLICIT ArrayRef(T const & t)
+		KFL_IMPLICIT constexpr ArrayRef(T const & t)
 			: data_(&t), size_(1)
 		{
 		}
 
-		ArrayRef(T const * data, size_t size)
+		constexpr ArrayRef(T const * data, size_t size)
 			: data_(data), size_(size)
 		{
 		}
 
-		ArrayRef(T const * begin, T const * end)
+		constexpr ArrayRef(T const * begin, T const * end)
 			: data_(begin), size_(end - begin)
 		{
 		}
 
 		template <typename A>
-		KFL_IMPLICIT ArrayRef(std::vector<T, A> const & v)
+		KFL_IMPLICIT constexpr ArrayRef(std::vector<T, A> const & v)
 			: data_(v.data()), size_(v.size())
 		{
 		}
@@ -99,65 +99,65 @@ namespace KlayGE
 		{
 		}
 
-		ArrayRef(std::initializer_list<T> const & v)
+		constexpr ArrayRef(std::initializer_list<T> const & v)
 			: data_(v.begin() == v.end() ? nullptr : v.begin()), size_(v.size())
 		{
 		}
 
 		template <typename U>
-		KFL_IMPLICIT ArrayRef(ArrayRef<U*> const & rhs,
+		KFL_IMPLICIT constexpr ArrayRef(ArrayRef<U*> const & rhs,
 			typename std::enable_if<std::is_convertible<U* const *, T const *>::value>::type* = 0)
 			: data_(rhs.data()), size_(rhs.size())
 		{
 		}
 
 		template <typename U, typename A>
-		KFL_IMPLICIT ArrayRef(std::vector<U*, A> const & v,
+		KFL_IMPLICIT constexpr ArrayRef(std::vector<U*, A> const & v,
 			typename std::enable_if<std::is_convertible<U* const *, T const *>::value>::type* = 0)
 			: data_(v.data()), size_(v.size())
 		{
 		}
 
-		iterator begin() const
+		constexpr iterator begin() const
 		{
 			return data_;
 		}
-		iterator end() const
+		constexpr iterator end() const
 		{
 			return data_ + size_;
 		}
 
-		reverse_iterator rbegin() const
+		constexpr reverse_iterator rbegin() const
 		{
 			return reverse_iterator(this->end());
 		}
-		reverse_iterator rend() const
+		constexpr reverse_iterator rend() const
 		{
 			return reverse_iterator(this->begin());
 		}
 
-		T const * data() const
+		constexpr T const * data() const
 		{
 			return data_;
 		}
 
-		size_t size() const
+		constexpr size_t size() const
 		{
 			return size_;
 		}
 
-		bool empty() const
+		constexpr bool empty() const
 		{
 			return size_ == 0;
 		}
 
-		T const & front() const
+		constexpr T const & front() const
 		{
 			BOOST_ASSERT(!this->empty());
 			return data_[0];
 		}
 
-		T const & back() const
+		constexpr T const & back() const
 		{
 			BOOST_ASSERT(!this->empty());
 			return data_[size_ - 1];
@@ -171,31 +171,31 @@ namespace KlayGE
 			return ArrayRef<T>(buff, size_);
 		}
 
-		ArrayRef<T> Slice(uint32_t n) const
+		constexpr ArrayRef<T> Slice(uint32_t n) const
 		{
 			BOOST_ASSERT_MSG(n <= this->size(), "Invalid specifier");
 			return ArrayRef<T>(this->data() + n, this->size() - n);
 		}
 
-		ArrayRef<T> Slice(uint32_t n, uint32_t m) const
+		constexpr ArrayRef<T> Slice(uint32_t n, uint32_t m) const
 		{
 			BOOST_ASSERT_MSG(n + m <= this->size(), "Invalid specifier");
 			return ArrayRef<T>(this->data() + n, m);
 		}
 
-		ArrayRef<T> DropBack(uint32_t n = 1) const
+		constexpr ArrayRef<T> DropBack(uint32_t n = 1) const
 		{
 			BOOST_ASSERT_MSG(this->size() >= n, "Dropping more elements than exist");
 			return this->Slice(0, this->Size() - n);
 		}
 
-		T const & operator[](size_t index) const
+		constexpr T const & operator[](size_t index) const
 		{
 			BOOST_ASSERT_MSG(index < size_, "Invalid index!");
 			return data_[index];
 		}
 
-		std::vector<T> ToVector() const
+		constexpr std::vector<T> ToVector() const
 		{
 			return std::vector<T>(data_, data_ + size_);
 		}

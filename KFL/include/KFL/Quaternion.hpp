@@ -62,14 +62,23 @@ namespace KlayGE
 		typedef typename Vector_T<T, elem_num>::const_iterator const_iterator;
 
 	public:
-		Quaternion_T() noexcept
+		constexpr Quaternion_T() noexcept
 		{
 		}
-		explicit Quaternion_T(T const * rhs) noexcept;
-		Quaternion_T(Vector_T<T, 3> const & vec, T s) noexcept;
+		explicit constexpr Quaternion_T(T const * rhs) noexcept
+			: quat_(rhs)
+		{
+		}
+		constexpr Quaternion_T(Vector_T<T, 3> const & vec, T s) noexcept
+			: quat_(vec.x(), vec.y(), vec.z(), s)
+		{
+		}
 		Quaternion_T(Quaternion_T const & rhs) noexcept;
 		Quaternion_T(Quaternion_T&& rhs) noexcept;
-		Quaternion_T(T x, T y, T z, T w) noexcept;
+		constexpr Quaternion_T(T x, T y, T z, T w) noexcept
+			: quat_(x, y, z, w)
+		{
+		}
 
 		static Quaternion_T const & Identity() noexcept;
 
@@ -78,7 +87,7 @@ namespace KlayGE
 		{
 			return quat_.begin();
 		}
-		const_iterator begin() const noexcept
+		constexpr const_iterator begin() const noexcept
 		{
 			return quat_.begin();
 		}
@@ -86,7 +95,7 @@ namespace KlayGE
 		{
 			return quat_.end();
 		}
-		const_iterator end() const noexcept
+		constexpr const_iterator end() const noexcept
 		{
 			return quat_.end();
 		}
@@ -94,7 +103,7 @@ namespace KlayGE
 		{
 			return quat_[index];
 		}
-		const_reference operator[](size_t index) const noexcept
+		constexpr const_reference operator[](size_t index) const noexcept
 		{
 			return quat_[index];
 		}
@@ -103,7 +112,7 @@ namespace KlayGE
 		{
 			return quat_[0];
 		}
-		const_reference x() const noexcept
+		constexpr const_reference x() const noexcept
 		{
 			return quat_[0];
 		}
@@ -111,7 +120,7 @@ namespace KlayGE
 		{
 			return quat_[1];
 		}
-		const_reference y() const noexcept
+		constexpr const_reference y() const noexcept
 		{
 			return quat_[1];
 		}
@@ -119,7 +128,7 @@ namespace KlayGE
 		{
 			return quat_[2];
 		}
-		const_reference z() const noexcept
+		constexpr const_reference z() const noexcept
 		{
 			return quat_[2];
 		}
@@ -127,7 +136,7 @@ namespace KlayGE
 		{
 			return quat_[3];
 		}
-		const_reference w() const noexcept
+		constexpr const_reference w() const noexcept
 		{
 			return quat_[3];
 		}

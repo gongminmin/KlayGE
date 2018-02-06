@@ -37,13 +37,6 @@
 namespace KlayGE
 {
 	template <typename T>
-	Sphere_T<T>::Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept
-		: center_(center),
-			radius_(radius)
-	{
-	}
-
-	template <typename T>
 	Sphere_T<T>::Sphere_T(Sphere_T<T> const & rhs) noexcept
 		: center_(rhs.center_),
 			radius_(rhs.radius_)

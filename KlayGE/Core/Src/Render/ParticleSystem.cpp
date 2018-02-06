@@ -556,15 +556,6 @@ namespace
 
 		using RenderableHelper::PosBound;
 	};
-
-	class ParticleCmp
-	{
-	public:
-		bool operator()(std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs) const
-		{
-			return lhs.second > rhs.second;
-		}
-	};
 }
 
 namespace KlayGE
@@ -791,7 +782,11 @@ namespace KlayGE
 
 		if (!active_particles.empty())
 		{
-			std::sort(active_particles.begin(), active_particles.end(), ParticleCmp());
+			std::sort(active_particles.begin(), active_particles.end(),
+				[](std::pair<uint32_t, float> const & lhs, std::pair<uint32_t, float> const & rhs)
+				{
+					return lhs.second > rhs.second;
+				});
 
 			checked_pointer_cast<RenderParticles>(renderable_)->PosBound(AABBox(min_bb, max_bb));
 		}

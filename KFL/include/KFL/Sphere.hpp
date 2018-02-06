@@ -50,10 +50,14 @@ namespace KlayGE
 				public Bound_T<T>
 	{
 	public:
-		Sphere_T() noexcept
+		constexpr Sphere_T() noexcept
+			: radius_()
 		{
 		}
-		Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept;
+		constexpr Sphere_T(Vector_T<T, 3> const & center, T radius) noexcept
+			: center_(center), radius_(radius)
+		{
+		}
 		Sphere_T(Sphere_T const & rhs) noexcept;
 		Sphere_T(Sphere_T&& rhs) noexcept;
 
@@ -75,7 +79,7 @@ namespace KlayGE
 		{
 			return center_;
 		}
-		Vector_T<T, 3> const & Center() const noexcept
+		constexpr Vector_T<T, 3> const & Center() const noexcept
 		{
 			return center_;
 		}
@@ -83,7 +87,7 @@ namespace KlayGE
 		{
 			return radius_;
 		}
-		T Radius() const noexcept
+		constexpr T Radius() const noexcept
 		{
 			return radius_;
 		}
