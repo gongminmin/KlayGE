@@ -10,4 +10,4 @@ def BuildDXBC2GLSL(build_info):
 			BuildAProject("DXBC2GLSL", "DXBC2GLSL", build_info, compiler_info)
 
 if __name__ == "__main__":
-	build_DXBC2GLSL(BuildInfo.FromArgv(sys.argv))
+	BuildDXBC2GLSL(BuildInfo.FromArgv(sys.argv))
