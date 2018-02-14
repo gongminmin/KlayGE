@@ -61,7 +61,7 @@
 #define D3DCOMPILE_ENABLE_STRICTNESS 0x00000800
 #endif
 
-#include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLTexture.hpp>

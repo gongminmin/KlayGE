@@ -56,7 +56,7 @@
 #endif
 #endif
 
-#include <KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp>
+#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>
 #include <KlayGE/OpenGLES/OGLESTexture.hpp>

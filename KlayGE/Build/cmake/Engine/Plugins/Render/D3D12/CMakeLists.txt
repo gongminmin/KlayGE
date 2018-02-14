@@ -39,7 +39,7 @@ SET(D3D12_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Mapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12Query.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderEngine.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderFactoryInternal.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderLayout.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D12/D3D12RenderView.hpp

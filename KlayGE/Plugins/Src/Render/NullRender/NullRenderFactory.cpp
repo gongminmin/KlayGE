@@ -35,7 +35,7 @@
 #include <KlayGE/NullRender/NullShaderObject.hpp>
 #include <KlayGE/NullRender/NullTexture.hpp>
 
-#include <KlayGE/NullRender/NullRenderFactoryInternal.hpp>
+#include <KlayGE/NullRender/NullRenderFactory.hpp>
 
 namespace KlayGE
 {

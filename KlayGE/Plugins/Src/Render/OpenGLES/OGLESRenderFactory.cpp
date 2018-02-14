@@ -25,7 +25,7 @@
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 #include <KlayGE/OpenGLES/OGLESFence.hpp>
 
-#include <KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp>
+#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 
 namespace KlayGE
 {

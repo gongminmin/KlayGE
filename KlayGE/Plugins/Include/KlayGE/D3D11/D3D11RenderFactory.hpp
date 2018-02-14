@@ -10,8 +10,8 @@
 // ÐÞ¸Ä¼ÇÂ¼
 /////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _D3D11RENDERFACTORYINTERNAL_HPP
-#define _D3D11RENDERFACTORYINTERNAL_HPP
+#ifndef KLAYGE_PLUGINS_D3D11_RENDER_FACTORY_HPP
+#define KLAYGE_PLUGINS_D3D11_RENDER_FACTORY_HPP
 
 #pragma once
 
@@ -96,4 +96,4 @@ namespace KlayGE
 	};
 }
 
-#endif			// _D3D11RENDERFACTORYINTERNAL_HPP
+#endif			// KLAYGE_PLUGINS_D3D11_RENDER_FACTORY_HPP

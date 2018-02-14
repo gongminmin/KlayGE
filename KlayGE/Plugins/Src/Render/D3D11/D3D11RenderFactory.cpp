@@ -25,7 +25,7 @@
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 #include <KlayGE/D3D11/D3D11Fence.hpp>
 
-#include <KlayGE/D3D11/D3D11RenderFactoryInternal.hpp>
+#include <KlayGE/D3D11/D3D11RenderFactory.hpp>
 
 namespace KlayGE
 {

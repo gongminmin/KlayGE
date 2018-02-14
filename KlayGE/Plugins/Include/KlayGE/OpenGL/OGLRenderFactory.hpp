@@ -1,17 +1,17 @@
-// OGLESRenderFactoryInternal.h
-// KlayGE OpenGL ES渲染工厂类 头文件
-// Ver 3.10.0
-// 版权所有(C) 龚敏敏, 2010
+// OGLRenderFactory.h
+// KlayGE OpenGL渲染工厂类 头文件
+// Ver 2.7.0
+// 版权所有(C) 龚敏敏, 2004-2005
 // Homepage: http://www.klayge.org
 //
-// 3.10.0
-// 初次建立 (2010.1.22)
+// 2.7.0
+// 支持vertex_buffer_object (2005.6.19)
 //
 // 修改记录
 //////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _OGLESRENDERFACTORYINTERNAL_HPP
-#define _OGLESRENDERFACTORYINTERNAL_HPP
+#ifndef KLAYGE_PLUGINS_OGL_RENDER_FACTORY_HPP
+#define KLAYGE_PLUGINS_OGL_RENDER_FACTORY_HPP
 
 #pragma once
 
@@ -20,25 +20,26 @@
 
 namespace KlayGE
 {
-	class OGLESRenderFactory : public RenderFactory
+	class OGLRenderFactory : public RenderFactory
 	{
 	public:
-		OGLESRenderFactory();
+		OGLRenderFactory();
 
 		std::wstring const & Name() const;
 
-		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t numMipMaps, uint32_t array_size,
+		virtual TexturePtr MakeDelayCreationTexture1D(uint32_t width, uint32_t num_mip_maps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t numMipMaps, uint32_t array_size,
+		virtual TexturePtr MakeDelayCreationTexture2D(uint32_t width, uint32_t height, uint32_t num_mip_maps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 		virtual TexturePtr MakeDelayCreationTexture3D(uint32_t width, uint32_t height, uint32_t depth, uint32_t array_size,
-				uint32_t numMipMaps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
-		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t numMipMaps, uint32_t array_size,
+				uint32_t num_mip_maps, ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
+		virtual TexturePtr MakeDelayCreationTextureCube(uint32_t size, uint32_t num_mip_maps, uint32_t array_size,
 				ElementFormat format, uint32_t sample_count, uint32_t sample_quality, uint32_t access_hint) override;
 
 		FrameBufferPtr MakeFrameBuffer();
 
 		RenderLayoutPtr MakeRenderLayout();
+
 		virtual GraphicsBufferPtr MakeDelayCreationVertexBuffer(BufferUsage usage, uint32_t access_hint,
 			uint32_t size_in_byte, ElementFormat fmt = EF_Unknown) override;
 		virtual GraphicsBufferPtr MakeDelayCreationIndexBuffer(BufferUsage usage, uint32_t access_hint,
@@ -90,9 +91,9 @@ namespace KlayGE
 		virtual void DoResume() override;
 
 	private:
-		OGLESRenderFactory(OGLESRenderFactory const &);
-		OGLESRenderFactory& operator=(OGLESRenderFactory const &);
+		OGLRenderFactory(OGLRenderFactory const &);
+		OGLRenderFactory& operator=(OGLRenderFactory const &);
 	};
 }
 
-#endif			// _OGLESRENDERFACTORYINTERNAL_HPP
+#endif			// KLAYGE_PLUGINS_OGL_RENDER_FACTORY_HPP

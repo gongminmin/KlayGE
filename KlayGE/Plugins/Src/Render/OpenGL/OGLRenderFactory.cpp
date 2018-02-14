@@ -25,7 +25,7 @@
 #include <KlayGE/OpenGL/OGLShaderObject.hpp>
 #include <KlayGE/OpenGL/OGLFence.hpp>
 
-#include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
+#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 
 namespace KlayGE
 {

@@ -41,7 +41,7 @@ SET(D3D11_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Mapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11Query.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderEngine.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactoryInternal.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderLayout.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/D3D11/D3D11RenderView.hpp

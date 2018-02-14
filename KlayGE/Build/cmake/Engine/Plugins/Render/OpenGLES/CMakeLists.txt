@@ -31,7 +31,7 @@ SET(OPENGLES_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESMapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESQuery.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderEngine.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp
+	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderLayout.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGLES/OGLESRenderView.hpp

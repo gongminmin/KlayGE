@@ -43,7 +43,7 @@
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12Fence.hpp>
 
-#include <KlayGE/D3D12/D3D12RenderFactoryInternal.hpp>
+#include <KlayGE/D3D12/D3D12RenderFactory.hpp>
 
 namespace KlayGE
 {
