@@ -176,32 +176,9 @@ void VideoTextureApp::OnCreate()
 	ground_ = MakeSharedPtr<TeapotObject>();
 	ground_->AddToSceneManager();
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
 	se.Load(ResLoader::Instance().Locate("big_buck_bunny.avi"));
 	se.Play();
-#else
-	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-	ElementFormat fmt;
-	uint32_t data = 0xFF000000;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-	{
-		fmt = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-		fmt = EF_ARGB8;
-	}
-
-	ElementInitData init_data;
-	init_data.data = &data;
-	init_data.slice_pitch = init_data.row_pitch = sizeof(data);
-
-	TexturePtr dummy_tex = rf.MakeTexture2D(1, 1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
-	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(dummy_tex);
-#endif
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("VideoTexture.uiml"));
 }
@@ -238,9 +215,7 @@ void VideoTextureApp::DoUpdateOverlay()
 uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 {
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	ShowEngine& se = Context::Instance().ShowFactoryInstance().ShowEngineInstance();
-#endif
 
 	Color clear_clr(0.2f, 0.4f, 0.6f, 1);
 	if (Context::Instance().Config().graphics_cfg.gamma)
@@ -251,9 +226,7 @@ uint32_t VideoTextureApp::DoUpdate(uint32_t /*pass*/)
 	}		
 	re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth, clear_clr, 1.0f, 0);
 
-#ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 	checked_pointer_cast<TeapotObject>(ground_)->VideoTexture(se.PresentTexture());
-#endif
 	checked_pointer_cast<TeapotObject>(ground_)->LightPos(light_->Position());
 	checked_pointer_cast<TeapotObject>(ground_)->LightColor(light_->Color());
 	checked_pointer_cast<TeapotObject>(ground_)->LightFalloff(light_->Falloff());
