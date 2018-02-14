@@ -71,11 +71,19 @@
 #endif
 
 #if defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS)
+	#define KLAYGE_STATIC_LINK_PLUGINS
+#endif
+
+#ifdef KLAYGE_STATIC_LINK_PLUGINS
 extern "C"
 {
 	void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr);
-	void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr);
+	void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr);
 	void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr);
+	void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr);
+	void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr);
+	void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr);
+	void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr);
 }
 #endif
 
@@ -266,7 +274,7 @@ namespace KlayGE
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
 		static char const * available_sfs_array[] = { "DShow" };
-		static char const * available_scfs_array[] = { "Python", "NullScript" };
+		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		static char const * available_rfs_array[] = { "D3D11", "D3D12" };
 		static char const * available_afs_array[] = { "XAudio" };
@@ -966,7 +974,7 @@ namespace KlayGE
 	{
 		render_factory_.reset();
 
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		render_loader_.Free();
 
 		std::string render_path = ResLoader::Instance().Locate("Render");
@@ -994,6 +1002,8 @@ namespace KlayGE
 	void Context::LoadAudioFactory(std::string const & af_name)
 	{
 		audio_factory_.reset();
+
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		audio_loader_.Free();
 
 		std::string audio_path = ResLoader::Instance().Locate("Audio");
@@ -1012,13 +1022,17 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			audio_loader_.Free();
 		}
+#else
+		KFL_UNUSED(af_name);
+		MakeAudioFactory(audio_factory_);
+#endif
 	}
 
 	void Context::LoadInputFactory(std::string const & if_name)
 	{
 		input_factory_.reset();
 
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		input_loader_.Free();
 
 		std::string input_path = ResLoader::Instance().Locate("Input");
@@ -1046,6 +1060,8 @@ namespace KlayGE
 	void Context::LoadShowFactory(std::string const & sf_name)
 	{
 		show_factory_.reset();
+
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		show_loader_.Free();
 
 		std::string show_path = ResLoader::Instance().Locate("Show");
@@ -1064,11 +1080,17 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			show_loader_.Free();
 		}
+#else
+		KFL_UNUSED(sf_name);
+		MakeShowFactory(show_factory_);
+#endif
 	}
 
 	void Context::LoadScriptFactory(std::string const & sf_name)
 	{
 		script_factory_.reset();
+
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		script_loader_.Free();
 
 		std::string script_path = ResLoader::Instance().Locate("Script");
@@ -1087,13 +1109,17 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			script_loader_.Free();
 		}
+#else
+		KFL_UNUSED(sf_name);
+		MakeScriptFactory(script_factory_);
+#endif
 	}
 
 	void Context::LoadSceneManager(std::string const & sm_name)
 	{
 		scene_mgr_.reset();
 
-#if !(defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS))
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		sm_loader_.Free();
 
 		std::string sm_path = ResLoader::Instance().Locate("Scene");
@@ -1121,6 +1147,8 @@ namespace KlayGE
 	void Context::LoadAudioDataSourceFactory(std::string const & adsf_name)
 	{
 		audio_data_src_factory_.reset();
+
+#ifndef KLAYGE_STATIC_LINK_PLUGINS
 		ads_loader_.Free();
 
 		std::string adsf_path = ResLoader::Instance().Locate("Audio");
@@ -1139,6 +1167,10 @@ namespace KlayGE
 			LogError("Loading %s failed", path.c_str());
 			ads_loader_.Free();
 		}
+#else
+		KFL_UNUSED(adsf_name);
+		MakeAudioDataSourceFactory(audio_data_src_factory_);
+#endif
 	}
 
 	SceneManager& Context::SceneManagerInstance()

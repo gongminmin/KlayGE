@@ -189,44 +189,50 @@ MACRO(SETUP_TUTORIAL EXE_NAME)
 		)
 	ENDIF()
 
-	IF(NOT KLAYGE_COMPILER_MSVC)
-		IF(KLAYGE_PLATFORM_ANDROID)
-			SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-				-Wl,--whole-archive
-				debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
-				-Wl,--no-whole-archive
-				debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-				debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-				debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
-				debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-				debug MeshMLLib${KLAYGE_OUTPUT_SUFFIX}_d optimized MeshMLLib${KLAYGE_OUTPUT_SUFFIX}
-				${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-				debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX}
-				log android atomic)
-		ELSEIF(KLAYGE_PLATFORM_IOS)
-			SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-				debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
-				debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-				debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
-				debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
-				debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
-				debug MeshMLLib${KLAYGE_OUTPUT_SUFFIX}_d optimized MeshMLLib${KLAYGE_OUTPUT_SUFFIX}
-				${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
-				debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX})
-		ELSE()
-			SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
-				debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
-				debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
-				debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX})
-			IF(KLAYGE_PLATFORM_LINUX)
-				SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES} dl pthread)
-			ENDIF()
+	IF(KLAYGE_PLATFORM_ANDROID)
+		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
+			-Wl,--whole-archive
+			debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
+			-Wl,--no-whole-archive
+			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
+			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
+			debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
+			debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
+			debug MeshMLLib${KLAYGE_OUTPUT_SUFFIX}_d optimized MeshMLLib${KLAYGE_OUTPUT_SUFFIX}
+			${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+			debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX}
+			log android atomic)
+	ELSEIF(KLAYGE_PLATFORM_IOS)
+		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
+			debug KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_RenderEngine_OpenGLES${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Scene_OCTree${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_InputEngine_MsgInput${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioEngine_NullAudio${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
+			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
+			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX}
+			debug glloader_es${KLAYGE_OUTPUT_SUFFIX}_d optimized glloader_es${KLAYGE_OUTPUT_SUFFIX}
+			debug kfont${KLAYGE_OUTPUT_SUFFIX}_d optimized kfont${KLAYGE_OUTPUT_SUFFIX}
+			debug MeshMLLib${KLAYGE_OUTPUT_SUFFIX}_d optimized MeshMLLib${KLAYGE_OUTPUT_SUFFIX}
+			${Boost_FILESYSTEM_LIBRARY} ${Boost_SYSTEM_LIBRARY}
+			debug LZMA${KLAYGE_OUTPUT_SUFFIX}_d optimized LZMA${KLAYGE_OUTPUT_SUFFIX})
+	ELSE()
+		SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES}
+			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
+			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}
+			debug KFL${KLAYGE_OUTPUT_SUFFIX}_d optimized KFL${KLAYGE_OUTPUT_SUFFIX})
+		IF(KLAYGE_PLATFORM_LINUX)
+			SET(EXTRA_LINKED_LIBRARIES ${EXTRA_LINKED_LIBRARIES} dl pthread)
 		ENDIF()
 	ENDIF()
 	ADD_DEPENDENCIES(${EXE_NAME} AllInEngine SampleCommon)
