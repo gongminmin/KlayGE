@@ -14,7 +14,6 @@
 #include <KFL/Util.hpp>
 
 #include <KlayGE/OggVorbis/OggVorbisSource.hpp>
-#include <KlayGE/OggVorbis/OggVorbisSourceFactory.hpp>
 
 namespace KlayGE
 {
@@ -44,7 +43,10 @@ namespace KlayGE
 	};
 }
 
-void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::OggVorbisAudioDataSourceFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::OggVorbisAudioDataSourceFactory>();
+	}
 }

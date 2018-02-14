@@ -38,6 +38,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
@@ -56,7 +57,6 @@
 
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 #include <KlayGE/D3D12/D3D12Mapping.hpp>
-#include <KlayGE/D3D12/D3D12RenderFactory.hpp>
 #include <KlayGE/D3D12/D3D12RenderFactoryInternal.hpp>
 #include <KlayGE/D3D12/D3D12RenderView.hpp>
 #include <KlayGE/D3D12/D3D12Texture.hpp>

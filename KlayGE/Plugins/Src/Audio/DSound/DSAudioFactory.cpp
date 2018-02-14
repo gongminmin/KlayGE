@@ -33,10 +33,12 @@
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/DSound/DSAudio.hpp>
-#include <KlayGE/DSound/DSAudioFactory.hpp>
 
-void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
-		KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer>>(L"DirectSound Audio Factory");
+	KLAYGE_SYMBOL_EXPORT void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::DSAudioEngine,
+			KlayGE::DSSoundBuffer, KlayGE::DSMusicBuffer>>(L"DirectSound Audio Factory");
+	}
 }

@@ -14,7 +14,6 @@ SET(NULL_RE_SOURCE_FILES
 
 SET(NULL_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderEngine.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderFactoryInternal.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullRenderStateObject.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/NullRender/NullShaderObject.hpp
@@ -23,8 +22,6 @@ SET(NULL_RE_HEADER_FILES
 
 SOURCE_GROUP("Source Files" FILES ${NULL_RE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${NULL_RE_HEADER_FILES})
-
-ADD_DEFINITIONS(-DKLAYGE_BUILD_DLL -DKLAYGE_NULL_RE_SOURCE)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include)

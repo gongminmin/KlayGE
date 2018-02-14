@@ -43,7 +43,6 @@
 #include <KlayGE/D3D12/D3D12ShaderObject.hpp>
 #include <KlayGE/D3D12/D3D12Fence.hpp>
 
-#include <KlayGE/D3D12/D3D12RenderFactory.hpp>
 #include <KlayGE/D3D12/D3D12RenderFactoryInternal.hpp>
 
 namespace KlayGE
@@ -277,7 +276,10 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::D3D12RenderFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::D3D12RenderFactory>();
+	}
 }

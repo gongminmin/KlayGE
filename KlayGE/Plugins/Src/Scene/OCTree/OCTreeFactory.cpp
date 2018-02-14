@@ -16,9 +16,11 @@
 #include <KlayGE/SceneManager.hpp>
 
 #include <KlayGE/OCTree/OCTree.hpp>
-#include <KlayGE/OCTree/OCTreeFactory.hpp>
 
-void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::OCTree>();
+	KLAYGE_SYMBOL_EXPORT void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::OCTree>();
+	}
 }

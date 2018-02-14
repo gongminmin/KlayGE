@@ -31,7 +31,6 @@
 #include <KlayGE/KlayGE.hpp>
 
 #include <KlayGE/NullAudioDataSource/NullSource.hpp>
-#include <KlayGE/NullAudioDataSource/NullSourceFactory.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +60,10 @@ namespace KlayGE
 	};
 }
 
-void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::NullAudioDataSourceFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeAudioDataSourceFactory(std::unique_ptr<KlayGE::AudioDataSourceFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::NullAudioDataSourceFactory>();
+	}
 }

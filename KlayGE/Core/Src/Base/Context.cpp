@@ -71,9 +71,12 @@
 #endif
 
 #if defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_IOS)
-#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
-#include <KlayGE/OCTree/OCTreeFactory.hpp>
-#include <KlayGE/MsgInput/MInputFactory.hpp>
+extern "C"
+{
+	void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr);
+	void MakeSceneManager(std::unique_ptr<KlayGE::SceneManager>& ptr);
+	void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr);
+}
 #endif
 
 #include <KlayGE/Context.hpp>

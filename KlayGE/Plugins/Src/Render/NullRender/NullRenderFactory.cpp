@@ -35,7 +35,6 @@
 #include <KlayGE/NullRender/NullShaderObject.hpp>
 #include <KlayGE/NullRender/NullTexture.hpp>
 
-#include <KlayGE/NullRender/NullRenderFactory.hpp>
 #include <KlayGE/NullRender/NullRenderFactoryInternal.hpp>
 
 namespace KlayGE
@@ -375,7 +374,10 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::NullRenderFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::NullRenderFactory>();
+	}
 }

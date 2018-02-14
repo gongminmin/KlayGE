@@ -25,7 +25,6 @@
 #include <KlayGE/OpenGLES/OGLESShaderObject.hpp>
 #include <KlayGE/OpenGLES/OGLESFence.hpp>
 
-#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp>
 
 namespace KlayGE
@@ -261,7 +260,10 @@ namespace KlayGE
 	}
 }
 
-void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::OGLESRenderFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeRenderFactory(std::unique_ptr<KlayGE::RenderFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::OGLESRenderFactory>();
+	}
 }

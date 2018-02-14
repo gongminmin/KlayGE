@@ -33,10 +33,12 @@
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/NullAudio/NullAudio.hpp>
-#include <KlayGE/NullAudio/NullAudioFactory.hpp>
 
-void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::NullAudioEngine,
-		KlayGE::NullSoundBuffer, KlayGE::NullMusicBuffer>>(L"Null Audio Factory");
+	KLAYGE_SYMBOL_EXPORT void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::NullAudioEngine,
+			KlayGE::NullSoundBuffer, KlayGE::NullMusicBuffer>>(L"Null Audio Factory");
+	}
 }

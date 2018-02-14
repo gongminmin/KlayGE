@@ -27,8 +27,9 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Matrix.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KFL/Hash.hpp>
 
 #include <cstdio>
@@ -60,7 +61,6 @@
 #define D3DCOMPILE_ENABLE_STRICTNESS 0x00000800
 #endif
 
-#include <KlayGE/OpenGL/OGLRenderFactory.hpp>
 #include <KlayGE/OpenGL/OGLRenderFactoryInternal.hpp>
 #include <KlayGE/OpenGL/OGLRenderEngine.hpp>
 #include <KlayGE/OpenGL/OGLMapping.hpp>

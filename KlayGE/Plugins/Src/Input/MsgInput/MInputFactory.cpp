@@ -33,7 +33,6 @@
 #include <KlayGE/InputFactory.hpp>
 
 #include <KlayGE/MsgInput/MInput.hpp>
-#include <KlayGE/MsgInput/MInputFactory.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +60,10 @@ namespace KlayGE
 	};
 }
 
-void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::MInputFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeInputFactory(std::unique_ptr<KlayGE::InputFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::MInputFactory>();
+	}
 }

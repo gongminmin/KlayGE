@@ -27,7 +27,6 @@ SET(OPENGL_RE_HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLMapping.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLQuery.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderEngine.hpp
-	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderFactory.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderFactoryInternal.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderLayout.hpp
 	${KLAYGE_PROJECT_DIR}/Plugins/Include/KlayGE/OpenGL/OGLRenderStateObject.hpp
@@ -39,8 +38,6 @@ SET(OPENGL_RE_HEADER_FILES
 
 SOURCE_GROUP("Source Files" FILES ${OPENGL_RE_SOURCE_FILES})
 SOURCE_GROUP("Header Files" FILES ${OPENGL_RE_HEADER_FILES})
-
-ADD_DEFINITIONS(-DKLAYGE_BUILD_DLL -DKLAYGE_OGL_RE_SOURCE)
 
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
 INCLUDE_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/UniversalDXSDK/Include)

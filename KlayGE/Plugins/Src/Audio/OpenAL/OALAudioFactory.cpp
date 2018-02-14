@@ -33,10 +33,12 @@
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/OpenAL/OALAudio.hpp>
-#include <KlayGE/OpenAL/OALAudioFactory.hpp>
 
-void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
-		KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer>>(L"OpenAL Audio Factory");
+	KLAYGE_SYMBOL_EXPORT void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::OALAudioEngine,
+			KlayGE::OALSoundBuffer, KlayGE::OALMusicBuffer>>(L"OpenAL Audio Factory");
+	}
 }

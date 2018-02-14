@@ -20,8 +20,9 @@
 #include <KlayGE/Context.hpp>
 #include <KFL/Math.hpp>
 #include <KFL/Matrix.hpp>
-#include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KlayGE/RenderEngine.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KFL/Hash.hpp>
 
 #include <cstdio>
@@ -55,7 +56,6 @@
 #endif
 #endif
 
-#include <KlayGE/OpenGLES/OGLESRenderFactory.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderFactoryInternal.hpp>
 #include <KlayGE/OpenGLES/OGLESRenderEngine.hpp>
 #include <KlayGE/OpenGLES/OGLESMapping.hpp>

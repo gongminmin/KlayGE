@@ -33,10 +33,12 @@
 #include <KlayGE/AudioFactory.hpp>
 
 #include <KlayGE/XAudio/XAAudio.hpp>
-#include <KlayGE/XAudio/XAAudioFactory.hpp>
 
-void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::XAAudioEngine,
-		KlayGE::XASoundBuffer, KlayGE::XAMusicBuffer>>(L"XAudio Audio Factory");
+	KLAYGE_SYMBOL_EXPORT void MakeAudioFactory(std::unique_ptr<KlayGE::AudioFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::ConcreteAudioFactory<KlayGE::XAAudioEngine,
+			KlayGE::XASoundBuffer, KlayGE::XAMusicBuffer>>(L"XAudio Audio Factory");
+	}
 }

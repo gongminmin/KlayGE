@@ -31,9 +31,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Script.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 
 #include <KlayGE/NullScript/NullScript.hpp>
-#include <KlayGE/NullScript/NullScriptFactory.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +61,10 @@ namespace KlayGE
 	};
 }
 
-void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::NullScriptFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::NullScriptFactory>();
+	}
 }

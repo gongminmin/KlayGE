@@ -20,6 +20,7 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneManager.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderSettings.hpp>
 #include <KlayGE/App3D.hpp>
 #include <KlayGE/Window.hpp>
@@ -38,7 +39,6 @@
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
 #include <KlayGE/D3D11/D3D11Mapping.hpp>
-#include <KlayGE/D3D11/D3D11RenderFactory.hpp>
 #include <KlayGE/D3D11/D3D11RenderFactoryInternal.hpp>
 #include <KlayGE/D3D11/D3D11RenderView.hpp>
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>

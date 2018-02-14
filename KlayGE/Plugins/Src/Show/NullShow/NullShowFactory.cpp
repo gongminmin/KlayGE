@@ -33,7 +33,6 @@
 #include <KlayGE/ShowFactory.hpp>
 
 #include <KlayGE/NullShow/NullShow.hpp>
-#include <KlayGE/NullShow/NullShowFactory.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +60,10 @@ namespace KlayGE
 	};
 }
 
-void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::NullShowFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::NullShowFactory>();
+	}
 }

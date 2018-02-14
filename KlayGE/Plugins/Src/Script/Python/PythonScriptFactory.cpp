@@ -31,9 +31,9 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Script.hpp>
+#include <KlayGE/ScriptFactory.hpp>
 
 #include <KlayGE/Python/PythonScript.hpp>
-#include <KlayGE/Python/PythonScriptFactory.hpp>
 
 namespace KlayGE
 {
@@ -61,7 +61,10 @@ namespace KlayGE
 	};
 }
 
-void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::PythonScriptFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeScriptFactory(std::unique_ptr<KlayGE::ScriptFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::PythonScriptFactory>();
+	}
 }

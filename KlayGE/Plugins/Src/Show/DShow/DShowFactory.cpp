@@ -15,7 +15,6 @@
 #include <KlayGE/ShowFactory.hpp>
 
 #include <KlayGE/DShow/DShow.hpp>
-#include <KlayGE/DShow/DShowFactory.hpp>
 
 namespace KlayGE
 {
@@ -43,7 +42,10 @@ namespace KlayGE
 	};
 }
 
-void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
+extern "C"
 {
-	ptr = KlayGE::MakeUniquePtr<KlayGE::DShowFactory>();
+	KLAYGE_SYMBOL_EXPORT void MakeShowFactory(std::unique_ptr<KlayGE::ShowFactory>& ptr)
+	{
+		ptr = KlayGE::MakeUniquePtr<KlayGE::DShowFactory>();
+	}
 }
