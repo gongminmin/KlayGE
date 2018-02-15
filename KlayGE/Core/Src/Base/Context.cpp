@@ -273,14 +273,14 @@ namespace KlayGE
 		static char const * available_afs_array[] = { "OpenAL", "DSound", "XAudio" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "DShow" };
+		static char const * available_sfs_array[] = { "DShow", "MFShow" };
 		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE)
 		static char const * available_rfs_array[] = { "D3D11", "D3D12" };
 		static char const * available_afs_array[] = { "XAudio" };
 		static char const * available_adsfs_array[] = { "OggVorbis" };
 		static char const * available_ifs_array[] = { "MsgInput" };
-		static char const * available_sfs_array[] = { "NullShow" };
+		static char const * available_sfs_array[] = { "MFShow" };
 		static char const * available_scfs_array[] = { "Python" };
 #elif defined(KLAYGE_PLATFORM_LINUX)
 		static char const * available_rfs_array[] = { "OpenGL" };
