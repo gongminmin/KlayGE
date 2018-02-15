@@ -966,7 +966,7 @@ namespace KlayGE
 	{
 		if (swap_chain_)
 		{
-			bool allow_tearing = dxgi_allow_tearing_;
+			bool allow_tearing = dxgi_allow_tearing_ && (sync_interval_ == 0);
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 			allow_tearing &= !isFullScreen_;
 #endif
