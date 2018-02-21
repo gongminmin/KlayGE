@@ -59,7 +59,6 @@
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
-#include <mutex>
 
 #include <boost/assert.hpp>
 #if defined(KLAYGE_COMPILER_CLANGC2)
@@ -89,106 +88,91 @@ namespace
 	uint32_t const KFX_VERSION = 0x0120;
 
 #if KLAYGE_IS_DEV_PLATFORM
-	std::mutex singleton_mutex;
-
-	class type_define
+	ArrayRef<std::pair<char const *, size_t>> GetTypeDefines()
 	{
-	public:
-		static type_define& instance()
-		{
-			if (!instance_)
-			{
-				std::lock_guard<std::mutex> lock(singleton_mutex);
-				if (!instance_)
-				{
-					instance_ = MakeUniquePtr<type_define>();
-				}
-			}
-			return *instance_;
-		}
-
-		uint32_t TypeCode(std::string_view name) const
-		{
-			size_t const name_hash = HashRange(name.begin(), name.end());
-			for (uint32_t i = 0; i < std::size(types_); ++ i)
-			{
-				if (types_[i].second == name_hash)
-				{
-					return i;
-				}
-			}
-
-			KFL_UNREACHABLE("Invalid type name");
-		}
-
-		std::string_view TypeName(uint32_t code) const
-		{
-			if (code < std::size(types_))
-			{
-				return types_[code].first;
-			}
-
-			KFL_UNREACHABLE("Invalid type code");
-		}
-
-	private:
-		static std::pair<char const *, size_t> const types_[46];
-		static std::unique_ptr<type_define> instance_;
-	};
-	std::unique_ptr<type_define> type_define::instance_;
 #define NAME_AND_HASH(name) std::make_pair(name, CT_HASH(name))
-	std::pair<char const *, size_t> const type_define::types_[] =
-	{
-		NAME_AND_HASH("bool"),
-		NAME_AND_HASH("string"),
-		NAME_AND_HASH("texture1D"),
-		NAME_AND_HASH("texture2D"),
-		NAME_AND_HASH("texture3D"),
-		NAME_AND_HASH("textureCUBE"),
-		NAME_AND_HASH("texture1DArray"),
-		NAME_AND_HASH("texture2DArray"),
-		NAME_AND_HASH("texture3DArray"),
-		NAME_AND_HASH("textureCUBEArray"),
-		NAME_AND_HASH("sampler"),
-		NAME_AND_HASH("shader"),
-		NAME_AND_HASH("uint"),
-		NAME_AND_HASH("uint2"),
-		NAME_AND_HASH("uint3"),
-		NAME_AND_HASH("uint4"),
-		NAME_AND_HASH("int"),
-		NAME_AND_HASH("int2"),
-		NAME_AND_HASH("int3"),
-		NAME_AND_HASH("int4"),
-		NAME_AND_HASH("float"),
-		NAME_AND_HASH("float2"),
-		NAME_AND_HASH("float2x2"),
-		NAME_AND_HASH("float2x3"),
-		NAME_AND_HASH("float2x4"),
-		NAME_AND_HASH("float3"),
-		NAME_AND_HASH("float3x2"),
-		NAME_AND_HASH("float3x3"),
-		NAME_AND_HASH("float3x4"),
-		NAME_AND_HASH("float4"),
-		NAME_AND_HASH("float4x2"),
-		NAME_AND_HASH("float4x3"),
-		NAME_AND_HASH("float4x4"),
-		NAME_AND_HASH("buffer"),
-		NAME_AND_HASH("structured_buffer"),
-		NAME_AND_HASH("byte_address_buffer"),
-		NAME_AND_HASH("rw_buffer"),
-		NAME_AND_HASH("rw_structured_buffer"),
-		NAME_AND_HASH("rw_texture1D"),
-		NAME_AND_HASH("rw_texture2D"),
-		NAME_AND_HASH("rw_texture3D"),
-		NAME_AND_HASH("rw_texture1DArray"),
-		NAME_AND_HASH("rw_texture2DArray"),
-		NAME_AND_HASH("rw_byte_address_buffer"),
-		NAME_AND_HASH("append_structured_buffer"),
-		NAME_AND_HASH("consume_structured_buffer")
-	};
+		static std::pair<char const *, size_t> const types[] =
+		{
+			NAME_AND_HASH("bool"),
+			NAME_AND_HASH("string"),
+			NAME_AND_HASH("texture1D"),
+			NAME_AND_HASH("texture2D"),
+			NAME_AND_HASH("texture3D"),
+			NAME_AND_HASH("textureCUBE"),
+			NAME_AND_HASH("texture1DArray"),
+			NAME_AND_HASH("texture2DArray"),
+			NAME_AND_HASH("texture3DArray"),
+			NAME_AND_HASH("textureCUBEArray"),
+			NAME_AND_HASH("sampler"),
+			NAME_AND_HASH("shader"),
+			NAME_AND_HASH("uint"),
+			NAME_AND_HASH("uint2"),
+			NAME_AND_HASH("uint3"),
+			NAME_AND_HASH("uint4"),
+			NAME_AND_HASH("int"),
+			NAME_AND_HASH("int2"),
+			NAME_AND_HASH("int3"),
+			NAME_AND_HASH("int4"),
+			NAME_AND_HASH("float"),
+			NAME_AND_HASH("float2"),
+			NAME_AND_HASH("float2x2"),
+			NAME_AND_HASH("float2x3"),
+			NAME_AND_HASH("float2x4"),
+			NAME_AND_HASH("float3"),
+			NAME_AND_HASH("float3x2"),
+			NAME_AND_HASH("float3x3"),
+			NAME_AND_HASH("float3x4"),
+			NAME_AND_HASH("float4"),
+			NAME_AND_HASH("float4x2"),
+			NAME_AND_HASH("float4x3"),
+			NAME_AND_HASH("float4x4"),
+			NAME_AND_HASH("buffer"),
+			NAME_AND_HASH("structured_buffer"),
+			NAME_AND_HASH("byte_address_buffer"),
+			NAME_AND_HASH("rw_buffer"),
+			NAME_AND_HASH("rw_structured_buffer"),
+			NAME_AND_HASH("rw_texture1D"),
+			NAME_AND_HASH("rw_texture2D"),
+			NAME_AND_HASH("rw_texture3D"),
+			NAME_AND_HASH("rw_texture1DArray"),
+			NAME_AND_HASH("rw_texture2DArray"),
+			NAME_AND_HASH("rw_byte_address_buffer"),
+			NAME_AND_HASH("append_structured_buffer"),
+			NAME_AND_HASH("consume_structured_buffer")
+		};
 #undef NAME_AND_HASH
 
-	ShadeMode ShadeModeFromStr(std::string_view name)
+		return types;
+	}
+
+	uint32_t TypeCodeFromName(std::string_view name)
+	{
+		auto const types = GetTypeDefines();
+
+		size_t const name_hash = HashRange(name.begin(), name.end());
+		for (uint32_t i = 0; i < types.size(); ++ i)
+		{
+			if (types[i].second == name_hash)
+			{
+				return i;
+			}
+		}
+
+		KFL_UNREACHABLE("Invalid type name");
+	}
+
+	std::string_view TypeNameFromCode(uint32_t code)
+	{
+		auto const types = GetTypeDefines();
+		if (code < types.size())
+		{
+			return types[code].first;
+		}
+
+		KFL_UNREACHABLE("Invalid type code");
+	}
+
+	ShadeMode ShadeModeFromName(std::string_view name)
 	{
 		static size_t constexpr sms_hash[] =
 		{
@@ -208,7 +192,7 @@ namespace
 		KFL_UNREACHABLE("Invalid ShadeMode name");
 	}
 
-	CompareFunction CompareFunctionFromStr(std::string_view name)
+	CompareFunction CompareFunctionFromName(std::string_view name)
 	{
 		static size_t constexpr cfs_hash[] =
 		{
@@ -234,7 +218,7 @@ namespace
 		KFL_UNREACHABLE("Invalid CompareFunction name");
 	}
 
-	CullMode CullModeFromStr(std::string_view name)
+	CullMode CullModeFromName(std::string_view name)
 	{
 		static size_t constexpr cms_hash[] =
 		{
@@ -255,7 +239,7 @@ namespace
 		KFL_UNREACHABLE("Invalid CullMode name");
 	}
 
-	PolygonMode PolygonModeFromStr(std::string_view name)
+	PolygonMode PolygonModeFromName(std::string_view name)
 	{
 		static size_t constexpr pms_hash[] =
 		{
@@ -276,7 +260,7 @@ namespace
 		KFL_UNREACHABLE("Invalid PolygonMode name");
 	}
 
-	AlphaBlendFactor AlphaBlendFactorFromStr(std::string_view name)
+	AlphaBlendFactor AlphaBlendFactorFromName(std::string_view name)
 	{
 		static size_t constexpr abfs_hash[] =
 		{
@@ -311,7 +295,7 @@ namespace
 		KFL_UNREACHABLE("Invalid AlphaBlendFactor name");
 	}
 
-	BlendOperation BlendOperationFromStr(std::string_view name)
+	BlendOperation BlendOperationFromName(std::string_view name)
 	{
 		static size_t constexpr bops_hash[] =
 		{
@@ -334,7 +318,7 @@ namespace
 		KFL_UNREACHABLE("Invalid BlendOperation name");
 	}
 
-	StencilOperation StencilOperationFromStr(std::string_view name)
+	StencilOperation StencilOperationFromName(std::string_view name)
 	{
 		static size_t constexpr sops_hash[] =
 		{
@@ -360,7 +344,7 @@ namespace
 		KFL_UNREACHABLE("Invalid StencilOperation name");
 	}
 
-	TexFilterOp TexFilterOpFromStr(std::string_view name)
+	TexFilterOp TexFilterOpFromName(std::string_view name)
 	{
 		static size_t constexpr tfs_hash[] =
 		{
@@ -402,7 +386,7 @@ namespace
 		KFL_UNREACHABLE("Invalid TexFilterOp name");
 	}
 
-	TexAddressingMode TexAddressingModeFromStr(std::string_view name)
+	TexAddressingMode TexAddressingModeFromName(std::string_view name)
 	{
 		static size_t constexpr tams_hash[] =
 		{
@@ -424,7 +408,7 @@ namespace
 		KFL_UNREACHABLE("Invalid TexAddressingMode name");
 	}
 
-	LogicOperation LogicOperationFromStr(std::string_view name)
+	LogicOperation LogicOperationFromName(std::string_view name)
 	{
 		static size_t constexpr lops_hash[] =
 		{
@@ -661,19 +645,19 @@ namespace
 
 					if (CT_HASH("filtering") == name_hash)
 					{
-						desc.filter = TexFilterOpFromStr(value_str);
+						desc.filter = TexFilterOpFromName(value_str);
 					}
 					else if (CT_HASH("address_u") == name_hash)
 					{
-						desc.addr_mode_u = TexAddressingModeFromStr(value_str);
+						desc.addr_mode_u = TexAddressingModeFromName(value_str);
 					}
 					else if (CT_HASH("address_v") == name_hash)
 					{
-						desc.addr_mode_v = TexAddressingModeFromStr(value_str);
+						desc.addr_mode_v = TexAddressingModeFromName(value_str);
 					}
 					else if (CT_HASH("address_w") == name_hash)
 					{
-						desc.addr_mode_w = TexAddressingModeFromStr(value_str);
+						desc.addr_mode_w = TexAddressingModeFromName(value_str);
 					}
 					else if (CT_HASH("max_anisotropy") == name_hash)
 					{
@@ -693,7 +677,7 @@ namespace
 					}
 					else if (CT_HASH("cmp_func") == name_hash)
 					{
-						desc.cmp_func = CompareFunctionFromStr(value_str);
+						desc.cmp_func = CompareFunctionFromName(value_str);
 					}
 					else if (CT_HASH("border_clr") == name_hash)
 					{
@@ -1300,7 +1284,8 @@ namespace
 						std::string const & value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
-						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
+						std::vector<float4x4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 15) / 16)),
+							float4x4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 						for (size_t index = 0; index < init_val.size(); ++ index)
 						{
 							for (size_t j = 0; j < 16; ++ j)
@@ -2132,7 +2117,7 @@ namespace
 				uint4 tmp;
 				var.Value(tmp);
 
-				for (int i = 0; i < 3; ++ i)
+				for (int i = 0; i < 4; ++ i)
 				{
 					tmp[i] = Native2LE(tmp[i]);
 				}
@@ -2503,7 +2488,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
-		type_ = type_define::instance().TypeCode(node->Attrib("type")->ValueString());
+		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
 		name_ = node->Attrib("name")->ValueString();
 		var_ = read_var(*node, type_, 0);
 	}
@@ -2821,7 +2806,7 @@ namespace KlayGE
 		{
 			XMLNodePtr const & node = parameter_nodes[param_index];
 
-			uint32_t type = type_define::instance().TypeCode(node->Attrib("type")->ValueString());
+			uint32_t type = TypeCodeFromName(node->Attrib("type")->ValueString());
 			if ((type != REDT_sampler)
 				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D)
 				&& (type != REDT_textureCUBE)
@@ -3383,7 +3368,7 @@ namespace KlayGE
 					break;
 
 				default:
-					str += std::string(type_define::instance().TypeName(param.Type())) + " " + param.Name();
+					str += std::string(TypeNameFromCode(param.Type())) + " " + param.Name();
 					if (param.ArraySize())
 					{
 						str += "[" + *param.ArraySize() + "]";
@@ -4014,15 +3999,15 @@ namespace KlayGE
 
 			if (CT_HASH("polygon_mode") == state_name_hash)
 			{
-				rs_desc.polygon_mode = PolygonModeFromStr(value_str);
+				rs_desc.polygon_mode = PolygonModeFromName(value_str);
 			}
 			else if (CT_HASH("shade_mode") == state_name_hash)
 			{
-				rs_desc.shade_mode = ShadeModeFromStr(value_str);
+				rs_desc.shade_mode = ShadeModeFromName(value_str);
 			}
 			else if (CT_HASH("cull_mode") == state_name_hash)
 			{
-				rs_desc.cull_mode = CullModeFromStr(value_str);
+				rs_desc.cull_mode = CullModeFromName(value_str);
 			}
 			else if (CT_HASH("front_face_ccw") == state_name_hash)
 			{
@@ -4069,37 +4054,37 @@ namespace KlayGE
 			else if (CT_HASH("blend_op") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.blend_op[index] = BlendOperationFromStr(value_str);
+				bs_desc.blend_op[index] = BlendOperationFromName(value_str);
 			}
 			else if (CT_HASH("src_blend") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.src_blend[index] = AlphaBlendFactorFromStr(value_str);
+				bs_desc.src_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("dest_blend") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.dest_blend[index] = AlphaBlendFactorFromStr(value_str);
+				bs_desc.dest_blend[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("blend_op_alpha") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.blend_op_alpha[index] = BlendOperationFromStr(value_str);
+				bs_desc.blend_op_alpha[index] = BlendOperationFromName(value_str);
 			}
 			else if (CT_HASH("src_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.src_blend_alpha[index] = AlphaBlendFactorFromStr(value_str);
+				bs_desc.src_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("dest_blend_alpha") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.dest_blend_alpha[index] = AlphaBlendFactorFromStr(value_str);
+				bs_desc.dest_blend_alpha[index] = AlphaBlendFactorFromName(value_str);
 			}
 			else if (CT_HASH("logic_op") == state_name_hash)
 			{
 				int index = get_index(*state_node);
-				bs_desc.logic_op[index] = LogicOperationFromStr(value_str);
+				bs_desc.logic_op[index] = LogicOperationFromName(value_str);
 			}
 			else if (CT_HASH("color_write_mask") == state_name_hash)
 			{
@@ -4143,7 +4128,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("depth_func") == state_name_hash)
 			{
-				dss_desc.depth_func = CompareFunctionFromStr(value_str);
+				dss_desc.depth_func = CompareFunctionFromName(value_str);
 			}
 			else if (CT_HASH("front_stencil_enable") == state_name_hash)
 			{
@@ -4151,7 +4136,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("front_stencil_func") == state_name_hash)
 			{
-				dss_desc.front_stencil_func = CompareFunctionFromStr(value_str);
+				dss_desc.front_stencil_func = CompareFunctionFromName(value_str);
 			}
 			else if (CT_HASH("front_stencil_ref") == state_name_hash)
 			{
@@ -4167,15 +4152,15 @@ namespace KlayGE
 			}
 			else if (CT_HASH("front_stencil_fail") == state_name_hash)
 			{
-				dss_desc.front_stencil_fail = StencilOperationFromStr(value_str);
+				dss_desc.front_stencil_fail = StencilOperationFromName(value_str);
 			}
 			else if (CT_HASH("front_stencil_depth_fail") == state_name_hash)
 			{
-				dss_desc.front_stencil_depth_fail = StencilOperationFromStr(value_str);
+				dss_desc.front_stencil_depth_fail = StencilOperationFromName(value_str);
 			}
 			else if (CT_HASH("front_stencil_pass") == state_name_hash)
 			{
-				dss_desc.front_stencil_pass = StencilOperationFromStr(value_str);
+				dss_desc.front_stencil_pass = StencilOperationFromName(value_str);
 			}
 			else if (CT_HASH("back_stencil_enable") == state_name_hash)
 			{
@@ -4183,7 +4168,7 @@ namespace KlayGE
 			}
 			else if (CT_HASH("back_stencil_func") == state_name_hash)
 			{
-				dss_desc.back_stencil_func = CompareFunctionFromStr(value_str);
+				dss_desc.back_stencil_func = CompareFunctionFromName(value_str);
 			}
 			else if (CT_HASH("back_stencil_ref") == state_name_hash)
 			{
@@ -4199,15 +4184,15 @@ namespace KlayGE
 			}
 			else if (CT_HASH("back_stencil_fail") == state_name_hash)
 			{
-				dss_desc.back_stencil_fail = StencilOperationFromStr(value_str);
+				dss_desc.back_stencil_fail = StencilOperationFromName(value_str);
 			}
 			else if (CT_HASH("back_stencil_depth_fail") == state_name_hash)
 			{
-				dss_desc.back_stencil_depth_fail = StencilOperationFromStr(value_str);
+				dss_desc.back_stencil_depth_fail = StencilOperationFromName(value_str);
 			}
 			else if (CT_HASH("back_stencil_pass") == state_name_hash)
 			{
-				dss_desc.back_stencil_pass = StencilOperationFromStr(value_str);
+				dss_desc.back_stencil_pass = StencilOperationFromName(value_str);
 			}
 			else if ((CT_HASH("vertex_shader") == state_name_hash) || (CT_HASH("pixel_shader") == state_name_hash)
 				|| (CT_HASH("geometry_shader") == state_name_hash) || (CT_HASH("compute_shader") == state_name_hash)
@@ -4779,7 +4764,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderEffectParameter::Load(XMLNodePtr const & node)
 	{
-		type_ = type_define::instance().TypeCode(node->Attrib("type")->ValueString());
+		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
 		name_->first = node->Attrib("name")->ValueString();
 		name_->second = HashRange(name_->first.begin(), name_->first.end());
