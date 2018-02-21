@@ -32,9 +32,9 @@
 #include <KFL/ErrorHandling.hpp>
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/DllLoader.hpp>
-#include <KFL/Thread.hpp>
 
 #include <cstring>
+#include <mutex>
 
 #include <C/LzmaLib.h>
 

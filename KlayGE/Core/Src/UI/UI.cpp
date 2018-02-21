@@ -31,7 +31,6 @@
 #include <KlayGE/SceneObjectHelper.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/Font.hpp>
-#include <KFL/Thread.hpp>
 #include <KlayGE/TransientBuffer.hpp>
 #include <KFL/Hash.hpp>
 #include <KlayGE/App3D.hpp>
@@ -39,6 +38,7 @@
 
 #include <cstring>
 #include <fstream>
+#include <mutex>
 
 #include <KlayGE/UI.hpp>
 

@@ -32,6 +32,7 @@
 #include <KlayGE/PostProcess.hpp>
 #include <KFL/Hash.hpp>
 
+#include <KlayGE/D3D11/D3D11Adapter.hpp>
 #include <KlayGE/D3D11/D3D11RenderWindow.hpp>
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
 #include <KlayGE/D3D11/D3D11Texture.hpp>

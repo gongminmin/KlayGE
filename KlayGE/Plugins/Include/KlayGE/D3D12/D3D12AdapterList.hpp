@@ -34,10 +34,13 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
+#include <KlayGE/D3D12/D3D12Typedefs.hpp>
 #include <KlayGE/D3D12/D3D12Adapter.hpp>
 
 namespace KlayGE
 {
+	class D3D12Adapter;
+
 	class D3D12AdapterList
 	{
 	public:
@@ -48,13 +51,13 @@ namespace KlayGE
 		void Enumerate(IDXGIFactory4Ptr const & gi_factory);
 
 		size_t NumAdapter() const;
-		D3D12AdapterPtr const & Adapter(size_t index) const;
+		D3D12Adapter& Adapter(size_t index) const;
 
 		uint32_t CurrentAdapterIndex() const;
 		void CurrentAdapterIndex(uint32_t index);
 
 	private:
-		std::vector<D3D12AdapterPtr> adapters_;
+		std::vector<std::unique_ptr<D3D12Adapter>> adapters_;
 		uint32_t			current_adapter_;
 	};
 

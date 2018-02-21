@@ -16,7 +16,6 @@
 #pragma once
 
 #include <KlayGE/D3D11/D3D11FrameBuffer.hpp>
-#include <KlayGE/D3D11/D3D11Adapter.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
 #if defined(KLAYGE_COMPILER_MSVC)
@@ -46,6 +45,7 @@ typedef std::shared_ptr<IAmdDxExtQuadBufferStereo> IAmdDxExtQuadBufferStereoPtr;
 namespace KlayGE
 {
 	struct RenderSettings;
+	class D3D11Adapter;
 
 	class D3D11RenderWindow : public D3D11FrameBuffer
 	{

@@ -37,7 +37,6 @@
 #include <KlayGE/ShaderObject.hpp>
 
 #include <KlayGE/D3D12/D3D12Typedefs.hpp>
-#include <KlayGE/D3D12/D3D12RenderView.hpp>
 
 namespace KlayGE
 {

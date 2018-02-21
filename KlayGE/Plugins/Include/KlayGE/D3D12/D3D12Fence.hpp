@@ -50,9 +50,9 @@ namespace KlayGE
 		virtual void Wait(uint64_t id) override;
 		virtual bool Completed(uint64_t id) override;
 
-		ID3D12FencePtr const & D3DFence() const
+		ID3D12Fence* D3DFence() const
 		{
-			return fence_;
+			return fence_.get();
 		}
 
 		uint64_t Signal(ID3D12CommandQueue* cmd_queue);

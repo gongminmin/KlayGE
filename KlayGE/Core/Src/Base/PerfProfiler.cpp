@@ -32,9 +32,9 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/Query.hpp>
-#include <KFL/Thread.hpp>
 
 #include <fstream>
+#include <mutex>
 
 #include <KlayGE/PerfProfiler.hpp>
 

@@ -35,7 +35,6 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Color.hpp>
 #include <KlayGE/Texture.hpp>
-#include <KFL/Thread.hpp>
 #include <KFL/Half.hpp>
 
 #include <vector>

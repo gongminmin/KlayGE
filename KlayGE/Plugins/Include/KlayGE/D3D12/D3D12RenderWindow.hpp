@@ -34,7 +34,6 @@
 #pragma once
 
 #include <KlayGE/D3D12/D3D12FrameBuffer.hpp>
-#include <KlayGE/D3D12/D3D12Adapter.hpp>
 #include <KlayGE/D3D12/D3D12RenderEngine.hpp>
 
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
@@ -62,11 +61,12 @@
 namespace KlayGE
 {
 	struct RenderSettings;
+	class D3D12Adapter;
 
 	class D3D12RenderWindow : public D3D12FrameBuffer
 	{
 	public:
-		D3D12RenderWindow(D3D12AdapterPtr const & adapter, std::string const & name, RenderSettings const & settings);
+		D3D12RenderWindow(D3D12Adapter* adapter, std::string const & name, RenderSettings const & settings);
 		~D3D12RenderWindow();
 
 		void Destroy();
@@ -133,7 +133,7 @@ namespace KlayGE
 		bool	isFullScreen_;
 		uint32_t sync_interval_;
 
-		D3D12AdapterPtr			adapter_;
+		D3D12Adapter* adapter_;
 
 		bool dxgi_stereo_support_;
 		bool dxgi_allow_tearing_;

@@ -34,13 +34,14 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KFL/XMLDom.hpp>
 #include <KlayGE/DeferredRenderingLayer.hpp>
-#include <KFL/Thread.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 #include <KlayGE/UI.hpp>
 #include <KFL/Hash.hpp>
 
 #include <fstream>
+#include <mutex>
 #include <sstream>
+
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <KlayGE/D3D11/D3D11Typedefs.hpp>
+#include <dxgiformat.h>
 
 namespace KlayGE
 {

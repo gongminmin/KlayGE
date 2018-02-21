@@ -19,6 +19,7 @@
 #include <system_error>
 #include <boost/assert.hpp>
 
+#include <KlayGE/D3D11/D3D11Adapter.hpp>
 #include <KlayGE/D3D11/D3D11AdapterList.hpp>
 
 namespace KlayGE

@@ -35,12 +35,12 @@
 
 #include <KFL/Vector.hpp>
 #include <KFL/Color.hpp>
-#include <KFL/Thread.hpp>
 
-#include <vector>
-#include <map>
-#include <unordered_map>
 #include <bitset>
+#include <map>
+#include <mutex>
+#include <unordered_map>
+#include <vector>
 
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ShaderObject.hpp>
@@ -225,7 +225,7 @@ namespace KlayGE
 
 	private:
 		D3D12AdapterList const & D3DAdapters() const;
-		D3D12AdapterPtr const & ActiveAdapter() const;
+		D3D12Adapter& ActiveAdapter() const;
 
 		virtual void DoCreateRenderWindow(std::string const & name, RenderSettings const & settings) override;
 		virtual void DoBindFrameBuffer(FrameBufferPtr const & fb) override;

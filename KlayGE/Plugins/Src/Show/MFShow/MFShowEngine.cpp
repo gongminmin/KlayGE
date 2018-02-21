@@ -32,11 +32,11 @@
 #define INITGUID
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/COMPtr.hpp>
-#include <KFL/Thread.hpp>
 #include <KlayGE/Context.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
 #include <cstring>
+#include <mutex>
 
 #include <boost/assert.hpp>
 
@@ -69,6 +69,9 @@
 #pragma GCC diagnostic pop
 #elif defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic pop
+#endif
+#if defined(KLAYGE_COMPILER_GCC) || defined(KLAYGE_COMPILER_CLANGC2)
+#undef __out
 #endif
 
 #include <KlayGE/MFShow/MFShow.hpp>

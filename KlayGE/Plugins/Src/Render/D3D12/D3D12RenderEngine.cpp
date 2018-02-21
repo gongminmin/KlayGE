@@ -215,7 +215,7 @@ namespace KlayGE
 
 	// 获取当前适配器
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D12AdapterPtr const & D3D12RenderEngine::ActiveAdapter() const
+	D3D12Adapter& D3D12RenderEngine::ActiveAdapter() const
 	{
 		return adapterList_.Adapter(adapterList_.CurrentAdapterIndex());
 	}
@@ -225,7 +225,7 @@ namespace KlayGE
 	void D3D12RenderEngine::DoCreateRenderWindow(std::string const & name,
 		RenderSettings const & settings)
 	{
-		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(this->ActiveAdapter(), name, settings);
+		D3D12RenderWindowPtr win = MakeSharedPtr<D3D12RenderWindow>(&this->ActiveAdapter(), name, settings);
 
 		native_shader_platform_name_ = "d3d_12_0";
 		switch (d3d_feature_level_)

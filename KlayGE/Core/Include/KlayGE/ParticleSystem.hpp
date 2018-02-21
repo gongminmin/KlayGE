@@ -35,11 +35,11 @@
 
 #include <KlayGE/PreDeclare.hpp>
 #include <KFL/Math.hpp>
-#include <KFL/Thread.hpp>
 #include <KlayGE/SceneObjectHelper.hpp>
 
-#include <vector>
+#include <mutex>
 #include <random>
+#include <vector>
 
 namespace KlayGE
 {

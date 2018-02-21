@@ -64,11 +64,11 @@ namespace KlayGE
 
 	// 获取显卡
 	/////////////////////////////////////////////////////////////////////////////////
-	D3D12AdapterPtr const & D3D12AdapterList::Adapter(size_t index) const
+	D3D12Adapter& D3D12AdapterList::Adapter(size_t index) const
 	{
 		BOOST_ASSERT(index < adapters_.size());
 
-		return adapters_[index];
+		return *adapters_[index];
 	}
 
 	// 获取当前显卡索引
@@ -100,9 +100,9 @@ namespace KlayGE
 				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter, D3D_FEATURE_LEVEL_11_0,
 					IID_ID3D12Device, reinterpret_cast<void**>(&device))))
 				{
-					D3D12AdapterPtr adapter = MakeSharedPtr<D3D12Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
 					adapter->Enumerate();
-					adapters_.push_back(adapter);
+					adapters_.push_back(std::move(adapter));
 
 					device->Release();
 				}

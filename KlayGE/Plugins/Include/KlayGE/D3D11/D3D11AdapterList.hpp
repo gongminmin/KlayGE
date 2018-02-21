@@ -16,10 +16,12 @@
 #pragma once
 
 #include <KlayGE/PreDeclare.hpp>
-#include <KlayGE/D3D11/D3D11Adapter.hpp>
+#include <KlayGE/D3D11/D3D11Typedefs.hpp>
 
 namespace KlayGE
 {
+	class D3D11Adapter;
+
 	class D3D11AdapterList
 	{
 	public:

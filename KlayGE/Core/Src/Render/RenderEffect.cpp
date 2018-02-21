@@ -55,11 +55,12 @@
 #include <KlayGE/RenderStateObject.hpp>
 #include <KlayGE/ShaderObject.hpp>
 #include <KFL/XMLDom.hpp>
-#include <KFL/Thread.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
+#include <mutex>
+
 #include <boost/assert.hpp>
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push

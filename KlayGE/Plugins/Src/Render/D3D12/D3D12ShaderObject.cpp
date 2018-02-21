@@ -39,7 +39,6 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
-#include <KFL/Thread.hpp>
 #include <KFL/Hash.hpp>
 
 #include <string>
