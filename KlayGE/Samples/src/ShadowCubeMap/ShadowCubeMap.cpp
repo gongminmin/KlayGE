@@ -492,7 +492,11 @@ void ShadowCubeMap::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&ShadowCubeMap::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ShadowCubeMap.uiml"));
@@ -504,9 +508,21 @@ void ShadowCubeMap::OnCreate()
 	id_sm_type_combo_ = dialog_->IDFromName("SMCombo");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().connect(std::bind(&ShadowCubeMap::ScaleFactorChangedHandler, this, std::placeholders::_1));
-	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&ShadowCubeMap::SMTypeChangedHandler, this, std::placeholders::_1));
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&ShadowCubeMap::CtrlCameraHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_scale_factor_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->ScaleFactorChangedHandler(sender);
+		});
+	dialog_->Control<UIComboBox>(id_sm_type_combo_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->SMTypeChangedHandler(sender);
+		});
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->CtrlCameraHandler(sender);
+		});
 
 	this->ScaleFactorChangedHandler(*dialog_->Control<UISlider>(id_scale_factor_slider_));
 	this->SMTypeChangedHandler(*dialog_->Control<UIComboBox>(id_sm_type_combo_));

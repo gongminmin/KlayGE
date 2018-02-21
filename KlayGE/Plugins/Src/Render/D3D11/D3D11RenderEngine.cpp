@@ -14,6 +14,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17.hpp>
 #include <KFL/CXX17/iterator.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Math.hpp>
@@ -43,6 +44,8 @@
 #include <KlayGE/D3D11/D3D11ShaderObject.hpp>
 
 #include <algorithm>
+#include <functional>
+
 #include <boost/assert.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -52,7 +55,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> ShaderSetShaderResources[ShaderObject::ST_NumShaderTypes] =
+	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11ShaderResourceView * const *)> const ShaderSetShaderResources[] =
 	{
 		std::mem_fn(&ID3D11DeviceContext::VSSetShaderResources),
 		std::mem_fn(&ID3D11DeviceContext::PSSetShaderResources),
@@ -61,8 +64,9 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext::HSSetShaderResources),
 		std::mem_fn(&ID3D11DeviceContext::DSSetShaderResources)
 	};
-	
-	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> ShaderSetSamplers[ShaderObject::ST_NumShaderTypes] =
+	KLAYGE_STATIC_ASSERT(std::size(ShaderSetShaderResources) == ShaderObject::ST_NumShaderTypes);
+
+	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11SamplerState * const *)> const ShaderSetSamplers[] =
 	{
 		std::mem_fn(&ID3D11DeviceContext::VSSetSamplers),
 		std::mem_fn(&ID3D11DeviceContext::PSSetSamplers),
@@ -71,8 +75,9 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext::HSSetSamplers),
 		std::mem_fn(&ID3D11DeviceContext::DSSetSamplers)
 	};
+	KLAYGE_STATIC_ASSERT(std::size(ShaderSetSamplers) == ShaderObject::ST_NumShaderTypes);
 
-	std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> ShaderSetConstantBuffers[ShaderObject::ST_NumShaderTypes] =
+	static std::function<void(ID3D11DeviceContext*, UINT, UINT, ID3D11Buffer * const *)> const ShaderSetConstantBuffers[] =
 	{
 		std::mem_fn(&ID3D11DeviceContext::VSSetConstantBuffers),
 		std::mem_fn(&ID3D11DeviceContext::PSSetConstantBuffers),
@@ -81,6 +86,7 @@ namespace
 		std::mem_fn(&ID3D11DeviceContext::HSSetConstantBuffers),
 		std::mem_fn(&ID3D11DeviceContext::DSSetConstantBuffers)
 	};
+	KLAYGE_STATIC_ASSERT(std::size(ShaderSetConstantBuffers) == ShaderObject::ST_NumShaderTypes);
 }
 
 namespace KlayGE
@@ -1273,14 +1279,22 @@ namespace KlayGE
 		std::sort(uav_format_.begin(), uav_format_.end());
 		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
 
-		caps_.vertex_format_support = std::bind<bool>(&D3D11RenderEngine::VertexFormatSupport, this,
-			std::placeholders::_1);
-		caps_.texture_format_support = std::bind<bool>(&D3D11RenderEngine::TextureFormatSupport, this,
-			std::placeholders::_1);
-		caps_.rendertarget_format_support = std::bind<bool>(&D3D11RenderEngine::RenderTargetFormatSupport, this,
-			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-		caps_.uav_format_support = std::bind<bool>(&D3D11RenderEngine::UAVFormatSupport, this,
-			std::placeholders::_1);
+		caps_.vertex_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->VertexFormatSupport(elem_fmt);
+			};
+		caps_.texture_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->TextureFormatSupport(elem_fmt);
+			};
+		caps_.rendertarget_format_support = [this](ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
+			{
+				return this->RenderTargetFormatSupport(elem_fmt, sample_count, sample_quality);
+			};
+		caps_.uav_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->UAVFormatSupport(elem_fmt);
+			};
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

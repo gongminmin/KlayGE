@@ -1758,14 +1758,22 @@ namespace KlayGE
 		std::sort(rendertarget_format_.begin(), rendertarget_format_.end());
 		rendertarget_format_.erase(std::unique(rendertarget_format_.begin(), rendertarget_format_.end()), rendertarget_format_.end());
 
-		caps_.vertex_format_support = std::bind<bool>(&OGLRenderEngine::VertexFormatSupport, this,
-			std::placeholders::_1);
-		caps_.texture_format_support = std::bind<bool>(&OGLRenderEngine::TextureFormatSupport, this,
-			std::placeholders::_1);
-		caps_.rendertarget_format_support = std::bind<bool>(&OGLRenderEngine::RenderTargetFormatSupport, this,
-			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-		caps_.uav_format_support = std::bind<bool>(&OGLRenderEngine::UAVFormatSupport, this,
-			std::placeholders::_1);
+		caps_.vertex_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->VertexFormatSupport(elem_fmt);
+			};
+		caps_.texture_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->TextureFormatSupport(elem_fmt);
+			};
+		caps_.rendertarget_format_support = [this](ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
+			{
+				return this->RenderTargetFormatSupport(elem_fmt, sample_count, sample_quality);
+			};
+		caps_.uav_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->UAVFormatSupport(elem_fmt);
+			};
 
 		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
 		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))

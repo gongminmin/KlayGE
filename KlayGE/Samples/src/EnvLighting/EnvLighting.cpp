@@ -617,7 +617,11 @@ void EnvLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&EnvLightingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("EnvLighting.uiml"));
@@ -625,7 +629,11 @@ void EnvLightingApp::OnCreate()
 	dialog_ = UIManager::Instance().GetDialog("Method");
 	id_type_combo_ = dialog_->IDFromName("TypeCombo");
 
-	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&EnvLightingApp::TypeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->TypeChangedHandler(sender);
+		});
 	this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 }
 

@@ -154,7 +154,11 @@ void ParticleEditorApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&ParticleEditorApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	terrain_ = MakeSharedPtr<TerrainObject>();
@@ -219,40 +223,116 @@ void ParticleEditorApp::OnCreate()
 
 	this->LoadParticleSystem(ResLoader::Instance().Locate("Fire.psml"));
 
-	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::OpenHandler, this, std::placeholders::_1));
-	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::SaveAsHandler, this, std::placeholders::_1));
+	dialog_->Control<UIButton>(id_open_)->OnClickedEvent().connect(
+		[this](UIButton const & sender)
+		{
+			this->OpenHandler(sender);
+		});
+	dialog_->Control<UIButton>(id_save_as_)->OnClickedEvent().connect(
+		[this](UIButton const & sender)
+		{
+			this->SaveAsHandler(sender);
+		});
 
-	dialog_->Control<UISlider>(id_gravity_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::GravityChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_gravity_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->GravityChangedHandler(sender);
+		});
 	this->GravityChangedHandler(*dialog_->Control<UISlider>(id_gravity_slider_));
-	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::DensityChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_density_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DensityChangedHandler(sender);
+		});
 	this->DensityChangedHandler(*dialog_->Control<UISlider>(id_density_slider_));
-	dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::FreqChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->FreqChangedHandler(sender);
+		});
 	this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
-	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::AngleChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_angle_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->AngleChangedHandler(sender);
+		});
 	this->AngleChangedHandler(*dialog_->Control<UISlider>(id_angle_slider_));
-	dialog_->Control<UISlider>(id_detail_x_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::DetailXChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_detail_x_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DetailXChangedHandler(sender);
+		});
 	this->DetailXChangedHandler(*dialog_->Control<UISlider>(id_detail_x_slider_));
-	dialog_->Control<UISlider>(id_detail_y_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::DetailYChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_detail_y_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DetailYChangedHandler(sender);
+		});
 	this->DetailYChangedHandler(*dialog_->Control<UISlider>(id_detail_y_slider_));
-	dialog_->Control<UISlider>(id_detail_z_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::DetailZChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_detail_z_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DetailZChangedHandler(sender);
+		});
 	this->DetailZChangedHandler(*dialog_->Control<UISlider>(id_detail_z_slider_));
-	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::MinVelocityChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_min_velocity_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->MinVelocityChangedHandler(sender);
+		});
 	this->MinVelocityChangedHandler(*dialog_->Control<UISlider>(id_min_velocity_slider_));
-	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::MaxVelocityChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_max_velocity_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->MaxVelocityChangedHandler(sender);
+		});
 	this->MaxVelocityChangedHandler(*dialog_->Control<UISlider>(id_max_velocity_slider_));
-	dialog_->Control<UISlider>(id_min_life_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::MinLifeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_min_life_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->MinLifeChangedHandler(sender);
+		});
 	this->MinLifeChangedHandler(*dialog_->Control<UISlider>(id_min_life_slider_));
-	dialog_->Control<UISlider>(id_max_life_slider_)->OnValueChangedEvent().connect(std::bind(&ParticleEditorApp::MaxLifeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_max_life_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->MaxLifeChangedHandler(sender);
+		});
 	this->MaxLifeChangedHandler(*dialog_->Control<UISlider>(id_max_life_slider_));
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(std::bind(&ParticleEditorApp::FPSCameraHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->FPSCameraHandler(sender);
+		});
 
-	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::ChangeParticleAlphaFromHandler, this, std::placeholders::_1));
-	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::ChangeParticleAlphaToHandler, this, std::placeholders::_1));
-	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::ChangeParticleColorFromHandler, this, std::placeholders::_1));
-	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().connect(std::bind(&ParticleEditorApp::ChangeParticleColorToHandler, this, std::placeholders::_1));
+	dialog_->Control<UITexButton>(id_particle_alpha_from_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeParticleAlphaFromHandler(sender);
+		});
+	dialog_->Control<UITexButton>(id_particle_alpha_to_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeParticleAlphaToHandler(sender);
+		});
+	dialog_->Control<UITexButton>(id_particle_color_from_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeParticleColorFromHandler(sender);
+		});
+	dialog_->Control<UITexButton>(id_particle_color_to_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeParticleColorToHandler(sender);
+		});
 
-	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(std::bind(&ParticleEditorApp::CurveTypeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_curve_type_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->CurveTypeChangedHandler(sender);
+		});
 }
 
 void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)

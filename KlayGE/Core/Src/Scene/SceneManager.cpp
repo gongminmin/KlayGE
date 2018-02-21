@@ -473,7 +473,7 @@ namespace KlayGE
 		if (!update_thread_ && !quit_)
 		{
 			update_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
-				std::bind(&SceneManager::UpdateThreadFunc, this)));
+				[this] { this->UpdateThreadFunc(); }));
 		}
 
 		std::vector<SceneObjectPtr> added_scene_objs;

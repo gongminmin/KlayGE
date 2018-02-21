@@ -353,7 +353,7 @@ namespace KlayGE
 			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
 			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
 			std::shared_ptr<joiner_impl_base<result_t>> myjoiner_data = MakeSharedPtr<joiner_impl_t>(myreturn,
-				bind(&threaded_t::needle, mythreaded));
+				[mythreaded] { threaded_t::needle(mythreaded); });
 
 			return joiner_t(myjoiner_data);
 		}
@@ -586,7 +586,7 @@ namespace KlayGE
 			std::shared_ptr<result_opt> myreturn = MakeSharedPtr<result_opt>();
 			std::shared_ptr<threaded_t> mythreaded = MakeSharedPtr<threaded_t>(function, myreturn);
 			std::shared_ptr<joiner_impl_base<result_t>> myjoiner_data = MakeSharedPtr<joiner_impl_t>(data_,
-				myreturn, std::bind(&threaded_t::needle, mythreaded));
+				myreturn, [mythreaded] { threaded_t::needle(mythreaded); });
 
 			return joiner_t(myjoiner_data);
 		}

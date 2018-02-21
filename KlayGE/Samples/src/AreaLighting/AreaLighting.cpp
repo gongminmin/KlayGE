@@ -168,7 +168,11 @@ void AreaLightingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&AreaLightingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("AreaLighting.uiml"));
@@ -181,15 +185,31 @@ void AreaLightingApp::OnCreate()
 	id_length_slider_ = dialog_->IDFromName("LengthSlider");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
-	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&AreaLightingApp::LightTypeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_light_type_combo_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->LightTypeChangedHandler(sender);
+		});
 	this->LightTypeChangedHandler(*dialog_->Control<UIComboBox>(id_light_type_combo_));
 
-	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(std::bind(&AreaLightingApp::RadiusChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_radius_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->RadiusChangedHandler(sender);
+		});
 	this->RadiusChangedHandler(*dialog_->Control<UISlider>(id_radius_slider_));
-	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(std::bind(&AreaLightingApp::LengthChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_length_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->LengthChangedHandler(sender);
+		});
 	this->LengthChangedHandler(*dialog_->Control<UISlider>(id_length_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&AreaLightingApp::CtrlCameraHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->CtrlCameraHandler(sender);
+		});
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

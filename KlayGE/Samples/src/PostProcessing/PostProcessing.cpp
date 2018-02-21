@@ -130,7 +130,11 @@ void PostProcessingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&PostProcessingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	copy_ = SyncLoadPostProcess("Copy.ppml", "copy");
@@ -159,17 +163,61 @@ void PostProcessingApp::OnCreate()
 	id_frosted_glass_ = dialog_->IDFromName("FrostedGlassPP");
 	id_black_hole_ = dialog_->IDFromName("BlackHolePP");
 
-	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FPSCameraHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CopyHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::AsciiArtsHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CartoonHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::TilingHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::HDRHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::NightVisionHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::SepiaHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::CrossStitchingHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::FrostedGlassHandler, this, std::placeholders::_1));
-	dialog_->Control<UIRadioButton>(id_black_hole_)->OnChangedEvent().connect(std::bind(&PostProcessingApp::BlackHoleHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->FPSCameraHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_copy_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->CopyHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_ascii_arts_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->AsciiArtsHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_cartoon_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->CartoonHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_tiling_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->TilingHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_hdr_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->HDRHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_night_vision_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->NightVisionHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_old_fashion_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->SepiaHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_cross_stitching_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->CrossStitchingHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_frosted_glass_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->FrostedGlassHandler(sender);
+		});
+	dialog_->Control<UIRadioButton>(id_black_hole_)->OnChangedEvent().connect(
+		[this](UIRadioButton const & sender)
+		{
+			this->BlackHoleHandler(sender);
+		});
 	this->CartoonHandler(*dialog_->Control<UIRadioButton>(id_cartoon_));
 	
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

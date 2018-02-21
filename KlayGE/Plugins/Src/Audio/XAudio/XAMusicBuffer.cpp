@@ -36,6 +36,8 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
+#include <functional>
+
 #include <boost/assert.hpp>
 
 #include <KlayGE/XAudio/XAAudio.hpp>
@@ -190,7 +192,7 @@ namespace KlayGE
 		curr_buffer_index_ = 0;
 		loop_ = loop;
 
-		play_thread_ = Context::Instance().ThreadPool()(std::bind(&XAMusicBuffer::LoopUpdateBuffer, this));
+		play_thread_ = Context::Instance().ThreadPool()([this] { this->LoopUpdateBuffer(); });
 
 		stopped_ = false;
 		{

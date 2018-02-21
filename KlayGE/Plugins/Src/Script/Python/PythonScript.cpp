@@ -39,7 +39,6 @@
 #include <KlayGE/App3D.hpp>
 
 #include <algorithm>
-#include <functional>
 #include <boost/assert.hpp>
 
 #include <KlayGE/Python/PythonScript.hpp>

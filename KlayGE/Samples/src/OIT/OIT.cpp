@@ -574,7 +574,11 @@ void OITApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&OITApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	blend_pp_ = SyncLoadPostProcess("Blend.ppml", "blend");
@@ -596,14 +600,23 @@ void OITApp::OnCreate()
 	}
 
 	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(
-		std::bind(&OITApp::OITModeHandler, this, std::placeholders::_1));
+		[this](UIComboBox const & sender)
+		{
+			this->OITModeHandler(sender);
+		});
 	this->OITModeHandler(*dialog_oit_->Control<UIComboBox>(id_oit_mode_));
 	dialog_oit_->Control<UISlider>(id_alpha_slider_)->OnValueChangedEvent().connect(
-		std::bind(&OITApp::AlphaHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->AlphaHandler(sender);
+		});
 	this->AlphaHandler(*dialog_oit_->Control<UISlider>(id_alpha_slider_));
 
 	dialog_layer_->Control<UIComboBox>(id_layer_combo_)->OnSelectionChangedEvent().connect(
-		std::bind(&OITApp::LayerChangedHandler, this, std::placeholders::_1));
+		[this](UIComboBox const & sender)
+		{
+			this->LayerChangedHandler(sender);
+		});
 	this->LayerChangedHandler(*dialog_layer_->Control<UIComboBox>(id_layer_combo_));
 
 	for (uint32_t i = 0; i < peeled_texs_.size(); ++ i)

@@ -35,7 +35,6 @@
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <algorithm>
-#include <functional>
 #include <boost/assert.hpp>
 
 #ifdef KLAYGE_DRAW_NODES

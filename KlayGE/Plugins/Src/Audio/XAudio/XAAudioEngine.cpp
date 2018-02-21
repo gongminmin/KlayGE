@@ -36,6 +36,8 @@
 
 #include <cmath>
 #include <cstring>
+#include <functional>
+
 #include <boost/assert.hpp>
 
 #include <KlayGE/XAudio/XAAudio.hpp>

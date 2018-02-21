@@ -75,7 +75,11 @@ void SoundApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&SoundApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	AudioDataSourceFactory& adsf = Context::Instance().AudioDataSourceFactoryInstance();
@@ -101,15 +105,31 @@ void SoundApp::OnCreate()
 	id_volume_static_ = dialog_->IDFromName("VolumeStatic");
 	id_volume_slider_ = dialog_->IDFromName("VolumeSlider");
 
-	dialog_->Control<UICheckBox>(id_music_1_)->OnChangedEvent().connect(std::bind(&SoundApp::Music1Handler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_music_1_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->Music1Handler(sender);
+		});
 	this->Music1Handler(*dialog_->Control<UICheckBox>(id_music_1_));
 
-	dialog_->Control<UICheckBox>(id_music_2_)->OnChangedEvent().connect(std::bind(&SoundApp::Music2Handler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_music_2_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->Music2Handler(sender);
+		});
 	this->Music2Handler(*dialog_->Control<UICheckBox>(id_music_2_));
 
-	dialog_->Control<UIButton>(id_sound_)->OnClickedEvent().connect(std::bind(&SoundApp::SoundHandler, this, std::placeholders::_1));
+	dialog_->Control<UIButton>(id_sound_)->OnClickedEvent().connect(
+		[this](UIButton const & sender)
+		{
+			this->SoundHandler(sender);
+		});
 
-	dialog_->Control<UISlider>(id_volume_slider_)->OnValueChangedEvent().connect(std::bind(&SoundApp::VolumeChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_volume_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->VolumeChangedHandler(sender);
+		});
 	this->VolumeChangedHandler(*dialog_->Control<UISlider>(id_volume_slider_));
 }
 

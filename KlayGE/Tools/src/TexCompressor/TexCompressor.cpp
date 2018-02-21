@@ -414,8 +414,11 @@ namespace
 		std::atomic<int> block_index(0);
 		for (uint32_t i = 0; i < num_threads; ++ i)
 		{
-			joiners[i] = tp(std::bind(CompressABlock, std::ref(block_index), std::cref(block_addrs), in_num_mipmaps,
-				in_width, in_height, in_format, std::cref(in_data), std::cref(new_data), fmt));
+			joiners[i] = tp(
+				[&block_index, &block_addrs, in_num_mipmaps, in_width, in_height, in_format, &in_data, &new_data, fmt]
+				{
+					CompressABlock(block_index, block_addrs, in_num_mipmaps, in_width, in_height, in_format, in_data, new_data, fmt);
+				});
 		}
 
 		uint32_t const total_blocks = static_cast<uint32_t>(block_addrs.size());

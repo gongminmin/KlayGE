@@ -56,13 +56,13 @@ namespace KlayGE
 		touch_downs_[0].fill(false);
 		touch_downs_[1].fill(false);
 
-		gesture_funcs_[GS_None] = std::bind(&InputTouch::GestureNone, this, std::placeholders::_1);
-		gesture_funcs_[GS_Pan] = std::bind(&InputTouch::GesturePan, this, std::placeholders::_1);
-		gesture_funcs_[GS_Tap] = std::bind(&InputTouch::GestureTap, this, std::placeholders::_1);
-		gesture_funcs_[GS_PressAndTap] = std::bind(&InputTouch::GesturePressAndTap, this, std::placeholders::_1);
-		gesture_funcs_[GS_TwoFingerIntermediate] = std::bind(&InputTouch::GestureTwoFingerIntermediate, this, std::placeholders::_1);
-		gesture_funcs_[GS_Zoom] = std::bind(&InputTouch::GestureZoom, this, std::placeholders::_1);
-		gesture_funcs_[GS_Rotate] = std::bind(&InputTouch::GestureRotate, this, std::placeholders::_1);
+		gesture_funcs_[GS_None] = [this](float elapsed_time) { this->GestureNone(elapsed_time); };
+		gesture_funcs_[GS_Pan] = [this](float elapsed_time) { this->GesturePan(elapsed_time); };
+		gesture_funcs_[GS_Tap] = [this](float elapsed_time) { this->GestureTap(elapsed_time); };
+		gesture_funcs_[GS_PressAndTap] = [this](float elapsed_time) { this->GesturePressAndTap(elapsed_time); };
+		gesture_funcs_[GS_TwoFingerIntermediate] = [this](float elapsed_time) { this->GestureTwoFingerIntermediate(elapsed_time); };
+		gesture_funcs_[GS_Zoom] = [this](float elapsed_time) { this->GestureZoom(elapsed_time); };
+		gesture_funcs_[GS_Rotate] = [this](float elapsed_time) { this->GestureRotate(elapsed_time); };
 
 		curr_gesture_ = gesture_funcs_[GS_None];
 	}

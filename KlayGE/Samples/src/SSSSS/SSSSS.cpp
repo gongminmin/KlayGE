@@ -123,7 +123,11 @@ void SSSSSApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&SSSSSApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("SSSSS.uiml"));
@@ -137,15 +141,35 @@ void SSSSSApp::OnCreate()
 	id_translucency_strength_static_ = dialog_params_->IDFromName("TranslucencyStrengthStatic");
 	id_translucency_strength_slider_ = dialog_params_->IDFromName("TranslucencyStrengthSlider");
 
-	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(std::bind(&SSSSSApp::SSSHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_sss_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->SSSHandler(sender);
+		});
 	this->SSSHandler(*dialog_params_->Control<UICheckBox>(id_sss_));
-	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::SSSStrengthChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_sss_strength_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->SSSStrengthChangedHandler(sender);
+		});
 	this->SSSStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_sss_strength_slider_));
-	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::SSSCorrectionChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_sss_correction_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->SSSCorrectionChangedHandler(sender);
+		});
 	this->SSSCorrectionChangedHandler(*dialog_params_->Control<UISlider>(id_sss_correction_slider_));
-	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(std::bind(&SSSSSApp::TranslucencyHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_translucency_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->TranslucencyHandler(sender);
+		});
 	this->TranslucencyHandler(*dialog_params_->Control<UICheckBox>(id_translucency_));
-	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(std::bind(&SSSSSApp::TranslucencyStrengthChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_translucency_strength_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->TranslucencyStrengthChangedHandler(sender);
+		});
 	this->TranslucencyStrengthChangedHandler(*dialog_params_->Control<UISlider>(id_translucency_strength_slider_));
 
 	SceneObjectPtr subsurface_obj = MakeSharedPtr<SceneObjectHelper>(sss_model, SceneObject::SOA_Cullable);

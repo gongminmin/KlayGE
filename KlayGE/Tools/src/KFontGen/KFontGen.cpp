@@ -456,7 +456,7 @@ void quantizer(std::vector<uint8_t>& lzma_dist, uint32_t non_empty_chars,
 		param.char_size_sq = char_size_sq;
 		param.s = s;
 		param.e = e;
-		joiners[i] = tp(std::bind(quantizer_chars, std::ref(lzma_dists[i]), std::ref(mses[i]), param));
+		joiners[i] = tp([&lzma_dists, &mses, param, i] { quantizer_chars(lzma_dists[i], mses[i], param); });
 	}
 
 	float mse = 0;

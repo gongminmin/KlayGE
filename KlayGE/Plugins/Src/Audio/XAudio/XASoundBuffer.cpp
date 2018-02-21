@@ -36,6 +36,7 @@
 #include <KlayGE/AudioFactory.hpp>
 #include <KlayGE/AudioDataSource.hpp>
 
+#include <functional>
 #include <random>
 
 #include <boost/assert.hpp>

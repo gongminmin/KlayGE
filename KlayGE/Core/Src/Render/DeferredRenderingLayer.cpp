@@ -1491,8 +1491,7 @@ namespace KlayGE
 		jobs_.clear();
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-			this, std::ref(*shadow_map_perf_))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 		for (uint32_t i = 0; i < lights_.size(); ++ i)
 		{
@@ -1503,8 +1502,7 @@ namespace KlayGE
 			}
 		}
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-			this, std::ref(*shadow_map_perf_))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); } ));
 #endif
 
 #ifdef KLAYGE_DEBUG
@@ -1519,8 +1517,7 @@ namespace KlayGE
 				no_viewport = false;
 #endif
 
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::SwitchViewportDRJob,
-					this, vpi)));
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this, vpi] { return this->SwitchViewportDRJob(vpi); }));
 
 				pvp.g_buffer_enables[PTB_Opaque] = (pvp.attrib & VPAM_NoOpaque) ? false : has_opaque_objs;
 				pvp.g_buffer_enables[PTB_TransparencyBack] = (pvp.attrib & VPAM_NoTransparencyBack) ? false : has_transparency_back_objs;
@@ -1559,13 +1556,19 @@ namespace KlayGE
 
 					if (pvp.g_buffer_enables[i])
 					{
-						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadowingDRJob,
-							this, std::cref(pvp), pass_tb)));
+						jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+							[this, vpi, pass_tb]
+							{
+								return this->ShadowingDRJob(viewports_[vpi], pass_tb);
+							}));
 						if (!(pvp.attrib & VPAM_NoGI))
 						{
 #ifndef KLAYGE_SHIP
-							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-								this, std::ref(*indirect_lighting_perfs_[pass_tb]))));
+							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+								[this, pass_tb]
+								{
+									return this->BeginPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
+								}));
 #endif
 							for (uint32_t li = 0; li < lights_.size(); ++ li)
 							{
@@ -1582,8 +1585,11 @@ namespace KlayGE
 								}
 							}
 #ifndef KLAYGE_SHIP
-							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-								this, std::ref(*indirect_lighting_perfs_[pass_tb]))));
+							jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+								[this, pass_tb]
+								{
+									return this->EndPerfProfileDRJob(*indirect_lighting_perfs_[pass_tb]);
+								}));
 #endif
 						}
 
@@ -1591,11 +1597,14 @@ namespace KlayGE
 					}
 				}
 
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::PostEffectsDRJob,
-					this, std::ref(pvp))));
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+					[this, vpi]
+					{
+						return this->PostEffectsDRJob(viewports_[vpi]);
+					}));
 				if (has_simple_forward_objs_ && !(pvp.attrib & VPAM_NoSimpleForward))
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::SimpleForwardDRJob, this)));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->SimpleForwardDRJob(); }));
 				}
 			}
 		}
@@ -1607,11 +1616,11 @@ namespace KlayGE
 #endif
 			)
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::VisualizeLightingDRJob, this)));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeLightingDRJob(); }));
 		}
 		else
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::FinishingDRJob, this)));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->FinishingDRJob(); }));
 		}
 
 #ifdef KLAYGE_DEBUG
@@ -1662,19 +1671,30 @@ namespace KlayGE
 	void DeferredRenderingLayer::AppendGBufferPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-			this, std::ref(*gbuffer_perfs_[pass_tb]))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, pass_tb]
+			{
+				return this->BeginPerfProfileDRJob(*gbuffer_perfs_[pass_tb]);
+			}));
 #endif
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::GBufferGenerationDRJob,
-			this, std::ref(viewports_[vp_index]), ComposePassType(PRT_MRT, pass_tb, PC_GBuffer))));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::RenderingStatsDRJob,
-			this)));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::GBufferProcessingDRJob,
-			this, std::cref(viewports_[vp_index]))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index, pass_tb]
+			{
+				return this->GBufferGenerationDRJob(viewports_[vp_index], ComposePassType(PRT_MRT, pass_tb, PC_GBuffer));
+			}));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->RenderingStatsDRJob(); }));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index]
+			{
+				return this->GBufferProcessingDRJob(viewports_[vp_index]);
+			}));
 		if (pass_tb == PTB_Opaque)
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::OpaqueGBufferProcessingDRJob,
-				this, std::cref(viewports_[vp_index]))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, vp_index]
+				{
+					return this->OpaqueGBufferProcessingDRJob(viewports_[vp_index]);
+				}));
 			if ((DeferredRenderingLayer::DT_Position == display_type_)
 				|| (DeferredRenderingLayer::DT_Normal == display_type_)
 				|| (DeferredRenderingLayer::DT_Depth == display_type_)
@@ -1682,12 +1702,15 @@ namespace KlayGE
 				|| (DeferredRenderingLayer::DT_Specular == display_type_)
 				|| (DeferredRenderingLayer::DT_Shininess == display_type_))
 			{
-				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::VisualizeGBufferDRJob, this)));
+				jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->VisualizeGBufferDRJob(); }));
 			}
 		}
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-			this, std::ref(*gbuffer_perfs_[pass_tb]))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, pass_tb]
+			{
+				return this->EndPerfProfileDRJob(*gbuffer_perfs_[pass_tb]);
+			}));
 #endif
 	}
 
@@ -1729,10 +1752,16 @@ namespace KlayGE
 
 				if (sm_seq != 0)
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadowMapGenerationDRJob,
-						this, std::cref(viewports_[0]), shadow_pt, light_index, 0)));
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadowMapGenerationDRJob,
-						this, std::cref(viewports_[0]), shadow_pt, light_index, 1)));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+						[this, shadow_pt, light_index]
+						{
+							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, 0);
+						}));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+						[this, shadow_pt, light_index]
+						{
+							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, 1);
+						}));
 				}
 			}
 			break;
@@ -1744,8 +1773,11 @@ namespace KlayGE
 			{
 				for (int j = 0; j < 7; ++ j)
 				{
-					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadowMapGenerationDRJob,
-						this, std::cref(viewports_[0]), shadow_pt, light_index, j)));
+					jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+						[this, shadow_pt, light_index, j]
+						{
+							return this->ShadowMapGenerationDRJob(viewports_[0], shadow_pt, light_index, j);
+						}));
 				}
 			}
 			break;
@@ -1764,73 +1796,102 @@ namespace KlayGE
 		BOOST_ASSERT(LightSource::LT_Directional == lights_[light_index]->Type());
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-			this, std::ref(*shadow_map_perf_))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 
 		PerViewport& pvp = viewports_[vp_index];
 		for (uint32_t i = 0; i < pvp.num_cascades + 1; ++ i)
 		{
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadowMapGenerationDRJob,
-				this, std::cref(pvp), PT_GenCascadedShadowMap, light_index, i)));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, vp_index, light_index, i]
+				{
+					return this->ShadowMapGenerationDRJob(viewports_[vp_index], PT_GenCascadedShadowMap, light_index, i);
+				}));
 		}
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-			this, std::ref(*shadow_map_perf_))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*shadow_map_perf_); }));
 #endif
 	}
 
 	void DeferredRenderingLayer::AppendIndirectLightingPassScanCode(uint32_t vp_index, uint32_t light_index)
 	{
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::IndirectLightingDRJob,
-			this, std::cref(viewports_[vp_index]), light_index)));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index, light_index]
+			{
+				return this->IndirectLightingDRJob(viewports_[vp_index], light_index);
+			}));
 	}
 
 	void DeferredRenderingLayer::AppendShadingPassScanCode(uint32_t vp_index, PassTargetBuffer pass_tb)
 	{
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ShadingDRJob,
-			this, std::cref(viewports_[vp_index]), ComposePassType(PRT_None, pass_tb, PC_Shading), 0)));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index, pass_tb]
+			{
+				return this->ShadingDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_Shading), 0);
+			}));
 
 		if (has_reflective_objs_)
 		{
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-				this, std::ref(*reflection_perfs_[pass_tb]))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, pass_tb]
+				{
+					return this->BeginPerfProfileDRJob(*reflection_perfs_[pass_tb]);
+				}));
 #endif
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::ReflectionDRJob,
-				this, std::cref(viewports_[vp_index]), ComposePassType(PRT_None, pass_tb, PC_Reflection))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, vp_index, pass_tb]
+				{
+					return this->ReflectionDRJob(viewports_[vp_index], ComposePassType(PRT_None, pass_tb, PC_Reflection));
+				}));
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-				this, std::ref(*reflection_perfs_[pass_tb]))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, pass_tb]
+				{
+					return this->EndPerfProfileDRJob(*reflection_perfs_[pass_tb]);
+				}));
 #endif
 		}
 
 		if (has_vdm_objs_)
 		{
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-				this, std::ref(*vdm_perf_))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->BeginPerfProfileDRJob(*vdm_perf_); }));
 #endif
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::VDMDRJob,
-				this, std::cref(viewports_[vp_index]))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+				[this, vp_index]
+				{
+					return this->VDMDRJob(viewports_[vp_index]);
+				}));
 #ifndef KLAYGE_SHIP
-			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-				this, std::ref(*vdm_perf_))));
+			jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>([this] { return this->EndPerfProfileDRJob(*vdm_perf_); }));
 #endif
 		}
 
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::BeginPerfProfileDRJob,
-			this, std::ref(*special_shading_perfs_[pass_tb]))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, pass_tb]
+			{
+				return this->BeginPerfProfileDRJob(*special_shading_perfs_[pass_tb]);
+			}));
 #endif
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::SpecialShadingDRJob,
-			this, std::ref(viewports_[vp_index]), ComposePassType(PRT_None, pass_tb, PC_SpecialShading))));
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::MergeShadingAndDepthDRJob,
-			this, std::ref(viewports_[vp_index]), pass_tb)));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index, pass_tb]
+			{
+				return this->SpecialShadingDRJob(viewports_[vp_index] , ComposePassType(PRT_None, pass_tb, PC_SpecialShading));
+			}));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, vp_index, pass_tb]
+			{
+				return this->MergeShadingAndDepthDRJob(viewports_[vp_index] , pass_tb);
+			}));
 #ifndef KLAYGE_SHIP
-		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(std::bind(&DeferredRenderingLayer::EndPerfProfileDRJob,
-			this, std::ref(*special_shading_perfs_[pass_tb]))));
+		jobs_.push_back(MakeSharedPtr<DeferredRenderingJob>(
+			[this, pass_tb]
+			{
+				return this->EndPerfProfileDRJob(*special_shading_perfs_[pass_tb]);
+			}));
 #endif
 	}
 

@@ -635,7 +635,11 @@ void CausticsMapApp::OnCreate()
 	InputActionMap action_map;
 	action_map.AddActions(actions, actions + std::size(actions));
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&CausticsMapApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	ie.ActionMap(action_map, input_handler);
 
 	//Model
@@ -952,23 +956,43 @@ void CausticsMapApp::InitUI()
 
 	int ui_id = 0;
 	ui_id = dialog_->IDFromName("Light_Density_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(std::bind(&CausticsMapApp::LightDensityHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->LightDensityHandler(sender);
+		});
 	LightDensityHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Refraction_Index_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(std::bind(&CausticsMapApp::RefractIndexHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->RefractIndexHandler(sender);
+		});
 	RefractIndexHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Point_Size_Slider");
-	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(std::bind(&CausticsMapApp::PointSizeHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(ui_id)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->PointSizeHandler(sender);
+		});
 	PointSizeHandler(*(dialog_->Control<UISlider>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Dual_Caustics_Checkbox");
-	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().connect(std::bind(&CausticsMapApp::DualFaceCausticsCheckBoxHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(ui_id)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->DualFaceCausticsCheckBoxHandler(sender);
+		});
 	DualFaceCausticsCheckBoxHandler(*(dialog_->Control<UICheckBox>(ui_id)));
 
 	ui_id = dialog_->IDFromName("Model_Combobox");
-	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().connect(std::bind(&CausticsMapApp::ModelSelectionComboBox, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(ui_id)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->ModelSelectionComboBox(sender);
+		});
 	ModelSelectionComboBox(*(dialog_->Control<UIComboBox>(ui_id)));
 }
 

@@ -76,10 +76,16 @@ namespace KlayGE
 #else
 		wnd_ = main_wnd->GetWindow();
 #endif
-		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(std::bind(&D3D11RenderWindow::OnExitSizeMove, this,
-			std::placeholders::_1));
-		on_size_connect_ = main_wnd->OnSize().connect(std::bind(&D3D11RenderWindow::OnSize, this,
-			std::placeholders::_1, std::placeholders::_2));
+		on_exit_size_move_connect_ = main_wnd->OnExitSizeMove().connect(
+			[this](Window const & win)
+			{
+				this->OnExitSizeMove(win);
+			});
+		on_size_connect_ = main_wnd->OnSize().connect(
+			[this](Window const & win, bool active)
+			{
+				this->OnSize(win, active);
+			});
 
 		if (this->FullScreen())
 		{
@@ -424,7 +430,10 @@ namespace KlayGE
 			&disp_info_stat));
 
 		auto callback = Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
-			std::bind(&D3D11RenderWindow::OnStereoEnabledChanged, this, std::placeholders::_1, std::placeholders::_2));
+			[this](IDisplayInformation* sender, IInspectable* args)
+			{
+				return this->OnStereoEnabledChanged(sender, args);
+			});
 
 		ComPtr<IDisplayInformation> disp_info;
 		TIFHR(disp_info_stat->GetForCurrentView(&disp_info));

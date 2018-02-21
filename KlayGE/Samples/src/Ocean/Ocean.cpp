@@ -926,7 +926,11 @@ void OceanApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&OceanApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Ocean.uiml"));
@@ -950,33 +954,73 @@ void OceanApp::OnCreate()
 	id_light_shaft_ = dialog_params_->IDFromName("LightShaft");
 	id_fps_camera_ = dialog_params_->IDFromName("FPSCamera");
 
-	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::DMapDimChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_dmap_dim_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DMapDimChangedHandler(sender);
+		});
 	this->DMapDimChangedHandler(*dialog_params_->Control<UISlider>(id_dmap_dim_slider_));
 
-	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::PatchLengthChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_patch_length_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->PatchLengthChangedHandler(sender);
+		});
 	this->PatchLengthChangedHandler(*dialog_params_->Control<UISlider>(id_patch_length_slider_));
 
-	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::TimeScaleChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_time_scale_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->TimeScaleChangedHandler(sender);
+		});
 	this->TimeScaleChangedHandler(*dialog_params_->Control<UISlider>(id_time_scale_slider_));
 
-	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::WaveAmplitudeChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_wave_amplitude_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->WaveAmplitudeChangedHandler(sender);
+		});
 	this->WaveAmplitudeChangedHandler(*dialog_params_->Control<UISlider>(id_wave_amplitude_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::WindSpeedXChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_wind_speed_x_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->WindSpeedXChangedHandler(sender);
+		});
 	this->WindSpeedXChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_x_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::WindSpeedYChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_wind_speed_y_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->WindSpeedYChangedHandler(sender);
+		});
 	this->WindSpeedYChangedHandler(*dialog_params_->Control<UISlider>(id_wind_speed_y_slider_));
 
-	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::WindDependencyChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_wind_dependency_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->WindDependencyChangedHandler(sender);
+		});
 	this->WindDependencyChangedHandler(*dialog_params_->Control<UISlider>(id_wind_dependency_slider_));
 
-	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(std::bind(&OceanApp::ChoppyScaleChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_choppy_scale_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->ChoppyScaleChangedHandler(sender);
+		});
 	this->ChoppyScaleChangedHandler(*dialog_params_->Control<UISlider>(id_choppy_scale_slider_));
 
-	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(std::bind(&OceanApp::LightShaftHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_light_shaft_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->LightShaftHandler(sender);
+		});
 
-	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(std::bind(&OceanApp::FPSCameraHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UICheckBox>(id_fps_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->FPSCameraHandler(sender);
+		});
 }
 
 void OceanApp::OnResize(uint32_t width, uint32_t height)

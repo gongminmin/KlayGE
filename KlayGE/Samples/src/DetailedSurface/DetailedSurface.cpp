@@ -604,7 +604,11 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(std::bind(&DetailedSurfaceApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+			input_handler->connect(
+				[this](InputEngine const & sender, InputAction const & action)
+				{
+					this->InputHandler(sender, action);
+				});
 			inputEngine.ActionMap(actionMap, input_handler);
 
 			loading_percentage_ = 90;
@@ -621,16 +625,32 @@ uint32_t DetailedSurfaceApp::DoUpdate(uint32_t /*pass*/)
 			id_wireframe_ = dialog_->IDFromName("Wireframe");
 
 			dialog_->Control<UISlider>(id_scale_slider_)->SetValue(static_cast<int>(height_scale_ * 100));
-			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(std::bind(&DetailedSurfaceApp::ScaleChangedHandler, this, std::placeholders::_1));
+			dialog_->Control<UISlider>(id_scale_slider_)->OnValueChangedEvent().connect(
+				[this](UISlider const & sender)
+				{
+					this->ScaleChangedHandler(sender);
+				});
 			this->ScaleChangedHandler(*dialog_->Control<UISlider>(id_scale_slider_));
 
 			dialog_->Control<UIComboBox>(id_detail_type_combo_)->SetSelectedByIndex(2);
-			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&DetailedSurfaceApp::DetailTypeChangedHandler, this, std::placeholders::_1));
+			dialog_->Control<UIComboBox>(id_detail_type_combo_)->OnSelectionChangedEvent().connect(
+				[this](UIComboBox const & sender)
+				{
+					this->DetailTypeChangedHandler(sender);
+				});
 			this->DetailTypeChangedHandler(*dialog_->Control<UIComboBox>(id_detail_type_combo_));
 
-			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().connect(std::bind(&DetailedSurfaceApp::NaLengthHandler, this, std::placeholders::_1));
+			dialog_->Control<UICheckBox>(id_na_length_)->OnChangedEvent().connect(
+				[this](UICheckBox const & sender)
+				{
+					this->NaLengthHandler(sender);
+				});
 			this->NaLengthHandler(*dialog_->Control<UICheckBox>(id_na_length_));
-			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(std::bind(&DetailedSurfaceApp::WireframeHandler, this, std::placeholders::_1));
+			dialog_->Control<UICheckBox>(id_wireframe_)->OnChangedEvent().connect(
+				[this](UICheckBox const & sender)
+				{
+					this->WireframeHandler(sender);
+				});
 			this->WireframeHandler(*dialog_->Control<UICheckBox>(id_wireframe_));
 
 			loading_percentage_ = 100;

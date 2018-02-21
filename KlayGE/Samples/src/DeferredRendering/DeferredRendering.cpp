@@ -189,7 +189,11 @@ void DeferredRenderingApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&DeferredRenderingApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("DeferredRendering.uiml"));
@@ -211,26 +215,58 @@ void DeferredRenderingApp::OnCreate()
 	dialog_->Control<UIComboBox>(id_buffer_combo_)->RemoveItem(9);
 #endif
 
-	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(std::bind(&DeferredRenderingApp::BufferChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_buffer_combo_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->BufferChangedHandler(sender);
+		});
 	this->BufferChangedHandler(*dialog_->Control<UIComboBox>(id_buffer_combo_));
 
-	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(std::bind(&DeferredRenderingApp::IllumChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UIComboBox>(id_illum_combo_)->OnSelectionChangedEvent().connect(
+		[this](UIComboBox const & sender)
+		{
+			this->IllumChangedHandler(sender);
+		});
 	this->IllumChangedHandler(*dialog_->Control<UIComboBox>(id_illum_combo_));
 
 	dialog_->Control<UISlider>(id_il_scale_slider_)->SetValue(static_cast<int>(il_scale_ * 10));
-	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(std::bind(&DeferredRenderingApp::ILScaleChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_il_scale_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->ILScaleChangedHandler(sender);
+		});
 	this->ILScaleChangedHandler(*dialog_->Control<UISlider>(id_il_scale_slider_));
 
-	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::SSVOHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ssvo_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->SSVOHandler(sender);
+		});
 	this->SSVOHandler(*dialog_->Control<UICheckBox>(id_ssvo_));
-	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::HDRHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_hdr_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->HDRHandler(sender);
+		});
 	this->HDRHandler(*dialog_->Control<UICheckBox>(id_hdr_));
-	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::AntiAliasHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_aa_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->AntiAliasHandler(sender);
+		});
 	this->AntiAliasHandler(*dialog_->Control<UICheckBox>(id_aa_));
-	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(std::bind(&DeferredRenderingApp::NumLightsChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_num_lights_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->NumLightsChangedHandler(sender);
+		});
 	this->NumLightsChangedHandler(*dialog_->Control<UISlider>(id_num_lights_slider_));
 
-	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(std::bind(&DeferredRenderingApp::CtrlCameraHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->CtrlCameraHandler(sender);
+		});
 	this->CtrlCameraHandler(*dialog_->Control<UICheckBox>(id_ctrl_camera_));
 
 	sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();

@@ -121,11 +121,11 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = std::bind(&D3D11RenderTargetRenderView::HWDiscard, this);
+			discard_func_ = [this] { this->HWDiscard(); };
 		}
 		else
 		{
-			discard_func_ = std::bind(&D3D11RenderTargetRenderView::FackDiscard, this);
+			discard_func_ = [this] { this->FackDiscard(); };
 		}
 	}
 
@@ -232,11 +232,11 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = std::bind(&D3D11DepthStencilRenderView::HWDiscard, this);
+			discard_func_ = [this] { this->HWDiscard(); };
 		}
 		else
 		{
-			discard_func_ = std::bind(&D3D11DepthStencilRenderView::FackDiscard, this);
+			discard_func_ = [this] { this->FackDiscard(); };
 		}
 	}
 
@@ -356,11 +356,11 @@ namespace KlayGE
 		D3D11RenderEngine& re = *checked_cast<D3D11RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (re.D3D11RuntimeSubVer() >= 1)
 		{
-			discard_func_ = std::bind(&D3D11UnorderedAccessView::HWDiscard, this);
+			discard_func_ = [this] { this->HWDiscard(); };
 		}
 		else
 		{
-			discard_func_ = std::bind(&D3D11UnorderedAccessView::FackDiscard, this);
+			discard_func_ = [this] { this->FackDiscard(); };
 		}
 	}
 

@@ -227,7 +227,7 @@ namespace KlayGE
 #endif
 
 		loading_thread_ = MakeUniquePtr<joiner<void>>(Context::Instance().ThreadPool()(
-				std::bind(&ResLoader::LoadingThreadFunc, this)));
+			[this] { this->LoadingThreadFunc(); }));
 	}
 
 	ResLoader::~ResLoader()

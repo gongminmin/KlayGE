@@ -176,7 +176,10 @@ namespace KlayGE
 		app_view_ = MakeCOMPtr(application_view);
 
 		app_view_->add_Activated(Callback<ITypedEventHandler<CoreApplicationView*, IActivatedEventArgs*>>(
-			std::bind(&MetroFramework::OnActivated, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreApplicationView* application_view, IActivatedEventArgs* args)
+			{
+				return this->OnActivated(application_view, args);
+			}).Get(),
 			&app_activated_token_);
 
 		ComPtr<ICoreApplication> core_app;
@@ -184,10 +187,16 @@ namespace KlayGE
 			&core_app);
 
 		core_app->add_Suspending(Callback<IEventHandler<SuspendingEventArgs*>>(
-			std::bind(&MetroFramework::OnSuspending, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](IInspectable* sender, ISuspendingEventArgs* args)
+			{
+				return this->OnSuspending(sender, args);
+			}).Get(),
 			&app_suspending_token_);
 		core_app->add_Resuming(Callback<IEventHandler<IInspectable*>>(
-			std::bind(&MetroFramework::OnResuming, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](IInspectable* sender, IInspectable* args)
+			{
+				return this->OnResuming(sender, args);
+			}).Get(),
 			&app_resuming_token_);
 
 		return S_OK;
@@ -198,15 +207,24 @@ namespace KlayGE
 		window_ = MakeCOMPtr(window);
 
 		window_->add_SizeChanged(Callback<ITypedEventHandler<CoreWindow*, WindowSizeChangedEventArgs*>>(
-			std::bind(&MetroFramework::OnWindowSizeChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IWindowSizeChangedEventArgs* args)
+			{
+				return this->OnWindowSizeChanged(sender, args);
+			}).Get(),
 			&win_size_changed_token_);
 
 		window_->add_VisibilityChanged(Callback<ITypedEventHandler<CoreWindow*, VisibilityChangedEventArgs*>>(
-			std::bind(&MetroFramework::OnVisibilityChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IVisibilityChangedEventArgs* args)
+			{
+				return this->OnVisibilityChanged(sender, args);
+			}).Get(),
 			&visibility_changed_token_);
 
 		window_->add_Closed(Callback<ITypedEventHandler<CoreWindow*, CoreWindowEventArgs*>>(
-			std::bind(&MetroFramework::OnWindowClosed, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, ICoreWindowEventArgs* args)
+			{
+				return this->OnWindowClosed(sender, args);
+			}).Get(),
 			&win_closed_token_);
 
 		ComPtr<ICoreCursorFactory> cursor_factory;
@@ -217,23 +235,41 @@ namespace KlayGE
 		window_->put_PointerCursor(cursor.Get());
 
 		window_->add_KeyDown(Callback<ITypedEventHandler<CoreWindow*, KeyEventArgs*>>(
-			std::bind(&MetroFramework::OnKeyDown, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IKeyEventArgs* args)
+			{
+				return this->OnKeyDown(sender, args);
+			}).Get(),
 			&key_down_token_);
 		window_->add_KeyUp(Callback<ITypedEventHandler<CoreWindow*, KeyEventArgs*>>(
-			std::bind(&MetroFramework::OnKeyUp, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IKeyEventArgs* args)
+			{
+				return this->OnKeyUp(sender, args);
+			}).Get(),
 			&key_up_token_);
 
 		window_->add_PointerPressed(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
-			std::bind(&MetroFramework::OnPointerPressed, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IPointerEventArgs* args)
+			{
+				return this->OnPointerPressed(sender, args);
+			}).Get(),
 			&pointer_pressed_token_);
 		window_->add_PointerReleased(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
-			std::bind(&MetroFramework::OnPointerReleased, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IPointerEventArgs* args)
+			{
+				return this->OnPointerReleased(sender, args);
+			}).Get(),
 			&pointer_released_token_);
 		window_->add_PointerMoved(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
-			std::bind(&MetroFramework::OnPointerMoved, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IPointerEventArgs* args)
+			{
+				return this->OnPointerMoved(sender, args);
+			}).Get(),
 			&pointer_moved_token_);
 		window_->add_PointerWheelChanged(Callback<ITypedEventHandler<CoreWindow*, PointerEventArgs*>>(
-			std::bind(&MetroFramework::OnPointerWheelChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](ICoreWindow* sender, IPointerEventArgs* args)
+			{
+				return this->OnPointerWheelChanged(sender, args);
+			}).Get(),
 			&pointer_wheel_changed_token_);
 
 		ComPtr<IDisplayInformationStatics> disp_info_stat;
@@ -244,11 +280,17 @@ namespace KlayGE
 		disp_info_stat->GetForCurrentView(&disp_info);
 
 		disp_info->add_DpiChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
-			std::bind(&MetroFramework::OnDpiChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](IDisplayInformation* sender, IInspectable* args)
+			{
+				return this->OnDpiChanged(sender, args);
+			}).Get(),
 			&dpi_changed_token_);
 
 		disp_info->add_OrientationChanged(Callback<ITypedEventHandler<DisplayInformation*, IInspectable*>>(
-			std::bind(&MetroFramework::OnOrientationChanged, this, std::placeholders::_1, std::placeholders::_2)).Get(),
+			[this](IDisplayInformation* sender, IInspectable* args)
+			{
+				return this->OnOrientationChanged(sender, args);
+			}).Get(),
 			&orientation_changed_token_);
 
 		app_->MainWnd()->SetWindow(window_);

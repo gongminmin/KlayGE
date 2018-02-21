@@ -212,7 +212,11 @@ void RasterizationOrderApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&RasterizationOrderApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("RasterizationOrder.uiml"));
@@ -221,10 +225,16 @@ void RasterizationOrderApp::OnCreate()
 	id_capture_ = dialog_params_->IDFromName("Capture");
 
 	dialog_params_->Control<UICheckBox>(id_color_map_)->OnChangedEvent().connect(
-		std::bind(&RasterizationOrderApp::ColorMapHandler, this, std::placeholders::_1));
+		[this](UICheckBox const & sender)
+		{
+			this->ColorMapHandler(sender);
+		});
 	this->ColorMapHandler(*dialog_params_->Control<UICheckBox>(id_color_map_));
 	dialog_params_->Control<UIButton>(id_capture_)->OnClickedEvent().connect(
-		std::bind(&RasterizationOrderApp::CaptureHandler, this, std::placeholders::_1));
+		[this](UIButton const & sender)
+		{
+			this->CaptureHandler(sender);
+		});
 }
 
 void RasterizationOrderApp::OnResize(uint32_t width, uint32_t height)

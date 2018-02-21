@@ -278,13 +278,21 @@ namespace KlayGE
 		std::sort(uav_format_.begin(), uav_format_.end());
 		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
 
-		caps_.vertex_format_support = std::bind<bool>(&NullRenderEngine::VertexFormatSupport, this,
-			std::placeholders::_1);
-		caps_.texture_format_support = std::bind<bool>(&NullRenderEngine::TextureFormatSupport, this,
-			std::placeholders::_1);
-		caps_.rendertarget_format_support = std::bind<bool>(&NullRenderEngine::RenderTargetFormatSupport, this,
-			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-		caps_.uav_format_support = std::bind<bool>(&NullRenderEngine::UAVFormatSupport, this,
-			std::placeholders::_1);
+		caps_.vertex_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->VertexFormatSupport(elem_fmt);
+			};
+		caps_.texture_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->TextureFormatSupport(elem_fmt);
+			};
+		caps_.rendertarget_format_support = [this](ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
+			{
+				return this->RenderTargetFormatSupport(elem_fmt, sample_count, sample_quality);
+			};
+		caps_.uav_format_support = [this](ElementFormat elem_fmt)
+			{
+				return this->UAVFormatSupport(elem_fmt);
+			};
 	}
 }

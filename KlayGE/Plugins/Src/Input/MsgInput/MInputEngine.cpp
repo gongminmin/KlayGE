@@ -183,30 +183,65 @@ namespace KlayGE
 
 		if (::RegisterRawInputDevices(&rids[0], static_cast<UINT>(rids.size()), sizeof(rids[0])))
 		{
-			on_raw_input_ = main_wnd->OnRawInput().connect(bind(&MsgInputEngine::OnRawInput, this,
-				std::placeholders::_1, std::placeholders::_2));
+			on_raw_input_ = main_wnd->OnRawInput().connect(
+				[this](Window const & wnd, HRAWINPUT ri)
+				{
+					this->OnRawInput(wnd, ri);
+				});
 		}
 #elif defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
-		on_key_down_ = main_wnd->OnKeyDown().connect(std::bind(&MsgInputEngine::OnKeyDown, this,
-			std::placeholders::_2));
-		on_key_up_ = main_wnd->OnKeyUp().connect(std::bind(&MsgInputEngine::OnKeyUp, this,
-			std::placeholders::_2));
+		on_key_down_ = main_wnd->OnKeyDown().connect(
+			[this](Window const & wnd, uint32_t key)
+			{
+				KFL_UNUSED(wnd);
+				this->OnKeyDown(key);
+			});
+		on_key_up_ = main_wnd->OnKeyUp().connect(
+			[this](Window const & wnd, uint32_t key)
+			{
+				KFL_UNUSED(wnd);
+				this->OnKeyUp(key);
+			});
 		devices_.push_back(MakeSharedPtr<MsgInputKeyboard>());
 #if defined KLAYGE_PLATFORM_ANDROID
-		on_mouse_down_ = main_wnd->OnMouseDown().connect(std::bind(&MsgInputEngine::OnMouseDown, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_mouse_up_ = main_wnd->OnMouseUp().connect(std::bind(&MsgInputEngine::OnMouseUp, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_mouse_move_ = main_wnd->OnMouseMove().connect(std::bind(&MsgInputEngine::OnMouseMove, this,
-			std::placeholders::_2));
-		on_mouse_wheel_ = main_wnd->OnMouseWheel().connect(std::bind(&MsgInputEngine::OnMouseWheel, this,
-			std::placeholders::_2, std::placeholders::_3));
+		on_mouse_down_ = main_wnd->OnMouseDown().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t buttons)
+			{
+				KFL_UNUSED(wnd);
+				this->OnMouseDown(pt, buttons);
+			});
+		on_mouse_up_ = main_wnd->OnMouseUp().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t buttons)
+			{
+				KFL_UNUSED(wnd);
+				this->OnMouseUp(pt, buttons);
+			});
+		on_mouse_move_ = main_wnd->OnMouseMove().connect(
+			this](Window const & wnd, int2 const & pt)
+			{
+				KFL_UNUSED(wnd);
+				this->OnMouseMove(pt);
+			});
+		on_mouse_wheel_ = main_wnd->OnMouseWheel().connect(
+			[this](Window const & wnd, int2 const & pt, int32_t wheel_delta)
+			{
+				KFL_UNUSED(wnd);
+				this->OnMouseWheel(pt, wheel_delta);
+			});
 		devices_.push_back(MakeSharedPtr<MsgInputMouse>());
 
-		on_joystick_axis_ = main_wnd->OnJoystickAxis().connect(std::bind(&MsgInputEngine::OnJoystickAxis, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_joystick_buttons_ = main_wnd->OnJoystickButtons().connect(std::bind(&MsgInputEngine::OnJoystickButtons, this,
-			std::placeholders::_2));
+		on_joystick_axis_ = main_wnd->OnJoystickAxis().connect(
+			[this](Window const & wnd, uint32_t axis, int32_t value)
+			{
+				KFL_UNUSED(wnd);
+				this->OnJoystickAxis(axis, value);
+			});
+		on_joystick_buttons_ = main_wnd->OnJoystickButtons().connect(
+			[this](Window const & wnd, uint32_t buttons)
+			{
+				KFL_UNUSED(wnd);
+				this->OnJoystickButtons(buttons);
+			});
 		devices_.push_back(MakeSharedPtr<MsgInputJoystick>());
 #endif
 #elif defined KLAYGE_PLATFORM_LINUX
@@ -216,14 +251,30 @@ namespace KlayGE
 
 #if ((defined KLAYGE_PLATFORM_WINDOWS_DESKTOP) && (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)) \
 			|| defined(KLAYGE_PLATFORM_WINDOWS_STORE) || defined(KLAYGE_PLATFORM_ANDROID) || defined(KLAYGE_PLATFORM_DARWIN)
-		on_pointer_down_ = main_wnd->OnPointerDown().connect(std::bind(&MsgInputEngine::OnPointerDown, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_up_ = main_wnd->OnPointerUp().connect(std::bind(&MsgInputEngine::OnPointerUp, this,
-			std::placeholders::_2, std::placeholders::_3));
-		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(std::bind(&MsgInputEngine::OnPointerUpdate, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
-		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(std::bind(&MsgInputEngine::OnPointerWheel, this,
-			std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+		on_pointer_down_ = main_wnd->OnPointerDown().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t id)
+			{
+				KFL_UNUSED(wnd);
+				this->OnPointerDown(pt, id);
+			});
+		on_pointer_up_ = main_wnd->OnPointerUp().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t id)
+			{
+				KFL_UNUSED(wnd);
+				this->OnPointerUp(pt, id);
+			});
+		on_pointer_update_ = main_wnd->OnPointerUpdate().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t id, bool down)
+			{
+				KFL_UNUSED(wnd);
+				this->OnPointerUpdate(pt, id, down);
+			});
+		on_pointer_wheel_ = main_wnd->OnPointerWheel().connect(
+			[this](Window const & wnd, int2 const & pt, uint32_t id, int32_t wheel_delta)
+			{
+				KFL_UNUSED(wnd);
+				this->OnPointerWheel(pt, id, wheel_delta);
+			});
 		devices_.push_back(MakeSharedPtr<MsgInputTouch>());
 #endif
 

@@ -154,7 +154,11 @@ void TessellationApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&TessellationApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Tessellation.uiml"));
@@ -170,15 +174,35 @@ void TessellationApp::OnCreate()
 	id_inside_static_ = dialog_->IDFromName("InsideStatic");
 	id_inside_slider_ = dialog_->IDFromName("InsideSlider");
 
-	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().connect(std::bind(&TessellationApp::TessellationOnHandler, this, std::placeholders::_1));
+	dialog_->Control<UICheckBox>(id_tess_enabled_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->TessellationOnHandler(sender);
+		});
 	this->TessellationOnHandler(*dialog_->Control<UICheckBox>(id_tess_enabled_));
-	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().connect(std::bind(&TessellationApp::Edge0ChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_edge0_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->Edge0ChangedHandler(sender);
+		});
 	this->Edge0ChangedHandler(*dialog_->Control<UISlider>(id_edge0_slider_));
-	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().connect(std::bind(&TessellationApp::Edge1ChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_edge1_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->Edge1ChangedHandler(sender);
+		});
 	this->Edge1ChangedHandler(*dialog_->Control<UISlider>(id_edge1_slider_));
-	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().connect(std::bind(&TessellationApp::Edge2ChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_edge2_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->Edge2ChangedHandler(sender);
+		});
 	this->Edge2ChangedHandler(*dialog_->Control<UISlider>(id_edge2_slider_));
-	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().connect(std::bind(&TessellationApp::InsideChangedHandler, this, std::placeholders::_1));
+	dialog_->Control<UISlider>(id_inside_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->InsideChangedHandler(sender);
+		});
 	this->InsideChangedHandler(*dialog_->Control<UISlider>(id_inside_slider_));
 
 	RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();

@@ -106,8 +106,11 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(std::bind(&FirstPersonCameraController::InputHandler, this,
-				std::placeholders::_1, std::placeholders::_2));
+			input_handler->connect(
+				[this](InputEngine const & ie, InputAction const & action)
+				{
+					this->InputHandler(ie, action);
+				});
 			inputEngine.ActionMap(actionMap, input_handler);
 		}
 	}
@@ -296,8 +299,11 @@ namespace KlayGE
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(std::bind(&TrackballCameraController::InputHandler, this,
-				std::placeholders::_1, std::placeholders::_2));
+			input_handler->connect(
+				[this](InputEngine const & ie, InputAction const & action)
+				{
+					this->InputHandler(ie, action);
+				});
 			inputEngine.ActionMap(actionMap, input_handler);
 		}
 	}
@@ -616,8 +622,11 @@ namespace KlayGE
 		CameraController::AttachCamera(camera);
 
 		start_time_ = Context::Instance().AppInstance().AppTime();
-		camera.BindUpdateFunc(std::bind(&CameraPathController::UpdateCameraFunc, this,
-			std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+		camera.BindUpdateFunc(
+			[this](Camera& camera, float app_time, float elapsed_time)
+			{
+				this->UpdateCameraFunc(camera, app_time, elapsed_time);
+			});
 	}
 
 	void CameraPathController::DetachCamera()

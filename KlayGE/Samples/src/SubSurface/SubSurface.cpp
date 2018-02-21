@@ -135,7 +135,11 @@ void SubSurfaceApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&SubSurfaceApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("SubSurface.uiml"));
@@ -145,10 +149,18 @@ void SubSurfaceApp::OnCreate()
 	id_mtl_thickness_static_ = dialog_params_->IDFromName("MtlThicknessStatic");
 	id_mtl_thickness_slider_ = dialog_params_->IDFromName("MtlThicknessSlider");
 
-	dialog_params_->Control<UISlider>(id_sigma_slider_)->OnValueChangedEvent().connect(std::bind(&SubSurfaceApp::SigmaChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_sigma_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->SigmaChangedHandler(sender);
+		});
 	this->SigmaChangedHandler(*dialog_params_->Control<UISlider>(id_sigma_slider_));
 
-	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(std::bind(&SubSurfaceApp::MtlThicknessChangedHandler, this, std::placeholders::_1));
+	dialog_params_->Control<UISlider>(id_mtl_thickness_slider_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->MtlThicknessChangedHandler(sender);
+		});
 	this->MtlThicknessChangedHandler(*dialog_params_->Control<UISlider>(id_mtl_thickness_slider_));
 
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();

@@ -188,7 +188,11 @@ void MetalnessApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&MetalnessApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("Metalness.uiml"));
@@ -201,13 +205,22 @@ void MetalnessApp::OnCreate()
 	id_metalness_ = dialog_->IDFromName("MetalnessSlider");
 
 	dialog_->Control<UICheckBox>(id_single_object_)->OnChangedEvent().connect(
-		std::bind(&MetalnessApp::SingleObjectHandler, this, std::placeholders::_1));
+		[this](UICheckBox const & sender)
+		{
+			this->SingleObjectHandler(sender);
+		});
 	this->SingleObjectHandler(*dialog_->Control<UICheckBox>(id_single_object_));
 	dialog_->Control<UISlider>(id_glossiness_)->OnValueChangedEvent().connect(
-		std::bind(&MetalnessApp::GlossinessChangedHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->GlossinessChangedHandler(sender);
+		});
 	this->GlossinessChangedHandler(*dialog_->Control<UISlider>(id_glossiness_));
 	dialog_->Control<UISlider>(id_metalness_)->OnValueChangedEvent().connect(
-		std::bind(&MetalnessApp::MetalnessChangedHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->MetalnessChangedHandler(sender);
+		});
 	this->MetalnessChangedHandler(*dialog_->Control<UISlider>(id_metalness_));
 }
 

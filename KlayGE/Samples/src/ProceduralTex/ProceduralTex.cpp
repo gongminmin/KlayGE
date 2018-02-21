@@ -303,7 +303,11 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			actionMap.AddActions(actions, actions + std::size(actions));
 
 			action_handler_t input_handler = MakeSharedPtr<input_signal>();
-			input_handler->connect(std::bind(&ProceduralTexApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+			input_handler->connect(
+				[this](InputEngine const & sender, InputAction const & action)
+				{
+					this->InputHandler(sender, action);
+				});
 			inputEngine.ActionMap(actionMap, input_handler);
 
 			loading_percentage_ = 90;
@@ -317,11 +321,19 @@ uint32_t ProceduralTexApp::DoUpdate(uint32_t /*pass*/)
 			id_freq_static_ = dialog_->IDFromName("FreqStatic");
 			id_freq_slider_ = dialog_->IDFromName("FreqSlider");
 
-			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(std::bind(&ProceduralTexApp::TypeChangedHandler, this, std::placeholders::_1));
+			dialog_->Control<UIComboBox>(id_type_combo_)->OnSelectionChangedEvent().connect(
+				[this](UIComboBox const & sender)
+				{
+					this->TypeChangedHandler(sender);
+				});
 			this->TypeChangedHandler(*dialog_->Control<UIComboBox>(id_type_combo_));
 
 			dialog_->Control<UISlider>(id_freq_slider_)->SetValue(static_cast<int>(procedural_freq_));
-			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(std::bind(&ProceduralTexApp::FreqChangedHandler, this, std::placeholders::_1));
+			dialog_->Control<UISlider>(id_freq_slider_)->OnValueChangedEvent().connect(
+				[this](UISlider const & sender)
+				{
+					this->FreqChangedHandler(sender);
+				});
 			this->FreqChangedHandler(*dialog_->Control<UISlider>(id_freq_slider_));
 
 			loading_percentage_ = 100;

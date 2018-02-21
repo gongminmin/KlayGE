@@ -206,14 +206,30 @@ void AtmosphericScatteringApp::OnCreate()
 	id_beta_button_ = dialog_param_->IDFromName("beta_button");
 	id_absorb_button_ = dialog_param_->IDFromName("absorb_button");
 
-	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(std::bind(&AtmosphericScatteringApp::AtmosphereTopHandler, this, std::placeholders::_1));
+	dialog_param_->Control<UISlider>(id_atmosphere_top_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->AtmosphereTopHandler(sender);
+		});
 	this->AtmosphereTopHandler(*(dialog_param_->Control<UISlider>(id_atmosphere_top_)));
 
-	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(std::bind(&AtmosphericScatteringApp::DensityHandler, this, std::placeholders::_1));
+	dialog_param_->Control<UISlider>(id_density_)->OnValueChangedEvent().connect(
+		[this](UISlider const & sender)
+		{
+			this->DensityHandler(sender);
+		});
 	this->DensityHandler(*(dialog_param_->Control<UISlider>(id_density_)));
 
-	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(std::bind(&AtmosphericScatteringApp::ChangeBetaHandler, this, std::placeholders::_1));
-	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(std::bind(&AtmosphericScatteringApp::ChangeAbsorbHandler, this, std::placeholders::_1));
+	dialog_param_->Control<UITexButton>(id_beta_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeBetaHandler(sender);
+		});
+	dialog_param_->Control<UITexButton>(id_absorb_button_)->OnClickedEvent().connect(
+		[this](UITexButton const & sender)
+		{
+			this->ChangeAbsorbHandler(sender);
+		});
 
 	this->LoadBeta(Color(38.05f, 82.36f, 214.65f, 1));
 	this->LoadAbsorb(Color(0.75f, 0.85f, 1, 1));
@@ -232,7 +248,11 @@ void AtmosphericScatteringApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&AtmosphericScatteringApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 }
 

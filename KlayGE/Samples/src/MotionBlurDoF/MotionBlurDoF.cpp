@@ -729,7 +729,11 @@ void MotionBlurDoFApp::OnCreate()
 	actionMap.AddActions(actions, actions + std::size(actions));
 
 	action_handler_t input_handler = MakeSharedPtr<input_signal>();
-	input_handler->connect(std::bind(&MotionBlurDoFApp::InputHandler, this, std::placeholders::_1, std::placeholders::_2));
+	input_handler->connect(
+		[this](InputEngine const & sender, InputAction const & action)
+		{
+			this->InputHandler(sender, action);
+		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
 	if (caps.fp_color_support && caps.texture_format_support(EF_ABGR32F)
@@ -769,19 +773,34 @@ void MotionBlurDoFApp::OnCreate()
 	if (depth_of_field_)
 	{
 		dof_dialog_->Control<UICheckBox>(id_dof_on_)->OnChangedEvent().connect(
-			std::bind(&MotionBlurDoFApp::DoFOnHandler, this, std::placeholders::_1));
+			[this](UICheckBox const & sender)
+			{
+				this->DoFOnHandler(sender);
+			});
 		this->DoFOnHandler(*dof_dialog_->Control<UICheckBox>(id_dof_on_));
 		dof_dialog_->Control<UICheckBox>(id_bokeh_on_)->OnChangedEvent().connect(
-			std::bind(&MotionBlurDoFApp::BokehOnHandler, this, std::placeholders::_1));
+			[this](UICheckBox const & sender)
+			{
+				this->BokehOnHandler(sender);
+			});
 		this->BokehOnHandler(*dof_dialog_->Control<UICheckBox>(id_bokeh_on_));
 		dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_)->OnValueChangedEvent().connect(
-			std::bind(&MotionBlurDoFApp::DoFFocusPlaneChangedHandler, this, std::placeholders::_1));
+			[this](UISlider const & sender)
+			{
+				this->DoFFocusPlaneChangedHandler(sender);
+			});
 		this->DoFFocusPlaneChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_plane_slider_));
 		dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_)->OnValueChangedEvent().connect(
-			std::bind(&MotionBlurDoFApp::DoFFocusRangeChangedHandler, this, std::placeholders::_1));
+			[this](UISlider const & sender)
+			{
+				this->DoFFocusRangeChangedHandler(sender);
+			});
 		this->DoFFocusRangeChangedHandler(*dof_dialog_->Control<UISlider>(id_dof_focus_range_slider_));
 		dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_)->OnChangedEvent().connect(
-			std::bind(&MotionBlurDoFApp::DoFBlurFactorHandler, this, std::placeholders::_1));
+			[this](UICheckBox const & sender)
+			{
+				this->DoFBlurFactorHandler(sender);
+			});
 		this->DoFBlurFactorHandler(*dof_dialog_->Control<UICheckBox>(id_dof_blur_factor_));
 	}
 	else
@@ -795,24 +814,45 @@ void MotionBlurDoFApp::OnCreate()
 	}
 
 	mb_dialog_->Control<UICheckBox>(id_mb_on_)->OnChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::MBOnHandler, this, std::placeholders::_1));
+		[this](UICheckBox const & sender)
+		{
+			this->MBOnHandler(sender);
+		});
 	mb_dialog_->Control<UISlider>(id_mb_exposure_slider_)->OnValueChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::MBExposureChangedHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->MBExposureChangedHandler(sender);
+		});
 	this->MBExposureChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_exposure_slider_));
 	mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_)->OnValueChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::MBBlurRadiusChangedHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->MBBlurRadiusChangedHandler(sender);
+		});
 	this->MBBlurRadiusChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_blur_radius_slider_));
 	mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_)->OnValueChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::MBReconstructionSamplesChangedHandler, this, std::placeholders::_1));
+		[this](UISlider const & sender)
+		{
+			this->MBReconstructionSamplesChangedHandler(sender);
+		});
 	this->MBReconstructionSamplesChangedHandler(*mb_dialog_->Control<UISlider>(id_mb_reconstruction_samples_slider_));
 	mb_dialog_->Control<UIComboBox>(id_motion_blur_type_)->OnSelectionChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::MotionBlurChangedHandler, this, std::placeholders::_1));
+		[this](UIComboBox const & sender)
+		{
+			this->MotionBlurChangedHandler(sender);
+		});
 
 	app_dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::CtrlCameraHandler, this, std::placeholders::_1));
+		[this](UICheckBox const & sender)
+		{
+			this->CtrlCameraHandler(sender);
+		});
 
 	app_dialog_->Control<UICheckBox>(id_use_instancing_)->OnChangedEvent().connect(
-		std::bind(&MotionBlurDoFApp::UseInstancingHandler, this, std::placeholders::_1));
+		[this](UICheckBox const & sender)
+		{
+			this->UseInstancingHandler(sender);
+		});
 }
 
 void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)

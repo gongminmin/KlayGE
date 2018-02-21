@@ -753,7 +753,10 @@ namespace KlayGE
 			locator_ = MakeCOMPtr(locator);
 
 			auto callback = Callback<ITypedEventHandler<Geolocator*, PositionChangedEventArgs*>>(
-				std::bind(&MsgInputSensor::OnPositionChanged, this, std::placeholders::_1, std::placeholders::_2));
+				[this](IGeolocator* sender, IPositionChangedEventArgs* e)
+				{
+					return this->OnPositionChanged(sender, e);
+				});
 			TIFHR(locator_->add_PositionChanged(callback.Get(), &position_token_));
 		}
 		{
@@ -768,7 +771,10 @@ namespace KlayGE
 				accelerometer_ = MakeCOMPtr(accelerometer);
 
 				auto callback = Callback<ITypedEventHandler<Accelerometer*, AccelerometerReadingChangedEventArgs*>>(
-					std::bind(&MsgInputSensor::OnAccelerometeReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+					[this](IAccelerometer* sender, IAccelerometerReadingChangedEventArgs* e)
+					{
+						return this->OnAccelerometeReadingChanged(sender, e);
+					});
 				TIFHR(accelerometer_->add_ReadingChanged(callback.Get(), &accelerometer_reading_token_));
 			}
 		}
@@ -784,7 +790,10 @@ namespace KlayGE
 				gyrometer_ = MakeCOMPtr(gyrometer);
 
 				auto callback = Callback<ITypedEventHandler<Gyrometer*, GyrometerReadingChangedEventArgs*>>(
-					std::bind(&MsgInputSensor::OnGyrometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+					[this](IGyrometer* sender, IGyrometerReadingChangedEventArgs* e)
+					{
+						return this->OnGyrometerReadingChanged(sender, e);
+					});
 				TIFHR(gyrometer_->add_ReadingChanged(callback.Get(), &gyrometer_reading_token_));
 			}
 		}
@@ -800,7 +809,10 @@ namespace KlayGE
 				inclinometer_ = MakeCOMPtr(inclinometer);
 
 				auto callback = Callback<ITypedEventHandler<Inclinometer*, InclinometerReadingChangedEventArgs*>>(
-					std::bind(&MsgInputSensor::OnInclinometerReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+					[this](IInclinometer* sender, IInclinometerReadingChangedEventArgs* e)
+					{
+						return this->OnInclinometerReadingChanged(sender, e);
+					});
 				TIFHR(inclinometer_->add_ReadingChanged(callback.Get(), &inclinometer_reading_token_));
 			}
 		}
@@ -816,7 +828,10 @@ namespace KlayGE
 				compass_ = MakeCOMPtr(compass);
 
 				auto callback = Callback<ITypedEventHandler<Compass*, CompassReadingChangedEventArgs*>>(
-					std::bind(&MsgInputSensor::OnCompassReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+					[this](ICompass* sender, ICompassReadingChangedEventArgs* e)
+					{
+						return this->OnCompassReadingChanged(sender, e);
+					});
 				TIFHR(compass_->add_ReadingChanged(callback.Get(), &compass_reading_token_));
 			}
 		}
@@ -832,7 +847,10 @@ namespace KlayGE
 				orientation_ = MakeCOMPtr(orientation);
 
 				auto callback = Callback<ITypedEventHandler<OrientationSensor*, OrientationSensorReadingChangedEventArgs*>>(
-					std::bind(&MsgInputSensor::OnOrientationSensorReadingChanged, this, std::placeholders::_1, std::placeholders::_2));
+					[this](IOrientationSensor* sender, IOrientationSensorReadingChangedEventArgs* e)
+					{
+						return this->OnOrientationSensorReadingChanged(sender, e);
+					});
 				TIFHR(orientation_->add_ReadingChanged(callback.Get(), &orientation_reading_token_));
 			}
 		}
