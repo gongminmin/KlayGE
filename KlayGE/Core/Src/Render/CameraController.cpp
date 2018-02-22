@@ -783,8 +783,8 @@ namespace KlayGE
 
 		for (XMLNodePtr curve_node = root->FirstNode("curve"); curve_node; curve_node = curve_node->NextSibling("curve"))
 		{
-			std::string type_str = curve_node->Attrib("type")->ValueString();
-			size_t const type_str_hash = RT_HASH(type_str.c_str());
+			std::string_view const type_str = curve_node->Attrib("type")->ValueString();
+			size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
 			CameraPathController::InterpolateType type;
 			if (CT_HASH("linear") == type_str_hash)
 			{
@@ -814,17 +814,17 @@ namespace KlayGE
 
 				float3 eye_ctrl_pt;
 				{
-					std::istringstream attr_ss(key_node->Attrib("eye")->ValueString());
+					std::istringstream attr_ss(std::string(key_node->Attrib("eye")->ValueString()));
 					attr_ss >> eye_ctrl_pt.x() >> eye_ctrl_pt.y() >> eye_ctrl_pt.z();
 				}				
 				float3 target_ctrl_pt;
 				{
-					std::istringstream attr_ss(key_node->Attrib("target")->ValueString());
+					std::istringstream attr_ss(std::string(key_node->Attrib("target")->ValueString()));
 					attr_ss >> target_ctrl_pt.x() >> target_ctrl_pt.y() >> target_ctrl_pt.z();
 				}				
 				float3 up_ctrl_pt;
 				{
-					std::istringstream attr_ss(key_node->Attrib("up")->ValueString());
+					std::istringstream attr_ss(std::string(key_node->Attrib("up")->ValueString()));
 					attr_ss >> up_ctrl_pt.x() >> up_ctrl_pt.y() >> up_ctrl_pt.z();
 				}
 

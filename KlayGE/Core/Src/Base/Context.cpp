@@ -541,8 +541,8 @@ namespace KlayGE
 			attr = stereo_node->Attrib("method");
 			if (attr)
 			{
-				std::string const & method_str = attr->ValueString();
-				size_t const method_str_hash = RT_HASH(method_str.c_str());
+				std::string_view const method_str = attr->ValueString();
+				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
 				if (CT_HASH("none") == method_str_hash)
 				{
 					stereo_method = STM_None;
@@ -602,8 +602,8 @@ namespace KlayGE
 			attr = output_node->Attrib("method");
 			if (attr)
 			{
-				std::string const & method_str = attr->ValueString();
-				size_t const method_str_hash = RT_HASH(method_str.c_str());
+				std::string_view const method_str = attr->ValueString();
+				size_t const method_str_hash = HashRange(method_str.begin(), method_str.end());
 				if (CT_HASH("hdr10") == method_str_hash)
 				{
 					display_output_method = DOM_HDR10;
@@ -640,7 +640,7 @@ namespace KlayGE
 				attr = options_node->Attrib("str");
 				if (attr)
 				{
-					std::string const & options_str = attr->ValueString();
+					std::string_view const options_str = attr->ValueString();
 
 					std::vector<std::string> strs;
 					boost::algorithm::split(strs, options_str, boost::is_any_of(","));

@@ -1895,12 +1895,12 @@ namespace KlayGE
 		{
 			XMLDocument kges_doc;
 			XMLNodePtr kges_root = kges_doc.Parse(file);
-			this->SceneName(kges_root->Attrib("name")->ValueString());
+			this->SceneName(std::string(kges_root->Attrib("name")->ValueString()));
 			{
 				XMLAttributePtr attr = kges_root->Attrib("skybox");
 				if (attr)
 				{
-					this->SkyboxName(attr->ValueString());
+					this->SkyboxName(std::string(attr->ValueString()));
 				}
 			}
 
@@ -1908,7 +1908,7 @@ namespace KlayGE
 			{
 				if ("model" == node->Name())
 				{
-					add_model_event_(node->Attrib("meshml")->ValueString().c_str());
+					add_model_event_(std::string(node->Attrib("meshml")->ValueString()).c_str());
 
 					EntityInfo& oi = entities_[last_entity_id_];
 					oi.name = node->Attrib("name")->ValueString();
@@ -1921,7 +1921,7 @@ namespace KlayGE
 				}
 				else if ("light" == node->Name())
 				{
-					std::string lt_str = node->Attrib("type")->ValueString();
+					std::string_view const lt_str = node->Attrib("type")->ValueString();
 					if ("ambient" == lt_str)
 					{
 						add_light_event_(LightSource::LT_Ambient);
@@ -1949,8 +1949,9 @@ namespace KlayGE
 					XMLNodePtr attr_node = node->FirstNode("attr");
 					if (attr_node)
 					{
+						std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
 						std::vector<std::string> tokens;
-						boost::algorithm::split(tokens, attr_node->Attrib("value")->ValueString(), boost::is_any_of(" \t|"));
+						boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
 						for (auto& token : tokens)
 						{
 							boost::algorithm::trim(token);
@@ -1978,7 +1979,7 @@ namespace KlayGE
 					XMLNodePtr color_node = node->FirstNode("color");
 					if (color_node)
 					{	
-						std::istringstream attr_ss(color_node->Attrib("v")->ValueString());
+						std::istringstream attr_ss(std::string(color_node->Attrib("v")->ValueString()));
 						float3 color;
 						attr_ss >> color.x() >> color.y() >> color.z();
 						light->Color(color);
@@ -1988,7 +1989,7 @@ namespace KlayGE
 						XMLNodePtr dir_node = node->FirstNode("dir");
 						if (dir_node)
 						{
-							std::istringstream attr_ss(dir_node->Attrib("v")->ValueString());
+							std::istringstream attr_ss(std::string(dir_node->Attrib("v")->ValueString()));
 							float3 dir;
 							attr_ss >> dir.x() >> dir.y() >> dir.z();
 							light->Direction(dir);
@@ -2000,7 +2001,7 @@ namespace KlayGE
 						XMLNodePtr pos_node = node->FirstNode("pos");
 						if (pos_node)
 						{
-							std::istringstream attr_ss(pos_node->Attrib("v")->ValueString());
+							std::istringstream attr_ss(std::string(pos_node->Attrib("v")->ValueString()));
 							float3 pos;
 							attr_ss >> pos.x() >> pos.y() >> pos.z();
 							light->Position(pos);
@@ -2009,7 +2010,7 @@ namespace KlayGE
 						XMLNodePtr fall_off_node = node->FirstNode("fall_off");
 						if (fall_off_node)
 						{
-							std::istringstream attr_ss(fall_off_node->Attrib("v")->ValueString());
+							std::istringstream attr_ss(std::string(fall_off_node->Attrib("v")->ValueString()));
 							float3 fall_off;
 							attr_ss >> fall_off.x() >> fall_off.y() >> fall_off.z();
 							light->Falloff(fall_off);
@@ -2023,7 +2024,8 @@ namespace KlayGE
 								XMLAttributePtr attr = projective_node->Attrib("name");
 								if (attr)
 								{
-									TexturePtr projective = ASyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+									TexturePtr projective = ASyncLoadTexture(std::string(attr->ValueString()),
+										EAH_GPU_Read | EAH_Immutable);
 									light->ProjectiveTexture(projective);
 								}
 							}
@@ -2062,19 +2064,19 @@ namespace KlayGE
 					XMLNodePtr eye_pos_node = node->FirstNode("eye_pos");
 					if (eye_pos_node)
 					{
-						std::istringstream attr_ss(eye_pos_node->Attrib("v")->ValueString());
+						std::istringstream attr_ss(std::string(eye_pos_node->Attrib("v")->ValueString()));
 						attr_ss >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
 					}
 					XMLNodePtr look_at_node = node->FirstNode("look_at");
 					if (look_at_node)
 					{
-						std::istringstream attr_ss(look_at_node->Attrib("v")->ValueString());
+						std::istringstream attr_ss(std::string(look_at_node->Attrib("v")->ValueString()));
 						attr_ss >> look_at.x() >> look_at.y() >> look_at.z();
 					}
 					XMLNodePtr up_node = node->FirstNode("up");
 					if (up_node)
 					{
-						std::istringstream attr_ss(up_node->Attrib("v")->ValueString());
+						std::istringstream attr_ss(std::string(up_node->Attrib("v")->ValueString()));
 						attr_ss >> up.x() >> up.y() >> up.z();
 					}
 					camera->ViewParams(eye_pos, look_at, up);
@@ -2263,7 +2265,7 @@ namespace KlayGE
 		XMLNodePtr pivot_node = node->FirstNode("pivot");
 		if (!!pivot_node)
 		{
-			std::istringstream attr_ss(pivot_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(pivot_node->Attrib("v")->ValueString()));
 			attr_ss >> oi.trf_pivot.x() >> oi.trf_pivot.y() >> oi.trf_pivot.z();
 		}
 		else
@@ -2274,7 +2276,7 @@ namespace KlayGE
 		XMLNodePtr scale_node = node->FirstNode("scale");
 		if (!!scale_node)
 		{
-			std::istringstream attr_ss(scale_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(scale_node->Attrib("v")->ValueString()));
 			attr_ss >> oi.trf_scale.x() >> oi.trf_scale.y() >> oi.trf_scale.z();
 		}
 		else
@@ -2285,7 +2287,7 @@ namespace KlayGE
 		XMLNodePtr rotate_node = node->FirstNode("rotate");
 		if (!!rotate_node)
 		{
-			std::istringstream attr_ss(rotate_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(rotate_node->Attrib("v")->ValueString()));
 			attr_ss >> oi.trf_rotate.x() >> oi.trf_rotate.y() >> oi.trf_rotate.z() >> oi.trf_rotate.w();
 		}
 		else
@@ -2296,7 +2298,7 @@ namespace KlayGE
 		XMLNodePtr translate_node = node->FirstNode("translate");
 		if (!!translate_node)
 		{
-			std::istringstream attr_ss(translate_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(translate_node->Attrib("v")->ValueString()));
 			attr_ss >> oi.trf_pos.x() >> oi.trf_pos.y() >> oi.trf_pos.z();
 		}
 		else

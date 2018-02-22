@@ -153,8 +153,9 @@ namespace
 						XMLAttributePtr attr = color_node->Attrib("from");
 						if (attr)
 						{
+							std::string_view const value_str = attr->ValueString();
 							std::vector<std::string> strs;
-							boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+							boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
 							for (size_t i = 0; i < 3; ++ i)
 							{
 								if (i < strs.size())
@@ -175,8 +176,9 @@ namespace
 						attr = color_node->Attrib("to");
 						if (attr)
 						{
+							std::string_view const value_str = attr->ValueString();
 							std::vector<std::string> strs;
-							boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+							boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
 							for (size_t i = 0; i < 3; ++ i)
 							{
 								if (i < strs.size())
@@ -230,8 +232,9 @@ namespace
 					XMLAttributePtr attr = pos_node->Attrib("min");
 					if (attr)
 					{
+						std::string_view const value_str = attr->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
 						for (size_t i = 0; i < 3; ++ i)
 						{
 							if (i < strs.size())
@@ -251,8 +254,9 @@ namespace
 					attr = pos_node->Attrib("max");
 					if (attr)
 					{
+						std::string_view const value_str = attr->ValueString();
 						std::vector<std::string> strs;
-						boost::algorithm::split(strs, attr->ValueString(), boost::is_any_of(" "));
+						boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
 						for (size_t i = 0; i < 3; ++ i)
 						{
 							if (i < strs.size())
@@ -317,7 +321,8 @@ namespace
 						}
 
 						XMLAttributePtr attr = node->Attrib("name");
-						size_t const name_hash = RT_HASH(attr->ValueString().c_str());
+						std::string_view const name = attr->ValueString();
+						size_t const name_hash = HashRange(name.begin(), name.end());
 						if (CT_HASH("size_over_life") == name_hash)
 						{
 							ps_desc_.ps_data->size_over_life_ctrl_pts = xys;

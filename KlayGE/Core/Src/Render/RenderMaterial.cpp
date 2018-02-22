@@ -64,7 +64,7 @@ namespace
 	using namespace KlayGE;
 
 	template <int N>
-	void ExtractFVector(std::string const & value_str, float* v)
+	void ExtractFVector(std::string_view value_str, float* v)
 	{
 		std::vector<std::string> strs;
 		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
@@ -271,8 +271,8 @@ namespace
 				XMLAttributePtr attr = detail_node->Attrib("mode");
 				if (attr)
 				{
-					std::string const & mode_str = attr->ValueString();
-					size_t const mode_hash = RT_HASH(mode_str.c_str());
+					std::string_view const mode_str = attr->ValueString();
+					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
 					if (CT_HASH("Flat Tessellation") == mode_hash)
 					{
 						mtl_desc_.mtl_data->detail_mode = RenderMaterial::SDM_FlatTessellation;

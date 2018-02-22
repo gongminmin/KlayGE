@@ -77,7 +77,7 @@ namespace
 	std::string const JIT_EXT_NAME = ".model_bin";
 
 	template <int N>
-	void ExtractFVector(std::string const & value_str, float* v)
+	void ExtractFVector(std::string_view value_str, float* v)
 	{
 		std::vector<std::string> strs;
 		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
@@ -96,7 +96,7 @@ namespace
 	}
 
 	template <int N>
-	void ExtractUIVector(std::string const & value_str, uint32_t* v)
+	void ExtractUIVector(std::string_view value_str, uint32_t* v)
 	{
 		std::vector<std::string> strs;
 		boost::algorithm::split(strs, value_str, boost::is_any_of(" "));
@@ -321,8 +321,8 @@ namespace
 				XMLAttributePtr attr = detail_node->Attrib("mode");
 				if (attr)
 				{
-					std::string const & mode_str = attr->ValueString();
-					size_t const mode_hash = RT_HASH(mode_str.c_str());
+					std::string_view const mode_str = attr->ValueString();
+					size_t const mode_hash = HashRange(mode_str.begin(), mode_str.end());
 					if (CT_HASH("Flat Tessellation") == mode_hash)
 					{
 						mtl.detail_mode = RenderMaterial::SDM_FlatTessellation;
@@ -689,10 +689,12 @@ namespace
 				{
 					XMLAttributePtr weight_attr = weight_node->Attrib("weight");
 
+					std::string_view const index_str = attr->ValueString();
+					std::string_view const weight_str = weight_attr->ValueString();
 					std::vector<std::string> index_strs;
 					std::vector<std::string> weight_strs;
-					boost::algorithm::split(index_strs, attr->ValueString(), boost::is_any_of(" "));
-					boost::algorithm::split(weight_strs, weight_attr->ValueString(), boost::is_any_of(" "));
+					boost::algorithm::split(index_strs, index_str, boost::is_any_of(" "));
+					boost::algorithm::split(weight_strs, weight_str, boost::is_any_of(" "));
 					
 					for (num_blend = 0; num_blend < 4; ++ num_blend)
 					{
@@ -1388,7 +1390,7 @@ namespace
 		uint32_t mesh_index = 0;
 		for (XMLNodePtr mesh_node = meshes_chunk->FirstNode("mesh"); mesh_node; mesh_node = mesh_node->NextSibling("mesh"), ++ mesh_index)
 		{
-			mesh_names.push_back(mesh_node->Attrib("name")->ValueString());
+			mesh_names.push_back(std::string(mesh_node->Attrib("name")->ValueString()));
 			mtl_ids.push_back(mesh_node->Attrib("mtl_id")->ValueInt());
 
 			pos_bbs.resize(mesh_index + 1);

@@ -429,7 +429,7 @@ namespace KlayGE
 			{
 				attr = node->Attrib("name");
 				include_docs.push_back(MakeUniquePtr<XMLDocument>());
-				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(attr->ValueString()));
+				XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(std::string(attr->ValueString())));
 
 				for (XMLNodePtr child_node = include_root->FirstNode(); child_node; child_node = child_node->NextSibling())
 				{
@@ -451,9 +451,9 @@ namespace KlayGE
 					int32_t x, y;
 					uint32_t width, height;
 					UIDialog::ControlAlignment align_x = UIDialog::CA_Left, align_y = UIDialog::CA_Top;
-					std::string id = node->AttribString("id", "");
-					std::string caption = node->AttribString("caption", "");
-					std::string skin = node->AttribString("skin", "");
+					std::string_view const id = node->AttribString("id", "");
+					std::string_view const caption = node->AttribString("caption", "");
+					std::string_view const skin = node->AttribString("skin", "");
 					x = node->Attrib("x")->ValueInt();
 					y = node->Attrib("y")->ValueInt();
 					width = node->Attrib("width")->ValueInt();
@@ -461,7 +461,7 @@ namespace KlayGE
 					attr = node->Attrib("align_x");
 					if (attr)
 					{
-						std::string const & align_x_str = attr->ValueString();
+						std::string_view const align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
@@ -479,7 +479,7 @@ namespace KlayGE
 					attr = node->Attrib("align_y");
 					if (attr)
 					{
-						std::string const & align_y_str = attr->ValueString();
+						std::string_view const align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
@@ -498,10 +498,10 @@ namespace KlayGE
 					TexturePtr tex;
 					if (!skin.empty())
 					{
-						tex = SyncLoadTexture(skin, EAH_GPU_Read | EAH_Immutable);
+						tex = SyncLoadTexture(std::string(skin), EAH_GPU_Read | EAH_Immutable);
 					}
 					dlg = this->MakeDialog(tex);
-					dlg->SetID(id);
+					dlg->SetID(std::string(id));
 					std::wstring wcaption;
 					Convert(wcaption, caption);
 					dlg->SetCaptionText(wcaption);
@@ -537,7 +537,7 @@ namespace KlayGE
 					dlg->SetSize(width, height);
 				}
 
-				std::vector<std::string> ctrl_ids;
+				std::vector<std::string_view> ctrl_ids;
 				for (XMLNodePtr ctrl_node = node->FirstNode("control"); ctrl_node; ctrl_node = ctrl_node->NextSibling("control"))
 				{
 					ctrl_ids.push_back(ctrl_node->Attrib("id")->ValueString());
@@ -555,9 +555,9 @@ namespace KlayGE
 
 					uint32_t id;
 					{
-						std::string id_str = ctrl_node->Attrib("id")->ValueString();
+						std::string_view id_str = ctrl_node->Attrib("id")->ValueString();
 						id = static_cast<uint32_t>(std::find(ctrl_ids.begin(), ctrl_ids.end(), id_str) - ctrl_ids.begin());
-						dlg->AddIDName(id_str, id);
+						dlg->AddIDName(std::string(id_str), id);
 					}
 
 					x = ctrl_node->Attrib("x")->ValueInt();
@@ -569,7 +569,7 @@ namespace KlayGE
 					attr = ctrl_node->Attrib("align_x");
 					if (attr)
 					{
-						std::string const & align_x_str = attr->ValueString();
+						std::string_view const align_x_str = attr->ValueString();
 						if ("left" == align_x_str)
 						{
 							align_x = UIDialog::CA_Left;
@@ -587,7 +587,7 @@ namespace KlayGE
 					attr = ctrl_node->Attrib("align_y");
 					if (attr)
 					{
-						std::string const & align_y_str = attr->ValueString();
+						std::string_view const align_y_str = attr->ValueString();
 						if ("top" == align_y_str)
 						{
 							align_y = UIDialog::CA_Top;
@@ -608,11 +608,11 @@ namespace KlayGE
 						dlg->CtrlLocation(id, loc);
 					}
 
-					std::string type_str = ctrl_node->Attrib("type")->ValueString();
-					size_t const type_str_hash = RT_HASH(type_str.c_str());
+					std::string_view const type_str = ctrl_node->Attrib("type")->ValueString();
+					size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
 					if (CT_HASH("static") == type_str_hash)
 					{
-						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIStatic>(dlg, id, wcaption,
@@ -620,7 +620,7 @@ namespace KlayGE
 					}
 					else if (CT_HASH("button") == type_str_hash)
 					{
-						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						std::wstring wcaption;
 						Convert(wcaption, caption);
@@ -633,8 +633,8 @@ namespace KlayGE
 						attr = ctrl_node->Attrib("texture");
 						if (attr)
 						{
-							std::string tex_name = attr->ValueString();
-							tex = SyncLoadTexture(tex_name, EAH_GPU_Read | EAH_Immutable);
+							std::string_view const tex_name = attr->ValueString();
+							tex = SyncLoadTexture(std::string(tex_name), EAH_GPU_Read | EAH_Immutable);
 						}
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						dlg->AddControl(MakeSharedPtr<UITexButton>(dlg, id, tex,
@@ -642,7 +642,7 @@ namespace KlayGE
 					}
 					else if (CT_HASH("check_box") == type_str_hash)
 					{
-						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 						bool checked = ReadBool(ctrl_node, "checked", false);
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
 						std::wstring wcaption;
@@ -652,7 +652,7 @@ namespace KlayGE
 					}
 					else if (CT_HASH("radio_button") == type_str_hash)
 					{
-						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 						int32_t button_group = ctrl_node->Attrib("button_group")->ValueInt();
 						bool checked = ReadBool(ctrl_node, "checked", false);
 						uint8_t hotkey = static_cast<uint8_t>(ctrl_node->AttribInt("hotkey", 0));
@@ -684,7 +684,7 @@ namespace KlayGE
 						attr = ctrl_node->Attrib("style");
 						if (attr)
 						{
-							std::string const & style_str = attr->ValueString();
+							std::string_view const style_str = attr->ValueString();
 							if ("single" == style_str)
 							{
 								style = UIListBox::SINGLE_SELECTION;
@@ -700,7 +700,7 @@ namespace KlayGE
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
-							std::string caption = item_node->Attrib("name")->ValueString();
+							std::string_view const caption = item_node->Attrib("name")->ValueString();
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->Control<UIListBox>(id)->AddItem(wcaption);
@@ -720,7 +720,7 @@ namespace KlayGE
 
 						for (XMLNodePtr item_node = ctrl_node->FirstNode("item"); item_node; item_node = item_node->NextSibling("item"))
 						{
-							std::string caption = item_node->Attrib("name")->ValueString();
+							std::string_view const caption = item_node->Attrib("name")->ValueString();
 							std::wstring wcaption;
 							Convert(wcaption, caption);
 							dlg->Control<UIComboBox>(id)->AddItem(wcaption);
@@ -734,7 +734,7 @@ namespace KlayGE
 					}
 					else if (CT_HASH("edit_box") == type_str_hash)
 					{
-						std::string caption = ctrl_node->Attrib("caption")->ValueString();
+						std::string_view const caption = ctrl_node->Attrib("caption")->ValueString();
 						std::wstring wcaption;
 						Convert(wcaption, caption);
 						dlg->AddControl(MakeSharedPtr<UIEditBox>(dlg, id, wcaption,

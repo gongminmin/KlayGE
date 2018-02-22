@@ -36,6 +36,18 @@
 #include <iosfwd>
 #include <vector>
 
+#include <boost/noncopyable.hpp>
+
+namespace rapidxml
+{
+	template <typename Ch>
+	class xml_node;
+	template <typename Ch>
+	class xml_attribute;
+	template <typename Ch>
+	class xml_document;
+}
+
 namespace KlayGE
 {
 	enum XMLNodeType
@@ -50,7 +62,7 @@ namespace KlayGE
 		XNT_PI
 	};
 
-	class XMLDocument
+	class XMLDocument : boost::noncopyable
 	{
 	public:
 		XMLDocument();
@@ -69,21 +81,21 @@ namespace KlayGE
 		void RootNode(XMLNodePtr const & new_node);
 
 	private:
-		std::shared_ptr<void> doc_;
+		std::shared_ptr<rapidxml::xml_document<char>> doc_;
 		std::vector<char> xml_src_;
 
 		XMLNodePtr root_;
 	};
 
-	class XMLNode
+	class XMLNode : boost::noncopyable
 	{
 		friend class XMLDocument;
 
 	public:
-		explicit XMLNode(void* node);
-		XMLNode(void* doc, XMLNodeType type, std::string_view name);
+		explicit XMLNode(rapidxml::xml_node<char>* node);
+		XMLNode(rapidxml::xml_document<char>& doc, XMLNodeType type, std::string_view name);
 
-		std::string const & Name() const;
+		std::string_view Name() const;
 		XMLNodeType Type() const;
 
 		XMLNodePtr Parent() const;
@@ -102,7 +114,7 @@ namespace KlayGE
 		int32_t AttribInt(std::string_view name, int32_t default_val) const;
 		uint32_t AttribUInt(std::string_view name, uint32_t default_val) const;
 		float AttribFloat(std::string_view name, float default_val) const;
-		std::string AttribString(std::string_view name, std::string default_val) const;
+		std::string_view AttribString(std::string_view name, std::string_view default_val) const;
 
 		XMLNodePtr FirstNode(std::string_view name) const;
 		XMLNodePtr LastNode(std::string_view name) const;
@@ -129,26 +141,26 @@ namespace KlayGE
 		int32_t ValueInt() const;
 		uint32_t ValueUInt() const;
 		float ValueFloat() const;
-		std::string ValueString() const;
+		std::string_view ValueString() const;
 
 	private:
-		void* node_;
-		std::string name_;
+		rapidxml::xml_node<char>* node_;
+		std::string_view name_;
 
 		std::vector<XMLNodePtr> children_;
 		std::vector<XMLAttributePtr> attrs_;
 	};
 
-	class XMLAttribute
+	class XMLAttribute : boost::noncopyable
 	{
 		friend class XMLDocument;
 		friend class XMLNode;
 
 	public:
-		explicit XMLAttribute(void* attr);
-		XMLAttribute(void* doc, std::string_view name, std::string_view value);
+		explicit XMLAttribute(rapidxml::xml_attribute<char>* attr);
+		XMLAttribute(rapidxml::xml_document<char>& doc, std::string_view name, std::string_view value);
 
-		std::string const & Name() const;
+		std::string_view Name() const;
 
 		XMLAttributePtr NextAttrib(std::string_view name) const;
 		XMLAttributePtr NextAttrib() const;
@@ -160,12 +172,12 @@ namespace KlayGE
 		int32_t ValueInt() const;
 		uint32_t ValueUInt() const;
 		float ValueFloat() const;
-		std::string const & ValueString() const;
+		std::string_view ValueString() const;
 
 	private:
-		void* attr_;
-		std::string name_;
-		std::string value_;
+		rapidxml::xml_attribute<char>* attr_;
+		std::string_view name_;
+		std::string_view value_;
 	};
 }
 

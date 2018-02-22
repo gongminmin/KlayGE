@@ -360,7 +360,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		{
 			sky_box_ = MakeSharedPtr<SceneObjectSkyBox>();
 
-			std::string skybox_name = attr->ValueString();
+			std::string const skybox_name = std::string(attr->ValueString());
 			if (!ResLoader::Instance().Locate(skybox_name).empty())
 			{
 				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(ASyncLoadTexture(skybox_name,
@@ -416,7 +416,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 	{
 		LightSourcePtr light;
 
-		std::string lt_str = light_node->Attrib("type")->ValueString();
+		std::string_view const lt_str = light_node->Attrib("type")->ValueString();
 		if ("ambient" == lt_str)
 		{
 			light = MakeSharedPtr<AmbientLightSource>();
@@ -447,8 +447,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr attr_node = light_node->FirstNode("attr");
 		if (attr_node)
 		{
+			std::string_view const attr_str = attr_node->Attrib("value")->ValueString();
 			std::vector<std::string> tokens;
-			boost::algorithm::split(tokens, attr_node->Attrib("value")->ValueString(), boost::is_any_of(" \t|"));
+			boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
 			for (auto& token : tokens)
 			{
 				boost::algorithm::trim(token);
@@ -476,7 +477,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr color_node = light_node->FirstNode("color");
 		if (color_node)
 		{
-			std::istringstream attr_ss(color_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(color_node->Attrib("v")->ValueString()));
 			float3 color;
 			attr_ss >> color.x() >> color.y() >> color.z();
 			light->Color(color);
@@ -488,7 +489,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr dir_node = light_node->FirstNode("dir");
 			if (dir_node)
 			{
-				std::istringstream attr_ss(dir_node->Attrib("v")->ValueString());
+				std::istringstream attr_ss(std::string(dir_node->Attrib("v")->ValueString()));
 				float3 dir;
 				attr_ss >> dir.x() >> dir.y() >> dir.z();
 				light->Direction(dir);
@@ -500,7 +501,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr pos_node = light_node->FirstNode("pos");
 			if (pos_node)
 			{
-				std::istringstream attr_ss(pos_node->Attrib("v")->ValueString());
+				std::istringstream attr_ss(std::string(pos_node->Attrib("v")->ValueString()));
 				float3 pos;
 				attr_ss >> pos.x() >> pos.y() >> pos.z();
 				light->Position(pos);
@@ -509,7 +510,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr fall_off_node = light_node->FirstNode("fall_off");
 			if (fall_off_node)
 			{
-				std::istringstream attr_ss(fall_off_node->Attrib("v")->ValueString());
+				std::istringstream attr_ss(std::string(fall_off_node->Attrib("v")->ValueString()));
 				float3 fall_off;
 				attr_ss >> fall_off.x() >> fall_off.y() >> fall_off.z();
 				light->Falloff(fall_off);
@@ -523,7 +524,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					XMLAttributePtr attr = projective_node->Attrib("name");
 					if (attr)
 					{
-						TexturePtr projective = ASyncLoadTexture(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+						TexturePtr projective = ASyncLoadTexture(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable);
 						light->ProjectiveTexture(projective);
 					}
 				}
@@ -548,7 +549,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			update_node = update_node->FirstNode();
 			if (update_node && (XNT_CData == update_node->Type()))
 			{
-				std::string update_script = update_node->ValueString();
+				std::string const update_script = std::string(update_node->ValueString());
 				if (!update_script.empty())
 				{
 					light->BindUpdateFunc(LightSourceUpdate(update_script));
@@ -564,7 +565,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		{
 			float3 scale(1, 1, 1);
 			{
-				std::istringstream attr_ss(scale_node->Attrib("v")->ValueString());
+				std::istringstream attr_ss(std::string(scale_node->Attrib("v")->ValueString()));
 				attr_ss >> scale.x() >> scale.y() >> scale.z();
 			}
 
@@ -588,21 +589,21 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr scale_node = model_node->FirstNode("scale");
 		if (scale_node)
 		{
-			std::istringstream attr_ss(scale_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(scale_node->Attrib("v")->ValueString()));
 			attr_ss >> scale.x() >> scale.y() >> scale.z();
 		}
 		
 		XMLNodePtr rotate_node = model_node->FirstNode("rotate");
 		if (!!rotate_node)
 		{
-			std::istringstream attr_ss(rotate_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(rotate_node->Attrib("v")->ValueString()));
 			attr_ss >> rotate.x() >> rotate.y() >> rotate.z() >> rotate.w();
 		}
 
 		XMLNodePtr translate_node = model_node->FirstNode("translate");
 		if (scale_node)
 		{
-			std::istringstream attr_ss(translate_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(translate_node->Attrib("v")->ValueString()));
 			attr_ss >> translate.x() >> translate.y() >> translate.z();
 		}
 
@@ -618,8 +619,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				{
 					obj_attr = SceneObject::SOA_Cullable;
 
+					std::string_view const attr_str = attr->ValueString();
 					std::vector<std::string> tokens;
-					boost::algorithm::split(tokens, attr->ValueString(), boost::is_any_of(" \t|"));
+					boost::algorithm::split(tokens, attr_str, boost::is_any_of(" \t|"));
 					for (auto& token : tokens)
 					{
 						boost::algorithm::trim(token);
@@ -658,7 +660,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLAttributePtr attr = model_node->Attrib("meshml");
 		BOOST_ASSERT(attr);
 
-		RenderModelPtr model = ASyncLoadModel(attr->ValueString(), EAH_GPU_Read | EAH_Immutable);
+		RenderModelPtr model = ASyncLoadModel(std::string(attr->ValueString()), EAH_GPU_Read | EAH_Immutable);
 		scene_models_.push_back(model);
 		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model, obj_attr);
 		scene_obj->ModelMatrix(obj_mat);
@@ -687,19 +689,19 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr eye_pos_node = camera_node->FirstNode("eye_pos");
 		if (eye_pos_node)
 		{
-			std::istringstream attr_ss(eye_pos_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(eye_pos_node->Attrib("v")->ValueString()));
 			attr_ss >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
 		}
 		XMLNodePtr look_at_node = camera_node->FirstNode("look_at");
 		if (look_at_node)
 		{
-			std::istringstream attr_ss(look_at_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(look_at_node->Attrib("v")->ValueString()));
 			attr_ss >> look_at.x() >> look_at.y() >> look_at.z();
 		}
 		XMLNodePtr up_node = camera_node->FirstNode("up");
 		if (up_node)
 		{
-			std::istringstream attr_ss(up_node->Attrib("v")->ValueString());
+			std::istringstream attr_ss(std::string(up_node->Attrib("v")->ValueString()));
 			attr_ss >> up.x() >> up.y() >> up.z();
 		}
 

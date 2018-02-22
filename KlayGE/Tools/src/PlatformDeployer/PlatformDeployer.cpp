@@ -113,7 +113,7 @@ std::string RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, st
 	XMLAttributePtr attr = node->Attrib(attr_name);
 	if (attr)
 	{
-		return attr->ValueString();
+		return std::string(attr->ValueString());
 	}
 
 	return default_value;

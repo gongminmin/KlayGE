@@ -105,7 +105,7 @@ void PackJTML(std::string const & jtml_name)
 	}
 
 	uint32_t tile_size = root->AttribInt("tile_size", 128);
-	std::string fmt_str = root->AttribString("format", "");
+	std::string_view const fmt_str = root->AttribString("format", "");
 	ElementFormat format = EF_ARGB8;
 	if ("ARGB8" == fmt_str)
 	{
@@ -127,11 +127,11 @@ void PackJTML(std::string const & jtml_name)
 	{
 		timer.restart();
 
-		std::string name = node->AttribString("name", "");
+		std::string const name = std::string(node->AttribString("name", ""));
 		int32_t x = node->AttribInt("x", 0);
 		int32_t y = node->AttribInt("y", 0);
-		std::string address_u_str = node->AttribString("address_u", "wrap");
-		std::string address_v_str = node->AttribString("address_v", "wrap");
+		std::string_view const address_u_str = node->AttribString("address_u", "wrap");
+		std::string_view const address_v_str = node->AttribString("address_v", "wrap");
 		Color border_clr;
 		border_clr.r() = node->AttribFloat("border_r", 0.0f);
 		border_clr.g() = node->AttribFloat("border_g", 0.0f);

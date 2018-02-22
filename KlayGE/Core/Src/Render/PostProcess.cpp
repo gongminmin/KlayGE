@@ -107,7 +107,7 @@ namespace
 
 			for (XMLNodePtr pp_node = root->FirstNode("post_processor"); pp_node; pp_node = pp_node->NextSibling("post_processor"))
 			{
-				std::string name = pp_node->Attrib("name")->ValueString();
+				std::string_view name = pp_node->Attrib("name")->ValueString();
 				if (pp_desc_.pp_name == name)
 				{
 					Convert(pp_desc_.pp_data->name, name);
@@ -127,7 +127,7 @@ namespace
 					{
 						for (XMLNodePtr p_node = params_chunk->FirstNode("param"); p_node; p_node = p_node->NextSibling("param"))
 						{
-							pp_desc_.pp_data->param_names.push_back(p_node->Attrib("name")->ValueString());
+							pp_desc_.pp_data->param_names.push_back(std::string(p_node->Attrib("name")->ValueString()));
 						}
 					}
 					XMLNodePtr input_chunk = pp_node->FirstNode("input");
@@ -135,7 +135,7 @@ namespace
 					{
 						for (XMLNodePtr pin_node = input_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
 						{
-							pp_desc_.pp_data->input_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+							pp_desc_.pp_data->input_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
 						}
 					}
 					XMLNodePtr output_chunk = pp_node->FirstNode("output");
@@ -143,7 +143,7 @@ namespace
 					{
 						for (XMLNodePtr pin_node = output_chunk->FirstNode("pin"); pin_node; pin_node = pin_node->NextSibling("pin"))
 						{
-							pp_desc_.pp_data->output_pin_names.push_back(pin_node->Attrib("name")->ValueString());
+							pp_desc_.pp_data->output_pin_names.push_back(std::string(pin_node->Attrib("name")->ValueString()));
 						}
 					}
 					XMLNodePtr shader_chunk = pp_node->FirstNode("shader");

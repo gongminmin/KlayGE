@@ -470,7 +470,7 @@ namespace
 		XMLAttributePtr attr = node.Attrib("profile");
 		if (attr)
 		{
-			return attr->ValueString();
+			return std::string(attr->ValueString());
 		}
 		else
 		{
@@ -480,8 +480,8 @@ namespace
 
 	std::string get_func_name(XMLNode const & node)
 	{
-		std::string value = node.Attrib("value")->ValueString();
-		return value.substr(0, value.find("("));
+		std::string_view value = node.Attrib("value")->ValueString();
+		return std::string(value.substr(0, value.find("(")));
 	}
 
 	std::unique_ptr<RenderVariable> read_var(XMLNode const & node, uint32_t type, uint32_t array_size)
@@ -529,7 +529,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
@@ -570,7 +570,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int32_t> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0);
@@ -594,7 +594,7 @@ namespace
 				std::string tmp;
 				if (attr)
 				{
-					tmp = attr->ValueString();
+					tmp = std::string(attr->ValueString());
 				}
 
 				var = MakeUniquePtr<RenderVariableString>();
@@ -620,7 +620,7 @@ namespace
 			attr = node.Attrib("elem_type");
 			if (attr)
 			{
-				*var = attr->ValueString();
+				*var = std::string(attr->ValueString());
 			}
 			else
 			{
@@ -634,7 +634,8 @@ namespace
 
 				for (XMLNodePtr state_node = node.FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 				{
-					size_t const name_hash = RT_HASH(state_node->Attrib("name")->ValueString().c_str());
+					std::string_view const name = state_node->Attrib("name")->ValueString();
+					size_t const name_hash = HashRange(name.begin(), name.end());
 
 					XMLAttributePtr const value_attr = state_node->Attrib("value");
 					std::string_view value_str;
@@ -747,7 +748,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float> init_val(std::min(array_size, static_cast<uint32_t>(strs.size())), 0.0f);
@@ -793,7 +794,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
@@ -847,7 +848,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<uint3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
@@ -906,7 +907,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
@@ -955,7 +956,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), int2(0, 0));
@@ -1009,7 +1010,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), int3(0, 0, 0));
@@ -1068,7 +1069,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<int4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), int4(0, 0, 0, 0));
@@ -1117,7 +1118,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float2> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 1) / 2)), float2(0, 0));
@@ -1171,7 +1172,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float3> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 2) / 3)), float3(0, 0, 0));
@@ -1230,7 +1231,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 3) / 4)), float4(0, 0, 0, 0));
@@ -1281,7 +1282,7 @@ namespace
 					value_node = value_node->FirstNode();
 					if (value_node && (XNT_CData == value_node->Type()))
 					{
-						std::string const & value_str = value_node->ValueString();
+						std::string_view const value_str = value_node->ValueString();
 						std::vector<std::string> strs;
 						boost::algorithm::split(strs, value_str, boost::is_any_of(","));
 						std::vector<float4x4> init_val(std::min(array_size, static_cast<uint32_t>((strs.size() + 15) / 16)),
@@ -1314,7 +1315,7 @@ namespace
 			attr = node.Attrib("elem_type");
 			if (attr)
 			{
-				*var = attr->ValueString();
+				*var = std::string(attr->ValueString());
 			}
 			else
 			{
@@ -2674,7 +2675,7 @@ namespace KlayGE
 			XMLAttributePtr attr = node->Attrib("name");
 			BOOST_ASSERT(attr);
 
-			std::string const & include_name = attr->ValueString();
+			std::string const include_name = std::string(attr->ValueString());
 
 			include_docs.push_back(MakeUniquePtr<XMLDocument>());
 			XMLNodePtr include_root = include_docs.back()->Parse(ResLoader::Instance().Open(include_name));
@@ -2741,7 +2742,7 @@ namespace KlayGE
 			XMLAttributePtr attr = node->Attrib("name");
 			BOOST_ASSERT(attr);
 
-			std::string const & include_name = attr->ValueString();
+			std::string const include_name = std::string(attr->ValueString());
 
 			XMLDocument include_doc;
 			XMLNodePtr include_root = include_doc.Parse(ResLoader::Instance().Open(include_name));
@@ -2822,7 +2823,7 @@ namespace KlayGE
 			{
 				RenderEffectConstantBuffer* cbuff = nullptr;
 				XMLNodePtr parent_node = node->Parent();
-				std::string cbuff_name = parent_node->AttribString("name", "global_cb");
+				std::string const cbuff_name = std::string(parent_node->AttribString("name", "global_cb"));
 				size_t const cbuff_name_hash = RT_HASH(cbuff_name.c_str());
 
 				bool found = false;
@@ -3621,7 +3622,7 @@ namespace KlayGE
 		XMLAttributePtr inherit_attr = node->Attrib("inherit");
 		if (inherit_attr)
 		{
-			std::string const & inherit = inherit_attr->ValueString();
+			std::string_view const inherit = inherit_attr->ValueString();
 			BOOST_ASSERT(inherit != name_);
 
 			parent_tech = effect.TechniqueByName(inherit);
@@ -3662,8 +3663,8 @@ namespace KlayGE
 				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
-					std::string name = macro_node->Attrib("name")->ValueString();
-					std::string value = macro_node->Attrib("value")->ValueString();
+					std::string_view const name = macro_node->Attrib("name")->ValueString();
+					std::string_view const value = macro_node->Attrib("value")->ValueString();
 					bool found = false;
 					for (size_t i = 0; i < macros_->size(); ++ i)
 					{
@@ -3748,10 +3749,10 @@ namespace KlayGE
 				{
 					++ weight_;
 
-					std::string state_name = state_node->Attrib("name")->ValueString();
+					std::string_view const state_name = state_node->Attrib("name")->ValueString();
 					if ("blend_enable" == state_name)
 					{
-						std::string value_str = state_node->Attrib("value")->ValueString();
+						std::string_view const value_str = state_node->Attrib("value")->ValueString();
 						if (BoolFromStr(value_str))
 						{
 							transparent_ = true;
@@ -3927,8 +3928,8 @@ namespace KlayGE
 				}
 				for (; macro_node; macro_node = macro_node->NextSibling("macro"))
 				{
-					std::string const name = macro_node->Attrib("name")->ValueString();
-					std::string const value = macro_node->Attrib("value")->ValueString();
+					std::string_view const name = macro_node->Attrib("name")->ValueString();
+					std::string_view const value = macro_node->Attrib("value")->ValueString();
 					bool found = false;
 					for (size_t i = 0; i < macros_->size(); ++ i)
 					{
@@ -3988,7 +3989,8 @@ namespace KlayGE
 
 		for (XMLNodePtr state_node = node->FirstNode("state"); state_node; state_node = state_node->NextSibling("state"))
 		{
-			size_t const state_name_hash = RT_HASH(state_node->Attrib("name")->ValueString().c_str());
+			std::string_view const name = state_node->Attrib("name")->ValueString();
+			size_t const state_name_hash = HashRange(name.begin(), name.end());
 
 			XMLAttributePtr const value_attr = state_node->Attrib("value");
 			std::string_view value_str;
@@ -4239,7 +4241,8 @@ namespace KlayGE
 						{
 							ShaderDesc::StreamOutputDecl decl;
 
-							size_t const usage_str_hash = RT_HASH(entry_node->Attrib("usage")->ValueString().c_str());
+							std::string_view const usage_str = entry_node->Attrib("usage")->ValueString();
+							size_t const usage_str_hash = HashRange(usage_str.begin(), usage_str.end());
 							XMLAttributePtr attr = entry_node->Attrib("usage_index");
 							if (attr)
 							{
@@ -5016,8 +5019,8 @@ namespace KlayGE
 		XMLAttributePtr attr = node->Attrib("type");
 		if (attr)
 		{
-			std::string const & type_str = attr->ValueString();
-			size_t const type_str_hash = RT_HASH(type_str.c_str());
+			std::string_view const type_str = attr->ValueString();
+			size_t const type_str_hash = HashRange(type_str.begin(), type_str.end());
 			if (CT_HASH("vertex_shader") == type_str_hash)
 			{
 				type_ = ShaderObject::ST_VertexShader;
