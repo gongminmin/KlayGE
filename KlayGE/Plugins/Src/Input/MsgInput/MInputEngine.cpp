@@ -217,7 +217,7 @@ namespace KlayGE
 				this->OnMouseUp(pt, buttons);
 			});
 		on_mouse_move_ = main_wnd->OnMouseMove().connect(
-			this](Window const & wnd, int2 const & pt)
+			[this](Window const & wnd, int2 const & pt)
 			{
 				KFL_UNUSED(wnd);
 				this->OnMouseMove(pt);
