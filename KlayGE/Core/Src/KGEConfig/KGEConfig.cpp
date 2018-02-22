@@ -428,12 +428,6 @@ INT_PTR CALLBACK Audio_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, LPAR
 				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("OpenAL")));
 				FreeLibrary(mod_al);
 			}
-			HMODULE mod_ds = LoadLibraryEx(TEXT("dsound.dll"), nullptr, 0);
-			if (mod_ds)
-			{
-				SendMessage(hFactoryCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(TEXT("DSound")));
-				FreeLibrary(mod_ds);
-			}
 			HMODULE mod_xaudio = LoadLibraryEx(TEXT("XAudio2_8.dll"), nullptr, 0);
 			if (mod_xaudio)
 			{
