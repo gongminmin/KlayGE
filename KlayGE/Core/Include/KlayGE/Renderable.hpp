@@ -266,7 +266,7 @@ namespace KlayGE
 		float CalcLod(float3 const & eye_pos, float fov_scale) const;
 
 		// For deferred only
-		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
+		void BindDeferredEffect(RenderEffectPtr const & deferred_effect);
 		virtual RenderTechnique* PassTech(PassType type) const;
 		virtual void UpdateTechniques();
 

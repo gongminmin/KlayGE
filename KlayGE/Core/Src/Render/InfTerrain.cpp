@@ -395,7 +395,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 
 		hw_tessellation_ = re.DeviceCaps().ds_support & tess;
-		this->UpdateTechnique();
+		this->UpdateTechniques();
 	}
 
 	void HQTerrainRenderable::ShowPatches(bool sp)
@@ -411,7 +411,7 @@ namespace KlayGE
 	void HQTerrainRenderable::Wireframe(bool wf)
 	{
 		wireframe_ = wf;
-		this->UpdateTechnique();
+		this->UpdateTechniques();
 	}
 
 	void HQTerrainRenderable::DetailNoiseScale(float scale)
@@ -437,8 +437,55 @@ namespace KlayGE
 		// Calculate matrix in SetMatrices.
 	}
 
-	void HQTerrainRenderable::UpdateTechnique()
+	void HQTerrainRenderable::UpdateTechniques()
 	{
+		RenderableHelper::UpdateTechniques();
+
+		auto deferred_effect = deferred_effect_.get();
+
+		terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
+		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
+		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
+		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
+		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
+		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
+		gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
+
+		*deferred_effect->ParameterByName("vertex_per_tile_edge") = static_cast<int32_t>(VERTEX_PER_TILE_EDGE);
+		*deferred_effect->ParameterByName("patches_per_tile_edge") = int2(PATCHES_PER_TILE_EDGE, PATCHES_PER_TILE_EDGE - 1);
+		*deferred_effect->ParameterByName("inv_patches_per_tile_edge") = 1.0f / PATCHES_PER_TILE_EDGE;
+		*deferred_effect->ParameterByName("inv_vertex_per_tile_edge") = 1.0f / VERTEX_PER_TILE_EDGE;
+		*deferred_effect->ParameterByName("world_scale") = world_scale_;
+		*deferred_effect->ParameterByName("vertical_scale") = float2(vertical_scale_, world_scale_ * vertical_scale_);
+		*deferred_effect->ParameterByName("world_uv_repeats") = float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_);
+
+		height_map_param_ = deferred_effect->ParameterByName("coarse_height_map");
+		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
+		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
+
+		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
+		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
+		proj_mat_param_ = deferred_effect->ParameterByName("proj_mat");
+		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
+		tri_size_param_ = deferred_effect->ParameterByName("tri_size");
+		tile_size_param_ = deferred_effect->ParameterByName("tile_size");
+		debug_show_patches_param_ = deferred_effect->ParameterByName("show_patches");
+		debug_show_tiles_param_ = deferred_effect->ParameterByName("show_tiles");
+		detail_noise_param_ = deferred_effect->ParameterByName("detail_noise_scale");
+		detail_uv_param_ = deferred_effect->ParameterByName("detail_uv_scale");
+		sample_spacing_param_ = deferred_effect->ParameterByName("coarse_sample_spacing");
+		frame_size_param_ = deferred_effect->ParameterByName("frame_size");
+
+		terrain_tex_layer_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_0");
+		terrain_tex_layer_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_1");
+		terrain_tex_layer_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_2");
+		terrain_tex_layer_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_3");
+
+		terrain_tex_layer_scale_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_scale_0");
+		terrain_tex_layer_scale_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_scale_1");
+		terrain_tex_layer_scale_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_scale_2");
+		terrain_tex_layer_scale_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_scale_3");
+
 		uint32_t tech_index;
 		if (hw_tessellation_)
 		{
@@ -541,56 +588,6 @@ namespace KlayGE
 	{
 		BOOST_ASSERT(layer < terrain_tex_layer_scale_params_.size());
 		*terrain_tex_layer_scale_params_[layer] = scale;
-	}
-
-	void HQTerrainRenderable::BindDeferredEffect(RenderEffectPtr const & deferred_effect)
-	{
-		RenderableHelper::BindDeferredEffect(deferred_effect);
-
-		terrain_gbuffer_mrt_techs_[0] = deferred_effect->TechniqueByName("GBufferTessTerrainFillMRTTech");
-		terrain_gbuffer_mrt_techs_[1] = deferred_effect->TechniqueByName("GBufferTessTerrainLineMRTTech");
-		terrain_gbuffer_mrt_techs_[2] = deferred_effect->TechniqueByName("GBufferNoTessTerrainFillMRTTech");
-		terrain_gbuffer_mrt_techs_[3] = deferred_effect->TechniqueByName("GBufferNoTessTerrainLineMRTTech");
-		gen_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainShadowMapTech");
-		gen_cascaded_sm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainCascadedShadowMapTech");
-		gen_rsm_tech_ = deferred_effect->TechniqueByName("GenNoTessTerrainReflectiveShadowMapTech");
-
-		*deferred_effect->ParameterByName("vertex_per_tile_edge") = static_cast<int32_t>(VERTEX_PER_TILE_EDGE);
-		*deferred_effect->ParameterByName("patches_per_tile_edge") = int2(PATCHES_PER_TILE_EDGE, PATCHES_PER_TILE_EDGE - 1);
-		*deferred_effect->ParameterByName("inv_patches_per_tile_edge") = 1.0f / PATCHES_PER_TILE_EDGE;
-		*deferred_effect->ParameterByName("inv_vertex_per_tile_edge") = 1.0f / VERTEX_PER_TILE_EDGE;
-		*deferred_effect->ParameterByName("world_scale") = world_scale_;
-		*deferred_effect->ParameterByName("vertical_scale") = float2(vertical_scale_, world_scale_ * vertical_scale_);
-		*deferred_effect->ParameterByName("world_uv_repeats") = float2(static_cast<float>(world_uv_repeats_), 1.0f / world_uv_repeats_);
-
-		height_map_param_ = deferred_effect->ParameterByName("coarse_height_map");
-		gradient_map_param_ = deferred_effect->ParameterByName("coarse_gradient_map");
-		mask_map_param_ = deferred_effect->ParameterByName("coarse_mask_map");
-
-		eye_pos_param_ = deferred_effect->ParameterByName("eye_pos");
-		view_dir_param_ = deferred_effect->ParameterByName("view_dir");
-		proj_mat_param_ = deferred_effect->ParameterByName("proj_mat");
-		texture_world_offset_param_ = deferred_effect->ParameterByName("texture_world_offset");
-		tri_size_param_ = deferred_effect->ParameterByName("tri_size");
-		tile_size_param_ = deferred_effect->ParameterByName("tile_size");
-		debug_show_patches_param_ = deferred_effect->ParameterByName("show_patches");
-		debug_show_tiles_param_ = deferred_effect->ParameterByName("show_tiles");
-		detail_noise_param_ = deferred_effect->ParameterByName("detail_noise_scale");
-		detail_uv_param_ = deferred_effect->ParameterByName("detail_uv_scale");
-		sample_spacing_param_ = deferred_effect->ParameterByName("coarse_sample_spacing");
-		frame_size_param_ = deferred_effect->ParameterByName("frame_size");
-
-		terrain_tex_layer_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_0");
-		terrain_tex_layer_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_1");
-		terrain_tex_layer_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_2");
-		terrain_tex_layer_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_3");
-
-		terrain_tex_layer_scale_params_[0] = deferred_effect->ParameterByName("terrain_tex_layer_scale_0");
-		terrain_tex_layer_scale_params_[1] = deferred_effect->ParameterByName("terrain_tex_layer_scale_1");
-		terrain_tex_layer_scale_params_[2] = deferred_effect->ParameterByName("terrain_tex_layer_scale_2");
-		terrain_tex_layer_scale_params_[3] = deferred_effect->ParameterByName("terrain_tex_layer_scale_3");
-
-		this->UpdateTechnique();
 	}
 
 	float3 HQTerrainRenderable::CalcUVOffset(Camera const & camera) const

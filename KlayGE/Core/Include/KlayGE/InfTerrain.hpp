@@ -185,14 +185,13 @@ namespace KlayGE
 		float GetHeight(float x, float z);
 
 	protected:
-		virtual void BindDeferredEffect(RenderEffectPtr const & deferred_effect) override;
 		void CreateNonTessIB();
 		void CreateNonTessVIDVB();
 		void CreateTessIB();
 		float3 CalcUVOffset(Camera const & camera) const;
 		void SetMatrices(Camera const & camera);
 		void RenderTerrain();
-		void UpdateTechnique();
+		void UpdateTechniques() override;
 
 		virtual void FlushTerrainData() = 0;
 

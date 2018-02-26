@@ -238,7 +238,7 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="pixel_shader" value="GBufferAlphaTestMRTPS()"/>
 		</pass>
 	</technique>
-	<technique name="GBufferAlphaBlendBackMRTTech">
+	<technique name="GBufferAlphaBlendBackMRTTech" inherit="GBufferMRTTech">
 		<pass name="p0">
 			<state name="depth_func" value="greater"/>
 
@@ -253,7 +253,6 @@ void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_
 			<state name="back_stencil_ref" value="0"/>
 			<state name="back_stencil_pass" value="replace"/>
 
-			<state name="vertex_shader" value="GBufferVS()"/>
 			<state name="pixel_shader" value="GBufferAlphaBlendMRTPS()"/>
 		</pass>
 	</technique>
