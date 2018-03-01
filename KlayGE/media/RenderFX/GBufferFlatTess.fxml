@@ -1,0 +1,197 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader version="5">
+		<![CDATA[
+struct VS_CONTROL_POINT_OUTPUT
+{
+	float3 Pos : POSITION;
+	float2 Texcoord : TEXCOORD0;
+	float4 TangentQuat : TEXCOORD1;
+};
+
+VS_CONTROL_POINT_OUTPUT GBufferTessVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float4 tangent_quat : TANGENT
+#if NUM_JOINTS > 0
+			, float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+			float4 blend_indices_f : BLENDINDICES
+#else
+			uint4 blend_indices : BLENDINDICES
+#endif
+#endif
+			)
+{
+#if NUM_JOINTS > 0
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
+#endif
+
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+
+	VS_CONTROL_POINT_OUTPUT output;
+
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, output.Pos, output.TangentQuat);
+	output.Texcoord = TexcoordNode(texcoord);
+
+	return output;
+}
+
+struct HS_CONSTANT_DATA_OUTPUT
+{
+	// Tess factor for the FF HW block
+	float edges[3]	: SV_TessFactor;
+	float inside	: SV_InsideTessFactor;
+};
+
+float2 ScreenCoord(float3 pos)
+{
+	float4 p = mul(float4(pos, 1), mvp);
+	p /= p.w;
+	p.y *= KLAYGE_FLIPPING;
+	return (p.xy * 0.5f + 0.5f) * frame_size;
+}
+
+float EdgeFactor(float2 p0_ss, float2 p1_ss, float3 p0_ws, float3 p1_ws)
+{
+	float np = distance(p0_ss, p1_ss);
+	float dist = length(mul(float4((p0_ws + p1_ws) / 2, 1), model_view).xyz);
+	return np / dist;
+}
+
+HS_CONSTANT_DATA_OUTPUT GBufferTessConstantsHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> ip)
+{
+	HS_CONSTANT_DATA_OUTPUT output;
+
+	const float BACK_FACE_THRESHOLD = 0.4f;
+		
+	float3 normal0 = transform_quat(float3(0, 0, 1), ip[0].TangentQuat);
+	float3 normal1 = transform_quat(float3(0, 0, 1), ip[1].TangentQuat);
+	float3 normal2 = transform_quat(float3(0, 0, 1), ip[2].TangentQuat);
+		
+	float3 edge0_normal = (normal2 + normal0) * 0.5f;
+	float3 edge1_normal = (normal0 + normal1) * 0.5f;
+	float3 edge2_normal = (normal1 + normal2) * 0.5f;
+
+	float3 orientation;
+	orientation.x = dot(edge0_normal, forward_vec);
+	orientation.y = dot(edge1_normal, forward_vec);
+	orientation.z = dot(edge2_normal, forward_vec);
+		
+	if (all(orientation > BACK_FACE_THRESHOLD))
+	{
+		output.inside = 0;
+		output.edges[0] = 0;
+		output.edges[1] = 0;
+		output.edges[2] = 0;
+	}
+	else
+	{
+		float2 p0 = ScreenCoord(ip[0].Pos);
+		float2 p1 = ScreenCoord(ip[1].Pos);
+		float2 p2 = ScreenCoord(ip[2].Pos);
+
+		float3 edges_factors = float3(EdgeFactor(p2, p0, ip[2].Pos, ip[0].Pos),
+				EdgeFactor(p0, p1, ip[0].Pos, ip[1].Pos),
+				EdgeFactor(p1, p2, ip[1].Pos, ip[2].Pos))
+			* tess_factors.x * 0.3f;
+
+		output.edges[0] = clamp(edges_factors.x, tess_factors.z, tess_factors.w);
+		output.edges[1] = clamp(edges_factors.y, tess_factors.z, tess_factors.w);
+		output.edges[2] = clamp(edges_factors.z, tess_factors.z, tess_factors.w);
+		output.inside = clamp((edges_factors.x + edges_factors.y + edges_factors.z) / 3,
+			tess_factors.z, tess_factors.w);
+	}
+
+	return output;
+}
+
+[domain("tri")]
+[partitioning("fractional_odd")]
+[outputtopology("triangle_cw")]
+[outputcontrolpoints(3)]
+[patchconstantfunc("GBufferTessConstantsHS")]
+VS_CONTROL_POINT_OUTPUT GBufferTessHS(InputPatch<VS_CONTROL_POINT_OUTPUT, 3> p, 
+										uint i : SV_OutputControlPointID)
+{
+	return p[i];
+}
+
+void PostTessellation(float3 bc_coords, float3 pos, float2 uv, float4 tangent_quat,
+						out float4 oTexCoord_2xy,
+						out float4 oTsToView0_2z,
+						out float4 oTsToView1_Depth,
+						out SS_TEXCOORD_TYPE oScreenTc,
+						out float4 oPos)
+{
+	float3x3 obj_to_tangent;
+	obj_to_tangent[0] = transform_quat(float3(1, 0, 0), tangent_quat);
+	obj_to_tangent[1] = transform_quat(float3(0, 1, 0), tangent_quat) * sign(tangent_quat.w);
+	obj_to_tangent[2] = transform_quat(float3(0, 0, 1), tangent_quat);
+
+	pos += HeightForTessellationNode(uv) * obj_to_tangent[2];
+
+	oPos = mul(float4(pos, 1), mvp);
+	oTexCoord_2xy.xy = uv;
+
+	float3x3 ts_to_view = mul(obj_to_tangent, (float3x3)model_view);
+	oTsToView0_2z.xyz = ts_to_view[0];
+	oTsToView1_Depth.xyz = ts_to_view[1];
+	oTexCoord_2xy.zw = ts_to_view[2].xy;
+	oTsToView0_2z.w = ts_to_view[2].z;
+
+	oTsToView1_Depth.w = oPos.w;
+
+	oScreenTc = EncodeSSTexcoord(oPos);
+}
+
+[domain("tri")]
+void GBufferFlatTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<VS_CONTROL_POINT_OUTPUT, 3> patch,
+
+							out float4 oTexCoord_2xy : TEXCOORD0,
+							out float4 oTsToView0_2z : TEXCOORD1,
+							out float4 oTsToView1_Depth : TEXCOORD2,
+							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+							out float4 oPos : SV_Position)
+{
+	float3 pos;
+	float2 texcoord;
+	float4 tangent_quat;
+	InterpolateFlatAttrs(bc_coords,
+				patch[0].Pos, patch[1].Pos, patch[2].Pos,
+				patch[0].Texcoord, patch[1].Texcoord, patch[2].Texcoord,
+				patch[0].TangentQuat, patch[1].TangentQuat, patch[2].TangentQuat,
+
+				pos, texcoord,
+				tangent_quat);
+				
+	PostTessellation(bc_coords, pos, texcoord, tangent_quat,
+				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="GBufferFlatTessMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SpecialShadingFlatTessTech" inherit="SpecialShadingTech" override="SpecialShadingTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferFlatTessDS()"/>
+		</pass>
+	</technique>
+</effect>

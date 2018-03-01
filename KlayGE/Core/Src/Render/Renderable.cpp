@@ -42,7 +42,7 @@ namespace KlayGE
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			this->BindDeferredEffect(drl->GBufferEffect());
+			this->BindDeferredEffect(drl->GBufferEffect(nullptr, false, false));
 		}
 	}
 
@@ -421,230 +421,25 @@ namespace KlayGE
 
 	void Renderable::UpdateTechniques()
 	{
-		bool sss;
-		bool two_sided;
-		RenderMaterial::SurfaceDetailMode sdm;
-		if (mtl_)
-		{
-			sss = mtl_->sss;
-			two_sided = mtl_->two_sided;
-			sdm = mtl_->detail_mode;
-		}
-		else
-		{
-			sss = false;
-			two_sided = false;
-			sdm = RenderMaterial::SDM_Parallax;
-		}
-
-		switch (sdm)
-		{
-		case RenderMaterial::SDM_Parallax:
-			if (this->AlphaTest())
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferAlphaTestMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
-					}
-				}
-			}
-			else
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
-					}
-				}
-			}
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
-			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
-			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
-			break;
-		
-		case RenderMaterial::SDM_FlatTessellation:
-			if (this->AlphaTest())
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferFlatTessAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessAlphaTestMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferFlatTessAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaTestMRTTech");
-					}
-				}
-			}
-			else
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferFlatTessMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferFlatTessMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferFlatTessMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessMRTTech");
-					}
-				}
-			}
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferFlatTessAlphaBlendFrontMRTTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessTech");
-			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendBackTech");
-			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingFlatTessAlphaBlendFrontTech");
-			break;
-
-		case RenderMaterial::SDM_SmoothTessellation:
-			if (this->AlphaTest())
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferSmoothTessAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessAlphaTestMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferSmoothTessAlphaTestMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaTestMRTTech");
-					}
-				}
-			}
-			else
-			{
-				if (sss)
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedSSSGBufferSmoothTessMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("SSSGBufferSmoothTessMRTTech");
-					}
-				}
-				else
-				{
-					if (two_sided)
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("TwoSidedGBufferSmoothTessMRTTech");
-					}
-					else
-					{
-						gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessMRTTech");
-					}
-				}
-			}
-			gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendBackMRTTech");
-			gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferSmoothTessAlphaBlendFrontMRTTech");
-			special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessTech");
-			special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendBackTech");
-			special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingSmoothTessAlphaBlendFrontTech");
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid surface detail mode");
-		}
-
 		if (this->AlphaTest())
 		{
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
 			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapAlphaTestTech");
-			if (sss)
-			{
-				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapAlphaTestTech");
-				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenCascadedShadowMapAlphaTestTech");
-			}
-			else
-			{
-				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
-				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
-			}
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapAlphaTestTech");
+			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapAlphaTestTech");
 		}
 		else
 		{
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferMRTTech");
 			gen_rsm_tech_ = deferred_effect_->TechniqueByName("GenReflectiveShadowMapTech");
-			if (sss)
-			{
-				gen_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenShadowMapTech");
-				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("SSSGenCascadedShadowMapTech");
-			}
-			else
-			{
-				gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
-				gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
-			}
+			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenShadowMapTech");
+			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenCascadedShadowMapTech");
 		}
+		gbuffer_alpha_blend_back_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
+		gbuffer_alpha_blend_front_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
+		special_shading_tech_ = deferred_effect_->TechniqueByName("SpecialShadingTech");
+		special_shading_alpha_blend_back_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendBackTech");
+		special_shading_alpha_blend_front_tech_ = deferred_effect_->TechniqueByName("SpecialShadingAlphaBlendFrontTech");
 
 		select_mode_tech_ = deferred_effect_->TechniqueByName("SelectModeTech");
 	}

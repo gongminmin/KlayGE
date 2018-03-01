@@ -194,7 +194,12 @@ SET(RENDERING_EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/FXAA.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GammaCorrection.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferFlatTess.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferLine.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSkinning.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSmoothTess.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferSSS.fxml
+	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBufferTwoSided.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/HDRDisplay.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/InfTerrain.fxml
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Imposter.fxml

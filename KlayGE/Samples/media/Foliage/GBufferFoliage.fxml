@@ -1,0 +1,91 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="InfTerrain.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="util.fxml"/>
+
+	<shader>
+		<![CDATA[
+void FoliageGBufferVS(float4 pos : POSITION,
+			float2 texcoord : TEXCOORD0,
+			float4 tangent_quat : TANGENT,
+#if NUM_JOINTS > 0
+			float4 blend_weights : BLENDWEIGHT,
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+			float4 blend_indices_f : BLENDINDICES,
+#else
+			uint4 blend_indices : BLENDINDICES,
+#endif
+#endif
+			float4 instance_pos_scale : TEXCOORD1,
+			float2 instance_rotation : TEXCOORD2,
+			out float4 oTexCoord_2xy : TEXCOORD0,
+			out float4 oTsToView0_2z : TEXCOORD1,
+			out float4 oTsToView1_Depth : TEXCOORD2,
+			out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+			out float4 oPos : SV_Position)
+{
+#if NUM_JOINTS > 0
+#if KLAYGE_OPENGL || KLAYGE_OPENGLES
+	int4 blend_indices = (int4)blend_indices_f;
+#endif
+#else
+	float4 blend_weights = 0;
+	int4 blend_indices = 0;
+#endif
+
+	float4 rotation_y_quat = float4(0, instance_rotation.x, 0, instance_rotation.y);
+
+	pos = float4(pos.xyz * pos_extent + pos_center, 1);
+	texcoord = texcoord * tc_extent + tc_center;
+	tangent_quat = tangent_quat * 2 - 1;
+	
+	pos.xyz *= instance_pos_scale.w;
+	pos.xyz = transform_quat(pos.xyz, rotation_y_quat);
+	pos.xyz += instance_pos_scale.xyz;
+
+	tangent_quat = mul_quat(tangent_quat, rotation_y_quat);
+
+	float3 result_pos;
+	float4 result_tangent_quat;
+	PositionNode(pos.xyz, tangent_quat, blend_weights, blend_indices, result_pos, result_tangent_quat);
+	oTexCoord_2xy.xy = TexcoordNode(texcoord);
+
+	oPos = mul(float4(result_pos, 1), mvp);
+
+	float3x3 obj_to_ts;
+	obj_to_ts[0] = transform_quat(float3(1, 0, 0), result_tangent_quat);
+	obj_to_ts[1] = transform_quat(float3(0, 1, 0), result_tangent_quat) * sign(result_tangent_quat.w);
+	obj_to_ts[2] = transform_quat(float3(0, 0, 1), result_tangent_quat);
+	float3x3 ts_to_view = mul(obj_to_ts, (float3x3)model_view);
+	oTsToView0_2z.xyz = ts_to_view[0];
+	oTsToView1_Depth.xyz = ts_to_view[1];
+	oTexCoord_2xy.zw = ts_to_view[2].xy;
+	oTsToView0_2z.w = ts_to_view[2].z;
+
+	oTsToView1_Depth.w = oPos.w;
+
+	oScreenTc = EncodeSSTexcoord(oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="FoliageGBufferMRT" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoliageGBufferVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenFoliageNoTessTerrainShadowMapTech" inherit="GenNoTessTerrainShadowMapTech" override="GenNoTessTerrainShadowMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoliageGBufferVS()"/>
+		</pass>
+	</technique>
+
+	<technique name="GenFoliageNoTessTerrainCascadedShadowMapTech" inherit="GenNoTessTerrainCascadedShadowMapTech" override="GenNoTessTerrainCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="FoliageGBufferVS()"/>
+		</pass>
+	</technique>
+</effect>

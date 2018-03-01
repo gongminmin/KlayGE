@@ -1,0 +1,27 @@
+<?xml version='1.0'?>
+
+<effect>
+	<technique name="GBufferLineMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GenShadowMapLineTech" inherit="GenShadowMapTech" override="GenShadowMapTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+
+	<technique name="GenCascadedShadowMapLineTech" inherit="GenCascadedShadowMapTech" override="GenCascadedShadowMapTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+	
+	<technique name="SpecialShadingLineTech" inherit="SpecialShadingTech" override="SpecialShadingTech">
+		<pass name="p0">
+			<state name="polygon_mode" value="line"/>
+		</pass>
+	</technique>
+</effect>

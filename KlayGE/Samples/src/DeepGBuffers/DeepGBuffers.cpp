@@ -36,31 +36,18 @@ namespace
 			: StaticMesh(model, name),
 				lighting_(true)
 		{
-			this->BindDeferredEffect(SyncLoadRenderEffect("DeepGBuffers.fxml"));
+			gbuffers_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
+			no_lighting_gbuffers_effect_ = SyncLoadRenderEffect("DeepGBuffers.fxml");
+
+			this->BindDeferredEffect(gbuffers_effect_);
 			technique_ = special_shading_tech_;
-		}
-
-		void UpdateTechniques() override
-		{
-			StaticMesh::UpdateTechniques();
-
-			if (lighting_)
-			{
-				gbuffer_mrt_tech_ = effect_->TechniqueByName("GBufferMRTTech");
-				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendFrontMRTTech");
-				gbuffer_alpha_blend_back_mrt_tech_ = effect_->TechniqueByName("GBufferAlphaBlendBackMRTTech");
-			}
-			else
-			{
-				gbuffer_mrt_tech_ = effect_->TechniqueByName("NoLightingGBufferMRTTech");
-				gbuffer_alpha_blend_front_mrt_tech_ = effect_->TechniqueByName("NoLightingGBufferAlphaBlendFrontMRTTech");
-				gbuffer_alpha_blend_back_mrt_tech_ = effect_->TechniqueByName("NoLightingGBufferAlphaBlendBackMRTTech");
-			}
 		}
 
 		void ReceivesLighting(bool lighting)
 		{
 			lighting_ = lighting;
+			this->BindDeferredEffect(lighting ? gbuffers_effect_ : no_lighting_gbuffers_effect_);
+
 			this->UpdateTechniques();
 		}
 
@@ -78,6 +65,9 @@ namespace
 
 	private:
 		bool lighting_;
+
+		RenderEffectPtr gbuffers_effect_;
+		RenderEffectPtr no_lighting_gbuffers_effect_;
 	};
 
 	class SpotLightSourceUpdate

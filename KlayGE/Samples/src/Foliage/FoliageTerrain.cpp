@@ -44,40 +44,21 @@ namespace KlayGE
 		FoliageMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			this->BindDeferredEffect(SyncLoadRenderEffect("Foliage.fxml"));
-			technique_ = gbuffer_mrt_tech_;
-
-			gen_sm_tech_ = deferred_effect_->TechniqueByName("GenFoliageNoTessTerrainShadowMapTech");
-			gen_cascaded_sm_tech_ = deferred_effect_->TechniqueByName("GenFoliageNoTessTerrainCascadedShadowMapTech");
 		}
 
 		void DoBuildMeshInfo() override
 		{
 			StaticMesh::DoBuildMeshInfo();
 
-			if ((effect_attrs_ & EA_AlphaTest) || (effect_attrs_ & EA_SSS))
+			std::string g_buffer_files[2];
+			g_buffer_files[0] = "GBufferFoliage.fxml";
+			uint32_t num = 1;
+			if (mtl_->two_sided)
 			{
-				if (mtl_->two_sided)
-				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageTwoSidedGBufferAlphaTestMRT");
-				}
-				else
-				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferAlphaTestMRT");
-				}
+				g_buffer_files[1] = "GBufferTwoSided.fxml";
+				++ num;
 			}
-			else
-			{
-				if (mtl_->two_sided)
-				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageTwoSidedGBufferMRT");
-				}
-				else
-				{
-					gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageGBufferMRT");
-				}
-			}
-			technique_ = gbuffer_mrt_tech_;
+			this->BindDeferredEffect(SyncLoadRenderEffects(ArrayRef<std::string>(g_buffer_files, num)));
 		}
 
 		void InstanceBuffer(uint32_t lod, GraphicsBufferPtr const & vb)
@@ -114,8 +95,8 @@ namespace KlayGE
 			GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(pos), pos);
 			rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_GR32F));
 
-			this->BindDeferredEffect(SyncLoadRenderEffect("Foliage.fxml"));
-			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("FoliageImpostorGBufferAlphaTestMRT");
+			this->BindDeferredEffect(SyncLoadRenderEffect("GBufferFoliageImpostor.fxml"));
+			gbuffer_mrt_tech_ = deferred_effect_->TechniqueByName("GBufferAlphaTestMRTTech");
 			technique_ = gbuffer_mrt_tech_;
 
 			pos_aabb_ = aabbox;
@@ -187,7 +168,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		foliage_dist_effect_ = SyncLoadRenderEffect("Foliage.fxml");
+		foliage_dist_effect_ = SyncLoadRenderEffect("FoliageDistribution.fxml");
 		foliage_dist_tech_ = foliage_dist_effect_->TechniqueByName("FoliageDistribution");
 		foliage_impostor_dist_tech_ = foliage_dist_effect_->TechniqueByName("FoliageImpostorDistribution");
 
@@ -520,7 +501,7 @@ namespace KlayGE
 		{
 			for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
 			{
-				auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+				auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
 				for (uint32_t lod = 0; lod < mesh->NumLods(); ++ lod)
 				{
 					mesh->Pass(type_);
@@ -534,7 +515,7 @@ namespace KlayGE
 		{
 			for (size_t plant_type = 0; plant_type < plant_impostor_meshes_.size(); ++ plant_type)
 			{
-				auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+				auto* mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
 				mesh->Pass(type_);
 				mesh->Render();
 			}

@@ -62,10 +62,12 @@
 
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
-namespace KlayGE
+namespace
 {
+	using namespace KlayGE;
+
 	int const SM_SIZE = 512;
-	
+
 	int const MAX_IL_MIPMAP_LEVELS = 3;
 
 	int const MAX_RSM_MIPMAP_LEVELS = 7; // (log(512)-log(4))/log(2) + 1
@@ -78,6 +80,25 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	uint32_t const TILE_SIZE = 32;
 #endif
+
+	union EffectIndex
+	{
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(push, 1)
+#endif
+		struct Flags
+		{
+			uint8_t line : 1;
+			uint8_t sss : 1;
+			uint8_t two_sided : 1;
+			uint8_t skinning : 1;
+			uint8_t detail_mode : 2;
+		} flags;
+#ifdef KLAYGE_HAS_STRUCT_PACK
+#pragma pack(pop)
+#endif
+		size_t index;
+	};
 
 	template <typename T>
 	void CreateConeMesh(std::vector<T>& vb, std::vector<uint16_t>& ib, uint16_t vertex_base, float radius, float height, uint16_t n)
@@ -393,8 +414,10 @@ namespace KlayGE
 			*(effect_->ParameterByName("depth_near_far_invfar")) = float3(camera.NearPlane(), camera.FarPlane(), 1 / camera.FarPlane());
 		}
 	};
+}
 
-
+namespace KlayGE
+{
 	DeferredRenderingLayer::DeferredRenderingLayer()
 		: active_viewport_(0),
 			sss_enabled_(true), translucency_enabled_(true),
@@ -533,8 +556,6 @@ namespace KlayGE
 		default_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 		merged_ambient_light_ = MakeSharedPtr<AmbientLightSource>();
 
-		g_buffer_effect_ = SyncLoadRenderEffect("GBuffer.fxml");
-		g_buffer_skinning_effect_ = SyncLoadRenderEffects({ "GBuffer.fxml", "GBufferSkinning.fxml" });
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		dr_effect_ = SyncLoadRenderEffect("DeferredRendering.fxml");
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -1254,6 +1275,70 @@ namespace KlayGE
 #endif
 			dr_debug_pp_->InputPin(4, this->SmallSSVOTex(index));
 		}
+	}
+
+	RenderEffectPtr const & DeferredRenderingLayer::GBufferEffect(RenderMaterial const * material, bool line, bool skinning) const
+	{
+		EffectIndex effect_index;
+		effect_index.index = 0;
+		if (material)
+		{
+			effect_index.flags.sss = material->sss;
+			effect_index.flags.two_sided = material->two_sided;
+			effect_index.flags.detail_mode = material->detail_mode;
+		}
+		effect_index.flags.line = line;
+		effect_index.flags.skinning = skinning;
+
+		if (!g_buffer_effects_[effect_index.index])
+		{
+			std::string g_buffer_files[6];
+			g_buffer_files[0] = "GBuffer.fxml";
+
+			uint32_t num = 1;
+			if (effect_index.flags.line)
+			{
+				g_buffer_files[num] = "GBufferLine.fxml";
+				++ num;
+			}
+			if (effect_index.flags.sss)
+			{
+				g_buffer_files[num] = "GBufferSSS.fxml";
+				++ num;
+			}
+			if (effect_index.flags.two_sided)
+			{
+				g_buffer_files[num] = "GBufferTwoSided.fxml";
+				++ num;
+			}
+			if (effect_index.flags.skinning)
+			{
+				g_buffer_files[num] = "GBufferSkinning.fxml";
+				++ num;
+			}
+			switch (effect_index.flags.detail_mode)
+			{
+			case RenderMaterial::SDM_Parallax:
+				break;
+
+			case RenderMaterial::SDM_FlatTessellation:
+				g_buffer_files[num] = "GBufferFlatTess.fxml";
+				++ num;
+				break;
+
+			case RenderMaterial::SDM_SmoothTessellation:
+				g_buffer_files[num] = "GBufferSmoothTess.fxml";
+				++ num;
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid detail mode");
+			}
+
+			g_buffer_effects_[effect_index.index] = SyncLoadRenderEffects(ArrayRef<std::string>(g_buffer_files, num));
+		}
+
+		return g_buffer_effects_[effect_index.index];
 	}
 
 	void DeferredRenderingLayer::EnableViewport(uint32_t index, bool enable)

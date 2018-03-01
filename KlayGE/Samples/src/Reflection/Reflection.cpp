@@ -35,8 +35,6 @@ namespace
 		ReflectMesh(RenderModelPtr const & model, std::wstring const & name)
 			: StaticMesh(model, name)
 		{
-			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
-			technique_ = special_shading_tech_;
 		}
 
 		virtual void DoBuildMeshInfo() override
@@ -46,6 +44,9 @@ namespace
 			mtl_ = SyncLoadRenderMaterial("ReflectMesh.mtlml");
 
 			effect_attrs_ |= EA_Reflection;
+
+			this->BindDeferredEffect(SyncLoadRenderEffect("Reflection.fxml"));
+			technique_ = special_shading_tech_;
 
 			reflection_tech_ = effect_->TechniqueByName("ReflectReflectionTech");
 			reflection_alpha_blend_back_tech_ = reflection_tech_;

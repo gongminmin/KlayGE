@@ -23,7 +23,7 @@
 	<parameter type="texture2DArray" name="gradient_tex_array"/>
 	<parameter type="texture2D" name="reflection_tex"/>
 
-	<cbuffer name="per_frame">s
+	<cbuffer name="per_frame">
 		<parameter type="int2" name="frames"/>
 		<parameter type="float3" name="min_disp0"/>
 		<parameter type="float3" name="min_disp1"/>

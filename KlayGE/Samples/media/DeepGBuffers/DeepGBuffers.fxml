@@ -3,7 +3,7 @@
 <effect>
 	<include name="GBuffer.fxml"/>
 
-	<technique name="NoLightingGBufferMRTTech" inherit="GBufferMRTTech">
+	<technique name="NoLightingGBufferMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>
@@ -15,31 +15,7 @@
 			<state name="back_stencil_pass" value="replace"/>
 		</pass>
 	</technique>
-	<technique name="NoLightingGBufferAlphaTestMRTTech" inherit="GBufferAlphaTestMRTTech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-		</pass>
-	</technique>
-	<technique name="NoLightingGBufferAlphaBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech">
-		<pass name="p0">
-			<state name="front_stencil_enable" value="true"/>
-			<state name="front_stencil_func" value="always_pass"/>
-			<state name="front_stencil_ref" value="128"/>
-			<state name="front_stencil_pass" value="replace"/>
-			<state name="back_stencil_enable" value="true"/>
-			<state name="back_stencil_func" value="always_pass"/>
-			<state name="back_stencil_ref" value="128"/>
-			<state name="back_stencil_pass" value="replace"/>
-		</pass>
-	</technique>
-	<technique name="NoLightingGBufferAlphaBlendFrontMRTTech" inherit="GBufferAlphaBlendFrontMRTTech">
+	<technique name="NoLightingGBufferAlphaBlendBackMRTTech" inherit="GBufferAlphaBlendBackMRTTech" override="GBufferAlphaBlendBackMRTTech">
 		<pass name="p0">
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="always_pass"/>

@@ -1,0 +1,50 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="GBufferFlatTess.fxml"/>
+
+	<shader version="5">
+		<![CDATA[
+[domain("tri")]
+void GBufferSmoothTessDS(HS_CONSTANT_DATA_OUTPUT HSConstantData, 
+							float3 bc_coords : SV_DomainLocation,
+							const OutputPatch<VS_CONTROL_POINT_OUTPUT, 3> patch,
+
+							out float4 oTexCoord_2xy : TEXCOORD0,
+							out float4 oTsToView0_2z : TEXCOORD1,
+							out float4 oTsToView1_Depth : TEXCOORD2,
+							out SS_TEXCOORD_TYPE oScreenTc : TEXCOORD3,
+							out float4 oPos : SV_Position)
+{
+	float3 pos;
+	float2 texcoord;
+	float4 tangent_quat;
+	InterpolatePhongAttrs(bc_coords,
+				patch[0].Pos, patch[1].Pos, patch[2].Pos,
+				patch[0].Texcoord, patch[1].Texcoord, patch[2].Texcoord,
+				patch[0].TangentQuat, patch[1].TangentQuat, patch[2].TangentQuat,
+
+				pos, texcoord,
+				tangent_quat);
+
+	PostTessellation(bc_coords, pos, texcoord, tangent_quat,
+				oTexCoord_2xy, oTsToView0_2z, oTsToView1_Depth, oScreenTc, oPos);
+}
+		]]>
+	</shader>
+
+	<technique name="GBufferSmoothTessMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+	<technique name="SpecialShadingSmoothTessTech" inherit="SpecialShadingTech" override="SpecialShadingTech">
+		<pass name="p0">
+			<state name="vertex_shader" value="GBufferTessVS()"/>
+			<state name="hull_shader" value="GBufferTessHS()"/>
+			<state name="domain_shader" value="GBufferSmoothTessDS()"/>
+		</pass>
+	</technique>
+</effect>

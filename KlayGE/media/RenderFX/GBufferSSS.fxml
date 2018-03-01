@@ -1,0 +1,46 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+float3 TransparencyPositionAdjustmentNode(float3 position, float4 tangent_quat)
+{
+	float3 normal = transform_quat(float3(0, 0, 1), tangent_quat);
+	return position + normal * 0.005f;
+}
+		]]>
+	</shader>
+
+	<shader_graph_nodes>
+		<node name="PositionAdjustmentNode" impl="TransparencyPositionAdjustmentNode"/>
+	</shader_graph_nodes>
+
+	<technique name="GBufferSSSMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+	<technique name="GBufferAlphaBlendBackSSSMRTTech" inherit="GBufferAlphaBlendBackMRTTech" override="GBufferAlphaBlendBackMRTTech">
+		<pass name="p0">
+			<state name="front_stencil_enable" value="true"/>
+			<state name="front_stencil_func" value="always_pass"/>
+			<state name="front_stencil_ref" value="32"/>
+			<state name="front_stencil_pass" value="replace"/>
+			<state name="front_stencil_write_mask" value="32"/>
+			<state name="back_stencil_enable" value="true"/>
+			<state name="back_stencil_func" value="always_pass"/>
+			<state name="back_stencil_ref" value="32"/>
+			<state name="back_stencil_pass" value="replace"/>
+			<state name="back_stencil_write_mask" value="32"/>
+		</pass>
+	</technique>
+</effect>

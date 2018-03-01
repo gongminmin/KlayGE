@@ -85,7 +85,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0120;
+	uint32_t const KFX_VERSION = 0x0130;
 
 #if KLAYGE_IS_DEV_PLATFORM
 	ArrayRef<std::pair<char const *, size_t>> GetTypeDefines()
@@ -2777,6 +2777,127 @@ namespace KlayGE
 		}
 	}
 
+	XMLNodePtr RenderEffectTemplate::ResolveInheritTechNode(XMLDocument& doc, XMLNode& root, XMLNodePtr const & tech_node)
+	{
+		auto inherit_attr = tech_node->Attrib("inherit");
+		if (!inherit_attr)
+		{
+			return tech_node;
+		}
+
+		auto const tech_name = tech_node->Attrib("name")->ValueString();
+
+		auto const inherit_name = inherit_attr->ValueString();
+		BOOST_ASSERT(inherit_name != tech_name);
+
+		XMLNodePtr new_tech_node;
+		for (auto node = root.FirstNode("technique"); node; node = node->NextSibling("technique"))
+		{
+			auto const parent_tech_name = node->Attrib("name")->ValueString();
+			if (parent_tech_name == inherit_name)
+			{
+				auto parent_node = this->ResolveInheritTechNode(doc, root, node);
+				new_tech_node = doc.CloneNode(parent_node);
+
+				for (auto tech_anno_node = tech_node->FirstNode("annotation"); tech_anno_node;
+					tech_anno_node = tech_anno_node->NextSibling("annotation"))
+				{
+					new_tech_node->AppendNode(doc.CloneNode(tech_anno_node));
+				}
+				for (auto tech_macro_node = tech_node->FirstNode("macro"); tech_macro_node;
+					tech_macro_node = tech_macro_node->NextSibling("macro"))
+				{
+					new_tech_node->AppendNode(doc.CloneNode(tech_macro_node));
+				}
+				for (auto pass_node = tech_node->FirstNode("pass"); pass_node; pass_node = pass_node->NextSibling("pass"))
+				{
+					auto const pass_name = pass_node->Attrib("name")->ValueString();
+
+					bool found_pass = false;
+					for (auto new_pass_node = new_tech_node->FirstNode("pass"); new_pass_node;
+						new_pass_node = new_pass_node->NextSibling("pass"))
+					{
+						auto const parent_pass_name = new_pass_node->Attrib("name")->ValueString();
+
+						if (pass_name == parent_pass_name)
+						{
+							for (auto pass_anno_node = pass_node->FirstNode("annotation"); pass_anno_node;
+								pass_anno_node = pass_anno_node->NextSibling("annotation"))
+							{
+								new_pass_node->AppendNode(doc.CloneNode(pass_anno_node));
+							}
+							for (auto pass_macro_node = pass_node->FirstNode("macro"); pass_macro_node;
+								pass_macro_node = pass_macro_node->NextSibling("macro"))
+							{
+								new_pass_node->AppendNode(doc.CloneNode(pass_macro_node));
+							}
+							for (auto pass_state_node = pass_node->FirstNode("state"); pass_state_node;
+								pass_state_node = pass_state_node->NextSibling("state"))
+							{
+								new_pass_node->AppendNode(doc.CloneNode(pass_state_node));
+							}
+
+							found_pass = true;
+							break;
+						}
+					}
+
+					if (!found_pass)
+					{
+						new_tech_node->AppendNode(doc.CloneNode(pass_node));
+					}
+				}
+
+				new_tech_node->RemoveAttrib(new_tech_node->Attrib("name"));
+				new_tech_node->AppendAttrib(doc.AllocAttribString("name", tech_name));
+
+				break;
+			}
+		}
+		BOOST_ASSERT(new_tech_node);
+
+		return new_tech_node;
+	}
+
+	void RenderEffectTemplate::ResolveOverrideTechs(XMLDocument& doc, XMLNode& root)
+	{
+		std::vector<XMLNodePtr> tech_nodes;
+		for (XMLNodePtr node = root.FirstNode("technique"); node; node = node->NextSibling("technique"))
+		{
+			tech_nodes.push_back(node);
+		}
+
+		for (auto const & node : tech_nodes)
+		{
+			auto override_attr = node->Attrib("override");
+			if (override_attr)
+			{
+				auto override_tech_name = override_attr->ValueString();
+				for (auto& overrided_node : tech_nodes)
+				{
+					auto name = overrided_node->Attrib("name")->ValueString();
+					if (override_tech_name == name)
+					{
+						auto new_node = doc.CloneNode(this->ResolveInheritTechNode(doc, root, node));
+						new_node->RemoveAttrib(new_node->Attrib("name"));
+						new_node->AppendAttrib(doc.AllocAttribString("name", name));
+						auto attr = new_node->Attrib("override");
+						if (attr)
+						{
+							new_node->RemoveAttrib(attr);
+						}
+
+						root.InsertNode(overrided_node, new_node);
+						root.RemoveNode(overrided_node);
+						overrided_node = new_node;
+
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	void RenderEffectTemplate::Load(XMLNode const & root, RenderEffect& effect)
 	{
 		{
@@ -2991,6 +3112,8 @@ namespace KlayGE
 						}
 					}
 				}
+
+				this->ResolveOverrideTechs(*frag_docs[0], *root);
 
 				this->Load(*root, effect);
 			}

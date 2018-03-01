@@ -43,7 +43,9 @@ SET(HEADER_FILES
 
 SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoggySkyBox.fxml
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Foliage.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoliageDistribution.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliage.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliageImpostor.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/ProceduralTerrain.fxml
 )
 
@@ -85,7 +87,6 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/DeferredRenderingDebug.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Depth.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer.kfx
-	${KLAYGE_PROJECT_DIR}/media/RenderFX/GBuffer+GBufferSkinning.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Fog.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/Font.kfx
 	${KLAYGE_PROJECT_DIR}/media/RenderFX/LensEffects.kfx
@@ -150,7 +151,9 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_c.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/DH001cross_filtered_y.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoggySkyBox.kfx
-	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Foliage.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/FoliageDistribution.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliage.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GBufferFoliageImpostor.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/GrassGreenTexture0002.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/Ground.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/Foliage/probability.dds

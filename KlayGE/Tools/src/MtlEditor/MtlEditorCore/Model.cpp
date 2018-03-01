@@ -14,6 +14,7 @@
 #include <KlayGE/ResLoader.hpp>
 #include <KlayGE/Camera.hpp>
 #include <KlayGE/FrameBuffer.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include "Model.hpp"
 
@@ -93,7 +94,12 @@ void DetailedSkinnedMesh::UpdateEffectAttrib()
 		effect_attrs_ |= EA_SpecialShading;
 	}
 
-	this->UpdateTechniques();
+	auto drl = Context::Instance().DeferredRenderingLayerInstance();
+	if (drl)
+	{
+		RenderModelPtr model = model_.lock();
+		this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model->IsSkinned()));
+	}
 }
 
 void DetailedSkinnedMesh::UpdateMaterial()

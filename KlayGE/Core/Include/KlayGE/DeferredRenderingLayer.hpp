@@ -41,6 +41,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/IndirectLightingLayer.hpp>
 #include <KlayGE/CascadedShadowLayer.hpp>
+#include <KlayGE/Renderable.hpp>
 
 #define TRIDITIONAL_DEFERRED 0
 #define LIGHT_INDEXED_DEFERRED 1
@@ -206,14 +207,7 @@ namespace KlayGE
 			atmospheric_pp_ = pp;
 		}
 
-		RenderEffectPtr const & GBufferEffect() const
-		{
-			return g_buffer_effect_;
-		}
-		RenderEffectPtr const & GBufferSkinningEffect() const
-		{
-			return g_buffer_skinning_effect_;
-		}
+		RenderEffectPtr const & GBufferEffect(RenderMaterial const * material, bool line, bool skinning) const;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		TexturePtr const & LightingTex(uint32_t vp) const
@@ -420,8 +414,9 @@ namespace KlayGE
 	private:
 		bool tex_array_support_;
 
-		RenderEffectPtr g_buffer_effect_;
-		RenderEffectPtr g_buffer_skinning_effect_;
+		// TODO: Remove the magic number
+		mutable RenderEffectPtr g_buffer_effects_[48];
+
 		RenderEffectPtr dr_effect_;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		uint32_t light_batch_;

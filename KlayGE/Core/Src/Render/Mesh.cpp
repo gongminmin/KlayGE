@@ -33,6 +33,7 @@
 #include <KlayGE/Light.hpp>
 #include <KlayGE/RenderMaterial.hpp>
 #include <KFL/Hash.hpp>
+#include <KlayGE/DeferredRenderingLayer.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -641,7 +642,7 @@ namespace KlayGE
 		auto drl = Context::Instance().DeferredRenderingLayerInstance();
 		if (drl)
 		{
-			this->UpdateTechniques();
+			this->BindDeferredEffect(drl->GBufferEffect(mtl_.get(), false, model->IsSkinned()));
 		}
 	}
 

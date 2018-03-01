@@ -61,7 +61,7 @@
 using namespace std;
 using namespace KlayGE;
 
-uint32_t const KFX_VERSION = 0x0110;
+uint32_t const KFX_VERSION = 0x0130;
 
 #ifdef KLAYGE_HAS_STRUCT_PACK
 #pragma pack(push, 1)

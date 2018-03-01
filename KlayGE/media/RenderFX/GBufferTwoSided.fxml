@@ -1,0 +1,9 @@
+<?xml version='1.0'?>
+
+<effect>
+	<technique name="TwoSidedGBufferMRTTech" inherit="GBufferMRTTech" override="GBufferMRTTech">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+		</pass>
+	</technique>
+</effect>
