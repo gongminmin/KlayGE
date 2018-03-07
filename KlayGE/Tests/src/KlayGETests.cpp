@@ -28,19 +28,36 @@ namespace KlayGE
 		}
 	};
 
+	class KlayGETestEnvironment : public testing::Environment
+	{
+	public:
+		void SetUp() override
+		{
+			Context::Instance().LoadCfg("KlayGE.cfg");
+			ContextCfg context_cfg = Context::Instance().Config();
+			context_cfg.graphics_cfg.hide_win = true;
+			context_cfg.graphics_cfg.hdr = false;
+			context_cfg.graphics_cfg.color_grading = false;
+			context_cfg.graphics_cfg.gamma = false;
+			Context::Instance().Config(context_cfg);
+
+			app_ = MakeSharedPtr<KlayGETestsApp>();
+			app_->Create();
+		}
+
+		void TearDown() override
+		{
+			app_.reset();
+
+			Context::Destroy();
+		}
+
+	private:
+		std::shared_ptr<App3DFramework> app_;
+	};
 
 	void KlayGETest::SetUp()
 	{
-		Context::Instance().LoadCfg("KlayGE.cfg");
-		ContextCfg context_cfg = Context::Instance().Config();
-		context_cfg.graphics_cfg.hide_win = true;
-		context_cfg.graphics_cfg.hdr = false;
-		context_cfg.graphics_cfg.color_grading = false;
-		context_cfg.graphics_cfg.gamma = false;
-		Context::Instance().Config(context_cfg);
-
-		app = MakeSharedPtr<KlayGETestsApp>();
-		app->Create();
 	}
 
 	void KlayGETest::TearDown()
@@ -51,6 +68,8 @@ namespace KlayGE
 int main(int argc, char** argv)
 {
 	InitGoogleTest(&argc, argv);
+	AddGlobalTestEnvironment(new KlayGE::KlayGETestEnvironment);
+
 	int ret_val = RUN_ALL_TESTS();
 	if (ret_val != 0)
 	{
