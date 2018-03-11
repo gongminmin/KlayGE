@@ -28,8 +28,8 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_LZMACODEC_HPP
-#define _KFL_LZMACODEC_HPP
+#ifndef KLAYGE_CORE_LZMA_CODEC_HPP
+#define KLAYGE_CORE_LZMA_CODEC_HPP
 
 #pragma once
 
@@ -56,4 +56,4 @@ namespace KlayGE
 	};
 }
 
-#endif			// _KFL_LZMACODEC_HPP
+#endif		// KLAYGE_CORE_LZMA_CODEC_HPP

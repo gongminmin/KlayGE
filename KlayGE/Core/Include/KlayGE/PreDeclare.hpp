@@ -382,6 +382,9 @@ namespace KlayGE
 
 	class ScriptEngine;
 	class ScriptFactory;
+
+	class Package;
+	typedef std::shared_ptr<Package> PackagePtr;
 }
 
 #endif			// _KLAYGE_PREDECLARE_HPP

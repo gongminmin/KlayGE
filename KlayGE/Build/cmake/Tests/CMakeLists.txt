@@ -1,3 +1,6 @@
+DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/Test.7z" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "f128c4a3861d69279b2b43c885bf107b2dd4aaf0")
+DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/Test.txt" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "e4c991063598ea62ed6fa5f6164565ca6e2fccb9")
+DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/TestPassword.7z" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "3b300e251ec5181ba03b24e57e478cab9d347471")
 DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex.dds" "cbda47a1678ce70b6720856736100979d469e159" "c180e28392be0f6d9b8e429c416392923d9e7139")
 DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc2.dds" "94b1630de2f012da484ce80adf0b0bb7de490d70" "3e4095b5252662319898cabd4011f0d9d50faad8")
 DOWNLOAD_FILE("KlayGE/Tests/media/leaf_v3_green_tex_bc3.dds" "94b1630de2f012da484ce80adf0b0bb7de490d70" "f596c895a2248b7650486adf32b911b5380c6f04")
@@ -16,6 +19,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/EncodeDecodeTexTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/MathTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/ResLoaderTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp
 )
 SET(HEADER_FILES

@@ -28,94 +28,51 @@
  * from http://www.klayge.org/licensing/.
  */
 
-#ifndef _KFL_ARCHIVEEXTRACTCALLBACK_HPP
-#define _KFL_ARCHIVEEXTRACTCALLBACK_HPP
+#ifndef KLAYGE_CORE_ARCHIVE_EXTRACT_CALLBACK_HPP
+#define KLAYGE_CORE_ARCHIVE_EXTRACT_CALLBACK_HPP
 
 #pragma once
 
-#include <string>
 #include <atomic>
+#include <string>
 
 #include <CPP/7zip/Archive/IArchive.h>
 #include <CPP/7zip/IPassword.h>
 
 namespace KlayGE
 {
-	class CArchiveExtractCallback : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
+	class ArchiveExtractCallback : boost::noncopyable, public IArchiveExtractCallback, public ICryptoGetTextPassword
 	{
 	public:
-		STDMETHOD_(ULONG, AddRef)()
-		{
-			++ ref_count_;
-			return ref_count_;
-		}
-		STDMETHOD_(ULONG, Release)()
-		{
-			-- ref_count_;
-			if (0 == ref_count_)
-			{
-				delete this;
-				return 0;
-			}
-			return ref_count_;
-		}
-
-		STDMETHOD(QueryInterface)(REFGUID iid, void** outObject)
-		{
-			if (IID_ICryptoGetTextPassword == iid)
-			{
-				*outObject = static_cast<ICryptoGetTextPassword*>(this);
-				this->AddRef();
-				return S_OK;
-			}
-			else
-			{
-				if (IID_IArchiveExtractCallback == iid)
-				{
-					*outObject = static_cast<IArchiveExtractCallback*>(this);
-					this->AddRef();
-					return S_OK;
-				}
-				else
-				{
-					return E_NOINTERFACE;
-				}
-			}
-		}
+		// IUnknown
+		STDMETHOD_(ULONG, AddRef)();
+		STDMETHOD_(ULONG, Release)();
+		STDMETHOD(QueryInterface)(REFGUID iid, void** out_object);
 
 		// IProgress
 		STDMETHOD(SetTotal)(UInt64 size);
-		STDMETHOD(SetCompleted)(const UInt64* completeValue);
+		STDMETHOD(SetCompleted)(UInt64 const * complete_value);
 
 		// IExtractCallBack
-		STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream **outStream, Int32 askExtractMode);
-		STDMETHOD(PrepareOperation)(Int32 askExtractMode);
-		STDMETHOD(SetOperationResult)(Int32 resultEOperationResult);
+		STDMETHOD(GetStream)(UInt32 index, ISequentialOutStream** out_stream, Int32 ask_extract_mode);
+		STDMETHOD(PrepareOperation)(Int32 ask_extract_mode);
+		STDMETHOD(SetOperationResult)(Int32 operation_result);
 
 		// ICryptoGetTextPassword
-		STDMETHOD(CryptoGetTextPassword)(BSTR *aPassword);
-
+		STDMETHOD(CryptoGetTextPassword)(BSTR* password);
 
 	public:
-		CArchiveExtractCallback()
-			: ref_count_(1), password_is_defined_(false)
-		{
-		}
-		
-		virtual ~CArchiveExtractCallback()
-		{
-		}
-
-		void Init(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & outFileStream);
+		ArchiveExtractCallback(std::string_view pw, std::shared_ptr<ISequentialOutStream> const & out_file_stream);
+		virtual ~ArchiveExtractCallback() = default;
 
 	private:
-		std::atomic<int32_t> ref_count_;
+		std::atomic<int32_t> ref_count_ = 1;
 
 		bool password_is_defined_;
 		std::wstring password_;
 
-		std::shared_ptr<ISequentialOutStream> _outFileStream;
+		std::shared_ptr<ISequentialOutStream> out_file_stream_;
 	};
 }
 
-#endif		// _KFL_ARCHIVEEXTRACTCALLBACK_HPP
+#endif		// KLAYGE_CORE_ARCHIVE_EXTRACT_CALLBACK_HPP
