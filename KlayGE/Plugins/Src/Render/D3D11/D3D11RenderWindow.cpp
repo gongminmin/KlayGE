@@ -523,6 +523,15 @@ namespace KlayGE
 		swap_chain_->SetFullscreenState(this->FullScreen(), nullptr);
 #endif
 
+		{
+			ID3D10Multithread* d3d_multithread;
+			if (SUCCEEDED(d3d_device->QueryInterface(IID_ID3D10Multithread, reinterpret_cast<void**>(&d3d_multithread))))
+			{
+				d3d_multithread->SetMultithreadProtected(true);
+				d3d_multithread->Release();
+			}
+		}
+
 		this->UpdateSurfacesPtrs();
 
 #ifdef KLAYGE_DEBUG

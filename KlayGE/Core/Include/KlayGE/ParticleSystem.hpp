@@ -292,14 +292,8 @@ namespace KlayGE
 		{
 			return static_cast<uint32_t>(particles_.size());
 		}
-		uint32_t NumActiveParticles() const
-		{
-			return static_cast<uint32_t>(active_particles_.size());
-		}
-		uint32_t GetActiveParticleIndex(uint32_t i) const
-		{
-			return active_particles_[i].first;
-		}
+		uint32_t NumActiveParticles() const;
+		uint32_t GetActiveParticleIndex(uint32_t i) const;
 		Particle const & GetParticle(uint32_t i) const
 		{
 			BOOST_ASSERT(i < particles_.size());
@@ -335,12 +329,17 @@ namespace KlayGE
 
 		void SceneDepthTexture(TexturePtr const & depth_tex);
 
+	private:
+		void UpdateParticlesNoLock(float elapsed_time, std::vector<std::pair<uint32_t, float>>& active_particles);
+		void UpdateParticleBufferNoLock(std::vector<std::pair<uint32_t, float>> const & active_particles);
+
 	protected:
 		std::vector<ParticleEmitterPtr> emitters_;
 		std::vector<ParticleUpdaterPtr> updaters_;
 
 		std::vector<Particle> particles_;
-		std::vector<std::pair<uint32_t, float>> active_particles_;
+		std::vector<std::pair<uint32_t, float>> actived_particles_;
+		mutable std::mutex actived_particles_mutex_;
 
 		float gravity_;
 		float3 force_;
@@ -352,8 +351,6 @@ namespace KlayGE
 		Color particle_color_to_;
 
 		bool gs_support_;
-
-		std::mutex update_mutex_;
 	};
 
 	KLAYGE_CORE_API ParticleSystemPtr SyncLoadParticleSystem(std::string const & psml_name);

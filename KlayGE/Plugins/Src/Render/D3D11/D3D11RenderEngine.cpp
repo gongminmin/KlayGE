@@ -1043,6 +1043,7 @@ namespace KlayGE
 			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_THREADING, &mt_feature, sizeof(mt_feature));
 			caps_.multithread_rendering_support = mt_feature.DriverCommandLists ? true : false;
 			caps_.multithread_res_creating_support = mt_feature.DriverConcurrentCreates ? true : false;
+			caps_.arbitrary_multithread_rendering_support = caps_.multithread_rendering_support;
 		}
 		caps_.mrt_independent_bit_depths_support = true;
 		if (d3d_11_runtime_sub_ver_ >= 1)

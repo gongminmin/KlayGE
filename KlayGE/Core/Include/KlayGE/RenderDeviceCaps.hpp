@@ -84,6 +84,7 @@ namespace KlayGE
 		bool primitive_restart_support : 1;
 		bool multithread_rendering_support : 1;
 		bool multithread_res_creating_support : 1;
+		bool arbitrary_multithread_rendering_support : 1;
 		bool mrt_independent_bit_depths_support : 1;
 		bool logic_op_support : 1;
 		bool independent_blend_support : 1;

@@ -1504,6 +1504,7 @@ namespace KlayGE
 		caps_.primitive_restart_support = true;
 		caps_.multithread_rendering_support = false;
 		caps_.multithread_res_creating_support = false;
+		caps_.arbitrary_multithread_rendering_support = false;
 		caps_.mrt_independent_bit_depths_support = false;
 		caps_.logic_op_support = true;
 		caps_.independent_blend_support = true;
