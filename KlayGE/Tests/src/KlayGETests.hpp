@@ -9,10 +9,8 @@
 
 namespace KlayGE
 {
-	class KlayGETest : public testing::Test
-	{
-	protected:
-		void SetUp() override;
-		void TearDown() override;
-	};
+	bool Compare2D(std::string const & test_name,
+		Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
+		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,
+		uint32_t width, uint32_t height, float tolerance);
 }

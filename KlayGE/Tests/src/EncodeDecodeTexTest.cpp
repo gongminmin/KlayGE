@@ -233,67 +233,67 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 	EXPECT_LT(mse, threshold);
 }
 
-TEST_F(KlayGETest, DecodeBC1)
+TEST(EncodeDecodeTexTest, DecodeBC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc1.dds", EF_BC1, 4.7f);
 }
 
-TEST_F(KlayGETest, DecodeBC2)
+TEST(EncodeDecodeTexTest, DecodeBC2)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc2.dds", EF_BC2, 9.0f);
 }
 
-TEST_F(KlayGETest, DecodeBC3)
+TEST(EncodeDecodeTexTest, DecodeBC3)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc3.dds", EF_BC3, 8.8f);
 }
 
-TEST_F(KlayGETest, DecodeBC6U)
+TEST(EncodeDecodeTexTest, DecodeBC6U)
 {
 	TestEncodeDecodeTex("memorial.dds", "memorial_bc6u.dds", EF_BC6, 0.1f);
 }
 
-TEST_F(KlayGETest, DecodeBC6S)
+TEST(EncodeDecodeTexTest, DecodeBC6S)
 {
 	TestEncodeDecodeTex("uffizi_probe.dds", "uffizi_probe_bc6s.dds", EF_SIGNED_BC6, 0.1f);
 }
 
-TEST_F(KlayGETest, DecodeBC7XRGB)
+TEST(EncodeDecodeTexTest, DecodeBC7XRGB)
 {
 	TestEncodeDecodeTex("Lenna.dds", "Lenna_bc7.dds", EF_BC7, 2.1f);
 }
 
-TEST_F(KlayGETest, DecodeBC7ARGB)
+TEST(EncodeDecodeTexTest, DecodeBC7ARGB)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "leaf_v3_green_tex_bc7.dds", EF_BC7, 8.6f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeBC1)
+TEST(EncodeDecodeTexTest, EncodeDecodeBC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_BC1, 4.6f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeBC2)
+TEST(EncodeDecodeTexTest, EncodeDecodeBC2)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC2, 9.1f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeBC3)
+TEST(EncodeDecodeTexTest, EncodeDecodeBC3)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC3, 8.9f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeBC7XRGB)
+TEST(EncodeDecodeTexTest, EncodeDecodeBC7XRGB)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_BC7, 1.8f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeBC7ARGB)
+TEST(EncodeDecodeTexTest, EncodeDecodeBC7ARGB)
 {
 	TestEncodeDecodeTex("leaf_v3_green_tex.dds", "", EF_BC7, 11.0f);
 }
 
-TEST_F(KlayGETest, EncodeDecodeETC1)
+TEST(EncodeDecodeTexTest, EncodeDecodeETC1)
 {
 	TestEncodeDecodeTex("Lenna.dds", "", EF_ETC1, 4.8f);
 }
