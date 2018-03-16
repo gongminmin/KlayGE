@@ -21,12 +21,15 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/MathTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/ResLoaderTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/StreamOutputTest.cpp
 )
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.hpp
 )
 SET(RESOURCE_FILES "")
-SET(EFFECT_FILES "")
+SET(EFFECT_FILES
+	${KLAYGE_PROJECT_DIR}/Tests/media/StreamOutput/StreamOutputTest.fxml
+)
 SET(POST_PROCESSORS "")
 SET(UI_FILES "")
 

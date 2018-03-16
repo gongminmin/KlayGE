@@ -323,7 +323,8 @@ namespace KlayGE
 			D3D12_RESOURCE_BARRIER barrier;
 			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
+			if (this->UpdateResourceBarrier(0, barrier,
+				src_heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_SOURCE))
 			{
 				barriers[n] = barrier;
 				++ n;

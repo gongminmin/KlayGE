@@ -74,7 +74,7 @@ namespace KlayGE
 		{
 			flags |= GL_MAP_READ_BIT;
 		}
-		else if (access_hint_ & EAH_CPU_Write)
+		if (access_hint_ & EAH_CPU_Write)
 		{
 			flags |= GL_MAP_WRITE_BIT;
 		}

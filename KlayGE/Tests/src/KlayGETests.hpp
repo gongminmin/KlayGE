@@ -9,6 +9,11 @@
 
 namespace KlayGE
 {
+	bool CompareBuffer(std::string const & test_name,
+		GraphicsBuffer& buff0, uint32_t buff0_offset,
+		GraphicsBuffer& buff1, uint32_t buff1_offset,
+		uint32_t num_elems, float tolerance);
+
 	bool Compare2D(std::string const & test_name,
 		Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
 		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,

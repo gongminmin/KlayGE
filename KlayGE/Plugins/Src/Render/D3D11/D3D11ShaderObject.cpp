@@ -815,7 +815,7 @@ namespace KlayGE
 		auto const & caps = d3d11_re.DeviceCaps();
 
 		std::vector<D3D11_SO_DECLARATION_ENTRY> d3d11_decl(so_decl.size());
-		for (size_t i = 0; i < so_decl.size(); ++i)
+		for (size_t i = 0; i < so_decl.size(); ++ i)
 		{
 			d3d11_decl[i] = D3D11Mapping::Mapping(so_decl[i]);
 		}

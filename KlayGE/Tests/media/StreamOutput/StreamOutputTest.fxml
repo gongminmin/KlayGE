@@ -1,0 +1,94 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+void CopyBufferVS(float4 pos : POSITION,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+}
+		]]>
+	</shader>
+
+	<technique name="CopyBuffer">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="CopyBufferVS()">
+				<stream_output>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<shader version="4">
+		<![CDATA[
+void VertexIDToBufferVS(uint vid : SV_VertexID,
+			out float4 oPos : SV_Position)
+{
+	oPos = float4(vid, vid + 0.25f, vid + 0.5f, vid + 0.75f);
+}
+		]]>
+	</shader>
+
+	<technique name="VertexIDToBuffer">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="VertexIDToBufferVS()">
+				<stream_output>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void ConditionalCopyBufferVS(float4 pos : POSITION,
+			out float4 oPos : SV_Position)
+{
+	oPos = pos;
+}
+		]]>
+	</shader>
+
+	<shader type="geometry_shader" version="4">
+		<![CDATA[
+struct ConditionalCopyBufferGSOut
+{
+	float4 pos : SV_Position;
+};
+
+[maxvertexcount(1)]
+void ConditionalCopyBufferGS(point float4 in_pos[1] : SV_Position,
+		inout PointStream<ConditionalCopyBufferGSOut> out_stream)
+{
+	if (in_pos[0].w > 0)
+	{
+		ConditionalCopyBufferGSOut gs_out;
+		gs_out.pos = in_pos[0];
+		out_stream.Append(gs_out);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="ConditionalCopyBuffer">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="ConditionalCopyBufferVS()"/>
+			<state name="geometry_shader" value="ConditionalCopyBufferGS()">
+				<stream_output>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
+</effect>

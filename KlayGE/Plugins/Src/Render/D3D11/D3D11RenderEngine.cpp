@@ -545,7 +545,7 @@ namespace KlayGE
 
 			num_so_buffs_ = num_buffs;
 		}
-		else
+		else if (num_so_buffs_ > 0)
 		{
 			std::vector<ID3D11Buffer*> d3d11_buffs(num_so_buffs_, nullptr);
 			std::vector<UINT> d3d11_buff_offsets(num_so_buffs_, 0);

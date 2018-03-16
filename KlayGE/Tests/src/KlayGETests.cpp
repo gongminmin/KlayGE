@@ -58,6 +58,42 @@ namespace KlayGE
 		std::shared_ptr<App3DFramework> app_;
 	};
 
+	bool CompareBuffer(std::string const & test_name,
+		GraphicsBuffer& buff0, uint32_t buff0_offset,
+		GraphicsBuffer& buff1, uint32_t buff1_offset,
+		uint32_t num_elems, float tolerance)
+	{
+		KFL_UNUSED(test_name);
+
+		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+
+		GraphicsBufferPtr buff0_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff0.Size(), nullptr);
+		buff0.CopyToBuffer(*buff0_cpu);
+
+		GraphicsBufferPtr buff1_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff1.Size(), nullptr);
+		buff1.CopyToBuffer(*buff1_cpu);
+
+		bool match = true;
+		{
+			GraphicsBuffer::Mapper buff0_mapper(*buff0_cpu, BA_Read_Only);
+			float const * buff0_p = reinterpret_cast<float const *>(buff0_mapper.Pointer<uint8_t>() + buff0_offset);
+
+			GraphicsBuffer::Mapper buff1_mapper(*buff1_cpu, BA_Read_Only);
+			float const * buff1_p = reinterpret_cast<float const *>(buff1_mapper.Pointer<uint8_t>() + buff1_offset);
+
+			for (uint32_t i = 0; i < num_elems; ++ i)
+			{
+				if (abs(buff0_p[i] - buff1_p[i]) > tolerance)
+				{
+					match = false;
+					break;
+				}
+			}
+		}
+
+		return match;
+	}
+
 	bool Compare2D(std::string const & test_name,
 		Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
 		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,

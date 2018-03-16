@@ -493,7 +493,7 @@ namespace KlayGE
 
 			d3d_render_cmd_list_->SOSetTargets(0, static_cast<UINT>(num_buffs), &sobv[0]);
 		}
-		else
+		else if (so_buffs_.size() > 0)
 		{
 			d3d_render_cmd_list_->SOSetTargets(0, 0, nullptr);
 
