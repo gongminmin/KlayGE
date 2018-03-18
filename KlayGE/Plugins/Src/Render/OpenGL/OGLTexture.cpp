@@ -114,7 +114,7 @@ namespace KlayGE
 
 		if (Context::Instance().RenderFactoryValid())
 		{
-			OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 			re.DeleteBuffers(1, &pbo_);
 		}
 		else
@@ -124,7 +124,15 @@ namespace KlayGE
 
 		if (sample_count_ <= 1)
 		{
-			glDeleteTextures(1, &texture_);
+			if (Context::Instance().RenderFactoryValid())
+			{
+				auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteTextures(1, &texture_);
+			}
+			else
+			{
+				glDeleteTextures(1, &texture_);
+			}
 		}
 		else
 		{

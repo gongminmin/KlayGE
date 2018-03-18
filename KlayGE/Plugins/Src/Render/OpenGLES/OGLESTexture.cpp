@@ -68,7 +68,15 @@ namespace KlayGE
 	{
 		this->DeleteHWResource();
 
-		glDeleteTextures(1, &texture_);
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeleteTextures(1, &texture_);
+		}
+		else
+		{
+			glDeleteTextures(1, &texture_);
+		}
 	}
 
 	std::wstring const & OGLESTexture::Name() const

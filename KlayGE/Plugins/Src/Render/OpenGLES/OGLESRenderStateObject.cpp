@@ -376,7 +376,15 @@ namespace KlayGE
 
 	OGLESSamplerStateObject::~OGLESSamplerStateObject()
 	{
-		glDeleteSamplers(1, &sampler_);
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeleteSamplers(1, &sampler_);
+		}
+		else
+		{
+			glDeleteSamplers(1, &sampler_);
+		}
 	}
 
 	void OGLESSamplerStateObject::Active(TexturePtr const & texture)

@@ -530,7 +530,15 @@ namespace KlayGE
 	{
 		if (2 == copy_to_tex_)
 		{
-			glDeleteTextures(1, &tex_2d_);
+			if (Context::Instance().RenderFactoryValid())
+			{
+				auto& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteTextures(1, &tex_2d_);
+			}
+			else
+			{
+				glDeleteTextures(1, &tex_2d_);
+			}
 		}
 	}
 

@@ -840,7 +840,15 @@ namespace KlayGE
 	{
 		if (2 == copy_to_tex_)
 		{
-			glDeleteTextures(1, &tex_2d_);
+			if (Context::Instance().RenderFactoryValid())
+			{
+				auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+				re.DeleteTextures(1, &tex_2d_);
+			}
+			else
+			{
+				glDeleteTextures(1, &tex_2d_);
+			}
 		}
 	}
 
@@ -1219,7 +1227,15 @@ namespace KlayGE
 
 	OGLGraphicsBufferRenderView::~OGLGraphicsBufferRenderView()
 	{
-		glDeleteTextures(1, &tex_);
+		if (Context::Instance().RenderFactoryValid())
+		{
+			auto& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.DeleteTextures(1, &tex_);
+		}
+		else
+		{
+			glDeleteTextures(1, &tex_);
+		}
 	}
 
 	void OGLGraphicsBufferRenderView::ClearColor(Color const & clr)
