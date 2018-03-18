@@ -256,6 +256,8 @@ namespace KlayGE
 		pso_hash_value_ = 0;
 		num_rts_ = 0;
 		rtv_formats_.fill(DXGI_FORMAT_UNKNOWN);
+		sample_count_ = 0;
+		sample_quality_ = 0;
 		for (size_t i = 0; i < clr_views_.size(); ++ i)
 		{
 			auto view = clr_views_[i].get();
@@ -265,6 +267,17 @@ namespace KlayGE
 				HashCombine(pso_hash_value_, fmt);
 				rtv_formats_[i] = D3D12Mapping::MappingFormat(fmt);
 				num_rts_ = static_cast<uint32_t>(i + 1);
+
+				if (sample_count_ == 0)
+				{
+					sample_count_ = view->SampleCount();
+					sample_quality_ = view->SampleQuality();
+				}
+				else
+				{
+					BOOST_ASSERT(sample_count_ == view->SampleCount());
+					BOOST_ASSERT(sample_quality_ == view->SampleQuality());
+				}
 			}
 		}
 		{
@@ -274,12 +287,26 @@ namespace KlayGE
 				auto fmt = view->Format();
 				HashCombine(pso_hash_value_, fmt);
 				dsv_format_ = D3D12Mapping::MappingFormat(fmt);
+
+				if (sample_count_ == 0)
+				{
+					sample_count_ = view->SampleCount();
+					sample_quality_ = view->SampleQuality();
+				}
+				else
+				{
+					BOOST_ASSERT(sample_count_ == view->SampleCount());
+					BOOST_ASSERT(sample_quality_ == view->SampleQuality());
+				}
 			}
 			else
 			{
 				dsv_format_ = DXGI_FORMAT_UNKNOWN;
 			}
 		}
+
+		HashCombine(pso_hash_value_, sample_count_);
+		HashCombine(pso_hash_value_, sample_quality_);
 	}
 
 	size_t D3D12FrameBuffer::PsoHashValue()
@@ -309,7 +336,7 @@ namespace KlayGE
 			pso_desc.RTVFormats[i] = rtv_formats_[i];
 		}
 		pso_desc.DSVFormat = dsv_format_;
-		pso_desc.SampleDesc.Count = 1;
-		pso_desc.SampleDesc.Quality = 0;
+		pso_desc.SampleDesc.Count = sample_count_;
+		pso_desc.SampleDesc.Quality = sample_quality_;
 	}
 }

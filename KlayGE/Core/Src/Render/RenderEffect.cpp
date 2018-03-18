@@ -85,7 +85,7 @@ namespace
 {
 	using namespace KlayGE;
 
-	uint32_t const KFX_VERSION = 0x0130;
+	uint32_t const KFX_VERSION = 0x0140;
 
 #if KLAYGE_IS_DEV_PLATFORM
 	ArrayRef<std::pair<char const *, size_t>> GetTypeDefines()
@@ -97,10 +97,12 @@ namespace
 			NAME_AND_HASH("string"),
 			NAME_AND_HASH("texture1D"),
 			NAME_AND_HASH("texture2D"),
+			NAME_AND_HASH("texture2DMS"),
 			NAME_AND_HASH("texture3D"),
 			NAME_AND_HASH("textureCUBE"),
 			NAME_AND_HASH("texture1DArray"),
 			NAME_AND_HASH("texture2DArray"),
+			NAME_AND_HASH("texture2DMSArray"),
 			NAME_AND_HASH("texture3DArray"),
 			NAME_AND_HASH("textureCUBEArray"),
 			NAME_AND_HASH("sampler"),
@@ -141,6 +143,7 @@ namespace
 			NAME_AND_HASH("consume_structured_buffer")
 		};
 #undef NAME_AND_HASH
+		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
 
 		return types;
 	}
@@ -625,6 +628,38 @@ namespace
 			else
 			{
 				*var = std::string("float4");
+			}
+			break;
+
+		case REDT_texture2DMS:
+		case REDT_texture2DMSArray:
+			{
+				var = MakeUniquePtr<RenderVariableTexture>();
+				*var = TexturePtr();
+
+				std::string elem_type;
+				attr = node.Attrib("elem_type");
+				if (attr)
+				{
+					elem_type = attr->ValueString();
+				}
+				else
+				{
+					elem_type = "float4";
+				}
+				
+				std::string sample_count;
+				attr = node.Attrib("sample_count");
+				if (attr)
+				{
+					sample_count = attr->ValueString();
+				}
+				else
+				{
+					sample_count = "1";
+				}
+
+				*var = elem_type + ", " + sample_count;
 			}
 			break;
 
@@ -1421,10 +1456,12 @@ namespace
 
 		case REDT_texture1D:
 		case REDT_texture2D:
+		case REDT_texture2DMS:
 		case REDT_texture3D:
 		case REDT_textureCUBE:
 		case REDT_texture1DArray:
 		case REDT_texture2DArray:
+		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
 		case REDT_rw_texture1D:
@@ -1968,10 +2005,12 @@ namespace
 
 		case REDT_texture1D:
 		case REDT_texture2D:
+		case REDT_texture2DMS:
 		case REDT_texture3D:
 		case REDT_textureCUBE:
 		case REDT_texture1DArray:
 		case REDT_texture2DArray:
+		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
 		case REDT_rw_texture1D:
@@ -2930,9 +2969,9 @@ namespace KlayGE
 
 			uint32_t type = TypeCodeFromName(node->Attrib("type")->ValueString());
 			if ((type != REDT_sampler)
-				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture3D)
+				&& (type != REDT_texture1D) && (type != REDT_texture2D) && (type != REDT_texture2DMS) && (type != REDT_texture3D)
 				&& (type != REDT_textureCUBE)
-				&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray)
+				&& (type != REDT_texture1DArray) && (type != REDT_texture2DArray) && (type != REDT_texture2DMSArray)
 				&& (type != REDT_texture3DArray) && (type != REDT_textureCUBEArray)
 				&& (type != REDT_buffer) && (type != REDT_structured_buffer)
 				&& (type != REDT_byte_address_buffer) && (type != REDT_rw_buffer)
@@ -3469,10 +3508,12 @@ namespace KlayGE
 				{
 				case REDT_texture1D:
 				case REDT_texture2D:
+				case REDT_texture2DMS:
 				case REDT_texture3D:
 				case REDT_textureCUBE:
 				case REDT_texture1DArray:
 				case REDT_texture2DArray:
+				case REDT_texture2DMSArray:
 				case REDT_texture3DArray:
 				case REDT_textureCUBEArray:
 				case REDT_sampler:
@@ -3514,10 +3555,12 @@ namespace KlayGE
 			{
 			case REDT_texture1D:
 			case REDT_texture2D:
+			case REDT_texture2DMS:
 			case REDT_texture3D:
 			case REDT_textureCUBE:
 			case REDT_texture1DArray:
 			case REDT_texture2DArray:
+			case REDT_texture2DMSArray:
 			case REDT_textureCUBEArray:
 			case REDT_buffer:
 			case REDT_structured_buffer:
@@ -3548,6 +3591,10 @@ namespace KlayGE
 				str += "Texture2D<" + elem_type + "> " + param_name + ";\n";
 				break;
 
+			case REDT_texture2DMS:
+				str += "Texture2DMS<" + elem_type + "> " + param_name + ";\n";
+				break;
+
 			case REDT_texture3D:
 				str += "#if KLAYGE_MAX_TEX_DEPTH <= 1\n";
 				str += "Texture2D<" + elem_type + "> " + param_name + ";\n";
@@ -3569,6 +3616,12 @@ namespace KlayGE
 			case REDT_texture2DArray:
 				str += "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1\n";
 				str += "Texture2DArray<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_texture2DMSArray:
+				str += "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1\n";
+				str += "Texture2DMSArray<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 
@@ -4933,8 +4986,10 @@ namespace KlayGE
 			}
 		}
 
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
-			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
+		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture2DMS == type_)
+			|| (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
+			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture2DMSArray == type_)
+			|| (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
 		{
 			for (size_t i = 0; i < annotations_->size(); ++ i)
 			{
@@ -5006,8 +5061,10 @@ namespace KlayGE
 			}
 		}
 
-		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
-			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
+		if (annotations_ && ((REDT_texture1D == type_) || (REDT_texture2D == type_) || (REDT_texture2DMS == type_)
+			|| (REDT_texture3D == type_) || (REDT_textureCUBE == type_)
+			|| (REDT_texture1DArray == type_) || (REDT_texture2DArray == type_) || (REDT_texture2DMSArray == type_)
+			|| (REDT_texture3DArray == type_) || (REDT_textureCUBEArray == type_)))
 		{
 			for (size_t i = 0; i < annotations_->size(); ++ i)
 			{

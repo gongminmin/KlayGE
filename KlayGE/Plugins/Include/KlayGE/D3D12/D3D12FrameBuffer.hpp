@@ -84,6 +84,8 @@ namespace KlayGE
 		uint32_t num_rts_;
 		std::array<DXGI_FORMAT, 8> rtv_formats_;
 		DXGI_FORMAT dsv_format_;
+		uint32_t sample_count_;
+		uint32_t sample_quality_;
 	};
 
 	typedef std::shared_ptr<D3D12FrameBuffer> D3D12FrameBufferPtr;

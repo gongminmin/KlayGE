@@ -95,6 +95,7 @@ namespace KlayGE
 		bool no_overwrite_support : 1;
 		bool full_npot_texture_support : 1;
 		bool render_to_texture_array_support : 1;
+		bool render_to_msaa_texture_support : 1;
 		bool load_from_buffer_support : 1;
 
 		bool gs_support : 1;

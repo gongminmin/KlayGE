@@ -1550,6 +1550,7 @@ namespace KlayGE
 		{
 			caps_.render_to_texture_array_support = false;
 		}
+		caps_.render_to_msaa_texture_support = false;	// TODO
 		if (glloader_GLES_VERSION_3_2() || glloader_GLES_OES_texture_buffer() || glloader_GLES_EXT_texture_buffer())
 		{
 			caps_.load_from_buffer_support = true;

@@ -1,3 +1,7 @@
+DOWNLOAD_FILE("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS2Test.dds" "25179ba8c887b73158e78ab7917e6790ea6cdf75" "942271432b537910e7641ed54127c089013ec8ce")
+DOWNLOAD_FILE("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS4Test.dds" "25179ba8c887b73158e78ab7917e6790ea6cdf75" "c88665cb9bd306e0f56b2bae7211fd37526a31e4")
+DOWNLOAD_FILE("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS8Test.dds" "25179ba8c887b73158e78ab7917e6790ea6cdf75" "ab7ebba0eca47348e7daa0d1fac01b4ccd10d677")
+DOWNLOAD_FILE("KlayGE/Tests/media/RenderToTexture/RenderToTextureTest.dds" "25179ba8c887b73158e78ab7917e6790ea6cdf75" "1a0f45e5edf0c52932f7b47893d6a292e11346e2")
 DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/Test.7z" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "f128c4a3861d69279b2b43c885bf107b2dd4aaf0")
 DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/Test.txt" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "e4c991063598ea62ed6fa5f6164565ca6e2fccb9")
 DOWNLOAD_FILE("KlayGE/Tests/media/ResLoader/TestPassword.7z" "4c3207dbbdb2189cd0145008ce105404d22ed4fd" "3b300e251ec5181ba03b24e57e478cab9d347471")
@@ -19,6 +23,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/EncodeDecodeTexTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/MathTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/RenderToTextureTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/ResLoaderTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/StreamOutputTest.cpp
@@ -28,6 +33,7 @@ SET(HEADER_FILES
 )
 SET(RESOURCE_FILES "")
 SET(EFFECT_FILES
+	${KLAYGE_PROJECT_DIR}/Tests/media/RenderToTexture/RenderToTextureTest.fxml
 	${KLAYGE_PROJECT_DIR}/Tests/media/StreamOutput/StreamOutputTest.fxml
 )
 SET(POST_PROCESSORS "")

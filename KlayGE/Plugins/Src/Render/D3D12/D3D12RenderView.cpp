@@ -166,6 +166,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+		sample_count_ = texture.SampleCount();
+		sample_quality_ = texture.SampleQuality();
 	}
 
 	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -178,6 +180,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+		sample_count_ = texture_3d.SampleCount();
+		sample_quality_ = texture_3d.SampleQuality();
 	}
 
 	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
@@ -190,6 +194,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 	}
 
 	D3D12RenderTargetRenderView::D3D12RenderTargetRenderView(GraphicsBuffer& gb, uint32_t width, uint32_t height, ElementFormat pf)
@@ -210,6 +216,8 @@ namespace KlayGE
 		width_ = width * height;
 		height_ = 1;
 		pf_ = pf;
+		sample_count_ = 1;
+		sample_quality_ = 0;
 	}
 
 	void D3D12RenderTargetRenderView::ClearColor(Color const & clr)
@@ -297,6 +305,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+		sample_count_ = texture.SampleCount();
+		sample_quality_ = texture.SampleQuality();
 	}
 
 	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(Texture& texture_3d, int array_index, uint32_t first_slice, uint32_t num_slices, int level)
@@ -309,6 +319,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+		sample_count_ = texture_3d.SampleCount();
+		sample_quality_ = texture_3d.SampleQuality();
 	}
 
 	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(Texture& texture_cube, int array_index, Texture::CubeFaces face, int level)
@@ -321,6 +333,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 	}
 
 	D3D12DepthStencilRenderView::D3D12DepthStencilRenderView(uint32_t width, uint32_t height,
@@ -337,6 +351,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = sample_count;
+		sample_quality_ = sample_quality;
 	}
 
 	void D3D12DepthStencilRenderView::ClearColor(Color const & clr)

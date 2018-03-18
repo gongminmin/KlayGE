@@ -244,6 +244,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = 1;
+		sample_quality_ = 0;
 	}
 
 	void OGLScreenColorRenderView::ClearColor(Color const & clr)
@@ -302,6 +304,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = 1;
+		sample_quality_ = 0;
 	}
 
 	void OGLScreenDepthStencilRenderView::ClearColor(Color const & /*clr*/)
@@ -349,6 +353,8 @@ namespace KlayGE
 		width_ = texture_1d_.Width(level);
 		height_ = 1;
 		pf_ = texture_1d_.Format();
+		sample_count_ = texture_1d.SampleCount();
+		sample_quality_ = texture_1d.SampleQuality();
 	}
 
 	void OGLTexture1DRenderView::ClearColor(Color const & clr)
@@ -590,6 +596,8 @@ namespace KlayGE
 		width_ = texture_2d_.Width(level);
 		height_ = texture_2d_.Height(level);
 		pf_ = texture_2d_.Format();
+		sample_count_ = texture_2d.SampleCount();
+		sample_quality_ = texture_2d.SampleQuality();
 	}
 
 	void OGLTexture2DRenderView::ClearColor(Color const & clr)
@@ -834,6 +842,8 @@ namespace KlayGE
 		width_ = texture_3d_.Width(level);
 		height_ = texture_3d_.Height(level);
 		pf_ = texture_3d_.Format();
+		sample_count_ = texture_3d.SampleCount();
+		sample_quality_ = texture_3d.SampleQuality();
 	}
 
 	OGLTexture3DRenderView::~OGLTexture3DRenderView()
@@ -1045,6 +1055,8 @@ namespace KlayGE
 		width_ = texture_cube_.Width(level);
 		height_ = texture_cube_.Height(level);
 		pf_ = texture_cube_.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 	}
 
 	OGLTextureCubeRenderView::OGLTextureCubeRenderView(Texture& texture_cube, int array_index, int level)
@@ -1062,6 +1074,8 @@ namespace KlayGE
 		width_ = texture_cube_.Width(level);
 		height_ = texture_cube_.Height(level);
 		pf_ = texture_cube_.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 	}
 
 	void OGLTextureCubeRenderView::ClearColor(Color const & clr)
@@ -1216,6 +1230,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = 1;
+		sample_quality_ = 0;
 
 		glGenTextures(1, &tex_);
 		glBindTexture(GL_TEXTURE_RECTANGLE_ARB, tex_);
@@ -1352,6 +1368,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = sample_count;
+		sample_quality_ = sample_quality;
 
 		GLint internalFormat;
 		GLenum glformat;
@@ -1398,6 +1416,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+		sample_count_ = texture.SampleCount();
+		sample_quality_ = texture.SampleQuality();
 
 		tex_ = checked_cast<OGLTexture*>(&texture)->GLTexture();
 	}
@@ -1876,6 +1896,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Height(level);
 		pf_ = texture_cube.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 
 		tex_ = checked_cast<OGLTextureCube*>(&texture_cube)->GLTexture();
 	}

@@ -1009,6 +1009,9 @@ namespace KlayGE
 
 	void D3D12RenderEngine::ForceFinish()
 	{
+		curr_vbvs_.clear();
+		curr_ibv_ = { 0, 0, DXGI_FORMAT_UNKNOWN };
+
 		this->ForceFlush();
 		this->SyncRenderCmd();
 
@@ -1195,6 +1198,7 @@ namespace KlayGE
 		caps_.no_overwrite_support = true;
 		caps_.full_npot_texture_support = true;
 		caps_.render_to_texture_array_support = true;
+		caps_.render_to_msaa_texture_support = true;
 		caps_.load_from_buffer_support = true;
 		caps_.gs_support = true;
 		caps_.hs_support = true;

@@ -256,15 +256,17 @@ namespace KlayGE
 			if (sample_count_ > 1)
 			{
 				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;
+				desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+				desc.Texture2DMSArray.ArraySize = num_items;
 			}
 			else
 			{
 				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+				desc.Texture2DArray.MostDetailedMip = first_level;
+				desc.Texture2DArray.MipLevels = num_levels;
+				desc.Texture2DArray.FirstArraySlice = first_array_index;
+				desc.Texture2DArray.ArraySize = num_items;
 			}
-			desc.Texture2DArray.MostDetailedMip = first_level;
-			desc.Texture2DArray.MipLevels = num_levels;
-			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.ArraySize = num_items;
 		}
 		else
 		{
@@ -275,9 +277,9 @@ namespace KlayGE
 			else
 			{
 				desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MostDetailedMip = first_level;
+				desc.Texture2D.MipLevels = num_levels;
 			}
-			desc.Texture2D.MostDetailedMip = first_level;
-			desc.Texture2D.MipLevels = num_levels;
 		}
 
 		return desc;
@@ -307,37 +309,33 @@ namespace KlayGE
 	{
 		D3D11_RENDER_TARGET_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
-		if (this->SampleCount() > 1)
+		if (array_size_ > 1)
 		{
-			if (this->ArraySize() > 1)
+			if (sample_count_ > 1)
 			{
 				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+				desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+				desc.Texture2DMSArray.ArraySize = array_size;
 			}
 			else
 			{
-				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+				desc.Texture2DArray.MipSlice = level;
+				desc.Texture2DArray.FirstArraySlice = first_array_index;
+				desc.Texture2DArray.ArraySize = array_size;
 			}
 		}
 		else
 		{
-			if (this->ArraySize() > 1)
+			if (sample_count_ > 1)
 			{
-				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DARRAY;
+				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 			}
 			else
 			{
 				desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MipSlice = level;
 			}
-		}
-		if (this->ArraySize() > 1)
-		{
-			desc.Texture2DArray.MipSlice = level;
-			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.ArraySize = array_size;
-		}
-		else
-		{
-			desc.Texture2D.MipSlice = level;
 		}
 
 		return desc;
@@ -348,37 +346,33 @@ namespace KlayGE
 		D3D11_DEPTH_STENCIL_VIEW_DESC desc;
 		desc.Format = D3D11Mapping::MappingFormat(this->Format());
 		desc.Flags = 0;
-		if (this->SampleCount() > 1)
+		if (array_size_ > 1)
 		{
-			if (this->ArraySize() > 1)
+			if (sample_count_ > 1)
 			{
 				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+				desc.Texture2DMSArray.FirstArraySlice = first_array_index;
+				desc.Texture2DMSArray.ArraySize = array_size;
 			}
 			else
 			{
-				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+				desc.Texture2DArray.MipSlice = level;
+				desc.Texture2DArray.FirstArraySlice = first_array_index;
+				desc.Texture2DArray.ArraySize = array_size;
 			}
 		}
 		else
 		{
-			if (this->ArraySize() > 1)
+			if (sample_count_ > 1)
 			{
-				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY;
+				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
 			}
 			else
 			{
 				desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+				desc.Texture2D.MipSlice = level;
 			}
-		}
-		if (this->ArraySize() > 1)
-		{
-			desc.Texture2DArray.MipSlice = level;
-			desc.Texture2DArray.FirstArraySlice = first_array_index;
-			desc.Texture2DArray.ArraySize = array_size;
-		}
-		else
-		{
-			desc.Texture2D.MipSlice = level;
 		}
 
 		return desc;

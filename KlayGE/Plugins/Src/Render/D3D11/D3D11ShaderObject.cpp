@@ -1297,10 +1297,12 @@ namespace KlayGE
 
 		case REDT_texture1D:
 		case REDT_texture2D:
+		case REDT_texture2DMS:
 		case REDT_texture3D:
 		case REDT_textureCUBE:
 		case REDT_texture1DArray:
 		case REDT_texture2DArray:
+		case REDT_texture2DMSArray:
 		case REDT_texture3DArray:
 		case REDT_textureCUBEArray:
 			ret.func = SetD3D11ShaderParameterTextureSRV(srvsrcs_[type][offset], srvs_[type][offset], param);

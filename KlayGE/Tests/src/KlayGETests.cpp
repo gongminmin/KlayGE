@@ -146,11 +146,11 @@ namespace KlayGE
 					}
 				}
 			}
-			if (!match)
-			{
-				SaveTexture(tex0_cpu, test_name + "_tex0.dds");
-				SaveTexture(tex1_cpu, test_name + "_tex1.dds");
-			}
+		}
+		if (!match)
+		{
+			SaveTexture(tex0_cpu, test_name + "_tex0.dds");
+			SaveTexture(tex1_cpu, test_name + "_tex1.dds");
 		}
 
 		return match;

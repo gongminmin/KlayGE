@@ -1557,6 +1557,7 @@ namespace KlayGE
 		{
 			caps_.render_to_texture_array_support = false;
 		}
+		caps_.render_to_msaa_texture_support = false;	// TODO
 		caps_.load_from_buffer_support = true;
 
 		caps_.gs_support = true;

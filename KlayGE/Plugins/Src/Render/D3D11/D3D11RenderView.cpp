@@ -49,6 +49,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+		sample_count_ = texture.SampleCount();
+		sample_quality_ = texture.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -61,6 +63,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+		sample_count_ = texture_3d.SampleCount();
+		sample_quality_ = texture_3d.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -73,6 +77,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -87,6 +93,8 @@ namespace KlayGE
 		width_ = width * height;
 		height_ = 1;
 		pf_ = pf;
+		sample_count_ = 1;
+		sample_quality_ = 0;
 
 		this->BindDiscardFunc();
 	}
@@ -157,6 +165,8 @@ namespace KlayGE
 		width_ = texture.Width(level);
 		height_ = texture.Height(level);
 		pf_ = texture.Format();
+		sample_count_ = texture.SampleCount();
+		sample_quality_ = texture.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -169,6 +179,8 @@ namespace KlayGE
 		width_ = texture_3d.Width(level);
 		height_ = texture_3d.Height(level);
 		pf_ = texture_3d.Format();
+		sample_count_ = texture_3d.SampleCount();
+		sample_quality_ = texture_3d.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -181,6 +193,8 @@ namespace KlayGE
 		width_ = texture_cube.Width(level);
 		height_ = texture_cube.Width(level);
 		pf_ = texture_cube.Format();
+		sample_count_ = texture_cube.SampleCount();
+		sample_quality_ = texture_cube.SampleQuality();
 
 		this->BindDiscardFunc();
 	}
@@ -198,6 +212,8 @@ namespace KlayGE
 		width_ = width;
 		height_ = height;
 		pf_ = pf;
+		sample_count_ = sample_count;
+		sample_quality_ = sample_quality;
 
 		this->BindDiscardFunc();
 	}

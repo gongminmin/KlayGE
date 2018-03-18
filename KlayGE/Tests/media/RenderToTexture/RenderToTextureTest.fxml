@@ -1,0 +1,105 @@
+<?xml version='1.0'?>
+
+<effect>
+	<shader>
+		<![CDATA[
+void RenderToTextureVS(float2 pos : POSITION,
+			out float2 oTexcoord : TEXCOORD0,
+			out float4 oPosition : SV_Position)
+{
+	oPosition = float4(pos, 0.5f, 1);
+
+	oTexcoord = pos / 2;
+	oTexcoord.y *= KLAYGE_FLIPPING;
+	oTexcoord += 0.5;
+}
+
+float4 RenderToTexturePS() : SV_Target0
+{
+	return 1;
+}
+		]]>
+	</shader>
+	
+	<technique name="RenderToTexture">
+		<macro name="SAMPLE_COUNT" value="1"/>
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="RenderToTextureVS()"/>
+			<state name="pixel_shader" value="RenderToTexturePS()"/>
+		</pass>
+	</technique>
+
+
+	<parameter type="texture2DMS" sample_count="SAMPLE_COUNT" name="src_ms"/>
+
+	<shader>
+		<![CDATA[
+float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
+{
+	uint width, height, samples;
+	src_ms.GetDimensions(width, height, samples);
+
+	int2 coord = texcoord * int2(width, height);
+	float4 ret = 0;
+	for (uint i = 0; i < samples; ++ i)
+	{
+		ret += src_ms.Load(coord, i);
+	}
+	ret /= samples;
+
+	return ret;
+}
+		]]>
+	</shader>
+
+	<technique name="ResolveToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="2"/>
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="RenderToTextureVS()"/>
+			<state name="pixel_shader" value="ResolveToTextureMSPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="ResolveToTextureMS4" inherit="ResolveToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="4"/>
+	</technique>
+
+	<technique name="ResolveToTextureMS8" inherit="ResolveToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="8"/>
+	</technique>
+
+
+	<shader>
+		<![CDATA[
+float4 CopyToTextureMSPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target0
+{
+	uint width, height, samples;
+	src_ms.GetDimensions(width, height, samples);
+	int2 coord = texcoord * int2(width, height);
+	return src_ms.Load(coord, sample_index);
+}
+		]]>
+	</shader>
+
+	<technique name="CopyToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="2"/>
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="vertex_shader" value="RenderToTextureVS()"/>
+			<state name="pixel_shader" value="CopyToTextureMSPS()"/>
+		</pass>
+	</technique>
+
+	<technique name="CopyToTextureMS4" inherit="CopyToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="4"/>
+	</technique>
+
+	<technique name="CopyToTextureMS8" inherit="CopyToTextureMS2">
+		<macro name="SAMPLE_COUNT" value="8"/>
+	</technique>
+</effect>

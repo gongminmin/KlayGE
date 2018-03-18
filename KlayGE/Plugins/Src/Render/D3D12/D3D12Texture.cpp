@@ -562,18 +562,21 @@ namespace KlayGE
 		D3D12Texture& other = *checked_cast<D3D12Texture*>(&target);
 
 		uint32_t const num_subres = array_size_ * num_mip_maps_;
+		bool const need_resolve = (this->SampleCount() > 1) && (1 == target.SampleCount());
 
 		UINT n = 0;
 		D3D12_RESOURCE_BARRIER barriers[2];
 		D3D12_RESOURCE_BARRIER barrier;
 		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
 		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
+		if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier,
+			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_SOURCE : D3D12_RESOURCE_STATE_COPY_SOURCE))
 		{
 			barriers[n] = barrier;
 			++ n;
 		}
-		if (other.UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
+		if (other.UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier,
+			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_COPY_DEST))
 		{
 			barriers[n] = barrier;
 			++ n;
@@ -583,7 +586,7 @@ namespace KlayGE
 			cmd_list->ResourceBarrier(n, barriers);
 		}
 
-		if ((this->SampleCount() > 1) && (1 == target.SampleCount()))
+		if (need_resolve)
 		{
 			for (uint32_t i = 0; i < num_subres; ++ i)
 			{
@@ -677,8 +680,8 @@ namespace KlayGE
 		}
 		tex_desc.MipLevels = static_cast<UINT16>(num_mip_maps_);
 		tex_desc.Format = dxgi_fmt_;
-		tex_desc.SampleDesc.Count = 1;
-		tex_desc.SampleDesc.Quality = 0;
+		tex_desc.SampleDesc.Count = sample_count_;
+		tex_desc.SampleDesc.Quality = sample_quality_;
 		tex_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		tex_desc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		if (access_hint_ & EAH_GPU_Write)

@@ -40,6 +40,14 @@ namespace KlayGE
 		{
 			return pf_;
 		}
+		uint32_t SampleCount() const
+		{
+			return sample_count_;
+		}
+		uint32_t SampleQuality() const
+		{
+			return sample_quality_;
+		}
 
 		virtual void ClearColor(Color const & clr) = 0;
 		virtual void ClearDepth(float depth) = 0;
@@ -55,6 +63,8 @@ namespace KlayGE
 		uint32_t width_;
 		uint32_t height_;
 		ElementFormat pf_;
+		uint32_t sample_count_;
+		uint32_t sample_quality_;
 	};
 
 	class KLAYGE_CORE_API UnorderedAccessView : boost::noncopyable
