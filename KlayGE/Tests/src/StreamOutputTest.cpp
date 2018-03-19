@@ -99,8 +99,7 @@ public:
 
 			auto vb_out = CopyBuffer(vb_in);
 
-			EXPECT_TRUE(CompareBuffer("CopyBuffer",
-				*vb_in, 0,
+			EXPECT_TRUE(CompareBuffer(*vb_in, 0,
 				*vb_out, 0,
 				num_vertices * 4, tolerance));
 		}
@@ -125,8 +124,7 @@ public:
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto vb_sanity = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, num_vertices * sizeof(float4), sanity_data.data());
 
-		EXPECT_TRUE(CompareBuffer("VertexIDToBuffer",
-			*vb_sanity, 0,
+		EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
 			*vb_out, 0,
 			static_cast<uint32_t>(sanity_data.size() * 4), tolerance));
 	}
@@ -176,8 +174,7 @@ public:
 			auto vb_out = ConditionalCopyBuffer(vb_in, output_primitives);
 
 			EXPECT_TRUE(output_primitives == sanity_size);
-			EXPECT_TRUE(CompareBuffer("ConditionalCopyBuffer",
-				*vb_sanity, 0,
+			EXPECT_TRUE(CompareBuffer(*vb_sanity, 0,
 				*vb_out, 0,
 				sanity_size * 4, tolerance));
 		}

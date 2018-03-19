@@ -58,13 +58,10 @@ namespace KlayGE
 		std::shared_ptr<App3DFramework> app_;
 	};
 
-	bool CompareBuffer(std::string const & test_name,
-		GraphicsBuffer& buff0, uint32_t buff0_offset,
+	bool CompareBuffer(GraphicsBuffer& buff0, uint32_t buff0_offset,
 		GraphicsBuffer& buff1, uint32_t buff1_offset,
 		uint32_t num_elems, float tolerance)
 	{
-		KFL_UNUSED(test_name);
-
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
 		GraphicsBufferPtr buff0_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff0.Size(), nullptr);
@@ -94,8 +91,7 @@ namespace KlayGE
 		return match;
 	}
 
-	bool Compare2D(std::string const & test_name,
-		Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
+	bool Compare2D(Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
 		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,
 		uint32_t width, uint32_t height, float tolerance)
 	{
@@ -149,6 +145,9 @@ namespace KlayGE
 		}
 		if (!match)
 		{
+			auto const * test_info = testing::UnitTest::GetInstance()->current_test_info();
+			auto test_name = std::string(test_info->test_case_name()) + '_' + test_info->name();
+
 			SaveTexture(tex0_cpu, test_name + "_tex0.dds");
 			SaveTexture(tex1_cpu, test_name + "_tex1.dds");
 		}

@@ -14,7 +14,7 @@
 using namespace std;
 using namespace KlayGE;
 
-void TestBlitter2D(std::string const & test_name, uint32_t array_size, uint32_t mip_levels, bool linear)
+void TestBlitter2D(uint32_t array_size, uint32_t mip_levels, bool linear)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -98,14 +98,13 @@ void TestBlitter2D(std::string const & test_name, uint32_t array_size, uint32_t 
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
 		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*dst_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
 			dst_x_size, dst_y_size, 2.0f / 255));
 	}
 }
 
-void TestBlitter2DToBuff(std::string const & test_name, uint32_t array_size, uint32_t mip_levels)
+void TestBlitter2DToBuff(uint32_t array_size, uint32_t mip_levels)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -186,14 +185,13 @@ void TestBlitter2DToBuff(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.slice_pitch = src_x_size * src_y_size * sizeof(float4);
 		TexturePtr dst_sanity = rf.MakeTexture2D(src_x_size, src_y_size, 1, 1, EF_ABGR32F, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*dst_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*src, array_index, mip, src_x_offset, src_y_offset,
 			src_x_size, src_y_size, 2.0f / 255));
 	}
 }
 
-void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uint32_t mip_levels)
+void TestBlitterBuffTo2D(uint32_t array_size, uint32_t mip_levels)
 {
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
@@ -258,8 +256,7 @@ void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uin
 		sanity_init_data.slice_pitch = dst_x_size * dst_y_size * sizeof(uint32_t);
 		TexturePtr dst_sanity = rf.MakeTexture2D(dst_x_size, dst_y_size, 1, 1, EF_ABGR8, 1, 0, EAH_CPU_Read, sanity_init_data);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*dst_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*dst_sanity, 0, 0, 0, 0,
 			*dst, array_index, mip, dst_x_offset, dst_y_offset,
 			dst_x_size, dst_y_size, 2.0f / 255));
 	}
@@ -267,25 +264,25 @@ void TestBlitterBuffTo2D(std::string const & test_name, uint32_t array_size, uin
 
 TEST(BlitterTest, Blit2D)
 {
-	TestBlitter2D("Blit2D", 1, 3, false);
+	TestBlitter2D(1, 3, false);
 }
 
 TEST(BlitterTest, Blit2DArray)
 {
-	TestBlitter2D("Blit2DArray", 5, 4, false);
+	TestBlitter2D( 5, 4, false);
 }
 
 TEST(BlitterTest, Blit2DToBuff)
 {
-	TestBlitter2DToBuff("Blit2DToBuff", 1, 3);
+	TestBlitter2DToBuff(1, 3);
 }
 
 TEST(BlitterTest, Blit2DArrayToBuff)
 {
-	TestBlitter2DToBuff("Blit2DArrayToBuff", 5, 4);
+	TestBlitter2DToBuff(5, 4);
 }
 
 TEST(BlitterTest, BlitBuffTo2D)
 {
-	TestBlitterBuffTo2D("BlitBuffTo2D", 5, 4);
+	TestBlitterBuffTo2D(5, 4);
 }

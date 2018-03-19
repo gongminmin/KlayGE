@@ -78,16 +78,15 @@ public:
 		auto target = RenderToTexture(WIDTH, HEIGHT, EF_ABGR8, sample_count);
 		auto target_resolved = HwResolveToTexture(target);
 
-		std::string test_name = "RenderToTexture";
+		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			test_name += "MS" + boost::lexical_cast<std::string>(sample_count);
+			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
 		}
 
-		auto target_sanity = SyncLoadTexture(test_name + "Test.dds", EAH_CPU_Read);
+		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*target_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*target_sanity, 0, 0, 0, 0,
 			*target_resolved, 0, 0, 0, 0,
 			WIDTH, HEIGHT, tolerance));
 	}
@@ -104,19 +103,15 @@ public:
 		auto target = RenderToTexture(WIDTH, HEIGHT, EF_ABGR8, sample_count);
 		auto target_resolved = ManualResolveToTexture(target);
 
-		std::string test_name = "ResolveToTexture";
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			std::string suffix = "MS" + boost::lexical_cast<std::string>(sample_count);
-			test_name += suffix;
-			sanity_name += suffix;
+			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*target_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*target_sanity, 0, 0, 0, 0,
 			*target_resolved, 0, 0, 0, 0,
 			WIDTH, HEIGHT, tolerance));
 	}
@@ -143,19 +138,15 @@ public:
 		auto target_copied = CopyToTexture(target);
 		auto target_resolved = ManualResolveToTexture(target_copied);
 
-		std::string test_name = "CopyToTexture";
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			std::string suffix = "MS" + boost::lexical_cast<std::string>(sample_count);
-			test_name += suffix;
-			sanity_name += suffix;
+			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
 
-		EXPECT_TRUE(Compare2D(test_name,
-			*target_sanity, 0, 0, 0, 0,
+		EXPECT_TRUE(Compare2D(*target_sanity, 0, 0, 0, 0,
 			*target_resolved, 0, 0, 0, 0,
 			WIDTH, HEIGHT, tolerance));
 	}
