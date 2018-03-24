@@ -27,6 +27,10 @@ namespace KlayGE
 					: left_(0), top_(0), width_(0), height_(0),
 						viewport_(MakeSharedPtr<Viewport>())
 	{
+		viewport_->left = left_;
+		viewport_->top = top_;
+		viewport_->width = width_;
+		viewport_->height = height_;
 	}
 
 	FrameBuffer::~FrameBuffer()

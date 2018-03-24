@@ -31,9 +31,6 @@ namespace KlayGE
 {
 	OGLESFrameBuffer::OGLESFrameBuffer(bool off_screen)
 	{
-		left_ = 0;
-		top_ = 0;
-
 		if (off_screen)
 		{
 			glGenFramebuffers(1, &fbo_);

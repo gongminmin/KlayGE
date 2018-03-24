@@ -34,9 +34,6 @@ namespace KlayGE
 {
 	OGLFrameBuffer::OGLFrameBuffer(bool off_screen)
 	{
-		left_ = 0;
-		top_ = 0;
-
 		if (off_screen)
 		{
 			if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())

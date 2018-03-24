@@ -26,12 +26,6 @@ namespace KlayGE
 {
 	D3D11FrameBuffer::D3D11FrameBuffer()
 	{
-		left_ = 0;
-		top_ = 0;
-
-		viewport_->left	= left_;
-		viewport_->top	= top_;
-
 		d3d_viewport_.MinDepth = 0.0f;
 		d3d_viewport_.MaxDepth = 1.0f;
 	}
