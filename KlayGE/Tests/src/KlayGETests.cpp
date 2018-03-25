@@ -64,18 +64,39 @@ namespace KlayGE
 	{
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		GraphicsBufferPtr buff0_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff0.Size(), nullptr);
-		buff0.CopyToBuffer(*buff0_cpu);
+		GraphicsBufferPtr buff0_cpu;
+		GraphicsBufferPtr buff1_cpu;
 
-		GraphicsBufferPtr buff1_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff1.Size(), nullptr);
-		buff1.CopyToBuffer(*buff1_cpu);
+		GraphicsBuffer* buff0_cpu_ptr;
+		if (buff0.AccessHint() & EAH_CPU_Read)
+		{
+			buff0_cpu_ptr = &buff0;
+		}
+		else
+		{
+			buff0_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff0.Size(), nullptr);
+			buff0_cpu_ptr = buff0_cpu.get();
+			buff0.CopyToBuffer(*buff0_cpu_ptr);
+		}
+
+		GraphicsBuffer* buff1_cpu_ptr;
+		if (buff1.AccessHint() & EAH_CPU_Read)
+		{
+			buff1_cpu_ptr = &buff1;
+		}
+		else
+		{
+			buff1_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, buff1.Size(), nullptr);
+			buff1_cpu_ptr = buff1_cpu.get();
+			buff1.CopyToBuffer(*buff1_cpu_ptr);
+		}
 
 		bool match = true;
 		{
-			GraphicsBuffer::Mapper buff0_mapper(*buff0_cpu, BA_Read_Only);
+			GraphicsBuffer::Mapper buff0_mapper(*buff0_cpu_ptr, BA_Read_Only);
 			float const * buff0_p = reinterpret_cast<float const *>(buff0_mapper.Pointer<uint8_t>() + buff0_offset);
 
-			GraphicsBuffer::Mapper buff1_mapper(*buff1_cpu, BA_Read_Only);
+			GraphicsBuffer::Mapper buff1_mapper(*buff1_cpu_ptr, BA_Read_Only);
 			float const * buff1_p = reinterpret_cast<float const *>(buff1_mapper.Pointer<uint8_t>() + buff1_offset);
 
 			for (uint32_t i = 0; i < num_elems; ++ i)

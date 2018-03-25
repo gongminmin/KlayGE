@@ -58,6 +58,7 @@ float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 		<macro name="SAMPLE_COUNT" value="2"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="RenderToTextureVS()"/>
 			<state name="pixel_shader" value="ResolveToTextureMSPS()"/>
@@ -89,6 +90,7 @@ float4 CopyToTextureMSPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_Sam
 		<macro name="SAMPLE_COUNT" value="2"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
+			<state name="depth_enable" value="false"/>
 
 			<state name="vertex_shader" value="RenderToTextureVS()"/>
 			<state name="pixel_shader" value="CopyToTextureMSPS()"/>
