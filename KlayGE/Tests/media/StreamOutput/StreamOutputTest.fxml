@@ -91,4 +91,37 @@ void ConditionalCopyBufferGS(point float4 in_pos[1] : SV_Position,
 			</state>
 		</pass>
 	</technique>
+
+
+	<parameter type="rw_byte_address_buffer" name="rw_output_primitives_buff"/>
+
+	<shader type="geometry_shader" major_version="5" minor_version="1">
+		<![CDATA[
+#if KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT
+[maxvertexcount(1)]
+void ConditionalCopyBufferRwGS(point float4 in_pos[1] : SV_Position,
+		inout PointStream<ConditionalCopyBufferGSOut> out_stream)
+{
+	if (in_pos[0].w > 0)
+	{
+		ConditionalCopyBufferGSOut gs_out;
+		gs_out.pos = in_pos[0];
+		out_stream.Append(gs_out);
+		
+		rw_output_primitives_buff.InterlockedAdd(0, 1);
+	}
+}
+#endif
+		]]>
+	</shader>
+
+	<technique name="ConditionalCopyBufferRw" inherit="ConditionalCopyBuffer">
+		<pass name="p0">
+			<state name="geometry_shader" value="ConditionalCopyBufferRwGS()">
+				<stream_output>
+					<entry usage="SV_Position" component="xyzw" slot="0"/>
+				</stream_output>
+			</state>
+		</pass>
+	</technique>
 </effect>
