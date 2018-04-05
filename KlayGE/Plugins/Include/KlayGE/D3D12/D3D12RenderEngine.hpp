@@ -348,6 +348,10 @@ namespace KlayGE
 
 		RenderEffectPtr blit_effect_;
 		RenderTechnique* bilinear_blit_tech_;
+
+		std::shared_ptr<ID3D12CommandSignature> draw_indirect_signature_;
+		std::shared_ptr<ID3D12CommandSignature> draw_indexed_indirect_signature_;
+		std::shared_ptr<ID3D12CommandSignature> dispatch_indirect_signature_;
 	};
 }
 

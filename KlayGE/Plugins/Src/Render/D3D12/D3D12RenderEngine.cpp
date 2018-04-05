@@ -359,6 +359,52 @@ namespace KlayGE
 		res_cmd_fence_ = rf.MakeFence();
 		render_cmd_fence_ = rf.MakeFence();
 
+		{
+			D3D12_INDIRECT_ARGUMENT_DESC indirect_param;
+			indirect_param.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
+
+			D3D12_COMMAND_SIGNATURE_DESC cmd_signature_desc;
+			cmd_signature_desc.ByteStride = sizeof(D3D12_DRAW_ARGUMENTS);
+			cmd_signature_desc.NumArgumentDescs = 1;
+			cmd_signature_desc.pArgumentDescs = &indirect_param;
+			cmd_signature_desc.NodeMask = 1;
+
+			ID3D12CommandSignature* cmd_signature;
+			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
+				IID_ID3D12CommandSignature, reinterpret_cast<void**>(&cmd_signature)));
+			draw_indirect_signature_ = MakeCOMPtr(cmd_signature);
+		}
+		{
+			D3D12_INDIRECT_ARGUMENT_DESC indirect_param;
+			indirect_param.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
+
+			D3D12_COMMAND_SIGNATURE_DESC cmd_signature_desc;
+			cmd_signature_desc.ByteStride = sizeof(D3D12_DRAW_INDEXED_ARGUMENTS);
+			cmd_signature_desc.NumArgumentDescs = 1;
+			cmd_signature_desc.pArgumentDescs = &indirect_param;
+			cmd_signature_desc.NodeMask = 1;
+
+			ID3D12CommandSignature* cmd_signature;
+			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
+				IID_ID3D12CommandSignature, reinterpret_cast<void**>(&cmd_signature)));
+			draw_indexed_indirect_signature_ = MakeCOMPtr(cmd_signature);
+		}
+		{
+			D3D12_INDIRECT_ARGUMENT_DESC indirect_param;
+			indirect_param.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+
+			D3D12_COMMAND_SIGNATURE_DESC cmd_signature_desc;
+			cmd_signature_desc.ByteStride = sizeof(D3D12_DISPATCH_ARGUMENTS);
+			cmd_signature_desc.NumArgumentDescs = 1;
+			cmd_signature_desc.pArgumentDescs = &indirect_param;
+			cmd_signature_desc.NodeMask = 1;
+
+			ID3D12CommandSignature* cmd_signature;
+			TIFHR(d3d_device_->CreateCommandSignature(&cmd_signature_desc, nullptr,
+				IID_ID3D12CommandSignature, reinterpret_cast<void**>(&cmd_signature)));
+			dispatch_indirect_signature_ = MakeCOMPtr(cmd_signature);
+		}
+
 		this->FillRenderDeviceCaps();
 	}
 
@@ -817,6 +863,21 @@ namespace KlayGE
 			}
 		}
 
+		if (rl.GetIndirectArgs())
+		{
+			auto& arg_buff = *checked_cast<D3D12GraphicsBuffer*>(rl.GetIndirectArgs().get());
+			if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
+			{
+				D3D12_RESOURCE_BARRIER barrier;
+				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+				if (arg_buff.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT))
+				{
+					barriers.push_back(barrier);
+				}
+			}
+		}
+
 		if (!barriers.empty())
 		{
 			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
@@ -899,7 +960,8 @@ namespace KlayGE
 		GraphicsBufferPtr const & indirect_buff = rl.GetIndirectArgs();
 		if (indirect_buff)
 		{
-			// TODO: ExecuteIndirect's first 2 parameters can't be right
+			auto* arg_buff = checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get();
+
 			if (rl.UseIndices())
 			{
 				for (uint32_t i = 0; i < num_passes; ++ i)
@@ -908,9 +970,8 @@ namespace KlayGE
 
 					pass.Bind(effect);
 					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
-					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
-						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get(),
-						rl.IndirectArgsOffset(), nullptr, 0);
+					d3d_render_cmd_list_->ExecuteIndirect(draw_indexed_indirect_signature_.get(), 1,
+						arg_buff, rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
 			}
@@ -922,10 +983,8 @@ namespace KlayGE
 
 					pass.Bind(effect);
 					this->UpdateRenderPSO(effect, pass, rl, has_tessellation);
-					// TODO: ExecuteIndirect's first 2 parameters can't be right
-					d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0,
-						checked_cast<D3D12GraphicsBuffer const *>(indirect_buff.get())->D3DResource().get(),
-						rl.IndirectArgsOffset(), nullptr, 0);
+					d3d_render_cmd_list_->ExecuteIndirect(draw_indirect_signature_.get(), 1,
+						arg_buff, rl.IndirectArgsOffset(), nullptr, 0);
 					pass.Unbind(effect);
 				}
 			}
@@ -985,6 +1044,25 @@ namespace KlayGE
 	void D3D12RenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
+		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+
+		auto& arg_buff = *checked_cast<D3D12GraphicsBuffer*>(buff_args.get());
+		if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
+		{
+			D3D12_RESOURCE_BARRIER barrier;
+			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+			if (arg_buff.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT))
+			{
+				barriers.push_back(barrier);
+			}
+		}
+
+		if (!barriers.empty())
+		{
+			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
+		}
+
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
 		{
@@ -992,9 +1070,8 @@ namespace KlayGE
 
 			pass.Bind(effect);
 			this->UpdateComputePSO(effect, pass);
-			// TODO: ExecuteIndirect's first 2 parameters can't be right
-			d3d_render_cmd_list_->ExecuteIndirect(nullptr, 0, checked_cast<D3D12GraphicsBuffer*>(buff_args.get())->D3DResource().get(),
-				offset, nullptr, 0);
+			d3d_render_cmd_list_->ExecuteIndirect(dispatch_indirect_signature_.get(), 1,
+				checked_cast<D3D12GraphicsBuffer*>(buff_args.get())->D3DResource().get(), offset, nullptr, 0);
 			pass.Unbind(effect);
 		}
 
@@ -1065,6 +1142,10 @@ namespace KlayGE
 
 		bilinear_blit_tech_ = nullptr;
 		blit_effect_.reset();
+
+		draw_indirect_signature_.reset();
+		draw_indexed_indirect_signature_.reset();
+		dispatch_indirect_signature_.reset();
 
 		cbv_srv_uav_desc_heap_.reset();
 		dsv_desc_heap_.reset();
