@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <cliext/map>
-
 namespace KlayGE
 {
 	public ref class TexViewerCoreWrapper
@@ -165,8 +163,6 @@ namespace KlayGE
 
 	private:
 		TexViewerCore* core_;
-
-		cliext::map<uint64_t, ElementFormat> elem_fmt_mapping_;
 	};
 }
 

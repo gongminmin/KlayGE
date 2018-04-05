@@ -1,4 +1,5 @@
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/iterator.hpp>
 
 #include "../TexViewerCore/TexViewerCore.hpp"
 
@@ -32,120 +33,6 @@ namespace KlayGE
 
 		core_ = new TexViewerCore(native_wnd.ToPointer());
 		core_->Create();
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_Unknown), ElementFormat::EF_Unknown));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_A8), ElementFormat::EF_A8));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R5G6B5), ElementFormat::EF_R5G6B5));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_A1RGB5), ElementFormat::EF_A1RGB5));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ARGB4), ElementFormat::EF_ARGB4));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R8), ElementFormat::EF_R8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_R8), ElementFormat::EF_SIGNED_R8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR8), ElementFormat::EF_GR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_GR8), ElementFormat::EF_SIGNED_GR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR8), ElementFormat::EF_BGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BGR8), ElementFormat::EF_SIGNED_BGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ARGB8), ElementFormat::EF_ARGB8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR8), ElementFormat::EF_ABGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_ABGR8), ElementFormat::EF_SIGNED_ABGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_A2BGR10), ElementFormat::EF_A2BGR10));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_A2BGR10), ElementFormat::EF_SIGNED_A2BGR10));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R8UI), ElementFormat::EF_R8UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R8I), ElementFormat::EF_R8I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR8UI), ElementFormat::EF_GR8UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR8I), ElementFormat::EF_GR8I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR8UI), ElementFormat::EF_BGR8UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR8I), ElementFormat::EF_BGR8I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR8UI), ElementFormat::EF_ABGR8UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR8I), ElementFormat::EF_ABGR8I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_A2BGR10UI), ElementFormat::EF_A2BGR10UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_A2BGR10I), ElementFormat::EF_A2BGR10I));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R16), ElementFormat::EF_R16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_R16), ElementFormat::EF_SIGNED_R16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR16), ElementFormat::EF_GR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_GR16), ElementFormat::EF_SIGNED_GR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR16), ElementFormat::EF_BGR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BGR16), ElementFormat::EF_SIGNED_BGR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR16), ElementFormat::EF_ABGR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_ABGR16), ElementFormat::EF_SIGNED_ABGR16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R32), ElementFormat::EF_R32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_R32), ElementFormat::EF_SIGNED_R32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR32), ElementFormat::EF_GR32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_GR32), ElementFormat::EF_SIGNED_GR32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR32), ElementFormat::EF_BGR32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BGR32), ElementFormat::EF_SIGNED_BGR32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR32), ElementFormat::EF_ABGR32));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_ABGR32), ElementFormat::EF_SIGNED_ABGR32));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R16UI), ElementFormat::EF_R16UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R16I), ElementFormat::EF_R16I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR16UI), ElementFormat::EF_GR16UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR16I), ElementFormat::EF_GR16I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR16UI), ElementFormat::EF_BGR16UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR16I), ElementFormat::EF_BGR16I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR16UI), ElementFormat::EF_ABGR16UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR16I), ElementFormat::EF_ABGR16I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R32UI), ElementFormat::EF_R32UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R32I), ElementFormat::EF_R32I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR32UI), ElementFormat::EF_GR32UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR32I), ElementFormat::EF_GR32I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR32UI), ElementFormat::EF_BGR32UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR32I), ElementFormat::EF_BGR32I));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR32UI), ElementFormat::EF_ABGR32UI));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR32I), ElementFormat::EF_ABGR32I));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R16F), ElementFormat::EF_R16F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR16F), ElementFormat::EF_GR16F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_B10G11R11F), ElementFormat::EF_B10G11R11F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR16F), ElementFormat::EF_BGR16F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR16F), ElementFormat::EF_ABGR16F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_R32F), ElementFormat::EF_R32F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_GR32F), ElementFormat::EF_GR32F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BGR32F), ElementFormat::EF_BGR32F));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR32F), ElementFormat::EF_ABGR32F));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC1), ElementFormat::EF_BC1));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC1), ElementFormat::EF_SIGNED_BC1));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC2), ElementFormat::EF_BC2));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC2), ElementFormat::EF_SIGNED_BC2));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC3), ElementFormat::EF_BC3));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC3), ElementFormat::EF_SIGNED_BC3));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC4), ElementFormat::EF_BC4));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC4), ElementFormat::EF_SIGNED_BC4));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC5), ElementFormat::EF_BC5));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC5), ElementFormat::EF_SIGNED_BC5));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC6), ElementFormat::EF_BC6));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_BC6), ElementFormat::EF_SIGNED_BC6));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC7), ElementFormat::EF_BC7));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC1), ElementFormat::EF_ETC1));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_R11), ElementFormat::EF_ETC2_R11));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_ETC2_R11), ElementFormat::EF_SIGNED_ETC2_R11));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_GR11), ElementFormat::EF_ETC2_GR11));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_SIGNED_ETC2_GR11), ElementFormat::EF_SIGNED_ETC2_GR11));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_BGR8), ElementFormat::EF_ETC2_BGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_BGR8_SRGB), ElementFormat::EF_ETC2_BGR8_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_A1BGR8), ElementFormat::EF_ETC2_A1BGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_A1BGR8_SRGB), ElementFormat::EF_ETC2_A1BGR8_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_ABGR8), ElementFormat::EF_ETC2_ABGR8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ETC2_ABGR8_SRGB), ElementFormat::EF_ETC2_ABGR8_SRGB));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_D16), ElementFormat::EF_D16));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_D24S8), ElementFormat::EF_D24S8));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_D32F), ElementFormat::EF_D32F));
-
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ARGB8_SRGB), ElementFormat::EF_ARGB8_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_ABGR8_SRGB), ElementFormat::EF_ABGR8_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC1_SRGB), ElementFormat::EF_BC1_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC2_SRGB), ElementFormat::EF_BC2_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC3_SRGB), ElementFormat::EF_BC3_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC4_SRGB), ElementFormat::EF_BC4_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC5_SRGB), ElementFormat::EF_BC5_SRGB));
-		elem_fmt_mapping_.insert(cliext::make_pair(static_cast<uint64_t>(EF_BC7_SRGB), ElementFormat::EF_BC7_SRGB));
 	}
 
 	TexViewerCoreWrapper::~TexViewerCoreWrapper()
@@ -205,7 +92,133 @@ namespace KlayGE
 
 	TexViewerCoreWrapper::ElementFormat TexViewerCoreWrapper::Format()
 	{
-		return elem_fmt_mapping_[core_->Format()];
+		static KlayGE::ElementFormat constexpr elem_fmt_mapping[] =
+		{
+			EF_Unknown,
+
+			EF_A8,
+
+			EF_R5G6B5,
+			EF_A1RGB5,
+			EF_ARGB4,
+
+			EF_R8,
+			EF_SIGNED_R8,
+			EF_GR8,
+			EF_SIGNED_GR8,
+			EF_BGR8,
+			EF_SIGNED_BGR8,
+			EF_ARGB8,
+			EF_ABGR8,
+			EF_SIGNED_ABGR8,
+			EF_A2BGR10,
+			EF_SIGNED_A2BGR10,
+
+			EF_R8UI,
+			EF_R8I,
+			EF_GR8UI,
+			EF_GR8I,
+			EF_BGR8UI,
+			EF_BGR8I,
+			EF_ABGR8UI,
+			EF_ABGR8I,
+			EF_A2BGR10UI,
+			EF_A2BGR10I,
+
+			EF_R16,
+			EF_SIGNED_R16,
+			EF_GR16,
+			EF_SIGNED_GR16,
+			EF_BGR16,
+			EF_SIGNED_BGR16,
+			EF_ABGR16,
+			EF_SIGNED_ABGR16,
+			EF_R32,
+			EF_SIGNED_R32,
+			EF_GR32,
+			EF_SIGNED_GR32,
+			EF_BGR32,
+			EF_SIGNED_BGR32,
+			EF_ABGR32,
+			EF_SIGNED_ABGR32,
+
+			EF_R16UI,
+			EF_R16I,
+			EF_GR16UI,
+			EF_GR16I,
+			EF_BGR16UI,
+			EF_BGR16I,
+			EF_ABGR16UI,
+			EF_ABGR16I,
+			EF_R32UI,
+			EF_R32I,
+			EF_GR32UI,
+			EF_GR32I,
+			EF_BGR32UI,
+			EF_BGR32I,
+			EF_ABGR32UI,
+			EF_ABGR32I,
+
+			EF_R16F,
+			EF_GR16F,
+			EF_B10G11R11F,
+			EF_BGR16F,
+			EF_ABGR16F,
+			EF_R32F,
+			EF_GR32F,
+			EF_BGR32F,
+			EF_ABGR32F,
+
+			EF_BC1,
+			EF_SIGNED_BC1,
+			EF_BC2,
+			EF_SIGNED_BC2,
+			EF_BC3,
+			EF_SIGNED_BC3,
+			EF_BC4,
+			EF_SIGNED_BC4,
+			EF_BC5,
+			EF_SIGNED_BC5,
+			EF_BC6,
+			EF_SIGNED_BC6,
+			EF_BC7,
+
+			EF_ETC1,
+			EF_ETC2_R11,
+			EF_SIGNED_ETC2_R11,
+			EF_ETC2_GR11,
+			EF_SIGNED_ETC2_GR11,
+			EF_ETC2_BGR8,
+			EF_ETC2_BGR8_SRGB,
+			EF_ETC2_A1BGR8,
+			EF_ETC2_A1BGR8_SRGB,
+			EF_ETC2_ABGR8,
+			EF_ETC2_ABGR8_SRGB,
+
+			EF_D16,
+			EF_D24S8,
+			EF_D32F,
+
+			EF_ARGB8_SRGB,
+			EF_ABGR8_SRGB,
+			EF_BC1_SRGB,
+			EF_BC2_SRGB,
+			EF_BC3_SRGB,
+			EF_BC4_SRGB,
+			EF_BC5_SRGB,
+			EF_BC7_SRGB
+		};
+
+		auto const format = core_->Format();
+		for (size_t i = 0; i < std::size(elem_fmt_mapping); ++ i)
+		{
+			if (elem_fmt_mapping[i] == format)
+			{
+				return static_cast<TexViewerCoreWrapper::ElementFormat>(i);
+			}
+		}
+
+		return ElementFormat::EF_Unknown;
 	}
 
 	void TexViewerCoreWrapper::ArrayIndex(uint32_t array_index)
