@@ -113,7 +113,9 @@ namespace KlayGE
 			return access_hint_;
 		}
 
-		virtual void CopyToBuffer(GraphicsBuffer& rhs) = 0;
+		virtual void CopyToBuffer(GraphicsBuffer& target) = 0;
+		virtual void CopyToSubBuffer(GraphicsBuffer& target,
+			uint32_t dst_offset, uint32_t src_offset, uint32_t size) = 0;
 
 		virtual void CreateHWResource(void const * init_data) = 0;
 		virtual void DeleteHWResource() = 0;

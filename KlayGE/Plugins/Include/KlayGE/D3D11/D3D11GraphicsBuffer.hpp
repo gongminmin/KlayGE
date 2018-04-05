@@ -42,7 +42,9 @@ namespace KlayGE
 			return d3d_ua_view_;
 		}
 
-		void CopyToBuffer(GraphicsBuffer& rhs);
+		void CopyToBuffer(GraphicsBuffer& target) override;
+		void CopyToSubBuffer(GraphicsBuffer& target,
+			uint32_t dst_offset, uint32_t src_offset, uint32_t size) override;
 
 		virtual void CreateHWResource(void const * init_data) override;
 		virtual void DeleteHWResource() override;

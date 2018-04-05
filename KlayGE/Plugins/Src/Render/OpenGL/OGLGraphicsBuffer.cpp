@@ -264,22 +264,31 @@ namespace KlayGE
 		re.BindBuffer(target_, vb_, force);
 	}
 
-	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	void OGLGraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
 	{
+		this->CopyToSubBuffer(target, 0, 0, size_in_byte_);
+	}
+
+	void OGLGraphicsBuffer::CopyToSubBuffer(GraphicsBuffer& target,
+		uint32_t dst_offset, uint32_t src_offset, uint32_t size)
+	{
+		BOOST_ASSERT(src_offset + size <= this->Size());
+		BOOST_ASSERT(dst_offset + size <= target.Size());
+
 		OGLRenderEngine& re = *checked_cast<OGLRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		if (glloader_GL_VERSION_4_5() || glloader_GL_ARB_direct_state_access())
 		{
-			glCopyNamedBufferSubData(vb_, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_, 0, 0, size_in_byte_);
+			glCopyNamedBufferSubData(vb_, checked_cast<OGLGraphicsBuffer*>(&target)->vb_, src_offset, dst_offset, size);
 		}
 		else if (glloader_GL_EXT_direct_state_access())
 		{
-			glNamedCopyBufferSubDataEXT(vb_, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_, 0, 0, size_in_byte_);
+			glNamedCopyBufferSubDataEXT(vb_, checked_cast<OGLGraphicsBuffer*>(&target)->vb_, src_offset, dst_offset, size);
 		}
 		else
 		{
 			re.BindBuffer(GL_COPY_READ_BUFFER, vb_);
-			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&rhs)->vb_);
-			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size_in_byte_);
+			re.BindBuffer(GL_COPY_WRITE_BUFFER, checked_cast<OGLGraphicsBuffer*>(&target)->vb_);
+			glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, src_offset, dst_offset, size);
 		}
 	}
 

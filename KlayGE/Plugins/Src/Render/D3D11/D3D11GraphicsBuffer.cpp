@@ -261,25 +261,32 @@ namespace KlayGE
 		d3d_imm_ctx_->Unmap(buffer_.get(), 0);
 	}
 
-	void D3D11GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	void D3D11GraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
 	{
-		BOOST_ASSERT(this->Size() <= rhs.Size());
+		this->CopyToSubBuffer(target, 0, 0, size_in_byte_);
+	}
 
-		D3D11GraphicsBuffer& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&rhs);
-		if (this->Size() == rhs.Size())
+	void D3D11GraphicsBuffer::CopyToSubBuffer(GraphicsBuffer& target,
+		uint32_t dst_offset, uint32_t src_offset, uint32_t size)
+	{
+		BOOST_ASSERT(src_offset + size <= this->Size());
+		BOOST_ASSERT(dst_offset + size <= target.Size());
+
+		auto& d3d_gb = *checked_cast<D3D11GraphicsBuffer*>(&target);
+		if ((src_offset == 0) && (dst_offset == 0) && (size == this->Size()) && (size == target.Size()))
 		{
 			d3d_imm_ctx_->CopyResource(d3d_gb.D3DBuffer(), buffer_.get());
 		}
 		else
 		{
 			D3D11_BOX box;
-			box.left = 0;
-			box.right = this->Size();
+			box.left = src_offset;
+			box.right = src_offset + size;
 			box.front = 0;
 			box.top = 0;
 			box.bottom = 1;
 			box.back = 1;
-			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, 0, 0, 0, buffer_.get(), 0, &box);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_gb.D3DBuffer(), 0, dst_offset, 0, 0, buffer_.get(), 0, &box);
 		}
 	}
 

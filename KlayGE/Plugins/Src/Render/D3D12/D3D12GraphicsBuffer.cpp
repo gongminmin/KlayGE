@@ -273,13 +273,20 @@ namespace KlayGE
 		d3d_resource_->Unmap(0, &write_range);
 	}
 
-	void D3D12GraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	void D3D12GraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
 	{
-		BOOST_ASSERT(this->Size() <= rhs.Size());
+		this->CopyToSubBuffer(target, 0, 0, size_in_byte_);
+	}
 
-		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
-		D3D12GraphicsBuffer& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&rhs);
+	void D3D12GraphicsBuffer::CopyToSubBuffer(GraphicsBuffer& target,
+		uint32_t dst_offset, uint32_t src_offset, uint32_t size)
+	{
+		BOOST_ASSERT(src_offset + size <= this->Size());
+		BOOST_ASSERT(dst_offset + size <= target.Size());
+
+		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* cmd_list = re.D3DRenderCmdList();
+		auto& d3d_gb = *checked_cast<D3D12GraphicsBuffer*>(&target);
 
 		D3D12_HEAP_TYPE src_heap_type;
 		if (EAH_CPU_Read == access_hint_)
@@ -295,11 +302,11 @@ namespace KlayGE
 			src_heap_type = D3D12_HEAP_TYPE_DEFAULT;
 		}
 		D3D12_HEAP_TYPE dst_heap_type;
-		if (EAH_CPU_Read == rhs.AccessHint())
+		if (EAH_CPU_Read == target.AccessHint())
 		{
 			dst_heap_type = D3D12_HEAP_TYPE_READBACK;
 		}
-		else if ((rhs.AccessHint() & EAH_CPU_Read) || (rhs.AccessHint() & EAH_CPU_Write))
+		else if ((target.AccessHint() & EAH_CPU_Read) || (target.AccessHint() & EAH_CPU_Write))
 		{
 			dst_heap_type = D3D12_HEAP_TYPE_UPLOAD;
 		}
@@ -311,8 +318,8 @@ namespace KlayGE
 		if ((src_heap_type == dst_heap_type) && (src_heap_type != D3D12_HEAP_TYPE_DEFAULT))
 		{
 			uint8_t const * src = static_cast<uint8_t const *>(this->Map(BA_Read_Only));
-			uint8_t* dst = static_cast<uint8_t*>(d3d_gb.Map(BA_Write_Only));
-			memcpy(dst, src, this->Size());
+			uint8_t* dst = static_cast<uint8_t*>(d3d_gb.Map(BA_Read_Write));
+			memcpy(dst + dst_offset, src + src_offset, size);
 			d3d_gb.Unmap();
 			this->Unmap();
 		}
@@ -339,7 +346,7 @@ namespace KlayGE
 				cmd_list->ResourceBarrier(n, barriers);
 			}
 
-			cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), 0, d3d_resource_.get(), 0, size_in_byte_);
+			cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), dst_offset, d3d_resource_.get(), src_offset, size);
 		}
 	}
 

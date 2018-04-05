@@ -193,12 +193,22 @@ namespace KlayGE
 		re.BindBuffer(target_, vb_, force);
 	}
 
-	void OGLESGraphicsBuffer::CopyToBuffer(GraphicsBuffer& rhs)
+	void OGLESGraphicsBuffer::CopyToBuffer(GraphicsBuffer& target)
 	{
-		GraphicsBuffer::Mapper lhs_mapper(*this, BA_Read_Only);
-		GraphicsBuffer::Mapper rhs_mapper(rhs, BA_Write_Only);
-		std::copy(lhs_mapper.Pointer<uint8_t>(), lhs_mapper.Pointer<uint8_t>() + size_in_byte_,
-			rhs_mapper.Pointer<uint8_t>());
+		this->CopyToSubBuffer(target, 0, 0, size_in_byte_);
+	}
+	
+	void OGLESGraphicsBuffer::CopyToSubBuffer(GraphicsBuffer& target,
+		uint32_t dst_offset, uint32_t src_offset, uint32_t size)
+	{
+		BOOST_ASSERT(src_offset + size <= this->Size());
+		BOOST_ASSERT(dst_offset + size <= target.Size());
+
+		GraphicsBuffer::Mapper src_mapper(*this, BA_Read_Only);
+		GraphicsBuffer::Mapper dst_mapper(target, BA_Write_Only);
+		uint8_t const * src = src_mapper.Pointer<uint8_t>() + src_offset;
+		uint8_t* dst = dst_mapper.Pointer<uint8_t>() + dst_offset;
+		memcpy(dst, src, size);
 	}
 
 	void OGLESGraphicsBuffer::UpdateSubresource(uint32_t offset, uint32_t size, void const * data)
