@@ -1559,6 +1559,7 @@ namespace KlayGE
 		{
 			caps_.load_from_buffer_support = false;
 		}
+		caps_.uavs_at_every_stage_support = false;	// TODO
 
 		caps_.gs_support = glloader_GLES_VERSION_3_2() || glloader_GLES_OES_geometry_shader()
 			|| glloader_GLES_EXT_geometry_shader() || glloader_GLES_ANDROID_extension_pack_es31a();

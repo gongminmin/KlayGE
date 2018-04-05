@@ -1072,6 +1072,7 @@ namespace KlayGE
 		caps_.render_to_texture_array_support = true;
 		caps_.render_to_msaa_texture_support = true;
 		caps_.load_from_buffer_support = true;
+		caps_.uavs_at_every_stage_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_1);
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

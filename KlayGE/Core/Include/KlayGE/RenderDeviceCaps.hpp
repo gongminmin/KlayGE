@@ -97,6 +97,7 @@ namespace KlayGE
 		bool render_to_texture_array_support : 1;
 		bool render_to_msaa_texture_support : 1;
 		bool load_from_buffer_support : 1;
+		bool uavs_at_every_stage_support : 1;
 
 		bool gs_support : 1;
 		bool cs_support : 1;
