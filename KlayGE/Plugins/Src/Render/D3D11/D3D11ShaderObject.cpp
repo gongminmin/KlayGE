@@ -786,6 +786,7 @@ namespace KlayGE
 
 		if (code->empty())
 		{
+			so_template_->shader_code_[type].second.clear();
 			code.reset();
 		}
 
@@ -1067,6 +1068,35 @@ namespace KlayGE
 		else
 		{
 			is_shader_validate_[type] = false;
+			switch (type)
+			{
+			case ST_VertexShader:
+				so_template_->vertex_shader_.reset();
+				break;
+
+			case ST_PixelShader:
+				so_template_->pixel_shader_.reset();
+				break;
+
+			case ST_GeometryShader:
+				so_template_->geometry_shader_.reset();
+				break;
+
+			case ST_ComputeShader:
+				so_template_->compute_shader_.reset();
+				break;
+
+			case ST_HullShader:
+				so_template_->hull_shader_.reset();
+				break;
+
+			case ST_DomainShader:
+				so_template_->domain_shader_.reset();
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid shader type");
+			}
 		}
 	}
 
@@ -1085,69 +1115,72 @@ namespace KlayGE
 			D3D11ShaderObject const & so = *checked_cast<D3D11ShaderObject*>(shared_so.get());
 
 			is_shader_validate_[type] = so.is_shader_validate_[type];
-			so_template_->shader_code_[type] = so.so_template_->shader_code_[type];
-			so_template_->shader_desc_[type] = so.so_template_->shader_desc_[type];
-			switch (type)
+			if (is_shader_validate_[type])
 			{
-			case ST_VertexShader:
-				so_template_->vertex_shader_ = so.so_template_->vertex_shader_;
-				so_template_->vs_signature_ = so.so_template_->vs_signature_;
-				so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
-				break;
-
-			case ST_PixelShader:
-				so_template_->pixel_shader_ = so.so_template_->pixel_shader_;
-				break;
-
-			case ST_GeometryShader:
-				so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
-				break;
-
-			case ST_ComputeShader:
-				so_template_->compute_shader_ = so.so_template_->compute_shader_;
-				cs_block_size_x_ = so.cs_block_size_x_;
-				cs_block_size_y_ = so.cs_block_size_y_;
-				cs_block_size_z_ = so.cs_block_size_z_;
-				break;
-
-			case ST_HullShader:
-				so_template_->hull_shader_ = so.so_template_->hull_shader_;
-				if (so_template_->hull_shader_)
+				so_template_->shader_code_[type] = so.so_template_->shader_code_[type];
+				so_template_->shader_desc_[type] = so.so_template_->shader_desc_[type];
+				switch (type)
 				{
-					has_tessellation_ = true;
-				}
-				break;
+				case ST_VertexShader:
+					so_template_->vertex_shader_ = so.so_template_->vertex_shader_;
+					so_template_->vs_signature_ = so.so_template_->vs_signature_;
+					so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
+					break;
 
-			case ST_DomainShader:
-				so_template_->domain_shader_ = so.so_template_->domain_shader_;
-				so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
-				if (so_template_->domain_shader_)
+				case ST_PixelShader:
+					so_template_->pixel_shader_ = so.so_template_->pixel_shader_;
+					break;
+
+				case ST_GeometryShader:
+					so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
+					break;
+
+				case ST_ComputeShader:
+					so_template_->compute_shader_ = so.so_template_->compute_shader_;
+					cs_block_size_x_ = so.cs_block_size_x_;
+					cs_block_size_y_ = so.cs_block_size_y_;
+					cs_block_size_z_ = so.cs_block_size_z_;
+					break;
+
+				case ST_HullShader:
+					so_template_->hull_shader_ = so.so_template_->hull_shader_;
+					if (so_template_->hull_shader_)
+					{
+						has_tessellation_ = true;
+					}
+					break;
+
+				case ST_DomainShader:
+					so_template_->domain_shader_ = so.so_template_->domain_shader_;
+					so_template_->geometry_shader_ = so.so_template_->geometry_shader_;
+					if (so_template_->domain_shader_)
+					{
+						has_tessellation_ = true;
+					}
+					break;
+
+				default:
+					is_shader_validate_[type] = false;
+					break;
+				}
+
+				samplers_[type] = so.samplers_[type];
+				srvsrcs_[type].resize(so.srvs_[type].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
+				srvs_[type].resize(so.srvs_[type].size());
+				if (so.so_template_->shader_desc_[type]->num_uavs > 0)
 				{
-					has_tessellation_ = true;
+					uavsrcs_.resize(so.uavs_.size(), nullptr);
+					uavs_.resize(so.uavs_.size());
 				}
-				break;
 
-			default:
-				is_shader_validate_[type] = false;
-				break;
-			}
+				so_template_->cbuff_indices_[type] = so.so_template_->cbuff_indices_[type];
+				d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
 
-			samplers_[type] = so.samplers_[type];
-			srvsrcs_[type].resize(so.srvs_[type].size(), std::make_tuple(static_cast<void*>(nullptr), 0, 0));
-			srvs_[type].resize(so.srvs_[type].size());
-			if (so.so_template_->shader_desc_[type]->num_uavs > 0)
-			{
-				uavsrcs_.resize(so.uavs_.size(), nullptr);
-				uavs_.resize(so.uavs_.size());
-			}
-
-			so_template_->cbuff_indices_[type] = so.so_template_->cbuff_indices_[type];
-			d3d11_cbuffs_[type].resize(so.d3d11_cbuffs_[type].size());
-
-			param_binds_[type].reserve(so.param_binds_[type].size());
-			for (auto const & pb : so.param_binds_[type])
-			{
-				param_binds_[type].push_back(this->GetBindFunc(type, pb.offset, pb.param));
+				param_binds_[type].reserve(so.param_binds_[type].size());
+				for (auto const & pb : so.param_binds_[type])
+				{
+					param_binds_[type].push_back(this->GetBindFunc(type, pb.offset, pb.param));
+				}
 			}
 		}
 	}
