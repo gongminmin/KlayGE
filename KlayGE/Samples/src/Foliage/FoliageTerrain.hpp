@@ -29,6 +29,11 @@ namespace KlayGE
 
 		void Render() override;
 
+		bool UseDrawIndirect() const
+		{
+			return use_draw_indirect_;
+		}
+
 		uint32_t Num3DPlants() const
 		{
 			return num_3d_plants_;
@@ -61,6 +66,8 @@ namespace KlayGE
 		RenderEffectPtr foliage_dist_effect_;
 		RenderTechnique* foliage_dist_tech_;
 		RenderTechnique* foliage_impostor_dist_tech_;
+		RenderTechnique* foliage_dist_rw_tech_;
+		RenderTechnique* foliage_impostor_dist_rw_tech_;
 		RenderLayoutPtr foliage_dist_rl_;
 
 		uint32_t num_3d_plants_;
@@ -68,6 +75,14 @@ namespace KlayGE
 
 		std::vector<std::vector<QueryPtr>> plant_lod_primitive_written_query_;
 		std::vector<QueryPtr> plant_impostor_primitive_written_query_;
+
+		GraphicsBufferPtr plant_primitive_written_buff_;
+		UnorderedAccessViewPtr plant_primitive_written_buff_uav_;
+		FrameBufferPtr plant_primitive_written_fb_;
+		GraphicsBufferPtr plant_lod_primitive_indirect_args_;
+		GraphicsBufferPtr plant_impostor_primitive_indirect_args_;
+
+		bool use_draw_indirect_;
 	};
 }
 

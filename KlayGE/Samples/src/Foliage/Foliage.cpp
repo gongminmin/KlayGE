@@ -248,10 +248,13 @@ void FoliageApp::DoUpdateOverlay()
 		<< deferred_rendering_->NumVerticesRendered() << " Vertices";
 	font_->RenderText(0, 36, Color(1, 1, 1, 1), stream.str(), 16);
 
-	stream.str(L"");
-	stream << checked_cast<ProceduralTerrain*>(terrain_->GetRenderable().get())->Num3DPlants() << " 3D plants "
-		<< checked_cast<ProceduralTerrain*>(terrain_->GetRenderable().get())->NumImpostorPlants() << " impostor plants";
-	font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+	if (!checked_cast<ProceduralTerrain*>(terrain_->GetRenderable().get())->UseDrawIndirect())
+	{
+		stream.str(L"");
+		stream << checked_cast<ProceduralTerrain*>(terrain_->GetRenderable().get())->Num3DPlants() << " 3D plants "
+			<< checked_cast<ProceduralTerrain*>(terrain_->GetRenderable().get())->NumImpostorPlants() << " impostor plants";
+		font_->RenderText(0, 54, Color(1, 1, 1, 1), stream.str(), 16);
+	}
 }
 
 uint32_t FoliageApp::DoUpdate(uint32_t pass)

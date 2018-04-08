@@ -168,9 +168,16 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
+		use_draw_indirect_ = caps.draw_indirect_support && caps.uavs_at_every_stage_support;
+
 		foliage_dist_effect_ = SyncLoadRenderEffect("FoliageDistribution.fxml");
 		foliage_dist_tech_ = foliage_dist_effect_->TechniqueByName("FoliageDistribution");
 		foliage_impostor_dist_tech_ = foliage_dist_effect_->TechniqueByName("FoliageImpostorDistribution");
+		if (use_draw_indirect_)
+		{
+			foliage_dist_rw_tech_ = foliage_dist_effect_->TechniqueByName("FoliageDistributionRw");
+			foliage_impostor_dist_rw_tech_ = foliage_dist_effect_->TechniqueByName("FoliageImpostorDistributionRw");
+		}
 
 		foliage_dist_rl_ = rf.MakeRenderLayout();
 		foliage_dist_rl_->TopologyType(RenderLayout::TT_PointList);
@@ -264,8 +271,21 @@ namespace KlayGE
 		plant_impostor_instance_rls_.resize(plant_meshes_.size());
 		num_tile_plants_.resize(plant_meshes_.size());
 		tile_addr_offset_width_.resize(plant_meshes_.size());
-		plant_lod_primitive_written_query_.resize(plant_meshes_.size());
-		plant_impostor_primitive_written_query_.resize(plant_meshes_.size());
+		if (use_draw_indirect_)
+		{
+			uint32_t indirect_args[] = { 0, 0, 0, 0 };
+			plant_primitive_written_buff_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
+				sizeof(indirect_args), indirect_args, EF_R32UI);
+
+			plant_primitive_written_fb_ = rf.MakeFrameBuffer();
+			plant_primitive_written_buff_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*plant_primitive_written_buff_, EF_R32UI);
+			plant_primitive_written_fb_->AttachUAV(0, plant_primitive_written_buff_uav_);
+		}
+		else
+		{
+			plant_lod_primitive_written_query_.resize(plant_meshes_.size());
+			plant_impostor_primitive_written_query_.resize(plant_meshes_.size());
+		}
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			plant_meshes_[plant_type] = SyncLoadModel(plant_parameters[plant_type].mesh_name, EAH_GPU_Read | EAH_Immutable,
@@ -313,7 +333,10 @@ namespace KlayGE
 
 			plant_lod_instance_buffers_[plant_type].resize(plant_meshes_[plant_type]->NumLods());
 			plant_lod_instance_rls_[plant_type].resize(plant_lod_instance_buffers_[plant_type].size());
-			plant_lod_primitive_written_query_[plant_type].resize(plant_lod_instance_buffers_[plant_type].size());
+			if (!use_draw_indirect_)
+			{
+				plant_lod_primitive_written_query_[plant_type].resize(plant_lod_instance_buffers_[plant_type].size());
+			}
 			for (uint32_t lod = 0; lod < static_cast<uint32_t>(plant_lod_instance_buffers_[plant_type].size()); ++ lod)
 			{
 				plant_lod_instance_buffers_[plant_type][lod] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
@@ -328,7 +351,10 @@ namespace KlayGE
 				plant_lod_instance_rls_[plant_type][lod]->BindVertexStream(plant_lod_instance_buffers_[plant_type][lod],
 					{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
 
-				plant_lod_primitive_written_query_[plant_type][lod] = rf.MakeSOStatisticsQuery();
+				if (!use_draw_indirect_)
+				{
+					plant_lod_primitive_written_query_[plant_type][lod] = rf.MakeSOStatisticsQuery();
+				}
 			}
 
 			plant_impostor_instance_buffers_[plant_type] = rf.MakeVertexBuffer(BU_Dynamic, EAH_GPU_Read | EAH_GPU_Write,
@@ -342,7 +368,72 @@ namespace KlayGE
 			plant_impostor_instance_rls_[plant_type]->BindVertexStream(plant_impostor_instance_buffers_[plant_type],
 				{ VertexElement(VEU_TextureCoord, 1, EF_ABGR32F), VertexElement(VEU_TextureCoord, 2, EF_GR32F) });
 
-			plant_impostor_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
+			if (!use_draw_indirect_)
+			{
+				plant_impostor_primitive_written_query_[plant_type] = rf.MakeSOStatisticsQuery();
+			}
+		}
+
+		if (use_draw_indirect_)
+		{
+			std::vector<uint32_t> lod_indirect_args;
+			std::vector<uint32_t> imposter_indirect_args(plant_meshes_.size() * 4);
+			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+			{
+				for (uint32_t lod = 0; lod < plant_meshes_[plant_type]->NumLods(); ++ lod)
+				{
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					{
+						auto const * mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						auto const & rl = mesh->GetRenderLayout(lod);
+
+						lod_indirect_args.push_back(rl.NumIndices());
+						lod_indirect_args.push_back(0);
+						lod_indirect_args.push_back(rl.StartIndexLocation());
+						lod_indirect_args.push_back(rl.StartVertexLocation());
+						lod_indirect_args.push_back(rl.StartInstanceLocation());
+					}
+				}
+
+				{
+					auto const * mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+					auto const & rl = mesh->GetRenderLayout();
+
+					imposter_indirect_args[plant_type * 4 + 0] = rl.NumVertices();
+					imposter_indirect_args[plant_type * 4 + 1] = 0;
+					imposter_indirect_args[plant_type * 4 + 2] = rl.StartVertexLocation();
+					imposter_indirect_args[plant_type * 4 + 3] = rl.StartInstanceLocation();
+				}
+			}
+			plant_lod_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
+				static_cast<uint32_t>(lod_indirect_args.size() * sizeof(uint32_t)), lod_indirect_args.data(), EF_R32UI);
+			plant_impostor_primitive_indirect_args_ = rf.MakeVertexBuffer(BU_Dynamic, EAH_DrawIndirectArgs,
+				static_cast<uint32_t>(imposter_indirect_args.size() * sizeof(uint32_t)), imposter_indirect_args.data(), EF_R32UI);
+
+			uint32_t offset = 0;
+			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+			{
+				for (uint32_t lod = 0; lod < plant_meshes_[plant_type]->NumLods(); ++ lod)
+				{
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					{
+						auto* mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						auto& rl = mesh->GetRenderLayout(lod);
+
+						rl.BindIndirectArgs(plant_lod_primitive_indirect_args_);
+						rl.IndirectArgsOffset(offset);
+						offset += 5 * sizeof(uint32_t);
+					}
+				}
+
+				{
+					auto* mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+					auto& rl = mesh->GetRenderLayout();
+
+					rl.BindIndirectArgs(plant_impostor_primitive_indirect_args_);
+					rl.IndirectArgsOffset(static_cast<uint32_t>(plant_type * 4 * sizeof(uint32_t)));
+				}
+			}
 		}
 
 		*(foliage_dist_effect_->ParameterByName("foliage_tile_size")) = tile_size;
@@ -375,11 +466,20 @@ namespace KlayGE
 		gradient_pp_->Apply();
 		//mask_pp_->Apply();
 
-		re.BindFrameBuffer(fb);
+		if (use_draw_indirect_)
+		{
+			re.BindFrameBuffer(plant_primitive_written_fb_);
+
+			*(foliage_dist_effect_->ParameterByName("rw_primitive_buff")) = plant_primitive_written_buff_;
+		}
+		else
+		{
+			re.BindFrameBuffer(fb);
+		}
 
 		height_map_tex_->CopyToTexture(*height_map_cpu_tex_);
 
-		Camera const * camera = re.CurFrameBuffer()->GetViewport()->camera.get();
+		Camera const * camera = fb->GetViewport()->camera.get();
 		
 		auto const & frustum = camera->ViewFrustum();
 		std::vector<float4> view_frustum_planes(6);
@@ -393,6 +493,7 @@ namespace KlayGE
 		*(foliage_dist_effect_->ParameterByName("foliage_texture_world_offset")) = texture_world_offset_;
 		*(foliage_dist_effect_->ParameterByName("fov_scale")) = camera->ProjMatrix()(0, 0);
 
+		uint32_t offset = sizeof(uint32_t);
 		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 		{
 			*(foliage_dist_effect_->ParameterByName("num_tile_plants")) = num_tile_plants_[plant_type];
@@ -419,9 +520,25 @@ namespace KlayGE
 				uint32_t const num_vertices = plant_lod_instance_buffers_[plant_type][lod]->Size() / sizeof(PlantInstanceData);
 				foliage_dist_rl_->NumVertices(num_vertices);
 				re.BindSOBuffers(plant_lod_instance_rls_[plant_type][lod]);
-				plant_lod_primitive_written_query_[plant_type][lod]->Begin();
-				re.Render(*foliage_dist_effect_, *foliage_dist_tech_, *foliage_dist_rl_);
-				plant_lod_primitive_written_query_[plant_type][lod]->End();
+				if (use_draw_indirect_)
+				{
+					uint32_t constexpr zero = 0;
+					plant_primitive_written_buff_->UpdateSubresource(0, 4, &zero);
+
+					re.Render(*foliage_dist_effect_, *foliage_dist_rw_tech_, *foliage_dist_rl_);
+
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					{
+						plant_primitive_written_buff_->CopyToSubBuffer(*plant_lod_primitive_indirect_args_, offset, 0, sizeof(uint32_t));
+						offset += 5 * sizeof(uint32_t);
+					}
+				}
+				else
+				{
+					plant_lod_primitive_written_query_[plant_type][lod]->Begin();
+					re.Render(*foliage_dist_effect_, *foliage_dist_tech_, *foliage_dist_rl_);
+					plant_lod_primitive_written_query_[plant_type][lod]->End();
+				}
 			}
 		}
 
@@ -449,38 +566,58 @@ namespace KlayGE
 			uint32_t const num_vertices = plant_impostor_instance_buffers_[plant_type]->Size() / sizeof(PlantInstanceData);
 			foliage_dist_rl_->NumVertices(num_vertices);
 			re.BindSOBuffers(plant_impostor_instance_rls_[plant_type]);
-			plant_impostor_primitive_written_query_[plant_type]->Begin();
-			re.Render(*foliage_dist_effect_, *foliage_impostor_dist_tech_, *foliage_dist_rl_);
-			plant_impostor_primitive_written_query_[plant_type]->End();
+			if (use_draw_indirect_)
+			{
+				uint32_t constexpr zero = 0;
+				plant_primitive_written_buff_->UpdateSubresource(0, 4, &zero);
+
+				re.Render(*foliage_dist_effect_, *foliage_impostor_dist_rw_tech_, *foliage_dist_rl_);
+
+				plant_primitive_written_buff_->CopyToSubBuffer(*plant_impostor_primitive_indirect_args_,
+					static_cast<uint32_t>((plant_type * 4 + 1) * sizeof(uint32_t)), 0, sizeof(uint32_t));
+			}
+			else
+			{
+				plant_impostor_primitive_written_query_[plant_type]->Begin();
+				re.Render(*foliage_dist_effect_, *foliage_impostor_dist_tech_, *foliage_dist_rl_);
+				plant_impostor_primitive_written_query_[plant_type]->End();
+			}
 		}
 		re.BindSOBuffers(RenderLayoutPtr());
 
 		num_3d_plants_ = 0;
-		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+		num_impostor_plants_ = 0;
+		if (use_draw_indirect_)
 		{
-			for (uint32_t lod = 0; lod < static_cast<uint32_t>(plant_lod_primitive_written_query_[plant_type].size()); ++ lod)
+			re.BindFrameBuffer(fb);
+		}
+		else
+		{
+			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
+			{
+				for (uint32_t lod = 0; lod < static_cast<uint32_t>(plant_lod_primitive_written_query_[plant_type].size()); ++ lod)
+				{
+					uint32_t const num_instances = static_cast<uint32_t>(
+						checked_pointer_cast<SOStatisticsQuery>(plant_lod_primitive_written_query_[plant_type][lod])->NumPrimitivesWritten());
+					for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					{
+						auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
+						mesh->ForceNumInstances(lod, num_instances);
+					}
+					num_3d_plants_ += num_instances;
+				}
+			}
+
+			for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
 			{
 				uint32_t const num_instances = static_cast<uint32_t>(
-					checked_pointer_cast<SOStatisticsQuery>(plant_lod_primitive_written_query_[plant_type][lod])->NumPrimitivesWritten());
-				for (uint32_t i = 0; i < plant_meshes_[plant_type]->NumSubrenderables(); ++ i)
+					checked_pointer_cast<SOStatisticsQuery>(plant_impostor_primitive_written_query_[plant_type])->NumPrimitivesWritten());
 				{
-					auto mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
-					mesh->ForceNumInstances(lod, num_instances);
+					auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
+					mesh->ForceNumInstances(num_instances);
 				}
-				num_3d_plants_ += num_instances;
+				num_impostor_plants_ += num_instances;
 			}
-		}
-
-		num_impostor_plants_ = 0;
-		for (size_t plant_type = 0; plant_type < plant_meshes_.size(); ++ plant_type)
-		{
-			uint32_t const num_instances = static_cast<uint32_t>(
-				checked_pointer_cast<SOStatisticsQuery>(plant_impostor_primitive_written_query_[plant_type])->NumPrimitivesWritten());
-			{
-				auto mesh = checked_cast<FoliageImpostorMesh*>(plant_impostor_meshes_[plant_type].get());
-				mesh->ForceNumInstances(num_instances);
-			}
-			num_impostor_plants_ += num_instances;
 		}
 	}
 
