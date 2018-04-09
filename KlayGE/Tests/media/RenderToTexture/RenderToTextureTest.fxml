@@ -22,7 +22,6 @@ float4 RenderToTexturePS() : SV_Target0
 	</shader>
 	
 	<technique name="RenderToTexture">
-		<macro name="SAMPLE_COUNT" value="1"/>
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 
@@ -32,7 +31,7 @@ float4 RenderToTexturePS() : SV_Target0
 	</technique>
 
 
-	<parameter type="texture2DMS" sample_count="SAMPLE_COUNT" name="src_ms"/>
+	<parameter type="texture2DMS" name="src_ms"/>
 
 	<shader>
 		<![CDATA[
@@ -54,8 +53,7 @@ float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 		]]>
 	</shader>
 
-	<technique name="ResolveToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="2"/>
+	<technique name="ResolveToTextureMS">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			<state name="depth_enable" value="false"/>
@@ -63,14 +61,6 @@ float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 			<state name="vertex_shader" value="RenderToTextureVS()"/>
 			<state name="pixel_shader" value="ResolveToTextureMSPS()"/>
 		</pass>
-	</technique>
-
-	<technique name="ResolveToTextureMS4" inherit="ResolveToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="4"/>
-	</technique>
-
-	<technique name="ResolveToTextureMS8" inherit="ResolveToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="8"/>
 	</technique>
 
 
@@ -86,8 +76,7 @@ float4 CopyToTextureMSPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_Sam
 		]]>
 	</shader>
 
-	<technique name="CopyToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="2"/>
+	<technique name="CopyToTextureMS">
 		<pass name="p0">
 			<state name="cull_mode" value="none"/>
 			<state name="depth_enable" value="false"/>
@@ -95,13 +84,5 @@ float4 CopyToTextureMSPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_Sam
 			<state name="vertex_shader" value="RenderToTextureVS()"/>
 			<state name="pixel_shader" value="CopyToTextureMSPS()"/>
 		</pass>
-	</technique>
-
-	<technique name="CopyToTextureMS4" inherit="CopyToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="4"/>
-	</technique>
-
-	<technique name="CopyToTextureMS8" inherit="CopyToTextureMS2">
-		<macro name="SAMPLE_COUNT" value="8"/>
 	</technique>
 </effect>

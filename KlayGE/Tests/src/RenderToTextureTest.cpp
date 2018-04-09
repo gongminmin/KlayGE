@@ -213,7 +213,7 @@ private:
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 
 		uint32_t const sample_count = source->SampleCount();
-		auto tech = effect->TechniqueByName("ResolveToTextureMS" + boost::lexical_cast<std::string>(sample_count));
+		auto tech = effect->TechniqueByName("ResolveToTextureMS");
 		*(effect->ParameterByName("src_ms")) = source;
 
 		float2 const vertices[] =
@@ -251,7 +251,7 @@ private:
 		auto effect = SyncLoadRenderEffect("RenderToTexture/RenderToTextureTest.fxml");
 
 		uint32_t const sample_count = source->SampleCount();
-		auto tech = effect->TechniqueByName("CopyToTextureMS" + boost::lexical_cast<std::string>(sample_count));
+		auto tech = effect->TechniqueByName("CopyToTextureMS");
 		*(effect->ParameterByName("src_ms")) = source;
 
 		float2 const vertices[] =

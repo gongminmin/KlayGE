@@ -653,13 +653,12 @@ namespace
 				if (attr)
 				{
 					sample_count = attr->ValueString();
+					*var = elem_type + ", " + sample_count;
 				}
 				else
 				{
-					sample_count = "1";
+					*var = elem_type;
 				}
-
-				*var = elem_type + ", " + sample_count;
 			}
 			break;
 
