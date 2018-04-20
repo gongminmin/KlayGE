@@ -1320,12 +1320,20 @@ namespace KlayGE
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
+		case REDT_rasterizer_ordered_texture1D:
+		case REDT_rasterizer_ordered_texture1DArray:
+		case REDT_rasterizer_ordered_texture2D:
+		case REDT_rasterizer_ordered_texture2DArray:
+		case REDT_rasterizer_ordered_texture3D:
 			ret.func = SetD3D12ShaderParameterTextureUAV(uavsrcs_[type][offset], uavs_[type][offset], param);
 			break;
 
 		case REDT_rw_buffer:
 		case REDT_rw_structured_buffer:
 		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
 			ret.func = SetD3D12ShaderParameterGraphicsBufferUAV(uavsrcs_[type][offset], uavs_[type][offset], param);
 			break;
 

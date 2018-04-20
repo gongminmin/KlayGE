@@ -1073,6 +1073,16 @@ namespace KlayGE
 		caps_.explicit_multi_sample_support = true;
 		caps_.load_from_buffer_support = true;
 		caps_.uavs_at_every_stage_support = (d3d_feature_level_ >= D3D_FEATURE_LEVEL_11_1);
+		if (d3d_11_runtime_sub_ver_ >= 3)
+		{
+			D3D11_FEATURE_DATA_D3D11_OPTIONS2 d3d11_feature;
+			d3d_device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS2, &d3d11_feature, sizeof(d3d11_feature));
+			caps_.rovs_support = d3d11_feature.ROVsSupported ? true : false;
+		}
+		else
+		{
+			caps_.rovs_support = false;
+		}
 		caps_.gs_support = true;
 		caps_.hs_support = true;
 		caps_.ds_support = true;

@@ -140,7 +140,15 @@ namespace
 			NAME_AND_HASH("rw_texture2DArray"),
 			NAME_AND_HASH("rw_byte_address_buffer"),
 			NAME_AND_HASH("append_structured_buffer"),
-			NAME_AND_HASH("consume_structured_buffer")
+			NAME_AND_HASH("consume_structured_buffer"),
+			NAME_AND_HASH("rasterizer_ordered_buffer"),
+			NAME_AND_HASH("rasterizer_ordered_byte_address_buffer"),
+			NAME_AND_HASH("rasterizer_ordered_structured_buffer"),
+			NAME_AND_HASH("rasterizer_ordered_texture1D"),
+			NAME_AND_HASH("rasterizer_ordered_texture1DArray"),
+			NAME_AND_HASH("rasterizer_ordered_texture2D"),
+			NAME_AND_HASH("rasterizer_ordered_texture2DArray"),
+			NAME_AND_HASH("rasterizer_ordered_texture3D")
 		};
 #undef NAME_AND_HASH
 		KLAYGE_STATIC_ASSERT(std::size(types) == REDT_count);
@@ -618,6 +626,11 @@ namespace
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
+		case REDT_rasterizer_ordered_texture1D:
+		case REDT_rasterizer_ordered_texture1DArray:
+		case REDT_rasterizer_ordered_texture2D:
+		case REDT_rasterizer_ordered_texture2DArray:
+		case REDT_rasterizer_ordered_texture3D:
 			var = MakeUniquePtr<RenderVariableTexture>();
 			*var = TexturePtr();
 			attr = node.Attrib("elem_type");
@@ -1344,6 +1357,8 @@ namespace
 		case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
 			var = MakeUniquePtr<RenderVariableBuffer>();
 			*var = GraphicsBufferPtr();
 			attr = node.Attrib("elem_type");
@@ -1359,6 +1374,7 @@ namespace
 
 		case REDT_byte_address_buffer:
 		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 			*var = GraphicsBufferPtr();
 			break;
@@ -1468,6 +1484,11 @@ namespace
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
+		case REDT_rasterizer_ordered_texture1D:
+		case REDT_rasterizer_ordered_texture1DArray:
+		case REDT_rasterizer_ordered_texture2D:
+		case REDT_rasterizer_ordered_texture2DArray:
+		case REDT_rasterizer_ordered_texture3D:
 			{
 				var = MakeUniquePtr<RenderVariableTexture>();
 				*var = TexturePtr();
@@ -1903,6 +1924,8 @@ namespace
 		case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
 			{
 				var = MakeUniquePtr<RenderVariableBuffer>();
 				*var = GraphicsBufferPtr();
@@ -1912,6 +1935,7 @@ namespace
 
 		case REDT_byte_address_buffer:
 		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
 			var = MakeUniquePtr<RenderVariableByteAddressBuffer>();
 			*var = GraphicsBufferPtr();
 			break;
@@ -2017,6 +2041,11 @@ namespace
 		case REDT_rw_texture3D:
 		case REDT_rw_texture1DArray:
 		case REDT_rw_texture2DArray:
+		case REDT_rasterizer_ordered_texture1D:
+		case REDT_rasterizer_ordered_texture1DArray:
+		case REDT_rasterizer_ordered_texture2D:
+		case REDT_rasterizer_ordered_texture2DArray:
+		case REDT_rasterizer_ordered_texture3D:
 			{
 				std::string tmp;
 				var.Value(tmp);
@@ -2428,6 +2457,8 @@ namespace
 		case REDT_rw_structured_buffer:
 		case REDT_consume_structured_buffer:
 		case REDT_append_structured_buffer:
+		case REDT_rasterizer_ordered_buffer:
+		case REDT_rasterizer_ordered_structured_buffer:
 			{
 				std::string tmp;
 				var.Value(tmp);
@@ -2437,6 +2468,7 @@ namespace
 
 		case REDT_byte_address_buffer:
 		case REDT_rw_byte_address_buffer:
+		case REDT_rasterizer_ordered_byte_address_buffer:
 			break;
 
 		default:
@@ -2978,7 +3010,12 @@ namespace KlayGE
 				&& (type != REDT_rw_texture2D) && (type != REDT_rw_texture3D)
 				&& (type != REDT_rw_texture1DArray) && (type != REDT_rw_texture2DArray)
 				&& (type != REDT_rw_byte_address_buffer) && (type != REDT_append_structured_buffer)
-				&& (type != REDT_consume_structured_buffer))
+				&& (type != REDT_consume_structured_buffer)
+				&& (type != REDT_rasterizer_ordered_buffer) && (type != REDT_rasterizer_ordered_byte_address_buffer)
+				&& (type != REDT_rasterizer_ordered_structured_buffer)
+				&& (type != REDT_rasterizer_ordered_texture1D) && (type != REDT_rasterizer_ordered_texture1DArray)
+				&& (type != REDT_rasterizer_ordered_texture2D) && (type != REDT_rasterizer_ordered_texture2DArray)
+				&& (type != REDT_rasterizer_ordered_texture3D))
 			{
 				RenderEffectConstantBuffer* cbuff = nullptr;
 				XMLNodePtr parent_node = node->Parent();
@@ -3529,6 +3566,14 @@ namespace KlayGE
 				case REDT_rw_byte_address_buffer:
 				case REDT_append_structured_buffer:
 				case REDT_consume_structured_buffer:
+				case REDT_rasterizer_ordered_buffer:
+				case REDT_rasterizer_ordered_byte_address_buffer:
+				case REDT_rasterizer_ordered_structured_buffer:
+				case REDT_rasterizer_ordered_texture1D:
+				case REDT_rasterizer_ordered_texture1DArray:
+				case REDT_rasterizer_ordered_texture2D:
+				case REDT_rasterizer_ordered_texture2DArray:
+				case REDT_rasterizer_ordered_texture3D:
 					break;
 
 				default:
@@ -3572,6 +3617,14 @@ namespace KlayGE
 			case REDT_rw_texture2DArray:
 			case REDT_append_structured_buffer:
 			case REDT_consume_structured_buffer:
+			case REDT_rasterizer_ordered_buffer:
+			case REDT_rasterizer_ordered_byte_address_buffer:
+			case REDT_rasterizer_ordered_structured_buffer:
+			case REDT_rasterizer_ordered_texture1D:
+			case REDT_rasterizer_ordered_texture1DArray:
+			case REDT_rasterizer_ordered_texture2D:
+			case REDT_rasterizer_ordered_texture2DArray:
+			case REDT_rasterizer_ordered_texture3D:
 				param.Var().Value(elem_type);
 				break;
 
@@ -3703,6 +3756,54 @@ namespace KlayGE
 			case REDT_consume_structured_buffer:
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 0)\n";
 				str += "ConsumeStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_buffer:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedBuffer<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_byte_address_buffer:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedByteAddressBuffer " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_structured_buffer:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedStructuredBuffer<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_texture1D:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedTexture1D<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_texture1DArray:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedTexture1DArray<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_texture2D:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedTexture2D<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_texture2DArray:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedTexture2DArray<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
+				break;
+
+			case REDT_rasterizer_ordered_texture3D:
+				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL(5, 1)\n";
+				str += "RasterizerOrderedTexture3D<" + elem_type + "> " + param_name + ";\n";
 				str += "#endif\n";
 				break;
 

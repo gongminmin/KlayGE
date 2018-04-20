@@ -98,6 +98,7 @@ namespace KlayGE
 		bool explicit_multi_sample_support : 1;
 		bool load_from_buffer_support : 1;
 		bool uavs_at_every_stage_support : 1;
+		bool rovs_support : 1;
 
 		bool gs_support : 1;
 		bool cs_support : 1;

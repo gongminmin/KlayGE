@@ -116,6 +116,14 @@ namespace KlayGE
 		REDT_rw_byte_address_buffer,
 		REDT_append_structured_buffer,
 		REDT_consume_structured_buffer,
+		REDT_rasterizer_ordered_buffer,
+		REDT_rasterizer_ordered_byte_address_buffer,
+		REDT_rasterizer_ordered_structured_buffer,
+		REDT_rasterizer_ordered_texture1D,
+		REDT_rasterizer_ordered_texture1DArray,
+		REDT_rasterizer_ordered_texture2D,
+		REDT_rasterizer_ordered_texture2DArray,
+		REDT_rasterizer_ordered_texture3D,
 
 		REDT_count
 	};

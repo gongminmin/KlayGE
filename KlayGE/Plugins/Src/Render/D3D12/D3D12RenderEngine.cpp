@@ -1273,7 +1273,6 @@ namespace KlayGE
 		caps_.multithread_res_creating_support = true;
 		caps_.arbitrary_multithread_rendering_support = false;
 		caps_.mrt_independent_bit_depths_support = true;
-		caps_.logic_op_support = true;
 		caps_.independent_blend_support = true;
 		caps_.draw_indirect_support = true;
 		caps_.no_overwrite_support = true;
@@ -1291,10 +1290,18 @@ namespace KlayGE
 			D3D12_FEATURE_DATA_D3D12_OPTIONS feature_data;
 			if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &feature_data, sizeof(feature_data))))
 			{
+				caps_.logic_op_support = feature_data.OutputMergerLogicOp ? true : false;
+				caps_.rovs_support = feature_data.ROVsSupported ? true : false;
+
 				if (feature_data.TypedUAVLoadAdditionalFormats)
 				{
 					check_uav_fmts = true;
 				}
+			}
+			else
+			{
+				caps_.logic_op_support = false;
+				caps_.rovs_support = false;
 			}
 		}
 
