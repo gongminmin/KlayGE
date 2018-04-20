@@ -544,6 +544,11 @@ namespace KlayGE
 						}
 					}
 				}
+
+				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+				{
+					break;
+				}
 			}
 		}
 #if defined KLAYGE_PLATFORM_WINDOWS_STORE
@@ -622,6 +627,11 @@ namespace KlayGE
 							}
 						}
 					}
+				}
+
+				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+				{
+					break;
 				}
 			}
 		}
