@@ -545,7 +545,7 @@ namespace KlayGE
 					}
 				}
 
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+				if ((std::get<1>(path) == 0) && std::filesystem::path(name.begin(), name.end()).is_absolute())
 				{
 					break;
 				}
@@ -629,7 +629,7 @@ namespace KlayGE
 					}
 				}
 
-				if ((std::get<1>(path) == 0) && std::filesystem::path(name).is_absolute())
+				if ((std::get<1>(path) == 0) && std::filesystem::path(name.begin(), name.end()).is_absolute())
 				{
 					break;
 				}
