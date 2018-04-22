@@ -152,14 +152,14 @@ void LIDRVS(float4 pos : POSITION,
 
 float4 LIDRAmbientPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
-	float3 normal = GetNormal(mrt_0);
-	float glossiness = GetGlossiness(mrt_0);
+	float3 normal = GetNormal(rt0);
+	float glossiness = GetGlossiness(rt0);
 	float shininess = Glossiness2Shininess(glossiness);
-	float3 c_diff = GetDiffuse(mrt_1);
-	float3 c_spec = GetSpecular(mrt_1);
+	float3 c_diff = GetDiffuse(rt1);
+	float3 c_spec = GetSpecular(rt1);
 
 	float n_dot_l = 0.5f + 0.5f * dot(light_dir_es.xyz, normal);
 	float3 halfway = normalize(light_dir_es.xyz - view_dir);
@@ -175,14 +175,14 @@ float4 LIDRDirectionalPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : S
 	
 	float3 shading = 0;
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(mrt_0);
-	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-	float3 c_diff = GetDiffuse(mrt_1);
-	float3 c_spec = GetSpecular(mrt_1);
+	float3 normal = GetNormal(rt0);
+	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
+	float3 c_diff = GetDiffuse(rt1);
+	float3 c_spec = GetSpecular(rt1);
 	
 	int num_lights = int(lights_attrib[0].w);
 
@@ -296,14 +296,14 @@ float4 LIDRPointPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targ
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
-		float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-		float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-		float3 normal = GetNormal(mrt_0);
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-		float3 c_diff = GetDiffuse(mrt_1);
-		float3 c_spec = GetSpecular(mrt_1);
+		float3 normal = GetNormal(rt0);
+		float shininess = Glossiness2Shininess(GetGlossiness(rt0));
+		float3 c_diff = GetDiffuse(rt1);
+		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -332,14 +332,14 @@ float4 LIDRSpotPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Targe
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
-		float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-		float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-		float3 normal = GetNormal(mrt_0);
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-		float3 c_diff = GetDiffuse(mrt_1);
-		float3 c_spec = GetSpecular(mrt_1);
+		float3 normal = GetNormal(rt0);
+		float shininess = Glossiness2Shininess(GetGlossiness(rt0));
+		float3 c_diff = GetDiffuse(rt1);
+		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -368,14 +368,14 @@ float4 LIDRSphereAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
-		float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-		float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-		float3 normal = GetNormal(mrt_0);
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-		float3 c_diff = GetDiffuse(mrt_1);
-		float3 c_spec = GetSpecular(mrt_1);
+		float3 normal = GetNormal(rt0);
+		float shininess = Glossiness2Shininess(GetGlossiness(rt0));
+		float3 c_diff = GetDiffuse(rt1);
+		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);
@@ -405,14 +405,14 @@ float4 LIDRTubeAreaPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	int4 light_index = light_index_tex.Sample(point_sampler, tc * tc_to_tile_scale) * 255 + 0.5f;
 	if (any(light_index))
 	{
-		float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-		float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
+		float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+		float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 		view_dir = normalize(view_dir);
 		float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-		float3 normal = GetNormal(mrt_0);
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
-		float3 c_diff = GetDiffuse(mrt_1);
-		float3 c_spec = GetSpecular(mrt_1);
+		float3 normal = GetNormal(rt0);
+		float shininess = Glossiness2Shininess(GetGlossiness(rt0));
+		float3 c_diff = GetDiffuse(rt1);
+		float3 c_spec = GetSpecular(rt1);
 		float spec_normalize = SpecularNormalizeFactor(shininess);
 
 		uint light_index_all = light_index.x | (light_index.y << 8) | (light_index.z << 16) | (light_index.w << 24);

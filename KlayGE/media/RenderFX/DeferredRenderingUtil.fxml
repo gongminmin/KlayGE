@@ -20,17 +20,17 @@ float4 StoreGBufferRT1(float3 albedo, float metalness)
 }
 
 void StoreGBufferMRT(float3 normal, float glossiness, float3 albedo, float metalness,
-			out float4 mrt_0, out float4 mrt_1)
+			out float4 rt0, out float4 rt1)
 {
-	mrt_0 = StoreGBufferRT0(normal, glossiness);
-	mrt_1 = StoreGBufferRT1(albedo, metalness);
+	rt0 = StoreGBufferRT0(normal, glossiness);
+	rt1 = StoreGBufferRT1(albedo, metalness);
 }
 
-float3 GetNormal(float4 mrt0)
+float3 GetNormal(float4 rt0)
 {
-	float nz = floor(mrt0.z * 255) / 16;
-	mrt0.xy += float2(floor(nz) / 16, frac(nz)) / 255;
-	float2 fenc = mrt0.xy * 4 - 2;
+	float nz = floor(rt0.z * 255) / 16;
+	rt0.xy += float2(floor(nz) / 16, frac(nz)) / 255;
+	float2 fenc = rt0.xy * 4 - 2;
 	float f = dot(fenc, fenc);
 	float g = sqrt(1 - f / 4);
 	float3 normal;
@@ -39,19 +39,19 @@ float3 GetNormal(float4 mrt0)
 	return normal;
 }
 
-float GetGlossiness(float4 mrt0)
+float GetGlossiness(float4 rt0)
 {
-	return mrt0.w;
+	return rt0.w;
 }
 
-float3 GetDiffuse(float4 mrt1)
+float3 GetDiffuse(float4 rt1)
 {
-	return DiffuseColor(mrt1.xyz, mrt1.w);
+	return DiffuseColor(rt1.xyz, rt1.w);
 }
 
-float3 GetSpecular(float4 mrt1)
+float3 GetSpecular(float4 rt1)
 {
-	return SpecularColor(mrt1.xyz, mrt1.w);
+	return SpecularColor(rt1.xyz, rt1.w);
 }
 
 

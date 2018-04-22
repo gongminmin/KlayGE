@@ -6,6 +6,8 @@
 
 	<macro name="NORMAL_THRESHOLD" value="0.7"/>
 
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+
 	<shader>
 		<![CDATA[
 void DecalGBufferVS(float4 pos : POSITION,
@@ -39,7 +41,7 @@ void DecalGBufferVS(float4 pos : POSITION,
 void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
 					float3 view_dir : TEXCOORD4,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
@@ -64,7 +66,7 @@ void DecalGBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_vi
 		opacity *= albedo_tex.Sample(bilinear_sampler, texcoord_2xy.xy).a;
 	}
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 		]]>
 	</shader>

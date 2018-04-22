@@ -253,7 +253,7 @@ AsciiArtsPostProcess::AsciiArtsPostProcess()
 
 	ascii_lums_builder builder(INPUT_NUM_ASCII, OUTPUT_NUM_ASCII, ASCII_WIDTH, ASCII_HEIGHT);
 
-	downsampler_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+	downsampler_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
 	cell_per_row_line_ep_ = effect->ParameterByName("cell_per_row_line");
 	*(effect->ParameterByName("lums_tex")) = FillTexture(builder.build(LoadFromKFont("gkai00mp.kfont")));

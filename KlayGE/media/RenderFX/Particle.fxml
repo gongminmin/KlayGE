@@ -78,7 +78,7 @@ float4 ParticlePS(PS_IN ps_in) : SV_Target
 		float2 tex_coord = ps_in.PosSS.xy / ps_in.PosSS.w;
 		tex_coord.y *= KLAYGE_FLIPPING;
 		tex_coord = tex_coord / 2 + 0.5f;
-		
+
 		float depth = ReadAFloat(depth_tex.Sample(point_sampler, tex_coord), far_plane);
 
 		clr.a *= lerp(particle_alpha_from_tex.Sample(bilinear_sampler, ps_in.tex.xy).r,

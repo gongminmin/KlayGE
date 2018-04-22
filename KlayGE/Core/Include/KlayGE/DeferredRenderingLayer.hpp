@@ -73,7 +73,7 @@ namespace KlayGE
 
 		std::array<bool, PTB_None> g_buffer_enables;
 
-		FrameBufferPtr g_buffer;
+		FrameBufferPtr g_buffer_fb;
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
@@ -445,7 +445,6 @@ namespace KlayGE
 		bool taa_enabled_;
 
 		PostProcessPtr vdm_composition_pp_;
-		PostProcessPtr copy_to_depth_pp_;
 
 		float light_scale_;
 		RenderLayoutPtr rl_cone_;
@@ -468,8 +467,8 @@ namespace KlayGE
 		std::array<std::array<RenderTechnique*, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechnique* technique_no_lighting_;
 		RenderTechnique* technique_shading_;
-		std::array<RenderTechnique*, 2> technique_merge_shadings_;
-		std::array<RenderTechnique*, 2> technique_merge_depths_;
+		RenderTechnique* technique_merge_shading_;
+		RenderTechnique* technique_merge_depth_;
 		RenderTechnique* technique_copy_shading_depth_;
 		RenderTechnique* technique_copy_depth_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -494,6 +493,9 @@ namespace KlayGE
 		RenderTechnique* technique_cldr_shadowing_unified_;
 		RenderTechnique* technique_cldr_light_intersection_unified_;
 		RenderTechnique* technique_cldr_unified_;
+
+		RenderTechnique* technique_depth_to_tiled_min_max_;
+		RenderTechnique* technique_cldr_lighting_mask_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
@@ -518,8 +520,8 @@ namespace KlayGE
 		PostProcessPtr depth_to_linear_pp_;
 		PostProcessPtr depth_mipmap_pp_;
 
-		RenderEffectParameter* g_buffer_tex_param_;
-		RenderEffectParameter* g_buffer_1_tex_param_;
+		RenderEffectParameter* g_buffer_rt0_tex_param_;
+		RenderEffectParameter* g_buffer_rt1_tex_param_;
 		RenderEffectParameter* depth_tex_param_;
 		RenderEffectParameter* shading_tex_param_;
 		RenderEffectParameter* light_attrib_param_;
@@ -574,11 +576,9 @@ namespace KlayGE
 		RenderEffectParameter* filtered_sms_2d_light_index_param_;
 		RenderEffectParameter* esms_scale_factor_param_;
 
-		RenderTechnique* technique_depth_to_tiled_min_max_;
-		RenderTechnique* technique_cldr_lighting_mask_;
 		RenderEffectParameter* near_q_far_param_;
 		RenderEffectParameter* width_height_param_;
-		RenderEffectParameter* depth_to_tiled_depth_in_tex_param_;
+		RenderEffectParameter* depth_to_tiled_ds_in_tex_param_;
 		RenderEffectParameter* depth_to_tiled_min_max_depth_rw_tex_param_;
 		RenderEffectParameter* linear_depth_rw_tex_param_;
 		RenderEffectParameter* upper_left_param_;

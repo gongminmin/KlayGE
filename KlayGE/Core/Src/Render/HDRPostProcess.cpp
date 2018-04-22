@@ -354,8 +354,8 @@ namespace KlayGE
 		: PostProcess(L"LensEffects", false)
 	{
 		bright_pass_downsampler_ = SyncLoadPostProcess("LensEffects.ppml", "sqr_bright");
-		downsamplers_[0] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
-		downsamplers_[1] = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+		downsamplers_[0] = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
+		downsamplers_[1] = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 		blurs_[0] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
 		blurs_[1] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
 		blurs_[2] = MakeSharedPtr<BlurPostProcess<SeparableGaussianFilterPostProcess>>(8, 1.0f);
@@ -497,7 +497,7 @@ namespace KlayGE
 		mul_real_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags);
 		mul_imag_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, EF_ABGR32F, 1, 0, tex_creation_flags);
 
-		bilinear_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+		bilinear_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
 		bright_pass_pp_ = SyncLoadPostProcess("LensEffects.ppml", "scaled_bright_pass");
 		bright_pass_pp_->OutputPin(0, resized_tex_);

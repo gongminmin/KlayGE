@@ -142,17 +142,17 @@ void VisualizeVertexVS(float4 pos : POSITION,
 }
 
 void VisualizeVertexMRTPS(float4 clr : COLOR,
-				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
-	mrt_0 = 0;
-	mrt_1 = clr;
+	rt0 = 0;
+	rt1 = clr;
 }
 
 void VisualizeTextureMRTPS(float2 tex0 : TEXCOORD0,
-				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
-	mrt_0 = 0;
-	mrt_1 = VisualizeTexture(tex0);
+	rt0 = 0;
+	rt1 = VisualizeTexture(tex0);
 }
 		]]>
 	</shader>

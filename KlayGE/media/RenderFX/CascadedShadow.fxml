@@ -34,14 +34,14 @@
 
 	<shader>
 		<![CDATA[
-float LogCascadeFromRange(uint cascade, float2 min_max_z)
+float LogCascadeFromRange(uint cascade, float2 min_max_depth)
 {
-	float z = min_max_z.y;
+	float z = min_max_depth.y;
 	if (cascade < uint(num_cascades))
 	{
-		float ratio = min_max_z.y / min_max_z.x;
+		float ratio = min_max_depth.y / min_max_depth.x;
 		float power = cascade * (1.0f / num_cascades);
-		z = min_max_z.x * pow(ratio, power);
+		z = min_max_depth.x * pow(ratio, power);
 	}
 	return z;
 }
@@ -62,14 +62,14 @@ void ClearZBoundsCS(uint GI : SV_GroupIndex)
 	interval_buff_uint[GI].y = 0;
 }
 
-groupshared float2 min_max_z_sh[BLOCK_SIZE];
+groupshared float2 min_max_depth_sh[BLOCK_SIZE];
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ReduceZBoundsFromDepthCS(uint3 gid : SV_GroupID,
 								uint3 gtid : SV_GroupThreadID,
 								uint GI : SV_GroupIndex)
 {
-	float2 min_max_z = near_far.yx;
+	float2 min_max_depth = near_far.yx;
 	
 	uint2 tile_start = gid.xy * TILE_DIM + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_DIM; tile_y += BLOCK_Y)
@@ -79,20 +79,20 @@ void ReduceZBoundsFromDepthCS(uint3 gid : SV_GroupID,
 			float depth = depth_tex.Load(uint3(tile_start + uint2(tile_x, tile_y), 0)).x;
 			if ((depth >= near_far.x) && (depth < near_far.y))
 			{
-				min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
+				min_max_depth = float2(min(min_max_depth.x, depth), max(min_max_depth.y, depth));
 			}
 		}
 	}
 
-	min_max_z_sh[GI] = min_max_z;
+	min_max_depth_sh[GI] = min_max_depth;
 	GroupMemoryBarrierWithGroupSync();
 
 	for (uint offset = BLOCK_SIZE >> 1; offset > 32; offset >>= 1)
 	{
 		if (GI < offset)
 		{
-			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
-			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+			min_max_depth_sh[GI].x = min(min_max_depth_sh[GI].x, min_max_depth_sh[GI + offset].x);
+			min_max_depth_sh[GI].y = max(min_max_depth_sh[GI].y, min_max_depth_sh[GI + offset].y);
 		}
 		GroupMemoryBarrierWithGroupSync();
 	}
@@ -100,24 +100,24 @@ void ReduceZBoundsFromDepthCS(uint3 gid : SV_GroupID,
 	{
 		if (GI < offset)
 		{
-			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
-			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+			min_max_depth_sh[GI].x = min(min_max_depth_sh[GI].x, min_max_depth_sh[GI + offset].x);
+			min_max_depth_sh[GI].y = max(min_max_depth_sh[GI].y, min_max_depth_sh[GI + offset].y);
 		}
 	}
 
 	if (0 == GI)
 	{
-		InterlockedMin(interval_buff_uint[0].x, asuint(min_max_z_sh[0].x));
-		InterlockedMax(interval_buff_uint[num_cascades - 1].y, asuint(min_max_z_sh[0].y));
+		InterlockedMin(interval_buff_uint[0].x, asuint(min_max_depth_sh[0].x));
+		InterlockedMax(interval_buff_uint[num_cascades - 1].y, asuint(min_max_depth_sh[0].y));
 	}
 }
 
 [numthreads(MAX_NUM_CASCADES, 1, 1)]
 void ComputeLogCascadesFromZBoundsCS(uint GI : SV_GroupIndex)
 {
-	float2 min_max_z = float2(interval_buff[0].x, interval_buff[num_cascades - 1].y);
+	float2 min_max_depth = float2(interval_buff[0].x, interval_buff[num_cascades - 1].y);
 	interval_buff[GI] = (uint2(0, num_cascades - 1) == GI) ? near_far
-		: float2(LogCascadeFromRange(GI, min_max_z), LogCascadeFromRange(GI + 1, min_max_z));
+		: float2(LogCascadeFromRange(GI, min_max_depth), LogCascadeFromRange(GI + 1, min_max_depth));
 }
 
 [numthreads(MAX_NUM_CASCADES, 1, 1)]
@@ -143,7 +143,7 @@ void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
 		maxs_reduce[cascade] = asfloat(0);
 	}
 
-	float2 min_max_z = float2(interval_buff_read[0].x, interval_buff_read[num_cascades - 1].y);
+	float2 min_max_depth = float2(interval_buff_read[0].x, interval_buff_read[num_cascades - 1].y);
 	{
 		uint2 tile_start = gid.xy * TILE_DIM + gtid.xy;
 		for (uint tile_y = 0; tile_y < TILE_DIM; tile_y += BLOCK_Y)
@@ -152,7 +152,7 @@ void ReduceBoundsFromDepthCS(uint3 gid : SV_GroupID,
 			{
 				uint2 coords = tile_start + uint2(tile_x, tile_y);
 				float depth = depth_tex.Load(uint3(coords, 0)).x;
-				if ((depth >= min_max_z.x) && (depth < min_max_z.y))
+				if ((depth >= min_max_depth.x) && (depth < min_max_depth.y))
 				{
 					uint cascade = 0;
 					for (uint i = 0; i < uint(num_cascades) - 1; ++ i)
@@ -307,7 +307,7 @@ void ComputeCustomCascadesCS(uint GI : SV_GroupIndex)
 		<![CDATA[
 float4 ReduceZBoundsFromDepthPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float2 min_max_z = near_far.yx;
+	float2 min_max_depth = near_far.yx;
 
 	tc = tc + delta_offset.zw;
 	for (int i = 0; i < 4; ++ i)
@@ -316,32 +316,32 @@ float4 ReduceZBoundsFromDepthPS(float2 tc : TEXCOORD0) : SV_Target
 		float depth = depth_tex.SampleLevel(point_sampler, ntc, 0).x;
 		if ((depth >= near_far.x) && (depth < near_far.y))
 		{
-			min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
+			min_max_depth = float2(min(min_max_depth.x, depth), max(min_max_depth.y, depth));
 		}
 	}
-	return float4(min_max_z, 0, 0);
+	return float4(min_max_depth, 0, 0);
 }
 
 float4 ReduceZBoundsFromDepthMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float2 min_max_z = depth_deriv_tex.Sample(bias_neg_1_point_sampler, tc).xy;
+	float2 min_max_depth = depth_deriv_tex.Sample(bias_neg_1_point_sampler, tc).xy;
 	for (int i = 1; i < 4; ++ i)
 	{
 		float2 ntc = tc + kernel[i] * delta_offset.xy;
 		float2 depth_deriv = depth_deriv_tex.Sample(bias_neg_1_point_sampler, ntc).xy;
-		min_max_z = float2(min(min_max_z.x, depth_deriv.x), max(min_max_z.y, depth_deriv.y));
+		min_max_depth = float2(min(min_max_depth.x, depth_deriv.x), max(min_max_depth.y, depth_deriv.y));
 	}
-	return float4(min_max_z, 0, 0);
+	return float4(min_max_depth, 0, 0);
 }
 
 float4 ComputeLogCascadesFromZBoundsPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	float2 min_max_z = depth_deriv_tex.SampleLevel(point_sampler, 0.5f, last_level).xy;
+	float2 min_max_depth = depth_deriv_tex.SampleLevel(point_sampler, 0.5f, last_level).xy;
 	
 	int addr = int(tc.x * MAX_NUM_CASCADES);
 	return float4((int2(0, num_cascades - 1) == addr) ? near_far
-		: float2(LogCascadeFromRange(addr, min_max_z), LogCascadeFromRange(addr + 1, min_max_z)), 0, 0);
+		: float2(LogCascadeFromRange(addr, min_max_depth), LogCascadeFromRange(addr + 1, min_max_depth)), 0, 0);
 }
 		]]>
 	</shader>

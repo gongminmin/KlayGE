@@ -37,7 +37,7 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<parameter type="texture2D" name="noise_tex">
@@ -112,7 +112,7 @@ float4 SSVOPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float obscurance = 1;
 
 	float depth = depth_tex.Sample(point_sampler, tc).x;
-	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
+	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(point_sampler, tc));
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);

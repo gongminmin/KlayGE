@@ -14,8 +14,8 @@
 			<param name="sm_far_plane"/>
 		</params>
 		<input>
-			<pin name="g_buffer_tex"/>
-			<pin name="g_buffer_1_tex"/>
+			<pin name="g_buffer_rt0_tex"/>
+			<pin name="g_buffer_rt1_tex"/>
 			<pin name="depth_tex"/>
 			<pin name="shadow_tex"/>
 		</input>

@@ -21,8 +21,8 @@
 	<parameter type="float2" name="inv_width_height"/>
 	<parameter type="float4x4" name="inv_proj"/>
 	<parameter type="texture2D" name="indirect_lighting_tex"/>
-	<parameter type="texture2D" name="g_buffer_tex"/>
-	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
@@ -61,7 +61,7 @@ void CopyToLightBufferVS(float4 pos : POSITION,
 float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	view_dir = normalize(view_dir);
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 ndc = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float shininess = Glossiness2Shininess(GetGlossiness(ndc));
 	float3 normal = GetNormal(ndc);
 	
@@ -69,8 +69,8 @@ float4 CopyToLightBufferPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) :
 
 	float3 diff_lighting = NearestDepthUpsamplingIL(tc).xyz * scaling_factor * detail_factor;
 
-	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	return float4(CalcShading(diff_lighting, 0, shininess, GetDiffuse(mrt1), GetSpecular(mrt1), view_dir, normal), 1);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	return float4(CalcShading(diff_lighting, 0, shininess, GetDiffuse(rt1), GetSpecular(rt1), view_dir, normal), 1);
 }
 		]]>
 	</shader>

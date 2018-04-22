@@ -146,13 +146,13 @@ void CalcProceduralTerrainNormalColor(float3 world_pos, float debug_patch,
 }
 
 void GBufferProceduralTerrainMRTPS(float3 world_pos : TEXCOORD0, float debug_patch : TEXCOORD1,
-				out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+				out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	float3 normal, color;
 	CalcProceduralTerrainNormalColor(world_pos, debug_patch, normal, color);
 
 	StoreGBufferMRT(normal, 0, color, 0,
-		mrt_0, mrt_1);
+		rt0, rt1);
 }
 		]]>
 	</shader>

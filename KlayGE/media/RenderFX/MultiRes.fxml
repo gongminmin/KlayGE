@@ -19,7 +19,7 @@
 
 	<parameter type="float4" name="delta_offset"/>
 
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="depth_deriv_tex"/>
 	<parameter type="texture2D" name="normal_cone_tex"/>
@@ -67,12 +67,12 @@ float4 DepthDerivateMipMapPS(float2 tc : TEXCOORD0) : SV_Target
 float4 GBuffer2NormalConePS(float2 tc : TEXCOORD0) : SV_Target
 {
 	tc = tc + delta_offset.zw;
-	float2 max_nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, tc, 0)).xy;
+	float2 max_nxy = GetNormal(g_buffer_rt0_tex.SampleLevel(point_sampler, tc, 0)).xy;
 	float2 min_nxy = max_nxy;
 	for (int i = 1; i < 9; ++ i)
 	{
 		float2 ntc = tc + kernel9[i] * delta_offset.xy;
-		float2 nxy = GetNormal(g_buffer_tex.SampleLevel(point_sampler, ntc, 0)).xy;
+		float2 nxy = GetNormal(g_buffer_rt0_tex.SampleLevel(point_sampler, ntc, 0)).xy;
 		max_nxy = max(max_nxy, nxy);
 		min_nxy = min(min_nxy, nxy);
 	}

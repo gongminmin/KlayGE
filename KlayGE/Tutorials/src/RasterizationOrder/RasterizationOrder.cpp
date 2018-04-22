@@ -205,7 +205,7 @@ void RasterizationOrderApp::OnCreate()
 
 	ras_order_fb_ = rf.MakeFrameBuffer();
 
-	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
 	InputEngine& inputEngine(Context::Instance().InputFactoryInstance().InputEngineInstance());
 	InputActionMap actionMap;

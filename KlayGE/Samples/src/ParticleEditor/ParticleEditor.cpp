@@ -182,7 +182,7 @@ void ParticleEditorApp::OnCreate()
 		scene_depth_buffer_->GetViewport()->camera = screen_buffer->GetViewport()->camera;
 	}
 
-	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("ParticleEditor.uiml"));
 	dialog_ = UIManager::Instance().GetDialogs()[0];

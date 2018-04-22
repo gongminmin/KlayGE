@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <post_processors>
-	<post_processor name="copy">
+	<post_processor name="Copy">
 		<input>
 			<pin name="src_tex"/>
 		</input>
@@ -11,7 +11,7 @@
 		<shader effect="Copy.fxml" tech="Copy"/>
 	</post_processor>
 
-	<post_processor name="bilinear_copy">
+	<post_processor name="BilinearCopy">
 		<input>
 			<pin name="src_tex"/>
 		</input>
@@ -21,7 +21,7 @@
 		<shader effect="Copy.fxml" tech="BilinearCopy"/>
 	</post_processor>
 
-	<post_processor name="add_copy">
+	<post_processor name="AddCopy">
 		<input>
 			<pin name="src_tex"/>
 		</input>
@@ -31,7 +31,7 @@
 		<shader effect="Copy.fxml" tech="AddCopy"/>
 	</post_processor>
 
-	<post_processor name="add_bilinear_copy">
+	<post_processor name="AddBilinearCopy">
 		<input>
 			<pin name="src_tex"/>
 		</input>

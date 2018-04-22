@@ -70,19 +70,13 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 		]]>
 	</shader>
 
-	<technique name="Copy">
+	<technique name="SSSCopy" inherit="Copy">
 		<pass name="p1">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="equal"/>
 			<state name="front_stencil_ref" value="32"/>
 			<state name="front_stencil_read_mask" value="32"/>
 			<state name="front_stencil_write_mask" value="0"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>
 	
@@ -187,9 +181,8 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 	</cbuffer>
 
 	<parameter type="texture2D" name="shadow_tex"/>
-	<parameter type="texture2D" name="shading_tex"/>
-	<parameter type="texture2D" name="g_buffer_tex"/>
-	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
 	
 	<shader>
 		<![CDATA[
@@ -216,13 +209,13 @@ void TranslucencyVS(float4 pos : POSITION,
 
 float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
 {
-	float4 mrt0 = g_buffer_tex.Sample(point_sampler, tc);
-	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
 
 	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane) / view_dir.z);
 	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
 	float4 light_view_pos = mul(float4(pos_es, 1), light_view);
-	float3 normal = GetNormal(mrt0);
+	float3 normal = GetNormal(rt0);
 
 	float2 coord_ls = light_vp_pos.xy / light_vp_pos.w * 0.5f;
 	coord_ls.y *= KLAYGE_FLIPPING;
@@ -232,7 +225,7 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 	float3 color = light_color * AttenuationTerm(light_pos_es, pos_es, light_falloff);
 	float3 light_vec = normalize(pos_es - light_pos_es);
 	float irradiance = max(0.3f + dot(normal, light_vec), 0);
-	float3 transmittance = CalcTransmit(s * strength) * color * irradiance * GetDiffuse(mrt1).rgb;
+	float3 transmittance = CalcTransmit(s * strength) * color * irradiance * GetDiffuse(rt1).rgb;
 	return float4(transmittance, 1);
 }
 		]]>

@@ -41,7 +41,7 @@ namespace KlayGE
 	SSRPostProcess::SSRPostProcess()
 			: PostProcess(L"ScreenSpaceReflection", false,
 				{ "min_samples", "max_samples" },
-				{ "g_buffer_0_tex", "g_buffer_1_tex", "front_side_depth_tex", "front_side_tex", "foreground_depth_tex" },
+				{ "g_buffer_rt0_tex", "g_buffer_rt1_tex", "front_side_depth_tex", "front_side_tex", "foreground_depth_tex" },
 				{ "output" },
 				RenderEffectPtr(), nullptr)
 	{

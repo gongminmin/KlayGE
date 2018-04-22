@@ -23,9 +23,9 @@ void GBufferSkyBoxVS(float4 pos : POSITION,
 	oPos = pos;
 }
 
-void GBufferSkyBoxMRTPS(out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+void GBufferSkyBoxMRTPS(out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
-	mrt_0 = mrt_1 = 0;
+	rt0 = rt1 = 0;
 }
 
 void SkyBoxVS(float4 pos : POSITION,

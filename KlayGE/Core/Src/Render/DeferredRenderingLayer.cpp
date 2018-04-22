@@ -344,7 +344,7 @@ namespace
 		DeferredRenderingDebugPostProcess()
 			: PostProcess(L"DeferredRenderingDebug", false,
 				{},
-				{ "g_buffer_tex", "g_buffer_1_tex", "depth_tex", "lighting_tex", "ssvo_tex" },
+				{ "g_buffer_rt0_tex", "g_buffer_rt1_tex", "depth_tex", "lighting_tex", "ssvo_tex" },
 				{ "out_tex" },
 				RenderEffectPtr(), nullptr)
 		{
@@ -454,7 +454,7 @@ namespace KlayGE
 		for (size_t vpi = 0; vpi < viewports_.size(); ++ vpi)
 		{
 			PerViewport& pvp = viewports_[vpi];
-			pvp.g_buffer = rf.MakeFrameBuffer();
+			pvp.g_buffer_fb = rf.MakeFrameBuffer();
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 			pvp.lighting_fb = rf.MakeFrameBuffer();
 #endif
@@ -612,10 +612,8 @@ namespace KlayGE
 #endif
 		technique_no_lighting_ = dr_effect->TechniqueByName("NoLightingTech");
 		technique_shading_ = dr_effect->TechniqueByName("ShadingTech");
-		technique_merge_shadings_[0] = dr_effect->TechniqueByName("MergeShadingTech");
-		technique_merge_shadings_[1] = dr_effect->TechniqueByName("MergeShadingAlphaBlendTech");
-		technique_merge_depths_[0] = dr_effect->TechniqueByName("MergeDepthTech");
-		technique_merge_depths_[1] = dr_effect->TechniqueByName("MergeDepthAlphaBlendTech");
+		technique_merge_shading_ = dr_effect->TechniqueByName("MergeShadingAlphaBlendTech");
+		technique_merge_depth_ = dr_effect->TechniqueByName("MergeDepthAlphaBlendTech");
 		technique_copy_shading_depth_ = dr_effect->TechniqueByName("CopyShadingDepthTech");
 		technique_copy_depth_ = dr_effect->TechniqueByName("CopyDepthTech");
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
@@ -624,6 +622,9 @@ namespace KlayGE
 			technique_cldr_shadowing_unified_ = dr_effect->TechniqueByName("ClusteredDRShadowingUnified");
 			technique_cldr_light_intersection_unified_ = dr_effect->TechniqueByName("ClusteredDRLightIntersection");
 			technique_cldr_unified_ = dr_effect->TechniqueByName(typed_uav_ ? "ClusteredDRUnified" : "ClusteredDRUnifiedNoTypedUAV");
+
+			technique_depth_to_tiled_min_max_ = dr_effect->TechniqueByName("DepthToTiledMinMax");
+			technique_cldr_lighting_mask_ = dr_effect->TechniqueByName("ClusteredDRLightingMask");
 		}
 		else
 		{
@@ -693,7 +694,6 @@ namespace KlayGE
 			effect_x, effect_x->TechniqueByName("SSVOBlurX"),
 			effect_y, effect_y->TechniqueByName("SSVOBlurY"));
 		ssr_pp_ = MakeSharedPtr<SSRPostProcess>();
-		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "taa");
 
 		sss_blur_pp_ = MakeSharedPtr<SSSBlurPP>();
 		sss_blur_pp_->SetParam(0, 1.0f);
@@ -703,8 +703,7 @@ namespace KlayGE
 		translucency_pp_->SetParam(6, 100.0f);
 
 		vdm_composition_pp_ = SyncLoadPostProcess("VarianceDepthMap.ppml", "VDMComposition");
-		copy_to_depth_pp_ = SyncLoadPostProcess("Depth.ppml", "CopyToDepth");
-		copy_to_depth_pp_->SetParam(0, 1);
+		taa_pp_ = SyncLoadPostProcess("TAA.ppml", "Taa");
 
 		rsm_fb_ = rf.MakeFrameBuffer();
 
@@ -740,8 +739,8 @@ namespace KlayGE
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
 		depth_mipmap_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthMipmapBilinear");
 
-		g_buffer_tex_param_ = dr_effect->ParameterByName("g_buffer_tex");
-		g_buffer_1_tex_param_ = dr_effect->ParameterByName("g_buffer_1_tex");
+		g_buffer_rt0_tex_param_ = dr_effect->ParameterByName("g_buffer_rt0_tex");
+		g_buffer_rt1_tex_param_ = dr_effect->ParameterByName("g_buffer_rt1_tex");
 		depth_tex_param_ = dr_effect->ParameterByName("depth_tex");
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		lighting_tex_param_ = dr_effect->ParameterByName("lighting_tex");
@@ -803,12 +802,9 @@ namespace KlayGE
 
 		if (cs_cldr_)
 		{
-			technique_depth_to_tiled_min_max_ = dr_effect->TechniqueByName("DepthToTiledMinMax");
-			technique_cldr_lighting_mask_ = dr_effect->TechniqueByName("ClusteredDRLightingMask");
-
 			near_q_far_param_ = dr_effect->ParameterByName("near_q_far");
 			width_height_param_ = dr_effect->ParameterByName("width_height");
-			depth_to_tiled_depth_in_tex_param_ = dr_effect->ParameterByName("depth_in_tex");
+			depth_to_tiled_ds_in_tex_param_ = dr_effect->ParameterByName("ds_in_tex");
 			depth_to_tiled_min_max_depth_rw_tex_param_ = dr_effect->ParameterByName("min_max_depth_rw_tex");
 			linear_depth_rw_tex_param_ = dr_effect->ParameterByName("linear_depth_rw_tex");
 			upper_left_param_ = dr_effect->ParameterByName("upper_left");
@@ -831,7 +827,7 @@ namespace KlayGE
 			filtered_sms_2d_light_index_param_ = dr_effect->ParameterByName("filtered_sms_2d_light_index");
 			esms_scale_factor_param_ = dr_effect->ParameterByName("esms_scale_factor");
 
-			copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+			copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 		}
 		else
 		{
@@ -1053,9 +1049,9 @@ namespace KlayGE
 		RenderViewPtr g_buffer_rt0_view = rf.Make2DRenderView(*pvp.g_buffer_rt0_tex, 0, 1, 0);
 		RenderViewPtr g_buffer_rt1_view = rf.Make2DRenderView(*pvp.g_buffer_rt1_tex, 0, 1, 0);
 
-		pvp.g_buffer->Attach(FrameBuffer::ATT_Color0, g_buffer_rt0_view);
-		pvp.g_buffer->Attach(FrameBuffer::ATT_Color1, g_buffer_rt1_view);
-		pvp.g_buffer->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
+		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_Color0, g_buffer_rt0_view);
+		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_Color1, g_buffer_rt1_view);
+		pvp.g_buffer_fb->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
 		this->SetupViewportGI(index, false);
 
@@ -1176,7 +1172,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
 		{
-			if (!caps.uav_format_support(shading_fmt))
+			if (!typed_uav_)
 			{
 				pvp.temp_shading_tex = rf.MakeTexture2D(width, height, 1, 1, shading_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Unordered);
 			}
@@ -1997,7 +1993,7 @@ namespace KlayGE
 		if (PTB_Opaque == pass_tb)
 		{
 			CameraPtr const & camera = pvp.frame_buffer->GetViewport()->camera;
-			pvp.g_buffer->GetViewport()->camera = camera;
+			pvp.g_buffer_fb->GetViewport()->camera = camera;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 			pvp.lighting_fb->GetViewport()->camera = camera;
 #endif
@@ -2010,11 +2006,11 @@ namespace KlayGE
 			}
 		}
 
-		re.BindFrameBuffer(pvp.g_buffer);
+		re.BindFrameBuffer(pvp.g_buffer_fb);
 
 		float depth = (PTB_TransparencyBack == pass_tb) ? 0.0f : 1.0f;
 		int32_t stencil = (PTB_Opaque == pass_tb) ? 0 : 16;
-		pvp.g_buffer->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
+		pvp.g_buffer_fb->Clear(FrameBuffer::CBM_Color | FrameBuffer::CBM_Depth | FrameBuffer::CBM_Stencil,
 			Color(0, 0, 0, 0), depth, stencil);
 	}
 
@@ -2038,7 +2034,7 @@ namespace KlayGE
 			this->BuildLinearDepthMipmap(pvp);
 			this->CreateDepthMinMaxMap(pvp);
 		}
-#else
+#elif DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		this->BuildLinearDepthMipmap(pvp);
 #endif
 	}
@@ -2061,7 +2057,7 @@ namespace KlayGE
 		pvp.g_buffer_rt0_tex->CopyToSubTexture2D(*pvp.g_buffer_rt0_backup_tex, 0, 0,
 			0, 0, width, height, 0, 0, 0, 0, width, height);
 
-		re.BindFrameBuffer(pvp.g_buffer);
+		re.BindFrameBuffer(pvp.g_buffer_fb);
 		for (auto const & de : decals_)
 		{
 			de->Pass(pass_type);
@@ -2654,8 +2650,8 @@ namespace KlayGE
 	{
 		RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*lighting_tex_param_ = pvp.lighting_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
@@ -2727,7 +2723,7 @@ namespace KlayGE
 			if (light_camera)
 			{
 				translucency_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
-					pvp.g_buffer->Attached(FrameBuffer::ATT_DepthStencil));
+					pvp.g_buffer_fb->Attached(FrameBuffer::ATT_DepthStencil));
 				translucency_pp_->InputPin(0, pvp.g_buffer_rt0_tex);
 				translucency_pp_->InputPin(1, pvp.g_buffer_rt1_tex);
 				translucency_pp_->InputPin(2, pvp.g_buffer_depth_tex);
@@ -2752,7 +2748,7 @@ namespace KlayGE
 	void DeferredRenderingLayer::AddSSS(PerViewport const & pvp)
 	{
 		sss_blur_pp_->OutputFrameBuffer()->Attach(FrameBuffer::ATT_DepthStencil,
-			pvp.g_buffer->Attached(FrameBuffer::ATT_DepthStencil));
+			pvp.g_buffer_fb->Attached(FrameBuffer::ATT_DepthStencil));
 		sss_blur_pp_->InputPin(0, pvp.merged_shading_texs[pvp.curr_merged_buffer_index]);
 		sss_blur_pp_->InputPin(1, pvp.g_buffer_depth_tex);
 		sss_blur_pp_->OutputPin(0, pvp.merged_shading_texs[pvp.curr_merged_buffer_index]);
@@ -2831,12 +2827,22 @@ namespace KlayGE
 		{
 			re.BindFrameBuffer(pvp.merged_shading_fbs[pvp.curr_merged_buffer_index]);
 			*shading_tex_param_ = pvp.shading_tex;
-			re.Render(*dr_effect_, *technique_merge_shadings_[pass_tb != PTB_Opaque], *rl_quad_);
+			re.Render(*dr_effect_, *technique_merge_shading_, *rl_quad_);
 		}
 
-		re.BindFrameBuffer(pvp.merged_depth_fbs[pvp.curr_merged_buffer_index]);
-		*depth_tex_param_ = pvp.g_buffer_depth_tex;
-		re.Render(*dr_effect_, *technique_merge_depths_[pass_tb != PTB_Opaque], *rl_quad_);
+		if (pass_tb == PTB_Opaque)
+		{
+			uint32_t const w = pvp.g_buffer_depth_tex->Width(0);
+			uint32_t const h = pvp.g_buffer_depth_tex->Height(0);
+			pvp.g_buffer_depth_tex->CopyToSubTexture2D(*pvp.merged_depth_texs[pvp.curr_merged_buffer_index],
+				0, 0, 0, 0, w, h, 0, 0, 0, 0, w, h);
+		}
+		else
+		{
+			re.BindFrameBuffer(pvp.merged_depth_fbs[pvp.curr_merged_buffer_index]);
+			*depth_tex_param_ = pvp.g_buffer_depth_tex;
+			re.Render(*dr_effect_, *technique_merge_depth_, *rl_quad_);
+		}
 	}
 
 	void DeferredRenderingLayer::SetupViewportGI(uint32_t vp, bool ssgi_enable)
@@ -2970,7 +2976,7 @@ namespace KlayGE
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 	void DeferredRenderingLayer::UpdateLightIndexedLighting(PerViewport const & pvp, PassTargetBuffer pass_tb)
 	{
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
@@ -3230,8 +3236,8 @@ namespace KlayGE
 			tech = technique_lidr_ambient_;
 		}
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
 		if (PTB_Opaque == pass_tb)
@@ -3272,8 +3278,8 @@ namespace KlayGE
 		*lights_dir_es_param_ = lights_dir_es;
 		*lights_attrib_param_ = lights_attrib;
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
@@ -3408,8 +3414,8 @@ namespace KlayGE
 		re.Render(*dr_effect_, *tech, *rl_quad_);
 
 		*light_index_tex_param_ = pvp.light_index_tex;
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*light_volume_mv_param_ = pvp.inv_proj;
 
@@ -3482,9 +3488,10 @@ namespace KlayGE
 		*tile_scale_param_ = float4(tile_scale.x(), tile_scale.y(), 0, 0);
 		*camera_proj_01_param_ = float2(pvp.proj(0, 0) * tile_scale.x(), pvp.proj(1, 1) * tile_scale.y());
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
-		*g_buffer_1_tex_param_ = pvp.g_buffer_rt1_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt1_tex_param_ = pvp.g_buffer_rt1_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
+		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
 		float3 upper_left = MathLib::transform_coord(float3(-1, +1, 1), pvp.inv_proj);
 		float3 upper_right = MathLib::transform_coord(float3(+1, +1, 1), pvp.inv_proj);
@@ -3495,8 +3502,6 @@ namespace KlayGE
 
 		*inv_width_height_param_ = float2(1.0f / w, 1.0f / h);
 		*width_height_param_ = uint2(w, h);
-
-		*lighting_mask_tex_param_ = pvp.lighting_mask_tex;
 
 		*skylight_diff_spec_mip_param_ = int3(0, 0, 0);
 
@@ -3703,25 +3708,26 @@ namespace KlayGE
 			lights_aabb_min_param_->CBuffer().Dirty(true);
 			lights_aabb_max_param_->CBuffer().Dirty(true);
 
-			if (pvp.temp_shading_tex)
+			bool const first_pass = !available_lights[0].empty();
+			if (typed_uav_)
 			{
-				if (available_lights[0].empty())
-				{
-					*shading_in_tex_param_
-						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
-					*shading_rw_tex_param_ = pvp.temp_shading_tex;
-				}
-				else
+				*shading_rw_tex_param_
+					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+			}
+			else
+			{
+				if (first_pass)
 				{
 					*shading_in_tex_param_ = TexturePtr();
 					*shading_rw_tex_param_
 						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
 				}
-			}
-			else
-			{
-				*shading_rw_tex_param_
-					= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+				else
+				{
+					*shading_in_tex_param_
+						= (PTB_Opaque == pass_tb) ? pvp.merged_shading_texs[pvp.curr_merged_buffer_index] : pvp.shading_tex;
+					*shading_rw_tex_param_ = pvp.temp_shading_tex;
+				}
 			}
 
 			{
@@ -3770,7 +3776,7 @@ namespace KlayGE
 			*intersected_light_indices_in_tex_param_ = pvp.intersected_light_indices_tex;
 			re.Dispatch(*dr_effect_, *technique_cldr_unified_, (w + BLOCK_X - 1) / BLOCK_X, (h + BLOCK_Y - 1) / BLOCK_Y, 1);
 
-			if (available_lights[0].empty() && pvp.temp_shading_tex)
+			if (!first_pass && !typed_uav_)
 			{
 				copy_pp_->InputPin(0, pvp.temp_shading_tex);
 				copy_pp_->OutputPin(0,
@@ -3789,7 +3795,7 @@ namespace KlayGE
 		TexturePtr const & in_tex = pvp.g_buffer_ds_tex;
 		TexturePtr const & out_tex = pvp.g_buffer_min_max_depth_texs.back();
 		*width_height_param_ = uint2(in_tex->Width(0) - 1, in_tex->Height(0) - 1);
-		*depth_to_tiled_depth_in_tex_param_ = in_tex;
+		*depth_to_tiled_ds_in_tex_param_ = in_tex;
 		*depth_to_tiled_min_max_depth_rw_tex_param_ = out_tex;
 		*linear_depth_rw_tex_param_ = pvp.g_buffer_depth_tex;
 
@@ -3817,7 +3823,7 @@ namespace KlayGE
 		std::shared_ptr<DeferredRenderingDebugPostProcess> pp = checked_pointer_cast<DeferredRenderingDebugPostProcess>(dr_debug_pp_);
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer->Width(), viewports_[0].g_buffer->Height(),
+		TexturePtr temp_tex = rf.MakeTexture2D(viewports_[0].g_buffer_fb->Width(), viewports_[0].g_buffer_fb->Height(),
 			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write);
 		pp->OutputPin(0, temp_tex);
 
@@ -3933,7 +3939,7 @@ namespace KlayGE
 		float4 near_q_far(camera->NearPlane() * q, q, camera->FarPlane(), 1 / camera->FarPlane());
 		depth_to_linear_pp_->SetParam(0, near_q_far);
 
-		*g_buffer_tex_param_ = pvp.g_buffer_rt0_tex;
+		*g_buffer_rt0_tex_param_ = pvp.g_buffer_rt0_tex;
 		*depth_tex_param_ = pvp.g_buffer_depth_tex;
 		*inv_width_height_param_ = float2(1.0f / pvp.frame_buffer->GetViewport()->width,
 			1.0f / pvp.frame_buffer->GetViewport()->height);
@@ -4085,7 +4091,7 @@ namespace KlayGE
 		{
 			this->UpdateShadowing(pvp);
 		}
-#else
+#elif DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		this->UpdateShadowing(pvp);
 #endif
 

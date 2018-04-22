@@ -69,7 +69,7 @@
 	</parameter>
 
 	<parameter type="float2" name="inv_width_height"/>
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 
 	<shader>
@@ -272,12 +272,12 @@ float4 DeferredRenderingPointPS(
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(mrt_0);
-	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
+	float3 normal = GetNormal(rt0);
+	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 	
 	return CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 		shininess, tc,
@@ -293,7 +293,7 @@ float4 DeferredRenderingSpotPS(
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
@@ -302,8 +302,8 @@ float4 DeferredRenderingSpotPS(
 				float2(light_pos_es.w, light_dir_es.w), pos_es.xyz);
 	if (spot > 0)
 	{
-		float3 normal = GetNormal(mrt_0);
-		float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
+		float3 normal = GetNormal(rt0);
+		float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 		
 		lighting = CalcDRLighting(light_pos_es.xyz, pos_es, normal, view_dir,
 			shininess, tc,
@@ -322,17 +322,17 @@ float4 DeferredRenderingDirectionalPS(
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
 	
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 lighting = 0;
 	
 	view_dir = normalize(view_dir);
 
 	float3 dir = light_dir_es.xyz;
-	float3 normal = GetNormal(mrt_0);
+	float3 normal = GetNormal(rt0);
 	float n_dot_l = dot(normal, dir);
 	if (n_dot_l > 0)
 	{
-		float spec = DistributionTerm(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(mrt_0))).x;
+		float spec = DistributionTerm(normalize(dir - view_dir), normal, Glossiness2Shininess(GetGlossiness(rt0))).x;
 		float3 shadow = 1;
 		if (shadowing_channel >= 0)
 		{
@@ -350,8 +350,8 @@ float4 DeferredRenderingAmbientPS(
 {
 	float2 tc = DecodeSSTexcoord(ss_tc);
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float3 normal = GetNormal(mrt_0);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+	float3 normal = GetNormal(rt0);
 
 	return CalcColor(0.5f + 0.5f * dot(light_dir_es.xyz, normal), 0, 1, 1, light_color, light_attrib);
 }
@@ -365,12 +365,12 @@ float4 DeferredRenderingSphereAreaPS(
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(mrt_0);
-	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
+	float3 normal = GetNormal(rt0);
+	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 	
 	float3 light_pos = SphereAreaLightPositionFixup(light_pos_es.xyz, light_radius_extend.x, pos_es,
 		normal, view_dir);
@@ -389,12 +389,12 @@ float4 DeferredRenderingTubeAreaPS(
 	float2 tc_ddx = ddx(tc);
 	float2 tc_ddy = ddy(tc);
 
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth_tex.Sample(point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(mrt_0);
-	float shininess = Glossiness2Shininess(GetGlossiness(mrt_0));
+	float3 normal = GetNormal(rt0);
+	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 	
 	float3 l0 = light_pos_es.xyz - light_radius_extend.yzw - pos_es;
 	float3 l1 = light_pos_es.xyz + light_radius_extend.yzw - pos_es;
@@ -658,7 +658,7 @@ float4 DeferredShadowingDirectionalPS(
 
 
 	<parameter type="texture2D" name="lighting_tex"/>
-	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
 
 	<parameter type="float2" name="near_q"/>
@@ -714,20 +714,20 @@ void ShadingVS(float4 pos : POSITION,
 
 float4 NoLightingPS(float2 tc : TEXCOORD0) : SV_Target
 {
-	return g_buffer_1_tex.Sample(point_sampler, tc);
+	return g_buffer_rt1_tex.Sample(point_sampler, tc);
 }
 
 float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
-	float4 mrt_0 = g_buffer_tex.Sample(point_sampler, tc);
-	float glossiness = GetGlossiness(mrt_0);
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
+	float glossiness = GetGlossiness(rt0);
 	float shininess = Glossiness2Shininess(glossiness);
-	float3 normal = GetNormal(mrt_0);
+	float3 normal = GetNormal(rt0);
 	
 	float4 lighting = lighting_tex.Sample(point_sampler, tc);
-	float4 mrt_1 = g_buffer_1_tex.Sample(point_sampler, tc);
-	float3 c_diff = GetDiffuse(mrt_1);
-	float3 c_spec = GetSpecular(mrt_1);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	float3 c_diff = GetDiffuse(rt1);
+	float3 c_spec = GetSpecular(rt1);
 	float4 shading = float4(CalcShading(lighting, shininess, c_diff, c_spec, view_dir, normal), 1);
 	shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
 	return shading;
@@ -817,16 +817,6 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MergeShadingTech">
-		<pass name="p0">
-			<state name="cull_mode" value="front"/>
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="vertex_shader" value="ShadingVS()"/>
-			<state name="pixel_shader" value="MergeShadingPS()"/>
-		</pass>
-	</technique>
 	<technique name="MergeShadingAlphaBlendTech">
 		<pass name="p0">
 			<state name="cull_mode" value="front"/>
@@ -855,14 +845,12 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 		</pass>
 	</technique>
 
-	<technique name="MergeDepthTech" inherit="MergeShadingTech">
-		<pass name="p0">			
-			<state name="pixel_shader" value="MergeDepthPS()"/>
-		</pass>
-	</technique>
-
 	<technique name="MergeDepthAlphaBlendTech" inherit="MergeDepthTech">
 		<pass name="p0">
+			<state name="cull_mode" value="front"/>
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
 			<state name="front_stencil_enable" value="true"/>
 			<state name="front_stencil_func" value="not_equal"/>
 			<state name="front_stencil_ref" value="16"/>
@@ -871,6 +859,9 @@ void CopyDepthPS(float2 tc : TEXCOORD0,
 			<state name="back_stencil_func" value="not_equal"/>
 			<state name="back_stencil_ref" value="16"/>
 			<state name="back_stencil_pass" value="keep"/>
+
+			<state name="vertex_shader" value="ShadingVS()"/>
+			<state name="pixel_shader" value="MergeDepthPS()"/>
 		</pass>
 	</technique>
 

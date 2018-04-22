@@ -1,7 +1,7 @@
 <?xml version='1.0'?>
 
 <post_processors>
-	<post_processor name="taa">
+	<post_processor name="Taa">
 		<input>
 			<pin name="curr_tex"/>
 			<pin name="prev_tex"/>

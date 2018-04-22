@@ -671,7 +671,7 @@ void CausticsMapApp::OnCreate()
 	checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CompressedCubeMap(y_cube_map_, c_cube_map_);
 	sky_box_->AddToSceneManager();
 
-	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 	if (depth_texture_support_)
 	{
 		depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
@@ -883,7 +883,7 @@ void CausticsMapApp::InitEnvCube()
 
 	for (int i = 0; i < 6; ++ i)
 	{
-		env_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "copy");
+		env_filter_pps_[i] = SyncLoadPostProcess("Copy.ppml", "Copy");
 
 		env_filter_pps_[i]->InputPin(0, env_tex_);
 		env_filter_pps_[i]->OutputPin(0, env_cube_tex_, 0, 0, i);

@@ -41,7 +41,7 @@ namespace KlayGE
 	SSVOPostProcess::SSVOPostProcess()
 			: PostProcess(L"SSVO", false,
 				{},
-				{ "g_buffer_tex", "depth_tex" },
+				{ "g_buffer_rt0_tex", "depth_tex" },
 				{ "out_tex" },
 				RenderEffectPtr(), nullptr)
 	{

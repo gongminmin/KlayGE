@@ -28,7 +28,7 @@ TilingPostProcess::TilingPostProcess()
 	auto effect = SyncLoadRenderEffect("TilingPP.fxml");
 	this->Technique(effect, effect->TechniqueByName("Tiling"));
 
-	downsampler_ = SyncLoadPostProcess("Copy.ppml", "bilinear_copy");
+	downsampler_ = SyncLoadPostProcess("Copy.ppml", "BilinearCopy");
 
 	tile_per_row_line_ep_ = effect->ParameterByName("tile_per_row_line");
 }

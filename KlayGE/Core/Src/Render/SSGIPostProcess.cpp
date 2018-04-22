@@ -41,7 +41,7 @@ namespace KlayGE
 	SSGIPostProcess::SSGIPostProcess()
 			: PostProcess(L"SSGI", false,
 				{},
-				{ "g_buffer_tex", "depth_tex", "shading_tex" },
+				{ "g_buffer_rt0_tex", "depth_tex", "shading_tex" },
 				{ "out_tex" },
 				RenderEffectPtr(), nullptr)
 	{

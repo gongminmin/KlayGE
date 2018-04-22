@@ -146,7 +146,7 @@ namespace
 				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
-				*(effect_->ParameterByName("g_buffer_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -173,7 +173,7 @@ namespace
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
 				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameShadingTex(drl->ActiveViewport());
-				*(effect_->ParameterByName("g_buffer_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();

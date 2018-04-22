@@ -742,10 +742,10 @@ void MotionBlurDoFApp::OnCreate()
 		depth_of_field_ = MakeSharedPtr<DepthOfField>();
 		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
 	}
-	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+	depth_of_field_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 	
 	motion_blur_ = MakeSharedPtr<MotionBlurPostProcess>();
-	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
+	motion_blur_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 
 	UIManager::Instance().Load(ResLoader::Instance().Open("MotionBlurDoF.uiml"));
 	dof_dialog_ = UIManager::Instance().GetDialogs()[0];

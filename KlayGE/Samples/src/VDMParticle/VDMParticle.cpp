@@ -188,8 +188,8 @@ void VDMParticleApp::OnCreate()
 	scene_fb_ = rf.MakeFrameBuffer();
 	scene_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
 	depth_to_linear_pp_ = SyncLoadPostProcess("Depth.ppml", "DepthToLinear");
-	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "copy");
-	add_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "add_bilinear_copy");
+	copy_pp_ = SyncLoadPostProcess("Copy.ppml", "Copy");
+	add_copy_pp_ = SyncLoadPostProcess("Copy.ppml", "AddBilinearCopy");
 	vdm_composition_pp_ = SyncLoadPostProcess("VarianceDepthMap.ppml", "VDMComposition");
 
 	fpc_controller_.Scalers(0.05f, 0.1f);

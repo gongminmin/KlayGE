@@ -16,8 +16,8 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="g_buffer_tex"/>
-	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="lighting_tex"/>
 	<parameter type="texture2D" name="ssvo_tex"/>
@@ -41,8 +41,8 @@ float4 ShowPositionPS(float2 tc0 : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_
 
 float4 ShowNormalPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float4 mrt0 = g_buffer_tex.Sample(point_sampler, tc0);
-	float3 normal = GetNormal(mrt0);	
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc0);
+	float3 normal = GetNormal(rt0);	
 	return float4(normal / 2 + 0.5f, 1);
 }
 
@@ -53,22 +53,22 @@ float4 ShowDepthPS(float2 tc0 : TEXCOORD0) : SV_Target
 
 float4 ShowDiffusePS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc0);
-	float3 diffuse = GetDiffuse(mrt1);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc0);
+	float3 diffuse = GetDiffuse(rt1);
 	return float4(diffuse, 1);
 }
 
 float4 ShowSpecularPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float4 mrt1 = g_buffer_1_tex.Sample(point_sampler, tc0);
-	float3 specular = GetSpecular(mrt1);
+	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc0);
+	float3 specular = GetSpecular(rt1);
 	return float4(specular, 1);
 }
 
 float4 ShowShininessPS(float2 tc0 : TEXCOORD0) : SV_Target
 {
-	float4 mrt0 = g_buffer_tex.Sample(point_sampler, tc0);
-	float shininess = Glossiness2Shininess(GetGlossiness(mrt0));
+	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc0);
+	float shininess = Glossiness2Shininess(GetGlossiness(rt0));
 	return float4(shininess.xxx / 256, 1);
 }
 

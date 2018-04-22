@@ -47,7 +47,7 @@ namespace KlayGE
 		mrt_blend_support_ = (caps.max_simultaneous_rts > 1) && caps.independent_blend_support;
 
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSS.fxml");
-		copy_tech_ = effect->TechniqueByName("Copy");
+		copy_tech_ = effect->TechniqueByName("SSSCopy");
 		blur_x_tech_ = effect->TechniqueByName("BlurX");
 		if (mrt_blend_support_)
 		{

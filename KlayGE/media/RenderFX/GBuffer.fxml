@@ -64,7 +64,6 @@
 	</parameter>
 
 	<parameter type="texture2D" name="opaque_depth_tex"/>
-	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 
 	<shader_graph_nodes>
 		<node name="PositionNode" return="void" impl="StaticPositionNode">
@@ -187,7 +186,7 @@ float3 RestoreNormal(float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_vi
 }
 
 void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_view0_2z, float3 ts_to_view1,
-					out float4 mrt_0, out float4 mrt_1)
+					out float4 rt0, out float4 rt1)
 {
 	float3 normal = RestoreNormal(texcoord_2xy, ts_to_view0_2z, ts_to_view1) * revert_normal;
 
@@ -196,36 +195,36 @@ void ConstructMRTGBuffer(float revert_normal, float4 texcoord_2xy, float4 ts_to_
 	float glossiness = GlossinessNode(texcoord_2xy.xy);
 
 	StoreGBufferMRT(normal, glossiness, albedo, metalness,
-		mrt_0, mrt_1);
+		rt0, rt1);
 }
 
 void GBufferMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					bool is_front_face : SV_IsFrontFace,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
-	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 
 void GBufferAlphaTestMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float3 ts_to_view1 : TEXCOORD2,
 					bool is_front_face : SV_IsFrontFace,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1);
 	float opacity = OpacityNode(texcoord_2xy.xy);
 	clip(opacity - alpha_test_threshold);
-	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, mrt_0, mrt_1);
+	ConstructMRTGBuffer(is_front_face ? 1 : -1, texcoord_2xy, ts_to_view0_2z, ts_to_view1, rt0, rt1);
 }
 
 void GBufferAlphaBlendMRTPS(float4 texcoord_2xy : TEXCOORD0, float4 ts_to_view0_2z : TEXCOORD1, float4 ts_to_view1_depth : TEXCOORD2,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD3,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
 	texcoord_2xy.xy = ParallaxMappingCorrection(texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz);
 	clip(opaque_depth_tex.Sample(point_sampler, screen_tc).x - ts_to_view1_depth.w);
-	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, mrt_0, mrt_1);
+	ConstructMRTGBuffer(1, texcoord_2xy, ts_to_view0_2z, ts_to_view1_depth.xyz, rt0, rt1);
 }
 		]]>
 	</shader>

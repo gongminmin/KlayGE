@@ -38,7 +38,7 @@
 		<state name="address_v" value="clamp"/>
 	</parameter>
 
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="depth_tex"/>
 	<parameter type="texture2D" name="shading_tex"/>
 
@@ -82,7 +82,7 @@ float3 CalcAlchemyObscurance(float2 tc, float3 pos_es, float3 x_dir, float3 y_di
 			float depth_sample = depth_tex.SampleGrad(point_sampler, tc_sample, grad_x, grad_y).x;
 			float3 pos_es_sample = sample_point * (depth_sample / sample_point.z);
 			float3 dir_es_sample = pos_es_sample - pos_es;
-			float3 normal_sample = GetNormal(g_buffer_tex.SampleGrad(point_sampler, tc_sample, grad_x, grad_y));
+			float3 normal_sample = GetNormal(g_buffer_rt0_tex.SampleGrad(point_sampler, tc_sample, grad_x, grad_y));
 			
 			if (dot(normal_sample, normal) < 1e-3f)
 			{
@@ -120,7 +120,7 @@ float4 SSGIPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 	float radius = 4;
 
 	float depth = depth_tex.Sample(point_sampler, tc).x;
-	float3 normal = GetNormal(g_buffer_tex.Sample(point_sampler, tc));
+	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(point_sampler, tc));
 
 	view_dir = normalize(view_dir);
 	float3 pos_es = view_dir * (depth / view_dir.z);

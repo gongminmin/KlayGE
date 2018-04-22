@@ -137,7 +137,7 @@ void PostProcessingApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	copy_ = SyncLoadPostProcess("Copy.ppml", "copy");
+	copy_ = SyncLoadPostProcess("Copy.ppml", "Copy");
 	ascii_arts_ = MakeSharedPtr<AsciiArtsPostProcess>();
 	cartoon_ = MakeSharedPtr<CartoonPostProcess>();
 	tiling_ = MakeSharedPtr<TilingPostProcess>();

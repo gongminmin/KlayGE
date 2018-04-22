@@ -24,7 +24,7 @@ float4 TemporalAAPS(float2 tc0 : TEXCOORD0) : SV_Target
 		<pass name="p0">
 			<state name="depth_enable" value="false"/>
 			<state name="depth_write_mask" value="0"/>
-			
+
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="TemporalAAPS()"/>
 		</pass>

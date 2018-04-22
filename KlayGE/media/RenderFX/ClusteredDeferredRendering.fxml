@@ -13,20 +13,20 @@
 
 	<parameter type="float4" name="near_q_far"/>
 	<parameter type="uint2" name="width_height"/>
-	<parameter type="texture2D" name="depth_in_tex"/>
+	<parameter type="texture2D" name="ds_in_tex"/>
 	<parameter type="rw_texture2D" elem_type="float2" name="min_max_depth_rw_tex"/>
 	<parameter type="rw_texture2D" elem_type="float" name="linear_depth_rw_tex"/>
 
 	<shader type="compute_shader" version="5">
 		<![CDATA[
-groupshared float2 min_max_z_sh[BLOCK_SIZE];
+groupshared float2 min_max_depth_sh[BLOCK_SIZE];
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
 {
-	float2 min_max_z = float2(asfloat(0x7F7FFFFF), 0.0f);
+	float2 min_max_depth = float2(asfloat(0x7F7FFFFF), 0.0f);
 	
 	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -34,21 +34,21 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
 		{
 			uint2 coord = tile_start + uint2(tile_x, tile_y);
-			float depth = non_linear_depth_to_linear(depth_in_tex.Load(uint3(min(coord, width_height), 0)).x, near_q_far.x, near_q_far.y);
+			float depth = non_linear_depth_to_linear(ds_in_tex.Load(uint3(min(coord, width_height), 0)).x, near_q_far.x, near_q_far.y);
 			linear_depth_rw_tex[coord] = depth;
-			min_max_z = float2(min(min_max_z.x, depth), max(min_max_z.y, depth));
+			min_max_depth = float2(min(min_max_depth.x, depth), max(min_max_depth.y, depth));
 		}
 	}
 
-	min_max_z_sh[GI] = min_max_z;
+	min_max_depth_sh[GI] = min_max_depth;
 	GroupMemoryBarrierWithGroupSync();
 
 	for (uint offset = BLOCK_SIZE >> 1; offset > 32; offset >>= 1)
 	{
 		if (GI < offset)
 		{
-			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
-			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+			min_max_depth_sh[GI].x = min(min_max_depth_sh[GI].x, min_max_depth_sh[GI + offset].x);
+			min_max_depth_sh[GI].y = max(min_max_depth_sh[GI].y, min_max_depth_sh[GI + offset].y);
 		}
 		GroupMemoryBarrierWithGroupSync();
 	}
@@ -56,14 +56,14 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 	{
 		if (GI < offset)
 		{
-			min_max_z_sh[GI].x = min(min_max_z_sh[GI].x, min_max_z_sh[GI + offset].x);
-			min_max_z_sh[GI].y = max(min_max_z_sh[GI].y, min_max_z_sh[GI + offset].y);
+			min_max_depth_sh[GI].x = min(min_max_depth_sh[GI].x, min_max_depth_sh[GI + offset].x);
+			min_max_depth_sh[GI].y = max(min_max_depth_sh[GI].y, min_max_depth_sh[GI + offset].y);
 		}
 	}
 	
 	if (0 == GI)
 	{
-		min_max_depth_rw_tex[gid.xy] = min_max_z_sh[0];
+		min_max_depth_rw_tex[gid.xy] = min_max_depth_sh[0];
 	}
 }
 		]]>
@@ -583,15 +583,15 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 		{
 			float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
-			float4 mrt_0 = g_buffer_tex.Load(coord);
-			float4 mrt_1 = g_buffer_1_tex.Load(coord);
+			float4 rt0 = g_buffer_rt0_tex.Load(coord);
+			float4 rt1 = g_buffer_rt1_tex.Load(coord);
 			float3 view_dir = -normalize(texcoord_to_view(tc));
-			float3 normal = GetNormal(mrt_0);
-			float glossiness = GetGlossiness(mrt_0);
+			float3 normal = GetNormal(rt0);
+			float glossiness = GetGlossiness(rt0);
 			float shininess = Glossiness2Shininess(glossiness);
 			float3 pos_es = view_dir * (depth_tex.Load(coord).x / view_dir.z);
-			float3 c_diff = GetDiffuse(mrt_1);
-			float3 c_spec = GetSpecular(mrt_1);
+			float3 c_diff = GetDiffuse(rt1);
+			float3 c_spec = GetSpecular(rt1);
 
 			tile_id.z = CalcDepthSlice(pos_es.z);
 
@@ -686,7 +686,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 		}
 		else
 		{
-			shading = g_buffer_1_tex.Load(coord);
+			shading = g_buffer_rt1_tex.Load(coord);
 		}
 
 		shading_rw_tex[coord.xy] = shading;

@@ -18,8 +18,8 @@
 		<parameter type="int" name="max_samples"/>
 	</cbuffer>
 	
-	<parameter type="texture2D" name="g_buffer_0_tex"/>
-	<parameter type="texture2D" name="g_buffer_1_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
 	<parameter type="texture2D" name="front_side_depth_tex"/>
 	<parameter type="texture2D" name="front_side_tex"/>
 	<parameter type="texture2D" name="back_side_depth_tex"/>
@@ -179,9 +179,9 @@ void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 {
 	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(g_buffer_0_tex.Sample(ssr_linear_sampler, tc));
+	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(ssr_linear_sampler, tc));
 	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0.1f);
-	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(g_buffer_1_tex.Sample(ssr_linear_sampler, tc))).x;
+	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(g_buffer_rt1_tex.Sample(ssr_linear_sampler, tc))).x;
 	return float4(clr.xyz, saturate(clr.w * fresnel));
 }
 		]]>

@@ -34,7 +34,7 @@
 		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="g_buffer_tex"/>
+	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="opaque_shading_tex"/>
 
 	<parameter type="sampler" name="point_clamp_sampler">
@@ -106,7 +106,7 @@ void OceanGBufferVS(float2 pos : POSITION,
 
 void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise_grad : TEXCOORD1,
 					SS_TEXCOORD_TYPE ss_tc : TEXCOORD2,
-					out float4 mrt_0 : SV_Target0, out float4 mrt_1 : SV_Target1)
+					out float4 rt0 : SV_Target0, out float4 rt1 : SV_Target1)
 {
 	float2 screen_tc = DecodeSSTexcoord(ss_tc);
 
@@ -130,7 +130,7 @@ void OceanGBufferAlphaBlendMRTPS(float3 texcoord_depth : TEXCOORD0, float2 noise
 	float3 normal = normalize(mul(float3(gradient.x, 1, gradient.y), (float3x3)model_view));
 
 	StoreGBufferMRT(normal, glossiness_clr.x, waterbody_color, 0,
-		mrt_0, mrt_1);
+		rt0, rt1);
 }
 
 void OceanReflectionAlphaBlendVS(float2 pos : POSITION,
@@ -228,7 +228,7 @@ float4 OceanSpecialShadingAlphaBlendPS(float3 eye_dir : TEXCOORD0, float4 tex_co
 {
 	float2 tc = DecodeSSTexcoord(ss_tc);
 
-	float4 ndc = g_buffer_tex.Sample(point_sampler, tc);
+	float4 ndc = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float3 normal = GetNormal(ndc);
 
 	float3 normal_ws = mul(normal, (float3x3)inv_view);
