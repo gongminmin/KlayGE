@@ -34,7 +34,6 @@
 		<parameter type="float4x4" name="inv_view"/>
 	</cbuffer>
 
-	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="opaque_shading_tex"/>
 
 	<parameter type="sampler" name="point_clamp_sampler">

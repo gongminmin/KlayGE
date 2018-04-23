@@ -626,7 +626,7 @@ namespace KlayGE
 			*glossiness_clr_param_ = float2(MathLib::clamp(glossiness_, 1e-6f, 0.999f),
 				static_cast<float>(!!textures_[RenderMaterial::TS_Glossiness]));
 			*inv_mv_ep_ = view_to_decal;
-			*opaque_depth_tex_param_ = drl->DepthTex(drl->ActiveViewport());
+			*opaque_depth_tex_param_ = drl->ResolvedDepthTex(drl->ActiveViewport());
 			*g_buffer_rt0_tex_param_ = drl->GBufferRT0BackupTex(drl->ActiveViewport());
 			break;
 

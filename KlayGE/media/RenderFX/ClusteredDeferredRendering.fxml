@@ -5,6 +5,7 @@
 	<macro name="NUM_DEPTH_SLICES" value="4"/>
 	
 	<include name="DeferredRendering.fxml"/>
+	<include name="PostProcess.fxml"/>
 
 	<macro name="BLOCK_X" value="16"/>
 	<macro name="BLOCK_Y" value="16"/>
@@ -14,6 +15,7 @@
 	<parameter type="float4" name="near_q_far"/>
 	<parameter type="uint2" name="width_height"/>
 	<parameter type="texture2D" name="ds_in_tex"/>
+	<parameter type="texture2DMS" name="linear_depth_in_tex_ms"/>
 	<parameter type="rw_texture2D" elem_type="float2" name="min_max_depth_rw_tex"/>
 	<parameter type="rw_texture2D" elem_type="float" name="linear_depth_rw_tex"/>
 
@@ -27,6 +29,11 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 							uint GI : SV_GroupIndex)
 {
 	float2 min_max_depth = float2(asfloat(0x7F7FFFFF), 0.0f);
+
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	linear_depth_in_tex_ms.GetDimensions(width, height, samples);
+#endif
 	
 	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -34,9 +41,21 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
 		{
 			uint2 coord = tile_start + uint2(tile_x, tile_y);
-			float depth = non_linear_depth_to_linear(ds_in_tex.Load(uint3(min(coord, width_height), 0)).x, near_q_far.x, near_q_far.y);
+			uint2 input_coord = min(coord, width_height);
+#if MULTI_SAMPLE_INPUT
+			float pixel_min_depth = asfloat(0x7F7FFFFF);
+			for (uint i = 0; i < samples; ++ i)
+			{
+				float depth = linear_depth_in_tex_ms.Load(input_coord, i).x;
+				pixel_min_depth = min(pixel_min_depth, depth);
+				min_max_depth = float2(min(min_max_depth.x, depth), max(min_max_depth.y, depth));
+			}
+			linear_depth_rw_tex[coord] = pixel_min_depth;
+#else
+			float depth = non_linear_depth_to_linear(ds_in_tex.Load(uint3(input_coord, 0)).x, near_q_far.x, near_q_far.y);
 			linear_depth_rw_tex[coord] = depth;
 			min_max_depth = float2(min(min_max_depth.x, depth), max(min_max_depth.y, depth));
+#endif
 		}
 	}
 
@@ -74,6 +93,9 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 			<state name="compute_shader" value="DepthToTiledMinMaxCS()"/>
 		</pass>
 	</technique>
+	<technique name="DepthToTiledMinMaxMS" inherit="DepthToTiledMinMax">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
 
 	<shader>
 		<![CDATA[
@@ -83,7 +105,7 @@ void ClusteredDRLightingMaskVS(float4 pos : POSITION,
 	oPos = pos;
 }
 
-float4 ClusteredDRLightingMaskPS() : SV_Target
+float4 ClusteredDRLightingMaskPS(uint sample_index : SV_SampleIndex) : SV_Target
 {
 	return 1;
 }
@@ -113,6 +135,155 @@ float4 ClusteredDRLightingMaskPS() : SV_Target
 		</pass>
 	</technique>
 
+	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_ds_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_depth_tex_ms"/>
+
+	<shader>
+		<![CDATA[
+float4 MultiSampleMaskPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
+	
+	int2 coord = texcoord * int2(width, height);
+
+	float4 rt0_s0 = g_buffer_rt0_tex_ms.Load(coord, 0);
+	float4 rt1_s0 = g_buffer_rt1_tex_ms.Load(coord, 0);
+	float depth_s0 = g_buffer_ds_tex_ms.Load(coord, 0).x;
+
+	bool is_multi_sample = false;
+	for (uint i = 1; i < samples; ++ i)
+	{
+		float4 rt0_sn = g_buffer_rt0_tex_ms.Load(coord, i);
+		float4 rt1_sn = g_buffer_rt1_tex_ms.Load(coord, i);
+		float depth_sn = g_buffer_ds_tex_ms.Load(coord, i).x;
+
+		float4 rt0_diff = rt0_sn - rt0_s0;
+		float4 rt1_diff = rt1_sn - rt1_s0;
+		if ((abs(depth_sn - depth_s0) > 1e-3f)
+			|| (dot(rt0_diff, rt0_diff) > 1e-3f)
+			|| (dot(rt1_diff, rt1_diff) > 1e-3f))
+		{
+			is_multi_sample = true;
+			break;
+		}
+	}
+
+	return is_multi_sample;
+}
+		]]>
+	</shader>
+
+	<technique name="MultiSampleMask">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="MultiSampleMaskPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
+		out float4 out_rt0 : SV_Target0,
+		out float4 out_rt1 : SV_Target1,
+		out float out_depth : SV_Target2,
+		out float out_multi_sample_mark : SV_Target3)
+{
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);	
+	int2 coord = texcoord * int2(width, height);
+
+	float4 rt0_s0 = g_buffer_rt0_tex_ms.Load(coord, 0);
+	float4 rt1_s0 = g_buffer_rt1_tex_ms.Load(coord, 0);
+	float z_s0 = g_buffer_ds_tex_ms.Load(coord, 0).x;
+	
+	float min_z = z_s0;
+	uint min_index = 0;
+	bool is_multi_sample = false;
+	for (uint i = 1; i < samples; ++ i)
+	{
+		float4 rt0_sn = g_buffer_rt0_tex_ms.Load(coord, i);
+		float4 rt1_sn = g_buffer_rt1_tex_ms.Load(coord, i);
+		float z_sn = g_buffer_ds_tex_ms.Load(coord, i).x;
+		
+		if (z_sn < min_z)
+		{
+			min_z = z_sn;
+			min_index = i;
+		}
+		
+		float4 rt0_diff = rt0_sn - rt0_s0;
+		float4 rt1_diff = rt1_sn - rt1_s0;
+		if ((abs(z_sn - z_s0) > 1e-3f)
+			|| (dot(rt0_diff, rt0_diff) > 1e-3f)
+			|| (dot(rt1_diff, rt1_diff) > 1e-3f))
+		{
+			is_multi_sample = true;
+		}
+	}
+	
+	out_rt0 = g_buffer_rt0_tex_ms.Load(coord, min_index);
+	out_rt1 = g_buffer_rt1_tex_ms.Load(coord, min_index);
+	out_depth = non_linear_depth_to_linear(g_buffer_ds_tex_ms.Load(coord, min_index).x, near_q_far.x, near_q_far.y);
+	out_multi_sample_mark = is_multi_sample;
+}
+		]]>
+	</shader>
+
+	<technique name="ResolveGBuffers">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ResolveGBuffersPS()"/>
+		</pass>
+	</technique>
+
+	<shader>
+		<![CDATA[
+float ResolveMergedDepthPS(float2 texcoord : TEXCOORD0) : SV_Target
+{
+	uint width, height, samples;
+	g_buffer_ds_tex_ms.GetDimensions(width, height, samples);	
+	int2 coord = texcoord * int2(width, height);
+
+	float min_z = g_buffer_ds_tex_ms.Load(coord, 0).x;
+	for (uint i = 1; i < samples; ++ i)
+	{
+		float z = g_buffer_ds_tex_ms.Load(coord, i).x;		
+		if (z < min_z)
+		{
+			min_z = z;
+		}
+	}
+	
+	return min_z;
+}
+		]]>
+	</shader>
+
+	<technique name="ResolveMergedDepth">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ResolveMergedDepthPS()"/>
+		</pass>
+	</technique>
+
 	<cbuffer name="overlap_test">
 		<parameter type="float4" name="tile_scale"/>
 		<parameter type="float2" name="camera_proj_01"/>
@@ -133,8 +304,12 @@ float4 ClusteredDRLightingMaskPS() : SV_Target
 		<parameter type="uint" name="lights_type" array_size="12"/>
 	</cbuffer>
 	<parameter type="texture2D" name="lighting_mask_tex"/>
+	<parameter type="texture2DMS" name="lighting_mask_tex_ms"/>
 	<parameter type="texture2D" name="shading_in_tex"/>
+	<parameter type="texture2DMS" name="shading_in_tex_ms"/>
+	<parameter type="texture2D" name="multi_sample_mask_tex"/>
 	<parameter type="rw_texture2D" name="shading_rw_tex"/>
+	<parameter type="rw_texture2DArray" name="shading_rw_tex_array"/>
 
 	<parameter type="texture2DArray" elem_type="uint" name="lights_start_in_tex"/>
 	<parameter type="rw_texture2DArray" elem_type="uint" name="lights_start_rw_tex"/>
@@ -543,6 +718,146 @@ uint CalcDepthSlice(float depth)
 groupshared uint intersected_light_indices_sh[NUM_DEPTH_SLICES][LIGHT_BATCH / 2];
 groupshared	uint light_start_sh[NUM_DEPTH_SLICES][8];
 
+float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
+{
+	float4 shading;
+	[branch]
+#if MULTI_SAMPLE_INPUT
+	if (lighting_mask_tex_ms.Load(coord.xy, sample_index).x > 0)
+#else
+	if (lighting_mask_tex.Load(coord).x > 0)
+#endif
+	{
+		float2 tc = (coord.xy + 0.5f) * inv_width_height;
+
+#if MULTI_SAMPLE_INPUT
+		float4 rt0 = g_buffer_rt0_tex_ms.Load(coord.xy, sample_index);
+		float4 rt1 = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
+		float depth = g_buffer_depth_tex_ms.Load(coord.xy, sample_index).x;
+#else
+		float4 rt0 = g_buffer_rt0_tex.Load(coord);
+		float4 rt1 = g_buffer_rt1_tex.Load(coord);
+		float depth = depth_tex.Load(coord).x;
+#endif
+		float3 view_dir = -normalize(texcoord_to_view(tc));
+		float3 normal = GetNormal(rt0);
+		float glossiness = GetGlossiness(rt0);
+		float shininess = Glossiness2Shininess(glossiness);
+		float3 pos_es = view_dir * (depth / view_dir.z);
+		float3 c_diff = GetDiffuse(rt1);
+		float3 c_spec = GetSpecular(rt1);
+
+		tile_id.z = CalcDepthSlice(pos_es.z);
+
+		float spec_normalize = SpecularNormalizeFactor(shininess);
+
+		shading = float4(0, 0, 0, 1);
+
+		uint i = lights_type[0];
+		for (; i < lights_type[1]; ++ i)
+		{
+			float3 light_dir = lights_dir_es[i].xyz;
+			float n_dot_l = 0.5f + 0.5f * dot(light_dir, normal);
+			float3 halfway = normalize(light_dir + view_dir);
+			shading.rgb += max(c_diff * lights_attrib[i].x * n_dot_l, 0) * lights_color[i].rgb;
+		}
+		for (; i < lights_type[2]; ++ i)
+		{
+			shading.rgb += CalcClusteredDRShading(i, -1, lights_dir_es[i].xyz, normal, view_dir, -1,
+				c_diff, c_spec, spec_normalize, shininess, tc, 1);
+		}
+		for (; i < lights_type[3]; ++ i)
+		{
+			shading.rgb += CalcClusteredDRShading(i, int(lights_attrib[0].z), lights_dir_es[i].xyz, normal, view_dir, -1,
+				c_diff, c_spec, spec_normalize, shininess, tc, 1);
+		}
+
+		i = 0;
+		for (; i < light_start_sh[tile_id.z][0]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRPoint(li, -1,
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][1]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li].z),
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][2]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRSpot(li, -1,
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][3]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li].z),
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][4]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRSphereArea(li, -1,
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][5]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li].z),
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][6]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRTubeArea(li, -1,
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+		for (; i < light_start_sh[tile_id.z][7]; ++ i)
+		{
+			uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
+			shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li].z),
+				pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
+		}
+
+		[branch]
+		if (lights_type[0] == lights_type[1])
+		{
+#if USE_TYPED_UAV
+#if KLAYGE_TYPED_UAV_SUPPORT
+#if MULTI_SAMPLE_INPUT
+			shading += shading_rw_tex_array[uint3(coord.xy, sample_index)];
+#else
+			shading += shading_rw_tex[coord.xy];
+#endif		
+#endif
+#else
+#if MULTI_SAMPLE_INPUT
+			shading += shading_in_tex_ms.Load(coord.xy, sample_index);
+#else
+			shading += shading_in_tex.Load(coord);
+#endif
+#endif
+		}
+		else
+		{
+			shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
+		}
+	}
+	else
+	{
+#if MULTI_SAMPLE_INPUT
+		shading = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
+#else
+		shading = g_buffer_rt1_tex.Load(coord);
+#endif
+	}
+
+	return shading;
+}
+
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
@@ -573,123 +888,29 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	GroupMemoryBarrierWithGroupSync();
 
 	uint3 coord = uint3(gid.xy * uint2(BLOCK_X, BLOCK_Y) + gtid.xy, 0);
+	
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
+#endif
 
 	[branch]
 	if (all(coord.xy < width_height))
 	{
-		float4 shading;
+		float4 shading = ClusteredDRUnifiedSample(tile_id, coord, 0);
+#if MULTI_SAMPLE_INPUT
+		shading_rw_tex_array[uint3(coord.xy, 0)] = shading;
 		[branch]
-		if (lighting_mask_tex.Load(coord).x > 0)
+		if (multi_sample_mask_tex.Load(coord).x > 0.5f)
 		{
-			float2 tc = (coord.xy + 0.5f) * inv_width_height;
-
-			float4 rt0 = g_buffer_rt0_tex.Load(coord);
-			float4 rt1 = g_buffer_rt1_tex.Load(coord);
-			float3 view_dir = -normalize(texcoord_to_view(tc));
-			float3 normal = GetNormal(rt0);
-			float glossiness = GetGlossiness(rt0);
-			float shininess = Glossiness2Shininess(glossiness);
-			float3 pos_es = view_dir * (depth_tex.Load(coord).x / view_dir.z);
-			float3 c_diff = GetDiffuse(rt1);
-			float3 c_spec = GetSpecular(rt1);
-
-			tile_id.z = CalcDepthSlice(pos_es.z);
-
-			float spec_normalize = SpecularNormalizeFactor(shininess);
-
-			shading = float4(0, 0, 0, 1);
-
-			uint i = lights_type[0];
-			for (; i < lights_type[1]; ++ i)
+			for (uint i = 1; i < samples; ++ i)
 			{
-				float3 light_dir = lights_dir_es[i].xyz;
-				float n_dot_l = 0.5f + 0.5f * dot(light_dir, normal);
-				float3 halfway = normalize(light_dir + view_dir);
-				shading.rgb += max(c_diff * lights_attrib[i].x * n_dot_l, 0) * lights_color[i].rgb;
+				shading_rw_tex_array[uint3(coord.xy, i)] = ClusteredDRUnifiedSample(tile_id, coord, i);
 			}
-			for (; i < lights_type[2]; ++ i)
-			{
-				shading.rgb += CalcClusteredDRShading(i, -1, lights_dir_es[i].xyz, normal, view_dir, -1,
-					c_diff, c_spec, spec_normalize, shininess, tc, 1);
-			}
-			for (; i < lights_type[3]; ++ i)
-			{
-				shading.rgb += CalcClusteredDRShading(i, int(lights_attrib[0].z), lights_dir_es[i].xyz, normal, view_dir, -1,
-					c_diff, c_spec, spec_normalize, shininess, tc, 1);
-			}
-
-			i = 0;
-			for (; i < light_start_sh[tile_id.z][0]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRPoint(li, -1,
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][1]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRPoint(li, int(lights_attrib[li].z),
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][2]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRSpot(li, -1,
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][3]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRSpot(li, int(lights_attrib[li].z),
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][4]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRSphereArea(li, -1,
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][5]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRSphereArea(li, int(lights_attrib[li].z),
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][6]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRTubeArea(li, -1,
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-			for (; i < light_start_sh[tile_id.z][7]; ++ i)
-			{
-				uint li = (intersected_light_indices_sh[tile_id.z][i / 2] >> ((i & 1) * 16)) & 0xFFFF;
-				shading.rgb += CalcClusteredDRTubeArea(li, int(lights_attrib[li].z),
-					pos_es, normal, view_dir, c_diff, c_spec, spec_normalize, shininess, tc);
-			}
-
-			[branch]
-			if (lights_type[0] == lights_type[1])
-			{
-#if USE_TYPED_UAV
-#if KLAYGE_TYPED_UAV_SUPPORT
-				shading += shading_rw_tex[coord.xy];
-#endif
+		}
 #else
-				shading += shading_in_tex.Load(coord);
-#endif
-			}
-			else
-			{
-				shading += SkylightShading(glossiness, c_diff, c_spec, normal, view_dir);
-			}
-		}
-		else
-		{
-			shading = g_buffer_rt1_tex.Load(coord);
-		}
-
 		shading_rw_tex[coord.xy] = shading;
+#endif
 	}
 }
 		]]>
@@ -707,9 +928,15 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 			<state name="compute_shader" value="ClusteredDRUnifiedCS()"/>
 		</pass>
 	</technique>
+	<technique name="ClusteredDRUnifiedMS" inherit="ClusteredDRUnified">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
 
 	<technique name="ClusteredDRUnifiedNoTypedUAV" inherit="ClusteredDRUnified">
 		<macro name="USE_TYPED_UAV" value="0"/>
+	</technique>
+	<technique name="ClusteredDRUnifiedNoTypedUAVMS" inherit="ClusteredDRUnifiedNoTypedUAV">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 
@@ -729,18 +956,145 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 groupshared bool intersected_shadowing_lights_sh[MAX_NUM_SHADOWED_LIGHTS];
 groupshared float2 csm_tc_dd[BLOCK_Y][BLOCK_X];
 
+static const uint LT_Ambient = 0;
+static const uint LT_Directional = 1;
+static const uint LT_Point = 2;
+static const uint LT_Spot = 3;
+static const uint LT_SphereArea = 4;
+static const uint LT_TubeArea = 5;
+	
+bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_index,
+	out bool write_projective, out float4 projective_shadowing, out float4 shadowing)
+{
+#if MULTI_SAMPLE_INPUT
+	float lighting_mask = lighting_mask_tex_ms.Load(coord.xy * 2, sample_index).x;
+	float depth = g_buffer_depth_tex_ms.Load(coord.xy * 2, sample_index).x;
+#else
+	float lighting_mask = lighting_mask_tex.Load(coord * 2).x;
+	float depth = depth_tex.Load(coord * 2).x;
+#endif
+
+	float2 tc = (coord.xy + 0.5f) * inv_width_height;
+
+	float3 view_dir = normalize(texcoord_to_view(tc));
+	float3 pos_es = view_dir * (depth / view_dir.z);
+
+	uint sun_index = MAX_NUM_SHADOWED_LIGHTS;
+	[unroll]
+	for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
+	{
+		if (intersected_shadowing_lights_sh[i] && (LT_Directional == lights_type[i]))
+		{
+			sun_index = i;
+			break;
+		}
+	}
+	float4 sun_tc_ddx_ddy = 0;
+	if (sun_index != MAX_NUM_SHADOWED_LIGHTS)
+	{
+		float2 light_proj_pos = mul(float4(pos_es, 1), lights_view_proj[sun_index]).xy;
+		light_proj_pos.y *= -1;
+		light_proj_pos = light_proj_pos * 0.5f + 0.5f;
+
+		csm_tc_dd[gtid.y][gtid.x] = light_proj_pos;
+		GroupMemoryBarrierWithGroupSync();
+
+		uint2 location = gtid.xy;
+		if (0 == gtid.x)
+		{
+			location.x = 1;
+		}
+		else if (BLOCK_X - 1 == gtid.x)
+		{
+			location.x = BLOCK_X - 2;
+		}
+		if (0 == gtid.y)
+		{
+			location.y = 1;
+		}
+		else if (BLOCK_Y - 1 == gtid.y)
+		{
+			location.y = BLOCK_Y - 2;
+		}
+		uint2 location_right_down = location + 1;
+		sun_tc_ddx_ddy = float4(csm_tc_dd[location.y][location_right_down.x], csm_tc_dd[location_right_down.y][location.x])
+			- csm_tc_dd[location.y][location.x].xyxy;
+	}
+	
+	bool ret = false;
+	write_projective = false;
+	projective_shadowing = 1;
+	shadowing = 1;
+
+	[branch]
+	if (all(coord.xy < width_height) && (lighting_mask > 0))
+	{
+		for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
+		{
+			[branch]
+			if (intersected_shadowing_lights_sh[i])
+			{
+				float4 new_shadowing;
+				if (LT_Directional == lights_type[i])
+				{
+					float len = dot(float4(pos_es, 1), view_z_to_light_view);
+					new_shadowing = ESMSun(pos_es, csm_tc_dd[gtid.y][gtid.x], sun_tc_ddx_ddy, len,
+						esms_scale_factor[i]);
+				}
+				else if (LT_Spot == lights_type[i])
+				{
+					float4 light_proj_pos = mul(float4(pos_es, 1), lights_view_proj[i]);
+					light_proj_pos /= light_proj_pos.w;
+					light_proj_pos.y *= KLAYGE_FLIPPING;
+					light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
+					float len = length(lights_pos_es[i].xyz - pos_es);
+					new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
+						filtered_sms_2d_light_index[i], esms_scale_factor[i]);
+				}
+				else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
+				{
+					float3 dir = lights_pos_es[i].xyz - pos_es;
+					float len = length(dir);
+					float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
+					new_shadowing = ESMOmnidirectional(dir_ls, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
+						esms_scale_factor[i]);
+				}
+
+				if (0 == i)
+				{
+					shadowing.x = new_shadowing.x;
+				}
+				else if (1 == i)
+				{
+					shadowing.y = new_shadowing.y;
+				}
+				else if (2 == i)
+				{
+					shadowing.z = new_shadowing.z;
+				}
+				else if (3 == i)
+				{
+					shadowing.w = new_shadowing.w;
+				}
+				else if (4 == i)
+				{
+					projective_shadowing = new_shadowing;
+					write_projective = true;
+				}
+			}
+		}
+		
+		ret = true;
+	}
+	
+	return ret;
+}
+
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 							uint3 gtid : SV_GroupThreadID,
 							uint GI : SV_GroupIndex)
-{
-	const uint LT_Ambient = 0;
-	const uint LT_Directional = 1;
-	const uint LT_Point = 2;
-	const uint LT_Spot = 3;
-	const uint LT_SphereArea = 4;
-	const uint LT_TubeArea = 5;
-			
+{			
 	float4 planes[6];
 	float2 min_max = min_max_depth_tex.Load(gid * 2).xy;
 	CalcTileViewFrustum(gid.xy * 2, min_max, planes);
@@ -765,6 +1119,11 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 		intersected_shadowing_lights_sh[GI] = intersected;
 	}
 	GroupMemoryBarrierWithGroupSync();
+	
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	g_buffer_depth_tex_ms.GetDimensions(width, height, samples);
+#endif
 
 	uint2 tile_start = gid.xy * TILE_SIZE + gtid.xy;
 	for (uint tile_y = 0; tile_y < TILE_SIZE; tile_y += BLOCK_Y)
@@ -772,121 +1131,49 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 		for (uint tile_x = 0; tile_x < TILE_SIZE; tile_x += BLOCK_X)
 		{
 			uint3 coord = uint3(tile_start + uint2(tile_x, tile_y), 0);
-
-			float2 tc = (coord.xy + 0.5f) * inv_width_height;
-
-			float3 view_dir = normalize(texcoord_to_view(tc));
-			float3 pos_es = view_dir * (depth_tex.Load(coord * 2).x / view_dir.z);
-
-			uint sun_index = MAX_NUM_SHADOWED_LIGHTS;
-			[unroll]
-			for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
+			
+#if MULTI_SAMPLE_INPUT
+			bool has_write_projective = false;
+			float4 total_projective_shadowing = 0;
+			float4 total_shadowing = 0;
+			for (uint i = 0; i < samples; ++ i)
 			{
-				if (intersected_shadowing_lights_sh[i] && (LT_Directional == lights_type[i]))
+				bool write_projective;
+				float4 projective_shadowing;
+				float4 shadowing;
+				[branch]
+				if (ClusteredDRShadowingUnifiedSample(gtid, coord, i,
+					write_projective, projective_shadowing, shadowing))
 				{
-					sun_index = i;
-					break;
-				}
-			}
-			float4 sun_tc_ddx_ddy = 0;
-			if (sun_index != MAX_NUM_SHADOWED_LIGHTS)
-			{
-				float2 light_proj_pos = mul(float4(pos_es, 1), lights_view_proj[sun_index]).xy;
-				light_proj_pos.y *= -1;
-				light_proj_pos = light_proj_pos * 0.5f + 0.5f;
-
-				csm_tc_dd[gtid.y][gtid.x] = light_proj_pos;
-				GroupMemoryBarrierWithGroupSync();
-
-				uint2 location = gtid.xy;
-				if (0 == gtid.x)
-				{
-					location.x = 1;
-				}
-				else if (BLOCK_X - 1 == gtid.x)
-				{
-					location.x = BLOCK_X - 2;
-				}
-				if (0 == gtid.y)
-				{
-					location.y = 1;
-				}
-				else if (BLOCK_Y - 1 == gtid.y)
-				{
-					location.y = BLOCK_Y - 2;
-				}
-				uint2 location_right_down = location + 1;
-				sun_tc_ddx_ddy = float4(csm_tc_dd[location.y][location_right_down.x], csm_tc_dd[location_right_down.y][location.x])
-					- csm_tc_dd[location.y][location.x].xyxy;
-			}
-
-			[branch]
-			if (all(coord.xy < width_height) && (lighting_mask_tex.Load(coord * 2).x > 0))
-			{
-				bool write_projective = false;
-				float4 projective_shadowing = 1;
-				float4 shadowing = 1;
-				for (uint i = 0; i < MAX_NUM_SHADOWED_LIGHTS; ++ i)
-				{
-					[branch]
-					if (intersected_shadowing_lights_sh[i])
+					if (write_projective)
 					{
-						float4 new_shadowing;
-						if (LT_Directional == lights_type[i])
-						{
-							float len = dot(float4(pos_es, 1), view_z_to_light_view);
-							new_shadowing = ESMSun(pos_es, csm_tc_dd[gtid.y][gtid.x], sun_tc_ddx_ddy, len,
-								esms_scale_factor[i]);
-						}
-						else if (LT_Spot == lights_type[i])
-						{
-							float4 light_proj_pos = mul(float4(pos_es, 1), lights_view_proj[i]);
-							light_proj_pos /= light_proj_pos.w;
-							light_proj_pos.y *= KLAYGE_FLIPPING;
-							light_proj_pos.xy = light_proj_pos.xy * 0.5f + 0.5f;
-							float len = length(lights_pos_es[i].xyz - pos_es);
-							new_shadowing = ESMDirectional(pos_es, light_proj_pos.xy, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-								filtered_sms_2d_light_index[i], esms_scale_factor[i]);
-						}
-						else //if ((LT_Point == lights_type[i]) || (LT_SphereArea == lights_type[i]) || (LT_TubeArea == lights_type[i]))
-						{
-							float3 dir = lights_pos_es[i].xyz - pos_es;
-							float len = length(dir);
-							float3 dir_ls = mul(-dir, (float3x3)view_to_light_model);
-							new_shadowing = ESMOmnidirectional(dir_ls, len, lights_attrib[i].z > 0, lights_attrib[i].w > 0,
-								esms_scale_factor[i]);
-						}
-
-						if (0 == i)
-						{
-							shadowing.x = new_shadowing.x;
-						}
-						else if (1 == i)
-						{
-							shadowing.y = new_shadowing.y;
-						}
-						else if (2 == i)
-						{
-							shadowing.z = new_shadowing.z;
-						}
-						else if (3 == i)
-						{
-							shadowing.w = new_shadowing.w;
-						}
-						else if (4 == i)
-						{
-							projective_shadowing = new_shadowing;
-							write_projective = true;
-						}
+						total_projective_shadowing += projective_shadowing;
+						has_write_projective = true;
 					}
+					total_shadowing += shadowing;
 				}
+			}
 
+			if (has_write_projective)
+			{
+				projective_shadowing_rw_tex[coord.xy] = total_projective_shadowing / samples;
+			}
+			shadowing_rw_tex[coord.xy] = total_shadowing / samples;
+#else
+			bool write_projective;
+			float4 projective_shadowing;
+			float4 shadowing;
+			[branch]
+			if (ClusteredDRShadowingUnifiedSample(gtid, coord, 0,
+				write_projective, projective_shadowing, shadowing))
+			{
 				if (write_projective)
 				{
 					projective_shadowing_rw_tex[coord.xy] = projective_shadowing;
 				}
 				shadowing_rw_tex[coord.xy] = shadowing;
 			}
+#endif
 		}
 	}
 }
@@ -896,6 +1183,42 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 	<technique name="ClusteredDRShadowingUnified">
 		<pass name="p0">
 			<state name="compute_shader" value="ClusteredDRShadowingUnifiedCS()"/>
+		</pass>
+	</technique>
+	<technique name="ClusteredDRShadowingUnifiedMS" inherit="ClusteredDRShadowingUnified">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+
+
+	<parameter type="texture2DArray" name="src_2d_tex_array"/>
+
+	<shader>
+		<![CDATA[
+float4 ArrayToMultiSamplePS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target0
+{
+	uint width, height, elements;
+	src_2d_tex_array.GetDimensions(width, height, elements);
+	int2 coord = texcoord * int2(width, height);
+	
+	if (multi_sample_mask_tex.Load(int3(coord, 0)).x < 0.5f)
+	{
+		sample_index = 0;
+	}
+	
+	return src_2d_tex_array.Load(int4(coord, sample_index, 0));
+}
+		]]>
+	</shader>
+
+	<technique name="ArrayToMultiSample">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="false"/>
+
+			<state name="cull_mode" value="front"/>
+
+			<state name="vertex_shader" value="PostProcessVS()"/>
+			<state name="pixel_shader" value="ArrayToMultiSamplePS()"/>
 		</pass>
 	</technique>
 </effect>

@@ -19,12 +19,15 @@
 	</cbuffer>
 	
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
+	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
 	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
 	<parameter type="texture2D" name="front_side_depth_tex"/>
 	<parameter type="texture2D" name="front_side_tex"/>
 	<parameter type="texture2D" name="back_side_depth_tex"/>
 	<parameter type="texture2D" name="back_side_tex"/>
 	<parameter type="texture2D" name="foreground_depth_tex"/>
+	<parameter type="texture2DMS" name="foreground_depth_tex_ms"/>
 
 	<parameter type="sampler" name="ssr_linear_sampler">
 		<state name="filtering" value="min_mag_linear_mip_point"/>
@@ -176,12 +179,27 @@ void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 	oViewDir = mul(oPos, inv_proj).xyz;
 }
 
-float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
+float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1,
+	uint sample_index : SV_SampleIndex) : SV_Target
 {
-	float3 pos_es = view_dir * (foreground_depth_tex.Sample(ssr_point_sampler, tc).x / view_dir.z);
-	float3 normal = GetNormal(g_buffer_rt0_tex.Sample(ssr_linear_sampler, tc));
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc * int2(width, height);
+
+	float4 rt0 = g_buffer_rt0_tex_ms.Load(coord, sample_index);
+	float4 rt1 = g_buffer_rt1_tex_ms.Load(coord, sample_index);
+	float depth = foreground_depth_tex_ms.Load(coord, sample_index).x;
+#else
+	float4 rt0 = g_buffer_rt0_tex.Sample(ssr_point_sampler, tc);
+	float4 rt1 = g_buffer_rt1_tex.Sample(ssr_point_sampler, tc);
+	float depth = foreground_depth_tex.Sample(ssr_point_sampler, tc).x;
+#endif
+
+	float3 pos_es = view_dir * (depth / view_dir.z);
+	float3 normal = GetNormal(rt0);
 	float4 clr = CalcSSR(tc, normal, pos_es, pos_es, 1, 0.1f);
-	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(g_buffer_rt1_tex.Sample(ssr_linear_sampler, tc))).x;
+	float fresnel = FresnelTerm(-view_dir, normal, GetSpecular(rt1)).x;
 	return float4(clr.xyz, saturate(clr.w * fresnel));
 }
 		]]>
@@ -217,5 +235,8 @@ float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir
 			<state name="vertex_shader" value="ScreenSpaceReflectionPostProcessVS()"/>
 			<state name="pixel_shader" value="ScreenSpaceReflectionPostProcessPS()"/>
 		</pass>
+	</technique>
+	<technique name="ScreenSpaceReflectionPostProcessMS" inherit="ScreenSpaceReflectionPostProcess">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 </effect>

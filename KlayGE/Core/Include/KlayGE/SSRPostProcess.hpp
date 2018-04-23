@@ -41,7 +41,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SSRPostProcess : public PostProcess
 	{
 	public:
-		SSRPostProcess();
+		explicit SSRPostProcess(bool multi_sample);
 
 		void Apply();
 

@@ -419,10 +419,10 @@ uint32_t ScreenSpaceReflectionApp::DoUpdate(KlayGE::uint32_t pass)
 
 			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackCamera(back_camera);
 
-			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionTex(deferred_rendering_->PrevFrameShadingTex(1));
-			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionDepthTex(deferred_rendering_->PrevFrameDepthTex(1));
-			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionTex(deferred_rendering_->CurrFrameShadingTex(0));
-			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionDepthTex(deferred_rendering_->CurrFrameDepthTex(0));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionTex(deferred_rendering_->PrevFrameResolvedShadingTex(1));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->FrontReflectionDepthTex(deferred_rendering_->PrevFrameResolvedDepthTex(1));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionTex(deferred_rendering_->CurrFrameResolvedShadingTex(0));
+			checked_pointer_cast<ReflectMesh>(teapot_->GetRenderable())->BackReflectionDepthTex(deferred_rendering_->CurrFrameResolvedDepthTex(0));
 		}
 	}
 

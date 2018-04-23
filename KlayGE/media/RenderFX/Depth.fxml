@@ -20,6 +20,7 @@
 	<parameter type="float4x4" name="inv_proj"/>
 
 	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2DMS" name="src_tex_ms"/>
 
 	<shader>
 		<![CDATA[
@@ -33,9 +34,17 @@ void DepthToLinearVS(float4 pos : POSITION,
 	oViewDir = mul(pos, inv_proj).xyz;
 }
 
-float4 DepthToLinearPS(float2 tc : TEXCOORD0) : SV_Target
+float4 DepthToLinearPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-	return WriteAFloat(non_linear_depth_to_linear(src_tex.Sample(point_sampler, tc).r, near_q_far.x, near_q_far.y), near_q_far.w);
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	src_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc * int2(width, height);
+	float z = src_tex_ms.Load(coord, sample_index).r;
+#else
+	float z = src_tex.Sample(point_sampler, tc).r;
+#endif
+	return WriteAFloat(non_linear_depth_to_linear(z, near_q_far.x, near_q_far.y), near_q_far.w);
 }
 
 float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
@@ -56,6 +65,9 @@ float4 DepthToESMPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Tar
 			<state name="vertex_shader" value="DepthToLinearVS()"/>
 			<state name="pixel_shader" value="DepthToLinearPS()"/>
 		</pass>
+	</technique>
+	<technique name="DepthToLinearMS" inherit="DepthToLinear">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 	<technique name="DepthToESM">
@@ -115,10 +127,28 @@ void DepthToMaxPS(float2 tc : TEXCOORD0,
 		out float4 oColor : SV_Target0,
 		out float oDepth : SV_Depth)
 {
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	src_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc * int2(width, height);
+
+	float z00 = 0;
+	float z01 = 0;
+	float z10 = 0;
+	float z11 = 0;
+	for (uint i = 0; i < samples; ++ i)
+	{
+		z00 = max(z00, ReadAFloat(src_tex_ms.Load(coord + int2(0, 0), i)));
+		z01 = max(z01, ReadAFloat(src_tex_ms.Load(coord + int2(1, 0), i)));
+		z10 = max(z10, ReadAFloat(src_tex_ms.Load(coord + int2(0, 1), i)));
+		z11 = max(z11, ReadAFloat(src_tex_ms.Load(coord + int2(1, 1), i)));
+	}
+#else
 	float z00 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(-offset.x, -offset.y)));
 	float z01 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(+offset.x, -offset.y)));
 	float z10 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(-offset.x, +offset.y)));
 	float z11 = ReadAFloat(src_tex.Sample(bias_neg_1_point_sampler, tc * tc_scale + float2(+offset.x, +offset.y)));
+#endif
 
 	float max_depth = z00;
 	max_depth = max(max_depth, z01);
@@ -160,6 +190,9 @@ void DepthToMaxPS(float2 tc : TEXCOORD0,
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="DepthToMaxPS()"/>
 		</pass>
+	</technique>
+	<technique name="DepthToMaxMS" inherit="DepthToMax">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 

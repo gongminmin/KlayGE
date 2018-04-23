@@ -550,7 +550,7 @@ namespace
 			auto drl = Context::Instance().DeferredRenderingLayerInstance();
 			if (drl)
 			{
-				*(effect_->ParameterByName("depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("depth_tex")) = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 			}
 		}
 

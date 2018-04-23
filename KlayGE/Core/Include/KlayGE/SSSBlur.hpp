@@ -44,7 +44,7 @@ namespace KlayGE
 	class KLAYGE_CORE_API SSSBlurPP : public PostProcess
 	{
 	public:
-		SSSBlurPP();
+		explicit SSSBlurPP(bool multi_sample);
 
 		virtual void InputPin(uint32_t index, TexturePtr const & tex) override;
 		using PostProcess::InputPin;

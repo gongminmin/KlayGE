@@ -13,6 +13,18 @@
 		</output>
 		<shader effect="Depth.fxml" tech="DepthToLinear"/>
 	</post_processor>
+	<post_processor name="DepthToLinearMS">
+		<params>
+			<param name="near_q_far"/>
+		</params>
+		<input>
+			<pin name="src_tex_ms"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Depth.fxml" tech="DepthToLinearMS"/>
+	</post_processor>
 
 	<post_processor name="DepthToESM">
 		<params>
@@ -67,6 +79,19 @@
 			<pin name="output"/>
 		</output>
 		<shader effect="Depth.fxml" tech="DepthToMax"/>
+	</post_processor>
+	<post_processor name="DepthToMaxMS">
+		<params>
+			<param name="offset"/>
+			<param name="tc_scale"/>
+		</params>
+		<input>
+			<pin name="src_tex_ms"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Depth.fxml" tech="DepthToMaxMS"/>
 	</post_processor>
 
 	<post_processor name="DepthMipmapPoint">

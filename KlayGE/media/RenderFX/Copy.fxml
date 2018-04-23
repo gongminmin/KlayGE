@@ -15,12 +15,20 @@
 	</parameter>
 
 	<parameter type="texture2D" name="src_tex"/>
+	<parameter type="texture2DMS" name="src_tex_ms"/>
 
 	<shader>
 		<![CDATA[
-float4 CopyPS(float2 tc0 : TEXCOORD0) : SV_Target
+float4 CopyPS(float2 tc0 : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	src_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc0 * int2(width, height);
+	return src_tex_ms.Load(coord, sample_index);
+#else
 	return src_tex.Sample(point_sampler, tc0);
+#endif
 }
 
 float4 BilinearCopyPS(float2 tc0 : TEXCOORD0) : SV_Target
@@ -38,6 +46,9 @@ float4 BilinearCopyPS(float2 tc0 : TEXCOORD0) : SV_Target
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
+	</technique>
+	<technique name="CopyMS" inherit="Copy">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 	<technique name="BilinearCopy">

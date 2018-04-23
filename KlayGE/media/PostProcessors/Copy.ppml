@@ -10,6 +10,15 @@
 		</output>
 		<shader effect="Copy.fxml" tech="Copy"/>
 	</post_processor>
+	<post_processor name="CopyMS">
+		<input>
+			<pin name="src_tex_ms"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="Copy.fxml" tech="CopyMS"/>
+	</post_processor>
 
 	<post_processor name="BilinearCopy">
 		<input>

@@ -24,4 +24,27 @@
 		</output>
 		<shader effect="SSS.fxml" tech="Translucency"/>
 	</post_processor>
+	<post_processor name="TranslucencyMS">
+		<params>
+			<param name="light_view_proj"/>
+			<param name="light_view"/>
+			<param name="inv_proj"/>
+			<param name="light_pos_es"/>
+			<param name="light_color"/>
+			<param name="light_falloff"/>
+			<param name="strength"/>
+			<param name="far_plane"/>
+			<param name="sm_far_plane"/>
+		</params>
+		<input>
+			<pin name="g_buffer_rt0_tex_ms"/>
+			<pin name="g_buffer_rt1_tex_ms"/>
+			<pin name="depth_tex_ms"/>
+			<pin name="shadow_tex"/>
+		</input>
+		<output>
+			<pin name="output"/>
+		</output>
+		<shader effect="SSS.fxml" tech="TranslucencyMS"/>
+	</post_processor>
 </post_processors>

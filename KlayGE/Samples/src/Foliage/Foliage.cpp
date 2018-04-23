@@ -265,8 +265,8 @@ uint32_t FoliageApp::DoUpdate(uint32_t pass)
 		if (light_shaft_on_)
 		{
 			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
-			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(0));
-			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(0));
+			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingTex(0));
+			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthTex(0));
 			light_shaft_pp_->Apply();
 		}
 	}

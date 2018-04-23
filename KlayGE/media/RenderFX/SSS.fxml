@@ -13,19 +13,31 @@
 	</cbuffer>
 
 	<parameter type="texture2D" name="depth_tex"/>
+	<parameter type="texture2DMS" name="depth_tex_ms"/>
 
 	<shader>
 		<![CDATA[
-float4 GuassBlur(float2 texcoord)
+float4 GuassBlur(float2 texcoord, uint sample_index)
 {
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	src_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = texcoord * int2(width, height);
+#endif
+	
 	// Gaussian weights for the six samples around the current pixel:
 	//   -3 -2 -1 +1 +2 +3
 	float w[6] = { 0.006f,   0.061f,   0.242f,  0.242f,  0.061f, 0.006f };
 	float o[6] = {  -1.0f, -0.6667f, -0.3333f, 0.3333f, 0.6667f,   1.0f };
 
 	// Fetch color and linear depth for current pixel:
+#if MULTI_SAMPLE_INPUT
+	float4 color_m = src_tex_ms.Load(coord, sample_index);
+	float depth_m = ReadAFloat(depth_tex_ms.Load(coord, sample_index), far_plane);
+#else
 	float4 color_m = src_tex.Sample(point_sampler, texcoord);
 	float depth_m = ReadAFloat(depth_tex.Sample(point_sampler, texcoord), far_plane);
+#endif
 
 	// Accumulate center sample, multiplying it with its gaussian weight:
 	float4 color_blurred = color_m * 0.382f;
@@ -40,8 +52,14 @@ float4 GuassBlur(float2 texcoord)
 	{
 		// Fetch color and depth for current sample:
 		float2 offset = texcoord + o[i] * final_step;
+#if MULTI_SAMPLE_INPUT
+		int2 offset_coord = offset * int2(width, height);
+		float3 color = src_tex_ms.Load(offset_coord, sample_index).rgb;
+		float depth = ReadAFloat(depth_tex_ms.Load(offset_coord, sample_index), far_plane);
+#else
 		float3 color = src_tex.Sample(point_sampler, offset).rgb;
 		float depth = ReadAFloat(depth_tex.Sample(point_sampler, offset), far_plane);
+#endif
 
 		// If the difference in depth is huge, we lerp color back to "color_m":
 		float s = min(0.0125f * correction * abs(depth_m - depth), 1);
@@ -56,16 +74,17 @@ float4 GuassBlur(float2 texcoord)
 	return color_blurred;
 }
 
-float4 BlurRT0PS(float2 texcoord : TEXCOORD0) : SV_Target
+float4 BlurRT0PS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-	return GuassBlur(texcoord);
+	return GuassBlur(texcoord, sample_index);
 }
 
 void BlurMRTPS(float2 texcoord : TEXCOORD0,
+			uint sample_index : SV_SampleIndex,
 			out float4 oRT0 : SV_Target0,
 			out float4 oRT1 : SV_Target1)
 {
-	oRT0 = oRT1 = GuassBlur(texcoord);
+	oRT0 = oRT1 = GuassBlur(texcoord, sample_index);
 }
 		]]>
 	</shader>
@@ -78,6 +97,9 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="front_stencil_read_mask" value="32"/>
 			<state name="front_stencil_write_mask" value="0"/>
 		</pass>
+	</technique>
+	<technique name="SSSCopyMS" inherit="SSSCopy">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 	
 	<technique name="BlurX">
@@ -94,6 +116,9 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="vertex_shader" value="PostProcessVS()"/>
 			<state name="pixel_shader" value="BlurRT0PS()"/>
 		</pass>
+	</technique>
+	<technique name="BlurXMS" inherit="BlurX">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 	<technique name="BlurY1">
@@ -122,15 +147,26 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="pixel_shader" value="BlurMRTPS()"/>
 		</pass>
 	</technique>
+	<technique name="BlurY1MS" inherit="BlurY1">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+	
 	<technique name="BlurY2" inherit="BlurY1">
 		<pass name="p1">
 			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
 		</pass>
 	</technique>
+	<technique name="BlurY2MS" inherit="BlurY2">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+	
 	<technique name="BlurY3" inherit="BlurY1">
 		<pass name="p1">
 			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
 		</pass>
+	</technique>
+	<technique name="BlurY3MS" inherit="BlurY3">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 	<technique name="Accum1">
@@ -157,15 +193,26 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 			<state name="pixel_shader" value="CopyPS()"/>
 		</pass>
 	</technique>
+	<technique name="Accum1MS" inherit="Accum1">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+	
 	<technique name="Accum2" inherit="Accum1">
 		<pass name="p1">
 			<state name="blend_factor" r="0.34" g="0.1864" b="0" a="1"/>
 		</pass>
 	</technique>
+	<technique name="Accum2MS" inherit="Accum2">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
+	</technique>
+	
 	<technique name="Accum3" inherit="Accum1">
 		<pass name="p1">
 			<state name="blend_factor" r="0.46" g="0" b="0.0402" a="1"/>
 		</pass>
+	</technique>
+	<technique name="Accum3MS" inherit="Accum3">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 
 
@@ -183,6 +230,8 @@ void BlurMRTPS(float2 texcoord : TEXCOORD0,
 	<parameter type="texture2D" name="shadow_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt0_tex"/>
 	<parameter type="texture2D" name="g_buffer_rt1_tex"/>
+	<parameter type="texture2DMS" name="g_buffer_rt0_tex_ms"/>
+	<parameter type="texture2DMS" name="g_buffer_rt1_tex_ms"/>
 	
 	<shader>
 		<![CDATA[
@@ -207,12 +256,23 @@ void TranslucencyVS(float4 pos : POSITION,
 	oViewDir = mul(oPos, inv_proj).xyz;
 }
 
-float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target0
+float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, uint sample_index : SV_SampleIndex) : SV_Target0
 {
+#if MULTI_SAMPLE_INPUT
+	uint width, height, samples;
+	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
+	int2 coord = tc * int2(width, height);
+
+	float4 rt0 = g_buffer_rt0_tex_ms.Load(coord, sample_index);
+	float4 rt1 = g_buffer_rt1_tex_ms.Load(coord, sample_index);
+	float depth = ReadAFloat(depth_tex_ms.Load(coord, sample_index), far_plane);
+#else
 	float4 rt0 = g_buffer_rt0_tex.Sample(point_sampler, tc);
 	float4 rt1 = g_buffer_rt1_tex.Sample(point_sampler, tc);
+	float depth = ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane);
+#endif
 
-	float3 pos_es = view_dir * (ReadAFloat(depth_tex.Sample(point_sampler, tc), far_plane) / view_dir.z);
+	float3 pos_es = view_dir * (depth / view_dir.z);
 	float4 light_vp_pos = mul(float4(pos_es, 1), light_view_proj);
 	float4 light_view_pos = mul(float4(pos_es, 1), light_view);
 	float3 normal = GetNormal(rt0);
@@ -253,5 +313,8 @@ float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_T
 			<state name="vertex_shader" value="TranslucencyVS()"/>
 			<state name="pixel_shader" value="TranslucencyPS()"/>
 		</pass>
+	</technique>
+	<technique name="TranslucencyMS" inherit="Translucency">
+		<macro name="MULTI_SAMPLE_INPUT" value="1"/>
 	</technique>
 </effect>

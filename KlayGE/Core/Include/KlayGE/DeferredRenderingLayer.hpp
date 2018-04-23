@@ -70,14 +70,20 @@ namespace KlayGE
 		uint32_t attrib;
 
 		FrameBufferPtr frame_buffer;
+		uint32_t sample_count = 1;
+		uint32_t sample_quality = 0;
 
 		std::array<bool, PTB_None> g_buffer_enables;
 
 		FrameBufferPtr g_buffer_fb;
+		FrameBufferPtr g_buffer_resolved_fb;
 		TexturePtr g_buffer_rt0_tex;
 		TexturePtr g_buffer_rt1_tex;
 		TexturePtr g_buffer_ds_tex;
 		TexturePtr g_buffer_depth_tex;
+		TexturePtr g_buffer_resolved_rt0_tex;
+		TexturePtr g_buffer_resolved_rt1_tex;
+		TexturePtr g_buffer_resolved_depth_tex;
 		TexturePtr g_buffer_rt0_backup_tex;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		std::vector<TexturePtr> g_buffer_min_max_depth_texs;
@@ -109,6 +115,9 @@ namespace KlayGE
 		std::array<TexturePtr, 2> merged_shading_texs;
 		std::array<FrameBufferPtr, 2> merged_depth_fbs;
 		std::array<TexturePtr, 2> merged_depth_texs;
+		std::array<TexturePtr, 2> merged_shading_resolved_texs;
+		std::array<FrameBufferPtr, 2> merged_depth_resolved_fbs;
+		std::array<TexturePtr, 2> merged_depth_resolved_texs;
 		uint32_t curr_merged_buffer_index;
 
 		TexturePtr small_ssvo_tex;
@@ -130,9 +139,14 @@ namespace KlayGE
 		TexturePtr light_index_tex;
 
 		TexturePtr temp_shading_tex;
+		FrameBufferPtr temp_shading_fb;
+
+		TexturePtr temp_shading_tex_array;
 
 		TexturePtr lighting_mask_tex;
 		FrameBufferPtr lighting_mask_fb;
+
+		TexturePtr multi_sample_mask_tex;
 
 		TexturePtr lights_start_tex;
 		TexturePtr intersected_light_indices_tex;
@@ -199,6 +213,7 @@ namespace KlayGE
 		void AddDecal(RenderDecalPtr const & decal);
 
 		void SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib);
+		void SetupViewport(uint32_t index, FrameBufferPtr const & fb, uint32_t attrib, uint32_t sample_count, uint32_t sample_quality);
 		void EnableViewport(uint32_t index, bool enable);
 		uint32_t Update(uint32_t pass);
 
@@ -223,17 +238,33 @@ namespace KlayGE
 		{
 			return viewports_[vp].merged_shading_texs[viewports_[vp].curr_merged_buffer_index];
 		}
+		TexturePtr const & CurrFrameResolvedShadingTex(uint32_t vp) const
+		{
+			return viewports_[vp].merged_shading_resolved_texs[viewports_[vp].curr_merged_buffer_index];
+		}
 		TexturePtr const & CurrFrameDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_texs[viewports_[vp].curr_merged_buffer_index];
+		}
+		TexturePtr const & CurrFrameResolvedDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_resolved_texs[viewports_[vp].curr_merged_buffer_index];
 		}
 		TexturePtr const & PrevFrameShadingTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_shading_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
+		TexturePtr const & PrevFrameResolvedShadingTex(uint32_t vp) const
+		{
+			return viewports_[vp].merged_shading_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
+		}
 		TexturePtr const & PrevFrameDepthTex(uint32_t vp) const
 		{
 			return viewports_[vp].merged_depth_texs[!viewports_[vp].curr_merged_buffer_index];
+		}
+		TexturePtr const & PrevFrameResolvedDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].merged_depth_resolved_texs[!viewports_[vp].curr_merged_buffer_index];
 		}
 
 		TexturePtr const & SmallSSVOTex(uint32_t vp) const
@@ -253,6 +284,18 @@ namespace KlayGE
 		{
 			return viewports_[vp].g_buffer_depth_tex;
 		}
+		TexturePtr const & GBufferResolvedRT0Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt0_tex;
+		}
+		TexturePtr const & GBufferResolvedRT1Tex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_rt1_tex;
+		}
+		TexturePtr const & ResolvedDepthTex(uint32_t vp) const
+		{
+			return viewports_[vp].g_buffer_resolved_depth_tex;
+		}
 		TexturePtr const & GBufferRT0BackupTex(uint32_t vp) const
 		{
 			return viewports_[vp].g_buffer_rt0_backup_tex;
@@ -266,6 +309,15 @@ namespace KlayGE
 		uint32_t ActiveViewport() const
 		{
 			return active_viewport_;
+		}
+
+		uint32_t ViewportSampleCount(uint32_t vp) const
+		{
+			return viewports_[vp].sample_count;
+		}
+		uint32_t ViewportSampleQuality(uint32_t vp) const
+		{
+			return viewports_[vp].sample_quality;
 		}
 
 		void DisplayIllum(int illum);
@@ -432,13 +484,13 @@ namespace KlayGE
 		PostProcessPtr ssvo_pp_;
 		PostProcessPtr ssvo_blur_pp_;
 
-		PostProcessPtr sss_blur_pp_;
+		PostProcessPtr sss_blur_pps_[2];
 		bool sss_enabled_;
 
-		PostProcessPtr translucency_pp_;
+		PostProcessPtr translucency_pps_[2];
 		bool translucency_enabled_;
 
-		PostProcessPtr ssr_pp_;
+		PostProcessPtr ssr_pps_[2];
 		bool ssr_enabled_;
 
 		PostProcessPtr taa_pp_;
@@ -467,8 +519,8 @@ namespace KlayGE
 		std::array<std::array<RenderTechnique*, 5>, LightSource::LT_NumLightTypes> technique_shadows_;
 		RenderTechnique* technique_no_lighting_;
 		RenderTechnique* technique_shading_;
-		RenderTechnique* technique_merge_shading_;
-		RenderTechnique* technique_merge_depth_;
+		RenderTechnique* technique_merge_shading_[2];
+		RenderTechnique* technique_merge_depth_[2];
 		RenderTechnique* technique_copy_shading_depth_;
 		RenderTechnique* technique_copy_depth_;
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -490,12 +542,15 @@ namespace KlayGE
 		RenderTechnique* technique_lidr_tube_area_shadow_;
 		RenderTechnique* technique_lidr_tube_area_no_shadow_;
 
-		RenderTechnique* technique_cldr_shadowing_unified_;
+		RenderTechnique* technique_cldr_shadowing_unified_[2];
 		RenderTechnique* technique_cldr_light_intersection_unified_;
-		RenderTechnique* technique_cldr_unified_;
+		RenderTechnique* technique_cldr_unified_[2];
 
-		RenderTechnique* technique_depth_to_tiled_min_max_;
+		RenderTechnique* technique_depth_to_tiled_min_max_[2];
 		RenderTechnique* technique_cldr_lighting_mask_;
+		RenderTechnique* technique_resolve_g_buffers_;
+		RenderTechnique* technique_resolve_merged_depth_;
+		RenderTechnique* technique_array_to_multiSample_;
 #endif
 		static uint32_t const MAX_NUM_SHADOWED_LIGHTS = 4;
 		static uint32_t const MAX_NUM_SHADOWED_SPOT_LIGHTS = 4;
@@ -517,13 +572,15 @@ namespace KlayGE
 		PostProcessPtr sm_filter_pp_;
 		PostProcessPtr csm_filter_pp_;
 		PostProcessPtr depth_to_esm_pp_;
-		PostProcessPtr depth_to_linear_pp_;
+		PostProcessPtr depth_to_linear_pps_[2];
 		PostProcessPtr depth_mipmap_pp_;
 
 		RenderEffectParameter* g_buffer_rt0_tex_param_;
 		RenderEffectParameter* g_buffer_rt1_tex_param_;
 		RenderEffectParameter* depth_tex_param_;
+		RenderEffectParameter* depth_tex_ms_param_;
 		RenderEffectParameter* shading_tex_param_;
+		RenderEffectParameter* shading_tex_ms_param_;
 		RenderEffectParameter* light_attrib_param_;
 		RenderEffectParameter* light_radius_extend_param_;
 		RenderEffectParameter* light_color_param_;
@@ -551,10 +608,16 @@ namespace KlayGE
 		RenderEffectParameter* num_cascades_param_;
 		RenderEffectParameter* view_z_to_light_view_param_;
 		std::array<RenderEffectParameter*, CascadedShadowLayer::MAX_NUM_CASCADES> filtered_csm_texs_param_;
-		PostProcessPtr depth_to_max_pp_;
+		PostProcessPtr depth_to_max_pps_[2];
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
 		RenderEffectParameter* lighting_tex_param_;
 #elif DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
+		RenderEffectParameter* g_buffer_rt0_tex_ms_param_;
+		RenderEffectParameter* g_buffer_rt1_tex_ms_param_;
+		RenderEffectParameter* g_buffer_ds_tex_ms_param_;
+		RenderEffectParameter* g_buffer_depth_tex_ms_param_;
+		RenderEffectParameter* src_2d_tex_array_param_;
+
 		RenderEffectParameter* min_max_depth_tex_param_;
 		RenderEffectParameter* lights_color_param_;
 		RenderEffectParameter* lights_pos_es_param_;
@@ -579,14 +642,19 @@ namespace KlayGE
 		RenderEffectParameter* near_q_far_param_;
 		RenderEffectParameter* width_height_param_;
 		RenderEffectParameter* depth_to_tiled_ds_in_tex_param_;
+		RenderEffectParameter* depth_to_tiled_linear_depth_in_tex_ms_param_;
 		RenderEffectParameter* depth_to_tiled_min_max_depth_rw_tex_param_;
 		RenderEffectParameter* linear_depth_rw_tex_param_;
 		RenderEffectParameter* upper_left_param_;
 		RenderEffectParameter* x_dir_param_;
 		RenderEffectParameter* y_dir_param_;
 		RenderEffectParameter* lighting_mask_tex_param_;
+		RenderEffectParameter* lighting_mask_tex_ms_param_;
+		RenderEffectParameter* multi_sample_mask_tex_param_;
 		RenderEffectParameter* shading_in_tex_param_;
+		RenderEffectParameter* shading_in_tex_ms_param_;
 		RenderEffectParameter* shading_rw_tex_param_;
+		RenderEffectParameter* shading_rw_tex_array_param_;
 		RenderEffectParameter* lights_type_param_;
 		RenderEffectParameter* lights_start_in_tex_param_;
 		RenderEffectParameter* lights_start_rw_tex_param_;
@@ -594,7 +662,7 @@ namespace KlayGE
 		RenderEffectParameter* intersected_light_indices_rw_tex_param_;
 		RenderEffectParameter* depth_slices_param_;
 		RenderEffectParameter* depth_slices_shading_param_;
-		PostProcessPtr copy_pp_;
+		PostProcessPtr copy_pps_[2];
 #endif
 
 		RenderEffectParameter* skylight_diff_spec_mip_param_;

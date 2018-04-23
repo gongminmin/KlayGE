@@ -38,15 +38,22 @@
 
 namespace KlayGE
 {
-	SSRPostProcess::SSRPostProcess()
+	SSRPostProcess::SSRPostProcess(bool multi_sample)
 			: PostProcess(L"ScreenSpaceReflection", false,
 				{ "min_samples", "max_samples" },
-				{ "g_buffer_rt0_tex", "g_buffer_rt1_tex", "front_side_depth_tex", "front_side_tex", "foreground_depth_tex" },
+				{
+					multi_sample ? "g_buffer_rt0_tex_ms" : "g_buffer_rt0_tex",
+					multi_sample ? "g_buffer_rt1_tex_ms" : "g_buffer_rt1_tex",
+					"front_side_depth_tex",
+					"front_side_tex",
+					multi_sample ? "foreground_depth_tex_ms" : "foreground_depth_tex"
+				},
 				{ "output" },
 				RenderEffectPtr(), nullptr)
 	{
 		RenderEffectPtr effect = SyncLoadRenderEffect("SSR.fxml");
-		this->Technique(effect, effect->TechniqueByName("ScreenSpaceReflectionPostProcess"));
+		this->Technique(effect,
+			effect->TechniqueByName(multi_sample ? "ScreenSpaceReflectionPostProcessMS" : "ScreenSpaceReflectionPostProcess"));
 
 		if (technique_ && technique_->Validate())
 		{

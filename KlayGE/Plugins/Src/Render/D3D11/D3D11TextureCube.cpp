@@ -106,16 +106,31 @@ namespace KlayGE
 
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
+			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
+			if ((sample_count_ != 1) || IsDepthFormat(format_))
+			{
+				BOOST_ASSERT(other.SampleCount() == sample_count_);
+				BOOST_ASSERT(dst_x_offset == 0);
+				BOOST_ASSERT(dst_y_offset == 0);
+
+				src_box_ptr = nullptr;
+			}
+			else
+			{
+				src_box.left = src_x_offset;
+				src_box.top = src_y_offset;
+				src_box.front = 0;
+				src_box.right = src_x_offset + src_width;
+				src_box.bottom = src_y_offset + src_height;
+				src_box.back = 1;
+
+				src_box_ptr = &src_box;
+			}
 
 			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(), D3D11CalcSubresource(dst_level, dst_array_index, target.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()), &src_box);
+				dst_x_offset, dst_y_offset, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index, this->NumMipMaps()),
+				src_box_ptr);
 		}
 		else
 		{
@@ -134,16 +149,33 @@ namespace KlayGE
 
 		if ((src_width == dst_width) && (src_height == dst_height) && (this->Format() == target.Format()))
 		{
+			D3D11_BOX* src_box_ptr;
 			D3D11_BOX src_box;
-			src_box.left = src_x_offset;
-			src_box.top = src_y_offset;
-			src_box.front = 0;
-			src_box.right = src_x_offset + src_width;
-			src_box.bottom = src_y_offset + src_height;
-			src_box.back = 1;
+			if ((sample_count_ != 1) || IsDepthFormat(format_))
+			{
+				BOOST_ASSERT(other.SampleCount() == sample_count_);
+				BOOST_ASSERT(dst_x_offset == 0);
+				BOOST_ASSERT(dst_y_offset == 0);
 
-			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(), D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - CF_Positive_X, target.NumMipMaps()),
-				dst_x_offset, dst_y_offset, 0, this->D3DResource(), D3D11CalcSubresource(src_level, src_array_index * 6 + src_face - CF_Positive_X, this->NumMipMaps()), &src_box);
+				src_box_ptr = nullptr;
+			}
+			else
+			{
+				src_box.left = src_x_offset;
+				src_box.top = src_y_offset;
+				src_box.front = 0;
+				src_box.right = src_x_offset + src_width;
+				src_box.bottom = src_y_offset + src_height;
+				src_box.back = 1;
+
+				src_box_ptr = &src_box;
+			}
+
+			d3d_imm_ctx_->CopySubresourceRegion(other.D3DResource(),
+				D3D11CalcSubresource(dst_level, dst_array_index * 6 + dst_face - CF_Positive_X, target.NumMipMaps()),
+				dst_x_offset, dst_y_offset, 0, this->D3DResource(),
+				D3D11CalcSubresource(src_level, src_array_index * 6 + src_face - CF_Positive_X, this->NumMipMaps()),
+				src_box_ptr);
 		}
 		else
 		{

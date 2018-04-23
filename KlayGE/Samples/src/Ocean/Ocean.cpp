@@ -136,7 +136,7 @@ namespace
 				*height_map_tess_enabled_param_ = static_cast<int32_t>(0);
 				*metalness_clr_param_ = float2(1, 0);
 				*glossiness_clr_param_ = float2(0.5f, 0);
-				*opaque_depth_tex_param_ = drl->CurrFrameDepthTex(drl->ActiveViewport());
+				*opaque_depth_tex_param_ = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueReflection:
@@ -146,7 +146,7 @@ namespace
 				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
-				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -161,8 +161,8 @@ namespace
 					*(effect_->ParameterByName("view")) = camera.ViewMatrix();
 					*(effect_->ParameterByName("inv_view")) = camera.InverseViewMatrix();
 				}
-				*(effect_->ParameterByName("front_side_depth_tex")) = drl->CurrFrameDepthTex(drl->ActiveViewport());
-				*(effect_->ParameterByName("front_side_tex")) = drl->CurrFrameShadingTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("front_side_depth_tex")) = drl->CurrFrameResolvedDepthTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("front_side_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
 				break;
 
 			case PT_OpaqueSpecialShading:
@@ -172,8 +172,8 @@ namespace
 				*albedo_map_enabled_param_ = static_cast<int32_t>(0);
 				*emissive_tex_param_ = TexturePtr();
 				*emissive_clr_param_ = float4(0, 0, 0, 0);
-				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameShadingTex(drl->ActiveViewport());
-				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferRT0Tex(drl->ActiveViewport());
+				*(effect_->ParameterByName("opaque_shading_tex")) = drl->CurrFrameResolvedShadingTex(drl->ActiveViewport());
+				*(effect_->ParameterByName("g_buffer_rt0_tex")) = drl->GBufferResolvedRT0Tex(drl->ActiveViewport());
 				{
 					App3DFramework const & app = Context::Instance().AppInstance();
 					Camera const & camera = app.ActiveCamera();
@@ -1205,8 +1205,8 @@ uint32_t OceanApp::DoUpdate(uint32_t pass)
 		if (light_shaft_on_)
 		{
 			light_shaft_pp_->SetParam(0, -sun_light_->Direction() * 10000.0f + this->ActiveCamera().EyePos());
-			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameShadingTex(deferred_rendering_->ActiveViewport()));
-			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameDepthTex(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(0, deferred_rendering_->PrevFrameResolvedShadingTex(deferred_rendering_->ActiveViewport()));
+			light_shaft_pp_->InputPin(1, deferred_rendering_->PrevFrameResolvedDepthTex(deferred_rendering_->ActiveViewport()));
 			light_shaft_pp_->Apply();
 		}
 	}
