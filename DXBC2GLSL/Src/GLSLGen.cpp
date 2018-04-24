@@ -195,6 +195,7 @@ uint32_t GLSLGen::DefaultRules(GLSLVersion version)
 		}
 		if (version >= GSV_450)
 		{
+			rules |= GSR_ExplicitMultiSample;
 		}
 		if (version >= GSV_460)
 		{
@@ -1066,7 +1067,14 @@ void GLSLGen::ToCopyToInterShaderInputRegisters(std::ostream& out) const
 						break;
 
 					case SN_SAMPLE_INDEX:
-						out << "gl_SampleID";
+						if (glsl_rules_ & GSR_ExplicitMultiSample)
+						{
+							out << "gl_SampleID";
+						}
+						else
+						{
+							out << "0";
+						}
 						need_comps = false;
 						break;
 
@@ -3903,7 +3911,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 						break;
 
 					case SRD_TEXTURE2DMS:
-						//dest.x=float(textureSize(src0,src1).x);
+						//dest.x=float(textureSize(src0).x);
 						this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
 						this->ToSingleComponentSelector(out, *insn.ops[0], 0);
 						out << " = ";
@@ -3920,7 +3928,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 							out << ")";
 						}
 						out << ";\n";
-						//dest.y=float(textureSize(src0,src1).y);
+						//dest.y=float(textureSize(src0).y);
 						this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
 						this->ToSingleComponentSelector(out, *insn.ops[0], 1);
 						out << " = ";
@@ -4188,7 +4196,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 						//but according to assemble instructions,parameters should be width,height,samples,elements
 						//-------------------------------------------------------------------------------------------
 					case SRD_TEXTURE2DMSARRAY:
-						//dest.x=float(textureSize(src0,src1).x);
+						//dest.x=float(textureSize(src0).x);
 						this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
 						this->ToSingleComponentSelector(out, *insn.ops[0], 0);
 						out << " = ";
@@ -4205,7 +4213,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 							out << ")";
 						}
 						out << ";\n";
-						//dest.y=float(textureSize(src0,src1).y);
+						//dest.y=float(textureSize(src0).y);
 						this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
 						this->ToSingleComponentSelector(out, *insn.ops[0], 1);
 						out << " = ";
@@ -4222,7 +4230,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 							out << ")";
 						}
 						out << ";\n";
-						//dest.z=float(textureSize(src0,src1).z);
+						//dest.z=float(textureSize(src0).z);
 						this->ToOperands(out, *insn.ops[0], oot | (oot << 8), false);
 						this->ToSingleComponentSelector(out, *insn.ops[0], 2);
 						out << " = textureSize(";
@@ -4247,8 +4255,36 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		break;
 
 	case SO_SAMPLE_INFO:
-		//dest.mask=?
-		BOOST_ASSERT_MSG(false, "for sampleinfo,there's no corresponding instruction in glsl");
+		//dest.mask=uint(textureSamples(src0));
+		for (auto const & tex : textures_)
+		{
+			if (tex.tex_index == insn.ops[0]->indices[0].disp)
+			{
+				std::string s;
+				if (!tex.samplers.empty())
+				{
+					DXBCInputBindDesc const & desc = this->GetResourceDesc(SIT_SAMPLER, static_cast<uint32_t>(tex.samplers[0].index));
+					s = std::string("_") + desc.name;
+				}
+				this->ToOperands(out, *insn.ops[0], oot | (oot << 8));
+				out << " = ";
+				if (glsl_rules_ & GSR_ExplicitMultiSample)
+				{
+					out << "uint(textureSamples(";
+					this->ToOperands(out, *insn.ops[1], oit, false);
+					out << s;
+					out << "))";
+				}
+				else
+				{
+					BOOST_ASSERT_MSG(false, "for sampleinfo, there's no corresponding instruction in glsl 4.5-");
+					out << "1";
+				}
+				out << ";";
+
+				break;
+			}
+		}
 		break;
 
 	case SO_BUFINFO:
@@ -4256,7 +4292,7 @@ void GLSLGen::ToInstruction(std::ostream& out, ShaderInstruction const & insn) c
 		{
 			for (auto const & tex : textures_)
 			{
-				if (tex.tex_index == insn.ops[2]->indices[0].disp)
+				if (tex.tex_index == insn.ops[0]->indices[0].disp)
 				{
 					std::string s;
 					if (!tex.samplers.empty())
@@ -6321,11 +6357,20 @@ void GLSLGen::ToOperandName(std::ostream& out, ShaderOperand const & op, ShaderI
 			}
 			else if (0 == strcmp(param_desc.semantic_name, "SV_SampleIndex"))
 			{
+				*need_comps = false;
 				*need_idx = false;
-				out << "gl_SampleID";
+				if (glsl_rules_ & GSR_ExplicitMultiSample)
+				{
+					out << "gl_SampleID";
+				}
+				else
+				{
+					out << "0";
+				}
 			}
 			else if (0 == strcmp(param_desc.semantic_name, "SV_PrimitiveID"))
 			{
+				*need_comps = false;
 				*need_idx = false;
 				out << "gl_PrimitiveID";
 			}
