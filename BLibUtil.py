@@ -701,6 +701,9 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				new_path += ";" + compiler_info.compiler_root
 			if "win" == build_info.host_platform:
 				cmake_cmd.AddCommand('@SET PATH=%s;%%PATH%%' % new_path)
+				if 0 == build_info.project_type.find("vs"):
+					cmake_cmd.AddCommand('@CALL "%s%s" %s' % (compiler_info.compiler_root, compiler_info.vcvarsall_path, vc_option))
+					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			else:
 				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
 			cmake_cmd.AddCommand('"%s" -G "%s" %s %s -DKLAYGE_BUILD_FOLDER="%s" %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, build_folder, "../cmake"))
