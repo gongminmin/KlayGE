@@ -6,18 +6,16 @@
 #  KLAYGE_MAYA_PATH  - Location of Maya.
 #
 
-IF(COMMAND CMAKE_POLICY)
-	CMAKE_POLICY(SET CMP0053 OLD)
-ENDIF()
+SET(ProgramFilesX86 "ProgramFiles(x86)")
 
 IF(NOT KLAYGE_MAYA_PATH)
 	FIND_PATH(KLAYGE_MAYA_PATH bin/maya.exe
 		PATHS
 		"$ENV{MAYA_ROOT}"
 		"$ENV{ProgramFiles}/Maya*/"
-		"$ENV{ProgramFiles(x86)}/Maya*/"
+		"$ENV{${ProgramFilesX86}}/Maya*/"
 		"$ENV{ProgramFiles}/Autodesk/Maya*/"
-		"$ENV{ProgramFiles(x86)}/Autodesk/Maya*/"
+		"$ENV{${ProgramFilesX86}}/Autodesk/Maya*/"
 	)
 ENDIF()
 

@@ -8,9 +8,7 @@
 #  KLAYGE_3DSMAX_UNICODE  - True if the 3DSMax is unicode version (>=2013).
 #
 
-IF(COMMAND CMAKE_POLICY)
-	CMAKE_POLICY(SET CMP0053 OLD)
-ENDIF()
+SET(ProgramFilesX86 "ProgramFiles(x86)")
 
 IF(NOT KLAYGE_3DSMAX_PATH)
 	FIND_PATH(KLAYGE_3DSMAX_PATH 3dsmax.exe
@@ -20,13 +18,13 @@ IF(NOT KLAYGE_3DSMAX_PATH)
 		"$ENV{ADSK_3DSMAX_2012}"
 		"$ENV{3DSMAX_2011_PATH}"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2010"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2010"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2010"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2009 SDK"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2009"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2009"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2008"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2008"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2008"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 9"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 9"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 9"
 	)
 ENDIF()
 
@@ -38,13 +36,13 @@ IF(NOT KLAYGE_3DSMAX_SDK_PATH)
 		"$ENV{ADSK_3DSMAX_SDK_2012}/maxsdk"
 		"$ENV{3DSMAX_2011_SDK_PATH}/maxsdk"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2010 SDK/maxsdk"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2010 SDK/maxsdk"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2010 SDK/maxsdk"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2009 SDK/maxsdk"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2009 SDK/maxsdk"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2009 SDK/maxsdk"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 2008 SDK/maxsdk"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 2008 SDK/maxsdk"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 2008 SDK/maxsdk"
 		"$ENV{ProgramFiles}/Autodesk/3ds Max 9 SDK/maxsdk"
-		"$ENV{ProgramFiles(x86)}/Autodesk/3ds Max 9 SDK/maxsdk"
+		"$ENV{${ProgramFilesX86}}/Autodesk/3ds Max 9 SDK/maxsdk"
 	)
 ENDIF()
 
