@@ -5,6 +5,7 @@
 		<control type="combo_box" id="OITMode" x="30" y="30" width="180" height="24" is_default="0" selected="1">
 			<item name="No OIT"/>
 			<item name="Depth Peeling"/>
+			<item name="Weighted Blended"/>
 			<item name="Per-Pixel Linked Lists"/>
 			<item name="Adaptive Transparency"/>
 		</control>

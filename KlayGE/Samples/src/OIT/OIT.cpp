@@ -75,6 +75,10 @@ namespace
 				at_effect_ = SyncLoadRenderEffect("AdaptiveTransparency.fxml");
 				at_render_tech_ = at_effect_->TechniqueByName("RenderAdaptiveTransparency");
 			}
+
+			wb_effect_ = SyncLoadRenderEffect("WeightedBlended.fxml");
+			wb_render_tech_ = wb_effect_->TechniqueByName("WeightedBlendedRender");
+			wb_blit_tech_ = wb_effect_->TechniqueByName("WeightedBlendedBlit");
 			
 			technique_ = dp_1st_tech_;
 
@@ -90,6 +94,8 @@ namespace
 			*(no_oit_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 			*(dp_effect_->ParameterByName("pos_center")) = pos_bb.Center();
 			*(dp_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			*(wb_effect_->ParameterByName("pos_center")) = pos_bb.Center();
+			*(wb_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("pos_center")) = pos_bb.Center();
@@ -101,6 +107,8 @@ namespace
 			*(no_oit_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			*(dp_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 			*(dp_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			*(wb_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+			*(wb_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
@@ -140,6 +148,24 @@ namespace
 			*(dp_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
 			*(dp_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
 			*(dp_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+
+			*(wb_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+			*(wb_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
+				textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
+			*(wb_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
+				textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
+			*(wb_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
+				textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+			*(wb_effect_->ParameterByName("albedo_map_enabled"))
+				= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+			*(wb_effect_->ParameterByName("normal_map_enabled"))
+				= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
+			*(wb_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
+			*(wb_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
+			*(wb_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
+			*(wb_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
+			*(wb_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
@@ -170,6 +196,7 @@ namespace
 		{
 			*(no_oit_effect_->ParameterByName("alpha")) = alpha;
 			*(dp_effect_->ParameterByName("alpha")) = alpha;
+			*(wb_effect_->ParameterByName("alpha")) = alpha;
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("alpha")) = alpha;
@@ -191,6 +218,11 @@ namespace
 				case OM_DepthPeeling:
 					effect_ = dp_effect_;
 					technique_ = dp_1st_tech_;
+					break;
+
+				case OM_WeightedBlended:
+					effect_ = wb_effect_;
+					technique_ = wb_render_tech_;
 					break;
 
 				case OM_PerPixelLinkedLists:
@@ -277,6 +309,7 @@ namespace
 				*(ppll_effect_->ParameterByName("bg_tex")) = bg_tex;
 			}
 		}
+
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
 			if (gen_ppll_tech_)
@@ -297,12 +330,24 @@ namespace
 			}
 		}
 
+		void AccumWeightTextures(TexturePtr const & accum_tex, TexturePtr const & weight_tex)
+		{
+			*(wb_effect_->ParameterByName("accum_tex")) = accum_tex;
+			*(wb_effect_->ParameterByName("weight_tex")) = weight_tex;
+		}
+
 		void RenderQuad()
 		{
 			RenderEffect* effect = nullptr;
 			RenderTechnique* tech = nullptr;
 			RenderLayout* rl = nullptr;
-			if (OM_PerPixelLinkedLists == mode_)
+			if (OM_WeightedBlended == mode_)
+			{
+				effect = wb_effect_.get();
+				tech = wb_blit_tech_;
+				rl = rl_quad_.get();
+			}
+			else if (OM_PerPixelLinkedLists == mode_)
 			{
 				effect = ppll_effect_.get();
 				tech = ppll_render_tech_;
@@ -322,7 +367,10 @@ namespace
 			BOOST_ASSERT(rl != nullptr);
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+			if ((OM_PerPixelLinkedLists == mode_) || (OM_AdaptiveTransparency == mode_))
+			{
+				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
+			}
 
 			re.Render(*effect, *tech, *rl);
 		}
@@ -349,6 +397,12 @@ namespace
 					*(effect_->ParameterByName("far_plane")) = float2(camera.FarPlane(), 1.0f / camera.FarPlane());
 					break;
 				}
+
+			case OM_WeightedBlended:
+				{
+					*(effect_->ParameterByName("near_far")) = float2(camera.NearPlane(), camera.FarPlane());
+					break;
+				}
 			
 			case OM_PerPixelLinkedLists:
 			case OM_AdaptiveTransparency:
@@ -367,6 +421,7 @@ namespace
 		{
 			*(no_oit_effect_->ParameterByName("light_pos")) = light_pos;
 			*(dp_effect_->ParameterByName("light_pos")) = light_pos;
+			*(wb_effect_->ParameterByName("light_pos")) = light_pos;
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("light_pos")) = light_pos;
@@ -385,6 +440,10 @@ namespace
 		RenderTechnique* dp_nth_tech_;
 		RenderTechnique* dp_1st_depth_tech_;
 		RenderTechnique* dp_nth_depth_tech_;
+
+		RenderEffectPtr wb_effect_;
+		RenderTechnique* wb_render_tech_;
+		RenderTechnique* wb_blit_tech_;
 
 		RenderEffectPtr gen_ppll_effect_;
 		RenderTechnique* gen_ppll_tech_;
@@ -468,12 +527,22 @@ namespace
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->BackgroundTex(bg_tex);
 			}
 		}
+
 		void LinkedListBuffer(GraphicsBufferPtr const & fragment_link_buf, GraphicsBufferPtr const & start_offset_buf)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
 			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->LinkedListBuffer(fragment_link_buf, start_offset_buf);
+			}
+		}
+
+		void AccumWeightTextures(TexturePtr const & accum_tex, TexturePtr const & weight_tex)
+		{
+			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++i)
+			{
+				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AccumWeightTextures(accum_tex, weight_tex);
 			}
 		}
 
@@ -558,6 +627,9 @@ void OITApp::OnCreate()
 		oc_queries_[i] = checked_pointer_cast<ConditionalRender>(rf.MakeConditionalRender());
 	}
 
+	weighted_fb_ = rf.MakeFrameBuffer();
+	weighted_fb_->GetViewport()->camera = re.CurFrameBuffer()->GetViewport()->camera;
+
 	if (caps.max_simultaneous_uavs > 0)
 	{
 		opaque_bg_fb_ = rf.MakeFrameBuffer();
@@ -595,8 +667,8 @@ void OITApp::OnCreate()
 
 	if (0 == caps.max_simultaneous_uavs)
 	{
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(4);
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(3);
-		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(2);
 	}
 
 	dialog_oit_->Control<UIComboBox>(id_oit_mode_)->OnSelectionChangedEvent().connect(
@@ -701,10 +773,18 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
+	{
+		accum_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_ABGR16F, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		weight_tex_ = rf.MakeTexture2D(width, height, 1, 1, caps.mrt_independent_bit_depths_support ? EF_R16F : EF_ABGR16F,
+			1, 0, EAH_GPU_Read | EAH_GPU_Write);
+		weighted_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*accum_tex_, 0, 1, 0));
+		weighted_fb_->Attach(FrameBuffer::ATT_Color1, rf.Make2DRenderView(*weight_tex_, 0, 1, 0));
+	}
+
 	if (caps.max_simultaneous_uavs > 0)
 	{
 		ElementFormat opaque_bg_format;
-		if (rf.RenderEngineInstance().DeviceCaps().rendertarget_format_support(EF_B10G11R11F, 1, 0))
+		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
 		{
 			opaque_bg_format = EF_B10G11R11F;
 		}
@@ -833,6 +913,29 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			{
 				re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
 			}
+			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
+			return App3DFramework::URV_Finished;
+		}
+	}
+	else if (OM_WeightedBlended == oit_mode_)
+	{
+		switch (pass)
+		{
+		case 0:
+			re.BindFrameBuffer(FrameBufferPtr());
+			re.CurFrameBuffer()->Attached(FrameBuffer::ATT_DepthStencil)->ClearDepthStencil(1, 0);
+			return App3DFramework::URV_OpaqueOnly | App3DFramework::URV_NeedFlush;
+
+		case 1:
+			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
+
+			re.BindFrameBuffer(weighted_fb_);
+			re.CurFrameBuffer()->Clear(FrameBuffer::CBM_Color, Color(0, 0, 0, 1), 1, 0);
+			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
+
+		default:
+			re.BindFrameBuffer(FrameBufferPtr());
+			checked_pointer_cast<PolygonObject>(polygon_)->AccumWeightTextures(accum_tex_, weight_tex_);
 			checked_pointer_cast<PolygonObject>(polygon_)->RenderQuad();
 			return App3DFramework::URV_Finished;
 		}

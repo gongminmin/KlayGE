@@ -19,6 +19,7 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/FragmentList.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/NoOIT.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/PerPixelLinkedLists.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/WeightedBlended.fxml
 )
 
 SET(POST_PROCESSORS

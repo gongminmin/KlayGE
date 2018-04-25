@@ -10,6 +10,7 @@ enum OITMode
 {
 	OM_No = 0,
 	OM_DepthPeeling,
+	OM_WeightedBlended,
 	OM_PerPixelLinkedLists,
 	OM_AdaptiveTransparency
 };
@@ -48,6 +49,11 @@ private:
 	std::array<KlayGE::ConditionalRenderPtr, 2> oc_queries_;
 	KlayGE::PostProcessPtr blend_pp_;
 	KlayGE::uint32_t num_layers_;
+
+	// Weighted Blended
+	KlayGE::FrameBufferPtr weighted_fb_;
+	KlayGE::TexturePtr accum_tex_;
+	KlayGE::TexturePtr weight_tex_;
 
 	// Per Pixel Linked Lists
 	KlayGE::FrameBufferPtr opaque_bg_fb_;
