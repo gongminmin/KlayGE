@@ -737,7 +737,7 @@ float4 ShadingPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1) : SV_Target
 
 float4 MergeShadingPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	shading_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = tc * int2(width, height);
@@ -749,7 +749,7 @@ float4 MergeShadingPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex)
 
 float4 MergeDepthPS(float2 tc : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	depth_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = tc * int2(width, height);

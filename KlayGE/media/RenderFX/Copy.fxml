@@ -21,7 +21,7 @@
 		<![CDATA[
 float4 CopyPS(float2 tc0 : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	src_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = tc0 * int2(width, height);

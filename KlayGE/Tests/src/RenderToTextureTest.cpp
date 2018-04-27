@@ -63,12 +63,12 @@ public:
 	void SetUp() override
 	{
 		auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-		render_to_msaa_texture_support_ = caps.render_to_msaa_texture_support;
+		explicit_multi_sample_support_ = caps.explicit_multi_sample_support;
 	}
 
 	void TestRenderToTexture(uint32_t sample_count, float tolerance)
 	{
-		if ((sample_count > 1) && !render_to_msaa_texture_support_)
+		if ((sample_count > 1) && !explicit_multi_sample_support_)
 		{
 			return;
 		}
@@ -93,7 +93,7 @@ public:
 
 	void TestResolveToTexture(uint32_t sample_count, float tolerance)
 	{
-		if ((sample_count > 1) && !render_to_msaa_texture_support_)
+		if ((sample_count > 1) && !explicit_multi_sample_support_)
 		{
 			return;
 		}
@@ -120,11 +120,9 @@ public:
 	{
 		bool skip = false;
 
-		auto& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-		auto const & caps = re.DeviceCaps();
 		if (sample_count > 1)
 		{
-			skip = !caps.render_to_msaa_texture_support;
+			skip = !explicit_multi_sample_support_;
 		}
 
 		if (skip)
@@ -276,7 +274,7 @@ private:
 	}
 
 private:
-	bool render_to_msaa_texture_support_;
+	bool explicit_multi_sample_support_;
 };
 
 TEST_F(RenderToTextureTest, RenderToTexture)

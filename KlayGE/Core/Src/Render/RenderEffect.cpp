@@ -3591,7 +3591,9 @@ namespace KlayGE
 				break;
 
 			case REDT_texture2DMS:
+				str += "#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT\n";
 				str += "Texture2DMS<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
 				break;
 
 			case REDT_texture3D:
@@ -3620,7 +3622,9 @@ namespace KlayGE
 
 			case REDT_texture2DMSArray:
 				str += "#if KLAYGE_MAX_TEX_ARRAY_LEN > 1\n";
+				str += "#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT\n";
 				str += "Texture2DMSArray<" + elem_type + "> " + param_name + ";\n";
+				str += "#endif\n";
 				str += "#endif\n";
 				break;
 

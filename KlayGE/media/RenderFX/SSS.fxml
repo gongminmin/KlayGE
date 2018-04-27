@@ -19,7 +19,7 @@
 		<![CDATA[
 float4 GuassBlur(float2 texcoord, uint sample_index)
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	src_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = texcoord * int2(width, height);
@@ -31,7 +31,7 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 	float o[6] = {  -1.0f, -0.6667f, -0.3333f, 0.3333f, 0.6667f,   1.0f };
 
 	// Fetch color and linear depth for current pixel:
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	float4 color_m = src_tex_ms.Load(coord, sample_index);
 	float depth_m = ReadAFloat(depth_tex_ms.Load(coord, sample_index), far_plane);
 #else
@@ -52,7 +52,7 @@ float4 GuassBlur(float2 texcoord, uint sample_index)
 	{
 		// Fetch color and depth for current sample:
 		float2 offset = texcoord + o[i] * final_step;
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		int2 offset_coord = offset * int2(width, height);
 		float3 color = src_tex_ms.Load(offset_coord, sample_index).rgb;
 		float depth = ReadAFloat(depth_tex_ms.Load(offset_coord, sample_index), far_plane);
@@ -258,7 +258,7 @@ void TranslucencyVS(float4 pos : POSITION,
 
 float4 TranslucencyPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1, uint sample_index : SV_SampleIndex) : SV_Target0
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = tc * int2(width, height);

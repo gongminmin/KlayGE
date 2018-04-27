@@ -37,6 +37,7 @@ float4 RenderToTexturePS() : SV_Target0
 		<![CDATA[
 float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 {
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
 	src_ms.GetDimensions(width, height, samples);
 
@@ -49,6 +50,9 @@ float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 	ret /= samples;
 
 	return ret;
+#else
+	return 0;
+#endif
 }
 		]]>
 	</shader>
@@ -68,10 +72,14 @@ float4 ResolveToTextureMSPS(float2 texcoord : TEXCOORD0) : SV_Target0
 		<![CDATA[
 float4 CopyToTextureMSPS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target0
 {
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
 	src_ms.GetDimensions(width, height, samples);
 	int2 coord = texcoord * int2(width, height);
 	return src_ms.Load(coord, sample_index);
+#else
+	return 0;
+#endif
 }
 		]]>
 	</shader>

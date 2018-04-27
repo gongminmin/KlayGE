@@ -374,6 +374,11 @@ namespace KlayGE
 			D3D_SHADER_MACRO macro = { "KLAYGE_UAVS_AT_EVERY_STAGE_SUPPORT", "1" };
 			macros.push_back(macro);
 		}
+		if (caps.explicit_multi_sample_support)
+		{
+			D3D_SHADER_MACRO macro = { "KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT", "1" };
+			macros.push_back(macro);
+		}
 		{
 			D3D_SHADER_MACRO macro_shader_type = { "", "1" };
 			switch (type)

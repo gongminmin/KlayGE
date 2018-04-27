@@ -182,7 +182,7 @@ void ScreenSpaceReflectionPostProcessVS(float4 pos : POSITION,
 float4 ScreenSpaceReflectionPostProcessPS(float2 tc : TEXCOORD0, float3 view_dir : TEXCOORD1,
 	uint sample_index : SV_SampleIndex) : SV_Target
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
 	int2 coord = tc * int2(width, height);

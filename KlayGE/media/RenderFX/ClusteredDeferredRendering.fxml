@@ -30,7 +30,7 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 {
 	float2 min_max_depth = float2(asfloat(0x7F7FFFFF), 0.0f);
 
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	linear_depth_in_tex_ms.GetDimensions(width, height, samples);
 #endif
@@ -42,7 +42,7 @@ void DepthToTiledMinMaxCS(uint3 gid : SV_GroupID,
 		{
 			uint2 coord = tile_start + uint2(tile_x, tile_y);
 			uint2 input_coord = min(coord, width_height);
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 			float pixel_min_depth = asfloat(0x7F7FFFFF);
 			for (uint i = 0; i < samples; ++ i)
 			{
@@ -142,60 +142,13 @@ float4 ClusteredDRLightingMaskPS(uint sample_index : SV_SampleIndex) : SV_Target
 
 	<shader>
 		<![CDATA[
-float4 MultiSampleMaskPS(float2 texcoord : TEXCOORD0) : SV_Target
-{
-	uint width, height, samples;
-	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
-	
-	int2 coord = texcoord * int2(width, height);
-
-	float4 rt0_s0 = g_buffer_rt0_tex_ms.Load(coord, 0);
-	float4 rt1_s0 = g_buffer_rt1_tex_ms.Load(coord, 0);
-	float depth_s0 = g_buffer_ds_tex_ms.Load(coord, 0).x;
-
-	bool is_multi_sample = false;
-	for (uint i = 1; i < samples; ++ i)
-	{
-		float4 rt0_sn = g_buffer_rt0_tex_ms.Load(coord, i);
-		float4 rt1_sn = g_buffer_rt1_tex_ms.Load(coord, i);
-		float depth_sn = g_buffer_ds_tex_ms.Load(coord, i).x;
-
-		float4 rt0_diff = rt0_sn - rt0_s0;
-		float4 rt1_diff = rt1_sn - rt1_s0;
-		if ((abs(depth_sn - depth_s0) > 1e-3f)
-			|| (dot(rt0_diff, rt0_diff) > 1e-3f)
-			|| (dot(rt1_diff, rt1_diff) > 1e-3f))
-		{
-			is_multi_sample = true;
-			break;
-		}
-	}
-
-	return is_multi_sample;
-}
-		]]>
-	</shader>
-
-	<technique name="MultiSampleMask">
-		<pass name="p0">
-			<state name="depth_enable" value="false"/>
-			<state name="depth_write_mask" value="false"/>
-
-			<state name="cull_mode" value="front"/>
-
-			<state name="vertex_shader" value="PostProcessVS()"/>
-			<state name="pixel_shader" value="MultiSampleMaskPS()"/>
-		</pass>
-	</technique>
-
-	<shader>
-		<![CDATA[
 void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 		out float4 out_rt0 : SV_Target0,
 		out float4 out_rt1 : SV_Target1,
 		out float out_depth : SV_Target2,
 		out float out_multi_sample_mark : SV_Target3)
 {
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
 	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);	
 	int2 coord = texcoord * int2(width, height);
@@ -233,6 +186,12 @@ void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 	out_rt1 = g_buffer_rt1_tex_ms.Load(coord, min_index);
 	out_depth = non_linear_depth_to_linear(g_buffer_ds_tex_ms.Load(coord, min_index).x, near_q_far.x, near_q_far.y);
 	out_multi_sample_mark = is_multi_sample;
+#else
+	out_rt0 = 0;
+	out_rt1 = 0,
+	out_depth = 0;
+	out_multi_sample_mark = 0
+#endif
 }
 		]]>
 	</shader>
@@ -253,6 +212,7 @@ void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 		<![CDATA[
 float ResolveMergedDepthPS(float2 texcoord : TEXCOORD0) : SV_Target
 {
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, samples;
 	g_buffer_ds_tex_ms.GetDimensions(width, height, samples);	
 	int2 coord = texcoord * int2(width, height);
@@ -266,8 +226,11 @@ float ResolveMergedDepthPS(float2 texcoord : TEXCOORD0) : SV_Target
 			min_z = z;
 		}
 	}
-	
+
 	return min_z;
+#else
+	return 0;
+#endif
 }
 		]]>
 	</shader>
@@ -722,7 +685,7 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 {
 	float4 shading;
 	[branch]
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	if (lighting_mask_tex_ms.Load(coord.xy, sample_index).x > 0)
 #else
 	if (lighting_mask_tex.Load(coord).x > 0)
@@ -730,7 +693,7 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 	{
 		float2 tc = (coord.xy + 0.5f) * inv_width_height;
 
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		float4 rt0 = g_buffer_rt0_tex_ms.Load(coord.xy, sample_index);
 		float4 rt1 = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
 		float depth = g_buffer_depth_tex_ms.Load(coord.xy, sample_index).x;
@@ -827,14 +790,14 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 		{
 #if USE_TYPED_UAV
 #if KLAYGE_TYPED_UAV_SUPPORT
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 			shading += shading_rw_tex_array[uint3(coord.xy, sample_index)];
 #else
 			shading += shading_rw_tex[coord.xy];
 #endif		
 #endif
 #else
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 			shading += shading_in_tex_ms.Load(coord.xy, sample_index);
 #else
 			shading += shading_in_tex.Load(coord);
@@ -848,7 +811,7 @@ float4 ClusteredDRUnifiedSample(uint3 tile_id, uint3 coord, uint sample_index)
 	}
 	else
 	{
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		shading = g_buffer_rt1_tex_ms.Load(coord.xy, sample_index);
 #else
 		shading = g_buffer_rt1_tex.Load(coord);
@@ -889,7 +852,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 
 	uint3 coord = uint3(gid.xy * uint2(BLOCK_X, BLOCK_Y) + gtid.xy, 0);
 	
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	g_buffer_rt0_tex_ms.GetDimensions(width, height, samples);
 #endif
@@ -898,7 +861,7 @@ void ClusteredDRUnifiedCS(uint3 gid : SV_GroupID,
 	if (all(coord.xy < width_height))
 	{
 		float4 shading = ClusteredDRUnifiedSample(tile_id, coord, 0);
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 		shading_rw_tex_array[uint3(coord.xy, 0)] = shading;
 		[branch]
 		if (multi_sample_mask_tex.Load(coord).x > 0.5f)
@@ -966,7 +929,7 @@ static const uint LT_TubeArea = 5;
 bool ClusteredDRShadowingUnifiedSample(uint3 gtid, uint3 coord, uint sample_index,
 	out bool write_projective, out float4 projective_shadowing, out float4 shadowing)
 {
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	float lighting_mask = lighting_mask_tex_ms.Load(coord.xy * 2, sample_index).x;
 	float depth = g_buffer_depth_tex_ms.Load(coord.xy * 2, sample_index).x;
 #else
@@ -1120,7 +1083,7 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 	}
 	GroupMemoryBarrierWithGroupSync();
 	
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 	uint width, height, samples;
 	g_buffer_depth_tex_ms.GetDimensions(width, height, samples);
 #endif
@@ -1132,7 +1095,7 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 		{
 			uint3 coord = uint3(tile_start + uint2(tile_x, tile_y), 0);
 			
-#if MULTI_SAMPLE_INPUT
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT && MULTI_SAMPLE_INPUT
 			bool has_write_projective = false;
 			float4 total_projective_shadowing = 0;
 			float4 total_shadowing = 0;
@@ -1196,6 +1159,7 @@ void ClusteredDRShadowingUnifiedCS(uint3 gid : SV_GroupID,
 		<![CDATA[
 float4 ArrayToMultiSamplePS(float2 texcoord : TEXCOORD0, uint sample_index : SV_SampleIndex) : SV_Target0
 {
+#if KLAYGE_EXPLICIT_MULTI_SAMPLE_SUPPORT
 	uint width, height, elements;
 	src_2d_tex_array.GetDimensions(width, height, elements);
 	int2 coord = texcoord * int2(width, height);
@@ -1204,8 +1168,11 @@ float4 ArrayToMultiSamplePS(float2 texcoord : TEXCOORD0, uint sample_index : SV_
 	{
 		sample_index = 0;
 	}
-	
+
 	return src_2d_tex_array.Load(int4(coord, sample_index, 0));
+#else
+	return 0;
+#endif
 }
 		]]>
 	</shader>
