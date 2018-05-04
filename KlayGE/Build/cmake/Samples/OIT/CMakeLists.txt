@@ -16,9 +16,11 @@ SET(EFFECT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/AdaptiveTransparency.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/Blend.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/DepthPeeling.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/FragmentArray.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/FragmentList.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/NoOIT.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/PerPixelLinkedLists.fxml
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/RovAdaptiveTransparency.fxml
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/WeightedBlended.fxml
 )
 
@@ -60,9 +62,12 @@ SET(CONTENT_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/AdaptiveTransparency.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/Blend.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/DepthPeeling.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/FragmentArray.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/FragmentList.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/NoOIT.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/PerPixelLinkedLists.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/RovAdaptiveTransparency.kfx
+	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/WeightedBlended.kfx
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot_clean.meshml.model_bin
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_diffuse.dds
 	${KLAYGE_PROJECT_DIR}/Samples/media/OIT/robot-clean_normal.dds

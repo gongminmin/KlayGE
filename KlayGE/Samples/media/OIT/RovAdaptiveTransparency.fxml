@@ -1,0 +1,71 @@
+<?xml version='1.0'?>
+
+<effect>
+	<macro name="TEMPORARY_BUFFER_MAX" value="8"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="int" name="frame_width"/>
+	</cbuffer>
+
+	<parameter type="structured_buffer" elem_type="float4" name="frags_buffer"/>
+	<parameter type="buffer" elem_type="uint" name="frag_length_buffer"/>
+
+	<shader major_version="5" minor_version="1">
+		<![CDATA[
+void RenderRovAdaptiveTransparencyVS(uint vertex_id : SV_VertexID,
+					out float2 oTex : TEXCOORD0,
+					out float4 oPos : SV_Position)
+{
+	float2 quad_texs[4] = { float2(0, 0), float2(1, 0), float2(0, 1), float2(1, 1) };
+	oTex = quad_texs[vertex_id];
+
+	oPos.xy = oTex * 2 - 1;
+	oPos.y *= KLAYGE_FLIPPING;
+	oPos.zw = float2(0, 1);
+}
+
+float4 RenderRovAdaptiveTransparencyPS(float2 tex : TEXCOORD0, float4 pos : SV_Position) : SV_Target
+{
+	uint index = (uint)pos.y * frame_width + (uint)pos.x;
+
+	float4 result = float4(0, 0, 0, 1);
+	uint length = frag_length_buffer[index];
+	if (length > 0)
+	{
+		for (uint i = 0; i < length; ++ i)
+		{
+			float4 frag_data = frags_buffer[index * TEMPORARY_BUFFER_MAX + i];
+
+			uint2 u16_color = asuint(frag_data.xy);
+			float4 node_color;
+			node_color.r = f16tof32(u16_color.x & 0xFFFF);
+			node_color.g = f16tof32(u16_color.x >> 16);
+			node_color.b = f16tof32(u16_color.y & 0xFFFF);
+			node_color.a = f16tof32(u16_color.y >> 16);
+
+			float vis = (0 == i) ? 1 : frags_buffer[index * TEMPORARY_BUFFER_MAX + i - 1].w;
+			result.rgb += node_color.rgb * node_color.a * vis;
+		}
+
+		result.a = frags_buffer[index * TEMPORARY_BUFFER_MAX + TEMPORARY_BUFFER_MAX - 1].w;
+	}
+
+	return result;
+}
+		]]>
+	</shader>
+
+	<technique name="RenderRovAdaptiveTransparency">
+		<pass name="p0">
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="blend_enable" value="true"/>
+			<state name="src_blend" value="one"/>
+			<state name="dest_blend" value="src_alpha"/>
+
+			<state name="vertex_shader" value="RenderRovAdaptiveTransparencyVS()"/>
+			<state name="pixel_shader" value="RenderRovAdaptiveTransparencyPS()"/>
+		</pass>
+	</technique>
+</effect>

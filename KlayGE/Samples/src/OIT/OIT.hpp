@@ -12,7 +12,8 @@ enum OITMode
 	OM_DepthPeeling,
 	OM_WeightedBlended,
 	OM_PerPixelLinkedLists,
-	OM_AdaptiveTransparency
+	OM_AdaptiveTransparency,
+	OM_RovAdaptiveTransparency
 };
 
 class OITApp : public KlayGE::App3DFramework
@@ -62,8 +63,10 @@ private:
 	KlayGE::FrameBufferPtr linked_list_fb_;
 	KlayGE::GraphicsBufferPtr frag_link_buf_;
 	KlayGE::GraphicsBufferPtr start_offset_buf_;
+	KlayGE::GraphicsBufferPtr frag_length_buf_;
 	KlayGE::UnorderedAccessViewPtr frag_link_uav_;
 	KlayGE::UnorderedAccessViewPtr start_offset_uav_;
+	KlayGE::UnorderedAccessViewPtr frag_length_uav_;
 
 	OITMode oit_mode_;
 	KlayGE::UIDialogPtr dialog_oit_;

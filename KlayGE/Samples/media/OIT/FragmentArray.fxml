@@ -1,0 +1,212 @@
+<?xml version='1.0'?>
+
+<effect>
+	<include name="Lighting.fxml"/>
+	<include name="util.fxml"/>
+	<include name="Quaternion.fxml"/>
+	<include name="NoOIT.fxml"/>
+
+	<cbuffer name="per_frame">
+		<parameter type="int" name="frame_width"/>
+	</cbuffer>
+
+	<macro name="TEMPORARY_BUFFER_MAX" value="8"/>
+
+	<parameter type="rw_structured_buffer" elem_type="float4" name="rw_frags_buffer"/>
+	<parameter type="rasterizer_ordered_buffer" elem_type="uint" name="rw_frag_length_buffer"/>
+
+	<shader major_version="5" minor_version="1">
+		<![CDATA[
+void FindFragment(float oit_depth[TEMPORARY_BUFFER_MAX + 1], float oit_trans[TEMPORARY_BUFFER_MAX + 1], float frag_depth,
+		out uint index, out float ret_trans)
+{
+	float4 depth, trans;
+
+	if (frag_depth > oit_depth[3])
+	{
+		depth = float4(oit_depth[4], oit_depth[5], oit_depth[6], oit_depth[7]);
+		trans = float4(oit_trans[4], oit_trans[5], oit_trans[6], oit_trans[7]);
+		index = 4;
+	}
+	else
+	{
+		depth = float4(oit_depth[0], oit_depth[1], oit_depth[2], oit_depth[3]);
+		trans = float4(oit_trans[0], oit_trans[1], oit_trans[2], oit_trans[3]);
+		index = 0;
+	}
+
+	if (frag_depth <= depth.x)
+	{
+		ret_trans = oit_trans[max(0, index - 1)];
+	}
+	else if (frag_depth <= depth.y)
+	{
+		index += 1;
+		ret_trans = trans.x;
+	}
+	else if (frag_depth <= depth.z)
+	{
+		index += 2;
+		ret_trans = trans.y;
+	}
+	else if (frag_depth <= depth.w)
+	{
+		index += 3;
+		ret_trans = trans.z;
+	}
+	else
+	{
+		index += 4;
+		ret_trans = trans.w;
+	}
+}
+
+void InsertFragment(float2 frag_data,
+						float frag_depth,
+						float frag_trans,
+						inout float2 oit_node_data[TEMPORARY_BUFFER_MAX + 1],
+						inout float oit_depth[TEMPORARY_BUFFER_MAX + 1],
+						inout float oit_trans[TEMPORARY_BUFFER_MAX + 1])
+{
+	uint index;
+	float find_trans;
+	FindFragment(oit_depth, oit_trans, frag_depth, index, find_trans);
+	float prev_trans = index != 0 ? find_trans : 1;
+
+	for (uint i = TEMPORARY_BUFFER_MAX; i > 0; -- i)
+	{
+		if (index <= i - 1)
+		{
+			oit_node_data[i] = oit_node_data[i - 1];
+			oit_depth[i] = oit_depth[i - 1];
+			oit_trans[i] = oit_trans[i - 1] * frag_trans;
+		}
+	}
+	for (i = 0; i <= TEMPORARY_BUFFER_MAX; ++ i)
+	{
+		if (index == i)
+		{
+			oit_node_data[i] = frag_data;
+			oit_depth[i] = frag_depth;
+			oit_trans[i] = frag_trans * prev_trans;
+		}
+	}
+
+	if (oit_depth[TEMPORARY_BUFFER_MAX] <= 1)
+	{
+		const uint start_removal_idx = TEMPORARY_BUFFER_MAX / 2;
+
+		float node_under_err[TEMPORARY_BUFFER_MAX];
+		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			node_under_err[i] = (oit_depth[i] - oit_depth[i - 1]) * (oit_trans[i - 1] - oit_trans[i]);
+		}
+
+		uint smallest_err_idx = start_removal_idx;
+		float smallest_err = node_under_err[smallest_err_idx];
+		for (i = start_removal_idx + 1; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (node_under_err[i] < smallest_err)
+			{
+				smallest_err = node_under_err[i];
+				smallest_err_idx = i;
+			}
+		}
+
+		for (i = start_removal_idx; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (i >= smallest_err_idx)
+			{
+				oit_node_data[i] = oit_node_data[i + 1]; 
+				oit_depth[i] = oit_depth[i + 1];
+			}
+		}
+		for (i = start_removal_idx - 1; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			if (i >= smallest_err_idx - 1)
+			{
+				oit_trans[i] = oit_trans[i + 1];
+			}
+		}
+	}
+}
+
+void GenPerPixelArraysVS(float4 pos				: POSITION,
+					float2 texcoord			: TEXCOORD0,
+					float4 tangent_quat		: TANGENT,
+					out float4 oL			: TEXCOORD0,
+					out float4 oH			: TEXCOORD1,
+					out float4 oPos			: SV_Position)
+{
+	Transform(pos, texcoord, tangent_quat,
+		oL, oH, oPos);
+}
+
+[earlydepthstencil]
+void GenPerPixelArraysPS(float4 L : TEXCOORD0,
+					float4 H : TEXCOORD1,
+					float4 pos : SV_Position)
+{
+	float4 color = Shading(L, H);
+	uint4 u16_color = f32tof16(color);
+
+	float2 frag_data;
+	frag_data = asfloat(u16_color.xz | (u16_color.yw << 16));
+
+	float2 oit_node_data[TEMPORARY_BUFFER_MAX + 1];
+	float oit_depth[TEMPORARY_BUFFER_MAX + 1];
+	float oit_trans[TEMPORARY_BUFFER_MAX + 1];
+	{
+		oit_node_data[TEMPORARY_BUFFER_MAX] = 0;
+		oit_depth[TEMPORARY_BUFFER_MAX] = 1.1f;
+		oit_trans[TEMPORARY_BUFFER_MAX] = 1.0f;
+	}
+
+	uint index = (uint)pos.y * frame_width + (uint)pos.x;
+	uint length = rw_frag_length_buffer[index];
+	length = min(TEMPORARY_BUFFER_MAX, length + 1);
+	rw_frag_length_buffer[index] = length;
+
+	if (length == 1)
+	{		
+		for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			oit_node_data[i] = 0;
+			oit_depth[i] = 1.1f;
+			oit_trans[i] = 1.0f;
+		}
+	}
+	else
+	{
+		for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+		{
+			float4 node_data = rw_frags_buffer[index * TEMPORARY_BUFFER_MAX + i];
+
+			oit_node_data[i] = node_data.xy;
+			oit_depth[i] = node_data.z;
+			oit_trans[i] = node_data.w;
+		}
+	}
+	
+	InsertFragment(frag_data, pos.z, 1 - color.a, oit_node_data, oit_depth, oit_trans);
+
+	for (uint i = 0; i < TEMPORARY_BUFFER_MAX; ++ i)
+	{
+		rw_frags_buffer[index * TEMPORARY_BUFFER_MAX + i] = float4(oit_node_data[i], oit_depth[i], oit_trans[i]);
+	}
+}
+		]]>
+	</shader>
+
+	<technique name="GenPerPixelArrays">
+		<pass name="p0">
+			<state name="cull_mode" value="none"/>
+
+			<state name="depth_enable" value="false"/>
+			<state name="depth_write_mask" value="0"/>
+
+			<state name="vertex_shader" value="GenPerPixelArraysVS()"/>
+			<state name="pixel_shader" value="GenPerPixelArraysPS()"/>
+		</pass>
+	</technique>
+</effect>

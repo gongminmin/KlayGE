@@ -41,9 +41,11 @@ namespace
 			: StaticMesh(model, name),
 				no_oit_tech_(nullptr),
 				dp_1st_tech_(nullptr), dp_nth_tech_(nullptr), dp_1st_depth_tech_(nullptr), dp_nth_depth_tech_(nullptr),
+				wb_effect_(nullptr), wb_render_tech_(nullptr), wb_blit_tech_(nullptr),
 				gen_ppll_tech_(nullptr),
 				ppll_render_tech_(nullptr),
-				at_render_tech_(nullptr)
+				at_render_tech_(nullptr),
+				gen_rov_ppa_effect_(nullptr), gen_rov_ppa_tech_(nullptr), rov_at_effect_(nullptr), rov_at_render_tech_(nullptr)
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -74,6 +76,15 @@ namespace
 
 				at_effect_ = SyncLoadRenderEffect("AdaptiveTransparency.fxml");
 				at_render_tech_ = at_effect_->TechniqueByName("RenderAdaptiveTransparency");
+
+				if (caps.rovs_support)
+				{
+					gen_rov_ppa_effect_ = SyncLoadRenderEffect("FragmentArray.fxml");
+					gen_rov_ppa_tech_ = gen_rov_ppa_effect_->TechniqueByName("GenPerPixelArrays");
+
+					rov_at_effect_ = SyncLoadRenderEffect("RovAdaptiveTransparency.fxml");
+					rov_at_render_tech_ = rov_at_effect_->TechniqueByName("RenderRovAdaptiveTransparency");
+				}
 			}
 
 			wb_effect_ = SyncLoadRenderEffect("WeightedBlended.fxml");
@@ -101,6 +112,11 @@ namespace
 				*(gen_ppll_effect_->ParameterByName("pos_center")) = pos_bb.Center();
 				*(gen_ppll_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
 			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("pos_center")) = pos_bb.Center();
+				*(gen_rov_ppa_effect_->ParameterByName("pos_extent")) = pos_bb.HalfSize();
+			}
 
 			AABBox const & tc_bb = this->TexcoordBound();
 			*(no_oit_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
@@ -113,6 +129,11 @@ namespace
 			{
 				*(gen_ppll_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
 				*(gen_ppll_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
+			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("tc_center")) = float2(tc_bb.Center().x(), tc_bb.Center().y());
+				*(gen_rov_ppa_effect_->ParameterByName("tc_extent")) = float2(tc_bb.HalfSize().x(), tc_bb.HalfSize().y());
 			}
 
 			*(no_oit_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
@@ -185,6 +206,25 @@ namespace
 				*(gen_ppll_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
 				*(gen_ppll_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
 			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("albedo_clr")) = mtl_->albedo;
+				*(gen_rov_ppa_effect_->ParameterByName("metalness_clr")) = float2(mtl_->metalness,
+					textures_[RenderMaterial::TS_Metalness].get() ? 1.0f : 0.0f);
+				*(gen_rov_ppa_effect_->ParameterByName("glossiness_clr")) = float2(mtl_->glossiness,
+					textures_[RenderMaterial::TS_Glossiness].get() ? 1.0f : 0.0f);
+				*(gen_rov_ppa_effect_->ParameterByName("emissive_clr")) = float4(mtl_->emissive.x(), mtl_->emissive.y(), mtl_->emissive.z(),
+					textures_[RenderMaterial::TS_Emissive].get() ? 1.0f : 0.0f);
+				*(gen_rov_ppa_effect_->ParameterByName("albedo_map_enabled"))
+					= static_cast<int32_t>(textures_[RenderMaterial::TS_Albedo].get() ? 1 : 0);
+				*(gen_rov_ppa_effect_->ParameterByName("normal_map_enabled"))
+					= static_cast<int32_t>(textures_[RenderMaterial::TS_Normal].get() ? 1 : 0);
+				*(gen_rov_ppa_effect_->ParameterByName("albedo_tex")) = textures_[RenderMaterial::TS_Albedo];
+				*(gen_rov_ppa_effect_->ParameterByName("metalness_tex")) = textures_[RenderMaterial::TS_Metalness];
+				*(gen_rov_ppa_effect_->ParameterByName("glossiness_tex")) = textures_[RenderMaterial::TS_Glossiness];
+				*(gen_rov_ppa_effect_->ParameterByName("emissive_tex")) = textures_[RenderMaterial::TS_Emissive];
+				*(gen_rov_ppa_effect_->ParameterByName("normal_tex")) = textures_[RenderMaterial::TS_Normal];
+			}
 		}
 
 		void SetOITMode(OITMode mode)
@@ -200,6 +240,10 @@ namespace
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("alpha")) = alpha;
+			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("alpha")) = alpha;
 			}
 		}
 
@@ -231,6 +275,11 @@ namespace
 					technique_ = gen_ppll_tech_;
 					break;
 
+				case OM_RovAdaptiveTransparency:
+					effect_ = gen_rov_ppa_effect_;
+					technique_ = gen_rov_ppa_tech_;
+					break;
+
 				default:
 					KFL_UNREACHABLE("Invalid OIT mode");
 				}
@@ -257,6 +306,11 @@ namespace
 				case OM_AdaptiveTransparency:
 					effect_ = at_effect_;
 					technique_ = at_render_tech_;
+					break;
+
+				case OM_RovAdaptiveTransparency:
+					effect_ = rov_at_effect_;
+					technique_ = rov_at_render_tech_;
 					break;
 
 				default:
@@ -317,6 +371,11 @@ namespace
 				*(gen_ppll_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_buf;
 				*(gen_ppll_effect_->ParameterByName("rw_start_offset_buffer")) = start_offset_buf;
 			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("rw_frags_buffer")) = fragment_link_buf;
+				*(gen_rov_ppa_effect_->ParameterByName("rw_frag_length_buffer")) = start_offset_buf;
+			}
 
 			if (ppll_render_tech_)
 			{
@@ -327,6 +386,11 @@ namespace
 			{
 				*(at_effect_->ParameterByName("frags_buffer")) = fragment_link_buf;
 				*(at_effect_->ParameterByName("start_offset_buffer")) = start_offset_buf;
+			}
+			if (rov_at_render_tech_)
+			{
+				*(rov_at_effect_->ParameterByName("frags_buffer")) = fragment_link_buf;
+				*(rov_at_effect_->ParameterByName("frag_length_buffer")) = start_offset_buf;
 			}
 		}
 
@@ -341,25 +405,34 @@ namespace
 			RenderEffect* effect = nullptr;
 			RenderTechnique* tech = nullptr;
 			RenderLayout* rl = nullptr;
-			if (OM_WeightedBlended == mode_)
+			switch (mode_)
 			{
+			case OM_WeightedBlended:
 				effect = wb_effect_.get();
 				tech = wb_blit_tech_;
 				rl = rl_quad_.get();
-			}
-			else if (OM_PerPixelLinkedLists == mode_)
-			{
+				break;
+
+			case OM_PerPixelLinkedLists:
 				effect = ppll_effect_.get();
 				tech = ppll_render_tech_;
 				rl = rl_quad_.get();
-			}
-			else
-			{
-				BOOST_ASSERT(OM_AdaptiveTransparency == mode_);
+				break;
 
+			case OM_AdaptiveTransparency:
 				effect = at_effect_.get();
 				tech = at_render_tech_;
 				rl = rl_quad_.get();
+				break;
+
+			case OM_RovAdaptiveTransparency:
+				effect = rov_at_effect_.get();
+				tech = rov_at_render_tech_;
+				rl = rl_quad_.get();
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid OIT mode");
 			}
 
 			BOOST_ASSERT(effect != nullptr);
@@ -367,7 +440,7 @@ namespace
 			BOOST_ASSERT(rl != nullptr);
 
 			RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
-			if ((OM_PerPixelLinkedLists == mode_) || (OM_AdaptiveTransparency == mode_))
+			if ((OM_PerPixelLinkedLists == mode_) || (OM_AdaptiveTransparency == mode_) || (OM_RovAdaptiveTransparency == mode_))
 			{
 				*(effect->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
 			}
@@ -406,6 +479,7 @@ namespace
 			
 			case OM_PerPixelLinkedLists:
 			case OM_AdaptiveTransparency:
+			case OM_RovAdaptiveTransparency:
 				{
 					RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
 					*(effect_->ParameterByName("frame_width")) = static_cast<int32_t>(re.CurFrameBuffer()->GetViewport()->width);
@@ -425,6 +499,10 @@ namespace
 			if (gen_ppll_tech_)
 			{
 				*(gen_ppll_effect_->ParameterByName("light_pos")) = light_pos;
+			}
+			if (gen_rov_ppa_tech_)
+			{
+				*(gen_rov_ppa_effect_->ParameterByName("light_pos")) = light_pos;
 			}
 		}
 
@@ -454,6 +532,12 @@ namespace
 
 		RenderEffectPtr at_effect_;
 		RenderTechnique* at_render_tech_;
+
+		RenderEffectPtr gen_rov_ppa_effect_;
+		RenderTechnique* gen_rov_ppa_tech_;
+
+		RenderEffectPtr rov_at_effect_;
+		RenderTechnique* rov_at_render_tech_;
 	};
 
 	class PolygonObject : public SceneObjectHelper
@@ -665,6 +749,10 @@ void OITApp::OnCreate()
 	id_layer_combo_ = dialog_layer_->IDFromName("LayerCombo");
 	id_layer_tex_ = dialog_layer_->IDFromName("LayerTexButton");
 
+	if ((0 == caps.max_simultaneous_uavs) || !caps.rovs_support)
+	{
+		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(5);
+	}
 	if (0 == caps.max_simultaneous_uavs)
 	{
 		dialog_oit_->Control<UIComboBox>(id_oit_mode_)->RemoveItem(4);
@@ -797,7 +885,7 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));
 		frag_link_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_GPU_Structured | EAH_Counter,
-			width * height * 4 * sizeof(float4), nullptr, EF_ABGR32F);
+			width * height * 8 * sizeof(float4), nullptr, EF_ABGR32F);
 		start_offset_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered | EAH_Raw,
 			width * height * sizeof(uint32_t), nullptr, EF_R32UI);
@@ -809,6 +897,14 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		linked_list_fb_->GetViewport()->height = height;
 
 		checked_pointer_cast<PolygonObject>(polygon_)->BackgroundTex(opaque_bg_tex_);
+
+		if (caps.rovs_support)
+		{
+			frag_length_buf_ = rf.MakeVertexBuffer(BU_Dynamic,
+				EAH_GPU_Read | EAH_GPU_Write | EAH_GPU_Unordered,
+				width * height * sizeof(uint32_t), nullptr, EF_R32UI);
+			frag_length_uav_ = rf.MakeGraphicsBufferUnorderedAccessView(*frag_length_buf_, EF_R32UI);
+		}
 	}
 
 	UIManager::Instance().SettleCtrls();
@@ -880,9 +976,10 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 {
 	RenderEngine& re(Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
-	if ((OM_PerPixelLinkedLists == oit_mode_) || (OM_AdaptiveTransparency == oit_mode_))
+	if ((OM_PerPixelLinkedLists == oit_mode_) || (OM_AdaptiveTransparency == oit_mode_) || (OM_RovAdaptiveTransparency == oit_mode_))
 	{
-		checked_pointer_cast<PolygonObject>(polygon_)->LinkedListBuffer(frag_link_buf_, start_offset_buf_);
+		checked_pointer_cast<PolygonObject>(polygon_)->LinkedListBuffer(frag_link_buf_,
+			(OM_RovAdaptiveTransparency == oit_mode_) ? frag_length_buf_ : start_offset_buf_);
 
 		switch (pass)
 		{
@@ -902,7 +999,18 @@ uint32_t OITApp::DoUpdate(uint32_t pass)
 			checked_pointer_cast<PolygonObject>(polygon_)->FirstPass(true);
 			
 			re.BindFrameBuffer(linked_list_fb_);
-			start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
+			{
+				if (OM_RovAdaptiveTransparency == oit_mode_)
+				{
+					linked_list_fb_->AttachUAV(1, frag_length_uav_);
+					frag_length_uav_->Clear(uint4(0, 0, 0, 0));
+				}
+				else
+				{
+					linked_list_fb_->AttachUAV(1, start_offset_uav_);
+					start_offset_uav_->Clear(uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF));
+				}
+			}
 			return App3DFramework::URV_TransparencyFrontOnly | App3DFramework::URV_NeedFlush;
 
 		default:

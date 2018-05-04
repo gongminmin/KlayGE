@@ -8,6 +8,7 @@
 			<item name="Weighted Blended"/>
 			<item name="Per-Pixel Linked Lists"/>
 			<item name="Adaptive Transparency"/>
+			<item name="Rov Adaptive Transparency"/>
 		</control>
 		
 		<control type="static" id="AlphaStatic" caption="Alpha:" x="30" y="80" width="180" height="24" is_default="0" />
