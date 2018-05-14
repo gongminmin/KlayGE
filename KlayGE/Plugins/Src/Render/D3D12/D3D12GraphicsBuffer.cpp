@@ -120,13 +120,8 @@ namespace KlayGE
 			memcpy(p, subres_init, size_in_byte_);
 			buffer_upload->Unmap(0, nullptr);
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
+			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
 
 			cmd_list->CopyResource(d3d_resource_.get(), buffer_upload.get());
 
@@ -325,26 +320,10 @@ namespace KlayGE
 		}
 		else
 		{
-			UINT n = 0;
-			D3D12_RESOURCE_BARRIER barriers[2];
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(0, barrier,
-				src_heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_SOURCE))
-			{
-				barriers[n] = barrier;
-				++ n;
-			}
-			if (d3d_gb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				barriers[n] = barrier;
-				++ n;
-			}
-			if (n > 0)
-			{
-				cmd_list->ResourceBarrier(n, barriers);
-			}
+			this->UpdateResourceBarrier(cmd_list, 0,
+				src_heap_type == D3D12_HEAP_TYPE_UPLOAD ? D3D12_RESOURCE_STATE_GENERIC_READ : D3D12_RESOURCE_STATE_COPY_SOURCE);
+			d3d_gb.UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
 
 			cmd_list->CopyBufferRegion(d3d_gb.D3DResource().get(), dst_offset, d3d_resource_.get(), src_offset, size);
 		}
@@ -374,13 +353,8 @@ namespace KlayGE
 			memcpy(p, data, size);
 			upload_buff->Unmap(0, nullptr);
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
+			this->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
 
 			cmd_list->CopyBufferRegion(d3d_resource_.get(), offset, upload_buff.get(), 0, size);
 

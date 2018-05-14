@@ -740,15 +740,11 @@ namespace KlayGE
 		{
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			D3D12RenderEngine& d3d12_re = *checked_cast<D3D12RenderEngine*>(&rf.RenderEngineInstance());
+			auto* cmd_list = d3d12_re.D3DRenderCmdList();
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			auto rt_tex = checked_cast<D3D12Texture*>(render_targets_[curr_back_buffer_].get());
-			if (rt_tex->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_PRESENT))
-			{
-				d3d12_re.D3DRenderCmdList()->ResourceBarrier(1, &barrier);
-			}
+			auto* rt_tex = checked_cast<D3D12Texture*>(render_targets_[curr_back_buffer_].get());
+			rt_tex->UpdateResourceBarrier(cmd_list, 0, D3D12_RESOURCE_STATE_PRESENT);
+			d3d12_re.FlushResourceBarriers(cmd_list);
 
 			d3d12_re.CommitRenderCmd();
 

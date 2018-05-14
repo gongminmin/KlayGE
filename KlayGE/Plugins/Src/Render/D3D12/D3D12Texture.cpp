@@ -564,27 +564,11 @@ namespace KlayGE
 		uint32_t const num_subres = array_size_ * num_mip_maps_;
 		bool const need_resolve = (this->SampleCount() > 1) && (1 == target.SampleCount());
 
-		UINT n = 0;
-		D3D12_RESOURCE_BARRIER barriers[2];
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier,
-			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_SOURCE : D3D12_RESOURCE_STATE_COPY_SOURCE))
-		{
-			barriers[n] = barrier;
-			++ n;
-		}
-		if (other.UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier,
-			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_COPY_DEST))
-		{
-			barriers[n] = barrier;
-			++ n;
-		}
-		if (n > 0)
-		{
-			cmd_list->ResourceBarrier(n, barriers);
-		}
+		this->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_SOURCE : D3D12_RESOURCE_STATE_COPY_SOURCE);
+		other.UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+			need_resolve ? D3D12_RESOURCE_STATE_RESOLVE_DEST : D3D12_RESOURCE_STATE_COPY_DEST);
+		re.FlushResourceBarriers(cmd_list);
 
 		if (need_resolve)
 		{
@@ -609,25 +593,9 @@ namespace KlayGE
 
 		D3D12Texture& other = *checked_cast<D3D12Texture2D*>(&target);
 
-		UINT n = 0;
-		D3D12_RESOURCE_BARRIER barriers[2];
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		if (this->UpdateResourceBarrier(src_subres, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
-		{
-			barriers[n] = barrier;
-			++ n;
-		}
-		if (other.UpdateResourceBarrier(dst_subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-		{
-			barriers[n] = barrier;
-			++ n;
-		}
-		if (n > 0)
-		{
-			cmd_list->ResourceBarrier(n, barriers);
-		}
+		this->UpdateResourceBarrier(cmd_list, src_subres, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		other.UpdateResourceBarrier(cmd_list, dst_subres, D3D12_RESOURCE_STATE_COPY_DEST);
+		re.FlushResourceBarriers(cmd_list);
 
 		D3D12_TEXTURE_COPY_LOCATION src;
 		src.pResource = d3d_resource_.get();
@@ -766,13 +734,8 @@ namespace KlayGE
 			ID3D12GraphicsCommandList* cmd_list = re.D3DResCmdList();
 			std::lock_guard<std::mutex> lock(re.D3DResCmdListMutex());
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
+			this->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
 
 			uint32_t const num_subres = array_size * num_mip_maps_;
 			std::vector<D3D12_PLACED_SUBRESOURCE_FOOTPRINT> layouts(num_subres);
@@ -866,13 +829,8 @@ namespace KlayGE
 
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(subres, barrier, D3D12_RESOURCE_STATE_COPY_SOURCE))
-			{
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
+			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_COPY_SOURCE);
+			re.FlushResourceBarriers(cmd_list);
 
 			D3D12_TEXTURE_COPY_LOCATION src;
 			src.pResource = d3d_resource_.get();
@@ -975,13 +933,8 @@ namespace KlayGE
 		{
 			ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (this->UpdateResourceBarrier(subres, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				cmd_list->ResourceBarrier(1, &barrier);
-			}
+			this->UpdateResourceBarrier(cmd_list, subres, D3D12_RESOURCE_STATE_COPY_DEST);
+			re.FlushResourceBarriers(cmd_list);
 
 			D3D12_TEXTURE_COPY_LOCATION src;
 			src.pResource = d3d_texture_upload_buff_.get();

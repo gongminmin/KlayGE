@@ -1346,7 +1346,9 @@ namespace KlayGE
 
 	void D3D12ShaderObject::Bind()
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
+		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		auto* cmd_list = re.D3DRenderCmdList();
+
 		for (size_t st = 0; st < ST_NumShaderTypes; ++ st)
 		{
 			for (auto const & pb : param_binds_[st])
@@ -1354,9 +1356,6 @@ namespace KlayGE
 				pb.func();
 			}
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			D3D12_RESOURCE_STATES state_after
 				= D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 			for (auto const & srvsrc : srvsrcs_[st])
@@ -1366,10 +1365,7 @@ namespace KlayGE
 					auto res = std::get<0>(srvsrc);
 					if (res != nullptr)
 					{
-						if (res->UpdateResourceBarrier(std::get<1>(srvsrc) + subres, barrier, state_after))
-						{
-							barriers.push_back(barrier);
-						}
+						res->UpdateResourceBarrier(cmd_list, std::get<1>(srvsrc) + subres, state_after);
 					}
 				}
 			}
@@ -1389,18 +1385,12 @@ namespace KlayGE
 					}
 #endif
 
-					if (uavsrc.first->UpdateResourceBarrier(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, barrier, state_after))
-					{
-						barriers.push_back(barrier);
-					}
+					uavsrc.first->UpdateResourceBarrier(cmd_list, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, state_after);
 				}
 			}
 		}
-		if (!barriers.empty())
-		{
-			auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
-			re.D3DRenderCmdList()->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+		
+		re.FlushResourceBarriers(cmd_list);
 
 		for (auto cb : all_cbuffs_)
 		{

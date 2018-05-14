@@ -52,56 +52,75 @@ namespace KlayGE
 		}
 	}
 
-	bool D3D12Resource::UpdateResourceBarrier(uint32_t sub_res, D3D12_RESOURCE_BARRIER& barrier, D3D12_RESOURCE_STATES target_state)
+	void D3D12Resource::UpdateResourceBarrier(ID3D12GraphicsCommandList* cmd_list, uint32_t sub_res, D3D12_RESOURCE_STATES target_state)
 	{
 		if (!d3d_resource_)
 		{
-			return false;
+			return;
 		}
+
+		D3D12_RESOURCE_BARRIER barrier;
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+		auto& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 
 		if (sub_res == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)
 		{
-#ifdef KLAYGE_DEBUG
+			bool same_state = true;
 			for (auto state : curr_states_)
 			{
-				BOOST_ASSERT(state == curr_states_[0]);
-#if defined(KLAYGE_COMPILER_CLANGC2)
-				KFL_UNUSED(state);
-#endif
+				if (state != curr_states_[0])
+				{
+					same_state = false;
+					break;
+				}
 			}
-#endif
 
-			if (curr_states_[0] == target_state)
+			if (same_state)
 			{
-				return false;
+				if (curr_states_[0] != target_state)
+				{
+					barrier.Transition.pResource = d3d_resource_.get();
+					barrier.Transition.StateBefore = curr_states_[0];
+					barrier.Transition.StateAfter = target_state;
+					barrier.Transition.Subresource = sub_res;
+					for (auto& state : curr_states_)
+					{
+						state = target_state;
+					}
+
+					re.AddResourceBarrier(cmd_list, barrier);
+				}
 			}
 			else
 			{
-				barrier.Transition.pResource = d3d_resource_.get();
-				barrier.Transition.StateBefore = curr_states_[0];
-				barrier.Transition.StateAfter = target_state;
-				barrier.Transition.Subresource = sub_res;
-				for (auto& state : curr_states_)
+				for (uint32_t i = 0; i < curr_states_.size(); ++ i)
 				{
-					state = target_state;
+					if (curr_states_[i] != target_state)
+					{
+						barrier.Transition.pResource = d3d_resource_.get();
+						barrier.Transition.StateBefore = curr_states_[i];
+						barrier.Transition.StateAfter = target_state;
+						barrier.Transition.Subresource = i;
+						curr_states_[i] = target_state;
+
+						re.AddResourceBarrier(cmd_list, barrier);
+					}
 				}
-				return true;
 			}
 		}
 		else
 		{
-			if (curr_states_[sub_res] == target_state)
-			{
-				return false;
-			}
-			else
+			if (curr_states_[sub_res] != target_state)
 			{
 				barrier.Transition.pResource = d3d_resource_.get();
 				barrier.Transition.StateBefore = curr_states_[sub_res];
 				barrier.Transition.StateAfter = target_state;
 				barrier.Transition.Subresource = sub_res;
 				curr_states_[sub_res] = target_state;
-				return true;
+
+				re.AddResourceBarrier(cmd_list, barrier);
 			}
 		}
 	}

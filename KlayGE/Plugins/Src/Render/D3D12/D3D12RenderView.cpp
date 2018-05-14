@@ -222,21 +222,13 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::ClearColor(Color const & clr)
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
-			if (rt_src_->UpdateResourceBarrier(rt_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-			{
-				barriers.push_back(barrier);
-			}
+			rt_src_->UpdateResourceBarrier(d3d_cmd_list_, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		d3d_cmd_list_->ClearRenderTargetView(rt_view_->Handle(), &clr.r(), 0, nullptr);
 	}
@@ -258,21 +250,13 @@ namespace KlayGE
 
 	void D3D12RenderTargetRenderView::Discard()
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < rt_num_subres_; ++ i)
 		{
-			if (rt_src_->UpdateResourceBarrier(rt_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-			{
-				barriers.push_back(barrier);
-			}
+			rt_src_->UpdateResourceBarrier(d3d_cmd_list_, rt_first_subres_ + i, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
@@ -364,63 +348,39 @@ namespace KlayGE
 
 	void D3D12DepthStencilRenderView::ClearDepth(float depth)
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-			{
-				barriers.push_back(barrier);
-			}
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 	}
 
 	void D3D12DepthStencilRenderView::ClearStencil(int32_t stencil)
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-			{
-				barriers.push_back(barrier);
-			}
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_STENCIL, 1, static_cast<uint8_t>(stencil), 0, nullptr);
 	}
 
 	void D3D12DepthStencilRenderView::ClearDepthStencil(float depth, int32_t stencil)
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-			{
-				barriers.push_back(barrier);
-			}
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		d3d_cmd_list_->ClearDepthStencilView(ds_view_->Handle(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL,
 			depth, static_cast<uint8_t>(stencil), 0, nullptr);
@@ -428,21 +388,13 @@ namespace KlayGE
 
 	void D3D12DepthStencilRenderView::Discard()
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < ds_num_subres_; ++ i)
 		{
-			if (ds_src_->UpdateResourceBarrier(ds_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-			{
-				barriers.push_back(barrier);
-			}
+			ds_src_->UpdateResourceBarrier(d3d_cmd_list_, ds_first_subres_ + i, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
@@ -551,13 +503,10 @@ namespace KlayGE
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
-		{
-			d3d_cmd_list_->ResourceBarrier(1, &barrier);
-		}
+		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -579,13 +528,10 @@ namespace KlayGE
 		TIFHR(d3d_device_->CreateDescriptorHeap(&cbv_srv_heap_desc, IID_ID3D12DescriptorHeap, reinterpret_cast<void**>(&csu_heap)));
 		ID3D12DescriptorHeapPtr cbv_srv_uav_heap = MakeCOMPtr(csu_heap);
 
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-		if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
-		{
-			d3d_cmd_list_->ResourceBarrier(1, &barrier);
-		}
+		ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE cpu_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 		D3D12_GPU_DESCRIPTOR_HANDLE gpu_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
@@ -598,21 +544,13 @@ namespace KlayGE
 
 	void D3D12UnorderedAccessView::Discard()
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-		D3D12_RESOURCE_BARRIER barrier;
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 		for (uint32_t i = 0; i < ua_num_subres_; ++ i)
 		{
-			if (ua_src_->UpdateResourceBarrier(ua_first_subres_ + i, barrier, D3D12_RESOURCE_STATE_UNORDERED_ACCESS))
-			{
-				barriers.push_back(barrier);
-			}
+			ua_src_->UpdateResourceBarrier(d3d_cmd_list_, ua_first_subres_ + i, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 		}
-		if (!barriers.empty())
-		{
-			d3d_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+
+		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+		re.FlushResourceBarriers(d3d_cmd_list_);
 
 		D3D12_DISCARD_REGION region;
 		region.NumRects = 0;
@@ -649,13 +587,10 @@ namespace KlayGE
 			memcpy(mapped, &count, sizeof(count));
 			ua_counter_upload_src_->Unmap(0, nullptr);
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (ua_src_->UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_COPY_DEST))
-			{
-				d3d_cmd_list_->ResourceBarrier(1, &barrier);
-			}
+			ua_src_->UpdateResourceBarrier(d3d_cmd_list_, 0, D3D12_RESOURCE_STATE_COPY_DEST);
+
+			D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
+			re.FlushResourceBarriers(d3d_cmd_list_);
 
 			d3d_cmd_list_->CopyBufferRegion(ua_src_->D3DResource().get(),
 				counter_offset_, ua_counter_upload_src_.get(), 0, sizeof(count));

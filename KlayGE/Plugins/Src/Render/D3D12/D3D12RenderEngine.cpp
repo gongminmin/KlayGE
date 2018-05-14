@@ -798,19 +798,10 @@ namespace KlayGE
 		D3D12FrameBuffer& fb = *checked_cast<D3D12FrameBuffer*>(this->CurFrameBuffer().get());
 		fb.BindBarrier();
 
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-
 		for (uint32_t i = 0; i < so_buffs_.size(); ++ i)
 		{
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(so_buffs_[i].get());
-
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_STREAM_OUT))
-			{
-				barriers.push_back(barrier);
-			}
+			d3dvb.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_STREAM_OUT);
 		}
 
 		uint32_t const num_vertex_streams = rl.NumVertexStreams();
@@ -822,13 +813,7 @@ namespace KlayGE
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
-				{
-					barriers.push_back(barrier);
-				}
+				d3dvb.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			}
 		}
 		if (rl.InstanceStream())
@@ -838,13 +823,7 @@ namespace KlayGE
 			D3D12GraphicsBuffer& d3dvb = *checked_cast<D3D12GraphicsBuffer*>(stream.get());
 			if (!(d3dvb.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				if (d3dvb.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER))
-				{
-					barriers.push_back(barrier);
-				}
+				d3dvb.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
 			}
 		}
 
@@ -853,13 +832,7 @@ namespace KlayGE
 			D3D12GraphicsBuffer& ib = *checked_cast<D3D12GraphicsBuffer*>(rl.GetIndexStream().get());
 			if (!(ib.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				if (ib.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDEX_BUFFER))
-				{
-					barriers.push_back(barrier);
-				}
+				ib.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 			}
 		}
 
@@ -868,20 +841,11 @@ namespace KlayGE
 			auto& arg_buff = *checked_cast<D3D12GraphicsBuffer*>(rl.GetIndirectArgs().get());
 			if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 			{
-				D3D12_RESOURCE_BARRIER barrier;
-				barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-				barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-				if (arg_buff.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT))
-				{
-					barriers.push_back(barrier);
-				}
+				arg_buff.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
 			}
 		}
 
-		if (!barriers.empty())
-		{
-			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+		this->FlushResourceBarriers(d3d_render_cmd_list_.get());
 
 		checked_cast<D3D12RenderLayout const *>(&rl)->Active();
 
@@ -1044,24 +1008,13 @@ namespace KlayGE
 	void D3D12RenderEngine::DoDispatchIndirect(RenderEffect const & effect, RenderTechnique const & tech,
 		GraphicsBufferPtr const & buff_args, uint32_t offset)
 	{
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
-
 		auto& arg_buff = *checked_cast<D3D12GraphicsBuffer*>(buff_args.get());
 		if (!(arg_buff.AccessHint() & (EAH_CPU_Read | EAH_CPU_Write)))
 		{
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-			if (arg_buff.UpdateResourceBarrier(0, barrier, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT))
-			{
-				barriers.push_back(barrier);
-			}
+			arg_buff.UpdateResourceBarrier(d3d_render_cmd_list_.get(), 0, D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT);
 		}
 
-		if (!barriers.empty())
-		{
-			d3d_render_cmd_list_->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+		this->FlushResourceBarriers(d3d_render_cmd_list_.get());
 
 		uint32_t const num_passes = tech.NumPasses();
 		for (uint32_t i = 0; i < num_passes; ++ i)
@@ -2095,6 +2048,55 @@ namespace KlayGE
 		if (buff)
 		{
 			curr_render_cmd_allocator_->release_after_sync_buffs_.push_back(buff);
+		}
+	}
+
+	std::vector<D3D12_RESOURCE_BARRIER>* D3D12RenderEngine::FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation)
+	{
+		auto iter = res_barriers_.begin();
+		for (; iter != res_barriers_.end(); ++ iter)
+		{
+			if (iter->first == cmd_list)
+			{
+				break;
+			}
+		}
+
+		std::vector<D3D12_RESOURCE_BARRIER>* ret;
+		if (iter == res_barriers_.end())
+		{
+			if (allow_creation)
+			{
+				res_barriers_.push_back(std::make_pair(cmd_list, std::vector<D3D12_RESOURCE_BARRIER>()));
+				ret = &res_barriers_.back().second;
+			}
+			else
+			{
+				ret = nullptr;
+			}
+		}
+		else
+		{
+			ret = &iter->second;
+		}
+
+		return ret;
+	}
+
+	void D3D12RenderEngine::AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, ArrayRef<D3D12_RESOURCE_BARRIER> barriers)
+	{
+		auto* res_barriers = this->FindResourceBarriers(cmd_list, true);
+		BOOST_ASSERT(res_barriers != nullptr);
+		res_barriers->insert(res_barriers->end(), barriers.begin(), barriers.end());
+	}
+
+	void D3D12RenderEngine::FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list)
+	{
+		auto* res_barriers = this->FindResourceBarriers(cmd_list, false);
+		if (res_barriers && !res_barriers->empty())
+		{
+			cmd_list->ResourceBarrier(static_cast<UINT>(res_barriers->size()), res_barriers->data());
+			res_barriers->clear();
 		}
 	}
 

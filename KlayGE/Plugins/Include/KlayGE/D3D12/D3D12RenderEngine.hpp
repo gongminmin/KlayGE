@@ -213,6 +213,9 @@ namespace KlayGE
 
 		void ReleaseAfterSync(ID3D12ResourcePtr const & buff);
 
+		void AddResourceBarrier(ID3D12GraphicsCommandList* cmd_list, ArrayRef<D3D12_RESOURCE_BARRIER> barriers);
+		void FlushResourceBarriers(ID3D12GraphicsCommandList* cmd_list);
+
 	private:
 		struct CmdAllocatorDependencies
 		{
@@ -258,6 +261,8 @@ namespace KlayGE
 
 		std::shared_ptr<CmdAllocatorDependencies> AllocCmdAllocator();
 		void RecycleCmdAllocator(std::shared_ptr<CmdAllocatorDependencies> const & cmd_allocator, uint64_t fence_val);
+
+		std::vector<D3D12_RESOURCE_BARRIER>* FindResourceBarriers(ID3D12GraphicsCommandList* cmd_list, bool allow_creation);
 
 	private:
 		// Direct3D rendering device
@@ -352,6 +357,8 @@ namespace KlayGE
 		std::shared_ptr<ID3D12CommandSignature> draw_indirect_signature_;
 		std::shared_ptr<ID3D12CommandSignature> draw_indexed_indirect_signature_;
 		std::shared_ptr<ID3D12CommandSignature> dispatch_indirect_signature_;
+
+		std::vector<std::pair<ID3D12GraphicsCommandList*, std::vector<D3D12_RESOURCE_BARRIER>>> res_barriers_;
 	};
 }
 

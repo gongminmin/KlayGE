@@ -459,10 +459,6 @@ namespace KlayGE
 			scissor_rc.left = 0;
 			scissor_rc.top = 0;
 
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-
 			D3D12_CPU_DESCRIPTOR_HANDLE cpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetCPUDescriptorHandleForHeapStart();
 			D3D12_GPU_DESCRIPTOR_HANDLE gpu_cbv_srv_uav_handle = cbv_srv_uav_heap->GetGPUDescriptorHandleForHeapStart();
 			uint32_t const srv_desc_size = re.CBVSRVUAVDescSize();
@@ -474,24 +470,11 @@ namespace KlayGE
 					{
 						cmd_list->SetGraphicsRootDescriptorTable(0, gpu_cbv_srv_uav_handle);
 
-						UINT n = 0;
-						D3D12_RESOURCE_BARRIER barriers[2];
-						if (this->UpdateResourceBarrier(CalcSubresource(level - 1, index * 6 + f, 0, num_mip_maps_, array_size_),
-							barrier, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE))
-						{
-							barriers[n] = barrier;
-							++ n;
-						}
-						if (this->UpdateResourceBarrier(CalcSubresource(level, index * 6 + f, 0, num_mip_maps_, array_size_),
-							barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-						{
-							barriers[n] = barrier;
-							++ n;
-						}
-						if (n > 0)
-						{
-							cmd_list->ResourceBarrier(n, barriers);
-						}
+						this->UpdateResourceBarrier(cmd_list, CalcSubresource(level - 1, index * 6 + f, 0, num_mip_maps_, array_size_),
+							D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+						this->UpdateResourceBarrier(cmd_list, CalcSubresource(level, index * 6 + f, 0, num_mip_maps_, array_size_),
+							D3D12_RESOURCE_STATE_RENDER_TARGET);
+						re.FlushResourceBarriers(cmd_list);
 
 						D3D12_CPU_DESCRIPTOR_HANDLE const & rt_handle = this->RetriveD3DRenderTargetView(index * 6 + f, 1, level)->Handle();
 

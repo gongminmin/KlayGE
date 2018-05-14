@@ -163,37 +163,21 @@ namespace KlayGE
 		D3D12RenderEngine& re = *checked_cast<D3D12RenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D12GraphicsCommandList* cmd_list = re.D3DRenderCmdList();
 
-		std::vector<D3D12_RESOURCE_BARRIER> barriers;
 		for (size_t i = 0; i < d3d_rt_src_.size(); ++ i)
 		{
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			for (uint32_t j = 0; j < d3d_rt_num_subres_[i]; ++ j)
 			{
-				if (d3d_rt_src_[i]->UpdateResourceBarrier(d3d_rt_first_subres_[i] + j, barrier, D3D12_RESOURCE_STATE_RENDER_TARGET))
-				{
-					barriers.push_back(barrier);
-				}
+				d3d_rt_src_[i]->UpdateResourceBarrier(cmd_list, d3d_rt_first_subres_[i] + j, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			}
 		}
 		if (d3d_ds_src_)
 		{
-			D3D12_RESOURCE_BARRIER barrier;
-			barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-			barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
 			for (uint32_t j = 0; j < d3d_ds_num_subres_; ++ j)
 			{
-				if (d3d_ds_src_->UpdateResourceBarrier(d3d_ds_first_subres_ + j, barrier, D3D12_RESOURCE_STATE_DEPTH_WRITE))
-				{
-					barriers.push_back(barrier);
-				}
+				d3d_ds_src_->UpdateResourceBarrier(cmd_list, d3d_ds_first_subres_ + j, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			}
 		}
-		if (!barriers.empty())
-		{
-			cmd_list->ResourceBarrier(static_cast<UINT>(barriers.size()), &barriers[0]);
-		}
+		re.FlushResourceBarriers(cmd_list);
 	}
 
 	void D3D12FrameBuffer::UpdateViewPointers()

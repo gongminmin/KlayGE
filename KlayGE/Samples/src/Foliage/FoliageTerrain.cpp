@@ -168,7 +168,7 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		RenderDeviceCaps const & caps = re.DeviceCaps();
 
-		use_draw_indirect_ = caps.draw_indirect_support && caps.uavs_at_every_stage_support;
+		use_draw_indirect_ = false;// caps.draw_indirect_support && caps.uavs_at_every_stage_support;
 
 		foliage_dist_effect_ = SyncLoadRenderEffect("FoliageDistribution.fxml");
 		foliage_dist_tech_ = foliage_dist_effect_->TechniqueByName("FoliageDistribution");
