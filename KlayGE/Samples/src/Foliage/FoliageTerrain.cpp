@@ -58,7 +58,7 @@ namespace KlayGE
 				g_buffer_files[1] = "GBufferTwoSided.fxml";
 				++ num;
 			}
-			this->BindDeferredEffect(SyncLoadRenderEffects(ArrayRef<std::string>(g_buffer_files, num)));
+			this->BindDeferredEffect(SyncLoadRenderEffects(MakeArrayRef(g_buffer_files, num)));
 		}
 
 		void InstanceBuffer(uint32_t lod, GraphicsBufferPtr const & vb)

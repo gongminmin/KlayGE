@@ -646,7 +646,7 @@ namespace KlayGE
 			++ num_heaps;
 		}
 
-		this->SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*>(heaps.data(), num_heaps));
+		this->SetDescriptorHeaps(MakeArrayRef(heaps.data(), num_heaps));
 
 		uint32_t root_param_index = 0;
 		for (uint32_t i = 0; i < ShaderObject::ST_NumShaderTypes; ++ i)
@@ -1599,7 +1599,7 @@ namespace KlayGE
 	void D3D12RenderEngine::SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*> descriptor_heaps)
 	{
 		if ((descriptor_heaps.size() != curr_num_desc_heaps_)
-			|| (descriptor_heaps != ArrayRef<ID3D12DescriptorHeap*>(curr_desc_heaps_.data(), curr_num_desc_heaps_)))
+			|| (descriptor_heaps != MakeArrayRef(curr_desc_heaps_.data(), curr_num_desc_heaps_)))
 		{
 			BOOST_ASSERT(descriptor_heaps.size() <= curr_desc_heaps_.size());
 			curr_num_desc_heaps_ = static_cast<uint32_t>(descriptor_heaps.size());

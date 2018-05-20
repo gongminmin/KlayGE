@@ -188,7 +188,7 @@ namespace KlayGE
 					}
 				}
 
-				feature_levels = ArrayRef<D3D_FEATURE_LEVEL>(all_feature_levels).Slice(feature_level_start_index);
+				feature_levels = MakeArrayRef(all_feature_levels).Slice(feature_level_start_index);
 			}
 
 			for (size_t i = 0; i < feature_levels.size(); ++ i)

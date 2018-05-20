@@ -338,7 +338,7 @@ namespace KlayGE
 				heaps[num_heaps] = sampler_heap;
 				++ num_heaps;
 			}
-			re.SetDescriptorHeaps(ArrayRef<ID3D12DescriptorHeap*>(heaps.data(), num_heaps));
+			re.SetDescriptorHeaps(MakeArrayRef(heaps.data(), num_heaps));
 
 			if (sampler_heap)
 			{

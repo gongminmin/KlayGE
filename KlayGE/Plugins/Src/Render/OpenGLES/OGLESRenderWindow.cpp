@@ -190,7 +190,7 @@ namespace KlayGE
 				}
 			}
 
-			available_versions = ArrayRef<std::pair<int, int>>(all_versions).Slice(version_start_index);
+			available_versions = MakeArrayRef(all_versions).Slice(version_start_index);
 		}
 
 		std::vector<EGLint> visual_attr =

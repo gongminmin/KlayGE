@@ -287,7 +287,7 @@ namespace KlayGE
 				}
 			}
 
-			feature_levels = ArrayRef<D3D_FEATURE_LEVEL>(all_feature_levels).Slice(feature_level_start_index);
+			feature_levels = MakeArrayRef(all_feature_levels).Slice(feature_level_start_index);
 		}
 
 		ID3D11Device* d3d_device = nullptr;

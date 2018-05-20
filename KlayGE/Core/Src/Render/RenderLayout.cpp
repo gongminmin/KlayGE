@@ -74,7 +74,7 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < vertex_streams_.size(); ++ i)
 			{
-				if (ArrayRef<VertexElement>(vertex_streams_[i].format) == vet)
+				if (MakeArrayRef(vertex_streams_[i].format) == vet)
 				{
 					vertex_streams_[i].stream = buffer;
 					vertex_streams_[i].vertex_size = size;

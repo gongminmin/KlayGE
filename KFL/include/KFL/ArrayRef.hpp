@@ -220,6 +220,42 @@ namespace KlayGE
 	{
 		return !(lhs == rhs);
 	}
+
+	template <typename T>
+	ArrayRef<T> MakeArrayRef(T const & t)
+	{
+		return ArrayRef<T>(t);
+	}
+
+	template <typename T>
+	ArrayRef<T> MakeArrayRef(T const * data, size_t size)
+	{
+		return ArrayRef<T>(data, size);
+	}
+
+	template <typename T>
+	ArrayRef<T> MakeArrayRef(T const * begin, T const * end)
+	{
+		return ArrayRef<T>(begin, end);
+	}
+
+	template <typename T, typename A>
+	ArrayRef<T> MakeArrayRef(std::vector<T, A> const & v)
+	{
+		return ArrayRef<T>(v);
+	}
+
+	template <typename T, size_t N>
+	ArrayRef<T> MakeArrayRef(T const (&arr)[N])
+	{
+		return ArrayRef<T>(arr);
+	}
+
+	template <typename T>
+	ArrayRef<T> MakeArrayRef(std::initializer_list<T> const & v)
+	{
+		return ArrayRef<T>(v);
+	}
 }
 
 #endif		// _KFL_ARRAYREF_HPP
