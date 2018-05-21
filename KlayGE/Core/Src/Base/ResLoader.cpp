@@ -378,16 +378,16 @@ namespace KlayGE
 						auto const password_start_offset = pkt_offset + 4;
 						if (next_slash_offset != std::string_view::npos)
 						{
-							password = path.substr(password_start_offset, next_slash_offset - password_start_offset);
+							password = std::string(path.substr(password_start_offset, next_slash_offset - password_start_offset));
 						}
 						else
 						{
-							password = path.substr(password_start_offset);
+							password = std::string(path.substr(password_start_offset));
 						}
 					}
 					if (next_slash_offset != std::string_view::npos)
 					{
-						path_in_package = path.substr(next_slash_offset + 1);
+						path_in_package = std::string(path.substr(next_slash_offset + 1));
 					}
 					break;
 				}

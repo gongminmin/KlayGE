@@ -143,8 +143,8 @@ namespace
 				XMLNodePtr particle_node = root->FirstNode("particle");
 				{
 					XMLNodePtr alpha_node = particle_node->FirstNode("alpha");
-					ps_desc_.ps_data->particle_alpha_from_tex = alpha_node->Attrib("from")->ValueString();
-					ps_desc_.ps_data->particle_alpha_to_tex = alpha_node->Attrib("to")->ValueString();
+					ps_desc_.ps_data->particle_alpha_from_tex = std::string(alpha_node->Attrib("from")->ValueString());
+					ps_desc_.ps_data->particle_alpha_to_tex = std::string(alpha_node->Attrib("to")->ValueString());
 				}
 				{
 					XMLNodePtr color_node = particle_node->FirstNode("color");
@@ -204,7 +204,7 @@ namespace
 				XMLAttributePtr type_attr = emitter_node->Attrib("type");
 				if (type_attr)
 				{
-					ps_desc_.ps_data->emitter_type = type_attr->ValueString();
+					ps_desc_.ps_data->emitter_type = std::string(type_attr->ValueString());
 				}
 				else
 				{
@@ -300,7 +300,7 @@ namespace
 				XMLAttributePtr type_attr = updater_node->Attrib("type");
 				if (type_attr)
 				{
-					ps_desc_.ps_data->updater_type = type_attr->ValueString();
+					ps_desc_.ps_data->updater_type = std::string(type_attr->ValueString());
 				}
 				else
 				{

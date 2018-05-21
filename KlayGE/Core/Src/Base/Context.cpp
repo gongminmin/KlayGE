@@ -358,43 +358,43 @@ namespace KlayGE
 			XMLNodePtr rf_node = context_node->FirstNode("render_factory");
 			if (rf_node)
 			{
-				rf_name = rf_node->Attrib("name")->ValueString();
+				rf_name = std::string(rf_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr af_node = context_node->FirstNode("audio_factory");
 			if (af_node)
 			{
-				af_name = af_node->Attrib("name")->ValueString();
+				af_name = std::string(af_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr if_node = context_node->FirstNode("input_factory");
 			if (if_node)
 			{
-				if_name = if_node->Attrib("name")->ValueString();
+				if_name = std::string(if_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr sf_node = context_node->FirstNode("show_factory");
 			if (sf_node)
 			{
-				sf_name = sf_node->Attrib("name")->ValueString();
+				sf_name = std::string(sf_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr scf_node = context_node->FirstNode("script_factory");
 			if (scf_node)
 			{
-				scf_name = scf_node->Attrib("name")->ValueString();
+				scf_name = std::string(scf_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr sm_node = context_node->FirstNode("scene_manager");
 			if (sm_node)
 			{
-				sm_name = sm_node->Attrib("name")->ValueString();
+				sm_name = std::string(sm_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr adsf_node = context_node->FirstNode("audio_data_source_factory");
 			if (adsf_node)
 			{
-				adsf_name = adsf_node->Attrib("name")->ValueString();
+				adsf_name = std::string(adsf_node->Attrib("name")->ValueString());
 			}
 
 			XMLNodePtr perf_profiler_node = context_node->FirstNode("perf_profiler");
@@ -425,13 +425,13 @@ namespace KlayGE
 			attr = frame_node->Attrib("color_fmt");
 			if (attr)
 			{
-				color_fmt_str = attr->ValueString();
+				color_fmt_str = std::string(attr->ValueString());
 			}
 			std::string depth_stencil_fmt_str = "D16";
 			attr = frame_node->Attrib("depth_stencil_fmt");
 			if (attr)
 			{
-				depth_stencil_fmt_str = attr->ValueString();
+				depth_stencil_fmt_str = std::string(attr->ValueString());
 			}
 			attr = frame_node->Attrib("fullscreen");
 			if (attr)

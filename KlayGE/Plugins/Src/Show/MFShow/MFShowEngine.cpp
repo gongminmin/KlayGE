@@ -647,7 +647,7 @@ namespace KlayGE
 
 		std::wstring url;
 		Convert(url, file_name);
-		media_engine_->SetSource(url.data());
+		media_engine_->SetSource(&url[0]);
 
 		state_ = SS_Stopped;
 	}

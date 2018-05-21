@@ -141,7 +141,7 @@ namespace
 				XMLAttributePtr attr = mtl_node->Attrib("name");
 				if (attr)
 				{
-					mtl.name = attr->ValueString();
+					mtl.name = std::string(attr->ValueString());
 				}
 			}
 
@@ -1472,7 +1472,7 @@ namespace
 		Joint joint;
 		for (XMLNodePtr bone_node = bones_chunk->FirstNode("bone"); bone_node; bone_node = bone_node->NextSibling("bone"))
 		{
-			joint.name = bone_node->Attrib("name")->ValueString();
+			joint.name = std::string(bone_node->Attrib("name")->ValueString());
 			joint.parent = static_cast<int16_t>(bone_node->Attrib("parent")->ValueInt());
 
 			XMLNodePtr bind_pos_node = bone_node->FirstNode("bind_pos");
@@ -1757,7 +1757,7 @@ namespace
 		{
 			for (; action_node; action_node = action_node->NextSibling("action"))
 			{
-				action.name = action_node->Attrib("name")->ValueString();
+				action.name = std::string(action_node->Attrib("name")->ValueString());
 
 				action.start_frame = action_node->Attrib("start")->ValueUInt();
 				action.end_frame = action_node->Attrib("end")->ValueUInt();

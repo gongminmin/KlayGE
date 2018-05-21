@@ -151,7 +151,7 @@ namespace
 				XMLAttributePtr attr = root->Attrib("name");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->name = attr->ValueString();
+					mtl_desc_.mtl_data->name = std::string(attr->ValueString());
 				}
 				else
 				{
@@ -184,7 +184,7 @@ namespace
 				attr = albedo_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Albedo] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Albedo] = std::string(attr->ValueString());
 				}
 			}
 
@@ -199,7 +199,7 @@ namespace
 				attr = metalness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Metalness] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Metalness] = std::string(attr->ValueString());
 				}
 			}
 
@@ -214,7 +214,7 @@ namespace
 				attr = glossiness_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Glossiness] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Glossiness] = std::string(attr->ValueString());
 				}
 			}
 
@@ -229,7 +229,7 @@ namespace
 				attr = emissive_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Emissive] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Emissive] = std::string(attr->ValueString());
 				}
 			}
 
@@ -239,7 +239,7 @@ namespace
 				XMLAttributePtr attr = normal_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Normal] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Normal] = std::string(attr->ValueString());
 				}
 			}
 
@@ -249,7 +249,7 @@ namespace
 				XMLAttributePtr attr = height_node->Attrib("texture");
 				if (attr)
 				{
-					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Height] = attr->ValueString();
+					mtl_desc_.mtl_data->tex_names[RenderMaterial::TS_Height] = std::string(attr->ValueString());
 				}
 
 				attr = height_node->Attrib("offset");

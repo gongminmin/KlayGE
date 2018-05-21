@@ -653,7 +653,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			update_node = update_node->FirstNode();
 			if (update_node && (XNT_CData == update_node->Type()))
 			{
-				update_script = update_node->ValueString();
+				update_script = std::string(update_node->ValueString());
 			}
 		}
 
@@ -734,7 +734,7 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			update_node = update_node->FirstNode();
 			if (update_node && (XNT_CData == update_node->Type()))
 			{
-				update_script = update_node->ValueString();
+				update_script = std::string(update_node->ValueString());
 			}
 		}
 

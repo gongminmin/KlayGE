@@ -13,7 +13,7 @@ std::string ReadWholeFile(ResIdentifierPtr const & res)
 	std::string str;
 	str.resize(res->tellg());
 	res->seekg(0, std::ios_base::beg);
-	res->read(str.data(), str.size());
+	res->read(&str[0], str.size());
 	return str;
 }
 

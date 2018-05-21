@@ -149,8 +149,8 @@ namespace
 					XMLNodePtr shader_chunk = pp_node->FirstNode("shader");
 					if (shader_chunk)
 					{
-						pp_desc_.pp_data->effect_name = shader_chunk->Attrib("effect")->ValueString();
-						pp_desc_.pp_data->tech_name = shader_chunk->Attrib("tech")->ValueString();
+						pp_desc_.pp_data->effect_name = std::string(shader_chunk->Attrib("effect")->ValueString());
+						pp_desc_.pp_data->tech_name = std::string(shader_chunk->Attrib("tech")->ValueString());
 
 						XMLAttributePtr attr = shader_chunk->Attrib("cs_data_per_thread_x");
 						if (attr)

@@ -1911,7 +1911,7 @@ namespace KlayGE
 					add_model_event_(std::string(node->Attrib("meshml")->ValueString()).c_str());
 
 					EntityInfo& oi = entities_[last_entity_id_];
-					oi.name = node->Attrib("name")->ValueString();
+					oi.name = std::string(node->Attrib("name")->ValueString());
 
 					this->LoadTransformNodes(node, oi);
 
@@ -1943,7 +1943,7 @@ namespace KlayGE
 					EntityInfo& oi = entities_[last_entity_id_];
 					LightSourcePtr light = oi.light;
 
-					oi.name = node->Attrib("name")->ValueString();
+					oi.name = std::string(node->Attrib("name")->ValueString());
 
 					int32_t light_attr = 0;
 					XMLNodePtr attr_node = node->FirstNode("attr");
@@ -2055,7 +2055,7 @@ namespace KlayGE
 					EntityInfo& oi = entities_[last_entity_id_];
 					CameraPtr camera = oi.camera;
 
-					oi.name = node->Attrib("name")->ValueString();
+					oi.name = std::string(node->Attrib("name")->ValueString());
 
 					float3 eye_pos(0, 0, -1);
 					float3 look_at(0, 0, 0);

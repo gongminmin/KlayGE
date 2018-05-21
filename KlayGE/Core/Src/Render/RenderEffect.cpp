@@ -654,7 +654,7 @@ namespace
 				attr = node.Attrib("elem_type");
 				if (attr)
 				{
-					elem_type = attr->ValueString();
+					elem_type = std::string(attr->ValueString());
 				}
 				else
 				{
@@ -665,7 +665,7 @@ namespace
 				attr = node.Attrib("sample_count");
 				if (attr)
 				{
-					sample_count = attr->ValueString();
+					sample_count = std::string(attr->ValueString());
 					*var = elem_type + ", " + sample_count;
 				}
 				else
@@ -2560,7 +2560,7 @@ namespace KlayGE
 	void RenderEffectAnnotation::Load(XMLNodePtr const & node)
 	{
 		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
-		name_ = node->Attrib("name")->ValueString();
+		name_ = std::string(node->Attrib("name")->ValueString());
 		var_ = read_var(*node, type_, 0);
 	}
 #endif
@@ -3895,7 +3895,7 @@ namespace KlayGE
 #if KLAYGE_IS_DEV_PLATFORM
 	void RenderTechnique::Load(RenderEffect& effect, XMLNodePtr const & node, uint32_t tech_index)
 	{
-		name_ = node->Attrib("name")->ValueString();
+		name_ = std::string(node->Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		RenderTechnique* parent_tech = nullptr;
@@ -3950,7 +3950,7 @@ namespace KlayGE
 					{
 						if ((*macros_)[i].first == name)
 						{
-							(*macros_)[i].second = value;
+							(*macros_)[i].second = std::string(value);
 							found = true;
 							break;
 						}
@@ -4171,7 +4171,7 @@ namespace KlayGE
 	void RenderPass::Load(RenderEffect& effect, XMLNodePtr const & node,
 		uint32_t tech_index, uint32_t pass_index, RenderPass const * inherit_pass)
 	{
-		name_ = node->Attrib("name")->ValueString();
+		name_ = std::string(node->Attrib("name")->ValueString());
 		name_hash_ = HashRange(name_.begin(), name_.end());
 
 		{
@@ -4215,7 +4215,7 @@ namespace KlayGE
 					{
 						if ((*macros_)[i].first == name)
 						{
-							(*macros_)[i].second = value;
+							(*macros_)[i].second = std::string(value);
 							found = true;
 							break;
 						}
@@ -4577,7 +4577,7 @@ namespace KlayGE
 							std::string component_str;
 							if (attr)
 							{
-								component_str = attr->ValueString();
+								component_str = std::string(attr->ValueString());
 							}
 							else
 							{
@@ -5049,14 +5049,14 @@ namespace KlayGE
 	{
 		type_ = TypeCodeFromName(node->Attrib("type")->ValueString());
 		name_ = MakeSharedPtr<std::remove_reference<decltype(*name_)>::type>();
-		name_->first = node->Attrib("name")->ValueString();
+		name_->first = std::string(node->Attrib("name")->ValueString());
 		name_->second = HashRange(name_->first.begin(), name_->first.end());
 
 		XMLAttributePtr attr = node->Attrib("semantic");
 		if (attr)
 		{
 			semantic_ = MakeSharedPtr<std::remove_reference<decltype(*semantic_)>::type>();
-			semantic_->first = attr->ValueString();
+			semantic_->first = std::string(attr->ValueString());
 			semantic_->second = HashRange(semantic_->first.begin(), semantic_->first.end());
 		}
 
@@ -5357,7 +5357,7 @@ namespace KlayGE
 		{
 			if ((XNT_Comment == shader_text_node->Type()) || (XNT_CData == shader_text_node->Type()))
 			{
-				str_ += shader_text_node->ValueString();
+				str_ += std::string(shader_text_node->ValueString());
 			}
 		}
 	}
@@ -5400,17 +5400,17 @@ namespace KlayGE
 
 		if (!name_.empty())
 		{
-			BOOST_ASSERT(name_ == attr->ValueString());
+			BOOST_ASSERT(name_ == std::string(attr->ValueString()));
 		}
 		else
 		{
-			name_ = attr->ValueString();
+			name_ = std::string(attr->ValueString());
 			name_hash_ = HashRange(name_.begin(), name_.end());
 
 			attr = node->Attrib("return");
 			if (attr)
 			{
-				return_type_ = attr->ValueString();
+				return_type_ = std::string(attr->ValueString());
 			}
 			else
 			{
@@ -5431,7 +5431,7 @@ namespace KlayGE
 		attr = node->Attrib("impl");
 		if (attr)
 		{
-			impl_ = attr->ValueString();
+			impl_ = std::string(attr->ValueString());
 		}
 	}
 #endif

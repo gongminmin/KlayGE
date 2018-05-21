@@ -100,10 +100,10 @@ namespace KlayGE
 			imposter_desc_.imposter_data->size = size_node->Attrib("value")->ValueUInt();
 
 			XMLNodePtr rt0_node = root->FirstNode("rt0");
-			imposter_desc_.imposter_data->rt0_name = rt0_node->Attrib("name")->ValueString();
+			imposter_desc_.imposter_data->rt0_name = std::string(rt0_node->Attrib("name")->ValueString());
 
 			XMLNodePtr rt1_node = root->FirstNode("rt1");
-			imposter_desc_.imposter_data->rt1_name = rt1_node->Attrib("name")->ValueString();
+			imposter_desc_.imposter_data->rt1_name = std::string(rt1_node->Attrib("name")->ValueString());
 		}
 
 		void MainThreadStage() override
