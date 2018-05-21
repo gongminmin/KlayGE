@@ -385,7 +385,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 
 		std::vector<uint32_t> compacted(total_num_vertices);
 		ElementFormat fmt;
-		if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
+		if (rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ABGR8))
 		{	
 			fmt = EF_ABGR8;
 			for (size_t j = 0; j < compacted.size(); ++ j)
@@ -398,7 +398,7 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 		}
 		else
 		{
-			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+			BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ARGB8));
 
 			fmt = EF_ARGB8;
 			for (size_t j = 0; j < compacted.size(); ++ j)

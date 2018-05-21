@@ -180,47 +180,14 @@ namespace KlayGE
 
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		ElementFormat fmt;
-		if (Context::Instance().Config().graphics_cfg.gamma)
+		auto const & caps = rf.RenderEngineInstance().DeviceCaps();
+		ArrayRef<ElementFormat> fmt_options = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
+		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8_SRGB))
-			{
-				fmt = EF_ABGR8_SRGB;
-			}
-			else
-			{
-				if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8_SRGB))
-				{
-					fmt = EF_ARGB8_SRGB;
-				}
-				else
-				{
-					if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-					{
-						fmt = EF_ABGR8;
-					}
-					else
-					{
-						BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-						fmt = EF_ARGB8;
-					}
-				}
-			}
+			fmt_options = fmt_options.Slice(2);
 		}
-		else
-		{
-			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-				fmt = EF_ARGB8;
-			}
-		}
+		auto const fmt = caps.BestMatchTextureFormat(fmt_options);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		present_tex_ = rf.MakeTexture2D(lpAllocInfo->dwWidth, lpAllocInfo->dwHeight, 1, 1, fmt, 1, 0, EAH_CPU_Write | EAH_GPU_Read);
 
 		IDirect3DSurface9* surf;

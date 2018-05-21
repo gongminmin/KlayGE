@@ -293,17 +293,8 @@ namespace KlayGE
 		RenderEngine& re = rf.RenderEngineInstance();
 		deferred_rendering_->SetupViewport(0, re.CurFrameBuffer(), 0);
 
-		ElementFormat fmt;
-		if (re.DeviceCaps().texture_format_support(EF_ABGR8))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ABGR8));
-
-			fmt = EF_ARGB8;
-		}
+		auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 
 		selective_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Write);
 		selective_cpu_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_CPU_Read);
@@ -348,20 +339,10 @@ namespace KlayGE
 			clear_clr.g() = 0.133f;
 			clear_clr.b() = 0.325f;
 		}
-		uint32_t texel;
-		ElementFormat fmt;
-		if (re.DeviceCaps().texture_format_support(EF_ABGR8))
-		{
-			fmt = EF_ABGR8;
-			texel = clear_clr.ABGR();
-		}
-		else
-		{
-			BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ARGB8));
-
-			fmt = EF_ARGB8;
-			texel = clear_clr.ARGB();
-		}
+		;
+		auto const fmt = re.DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+		BOOST_ASSERT(fmt != EF_Unknown);
+		uint32_t texel = ((fmt == EF_ABGR8) ? clear_clr.ABGR() : clear_clr.ARGB());
 		ElementInitData init_data[6];
 		for (int i = 0; i < 6; ++ i)
 		{

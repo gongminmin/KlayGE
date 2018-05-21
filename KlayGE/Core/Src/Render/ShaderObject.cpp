@@ -364,7 +364,7 @@ namespace KlayGE
 			D3D_SHADER_MACRO macro = { "KLAYGE_PACK_TO_RGBA", "1" };
 			macros.push_back(macro);
 		}
-		if (caps.uav_format_support(EF_ABGR16F))
+		if (caps.UavFormatSupport(EF_ABGR16F))
 		{
 			D3D_SHADER_MACRO macro = { "KLAYGE_TYPED_UAV_SUPPORT", "1" };
 			macros.push_back(macro);

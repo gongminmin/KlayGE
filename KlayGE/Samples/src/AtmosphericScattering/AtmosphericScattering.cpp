@@ -271,20 +271,10 @@ void AtmosphericScatteringApp::LoadBeta(Color const & clr)
 	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Beta(clr);
 
 	Color f4_clr = clr / 250.0f;
-	ElementFormat fmt;
-	uint32_t data = 0xFF000000;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-	{
-		fmt = EF_ABGR8;
-		data |= f4_clr.ABGR();
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
 
-		fmt = EF_ARGB8;
-		data |= f4_clr.ARGB();
-	}
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	BOOST_ASSERT(fmt != EF_Unknown);
+	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? f4_clr.ABGR() : f4_clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;
@@ -300,20 +290,9 @@ void AtmosphericScatteringApp::LoadAbsorb(Color const & clr)
 	checked_pointer_cast<PlanetMesh>(planet_->GetRenderable())->Absorb(clr);
 	checked_pointer_cast<AtmosphereMesh>(atmosphere_->GetRenderable())->Absorb(clr);
 
-	ElementFormat fmt;
-	uint32_t data = 0xFF000000;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-	{
-		fmt = EF_ABGR8;
-		data |= clr.ABGR();
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-		fmt = EF_ARGB8;
-		data |= clr.ARGB();
-	}
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	BOOST_ASSERT(fmt != EF_Unknown);
+	uint32_t data = 0xFF000000 | ((fmt == EF_ABGR8) ? clr.ABGR() : clr.ARGB());
 
 	ElementInitData init_data;
 	init_data.data = &data;

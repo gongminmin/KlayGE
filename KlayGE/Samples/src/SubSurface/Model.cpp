@@ -148,15 +148,8 @@ DetailedModel::DetailedModel(std::wstring const & name)
 	nor_init_data.data = &empty_nor;
 	nor_init_data.slice_pitch = nor_init_data.row_pitch = sizeof(empty_nor);
 
-	ElementFormat format;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-	{
-		format = EF_ABGR8;
-	}
-	else
-	{
-		format = EF_ARGB8;
-	}
+	auto const format = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	BOOST_ASSERT(format != EF_Unknown);
 	empty_bump_map_ = rf.MakeTexture2D(1, 1, 1, 1, format, 1, 0, EAH_GPU_Read | EAH_Immutable, nor_init_data);
 }
 

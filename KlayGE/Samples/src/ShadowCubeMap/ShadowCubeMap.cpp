@@ -409,29 +409,13 @@ void ShadowCubeMap::OnCreate()
 	this->LookAt(float3(0.0f, 10.0f, -25.0f), float3(0, 10.0f, 0));
 	this->Proj(0.1f, 200);
 
-	ElementFormat fmt;
-	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
-	{
-		fmt = EF_D24S8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-
-		fmt = EF_D16;
-	}
+	auto fmt = caps.BestMatchRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	BOOST_ASSERT(fmt != EF_Unknown);
 	RenderViewPtr depth_view = rf.Make2DDepthStencilRenderView(SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, fmt, 1, 0);
 	if (caps.pack_to_rgba_required)
 	{
-		if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			fmt = EF_ARGB8;
-		}
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 	}
 	else
 	{

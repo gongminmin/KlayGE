@@ -440,7 +440,7 @@ namespace KlayGE
 			static_assert(32 == TILE_SIZE, "TILE_SIZE must be 32.");
 
 			cs_cldr_ = true;
-			if (caps.uav_format_support(EF_ABGR16F) && caps.uav_format_support(EF_B10G11R11F) && caps.uav_format_support(EF_ABGR8))
+			if (caps.UavFormatSupport(EF_ABGR16F) && caps.UavFormatSupport(EF_B10G11R11F) && caps.UavFormatSupport(EF_ABGR8))
 			{
 				typed_uav_ = true;
 			}
@@ -655,16 +655,8 @@ namespace KlayGE
 #endif
 
 		sm_fb_ = rf.MakeFrameBuffer();
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-		{
-			fmt = EF_R32F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
-			fmt = EF_R16F;
-		}
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		sm_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		sm_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*sm_tex_, 0, 1, 0));
 		sm_depth_tex_ = rf.MakeTexture2D(SM_SIZE, SM_SIZE, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -719,17 +711,8 @@ namespace KlayGE
 
 		rsm_fb_ = rf.MakeFrameBuffer();
 
-		ElementFormat fmt8;
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt8 = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt8 = EF_ARGB8;
-		}
+		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt8 != EF_Unknown);
 		rsm_texs_[0] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 		rsm_texs_[1] = rf.MakeTexture2D(SM_SIZE, SM_SIZE, MAX_RSM_MIPMAP_LEVELS, 1, fmt8, 1, 0,
@@ -908,7 +891,7 @@ namespace KlayGE
 			|| !caps.depth_texture_support
 			|| !caps.fp_color_support
 			|| caps.pack_to_rgba_required
-			|| !caps.texture_format_support(EF_D24S8) || !caps.rendertarget_format_support(EF_D24S8, 1, 0))
+			|| !caps.TextureRenderTargetFormatSupport(EF_D24S8, 1, 0))
 		{
 			return false;
 		}
@@ -1026,26 +1009,10 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		ElementFormat fmt8;
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt8 = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			fmt8 = EF_ARGB8;
-		}
-		ElementFormat depth_fmt;
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			depth_fmt = EF_R16F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-			depth_fmt = EF_R32F;
-		}
+		auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt8 != EF_Unknown);
+		auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R16F, EF_R32F }, 1, 0);
+		BOOST_ASSERT(depth_fmt != EF_Unknown);
 
 		pvp.g_buffer_ds_tex = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, sample_count, sample_quality, EAH_GPU_Read | EAH_GPU_Write);
 		RenderViewPtr ds_view = rf.Make2DDepthStencilRenderView(*pvp.g_buffer_ds_tex, 0, 1, 0);
@@ -1143,16 +1110,8 @@ namespace KlayGE
 
 		this->SetupViewportGI(index, false);
 
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-		{
-			fmt = EF_R32F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
-			fmt = EF_R16F;
-		}
+		auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R32F, EF_R16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		if (tex_array_support_)
 		{
 			pvp.filtered_csm_texs[0] = rf.MakeTexture2D(SM_SIZE * 2, SM_SIZE * 2, 3,
@@ -1167,15 +1126,8 @@ namespace KlayGE
 			}
 		}
 
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			fmt = EF_ARGB8;
-		}
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
@@ -1186,28 +1138,8 @@ namespace KlayGE
 		pvp.shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.shadowing_tex, 0, 1, 0));
 
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				fmt = EF_ARGB8;
-			}
-
-			ElementFormat fmt_srgb = MakeSRGB(fmt);
-			if (caps.texture_format_support(fmt_srgb) && caps.rendertarget_format_support(fmt_srgb, 1, 0))
-			{
-				fmt = fmt_srgb;
-			}
-		}
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.projective_shadowing_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, hint);
 		pvp.projective_shadowing_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.projective_shadowing_tex, 0, 1, 0));
 
@@ -1216,7 +1148,7 @@ namespace KlayGE
 		pvp.reflection_fb->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(
 			pvp.reflection_tex->Width(0), pvp.reflection_tex->Height(0), ds_view->Format(), 1, 0));
 
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
+		BOOST_ASSERT(caps.TextureRenderTargetFormatSupport(EF_ABGR16F, 1, 0));
 		ElementFormat shading_fmt = EF_ABGR16F;
 
 #if DEFAULT_DEFERRED == TRIDITIONAL_DEFERRED
@@ -1235,15 +1167,8 @@ namespace KlayGE
 		pvp.vdm_fb->Attach(FrameBuffer::ATT_Color2, rf.Make2DRenderView(*pvp.vdm_count_tex, 0, 1, 0));
 		pvp.vdm_fb->Attach(FrameBuffer::ATT_DepthStencil, pvp.g_buffer_vdm_max_ds_views[1]);
 
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-			fmt = EF_ABGR16F;
-		}
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		hint = EAH_GPU_Read | EAH_GPU_Write;
 #if DEFAULT_DEFERRED == LIGHT_INDEXED_DEFERRED
 		if (cs_cldr_)
@@ -1290,20 +1215,8 @@ namespace KlayGE
 				}
 			}
 
-			ElementFormat lighting_mask_fmt;
-			if (caps.rendertarget_format_support(EF_R8, 1, 0))
-			{
-				lighting_mask_fmt = EF_R8;
-			}
-			else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				lighting_mask_fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				lighting_mask_fmt = EF_ARGB8;
-			}
+			auto const lighting_mask_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(lighting_mask_fmt != EF_Unknown);
 			pvp.lighting_mask_tex = rf.MakeTexture2D(width, height, 1, 1, lighting_mask_fmt, sample_count, sample_quality,
 				EAH_GPU_Read | EAH_GPU_Write);
 			pvp.lighting_mask_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.lighting_mask_tex, 0, 1, 0));
@@ -1323,17 +1236,8 @@ namespace KlayGE
 				pvp.g_buffer_resolved_fb->Attach(FrameBuffer::ATT_Color3, rf.Make2DRenderView(*pvp.multi_sample_mask_tex, 0, 1, 0));
 			}
 
-			ElementFormat light_indices_fmt;
-			if (caps.uav_format_support(EF_R16UI))
-			{
-				light_indices_fmt = EF_R16UI;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.uav_format_support(EF_R32UI));
-
-				light_indices_fmt = EF_R32UI;
-			}
+			auto const light_indices_fmt = caps.BestMatchUavFormat({ EF_R16UI, EF_R32UI });
+			BOOST_ASSERT(light_indices_fmt != EF_Unknown);
 			pvp.lights_start_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE * 8,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, num_depth_slices_, light_indices_fmt, 1, 0,
 				EAH_GPU_Read | EAH_GPU_Unordered);
@@ -1343,16 +1247,8 @@ namespace KlayGE
 		}
 		else
 		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-				fmt = EF_ARGB8;
-			}
+			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(fmt != EF_Unknown);
 			pvp.light_index_tex = rf.MakeTexture2D((width + (TILE_SIZE - 1)) / TILE_SIZE,
 				(height + (TILE_SIZE - 1)) / TILE_SIZE, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			pvp.light_index_fb->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*pvp.light_index_tex, 0, 1, 0));
@@ -1378,23 +1274,8 @@ namespace KlayGE
 			}
 		}
 
-		if (caps.rendertarget_format_support(EF_R8, 1, 0))
-		{
-			fmt = EF_R8;
-		}
-		else if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			fmt = EF_R16F;
-		}
-		else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			fmt = EF_ARGB8;
-		}
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_R8, EF_R16F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		pvp.small_ssvo_tex = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 		if (0 == index)

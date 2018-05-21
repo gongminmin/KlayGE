@@ -144,23 +144,23 @@ namespace KlayGE
 		}
 		else if (CT_HASH("VERTEX_FORMAT") == name_hash)
 		{
-			vertex_format_ = *static_cast<std::vector<ElementFormat>*>(value);
-			this->FillRenderDeviceCaps();
+			auto vertex_formats = *static_cast<std::vector<ElementFormat>*>(value);
+			this->AssignCapVertexFormats(std::move(vertex_formats));
 		}
 		else if (CT_HASH("TEXTURE_FORMAT") == name_hash)
 		{
-			texture_format_ = *static_cast<std::vector<ElementFormat>*>(value);
-			this->FillRenderDeviceCaps();
+			auto texture_formats = *static_cast<std::vector<ElementFormat>*>(value);
+			this->AssignCapTextureFormats(std::move(texture_formats));
 		}
 		else if (CT_HASH("RENDER_TARGET_FORMAT") == name_hash)
 		{
-			rendertarget_format_ = *static_cast<std::map<ElementFormat, std::vector<std::pair<uint32_t, uint32_t>>>*>(value);
-			this->FillRenderDeviceCaps();
+			auto render_target_formats = *static_cast<std::map<ElementFormat, std::vector<uint32_t>>*>(value);
+			this->AssignCapRenderTargetFormats(std::move(render_target_formats));
 		}
 		else if (CT_HASH("UAV_FORMAT") == name_hash)
 		{
-			uav_format_ = *static_cast<std::vector<ElementFormat>*>(value);
-			this->FillRenderDeviceCaps();
+			auto uav_formats = *static_cast<std::vector<ElementFormat>*>(value);
+			this->AssignCapUavFormats(std::move(uav_formats));
 		}
 		else if (CT_HASH("DEVICE_CAPS") == name_hash)
 		{
@@ -233,66 +233,5 @@ namespace KlayGE
 	void NullRenderEngine::FullScreen(bool fs)
 	{
 		KFL_UNUSED(fs);
-	}
-
-	bool NullRenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(vertex_format_.begin(), vertex_format_.end(), elem_fmt);
-		return (iter != vertex_format_.end()) && (*iter == elem_fmt);
-	}
-
-	bool NullRenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(texture_format_.begin(), texture_format_.end(), elem_fmt);
-		return (iter != texture_format_.end()) && (*iter == elem_fmt);
-	}
-
-	bool NullRenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
-	{
-		auto iter = rendertarget_format_.find(elem_fmt);
-		if (iter != rendertarget_format_.end())
-		{
-			for (auto const & p : iter->second)
-			{
-				if ((sample_count == p.first) && (sample_quality < p.second))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	bool NullRenderEngine::UAVFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(uav_format_.begin(), uav_format_.end(), elem_fmt);
-		return (iter != uav_format_.end()) && (*iter == elem_fmt);
-	}
-
-	void NullRenderEngine::FillRenderDeviceCaps()
-	{
-		std::sort(vertex_format_.begin(), vertex_format_.end());
-		vertex_format_.erase(std::unique(vertex_format_.begin(), vertex_format_.end()), vertex_format_.end());
-		std::sort(texture_format_.begin(), texture_format_.end());
-		texture_format_.erase(std::unique(texture_format_.begin(), texture_format_.end()), texture_format_.end());
-		std::sort(uav_format_.begin(), uav_format_.end());
-		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
-
-		caps_.vertex_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->VertexFormatSupport(elem_fmt);
-			};
-		caps_.texture_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->TextureFormatSupport(elem_fmt);
-			};
-		caps_.rendertarget_format_support = [this](ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
-			{
-				return this->RenderTargetFormatSupport(elem_fmt, sample_count, sample_quality);
-			};
-		caps_.uav_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->UAVFormatSupport(elem_fmt);
-			};
 	}
 }

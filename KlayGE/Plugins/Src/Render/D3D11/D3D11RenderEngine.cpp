@@ -884,10 +884,6 @@ namespace KlayGE
 		stereo_nv_3d_vision_fb_.reset();
 		stereo_nv_3d_vision_tex_.reset();
 
-		vertex_format_.clear();
-		texture_format_.clear();
-		rendertarget_format_.clear();
-
 		timestamp_disjoint_query_.reset();
 		inv_timestamp_freq_ = 0;
 
@@ -945,40 +941,6 @@ namespace KlayGE
 	void D3D11RenderEngine::FullScreen(bool fs)
 	{
 		checked_cast<D3D11RenderWindow*>(screen_frame_buffer_.get())->FullScreen(fs);
-	}
-
-	bool D3D11RenderEngine::VertexFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(vertex_format_.begin(), vertex_format_.end(), elem_fmt);
-		return (iter != vertex_format_.end()) && (*iter == elem_fmt);
-	}
-
-	bool D3D11RenderEngine::TextureFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(texture_format_.begin(), texture_format_.end(), elem_fmt);
-		return (iter != texture_format_.end()) && (*iter == elem_fmt);
-	}
-
-	bool D3D11RenderEngine::RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
-	{
-		auto iter = rendertarget_format_.find(elem_fmt);
-		if (iter != rendertarget_format_.end())
-		{
-			for (auto const & p : iter->second)
-			{
-				if ((sample_count == p.first) && (sample_quality < p.second))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	bool D3D11RenderEngine::UAVFormatSupport(ElementFormat elem_fmt)
-	{
-		auto iter = std::lower_bound(uav_format_.begin(), uav_format_.end(), elem_fmt);
-		return (iter != uav_format_.end()) && (*iter == elem_fmt);
 	}
 
 	// 填充设备能力
@@ -1087,6 +1049,11 @@ namespace KlayGE
 		caps_.hs_support = true;
 		caps_.ds_support = true;
 
+		std::vector<ElementFormat> vertex_formats;
+		std::vector<ElementFormat> texture_formats;
+		std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
+		std::vector<ElementFormat> uav_formats;
+
 		bool check_16bpp_fmts = (dxgi_sub_ver_ >= 2);
 		bool check_uav_fmts = false;
 		if (d3d_11_runtime_sub_ver_ >= 3)
@@ -1100,9 +1067,9 @@ namespace KlayGE
 
 		if (!check_uav_fmts)
 		{
-			uav_format_.push_back(EF_R32F);
-			uav_format_.push_back(EF_R32UI);
-			uav_format_.push_back(EF_R32I);
+			uav_formats.push_back(EF_R32F);
+			uav_formats.push_back(EF_R32UI);
+			uav_formats.push_back(EF_R32I);
 		}
 
 		std::pair<ElementFormat, DXGI_FORMAT> const fmts[] = 
@@ -1220,13 +1187,13 @@ namespace KlayGE
 					{
 						if (s1 & D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
 						{
-							vertex_format_.push_back(fmt.first);
+							vertex_formats.push_back(fmt.first);
 						}
 						if (s1 & (D3D11_FORMAT_SUPPORT_TEXTURE1D | D3D11_FORMAT_SUPPORT_TEXTURE2D
 							| D3D11_FORMAT_SUPPORT_TEXTURE3D | D3D11_FORMAT_SUPPORT_TEXTURECUBE
 							| D3D11_FORMAT_SUPPORT_SHADER_LOAD | D3D11_FORMAT_SUPPORT_SHADER_SAMPLE))
 						{
-							texture_format_.push_back(fmt.first);
+							texture_formats.push_back(fmt.first);
 						}
 					}
 				}
@@ -1234,13 +1201,13 @@ namespace KlayGE
 				{
 					if (s & D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
 					{
-						vertex_format_.push_back(fmt.first);
+						vertex_formats.push_back(fmt.first);
 					}
 					if ((s & (D3D11_FORMAT_SUPPORT_TEXTURE1D | D3D11_FORMAT_SUPPORT_TEXTURE2D
 						| D3D11_FORMAT_SUPPORT_TEXTURE3D | D3D11_FORMAT_SUPPORT_TEXTURECUBE))
 						&& (s & D3D11_FORMAT_SUPPORT_SHADER_SAMPLE))
 					{
-						texture_format_.push_back(fmt.first);
+						texture_formats.push_back(fmt.first);
 					}
 
 					if (check_uav_fmts)
@@ -1252,7 +1219,7 @@ namespace KlayGE
 							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_LOAD) != 0)
 							&& ((format_support.OutFormatSupport2 & D3D11_FORMAT_SUPPORT2_UAV_TYPED_STORE) != 0))
 						{
-							uav_format_.push_back(fmt.first);
+							uav_formats.push_back(fmt.first);
 						}
 					}
 				}
@@ -1268,7 +1235,7 @@ namespace KlayGE
 						{
 							if (quality > 0)
 							{
-								rendertarget_format_[fmt.first].emplace_back(count, quality);
+								render_target_formats[fmt.first].push_back(RenderDeviceCaps::EncodeSampleCountQuality(count, quality));
 								count <<= 1;
 							}
 							else
@@ -1285,35 +1252,10 @@ namespace KlayGE
 			}
 		}
 
-		std::sort(vertex_format_.begin(), vertex_format_.end());
-		vertex_format_.erase(std::unique(vertex_format_.begin(), vertex_format_.end()), vertex_format_.end());
-		std::sort(texture_format_.begin(), texture_format_.end());
-		texture_format_.erase(std::unique(texture_format_.begin(), texture_format_.end()), texture_format_.end());
-		std::sort(uav_format_.begin(), uav_format_.end());
-		uav_format_.erase(std::unique(uav_format_.begin(), uav_format_.end()), uav_format_.end());
-
-		caps_.vertex_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->VertexFormatSupport(elem_fmt);
-			};
-		caps_.texture_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->TextureFormatSupport(elem_fmt);
-			};
-		caps_.rendertarget_format_support = [this](ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality)
-			{
-				return this->RenderTargetFormatSupport(elem_fmt, sample_count, sample_quality);
-			};
-		caps_.uav_format_support = [this](ElementFormat elem_fmt)
-			{
-				return this->UAVFormatSupport(elem_fmt);
-			};
-
-		caps_.depth_texture_support = (caps_.texture_format_support(EF_D24S8) || caps_.texture_format_support(EF_D16));
-		caps_.fp_color_support = ((caps_.texture_format_support(EF_B10G11R11F) && caps_.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-			|| (caps_.texture_format_support(EF_ABGR16F) && caps_.rendertarget_format_support(EF_ABGR16F, 1, 0)));
-		caps_.pack_to_rgba_required = !(caps_.texture_format_support(EF_R16F) && caps_.rendertarget_format_support(EF_R16F, 1, 0)
-			&& caps_.texture_format_support(EF_R32F) && caps_.rendertarget_format_support(EF_R32F, 1, 0));
+		this->AssignCapVertexFormats(std::move(vertex_formats));
+		this->AssignCapTextureFormats(std::move(texture_formats));
+		this->AssignCapRenderTargetFormats(std::move(render_target_formats));
+		this->AssignCapUavFormats(std::move(uav_formats));
 	}
 
 	void D3D11RenderEngine::DetectD3D11Runtime(ID3D11Device* device, ID3D11DeviceContext* imm_ctx)

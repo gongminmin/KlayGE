@@ -372,41 +372,12 @@ namespace KlayGE
 		auto& rf = Context::Instance().RenderFactoryInstance();
 		auto& re = rf.RenderEngineInstance();
 		auto const & caps = re.DeviceCaps();
-		if (Context::Instance().Config().graphics_cfg.gamma)
+		ArrayRef<ElementFormat> fmt_options = { EF_ABGR8_SRGB, EF_ARGB8_SRGB, EF_ABGR8, EF_ARGB8 };
+		if (!Context::Instance().Config().graphics_cfg.gamma)
 		{
-			if (caps.texture_format_support(EF_ABGR8_SRGB))
-			{
-				format_ = EF_ABGR8_SRGB;
-			}
-			else if (caps.texture_format_support(EF_ARGB8_SRGB))
-			{
-				format_ = EF_ARGB8_SRGB;
-			}
-			else if (caps.texture_format_support(EF_ABGR8))
-			{
-				format_ = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8));
-
-				format_ = EF_ARGB8;
-			}
+			fmt_options = fmt_options.Slice(2);
 		}
-		else
-		{
-			if (caps.texture_format_support(EF_ABGR8))
-			{
-				format_ = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8));
-
-				format_ = EF_ARGB8;
-			}
-		}
-
+		format_ = caps.BestMatchTextureFormat(fmt_options);
 		switch (format_)
 		{
 		case EF_ABGR8_SRGB:

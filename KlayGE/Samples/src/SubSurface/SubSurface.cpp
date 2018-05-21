@@ -187,29 +187,15 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	ElementFormat fmt;
 	if (depth_texture_support_)
 	{
-		if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 
-			fmt = EF_ARGB8;
-		}
 		// Just dummy
 		back_face_depth_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-		if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
-		{
-			fmt = EF_D24S8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
+		fmt = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 
-			fmt = EF_D16;
-		}
 		float4 constexpr back_face_ds_clear_value(0, 0, 0, 0);
 		back_face_ds_tex = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write, {}, &back_face_ds_clear_value);
 		back_face_ds_view = rf.Make2DDepthStencilRenderView(*back_face_ds_tex, 0, 1, 0);
@@ -220,15 +206,8 @@ void SubSurfaceApp::OnResize(uint32_t width, uint32_t height)
 	{
 		if (caps.pack_to_rgba_required)
 		{
-			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				fmt = EF_ARGB8;
-			}
+			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(fmt != EF_Unknown);
 		}
 		else
 		{

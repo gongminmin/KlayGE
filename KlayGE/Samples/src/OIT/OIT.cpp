@@ -794,16 +794,9 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	ElementFormat ds_format;
-	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
-	{
-		ds_format = EF_D24S8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-		ds_format = EF_D16;
-	}
+	auto const ds_format = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+	BOOST_ASSERT(ds_format != EF_Unknown);
+
 	if (depth_texture_support_)
 	{
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
@@ -814,16 +807,9 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 	}
 	else
 	{
-		ElementFormat depth_format;
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			depth_format = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			depth_format = EF_ARGB8;
-		}
+		auto const depth_format = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+		BOOST_ASSERT(depth_format != EF_Unknown);
+
 		for (size_t i = 0; i < depth_texs_.size(); ++ i)
 		{
 			depth_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, depth_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -831,20 +817,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 		}
 	}
 
-	ElementFormat peel_format;
-	if (caps.rendertarget_format_support(EF_ABGR16F, 1, 0))
-	{
-		peel_format = EF_ABGR16F;
-	}
-	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-	{
-		peel_format = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-		peel_format = EF_ARGB8;
-	}
+	auto const peel_format = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR16F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	BOOST_ASSERT(peel_format != EF_Unknown);
 	for (size_t i = 0; i < peeling_fbs_.size(); ++ i)
 	{
 		peeled_texs_[i] = rf.MakeTexture2D(width, height, 1, 1, peel_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
@@ -871,15 +845,8 @@ void OITApp::OnResize(uint32_t width, uint32_t height)
 
 	if (caps.max_simultaneous_uavs > 0)
 	{
-		ElementFormat opaque_bg_format;
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			opaque_bg_format = EF_B10G11R11F;
-		}
-		else
-		{
-			opaque_bg_format = peel_format;
-		}
+		auto const opaque_bg_format = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, peel_format }, 1, 0);
+		BOOST_ASSERT(opaque_bg_format != EF_Unknown);
 		opaque_bg_tex_ = rf.MakeTexture2D(width, height, 1, 1, opaque_bg_format, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*opaque_bg_tex_, 0, 1, 0));
 		opaque_bg_fb_->Attach(FrameBuffer::ATT_DepthStencil, rf.Make2DDepthStencilRenderView(width, height, ds_format, 1, 0));

@@ -384,21 +384,8 @@ void JudaTexViewer::OpenJudaTex(std::string const & name)
 
 	juda_tex_ = LoadJudaTexture(name);
 
-	ElementFormat fmt;
-	if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_BC1))
-	{
-		fmt = EF_BC1;
-	}
-	else if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-	{
-		fmt = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-		fmt = EF_ARGB8;
-	}
+	auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_BC1, EF_ABGR8, EF_ARGB8 });
+	BOOST_ASSERT(fmt != EF_Unknown);
 	juda_tex_->CacheProperty(1024, fmt, BORDER_SIZE);
 
 	num_tiles_ = juda_tex_->NumTiles();

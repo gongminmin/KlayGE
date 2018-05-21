@@ -112,17 +112,7 @@ namespace KlayGE
 			std::vector<TexturePtr> inter_tex_y_down(heights.size());
 
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
-			ElementFormat fmt;
-			if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
-			{
-				fmt = EF_ABGR32F;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-				fmt = EF_ABGR16F;
-			}
+			auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
 
 			{
 				inter_tex_x_up[0] = tex;

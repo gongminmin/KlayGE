@@ -94,47 +94,16 @@ namespace KlayGE
 		g_buffer_rt0_tex_ = rt0_tex;
 		g_buffer_depth_tex_ = depth_tex;
 
-		ElementFormat fmt8;
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt8 = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			fmt8 = EF_ARGB8;
-		}
-
-		ElementFormat depth_fmt;
-		if (caps.pack_to_rgba_required)
-		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				depth_fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				depth_fmt = EF_ARGB8;
-			}
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-			{
-				depth_fmt = EF_R16F;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-				depth_fmt = EF_R32F;
-			}
-		}
-
 		multi_res_tex_ = multi_res_tex;
 		if (multi_res_tex->NumMipMaps() > 1)
 		{
+			auto const fmt8 = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(fmt8 != EF_Unknown);
+
+			auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
+				caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+			BOOST_ASSERT(depth_fmt != EF_Unknown);
+
 			depth_deriative_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),
 				multi_res_tex->NumMipMaps(), 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 			normal_cone_tex_ = rf.MakeTexture2D(multi_res_tex->Width(0), multi_res_tex->Height(0),

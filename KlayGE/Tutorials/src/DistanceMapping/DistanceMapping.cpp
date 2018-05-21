@@ -107,7 +107,7 @@ namespace
 
 			uint32_t tangent[std::size(xyzs)];
 			ElementFormat fmt;
-			if (rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8))
+			if (rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ABGR8))
 			{
 				fmt = EF_ABGR8;
 
@@ -121,7 +121,7 @@ namespace
 			}
 			else
 			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8));
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ARGB8));
 
 				fmt = EF_ARGB8;
 

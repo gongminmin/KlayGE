@@ -581,7 +581,7 @@ namespace KlayGE
 				std::vector<std::pair<char const *, char const *>> macros;
 				macros.emplace_back("KLAYGE_DXBC2GLSL", "1");
 				macros.emplace_back("KLAYGE_OPENGLES", "1");
-				if (!caps.texture_format_support(EF_BC5) || !caps.texture_format_support(EF_BC5_SRGB))
+				if (!caps.TextureFormatSupport(EF_BC5) || !caps.TextureFormatSupport(EF_BC5_SRGB))
 				{
 					macros.emplace_back("KLAYGE_BC5_AS_AG", "1");
 				}
@@ -589,7 +589,7 @@ namespace KlayGE
 				{
 					macros.emplace_back("KLAYGE_BC5_AS_GA", "1");
 				}
-				if (!caps.texture_format_support(EF_BC4) || !caps.texture_format_support(EF_BC4_SRGB))
+				if (!caps.TextureFormatSupport(EF_BC4) || !caps.TextureFormatSupport(EF_BC4_SRGB))
 				{
 					macros.emplace_back("KLAYGE_BC4_AS_G", "1");
 				}

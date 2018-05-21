@@ -91,17 +91,8 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
-		}
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, std::max(1U, g_buffer_rt0_tex_->NumMipMaps() - 1),
 			1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write);
@@ -127,31 +118,9 @@ namespace KlayGE
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 		RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-		ElementFormat fmt;
-		if (caps.pack_to_rgba_required)
-		{
-			if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				fmt = EF_ARGB8;
-			}
-		}
-		else
-		{
-			if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-			{
-				fmt = EF_R32F;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.rendertarget_format_support(EF_R16F, 1, 0));
-				fmt = EF_R16F;
-			}
-		}
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat(
+			caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R32F, EF_R16F }), 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 
 		rsm_depth_derivative_tex_ = rf.MakeTexture2D(MIN_RSM_MIPMAP_SIZE, MIN_RSM_MIPMAP_SIZE, 1, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
@@ -274,17 +243,8 @@ namespace KlayGE
 		uint32_t const width = rt0_tex->Width(0);
 		uint32_t const height = rt0_tex->Height(0);
 
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-
-			fmt = EF_ABGR16F;
-		}
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		small_ssgi_tex_ = rf.MakeTexture2D(width / 4, height / 4, g_buffer_rt0_tex_->NumMipMaps() - 2, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_GPU_Write);
 		indirect_lighting_tex_ = rf.MakeTexture2D(width / 2, height / 2, 1, 1, fmt, 1, 0,  EAH_GPU_Read | EAH_GPU_Write);

@@ -110,19 +110,18 @@ namespace
 		TexturePtr ret;
 		if (caps.max_texture_depth >= vol_size)
 		{
-			if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-			{
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ABGR8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
-			}
-			else
+			auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+			BOOST_ASSERT(fmt != EF_Unknown);
+
+			if (fmt == EF_ARGB8)
 			{
 				for (uint32_t i = 0; i < vol_size * vol_size * vol_size; ++ i)
 				{
 					std::swap(data_block[i * 4 + 0], data_block[i * 4 + 2]);
 				}
-
-				ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, EF_ARGB8, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 			}
+
+			ret = rf.MakeTexture3D(vol_size, vol_size, vol_size, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data);
 		}
 
 		return ret;
@@ -439,13 +438,13 @@ namespace
 
 				{
 					RenderDeviceCaps const & caps = re.DeviceCaps();
-					ElementFormat fmt;
+					auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
+					BOOST_ASSERT(fmt != EF_Unknown);
+
 					std::vector<uint8_t> pos;
 					ElementInitData pos_init;
-					if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
+					if (fmt == EF_ABGR32F)
 					{
-						fmt = EF_ABGR32F;
-
 						pos.resize(tex_width_ * tex_height_ * sizeof(float) * 4);
 						float* p = reinterpret_cast<float*>(&pos[0]);
 						for (int i = 0; i < tex_width_ * tex_height_; ++ i)
@@ -462,8 +461,6 @@ namespace
 					}
 					else
 					{
-						fmt = EF_ABGR16F;
-
 						pos.resize(tex_width_ * tex_height_ * sizeof(half) * 4);
 						half* p = reinterpret_cast<half*>(&pos[0]);
 						for (int i = 0; i < tex_width_ * tex_height_; ++ i)
@@ -810,7 +807,7 @@ void GPUParticleSystemApp::OnCreate()
 		// Shaders are compiled to d3d11_0 for Windows store apps. No typed UAV support.
 		use_typed_uav = false;
 #else
-		use_typed_uav = caps.uav_format_support(EF_ABGR16F);
+		use_typed_uav = caps.UavFormatSupport(EF_ABGR16F);
 #endif
 	}
 	else

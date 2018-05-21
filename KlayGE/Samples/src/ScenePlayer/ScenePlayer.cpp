@@ -383,20 +383,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 				Color color(0, 0, 0, 1);
 				attr_ss >> color.r() >> color.g() >> color.b();
 
-				uint32_t texel;
-				ElementFormat fmt;
-				if (rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8))
-				{
-					fmt = EF_ABGR8;
-					texel = color.ABGR();
-				}
-				else
-				{
-					BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ARGB8));
-
-					fmt = EF_ARGB8;
-					texel = color.ARGB();
-				}
+				auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+				BOOST_ASSERT(fmt != EF_Unknown);
+				uint32_t texel = (fmt == EF_ABGR8) ? color.ABGR() : color.ARGB();
 				ElementInitData init_data[6];
 				for (int i = 0; i < 6; ++ i)
 				{
@@ -405,7 +394,8 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 					init_data[i].slice_pitch = init_data[i].row_pitch;
 				}
 
-				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_Immutable, init_data));
+				checked_pointer_cast<SceneObjectSkyBox>(sky_box_)->CubeMap(rf.MakeTextureCube(1, 1, 1, fmt, 1, 0,
+					EAH_GPU_Read | EAH_Immutable, init_data));
 			}
 
 			sky_box_->AddToSceneManager();

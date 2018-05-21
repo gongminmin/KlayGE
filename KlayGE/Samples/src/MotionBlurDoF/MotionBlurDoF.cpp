@@ -365,17 +365,9 @@ namespace
 				uint32_t const width = tex->Width(0) + max_radius_ * 4 + 1;
 				uint32_t const height = tex->Height(0) + max_radius_ * 4 + 1;
 
-				RenderDeviceCaps const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
-				ElementFormat fmt;
-				if (caps.texture_format_support(EF_ABGR32F))
-				{
-					fmt = EF_ABGR32F;
-				}
-				else
-				{
-					BOOST_ASSERT(caps.texture_format_support(EF_ABGR16F));
-					fmt = EF_ABGR16F;
-				}
+				auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
+				auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR32F, EF_ABGR16F }, 1, 0);
+				BOOST_ASSERT(fmt != EF_Unknown);
 
 				RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 				spread_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0,
@@ -736,8 +728,7 @@ void MotionBlurDoFApp::OnCreate()
 		});
 	inputEngine.ActionMap(actionMap, input_handler);
 
-	if (caps.fp_color_support && caps.texture_format_support(EF_ABGR32F)
-		&& caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
+	if (caps.fp_color_support && caps.TextureRenderTargetFormatSupport(EF_ABGR32F, 1, 0))
 	{
 		depth_of_field_ = MakeSharedPtr<DepthOfField>();
 		bokeh_filter_ = MakeSharedPtr<BokehFilter>();
@@ -876,31 +867,9 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 	}
 
-	ElementFormat depth_fmt;
-	if (caps.pack_to_rgba_required)
-	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			depth_fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			depth_fmt = EF_ARGB8;
-		}
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			depth_fmt = EF_R16F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-			depth_fmt = EF_R32F;
-		}
-	}
+	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
+		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	depth_tex_ = rf.MakeTexture2D(width, height, 2, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 
 	if (depth_texture_support_)
@@ -910,55 +879,16 @@ void MotionBlurDoFApp::OnResize(uint32_t width, uint32_t height)
 		depth_to_linear_pp_->OutputPin(0, depth_tex_);
 	}
 
-	ElementFormat color_fmt;
-	if (caps.fp_color_support)
-	{
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			color_fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-			color_fmt = EF_ABGR16F;
-		}
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			color_fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			color_fmt = EF_ARGB8;
-		}
-	}
+	auto const color_fmt = caps.BestMatchTextureRenderTargetFormat(caps.fp_color_support ? MakeArrayRef({ EF_B10G11R11F, EF_ABGR16F })
+		: MakeArrayRef({ EF_ABGR8, EF_ARGB8 }), 1, 0);
+	BOOST_ASSERT(color_fmt != EF_Unknown);
 
 	color_tex_ = rf.MakeTexture2D(width, height, 2, 1, color_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write | EAH_Generate_Mips);
 	clr_depth_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*color_tex_, 0, 1, 0));
 	clr_depth_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);
 
-	ElementFormat motion_fmt;
-	if (caps.rendertarget_format_support(EF_GR8, 1, 0))
-	{
-		motion_fmt = EF_GR8;
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			motion_fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-
-			motion_fmt = EF_ARGB8;
-		}
-	}
-
+	auto const motion_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	BOOST_ASSERT(motion_fmt != EF_Unknown);
 	velocity_tex_ = rf.MakeTexture2D(width, height, 1, 1, motion_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 	velocity_fb_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*velocity_tex_, 0, 1, 0));
 	velocity_fb_->Attach(FrameBuffer::ATT_DepthStencil, ds_view);

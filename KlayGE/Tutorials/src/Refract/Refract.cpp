@@ -231,17 +231,8 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 	RenderViewPtr backface_ds_view;
 	if (depth_texture_support_)
 	{
-		ElementFormat ds_fmt;
-		if (caps.texture_format_support(cfg.graphics_cfg.depth_stencil_fmt))
-		{
-			ds_fmt = cfg.graphics_cfg.depth_stencil_fmt;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.texture_format_support(EF_D16));
-
-			ds_fmt = EF_D16;
-		}
+		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ cfg.graphics_cfg.depth_stencil_fmt, EF_D16 }, 1, 0);
+		BOOST_ASSERT(ds_fmt != EF_Unknown);
 		backface_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		backface_ds_view = rf.Make2DDepthStencilRenderView(*backface_ds_tex_, 0, 1, 0);
 	}
@@ -250,47 +241,13 @@ void Refract::OnResize(uint32_t width, uint32_t height)
 		backface_ds_view = rf.Make2DDepthStencilRenderView(width, height, EF_D16, 1, 0);
 	}
 
-	ElementFormat depth_fmt;
-	if (caps.pack_to_rgba_required)
-	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			depth_fmt = EF_ABGR8;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			depth_fmt = EF_ARGB8;
-		}
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			depth_fmt = EF_R16F;
-		}
-		else 
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-			depth_fmt = EF_R32F;
-		}
-	}
+	auto const depth_fmt = caps.BestMatchTextureRenderTargetFormat(
+		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+	BOOST_ASSERT(depth_fmt != EF_Unknown);
 	backface_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, depth_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	ElementFormat normal_fmt;
-	if (caps.rendertarget_format_support(EF_GR8, 1, 0))
-	{
-		normal_fmt = EF_GR8;
-	}
-	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-	{
-		normal_fmt = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-		normal_fmt = EF_ARGB8;
-	}
+	auto const normal_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	BOOST_ASSERT(normal_fmt != EF_Unknown);
 	backface_tex_ = rf.MakeTexture2D(width, height, 1, 1, normal_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	backface_buffer_->Attach(FrameBuffer::ATT_Color0, rf.Make2DRenderView(*backface_tex_, 0, 1, 0));

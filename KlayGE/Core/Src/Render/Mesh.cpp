@@ -1256,7 +1256,7 @@ namespace KlayGE
 			merged_buff[i].resize(all_num_vertices * merged_ves[i].element_size());
 			decoded->read(&merged_buff[i][0], merged_buff[i].size() * sizeof(merged_buff[i][0]));
 
-			if ((EF_A2BGR10 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_A2BGR10))
+			if ((EF_A2BGR10 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_A2BGR10))
 			{
 				merged_ves[i].format = EF_ARGB8;
 
@@ -1274,9 +1274,9 @@ namespace KlayGE
 						| (MathLib::clamp<uint32_t>(static_cast<uint32_t>(w * 255), 0, 255) << 24);
 				}
 			}
-			if ((EF_ARGB8 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ARGB8))
+			if ((EF_ARGB8 == merged_ves[i].format) && !rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ARGB8))
 			{
-				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().vertex_format_support(EF_ABGR8));
+				BOOST_ASSERT(rf.RenderEngineInstance().DeviceCaps().VertexFormatSupport(EF_ABGR8));
 
 				merged_ves[i].format = EF_ABGR8;
 

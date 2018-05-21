@@ -154,11 +154,6 @@ namespace KlayGE
 		void FillRenderDeviceCaps();
 		void InitRenderStates();
 
-		bool VertexFormatSupport(ElementFormat elem_fmt);
-		bool TextureFormatSupport(ElementFormat elem_fmt);
-		bool RenderTargetFormatSupport(ElementFormat elem_fmt, uint32_t sample_count, uint32_t sample_quality);
-		bool UAVFormatSupport(ElementFormat elem_fmt);
-
 		virtual void CheckConfig(RenderSettings& settings) override;
 
 	private:
@@ -185,11 +180,6 @@ namespace KlayGE
 		std::vector<GLuint> binded_samplers_;
 		std::map<GLenum, GLuint> binded_buffers_;
 		std::map<GLenum, std::vector<GLuint>> binded_buffers_with_binding_points_;
-
-		std::vector<ElementFormat> vertex_format_;
-		std::vector<ElementFormat> texture_format_;
-		std::vector<ElementFormat> rendertarget_format_;
-		uint32_t max_samples_;
 
 		std::map<GLuint, std::map<GLint, int4>> uniformi_cache_;
 		std::map<GLuint, std::map<GLint, float4>> uniformf_cache_;

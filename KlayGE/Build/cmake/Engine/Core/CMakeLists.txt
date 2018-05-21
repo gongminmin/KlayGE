@@ -94,6 +94,7 @@ SET(RENDERING_SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Query.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/Renderable.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderableHelper.cpp
+	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderDeviceCaps.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderEffect.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderEngine.cpp
 	${KLAYGE_PROJECT_DIR}/Core/Src/Render/RenderFactory.cpp

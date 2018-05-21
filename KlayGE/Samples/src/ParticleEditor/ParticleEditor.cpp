@@ -343,63 +343,21 @@ void ParticleEditorApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	ElementFormat fmt;
-	if (caps.fp_color_support && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-	{
-		fmt = EF_B10G11R11F;
-	}
-	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-	{
-		fmt = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-		fmt = EF_ARGB8;
-	}
+	auto fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR8, EF_ARGB8 }, 1, 0);
+	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	if (caps.pack_to_rgba_required)
-	{
-		if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-		{
-			fmt = EF_ABGR8;
-		}
-		else if (caps.rendertarget_format_support(EF_ARGB8, 1, 0))
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-			fmt = EF_ARGB8;
-		}
-	}
-	else
-	{
-		if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-		{
-			fmt = EF_R16F;
-		}
-		else if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-			fmt = EF_R32F;
-		}
-	}
+	fmt = caps.BestMatchTextureRenderTargetFormat(
+		caps.pack_to_rgba_required ? MakeArrayRef({ EF_ABGR8, EF_ARGB8 }) : MakeArrayRef({ EF_R16F, EF_R32F }), 1, 0);
+	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
-
-	ElementFormat ds_fmt;
-	if (caps.rendertarget_format_support(EF_D24S8, 1, 0))
-	{
-		ds_fmt = EF_D24S8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_D16, 1, 0));
-
-		ds_fmt = EF_D16;
-	}
 
 	RenderViewPtr ds_view;
 	if (depth_texture_support_)
 	{
+		auto const ds_fmt = caps.BestMatchTextureRenderTargetFormat({ EF_D24S8, EF_D16 }, 1, 0);
+		BOOST_ASSERT(ds_fmt != EF_Unknown);
+
 		scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, ds_fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		ds_view = rf.Make2DDepthStencilRenderView(*scene_ds_tex_, 0, 1, 0);
 
@@ -823,11 +781,13 @@ void ParticleEditorApp::LoadParticleAlpha(int id, std::string const & name)
 			}
 		}
 
+		auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+		BOOST_ASSERT(fmt != EF_Unknown);
+
 		ElementInitData init_data;
 		init_data.data = &data[0];
 		init_data.row_pitch = tex->Width(0) * 4;
-		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1,
-			rf.RenderEngineInstance().DeviceCaps().texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8, 1, 0,
+		tex_for_button = rf.MakeTexture2D(cpu_tex->Width(0), cpu_tex->Height(0), 1, 1, fmt, 1, 0,
 			EAH_GPU_Read | EAH_Immutable, init_data);
 	}
 	else
@@ -842,7 +802,8 @@ void ParticleEditorApp::LoadParticleColor(int id, KlayGE::Color const & clr)
 	RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 	RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
 
-	ElementFormat fmt = caps.texture_format_support(EF_ABGR8) ? EF_ABGR8 : EF_ARGB8;
+	auto const fmt = caps.BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
+	BOOST_ASSERT(fmt != EF_Unknown);
 
 	uint32_t data;
 	data = 0xFF000000 | ((EF_ABGR8 == fmt) ? clr.ABGR() : clr.ARGB());

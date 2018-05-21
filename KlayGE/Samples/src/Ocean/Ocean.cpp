@@ -335,17 +335,8 @@ namespace
 				gradient_tex_.resize(ocean_param_.num_frames);
 				for (uint32_t i = 0; i < ocean_param_.num_frames; ++ i)
 				{
-					ElementFormat fmt;
-					if (re.DeviceCaps().texture_format_support(EF_GR8))
-					{
-						fmt = EF_GR8;
-					}
-					else
-					{
-						BOOST_ASSERT(re.DeviceCaps().texture_format_support(EF_ABGR8));
-
-						fmt = EF_ABGR8;
-					}
+					auto const fmt = re.DeviceCaps().BestMatchTextureRenderTargetFormat({ EF_GR8, EF_ABGR8 }, 1, 0);
+					BOOST_ASSERT(fmt != EF_Unknown);
 
 					ArrayRef<ElementInitData> did;
 					if (use_load_tex)

@@ -249,31 +249,17 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	ElementFormat fmt;
-	if (caps.fp_color_support && caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
+	ArrayRef<ElementFormat> fmt_options = { EF_B10G11R11F, EF_ABGR8, EF_ARGB8 };
+	if (!caps.fp_color_support)
 	{
-		fmt = EF_B10G11R11F;
+		fmt_options = fmt_options.Slice(1);
 	}
-	else if (caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-	{
-		fmt = EF_ABGR8;
-	}
-	else
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-		fmt = EF_ARGB8;
-	}
+	auto fmt = caps.BestMatchRenderTargetFormat(fmt_options, 1, 0);
+	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
-	if (caps.rendertarget_format_support(EF_R16F, 1, 0))
-	{
-		fmt = EF_R16F;
-	}
-	else if (caps.rendertarget_format_support(EF_R32F, 1, 0))
-	{
-		BOOST_ASSERT(caps.rendertarget_format_support(EF_R32F, 1, 0));
-		fmt = EF_R32F;
-	}
+	fmt = caps.BestMatchRenderTargetFormat({ EF_R16F, EF_R32F }, 1, 0);
+	BOOST_ASSERT(fmt != EF_Unknown);
 	scene_depth_tex_ = rf.MakeTexture2D(width, height, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 
 	scene_ds_tex_ = rf.MakeTexture2D(width, height, 1, 1, EF_D24S8, 1, 0, EAH_GPU_Read | EAH_GPU_Write);

@@ -135,15 +135,8 @@ namespace KlayGE
 		ElementFormat fmt;
 		if (caps.pack_to_rgba_required)
 		{
-			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				fmt = EF_ARGB8;
-			}
+			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(fmt != EF_Unknown);
 		}
 		else
 		{
@@ -232,15 +225,8 @@ namespace KlayGE
 		ElementFormat fmt;
 		if (caps.pack_to_rgba_required)
 		{
-			if (caps.texture_format_support(EF_ABGR8) && caps.rendertarget_format_support(EF_ABGR8, 1, 0))
-			{
-				fmt = EF_ABGR8;
-			}
-			else
-			{
-				BOOST_ASSERT(caps.texture_format_support(EF_ARGB8) && caps.rendertarget_format_support(EF_ARGB8, 1, 0));
-				fmt = EF_ARGB8;
-			}
+			fmt = caps.BestMatchTextureRenderTargetFormat({ EF_ABGR8, EF_ARGB8 }, 1, 0);
+			BOOST_ASSERT(fmt != EF_Unknown);
 		}
 		else
 		{
@@ -450,16 +436,8 @@ namespace KlayGE
 		pattern_real_tex_ = SyncLoadTexture("lens_effects_real.dds", EAH_GPU_Read | EAH_Immutable);
 		pattern_imag_tex_ = SyncLoadTexture("lens_effects_imag.dds", EAH_GPU_Read | EAH_Immutable);
 
-		ElementFormat fmt;
-		if (caps.rendertarget_format_support(EF_B10G11R11F, 1, 0))
-		{
-			fmt = EF_B10G11R11F;
-		}
-		else
-		{
-			BOOST_ASSERT(caps.rendertarget_format_support(EF_ABGR16F, 1, 0));
-			fmt = EF_ABGR16F;
-		}
+		auto const fmt = caps.BestMatchTextureRenderTargetFormat({ EF_B10G11R11F, EF_ABGR16F }, 1, 0);
+		BOOST_ASSERT(fmt != EF_Unknown);
 		resized_tex_ = rf.MakeTexture2D(WIDTH, HEIGHT, 1, 1, fmt, 1, 0, EAH_GPU_Read | EAH_GPU_Write);
 		{
 			std::vector<uint8_t> zero_data(WIDTH * HEIGHT, 0);
@@ -616,7 +594,7 @@ namespace KlayGE
 
 		if (fft_lens_effects && fp_texture_support_)
 		{
-			if (caps.rendertarget_format_support(EF_ABGR32F, 1, 0))
+			if (caps.TextureRenderTargetFormatSupport(EF_ABGR32F, 1, 0))
 			{
 				lens_effects_ = MakeSharedPtr<FFTLensEffectsPostProcess>();
 			}
