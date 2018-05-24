@@ -22,7 +22,7 @@ namespace KlayGE
 			CM_EntitySelection,
 			CM_EntityTranslation,
 			CM_EntityRotation,
-			CM_EntityScaling
+			CM_EntityScale
 		};
 
 		enum EntityType
@@ -83,7 +83,6 @@ namespace KlayGE
 		void DisplayGamma(bool gamma);
 		void DisplayColorGrading(bool cg);
 
-		ControlMode GetControlMode() const;
 		void SetControlMode(ControlMode mode);
 
 		uint32_t AddModel(std::string const & meshml_name);
@@ -95,32 +94,28 @@ namespace KlayGE
 		uint32_t AddCamera(std::string const & name);
 		void ClearCameras();
 
-		uint32_t NumEntities() const;
-		uint32_t EntityIDByIndex(uint32_t index) const;
-
 		void RemoveEntity(uint32_t id);
 		void SelectEntity(uint32_t id);
-		uint32_t SelectedEntity() const;
-		std::string const & EntityName(uint32_t id) const;
+
+		std::string const & EntityName(uint32_t id);
 		void EntityName(uint32_t id, std::string const & name);
-		bool HideEntity(uint32_t id) const;
-		void HideEntity(uint32_t id, bool hide);
-		EntityType GetEntityType(uint32_t id) const;
+		bool EntityVisible(uint32_t id);
+		void EntityVisible(uint32_t id, bool visible);
 		LightSourcePtr const & GetLight(uint32_t id) const;
 		std::string const & LightProjectiveTexName(uint32_t id) const;
 		void LightProjectiveTexName(uint32_t id, std::string const & name);
 		CameraPtr const & GetCamera(uint32_t id) const;
-		float3 const & EntityScaling(uint32_t id) const;
-		void EntityScaling(uint32_t id, float3 const & s);
+		float3 const & EntityScale(uint32_t id) const;
+		void EntityScale(uint32_t id, float3 const & s);
 		Quaternion const & EntityRotation(uint32_t id) const;
 		void EntityRotation(uint32_t id, Quaternion const & r);
-		float3 const & EntityTranslation(uint32_t id) const;
-		void EntityTranslation(uint32_t id, float3 const & t);
-		uint32_t ActiveCameraID() const;
-		void ActiveCameraID(uint32_t id);
+		float3 const & EntityPosition(uint32_t id) const;
+		void EntityPosition(uint32_t id, float3 const & t);
+		float3 const & EntityPivot(uint32_t id) const;
+		void EntityPivot(uint32_t id, float3 const & t);
 
-		uint32_t BackupEntityInfo(uint32_t id);
-		void RestoreEntityInfo(uint32_t id, uint32_t backup_id);
+		uint32_t ActiveCameraId() const;
+		void ActiveCameraId(uint32_t id);
 
 		void MouseMove(int x, int y, uint32_t button);
 		void MouseDown(int x, int y, uint32_t button);
@@ -130,8 +125,6 @@ namespace KlayGE
 	public:
 		typedef void (__stdcall *UpdatePropertyEvent)();
 		typedef void (__stdcall *UpdateSelectEntityEvent)(uint32_t obj_id);
-		typedef void (__stdcall *UpdateAddEntityEvent)(uint32_t obj_id);
-		typedef void (__stdcall *UpdateRemoveEntityEvent)(uint32_t obj_id);
 		typedef void (__stdcall *AddModelEvent)(char const * name);
 		typedef void (__stdcall *AddLightEvent)(LightSource::LightType type);
 		typedef void (__stdcall *AddCameraEvent)();
@@ -143,14 +136,6 @@ namespace KlayGE
 		void UpdateSelectEntityCallback(UpdateSelectEntityEvent callback)
 		{
 			update_select_entity_event_ = callback;
-		}
-		void UpdateAddEntityCallback(UpdateAddEntityEvent callback)
-		{
-			update_add_entity_event_ = callback;
-		}
-		void UpdateRemoveEntityCallback(UpdateRemoveEntityEvent callback)
-		{
-			update_remove_entity_event_ = callback;
 		}
 		void AddModelCallback(AddModelEvent callback)
 		{
@@ -172,7 +157,7 @@ namespace KlayGE
 		virtual void DoUpdateOverlay() override;
 		virtual uint32_t DoUpdate(uint32_t pass) override;
 
-		void UpdateSelectedEntity();
+		void UpdateSelectedEntity(bool callback);
 		void UpdateEntityAxis();
 		void UpdateHelperObjs();
 		void UpdateSceneAABB();
@@ -223,14 +208,11 @@ namespace KlayGE
 		TexturePtr selective_cpu_tex_;
 
 		uint32_t last_entity_id_;
-		uint32_t last_backup_entity_id_;
 
 		AABBox scene_aabb_;
 
 		UpdatePropertyEvent update_property_event_;
 		UpdateSelectEntityEvent update_select_entity_event_;
-		UpdateAddEntityEvent update_add_entity_event_;
-		UpdateRemoveEntityEvent update_remove_entity_event_;
 		AddModelEvent add_model_event_;
 		AddLightEvent add_light_event_;
 		AddCameraEvent add_camera_event_;

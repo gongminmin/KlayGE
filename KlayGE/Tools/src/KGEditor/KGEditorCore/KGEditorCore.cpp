@@ -521,7 +521,7 @@ namespace KlayGE
 					ctrl_mode_(CM_EntitySelection), selected_axis_(SA_None),
 					mouse_down_in_wnd_(false), mouse_tracking_mode_(false),
 					tb_controller_(false), update_selective_buffer_(false),
-					last_entity_id_(0), last_backup_entity_id_(0)
+					last_entity_id_(0)
 	{
 		ResLoader::Instance().AddPath("../../Tools/media/KGEditor");
 	}
@@ -849,11 +849,6 @@ namespace KlayGE
 		Context::Instance().RenderFactoryInstance().RenderEngineInstance().ColorGradingEnabled(cg);
 	}
 
-	KGEditorCore::ControlMode KGEditorCore::GetControlMode() const
-	{
-		return ctrl_mode_;
-	}
-
 	void KGEditorCore::SetControlMode(KGEditorCore::ControlMode mode)
 	{
 		ctrl_mode_ = mode;
@@ -895,8 +890,6 @@ namespace KlayGE
 
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
-
-		update_add_entity_event_(entity_id);
 
 		return entity_id;
 	}
@@ -989,8 +982,6 @@ namespace KlayGE
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
 
-		update_add_entity_event_(entity_id);
-
 		return entity_id;
 	}
 
@@ -1046,8 +1037,6 @@ namespace KlayGE
 		update_selective_buffer_ = true;
 		this->UpdateSceneAABB();
 
-		update_add_entity_event_(entity_id);
-
 		return entity_id;
 	}
 
@@ -1073,24 +1062,8 @@ namespace KlayGE
 		update_property_event_();
 	}
 
-	uint32_t KGEditorCore::NumEntities() const
-	{
-		return static_cast<uint32_t>(entities_.size());
-	}
-
-	uint32_t KGEditorCore::EntityIDByIndex(uint32_t index) const
-	{
-		BOOST_ASSERT(index < this->NumEntities());
-
-		auto iter = entities_.begin();
-		std::advance(iter, index);
-		return iter->first;
-	}
-
 	void KGEditorCore::RemoveEntity(uint32_t entity_id)
 	{
-		update_remove_entity_event_(entity_id);
-
 		auto iter = entities_.find(entity_id);
 		if (iter != entities_.end())
 		{
@@ -1161,12 +1134,7 @@ namespace KlayGE
 		update_property_event_();
 	}
 
-	uint32_t KGEditorCore::SelectedEntity() const
-	{
-		return selected_entity_;
-	}
-
-	std::string const & KGEditorCore::EntityName(uint32_t id) const
+	std::string const & KGEditorCore::EntityName(uint32_t id)
 	{
 		return this->GetEntityInfo(id).name;
 	}
@@ -1176,19 +1144,22 @@ namespace KlayGE
 		this->GetEntityInfo(id).name = name;
 	}
 
-	bool KGEditorCore::HideEntity(uint32_t id) const
+	bool KGEditorCore::EntityVisible(uint32_t id)
 	{
-		return !this->GetEntityInfo(id).scene_obj->Visible();
+		return this->GetEntityInfo(id).scene_obj->Visible();
 	}
 
-	void KGEditorCore::HideEntity(uint32_t id, bool hide)
+	void KGEditorCore::EntityVisible(uint32_t id, bool visible)
 	{
-		this->GetEntityInfo(id).scene_obj->Visible(!hide);
-	}
+		auto& entity = this->GetEntityInfo(id);
+		entity.scene_obj->Visible(visible);
+		if (entity.type == ET_Light)
+		{
+			entity.light->Enabled(visible);
+		}
 
-	KGEditorCore::EntityType KGEditorCore::GetEntityType(uint32_t id) const
-	{
-		return this->GetEntityInfo(id).type;
+		update_selective_buffer_ = true;
+		this->UpdateSceneAABB();
 	}
 
 	LightSourcePtr const & KGEditorCore::GetLight(uint32_t id) const
@@ -1213,7 +1184,14 @@ namespace KlayGE
 		BOOST_ASSERT(ET_Light == entity_info.type);
 
 		entity_info.projective_tex_name = name;
-		entity_info.light->ProjectiveTexture(ASyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable));
+		if (name.empty())
+		{
+			entity_info.light->ProjectiveTexture(TexturePtr());
+		}
+		else
+		{
+			entity_info.light->ProjectiveTexture(ASyncLoadTexture(name, EAH_GPU_Read | EAH_Immutable));
+		}
 	}
 
 	CameraPtr const & KGEditorCore::GetCamera(uint32_t id) const
@@ -1224,15 +1202,15 @@ namespace KlayGE
 		return entity_info.camera;
 	}
 
-	float3 const & KGEditorCore::EntityScaling(uint32_t id) const
+	float3 const & KGEditorCore::EntityScale(uint32_t id) const
 	{
 		return this->GetEntityInfo(id).trf_scale;
 	}
 
-	void KGEditorCore::EntityScaling(uint32_t id, float3 const & s)
+	void KGEditorCore::EntityScale(uint32_t id, float3 const & s)
 	{
 		this->GetEntityInfo(id).trf_scale = s;
-		this->UpdateSelectedEntity();
+		this->UpdateSelectedEntity(false);
 	}
 
 	Quaternion const & KGEditorCore::EntityRotation(uint32_t id) const
@@ -1243,26 +1221,37 @@ namespace KlayGE
 	void KGEditorCore::EntityRotation(uint32_t id, Quaternion const & r)
 	{
 		this->GetEntityInfo(id).trf_rotate = r;
-		this->UpdateSelectedEntity();
+		this->UpdateSelectedEntity(false);
 	}
 
-	float3 const & KGEditorCore::EntityTranslation(uint32_t id) const
+	float3 const & KGEditorCore::EntityPosition(uint32_t id) const
 	{
 		return this->GetEntityInfo(id).trf_pos;
 	}
 
-	void KGEditorCore::EntityTranslation(uint32_t id, float3 const & t)
+	void KGEditorCore::EntityPosition(uint32_t id, float3 const & t)
 	{
 		this->GetEntityInfo(id).trf_pos = t;
-		this->UpdateSelectedEntity();
+		this->UpdateSelectedEntity(false);
 	}
 
-	uint32_t KGEditorCore::ActiveCameraID() const
+	float3 const & KGEditorCore::EntityPivot(uint32_t id) const
+	{
+		return this->GetEntityInfo(id).trf_pivot;
+	}
+
+	void KGEditorCore::EntityPivot(uint32_t id, float3 const & t)
+	{
+		this->GetEntityInfo(id).trf_pivot = t;
+		this->UpdateSelectedEntity(false);
+	}
+
+	uint32_t KGEditorCore::ActiveCameraId() const
 	{
 		return active_camera_id_;
 	}
 
-	void KGEditorCore::ActiveCameraID(uint32_t id)
+	void KGEditorCore::ActiveCameraId(uint32_t id)
 	{
 		active_camera_id_ = id;
 
@@ -1270,64 +1259,13 @@ namespace KlayGE
 		CameraPtr camera = (0 == id) ? system_camera_ : this->GetCamera(id);
 
 		re.CurFrameBuffer()->GetViewport()->camera = camera;
+		re.DefaultFrameBuffer()->GetViewport()->camera = camera;
 		selective_fb_->GetViewport()->camera = camera;
 
 		tb_controller_.AttachCamera(this->ActiveCamera());
 	}
 
-	uint32_t KGEditorCore::BackupEntityInfo(uint32_t id)
-	{
-		update_remove_entity_event_(id);
-
-		uint32_t const backup_entity_id = last_backup_entity_id_ + 1;
-		last_backup_entity_id_ = backup_entity_id;
-
-		auto iter = entities_.find(id);
-		BOOST_ASSERT(iter != entities_.end());
-
-		backup_entities_.emplace(backup_entity_id, iter->second);
-
-		iter->second.scene_obj->DelFromSceneManager();
-		switch (iter->second.type)
-		{
-		case ET_Model:
-			break;
-
-		case ET_Light:
-			iter->second.light->DelFromSceneManager();
-			break;
-
-		case ET_Camera:
-			iter->second.camera->DelFromSceneManager();
-			break;
-
-		default:
-			break;
-		}
-
-		entities_.erase(iter);
-
-		update_selective_buffer_ = true;
-		this->UpdateSceneAABB();
-
-		update_property_event_();
-
-		return last_backup_entity_id_;
-	}
-
-	void KGEditorCore::RestoreEntityInfo(uint32_t id, uint32_t backup_id)
-	{
-		auto iter = backup_entities_.find(backup_id);
-		BOOST_ASSERT(iter != backup_entities_.end());
-
-		entities_.emplace(id, iter->second);
-
-		update_add_entity_event_(id);
-
-		backup_entities_.erase(iter);
-	}
-
-	void KGEditorCore::UpdateSelectedEntity()
+	void KGEditorCore::UpdateSelectedEntity(bool callback)
 	{
 		EntityInfo& ei = entities_[selected_entity_];
 		float4x4 model_mat = MathLib::transformation<float>(&ei.trf_pivot, nullptr, &ei.trf_scale,
@@ -1360,7 +1298,10 @@ namespace KlayGE
 
 		update_selective_buffer_ = true;
 
-		update_property_event_();
+		if (callback)
+		{
+			update_property_event_();
+		}
 	}
 
 	void KGEditorCore::UpdateEntityAxis()
@@ -1417,7 +1358,7 @@ namespace KlayGE
 				this->UpdateEntityAxis();
 				break;
 
-			case CM_EntityScaling:
+			case CM_EntityScale:
 				scaling_axis_->Visible(true);
 				this->UpdateEntityAxis();
 				break;
@@ -1435,9 +1376,12 @@ namespace KlayGE
 		for (auto const & entity : entities_)
 		{
 			EntityInfo const & ei = entity.second;
-			float4x4 model_mat = MathLib::transformation<float>(&ei.trf_pivot, nullptr, &ei.trf_scale,
-				&ei.trf_pivot, &ei.trf_rotate, &ei.trf_pos);
-			scene_aabb_ |= MathLib::convert_to_aabbox(MathLib::transform_obb(ei.obb, model_mat));
+			if (ei.scene_obj->Visible())
+			{
+				float4x4 model_mat = MathLib::transformation<float>(&ei.trf_pivot, nullptr, &ei.trf_scale,
+					&ei.trf_pivot, &ei.trf_rotate, &ei.trf_pos);
+				scene_aabb_ |= MathLib::convert_to_aabbox(MathLib::transform_obb(ei.obb, model_mat));
+			}
 		}
 	}
 
@@ -1528,109 +1472,109 @@ namespace KlayGE
 				switch (ctrl_mode_)
 				{
 				case CM_EntityTranslation:
-				{
-					float const DIST_THRESHOLD = 0.1f;
-
 					{
-						float min_dist = 1e10f;
-						for (int i = 0; i < 3; ++ i)
+						float const DIST_THRESHOLD = 0.1f;
+
 						{
-							int index0 = (i + 1) % 3;
-							int index1 = (i + 2) % 3;
-							float dist = MathLib::sqr(intersect_pt[index0][index1])
-								+ MathLib::sqr(intersect_pt[index1][index0]);
-							if ((intersect_pt[index0][i] > 0.4f) && (intersect_pt[index0][i] < 1.2f)
-								&& (dist < DIST_THRESHOLD) && (dist < min_dist))
+							float min_dist = 1e10f;
+							for (int i = 0; i < 3; ++ i)
 							{
-								min_dist = dist;
-								selected_axis_ = static_cast<SelectedAxis>(1UL << i);
+								int index0 = (i + 1) % 3;
+								int index1 = (i + 2) % 3;
+								float dist = MathLib::sqr(intersect_pt[index0][index1])
+									+ MathLib::sqr(intersect_pt[index1][index0]);
+								if ((intersect_pt[index0][i] > 0.4f) && (intersect_pt[index0][i] < 1.2f)
+									&& (dist < DIST_THRESHOLD) && (dist < min_dist))
+								{
+									min_dist = dist;
+									selected_axis_ = static_cast<SelectedAxis>(1UL << i);
+								}
 							}
 						}
-					}
-					if (SA_None == selected_axis_)
-					{
-						float min_dist = 1e10f;
-						for (int i = 0; i < 3; ++ i)
+						if (SA_None == selected_axis_)
 						{
-							int index0 = (i + 1) % 3;
-							int index1 = (i + 2) % 3;
-							float dist = MathLib::sqr(intersect_pt[i][index0])
-								+ MathLib::sqr(intersect_pt[i][index1]);
-							if ((intersect_pt[i][index0] < 0.4f) && (intersect_pt[i][index0] > 0)
-								&& (intersect_pt[i][index1] < 0.4f) && (intersect_pt[i][index1] > 0)
-								&& (dist < min_dist))
+							float min_dist = 1e10f;
+							for (int i = 0; i < 3; ++ i)
 							{
-								min_dist = dist;
-								selected_axis_ = static_cast<SelectedAxis>((1UL << index0) | (1UL << index1));
+								int index0 = (i + 1) % 3;
+								int index1 = (i + 2) % 3;
+								float dist = MathLib::sqr(intersect_pt[i][index0])
+									+ MathLib::sqr(intersect_pt[i][index1]);
+								if ((intersect_pt[i][index0] < 0.4f) && (intersect_pt[i][index0] > 0)
+									&& (intersect_pt[i][index1] < 0.4f) && (intersect_pt[i][index1] > 0)
+									&& (dist < min_dist))
+								{
+									min_dist = dist;
+									selected_axis_ = static_cast<SelectedAxis>((1UL << index0) | (1UL << index1));
+								}
 							}
 						}
-					}
 
-					checked_pointer_cast<RenderableTranslationAxis>(translation_axis_->GetRenderable())->HighlightAxis(selected_axis_);
-				}
-				break;
+						checked_pointer_cast<RenderableTranslationAxis>(translation_axis_->GetRenderable())->HighlightAxis(selected_axis_);
+					}
+					break;
 
 				case CM_EntityRotation:
-				{
-					float const DIST_THRESHOLD = 0.2f;
-
-					float min_dist = 1e10f;
-					for (int i = 0; i < 3; ++ i)
 					{
-						float dist = abs(1 - MathLib::length(intersect_pt[i]));
-						if ((dist < DIST_THRESHOLD) && (dist < min_dist))
-						{
-							min_dist = dist;
-							selected_axis_ = static_cast<SelectedAxis>(1UL << i);
-						}
-					}
+						float const DIST_THRESHOLD = 0.2f;
 
-					checked_pointer_cast<RenderableRotationAxis>(rotation_axis_->GetRenderable())->HighlightAxis(selected_axis_);
-				}
-				break;
-
-				case CM_EntityScaling:
-				{
-					float const DIST_THRESHOLD = 0.1f;
-
-					{
 						float min_dist = 1e10f;
 						for (int i = 0; i < 3; ++ i)
 						{
-							int index0 = (i + 1) % 3;
-							int index1 = (i + 2) % 3;
-							float dist = MathLib::sqr(intersect_pt[index0][index1])
-								+ MathLib::sqr(intersect_pt[index1][index0]);
-							if ((intersect_pt[index0][i] > 0.4f) && (intersect_pt[index0][i] < 1.2f)
-								&& (dist < DIST_THRESHOLD) && (dist < min_dist))
+							float dist = abs(1 - MathLib::length(intersect_pt[i]));
+							if ((dist < DIST_THRESHOLD) && (dist < min_dist))
 							{
 								min_dist = dist;
 								selected_axis_ = static_cast<SelectedAxis>(1UL << i);
 							}
 						}
+
+						checked_pointer_cast<RenderableRotationAxis>(rotation_axis_->GetRenderable())->HighlightAxis(selected_axis_);
 					}
-					if (SA_None == selected_axis_)
+					break;
+
+				case CM_EntityScale:
 					{
-						float min_dist = 1e10f;
-						for (int i = 0; i < 3; ++ i)
+						float const DIST_THRESHOLD = 0.1f;
+
 						{
-							int index0 = (i + 1) % 3;
-							int index1 = (i + 2) % 3;
-							float dist = MathLib::sqr(intersect_pt[i][index0])
-								+ MathLib::sqr(intersect_pt[i][index1]);
-							if ((intersect_pt[i][index0] < 0.4f) && (intersect_pt[i][index0] > 0)
-								&& (intersect_pt[i][index1] < 0.4f) && (intersect_pt[i][index1] > 0)
-								&& (dist < min_dist))
+							float min_dist = 1e10f;
+							for (int i = 0; i < 3; ++ i)
 							{
-								min_dist = dist;
-								selected_axis_ = SA_XYZ;
+								int index0 = (i + 1) % 3;
+								int index1 = (i + 2) % 3;
+								float dist = MathLib::sqr(intersect_pt[index0][index1])
+									+ MathLib::sqr(intersect_pt[index1][index0]);
+								if ((intersect_pt[index0][i] > 0.4f) && (intersect_pt[index0][i] < 1.2f)
+									&& (dist < DIST_THRESHOLD) && (dist < min_dist))
+								{
+									min_dist = dist;
+									selected_axis_ = static_cast<SelectedAxis>(1UL << i);
+								}
 							}
 						}
-					}
+						if (SA_None == selected_axis_)
+						{
+							float min_dist = 1e10f;
+							for (int i = 0; i < 3; ++ i)
+							{
+								int index0 = (i + 1) % 3;
+								int index1 = (i + 2) % 3;
+								float dist = MathLib::sqr(intersect_pt[i][index0])
+									+ MathLib::sqr(intersect_pt[i][index1]);
+								if ((intersect_pt[i][index0] < 0.4f) && (intersect_pt[i][index0] > 0)
+									&& (intersect_pt[i][index1] < 0.4f) && (intersect_pt[i][index1] > 0)
+									&& (dist < min_dist))
+								{
+									min_dist = dist;
+									selected_axis_ = SA_XYZ;
+								}
+							}
+						}
 
-					checked_pointer_cast<RenderableScalingAxis>(scaling_axis_->GetRenderable())->HighlightAxis(selected_axis_);
-				}
-				break;
+						checked_pointer_cast<RenderableScalingAxis>(scaling_axis_->GetRenderable())->HighlightAxis(selected_axis_);
+					}
+					break;
 
 				default:
 					break;
@@ -1716,38 +1660,38 @@ namespace KlayGE
 					switch (ctrl_mode_)
 					{
 					case CM_EntityTranslation:
-					{
-						float3 translation(0, 0, 0);
-						for (int i = 0; i < 3; ++ i)
 						{
-							if (selected_axis_ & (1UL << i))
+							float3 translation(0, 0, 0);
+							for (int i = 0; i < 3; ++ i)
 							{
-								translation[i] = this_intersect_pt[intersect_index[i]][i]
-									- last_intersect_pt[intersect_index[i]][i];
+								if (selected_axis_ & (1UL << i))
+								{
+									translation[i] = this_intersect_pt[intersect_index[i]][i]
+										- last_intersect_pt[intersect_index[i]][i];
+								}
 							}
+							ei.trf_pos = MathLib::transform_quat(translation * ei.trf_scale, ei.trf_rotate) + ei.trf_pos;
+							dirty = true;
 						}
-						ei.trf_pos = MathLib::transform_quat(translation * ei.trf_scale, ei.trf_rotate) + ei.trf_pos;
-						dirty = true;
-					}
-					break;
+						break;
 
 					case CM_EntityRotation:
-					{
-						for (int i = 0; i < 3; ++ i)
 						{
-							if (selected_axis_ & (1UL << i))
+							for (int i = 0; i < 3; ++ i)
 							{
-								Quaternion quat = MathLib::axis_to_axis(last_intersect_pt[i], this_intersect_pt[i]);
-								ei.trf_rotate = quat * ei.trf_rotate;
-								dirty = true;
+								if (selected_axis_ & (1UL << i))
+								{
+									Quaternion quat = MathLib::axis_to_axis(last_intersect_pt[i], this_intersect_pt[i]);
+									ei.trf_rotate = quat * ei.trf_rotate;
+									dirty = true;
 
-								break;
+									break;
+								}
 							}
 						}
-					}
-					break;
+						break;
 
-					case CM_EntityScaling:
+					case CM_EntityScale:
 						if ((ei.type != ET_Light) && (ei.type != ET_Camera))
 						{
 							float3 scaling(1, 1, 1);
@@ -1789,7 +1733,7 @@ namespace KlayGE
 
 					if (dirty)
 					{
-						this->UpdateSelectedEntity();
+						this->UpdateSelectedEntity(true);
 					}
 				}
 			}
@@ -1827,7 +1771,7 @@ namespace KlayGE
 				mouse_tracking_mode_ = false;
 				if (selected_entity_ > 0)
 				{
-					if (CM_EntityScaling == ctrl_mode_)
+					if (CM_EntityScale == ctrl_mode_)
 					{
 						display_scaling_for_axis_ = float3(1, 1, 1);
 						this->UpdateEntityAxis();

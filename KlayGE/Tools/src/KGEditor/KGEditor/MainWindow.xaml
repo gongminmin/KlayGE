@@ -44,9 +44,9 @@
                 </RibbonGroup>
                 <RibbonGroup Header="Control Mode">
                     <RibbonRadioButton LargeImageSource="Images\Selection.png" Label="Selection" Name="selection" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntitySelection}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="Q"/>
-                    <RibbonRadioButton LargeImageSource="Images\Translation.png" Label="Translation" Name="translation" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntityTranslation}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="W"/>
+                    <RibbonRadioButton LargeImageSource="Images\Translation.png" Label="Translation" Name="translation" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntityPosition}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="W"/>
                     <RibbonRadioButton LargeImageSource="Images\Rotation.png" Label="Rotation" Name="rotation" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntityRotation}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="E"/>
-                    <RibbonRadioButton LargeImageSource="Images\Scaling.png" Label="Scaling" Name="scaling" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntityScaling}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="R"/>
+                    <RibbonRadioButton LargeImageSource="Images\Scaling.png" Label="Scale" Name="scaling" IsChecked="{Binding ControlModeProperty, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={x:Static src:ControlModeEnum.CM_EntityScale}, Mode=TwoWay}" GroupName="ControlModeGroup" KeyTip="R"/>
                 </RibbonGroup>
             </RibbonTab>
         </Ribbon>

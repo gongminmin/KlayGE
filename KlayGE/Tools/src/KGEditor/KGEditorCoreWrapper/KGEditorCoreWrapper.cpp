@@ -114,11 +114,6 @@ namespace KlayGE
 		core_->DisplayColorGrading(cg);
 	}
 
-	KGEditorCoreWrapper::ControlMode KGEditorCoreWrapper::GetControlMode()
-	{
-		return static_cast<KGEditorCoreWrapper::ControlMode>(core_->GetControlMode());
-	}
-
 	void KGEditorCoreWrapper::SetControlMode(KGEditorCoreWrapper::ControlMode mode)
 	{
 		core_->SetControlMode(static_cast<KGEditorCore::ControlMode>(mode));
@@ -154,16 +149,6 @@ namespace KlayGE
 		core_->ClearCameras();
 	}
 
-	uint32_t KGEditorCoreWrapper::NumEntities()
-	{
-		return core_->NumEntities();
-	}
-
-	uint32_t KGEditorCoreWrapper::EntityIDByIndex(uint32_t index)
-	{
-		return core_->EntityIDByIndex(index);
-	}
-
 	void KGEditorCoreWrapper::RemoveEntity(uint32_t id)
 	{
 		core_->RemoveEntity(id);
@@ -172,11 +157,6 @@ namespace KlayGE
 	void KGEditorCoreWrapper::SelectEntity(uint32_t id)
 	{
 		core_->SelectEntity(id);
-	}
-
-	uint32_t KGEditorCoreWrapper::SelectedEntity()
-	{
-		return core_->SelectedEntity();
 	}
 
 	System::String^ KGEditorCoreWrapper::EntityName(uint32_t id)
@@ -189,19 +169,14 @@ namespace KlayGE
 		core_->EntityName(id, StringToStd(name));
 	}
 
-	bool KGEditorCoreWrapper::HideEntity(uint32_t id)
+	bool KGEditorCoreWrapper::EntityVisible(uint32_t id)
 	{
-		return core_->HideEntity(id);
+		return core_->EntityVisible(id);
 	}
 
-	void KGEditorCoreWrapper::HideEntity(uint32_t id, bool hide)
+	void KGEditorCoreWrapper::EntityVisible(uint32_t id, bool visible)
 	{
-		return core_->HideEntity(id, hide);
-	}
-
-	KGEditorCoreWrapper::EntityType KGEditorCoreWrapper::GetEntityType(uint32_t id)
-	{
-		return static_cast<KGEditorCoreWrapper::EntityType>(core_->GetEntityType(id));
+		core_->EntityVisible(id, visible);
 	}
 
 	KGEditorCoreWrapper::LightType KGEditorCoreWrapper::GetLightType(uint32_t id)
@@ -367,19 +342,19 @@ namespace KlayGE
 		camera->ProjParams(camera->FOV(), camera->Aspect(), camera->NearPlane(), far_plane);
 	}
 
-	array<float>^ KGEditorCoreWrapper::EntityScaling(uint32_t id)
+	array<float>^ KGEditorCoreWrapper::EntityScale(uint32_t id)
 	{
-		auto const & scaling = core_->EntityScaling(id);
+		auto const & scaling = core_->EntityScale(id);
 		array<float>^ ret = { scaling.x(), scaling.y(), scaling.z() };
 		return ret;
 	}
 
-	void KGEditorCoreWrapper::EntityScaling(uint32_t id, array<float>^ s)
+	void KGEditorCoreWrapper::EntityScale(uint32_t id, array<float>^ s)
 	{
 		float x = s[0];
 		float y = s[1];
 		float z = s[2];
-		core_->EntityScaling(id, float3(x, y, z));
+		core_->EntityScale(id, float3(x, y, z));
 	}
 
 	array<float>^ KGEditorCoreWrapper::EntityRotation(uint32_t id)
@@ -394,39 +369,44 @@ namespace KlayGE
 		core_->EntityRotation(id, Quaternion(r[0], r[1], r[2], r[3]));
 	}
 
-	array<float>^ KGEditorCoreWrapper::EntityTranslation(uint32_t id)
+	array<float>^ KGEditorCoreWrapper::EntityPosition(uint32_t id)
 	{
-		auto const & trans = core_->EntityTranslation(id);
+		auto const & trans = core_->EntityPosition(id);
 		array<float>^ ret = { trans.x(), trans.y(), trans.z() };
 		return ret;
 	}
 
-	void KGEditorCoreWrapper::EntityTranslation(uint32_t id, array<float>^ t)
+	void KGEditorCoreWrapper::EntityPosition(uint32_t id, array<float>^ t)
 	{
 		float x = t[0];
 		float y = t[1];
 		float z = t[2];
-		core_->EntityTranslation(id, float3(x, y, z));
+		core_->EntityPosition(id, float3(x, y, z));
 	}
 
-	uint32_t KGEditorCoreWrapper::ActiveCamera()
+	array<float>^ KGEditorCoreWrapper::EntityPivot(uint32_t id)
 	{
-		return core_->ActiveCameraID();
+		auto const & pivot = core_->EntityPivot(id);
+		array<float>^ ret = { pivot.x(), pivot.y(), pivot.z() };
+		return ret;
 	}
 
-	void KGEditorCoreWrapper::ActiveCamera(uint32_t id)
+	void KGEditorCoreWrapper::EntityPivot(uint32_t id, array<float>^ t)
 	{
-		core_->ActiveCameraID(id);
+		float x = t[0];
+		float y = t[1];
+		float z = t[2];
+		core_->EntityPivot(id, float3(x, y, z));
 	}
 
-	uint32_t KGEditorCoreWrapper::BackupEntityInfo(uint32_t id)
+	uint32_t KGEditorCoreWrapper::ActiveCameraId()
 	{
-		return core_->BackupEntityInfo(id);
+		return core_->ActiveCameraId();
 	}
 
-	void KGEditorCoreWrapper::RestoreEntityInfo(uint32_t id, uint32_t backup_id)
+	void KGEditorCoreWrapper::ActiveCameraId(uint32_t id)
 	{
-		core_->RestoreEntityInfo(id, backup_id);
+		core_->ActiveCameraId(id);
 	}
 
 	void KGEditorCoreWrapper::MouseMove(int x, int y, uint32_t button)
@@ -458,22 +438,6 @@ namespace KlayGE
 
 		IntPtr ip = Marshal::GetFunctionPointerForDelegate(callback);
 		core_->UpdateSelectEntityCallback(static_cast<KGEditorCore::UpdateSelectEntityEvent>(ip.ToPointer()));
-	}
-
-	void KGEditorCoreWrapper::UpdateAddEntityCallback(UpdateAddEntityDelegate^ callback)
-	{
-		update_add_entity_delegate_ = callback;
-
-		IntPtr ip = Marshal::GetFunctionPointerForDelegate(callback);
-		core_->UpdateAddEntityCallback(static_cast<KGEditorCore::UpdateAddEntityEvent>(ip.ToPointer()));
-	}
-
-	void KGEditorCoreWrapper::UpdateRemoveEntityCallback(UpdateRemoveEntityDelegate^ callback)
-	{
-		update_remove_entity_delegate_ = callback;
-
-		IntPtr ip = Marshal::GetFunctionPointerForDelegate(callback);
-		core_->UpdateRemoveEntityCallback(static_cast<KGEditorCore::UpdateRemoveEntityEvent>(ip.ToPointer()));
 	}
 
 	void KGEditorCoreWrapper::AddModelCallback(AddModelDelegate^ callback)

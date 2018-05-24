@@ -16,8 +16,8 @@ namespace KGEditor
 		ECC_ClearEntities,
 		ECC_SelectEntity,
 		ECC_SetEntityName,
-		ECC_HideEntity,
-		ECC_SetEntityScaling,
+		ECC_SetEntityVisible,
+		ECC_SetEntityScale,
 		ECC_SetEntityRotation,
 		ECC_SetEntityTranslation,
 		ECC_SetActiveCamera,
@@ -27,6 +27,7 @@ namespace KGEditor
 		ECC_SetLightFalloff,
 		ECC_SetLightInnerAngle,
 		ECC_SetLightOuterAngle,
+		ECC_SetLightProjectiveTex,
 		ECC_SetCameraLookAt,
 		ECC_SetCameraUpVec,
 		ECC_SetCameraFoV,
@@ -39,784 +40,769 @@ namespace KGEditor
 
 	abstract class KGEditorCommand
 	{
-		public KGEditorCommand(KGEditorCoreWrapper core, KGEditorCommandCode code, string cmd_name)
+		public KGEditorCommand(KGEditorCommandCode code, string cmd_name)
 		{
-			core_ = core;
 			code_ = code;
 			cmd_name_ = cmd_name;
 		}
 
-		public string Name()
+		public string Name
 		{
-			return cmd_name_;
+			get
+			{
+				return cmd_name_;
+			}
 		}
-		public KGEditorCommandCode Code()
+		public KGEditorCommandCode Code
 		{
-			return code_;
+			get
+			{
+				return code_;
+			}
 		}
 
 		public abstract object Execute();
 		public abstract void Revoke();
 
-		protected KGEditorCoreWrapper core_;
-		protected KGEditorCommandCode code_;
-		protected string cmd_name_;
+		protected readonly KGEditorCommandCode code_;
+		protected readonly string cmd_name_;
 	};
 
 	class KGEditorCommandSetSceneName : KGEditorCommand
 	{
-		public KGEditorCommandSetSceneName(KGEditorCoreWrapper core, string name)
-			: base(core, KGEditorCommandCode.ECC_SetSceneName, "Set scene name")
+		public KGEditorCommandSetSceneName(Scene scene, string name)
+			: base(KGEditorCommandCode.ECC_SetSceneName, "Set scene name")
 		{
+			scene_ = scene;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_name_ = core_.SceneName();
-			core_.SceneName(name_);
+			old_name_ = scene_.Name;
+			scene_.Name = name_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SceneName(old_name_);
+			scene_.Name = old_name_;
 		}
 
-		private string name_;
+		private readonly Scene scene_;
+		private readonly string name_;
 		private string old_name_;
 	};
 
 	class KGEditorCommandSetSkyboxName : KGEditorCommand
 	{
-		public KGEditorCommandSetSkyboxName(KGEditorCoreWrapper core, string name)
-			: base(core, KGEditorCommandCode.ECC_SetSkyboxName, "Set skybox name")
+		public KGEditorCommandSetSkyboxName(Scene scene, string name)
+			: base(KGEditorCommandCode.ECC_SetSkyboxName, "Set skybox name")
 		{
+			scene_ = scene;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_name_ = core_.SkyboxName();
-			core_.SkyboxName(name_);
+			old_name_ = scene_.SkyboxName;
+			scene_.SkyboxName = name_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SkyboxName(old_name_);
+			scene_.SkyboxName = old_name_;
 		}
 
-		private string name_;
+		private readonly Scene scene_;
+		private readonly string name_;
 		private string old_name_;
 	};
 
 	class KGEditorCommandSetControlMode : KGEditorCommand
 	{
-		public KGEditorCommandSetControlMode(KGEditorCoreWrapper core, KGEditorCoreWrapper.ControlMode mode)
-			: base(core, KGEditorCommandCode.ECC_SetControlMode, "Set control mode")
+		public KGEditorCommandSetControlMode(MainWindow wnd, KGEditorCoreWrapper.ControlMode mode)
+			: base(KGEditorCommandCode.ECC_SetControlMode, "Set control mode")
 		{
+			wnd_ = wnd;
 			mode_ = mode;
 		}
 
 		public override object Execute()
 		{
-			old_mode_ = core_.GetControlMode();
-			core_.SetControlMode(mode_);
+			old_mode_ = (KGEditorCoreWrapper.ControlMode)wnd_.ControlModeProperty;
+			wnd_.DoSetControlMode(mode_);
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SetControlMode(old_mode_);
+			wnd_.DoSetControlMode(old_mode_);
 		}
 
-		private KGEditorCoreWrapper.ControlMode mode_;
+		private readonly MainWindow wnd_;
+		private readonly KGEditorCoreWrapper.ControlMode mode_;
 		private KGEditorCoreWrapper.ControlMode old_mode_;
 	};
 
 	class KGEditorCommandAddModel : KGEditorCommand
 	{
-		public KGEditorCommandAddModel(KGEditorCoreWrapper core, string meshml_name)
-			: base(core, KGEditorCommandCode.ECC_AddModel, "Add model")
+		public KGEditorCommandAddModel(KGEditorCoreWrapper core, MainWindow wnd, Scene scene, string meshml_name)
+			: base(KGEditorCommandCode.ECC_AddModel, "Add model")
 		{
-			name_ = meshml_name;
+			core_ = core;
+			wnd_ = wnd;
+			scene_ = scene;
+			model_name_ = meshml_name;
 		}
 
 		public override object Execute()
 		{
-			old_selected_entity_id_ = core_.SelectedEntity();
-			entity_id_ = core_.AddModel(name_);
-			core_.SelectEntity(entity_id_);
+			old_selected_entity_id_ = wnd_.SelectedEntityId;
+			entity_id_ = core_.AddModel(model_name_);
+			scene_.AddEntity(entity_id_, SceneEntityType.ET_Model);
+			wnd_.SelectedEntityId = entity_id_;
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
-			core_.RemoveEntity(entity_id_);
-			core_.SelectEntity(old_selected_entity_id_);
+			scene_.RemoveEntity(entity_id_);
+			wnd_.SelectedEntityId = old_selected_entity_id_;
 		}
 
-		private string name_;
+		private readonly KGEditorCoreWrapper core_;
+		private readonly MainWindow wnd_;
+		private readonly Scene scene_;
+		private readonly string model_name_;
 		private uint entity_id_;
 		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandAddLight : KGEditorCommand
 	{
-		public KGEditorCommandAddLight(KGEditorCoreWrapper core, KGEditorCoreWrapper.LightType type, string name)
-			: base(core, KGEditorCommandCode.ECC_AddLight, "Add light")
+		public KGEditorCommandAddLight(KGEditorCoreWrapper core, MainWindow wnd, Scene scene, KGEditorCoreWrapper.LightType type, string name)
+			: base(KGEditorCommandCode.ECC_AddLight, "Add light")
 		{
+			core_ = core;
+			wnd_ = wnd;
+			scene_ = scene;
 			type_ = type;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_selected_entity_id_ = core_.SelectedEntity();
+			old_selected_entity_id_ = wnd_.SelectedEntityId;
 			entity_id_ = core_.AddLight(type_, name_);
-			core_.SelectEntity(entity_id_);
+			scene_.AddEntity(entity_id_, SceneEntityType.ET_Light);
+			wnd_.SelectedEntityId = entity_id_;
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
-			core_.RemoveEntity(entity_id_);
-			core_.SelectEntity(old_selected_entity_id_);
+			scene_.RemoveEntity(entity_id_);
+			wnd_.SelectedEntityId = old_selected_entity_id_;
 		}
 
-		private KGEditorCoreWrapper.LightType type_;
-		private string name_;
+		private readonly KGEditorCoreWrapper core_;
+		private readonly MainWindow wnd_;
+		private readonly Scene scene_;
+		private readonly KGEditorCoreWrapper.LightType type_;
+		private readonly string name_;
 		private uint entity_id_;
 		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandAddCamera : KGEditorCommand
 	{
-		public KGEditorCommandAddCamera(KGEditorCoreWrapper core, string name)
-			: base(core, KGEditorCommandCode.ECC_AddCamera, "Add camera")
+		public KGEditorCommandAddCamera(KGEditorCoreWrapper core, MainWindow wnd, Scene scene, string name)
+			: base(KGEditorCommandCode.ECC_AddCamera, "Add camera")
 		{
+			core_ = core;
+			wnd_ = wnd;
+			scene_ = scene;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_selected_entity_id_ = core_.SelectedEntity();
+			old_selected_entity_id_ = wnd_.SelectedEntityId;
 			entity_id_ = core_.AddCamera(name_);
-			core_.SelectEntity(entity_id_);
+			scene_.AddEntity(entity_id_, SceneEntityType.ET_Camera);
+			wnd_.SelectedEntityId = entity_id_;
 			return entity_id_;
 		}
 
 		public override void Revoke()
 		{
-			core_.RemoveEntity(entity_id_);
-			core_.SelectEntity(old_selected_entity_id_);
+			scene_.RemoveEntity(entity_id_);
+			wnd_.SelectedEntityId = old_selected_entity_id_;
 		}
 
-		private string name_;
+		private readonly KGEditorCoreWrapper core_;
+		private readonly MainWindow wnd_;
+		private readonly Scene scene_;
+		private readonly string name_;
 		private uint entity_id_;
 		private uint old_selected_entity_id_;
 	};
 
 	class KGEditorCommandRemoveEntity : KGEditorCommand
 	{
-		public KGEditorCommandRemoveEntity(KGEditorCoreWrapper core, uint entity_id)
-			: base(core, KGEditorCommandCode.ECC_RemoveEntity, "Remove entity")
+		public KGEditorCommandRemoveEntity(KGEditorCoreWrapper core, MainWindow wnd, SceneEntity entity)
+			: base(KGEditorCommandCode.ECC_RemoveEntity, "Remove entity")
 		{
-			entity_id_ = entity_id;
+			core_ = core;
+			wnd_ = wnd;
+			entity_ = entity;
 		}
-
-		// TODO: Destory the backup entity when dispose
 
 		public override object Execute()
 		{
-			old_selected_entity_id_ = core_.SelectedEntity();
-			if (old_selected_entity_id_ == entity_id_)
+			old_selected_entity_id_ = wnd_.SelectedEntityId;
+			if (old_selected_entity_id_ == entity_.Id)
 			{
-				core_.SelectEntity(0);
+				wnd_.SelectedEntityId = 0;
 			}
 
-			backup_entity_id_ = core_.BackupEntityInfo(entity_id_);
+			core_.EntityVisible(entity_.Id, false);
+
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.RestoreEntityInfo(entity_id_, backup_entity_id_);
-			core_.SelectEntity(old_selected_entity_id_);
+			wnd_.RestoreEntityInfo(entity_);
+			wnd_.SelectedEntityId = old_selected_entity_id_;
+			core_.EntityVisible(entity_.Id, true);
 		}
 
-		private uint entity_id_;
-		private uint backup_entity_id_;
+		private readonly KGEditorCoreWrapper core_;
+		private readonly MainWindow wnd_;
+		private readonly SceneEntity entity_;
 		private uint old_selected_entity_id_;
-	};
-
-	class KGEditorCommandClearEntities : KGEditorCommand
-	{
-		public KGEditorCommandClearEntities(KGEditorCoreWrapper core, KGEditorCoreWrapper.EntityType type)
-			: base(core, KGEditorCommandCode.ECC_ClearEntities, "Clear entities")
-		{
-			type_ = type;
-		}
-
-		// TODO: Destory the backup entities when dispose
-
-		public override object Execute()
-		{
-			uint n = core_.NumEntities();
-			for (uint i = 0; i < n; ++ i)
-			{
-				uint id = core_.EntityIDByIndex(i);
-				if (core_.GetEntityType(id) == type_)
-				{
-					backup_entity_ids_.Add(id, core_.BackupEntityInfo(id));
-				}
-			}
-
-			switch (type_)
-			{
-				case KGEditorCoreWrapper.EntityType.ET_Model:
-					core_.ClearModels();
-					break;
-
-				case KGEditorCoreWrapper.EntityType.ET_Light:
-					core_.ClearLights();
-					break;
-
-				case KGEditorCoreWrapper.EntityType.ET_Camera:
-				default:
-					core_.ClearCameras();
-					break;
-			}
-
-			return null;
-		}
-
-		public override void Revoke()
-		{
-			foreach (var item in backup_entity_ids_)
-			{
-				core_.RestoreEntityInfo(item.Key, item.Value);
-			}
-		}
-
-		private KGEditorCoreWrapper.EntityType type_;
-		private Dictionary<uint, uint> backup_entity_ids_ = new Dictionary<uint, uint>();
 	};
 
 	class KGEditorCommandSelectEntity : KGEditorCommand
 	{
-		public KGEditorCommandSelectEntity(KGEditorCoreWrapper core, uint id)
-			: base(core, KGEditorCommandCode.ECC_SelectEntity, "Select entity")
+		public KGEditorCommandSelectEntity(MainWindow wnd, uint id)
+			: base(KGEditorCommandCode.ECC_SelectEntity, "Select entity")
 		{
+			wnd_ = wnd;
 			id_ = id;
 		}
 
 		public override object Execute()
 		{
-			old_id_ = core_.SelectedEntity();
-			core_.SelectEntity(id_);
+			old_id_ = wnd_.SelectedEntityId;
+			wnd_.SelectedEntityId = id_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.SelectEntity(old_id_);
+			wnd_.SelectedEntityId = old_id_;
 		}
 
-		private uint id_;
+		private readonly MainWindow wnd_;
+		private readonly uint id_;
 		private uint old_id_;
 	};
 
 	class KGEditorCommandSetEntityName : KGEditorCommand
 	{
-		public KGEditorCommandSetEntityName(KGEditorCoreWrapper core, uint id, string name)
-			: base(core, KGEditorCommandCode.ECC_SetEntityName, "Set entity name")
+		public KGEditorCommandSetEntityName(SceneEntity entity, string name)
+			: base(KGEditorCommandCode.ECC_SetEntityName, "Set entity name")
 		{
-			id_ = id;
+			entity_ = entity;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_name_ = core_.EntityName(id_);
-			core_.EntityName(id_, name_);
+			old_name_ = entity_.Name;
+			entity_.Name = name_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.EntityName(id_, old_name_);
+			entity_.Name = old_name_;
 		}
 
-		private uint id_;
-		private string name_;
+		private readonly SceneEntity entity_;
+		private readonly string name_;
 		private string old_name_;
 	};
 
-	class KGEditorCommandHideEntity : KGEditorCommand
+	class KGEditorCommandEntityVisible : KGEditorCommand
 	{
-		public KGEditorCommandHideEntity(KGEditorCoreWrapper core, uint id, bool hide)
-			: base(core, KGEditorCommandCode.ECC_HideEntity, "Hide entity")
+		public KGEditorCommandEntityVisible(SceneEntity entity, bool visible)
+			: base(KGEditorCommandCode.ECC_SetEntityVisible, "Set entity visible")
 		{
-			id_ = id;
-			hide_ = hide;
+			entity_ = entity;
+			visible_ = visible;
 		}
 
 		public override object Execute()
 		{
-			old_hide_ = core_.HideEntity(id_);
-			core_.HideEntity(id_, hide_);
+			old_hide_ = entity_.Visible;
+			entity_.Visible = visible_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.HideEntity(id_, old_hide_);
+			entity_.Visible = old_hide_;
 		}
 
-		private uint id_;
-		private bool hide_;
+		private readonly SceneEntity entity_;
+		private readonly bool visible_;
 		private bool old_hide_;
 	};
 
-	class KGEditorCommandSetEntityScaling : KGEditorCommand
+	class KGEditorCommandSetEntityScale : KGEditorCommand
 	{
-		public KGEditorCommandSetEntityScaling(KGEditorCoreWrapper core, uint id, float[] scaling)
-			: base(core, KGEditorCommandCode.ECC_SetEntityScaling, "Set entity scaling")
+		public KGEditorCommandSetEntityScale(SceneEntity entity, float[] scale)
+			: base(KGEditorCommandCode.ECC_SetEntityScale, "Set entity scale")
 		{
-			id_ = id;
-			scaling_ = scaling;
+			entity_ = entity;
+			scale_ = scale;
 		}
 
 		public override object Execute()
 		{
-			old_scaling_ = core_.EntityScaling(id_);
-			core_.EntityScaling(id_, scaling_);
+			old_scale_ = entity_.TransformScale;
+			entity_.TransformScale = scale_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.EntityScaling(id_, old_scaling_);
+			entity_.TransformScale = old_scale_;
 		}
 
-		private uint id_;
-		private float[] scaling_;
-		private float[] old_scaling_;
+		private readonly SceneEntity entity_;
+		private readonly float[] scale_;
+		private float[] old_scale_;
 	};
 
 	class KGEditorCommandSetEntityRotation : KGEditorCommand
 	{
-		public KGEditorCommandSetEntityRotation(KGEditorCoreWrapper core, uint id, float[] rot_quat)
-			: base(core, KGEditorCommandCode.ECC_SetEntityRotation, "Set entity rotation")
+		public KGEditorCommandSetEntityRotation(SceneEntity entity, float[] rot_quat)
+			: base(KGEditorCommandCode.ECC_SetEntityRotation, "Set entity rotation")
 		{
-			id_ = id;
+			entity_ = entity;
 			rot_ = rot_quat;
 		}
 
 		public override object Execute()
 		{
-			old_rot_ = core_.EntityRotation(id_);
-			core_.EntityRotation(id_, rot_);
+			old_rot_ = entity_.TransformRotation;
+			entity_.TransformRotation = rot_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.EntityRotation(id_, old_rot_);
+			entity_.TransformRotation = old_rot_;
 		}
 
-		private uint id_;
-		private float[] rot_;
+		private readonly SceneEntity entity_;
+		private readonly float[] rot_;
 		private float[] old_rot_;
 	};
 
-	class KGEditorCommandSetEntityTranslation : KGEditorCommand
+	class KGEditorCommandSetEntityPosition : KGEditorCommand
 	{
-		public KGEditorCommandSetEntityTranslation(KGEditorCoreWrapper core, uint id, float[] trans)
-			: base(core, KGEditorCommandCode.ECC_SetEntityTranslation, "Set entity translation")
+		public KGEditorCommandSetEntityPosition(SceneEntity entity, float[] trans)
+			: base(KGEditorCommandCode.ECC_SetEntityTranslation, "Set entity translation")
 		{
-			id_ = id;
+			entity_ = entity;
 			trans_ = trans;
 		}
 
 		public override object Execute()
 		{
-			old_trans_ = core_.EntityTranslation(id_);
-			core_.EntityTranslation(id_, trans_);
+			old_trans_ = entity_.TransformPosition;
+			entity_.TransformPosition = trans_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.EntityTranslation(id_, old_trans_);
+			entity_.TransformPosition = old_trans_;
 		}
 
-		private uint id_;
-		private float[] trans_;
+		private readonly SceneEntity entity_;
+		private readonly float[] trans_;
 		private float[] old_trans_;
 	};
 
 	class KGEditorCommandSetActiveCamera : KGEditorCommand
 	{
-		public KGEditorCommandSetActiveCamera(KGEditorCoreWrapper core, uint id)
-			: base(core, KGEditorCommandCode.ECC_SetActiveCamera, "Switch camera")
+		public KGEditorCommandSetActiveCamera(Scene scene, uint id)
+			: base(KGEditorCommandCode.ECC_SetActiveCamera, "Switch camera")
 		{
+			scene_ = scene;
 			id_ = id;
 		}
 
 		public override object Execute()
 		{
-			old_id_ = core_.ActiveCamera();
-			core_.ActiveCamera(id_);
+			old_id_ = scene_.ActiveCameraId;
+			scene_.ActiveCameraId = id_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.ActiveCamera(old_id_);
+			scene_.ActiveCameraId = old_id_;
 		}
 
-		private uint id_;
+		private readonly Scene scene_;
+		private readonly uint id_;
 		private uint old_id_;
 	};
 
 	class KGEditorCommandSetLightEnabled : KGEditorCommand
 	{
-		public KGEditorCommandSetLightEnabled(KGEditorCoreWrapper core, uint id, bool enabled)
-			: base(core, KGEditorCommandCode.ECC_SetLightEnabled, "Set light enabled")
+		public KGEditorCommandSetLightEnabled(SceneEntityLight light, bool enabled)
+			: base(KGEditorCommandCode.ECC_SetLightEnabled, "Set light enabled")
 		{
-			id_ = id;
+			light_ = light;
 			enabled_ = enabled;
 		}
 
 		public override object Execute()
 		{
-			old_enabled_ = core_.LightEnabled(id_);
-			core_.LightEnabled(id_, enabled_);
+			old_enabled_ = light_.LightEnabled;
+			light_.LightEnabled = enabled_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightEnabled(id_, old_enabled_);
+			light_.LightEnabled = old_enabled_;
 		}
 
-		private uint id_;
-		private bool enabled_;
+		private readonly SceneEntityLight light_;
+		private readonly bool enabled_;
 		private bool old_enabled_;
 	};
 
 	class KGEditorCommandSetLightAttrib : KGEditorCommand
 	{
-		public KGEditorCommandSetLightAttrib(KGEditorCoreWrapper core, uint id, int attrib)
-			: base(core, KGEditorCommandCode.ECC_SetLightAttrib, "Set light attribute")
+		public KGEditorCommandSetLightAttrib(SceneEntityLight light, int attrib)
+			: base(KGEditorCommandCode.ECC_SetLightAttrib, "Set light attribute")
 		{
-			id_ = id;
+			light_ = light;
 			attrib_ = attrib;
 		}
 
 		public override object Execute()
 		{
-			old_attrib_ = core_.LightAttrib(id_);
-			core_.LightAttrib(id_, attrib_);
+			old_attrib_ = light_.LightAttrib;
+			light_.LightAttrib = attrib_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightAttrib(id_, old_attrib_);
+			light_.LightAttrib = old_attrib_;
 		}
 
-		private uint id_;
-		private int attrib_;
+		private readonly SceneEntityLight light_;
+		private readonly int attrib_;
 		private int old_attrib_;
 	};
 
 	class KGEditorCommandSetLightColor : KGEditorCommand
 	{
-		public KGEditorCommandSetLightColor(KGEditorCoreWrapper core, uint id, float[] color)
-			: base(core, KGEditorCommandCode.ECC_SetLightColor, "Set light color")
+		public KGEditorCommandSetLightColor(SceneEntityLight light, float[] color)
+			: base(KGEditorCommandCode.ECC_SetLightColor, "Set light color")
 		{
-			id_ = id;
+			light_ = light;
 			color_ = color;
 		}
 
 		public override object Execute()
 		{
-			old_color_ = core_.LightColor(id_);
-			core_.LightColor(id_, color_);
+			old_color_ = light_.LightColor;
+			light_.LightColor = color_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightColor(id_, old_color_);
+			light_.LightColor = old_color_;
 		}
 
-		private uint id_;
-		private float[] color_;
+		private readonly SceneEntityLight light_;
+		private readonly float[] color_;
 		private float[] old_color_;
 	};
 
 	class KGEditorCommandSetLightFalloff : KGEditorCommand
 	{
-		public KGEditorCommandSetLightFalloff(KGEditorCoreWrapper core, uint id, float[] falloff)
-			: base(core, KGEditorCommandCode.ECC_SetLightFalloff, "Set light falloff")
+		public KGEditorCommandSetLightFalloff(SceneEntityLight light, float[] falloff)
+			: base(KGEditorCommandCode.ECC_SetLightFalloff, "Set light falloff")
 		{
-			id_ = id;
+			light_ = light;
 			falloff_ = falloff;
 		}
 
 		public override object Execute()
 		{
-			old_falloff_ = core_.LightFalloff(id_);
-			core_.LightFalloff(id_, falloff_);
+			old_falloff_ = light_.LightFalloff;
+			light_.LightFalloff = falloff_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightFalloff(id_, old_falloff_);
+			light_.LightFalloff = old_falloff_;
 		}
 
-		private uint id_;
-		private float[] falloff_;
+		private readonly SceneEntityLight light_;
+		private readonly float[] falloff_;
 		private float[] old_falloff_;
 	};
 
 	class KGEditorCommandSetLightInnerAngle : KGEditorCommand
 	{
-		public KGEditorCommandSetLightInnerAngle(KGEditorCoreWrapper core, uint id, float angle)
-			: base(core, KGEditorCommandCode.ECC_SetLightInnerAngle, "Set light inner angle")
+		public KGEditorCommandSetLightInnerAngle(SceneEntityLight light, float angle)
+			: base(KGEditorCommandCode.ECC_SetLightInnerAngle, "Set light inner angle")
 		{
-			id_ = id;
+			light_ = light;
 			angle_ = angle;
 		}
 
 		public override object Execute()
 		{
-			old_angle_ = core_.LightInnerAngle(id_);
-			core_.LightInnerAngle(id_, angle_);
+			old_angle_ = light_.LightInnerAngle;
+			light_.LightInnerAngle = angle_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightInnerAngle(id_, old_angle_);
+			light_.LightInnerAngle = old_angle_;
 		}
 
-		private uint id_;
-		private float angle_;
+		private readonly SceneEntityLight light_;
+		private readonly float angle_;
 		private float old_angle_;
 	};
 
 	class KGEditorCommandSetLightOuterAngle : KGEditorCommand
 	{
-		public KGEditorCommandSetLightOuterAngle(KGEditorCoreWrapper core, uint id, float angle)
-			: base(core, KGEditorCommandCode.ECC_SetLightOuterAngle, "Set light outer angle")
+		public KGEditorCommandSetLightOuterAngle(SceneEntityLight light, float angle)
+			: base(KGEditorCommandCode.ECC_SetLightOuterAngle, "Set light outer angle")
 		{
-			id_ = id;
+			light_ = light;
 			angle_ = angle;
 		}
 
 		public override object Execute()
 		{
-			old_angle_ = core_.LightOuterAngle(id_);
-			core_.LightOuterAngle(id_, angle_);
+			old_angle_ = light_.LightOuterAngle;
+			light_.LightOuterAngle = angle_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightOuterAngle(id_, old_angle_);
+			light_.LightOuterAngle = old_angle_;
 		}
 
-		private uint id_;
-		private float angle_;
+		private readonly SceneEntityLight light_;
+		private readonly float angle_;
 		private float old_angle_;
 	};
 
 	class KGEditorCommandSetProjectiveTex : KGEditorCommand
 	{
-		public KGEditorCommandSetProjectiveTex(KGEditorCoreWrapper core, uint id, string name)
-			: base(core, KGEditorCommandCode.ECC_SetLightOuterAngle, "Set projective texture")
+		public KGEditorCommandSetProjectiveTex(SceneEntityLight light, string name)
+			: base(KGEditorCommandCode.ECC_SetLightProjectiveTex, "Set projective texture")
 		{
-			id_ = id;
+			light_ = light;
 			name_ = name;
 		}
 
 		public override object Execute()
 		{
-			old_name_ = core_.LightProjectiveTex(id_);
-			core_.LightProjectiveTex(id_, name_);
+			old_name_ = light_.LightProjectiveTex;
+			light_.LightProjectiveTex = name_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.LightProjectiveTex(id_, old_name_);
+			light_.LightProjectiveTex = old_name_;
 		}
 
-		private uint id_;
-		private string name_;
+		private readonly SceneEntityLight light_;
+		private readonly string name_;
 		private string old_name_;
 	};
 
 	class KGEditorCommandSetCameraLookAt : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraLookAt(KGEditorCoreWrapper core, uint id, float[] look_at)
-			: base(core, KGEditorCommandCode.ECC_SetCameraLookAt, "Set camera look at")
+		public KGEditorCommandSetCameraLookAt(SceneEntityCamera camera, float[] look_at)
+			: base(KGEditorCommandCode.ECC_SetCameraLookAt, "Set camera look at")
 		{
-			id_ = id;
+			camera_ = camera;
 			look_at_ = look_at;
 		}
 
 		public override object Execute()
 		{
-			old_look_at_ = core_.CameraLookAt(id_);
-			core_.CameraLookAt(id_, look_at_);
+			old_look_at_ = camera_.CameraLookAt;
+			camera_.CameraLookAt = look_at_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraLookAt(id_, old_look_at_);
+			camera_.CameraLookAt = old_look_at_;
 		}
 
-		private uint id_;
-		private float[] look_at_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float[] look_at_;
 		private float[] old_look_at_;
 	};
 
 	class KGEditorCommandSetCameraUpVec : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraUpVec(KGEditorCoreWrapper core, uint id, float[] up_vec)
-			: base(core, KGEditorCommandCode.ECC_SetCameraUpVec, "Set camera up vec")
+		public KGEditorCommandSetCameraUpVec(SceneEntityCamera camera, float[] up_vec)
+			: base(KGEditorCommandCode.ECC_SetCameraUpVec, "Set camera up vec")
 		{
-			id_ = id;
+			camera_ = camera;
 			up_vec_ = up_vec;
 		}
 
 		public override object Execute()
 		{
-			old_up_vec_ = core_.CameraUpVec(id_);
-			core_.CameraUpVec(id_, up_vec_);
+			old_up_vec_ = camera_.CameraUpVec;
+			camera_.CameraUpVec = up_vec_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraUpVec(id_, old_up_vec_);
+			camera_.CameraUpVec = old_up_vec_;
 		}
 
-		private uint id_;
-		private float[] up_vec_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float[] up_vec_;
 		private float[] old_up_vec_;
 	};
 
 	class KGEditorCommandSetCameraFoV : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraFoV(KGEditorCoreWrapper core, uint id, float fov)
-			: base(core, KGEditorCommandCode.ECC_SetCameraFoV, "Set camera fov")
+		public KGEditorCommandSetCameraFoV(SceneEntityCamera camera, float fov)
+			: base(KGEditorCommandCode.ECC_SetCameraFoV, "Set camera fov")
 		{
-			id_ = id;
+			camera_ = camera;
 			fov_ = fov;
 		}
 
 		public override object Execute()
 		{
-			old_fov_ = core_.CameraFoV(id_);
-			core_.CameraFoV(id_, fov_);
+			old_fov_ = camera_.CameraFoV;
+			camera_.CameraFoV = fov_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraFoV(id_, old_fov_);
+			camera_.CameraFoV = old_fov_;
 		}
 
-		private uint id_;
-		private float fov_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float fov_;
 		private float old_fov_;
 	};
 
 	class KGEditorCommandSetCameraAspect : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraAspect(KGEditorCoreWrapper core, uint id, float aspect)
-			: base(core, KGEditorCommandCode.ECC_SetCameraAspect, "Set camera aspect")
+		public KGEditorCommandSetCameraAspect(SceneEntityCamera camera, float aspect)
+			: base(KGEditorCommandCode.ECC_SetCameraAspect, "Set camera aspect")
 		{
-			id_ = id;
+			camera_ = camera;
 			aspect_ = aspect;
 		}
 
 		public override object Execute()
 		{
-			old_aspect_ = core_.CameraAspect(id_);
-			core_.CameraAspect(id_, aspect_);
+			old_aspect_ = camera_.CameraAspect;
+			camera_.CameraAspect = aspect_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraAspect(id_, old_aspect_);
+			camera_.CameraAspect = old_aspect_;
 		}
 
-		private uint id_;
-		private float aspect_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float aspect_;
 		private float old_aspect_;
 	};
 
 	class KGEditorCommandSetCameraNearPlane : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraNearPlane(KGEditorCoreWrapper core, uint id, float near_plane)
-			: base(core, KGEditorCommandCode.ECC_SetCameraNearPlane, "Set camera near plane")
+		public KGEditorCommandSetCameraNearPlane(SceneEntityCamera camera, float near_plane)
+			: base(KGEditorCommandCode.ECC_SetCameraNearPlane, "Set camera near plane")
 		{
-			id_ = id;
+			camera_ = camera;
 			near_plane_ = near_plane;
 		}
 
 		public override object Execute()
 		{
-			old_near_plane_ = core_.CameraNearPlane(id_);
-			core_.CameraNearPlane(id_, near_plane_);
+			old_near_plane_ = camera_.CameraNearPlane;
+			camera_.CameraNearPlane = near_plane_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraNearPlane(id_, old_near_plane_);
+			camera_.CameraNearPlane = old_near_plane_;
 		}
 
-		private uint id_;
-		private float near_plane_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float near_plane_;
 		private float old_near_plane_;
 	};
 
 	class KGEditorCommandSetCameraFarPlane : KGEditorCommand
 	{
-		public KGEditorCommandSetCameraFarPlane(KGEditorCoreWrapper core, uint id, float far_plane)
-			: base(core, KGEditorCommandCode.ECC_SetCameraFarPlane, "Set camera far plane")
+		public KGEditorCommandSetCameraFarPlane(SceneEntityCamera camera, float far_plane)
+			: base(KGEditorCommandCode.ECC_SetCameraFarPlane, "Set camera far plane")
 		{
-			id_ = id;
+			camera_ = camera;
 			far_plane_ = far_plane;
 		}
 
 		public override object Execute()
 		{
-			old_far_plane_ = core_.CameraFarPlane(id_);
-			core_.CameraFarPlane(id_, far_plane_);
+			old_far_plane_ = camera_.CameraFarPlane;
+			camera_.CameraFarPlane = far_plane_;
 			return null;
 		}
 
 		public override void Revoke()
 		{
-			core_.CameraFarPlane(id_, old_far_plane_);
+			camera_.CameraFarPlane = old_far_plane_;
 		}
 
-		private uint id_;
-		private float far_plane_;
+		private readonly SceneEntityCamera camera_;
+		private readonly float far_plane_;
 		private float old_far_plane_;
 	};
 }

@@ -27,11 +27,14 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/Commands.cs
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/MainWindow.xaml
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/MainWindow.xaml.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/MathHelper.cs
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/OpenTexUserControlEditor.xaml
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/OpenTexUserControlEditor.xaml.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/Scene.cs
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntity.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntityCamera.cs
+	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntityLight.cs
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneEntityViewModel.cs
-	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SceneLight.cs
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SliderUserControlEditor.xaml
 	${KLAYGE_PROJECT_DIR}/Tools/src/KGEditor/KGEditor/SliderUserControlEditor.xaml.cs
 )

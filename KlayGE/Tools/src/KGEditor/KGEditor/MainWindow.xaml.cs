@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,9 +25,9 @@ namespace KGEditor
 	public enum ControlModeEnum
 	{
 		CM_EntitySelection = KGEditorCoreWrapper.ControlMode.CM_EntitySelection,
-		CM_EntityTranslation = KGEditorCoreWrapper.ControlMode.CM_EntityTranslation,
+		CM_EntityPosition = KGEditorCoreWrapper.ControlMode.CM_EntityPosition,
 		CM_EntityRotation = KGEditorCoreWrapper.ControlMode.CM_EntityRotation,
-		CM_EntityScaling = KGEditorCoreWrapper.ControlMode.CM_EntityScaling,
+		CM_EntityScale = KGEditorCoreWrapper.ControlMode.CM_EntityScale,
 	}
 
 	/// <summary>
@@ -51,10 +52,10 @@ namespace KGEditor
 		enum EntityProperties
 		{
 			EP_EntityName,
-			EP_HideEntity,
-			EP_EntityTranslationX,
-			EP_EntityTranslationY,
-			EP_EntityTranslationZ,
+			EP_EntityVisible,
+			EP_EntityPositionX,
+			EP_EntityPositionY,
+			EP_EntityPositionZ,
 			EP_EntityRotationQuatX,
 			EP_EntityRotationQuatY,
 			EP_EntityRotationQuatZ,
@@ -62,9 +63,9 @@ namespace KGEditor
 			EP_EntityRotationAngleYaw,
 			EP_EntityRotationAnglePitch,
 			EP_EntityRotationAngleRoll,
-			EP_EntityScalingX,
-			EP_EntityScalingY,
-			EP_EntityScalingZ,
+			EP_EntityScaleX,
+			EP_EntityScaleY,
+			EP_EntityScaleZ,
 
 			Num_EntityProperties
 		}
@@ -152,9 +153,9 @@ namespace KGEditor
 		}
 
 		[CategoryOrder("Properties", 0)]
-		[CategoryOrder("Translation", 1)]
+		[CategoryOrder("Position", 1)]
 		[CategoryOrder("Rotation", 2)]
-		[CategoryOrder("Scaling", 3)]
+		[CategoryOrder("Scale", 3)]
 		public class EntityPropertyType
 		{
 			[Category("Properties")]
@@ -163,24 +164,24 @@ namespace KGEditor
 			public string Name { get; set; }
 
 			[Category("Properties")]
-			[DisplayName("Hide")]
-			[PropertyOrder((int)EntityProperties.EP_HideEntity)]
-			public bool Hide { get; set; }
+			[DisplayName("Visible")]
+			[PropertyOrder((int)EntityProperties.EP_EntityVisible)]
+			public bool Visible { get; set; }
 
-			[Category("Translation")]
+			[Category("Position")]
 			[DisplayName("X")]
-			[PropertyOrder((int)EntityProperties.EP_EntityTranslationX)]
-			public float TranslationX { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityPositionX)]
+			public float PositionX { get; set; }
 
-			[Category("Translation")]
+			[Category("Position")]
 			[DisplayName("Y")]
-			[PropertyOrder((int)EntityProperties.EP_EntityTranslationY)]
-			public float TranslationY { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityPositionY)]
+			public float PositionY { get; set; }
 
-			[Category("Translation")]
+			[Category("Position")]
 			[DisplayName("Z")]
-			[PropertyOrder((int)EntityProperties.EP_EntityTranslationZ)]
-			public float TranslationZ { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityPositionZ)]
+			public float PositionZ { get; set; }
 
 			[Category("Rotation")]
 			[DisplayName("Quaternion X")]
@@ -217,24 +218,24 @@ namespace KGEditor
 			[PropertyOrder((int)EntityProperties.EP_EntityRotationAngleRoll)]
 			public float RotationRoll { get; set; }
 
-			[Category("Scaling")]
+			[Category("Scale")]
 			[DisplayName("X")]
-			[PropertyOrder((int)EntityProperties.EP_EntityScalingX)]
-			public float ScalingX { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityScaleX)]
+			public float ScaleX { get; set; }
 
-			[Category("Scaling")]
+			[Category("Scale")]
 			[DisplayName("Y")]
-			[PropertyOrder((int)EntityProperties.EP_EntityScalingY)]
-			public float ScalingY { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityScaleY)]
+			public float ScaleY { get; set; }
 
-			[Category("Scaling")]
+			[Category("Scale")]
 			[DisplayName("Z")]
-			[PropertyOrder((int)EntityProperties.EP_EntityScalingZ)]
-			public float ScalingZ { get; set; }
+			[PropertyOrder((int)EntityProperties.EP_EntityScaleZ)]
+			public float ScaleZ { get; set; }
 		}
 
 		[CategoryOrder("Properties", 0)]
-		[CategoryOrder("Translation", 1)]
+		[CategoryOrder("Position", 1)]
 		[CategoryOrder("Rotation", 2)]
 		[CategoryOrder("Scaling", 3)]
 		[CategoryOrder("Light", 4)]
@@ -320,7 +321,7 @@ namespace KGEditor
 		}
 
 		[CategoryOrder("Properties", 0)]
-		[CategoryOrder("Translation", 1)]
+		[CategoryOrder("Position", 1)]
 		[CategoryOrder("Rotation", 2)]
 		[CategoryOrder("Scaling", 3)]
 		[CategoryOrder("Camera", 4)]
@@ -383,27 +384,7 @@ namespace KGEditor
 
 			DataContext = this;
 
-			var category_list = new SceneEntityViewModel[3];
-
-			var entity = new SceneEntity();
-			entity.ID = 0;
-			entity.Name = "Models";
-			entity.Type = KGEditorCoreWrapper.EntityType.ET_Model;
-			category_list[0] = new SceneEntityViewModel(this, entity);
-
-			entity = new SceneEntity();
-			entity.ID = 0;
-			entity.Name = "Lights";
-			entity.Type = KGEditorCoreWrapper.EntityType.ET_Light;
-			category_list[1] = new SceneEntityViewModel(this, entity);
-
-			entity = new SceneEntity();
-			entity.ID = 0;
-			entity.Name = "Cameras";
-			entity.Type = KGEditorCoreWrapper.EntityType.ET_Camera;
-			category_list[2] = new SceneEntityViewModel(this, entity);
-
-			scene_entity_category_ = new ReadOnlyCollection<SceneEntityViewModel>(category_list);
+			scene_ = new Scene(this);
 
 			CameraItemsSource.items.Clear();
 			CameraItemsSource.items.Add("System");
@@ -430,13 +411,11 @@ namespace KGEditor
 			IntPtr wnd = editor_wnd.Handle;
 			core_ = new KGEditorCoreWrapper(wnd);
 
-			core_.UpdatePropertyCallback(this.UpdatePropList);
-			core_.UpdateSelectEntityCallback(this.UpdateSelectEntity);
-			core_.UpdateAddEntityCallback(this.UpdateAddEntity);
-			core_.UpdateRemoveEntityCallback(this.UpdateRemoveEntity);
-			core_.AddModelCallback(this.AddModel);
-			core_.AddLightCallback(this.AddLight);
-			core_.AddCameraCallback(this.AddCamera);
+			core_.UpdatePropertyCallback(this.UpdatePropListNativeCallback);
+			core_.UpdateSelectEntityCallback(this.UpdateSelectEntityNativeCallback);
+			core_.AddModelCallback(this.AddModelNativeCallback);
+			core_.AddLightCallback(this.AddLightNativeCallback);
+			core_.AddCameraCallback(this.AddCameraNativeCallback);
 
 			CompositionTarget.Rendering += this.MainWindowIdle;
 		}
@@ -462,6 +441,14 @@ namespace KGEditor
 			core_.Resize((uint)editor_frame.Width, (uint)editor_frame.Height);
 		}
 
+		public static KGEditorCoreWrapper KGEditNativeCore
+		{
+			get
+			{
+				return core_;
+			}
+		}
+
 		private void LoadScene(string file_name)
 		{
 			string ext_name = System.IO.Path.GetExtension(file_name).ToLower();
@@ -471,6 +458,8 @@ namespace KGEditor
 			}
 
 			core_.LoadScene(file_name);
+			scene_.RetrieveProperties();
+
 			this.FileNameChanged(file_name);
 
 			this.ClearHistroy();
@@ -479,7 +468,7 @@ namespace KGEditor
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
 
-			this.UpdateEntityProperties(0);
+			this.SelectedEntityId = 0;
 		}
 
 		private void OpenClick(object sender, RoutedEventArgs e)
@@ -532,7 +521,7 @@ namespace KGEditor
 			dlg.CheckFileExists = true;
 			if (true == dlg.ShowDialog())
 			{
-				this.AddModel(dlg.FileName);
+				this.AddModelNativeCallback(dlg.FileName);
 
 				save.IsEnabled = true;
 				save_as.IsEnabled = true;
@@ -541,7 +530,7 @@ namespace KGEditor
 
 		private void AddAmbientLightClick(object sender, RoutedEventArgs e)
 		{
-			this.AddLight(KGEditorCoreWrapper.LightType.LT_Ambient);
+			this.AddLightNativeCallback(KGEditorCoreWrapper.LightType.LT_Ambient);
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
@@ -549,7 +538,7 @@ namespace KGEditor
 
 		private void AddDirectionalLightClick(object sender, RoutedEventArgs e)
 		{
-			this.AddLight(KGEditorCoreWrapper.LightType.LT_Directional);
+			this.AddLightNativeCallback(KGEditorCoreWrapper.LightType.LT_Directional);
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
@@ -557,7 +546,7 @@ namespace KGEditor
 
 		private void AddPointLightClick(object sender, RoutedEventArgs e)
 		{
-			this.AddLight(KGEditorCoreWrapper.LightType.LT_Point);
+			this.AddLightNativeCallback(KGEditorCoreWrapper.LightType.LT_Point);
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
@@ -565,7 +554,7 @@ namespace KGEditor
 
 		private void AddSpotLightClick(object sender, RoutedEventArgs e)
 		{
-			this.AddLight(KGEditorCoreWrapper.LightType.LT_Spot);
+			this.AddLightNativeCallback(KGEditorCoreWrapper.LightType.LT_Spot);
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
@@ -573,7 +562,7 @@ namespace KGEditor
 
 		private void AddCameraClick(object sender, RoutedEventArgs e)
 		{
-			this.AddCamera();
+			this.AddCameraNativeCallback();
 
 			save.IsEnabled = true;
 			save_as.IsEnabled = true;
@@ -592,11 +581,15 @@ namespace KGEditor
 			}
 			set
 			{
-				this.ControlMode((KGEditorCoreWrapper.ControlMode)value);
+				var mode = (KGEditorCoreWrapper.ControlMode)value;
+				if (mode != control_mode_)
+				{
+					this.ExecuteCommand(new KGEditorCommandSetControlMode(this, mode));
+				}
 			}
 		}
 
-		private void AddModel(string file_name)
+		private void AddModelNativeCallback(string file_name)
 		{
 			string ext_name = System.IO.Path.GetExtension(file_name);
 			if ((ext_name != ".meshml") && (ext_name != ".model_bin"))
@@ -604,10 +597,10 @@ namespace KGEditor
 				return;
 			}
 
-			this.ExecuteCommand(new KGEditorCommandAddModel(core_, file_name));
+			this.ExecuteCommand(new KGEditorCommandAddModel(core_, this, scene_, file_name));
 		}
 
-		private void AddLight(KGEditorCoreWrapper.LightType type)
+		private void AddLightNativeCallback(KGEditorCoreWrapper.LightType type)
 		{
 			string type_str;
 			switch (type)
@@ -636,9 +629,9 @@ namespace KGEditor
 			{
 				light_name = type_str + index.ToString();
 				bool found = false;
-				foreach (var light in scene_entity_category_[1].Children)
+				foreach (var light in scene_.SceneRoot[1].Children)
 				{
-					if (core_.EntityName(light.Entity.ID) == light_name)
+					if (light.Entity.Name == light_name)
 					{
 						found = true;
 						break;
@@ -653,10 +646,10 @@ namespace KGEditor
 				++ index;
 			}
 
-			this.ExecuteCommand(new KGEditorCommandAddLight(core_, type, light_name));
+			this.ExecuteCommand(new KGEditorCommandAddLight(core_, this, scene_, type, light_name));
 		}
 
-		private void AddCamera()
+		private void AddCameraNativeCallback()
 		{
 			string camera_name;
 			int index = 0;
@@ -664,9 +657,9 @@ namespace KGEditor
 			{
 				camera_name = "Camera" + index.ToString();
 				bool found = false;
-				foreach (var camera in scene_entity_category_[2].Children)
+				foreach (var camera in scene_.SceneRoot[2].Children)
 				{
-					if (core_.EntityName(camera.Entity.ID) == camera_name)
+					if (camera.Entity.Name == camera_name)
 					{
 						found = true;
 						break;
@@ -681,15 +674,14 @@ namespace KGEditor
 				++ index;
 			}
 
-			this.ExecuteCommand(new KGEditorCommandAddCamera(core_, camera_name));
+			this.ExecuteCommand(new KGEditorCommandAddCamera(core_, this, scene_, camera_name));
 		}
 
 		private void UndoClick(object sender, RoutedEventArgs e)
 		{
 			this.Undo();
 
-			selected_entity_id_ = core_.SelectedEntity();
-			this.UpdateEntityProperties(selected_entity_id_);
+			this.UpdateEntityProperties();
 			this.UpdateHistroy();
 		}
 
@@ -697,8 +689,7 @@ namespace KGEditor
 		{
 			this.Redo();
 
-			selected_entity_id_ = core_.SelectedEntity();
-			this.UpdateEntityProperties(selected_entity_id_);
+			this.UpdateEntityProperties();
 			this.UpdateHistroy();
 		}
 
@@ -788,40 +779,63 @@ namespace KGEditor
 
 		public void SelectEntity(uint entity_id)
 		{
-			this.ExecuteCommand(new KGEditorCommandSelectEntity(core_, entity_id));
-			this.UpdateEntityProperties(entity_id);
+			if (this.SelectedEntityId != entity_id)
+			{
+				this.ExecuteCommand(new KGEditorCommandSelectEntity(this, entity_id));
+			}
 		}
 
 		public void RemoveEntity(uint entity_id)
 		{
 			if (entity_id > 0)
 			{
-				foreach (var category in scene_entity_category_)
+				foreach (var category in scene_.SceneRoot)
 				{
 					foreach (var entity in category.Children)
 					{
-						if (entity.Entity.ID == entity_id)
+						if (entity.Entity.Id == entity_id)
 						{
+							this.ExecuteCommand(new KGEditorCommandRemoveEntity(core_, this, entity.Entity));
 							category.Children.Remove(entity);
 							break;
 						}
 					}
 				}
-
-				this.ExecuteCommand(new KGEditorCommandRemoveEntity(core_, entity_id));
 			}
 		}
 
-		private void ControlMode(KGEditorCoreWrapper.ControlMode mode)
+		public void RestoreEntityInfo(SceneEntity entity)
 		{
-			control_mode_ = mode;
-			this.ExecuteCommand(new KGEditorCommandSetControlMode(core_, mode));
+			int type = (int)entity.Type;
+			scene_.SceneRoot[type].Children.Add(new SceneEntityViewModel(this, entity));
+			scene_.SceneRoot[type].Children.Last().SelectedInternal(true);
 		}
 
-		private void UpdateEntityProperties(uint entity_id)
+		public void DoSetControlMode(KGEditorCoreWrapper.ControlMode mode)
 		{
-			selected_entity_id_ = entity_id;
+			control_mode_ = mode;
+			core_.SetControlMode(control_mode_);
+		}
 
+		public uint SelectedEntityId
+		{
+			get
+			{
+				return selected_entity_id_;
+			}
+			set
+			{
+				if (selected_entity_id_ != value)
+				{
+					selected_entity_id_ = value;
+					core_.SelectEntity(selected_entity_id_);
+					this.UpdateEntityProperties();
+				}
+			}
+		}
+
+		private void UpdateEntityProperties()
+		{
 			properties.SelectedObject = null;
 
 			if (0 == selected_entity_id_)
@@ -830,17 +844,18 @@ namespace KGEditor
 			}
 			else
 			{
-				switch (core_.GetEntityType(selected_entity_id_))
+				var entity = scene_.FindSceneEntity(selected_entity_id_);
+				switch (entity.Entity.Type)
 				{
-					case KGEditorCoreWrapper.EntityType.ET_Model:
+					case SceneEntityType.ET_Model:
 						properties.SelectedObject = entity_properties_obj_;
 						break;
 
-					case KGEditorCoreWrapper.EntityType.ET_Light:
+					case SceneEntityType.ET_Light:
 						properties.SelectedObject = light_properties_obj_;
 						break;
 
-					case KGEditorCoreWrapper.EntityType.ET_Camera:
+					case SceneEntityType.ET_Camera:
 					default:
 						properties.SelectedObject = camera_properties_obj_;
 						break;
@@ -848,127 +863,128 @@ namespace KGEditor
 			}
 		}
 
-		private void UpdatePropList()
+		private void UpdatePropListNativeCallback()
 		{
 			int active_prop_list = -1;
 
 			if (core_ != null)
 			{
-				selected_entity_id_ = core_.SelectedEntity();
 				if (selected_entity_id_ > 0)
 				{
-					float[] translation = core_.EntityTranslation(selected_entity_id_);
-					float[] quat = core_.EntityRotation(selected_entity_id_);
-					float[] yaw_pitch_roll = this.QuatToYawPitchRoll(quat);
-					float[] scaling = core_.EntityScaling(selected_entity_id_);
+					var entity = scene_.FindSceneEntity(selected_entity_id_).Entity;
 
-					active_prop_list = (int)core_.GetEntityType(selected_entity_id_);
+					entity.RetrieveProperties();
+					float[] yaw_pitch_roll = MathHelper.QuatToYawPitchRoll(entity.TransformRotation);
+
+					active_prop_list = (int)entity.Type;
 
 					EntityPropertyType entity_common_props;
-					switch ((KGEditorCoreWrapper.EntityType)active_prop_list)
+					switch (entity.Type)
 					{
-						case KGEditorCoreWrapper.EntityType.ET_Model:
+						case SceneEntityType.ET_Model:
 							entity_common_props = entity_properties_obj_;
 							break;
 
-						case KGEditorCoreWrapper.EntityType.ET_Light:
+						case SceneEntityType.ET_Light:
 							entity_common_props = light_properties_obj_;
 							break;
 
-						case KGEditorCoreWrapper.EntityType.ET_Camera:
+						case SceneEntityType.ET_Camera:
 						default:
 							entity_common_props = camera_properties_obj_;
 							break;
 					}
 
-					entity_common_props.Name = core_.EntityName(selected_entity_id_);
-					entity_common_props.Hide = core_.HideEntity(selected_entity_id_);
-					entity_common_props.TranslationX = translation[0];
-					entity_common_props.TranslationY = translation[1];
-					entity_common_props.TranslationZ = translation[2];
-					entity_common_props.RotationQuatX = quat[0];
-					entity_common_props.RotationQuatY = quat[1];
-					entity_common_props.RotationQuatZ = quat[2];
-					entity_common_props.RotationQuatW = quat[3];
+					entity_common_props.Name = entity.Name;
+					entity_common_props.Visible = entity.Visible;
+					entity_common_props.PositionX = entity.TransformPosition[0];
+					entity_common_props.PositionY = entity.TransformPosition[1];
+					entity_common_props.PositionZ = entity.TransformPosition[2];
+					entity_common_props.RotationQuatX = entity.TransformRotation[0];
+					entity_common_props.RotationQuatY = entity.TransformRotation[1];
+					entity_common_props.RotationQuatZ = entity.TransformRotation[2];
+					entity_common_props.RotationQuatW = entity.TransformRotation[3];
 					entity_common_props.RotationYaw = yaw_pitch_roll[0];
 					entity_common_props.RotationPitch = yaw_pitch_roll[1];
 					entity_common_props.RotationRoll = yaw_pitch_roll[2];
-					entity_common_props.ScalingX = scaling[0];
-					entity_common_props.ScalingY = scaling[1];
-					entity_common_props.ScalingZ = scaling[2];
+					entity_common_props.ScaleX = entity.TransformScale[0];
+					entity_common_props.ScaleY = entity.TransformScale[1];
+					entity_common_props.ScaleZ = entity.TransformScale[2];
 
-					switch ((KGEditorCoreWrapper.EntityType)active_prop_list)
+					switch (entity.Type)
 					{
-						case KGEditorCoreWrapper.EntityType.ET_Model:
+						case SceneEntityType.ET_Model:
 							break;
 
-						case KGEditorCoreWrapper.EntityType.ET_Light:
+						case SceneEntityType.ET_Light:
 							{
+								var light = entity as SceneEntityLight;
+								Debug.Assert(light != null);
+
 								light_properties_obj_.Type
-									= LightTypeItemsSource.items[(int)core_.GetLightType(selected_entity_id_)].Value as string;
-								light_properties_obj_.Enabled = core_.LightEnabled(selected_entity_id_);
-								int light_attrib = core_.LightAttrib(selected_entity_id_);
+									= LightTypeItemsSource.items[(int)light.LightType].Value as string;
+								light_properties_obj_.Enabled = light.LightEnabled;
 								light_properties_obj_.NoShadow
-									= (light_attrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoShadow) != 0;
+									= (light.LightAttrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoShadow) != 0;
 								light_properties_obj_.NoDiffuse
-									= (light_attrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoDiffuse) != 0;
+									= (light.LightAttrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoDiffuse) != 0;
 								light_properties_obj_.NoSpecular
-									= (light_attrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoSpecular) != 0;
+									= (light.LightAttrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_NoSpecular) != 0;
 								light_properties_obj_.Indirect
-									= (light_attrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_IndirectLighting) != 0;
-								float[] light_color = core_.LightColor(selected_entity_id_);
-								light_properties_obj_.Multiplier = this.FloatPtrToMultipiler(light_color);
-								light_properties_obj_.Color = this.FloatPtrToLDRColor(light_color, light_properties_obj_.Multiplier);
-								float[] light_falloff = core_.LightFalloff(selected_entity_id_);
-								light_properties_obj_.FalloffConstant = light_falloff[0];
-								light_properties_obj_.FalloffLinear = light_falloff[1];
-								light_properties_obj_.FalloffQuadratic = light_falloff[2];
-								light_properties_obj_.InnerAngle = (float)(core_.LightInnerAngle(selected_entity_id_) * (180 / Math.PI));
-								light_properties_obj_.OuterAngle = (float)(core_.LightOuterAngle(selected_entity_id_) * (180 / Math.PI));
-								light_properties_obj_.ProjectiveTex = core_.LightProjectiveTex(selected_entity_id_);
+									= (light.LightAttrib & (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_IndirectLighting) != 0;
+								light_properties_obj_.Multiplier = MathHelper.FloatPtrToMultipiler(light.LightColor);
+								light_properties_obj_.Color = MathHelper.FloatPtrToLDRColor(light.LightColor,
+									light_properties_obj_.Multiplier);
+								light_properties_obj_.FalloffConstant = light.LightFalloff[0];
+								light_properties_obj_.FalloffLinear = light.LightFalloff[1];
+								light_properties_obj_.FalloffQuadratic = light.LightFalloff[2];
+								light_properties_obj_.InnerAngle = MathHelper.Rad2Deg(light.LightInnerAngle);
+								light_properties_obj_.OuterAngle = MathHelper.Rad2Deg(light.LightOuterAngle);
+								light_properties_obj_.ProjectiveTex = light.LightProjectiveTex;
 							}
 							break;
 
-						case KGEditorCoreWrapper.EntityType.ET_Camera:
+						case SceneEntityType.ET_Camera:
 						default:
 							{
-								float[] look_at = core_.CameraLookAt(selected_entity_id_);
-								float[] up_vec = core_.CameraUpVec(selected_entity_id_);
-								camera_properties_obj_.LookAtX = look_at[0];
-								camera_properties_obj_.LookAtY = look_at[1];
-								camera_properties_obj_.LookAtZ = look_at[2];
-								camera_properties_obj_.UpVecX = up_vec[0];
-								camera_properties_obj_.UpVecY = up_vec[1];
-								camera_properties_obj_.UpVecZ = up_vec[2];
+								var camera = entity as SceneEntityCamera;
+								Debug.Assert(camera != null);
+
+								camera_properties_obj_.LookAtX = camera.CameraLookAt[0];
+								camera_properties_obj_.LookAtY = camera.CameraLookAt[1];
+								camera_properties_obj_.LookAtZ = camera.CameraLookAt[2];
+								camera_properties_obj_.UpVecX = camera.CameraUpVec[0];
+								camera_properties_obj_.UpVecY = camera.CameraUpVec[1];
+								camera_properties_obj_.UpVecZ = camera.CameraUpVec[2];
+
+								camera_properties_obj_.FoV = camera.CameraFoV;
+								camera_properties_obj_.Aspect = camera.CameraAspect;
+								camera_properties_obj_.NearPlane = camera.CameraNearPlane;
+								camera_properties_obj_.FarPlane = camera.CameraFarPlane;
 							}
-							camera_properties_obj_.FoV = core_.CameraFoV(selected_entity_id_);
-							camera_properties_obj_.Aspect = core_.CameraAspect(selected_entity_id_);
-							camera_properties_obj_.NearPlane = core_.CameraNearPlane(selected_entity_id_);
-							camera_properties_obj_.FarPlane = core_.CameraFarPlane(selected_entity_id_);
 							break;
 					}
 				}
 				else
 				{
-					system_properties_obj_.SceneName = core_.SceneName();
-					system_properties_obj_.SkyBox = core_.SkyboxName();
+					system_properties_obj_.SceneName = scene_.Name;
+					system_properties_obj_.SkyBox = scene_.SkyboxName;
 				}
 			}
 
-			// TODO: Why it's very slow
 			properties.SelectedObject = null;
 
-			switch ((KGEditorCoreWrapper.EntityType)active_prop_list)
+			switch ((SceneEntityType)active_prop_list)
 			{
-				case KGEditorCoreWrapper.EntityType.ET_Model:
+				case SceneEntityType.ET_Model:
 					properties.SelectedObject = entity_properties_obj_;
 					break;
 
-				case KGEditorCoreWrapper.EntityType.ET_Light:
+				case SceneEntityType.ET_Light:
 					properties.SelectedObject = light_properties_obj_;
 					break;
 
-				case KGEditorCoreWrapper.EntityType.ET_Camera:
+				case SceneEntityType.ET_Camera:
 					properties.SelectedObject = camera_properties_obj_;
 					break;
 
@@ -978,7 +994,7 @@ namespace KGEditor
 					CameraItemsSource.items.Clear();
 					CameraItemsSource.items.Add("System");
 
-					foreach (var camera in scene_entity_category_[2].Children)
+					foreach (var camera in scene_.SceneRoot[2].Children)
 					{
 						CameraItemsSource.items.Add(camera.Entity.Name);
 					}
@@ -986,90 +1002,58 @@ namespace KGEditor
 			}
 		}
 
-		private void UpdateSelectEntity(uint entity_id)
+		private void UpdateSelectEntityNativeCallback(uint entity_id)
 		{
-			foreach (var category in scene_entity_category_)
+			if (selected_entity_id_ != entity_id)
 			{
-				foreach (var entity in category.Children)
+				if (selected_entity_id_ > 0)
 				{
-					entity.IsSelected = false;
+					scene_.FindSceneEntity(selected_entity_id_).IsSelected = false;
 				}
-			}
 
-			if (entity_id > 0)
-			{
-				foreach (var category in scene_entity_category_)
+				if (entity_id > 0)
 				{
-					foreach (var entity in category.Children)
-					{
-						if (entity.Entity.ID == entity_id)
-						{
-							entity.IsSelected = true;
-						}
-					}
+					scene_.FindSceneEntity(entity_id).IsSelected = true;
 				}
-			}
-			else
-			{
-				this.SelectEntity(entity_id);
-			}
-		}
-
-		private void UpdateAddEntity(uint entity_id)
-		{
-			if (entity_id > 0)
-			{
-				var entity = new SceneEntity();
-				entity.ID = entity_id;
-				entity.Name = core_.EntityName(entity_id);
-				entity.Type = core_.GetEntityType(entity_id);
-				int type = (int)core_.GetEntityType(entity_id);
-				scene_entity_category_[type].Children.Add(new SceneEntityViewModel(this, entity));
-				scene_entity_category_[type].Children.Last().SelectedInternal(true);
-			}
-		}
-
-		private void UpdateRemoveEntity(uint entity_id)
-		{
-			if (entity_id > 0)
-			{
-				int type = (int)core_.GetEntityType(entity_id);
-				foreach (var entity in scene_entity_category_[type].Children)
+				else
 				{
-					if (entity.Entity.ID == entity_id)
-					{
-						scene_entity_category_[type].Children.Remove(entity);
-						break;
-					}
+					this.SelectEntity(0);
 				}
 			}
 		}
 
 		private void PropertyGridValueChanged(object sender, Xceed.Wpf.Toolkit.PropertyGrid.PropertyValueChangedEventArgs e)
 		{
-			Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
+			var item = e.OriginalSource as Xceed.Wpf.Toolkit.PropertyGrid.PropertyItem;
 			if (properties.SelectedObject == system_properties_obj_)
 			{
 				switch ((SystemProperties)item.PropertyOrder)
 				{
 					case SystemProperties.SP_SystemSceneName:
-						if (core_.SceneName() != system_properties_obj_.SceneName)
+						if (scene_.Name != system_properties_obj_.SceneName)
 						{
-							this.ExecuteCommand(new KGEditorCommandSetSceneName(core_, system_properties_obj_.SceneName));
+							this.ExecuteCommand(new KGEditorCommandSetSceneName(scene_, system_properties_obj_.SceneName));
 						}
 						break;
 
 					case SystemProperties.SP_SystemActiveCamera:
 						{
-							foreach (var camera in scene_entity_category_[2].Children)
+							if (system_properties_obj_.ActiveCamera == "System")
 							{
-								if (system_properties_obj_.ActiveCamera == core_.EntityName(camera.Entity.ID))
+								this.ExecuteCommand(new KGEditorCommandSetActiveCamera(scene_, 0));
+							}
+							else
+							{
+								foreach (var camera in scene_.SceneRoot[2].Children)
 								{
-									if (core_.ActiveCamera() != camera.Entity.ID)
+									if (system_properties_obj_.ActiveCamera == camera.Entity.Name)
 									{
-										this.ExecuteCommand(new KGEditorCommandSetActiveCamera(core_, camera.Entity.ID));
+										if (scene_.ActiveCameraId != camera.Entity.Id)
+										{
+											this.ExecuteCommand(new KGEditorCommandSetActiveCamera(scene_, camera.Entity.Id));
+										}
+										break;
 									}
-									break;
 								}
 							}
 						}
@@ -1077,10 +1061,10 @@ namespace KGEditor
 
 					case SystemProperties.SP_SystemSkyBox:
 						{
-							string sky_box_name = RelativePath(system_properties_obj_.SkyBox);
-							if (core_.SkyboxName() != sky_box_name)
+							string skybox_name = this.RelativePath(system_properties_obj_.SkyBox);
+							if (scene_.SkyboxName != skybox_name)
 							{
-								this.ExecuteCommand(new KGEditorCommandSetSkyboxName(core_, sky_box_name));
+								this.ExecuteCommand(new KGEditorCommandSetSkyboxName(scene_, skybox_name));
 							}
 						}
 						break;
@@ -1117,38 +1101,38 @@ namespace KGEditor
 			else
 			{
 				var entity_common_props = properties.SelectedObject as EntityPropertyType;
+				var entity = scene_.FindSceneEntity(selected_entity_id_).Entity;
 
 				switch ((EntityProperties)item.PropertyOrder)
 				{
 					case EntityProperties.EP_EntityName:
-						if (core_.EntityName(selected_entity_id_) != entity_common_props.Name)
+						if (entity.Name != entity_common_props.Name)
 						{
-							this.ExecuteCommand(new KGEditorCommandSetEntityName(core_, selected_entity_id_, entity_common_props.Name));
+							this.ExecuteCommand(new KGEditorCommandSetEntityName(entity, entity_common_props.Name));
 						}
 						break;
 
-					case EntityProperties.EP_HideEntity:
-						if (core_.HideEntity(selected_entity_id_) != entity_common_props.Hide)
+					case EntityProperties.EP_EntityVisible:
+						if (entity.Visible != entity_common_props.Visible)
 						{
-							this.ExecuteCommand(new KGEditorCommandHideEntity(core_, selected_entity_id_, entity_common_props.Hide));
+							this.ExecuteCommand(new KGEditorCommandEntityVisible(entity, entity_common_props.Visible));
 						}
 						break;
 
-					case EntityProperties.EP_EntityTranslationX:
-					case EntityProperties.EP_EntityTranslationY:
-					case EntityProperties.EP_EntityTranslationZ:
+					case EntityProperties.EP_EntityPositionX:
+					case EntityProperties.EP_EntityPositionY:
+					case EntityProperties.EP_EntityPositionZ:
 						{
 							float[] trans = new float[]
 							{
-								entity_common_props.TranslationX,
-								entity_common_props.TranslationY,
-								entity_common_props.TranslationZ
+								entity_common_props.PositionX,
+								entity_common_props.PositionY,
+								entity_common_props.PositionZ
 							};
-							float[] old_trans = core_.EntityTranslation(selected_entity_id_);
-							if (!this.FloatEqual(old_trans[0], trans[0]) || !this.FloatEqual(old_trans[1], trans[1])
-								|| !this.FloatEqual(old_trans[2], trans[2]))
+							float[] old_trans = entity.TransformPosition;
+							if (!MathHelper.FloatArrayEqual(old_trans, trans))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetEntityTranslation(core_, selected_entity_id_, trans));
+								this.ExecuteCommand(new KGEditorCommandSetEntityPosition(entity, trans));
 							}
 						}
 						break;
@@ -1165,14 +1149,13 @@ namespace KGEditor
 								entity_common_props.RotationQuatZ,
 								entity_common_props.RotationQuatW
 							};
-							float[] old_quat = core_.EntityRotation(selected_entity_id_);
-							if (!this.FloatEqual(old_quat[0], quat[0]) || !this.FloatEqual(old_quat[1], quat[1])
-								|| !this.FloatEqual(old_quat[2], quat[2]) || !this.FloatEqual(old_quat[3], quat[3]))
+							float[] old_quat = entity.TransformRotation;
+							if (!MathHelper.FloatArrayEqual(old_quat, quat))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetEntityRotation(core_, selected_entity_id_, quat));
+								this.ExecuteCommand(new KGEditorCommandSetEntityRotation(entity, quat));
 							}
 
-							float[] yaw_pitch_roll = this.QuatToYawPitchRoll(quat);
+							float[] yaw_pitch_roll = MathHelper.QuatToYawPitchRoll(quat);
 							entity_common_props.RotationYaw = yaw_pitch_roll[0];
 							entity_common_props.RotationPitch = yaw_pitch_roll[1];
 							entity_common_props.RotationRoll = yaw_pitch_roll[2];
@@ -1183,32 +1166,30 @@ namespace KGEditor
 					case EntityProperties.EP_EntityRotationAnglePitch:
 					case EntityProperties.EP_EntityRotationAngleRoll:
 						{
-							float[] quat = this.RotationQuatYawPitchRoll(entity_common_props.RotationYaw, entity_common_props.RotationPitch,
-								entity_common_props.RotationRoll);
-							float[] old_quat = core_.EntityRotation(selected_entity_id_);
-							if (!this.FloatEqual(old_quat[0], quat[0]) || !this.FloatEqual(old_quat[1], quat[1])
-								|| !this.FloatEqual(old_quat[2], quat[2]) || !this.FloatEqual(old_quat[3], quat[3]))
+							float[] quat = MathHelper.RotationQuatYawPitchRoll(entity_common_props.RotationYaw,
+								entity_common_props.RotationPitch, entity_common_props.RotationRoll);
+							float[] old_quat = entity.TransformRotation;
+							if (!MathHelper.FloatArrayEqual(old_quat, quat))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetEntityRotation(core_, selected_entity_id_, quat));
+								this.ExecuteCommand(new KGEditorCommandSetEntityRotation(entity, quat));
 							}
 						}
 						break;
 
-					case EntityProperties.EP_EntityScalingX:
-					case EntityProperties.EP_EntityScalingY:
-					case EntityProperties.EP_EntityScalingZ:
+					case EntityProperties.EP_EntityScaleX:
+					case EntityProperties.EP_EntityScaleY:
+					case EntityProperties.EP_EntityScaleZ:
 						{
-							float[] scaling = new float[]
+							float[] scale = new float[]
 							{
-								entity_common_props.ScalingX,
-								entity_common_props.ScalingY,
-								entity_common_props.ScalingZ
+								entity_common_props.ScaleX,
+								entity_common_props.ScaleY,
+								entity_common_props.ScaleZ
 							};
-							float[] old_scale = core_.EntityScaling(selected_entity_id_);
-							if (!this.FloatEqual(old_scale[0], scaling[0]) || !this.FloatEqual(old_scale[1], scaling[1])
-								|| !this.FloatEqual(old_scale[2], scaling[2]))
+							float[] old_scale = entity.TransformScale;
+							if (!MathHelper.FloatArrayEqual(old_scale, scale))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetEntityScaling(core_, selected_entity_id_, scaling));
+								this.ExecuteCommand(new KGEditorCommandSetEntityScale(entity, scale));
 							}
 						}
 						break;
@@ -1219,16 +1200,18 @@ namespace KGEditor
 
 				if (properties.SelectedObject == light_properties_obj_)
 				{
+					var light = entity as SceneEntityLight;
+					Debug.Assert(light != null);
+
 					switch ((LightProperties)item.PropertyOrder)
 					{
 						case LightProperties.LP_Type:
 							break;
 
 						case LightProperties.LP_Enabled:
-							if (core_.LightEnabled(selected_entity_id_) != light_properties_obj_.Enabled)
+							if (light.LightEnabled != light_properties_obj_.Enabled)
 							{
-								this.ExecuteCommand(new KGEditorCommandSetLightEnabled(core_, selected_entity_id_,
-									light_properties_obj_.Enabled));
+								this.ExecuteCommand(new KGEditorCommandSetLightEnabled(light, light_properties_obj_.Enabled));
 							}
 							break;
 
@@ -1255,9 +1238,9 @@ namespace KGEditor
 									attrib |= (int)KGEditorCoreWrapper.LightSrcAttrib.LSA_IndirectLighting;
 								}
 
-								if (core_.LightAttrib(selected_entity_id_) != attrib)
+								if (light.LightAttrib != attrib)
 								{
-									this.ExecuteCommand(new KGEditorCommandSetLightAttrib(core_, selected_entity_id_, attrib));
+									this.ExecuteCommand(new KGEditorCommandSetLightAttrib(light, attrib));
 								}
 							}
 							break;
@@ -1265,12 +1248,11 @@ namespace KGEditor
 						case LightProperties.LP_Color:
 						case LightProperties.LP_Multiplier:
 							{
-								float[] color = this.ColorToFloatPtr(light_properties_obj_.Color, light_properties_obj_.Multiplier);
-								float[] old_color = core_.LightColor(selected_entity_id_);
-								if (!this.FloatEqual(old_color[0], color[0]) || !this.FloatEqual(old_color[1], color[1])
-									|| !this.FloatEqual(old_color[2], color[2]))
+								float[] color = MathHelper.ColorToFloatPtr(light_properties_obj_.Color, light_properties_obj_.Multiplier);
+								float[] old_color = light.LightColor;
+								if (!MathHelper.FloatArrayEqual(old_color, color))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetLightColor(core_, selected_entity_id_, color));
+									this.ExecuteCommand(new KGEditorCommandSetLightColor(light, color));
 								}
 							}
 							break;
@@ -1285,46 +1267,47 @@ namespace KGEditor
 									light_properties_obj_.FalloffLinear,
 									light_properties_obj_.FalloffQuadratic
 								};
-								float[] old_falloff = core_.LightFalloff(selected_entity_id_);
-								if (!this.FloatEqual(old_falloff[0], falloff[0]) || !this.FloatEqual(old_falloff[1], falloff[1])
-									|| !this.FloatEqual(old_falloff[2], falloff[2]))
+								float[] old_falloff = light.LightFalloff;
+								if (!MathHelper.FloatArrayEqual(old_falloff, falloff))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetLightFalloff(core_, selected_entity_id_, falloff));
+									this.ExecuteCommand(new KGEditorCommandSetLightFalloff(light, falloff));
 								}
 							}
 							break;
 
 						case LightProperties.LP_InnerAngle:
 							{
-								float inner_angle = (float)(core_.LightInnerAngle(selected_entity_id_) * (180 / Math.PI));
-								if (!this.FloatEqual(inner_angle, light_properties_obj_.InnerAngle))
+								float inner_angle = MathHelper.Deg2Rad(light_properties_obj_.InnerAngle);
+								if (!MathHelper.FloatEqual(light.LightInnerAngle, inner_angle))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetLightInnerAngle(core_, selected_entity_id_, inner_angle));
+									this.ExecuteCommand(new KGEditorCommandSetLightInnerAngle(light, inner_angle));
 								}
 							}
 							break;
 
 						case LightProperties.LP_OuterAngle:
 							{
-								float outer_angle = (float)(core_.LightOuterAngle(selected_entity_id_) * (180 / Math.PI));
-								if (!this.FloatEqual(outer_angle, light_properties_obj_.OuterAngle))
+								float outer_angle = MathHelper.Deg2Rad(light_properties_obj_.OuterAngle);
+								if (!MathHelper.FloatEqual(light.LightOuterAngle, outer_angle))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetLightOuterAngle(core_, selected_entity_id_, outer_angle));
+									this.ExecuteCommand(new KGEditorCommandSetLightOuterAngle(light, outer_angle));
 								}
 							}
 							break;
 
 						case LightProperties.LP_ProjectiveTex:
-							if (core_.LightProjectiveTex(selected_entity_id_) != light_properties_obj_.ProjectiveTex)
+							if (light.LightProjectiveTex != light_properties_obj_.ProjectiveTex)
 							{
-								this.ExecuteCommand(new KGEditorCommandSetProjectiveTex(core_, selected_entity_id_,
-									light_properties_obj_.ProjectiveTex));
+								this.ExecuteCommand(new KGEditorCommandSetProjectiveTex(light, light_properties_obj_.ProjectiveTex));
 							}
 							break;
 					}
 				}
 				else if (properties.SelectedObject == camera_properties_obj_)
 				{
+					var camera = entity as SceneEntityCamera;
+					Debug.Assert(camera != null);
+
 					switch ((CameraProperties)item.PropertyOrder)
 					{
 						case CameraProperties.CP_LookAtX:
@@ -1337,11 +1320,10 @@ namespace KGEditor
 									camera_properties_obj_.LookAtY,
 									camera_properties_obj_.LookAtZ
 								};
-								float[] old_look_at = core_.CameraLookAt(selected_entity_id_);
-								if (!this.FloatEqual(old_look_at[0], look_at[0]) || !this.FloatEqual(old_look_at[1], look_at[1])
-									|| !this.FloatEqual(old_look_at[2], look_at[2]))
+								float[] old_look_at = camera.CameraLookAt;
+								if (!MathHelper.FloatArrayEqual(old_look_at, look_at))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetCameraLookAt(core_, selected_entity_id_, look_at));
+									this.ExecuteCommand(new KGEditorCommandSetCameraLookAt(camera, look_at));
 								}
 							}
 							break;
@@ -1356,44 +1338,39 @@ namespace KGEditor
 									camera_properties_obj_.UpVecY,
 									camera_properties_obj_.UpVecZ
 								};
-								float[] old_up_vec = core_.CameraUpVec(selected_entity_id_);
-								if (!this.FloatEqual(old_up_vec[0], up_vec[0]) || !this.FloatEqual(old_up_vec[1], up_vec[1])
-									|| !this.FloatEqual(old_up_vec[2], up_vec[2]))
+								float[] old_up_vec = camera.CameraUpVec;
+								if (!MathHelper.FloatArrayEqual(old_up_vec, up_vec))
 								{
-									this.ExecuteCommand(new KGEditorCommandSetCameraUpVec(core_, selected_entity_id_, up_vec));
+									this.ExecuteCommand(new KGEditorCommandSetCameraUpVec(camera, up_vec));
 								}
 							}
 							break;
 
 						case CameraProperties.CP_FoV:
-							if (!this.FloatEqual(core_.CameraFoV(selected_entity_id_), camera_properties_obj_.FoV))
+							if (!MathHelper.FloatEqual(camera.CameraFoV, camera_properties_obj_.FoV))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetCameraFoV(core_, selected_entity_id_,
-									camera_properties_obj_.FoV));
+								this.ExecuteCommand(new KGEditorCommandSetCameraFoV(camera, camera_properties_obj_.FoV));
 							}
 							break;
 
 						case CameraProperties.CP_Aspect:
-							if (!this.FloatEqual(core_.CameraAspect(selected_entity_id_), camera_properties_obj_.Aspect))
+							if (!MathHelper.FloatEqual(camera.CameraAspect, camera_properties_obj_.Aspect))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetCameraAspect(core_, selected_entity_id_,
-									camera_properties_obj_.Aspect));
+								this.ExecuteCommand(new KGEditorCommandSetCameraAspect(camera, camera_properties_obj_.Aspect));
 							}
 							break;
 
 						case CameraProperties.CP_NearPlane:
-							if (!this.FloatEqual(core_.CameraNearPlane(selected_entity_id_), camera_properties_obj_.NearPlane))
+							if (!MathHelper.FloatEqual(camera.CameraNearPlane, camera_properties_obj_.NearPlane))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetCameraNearPlane(core_, selected_entity_id_,
-									camera_properties_obj_.NearPlane));
+								this.ExecuteCommand(new KGEditorCommandSetCameraNearPlane(camera, camera_properties_obj_.NearPlane));
 							}
 							break;
 
 						case CameraProperties.CP_FarPlane:
-							if (!this.FloatEqual(core_.CameraFarPlane(selected_entity_id_), camera_properties_obj_.FarPlane))
+							if (!MathHelper.FloatEqual(camera.CameraFarPlane, camera_properties_obj_.FarPlane))
 							{
-								this.ExecuteCommand(new KGEditorCommandSetCameraFarPlane(core_, selected_entity_id_,
-									camera_properties_obj_.FarPlane));
+								this.ExecuteCommand(new KGEditorCommandSetCameraFarPlane(camera, camera_properties_obj_.FarPlane));
 							}
 							break;
 					}
@@ -1459,13 +1436,13 @@ namespace KGEditor
 		{
 			get
 			{
-				return scene_entity_category_;
+				return scene_.SceneRoot;
 			}
 		}
 
-		string HistroyCmdName(int index)
+		private string HistroyCmdName(int index)
 		{
-			return command_history_[index].Name();
+			return command_history_[index].Name;
 		}
 
 		private object ExecuteCommand(KGEditorCommand cmd)
@@ -1486,7 +1463,7 @@ namespace KGEditor
 
 		private void Undo()
 		{
-			//Assert(end_command_index_ != 0);
+			Debug.Assert(end_command_index_ != 0);
 
 			-- end_command_index_;
 			command_history_[end_command_index_].Revoke();
@@ -1494,7 +1471,7 @@ namespace KGEditor
 
 		private void Redo()
 		{
-			//Assert(end_command_index_ != command_history_.Count);
+			Debug.Assert(end_command_index_ != command_history_.Count);
 
 			command_history_[end_command_index_].Execute();
 			++ end_command_index_;
@@ -1506,125 +1483,7 @@ namespace KGEditor
 			end_command_index_ = 0;
 		}
 
-		float LinearToSRGB(float linear)
-		{
-			if (linear < 0.0031308f)
-			{
-				return 12.92f * linear;
-			}
-			else
-			{
-				const float ALPHA = 0.055f;
-				return (1 + ALPHA) * (float)Math.Pow(linear, 1 / 2.4f) - ALPHA;
-			}
-		}
-
-		float SRGBToLinear(float srgb)
-		{
-			if (srgb < 0.04045f)
-			{
-				return srgb / 12.92f;
-			}
-			else
-			{
-				const float ALPHA = 0.055f;
-				return (float)Math.Pow((srgb + ALPHA) / (1 + ALPHA), 2.4f);
-			}
-		}
-
-		private float FloatPtrToMultipiler(float[] clr)
-		{
-			return Math.Max(Math.Max(Math.Max(clr[0], clr[1]), clr[2]), 1.0f);
-		}
-
-		private Color FloatPtrToLDRColor(float[] clr, float multiplier)
-		{
-			float[] temp = new float[3];
-			for (int i = 0; i < 3; ++ i)
-			{
-				temp[i] = LinearToSRGB(clr[i] / multiplier);
-			}
-			return Color.FromArgb(255,
-				(byte)(Math.Max(Math.Min((int)(temp[0] * 255 + 0.5f), 255), 0)),
-				(byte)(Math.Max(Math.Min((int)(temp[1] * 255 + 0.5f), 255), 0)),
-				(byte)(Math.Max(Math.Min((int)(temp[2] * 255 + 0.5f), 255), 0)));
-		}
-
-		private float[] ColorToFloatPtr(Color clr, float multiplier)
-		{
-			float[] ret = new float[3];
-			ret[0] = clr.R / 255.0f;
-			ret[1] = clr.G / 255.0f;
-			ret[2] = clr.B / 255.0f;
-			for (int i = 0; i < 3; ++ i)
-			{
-				ret[i] = SRGBToLinear(ret[i]) * multiplier;
-			}
-			return ret;
-		}
-
-		// From http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
-		float[] QuatToYawPitchRoll(float[] quat)
-		{
-			float[] yaw_pitch_roll = new float[3];
-
-			float sqx = quat[0] * quat[0];
-			float sqy = quat[1] * quat[1];
-			float sqz = quat[2] * quat[2];
-			float sqw = quat[3] * quat[3];
-			float unit = sqx + sqy + sqz + sqw;
-			float test = quat[3] * quat[0] + quat[1] * quat[2];
-			if (test > 0.499f * unit)
-			{
-				// singularity at north pole
-				yaw_pitch_roll[0] = 2 * (float)Math.Atan2(quat[2], quat[3]);
-				yaw_pitch_roll[1] = (float)Math.PI / 2;
-				yaw_pitch_roll[2] = 0;
-			}
-			else if (test< -0.499f * unit)
-			{
-				// singularity at south pole
-				yaw_pitch_roll[0] = -2 * (float)Math.Atan2(quat[2], quat[3]);
-				yaw_pitch_roll[1] = -(float)Math.PI / 2;
-				yaw_pitch_roll[2] = 0;
-			}
-			else
-			{
-				yaw_pitch_roll[0] = (float)Math.Atan2(2 * (quat[1] * quat[3] - quat[0] * quat[2]), -sqx - sqy + sqz + sqw);
-				yaw_pitch_roll[1] = (float)Math.Asin(2 * test / unit);
-				yaw_pitch_roll[2] = (float)Math.Atan2(2 * (quat[2] * quat[3] - quat[0] * quat[1]), -sqx + sqy - sqz + sqw);
-			}
-
-			return yaw_pitch_roll;
-		}
-
-		float[] RotationQuatYawPitchRoll(float yaw, float pitch, float roll)
-		{
-			float ang_x = pitch / 2;
-			float ang_y = yaw / 2;
-			float ang_z = roll / 2;
-			float sx = (float)Math.Sin(ang_x);
-			float cx = (float)Math.Cos(ang_x);
-			float sy = (float)Math.Sin(ang_y);
-			float cy = (float)Math.Cos(ang_y);
-			float sz = (float)Math.Sin(ang_z);
-			float cz = (float)Math.Cos(ang_z);
-
-			return new float[]
-			{
-				sx * cy * cz + cx * sy * sz,
-				cx * sy * cz - sx * cy * sz,
-				cx * cy * sz - sx * sy * cz,
-				sx * sy * sz + cx * cy * cz
-			};
-		}
-
-		private bool FloatEqual(float a, float b)
-		{
-			return Math.Abs(a - b) < 1e-6f;
-		}
-
-		private KGEditorCoreWrapper core_;
+		private static KGEditorCoreWrapper core_;
 		private SystemPropertyType system_properties_obj_ = new SystemPropertyType();
 		private EntityPropertyType entity_properties_obj_ = new EntityPropertyType();
 		private LightPropertyType light_properties_obj_ = new LightPropertyType();
@@ -1633,7 +1492,7 @@ namespace KGEditor
 		private uint selected_entity_id_ = 0;
 		private string opened_file_ = "";
 
-		private readonly ReadOnlyCollection<SceneEntityViewModel> scene_entity_category_;
+		private Scene scene_;
 
 		private List<KGEditorCommand> command_history_ = new List<KGEditorCommand>();
 		private int end_command_index_ = 0;

@@ -88,7 +88,7 @@ namespace KGEditor
 
 					if (is_selected_)
 					{
-						wnd_.SelectEntity(entity_.ID);
+						wnd_.SelectEntity(entity_.Id);
 					}
 				}
 			}

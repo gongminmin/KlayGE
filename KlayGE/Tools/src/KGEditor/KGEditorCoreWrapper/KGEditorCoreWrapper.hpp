@@ -13,16 +13,9 @@ namespace KlayGE
 		enum class ControlMode
 		{
 			CM_EntitySelection = 0,
-			CM_EntityTranslation,
+			CM_EntityPosition,
 			CM_EntityRotation,
-			CM_EntityScaling
-		};
-
-		enum class EntityType
-		{
-			ET_Model = 0,
-			ET_Light,
-			ET_Camera
+			CM_EntityScale
 		};
 
 		enum class LightType
@@ -67,7 +60,6 @@ namespace KlayGE
 		void DisplayGamma(bool gamma);
 		void DisplayColorGrading(bool cg);
 
-		ControlMode GetControlMode();
 		void SetControlMode(ControlMode mode);
 
 		uint32_t AddModel(System::String^ meshml_name);
@@ -79,23 +71,21 @@ namespace KlayGE
 		uint32_t AddCamera(System::String^ name);
 		void ClearCameras();
 
-		uint32_t NumEntities();
-		uint32_t EntityIDByIndex(uint32_t index);
 		void RemoveEntity(uint32_t id);
 		void SelectEntity(uint32_t id);
-		uint32_t SelectedEntity();
 
 		System::String^ EntityName(uint32_t id);
 		void EntityName(uint32_t id, System::String^ name);
-		bool HideEntity(uint32_t id);
-		void HideEntity(uint32_t id, bool hide);
-		EntityType GetEntityType(uint32_t id);
-		array<float>^ EntityScaling(uint32_t id);
-		void EntityScaling(uint32_t id, array<float>^ s);
+		bool EntityVisible(uint32_t id);
+		void EntityVisible(uint32_t id, bool visible);
+		array<float>^ EntityScale(uint32_t id);
+		void EntityScale(uint32_t id, array<float>^ s);
 		array<float>^ EntityRotation(uint32_t id);
 		void EntityRotation(uint32_t id, array<float>^ r);
-		array<float>^ EntityTranslation(uint32_t id);
-		void EntityTranslation(uint32_t id, array<float>^ t);
+		array<float>^ EntityPosition(uint32_t id);
+		void EntityPosition(uint32_t id, array<float>^ t);
+		array<float>^ EntityPivot(uint32_t id);
+		void EntityPivot(uint32_t id, array<float>^ t);
 
 		LightType GetLightType(uint32_t id);
 		bool LightEnabled(uint32_t id);
@@ -126,11 +116,8 @@ namespace KlayGE
 		float CameraFarPlane(uint32_t id);
 		void CameraFarPlane(uint32_t id, float far_plane);
 
-		uint32_t ActiveCamera();
-		void ActiveCamera(uint32_t id);
-
-		uint32_t BackupEntityInfo(uint32_t id);
-		void RestoreEntityInfo(uint32_t id, uint32_t backup_id);
+		uint32_t ActiveCameraId();
+		void ActiveCameraId(uint32_t id);
 
 		void MouseMove(int x, int y, uint32_t button);
 		void MouseDown(int x, int y, uint32_t button);
@@ -139,16 +126,12 @@ namespace KlayGE
 	public:
 		delegate void UpdatePropertyDelegate();
 		delegate void UpdateSelectEntityDelegate(uint32_t obj_id);
-		delegate void UpdateAddEntityDelegate(uint32_t obj_id);
-		delegate void UpdateRemoveEntityDelegate(uint32_t obj_id);
 		delegate void AddModelDelegate(System::String^ name);
 		delegate void AddLightDelegate(LightType type);
 		delegate void AddCameraDelegate();
 
 		void UpdatePropertyCallback(UpdatePropertyDelegate^ callback);
 		void UpdateSelectEntityCallback(UpdateSelectEntityDelegate^ callback);
-		void UpdateAddEntityCallback(UpdateAddEntityDelegate^ callback);
-		void UpdateRemoveEntityCallback(UpdateRemoveEntityDelegate^ callback);
 		void AddModelCallback(AddModelDelegate^ callback);
 		void AddLightCallback(AddLightDelegate^ callback);
 		void AddCameraCallback(AddCameraDelegate^ callback);
@@ -163,8 +146,6 @@ namespace KlayGE
 
 		UpdatePropertyDelegate^ update_property_delegate_;
 		UpdateSelectEntityDelegate^ update_select_entity_delegate_;
-		UpdateAddEntityDelegate^ update_add_entity_delegate_;
-		UpdateRemoveEntityDelegate^ update_remove_entity_delegate_;
 		AddModelDelegate^ add_model_delegate_;
 		AddModelDelegateWithCString^ add_model_delegate_with_c_string_;
 		AddLightDelegate^ add_light_delegate_;
