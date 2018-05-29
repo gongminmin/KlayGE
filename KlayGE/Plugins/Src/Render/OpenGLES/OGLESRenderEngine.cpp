@@ -1555,207 +1555,240 @@ namespace KlayGE
 			caps_.tess_method = TM_No;
 		}
 
-		std::vector<ElementFormat> vertex_formats;
-		std::vector<ElementFormat> texture_formats;
-		std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
-
-		vertex_formats.push_back(EF_A8);
-		vertex_formats.push_back(EF_R8);
-		vertex_formats.push_back(EF_GR8);
-		vertex_formats.push_back(EF_BGR8);
-		if (glloader_GLES_EXT_texture_format_BGRA8888())
 		{
-			vertex_formats.push_back(EF_ARGB8);
-		}
-		vertex_formats.push_back(EF_ABGR8);
-		vertex_formats.push_back(EF_R8UI);
-		vertex_formats.push_back(EF_GR8UI);
-		vertex_formats.push_back(EF_BGR8UI);
-		vertex_formats.push_back(EF_ABGR8UI);
-		vertex_formats.push_back(EF_SIGNED_R8);
-		vertex_formats.push_back(EF_SIGNED_GR8);
-		vertex_formats.push_back(EF_SIGNED_BGR8);
-		vertex_formats.push_back(EF_SIGNED_ABGR8);
-		vertex_formats.push_back(EF_R8I);
-		vertex_formats.push_back(EF_GR8I);
-		vertex_formats.push_back(EF_BGR8I);
-		vertex_formats.push_back(EF_ABGR8I);
-		if (glloader_GLES_OES_vertex_type_10_10_10_2())
-		{
-			vertex_formats.push_back(EF_A2BGR10);
-		}
-		vertex_formats.push_back(EF_R16);
-		vertex_formats.push_back(EF_GR16);
-		vertex_formats.push_back(EF_BGR16);
-		vertex_formats.push_back(EF_ABGR16);
-		vertex_formats.push_back(EF_R16UI);
-		vertex_formats.push_back(EF_GR16UI);
-		vertex_formats.push_back(EF_BGR16UI);
-		vertex_formats.push_back(EF_ABGR16UI);
-		vertex_formats.push_back(EF_SIGNED_R16);
-		vertex_formats.push_back(EF_SIGNED_GR16);
-		vertex_formats.push_back(EF_SIGNED_BGR16);
-		vertex_formats.push_back(EF_SIGNED_ABGR16);
-		vertex_formats.push_back(EF_R16I);
-		vertex_formats.push_back(EF_GR16I);
-		vertex_formats.push_back(EF_BGR16I);
-		vertex_formats.push_back(EF_ABGR16I);
-		vertex_formats.push_back(EF_R32UI);
-		vertex_formats.push_back(EF_GR32UI);
-		vertex_formats.push_back(EF_BGR32UI);
-		vertex_formats.push_back(EF_ABGR32UI);
-		vertex_formats.push_back(EF_R32I);
-		vertex_formats.push_back(EF_GR32I);
-		vertex_formats.push_back(EF_BGR32I);
-		vertex_formats.push_back(EF_ABGR32I);
-		vertex_formats.push_back(EF_R32F);
-		vertex_formats.push_back(EF_GR32F);
-		vertex_formats.push_back(EF_BGR32F);
-		vertex_formats.push_back(EF_ABGR32F);
-		vertex_formats.push_back(EF_R16F);
-		vertex_formats.push_back(EF_GR16F);
-		vertex_formats.push_back(EF_BGR16F);
-		vertex_formats.push_back(EF_ABGR16F);
-
-		texture_formats.push_back(EF_A8);
-		texture_formats.push_back(EF_ARGB4);
-		texture_formats.push_back(EF_R8);
-		texture_formats.push_back(EF_SIGNED_R8);
-		texture_formats.push_back(EF_GR8);
-		texture_formats.push_back(EF_ABGR8);
-		if (glloader_GLES_EXT_texture_format_BGRA8888())
-		{
-			texture_formats.push_back(EF_ARGB8);
-		}
-		texture_formats.push_back(EF_A2BGR10);
-		texture_formats.push_back(EF_R8UI);
-		texture_formats.push_back(EF_R8I);
-		texture_formats.push_back(EF_GR8UI);
-		texture_formats.push_back(EF_GR8I);
-		texture_formats.push_back(EF_BGR8UI);
-		texture_formats.push_back(EF_BGR8I);
-		texture_formats.push_back(EF_R16UI);
-		texture_formats.push_back(EF_R16I);
-		texture_formats.push_back(EF_GR16UI);
-		texture_formats.push_back(EF_GR16I);
-		texture_formats.push_back(EF_BGR16UI);
-		texture_formats.push_back(EF_BGR16I);
-		texture_formats.push_back(EF_ABGR16UI);
-		texture_formats.push_back(EF_ABGR16I);
-		texture_formats.push_back(EF_R32UI);
-		texture_formats.push_back(EF_R32I);
-		texture_formats.push_back(EF_GR32UI);
-		texture_formats.push_back(EF_GR32I);
-		texture_formats.push_back(EF_BGR32UI);
-		texture_formats.push_back(EF_BGR32I);
-		texture_formats.push_back(EF_ABGR32UI);
-		texture_formats.push_back(EF_ABGR32I);
-		if (!this->HackForPVR() && !this->HackForAndroidEmulator())
-		{
-			texture_formats.push_back(EF_R16F);
-			texture_formats.push_back(EF_GR16F);
-			texture_formats.push_back(EF_BGR16F);
-			texture_formats.push_back(EF_ABGR16F);
-		}
-		texture_formats.push_back(EF_B10G11R11F);
-		if (glloader_GLES_OES_texture_float())
-		{
-			texture_formats.push_back(EF_R32F);
-			texture_formats.push_back(EF_GR32F);
-			texture_formats.push_back(EF_BGR32F);
-			texture_formats.push_back(EF_ABGR32F);
-		}
-		if (glloader_GLES_EXT_texture_compression_dxt1() || glloader_GLES_EXT_texture_compression_s3tc())
-		{
-			texture_formats.push_back(EF_BC1);
-		}
-		if (glloader_GLES_EXT_texture_compression_s3tc())
-		{
-			texture_formats.push_back(EF_BC2);
-			texture_formats.push_back(EF_BC3);
-		}
-		if (glloader_GLES_EXT_texture_compression_latc() && !(this->HackForPVR() || this->HackForMali() || this->HackForAdreno()))
-		{
-			texture_formats.push_back(EF_BC4);
-			texture_formats.push_back(EF_BC5);
-			texture_formats.push_back(EF_SIGNED_BC4);
-			texture_formats.push_back(EF_SIGNED_BC5);
-		}
-		texture_formats.push_back(EF_D16);
-		texture_formats.push_back(EF_D24S8);
-		texture_formats.push_back(EF_D32F);
-		texture_formats.push_back(EF_ABGR8_SRGB);
-		texture_formats.push_back(EF_ETC1);
-		texture_formats.push_back(EF_ETC2_R11);
-		texture_formats.push_back(EF_SIGNED_ETC2_R11);
-		texture_formats.push_back(EF_ETC2_GR11);
-		texture_formats.push_back(EF_SIGNED_ETC2_GR11);
-		texture_formats.push_back(EF_ETC2_BGR8);
-		texture_formats.push_back(EF_ETC2_BGR8_SRGB);
-		texture_formats.push_back(EF_ETC2_A1BGR8);
-		texture_formats.push_back(EF_ETC2_A1BGR8_SRGB);
-		texture_formats.push_back(EF_ETC2_ABGR8);
-		texture_formats.push_back(EF_ETC2_ABGR8_SRGB);
-
-		GLint max_samples;
-		glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
-
-		auto add_render_target_format = [&render_target_formats, &max_samples](ElementFormat fmt)
-		{
-			for (int i = 1; i <= max_samples; i *= 2)
+			std::vector<ElementFormat> vertex_formats =
 			{
-				render_target_formats[fmt].push_back(RenderDeviceCaps::EncodeSampleCountQuality(i, 1));
+				EF_A8,
+				EF_R8,
+				EF_GR8,
+				EF_BGR8,
+				EF_ABGR8,
+				EF_R8UI,
+				EF_GR8UI,
+				EF_BGR8UI,
+				EF_ABGR8UI,
+				EF_SIGNED_R8,
+				EF_SIGNED_GR8,
+				EF_SIGNED_BGR8,
+				EF_SIGNED_ABGR8,
+				EF_R8I,
+				EF_GR8I,
+				EF_BGR8I,
+				EF_ABGR8I,
+				EF_R16,
+				EF_GR16,
+				EF_BGR16,
+				EF_ABGR16,
+				EF_R16UI,
+				EF_GR16UI,
+				EF_BGR16UI,
+				EF_ABGR16UI,
+				EF_SIGNED_R16,
+				EF_SIGNED_GR16,
+				EF_SIGNED_BGR16,
+				EF_SIGNED_ABGR16,
+				EF_R16I,
+				EF_GR16I,
+				EF_BGR16I,
+				EF_ABGR16I,
+				EF_R32UI,
+				EF_GR32UI,
+				EF_BGR32UI,
+				EF_ABGR32UI,
+				EF_R32I,
+				EF_GR32I,
+				EF_BGR32I,
+				EF_ABGR32I,
+				EF_R32F,
+				EF_GR32F,
+				EF_BGR32F,
+				EF_ABGR32F,
+				EF_R16F,
+				EF_GR16F,
+				EF_BGR16F,
+				EF_ABGR16F
+			};
+			if (glloader_GLES_EXT_texture_format_BGRA8888())
+			{
+				vertex_formats.push_back(EF_ARGB8);
 			}
-		};
+			if (glloader_GLES_OES_vertex_type_10_10_10_2())
+			{
+				vertex_formats.push_back(EF_A2BGR10);
+			}
 
-		add_render_target_format(EF_R8);
-		add_render_target_format(EF_GR8);
-		if (glloader_GLES_EXT_texture_format_BGRA8888())
-		{
-			add_render_target_format(EF_ARGB8);
+			this->AssignCapVertexFormats(std::move(vertex_formats));
 		}
-		add_render_target_format(EF_ABGR8);
-		add_render_target_format(EF_SIGNED_ABGR8);
-		add_render_target_format(EF_A2BGR10);
-		add_render_target_format(EF_R16UI);
-		add_render_target_format(EF_R16I);
-		add_render_target_format(EF_GR16UI);
-		add_render_target_format(EF_GR16I);
-		add_render_target_format(EF_ABGR16UI);
-		add_render_target_format(EF_ABGR16I);
-		add_render_target_format(EF_R32UI);
-		add_render_target_format(EF_R32I);
-		add_render_target_format(EF_GR32UI);
-		add_render_target_format(EF_GR32I);
-		add_render_target_format(EF_ABGR32UI);
-		add_render_target_format(EF_ABGR32I);
-		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
 		{
-			add_render_target_format(EF_R16F);
-			add_render_target_format(EF_GR16F);
-		}
-		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float()
-			|| this->HackForTegra())
-		{
-			add_render_target_format(EF_ABGR16F);
-		}
-		if (glloader_GLES_VERSION_3_2() || glloader_GLES_APPLE_color_buffer_packed_float() || glloader_GLES_NV_packed_float())
-		{
-			add_render_target_format(EF_B10G11R11F);
-		}
-		if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_float())
-		{
-			add_render_target_format(EF_R32F);
-			add_render_target_format(EF_GR32F);
-			add_render_target_format(EF_ABGR32F);
-		}
-		add_render_target_format(EF_D16);
-		add_render_target_format(EF_D24S8);
-		add_render_target_format(EF_D32F);
-		add_render_target_format(EF_ABGR8_SRGB);
+			std::vector<ElementFormat> texture_formats =
+			{
+				EF_A8,
+				EF_ARGB4,
+				EF_R8,
+				EF_SIGNED_R8,
+				EF_GR8,
+				EF_ABGR8,
+				EF_A2BGR10,
+				EF_R8UI,
+				EF_R8I,
+				EF_GR8UI,
+				EF_GR8I,
+				EF_BGR8UI,
+				EF_BGR8I,
+				EF_R16UI,
+				EF_R16I,
+				EF_GR16UI,
+				EF_GR16I,
+				EF_BGR16UI,
+				EF_BGR16I,
+				EF_ABGR16UI,
+				EF_ABGR16I,
+				EF_R32UI,
+				EF_R32I,
+				EF_GR32UI,
+				EF_GR32I,
+				EF_BGR32UI,
+				EF_BGR32I,
+				EF_ABGR32UI,
+				EF_ABGR32I,
+				EF_B10G11R11F,
+				EF_D16,
+				EF_D24S8,
+				EF_D32F,
+				EF_ABGR8_SRGB,
+				EF_ETC1,
+				EF_ETC2_R11,
+				EF_SIGNED_ETC2_R11,
+				EF_ETC2_GR11,
+				EF_SIGNED_ETC2_GR11,
+				EF_ETC2_BGR8,
+				EF_ETC2_BGR8_SRGB,
+				EF_ETC2_A1BGR8,
+				EF_ETC2_A1BGR8_SRGB,
+				EF_ETC2_ABGR8,
+				EF_ETC2_ABGR8_SRGB
+			};
+			if (glloader_GLES_EXT_texture_format_BGRA8888())
+			{
+				texture_formats.push_back(EF_ARGB8);
+			}
+			if (!this->HackForPVR() && !this->HackForAndroidEmulator())
+			{
+				texture_formats.insert(texture_formats.end(),
+					{
+						EF_R16F,
+						EF_GR16F,
+						EF_BGR16F,
+						EF_ABGR16F
+					});
+			}
+			if (glloader_GLES_OES_texture_float())
+			{
+				texture_formats.insert(texture_formats.end(),
+					{
+						EF_R32F,
+						EF_GR32F,
+						EF_BGR32F,
+						EF_ABGR32F
+					});
+			}
+			if (glloader_GLES_EXT_texture_compression_dxt1() || glloader_GLES_EXT_texture_compression_s3tc())
+			{
+				texture_formats.push_back(EF_BC1);
+			}
+			if (glloader_GLES_EXT_texture_compression_s3tc())
+			{
+				texture_formats.insert(texture_formats.end(),
+					{
+						EF_BC2,
+						EF_BC3
+					});
+			}
+			if (glloader_GLES_EXT_texture_compression_latc() && !(this->HackForPVR() || this->HackForMali() || this->HackForAdreno()))
+			{
+				texture_formats.insert(texture_formats.end(),
+					{
+						EF_BC4,
+						EF_BC5,
+						EF_SIGNED_BC4,
+						EF_SIGNED_BC5
+					});
+			}
 
-		this->AssignCapVertexFormats(std::move(vertex_formats));
-		this->AssignCapTextureFormats(std::move(texture_formats));
-		this->AssignCapRenderTargetFormats(std::move(render_target_formats));
+			this->AssignCapTextureFormats(std::move(texture_formats));
+		}
+		{
+			GLint max_samples;
+			glGetIntegerv(GL_MAX_SAMPLES, &max_samples);
+
+			std::map<ElementFormat, std::vector<uint32_t>> render_target_formats;
+			auto add_render_target_format = [&render_target_formats, &max_samples](ArrayRef<ElementFormat> fmts)
+			{
+				for (auto fmt : fmts)
+				{
+					for (int i = 1; i <= max_samples; i *= 2)
+					{
+						render_target_formats[fmt].push_back(RenderDeviceCaps::EncodeSampleCountQuality(i, 1));
+					}
+				}
+			};
+
+			add_render_target_format(
+				{
+					EF_R8,
+					EF_GR8,
+					EF_ABGR8,
+					EF_SIGNED_ABGR8,
+					EF_A2BGR10,
+					EF_R16UI,
+					EF_R16I,
+					EF_GR16UI,
+					EF_GR16I,
+					EF_ABGR16UI,
+					EF_ABGR16I,
+					EF_R32UI,
+					EF_R32I,
+					EF_GR32UI,
+					EF_GR32I,
+					EF_ABGR32UI,
+					EF_ABGR32I,
+					EF_D16,
+					EF_D24S8,
+					EF_D32F,
+					EF_ABGR8_SRGB
+				});
+			if (glloader_GLES_EXT_texture_format_BGRA8888())
+			{
+				add_render_target_format(EF_ARGB8);
+			}
+			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float())
+			{
+				add_render_target_format(
+					{
+						EF_R16F,
+						EF_GR16F
+					});
+			}
+			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_half_float() || glloader_GLES_EXT_color_buffer_float()
+				|| this->HackForTegra())
+			{
+				add_render_target_format(EF_ABGR16F);
+			}
+			if (glloader_GLES_VERSION_3_2() || glloader_GLES_APPLE_color_buffer_packed_float() || glloader_GLES_NV_packed_float())
+			{
+				add_render_target_format(EF_B10G11R11F);
+			}
+			if (glloader_GLES_VERSION_3_2() || glloader_GLES_EXT_color_buffer_float())
+			{
+				add_render_target_format(
+					{
+						EF_R32F,
+						EF_GR32F,
+						EF_ABGR32F
+					});
+			}
+
+			this->AssignCapRenderTargetFormats(std::move(render_target_formats));
+		}
 	}
 }

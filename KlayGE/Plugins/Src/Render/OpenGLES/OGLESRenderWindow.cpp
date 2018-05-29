@@ -195,7 +195,7 @@ namespace KlayGE
 
 		std::vector<EGLint> visual_attr =
 		{
-			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+			EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT,
 			EGL_RED_SIZE, r_size,
 			EGL_GREEN_SIZE, g_size,
 			EGL_BLUE_SIZE, b_size,
@@ -250,15 +250,15 @@ namespace KlayGE
 		context_ = nullptr;
 		EGLint ctx_attr[] =
 		{
-			EGL_CONTEXT_MAJOR_VERSION_KHR, available_versions[0].first,
-			EGL_CONTEXT_MINOR_VERSION_KHR, available_versions[0].second,
+			EGL_CONTEXT_MAJOR_VERSION, available_versions[0].first,
+			EGL_CONTEXT_MINOR_VERSION, available_versions[0].second,
 			EGL_NONE
 		};
 		size_t test_version_index = 0;
 		while ((nullptr == context_) && (test_version_index < available_versions.size()))
 		{
 			ctx_attr[1] = available_versions[test_version_index].first;
-			ctx_attr[2] = EGL_CONTEXT_MINOR_VERSION_KHR;
+			ctx_attr[2] = EGL_CONTEXT_MINOR_VERSION;
 			ctx_attr[3] = available_versions[test_version_index].second;
 			context_ = eglCreateContext(display_, cfg_, EGL_NO_CONTEXT, ctx_attr);
 

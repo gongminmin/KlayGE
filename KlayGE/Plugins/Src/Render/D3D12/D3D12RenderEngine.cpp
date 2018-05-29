@@ -1231,9 +1231,12 @@ namespace KlayGE
 
 		if (!check_uav_fmts)
 		{
-			uav_formats.push_back(EF_R32F);
-			uav_formats.push_back(EF_R32UI);
-			uav_formats.push_back(EF_R32I);
+			uav_formats.insert(uav_formats.end(),
+				{
+					EF_R32F,
+					EF_R32UI,
+					EF_R32I
+				});
 		}
 
 		std::pair<ElementFormat, DXGI_FORMAT> const fmts[] = 

@@ -358,11 +358,8 @@ namespace KlayGE
 						auto const * mesh = checked_cast<FoliageMesh*>(plant_meshes_[plant_type]->Subrenderable(i).get());
 						auto const & rl = mesh->GetRenderLayout(lod);
 
-						lod_indirect_args.push_back(rl.NumIndices());
-						lod_indirect_args.push_back(0);
-						lod_indirect_args.push_back(rl.StartIndexLocation());
-						lod_indirect_args.push_back(rl.StartVertexLocation());
-						lod_indirect_args.push_back(rl.StartInstanceLocation());
+						lod_indirect_args.insert(lod_indirect_args.end(),
+							{ rl.NumIndices(), 0, rl.StartIndexLocation(), rl.StartVertexLocation(), rl.StartInstanceLocation() });
 					}
 				}
 

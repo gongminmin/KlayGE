@@ -57,7 +57,7 @@ namespace KlayGE
 		}
 	}
 
-#if !defined(NDEBUG) || !defined(LLVM_BUILTIN_UNREACHABLE)
+#if defined(KLAYGE_DEBUG) || !defined(KLAYGE_BUILTIN_UNREACHABLE)
 	void KFLUnreachableInternal(char const * msg, char const * file, uint32_t line)
 	{
 		if (msg)

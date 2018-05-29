@@ -238,36 +238,47 @@ int main(int argc, char* argv[])
 	device_caps.hs_support = plat.hs_support;
 	device_caps.ds_support = plat.ds_support;
 
-	std::vector<ElementFormat> texture_format;
-	texture_format.push_back(EF_R8);
-	texture_format.push_back(EF_ABGR8);
-	texture_format.push_back(EF_ARGB8);
-	texture_format.push_back(EF_BC1);
-	texture_format.push_back(EF_BC1_SRGB);
-	texture_format.push_back(EF_BC2);
-	texture_format.push_back(EF_BC2_SRGB);
-	texture_format.push_back(EF_BC3);
-	texture_format.push_back(EF_BC3_SRGB);
+	std::vector<ElementFormat> texture_format =
+	{
+		EF_R8,
+		EF_ABGR8,
+		EF_ARGB8,
+		EF_BC1,
+		EF_BC1_SRGB,
+		EF_BC2,
+		EF_BC2_SRGB,
+		EF_BC3,
+		EF_BC3_SRGB
+	};
 	if (plat.bc4_support)
 	{
-		texture_format.push_back(EF_BC4);
-		texture_format.push_back(EF_BC4_SRGB);
+		texture_format.insert(texture_format.end(),
+			{
+				EF_BC4,
+				EF_BC4_SRGB
+			});
 	}
 	if (plat.bc5_support)
 	{
-		texture_format.push_back(EF_BC5);
-		texture_format.push_back(EF_BC5_SRGB);
+		texture_format.insert(texture_format.end(),
+			{
+				EF_BC5,
+				EF_BC5_SRGB
+			});
 	}
 
 	std::vector<ElementFormat> uav_format;
 	if (device_caps.max_shader_model >= ShaderModel(5, 1))
 	{
-		uav_format.push_back(EF_ABGR16F);
-		uav_format.push_back(EF_B10G11R11F);
-		uav_format.push_back(EF_ABGR8);
-		uav_format.push_back(EF_R16UI);
-		uav_format.push_back(EF_R32UI);
-		uav_format.push_back(EF_R32F);
+		uav_format.insert(uav_format.end(),
+			{
+				EF_ABGR16F,
+				EF_B10G11R11F,
+				EF_ABGR8,
+				EF_R16UI,
+				EF_R32UI,
+				EF_R32F
+			});
 	}
 
 	RenderEngine& re = Context::Instance().RenderFactoryInstance().RenderEngineInstance();
