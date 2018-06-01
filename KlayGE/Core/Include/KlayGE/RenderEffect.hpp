@@ -238,16 +238,31 @@ namespace KlayGE
 		{
 			return 0;
 		}
+
+	protected:
+		struct CBufferDesc
+		{
+			RenderEffectConstantBuffer* cbuff;
+			uint32_t offset;
+			uint32_t stride;
+		};
 	};
 
 	template <typename T>
 	class RenderVariableConcrete : public RenderVariable
 	{
 	public:
-		RenderVariableConcrete()
-			: in_cbuff_(false)
+		explicit RenderVariableConcrete(bool in_cbuff)
+			: in_cbuff_(in_cbuff)
 		{
-			new (data_.val) T;
+			if (!in_cbuff_)
+			{
+				new (data_.val) T;
+			}
+		}
+		RenderVariableConcrete()
+			: RenderVariableConcrete(false)
+		{
 		}
 		virtual ~RenderVariableConcrete()
 		{
@@ -259,16 +274,11 @@ namespace KlayGE
 
 		std::unique_ptr<RenderVariable> Clone() override
 		{
-			auto ret = MakeUniquePtr<RenderVariableConcrete<T>>();
+			auto ret = MakeUniquePtr<RenderVariableConcrete<T>>(in_cbuff_);
 			if (in_cbuff_)
 			{
-				if (!ret->in_cbuff_)
-				{
-					ret->RetriveT().~T();
-				}
 				ret->data_ = data_;
 			}
-			ret->in_cbuff_ = in_cbuff_;
 			T val;
 			this->Value(val);
 			*ret = val;
@@ -279,11 +289,12 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				T& val_in_cbuff = *(data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset));
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				T& val_in_cbuff = *(cbuff_desc.cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 				if (val_in_cbuff != value)
 				{
 					val_in_cbuff = value;
-					data_.cbuff_desc.cbuff->Dirty(true);
+					cbuff_desc.cbuff->Dirty(true);
 				}
 			}
 			else
@@ -297,7 +308,8 @@ namespace KlayGE
 		{
 			if (in_cbuff_)
 			{
-				val = *(data_.cbuff_desc.cbuff->template VariableInBuff<T>(data_.cbuff_desc.offset));
+				auto const & cbuff_desc = this->RetriveCBufferDesc();
+				val = *(cbuff_desc.cbuff->template VariableInBuff<T>(cbuff_desc.offset));
 			}
 			else
 			{
@@ -309,13 +321,14 @@ namespace KlayGE
 		{
 			if (!in_cbuff_)
 			{
-				T val;
-				this->Value(val);
+				T val = this->RetriveT();
 				this->RetriveT().~T();
 				in_cbuff_ = true;
-				data_.cbuff_desc.cbuff = &cbuff;
-				data_.cbuff_desc.offset = offset;
-				data_.cbuff_desc.stride = stride;
+				CBufferDesc cbuff_desc;
+				cbuff_desc.cbuff = &cbuff;
+				cbuff_desc.offset = offset;
+				cbuff_desc.stride = stride;
+				this->RetriveCBufferDesc() = std::move(cbuff_desc);
 				this->operator=(val);
 			}
 		}
@@ -323,7 +336,7 @@ namespace KlayGE
 		virtual void RebindToCBuffer(RenderEffectConstantBuffer& cbuff) override
 		{
 			BOOST_ASSERT(in_cbuff_);
-			data_.cbuff_desc.cbuff = &cbuff;
+			this->RetriveCBufferDesc().cbuff = &cbuff;
 		}
 
 		virtual bool InCBuffer() const override
@@ -332,11 +345,11 @@ namespace KlayGE
 		}
 		virtual uint32_t CBufferOffset() const override
 		{
-			return data_.cbuff_desc.offset;
+			return this->RetriveCBufferDesc().offset;
 		}
 		virtual uint32_t Stride() const override
 		{
-			return data_.cbuff_desc.stride;
+			return this->RetriveCBufferDesc().stride;
 		}
 
 	protected:
@@ -361,17 +374,19 @@ namespace KlayGE
 			return *r2t.t;
 		}
 
+		CBufferDesc& RetriveCBufferDesc()
+		{
+			return data_.cbuff_desc;
+		}
+		CBufferDesc const & RetriveCBufferDesc() const
+		{
+			return data_.cbuff_desc;
+		}
+
 	protected:
 		bool in_cbuff_;
 		union VarData
 		{
-			struct CBufferDesc
-			{
-				RenderEffectConstantBuffer* cbuff;
-				uint32_t offset;
-				uint32_t stride;
-			};
-
 			CBufferDesc cbuff_desc;
 			uint8_t val[sizeof(T)];
 		};
@@ -381,6 +396,9 @@ namespace KlayGE
 	class RenderVariableFloat4x4 : public RenderVariableConcrete<float4x4>
 	{
 	public:
+		explicit RenderVariableFloat4x4(bool in_cbuff);
+		RenderVariableFloat4x4();
+
 		std::unique_ptr<RenderVariable> Clone() override;
 
 		virtual RenderVariable& operator=(float4x4 const & value) override;
@@ -391,21 +409,42 @@ namespace KlayGE
 	class RenderVariableArray : public RenderVariableConcrete<std::vector<T>>
 	{
 	public:
+		explicit RenderVariableArray(bool in_cbuff)
+			: RenderVariableConcrete<std::vector<T>>(in_cbuff)
+		{
+		}
+		RenderVariableArray()
+			: RenderVariableConcrete<std::vector<T>>()
+		{
+		}
+
 		std::unique_ptr<RenderVariable> Clone() override
 		{
-			auto ret = MakeUniquePtr<RenderVariableArray<T>>();
+			auto ret = MakeUniquePtr<RenderVariableArray<T>>(this->in_cbuff_);
 			if (this->in_cbuff_)
 			{
-				if (!ret->in_cbuff_)
-				{
-					ret->RetriveT().~vector();
-				}
 				ret->RenderVariableConcrete<std::vector<T>>::data_ = this->data_;
+				ret->size_ = this->size_;
+
+				auto const & src_cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const * src = src_cbuff_desc.cbuff->template VariableInBuff<uint8_t>(src_cbuff_desc.offset);
+
+				auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
+				uint8_t* dst = dst_cbuff_desc.cbuff->template VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
+
+				for (size_t i = 0; i < size_; ++ i)
+				{
+					memcpy(dst, src, sizeof(T));
+					src += src_cbuff_desc.stride;
+					dst += dst_cbuff_desc.stride;
+				}
+
+				dst_cbuff_desc.cbuff->Dirty(true);
 			}
-			ret->RenderVariableConcrete<std::vector<T>>::in_cbuff_ = this->in_cbuff_;
-			std::vector<T> val;
-			this->Value(val);
-			*ret = val;
+			else
+			{
+				ret->RetriveT() = this->RetriveT();
+			}
 			return std::move(ret);
 		}
 
@@ -413,15 +452,20 @@ namespace KlayGE
 		{
 			if (this->in_cbuff_)
 			{
-				uint8_t* target = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
+				uint8_t const * src = reinterpret_cast<uint8_t const *>(value.data());
+
+				auto& cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t* dst = cbuff_desc.cbuff->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					memcpy(target + i * this->data_.cbuff_desc.stride, &value[i], sizeof(value[i]));
+					memcpy(dst, src, sizeof(T));
+					src += sizeof(T);
+					dst += cbuff_desc.stride;
 				}
 
-				this->data_.cbuff_desc.cbuff->Dirty(true);
+				cbuff_desc.cbuff->Dirty(true);
 			}
 			else
 			{
@@ -434,12 +478,17 @@ namespace KlayGE
 		{
 			if (this->in_cbuff_)
 			{
-				uint8_t const * src = this->data_.cbuff_desc.cbuff->template VariableInBuff<uint8_t>(this->data_.cbuff_desc.offset);
+				auto const & cbuff_desc = this->RetriveCBufferDesc();
+				uint8_t const * src = cbuff_desc.cbuff->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				val.resize(size_);
+				uint8_t* dst = reinterpret_cast<uint8_t*>(val.data());
+
 				for (size_t i = 0; i < size_; ++ i)
 				{
-					memcpy(&val[i], src + i * this->data_.cbuff_desc.stride, sizeof(val[i]));
+					memcpy(&val[i], src, sizeof(val[i]));
+					src += cbuff_desc.stride;
+					dst += sizeof(T);
 				}
 			}
 			else
@@ -455,6 +504,9 @@ namespace KlayGE
 	class RenderVariableFloat4x4Array : public RenderVariableConcrete<std::vector<float4x4>>
 	{
 	public:
+		explicit RenderVariableFloat4x4Array(bool in_cbuff);
+		RenderVariableFloat4x4Array();
+
 		std::unique_ptr<RenderVariable> Clone() override;
 
 		virtual RenderVariable& operator=(std::vector<float4x4> const & value) override;

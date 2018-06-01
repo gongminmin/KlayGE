@@ -5911,17 +5911,31 @@ namespace KlayGE
 		KFL_UNREACHABLE("Can't be called");
 	}
 
+	RenderVariableFloat4x4::RenderVariableFloat4x4(bool in_cbuff)
+		: RenderVariableConcrete<float4x4>(in_cbuff)
+	{
+	}
+
+	RenderVariableFloat4x4::RenderVariableFloat4x4()
+		: RenderVariableConcrete<float4x4>()
+	{
+	}
+
 	std::unique_ptr<RenderVariable> RenderVariableFloat4x4::Clone()
 	{
-		auto ret = MakeUniquePtr<RenderVariableFloat4x4>();
-		ret->in_cbuff_ = in_cbuff_;
+		auto ret = MakeUniquePtr<RenderVariableFloat4x4>(in_cbuff_);
 		if (in_cbuff_)
 		{
 			ret->data_ = data_;
+
+			float4x4 val;
+			RenderVariableConcrete<float4x4>::Value(val);			
+			RenderVariableConcrete<float4x4>::operator=(val);
 		}
-		float4x4 val;
-		this->Value(val);
-		*ret = val;
+		else
+		{
+			ret->RetriveT() = this->RetriveT();
+		}
 		return std::move(ret);
 	}
 
@@ -5936,21 +5950,38 @@ namespace KlayGE
 		val = MathLib::transpose(val);
 	}
 
+	RenderVariableFloat4x4Array::RenderVariableFloat4x4Array(bool in_cbuff)
+		: RenderVariableConcrete<std::vector<float4x4>>(in_cbuff)
+	{
+	}
+
+	RenderVariableFloat4x4Array::RenderVariableFloat4x4Array()
+		: RenderVariableConcrete<std::vector<float4x4>>()
+	{
+	}
+
 	std::unique_ptr<RenderVariable> RenderVariableFloat4x4Array::Clone()
 	{
-		auto ret = MakeUniquePtr<RenderVariableFloat4x4Array>();
+		auto ret = MakeUniquePtr<RenderVariableFloat4x4Array>(in_cbuff_);
 		if (in_cbuff_)
 		{
-			if (!ret->in_cbuff_)
-			{
-				ret->RetriveT().~vector();
-			}
 			ret->data_ = data_;
+			ret->size_ = size_;
+
+			auto const & src_cbuff_desc = this->RetriveCBufferDesc();
+			float4x4 const * src = src_cbuff_desc.cbuff->VariableInBuff<float4x4>(src_cbuff_desc.offset);
+
+			auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
+			float4x4* dst = dst_cbuff_desc.cbuff->VariableInBuff<float4x4>(dst_cbuff_desc.offset);
+
+			memcpy(dst, src, size_ * sizeof(float4x4));
+
+			dst_cbuff_desc.cbuff->Dirty(true);
 		}
-		ret->in_cbuff_ = in_cbuff_;
-		std::vector<float4x4> val;
-		this->Value(val);
-		*ret = val;
+		else
+		{
+			ret->RetriveT() = this->RetriveT();
+		}
 		return std::move(ret);
 	}
 
@@ -5958,15 +5989,20 @@ namespace KlayGE
 	{
 		if (in_cbuff_)
 		{
-			float4x4* target = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
+			float4x4 const * src = value.data();
+
+			auto& cbuff_desc = this->RetriveCBufferDesc();
+			float4x4* dst = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
 
 			size_ = static_cast<uint32_t>(value.size());
 			for (size_t i = 0; i < value.size(); ++ i)
 			{
-				target[i] = MathLib::transpose(value[i]);
+				*dst = MathLib::transpose(*src);
+				++ src;
+				++ dst;
 			}
 
-			data_.cbuff_desc.cbuff->Dirty(true);
+			cbuff_desc.cbuff->Dirty(true);
 		}
 		else
 		{
@@ -5979,12 +6015,17 @@ namespace KlayGE
 	{
 		if (in_cbuff_)
 		{
-			float4x4 const * src = data_.cbuff_desc.cbuff->VariableInBuff<float4x4>(data_.cbuff_desc.offset);
+			auto const & cbuff_desc = this->RetriveCBufferDesc();
+			float4x4 const * src = cbuff_desc.cbuff->VariableInBuff<float4x4>(cbuff_desc.offset);
 
 			val.resize(size_);
+			float4x4* dst = val.data();
+
 			for (size_t i = 0; i < size_; ++ i)
 			{
-				val[i] = MathLib::transpose(src[i]);
+				*dst = MathLib::transpose(*src);
+				++ src;
+				++ dst;
 			}
 		}
 		else
