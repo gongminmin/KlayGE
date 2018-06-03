@@ -1820,7 +1820,7 @@ namespace
 						size_t j = 0;
 						do
 						{
-							std::stringstream ss;
+							std::ostringstream ss;
 							ss << tex_base << "_" << type << "_" << j << ".dds";
 							new_name = filesystem::path(ss.str());
 							++ j;

@@ -72,12 +72,11 @@ namespace
 	std::mutex singleton_mutex;
 
 #ifdef KLAYGE_PLATFORM_ANDROID
-	class AAssetStreamBuf : public KlayGE::MemStreamBuf
+	class AAssetStreamBuf : public KlayGE::MemInputStreamBuf
 	{
 	public:
 		explicit AAssetStreamBuf(AAsset* asset)
-			: MemStreamBuf(AAsset_getBuffer(asset), 
-					static_cast<uint8_t const *>(AAsset_getBuffer(asset)) + AAsset_getLength(asset)),
+			: MemInputStreamBuf(AAsset_getBuffer(asset), AAsset_getLength(asset)),
 				asset_(asset)
 		{
 			BOOST_ASSERT(asset_ != nullptr);

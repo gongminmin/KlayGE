@@ -249,17 +249,17 @@ int main(int argc, char* argv[])
 	}
 	if (argc > 3)
 	{
-		std::stringstream ss(argv[3]);
+		std::istringstream ss(argv[3]);
 		ss >> width;
 	}
 	if (argc > 4)
 	{
-		std::stringstream ss(argv[4]);
+		std::istringstream ss(argv[4]);
 		ss >> height;
 	}
 	if (argc > 5)
 	{
-		std::stringstream ss(argv[5]);
+		std::istringstream ss(argv[5]);
 		ss >> depth;
 	}
 

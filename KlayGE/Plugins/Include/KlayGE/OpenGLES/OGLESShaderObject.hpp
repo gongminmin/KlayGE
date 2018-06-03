@@ -94,7 +94,7 @@ namespace KlayGE
 		void LinkGLSL();
 		void AttachUBOs(RenderEffect const & effect);
 		void FillTFBVaryings(ShaderDesc const & sd);
-		void PrintGLSLError(ShaderType type, char const * info);
+		void PrintGLSLError(ShaderType type, std::string_view info);
 		void PrintGLSLErrorAtLine(std::string const & glsl, int err_line);
 
 	public:

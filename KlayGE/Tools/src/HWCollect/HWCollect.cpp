@@ -379,7 +379,7 @@ void DetectMainboardInfo(std::ostream& os)
 
 int main()
 {
-	std::stringstream ss;
+	std::ostringstream ss;
 
 	ss << "=== OS information ===" << endl;
 	DetectOSInfo(ss);

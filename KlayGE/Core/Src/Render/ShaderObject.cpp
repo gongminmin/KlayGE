@@ -18,6 +18,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/ResLoader.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 
 #include <string>
 #include <vector>
@@ -441,7 +442,9 @@ namespace KlayGE
 
 			std::map<int, std::vector<std::string>> err_lines;
 			{
-				std::istringstream err_iss(err_msg);
+				MemInputStreamBuf err_msg_buff(err_msg.data(), err_msg.size());
+				std::istream err_iss(&err_msg_buff);
+
 				std::string err_str;
 				while (err_iss)
 				{
@@ -489,7 +492,9 @@ namespace KlayGE
 			{
 				if (iter->first >= 0)
 				{
-					std::istringstream iss(hlsl_shader_text);
+					MemInputStreamBuf hlsl_buff(hlsl_shader_text.data(), hlsl_shader_text.size());
+					std::istream iss(&hlsl_buff);
+
 					std::string s;
 					int line = 1;
 

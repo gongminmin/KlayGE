@@ -759,7 +759,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					HWND hStereoSepEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_SEP_EDIT);
 					TCHAR buf[256];
 					GetWindowText(hStereoSepEdit, buf, static_cast<int>(std::size(buf)));
-					std::basic_stringstream<TCHAR>(buf) >> cfg.graphics_cfg.stereo_separation;
+					std::basic_istringstream<TCHAR>(buf) >> cfg.graphics_cfg.stereo_separation;
 				}
 				{
 					HWND hOutputCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_OUTPUT_COMBO);

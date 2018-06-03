@@ -14,6 +14,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/string_view.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
@@ -23,12 +24,12 @@
 #include <KlayGE/RenderEffect.hpp>
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Hash.hpp>
 
 #include <cstdio>
 #include <string>
 #include <algorithm>
-#include <sstream>
 #include <cstring>
 #include <boost/assert.hpp>
 #if defined(KLAYGE_COMPILER_CLANGC2)
@@ -211,70 +212,58 @@ namespace KlayGE
 		is_shader_validate_[type] = false;
 		if (native_shader_block.size() >= 24)
 		{
-			uint8_t const * nsbp = &native_shader_block[0];
+			MemInputStreamBuf native_shader_buff(native_shader_block.data(), native_shader_block.size());
+			std::istream native_shader_stream(&native_shader_buff);
 
 			is_shader_validate_[type] = true;
 
 			uint32_t len32;
-			std::memcpy(&len32, nsbp, sizeof(len32));
-			nsbp += sizeof(len32);
+			native_shader_stream.read(reinterpret_cast<char*>(&len32), sizeof(len32));
 			len32 = LE2Native(len32);
 			so_template_->glsl_srcs_[type] = MakeSharedPtr<std::string>(len32, '\0');
-			std::memcpy(&(*so_template_->glsl_srcs_[type])[0], nsbp, len32);
-			nsbp += len32;
+			native_shader_stream.read(&(*so_template_->glsl_srcs_[type])[0], len32);
 
 			uint16_t num16;
-			std::memcpy(&num16, nsbp, sizeof(num16));
-			nsbp += sizeof(num16);
+			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			so_template_->pnames_[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
-				std::memcpy(&len8, nsbp, sizeof(len8));
-				nsbp += sizeof(len8);
-											
+				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
+
 				(*so_template_->pnames_[type])[i].resize(len8);
-				std::memcpy(&(*so_template_->pnames_[type])[i][0], nsbp, len8);
-				nsbp += len8;
+				native_shader_stream.read(&(*so_template_->pnames_[type])[i][0], len8);
 			}
 
-			std::memcpy(&num16, nsbp, sizeof(num16));
-			nsbp += sizeof(num16);
+			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			so_template_->glsl_res_names_[type] = MakeSharedPtr<std::vector<std::string>>(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
-				std::memcpy(&len8, nsbp, sizeof(len8));
-				nsbp += sizeof(len8);
+				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				(*so_template_->glsl_res_names_[type])[i].resize(len8);
-				std::memcpy(&(*so_template_->glsl_res_names_[type])[i][0], nsbp, len8);
-				nsbp += len8;
+				native_shader_stream.read(&(*so_template_->glsl_res_names_[type])[i][0], len8);
 			}
 
-			std::memcpy(&num16, nsbp, sizeof(num16));
-			nsbp += sizeof(num16);
+			native_shader_stream.read(reinterpret_cast<char*>(&num16), sizeof(num16));
 			num16 = LE2Native(num16);
 			for (size_t i = 0; i < num16; ++ i)
 			{
 				uint8_t len8;
-				std::memcpy(&len8, nsbp, sizeof(len8));
-				nsbp += sizeof(len8);
+				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 				std::string tex_name;
 				tex_name.resize(len8);
-				std::memcpy(&tex_name[0], nsbp, len8);
-				nsbp += len8;
+				native_shader_stream.read(&tex_name[0], len8);
 
-				std::memcpy(&len8, nsbp, sizeof(len8));
-				nsbp += sizeof(len8);
+				native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8)); 
 
 				std::string sampler_name;
 				sampler_name.resize(len8);
-				std::memcpy(&sampler_name[0], nsbp, len8);
-				nsbp += len8;
+				native_shader_stream.read(&sampler_name[0], len8);
 
 				std::string combined_sampler_name = tex_name + "_" + sampler_name;
 
@@ -298,39 +287,33 @@ namespace KlayGE
 			if (ST_VertexShader == type)
 			{
 				uint8_t num8;
-				std::memcpy(&num8, nsbp, sizeof(num8));
-				nsbp += sizeof(num8);
+				native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 				so_template_->vs_usages_.resize(num8);
 				for (size_t i = 0; i < num8; ++ i)
 				{
 					uint8_t veu;
-					std::memcpy(&veu, nsbp, sizeof(veu));
-					nsbp += sizeof(veu);
+					native_shader_stream.read(reinterpret_cast<char*>(&veu), sizeof(veu));
 
 					so_template_->vs_usages_[i] = static_cast<VertexElementUsage>(veu);
 				}
 
-				std::memcpy(&num8, nsbp, sizeof(num8));
-				nsbp += sizeof(num8);
+				native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 				if (num8 > 0)
 				{
 					so_template_->vs_usage_indices_.resize(num8);
-					std::memcpy(&so_template_->vs_usage_indices_[0], nsbp, num8 * sizeof(so_template_->vs_usage_indices_[0]));
-					nsbp += num8 * sizeof(so_template_->vs_usage_indices_[0]);
+					native_shader_stream.read(reinterpret_cast<char*>(&so_template_->vs_usage_indices_[0]),
+						num8 * sizeof(so_template_->vs_usage_indices_[0]));
 				}
 
-				std::memcpy(&num8, nsbp, sizeof(num8));
-				nsbp += sizeof(num8);
+				native_shader_stream.read(reinterpret_cast<char*>(&num8), sizeof(num8));
 				so_template_->glsl_vs_attrib_names_.resize(num8);
 				for (size_t i = 0; i < num8; ++ i)
 				{
 					uint8_t len8;
-					std::memcpy(&len8, nsbp, sizeof(len8));
-					nsbp += sizeof(len8);
+					native_shader_stream.read(reinterpret_cast<char*>(&len8), sizeof(len8));
 
 					so_template_->glsl_vs_attrib_names_[i].resize(len8);
-					std::memcpy(&so_template_->glsl_vs_attrib_names_[i][0], nsbp, len8);
-					nsbp += len8;
+					native_shader_stream.read(&so_template_->glsl_vs_attrib_names_[i][0], len8);
 				}
 			}
 
@@ -360,11 +343,12 @@ namespace KlayGE
 
 	void OGLESShaderObject::StreamOut(std::ostream& os, ShaderType type)
 	{
-		std::vector<uint8_t> native_shader_block;
+		std::vector<char> native_shader_block;
 
 		if (so_template_->glsl_srcs_[type])
 		{
-			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+			VectorOutputStreamBuf native_shader_buff(native_shader_block);
+			std::ostream oss(&native_shader_buff);
 
 			uint32_t len32 = Native2LE(static_cast<uint32_t>(so_template_->glsl_srcs_[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
@@ -438,10 +422,6 @@ namespace KlayGE
 					oss.write(&so_template_->glsl_vs_attrib_names_[i][0], so_template_->glsl_vs_attrib_names_[i].size());
 				}
 			}
-
-			std::string out_str = oss.str();
-			native_shader_block.resize(out_str.size());
-			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
 		}
 
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
@@ -1438,14 +1418,15 @@ namespace KlayGE
 		//glUseProgram(0);
 	}
 
-	void OGLESShaderObject::PrintGLSLError(ShaderType type, char const * info)
+	void OGLESShaderObject::PrintGLSLError(ShaderType type, std::string_view info)
 	{
 		OGLESRenderEngine& re = *checked_cast<OGLESRenderEngine*>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		std::string const & glsl = *so_template_->glsl_srcs_[type];
 
 		if (re.HackForMali())
 		{
-			std::istringstream err_iss(&info[0]);
+			MemInputStreamBuf info_buff(info.data(), info.size());
+			std::istream err_iss(&info_buff);
 			std::string err_str;
 			while (err_iss)
 			{
@@ -1460,7 +1441,8 @@ namespace KlayGE
 						std::string part_err_str = err_str.substr(pos, pos2 - pos);
 						int err_line = boost::lexical_cast<int>(part_err_str);
 
-						std::istringstream iss(glsl);
+						MemInputStreamBuf glsl_buff(glsl.data(), glsl.size());
+						std::istream iss(&glsl_buff);
 						std::string s;
 						int line = 1;
 						LogError("...");
@@ -1483,7 +1465,8 @@ namespace KlayGE
 		}
 		else
 		{
-			std::istringstream iss(glsl);
+			MemInputStreamBuf glsl_buff(glsl.data(), glsl.size());
+			std::istream iss(&glsl_buff);
 			std::string s;
 			int line = 1;
 			while (iss)
@@ -1500,7 +1483,8 @@ namespace KlayGE
 
 	void OGLESShaderObject::PrintGLSLErrorAtLine(std::string const & glsl, int err_line)
 	{
-		std::istringstream iss(glsl);
+		MemInputStreamBuf glsl_buff(glsl.data(), glsl.size());
+		std::istream iss(&glsl_buff);
 		std::string s;
 		int line = 1;
 		LogError("...");

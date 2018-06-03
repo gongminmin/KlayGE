@@ -29,6 +29,7 @@
  */
 
 #include <DXBC2GLSL/DXBC2GLSL.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <DXBC2GLSL/DXBC.hpp>
 #include <DXBC2GLSL/GLSLGen.hpp>
 #include <sstream>
@@ -58,13 +59,12 @@ namespace DXBC2GLSL
 			{
 				shader_ = ShaderParse(*dxbc_);
 
-				std::stringstream ss;
+				KlayGE::StringOutputStreamBuf glsl_buff(glsl_);
+				std::ostream ss(&glsl_buff);
 
 				GLSLGen converter;
 				converter.FeedDXBC(shader_, has_gs, has_ps, ds_partitioning, ds_output_primitive, version, glsl_rules);
 				converter.ToGLSL(ss);
-
-				glsl_ = ss.str();
 			}
 		}
 	}

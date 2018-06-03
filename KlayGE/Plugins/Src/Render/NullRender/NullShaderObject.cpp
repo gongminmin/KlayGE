@@ -35,10 +35,9 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/RenderEffect.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Hash.hpp>
 #include <KFL/ResIdentifier.hpp>
-
-#include <sstream>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -222,7 +221,9 @@ namespace KlayGE
 
 		auto d3d_so_template = checked_cast<D3D11ShaderObjectTemplate*>(so_template_.get());
 
-		std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+		std::vector<char> native_shader_block;
+		VectorOutputStreamBuf native_shader_buff(native_shader_block);
+		std::ostream oss(&native_shader_buff);
 
 		{
 			uint8_t len = static_cast<uint8_t>(d3d_so_template->shader_code_[type].second.size());
@@ -310,7 +311,6 @@ namespace KlayGE
 			}
 		}
 
-		std::string native_shader_block = oss.str();
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());
 		{
 			uint32_t tmp = Native2LE(len);
@@ -815,11 +815,12 @@ namespace KlayGE
 #ifndef KLAYGE_PLATFORM_WINDOWS_STORE
 		auto ogl_so_template = checked_cast<OGLShaderObjectTemplate*>(so_template_.get());
 
-		std::vector<uint8_t> native_shader_block;
+		std::vector<char> native_shader_block;
 
 		if (ogl_so_template->glsl_srcs_[type])
 		{
-			std::ostringstream oss(std::ios_base::binary | std::ios_base::out);
+			VectorOutputStreamBuf native_shader_buff(native_shader_block);
+			std::ostream oss(&native_shader_buff);
 
 			uint32_t len32 = Native2LE(static_cast<uint32_t>(ogl_so_template->glsl_srcs_[type]->size()));
 			oss.write(reinterpret_cast<char const *>(&len32), sizeof(len32));
@@ -904,10 +905,6 @@ namespace KlayGE
 				uint32_t gmov = Native2LE(ogl_so_template->gs_max_output_vertex_);
 				oss.write(reinterpret_cast<char const *>(&gmov), sizeof(gmov));
 			}
-
-			std::string out_str = oss.str();
-			native_shader_block.resize(out_str.size());
-			std::memcpy(&native_shader_block[0], &out_str[0], out_str.size());
 		}
 
 		uint32_t len = static_cast<uint32_t>(native_shader_block.size());

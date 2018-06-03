@@ -29,6 +29,7 @@
  */
 
 #include <DXBC2GLSL/Utils.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <exception>
 #include <sstream>
 #include <limits>
@@ -41,14 +42,14 @@ namespace
 	public:
 		bad_assert(char const * expr, char const * msg, char const * function, char const * file, long line)
 		{
-			std::stringstream ss;
+			KlayGE::StringOutputStreamBuf what_buff(what_);
+			std::ostream ss(&what_buff);
 			ss << expr;
 			if (msg)
 			{
 				ss << ' ' << msg;
 			}
 			ss << " in " << function << ", line " << line << " of " << file;
-			what_ = ss.str();
 		}
 
 		char const * what() const noexcept
