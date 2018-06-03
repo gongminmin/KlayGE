@@ -17,9 +17,7 @@
 namespace KlayGE
 {
 	D3D11VideoMode::D3D11VideoMode()
-				: width_(0),
-					height_(0),
-					format_(DXGI_FORMAT_UNKNOWN)
+				: D3D11VideoMode(0, 0, DXGI_FORMAT_UNKNOWN)
 	{
 	}
 

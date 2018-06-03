@@ -44,14 +44,14 @@ namespace KlayGE
 			: func_(func), line_(line), file_(file)
 		{
 #ifdef KLAYGE_DEBUG
-			LOG_Info("Enter %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
+			LogInfo("Enter %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
 #endif
 		}
 
 		~Trace()
 		{
 #ifdef KLAYGE_DEBUG
-			LOG_Info("Leave %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
+			LogInfo("Leave %s in file %s (line %d)", func_, file_ != nullptr ? file_ : "", line_);
 #endif
 		}
 

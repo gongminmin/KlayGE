@@ -21,12 +21,8 @@
 namespace KlayGE
 {
 	UICheckBox::UICheckBox(UIDialogPtr const & dialog)
-					: UIControl(UICheckBox::Type, dialog),
-						checked_(false), pressed_(false)
+					: UICheckBox(UICheckBox::Type, dialog)
 	{
-		hotkey_ = 0;
-
-		this->InitDefaultElements();
 	}
 
 	UICheckBox::UICheckBox(uint32_t type, UIDialogPtr const & dialog)
@@ -35,26 +31,6 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
-		this->InitDefaultElements();
-	}
-
-	UICheckBox::UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bChecked, uint8_t hotkey, bool bIsDefault)
-					: UIControl(UICheckBox::Type, dialog),
-						checked_(bChecked), pressed_(false),
-						text_(strText)
-	{
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UICheckBox::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Box
@@ -75,6 +51,20 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UICheckBox::UICheckBox(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, bool bChecked, uint8_t hotkey, bool bIsDefault)
+					: UICheckBox(dialog)
+	{
+		checked_ = bChecked;
+		this->SetText(strText);
+
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	void UICheckBox::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)

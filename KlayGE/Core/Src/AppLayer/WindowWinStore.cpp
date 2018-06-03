@@ -61,19 +61,6 @@ using namespace Microsoft::WRL::Wrappers;
 
 namespace KlayGE
 {
-	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
-	{
-		Convert(wname_, name);
-
-		pointer_id_map_.fill(0);
-
-		width_ = settings.width;
-		height_ = settings.height;
-		full_screen_ = settings.full_screen;
-	}
-
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)

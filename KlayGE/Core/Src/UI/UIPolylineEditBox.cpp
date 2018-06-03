@@ -20,13 +20,8 @@
 namespace KlayGE
 {
 	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog)
-					: UIControl(UIPolylineEditBox::Type, dialog),
-						active_pt_(-1),
-						move_point_(false)
+					: UIPolylineEditBox(UIPolylineEditBox::Type, dialog)
 	{
-		hotkey_ = 0;
-
-		this->InitDefaultElements();
 	}
 
 	UIPolylineEditBox::UIPolylineEditBox(uint32_t type, UIDialogPtr const & dialog)
@@ -36,26 +31,6 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
-		this->InitDefaultElements();
-	}
-
-	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
-					: UIControl(UIPolylineEditBox::Type, dialog),
-						active_pt_(-1),
-						move_point_(false)
-	{
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UIPolylineEditBox::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Background
@@ -87,6 +62,17 @@ namespace KlayGE
 			Element.TextureColor().SetState(UICS_Normal);
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UIPolylineEditBox::UIPolylineEditBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
+					: UIPolylineEditBox(dialog)
+	{
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	void UIPolylineEditBox::ActivePoint(int index)

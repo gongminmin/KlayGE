@@ -624,7 +624,7 @@ namespace
 		void AccumWeightTextures(TexturePtr const & accum_tex, TexturePtr const & weight_tex)
 		{
 			RenderModelPtr model = checked_pointer_cast<RenderModel>(renderable_);
-			for (uint32_t i = 0; i < model->NumSubrenderables(); ++i)
+			for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 			{
 				checked_pointer_cast<RenderPolygon>(model->Subrenderable(i))->AccumWeightTextures(accum_tex, weight_tex);
 			}

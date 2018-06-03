@@ -84,7 +84,6 @@ namespace KlayGE
 		};
 
 	public:
-		Window(std::string const & name, RenderSettings const & settings);
 		Window(std::string const & name, RenderSettings const & settings, void* native_wnd);
 		~Window();
 

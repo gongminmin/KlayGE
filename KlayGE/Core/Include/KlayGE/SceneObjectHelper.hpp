@@ -67,8 +67,7 @@ namespace KlayGE
 		void Scaling(float3 const & s);
 
 	private:
-		void Init(LightSourcePtr const & light, RenderModelPtr const & light_model);
-		void Init(LightSourcePtr const & light,
+		RenderModelPtr LoadModel(LightSourcePtr const & light,
 			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
@@ -91,9 +90,7 @@ namespace KlayGE
 		void Scaling(float3 const & s);
 
 	private:
-		void Init(CameraPtr const & camera, RenderModelPtr const & camera_model);
-		void Init(CameraPtr const & camera,
-			std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
+		RenderModelPtr LoadModel(std::function<StaticMeshPtr(RenderModelPtr const &, std::wstring const &)> CreateMeshFactoryFunc);
 
 	protected:
 		float4x4 model_scaling_;

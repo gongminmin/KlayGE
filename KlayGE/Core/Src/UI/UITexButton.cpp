@@ -21,12 +21,8 @@
 namespace KlayGE
 {
 	UITexButton::UITexButton(UIDialogPtr const & dialog)
-					: UIControl(UITexButton::Type, dialog),
-						pressed_(false)
+					: UITexButton(UITexButton::Type, dialog)
 	{
-		hotkey_ = 0;
-
-		this->InitDefaultElements();
 	}
 
 	UITexButton::UITexButton(uint32_t type, UIDialogPtr const & dialog)
@@ -35,27 +31,6 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
-		this->InitDefaultElements();
-	}
-
-	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
-					: UIControl(UITexButton::Type, dialog),
-						pressed_(false)
-	{
-		tex_index_ = UIManager::Instance().AddTexture(tex);
-
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UITexButton::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Fill layer
@@ -71,16 +46,6 @@ namespace KlayGE
 
 		// Button
 		{
-			TexturePtr const & tex = UIManager::Instance().GetTexture(tex_index_);
-
-			if (tex)
-			{
-				Element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, tex->Width(0), tex->Height(0)));
-			}
-			else
-			{
-				Element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, 1, 1));
-			}
 			Element.SetFont(0);
 			Element.TextureColor().States[UICS_MouseOver] = Color(1, 1, 1, 1);
 			Element.TextureColor().States[UICS_Normal] = Color(1, 1, 1, 1);
@@ -89,6 +54,30 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UITexButton::UITexButton(UIDialogPtr const & dialog, int ID, TexturePtr const & tex, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
+					: UITexButton(dialog)
+	{
+		tex_index_ = UIManager::Instance().AddTexture(tex);
+		{
+			auto& element = *elements_.back();
+			if (tex)
+			{
+				element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, tex->Width(0), tex->Height(0)));
+			}
+			else
+			{
+				element.SetTexture(static_cast<uint32_t>(tex_index_), IRect(0, 0, 1, 1));
+			}
+		}
+
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	void UITexButton::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)

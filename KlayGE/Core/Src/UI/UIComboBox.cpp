@@ -21,15 +21,8 @@
 namespace KlayGE
 {
 	UIComboBox::UIComboBox(UIDialogPtr const & dialog)
-						: UIControl(UIComboBox::Type, dialog),
-							selected_(-1), focused_(-1),
-							drop_height_(100), scroll_bar_(dialog),
-							sb_width_(16), opened_(false),
-							pressed_(false)
+						: UIComboBox(UIComboBox::Type, dialog)
 	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
 	UIComboBox::UIComboBox(uint32_t type, UIDialogPtr const & dialog)
@@ -38,32 +31,6 @@ namespace KlayGE
 							drop_height_(100), scroll_bar_(dialog),
 							sb_width_(16), opened_(false),
 							pressed_(false)
-	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
-	}
-
-	UIComboBox::UIComboBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
-						: UIControl(UIComboBox::Type, dialog),
-							selected_(-1), focused_(-1),
-							drop_height_(100), scroll_bar_(dialog),
-							sb_width_(16), opened_(false),
-							pressed_(false)
-	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UIComboBox::InitDefaultElements()
 	{
 		UIElement Element;
 
@@ -107,6 +74,19 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+
+		this->GetDialog()->InitControl(scroll_bar_);
+	}
+
+	UIComboBox::UIComboBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
+						: UIComboBox(dialog)
+	{
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	UIComboBox::~UIComboBox()

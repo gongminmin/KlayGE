@@ -261,27 +261,24 @@ namespace KlayGE
 		ArrayRef<std::string> input_pin_names,
 		ArrayRef<std::string> output_pin_names,
 		RenderEffectPtr const & effect, RenderTechnique* tech)
-			: RenderableHelper(name),
-				volumetric_(volumetric),
-				cs_based_(false), cs_pixel_per_thread_x_(1), cs_pixel_per_thread_y_(1), cs_pixel_per_thread_z_(1),
-				input_pins_(input_pin_names.size()),
-				output_pins_(output_pin_names.size()),
-				num_bind_output_(0),
-				params_(param_names.size()),
-				input_pins_ep_(input_pin_names.size())
+			: PostProcess(name, volumetric)
 	{
+		input_pins_.resize(input_pin_names.size());
 		for (size_t i = 0; i < input_pin_names.size(); ++ i)
 		{
 			input_pins_[i].first = input_pin_names[i];
 		}
+		output_pins_.resize(output_pin_names.size());
 		for (size_t i = 0; i < output_pin_names.size(); ++ i)
 		{
 			output_pins_[i].first = output_pin_names[i];
 		}
+		params_.resize(param_names.size());
 		for (size_t i = 0; i < param_names.size(); ++ i)
 		{
 			params_[i].first = param_names[i];
 		}
+		input_pins_ep_.resize(input_pin_names.size());
 		this->Technique(effect, tech);
 	}
 

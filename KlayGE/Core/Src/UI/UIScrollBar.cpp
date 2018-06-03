@@ -20,48 +20,18 @@
 namespace KlayGE
 {
 	// Minimum scroll bar thumb size
-	int const SCROLLBAR_MINTHUMBSIZE = 8;
+	int constexpr SCROLLBAR_MINTHUMBSIZE = 8;
 
 	// Delay and repeat period when clicking on the scroll bar arrows
-	float const SCROLLBAR_ARROWCLICK_DELAY = 0.33f;
-	float const SCROLLBAR_ARROWCLICK_REPEAT = 0.05f;
+	float constexpr SCROLLBAR_ARROWCLICK_DELAY = 0.33f;
+	float constexpr SCROLLBAR_ARROWCLICK_REPEAT = 0.05f;
 
 	Timer UIScrollBar::timer_;
 
 
 	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog)
-					: UIControl(UIScrollBar::Type, dialog),
-						show_thumb_(true), drag_(false),
-						position_(0), page_size_(1),
-						start_(0), end_(1),
-						arrow_(CLEAR), arrow_ts_(0)
+					: UIScrollBar(UIScrollBar::Type, dialog)
 	{
-		up_button_rc_ = IRect(0, 0, 0, 0);
-		down_button_rc_ = IRect(0, 0, 0, 0);
-		track_rc_ = IRect(0, 0, 0, 0);
-		thumb_rc_ = IRect(0, 0, 0, 0);
-
-		this->InitDefaultElements();
-	}
-
-	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
-					: UIControl(UIScrollBar::Type, dialog),
-						show_thumb_(true), drag_(false),
-						position_(nTrackPos), page_size_(nPageSize),
-						start_(nTrackStart), end_(nTrackEnd),
-						arrow_(CLEAR), arrow_ts_(0)
-	{
-		up_button_rc_ = IRect(0, 0, 0, 0);
-		down_button_rc_ = IRect(0, 0, 0, 0);
-		track_rc_ = IRect(0, 0, 0, 0);
-		thumb_rc_ = IRect(0, 0, 0, 0);
-
-		this->InitDefaultElements();
-
-		// Set the ID and position
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
 	}
 
 	UIScrollBar::UIScrollBar(uint32_t type, UIDialogPtr const & dialog)
@@ -76,11 +46,6 @@ namespace KlayGE
 		track_rc_ = IRect(0, 0, 0, 0);
 		thumb_rc_ = IRect(0, 0, 0, 0);
 
-		this->InitDefaultElements();
-	}
-
-	void UIScrollBar::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Track
@@ -113,6 +78,20 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UIScrollBar::UIScrollBar(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int nTrackStart, int nTrackEnd, int nTrackPos, int nPageSize)
+					: UIScrollBar(UIScrollBar::Type, dialog)
+	{
+		position_ = nTrackPos;
+		page_size_ = nPageSize;
+		start_ = nTrackStart;
+		end_ = nTrackEnd;
+
+		// Set the ID and position
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 	}
 
 	UIScrollBar::~UIScrollBar()

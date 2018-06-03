@@ -20,9 +20,7 @@
 namespace KlayGE
 {
 	UISlider::UISlider(UIDialogPtr const & dialog)
-					: UIControl(UISlider::Type, dialog),
-						value_(50), min_(0), max_(100),
-						pressed_(false)
+					: UISlider(UISlider::Type, dialog)
 	{
 	}
 
@@ -30,27 +28,6 @@ namespace KlayGE
 					: UIControl(type, dialog),
 						value_(50), min_(0), max_(100),
 						pressed_(false)
-	{
-		this->InitDefaultElements();
-	}
-
-	UISlider::UISlider(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int min, int max, int value, bool bIsDefault)
-					: UIControl(UISlider::Type, dialog),
-						value_(value), min_(min), max_(max),
-						pressed_(false)
-	{
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetIsDefault(bIsDefault);
-
-		this->UpdateRects();
-	}
-
-	void UISlider::InitDefaultElements()
 	{
 		UIElement Element;
 
@@ -70,6 +47,22 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UISlider::UISlider(UIDialogPtr const & dialog, int ID, int4 const & coord_size, int min, int max, int value, bool bIsDefault)
+					: UISlider(dialog)
+	{
+		value_ = value;
+		min_ = min;
+		max_ = max;
+
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetIsDefault(bIsDefault);
+
+		this->UpdateRects();
 	}
 
 	void UISlider::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)

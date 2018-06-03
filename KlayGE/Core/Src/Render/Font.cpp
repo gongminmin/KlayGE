@@ -841,9 +841,8 @@ namespace KlayGE
 	}
 
 	Font::Font(std::shared_ptr<FontRenderable> const & fr, uint32_t flags)
-			: font_renderable_(fr)
+			: Font(fr)
 	{
-		fso_attrib_ = SceneObject::SOA_Overlay;
 		if (flags & Font::FS_Cullable)
 		{
 			fso_attrib_ |= SceneObject::SOA_Cullable;

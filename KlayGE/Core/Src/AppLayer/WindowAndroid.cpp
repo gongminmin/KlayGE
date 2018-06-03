@@ -42,57 +42,12 @@
 
 namespace KlayGE
 {
-	Window::Window(std::string const & /*name*/, RenderSettings const & settings)
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
-		a_window_ = nullptr;
+		KFL_UNUSED(name);
 
-		android_app* state = Context::Instance().AppState();
-		state->userData = this;
-		state->onAppCmd = HandleCMD;
-		state->onInputEvent = HandleInput;
-
-		while (nullptr == a_window_)
-		{
-			// Read all pending events.
-			int ident;
-			int events;
-			android_poll_source* source;
-
-			do
-			{
-				ident = ALooper_pollAll(0, nullptr, &events, reinterpret_cast<void**>(&source));
-
-				// Process this event.
-				if (source != nullptr)
-				{
-					source->process(state, source);
-				}
-
-				// Check if we are exiting.
-				if (state->destroyRequested != 0)
-				{
-					return;
-				}
-			} while ((nullptr == a_window_) && (ident >= 0));
-		}
-
-		left_ = settings.left;
-		top_ = settings.top;
-		width_ = ANativeWindow_getWidth(a_window_);
-		height_ = ANativeWindow_getHeight(a_window_);
-
-		if (keep_screen_on_)
-		{
-			ANativeActivity_setWindowFlags(state->activity, AWINDOW_FLAG_KEEP_SCREEN_ON, 0);
-		}
-	}
-
-	Window::Window(std::string const & /*name*/, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
-	{
 		a_window_ = static_cast<ANativeWindow*>(native_wnd);
 
 		android_app* state = Context::Instance().AppState();

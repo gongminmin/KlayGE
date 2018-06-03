@@ -1245,7 +1245,18 @@ namespace KlayGE
 		}
 
 		tex_index_ = UIManager::Instance().AddTexture(ct);
-		this->InitDefaultElements();
+
+		this->SetFont(0, SyncLoadFont("gkai00mp.kfont"), 12);
+
+		// Element for the caption
+		cap_element_.SetFont(0);
+		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), IRect(17, 269, 241, 287));
+		cap_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.4f, 1);
+		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
+		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);
+		// Pre-blend as we don't need to transition the state
+		cap_element_.TextureColor().SetState(UICS_Normal);
+		cap_element_.FontColor().SetState(UICS_Normal);
 	}
 
 	UIDialog::~UIDialog()
@@ -1830,22 +1841,6 @@ namespace KlayGE
 			size.cy() += 1;
 		}
 		return size;
-	}
-
-	// Initialize default Elements
-	void UIDialog::InitDefaultElements()
-	{
-		this->SetFont(0, SyncLoadFont("gkai00mp.kfont"), 12);
-
-		// Element for the caption
-		cap_element_.SetFont(0);
-		cap_element_.SetTexture(static_cast<uint32_t>(tex_index_), IRect(17, 269, 241, 287));
-		cap_element_.TextureColor().States[UICS_Normal] = Color(0.4f, 0.6f, 0.4f, 1);
-		cap_element_.FontColor().States[UICS_Normal] = Color(1, 1, 1, 1);
-		cap_element_.SetFont(0, Color(1, 1, 1, 1), Font::FA_Hor_Left | Font::FA_Ver_Middle);
-		// Pre-blend as we don't need to transition the state
-		cap_element_.TextureColor().SetState(UICS_Normal);
-		cap_element_.FontColor().SetState(UICS_Normal);
 	}
 
 	bool UIDialog::OnCycleFocus(bool bForward)

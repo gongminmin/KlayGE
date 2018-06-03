@@ -91,66 +91,6 @@ namespace KlayGE
 	}
 #endif
 
-	Window::Window(std::string const & name, RenderSettings const & settings)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
-	{
-		this->DetectsDpi();
-		this->KeepScreenOn();
-
-		HINSTANCE hInst = ::GetModuleHandle(nullptr);
-
-		// Register the window class
-		Convert(wname_, name);
-		WNDCLASSEXW wc;
-		wc.cbSize = sizeof(wc);
-		wc.style = CS_HREDRAW | CS_VREDRAW;
-		wc.lpfnWndProc = WndProc;
-		wc.cbClsExtra = 0;
-		wc.cbWndExtra = sizeof(this);
-		wc.hInstance = hInst;
-		wc.hIcon = nullptr;
-		wc.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
-		wc.hbrBackground = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
-		wc.lpszMenuName = nullptr;
-		wc.lpszClassName = wname_.c_str();
-		wc.hIconSm = nullptr;
-		::RegisterClassExW(&wc);
-
-		if (settings.full_screen)
-		{
-			win_style_ = WS_POPUP;
-		}
-		else
-		{
-			win_style_ = WS_OVERLAPPEDWINDOW;
-		}
-
-		RECT rc = { 0, 0, static_cast<LONG>(settings.width * dpi_scale_ + 0.5f), static_cast<LONG>(settings.height * dpi_scale_ + 0.5f) };
-		::AdjustWindowRect(&rc, win_style_, false);
-
-		// Create our main window
-		// Pass pointer to self
-		wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(), win_style_, settings.left, settings.top,
-			rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
-
-		default_wnd_proc_ = ::DefWindowProc;
-		external_wnd_ = false;
-
-		::GetClientRect(wnd_, &rc);
-		left_ = rc.left;
-		top_ = rc.top;
-		width_ = rc.right - rc.left;
-		height_ = rc.bottom - rc.top;
-
-		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-		::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
-		::UpdateWindow(wnd_);
-
-		ready_ = true;
-	}
-
 	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity), hide_(settings.hide_win)
@@ -160,10 +100,53 @@ namespace KlayGE
 
 		Convert(wname_, name);
 
-		wnd_ = static_cast<HWND>(native_wnd);
-		default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
-		::SetWindowLongPtrW(wnd_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc));
-		external_wnd_ = true;
+		if (native_wnd != nullptr)
+		{
+			wnd_ = static_cast<HWND>(native_wnd);
+			default_wnd_proc_ = reinterpret_cast<WNDPROC>(::GetWindowLongPtrW(wnd_, GWLP_WNDPROC));
+			::SetWindowLongPtrW(wnd_, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(WndProc));
+			external_wnd_ = true;
+		}
+		else
+		{
+			HINSTANCE hInst = ::GetModuleHandle(nullptr);
+
+			// Register the window class
+			WNDCLASSEXW wc;
+			wc.cbSize = sizeof(wc);
+			wc.style = CS_HREDRAW | CS_VREDRAW;
+			wc.lpfnWndProc = WndProc;
+			wc.cbClsExtra = 0;
+			wc.cbWndExtra = sizeof(this);
+			wc.hInstance = hInst;
+			wc.hIcon = nullptr;
+			wc.hCursor = ::LoadCursor(nullptr, IDC_ARROW);
+			wc.hbrBackground = static_cast<HBRUSH>(::GetStockObject(BLACK_BRUSH));
+			wc.lpszMenuName = nullptr;
+			wc.lpszClassName = wname_.c_str();
+			wc.hIconSm = nullptr;
+			::RegisterClassExW(&wc);
+
+			if (settings.full_screen)
+			{
+				win_style_ = WS_POPUP;
+			}
+			else
+			{
+				win_style_ = WS_OVERLAPPEDWINDOW;
+			}
+
+			RECT rc = { 0, 0, static_cast<LONG>(settings.width * dpi_scale_ + 0.5f), static_cast<LONG>(settings.height * dpi_scale_ + 0.5f) };
+			::AdjustWindowRect(&rc, win_style_, false);
+
+			// Create our main window
+			// Pass pointer to self
+			wnd_ = ::CreateWindowW(wname_.c_str(), wname_.c_str(), win_style_, settings.left, settings.top,
+				rc.right - rc.left, rc.bottom - rc.top, 0, 0, hInst, nullptr);
+
+			default_wnd_proc_ = ::DefWindowProc;
+			external_wnd_ = false;
+		}
 
 		RECT rc;
 		::GetClientRect(wnd_, &rc);
@@ -174,6 +157,7 @@ namespace KlayGE
 
 		::SetWindowLongPtrW(wnd_, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
+		::ShowWindow(wnd_, hide_ ? SW_HIDE : SW_SHOWNORMAL);
 		::UpdateWindow(wnd_);
 
 		ready_ = true;

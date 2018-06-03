@@ -27,11 +27,13 @@
 
 namespace KlayGE
 {
-	Window::Window(std::string const & name, RenderSettings const & settings)
+	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
 		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
 			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
 	{
 		KFL_UNUSED(settings);
+		KFL_UNUSED(native_wnd);
+
 		NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
 
 		CGRect bounds = [[UIScreen mainScreen] bounds];
@@ -53,16 +55,6 @@ namespace KlayGE
 		height_ = rect.size.height;
 
 		[pool release];
-	}
-
-	Window::Window(std::string const & name, RenderSettings const & settings, void* native_wnd)
-		: active_(false), ready_(false), closed_(false), keep_screen_on_(settings.keep_screen_on),
-			dpi_scale_(1), effective_dpi_scale_(1), win_rotation_(WR_Identity)
-	{
-		KFL_UNUSED(name);
-		KFL_UNUSED(settings);
-		KFL_UNUSED(native_wnd);
-		LogWarn("Unimplemented Window::Window");
 	}
 
 	Window::~Window()

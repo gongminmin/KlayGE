@@ -20,12 +20,8 @@
 namespace KlayGE
 {
 	UIButton::UIButton(UIDialogPtr const & dialog)
-					: UIControl(UIButton::Type, dialog),
-						pressed_(false)
+					: UIButton(UIButton::Type, dialog)
 	{
-		hotkey_ = 0;
-
-		this->InitDefaultElements();
 	}
 
 	UIButton::UIButton(uint32_t type, UIDialogPtr const & dialog)
@@ -34,26 +30,6 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
-		this->InitDefaultElements();
-	}
-
-	UIButton::UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
-					: UIControl(UIButton::Type, dialog),
-						pressed_(false),
-						text_(strText)
-	{
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UIButton::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Button
@@ -76,6 +52,19 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UIButton::UIButton(UIDialogPtr const & dialog, int ID, std::wstring const & strText, int4 const & coord_size, uint8_t hotkey, bool bIsDefault)
+					: UIButton(dialog)
+	{
+		this->SetText(strText);
+
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	void UIButton::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)

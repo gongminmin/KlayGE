@@ -21,12 +21,8 @@
 namespace KlayGE
 {
 	UIRadioButton::UIRadioButton(UIDialogPtr const & dialog)
-						: UIControl(UIRadioButton::Type, dialog),
-							checked_(false), pressed_(false)
+						: UIRadioButton(UIRadioButton::Type, dialog)
 	{
-		hotkey_ = 0;
-
-		this->InitDefaultElements();
 	}
 
 	UIRadioButton::UIRadioButton(uint32_t type, UIDialogPtr const & dialog)
@@ -35,26 +31,6 @@ namespace KlayGE
 	{
 		hotkey_ = 0;
 
-		this->InitDefaultElements();
-	}
-
-	UIRadioButton::UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int4 const & coord_size, bool bChecked, uint8_t hotkey, bool bIsDefault)
-						: UIControl(UIRadioButton::Type, dialog),
-							button_group_(nButtonGroup),
-							checked_(bChecked), pressed_(false), text_(strText)
-	{
-		this->InitDefaultElements();
-
-		// Set the ID and list index
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-		this->SetHotkey(hotkey);
-		this->SetIsDefault(bIsDefault);
-	}
-
-	void UIRadioButton::InitDefaultElements()
-	{
 		UIElement Element;
 
 		// Box
@@ -75,6 +51,21 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+	}
+
+	UIRadioButton::UIRadioButton(UIDialogPtr const & dialog, int ID, uint32_t nButtonGroup, std::wstring const & strText, int4 const & coord_size, bool bChecked, uint8_t hotkey, bool bIsDefault)
+						: UIRadioButton(dialog)
+	{
+		button_group_ = nButtonGroup;
+		checked_ = bChecked;
+		this->SetText(strText);
+
+		// Set the ID and list index
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
+		this->SetHotkey(hotkey);
+		this->SetIsDefault(bIsDefault);
 	}
 
 	void UIRadioButton::KeyDownHandler(UIDialog const & /*sender*/, uint32_t key)

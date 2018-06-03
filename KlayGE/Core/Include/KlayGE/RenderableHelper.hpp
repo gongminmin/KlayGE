@@ -77,9 +77,6 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
-
-	private:
 		RenderEffectParameter* v0_ep_;
 	};
 
@@ -96,9 +93,6 @@ namespace KlayGE
 		void SetColor(Color const & clr);
 
 		void OnRenderBegin();
-
-	private:
-		void Init();
 
 	private:
 		RenderEffectParameter* v0_ep_;
@@ -120,9 +114,6 @@ namespace KlayGE
 		void OnRenderBegin();
 
 	private:
-		void Init();
-
-	private:
 		RenderEffectParameter* v0_ep_;
 		RenderEffectParameter* v1_ep_;
 		RenderEffectParameter* v2_ep_;
@@ -141,9 +132,6 @@ namespace KlayGE
 		void SetColor(Color const & clr);
 
 		void OnRenderBegin();
-
-	private:
-		void Init();
 
 	private:
 		RenderEffectParameter* v0_ep_;
@@ -169,9 +157,6 @@ namespace KlayGE
 		void SetColor(Color const & clr);
 
 		void OnRenderBegin();
-
-	private:
-		void Init();
 
 	private:
 		RenderEffectParameter* v0_ep_;

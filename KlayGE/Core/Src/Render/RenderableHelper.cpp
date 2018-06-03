@@ -77,14 +77,32 @@ namespace KlayGE
 	RenderablePoint::RenderablePoint()
 		: RenderableHelper(L"Point")
 	{
-		this->Init();
+		auto& rf = Context::Instance().RenderFactoryInstance();
+
+		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("PointTec");
+		v0_ep_ = effect_->ParameterByName("v0");
+		color_ep_ = effect_->ParameterByName("color");
+		mvp_param_ = effect_->ParameterByName("mvp");
+
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_PointList);
+
+		float v = 0;
+		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(v), &v);
+		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
+
+		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
+
+		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
+		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
+
+		effect_attrs_ |= EA_SimpleForward;
 	}
 
 	RenderablePoint::RenderablePoint(float3 const & v, Color const & clr)
-		: RenderableHelper(L"Point")
+		: RenderablePoint()
 	{
-		this->Init();
-
 		this->SetPoint(v);
 		this->SetColor(clr);
 	}
@@ -106,21 +124,28 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderablePoint::Init()
+
+	RenderableLine::RenderableLine()
+		: RenderableHelper(L"Line")
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& rf = Context::Instance().RenderFactoryInstance();
 
 		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect_->TechniqueByName("PointTec");
+		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
 		v0_ep_ = effect_->ParameterByName("v0");
+		v1_ep_ = effect_->ParameterByName("v1");
 		color_ep_ = effect_->ParameterByName("color");
 		mvp_param_ = effect_->ParameterByName("mvp");
 
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_PointList);
+		float vertices[] =
+		{
+			0, 1
+		};
 
-		float v = 0;
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(v), &v);
+		rl_ = rf.MakeRenderLayout();
+		rl_->TopologyType(RenderLayout::TT_LineList);
+
+		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
 		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -130,19 +155,10 @@ namespace KlayGE
 
 		effect_attrs_ |= EA_SimpleForward;
 	}
-
-
-	RenderableLine::RenderableLine()
-		: RenderableHelper(L"Line")
-	{
-		this->Init();
-	}
 	
 	RenderableLine::RenderableLine(float3 const & v0, float3 const & v1, Color const & clr)
-		: RenderableHelper(L"Line")
+		: RenderableLine()
 	{
-		this->Init();
-
 		this->SetLine(v0, v1);
 		this->SetColor(clr);
 	}
@@ -170,26 +186,29 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLine::Init()
+
+	RenderableTriangle::RenderableTriangle()
+		: RenderableHelper(L"Triangle")
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& rf = Context::Instance().RenderFactoryInstance();
 
 		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
 		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
 		v0_ep_ = effect_->ParameterByName("v0");
 		v1_ep_ = effect_->ParameterByName("v1");
+		v2_ep_ = effect_->ParameterByName("v2");
 		color_ep_ = effect_->ParameterByName("color");
 		mvp_param_ = effect_->ParameterByName("mvp");
 
 		float vertices[] =
 		{
-			0, 1
+			0, 1, 2
 		};
 
 		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_LineList);
+		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
+		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
 		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -200,18 +219,9 @@ namespace KlayGE
 		effect_attrs_ |= EA_SimpleForward;
 	}
 
-
-	RenderableTriangle::RenderableTriangle()
-		: RenderableHelper(L"Triangle")
-	{
-		this->Init();
-	}
-
 	RenderableTriangle::RenderableTriangle(float3 const & v0, float3 const & v1, float3 const & v2, Color const & clr)
-		: RenderableHelper(L"Triangle")
+		: RenderableTriangle()
 	{
-		this->Init();
-
 		this->SetTriangle(v0, v1, v2);
 		this->SetColor(clr);
 	}
@@ -240,81 +250,11 @@ namespace KlayGE
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableTriangle::Init()
-	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-
-		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
-		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
-		v0_ep_ = effect_->ParameterByName("v0");
-		v1_ep_ = effect_->ParameterByName("v1");
-		v2_ep_ = effect_->ParameterByName("v2");
-		color_ep_ = effect_->ParameterByName("color");
-		mvp_param_ = effect_->ParameterByName("mvp");
-
-		float vertices[] =
-		{
-			0, 1, 2
-		};
-
-		rl_ = rf.MakeRenderLayout();
-		rl_->TopologyType(RenderLayout::TT_TriangleList);
-
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
-		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
-
-		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
-
-		*(effect_->ParameterByName("pos_center")) = float3(0, 0, 0);
-		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
-
-		effect_attrs_ |= EA_SimpleForward;
-	}
-
 
 	RenderableTriBox::RenderableTriBox()
 		: RenderableHelper(L"TriBox")
 	{
-		this->Init();
-	}
-
-	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr)
-		: RenderableHelper(L"TriBox")
-	{
-		this->Init();
-
-		this->SetBox(obb);
-		this->SetColor(clr);
-	}
-
-	void RenderableTriBox::SetBox(OBBox const & obb)
-	{
-		pos_aabb_ = MathLib::convert_to_aabbox(obb);
-
-		*v0_ep_ = obb.Corner(0);
-		*v1_ep_ = obb.Corner(1);
-		*v2_ep_ = obb.Corner(2);
-		*v3_ep_ = obb.Corner(3);
-		*v4_ep_ = obb.Corner(4);
-		*v5_ep_ = obb.Corner(5);
-		*v6_ep_ = obb.Corner(6);
-		*v7_ep_ = obb.Corner(7);
-	}
-
-	void RenderableTriBox::SetColor(Color const & clr)
-	{
-		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
-	}
-
-	void RenderableTriBox::OnRenderBegin()
-	{
-		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
-		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
-	}
-
-	void RenderableTriBox::Init()
-	{		
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& rf = Context::Instance().RenderFactoryInstance();
 
 		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
 		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
@@ -347,10 +287,10 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_TriangleList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
+		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
 		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
+		auto ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rl_->BindIndexStream(ib, EF_R16UI);
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -361,23 +301,14 @@ namespace KlayGE
 		effect_attrs_ |= EA_SimpleForward;
 	}
 
-
-	RenderableLineBox::RenderableLineBox()
-		: RenderableHelper(L"LineBox")
+	RenderableTriBox::RenderableTriBox(OBBox const & obb, Color const & clr)
+		: RenderableTriBox()
 	{
-		this->Init();
-	}
-	
-	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr)
-		: RenderableHelper(L"LineBox")
-	{
-		this->Init();
-
 		this->SetBox(obb);
 		this->SetColor(clr);
 	}
 
-	void RenderableLineBox::SetBox(OBBox const & obb)
+	void RenderableTriBox::SetBox(OBBox const & obb)
 	{
 		pos_aabb_ = MathLib::convert_to_aabbox(obb);
 
@@ -391,20 +322,22 @@ namespace KlayGE
 		*v7_ep_ = obb.Corner(7);
 	}
 
-	void RenderableLineBox::SetColor(Color const & clr)
+	void RenderableTriBox::SetColor(Color const & clr)
 	{
 		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
 	}
 
-	void RenderableLineBox::OnRenderBegin()
+	void RenderableTriBox::OnRenderBegin()
 	{
 		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
 		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
-	void RenderableLineBox::Init()
+
+	RenderableLineBox::RenderableLineBox()
+		: RenderableHelper(L"LineBox")
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+		auto& rf = Context::Instance().RenderFactoryInstance();
 
 		effect_ = SyncLoadRenderEffect("RenderableHelper.fxml");
 		technique_ = simple_forward_tech_ = effect_->TechniqueByName("LineTec");
@@ -434,10 +367,10 @@ namespace KlayGE
 		rl_ = rf.MakeRenderLayout();
 		rl_->TopologyType(RenderLayout::TT_LineList);
 
-		GraphicsBufferPtr vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
+		auto vb = rf.MakeVertexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(vertices), vertices);
 		rl_->BindVertexStream(vb, VertexElement(VEU_Position, 0, EF_R32F));
 
-		GraphicsBufferPtr ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
+		auto ib = rf.MakeIndexBuffer(BU_Static, EAH_GPU_Read | EAH_Immutable, sizeof(indices), indices);
 		rl_->BindIndexStream(ib, EF_R16UI);
 
 		tc_aabb_ = AABBox(float3(0, 0, 0), float3(0, 0, 0));
@@ -446,6 +379,38 @@ namespace KlayGE
 		*(effect_->ParameterByName("pos_extent")) = float3(1, 1, 1);
 
 		effect_attrs_ |= EA_SimpleForward;
+	}
+	
+	RenderableLineBox::RenderableLineBox(OBBox const & obb, Color const & clr)
+		: RenderableLineBox()
+	{
+		this->SetBox(obb);
+		this->SetColor(clr);
+	}
+
+	void RenderableLineBox::SetBox(OBBox const & obb)
+	{
+		pos_aabb_ = MathLib::convert_to_aabbox(obb);
+
+		*v0_ep_ = obb.Corner(0);
+		*v1_ep_ = obb.Corner(1);
+		*v2_ep_ = obb.Corner(2);
+		*v3_ep_ = obb.Corner(3);
+		*v4_ep_ = obb.Corner(4);
+		*v5_ep_ = obb.Corner(5);
+		*v6_ep_ = obb.Corner(6);
+		*v7_ep_ = obb.Corner(7);
+	}
+
+	void RenderableLineBox::SetColor(Color const & clr)
+	{
+		*color_ep_ = float4(clr.r(), clr.g(), clr.b(), clr.a());
+	}
+
+	void RenderableLineBox::OnRenderBegin()
+	{
+		Camera const & camera = Context::Instance().AppInstance().ActiveCamera();
+		*mvp_param_ = model_mat_ * camera.ViewProjMatrix();
 	}
 
 

@@ -23,16 +23,8 @@
 namespace KlayGE
 {
 	UIListBox::UIListBox(UIDialogPtr const & dialog)
-						: UIControl(UIListBox::Type, dialog),
-							scroll_bar_(dialog),
-							sb_width_(16), border_(6), margin_(5), text_height_(0),
-							style_(SINGLE_SELECTION),
-							selected_(-1), sel_start_(0),
-							drag_(false)
+						: UIListBox(UIListBox::Type, dialog)
 	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
 	}
 
 	UIListBox::UIListBox(uint32_t type, UIDialogPtr const & dialog)
@@ -42,32 +34,6 @@ namespace KlayGE
 							style_(SINGLE_SELECTION),
 							selected_(-1), sel_start_(0),
 							drag_(false)
-	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
-	}
-
-	UIListBox::UIListBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, STYLE dwStyle)
-						: UIControl(UIListBox::Type, dialog),
-							scroll_bar_(dialog),
-							sb_width_(16), border_(6), margin_(5), text_height_(0),
-							style_(dwStyle),
-							selected_(-1), sel_start_(0),
-							drag_(false)
-
-	{
-		this->InitDefaultElements();
-
-		this->GetDialog()->InitControl(scroll_bar_);
-
-		// Set the ID and position
-		this->SetID(ID);
-		this->SetLocation(coord_size.x(), coord_size.y());
-		this->SetSize(coord_size.z(), coord_size.w());
-	}
-
-	void UIListBox::InitDefaultElements()
 	{
 		UIElement Element;
 
@@ -86,6 +52,20 @@ namespace KlayGE
 
 			elements_.push_back(MakeUniquePtr<UIElement>(Element));
 		}
+
+		this->GetDialog()->InitControl(scroll_bar_);
+	}
+
+	UIListBox::UIListBox(UIDialogPtr const & dialog, int ID, int4 const & coord_size, STYLE dwStyle)
+						: UIListBox(dialog)
+
+	{
+		style_ = dwStyle;
+
+		// Set the ID and position
+		this->SetID(ID);
+		this->SetLocation(coord_size.x(), coord_size.y());
+		this->SetSize(coord_size.z(), coord_size.w());
 	}
 
 	UIListBox::~UIListBox()

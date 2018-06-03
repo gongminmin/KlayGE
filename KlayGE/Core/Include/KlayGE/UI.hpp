@@ -653,15 +653,12 @@ namespace KlayGE
 		void MouseWheelHandler(uint32_t buttons, int2 const & pt, int32_t z_delta);
 		void MouseOverHandler(uint32_t buttons, int2 const & pt);
 
+		// Control events
+		bool OnCycleFocus(bool bForward);
+
 	private:
 		bool keyboard_input_;
 		bool mouse_input_;
-
-		// Initialize default Elements
-		void InitDefaultElements();
-
-		// Control events
-		bool OnCycleFocus(bool bForward);
 
 		std::weak_ptr<UIControl> control_focus_;				// The control which has focus
 		std::weak_ptr<UIControl> control_mouse_over_;			// The control which is hovered over
@@ -724,8 +721,6 @@ namespace KlayGE
 		void SetText(std::wstring const & strText);
 
 	protected:
-		virtual void InitDefaultElements();
-
 		std::wstring text_;			// Window text
 	};
 
@@ -777,8 +772,6 @@ namespace KlayGE
 		ClickedEvent clicked_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		bool pressed_;
 
 		std::wstring text_;			// Window text
@@ -832,8 +825,6 @@ namespace KlayGE
 		ClickedEvent clicked_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		bool pressed_;
 
 		size_t tex_index_;
@@ -898,7 +889,6 @@ namespace KlayGE
 
 	protected:
 		virtual void SetCheckedInternal(bool bChecked);
-		virtual void InitDefaultElements();
 
 		bool checked_;
 		IRect button_rc_;
@@ -977,7 +967,6 @@ namespace KlayGE
 
 	protected:
 		virtual void SetCheckedInternal(bool bChecked, bool bClearGroup);
-		virtual void InitDefaultElements();
 
 		uint32_t button_group_;
 
@@ -1053,8 +1042,6 @@ namespace KlayGE
 		ValueChangedEvent value_changed_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		void SetValueInternal(int nValue);
 		int ValueFromPos(int x);
 
@@ -1126,8 +1113,6 @@ namespace KlayGE
 		void MouseUpHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
 	protected:
-		virtual void InitDefaultElements();
-
 		// ARROWSTATE indicates the state of the arrow buttons.
 		enum ARROWSTATE
 		{
@@ -1265,8 +1250,6 @@ namespace KlayGE
 		SelectionEvent selection_end_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		IRect text_rc_;      // Text rendering bound
 		IRect selection_rc_; // Selection box bound
 		UIScrollBar scroll_bar_;
@@ -1389,8 +1372,6 @@ namespace KlayGE
 		SelectionChangedEvent selection_changed_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		int     selected_;
 		int     focused_;
 		int     drop_height_;
@@ -1556,8 +1537,6 @@ namespace KlayGE
 		EditBoxEvent string_event_;
 
 	protected:
-		virtual void InitDefaultElements();
-
 		void PlaceCaret(int nCP);
 		void DeleteSelectionText();
 		void ResetCaretBlink();
@@ -1642,11 +1621,10 @@ namespace KlayGE
 		void MouseOverHandler(UIDialog const & sender, uint32_t buttons, int2 const & pt);
 
 	protected:
-		virtual void InitDefaultElements();
-		static const int BACKGROUND_INDEX = 0;
-		static const int COORDLINE_INDEX = 1;
-		static const int POLYLINE_INDEX = 2;
-		static const int CTRLPOINTS_INDEX = 3;
+		static int constexpr BACKGROUND_INDEX = 0;
+		static int constexpr COORDLINE_INDEX = 1;
+		static int constexpr POLYLINE_INDEX = 2;
+		static int constexpr CTRLPOINTS_INDEX = 3;
 
 	protected:
 		std::vector<float2> ctrl_points_;
@@ -1683,9 +1661,8 @@ namespace KlayGE
 		int GetValue() const;
 
 	protected:
-		virtual void InitDefaultElements();
-		static const int BACKGROUND_INDEX = 0;
-		static const int BAR_INDEX = 1;
+		static int constexpr BACKGROUND_INDEX = 0;
+		static int constexpr BAR_INDEX = 1;
 
 	protected:
 		int progress_;
