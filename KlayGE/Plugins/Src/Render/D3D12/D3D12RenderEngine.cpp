@@ -92,21 +92,36 @@ namespace KlayGE
 		native_shader_fourcc_ = MakeFourCC<'D', 'X', 'B', 'C'>::value;
 		native_shader_version_ = 5;
 
-		IDXGIFactory4* gi_factory;
+		IDXGIFactory4* gi_factory_4;
 		TIFHR(D3D12InterfaceLoader::Instance().CreateDXGIFactory2(dxgi_factory_flags,
-			IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory)));
-		gi_factory_4_ = MakeCOMPtr(gi_factory);
+			IID_IDXGIFactory4, reinterpret_cast<void**>(&gi_factory_4)));
+		gi_factory_4_ = MakeCOMPtr(gi_factory_4);
 		dxgi_sub_ver_ = 4;
 
-		IDXGIFactory5* gi_factory5;
-		gi_factory->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory5));
-		if (gi_factory5 != nullptr)
+		IDXGIFactory5* gi_factory_5;
+		gi_factory_4->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory_5));
+		if (gi_factory_5 != nullptr)
 		{
-			gi_factory_5_ = MakeCOMPtr(gi_factory5);
+			gi_factory_5_ = MakeCOMPtr(gi_factory_5);
 			dxgi_sub_ver_ = 5;
+
+			IDXGIFactory6* gi_factory_6;
+			gi_factory_4->QueryInterface(IID_IDXGIFactory5, reinterpret_cast<void**>(&gi_factory_6));
+			if (gi_factory_6 != nullptr)
+			{
+				gi_factory_6_ = MakeCOMPtr(gi_factory_6);
+				dxgi_sub_ver_ = 6;
+			}
 		}
 
-		adapterList_.Enumerate(gi_factory_4_);
+		if (gi_factory_6_)
+		{
+			adapterList_.Enumerate(gi_factory_6_);
+		}
+		else
+		{
+			adapterList_.Enumerate(gi_factory_4_);
+		}
 	}
 
 	// Îö¹¹º¯Êý
@@ -164,6 +179,11 @@ namespace KlayGE
 	IDXGIFactory5* D3D12RenderEngine::DXGIFactory5() const
 	{
 		return gi_factory_5_.get();
+	}
+
+	IDXGIFactory6* D3D12RenderEngine::DXGIFactory6() const
+	{
+		return gi_factory_6_.get();
 	}
 
 	uint8_t D3D12RenderEngine::DXGISubVer() const

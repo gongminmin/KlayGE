@@ -110,7 +110,19 @@ namespace KlayGE
 
 	FencePtr D3D11RenderFactory::MakeFence()
 	{
-		return MakeSharedPtr<D3D11Fence>();
+		FencePtr ret;
+
+		auto* d3d_device_5 = checked_cast<D3D11RenderEngine*>(re_.get())->D3DDevice5();
+		if (d3d_device_5 != nullptr)
+		{
+			ret = MakeSharedPtr<D3D11_4Fence>();
+		}
+		else
+		{
+			ret = MakeSharedPtr<D3D11Fence>();
+		}
+
+		return ret;
 	}
 
 	RenderViewPtr D3D11RenderFactory::Make1DRenderView(Texture& texture, int first_array_index, int array_size, int level)

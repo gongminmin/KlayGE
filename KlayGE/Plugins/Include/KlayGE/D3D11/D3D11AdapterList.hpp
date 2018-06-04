@@ -30,6 +30,7 @@ namespace KlayGE
 		void Destroy();
 
 		void Enumerate(IDXGIFactory1Ptr const & gi_factory);
+		void Enumerate(IDXGIFactory6Ptr const & gi_factory);
 
 		size_t NumAdapter() const;
 		D3D11Adapter& Adapter(size_t index) const;

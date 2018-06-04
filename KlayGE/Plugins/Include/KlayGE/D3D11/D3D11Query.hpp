@@ -19,7 +19,21 @@
 
 namespace KlayGE
 {
-	class D3D11OcclusionQuery : public OcclusionQuery
+	class D3D11Query
+	{
+	public:
+		D3D11Query();
+		virtual ~D3D11Query();
+
+		void SignalFence();
+		void WaitForFence();
+
+	protected:
+		FencePtr fence_;
+		uint64_t fence_val_;
+	};
+
+	class D3D11OcclusionQuery : public OcclusionQuery, public D3D11Query
 	{
 	public:
 		D3D11OcclusionQuery();
@@ -33,7 +47,7 @@ namespace KlayGE
 		ID3D11QueryPtr query_;
 	};
 
-	class D3D11ConditionalRender : public ConditionalRender
+	class D3D11ConditionalRender : public ConditionalRender, public D3D11Query
 	{
 	public:
 		D3D11ConditionalRender();
@@ -50,7 +64,7 @@ namespace KlayGE
 		ID3D11PredicatePtr predicate_;
 	};
 
-	class D3D11TimerQuery : public TimerQuery
+	class D3D11TimerQuery : public TimerQuery, public D3D11Query
 	{
 	public:
 		D3D11TimerQuery();
@@ -65,7 +79,7 @@ namespace KlayGE
 		ID3D11QueryPtr timestamp_end_query_;
 	};
 
-	class D3D11SOStatisticsQuery : public SOStatisticsQuery
+	class D3D11SOStatisticsQuery : public SOStatisticsQuery, public D3D11Query
 	{
 	public:
 		D3D11SOStatisticsQuery();

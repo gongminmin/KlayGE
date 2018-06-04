@@ -47,6 +47,7 @@ namespace KlayGE
 	typedef std::shared_ptr<IDXGIFactory3>				IDXGIFactory3Ptr;
 	typedef std::shared_ptr<IDXGIFactory4>				IDXGIFactory4Ptr;
 	typedef std::shared_ptr<IDXGIFactory5>				IDXGIFactory5Ptr;
+	typedef std::shared_ptr<IDXGIFactory6>				IDXGIFactory6Ptr;
 	typedef std::shared_ptr<IDXGIAdapter1>				IDXGIAdapter1Ptr;
 	typedef std::shared_ptr<IDXGIAdapter2>				IDXGIAdapter2Ptr;
 	typedef std::shared_ptr<IDXGISwapChain>				IDXGISwapChainPtr;
@@ -59,16 +60,19 @@ namespace KlayGE
 	typedef std::shared_ptr<ID3D11Device2>				ID3D11Device2Ptr;
 	typedef std::shared_ptr<ID3D11Device3>				ID3D11Device3Ptr;
 	typedef std::shared_ptr<ID3D11Device4>				ID3D11Device4Ptr;
+	typedef std::shared_ptr<ID3D11Device5>				ID3D11Device5Ptr;
 	typedef std::shared_ptr<ID3D11DeviceContext>		ID3D11DeviceContextPtr;
 	typedef std::shared_ptr<ID3D11DeviceContext1>		ID3D11DeviceContext1Ptr;
 	typedef std::shared_ptr<ID3D11DeviceContext2>		ID3D11DeviceContext2Ptr;
 	typedef std::shared_ptr<ID3D11DeviceContext3>		ID3D11DeviceContext3Ptr;
+	typedef std::shared_ptr<ID3D11DeviceContext4>		ID3D11DeviceContext4Ptr;
 	typedef std::shared_ptr<ID3D11Resource>				ID3D11ResourcePtr;
 	typedef std::shared_ptr<ID3D11Texture1D>			ID3D11Texture1DPtr;
 	typedef std::shared_ptr<ID3D11Texture2D>			ID3D11Texture2DPtr;
 	typedef std::shared_ptr<ID3D11Texture3D>			ID3D11Texture3DPtr;
 	typedef std::shared_ptr<ID3D11Texture2D>			ID3D11TextureCubePtr;
 	typedef std::shared_ptr<ID3D11Buffer>				ID3D11BufferPtr;
+	typedef std::shared_ptr<ID3D11Fence>				ID3D11FencePtr;
 	typedef std::shared_ptr<ID3D11InputLayout>			ID3D11InputLayoutPtr;
 	typedef std::shared_ptr<ID3D11Query>				ID3D11QueryPtr;
 	typedef std::shared_ptr<ID3D11Predicate>			ID3D11PredicatePtr;

@@ -15,6 +15,7 @@
 #include <KFL/COMPtr.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Context.hpp>
+#include <KlayGE/Fence.hpp>
 #include <KlayGE/RenderFactory.hpp>
 
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -22,6 +23,39 @@
 
 namespace KlayGE
 {
+	D3D11Query::D3D11Query()
+	{
+		auto& rf = Context::Instance().RenderFactoryInstance();
+		auto const & re = *checked_cast<D3D11RenderEngine const *>(&rf.RenderEngineInstance());
+
+		auto* d3d_device_5 = re.D3DDevice5();
+		if (d3d_device_5 != nullptr)
+		{
+			fence_ = rf.MakeFence();
+		}
+	}
+
+	D3D11Query::~D3D11Query()
+	{
+	}
+
+	void D3D11Query::SignalFence()
+	{
+		if (fence_)
+		{
+			fence_val_ = fence_->Signal(Fence::FT_Render);
+		}
+	}
+
+	void D3D11Query::WaitForFence()
+	{
+		if (fence_)
+		{
+			fence_->Wait(fence_val_);
+		}
+	}
+
+
 	D3D11OcclusionQuery::D3D11OcclusionQuery()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
@@ -50,12 +84,16 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(query_.get());
+
+		this->SignalFence();
 	}
 
 	uint64_t D3D11OcclusionQuery::SamplesPassed()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		this->WaitForFence();
 
 		uint64_t ret;
 		while (S_OK != d3d_imm_ctx->GetData(query_.get(), &ret, sizeof(ret), 0));
@@ -91,6 +129,8 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(predicate_.get());
+
+		this->SignalFence();
 	}
 
 	void D3D11ConditionalRender::BeginConditionalRender()
@@ -113,6 +153,8 @@ namespace KlayGE
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		this->WaitForFence();
 
 		BOOL ret;
 		while (S_OK != d3d_imm_ctx->GetData(predicate_.get(), &ret, sizeof(ret), 0));
@@ -152,6 +194,8 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(timestamp_end_query_.get());
+
+		this->SignalFence();
 	}
 
 	double D3D11TimerQuery::TimeElapsed()
@@ -160,6 +204,8 @@ namespace KlayGE
 		if (re.InvTimestampFreq() > 0)
 		{
 			ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+			this->WaitForFence();
 
 			uint64_t start_timestamp, end_timestamp;
 			while (S_OK != d3d_imm_ctx->GetData(timestamp_start_query_.get(), &start_timestamp, sizeof(start_timestamp), 0));
@@ -202,12 +248,16 @@ namespace KlayGE
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
 
 		d3d_imm_ctx->End(so_stat_query_.get());
+
+		this->SignalFence();
 	}
 
 	uint64_t D3D11SOStatisticsQuery::NumPrimitivesWritten()
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		this->WaitForFence();
 
 		D3D11_QUERY_DATA_SO_STATISTICS data;
 		while (S_OK != d3d_imm_ctx->GetData(so_stat_query_.get(), &data, sizeof(data), 0));
@@ -218,6 +268,8 @@ namespace KlayGE
 	{
 		D3D11RenderEngine const & re = *checked_cast<D3D11RenderEngine const *>(&Context::Instance().RenderFactoryInstance().RenderEngineInstance());
 		ID3D11DeviceContext* d3d_imm_ctx = re.D3DDeviceImmContext();
+
+		this->WaitForFence();
 
 		D3D11_QUERY_DATA_SO_STATISTICS data;
 		while (S_OK != d3d_imm_ctx->GetData(so_stat_query_.get(), &data, sizeof(data), 0));

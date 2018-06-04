@@ -117,4 +117,34 @@ namespace KlayGE
 			TERRC(std::errc::function_not_supported);
 		}
 	}
+	
+	void D3D12AdapterList::Enumerate(IDXGIFactory6Ptr const & gi_factory)
+	{
+		UINT adapter_no = 0;
+		IDXGIAdapter1* dxgi_adapter = nullptr;
+		while (gi_factory->EnumAdapterByGpuPreference(adapter_no, DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+			IID_IDXGIAdapter1, reinterpret_cast<void**>(&dxgi_adapter)) != DXGI_ERROR_NOT_FOUND)
+		{
+			if (dxgi_adapter != nullptr)
+			{
+				ID3D12Device* device = nullptr;
+				if (SUCCEEDED(D3D12InterfaceLoader::Instance().D3D12CreateDevice(dxgi_adapter, D3D_FEATURE_LEVEL_11_0,
+					IID_ID3D12Device, reinterpret_cast<void**>(&device))))
+				{
+					auto adapter = MakeUniquePtr<D3D12Adapter>(adapter_no, MakeCOMPtr(dxgi_adapter));
+					adapter->Enumerate();
+					adapters_.push_back(std::move(adapter));
+
+					device->Release();
+				}
+			}
+
+			++ adapter_no;
+		}
+
+		if (adapters_.empty())
+		{
+			TERRC(std::errc::function_not_supported);
+		}
+	}
 }

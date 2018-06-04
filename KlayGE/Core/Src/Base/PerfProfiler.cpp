@@ -50,8 +50,11 @@ namespace KlayGE
 	PerfRange::PerfRange()
 		: cpu_time_(0), gpu_time_(0), dirty_(false)
 	{
-		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
-		gpu_timer_query_ = rf.MakeTimerQuery();
+		if (Context::Instance().Config().perf_profiler)
+		{
+			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
+			gpu_timer_query_ = rf.MakeTimerQuery();
+		}
 	}
 
 	void PerfRange::Begin()

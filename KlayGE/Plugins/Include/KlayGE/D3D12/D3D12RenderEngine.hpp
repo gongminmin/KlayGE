@@ -82,6 +82,7 @@ namespace KlayGE
 
 		IDXGIFactory4* DXGIFactory4() const;
 		IDXGIFactory5* DXGIFactory5() const;
+		IDXGIFactory6* DXGIFactory6() const;
 		uint8_t DXGISubVer() const;
 
 		ID3D12Device* D3DDevice() const;
@@ -264,6 +265,7 @@ namespace KlayGE
 		// Only created after top-level window created
 		IDXGIFactory4Ptr gi_factory_4_;
 		IDXGIFactory5Ptr gi_factory_5_;
+		IDXGIFactory6Ptr gi_factory_6_;
 		uint8_t dxgi_sub_ver_;
 
 		ID3D12DevicePtr d3d_device_;

@@ -53,6 +53,23 @@ namespace KlayGE
 		std::map<uint64_t, ID3D11QueryPtr> fences_;
 		std::atomic<uint64_t> fence_val_;
 	};
+	
+	class D3D11_4Fence : public Fence
+	{
+	public:
+		D3D11_4Fence();
+		~D3D11_4Fence() override;
+
+		uint64_t Signal(FenceType ft) override;
+		void Wait(uint64_t id) override;
+		bool Completed(uint64_t id) override;
+
+	private:
+		ID3D11FencePtr fence_;
+		HANDLE fence_event_;
+		uint64_t last_completed_val_;
+		std::atomic<uint64_t> fence_val_;
+	};
 }
 
 #endif		// _D3D11FENCE_HPP
