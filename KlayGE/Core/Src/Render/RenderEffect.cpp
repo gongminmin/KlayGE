@@ -5106,7 +5106,7 @@ namespace KlayGE
 
 						if (ResLoader::Instance().Locate(val).empty())
 						{
-							LogError("%s NOT found", val.c_str());
+							LogError() << val << " NOT found" << std::endl;
 						}
 						else
 						{
@@ -5181,7 +5181,7 @@ namespace KlayGE
 
 						if (ResLoader::Instance().Locate(val).empty())
 						{
-							LogError("%s NOT found", val.c_str());
+							LogError() << val << " NOT found" << std::endl;
 						}
 						else
 						{

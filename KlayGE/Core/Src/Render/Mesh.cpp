@@ -1065,7 +1065,7 @@ namespace KlayGE
 
 			if (failed)
 			{
-				LogError("MeshMLJIT failed. Forgot to build Tools?");
+				LogError() << "MeshMLJIT failed. Forgot to build Tools?" << std::endl;
 			}
 		}
 #else

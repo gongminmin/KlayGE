@@ -438,7 +438,7 @@ namespace KlayGE
 			flags, 0, code, err_msg);
 		if (!err_msg.empty())
 		{
-			LogError("Error when compiling %s:", func_name);
+			LogError() << "Error when compiling " << func_name << ":" << std::endl;
 
 			std::map<int, std::vector<std::string>> err_lines;
 			{
@@ -498,7 +498,7 @@ namespace KlayGE
 					std::string s;
 					int line = 1;
 
-					LogInfo("...");
+					LogInfo() << "..." << std::endl;
 					while (iss && ((iter->first - line) >= 3))
 					{
 						std::getline(iss, s);
@@ -513,16 +513,16 @@ namespace KlayGE
 							s.resize(s.size() - 1);
 						}
 
-						LogInfo("%d %s", line, s.c_str());
+						LogInfo() << line << ' ' << s << std::endl;
 
 						++ line;
 					}
-					LogInfo("...");
+					LogInfo() << "..." << std::endl;
 				}
 
 				for (auto const & msg : iter->second)
 				{
-					LogError(msg.c_str());
+					LogError() << msg << std::endl;
 				}
 			}
 		}

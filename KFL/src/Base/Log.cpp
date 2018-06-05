@@ -29,6 +29,8 @@
  */
 
 #include <KFL/KFL.hpp>
+#include <KFL/ArrayRef.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 
 #include <cstdarg>
 #include <cstdio>
@@ -42,74 +44,106 @@
 
 #include <KFL/Log.hpp>
 
-#ifdef KLAYGE_DEBUG
-#ifndef KLAYGE_PLATFORM_ANDROID
 namespace
 {
-	std::ofstream log_file("KlayGE.log");
+	using namespace KlayGE;
+
+	class EmptyOStreamsCallback : boost::noncopyable
+	{
+	public:
+		EmptyOStreamsCallback()
+		{
+		}
+		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs)
+		{
+			KFL_UNUSED(rhs);
+		}
+
+		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
+		{
+			KFL_UNUSED(buff);
+			return static_cast<std::streambuf::int_type>(count);
+		}
+	};
+
+	class MultiOStreamsCallback : boost::noncopyable
+	{
+	public:
+		explicit MultiOStreamsCallback(ArrayRef<std::ostream*> oss)
+			: oss_(oss)
+		{
+		}
+		MultiOStreamsCallback(MultiOStreamsCallback&& rhs)
+			: oss_(std::move(rhs.oss_))
+		{
+		}
+
+		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
+		{
+			for (auto& os : oss_)
+			{
+				os->write(static_cast<char const *>(buff), count);
+			}
+			return static_cast<std::streambuf::int_type>(count);
+		}
+
+	private:
+		ArrayRef<std::ostream*> oss_;
+	};
+
+	std::ostream& Log()
+	{
+#ifdef KLAYGE_DEBUG
+#ifndef KLAYGE_PLATFORM_ANDROID
+		static std::ofstream log_file("KlayGE.log");
+#endif
+#endif
+
+		static std::ostream* oss[] =
+		{
+#ifdef KLAYGE_DEBUG
+#ifndef KLAYGE_PLATFORM_ANDROID
+			&log_file,
+#endif
+#endif
+			&std::clog
+		};
+		static CallbackOutputStreamBuf<MultiOStreamsCallback> log_stream_buff((MultiOStreamsCallback(oss)));
+		static std::ostream log_stream(&log_stream_buff);
+		return log_stream;
+	}
+
+	std::ostream& EmptyLog()
+	{
+		static CallbackOutputStreamBuf<EmptyOStreamsCallback> empty_stream_buff((EmptyOStreamsCallback()));
+		static std::ostream empty_stream(&empty_stream_buff);
+		return empty_stream;
+	}
 }
-#endif
-#endif
 
 namespace KlayGE
 {
-	void LogInfo(char const * fmt, ...)
+	std::ostream& LogDebug()
 	{
-		va_list args;
-		va_start(args, fmt);
-
-#ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_vprint(ANDROID_LOG_INFO, "KlayGE", fmt, args);
-#else
-		std::array<char, 1024> buffer;
-		vsprintf(&buffer[0], fmt, args);
-
-		std::clog << "(INFO) KlayGE: " << &buffer[0] << std::endl;
 #ifdef KLAYGE_DEBUG
-		log_file << "(INFO) KlayGE: " << &buffer[0] << std::endl;
+		return Log();
+#else
+		return EmptyLog();
 #endif
-#endif
-
-		va_end(args);
 	}
 
-	void LogWarn(char const * fmt, ...)
+	std::ostream& LogInfo()
 	{
-		va_list args;
-		va_start(args, fmt);
-
-#ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_vprint(ANDROID_LOG_WARN, "KlayGE", fmt, args);
-#else
-		std::array<char, 1024> buffer;
-		vsprintf(&buffer[0], fmt, args);
-
-		std::clog << "(WARN) KlayGE: " << &buffer[0] << std::endl;
-#ifdef KLAYGE_DEBUG
-		log_file << "(WARN) KlayGE: " << &buffer[0] << std::endl;
-#endif
-#endif
-
-		va_end(args);
+		return Log() << "(INFO) KlayGE: ";
 	}
 
-	void LogError(char const * fmt, ...)
+	std::ostream& LogWarn()
 	{
-		va_list args;
-		va_start(args, fmt);
+		return Log() << "(WARN) KlayGE: ";
+	}
 
-#ifdef KLAYGE_PLATFORM_ANDROID
-		__android_log_vprint(ANDROID_LOG_ERROR, "KlayGE", fmt, args);
-#else
-		std::array<char, 1024> buffer;
-		vsprintf(&buffer[0], fmt, args);
-
-		std::clog << "(ERROR) KlayGE: " << &buffer[0] << std::endl;
-#ifdef KLAYGE_DEBUG
-		log_file << "(ERROR) KlayGE: " << &buffer[0] << std::endl;
-#endif
-#endif
-
-		va_end(args);
+	std::ostream& LogError()
+	{
+		return Log() << "(ERROR) KlayGE: ";
 	}
 }

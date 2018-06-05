@@ -441,7 +441,7 @@ namespace KlayGE
 
 			if (failed)
 			{
-				LogError("MeshConv failed. Forgot to build Tools?");
+				LogError() << "MeshConv failed. Forgot to build Tools?" << std::endl;
 				return false;
 			}
 

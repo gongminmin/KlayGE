@@ -1414,9 +1414,10 @@ namespace KlayGE
 					{
 						is_shader_validate_[type] = false;
 
-						LogError("Error(s) in conversion: %s/%s/%s", tech.Name().c_str(), pass.Name().c_str(), sd.func_name.c_str());
-						LogError(ex.what());
-						LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
+						LogError() << "Error(s) in conversion: " << tech.Name() << "/" << pass.Name() << "/" << sd.func_name << std::endl;
+						LogError() << ex.what() << std::endl;
+						LogError() << "Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP."
+							<< std::endl;
 					}
 				}
 			}

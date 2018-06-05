@@ -1222,8 +1222,8 @@ namespace
 
 				if (!found)
 				{
-					LogError("%s's format (%ld) is not supported.",
-						tex_desc_.res_name.c_str(), tex_data.format);
+					LogError() << tex_desc_.res_name << "'s format (0x" << std::hex << static_cast<uint64_t>(tex_data.format)
+						<< ") is not supported." << std::endl;
 					break;
 				}
 			}

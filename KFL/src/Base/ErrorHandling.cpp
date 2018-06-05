@@ -62,15 +62,15 @@ namespace KlayGE
 	{
 		if (msg)
 		{
-			LogError(msg);
+			LogError() << msg << std::endl;
 		}
 		if (file)
 		{
-			LogError("UNREACHABLE executed at %s: %d.", file, line);
+			LogError() << "UNREACHABLE executed at " << file << ": " << line << "." << std::endl;
 		}
 		else
 		{
-			LogError("UNREACHABLE executed.");
+			LogError() << "UNREACHABLE executed." << std::endl;
 		}
 
 		TMSG("Unreachable.");

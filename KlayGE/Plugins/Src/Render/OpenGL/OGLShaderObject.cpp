@@ -850,9 +850,10 @@ namespace KlayGE
 					{
 						is_shader_validate_[type] = false;
 
-						LogError("Error(s) in conversion: %s/%s/%s", tech.Name().c_str(), pass.Name().c_str(), sd.func_name.c_str());
-						LogError(ex.what());
-						LogError("Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP.");
+						LogError() << "Error(s) in conversion: " << tech.Name() << "/" << pass.Name() << "/" << sd.func_name << std::endl;
+						LogError() << ex.what() << std::endl;
+						LogError() << "Please send this information and your shader to webmaster at klayge.org. We'll fix this ASAP."
+							<< std::endl;
 					}
 				}
 			}
@@ -1071,9 +1072,9 @@ namespace KlayGE
 					glGetProgramiv(ret->glsl_program_, GL_INFO_LOG_LENGTH, &len);
 					if (len > 0)
 					{
-						std::vector<char> info(len + 1, 0);
+						std::vector<char> info(len);
 						glGetProgramInfoLog(ret->glsl_program_, len, &len, &info[0]);
-						LogError(&info[0]);
+						LogError() << std::string_view(info.data(), len) << std::endl;
 					}
 				}
 #endif
@@ -1215,7 +1216,7 @@ namespace KlayGE
 			glGetShaderiv(object, GL_COMPILE_STATUS, &compiled);
 			if (!compiled)
 			{
-				LogError("Error when compiling GLSL %s:", so_template_->shader_func_names_[type].c_str());
+				LogError() << "Error when compiling GLSL " << so_template_->shader_func_names_[type] << ":" << std::endl;
 
 				GLint len = 0;
 				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &len);
@@ -1269,7 +1270,7 @@ namespace KlayGE
 				shader_names.resize(shader_names.size() - 1);
 			}
 
-			LogError("Error when linking GLSLs %s:", shader_names.c_str());
+			LogError() << "Error when linking GLSLs " << shader_names << ":" << std::endl;
 
 			GLint len = 0;
 			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
@@ -1321,14 +1322,12 @@ namespace KlayGE
 					}
 					else
 					{
-						info.push_back(0);
-						LogError(&info[0]);
+						LogError() << std::string_view(info.data(), len) << std::endl;
 					}
 				}
 				else
 				{
-					info.push_back(0);
-					LogError(&info[0]);
+					LogError() << std::string_view(info.data(), len) << std::endl;
 				}
 			}
 		}
@@ -1532,9 +1531,9 @@ namespace KlayGE
 			glGetProgramiv(glsl_program_, GL_INFO_LOG_LENGTH, &len);
 			if (len > 0)
 			{
-				std::vector<char> info(len + 1, 0);
+				std::vector<char> info(len);
 				glGetProgramInfoLog(glsl_program_, len, &len, &info[0]);
-				LogError(&info[0]);
+				LogError() << std::string_view(info.data(), len) << std::endl;
 			}
 		}
 #endif
@@ -1573,8 +1572,7 @@ namespace KlayGE
 						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
 					}
 
-					LogError(err_str.c_str());
-					LogError("\n");
+					LogError() << err_str << std::endl << std::endl;
 				}
 			}
 		}
@@ -1596,8 +1594,7 @@ namespace KlayGE
 						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
 					}
 
-					LogError(err_str.c_str());
-					LogError("\n");
+					LogError() << err_str << std::endl << std::endl;
 				}
 			}
 		}
@@ -1610,12 +1607,11 @@ namespace KlayGE
 			while (iss)
 			{
 				std::getline(iss, s);
-				LogError("%d %s", line, s.c_str());
+				LogError() << line << ' ' << s << std::endl;
 				++ line;
 			}
 
-			LogError(&info[0]);
-			LogError("\n");
+			LogError() << info << std::endl << std::endl;
 		}
 	}
 
@@ -1625,16 +1621,16 @@ namespace KlayGE
 		std::istream iss(&glsl_buff);
 		std::string s;
 		int line = 1;
-		LogError("...");
+		LogError() << "..." << std::endl;
 		while (iss)
 		{
 			std::getline(iss, s);
 			if ((line - err_line > -3) && (line - err_line < 3))
 			{
-				LogError("%d %s", line, s.c_str());
+				LogError() << line << ' ' << s << std::endl;
 			}
 			++ line;
 		}
-		LogError("...");
+		LogError() << "..." << std::endl;
 	}
 }

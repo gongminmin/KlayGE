@@ -164,11 +164,11 @@ namespace
 			+ "message: " + message;
 		if (GL_DEBUG_TYPE_ERROR == type)
 		{
-			KlayGE::LogError(dbg.c_str());
+			KlayGE::LogError() << dbg << std::endl;
 		}
 		else
 		{
-			KlayGE::LogInfo(dbg.c_str());
+			KlayGE::LogInfo() << dbg << std::endl;
 		}
 	}
 #endif

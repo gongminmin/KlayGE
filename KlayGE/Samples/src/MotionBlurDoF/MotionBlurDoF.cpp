@@ -1134,7 +1134,7 @@ uint32_t MotionBlurDoFApp::DoUpdate(uint32_t pass)
 					}
 					catch (...)
 					{
-						LogWarn("Wrong callings to script engine");
+						LogWarn() << "Wrong callings to script engine" << std::endl;
 					}
 
 					SceneObjectPtr so = MakeSharedPtr<Teapot>();

@@ -35,9 +35,10 @@
 
 namespace KlayGE
 {
-	void LogInfo(char const * fmt, ...);
-	void LogWarn(char const * fmt, ...);
-	void LogError(char const * fmt, ...);
+	std::ostream& LogDebug();
+	std::ostream& LogInfo();
+	std::ostream& LogWarn();
+	std::ostream& LogError();
 }
 
 #endif		// _KFL_LOG_HPP

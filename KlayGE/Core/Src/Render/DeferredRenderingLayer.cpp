@@ -1724,7 +1724,7 @@ namespace KlayGE
 #ifdef KLAYGE_DEBUG
 		if (no_viewport)
 		{
-			LogError("No viewport available.");
+			LogDebug() << "No viewport available." << std::endl;
 		}
 #endif
 	}

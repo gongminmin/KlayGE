@@ -66,7 +66,7 @@ namespace KlayGE
 		size_t const len = strlen(data);
 		if ((len > 1) || (data[0] != '\n'))
 		{
-			LogInfo(data);
+			LogInfo() << data << std::endl;
 		}
 		return PyLong_FromSize_t(len);
 	}
