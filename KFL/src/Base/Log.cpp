@@ -34,11 +34,12 @@
 
 #include <cstdarg>
 #include <cstdio>
+#include <iostream>
 
 #ifdef KLAYGE_PLATFORM_ANDROID
 #include <android/log.h>
+#include <cstring>
 #else
-#include <iostream>
 #include <fstream>
 #endif
 
@@ -66,6 +67,40 @@ namespace
 		}
 	};
 
+#ifdef KLAYGE_PLATFORM_ANDROID
+	class AndroidLogStreamCallback : boost::noncopyable
+	{
+	public:
+		explicit AndroidLogStreamCallback(int prio)
+			: prio_(prio)
+		{
+		}
+		AndroidLogStreamCallback(AndroidLogStreamCallback&& rhs)
+			: prio_(rhs.prio_)
+		{
+		}
+
+		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
+		{
+			std::vector<char> tmp(count + 1);
+			std::memcpy(tmp.data(), buff, count);
+			tmp.back() = 0;
+			__android_log_write(prio_, "KlayGE", tmp.data());
+			return static_cast<std::streambuf::int_type>(count);
+		}
+
+	private:
+		int prio_;
+	};
+
+	template <int PRIO>
+	std::ostream& AndroidLog()
+	{
+		static CallbackOutputStreamBuf<AndroidLogStreamCallback> log_stream_buff((AndroidLogStreamCallback(PRIO)));
+		static std::ostream log_stream(&log_stream_buff);
+		return log_stream;
+	}
+#else
 	class MultiOStreamsCallback : boost::noncopyable
 	{
 	public:
@@ -94,17 +129,13 @@ namespace
 	std::ostream& Log()
 	{
 #ifdef KLAYGE_DEBUG
-#ifndef KLAYGE_PLATFORM_ANDROID
 		static std::ofstream log_file("KlayGE.log");
-#endif
 #endif
 
 		static std::ostream* oss[] =
 		{
 #ifdef KLAYGE_DEBUG
-#ifndef KLAYGE_PLATFORM_ANDROID
 			&log_file,
-#endif
 #endif
 			&std::clog
 		};
@@ -112,6 +143,7 @@ namespace
 		static std::ostream log_stream(&log_stream_buff);
 		return log_stream;
 	}
+#endif
 
 	std::ostream& EmptyLog()
 	{
@@ -126,7 +158,11 @@ namespace KlayGE
 	std::ostream& LogDebug()
 	{
 #ifdef KLAYGE_DEBUG
-		return Log();
+#ifdef KLAYGE_PLATFORM_ANDROID
+		return AndroidLog<ANDROID_LOG_DEBUG>();
+#else
+		return Log() << "(DEBUG) KlayGE: ";
+#endif
 #else
 		return EmptyLog();
 #endif
@@ -134,16 +170,28 @@ namespace KlayGE
 
 	std::ostream& LogInfo()
 	{
+#ifdef KLAYGE_PLATFORM_ANDROID
+		return AndroidLog<ANDROID_LOG_INFO>();
+#else
 		return Log() << "(INFO) KlayGE: ";
+#endif
 	}
 
 	std::ostream& LogWarn()
 	{
+#ifdef KLAYGE_PLATFORM_ANDROID
+		return AndroidLog<ANDROID_LOG_WARN>();
+#else
 		return Log() << "(WARN) KlayGE: ";
+#endif
 	}
 
 	std::ostream& LogError()
 	{
+#ifdef KLAYGE_PLATFORM_ANDROID
+		return AndroidLog<ANDROID_LOG_ERROR>();
+#else
 		return Log() << "(ERROR) KlayGE: ";
+#endif
 	}
 }
