@@ -636,8 +636,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					std::string str;
 					Convert(str, buf);
 					std::string::size_type p = str.find('x');
-					std::istringstream(str.substr(0, p)) >> cfg.graphics_cfg.width;
-					std::istringstream(str.substr(p + 1, str.size())) >> cfg.graphics_cfg.height;
+					cfg.graphics_cfg.width = boost::lexical_cast<int>(str.substr(0, p));
+					cfg.graphics_cfg.height = boost::lexical_cast<int>(str.substr(p + 1, str.size()));
 				}
 				{
 					HWND hClrFmtCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_CLR_FMT_COMBO);
@@ -759,7 +759,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					HWND hStereoSepEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_SEP_EDIT);
 					TCHAR buf[256];
 					GetWindowText(hStereoSepEdit, buf, static_cast<int>(std::size(buf)));
-					std::basic_istringstream<TCHAR>(buf) >> cfg.graphics_cfg.stereo_separation;
+					cfg.graphics_cfg.stereo_separation = boost::lexical_cast<float>(buf);
 				}
 				{
 					HWND hOutputCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_OUTPUT_COMBO);

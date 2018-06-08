@@ -11,6 +11,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/RenderEffect.hpp>
@@ -461,7 +462,8 @@ namespace KlayGE
 						std::string part_err_str = err_str.substr(0, pos);
 						pos = part_err_str.rfind("(");
 						part_err_str = part_err_str.substr(pos + 1);
-						std::istringstream(part_err_str) >> err_line;
+						MemInputStreamBuf stream_buff(part_err_str.data(), part_err_str.size());
+						std::istream(&stream_buff) >> err_line;
 					}
 
 					std::vector<std::string>& msgs = err_lines[err_line];

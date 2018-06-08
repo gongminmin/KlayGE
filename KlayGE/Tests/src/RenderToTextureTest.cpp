@@ -38,7 +38,6 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push

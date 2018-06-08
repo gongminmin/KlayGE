@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/iterator.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/Util.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Font.hpp>
@@ -379,9 +380,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			}
 			else
 			{
-				std::istringstream attr_ss(skybox_name);
 				Color color(0, 0, 0, 1);
-				attr_ss >> color.r() >> color.g() >> color.b();
+				MemInputStreamBuf stream_buff(skybox_name.data(), skybox_name.size());
+				std::istream(&stream_buff) >> color.r() >> color.g() >> color.b();
 
 				auto const fmt = rf.RenderEngineInstance().DeviceCaps().BestMatchTextureFormat({ EF_ABGR8, EF_ARGB8 });
 				BOOST_ASSERT(fmt != EF_Unknown);
@@ -467,9 +468,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr color_node = light_node->FirstNode("color");
 		if (color_node)
 		{
-			std::istringstream attr_ss(std::string(color_node->Attrib("v")->ValueString()));
 			float3 color;
-			attr_ss >> color.x() >> color.y() >> color.z();
+			auto v = color_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> color.x() >> color.y() >> color.z();
 			light->Color(color);
 		}
 
@@ -479,9 +481,10 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr dir_node = light_node->FirstNode("dir");
 			if (dir_node)
 			{
-				std::istringstream attr_ss(std::string(dir_node->Attrib("v")->ValueString()));
 				float3 dir;
-				attr_ss >> dir.x() >> dir.y() >> dir.z();
+				auto v = dir_node->Attrib("v")->ValueString();
+				MemInputStreamBuf stream_buff(v.data(), v.size());
+				std::istream(&stream_buff) >> dir.x() >> dir.y() >> dir.z();
 				light->Direction(dir);
 			}
 		}
@@ -491,18 +494,20 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 			XMLNodePtr pos_node = light_node->FirstNode("pos");
 			if (pos_node)
 			{
-				std::istringstream attr_ss(std::string(pos_node->Attrib("v")->ValueString()));
 				float3 pos;
-				attr_ss >> pos.x() >> pos.y() >> pos.z();
+				auto v = pos_node->Attrib("v")->ValueString();
+				MemInputStreamBuf stream_buff(v.data(), v.size());
+				std::istream(&stream_buff) >> pos.x() >> pos.y() >> pos.z();
 				light->Position(pos);
 			}
 
 			XMLNodePtr fall_off_node = light_node->FirstNode("fall_off");
 			if (fall_off_node)
 			{
-				std::istringstream attr_ss(std::string(fall_off_node->Attrib("v")->ValueString()));
 				float3 fall_off;
-				attr_ss >> fall_off.x() >> fall_off.y() >> fall_off.z();
+				auto v = fall_off_node->Attrib("v")->ValueString();
+				MemInputStreamBuf stream_buff(v.data(), v.size());
+				std::istream(&stream_buff) >> fall_off.x() >> fall_off.y() >> fall_off.z();
 				light->Falloff(fall_off);
 			}
 
@@ -555,8 +560,9 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		{
 			float3 scale(1, 1, 1);
 			{
-				std::istringstream attr_ss(std::string(scale_node->Attrib("v")->ValueString()));
-				attr_ss >> scale.x() >> scale.y() >> scale.z();
+				auto v = scale_node->Attrib("v")->ValueString();
+				MemInputStreamBuf stream_buff(v.data(), v.size());
+				std::istream(&stream_buff) >> scale.x() >> scale.y() >> scale.z();
 			}
 
 			SceneObjectPtr light_proxy = MakeSharedPtr<SceneObjectLightSourceProxy>(light);
@@ -579,22 +585,25 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr scale_node = model_node->FirstNode("scale");
 		if (scale_node)
 		{
-			std::istringstream attr_ss(std::string(scale_node->Attrib("v")->ValueString()));
-			attr_ss >> scale.x() >> scale.y() >> scale.z();
+			auto v = scale_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> scale.x() >> scale.y() >> scale.z();
 		}
 		
 		XMLNodePtr rotate_node = model_node->FirstNode("rotate");
 		if (!!rotate_node)
 		{
-			std::istringstream attr_ss(std::string(rotate_node->Attrib("v")->ValueString()));
-			attr_ss >> rotate.x() >> rotate.y() >> rotate.z() >> rotate.w();
+			auto v = rotate_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> rotate.x() >> rotate.y() >> rotate.z() >> rotate.w();
 		}
 
 		XMLNodePtr translate_node = model_node->FirstNode("translate");
 		if (scale_node)
 		{
-			std::istringstream attr_ss(std::string(translate_node->Attrib("v")->ValueString()));
-			attr_ss >> translate.x() >> translate.y() >> translate.z();
+			auto v = translate_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> translate.x() >> translate.y() >> translate.z();
 		}
 
 		obj_mat = MathLib::transformation<float>(nullptr, nullptr, &scale, nullptr, &rotate, &translate);
@@ -679,20 +688,23 @@ void ScenePlayerApp::LoadScene(std::string const & name)
 		XMLNodePtr eye_pos_node = camera_node->FirstNode("eye_pos");
 		if (eye_pos_node)
 		{
-			std::istringstream attr_ss(std::string(eye_pos_node->Attrib("v")->ValueString()));
-			attr_ss >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
+			auto v = eye_pos_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> eye_pos.x() >> eye_pos.y() >> eye_pos.z();
 		}
 		XMLNodePtr look_at_node = camera_node->FirstNode("look_at");
 		if (look_at_node)
 		{
-			std::istringstream attr_ss(std::string(look_at_node->Attrib("v")->ValueString()));
-			attr_ss >> look_at.x() >> look_at.y() >> look_at.z();
+			auto v = look_at_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> look_at.x() >> look_at.y() >> look_at.z();
 		}
 		XMLNodePtr up_node = camera_node->FirstNode("up");
 		if (up_node)
 		{
-			std::istringstream attr_ss(std::string(up_node->Attrib("v")->ValueString()));
-			attr_ss >> up.x() >> up.y() >> up.z();
+			auto v = up_node->Attrib("v")->ValueString();
+			MemInputStreamBuf stream_buff(v.data(), v.size());
+			std::istream(&stream_buff) >> up.x() >> up.y() >> up.z();
 		}
 
 		XMLNodePtr fov_node = camera_node->FirstNode("fov");

@@ -25,6 +25,7 @@
 
 #include <KlayGE/KlayGE.hpp>
 #include <KFL/CXX17/iterator.hpp>
+#include <KFL/CustomizedStreamBuf.hpp>
 #include <KFL/ErrorHandling.hpp>
 #include <KFL/Util.hpp>
 #include <KlayGE/Context.hpp>
@@ -37,7 +38,6 @@
 #include <KlayGE/App3D.hpp>
 #include <KFL/Hash.hpp>
 
-#include <sstream>
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
@@ -814,18 +814,21 @@ namespace KlayGE
 
 				float3 eye_ctrl_pt;
 				{
-					std::istringstream attr_ss(std::string(key_node->Attrib("eye")->ValueString()));
-					attr_ss >> eye_ctrl_pt.x() >> eye_ctrl_pt.y() >> eye_ctrl_pt.z();
-				}				
+					auto v = key_node->Attrib("eye")->ValueString();
+					MemInputStreamBuf stream_buff(v.data(), v.size());
+					std::istream(&stream_buff) >> eye_ctrl_pt.x() >> eye_ctrl_pt.y() >> eye_ctrl_pt.z();
+				}
 				float3 target_ctrl_pt;
 				{
-					std::istringstream attr_ss(std::string(key_node->Attrib("target")->ValueString()));
-					attr_ss >> target_ctrl_pt.x() >> target_ctrl_pt.y() >> target_ctrl_pt.z();
-				}				
+					auto v = key_node->Attrib("target")->ValueString();
+					MemInputStreamBuf stream_buff(v.data(), v.size());
+					std::istream(&stream_buff) >> target_ctrl_pt.x() >> target_ctrl_pt.y() >> target_ctrl_pt.z();
+				}
 				float3 up_ctrl_pt;
 				{
-					std::istringstream attr_ss(std::string(key_node->Attrib("up")->ValueString()));
-					attr_ss >> up_ctrl_pt.x() >> up_ctrl_pt.y() >> up_ctrl_pt.z();
+					auto v = key_node->Attrib("up")->ValueString();
+					MemInputStreamBuf stream_buff(v.data(), v.size());
+					std::istream(&stream_buff) >> up_ctrl_pt.x() >> up_ctrl_pt.y() >> up_ctrl_pt.z();
 				}
 
 				bool corner;

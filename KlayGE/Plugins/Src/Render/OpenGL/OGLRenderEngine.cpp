@@ -182,19 +182,12 @@ namespace
 		KFL_UNUSED(length);
 		KFL_UNUSED(user_param);
 
-		std::string dbg = std::string("OpenGL debug output: source: ") + DebugSourceString(source) + "; "
-			+ "type: " + DebugTypeString(type) + "; "
-			+ "id: " + boost::lexical_cast<std::string>(id) + "; "
-			+ "severity: " + DebugSeverityString(severity) + "; "
-			+ "message: " + message;
-		if (GL_DEBUG_TYPE_ERROR == type)
-		{
-			KlayGE::LogError() << dbg << std::endl;
-		}
-		else
-		{
-			KlayGE::LogInfo() << dbg << std::endl;
-		}
+		auto& os = (GL_DEBUG_TYPE_ERROR == type) ? KlayGE::LogError() : KlayGE::LogInfo();
+		os << "OpenGL debug output: source: " << DebugSourceString(source) << "; "
+			<< "type: " << DebugTypeString(type) << "; "
+			<< "id: " << id << "; "
+			<< "severity: " << DebugSeverityString(severity) << "; "
+			<< "message: " << message << std::endl;
 	}
 #endif
 }
