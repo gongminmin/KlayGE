@@ -59,6 +59,7 @@
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
+#include <string>
 
 #include <boost/assert.hpp>
 #if defined(KLAYGE_COMPILER_CLANGC2)
@@ -549,7 +550,7 @@ namespace
 							if (index < strs.size())
 							{
 								boost::algorithm::trim(strs[index]);
-								init_val[index] = boost::lexical_cast<uint32_t>(strs[index]);
+								init_val[index] = std::stoul(strs[index]);
 							}
 						}
 						*var = init_val;
@@ -590,7 +591,7 @@ namespace
 							if (index < strs.size())
 							{
 								boost::algorithm::trim(strs[index]);
-								init_val[index] = boost::lexical_cast<int32_t>(strs[index]);
+								init_val[index] = std::stol(strs[index]);
 							}
 						}
 						*var = init_val;
@@ -804,7 +805,7 @@ namespace
 							if (index < strs.size())
 							{
 								boost::algorithm::trim(strs[index]);
-								init_val[index] = boost::lexical_cast<float>(strs[index]);
+								init_val[index] = std::stof(strs[index]);
 							}
 						}
 						*var = init_val;
@@ -852,7 +853,7 @@ namespace
 								if (index * 2 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 2 + j]);
+									init_val[index][j] = std::stoul(strs[index * 2 + j]);
 								}
 							}
 						}
@@ -906,7 +907,7 @@ namespace
 								if (index * 3 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 3 + j]);
+									init_val[index][j] = std::stoul(strs[index * 3 + j]);
 								}
 							}
 						}
@@ -965,7 +966,7 @@ namespace
 								if (index * 4 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = boost::lexical_cast<uint32_t>(strs[index * 4 + j]);
+									init_val[index][j] = std::stoul(strs[index * 4 + j]);
 								}
 							}
 						}
@@ -1014,7 +1015,7 @@ namespace
 								if (index * 2 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 2 + j]);
+									init_val[index][j] = std::stol(strs[index * 2 + j]);
 								}
 							}
 						}
@@ -1068,7 +1069,7 @@ namespace
 								if (index * 3 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 3 + j]);
+									init_val[index][j] = std::stol(strs[index * 3 + j]);
 								}
 							}
 						}
@@ -1127,7 +1128,7 @@ namespace
 								if (index * 4 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = boost::lexical_cast<int32_t>(strs[index * 4 + j]);
+									init_val[index][j] = std::stol(strs[index * 4 + j]);
 								}
 							}
 						}
@@ -1176,7 +1177,7 @@ namespace
 								if (index * 2 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 2 + j]);
-									init_val[index][j] = boost::lexical_cast<float>(strs[index * 2 + j]);
+									init_val[index][j] = std::stof(strs[index * 2 + j]);
 								}
 							}
 						}
@@ -1230,7 +1231,7 @@ namespace
 								if (index * 3 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 3 + j]);
-									init_val[index][j] = boost::lexical_cast<float>(strs[index * 3 + j]);
+									init_val[index][j] = std::stof(strs[index * 3 + j]);
 								}
 							}
 						}
@@ -1289,7 +1290,7 @@ namespace
 								if (index * 4 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 4 + j]);
-									init_val[index][j] = boost::lexical_cast<float>(strs[index * 4 + j]);
+									init_val[index][j] = std::stof(strs[index * 4 + j]);
 								}
 							}
 						}
@@ -1341,7 +1342,7 @@ namespace
 								if (index * 16 + j < strs.size())
 								{
 									boost::algorithm::trim(strs[index * 16 + j]);
-									init_val[index][j] = boost::lexical_cast<float>(strs[index * 16 + j]);
+									init_val[index][j] = std::stof(strs[index * 16 + j]);
 								}
 							}
 						}
@@ -3862,8 +3863,8 @@ namespace KlayGE
 			if ((ver.major_ver != 0) || (ver.minor_ver != 0))
 			{
 				str += "#if KLAYGE_SHADER_MODEL >= SHADER_MODEL("
-					+ boost::lexical_cast<std::string>(static_cast<int>(ver.major_ver)) + ", "
-					+ boost::lexical_cast<std::string>(static_cast<int>(ver.minor_ver)) + ")\n";
+					+ std::to_string(static_cast<int>(ver.major_ver)) + ", "
+					+ std::to_string(static_cast<int>(ver.minor_ver)) + ")\n";
 			}
 
 			str += effect_shader_frag.str() + "\n";

@@ -21,15 +21,7 @@
 #include <stdlib.h>
 #include <commctrl.h>
 #include <sstream>
-
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <string>
 
 #include "resource.h"
 
@@ -183,8 +175,8 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			{
 				SendMessage(hResCombo, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(buf));
 
-				std::string const res = boost::lexical_cast<std::string>(cfg.graphics_cfg.width) + 'x'
-					+ boost::lexical_cast<std::string>(cfg.graphics_cfg.height) + ' ';
+				std::string const res = std::to_string(cfg.graphics_cfg.width) + 'x'
+					+ std::to_string(cfg.graphics_cfg.height) + ' ';
 
 				std::string str;
 				Convert(str, buf);
@@ -382,7 +374,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			for (uint32_t i = 0; i < std::size(paper_white_candidates); ++ i)
 			{
 				std::basic_string<TCHAR> str;
-				Convert(str, boost::lexical_cast<std::string>(paper_white_candidates[i]));
+				Convert(str, std::to_string(paper_white_candidates[i]));
 				SendMessage(hPaperWhiteCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(str.c_str()));
 
 				if ((sel == -1) && (cfg.graphics_cfg.paper_white <= paper_white_candidates[i]))
@@ -398,7 +390,7 @@ INT_PTR CALLBACK Graphics_Tab_DlgProc(HWND hDlg, UINT uMsg, WPARAM /*wParam*/, L
 			for (uint32_t i = 0; i < std::size(max_lum_candidates); ++ i)
 			{
 				std::basic_string<TCHAR> str;
-				Convert(str, boost::lexical_cast<std::string>(max_lum_candidates[i]));
+				Convert(str, std::to_string(max_lum_candidates[i]));
 				SendMessage(hMaxLumCombo, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(str.c_str()));
 
 				if ((sel == -1) && (cfg.graphics_cfg.display_max_luminance <= max_lum_candidates[i]))
@@ -636,8 +628,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					std::string str;
 					Convert(str, buf);
 					std::string::size_type p = str.find('x');
-					cfg.graphics_cfg.width = boost::lexical_cast<int>(str.substr(0, p));
-					cfg.graphics_cfg.height = boost::lexical_cast<int>(str.substr(p + 1, str.size()));
+					cfg.graphics_cfg.width = std::stoi(str.substr(0, p));
+					cfg.graphics_cfg.height = std::stoi(str.substr(p + 1, str.size()));
 				}
 				{
 					HWND hClrFmtCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_CLR_FMT_COMBO);
@@ -759,7 +751,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					HWND hStereoSepEdit = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_STEREO_SEP_EDIT);
 					TCHAR buf[256];
 					GetWindowText(hStereoSepEdit, buf, static_cast<int>(std::size(buf)));
-					cfg.graphics_cfg.stereo_separation = boost::lexical_cast<float>(buf);
+					cfg.graphics_cfg.stereo_separation = std::stof(buf);
 				}
 				{
 					HWND hOutputCombo = GetDlgItem(hTabDlg[GRAPHICS_TAB], IDC_OUTPUT_COMBO);

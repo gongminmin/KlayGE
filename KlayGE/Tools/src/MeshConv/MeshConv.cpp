@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 #include <cstring>
+#include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -949,7 +950,7 @@ int main(int argc, char* argv[])
 
 		for (uint32_t num_lods = 0;; ++ num_lods)
 		{
-			std::string const lod_file_name = base_name.string() + "_lod" + boost::lexical_cast<std::string>(num_lods) + ext_name.string();
+			std::string const lod_file_name = base_name.string() + "_lod" + std::to_string(num_lods) + ext_name.string();
 			std::string const file_name = ResLoader::Instance().Locate((source_folder / lod_file_name).string());
 			if (file_name.empty())
 			{

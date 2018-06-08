@@ -32,6 +32,8 @@
 #include <KFL/Util.hpp>
 #include <KFL/ResIdentifier.hpp>
 
+#include <string>
+
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
@@ -85,17 +87,17 @@ namespace KlayGE
 	
 	XMLAttributePtr XMLDocument::AllocAttribInt(std::string_view name, int32_t value)
 	{
-		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
+		return this->AllocAttribString(name, std::to_string(value));
 	}
 
 	XMLAttributePtr XMLDocument::AllocAttribUInt(std::string_view name, uint32_t value)
 	{
-		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
+		return this->AllocAttribString(name, std::to_string(value));
 	}
 
 	XMLAttributePtr XMLDocument::AllocAttribFloat(std::string_view name, float value)
 	{
-		return this->AllocAttribString(name, boost::lexical_cast<std::string>(value));
+		return this->AllocAttribString(name, std::to_string(value));
 	}
 
 	XMLAttributePtr XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
@@ -502,17 +504,17 @@ namespace KlayGE
 
 	int32_t XMLNode::ValueInt() const
 	{
-		return boost::lexical_cast<int32_t>(this->ValueString());
+		return std::stol(std::string(this->ValueString()));
 	}
 
 	uint32_t XMLNode::ValueUInt() const
 	{
-		return boost::lexical_cast<uint32_t>(this->ValueString());
+		return std::stoul(std::string(this->ValueString()));
 	}
 
 	float XMLNode::ValueFloat() const
 	{
-		return boost::lexical_cast<float>(this->ValueString());
+		return std::stof(std::string(this->ValueString()));
 	}
 
 	std::string_view XMLNode::ValueString() const
@@ -586,17 +588,17 @@ namespace KlayGE
 
 	int32_t XMLAttribute::ValueInt() const
 	{
-		return boost::lexical_cast<int32_t>(value_);
+		return std::stol(std::string(value_));
 	}
 
 	uint32_t XMLAttribute::ValueUInt() const
 	{
-		return boost::lexical_cast<uint32_t>(value_);
+		return std::stoul(std::string(value_));
 	}
 
 	float XMLAttribute::ValueFloat() const
 	{
-		return boost::lexical_cast<float>(value_);
+		return std::stof(std::string(value_));
 	}
 
 	std::string_view XMLAttribute::ValueString() const

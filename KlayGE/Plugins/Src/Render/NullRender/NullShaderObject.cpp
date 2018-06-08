@@ -39,14 +39,7 @@
 #include <KFL/Hash.hpp>
 #include <KFL/ResIdentifier.hpp>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <string>
 
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #include <KlayGE/SALWrapper.hpp>
@@ -1332,7 +1325,7 @@ namespace KlayGE
 										{
 											usage = VEU_TextureCoord;
 											usage_index = static_cast<uint8_t>(semantic_index);
-											glsl_param_name = "TEXCOORD" + boost::lexical_cast<std::string>(semantic_index);
+											glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
 										}
 										else if (CT_HASH("TANGENT") == semantic_hash)
 										{

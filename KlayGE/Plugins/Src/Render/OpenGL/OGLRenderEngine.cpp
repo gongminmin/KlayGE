@@ -56,15 +56,9 @@
 
 #include <algorithm>
 #include <cstring>
+#include <string>
+
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KlayGE/OpenGL/OGLMapping.hpp>
 #include <KlayGE/OpenGL/OGLRenderWindow.hpp>
@@ -1401,7 +1395,7 @@ namespace KlayGE
 		}
 		else if (0 == name.find("FEATURE_NAME_"))
 		{
-			int const n = boost::lexical_cast<int>(name.substr(13));
+			int const n = std::stoi(std::string(name.substr(13)));
 			*static_cast<std::string*>(value) = glloader_get_feature_name(n);
 		}
 	}

@@ -17,14 +17,6 @@
 #include <cstring>
 
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 using namespace std;
 using namespace KlayGE;
@@ -257,15 +249,15 @@ int main(int argc, char* argv[])
 	}
 	if (argc > 3)
 	{
-		width = boost::lexical_cast<int>(argv[3]);
+		width = std::stoi(argv[3]);
 	}
 	if (argc > 4)
 	{
-		height = boost::lexical_cast<int>(argv[4]);
+		height = std::stoi(argv[4]);
 	}
 	if (argc > 5)
 	{
-		depth = boost::lexical_cast<int>(argv[5]);
+		depth = std::stoi(argv[5]);
 	}
 
 	Context::Instance().LoadCfg("KlayGE.cfg");

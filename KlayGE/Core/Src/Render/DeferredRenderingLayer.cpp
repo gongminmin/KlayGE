@@ -51,14 +51,7 @@
 #include <KlayGE/SSSBlur.hpp>
 #include <KlayGE/PerfProfiler.hpp>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <string>
 
 #include <KlayGE/DeferredRenderingLayer.hpp>
 
@@ -3973,7 +3966,7 @@ namespace KlayGE
 			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write);
 		pp->OutputPin(0, temp_tex);
 
-		std::string index_str = boost::lexical_cast<std::string>(index);
+		std::string index_str = std::to_string(index);
 
 		pp->Display(DT_Position);
 		pp->Apply();

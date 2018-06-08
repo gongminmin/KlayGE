@@ -30,15 +30,8 @@
 
 #include <KFL/KFL.hpp>
 
+#include <string>
 #include <system_error>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KFL/ErrorHandling.hpp>
 
@@ -46,7 +39,7 @@ namespace KlayGE
 {
 	std::string CombineFileLine(std::string_view file, int line)
 	{
-		return std::string(file) + ": " + boost::lexical_cast<std::string>(line);
+		return std::string(file) + ": " + std::to_string(line);
 	}
 
 	void Verify(bool x)

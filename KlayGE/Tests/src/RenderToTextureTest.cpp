@@ -39,15 +39,6 @@
 #include <vector>
 #include <string>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-
 #include "KlayGETests.hpp"
 
 using namespace std;
@@ -80,7 +71,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
+			sanity_name += "MS" + std::to_string(sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -105,7 +96,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
+			sanity_name += "MS" + std::to_string(sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);
@@ -138,7 +129,7 @@ public:
 		std::string sanity_name = "RenderToTexture";
 		if (sample_count > 1)
 		{
-			sanity_name += "MS" + boost::lexical_cast<std::string>(sample_count);
+			sanity_name += "MS" + std::to_string(sample_count);
 		}
 
 		auto target_sanity = SyncLoadTexture(sanity_name + "Test.dds", EAH_CPU_Read);

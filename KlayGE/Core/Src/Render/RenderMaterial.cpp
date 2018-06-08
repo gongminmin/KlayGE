@@ -38,6 +38,7 @@
 #include <KFL/CXX17/filesystem.hpp>
 
 #include <fstream>
+#include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -48,14 +49,6 @@
 #pragma clang diagnostic pop
 #endif
 #include <boost/algorithm/string/trim.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KlayGE/RenderMaterial.hpp>
 
@@ -454,10 +447,10 @@ namespace KlayGE
 		{
 			XMLNodePtr albedo_node = doc.AllocNode(XNT_Element, "albedo");
 
-			std::string color_str = boost::lexical_cast<std::string>(mtl->albedo.x())
-				+ ' ' + boost::lexical_cast<std::string>(mtl->albedo.y())
-				+ ' ' + boost::lexical_cast<std::string>(mtl->albedo.z())
-				+ ' ' + boost::lexical_cast<std::string>(mtl->albedo.w());
+			std::string color_str = std::to_string(mtl->albedo.x())
+				+ ' ' + std::to_string(mtl->albedo.y())
+				+ ' ' + std::to_string(mtl->albedo.z())
+				+ ' ' + std::to_string(mtl->albedo.w());
 			albedo_node->AppendAttrib(doc.AllocAttribString("color", color_str));
 
 			if (!mtl->tex_names[RenderMaterial::TS_Albedo].empty())
@@ -507,9 +500,9 @@ namespace KlayGE
 
 			if ((mtl->emissive.x() > 0) || (mtl->emissive.y() > 0) || (mtl->emissive.z() > 0))
 			{
-				std::string color_str = boost::lexical_cast<std::string>(mtl->emissive.x())
-					+ ' ' + boost::lexical_cast<std::string>(mtl->emissive.y())
-					+ ' ' + boost::lexical_cast<std::string>(mtl->emissive.z());
+				std::string color_str = std::to_string(mtl->emissive.x())
+					+ ' ' + std::to_string(mtl->emissive.y())
+					+ ' ' + std::to_string(mtl->emissive.z());
 				emissive_node->AppendAttrib(doc.AllocAttribString("color", color_str));
 			}
 			if (!mtl->tex_names[RenderMaterial::TS_Emissive].empty())

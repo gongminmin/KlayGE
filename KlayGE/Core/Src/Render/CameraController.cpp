@@ -38,14 +38,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KFL/Hash.hpp>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
+#include <string>
 
 #include <KlayGE/CameraController.hpp>
 
@@ -894,23 +887,23 @@ namespace KlayGE
 
 				{
 					float3 const & eye_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string eye_str = boost::lexical_cast<std::string>(eye_ctrl_pt.x())
-						+ ' ' + boost::lexical_cast<std::string>(eye_ctrl_pt.y())
-						+ ' ' + boost::lexical_cast<std::string>(eye_ctrl_pt.z());
+					std::string eye_str = std::to_string(eye_ctrl_pt.x())
+						+ ' ' + std::to_string(eye_ctrl_pt.y())
+						+ ' ' + std::to_string(eye_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("eye", eye_str));
 				}
 				{
 					float3 const & target_ctrl_pt = path->TargetControlPoint(curve_id, key_id);
-					std::string target_str = boost::lexical_cast<std::string>(target_ctrl_pt.x())
-						+ ' ' + boost::lexical_cast<std::string>(target_ctrl_pt.y())
-						+ ' ' + boost::lexical_cast<std::string>(target_ctrl_pt.z());
+					std::string target_str = std::to_string(target_ctrl_pt.x())
+						+ ' ' + std::to_string(target_ctrl_pt.y())
+						+ ' ' + std::to_string(target_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("target", target_str));
 				}
 				{
 					float3 const & up_ctrl_pt = path->EyeControlPoint(curve_id, key_id);
-					std::string up_str = boost::lexical_cast<std::string>(up_ctrl_pt.x())
-						+ ' ' + boost::lexical_cast<std::string>(up_ctrl_pt.y())
-						+ ' ' + boost::lexical_cast<std::string>(up_ctrl_pt.z());
+					std::string up_str = std::to_string(up_ctrl_pt.x())
+						+ ' ' + std::to_string(up_ctrl_pt.y())
+						+ ' ' + std::to_string(up_ctrl_pt.z());
 					key_node->AppendAttrib(doc.AllocAttribString("up", up_str));
 				}
 

@@ -27,15 +27,6 @@
 #include <sstream>
 #include <fstream>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
-
 #include <KlayGE/ShaderObject.hpp>
 
 #if KLAYGE_IS_DEV_PLATFORM
@@ -134,7 +125,7 @@ namespace
 			}
 			return hr;
 #else
-			std::string mark = boost::lexical_cast<std::string>(static_cast<void const *>(src_data.c_str()));
+			std::string mark = std::to_string(reinterpret_cast<uint64_t>(src_data.c_str()));
 			std::string compile_input_file = entry_point + mark + "Input.tmp";
 			std::string compile_output_file = entry_point + mark + "Output.tmp";
 
@@ -316,12 +307,12 @@ namespace KlayGE
 
 		std::string const & hlsl_shader_text = effect.HLSLShaderText();
 
-		std::string max_sm_str = boost::lexical_cast<std::string>(caps.max_shader_model.FullVersion());
-		std::string max_tex_array_str = boost::lexical_cast<std::string>(caps.max_texture_array_length);
-		std::string max_tex_depth_str = boost::lexical_cast<std::string>(caps.max_texture_depth);
-		std::string max_tex_units_str = boost::lexical_cast<std::string>(static_cast<int>(caps.max_pixel_texture_units));
-		std::string flipping_str = boost::lexical_cast<std::string>(re.RequiresFlipping() ? -1 : +1);
-		std::string render_to_tex_array_str = boost::lexical_cast<std::string>(caps.render_to_texture_array_support ? 1 : 0);
+		std::string max_sm_str = std::to_string(caps.max_shader_model.FullVersion());
+		std::string max_tex_array_str = std::to_string(caps.max_texture_array_length);
+		std::string max_tex_depth_str = std::to_string(caps.max_texture_depth);
+		std::string max_tex_units_str = std::to_string(static_cast<int>(caps.max_pixel_texture_units));
+		std::string flipping_str = std::to_string(re.RequiresFlipping() ? -1 : +1);
+		std::string render_to_tex_array_str = std::to_string(caps.render_to_texture_array_support ? 1 : 0);
 
 		std::string err_msg;
 		std::vector<D3D_SHADER_MACRO> macros;

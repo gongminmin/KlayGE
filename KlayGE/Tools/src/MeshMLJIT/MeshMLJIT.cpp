@@ -15,6 +15,7 @@
 #include <fstream>
 #include <vector>
 #include <cstring>
+#include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -122,7 +123,7 @@ namespace
 			OfflineRenderMaterial offline_mtl;
 			auto& mtl = offline_mtl.material;
 
-			mtl.name = "Material " + boost::lexical_cast<std::string>(mtl_index);
+			mtl.name = "Material " + std::to_string(mtl_index);
 
 			mtl.albedo = float4(0, 0, 0, 1);
 			mtl.metalness = 0;

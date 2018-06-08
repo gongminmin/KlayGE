@@ -38,15 +38,8 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <glloader/glloader.h>
 
@@ -768,7 +761,7 @@ namespace KlayGE
 										{
 											usage = VEU_TextureCoord;
 											usage_index = static_cast<uint8_t>(semantic_index);
-											glsl_param_name = "TEXCOORD" + boost::lexical_cast<std::string>(semantic_index);
+											glsl_param_name = "TEXCOORD" + std::to_string(semantic_index);
 										}
 										else if (CT_HASH("TANGENT") == semantic_hash)
 										{
@@ -1465,7 +1458,7 @@ namespace KlayGE
 				break;
 
 			case VEU_TextureCoord:
-				glsl_param_name = "v_TEXCOORD" + boost::lexical_cast<std::string>(static_cast<int>(decl.usage_index));
+				glsl_param_name = "v_TEXCOORD" + std::to_string(static_cast<int>(decl.usage_index));
 				break;
 
 			case VEU_Tangent:
@@ -1569,7 +1562,7 @@ namespace KlayGE
 						pos += 4;
 						std::string::size_type pos2 = err_str.find(':', pos + 1);
 						std::string part_err_str = err_str.substr(pos, pos2 - pos);
-						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
+						this->PrintGLSLErrorAtLine(glsl, std::stoi(part_err_str));
 					}
 
 					LogError() << err_str << std::endl << std::endl;
@@ -1591,7 +1584,7 @@ namespace KlayGE
 					{
 						std::string::size_type pos2 = err_str.find('(') + 1;
 						std::string part_err_str = err_str.substr(pos2, pos - pos2);
-						this->PrintGLSLErrorAtLine(glsl, boost::lexical_cast<int>(part_err_str));
+						this->PrintGLSLErrorAtLine(glsl, std::stoi(part_err_str));
 					}
 
 					LogError() << err_str << std::endl << std::endl;

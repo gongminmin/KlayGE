@@ -27,15 +27,9 @@
 #include <KFL/ArrayRef.hpp>
 
 #include <cstring>
+#include <string>
+
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KlayGE/D3D11/D3D11Adapter.hpp>
 #include <KlayGE/D3D11/D3D11RenderEngine.hpp>
@@ -287,9 +281,7 @@ namespace KlayGE
 						description_ += fl_str.data();
 						if (settings.sample_count > 1)
 						{
-							description_ += L" ("
-								+ boost::lexical_cast<std::wstring>(settings.sample_count)
-								+ L"x AA)";
+							description_ += L" (" + std::to_wstring(settings.sample_count) + L"x AA)";
 						}
 						break;
 					}

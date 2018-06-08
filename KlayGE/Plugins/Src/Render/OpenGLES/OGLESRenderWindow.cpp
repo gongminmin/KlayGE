@@ -25,16 +25,10 @@
 #include <KlayGE/Window.hpp>
 
 #include <map>
+#include <string>
 #include <system_error>
+
 #include <boost/assert.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <glloader/glloader.h>
 
@@ -300,7 +294,7 @@ namespace KlayGE
 		description_ = vendor + L" " + renderer + L" " + version;
 		if (settings.sample_count > 1)
 		{
-			description_ += L" (" + boost::lexical_cast<std::wstring>(settings.sample_count) + L"x AA)";
+			description_ += L" (" + std::to_wstring(settings.sample_count) + L"x AA)";
 		}
 	}
 

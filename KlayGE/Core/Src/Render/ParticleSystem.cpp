@@ -43,6 +43,7 @@
 #include <KFL/Hash.hpp>
 
 #include <fstream>
+#include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push
@@ -53,14 +54,6 @@
 #pragma clang diagnostic pop
 #endif
 #include <boost/algorithm/string/trim.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #include <KlayGE/ParticleSystem.hpp>
 
@@ -968,16 +961,16 @@ namespace KlayGE
 				{
 					Color const & from = ps->ParticleColorFrom();
 					{
-						std::string from_str = boost::lexical_cast<std::string>(from.r())
-							+ ' ' + boost::lexical_cast<std::string>(from.g())
-							+ ' ' + boost::lexical_cast<std::string>(from.b());
+						std::string from_str = std::to_string(from.r())
+							+ ' ' + std::to_string(from.g())
+							+ ' ' + std::to_string(from.b());
 						color_node->AppendAttrib(doc.AllocAttribString("from", from_str));
 					}
 					Color const & to = ps->ParticleColorTo();
 					{
-						std::string to_str = boost::lexical_cast<std::string>(to.r())
-							+ ' ' + boost::lexical_cast<std::string>(to.g())
-							+ ' ' + boost::lexical_cast<std::string>(to.b());
+						std::string to_str = std::to_string(to.r())
+							+ ' ' + std::to_string(to.g())
+							+ ' ' + std::to_string(to.b());
 						color_node->AppendAttrib(doc.AllocAttribString("to", to_str));
 					}
 				}
@@ -1006,15 +999,15 @@ namespace KlayGE
 			{
 				XMLNodePtr pos_node = doc.AllocNode(XNT_Element, "pos");
 				{
-					std::string min_str = boost::lexical_cast<std::string>(particle_emitter->MinPosition().x())
-						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MinPosition().y())
-						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MinPosition().z());
+					std::string min_str = std::to_string(particle_emitter->MinPosition().x())
+						+ ' ' + std::to_string(particle_emitter->MinPosition().y())
+						+ ' ' + std::to_string(particle_emitter->MinPosition().z());
 					pos_node->AppendAttrib(doc.AllocAttribString("min", min_str));
 				}
 				{
-					std::string max_str = boost::lexical_cast<std::string>(particle_emitter->MaxPosition().x())
-						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MaxPosition().y())
-						+ ' ' + boost::lexical_cast<std::string>(particle_emitter->MaxPosition().z());
+					std::string max_str = std::to_string(particle_emitter->MaxPosition().x())
+						+ ' ' + std::to_string(particle_emitter->MaxPosition().y())
+						+ ' ' + std::to_string(particle_emitter->MaxPosition().z());
 					pos_node->AppendAttrib(doc.AllocAttribString("max", max_str));
 				}
 				emitter_node->AppendNode(pos_node);

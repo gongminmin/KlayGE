@@ -35,15 +35,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <string>
 
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore mpl_assertion_in_line_xxx
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 #include <boost/assert.hpp>
 
 namespace
@@ -1141,7 +1134,7 @@ namespace KlayGE
 				{
 					Mesh opt_mesh;
 					opt_mesh.material_id = static_cast<int>(i);
-					opt_mesh.name = "combined_for_mtl_" + boost::lexical_cast<std::string>(i);
+					opt_mesh.name = "combined_for_mtl_" + std::to_string(i);
 
 					for (auto const & mesh : meshes_to_combine)
 					{

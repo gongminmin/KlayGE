@@ -66,8 +66,7 @@
 #include <vector>
 #include <limits>
 #include <functional>
-
-#include <boost/lexical_cast.hpp>
+#include <string>
 
 #include "util.hpp"
 #include "mesh_extractor.hpp"
@@ -843,7 +842,7 @@ namespace KlayGE
 					else
 					{
 						meshml_obj_.SetMesh(mesh_id, objs_mtl_id_[i], 
-							obj_name + "__mat_" + boost::lexical_cast<std::string>(i - mtl_base_index), 1);
+							obj_name + "__mat_" + std::to_string(i - mtl_base_index), 1);
 					}
 				}
 			}

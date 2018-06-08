@@ -51,14 +51,6 @@
 #pragma clang diagnostic pop
 #endif
 #include <boost/algorithm/string/trim.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
@@ -932,11 +924,8 @@ namespace KlayGE
 			}
 			output_node->AppendAttrib(cfg_doc.AllocAttribString("method", method_str));
 
-			output_node->AppendAttrib(cfg_doc.AllocAttribString("white",
-				boost::lexical_cast<std::string>(cfg_.graphics_cfg.paper_white)));
-
-			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum",
-				boost::lexical_cast<std::string>(cfg_.graphics_cfg.display_max_luminance)));
+			output_node->AppendAttrib(cfg_doc.AllocAttribString("white", std::to_string(cfg_.graphics_cfg.paper_white)));
+			output_node->AppendAttrib(cfg_doc.AllocAttribString("max_lum", std::to_string(cfg_.graphics_cfg.display_max_luminance)));
 
 			graphics_node->AppendNode(output_node);
 		}

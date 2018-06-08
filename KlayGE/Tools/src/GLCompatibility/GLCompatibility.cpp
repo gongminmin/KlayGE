@@ -12,14 +12,6 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-variable" // Ignore unused variable (mpl_assertion_in_line_xxx) in boost
-#endif
-#include <boost/lexical_cast.hpp>
-#if defined(KLAYGE_COMPILER_CLANGC2)
-#pragma clang diagnostic pop
-#endif
 
 #ifdef KLAYGE_COMPILER_MSVC
 extern "C"
@@ -61,7 +53,7 @@ namespace
 			for (int i = 0; i < num_exts; ++ i)
 			{
 				std::string name;
-				re.GetCustomAttrib("FEATURE_NAME_" + boost::lexical_cast<std::string>(i), &name);
+				re.GetCustomAttrib("FEATURE_NAME_" + std::to_string(i), &name);
 				std::string::size_type p = name.find("GL_VERSION_");
 				if (std::string::npos == p)
 				{
