@@ -49,24 +49,6 @@ namespace
 {
 	using namespace KlayGE;
 
-	class EmptyOStreamsCallback : boost::noncopyable
-	{
-	public:
-		EmptyOStreamsCallback()
-		{
-		}
-		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs)
-		{
-			KFL_UNUSED(rhs);
-		}
-
-		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
-		{
-			KFL_UNUSED(buff);
-			return static_cast<std::streambuf::int_type>(count);
-		}
-	};
-
 #ifdef KLAYGE_PLATFORM_ANDROID
 	class AndroidLogStreamCallback : boost::noncopyable
 	{
@@ -145,12 +127,32 @@ namespace
 	}
 #endif
 
+#ifndef KLAYGE_DEBUG
+	class EmptyOStreamsCallback : boost::noncopyable
+	{
+	public:
+		EmptyOStreamsCallback()
+		{
+		}
+		EmptyOStreamsCallback(EmptyOStreamsCallback&& rhs)
+		{
+			KFL_UNUSED(rhs);
+		}
+
+		std::streambuf::int_type operator()(void const * buff, std::streamsize count)
+		{
+			KFL_UNUSED(buff);
+			return static_cast<std::streambuf::int_type>(count);
+		}
+	};
+
 	std::ostream& EmptyLog()
 	{
 		static CallbackOutputStreamBuf<EmptyOStreamsCallback> empty_stream_buff((EmptyOStreamsCallback()));
 		static std::ostream empty_stream(&empty_stream_buff);
 		return empty_stream;
 	}
+#endif
 }
 
 namespace KlayGE
