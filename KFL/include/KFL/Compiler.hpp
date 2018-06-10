@@ -33,6 +33,23 @@
 
 // KlayGE requires vc 14.0+, g++ 7.1+, clang 3.6+, with C++14 or C++17 option on.
 
+// Macros for C++17 core features:
+// KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+// KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
+
+// Macros for C++17 library features:
+// KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+// KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT
+// KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+// KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+// KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+
+// Macros for C++2a library features:
+// KLAYGE_CXX2A_LIBRARY_ENDIAN_SUPPORT
+
+// Macros for TS library features:
+// KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+
 // Detects supported compilers
 #if defined(__clang__)
 	// Clang++
