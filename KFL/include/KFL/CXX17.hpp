@@ -33,6 +33,15 @@
 
 #pragma once
 
+#ifdef KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+	#define KLAYGE_IF_CONSTEXPR(x) if constexpr (x)
+#else
+	#ifdef KLAYGE_COMPILER_MSVC
+	#pragma warning(disable: 4127)
+	#endif
+	#define KLAYGE_IF_CONSTEXPR(x) if (x)
+#endif
+
 #ifdef KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 	#define KLAYGE_STATIC_ASSERT(x) static_assert(x)
 #else

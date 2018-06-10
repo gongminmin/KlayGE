@@ -57,6 +57,9 @@
 			#error "Unsupported compiler version. Please install Apple clang++ 6.1 or up."
 		#endif
 
+		#if CLANG_VERSION >= 80
+			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#endif
 		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#if CLANG_VERSION >= 90
 			#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
@@ -71,6 +74,7 @@
 			#error "Unsupported compiler version. Please install clang++ 5.0 (NDK 16) or up."
 		#endif
 
+		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
 		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
@@ -87,6 +91,9 @@
 
 		#define KLAYGE_COMPILER_CLANGC2
 
+		#if CLANG_VERSION >= 39
+			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#endif
 		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
 		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
 
@@ -133,6 +140,7 @@
 		#error "_GLIBCXX_HAS_GTHREADS must be turned on."
 	#endif
 
+	#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
 	#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
 	#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
@@ -169,6 +177,9 @@
 	#endif
 
 	#if _MSVC_LANG > 201402
+		#if _MSC_VER >= 1911
+			#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#endif
 		#if _MSC_VER >= 1910
 			#define KLAYGE_CXX17_CORE_STATIC_ASSERT_V2_SUPPORT
 		#endif
