@@ -63,19 +63,6 @@
 	#endif
 #endif
 
-// Defines the native endian
-#if defined(KLAYGE_CPU_ARM) || defined(KLAYGE_CPU_ARM64)
-	#if defined(__BIG_ENDIAN__) || defined(__ARMEB__) || defined(__THUMBEB__) || defined(__AARCH64EB__)
-		#define KLAYGE_BIG_ENDIAN
-	#else
-		#define KLAYGE_LITTLE_ENDIAN
-	#endif
-#elif defined(KLAYGE_CPU_X86) || defined(KLAYGE_CPU_X64) || defined(KLAYGE_PLATFORM_WINDOWS)
-	#define KLAYGE_LITTLE_ENDIAN
-#else
-	#error "Unknown CPU endian."
-#endif
-
 // Detects optional instruction sets
 #ifdef KLAYGE_CPU_X64
 	#define KLAYGE_SSE_SUPPORT
