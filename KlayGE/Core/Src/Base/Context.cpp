@@ -41,6 +41,7 @@
 #include <fstream>
 #include <mutex>
 #include <sstream>
+#include <string>
 
 #if defined(KLAYGE_COMPILER_CLANGC2)
 #pragma clang diagnostic push

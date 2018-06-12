@@ -38,6 +38,7 @@
 #include <KlayGE/App3D.hpp>
 #include <KFL/Hash.hpp>
 
+#include <istream>
 #include <string>
 
 #include <KlayGE/CameraController.hpp>

@@ -3966,7 +3966,7 @@ namespace KlayGE
 			1, 1, EF_ABGR32F, 1, 0, EAH_GPU_Write);
 		pp->OutputPin(0, temp_tex);
 
-		std::string index_str = std::to_string(index);
+		std::string const index_str = std::to_string(index);
 
 		pp->Display(DT_Position);
 		pp->Apply();
