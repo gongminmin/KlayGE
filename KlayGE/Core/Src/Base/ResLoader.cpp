@@ -271,7 +271,12 @@ namespace KlayGE
 		if (!new_path.is_absolute())
 		{
 			std::filesystem::path full_path = std::filesystem::path(exe_path_) / new_path;
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+			std::error_code ec;
+			if (!std::filesystem::exists(full_path, ec))
+#else
 			if (!std::filesystem::exists(full_path))
+#endif
 			{
 #ifndef KLAYGE_PLATFORM_ANDROID
 				try
@@ -282,7 +287,11 @@ namespace KlayGE
 				{
 					full_path = new_path;
 				}
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+				if (!std::filesystem::exists(full_path, ec))
+#else
 				if (!std::filesystem::exists(full_path))
+#endif
 				{
 					return "";
 				}
@@ -368,7 +377,12 @@ namespace KlayGE
 			{
 				package_path = std::string(path.substr(0, pkt_offset + 3));
 				std::filesystem::path pkt_path(package_path);
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+				std::error_code ec;
+				if (std::filesystem::exists(pkt_path, ec)
+#else
 				if (std::filesystem::exists(pkt_path)
+#endif
 					&& (std::filesystem::is_regular_file(pkt_path) || std::filesystem::is_symlink(pkt_path)))
 				{
 					auto const next_slash_offset = path.find('/', pkt_offset + 3);
@@ -523,7 +537,12 @@ namespace KlayGE
 					std::replace(res_name.begin(), res_name.end(), '\\', '/');
 #endif
 
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+					std::error_code ec;
+					if (std::filesystem::exists(std::filesystem::path(res_name), ec))
+#else
 					if (std::filesystem::exists(std::filesystem::path(res_name)))
+#endif
 					{
 						return res_name;
 					}
@@ -599,7 +618,12 @@ namespace KlayGE
 #endif
 
 					std::filesystem::path res_path(res_name);
+#if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
+					std::error_code ec;
+					if (std::filesystem::exists(res_path, ec))
+#else
 					if (std::filesystem::exists(res_path))
+#endif
 					{
 #if defined(KLAYGE_CXX17_LIBRARY_FILESYSTEM_SUPPORT) || defined(KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT)
 						uint64_t timestamp = std::filesystem::last_write_time(res_path).time_since_epoch().count();
