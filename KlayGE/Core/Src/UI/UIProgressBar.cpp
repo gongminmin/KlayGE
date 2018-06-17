@@ -20,7 +20,7 @@
 namespace KlayGE
 {
 	UIProgressBar::UIProgressBar(UIDialogPtr const & dialog)
-					: UIProgressBar(UIPolylineEditBox::Type, dialog)
+					: UIProgressBar(UIProgressBar::Type, dialog)
 	{
 	}
 

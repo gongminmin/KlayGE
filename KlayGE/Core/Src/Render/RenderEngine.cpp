@@ -294,7 +294,8 @@ namespace KlayGE
 			mono_frame_buffer_ = rf.MakeFrameBuffer();
 			mono_frame_buffer_->GetViewport()->camera = cur_frame_buffer_->GetViewport()->camera;
 
-			ArrayRef<ElementFormat> fmt_options = { EF_B10G11R11F, settings.color_fmt, EF_ABGR8, EF_ARGB8 };
+			ElementFormat const backup_fmts[] = { EF_B10G11R11F, settings.color_fmt, EF_ABGR8, EF_ARGB8 };
+			ArrayRef<ElementFormat> fmt_options = backup_fmts;
 			if (settings.display_output_method != DOM_sRGB)
 			{
 				fmt_options = fmt_options.Slice(1);

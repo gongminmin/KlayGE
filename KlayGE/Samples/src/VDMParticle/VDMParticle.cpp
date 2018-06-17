@@ -249,7 +249,8 @@ void VDMParticleApp::OnResize(uint32_t width, uint32_t height)
 	RenderEngine& re = rf.RenderEngineInstance();
 	RenderDeviceCaps const & caps = re.DeviceCaps();
 
-	ArrayRef<ElementFormat> fmt_options = { EF_B10G11R11F, EF_ABGR8, EF_ARGB8 };
+	static ElementFormat constexpr backup_fmts[] = { EF_B10G11R11F, EF_ABGR8, EF_ARGB8 };
+	ArrayRef<ElementFormat> fmt_options = backup_fmts;
 	if (!caps.fp_color_support)
 	{
 		fmt_options = fmt_options.Slice(1);
