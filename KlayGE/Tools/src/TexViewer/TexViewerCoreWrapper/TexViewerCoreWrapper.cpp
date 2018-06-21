@@ -25,6 +25,7 @@ namespace KlayGE
 		Context::Instance().LoadCfg("KlayGE.cfg");
 
 		ContextCfg cfg = Context::Instance().Config();
+		cfg.render_factory_name = "D3D11";
 		cfg.graphics_cfg.hdr = false;
 		cfg.graphics_cfg.ppaa = false;
 		cfg.graphics_cfg.gamma = true;
