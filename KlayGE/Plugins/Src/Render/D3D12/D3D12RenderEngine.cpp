@@ -1333,26 +1333,24 @@ namespace KlayGE
 		D3D12_FEATURE_DATA_FORMAT_SUPPORT fmt_support;
 		for (auto const & fmt : fmts)
 		{
-			DXGI_FORMAT dxgi_fmt;
 			if (IsDepthFormat(fmt.first))
 			{
 				switch (fmt.first)
 				{
 				case EF_D16:
-					dxgi_fmt = DXGI_FORMAT_R16_TYPELESS;
+					fmt_support.Format = DXGI_FORMAT_R16_TYPELESS;
 					break;
 
 				case EF_D24S8:
-					dxgi_fmt = DXGI_FORMAT_R24G8_TYPELESS;
+					fmt_support.Format = DXGI_FORMAT_R24G8_TYPELESS;
 					break;
 
 				case EF_D32F:
 				default:
-					dxgi_fmt = DXGI_FORMAT_R32_TYPELESS;
+					fmt_support.Format = DXGI_FORMAT_R32_TYPELESS;
 					break;
 				}
 
-				fmt_support.Format = dxgi_fmt;
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
@@ -1375,9 +1373,7 @@ namespace KlayGE
 			}
 			else
 			{
-				dxgi_fmt = fmt.second;
-
-				fmt_support.Format = dxgi_fmt;
+				fmt_support.Format = fmt.second;
 				fmt_support.Support1 = D3D12_FORMAT_SUPPORT1_NONE;
 				fmt_support.Support2 = D3D12_FORMAT_SUPPORT2_NONE;
 				if (SUCCEEDED(d3d_device_->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &fmt_support, sizeof(fmt_support))))
@@ -1415,7 +1411,9 @@ namespace KlayGE
 					|| (fmt_support.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL))
 				{
 					D3D12_FEATURE_DATA_MULTISAMPLE_QUALITY_LEVELS msaa_quality_levels;
-					msaa_quality_levels.Format = dxgi_fmt;
+					msaa_quality_levels.Format = fmt.second;
+					msaa_quality_levels.Flags = D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE;
+					msaa_quality_levels.NumQualityLevels = 0;
 
 					UINT count = 1;
 					while (count <= D3D12_MAX_MULTISAMPLE_SAMPLE_COUNT)
