@@ -177,7 +177,6 @@ namespace KlayGE
 				d3d_ds_src_->UpdateResourceBarrier(cmd_list, d3d_ds_first_subres_ + j, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			}
 		}
-		re.FlushResourceBarriers(cmd_list);
 	}
 
 	void D3D12FrameBuffer::UpdateViewPointers()
