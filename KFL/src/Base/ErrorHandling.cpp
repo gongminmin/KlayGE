@@ -30,6 +30,7 @@
 
 #include <KFL/KFL.hpp>
 
+#include <ostream>
 #include <string>
 #include <system_error>
 
