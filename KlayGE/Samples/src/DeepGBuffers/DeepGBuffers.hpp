@@ -22,6 +22,7 @@ private:
 	void InputHandler(KlayGE::InputEngine const & sender, KlayGE::InputAction const & action);
 	void ReceivesLightingHandler(KlayGE::UICheckBox const & sender);
 	void TransparencyChangedHandler(KlayGE::UISlider const & sender);
+	void SimpleForwardHandler(KlayGE::UICheckBox const & sender);
 	void CtrlCameraHandler(KlayGE::UICheckBox const & sender);
 
 	KlayGE::FontPtr font_;
@@ -39,6 +40,7 @@ private:
 	int id_receives_lighting_;
 	int id_transparency_static_;
 	int id_transparency_slider_;
+	int id_simple_forward_;
 	int id_ctrl_camera_;
 
 	float transparency_;

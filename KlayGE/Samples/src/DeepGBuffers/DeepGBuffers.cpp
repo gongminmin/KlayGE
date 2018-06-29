@@ -41,30 +41,57 @@ namespace
 
 			this->BindDeferredEffect(gbuffers_effect_);
 			technique_ = special_shading_tech_;
+
+			simple_forward_tech_ = no_lighting_gbuffers_effect_->TechniqueByName("NoLightingSimpleForwardTech");
 		}
 
 		void ReceivesLighting(bool lighting)
 		{
-			lighting_ = lighting;
-			this->BindDeferredEffect(lighting ? gbuffers_effect_ : no_lighting_gbuffers_effect_);
+			if (!simple_forward_)
+			{
+				lighting_ = lighting;
+				this->BindDeferredEffect(lighting ? gbuffers_effect_ : no_lighting_gbuffers_effect_);
 
-			this->UpdateTechniques();
+				this->UpdateTechniques();
+			}
 		}
 
 		void Transparency(float alpha)
 		{
 			mtl_->albedo.w() = alpha;
 
-			effect_attrs_ &= ~(EA_TransparencyFront | EA_TransparencyBack);
-			if (alpha < 1 - 1e-6f)
+			if (!simple_forward_)
 			{
-				effect_attrs_ |= (EA_TransparencyFront | EA_TransparencyBack | EA_SpecialShading);
+				effect_attrs_ &= ~(EA_TransparencyFront | EA_TransparencyBack);
+				if (alpha < 1 - 1e-6f)
+				{
+					effect_attrs_ |= (EA_TransparencyFront | EA_TransparencyBack | EA_SpecialShading);
+				}
+				this->UpdateTechniques();
 			}
-			this->UpdateTechniques();
+		}
+
+		void SimpleForward(bool simple_forward)
+		{
+			simple_forward_ = simple_forward;
+
+			if (simple_forward_)
+			{
+				this->BindDeferredEffect(no_lighting_gbuffers_effect_);
+				effect_attrs_ |= EA_SimpleForward;
+			}
+			else
+			{
+				effect_attrs_ &= ~EA_SimpleForward;
+
+				this->ReceivesLighting(lighting_);
+				this->Transparency(mtl_->albedo.w());
+			}
 		}
 
 	private:
 		bool lighting_;
+		bool simple_forward_;
 
 		RenderEffectPtr gbuffers_effect_;
 		RenderEffectPtr no_lighting_gbuffers_effect_;
@@ -198,6 +225,7 @@ void DeepGBuffersApp::OnCreate()
 	id_receives_lighting_ = dialog_->IDFromName("Lighting");
 	id_transparency_static_ = dialog_->IDFromName("TransparencyStatic");
 	id_transparency_slider_ = dialog_->IDFromName("TransparencySlider");
+	id_simple_forward_ = dialog_->IDFromName("SimpleForward");
 	id_ctrl_camera_ = dialog_->IDFromName("CtrlCamera");
 
 	dialog_->Control<UICheckBox>(id_receives_lighting_)->OnChangedEvent().connect(
@@ -214,6 +242,13 @@ void DeepGBuffersApp::OnCreate()
 			this->TransparencyChangedHandler(sender);
 		});
 	this->TransparencyChangedHandler(*dialog_->Control<UISlider>(id_transparency_slider_));
+
+	dialog_->Control<UICheckBox>(id_simple_forward_)->OnChangedEvent().connect(
+		[this](UICheckBox const & sender)
+		{
+			this->SimpleForwardHandler(sender);
+		});
+	this->SimpleForwardHandler(*dialog_->Control<UICheckBox>(id_simple_forward_));
 
 	dialog_->Control<UICheckBox>(id_ctrl_camera_)->OnChangedEvent().connect(
 		[this](UICheckBox const & sender)
@@ -271,6 +306,24 @@ void DeepGBuffersApp::TransparencyChangedHandler(UISlider const & sender)
 	std::wostringstream stream;
 	stream << L"Transparency: " << transparency_;
 	dialog_->Control<UIStatic>(id_transparency_static_)->SetText(stream.str());
+}
+
+void DeepGBuffersApp::SimpleForwardHandler(UICheckBox const & sender)
+{
+	bool const simple_forward = sender.GetChecked();
+
+	if (simple_forward)
+	{
+		auto control = dialog_->Control<UICheckBox>(id_receives_lighting_);
+		control->SetEnabled(false);
+		control->SetChecked(false);
+	}
+
+	RenderablePtr const & model = scene_obj_->GetRenderable();
+	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
+	{
+		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->SimpleForward(simple_forward);
+	}
 }
 
 void DeepGBuffersApp::CtrlCameraHandler(UICheckBox const & sender)

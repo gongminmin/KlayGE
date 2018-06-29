@@ -7,6 +7,8 @@
 		<control type="static" id="TransparencyStatic" caption="Transparency:" x="20" y="60" width="120" height="24" is_default="0"/>
 		<control type="slider" id="TransparencySlider" x="20" y="90" width="120" height="24" min="0" max="20" value="20" is_default="0"/>
 
+		<control type="check_box" id="SimpleForward" caption="Simple Forward" x="20" y="130" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
+
 		<control type="check_box" id="CtrlCamera" caption="Control camera" x="20" y="348" width="350" height="24" checked="0" hotkey="0" is_default="0"/>
 	</dialog>
 
