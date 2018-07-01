@@ -74,8 +74,7 @@ namespace KlayGE
 		*(vpls_lighting_effect_->ParameterByName("vpls_tex")) = vpl_tex_;
 		*(vpls_lighting_effect_->ParameterByName("vpl_params")) = float2(1.0f / VPL_COUNT, 0.5f / VPL_COUNT);
 
-		vpl_renderable_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>())->Subrenderable(0);
+		vpl_renderable_ = SyncLoadModel("indirect_light_proxy.meshml", EAH_GPU_Read | EAH_Immutable)->Subrenderable(0);
 		vpl_renderable_->GetRenderLayout().NumInstances(VPL_COUNT);
 	}
 

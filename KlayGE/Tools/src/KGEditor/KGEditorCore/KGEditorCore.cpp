@@ -864,8 +864,7 @@ namespace KlayGE
 
 		ResLoader::Instance().AddPath(meshml_name.substr(0, meshml_name.find_last_of('\\')));
 
-		RenderModelPtr model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable,
-			CreateModelFactory<RenderModel>(), CreateMeshFactory<StaticMesh>());
+		RenderModelPtr model = SyncLoadModel(meshml_name, EAH_GPU_Read | EAH_Immutable);
 		SceneObjectPtr scene_obj = MakeSharedPtr<SceneObjectHelper>(model,
 			SceneObject::SOA_Cullable | SceneObject::SOA_Moveable);
 		scene_obj->AddToSceneManager();

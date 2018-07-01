@@ -266,7 +266,6 @@ void DetailedSkinnedModel::DoBuildModelInfo()
 			}
 			break;
 
-		
 		case VEU_Tangent:
 			{
 				GraphicsBufferPtr vb_cpu = rf.MakeVertexBuffer(BU_Static, EAH_CPU_Read, vb->Size(), nullptr);
