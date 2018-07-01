@@ -207,8 +207,8 @@ class BuildInfo:
 
 		self.is_dev_platform = (self.is_windows_desktop or self.is_linux or self.is_darwin)
 
+		project_type = ""
 		if ("" == compiler) or self.is_clean:
-			project_type = ""
 			compiler = ""
 			if ("auto" == cfg_build.project) and ("auto" == cfg_build.compiler):
 				if 0 == target_platform.find("win"):
