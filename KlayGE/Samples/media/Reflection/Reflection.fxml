@@ -87,8 +87,8 @@ float4 ReflectReflectionPS(
 	float3 reflect_vec_back = reflect(pos_es_back, normal_es_back);
 
 	float3 reflect_vec_ws = mul(reflect_vec_front, (float3x3)inv_view);
-	float3 sky = decode_hdr_yc(skybox_tex.SampleLevel(skybox_sampler, reflect_vec_front, 0).r,
-			skybox_C_tex.SampleLevel(skybox_sampler, reflect_vec_front, 0)).xyz;
+	float3 sky = decode_hdr_yc(skybox_tex.SampleLevel(skybox_sampler, reflect_vec_ws, 0).r,
+			skybox_C_tex.SampleLevel(skybox_sampler, reflect_vec_ws, 0)).xyz;
 
 	float4 ssr;
 	if (reflect_vec_front.z > 0)
