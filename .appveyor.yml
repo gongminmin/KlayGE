@@ -1,0 +1,19 @@
+version: '{branch}-{build}'
+
+clone_depth: 5
+
+platform:
+  - x64
+
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      COMPILER: vc141
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+      COMPILER: vc140
+
+configuration:
+  - Release
+
+build_script:
+  - python BuildAll.py %COMPILER% %PLATFORM% %CONFIGURATION%
