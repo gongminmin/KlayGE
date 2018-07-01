@@ -22,22 +22,6 @@ def LogInfo(message):
 def LogWarning(message):
 	print("[W] %s" % message)
 
-try:
-	import cfg_build
-	GenerateCfgBuildFromDefault()
-	hint_for_migrating = True
-except:
-	hint_for_migrating = False
-
-if hint_for_migrating:
-	LogError("cfg_build.py is retired. Please migrate your configurations to new CfgBuild.py.")
-
-try:
-	from CfgBuild import ActivedCfgBuild
-except:
-	GenerateCfgBuildFromDefault()
-	from CfgBuild import ActivedCfgBuild
-
 class CompilerInfo:
 	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
 		self.arch = arch
@@ -49,22 +33,40 @@ class CompilerInfo:
 class BuildInfo:
 	@classmethod
 	def FromArgv(BuildInfo, argv, base = 0):
-		if len(argv) > base + 1:
+		compiler = ""
+		archs = ""
+		cfg = ""
+		target = ""
+
+		argc = len(argv)
+		if argc > base + 1:
 			compiler = argv[base + 1]
-		else:
-			compiler = ""
-		if len(argv) > base + 2:
+		if argc > base + 2:
 			archs = (argv[base + 2], )
-		else:
-			archs = ""
-		if len(argv) > base + 3:
+		if argc > base + 3:
 			cfg = (argv[base + 3], )
-		else:
-			cfg = ""
+		if argc > base + 4:
+			target = argv[base + 4]
 
-		return BuildInfo(compiler, archs, cfg)
+		return BuildInfo(compiler, archs, cfg, target)
 
-	def __init__(self, compiler, archs, cfg):
+	def __init__(self, compiler, archs, cfg, target):
+		try:
+			import cfg_build
+			GenerateCfgBuildFromDefault()
+			hint_for_migrating = True
+		except:
+			hint_for_migrating = False
+
+		if hint_for_migrating:
+			LogError("cfg_build.py is retired. Please migrate your configurations to new CfgBuild.py.")
+
+		try:
+			from CfgBuild import ActivedCfgBuild
+		except:
+			GenerateCfgBuildFromDefault()
+			from CfgBuild import ActivedCfgBuild
+
 		cfg_build = ActivedCfgBuild()
 		try:
 			cfg_build.cmake_path
@@ -74,22 +76,34 @@ class BuildInfo:
 			cfg_build.project
 		except:
 			cfg_build.project = "auto"
-		try:
-			cfg_build.compiler
-		except:
-			cfg_build.compiler = "auto"
-		try:
-			cfg_build.arch
-		except:
-			cfg_build.arch = ("x64", )
-		try:
-			cfg_build.config
-		except:
-			cfg_build.config = ("Debug", "RelWithDebInfo")
-		try:
-			cfg_build.target
-		except:
-			cfg_build.target = "auto"
+		if len(compiler) > 0:
+			cfg_build.compiler = compiler
+		else:
+			try:
+				cfg_build.compiler
+			except:
+				cfg_build.compiler = "auto"
+		if len(archs) > 0:
+			cfg_build.arch = archs
+		else:
+			try:
+				cfg_build.arch
+			except:
+				cfg_build.arch = ("x64", )
+		if len(cfg) > 0:
+			cfg_build.config = cfg
+		else:
+			try:
+				cfg_build.config
+			except:
+				cfg_build.config = ("Debug", "RelWithDebInfo")
+		if len(target) > 0:
+			cfg_build.target = target
+		else:
+			try:
+				cfg_build.target
+			except:
+				cfg_build.target = "auto"
 		try:
 			cfg_build.shader_platform_name
 		except:
