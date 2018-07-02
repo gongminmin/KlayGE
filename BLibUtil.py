@@ -192,7 +192,7 @@ class BuildInfo:
 		self.cmake_path = cfg_build.cmake_path
 		if self.cmake_path == "auto":
 			self.cmake_path = self.FindCMake()
-		self.cmake_ver = self.RetriveCMakeVersion()
+		self.cmake_ver = self.RetrieveCMakeVersion()
 		if self.cmake_ver < 39:
 			LogError("CMake 3.9+ is required.")
 
@@ -384,7 +384,7 @@ class BuildInfo:
 				compiler_version = 140
 			elif "clangc2" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.RetriveClangVersion(compiler_root)
+				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
 				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
@@ -397,7 +397,7 @@ class BuildInfo:
 				compiler_version = 140
 			elif "clangc2" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.RetriveClangVersion(compiler_root)
+				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
 				LogError("Wrong combination of project and compiler.\n")
 			multi_config = True
@@ -406,7 +406,7 @@ class BuildInfo:
 		elif "xcode" == project_type:
 			if "clang" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.RetriveClangVersion()
+				compiler_version = self.RetrieveClangVersion()
 				gen_name = "Xcode"
 				multi_config = True
 				for arch in archs:
@@ -420,17 +420,17 @@ class BuildInfo:
 				gen_name = "Unix Makefiles"
 			if "clang" == compiler:
 				compiler_name = "clang"
-				compiler_version = self.RetriveClangVersion()
+				compiler_version = self.RetrieveClangVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			elif "mingw" == compiler:
 				compiler_name = "mgw"
-				compiler_version = self.RetriveGCCVersion()
+				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			elif "gcc" == compiler:
 				compiler_name = "gcc"
-				compiler_version = self.RetriveGCCVersion()
+				compiler_version = self.RetrieveGCCVersion()
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
@@ -474,12 +474,12 @@ class BuildInfo:
 		batch_cmd.AddCommand('xcodebuild -quiet -target %s -configuration %s' % (target_name, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
 		
-	def RetriveGCCVersion(self):
+	def RetrieveGCCVersion(self):
 		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
 
-	def RetriveClangVersion(self, path = ""):
+	def RetrieveClangVersion(self, path = ""):
 		if ("android" == self.target_platform):
 			android_ndk_path = os.environ["ANDROID_NDK"]
 			prebuilt_llvm_path = android_ndk_path + "\\toolchains\\llvm"
@@ -560,7 +560,7 @@ class BuildInfo:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
 		return cmake_loc.split(sep)[0]
 
-	def RetriveCMakeVersion(self):
+	def RetrieveCMakeVersion(self):
 		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
 		if len(cmake_ver) == 0:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
