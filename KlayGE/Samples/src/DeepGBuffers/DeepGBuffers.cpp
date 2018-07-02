@@ -71,7 +71,7 @@ namespace
 			}
 		}
 
-		void SimpleForward(bool simple_forward)
+		void SimpleForwardMode(bool simple_forward)
 		{
 			simple_forward_ = simple_forward;
 
@@ -322,7 +322,7 @@ void DeepGBuffersApp::SimpleForwardHandler(UICheckBox const & sender)
 	RenderablePtr const & model = scene_obj_->GetRenderable();
 	for (uint32_t i = 0; i < model->NumSubrenderables(); ++ i)
 	{
-		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->SimpleForward(simple_forward);
+		checked_pointer_cast<SwitchableMesh>(model->Subrenderable(i))->SimpleForwardMode(simple_forward);
 	}
 }
 
