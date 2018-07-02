@@ -189,6 +189,13 @@ class BuildInfo:
 		self.prefer_static = prefer_static
 		self.is_clean = ("clean" == compiler)
 
+		if self.host_platform == "win":
+			self.where_cmd = "where"
+			self.sep = "\r\n"
+		else:
+			self.where_cmd = "which"
+			self.sep = "\n"
+
 		self.cmake_path = cfg_build.cmake_path
 		if self.cmake_path == "auto":
 			self.cmake_path = self.FindCMake()
@@ -239,10 +246,10 @@ class BuildInfo:
 						if ("VS140COMNTOOLS" in env) or os.path.exists(program_files_folder + "\\Microsoft Visual Studio 14.0\\VC\\VCVARSALL.BAT"):
 							project_type = "vs2015"
 							compiler = "vc140"
-						elif 0 == subprocess.call("where clang++"):
+						elif len(self.FindClang()) != 0:
 							project_type = "make"
 							compiler = "clang"
-						elif 0 == subprocess.call("where g++"):
+						elif len(self.FindGCC()) != 0:
 							project_type = "make"
 							compiler = "mingw"
 				elif ("linux" == target_platform):
@@ -342,12 +349,10 @@ class BuildInfo:
 						else:
 							LogError("Could NOT find clangc2 compiler toolset.\n")
 			elif "clang" == compiler:
-				clang_loc = subprocess.check_output("where clang++").decode()
-				clang_loc = clang_loc.split("\r\n")[0]
+				clang_loc = self.FindClang()
 				compiler_root = clang_loc[0:clang_loc.rfind("\\clang++") + 1]
 			elif "mingw" == compiler:
-				gcc_loc = subprocess.check_output("where g++").decode()
-				gcc_loc = gcc_loc.split("\r\n")[0]
+				gcc_loc = self.FindGCC()
 				compiler_root = gcc_loc[0:gcc_loc.rfind("\\g++") + 1]
 		else:
 			compiler_root = ""
@@ -473,11 +478,37 @@ class BuildInfo:
 	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
 		batch_cmd.AddCommand('xcodebuild -quiet -target %s -configuration %s' % (target_name, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
-		
+
+	def FindGCC(self):
+		if self.host_platform != "win":
+			env = os.environ
+			if "CXX" in env:
+				gcc_loc = env["CXX"]
+				if len(gcc_loc) != 0:
+					return gcc_loc.split(self.sep)[0]
+
+		gcc_loc = subprocess.check_output(self.where_cmd + " g++", shell = True).decode()
+		if len(gcc_loc) == 0:
+			LogError("Could NOT find g++. Please install g++ 7.1+, set its path into CXX, or put its path into %%PATH%%.")
+		return gcc_loc.split(self.sep)[0]
+
 	def RetrieveGCCVersion(self):
-		gcc_ver = subprocess.check_output(["gcc", "-dumpversion"]).decode()
+		gcc_ver = subprocess.check_output([self.FindGCC(), "-dumpfullversion"]).decode()
 		gcc_ver_components = gcc_ver.split(".")
 		return int(gcc_ver_components[0] + gcc_ver_components[1])
+
+	def FindClang(self):
+		if self.host_platform != "win":
+			env = os.environ
+			if "CXX" in env:
+				clang_loc = env["CXX"]
+				if len(clang_loc) != 0:
+					return clang_loc.split(self.sep)[0]
+
+		clang_loc = subprocess.check_output(self.where_cmd + " clang++", shell = True).decode()
+		if len(clang_loc) == 0:
+			LogError("Could NOT find g++. Please install clang++ 3.6+, set its path into CXX, or put its path into %%PATH%%.")
+		return clang_loc.split(self.sep)[0]
 
 	def RetrieveClangVersion(self, path = ""):
 		if ("android" == self.target_platform):
@@ -549,16 +580,10 @@ class BuildInfo:
 		return ""
 
 	def FindCMake(self):
-		if self.host_platform == "win":
-			where_cmd = "where"
-			sep = "\r\n"
-		else:
-			where_cmd = "which"
-			sep = "\n"
-		cmake_loc = subprocess.check_output(where_cmd + " cmake", shell = True).decode()
+		cmake_loc = subprocess.check_output(self.where_cmd + " cmake", shell = True).decode()
 		if len(cmake_loc) == 0:
 			LogError("Could NOT find CMake. Please install CMake 3.9+, set its path into CfgBuild's self.cmake_path, or put its path into %%PATH%%.")
-		return cmake_loc.split(sep)[0]
+		return cmake_loc.split(self.sep)[0]
 
 	def RetrieveCMakeVersion(self):
 		cmake_ver = subprocess.check_output([self.cmake_path, "--version"]).decode()
