@@ -1794,7 +1794,8 @@ namespace
 			if (ext_name != ".dds")
 			{
 				std::string cmd = "texconv -f A8B8G8R8 -ft DDS -m 1 \"" + slot.first.string() + "\"";
-				system(cmd.c_str());
+				int err = system(cmd.c_str());
+				KFL_UNUSED(err);
 
 				std::string tex_base = (slot.first.parent_path() / slot.first.stem()).string();
 				deploy_files.emplace_back(filesystem::path(tex_base + ".dds"),
@@ -1886,7 +1887,8 @@ namespace
 			cout << "Processing " << df.first.string() << endl;
 
 			std::string cmd = "platformdeployer -P " + platform + " -I \"" + df.first.string() + "\" -T " + deploy_type;
-			system(cmd.c_str());
+			int err = system(cmd.c_str());
+			KFL_UNUSED(err);
 		}
 
 		filesystem::path output_folder = filesystem::path(output_name).parent_path();

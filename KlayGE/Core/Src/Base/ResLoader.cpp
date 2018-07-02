@@ -34,6 +34,9 @@
 #include <KlayGE/Package.hpp>
 #include <KFL/CXX17/filesystem.hpp>
 
+#if defined KLAYGE_PLATFORM_LINUX
+#include <cstring>
+#endif
 #include <fstream>
 #include <sstream>
 

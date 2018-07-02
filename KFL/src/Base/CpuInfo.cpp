@@ -42,6 +42,7 @@
 #include <intrin.h>
 #endif
 #endif
+#include <cstring>
 #include <vector>
 #include <boost/assert.hpp>
 

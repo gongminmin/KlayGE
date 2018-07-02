@@ -820,7 +820,8 @@ namespace
 			if (!*font_desc_.kfont)
 			{
 				std::shared_ptr<FontRenderable> fr = MakeSharedPtr<FontRenderable>(font_desc_.kfont_loader);
-				*font_desc_.kfont = MakeSharedPtr<Font>(fr, font_desc_.flag);
+				// Use KlayGE:: here to prevent an error on Linux
+				*font_desc_.kfont = MakeSharedPtr<KlayGE::Font>(fr, font_desc_.flag);
 			}
 		}
 

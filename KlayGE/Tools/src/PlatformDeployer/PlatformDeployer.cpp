@@ -381,8 +381,10 @@ void Deploy(std::vector<std::string> const & res_names, std::string const & res_
 
 	if ((res_type != "cubemap") && (res_type != "model") && (res_type != "effect"))
 	{
-		system("convert.bat");
-		system("del convert.bat");
+		int err = system("convert.bat");
+		KFL_UNUSED(err);
+		err = system("del convert.bat");
+		KFL_UNUSED(err);
 	}
 }
 

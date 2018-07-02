@@ -91,7 +91,7 @@ static uint8_t const grad4[] =
 
 static uint8_t simplex[][4] =
 {
-    { 0, 1, 2, 3 },
+	{ 0, 1, 2, 3 },
 	{ 0, 1, 3, 2 },
 	{ 0, 0, 0, 0 },
 	{ 0, 2, 3, 1 },
@@ -100,7 +100,7 @@ static uint8_t simplex[][4] =
 	{ 0, 0, 0, 0 },
 	{ 1, 2, 3, 0 },
 
-    { 0, 2, 1, 3 },
+	{ 0, 2, 1, 3 },
 	{ 0, 0, 0, 0 },
 	{ 0, 3, 1, 2 },
 	{ 0, 3, 2, 1 },
@@ -118,7 +118,7 @@ static uint8_t simplex[][4] =
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 
-    { 1, 2, 0, 3 },
+	{ 1, 2, 0, 3 },
 	{ 0, 0, 0, 0 },
 	{ 1, 3, 0, 2 },
 	{ 0, 0, 0, 0 },
@@ -127,7 +127,7 @@ static uint8_t simplex[][4] =
 	{ 2, 3, 0, 1 },
 	{ 2, 3, 1, 0 },
 
-    { 1, 0, 2, 3 },
+	{ 1, 0, 2, 3 },
 	{ 1, 0, 3, 2 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
@@ -136,7 +136,7 @@ static uint8_t simplex[][4] =
 	{ 0, 0, 0, 0 },
 	{ 2, 1, 3, 0 },
 
-    { 0, 0, 0, 0 },
+	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
@@ -145,7 +145,7 @@ static uint8_t simplex[][4] =
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 
-    { 2, 0, 1, 3 },
+	{ 2, 0, 1, 3 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
@@ -154,7 +154,7 @@ static uint8_t simplex[][4] =
 	{ 0, 0, 0, 0 },
 	{ 3, 1, 2, 0 },
 
-    { 2, 1, 0, 3 },
+	{ 2, 1, 0, 3 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
 	{ 0, 0, 0, 0 },
@@ -252,8 +252,10 @@ void GenfBmTexs()
 	SaveTexture(OUTPUT_PATH "fBm5_tex.dds", Texture::TT_2D,
 		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_R8, init_data);
 
-	system("Mipmapper " OUTPUT_PATH "fBm5_tex.dds");
-	system("TexCompressor BC4 " OUTPUT_PATH "fBm5_tex.dds");
+	int err = system("Mipmapper " OUTPUT_PATH "fBm5_tex.dds");
+	KFL_UNUSED(err);
+	err = system("TexCompressor BC4 " OUTPUT_PATH "fBm5_tex.dds");
+	KFL_UNUSED(err);
 
 	std::vector<float3> fdata3(TEX_SIZE * TEX_SIZE);
 	for (uint32_t y = 0; y < TEX_SIZE; ++ y)
@@ -279,8 +281,10 @@ void GenfBmTexs()
 	SaveTexture(OUTPUT_PATH "fBm5_grad_tex.dds", Texture::TT_2D,
 		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_ABGR8, init_data);
 
-	system("Mipmapper " OUTPUT_PATH "fBm5_grad_tex.dds");
-	system("TexCompressor BC5 " OUTPUT_PATH "fBm5_grad_tex.dds");
+	err = system("Mipmapper " OUTPUT_PATH "fBm5_grad_tex.dds");
+	KFL_UNUSED(err);
+	err = system("TexCompressor BC5 " OUTPUT_PATH "fBm5_grad_tex.dds");
+	KFL_UNUSED(err);
 }
 
 int main()
