@@ -471,7 +471,7 @@ class BuildInfo:
 		batch_cmd.AddCommand('@if ERRORLEVEL 1 exit /B 1')
 		
 	def XCodeBuildAddBuildCommand(self, batch_cmd, target_name, config):
-		batch_cmd.AddCommand('xcodebuild -target %s -configuration %s' % (target_name, config))
+		batch_cmd.AddCommand('xcodebuild -quiet -target %s -configuration %s' % (target_name, config))
 		batch_cmd.AddCommand('if (($? != 0)); then exit 1; fi')
 		
 	def RetriveGCCVersion(self):
