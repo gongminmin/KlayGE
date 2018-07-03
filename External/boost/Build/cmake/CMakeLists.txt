@@ -34,6 +34,7 @@ FOREACH(flag_var
 		STRING(REPLACE "/W4" "/W3" ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "/WX" "/WX-" ${flag_var} "${${flag_var}}")
 	ELSE()
+		STRING(REPLACE "-Wall" " " ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "-Werror" "-Wno-error" ${flag_var} "${${flag_var}}")
 	ENDIF()
 ENDFOREACH()

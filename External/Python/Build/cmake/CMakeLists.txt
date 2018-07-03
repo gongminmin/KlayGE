@@ -39,6 +39,7 @@ FOREACH(flag_var
 		STRING(REPLACE "/WX" "/WX-" ${flag_var} "${${flag_var}}")
 		SET(${flag_var} "${${flag_var}} /wd4273 /we4013 /we4133")
 	ELSE()
+		STRING(REPLACE "-Wall" " " ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "-Werror" "-Wno-error" ${flag_var} "${${flag_var}}")
 	ENDIF()
 ENDFOREACH()
