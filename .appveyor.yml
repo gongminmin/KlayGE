@@ -11,9 +11,17 @@ environment:
       COMPILER: vc141
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
       COMPILER: vc140
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      COMPILER: mingw
+      MINGW_PATH: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
 
 configuration:
   - Release
+
+before_build:
+  # Workaround for CMake not wanting sh.exe on PATH for MinGW
+  - if "%COMPILER%" equ "mingw" set PATH=%PATH:C:\Program Files\Git\usr\bin;=%
+  - if "%COMPILER%" equ "mingw" set PATH=%MINGW_PATH%;%PATH%
 
 build_script:
   - python BuildAll.py %COMPILER% %PLATFORM% %CONFIGURATION%
