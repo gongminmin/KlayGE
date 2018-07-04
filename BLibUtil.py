@@ -5,10 +5,12 @@ import os, sys, multiprocessing, subprocess, shutil, platform
 
 def GenerateCfgBuildFromDefault():
 	print("Generating CfgBuild.py ...")
+	sys.stdout.flush()
 	shutil.copyfile("CfgBuildDefault.py", "CfgBuild.py")
 
 def LogError(message):
 	print("[E] %s" % message)
+	sys.stdout.flush()
 	if 0 == sys.platform.find("win"):
 		pause_cmd = "pause"
 	else:
@@ -18,9 +20,11 @@ def LogError(message):
 
 def LogInfo(message):
 	print("[I] %s" % message)
+	sys.stdout.flush()
 
 def LogWarning(message):
 	print("[W] %s" % message)
+	sys.stdout.flush()
 
 class CompilerInfo:
 	def __init__(self, arch, gen_name, compiler_root, vcvarsall_path = "", vcvarsall_options = ""):
@@ -603,6 +607,7 @@ class BuildInfo:
 			print("\tTarget API level: %d" % self.target_api_level)
 		elif self.is_windows_store:
 			print("\tTarget API level: %s" % self.target_api_level)
+		print("\tCPU count: %d" % multiprocessing.cpu_count())
 		print("\tPrefer static library: %s" % self.prefer_static)
 		print("\tShader platform: %s" % self.shader_platform_name)
 		print("\tIs dev platform: %s" % self.is_dev_platform)
@@ -628,6 +633,7 @@ class BuildInfo:
 			print("\tOculus LibOVR path: %s" % self.libovr_path)
 		
 		print("")
+		sys.stdout.flush()
 
 class BatchCommand:
 	def __init__(self, host_platform):
@@ -722,11 +728,13 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 		build_dir = "%s/Build/%s" % (build_path, build_folder)
 		if build_info.is_clean:
 			print("Cleaning %s..." % name)
+			sys.stdout.flush()
 
 			if os.path.isdir(build_dir):
 				shutil.rmtree(build_dir)
 		else:
 			print("Building %s..." % name)
+			sys.stdout.flush()
 
 			if not os.path.exists(build_dir):
 				os.makedirs(build_dir)
@@ -768,6 +776,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 			os.chdir(curdir)
 
 			print("")
+			sys.stdout.flush()
 	else:
 		if "win" == build_info.host_platform:
 			if build_info.target_platform != "android":
@@ -781,11 +790,13 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 			build_dir = "%s/Build/%s" % (build_path, build_folder)
 			if build_info.is_clean:
 				print("Cleaning %s %s..." % (name, config))
+				sys.stdout.flush()
 
 				if os.path.isdir(build_dir):
 					shutil.rmtree(build_dir)
 			else:
 				print("Building %s %s..." % (name, config))
+				sys.stdout.flush()
 
 				if not os.path.exists(build_dir):
 					os.makedirs(build_dir)
@@ -830,3 +841,4 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				os.chdir(curdir)
 
 				print("")
+				sys.stdout.flush()
