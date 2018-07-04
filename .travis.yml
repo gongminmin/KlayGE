@@ -1,0 +1,53 @@
+language: cpp
+
+git:
+  depth: 5
+  quiet: true
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+            - wine
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libglu1-mesa-dev
+            - libopenal-dev
+          update:
+            - true
+      env: MATRIX_EVAL="CC=gcc-7 && CXX=g++-7" COMPILER="gcc"
+
+    - os: osx
+      osx_image: xcode9.3
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
+
+    - os: osx
+      osx_image: xcode9.4
+      env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"
+
+before_install:
+  - eval "${MATRIX_EVAL}"
+  # Linux
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+      export WINEARCH=win32;
+      winetricks;
+    fi
+  # macOS
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update > /dev/null;
+      brew upgrade > /dev/null;
+      brew cask install xquartz;
+      brew install wine --without-win64;
+    fi
+
+script:
+  - python BuildAll.py $COMPILER x64 Release
