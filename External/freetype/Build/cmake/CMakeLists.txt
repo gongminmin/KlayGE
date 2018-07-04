@@ -28,8 +28,10 @@ DOWNLOAD_PACKAGE("freetype" ${REL_PATH} ${PACKAGE_COMMIT_ID} ${PACKAGE_FILE_ID} 
 FOREACH(flag_var
 		CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 	IF(KLAYGE_COMPILER_MSVC)
+		STRING(REPLACE "/W4" "/W0" ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "/WX" "/WX-" ${flag_var} "${${flag_var}}")
 	ELSE()
+		STRING(REPLACE "-Wall" "-w" ${flag_var} "${${flag_var}}")
 		STRING(REPLACE "-Werror" "-Wno-error" ${flag_var} "${${flag_var}}")
 	ENDIF()
 ENDFOREACH()
