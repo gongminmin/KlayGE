@@ -3,8 +3,8 @@ SET(SOURCE_FILES
 )
 
 SET(EXTRA_INCLUDE_DIRS ${EXTRA_INCLUDE_DIRS}
-		${KLAYGE_PROJECT_DIR}/../External/assimp/Build/${KLAYGE_BUILD_FOLDER}/assimp/include
-		${KLAYGE_PROJECT_DIR}/../MeshMLLib/include)
+	${KLAYGE_PROJECT_DIR}/../External/assimp/Build/${KLAYGE_BUILD_FOLDER}/assimp/include
+	${KLAYGE_PROJECT_DIR}/../MeshMLLib/include)
 
 SET(EXTRA_LINKED_DIRS ${EXTRA_LINKED_DIRS}
 	${KLAYGE_PROJECT_DIR}/../External/assimp/lib/${KLAYGE_PLATFORM_NAME}
