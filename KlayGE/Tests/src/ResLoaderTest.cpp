@@ -77,8 +77,7 @@ TEST(ResLoaderTest, MountUnmountEncrypt7zPath)
 
 	auto res = ResLoader::Instance().Open("ResLoaderTestData/Test.txt");
 	EXPECT_TRUE(res);
-	// BUG: Can't read from encrypt package, Github #164
-	//EXPECT_EQ(ReadWholeFile(res), sanity_string);
+	EXPECT_EQ(ReadWholeFile(res), sanity_string);
 
 	ResLoader::Instance().Unmount("ResLoaderTestData", "../../Tests/media/ResLoader/TestPassword.7z|1234");
 	EXPECT_TRUE(ResLoader::Instance().Locate("ResLoaderTestData/Test.txt").empty());
@@ -91,8 +90,7 @@ TEST(ResLoaderTest, MountUnmountInsideEncrypt7zPath)
 
 	auto res = ResLoader::Instance().Open("ResLoaderTestData/Test.txt");
 	EXPECT_TRUE(res);
-	// BUG: Can't read from encrypt package, Github #164
-	//EXPECT_EQ(ReadWholeFile(res), sanity_string);
+	EXPECT_EQ(ReadWholeFile(res), sanity_string);
 
 	ResLoader::Instance().Unmount("ResLoaderTestData", "../../Tests/media/ResLoader/TestPassword.7z|1234/ResLoader");
 	EXPECT_TRUE(ResLoader::Instance().Locate("ResLoaderTestData/Test.txt").empty());
