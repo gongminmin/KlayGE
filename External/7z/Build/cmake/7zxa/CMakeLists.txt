@@ -14,10 +14,11 @@ SET(7ZIP_COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/FilterCoder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/InBuffer.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/LimitedStreams.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/LockedStream.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/MethodId.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/MethodProps.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/OutBuffer.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/ProgressUtils.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/PropId.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamBinder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamObjects.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/StreamUtils.cpp
@@ -27,8 +28,8 @@ SET(7ZIP_COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/FilterCoder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/InBuffer.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/LimitedStreams.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/LockedStream.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/MethodId.h
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/MethodProps.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/OutBuffer.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/ProgressUtils.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Common/RegisterArc.h
@@ -42,7 +43,6 @@ SET(ARCHIVE_7Z_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zCompressionMode.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zDecode.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zExtract.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zFolderOutStream.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zHandler.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zHeader.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zIn.cpp
@@ -50,28 +50,23 @@ SET(ARCHIVE_7Z_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zRegister.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zCompressionMode.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zDecode.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zFolderOutStream.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zHandler.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zHeader.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zIn.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zItem.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/7zProperties.h
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/StdAfx.h
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/StdAfx.cpp
 )
 SET(ARCHIVE_COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2MT.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2ST.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CrossThreadProgress.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/HandlerOut.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/ItemNameUtils.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/MultiStream.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/OutStreamWithCRC.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/ParseProperties.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2MT.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CoderMixer2ST.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/CrossThreadProgress.h
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/HandlerOut.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/ItemNameUtils.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/MultiStream.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/OutStreamWithCRC.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Common/ParseProperties.h
 )
@@ -80,15 +75,20 @@ SET(ARCHIVE_FILES
 )
 SET(C_FILES
 	${SEVENZIP_PROJECT_DIR}/C/7zCrc.c
+	${SEVENZIP_PROJECT_DIR}/C/7zCrcOpt.c
 	${SEVENZIP_PROJECT_DIR}/C/Aes.c
+	${SEVENZIP_PROJECT_DIR}/C/AesOpt.c
 	${SEVENZIP_PROJECT_DIR}/C/Alloc.c
+	${SEVENZIP_PROJECT_DIR}/C/Bcj2.c
 	${SEVENZIP_PROJECT_DIR}/C/Bra.c
 	${SEVENZIP_PROJECT_DIR}/C/Bra86.c
 	${SEVENZIP_PROJECT_DIR}/C/BraIA64.c
 	${SEVENZIP_PROJECT_DIR}/C/CpuArch.c
 	${SEVENZIP_PROJECT_DIR}/C/Delta.c
 	${SEVENZIP_PROJECT_DIR}/C/Lzma2Dec.c
+	${SEVENZIP_PROJECT_DIR}/C/Lzma2DecMt.c
 	${SEVENZIP_PROJECT_DIR}/C/LzmaDec.c
+	${SEVENZIP_PROJECT_DIR}/C/MtDec.c
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd7.c
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd7Dec.c
 	${SEVENZIP_PROJECT_DIR}/C/Sha256.c
@@ -96,29 +96,32 @@ SET(C_FILES
 	${SEVENZIP_PROJECT_DIR}/C/7zCrc.h
 	${SEVENZIP_PROJECT_DIR}/C/Aes.h
 	${SEVENZIP_PROJECT_DIR}/C/Alloc.h
+	${SEVENZIP_PROJECT_DIR}/C/Bcj2.h
 	${SEVENZIP_PROJECT_DIR}/C/Bra.h
 	${SEVENZIP_PROJECT_DIR}/C/CpuArch.h
 	${SEVENZIP_PROJECT_DIR}/C/Delta.h
 	${SEVENZIP_PROJECT_DIR}/C/Lzma2Dec.h
+	${SEVENZIP_PROJECT_DIR}/C/Lzma2DecMt.h
 	${SEVENZIP_PROJECT_DIR}/C/LzmaDec.h
+	${SEVENZIP_PROJECT_DIR}/C/MtDec.h
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd.h
 	${SEVENZIP_PROJECT_DIR}/C/Ppmd7.h
 	${SEVENZIP_PROJECT_DIR}/C/RotateDefs.h
 	${SEVENZIP_PROJECT_DIR}/C/Sha256.h
 	${SEVENZIP_PROJECT_DIR}/C/Threads.h
-	${SEVENZIP_PROJECT_DIR}/C/Types.h
 )
 SET(COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/CRC.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/Common/CrcReg.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/IntToString.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyString.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyVector.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyWindows.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/NewHandler.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/Common/Sha256Reg.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringConvert.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringToInt.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/Wildcard.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/Common/Buffer.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/DynamicBuffer.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/IntToString.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/MyCom.h
@@ -131,7 +134,6 @@ SET(COMMON_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/NewHandler.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringConvert.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/StringToInt.h
-	${SEVENZIP_PROJECT_DIR}/CPP/Common/Types.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Common/Wildcard.h
 )
 SET(7Z_COMPRESS_FILES
@@ -139,10 +141,10 @@ SET(7Z_COMPRESS_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/Bcj2Register.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BcjCoder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BcjRegister.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BranchCoder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BranchMisc.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BranchRegister.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/ByteSwap.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/CodecExports.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/CopyCoder.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/CopyRegister.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/Lzma2Decoder.cpp
@@ -151,13 +153,10 @@ SET(7Z_COMPRESS_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/LzmaRegister.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/Bcj2Coder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BcjCoder.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BranchCoder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BranchMisc.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/CopyCoder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/Lzma2Decoder.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/LzmaDecoder.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/RangeCoder.h
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/RangeCoderBit.h
 )
 SET(BIT_CODER_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/BitlDecoder.cpp
@@ -196,49 +195,20 @@ SET(CRYPTO_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/7zAes.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/7zAesRegister.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/MyAes.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/MyAesReg.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/7zAes.h
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Crypto/MyAes.h
-)
-SET(SPEC_ICONS_FILES
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/7z.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/arj.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/bz2.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/cab.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/cpio.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/deb.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/dmg.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/fat.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/gz.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/hfs.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/iso.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/lzh.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/lzma.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/ntfs.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/rar.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/rpm.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/split.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/squashfs.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/tar.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/vhd.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/wim.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/xar.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/xz.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/z.ico
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Icons/zip.ico
 )
 SET(SPEC_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/Archive2.def
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/ArchiveExports.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Compress/CodecExports.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/DllExports2.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Bundles/Format7zExtract/resource.rc
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Bundles/Format7zExtract/StdAfx.cpp
-	${SEVENZIP_PROJECT_DIR}/CPP/7zip/Bundles/Format7zExtract/StdAfx.h
 )
 SET(WINDOWS_FILES
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/PropVariant.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Synchronization.cpp
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/System.cpp
+	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Defs.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/PropVariant.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/Synchronization.h
 	${SEVENZIP_PROJECT_DIR}/CPP/Windows/System.h
@@ -259,15 +229,15 @@ SOURCE_GROUP("Compress\\PPMD" FILES ${PPMD_FILES})
 SOURCE_GROUP("Compress\\Zip Compress" FILES ${ZIP_COMPRESS_FILES})
 SOURCE_GROUP("Compress" FILES ${COMPRESS_FILES})
 SOURCE_GROUP("Crypto" FILES ${CRYPTO_FILES})
-SOURCE_GROUP("Spec\\Icons" FILES ${SPEC_ICONS_FILES})
 SOURCE_GROUP("Spec" FILES ${SPEC_FILES})
 SOURCE_GROUP("Windows" FILES ${WINDOWS_FILES})
 
-ADD_DEFINITIONS(-DNO_ASM)
 ADD_DEFINITIONS(-DMY7Z_EXPORTS)
 ADD_DEFINITIONS(-DNO_REGISTRY)
 ADD_DEFINITIONS(-DEXTRACT_ONLY)
-ADD_DEFINITIONS(-D_7ZIP_LARGE_PAGES)
+IF(KLAYGE_PLATFORM_WINDOWS_DESKTOP)
+	ADD_DEFINITIONS(-D_7ZIP_LARGE_PAGES)
+ENDIF()
 ADD_DEFINITIONS(-D_7ZIP_ST)
 
 INCLUDE_DIRECTORIES(${SEVENZIP_PROJECT_DIR}/CPP/)
@@ -301,10 +271,12 @@ IF(KLAYGE_PLATFORM_DARWIN OR KLAYGE_PLATFORM_LINUX)
 ENDIF()
 
 IF(KLAYGE_COMPILER_MSVC)
-	ADD_PRECOMPILED_HEADER(${LIB_NAME} "StdAfx.h" "${SEVENZIP_PROJECT_DIR}/CPP/7zip/Bundles/Format7zExtract/"
-		"${SEVENZIP_PROJECT_DIR}/CPP/7zip/Bundles/Format7zExtract/StdAfx.cpp")
+	ADD_PRECOMPILED_HEADER(${LIB_NAME} "StdAfx.h" "${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/"
+		"${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/StdAfx.cpp")
 
 	SET_SOURCE_FILES_PROPERTIES(${C_FILES} PROPERTIES COMPILE_FLAGS "/Y-")
+ELSE()
+	INCLUDE_DIRECTORIES(${SEVENZIP_PROJECT_DIR}/CPP/7zip/Archive/7z/)
 ENDIF()
 
 TARGET_LINK_LIBRARIES(${LIB_NAME})
