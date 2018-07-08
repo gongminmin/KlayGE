@@ -190,7 +190,7 @@ void ResolveGBuffersPS(float2 texcoord : TEXCOORD0,
 	out_rt0 = 0;
 	out_rt1 = 0,
 	out_depth = 0;
-	out_multi_sample_mark = 0
+	out_multi_sample_mark = 0;
 #endif
 }
 		]]>
