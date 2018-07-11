@@ -283,6 +283,9 @@ float ResolveMergedDepthPS(float2 texcoord : TEXCOORD0) : SV_Target
 	<parameter type="float3" name="x_dir"/>
 	<parameter type="float3" name="y_dir"/>
 
+	<macro name="SCAN_TYPE" value="uint"/>
+	<include name="PrefixSum.fxml"/>
+
 	<shader type="compute_shader" version="5">
 		<![CDATA[
 void CalcTileViewFrustum(uint2 coord, float2 min_max, out float4 planes[6])
@@ -497,6 +500,35 @@ void WriteALightIndex(uint3 tile_id, uint offset, uint index)
 groupshared uint num_intersected_lights_sh;
 groupshared float4 planes_sh[6];
 groupshared bool empty_frustum_sh;
+groupshared uint intersected_lights_sh[LIGHT_BATCH];
+
+void ScanIntersectedLight(uint GI)
+{
+	uint sum = 0;
+	for (uint b = 0; b < LIGHT_BATCH / BLOCK_SIZE; ++ b)
+	{
+		uint index = b * BLOCK_SIZE + GI;
+		uint val = intersected_lights_sh[index] & 1;
+		uint start_addr = ScanBlock(false, GI, val) + sum;
+		if (val)
+		{
+			intersected_lights_sh[start_addr] |= index << 16;
+		}
+
+		uint num = start_addr + val;
+		if (BLOCK_SIZE - 1 == GI)
+		{
+			num_intersected_lights_sh = num;
+		}
+		GroupMemoryBarrierWithGroupSync();
+
+		intersected_lights_sh[index] &= ~1;
+		intersected_lights_sh[index] |= num;
+
+		sum = num_intersected_lights_sh;
+		GroupMemoryBarrierWithGroupSync();
+	}
+}
 
 [numthreads(BLOCK_X, BLOCK_Y, 1)]
 void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
@@ -535,139 +567,44 @@ void ClusteredDRLightIntersectionCS(uint3 gid : SV_GroupID,
 		planes[i] = planes_sh[i];
 	}
 
-	for (uint index = lights_type[3] + GI; index < lights_type[4]; index += BLOCK_SIZE)
+	uint index;
+	for (index = GI; index < lights_type[3]; index += BLOCK_SIZE)
 	{
-		if (OverlapTestPoint(planes, index))
+		intersected_lights_sh[index] = 0;
+	}
+	for (index = lights_type[3] + GI; index < lights_type[5]; index += BLOCK_SIZE)
+	{
+		intersected_lights_sh[index] = OverlapTestPoint(planes, index);
+	}
+	for (index = lights_type[5] + GI; index < lights_type[7]; index += BLOCK_SIZE)
+	{
+		intersected_lights_sh[index] = OverlapTestSpot(planes, index);
+	}
+	for (index = lights_type[7] + GI; index < lights_type[11]; index += BLOCK_SIZE)
+	{
+		intersected_lights_sh[index] = OverlapTestPoint(planes, index);
+	}
+	for (index = lights_type[11] + GI; index < LIGHT_BATCH; index += BLOCK_SIZE)
+	{
+		intersected_lights_sh[index] = 0;
+	}
+	GroupMemoryBarrierWithGroupSync();
+
+	ScanIntersectedLight(GI);
+
+	if (GI < 8)
+	{
+		index = lights_type[GI + 4] - 1;
+		lights_start_rw_tex[uint3(gid.x * 8 + GI, gid.yz)] = intersected_lights_sh[index] & 0xFFFF;
+	}
+
+	for (uint b = 0; b < LIGHT_BATCH / BLOCK_SIZE; ++ b)
+	{
+		index = b * BLOCK_SIZE + GI;
+		if (index < num_intersected_lights_sh)
 		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
+			WriteALightIndex(gid, index, intersected_lights_sh[index] >> 16);
 		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 0, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	for (index = lights_type[4] + GI; index < lights_type[5]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestPoint(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 1, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	for (index = lights_type[5] + GI; index < lights_type[6]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestSpot(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 2, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
-	for (index = lights_type[6] + GI; index < lights_type[7]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestSpot(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 3, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
-	for (index = lights_type[7] + GI; index < lights_type[8]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestPoint(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 4, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	for (index = lights_type[8] + GI; index < lights_type[9]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestPoint(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 5, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
-	for (index = lights_type[9] + GI; index < lights_type[10]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestPoint(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 6, gid.yz)] = num_intersected_lights_sh;
-	}
-	GroupMemoryBarrierWithGroupSync();
-	
-	for (index = lights_type[10] + GI; index < lights_type[11]; index += BLOCK_SIZE)
-	{
-		if (OverlapTestPoint(planes, index))
-		{
-			uint light_index;
-			InterlockedAdd(num_intersected_lights_sh, 1, light_index);
-			WriteALightIndex(gid, light_index, index);
-		}
-	}
-	GroupMemoryBarrierWithGroupSync();
-
-	if (0 == GI)
-	{
-		lights_start_rw_tex[uint3(gid.x * 8 + 7, gid.yz)] = num_intersected_lights_sh;
 	}
 }
 
