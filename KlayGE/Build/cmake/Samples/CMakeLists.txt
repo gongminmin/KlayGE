@@ -144,11 +144,12 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../kfont/lib/${KLAYGE_PLATFORM_NAME})
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../MeshMLLib/lib/${KLAYGE_PLATFORM_NAME})
 		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/7z/lib/${KLAYGE_PLATFORM_NAME})
+		LINK_DIRECTORIES(${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue/lib/${KLAYGE_PLATFORM_NAME})
 	ENDIF()
 	LINK_DIRECTORIES(${EXTRA_LINKED_DIRS})
 
 	IF(KLAYGE_PLATFORM_ANDROID)
-		ADD_LIBRARY(${EXE_NAME} SHARED ${SOURCE_FILES} ${KLAYGE_PROJECT_DIR}/../External/android_native_app_glue/android_native_app_glue.c)
+		ADD_LIBRARY(${EXE_NAME} SHARED ${SOURCE_FILES})
 	ELSE()
 		ADD_EXECUTABLE(${EXE_NAME} ${SOURCE_FILES} ${HEADER_FILES} ${RESOURCE_FILES} ${EFFECT_FILES} ${POST_PROCESSORS} ${UI_FILES})
 	ENDIF()
@@ -205,6 +206,7 @@ MACRO(SETUP_SAMPLE EXE_NAME)
 			debug KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ShowEngine_NullShow${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_ScriptEngine_NullScript${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_AudioDataSource_NullAudioDataSource${KLAYGE_OUTPUT_SUFFIX}
+			debug android_native_app_glue${KLAYGE_OUTPUT_SUFFIX}_d optimized android_native_app_glue${KLAYGE_OUTPUT_SUFFIX}
 			-Wl,--no-whole-archive
 			debug SampleCommon${KLAYGE_OUTPUT_SUFFIX}_d optimized SampleCommon${KLAYGE_OUTPUT_SUFFIX}
 			debug KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}_d optimized KlayGE_Core${KLAYGE_OUTPUT_SUFFIX}

@@ -55,7 +55,8 @@ def BuildExternalLibs(build_info):
 		BuildPython(build_info, compiler_info)
 		Build7z(build_info, compiler_info)
 		BuildRapidxml(build_info, compiler_info)
-		BuildAndroidNativeAppGlue(build_info, compiler_info)
+		if build_info.target_platform.find("android") == 0:
+			BuildAndroidNativeAppGlue(build_info, compiler_info)
 		BuildLibogg(build_info, compiler_info)
 		BuildLibvorbis(build_info, compiler_info)
 
