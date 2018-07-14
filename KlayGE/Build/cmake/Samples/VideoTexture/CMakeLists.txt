@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/VideoTexture/big_buck_bunny.avi" "cbda47a1678ce70b6720856736100979d469e159" "5074a181b6f246d1eaa7879010f2c2319a3cd857")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VideoTexture/big_buck_bunny.avi" "5074a181b6f246d1eaa7879010f2c2319a3cd857")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/VideoTexture/VideoTexture.cpp

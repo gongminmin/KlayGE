@@ -1,10 +1,10 @@
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/A.png" "7017f9e98422e295d76b70000276676386c16658" "acdbd5252f3ecd430d8bdc89f1d00f0296f87f52")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/B.png" "7017f9e98422e295d76b70000276676386c16658" "4a63684a7e5aa4d9f2def99fa94c9b74f0d8cbdd")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/G.png" "7017f9e98422e295d76b70000276676386c16658" "188b04cf3753f40c2184c017c3655c8df0ef0ca5")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/Open.png" "7017f9e98422e295d76b70000276676386c16658" "2494b313c7b71b2b4aec75541faacc720acc0b16")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/R.png" "7017f9e98422e295d76b70000276676386c16658" "98828e5fcbd53eab1a4a358456b008e7d9ba8801")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/Save.png" "7017f9e98422e295d76b70000276676386c16658" "1bba12c7f5c9b339e15f5d73507988f14bfdd7e2")
-DOWNLOAD_FILE("KlayGE/Tools/src/TexViewer/TexViewer/Images/SaveAs.png" "7017f9e98422e295d76b70000276676386c16658" "43561560c76dad3bd62c80edd17d569ad39651d7")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/A.png" "acdbd5252f3ecd430d8bdc89f1d00f0296f87f52")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/B.png" "4a63684a7e5aa4d9f2def99fa94c9b74f0d8cbdd")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/G.png" "188b04cf3753f40c2184c017c3655c8df0ef0ca5")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/Open.png" "2494b313c7b71b2b4aec75541faacc720acc0b16")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/R.png" "98828e5fcbd53eab1a4a358456b008e7d9ba8801")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/Save.png" "1bba12c7f5c9b339e15f5d73507988f14bfdd7e2")
+DOWNLOAD_DEPENDENCY("KlayGE/Tools/src/TexViewer/TexViewer/Images/SaveAs.png" "43561560c76dad3bd62c80edd17d569ad39651d7")
 
 INCLUDE(CSharpUtilities)
 

@@ -1,7 +1,7 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_day.dds" "70c85cc54ca5a5bc393fdd04f1e2627024ff83cc" "23347ac909cbaf9aed03e8228d4eb64639e785f7")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/earth_night.dds" "70c85cc54ca5a5bc393fdd04f1e2627024ff83cc" "1d44faa87e412a4d675aa4de5d4a1cf4bb0b68e7")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/geosphere.meshml" "6087c70ee0482c7d2085e5411553b374d08b8ebe" "19f021ac780d313c9c3058d0c5605ddd1bce4746")
-DOWNLOAD_FILE("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds" "cbda47a1678ce70b6720856736100979d469e159" "e006d8f16187e53c34f49c29d092a8f53f74824b")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/earth_day.dds" "23347ac909cbaf9aed03e8228d4eb64639e785f7")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/earth_night.dds" "1d44faa87e412a4d675aa4de5d4a1cf4bb0b68e7")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/geosphere.meshml" "19f021ac780d313c9c3058d0c5605ddd1bce4746")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/AtmosphericScattering/ocean_mask.dds" "e006d8f16187e53c34f49c29d092a8f53f74824b")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/AtmosphericScattering/AtmosphericScattering.cpp

@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/EnvLighting/IntegratedBRDF.dds" "20e84d895bf9be7ef66d691e987e43a2fdb9857d" "edee7f1b8645f1b5dba11d8766afa69466f4027d")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/EnvLighting/IntegratedBRDF.dds" "edee7f1b8645f1b5dba11d8766afa69466f4027d")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/EnvLighting/EnvLighting.cpp

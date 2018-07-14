@@ -1,13 +1,13 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/DH001cross_filtered_c.dds" "224f6a5f538391161658928d43917d2a7fc5f1ea" "0bcb4b159a3f1f5255b00722378d0c851bd7333a")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/DH001cross_filtered_y.dds" "224f6a5f538391161658928d43917d2a7fc5f1ea" "9416d0a724293bc0a48f5627eadc7bd812fe649a")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/Dirt.dds" "cbda47a1678ce70b6720856736100979d469e159" "0980bdbf018a6126cfce0cdde9229458c14e30b4")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/grass.dds" "cbda47a1678ce70b6720856736100979d469e159" "99497d6d0617e14eecd8c25e16e2f31eb9011195")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/GrassGreenTexture0002.dds" "cbda47a1678ce70b6720856736100979d469e159" "5e20a4c450848b237941d6015ec517d5c2c0a7fe")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/OceanDisplacement.dds" "20e84d895bf9be7ef66d691e987e43a2fdb9857d" "7cca595feb8ed0f4b89443c59b28717d7ff987bb")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds" "20e84d895bf9be7ef66d691e987e43a2fdb9857d" "fa6186c185d597dc0724ca68fa1b7b3eefb2acc0")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/OceanGradient.dds" "20e84d895bf9be7ef66d691e987e43a2fdb9857d" "0527570befa4ec1b8039a919cc0cc6077f5c6e57")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/RealSand40BoH.dds" "cbda47a1678ce70b6720856736100979d469e159" "1fcb18a6f441b3775b064f819b64118ed654c4b5")
-DOWNLOAD_FILE("KlayGE/Samples/media/Ocean/snow_DM.dds" "cbda47a1678ce70b6720856736100979d469e159" "a01473c33d27ef663ff47992071de98c9ed42b24")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/DH001cross_filtered_c.dds" "0bcb4b159a3f1f5255b00722378d0c851bd7333a")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/DH001cross_filtered_y.dds" "9416d0a724293bc0a48f5627eadc7bd812fe649a")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/Dirt.dds" "0980bdbf018a6126cfce0cdde9229458c14e30b4")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/grass.dds" "99497d6d0617e14eecd8c25e16e2f31eb9011195")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/GrassGreenTexture0002.dds" "5e20a4c450848b237941d6015ec517d5c2c0a7fe")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/OceanDisplacement.dds" "7cca595feb8ed0f4b89443c59b28717d7ff987bb")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/OceanDisplacementParam.dds" "fa6186c185d597dc0724ca68fa1b7b3eefb2acc0")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/OceanGradient.dds" "0527570befa4ec1b8039a919cc0cc6077f5c6e57")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/RealSand40BoH.dds" "1fcb18a6f441b3775b064f819b64118ed654c4b5")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Ocean/snow_DM.dds" "a01473c33d27ef663ff47992071de98c9ed42b24")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Ocean/Ocean.cpp

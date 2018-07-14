@@ -1,6 +1,6 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/Sound/Carl_Douglas_-_Kung_Fu_Fighting.ogg" "33ccf7fd38e21213833fa78163d9361ba55a5bcd" "3ffdfd65a6c3ce480f129f850e10690a22924cb0")
-DOWNLOAD_FILE("KlayGE/Samples/media/Sound/Cash_register.ogg" "e6c7ea418bbb11dd842d946df462f74c1dc9f4a2" "c789a1a76e78af18370df374f4274a55e6fc9d5c")
-DOWNLOAD_FILE("KlayGE/Samples/media/Sound/Metallica_-_Enter_Sandman.ogg" "33ccf7fd38e21213833fa78163d9361ba55a5bcd" "51e40e4911580e3c82dbd8a507f82260f2a080f0")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Sound/Carl_Douglas_-_Kung_Fu_Fighting.ogg" "3ffdfd65a6c3ce480f129f850e10690a22924cb0")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Sound/Cash_register.ogg" "c789a1a76e78af18370df374f4274a55e6fc9d5c")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Sound/Metallica_-_Enter_Sandman.ogg" "51e40e4911580e3c82dbd8a507f82260f2a080f0")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Sound/Sound.cpp

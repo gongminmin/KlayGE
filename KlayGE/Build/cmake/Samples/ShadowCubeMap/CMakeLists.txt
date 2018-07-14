@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/ShadowCubeMap/lamp.dds" "cbda47a1678ce70b6720856736100979d469e159" "454abe1e0e71f7c56f97822bae184a9661f20cb8")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/ShadowCubeMap/lamp.dds" "454abe1e0e71f7c56f97822bae184a9661f20cb8")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/ShadowCubeMap/ShadowCubeMap.cpp

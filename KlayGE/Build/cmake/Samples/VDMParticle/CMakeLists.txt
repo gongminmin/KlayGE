@@ -1,11 +1,11 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_back_diffuse.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "f97873084a14bfb7dee9c0cc86de9c7062302ac9")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_back_normal.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "9505e187bb9cfa4b44516bfaa197840750986a82")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_back_specular.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "e432e15e1d1d85145a8617ad9da98f649ec97dc2")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_top_diffuse.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "28934a2cbe7f169b976899962bd4429bbec278bd")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_top_normal.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "9434eb8984debc8ac0c2aa9f0af2c03eaf6ab6d5")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/At_Droid_top_specular.dds" "bc88770853e213688ac0c1fddc99a8f3d7c6ea67" "25889f641377037dee04e50a415c81e3b23c7dea")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/attack_droid.meshml" "bb080b8e949760116f22ca09d4b2cf63002c3847" "b725a810a0d6f950a6bdffab5c24250d9ce9af38")
-DOWNLOAD_FILE("KlayGE/Samples/media/VDMParticle/fire.dds" "bb080b8e949760116f22ca09d4b2cf63002c3847" "f5037acd6159f853ee7b8848034f8f03c55f7136")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_diffuse.dds" "f97873084a14bfb7dee9c0cc86de9c7062302ac9")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_normal.dds" "9505e187bb9cfa4b44516bfaa197840750986a82")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_back_specular.dds" "e432e15e1d1d85145a8617ad9da98f649ec97dc2")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_diffuse.dds" "28934a2cbe7f169b976899962bd4429bbec278bd")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_normal.dds" "9434eb8984debc8ac0c2aa9f0af2c03eaf6ab6d5")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/At_Droid_top_specular.dds" "25889f641377037dee04e50a415c81e3b23c7dea")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/attack_droid.meshml" "b725a810a0d6f950a6bdffab5c24250d9ce9af38")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VDMParticle/fire.dds" "f5037acd6159f853ee7b8848034f8f03c55f7136")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/VDMParticle/VDMParticle.cpp

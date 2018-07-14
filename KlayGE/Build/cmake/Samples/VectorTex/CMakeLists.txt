@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/VectorTex/Drawing.dds" "c84931df0907ed974fd398621ba463985062c8ce" "118c6b3bb377fa2b0ea6ab1dfe3fc5a776257647")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/VectorTex/Drawing.dds" "118c6b3bb377fa2b0ea6ab1dfe3fc5a776257647")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/VectorTex/VectorTex.cpp

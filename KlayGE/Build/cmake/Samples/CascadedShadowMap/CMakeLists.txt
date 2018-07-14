@@ -1,10 +1,10 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml" "cbda47a1678ce70b6720856736100979d469e159" "3610e9ef72a662cd8c97043cdd8e57724c3b6afa")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_e.dds" "cbda47a1678ce70b6720856736100979d469e159" "100339339154778c263f99259706e3cfc7769191")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_f.dds" "cbda47a1678ce70b6720856736100979d469e159" "8c4a8f351ee0e05e071130be8e40ee1274c8a1d3")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/p12_fb.dds" "cbda47a1678ce70b6720856736100979d469e159" "cb65cbc2de7514745521a25fcd97cace712a2939")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/plane.meshml" "cbda47a1678ce70b6720856736100979d469e159" "026bb36bcdc4d29c041521a4256f5b1236f4ff7a")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/stones.dds" "cbda47a1678ce70b6720856736100979d469e159" "8656637ad71427f8926cfa9cae1ee3626f9bd5dd")
-DOWNLOAD_FILE("KlayGE/Samples/media/CascadedShadowMap/tau_bump.dds" "cbda47a1678ce70b6720856736100979d469e159" "512f0b5fed7569cc10ff6533f45cbca6b9b5c20b")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/katapult.meshml" "3610e9ef72a662cd8c97043cdd8e57724c3b6afa")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_e.dds" "100339339154778c263f99259706e3cfc7769191")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_f.dds" "8c4a8f351ee0e05e071130be8e40ee1274c8a1d3")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/p12_fb.dds" "cb65cbc2de7514745521a25fcd97cace712a2939")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/plane.meshml" "026bb36bcdc4d29c041521a4256f5b1236f4ff7a")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/stones.dds" "8656637ad71427f8926cfa9cae1ee3626f9bd5dd")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CascadedShadowMap/tau_bump.dds" "512f0b5fed7569cc10ff6533f45cbca6b9b5c20b")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/CascadedShadowMap/CascadedShadowMap.cpp

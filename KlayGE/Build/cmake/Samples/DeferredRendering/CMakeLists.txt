@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/DeferredRendering/fire.dds" "cbda47a1678ce70b6720856736100979d469e159" "f5037acd6159f853ee7b8848034f8f03c55f7136")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DeferredRendering/fire.dds" "f5037acd6159f853ee7b8848034f8f03c55f7136")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DeferredRendering/DeferredRendering.cpp

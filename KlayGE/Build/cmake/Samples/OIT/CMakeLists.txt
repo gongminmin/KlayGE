@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/OIT/robot_clean.meshml" "78cb4a721a19103c35be4d98843517f4b507a7a0" "bf27b026ac931cedfc4237dc453d916936d42e66")
-DOWNLOAD_FILE("KlayGE/Samples/media/OIT/robot-clean_diffuse.dds" "78cb4a721a19103c35be4d98843517f4b507a7a0" "218c7dd270c056d5c4681c4cafbb00c9e8675260")
-DOWNLOAD_FILE("KlayGE/Samples/media/OIT/robot-clean_normal.dds" "78cb4a721a19103c35be4d98843517f4b507a7a0" "131ef20c80fae0592ec768cb8f624a93c4b978e3")
-DOWNLOAD_FILE("KlayGE/Samples/media/OIT/robot-clean_selfillumination.dds" "78cb4a721a19103c35be4d98843517f4b507a7a0" "cead9708e3350029fe597b13d26110adfab003bd")
-DOWNLOAD_FILE("KlayGE/Samples/media/OIT/robot-clean_specular.dds" "78cb4a721a19103c35be4d98843517f4b507a7a0" "f3593162a63958ea2f11654fb03d24acc40178aa")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot_clean.meshml" "bf27b026ac931cedfc4237dc453d916936d42e66")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_diffuse.dds" "218c7dd270c056d5c4681c4cafbb00c9e8675260")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_normal.dds" "131ef20c80fae0592ec768cb8f624a93c4b978e3")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_selfillumination.dds" "cead9708e3350029fe597b13d26110adfab003bd")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/OIT/robot-clean_specular.dds" "f3593162a63958ea2f11654fb03d24acc40178aa")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/OIT/OIT.cpp

@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/bunny.meshml" "54e95a3a317ffd3e884af63e008ce6cce2289af0" "3d5fadd23ae6a8599bb1afeee5468543bb1215de")
-DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/diffuse.dds" "55df1241283c25a5174c96090d7918060aef9966" "b68b543509b380eb1a65755107f0fcdcf8f4d9e6")
-DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/distance.dds" "55df1241283c25a5174c96090d7918060aef9966" "60aaa3599993f631aa266b8ad8cf8ac3f8858090")
-DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/normal.dds" "55df1241283c25a5174c96090d7918060aef9966" "3b6fc91238c77d42efa091e8ec047f97a33c3840")
-DOWNLOAD_FILE("KlayGE/Samples/media/CausticsMap/point.dds" "cbda47a1678ce70b6720856736100979d469e159" "551e042821897c6338be6063ad18bbbc7fa5b5af")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/bunny.meshml" "3d5fadd23ae6a8599bb1afeee5468543bb1215de")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/diffuse.dds" "b68b543509b380eb1a65755107f0fcdcf8f4d9e6")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/distance.dds" "60aaa3599993f631aa266b8ad8cf8ac3f8858090")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/normal.dds" "3b6fc91238c77d42efa091e8ec047f97a33c3840")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/CausticsMap/point.dds" "551e042821897c6338be6063ad18bbbc7fa5b5af")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/CausticsMap/CausticsMap.cpp

@@ -1,6 +1,6 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/ParticleEditor/fire.dds" "cbda47a1678ce70b6720856736100979d469e159" "f5037acd6159f853ee7b8848034f8f03c55f7136")
-DOWNLOAD_FILE("KlayGE/Samples/media/ParticleEditor/grass.dds" "cbda47a1678ce70b6720856736100979d469e159" "99497d6d0617e14eecd8c25e16e2f31eb9011195")
-DOWNLOAD_FILE("KlayGE/Samples/media/ParticleEditor/particle.dds" "cbda47a1678ce70b6720856736100979d469e159" "a1377fd4f1435b8b15077c569afb4b088ab6b23b")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/ParticleEditor/fire.dds" "f5037acd6159f853ee7b8848034f8f03c55f7136")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/ParticleEditor/grass.dds" "99497d6d0617e14eecd8c25e16e2f31eb9011195")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/ParticleEditor/particle.dds" "a1377fd4f1435b8b15077c569afb4b088ab6b23b")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/ParticleEditor/ParticleEditor.cpp

@@ -1,8 +1,8 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/DetailedSurface.jdt" "cbda47a1678ce70b6720856736100979d469e159" "9fd82c4b5528d181e0c40e29e6d20d9e7427e8be")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/diffuse.dds" "cbda47a1678ce70b6720856736100979d469e159" "95430e9a0e2100f0d4c721cc6a49b4a39df8de34")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/height.dds" "cbda47a1678ce70b6720856736100979d469e159" "8a5475aa5e5e5c64dc06804c63325c82e6ea7866")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/na_length.dds" "cbda47a1678ce70b6720856736100979d469e159" "cd9a5826b056bf8d37a9d3ecb210d17a8b1607b3")
-DOWNLOAD_FILE("KlayGE/Samples/media/DetailedSurface/normal.dds" "cbda47a1678ce70b6720856736100979d469e159" "226e1bff32280d0a598d537c9547940bd07fd506")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DetailedSurface/DetailedSurface.jdt" "9fd82c4b5528d181e0c40e29e6d20d9e7427e8be")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DetailedSurface/diffuse.dds" "95430e9a0e2100f0d4c721cc6a49b4a39df8de34")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DetailedSurface/height.dds" "8a5475aa5e5e5c64dc06804c63325c82e6ea7866")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DetailedSurface/na_length.dds" "cd9a5826b056bf8d37a9d3ecb210d17a8b1607b3")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/DetailedSurface/normal.dds" "226e1bff32280d0a598d537c9547940bd07fd506")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/DetailedSurface/DetailedSurface.cpp

@@ -1,4 +1,4 @@
-DOWNLOAD_FILE("KlayGE/Samples/media/Metalness/helmet_armet_2.meshml" "dc5b074b1a178a2f1755e2eb47c821913dd293e2" "29a8d99c824be86098ee830d9c8dcfc32705cfde")
+DOWNLOAD_DEPENDENCY("KlayGE/Samples/media/Metalness/helmet_armet_2.meshml" "29a8d99c824be86098ee830d9c8dcfc32705cfde")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Samples/src/Metalness/Metalness.cpp
