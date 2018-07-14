@@ -724,8 +724,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 		if build_info.is_windows_store:
 			additional_options += " -DCMAKE_SYSTEM_NAME=\"WindowsStore\" -DCMAKE_SYSTEM_VERSION=%s" % build_info.target_api_level
 
-		build_folder = "%s_%s%d_%s_%s" % (build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
-		build_dir = "%s/Build/%s" % (build_path, build_folder)
+		build_dir = "%s/Build/%s_%s%d_%s_%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch)
 		if build_info.is_clean:
 			print("Cleaning %s..." % name)
 			sys.stdout.flush()
@@ -753,7 +752,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 					cmake_cmd.AddCommand('@CD /d "%s"' % build_dir)
 			else:
 				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
-			cmake_cmd.AddCommand('"%s" -G "%s" %s %s -DKLAYGE_BUILD_FOLDER="%s" %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, build_folder, "../cmake"))
+			cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, "../cmake"))
 			if cmake_cmd.Execute() != 0:
 				LogError("Config %s failed.\n" % name)
 
@@ -786,8 +785,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 		make_name += " -j%d" % multiprocessing.cpu_count()
 
 		for config in build_info.cfg:
-			build_folder = "%s_%s%d_%s_%s-%s" % (build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
-			build_dir = "%s/Build/%s" % (build_path, build_folder)
+			build_dir = "%s/Build/%s_%s%d_%s_%s-%s" % (build_path, build_info.project_type, build_info.compiler_name, build_info.compiler_version, build_info.target_platform, compiler_info.arch, config)
 			if build_info.is_clean:
 				print("Cleaning %s %s..." % (name, config))
 				sys.stdout.flush()
@@ -821,7 +819,7 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 					config_options += " -DANDROID_STL=c++_static -DANDROID_ABI=\"%s\" -DANDROID_TOOLCHAIN_NAME=%s-clang" % (abi_arch, toolchain_arch)
 
 				cmake_cmd = BatchCommand(build_info.host_platform)
-				cmake_cmd.AddCommand('"%s" -G "%s" %s -DKLAYGE_BUILD_FOLDER="%s" %s %s' % (build_info.cmake_path, compiler_info.generator, additional_options, build_folder, config_options, "../cmake"))
+				cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, additional_options, config_options, "../cmake"))
 				if cmake_cmd.Execute() != 0:
 					LogError("Config %s failed.\n" % name)
 
