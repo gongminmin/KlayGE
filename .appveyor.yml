@@ -18,6 +18,9 @@ environment:
 configuration:
   - Release
 
+cache:
+  - External
+
 before_build:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
   - if "%COMPILER%" equ "mingw" set PATH=%PATH:C:\Program Files\Git\usr\bin;=%

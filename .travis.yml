@@ -4,6 +4,10 @@ git:
   depth: 5
   quiet: true
 
+cache:
+  directories:
+    - External
+
 matrix:
   include:
     - os: linux
