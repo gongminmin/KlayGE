@@ -1,4 +1,9 @@
 # KlayGE
+
+[![GitHub release](https://img.shields.io/badge/release-v4.13.0-blue.svg)](https://github.com/gongminmin/KlayGE/releases/latest)
+[![Build status](https://ci.appveyor.com/api/projects/status/uddr0wulxuferji4/branch/develop?svg=true)](https://ci.appveyor.com/project/gongminmin/KlayGE/branch/develop)
+[![Build Status](https://travis-ci.org/gongminmin/KlayGE.svg?branch=develop)](https://travis-ci.org/gongminmin/KlayGE)
+
 KlayGE is a cross-platform open source game engine with plugin-based architecture. It's started since 2003. The explicit goal of KlayGE is: to arm your engine with cutting-edge technology. It provides a framework to make game development, testing, porting as simple as possible. 
 
 # Getting started
