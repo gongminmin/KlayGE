@@ -17,7 +17,7 @@ SET(REL_PATH "External/Downloads/android_native_app_glue_${NDK_VERSION}.patched.
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
 SET(PACKAGE_FILE_ID "b32103ef58937c827b9a1dba3070f49d8c9ec1c0")
 
-DOWNLOAD_PACKAGE("android_native_app_glue" ${REL_PATH} ${PACKAGE_FILE_ID} "android_native_app_glue.c")
+DOWNLOAD_PACKAGE("android_native_app_glue" ${REL_PATH} ${PACKAGE_FILE_ID})
 
 FOREACH(flag_var
 		CMAKE_C_FLAGS CMAKE_CXX_FLAGS)

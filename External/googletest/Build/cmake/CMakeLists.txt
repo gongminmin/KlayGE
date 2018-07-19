@@ -23,7 +23,7 @@ SET(REL_PATH "External/Downloads/googletest-${GOOGLETEST_VERSION}.7z")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
 SET(PACKAGE_FILE_ID "bd5d9390d9855ad0decd28bce87813e20643cfef")
 
-DOWNLOAD_PACKAGE("googletest" ${REL_PATH} ${PACKAGE_FILE_ID} "README.md")
+DOWNLOAD_PACKAGE("googletest" ${REL_PATH} ${PACKAGE_FILE_ID})
 
 OPTION(gtest_disable_pthreads "" ON)
 OPTION(gtest_force_shared_crt "" ON)

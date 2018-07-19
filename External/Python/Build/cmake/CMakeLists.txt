@@ -22,11 +22,11 @@ SET(REL_PATH "External/Downloads/Python-${PY_VERSION}.patched.7z")
 SET(SEVENZIP_PATH "${KLAYGE_ROOT_DIR}/External/Downloads/${KLAYGE_HOST_PLATFORM_NAME}/7z")
 SET(PACKAGE_FILE_ID "d62fb6844ceb84f29611bf1a6b42509623c008cf")
 
-DOWNLOAD_PACKAGE("Python" ${REL_PATH} ${PACKAGE_FILE_ID} "README")
+DOWNLOAD_PACKAGE("Python" ${REL_PATH} ${PACKAGE_FILE_ID})
 
 SET(PACKAGE_FILE_ID "bf083f45d8723febb6ae3dc004f30db107eb33f7")
 
-DOWNLOAD_PACKAGE("Python/Build/cmake/python-cmake-buildsystem" "External/Downloads/python-cmake-buildsystem.patched.7z" ${PACKAGE_FILE_ID} "README.rst")
+DOWNLOAD_PACKAGE("Python/Build/cmake/python-cmake-buildsystem" "External/Downloads/python-cmake-buildsystem.patched.7z" ${PACKAGE_FILE_ID})
 
 SET(SRC_DIR ${PYTHON_PROJECT_DIR})
 
