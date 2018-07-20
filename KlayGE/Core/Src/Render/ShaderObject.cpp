@@ -265,7 +265,7 @@ namespace
 			mod_d3dcompiler_ = ::LoadLibraryEx(TEXT("d3dcompiler_47.dll"), nullptr, 0);
 			KLAYGE_ASSUME(mod_d3dcompiler_ != nullptr);
 
-			DynamicD3DCompile_ = reinterpret_cast<pD3DCompile>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
+			DynamicD3DCompile_ = reinterpret_cast<D3DCompileFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DCompile"));
 			DynamicD3DReflect_ = reinterpret_cast<D3DReflectFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DReflect"));
 			DynamicD3DStripShader_ = reinterpret_cast<D3DStripShaderFunc>(::GetProcAddress(mod_d3dcompiler_, "D3DStripShader"));
 #endif
@@ -273,12 +273,15 @@ namespace
 
 	private:
 #ifdef CALL_D3DCOMPILER_DIRECTLY
+		typedef HRESULT (WINAPI *D3DCompileFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, LPCSTR pSourceName,
+			D3D_SHADER_MACRO const * pDefines, ID3DInclude* pInclude, LPCSTR pEntrypoint,
+			LPCSTR pTarget, UINT Flags1, UINT Flags2, ID3DBlob** ppCode, ID3DBlob** ppErrorMsgs);
 		typedef HRESULT (WINAPI *D3DReflectFunc)(LPCVOID pSrcData, SIZE_T SrcDataSize, REFIID pInterface, void** ppReflector);
 		typedef HRESULT (WINAPI *D3DStripShaderFunc)(LPCVOID pShaderBytecode, SIZE_T BytecodeLength, UINT uStripFlags,
 			ID3DBlob** ppStrippedBlob);
 
 		HMODULE mod_d3dcompiler_;
-		pD3DCompile DynamicD3DCompile_;
+		D3DCompileFunc DynamicD3DCompile_;
 		D3DReflectFunc DynamicD3DReflect_;
 		D3DStripShaderFunc DynamicD3DStripShader_;
 #endif

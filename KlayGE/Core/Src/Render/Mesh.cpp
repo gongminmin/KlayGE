@@ -1619,9 +1619,22 @@ namespace KlayGE
 							{
 							case EF_ABGR32F:
 							case EF_BGR32F:
+								pos = *reinterpret_cast<float3 const *>(src);
+								break;
+
 							case EF_GR32F:
+								{
+									float const * p = reinterpret_cast<float const *>(src);
+									pos.x() = p[0];
+									pos.y() = p[1];
+								}
+								break;
+
 							case EF_R32F:
-								std::memcpy(&pos, src, std::min<int>(merged_ves[ve].element_size(), sizeof(pos)));
+								{
+									float const * p = reinterpret_cast<float const *>(src);
+									pos.x() = p[0];
+								}
 								break;
 
 							default:
@@ -1643,9 +1656,22 @@ namespace KlayGE
 							{
 							case EF_ABGR32F:
 							case EF_BGR32F:
+								texcoords.back() = *reinterpret_cast<float3 const *>(src);
+								break;
+
 							case EF_GR32F:
+								{
+									float const * p = reinterpret_cast<float const *>(src);
+									texcoords.back().x() = p[0];
+									texcoords.back().y() = p[1];
+								}
+								break;
+
 							case EF_R32F:
-								std::memcpy(&texcoords.back(), src, std::min<int>(merged_ves[ve].element_size(), sizeof(texcoords.back())));
+								{
+									float const * p = reinterpret_cast<float const *>(src);
+									texcoords.back().x() = p[0];
+								}
 								break;
 
 							default:
@@ -1666,7 +1692,7 @@ namespace KlayGE
 							{
 							case EF_ABGR32F:
 							case EF_BGR32F:
-								std::memcpy(&normal, src, std::min<int>(merged_ves[ve].element_size(), sizeof(normal)));
+								normal = *reinterpret_cast<float3 const *>(src);
 								break;
 
 							case EF_A2BGR10:
@@ -1705,7 +1731,7 @@ namespace KlayGE
 							switch (merged_ves[ve].format)
 							{
 							case EF_ABGR32F:
-								std::memcpy(&tangent_quat, src, std::min<int>(merged_ves[ve].element_size(), sizeof(tangent_quat)));
+								tangent_quat = *reinterpret_cast<Quaternion const *>(src);
 								break;
 
 							case EF_ABGR8:

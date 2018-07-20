@@ -1935,7 +1935,7 @@ namespace KlayGE
 			ModeInfo const & info = mode_info_[mode_to_info_[mode]];
 
 			std::array<std::pair<int3, int3>, BC6_MAX_REGIONS> end_pts;
-			memset(&end_pts[0], 0, BC6_MAX_REGIONS * sizeof(end_pts[0]));
+			memset(reinterpret_cast<void*>(&end_pts[0]), 0, BC6_MAX_REGIONS * sizeof(end_pts[0]));
 			uint32_t shape = 0;
 
 			// Read header
@@ -1989,7 +1989,7 @@ namespace KlayGE
 						break;
 
 					default:
-						memset(abgr, 0, 16 * sizeof(abgr[0]));
+						memset(reinterpret_cast<void*>(abgr), 0, 16 * sizeof(abgr[0]));
 						return;
 					}
 				}
@@ -2027,14 +2027,14 @@ namespace KlayGE
 				size_t num_bits = IsFixUpOffset(info.partitions, shape, i) ? info.index_prec - 1 : info.index_prec;
 				if (start_bit + num_bits > 128)
 				{
-					memset(abgr, 0, 16 * sizeof(abgr[0]));
+					memset(reinterpret_cast<void*>(abgr), 0, 16 * sizeof(abgr[0]));
 					return;
 				}
 
 				uint8_t index = ReadBits(input, start_bit, num_bits);
 				if (index >= ((info.partitions > 1) ? 8 : 16))
 				{
-					memset(abgr, 0, 16 * sizeof(abgr[0]));
+					memset(reinterpret_cast<void*>(abgr), 0, 16 * sizeof(abgr[0]));
 					return;
 				}
 
@@ -2339,7 +2339,7 @@ namespace KlayGE
 				{
 					if (start_bit + rgba_prec[ch] > 128)
 					{
-						memset(argb, 0, 16 * sizeof(argb[0]));
+						memset(reinterpret_cast<void*>(argb), 0, 16 * sizeof(argb[0]));
 						return;
 					}
 
@@ -2353,7 +2353,7 @@ namespace KlayGE
 			{
 				if (start_bit > 127)
 				{
-					memset(argb, 0, 16 * sizeof(argb[0]));
+					memset(reinterpret_cast<void*>(argb), 0, 16 * sizeof(argb[0]));
 					return;
 				}
 
@@ -2389,7 +2389,7 @@ namespace KlayGE
 					? index_prec_1 - 1 : index_prec_1;
 				if (start_bit + num_bits > 128)
 				{
-					memset(argb, 0, 16 * sizeof(argb[0]));
+					memset(reinterpret_cast<void*>(argb), 0, 16 * sizeof(argb[0]));
 					return;
 				}
 				w1[i] = ReadBits(input, start_bit, num_bits);
@@ -2402,7 +2402,7 @@ namespace KlayGE
 					size_t num_bits = i ? index_prec_2 : index_prec_2 - 1;
 					if (start_bit + num_bits > 128)
 					{
-						memset(argb, 0, 16 * sizeof(argb[0]));
+						memset(reinterpret_cast<void*>(argb), 0, 16 * sizeof(argb[0]));
 						return;
 					}
 					w2[i] = ReadBits(input, start_bit, num_bits);
@@ -2447,7 +2447,7 @@ namespace KlayGE
 		}
 		else
 		{
-			memset(argb, 0, 16 * sizeof(argb[0]));
+			memset(reinterpret_cast<void*>(argb), 0, 16 * sizeof(argb[0]));
 		}
 	}
 

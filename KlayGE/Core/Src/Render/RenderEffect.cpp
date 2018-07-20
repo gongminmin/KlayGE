@@ -4573,6 +4573,10 @@ namespace KlayGE
 							{
 								decl.usage = VEU_Binormal;
 							}
+							else
+							{
+								KFL_UNREACHABLE("Invalid usage");
+							}
 
 							attr = entry_node->Attrib("component");
 							std::string component_str;
@@ -5970,10 +5974,10 @@ namespace KlayGE
 			ret->size_ = size_;
 
 			auto const & src_cbuff_desc = this->RetriveCBufferDesc();
-			float4x4 const * src = src_cbuff_desc.cbuff->VariableInBuff<float4x4>(src_cbuff_desc.offset);
+			uint8_t const * src = src_cbuff_desc.cbuff->VariableInBuff<uint8_t>(src_cbuff_desc.offset);
 
 			auto const & dst_cbuff_desc = ret->RetriveCBufferDesc();
-			float4x4* dst = dst_cbuff_desc.cbuff->VariableInBuff<float4x4>(dst_cbuff_desc.offset);
+			uint8_t* dst = dst_cbuff_desc.cbuff->VariableInBuff<uint8_t>(dst_cbuff_desc.offset);
 
 			memcpy(dst, src, size_ * sizeof(float4x4));
 

@@ -434,7 +434,7 @@ namespace KlayGE
 
 				for (size_t i = 0; i < size_; ++ i)
 				{
-					memcpy(dst, src, sizeof(T));
+					*reinterpret_cast<T*>(dst) = *reinterpret_cast<T const *>(src);
 					src += src_cbuff_desc.stride;
 					dst += dst_cbuff_desc.stride;
 				}
@@ -460,7 +460,7 @@ namespace KlayGE
 				size_ = static_cast<uint32_t>(value.size());
 				for (size_t i = 0; i < value.size(); ++ i)
 				{
-					memcpy(dst, src, sizeof(T));
+					*reinterpret_cast<T*>(dst) = *reinterpret_cast<T const *>(src);
 					src += sizeof(T);
 					dst += cbuff_desc.stride;
 				}
@@ -482,13 +482,11 @@ namespace KlayGE
 				uint8_t const * src = cbuff_desc.cbuff->template VariableInBuff<uint8_t>(cbuff_desc.offset);
 
 				val.resize(size_);
-				uint8_t* dst = reinterpret_cast<uint8_t*>(val.data());
 
 				for (size_t i = 0; i < size_; ++ i)
 				{
-					memcpy(&val[i], src, sizeof(val[i]));
+					val[i] = *reinterpret_cast<T const *>(src);
 					src += cbuff_desc.stride;
-					dst += sizeof(T);
 				}
 			}
 			else
