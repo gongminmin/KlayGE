@@ -27,4 +27,6 @@ before_build:
   - if "%COMPILER%" equ "mingw" set PATH=%MINGW_PATH%;%PATH%
 
 build_script:
+  # Reset the repo to restore changes in External
+  - git reset --hard
   - python BuildAll.py %COMPILER% %PLATFORM% %CONFIGURATION%
