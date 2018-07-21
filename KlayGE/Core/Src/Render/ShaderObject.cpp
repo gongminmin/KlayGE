@@ -166,7 +166,7 @@ namespace
 			static bool first = true;
 			if (first)
 			{
-				ss << WINE_PATH << "wineserver -p";
+				ss << KFL_STRINGIZE(WINE_PATH) << "wineserver -p";
 				int err = system(ss.str().c_str());
 				KFL_UNUSED(err);
 				// We should hold on a persistant wineserver, or XCode will lost connection after wineserver instance close and wine may not be able to find '.exe.so' file
@@ -175,7 +175,7 @@ namespace
 			}
 			d3dcompiler_wrapper_name += ".exe.so";
 			std::string wrapper_path = ResLoader::Instance().Locate(d3dcompiler_wrapper_name);
-			ss << WINE_PATH << "wine " << wrapper_path;
+			ss << KFL_STRINGIZE(WINE_PATH) << "wine " << wrapper_path;
 #endif
 			ss << " compile";
 			ss << " " << compile_input_file;
