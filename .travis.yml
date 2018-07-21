@@ -24,7 +24,6 @@ matrix:
             - winetricks
             - libx11-dev
             - libgl1-mesa-dev
-            - libglu1-mesa-dev
             - libopenal-dev
           update:
             - true
@@ -47,10 +46,8 @@ before_install:
     fi
   # macOS
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      brew update > /dev/null;
-      brew upgrade > /dev/null;
       brew cask install xquartz;
-      brew install wine --without-win64;
+      brew install wine;
     fi
 
 script:
