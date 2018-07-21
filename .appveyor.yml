@@ -20,6 +20,11 @@ configuration:
 
 cache:
   - External
+  - KlayGE/media
+  - KlayGE/Samples/media
+  - KlayGE/Tests/media
+  - KlayGE/Tools/media
+  - KlayGE/Tutorials/media
 
 before_build:
   # Workaround for CMake not wanting sh.exe on PATH for MinGW
