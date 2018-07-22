@@ -123,8 +123,24 @@
 		#ifndef _SCL_SECURE_NO_DEPRECATE
 			#define _SCL_SECURE_NO_DEPRECATE
 		#endif
+	#elif defined(linux) || defined(__linux) || defined(__linux__)
+		#if CLANG_VERSION >= 50
+			#define KLAYGE_COMPILER_VERSION CLANG_VERSION
+		#else
+			#error "Unsupported compiler version. Please install clang++ 5.0 or up."
+		#endif
+
+		#define KLAYGE_CXX17_CORE_IF_CONSTEXPR_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_ANY_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_OPTIONAL_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_SIZE_AND_MORE_SUPPORT
+		#define KLAYGE_CXX17_LIBRARY_STRING_VIEW_SUPPORT
+		#define KLAYGE_TS_LIBRARY_FILESYSTEM_SUPPORT
+
+		#define KLAYGE_SYMBOL_EXPORT __attribute__((__visibility__("default")))
+		#define KLAYGE_SYMBOL_IMPORT
 	#else
-		#error "Clang++ on an unknown platform. Only Apple+, Android, and Windows are supported."
+		#error "Clang++ on an unknown platform. Only Apple, Android, Linux, and Windows are supported."
 	#endif
 
 	#define KLAYGE_ATTRIBUTE_NORETURN __attribute__((noreturn))

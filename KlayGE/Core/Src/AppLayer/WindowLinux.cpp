@@ -172,7 +172,6 @@ namespace KlayGE
 
 	Window::~Window()
 	{
-		//XFree(fbc_);
 		XFree(vi_);
 		XDestroyWindow(x_display_, x_window_);
 		XCloseDisplay(x_display_);

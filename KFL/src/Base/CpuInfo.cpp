@@ -31,7 +31,7 @@
 #include <KFL/KFL.hpp>
 #include <KFL/Util.hpp>
 
-#ifdef KLAYGE_PLATFORM_WINDOWS
+#if defined(KLAYGE_PLATFORM_WINDOWS)
 #include <windows.h>
 #ifdef KLAYGE_PLATFORM_WINDOWS_DESKTOP
 #if (_WIN32_WINNT >= _WIN32_WINNT_WINBLUE)
@@ -41,6 +41,8 @@
 #ifdef KLAYGE_COMPILER_MSVC
 #include <intrin.h>
 #endif
+#elif defined(KLAYGE_PLATFORM_LINUX)
+#include <sched.h>
 #endif
 #include <cstring>
 #include <vector>

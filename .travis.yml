@@ -53,6 +53,25 @@ matrix:
             - true
       env: MATRIX_EVAL="CC=gcc-8 && CXX=g++-8" COMPILER="gcc"
 
+    - os: linux
+      dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-5.0
+          packages:
+            - clang-5.0
+            - wine
+            - wine-dev
+            - winetricks
+            - libx11-dev
+            - libgl1-mesa-dev
+            - libopenal-dev
+          update:
+            - true
+      env: MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0" COMPILER="clang"
+
     - os: osx
       osx_image: xcode9.3
       env: MATRIX_EVAL="CC=clang && CXX=clang++" COMPILER="clang"

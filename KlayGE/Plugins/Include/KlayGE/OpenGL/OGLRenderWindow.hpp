@@ -71,7 +71,6 @@ namespace KlayGE
 		::Display* x_display_;
 		::Window x_window_;
 		::GLXContext x_context_;
-		::GLXFBConfig* fbc_;
 #endif
 
 		bool	isFullScreen_;
