@@ -81,6 +81,11 @@ namespace KlayGE
 		{
 		}
 
+		static size_t size() noexcept
+		{
+			return elem_num;
+		}
+
 		// »°œÚ¡ø
 		iterator begin() noexcept
 		{
