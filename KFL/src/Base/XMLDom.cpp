@@ -102,7 +102,8 @@ namespace KlayGE
 
 	XMLAttributePtr XMLDocument::AllocAttribString(std::string_view name, std::string_view value)
 	{
-		return MakeSharedPtr<XMLAttribute>(*doc_, name, value);
+		return MakeSharedPtr<XMLAttribute>(*doc_, std::string_view(doc_->allocate_string(name.data(), name.size()), name.size()),
+			std::string_view(doc_->allocate_string(value.data(), value.size()), value.size()));
 	}
 
 	void XMLDocument::RootNode(XMLNodePtr const & new_node)
