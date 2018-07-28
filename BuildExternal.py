@@ -28,6 +28,9 @@ def BuildUniversalDXSDK(build_info, compiler_info):
 def BuildOpenALSDK(build_info, compiler_info):
 	BuildAProject("OpenALSDK", "External/OpenALSDK", build_info, compiler_info)
 
+def BuildRapidjson(build_info, compiler_info):
+	BuildAProject("rapidjson", "External/rapidjson", build_info, compiler_info)
+
 def BuildRapidxml(build_info, compiler_info):
 	BuildAProject("rapidxml", "External/rapidxml", build_info, compiler_info)
 
@@ -54,6 +57,7 @@ def BuildExternalLibs(build_info):
 		BuildBoost(build_info, compiler_info)
 		BuildPython(build_info, compiler_info)
 		Build7z(build_info, compiler_info)
+		BuildRapidjson(build_info, compiler_info)
 		BuildRapidxml(build_info, compiler_info)
 		if build_info.target_platform.find("android") == 0:
 			BuildAndroidNativeAppGlue(build_info, compiler_info)

@@ -86,6 +86,7 @@ External/libvorbis
 External/nanosvg
 External/OpenALSDK
 External/Python
+External/rapidjson
 External/rapidxml
 External/UniversalDXSDK
 External/wpftoolkit
