@@ -112,6 +112,31 @@ namespace KlayGE
 		return match;
 	}
 
+	ElementFormat UncompressedFormat(ElementFormat fmt)
+	{
+		if (IsCompressedFormat(fmt))
+		{
+			if ((fmt == EF_BC6) || (fmt == EF_SIGNED_BC6))
+			{
+				fmt = EF_ABGR16F;
+			}
+			else if (IsSigned(fmt))
+			{
+				fmt = EF_SIGNED_ABGR8;
+			}
+			else if (IsSRGB(fmt))
+			{
+				fmt = EF_ARGB8_SRGB;
+			}
+			else
+			{
+				fmt = EF_ARGB8;
+			}
+		}
+
+		return fmt;
+	}
+
 	bool Compare2D(Texture& tex0, uint32_t tex0_array_index, uint32_t tex0_level, uint32_t tex0_x_offset, uint32_t tex0_y_offset,
 		Texture& tex1, uint32_t tex1_array_index, uint32_t tex1_level, uint32_t tex1_x_offset, uint32_t tex1_y_offset,
 		uint32_t width, uint32_t height, float tolerance)
@@ -121,8 +146,8 @@ namespace KlayGE
 
 		RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 
-		ElementFormat const tex0_fmt = tex0.Format();
-		ElementFormat const tex1_fmt = tex1.Format();
+		ElementFormat const tex0_fmt = UncompressedFormat(tex0.Format());
+		ElementFormat const tex1_fmt = UncompressedFormat(tex1.Format());
 
 		TexturePtr tex0_cpu = rf.MakeTexture2D(width, height, 1, 1, tex0_fmt, 1, 0, EAH_CPU_Read);
 		tex0.CopyToSubTexture2D(*tex0_cpu, 0, 0, 0, 0, width, height,

@@ -37,6 +37,8 @@
 #endif
 #include <boost/algorithm/string/trim.hpp>
 
+#include <KlayGE/ToolCommon.hpp>
+
 using namespace std;
 using namespace KlayGE;
 
@@ -56,46 +58,6 @@ struct OfflineRenderDeviceCaps
 	bool r16f_support : 1;
 	bool srgb_support : 1;
 };
-
-std::string DosWildcardToRegex(std::string const & wildcard)
-{
-	std::string ret;
-	for (size_t i = 0; i < wildcard.size(); ++ i)
-	{
-		switch (wildcard[i])
-		{
-		case '*':
-			ret.append(".*");
-			break;
-
-		case '?':
-			ret.append(".");
-			break;
-
-		case '+':
-		case '(':
-		case ')':
-		case '^':
-		case '$':
-		case '.':
-		case '{':
-		case '}':
-		case '[':
-		case ']':
-		case '|':
-		case '\\':
-			ret.push_back('\\');
-			ret.push_back(wildcard[i]);
-			break;
-
-		default:
-			ret.push_back(wildcard[i]);
-			break;
-		}
-	}
-
-	return ret;
-}
 
 int RetrieveAttrValue(XMLNodePtr node, std::string const & attr_name, int default_value)
 {

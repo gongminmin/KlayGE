@@ -34,6 +34,7 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <KlayGE/JudaTexture.hpp>
+#include <KlayGE/ToolCommon.hpp>
 
 using namespace std;
 using namespace KlayGE;
@@ -45,46 +46,6 @@ struct TextureDesc
 	uint32_t height;
 };
 typedef std::shared_ptr<TextureDesc> TextureDescPtr;
-
-std::string DosWildcardToRegex(std::string const & wildcard)
-{
-	std::string ret;
-	for (size_t i = 0; i < wildcard.size(); ++ i)
-	{
-		switch (wildcard[i])
-		{
-		case '*':
-			ret.append(".*");
-			break;
-
-		case '?':
-			ret.append(".");
-			break;
-
-		case '+':
-		case '(':
-		case ')':
-		case '^':
-		case '$':
-		case '.':
-		case '{':
-		case '}':
-		case '[':
-		case ']':
-		case '|':
-		case '\\':
-			ret.push_back('\\');
-			ret.push_back(wildcard[i]);
-			break;
-
-		default:
-			ret.push_back(wildcard[i]);
-			break;
-		}
-	}
-
-	return ret;
-}
 
 // From http://www.blackpawn.com/texts/lightmaps/default.html
 class TexPackNode : public std::enable_shared_from_this<TexPackNode>
