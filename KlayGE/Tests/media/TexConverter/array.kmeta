@@ -1,0 +1,25 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "albedo",
+
+	"prefered_format": "BC1_SRGB",
+	"force_srgb": true,
+
+	"mipmap":
+	{
+		"enabled": true,
+		"auto_gen": true,
+		"num_levels": 0,
+		"linear": true
+	},
+
+	"array":
+	[
+		"lion.jpg",
+		"background.jpg",
+		"lion_ddn.jpg"
+	]
+}

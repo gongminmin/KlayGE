@@ -1,0 +1,37 @@
+{
+	"version": 1,
+
+	"type": "2D",
+
+	"slot": "albedo",
+
+	"prefered_format": "BC1_SRGB",
+	"force_srgb": true,
+
+	"mipmap":
+	{
+		"enabled": true,
+		"auto_gen": false,
+		"num_levels": 3,
+		"linear": true
+	},
+
+	"array":
+	[
+		[
+			"lion.jpg",
+			"lion_half.jpg",
+			"lion_quarter.jpg"
+		],
+		[
+			"background.jpg",
+			"background_half.jpg",
+			"background_quarter.jpg"
+		],
+		[
+			"lion_ddn.jpg",
+			"lion_ddn_half.jpg",
+			"lion_ddn_quarter.jpg"
+		]
+	]
+}
