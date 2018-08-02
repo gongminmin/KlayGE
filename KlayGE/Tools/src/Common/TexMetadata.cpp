@@ -33,6 +33,9 @@
 #include <KFL/Hash.hpp>
 #include <KlayGE/ResLoader.hpp>
 
+#include <algorithm>
+#include <iterator>
+
 #include <rapidjson/document.h>
 
 #include <KlayGE/TexMetadata.hpp>
@@ -301,7 +304,7 @@ namespace KlayGE
 	
 	uint32_t TexMetadata::ArraySize() const
 	{
-		return static_cast<uint32_t>(plane_file_names_.size());
+		return plane_file_names_.empty() ? 1 : static_cast<uint32_t>(plane_file_names_.size());
 	}
 
 	std::string_view TexMetadata::PlaneFileName(uint32_t array_index, uint32_t mip) const

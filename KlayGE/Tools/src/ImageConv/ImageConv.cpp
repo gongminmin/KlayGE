@@ -127,8 +127,7 @@ int main(int argc, char* argv[])
 		output_name += ".dds";
 	}
 
-	TexMetadata metadata;
-	metadata.Load(metadata_name);
+	TexMetadata metadata(metadata_name);
 
 	Texture::TextureType output_type;
 	uint32_t output_width;

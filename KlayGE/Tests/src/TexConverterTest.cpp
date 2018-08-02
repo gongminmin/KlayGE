@@ -91,6 +91,11 @@ public:
 	}
 };
 
+TEST_F(TexConverterTest, NoMetadata)
+{
+	RunTest("lion.jpg", "", "lion.passthrough.dds", 1.0f / 255);
+}
+
 TEST_F(TexConverterTest, PassThrough)
 {
 	RunTest("lion.jpg", "lion.jpg.passthrough.kmeta", "lion.passthrough.dds", 1.0f / 255);

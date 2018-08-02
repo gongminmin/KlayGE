@@ -36,6 +36,7 @@
 #include <KlayGE/PreDeclare.hpp>
 #include <KlayGE/Texture.hpp>
 
+#include <string>
 #include <vector>
 
 #include <KlayGE/ToolCommon.hpp>
@@ -61,7 +62,7 @@ namespace KlayGE
 	{
 	public:
 		TexMetadata();
-		TexMetadata(std::string_view name);
+		explicit TexMetadata(std::string_view name);
 
 		void Load(std::string_view name);
 
