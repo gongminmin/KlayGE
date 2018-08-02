@@ -519,6 +519,11 @@ namespace KlayGE
 
 	std::string ResLoader::Locate(std::string_view name)
 	{
+		if (name.empty())
+		{
+			return "";
+		}
+
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		AAsset* asset = this->LocateFileAndroid(name);
 		if (asset != nullptr)
@@ -586,6 +591,11 @@ namespace KlayGE
 
 	ResIdentifierPtr ResLoader::Open(std::string_view name)
 	{
+		if (name.empty())
+		{
+			return ResIdentifierPtr();
+		}
+
 #if defined(KLAYGE_PLATFORM_ANDROID)
 		AAsset* asset = this->LocateFileAndroid(name);
 		if (asset != nullptr)
