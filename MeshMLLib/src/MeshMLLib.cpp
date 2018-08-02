@@ -66,7 +66,7 @@ namespace KlayGE
 			&& (tex_names == rhs.tex_names);
 	}
 
-	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::Keyframes::Frame(float frame) const
+	std::pair<std::pair<Quaternion, Quaternion>, float> MeshMLObj::KeyframeSet::Frame(float frame) const
 	{
 		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
 		if (frame_ids.size() == 1)
@@ -138,6 +138,23 @@ namespace KlayGE
 		joint.bind_scale = scale;
 	}
 
+	uint32_t MeshMLObj::NumJoints() const
+	{
+		return static_cast<uint32_t>(joints_.size());
+	}
+
+	void MeshMLObj::GetJoint(int joint_id, std::string& joint_name, int& parent_id,
+		Quaternion& bind_real, Quaternion& bind_dual) const
+	{
+		auto iter = joints_.find(joint_id);
+		BOOST_ASSERT(iter != joints_.end());
+
+		joint_name = iter->second.name;
+		parent_id = iter->second.parent_id;
+		bind_real = iter->second.bind_real;
+		bind_dual = iter->second.bind_dual;
+	}
+
 	int MeshMLObj::AllocMaterial()
 	{
 		int id = static_cast<int>(materials_.size());
@@ -181,6 +198,51 @@ namespace KlayGE
 		mtl.tex_names[type] = std::string(name);
 	}
 
+	uint32_t MeshMLObj::NumMaterials() const
+	{
+		return static_cast<uint32_t>(materials_.size());
+	}
+
+	void MeshMLObj::GetMaterial(int mtl_id, std::string& name, float4& albedo, float& metalness, float& glossiness,
+		float3& emissive, bool& transparent, float& alpha_test, bool& sss, bool& two_sided) const
+	{
+		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
+
+		Material const & mtl = materials_[mtl_id];
+		name = mtl.name;
+		albedo = mtl.albedo;
+		metalness = mtl.metalness;
+		glossiness = mtl.glossiness;
+		emissive = mtl.emissive;
+		transparent = mtl.transparent;
+		alpha_test = mtl.alpha_test;
+		sss = mtl.sss;
+		two_sided = mtl.two_sided;
+	}
+
+	void MeshMLObj::GetDetailMaterial(int mtl_id, Material::SurfaceDetailMode& detail_mode, float& height_offset, float& height_scale,
+		float& edge_tess_hint, float& inside_tess_hint, float& min_tess, float& max_tess) const
+	{
+		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
+
+		Material const & mtl = materials_[mtl_id];
+		detail_mode = mtl.detail_mode;
+		height_offset = mtl.height_offset_scale.x();
+		height_scale = mtl.height_offset_scale.y();
+		edge_tess_hint = mtl.tess_factors.x();
+		inside_tess_hint = mtl.tess_factors.y();
+		min_tess = mtl.tess_factors.z();
+		max_tess = mtl.tess_factors.w();
+	}
+
+	void MeshMLObj::GetTextureSlot(int mtl_id, Material::TextureSlot type, std::string& name) const
+	{
+		BOOST_ASSERT(static_cast<int>(materials_.size()) > mtl_id);
+
+		Material const & mtl = materials_[mtl_id];
+		name = mtl.tex_names[type];
+	}
+
 	int MeshMLObj::AllocMesh()
 	{
 		int id = static_cast<int>(meshes_.size());
@@ -197,6 +259,29 @@ namespace KlayGE
 		mesh.name = std::string(name);
 		mesh.lod_vertices.resize(lod);
 		mesh.lod_triangles.resize(lod);
+	}
+
+	uint32_t MeshMLObj::NumMeshes() const
+	{
+		return static_cast<uint32_t>(meshes_.size());
+	}
+
+	uint32_t MeshMLObj::NumMeshLods(int mesh_id) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+
+		Mesh const & mesh = meshes_[mesh_id];
+		return static_cast<uint32_t>(mesh.lod_vertices.size());
+	}
+
+	void MeshMLObj::GetMesh(int mesh_id, int& material_id, std::string& name, int& num_lods) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+
+		Mesh const & mesh = meshes_[mesh_id];
+		material_id = mesh.material_id;
+		name = mesh.name;
+		num_lods = static_cast<int>(mesh.lod_vertices.size());
 	}
 
 	int MeshMLObj::AllocVertex(int mesh_id, int lod)
@@ -246,6 +331,28 @@ namespace KlayGE
 		vertex.texcoords = texcoords;
 	}
 
+	uint32_t MeshMLObj::NumVertices(int mesh_id, int lod) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		
+		return static_cast<uint32_t>(meshes_[mesh_id].lod_vertices[lod].size());
+	}
+
+	void MeshMLObj::GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, Quaternion& tangent_quat,
+		int& texcoord_components, std::vector<float3>& texcoords) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
+
+		Vertex const & vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
+		pos = vertex.position / unit_scale_;
+		tangent_quat = vertex.tangent_quat;
+		texcoord_components = vertex.texcoord_components;
+		texcoords = vertex.texcoords;
+	}
+
 	int MeshMLObj::AllocJointBinding(int mesh_id, int lod, int vertex_id)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
@@ -271,6 +378,29 @@ namespace KlayGE
 		binding.second = weight;
 	}
 
+	uint32_t MeshMLObj::NumJointBindings(int mesh_id, int lod, int vertex_id) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
+
+		Vertex const & vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
+		return static_cast<uint32_t>(vertex.binds.size());
+	}
+
+	void MeshMLObj::GetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
+		int& joint_id, float& weight) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod].size()) > vertex_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_vertices[lod][vertex_id].binds.size()) > binding_id);
+
+		JointBinding const & binding = meshes_[mesh_id].lod_vertices[lod][vertex_id].binds[binding_id];
+		joint_id = binding.first;
+		weight = binding.second;
+	}
+
 	int MeshMLObj::AllocTriangle(int mesh_id, int lod)
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
@@ -294,26 +424,60 @@ namespace KlayGE
 		triangle.vertex_index[2] = index2;
 	}
 
-	int MeshMLObj::AllocKeyframes()
+	uint32_t MeshMLObj::NumTriangles(int mesh_id, int lod) const
 	{
-		int id = static_cast<int>(keyframes_.size());
-		keyframes_.resize(id + 1);
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles.size()) > lod);
+
+		Mesh const & mesh = meshes_[mesh_id];
+		return static_cast<uint32_t>(mesh.lod_triangles[lod].size());
+	}
+
+	void MeshMLObj::GetTriangle(int mesh_id, int lod, int triangle_id, int& index0, int& index1, int& index2) const
+	{
+		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles.size()) > lod);
+		BOOST_ASSERT(static_cast<int>(meshes_[mesh_id].lod_triangles[lod].size()) > triangle_id);
+
+		Triangle const & triangle = meshes_[mesh_id].lod_triangles[lod][triangle_id];
+		index0 = triangle.vertex_index[0];
+		index1 = triangle.vertex_index[1];
+		index2 = triangle.vertex_index[2];
+	}
+
+	int MeshMLObj::AllocKeyframeSet()
+	{
+		int id = static_cast<int>(keyframe_sets_.size());
+		keyframe_sets_.resize(id + 1);
 		return id;
 	}
 
-	void MeshMLObj::SetKeyframes(int kfs_id, int joint_id)
+	void MeshMLObj::SetKeyframeSet(int kfs_id, int joint_id)
 	{
-		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
 
-		Keyframes& kfs = keyframes_[kfs_id];
+		KeyframeSet& kfs = keyframe_sets_[kfs_id];
 		kfs.joint_id = joint_id;
+	}
+	
+	uint32_t MeshMLObj::NumKeyframeSets() const
+	{
+		return static_cast<uint32_t>(keyframe_sets_.size());
+	}
+
+	void MeshMLObj::GetKeyframeSet(int kfs_id, int& joint_id) const
+	{
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
+
+		KeyframeSet const & kfs = keyframe_sets_[kfs_id];
+		joint_id = kfs.joint_id;
 	}
 
 	int MeshMLObj::AllocKeyframe(int kfs_id)
 	{
-		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
 
-		Keyframes& kfs = keyframes_[kfs_id];
+		KeyframeSet& kfs = keyframe_sets_[kfs_id];
 		int id = static_cast<int>(kfs.frame_ids.size());
 		kfs.frame_ids.push_back(id);
 		kfs.bind_reals.push_back(Quaternion());
@@ -337,8 +501,8 @@ namespace KlayGE
 
 	void MeshMLObj::SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual)
 	{
-		BOOST_ASSERT(static_cast<int>(keyframes_.size()) > kfs_id);
-		BOOST_ASSERT(static_cast<int>(keyframes_[kfs_id].bind_reals.size()) > kf_id);
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_[kfs_id].bind_reals.size()) > kf_id);
 
 		float scale = MathLib::length(bind_real);
 		if (MathLib::SignBit(bind_real.w()) < 0)
@@ -346,11 +510,30 @@ namespace KlayGE
 			scale = -scale;
 		}
 		
-		Keyframes& kfs = keyframes_[kfs_id];
+		KeyframeSet& kfs = keyframe_sets_[kfs_id];
 		kfs.frame_ids[kf_id] = frame_id;
 		kfs.bind_reals[kf_id] = bind_real / scale;
 		kfs.bind_duals[kf_id] = bind_dual;
 		kfs.bind_scales[kf_id] = scale;
+	}
+
+	uint32_t MeshMLObj::NumKeyframes(int kfs_id) const
+	{
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
+
+		KeyframeSet const & kfs = keyframe_sets_[kfs_id];
+		return static_cast<uint32_t>(kfs.frame_ids.size());
+	}
+
+	void MeshMLObj::GetKeyframe(int kfs_id, int kf_id, int& frame_id, Quaternion& bind_real, Quaternion& bind_dual) const
+	{
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
+		BOOST_ASSERT(static_cast<int>(keyframe_sets_[kfs_id].bind_reals.size()) > kf_id);
+
+		KeyframeSet const & kfs = keyframe_sets_[kfs_id];
+		frame_id = kfs.frame_ids[kf_id];
+		bind_real = kfs.bind_reals[kf_id] * kfs.bind_scales[kf_id];
+		bind_dual = kfs.bind_duals[kf_id];
 	}
 
 	int MeshMLObj::AllocAction()
@@ -370,6 +553,21 @@ namespace KlayGE
 		action.end_frame = end_frame;
 	}
 
+	uint32_t MeshMLObj::NumActions() const
+	{
+		return static_cast<uint32_t>(actions_.size());
+	}
+
+	void MeshMLObj::GetAction(int action_id, std::string& name, int& start_frame, int& end_frame) const
+	{
+		BOOST_ASSERT(static_cast<int>(actions_.size()) > action_id);
+
+		AnimationAction const & action = actions_[action_id];
+		name = action.name;
+		start_frame = action.start_frame;
+		end_frame = action.end_frame;
+	}
+
 	void MeshMLObj::WriteMeshML(std::ostream& os, int vertex_export_settings, int user_export_settings, std::string_view encoding)
 	{
 		this->OptimizeJoints();
@@ -380,7 +578,7 @@ namespace KlayGE
 		std::vector<int> joint_index_to_id;
 		if (joints_.empty())
 		{
-			keyframes_.clear();
+			keyframe_sets_.clear();
 		}
 		else
 		{
@@ -425,7 +623,7 @@ namespace KlayGE
 			}
 
 			// Replace joint_id in keyframes and remove unused keyframes
-			for (auto iter = keyframes_.begin(); iter != keyframes_.end();)
+			for (auto iter = keyframe_sets_.begin(); iter != keyframe_sets_.end();)
 			{
 				auto fiter = joint_id_to_index.find(iter->joint_id);
 				if (fiter != joint_id_to_index.end())
@@ -435,7 +633,7 @@ namespace KlayGE
 				}
 				else
 				{
-					iter = keyframes_.erase(iter);
+					iter = keyframe_sets_.erase(iter);
 				}
 			}
 		}
@@ -463,7 +661,7 @@ namespace KlayGE
 		{
 			this->WriteMeshChunk(os, vertex_export_settings);
 		}
-		if (!keyframes_.empty())
+		if (!keyframe_sets_.empty())
 		{
 			this->WriteKeyframeChunk(os);
 			this->WriteAABBKeyframeChunk(os);
@@ -799,9 +997,9 @@ namespace KlayGE
 
 		os << "\t<key_frames_chunk num_frames=\"" << num_frames_
 			<< "\" frame_rate=\"" << frame_rate_ << "\">" << std::endl;
-		for (size_t i = 0; i < keyframes_.size(); ++i)
+		for (size_t i = 0; i < keyframe_sets_.size(); ++i)
 		{
-			Keyframes kf = keyframes_[i];
+			KeyframeSet kf = keyframe_sets_[i];
 
 			BOOST_ASSERT((kf.bind_reals.size() == kf.bind_duals.size())
 				&& (kf.frame_ids.size() == kf.bind_scales.size())
@@ -1262,9 +1460,9 @@ namespace KlayGE
 		{
 			size_t kf_id = 0;
 			Joint& joint = bind_joints[i];
-			for (size_t j = 0; j < keyframes_.size(); ++ j)
+			for (size_t j = 0; j < keyframe_sets_.size(); ++ j)
 			{
-				Keyframes const & kf = keyframes_[j];
+				KeyframeSet const & kf = keyframe_sets_[j];
 				if (kf.joint_id == static_cast<int>(i))
 				{
 					kf_id = j;
@@ -1272,7 +1470,7 @@ namespace KlayGE
 				}
 			}
 
-			Keyframes const & kf = keyframes_[kf_id];
+			KeyframeSet const & kf = keyframe_sets_[kf_id];
 
 			std::pair<std::pair<Quaternion, Quaternion>, float> key_dq = kf.Frame(static_cast<float>(frame));
 

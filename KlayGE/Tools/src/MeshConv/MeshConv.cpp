@@ -764,8 +764,8 @@ namespace
 			for (auto const & frame : anim.resampled_frames)
 			{
 				int joint_id = frame.first;
-				int kfs_id = meshml_obj.AllocKeyframes();
-				meshml_obj.SetKeyframes(kfs_id, joint_id);
+				int kfs_id = meshml_obj.AllocKeyframeSet();
+				meshml_obj.SetKeyframeSet(kfs_id, joint_id);
 
 				for (auto const & resampled : frame.second)
 				{

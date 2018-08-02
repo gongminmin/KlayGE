@@ -199,8 +199,8 @@ namespace KlayGE
 			meshml_obj_.SetJoint(joint_id, tstr_to_str(root_node_->GetName()), -1, Quaternion(0, 0, 0, 1), Quaternion(0, 0, 0, 0));
 			joint_node_to_id_.emplace(root_node_, joint_id);
 
-			int kfs_id = meshml_obj_.AllocKeyframes();
-			meshml_obj_.SetKeyframes(kfs_id, joint_id);
+			int kfs_id = meshml_obj_.AllocKeyframeSet();
+			meshml_obj_.SetKeyframeSet(kfs_id, joint_id);
 
 			int tpf = GetTicksPerFrame();
 
@@ -861,8 +861,8 @@ namespace KlayGE
 			parent_node = root_node_;
 		}
 
-		int kfs_id = meshml_obj_.AllocKeyframes();
-		meshml_obj_.SetKeyframes(kfs_id, joint_node_to_id_[node]);
+		int kfs_id = meshml_obj_.AllocKeyframeSet();
+		meshml_obj_.SetKeyframeSet(kfs_id, joint_node_to_id_[node]);
 
 		for (int i = start_frame_; i < end_frame_; ++ i)
 		{

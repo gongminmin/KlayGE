@@ -295,8 +295,8 @@ void MayaMeshExporter::ExportMayaNodes(MItDag& dag_iterator)
 		std::map<int, int> joint_id_to_kfs_id;
 		for (auto const & joint : joint_to_id_)
 		{
-			int kfs_id = meshml_obj_.AllocKeyframes();
-			meshml_obj_.SetKeyframes(kfs_id, joint.second);
+			int kfs_id = meshml_obj_.AllocKeyframeSet();
+			meshml_obj_.SetKeyframeSet(kfs_id, joint.second);
 
 			joint_id_to_kfs_id.emplace(joint.second, kfs_id);
 		}

@@ -142,6 +142,11 @@ namespace KlayGE
 			return frame_rate_;
 		}
 
+		float UnitScale() const
+		{
+			return unit_scale_;
+		}
+
 		int AllocJoint();
 		void SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 			float4x4 const & bind_mat);
@@ -149,6 +154,9 @@ namespace KlayGE
 			Quaternion const & bind_quat, float3 const & bind_pos);
 		void SetJoint(int joint_id, std::string_view joint_name, int parent_id,
 			Quaternion const & bind_real, Quaternion const & bind_dual);
+		uint32_t NumJoints() const;
+		void GetJoint(int joint_id, std::string& joint_name, int& parent_id,
+			Quaternion& bind_real, Quaternion& bind_dual) const;
 
 		int AllocMaterial();
 		void SetMaterial(int mtl_id, std::string_view name, float4 const & albedo, float metalness, float glossiness,
@@ -156,9 +164,18 @@ namespace KlayGE
 		void SetDetailMaterial(int mtl_id, Material::SurfaceDetailMode detail_mode, float height_offset, float height_scale,
 			float edge_tess_hint, float inside_tess_hint, float min_tess, float max_tess);
 		void SetTextureSlot(int mtl_id, Material::TextureSlot type, std::string_view name);
+		uint32_t NumMaterials() const;
+		void GetMaterial(int mtl_id, std::string& name, float4& albedo, float& metalness, float& glossiness,
+			float3& emissive, bool& transparent, float& alpha_test, bool& sss, bool& two_sided) const;
+		void GetDetailMaterial(int mtl_id, Material::SurfaceDetailMode& detail_mode, float& height_offset, float& height_scale,
+			float& edge_tess_hint, float& inside_tess_hint, float& min_tess, float& max_tess) const;
+		void GetTextureSlot(int mtl_id, Material::TextureSlot type, std::string& name) const;
 
 		int AllocMesh();
 		void SetMesh(int mesh_id, int material_id, std::string_view name, int num_lods);
+		uint32_t NumMeshes() const;
+		uint32_t NumMeshLods(int mesh_id) const;
+		void GetMesh(int mesh_id, int& material_id, std::string& name, int& num_lods) const;
 		int AllocVertex(int mesh_id, int lod);
 		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, float3 const & normal,
 			int texcoord_components, std::vector<float3> const & texcoords);
@@ -167,21 +184,35 @@ namespace KlayGE
 			int texcoord_components, std::vector<float3> const & texcoords);
 		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
 			int texcoord_components, std::vector<float3> const & texcoords);
+		uint32_t NumVertices(int mesh_id, int lod) const;
+		void GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, Quaternion& tangent_quat,
+			int& texcoord_components, std::vector<float3>& texcoords) const;
 		int AllocJointBinding(int mesh_id, int lod, int vertex_id);
 		void SetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
 			int joint_id, float weight);
+		uint32_t NumJointBindings(int mesh_id, int lod, int vertex_id) const;
+		void GetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
+			int& joint_id, float& weight) const;
 		int AllocTriangle(int mesh_id, int lod);
 		void SetTriangle(int mesh_id, int lod, int triangle_id, int index0, int index1, int index2);
+		uint32_t NumTriangles(int mesh_id, int lod) const;
+		void GetTriangle(int mesh_id, int lod, int triangle_id, int& index0, int& index1, int& index2) const;
 
-		int AllocKeyframes();
-		void SetKeyframes(int kfs_id, int joint_id);
+		int AllocKeyframeSet();
+		void SetKeyframeSet(int kfs_id, int joint_id);
+		uint32_t NumKeyframeSets() const;
+		void GetKeyframeSet(int kfs_id, int& joint_id) const;
 		int AllocKeyframe(int kfs_id);
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, float4x4 const & bind_mat);
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_quat, float3 const & bind_pos);
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual);
+		uint32_t NumKeyframes(int kfs_id) const;
+		void GetKeyframe(int kfs_id, int kf_id, int& frame_id, Quaternion& bind_real, Quaternion& bind_dual) const;
 
 		int AllocAction();
 		void SetAction(int action_id, std::string_view name, int start_frame, int end_frame);
+		uint32_t NumActions() const;
+		void GetAction(int action_id, std::string& name, int& start_frame, int& end_frame) const;
 
 		void WriteMeshML(std::ostream& os,
 			int vertex_export_settings = VES_TangentQuat | VES_Texcoord, int user_export_settings = UES_SortMeshes,
@@ -222,7 +253,7 @@ namespace KlayGE
 			float bind_scale;
 		};
 
-		struct Keyframes
+		struct KeyframeSet
 		{
 			int joint_id;
 
@@ -274,7 +305,7 @@ namespace KlayGE
 		std::map<int, Joint> joints_;
 		std::vector<Material> materials_;
 		std::vector<Mesh> meshes_;
-		std::vector<Keyframes> keyframes_;
+		std::vector<KeyframeSet> keyframe_sets_;
 		std::vector<AnimationAction> actions_;
 	};
 }

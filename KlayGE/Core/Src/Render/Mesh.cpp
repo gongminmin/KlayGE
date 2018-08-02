@@ -1849,8 +1849,8 @@ namespace KlayGE
 		{
 			for (size_t i = 0; i < kfs->size(); ++ i)
 			{
-				int kfs_id = obj.AllocKeyframes();
-				obj.SetKeyframes(kfs_id, joint_map[i]);
+				int kfs_id = obj.AllocKeyframeSet();
+				obj.SetKeyframeSet(kfs_id, joint_map[i]);
 
 				for (size_t k = 0; k < (*kfs)[i].frame_id.size(); ++ k)
 				{
