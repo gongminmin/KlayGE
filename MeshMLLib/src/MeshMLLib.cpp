@@ -305,6 +305,7 @@ namespace KlayGE
 		Vertex& vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		vertex.position = pos * unit_scale_;
 		vertex.normal = normal;
+		vertex.tangent_quat = Quaternion(0, 0, 0, 0);
 		vertex.texcoord_components = texcoord_components;
 		vertex.texcoords = texcoords;
 	}
@@ -326,6 +327,7 @@ namespace KlayGE
 
 		Vertex& vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		vertex.position = pos * unit_scale_;
+		vertex.normal = float3(0, 0, 0);
 		vertex.tangent_quat = tangent_quat;
 		vertex.texcoord_components = texcoord_components;
 		vertex.texcoords = texcoords;
@@ -339,7 +341,7 @@ namespace KlayGE
 		return static_cast<uint32_t>(meshes_[mesh_id].lod_vertices[lod].size());
 	}
 
-	void MeshMLObj::GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, Quaternion& tangent_quat,
+	void MeshMLObj::GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, float3& normal, Quaternion& tangent_quat,
 		int& texcoord_components, std::vector<float3>& texcoords) const
 	{
 		BOOST_ASSERT(static_cast<int>(meshes_.size()) > mesh_id);
@@ -348,6 +350,7 @@ namespace KlayGE
 
 		Vertex const & vertex = meshes_[mesh_id].lod_vertices[lod][vertex_id];
 		pos = vertex.position / unit_scale_;
+		normal = vertex.normal;
 		tangent_quat = vertex.tangent_quat;
 		texcoord_components = vertex.texcoord_components;
 		texcoords = vertex.texcoords;
@@ -525,15 +528,17 @@ namespace KlayGE
 		return static_cast<uint32_t>(kfs.frame_ids.size());
 	}
 
-	void MeshMLObj::GetKeyframe(int kfs_id, int kf_id, int& frame_id, Quaternion& bind_real, Quaternion& bind_dual) const
+	void MeshMLObj::GetKeyframe(int kfs_id, int kf_id, int& frame_id,
+		Quaternion& bind_real, Quaternion& bind_dual, float& bind_scale) const
 	{
 		BOOST_ASSERT(static_cast<int>(keyframe_sets_.size()) > kfs_id);
 		BOOST_ASSERT(static_cast<int>(keyframe_sets_[kfs_id].bind_reals.size()) > kf_id);
 
 		KeyframeSet const & kfs = keyframe_sets_[kfs_id];
 		frame_id = kfs.frame_ids[kf_id];
-		bind_real = kfs.bind_reals[kf_id] * kfs.bind_scales[kf_id];
+		bind_real = kfs.bind_reals[kf_id];
 		bind_dual = kfs.bind_duals[kf_id];
+		bind_scale = kfs.bind_scales[kf_id];
 	}
 
 	int MeshMLObj::AllocAction()

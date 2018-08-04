@@ -185,7 +185,7 @@ namespace KlayGE
 		void SetVertex(int mesh_id, int lod, int vertex_id, float3 const & pos, Quaternion const & tangent_quat,
 			int texcoord_components, std::vector<float3> const & texcoords);
 		uint32_t NumVertices(int mesh_id, int lod) const;
-		void GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, Quaternion& tangent_quat,
+		void GetVertex(int mesh_id, int lod, int vertex_id, float3& pos, float3& normal, Quaternion& tangent_quat,
 			int& texcoord_components, std::vector<float3>& texcoords) const;
 		int AllocJointBinding(int mesh_id, int lod, int vertex_id);
 		void SetJointBinding(int mesh_id, int lod, int vertex_id, int binding_id,
@@ -207,7 +207,7 @@ namespace KlayGE
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_quat, float3 const & bind_pos);
 		void SetKeyframe(int kfs_id, int kf_id, int frame_id, Quaternion const & bind_real, Quaternion const & bind_dual);
 		uint32_t NumKeyframes(int kfs_id) const;
-		void GetKeyframe(int kfs_id, int kf_id, int& frame_id, Quaternion& bind_real, Quaternion& bind_dual) const;
+		void GetKeyframe(int kfs_id, int kf_id, int& frame_id, Quaternion& bind_real, Quaternion& bind_dual, float& bind_scale) const;
 
 		int AllocAction();
 		void SetAction(int action_id, std::string_view name, int start_frame, int end_frame);
