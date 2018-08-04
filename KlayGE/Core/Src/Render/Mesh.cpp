@@ -697,14 +697,12 @@ namespace KlayGE
 	}
 
 
-	std::pair<std::pair<Quaternion, Quaternion>, float> KeyFrames::Frame(float frame) const
+	std::tuple<Quaternion, Quaternion, float> KeyFrames::Frame(float frame) const
 	{
-		std::pair<std::pair<Quaternion, Quaternion>, float> ret;
+		std::tuple<Quaternion, Quaternion, float> ret;
 		if (frame_id.size() == 1)
 		{
-			ret.first.first = bind_real[0];
-			ret.first.second = bind_dual[0];
-			ret.second = bind_scale[0];
+			ret = std::make_tuple(bind_real[0], bind_dual[0], bind_scale[0]);
 		}
 		else
 		{
@@ -718,8 +716,8 @@ namespace KlayGE
 			int frame0 = frame_id[index0];
 			int frame1 = frame_id[index1];
 			float factor = (frame - frame0) / (frame1 - frame0);
-			ret.first = MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], factor);
-			ret.second = MathLib::lerp(bind_scale[index0], bind_scale[index1], factor);
+			auto dq = MathLib::sclerp(bind_real[index0], bind_dual[index0], bind_real[index1], bind_dual[index1], factor);
+			ret = std::make_tuple(dq.first, dq.second, MathLib::lerp(bind_scale[index0], bind_scale[index1], factor));
 		}
 		return ret;
 	}
@@ -762,29 +760,31 @@ namespace KlayGE
 			Joint& joint = joints_[i];
 			KeyFrames const & kf = (*key_frames_)[i];
 
-			std::pair<std::pair<Quaternion, Quaternion>, float> key_dq = kf.Frame(frame);
+			std::tuple<Quaternion, Quaternion, float> key_dq = kf.Frame(frame);
 
 			if (joint.parent != -1)
 			{
 				Joint const & parent(joints_[joint.parent]);
 
-				if (MathLib::dot(key_dq.first.first, parent.bind_real) < 0)
+				if (MathLib::dot(std::get<0>(key_dq), parent.bind_real) < 0)
 				{
-					key_dq.first.first = -key_dq.first.first;
-					key_dq.first.second = -key_dq.first.second;
+					std::get<0>(key_dq) = -std::get<0>(key_dq);
+					std::get<1>(key_dq) = -std::get<1>(key_dq);
 				}
 
-				if ((MathLib::SignBit(key_dq.second) > 0) && (MathLib::SignBit(parent.bind_scale) > 0))
+				if ((MathLib::SignBit(std::get<2>(key_dq)) > 0) && (MathLib::SignBit(parent.bind_scale) > 0))
 				{
-					joint.bind_real = MathLib::mul_real(key_dq.first.first, parent.bind_real);
-					joint.bind_dual = MathLib::mul_dual(key_dq.first.first, key_dq.first.second * parent.bind_scale, parent.bind_real, parent.bind_dual);
-					joint.bind_scale = key_dq.second * parent.bind_scale;
+					joint.bind_real = MathLib::mul_real(std::get<0>(key_dq), parent.bind_real);
+					joint.bind_dual = MathLib::mul_dual(std::get<0>(key_dq), std::get<1>(key_dq) * parent.bind_scale,
+						parent.bind_real, parent.bind_dual);
+					joint.bind_scale = std::get<2>(key_dq) * parent.bind_scale;
 				}
 				else
 				{
-					float4x4 tmp_mat = MathLib::scaling(MathLib::abs(key_dq.second), MathLib::abs(key_dq.second), key_dq.second)
-						* MathLib::to_matrix(key_dq.first.first)
-						* MathLib::translation(MathLib::udq_to_trans(key_dq.first.first, key_dq.first.second))
+					float const key_scale = std::get<2>(key_dq);
+					float4x4 tmp_mat = MathLib::scaling(MathLib::abs(key_scale), MathLib::abs(key_scale), key_scale)
+						* MathLib::to_matrix(std::get<0>(key_dq))
+						* MathLib::translation(MathLib::udq_to_trans(std::get<0>(key_dq), std::get<1>(key_dq)))
 						* MathLib::scaling(MathLib::abs(parent.bind_scale), MathLib::abs(parent.bind_scale), parent.bind_scale)
 						* MathLib::to_matrix(parent.bind_real)
 						* MathLib::translation(MathLib::udq_to_trans(parent.bind_real, parent.bind_dual));
@@ -813,9 +813,9 @@ namespace KlayGE
 			}
 			else
 			{
-				joint.bind_real = key_dq.first.first;
-				joint.bind_dual = key_dq.first.second;
-				joint.bind_scale = key_dq.second;
+				joint.bind_real = std::get<0>(key_dq);
+				joint.bind_dual = std::get<1>(key_dq);
+				joint.bind_scale = std::get<2>(key_dq);
 			}
 		}
 
@@ -1499,7 +1499,7 @@ namespace KlayGE
 					action.start_frame = LE2Native(action.start_frame);
 					decoded->read(&action.end_frame, sizeof(action.end_frame));
 					action.end_frame = LE2Native(action.end_frame);
-					actions->push_back(action);
+					(*actions)[action_index] = action;
 				}
 			}
 		}

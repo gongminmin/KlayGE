@@ -33,8 +33,9 @@
 #include <KFL/Math.hpp>
 #include <KlayGE/SceneObject.hpp>
 
-#include <vector>
 #include <string>
+#include <tuple>
+#include <vector>
 
 namespace KlayGE
 {
@@ -275,7 +276,7 @@ namespace KlayGE
 		std::vector<Quaternion> bind_dual;
 		std::vector<float> bind_scale;
 
-		std::pair<std::pair<Quaternion, Quaternion>, float> Frame(float frame) const;
+		std::tuple<Quaternion, Quaternion, float> Frame(float frame) const;
 	};
 	typedef std::vector<KeyFrames> KeyFramesType;
 
