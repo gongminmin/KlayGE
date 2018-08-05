@@ -80,7 +80,7 @@ class BuildInfo:
 			cfg_build.project
 		except:
 			cfg_build.project = "auto"
-		if len(compiler) > 0:
+		if (len(compiler) > 0) and (compiler.lower() != "clean"):
 			cfg_build.compiler = compiler
 		else:
 			try:
@@ -395,7 +395,7 @@ class BuildInfo:
 				compiler_name = "clang"
 				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
-				LogError("Wrong combination of project and compiler.\n")
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
 				compilers.append(CompilerInfo(arch, "Visual Studio 15", compiler_root, vcvarsall_path, vcvarsall_options))
@@ -408,7 +408,7 @@ class BuildInfo:
 				compiler_name = "clang"
 				compiler_version = self.RetrieveClangVersion(compiler_root)
 			else:
-				LogError("Wrong combination of project and compiler.\n")
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 			multi_config = True
 			for arch in archs:
 				compilers.append(CompilerInfo(arch, "Visual Studio 14", compiler_root, vcvarsall_path))
@@ -421,7 +421,7 @@ class BuildInfo:
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
-				LogError("Wrong combination of project and compiler.\n")
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 		elif "make" == project_type:
 			if "win" == host_platform:
 				gen_name = "MinGW Makefiles"
@@ -443,7 +443,7 @@ class BuildInfo:
 				for arch in archs:
 					compilers.append(CompilerInfo(arch, gen_name, compiler_root))
 			else:
-				LogError("Wrong combination of project and compiler.\n")
+				LogError("Wrong combination of project %s and compiler %s.\n" % (project_type, compiler))
 		else:
 			compiler_name = ""
 			compiler_version = 0
