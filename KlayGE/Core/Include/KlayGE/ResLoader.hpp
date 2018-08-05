@@ -97,6 +97,7 @@ namespace KlayGE
 
 		void AddPath(std::string_view phy_path);
 		void DelPath(std::string_view phy_path);
+		bool IsInPath(std::string_view phy_path);
 		std::string const & LocalFolder() const
 		{
 			return local_path_;

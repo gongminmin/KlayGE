@@ -429,6 +429,40 @@ namespace KlayGE
 		this->Unmount("", phy_path);
 	}
 
+	bool ResLoader::IsInPath(std::string_view phy_path)
+	{
+		std::string_view virtual_path = "";
+
+		std::lock_guard<std::mutex> lock(paths_mutex_);
+
+		std::string real_path = this->RealPath(phy_path);
+		if (!real_path.empty())
+		{
+			std::string virtual_path_str(virtual_path);
+			if (!virtual_path.empty() && (virtual_path.back() != '/'))
+			{
+				virtual_path_str.push_back('/');
+			}
+			uint64_t const virtual_path_hash = HashRange(virtual_path_str.begin(), virtual_path_str.end());
+
+			bool found = false;
+			for (auto const & path : paths_)
+			{
+				if ((std::get<0>(path) == virtual_path_hash) && (std::get<2>(path) == real_path))
+				{
+					found = true;
+					break;
+				}
+			}
+
+			return found;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
 	void ResLoader::Mount(std::string_view virtual_path, std::string_view phy_path)
 	{
 		std::lock_guard<std::mutex> lock(paths_mutex_);
