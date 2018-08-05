@@ -29,6 +29,8 @@
  */
 
 #include <KlayGE/KlayGE.hpp>
+#include <KFL/CXX17/filesystem.hpp>
+#include <KlayGE/ResLoader.hpp>
 
 #include <cstring>
 
@@ -45,6 +47,13 @@ namespace KlayGE
 		input_name_ = std::string(input_name);
 		metadata_ = metadata;
 
+		auto in_folder = std::filesystem::path(ResLoader::Instance().Locate(input_name_)).parent_path().string();
+		bool const in_path = ResLoader::Instance().IsInPath(in_folder);
+		if (!in_path)
+		{
+			ResLoader::Instance().AddPath(in_folder);
+		}
+
 		if (!this->Load())
 		{
 			return false;
@@ -52,6 +61,11 @@ namespace KlayGE
 
 		this->Save(output_type, output_width, output_height, output_depth, output_num_mipmaps, output_array_size,
 			output_format, output_init_data, output_data_block);
+
+		if (!in_path)
+		{
+			ResLoader::Instance().DelPath(in_folder);
+		}
 
 		return true;
 	}
@@ -65,7 +79,11 @@ namespace KlayGE
 		planes_[0][0] = MakeSharedPtr<ImagePlane>();
 		auto& first_image = *planes_[0][0];
 
-		first_image.Load(input_name_, metadata_);
+		if (!first_image.Load(input_name_, metadata_))
+		{
+			LogError() << "COULDN'T load " << input_name_ << '.' << std::endl;
+			return false;
+		}
 
 		width_ = first_image.Width();
 		height_ = first_image.Height();
@@ -123,8 +141,13 @@ namespace KlayGE
 
 				if (arr > 0)
 				{
+					std::string_view const plane_file_name = metadata_.PlaneFileName(arr, 0);
 					planes_[arr][0] = MakeSharedPtr<ImagePlane>();
-					planes_[arr][0]->Load(metadata_.PlaneFileName(arr, 0), metadata_);
+					if (!planes_[arr][0]->Load(plane_file_name, metadata_))
+					{
+						LogError() << "COULDN'T load " << plane_file_name << '.' << std::endl;
+						return false;
+					}
 				}
 
 				uint32_t w = width_;
@@ -149,8 +172,13 @@ namespace KlayGE
 				{
 					if ((arr != 0) || (m != 0))
 					{
+						std::string_view const plane_file_name = metadata_.PlaneFileName(arr, m);
 						planes_[arr][m] = MakeSharedPtr<ImagePlane>();
-						planes_[arr][m]->Load(metadata_.PlaneFileName(arr, m), metadata_);
+						if (!planes_[arr][m]->Load(plane_file_name, metadata_))
+						{
+							LogError() << "COULDN'T load " << plane_file_name << '.' << std::endl;
+							return false;
+						}
 					}
 				}
 			}

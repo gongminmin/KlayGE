@@ -153,6 +153,10 @@ int main(int argc, char* argv[])
 			cout << "Texture has been saved to " << output_name << "." << endl;
 		}
 	}
+	else
+	{
+		LogError() << "FAIL to convert file " << file_name << " with metadata " << metadata_name << std::endl;
+	}
 
 	Context::Destroy();
 

@@ -298,6 +298,10 @@ namespace KlayGE
 				new_metadata.plane_file_names_.assign(1, std::vector<std::string>(1, std::string(name)));
 			}
 		}
+		else if (!name.empty())
+		{
+			LogError() << "COULDN'T find " << name << ". Fallback to default metadata." << std::endl;
+		}
 
 		*this = std::move(new_metadata);
 	}
