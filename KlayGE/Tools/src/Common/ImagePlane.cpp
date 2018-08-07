@@ -55,15 +55,17 @@ namespace KlayGE
 		std::string const ext_name = std::filesystem::path(name_str).extension().string();
 		if (ext_name == ".dds")
 		{
-			Texture::TextureType type;
-			uint32_t depth;
-			uint32_t num_mipmaps;
-			uint32_t array_size;
-			ElementFormat format;
-			std::vector<ElementInitData> init_data;
-			std::vector<uint8_t> data_block;
+			TexturePtr in_tex = LoadSoftwareTexture(name_str);
+			auto const type = in_tex->Type();
+			width_ = in_tex->Width(0);
+			height_ = in_tex->Height(0);
+			auto const depth = in_tex->Depth(0);
+			auto const num_mipmaps = in_tex->NumMipMaps();
+			auto const array_size = in_tex->ArraySize();
+			auto const format = in_tex->Format();
+			auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+			auto const & data_block = checked_cast<SoftwareTexture*>(in_tex.get())->DataBlock();
 
-			LoadTexture(name_str, type, width_, height_, depth, num_mipmaps, array_size, format, init_data, data_block);
 			if (type != Texture::TT_2D)
 			{
 				LogWarn() << "Only 2D texture are supported." << std::endl;
@@ -84,7 +86,7 @@ namespace KlayGE
 			if (IsCompressedFormat(format))
 			{
 				compressed_format_ = format;
-				compressed_data_ = std::move(data_block);
+				compressed_data_ = data_block;
 				compressed_row_pitch_ = init_data[0].row_pitch;
 				compressed_slice_pitch_ = init_data[0].slice_pitch;
 

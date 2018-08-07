@@ -1293,10 +1293,26 @@ namespace
 		{
 			TexDesc::TexData& tex_data = *tex_desc_.tex_data;
 
-			LoadTexture(tex_desc_.res_name, tex_data.type,
-				tex_data.width, tex_data.height, tex_data.depth,
-				tex_data.num_mipmaps, tex_data.array_size, tex_data.format,
-				tex_data.init_data, tex_data.data_block);
+			{
+				TexturePtr tex = LoadSoftwareTexture(tex_desc_.res_name);
+				tex_data.type = tex->Type();
+				tex_data.width = tex->Width(0);
+				tex_data.height = tex->Height(0);
+				tex_data.depth = tex->Depth(0);
+				tex_data.num_mipmaps = tex->NumMipMaps();
+				tex_data.array_size = tex->ArraySize();
+				tex_data.format = tex->Format();
+
+				auto* sw_tex = checked_cast<SoftwareTexture*>(tex.get());
+				tex_data.init_data = sw_tex->SubresourceData();
+				tex_data.data_block = sw_tex->DataBlock();
+
+				for (size_t i = 0; i < tex_data.init_data.size(); ++ i)
+				{
+					size_t const offset = static_cast<uint8_t const *>(tex_data.init_data[i].data) - sw_tex->DataBlock().data();
+					tex_data.init_data[i].data = tex_data.data_block.data() + offset;
+				}
+			}
 
 			RenderFactory& rf = Context::Instance().RenderFactoryInstance();
 			RenderDeviceCaps const & caps = rf.RenderEngineInstance().DeviceCaps();
@@ -1983,21 +1999,27 @@ namespace KlayGE
 		}
 	}
 
-	// 载入DDS格式文件
-	void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
+	TexturePtr LoadSoftwareTexture(std::string const & tex_name)
 	{
+		TexturePtr ret;
 		ResIdentifierPtr tex_res = ResLoader::Instance().Open(tex_name);
-
-		LoadTexture(tex_res, type, width, height, depth, num_mipmaps, array_size,
-			format, init_data, data_block);
+		if (tex_res)
+		{
+			ret = LoadSoftwareTexture(tex_res);
+		}
+		return ret;
 	}
 
-	void LoadTexture(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block)
+	TexturePtr LoadSoftwareTexture(ResIdentifierPtr const & tex_res)
 	{
+		Texture::TextureType type;
+		uint32_t width, height, depth;
+		uint32_t num_mipmaps;
+		uint32_t array_size;
+		ElementFormat format;
+		std::vector<ElementInitData> init_data;
+		std::vector<uint8_t> data_block;
+
 		uint32_t row_pitch, slice_pitch;
 		GetImageInfo(tex_res, type, width, height, depth, num_mipmaps, array_size, format,
 			row_pitch, slice_pitch);
@@ -2187,6 +2209,11 @@ namespace KlayGE
 		{
 			init_data[i].data = &data_block[base[i]];
 		}
+
+		auto ret = MakeSharedPtr<SoftwareTexture>(type, width, height, depth,
+			num_mipmaps, array_size, format, false);
+		ret->CreateHWResource(init_data, nullptr);
+		return ret;
 	}
 
 	TexturePtr SyncLoadTexture(std::string const & tex_name, uint32_t access_hint)
@@ -2726,39 +2753,46 @@ namespace KlayGE
 	// 把纹理保存入DDS文件
 	void SaveTexture(TexturePtr const & texture, std::string const & tex_name)
 	{
-		RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
-
 		ElementFormat format = texture->Format();
 		uint32_t numMipMaps = texture->NumMipMaps();
 		uint32_t array_size = texture->ArraySize();
 
 		TexturePtr texture_sys_mem;
-		switch (texture->Type())
+		if (texture->AccessHint() & EAH_CPU_Read)
 		{
-		case Texture::TT_1D:
-			texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
-			break;
-
-		case Texture::TT_2D:
-			texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
-			break;
-
-		case Texture::TT_3D:
-			texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
-				texture->Depth(0), numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
-			break;
-
-		case Texture::TT_Cube:
-			texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
-				numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid texture type");
+			texture_sys_mem = texture;
 		}
-		texture->CopyToTexture(*texture_sys_mem);
+		else
+		{
+			RenderFactory& renderFactory = Context::Instance().RenderFactoryInstance();
+
+			switch (texture->Type())
+			{
+			case Texture::TT_1D:
+				texture_sys_mem = renderFactory.MakeTexture1D(texture->Width(0),
+					numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
+				break;
+
+			case Texture::TT_2D:
+				texture_sys_mem = renderFactory.MakeTexture2D(texture->Width(0), texture->Height(0),
+					numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
+				break;
+
+			case Texture::TT_3D:
+				texture_sys_mem = renderFactory.MakeTexture3D(texture->Width(0), texture->Height(0),
+					texture->Depth(0), numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
+				break;
+
+			case Texture::TT_Cube:
+				texture_sys_mem = renderFactory.MakeTextureCube(texture->Width(0),
+					numMipMaps, array_size, format, 1, 0, EAH_CPU_Read);
+				break;
+
+			default:
+				KFL_UNREACHABLE("Invalid texture type");
+			}
+			texture->CopyToTexture(*texture_sys_mem);
+		}
 
 		uint32_t const format_size = NumFormatBytes(format);
 
@@ -3613,5 +3647,472 @@ namespace KlayGE
 		}
 
 		return std::make_pair(look_dir, up_dir);
+	}
+
+
+	SoftwareTexture::SoftwareTexture(TextureType type, uint32_t width, uint32_t height, uint32_t depth,
+		uint32_t num_mipmaps, uint32_t array_size, ElementFormat format, bool ref_only)
+		: Texture(type, 1, 0, EAH_CPU_Read | EAH_CPU_Write),
+			ref_only_(ref_only), width_(width), height_(height), depth_(depth)
+	{
+		num_mip_maps_ = num_mipmaps;
+		array_size_ = array_size;
+		format_ = format;
+	}
+
+	std::wstring const & SoftwareTexture::Name() const
+	{
+		static const std::wstring name(L"Software Texture");
+		return name;
+	}
+
+	uint32_t SoftwareTexture::Width(uint32_t level) const
+	{
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return std::max<uint32_t>(1U, width_ >> level);
+	}
+
+	uint32_t SoftwareTexture::Height(uint32_t level) const
+	{
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return std::max<uint32_t>(1U, height_ >> level);
+	}
+
+	uint32_t SoftwareTexture::Depth(uint32_t level) const
+	{
+		BOOST_ASSERT(level < num_mip_maps_);
+
+		return std::max<uint32_t>(1U, depth_ >> level);
+	}
+
+	void SoftwareTexture::CopyToTexture(Texture& target)
+	{
+		BOOST_ASSERT(type_ == target.Type());
+
+		auto& sw_target = *checked_cast<SoftwareTexture*>(&target);
+
+		uint32_t const num_faces = (type_ == TT_Cube) ? 6 : 1;
+		uint32_t const array_size = std::min(array_size_, target.ArraySize());
+		uint32_t const num_mip_maps = std::min(num_mip_maps_, target.NumMipMaps());
+		for (uint32_t array_index = 0; array_index < array_size; ++ array_index)
+		{
+			for (uint32_t face = 0; face < num_faces; ++ face)
+			{
+				for (uint32_t mip = 0; mip < num_mip_maps; ++ mip)
+				{
+					auto const & src_data = subres_data_[(array_index * num_faces + face) * num_mip_maps_ + mip];
+					auto const & dst_data = sw_target.subres_data_[(array_index * num_faces + face) * target.NumMipMaps() + mip];
+
+					ResizeTexture(const_cast<void*>(dst_data.data), dst_data.row_pitch, dst_data.slice_pitch, target.Format(),
+						target.Width(mip), target.Height(mip), target.Depth(mip),
+						src_data.data, src_data.row_pitch, src_data.slice_pitch, format_,
+						this->Width(mip), this->Height(mip), this->Depth(mip),
+						true);
+				}
+			}
+		}
+	}
+
+	void SoftwareTexture::CopyToSubTexture1D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width)
+	{
+		auto& sw_target = *checked_cast<SoftwareTexture*>(&target);
+
+		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
+		auto const & dst_data = sw_target.subres_data_[dst_array_index * target.NumMipMaps() + dst_level];
+
+		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data.data)
+			+ src_x_offset * NumFormatBytes(format_);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(const_cast<void*>(dst_data.data))
+			+ dst_x_offset * NumFormatBytes(target.Format());
+
+		ResizeTexture(dst_ptr, dst_data.row_pitch, dst_data.slice_pitch, target.Format(),
+			dst_width, 1, 1,
+			src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
+			src_width, 1, 1,
+			true);
+	}
+
+	void SoftwareTexture::CopyToSubTexture2D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+		uint32_t src_width, uint32_t src_height)
+	{
+		auto& sw_target = *checked_cast<SoftwareTexture*>(&target);
+
+		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
+		auto const & dst_data = sw_target.subres_data_[dst_array_index * target.NumMipMaps() + dst_level];
+
+		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data.data)
+			+ src_y_offset * src_data.row_pitch + src_x_offset * NumFormatBytes(format_);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(const_cast<void*>(dst_data.data))
+			+ dst_y_offset * dst_data.row_pitch + dst_x_offset * NumFormatBytes(target.Format());
+
+		ResizeTexture(dst_ptr, dst_data.row_pitch, dst_data.slice_pitch, target.Format(),
+			dst_width, dst_height, 1,
+			src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
+			src_width, src_height, 1,
+			true);
+	}
+
+	void SoftwareTexture::CopyToSubTexture3D(Texture& target,
+		uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
+		uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+		uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
+		uint32_t src_width, uint32_t src_height, uint32_t src_depth)
+	{
+		auto& sw_target = *checked_cast<SoftwareTexture*>(&target);
+
+		auto const & src_data = subres_data_[src_array_index * num_mip_maps_ + src_level];
+		auto const & dst_data = sw_target.subres_data_[dst_array_index * target.NumMipMaps() + dst_level];
+
+		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data.data)
+			+ src_z_offset * src_data.slice_pitch + src_y_offset * src_data.row_pitch + src_x_offset * NumFormatBytes(format_);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(const_cast<void*>(dst_data.data))
+			+ dst_z_offset * dst_data.slice_pitch + dst_y_offset * dst_data.row_pitch + dst_x_offset * NumFormatBytes(target.Format());
+
+		ResizeTexture(dst_ptr, dst_data.row_pitch, dst_data.slice_pitch, target.Format(),
+			dst_width, dst_height, dst_depth,
+			src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
+			src_width, src_height, src_depth,
+			true);
+	}
+
+	void SoftwareTexture::CopyToSubTextureCube(Texture& target,
+		uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+		uint32_t dst_width, uint32_t dst_height,
+		uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+		uint32_t src_width, uint32_t src_height)
+	{
+		auto& sw_target = *checked_cast<SoftwareTexture*>(&target);
+
+		auto const & src_data = subres_data_[(src_array_index * 6 + src_face) * num_mip_maps_ + src_level];
+		auto const & dst_data = sw_target.subres_data_[(dst_array_index * 6 + dst_face) * target.NumMipMaps() + dst_level];
+
+		uint8_t const * src_ptr = static_cast<uint8_t const *>(src_data.data)
+			+ src_y_offset * src_data.row_pitch + src_x_offset * NumFormatBytes(format_);
+		uint8_t* dst_ptr = static_cast<uint8_t*>(const_cast<void*>(dst_data.data))
+			+ dst_y_offset * dst_data.row_pitch + dst_x_offset * NumFormatBytes(target.Format());
+
+		ResizeTexture(dst_ptr, dst_data.row_pitch, dst_data.slice_pitch, target.Format(),
+			dst_width, dst_height, 1,
+			src_ptr, src_data.row_pitch, src_data.slice_pitch, format_,
+			src_width, src_height, 1,
+			true);
+	}
+
+	void SoftwareTexture::BuildMipSubLevels()
+	{
+		for (uint32_t index = 0; index < this->ArraySize(); ++ index)
+		{
+			for (uint32_t level = 1; level < this->NumMipMaps(); ++ level)
+			{
+				switch (type_)
+				{
+				case TT_1D:
+					this->CopyToSubTexture1D(*this, index, level, 0, this->Width(level),
+						index, level - 1, 0, this->Width(level - 1));
+					break;
+
+				case TT_2D:
+					this->CopyToSubTexture2D(*this, index, level, 0, 0, this->Width(level), this->Height(level),
+						index, level - 1, 0, 0, this->Width(level - 1), this->Height(level - 1));
+					break;
+
+				case TT_3D:
+					this->CopyToSubTexture3D(*this, index, level, 0, 0, 0, this->Width(level), this->Height(level), this->Depth(level),
+						index, level - 1, 0, 0, 0, this->Width(level - 1), this->Height(level - 1), this->Depth(level - 1));
+					break;
+
+				case TT_Cube:
+					for (uint32_t face = 0; face < 6; ++ face)
+					{
+						this->CopyToSubTextureCube(*this, index, static_cast<CubeFaces>(face), level, 0, 0,
+							this->Width(level), this->Height(level),
+							index, static_cast<CubeFaces>(face), level - 1, 0, 0,
+							this->Width(level - 1), this->Height(level - 1));
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	void SoftwareTexture::Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t width,
+		void*& data)
+	{
+		KFL_UNUSED(tma);
+		KFL_UNUSED(width);
+
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = false;
+		if (mapped_[subres]->compare_exchange_strong(already_mapped, true))
+		{
+			auto const & init_data = subres_data_[subres];
+			uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data);
+			data = const_cast<uint8_t*>(ptr + x_offset * NumFormatBytes(format_));
+		}
+		else
+		{
+			data = nullptr;
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& row_pitch)
+	{
+		KFL_UNUSED(tma);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = false;
+		if (mapped_[subres]->compare_exchange_strong(already_mapped, true))
+		{
+			auto const & init_data = subres_data_[subres];
+			uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data);
+			row_pitch = init_data.row_pitch;
+			data = const_cast<uint8_t*>(ptr + y_offset * row_pitch + x_offset * NumFormatBytes(format_));
+		}
+		else
+		{
+			data = nullptr;
+			row_pitch = 0;
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void*& data, uint32_t& row_pitch, uint32_t& slice_pitch)
+	{
+		KFL_UNUSED(tma);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+		KFL_UNUSED(depth);
+
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = false;
+		if (mapped_[subres]->compare_exchange_strong(already_mapped, true))
+		{
+			auto const & init_data = subres_data_[subres];
+			uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data);
+			row_pitch = init_data.row_pitch;
+			slice_pitch = init_data.slice_pitch;
+			data = const_cast<uint8_t*>(ptr + z_offset * slice_pitch + y_offset * row_pitch + x_offset * NumFormatBytes(format_));
+		}
+		else
+		{
+			data = nullptr;
+			row_pitch = 0;
+			slice_pitch = 0;
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void*& data, uint32_t& row_pitch)
+	{
+		KFL_UNUSED(tma);
+		KFL_UNUSED(width);
+		KFL_UNUSED(height);
+
+		size_t const subres = (array_index * 6 + face) * num_mip_maps_ + level;
+
+		bool already_mapped = false;
+		if (mapped_[subres]->compare_exchange_strong(already_mapped, true))
+		{
+			auto const & init_data = subres_data_[subres];
+			uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data);
+			row_pitch = init_data.row_pitch;
+			data = const_cast<uint8_t*>(ptr + y_offset * row_pitch + x_offset * NumFormatBytes(format_));
+		}
+		else
+		{
+			data = nullptr;
+			row_pitch = 0;
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::Unmap1D(uint32_t array_index, uint32_t level)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = true;
+		if (!mapped_[subres]->compare_exchange_strong(already_mapped, false))
+		{
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::Unmap2D(uint32_t array_index, uint32_t level)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = true;
+		if (!mapped_[subres]->compare_exchange_strong(already_mapped, false))
+		{
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::Unmap3D(uint32_t array_index, uint32_t level)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+
+		bool already_mapped = true;
+		if (!mapped_[subres]->compare_exchange_strong(already_mapped, false))
+		{
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level)
+	{
+		size_t const subres = (array_index * 6 + face) * num_mip_maps_ + level;
+
+		bool already_mapped = true;
+		if (!mapped_[subres]->compare_exchange_strong(already_mapped, false))
+		{
+			TERRC(std::errc::device_or_resource_busy);
+		}
+	}
+
+	void SoftwareTexture::CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint)
+	{
+		KFL_UNUSED(clear_value_hint);
+
+		uint32_t const num_faces = (type_ == TT_Cube) ? 6 : 1;
+		BOOST_ASSERT(init_data.size() == num_mip_maps_ * array_size_ * num_faces);
+
+		subres_data_.assign(init_data.begin(), init_data.end());
+		mapped_.resize(init_data.size());
+
+		for (size_t i = 0; i < init_data.size(); ++ i)
+		{
+			mapped_[i] = MakeUniquePtr<std::atomic<bool>>(false);
+		}
+
+		data_block_.clear();
+		if (!ref_only_)
+		{
+			uint32_t size = 0;
+			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+			{
+				for (uint32_t face = 0; face < num_faces; ++ face)
+				{
+					for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+					{
+						size_t const subres = (array_index * num_faces + face) * num_mip_maps_ + level;
+						size += init_data[subres].slice_pitch * this->Depth(level);
+					}
+				}
+			}
+
+			data_block_.reserve(size);
+			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+			{
+				for (uint32_t face = 0; face < num_faces; ++ face)
+				{
+					for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+					{
+						size_t const subres = (array_index * num_faces + face) * num_mip_maps_ + level;
+
+						uint8_t const * p = static_cast<uint8_t const *>(init_data[subres].data);
+						subres_data_[subres].data = data_block_.data() + data_block_.size();
+						data_block_.insert(data_block_.end(), p, p + init_data[subres].slice_pitch * this->Depth(level));
+					}
+				}
+			}
+		}
+	}
+
+	void SoftwareTexture::DeleteHWResource()
+	{
+		subres_data_.clear();
+		data_block_.clear();
+		mapped_.clear();
+	}
+
+	bool SoftwareTexture::HWResourceReady() const
+	{
+		return !subres_data_.empty();
+	}
+
+	void SoftwareTexture::UpdateSubresource1D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t width,
+		void const * data)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+		auto const & init_data = subres_data_[subres];
+		uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data) + x_offset * NumFormatBytes(format_);
+
+		ResizeTexture(const_cast<uint8_t*>(ptr), init_data.row_pitch, init_data.slice_pitch, format_,
+			width, 1, 1,
+			data, init_data.row_pitch, init_data.slice_pitch, format_,
+			width, 1, 1,
+			false);
+	}
+
+	void SoftwareTexture::UpdateSubresource2D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+		auto const & init_data = subres_data_[subres];
+		uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data)
+			+ y_offset * init_data.row_pitch + x_offset * NumFormatBytes(format_);
+
+		ResizeTexture(const_cast<uint8_t*>(ptr), init_data.row_pitch, init_data.slice_pitch, format_,
+			width, height, 1,
+			data, row_pitch, init_data.slice_pitch, format_,
+			width, height, 1,
+			false);
+	}
+
+	void SoftwareTexture::UpdateSubresource3D(uint32_t array_index, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+		uint32_t width, uint32_t height, uint32_t depth,
+		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
+	{
+		size_t const subres = array_index * num_mip_maps_ + level;
+		auto const & init_data = subres_data_[subres];
+		uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data)
+			+ z_offset * init_data.slice_pitch + y_offset * init_data.row_pitch + x_offset * NumFormatBytes(format_);
+
+		ResizeTexture(const_cast<uint8_t*>(ptr), init_data.row_pitch, init_data.slice_pitch, format_,
+			width, height, depth,
+			data, row_pitch, slice_pitch, format_,
+			width, height, depth,
+			false);
+	}
+
+	void SoftwareTexture::UpdateSubresourceCube(uint32_t array_index, CubeFaces face, uint32_t level,
+		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+		void const * data, uint32_t row_pitch)
+	{
+		size_t const subres = (array_index * 6 + face) * num_mip_maps_ + level;
+		auto const & init_data = subres_data_[subres];
+		uint8_t const * ptr = static_cast<uint8_t const *>(init_data.data)
+			+ y_offset * init_data.row_pitch + x_offset * NumFormatBytes(format_);
+
+		ResizeTexture(const_cast<uint8_t*>(ptr), init_data.row_pitch, init_data.slice_pitch, format_,
+			width, height, 1,
+			data, row_pitch, init_data.slice_pitch, format_,
+			width, height, 1,
+			false);
 	}
 }

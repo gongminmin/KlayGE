@@ -88,14 +88,15 @@ namespace
 
 	void CreateHeightMap(std::string const & in_file, std::string const & out_file, float min_z)
 	{
-		Texture::TextureType type;
-		uint32_t width, height, depth;
-		uint32_t num_mipmaps;
-		uint32_t array_size;
-		ElementFormat format;
-		std::vector<ElementInitData> in_data;
-		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, type, width, height, depth, num_mipmaps, array_size, format, in_data, in_data_block);
+		TexturePtr in_tex = LoadSoftwareTexture(in_file);
+		auto const type = in_tex->Type();
+		auto const width = in_tex->Width(0);
+		auto const height = in_tex->Height(0);
+		auto const depth = in_tex->Depth(0);
+		auto const num_mipmaps = in_tex->NumMipMaps();
+		auto const array_size = in_tex->ArraySize();
+		auto const format = in_tex->Format();
+		auto const & in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
 
 		if ((Texture::TT_2D == type) && ((EF_ABGR8 == format) || (EF_ARGB8 == format) || (EF_BC5 == format)))
 		{
@@ -212,7 +213,9 @@ namespace
 				the_height = std::max(the_height / 2, 1U);
 			}
 
-			SaveTexture(out_file, type, width, height, depth, num_mipmaps, array_size, EF_R8, heights_data);
+			TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(type, width, height, depth, num_mipmaps, array_size, EF_R8, true);
+			out_tex->CreateHWResource(heights_data, nullptr);
+			SaveTexture(out_tex, out_file);
 		}
 		else
 		{

@@ -239,50 +239,22 @@ namespace
 
 			checked_pointer_cast<RenderOcean>(renderable_)->PatchLength(ocean_param_.patch_length);
 
-			Texture::TextureType disp_type;
-			uint32_t disp_width = 0, disp_height = 0, disp_depth;
-			uint32_t disp_num_mipmaps = 1;
-			uint32_t disp_array_size = 0;
-			ElementFormat disp_format;
-			std::vector<ElementInitData> disp_init_data;
-			std::vector<uint8_t> disp_data_block;
-			if (!ResLoader::Instance().Locate("OceanDisplacement.dds").empty())
-			{
-				LoadTexture("OceanDisplacement.dds", disp_type, disp_width, disp_height, disp_depth, disp_num_mipmaps, disp_array_size,
-					disp_format, disp_init_data, disp_data_block);
-			}
-
-			Texture::TextureType grad_type;
-			uint32_t grad_width = 0, grad_height = 0, grad_depth;
-			uint32_t grad_num_mipmaps = 1;
-			uint32_t grad_array_size = 0;
-			ElementFormat grad_format;
-			std::vector<ElementInitData> grad_init_data;
-			std::vector<uint8_t> grad_data_block;
-			if (!ResLoader::Instance().Locate("OceanGradient.dds").empty())
-			{
-				LoadTexture("OceanGradient.dds", grad_type, grad_width, grad_height, grad_depth, grad_num_mipmaps, grad_array_size,
-					grad_format, grad_init_data, grad_data_block);
-			}
-			
-			Texture::TextureType disp_param_type;
-			uint32_t disp_param_width = 0, disp_param_height = 0, disp_param_depth;
-			uint32_t disp_param_num_mipmaps = 1;
-			uint32_t disp_param_array_size = 0;
-			ElementFormat disp_param_format;
-			std::vector<ElementInitData> disp_param_init_data;
-			std::vector<uint8_t> disp_param_data_block;
-			if (!ResLoader::Instance().Locate("OceanDisplacementParam.dds").empty())
-			{
-				LoadTexture("OceanDisplacementParam.dds", disp_param_type, disp_param_width, disp_param_height, disp_param_depth, disp_param_num_mipmaps, disp_param_array_size,
-					disp_param_format, disp_param_init_data, disp_param_data_block);
-			}
+			TexturePtr disp_tex = LoadSoftwareTexture("OceanDisplacement.dds");
+			TexturePtr grad_tex = LoadSoftwareTexture("OceanGradient.dds");
+			TexturePtr disp_param_tex = LoadSoftwareTexture("OceanDisplacementParam.dds");
 
 			bool use_load_tex;
-			if ((disp_array_size == ocean_param_.num_frames) && (disp_width == static_cast<uint32_t>(ocean_param_.dmap_dim)) && (disp_height == disp_width)
-				&& (grad_array_size == ocean_param_.num_frames) && (grad_width == static_cast<uint32_t>(ocean_param_.dmap_dim)) && (grad_height == grad_width)
-				&& (disp_param_width == ocean_param_.num_frames) && (disp_param_height >= 2))
+			if (disp_tex && grad_tex, disp_param_tex
+				&& (disp_tex->ArraySize() == ocean_param_.num_frames)
+				&& (disp_tex->Width(0) == static_cast<uint32_t>(ocean_param_.dmap_dim))
+				&& (disp_tex->Height(0) == disp_tex->Width(0))
+				&& (grad_tex->ArraySize() == ocean_param_.num_frames)
+				&& (grad_tex->Width(0) == static_cast<uint32_t>(ocean_param_.dmap_dim))
+				&& (grad_tex->Height(0) == grad_tex->Width(0))
+				&& (disp_param_tex->Width(0) == ocean_param_.num_frames)
+				&& (disp_param_tex->Height(0) >= 2))
 			{
+				auto const & disp_param_init_data = checked_cast<SoftwareTexture*>(disp_param_tex.get())->SubresourceData();
 				float4 const * row0 = static_cast<float4 const *>(disp_param_init_data[0].data);
 				float4 const * row1 = row0 + disp_param_init_data[0].row_pitch / sizeof(float4);
 				displacement_params_.resize(ocean_param_.num_frames * 2);
@@ -307,8 +279,8 @@ namespace
 				ArrayRef<ElementInitData> gid;
 				if (use_load_tex)
 				{
-					did = disp_init_data;
-					gid = grad_init_data;
+					did = checked_cast<SoftwareTexture*>(disp_tex.get())->SubresourceData();
+					gid = checked_cast<SoftwareTexture*>(grad_tex.get())->SubresourceData();
 				}
 
 				displacement_tex_array_ = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -341,7 +313,8 @@ namespace
 					ArrayRef<ElementInitData> did;
 					if (use_load_tex)
 					{
-						did = disp_init_data[i * disp_num_mipmaps];
+						auto const & disp_init_data = checked_cast<SoftwareTexture*>(disp_tex.get())->SubresourceData();
+						did = disp_init_data[i * disp_tex->NumMipMaps()];
 					}
 
 					gradient_tex_[i] = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
@@ -351,11 +324,13 @@ namespace
 
 					if (use_load_tex)
 					{
+						auto const & grad_init_data = checked_cast<SoftwareTexture*>(grad_tex.get())->SubresourceData();
+
 						TexturePtr gta;
 						if (EF_GR8 == fmt)
 						{
 							gta = rf.MakeTexture2D(ocean_param_.dmap_dim, ocean_param_.dmap_dim,
-								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, grad_init_data[i * grad_num_mipmaps]);
+								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write, grad_init_data[i * grad_tex->NumMipMaps()]);
 						}
 						else
 						{
@@ -363,10 +338,10 @@ namespace
 								1, 1, fmt, 1, 0, EAH_CPU_Read | EAH_CPU_Write);
 
 							Texture::Mapper mapper(*gta, 0, 0, TMA_Write_Only, 0, 0, ocean_param_.dmap_dim, ocean_param_.dmap_dim);
-							ElementInitData* gid = &grad_init_data[i * grad_num_mipmaps];
-							uint8_t const * src = static_cast<uint8_t const *>(gid->data);
+							ElementInitData const & gid = grad_init_data[i * grad_tex->NumMipMaps()];
+							uint8_t const * src = static_cast<uint8_t const *>(gid.data);
 							uint8_t* dst = mapper.Pointer<uint8_t>();
-							uint32_t const src_pitch = gid->row_pitch;
+							uint32_t const src_pitch = gid.row_pitch;
 							uint32_t const dst_pitch = mapper.RowPitch();
 							for (int y = 0; y < ocean_param_.dmap_dim; ++ y)
 							{
@@ -675,7 +650,10 @@ namespace
 			param_init_data.data = &disp_params[0];
 			param_init_data.row_pitch = ocean_param_.num_frames * sizeof(float4);
 			param_init_data.slice_pitch = param_init_data.row_pitch * 2;
-			SaveTexture(PREFIX + "OceanDisplacementParam.dds", Texture::TT_2D, ocean_param_.num_frames, 2, 1, 1, 1, EF_ABGR32F, param_init_data);
+			TexturePtr ocean_displacement_param_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, ocean_param_.num_frames, 2, 1,
+				1, 1, EF_ABGR32F, true);
+			ocean_displacement_param_tex->CreateHWResource(param_init_data, nullptr);
+			SaveTexture(ocean_displacement_param_tex, PREFIX + "OceanDisplacementParam.dds");
 
 			if (use_tex_array_)
 			{
@@ -718,9 +696,11 @@ namespace
 						}
 					}
 
-					SaveTexture(PREFIX + "OceanDisplacement.dds", Texture::TT_2D,
+					TexturePtr ocean_displacement_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
 						ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, ocean_param_.num_frames,
-						displacement_tex_[0]->Format(), disp_init_data);
+						displacement_tex_[0]->Format(), true);
+					ocean_displacement_tex->CreateHWResource(disp_init_data, nullptr);
+					SaveTexture(ocean_displacement_tex, PREFIX + "OceanDisplacement.dds");
 				}
 
 				{
@@ -750,9 +730,11 @@ namespace
 						}
 					}
 
-					SaveTexture(PREFIX + "OceanGradient.dds", Texture::TT_2D,
+					TexturePtr ocean_gradient_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
 						ocean_param_.dmap_dim, ocean_param_.dmap_dim, 1, 1, ocean_param_.num_frames,
-						gradient_tex_[0]->Format(), grad_init_data);
+						gradient_tex_[0]->Format(), true);
+					ocean_gradient_tex->CreateHWResource(grad_init_data, nullptr);
+					SaveTexture(ocean_gradient_tex, PREFIX + "OceanGradient.dds");
 				}
 			}
 		}

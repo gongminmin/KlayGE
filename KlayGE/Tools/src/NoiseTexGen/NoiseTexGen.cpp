@@ -179,8 +179,10 @@ void GenSimplexPerm()
 
 	init_data[0].data = simplex;
 	init_data[0].slice_pitch = init_data[0].row_pitch = sizeof(simplex);
-	SaveTexture(OUTPUT_PATH "noise_simplex.dds", Texture::TT_2D,
-		64, 1, 1, 1, 1, EF_ABGR8, init_data);
+	TexturePtr noise_simplex_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+		64, 1, 1, 1, 1, EF_ABGR8, true);
+	noise_simplex_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(noise_simplex_tex, OUTPUT_PATH "noise_simplex.dds");
 
 	std::vector<uint8_t> grad_perm(256 * 256 * 4);
 	for (int y = 0; y < 256; ++ y)
@@ -197,8 +199,10 @@ void GenSimplexPerm()
 	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
 	init_data[0].slice_pitch = static_cast<uint32_t>(grad_perm.size() * sizeof(grad_perm[0]));
-	SaveTexture(OUTPUT_PATH "noise_grad3_perm.dds", Texture::TT_2D,
-		256, 256, 1, 1, 1, EF_ABGR8, init_data);
+	TexturePtr noise_grad3_perm_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+		256, 256, 1, 1, 1, EF_ABGR8, true);
+	noise_grad3_perm_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(noise_grad3_perm_tex, OUTPUT_PATH "noise_grad3_perm.dds");
 
 	for (int y = 0; y < 256; ++ y)
 	{
@@ -214,8 +218,10 @@ void GenSimplexPerm()
 	init_data[0].data = &grad_perm[0];
 	init_data[0].row_pitch = 256 * 4;
 	init_data[0].slice_pitch = static_cast<uint32_t>(grad_perm.size() * sizeof(grad_perm[0]));
-	SaveTexture(OUTPUT_PATH "noise_grad4_perm.dds", Texture::TT_2D,
-		256, 256, 1, 1, 1, EF_ABGR8, init_data);
+	TexturePtr noise_grad4_perm_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+		256, 256, 1, 1, 1, EF_ABGR8, true);
+	noise_grad4_perm_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(noise_grad4_perm_tex, OUTPUT_PATH "noise_grad4_perm.dds");
 }
 
 void GenfBmTexs()
@@ -249,8 +255,10 @@ void GenfBmTexs()
 	init_data[0].data = &data[0];
 	init_data[0].row_pitch = TEX_SIZE;
 	init_data[0].slice_pitch = TEX_SIZE * TEX_SIZE;
-	SaveTexture(OUTPUT_PATH "fBm5_tex.dds", Texture::TT_2D,
-		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_R8, init_data);
+	TexturePtr fbm5_tex_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_R8, true);
+	fbm5_tex_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(fbm5_tex_tex, OUTPUT_PATH "fBm5_tex.dds");
 
 	int err = system("Mipmapper " OUTPUT_PATH "fBm5_tex.dds");
 	KFL_UNUSED(err);
@@ -278,8 +286,10 @@ void GenfBmTexs()
 	init_data[0].data = &data3[0];
 	init_data[0].row_pitch = TEX_SIZE * sizeof(uint32_t);
 	init_data[0].slice_pitch = TEX_SIZE * sizeof(uint32_t)* TEX_SIZE;
-	SaveTexture(OUTPUT_PATH "fBm5_grad_tex.dds", Texture::TT_2D,
-		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_ABGR8, init_data);
+	TexturePtr fbm5_grad_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_ABGR8, true);
+	fbm5_grad_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(fbm5_grad_tex, OUTPUT_PATH "fBm5_grad_tex.dds");
 
 	err = system("Mipmapper " OUTPUT_PATH "fBm5_grad_tex.dds");
 	KFL_UNUSED(err);

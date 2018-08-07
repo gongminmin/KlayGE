@@ -43,19 +43,19 @@ namespace
 		data[0].row_pitch = pitch;
 		data[0].slice_pitch = pitch * height;
 
-		SaveTexture(out_file, type, width, height, depth, num_mipmaps, array_size, format, data);
+		TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(type, width, height, depth, num_mipmaps, array_size, format, true);
+		out_tex->CreateHWResource(data, nullptr);
+		SaveTexture(out_tex, out_file);
 	}
 
 	void convert_flatten_to_vol(std::string const & out_file, std::string const & in_file)
 	{
-		Texture::TextureType type;
-		uint32_t width, height, depth;
-		uint32_t num_mipmaps;
-		uint32_t array_size;
-		ElementFormat format;
-		std::vector<ElementInitData> in_data;
-		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, type, width, height, depth, num_mipmaps, array_size, format, in_data, in_data_block);
+		TexturePtr in_tex = LoadSoftwareTexture(in_file);
+		auto const type = in_tex->Type();
+		auto const height = in_tex->Height(0);
+		auto const num_mipmaps = in_tex->NumMipMaps();
+		auto const array_size = in_tex->ArraySize();
+		auto const format = in_tex->Format();
 
 		if ((Texture::TT_2D == type) && ((EF_ARGB8 == format) || (EF_ABGR8 == format)))
 		{
@@ -67,8 +67,9 @@ namespace
 			uint32_t dst_pitch = size * 4;
 			out_data_block.resize(dst_pitch * size * size);
 
-			uint32_t const * src = static_cast<uint32_t const *>(in_data[0].data);
-			uint32_t const src_pitch = in_data[0].row_pitch / 4;
+			Texture::Mapper in_mapper(*in_tex, 0, 0, TMA_Read_Only, 0, 0, size, size);
+			uint32_t const * src = in_mapper.Pointer<uint32_t>();
+			uint32_t const src_pitch = in_mapper.RowPitch() / 4;
 			uint32_t* dst = reinterpret_cast<uint32_t*>(&out_data_block[0]);
 			for (uint32_t z = 0; z < size; ++ z)
 			{
@@ -86,7 +87,9 @@ namespace
 			out_data[0].row_pitch = dst_pitch;
 			out_data[0].slice_pitch = dst_pitch * size;
 
-			SaveTexture(out_file, Texture::TT_3D, size, size, size, num_mipmaps, array_size, format, out_data);
+			TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_3D, size, size, size, num_mipmaps, array_size, format, true);
+			out_tex->CreateHWResource(out_data, nullptr);
+			SaveTexture(out_tex, out_file);
 		}
 		else
 		{

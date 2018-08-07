@@ -291,14 +291,16 @@ namespace
 	void CompressHDR(std::string const & in_file,
 		std::string const & out_y_file, std::string const & out_c_file, ElementFormat y_format, ElementFormat c_format)
 	{
-		Texture::TextureType in_type;
-		uint32_t in_width, in_height, in_depth;
-		uint32_t in_num_mipmaps;
-		uint32_t in_array_size;
-		ElementFormat in_format;
-		std::vector<ElementInitData> in_data;
-		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
+		TexturePtr in_tex = LoadSoftwareTexture(in_file);
+		auto const in_type = in_tex->Type();
+		auto const in_width = in_tex->Width(0);
+		auto const in_height = in_tex->Height(0);
+		auto const in_depth = in_tex->Depth(0);
+		auto in_num_mipmaps = in_tex->NumMipMaps();
+		auto const in_array_size = in_tex->ArraySize();
+		auto in_format = in_tex->Format();
+		auto in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
+		auto in_data_block = checked_cast<SoftwareTexture*>(in_tex.get())->DataBlock();
 
 		if (EF_ABGR16F == in_format)
 		{
@@ -371,7 +373,10 @@ namespace
 			CompressHDRSubresource(y_data[i], c_data[i], y_data_block[i], c_data_block[i], in_data[i], y_format, c_format);
 		}
 
-		SaveTexture(out_y_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, y_format, y_data);
+		TexturePtr out_y_tex = MakeSharedPtr<SoftwareTexture>(in_type, in_width, in_height, in_depth,
+			in_num_mipmaps, in_array_size, y_format, true);
+		out_y_tex->CreateHWResource(y_data, nullptr);
+		SaveTexture(out_y_tex, out_y_file);
 
 		uint32_t c_width = std::max(in_width / 2, 1U);
 		uint32_t c_height = std::max(in_height / 2, 1U);
@@ -380,7 +385,10 @@ namespace
 			c_width = (c_width + 3) & ~3;
 			c_height = (c_height + 3) & ~3;
 		}
-		SaveTexture(out_c_file, in_type, c_width, c_height, in_depth, in_num_mipmaps, in_array_size, c_format, c_data);
+		TexturePtr out_c_tex = MakeSharedPtr<SoftwareTexture>(in_type, c_width, c_height, in_depth,
+			in_num_mipmaps, in_array_size, c_format, true);
+		out_c_tex->CreateHWResource(c_data, nullptr);
+		SaveTexture(out_c_tex, out_c_file);
 
 		float mse = 0;
 		int n = 0;

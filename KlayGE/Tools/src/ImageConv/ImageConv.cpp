@@ -145,8 +145,10 @@ int main(int argc, char* argv[])
 		output_init_data, output_data_block);
 	if (succ)
 	{
-		SaveTexture(output_name, output_type, output_width, output_height, output_depth, output_num_mipmaps, output_array_size, output_format,
-			output_init_data);
+		TexturePtr output_tex = MakeSharedPtr<SoftwareTexture>(output_type, output_width, output_height, output_depth,
+			output_num_mipmaps, output_array_size, output_format, true);
+		output_tex->CreateHWResource(output_init_data, nullptr);
+		SaveTexture(output_tex, output_name);
 
 		if (!quiet)
 		{

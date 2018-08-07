@@ -16,14 +16,15 @@ namespace
 {
 	void GenMipmap(std::string const & in_file, std::string const & out_file)
 	{
-		Texture::TextureType in_type;
-		uint32_t in_width, in_height, in_depth;
-		uint32_t in_num_mipmaps;
-		uint32_t in_array_size;
-		ElementFormat in_format;
-		std::vector<ElementInitData> in_data;
-		std::vector<uint8_t> in_data_block;
-		LoadTexture(in_file, in_type, in_width, in_height, in_depth, in_num_mipmaps, in_array_size, in_format, in_data, in_data_block);
+		TexturePtr in_tex = LoadSoftwareTexture(in_file);
+		auto const in_type = in_tex->Type();
+		auto const in_width = in_tex->Width(0);
+		auto const in_height = in_tex->Height(0);
+		auto const in_depth = in_tex->Depth(0);
+		auto const in_num_mipmaps = in_tex->NumMipMaps();
+		auto const in_array_size = in_tex->ArraySize();
+		auto const in_format = in_tex->Format();
+		auto const & in_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
 
 		uint32_t const elem_size = NumFormatBytes(in_format);
 
@@ -96,7 +97,10 @@ namespace
 			}
 		}
 
-		SaveTexture(out_file, in_type, in_width, in_height, in_depth, num_full_mip_maps, in_array_size, in_format, new_data);
+		TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(in_type, in_width, in_height, in_depth,
+			num_full_mip_maps, in_array_size, in_format, true);
+		out_tex->CreateHWResource(new_data, nullptr);
+		SaveTexture(out_tex, out_file);
 	}
 }
 

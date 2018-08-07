@@ -54,6 +54,7 @@
 #include <KlayGE/ElementFormat.hpp>
 #include <KFL/ArrayRef.hpp>
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <boost/assert.hpp>
@@ -312,6 +313,98 @@ namespace KlayGE
 		uint32_t		access_hint_;
 	};
 
+	class KLAYGE_CORE_API SoftwareTexture : public Texture
+	{
+	public:
+		SoftwareTexture(TextureType type, uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,
+			ElementFormat format, bool ref_only);
+
+		std::wstring const & Name() const override;
+
+		uint32_t Width(uint32_t level) const override;
+		uint32_t Height(uint32_t level) const override;
+		uint32_t Depth(uint32_t level) const override;
+
+		void CopyToTexture(Texture& target) override;
+		void CopyToSubTexture1D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_width,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_width) override;
+		void CopyToSubTexture2D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+			uint32_t src_width, uint32_t src_height) override;
+		void CopyToSubTexture3D(Texture& target,
+			uint32_t dst_array_index, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset, uint32_t dst_z_offset,
+			uint32_t dst_width, uint32_t dst_height, uint32_t dst_depth,
+			uint32_t src_array_index, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset, uint32_t src_z_offset,
+			uint32_t src_width, uint32_t src_height, uint32_t src_depth) override;
+		void CopyToSubTextureCube(Texture& target,
+			uint32_t dst_array_index, CubeFaces dst_face, uint32_t dst_level, uint32_t dst_x_offset, uint32_t dst_y_offset,
+			uint32_t dst_width, uint32_t dst_height,
+			uint32_t src_array_index, CubeFaces src_face, uint32_t src_level, uint32_t src_x_offset, uint32_t src_y_offset,
+			uint32_t src_width, uint32_t src_height) override;
+
+		void BuildMipSubLevels() override;
+
+		void Map1D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t width,
+			void*& data) override;
+		void Map2D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void*& data, uint32_t& row_pitch) override;
+		void Map3D(uint32_t array_index, uint32_t level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth,
+			void*& data, uint32_t& row_pitch, uint32_t& slice_pitch) override;
+		void MapCube(uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void*& data, uint32_t& row_pitch) override;
+
+		void Unmap1D(uint32_t array_index, uint32_t level) override;
+		void Unmap2D(uint32_t array_index, uint32_t level) override;
+		void Unmap3D(uint32_t array_index, uint32_t level) override;
+		void UnmapCube(uint32_t array_index, CubeFaces face, uint32_t level) override;
+
+		void CreateHWResource(ArrayRef<ElementInitData> init_data, float4 const * clear_value_hint) override;
+		void DeleteHWResource() override;
+		bool HWResourceReady() const override;
+
+		void UpdateSubresource1D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t width,
+			void const * data) override;
+		void UpdateSubresource2D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void const * data, uint32_t row_pitch) override;
+		void UpdateSubresource3D(uint32_t array_index, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+			uint32_t width, uint32_t height, uint32_t depth,
+			void const * data, uint32_t row_pitch, uint32_t slice_pitch) override;
+		void UpdateSubresourceCube(uint32_t array_index, CubeFaces face, uint32_t level,
+			uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
+			void const * data, uint32_t row_pitch) override;
+
+		std::vector<ElementInitData> const & SubresourceData() const
+		{
+			return subres_data_;
+		}
+		std::vector<uint8_t> const & DataBlock() const
+		{
+			return data_block_;
+		}
+
+	private:
+		bool ref_only_;
+
+		uint32_t width_;
+		uint32_t height_;
+		uint32_t depth_;
+
+		std::vector<ElementInitData> subres_data_;
+		std::vector<uint8_t> data_block_;
+		std::vector<std::unique_ptr<std::atomic<bool>>> mapped_;
+	};
+
 	KLAYGE_CORE_API void GetImageInfo(std::string const & tex_name, Texture::TextureType& type,
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
@@ -319,18 +412,11 @@ namespace KlayGE
 		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
 		ElementFormat& format, uint32_t& row_pitch, uint32_t& slice_pitch);
 
-	KLAYGE_CORE_API void LoadTexture(std::string const & tex_name, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
-	KLAYGE_CORE_API void LoadTexture(ResIdentifierPtr const & tex_res, Texture::TextureType& type,
-		uint32_t& width, uint32_t& height, uint32_t& depth, uint32_t& num_mipmaps, uint32_t& array_size,
-		ElementFormat& format, std::vector<ElementInitData>& init_data, std::vector<uint8_t>& data_block);
+	KLAYGE_CORE_API TexturePtr LoadSoftwareTexture(std::string const & tex_name);
+	KLAYGE_CORE_API TexturePtr LoadSoftwareTexture(ResIdentifierPtr const & tex_res);
 	KLAYGE_CORE_API TexturePtr SyncLoadTexture(std::string const & tex_name, uint32_t access_hint);
 	KLAYGE_CORE_API TexturePtr ASyncLoadTexture(std::string const & tex_name, uint32_t access_hint);
 
-	KLAYGE_CORE_API void SaveTexture(std::string const & tex_name, Texture::TextureType type,
-		uint32_t width, uint32_t height, uint32_t depth, uint32_t num_mipmaps, uint32_t array_size,
-		ElementFormat format, ArrayRef<ElementInitData> init_data);
 	KLAYGE_CORE_API void SaveTexture(TexturePtr const & texture, std::string const & tex_name);
 
 	KLAYGE_CORE_API void ResizeTexture(void* dst_data, uint32_t dst_row_pitch, uint32_t dst_slice_pitch, ElementFormat dst_format,

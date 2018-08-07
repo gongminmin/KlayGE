@@ -182,11 +182,12 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		Texture::TextureType type;
-		uint32_t depth, num_mipmaps, array_size;
-		std::vector<ElementInitData> init_data;
-		std::vector<uint8_t> data_block;
-		LoadTexture(in_name, type, ras_width, ras_height, depth, num_mipmaps, array_size, format, init_data, data_block);
+		TexturePtr in_tex = LoadSoftwareTexture(in_name);
+		ras_width = in_tex->Width(0);
+		ras_height = in_tex->Height(0);
+		auto const depth = in_tex->Depth(0);
+		format = in_tex->Format();
+		auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
 
 		if (NumComponents(format) != num_channels)
 		{
@@ -250,7 +251,9 @@ int main(int argc, char* argv[])
 	init_data.data = &quan_dist[0];
 	init_data.row_pitch = width * num_channels;
 	init_data.slice_pitch = width * height * num_channels;
-	SaveTexture(out_name, Texture::TT_2D, width, height, 1, 1, 1, format, init_data);
+	TexturePtr out_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1, format, true);
+	out_tex->CreateHWResource(init_data, nullptr);
+	SaveTexture(out_tex, out_name);
 
 	Context::Destroy();
 }
