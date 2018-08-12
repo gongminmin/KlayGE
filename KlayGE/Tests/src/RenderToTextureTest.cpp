@@ -54,6 +54,8 @@ public:
 	{
 		auto const & caps = Context::Instance().RenderFactoryInstance().RenderEngineInstance().DeviceCaps();
 		explicit_multi_sample_support_ = caps.explicit_multi_sample_support;
+
+		ResLoader::Instance().AddPath("../../Tests/media/RenderToTexture");
 	}
 
 	void TestRenderToTexture(uint32_t sample_count, float tolerance)
@@ -62,8 +64,6 @@ public:
 		{
 			return;
 		}
-
-		ResLoader::Instance().AddPath("../../Tests/media/RenderToTexture");
 
 		auto target = RenderToTexture(WIDTH, HEIGHT, EF_ABGR8, sample_count);
 		auto target_resolved = HwResolveToTexture(target);
@@ -87,8 +87,6 @@ public:
 		{
 			return;
 		}
-
-		ResLoader::Instance().AddPath("../../Tests/media/RenderToTexture");
 
 		auto target = RenderToTexture(WIDTH, HEIGHT, EF_ABGR8, sample_count);
 		auto target_resolved = ManualResolveToTexture(target);
@@ -119,8 +117,6 @@ public:
 		{
 			return;
 		}
-
-		ResLoader::Instance().AddPath("../../Tests/media/RenderToTexture");
 
 		auto target = RenderToTexture(WIDTH, HEIGHT, EF_ABGR8, sample_count);
 		auto target_copied = CopyToTexture(target);

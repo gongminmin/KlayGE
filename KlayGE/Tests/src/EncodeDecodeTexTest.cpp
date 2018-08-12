@@ -18,6 +18,8 @@ using namespace KlayGE;
 void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_name,
 		ElementFormat bc_fmt, float threshold)
 {
+	ResLoader::Instance().AddPath("../../Tests/media/EncodeDecodeTex");
+
 	std::vector<uint8_t> input_argb;
 	std::vector<uint8_t> bc_blocks;
 	uint32_t width, height;
