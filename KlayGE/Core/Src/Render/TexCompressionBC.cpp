@@ -886,10 +886,7 @@ namespace KlayGE
 
 	TexCompressionBC1::TexCompressionBC1()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC1) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_BC1;
 	}
 
 	void TexCompressionBC1::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1376,10 +1373,7 @@ namespace KlayGE
 
 	TexCompressionBC2::TexCompressionBC2()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC2) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_BC2;
 	}
 
 	void TexCompressionBC2::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1430,10 +1424,7 @@ namespace KlayGE
 
 	TexCompressionBC3::TexCompressionBC3()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC3) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_BC3;
 	}
 
 	void TexCompressionBC3::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1479,10 +1470,7 @@ namespace KlayGE
 
 	TexCompressionBC4::TexCompressionBC4()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC4) * 4;
-		decoded_fmt_ = EF_R8;
+		compression_format_ = EF_BC4;
 	}
 
 	// Alpha block compression (this is easy for a change)
@@ -1588,10 +1576,7 @@ namespace KlayGE
 
 	TexCompressionBC5::TexCompressionBC5()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC5) * 4;
-		decoded_fmt_ = EF_GR8;
+		compression_format_ = EF_BC5;
 	}
 
 	void TexCompressionBC5::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -1891,10 +1876,7 @@ namespace KlayGE
 
 	TexCompressionBC6U::TexCompressionBC6U()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC6) * 4;
-		decoded_fmt_ = EF_ABGR16F;
+		compression_format_ = EF_BC6;
 	}
 
 	void TexCompressionBC6U::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2145,10 +2127,7 @@ namespace KlayGE
 
 	TexCompressionBC6S::TexCompressionBC6S()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_SIGNED_BC6) * 4;
-		decoded_fmt_ = EF_ABGR16F;
+		compression_format_ = EF_SIGNED_BC6;
 	}
 
 	void TexCompressionBC6S::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2190,10 +2169,7 @@ namespace KlayGE
 	TexCompressionBC7::TexCompressionBC7()
 		: index_mode_(0)
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_BC7) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_BC7;
 	}
 
 	void TexCompressionBC7::EncodeBlock(void* output, void const * input, TexCompressionMethod method)
@@ -2238,7 +2214,7 @@ namespace KlayGE
 			KFL_UNREACHABLE("Invalid compression method");
 		}
 
-		RGBACluster block_cluster(argb, block_width_ * block_height_, GetPartition);
+		RGBACluster block_cluster(argb, BlockWidth(EF_BC7) * BlockHeight(EF_BC7), GetPartition);
 		ShapeSelection selection = BoxSelection(block_cluster, metric);
 		BOOST_ASSERT(selection.selected_modes > 0);
 

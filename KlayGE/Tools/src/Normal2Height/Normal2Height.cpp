@@ -101,9 +101,9 @@ namespace
 		if ((Texture::TT_2D == type) && ((EF_ABGR8 == format) || (EF_ARGB8 == format) || (EF_BC5 == format)))
 		{
 			TexCompressionBC5 bc5_codec;
-			uint32_t const block_width = bc5_codec.BlockWidth();
-			uint32_t const block_height = bc5_codec.BlockHeight();
-			uint32_t const block_bytes = NumFormatBytes(format) * 4;
+			uint32_t const block_width = BlockWidth(EF_BC5);
+			uint32_t const block_height = BlockHeight(EF_BC5);
+			uint32_t const block_bytes = BlockBytes(EF_BC5);
 
 			uint32_t the_width = width;
 			uint32_t the_height = height;

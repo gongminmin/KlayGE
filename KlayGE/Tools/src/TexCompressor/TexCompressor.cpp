@@ -200,9 +200,9 @@ namespace
 			KFL_UNREACHABLE("Invalid compression format");
 		}
 
-		ElementFormat const block_in_fmt = in_codec ? in_codec->DecodedFormat() : in_format;
-		bool const color_conversion = (MakeNonSRGB(block_in_fmt) != out_codec->DecodedFormat());
-		uint32_t const num_texels = out_codec->BlockWidth() * out_codec->BlockHeight();
+		ElementFormat const block_in_fmt = DecodedFormat(in_format);
+		bool const color_conversion = (MakeNonSRGB(block_in_fmt) != DecodedFormat(out_format));
+		uint32_t const num_texels = BlockWidth(out_format) * BlockHeight(out_format);
 		std::vector<uint8_t> block_in_data;
 		std::vector<Color> block_in_data_f32;
 
@@ -227,22 +227,22 @@ namespace
 			uint8_t const * src_data = static_cast<uint8_t const *>(sub_res_data.data);
 			if (in_codec)
 			{
-				BOOST_ASSERT(in_codec->BlockWidth() == out_codec->BlockWidth());
-				BOOST_ASSERT(in_codec->BlockHeight() == out_codec->BlockHeight());
+				BOOST_ASSERT(BlockWidth(in_format) == BlockWidth(out_format));
+				BOOST_ASSERT(BlockHeight(in_format) == BlockHeight(out_format));
 
 				block_in_data.resize(num_texels * NumFormatBytes(block_in_fmt));
 				in_codec->DecodeBlock(&block_in_data[0], src_data
-					+ (y / in_codec->BlockHeight()) * sub_res_data.row_pitch + x / in_codec->BlockWidth() * in_codec->BlockBytes());
+					+ (y / BlockHeight(in_format)) * sub_res_data.row_pitch + x / BlockWidth(in_format) * BlockBytes(in_format));
 			}
 			else
 			{
 				uint32_t const elem_size = NumFormatBytes(in_format);
 				block_in_data.resize(num_texels * elem_size, 0);
-				for (uint32_t dy = 0; (dy < out_codec->BlockHeight()) && (y + dy < mip_height); ++ dy)
+				for (uint32_t dy = 0; (dy < BlockHeight(out_format)) && (y + dy < mip_height); ++ dy)
 				{
-					memcpy(&block_in_data[dy * out_codec->BlockWidth() * elem_size],
+					memcpy(&block_in_data[dy * BlockWidth(out_format) * elem_size],
 						src_data + (y + dy) * sub_res_data.row_pitch + x * elem_size,
-						std::min(out_codec->BlockWidth(), mip_width - x) * elem_size);
+						std::min(BlockWidth(out_format), mip_width - x) * elem_size);
 				}
 			}
 
@@ -250,12 +250,12 @@ namespace
 			{
 				block_in_data_f32.resize(num_texels);
 				ConvertToABGR32F(block_in_fmt, &block_in_data[0], num_texels, &block_in_data_f32[0]);
-				block_in_data.resize(num_texels * NumFormatBytes(out_codec->DecodedFormat()));
-				ConvertFromABGR32F(out_codec->DecodedFormat(), &block_in_data_f32[0], num_texels, &block_in_data[0]);
+				block_in_data.resize(num_texels * NumFormatBytes(DecodedFormat(out_format)));
+				ConvertFromABGR32F(DecodedFormat(out_format), &block_in_data_f32[0], num_texels, &block_in_data[0]);
 			}
 
-			uint32_t const offset = y / out_codec->BlockHeight() * out_data[sub_res].row_pitch
-				+ (x / out_codec->BlockWidth()) * out_codec->BlockBytes();
+			uint32_t const offset = y / BlockHeight(out_format) * out_data[sub_res].row_pitch
+				+ (x / BlockWidth(out_format)) * BlockBytes(out_format);
 			uint8_t* dst = static_cast<uint8_t*>(const_cast<void*>(out_data[sub_res].data));
 			out_codec->EncodeBlock(dst + offset, &block_in_data[0], TCM_Quality);
 		}
@@ -282,90 +282,8 @@ namespace
 			fmt = MakeSRGB(fmt);
 		}
 
-		std::unique_ptr<TexCompression> out_codec;
-		switch (fmt)
-		{
-		case EF_BC1:
-		case EF_BC1_SRGB:
-		case EF_SIGNED_BC1:
-			out_codec = MakeUniquePtr<TexCompressionBC1>();
-			break;
-
-		case EF_BC2:
-		case EF_BC2_SRGB:
-		case EF_SIGNED_BC2:
-			out_codec = MakeUniquePtr<TexCompressionBC2>();
-			break;
-
-		case EF_BC3:
-		case EF_BC3_SRGB:
-		case EF_SIGNED_BC3:
-			out_codec = MakeUniquePtr<TexCompressionBC3>();
-			break;
-
-		case EF_BC4:
-		case EF_BC4_SRGB:
-		case EF_SIGNED_BC4:
-			out_codec = MakeUniquePtr<TexCompressionBC4>();
-			break;
-
-		case EF_BC5:
-		case EF_BC5_SRGB:
-		case EF_SIGNED_BC5:
-			out_codec = MakeUniquePtr<TexCompressionBC5>();
-			break;
-
-		case EF_BC6:
-			out_codec = MakeUniquePtr<TexCompressionBC6U>();
-			break;
-
-		case EF_SIGNED_BC6:
-			out_codec = MakeUniquePtr<TexCompressionBC6S>();
-			break;
-
-		case EF_BC7:
-		case EF_BC7_SRGB:
-			out_codec = MakeUniquePtr<TexCompressionBC7>();
-			break;
-
-		case EF_ETC1:
-			out_codec = MakeUniquePtr<TexCompressionETC1>();
-			break;
-
-		case EF_ETC2_BGR8:
-		case EF_ETC2_BGR8_SRGB:
-			out_codec = MakeUniquePtr<TexCompressionETC2RGB8>();
-			break;
-
-		case EF_ETC2_A1BGR8:
-		case EF_ETC2_A1BGR8_SRGB:
-			out_codec = MakeUniquePtr<TexCompressionETC2RGB8A1>();
-			break;
-
-		case EF_ETC2_ABGR8:
-		case EF_ETC2_ABGR8_SRGB:
-			// TODO
-			KFL_UNREACHABLE("Not implemented");
-			break;
-
-		case EF_ETC2_R11:
-		case EF_SIGNED_ETC2_R11:
-			// TODO
-			KFL_UNREACHABLE("Not implemented");
-			break;
-
-		case EF_ETC2_GR11:
-		case EF_SIGNED_ETC2_GR11:
-			// TODO
-			KFL_UNREACHABLE("Not implemented");
-			break;
-
-		default:
-			KFL_UNREACHABLE("Invalid compression format");
-		}
-
-		uint32_t out_width = (in_width + out_codec->BlockWidth() - 1) & ~(out_codec->BlockWidth() - 1);
-		uint32_t out_height = (in_height + out_codec->BlockHeight() - 1) & ~(out_codec->BlockHeight() - 1);
+		uint32_t out_width = (in_width + BlockWidth(fmt) - 1) & ~(BlockWidth(fmt) - 1);
+		uint32_t out_height = (in_height + BlockHeight(fmt) - 1) & ~(BlockHeight(fmt) - 1);
 
 		std::vector<ElementInitData> new_data(in_data.size());
 		std::vector<std::vector<uint8_t>> new_data_block(in_data.size());
@@ -382,19 +300,19 @@ namespace
 			for (uint32_t mip = 0; mip < in_num_mipmaps; ++ mip)
 			{
 				uint32_t const sub_res = array_index * in_num_mipmaps + mip;
-				uint32_t const block_size = out_codec->BlockBytes();
+				uint32_t const block_size = BlockBytes(fmt);
 
 				ElementInitData& dst_data = new_data[sub_res];
 
-				dst_data.row_pitch = ((dst_width + out_codec->BlockWidth() - 1) / out_codec->BlockWidth()) * block_size;
-				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + out_codec->BlockHeight() - 1) / out_codec->BlockHeight());
+				dst_data.row_pitch = ((dst_width + BlockWidth(fmt) - 1) / BlockWidth(fmt)) * block_size;
+				dst_data.slice_pitch = dst_data.row_pitch * ((dst_height + BlockHeight(fmt) - 1) / BlockHeight(fmt));
 
 				new_data_block[sub_res].resize(dst_data.slice_pitch);
 				dst_data.data = &new_data_block[sub_res][0];
 
-				for (uint32_t y = 0; y < src_height; y += out_codec->BlockHeight())
+				for (uint32_t y = 0; y < src_height; y += BlockHeight(fmt))
 				{
-					for (uint32_t x = 0; x < src_width; x += out_codec->BlockWidth())
+					for (uint32_t x = 0; x < src_width; x += BlockWidth(fmt))
 					{
 						block_addrs.push_back(std::make_tuple(sub_res, x, y));
 					}

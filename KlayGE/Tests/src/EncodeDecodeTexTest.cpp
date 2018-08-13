@@ -59,7 +59,7 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 		KFL_UNREACHABLE("Unsupported compression format");
 	}
 
-	ElementFormat const decoded_fmt = codec->DecodedFormat();
+	ElementFormat const decoded_fmt = DecodedFormat(bc_fmt);
 	uint32_t const pixel_size = NumFormatBytes(decoded_fmt);
 
 	{
@@ -102,9 +102,9 @@ void TestEncodeDecodeTex(std::string const & input_name, std::string const & tc_
 		}
 	}
 
-	uint32_t const block_width = codec->BlockWidth();
-	uint32_t const block_height = codec->BlockWidth();
-	uint32_t const block_bytes = codec->BlockBytes();
+	uint32_t const block_width = BlockWidth(bc_fmt);
+	uint32_t const block_height = BlockWidth(bc_fmt);
+	uint32_t const block_bytes = BlockBytes(bc_fmt);
 	bc_blocks.resize((width + block_width - 1) / block_width * (height + block_height - 1) / block_height * block_bytes);
 
 	if (tc_name.empty())

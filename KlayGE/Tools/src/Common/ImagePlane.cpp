@@ -343,91 +343,9 @@ namespace KlayGE
 		uint32_t new_slice_pitch;
 		if (IsCompressedFormat(format))
 		{
-			std::unique_ptr<TexCompression> out_codec;
-			switch (format)
-			{
-			case EF_BC1:
-			case EF_BC1_SRGB:
-			case EF_SIGNED_BC1:
-				out_codec = MakeUniquePtr<TexCompressionBC1>();
-				break;
-
-			case EF_BC2:
-			case EF_BC2_SRGB:
-			case EF_SIGNED_BC2:
-				out_codec = MakeUniquePtr<TexCompressionBC2>();
-				break;
-
-			case EF_BC3:
-			case EF_BC3_SRGB:
-			case EF_SIGNED_BC3:
-				out_codec = MakeUniquePtr<TexCompressionBC3>();
-				break;
-
-			case EF_BC4:
-			case EF_BC4_SRGB:
-			case EF_SIGNED_BC4:
-				out_codec = MakeUniquePtr<TexCompressionBC4>();
-				break;
-
-			case EF_BC5:
-			case EF_BC5_SRGB:
-			case EF_SIGNED_BC5:
-				out_codec = MakeUniquePtr<TexCompressionBC5>();
-				break;
-
-			case EF_BC6:
-				out_codec = MakeUniquePtr<TexCompressionBC6U>();
-				break;
-
-			case EF_SIGNED_BC6:
-				out_codec = MakeUniquePtr<TexCompressionBC6S>();
-				break;
-
-			case EF_BC7:
-			case EF_BC7_SRGB:
-				out_codec = MakeUniquePtr<TexCompressionBC7>();
-				break;
-
-			case EF_ETC1:
-				out_codec = MakeUniquePtr<TexCompressionETC1>();
-				break;
-
-			case EF_ETC2_BGR8:
-			case EF_ETC2_BGR8_SRGB:
-				out_codec = MakeUniquePtr<TexCompressionETC2RGB8>();
-				break;
-
-			case EF_ETC2_A1BGR8:
-			case EF_ETC2_A1BGR8_SRGB:
-				out_codec = MakeUniquePtr<TexCompressionETC2RGB8A1>();
-				break;
-
-			case EF_ETC2_ABGR8:
-			case EF_ETC2_ABGR8_SRGB:
-				// TODO
-				KFL_UNREACHABLE("Not implemented");
-				break;
-
-			case EF_ETC2_R11:
-			case EF_SIGNED_ETC2_R11:
-				// TODO
-				KFL_UNREACHABLE("Not implemented");
-				break;
-
-			case EF_ETC2_GR11:
-			case EF_SIGNED_ETC2_GR11:
-				// TODO
-				KFL_UNREACHABLE("Not implemented");
-				break;
-
-			default:
-				KFL_UNREACHABLE("Invalid compression format");
-			}
-
-			uint32_t const block_width = out_codec->BlockWidth();
-			uint32_t const block_height = out_codec->BlockHeight();
-			uint32_t const block_bytes = out_codec->BlockBytes();
+			uint32_t const block_width = BlockWidth(format);
+			uint32_t const block_height = BlockHeight(format);
+			uint32_t const block_bytes = BlockBytes(format);
 
 			new_row_pitch = ((width_ + block_width - 1) / block_width) * block_bytes;
 			new_slice_pitch = new_row_pitch * ((height_ + block_height - 1) / block_height);

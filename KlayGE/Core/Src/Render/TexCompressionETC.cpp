@@ -639,13 +639,10 @@ namespace KlayGE
 		valid_ = false;
 	}
 
-	
+
 	TexCompressionETC1::TexCompressionETC1()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_ETC1) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_ETC1;
 
 		params_ = nullptr;
 		result_ = nullptr;
@@ -1834,10 +1831,7 @@ namespace KlayGE
 
 	TexCompressionETC2RGB8::TexCompressionETC2RGB8()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_ETC2_BGR8) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_ETC2_BGR8;
 
 		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
 	}
@@ -2057,10 +2051,7 @@ namespace KlayGE
 
 	TexCompressionETC2RGB8A1::TexCompressionETC2RGB8A1()
 	{
-		block_width_ = block_height_ = 4;
-		block_depth_ = 1;
-		block_bytes_ = NumFormatBytes(EF_ETC2_A1BGR8) * 4;
-		decoded_fmt_ = EF_ARGB8;
+		compression_format_ = EF_ETC2_A1BGR8;
 
 		etc1_codec_ = MakeSharedPtr<TexCompressionETC1>();
 		etc2_rgb8_codec_ = MakeSharedPtr<TexCompressionETC2RGB8>();

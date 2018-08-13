@@ -2444,9 +2444,9 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format))
 				{
-					uint32_t const block_width = tex_codec_->BlockWidth();
-					uint32_t const block_height = tex_codec_->BlockHeight();
-					uint32_t const block_bytes = NumFormatBytes(format) * 4;
+					uint32_t const block_width = BlockWidth(format);
+					uint32_t const block_height = BlockHeight(format);
+					uint32_t const block_bytes = BlockBytes(format);
 					uint32_t const bc_row_pitch = (mip_tile_with_border_size + block_width - 1) / block_width * block_bytes;
 					uint32_t const bc_slice_pitch = (mip_tile_with_border_size + block_height - 1) / block_height * bc_row_pitch;
 					std::vector<uint8_t> bc(bc_slice_pitch);

@@ -52,32 +52,17 @@ namespace KlayGE
 		TCEM_Nonuniform,  // { 0.3, 0.59, 0.11 }
 	};
 
+	KLAYGE_CORE_API uint32_t BlockWidth(ElementFormat format);
+	KLAYGE_CORE_API uint32_t BlockHeight(ElementFormat format);
+	KLAYGE_CORE_API uint32_t BlockDepth(ElementFormat format);
+	KLAYGE_CORE_API uint32_t BlockBytes(ElementFormat format);
+	KLAYGE_CORE_API ElementFormat DecodedFormat(ElementFormat format);
+
 	class KLAYGE_CORE_API TexCompression : boost::noncopyable
 	{
 	public:
 		virtual ~TexCompression()
 		{
-		}
-
-		uint32_t BlockWidth() const
-		{
-			return block_width_;
-		}
-		uint32_t BlockHeight() const
-		{
-			return block_height_;
-		}
-		uint32_t BlockDepth() const
-		{
-			return block_depth_;
-		}
-		uint32_t BlockBytes() const
-		{
-			return block_bytes_;
-		}
-		ElementFormat DecodedFormat() const
-		{
-			return decoded_fmt_;
 		}
 
 		virtual void EncodeBlock(void* output, void const * input, TexCompressionMethod method) = 0;
@@ -95,11 +80,7 @@ namespace KlayGE
 		virtual void DecodeTex(TexturePtr const & out_tex, TexturePtr const & in_tex);
 
 	protected:
-		uint32_t block_width_;
-		uint32_t block_height_;
-		uint32_t block_depth_;
-		uint32_t block_bytes_;
-		ElementFormat decoded_fmt_;
+		ElementFormat compression_format_;
 	};
 
 	class ARGBColor32 : boost::equality_comparable<ARGBColor32>

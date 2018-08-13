@@ -193,7 +193,7 @@ namespace KlayGE
 
 					for (uint32_t ch = 0; ch < 4; ++ ch)
 					{
-						if (abs(tex0_clr[ch] - tex1_clr[ch]) > tolerance)
+						if (abs(diff[ch]) > tolerance)
 						{
 							match = false;
 							diff_pixel[ch] = 255;
