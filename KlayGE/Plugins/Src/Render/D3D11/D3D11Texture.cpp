@@ -19,6 +19,7 @@
 #include <KlayGE/RenderEngine.hpp>
 #include <KlayGE/RenderFactory.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/TexCompression.hpp>
 #include <KFL/Hash.hpp>
 
 #include <cstring>
@@ -674,31 +675,90 @@ namespace KlayGE
 		uint32_t x_offset, uint32_t width,
 		void const * data)
 	{
-		D3D11_BOX box;
-		box.left = x_offset;
-		box.top = 0;
-		box.front = 0;
-		box.right = x_offset + width;
-		box.bottom = 1;
-		box.back = 1;
-		uint32_t const texel_size = NumFormatBytes(format_);
-		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
-			data, width * texel_size, width * texel_size);
+		if (access_hint_ & (EAH_GPU_Read | EAH_GPU_Write))
+		{
+			D3D11_BOX box;
+			box.left = x_offset;
+			box.top = 0;
+			box.front = 0;
+			box.right = x_offset + width;
+			box.bottom = 1;
+			box.back = 1;
+			uint32_t const texel_size = NumFormatBytes(format_);
+			d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+				data, width * texel_size, width * texel_size);
+		}
+		else if (access_hint_ & EAH_CPU_Write)
+		{
+			Texture::Mapper mapper(*this, array_index, level, TMA_Write_Only, x_offset, width);
+
+			uint8_t const * src = static_cast<uint8_t const *>(data);
+			uint8_t* dst = mapper.Pointer<uint8_t>();
+			uint32_t const bytes_per_row = width * NumFormatBytes(format_);
+			
+			std::memcpy(dst, src, bytes_per_row);
+		}
+		else
+		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			ElementInitData init_data;
+			init_data.data = data;
+			init_data.row_pitch = width * NumFormatBytes(format_);
+			init_data.slice_pitch = init_data.row_pitch;
+			TexturePtr temp_tex = rf.MakeTexture1D(width, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
+				x_offset, 0, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				nullptr);
+		}
 	}
 
 	void D3D11Texture::UpdateSubresource2D(uint32_t array_index, uint32_t level,
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		D3D11_BOX box;
-		box.left = x_offset;
-		box.top = y_offset;
-		box.front = 0;
-		box.right = x_offset + width;
-		box.bottom = y_offset + height;
-		box.back = 1;
-		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
-			data, row_pitch, row_pitch);
+		if (access_hint_ & (EAH_GPU_Read | EAH_GPU_Write))
+		{
+			D3D11_BOX box;
+			box.left = x_offset;
+			box.top = y_offset;
+			box.front = 0;
+			box.right = x_offset + width;
+			box.bottom = y_offset + height;
+			box.back = 1;
+			d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+				data, row_pitch, row_pitch);
+		}
+		else if (access_hint_ & EAH_CPU_Write)
+		{
+			Texture::Mapper mapper(*this, array_index, level, TMA_Write_Only, x_offset, y_offset, width, height);
+
+			uint8_t const * src = static_cast<uint8_t const *>(data);
+			uint8_t* dst = mapper.Pointer<uint8_t>();
+			uint32_t const dst_row_pitch = mapper.RowPitch();
+			uint32_t const block_width = BlockWidth(format_);
+			uint32_t const block_height = BlockHeight(format_);
+			uint32_t const block_bytes = BlockBytes(format_);
+			uint32_t const bytes_per_row = (width + block_width - 1) / block_width * block_bytes;
+			for (uint32_t y = 0; y < height; y += block_height)
+			{
+				std::memcpy(dst, src, bytes_per_row);
+
+				src += row_pitch;
+				dst += dst_row_pitch;
+			}
+		}
+		else
+		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			ElementInitData init_data;
+			init_data.data = data;
+			init_data.row_pitch = row_pitch;
+			init_data.slice_pitch = row_pitch * height;
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
+				x_offset, y_offset, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				nullptr);
+		}
 	}
 
 	void D3D11Texture::UpdateSubresource3D(uint32_t array_index, uint32_t level,
@@ -706,29 +766,109 @@ namespace KlayGE
 		uint32_t width, uint32_t height, uint32_t depth,
 		void const * data, uint32_t row_pitch, uint32_t slice_pitch)
 	{
-		D3D11_BOX box;
-		box.left = x_offset;
-		box.top = y_offset;
-		box.front = z_offset;
-		box.right = x_offset + width;
-		box.bottom = y_offset + height;
-		box.back = z_offset + depth;
-		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
-			data, row_pitch, slice_pitch);
+		if (access_hint_ & (EAH_GPU_Read | EAH_GPU_Write))
+		{
+			D3D11_BOX box;
+			box.left = x_offset;
+			box.top = y_offset;
+			box.front = z_offset;
+			box.right = x_offset + width;
+			box.bottom = y_offset + height;
+			box.back = z_offset + depth;
+			d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), array_index * num_mip_maps_ + level, &box,
+				data, row_pitch, slice_pitch);
+		}
+		else if (access_hint_ & EAH_CPU_Write)
+		{
+			Texture::Mapper mapper(*this, array_index, level, TMA_Write_Only, x_offset, y_offset, width, height);
+
+			uint8_t const * src0 = static_cast<uint8_t const *>(data);
+			uint8_t* dst0 = mapper.Pointer<uint8_t>();
+			uint32_t const dst_row_pitch = mapper.RowPitch();
+			uint32_t const dst_slice_pitch = mapper.SlicePitch();
+			uint32_t const block_width = BlockWidth(format_);
+			uint32_t const block_height = BlockHeight(format_);
+			uint32_t const block_depth = BlockDepth(format_);
+			uint32_t const block_bytes = BlockBytes(format_);
+			uint32_t const bytes_per_row = (width + block_width - 1) / block_width * block_bytes;
+			for (uint32_t z = 0; z < depth; z += block_depth)
+			{
+				uint8_t const * src = src0;
+				uint8_t* dst = dst0;
+
+				for (uint32_t y = 0; y < height; y += block_height)
+				{
+					std::memcpy(dst, src, bytes_per_row);
+
+					src += row_pitch;
+					dst += dst_row_pitch;
+				}
+
+				src0 += slice_pitch;
+				dst0 += dst_slice_pitch;
+			}
+		}
+		else
+		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			ElementInitData init_data;
+			init_data.data = data;
+			init_data.row_pitch = row_pitch;
+			init_data.slice_pitch = row_pitch * height;
+			TexturePtr temp_tex = rf.MakeTexture3D(width, height, depth, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_),
+				x_offset, y_offset, z_offset, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(),
+				D3D11CalcSubresource(0, 0, 1),
+				nullptr);
+		}
 	}
 
 	void D3D11Texture::UpdateSubresourceCube(uint32_t array_index, Texture::CubeFaces face, uint32_t level,
 		uint32_t x_offset, uint32_t y_offset, uint32_t width, uint32_t height,
 		void const * data, uint32_t row_pitch)
 	{
-		D3D11_BOX box;
-		box.left = x_offset;
-		box.top = y_offset;
-		box.front = 0;
-		box.right = x_offset + width;
-		box.bottom = y_offset + height;
-		box.back = 1;
-		d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), (array_index * 6 + face) * num_mip_maps_ + level, &box,
-			data, row_pitch, row_pitch);
+		if (access_hint_ & (EAH_GPU_Read | EAH_GPU_Write))
+		{
+			D3D11_BOX box;
+			box.left = x_offset;
+			box.top = y_offset;
+			box.front = 0;
+			box.right = x_offset + width;
+			box.bottom = y_offset + height;
+			box.back = 1;
+			d3d_imm_ctx_->UpdateSubresource(d3d_texture_.get(), (array_index * 6 + face) * num_mip_maps_ + level, &box,
+				data, row_pitch, row_pitch);
+		}
+		else if (access_hint_ & EAH_CPU_Write)
+		{
+			Texture::Mapper mapper(*this, array_index * 6 + face, level, TMA_Write_Only, x_offset, y_offset, width, height);
+
+			uint8_t const * src = static_cast<uint8_t const *>(data);
+			uint8_t* dst = mapper.Pointer<uint8_t>();
+			uint32_t const dst_row_pitch = mapper.RowPitch();
+			uint32_t const block_width = BlockWidth(format_);
+			uint32_t const block_height = BlockHeight(format_);
+			uint32_t const block_bytes = BlockBytes(format_);
+			uint32_t const bytes_per_row = (width + block_width - 1) / block_width * block_bytes;
+			for (uint32_t y = 0; y < height; y += block_height)
+			{
+				std::memcpy(dst, src, bytes_per_row);
+
+				src += row_pitch;
+				dst += dst_row_pitch;
+			}
+		}
+		else
+		{
+			auto& rf = Context::Instance().RenderFactoryInstance();
+			ElementInitData init_data;
+			init_data.data = data;
+			init_data.row_pitch = row_pitch;
+			init_data.slice_pitch = row_pitch * height;
+			TexturePtr temp_tex = rf.MakeTexture2D(width, height, 1, 1, format_, 1, 0, EAH_CPU_Write, init_data);
+			d3d_imm_ctx_->CopySubresourceRegion(d3d_texture_.get(), D3D11CalcSubresource(level, array_index * 6 + face, num_mip_maps_),
+				x_offset, y_offset, 0, checked_cast<D3D11Texture*>(temp_tex.get())->d3d_texture_.get(), D3D11CalcSubresource(0, 0, 1),
+				nullptr);
+		}
 	}
 }

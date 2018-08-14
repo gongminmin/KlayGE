@@ -20,6 +20,7 @@
 #include <KlayGE/RenderFactory.hpp>
 #include <KFL/Math.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/TexCompression.hpp>
 
 #include <cstring>
 
@@ -417,7 +418,17 @@ namespace KlayGE
 		D3D11_MAPPED_SUBRESOURCE mapped;
 		TIFHR(d3d_imm_ctx_->Map(d3d_texture_.get(), D3D11CalcSubresource(level, array_index, num_mip_maps_), D3D11Mapping::Mapping(tma, type_, access_hint_, num_mip_maps_), 0, &mapped));
 		uint8_t* p = static_cast<uint8_t*>(mapped.pData);
-		data = p + y_offset * mapped.RowPitch + x_offset * NumFormatBytes(format_);
+		if (IsCompressedFormat(format_))
+		{
+			uint32_t const block_width = BlockWidth(format_);
+			uint32_t const block_height = BlockHeight(format_);
+			uint32_t const block_bytes = BlockBytes(format_);
+			data = p + (y_offset / block_height) * mapped.RowPitch + (x_offset / block_width) * block_bytes;
+		}
+		else
+		{
+			data = p + y_offset * mapped.RowPitch + x_offset * NumFormatBytes(format_);
+		}
 		row_pitch = mapped.RowPitch;
 	}
 

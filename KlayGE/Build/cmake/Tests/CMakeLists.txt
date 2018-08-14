@@ -1,10 +1,14 @@
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS2Test.dds" "942271432b537910e7641ed54127c089013ec8ce")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS4Test.dds" "c88665cb9bd306e0f56b2bae7211fd37526a31e4")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS8Test.dds" "ab7ebba0eca47348e7daa0d1fac01b4ccd10d677")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureTest.dds" "1a0f45e5edf0c52932f7b47893d6a292e11346e2")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.7z" "f128c4a3861d69279b2b43c885bf107b2dd4aaf0")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.txt" "e4c991063598ea62ed6fa5f6164565ca6e2fccb9")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/TestPassword.7z" "3b300e251ec5181ba03b24e57e478cab9d347471")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex.dds" "c180e28392be0f6d9b8e429c416392923d9e7139")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc2.dds" "3e4095b5252662319898cabd4011f0d9d50faad8")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc3.dds" "f596c895a2248b7650486adf32b911b5380c6f04")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc7.dds" "7c55686ca97660ca3c057437e37c596c5455449b")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna.dds" "292f31bcc45712989e1f3593835d5129bba8c0ac")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna_bc1.dds" "1c236d9d06364fbeb03a274802b086d782a9609b")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna_bc7.dds" "90a50b2ed010a9d29ebf36d7c2dd5f93ed1d44c0")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/memorial.dds" "cee51491891a16bf5cc39eb1fd54fff0b0ae0683")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/memorial_bc6u.dds" "23609a1794f2c95b643c12282728a9865988fc47")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe.dds" "f614b2494da0b649e0c14a2648213a3c95da8bcc")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe_bc6s.dds" "f3b28807c56a1c8b99d1fe8d831d6a653539abd1")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/anim.fbx" "529AD0044C9F4EA1296384F0CC9BD28061E1742D")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/anim.meshml" "DA4FC74BE684E84E5D15AAE2F50934CCBE42DB2F")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a.lod.meshml" "DFE9704D2377BDFAE3436F65EB793FC92482BE14")
@@ -16,6 +20,13 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a.nolod.meshml" "7793
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a_lod0.obj" "CCAD8B5BB3767CCE0EB391DF67DA3E38C5294268")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a_lod1.obj" "68BF04C67F6EF2AE84B8EB4DFDFAF56B1E546962")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/MeshConverter/tree2a_lod2.obj" "E3E1BE4E1E2F8010D16FD4B24B7E9D670F3034E1")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS2Test.dds" "942271432b537910e7641ed54127c089013ec8ce")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS4Test.dds" "c88665cb9bd306e0f56b2bae7211fd37526a31e4")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureMS8Test.dds" "ab7ebba0eca47348e7daa0d1fac01b4ccd10d677")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/RenderToTexture/RenderToTextureTest.dds" "1a0f45e5edf0c52932f7b47893d6a292e11346e2")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.7z" "f128c4a3861d69279b2b43c885bf107b2dd4aaf0")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/Test.txt" "e4c991063598ea62ed6fa5f6164565ca6e2fccb9")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/ResLoader/TestPassword.7z" "3b300e251ec5181ba03b24e57e478cab9d347471")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/array.dds" "7B7596C05A82D06F0F17DEDC61B3E075155DE063")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/array_mip.dds" "771F77EC806BADE1877EC9132DDC343A9B4B21F1")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/background.jpg" "8981B88F6D7DC9803AEFD3B5D385648A854B2BF9")
@@ -33,17 +44,10 @@ DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/lion_ddn_half.jpg" "9747A53
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/lion_ddn_quarter.jpg" "23F8715F35F2234E62CCED056C1A8455D5B3BB9A")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/lion_half.jpg" "F60D54299486F6B62000761EB44DC088F7D375D5")
 DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/TexConverter/lion_quarter.jpg" "E73C4DF3CE43199B54DB90E6CB126256879F55C6")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex.dds" "c180e28392be0f6d9b8e429c416392923d9e7139")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc2.dds" "3e4095b5252662319898cabd4011f0d9d50faad8")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc3.dds" "f596c895a2248b7650486adf32b911b5380c6f04")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/leaf_v3_green_tex_bc7.dds" "7c55686ca97660ca3c057437e37c596c5455449b")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna.dds" "292f31bcc45712989e1f3593835d5129bba8c0ac")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna_bc1.dds" "1c236d9d06364fbeb03a274802b086d782a9609b")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/Lenna_bc7.dds" "90a50b2ed010a9d29ebf36d7c2dd5f93ed1d44c0")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/memorial.dds" "cee51491891a16bf5cc39eb1fd54fff0b0ae0683")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/memorial_bc6u.dds" "23609a1794f2c95b643c12282728a9865988fc47")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe.dds" "f614b2494da0b649e0c14a2648213a3c95da8bcc")
-DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/EncodeDecodeTex/uffizi_probe_bc6s.dds" "f3b28807c56a1c8b99d1fe8d831d6a653539abd1")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/Texture/Lenna_quarter.dds" "2A6531EA2E0D36E20618AFF76E681CF33BC063EB")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/Texture/Lenna_quarter_bc1.dds" "ED641FEA484C08CB8B98F0A3323B0D3839373514")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/Texture/Lenna_SubTexture.dds" "9350A31AFC4F250E031EF4BD8590063E1773AEA0")
+DOWNLOAD_DEPENDENCY("KlayGE/Tests/media/Texture/Lenna_SubTexture_bc1.dds" "93534350BD4F6DB96CFF7992838C6AE6C1691958")
 
 SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/BlitterTest.cpp
@@ -57,6 +61,7 @@ SET(SOURCE_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/SIMDMathTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/StreamOutputTest.cpp
 	${KLAYGE_PROJECT_DIR}/Tests/src/TexConverterTest.cpp
+	${KLAYGE_PROJECT_DIR}/Tests/src/TextureTest.cpp
 )
 SET(HEADER_FILES
 	${KLAYGE_PROJECT_DIR}/Tests/src/KlayGETests.hpp
