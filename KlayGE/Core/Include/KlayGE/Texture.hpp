@@ -102,72 +102,24 @@ namespace KlayGE
 		};
 
 	public:
-		class Mapper : boost::noncopyable
+		class KLAYGE_CORE_API Mapper : boost::noncopyable
 		{
 			friend class Texture;
 
 		public:
 			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-						uint32_t x_offset, uint32_t width)
-				: tex_(tex),
-					mapped_array_index_(array_index),
-					mapped_level_(level)
-			{
-				tex_.Map1D(array_index, level, tma, x_offset, width, data_);
-				row_pitch_ = slice_pitch_ = width * NumFormatBytes(tex.Format());
-			}
+				uint32_t x_offset, uint32_t width);
 			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-						uint32_t x_offset, uint32_t y_offset,
-						uint32_t width, uint32_t height)
-				: tex_(tex),
-					mapped_array_index_(array_index),
-					mapped_level_(level)
-			{
-				tex_.Map2D(array_index, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
-				slice_pitch_ = row_pitch_ * height;
-			}
+				uint32_t x_offset, uint32_t y_offset,
+				uint32_t width, uint32_t height);
 			Mapper(Texture& tex, uint32_t array_index, uint32_t level, TextureMapAccess tma,
-						uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
-						uint32_t width, uint32_t height, uint32_t depth)
-				: tex_(tex),
-					mapped_array_index_(array_index),
-					mapped_level_(level)
-			{
-				tex_.Map3D(array_index, level, tma, x_offset, y_offset, z_offset, width, height, depth, data_, row_pitch_, slice_pitch_);
-			}
+				uint32_t x_offset, uint32_t y_offset, uint32_t z_offset,
+				uint32_t width, uint32_t height, uint32_t depth);
 			Mapper(Texture& tex, uint32_t array_index, CubeFaces face, uint32_t level, TextureMapAccess tma,
-						uint32_t x_offset, uint32_t y_offset,
-						uint32_t width, uint32_t height)
-				: tex_(tex),
-					mapped_array_index_(array_index),
-					mapped_face_(face),
-					mapped_level_(level)
-			{
-				tex_.MapCube(array_index, face, level, tma, x_offset, y_offset, width, height, data_, row_pitch_);
-				slice_pitch_ = row_pitch_ * height;
-			}
+				uint32_t x_offset, uint32_t y_offset,
+				uint32_t width, uint32_t height);
 
-			~Mapper()
-			{
-				switch (tex_.Type())
-				{
-				case TT_1D:
-					tex_.Unmap1D(mapped_array_index_, mapped_level_);
-					break;
-
-				case TT_2D:
-					tex_.Unmap2D(mapped_array_index_, mapped_level_);
-					break;
-
-				case TT_3D:
-					tex_.Unmap3D(mapped_array_index_, mapped_level_);
-					break;
-
-				case TT_Cube:
-					tex_.UnmapCube(mapped_array_index_, mapped_face_, mapped_level_);
-					break;
-				}
-			}
+			~Mapper();
 
 			template <typename T>
 			T const * Pointer() const
