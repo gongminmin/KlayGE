@@ -129,25 +129,10 @@ int main(int argc, char* argv[])
 
 	TexMetadata metadata(metadata_name);
 
-	Texture::TextureType output_type;
-	uint32_t output_width;
-	uint32_t output_height;
-	uint32_t output_depth;
-	uint32_t output_num_mipmaps;
-	uint32_t output_array_size;
-	ElementFormat output_format;
-	std::vector<ElementInitData> output_init_data;
-	std::vector<uint8_t> output_data_block;
-
 	TexConverter tc;
-	bool succ = tc.Convert(file_name, metadata,
-		output_type, output_width, output_height, output_depth, output_num_mipmaps, output_array_size, output_format,
-		output_init_data, output_data_block);
-	if (succ)
+	TexturePtr output_tex = tc.Convert(file_name, metadata);
+	if (output_tex)
 	{
-		TexturePtr output_tex = MakeSharedPtr<SoftwareTexture>(output_type, output_width, output_height, output_depth,
-			output_num_mipmaps, output_array_size, output_format, true);
-		output_tex->CreateHWResource(output_init_data, nullptr);
 		SaveTexture(output_tex, output_name);
 
 		if (!quiet)

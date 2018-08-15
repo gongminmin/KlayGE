@@ -39,11 +39,10 @@
 
 namespace KlayGE
 {
-	bool TexConverter::Convert(std::string_view input_name, TexMetadata const & metadata,
-		Texture::TextureType& output_type, uint32_t& output_width, uint32_t& output_height, uint32_t& output_depth,
-		uint32_t& output_num_mipmaps, uint32_t& output_array_size,
-		ElementFormat& output_format, std::vector<ElementInitData>& output_init_data, std::vector<uint8_t>& output_data_block)
+	TexturePtr TexConverter::Convert(std::string_view input_name, TexMetadata const & metadata)
 	{
+		TexturePtr ret;
+
 		input_name_ = std::string(input_name);
 		metadata_ = metadata;
 
@@ -54,20 +53,17 @@ namespace KlayGE
 			ResLoader::Instance().AddPath(in_folder);
 		}
 
-		if (!this->Load())
+		if (this->Load())
 		{
-			return false;
+			ret = this->Save();
 		}
-
-		this->Save(output_type, output_width, output_height, output_depth, output_num_mipmaps, output_array_size,
-			output_format, output_init_data, output_data_block);
 
 		if (!in_path)
 		{
 			ResLoader::Instance().DelPath(in_folder);
 		}
 
-		return true;
+		return ret;
 	}
 
 	bool TexConverter::Load()
@@ -87,13 +83,13 @@ namespace KlayGE
 
 		width_ = first_image.Width();
 		height_ = first_image.Height();
-		if (first_image.CompressedFormat() != EF_Unknown)
+		if (first_image.CompressedTex())
 		{
-			format_ = first_image.CompressedFormat();
+			format_ = first_image.CompressedTex()->Format();
 		}
 		else
 		{
-			format_ = first_image.UncompressedFormat();
+			format_ = first_image.UncompressedTex()->Format();
 		}
 		BOOST_ASSERT(format_ != EF_Unknown);
 		if (metadata_.PreferedFormat() == EF_Unknown)
@@ -200,19 +196,17 @@ namespace KlayGE
 		return true;
 	}
 
-	void TexConverter::Save(Texture::TextureType& output_type, uint32_t& output_width, uint32_t& output_height, uint32_t& output_depth,
-		uint32_t& output_num_mipmaps, uint32_t& output_array_size,
-		ElementFormat& output_format, std::vector<ElementInitData>& output_init_data, std::vector<uint8_t>& output_data_block)
+	TexturePtr TexConverter::Save()
 	{
-		output_type = Texture::TT_2D;
-		output_width = width_;
-		output_height = height_;
-		output_depth = 1;
-		output_num_mipmaps = num_mipmaps_;
-		output_array_size = array_size_;
-		output_format = format_;
+		Texture::TextureType output_type = Texture::TT_2D;
+		uint32_t output_width = width_;
+		uint32_t output_height = height_;
+		uint32_t output_depth = 1;
+		uint32_t output_num_mipmaps = num_mipmaps_;
+		uint32_t output_array_size = array_size_;
+		ElementFormat output_format = format_;
 
-		output_init_data.resize(array_size_ * num_mipmaps_);
+		std::vector<ElementInitData> output_init_data(array_size_ * num_mipmaps_);
 		uint32_t data_size = 0;
 		for (uint32_t arr = 0; arr < array_size_; ++ arr)
 		{
@@ -223,19 +217,23 @@ namespace KlayGE
 
 				if (IsCompressedFormat(format_))
 				{
-					out_data.row_pitch = plane.CompressedRowPitch();
-					out_data.slice_pitch = plane.CompressedSlicePitch();
+					Texture::Mapper mapper(*plane.CompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+						plane.CompressedTex()->Width(0), plane.CompressedTex()->Height(0));
+					out_data.row_pitch = mapper.RowPitch();
+					out_data.slice_pitch = mapper.SlicePitch();
 				}
 				else
 				{
-					out_data.row_pitch = plane.UncompressedRowPitch();
-					out_data.slice_pitch = plane.UncompressedSlicePitch();
+					Texture::Mapper mapper(*plane.UncompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+						plane.UncompressedTex()->Width(0), plane.UncompressedTex()->Height(0));
+					out_data.row_pitch = mapper.RowPitch();
+					out_data.slice_pitch = mapper.SlicePitch();
 				}
 				data_size += out_data.slice_pitch;
 			}
 		}
 
-		output_data_block.resize(data_size);
+		std::vector<uint8_t> output_data_block(data_size);
 		uint32_t start_index = 0;
 		for (uint32_t arr = 0; arr < array_size_; ++ arr)
 		{
@@ -245,19 +243,26 @@ namespace KlayGE
 				auto& out_data = output_init_data[arr * num_mipmaps_ + m];
 
 				uint8_t* dst = &output_data_block[start_index];
-				uint8_t const * src;
 				if (IsCompressedFormat(format_))
 				{
-					src = plane.CompressedData().data();
+					Texture::Mapper mapper(*plane.CompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+						plane.CompressedTex()->Width(0), plane.CompressedTex()->Height(0));
+					std::memcpy(dst, mapper.Pointer<uint8_t>(), out_data.slice_pitch);
 				}
 				else
 				{
-					src = plane.UncompressedData().data();
+					Texture::Mapper mapper(*plane.UncompressedTex(), 0, 0, TMA_Read_Only, 0, 0,
+						plane.UncompressedTex()->Width(0), plane.UncompressedTex()->Height(0));
+					std::memcpy(dst, mapper.Pointer<uint8_t>(), out_data.slice_pitch);
 				}
-				std::memcpy(dst, src, out_data.slice_pitch);
 				out_data.data = dst;
 				start_index += out_data.slice_pitch;
 			}
 		}
+
+		TexturePtr ret = MakeSharedPtr<SoftwareTexture>(output_type, output_width, output_height, output_depth,
+			output_num_mipmaps, output_array_size, output_format, false);
+		ret->CreateHWResource(output_init_data, nullptr);
+		return ret;
 	}
 }

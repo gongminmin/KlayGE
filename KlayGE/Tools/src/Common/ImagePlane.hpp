@@ -50,58 +50,26 @@ namespace KlayGE
 		void FormatConversion(ElementFormat format);
 		ImagePlane ResizeTo(uint32_t width, uint32_t height, bool linear);
 
-		std::vector<uint8_t> const & UncompressedData() const
-		{
-			return uncompressed_data_;
-		}
-		std::vector<uint8_t> const & CompressedData() const
-		{
-			return compressed_data_;
-		}
 		uint32_t Width() const
 		{
-			return width_;
+			return uncompressed_tex_->Width(0);
 		}
 		uint32_t Height() const
 		{
-			return height_;
+			return uncompressed_tex_->Height(0);
 		}
-		uint32_t UncompressedRowPitch() const
+		TexturePtr const & UncompressedTex() const
 		{
-			return uncompressed_row_pitch_;
+			return uncompressed_tex_;
 		}
-		uint32_t CompressedRowPitch() const
+		TexturePtr const & CompressedTex() const
 		{
-			return compressed_row_pitch_;
-		}
-		uint32_t UncompressedSlicePitch() const
-		{
-			return uncompressed_slice_pitch_;
-		}
-		uint32_t CompressedSlicePitch() const
-		{
-			return compressed_slice_pitch_;
-		}
-		ElementFormat UncompressedFormat() const
-		{
-			return uncompressed_format_;
-		}
-		ElementFormat CompressedFormat() const
-		{
-			return compressed_format_;
+			return compressed_tex_;
 		}
 
 	private:
-		std::vector<uint8_t> uncompressed_data_;
-		std::vector<uint8_t> compressed_data_;
-		uint32_t width_;
-		uint32_t height_;
-		uint32_t uncompressed_row_pitch_;
-		uint32_t compressed_row_pitch_;
-		uint32_t uncompressed_slice_pitch_;
-		uint32_t compressed_slice_pitch_;
-		ElementFormat uncompressed_format_;
-		ElementFormat compressed_format_ = EF_Unknown;
+		TexturePtr uncompressed_tex_;
+		TexturePtr compressed_tex_;
 	};
 }
 

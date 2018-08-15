@@ -57,14 +57,10 @@ namespace KlayGE
 		{
 			TexturePtr in_tex = LoadSoftwareTexture(name_str);
 			auto const type = in_tex->Type();
-			width_ = in_tex->Width(0);
-			height_ = in_tex->Height(0);
 			auto const depth = in_tex->Depth(0);
 			auto const num_mipmaps = in_tex->NumMipMaps();
 			auto const array_size = in_tex->ArraySize();
 			auto const format = in_tex->Format();
-			auto const & init_data = checked_cast<SoftwareTexture*>(in_tex.get())->SubresourceData();
-			auto const & data_block = checked_cast<SoftwareTexture*>(in_tex.get())->DataBlock();
 
 			if (type != Texture::TT_2D)
 			{
@@ -85,45 +81,41 @@ namespace KlayGE
 
 			if (IsCompressedFormat(format))
 			{
-				compressed_format_ = format;
-				compressed_data_ = data_block;
-				compressed_row_pitch_ = init_data[0].row_pitch;
-				compressed_slice_pitch_ = init_data[0].slice_pitch;
+				compressed_tex_ = in_tex;
 
+				ElementFormat uncompressed_format;
 				if ((format == EF_BC6) || (format == EF_SIGNED_BC6))
 				{
-					uncompressed_format_ = EF_ABGR16F;
+					uncompressed_format = EF_ABGR16F;
 				}
 				else if (IsSigned(format))
 				{
-					uncompressed_format_ = EF_SIGNED_ABGR8;
+					uncompressed_format = EF_SIGNED_ABGR8;
 				}
 				else if (IsSRGB(format))
 				{
-					uncompressed_format_ = EF_ARGB8_SRGB;
+					uncompressed_format = EF_ARGB8_SRGB;
 				}
 				else
 				{
-					uncompressed_format_ = EF_ARGB8;
+					uncompressed_format = EF_ARGB8;
 				}
 
-				uncompressed_row_pitch_ = width_ * NumFormatBytes(uncompressed_format_);
-				uncompressed_slice_pitch_ = uncompressed_row_pitch_ * height_;
-				uncompressed_data_.resize(uncompressed_slice_pitch_);
-
-				ResizeTexture(uncompressed_data_.data(), uncompressed_row_pitch_, uncompressed_slice_pitch_,
-					uncompressed_format_, width_, height_, 1,
-					compressed_data_.data(), compressed_row_pitch_, compressed_slice_pitch_,
-					compressed_format_, width_, height_, 1, false);
+				uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, in_tex->Width(0), in_tex->Height(0),
+					in_tex->Depth(0), in_tex->NumMipMaps(), in_tex->ArraySize(), uncompressed_format, false);
+				ElementInitData init_data;
+				init_data.row_pitch = in_tex->Width(0) * NumFormatBytes(uncompressed_format);
+				init_data.slice_pitch = init_data.row_pitch * in_tex->Height(0);
+				std::vector<uint8_t> empty_data(init_data.slice_pitch, 0);
+				init_data.data = empty_data.data();
+				uncompressed_tex_->CreateHWResource(init_data, nullptr);
+				compressed_tex_->CopyToTexture(*uncompressed_tex_);
 			}
 			else
 			{
-				uncompressed_data_ = std::move(data_block);
-				uncompressed_row_pitch_ = init_data[0].row_pitch;
-				uncompressed_slice_pitch_ = init_data[0].slice_pitch;
-				uncompressed_format_ = format;
+				uncompressed_tex_ = in_tex;
 
-				compressed_format_ = EF_Unknown;
+				compressed_tex_.reset();
 			}
 		}
 		else
@@ -153,16 +145,16 @@ namespace KlayGE
 				return false;
 			}
 
-			width_ = FreeImage_GetWidth(dib.get());
-			height_ = FreeImage_GetHeight(dib.get());
-			if ((width_ == 0) || (height_ == 0))
+			uint32_t const width = FreeImage_GetWidth(dib.get());
+			uint32_t const height = FreeImage_GetHeight(dib.get());
+			if ((width == 0) || (height == 0))
 			{
 				return false;
 			}
 
 			FreeImage_FlipVertical(dib.get());
 
-			uncompressed_format_ = EF_ABGR8;
+			ElementFormat uncompressed_format = EF_ABGR8;
 			FREE_IMAGE_TYPE const image_type = FreeImage_GetImageType(dib.get());
 			switch (image_type)
 			{
@@ -182,16 +174,16 @@ namespace KlayGE
 						{
 							if ((r_mask == 0xFF0000) && (g_mask == 0xFF00) && (b_mask == 0xFF))
 							{
-								uncompressed_format_ = EF_ARGB8;
+								uncompressed_format = EF_ARGB8;
 							}
 							else if ((r_mask == 0xFF) && (g_mask == 0xFF00) && (b_mask == 0xFF0000))
 							{
-								uncompressed_format_ = EF_ABGR8;
+								uncompressed_format = EF_ABGR8;
 							}
 						}
 						else
 						{
-							uncompressed_format_ = EF_ARGB8;
+							uncompressed_format = EF_ARGB8;
 						}
 						dib.reset(FreeImage_ConvertTo32Bits(dib.get()));
 						break;
@@ -199,22 +191,22 @@ namespace KlayGE
 					case 16:
 						if ((r_mask == (0x1F << 10)) && (g_mask == (0x1F << 5)) && (b_mask == 0x1F))
 						{
-							uncompressed_format_ = EF_A1RGB5;
+							uncompressed_format = EF_A1RGB5;
 						}
 						else if ((r_mask == (0x1F << 11)) && (g_mask == (0x3F << 5)) && (b_mask == 0x1F))
 						{
-							uncompressed_format_ = EF_R5G6B5;
+							uncompressed_format = EF_R5G6B5;
 						}
 						break;
 
 					case 32:
 						if ((r_mask == 0xFF0000) && (g_mask == 0xFF00) && (b_mask == 0xFF))
 						{
-							uncompressed_format_ = EF_ARGB8;
+							uncompressed_format = EF_ARGB8;
 						}
 						else if ((r_mask == 0xFF) && (g_mask == 0xFF00) && (b_mask == 0xFF0000))
 						{
-							uncompressed_format_ = EF_ABGR8;
+							uncompressed_format = EF_ABGR8;
 						}
 						break;
 
@@ -225,45 +217,45 @@ namespace KlayGE
 				break;
 
 			case FIT_UINT16:
-				uncompressed_format_ = EF_R16UI;
+				uncompressed_format = EF_R16UI;
 				break;
 
 			case FIT_INT16:
-				uncompressed_format_ = EF_R16I;
+				uncompressed_format = EF_R16I;
 				break;
 
 			case FIT_UINT32:
-				uncompressed_format_ = EF_R32UI;
+				uncompressed_format = EF_R32UI;
 				break;
 
 			case FIT_INT32:
-				uncompressed_format_ = EF_R32I;
+				uncompressed_format = EF_R32I;
 				break;
 
 			case FIT_FLOAT:
-				uncompressed_format_ = EF_R32F;
+				uncompressed_format = EF_R32F;
 				break;
 
 			case FIT_COMPLEX:
-				uncompressed_format_ = EF_GR32F;
+				uncompressed_format = EF_GR32F;
 				break;
 
 			case FIT_RGB16:
-				uncompressed_format_ = EF_ABGR16;
+				uncompressed_format = EF_ABGR16;
 				dib.reset(FreeImage_ConvertToRGBA16(dib.get()));
 				break;
 
 			case FIT_RGBA16:
-				uncompressed_format_ = EF_ABGR16;
+				uncompressed_format = EF_ABGR16;
 				break;
 
 			case FIT_RGBF:
-				uncompressed_format_ = EF_ABGR32F;
+				uncompressed_format = EF_ABGR32F;
 				dib.reset(FreeImage_ConvertToRGBAF(dib.get()));
 				break;
 
 			case FIT_RGBAF:
-				uncompressed_format_ = EF_ABGR32F;
+				uncompressed_format = EF_ABGR32F;
 				break;
 
 			default:
@@ -276,18 +268,62 @@ namespace KlayGE
 				return false;
 			}
 
-			uncompressed_row_pitch_ = FreeImage_GetPitch(dib.get());
-			uncompressed_slice_pitch_ = uncompressed_row_pitch_ * height_;
-			uncompressed_data_.assign(src, src + uncompressed_slice_pitch_);
+			ElementInitData uncompressed_init_data;
+			uncompressed_init_data.data = src;
+			uncompressed_init_data.row_pitch = FreeImage_GetPitch(dib.get());
+			uncompressed_init_data.slice_pitch = uncompressed_init_data.row_pitch * height;
+
+			uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height,
+				1, 1, 1, uncompressed_format, false);
+			uncompressed_tex_->CreateHWResource(uncompressed_init_data, nullptr);
 		}
 
 		if (metadata.ForceSRGB())
 		{
-			uncompressed_format_ = MakeSRGB(uncompressed_format_);
-			compressed_format_ = MakeSRGB(compressed_format_);
+			if (!IsSRGB(uncompressed_tex_->Format()))
+			{
+				uint32_t const width = uncompressed_tex_->Width(0);
+				uint32_t const height = uncompressed_tex_->Height(0);
+
+				TexturePtr srgb_uncompressed_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+					width, height, 1, 1, 1, MakeSRGB(uncompressed_tex_->Format()), false);
+				{
+					Texture::Mapper ori_mapper(*uncompressed_tex_, 0, 0, TMA_Read_Only, 0, 0, width, height);
+
+					ElementInitData init_data;
+					init_data.data = ori_mapper.Pointer<void>();
+					init_data.row_pitch = ori_mapper.RowPitch();
+					init_data.slice_pitch = ori_mapper.SlicePitch();
+
+					srgb_uncompressed_tex->CreateHWResource(init_data, nullptr);
+				}
+
+				uncompressed_tex_ = srgb_uncompressed_tex;
+			}
+
+			if (compressed_tex_ && !IsSRGB(compressed_tex_->Format()))
+			{
+				uint32_t const width = compressed_tex_->Width(0);
+				uint32_t const height = compressed_tex_->Height(0);
+
+				TexturePtr srgb_compressed_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+					width, height, 1, 1, 1, MakeSRGB(compressed_tex_->Format()), false);
+				{
+					Texture::Mapper ori_mapper(*compressed_tex_, 0, 0, TMA_Read_Only, 0, 0, width, height);
+
+					ElementInitData init_data;
+					init_data.data = ori_mapper.Pointer<void>();
+					init_data.row_pitch = ori_mapper.RowPitch();
+					init_data.slice_pitch = ori_mapper.SlicePitch();
+
+					srgb_compressed_tex->CreateHWResource(init_data, nullptr);
+				}
+
+				compressed_tex_ = srgb_compressed_tex;
+			}
 		}
 
-		uint32_t const num_channels = NumComponents(uncompressed_format_);
+		uint32_t const num_channels = NumComponents(uncompressed_tex_->Format());
 		uint32_t channel_mapping[4];
 		for (uint32_t ch = 0; ch < num_channels; ++ ch)
 		{
@@ -305,20 +341,23 @@ namespace KlayGE
 		}
 		if (need_swizzle)
 		{
-			compressed_data_.clear();
-			compressed_row_pitch_ = 0;
-			compressed_slice_pitch_ = 0;
-			compressed_format_ = EF_Unknown;
+			compressed_tex_.reset();
 
-			uint8_t* ptr = uncompressed_data_.data();
-			std::vector<Color> line_32f(width_);
-			for (uint32_t y = 0; y < height_; ++ y)
+			uint32_t const width = uncompressed_tex_->Width(0);
+			uint32_t const height = uncompressed_tex_->Height(0);
+			ElementFormat const format = uncompressed_tex_->Format();
+
+			Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0,
+				uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+			uint8_t* ptr = mapper.Pointer<uint8_t>();
+			std::vector<Color> line_32f(width);
+			for (uint32_t y = 0; y < height; ++ y)
 			{
-				ConvertToABGR32F(uncompressed_format_, ptr, width_, line_32f.data());
+				ConvertToABGR32F(format, ptr, width, line_32f.data());
 
 				Color original_clr;
 				Color swizzled_clr(0, 0, 0, 0);
-				for (uint32_t x = 0; x < width_; ++ x)
+				for (uint32_t x = 0; x < width; ++ x)
 				{
 					original_clr = line_32f[x];
 					for (uint32_t ch = 0; ch < num_channels; ++ ch)
@@ -328,9 +367,9 @@ namespace KlayGE
 					line_32f[x] = swizzled_clr;
 				}
 
-				ConvertFromABGR32F(uncompressed_format_, line_32f.data(), width_, ptr);
+				ConvertFromABGR32F(format, line_32f.data(), width, ptr);
 
-				ptr += uncompressed_row_pitch_;
+				ptr += mapper.RowPitch();
 			}
 		}
 
@@ -339,61 +378,56 @@ namespace KlayGE
 
 	void ImagePlane::FormatConversion(ElementFormat format)
 	{
-		uint32_t new_row_pitch;
-		uint32_t new_slice_pitch;
-		if (IsCompressedFormat(format))
-		{
-			uint32_t const block_width = BlockWidth(format);
-			uint32_t const block_height = BlockHeight(format);
-			uint32_t const block_bytes = BlockBytes(format);
-
-			new_row_pitch = ((width_ + block_width - 1) / block_width) * block_bytes;
-			new_slice_pitch = new_row_pitch * ((height_ + block_height - 1) / block_height);
-		}
-		else
-		{
-			new_row_pitch = width_ * NumFormatBytes(format);
-			new_slice_pitch = new_row_pitch * height_;
-		}
-
-		std::vector<uint8_t> new_data(new_slice_pitch);
-		ResizeTexture(new_data.data(), new_row_pitch, new_slice_pitch, format,
-			width_, height_, 1,
-			uncompressed_data_.data(), uncompressed_row_pitch_, uncompressed_slice_pitch_, uncompressed_format_,
-			width_, height_, 1,
-			false);
+		TexturePtr new_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, uncompressed_tex_->Width(0), uncompressed_tex_->Height(0),
+			1, 1, 1, format, false);
+		uint32_t const block_width = BlockWidth(format);
+		uint32_t const block_height = BlockHeight(format);
+		uint32_t const block_bytes = BlockBytes(format);
+		ElementInitData init_data;
+		init_data.row_pitch = (uncompressed_tex_->Width(0) + block_width - 1) / block_width * block_bytes;
+		init_data.slice_pitch = init_data.row_pitch * ((uncompressed_tex_->Height(0) + block_height - 1) / block_height);
+		std::vector<uint8_t> empty_data(init_data.slice_pitch, 0);
+		init_data.data = empty_data.data();
+		new_tex->CreateHWResource(init_data, nullptr);
+		uncompressed_tex_->CopyToTexture(*new_tex);
 
 		if (IsCompressedFormat(format))
 		{
-			compressed_data_ = std::move(new_data);
-			compressed_row_pitch_ = new_row_pitch;
-			compressed_slice_pitch_ = new_slice_pitch;
-			compressed_format_ = format;
+			compressed_tex_ = new_tex;
 		}
 		else
 		{
-			uncompressed_data_ = std::move(new_data);
-			uncompressed_row_pitch_ = new_row_pitch;
-			uncompressed_slice_pitch_ = new_slice_pitch;
-			uncompressed_format_ = format;
+			uncompressed_tex_ = new_tex;
 		}
 	}
 
 	ImagePlane ImagePlane::ResizeTo(uint32_t width, uint32_t height, bool linear)
 	{
-		ImagePlane target;
-		target.width_ = width;
-		target.height_ = height;
-		target.uncompressed_row_pitch_ = target.width_ * NumFormatBytes(uncompressed_format_);
-		target.uncompressed_slice_pitch_ = target.uncompressed_row_pitch_ * target.height_;
-		target.uncompressed_data_.resize(target.uncompressed_slice_pitch_);
-		target.uncompressed_format_ = uncompressed_format_;
+		BOOST_ASSERT(uncompressed_tex_);
 
-		ResizeTexture(target.uncompressed_data_.data(), target.uncompressed_row_pitch_, target.uncompressed_slice_pitch_,
-			uncompressed_format_, width, height, 1,
-			uncompressed_data_.data(), uncompressed_row_pitch_, uncompressed_slice_pitch_, uncompressed_format_,
-			width_, height_, 1,
-			linear);
+		auto const format = uncompressed_tex_->Format();
+
+		ImagePlane target;
+		target.uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, width, height, 1, 1, 1,
+			format, false);
+
+		ElementInitData target_init_data;
+		target_init_data.row_pitch = width * NumFormatBytes(uncompressed_tex_->Format());
+		target_init_data.slice_pitch = target_init_data.row_pitch * height;
+		std::vector<uint8_t> target_data(target_init_data.slice_pitch);
+		target_init_data.data = target_data.data();
+
+		{
+			Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Only, 0, 0,
+				uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+			ResizeTexture(target_data.data(), target_init_data.row_pitch, target_init_data.slice_pitch,
+				format, width, height, 1,
+				mapper.Pointer<void>(), mapper.RowPitch(), mapper.SlicePitch(), format,
+				uncompressed_tex_->Width(0), uncompressed_tex_->Height(0), 1,
+				linear);
+		}
+
+		target.uncompressed_tex_->CreateHWResource(target_init_data, nullptr);
 
 		return target;
 	}

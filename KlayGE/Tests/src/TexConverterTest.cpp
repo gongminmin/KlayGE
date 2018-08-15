@@ -54,23 +54,9 @@ public:
 	{
 		TexMetadata metadata(metadata_name);
 
-		Texture::TextureType output_type;
-		uint32_t output_width;
-		uint32_t output_height;
-		uint32_t output_depth;
-		uint32_t output_num_mipmaps;
-		uint32_t output_array_size;
-		ElementFormat output_format;
-		std::vector<ElementInitData> output_init_data;
-		std::vector<uint8_t> output_data_block;
-
 		TexConverter tc;
-		EXPECT_TRUE(tc.Convert(input_name, metadata,
-			output_type, output_width, output_height, output_depth, output_num_mipmaps, output_array_size, output_format,
-			output_init_data, output_data_block));
-
-		auto target = Context::Instance().RenderFactoryInstance().MakeTexture2D(output_width, output_height,
-			output_num_mipmaps, output_array_size, output_format, 1, 0, EAH_CPU_Read, output_init_data);
+		auto target = tc.Convert(input_name, metadata);
+		EXPECT_NE(target.get(), nullptr);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
 

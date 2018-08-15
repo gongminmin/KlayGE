@@ -49,16 +49,11 @@ namespace KlayGE
 	class KLAYGE_TOOL_API TexConverter
 	{
 	public:
-		bool Convert(std::string_view input_name, TexMetadata const & metadata,
-			Texture::TextureType& output_type, uint32_t& output_width, uint32_t& output_height, uint32_t& output_depth,
-			uint32_t& output_num_mipmaps, uint32_t& output_array_size,
-			ElementFormat& output_format, std::vector<ElementInitData>& output_init_data, std::vector<uint8_t>& output_data_block);
+		TexturePtr Convert(std::string_view input_name, TexMetadata const & metadata);
 
 	private:
 		bool Load();
-		void Save(Texture::TextureType& output_type, uint32_t& output_width, uint32_t& output_height, uint32_t& output_depth,
-			uint32_t& output_num_mipmaps, uint32_t& output_array_size,
-			ElementFormat& output_format, std::vector<ElementInitData>& output_init_data, std::vector<uint8_t>& output_data_block);
+		TexturePtr Save();
 
 	private:
 		std::string input_name_;
