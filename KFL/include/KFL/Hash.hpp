@@ -46,10 +46,10 @@ namespace KlayGE
 
 	size_t constexpr CTHashImpl(char const * str, size_t seed)
 	{
-		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (*str + PRIME_NUM + (seed << 6) + (seed >> 2)));
+		return 0 == *str ? seed : CTHashImpl(str + 1, seed ^ (static_cast<size_t>(*str) + PRIME_NUM + (seed << 6) + (seed >> 2)));
 	}
 
-#ifdef KLAYGE_COMPILER_MSVC
+#if defined(KLAYGE_COMPILER_MSVC) && (_MSC_VER < 1914)
 	template <size_t N>
 	struct EnsureConst
 	{

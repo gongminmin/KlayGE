@@ -56,7 +56,7 @@ public:
 
 		TexConverter tc;
 		auto target = tc.Convert(input_name, metadata);
-		EXPECT_NE(target.get(), nullptr);
+		EXPECT_TRUE(target);
 
 		auto target_sanity = SyncLoadTexture(sanity_name, EAH_CPU_Read);
 
