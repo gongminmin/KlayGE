@@ -754,7 +754,11 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				cmake_cmd.AddCommand('export PATH=$PATH:%s' % new_path)
 			cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, toolset_name, additional_options, "../cmake"))
 			if cmake_cmd.Execute() != 0:
-				LogError("Config %s failed.\n" % name)
+				LogWarning("Config %s failed, retry 1...\n" % name)
+				if cmake_cmd.Execute() != 0:
+					LogWarning("Config %s failed, retry 2...\n" % name)
+					if cmake_cmd.Execute() != 0:
+						LogError("Config %s failed.\n" % name)
 
 			build_cmd = BatchCommand(build_info.host_platform)
 			if 0 == build_info.project_type.find("vs"):
@@ -821,7 +825,11 @@ def BuildAProject(name, build_path, build_info, compiler_info, need_install = Fa
 				cmake_cmd = BatchCommand(build_info.host_platform)
 				cmake_cmd.AddCommand('"%s" -G "%s" %s %s %s' % (build_info.cmake_path, compiler_info.generator, additional_options, config_options, "../cmake"))
 				if cmake_cmd.Execute() != 0:
-					LogError("Config %s failed.\n" % name)
+					LogWarning("Config %s failed, retry 1...\n" % name)
+					if cmake_cmd.Execute() != 0:
+						LogWarning("Config %s failed, retry 2...\n" % name)
+						if cmake_cmd.Execute() != 0:
+							LogError("Config %s failed.\n" % name)
 
 				install_str = ""
 				if need_install and (not build_info.prefer_static):
