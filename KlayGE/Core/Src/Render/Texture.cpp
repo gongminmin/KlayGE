@@ -3725,7 +3725,21 @@ namespace KlayGE
 		: Texture(type, 1, 0, EAH_CPU_Read | EAH_CPU_Write),
 			ref_only_(ref_only), width_(width), height_(height), depth_(depth)
 	{
+		if (0 == num_mipmaps)
+		{
+			num_mipmaps = 1;
+			uint32_t w = width;
+			uint32_t h = height;
+			while ((w != 1) || (h != 1))
+			{
+				++ num_mipmaps;
+
+				w = std::max<uint32_t>(1U, w / 2);
+				h = std::max<uint32_t>(1U, h / 2);
+			}
+		}
 		num_mip_maps_ = num_mipmaps;
+
 		array_size_ = array_size;
 		format_ = format;
 	}

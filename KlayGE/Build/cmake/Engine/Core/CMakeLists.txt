@@ -7,7 +7,7 @@ DOWNLOAD_DEPENDENCY("KlayGE/media/Models/indirect_light_proxy.meshml" "2e15fa6d1
 DOWNLOAD_DEPENDENCY("KlayGE/media/Models/point_light_proxy.meshml" "f29b7d9043bc15b1c2ae055242f8b95bcfd8e45d")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Models/spot_light_proxy.meshml" "0b97f143c4ef37ce8e062243095120ff11a87314")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Models/tube_light_proxy.meshml" "e6fd2f97ba40eb6cde9b3071b4974e3e34002124")
-DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/2D/fBm5_grad_tex.dds" "d2e957bb56628345c9a8c3c119a9b21252dad736")
+DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/2D/fBm5_grad_tex.dds" "D51AB2BFEC5BC93FBD5C1AFBE8AE30D823938C45")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/2D/fBm5_tex.dds" "d3c1f21fc2d6bcdd4a445f8fcd7f8f59d12c395f")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/2D/flare.dds" "1438372d81bea4f721a6e664caf0c0a41f11f674")
 DOWNLOAD_DEPENDENCY("KlayGE/media/Textures/2D/klayge_logo.dds" "fc5795e65bb5e3ed34d56cb1ad7eb720588cb87a")

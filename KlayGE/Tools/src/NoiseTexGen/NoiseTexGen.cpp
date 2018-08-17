@@ -1,5 +1,6 @@
 #include <KlayGE/KlayGE.hpp>
 #include <KlayGE/Texture.hpp>
+#include <KlayGE/TexCompression.hpp>
 #include <KFL/Noise.hpp>
 
 #include <iostream>
@@ -244,57 +245,113 @@ void GenfBmTexs()
 			max_v = std::max(max_v, v);
 		}
 	}
-	float inv_range = 1 / (max_v - min_v);
-	std::vector<uint8_t> data(TEX_SIZE * TEX_SIZE);
-	for (uint32_t i = 0; i < data.size(); ++ i)
-	{
-		float v = (fdata[i] - min_v) * inv_range;
-		data[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(v * 255 + 0.5f), 0, 255));
-	}
-	std::vector<ElementInitData> init_data(1);
-	init_data[0].data = &data[0];
-	init_data[0].row_pitch = TEX_SIZE;
-	init_data[0].slice_pitch = TEX_SIZE * TEX_SIZE;
-	TexturePtr fbm5_tex_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
-		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_R8, true);
-	fbm5_tex_tex->CreateHWResource(init_data, nullptr);
-	SaveTexture(fbm5_tex_tex, OUTPUT_PATH "fBm5_tex.dds");
 
-	int err = system("Mipmapper " OUTPUT_PATH "fBm5_tex.dds");
-	KFL_UNUSED(err);
-	err = system("TexCompressor BC4 " OUTPUT_PATH "fBm5_tex.dds");
-	KFL_UNUSED(err);
-
-	std::vector<float3> fdata3(TEX_SIZE * TEX_SIZE);
-	for (uint32_t y = 0; y < TEX_SIZE; ++ y)
 	{
-		for (uint32_t x = 0; x < TEX_SIZE; ++ x)
+		float inv_range = 1 / (max_v - min_v);
+		std::vector<uint8_t> data(TEX_SIZE * TEX_SIZE);
+		for (uint32_t i = 0; i < data.size(); ++ i)
 		{
-			float f0 = fdata[y * TEX_SIZE + x];
-			float d = 2;
-			float fx = noiser.tileable_fBm((x + d + 0.5f) / TEX_SIZE * STRIDE, (y + 0.5f) / TEX_SIZE * STRIDE, STRIDE, STRIDE, 5, 2, 0.5f);
-			float fy = noiser.tileable_fBm((x + 0.5f) / TEX_SIZE * STRIDE, (y + d + 0.5f) / TEX_SIZE * STRIDE, STRIDE, STRIDE, 5, 2, 0.5f);
-			fdata3[y * TEX_SIZE + x] = MathLib::normalize(float3(fx - f0, fy - f0, STRIDE * 16 / TEX_SIZE)) * 0.5f + 0.5f;
+			float v = (fdata[i] - min_v) * inv_range;
+			data[i] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(v * 255 + 0.5f), 0, 255));
 		}
-	}
-	std::vector<uint32_t> data3(TEX_SIZE * TEX_SIZE);
-	for (uint32_t i = 0; i < fdata3.size(); ++ i)
-	{
-		data3[i] = (static_cast<uint8_t>(MathLib::clamp(static_cast<int>(fdata3[i].x() * 255 + 0.5f), 0, 255)) << 0)
-			| (static_cast<uint8_t>(MathLib::clamp(static_cast<int>(fdata3[i].y() * 255 + 0.5f), 0, 255)) << 8);
-	}
-	init_data[0].data = &data3[0];
-	init_data[0].row_pitch = TEX_SIZE * sizeof(uint32_t);
-	init_data[0].slice_pitch = TEX_SIZE * sizeof(uint32_t)* TEX_SIZE;
-	TexturePtr fbm5_grad_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
-		TEX_SIZE, TEX_SIZE, 1, 1, 1, EF_ABGR8, true);
-	fbm5_grad_tex->CreateHWResource(init_data, nullptr);
-	SaveTexture(fbm5_grad_tex, OUTPUT_PATH "fBm5_grad_tex.dds");
 
-	err = system("Mipmapper " OUTPUT_PATH "fBm5_grad_tex.dds");
-	KFL_UNUSED(err);
-	err = system("TexCompressor BC5 " OUTPUT_PATH "fBm5_grad_tex.dds");
-	KFL_UNUSED(err);
+		TexturePtr fbm5_tex_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_R8, false);
+
+		std::vector<ElementInitData> r8_init_data(fbm5_tex_tex->NumMipMaps());
+		for (uint32_t i = 0; i < r8_init_data.size(); ++ i)
+		{
+			uint32_t const width = fbm5_tex_tex->Width(i);
+			uint32_t const height = fbm5_tex_tex->Height(i);
+
+			r8_init_data[i].data = &data[0];
+			r8_init_data[i].row_pitch = width;
+			r8_init_data[i].slice_pitch = r8_init_data[i].row_pitch * height;
+		}
+		fbm5_tex_tex->CreateHWResource(r8_init_data, nullptr);
+		fbm5_tex_tex->BuildMipSubLevels();
+
+		TexturePtr fbm5_tex_bc4_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC4, false);
+
+		uint32_t const bc4_block_width = BlockWidth(EF_BC4);
+		uint32_t const bc4_block_height = BlockHeight(EF_BC4);
+		uint32_t const bc4_block_bytes = BlockBytes(EF_BC4);
+		std::vector<ElementInitData> bc4_init_data(fbm5_tex_tex->NumMipMaps());
+		std::vector<uint8_t> empty_data;
+		for (size_t i = 0; i < r8_init_data.size(); ++i)
+		{
+			bc4_init_data[i].row_pitch = TEX_SIZE / bc4_block_width * bc4_block_bytes;
+			bc4_init_data[i].slice_pitch = TEX_SIZE / bc4_block_height * bc4_init_data[i].row_pitch;
+			if (i == 0)
+			{
+				empty_data.resize(bc4_init_data[i].slice_pitch);
+			}
+			bc4_init_data[i].data = &empty_data[0];
+		}
+		fbm5_tex_bc4_tex->CreateHWResource(bc4_init_data, nullptr);
+		fbm5_tex_tex->CopyToTexture(*fbm5_tex_bc4_tex);
+		SaveTexture(fbm5_tex_bc4_tex, OUTPUT_PATH "fBm5_tex.dds");
+	}
+
+	{
+		std::vector<float3> fdata3(TEX_SIZE * TEX_SIZE);
+		for (uint32_t y = 0; y < TEX_SIZE; ++ y)
+		{
+			for (uint32_t x = 0; x < TEX_SIZE; ++ x)
+			{
+				float f0 = fdata[y * TEX_SIZE + x];
+				float d = 2;
+				float fx = noiser.tileable_fBm((x + d + 0.5f) / TEX_SIZE * STRIDE, (y + 0.5f) / TEX_SIZE * STRIDE, STRIDE, STRIDE, 5, 2, 0.5f);
+				float fy = noiser.tileable_fBm((x + 0.5f) / TEX_SIZE * STRIDE, (y + d + 0.5f) / TEX_SIZE * STRIDE, STRIDE, STRIDE, 5, 2, 0.5f);
+				fdata3[y * TEX_SIZE + x] = MathLib::normalize(float3(fx - f0, fy - f0, STRIDE * 16 / TEX_SIZE)) * 0.5f + 0.5f;
+			}
+		}
+		std::vector<uint8_t> rg_data(TEX_SIZE * TEX_SIZE * 2);
+		for (uint32_t i = 0; i < TEX_SIZE * TEX_SIZE; ++ i)
+		{
+			rg_data[i * 2 + 0] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(fdata3[i].x() * 255 + 0.5f), 0, 255));
+			rg_data[i * 2 + 1] = static_cast<uint8_t>(MathLib::clamp(static_cast<int>(fdata3[i].y() * 255 + 0.5f), 0, 255));
+		}
+
+		TexturePtr fbm5_grad_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_GR8, false);
+
+		std::vector<ElementInitData> gr8_init_data(fbm5_grad_tex->NumMipMaps());
+		for (uint32_t i = 0; i < gr8_init_data.size(); ++ i)
+		{
+			uint32_t const width = fbm5_grad_tex->Width(i);
+			uint32_t const height = fbm5_grad_tex->Height(i);
+
+			gr8_init_data[i].data = &rg_data[0];
+			gr8_init_data[i].row_pitch = width * 2;
+			gr8_init_data[i].slice_pitch = gr8_init_data[i].row_pitch * height;
+		}
+		fbm5_grad_tex->CreateHWResource(gr8_init_data, nullptr);
+		fbm5_grad_tex->BuildMipSubLevels();
+
+		TexturePtr fbm5_grad_bc5_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
+			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC5, false);
+
+		uint32_t const bc5_block_width = BlockWidth(EF_BC5);
+		uint32_t const bc5_block_height = BlockHeight(EF_BC5);
+		uint32_t const bc5_block_bytes = BlockBytes(EF_BC5);
+		std::vector<ElementInitData> bc5_init_data(fbm5_grad_tex->NumMipMaps());
+		std::vector<uint8_t> empty_data;
+		for (size_t i = 0; i < gr8_init_data.size(); ++ i)
+		{
+			bc5_init_data[i].row_pitch = TEX_SIZE / bc5_block_width * bc5_block_bytes;
+			bc5_init_data[i].slice_pitch = TEX_SIZE / bc5_block_height * bc5_init_data[i].row_pitch;
+			if (i == 0)
+			{
+				empty_data.resize(bc5_init_data[i].slice_pitch);
+			}
+			bc5_init_data[i].data = &empty_data[0];
+		}
+		fbm5_grad_bc5_tex->CreateHWResource(bc5_init_data, nullptr);
+		fbm5_grad_tex->CopyToTexture(*fbm5_grad_bc5_tex);
+		SaveTexture(fbm5_grad_bc5_tex, OUTPUT_PATH "fBm5_grad_tex.dds");
+	}
 }
 
 int main()
