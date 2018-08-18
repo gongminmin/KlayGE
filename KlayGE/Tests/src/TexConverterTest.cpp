@@ -126,3 +126,18 @@ TEST_F(TexConverterTest, DDSChannel)
 {
 	RunTest("lion.bc1.dds", "lion.jpg.channel.kmeta", "lion.bc1_channel.dds", 1.0f / 255);
 }
+
+TEST_F(TexConverterTest, NormalCompressionBC5)
+{
+	RunTest("lion_ddn.jpg", "lion_ddn.jpg.bc5.kmeta", "lion_ddn_bc5.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, NormalCompressionBC3)
+{
+	RunTest("lion_ddn.jpg", "lion_ddn.jpg.bc3.kmeta", "lion_ddn_bc3.dds", 1.0f / 255);
+}
+
+TEST_F(TexConverterTest, NormalCompressionGR)
+{
+	RunTest("lion_ddn.jpg", "lion_ddn.jpg.gr.kmeta", "lion_ddn_gr.dds", 1.0f / 255);
+}

@@ -133,7 +133,13 @@ namespace KlayGE
 			std::unique_ptr<FIBITMAP, decltype(fi_bitmap_deleter)> dib(nullptr, fi_bitmap_deleter);
 			if (FreeImage_FIFSupportsReading(fif))
 			{
-				dib.reset(FreeImage_Load(fif, name_str.c_str()));
+				int flag = 0;
+				if (fif == FIF_JPEG)
+				{
+					flag = JPEG_ACCURATE;
+				}
+
+				dib.reset(FreeImage_Load(fif, name_str.c_str(), flag));
 			}
 			if (!dib)
 			{
@@ -334,7 +340,24 @@ namespace KlayGE
 				break;
 			}
 		}
-		if (need_swizzle)
+
+		bool need_normal_compression = false;
+		if (metadata.Slot() == TS_Normal)
+		{
+			switch (metadata.PreferedFormat())
+			{
+			case EF_BC3:
+			case EF_BC5:
+			case EF_GR8:
+				need_normal_compression = true;
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		if (need_swizzle || need_normal_compression)
 		{
 			compressed_tex_.reset();
 
@@ -358,6 +381,26 @@ namespace KlayGE
 					for (uint32_t ch = 0; ch < num_channels; ++ ch)
 					{
 						swizzled_clr[ch] = original_clr[channel_mapping[ch]];
+					}
+					if (need_normal_compression)
+					{
+						switch (metadata.PreferedFormat())
+						{
+						case EF_BC3:
+							swizzled_clr.a() = swizzled_clr.r();
+							swizzled_clr.r() = 0;
+							swizzled_clr.b() = 0;
+							break;
+
+						case EF_BC5:
+						case EF_GR8:
+							swizzled_clr.b() = 0;
+							swizzled_clr.a() = 0;
+							break;
+
+						default:
+							KFL_UNREACHABLE("Invalid normal compression format.");
+						}
 					}
 					line_32f[x] = swizzled_clr;
 				}

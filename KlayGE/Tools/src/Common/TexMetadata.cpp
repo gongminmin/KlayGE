@@ -206,6 +206,10 @@ namespace KlayGE
 					new_metadata.prefered_format_ = EF_ETC1;
 					break;
 
+				case CT_HASH("GR8"):
+					new_metadata.prefered_format_ = EF_GR8;
+					break;
+
 				default:
 					new_metadata.prefered_format_ = EF_Unknown;
 					break;
