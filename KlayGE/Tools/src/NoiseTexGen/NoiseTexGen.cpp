@@ -273,23 +273,7 @@ void GenfBmTexs()
 
 		TexturePtr fbm5_tex_bc4_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
 			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC4, false);
-
-		uint32_t const bc4_block_width = BlockWidth(EF_BC4);
-		uint32_t const bc4_block_height = BlockHeight(EF_BC4);
-		uint32_t const bc4_block_bytes = BlockBytes(EF_BC4);
-		std::vector<ElementInitData> bc4_init_data(fbm5_tex_tex->NumMipMaps());
-		std::vector<uint8_t> empty_data;
-		for (size_t i = 0; i < r8_init_data.size(); ++i)
-		{
-			bc4_init_data[i].row_pitch = TEX_SIZE / bc4_block_width * bc4_block_bytes;
-			bc4_init_data[i].slice_pitch = TEX_SIZE / bc4_block_height * bc4_init_data[i].row_pitch;
-			if (i == 0)
-			{
-				empty_data.resize(bc4_init_data[i].slice_pitch);
-			}
-			bc4_init_data[i].data = &empty_data[0];
-		}
-		fbm5_tex_bc4_tex->CreateHWResource(bc4_init_data, nullptr);
+		fbm5_tex_bc4_tex->CreateHWResource({}, nullptr);
 		fbm5_tex_tex->CopyToTexture(*fbm5_tex_bc4_tex);
 		SaveTexture(fbm5_tex_bc4_tex, OUTPUT_PATH "fBm5_tex.dds");
 	}
@@ -331,24 +315,8 @@ void GenfBmTexs()
 		fbm5_grad_tex->BuildMipSubLevels();
 
 		TexturePtr fbm5_grad_bc5_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D,
-			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC5, false);
-
-		uint32_t const bc5_block_width = BlockWidth(EF_BC5);
-		uint32_t const bc5_block_height = BlockHeight(EF_BC5);
-		uint32_t const bc5_block_bytes = BlockBytes(EF_BC5);
-		std::vector<ElementInitData> bc5_init_data(fbm5_grad_tex->NumMipMaps());
-		std::vector<uint8_t> empty_data;
-		for (size_t i = 0; i < gr8_init_data.size(); ++ i)
-		{
-			bc5_init_data[i].row_pitch = TEX_SIZE / bc5_block_width * bc5_block_bytes;
-			bc5_init_data[i].slice_pitch = TEX_SIZE / bc5_block_height * bc5_init_data[i].row_pitch;
-			if (i == 0)
-			{
-				empty_data.resize(bc5_init_data[i].slice_pitch);
-			}
-			bc5_init_data[i].data = &empty_data[0];
-		}
-		fbm5_grad_bc5_tex->CreateHWResource(bc5_init_data, nullptr);
+			TEX_SIZE, TEX_SIZE, 1, 0, 1, EF_BC5, false);		
+		fbm5_grad_bc5_tex->CreateHWResource({}, nullptr);
 		fbm5_grad_tex->CopyToTexture(*fbm5_grad_bc5_tex);
 		SaveTexture(fbm5_grad_bc5_tex, OUTPUT_PATH "fBm5_grad_tex.dds");
 	}

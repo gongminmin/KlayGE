@@ -4176,9 +4176,37 @@ namespace KlayGE
 
 		uint32_t const num_faces = (type_ == TT_Cube) ? 6 : 1;
 		uint32_t const num_subres = num_mip_maps_ * array_size_ * num_faces;
-		BOOST_ASSERT(init_data.size() >= num_subres);
 
-		subres_data_.assign(init_data.begin(), init_data.begin() + num_subres);
+		if (init_data.empty())
+		{
+			BOOST_ASSERT(!ref_only_);
+
+			subres_data_.resize(num_subres);
+
+			uint32_t const block_width = BlockWidth(format_);
+			uint32_t const block_height = BlockHeight(format_);
+			uint32_t const block_bytes = BlockBytes(format_);
+			for (uint32_t array_index = 0; array_index < array_size_; ++ array_index)
+			{
+				for (uint32_t face = 0; face < num_faces; ++ face)
+				{
+					for (uint32_t level = 0; level < num_mip_maps_; ++ level)
+					{
+						size_t const subres = (array_index * num_faces + face) * num_mip_maps_ + level;
+
+						subres_data_[subres].row_pitch = (this->Width(level) + block_width - 1) / block_width * block_bytes;
+						subres_data_[subres].slice_pitch
+							= (this->Height(level) + block_height - 1) / block_height * subres_data_[subres].row_pitch;
+					}
+				}
+			}
+		}
+		else
+		{
+			BOOST_ASSERT(init_data.size() >= num_subres);
+
+			subres_data_.assign(init_data.begin(), init_data.begin() + num_subres);
+		}
 		mapped_.resize(num_subres);
 
 		for (auto& item : mapped_)
@@ -4197,7 +4225,7 @@ namespace KlayGE
 					for (uint32_t level = 0; level < num_mip_maps_; ++ level)
 					{
 						size_t const subres = (array_index * num_faces + face) * num_mip_maps_ + level;
-						size += init_data[subres].slice_pitch * this->Depth(level);
+						size += subres_data_[subres].slice_pitch * this->Depth(level);
 					}
 				}
 			}
@@ -4211,11 +4239,24 @@ namespace KlayGE
 					{
 						size_t const subres = (array_index * num_faces + face) * num_mip_maps_ + level;
 
-						uint8_t const * p = static_cast<uint8_t const *>(init_data[subres].data);
 						subres_data_[subres].data = data_block_.data() + data_block_.size();
-						data_block_.insert(data_block_.end(), p, p + init_data[subres].slice_pitch * this->Depth(level));
+						uint32_t const subres_size = subres_data_[subres].slice_pitch * this->Depth(level);
+						if (init_data.empty())
+						{
+							data_block_.resize(data_block_.size() + subres_size);
+						}
+						else
+						{
+							uint8_t const * p = static_cast<uint8_t const *>(init_data[subres].data);
+							data_block_.insert(data_block_.end(), p, p + subres_size);
+						}
 					}
 				}
+			}
+
+			if (init_data.empty())
+			{
+				std::memset(data_block_.data(), 0, data_block_.size());
 			}
 		}
 	}

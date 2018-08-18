@@ -103,12 +103,7 @@ namespace KlayGE
 
 				uncompressed_tex_ = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, in_tex->Width(0), in_tex->Height(0),
 					in_tex->Depth(0), in_tex->NumMipMaps(), in_tex->ArraySize(), uncompressed_format, false);
-				ElementInitData init_data;
-				init_data.row_pitch = in_tex->Width(0) * NumFormatBytes(uncompressed_format);
-				init_data.slice_pitch = init_data.row_pitch * in_tex->Height(0);
-				std::vector<uint8_t> empty_data(init_data.slice_pitch, 0);
-				init_data.data = empty_data.data();
-				uncompressed_tex_->CreateHWResource(init_data, nullptr);
+				uncompressed_tex_->CreateHWResource({}, nullptr);
 				compressed_tex_->CopyToTexture(*uncompressed_tex_);
 			}
 			else
@@ -380,15 +375,7 @@ namespace KlayGE
 	{
 		TexturePtr new_tex = MakeSharedPtr<SoftwareTexture>(Texture::TT_2D, uncompressed_tex_->Width(0), uncompressed_tex_->Height(0),
 			1, 1, 1, format, false);
-		uint32_t const block_width = BlockWidth(format);
-		uint32_t const block_height = BlockHeight(format);
-		uint32_t const block_bytes = BlockBytes(format);
-		ElementInitData init_data;
-		init_data.row_pitch = (uncompressed_tex_->Width(0) + block_width - 1) / block_width * block_bytes;
-		init_data.slice_pitch = init_data.row_pitch * ((uncompressed_tex_->Height(0) + block_height - 1) / block_height);
-		std::vector<uint8_t> empty_data(init_data.slice_pitch, 0);
-		init_data.data = empty_data.data();
-		new_tex->CreateHWResource(init_data, nullptr);
+		new_tex->CreateHWResource({}, nullptr);
 		uncompressed_tex_->CopyToTexture(*new_tex);
 
 		if (IsCompressedFormat(format))
@@ -398,6 +385,7 @@ namespace KlayGE
 		else
 		{
 			uncompressed_tex_ = new_tex;
+			compressed_tex_.reset();
 		}
 	}
 
