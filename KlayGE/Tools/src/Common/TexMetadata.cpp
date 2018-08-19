@@ -264,6 +264,13 @@ namespace KlayGE
 				}
 			}
 
+			if (document.HasMember("rgb_to_lum"))
+			{
+				auto const & rgb_to_lum_val = document["rgb_to_lum"];
+				BOOST_ASSERT(rgb_to_lum_val.IsBool());
+				new_metadata.rgb_to_lum_ = rgb_to_lum_val.GetBool();
+			}
+
 			if (document.HasMember("mipmap"))
 			{
 				auto const & mipmap_val = document["mipmap"];

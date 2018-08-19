@@ -180,13 +180,24 @@ namespace KlayGE
 			}
 		}
 
+		if (metadata_.RgbToLum())
+		{
+			for (uint32_t arr = 0; arr < array_size_; ++ arr)
+			{
+				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
+				{
+					planes_[arr][m]->RgbToLum();
+				}
+			}
+		}
+
 		if ((metadata_.Slot() == TS_Normal) && metadata_.BumpToNormal())
 		{
 			for (uint32_t arr = 0; arr < array_size_; ++ arr)
 			{
 				for (uint32_t m = 0; m < num_mipmaps_; ++ m)
 				{
-					planes_[arr][m]->Bump2Normal(metadata_.BumpScale());
+					planes_[arr][m]->BumpToNormal(metadata_.BumpScale());
 				}
 			}
 		}

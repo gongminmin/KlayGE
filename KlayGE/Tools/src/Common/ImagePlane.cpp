@@ -422,7 +422,37 @@ namespace KlayGE
 		}
 	}
 
-	void ImagePlane::Bump2Normal(float scale)
+	void ImagePlane::RgbToLum()
+	{
+		compressed_tex_.reset();
+
+		uint32_t const width = uncompressed_tex_->Width(0);
+		uint32_t const height = uncompressed_tex_->Height(0);
+		ElementFormat const format = uncompressed_tex_->Format();
+		uint32_t const elem_size = NumFormatBytes(format);
+
+		Texture::Mapper mapper(*uncompressed_tex_, 0, 0, TMA_Read_Write, 0, 0,
+			uncompressed_tex_->Width(0), uncompressed_tex_->Height(0));
+		uint8_t* ptr = mapper.Pointer<uint8_t>();
+
+		for (uint32_t y = 0; y < height; ++y)
+		{
+			for (uint32_t x = 0; x < width; ++x)
+			{
+				Color color_32f;
+				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
+
+				float const lum = this->RgbToLum(color_32f);
+
+				Color const color_f32(lum, lum, lum, 1);
+				ConvertFromABGR32F(format, &color_f32, 1, ptr + x * elem_size);
+			}
+
+			ptr += mapper.RowPitch();
+		}
+	}
+
+	void ImagePlane::BumpToNormal(float scale)
 	{
 		compressed_tex_.reset();
 
@@ -443,8 +473,7 @@ namespace KlayGE
 				Color color_32f;
 				ConvertToABGR32F(format, ptr + x * elem_size, 1, &color_32f);
 
-				float3 constexpr RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f);
-				height_map[y * width + x] = MathLib::dot(float3(color_32f.r(), color_32f.g(), color_32f.b()), RGB_TO_LUM);
+				height_map[y * width + x] = this->RgbToLum(color_32f);
 			}
 
 			ptr += mapper.RowPitch();
@@ -521,5 +550,11 @@ namespace KlayGE
 		target.uncompressed_tex_->CreateHWResource(target_init_data, nullptr);
 
 		return target;
+	}
+
+	float ImagePlane::RgbToLum(Color const & clr)
+	{
+		float3 constexpr RGB_TO_LUM(0.2126f, 0.7152f, 0.0722f);
+		return MathLib::dot(float3(clr.r(), clr.g(), clr.b()), RGB_TO_LUM);
 	}
 }

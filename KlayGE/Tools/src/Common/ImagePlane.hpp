@@ -47,7 +47,8 @@ namespace KlayGE
 	{
 	public:
 		bool Load(std::string_view name, TexMetadata const & metadata);
-		void Bump2Normal(float scale);
+		void RgbToLum();
+		void BumpToNormal(float scale);
 		void PrepareNormalCompression(ElementFormat normal_compression_format);
 		void FormatConversion(ElementFormat format);
 		ImagePlane ResizeTo(uint32_t width, uint32_t height, bool linear);
@@ -68,6 +69,9 @@ namespace KlayGE
 		{
 			return compressed_tex_;
 		}
+
+	private:
+		float RgbToLum(Color const & clr);
 
 	private:
 		TexturePtr uncompressed_tex_;

@@ -92,6 +92,11 @@ namespace KlayGE
 			return channel_mapping_[channel];
 		}
 
+		bool RgbToLum() const
+		{
+			return rgb_to_lum_;
+		}
+
 		bool MipmapEnabled() const
 		{
 			return mipmap_.enabled;
@@ -129,6 +134,7 @@ namespace KlayGE
 		ElementFormat prefered_format_ = EF_Unknown;
 		bool force_srgb_ = false;
 		uint8_t channel_mapping_[4] = { 0, 1, 2, 3 };
+		bool rgb_to_lum_ = false;
 
 		struct Mipmap
 		{
